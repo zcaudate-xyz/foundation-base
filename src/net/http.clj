@@ -1,6 +1,7 @@
 ^{:no-test true}
 (ns net.http
   (:require [clojure.string]
+            [net.http.api :as api]
             [net.http.client :as client]
             [net.http.websocket :as ws]
             [std.json :as json]
@@ -12,7 +13,8 @@
   (:import java.net.URLEncoder)
   (:refer-clojure :exclude [get]))
 
-(f/intern-in client/request
+(f/intern-in api/call-api
+             client/request
              client/get
              client/post
              client/put

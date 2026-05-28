@@ -122,8 +122,9 @@
   (let [rt (script/script-test
             :postgres
             {:runtime :jdbc.client
-             :require '[[postgres.sample.scratch-v1 :as scratch]]
-             :config {:host +postgres-host+
+            :require '[[postgres.sample.scratch-v1 :as scratch]
+                       [postgres.sample.scratch-v0 :as scratch-v0]]
+            :config {:host +postgres-host+
                       :port +postgres-port+
                       :user "postgres"
                       :pass "postgres"
@@ -241,10 +242,12 @@
 (declare wait-postgrest-schema!)
 
 (defn reload-postgrest!
-  ([] (reload-postgrest! +scratch-schema+))
+  ([] (reload-postgrest! +scratch-schema+ +scratch-entry-table+))
   ([schema-name]
+   (reload-postgrest! schema-name +scratch-entry-table+))
+  ([schema-name table-name]
    (pg-exec-best-effort! "NOTIFY pgrst, 'reload schema'")
-   (wait-postgrest-schema! schema-name)))
+   (wait-postgrest-schema! schema-name table-name)))
 
 (defn cleanup-scratch-entry!
   [name]
@@ -290,33 +293,36 @@
         "END $$;")))
 
 (defn wait-postgrest-schema!
-  [schema-name]
-  (let [status (parse-shell-env (supabase-status-env))
-        base-url (get status "API_URL")
-        api-key (get status "SERVICE_ROLE_KEY")
-        headers {"apikey" api-key
-                 "Authorization" (str "Bearer " api-key)
-                 "Accept-Profile" schema-name
-                 "Content-Profile" schema-name}
-        url (str base-url "/rest/v1/" +scratch-entry-table+ "?select=name&limit=1")]
-    (loop [attempt 0]
-      (let [response (try
-                       (http-get url headers)
-                       (catch Throwable _
-                         nil))
-            ready? (and response
-                        (== 200 (:status response)))]
-        (cond ready?
-              true
+  ([schema-name]
+   (wait-postgrest-schema! schema-name +scratch-entry-table+))
+  ([schema-name table-name]
+   (let [status (parse-shell-env (supabase-status-env))
+         base-url (get status "API_URL")
+         api-key (get status "SERVICE_ROLE_KEY")
+         headers {"apikey" api-key
+                  "Authorization" (str "Bearer " api-key)
+                  "Accept-Profile" schema-name
+                  "Content-Profile" schema-name}
+         url (str base-url "/rest/v1/" table-name "?select=*&limit=1")]
+     (loop [attempt 0]
+       (let [response (try
+                        (http-get url headers)
+                        (catch Throwable _
+                          nil))
+             ready? (and response
+                         (== 200 (:status response)))]
+         (cond ready?
+               true
 
-              (< attempt 29)
-              (do (Thread/sleep 1000)
-                  (recur (inc attempt)))
+               (< attempt 29)
+               (do (Thread/sleep 1000)
+                   (recur (inc attempt)))
 
-              :else
-              (throw (ex-info "Timed out waiting for PostgREST schema cache"
-                              {:schema schema-name
-                               :response response})))))))
+               :else
+               (throw (ex-info "Timed out waiting for PostgREST schema cache"
+                               {:schema schema-name
+                                :table table-name
+                                :response response}))))))))
 
 (defn cleanup-public-entry!
   [name]

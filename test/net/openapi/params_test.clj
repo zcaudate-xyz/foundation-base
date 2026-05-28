@@ -19,7 +19,7 @@
   [(params/param->str (java.util.Date. 0) "yyyy-MM-dd")
    (params/param->str [1 2 3] nil)
    (params/param->str :hello nil)]
-  => ["1970-01-01" "1,2,3" ":hello"])
+  => ["1970-01-01" "1,2,3" "hello"])
 
 ^{:refer net.openapi.params/normalize-array-param :added "4.0"}
 (fact "Normalize array parameter according to :collection-format specified in the parameter's meta data.
@@ -39,21 +39,18 @@
   otherwise, apply `param->str`."
   (let [file (java.io.File. "/tmp/example")]
     [(params/normalize-param file)
-     (try
-       (params/normalize-param :hello)
-       (catch Throwable t
-         :thrown))])
-  => [(java.io.File. "/tmp/example") :thrown])
+     (params/normalize-param :hello)])
+  => [(java.io.File. "/tmp/example") "hello"])
 
 ^{:refer net.openapi.params/normalize-params :added "4.0"}
 (fact "Normalize parameters values: remove nils, format to string with `param->str`."
   (params/normalize-params {:a nil
-                            :b nil})
-  => {})
+                            :b :hello})
+  => {:b "hello"})
 
 ^{:refer net.openapi.params/make-url :added "4.0"}
 (fact "Make full URL by adding base URL and filling path parameters."
   (params/make-url "https://api.test"
-                   "/users"
-                   {})
-  => "https://api.test/users")
+                   "/users/{vhost}"
+                   {:vhost "/"})
+  => "https://api.test/users/%2F")

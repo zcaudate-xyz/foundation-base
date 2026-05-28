@@ -1,7 +1,7 @@
 (ns postgres.core.supabase-test
   (:require [clojure.string :as str]
-            [net.http :as http]
             [hara.model.spec-postgres :as grammar]
+            [lib.supabase.support :as support]
             [postgres.core.supabase :as s]
             [hara.lang :as l])
   (:use code.test))
@@ -10,6 +10,10 @@
   {:require [[postgres.core :as pg]
              [postgres.core.supabase :as s]
              [postgres.sample.scratch-v1 :as scratch]]})
+
+(fact:global
+  {:setup [(support/start!)]
+   :teardown [(support/stop!)]})
 
 ^{:refer postgres.core.supabase/create-role :added "4.0"}
 (fact "creates a role"
@@ -230,11 +234,24 @@
   => "BODY")
 
 ^{:refer postgres.core.supabase/api-call :added "4.0"}
-(fact "calls an api"
-
-  (with-redefs [http/post (fn [_ _] {:status 200 :body "{\"ok\":true}"})]
-    (s/api-call {:key "key"} {}))
-  => {:status 200 :body {"ok" true}})
+(fact "calls a live api route"
+  (let [message (support/random-log-message)
+        _ (support/seed-log! message)]
+    (try
+      (= message
+         (->> (s/api-call (merge (support/anon-opts)
+                                 {:group :rest
+                                  :method :get
+                                  :route "/Log?select=message"
+                                  :headers {"Content-Profile" support/+scratch-v0-schema+}})
+                          {})
+              :body
+              (filter #(= message (support/log-message %)))
+              first
+              (support/log-message)))
+      (finally
+        (support/clear-log! message))))
+  => true)
 
 ^{:refer postgres.core.supabase/api-call :added "4.0"}
 (fact "throws when api key is missing"
@@ -247,61 +264,126 @@
 (fact "throws on supabase api errors"
   ^:hidden
   
-  (with-redefs [http/post (fn [_ _] {:status 401 :body "{\"message\":\"bad key\"}"})]
-    (s/api-call {:key "key"} {}))
+  (s/api-call {:host (support/base-url)
+               :key "bad-key"
+               :route "/auth/v1/user"
+               :method :get}
+              {})
   => (throws clojure.lang.ExceptionInfo "Supabase API request failed"))
 
 ^{:refer postgres.core.supabase/api-rpc :added "4.0"}
-(fact "calls the rpc"
-
-  ;; api-call wrapper
-  (with-redefs [http/post (fn [_ _] {:status 200 :body "{\"ok\":true}"})]
-    (s/api-rpc {:fn (atom {:id `rpc/func :static/schema "rpc"}) :key "key"}))
-  => {:status 200 :body {"ok" true}})
+(fact "calls a public scratch-v0 ping rpc"
+  (-> (s/api-rpc (merge (support/anon-opts)
+                        {:fn support/+ping-fn+}))
+      :body)
+  => "pong")
 
 ^{:refer postgres.core.supabase/api-select-all :added "4.0"}
-(fact "does a select all call"
-
-  ;; api-call wrapper
-  (with-redefs [http/get (fn [_ _] {:status 200 :body "[{\"id\":1}]"})]
-    (s/api-select-all (atom {:id 'table :static/schema "public"}) {:key "key"}))
-  => {:status 200, :body [{"id" 1}]})
+(fact "selects scratch-v0 log rows"
+  (let [message (support/random-log-message)
+        _ (support/seed-log! message)]
+    (try
+      (= message
+         (->> (s/api-select-all support/+log-table+ (support/anon-opts))
+              :body
+              (filter #(= message (support/log-message %)))
+              first
+              (support/log-message)))
+      (finally
+        (support/clear-log! message))))
+  => true)
 
 ^{:refer postgres.core.supabase/api-signup :added "4.0"}
 (fact "sign up via supabase api"
-
-  ;; api-call wrapper
-  (with-redefs [http/post (fn [_ _] {:status 200 :body "{\"user\":{}}"})]
-    (s/api-signup {:email "a@a.com" :password "pass"} {:key "key"}))
-  => {:status 200 :body {"user" {}}})
+ 
+  (let [email (support/random-email)
+        password "pass123456"
+        signed-up (s/api-signup {"email" email
+                                 "password" password}
+                                (support/anon-opts))
+        uid (or (get-in signed-up [:body "user" "id"])
+                (get-in signed-up [:body "id"]))]
+    (try
+      [(some? uid)
+       (= email (get-in signed-up [:body "user" "email"]))]
+      (finally
+        (support/delete-auth-user! uid))))
+  => [true true])
 
 ^{:refer postgres.core.supabase/api-signin :added "4.0"}
 (fact "sign in via supabase api"
-
-  ;; api-call wrapper
-  (with-redefs [http/post (fn [_ _] {:status 200 :body "{\"token\":\"abc\"}"})]
-    (s/api-signin {:email "a@a.com" :password "pass"} {:key "key"}))
-  => {:status 200 :body {"token" "abc"}})
+ 
+  (let [{:keys [uid signed-in]} (support/create-auth-session!)]
+    (try
+      [(string? (get-in signed-in [:body "access_token"]))
+       (string? (get-in signed-in [:body "user" "email"]))]
+      (finally
+        (support/delete-auth-user! uid))))
+  => [true true])
 
 ^{:refer postgres.core.supabase/api-signup-create :added "4.0"}
 (fact "create user via supabase api"
-
-  ;; api-call wrapper
-  (with-redefs [http/post (fn [_ _] {:status 200 :body "{\"user\":{}}"})]
-    (s/api-signup-create {:email "a@a.com" :password "pass"} {:key "key"}))
-  => {:status 200 :body {"user" {}}})
+ 
+  (let [{:keys [uid created]} (support/create-auth-user!)]
+    (try
+      [(some? uid)
+       (= 200 (:status created))]
+      (finally
+        (support/delete-auth-user! uid))))
+  => [true true])
 
 ^{:refer postgres.core.supabase/api-signup-delete :added "4.0"}
 (fact "remove user via supabase api"
-
-  ;; api-call wrapper
-  (with-redefs [http/delete (fn [_ _] {:status 200 :body "{}"})]
-    (s/api-signup-delete "uid" {:key "key"}))
-  => {:status 200 :body {}})
+ 
+  (let [{:keys [uid]} (support/create-auth-user!)]
+    [(= 200 (:status (s/api-signup-delete uid (support/service-opts))))
+     (try
+       (s/api-call (merge (support/service-opts)
+                          {:group :admin
+                           :method :get
+                           :route (str "/users/" uid)})
+                   {})
+       false
+       (catch clojure.lang.ExceptionInfo e
+         (= 404 (:status (ex-data e)))) )])
+  => [true true])
 
 ^{:refer postgres.core.supabase/api-impersonate :added "4.0"}
 (fact "inpersonates a user"
+ 
+  (let [{:keys [uid]} (support/create-auth-user!)]
+    (try
+      (s/api-impersonate uid (support/service-opts))
+      (finally
+        (support/delete-auth-user! uid))))
+  => (throws clojure.lang.ExceptionInfo "Supabase API request failed"))
 
-  (with-redefs [http/post (fn [_ _] {:status 200 :body "{\"token\":\"imp\"}"})]
-    (s/api-impersonate "uid" {:key "key"}))
-  => {:status 200 :body {"token" "imp"}})
+^{:refer postgres.core.supabase/api-rpc :added "4.0"}
+(fact "allows authenticated users to append logs through scratch-v0"
+  (let [{:keys [uid access-token]} (support/create-auth-session!)
+        message (support/random-log-message)]
+    (try
+      (let [response (s/api-rpc (merge (support/auth-opts access-token)
+                                       {:fn support/+log-append-fn+
+                                        :args {"i_message" message}}))]
+        [(:status response)
+         (= message
+            (->> (support/list-logs)
+                 (filter #(= message (support/log-message %)))
+                 first
+                 (support/log-message)))])
+      (finally
+        (support/clear-log! message)
+        (support/delete-auth-user! uid))))
+  => [200 true])
+
+^{:refer postgres.core.supabase/api-rpc :added "4.0"}
+(fact "rejects anonymous users for scratch-v0 log append"
+  (let [message (support/random-log-message)]
+    (try
+      (s/api-rpc (merge (support/anon-opts)
+                        {:fn support/+log-append-fn+
+                         :args {"i_message" message}}))
+      (finally
+        (support/clear-log! message))))
+  => (throws clojure.lang.ExceptionInfo "Supabase API request failed"))

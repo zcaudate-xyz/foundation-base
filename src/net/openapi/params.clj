@@ -1,8 +1,8 @@
 (ns net.openapi.params
-  (:require [clojure.string])
+  (:require [clojure.string :as string])
   (:import (java.io File) (java.util Date TimeZone) (java.text SimpleDateFormat)))
 
-(defn- ^SimpleDateFormat make-date-format
+(defn ^:private ^SimpleDateFormat make-date-format
   ([^String format-str] (make-date-format format-str nil))
   ([^String format-str ^String time-zone]
    (let [date-format (SimpleDateFormat. format-str)]
@@ -29,57 +29,78 @@
 (defn param->str
   "Format the given parameter value to string."
   {:added "4.0"}
-  [param date-format]
+  ([param]
+  (param->str param nil))
+  ([param date-format]
   (cond
     (instance? Date param) (format-date param date-format)
-    (sequential? param) (clojure.string/join "," param)
-    :else (str param)))
+    (keyword? param) (name param)
+    (symbol? param) (name param)
+    (sequential? param) (string/join "," param)
+    :else (str param))))
 
 (declare normalize-param)
 
+(defn encode-path-segment
+  [value]
+  (-> (java.net.URLEncoder/encode (str value) "UTF-8")
+     (.replace "+" "%20")))
+
 (defn normalize-array-param
   "Normalize array parameter according to :collection-format specified in the parameter's meta data.
-   When the parameter contains File, a seq is returned so as to keep File parameters.
-   For :multi collection format, a seq is returned which will be handled properly by clj-http.
-   For other cases, a string is returned."
+  When the parameter contains File, a seq is returned so as to keep File parameters.
+  For :multi collection format, a seq is returned which will be handled properly by clj-http.
+  For other cases, a string is returned."
   {:added "4.0"}
-  [xs]
+  ([xs]
+  (normalize-array-param xs nil))
+  ([xs date-format]
   (if (some (partial instance? File) xs)
-    (map normalize-param xs)
+    (map #(normalize-param % date-format) xs)
     (case (-> (meta xs) :collection-format (or :csv))
-      :csv (clojure.string/join "," (map normalize-param xs))
-      :ssv (clojure.string/join " " (map normalize-param xs))
-      :tsv (clojure.string/join "\t" (map normalize-param xs))
-      :pipes (clojure.string/join "|" (map normalize-param xs))
-      :multi (map normalize-param xs))))
+      :csv (string/join "," (map #(normalize-param % date-format) xs))
+      :ssv (string/join " " (map #(normalize-param % date-format) xs))
+      :tsv (string/join "\t" (map #(normalize-param % date-format) xs))
+      :pipes (string/join "|" (map #(normalize-param % date-format) xs))
+      :multi (map #(normalize-param % date-format) xs)))))
 
 (defn normalize-param
   "Normalize parameter value, handling three cases:
-   for sequential value, apply `normalize-array-param` which handles collection format;
-   for File value, use current value;
-   otherwise, apply `param->str`."
+  for sequential value, apply `normalize-array-param` which handles collection format;
+  for File value, use current value;
+  otherwise, apply `param->str`."
   {:added "4.0"}
-  [param]
+  ([param]
+  (normalize-param param nil))
+  ([param date-format]
   (cond
-    (sequential? param) (normalize-array-param param)
+    (sequential? param) (normalize-array-param param date-format)
     (instance? File param) param
-    :else (param->str param)))
+    :else (param->str param date-format))))
 
 (defn normalize-params
   "Normalize parameters values: remove nils, format to string with `param->str`."
   {:added "4.0"}
-  [params]
+  ([params]
+  (normalize-params params nil))
+  ([params date-format]
   (->> params
        (remove (comp nil? second))
-       (map (fn [[k v]] [k (normalize-param v)]))
-       (into {})))
+       (map (fn [[k v]] [k (normalize-param v date-format)]))
+       (into {}))))
 
 (defn make-url
   "Make full URL by adding base URL and filling path parameters."
   {:added "4.0"}
   [base-url path path-params]
   (let [path (reduce (fn [p [k v]]
-                       (clojure.string/replace p (re-pattern (str "\\{" k "\\}")) (normalize-param v)))
+                      (let [k (cond
+                                (keyword? k) (name k)
+                                (symbol? k) (name k)
+                                :else (str k))]
+                        (string/replace p
+                                        (re-pattern (str "\\{" (java.util.regex.Pattern/quote k) "\\}"))
+                                        (encode-path-segment (normalize-param v)))))
                      path
                      path-params)]
-    (str base-url path)))
+   (str (or base-url "") path)))

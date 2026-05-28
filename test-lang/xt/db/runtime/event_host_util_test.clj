@@ -167,14 +167,21 @@
 (fact "reloads postgrest and waits for the schema cache"
   (let [calls (atom [])]
     (with-redefs [event-host-util/pg-exec-best-effort! (fn [sql] (swap! calls conj sql))
-                  event-host-util/wait-postgrest-schema! (fn [schema] (swap! calls conj schema))]
+                  event-host-util/wait-postgrest-schema! (fn
+                                                           ([schema]
+                                                            (swap! calls conj [schema "Entry"]))
+                                                           ([schema table]
+                                                            (swap! calls conj [schema table])))]
       (event-host-util/reload-postgrest!)
       (event-host-util/reload-postgrest! "public")
+      (event-host-util/reload-postgrest! "scratch_v0" "Log")
       @calls))
   => ["NOTIFY pgrst, 'reload schema'"
-      "scratch"
+      ["scratch" "Entry"]
       "NOTIFY pgrst, 'reload schema'"
-      "public"])
+      ["public" "Entry"]
+      "NOTIFY pgrst, 'reload schema'"
+      ["scratch_v0" "Log"]])
 
 ^{:refer xt.db.runtime.event-host-util/cleanup-scratch-entry! :added "4.1"}
 (fact "deletes named rows from the scratch entry table"
@@ -224,8 +231,9 @@
                   {:status 200
                    :url url
                    :headers headers})]
-    (event-host-util/wait-postgrest-schema! "scratch"))
-  => true)
+    [(event-host-util/wait-postgrest-schema! "scratch")
+     (event-host-util/wait-postgrest-schema! "scratch_v0" "Log")])
+  => [true true])
 
 ^{:refer xt.db.runtime.event-host-util/cleanup-public-entry! :added "4.1"}
 (fact "deletes named rows from the public entry table"

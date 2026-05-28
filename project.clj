@@ -103,6 +103,7 @@
 
    ;; hara.runtime.basic
    [http-kit "2.8.0"]
+   [com.rabbitmq/amqp-client "5.21.0"]
 
    ;; hara.runtime.graal
    [org.graalvm.polyglot/polyglot "24.1.0"]

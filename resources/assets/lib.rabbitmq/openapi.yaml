@@ -1,0 +1,2618 @@
+---
+swagger: '2.0'
+info:
+  title: Rabbitmq Http API
+  version: '1.0'
+  description: This is the OpenAPI specification of the RabbitMQ HTTP API. For more
+    information, please refer to [HTTP API](https://cdn.rawgit.com/rabbitmq/rabbitmq-management/v3.7.14/priv/www/api/index.html)
+    official documentation.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  contact:
+    name: Carlos Lozano
+    url: https://www.linkedin.com/in/clozano/
+    email: carlos@adaptive.me
+host: mb1.bus.adaptive.me
+paths:
+  "/exchanges":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/Exchange"
+          examples:
+            application/json:
+            - arguments: {}
+              auto_delete: false
+              durable: true
+              internal: false
+              name: ''
+              type: direct
+              user_who_performed_action: rmq-internal
+              vhost: "/"
+      consumes:
+      - application/json
+      summary: List Exchanges
+      tags:
+      - Exchanges
+      operationId: ListExchanges
+      security:
+      - basic_auth: []
+  "/exchanges/{vhost}/{exchange}":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: exchange
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/Exchange"
+          examples:
+            application/json:
+              arguments: {}
+              auto_delete: false
+              durable: true
+              incoming: []
+              internal: false
+              message_stats:
+                publish_in: 1247498
+                publish_in_details:
+                  rate: 0
+                publish_out: 1246679
+                publish_out_details:
+                  rate: 0
+              name: shared.exchange
+              outgoing: []
+              type: direct
+              user_who_performed_action: adminuser
+              vhost: cloud
+      summary: Read Exchange
+      tags:
+      - Exchanges
+      operationId: GetExchange
+      security:
+      - basic_auth: []
+      consumes:
+      - application/json
+    put:
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/ExchangeRequest"
+        x-examples:
+          application/json:
+            type: direct
+            auto_delete: false
+            durable: true
+            internal: false
+            arguments: {}
+      responses:
+        '201':
+          description: ''
+        '204':
+          description: ''
+          headers:
+            Content-Security-Policy:
+              type: string
+            Vary:
+              type: string
+      summary: Create Exchange
+      operationId: CreateExchange
+      tags:
+      - Exchanges
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      security:
+      - basic_auth: []
+    delete:
+      responses:
+        '204':
+          description: ''
+        '404':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: Object Not Found
+              reason: Not Found
+      consumes:
+      - application/json
+      summary: Delete Exchange
+      operationId: DeleteExchange
+      tags:
+      - Exchanges
+      security:
+      - basic_auth: []
+  "/exchanges/{vhost}":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/Exchange"
+          examples:
+            application/json:
+            - arguments: {}
+              auto_delete: false
+              durable: true
+              internal: false
+              name: ''
+              type: direct
+              user_who_performed_action: adminuser
+              vhost: cloud
+      summary: List Exchanges for VHost
+      tags:
+      - Exchanges
+      operationId: ListExchangesForHost
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/overview":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/Overview"
+          examples:
+            application/json:
+              churn_rates:
+                channel_closed: 264850
+                channel_closed_details:
+                  rate: 0
+                channel_created: 264851
+                channel_created_details:
+                  rate: 0
+                connection_closed: 264852
+                connection_closed_details:
+                  rate: 0
+                connection_created: 264851
+                connection_created_details:
+                  rate: 0
+                queue_created: 0
+                queue_created_details:
+                  rate: 0
+                queue_declared: 3
+                queue_declared_details:
+                  rate: 0
+                queue_deleted: 0
+                queue_deleted_details:
+                  rate: 0
+              cluster_name: rabbit@rabbitmq-cloud-0.rabbitmq-cloud.trumpf.svc.cluster.local
+              contexts:
+              - description: RabbitMQ Management
+                node: rabbit@rabbitmq-cloud-0
+                path: "/"
+                port: '15672'
+                ssl_opts: []
+              erlang_full_version: Erlang/OTP 21 [erts-10.3.4] [source] [64-bit] [smp:8:8]
+                [ds:8:8:10] [async-threads:128] [hipe]
+              erlang_version: 21.3.7
+              exchange_types:
+              - description: AMQP headers exchange, as per the AMQP specification
+                enabled: true
+                name: headers
+              listeners:
+              - ip_address: "::"
+                node: rabbit@rabbitmq-cloud-0
+                port: 5672
+                protocol: amqp
+                socket_opts:
+                  backlog: 128
+                  exit_on_close: false
+                  linger:
+                  - true
+                  nodelay: true
+              management_version: 3.7.14
+              message_stats:
+                ack: 1264822
+                ack_details:
+                  rate: 0
+                confirm: 258495
+                confirm_details:
+                  rate: 0
+                deliver: 1264822
+                deliver_details:
+                  rate: 0
+                deliver_get: 1264846
+                deliver_get_details:
+                  rate: 0
+                deliver_no_ack: 0
+                deliver_no_ack_details:
+                  rate: 0
+                disk_reads: 0
+                disk_reads_details:
+                  rate: 0
+                disk_writes: 1000000
+                disk_writes_details:
+                  rate: 0
+                get: 24
+                get_details:
+                  rate: 0
+                get_no_ack: 0
+                get_no_ack_details:
+                  rate: 0
+                publish: 1247498
+                publish_details:
+                  rate: 0
+                redeliver: 24
+                redeliver_details:
+                  rate: 0
+                return_unroutable: 0
+                return_unroutable_details:
+                  rate: 0
+              node: rabbit@rabbitmq-cloud-0
+              object_totals:
+                channels: 1
+                connections: 1
+                consumers: 0
+                exchanges: 16
+                queues: 1
+              queue_totals:
+                messages: 0
+                messages_details:
+                  rate: 0
+                messages_ready: 0
+                messages_ready_details:
+                  rate: 0
+                messages_unacknowledged: 0
+                messages_unacknowledged_details:
+                  rate: 0
+              rabbitmq_version: 3.7.14
+              rates_mode: basic
+              sample_retention_policies:
+                basic:
+                - 600
+                detailed:
+                - 600
+                global:
+                - 600
+              statistics_db_event_queue: 0
+      summary: Get Overview
+      operationId: GetOverview
+      consumes:
+      - application/json
+      tags:
+      - Informational
+      security:
+      - basic_auth: []
+  "/cluster-name":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ClusterName"
+          examples:
+            application/json:
+              name: rabbit@rabbitmq-cloud-0.rabbitmq-cloud.trumpf.svc.cluster.local
+      summary: Read Cluster Name
+      consumes:
+      - application/json
+      tags:
+      - Informational
+      operationId: GetClusterName
+      security:
+      - basic_auth: []
+  "/definitions":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/Definition"
+          examples:
+            application/json:
+              bindings:
+              - arguments: {}
+                destination: shared.queue.cloud
+                destination_type: queue
+                routing_key: shared.queue.cloud.key
+                source: shared.exchange
+                vhost: cloud
+              exchanges:
+              - arguments: {}
+                auto_delete: false
+                durable: true
+                internal: false
+                name: shared.exchange
+                type: direct
+                vhost: cloud
+              global_parameters:
+              - name: cluster_name
+                value: rabbit@rabbitmq-cloud-0.rabbitmq-cloud.trumpf.svc.cluster.local
+              parameters: []
+              permissions:
+              - configure: ".*"
+                read: ".*"
+                user: adminuser
+                vhost: cloud
+                write: ".*"
+              policies: []
+              queues:
+              - arguments: {}
+                auto_delete: false
+                durable: true
+                name: shared.queue.cloud
+                vhost: cloud
+              rabbit_version: 3.7.14
+              topic_permissions:
+              - exchange: shared.exchange
+                read: ".*"
+                user: apiuser
+                vhost: cloud
+                write: ".*"
+              users:
+              - hashing_algorithm: rabbit_password_hashing_sha256
+                name: apiuser
+                password_hash: mVZvOq/iWjeTCvDw8bSZkHUB+w8Z07S/lZwg4e7NcNscLjah
+                tags: administrator
+              vhosts:
+              - name: cloud
+      summary: List Definitions
+      tags:
+      - Informational
+      operationId: ListDefinitions
+      consumes:
+      - application/json
+  "/definitions/{vhost}":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          headers:
+            Content-Security-Policy:
+              type: string
+            Vary:
+              type: string
+          schema:
+            "$ref": "#/definitions/Definition"
+          examples:
+            application/json:
+              bindings:
+              - arguments: {}
+                destination: shared.queue.cloud
+                destination_type: queue
+                routing_key: shared.queue.cloud.key
+                source: shared.exchange
+              exchanges:
+              - arguments: {}
+                auto_delete: false
+                durable: true
+                internal: false
+                name: shared.exchange
+                type: direct
+              parameters: []
+              policies: []
+              queues:
+              - arguments: {}
+                auto_delete: false
+                durable: true
+                name: shared.queue.cloud
+              rabbit_version: 3.7.14
+      summary: Get Definitions for VHost
+      tags:
+      - Informational
+      - Virtual Hosts
+      operationId: GetDefinitionsForVirtualHost
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+    post:
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/Definition"
+        x-examples:
+          application/json:
+            bindings:
+            - arguments:
+                x-arg: value
+              destination: shared.queue.cloud4
+              destination_type: queue
+              routing_key: my_routing_key
+              source: shared.exchange
+            exchanges:
+            - arguments: {}
+              auto_delete: false
+              durable: true
+              internal: false
+              name: shared.exchange
+              type: direct
+            parameters: []
+            policies: []
+            queues:
+            - arguments: {}
+              auto_delete: false
+              durable: true
+              name: shared.queue.cloud4
+            rabbit_version: 3.7.14
+      responses:
+        '204':
+          description: ''
+        '400':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: bad_request
+              reason: vhost_not_found
+      summary: Create Definitions for VHost
+      tags:
+      - Virtual Hosts
+      operationId: CreateDefinitionsForVirtualHost
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      security:
+      - basic_auth: []
+  "/queues/{vhost}/{queue}/get":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: queue
+      in: path
+      type: string
+      required: true
+    post:
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/ConsumeRequest"
+        x-examples:
+          application/json:
+            count: 1
+            ackmode: ack_requeue_true
+            encoding: auto
+            truncate: 50000
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/ConsumeResponse"
+          examples:
+            application/json:
+            - exchange: shared.exchange
+              message_count: 24
+              payload: my body
+              payload_bytes: 7
+              payload_encoding: string
+              properties: []
+              redelivered: true
+              routing_key: shared.queue.cloud.key
+        '401':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: not_authorised
+              reason: Access refused.
+        '404':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: not_found
+              reason: NOT_FOUND - no queue 'shared.queue.clouds' in vhost 'cloud'
+      operationId: ConsumeMessage
+      summary: Consume Message
+      produces:
+      - application/json
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+      tags:
+      - Pub/Sub
+      - Queues
+  "/exchanges/{vhost}/{exchange}/publish":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: exchange
+      in: path
+      type: string
+      required: true
+    post:
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/PublishRequest"
+        x-examples:
+          application/json:
+            routing_key: shared.key
+            payload: This is the payload
+            payload_encoding: string
+            properties:
+              app_id: ApplicationId
+              correlation_id: CorrelationId
+              message_id: MessageId
+              user_id: testuser
+              delivery_mode: 2
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/PublishResponse"
+          examples:
+            application/json:
+              routed: true
+      summary: Publish Message
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      security:
+      - basic_auth: []
+      operationId: PublishMessage
+      tags:
+      - Pub/Sub
+      - Exchanges
+  "/vhosts":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/VHost"
+          examples:
+            application/json:
+            - cluster_state:
+                rabbit@rabbitmq-cloud-0: running
+              name: "/"
+              tracing: false
+      summary: List VHosts
+      operationId: ListVirtualHosts
+      security:
+      - basic_auth: []
+      consumes:
+      - application/json
+      tags:
+      - Virtual Hosts
+  "/vhosts/{vhost}":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/VHost"
+          examples:
+            application/json:
+              message_stats:
+                ack: 1264822
+                ack_details:
+                  rate: 0
+                confirm: 258525
+                confirm_details:
+                  rate: 0
+                deliver: 1264822
+                deliver_details:
+                  rate: 0
+                deliver_get: 1264850
+                deliver_get_details:
+                  rate: 0
+                deliver_no_ack: 0
+                deliver_no_ack_details:
+                  rate: 0
+                get: 28
+                get_details:
+                  rate: 0
+                get_no_ack: 0
+                get_no_ack_details:
+                  rate: 0
+                publish: 1247528
+                publish_details:
+                  rate: 0
+                redeliver: 27
+                redeliver_details:
+                  rate: 0
+                return_unroutable: 7
+                return_unroutable_details:
+                  rate: 0
+              messages: 25
+              messages_details:
+                rate: 0
+              messages_ready: 25
+              messages_ready_details:
+                rate: 0
+              messages_unacknowledged: 0
+              messages_unacknowledged_details:
+                rate: 0
+              name: cloud
+              recv_oct: 178988418
+              recv_oct_details:
+                rate: 1.6
+              send_oct: 274962337
+              send_oct_details:
+                rate: 1.6
+              tracing: false
+        '400':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+        '401':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: not_authorised
+              reason: Login failed
+        '403':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+        '404':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: Object Not Found
+              reason: Not Found
+      operationId: GetVirtualHost
+      summary: Read VHost
+      security:
+      - basic_auth: []
+      consumes:
+      - application/json
+      tags:
+      - Virtual Hosts
+    put:
+      responses:
+        '201':
+          description: ''
+        '204':
+          description: ''
+      summary: Create VHost
+      tags:
+      - Virtual Hosts
+      operationId: CreateVirtualHost
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+    delete:
+      responses:
+        '204':
+          description: ''
+        '404':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: Object Not Found
+              reason: Not Found
+      summary: Delete VHost
+      tags:
+      - Virtual Hosts
+      operationId: DeleteVirtualHost
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/bindings":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/Binding"
+          examples:
+            application/json:
+            - arguments: {}
+              destination: shared.queue.cloud
+              destination_type: queue
+              properties_key: shared.queue.cloud
+              routing_key: shared.queue.cloud
+              source: ''
+              vhost: cloud
+        '400':
+          description: ''
+        '500':
+          description: ''
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+      summary: List Bindings
+      tags:
+      - Bindings
+      operationId: ListBindings
+  "/exchanges/{vhost}/{exchange}/bindings/source":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: exchange
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/Binding"
+          examples:
+            application/json:
+            - arguments: {}
+              destination: shared.queue.cloud
+              destination_type: queue
+              properties_key: shared.queue.cloud.key
+              routing_key: shared.queue.cloud.key
+              source: shared.exchange
+              vhost: cloud
+      consumes:
+      - application/json
+      summary: List Bindings as Source
+      operationId: ListBindingsAsSource
+      tags:
+      - Bindings
+      security:
+      - basic_auth: []
+  "/exchanges/{vhost}/{exchange}/bindings/destination":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: exchange
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/Binding"
+          examples:
+            application/json:
+            - arguments: {}
+              destination: shared.exchange
+              destination_type: exchange
+              properties_key: shared.queue.cloud.key
+              routing_key: shared.queue.cloud.key
+              source: test.exchange
+              vhost: cloud
+      summary: List Bindings as Destination
+      operationId: ListBindingsAsDestination
+      tags:
+      - Bindings
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/queues":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/Queue"
+          examples:
+            application/json:
+            - arguments: {}
+              auto_delete: false
+              backing_queue_status:
+                avg_ack_egress_rate: 0
+                avg_ack_ingress_rate: 9.472023639246112e-21
+                avg_egress_rate: 9.472023639246112e-21
+                avg_ingress_rate: 0.08336487738719885
+                delta:
+                - delta
+                len: 57
+                mode: default
+                next_seq_id: 1264879
+                q1: 0
+                q2: 0
+                q3: 0
+                q4: 57
+                target_ram_count: infinity
+              consumer_utilisation: 
+              consumers: 0
+              durable: true
+              effective_policy_definition: []
+              exclusive: false
+              exclusive_consumer_tag: 
+              garbage_collection:
+                fullsweep_after: 65535
+                max_heap_size: 0
+                min_bin_vheap_size: 46422
+                min_heap_size: 233
+                minor_gcs: 1264
+              head_message_timestamp: 
+              idle_since: '2019-05-10 19:39:01'
+              memory: 50664
+              message_bytes: 399
+              message_bytes_paged_out: 0
+              message_bytes_persistent: 0
+              message_bytes_ram: 399
+              message_bytes_ready: 399
+              message_bytes_unacknowledged: 0
+              message_stats:
+                ack: 1264822
+                ack_details:
+                  rate: 0
+                deliver: 1264822
+                deliver_details:
+                  rate: 0
+                deliver_get: 1264855
+                deliver_get_details:
+                  rate: 0
+                deliver_no_ack: 0
+                deliver_no_ack_details:
+                  rate: 0
+                get: 33
+                get_details:
+                  rate: 0
+                get_no_ack: 0
+                get_no_ack_details:
+                  rate: 0
+                publish: 1246734
+                publish_details:
+                  rate: 0
+                redeliver: 32
+                redeliver_details:
+                  rate: 0
+              messages: 57
+              messages_details:
+                rate: 0
+              messages_paged_out: 0
+              messages_persistent: 0
+              messages_ram: 57
+              messages_ready: 57
+              messages_ready_details:
+                rate: 0
+              messages_ready_ram: 57
+              messages_unacknowledged: 0
+              messages_unacknowledged_details:
+                rate: 0
+              messages_unacknowledged_ram: 0
+              name: shared.queue.cloud
+              node: rabbit@rabbitmq-cloud-0
+              operator_policy: 
+              policy: 
+              recoverable_slaves: 
+              reductions: 2262604946
+              reductions_details:
+                rate: 0
+              state: running
+              vhost: cloud
+      summary: List Queues
+      tags:
+      - Queues
+      operationId: ListQueues
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/queues/{vhost}":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/Queue"
+          examples:
+            application/json:
+            - arguments: {}
+              auto_delete: false
+              backing_queue_status:
+                avg_ack_egress_rate: 0
+                avg_ack_ingress_rate: 9.472023639246112e-21
+                avg_egress_rate: 9.472023639246112e-21
+                avg_ingress_rate: 0.08336487738719885
+                delta:
+                - delta
+                len: 57
+                mode: default
+                next_seq_id: 1264879
+                q1: 0
+                q2: 0
+                q3: 0
+                q4: 57
+                target_ram_count: infinity
+              consumer_utilisation: 
+              consumers: 0
+              durable: true
+              effective_policy_definition: []
+              exclusive: false
+              exclusive_consumer_tag: 
+              garbage_collection:
+                fullsweep_after: 65535
+                max_heap_size: 0
+                min_bin_vheap_size: 46422
+                min_heap_size: 233
+                minor_gcs: 1264
+              head_message_timestamp: 
+              idle_since: '2019-05-10 19:39:01'
+              memory: 50664
+              message_bytes: 399
+              message_bytes_paged_out: 0
+              message_bytes_persistent: 0
+              message_bytes_ram: 399
+              message_bytes_ready: 399
+              message_bytes_unacknowledged: 0
+              message_stats:
+                ack: 1264822
+                ack_details:
+                  rate: 0
+                deliver: 1264822
+                deliver_details:
+                  rate: 0
+                deliver_get: 1264855
+                deliver_get_details:
+                  rate: 0
+                deliver_no_ack: 0
+                deliver_no_ack_details:
+                  rate: 0
+                get: 33
+                get_details:
+                  rate: 0
+                get_no_ack: 0
+                get_no_ack_details:
+                  rate: 0
+                publish: 1246734
+                publish_details:
+                  rate: 0
+                redeliver: 32
+                redeliver_details:
+                  rate: 0
+              messages: 57
+              messages_details:
+                rate: 0
+              messages_paged_out: 0
+              messages_persistent: 0
+              messages_ram: 57
+              messages_ready: 57
+              messages_ready_details:
+                rate: 0
+              messages_ready_ram: 57
+              messages_unacknowledged: 0
+              messages_unacknowledged_details:
+                rate: 0
+              messages_unacknowledged_ram: 0
+              name: shared.queue.cloud
+              node: rabbit@rabbitmq-cloud-0
+              operator_policy: 
+              policy: 
+              recoverable_slaves: 
+              reductions: 2262604946
+              reductions_details:
+                rate: 0
+              state: running
+              vhost: cloud
+      summary: List Queues for VHost
+      tags:
+      - Queues
+      operationId: ListQueuesForVirtualHost
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/queues/{vhost}/{queue}":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: queue
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/Queue"
+          examples:
+            application/json:
+              arguments: {}
+              auto_delete: false
+              backing_queue_status:
+                avg_ack_egress_rate: 0
+                avg_ack_ingress_rate: 9.472023639246112e-21
+                avg_egress_rate: 9.472023639246112e-21
+                avg_ingress_rate: 0.08336487738719885
+                delta:
+                - delta
+                len: 57
+                mode: default
+                next_seq_id: 1264879
+                q1: 0
+                q2: 0
+                q3: 0
+                q4: 57
+                target_ram_count: infinity
+              consumer_details: []
+              consumer_utilisation: 
+              consumers: 0
+              deliveries: []
+              durable: true
+              effective_policy_definition: []
+              exclusive: false
+              exclusive_consumer_tag: 
+              garbage_collection:
+                fullsweep_after: 65535
+                max_heap_size: 0
+                min_bin_vheap_size: 46422
+                min_heap_size: 233
+                minor_gcs: 1264
+              head_message_timestamp: 
+              idle_since: '2019-05-10 19:39:01'
+              incoming: []
+              memory: 50664
+              message_bytes: 399
+              message_bytes_paged_out: 0
+              message_bytes_persistent: 0
+              message_bytes_ram: 399
+              message_bytes_ready: 399
+              message_bytes_unacknowledged: 0
+              message_stats:
+                ack: 1264822
+                ack_details:
+                  rate: 0
+                deliver: 1264822
+                deliver_details:
+                  rate: 0
+                deliver_get: 1264855
+                deliver_get_details:
+                  rate: 0
+                deliver_no_ack: 0
+                deliver_no_ack_details:
+                  rate: 0
+                get: 33
+                get_details:
+                  rate: 0
+                get_no_ack: 0
+                get_no_ack_details:
+                  rate: 0
+                publish: 1246734
+                publish_details:
+                  rate: 0
+                redeliver: 32
+                redeliver_details:
+                  rate: 0
+              messages: 57
+              messages_details:
+                rate: 0
+              messages_paged_out: 0
+              messages_persistent: 0
+              messages_ram: 57
+              messages_ready: 57
+              messages_ready_details:
+                rate: 0
+              messages_ready_ram: 57
+              messages_unacknowledged: 0
+              messages_unacknowledged_details:
+                rate: 0
+              messages_unacknowledged_ram: 0
+              name: shared.queue.cloud
+              node: rabbit@rabbitmq-cloud-0
+              operator_policy: 
+              policy: 
+              recoverable_slaves: 
+              reductions: 2262604946
+              reductions_details:
+                rate: 0
+              state: running
+              vhost: cloud
+      summary: Get Queue
+      tags:
+      - Queues
+      operationId: GetQueue
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+    put:
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/QueueRequest"
+        x-examples:
+          application/json:
+            auto_delete: false
+            durable: true
+            arguments:
+              x-arg: ex
+      responses:
+        '201':
+          description: ''
+        '204':
+          description: ''
+      summary: Create Queue
+      tags:
+      - Queues
+      operationId: CreateQueue
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+    delete:
+      responses:
+        '204':
+          description: ''
+        '404':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: Object Not Found
+              reason: Not Found
+      summary: Delete Queue
+      parameters:
+      - in: query
+        name: if-empty
+        type: boolean
+        default: true
+      - in: query
+        name: if-unused
+        type: boolean
+        default: true
+      tags:
+      - Queues
+      operationId: DeleteQueue
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/queues/{vhost}/{queue}/bindings":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: queue
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/Binding"
+          examples:
+            application/json:
+            - arguments: {}
+              destination: shared.queue.cloud
+              destination_type: queue
+              properties_key: shared.queue.cloud
+              routing_key: shared.queue.cloud
+              source: ''
+              vhost: cloud
+      summary: List All Bindings for Queue
+      tags:
+      - Bindings
+      - Queues
+      operationId: ListBindingsForQueue
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/queues/{vhost}/{queue}/actions":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: queue
+      in: path
+      type: string
+      required: true
+    post:
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/QueueAction"
+        x-examples:
+          application/json:
+            action: sync
+      responses:
+        '204':
+          description: ''
+      summary: Create Actions for Queue
+      tags:
+      - Queues
+      operationId: CreateQueueActions
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      security:
+      - basic_auth: []
+  "/queues/{vhost}/{queue}/contents":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: queue
+      in: path
+      type: string
+      required: true
+    delete:
+      responses:
+        '204':
+          description: ''
+      summary: Delete Queue Contents (Purge)
+      tags:
+      - Queues
+      operationId: DeleteQueueContents
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/bindings/{vhost}/e/{exchange}/q/{queue}":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: exchange
+      in: path
+      type: string
+      required: true
+    - name: queue
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/Binding"
+          examples:
+            application/json:
+            - arguments:
+                x-arg: value
+              destination: shared.queue.cloud4
+              destination_type: queue
+              properties_key: my_routing_key~O1oKpA
+              routing_key: my_routing_key
+              source: shared.exchange
+              vhost: cloud
+      summary: List Bindings for Queue
+      tags:
+      - Bindings
+      operationId: ListBindingsForQueueExchange
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+    post:
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/BindingRequest"
+      responses:
+        '201':
+          description: ''
+        '405':
+          description: ''
+      summary: Create Bindings for Queue
+      tags:
+      - Bindings
+      operationId: CreateBindingsForQueueExchange
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      security:
+      - basic_auth: []
+  "/bindings/{vhost}/e/{exchange}/q/{queue}/{propertyKey}":
+    parameters:
+    - name: vhost
+      in: path
+      type: string
+      required: true
+    - name: exchange
+      in: path
+      type: string
+      required: true
+    - name: queue
+      in: path
+      type: string
+      required: true
+    - name: propertyKey
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/Binding"
+          examples:
+            application/json:
+              arguments:
+                x-arg: value
+              destination: shared.queue.cloud4
+              destination_type: queue
+              properties_key: my_routing_key~O1oKpA
+              routing_key: my_routing_key
+              source: shared.exchange
+              vhost: cloud
+        '404':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: Object Not Found
+              reason: Not Found
+      summary: Get Binding for Queue
+      tags:
+      - Bindings
+      operationId: GetBindingForQueueExchange
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+    delete:
+      responses:
+        '204':
+          description: ''
+        '404':
+          description: ''
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              reason:
+                type: string
+          examples:
+            application/json:
+              error: Object Not Found
+              reason: Not Found
+      summary: Delete Binding for Queue
+      tags:
+      - Bindings
+      operationId: DeleteBindingForQueueExchange
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/users":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/PermissionUser"
+          examples:
+            application/json:
+            - hashing_algorithm: rabbit_password_hashing_sha256
+              name: adminuser
+              password_hash: masEFKl4ejfIv1DHb1WQ9jFYe9fKx6PqIAf/BxSU6k9NlXtQ
+              tags: administrator
+      operationId: ListUsers
+      tags:
+      - Users
+      summary: List Users
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/users/without-permissions":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/User"
+          examples:
+            application/json:
+            - hashing_algorithm: rabbit_password_hashing_sha256
+              name: flowers
+              password_hash: tSBI8cXfyjsgfOusC0H640/v6aITQMZ2ZP5eWSHOUtY8sCMl
+              tags: ''
+      summary: List Users without Permissions
+      tags:
+      - Users
+      - Permissions
+      operationId: ListUsersWithoutPermissions
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/users/{name}":
+    parameters:
+    - name: name
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/User"
+          examples:
+            application/json:
+              hashing_algorithm: rabbit_password_hashing_sha256
+              name: apiuser
+              password_hash: mVZvOq/iWjeTCvDw8bSZkHUB+w8Z07S/lZwg4e7NcNscLjah
+              tags: administrator
+        '404':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: Object Not Found
+              reason: Not Found
+      summary: Get User
+      tags:
+      - Users
+      operationId: GetUser
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+    put:
+      parameters:
+      - in: body
+        name: body
+        schema:
+          "$ref": "#/definitions/UserRequest"
+        x-examples:
+          application/json:
+            password: secret
+            tags: ''
+      responses:
+        '201':
+          description: ''
+        '204':
+          description: ''
+      summary: Create User
+      tags:
+      - Users
+      operationId: CreateUser
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+    delete:
+      responses:
+        '204':
+          description: ''
+        '404':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: Object Not Found
+              reason: Not Found
+      summary: Delete User
+      tags:
+      - Users
+      operationId: DeleteUser
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/users/{user}/permissions":
+    parameters:
+    - name: user
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/PermissionUser"
+          examples:
+            application/json:
+            - configure: ".*"
+              read: ".*"
+              user: apiuser
+              vhost: "/"
+              write: ".*"
+        '404':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+          examples:
+            application/json:
+              error: Object Not Found
+              reason: Not Found
+      summary: List User Permissions
+      tags:
+      - Users
+      - Permissions
+      operationId: ListUserPermissions
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/users/{user}/topic-permissions":
+    parameters:
+    - name: user
+      in: path
+      type: string
+      required: true
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            type: array
+            items:
+              "$ref": "#/definitions/PermissionTopic"
+          examples:
+            application/json:
+            - exchange: shared.exchange
+              read: ".*"
+              user: apiuser
+              vhost: cloud
+              write: ".*"
+      tags:
+      - Permissions
+      summary: List Users Topic Permissions
+      operationId: ListUsersTopicPermissions
+      consumes:
+      - application/json
+      security:
+      - basic_auth: []
+  "/whoami":
+    get:
+      responses:
+        '200':
+          description: ''
+          schema:
+            "$ref": "#/definitions/WhoAmI"
+          examples:
+            application/json:
+              name: apiuser
+              tags: administrator
+        '401':
+          description: ''
+          schema:
+            "$ref": "#/definitions/ErrorMessage"
+      tags:
+      - Users
+      summary: Get Current User
+      operationId: GetUserCurrent
+      security:
+      - basic_auth: []
+      consumes:
+      - application/json
+securityDefinitions:
+  basic_auth:
+    type: basic
+    description: Basic authentication as per RabbitMQ HTTP API requirements.
+schemes:
+- http
+- https
+security:
+- basic_auth: []
+tags:
+- name: Bindings
+- name: Informational
+- name: Exchanges
+- name: Pub/Sub
+- name: Queues
+- name: Virtual Hosts
+- name: Users
+- name: Permissions
+definitions:
+  BindingRequest:
+    type: object
+    required:
+    - routing_key
+    properties:
+      routing_key:
+        type: string
+      arguments:
+        type: object
+        properties:
+          x-arg:
+            type: string
+    title: BindingRequest
+  Binding:
+    type: object
+    properties:
+      arguments:
+        type: object
+        properties:
+          x-arg:
+            type: string
+      destination:
+        type: string
+      destination_type:
+        type: string
+      properties_key:
+        type: string
+      routing_key:
+        type: string
+      source:
+        type: string
+      vhost:
+        type: string
+    title: Binding
+  ClusterName:
+    type: object
+    properties:
+      name:
+        type: string
+    title: ClusterName
+  Exchange:
+    type: object
+    title: Exchange
+    properties:
+      arguments:
+        type: object
+        properties:
+          x-arg:
+            type: string
+      auto_delete:
+        type: boolean
+      durable:
+        type: boolean
+      incoming:
+        type: array
+        items:
+          type: object
+      internal:
+        type: boolean
+      message_stats:
+        type: object
+        properties:
+          publish_in:
+            type: integer
+          publish_in_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          publish_out:
+            type: integer
+          publish_out_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+      name:
+        type: string
+      outgoing:
+        type: array
+        items:
+          type: object
+      type:
+        type: string
+      user_who_performed_action:
+        type: string
+      vhost:
+        type: string
+  WhoAmI:
+    type: object
+    properties:
+      name:
+        type: string
+      tags:
+        type: string
+    title: WhoAmI
+  VHost:
+    type: object
+    title: VHost
+    properties:
+      message_stats:
+        type: object
+        properties:
+          ack:
+            type: integer
+          ack_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          confirm:
+            type: integer
+          confirm_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          deliver:
+            type: integer
+          deliver_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          deliver_get:
+            type: integer
+          deliver_get_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          deliver_no_ack:
+            type: integer
+          deliver_no_ack_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          get:
+            type: integer
+          get_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          get_no_ack:
+            type: integer
+          get_no_ack_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          publish:
+            type: integer
+          publish_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          redeliver:
+            type: integer
+          redeliver_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          return_unroutable:
+            type: integer
+          return_unroutable_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+      messages:
+        type: integer
+      messages_details:
+        type: object
+        properties:
+          rate:
+            type: integer
+      messages_ready:
+        type: integer
+      messages_ready_details:
+        type: object
+        properties:
+          rate:
+            type: integer
+      messages_unacknowledged:
+        type: integer
+      messages_unacknowledged_details:
+        type: object
+        properties:
+          rate:
+            type: integer
+      name:
+        type: string
+      recv_oct:
+        type: integer
+      recv_oct_details:
+        type: object
+        properties:
+          rate:
+            type: number
+      send_oct:
+        type: integer
+      send_oct_details:
+        type: object
+        properties:
+          rate:
+            type: number
+      tracing:
+        type: boolean
+  PermissionTopic:
+    type: object
+    properties:
+      exchange:
+        type: string
+      read:
+        type: string
+      user:
+        type: string
+      vhost:
+        type: string
+      write:
+        type: string
+  PermissionUser:
+    type: object
+    properties:
+      configure:
+        type: string
+      read:
+        type: string
+      user:
+        type: string
+      vhost:
+        type: string
+      write:
+        type: string
+  ErrorMessage:
+    type: object
+    properties:
+      error:
+        type: string
+      reason:
+        type: string
+    title: ErrorMessage
+  User:
+    type: object
+    properties:
+      hashing_algorithm:
+        type: string
+      name:
+        type: string
+      password_hash:
+        type: string
+      tags:
+        type: string
+    title: User
+  UserRequest:
+    type: object
+    properties:
+      password:
+        type: string
+      tags:
+        type: string
+    title: UserRequest
+  Queue:
+    type: object
+    properties:
+      arguments:
+        type: object
+        properties:
+          x-arg:
+            type: string
+      auto_delete:
+        type: boolean
+      backing_queue_status:
+        type: object
+        properties:
+          avg_ack_egress_rate:
+            type: integer
+          avg_ack_ingress_rate:
+            type: number
+          avg_egress_rate:
+            type: number
+          avg_ingress_rate:
+            type: number
+          delta:
+            type: array
+            items:
+              type: string
+          len:
+            type: integer
+          mode:
+            type: string
+          next_seq_id:
+            type: integer
+          q1:
+            type: integer
+          q2:
+            type: integer
+          q3:
+            type: integer
+          q4:
+            type: integer
+          target_ram_count:
+            type: string
+      consumer_details:
+        type: array
+        items:
+          type: object
+      consumer_utilisation:
+        type: 'null'
+      consumers:
+        type: integer
+      deliveries:
+        type: array
+        items:
+          type: object
+      durable:
+        type: boolean
+      effective_policy_definition:
+        type: array
+        items:
+          type: object
+      exclusive:
+        type: boolean
+      exclusive_consumer_tag:
+        type: 'null'
+      garbage_collection:
+        type: object
+        properties:
+          fullsweep_after:
+            type: integer
+          max_heap_size:
+            type: integer
+          min_bin_vheap_size:
+            type: integer
+          min_heap_size:
+            type: integer
+          minor_gcs:
+            type: integer
+      head_message_timestamp:
+        type: 'null'
+      idle_since:
+        type: string
+      incoming:
+        type: array
+        items:
+          type: object
+      memory:
+        type: integer
+      message_bytes:
+        type: integer
+      message_bytes_paged_out:
+        type: integer
+      message_bytes_persistent:
+        type: integer
+      message_bytes_ram:
+        type: integer
+      message_bytes_ready:
+        type: integer
+      message_bytes_unacknowledged:
+        type: integer
+      message_stats:
+        type: object
+        properties:
+          ack:
+            type: integer
+          ack_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          deliver:
+            type: integer
+          deliver_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          deliver_get:
+            type: integer
+          deliver_get_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          deliver_no_ack:
+            type: integer
+          deliver_no_ack_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          get:
+            type: integer
+          get_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          get_no_ack:
+            type: integer
+          get_no_ack_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          publish:
+            type: integer
+          publish_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          redeliver:
+            type: integer
+          redeliver_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+      messages:
+        type: integer
+      messages_details:
+        type: object
+        properties:
+          rate:
+            type: integer
+      messages_paged_out:
+        type: integer
+      messages_persistent:
+        type: integer
+      messages_ram:
+        type: integer
+      messages_ready:
+        type: integer
+      messages_ready_details:
+        type: object
+        properties:
+          rate:
+            type: integer
+      messages_ready_ram:
+        type: integer
+      messages_unacknowledged:
+        type: integer
+      messages_unacknowledged_details:
+        type: object
+        properties:
+          rate:
+            type: integer
+      messages_unacknowledged_ram:
+        type: integer
+      name:
+        type: string
+      node:
+        type: string
+      operator_policy:
+        type: 'null'
+      policy:
+        type: 'null'
+      recoverable_slaves:
+        type: 'null'
+      reductions:
+        type: integer
+      reductions_details:
+        type: object
+        properties:
+          rate:
+            type: integer
+      state:
+        type: string
+      vhost:
+        type: string
+    title: Queue
+  QueueRequest:
+    type: object
+    properties:
+      auto_delete:
+        type: boolean
+      durable:
+        type: boolean
+      arguments:
+        type: object
+        properties:
+          x-arg:
+            type: string
+    title: QueueRequest
+  Overview:
+    type: object
+    properties:
+      churn_rates:
+        type: object
+        properties:
+          channel_closed:
+            type: integer
+          channel_closed_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          channel_created:
+            type: integer
+          channel_created_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          connection_closed:
+            type: integer
+          connection_closed_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          connection_created:
+            type: integer
+          connection_created_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          queue_created:
+            type: integer
+          queue_created_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          queue_declared:
+            type: integer
+          queue_declared_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          queue_deleted:
+            type: integer
+          queue_deleted_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+      cluster_name:
+        type: string
+      contexts:
+        type: array
+        items:
+          type: object
+          properties:
+            description:
+              type: string
+            node:
+              type: string
+            path:
+              type: string
+            port:
+              type: string
+            ssl_opts:
+              type: array
+              items:
+                type: object
+                properties: {}
+      erlang_full_version:
+        type: string
+      erlang_version:
+        type: string
+      exchange_types:
+        type: array
+        items:
+          type: object
+          properties:
+            description:
+              type: string
+            enabled:
+              type: boolean
+            name:
+              type: string
+            internal_purpose:
+              type: string
+      listeners:
+        type: array
+        items:
+          type: object
+          properties:
+            ip_address:
+              type: string
+            node:
+              type: string
+            port:
+              type: integer
+            protocol:
+              type: string
+            socket_opts:
+              type: object
+              properties:
+                backlog:
+                  type: integer
+                exit_on_close:
+                  type: boolean
+                linger:
+                  type: array
+                  items:
+                    type: integer
+                nodelay:
+                  type: boolean
+                connection_type:
+                  type: string
+                port:
+                  type: integer
+      management_version:
+        type: string
+      message_stats:
+        type: object
+        properties:
+          ack:
+            type: integer
+          ack_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          confirm:
+            type: integer
+          confirm_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          deliver:
+            type: integer
+          deliver_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          deliver_get:
+            type: integer
+          deliver_get_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          deliver_no_ack:
+            type: integer
+          deliver_no_ack_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          disk_reads:
+            type: integer
+          disk_reads_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          disk_writes:
+            type: integer
+          disk_writes_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          get:
+            type: integer
+          get_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          get_no_ack:
+            type: integer
+          get_no_ack_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          publish:
+            type: integer
+          publish_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          redeliver:
+            type: integer
+          redeliver_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          return_unroutable:
+            type: integer
+          return_unroutable_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+      node:
+        type: string
+      object_totals:
+        type: object
+        properties:
+          channels:
+            type: integer
+          connections:
+            type: integer
+          consumers:
+            type: integer
+          exchanges:
+            type: integer
+          queues:
+            type: integer
+      queue_totals:
+        type: object
+        properties:
+          messages:
+            type: integer
+          messages_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          messages_ready:
+            type: integer
+          messages_ready_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+          messages_unacknowledged:
+            type: integer
+          messages_unacknowledged_details:
+            type: object
+            properties:
+              rate:
+                type: integer
+      rabbitmq_version:
+        type: string
+      rates_mode:
+        type: string
+      sample_retention_policies:
+        type: object
+        properties:
+          basic:
+            type: array
+            items:
+              type: integer
+          detailed:
+            type: array
+            items:
+              type: integer
+          global:
+            type: array
+            items:
+              type: integer
+      statistics_db_event_queue:
+        type: integer
+    title: Overview
+  PublishResponse:
+    type: object
+    properties:
+      routed:
+        type: boolean
+    title: PublishResponse
+  MessageProperties:
+    type: object
+    title: MessageProperties
+    properties:
+      app_id:
+        type: string
+      correlation_id:
+        type: string
+      message_id:
+        type: string
+      user_id:
+        type: string
+      timestamp:
+        type: integer
+      content_type:
+        type: string
+      delivery_mode:
+        type: integer
+        description: 1 = Non Persistent, 2 = Persistent
+      priority:
+        type: integer
+      cluster_id:
+        type: string
+  PublishRequest:
+    type: object
+    title: PublishRequest
+    properties:
+      routing_key:
+        type: string
+      payload:
+        type: string
+      payload_encoding:
+        type: string
+        enum:
+        - string
+        - base64
+        default: string
+      properties:
+        "$ref": "#/definitions/PublishProperties"
+    required:
+    - routing_key
+    - payload
+    - payload_encoding
+  ExchangeRequest:
+    type: object
+    title: ExchangeRequest
+    properties:
+      type:
+        type: string
+      auto_delete:
+        type: boolean
+      durable:
+        type: boolean
+      internal:
+        type: boolean
+      arguments:
+        type: object
+        properties:
+          x-arg:
+            type: string
+  Definition:
+    type: object
+    title: Definition
+    properties:
+      bindings:
+        type: array
+        items:
+          "$ref": "#/definitions/Binding"
+      exchanges:
+        type: array
+        items:
+          "$ref": "#/definitions/Exchange"
+      parameters:
+        type: array
+        items:
+          type: object
+      policies:
+        type: array
+        items:
+          type: object
+      queues:
+        type: array
+        items:
+          "$ref": "#/definitions/Queue"
+      rabbit_version:
+        type: string
+  ConsumeResponse:
+    type: object
+    title: ConsumeResponse
+    properties:
+      exchange:
+        type: string
+      message_count:
+        type: integer
+      payload:
+        type: string
+      payload_bytes:
+        type: integer
+      payload_encoding:
+        type: string
+      properties:
+        "$ref": "#/definitions/MessageProperties"
+      redelivered:
+        type: boolean
+      routing_key:
+        type: string
+  ConsumeRequest:
+    type: object
+    title: ConsumeRequest
+    properties:
+      count:
+        type: integer
+        default: 1
+        minimum: 0
+      ackmode:
+        type: string
+        default: ack_requeue_true
+      encoding:
+        type: string
+        default: string
+      truncate:
+        type: integer
+        minimum: 0
+        maximum: 5000000
+        default: 1000000
+    required:
+    - count
+    - ackmode
+    - encoding
+    - truncate
+  QueueAction:
+    type: object
+    required:
+    - action
+    properties:
+      action:
+        type: string
+        enum:
+        - sync
+        - cancel_sync
+    title: QueueAction
+  PublishProperties:
+    type: object
+    title: PublishProperties
+    properties:
+      app_id:
+        type: string
+      correlation_id:
+        type: string
+      message_id:
+        type: string
+      user_id:
+        type: string
+      delivery_mode:
+        type: integer
+        description: 1 = Non Persistent, 2 = Persistent
+        default: 2
+basePath: "/rabbitmq/api"
+produces:
+- application/json
+consumes:
+- application/json

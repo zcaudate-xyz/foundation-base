@@ -3,8 +3,8 @@ project_id = "foundation-base-local"
 [api]
 enabled = true
 port = 55121
-schemas = ["public", "storage", "graphql_public", "scratch"]
-extra_search_path = ["public", "extensions", "scratch"]
+schemas = ["public", "storage", "graphql_public", "scratch", "scratch_v0"]
+extra_search_path = ["public", "extensions", "scratch", "scratch_v0"]
 max_rows = 1000
 
 [db]
