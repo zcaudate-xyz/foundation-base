@@ -21,8 +21,9 @@
   => #(let [[opts body] %]
         (and (= {"input" "hello"} body)
              (= "key" (:key opts))
+             (= :post (:method opts))
              (= {"Content-Profile" "scratch"} (:headers opts))
-             (= "/rest/v1/rpc/echo_name" (:route opts)))))
+             (= "/rpc/echo_name" (:route opts)))))
 
 ^{:refer lib.supabase.rpc/rpc :added "4.1"}
 (fact "wraps rpc into api-rpc with a client"

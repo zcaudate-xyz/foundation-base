@@ -1,5 +1,6 @@
 (ns lib.supabase.auth
-  (:require [lib.supabase.common :as common]))
+  (:require [lib.supabase.common :as common]
+            [lib.supabase.route :as route]))
 
 (defn has-session?
   "Checks whether the payload looks like a Supabase token response."
@@ -77,25 +78,21 @@
   "Signs up a user through the auth API."
   {:added "4.1.4"}
   [body & [opts]]
-  (common/api-call (merge opts
-                          {:route "/auth/v1/signup"})
+  (common/api-call (route/route-request :auth/signup opts)
                    body))
 
 (defn api-signin
   "Signs in a user through the auth API."
   {:added "4.1.4"}
   [body & [opts]]
-  (common/api-call (merge opts
-                          {:route "/auth/v1/token?grant_type=password"})
+  (common/api-call (route/route-request :auth/signin-password opts)
                    body))
 
 (defn api-impersonate
   "Impersonates a user through the auth API."
   {:added "4.1.4"}
   [uid & [opts]]
-  (common/api-call (merge opts
-                          {:route "/auth/v1/token?grant_type=impersonate"
-                           :type :service})
+  (common/api-call (route/route-request :auth/impersonate opts)
                    {"user_id" uid}))
 
 (defn sign-up
@@ -125,12 +122,11 @@
   (let [refresh-token (or (:refresh_token (common/raw-state client))
                           (:refresh_token opts))]
     (when-not refresh-token
-      (throw (ex-info "Supabase refresh token not configured"
+    (throw (ex-info "Supabase refresh token not configured"
                       {:client client
                        :opts opts})))
-    (let [response (common/api-call (merge opts
-                                           {:client client
-                                            :route "/auth/v1/token?grant_type=refresh_token"})
+    (let [response (common/api-call (route/route-request :auth/refresh-session
+                                                         (merge opts {:client client}))
                                     {"refresh_token" refresh-token})]
       (update response :body #(auth-result client %)))))
 
@@ -140,9 +136,9 @@
   [client & [opts]]
   (let [opts (or opts {})
         scope (or (:scope opts) "global")
-        response (common/api-call (merge opts
-                                         {:client client
-                                          :route (str "/auth/v1/logout?scope=" scope)})
+        response (common/api-call (route/route-request :auth/sign-out
+                                                         (merge opts {:client client})
+                                                         scope)
                                   {})]
     (when (not= scope "others")
       (clear-session! client))

@@ -1,7 +1,6 @@
 (ns lib.supabase-test
   (:require [lib.supabase :as s]
-            [lib.supabase.support :as support]
-            [net.http :as http])
+            [lib.supabase.support :as support])
   (:use code.test))
 
 (fact:global
@@ -9,10 +8,23 @@
    :teardown [(support/stop!)]})
 
 ^{:refer lib.supabase/api-call :added "4.1.4"}
-(fact "calls an api"
-  (with-redefs [http/post (fn [_ _] {:status 200 :body "{\"ok\":true}"})]
-    (s/api-call {:key "key"} {}))
-  => {:status 200 :body {"ok" true}})
+(fact "calls a live api route against local docker supabase"
+  (let [message (support/random-log-message)
+        _ (support/seed-log! message)]
+    (try
+      (->> (s/api-call (merge (support/anon-opts)
+                              {:group :rest
+                               :method :get
+                               :route "/Log?select=message"
+                               :headers {"Content-Profile" support/+scratch-v0-schema+}})
+                       {})
+           :body
+           (filter #(= message (get % "message")))
+           first
+           (get "message"))
+      (finally
+        (support/clear-log! message))))
+  => string?)
 
 ^{:refer lib.supabase/api-signup-create :added "4.1.4"}
 (fact "creates an auth user and signs in against local docker supabase"
@@ -39,27 +51,55 @@
            (string? (nth % 2))))
 
 ^{:refer lib.supabase/api-select-all :added "4.1.4"}
-(fact "selects scratch table rows through postgrest against local docker supabase"
-  (let [name "copilot_lib_supabase_select"
-        _ (support/seed-entry! name ["copilot" "supabase" "select"])]
+(fact "selects scratch-v0 log rows through postgrest against local docker supabase"
+  (let [message (support/random-log-message)
+        _ (support/seed-log! message)]
     (try
-      (->> (s/api-select-all (atom {:id 'Entry :static/schema "scratch"})
-                             (support/service-opts))
+      (->> (s/api-select-all support/+log-table+
+                             (support/anon-opts))
            :body
-           (filter #(= name (get % "name")))
+           (filter #(= message (get % "message")))
            first
-           ((juxt #(get % "name") #(get % "tags"))))
+           (get "message"))
       (finally
-        (support/clear-entry! name))))
-  => ["copilot_lib_supabase_select" ["copilot" "supabase" "select"]])
+        (support/clear-log! message))))
+  => string?)
 
 ^{:refer lib.supabase/api-rpc :added "4.1.4"}
-(fact "calls a scratch schema rpc through local docker supabase"
-  (-> (s/api-rpc (merge (support/service-opts)
-                        {:fn (atom {:id 'echo_name :static/schema "scratch"})
-                         :args {"input" "copilot-rpc"}}))
+(fact "calls a public scratch-v0 ping rpc through local docker supabase"
+  (-> (s/api-rpc (merge (support/anon-opts)
+                        {:fn support/+ping-fn+}))
       :body)
-  => [{"name" "copilot-rpc"}])
+  => "pong")
+
+^{:refer lib.supabase/api-rpc :added "4.1.4"}
+(fact "calls the authenticated scratch-v0 log append rpc through local docker supabase"
+  (let [{:keys [uid access-token]} (support/create-auth-session!)
+        message (support/random-log-message)]
+    (try
+      (let [response (s/api-rpc (merge (support/auth-opts access-token)
+                                       {:fn support/+log-append-fn+
+                                        :args {"i_message" message}}))]
+        [(:status response)
+         (->> (support/list-logs)
+              (filter #(= message (get % "message")))
+              first
+              (get "message"))])
+      (finally
+        (support/clear-log! message)
+        (support/delete-auth-user! uid))))
+  => [200 string?])
+
+^{:refer lib.supabase/api-rpc :added "4.1.4"}
+(fact "rejects anonymous access to the scratch-v0 log append rpc"
+  (let [message (support/random-log-message)]
+    (try
+      (s/api-rpc (merge (support/anon-opts)
+                        {:fn support/+log-append-fn+
+                         :args {"i_message" message}}))
+      (finally
+        (support/clear-log! message))))
+  => (throws clojure.lang.ExceptionInfo "Supabase API request failed"))
 
 ^{:refer lib.supabase/connect :added "4.1.4"}
 (fact "connects a native realtime websocket against local docker supabase"

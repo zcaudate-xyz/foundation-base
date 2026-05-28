@@ -4,6 +4,7 @@
             [lib.supabase.common :as common]
             [lib.supabase.query :as query]
             [lib.supabase.realtime :as realtime]
+            [lib.supabase.route :as route]
             [lib.supabase.rpc :as rpc]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [update]))
@@ -17,6 +18,20 @@
              common/admin-url
              common/decode-body
              common/api-call
+
+             route/+roots+
+             route/+routes+
+             route/route-group
+             route/route-summary
+             route/route-entry
+             route/route-path
+             route/route-method
+             route/route-request
+             route/root-path
+             route/auth-route
+             route/admin-route
+             route/rest-route
+             route/realtime-route
 
              auth/has-session?
              auth/token-response->session

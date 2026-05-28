@@ -1,6 +1,7 @@
 (ns lib.supabase.query
   (:require [clojure.string :as str]
-            [lib.supabase.common :as common])
+            [lib.supabase.common :as common]
+            [lib.supabase.route :as route])
   (:refer-clojure :exclude [update]))
 
 (defn url-encode [s]
@@ -60,11 +61,10 @@
   "Selects all rows from a table through PostgREST."
   {:added "4.1.4"}
   [table & [opts]]
-  (let [route (str "/rest/v1/" (table-name table) "?select=*")]
-    (common/api-call (merge opts
-                            {:method :get
-                             :headers (schema-headers table)
-                             :route route})
+  (let [route-path (route/rest-route :table-all (table-name table))]
+    (common/api-call (merge (route/route-request :rest/table-all opts (table-name table))
+                            {:headers (schema-headers table)
+                             :route route-path})
                      {})))
 
 (defn select
@@ -72,23 +72,27 @@
   {:added "4.1.4"}
   [client table & [opts]]
   (let [opts (or opts {})
-        route (append-query (str "/rest/v1/" (table-name table))
-                            (query-params opts))]
+        route-path (append-query (route/rest-route :table (table-name table))
+                                 (query-params opts))]
     (common/api-call (merge opts
+                            (route/route-request :rest/table
+                                                {:client client}
+                                                (table-name table))
                             {:client client
                              :method :get
                              :headers (merge (schema-headers table)
                                              (:headers opts))
-                             :route route})
+                             :route route-path})
                      {})))
 
 (defn prefer-header [{:keys [returning count upsert?]}]
-  (->> [(when returning (str "return=" (name returning)))
-        (when count (str "count=" (name count)))
-        (when upsert? "resolution=merge-duplicates")]
-       (remove nil?)
-       seq
-       (str/join ",")))
+  (let [parts (->> [(when returning (str "return=" (name returning)))
+                    (when count (str "count=" (name count)))
+                    (when upsert? "resolution=merge-duplicates")]
+                   (remove nil?)
+                   seq)]
+    (when parts
+      (str/join "," parts))))
 
 (defn write-op [client method table rows opts]
   (let [opts (or opts {})
@@ -97,10 +101,13 @@
                        (when-let [prefer (prefer-header opts)]
                          {"Prefer" prefer}))]
     (common/api-call (merge opts
+                            (route/route-request :rest/table
+                                                {:client client}
+                                                (table-name table))
                             {:client client
-                             :method method
-                             :headers headers
-                             :route (str "/rest/v1/" (table-name table))})
+                            :method method
+                            :headers headers
+                            :route (route/rest-route :table (table-name table))})
                      rows)))
 
 (defn insert
@@ -120,17 +127,20 @@
   {:added "4.1.4"}
   [client table values & [opts]]
   (let [opts (or opts {})
-        route (append-query (str "/rest/v1/" (table-name table))
-                            (map (fn [[k v]] [(name k) (filter-clause v)])
-                                 (:filters opts)))]
+        route-path (append-query (route/rest-route :table (table-name table))
+                                 (map (fn [[k v]] [(name k) (filter-clause v)])
+                                      (:filters opts)))]
     (common/api-call (merge opts
+                            (route/route-request :rest/table
+                                                {:client client}
+                                                (table-name table))
                             {:client client
                              :method :patch
                              :headers (merge (schema-headers table)
                                              (:headers opts)
                                              (when-let [prefer (prefer-header opts)]
                                                {"Prefer" prefer}))
-                             :route route})
+                             :route route-path})
                      values)))
 
 (defn delete
@@ -138,13 +148,16 @@
   {:added "4.1.4"}
   [client table & [opts]]
   (let [opts (or opts {})
-        route (append-query (str "/rest/v1/" (table-name table))
-                            (map (fn [[k v]] [(name k) (filter-clause v)])
-                                 (:filters opts)))]
+        route-path (append-query (route/rest-route :table (table-name table))
+                                 (map (fn [[k v]] [(name k) (filter-clause v)])
+                                      (:filters opts)))]
     (common/api-call (merge opts
+                            (route/route-request :rest/table
+                                                {:client client}
+                                                (table-name table))
                             {:client client
                              :method :delete
                              :headers (merge (schema-headers table)
                                              (:headers opts))
-                             :route route})
+                             :route route-path})
                      {})))

@@ -1,5 +1,6 @@
 (ns lib.supabase.common
   (:require [clojure.string :as str]
+            [lib.supabase.route :as route]
             [net.http :as http]
             [std.json :as json]
             [std.lib.foundation :as f]))
@@ -90,19 +91,22 @@
   "Returns an auth API URL."
   {:added "4.1.4"}
   [client path]
-  (join-url (:base_url client) (str "/auth/v1" path)))
+  (join-url (:base_url client)
+            (str (route/root-path :auth) path)))
 
 (defn rest-url
   "Returns a PostgREST URL."
   {:added "4.1.4"}
   [client path]
-  (join-url (:base_url client) (str "/rest/v1" path)))
+  (join-url (:base_url client)
+            (str (route/root-path :rest) path)))
 
 (defn admin-url
   "Returns an auth admin URL."
   {:added "4.1.4"}
   [client path]
-  (join-url (:base_url client) (str "/auth/v1/admin" path)))
+  (join-url (:base_url client)
+            (str (route/root-path :admin) path)))
 
 (defn resolve-host
   [client {:keys [host]}]
@@ -152,6 +156,7 @@
   ([opts body]
    (let [{:keys [client
                  route
+                 group
                  method
                  type
                  headers]
@@ -176,6 +181,9 @@
                           "Accept-Profile"
                           (get headers "Content-Profile"))
                    headers)
+         route (if group
+                 (str (route/root-path group) route)
+                 route)
          request {:host host
                   :route route
                   :method method

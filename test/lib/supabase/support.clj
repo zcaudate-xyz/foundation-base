@@ -5,6 +5,29 @@
             [xt.db.runtime.event-host-util :as live])
   (:import (java.util UUID)))
 
+(def +scratch-v0-module+
+  'postgres.sample.scratch-v0)
+
+(def +scratch-v0-schema+
+  "scratch_v0")
+
+(def +log-table-name+
+  "Log")
+
+(def +log-table+
+  (atom {:id 'Log
+         :static/schema +scratch-v0-schema+}))
+
+(def +ping-fn+
+  (atom {:id 'ping
+         :static/schema +scratch-v0-schema+}))
+
+(def +log-append-fn+
+  (atom {:id 'log-append
+         :static/schema +scratch-v0-schema+}))
+
+(declare clear-log!)
+
 (defn- port-open?
   [host port]
   (try
@@ -22,9 +45,13 @@
   (l/rt:restart)
   (live/init-live-postgres-runtime!)
   (l/rt:setup (live/pg-rt) live/+postgres-module+)
+  (l/rt:setup (live/pg-rt) +scratch-v0-module+)
   (live/grant-scratch-schema!)
   (live/ensure-scratch-entry-table!)
+  (live/pg-exec-best-effort!
+   (str "GRANT USAGE ON SCHEMA \"" +scratch-v0-schema+ "\" TO anon, authenticated, service_role"))
   (live/reload-postgrest!)
+  (live/reload-postgrest! +scratch-v0-schema+ +log-table-name+)
   (live/refresh-live-supabase-config!)
   (live/pg-exec!
    (str "CREATE OR REPLACE FUNCTION \"" live/+scratch-schema+ "\".\"echo_name\"(input text)\n"
@@ -41,6 +68,9 @@
 
 (defn stop!
   []
+  (try
+    (l/rt:teardown (live/pg-rt) +scratch-v0-module+)
+    (catch Throwable _))
   (try
     (l/rt:teardown (live/pg-rt) live/+postgres-module+)
     (catch Throwable _))
@@ -74,6 +104,10 @@
    :key (anon-key)
    :type :anon})
 
+(defn auth-opts
+  [access-token]
+  (assoc (anon-opts) :auth access-token))
+
 (defn service-client
   []
   (supabase/create-client (base-url)
@@ -91,6 +125,45 @@
   []
   (str "copilot+" (UUID/randomUUID) "@example.com"))
 
+(defn random-log-message
+  []
+  (str "copilot-log-" (UUID/randomUUID)))
+
+(defn create-auth-user!
+  ([] (create-auth-user! (random-email) "pass123456"))
+  ([email password]
+   (let [created (supabase/api-signup-create {"email" email
+                                              "password" password
+                                              "email_confirm" true}
+                                             (service-opts))
+         uid (or (get-in created [:body "user" "id"])
+                 (get-in created [:body "id"]))]
+     {:created created
+      :uid uid
+      :email email
+      :password password})))
+
+(defn sign-in-user!
+  [{:keys [email password]}]
+  (supabase/api-signin {"email" email
+                        "password" password}
+                       (anon-opts)))
+
+(defn create-auth-session!
+  ([] (create-auth-session! (random-email) "pass123456"))
+  ([email password]
+   (let [user (create-auth-user! email password)
+         signed-in (sign-in-user! user)]
+     (assoc user
+            :signed-in signed-in
+            :access-token (get-in signed-in [:body "access_token"])))))
+
+(defn delete-auth-user!
+  [uid]
+  (when uid
+    (supabase/api-signup-delete uid (service-opts)))
+  true)
+
 (defn seed-entry!
   [name tags]
   (live/setup-scratch-entry! name tags)
@@ -100,3 +173,23 @@
   [name]
   (live/cleanup-scratch-entry! name)
   true)
+
+(defn seed-log!
+  [message]
+  (clear-log! message)
+  (live/pg-exec!
+   (str "INSERT INTO \"" +scratch-v0-schema+ "\".\"" +log-table-name+ "\" (message)"
+        " VALUES (" (live/sql-literal message) ")"))
+  (Thread/sleep 200)
+  true)
+
+(defn clear-log!
+  [message]
+  (live/pg-exec-best-effort!
+   (str "DELETE FROM \"" +scratch-v0-schema+ "\".\"" +log-table-name+ "\""
+        " WHERE message = " (live/sql-literal message)))
+  true)
+
+(defn list-logs
+  [& [opts]]
+  (:body (supabase/api-select-all +log-table+ (merge (anon-opts) opts))))

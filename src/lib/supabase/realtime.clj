@@ -1,6 +1,7 @@
 (ns lib.supabase.realtime
   (:require [clojure.string :as str]
             [lib.supabase.common :as common]
+            [lib.supabase.route :as route]
             [net.http.websocket :as ws]
             [std.json :as json]))
 
@@ -30,7 +31,9 @@
 
                          :else
                          base-url)]
-      (str base-url "/realtime/v1/websocket"))))
+      (str base-url
+           (route/root-path :realtime)
+           (route/realtime-route :websocket)))))
 
 (defn prepare-connect-url
   "Builds the websocket connect URL."

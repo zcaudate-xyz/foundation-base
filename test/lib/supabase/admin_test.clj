@@ -12,7 +12,9 @@
   (with-redefs [common/api-call (fn [opts body] [opts body])]
     (api-signup-create {"email" "a@a.com"} {:key "key"}))
   => [{:key "key"
-       :route "/auth/v1/admin/users"
+       :group :admin
+       :method :post
+       :route "/users"
        :type :service}
       {"email" "a@a.com"}])
 
@@ -21,8 +23,9 @@
   (with-redefs [common/api-call (fn [opts body] [opts body])]
     (api-signup-delete "user-1" {:key "key"}))
   => [{:key "key"
+       :group :admin
        :method :delete
-       :route "/auth/v1/admin/users/user-1"
+       :route "/users/user-1"
        :type :service}
       {}])
 
@@ -33,8 +36,9 @@
   => #(let [[opts body] %]
         (and (= {} body)
              (= :get (:method opts))
+             (= :admin (:group opts))
              (= :service (:type opts))
-             (= "/auth/v1/admin/users" (:route opts)))))
+             (= "/users" (:route opts)))))
 
 ^{:refer lib.supabase.admin/get-user-by-id :added "4.1"}
 (fact "gets a user by id"
@@ -43,7 +47,8 @@
   => #(let [[opts body] %]
         (and (= {} body)
              (= :get (:method opts))
-             (= "/auth/v1/admin/users/user-1" (:route opts)))))
+             (= :admin (:group opts))
+             (= "/users/user-1" (:route opts)))))
 
 ^{:refer lib.supabase.admin/create-user :added "4.1"}
 (fact "wraps user creation"
@@ -61,7 +66,8 @@
   => #(let [[opts body] %]
         (and (= {"ban_duration" "none"} body)
              (= :put (:method opts))
-             (= "/auth/v1/admin/users/user-1" (:route opts)))))
+             (= :admin (:group opts))
+             (= "/users/user-1" (:route opts)))))
 
 ^{:refer lib.supabase.admin/delete-user :added "4.1"}
 (fact "wraps user deletion"
@@ -78,5 +84,7 @@
     (invite-user-by-email (sample-client) {"email" "a@a.com"}))
   => #(let [[opts body] %]
         (and (= {"email" "a@a.com"} body)
+             (= :post (:method opts))
+             (= :auth (:group opts))
              (= :service (:type opts))
-             (= "/auth/v1/invite" (:route opts)))))
+             (= "/invite" (:route opts)))))

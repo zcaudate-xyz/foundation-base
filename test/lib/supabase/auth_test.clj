@@ -71,20 +71,22 @@
 (fact "routes signup through the auth API"
   (with-redefs [common/api-call (fn [opts body] [opts body])]
     (api-signup {"email" "a@a.com"} {:key "key"}))
-  => [{:key "key" :route "/auth/v1/signup"} {"email" "a@a.com"}])
+  => [{:key "key" :group :auth :method :post :route "/signup"} {"email" "a@a.com"}])
 
 ^{:refer lib.supabase.auth/api-signin :added "4.1"}
 (fact "routes signin through the auth token endpoint"
   (with-redefs [common/api-call (fn [opts body] [opts body])]
     (api-signin {"email" "a@a.com"} {:key "key"}))
-  => [{:key "key" :route "/auth/v1/token?grant_type=password"} {"email" "a@a.com"}])
+  => [{:key "key" :group :auth :method :post :route "/token?grant_type=password"} {"email" "a@a.com"}])
 
 ^{:refer lib.supabase.auth/api-impersonate :added "4.1"}
 (fact "routes impersonation through the service auth endpoint"
   (with-redefs [common/api-call (fn [opts body] [opts body])]
     (api-impersonate "user-1" {:key "key"}))
   => [{:key "key"
-       :route "/auth/v1/token?grant_type=impersonate"
+       :group :auth
+       :method :post
+       :route "/token?grant_type=impersonate"
        :type :service}
       {"user_id" "user-1"}])
 

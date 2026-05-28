@@ -59,9 +59,10 @@
   (with-redefs [common/api-call (fn [opts body] [opts body])]
     (api-select-all sample-table {:key "key"}))
   => [{:key "key"
+       :group :rest
        :method :get
        :headers {"Content-Profile" "scratch"}
-       :route "/rest/v1/Entry?select=*"}
+       :route "/Entry?select=*"}
       {}])
 
 ^{:refer lib.supabase.query/select :added "4.1"}
@@ -75,8 +76,9 @@
   => #(let [[opts body] %]
         (and (= {} body)
              (= :get (:method opts))
+             (= :rest (:group opts))
              (= "http://localhost:54321" (:base_url (:client opts)))
-             (= "/rest/v1/Entry?select=id&id=eq.1&limit=1" (:route opts)))))
+             (= "/Entry?select=id&id=eq.1&limit=1" (:route opts)))))
 
 ^{:refer lib.supabase.query/prefer-header :added "4.1"}
 (fact "builds Prefer header values"
@@ -127,7 +129,9 @@
   => #(let [[opts body] %]
         (and (= {"name" "updated"} body)
              (= :patch (:method opts))
-             (= "/rest/v1/Entry?id=eq.1" (:route opts)))))
+             (= :rest (:group opts))
+             (= "/Entry?id=eq.1" (:route opts))
+             (nil? (get-in opts [:headers "Prefer"])))))
 
 ^{:refer lib.supabase.query/delete :added "4.1"}
 (fact "builds delete requests with filters"
@@ -138,4 +142,5 @@
   => #(let [[opts body] %]
         (and (= {} body)
              (= :delete (:method opts))
-             (= "/rest/v1/Entry?id=eq.1" (:route opts)))))
+             (= :rest (:group opts))
+             (= "/Entry?id=eq.1" (:route opts)))))
