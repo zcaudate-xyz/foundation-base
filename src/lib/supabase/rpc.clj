@@ -2,7 +2,7 @@
   (:require [lib.supabase.common :as common]
             [std.string.case :as case]))
 
-(defn- fn-meta [f]
+(defn fn-meta [f]
   (let [f (if (instance? clojure.lang.IDeref f)
             @f
             f)]

@@ -16,7 +16,7 @@
 (defn start!
   []
   (when-not (port-open? live/+postgres-host+ live/+postgres-port+)
-    @(os/sh {:args [live/+shell+ "-lc" (live/supabase-shell-command "start" "-x" "logflare")]
+    @(os/sh {:args [live/+shell+ "-lc" (live/supabase-shell-command "start" "-x" "logflare" "--ignore-health-check")]
              :root live/+supabase-cli-root+
              :ignore-errors false}))
   (l/rt:restart)

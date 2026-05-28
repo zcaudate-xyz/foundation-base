@@ -5,9 +5,10 @@
   "Checks whether the payload looks like a Supabase token response."
   {:added "4.1.4"}
   [data]
-  (and (get data "access_token")
-       (get data "refresh_token")
-       (get data "expires_in")))
+  (boolean
+   (and (get data "access_token")
+        (get data "refresh_token")
+        (get data "expires_in"))))
 
 (defn token-response->session
   "Normalizes a token response into a session map."
@@ -59,7 +60,7 @@
   {:data {:user (:user (common/raw-state client))}
    :error nil})
 
-(defn- auth-result
+(defn auth-result
   [client data]
   (let [session (token-response->session data)
         user (or (get data "user")

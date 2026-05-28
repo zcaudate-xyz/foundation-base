@@ -61,7 +61,7 @@
   [client]
   (true? (:socket_open? (common/raw-state client))))
 
-(defn- append-message!
+(defn append-message!
   [client data last?]
   (let [message (str data)
         frame-text (:message_buffer
@@ -70,7 +70,7 @@
       (common/swap-state! client assoc :message_buffer "")
       (json/read frame-text))))
 
-(defn- dispatch-frame!
+(defn dispatch-frame!
   [client frame]
   (let [topic (get frame "topic")
         event (get frame "event")

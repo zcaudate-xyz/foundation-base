@@ -91,7 +91,7 @@
       [:conn]])
 
 ^{:refer lib.postgres/stop-pg :added "4.1"}
-(fact "runs teardown shell hooks after closing the postgres connection"
+(fact "runs shutdown shell hooks after closing the postgres connection"
   (let [calls (atom [])]
     (with-redefs [conn/conn-close (fn [_]
                                     (swap! calls conj [:conn-close])
@@ -101,7 +101,7 @@
                           "ok")]
       (base/stop-pg {:instance (atom (mock-pooled-conn))
                      :notifications (atom {})
-                     :teardown {:args ["supabase" "stop"]
+                    :shutdown {:args ["supabase" "stop"]
                                 :root "docker/supbase"
                                 :ignore-errors true}}))
     @calls)

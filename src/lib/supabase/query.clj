@@ -3,10 +3,10 @@
             [lib.supabase.common :as common])
   (:refer-clojure :exclude [update]))
 
-(defn- url-encode [s]
+(defn url-encode [s]
   (java.net.URLEncoder/encode (str s) "UTF-8"))
 
-(defn- append-query [route params]
+(defn append-query [route params]
   (if (empty? params)
     route
     (str route
@@ -16,7 +16,7 @@
                           (str (url-encode k) "=" (url-encode v)))
                         params)))))
 
-(defn- entry-meta [entry]
+(defn entry-meta [entry]
   (let [entry (if (instance? clojure.lang.IDeref entry)
                 @entry
                 entry)]
@@ -27,25 +27,25 @@
                  (:schema entry)
                  (get entry "schema"))}))
 
-(defn- table-name [table]
+(defn table-name [table]
   (let [{:keys [id]} (entry-meta table)]
     (cond (string? id) id
           (keyword? id) (name id)
           (symbol? id) (name id)
           :else (str id))))
 
-(defn- schema-headers [table]
+(defn schema-headers [table]
   (when-let [schema (:schema (entry-meta table))]
     {"Content-Profile" schema}))
 
-(defn- filter-clause [value]
+(defn filter-clause [value]
   (cond (string? value) value
         (and (vector? value)
              (= 2 (count value))) (let [[op v] value]
                                     (str (name op) "." v))
         :else (str value)))
 
-(defn- query-params [{:keys [select filters order limit offset]}]
+(defn query-params [{:keys [select filters order limit offset]}]
   (vec
    (concat
     [["select" (or select "*")]]
@@ -82,7 +82,7 @@
                              :route route})
                      {})))
 
-(defn- prefer-header [{:keys [returning count upsert?]}]
+(defn prefer-header [{:keys [returning count upsert?]}]
   (->> [(when returning (str "return=" (name returning)))
         (when count (str "count=" (name count)))
         (when upsert? "resolution=merge-duplicates")]
@@ -90,7 +90,7 @@
        seq
        (str/join ",")))
 
-(defn- write-op [client method table rows opts]
+(defn write-op [client method table rows opts]
   (let [opts (or opts {})
         headers (merge (schema-headers table)
                        (:headers opts)

@@ -62,7 +62,7 @@
     {:key :container
      :setup docker/start-runtime
      :teardown docker/stop-runtime}
-    {:key :teardown
+    {:key :shutdown
      :teardown run-pg-lifecycle}]))
 
 (defn stop-pg-temp-teardown
@@ -100,5 +100,5 @@
     {:key :container
      :setup docker/start-runtime
      :teardown docker/stop-runtime}
-    {:key :teardown
+    {:key :shutdown
      :teardown run-pg-lifecycle}]))
