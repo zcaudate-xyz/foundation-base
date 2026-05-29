@@ -17,14 +17,36 @@
                    :content-type "application/json"
                    :accepts ["application/json"]
                    :body {:hello "world"}}))
-  => {:uri "https://api.test/users/42"
+  => {:uri "https://api.test/users/42?q=hello"
       :method :post
-      :query-params {:q "hello"}
       :headers {"X-Token" "abc"
                 "Cookie" "session=s1"
                 "Accept" "application/json"
                 "Content-Type" "application/json"}
       :body "{\"hello\":\"world\"}"})
+
+(fact "accepts ring-style params and forwards extra request options"
+  (with-redefs [client/request identity]
+    (api/call-api "https://api.test"
+                 "/users/{id}"
+                 :post
+                 {:route-params {:id 42}
+                  :query-params {:q "hello"}
+                  :headers {"X-Token" "abc"
+                            "Accept" "application/json"}
+                  :cookies {"session" {:value "s1"}}
+                  :form-params {:hello "world"}
+                  :as :bytes
+                  :type :async}))
+  => {:uri "https://api.test/users/42?q=hello"
+      :method :post
+      :headers {"X-Token" "abc"
+               "Accept" "application/json"
+               "Cookie" "session=s1"
+               "Content-Type" "application/x-www-form-urlencoded"}
+      :body "hello=world"
+      :as :bytes
+      :type :async})
 
 ^{:refer net.http/call-api :added "4.1.4"}
 (fact "interns call-api onto net.http"

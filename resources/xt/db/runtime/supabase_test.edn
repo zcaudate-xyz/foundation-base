@@ -1,0 +1,15 @@
+{:supabase
+ {:shell [:or [:env "FOUNDATION_SUPABASE_SHELL"] "/bin/bash"]
+  :cli_root [:or [:env "FOUNDATION_SUPABASE_CLI_ROOT"] "docker"]
+  :config_path [:or [:env "FOUNDATION_SUPABASE_CONFIG_PATH"] "docker/supabase/config.toml"]
+  :db {:host [:or [:env "FOUNDATION_SUPABASE_DB_HOST"] "127.0.0.1"]
+       :port [:or [:env "FOUNDATION_SUPABASE_DB_PORT" {:type :edn}] 55122]
+       :user [:or [:env "FOUNDATION_SUPABASE_DB_USER"] "postgres"]
+       :password [:or [:env "FOUNDATION_SUPABASE_DB_PASSWORD"] "postgres"]
+       :database [:or [:env "FOUNDATION_SUPABASE_DB_NAME"] "postgres"]}
+  :api {:protocol [:or [:env "FOUNDATION_SUPABASE_API_PROTOCOL"] "http"]
+        :hostname [:env "FOUNDATION_SUPABASE_API_HOST" {:default nil}]
+        :port [:or [:env "FOUNDATION_SUPABASE_API_PORT" {:type :edn}] 55121]
+        :base_url [:env "FOUNDATION_SUPABASE_API_URL" {:default nil}]
+        :anon_key [:env "FOUNDATION_SUPABASE_ANON_KEY" {:default nil}]
+        :service_key [:env "FOUNDATION_SUPABASE_SERVICE_KEY" {:default nil}]}}}

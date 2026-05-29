@@ -58,6 +58,20 @@
       "  []"
       "  (hello-name (szndb.core.fn-util/auth-uid) 1 2 3))"])
 
+^{:refer std.block.template/defn-form :added "4.1.4"}
+(fact "creates a standard defn form"
+  (gen/defn-form
+   '{fsym hello
+     doc "Greets."
+     base-args [client]
+     opts-args [client opts]
+     body-form (greet client opts)})
+  => '(defn hello
+        "Greets."
+        ([client] (hello client {}))
+        ([client opts]
+         (greet client opts))))
+
 
 (comment
   (-> (nav/parse-first

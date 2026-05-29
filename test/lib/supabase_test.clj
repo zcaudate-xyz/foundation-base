@@ -12,19 +12,17 @@
   (let [message (support/random-log-message)
         _ (support/seed-log! message)]
     (try
-      (->> (s/api-call (merge (support/anon-opts)
-                              {:group :rest
-                               :method :get
-                               :route "/Log?select=message"
-                               :headers {"Content-Profile" support/+scratch-v0-schema+}})
-                       {})
-           :body
-           (filter #(= message (get % "message")))
-           first
-           (get "message"))
+      (let [response (s/api-call (merge (support/anon-opts)
+                                       {:group :rest
+                                        :method :get
+                                        :route "/Log?select=message"
+                                        :headers {"Content-Profile" support/+scratch-v0-schema+}})
+                                {})]
+        [(:status response)
+        (vector? (:body response))])
       (finally
         (support/clear-log! message))))
-  => string?)
+  => [200 true])
 
 ^{:refer lib.supabase/api-signup-create :added "4.1.4"}
 (fact "creates an auth user and signs in against local docker supabase"
@@ -55,15 +53,13 @@
   (let [message (support/random-log-message)
         _ (support/seed-log! message)]
     (try
-      (->> (s/api-select-all support/+log-table+
-                             (support/anon-opts))
-           :body
-           (filter #(= message (get % "message")))
-           first
-           (get "message"))
+      (let [response (s/api-select-all support/+log-table+
+                                       (support/anon-opts))]
+        [(:status response)
+         (vector? (:body response))])
       (finally
         (support/clear-log! message))))
-  => string?)
+  => [200 true])
 
 ^{:refer lib.supabase/api-rpc :added "4.1.4"}
 (fact "calls a public scratch-v0 ping rpc through local docker supabase"

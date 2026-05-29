@@ -28,8 +28,18 @@
   ([name link mopts]
    (let [{:keys [emit]} mopts
          async-ns (set (-> emit :static :import/async))
-         {:keys [ns as refer]} link
+         {:keys [ns as refer suffix]} link
          {:lang/keys [format]} emit]
+     (let [name (str name)
+           name (if (= :link (:import emit))
+                  (str (if (or (clojure.string/starts-with? name ".")
+                               (clojure.string/starts-with? name "/")
+                               (.contains name "://"))
+                         ""
+                         "./")
+                       name
+                       (or suffix ""))
+                  name)]
      (case format
        :none nil
        (:global)   (let [sym (if (vector? as)
@@ -58,7 +68,7 @@
                  (list :- :import (str "'" name "'"))
                  (list :- :import
                        (list 'quote imports)
-                       :from (str "'" name "'")))))))))
+                       :from (str "'" name "'"))))))))))
 
 (defn js-module-export
   "outputs the js module export form"
