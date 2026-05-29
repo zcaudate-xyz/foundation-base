@@ -5,7 +5,7 @@
             [hara.runtime.chromedriver :as chromedriver]
             [js.worker.link]
             [js.worker.sharedworker :as worker-shared]
-            [xt.db.runtime.event-host-util :as live]
+            [scaffold.supabase.event-host-util :as live]
             [xt.db.helpers.test-fixtures :as fixtures]
             [xt.lang.common-notify :as notify]))
 

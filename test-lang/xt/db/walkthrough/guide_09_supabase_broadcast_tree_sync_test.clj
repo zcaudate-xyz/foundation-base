@@ -5,7 +5,7 @@
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.data-main-test :as sample]
             [xt.db.runtime.event-supabase :as event-supabase]
-            [xt.db.runtime.event-host-util :as live]))
+            [scaffold.supabase.event-host-util :as live]))
 
 (def +live-broadcast-topic+
   "room:users-tree")
@@ -86,7 +86,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.db.helpers.data-main-test :as sample]
-             [xt.db.runtime.event-host-util :as live]]})
+             [scaffold.supabase.event-host-util :as live]]})
 
 (def.js UserTreeQuery
   (@! +user-tree-query+))

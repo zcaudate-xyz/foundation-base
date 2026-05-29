@@ -1,0 +1,21 @@
+{:supabase
+ {:shell [:env "FOUNDATION_SUPABASE_SHELL" {:default nil}]
+  :setup {:type [:env "FOUNDATION_SUPABASE_SETUP_TYPE" {:type :edn :default nil}]
+          :root [:env "FOUNDATION_SUPABASE_ROOT" {:default nil}]
+          :config_path [:env "FOUNDATION_SUPABASE_CONFIG_PATH" {:default nil}]
+          :compose_file [:env "FOUNDATION_SUPABASE_COMPOSE_FILE" {:default nil}]
+          :env_file [:env "FOUNDATION_SUPABASE_ENV_FILE" {:default nil}]
+          :project_name [:env "FOUNDATION_SUPABASE_PROJECT_NAME" {:default nil}]
+          :startup_command [:env "FOUNDATION_SUPABASE_STARTUP_COMMAND" {:default nil}]
+          :status_command [:env "FOUNDATION_SUPABASE_STATUS_COMMAND" {:default nil}]}
+  :db {:host [:env "FOUNDATION_SUPABASE_DB_HOST" {:default nil}]
+       :port [:env "FOUNDATION_SUPABASE_DB_PORT" {:type :edn :default nil}]
+       :user [:env "FOUNDATION_SUPABASE_DB_USER" {:default nil}]
+       :password [:env "FOUNDATION_SUPABASE_DB_PASSWORD" {:default nil}]
+       :database [:env "FOUNDATION_SUPABASE_DB_NAME" {:default nil}]}
+  :api {:protocol [:env "FOUNDATION_SUPABASE_API_PROTOCOL" {:default nil}]
+        :hostname [:env "FOUNDATION_SUPABASE_API_HOST" {:default nil}]
+        :port [:env "FOUNDATION_SUPABASE_API_PORT" {:type :edn :default nil}]
+        :base_url [:env "FOUNDATION_SUPABASE_API_URL" {:default nil}]
+        :anon_key [:env "FOUNDATION_SUPABASE_ANON_KEY" {:default nil}]
+        :service_key [:env "FOUNDATION_SUPABASE_SERVICE_KEY" {:default nil}]}}}

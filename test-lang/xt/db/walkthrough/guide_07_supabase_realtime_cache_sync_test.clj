@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.test-fixtures :as fixtures]
-            [xt.db.runtime.event-host-util :as live]))
+            [scaffold.supabase.event-host-util :as live]))
 
 (def +supabase-pg-config+
   {:host live/+postgres-host+

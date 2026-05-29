@@ -1,8 +1,8 @@
-(ns xt.db.runtime.supabase-config
+(ns scaffold.supabase.config
   (:require [std.config :as config]))
 
 (def +config-file+
-  "resources/xt/db/runtime/supabase_test.edn")
+  "config/scaffold/supabase.edn")
 
 (defn load-config
   []
@@ -24,13 +24,45 @@
   []
   (:shell (supabase-config)))
 
+(defn setup-config
+  []
+  (:setup (supabase-config)))
+
+(defn setup-type
+  []
+  (:type (setup-config)))
+
+(defn cli-command
+  []
+  (:cli_command (setup-config)))
+
+(defn compose-file
+  []
+  (:compose_file (setup-config)))
+
+(defn env-file
+  []
+  (:env_file (setup-config)))
+
+(defn project-name
+  []
+  (:project_name (setup-config)))
+
+(defn startup-command
+  []
+  (:startup_command (setup-config)))
+
+(defn status-command
+  []
+  (:status_command (setup-config)))
+
 (defn cli-root
   []
-  (:cli_root (supabase-config)))
+  (:root (setup-config)))
 
 (defn config-path
   []
-  (:config_path (supabase-config)))
+  (:config_path (setup-config)))
 
 (defn postgres-host
   []

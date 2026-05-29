@@ -1,10 +1,10 @@
-(ns xt.db.runtime.event-host-util
+(ns scaffold.supabase.event-host-util
   (:require [clojure.string :as str]
             [hara.lang :as l]
             [hara.lang.script :as script]
             [hara.runtime.postgres :as pg]
             [postgres.sample.scratch-v1]
-            [xt.db.runtime.supabase-config :as supabase-config]
+            [scaffold.supabase.config :as supabase-config]
             [std.json :as json]
             [std.lib.os :as os])
   (:import (java.net URI)
@@ -36,6 +36,9 @@
 
 (def +scratch-schema+
   "scratch")
+
+(def +scratch-v0-schema+
+  "scratch_v0")
 
 (def +public-schema+
   "public")
@@ -97,11 +100,66 @@
   (str/join " " parts))
 
 (def +supabase-command+
-  ["npx" "supabase"])
+  (or (supabase-config/cli-command)
+      ["npx" "supabase"]))
+
+(def +compose-file+
+  (supabase-config/compose-file))
+
+(def +env-file+
+  (supabase-config/env-file))
+
+(def +project-name+
+  (supabase-config/project-name))
+
+(defn supabase-setup-type
+  []
+  (or (supabase-config/setup-type)
+      :docker-compose))
+
+(defn compose-command
+  [& parts]
+  (apply shell-command
+         (concat ["docker-compose"]
+                 (when +project-name+
+                   ["-p" +project-name+])
+                 (when +env-file+
+                   ["--env-file" +env-file+])
+                 (when +compose-file+
+                   ["-f" +compose-file+])
+                 parts)))
+
+(defn compose-status-command
+  []
+  (shell-command
+   "printf"
+   "'%s\\n'"
+   (str "\"API_URL=" (supabase-config/resolved-api-base-url) "\"")
+   (str "\"SERVICE_ROLE_KEY=" (or (supabase-config/service-key) "") "\"")))
 
 (defn supabase-shell-command
   [& parts]
-  (apply shell-command (concat +supabase-command+ parts)))
+  (case (supabase-setup-type)
+    :docker-compose (apply compose-command parts)
+    (apply shell-command (concat +supabase-command+ parts))))
+
+(defn startup-command
+  []
+  (or (supabase-config/startup-command)
+      (case (supabase-setup-type)
+        :docker-compose (supabase-shell-command
+                         "up" "-d"
+                         "db" "auth" "rest" "realtime" "storage" "meta" "kong" "inbucket")
+        :supabase-cli (supabase-shell-command "start")
+        nil)))
+
+(defn status-command
+  []
+  (or (supabase-config/status-command)
+      (case (supabase-setup-type)
+        :docker-compose (compose-status-command)
+        :supabase-cli (supabase-shell-command "status" "-o" "env")
+        nil)))
 
 (defn startup-shell-command
   []
@@ -110,13 +168,15 @@
    "if (echo > /dev/tcp/" +postgres-host+ "/" (str +postgres-port+) ") >/dev/null 2>&1; then\n"
    "  exit 0\n"
    "fi\n"
-   "start_output=$(" (supabase-shell-command "start") " 2>&1) || start_status=$?\n"
-   "if [ -n \"${start_status:-}\" ]; then\n"
-   "  if ! printf '%s\\n' \"$start_output\" | grep -q 'already running'; then\n"
-   "    printf '%s\\n' \"$start_output\" >&2\n"
-   "    exit \"$start_status\"\n"
-   "  fi\n"
-   "fi\n"
+   (when-let [cmd (startup-command)]
+     (str
+      "start_output=$(" cmd " 2>&1) || start_status=$?\n"
+      "if [ -n \"${start_status:-}\" ]; then\n"
+      "  if ! printf '%s\\n' \"$start_output\" | grep -q 'already running'; then\n"
+      "    printf '%s\\n' \"$start_output\" >&2\n"
+      "    exit \"$start_status\"\n"
+      "  fi\n"
+      "fi\n"))
    "for i in $(seq 1 120); do\n"
    "  if (echo > /dev/tcp/" +postgres-host+ "/" (str +postgres-port+) ") >/dev/null 2>&1; then\n"
    "    exit 0\n"
@@ -154,8 +214,10 @@
 
 (defn supabase-status-env
   []
-  @(os/sh {:args [+shell+ "-lc" (supabase-shell-command "status" "-o" "env")]
-           :root +supabase-cli-root+}))
+  (if-let [cmd (status-command)]
+    @(os/sh {:args [+shell+ "-lc" cmd]
+             :root +supabase-cli-root+})
+    ""))
 
 (defn parse-shell-env
   [s]
@@ -185,8 +247,8 @@
         base-url (or (supabase-config/api-base-url)
                      (get status "API_URL")
                      (supabase-config/resolved-api-base-url))
-        service-key (or (supabase-config/service-key)
-                        (get status "SERVICE_ROLE_KEY"))
+        service-key (or (get status "SERVICE_ROLE_KEY")
+                        (supabase-config/service-key))
         config {"::" "db.supabase"
                 "client" {"base_url" base-url
                           "schema_name" +scratch-schema+
@@ -214,6 +276,7 @@
   []
   (pg-exec!
    (str "CREATE SCHEMA IF NOT EXISTS \"" +scratch-schema+ "\";\n"
+        "CREATE SCHEMA IF NOT EXISTS \"" +scratch-v0-schema+ "\";\n"
         "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n"
         "CREATE TABLE IF NOT EXISTS \"" +scratch-schema+ "\".\"" +scratch-entry-table+ "\" (\n"
         "  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),\n"
@@ -283,7 +346,9 @@
 (defn ensure-public-entry-table!
   []
   (pg-exec!
-   (str "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n"
+   (str "CREATE SCHEMA IF NOT EXISTS \"" +scratch-schema+ "\";\n"
+        "CREATE SCHEMA IF NOT EXISTS \"" +scratch-v0-schema+ "\";\n"
+        "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n"
         "CREATE TABLE IF NOT EXISTS \"" +public-schema+ "\".\"" +scratch-entry-table+ "\" (\n"
         "  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),\n"
         "  name text NOT NULL UNIQUE,\n"
@@ -315,8 +380,8 @@
         base-url (or (supabase-config/api-base-url)
                      (get status "API_URL")
                      (supabase-config/resolved-api-base-url))
-        api-key (or (supabase-config/service-key)
-                    (get status "SERVICE_ROLE_KEY"))
+        api-key (or (get status "SERVICE_ROLE_KEY")
+                    (supabase-config/service-key))
         headers {"apikey" api-key
                  "Authorization" (str "Bearer " api-key)
                  "Accept-Profile" schema-name

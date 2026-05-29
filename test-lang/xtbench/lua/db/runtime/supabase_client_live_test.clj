@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [xt.db.runtime.event-host-util :as live]))
+            [scaffold.supabase.event-host-util :as live]))
 
 (l/script- :lua
   {:runtime :basic
