@@ -397,7 +397,7 @@
          (cond ready?
                true
 
-               (< attempt 29)
+               (< attempt 89)
                (do (Thread/sleep 1000)
                    (recur (inc attempt)))
 

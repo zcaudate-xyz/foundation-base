@@ -1,6 +1,6 @@
 (ns postgres.sample.scratch-v0
   (:require [hara.lang :as l]
-            [postgres.core :as pg]
+            [postgres.core :as pg :refer [defret.pg defsel.pg]]
             [postgres.core.supabase :as s]))
 
 (l/script :postgres
@@ -23,6 +23,18 @@
         :sql {:default (pg/uuid-generate-v4)}}
    :message {:type :text :required true}
    :author-id {:type :uuid}])
+
+(defsel.pg ^{:- [-/Log]
+             :args []
+             :api/view true}
+  log-all)
+
+(defret.pg ^{:- [-/Log]
+             :args []
+             :api/view true}
+  log-default
+  [:uuid i-log-id]
+  #{:*/standard})
 
 (defn.pg ^{:%% :sql
            :- [:text]

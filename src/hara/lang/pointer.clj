@@ -151,10 +151,11 @@
   "emits the display string for pointer"
   {:added "4.0"}
   ([{:keys [lang form id module section library] :as ptr} meta]
-   (let [meta  (assoc meta
-                      :lang lang
-                      :module module
-                      :library (or library (impl/runtime-library)))]
+   (let [library (or library (impl/runtime-library))
+         meta  (assoc meta
+                     :lang lang
+                     :module module
+                     :library library)]
      (cond form
            (impl/emit-str form meta)
 
@@ -162,9 +163,12 @@
            (cond->  "<free"
              module (str ":" module)
              :then (str ">"))
-           
+            
            :else
-           (let [entry (get-entry ptr)]
+           (let [entry (cond-> (get-entry ptr)
+                         (not= :fragment section)
+                         (or (book/get-code-entry-view (lib/get-book library lang)
+                                                      (ut/sym-full ptr))))]
              (cond (nil? entry)
                    (str (ptr-tag ptr :not-found))
                    

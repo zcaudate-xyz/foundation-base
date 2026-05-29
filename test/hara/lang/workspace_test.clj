@@ -54,7 +54,11 @@
 
 ^{:refer hara.lang.workspace/ptr-display-str :added "4.0"}
 (fact "copies pointer text to clipboard"
-  (w/ptr-display-str cl/noop) => string?)
+  (w/ptr-display-str cl/noop) => string?
+  (w/ptr-display-str workspace-noop)
+  => (fn [s]
+       (and (string? s)
+            (re-find #"return" s))))
 
 ^{:refer hara.lang.workspace/ptr-clip :added "4.0"}
 (comment "copies pointer text to clipboard"

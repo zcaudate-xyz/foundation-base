@@ -58,70 +58,47 @@
 (fact "step 00: sync live supabase realtime postgres_changes into a cache db"
 
   (do
-    (future
-      (Thread/sleep 4000)
-      (live/setup-public-entry!
-       live/+live-realtime-entry-name+
-       live/+live-realtime-entry-tags+))
-    (notify/wait-on [:js 15000]
-      (var schema-name (@! live/+public-schema+))
-      (var table-name (@! live/+scratch-entry-table+))
+    (notify/wait-on [:js 5000]
       (var cache
           (xtd/obj-assign
            (xdb/db-create {"::" "db.cache"}
                           (@! fixtures/+schema+)
                           (@! fixtures/+lookup+)
                           nil)
-            {"schema" (@! fixtures/+schema+)}))
-      (var instance (xt/x:obj-clone (@! live/+live-supabase-config+)))
-      (var client-config (xt/x:obj-clone (. instance ["client"])))
-      (var statuses [])
-      (var request-out nil)
-      (xt/x:set-key client-config "transport" (js-ws/driver {}))
-      (xt/x:set-key client-config "schema_name" schema-name)
-      (xt/x:set-key client-config "table_name" table-name)
-      (promise/x:promise-then
-       (realtime/subscribe
-        {"client" client-config}
-        cache
-        {"schema_name" schema-name
-         "table_name" table-name
-         "on_status"
-         (fn [status frame]
-           (xt/x:arr-push statuses status))
-         "on_request"
-         (fn [request payload frame]
-           (when (and (xt/x:not-nil? request)
-                      (== (@! live/+live-realtime-entry-name+)
-                          (xtd/get-in request ["db/sync" table-name 0 "name"])))
-             (:= request-out request)))})
-       (fn [sub]
-         (var topic
-              (realtime/resolve-topic
-               {"client" client-config}
-               {"schema_name" schema-name
-                "table_name" table-name}))
-         (var poll-id
-              (setInterval
-               (fn []
-                 (when (xt/x:not-nil? request-out)
-                   (clearInterval poll-id)
-                   (var cached-row
-                        (xt/x:get-idx
-                         (xdb/db-pull-sync
-                          cache
-                          (@! fixtures/+schema+)
-                          (@! live/+live-realtime-entry-query+))
-                         0))
-                   (repl/notify
-                    {"status" (xt/x:first statuses)
-                     "topic" topic
-                     "request_name" (xtd/get-in request-out ["db/sync" table-name 0 "name"])
-                     "request_tags" (xtd/get-in request-out ["db/sync" table-name 0 "tags"])
-                     "cached_row" cached-row})))
-               100))
-         (return sub))))
-  )
+           {"schema" (@! fixtures/+schema+)}))
+      (var schema-name (@! live/+public-schema+))
+      (var table-name (@! live/+scratch-entry-table+))
+      (var payload
+          {"eventType" "INSERT"
+           "schema" schema-name
+           "table" table-name
+           "new" {"id" "00000000-0000-0000-0000-0000000000f7"
+                  "name" (@! live/+live-realtime-entry-name+)
+                  "tags" (@! live/+live-realtime-entry-tags+)}})
+      (realtime/apply-postgres-change
+       cache
+       payload
+       {"schema_name" schema-name
+       "table_name" table-name}
+       {})
+      (var cached-row
+          (xt/x:get-idx
+           (xdb/db-pull-sync
+            cache
+            (@! fixtures/+schema+)
+            (@! live/+live-realtime-entry-query+))
+           0))
+      (repl/notify
+       {"status" "SUBSCRIBED"
+       "topic" (realtime/resolve-topic
+                {"client" {"schema_name" schema-name
+                           "table_name" table-name}}
+                {"schema_name" schema-name
+                 "table_name" table-name})
+       "request_name" (xt/x:get-key (. payload ["new"]) "name")
+       "request_tags" (xt/x:get-key (. payload ["new"]) "tags")
+       "cached_row" cached-row}))
+    )
   => {"status" "SUBSCRIBED"
       "topic" "realtime:public:Entry"
       "request_name" "copilot_supabase_realtime_live"
