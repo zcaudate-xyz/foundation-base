@@ -1068,21 +1068,21 @@
   {:added "4.1"}
   ([arr pred] (list (quote x:arr-filter) arr pred)))
 
-(defspec.xt x:arr-foldl [:fn [[:xt/array :xt/any] :xt/any :xt/fn] :xt/any])
+(defspec.xt x:arr-foldl [:fn [[:xt/array :xt/any] :xt/fn :xt/any] :xt/any])
 
 (defmacro.xt ^{:standalone true} 
   x:arr-foldl
   "folds arrays from the left"
   {:added "4.1"}
-  ([arr init f] (list (quote x:arr-foldl) arr init f)))
+  ([arr f init] (list (quote x:arr-foldl) arr f init)))
 
-(defspec.xt x:arr-foldr [:fn [[:xt/array :xt/any] :xt/any :xt/fn] :xt/any])
+(defspec.xt x:arr-foldr [:fn [[:xt/array :xt/any] :xt/fn :xt/any] :xt/any])
 
 (defmacro.xt ^{:standalone true} 
   x:arr-foldr
   "folds arrays from the right"
   {:added "4.1"}
-  ([arr init f] (list (quote x:arr-foldr) arr init f)))
+  ([arr f init] (list (quote x:arr-foldr) arr f init)))
 
 (defspec.xt x:arr-find [:fn [[:xt/array :xt/any] :xt/fn] :xt/any])
 

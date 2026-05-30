@@ -60,6 +60,12 @@
        (and (string? s)
             (re-find #"return" s))))
 
+(fact "pointer string renders xtalk form content"
+  (str workspace-noop)
+  => (fn [s]
+       (and (string? s)
+            (re-find #"defn\\.xt|return" s))))
+
 ^{:refer hara.lang.workspace/ptr-clip :added "4.0"}
 (comment "copies pointer text to clipboard"
 

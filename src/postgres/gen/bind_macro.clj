@@ -1,4 +1,4 @@
-(ns hara.model.spec-postgres.gen-bind
+(ns postgres.gen.bind-macro
   (:require [clojure.string]
              [hara.model.spec-postgres.common :as common]
              [hara.runtime.postgres.base.application :as app]

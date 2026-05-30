@@ -5,56 +5,50 @@
   {:require [[js.cell.service :as service]
              [js.cell.binding :as binding]
              [js.cell.binding.model :as binding-model]
-             [js.cell.service.db-sync :as db-sync]
              [xt.db.runtime :as xdb]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [postgres.sample.scratch-v3 :as scratch]
-             [postgres.sample.scratch-v3.view-all :as view-all]
+             [postgres.sample.scratch-v3.view-currency :as view-currency]
              [postgres.sample.scratch-v3.realtime :as realtime]]
    :export [MODULE]})
 
+(defn.js make-query
+  [db-id select-method target]
+  (var query {"db" db-id
+              "table" "Currency"
+              "select_method" select-method
+              "return_method" "default"})
+  (when target
+    (xt/x:set-key query "target" target))
+  (return query))
+
+(defn.js make-binding
+  [db-id select-method default-output target]
+  (return {"query" (-/make-query db-id select-method target)
+           "default_output" default-output}))
+
+(defn.js make-binding-pair
+  [view-id select-method default-output]
+  (var out {})
+  (xt/x:set-key out (+ view-id "_local")
+                (-/make-binding "currency-local"
+                                select-method
+                                default-output
+                                nil))
+  (xt/x:set-key out (+ view-id "_remote")
+                (-/make-binding "currency-remote"
+                                select-method
+                                default-output
+                                "supabase"))
+  (return out))
+
 (def.js BINDINGS
   {"currency"
-   {"all_local"
-    {"query" {"db" "currency-local"
-              "table" "Currency"
-              "select_method" "all_active"
-              "return_method" "default"}
-     "default_output" []}
-    "all_remote"
-    {"query" {"db" "currency-remote"
-              "table" "Currency"
-              "select_method" "all_active"
-              "return_method" "default"
-              "target" "supabase"}
-     "default_output" []}
-    "by_id_local"
-    {"query" {"db" "currency-local"
-              "table" "Currency"
-              "select_method" "by_id"
-              "return_method" "default"}
-     "default_output" nil}
-    "by_id_remote"
-    {"query" {"db" "currency-remote"
-              "table" "Currency"
-              "select_method" "by_id"
-              "return_method" "default"
-              "target" "supabase"}
-     "default_output" nil}
-    "by_type_local"
-    {"query" {"db" "currency-local"
-              "table" "Currency"
-              "select_method" "by_type"
-              "return_method" "default"}
-     "default_output" []}
-    "by_type_remote"
-    {"query" {"db" "currency-remote"
-              "table" "Currency"
-              "select_method" "by_type"
-              "return_method" "default"
-              "target" "supabase"}
-     "default_output" []}}})
+   (xtd/obj-assign
+    (-/make-binding-pair "all" "all_active" [])
+    (-/make-binding-pair "by_id" "by_id" nil)
+    (-/make-binding-pair "by_type" "by_type" []))})
 
 (defn.js create-local-db
   "creates the local cache db used by js.cell views"
@@ -62,7 +56,7 @@
   []
   (var schema (scratch/get-schema))
   (var lookup (scratch/get-schema-lookup))
-  (var views (view-all/get-views))
+  (var views (view-currency/make-views))
   (return (xtd/obj-assign
            (xdb/db-create {"::" "db.cache"} schema lookup nil)
            {"schema" schema
@@ -75,7 +69,7 @@
   (return (xtd/obj-assign
            {"::" "db.supabase"
             "schema" (scratch/get-schema)
-            "views" (view-all/get-views)}
+           "views" (view-currency/make-views)}
            (or opts {}))))
 
 (defn.js create-service

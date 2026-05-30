@@ -2,47 +2,49 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[postgres.sample.scratch-v3.state :as state]]
+  {:require [[postgres.sample.scratch-v3.realtime :as realtime]]
    :export [MODULE]})
 
+(def.js EVENT_SYNC
+  (realtime/db-sync ["Currency"]))
+
+(def.js BRIEF
+  {:type "view"
+   :input (fn:> {:return-method "default"})})
+
+(defn.js descriptor
+  [base-input local-input]
+  (return {:table "Currency"
+           :event-sync -/EVENT_SYNC
+           :base {:brief -/BRIEF
+                  :list {:type "view"
+                         :input base-input}}
+           :local {:list {:type "raw"
+                          :input local-input}}}))
+
 (def.js CURRENCY_ALL
-  {:table "Currency"
-   :event-sync (state/db-sync ["Currency"])
-   :base {:brief {:type "view"
-                  :input (fn:> {:return-method "default"})}
-          :list {:type "view"
-                 :input (fn [[] _context]
-                          (return {:select-method "all_active"}))}}
-   :local {:list {:type "raw"
-                  :input (fn [[] _context]
-                           (return {:__deleted__ false}))}}})
+  (-/descriptor
+   (fn [[] _context]
+     (return {:select-method "all_active"}))
+   (fn [[] _context]
+     (return {:__deleted__ false}))))
 
 (def.js CURRENCY_BY_ID
-  {:table "Currency"
-   :event-sync (state/db-sync ["Currency"])
-   :base {:brief {:type "view"
-                  :input (fn:> {:return-method "default"})}
-          :list {:type "view"
-                 :input (fn [[currency-id] _context]
-                          (return {:select-method "by_id"
-                                   :select-args [currency-id]}))}}
-   :local {:list {:type "raw"
-                  :input (fn [[currency-id] _context]
-                           (return {:id currency-id
-                                    :__deleted__ false}))}}})
+  (-/descriptor
+   (fn [[currency-id] _context]
+     (return {:select-method "by_id"
+              :select-args [currency-id]}))
+   (fn [[currency-id] _context]
+     (return {:id currency-id
+              :__deleted__ false}))))
 
 (def.js CURRENCY_BY_TYPE
-  {:table "Currency"
-   :event-sync (state/db-sync ["Currency"])
-   :base {:brief {:type "view"
-                  :input (fn:> {:return-method "default"})}
-          :list {:type "view"
-                 :input (fn [[currency-type] _context]
-                          (return {:select-method "by_type"
-                                   :select-args [currency-type]}))}}
-   :local {:list {:type "raw"
-                  :input (fn [[currency-type] _context]
-                           (return {:type currency-type
-                                    :__deleted__ false}))}}})
+  (-/descriptor
+   (fn [[currency-type] _context]
+     (return {:select-method "by_type"
+              :select-args [currency-type]}))
+   (fn [[currency-type] _context]
+     (return {:type currency-type
+              :__deleted__ false}))))
 
 (def.js MODULE (!:module))

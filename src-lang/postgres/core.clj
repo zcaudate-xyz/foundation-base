@@ -1,5 +1,5 @@
 (ns postgres.core
-  (:require [hara.model.spec-postgres.gen-bind]
+  (:require [postgres.gen.bind-macro]
             [postgres.entity :as entity]
             [hara.runtime.postgres.base.application :as app]
             [postgres.core.addon]
@@ -20,8 +20,8 @@
 
 (f/intern-in graph-view/defret.pg
              graph-view/defsel.pg
-             hara.model.spec-postgres.gen-bind/bind-app
-             hara.model.spec-postgres.gen-bind/bind-schema
+             postgres.gen.bind-macro/bind-app
+             postgres.gen.bind-macro/bind-schema
              app/app-create
              app/app-list
              app/app

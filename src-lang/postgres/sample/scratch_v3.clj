@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]
              [postgres.core :as pg :refer [defret.pg defsel.pg]]
              [hara.runtime.postgres.base.application :as app]
-             [hara.model.spec-postgres.gen-bind :as bind-pg]))
+             [postgres.gen.bind-macro :as bind-pg]))
 
 (l/script :postgres
   {:config {:dbname "test-scratch"}

@@ -1,6 +1,6 @@
 (ns xtbench.lua.db.text.sql-view-test
   (:require [hara.lang :as l]
-            [hara.model.spec-postgres.gen-bind :as gen]
+            [postgres.gen.bind-macro :as gen]
             [std.string.prose :as prose]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user])

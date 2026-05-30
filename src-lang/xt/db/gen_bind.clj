@@ -1,6 +1,6 @@
 (ns xt.db.gen-bind
   (:require [hara.lang :as l]
-            [hara.model.spec-postgres.gen-bind :as gen]
+            [postgres.gen.bind-macro :as gen]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.string.case :as case]))

@@ -1,7 +1,7 @@
 (ns xtbench.python.db.text.sql-call-test
   (:use code.test)
   (:require [hara.lang :as l]
-            [hara.model.spec-postgres.gen-bind :as gen]
+            [postgres.gen.bind-macro :as gen]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise]))
 

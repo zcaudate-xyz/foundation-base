@@ -1,6 +1,6 @@
 (ns xt.db.runtime.cache-view-test
   (:require [hara.lang :as l]
-            [hara.model.spec-postgres.gen-bind :as gen]
+            [postgres.gen.bind-macro :as gen]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user])
   (:use code.test))

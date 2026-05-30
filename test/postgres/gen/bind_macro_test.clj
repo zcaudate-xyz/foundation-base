@@ -1,6 +1,6 @@
-(ns hara.model.spec-postgres.gen-bind-test
+(ns postgres.gen.bind-macro-test
   (:require [postgres.core :as pg]
-            [hara.model.spec-postgres.gen-bind :as gen]
+            [postgres.gen.bind-macro :as gen]
             [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [xt.db.helpers.seed-system-test :as data]
@@ -42,7 +42,7 @@
              (l/rt:scaffold :python)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.model.spec-postgres.gen-bind/to-lookup :added "4.1"}
+^{:refer postgres.gen.bind-macro/to-lookup :added "4.1"}
 (fact "creates a lookup map from array"
   (gen/to-lookup [:a :b :c]) => {:a true :b true :c true}
 
@@ -50,7 +50,7 @@
 
   (gen/to-lookup ["x" "y"]) => {"x" true "y" true})
 
-^{:refer hara.model.spec-postgres.gen-bind/plain-symbol? :added "4.1"}
+^{:refer postgres.gen.bind-macro/plain-symbol? :added "4.1"}
 (fact "checks if form is a plain symbol without namespace"
   (gen/plain-symbol? 'foo) => true
 
@@ -62,10 +62,10 @@
 
   (gen/plain-symbol? 123) => false)
 
-^{:refer hara.model.spec-postgres.gen-bind/bind-entry :added "4.1"}
+^{:refer postgres.gen.bind-macro/bind-entry :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.model.spec-postgres.gen-bind/transform-to-str :added "4.0"}
+^{:refer postgres.gen.bind-macro/transform-to-str :added "4.0"}
 (fact "transforms relevant forms to string"
 
   (gen/transform-to-str 'scratch/Task)
@@ -77,7 +77,7 @@
   (gen/transform-to-str [1 2 3])
   => [1 2 3])
 
-^{:refer hara.model.spec-postgres.gen-bind/transform-query-or :added "4.0"}
+^{:refer postgres.gen.bind-macro/transform-query-or :added "4.0"}
 (fact "transforms a setvec form"
 
   (gen/transform-query-or
@@ -88,7 +88,7 @@
       :id "hello"]})
   => [{:name "hello", :id "hello"} {:name "hello", :id "hello"}])
 
-^{:refer hara.model.spec-postgres.gen-bind/transform-query-classify :added "4.0"}
+^{:refer postgres.gen.bind-macro/transform-query-classify :added "4.0"}
 (fact "transform function and quote representations"
 
   (gen/transform-query-classify
@@ -103,7 +103,7 @@
    '[:select * :from scratch/Task])
   => '{"::" "sql/select", :args [* :from scratch/Task]})
 
-^{:refer hara.model.spec-postgres.gen-bind/transform-query :added "4.0"
+^{:refer postgres.gen.bind-macro/transform-query :added "4.0"
   :setup [(def +query-json+
             ["UserAccount"
              {"custom" [],
@@ -176,13 +176,13 @@
     {}))
   => +query-json+)
 
-^{:refer hara.model.spec-postgres.gen-bind/transform-schema :added "4.0"}
+^{:refer postgres.gen.bind-macro/transform-schema :added "4.0"}
 (fact "transforms the schema"
 
   (gen/transform-schema (:tree (:schema sample/+app+)))
   => map?)
 
-^{:refer hara.model.spec-postgres.gen-bind/bind-function :added "4.0"}
+^{:refer postgres.gen.bind-macro/bind-function :added "4.0"}
 (fact "generates the type signatures for a pg function"
 
   (gen/bind-function scratch/ping)
@@ -200,7 +200,7 @@
   => {:input [{:symbol "input", :type "jsonb"}],
       :return "jsonb", :schema "scratch", :id "echo", :flags {}})
 
-^{:refer hara.model.spec-postgres.gen-bind/bind-view-guards :added "4.0"}
+^{:refer postgres.gen.bind-macro/bind-view-guards :added "4.0"}
 (fact "gets more guards"
 
   (gen/bind-view-guards (:guards (:static/view @user/user-account-by-organisation)))
@@ -214,7 +214,7 @@
         :flags {}},
        :args ["{{<%>}}" "{{i_organisation_id}}"]}])
 
-^{:refer hara.model.spec-postgres.gen-bind/bind-view :added "4.0"}
+^{:refer postgres.gen.bind-macro/bind-view :added "4.0"}
 (fact "generates the view interface"
 
   (gen/bind-view data/currency-all-fiat)
@@ -269,7 +269,7 @@
        {"organisation_accesses"
         {"organisation" "{{i_organisation_id}}"}}}})
 
-^{:refer hara.model.spec-postgres.gen-bind/bind-table :added "4.0"}
+^{:refer postgres.gen.bind-macro/bind-table :added "4.0"}
 (fact "gets the table interface"
 
   (gen/bind-table data/Currency)
@@ -278,7 +278,7 @@
       :public true,
       :schema-update false})
 
-^{:refer hara.model.spec-postgres.gen-bind/bind-app :added "4.0"}
+^{:refer postgres.gen.bind-macro/bind-app :added "4.0"}
 (fact "gets the app interface given a name"
 
   (gen/bind-app (pg/app "test-db-helpers"))
@@ -361,13 +361,13 @@
        :schema-update false,
        :position 10}})
 
-^{:refer hara.model.spec-postgres.gen-bind/bind-schema :added "4.0"}
+^{:refer postgres.gen.bind-macro/bind-schema :added "4.0"}
 (fact "binds a schema"
 
   (gen/bind-schema (:schema (pg/app "test-db-helpers")))
   => map?)
 
-^{:refer hara.model.spec-postgres.gen-bind/list-view :added "4.0"}
+^{:refer postgres.gen.bind-macro/list-view :added "4.0"}
 (fact "lists all views in the schema"
 
   (gen/list-view 'xt.db.helpers.seed-user-test :select)
@@ -378,7 +378,7 @@
        [organisation-view-membership xt.db.helpers.seed-user-test/organisation-view-membership]
        [organisation-view-default xt.db.helpers.seed-user-test/organisation-view-default]])
 
-^{:refer hara.model.spec-postgres.gen-bind/list-api :added "4.0"}
+^{:refer postgres.gen.bind-macro/list-api :added "4.0"}
 (fact "lists all apis"
 
   (gen/list-api 'postgres.sample.scratch-v1)
@@ -386,7 +386,7 @@
        [ping-ok postgres.sample.scratch-v1/ping-ok]
        [echo postgres.sample.scratch-v1/echo]])
 
-^{:refer hara.model.spec-postgres.gen-bind/list-debug :added "4.0"}
+^{:refer postgres.gen.bind-macro/list-debug :added "4.0"}
 (fact  "lists all debug apis"
 
   (gen/list-debug 'postgres.sample.scratch-v1)
@@ -399,7 +399,7 @@
        [insert-task postgres.sample.scratch-v1/insert-task]
        [insert-entry postgres.sample.scratch-v1/insert-entry]])
 
-^{:refer hara.model.spec-postgres.gen-bind/list-all :added "4.0"}
+^{:refer postgres.gen.bind-macro/list-all :added "4.0"}
 (fact "lists all function forms"
 
   (gen/list-all 'postgres.sample.scratch-v1)

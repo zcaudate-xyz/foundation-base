@@ -1,7 +1,7 @@
 (ns postgres.sample.scratch-v0.view-log
   (:require [std.lib :as h]
             [hara.lang :as l]
-            [hara.model.spec-postgres.gen-bind :as bind-pg]
+            [postgres.gen.bind-macro :as bind-pg]
             [xt.db.gen-bind :as bind]
             [postgres.sample.scratch-v0]))
 

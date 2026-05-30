@@ -1,8 +1,8 @@
 (ns hara.runtime.postgres
   (:require [hara.runtime.postgres.base.client :as client]
             [hara.runtime.postgres.base.client-impl :as client-impl]
+            [postgres.gen.bind-macro]
             [postgres.typed :as typed]
-            [hara.model.spec-postgres.gen-bind]
             [postgres.entity :as entity]
             [hara.runtime.postgres.base.application :as app]
             [postgres.core.addon]
@@ -19,7 +19,7 @@
               postgres.core.addon
               postgres.core.impl
               postgres.core.graph
-              hara.model.spec-postgres.gen-bind)
+              postgres.gen.bind-macro)
 
 (f/intern-in client/rt-add-notify
              client/rt-remove-notify

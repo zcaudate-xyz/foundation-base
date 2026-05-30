@@ -86,8 +86,17 @@
                            (or (:json emit) :full)))
 
          (= :xtalk lang)
-         (env/pp-str (:form @ptr))
-         
+         (let [entry (ptr/ptr-deref (assoc ptr :library library))]
+           (cond (:form entry)
+                 (env/pp-str (:form entry))
+
+                 (:form-input entry)
+                 (env/pp-str (:form-input entry))
+
+                 :else
+                 (ptr/ptr-display ptr {:library library
+                                       :emit emit})))
+          
          :else
          (ptr/ptr-display ptr {:library library
                                :emit emit}))))

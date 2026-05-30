@@ -69,15 +69,21 @@
   {:added "4.0"}
   ([ptr & [opts]]
    (impl-entry/with:cache-force
-    (ptr/ptr-display ptr (or opts
-                             (ut/lang-rt-default ptr))))))
+    (let [opts  (or opts
+                    (ut/lang-rt-default ptr))
+          entry (ptr/ptr-deref ptr)]
+      (if (and (= :xtalk (:lang ptr))
+               (map? entry)
+               (nil? (:form entry))
+               (:form-input entry))
+        (env/pp-str (:form-input entry))
+        (ptr/ptr-display ptr opts))))))
 
 (defn ptr-display-str
   "copies pointer text to clipboard"
   {:added "4.0"}
   [ptr]
-  (impl-entry/with:cache-force
-   (ptr/ptr-display ptr (ut/lang-rt-default ptr))))
+  (emit-ptr ptr (ut/lang-rt-default ptr)))
 
 (defn ptr-clip
   "copies pointer text to clipboard"
