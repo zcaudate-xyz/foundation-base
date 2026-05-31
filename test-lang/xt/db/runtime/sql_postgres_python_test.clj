@@ -15,10 +15,11 @@
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.node.schema-query :as schema-query]
-             [xt.db.node.schema-state :as schema-state]
+             [xt.db.node.event-type :as event-type]
              [xt.db.runtime.sql :as impl-sql]
              [xt.db.text.sql-util :as ut]
              [xt.protocol.impl.connection-sql :as sql]
+             [xt.substrate.page-model :as page-model]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [python.lib.driver-postgres :as py-pg]]})
@@ -50,10 +51,20 @@
     (var conn (py-pg/wrap-connection
                (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
     (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
-    (var state (schema-state/base-state
+    (var state (page-model/base-state
                 {"schema" (@! fixtures/+schema+)
-                 "lookup" (@! fixtures/+lookup+)
-                 "views" {}}))
+                "lookup" (@! fixtures/+lookup+)
+                "views" {}}))
+    (xt/x:set-key state "::" event-type/STATE_TAG)
+    (xt/x:set-key state "schema" (@! fixtures/+schema+))
+    (xt/x:set-key state "views" {})
+    (xt/x:set-key state "lookup" (@! fixtures/+lookup+))
+    (xt/x:set-key state "queries" {})
+    (xt/x:set-key state "watch" {})
+    (xt/x:set-key state "view_watch" {})
+    (xt/x:set-key state "pending" {})
+    (xt/x:set-key state "remote" {})
+    (xt/x:set-key state "db" nil)
     (var [ok prepared]
          (schema-query/prepare-query
           state
@@ -109,10 +120,20 @@
     (var conn (py-pg/wrap-connection
                (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
     (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
-    (var state (schema-state/base-state
+    (var state (page-model/base-state
                 {"schema" (@! fixtures/+schema+)
-                 "lookup" (@! fixtures/+lookup+)
-                 "views" {}}))
+                "lookup" (@! fixtures/+lookup+)
+                "views" {}}))
+    (xt/x:set-key state "::" event-type/STATE_TAG)
+    (xt/x:set-key state "schema" (@! fixtures/+schema+))
+    (xt/x:set-key state "views" {})
+    (xt/x:set-key state "lookup" (@! fixtures/+lookup+))
+    (xt/x:set-key state "queries" {})
+    (xt/x:set-key state "watch" {})
+    (xt/x:set-key state "view_watch" {})
+    (xt/x:set-key state "pending" {})
+    (xt/x:set-key state "remote" {})
+    (xt/x:set-key state "db" nil)
     (var alpha-id
          (sql/query-sync
           conn

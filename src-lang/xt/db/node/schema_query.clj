@@ -3,7 +3,6 @@
 
 (l/script :xtalk
   {:require [[xt.db.runtime.cache-view :as cache-view]
-             [xt.db.node.schema-state :as schema-state]
              [xt.db.text.base-check :as check]
              [xt.db.text.base-scope :as base-scope]
              [xt.lang.spec-base :as xt]
@@ -69,7 +68,7 @@
          return-entry
          return-method
          return-query} qm)
-  (var views (schema-state/get-views state))
+  (var views (or (xt/x:get-key state "views") {}))
   (var out-select-entry
        (:? (xt/x:not-nil? select-entry)
            (-/view-query-entry table select-entry "select")
@@ -108,7 +107,7 @@
   [state table qm]
   (var qe (-/view-query-entries state table qm nil))
   (var #{select-entry return-entry} qe)
-  (var schema (schema-state/get-schema state))
+  (var schema (or (xt/x:get-key state "schema") {}))
   (var select-triggers (:? select-entry
                            (base-scope/get-query-tables
                             schema table
@@ -268,7 +267,7 @@
             (when (not r-ok)
               (return [r-ok r-err]))
             (:= tree (cache-view/query-combined
-                      (schema-state/get-schema state)
+                     (or (xt/x:get-key state "schema") {})
                       select-entry
                       select-args
                       resolved-return-entry
@@ -280,7 +279,7 @@
             (when (not s-ok)
               (return [s-ok s-err]))
             (:= tree (cache-view/query-select
-                      (schema-state/get-schema state)
+                      (or (xt/x:get-key state "schema") {})
                       select-entry
                       select-args)))
 
@@ -292,7 +291,7 @@
             (when (not r-ok)
               (return [r-ok r-err]))
             (:= tree (cache-view/query-return
-                      (schema-state/get-schema state)
+                      (or (xt/x:get-key state "schema") {})
                       resolved-return-entry
                       return-id
                       return-args)))
@@ -302,7 +301,7 @@
             (when (not r-ok)
               (return [r-ok r-err]))
             (:= tree (cache-view/query-return-bulk
-                      (schema-state/get-schema state)
+                      (or (xt/x:get-key state "schema") {})
                       resolved-return-entry
                       return-bulk
                       return-args))))

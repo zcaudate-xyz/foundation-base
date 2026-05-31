@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.node.schema-spec :as spec]
+  {:require [[xt.db.node.event-type :as event-type]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
@@ -10,14 +10,14 @@
   "gets xt.db.node options from node metadata"
   {:added "4.1"}
   [node]
-  (return (or (xtd/get-in node ["meta" spec/META_KEY])
+  (return (or (xtd/get-in node ["meta" event-type/META_KEY])
               {})))
 
 (defn.xt set-node-opts
   "stores xt.db.node options on node metadata"
   {:added "4.1"}
   [node opts]
-  (xtd/set-in node ["meta" spec/META_KEY] (or opts {}))
+  (xtd/set-in node ["meta" event-type/META_KEY] (or opts {}))
   (return opts))
 
 (defn.xt state?
@@ -25,7 +25,7 @@
   {:added "4.1"}
   [state]
   (return (and (xt/x:is-object? state)
-               (== spec/STATE_TAG
+               (== event-type/STATE_TAG
                    (xt/x:get-key state "::")))))
 
 (defn.xt request-payload

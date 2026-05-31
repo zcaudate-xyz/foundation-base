@@ -64,6 +64,7 @@
    ["id" :xt/str]
    ["listeners" event-common/EventListenerMap]
    ["spaces" [:xt/dict :xt/str node-space/NodeSpace]]
+   ["services" [:xt/dict :xt/str :xt/any]]
    ["handlers" [:xt/dict :xt/str NodeHandlerEntry]]
    ["triggers" [:xt/dict :xt/str NodeTriggerEntry]]
    ["pending" [:xt/dict :xt/str node-request/PendingEntry]]
@@ -117,6 +118,15 @@
         node-request/RequestHandler
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
        NodeHandlerEntry])
+
+(defspec.xt get-services
+  [:fn [EventNode] [:xt/dict :xt/str :xt/any]])
+
+(defspec.xt get-service
+  [:fn [EventNode :xt/str] :xt/any])
+
+(defspec.xt set-service
+  [:fn [EventNode :xt/str :xt/any] :xt/any])
 
 (defspec.xt unregister-handler
   [:fn [EventNode :xt/str] [:xt/maybe NodeHandlerEntry]])
@@ -416,6 +426,7 @@
      {:id (or (xt/x:get-key opts "id")
               (frame/rand-id "node-" 6))
       :spaces {}
+      :services {}
       :handlers {}
       :triggers {}
       :pending {}
@@ -438,6 +449,29 @@
                 action
                 entry)
   (return entry))
+
+(defn.xt get-services
+  "gets registered node services"
+  {:added "4.1"}
+  [node]
+  (return (or (xt/x:get-key node "services")
+              {})))
+
+(defn.xt get-service
+  "gets a registered node service"
+  {:added "4.1"}
+  [node service-id]
+  (return (xt/x:get-key (-/get-services node)
+                        service-id)))
+
+(defn.xt set-service
+  "sets a shared service on the node"
+  {:added "4.1"}
+  [node service-id service]
+  (xt/x:set-key (xt/x:get-key node "services")
+                service-id
+                service)
+  (return service))
 
 (defn.xt unregister-handler
   "unregisters a shared request handler"

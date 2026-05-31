@@ -7,8 +7,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node.schema-query :as schema-query]
-              [xt.db.node.schema-state :as schema-state]
+              [xt.db.node.event-type :as event-type]
               [xt.db.helpers.data-main-test :as sample]
+              [xt.substrate.page-model :as page-model]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]]})
 
@@ -119,9 +120,20 @@
 (fact "gets select and return entries from the state"
 
   (!.js
+     (var state (page-model/base-state {"schema" sample/Schema
+                                       "views" (@! +views+)}))
+     (xt/x:set-key state "::" event-type/STATE_TAG)
+     (xt/x:set-key state "schema" sample/Schema)
+     (xt/x:set-key state "views" (@! +views+))
+     (xt/x:set-key state "lookup" {})
+     (xt/x:set-key state "queries" {})
+     (xt/x:set-key state "watch" {})
+     (xt/x:set-key state "view_watch" {})
+     (xt/x:set-key state "pending" {})
+     (xt/x:set-key state "remote" {})
+     (xt/x:set-key state "db" nil)
      (schema-query/view-query-entries
-     (schema-state/base-state {"schema" sample/Schema
-                                "views" (@! +views+)})
+     state
      "UserAccount"
      {:select-method "by_organisation"
       :return-method "info"}
@@ -136,8 +148,19 @@
 (fact "gets inline select and return entries without state views"
 
   (!.js
+     (var state (page-model/base-state {"schema" sample/Schema}))
+     (xt/x:set-key state "::" event-type/STATE_TAG)
+     (xt/x:set-key state "schema" sample/Schema)
+     (xt/x:set-key state "views" {})
+     (xt/x:set-key state "lookup" {})
+     (xt/x:set-key state "queries" {})
+     (xt/x:set-key state "watch" {})
+     (xt/x:set-key state "view_watch" {})
+     (xt/x:set-key state "pending" {})
+     (xt/x:set-key state "remote" {})
+     (xt/x:set-key state "db" nil)
      (schema-query/view-query-entries
-      (schema-state/base-state {"schema" sample/Schema})
+      state
       "UserAccount"
       (@! +inline-query+)
       false))
@@ -151,9 +174,20 @@
 (fact "collects dependent tables touched by a query"
 
   (!.js
+     (var state (page-model/base-state {"schema" sample/Schema
+                                        "views" (@! +views+)}))
+     (xt/x:set-key state "::" event-type/STATE_TAG)
+     (xt/x:set-key state "schema" sample/Schema)
+     (xt/x:set-key state "views" (@! +views+))
+     (xt/x:set-key state "lookup" {})
+     (xt/x:set-key state "queries" {})
+     (xt/x:set-key state "watch" {})
+     (xt/x:set-key state "view_watch" {})
+     (xt/x:set-key state "pending" {})
+     (xt/x:set-key state "remote" {})
+     (xt/x:set-key state "db" nil)
      (schema-query/view-triggers
-     (schema-state/base-state {"schema" sample/Schema
-                                "views" (@! +views+)})
+     state
      "UserAccount"
      {:select-method "by_organisation"
       :return-method "info"}))
@@ -244,10 +278,21 @@
 (fact "prepares a cache query plan and trigger set"
 
   (!.js
+    (var state (page-model/base-state {"schema" sample/Schema
+                                       "views" (@! +views+)}))
+    (xt/x:set-key state "::" event-type/STATE_TAG)
+    (xt/x:set-key state "schema" sample/Schema)
+    (xt/x:set-key state "views" (@! +views+))
+    (xt/x:set-key state "lookup" {})
+    (xt/x:set-key state "queries" {})
+    (xt/x:set-key state "watch" {})
+    (xt/x:set-key state "view_watch" {})
+    (xt/x:set-key state "pending" {})
+    (xt/x:set-key state "remote" {})
+    (xt/x:set-key state "db" nil)
     (var [ok prepared]
          (schema-query/prepare-query
-          (schema-state/base-state {"schema" sample/Schema
-                                     "views" (@! +views+)})
+          state
           {:key "orders/main"
            :table "UserAccount"
            :select-method "by_organisation"
@@ -270,9 +315,20 @@
 (fact "prepares a cache query plan from inline entries"
 
   (!.js
+    (var state (page-model/base-state {"schema" sample/Schema}))
+    (xt/x:set-key state "::" event-type/STATE_TAG)
+    (xt/x:set-key state "schema" sample/Schema)
+    (xt/x:set-key state "views" {})
+    (xt/x:set-key state "lookup" {})
+    (xt/x:set-key state "queries" {})
+    (xt/x:set-key state "watch" {})
+    (xt/x:set-key state "view_watch" {})
+    (xt/x:set-key state "pending" {})
+    (xt/x:set-key state "remote" {})
+    (xt/x:set-key state "db" nil)
     (var [ok prepared]
          (schema-query/prepare-query
-          (schema-state/base-state {"schema" sample/Schema})
+          state
           (@! +inline-query+)
           {:model-id "orders"
            :view-id "main"

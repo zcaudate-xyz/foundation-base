@@ -286,6 +286,54 @@
     (. (main/get-trigger n "event/updated") ["meta"] ["kind"])])
   => ["node-a" "local" ["room/a" "room/b"] "alpha" 2 "request" "stream"])
 
+^{:refer xt.substrate/get-services :added "4.1"}
+(fact "node-create keeps a first-class services registry"
+
+  (!.js
+   (var n (main/node-create {"id" "node-services"
+                            "services" {"cache" {"scope" "global"}}}))
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:obj-keys (main/get-services n))])
+  => ["global" ["cache"]]
+
+  (!.lua
+   (var n (main/node-create {"id" "node-services"
+                            "services" {"cache" {"scope" "global"}}}))
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:obj-keys (main/get-services n))])
+  => ["global" ["cache"]]
+
+  (!.py
+   (var n (main/node-create {"id" "node-services"
+                            "services" {"cache" {"scope" "global"}}}))
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:obj-keys (main/get-services n))])
+  => ["global" ["cache"]])
+
+^{:refer xt.substrate/set-service :added "4.1"}
+(fact "set-service registers a runtime service on the node"
+
+  (!.js
+   (var n (main/node-create {"id" "node-service-set"}))
+   (main/set-service n "cache" {"scope" "local"})
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:obj-keys (main/get-services n))])
+  => ["local" ["cache"]]
+
+  (!.lua
+   (var n (main/node-create {"id" "node-service-set"}))
+   (main/set-service n "cache" {"scope" "local"})
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:obj-keys (main/get-services n))])
+  => ["local" ["cache"]]
+
+  (!.py
+   (var n (main/node-create {"id" "node-service-set"}))
+   (main/set-service n "cache" {"scope" "local"})
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:obj-keys (main/get-services n))])
+  => ["local" ["cache"]])
+
 ^{:refer xt.substrate/node-create :added "4.1"}
 (fact "node-create rejects space configs without explicit state or meta keys"
 

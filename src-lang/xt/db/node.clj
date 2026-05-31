@@ -5,7 +5,7 @@
 (l/script :xtalk
   {:require [[xt.db.node.model-view :as model]
              [xt.db.node.view-util :as util]
-             [xt.db.node.schema-spec :as spec]
+             [xt.db.node.event-type :as event-type]
              [xt.db.runtime :as db-runtime]
              [xt.db.text.sql-manage :as sql-manage]
              [xt.db.text.sql-util :as sql-util]
@@ -15,15 +15,15 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
 
-(def.xt META_KEY spec/META_KEY)
-(def.xt STATE_TAG spec/STATE_TAG)
+(def.xt META_KEY event-type/META_KEY)
+(def.xt STATE_TAG event-type/STATE_TAG)
 
-(def.xt ACTION_QUERY spec/ACTION_QUERY)
-(def.xt ACTION_QUERY_REFRESH spec/ACTION_QUERY_REFRESH)
-(def.xt ACTION_SYNC spec/ACTION_SYNC)
-(def.xt ACTION_REMOVE spec/ACTION_REMOVE)
-(def.xt ACTION_CLEAR spec/ACTION_CLEAR)
-(def.xt ACTION_SNAPSHOT spec/ACTION_SNAPSHOT)
+(def.xt ACTION_QUERY event-type/ACTION_QUERY)
+(def.xt ACTION_QUERY_REFRESH event-type/ACTION_QUERY_REFRESH)
+(def.xt ACTION_SYNC event-type/ACTION_SYNC)
+(def.xt ACTION_REMOVE event-type/ACTION_REMOVE)
+(def.xt ACTION_CLEAR event-type/ACTION_CLEAR)
+(def.xt ACTION_SNAPSHOT event-type/ACTION_SNAPSHOT)
 (def.xt ACTION_MODEL_PUT "xt.db/model-put")
 (def.xt ACTION_MODEL_GET "xt.db/model-get")
 (def.xt ACTION_MODEL_MATERIALIZE "xt.db/model-materialize")
@@ -40,10 +40,10 @@
 (def.xt ACTION_VIEW_SET_INPUT "xt.db/view-set-input")
 (def.xt ACTION_NODE_SUMMARY "xt.db/node-summary")
 
-(def.xt SIGNAL_CACHE_CHANGED spec/SIGNAL_CACHE_CHANGED)
-(def.xt SIGNAL_CACHE_INVALIDATED spec/SIGNAL_CACHE_INVALIDATED)
-(def.xt SIGNAL_QUERY_CHANGED spec/SIGNAL_QUERY_CHANGED)
-(def.xt SIGNAL_MODEL_CHANGED spec/SIGNAL_MODEL_CHANGED)
+(def.xt SIGNAL_CACHE_CHANGED event-type/SIGNAL_CACHE_CHANGED)
+(def.xt SIGNAL_CACHE_INVALIDATED event-type/SIGNAL_CACHE_INVALIDATED)
+(def.xt SIGNAL_QUERY_CHANGED event-type/SIGNAL_QUERY_CHANGED)
+(def.xt SIGNAL_MODEL_CHANGED event-type/SIGNAL_MODEL_CHANGED)
 
 (def.xt SOURCE_KINDS
   {"postgres" {"dbtype" "db.sql"

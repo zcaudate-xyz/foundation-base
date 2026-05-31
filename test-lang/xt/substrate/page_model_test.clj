@@ -230,6 +230,29 @@
                 ["selected_id"]))
   => "task-9")
 
+^{:refer xt.substrate.page-model/model-set-state.refresh :added "4.1"}
+(fact "refreshes state-dependent views after state changes"
+  (notify/wait-on :js
+    (var node (substrate/node-create {"id" "node-model-set-state-refresh"}))
+    (page-model/model-put node
+                          "screen/main"
+                          "orders"
+                          {"state" {"selected_id" "task-1"}
+                           "views" {"detail" {"deps" {"state" ["selected_id"]}
+                                              "resolver" {"type" "fn/local"
+                                                          "fn" (fn [ctx]
+                                                                 (return {"id" (xtd/get-in ctx ["model" "state" "selected_id"])}))}}}})
+    (page-model/model-set-state node "screen/main" "orders" ["selected_id"] "task-10")
+    (promise/x:with-delay
+     20
+     (fn []
+       (repl/notify
+        (page-model/view-refresh-result
+         (page-model/view-get node "screen/main" "orders" "detail"))))))
+  => {"value" {"id" "task-10"}
+      "status" "ready"
+      "error" nil})
+
 ^{:refer xt.substrate.page-model/view-set-input :added "4.1"}
 (fact "sets view input on the page model state"
   (!.js
@@ -241,8 +264,109 @@
                                                           "fn" (fn [ctx]
                                                                  (return {"id" (xt/x:first (. ctx ["input"]))}))}}}})
     (page-model/view-set-input node "screen/main" "orders" "detail" ["task-7"])
-    (. (page-model/view-get node "screen/main" "orders" "detail") ["input"]))
+    (xtd/get-in (page-model/view-get node "screen/main" "orders" "detail")
+               ["input" "current" "data"]))
   => ["task-7"])
+
+^{:refer xt.substrate.page-model/view-set-input.refresh :added "4.1"}
+(fact "auto-refreshes a view after input changes"
+  (notify/wait-on :js
+    (var node (substrate/node-create {"id" "node-view-set-input-refresh"}))
+    (page-model/model-put node
+                         "screen/main"
+                         "orders"
+                         {"views" {"detail" {"resolver" {"type" "fn/local"
+                                                         "fn" (fn [ctx]
+                                                                (return {"id" (xt/x:first (. ctx ["input"]))}))}}}})
+    (page-model/view-set-input node "screen/main" "orders" "detail" ["task-8"])
+    (promise/x:with-delay
+     20
+     (fn []
+       (repl/notify
+        (page-model/view-refresh-result
+         (page-model/view-get node "screen/main" "orders" "detail"))))))
+  => {"value" {"id" "task-8"}
+      "status" "ready"
+      "error" nil})
+
+^{:refer xt.substrate.page-model/node-services :added "4.1"}
+(fact "gets the node service registry"
+  (!.js
+    (xt/x:obj-keys
+    (page-model/node-services
+     (substrate/node-create
+      {"id" "node-services"
+       "services" {"cache" {"fn" (fn [ctx] (return ctx))}
+                    "search" (fn [ctx] (return ctx))}}))))
+  => ["cache" "search"])
+
+^{:refer xt.substrate.page-model/resolve-view.fn-custom :added "4.1"}
+(fact "runs an fn/custom resolver through node.services"
+  (!.js
+    (var node
+        (substrate/node-create
+         {"id" "node-custom-service"
+          "services"
+          {"lookup"
+           {"fn"
+            (fn [ctx]
+              (return {"id" (xt/x:first (. ctx ["input"]))
+                       "selected" (xtd/get-in ctx ["model" "state" "selected_id"])}))}}}))
+    (page-model/model-put
+    node
+    "screen/main"
+    "orders"
+    {"state" {"selected_id" "task-11"}
+     "views"
+     {"detail"
+      {"resolver"
+       {"type" "fn/custom"
+        "service" "lookup"}}}})
+    (page-model/view-set-input node "screen/main" "orders" "detail" ["task-12"])
+    (page-model/view-refresh node "screen/main" "orders" "detail"))
+  => {"value" {"id" "task-12"
+              "selected" "task-11"}
+     "status" "ready"
+     "error" nil})
+
+^{:refer xt.substrate.page-model/view-refresh.dependents :added "4.1"}
+(fact "refreshes dependent views after a source view resolves"
+  (notify/wait-on :js
+    (var node (substrate/node-create {"id" "node-view-refresh-dependents"}))
+    (page-model/model-put
+     node
+     "screen/main"
+     "orders"
+     {"state" {"selected_id" "task-13"}
+      "views"
+      {"list"
+       {"resolver"
+        {"type" "fn/local"
+         "fn" (fn [ctx]
+                (return {"id" (xtd/get-in ctx ["model" "state" "selected_id"])}))}}
+       "detail"
+       {"deps" {"views" ["list"]}
+        "resolver"
+        {"type" "fn/local"
+         "fn" (fn [ctx]
+                (return
+                 {"selected"
+                  (xtd/get-in
+                   (page-model/view-get (. ctx ["node"])
+                                        (. ctx ["space_id"])
+                                        "orders"
+                                        "list")
+                   ["value" "id"])}))}}}})
+    (page-model/view-refresh node "screen/main" "orders" "list")
+    (promise/x:with-delay
+     20
+     (fn []
+       (repl/notify
+        (page-model/view-refresh-result
+         (page-model/view-get node "screen/main" "orders" "detail"))))))
+  => {"value" {"selected" "task-13"}
+      "status" "ready"
+      "error" nil})
 
 ^{:refer xt.substrate.page-model/view-refresh-result :added "4.1"}
 (fact "returns the public refresh result shape"

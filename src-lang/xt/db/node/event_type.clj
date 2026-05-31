@@ -1,4 +1,4 @@
-(ns xt.db.node.schema-spec
+(ns xt.db.node.event-type
   (:require [hara.lang :as l]))
 
 (l/script :xtalk

@@ -3,13 +3,12 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.node.schema-spec :as spec]
+  {:require [[xt.db.node.event-type :as event-type]
              [xt.db.node.model-query :as model-query]
              [xt.db.runtime :as db-runtime]
              [xt.db.node.view-util :as util]
              [xt.substrate :as event-node]
              [xt.substrate.base-space :as node-space]
-             [xt.substrate.page-spec :as page-spec]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
@@ -83,7 +82,9 @@
   "normalizes the source role declared by a view"
   {:added "4.1"}
   [view]
-  (return (page-spec/view-source view)))
+  (return (or (xt/x:get-key view "source")
+              (xtd/get-in view ["use" "source"])
+              "caching")))
 
 (defn.xt normalize-dep
   "normalizes a dependency path into [model-id view-id]"
@@ -161,7 +162,7 @@
   {:added "4.1"}
   [opts]
   (:= opts (or opts {}))
-  (return {"::" spec/STATE_TAG
+  (return {"::" event-type/STATE_TAG
            :schema (or (xt/x:get-key opts "schema") {})
            :lookup (or (xt/x:get-key opts "lookup") {})
            :models {}
@@ -196,7 +197,7 @@
              "input" input
              "value" value
              "pending" false
-             "status" spec/STATUS_IDLE
+             "status" event-type/STATUS_IDLE
              "error" nil
              "meta" meta
              "tables" {}
@@ -298,7 +299,7 @@
   [state model-id view-id]
   (var view (-/ensure-view state model-id view-id))
   (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_READY)
+  (xt/x:set-key view "status" event-type/STATUS_READY)
   (xt/x:set-key view "updated_at" (xt/x:now-ms))
   (xt/x:set-key view "error" nil)
   (return view))
@@ -309,7 +310,7 @@
   [state model-id view-id error]
   (var view (-/ensure-view state model-id view-id))
   (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_ERROR)
+  (xt/x:set-key view "status" event-type/STATUS_ERROR)
   (xt/x:set-key view "updated_at" (xt/x:now-ms))
   (xt/x:set-key view "error" error)
   (return view))
@@ -322,7 +323,7 @@
   (xt/x:set-key view "value" value)
   (xt/x:set-key view "source" source-id)
   (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_READY)
+  (xt/x:set-key view "status" event-type/STATUS_READY)
   (xt/x:set-key view "updated_at" (xt/x:now-ms))
   (xt/x:set-key view "error" nil)
   (return view))
@@ -391,7 +392,7 @@
     (xt/for:object [[view-id _] (or (xt/x:get-key model "views") {})]
       (var view (-/ensure-view state model-id view-id))
       (xt/x:set-key view "pending" false)
-      (xt/x:set-key view "status" spec/STATUS_IDLE)
+      (xt/x:set-key view "status" event-type/STATUS_IDLE)
       (xt/x:set-key view "error" nil)))
   (return true))
 
@@ -538,7 +539,7 @@
   {:added "4.1"}
   [view]
   (xt/x:set-key view "pending" false)
-  (xt/x:set-key view "status" spec/STATUS_STALE)
+  (xt/x:set-key view "status" event-type/STATUS_STALE)
   (xt/x:set-key view "error" nil)
   (xt/x:set-key view "updated_at" (xt/x:now-ms))
   (return view))
@@ -628,7 +629,7 @@
   [node space-id payload]
   (return (event-node/request node
                               space-id
-                              spec/ACTION_QUERY
+                              event-type/ACTION_QUERY
                               [payload]
                               nil)))
 
@@ -638,7 +639,7 @@
   [node space-id payload]
   (return (event-node/request node
                               space-id
-                              spec/ACTION_QUERY_REFRESH
+                              event-type/ACTION_QUERY_REFRESH
                               [payload]
                               nil)))
 
@@ -648,7 +649,7 @@
   [node space-id payload]
   (return (event-node/request node
                               space-id
-                              spec/ACTION_SYNC
+                              event-type/ACTION_SYNC
                               [payload]
                               nil)))
 
@@ -658,7 +659,7 @@
   [node space-id payload]
   (return (event-node/request node
                               space-id
-                              spec/ACTION_REMOVE
+                              event-type/ACTION_REMOVE
                               [payload]
                               nil)))
 
@@ -668,7 +669,7 @@
   [node space-id]
   (return (event-node/request node
                               space-id
-                              spec/ACTION_CLEAR
+                              event-type/ACTION_CLEAR
                               [{}]
                               nil)))
 
@@ -678,7 +679,7 @@
   [node space-id]
   (return (event-node/request node
                               space-id
-                              spec/ACTION_SNAPSHOT
+                              event-type/ACTION_SNAPSHOT
                               [{}]
                               nil)))
 
@@ -892,7 +893,7 @@
        node
        space-id
        remote
-       spec/ACTION_QUERY
+       event-type/ACTION_QUERY
        (-/remote-view-payload view remote model-id view-id))
       (fn [response]
         (-/apply-remote-events state response)
@@ -1057,22 +1058,22 @@
   {:added "4.1"}
   [node opts]
   (util/set-node-opts node opts)
-  (event-node/register-handler node spec/ACTION_QUERY -/handle-query nil)
-  (event-node/register-handler node spec/ACTION_QUERY_REFRESH -/handle-query-refresh nil)
-  (event-node/register-handler node spec/ACTION_SYNC -/handle-sync nil)
-  (event-node/register-handler node spec/ACTION_REMOVE -/handle-remove nil)
-  (event-node/register-handler node spec/ACTION_CLEAR -/handle-clear nil)
-  (event-node/register-handler node spec/ACTION_SNAPSHOT -/handle-snapshot nil)
+  (event-node/register-handler node event-type/ACTION_QUERY -/handle-query nil)
+  (event-node/register-handler node event-type/ACTION_QUERY_REFRESH -/handle-query-refresh nil)
+  (event-node/register-handler node event-type/ACTION_SYNC -/handle-sync nil)
+  (event-node/register-handler node event-type/ACTION_REMOVE -/handle-remove nil)
+  (event-node/register-handler node event-type/ACTION_CLEAR -/handle-clear nil)
+  (event-node/register-handler node event-type/ACTION_SNAPSHOT -/handle-snapshot nil)
   (return node))
 
 (defn.xt uninstall
   "removes xt.db.node view handlers from a node"
   {:added "4.1"}
   [node]
-  (event-node/unregister-handler node spec/ACTION_QUERY)
-  (event-node/unregister-handler node spec/ACTION_QUERY_REFRESH)
-  (event-node/unregister-handler node spec/ACTION_SYNC)
-  (event-node/unregister-handler node spec/ACTION_REMOVE)
-  (event-node/unregister-handler node spec/ACTION_CLEAR)
-  (event-node/unregister-handler node spec/ACTION_SNAPSHOT)
+  (event-node/unregister-handler node event-type/ACTION_QUERY)
+  (event-node/unregister-handler node event-type/ACTION_QUERY_REFRESH)
+  (event-node/unregister-handler node event-type/ACTION_SYNC)
+  (event-node/unregister-handler node event-type/ACTION_REMOVE)
+  (event-node/unregister-handler node event-type/ACTION_CLEAR)
+  (event-node/unregister-handler node event-type/ACTION_SNAPSHOT)
   (return node))

@@ -7,8 +7,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node.model-query :as model-query]
-             [xt.db.node.schema-state :as schema-state]
+             [xt.db.node.event-type :as event-type]
              [xt.db.helpers.data-main-test :as sample]
+             [xt.substrate.page-model :as page-model]
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
@@ -32,10 +33,21 @@
 ^{:refer xt.db.node.model-query/prepare-resolver :added "4.1"}
 (fact "prepares a db/query resolver through schema-query"
   (!.js
+    (var state (page-model/base-state {"schema" sample/Schema
+                                       "views" (@! +views+)}))
+    (xt/x:set-key state "::" event-type/STATE_TAG)
+    (xt/x:set-key state "schema" sample/Schema)
+    (xt/x:set-key state "views" (@! +views+))
+    (xt/x:set-key state "lookup" {})
+    (xt/x:set-key state "queries" {})
+    (xt/x:set-key state "watch" {})
+    (xt/x:set-key state "view_watch" {})
+    (xt/x:set-key state "pending" {})
+    (xt/x:set-key state "remote" {})
+    (xt/x:set-key state "db" nil)
     (var [ok prepared]
          (model-query/prepare-resolver
-          (schema-state/base-state {"schema" sample/Schema
-                                   "views" (@! +views+)})
+          state
           {"type" "db/query"
            "table" "UserAccount"
            "select_method" "by_organisation"
@@ -86,10 +98,21 @@
 ^{:refer xt.db.node.model-query/resolver-triggers :added "4.1"}
 (fact "collects dependent tables for a db/query resolver"
   (!.js
+    (var state (page-model/base-state {"schema" sample/Schema
+                                       "views" (@! +views+)}))
+    (xt/x:set-key state "::" event-type/STATE_TAG)
+    (xt/x:set-key state "schema" sample/Schema)
+    (xt/x:set-key state "views" (@! +views+))
+    (xt/x:set-key state "lookup" {})
+    (xt/x:set-key state "queries" {})
+    (xt/x:set-key state "watch" {})
+    (xt/x:set-key state "view_watch" {})
+    (xt/x:set-key state "pending" {})
+    (xt/x:set-key state "remote" {})
+    (xt/x:set-key state "db" nil)
     (var out
          (model-query/resolver-triggers
-          (schema-state/base-state {"schema" sample/Schema
-                                    "views" (@! +views+)})
+          state
           {"table" "UserAccount"
            "select_method" "by_organisation"
            "return_method" "info"}))
