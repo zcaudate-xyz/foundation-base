@@ -50,11 +50,22 @@
 (defn.pg ^{:props [:security :definer]
            :api/flags []
            :api/meta {:sb/grant :auth}}
+  log-append-public
+  "Appends a log row for the current authenticated user."
+  {:added "4.1.4"}
+  [:text i-message]
+  (let [o-log (pg/t:insert -/Log
+                           {:message i-message})]
+    (return o-log)))
+
+(defn.pg ^{:props [:security :definer]
+           :api/flags []
+           :api/meta {:sb/grant :auth}}
   log-append
   "Appends a log row for the current authenticated user."
   {:added "4.1.4"}
   [:text i-message]
   (let [o-log (pg/t:insert -/Log
-                           {:message i-message
-                            :author-id (s/auth-uid)})]
+                {:message i-message
+                 :author-id (s/auth-uid)})]
     (return o-log)))

@@ -16,3 +16,10 @@
    :schema "scratch_v0"
    :id "log_append"
    :flags {}})
+
+(def.xt log-append-public
+  {:input [{:symbol "i_message" :type "text"}]
+   :return "jsonb"
+   :schema "scratch_v0"
+   :id "log_append_public"
+   :flags {}})

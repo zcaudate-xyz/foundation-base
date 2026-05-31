@@ -78,9 +78,8 @@
     (var out (sql/query conn q))
     (if (spec-promise/x:promise-native? out)
       (return
-       (spec-promise/x:promise-catch
-        (spec-promise/x:promise-then out success-fn)
-        error-fn))
+       (-> (spec-promise/x:promise-then out success-fn)
+           (spec-promise/x:promise-catch error-fn)))
       (return (success-fn out)))
     (catch err
       (return (error-fn err)))))
@@ -104,22 +103,23 @@
   (var success-fn (fn [val]
                     (return
                      (xt/x:cat "{\"status\": \"ok\", \"data\":"
-                            (:? (== "jsonb" (xt/x:get-key spec "return"))
-                                (or val "null")
-                                (xt/x:json-encode val))
-                            "}"))))
+                               (:? (== "jsonb" (xt/x:get-key spec "return"))
+                                   (:? (xt/x:is-string? val)
+                                       val
+                                       (xt/x:json-encode val))
+                                   (xt/x:json-encode val))
+                               "}"))))
   (var error-fn (fn [err]
                   (if (xt/x:get-key err "status")
                      (return (xt/x:json-encode err))
                      (return (xt/x:json-encode {:status "error"
-                                            :data err})))))
+                                                :data err})))))
   (try
     (var out (sql/query conn q))
     (if (spec-promise/x:promise-native? out)
       (return
-       (spec-promise/x:promise-catch
-        (spec-promise/x:promise-then out success-fn)
-        error-fn))
+       (-> (spec-promise/x:promise-then out success-fn)
+           (spec-promise/x:promise-catch error-fn)))
       (return (success-fn out)))
     (catch err
       (return (error-fn err)))))
