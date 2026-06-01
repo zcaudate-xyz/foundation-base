@@ -59,10 +59,10 @@
          "views"
          {"list" {"source" "caching"
                   "status" "idle"
-                  "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+                  "query_keys" ["type" "table" "select_entry" "return_entry"]}
           "detail" {"source" "primary"
                     "status" "idle"
-                    "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}})
+                    "query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}})
 
 ^{:refer xt.db.walkthrough.guide-00-model-sources/STEP.01-empty-query :added "4.1"}
 (fact "step 01: querying the empty structural caching source returns a ready empty result"

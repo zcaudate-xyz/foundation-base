@@ -61,7 +61,7 @@
           "views"
           {"list" {"source" "caching"
                   "status" "idle"
-                  "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+                  "query_keys" ["type" "table" "select_entry" "return_entry"]}
            "detail" {"source" "primary"
                     "status" "idle"
-                    "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}})
+                    "query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}})

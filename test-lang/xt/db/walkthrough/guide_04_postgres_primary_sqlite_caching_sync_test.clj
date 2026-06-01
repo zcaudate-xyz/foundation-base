@@ -91,7 +91,7 @@
                                      ["data" 0 "name"])
                      "detail_default" (xtd/get-in
                                        (node/view-get node "screen/admin" "entries-screen" "detail")
-                                       ["resolver" "select_args" 0])})))))))))
+                                       ["query" "select_args" 0])})))))))))
   => {"summary"
       {"id" "admin-screen"
        "spaces"
@@ -110,9 +110,9 @@
            "views"
            {"list" {"source" "caching"
                     "status" "ready"
-                    "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+                    "query_keys" ["type" "table" "select_entry" "return_entry"]}
             "detail" {"source" "primary"
                      "status" "ready"
-                     "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
+                     "query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
       "cached_first" "alpha"
       "detail_default" "alpha"})

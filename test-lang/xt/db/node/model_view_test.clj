@@ -638,7 +638,7 @@
      {"default_input" ["alpha"]
       "use" {"source" "primary"}
       "meta" {"role" "test"}
-      "resolver" {"type" "db/query" "table" "Task"}}))
+      "query" {"type" "db/query" "table" "Task"}}))
   => {"id" "detail"
       "source" "primary"
       "input" ["alpha"]
@@ -648,7 +648,7 @@
       "meta" {"role" "test"}
       "tables" {}
       "query_key" nil
-      "resolver" {"type" "db/query" "table" "Task"}})
+      "query" {"type" "db/query" "table" "Task"}})
 
 ^{:refer xt.db.node.model-view/normalize-model :added "4.1"}
 (fact "normalizes model sources, views, deps, and unknown deps"
@@ -967,7 +967,7 @@
   (!.js
     (model/remote-view-payload
      {"input" ["alpha"]
-      "resolver" {"type" "db/query" "table" "Entry"}}
+      "query" {"type" "db/query" "table" "Entry"}}
      {"model_id" "remote-entries"
       "view_id" "detail"}
      "entries"
@@ -975,8 +975,47 @@
   => {"view" {"model_id" "remote-entries"
               "view_id" "detail"
               "args" ["alpha"]}
-      "resolver" {"type" "db/query"
-                  "table" "Entry"}})
+      "query" {"type" "db/query"
+               "table" "Entry"}})
+
+^{:refer xt.db.node.model-view/payload-view-context :added "4.1"}
+(fact "merges top-level payload view context into the nested view payload"
+  (!.js
+    [(model/payload-view-context
+      {"view" {"model_id" "orders"}
+       "view_id" "detail"
+       "args" ["a"]})
+     (model/payload-view-context
+      {"model_id" "orders"
+       "view_id" "detail"
+       "input" ["a" "b"]})
+     (model/payload-view-context {})])
+  => [{"model_id" "orders"
+       "view_id" "detail"
+       "args" ["a"]}
+      {"model_id" "orders"
+       "view_id" "detail"
+       "args" ["a" "b"]}
+      {}])
+
+^{:refer xt.db.node.model-view/payload-query :added "4.1"}
+(fact "prefers the nested query entry when present"
+  (!.js
+    [(model/payload-query
+      {"query" {"type" "db/query"
+                "table" "UserAccount"}})
+     (model/payload-query
+      {"resolver" {"type" "db/query"
+                   "table" "UserAccount"}})
+     (model/payload-query
+      {"type" "db/query"
+       "table" "UserAccount"})])
+  => [{"type" "db/query"
+       "table" "UserAccount"}
+      {"type" "db/query"
+       "table" "UserAccount"}
+      {"type" "db/query"
+       "table" "UserAccount"}])
 
 ^{:refer xt.db.node.model-view/find-view-by-query-key :added "4.1"}
 (fact "finds a registered view by query key"

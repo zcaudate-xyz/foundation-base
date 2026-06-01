@@ -138,10 +138,10 @@
            "views"
            {"list" {"source" "caching"
                     "status" "ready"
-                    "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+                    "query_keys" ["type" "table" "select_entry" "return_entry"]}
             "detail" {"source" "primary"
                       "status" "idle"
-                      "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
+                      "query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
       "initial_count" 2
       "updated_count" 3
       "cached_count" 3

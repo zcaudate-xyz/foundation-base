@@ -88,9 +88,9 @@
           "views"
           {"list" {"source" "caching"
                    "status" "ready"
-                   "resolver_keys" ["type" "table" "select_entry" "return_entry"]}
+                   "query_keys" ["type" "table" "select_entry" "return_entry"]}
            "detail" {"source" "primary"
                      "status" "ready"
-                     "resolver_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
+                     "query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}}
      "list_name" "alpha-cached"
      "detail_name" "alpha"})

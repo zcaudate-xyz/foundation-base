@@ -4,7 +4,6 @@
 
 (l/script :xtalk
   {:require [[xt.db.node.model-view :as model]
-             [xt.db.node.view-util :as util]
              [xt.db.node.event-type :as event-type]
              [xt.db.runtime :as db-runtime]
              [xt.db.text.sql-manage :as sql-manage]
@@ -186,7 +185,7 @@
             (xt/x:not-nil? (xt/x:get-key source "db"))
             (not (-/source-live? source)))
     (return source))
-  (var opts (util/node-opts node))
+  (var opts (model/node-opts node))
   (var schema (or (xt/x:get-key source "schema")
                   (xt/x:get-key opts "schema")
                   {}))
@@ -564,7 +563,9 @@
                    ["views" view-id]
                    {"source" (xt/x:get-key view-entry "source")
                     "status" (xt/x:get-key view-entry "status")
-                    "resolver_keys" (xt/x:obj-keys (or (xt/x:get-key view-entry "resolver") {}))}))
+                    "query_keys" (xt/x:obj-keys (or (xt/x:get-key view-entry "query")
+                                                     (xt/x:get-key view-entry "resolver")
+                                                     {}))}))
       (xtd/set-in space-summary ["models" model-id] model-summary))
     (xtd/set-in out ["spaces" space-id] space-summary))
   (return out))
@@ -599,4 +600,4 @@
 (def.xt view-refresh model/view-refresh)
 (def.xt view-set-input model/view-set-input)
  
-(def.xt node-opts util/node-opts)
+(def.xt node-opts model/node-opts)

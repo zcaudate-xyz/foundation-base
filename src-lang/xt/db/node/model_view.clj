@@ -4,14 +4,91 @@
 
 (l/script :xtalk
   {:require [[xt.db.node.event-type :as event-type]
-             [xt.db.node.model-query :as model-query]
+             [xt.db.node.schema-query :as schema-query]
              [xt.db.runtime :as db-runtime]
-             [xt.db.node.view-util :as util]
              [xt.substrate :as event-node]
+             [xt.substrate.base-sync :as sync]
              [xt.substrate.base-space :as node-space]
+             [xt.substrate.page-model :as page-model]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
+
+(defn.xt node-opts
+  "gets xt.db.node options from node metadata"
+  {:added "4.1"}
+  [node]
+  (return (or (xtd/get-in node ["meta" event-type/META_KEY])
+             {})))
+
+(defn.xt set-node-opts
+  "stores xt.db.node options on node metadata"
+  {:added "4.1"}
+  [node opts]
+  (xtd/set-in node ["meta" event-type/META_KEY] (or opts {}))
+  (return (-/node-opts node)))
+
+(defn.xt state?
+  "checks for a db.node state map"
+  {:added "4.1"}
+  [state]
+  (return (and (xt/x:is-object? state)
+              (== event-type/STATE_TAG
+                  (xt/x:get-key state "::")))))
+
+(defn.xt query-spec
+  "gets the xt.db query definition from query or legacy resolver keys"
+  {:added "4.1"}
+  [entry]
+  (return (or (xt/x:get-key (or entry {}) "query")
+              (xt/x:get-key (or entry {}) "resolver"))))
+
+(defn.xt payload-view-context
+  "normalizes payload view context"
+  {:added "4.1"}
+  [payload]
+  (var view-context (xtd/clone-nested (or (xt/x:get-key payload "view") {})))
+  (when (and (xt/x:nil? (xt/x:get-key view-context "model_id"))
+             (xt/x:not-nil? (xt/x:get-key payload "model_id")))
+    (xt/x:set-key view-context "model_id" (xt/x:get-key payload "model_id")))
+  (when (and (xt/x:nil? (xt/x:get-key view-context "view_id"))
+             (xt/x:not-nil? (xt/x:get-key payload "view_id")))
+    (xt/x:set-key view-context "view_id" (xt/x:get-key payload "view_id")))
+  (when (and (xt/x:nil? (xt/x:get-key view-context "args"))
+             (xt/x:not-nil? (xt/x:get-key payload "args")))
+    (xt/x:set-key view-context "args" (xt/x:get-key payload "args")))
+  (when (and (xt/x:nil? (xt/x:get-key view-context "args"))
+             (xt/x:not-nil? (xt/x:get-key payload "input")))
+    (xt/x:set-key view-context "args" (xt/x:get-key payload "input")))
+  (return view-context))
+
+(defn.xt payload-query
+  "gets the query payload for a request"
+  {:added "4.1"}
+  [payload]
+  (return (or (xt/x:get-key payload "query")
+              (xt/x:get-key payload "resolver")
+              payload)))
+
+(defn.xt prepare-query
+  "prepares a local query plan through schema-query"
+  {:added "4.1"}
+  [state query view-context]
+  (return (schema-query/prepare-query
+           state
+           query
+           view-context)))
+
+(defn.xt query-triggers
+  "gets dependent tables for a db/query payload"
+  {:added "4.1"}
+  [state query]
+  (:= query (or query {}))
+  (return
+   (schema-query/view-triggers
+    state
+    (xt/x:get-key query "table")
+    query)))
 
 (defn.xt source-base
   "creates the base structural definition for a source role"
@@ -54,6 +131,10 @@
         (or (xt/x:get-key source "setup") {})))
   (when (> (xt/x:len (xt/x:obj-keys setup)) 0)
     (xt/x:set-key out "setup" setup))
+  (var query (-/query-spec source))
+  (when (xt/x:not-nil? query)
+    (xt/x:set-key out "query" query))
+  (xt/x:del-key out "resolver")
   (return out))
 
 (defn.xt normalize-sources
@@ -90,95 +171,45 @@
   "normalizes a dependency path into [model-id view-id]"
   {:added "4.1"}
   [model-id dep]
-  (cond (xt/x:is-array? dep)
-        (if (== 1 (xt/x:len dep))
-          (return [model-id
-                   (xt/x:first dep)])
-          (return [(xt/x:first dep)
-                   (xt/x:second dep)]))
-
-        (xt/x:is-string? dep)
-        (return [model-id dep])
-
-        (xt/x:is-object? dep)
-        (return [(or (xt/x:get-key dep "model")
-                     model-id)
-                 (or (xt/x:get-key dep "view")
-                     (xt/x:get-key dep "id")
-                     (xt/x:get-key dep "name"))])
-
-        :else
-        (return nil)))
+  (return (page-model/normalize-view-dep model-id dep)))
 
 (defn.xt get-view-deps
   "gets normalized dependencies for a single view"
   {:added "4.1"}
   [model-id view]
-  (var out [])
-  (xt/for:array [dep (or (xt/x:get-key view "deps") [])]
-    (var path (-/normalize-dep model-id dep))
-    (when (and (xt/x:not-nil? path)
-               (xt/x:not-nil? (xt/x:first path))
-               (xt/x:not-nil? (xt/x:second path)))
-      (xt/x:arr-push out path)))
-  (return out))
+  (return (page-model/get-view-deps model-id view)))
 
 (defn.xt get-model-deps
   "gets view dependency indexes for a model"
   {:added "4.1"}
   [model-id views]
-  (var all-deps {})
-  (xt/for:object [[view-id view-entry] views]
-    (xt/for:array [path (-/get-view-deps model-id view-entry)]
-      (xtd/set-in all-deps
-                  [(xt/x:first path)
-                   (xt/x:second path)
-                   view-id]
-                  true)))
-  (return all-deps))
+  (return (page-model/get-model-deps model-id views)))
 
 (defn.xt get-unknown-deps
   "gets unresolved dependency paths for a model"
   {:added "4.1"}
   [state model-id views model-deps]
-  (var out [])
-  (xt/for:object [[linked-model-id linked-views] model-deps]
-    (cond (== model-id linked-model-id)
-          (xt/for:object [[linked-view-id _] linked-views]
-            (when (xt/x:nil? (xt/x:get-key views linked-view-id))
-              (xt/x:arr-push out [linked-model-id linked-view-id])))
-
-          :else
-          (do (var linked-model (xtd/get-in state ["models" linked-model-id]))
-              (xt/for:object [[linked-view-id _] linked-views]
-                (when (or (xt/x:nil? linked-model)
-                          (xt/x:nil? (xt/x:get-key (xt/x:get-key linked-model "views")
-                                                   linked-view-id)))
-                  (xt/x:arr-push out [linked-model-id linked-view-id]))))))
-  (return out))
+  (return (page-model/get-unknown-deps state model-id views model-deps)))
 
 (defn.xt base-state
   "creates the base xt.db view state"
   {:added "4.1"}
   [opts]
   (:= opts (or opts {}))
-  (return {"::" event-type/STATE_TAG
-           :schema (or (xt/x:get-key opts "schema") {})
-           :lookup (or (xt/x:get-key opts "lookup") {})
-           :models {}
-           :queries {}
-           :sources (-/normalize-sources nil (xt/x:get-key opts "sources"))
-           :meta (or (xt/x:get-key opts "meta") {})
-           :opts opts
-           "remote" (or (xt/x:get-key opts "remote") {})}))
+  (var state (page-model/base-state opts))
+  (xt/x:set-key state "::" event-type/STATE_TAG)
+  (xt/x:set-key state "schema" (or (xt/x:get-key opts "schema") {}))
+  (xt/x:set-key state "lookup" (or (xt/x:get-key opts "lookup") {}))
+  (xt/x:set-key state "queries" {})
+  (xt/x:set-key state "sources" (-/normalize-sources nil (xt/x:get-key opts "sources")))
+  (xt/x:set-key state "remote" (or (xt/x:get-key opts "remote") {}))
+  (return state))
 
 (defn.xt model-views
   "normalizes a model input into a view map"
   {:added "4.1"}
   [model-spec]
-  (return (or (xt/x:get-key model-spec "views")
-              model-spec
-              {})))
+  (return (page-model/model-views model-spec)))
 
 (defn.xt normalize-view
   "normalizes a single view record"
@@ -202,8 +233,12 @@
              "meta" meta
              "tables" {}
              "query_key" nil}))
+  (var query (-/query-spec view))
+  (when (xt/x:not-nil? query)
+    (xt/x:set-key out "query" query))
   (xt/x:del-key out "default_input")
   (xt/x:del-key out "use")
+  (xt/x:del-key out "resolver")
   (return out))
 
 (defn.xt normalize-model
@@ -225,31 +260,25 @@
   "gets a registered model"
   {:added "4.1"}
   [state model-id]
-  (return (xtd/get-in state ["models" model-id])))
+  (return (page-model/get-model state model-id)))
 
 (defn.xt ensure-model
   "gets a registered model or throws"
   {:added "4.1"}
   [state model-id]
-  (var model (-/get-model state model-id))
-  (when (xt/x:nil? model)
-    (xt/x:err (xt/x:cat "model not found - " model-id)))
-  (return model))
+  (return (page-model/ensure-model state model-id)))
 
 (defn.xt get-view
   "gets a registered view"
   {:added "4.1"}
   [state model-id view-id]
-  (return (xtd/get-in state ["models" model-id "views" view-id])))
+  (return (page-model/get-view state model-id view-id)))
 
 (defn.xt ensure-view
   "gets a registered view or throws"
   {:added "4.1"}
   [state model-id view-id]
-  (var view (-/get-view state model-id view-id))
-  (when (xt/x:nil? view)
-    (xt/x:err (xt/x:cat "view not found - " (xt/x:json-encode [model-id view-id]))))
-  (return view))
+  (return (page-model/ensure-view state model-id view-id)))
 
 (defn.xt rebuild-model
   "recomputes dependency indexes for a model"
@@ -516,8 +545,9 @@
          "view_id" (or (xt/x:get-key remote "view_id")
                        view-id)
          "args" (or (xt/x:get-key view "input") [])}})
-  (when (xt/x:has-key? view "resolver")
-    (xt/x:set-key payload "resolver" (xt/x:get-key view "resolver")))
+  (var query (-/query-spec view))
+  (when (xt/x:not-nil? query)
+    (xt/x:set-key payload "query" query))
   (return payload))
 
 (defn.xt find-view-by-query-key
@@ -571,7 +601,7 @@
     (xt/x:set-key tables table true)
     (xt/for:object [[model-id model] (or (xt/x:get-key state "models") {})]
       (xt/for:object [[source-id source] (or (xt/x:get-key model "sources") {})]
-        (var query (xt/x:get-key source "resolver"))
+        (var query (-/query-spec source))
         (var source-table (or (xt/x:get-key source "table")
                               (:? (xt/x:not-nil? query)
                                   (xt/x:get-key query "table")
@@ -618,8 +648,8 @@
   [node space-id]
   (var space (node-space/ensure-space node space-id nil))
   (var state (xt/x:get-key space "state"))
-  (when (not (util/state? state))
-    (:= state (-/base-state (util/node-opts node)))
+  (when (not (-/state? state))
+    (:= state (-/base-state (-/node-opts node)))
     (xt/x:set-key space "state" state))
   (return state))
 
@@ -781,14 +811,14 @@
   [node space-id model-id source-id]
   (var state (-/ensure-space-state node space-id))
   (var source (-/ensure-source state model-id source-id))
-  (var query (xt/x:get-key source "resolver"))
+  (var query (-/query-spec source))
   (var db (xt/x:get-key source "db"))
   (when (or (not (== true (xt/x:get-key source "live")))
             (xt/x:nil? db)
             (xt/x:nil? query))
     (return (promise/x:promise-run source)))
   (var [ok prepared]
-       (model-query/prepare-resolver
+       (-/prepare-query
         state
         query
         {"model_id" model-id
@@ -821,7 +851,7 @@
   (var upstream-refresh
        (:? (and (== true (xt/x:get-key upstream "live"))
                 (xt/x:not-nil? (xt/x:get-key upstream "db"))
-                (xt/x:not-nil? (xt/x:get-key upstream "resolver")))
+                (xt/x:not-nil? (-/query-spec upstream)))
            (-/source-refresh node space-id model-id upstream-id)
            (promise/x:promise-run upstream)))
   (return
@@ -835,7 +865,7 @@
                  (xt/x:not-nil? db))
         (db-runtime/db-clear db)
         (var data (or (xt/x:get-key synced "data") []))
-        (var query (xt/x:get-key synced "resolver"))
+        (var query (-/query-spec synced))
         (var table (or (xt/x:get-key synced "table")
                        (:? (xt/x:not-nil? query)
                            (xt/x:get-key query "table")
@@ -911,7 +941,7 @@
                view-id
                (or (xt/x:get-key response "source")
                    (xt/x:get-key view "source"))
-               (util/response-value response))
+              (page-model/output-process response))
               (return (-/view-refresh-result view))))))))
   (var source-id (or (xt/x:get-key view "source")
                      "caching"))
@@ -921,9 +951,9 @@
   (cond (and (xt/x:is-boolean? live?)
              live?)
         (do (var [ok prepared]
-                 (model-query/prepare-resolver
+                 (-/prepare-query
                   state
-                  (xt/x:get-key view "resolver")
+                  (-/query-spec view)
                   {"model_id" model-id
                    "view_id" view-id
                    "args" (or (xt/x:get-key view "input") [])}))
@@ -971,12 +1001,12 @@
   "handles a query request for the clean view-based implementation"
   {:added "4.1"}
   [current-space args request node]
-  (var payload (util/request-payload args))
+  (var payload (sync/request-payload args))
   (var state (-/ensure-space-state node (xt/x:get-key current-space "id")))
-  (var view-context (model-query/payload-view-context payload))
+  (var view-context (-/payload-view-context payload))
   (var model-id (xt/x:get-key view-context "model_id"))
   (var view-id (xt/x:get-key view-context "view_id"))
-  (var resolver (model-query/query-resolver payload))
+  (var query (-/payload-query payload))
   (when (and (xt/x:not-nil? model-id)
              (xt/x:not-nil? view-id))
     (var view (-/ensure-view state model-id view-id))
@@ -986,9 +1016,11 @@
        model-id
        view-id
        (xt/x:get-key view-context "args")))
-    (when (and (xt/x:not-nil? resolver)
-               (xt/x:has-key? payload "resolver"))
-      (xt/x:set-key view "resolver" resolver))
+    (when (and (xt/x:not-nil? query)
+               (or (xt/x:has-key? payload "query")
+                   (xt/x:has-key? payload "resolver")))
+      (xt/x:set-key view "query" query)
+      (xt/x:del-key view "resolver"))
     (return (-/view-refresh node
                             (xt/x:get-key current-space "id")
                             model-id
@@ -1001,7 +1033,7 @@
   "handles a cached query refresh request"
   {:added "4.1"}
   [current-space args request node]
-  (var payload (util/request-payload args))
+  (var payload (sync/request-payload args))
   (var state (-/ensure-space-state node (xt/x:get-key current-space "id")))
   (var query-key (xt/x:get-key payload "query_key"))
   (when (xt/x:not-nil? query-key)
@@ -1018,7 +1050,7 @@
   "handles a sync request for the clean view-based implementation"
   {:added "4.1"}
   [current-space args request node]
-  (var payload (util/request-payload args))
+  (var payload (sync/request-payload args))
   (var state (-/ensure-space-state node (xt/x:get-key current-space "id")))
   (var sync-data (or (xt/x:get-key payload "db/sync")
                      payload))
@@ -1030,7 +1062,7 @@
   "handles a remove request for the clean view-based implementation"
   {:added "4.1"}
   [current-space args request node]
-  (var payload (util/request-payload args))
+  (var payload (sync/request-payload args))
   (var state (-/ensure-space-state node (xt/x:get-key current-space "id")))
   (var remove-data (or (xt/x:get-key payload "db/remove")
                        payload))
@@ -1057,7 +1089,7 @@
   "installs xt.db.node view handlers on a node"
   {:added "4.1"}
   [node opts]
-  (util/set-node-opts node opts)
+  (-/set-node-opts node opts)
   (event-node/register-handler node event-type/ACTION_QUERY -/handle-query nil)
   (event-node/register-handler node event-type/ACTION_QUERY_REFRESH -/handle-query-refresh nil)
   (event-node/register-handler node event-type/ACTION_SYNC -/handle-sync nil)
