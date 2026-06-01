@@ -8,7 +8,7 @@
    :require [[xt.db.node.schema-query :as schema-query]
               [xt.db.node.event-type :as event-type]
               [xt.db.helpers.data-main-test :as sample]
-              [xt.substrate.page-model :as page-model]
+              [xt.db.node.state :as state]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]]})
 
@@ -150,7 +150,7 @@
 (fact "prepares a cache query plan and trigger set"
 
   (!.lua
-    (var state (page-model/base-state {"schema" sample/Schema
+    (var state (state/base-state {"schema" sample/Schema
                                        "views" (@! +views+)}))
     (xt/x:set-key state "::" event-type/STATE_TAG)
     (xt/x:set-key state "schema" sample/Schema)

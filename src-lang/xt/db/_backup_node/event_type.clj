@@ -7,9 +7,6 @@
 (def$.xt META_KEY "xt.db")
 (def$.xt STATE_TAG "xt.db.state")
 
-(def$.xt SERVICE_NODE "xt.db/node")
-(def$.xt SERVICE_SOURCE_KINDS "xt.db/source-kinds")
-
 (def$.xt ACTION_QUERY         "xt.db/query")
 (def$.xt ACTION_QUERY_REFRESH "xt.db/query-refresh")
 (def$.xt ACTION_SYNC          "xt.db/sync")

@@ -19,6 +19,8 @@
              [js.lib.driver-postgres :as js-postgres]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.db.text.sql-call :as call]
+             [xt.db.runtime.driver :as driver]
+             [xt.db.substrate :as db-helper]
              [postgres.sample.scratch-v0.route-entries :as entries]]})
 
 (fact:global
@@ -27,9 +29,98 @@
   :teardown [(l/rt:stop)]})
 
 
-(comment
 
-  (event-node/node-create {})
+
+(comment
+  
+
+  (!.js
+    (driver/get-driver "postgres"))
+  
+  
+  (defn )
+  (base-page/add-model-attach
+   node
+   "space/a"
+   "entries"
+   {"ping" {"handler" (create-call-request
+                       "entries/ping"
+                       "db/fn.primary"
+                       "action/ping.primary")
+            "defaultArgs" []}})
+  
+
+  (notify/wait-on :js
+    (var node
+         (event-node/node-create
+          {"services"
+           {"db/primary"
+            {"database" "test-scratch"}}
+           "handlers"
+           {"db/fn.primary"
+            {"fn"   (db-helper/call-db-handler js-postgres/driver "db/primary")
+             "meta" {"kind" "request"}}}}))
+    (base-page/add-model-attach node
+                                nil
+                                "page"
+                                {"ping" (db-helper/call-view-request entries/ping
+                                                                     "ping"
+                                                                     "db/fn.primary"
+                                                                     {})}))
+  
+  
+  (notify/wait-on :js
+    (-> (event-node/node-create
+         {"services"
+          {"db/primary"
+           {"database" "test-scratch"}}
+          "handlers"
+          {"db/fn.primary"
+           {"fn" (fn [space args request node]
+                   (var opts (xt/x:first args))
+                   (var fn-template (. opts ["template"]))
+                   (var fn-args     (. opts ["args"]))
+                   (return
+                    (-> (sql/connect
+                         (driver/get-driver "postgres")
+                         (event-node/get-service node "db/primary"))
+                        (promise/x:promise-then
+                         (fn [conn]
+                           (return (call/call-raw conn fn-template fn-args)))))))
+            "meta" {"kind" "request"}}}})
+        (event-node/request nil
+                            "db/fn.primary"
+                            [{"template" entries/ping
+                              "args" []}]
+                            {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  
+  
+  (notify/wait-on :js
+    (-> (event-node/node-create
+         {"handlers"
+          {"db/ping"
+           {"fn" (fn [space args request node]
+                   (return request))
+            "meta" {"kind" "request"}}}})
+        (event-node/request nil
+                            "db/ping"
+                            []
+                            {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => {"space" "__NODE__",
+      "args" [],
+      "id" "req-VCsVVv",
+      "action" "db/ping",
+      "kind" "request",
+      "meta" {}}
+  
+  {"space" "ANY", "args" [], "id" "req-QigeQW", "action" "db/ping", "kind" "request", "meta" {}}
+
   
   (notify/wait-on :js
     (-> (event-node/node-create

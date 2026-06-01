@@ -19,7 +19,7 @@
              [xt.db.runtime.sql :as impl-sql]
              [xt.db.text.sql-util :as ut]
              [xt.protocol.impl.connection-sql :as sql]
-             [xt.substrate.page-model :as page-model]
+             [xt.db.node.state :as state]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [python.lib.driver-postgres :as py-pg]]})
@@ -51,7 +51,7 @@
     (var conn (py-pg/wrap-connection
                (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
     (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
-    (var state (page-model/base-state
+    (var state (state/base-state
                 {"schema" (@! fixtures/+schema+)
                 "lookup" (@! fixtures/+lookup+)
                 "views" {}}))
@@ -120,7 +120,7 @@
     (var conn (py-pg/wrap-connection
                (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
     (var db-opts (ut/postgres-opts (@! fixtures/+lookup+)))
-    (var state (page-model/base-state
+    (var state (state/base-state
                 {"schema" (@! fixtures/+schema+)
                 "lookup" (@! fixtures/+lookup+)
                 "views" {}}))

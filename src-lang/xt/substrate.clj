@@ -6,6 +6,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
              [xt.event.base-listener :as event-common]
+             [xt.substrate.base-page :as page]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-space :as node-space]
@@ -18,6 +19,24 @@
 (def.xt get-space-state node-space/get-space-state)
 (def.xt set-space-state node-space/set-space-state)
 (def.xt update-space-state node-space/update-space-state)
+(def.xt get-space-page page/get-space-page)
+(def.xt ensure-space-page page/ensure-space-page)
+(def.xt set-space-page page/set-space-page)
+(def.xt page-model-get page/model-get)
+(def.xt page-model-ensure page/model-ensure)
+(def.xt page-view-ensure page/view-ensure)
+(def.xt page-add-model-attach page/add-model-attach)
+(def.xt page-add-model page/add-model)
+(def.xt page-remove-model page/remove-model)
+(def.xt page-remove-view page/remove-view)
+(def.xt page-model-update page/model-update)
+(def.xt page-view-update page/view-update)
+(def.xt page-view-set-input page/view-set-input)
+(def.xt page-trigger-model page/trigger-model)
+(def.xt page-trigger-view page/trigger-view)
+(def.xt page-trigger-all page/trigger-all)
+(def.xt add-raw-page-callback page/add-raw-callback)
+(def.xt remove-raw-page-callback page/remove-raw-callback)
 
 (defspec.xt NodeTriggerHandler
   [:fn [node-space/NodeSpace frame/NodeFrame :xt/any] :xt/any])

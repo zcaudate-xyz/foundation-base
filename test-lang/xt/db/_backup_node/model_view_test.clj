@@ -8,7 +8,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node :as node]
-   [xt.db.node.state :as model]
+             [xt.db.node.model-view :as model]
              [xt.db.helpers.test-fixtures :as fixtures]
              [js.lib.driver-sqlite :as js-sqlite]
              [xt.lang.common-data :as xtd]
@@ -21,7 +21,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.state/normalize-sources :added "4.1"}
+^{:refer xt.db.node.model-view/normalize-sources :added "4.1"}
 (fact "normalizes shared primary and caching sources"
 
   (!.js
@@ -34,7 +34,7 @@
      (. out ["cache_alt"] ["sync_from"])])
   => ["sqlite" "primary" "primary"])
 
-^{:refer xt.db.node.state/normalize-view-source :added "4.1"}
+^{:refer xt.db.node.model-view/normalize-view-source :added "4.1"}
 (fact "normalizes view source declarations"
   (!.js
     [(model/normalize-view-source {"source" "primary"})
@@ -42,7 +42,7 @@
      (model/normalize-view-source {})])
   => ["primary" "archive" "caching"])
 
-^{:refer xt.db.node.state/base-state :added "4.1"}
+^{:refer xt.db.node.model-view/base-state :added "4.1"}
 (fact "creates the base view state with primary and caching sources"
 
   (!.js
@@ -59,7 +59,7 @@
       "sqlite"
       []])
 
-^{:refer xt.db.node.state/put-model :added "4.1"}
+^{:refer xt.db.node.model-view/put-model :added "4.1"}
 (fact "normalizes model sources once and lets views declare a stable source role"
 
   (!.js
@@ -78,7 +78,7 @@
       ["alpha"]
       "primary"])
 
-^{:refer xt.db.node.state/sync-source :added "4.1"}
+^{:refer xt.db.node.model-view/sync-source :added "4.1"}
 (fact "syncs caching from primary through the stable model source binding"
 
   (!.js
@@ -96,7 +96,7 @@
      (xt/x:is-number? (xtd/get-in out ["models" "entries" "sources" "caching" "updated_at"]))])
   => ["alpha" "alpha" true])
 
-^{:refer xt.db.node.state/model-put :added "4.1"}
+^{:refer xt.db.node.model-view/model-put :added "4.1"}
 (fact "stores a clean view model with structural primary and caching sources"
 
   (!.js
@@ -219,7 +219,7 @@
       "row_count" 2
       "first_name" "alpha"})
 
-^{:refer xt.db.node.state/view-refresh.resolver :added "4.1"}
+^{:refer xt.db.node.model-view/view-refresh.resolver :added "4.1"}
 (fact "refreshes a live sqlite view from a resolver with type db/query"
 
   (notify/wait-on [:js 10000]
@@ -264,7 +264,7 @@
       "first_name" "alpha"
       "status" "ready"})
 
-^{:refer xt.db.node.state/query.wrapper :added "4.1"}
+^{:refer xt.db.node.model-view/query.wrapper :added "4.1"}
 (fact "queries and refreshes a registered resolver-backed view through request handlers"
 
   (notify/wait-on [:js 10000]
@@ -320,7 +320,7 @@
       "refresh_count" 2
       "status" "ready"})
 
-^{:refer xt.db.node.state/sync.wrapper :added "4.1"}
+^{:refer xt.db.node.model-view/sync.wrapper :added "4.1"}
 (fact "applies db/sync and db/remove through request handlers on model sources"
 
   (notify/wait-on :js
@@ -371,7 +371,7 @@
       "names" ["alpha" "gamma"]
       "status" "ready"})
 
-^{:refer xt.db.node.state/view-refresh.remote :added "4.1"}
+^{:refer xt.db.node.model-view/view-refresh.remote :added "4.1"}
 (fact "refreshes a local view from a remote registered view in another space"
 
   (notify/wait-on :js
@@ -415,7 +415,7 @@
       "status" "ready"
       "source" "primary"})
 
-^{:refer xt.db.node.state/source-refresh :added "4.1"}
+^{:refer xt.db.node.model-view/source-refresh :added "4.1"}
 (fact "syncs a live primary sqlite source into a live caching sqlite source"
 
   (notify/wait-on [:js 10000]
@@ -493,7 +493,7 @@
        "cached_first" "alpha"
        "list_source" "caching"})
 
-^{:refer xt.db.node.state/model-sync :added "4.1"}
+^{:refer xt.db.node.model-view/model-sync :added "4.1"}
 (fact "syncs caching from primary and refreshes views from their declared source roles"
 
   (notify/wait-on :js
@@ -534,7 +534,7 @@
       "detail_name" "alpha"})
 
 
-^{:refer xt.db.node.state/source-base :added "4.1"}
+^{:refer xt.db.node.model-view/source-base :added "4.1"}
 (fact "creates the base structural shape for a source role"
   (!.js
     [(model/source-base "primary")
@@ -550,7 +550,7 @@
        "synced_at" nil
        "sync_from" "primary"}])
 
-^{:refer xt.db.node.state/normalize-source :added "4.1"}
+^{:refer xt.db.node.model-view/normalize-source :added "4.1"}
 (fact "merges current and incoming source state"
   (!.js
     (model/normalize-source
@@ -570,7 +570,7 @@
       "config" {"driver" "sqlite.driver"}
       "setup" {"seed" [{"id" "e1"}]}})
 
-^{:refer xt.db.node.state/normalize-dep :added "4.1"}
+^{:refer xt.db.node.model-view/normalize-dep :added "4.1"}
 (fact "normalizes dependency declarations into [model-id view-id]"
   (!.js
     [(model/normalize-dep "task" ["detail"])
@@ -584,7 +584,7 @@
       ["remote" "list"]
       nil])
 
-^{:refer xt.db.node.state/get-view-deps :added "4.1"}
+^{:refer xt.db.node.model-view/get-view-deps :added "4.1"}
 (fact "returns normalized dependencies for a view"
   (!.js
     (model/get-view-deps
@@ -594,7 +594,7 @@
       ["other" "list"]
       ["task" "summary"]])
 
-^{:refer xt.db.node.state/get-model-deps :added "4.1"}
+^{:refer xt.db.node.model-view/get-model-deps :added "4.1"}
 (fact "indexes dependent views by source model and view"
   (!.js
     (model/get-model-deps
@@ -604,7 +604,7 @@
   => {"task" {"list" {"detail" true}}
       "other" {"remote" {"summary" true}}})
 
-^{:refer xt.db.node.state/get-unknown-deps :added "4.1"}
+^{:refer xt.db.node.model-view/get-unknown-deps :added "4.1"}
 (fact "finds dependency paths that are not present in state"
   (!.js
     (model/get-unknown-deps
@@ -620,7 +620,7 @@
       ["other" "gone"]
       ["ghost" "view"]])
 
-^{:refer xt.db.node.state/model-views :added "4.1"}
+^{:refer xt.db.node.model-view/model-views :added "4.1"}
 (fact "accepts either a model spec or a direct views map"
   (!.js
     [(xt/x:obj-keys
@@ -630,7 +630,7 @@
   => [["list" "detail"]
       ["list" "detail"]])
 
-^{:refer xt.db.node.state/normalize-view :added "4.1"}
+^{:refer xt.db.node.model-view/normalize-view :added "4.1"}
 (fact "normalizes view defaults and strips use/default_input helpers"
   (!.js
     (model/normalize-view
@@ -650,7 +650,7 @@
       "query_key" nil
       "query" {"type" "db/query" "table" "Task"}})
 
-^{:refer xt.db.node.state/normalize-model :added "4.1"}
+^{:refer xt.db.node.model-view/normalize-model :added "4.1"}
 (fact "normalizes model sources, views, deps, and unknown deps"
   (!.js
     (var out
@@ -671,7 +671,7 @@
       "deps" {}
       "unknown_deps" []})
 
-^{:refer xt.db.node.state/get-model :added "4.1"}
+^{:refer xt.db.node.model-view/get-model :added "4.1"}
 (fact "gets a registered model from state"
   (!.js
     (var state (model/base-state {}))
@@ -680,7 +680,7 @@
      (model/get-model state "missing")])
   => [true nil])
 
-^{:refer xt.db.node.state/ensure-model :added "4.1"}
+^{:refer xt.db.node.model-view/ensure-model :added "4.1"}
 (fact "returns a registered model"
   (!.js
     (xt/x:not-nil?
@@ -689,7 +689,7 @@
       "entries")))
   => true)
 
-^{:refer xt.db.node.state/get-view :added "4.1"}
+^{:refer xt.db.node.model-view/get-view :added "4.1"}
 (fact "gets a registered view from state"
   (!.js
     (var state (model/base-state {}))
@@ -698,7 +698,7 @@
      (model/get-view state "entries" "detail")])
   => [true nil])
 
-^{:refer xt.db.node.state/ensure-view :added "4.1"}
+^{:refer xt.db.node.model-view/ensure-view :added "4.1"}
 (fact "returns a registered view"
   (!.js
     (xt/x:not-nil?
@@ -708,7 +708,7 @@
       "list")))
   => true)
 
-^{:refer xt.db.node.state/rebuild-model :added "4.1"}
+^{:refer xt.db.node.model-view/rebuild-model :added "4.1"}
 (fact "recomputes dependency indexes and missing links"
   (!.js
     (var state (model/base-state {}))
@@ -723,7 +723,7 @@
               "ghost" {"gone" {"detail" true}}}
       "unknown_deps" [["ghost" "gone"]]})
 
-^{:refer xt.db.node.state/put-view :added "4.1"}
+^{:refer xt.db.node.model-view/put-view :added "4.1"}
 (fact "adds a normalized view onto an existing model"
   (!.js
     (var state (model/base-state {}))
@@ -735,7 +735,7 @@
   => {"view_ids" ["list" "detail"]
       "deps" {"entries" {"list" {"detail" true}}}})
 
-^{:refer xt.db.node.state/set-view-input :added "4.1"}
+^{:refer xt.db.node.model-view/set-view-input :added "4.1"}
 (fact "updates a view input vector"
   (!.js
     (var state (model/base-state {}))
@@ -743,7 +743,7 @@
     (. (model/set-view-input state "entries" "detail" ["alpha"]) ["input"]))
   => ["alpha"])
 
-^{:refer xt.db.node.state/set-view-ready :added "4.1"}
+^{:refer xt.db.node.model-view/set-view-ready :added "4.1"}
 (fact "marks a view ready and clears errors"
   (!.js
     (var state (model/base-state {}))
@@ -756,7 +756,7 @@
      (. out ["error"])])
   => ["ready" false true nil])
 
-^{:refer xt.db.node.state/set-view-error :added "4.1"}
+^{:refer xt.db.node.model-view/set-view-error :added "4.1"}
 (fact "marks a view errored"
   (!.js
     (var state (model/base-state {}))
@@ -768,7 +768,7 @@
      (. out ["error"] ["message"])])
   => ["error" false true "boom"])
 
-^{:refer xt.db.node.state/set-view-value :added "4.1"}
+^{:refer xt.db.node.model-view/set-view-value :added "4.1"}
 (fact "stores the current view value and source"
   (!.js
     (var state (model/base-state {}))
@@ -779,7 +779,7 @@
      (xt/x:len (. out ["value"]))])
   => ["primary" "ready" 1])
 
-^{:refer xt.db.node.state/get-source :added "4.1"}
+^{:refer xt.db.node.model-view/get-source :added "4.1"}
 (fact "gets a source binding from a model"
   (!.js
     (var state (model/base-state {}))
@@ -789,7 +789,7 @@
      (model/get-source state "entries" "archive")])
   => ["sqlite" nil])
 
-^{:refer xt.db.node.state/ensure-source :added "4.1"}
+^{:refer xt.db.node.model-view/ensure-source :added "4.1"}
 (fact "returns a registered source binding"
   (!.js
     (xt/x:not-nil?
@@ -799,7 +799,7 @@
       "primary")))
   => true)
 
-^{:refer xt.db.node.state/set-source-data :added "4.1"}
+^{:refer xt.db.node.model-view/set-source-data :added "4.1"}
 (fact "stores cloned source data and sets updated_at"
   (!.js
     (var state (model/base-state {}))
@@ -809,7 +809,7 @@
      (xt/x:is-number? (. out ["updated_at"]))])
   => ["alpha" true])
 
-^{:refer xt.db.node.state/sync-model-sources :added "4.1"}
+^{:refer xt.db.node.model-view/sync-model-sources :added "4.1"}
 (fact "synchronizes every source with a sync_from binding"
   (!.js
     (var state (model/base-state {}))
@@ -823,7 +823,7 @@
   => {"synced" ["caching" "archive"]
       "archive_name" "alpha"})
 
-^{:refer xt.db.node.state/clear-state :added "4.1"}
+^{:refer xt.db.node.model-view/clear-state :added "4.1"}
 (fact "clears cached queries and resets views to idle"
   (!.js
     (var state (model/base-state {}))
@@ -841,7 +841,7 @@
       "detail_status" "idle"
       "list_error" nil})
 
-^{:refer xt.db.node.state/get-view-dependents :added "4.1"}
+^{:refer xt.db.node.model-view/get-view-dependents :added "4.1"}
 (fact "finds all views that depend on a given view"
   (!.js
     (var state (model/base-state {}))
@@ -852,7 +852,7 @@
   => {"entries" ["detail"]
       "other" ["mirror"]})
 
-^{:refer xt.db.node.state/get-model-dependents :added "4.1"}
+^{:refer xt.db.node.model-view/get-model-dependents :added "4.1"}
 (fact "finds models that depend on a source model"
   (!.js
     (var state (model/base-state {}))
@@ -861,7 +861,7 @@
     (model/get-model-dependents state "entries"))
   => {"other" true})
 
-^{:refer xt.db.node.state/snapshot-state :added "4.1"}
+^{:refer xt.db.node.model-view/snapshot-state :added "4.1"}
 (fact "returns a public snapshot of state"
   (!.js
     (var state (model/base-state {"schema" {"Task" {}}
@@ -870,7 +870,7 @@
     (xt/x:obj-keys (model/snapshot-state state)))
   => ["schema" "lookup" "sources" "queries" "models"])
 
-^{:refer xt.db.node.state/not-implemented :added "4.1"}
+^{:refer xt.db.node.model-view/not-implemented :added "4.1"}
 (fact "returns a standard error payload"
   (!.js
     (model/not-implemented "xt.db/test" {"id" "p1"}))
@@ -878,7 +878,7 @@
       "tag" "xt.db/test"
       "data" {"id" "p1"}})
 
-^{:refer xt.db.node.state/view-refresh-result :added "4.1"}
+^{:refer xt.db.node.model-view/view-refresh-result :added "4.1"}
 (fact "returns the public refresh shape from a view"
   (!.js
     (model/view-refresh-result
@@ -891,7 +891,7 @@
       "value" [{"id" "t1"}]
       "status" "ready"})
 
-^{:refer xt.db.node.state/view-remote-spec :added "4.1"}
+^{:refer xt.db.node.model-view/view-remote-spec :added "4.1"}
 (fact "returns a configured remote view spec only when actionable"
   (!.js
     [(model/view-remote-spec {"remote" {"space" "screen/server"
@@ -903,7 +903,7 @@
        "view_id" "list"}
       nil])
 
-^{:refer xt.db.node.state/normalize-remote :added "4.1"}
+^{:refer xt.db.node.model-view/normalize-remote :added "4.1"}
 (fact "merges state, view, and call-level remote settings"
   (!.js
     (model/normalize-remote
@@ -918,7 +918,7 @@
       "model_id" "entries"
       "view_id" "list"})
 
-^{:refer xt.db.node.state/request-remote :added "4.1"}
+^{:refer xt.db.node.model-view/request-remote :added "4.1"}
 (fact "issues a remote request against another node space"
   (notify/wait-on :js
     (var node
@@ -943,7 +943,7 @@
   => {"space_id" "server"
       "value" 42})
 
-^{:refer xt.db.node.state/apply-remote-events :added "4.1"}
+^{:refer xt.db.node.model-view/apply-remote-events :added "4.1"}
 (fact "applies db/sync and db/remove envelopes into local source state"
   (!.js
     (var state (model/base-state {}))
@@ -962,7 +962,7 @@
      (xtd/get-in state ["models" "entries" "sources" "primary" "data" 1 "name"])])
   => [2 "gamma"])
 
-^{:refer xt.db.node.state/remote-view-payload :added "4.1"}
+^{:refer xt.db.node.model-view/remote-view-payload :added "4.1"}
 (fact "builds a remote query payload from the local view state"
   (!.js
     (model/remote-view-payload
@@ -978,7 +978,7 @@
       "query" {"type" "db/query"
                "table" "Entry"}})
 
-^{:refer xt.db.node.state/payload-view-context :added "4.1"}
+^{:refer xt.db.node.model-view/payload-view-context :added "4.1"}
 (fact "merges top-level payload view context into the nested view payload"
   (!.js
     [(model/payload-view-context
@@ -998,7 +998,7 @@
        "args" ["a" "b"]}
       {}])
 
-^{:refer xt.db.node.state/payload-query :added "4.1"}
+^{:refer xt.db.node.model-view/payload-query :added "4.1"}
 (fact "prefers the nested query entry when present"
   (!.js
     [(model/payload-query
@@ -1017,7 +1017,7 @@
       {"type" "db/query"
        "table" "UserAccount"}])
 
-^{:refer xt.db.node.state/find-view-by-query-key :added "4.1"}
+^{:refer xt.db.node.model-view/find-view-by-query-key :added "4.1"}
 (fact "finds a registered view by query key"
   (!.js
     (var state (model/base-state {}))
@@ -1036,7 +1036,7 @@
               "tables" {}
               "query_key" "q-42"}})
 
-^{:refer xt.db.node.state/mark-view-stale :added "4.1"}
+^{:refer xt.db.node.model-view/mark-view-stale :added "4.1"}
 (fact "marks a single view stale"
   (!.js
     (var out
@@ -1050,7 +1050,7 @@
      (xt/x:is-number? (. out ["updated_at"]))])
   => ["stale" false nil true])
 
-^{:refer xt.db.node.state/mark-stale-by-tables :added "4.1"}
+^{:refer xt.db.node.model-view/mark-stale-by-tables :added "4.1"}
 (fact "marks matching views stale by table or query key"
   (!.js
     (var state (model/base-state {}))
@@ -1062,7 +1062,7 @@
      (xtd/get-in state ["models" "entries" "views" "detail" "status"])])
   => ["stale" "stale"])
 
-^{:refer xt.db.node.state/sync-state-event :added "4.1"}
+^{:refer xt.db.node.model-view/sync-state-event :added "4.1"}
 (fact "applies sync and remove events across matching model sources"
   (!.js
     (var state (model/base-state {}))
@@ -1076,7 +1076,7 @@
      (xt/x:len (xtd/get-in state ["models" "entries" "sources" "primary" "data"]))])
   => ["idle" 0])
 
-^{:refer xt.db.node.state/ensure-space-state :added "4.1"}
+^{:refer xt.db.node.model-view/ensure-space-state :added "4.1"}
 (fact "creates xt.db state on demand for a node space"
   (!.js
     (var node (event-node/node-create {"id" "node-space"}))
@@ -1085,7 +1085,7 @@
      (xt/x:not-nil? (. (. node ["spaces"]) ["screen/admin"] ["state"]))])
   => ["xt.db.state" true])
 
-^{:refer xt.db.node.state/query :added "4.1"}
+^{:refer xt.db.node.model-view/query :added "4.1"}
 (fact "issues a structural query through installed handlers"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-query"}))
@@ -1109,7 +1109,7 @@
   => {"status" "ready"
       "name" "alpha"})
 
-^{:refer xt.db.node.state/query-refresh :added "4.1"}
+^{:refer xt.db.node.model-view/query-refresh :added "4.1"}
 (fact "refreshes a cached structural view by query key"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-query-refresh"}))
@@ -1132,7 +1132,7 @@
   => {"status" "ready"
       "name" "alpha"})
 
-^{:refer xt.db.node.state/sync :added "4.1"}
+^{:refer xt.db.node.model-view/sync :added "4.1"}
 (fact "issues db/sync through installed handlers"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-sync"}))
@@ -1154,7 +1154,7 @@
   => {"tables" ["Entry"]
       "name" "alpha"})
 
-^{:refer xt.db.node.state/remove :added "4.1"}
+^{:refer xt.db.node.model-view/remove :added "4.1"}
 (fact "issues db/remove through installed handlers"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-remove"}))
@@ -1179,7 +1179,7 @@
   => {"tables" ["Entry"]
       "count" 1})
 
-^{:refer xt.db.node.state/clear :added "4.1"}
+^{:refer xt.db.node.model-view/clear :added "4.1"}
 (fact "clears query caches through installed handlers"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-clear"}))
@@ -1201,7 +1201,7 @@
   => {"cleared" true
       "queries" []})
 
-^{:refer xt.db.node.state/snapshot :added "4.1"}
+^{:refer xt.db.node.model-view/snapshot :added "4.1"}
 (fact "requests the current state snapshot"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-snapshot"}))
@@ -1216,7 +1216,7 @@
   => {"keys" ["schema" "lookup" "sources" "queries" "models"]
       "models" ["entries"]})
 
-^{:refer xt.db.node.state/view-put :added "4.1"}
+^{:refer xt.db.node.model-view/view-put :added "4.1"}
 (fact "registers a view on an installed node space"
   (!.js
     (var node (event-node/node-create {"id" "node-view-put"}))
@@ -1241,7 +1241,7 @@
   => [["list" "detail"]
       "primary"])
 
-^{:refer xt.db.node.state/model-get :added "4.1"}
+^{:refer xt.db.node.model-view/model-get :added "4.1"}
 (fact "gets a registered node model"
   (!.js
     (var node (event-node/node-create {"id" "node-model-get"}))
@@ -1259,7 +1259,7 @@
   => [["primary" "caching"]
       ["entries"]])
 
-^{:refer xt.db.node.state/view-get :added "4.1"}
+^{:refer xt.db.node.model-view/view-get :added "4.1"}
 (fact "gets a registered node view"
   (!.js
     (var node (event-node/node-create {"id" "node-view-get"}))
@@ -1275,7 +1275,7 @@
     (. (model/view-get node "screen/admin" "entries" "list") ["source"]))
   => "caching")
 
-^{:refer xt.db.node.state/view-val :added "4.1"}
+^{:refer xt.db.node.model-view/view-val :added "4.1"}
 (fact "gets the current node view value"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-view-val"}))
@@ -1291,7 +1291,7 @@
                         [0 "name"]))))))
   => "alpha")
 
-^{:refer xt.db.node.state/view-input :added "4.1"}
+^{:refer xt.db.node.model-view/view-input :added "4.1"}
 (fact "gets the current node view input"
   (!.js
     (var node (event-node/node-create {"id" "node-view-input"}))
@@ -1306,7 +1306,7 @@
     (model/view-input node "screen/admin" "entries" "detail"))
   => ["alpha"])
 
-^{:refer xt.db.node.state/view-pending :added "4.1"}
+^{:refer xt.db.node.model-view/view-pending :added "4.1"}
 (fact "gets the current node view pending flag"
   (!.js
     (var node (event-node/node-create {"id" "node-view-pending"}))
@@ -1315,7 +1315,7 @@
     (model/view-pending node "screen/admin" "entries" "list"))
   => false)
 
-^{:refer xt.db.node.state/view-error :added "4.1"}
+^{:refer xt.db.node.model-view/view-error :added "4.1"}
 (fact "gets the current node view error"
   (!.js
     (var node (event-node/node-create {"id" "node-view-error"}))
@@ -1327,7 +1327,7 @@
     (. (model/view-error node "screen/admin" "entries" "list") ["message"]))
   => "boom")
 
-^{:refer xt.db.node.state/view-dependents :added "4.1"}
+^{:refer xt.db.node.model-view/view-dependents :added "4.1"}
 (fact "gets dependent views for a node view"
   (!.js
     (var node (event-node/node-create {"id" "node-view-dependents"}))
@@ -1340,7 +1340,7 @@
     (model/view-dependents node "screen/admin" "entries" "list"))
   => {"entries" ["detail"]})
 
-^{:refer xt.db.node.state/model-dependents :added "4.1"}
+^{:refer xt.db.node.model-view/model-dependents :added "4.1"}
 (fact "gets dependent models for a node model"
   (!.js
     (var node (event-node/node-create {"id" "node-model-dependents"}))
@@ -1350,7 +1350,7 @@
     (model/model-dependents node "screen/admin" "entries"))
   => {"other" true})
 
-^{:refer xt.db.node.state/source-get :added "4.1"}
+^{:refer xt.db.node.model-view/source-get :added "4.1"}
 (fact "gets a source binding from a node model"
   (!.js
     (var node (event-node/node-create {"id" "node-source-get"}))
@@ -1363,7 +1363,7 @@
     (. (model/source-get node "screen/admin" "entries" "primary") ["kind"]))
   => "sqlite")
 
-^{:refer xt.db.node.state/source-put :added "4.1"}
+^{:refer xt.db.node.model-view/source-put :added "4.1"}
 (fact "stores source data on a node model"
   (!.js
     (var node (event-node/node-create {"id" "node-source-put"}))
@@ -1379,7 +1379,7 @@
                 ["data" 0 "name"]))
   => "alpha")
 
-^{:refer xt.db.node.state/source-sync :added "4.1"}
+^{:refer xt.db.node.model-view/source-sync :added "4.1"}
 (fact "synchronizes a node source from its upstream source"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-source-sync"}))
@@ -1399,7 +1399,7 @@
                         ["data" 0 "name"]))))))
   => "alpha")
 
-^{:refer xt.db.node.state/view-refresh :added "4.1"}
+^{:refer xt.db.node.model-view/view-refresh :added "4.1"}
 (fact "refreshes a structural node view from its source role"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-view-refresh"}))
@@ -1416,7 +1416,7 @@
   => {"status" "ready"
       "name" "alpha"})
 
-^{:refer xt.db.node.state/model-refresh :added "4.1"}
+^{:refer xt.db.node.model-view/model-refresh :added "4.1"}
 (fact "refreshes all views in a node model"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-model-refresh"}))
@@ -1443,7 +1443,7 @@
       "list_name" "beta"
       "detail_name" "alpha"})
 
-^{:refer xt.db.node.state/view-set-input :added "4.1"}
+^{:refer xt.db.node.model-view/view-set-input :added "4.1"}
 (fact "sets view input and refreshes the node view"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-view-set-input"}))
@@ -1466,7 +1466,7 @@
       "status" "ready"
       "name" "alpha"})
 
-^{:refer xt.db.node.state/handle-query :added "4.1"}
+^{:refer xt.db.node.model-view/handle-query :added "4.1"}
 (fact "handles a direct query request for a registered view"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-handle-query"}))
@@ -1487,7 +1487,7 @@
       "value" [{"id" "e1" "name" "alpha"}]
       "status" "ready"})
 
-^{:refer xt.db.node.state/handle-query-refresh :added "4.1"}
+^{:refer xt.db.node.model-view/handle-query-refresh :added "4.1"}
 (fact "handles a direct cached query refresh request"
   (notify/wait-on :js
     (var node (event-node/node-create {"id" "node-handle-query-refresh"}))
@@ -1510,7 +1510,7 @@
       "value" [{"id" "e1" "name" "alpha"}]
       "status" "ready"})
 
-^{:refer xt.db.node.state/handle-sync :added "4.1"}
+^{:refer xt.db.node.model-view/handle-sync :added "4.1"}
 (fact "handles a direct db/sync request"
   (!.js
     (var node (event-node/node-create {"id" "node-handle-sync"}))
@@ -1527,7 +1527,7 @@
   => {"db/sync" {"Entry" [{"id" "e1" "name" "alpha"}]}
       "tables" {"Entry" true}})
 
-^{:refer xt.db.node.state/handle-remove :added "4.1"}
+^{:refer xt.db.node.model-view/handle-remove :added "4.1"}
 (fact "handles a direct db/remove request"
   (!.js
     (var node (event-node/node-create {"id" "node-handle-remove"}))
@@ -1546,7 +1546,7 @@
   => {"db/remove" {"Entry" ["e1"]}
       "tables" {"Entry" true}})
 
-^{:refer xt.db.node.state/handle-clear :added "4.1"}
+^{:refer xt.db.node.model-view/handle-clear :added "4.1"}
 (fact "handles a direct clear request"
   (!.js
     (var node (event-node/node-create {"id" "node-handle-clear"}))
@@ -1558,7 +1558,7 @@
     (model/handle-clear {"id" "screen/admin"} [{}] nil node))
   => true)
 
-^{:refer xt.db.node.state/handle-snapshot :added "4.1"}
+^{:refer xt.db.node.model-view/handle-snapshot :added "4.1"}
 (fact "handles a direct snapshot request"
   (!.js
     (var node (event-node/node-create {"id" "node-handle-snapshot"}))
@@ -1572,7 +1572,7 @@
   => {"keys" ["schema" "lookup" "sources" "queries" "models"]
       "models" ["entries"]})
 
-^{:refer xt.db.node.state/install :added "4.1"}
+^{:refer xt.db.node.model-view/install :added "4.1"}
 (fact "installs xt.db model-view handlers on a node"
   (!.js
     (var node (event-node/node-create {"id" "node-install"}))
@@ -1582,7 +1582,7 @@
      (xt/x:not-nil? (event-node/get-handler node "xt.db/snapshot"))])
   => [true true true])
 
-^{:refer xt.db.node.state/uninstall :added "4.1"}
+^{:refer xt.db.node.model-view/uninstall :added "4.1"}
 (fact "removes xt.db model-view handlers from a node"
   (!.js
     (var node (event-node/node-create {"id" "node-uninstall"}))

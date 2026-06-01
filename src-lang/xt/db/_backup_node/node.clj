@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.node.state :as model]
+  {:require [[xt.db.node.model-view :as model]
              [xt.db.node.event-type :as event-type]
              [xt.db.runtime :as db-runtime]
              [xt.db.text.sql-manage :as sql-manage]
@@ -16,9 +16,6 @@
 
 (def.xt META_KEY event-type/META_KEY)
 (def.xt STATE_TAG event-type/STATE_TAG)
-
-(def.xt SERVICE_NODE event-type/SERVICE_NODE)
-(def.xt SERVICE_SOURCE_KINDS event-type/SERVICE_SOURCE_KINDS)
 
 (def.xt ACTION_QUERY event-type/ACTION_QUERY)
 (def.xt ACTION_QUERY_REFRESH event-type/ACTION_QUERY_REFRESH)
@@ -517,7 +514,7 @@
   (return node))
 
 (defn.xt create
-  "creates a substrate node with xt.db services, methods, and handlers installed"
+  "creates a node from a declarative xt.db manifest and installs remote control handlers"
   {:added "4.1"}
   [spec]
   (:= spec (or spec {}))

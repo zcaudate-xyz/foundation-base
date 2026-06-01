@@ -1,20 +1,21 @@
-(ns xtbench.python.db.node.schema-query-test
+(ns xt.db.node.schema-query-test
   (:require [hara.lang :as l]
             [xt.db.helpers.data-main-test :as sample])
   (:use code.test))
 
-(l/script- :python
+^{:seedgen/root {:all true}}
+(l/script- :js
   {:runtime :basic
    :require [[xt.db.node.schema-query :as schema-query]
               [xt.db.node.event-type :as event-type]
               [xt.db.helpers.data-main-test :as sample]
-              [xt.db.node.state :as state]
+              [xt.substrate.page-model :as page-model]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 (def +views+
   {"UserAccount"
@@ -44,10 +45,53 @@
                        "nickname"
                        "id"]}}}}})
 
+(def +inline-query+
+  {:table "UserAccount"
+   :select-entry {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
+                 "return" "jsonb"
+                 "view" {"query" {"organisation_accesses"
+                                  {"organisation" "{{i_organisation_id}}"}}}}
+   :return-entry {"input" [{"symbol" "i_account_id", "type" "uuid"}]
+                 "return" "jsonb"
+                 "view" {"query" [["profile" ["*/standard"]]
+                                  "nickname"
+                                  "id"]}}
+   :select-args ["00000000-0000-0000-0000-000000000001"]})
+
+^{:refer xt.db.node.schema-query/view-query-entry :added "4.1"}
+(fact "normalizes inline query entries without a registry"
+
+  (!.js
+    (schema-query/view-query-entry
+     "UserAccount"
+     {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
+      "view" {"query" {"nickname" "root"}}}
+     "select"))
+  => {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
+      "return" "jsonb"
+      "flags" {}
+      "view" {"table" "UserAccount"
+              "type" "select"
+              "access" {"roles" {}}
+              "guards" []
+              "query" {"nickname" "root"}}})
+
 ^{:refer xt.db.node.schema-query/view-query-return-entry :added "4.1"}
 (fact "creates a return entry from an inline return query"
 
-  (!.py
+  ^{:seedgen/base
+    {:lua
+     {:expect
+      (l/as-lua
+       {"input" []
+        "return" "jsonb"
+        "flags" {}
+        "view" {"table" "UserAccount",
+                "type" "return",
+                "query" ["nickname"],
+                "access" {"roles" {}},
+                "guards" []}})}}}
+  (!.js
     (schema-query/view-query-return-entry
      "UserAccount"
      ["nickname" ["profile" ["first_name"]]]
@@ -64,7 +108,7 @@
 ^{:refer xt.db.node.schema-query/view-query-return-combined :added "4.1"}
 (fact "merges inline return-query fragments into an existing return entry"
 
-  (!.py
+  (!.js
     (schema-query/view-query-return-combined
      "UserAccount"
      {"view" {"query" ["nickname"]}}
@@ -75,10 +119,21 @@
 ^{:refer xt.db.node.schema-query/view-query-entries :added "4.1"}
 (fact "gets select and return entries from the state"
 
-  (!.py
+  (!.js
+     (var state (page-model/base-state {"schema" sample/Schema
+                                       "views" (@! +views+)}))
+     (xt/x:set-key state "::" event-type/STATE_TAG)
+     (xt/x:set-key state "schema" sample/Schema)
+     (xt/x:set-key state "views" (@! +views+))
+     (xt/x:set-key state "lookup" {})
+     (xt/x:set-key state "queries" {})
+     (xt/x:set-key state "watch" {})
+     (xt/x:set-key state "view_watch" {})
+     (xt/x:set-key state "pending" {})
+     (xt/x:set-key state "remote" {})
+     (xt/x:set-key state "db" nil)
      (schema-query/view-query-entries
-     (-/base-state {"schema" sample/Schema
-                    "views" (@! +views+)})
+     state
      "UserAccount"
      {:select-method "by_organisation"
       :return-method "info"}
@@ -89,13 +144,50 @@
        "return_entry" {"view" {"table" "UserAccount"
                                "type" "return"}}}))
 
+^{:refer xt.db.node.schema-query/view-query-entries.inline :added "4.1"}
+(fact "gets inline select and return entries without state views"
+
+  (!.js
+     (var state (page-model/base-state {"schema" sample/Schema}))
+     (xt/x:set-key state "::" event-type/STATE_TAG)
+     (xt/x:set-key state "schema" sample/Schema)
+     (xt/x:set-key state "views" {})
+     (xt/x:set-key state "lookup" {})
+     (xt/x:set-key state "queries" {})
+     (xt/x:set-key state "watch" {})
+     (xt/x:set-key state "view_watch" {})
+     (xt/x:set-key state "pending" {})
+     (xt/x:set-key state "remote" {})
+     (xt/x:set-key state "db" nil)
+     (schema-query/view-query-entries
+      state
+      "UserAccount"
+      (@! +inline-query+)
+      false))
+  => (contains-in
+      {"select_entry" {"view" {"table" "UserAccount"
+                               "type" "select"}}
+       "return_entry" {"view" {"table" "UserAccount"
+                               "type" "return"}}}))
+
 ^{:refer xt.db.node.schema-query/view-triggers :added "4.1"}
 (fact "collects dependent tables touched by a query"
 
-  (!.py
+  (!.js
+     (var state (page-model/base-state {"schema" sample/Schema
+                                        "views" (@! +views+)}))
+     (xt/x:set-key state "::" event-type/STATE_TAG)
+     (xt/x:set-key state "schema" sample/Schema)
+     (xt/x:set-key state "views" (@! +views+))
+     (xt/x:set-key state "lookup" {})
+     (xt/x:set-key state "queries" {})
+     (xt/x:set-key state "watch" {})
+     (xt/x:set-key state "view_watch" {})
+     (xt/x:set-key state "pending" {})
+     (xt/x:set-key state "remote" {})
+     (xt/x:set-key state "db" nil)
      (schema-query/view-triggers
-     (-/base-state {"schema" sample/Schema
-                    "views" (@! +views+)})
+     state
      "UserAccount"
      {:select-method "by_organisation"
       :return-method "info"}))
@@ -107,7 +199,9 @@
 ^{:refer xt.db.node.schema-query/view-local-transform :added "4.1"}
 (fact "removes __deleted__ markers from local view entries"
 
-  (!.py
+  ^{:seedgen/base {:lua {:expect (l/as-lua {"view" {"query" {"status" "open"}}
+                                            "input" []})}}}
+  (!.js
     (schema-query/view-local-transform
      {"view" {"query" {"status" "open"
                         "__deleted__" true}}
@@ -118,7 +212,16 @@
 ^{:refer xt.db.node.schema-query/query-check :added "4.1"}
 (fact "checks argument length and type against a view entry"
 
-  (!.py
+  ^{:seedgen/base
+    {:lua
+     {:expect
+      (l/as-lua
+       [[true nil]
+        [false {"status" "error"
+                "tag" "net/arg-typecheck-failed"
+                "data" {"input" 1
+                        "spec" {"symbol" "i_organisation_id", "type" "uuid"}}}]])}}}
+  (!.js
     [(schema-query/query-check
       {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]}
       ["00000000-0000-0000-0000-000000000001"]
@@ -136,7 +239,16 @@
 ^{:refer xt.db.node.schema-query/normalize-query :added "4.1"}
 (fact "normalizes query specs using the view args by default"
 
-  (!.py
+  ^{:seedgen/base
+    {:lua
+     {:expect
+      (l/as-lua
+       {"table" "UserAccount"
+        "select_method" "by_organisation"
+        "select_args" ["00000000-0000-0000-0000-000000000001"]
+        "return_method" "info"
+        "return_args" []})}}}
+  (!.js
     (schema-query/normalize-query
      {:table "UserAccount"
         :select-method "by_organisation"
@@ -151,7 +263,7 @@
 ^{:refer xt.db.node.schema-query/query-key :added "4.1"}
 (fact "uses an explicit query key or computes a stable key"
 
-  (!.py
+  (!.js
     [(schema-query/query-key {:key "orders/main"} {})
      (xt/x:is-string?
       (schema-query/query-key
@@ -165,8 +277,8 @@
 ^{:refer xt.db.node.schema-query/prepare-query :added "4.1"}
 (fact "prepares a cache query plan and trigger set"
 
-  (!.py
-    (var state (state/base-state {"schema" sample/Schema
+  (!.js
+    (var state (page-model/base-state {"schema" sample/Schema
                                        "views" (@! +views+)}))
     (xt/x:set-key state "::" event-type/STATE_TAG)
     (xt/x:set-key state "schema" sample/Schema)
@@ -195,6 +307,37 @@
      (. (. prepared ["tables"]) ["UserProfile"])])
   => [true
       "orders/main"
+      "UserAccount"
+      "00000000-0000-0000-0000-000000000001"
+      true])
+
+^{:refer xt.db.node.schema-query/prepare-query.inline :added "4.1"}
+(fact "prepares a cache query plan from inline entries"
+
+  (!.js
+    (var state (page-model/base-state {"schema" sample/Schema}))
+    (xt/x:set-key state "::" event-type/STATE_TAG)
+    (xt/x:set-key state "schema" sample/Schema)
+    (xt/x:set-key state "views" {})
+    (xt/x:set-key state "lookup" {})
+    (xt/x:set-key state "queries" {})
+    (xt/x:set-key state "watch" {})
+    (xt/x:set-key state "view_watch" {})
+    (xt/x:set-key state "pending" {})
+    (xt/x:set-key state "remote" {})
+    (xt/x:set-key state "db" nil)
+    (var [ok prepared]
+         (schema-query/prepare-query
+          state
+          (@! +inline-query+)
+          {:model-id "orders"
+           :view-id "main"
+           :args []}))
+    [ok
+     (xt/x:first (. prepared ["plan"]))
+     (xtd/get-in (. prepared ["plan"]) [1 "organisation_accesses" "organisation"])
+     (. (. prepared ["tables"]) ["UserProfile"])])
+  => [true
       "UserAccount"
       "00000000-0000-0000-0000-000000000001"
       true])
