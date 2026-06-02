@@ -44,11 +44,11 @@
                        "nickname"
                        "id"]}}}}})
 
-^{:refer xt.db.node.schema-query/view-query-return-entry :added "4.1"}
+^{:refer xt.db.node.schema-query/query-return-entry :added "4.1"}
 (fact "creates a return entry from an inline return query"
 
   (!.dt
-    (schema-query/view-query-return-entry
+    (schema-query/query-return-entry
      "UserAccount"
      ["nickname" ["profile" ["first_name"]]]
      true))
@@ -61,24 +61,35 @@
               "access" {"roles" {}},
               "guards" []}})
 
-^{:refer xt.db.node.schema-query/view-query-return-combined :added "4.1"}
+^{:refer xt.db.node.schema-query/query-return-combined :added "4.1"}
 (fact "merges inline return-query fragments into an existing return entry"
 
   (!.dt
-    (schema-query/view-query-return-combined
+    (schema-query/query-return-combined
      "UserAccount"
      {"view" {"query" ["nickname"]}}
      ["id" ["profile" ["first_name"]]]
      true))
   => {"view" {"query" ["nickname" "id"]}})
 
-^{:refer xt.db.node.schema-query/view-query-entries :added "4.1"}
+^{:refer xt.db.node.schema-query/query-entries :added "4.1"}
 (fact "gets select and return entries from the state"
 
   (!.dt
-     (schema-query/view-query-entries
-     (-/base-state {"schema" sample/Schema
-                    "views" (@! +views+)})
+     (var state (state/base-state {"schema" sample/Schema
+                                  "views" (@! +views+)}))
+     (xt/x:set-key state "::" event-type/STATE_TAG)
+     (xt/x:set-key state "schema" sample/Schema)
+     (xt/x:set-key state "views" (@! +views+))
+     (xt/x:set-key state "lookup" {})
+     (xt/x:set-key state "queries" {})
+     (xt/x:set-key state "watch" {})
+     (xt/x:set-key state "view_watch" {})
+     (xt/x:set-key state "pending" {})
+     (xt/x:set-key state "remote" {})
+     (xt/x:set-key state "db" nil)
+     (schema-query/query-entries
+     state
      "UserAccount"
      {:select-method "by_organisation"
       :return-method "info"}
@@ -89,13 +100,24 @@
        "return_entry" {"view" {"table" "UserAccount"
                                "type" "return"}}}))
 
-^{:refer xt.db.node.schema-query/view-triggers :added "4.1"}
+^{:refer xt.db.node.schema-query/query-triggers :added "4.1"}
 (fact "collects dependent tables touched by a query"
 
   (!.dt
-     (schema-query/view-triggers
-     (-/base-state {"schema" sample/Schema
-                    "views" (@! +views+)})
+     (var state (state/base-state {"schema" sample/Schema
+                                  "views" (@! +views+)}))
+     (xt/x:set-key state "::" event-type/STATE_TAG)
+     (xt/x:set-key state "schema" sample/Schema)
+     (xt/x:set-key state "views" (@! +views+))
+     (xt/x:set-key state "lookup" {})
+     (xt/x:set-key state "queries" {})
+     (xt/x:set-key state "watch" {})
+     (xt/x:set-key state "view_watch" {})
+     (xt/x:set-key state "pending" {})
+     (xt/x:set-key state "remote" {})
+     (xt/x:set-key state "db" nil)
+     (schema-query/query-triggers
+     state
      "UserAccount"
      {:select-method "by_organisation"
       :return-method "info"}))
@@ -104,11 +126,11 @@
                 "OrganisationAccess" true
                 "Organisation" true}))
 
-^{:refer xt.db.node.schema-query/view-local-transform :added "4.1"}
+^{:refer xt.db.node.schema-query/query-local-transform :added "4.1"}
 (fact "removes __deleted__ markers from local view entries"
 
   (!.dt
-    (schema-query/view-local-transform
+    (schema-query/query-local-transform
      {"view" {"query" {"status" "open"
                         "__deleted__" true}}
       "input" []}))

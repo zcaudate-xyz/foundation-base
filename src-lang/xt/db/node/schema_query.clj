@@ -9,7 +9,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as xtt]]})
 
-(defn.xt view-query-entry
+(defn.xt query-entry
   "creates a normalized inline query entry"
   {:added "4.1"}
   [table entry type]
@@ -32,7 +32,7 @@
   (xt/x:set-key entry "view" view)
   (return entry))
 
-(defn.xt view-query-return-entry
+(defn.xt query-return-entry
   "creates the return entry for `return-query`"
   {:added "4.1"}
   [table return-query data-only]
@@ -48,7 +48,7 @@
            :access {:roles {}}
            :guards []}}))
 
-(defn.xt view-query-return-combined
+(defn.xt query-return-combined
   "creates the combined return entry for `return-query`"
   {:added "4.1"}
   [table return-entry return-query data-only]
@@ -59,7 +59,7 @@
   (xt/x:arr-assign query query-mixin)
   (return return-entry))
 
-(defn.xt view-query-entries
+(defn.xt query-entries
   "gets the select and return entries"
   {:added "4.1"}
   [state table qm data-only]
@@ -71,23 +71,23 @@
   (var views (or (xt/x:get-key state "views") {}))
   (var out-select-entry
        (:? (xt/x:not-nil? select-entry)
-           (-/view-query-entry table select-entry "select")
+           (-/query-entry table select-entry "select")
            (:? (xt/x:not-nil? select-method)
                (xtd/get-in views [table "select" select-method])
                nil)))
   (var out-return-entry nil)
   (cond (and return-entry return-query)
-        (:= out-return-entry (-/view-query-return-combined
+        (:= out-return-entry (-/query-return-combined
                               table
-                              (-/view-query-entry table return-entry "return")
+                              (-/query-entry table return-entry "return")
                               return-query
                               data-only))
 
         (xt/x:not-nil? return-entry)
-        (:= out-return-entry (-/view-query-entry table return-entry "return"))
+        (:= out-return-entry (-/query-entry table return-entry "return"))
 
         (and return-method return-query)
-        (:= out-return-entry (-/view-query-return-combined
+        (:= out-return-entry (-/query-return-combined
                               table
                               (xtd/clone-nested (xtd/get-in views [table "return" return-method]))
                               return-query
@@ -97,15 +97,15 @@
         (:= out-return-entry (xtd/get-in views [table "return" return-method]))
 
         return-query
-        (:= out-return-entry (-/view-query-return-entry table return-query data-only)))
+        (:= out-return-entry (-/query-return-entry table return-query data-only)))
   (return {:select-entry out-select-entry
            :return-entry out-return-entry}))
 
-(defn.xt view-triggers
+(defn.xt query-triggers
   "gets dependent tables for a query"
   {:added "4.1"}
   [state table qm]
-  (var qe (-/view-query-entries state table qm nil))
+  (var qe (-/query-entries state table qm nil))
   (var #{select-entry return-entry} qe)
   (var schema (or (xt/x:get-key state "schema") {}))
   (var select-triggers (:? select-entry
@@ -121,7 +121,7 @@
                            {}))
   (return (xt/x:obj-assign select-triggers return-triggers)))
 
-(defn.xt view-local-transform
+(defn.xt query-local-transform
   "strips `__deleted__` markers from local queries"
   {:added "4.1"}
   [view-entry]
@@ -238,11 +238,11 @@
          return-args
          return-omit
          data-only} qm)
-  (var qe (-/view-query-entries state table qm data-only))
+  (var qe (-/query-entries state table qm data-only))
   (var select-entry (xt/x:get-key qe "select_entry"))
   (var resolved-return-entry (xt/x:get-key qe "return_entry"))
-  (:= select-entry (-/view-local-transform select-entry))
-  (:= resolved-return-entry (-/view-local-transform resolved-return-entry))
+  (:= select-entry (-/query-local-transform select-entry))
+  (:= resolved-return-entry (-/query-local-transform resolved-return-entry))
   (when (and (or select-method
                  (xt/x:not-nil? inline-select-entry))
              (not select-entry))
@@ -311,4 +311,4 @@
                            :view-id (xt/x:get-key view-context "view_id")
                            :args (or (xt/x:get-key view-context "args") [])}
                  :plan tree
-                 :tables (-/view-triggers state table qm)}]))
+                 :tables (-/query-triggers state table qm)}]))

@@ -6,7 +6,8 @@
              [xt.lang.spec-promise :as promise]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.substrate :as substrate]
-             [xt.db.text.sql-call :as call]]})
+             [xt.db.text.sql-call :as call]
+             [xt.db.node.schema-query :as schema-query]]})
 
 (defn.xt call-db-handler
   [driver-fn service-id]
@@ -29,16 +30,44 @@
    (fn [context]
      (var space   (. context ["space"]))
      (var args    (. context ["args"]))
-     (var request {"action" action-id
-                   "space"  (get space "id")
-                   "args"   args})
      (var node    (. context ["node"]))
      (return
       (substrate/request node
-                         (. opts ["id"])
+                         (. space ["id"])
                          handler-id
-                         [{"args" (. context ["args"])
+                         [{"args" args
                            "template" template}]
-                         meta)))))
+                         (xt/x:obj-assign {"action_id" action-id}
+                                          (or meta {})))))))
 
 
+;;
+;;
+;
+
+(defn.xt query-db-handler
+  [service-id desc opts]
+  (return
+   (fn [space args request node]
+     (var payload       (or (xt/x:first args) {}))
+     (var query-spec    (or (. payload ["query"])
+                            payload))
+     (var view-context  (or (. payload ["view"])
+                            {"args" []}))
+     (var schema        (. desc ["schema"]))
+     (var views         (. desc ["views"]))
+     (var db            (substrate/get-service node service-id))
+     (var [ok prepared] (prepare-query desc
+                                       query-spec
+                                       view-context))
+     (when (not ok)
+       (return prepared))
+     (return
+      (db-runtime/db-pull db
+                          schema
+                          (. prepared ["plan"]))))))
+
+
+;; 1. discover how transport works
+;; 2. figure out how to load models and views with only data 
+;; 3. figure out how to load/unload routes through only the server

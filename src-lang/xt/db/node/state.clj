@@ -84,7 +84,7 @@
   [state query]
   (:= query (or query {}))
   (return
-   (schema-query/view-triggers
+   (schema-query/query-triggers
     state
     (xt/x:get-key query "table")
     query)))

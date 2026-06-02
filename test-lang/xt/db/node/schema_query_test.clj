@@ -58,11 +58,11 @@
                                   "id"]}}
    :select-args ["00000000-0000-0000-0000-000000000001"]})
 
-^{:refer xt.db.node.schema-query/view-query-entry :added "4.1"}
+^{:refer xt.db.node.schema-query/query-entry :added "4.1"}
 (fact "normalizes inline query entries without a registry"
 
   (!.js
-    (schema-query/view-query-entry
+    (schema-query/query-entry
      "UserAccount"
      {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
       "view" {"query" {"nickname" "root"}}}
@@ -76,7 +76,7 @@
               "guards" []
               "query" {"nickname" "root"}}})
 
-^{:refer xt.db.node.schema-query/view-query-return-entry :added "4.1"}
+^{:refer xt.db.node.schema-query/query-return-entry :added "4.1"}
 (fact "creates a return entry from an inline return query"
 
   ^{:seedgen/base
@@ -92,7 +92,7 @@
                 "access" {"roles" {}},
                 "guards" []}})}}}
   (!.js
-    (schema-query/view-query-return-entry
+    (schema-query/query-return-entry
      "UserAccount"
      ["nickname" ["profile" ["first_name"]]]
      true))
@@ -105,18 +105,18 @@
               "access" {"roles" {}},
               "guards" []}})
 
-^{:refer xt.db.node.schema-query/view-query-return-combined :added "4.1"}
+^{:refer xt.db.node.schema-query/query-return-combined :added "4.1"}
 (fact "merges inline return-query fragments into an existing return entry"
 
   (!.js
-    (schema-query/view-query-return-combined
+    (schema-query/query-return-combined
      "UserAccount"
      {"view" {"query" ["nickname"]}}
      ["id" ["profile" ["first_name"]]]
      true))
   => {"view" {"query" ["nickname" "id"]}})
 
-^{:refer xt.db.node.schema-query/view-query-entries :added "4.1"}
+^{:refer xt.db.node.schema-query/query-entries :added "4.1"}
 (fact "gets select and return entries from the state"
 
   (!.js
@@ -132,7 +132,7 @@
      (xt/x:set-key state "pending" {})
      (xt/x:set-key state "remote" {})
      (xt/x:set-key state "db" nil)
-     (schema-query/view-query-entries
+     (schema-query/query-entries
      state
      "UserAccount"
      {:select-method "by_organisation"
@@ -144,7 +144,7 @@
        "return_entry" {"view" {"table" "UserAccount"
                                "type" "return"}}}))
 
-^{:refer xt.db.node.schema-query/view-query-entries.inline :added "4.1"}
+^{:refer xt.db.node.schema-query/query-entries.inline :added "4.1"}
 (fact "gets inline select and return entries without state views"
 
   (!.js
@@ -159,7 +159,7 @@
      (xt/x:set-key state "pending" {})
      (xt/x:set-key state "remote" {})
      (xt/x:set-key state "db" nil)
-     (schema-query/view-query-entries
+     (schema-query/query-entries
       state
       "UserAccount"
       (@! +inline-query+)
@@ -170,7 +170,7 @@
        "return_entry" {"view" {"table" "UserAccount"
                                "type" "return"}}}))
 
-^{:refer xt.db.node.schema-query/view-triggers :added "4.1"}
+^{:refer xt.db.node.schema-query/query-triggers :added "4.1"}
 (fact "collects dependent tables touched by a query"
 
   (!.js
@@ -186,7 +186,7 @@
      (xt/x:set-key state "pending" {})
      (xt/x:set-key state "remote" {})
      (xt/x:set-key state "db" nil)
-     (schema-query/view-triggers
+     (schema-query/query-triggers
      state
      "UserAccount"
      {:select-method "by_organisation"
@@ -196,13 +196,13 @@
                 "OrganisationAccess" true
                 "Organisation" true}))
 
-^{:refer xt.db.node.schema-query/view-local-transform :added "4.1"}
+^{:refer xt.db.node.schema-query/query-local-transform :added "4.1"}
 (fact "removes __deleted__ markers from local view entries"
 
   ^{:seedgen/base {:lua {:expect (l/as-lua {"view" {"query" {"status" "open"}}
                                             "input" []})}}}
   (!.js
-    (schema-query/view-local-transform
+    (schema-query/query-local-transform
      {"view" {"query" {"status" "open"
                         "__deleted__" true}}
       "input" []}))
