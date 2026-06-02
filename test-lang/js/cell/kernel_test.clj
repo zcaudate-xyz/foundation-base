@@ -28,7 +28,7 @@
    :require [[xt.lang.spec-base :as xt]
                [xt.lang.common-repl :as repl]
                [xt.lang.common-resource :as rt]
-               [xt.event.base-view :as base-view]
+               [xt.event.base-model :as base-model]
                [js.cell.kernel.worker-impl :as internal]
                [js.cell.kernel.base-link :as link-raw]
                [js.cell.kernel.base-link-local :as link-fn]
@@ -136,14 +136,14 @@
                (then (repl/>notify))))]}
 (fact "calls access function on the current cell"
 
-  (!.js (cl/fn-access-cell base-view/get-current))
+  (!.js (cl/fn-access-cell base-model/get-current))
   => (contains-in
       {"hello" {"echo" ["HELLO" integer?]}}))
 
 ^{:refer js.cell.kernel/fn-access-model :added "4.0" :unchecked true}
 (fact "calls access function on the current model"
 
-  (!.js (cl/fn-access-model base-view/get-current "hello"))
+  (!.js (cl/fn-access-model base-model/get-current "hello"))
   => (contains-in
       {"echo" ["HELLO" integer?]}))
 
@@ -159,7 +159,7 @@
                (then (repl/>notify))))]}
 (fact "calls access function on the current view"
 
-  (!.js (cl/fn-access-view base-view/get-current
+  (!.js (cl/fn-access-view base-model/get-current
                            ["hello" "echo"] []))
   => (contains ["HELLO" integer?]))
 

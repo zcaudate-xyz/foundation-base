@@ -14,7 +14,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.event.base-view :as event-view]
+             [xt.event.base-model :as event-model]
              [xt.substrate :as event-node]
              [xt.substrate.base-page :as base-page]
              [js.lib.driver-postgres :as js-postgres]
@@ -61,7 +61,7 @@
            {"db/fn.primary"
             {"fn"   (db-helper/call-db-handler js-postgres/driver "db/primary")
              "meta" {"kind" "request"}}}}))
-    (base-page/add-model-attach node
+    (base-page/add-group-attach node
                                 nil
                                 "page"
                                 {"ping" {"handler" (db-helper/call-view-request entries/ping
@@ -69,8 +69,8 @@
                                                                                 "action/ping.primary"
                                                                                 {})
                                          "defaultArgs" []}})
-    (var [_model view] (base-page/view-ensure node nil "page" "ping"))
-    (repl/notify view))
+    (var [_group model] (base-page/model-ensure node nil "page" "ping"))
+    (repl/notify model))
   => (contains-in
       {"output"
        {"elapsed" nil, "current" nil, "type" "output", "updated" nil},
@@ -95,7 +95,7 @@
            {"db/fn.primary"
             {"fn"   (db-helper/call-db-handler js-postgres/driver "db/primary")
              "meta" {"kind" "request"}}}}))
-    (base-page/add-model-attach node
+    (base-page/add-group-attach node
                                 nil
                                 "page"
                                 {"ping" {"handler" (db-helper/call-view-request entries/ping
@@ -103,12 +103,12 @@
                                                                                 "action/ping.primary"
                                                                                 {})
                                          "defaultArgs" []}})
-    (-> (event-node/page-view-update node nil "page" "ping" {})
+    (-> (event-node/page-model-update node nil "page" "ping" {})
         (promise/x:promise-then
          (fn [out]
-           (var [_model view] (base-page/view-ensure node nil "page" "ping"))
+           (var [_group model] (base-page/model-ensure node nil "page" "ping"))
            (repl/notify {:out out
-                         :value (event-view/get-current view nil)})))))
+                         :value (event-model/get-current model nil)})))))
   => {"value" "pong",
       "out" {"path" ["page" "ping"], "post" [false], "::" "view.run", "main" [true "pong"], "pre" [false]}}
   
@@ -122,7 +122,7 @@
            {"db/fn.primary"
             {"fn"   (db-helper/call-db-handler js-postgres/driver "db/primary")
              "meta" {"kind" "request"}}}}))
-    (base-page/add-model-attach node
+    (base-page/add-group-attach node
                                 nil
                                 "page"
                                 {"ping" {"handler" (db-helper/call-view-request entries/ping
@@ -130,13 +130,13 @@
                                                                                 "action/ping.primary"
                                                                                 {})
                                          "defaultArgs" []}})
-    (-> (event-node/page-view-update node nil "page" "ping" {})
+    (-> (event-node/page-model-update node nil "page" "ping" {})
         (promise/x:promise-then
          (fn [_]
-           (repl/notify (base-page/view-ensure node nil "page" "ping"))))))
+           (repl/notify (base-page/model-ensure node nil "page" "ping"))))))
   => (contains-in
       [{"name" "page",
-        "views"
+        "models"
         {"ping"
          {"output"
           {"tag" "main",

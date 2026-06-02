@@ -5,7 +5,7 @@
   {:require [[xt.lang.common-resource :as rt :with [defsingleton.js]]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.event.base-view :as event-view]
+             [xt.event.base-model :as event-model]
              [js.cell.kernel.base-link :as raw]
              [js.cell.kernel.base-impl :as impl-common]
              [js.cell.kernel.base-model :as impl-model]
@@ -164,19 +164,19 @@
   "gets all vals in the context"
   {:added "4.0"}
   [ctx]
-  (return (-/fn-access-cell event-view/get-current ctx)))
+  (return (-/fn-access-cell event-model/get-current ctx)))
 
 (defn.js cell-outputs
   "gets all output data in the context"
   {:added "4.0"}
   [ctx]
-  (return (-/fn-access-cell event-view/get-output ctx)))
+  (return (-/fn-access-cell event-model/get-output ctx)))
 
 (defn.js cell-inputs
   "gets all output data in the context"
   {:added "4.0"}
   [ctx]
-  (return (-/fn-access-cell event-view/get-input ctx)))
+  (return (-/fn-access-cell event-model/get-input ctx)))
 
 (defn.js cell-trigger
   "triggers a view given event"
@@ -192,13 +192,13 @@
   "gets the model outputs"
   {:added "4.0"}
   [model-id ctx]
-  (return (-/fn-access-model event-view/get-output model-id ctx)))
+  (return (-/fn-access-model event-model/get-output model-id ctx)))
 
 (defn.js model-vals
   "gets model vals"
   {:added "4.0"}
   [model-id ctx]
-  (return (-/fn-access-model event-view/get-current model-id ctx)))
+  (return (-/fn-access-model event-model/get-current model-id ctx)))
 
 (defn.js model-is-errored
   "checks if model has errored"
@@ -209,7 +209,7 @@
   (when model
     (var #{views} model)
     (return (xt/x:arr-some (xtd/obj-vals views)
-                         event-view/is-errored)))
+                         event-model/is-errored)))
   (return false))
 
 (defn.js model-is-pending
@@ -221,7 +221,7 @@
   (when model
     (var #{views} model)
     (return (xt/x:arr-some (xtd/obj-vals views)
-                         event-view/is-pending)))
+                         event-model/is-pending)))
   (return false))
 
 (defn.js add-model-attach
@@ -263,7 +263,7 @@
   "gets the success value"
   {:added "4.0"}
   [path  ctx]
-  (return (-/fn-access-view event-view/get-success
+  (return (-/fn-access-view event-model/get-success
                             path
                             []
                             ctx)))
@@ -272,7 +272,7 @@
   "gets the view val"
   {:added "4.0"}
   [path ctx]
-  (return (-/fn-access-view event-view/get-current
+  (return (-/fn-access-view event-model/get-current
                              path
                              []
                              ctx)))
@@ -281,7 +281,7 @@
   "gets the view input"
   {:added "4.0"}
   [path ctx]
-  (return (-/fn-access-view event-view/get-input
+  (return (-/fn-access-view event-model/get-input
                              path
                              []
                              ctx)))
@@ -290,7 +290,7 @@
   "gets the view output"
   {:added "4.0"}
   [path ctx]
-  (return (-/fn-access-view event-view/get-output
+  (return (-/fn-access-view event-model/get-output
                             path
                             []
                             ctx)))
@@ -299,7 +299,7 @@
   "sets the view val"
   {:added "4.0"}
   [path val errored ctx]
-  (return (-/fn-access-view event-view/set-output
+  (return (-/fn-access-view event-model/set-output
                             path
                             [val errored]
                             ctx)))
@@ -308,7 +308,7 @@
   "gets updated"
   {:added "4.0"}
   [path ctx]
-  (return (-/fn-access-view event-view/get-time-updated
+  (return (-/fn-access-view event-model/get-time-updated
                              path
                              []
                              ctx)))
@@ -317,7 +317,7 @@
   "gets the errored flag for view"
   {:added "4.0"}
   [path ctx]
-  (return (-/fn-access-view event-view/is-errored
+  (return (-/fn-access-view event-model/is-errored
                              path
                              []
                              ctx)))
@@ -326,7 +326,7 @@
   "gets pending"
   {:added "4.0"}
   [path ctx]
-  (return (-/fn-access-view event-view/is-pending
+  (return (-/fn-access-view event-model/is-pending
                              path
                              []
                              ctx)))
@@ -335,7 +335,7 @@
   "gets the elapsed time"
   {:added "4.0"}
   [path ctx]
-  (return (-/fn-access-view event-view/get-time-elapsed
+  (return (-/fn-access-view event-model/get-time-elapsed
                              path
                              []
                              ctx)))

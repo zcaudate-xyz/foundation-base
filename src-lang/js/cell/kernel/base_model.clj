@@ -7,7 +7,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-trace :as trace]
              [xt.event.util-throttle :as th]
-             [xt.event.base-view :as event-view]
+             [xt.event.base-model :as event-model]
              [js.cell.kernel.base-link :as link]
              [js.cell.kernel.base-util :as util]
              [js.cell.kernel.base-impl :as impl]
@@ -149,7 +149,7 @@
   [cell model-id view-id opts]
   (var path [model-id view-id])
   (var [model view] (impl/view-ensure cell model-id view-id))
-  (var [context disabled] (event-view/pipeline-prep view
+  (var [context disabled] (event-model/pipeline-prep view
                                                    (j/assign {:path  path
                                                               :cell  cell
                                                               :model  model}
@@ -199,7 +199,7 @@
   [context save-output path refresh-deps-fn]
   (xt/x:set-key (. context ["acc"]) "path" path)
   (return
-   (. (event-view/pipeline-run-remote
+   (. (event-model/pipeline-run-remote
        context
        save-output
        -/async-fn
@@ -222,7 +222,7 @@
   [context disabled path refresh-deps-fn]
   (xt/x:set-key (. context ["acc"]) "path" path)
   (return
-   (. (event-view/pipeline-run
+   (. (event-model/pipeline-run
        context
        disabled
        -/async-fn
@@ -345,7 +345,7 @@
      defaultInit
      trigger
      options}]
-  (var view (event-view/create-view
+  (var view (event-model/create-view
              nil
               (xtd/obj-assign-nested
                {:main   {:handler handler
@@ -359,8 +359,8 @@
              (j/assign {:trigger trigger
                         :init defaultInit}
                        options)))
-  (event-view/init-view view)
-  (event-view/add-listener
+  (event-model/init-view view)
+  (event-model/add-listener
    view
    "@/cell"
    (fn [id data t meta]
@@ -458,7 +458,7 @@
   {:added "4.0"}
   [cell model-id view-id current ?event]
   (var [model view] (impl/view-ensure cell model-id view-id))
-  (event-view/set-input view current)
+  (event-model/set-input view current)
   (return(-/view-update cell model-id view-id (or ?event {}))))
 
 ;;

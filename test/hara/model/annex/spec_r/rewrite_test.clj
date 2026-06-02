@@ -7,7 +7,7 @@
 
 ^{:refer hara.model.annex.spec-r/tf-defn :added "4.1"}
 (fact "applies inferred optional arguments during defn expansion"
-  (preprocess/with:macro-opts [{:module {:id 'xt.event.base-view}}]
+  (preprocess/with:macro-opts [{:module {:id 'xt.event.base-model}}]
     (r/tf-defn '(defn get-output [view dest-key]
                   (return dest-key))))
   => '(def get-output

@@ -62,7 +62,7 @@
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-resource :as rt :with [defsingleton.js]]
-              [xt.event.base-view :as event-view]
+              [xt.event.base-model :as event-model]
               [xt.protocol.impl.connection-sql :as dbsql]]})
 
 (defn node-remote-script
@@ -515,8 +515,8 @@
              "has_main" (not (xt/x:nil? (xtd/get-in view ["pipeline" "main" "handler"])))
              "has_remote" (not (xt/x:nil? (xtd/get-in view ["pipeline" "remote" "handler"])))
              "has_sync" (not (xt/x:nil? (xtd/get-in view ["pipeline" "sync" "handler"])))
-             "current" (event-view/get-current view)
-             "updated" (event-view/get-time-updated view)})))
+             "current" (event-model/get-current view)
+             "updated" (event-model/get-time-updated view)})))
 
 (defn.js boot-proxy-cell
   [service-registry]
@@ -542,7 +542,7 @@
   (var disabled (. prepared [2]))
   (xt/x:set-key (. context ["acc"]) "path" path)
   (return
-   (. (event-view/pipeline-run-sync
+   (. (event-model/pipeline-run-sync
        context
        true
        base-model/async-fn

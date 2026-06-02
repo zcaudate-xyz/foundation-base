@@ -598,12 +598,12 @@
 (fact "analyzes event-route, event-view, and event-box namespace specs"
   (typed/clear-registry!)
   (typed/analyze-and-register! 'xt.event.base-route)
-  (typed/analyze-and-register! 'xt.event.base-view)
+  (typed/analyze-and-register! 'xt.event.base-model)
   (typed/analyze-and-register! 'xt.event.base-box)
   [(analysis/get-function-output-type 'xt.event.base-route/make-route)
    (analysis/get-function-output-type 'xt.event.base-route/get-param)
-   (analysis/get-function-output-type 'xt.event.base-view/create-view)
-   (analysis/get-function-output-type 'xt.event.base-view/pipeline-prep)
+   (analysis/get-function-output-type 'xt.event.base-model/create-view)
+   (analysis/get-function-output-type 'xt.event.base-model/pipeline-prep)
    (analysis/get-function-output-type 'xt.event.base-box/make-box)]
   => '[{:kind :named :name xt.event.base-route/EventRoute}
        {:kind :maybe

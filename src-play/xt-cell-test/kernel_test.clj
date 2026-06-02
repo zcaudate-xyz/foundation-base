@@ -7,7 +7,7 @@
 (l/script- :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
-             [xt.event.base-view :as base-view]
+             [xt.event.base-model :as base-model]
              [xt.cell.kernel.base-impl :as impl-common]
              [xt.cell.kernel.base-link-local :as link-fn]
              [xt.cell.kernel.inner-impl :as inner-impl]
@@ -18,7 +18,7 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
               [xt.lang.common-lib :as k]
-              [xt.event.base-view :as base-view]
+              [xt.event.base-model :as base-model]
               [xt.cell.kernel.base-impl :as impl-common]
               [xt.cell.kernel.base-link-local :as link-fn]
               [xt.cell.kernel.inner-impl :as inner-impl]
@@ -221,15 +221,15 @@
   => map?
 
   (!.js
-   (cl/fn-access-cell base-view/get-current))
+   (cl/fn-access-cell base-model/get-current))
   => (contains-in {"hello" {"echo" ["HELLO" integer?]}})
 
   (!.js
-   (cl/fn-access-model base-view/get-current "hello"))
+   (cl/fn-access-model base-model/get-current "hello"))
   => (contains-in {"echo" ["HELLO" integer?]})
 
   (!.js
-   (cl/fn-access-view base-view/get-current ["hello" "echo"] []))
+   (cl/fn-access-view base-model/get-current ["hello" "echo"] []))
   => (contains ["HELLO" integer?])
 
   (!.js
@@ -278,7 +278,7 @@
 (fact "maps an accessor across all views in the current cell"
 
   (!.js
-   (cl/fn-access-cell base-view/get-current))
+   (cl/fn-access-cell base-model/get-current))
   => (contains-in {"hello" {"echo" ["HELLO" integer?]}}))
 
 ^{:refer xt.cell.kernel/fn-access-model :added "4.1"
@@ -289,7 +289,7 @@
 (fact "maps an accessor across all views in a model"
 
   (!.js
-   (cl/fn-access-model base-view/get-current "hello"))
+   (cl/fn-access-model base-model/get-current "hello"))
   => (contains-in {"echo" ["HELLO" integer?]}))
 
 ^{:refer xt.cell.kernel/fn-access-view :added "4.1"
@@ -300,7 +300,7 @@
 (fact "applies an accessor to a single view"
 
   (!.js
-   (cl/fn-access-view base-view/get-current ["hello" "echo"] []))
+   (cl/fn-access-view base-model/get-current ["hello" "echo"] []))
   => (contains ["HELLO" integer?]))
 
 ^{:refer xt.cell.kernel/list-models :added "4.1"

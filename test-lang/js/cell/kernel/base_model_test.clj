@@ -9,7 +9,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-resource :as rt :with [defsingleton.js]]
-              [xt.event.base-view :as base-view]
+              [xt.event.base-model :as base-model]
              [js.core :as j]
              [js.cell.kernel.base-link :as base-link]
              [js.cell.kernel.base-link-local :as base-link-local]

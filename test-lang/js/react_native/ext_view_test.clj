@@ -13,7 +13,7 @@
               [js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
               [js.react.ext-view :as ext-view]
-              [xt.event.base-view :as event-view]
+              [xt.event.base-model :as event-model]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-lib :as k]]
    })
@@ -60,7 +60,7 @@
        [:% n/Button
         {:title "D"
          :onPress (fn []
-                    (event-view/set-input view {})
+                    (event-model/set-input view {})
                     (ext-view/refresh-view view))}]
        [:% n/Tabs
         {:data ["input" "output" "pending" "elapsed" "disabled" "success"]
@@ -118,7 +118,7 @@
        [:% n/Button
         {:title "D"
          :onPress (fn []
-                    (event-view/set-input view {})
+                    (event-model/set-input view {})
                     (ext-view/refresh-view view))}]
        [:% n/TabsMulti
         {:data ["input" "output" "pending" "elapsed" "disabled"]
@@ -204,7 +204,7 @@
        [:% n/Button
         {:title "D"
          :onPress (fn []
-                    (event-view/set-input view {})
+                    (event-model/set-input view {})
                     (ext-view/refresh-view view))}]
        [:% n/TabsMulti
         {:data ["input" "output" "pending" "elapsed" "disabled"]

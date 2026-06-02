@@ -8,7 +8,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]
-             [xt.event.base-view :as event-view]
+             [xt.event.base-model :as event-model]
              [js.core :as j]
              [js.react.ext-view :as ext-view]]})
 
@@ -53,13 +53,13 @@
 
   (j/<!
    (do:>
-    (var v (event-view/create-view
+    (var v (event-model/create-view
             (fn:> [x] (j/future-delayed [100]
                         (return {:value x})))
             {}
             [3]
             {:value 0}))
-    (event-view/init-view v)
+    (event-model/init-view v)
     (return (ext-view/refresh-view v))))
   => {"::" "view.run"
       "post" [false],
@@ -71,13 +71,13 @@
 
   (j/<!
    (do:>
-    (var v (event-view/create-view
+    (var v (event-model/create-view
             (fn:> [x] (j/future-delayed [100]
                         (return {:value x})))
             {}
             [3]
             {:value 0}))
-    (event-view/init-view v)
+    (event-model/init-view v)
     (return (ext-view/refresh-args v [10]))))
   => {"::" "view.run"
       "post" [false],

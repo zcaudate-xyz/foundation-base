@@ -15,7 +15,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-resource :as rt :with [defsingleton.js]]
              [xt.protocol.impl.connection-sql :as dbsql]
-             [xt.event.base-view :as event-view]
+             [xt.event.base-model :as event-model]
              [js.cell.kernel :as cl]
              [js.cell.e2e.common :as common]
              [js.cell.runtime.link :as runtime-link]

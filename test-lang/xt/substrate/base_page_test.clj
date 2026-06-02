@@ -46,32 +46,32 @@
   => {"count" 1
       "label" "A"
       "page" {"::" "substrate.page"
-               "models" {}
+               "groups" {}
                "meta" {}
                "opts" {}}})
 
 ^{:refer xt.substrate.base-page/set-space-page :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/model-get :added "4.1"}
+^{:refer xt.substrate.base-page/group-get :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.base-page/group-ensure :added "4.1"}
 (fact "TODO")
 
 ^{:refer xt.substrate.base-page/model-ensure :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/view-ensure :added "4.1"}
-(fact "TODO")
-
 ^{:refer xt.substrate.base-page/trigger-listeners :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/prep-view :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.substrate.base-page/get-view-dependents :added "4.1"}
+^{:refer xt.substrate.base-page/prep-model :added "4.1"}
 (fact "TODO")
 
 ^{:refer xt.substrate.base-page/get-model-dependents :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.base-page/get-group-dependents :added "4.1"}
 (fact "TODO")
 
 ^{:refer xt.substrate.base-page/run-tail-call :added "4.1"}
@@ -86,25 +86,25 @@
 ^{:refer xt.substrate.base-page/run-refresh :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/refresh-view-dependents :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.substrate.base-page/refresh-view :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.substrate.base-page/refresh-view-remote :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.substrate.base-page/refresh-view-dependents-unthrottled :added "4.1"}
+^{:refer xt.substrate.base-page/refresh-model-dependents :added "4.1"}
 (fact "TODO")
 
 ^{:refer xt.substrate.base-page/refresh-model :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/get-model-deps :added "4.1"}
+^{:refer xt.substrate.base-page/refresh-model-remote :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.base-page/refresh-model-dependents-unthrottled :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.base-page/refresh-group :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.base-page/get-group-deps :added "4.1"}
 (fact "compiles local and cross-model dependencies"
   (!.js
-   (base-page/get-model-deps
+   (base-page/get-group-deps
     "hello"
     {"source" {}
      "detail" {"deps" ["source" ["other" "remote"]]}}))
@@ -115,7 +115,7 @@
 (fact "reports missing dependent views in the current space runtime"
   (!.js
    (var node (substrate/node-create (-/create-node)))
-   (base-page/add-model-attach
+   (base-page/add-group-attach
     node
     "space/a"
     "other"
@@ -127,7 +127,7 @@
     "space/a"
     "hello"
     {"detail" {"deps" ["missing" ["other" "unknown"]]}}
-    (base-page/get-model-deps
+    (base-page/get-group-deps
      "hello"
      {"detail" {"deps" ["missing" ["other" "unknown"]]}})))
   => [["hello" "missing"]
@@ -136,37 +136,37 @@
 ^{:refer xt.substrate.base-page/create-throttle :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/create-view :added "4.1"}
+^{:refer xt.substrate.base-page/create-model :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/add-model-attach :added "4.1"}
+^{:refer xt.substrate.base-page/add-group-attach :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/add-model :added "4.1"}
+^{:refer xt.substrate.base-page/add-group :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.base-page/remove-group :added "4.1"}
 (fact "TODO")
 
 ^{:refer xt.substrate.base-page/remove-model :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/remove-view :added "4.1"}
+^{:refer xt.substrate.base-page/group-update :added "4.1"}
 (fact "TODO")
 
 ^{:refer xt.substrate.base-page/model-update :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/view-update :added "4.1"}
+^{:refer xt.substrate.base-page/model-set-input :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/view-set-input :added "4.1"}
+^{:refer xt.substrate.base-page/trigger-group-raw :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.substrate.base-page/trigger-model-raw :added "4.1"}
+^{:refer xt.substrate.base-page/trigger-group :added "4.1"}
 (fact "TODO")
 
 ^{:refer xt.substrate.base-page/trigger-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.substrate.base-page/trigger-view :added "4.1"}
 (fact "TODO")
 
 ^{:refer xt.substrate.base-page/trigger-all :added "4.1"}

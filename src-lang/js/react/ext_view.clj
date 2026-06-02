@@ -3,7 +3,7 @@
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
-             [xt.event.base-view :as event-view]
+             [xt.event.base-model :as event-model]
              [js.react :as r]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
@@ -41,9 +41,9 @@
   "refreshes the view"
   {:added "4.0"}
   [view opts]
-  (var [context disabled] (event-view/pipeline-prep view opts))
+  (var [context disabled] (event-model/pipeline-prep view opts))
   (var #{acc} context)
-  (return (. (event-view/pipeline-run
+  (return (. (event-model/pipeline-run
               context
               disabled
               (fn [handler-fn context #{success error}]
@@ -62,7 +62,7 @@
   {:added "4.0"}
   [view args opts]
   
-  (event-view/set-input view {:data args})
+  (event-model/set-input view {:data args})
   (return (-/refresh-view view opts)))
 
 (defn.js refresh-view-remote
@@ -70,10 +70,10 @@
   {:added "4.0"}
   [view save-output opts]
   (when (xtd/get-in view ["pipeline" "remote" "handler"])
-    (var [context disabled] (event-view/pipeline-prep view opts))
+    (var [context disabled] (event-model/pipeline-prep view opts))
     (var #{acc} context)
     
-    (return (. (event-view/pipeline-run-remote
+    (return (. (event-model/pipeline-run-remote
                 context
                 save-output
                 (fn [handler-fn context #{success error}]
@@ -90,7 +90,7 @@
   "refreshes view using remote function with new args"
   {:added "4.0"}
   [view args save-output opts]
-  (event-view/set-input view {:data args})
+  (event-model/set-input view {:data args})
   (return (-/refresh-view-remote view save-output opts)))
 
 (defn.js refresh-view-sync
@@ -98,9 +98,9 @@
   {:added "4.0"}
   [view save-output opts]
   (when (xtd/get-in view ["pipeline" "sync" "handler"])
-    (var [context disabled] (event-view/pipeline-prep view opts))
+    (var [context disabled] (event-model/pipeline-prep view opts))
     (var #{acc} context)
-    (return (. (event-view/pipeline-run-sync
+    (return (. (event-model/pipeline-run-sync
                 context
                 save-output
                 (fn [handler-fn context #{success error}]
@@ -117,7 +117,7 @@
   "refreshes view using args function"
   {:added "4.0"}
   [view args save-output opts]
-  (event-view/set-input view {:data args})
+  (event-model/set-input view {:data args})
   (return (-/refresh-view-sync view save-output opts)))
 
 (defn.js make-view
@@ -129,14 +129,14 @@
    default-output
    default-process
    options]
-  (var view (event-view/create-view
+  (var view (event-model/create-view
              main-handler
              pipeline
              default-args
              default-output
              default-process
              options))
-  (event-view/init-view view)
+  (event-model/init-view view)
   (xt/x:set-key view "init" (-/refresh-view view))
   (return view))
 
@@ -175,12 +175,12 @@
                              options}))))
 
 (def.js TYPES
-  {:input    [event-view/get-input  "current"]
-   :output   [event-view/get-output "current"]
-   :pending  [event-view/get-output "pending"]
-   :elapsed  [event-view/get-output "elapsed"]
-   :disabled [event-view/get-output "disabled"]
-   :success  [event-view/get-success nil "output"]})
+  {:input    [event-model/get-input  "current"]
+   :output   [event-model/get-output "current"]
+   :pending  [event-model/get-output "pending"]
+   :elapsed  [event-model/get-output "elapsed"]
+   :disabled [event-model/get-output "disabled"]
+   :success  [event-model/get-success nil "output"]})
 
 (defn.js initViewBase
   "initialises the view listener"
@@ -197,7 +197,7 @@
     (var listener-id (. (Math.random)
                         (toString 36)
                         (substr 2 4)))
-     (event-view/add-listener
+     (event-model/add-listener
       view
       listener-id
       (fn [id data t meta]
@@ -222,7 +222,7 @@
      meta
      pred)
     (return
-     (fn:> (event-view/remove-listener view listener-id)))))
+     (fn:> (event-model/remove-listener view listener-id)))))
 
 (defn.js listenView
   "creates the most basic views"
@@ -254,7 +254,7 @@
   "creates listeners on the output"
   {:added "4.0"}
   [view types meta dest-key tag-key]
-  (var getOutput (fn:> (xtd/obj-clone (event-view/get-output view dest-key))))
+  (var getOutput (fn:> (xtd/obj-clone (event-model/get-output view dest-key))))
   (var [output setOutput] (r/local getOutput))
   (var wrap (r/useIsMountedWrap))
   (var outputRef (r/useFollowRef output))
@@ -281,7 +281,7 @@
   {:added "4.0"}
   [view delay meta dest-key]
   (var getResult (fn:> (xtd/clone-shallow
-                        (event-view/get-success view))))
+                        (event-model/get-success view))))
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
   (r/init []
@@ -289,7 +289,7 @@
                         (toString 36)
                         (substr 2 4)))
     (var [setThrottled throttle] (-/throttled-setter setResult delay))
-    (event-view/add-listener
+    (event-model/add-listener
      view
       listener-id
        (fn [_ _ _ _]
@@ -304,7 +304,7 @@
     (return
      (fn []
        (xt/x:set-key throttle "mounted" false)
-       (event-view/remove-listener view listener-id))))
+       (event-model/remove-listener view listener-id))))
   (return result))
 
 (defn.js wrap-pending
@@ -315,13 +315,13 @@
     (return f)
     (return
      (fn [view ...args]
-       (event-view/set-pending view true)
+       (event-model/set-pending view true)
        (return
          (. (promise/x:promise
              (fn []
                (return (f view ...args))))
             (then (fn [res]
-                    (event-view/set-pending view false)
+                    (event-model/set-pending view false)
                     (return res)))))))))
 
 (defn.js refreshArgsFn
@@ -352,7 +352,7 @@
                          (return (-/refresh-args-remote view args true opts)))))))))
 
         :else
-        (return (fn:> (event-view/set-output view nil)))))
+        (return (fn:> (event-model/set-output view nil)))))
 
 (defn.js useRefreshArgs
   "refreshes args on the view"
@@ -426,7 +426,7 @@
   "checks that view is empty (context method)"
   {:added "0.1"}
   [#{view}]
-  (return (xtd/is-empty? (event-view/get-current view))))
+  (return (xtd/is-empty? (event-model/get-current view))))
 
 (comment
   
