@@ -4,6 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
+             [xt.db.text.base-graph :as base-graph]
              [xt.db.text.sql-util :as ut]
              [xt.db.text.base-scope :as scope]]})
 
@@ -11,19 +12,7 @@
   "formats the query inputs"
   {:added "4.0"}
   [query]
-  (var table-name (xt/x:first query))
-  (var cnt (xt/x:len query))
-  (cond (== cnt 1)
-        (return [table-name {} nil])
-
-        (== cnt 3)
-        (return [table-name (xt/x:second query) (xtd/nth query 2)])
-
-        (xt/x:is-array? (xt/x:second query))
-        (return [table-name {} (xt/x:second query)])
-        
-        :else
-        (return [table-name (xt/x:second query) nil])))
+  (return (base-graph/base-query-inputs query)))
 
 (defn.xt base-format-return
   "formats the query return"
@@ -214,6 +203,7 @@
   "select return call"
   {:added "4.0"}
   [schema tree indent opts]
+  (:= tree (base-graph/select-tree schema tree opts))
   (var column-fn   (xt/x:get-key opts "column_fn" (fn [x] (return x))))
   (var wrapper-fn  (xt/x:get-key opts "wrapper_fn" (fn [s indent] (return s))))
   (var format-fn   (fn:> [input] (ut/encode-sql input column-fn opts ut/encode-loop-fn)))
@@ -244,15 +234,7 @@
   "gets the selection tree structure"
   {:added "4.0"}
   [schema query opts]
-  (var input (scope/get-link-standard query))
-  (var table-name := (xt/x:first input))
-  (var linked := (xtd/second input))
-  (var return-params (xt/x:last linked))
-  (var where-params  (xt/x:arr-filter linked (fn [x]
-                                             (return (and (xt/x:is-object? x)
-                                                          (xtd/not-empty? x))))))
-  (var tree (scope/get-tree schema table-name where-params return-params opts))
-  (return tree))
+  (return (base-graph/select-tree schema query opts)))
 
 (defn.xt select
   "encodes a select state given schema and graph"

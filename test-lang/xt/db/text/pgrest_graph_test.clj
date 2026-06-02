@@ -253,7 +253,7 @@
       "headers" {}})
 
 ^{:refer xt.db.text.pgrest-graph/select-tree :added "4.1"}
-(fact "returns the tree unchanged"
+(fact "returns explicit trees unchanged and expands query forms"
 
   (!.js
     (g/select-tree
@@ -270,8 +270,21 @@
        "links" []
        "data" ["id"]}])
 
+  (!.js
+    (g/select-tree
+     sample/Schema
+     ["Currency"
+      {"id" "USD"}
+      ["id"]]
+     {}))
+  => ["Currency"
+      {"custom" []
+       "where" [{"id" "USD"}]
+       "links" []
+       "data" ["id"]}]
+
 ^{:refer xt.db.text.pgrest-graph/select :added "4.1"}
-(fact "wraps select-return at the top level"
+(fact "wraps select-return at the top level and accepts query forms"
 
   (!.js
     (g/select
@@ -295,4 +308,23 @@
                 "limit=5"],
       "query" "select=id,name&type=eq.fiat&order=name&limit=5",
       "url" "/rest/v1/Currency?select=id,name&type=eq.fiat&order=name&limit=5",
+      "headers" {}}
+
+  (!.js
+    (g/select
+     sample/Schema
+     ["Currency"
+      {"id" "USD"}
+      ["id"]]
+     {}))
+  => {"type" "query",
+      "table" "Currency",
+      "method" "GET",
+      "path" "/rest/v1/Currency",
+      "select" "id",
+      "filters" [{"id" "USD"}],
+      "params" ["select=id"
+               "id=eq.USD"],
+      "query" "select=id&id=eq.USD",
+      "url" "/rest/v1/Currency?select=id&id=eq.USD",
       "headers" {}})

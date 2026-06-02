@@ -208,6 +208,21 @@
                    {}))
   => +out+)
 
+^{:refer xt.db.text.sql-graph/select-tree.query :added "4.1"}
+(fact "accepts clause and return query forms and expands them into tree ir"
+
+  (!.js
+    (g/select-tree sample/Schema
+                   ["UserAccount"
+                   {"id" "00000000-0000-0000-0000-000000000000"}
+                   ["nickname"]]
+                   {}))
+  => ["UserAccount"
+      {"custom" [],
+       "where" [{"id" "00000000-0000-0000-0000-000000000000"}],
+       "links" [],
+       "data" ["nickname"]}])
+
 ^{:refer xt.db.text.sql-graph/select :added "4.0"}
 (fact "encodes a select state given schema and graph"
 

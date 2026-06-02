@@ -3,7 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]]})
+             [xt.lang.common-data :as xtd]
+             [xt.db.text.base-graph :as base-graph]]})
 
 (defn.xt tree-count?
   "checks whether custom tree params request a count result"
@@ -259,6 +260,7 @@
   "compiles a tree-ir selection into a PostgREST request map"
   {:added "4.1"}
   [schema tree indent opts]
+  (:= tree (base-graph/select-tree schema tree opts))
   (var table-name (xt/x:first tree))
   (var params (xtd/second tree))
   (var where (or (xt/x:get-key params "where") []))
@@ -284,7 +286,7 @@
   "returns the tree unchanged for api parity with sql-graph"
   {:added "4.1"}
   [schema query opts]
-  (return query))
+  (return (base-graph/select-tree schema query opts)))
 
 (defn.xt select
   "compiles a tree-ir query into a PostgREST request map"
