@@ -23,12 +23,12 @@
             {:input [{:symbol "i_account_id", `:type "uuid"}], :return "jsonb",
              :schema "scratch-sample-db", :id "organisation_all_as_admin",
              :flags {:personal true}, :view {:table "Organisation", :type "select", :tag "all_as_admin", :query nil}})
-                   (def +check-organisation-all-as-admin+
-                     ["Organisation"
-                      {"custom" [],
-                       "where" [],
-                       "links" [],
-                       "data" ["id"]}])] :guard true :adopt true}
+          (def +check-organisation-all-as-admin+
+            ["Organisation"
+             {"custom" [],
+              "where" [],
+              "links" [],
+              "data" ["id"]}])] :guard true :adopt true}
 (fact "provides a view select query"
 
   ^{:seedgen/base   {:lua   {:transform {'+check-organisation-all-as-admin+
@@ -53,12 +53,13 @@
               :type "return",
               :tag "view_default",
               :query ["*/data"]}})
-                   (def +check-organisation-view-default+
-                     ["Organisation"
-                      {"custom" [],
-                       "where" [{"id" "{{RETURN}}"}],
-                       "links" [],
-                       "data" ["id" "name" "title" "description" "tags"]}])] :adopt true}
+          (def +check-organisation-view-default+
+            ["Organisation"
+             {"custom" [],
+              "where" [{"id" "{{RETURN}}"}],
+              "links" [],
+              "data" ["id" "name" "title" "description" "tags"]}])]
+  :adopt true}
 (fact "provides a view return query"
 
   ^{:seedgen/base {:lua {:transform {+check-organisation-view-default+
@@ -84,13 +85,13 @@
               :type "select",
               :tag "all_as_admin",
               :query nil}})
-                   (def +check-organisation-all-as-admin+
-                   [["Organisation"
-                    {"custom" [],
-                     "where" [],
-                     "links" [],
-                     "data" ["id"]}]
-                   "SELECT id FROM Organisation"])] :adopt true}
+          (def +check-organisation-all-as-admin+
+            [["Organisation"
+              {"custom" [],
+               "where" [],
+               "links" [],
+               "data" ["id"]}]
+             "SELECT id FROM Organisation"])] :adopt true}
 (fact "provides a view select query"
 
   ^{:seedgen/base {:lua {:transform {+check-organisation-all-as-admin+
@@ -140,14 +141,13 @@
 
 ^{:refer xt.db.text.sql-view/tree-control-array :added "4.0"
   :setup [(def +check-tree-control-array+
-            [{"args"
-              [{"args" [{"::" "sql/column", "name" "name"}],
-                "::" "sql/tuple"}],
-              "::" "sql/keyword",
-              "name" "ORDER BY"}
-             {"args" [{"::" "sql/keyword", "name" 20}],
-              "::" "sql/keyword",
-              "name" "LIMIT"}])]}
+            [{"::" "sql/keyword",
+              "name" "ORDER BY"
+              "args" [{"args" [{"::" "sql/column", "name" "name"}],
+                       "::" "sql/tuple"}]}
+             {"::" "sql/keyword",
+              "name" "LIMIT"
+              "args" [{"::" "sql/keyword", "name" 20}]}])]}
 (fact "creates a control array"
 
   ^{:seedgen/base {:lua {:transform {+check-tree-control-array+
@@ -206,19 +206,19 @@
                  {"::" "sql/defenum",
                   :schema "scratch-sample-db",
                   :name "EnumCurrencyType"}]}}}})
-                   (def +check-tree-count+
-                     ["Currency"
-                      {"custom" [{"::" "sql/count"}],
-                       "where"
-                       [{"type"
-                         {"args"
-                          [{"name" "{{i_type}}", "::" "sql/arg"}
-                           {"schema" "scratch-sample-db",
-                            "name" "EnumCurrencyType",
-                            "::" "sql/defenum"}],
-                          "::" "sql/cast"}}],
-                       "links" [],
-                       "data" []}])]}
+          (def +check-tree-count+
+            ["Currency"
+             {"custom" [{"::" "sql/count"}],
+              "where"
+              [{"type"
+                {"args"
+                 [{"name" "{{i_type}}", "::" "sql/arg"}
+                  {"schema" "scratch-sample-db",
+                   "name" "EnumCurrencyType",
+                   "::" "sql/defenum"}],
+                 "::" "sql/cast"}}],
+              "links" [],
+              "data" []}])]}
 (fact "provides a view count query"
 
   ^{:seedgen/base {:lua {:transform {+check-tree-count+ (l/as-lua +check-tree-count+)}}}}
@@ -249,19 +249,19 @@
                  {"::" "sql/defenum",
                   :schema "scratch-sample-db",
                   :name "EnumCurrencyType"}]}}}})
-                   (def +check-tree-select+
-                     ["Currency"
-                      {"custom" [],
-                       "where"
-                       [{"type"
-                         {"args"
-                          [{"name" "{{i_type}}", "::" "sql/arg"}
-                           {"schema" "scratch-sample-db",
-                            "name" "EnumCurrencyType",
-                            "::" "sql/defenum"}],
-                          "::" "sql/cast"}}],
-                       "links" [],
-                       "data" ["id"]}])]}
+          (def +check-tree-select+
+            ["Currency"
+             {"custom" [],
+              "where"
+              [{"type"
+                {"args"
+                 [{"name" "{{i_type}}", "::" "sql/arg"}
+                  {"schema" "scratch-sample-db",
+                   "name" "EnumCurrencyType",
+                   "::" "sql/defenum"}],
+                 "::" "sql/cast"}}],
+              "links" [],
+              "data" ["id"]}])]}
 (fact "provides a view select query"
 
   ^{:seedgen/base {:lua {:transform {+check-tree-select+ (l/as-lua +check-tree-select+)}}}}
@@ -275,20 +275,20 @@
 ^{:refer xt.db.text.sql-view/tree-return :added "4.0"
   :setup [(def +return+
             (gen/bind-view data/currency-default))
-                   (def +out+
-                     ["Currency"
-                      {"custom" [],
-                       "where" [{"id" "{{RETURN}}"}],
-                       "links" [],
-                       "data"
-                       ["id"
-                        "type"
-                        "symbol"
-                        "native"
-                        "decimal"
-                        "name"
-                        "plural"
-                        "description"]}])]}
+          (def +out+
+            ["Currency"
+             {"custom" [],
+              "where" [{"id" "{{RETURN}}"}],
+              "links" [],
+              "data"
+              ["id"
+               "type"
+               "symbol"
+               "native"
+               "decimal"
+               "name"
+               "plural"
+               "description"]}])]}
 (fact "provides a view return query"
 
   (!.js
@@ -302,29 +302,29 @@
 ^{:refer xt.db.text.sql-view/tree-combined :added "4.0"
   :setup [(def +select+
             (gen/bind-view user/organisation-all-as-admin))
-                   (def +return+
-                     (gen/bind-view user/organisation-view-membership))
-                   (def +out+
-                     ["Organisation"
-                      {"custom" [],
-                       "where" [],
-                       "links"
-                       [["access"
-                         "reverse"
-                         ["OrganisationAccess"
-                          {"custom" [],
-                           "where" [{"organisation" ["eq" ["Organisation.id"]]}],
-                           "links"
-                           [["account"
-                             "forward"
-                             ["UserAccount"
-                              {"custom" [],
-                               "where"
-                               [{"id" ["eq" ["OrganisationAccess.account_id"]]}],
-                               "links" [],
-                               "data" ["id" "nickname"]}]]],
-                           "data" ["id" "role"]}]]],
-                       "data" ["id" "name" "title" "description" "tags"]}])]}
+          (def +return+
+            (gen/bind-view user/organisation-view-membership))
+          (def +out+
+            ["Organisation"
+             {"custom" [],
+              "where" [],
+              "links"
+              [["access"
+                "reverse"
+                ["OrganisationAccess"
+                 {"custom" [],
+                  "where" [{"organisation" ["eq" ["Organisation.id"]]}],
+                  "links"
+                  [["account"
+                    "forward"
+                    ["UserAccount"
+                     {"custom" [],
+                      "where"
+                      [{"id" ["eq" ["OrganisationAccess.account_id"]]}],
+                      "links" [],
+                      "data" ["id" "nickname"]}]]],
+                  "data" ["id" "role"]}]]],
+              "data" ["id" "name" "title" "description" "tags"]}])]}
 (fact "provides a view return query"
 
   (!.js
@@ -354,13 +354,13 @@
 ^{:refer xt.db.text.sql-view/query-select :added "4.0"
   :setup [(def +select+
             (gen/bind-view data/currency-all-crypto))
-                   (def +out+
-                     [["Currency"
-                       {"custom" [],
-                        "where" [{"type" "crypto"}],
-                        "links" [],
-                        "data" ["id"]}]
-                      "SELECT id FROM Currency\n  WHERE type = 'crypto'"])]}
+          (def +out+
+            [["Currency"
+              {"custom" [],
+               "where" [{"type" "crypto"}],
+               "links" [],
+               "data" ["id"]}]
+             "SELECT id FROM Currency\n  WHERE type = 'crypto'"])]}
 (fact "provides a view select query"
 
   (!.js
@@ -379,13 +379,13 @@
 ^{:refer xt.db.text.sql-view/query-count :added "4.0"
   :setup [(def +select+
             (gen/bind-view data/currency-all-crypto))
-                   (def +out+
-                     [["Currency"
-                       {"custom" [{"::" "sql/count"}],
-                        "where" [{"type" "crypto"}],
-                        "links" [],
-                        "data" []}]
-                      "SELECT count(*) FROM Currency\n  WHERE type = 'crypto'"])]}
+          (def +out+
+            [["Currency"
+              {"custom" [{"::" "sql/count"}],
+               "where" [{"type" "crypto"}],
+               "links" [],
+               "data" []}]
+             "SELECT count(*) FROM Currency\n  WHERE type = 'crypto'"])]}
 (fact "provides the count statement"
 
   (!.js
@@ -404,13 +404,13 @@
 ^{:refer xt.db.text.sql-view/query-return :added "4.0"
   :setup [(def +return+
             (gen/bind-view data/currency-info))
-                   (def +out+
-                     [["Currency"
-                       {"custom" [],
-                        "where" [{"id" "STATS"}],
-                        "links" [],
-                        "data" ["id" "description"]}]
-                      "SELECT id, description FROM Currency\n  WHERE id = 'STATS'"])]}
+          (def +out+
+            [["Currency"
+              {"custom" [],
+               "where" [{"id" "STATS"}],
+               "links" [],
+               "data" ["id" "description"]}]
+             "SELECT id, description FROM Currency\n  WHERE id = 'STATS'"])]}
 (fact "provides a view return query"
 
   (!.js
@@ -443,15 +443,15 @@
 ^{:refer xt.db.text.sql-view/query-combined :added "4.0"
   :setup [(def +select+
             (gen/bind-view data/currency-all-crypto))
-                   (def +return+
-                     (gen/bind-view data/currency-info))
-                   (def +out+
-                     [["Currency"
-                       {"custom" [],
-                        "where" [{"type" "crypto"}],
-                        "links" [],
-                        "data" ["id" "description"]}]
-                      "SELECT id, description FROM Currency\n  WHERE type = 'crypto'"])]}
+          (def +return+
+            (gen/bind-view data/currency-info))
+          (def +out+
+            [["Currency"
+              {"custom" [],
+               "where" [{"type" "crypto"}],
+               "links" [],
+               "data" ["id" "description"]}]
+             "SELECT id, description FROM Currency\n  WHERE type = 'crypto'"])]}
 (fact "provides a view combine query"
 
   (!.js
