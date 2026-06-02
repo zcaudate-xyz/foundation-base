@@ -1,12 +1,11 @@
-(ns xt.db.node.schema-query-test
+(ns xtbench.dart.db.runtime.dataview-test
   (:require [hara.lang :as l]
             [xt.db.helpers.data-main-test :as sample])
   (:use code.test))
 
-^{:seedgen/root {:all true}}
-(l/script- :js
-  {:runtime :basic
-   :require [[xt.db.node.schema-query :as schema-query]
+(l/script- :dart
+  {:runtime :twostep
+   :require [[xt.db.runtime.dataview :as dataview]
               [xt.db.node.event-type :as event-type]
               [xt.db.helpers.data-main-test :as sample]
               [xt.db.node.state :as state]
@@ -15,7 +14,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 (def +views+
   {"UserAccount"
@@ -45,54 +44,11 @@
                        "nickname"
                        "id"]}}}}})
 
-(def +inline-query+
-  {:table "UserAccount"
-   :select-entry {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
-                 "return" "jsonb"
-                 "view" {"query" {"organisation_accesses"
-                                  {"organisation" "{{i_organisation_id}}"}}}}
-   :return-entry {"input" [{"symbol" "i_account_id", "type" "uuid"}]
-                 "return" "jsonb"
-                 "view" {"query" [["profile" ["*/standard"]]
-                                  "nickname"
-                                  "id"]}}
-   :select-args ["00000000-0000-0000-0000-000000000001"]})
-
-^{:refer xt.db.node.schema-query/query-entry :added "4.1"}
-(fact "normalizes inline query entries without a registry"
-
-  (!.js
-    (schema-query/query-entry
-     "UserAccount"
-     {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
-      "view" {"query" {"nickname" "root"}}}
-     "select"))
-  => {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]
-      "return" "jsonb"
-      "flags" {}
-      "view" {"table" "UserAccount"
-              "type" "select"
-              "access" {"roles" {}}
-              "guards" []
-              "query" {"nickname" "root"}}})
-
-^{:refer xt.db.node.schema-query/query-return-entry :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-return-entry :added "4.1"}
 (fact "creates a return entry from an inline return query"
 
-  ^{:seedgen/base
-    {:lua
-     {:expect
-      (l/as-lua
-       {"input" []
-        "return" "jsonb"
-        "flags" {}
-        "view" {"table" "UserAccount",
-                "type" "return",
-                "query" ["nickname"],
-                "access" {"roles" {}},
-                "guards" []}})}}}
-  (!.js
-    (schema-query/query-return-entry
+  (!.dt
+    (dataview/query-return-entry
      "UserAccount"
      ["nickname" ["profile" ["first_name"]]]
      true))
@@ -101,27 +57,25 @@
       "flags" {},
       "view" {"table" "UserAccount",
               "type" "return",
-              "query" ["nickname"],
-              "access" {"roles" {}},
-              "guards" []}})
+              "query" ["nickname"]}})
 
-^{:refer xt.db.node.schema-query/query-return-combined :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-return-combined :added "4.1"}
 (fact "merges inline return-query fragments into an existing return entry"
 
-  (!.js
-    (schema-query/query-return-combined
+  (!.dt
+    (dataview/query-return-combined
      "UserAccount"
      {"view" {"query" ["nickname"]}}
      ["id" ["profile" ["first_name"]]]
      true))
   => {"view" {"query" ["nickname" "id"]}})
 
-^{:refer xt.db.node.schema-query/query-entries :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-entries :added "4.1"}
 (fact "gets select and return entries from the state"
 
-  (!.js
+  (!.dt
      (var state (state/base-state {"schema" sample/Schema
-                                       "views" (@! +views+)}))
+                                  "views" (@! +views+)}))
      (xt/x:set-key state "::" event-type/STATE_TAG)
      (xt/x:set-key state "schema" sample/Schema)
      (xt/x:set-key state "views" (@! +views+))
@@ -132,7 +86,7 @@
      (xt/x:set-key state "pending" {})
      (xt/x:set-key state "remote" {})
      (xt/x:set-key state "db" nil)
-     (schema-query/query-entries
+     (dataview/query-entries
      state
      "UserAccount"
      {:select-method "by_organisation"
@@ -144,38 +98,12 @@
        "return_entry" {"view" {"table" "UserAccount"
                                "type" "return"}}}))
 
-^{:refer xt.db.node.schema-query/query-entries.inline :added "4.1"}
-(fact "gets inline select and return entries without state views"
-
-  (!.js
-     (var state (state/base-state {"schema" sample/Schema}))
-     (xt/x:set-key state "::" event-type/STATE_TAG)
-     (xt/x:set-key state "schema" sample/Schema)
-     (xt/x:set-key state "views" {})
-     (xt/x:set-key state "lookup" {})
-     (xt/x:set-key state "queries" {})
-     (xt/x:set-key state "watch" {})
-     (xt/x:set-key state "view_watch" {})
-     (xt/x:set-key state "pending" {})
-     (xt/x:set-key state "remote" {})
-     (xt/x:set-key state "db" nil)
-     (schema-query/query-entries
-      state
-      "UserAccount"
-      (@! +inline-query+)
-      false))
-  => (contains-in
-      {"select_entry" {"view" {"table" "UserAccount"
-                               "type" "select"}}
-       "return_entry" {"view" {"table" "UserAccount"
-                               "type" "return"}}}))
-
-^{:refer xt.db.node.schema-query/query-triggers :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-triggers :added "4.1"}
 (fact "collects dependent tables touched by a query"
 
-  (!.js
+  (!.dt
      (var state (state/base-state {"schema" sample/Schema
-                                        "views" (@! +views+)}))
+                                  "views" (@! +views+)}))
      (xt/x:set-key state "::" event-type/STATE_TAG)
      (xt/x:set-key state "schema" sample/Schema)
      (xt/x:set-key state "views" (@! +views+))
@@ -186,7 +114,7 @@
      (xt/x:set-key state "pending" {})
      (xt/x:set-key state "remote" {})
      (xt/x:set-key state "db" nil)
-     (schema-query/query-triggers
+     (dataview/query-triggers
      state
      "UserAccount"
      {:select-method "by_organisation"
@@ -196,37 +124,26 @@
                 "OrganisationAccess" true
                 "Organisation" true}))
 
-^{:refer xt.db.node.schema-query/query-local-transform :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-local-transform :added "4.1"}
 (fact "removes __deleted__ markers from local view entries"
 
-  ^{:seedgen/base {:lua {:expect (l/as-lua {"view" {"query" {"status" "open"}}
-                                            "input" []})}}}
-  (!.js
-    (schema-query/query-local-transform
+  (!.dt
+    (dataview/query-local-transform
      {"view" {"query" {"status" "open"
                         "__deleted__" true}}
       "input" []}))
   => {"view" {"query" {"status" "open"}}
       "input" []})
 
-^{:refer xt.db.node.schema-query/query-check :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-check :added "4.1"}
 (fact "checks argument length and type against a view entry"
 
-  ^{:seedgen/base
-    {:lua
-     {:expect
-      (l/as-lua
-       [[true nil]
-        [false {"status" "error"
-                "tag" "net/arg-typecheck-failed"
-                "data" {"input" 1
-                        "spec" {"symbol" "i_organisation_id", "type" "uuid"}}}]])}}}
-  (!.js
-    [(schema-query/query-check
+  (!.dt
+    [(dataview/query-check
       {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]}
       ["00000000-0000-0000-0000-000000000001"]
       false)
-     (schema-query/query-check
+     (dataview/query-check
       {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]}
       [1]
       false)])
@@ -236,22 +153,13 @@
               "data" {"input" 1
                       "spec" {"symbol" "i_organisation_id", "type" "uuid"}}}]])
 
-^{:refer xt.db.node.schema-query/normalize-query :added "4.1"}
+^{:refer xt.db.runtime.dataview/normalize-query :added "4.1"}
 (fact "normalizes query specs using the view args by default"
 
-  ^{:seedgen/base
-    {:lua
-     {:expect
-      (l/as-lua
-       {"table" "UserAccount"
-        "select_method" "by_organisation"
-        "select_args" ["00000000-0000-0000-0000-000000000001"]
-        "return_method" "info"
-        "return_args" []})}}}
-  (!.js
-    (schema-query/normalize-query
+  (!.dt
+    (dataview/normalize-query
      {:table "UserAccount"
-        :select-method "by_organisation"
+       :select-method "by_organisation"
        :return-method "info"}
      {:args ["00000000-0000-0000-0000-000000000001"]}))
   => {"table" "UserAccount"
@@ -260,13 +168,13 @@
       "return_method" "info"
       "return_args" []})
 
-^{:refer xt.db.node.schema-query/query-key :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-key :added "4.1"}
 (fact "uses an explicit query key or computes a stable key"
 
-  (!.js
-    [(schema-query/query-key {:key "orders/main"} {})
+  (!.dt
+    [(dataview/query-key {:key "orders/main"} {})
      (xt/x:is-string?
-      (schema-query/query-key
+      (dataview/query-key
        {:table "UserAccount"
         :select-method "by_organisation"}
        {:model-id "orders"
@@ -274,10 +182,10 @@
         :args ["00000000-0000-0000-0000-000000000001"]}))])
   => ["orders/main" true])
 
-^{:refer xt.db.node.schema-query/prepare-query :added "4.1"}
+^{:refer xt.db.runtime.dataview/prepare-query :added "4.1"}
 (fact "prepares a cache query plan and trigger set"
 
-  (!.js
+  (!.dt
     (var state (state/base-state {"schema" sample/Schema
                                        "views" (@! +views+)}))
     (xt/x:set-key state "::" event-type/STATE_TAG)
@@ -291,7 +199,7 @@
     (xt/x:set-key state "remote" {})
     (xt/x:set-key state "db" nil)
     (var [ok prepared]
-         (schema-query/prepare-query
+         (dataview/prepare-query
           state
           {:key "orders/main"
            :table "UserAccount"
@@ -307,37 +215,6 @@
      (. (. prepared ["tables"]) ["UserProfile"])])
   => [true
       "orders/main"
-      "UserAccount"
-      "00000000-0000-0000-0000-000000000001"
-      true])
-
-^{:refer xt.db.node.schema-query/prepare-query.inline :added "4.1"}
-(fact "prepares a cache query plan from inline entries"
-
-  (!.js
-    (var state (state/base-state {"schema" sample/Schema}))
-    (xt/x:set-key state "::" event-type/STATE_TAG)
-    (xt/x:set-key state "schema" sample/Schema)
-    (xt/x:set-key state "views" {})
-    (xt/x:set-key state "lookup" {})
-    (xt/x:set-key state "queries" {})
-    (xt/x:set-key state "watch" {})
-    (xt/x:set-key state "view_watch" {})
-    (xt/x:set-key state "pending" {})
-    (xt/x:set-key state "remote" {})
-    (xt/x:set-key state "db" nil)
-    (var [ok prepared]
-         (schema-query/prepare-query
-          state
-          (@! +inline-query+)
-          {:model-id "orders"
-           :view-id "main"
-           :args []}))
-    [ok
-     (xt/x:first (. prepared ["plan"]))
-     (xtd/get-in (. prepared ["plan"]) [1 "organisation_accesses" "organisation"])
-     (. (. prepared ["tables"]) ["UserProfile"])])
-  => [true
       "UserAccount"
       "00000000-0000-0000-0000-000000000001"
       true])

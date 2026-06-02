@@ -4,7 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.db.node.event-type :as event-type]
-             [xt.db.node.schema-query :as schema-query]
+             [xt.db.runtime.dataview :as dataview]
              [xt.db.runtime :as db-runtime]
              [xt.substrate :as event-node]
              [xt.substrate.base-sync :as sync]
@@ -70,10 +70,10 @@
               payload)))
 
 (defn.xt prepare-query
-  "prepares a local query plan through schema-query"
+  "prepares a local query plan through dataview"
   {:added "4.1"}
   [state query view-context]
-  (return (schema-query/prepare-query
+  (return (dataview/prepare-query
            state
            query
            view-context)))
@@ -84,7 +84,7 @@
   [state query]
   (:= query (or query {}))
   (return
-   (schema-query/query-triggers
+   (dataview/query-triggers
     state
     (xt/x:get-key query "table")
     query)))

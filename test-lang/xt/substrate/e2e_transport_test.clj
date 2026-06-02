@@ -195,9 +195,7 @@
 
 
 
-
-
-
+^{:name demo-002-request-frame-dataview  :refer xt.substrate.base-frame/request-frame}
 
 
 

@@ -1,4 +1,4 @@
-(ns xt.db.node.schema-query
+(ns xt.db.runtime.dataview
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
@@ -25,10 +25,6 @@
     (xt/x:set-key view "table" table))
   (when (xt/x:nil? (xt/x:get-key view "type"))
     (xt/x:set-key view "type" type))
-  (when (xt/x:nil? (xt/x:get-key view "access"))
-    (xt/x:set-key view "access" {"roles" {}}))
-  (when (xt/x:nil? (xt/x:get-key view "guards"))
-    (xt/x:set-key view "guards" []))
   (xt/x:set-key entry "view" view)
   (return entry))
 
@@ -44,9 +40,7 @@
            :type "return"
            :query (:? data-only
                       (xt/x:arr-filter return-query xt/x:is-string?)
-                      return-query)
-           :access {:roles {}}
-           :guards []}}))
+                      return-query)}}))
 
 (defn.xt query-return-combined
   "creates the combined return entry for `return-query`"

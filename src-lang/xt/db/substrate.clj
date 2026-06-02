@@ -8,7 +8,7 @@
              [xt.substrate :as substrate]
              [xt.db.runtime :as db-runtime]
              [xt.db.text.sql-call :as call]
-             [xt.db.node.schema-query :as schema-query]]})
+             [xt.db.runtime.dataview :as dataview]]})
 
 (defn.xt call-db-handler
   [driver-fn service-id]
@@ -58,7 +58,7 @@
      (var schema        (. desc ["schema"]))
      (var views         (. desc ["views"]))
      (var db            (substrate/get-service node service-id))
-     (var [ok prepared] (schema-query/prepare-query desc
+     (var [ok prepared] (dataview/prepare-query desc
                                                     query-spec
                                                     view-context))
      (when (not ok)

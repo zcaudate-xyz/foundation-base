@@ -16,7 +16,7 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.node.schema-query :as schema-query]
+   :require [[xt.db.runtime.dataview :as dataview]
              [xt.db.node.event-type :as event-type]
              [xt.db.runtime.sql :as impl-sql]
              [xt.db.text.sql-util :as ut]
@@ -85,7 +85,7 @@
            (xt/x:set-key state "remote" {})
            (xt/x:set-key state "db" nil)
            (var [ok prepared]
-                (schema-query/prepare-query
+                (dataview/prepare-query
                  state
                  {:table "Entry",
                   :select-entry
@@ -161,7 +161,7 @@
            (xt/x:set-key state "remote" {})
            (xt/x:set-key state "db" nil)
            (var [ok prepared]
-                (schema-query/prepare-query
+                (dataview/prepare-query
                  state
                  (@! fixtures/+model-query+)
                  {"args" []}))

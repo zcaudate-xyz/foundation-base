@@ -1,11 +1,11 @@
-(ns xtbench.python.db.node.schema-query-test
+(ns xtbench.lua.db.runtime.dataview-test
   (:require [hara.lang :as l]
             [xt.db.helpers.data-main-test :as sample])
   (:use code.test))
 
-(l/script- :python
+(l/script- :lua
   {:runtime :basic
-   :require [[xt.db.node.schema-query :as schema-query]
+   :require [[xt.db.runtime.dataview :as dataview]
               [xt.db.node.event-type :as event-type]
               [xt.db.helpers.data-main-test :as sample]
               [xt.db.node.state :as state]
@@ -44,38 +44,31 @@
                        "nickname"
                        "id"]}}}}})
 
-^{:refer xt.db.node.schema-query/query-return-entry :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-return-entry :added "4.1"}
 (fact "creates a return entry from an inline return query"
 
-  (!.py
-    (schema-query/query-return-entry
+  (!.lua
+    (dataview/query-return-entry
      "UserAccount"
      ["nickname" ["profile" ["first_name"]]]
      true))
-  => {"input" [],
-      "return" "jsonb",
-      "flags" {},
-      "view" {"table" "UserAccount",
-              "type" "return",
-              "query" ["nickname"],
-              "access" {"roles" {}},
-              "guards" []}})
+  => (l/as-lua {"return" "jsonb", "flags" {}, "input" [], "view" {"table" "UserAccount", "query" ["nickname"], "type" "return"}}))
 
-^{:refer xt.db.node.schema-query/query-return-combined :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-return-combined :added "4.1"}
 (fact "merges inline return-query fragments into an existing return entry"
 
-  (!.py
-    (schema-query/query-return-combined
+  (!.lua
+    (dataview/query-return-combined
      "UserAccount"
      {"view" {"query" ["nickname"]}}
      ["id" ["profile" ["first_name"]]]
      true))
   => {"view" {"query" ["nickname" "id"]}})
 
-^{:refer xt.db.node.schema-query/query-entries :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-entries :added "4.1"}
 (fact "gets select and return entries from the state"
 
-  (!.py
+  (!.lua
      (var state (state/base-state {"schema" sample/Schema
                                   "views" (@! +views+)}))
      (xt/x:set-key state "::" event-type/STATE_TAG)
@@ -88,7 +81,7 @@
      (xt/x:set-key state "pending" {})
      (xt/x:set-key state "remote" {})
      (xt/x:set-key state "db" nil)
-     (schema-query/query-entries
+     (dataview/query-entries
      state
      "UserAccount"
      {:select-method "by_organisation"
@@ -100,10 +93,10 @@
        "return_entry" {"view" {"table" "UserAccount"
                                "type" "return"}}}))
 
-^{:refer xt.db.node.schema-query/query-triggers :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-triggers :added "4.1"}
 (fact "collects dependent tables touched by a query"
 
-  (!.py
+  (!.lua
      (var state (state/base-state {"schema" sample/Schema
                                   "views" (@! +views+)}))
      (xt/x:set-key state "::" event-type/STATE_TAG)
@@ -116,7 +109,7 @@
      (xt/x:set-key state "pending" {})
      (xt/x:set-key state "remote" {})
      (xt/x:set-key state "db" nil)
-     (schema-query/query-triggers
+     (dataview/query-triggers
      state
      "UserAccount"
      {:select-method "by_organisation"
@@ -126,57 +119,48 @@
                 "OrganisationAccess" true
                 "Organisation" true}))
 
-^{:refer xt.db.node.schema-query/query-local-transform :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-local-transform :added "4.1"}
 (fact "removes __deleted__ markers from local view entries"
 
-  (!.py
-    (schema-query/query-local-transform
+  (!.lua
+    (dataview/query-local-transform
      {"view" {"query" {"status" "open"
                         "__deleted__" true}}
       "input" []}))
-  => {"view" {"query" {"status" "open"}}
-      "input" []})
+  => (l/as-lua {"input" [], "view" {"query" {"status" "open"}}}))
 
-^{:refer xt.db.node.schema-query/query-check :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-check :added "4.1"}
 (fact "checks argument length and type against a view entry"
 
-  (!.py
-    [(schema-query/query-check
+  (!.lua
+    [(dataview/query-check
       {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]}
       ["00000000-0000-0000-0000-000000000001"]
       false)
-     (schema-query/query-check
+     (dataview/query-check
       {"input" [{"symbol" "i_organisation_id", "type" "uuid"}]}
       [1]
       false)])
-  => [[true nil]
-      [false {"status" "error"
-              "tag" "net/arg-typecheck-failed"
-              "data" {"input" 1
-                      "spec" {"symbol" "i_organisation_id", "type" "uuid"}}}]])
+  => (l/as-lua [[true nil] [false {"tag" "net/arg-typecheck-failed", "status" "error", "data" {"spec" {"symbol" "i_organisation_id", "type" "uuid"}, "input" 1}}]]))
 
-^{:refer xt.db.node.schema-query/normalize-query :added "4.1"}
+^{:refer xt.db.runtime.dataview/normalize-query :added "4.1"}
 (fact "normalizes query specs using the view args by default"
 
-  (!.py
-    (schema-query/normalize-query
+  (!.lua
+    (dataview/normalize-query
      {:table "UserAccount"
         :select-method "by_organisation"
        :return-method "info"}
      {:args ["00000000-0000-0000-0000-000000000001"]}))
-  => {"table" "UserAccount"
-      "select_method" "by_organisation"
-      "select_args" ["00000000-0000-0000-0000-000000000001"]
-      "return_method" "info"
-      "return_args" []})
+  => (l/as-lua {"table" "UserAccount", "return_method" "info", "return_args" [], "select_args" ["00000000-0000-0000-0000-000000000001"], "select_method" "by_organisation"}))
 
-^{:refer xt.db.node.schema-query/query-key :added "4.1"}
+^{:refer xt.db.runtime.dataview/query-key :added "4.1"}
 (fact "uses an explicit query key or computes a stable key"
 
-  (!.py
-    [(schema-query/query-key {:key "orders/main"} {})
+  (!.lua
+    [(dataview/query-key {:key "orders/main"} {})
      (xt/x:is-string?
-      (schema-query/query-key
+      (dataview/query-key
        {:table "UserAccount"
         :select-method "by_organisation"}
        {:model-id "orders"
@@ -184,10 +168,10 @@
         :args ["00000000-0000-0000-0000-000000000001"]}))])
   => ["orders/main" true])
 
-^{:refer xt.db.node.schema-query/prepare-query :added "4.1"}
+^{:refer xt.db.runtime.dataview/prepare-query :added "4.1"}
 (fact "prepares a cache query plan and trigger set"
 
-  (!.py
+  (!.lua
     (var state (state/base-state {"schema" sample/Schema
                                        "views" (@! +views+)}))
     (xt/x:set-key state "::" event-type/STATE_TAG)
@@ -201,7 +185,7 @@
     (xt/x:set-key state "remote" {})
     (xt/x:set-key state "db" nil)
     (var [ok prepared]
-         (schema-query/prepare-query
+         (dataview/prepare-query
           state
           {:key "orders/main"
            :table "UserAccount"
