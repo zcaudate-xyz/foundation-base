@@ -11,7 +11,7 @@
               [xt.lang.common-repl :as repl]
               [xt.lang.common-string :as str]
               [xt.lang.spec-promise :as promise]
-              [xt.db.runtime :as db-instance]
+              [xt.db.system :as db-instance]
               [xt.db.node :as db-node]
               [xt.db.helpers.test-fixtures :as fixtures]
               [xt.db.text.sql-manage :as sql-manage]
@@ -65,13 +65,13 @@
                         "query_sync" (fn [inner query]
                                        (return (raw-query inner query)))}))
             (var db-opts (xt.db.text.sql-util/sqlite-opts nil))
-            (var db (xt.db.runtime/db-create
+            (var db (xt.db.system/db-create
                      {"::" "db.sql"
                       :instance conn}
                      xt.db.helpers.test-fixtures/Schema
                      xt.db.helpers.test-fixtures/Lookup
                      db-opts))
-            (xt.db.runtime/db-exec-sync
+            (xt.db.system/db-exec-sync
              db
              (xt.lang.common-string/join
               "\n\n"

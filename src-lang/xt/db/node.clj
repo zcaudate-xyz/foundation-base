@@ -5,7 +5,7 @@
 (l/script :xtalk
   {:require [[xt.db.node.state :as model]
              [xt.db.node.event-type :as event-type]
-             [xt.db.runtime :as db-runtime]
+             [xt.db.system :as db-runtime]
              [xt.db.text.sql-manage :as sql-manage]
              [xt.db.text.sql-util :as sql-util]
              [xt.substrate :as event-node]

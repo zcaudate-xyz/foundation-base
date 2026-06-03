@@ -7,7 +7,7 @@
   {:runtime :basic
    :require [[js.lib.client-fetch :as js-fetch]
              [xt.db.runtime.supabase-client :as supabase]
-             [xt.db.text.pgrest :as pgrest]
+             [xt.db.text.pgrest-graph :as pgrest]
              [xt.lang.common-notify :as notify]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]

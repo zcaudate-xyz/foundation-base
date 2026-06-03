@@ -1,8 +1,8 @@
-(ns xt.db.runtime.event-nchan
+(ns xt.db.system.event-nchan
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.runtime.event-common :as common]
+  {:require [[xt.db.system.event-common :as common]
              [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]

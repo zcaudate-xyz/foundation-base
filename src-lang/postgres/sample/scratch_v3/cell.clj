@@ -5,7 +5,7 @@
   {:require [[js.cell.service :as service]
              [js.cell.binding :as binding]
              [js.cell.binding.model :as binding-model]
-             [xt.db.runtime :as xdb]
+             [xt.db.system :as xdb]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [postgres.sample.scratch-v3 :as scratch]

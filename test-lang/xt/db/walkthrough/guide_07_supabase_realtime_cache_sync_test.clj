@@ -28,8 +28,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.lib.client-websocket :as js-ws]
-             [xt.db.runtime :as xdb]
-             [xt.db.runtime.event-supabase :as realtime]
+             [xt.db.system :as xdb]
+             [xt.db.system.event-supabase :as realtime]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]

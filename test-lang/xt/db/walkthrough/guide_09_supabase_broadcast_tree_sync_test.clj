@@ -4,7 +4,7 @@
             [postgres.core :as pg]
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.data-main-test :as sample]
-            [xt.db.runtime.event-supabase :as event-supabase]
+            [xt.db.system.event-supabase :as event-supabase]
             [scaffold.supabase.event-host-util :as live]))
 
 (def +live-broadcast-topic+
@@ -72,8 +72,8 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.runtime :as xdb]
-             [xt.db.runtime.event-supabase :as event-supabase]
+   :require [[xt.db.system :as xdb]
+             [xt.db.system.event-supabase :as event-supabase]
              [js.lib.client-fetch :as js-fetch]
              [js.lib.client-websocket :as js-ws]
              [js.lib.driver-sqlite :as js-sqlite]

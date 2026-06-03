@@ -1,15 +1,15 @@
-(ns xt.db.runtime.event-supabase-test
+(ns xt.db.system.event-supabase-test
   (:require [hara.lang :as l]
             [xt.db.helpers.test-fixtures :as fixtures]
             [xt.lang.common-notify :as notify]
-            [xt.db.runtime.event-supabase :as event-supabase])
+            [xt.db.system.event-supabase :as event-supabase])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.runtime :as xdb]
-             [xt.db.runtime.event-supabase :as event-supabase]
+   :require [[xt.db.system :as xdb]
+             [xt.db.system.event-supabase :as event-supabase]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
@@ -21,7 +21,7 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.runtime.event-supabase/broadcast-client :added "4.1.4"}
+^{:refer xt.db.system.event-supabase/broadcast-client :added "4.1.4"}
 (fact "marks a client config as a broadcast subscription"
   (!.js
    (event-supabase/broadcast-client
@@ -32,7 +32,7 @@
       "topic" "room:new"
       "message_event" "broadcast"})
 
-^{:refer xt.db.runtime.event-supabase/subscribe-broadcast :added "4.1.4"}
+^{:refer xt.db.system.event-supabase/subscribe-broadcast :added "4.1.4"}
 (fact "subscribes to broadcast topics carrying native xt.db requests"
   (notify/wait-on [:js 2000]
     (var cache
@@ -94,7 +94,7 @@
       "request-name" "event-supabase"})
 
 
-^{:refer xt.db.runtime.event-supabase/client? :added "4.1"}
+^{:refer xt.db.system.event-supabase/client? :added "4.1"}
 (fact "detects wrapped supabase realtime clients"
   (!.js
    [(event-supabase/client? (event-supabase/client {"base_url" "https://db.test"}))
@@ -102,7 +102,7 @@
     (event-supabase/client? nil)])
   => [true false false])
 
-^{:refer xt.db.runtime.event-supabase/raw-client :added "4.1"}
+^{:refer xt.db.system.event-supabase/raw-client :added "4.1"}
 (fact "unwraps tagged supabase realtime clients"
   (!.js
    [(event-supabase/raw-client (event-supabase/client {"base_url" "https://db.test"}))
@@ -112,7 +112,7 @@
       {"base_url" "https://plain.test"}
       {}])
 
-^{:refer xt.db.runtime.event-supabase/resolve-transport :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-transport :added "4.1"}
 (fact "resolves websocket drivers from realtime transport config"
   (!.js
    (do:>
@@ -134,7 +134,7 @@
       thrown])))
   => [true true true])
 
-^{:refer xt.db.runtime.event-supabase/resolve-base-url :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-base-url :added "4.1"}
 (fact "resolves base urls from client config then opts"
   (!.js
    [(event-supabase/resolve-base-url nil (event-supabase/client {"base_url" "https://db.test"}) {})
@@ -142,7 +142,7 @@
     (event-supabase/resolve-base-url nil (event-supabase/client {}) {})])
   => ["https://db.test" "https://opts.test" nil])
 
-^{:refer xt.db.runtime.event-supabase/resolve-websocket-url :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-websocket-url :added "4.1"}
 (fact "resolves websocket url overrides from client config then opts"
   (!.js
    [(event-supabase/resolve-websocket-url nil (event-supabase/client {"websocket_url" "wss://client.test"}) {})
@@ -150,7 +150,7 @@
     (event-supabase/resolve-websocket-url nil (event-supabase/client {}) {})])
   => ["wss://client.test" "wss://opts.test" nil])
 
-^{:refer xt.db.runtime.event-supabase/resolve-schema-name :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-schema-name :added "4.1"}
 (fact "resolves schema names from client config then opts"
   (!.js
    [(event-supabase/resolve-schema-name (event-supabase/client {"schema_name" "client_schema"}) {})
@@ -158,7 +158,7 @@
     (event-supabase/resolve-schema-name (event-supabase/client {}) {})])
   => ["client_schema" "opts_schema" "public"])
 
-^{:refer xt.db.runtime.event-supabase/resolve-table-name :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-table-name :added "4.1"}
 (fact "resolves table names from opts, client config, or payload"
   (!.js
    [(event-supabase/resolve-table-name {"table" "payload_table"} (event-supabase/client {}) {})
@@ -166,7 +166,7 @@
     (event-supabase/resolve-table-name {} (event-supabase/client {}) {"table_name" "opts_table"})])
   => ["payload_table" "client_table" "opts_table"])
 
-^{:refer xt.db.runtime.event-supabase/resolve-id-key :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-id-key :added "4.1"}
 (fact "resolves id keys from opts then client config"
   (!.js
    [(event-supabase/resolve-id-key (event-supabase/client {"id_key" "client_id"}) {})
@@ -174,7 +174,7 @@
     (event-supabase/resolve-id-key (event-supabase/client {}) {})])
   => ["client_id" "opts_id" "id"])
 
-^{:refer xt.db.runtime.event-supabase/resolve-event :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-event :added "4.1"}
 (fact "resolves event selectors from opts then client config"
   (!.js
    [(event-supabase/resolve-event (event-supabase/client {"event" "INSERT"}) {})
@@ -182,7 +182,7 @@
     (event-supabase/resolve-event (event-supabase/client {}) {})])
   => ["INSERT" "DELETE" "*"])
 
-^{:refer xt.db.runtime.event-supabase/resolve-api-key :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-api-key :added "4.1"}
 (fact "resolves api keys from client config then opts"
   (!.js
    [(event-supabase/resolve-api-key nil (event-supabase/client {"api_key" "key-client"}) {})
@@ -190,7 +190,7 @@
     (event-supabase/resolve-api-key nil (event-supabase/client {}) {})])
   => ["key-client" "key-opts" nil])
 
-^{:refer xt.db.runtime.event-supabase/resolve-auth-token :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-auth-token :added "4.1"}
 (fact "resolves auth tokens from client config then opts"
   (!.js
    [(event-supabase/resolve-auth-token nil (event-supabase/client {"auth_token" "token-client"}) {})
@@ -198,7 +198,7 @@
     (event-supabase/resolve-auth-token nil (event-supabase/client {}) {})])
   => ["token-client" "token-opts" nil])
 
-^{:refer xt.db.runtime.event-supabase/resolve-params :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-params :added "4.1"}
 (fact "merges websocket params on top of the default vsn"
   (!.js
    (event-supabase/resolve-params
@@ -207,7 +207,7 @@
     {"params" {"b" 2}}))
   => {"vsn" "client" "a" 1 "b" 2})
 
-^{:refer xt.db.runtime.event-supabase/create-scaffold :added "4.1"}
+^{:refer xt.db.system.event-supabase/create-scaffold :added "4.1"}
 (fact "creates scaffold values used to connect to realtime"
   (!.js
    [(event-supabase/create-scaffold
@@ -232,7 +232,7 @@
                  "tenant" "main"}}
       "https://db.test"])
 
-^{:refer xt.db.runtime.event-supabase/trim-trailing-slash :added "4.1"}
+^{:refer xt.db.system.event-supabase/trim-trailing-slash :added "4.1"}
 (fact "trims trailing slashes from base urls"
   (!.js
    [(event-supabase/trim-trailing-slash "https://db.test/")
@@ -240,7 +240,7 @@
     (event-supabase/trim-trailing-slash nil)])
   => ["https://db.test" "https://db.test" nil])
 
-^{:refer xt.db.runtime.event-supabase/derive-websocket-url :added "4.1"}
+^{:refer xt.db.system.event-supabase/derive-websocket-url :added "4.1"}
 (fact "derives realtime websocket urls from Supabase base urls"
   (!.js
    [(event-supabase/derive-websocket-url "https://db.test")
@@ -252,14 +252,14 @@
       "ws://db.test/realtime/v1/websocket"
       nil])
 
-^{:refer xt.db.runtime.event-supabase/encode-query-params :added "4.1"}
+^{:refer xt.db.system.event-supabase/encode-query-params :added "4.1"}
 (fact "encodes flat realtime query params"
   (!.js
    [(event-supabase/encode-query-params {"vsn" "1.0.0" "apikey" "key-1"})
     (event-supabase/encode-query-params nil)])
   => ["vsn=1.0.0&apikey=key-1" ""])
 
-^{:refer xt.db.runtime.event-supabase/prepare-connect-url :added "4.1"}
+^{:refer xt.db.system.event-supabase/prepare-connect-url :added "4.1"}
 (fact "builds the realtime websocket url with params and apikey"
   (!.js
    [(event-supabase/prepare-connect-url
@@ -275,7 +275,7 @@
   => ["wss://db.test/realtime/v1/websocket?vsn=1.0.0&apikey=key-1"
       "wss://socket.test/realtime?vsn=1.0.0&tenant=main"])
 
-^{:refer xt.db.runtime.event-supabase/resolve-topic :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-topic :added "4.1"}
 (fact "resolves direct or derived realtime topics"
   (!.js
    [(event-supabase/resolve-topic (event-supabase/client {"topic" "room:entries"}) {})
@@ -286,7 +286,7 @@
       "realtime:room:entries"
       "realtime:public:Entry"])
 
-^{:refer xt.db.runtime.event-supabase/normalize-filter :added "4.1"}
+^{:refer xt.db.system.event-supabase/normalize-filter :added "4.1"}
 (fact "normalizes postgres_changes filters with defaults"
   (!.js
    (event-supabase/normalize-filter
@@ -300,7 +300,7 @@
       "table" "Entry"
       "filter" "id=eq.1"})
 
-^{:refer xt.db.runtime.event-supabase/resolve-filters :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-filters :added "4.1"}
 (fact "resolves filters from arrays, single filters, or table declarations"
   (!.js
    [(event-supabase/resolve-filters
@@ -323,14 +323,14 @@
       [{"event" "*" "schema" "public" "table" "Entry" "filter" "id=eq.1"}]
       [{"event" "*" "schema" "public" "table" "Entry"}]])
 
-^{:refer xt.db.runtime.event-supabase/resolve-ref :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-ref :added "4.1"}
 (fact "resolves stable refs from opts or client config"
   (!.js
    [(event-supabase/resolve-ref (event-supabase/client {"ref" "client-ref"}) {})
     (event-supabase/resolve-ref (event-supabase/client {"ref" "client-ref"}) {"ref" "opts-ref"})])
   => ["client-ref" "opts-ref"])
 
-^{:refer xt.db.runtime.event-supabase/resolve-message-event :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-message-event :added "4.1"}
 (fact "resolves inbound message events from opts then client config"
   (!.js
    [(event-supabase/resolve-message-event (event-supabase/client {"message_event" "broadcast"}) {})
@@ -338,7 +338,7 @@
     (event-supabase/resolve-message-event (event-supabase/client {}) {})])
   => ["broadcast" "custom" "postgres_changes"])
 
-^{:refer xt.db.runtime.event-supabase/resolve-request-transform :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-request-transform :added "4.1"}
 (fact "prefers request transforms from opts over client config"
   (!.js
    [(event-supabase/resolve-request-transform
@@ -349,7 +349,7 @@
      {"request_transform" "from-opts"})])
   => ["from-client" "from-opts"])
 
-^{:refer xt.db.runtime.event-supabase/join-payload :added "4.1"}
+^{:refer xt.db.system.event-supabase/join-payload :added "4.1"}
 (fact "builds join payloads with filters and auth tokens"
   (!.js
    (event-supabase/join-payload
@@ -366,7 +366,7 @@
                                      "table" "Entry"}]}
       "access_token" "token-1"})
 
-^{:refer xt.db.runtime.event-supabase/join-frame :added "4.1"}
+^{:refer xt.db.system.event-supabase/join-frame :added "4.1"}
 (fact "creates phoenix join frames for the resolved topic"
   (!.js
    (event-supabase/join-frame
@@ -381,7 +381,7 @@
       "ref" "join-1"
       "join_ref" "join-1"})
 
-^{:refer xt.db.runtime.event-supabase/leave-frame :added "4.1"}
+^{:refer xt.db.system.event-supabase/leave-frame :added "4.1"}
 (fact "creates phoenix leave frames for the resolved topic"
   (!.js
    (event-supabase/leave-frame
@@ -393,7 +393,7 @@
       "ref" "leave-1"
       "join_ref" "leave-1"})
 
-^{:refer xt.db.runtime.event-supabase/resolve-client :added "4.1"}
+^{:refer xt.db.system.event-supabase/resolve-client :added "4.1"}
 (fact "resolves wrapped realtime clients from db or opts"
   (!.js
    (do:>
@@ -408,7 +408,7 @@
       thrown])))
   => [true true true])
 
-^{:refer xt.db.runtime.event-supabase/client :added "4.1"}
+^{:refer xt.db.system.event-supabase/client :added "4.1"}
 (fact "wraps raw realtime config as a tagged client"
   (!.js
    (var client (event-supabase/client {"base_url" "https://db.test"}))
@@ -416,7 +416,7 @@
     (event-supabase/raw-client client)])
   => [true {"base_url" "https://db.test"}])
 
-^{:refer xt.db.runtime.event-supabase/connect :added "4.1"}
+^{:refer xt.db.system.event-supabase/connect :added "4.1"}
 (fact "connects through the websocket driver to the prepared url"
   (notify/wait-on [:js 2000]
     (var urls [])
@@ -445,7 +445,7 @@
   => {"client" true
       "url" "wss://db.test/realtime/v1/websocket?vsn=1.0.0&apikey=key-1"})
 
-^{:refer xt.db.runtime.event-supabase/extract-message-data :added "4.1"}
+^{:refer xt.db.system.event-supabase/extract-message-data :added "4.1"}
 (fact "extracts payload text from websocket events"
   (!.js
    [(event-supabase/extract-message-data "plain")
@@ -453,7 +453,7 @@
     (event-supabase/extract-message-data {"body" "fallback"})])
   => ["plain" "{\"ok\":true}" "fallback"])
 
-^{:refer xt.db.runtime.event-supabase/decode-message :added "4.1"}
+^{:refer xt.db.system.event-supabase/decode-message :added "4.1"}
 (fact "decodes websocket frames from json"
   (!.js
    [(event-supabase/decode-message "{\"event\":\"phx_reply\"}")
@@ -461,7 +461,7 @@
   => [{"event" "phx_reply"}
       {"payload" {"status" "ok"}}])
 
-^{:refer xt.db.runtime.event-supabase/payload-event-type :added "4.1"}
+^{:refer xt.db.system.event-supabase/payload-event-type :added "4.1"}
 (fact "normalizes postgres change event type keys"
   (!.js
    [(event-supabase/payload-event-type {"eventType" "insert"})
@@ -469,7 +469,7 @@
     (event-supabase/payload-event-type {"type" "update"})])
   => ["INSERT" "DELETE" "UPDATE"])
 
-^{:refer xt.db.runtime.event-supabase/payload-row :added "4.1"}
+^{:refer xt.db.system.event-supabase/payload-row :added "4.1"}
 (fact "extracts the current or deleted row from change payloads"
   (!.js
    [(event-supabase/payload-row {"eventType" "INSERT"
@@ -479,14 +479,14 @@
   => [{"id" "id-1"}
       {"id" "id-2"}])
 
-^{:refer xt.db.runtime.event-supabase/payload-id :added "4.1"}
+^{:refer xt.db.system.event-supabase/payload-id :added "4.1"}
 (fact "extracts ids from payload rows using the resolved id key"
   (!.js
    [(event-supabase/payload-id {"record" {"id" "id-1"}} (event-supabase/client {}) {})
     (event-supabase/payload-id {"record" {"entry_id" "id-2"}} (event-supabase/client {"id_key" "entry_id"}) {})])
   => ["id-1" "id-2"])
 
-^{:refer xt.db.runtime.event-supabase/postgres-change->sync-request :added "4.1"}
+^{:refer xt.db.system.event-supabase/postgres-change->sync-request :added "4.1"}
 (fact "converts postgres change payloads into native xt.db requests"
   (!.js
    [(event-supabase/postgres-change->sync-request
@@ -507,7 +507,7 @@
                             "__deleted__" false}]}}
       {"db/remove" {"Entry" ["id-2"]}}])
 
-^{:refer xt.db.runtime.event-supabase/apply-sync-request :added "4.1"}
+^{:refer xt.db.system.event-supabase/apply-sync-request :added "4.1"}
 (fact "applies sync requests to the local cache db"
   (!.js
    (var cache
@@ -543,7 +543,7 @@
           "__deleted__" false}]}}
       "apply-sync"])
 
-^{:refer xt.db.runtime.event-supabase/apply-postgres-change :added "4.1"}
+^{:refer xt.db.system.event-supabase/apply-postgres-change :added "4.1"}
 (fact "converts postgres changes and applies them to the cache"
   (!.js
    (var cache
@@ -577,7 +577,7 @@
            "__deleted__" false}]}}]
       "apply-postgres"])
 
-^{:refer xt.db.runtime.event-supabase/payload->request :added "4.1"}
+^{:refer xt.db.system.event-supabase/payload->request :added "4.1"}
 (fact "normalizes incoming realtime payloads into xt.db requests"
   (!.js
    [(event-supabase/payload->request
@@ -600,7 +600,7 @@
       {"db/remove" {"Entry" ["id-2"]}}
       {"db/remove" {"Entry" ["id-3"]}}])
 
-^{:refer xt.db.runtime.event-supabase/apply-request :added "4.1"}
+^{:refer xt.db.system.event-supabase/apply-request :added "4.1"}
 (fact "applies normalized realtime requests to the cache"
   (!.js
    (var cache
@@ -634,7 +634,7 @@
            "__deleted__" false}]}}]
       "apply-request"])
 
-^{:refer xt.db.runtime.event-supabase/handle-frame :added "4.1"}
+^{:refer xt.db.system.event-supabase/handle-frame :added "4.1"}
 (fact "handles join replies and postgres change frames"
   (notify/wait-on [:js 2000]
     (var cache
@@ -674,7 +674,7 @@
       "status" "SUBSCRIBED"
       "request_name" "handle-frame"})
 
-^{:refer xt.db.runtime.event-supabase/subscribe :added "4.1"}
+^{:refer xt.db.system.event-supabase/subscribe :added "4.1"}
 (fact "subscribes to postgres_changes topics and applies incoming requests"
   (notify/wait-on [:js 2000]
     (var cache
@@ -738,14 +738,14 @@
       "request_name" "subscribe"
       "status" "SUBSCRIBED"})
 
-^{:refer xt.db.runtime.event-supabase/subscription? :added "4.1"}
+^{:refer xt.db.system.event-supabase/subscription? :added "4.1"}
 (fact "detects tagged supabase realtime subscriptions"
   (!.js
    [(event-supabase/subscription? {"::" "db.supabase.realtime.subscription"})
     (event-supabase/subscription? {"::" "other.subscription"})])
   => [true false])
 
-^{:refer xt.db.runtime.event-supabase/unsubscribe :added "4.1"}
+^{:refer xt.db.system.event-supabase/unsubscribe :added "4.1"}
 (fact "sends the leave frame then closes the realtime socket"
   (notify/wait-on [:js 2000]
     (var sent [])

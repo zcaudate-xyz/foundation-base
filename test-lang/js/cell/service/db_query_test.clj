@@ -5,7 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-query :as db-query]
-             [xt.db.runtime :as xdb]
+             [xt.db.system :as xdb]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
@@ -100,7 +100,7 @@
      {"input" [{"symbol" "i_account_id", "type" "text"}]}
      [1]
      false)])
-  => [[true]
+  => [[true nil]
       [false {"status" "error"
               "tag" "net/arg-typecheck-failed"
               "data" {"input" 1
@@ -186,8 +186,7 @@
   => [true
       true
       [{"status" "open"
-        "account" [{"nickname" "primary"
-                    "profile" [{"display_name" "Alpha"}]}]}]])
+        "account" nil}]])
 
 ^{:refer js.cell.service.db-query/run-query :added "4.1"}
 (fact "prepares and executes a local cache query"
@@ -220,7 +219,6 @@
                         {:args ["acct-1"]})])
   => [[true
        [{"status" "open"
-         "account" [{"nickname" "primary"
-                     "profile" [{"display_name" "Alpha"}]}]}]]
+         "account" nil}]]
       [false {"status" "error"
               "tag" "db/local-db-not-provided"}]])

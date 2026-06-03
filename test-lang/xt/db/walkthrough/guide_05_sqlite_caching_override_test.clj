@@ -7,7 +7,7 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.runtime :as db-instance]
+   :require [[xt.db.system :as db-instance]
              [xt.db.node :as node]
              [js.lib.driver-sqlite :as js-sqlite]
              [xt.lang.spec-base :as xt]

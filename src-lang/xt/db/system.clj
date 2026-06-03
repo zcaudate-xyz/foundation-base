@@ -1,13 +1,11 @@
-(ns xt.db.runtime
+(ns xt.db.system
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.text.base-schema :as base-schema]
+  {:require [[xt.db.system.client-memory :as impl-memory]
+             [xt.db.system.client-sql :as impl-sql]
+             [xt.db.system.client-supabase :as impl-supabase]
              [xt.db.text.base-scope :as scope]
-             [xt.db.runtime.cache :as impl-cache]
-             [xt.db.runtime.supabase-client :as impl-supabase]
-             [xt.db.runtime.sql :as impl-sql]
-             [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
@@ -22,38 +20,125 @@
                :data {:op op
                       :dbtype dbtype}}))
 
+(defn.xt ensure-memory-client
+  [instance]
+  (if (impl-memory/client? instance)
+    (return instance)
+    (return (impl-memory/client instance))))
+
+(defn.xt ensure-sql-client
+  [instance]
+  (if (impl-sql/client? instance)
+    (return instance)
+    (return {"::" "db.client.sql"
+             "instance" instance})))
+
+(defn.xt ensure-supabase-client
+  [instance]
+  (if (impl-supabase/client? instance)
+    (return instance)
+    (return (impl-supabase/client instance))))
+
 (def.xt IMPL
-  {"db.cache"    {"create"      (fn [m]
-                                  (return {:rows {}}))
-                  "add"         impl-cache/cache-process-event-sync
-                  "remove"      impl-cache/cache-process-event-remove
-                  "pull_sync"   impl-cache/cache-pull-sync
-                  "delete_sync" impl-cache/cache-delete-sync
-                  "clear"       impl-cache/cache-clear}
-    "db.supabase" {"create"    (fn [m]
-                                 (var out (xt/x:obj-clone m))
-                                 (when (xt/x:not-nil? (xt/x:get-key out "client"))
-                                   (xt/x:set-key out
-                                                 "client"
-                                                 (impl-supabase/client
-                                                  (xt/x:get-key out "client"))))
-                                 (return out))
-                   "pull"      impl-supabase/pull}
-    "db.sql"      {"create"      (fn [m]
-                                   (return (xt/x:get-key m "instance")))
-                  "exec_sync"   (fn [instance raw-input _opts]
-                                   (return (sql/query-sync instance raw-input)))
-                  "add"         impl-sql/sql-process-event-sync
-                  "remove"      impl-sql/sql-process-event-remove
-                  "pull"        impl-sql/sql-pull
-                  "pull_sync"   impl-sql/sql-pull-sync
-                  "delete_sync" impl-sql/sql-delete-sync
-                  "clear"       impl-sql/sql-clear}})
+  {"db.cache" {"create"      (fn [m]
+                               (return (impl-memory/client m)))
+               "add"         (fn [instance tag data schema lookup opts]
+                               (return (impl-memory/process-event-sync
+                                        (-/ensure-memory-client instance)
+                                        tag
+                                        data
+                                        schema
+                                        lookup
+                                        opts)))
+               "remove"      (fn [instance tag data schema lookup opts]
+                               (return (impl-memory/process-event-remove
+                                        (-/ensure-memory-client instance)
+                                        tag
+                                        data
+                                        schema
+                                        lookup
+                                        opts)))
+               "pull_sync"   (fn [instance schema tree opts]
+                               (return (impl-memory/pull-sync
+                                        (-/ensure-memory-client instance)
+                                        schema
+                                        tree
+                                        opts)))
+               "delete_sync" (fn [instance schema table-name ids opts]
+                               (return (impl-memory/record-delete-sync
+                                        (-/ensure-memory-client instance)
+                                        schema
+                                        table-name
+                                        ids
+                                        opts)))
+               "clear"       (fn [instance]
+                               (return (impl-memory/clear
+                                        (-/ensure-memory-client instance))))}
+   "db.supabase" {"create" (fn [m]
+                             (return (impl-supabase/client m)))
+                  "pull"   (fn [instance schema tree opts]
+                             (return (impl-supabase/pull
+                                      (-/ensure-supabase-client instance)
+                                      schema
+                                      tree
+                                      opts)))}
+   "db.sql" {"create"      (fn [m]
+                             (return (impl-sql/client m)))
+             "exec_sync"   (fn [instance raw-input _opts]
+                             (return (impl-sql/exec-sync
+                                      (-/ensure-sql-client instance)
+                                      raw-input)))
+             "add"         (fn [instance tag data schema lookup opts]
+                             (return (impl-sql/process-event-sync
+                                      (-/ensure-sql-client instance)
+                                      tag
+                                      data
+                                      schema
+                                      lookup
+                                      opts)))
+             "remove"      (fn [instance tag data schema lookup opts]
+                             (return (impl-sql/process-event-remove
+                                      (-/ensure-sql-client instance)
+                                      tag
+                                      data
+                                      schema
+                                      lookup
+                                      opts)))
+             "pull"        (fn [instance schema tree opts]
+                             (return (impl-sql/pull
+                                      (-/ensure-sql-client instance)
+                                      schema
+                                      tree
+                                      opts)))
+             "pull_sync"   (fn [instance schema tree opts]
+                             (return (impl-sql/pull-sync
+                                      (-/ensure-sql-client instance)
+                                      schema
+                                      tree
+                                      opts)))
+             "delete_sync" (fn [instance schema table-name ids opts]
+                             (return (impl-sql/record-delete-sync
+                                      (-/ensure-sql-client instance)
+                                      schema
+                                      table-name
+                                      ids
+                                      opts)))}})
 
 (defn.xt get-dbtype
   [db]
-  (return (or (xt/x:get-key db "::")
-              "db.sql")))
+  (var tag (xt/x:get-key db "::"))
+  (cond (== tag "db.client.memory")
+        (return "db.cache")
+
+        (== tag "db.client.sql")
+        (return "db.sql")
+
+        (== tag "db.client.supabase")
+        (return "db.supabase")
+
+        :else
+        (return (or tag
+                    "db.sql"))))
 
 (defn.xt process-event
   "processes an event"

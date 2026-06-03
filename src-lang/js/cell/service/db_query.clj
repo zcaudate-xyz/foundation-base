@@ -7,7 +7,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as xtt]
-             [xt.db.runtime :as xdb]
+             [xt.db.system :as xdb]
              [xt.db.text.base-check :as check]
              [xt.db.runtime.cache-view :as cache-view]]})
 

@@ -1,8 +1,8 @@
-(ns xt.db.runtime.event-supabase
+(ns xt.db.system.event-supabase
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.runtime.event-common :as event-common]
+  {:require [[xt.db.system.event-common :as event-common]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]

@@ -1,4 +1,4 @@
-(ns xt.db.runtime.event-common-test
+(ns xt.db.system.event-common-test
   (:require [hara.lang :as l]
             [xt.db.helpers.test-fixtures :as fixtures]
             [xt.lang.common-notify :as notify])
@@ -7,8 +7,8 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.runtime :as xdb]
-             [xt.db.runtime.event-common :as event-common]
+   :require [[xt.db.system :as xdb]
+             [xt.db.system.event-common :as event-common]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
@@ -20,7 +20,7 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.runtime.event-common/unwrap-request :added "4.1.4"}
+^{:refer xt.db.system.event-common/unwrap-request :added "4.1.4"}
 (fact "unwraps native xt.db requests from top-level or nested payload envelopes"
   (!.js
    [(event-common/unwrap-request {"db/sync" {"Entry" []}})
@@ -32,7 +32,7 @@
      true
      false])
 
-^{:refer xt.db.runtime.event-common/apply-request :added "4.1.4"}
+^{:refer xt.db.system.event-common/apply-request :added "4.1.4"}
 (fact "applies native xt.db requests to a local cache db"
   (!.js
    (var cache
@@ -64,7 +64,7 @@
      ["name"]]))
   => [])
 
-^{:refer xt.db.runtime.event-common/client? :added "4.1.4"}
+^{:refer xt.db.system.event-common/client? :added "4.1.4"}
 (fact "provides shared transport helpers for tagging, decoding, and subscription teardown"
   (notify/wait-on [:js 2000]
    (var closes [])
@@ -112,7 +112,7 @@
      "common/unsubscribe"])
 
 
-^{:refer xt.db.runtime.event-common/raw-client :added "4.1"}
+^{:refer xt.db.system.event-common/raw-client :added "4.1"}
 (fact "unwraps tagged clients and leaves plain sources intact"
   (!.js
    (var driver (ws/driver-create {"connect_sync" (fn [_url]
@@ -130,7 +130,7 @@
       {"foo" 1}
       {}])
 
-^{:refer xt.db.runtime.event-common/resolve-client-source :added "4.1"}
+^{:refer xt.db.system.event-common/resolve-client-source :added "4.1"}
 (fact "resolves client or transport sources from db then opts"
   (!.js
    [(event-common/resolve-client-source {"client" {"id" "db-client"}} {"client" {"id" "opts-client"}})
@@ -142,7 +142,7 @@
       {"id" "opts-client"}
       nil])
 
-^{:refer xt.db.runtime.event-common/wrap-client :added "4.1"}
+^{:refer xt.db.system.event-common/wrap-client :added "4.1"}
 (fact "wraps websocket and plain configs with a tagged client descriptor"
   (!.js
    (var driver (ws/driver-create {"connect_sync" (fn [_url]
@@ -159,7 +159,7 @@
       {"base_url" "wss://example.test"}
       {}])
 
-^{:refer xt.db.runtime.event-common/resolve-transport :added "4.1"}
+^{:refer xt.db.system.event-common/resolve-transport :added "4.1"}
 (fact "resolves websocket drivers from wrapped configs or transport functions"
   (!.js
    (do:>
@@ -189,7 +189,7 @@
       thrown])))
   => [true true true])
 
-^{:refer xt.db.runtime.event-common/request-op :added "4.1"}
+^{:refer xt.db.system.event-common/request-op :added "4.1"}
 (fact "detects supported xt.db request ops at top level"
   (!.js
    [(event-common/request-op {"db/sync" {"Entry" []}})
@@ -198,7 +198,7 @@
     (event-common/request-op nil)])
   => ["db/sync" "db/remove" nil nil])
 
-^{:refer xt.db.runtime.event-common/request? :added "4.1"}
+^{:refer xt.db.system.event-common/request? :added "4.1"}
 (fact "detects xt.db requests directly or inside payload envelopes"
   (!.js
    [(event-common/request? {"db/sync" {"Entry" []}})
@@ -207,7 +207,7 @@
     (event-common/request? "plain-text")])
   => [true true false false])
 
-^{:refer xt.db.runtime.event-common/trim-trailing-slash :added "4.1"}
+^{:refer xt.db.system.event-common/trim-trailing-slash :added "4.1"}
 (fact "trims only one trailing slash from strings"
   (!.js
    [(event-common/trim-trailing-slash "https://stream.test/")
@@ -217,7 +217,7 @@
       "https://stream.test"
       nil])
 
-^{:refer xt.db.runtime.event-common/encode-query-params :added "4.1"}
+^{:refer xt.db.system.event-common/encode-query-params :added "4.1"}
 (fact "encodes flat query params while skipping nil values"
   (!.js
    [(event-common/encode-query-params {"a" 1 "b" "two" "c" nil})
@@ -225,7 +225,7 @@
     (event-common/encode-query-params nil)])
   => ["a=1&b=two" "" ""])
 
-^{:refer xt.db.runtime.event-common/extract-message-data :added "4.1"}
+^{:refer xt.db.system.event-common/extract-message-data :added "4.1"}
 (fact "extracts websocket payloads from strings, data, or body fields"
   (!.js
    [(event-common/extract-message-data "plain-text")
@@ -237,7 +237,7 @@
       "fallback"
       {"other" true}])
 
-^{:refer xt.db.runtime.event-common/decode-message :added "4.1"}
+^{:refer xt.db.system.event-common/decode-message :added "4.1"}
 (fact "decodes json by default and can decode only json-looking payloads"
   (!.js
    [(event-common/decode-message {"data" "{\"db/sync\":{\"Entry\":[]}}"} {})
@@ -249,7 +249,7 @@
       {"ok" true}
       "plain-text"])
 
-^{:refer xt.db.runtime.event-common/resolve-request-transform :added "4.1"}
+^{:refer xt.db.system.event-common/resolve-request-transform :added "4.1"}
 (fact "prefers request transforms from opts over client config"
   (!.js
    [(event-common/resolve-request-transform
@@ -268,7 +268,7 @@
       "from-opts"
       nil])
 
-^{:refer xt.db.runtime.event-common/apply-payload :added "4.1"}
+^{:refer xt.db.system.event-common/apply-payload :added "4.1"}
 (fact "unwraps payload envelopes and applies native requests to the cache"
   (!.js
    (var cache
@@ -305,7 +305,7 @@
       [{"name" "payload"}]
       [true nil]])
 
-^{:refer xt.db.runtime.event-common/subscription? :added "4.1"}
+^{:refer xt.db.system.event-common/subscription? :added "4.1"}
 (fact "detects tagged subscription handles and active state"
   (!.js
    (var subscription {"::" "transport.subscription"
@@ -320,7 +320,7 @@
                                        "transport.subscription")])
   => [true false true false])
 
-^{:refer xt.db.runtime.event-common/subscription-active? :added "4.1"}
+^{:refer xt.db.system.event-common/subscription-active? :added "4.1"}
 (fact "treats missing active flags as active until explicitly disabled"
   (!.js
    [(event-common/subscription-active? {"::" "transport.subscription"} "transport.subscription")
@@ -332,7 +332,7 @@
                                        "transport.subscription")])
   => [true false false])
 
-^{:refer xt.db.runtime.event-common/unsubscribe :added "4.1"}
+^{:refer xt.db.system.event-common/unsubscribe :added "4.1"}
 (fact "marks subscriptions inactive and disconnects tagged sockets only"
   (notify/wait-on [:js 2000]
     (var closes [])

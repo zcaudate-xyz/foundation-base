@@ -1,15 +1,15 @@
-(ns xt.db.runtime.event-nchan-test
+(ns xt.db.system.event-nchan-test
   (:require [hara.lang :as l]
             [xt.db.helpers.test-fixtures :as fixtures]
             [xt.lang.common-notify :as notify]
-            [xt.db.runtime.event-nchan :as event-nchan])
+            [xt.db.system.event-nchan :as event-nchan])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.runtime :as xdb]
-             [xt.db.runtime.event-nchan :as event-nchan]
+   :require [[xt.db.system :as xdb]
+             [xt.db.system.event-nchan :as event-nchan]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
@@ -21,7 +21,7 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.runtime.event-nchan/resolve-subscriber-url :added "4.1.4"}
+^{:refer xt.db.system.event-nchan/resolve-subscriber-url :added "4.1.4"}
 (fact "derives stream-style websocket/http urls and payloads"
   (!.js
    [(event-nchan/resolve-subscriber-url
@@ -56,7 +56,7 @@
       "{\"db/sync\":{\"Entry\":[]}}"
       {"db/remove" {"Entry" ["id-1"]}}])
 
-^{:refer xt.db.runtime.event-nchan/subscribe :added "4.1.4"}
+^{:refer xt.db.system.event-nchan/subscribe :added "4.1.4"}
 (fact "subscribes to an nchan topic carrying native xt.db requests"
   (notify/wait-on [:js 2000]
     (var cache
@@ -129,7 +129,7 @@
       "active" false})
 
 
-^{:refer xt.db.runtime.event-nchan/client? :added "4.1"}
+^{:refer xt.db.system.event-nchan/client? :added "4.1"}
 (fact "detects wrapped nchan clients"
   (!.js
    [(event-nchan/client? (event-nchan/client {"base_url" "https://stream.test"}))
@@ -137,7 +137,7 @@
     (event-nchan/client? nil)])
   => [true false false])
 
-^{:refer xt.db.runtime.event-nchan/raw-client :added "4.1"}
+^{:refer xt.db.system.event-nchan/raw-client :added "4.1"}
 (fact "unwraps tagged nchan client descriptors"
   (!.js
    [(event-nchan/raw-client (event-nchan/client {"base_url" "https://stream.test"}))
@@ -147,7 +147,7 @@
       {"base_url" "https://plain.test"}
       {}])
 
-^{:refer xt.db.runtime.event-nchan/resolve-transport :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-transport :added "4.1"}
 (fact "resolves websocket drivers from nchan transport config"
   (!.js
    (do:>
@@ -169,7 +169,7 @@
       thrown])))
   => [true true true])
 
-^{:refer xt.db.runtime.event-nchan/resolve-base-url :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-base-url :added "4.1"}
 (fact "resolves base urls from client config then opts"
   (!.js
    [(event-nchan/resolve-base-url nil (event-nchan/client {"base_url" "https://client.test"}) {})
@@ -177,7 +177,7 @@
     (event-nchan/resolve-base-url nil (event-nchan/client {}) {})])
   => ["https://client.test" "https://opts.test" nil])
 
-^{:refer xt.db.runtime.event-nchan/trim-trailing-slash :added "4.1"}
+^{:refer xt.db.system.event-nchan/trim-trailing-slash :added "4.1"}
 (fact "trims a trailing slash from nchan base urls"
   (!.js
    [(event-nchan/trim-trailing-slash "https://stream.test/")
@@ -185,7 +185,7 @@
     (event-nchan/trim-trailing-slash nil)])
   => ["https://stream.test" "https://stream.test" nil])
 
-^{:refer xt.db.runtime.event-nchan/derive-websocket-base-url :added "4.1"}
+^{:refer xt.db.system.event-nchan/derive-websocket-base-url :added "4.1"}
 (fact "converts http origins to websocket origins"
   (!.js
    [(event-nchan/derive-websocket-base-url "https://stream.test/")
@@ -194,7 +194,7 @@
     (event-nchan/derive-websocket-base-url nil)])
   => ["wss://stream.test" "ws://stream.test" "ws://stream.test" nil])
 
-^{:refer xt.db.runtime.event-nchan/channel-group :added "4.1"}
+^{:refer xt.db.system.event-nchan/channel-group :added "4.1"}
 (fact "resolves channel groups from opts then client"
   (!.js
    [(event-nchan/channel-group (event-nchan/client {"channel_group" "client-group"}) {})
@@ -202,7 +202,7 @@
     (event-nchan/channel-group (event-nchan/client {}) {})])
   => ["client-group" "opts-group" "user"])
 
-^{:refer xt.db.runtime.event-nchan/channel-id :added "4.1"}
+^{:refer xt.db.system.event-nchan/channel-id :added "4.1"}
 (fact "resolves channel ids from opts then client"
   (!.js
    [(event-nchan/channel-id (event-nchan/client {"channel_id" "client-id"}) {})
@@ -210,7 +210,7 @@
     (event-nchan/channel-id (event-nchan/client {}) {})])
   => ["client-id" "opts-id" "default"])
 
-^{:refer xt.db.runtime.event-nchan/resolve-first-message :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-first-message :added "4.1"}
 (fact "resolves the first_message option from opts then client"
   (!.js
    [(event-nchan/resolve-first-message (event-nchan/client {"first_message" "oldest"}) {})
@@ -218,7 +218,7 @@
     (event-nchan/resolve-first-message (event-nchan/client {}) {})])
   => ["oldest" "newest" nil])
 
-^{:refer xt.db.runtime.event-nchan/resolve-params :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-params :added "4.1"}
 (fact "merges params with opts overriding client defaults"
   (!.js
    (event-nchan/resolve-params
@@ -226,7 +226,7 @@
     {"params" {"b" 3 "c" 4}}))
   => {"a" 1 "b" 3 "c" 4})
 
-^{:refer xt.db.runtime.event-nchan/resolve-subscriber-path :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-subscriber-path :added "4.1"}
 (fact "resolves the subscriber path from opts or channel group"
   (!.js
    [(event-nchan/resolve-subscriber-path
@@ -237,7 +237,7 @@
      {"subscriber_path" "/opts/sub"})])
   => ["/stream/alpha" "/opts/sub"])
 
-^{:refer xt.db.runtime.event-nchan/resolve-publisher-path :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-publisher-path :added "4.1"}
 (fact "resolves the publisher path from opts or subscriber path"
   (!.js
    [(event-nchan/resolve-publisher-path
@@ -248,7 +248,7 @@
      {"publisher_path" "/opts/pub"})])
   => ["/stream/alpha/publish" "/opts/pub"])
 
-^{:refer xt.db.runtime.event-nchan/resolve-info-path :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-info-path :added "4.1"}
 (fact "resolves the info path from opts or subscriber path"
   (!.js
    [(event-nchan/resolve-info-path
@@ -259,14 +259,14 @@
      {"info_path" "/opts/info"})])
   => ["/stream/alpha/info" "/opts/info"])
 
-^{:refer xt.db.runtime.event-nchan/encode-query-params :added "4.1"}
+^{:refer xt.db.system.event-nchan/encode-query-params :added "4.1"}
 (fact "encodes flat nchan query params"
   (!.js
    [(event-nchan/encode-query-params {"id" "tab-a" "first_message" "newest"})
     (event-nchan/encode-query-params nil)])
   => ["id=tab-a&first_message=newest" ""])
 
-^{:refer xt.db.runtime.event-nchan/create-scaffold :added "4.1"}
+^{:refer xt.db.system.event-nchan/create-scaffold :added "4.1"}
 (fact "creates derived nchan endpoint scaffold values"
   (!.js
    (event-nchan/create-scaffold
@@ -292,7 +292,7 @@
                 "id" "id-1"
                 "first_message" "newest"}})
 
-^{:refer xt.db.runtime.event-nchan/resolve-publisher-url :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-publisher-url :added "4.1"}
 (fact "resolves publisher urls from direct config or scaffolded paths"
   (!.js
    [(event-nchan/resolve-publisher-url
@@ -308,7 +308,7 @@
   => ["https://publish.test/direct"
       "https://stream.test/stream/delta/publish?id=id-1"])
 
-^{:refer xt.db.runtime.event-nchan/resolve-info-url :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-info-url :added "4.1"}
 (fact "resolves info urls from direct config or scaffolded paths"
   (!.js
    [(event-nchan/resolve-info-url
@@ -323,7 +323,7 @@
   => ["https://info.test/direct"
       "https://stream.test/stream/delta/info"])
 
-^{:refer xt.db.runtime.event-nchan/resolve-request-transform :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-request-transform :added "4.1"}
 (fact "prefers request transforms from opts over client config"
   (!.js
    [(event-nchan/resolve-request-transform
@@ -334,7 +334,7 @@
      {"request_transform" "from-opts"})])
   => ["from-client" "from-opts"])
 
-^{:refer xt.db.runtime.event-nchan/resolve-client :added "4.1"}
+^{:refer xt.db.system.event-nchan/resolve-client :added "4.1"}
 (fact "resolves wrapped clients from db or opts and throws when missing"
   (!.js
    (do:>
@@ -349,7 +349,7 @@
       thrown])))
   => [true true true])
 
-^{:refer xt.db.runtime.event-nchan/client :added "4.1"}
+^{:refer xt.db.system.event-nchan/client :added "4.1"}
 (fact "wraps raw config as a tagged nchan client"
   (!.js
    (var client (event-nchan/client {"base_url" "https://stream.test"}))
@@ -357,7 +357,7 @@
     (event-nchan/raw-client client)])
   => [true {"base_url" "https://stream.test"}])
 
-^{:refer xt.db.runtime.event-nchan/connect :added "4.1"}
+^{:refer xt.db.system.event-nchan/connect :added "4.1"}
 (fact "connects through the websocket driver to the derived subscriber url"
   (notify/wait-on [:js 2000]
     (var urls [])
@@ -385,7 +385,7 @@
   => {"client" true
       "url" "wss://stream.test/stream/user?id=tab-a"})
 
-^{:refer xt.db.runtime.event-nchan/extract-message-data :added "4.1"}
+^{:refer xt.db.system.event-nchan/extract-message-data :added "4.1"}
 (fact "extracts message payload text from nchan frames"
   (!.js
    [(event-nchan/extract-message-data "plain")
@@ -393,7 +393,7 @@
     (event-nchan/extract-message-data {"body" "fallback"})])
   => ["plain" "{\"ok\":true}" "fallback"])
 
-^{:refer xt.db.runtime.event-nchan/decode-message :added "4.1"}
+^{:refer xt.db.system.event-nchan/decode-message :added "4.1"}
 (fact "decodes json text when the payload looks like json"
   (!.js
    [(event-nchan/decode-message "{\"db/sync\":{\"Entry\":[]}}")
@@ -403,7 +403,7 @@
       {"ok" true}
       "plain-text"])
 
-^{:refer xt.db.runtime.event-nchan/request-payload :added "4.1"}
+^{:refer xt.db.system.event-nchan/request-payload :added "4.1"}
 (fact "encodes requests directly or inside an event envelope"
   (!.js
    [(event-nchan/request-payload
@@ -417,7 +417,7 @@
   => ["{\"db/sync\":{\"Entry\":[]}}"
       "{\"event\":\"db/remove\",\"payload\":{\"db/remove\":{\"Entry\":[\"id-1\"]}}}"])
 
-^{:refer xt.db.runtime.event-nchan/payload->request :added "4.1"}
+^{:refer xt.db.system.event-nchan/payload->request :added "4.1"}
 (fact "normalizes raw nchan payloads into native xt.db requests"
   (!.js
    [(event-nchan/payload->request
@@ -438,7 +438,7 @@
       {"db/remove" {"Entry" ["id-1"]}}
       {"db/sync" {"Entry" [{"id" "id-1"}]}}])
 
-^{:refer xt.db.runtime.event-nchan/apply-request :added "4.1"}
+^{:refer xt.db.system.event-nchan/apply-request :added "4.1"}
 (fact "applies normalized requests to the local cache db"
   (!.js
    (var cache
@@ -473,7 +473,7 @@
            "__deleted__" false}]}}]
       [{"name" "apply-request"}]])
 
-^{:refer xt.db.runtime.event-nchan/handle-message :added "4.1"}
+^{:refer xt.db.system.event-nchan/handle-message :added "4.1"}
 (fact "decodes inbound frames, applies them, and notifies on_request"
   (notify/wait-on [:js 2000]
     (var cache
@@ -515,14 +515,14 @@
       "seen_name" "handle-message"
       "entry_name" "handle-message"})
 
-^{:refer xt.db.runtime.event-nchan/subscription? :added "4.1"}
+^{:refer xt.db.system.event-nchan/subscription? :added "4.1"}
 (fact "detects tagged nchan subscriptions"
   (!.js
    [(event-nchan/subscription? {"::" "db.nchan.subscription"})
     (event-nchan/subscription? {"::" "other.subscription"})])
   => [true false])
 
-^{:refer xt.db.runtime.event-nchan/subscription-active? :added "4.1"}
+^{:refer xt.db.system.event-nchan/subscription-active? :added "4.1"}
 (fact "treats subscriptions as active until explicitly disabled"
   (!.js
    [(event-nchan/subscription-active? {"::" "db.nchan.subscription"})
@@ -532,7 +532,7 @@
                                        "active" true})])
   => [true false false])
 
-^{:refer xt.db.runtime.event-nchan/unsubscribe :added "4.1"}
+^{:refer xt.db.system.event-nchan/unsubscribe :added "4.1"}
 (fact "marks nchan subscriptions inactive and closes the socket"
   (notify/wait-on [:js 2000]
     (var closes [])

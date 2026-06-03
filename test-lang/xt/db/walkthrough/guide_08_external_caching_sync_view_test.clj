@@ -16,7 +16,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.node :as node]
-             [xt.db.runtime :as xdb]
+             [xt.db.system :as xdb]
              [js.lib.driver-postgres :as js-pg]
              [js.lib.driver-sqlite :as js-sqlite]
              [xt.lang.spec-base :as xt]

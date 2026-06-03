@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.text.pgrest :as pgrest]
+  {:require [[xt.db.system.client-supabase :as system-supabase]
              [xt.lib.supabase :as supabase]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
@@ -32,10 +32,7 @@
 (defn.xt resolve-schema-name
   {:added "4.1.3"}
   [db client opts]
-  (var raw_client (-/raw-client client))
-  (return (or (xt/x:get-key raw_client "schema_name")
-              (xt/x:get-key opts "schema_name")
-              nil)))
+  (return (system-supabase/resolve-schema-name client opts)))
 
 (defn.xt resolve-api-key
   {:added "4.1.3"}
@@ -50,9 +47,7 @@
 (defn.xt create-scaffold
   {:added "4.1.3"}
   [db client opts]
-  (var scaffold (supabase/create-scaffold db client opts))
-  (xt/x:set-key scaffold "schema_name" (-/resolve-schema-name db client opts))
-  (return scaffold))
+  (return (system-supabase/create-scaffold client opts)))
 
 (defn.xt join-url
   {:added "4.1.3"}
@@ -62,42 +57,12 @@
 (defn.xt resolve-request-headers
   {:added "4.1.3"}
   [db client request opts]
-  (var scaffold (-/create-scaffold db client opts))
-  (var headers (fetch-if/merge-headers
-                (xt/x:get-key request "headers")
-                (xt/x:get-key scaffold "headers")))
-  (var schema_name (xt/x:get-key scaffold "schema_name"))
-  (when (xt/x:not-nil? schema_name)
-    (xt/x:set-key headers "Content-Profile" schema_name))
-  (when (and (== "GET" (xt/x:get-key request "method"))
-             (xt/x:not-nil? (xt/x:get-key headers "Content-Profile"))
-             (xt/x:nil? (xt/x:get-key headers "Accept-Profile")))
-    (xt/x:set-key headers
-                  "Accept-Profile"
-                  (xt/x:get-key headers "Content-Profile")))
-  (var api_key (xt/x:get-key scaffold "api_key"))
-  (when (xt/x:not-nil? api_key)
-    (xt/x:set-key headers "apikey" api_key))
-  (var auth_token (xt/x:get-key scaffold "auth_token"))
-  (when (xt/x:not-nil? auth_token)
-    (xt/x:set-key headers
-                  "Authorization"
-                  (xt/x:cat "Bearer " auth_token)))
-  (return headers))
+  (return (system-supabase/resolve-request-headers client request opts)))
 
 (defn.xt prepare-request
   {:added "4.1.3"}
   [db client input opts]
-  (var scaffold (-/create-scaffold db client opts))
-  (var request (fetch-if/request-prepare input))
-  (xt/x:set-key request
-                "url"
-                (-/join-url (xt/x:get-key scaffold "base_url")
-                            (xt/x:get-key request "url")))
-  (xt/x:set-key request
-                "headers"
-                (-/resolve-request-headers db client request opts))
-  (return request))
+  (return (system-supabase/prepare-request client input opts)))
 
 (defn.xt dispatch-request
   {:added "4.1.3"}
@@ -109,21 +74,7 @@
 (defn.xt unwrap-response
   {:added "4.1.3"}
   [response]
-  (cond (xt/x:nil? response)
-        (return nil)
-
-        (xt/x:not-nil? (xt/x:get-key response "body"))
-        (do (var body (xt/x:get-key response "body"))
-            (if (and (xt/x:is-object? body)
-                     (xt/x:not-nil? (xt/x:get-key body "data")))
-              (return (xt/x:get-key body "data"))
-              (return body)))
-
-        (xt/x:not-nil? (xt/x:get-key response "data"))
-        (return (xt/x:get-key response "data"))
-
-        :else
-        (return response)))
+  (return (system-supabase/unwrap-response response)))
 
 (defn.xt client
   {:added "4.1.3"}
@@ -145,24 +96,9 @@
 (defn.xt resolve-client
   {:added "4.1.3"}
   [db opts]
-  (var source (or (xt/x:get-key db "client")
-                  (xt/x:get-key opts "client")
-                  (xt/x:get-key db "transport")
-                  (xt/x:get-key opts "transport")
-                  nil))
-  (when (xt/x:nil? source)
-    (xt/x:err "Supabase pull missing client"))
-  (if (supabase/client? source)
-    (return source)
-    (return (-/client source))))
+  (return (system-supabase/resolve-client db opts)))
 
 (defn.xt pull
   {:added "4.1.3"}
   [db schema query-plan opts]
-  (var compiled (pgrest/compile-query query-plan))
-  (var client (-/resolve-client db (or opts {})))
-  (return
-   (promise/x:promise-then
-    (fetch/request client compiled opts)
-    (fn [response]
-      (return (-/unwrap-response response))))))
+  (return (system-supabase/pull db schema query-plan opts)))

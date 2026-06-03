@@ -1,4 +1,4 @@
-(ns xt.db.runtime-test
+(ns xt.db.system-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
@@ -12,21 +12,48 @@
              [xt.lang.spec-promise :as promise]
              [xt.event.util-throttle :as th]
              [xt.protocol.impl.connection-sql :as sql]
-             [xt.db.runtime :as instance]
+             [xt.db.system :as instance]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.runtime/unsupported-op :added "4.1"}
+^{:refer xt.db.system/unsupported-op :added "4.1"}
 (fact "signals unsupported backend operations"
 
   (!.js
    (instance/unsupported-op "clear" "db.void"))
   => (throws))
 
-^{:refer xt.db.runtime/get-dbtype :added "4.1"}
+^{:refer xt.db.system/ensure-memory-client :added "4.1"}
+(fact "coerces raw memory backend instances into tagged system clients"
+
+  (!.js
+   (xtd/get-in (instance/ensure-memory-client {"rows" {}})
+               ["::"]))
+  => "db.client.memory")
+
+^{:refer xt.db.system/ensure-sql-client :added "4.1"}
+(fact "coerces raw sql backend instances into tagged system clients"
+
+  (!.js
+   (xt/x:is-function?
+    (xt/x:get-key
+     (xt/x:get-key (instance/ensure-sql-client {"query_sync" (fn [_] (return true))})
+                   "instance")
+     "query_sync")))
+  => true)
+
+^{:refer xt.db.system/ensure-supabase-client :added "4.1"}
+(fact "coerces raw supabase backend instances into tagged system clients"
+
+  (!.js
+   (xtd/get-in (instance/ensure-supabase-client {"base_url" "https://db.test"})
+               ["::"]))
+  => "db.client.supabase")
+
+^{:refer xt.db.system/get-dbtype :added "4.1"}
 (fact "gets the backend type with a sql default"
 
   (!.js
@@ -34,7 +61,7 @@
     (instance/get-dbtype {"::" "db.cache"})])
   => ["db.sql" "db.cache"])
 
-^{:refer xt.db.runtime/process-event :added "4.1"}
+^{:refer xt.db.system/process-event :added "4.1"}
 (fact "dispatches events through the backend implementation map"
 
   (!.js
@@ -57,7 +84,7 @@
   => [["db-1" "add" 1 "schema-a" "lookup-a" true]
       ["db-1" "input" 2 "schema-b" "lookup-b" false]])
 
-^{:refer xt.db.runtime/process-triggers :added "4.1"}
+^{:refer xt.db.system/process-triggers :added "4.1"}
 (fact "runs only the listeners that match changed tables"
 
   (!.js
@@ -77,7 +104,7 @@
    [ids fired])
   => [["account"] ["account"]])
 
-^{:refer xt.db.runtime/add-trigger :added "4.1"}
+^{:refer xt.db.system/add-trigger :added "4.1"}
 (fact "adds triggers to the db map"
 
   (!.js
@@ -86,7 +113,7 @@
     (xtd/get-in db ["triggers" "watch" "id"])])
   => ["watch" "watch"])
 
-^{:refer xt.db.runtime/remove-trigger :added "4.1"}
+^{:refer xt.db.system/remove-trigger :added "4.1"}
 (fact "removes triggers from the db map"
 
   ^{:seedgen/base {:lua {:expect (l/as-lua [{"id" "watch"} nil])}}}
@@ -96,7 +123,7 @@
     (xtd/get-in db ["triggers" "watch"])])
   => [{"id" "watch"} nil])
 
-^{:refer xt.db.runtime/db-trigger :added "4.1"}
+^{:refer xt.db.system/db-trigger :added "4.1"}
 (fact "delegates trigger execution through the stored listeners"
 
   (!.js
@@ -108,7 +135,7 @@
      {"UserAccount" true}))
   => ["watch"])
 
-^{:refer xt.db.runtime/db-create :added "4.1"}
+^{:refer xt.db.system/db-create :added "4.1"}
 (fact "creates db wrappers with handlers and throttle state"
 
   ^{:seedgen/base {:lua {:expect (l/as-lua ["db.create" "instance-a" [] {} true true true "test"])}}}
@@ -132,7 +159,7 @@
     (xtd/get-in db ["opts" "mode"])])
   => ["db.create" "instance-a" [] {} true true true "test"])
 
-^{:refer xt.db.runtime/queue-event :added "4.1"}
+^{:refer xt.db.system/queue-event :added "4.1"}
 (fact "queues events and hands them to the throttle"
 
   ^{:seedgen/base {:lua {:expect (l/as-lua [1 42 []])}}}
@@ -149,7 +176,7 @@
     (. entry ["args"])])
   => [1 42 []])
 
-^{:refer xt.db.runtime/sync-event :added "4.1"}
+^{:refer xt.db.system/sync-event :added "4.1"}
 (fact "returns passthrough values or trigger/table pairs for sync events"
 
   (!.js
@@ -177,7 +204,7 @@
     fired])
   => ["watch" true true ["watch"]])
 
-^{:refer xt.db.runtime/db-exec-sync :added "4.1"}
+^{:refer xt.db.system/db-exec-sync :added "4.1"}
 (fact "executes raw sql only for sql backends"
 
   (!.js
@@ -198,7 +225,7 @@
     "SELECT 1;"))
   => (throws))
 
-^{:refer xt.db.runtime/db-pull-sync :added "4.1"}
+^{:refer xt.db.system/db-pull-sync :added "4.1"}
 (fact "dispatches pull requests through the configured backend"
 
   (!.js
@@ -223,7 +250,7 @@
     ["UserAccount" ["nickname"]]))
   => (throws))
 
-^{:refer xt.db.runtime/db-pull :added "4.1"}
+^{:refer xt.db.system/db-pull :added "4.1"}
 (fact "dispatches async pulls and falls back to sync backends"
 
   (notify/wait-on :js
@@ -266,7 +293,7 @@
       (repl/notify err))))
   => ["pull-sync-1" ["UserAccount" ["nickname"]] "sync"])
 
-^{:refer xt.db.runtime/db-delete-sync :added "4.1"}
+^{:refer xt.db.system/db-delete-sync :added "4.1"}
 (fact "dispatches deletions through the configured backend"
 
   (!.js
@@ -283,7 +310,7 @@
     ["user-1"]))
   => ["delete-1" "UserAccount" ["user-1"] "cache"])
 
-^{:refer xt.db.runtime/db-clear :added "4.1"}
+^{:refer xt.db.system/db-clear :added "4.1"}
 (fact "clears supported backends and throws for unsupported ones"
 
   (!.js
@@ -302,7 +329,7 @@
      :instance {}}))
   => (throws))
 
-^{:refer xt.db.runtime/add-view-trigger :added "4.1"}
+^{:refer xt.db.system/add-view-trigger :added "4.1"}
 (fact "creates view triggers that watch linked tables and pull the view tree"
 
   (!.js
@@ -331,7 +358,7 @@
   => [true true true])
 
 
-^{:refer xt.db.runtime/db-pull :added "4.1"}
+^{:refer xt.db.system/db-pull :added "4.1"}
 (fact "propagates unsupported pull backends through the async wrapper"
 
   (notify/wait-on :js

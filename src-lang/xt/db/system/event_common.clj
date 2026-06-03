@@ -1,8 +1,8 @@
-(ns xt.db.runtime.event-common
+(ns xt.db.system.event-common
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.runtime :as db-runtime]
+  {:require [[xt.db.system :as db-system]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]
@@ -181,17 +181,17 @@
   {:added "4.1.4"}
   [local-db request opts]
   (when (xt/x:not-nil? (xt/x:get-key request "db/sync"))
-    (db-runtime/sync-event local-db
-                           ["add" (xt/x:get-key request "db/sync")]))
+    (db-system/sync-event local-db
+                          ["add" (xt/x:get-key request "db/sync")]))
   (when (xt/x:not-nil? (xt/x:get-key request "db/remove"))
     (var schema (or (xt/x:get-key opts "schema")
                     (xt/x:get-key local-db "schema")
                     nil))
     (if (xt/x:not-nil? schema)
       (xt/for:object [[table ids] (xt/x:get-key request "db/remove")]
-        (db-runtime/db-delete-sync local-db schema table ids))
-      (db-runtime/sync-event local-db
-                             ["remove" (xt/x:get-key request "db/remove")])))
+        (db-system/db-delete-sync local-db schema table ids))
+      (db-system/sync-event local-db
+                            ["remove" (xt/x:get-key request "db/remove")])))
   (return request))
 
 (defn.xt apply-payload

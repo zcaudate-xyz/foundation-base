@@ -6,7 +6,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.substrate :as substrate]
-             [xt.db.runtime :as db-runtime]
+             [xt.db.system :as db-system]
              [xt.db.text.sql-call :as call]
              [xt.db.runtime.dataview :as dataview]]})
 
@@ -64,9 +64,9 @@
      (when (not ok)
        (return prepared))
      (return
-      (db-runtime/db-pull db
-                          schema
-                          (. prepared ["plan"]))))))
+      (db-system/db-pull db
+                         schema
+                         (. prepared ["plan"]))))))
 
 
 ;; 1. discover how transport works
