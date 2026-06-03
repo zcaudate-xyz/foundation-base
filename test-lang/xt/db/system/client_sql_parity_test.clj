@@ -123,12 +123,11 @@
                                       sample/SchemaLookup
                                       (ut/sqlite-opts nil))
            (repl/notify
-            [(client/process-event-remove db
-                                          "input"
-                                          {"UserAccount" [sample/RootUser]}
-                                          sample/Schema
-                                          sample/SchemaLookup
-                                          (ut/sqlite-opts nil))
+            [(client/prepare-event-input
+              {"UserAccount" [sample/RootUser]}
+              sample/Schema
+              sample/SchemaLookup
+              (ut/sqlite-opts nil))
              (xtd/arr-sort
               (client/process-event-remove db
                                            "remove"

@@ -63,12 +63,35 @@
    (promise/x:promise-run
     (-/pull-sync client schema tree opts))))
 
-(defn.xt delete-sync
-  "deletes ids directly from the memory client"
+(defn.xt record-add-sync
+  "adds records directly to a single table in the memory client"
+  {:added "4.1"}
+  [client schema table-name records opts]
+  (:= client (-/client client))
+  (return (store/set-sync client schema {table-name records} opts)))
+
+(defn.xt record-add
+  "adds records directly with async semantics"
+  {:added "4.1"}
+  [client schema table-name records opts]
+  (return
+   (promise/x:promise-run
+    (-/record-add-sync client schema table-name records opts))))
+
+(defn.xt record-delete-sync
+  "deletes ids directly from a single table in the memory client"
   {:added "4.1"}
   [client schema table-name ids opts]
   (:= client (-/client client))
   (return (store/delete-sync client schema table-name ids opts)))
+
+(defn.xt record-delete
+  "deletes ids directly with async semantics"
+  {:added "4.1"}
+  [client schema table-name ids opts]
+  (return
+   (promise/x:promise-run
+    (-/record-delete-sync client schema table-name ids opts))))
 
 (defn.xt clear
   "clears the memory client"

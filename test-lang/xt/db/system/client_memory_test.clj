@@ -17,7 +17,13 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.client-memory/client? :added "4.1"}
-(fact "TODO")
+(fact "detects tagged memory clients"
+
+  (!.js
+    [(client/client? (client/client nil))
+     (client/client? {"::" "db.client.memory"})
+     (client/client? nil)])
+  => [true true false])
 
 ^{:refer xt.db.system.client-memory/client :added "4.1"}
 (fact "creates a tagged memory client"
@@ -160,7 +166,38 @@
            (repl/notify out)))))
   => [{"nickname" "root"}])
 
-^{:refer xt.db.system.client-memory/delete-sync :added "4.1"}
+^{:refer xt.db.system.client-memory/record-add-sync :added "4.1"}
+(fact "adds records directly to a single table"
+
+  (!.js
+    (var db (client/client nil))
+    (client/record-add-sync
+     db
+     sample/Schema
+     "UserAccount"
+     [{"id" "USER-9" "nickname" "delta"}]
+     nil)
+    (xtd/get-in db ["rows" "UserAccount" "USER-9" "record" "data"]))
+  => {"id" "USER-9" "nickname" "delta"})
+
+^{:refer xt.db.system.client-memory/record-add :added "4.1"}
+(fact "adds records directly with async semantics"
+
+  (notify/wait-on :js
+    (var db (client/client nil))
+    (-> (client/record-add
+         db
+         sample/Schema
+         "UserAccount"
+         [{"id" "USER-10" "nickname" "echo"}]
+         nil)
+        (promise/x:promise-then
+         (fn [_]
+           (repl/notify
+            (xtd/get-in db ["rows" "UserAccount" "USER-10" "record" "data"]))))))
+  => {"id" "USER-10" "nickname" "echo"})
+
+^{:refer xt.db.system.client-memory/record-delete-sync :added "4.1"}
 (fact "deletes ids directly from the memory client"
 
   (!.js
@@ -171,7 +208,7 @@
                                sample/Schema
                                sample/SchemaLookup
                                nil)
-    (client/delete-sync
+    (client/record-delete-sync
      db
      sample/Schema
      "UserAccount"
@@ -180,6 +217,31 @@
     (xtd/get-in db ["rows"
                     "UserAccount"
                     "00000000-0000-0000-0000-000000000000"]))
+  => nil)
+
+^{:refer xt.db.system.client-memory/record-delete :added "4.1"}
+(fact "deletes ids directly with async semantics"
+
+  (notify/wait-on :js
+    (var db (client/client nil))
+    (client/process-event-sync db
+                               "add"
+                               {"UserAccount" [sample/RootUser]}
+                               sample/Schema
+                               sample/SchemaLookup
+                               nil)
+    (-> (client/record-delete
+         db
+         sample/Schema
+         "UserAccount"
+         ["00000000-0000-0000-0000-000000000000"]
+         nil)
+        (promise/x:promise-then
+         (fn [_]
+           (repl/notify
+            (xtd/get-in db ["rows"
+                            "UserAccount"
+                            "00000000-0000-0000-0000-000000000000"]))))))
   => nil)
 
 ^{:refer xt.db.system.client-memory/clear :added "4.1"}

@@ -219,20 +219,26 @@
   [client tag data schema lookup opts]
   (return (-/unsupported-op "process_event_remove")))
 
-(defn.xt delete-sync
+(defn.xt record-add-sync
+  "client-supabase does not support direct record writes"
+  {:added "4.1"}
+  [client schema table-name records opts]
+  (return (-/unsupported-op "record_add_sync")))
+
+(defn.xt record-add
+  "client-supabase does not support async record writes"
+  {:added "4.1"}
+  [client schema table-name records opts]
+  (return (-/unsupported-op "record_add")))
+
+(defn.xt record-delete-sync
   "client-supabase does not support direct deletes"
   {:added "4.1"}
   [client schema table-name ids opts]
-  (return (-/unsupported-op "delete_sync")))
+  (return (-/unsupported-op "record_delete_sync")))
 
-(defn.xt delete
+(defn.xt record-delete
   "client-supabase does not support async deletes"
   {:added "4.1"}
   [client schema table-name ids opts]
-  (return (-/unsupported-op "delete")))
-
-(defn.xt clear
-  "client-supabase does not support clear"
-  {:added "4.1"}
-  [client]
-  (return (-/unsupported-op "clear")))
+  (return (-/unsupported-op "record_delete")))

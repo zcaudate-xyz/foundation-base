@@ -39,6 +39,35 @@
                  (fn [id]
                    (return (raw/raw-delete table-name {"id" id} opts))))))
 
+(defn.xt prepare-sync-input
+  "prepares nested data into sql upsert statements"
+  {:added "4.1"}
+  [data schema lookup opts]
+  (var flat (f/flatten-bulk schema data))
+  (var statements (sql-table/table-emit-flat
+                  sql-table/table-emit-upsert
+                  schema
+                  lookup
+                  flat
+                  opts))
+  (return (xt/x:str-join "\n\n" statements)))
+
+(defn.xt prepare-event-input
+  "prepares nested removals into sql delete statements"
+  {:added "4.1"}
+  [data schema lookup opts]
+  (var flat (f/flatten-bulk schema data))
+  (var ordered (xtd/arr-keep (base-schema/table-order lookup)
+                            (fn [table-name]
+                              (return (:? (xt/x:has-key? flat table-name)
+                                          [table-name (xt/x:obj-keys (xt/x:get-key flat table-name))]
+                                          nil)))))
+  (var statements (xtd/arr-mapcat ordered
+                                 (fn [entry]
+                                   (var [table-name ids] entry)
+                                   (return (-/sql-gen-delete table-name ids opts)))))
+  (return (xt/x:str-join "\n\n" statements)))
+
 (defn.xt process-event-sync
   "processes nested data into sql upserts"
   {:added "4.1"}
@@ -46,19 +75,9 @@
   (:= client (-/client client))
   (var instance (xt/x:get-key client "instance"))
   (var flat (f/flatten-bulk schema data))
-  (var statements (sql-table/table-emit-flat
-                   sql-table/table-emit-upsert
-                   schema
-                   lookup
-                   flat
-                   opts))
-  (cond (== tag "input")
-        (return (xt/x:str-join "\n\n" statements))
-
-        :else
-        (do (sql/query-sync instance
-                            (xt/x:str-join "\n\n" statements))
-            (return (xt/x:obj-keys flat)))))
+  (sql/query-sync instance
+                 (-/prepare-sync-input data schema lookup opts))
+  (return (xt/x:obj-keys flat)))
 
 (defn.xt process-event-remove
   "processes nested removals into delete statements"
@@ -67,22 +86,9 @@
   (:= client (-/client client))
   (var instance (xt/x:get-key client "instance"))
   (var flat (f/flatten-bulk schema data))
-  (var ordered (xtd/arr-keep (base-schema/table-order lookup)
-                             (fn [table-name]
-                               (return (:? (xt/x:has-key? flat table-name)
-                                           [table-name (xt/x:obj-keys (xt/x:get-key flat table-name))]
-                                           nil)))))
-  (var statements (xtd/arr-mapcat ordered
-                                  (fn [entry]
-                                    (var [table-name ids] entry)
-                                    (return (-/sql-gen-delete table-name ids opts)))))
-  (cond (== tag "input")
-        (return (xt/x:str-join "\n\n" statements))
-
-        :else
-        (do (sql/query-sync instance
-                            (xt/x:str-join "\n\n" statements))
-            (return (xt/x:obj-keys flat)))))
+  (sql/query-sync instance
+                 (-/prepare-event-input data schema lookup opts))
+  (return (xt/x:obj-keys flat)))
 
 (defn.xt exec-sync
   "executes raw sql through query-sync"
@@ -120,7 +126,30 @@
         (xt/x:err "SQL pull expected decoded structured data"))
       (return output)))))
 
-(defn.xt delete-sync
+(defn.xt record-add-sync
+  "adds rows directly through query-sync"
+  {:added "4.1"}
+  [client schema table-name records opts]
+  (:= client (-/client client))
+  (var lookup {table-name {"position" 0}})
+  (return
+   (sql/query-sync
+    (xt/x:get-key client "instance")
+    (-/prepare-sync-input {table-name records} schema lookup opts))))
+
+(defn.xt record-add
+  "adds rows with async sql semantics"
+  {:added "4.1"}
+  [client schema table-name records opts]
+  (:= client (-/client client))
+  (var lookup {table-name {"position" 0}})
+  (return
+   (sql/ensure-promise
+    (sql/query
+     (xt/x:get-key client "instance")
+     (-/prepare-sync-input {table-name records} schema lookup opts)))))
+
+(defn.xt record-delete-sync
   "deletes rows through query-sync"
   {:added "4.1"}
   [client schema table-name ids opts]
@@ -130,7 +159,7 @@
     (xt/x:get-key client "instance")
     (xt/x:str-join "\n\n" (-/sql-gen-delete table-name ids opts)))))
 
-(defn.xt delete
+(defn.xt record-delete
   "deletes rows with async sql semantics"
   {:added "4.1"}
   [client schema table-name ids opts]
@@ -140,9 +169,3 @@
     (sql/query
      (xt/x:get-key client "instance")
      (xt/x:str-join "\n\n" (-/sql-gen-delete table-name ids opts))))))
-
-(defn.xt clear
-  "treats clear as a no-op success"
-  {:added "4.1"}
-  [client]
-  (return true))

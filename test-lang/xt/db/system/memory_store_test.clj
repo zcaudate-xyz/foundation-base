@@ -116,3 +116,52 @@
     (store/clear mem)
     (xtd/get-in mem ["rows" "UserAccount"]))
   => nil)
+
+
+^{:refer xt.db.system.memory-store/create-store :added "4.1"}
+(fact "creates an empty rows store"
+
+  (!.js
+    (store/create-store nil))
+  => {"rows" {}})
+
+^{:refer xt.db.system.memory-store/get-rows :added "4.1"}
+(fact "returns rows and initialises missing rows maps"
+
+  (!.js
+    (var current {"rows" {"Currency" {"USD" {"record" {"data" {"id" "USD"}}}}}})
+    (var fresh {})
+    (store/get-rows fresh)
+    [(store/get-rows current)
+     (. fresh ["rows"])])
+  => [{"Currency" {"USD" {"record" {"data" {"id" "USD"}}}}}
+      {}])
+
+^{:refer xt.db.system.memory-store/remove-input :added "4.1"}
+(fact "prepares ordered delete ids from nested data"
+
+  (!.js
+    (store/remove-input
+     sample/Schema
+     sample/SchemaLookup
+     {"UserAccount" [sample/RootUser]}))
+  => [["UserAccount" ["00000000-0000-0000-0000-000000000000"]]
+      ["UserProfile" ["c4643895-b0ce-44cc-b07b-2386bf18d43b"]]])
+
+^{:refer xt.db.system.memory-store/delete-sync :added "4.1"}
+(fact "deletes ids directly from the store"
+
+  (!.js
+    (var mem (store/create-store nil))
+    (store/set-sync mem
+                    sample/Schema
+                    {"UserAccount" [sample/RootUser]}
+                    nil)
+    (store/delete-sync
+     mem
+     sample/Schema
+     "UserAccount"
+     ["00000000-0000-0000-0000-000000000000"]
+     nil)
+    (xtd/get-in mem ["rows" "UserAccount" "00000000-0000-0000-0000-000000000000"]))
+  => nil)
