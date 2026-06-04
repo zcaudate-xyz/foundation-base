@@ -3,55 +3,83 @@
 
 (l/script :xtalk
   {:require [[xt.db.system.impl-common :as impl-common]
-             [xt.db.system.memory-store :as store]
+             [xt.db.system.memory-util :as util]
+             [xt.db.system.memory-graph :as graph]
+             [xt.db.text.base-flatten :as f]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
 
-(defn.xt pull-sync
+(defn.xt pull
   "fetches tree ir data from the memory client"
   {:added "4.1"}
   [client tree]
-  (var #{schema opts} client)
-  (return (store/fetch-sync client schema tree opts)))
+  (var #{rows schema opts} client)
+  (return (graph/pull rows
+                      schema
+                      tree
+                      opts)))
 
-(defn.xt pull
+(defn.xt pull-async
   "fetches tree ir data with async semantics"
   {:added "4.1"}
   [client tree]
   (return
    (promise/x:promise-run
-    (-/pull-sync client tree))))
+    (-/pull client tree))))
 
-(defn.xt record-add-sync
+(defn.xt record-add
   "adds records directly to a single table in the memory client"
   {:added "4.1"}
   [client table-name records]
-  (var #{schema opts} client)
-  (return (store/set-sync client schema {table-name records} opts)))
+  (var #{rows schema opts} client)
+  (return
+   (util/add-bulk rows schema {table-name records})))
 
-(defn.xt record-add
+(defn.xt record-add-async
   "adds records directly with async semantics"
   {:added "4.1"}
   [client table-name records]
-  (var #{schema opts} client)
   (return
    (promise/x:promise-run
-    (-/record-add-sync client table-name records))))
+    (-/record-add client table-name records))))
 
-(defn.xt record-delete-sync
+(defn.xt record-delete
   "deletes ids directly from a single table in the memory client"
   {:added "4.1"}
   [client table-name ids]
-  (var #{schema opts} client)
-  (return (store/delete-sync client schema table-name ids opts)))
+  (var #{rows schema opts} client)
+  (return (util/remove-bulk rows
+                            schema
+                            table-name
+                            ids)))
 
-(defn.xt record-delete
+(defn.xt record-delete-async
   "deletes ids directly with async semantics"
   {:added "4.1"}
   [client table-name ids]
   (return
    (promise/x:promise-run
-    (-/record-delete-sync client table-name ids))))
+    (-/record-delete client table-name ids))))
+
+
+;;
+;;
+;;
+
+(defn.xt process-add-event
+  [client data]
+  (var #{rows schema} client)
+  (return
+   (util/add-bulk rows schema data)))
+
+(defn.xt process-remove-event
+  [client data]
+  (var #{rows schema lookup} client)
+  (var ordered (f/flatten-bulk-ids schema lookup data))
+  (xt/for:array [entry ordered]
+    (var [table-name ids] entry)
+    (util/remove-bulk rows schema table-name ids))
+  (return (xt/x:arr-map ordered xt/x:first)))
 
 (defn.xt memory-client
   [schema lookup opts]
@@ -59,8 +87,3 @@
    (xt/x:obj-assign
     (impl-common/client-base "db.client.memory" schema lookup opts)
     {"rows" {}})))
-
-
-
-
-

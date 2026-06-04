@@ -322,3 +322,34 @@
   
   (s/seedgen-langadd 'xt.db.text.base-flatten {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.db.text.base-flatten {:lang [:lua :python] :write true}))
+
+
+^{:refer xt.db.text.base-flatten/flatten-bulk-ids :added "4.1"}
+(fact "prepares ordered delete ids from nested bulk data"
+
+  (!.js
+    (xtd/arr-map
+     (f/flatten-bulk-ids
+      sample/Schema
+      sample/SchemaLookup
+      {"UserAccount" [sample/RootUserFull]})
+     (fn [entry]
+       (var [table-name ids] entry)
+       (xtd/arr-sort ids
+                     (fn [id] (return id))
+                     xt/x:lt)
+       (return [table-name ids]))))
+  => [["UserAccount" ["00000000-0000-0000-0000-000000000000"]]
+      ["UserProfile" ["c4643895-b0ce-44cc-b07b-2386bf18d43b"]]
+      ["UserNotification" ["d0adc63a-0bfa-41fe-b054-f4fb0cb354bd"]]
+      ["Asset" ["222de282-ca29-4d04-81dd-86ec3f9189cf"
+                "63acfd25-4b1b-4de4-aa82-909019c95591"
+                "9261d072-b7f5-41df-935a-c36fe13acf14"
+                "9e576e3e-c73e-4d18-92b4-f975c1bed3d4"]]
+      ["Wallet" ["531f3edb-b9d4-4c8e-8419-22edfe715b15"]]
+      ["WalletAsset" ["2b3d4318-8cea-4420-a31c-f110d8198654"
+                      "38889fdc-de34-4161-bb37-f8844d67ee5a"
+                      "4b146b40-947a-42a5-b116-2ad8816c4078"
+                      "6eb2fa48-c753-41c6-abda-c680828da1d2"]]
+      ["Organisation" ["ec088f52-310b-491b-a034-d4efc222fd00"]]
+      ["Currency" ["STATS" "USD" "XLM" "XLM.T"]]])

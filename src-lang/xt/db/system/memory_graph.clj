@@ -233,7 +233,7 @@
                                {})
                            (xtd/obj-pick ids)
                            (xt/x:obj-vals)))
-    (var child-output (-/fetch-entries rows schema child-tree child-entries opts))
+    (var child-output (-/pull-entries rows schema child-tree child-entries opts))
     (xt/x:set-key out link-name (:? (and (xt/x:is-array? child-output)
                                          (< 0 (xt/x:len child-output)))
                                     child-output
@@ -259,8 +259,8 @@
     (:= out (xt/x:arr-slice out sidx eidx)))
   (return out))
 
-(defn.xt fetch-entries
-  "fetches results for a given tree and entry list"
+(defn.xt pull-entries
+  "pulles results for a given tree and entry list"
   {:added "4.1"}
   [rows schema tree entries opts]
   (var table-name (xt/x:first tree))
@@ -285,47 +285,55 @@
                                                      opts)))))
   (return (-/apply-custom out custom)))
 
-(defn.xt fetch
-  "fetches data from rows using tree ir"
+;;
+;;
+
+(defn.xt pull
+  "pulles data from rows using tree ir"
   {:added "4.1"}
   [rows schema tree opts]
   (:= tree (base-graph/select-tree schema tree opts))
   (var table-name (xt/x:first tree))
   (var entries (xt/x:obj-vals (or (xt/x:get-key rows table-name)
                                   {})))
-  (return (-/fetch-entries rows schema tree entries opts)))
+  (return (-/pull-entries rows schema tree entries opts)))
 
-(defn.xt query-select
-  "plans and fetches a select query"
+
+;;
+;; memory sql views
+;;
+
+(defn.xt view-select
+  "plans and pulles a select query"
   {:added "4.1"}
   [rows schema entry args opts]
   (var tree (base-tree/plan-select schema entry args opts))
-  (return (-/fetch rows schema tree opts)))
+  (return (-/pull rows schema tree opts)))
 
-(defn.xt query-count
-  "plans and fetches a count query"
+(defn.xt view-count
+  "plans and pulles a count query"
   {:added "4.1"}
   [rows schema entry args opts]
   (var tree (base-tree/plan-count schema entry args opts))
-  (return (-/fetch rows schema tree opts)))
+  (return (-/pull rows schema tree opts)))
 
-(defn.xt query-return
-  "plans and fetches a return query"
+(defn.xt view-return
+  "plans and pulles a return query"
   {:added "4.1"}
   [rows schema entry id args opts]
   (var tree (base-tree/plan-return schema entry id args opts))
-  (return (-/fetch rows schema tree opts)))
+  (return (-/pull rows schema tree opts)))
 
-(defn.xt query-return-bulk
-  "plans and fetches a bulk return query"
+(defn.xt view-return-bulk
+  "plans and pulles a bulk return query"
   {:added "4.1"}
   [rows schema entry ids args opts]
   (var tree (base-tree/plan-return-bulk schema entry ids args opts))
-  (return (-/fetch rows schema tree opts)))
+  (return (-/pull rows schema tree opts)))
 
-(defn.xt query-combined
-  "plans and fetches a combined query"
+(defn.xt view-combined
+  "plans and pulles a combined query"
   {:added "4.1"}
   [rows schema sel-entry sel-args ret-entry ret-args ret-omit opts]
   (var tree (base-tree/plan-combined schema sel-entry sel-args ret-entry ret-args ret-omit opts))
-  (return (-/fetch rows schema tree opts)))
+  (return (-/pull rows schema tree opts)))

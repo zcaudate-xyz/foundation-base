@@ -194,15 +194,18 @@
                        ~(meta &form))))))
 
 (defn hydrate-top-level-entry
-  [entry reserved grammar lib module]
+  [entry lang reserved lib module]
   (let [snapshot (lib/get-snapshot lib)
         [book-lang module-entry] (lib/snapshot-find-module snapshot module)
-        book (when book-lang
-               (lib/get-book lib book-lang))
+        book (or (when book-lang
+                   (lib/get-book lib book-lang))
+                 (lib/get-book lib lang))
+        grammar (:grammar book)
         [hmeta _] (entry/hydrate-form (:form-input entry)
                                       reserved
                                       grammar
-                                      {:module module-entry
+                                      {:lang lang
+                                       :module module-entry
                                        :snapshot snapshot
                                        :book book})
         entry (merge entry hmeta)]
@@ -213,7 +216,7 @@
 (defn intern-top-level-fn
   "interns a top level function"
   {:added "4.0"}
-  ([lang [op reserved grammar] [_ sym & body :as form-raw] smeta]
+  ([lang [op reserved] [_ sym & body :as form-raw] smeta]
    (let [{:keys [format section priority]} reserved
          [module fmeta] (intern-prep lang form-raw)
          form          (apply list op sym body)
@@ -226,7 +229,7 @@
                                                 reserved
                                                 meta-entry))
          lib    (impl/runtime-library)
-         entry  (hydrate-top-level-entry entry reserved grammar lib module)
+         entry  (hydrate-top-level-entry entry lang reserved lib module)
          sym    (cond (vector? sym)
                       (first (filter symbol? sym))
                        
@@ -294,7 +297,7 @@
       (str op ".") tag
       (fn [&form &env sym & body]
         `(intern-top-level-fn ~lang
-                              (quote [~op ~reserved ~grammar])
+                              (quote [~op ~reserved])
                               (quote ~&form)
                               (merge (quote ~(meta sym))
                                      {:time (time/time-ns)})))))))

@@ -135,7 +135,7 @@
 ;; prep schema inputs
 ;;
 
-(defn.xt prepare-sync-input
+(defn.xt prepare-add-input
   "prepares nested data into sqlite upsert statements"
   {:added "4.1"}
   [data schema lookup opts]
@@ -152,12 +152,7 @@
   "prepares nested removals into sqlite delete statements"
   {:added "4.1"}
   [data schema lookup opts]
-  (var flat (f/flatten-bulk schema data))
-  (var ordered (xtd/arr-keep (base-schema/table-order lookup)
-                             (fn [table-name]
-                               (return (:? (xt/x:has-key? flat table-name)
-                                           [table-name (xt/x:obj-keys (xt/x:get-key flat table-name))]
-                                           nil)))))
+  (var ordered (f/flatten-bulk-ids schema lookup data))
   (var statements (xtd/arr-mapcat ordered
                                   (fn [entry]
                                     (var [table-name ids] entry)
@@ -166,4 +161,6 @@
                                                    (fn [id]
                                                      (return (raw/raw-delete table-name {"id" id} opts))))))))
   (return (xt/x:str-join "\n\n" statements)))
+
+
 

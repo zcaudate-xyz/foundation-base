@@ -14,35 +14,6 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
 
-(defn.xt process-remove-event
-  "processes nested removals into sqlite delete statements"
-  {:added "4.1"}
-  [client data]
-  (var #{instance
-         schema
-         lookup
-         opts
-         } client)
-  (var flat (f/flatten-bulk schema data))
-  (sql/query instance
-                  (sql-table/prepare-remove-input data schema lookup opts))
-  (return (xt/x:obj-keys flat)))
-
-(defn.xt process-add-event
-  "processes nested data into sqlite upserts"
-  {:added "4.1"}
-  [client data]
-  (var #{instance
-         schema
-         lookup
-         opts} client)
-  (var flat (f/flatten-bulk schema data))
-  (sql/query instance
-                  (-/prepare-sync-input data schema lookup opts))
-  (return (xt/x:obj-keys flat)))
-
-
-
 (defn.xt pull-sync
   "runs a tree ir pull against a sqlite client"
   {:added "4.1"}
@@ -112,6 +83,35 @@
   (return (sql/query instance
                           raw-input)))
 
+
+(defn.xt process-remove-event
+  "processes nested removals into sqlite delete statements"
+  {:added "4.1"}
+  [client data]
+  (var #{instance
+         schema
+         lookup
+         opts
+         } client)
+  (var flat (f/flatten-bulk schema data))
+  (sql/query instance
+                  (sql-table/prepare-remove-input data schema lookup opts))
+  (return (xt/x:obj-keys flat)))
+
+(defn.xt process-add-event
+  "processes nested data into sqlite upserts"
+  {:added "4.1"}
+  [client data]
+  (var #{instance
+         schema
+         lookup
+         opts} client)
+  (var flat (f/flatten-bulk schema data))
+  (sql/query instance
+                  (-/prepare-sync-input data schema lookup opts))
+  (return (xt/x:obj-keys flat)))
+
+
 (defn.xt sqlite-client
   "creates the thin sqlite client record with stored schema context"
   {:added "4.1"}
@@ -128,7 +128,7 @@
 
 
 (comment
-
+  
   
   (defn.xt prepare-event-input
     "prepares nested removals into sqlite delete statements"

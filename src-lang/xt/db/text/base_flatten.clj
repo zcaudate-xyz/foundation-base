@@ -145,3 +145,16 @@
         (when (xt/x:not-nil? obj)
           (-/flatten-obj schema table-name obj {} acc)))))
   (return acc))
+
+(defn.xt flatten-bulk-ids
+  "prepares ordered delete ids from nested input data"
+  {:added "4.1"}
+  [schema lookup m]
+  (var flat (-/flatten-bulk schema m))
+  (return
+   (xtd/arr-keep (sch/table-order lookup)
+                 (fn [table-name]
+                   (return (:? (xt/x:has-key? flat table-name)
+                               [table-name (xt/x:obj-keys (xt/x:get-key flat table-name))]
+                               nil))))))
+
