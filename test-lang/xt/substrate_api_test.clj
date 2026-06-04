@@ -9,8 +9,6 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.state :as model]
-             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]]})
 
 (l/script- :lua
@@ -18,8 +16,6 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.state :as model]
-             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]]})
 
 (l/script- :python
@@ -27,8 +23,6 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.state :as model]
-             [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as event-node]]})
 
 (fact:global

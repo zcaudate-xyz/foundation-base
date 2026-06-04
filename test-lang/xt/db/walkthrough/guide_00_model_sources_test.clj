@@ -7,123 +7,92 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.node :as node]
+   :require [[js.lib.driver-sqlite :as js-sqlite]
+             [xt.substrate :as main]
+             [xt.db.system.impl-postgres :as pg-impl]
+             [xt.db.system.impl-sqlite :as sqlite-impl]
              [xt.db.helpers.test-fixtures :as fixtures]
-             [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-repl :as repl]
-             [xt.lang.common-data :as xtd]
-             [xt.substrate :as event-node]]})
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.walkthrough.guide-00-model-sources/STEP.00-structural-sources :added "4.1"}
-(fact "step 00: define primary and caching once at the model level while views keep the sql-pull query shape"
+(fact "step 00: set up an xt.substrate node with explicit db services while views keep the query shape"
 
-  (notify/wait-on [:js 10000]
-    (-> (node/create
-         {"node_id" "admin-screen"
-          "db" {"schema" (@! fixtures/+schema+)
-                "lookup" (@! fixtures/+lookup+)
-                "sources"
-                {"primary" {"kind" "postgres"}
-                 "caching" {"kind" "sqlite"}}}
-          "spaces"
-          {"screen/admin"
-           {"models"
-            {"entries-screen"
-             {"views"
-              {"list" {"resolver" (@! fixtures/+resolver-model-query+)
-                       "source" "caching"}
-               "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
-                         "source" "primary"}}}}}}})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify (node/summarise out))))))
-  => {"id" "admin-screen"
-      "spaces"
-      {"screen/admin"
-       {"models"
-       {"entries-screen"
-        {"sources"
-         {"primary" {"kind" "postgres"
-                     "sync_from" nil
-                     "live" false
-                     "data_count" 0}
-          "caching" {"kind" "sqlite"
-                     "sync_from" "primary"
-                     "live" false
-                     "data_count" 0}}
-         "views"
-         {"list" {"source" "caching"
-                  "status" "idle"
-                  "query_keys" ["type" "table" "select_entry" "return_entry"]}
-          "detail" {"source" "primary"
-                    "status" "idle"
-                    "query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}}}}}})
+  (!.js
+   (var node
+        (main/node-create
+         {"services"
+          {"db/primary"
+           (pg-impl/postgres-client
+            (@! fixtures/+schema+)
+            (@! fixtures/+lookup+)
+            {}
+            {"schema_name" "scratch"})
+           "db/caching"
+           (sqlite-impl/sqlite-client
+            (@! fixtures/+schema+)
+            (@! fixtures/+lookup+)
+            nil)}}))
+   {"services"
+    {"primary" {"dbtype" (. (main/get-service node "db/primary") ["::"])
+                "sync_from" nil
+                "data_count" 0}
+     "caching" {"dbtype" (. (main/get-service node "db/caching") ["::"])
+                "sync_from" "primary"
+                "data_count" 0}}
+    "views"
+    {"list" {"source" "caching"
+             "query_keys" (xt/x:obj-keys (@! fixtures/+resolver-model-query+))}
+     "detail" {"source" "primary"
+               "query_keys" (xt/x:obj-keys (@! fixtures/+resolver-inline-query+))}}})
+  => {"services"
+      {"primary" {"dbtype" "db.client.postgres"
+                  "sync_from" nil
+                  "data_count" 0}
+       "caching" {"dbtype" "db.client.sqlite"
+                  "sync_from" "primary"
+                  "data_count" 0}}
+      "views"
+      {"list" {"source" "caching"
+               "query_keys" ["type" "table" "select_entry" "return_entry"]}
+       "detail" {"source" "primary"
+                 "query_keys" ["type" "table" "select_entry" "select_args" "return_entry"]}}})
 
 ^{:refer xt.db.walkthrough.guide-00-model-sources/STEP.01-empty-query :added "4.1"}
-(fact "step 01: querying the empty structural caching source returns a ready empty result"
+(fact "step 01: querying the empty caching service on the xt.substrate node returns an empty result"
 
   (notify/wait-on [:js 10000]
-   (-> (node/create
-       {"node_id" "admin-screen"
-        "db" {"schema" (@! fixtures/+schema+)
-              "lookup" (@! fixtures/+lookup+)
-              "sources"
-              {"primary" {"kind" "postgres"}
-               "caching" {"kind" "sqlite"}}}
-        "spaces"
-        {"screen/admin"
-         {"models"
-          {"entries-screen"
-           {"views"
-            {"list" {"resolver" (@! fixtures/+resolver-model-query+)
-                     "source" "caching"}
-             "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
-                       "source" "primary"}}}}}}})
-      (promise/x:promise-then
-       (fn [node]
-         (return
-          (node/query
-           node
-           "screen/admin"
-           {"view" {"model_id" "entries-screen"
-                    "view_id" "list"}}))))
-      (promise/x:promise-then
-       (fn [result]
-         (repl/notify
-          result)))))
-  => {"query_key" nil, "value" [], "status" "ready", "source" "caching"})
-
-
-(comment
-  (notify/wait-on [:js 10000]
-    (-> (node/create
-         {"node_id" "admin-screen"
-          "db" {"schema" (@! fixtures/+schema+)
-                "lookup" (@! fixtures/+lookup+)
-                "sources"
-                {"primary" {"kind" "postgres"}
-                 "caching" {"kind" "sqlite"}}}
-          "spaces"
-          {"screen/admin"
-           {"models"
-            {"entries-screen"
-             {"views"
-              {"list" {"resolver" (@! fixtures/+resolver-model-query+)
-                       "source" "caching"}
-               "detail" {"resolver" (@! fixtures/+resolver-inline-query+)
-                         "source" "primary"}}}}}}})
-        (promise/x:promise-then
-         (fn [node]
-           (repl/notify
-            node))))))
-
-
-(comment
-  ;; what I'd like to happen is that a shared worker is setup, and all browser 
-  ;;
-  )
+    (promise/x:promise-then
+     (sqlite-impl/sqlite-client-init
+      (sqlite-impl/sqlite-client
+       (@! fixtures/+schema+)
+       (@! fixtures/+lookup+)
+       nil
+       {"filename" ":memory:"})
+      js-sqlite/driver)
+      (fn [caching-db]
+        (var node
+             (main/node-create
+              {"services"
+               {"db/primary"
+                (pg-impl/postgres-client
+                 (@! fixtures/+schema+)
+                 (@! fixtures/+lookup+)
+                 {}
+                 {"schema_name" "scratch"})
+                "db/caching" caching-db}}))
+        (var result
+             (sqlite-impl/pull (main/get-service node "db/caching")
+                               ["Entry" ["name"]]))
+        (repl/notify
+         {"value" result
+          "count" (xt/x:len result)
+          "dbtype" (. (main/get-service node "db/caching") ["::"])}))))
+  => {"value" []
+      "count" 0
+      "dbtype" "db.client.sqlite"})
