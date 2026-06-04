@@ -126,19 +126,7 @@
 
 (defn.xt get-dbtype
   [db]
-  (var tag (xt/x:get-key db "::"))
-  (cond (== tag "db.client.memory")
-        (return "db.cache")
-
-        (== tag "db.client.sql")
-        (return "db.sql")
-
-        (== tag "db.client.supabase")
-        (return "db.supabase")
-
-        :else
-        (return (or tag
-                    "db.sql"))))
+  (return (xt/x:get-key db "::")))
 
 (defn.xt process-event
   "processes an event"

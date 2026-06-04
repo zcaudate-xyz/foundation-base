@@ -170,3 +170,35 @@
         {"@/page"
          {"pred" nil,
           "meta" {"listener/id" "@/page", "listener/type" "view"}}}}]))
+
+^{:refer xt.db.substrate/init-db-services :added "4.1"}
+(fact "initializes db/primary and db/caching services from node service config"
+
+  (notify/wait-on :js
+    (var node
+         (event-node/node-create
+          {"schema"
+           {"Entry"
+            {"id" {"type" "uuid" "primary" true "order" 0}
+             "name" {"type" "text" "order" 1}}}
+           "lookup"
+           {"Entry" {"position" 0}}
+           "services"
+           {"db/primary"
+            {"kind" "postgres"
+             "instance" {"database" "test-scratch"}}
+            "db/caching"
+            {"kind" "sqlite"
+             "instance" {"filename" ":memory:"}}}}))
+    (db-helper/init-db-services node)
+    (repl/notify
+     {"primary_type" (xt/x:get-key (event-node/get-service node "db/primary") "::")
+      "caching_type" (xt/x:get-key (event-node/get-service node "db/caching") "::")
+      "primary_db" (xtd/get-in (event-node/get-service node "db/primary")
+                               ["instance" "database"])
+      "caching_file" (xtd/get-in (event-node/get-service node "db/caching")
+                                 ["instance" "filename"])}))
+  => {"primary_type" "db.sql"
+      "caching_type" "db.sql"
+      "primary_db" "test-scratch"
+      "caching_file" ":memory:"})

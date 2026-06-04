@@ -193,25 +193,43 @@
       `(intern-free-fn ~lang (quote ~&form)
                        ~(meta &form))))))
 
+(defn hydrate-top-level-entry
+  [entry reserved grammar lib module]
+  (let [snapshot (lib/get-snapshot lib)
+        [book-lang module-entry] (lib/snapshot-find-module snapshot module)
+        book (when book-lang
+               (lib/get-book lib book-lang))
+        [hmeta _] (entry/hydrate-form (:form-input entry)
+                                      reserved
+                                      grammar
+                                      {:module module-entry
+                                       :snapshot snapshot
+                                       :book book})
+        entry (merge entry hmeta)]
+    (if-let [hydrate-hook (:hydrate-hook reserved)]
+      (or (hydrate-hook entry) entry)
+      entry)))
+
 (defn intern-top-level-fn
   "interns a top level function"
   {:added "4.0"}
-  ([lang [op reserved] [_ sym & body :as form-raw] smeta]
+  ([lang [op reserved grammar] [_ sym & body :as form-raw] smeta]
    (let [{:keys [format section priority]} reserved
          [module fmeta] (intern-prep lang form-raw)
          form          (apply list op sym body)
-         
+         meta-entry    (merge smeta
+                              fmeta
+                              {:lang lang
+                               :module module})
          [tmeta entry] (binding [preprocess-base/*macro-splice* (:static/template smeta)]
                          (entry/create-code-raw form
                                                 reserved
-                                                (merge smeta
-                                                       fmeta
-                                                       {:lang lang
-                                                        :module module})))
+                                                meta-entry))
          lib    (impl/runtime-library)
+         entry  (hydrate-top-level-entry entry reserved grammar lib module)
          sym    (cond (vector? sym)
                       (first (filter symbol? sym))
-                      
+                       
                       :else sym)
          var    (ptr/ptr-intern (:namespace entry)
                                 (with-meta sym (merge tmeta
@@ -276,7 +294,7 @@
       (str op ".") tag
       (fn [&form &env sym & body]
         `(intern-top-level-fn ~lang
-                              (quote [~op ~reserved])
+                              (quote [~op ~reserved ~grammar])
                               (quote ~&form)
                               (merge (quote ~(meta sym))
                                      {:time (time/time-ns)})))))))

@@ -54,12 +54,12 @@
   => "db.client.supabase")
 
 ^{:refer xt.db.system/get-dbtype :added "4.1"}
-(fact "gets the backend type with a sql default"
+(fact "gets the backend type from the explicit db tag"
 
   (!.js
    [(instance/get-dbtype {})
     (instance/get-dbtype {"::" "db.cache"})])
-  => ["db.sql" "db.cache"])
+  => [nil "db.cache"])
 
 ^{:refer xt.db.system/process-event :added "4.1"}
 (fact "dispatches events through the backend implementation map"

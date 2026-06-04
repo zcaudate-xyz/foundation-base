@@ -1,6 +1,7 @@
 (ns postgres.sample.scratch-v3-test
   (:require [clojure.string :as str]
             [hara.lang :as l]
+            [hara.runtime.postgres.base.application :as app]
             [postgres.sample.scratch-v3 :as scratch])
   (:use code.test))
 
@@ -21,6 +22,13 @@
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
+
+^{:refer postgres.sample.scratch-v3/Currency :added "4.1"}
+(fact "registers Currency in the scratch-v3 application schema"
+  (let [appv (app/app-create "scratch-v3")]
+    [(contains? (:tables appv) 'Currency)
+     (some? (get-in appv [:schema :tree :Currency]))])
+  => [true true])
 
 ^{:refer postgres.sample.scratch-v3/Currency :added "4.1"}
 (fact "defines currency queries, mutations, and schema bindings"
