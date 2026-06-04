@@ -7,7 +7,8 @@
              [xt.db.system.memory-graph :as graph]
              [xt.db.text.base-flatten :as f]
              [xt.lang.spec-base :as xt]
-             [xt.lang.spec-promise :as promise]]})
+             [xt.lang.spec-promise :as promise]
+             [xt.protocol.impl.graphdb :as graphdb]]})
 
 (defn.xt pull
   "fetches tree ir data from the memory client"
@@ -18,6 +19,12 @@
                       schema
                       tree
                       opts)))
+
+(defn.xt pull-sync
+  "fetches tree ir data synchronously from the memory client"
+  {:added "4.1"}
+  [client tree]
+  (return (-/pull client tree)))
 
 (defn.xt pull-async
   "fetches tree ir data with async semantics"
@@ -87,3 +94,25 @@
    (xt/x:obj-assign
     (impl-common/client-base "db.client.memory" schema lookup opts)
     {"rows" {}})))
+
+(defn.xt attach-graphdb
+  "attaches graphdb methods to a raw memory client"
+  {:added "4.1"}
+  [client]
+  (return
+   (graphdb/db-create
+    client
+    {"pull"          (fn [client schema tree opts]
+                       (return (-/pull-async client tree)))
+     "pull_sync"     (fn [client schema tree opts]
+                       (return (-/pull-sync client tree)))
+     "record_add"    (fn [client schema table-name records opts]
+                       (return (-/record-add-async client table-name records)))
+     "record_delete" (fn [client schema table-name ids opts]
+                       (return (-/record-delete-async client table-name ids)))})))
+
+(defn.xt client
+  "creates a protocol.db-graph compatible memory client"
+  {:added "4.1"}
+  [schema lookup opts]
+  (return (-/attach-graphdb (-/memory-client schema lookup opts))))

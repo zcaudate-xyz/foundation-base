@@ -49,8 +49,8 @@
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
-                          "UserAccount"
-                          [sample/RootUser])
+                     "UserAccount"
+                     [sample/RootUser])
     (impl/pull
      client
      ["UserAccount"
@@ -72,8 +72,8 @@
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
-                          "UserAccount"
-                          [sample/RootUser])
+                     "UserAccount"
+                     [sample/RootUser])
     (impl/pull
      client
      ["UserAccount"
@@ -89,8 +89,8 @@
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
-                          "UserAccount"
-                          [sample/RootUser])
+                     "UserAccount"
+                     [sample/RootUser])
     (impl/record-delete
      client
      "UserAccount"
@@ -103,21 +103,18 @@
 ^{:refer xt.db.system.impl-memory/pull :added "4.1"}
 (fact "pull reads through async semantics"
 
-  (notify/wait-on :js
+  (!.js
     (var client (impl/memory-client sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
-                          "UserAccount"
-                          [sample/RootUser])
-    (-> (impl/pull
-         client
-         ["UserAccount"
-          {"id" "00000000-0000-0000-0000-000000000000"}
-          ["nickname"]])
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))))
+                     "UserAccount"
+                     [sample/RootUser])
+    (impl/pull
+     client
+     ["UserAccount"
+      {"id" "00000000-0000-0000-0000-000000000000"}
+      ["nickname"]]))
   => [{"nickname" "root"}])
 
 ^{:refer xt.db.system.impl-memory/pull-async :added "4.1"}
@@ -143,22 +140,19 @@
 ^{:refer xt.db.system.impl-memory/record-add :added "4.1"}
 (fact "record-add writes through async semantics"
 
-  (notify/wait-on :js
+  (!.js
     (var client (impl/memory-client sample/Schema
                                     sample/SchemaLookup
                                     nil))
-    (-> (impl/record-add
-         client
-         "UserAccount"
-         [{"id" "USER-10" "nickname" "echo"}])
-        (promise/x:promise-then
-         (fn [_]
-           (repl/notify
-            (xtd/get-in client ["rows"
-                                "UserAccount"
-                                "USER-10"
-                                "record"
-                                "data"]))))))
+    (impl/record-add
+     client
+     "UserAccount"
+     [{"id" "USER-10" "nickname" "echo"}])
+    (xtd/get-in client ["rows"
+                        "UserAccount"
+                        "USER-10"
+                        "record"
+                        "data"]))
   => {"id" "USER-10" "nickname" "echo"})
 
 ^{:refer xt.db.system.impl-memory/record-add-async :added "4.1"}
@@ -185,23 +179,20 @@
 ^{:refer xt.db.system.impl-memory/record-delete :added "4.1"}
 (fact "record-delete removes ids with async semantics"
 
-  (notify/wait-on :js
+  (!.js
     (var client (impl/memory-client sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
-                          "UserAccount"
-                          [sample/RootUser])
-    (-> (impl/record-delete
-         client
-         "UserAccount"
-         ["00000000-0000-0000-0000-000000000000"])
-        (promise/x:promise-then
-         (fn [_]
-           (repl/notify
-            (xtd/get-in client ["rows"
-                                "UserAccount"
-                                "00000000-0000-0000-0000-000000000000"]))))))
+                     "UserAccount"
+                     [sample/RootUser])
+    (impl/record-delete
+     client
+     "UserAccount"
+     ["00000000-0000-0000-0000-000000000000"])
+    (xtd/get-in client ["rows"
+                        "UserAccount"
+                        "00000000-0000-0000-0000-000000000000"]))
   => nil)
 
 ^{:refer xt.db.system.impl-memory/record-delete-async :added "4.1"}
@@ -228,7 +219,7 @@
 
 ^{:refer xt.db.system.impl-memory/process-add-event :added "4.1"}
 (fact "process-add-event merges nested data into rows and links"
-
+  
   (!.js
     (var client (impl/memory-client sample/Schema
                                     sample/SchemaLookup
