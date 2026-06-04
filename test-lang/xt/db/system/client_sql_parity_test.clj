@@ -12,7 +12,7 @@
                  :dart         {:extra [[dart.lib.driver-sqlite :as dart-sqlite]]}}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.system.client-sql :as client]
+   :require [[xt.db.system.base-sql :as client]
              [xt.db.helpers.data-main-test :as sample]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
@@ -31,7 +31,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.system.client-sql/process-event-sync :added "4.1"
+^{:refer xt.db.system.base-sql/process-event-sync :added "4.1"
   :setup [(def +user-profile-tree+
             ["UserAccount"
              ["nickname"
@@ -51,13 +51,13 @@
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (str/join "\n\n"
                                        (manage/table-create-all
                                         sample/Schema
                                         sample/SchemaLookup
                                         (ut/sqlite-opts nil))))
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (raw/raw-insert "Currency"
                                              ["id" "type" "symbol" "native" "decimal"
                                               "name" "plural" "description"]
@@ -81,7 +81,7 @@
   => [+sql-touched-output+
       +nested-user-output+])
 
-^{:refer xt.db.system.client-sql/process-event-remove :added "4.1"
+^{:refer xt.db.system.base-sql/process-event-remove :added "4.1"
   :setup [(def +user-profile-tree+
             ["UserAccount"
              ["nickname"
@@ -103,13 +103,13 @@
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (str/join "\n\n"
                                        (manage/table-create-all
                                         sample/Schema
                                         sample/SchemaLookup
                                         (ut/sqlite-opts nil))))
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (raw/raw-insert "Currency"
                                              ["id" "type" "symbol" "native" "decimal"
                                               "name" "plural" "description"]

@@ -81,7 +81,7 @@
                 (@! fixtures/+schema+)
                 (@! fixtures/+lookup+)
                 (sql-util/sqlite-opts nil)))
-       (dbsql/query-sync
+       (dbsql/query
         conn
         (str/join "\n\n"
                   (sql-manage/table-create-all
@@ -124,7 +124,7 @@
                     (@! fixtures/+lookup+)
                     (sql-util/postgres-opts (@! fixtures/+lookup+))))
            (promise/x:promise-then
-            (dbsql/query conn "SELECT 1 as n;")
+            (dbsql/query-async conn "SELECT 1 as n;")
             (fn [result]
               (repl/notify
                {"has_db" (xt/x:not-nil? db)
@@ -148,7 +148,7 @@
         (promise/x:promise-then
          (fn [conn]
            (promise/x:promise-then
-            (dbsql/query
+            (dbsql/query-async
              conn
              (xt/x:cat
               "INSERT INTO \"scratch\".\"Entry\" (name, tags) "

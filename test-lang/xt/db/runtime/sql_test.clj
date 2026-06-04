@@ -40,7 +40,7 @@
    (impl-sql/sql-process-event-sync
     (dbsql/connection-create
      {"queries" []}
-     {"query_sync" (fn [state input]
+     {"query" (fn [state input]
                      (xt/x:arr-push (. state ["queries"]) input)
                      (return input))})
     "input"
@@ -56,7 +56,7 @@
                  "conn"
                  (dbsql/connection-create
                   (. state ["raw"])
-                  {"query_sync" (fn [input-state input]
+                  {"query" (fn [input-state input]
                                   (xt/x:arr-push (. input-state ["queries"]) input)
                                   (return input))}))
    (var touched
@@ -78,7 +78,7 @@
    (impl-sql/sql-process-event-remove
     (dbsql/connection-create
      {"queries" []}
-     {"query_sync" (fn [state input]
+     {"query" (fn [state input]
                      (xt/x:arr-push (. state ["queries"]) input)
                      (return input))})
     "input"
@@ -94,7 +94,7 @@
                  "conn"
                  (dbsql/connection-create
                   (. state ["raw"])
-                  {"query_sync" (fn [input-state input]
+                  {"query" (fn [input-state input]
                                   (xt/x:arr-push (. input-state ["queries"]) input)
                                   (return input))}))
    (var touched
@@ -116,7 +116,7 @@
    (impl-sql/sql-pull-sync
     (dbsql/connection-create
      {}
-     {"query_sync" (fn [_conn _input]
+     {"query" (fn [_conn _input]
                      (return [{"id" "USER-0"}]))})
     sample/Schema
     ["UserAccount" ["id"]]
@@ -130,7 +130,7 @@
    (impl-sql/sql-pull-sync
     (dbsql/connection-create
      {}
-     {"query_sync" (fn [_conn _input]
+     {"query" (fn [_conn _input]
                      (return "[{\"id\":\"USER-0\"}]"))})
     sample/Schema
     ["UserAccount" ["id"]]
@@ -138,13 +138,13 @@
   => (throws))
 
 ^{:refer xt.db.runtime.sql/sql-delete-sync :added "4.1"}
-(fact "runs delete statements through query-sync"
+(fact "runs delete statements through query"
 
   (!.js
    (impl-sql/sql-delete-sync
     (dbsql/connection-create
      {"queries" []}
-     {"query_sync" (fn [state input]
+     {"query" (fn [state input]
                      (xt/x:arr-push (. state ["queries"]) input)
                      (return input))})
     sample/Schema

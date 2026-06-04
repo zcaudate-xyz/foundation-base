@@ -170,7 +170,7 @@
          (fn [interim]
            (var #{conn ok prepared db-opts} interim)
            (return
-            (-> (sql/query conn "SELECT \"id\" FROM \"scratch\".\"Entry\" WHERE \"name\" = 'alpha';")
+            (-> (sql/query-async conn "SELECT \"id\" FROM \"scratch\".\"Entry\" WHERE \"name\" = 'alpha';")
                 (spec-promise/x:promise-then
                  (fn [alpha-id]
                    (return #{conn ok prepared db-opts alpha-id})))))))
@@ -228,7 +228,7 @@
          (fn [interim]
            (var #{conn cleared} interim)
            (return
-            (-> (sql/query conn "SELECT COUNT(*)::int FROM \"scratch\".\"Entry\";")
+            (-> (sql/query-async conn "SELECT COUNT(*)::int FROM \"scratch\".\"Entry\";")
                 (spec-promise/x:promise-then
                  (fn [count]
                    (return #{conn cleared count})))))))        

@@ -36,7 +36,7 @@
                         (sql-util/sqlite-opts nil)))
 
                ;; 2. Install schema (create tables)
-               (dbsql/query-sync
+               (dbsql/query
                 conn
                 (str/join "\n\n"
                           (sql-manage/table-create-all

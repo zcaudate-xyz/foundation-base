@@ -97,7 +97,7 @@
    (promise/x:promise-then
     (dbsql/connect (js-sqlite/driver) {})
     (fn [conn]
-      (dbsql/query-sync conn
+      (dbsql/query conn
                         (str/join "\n\n"
                                   (manage/table-create-all
                                    sample/Schema

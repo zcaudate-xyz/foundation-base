@@ -35,7 +35,7 @@
   (!.py
     (var conn (py-sqlite/wrap-connection
                (py-sqlite/connect-constructor {})))
-    (sql/query-sync
+    (sql/query
      conn
      (xt/x:str-join
       "\n\n"
@@ -74,7 +74,7 @@
     (impl-sql/sql-pull-sync
      (sql/connection-create
       {}
-      {"query_sync" (fn [_conn _input]
+      {"query" (fn [_conn _input]
                       (return "[{\"id\":\"USD\"}]"))})
      sample/Schema
      ["Currency" ["id"]]
@@ -82,12 +82,12 @@
   => (throws))
 
 ^{:refer xt.db.runtime.sql/sql-delete-sync :added "4.1"}
-(fact "deletes live sqlite rows through query-sync"
+(fact "deletes live sqlite rows through query"
 
   (!.py
     (var conn (py-sqlite/wrap-connection
                (py-sqlite/connect-constructor {})))
-    (sql/query-sync
+    (sql/query
      conn
      (xt/x:str-join
       "\n\n"
@@ -133,7 +133,7 @@
   (!.py
     (var conn (py-sqlite/wrap-connection
                (py-sqlite/connect-constructor {})))
-    (sql/query-sync
+    (sql/query
      conn
      (xt/x:str-join
       "\n\n"
@@ -148,7 +148,7 @@
                        (@! sample/+currency+)
                        (ut/sqlite-opts nil))]))
     (var cleared (impl-sql/sql-clear conn))
-    (var count (sql/query-sync conn "SELECT COUNT(*) FROM Currency;"))
+    (var count (sql/query conn "SELECT COUNT(*) FROM Currency;"))
     (sql/disconnect conn)
     [cleared count])
   => [true 4])

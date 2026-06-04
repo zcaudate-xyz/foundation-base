@@ -41,7 +41,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return true))})))})
@@ -60,7 +60,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return true))})))})
@@ -79,7 +79,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return true))})))})
@@ -99,7 +99,7 @@
           {"tag" "raw"}
           {"query"      (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query" (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return true))}))
@@ -114,7 +114,7 @@
           {"tag" "raw"}
           {"query"      (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query" (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return true))}))
@@ -129,7 +129,7 @@
           {"tag" "raw"}
           {"query"      (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query" (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return true))}))
@@ -197,7 +197,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return true))})))})
@@ -215,7 +215,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return true))})))})
@@ -233,7 +233,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return true))})))})
@@ -252,7 +252,7 @@
           {"tag" "raw"}
           {"query"      (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query" (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return true))}))
@@ -266,7 +266,7 @@
           {"tag" "raw"}
           {"query"      (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query" (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return true))}))
@@ -280,7 +280,7 @@
           {"tag" "raw"}
           {"query"      (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query" (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return true))}))
@@ -294,45 +294,45 @@
   (!.js
     (var conn (sql/connection-create
                {"tag"         "raw"}
-               {"query"       (fn [raw query]
+               {"query_async" (fn [raw query]
                                 (return 1))
-                "query_sync"  (fn [raw query]
+                "query"       (fn [raw query]
                                 (return 2))
                 "disconnect"  (fn [raw]
                                 (return true))}))
     [(sql/connection? conn)
-     (sql/query conn "SELECT 1;")
-     (sql/query-sync conn "SELECT 2;")
+     (sql/query-async conn "SELECT 1;")
+     (sql/query conn "SELECT 2;")
      (sql/disconnect conn)])
   => [true 1 2 true]
 
   (!.lua
     (var conn (sql/connection-create
                {"tag"         "raw"}
-               {"query"       (fn [raw query]
+               {"query_async" (fn [raw query]
                                 (return 1))
-                "query_sync"  (fn [raw query]
+                "query"       (fn [raw query]
                                 (return 2))
                 "disconnect"  (fn [raw]
                                 (return true))}))
     [(sql/connection? conn)
-     (sql/query conn "SELECT 1;")
-     (sql/query-sync conn "SELECT 2;")
+     (sql/query-async conn "SELECT 1;")
+     (sql/query conn "SELECT 2;")
      (sql/disconnect conn)])
   => [true 1 2 true]
 
   (!.py
     (var conn (sql/connection-create
                {"tag"         "raw"}
-               {"query"       (fn [raw query]
+               {"query_async" (fn [raw query]
                                 (return 1))
-                "query_sync"  (fn [raw query]
+                "query"       (fn [raw query]
                                 (return 2))
                 "disconnect"  (fn [raw]
                                 (return true))}))
     [(sql/connection? conn)
-     (sql/query conn "SELECT 1;")
-     (sql/query-sync conn "SELECT 2;")
+     (sql/query-async conn "SELECT 1;")
+     (sql/query conn "SELECT 2;")
      (sql/disconnect conn)])
   => [true 1 2 true])
 
@@ -347,7 +347,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return true))})))})
@@ -363,7 +363,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return true))})))})
@@ -379,7 +379,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return true))})))})
@@ -398,7 +398,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return (xt/x:get-key raw "dsn")))})))})
@@ -419,7 +419,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return (xt/x:get-key raw "dsn")))})))})
@@ -440,7 +440,7 @@
                         opts
                         {"query"      (fn [raw input]
                                         (return input))
-                         "query_sync" (fn [raw input]
+                         "query" (fn [raw input]
                                         (return input))
                          "disconnect" (fn [raw]
                                         (return (xt/x:get-key raw "dsn")))})))})
@@ -462,7 +462,7 @@
           {"tag" "raw"}
           {"query"      (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query" (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return (xt/x:get-key raw "tag")))}))
@@ -475,7 +475,7 @@
           {"tag" "raw"}
           {"query"      (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query" (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return (xt/x:get-key raw "tag")))}))
@@ -488,95 +488,95 @@
           {"tag" "raw"}
           {"query"      (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query" (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return (xt/x:get-key raw "tag")))}))
     (sql/disconnect conn))
   => "raw")
 
-^{:refer xt.protocol.impl.connection-sql/query :added "4.1"}
-(fact "queries through wrapped sql connections"
+^{:refer xt.protocol.impl.connection-sql/query-async :added "4.1"}
+(fact "queries asynchronously through wrapped sql connections"
 
   (!.js
     (var conn
          (sql/connection-create
           {"tag" "raw"}
-          {"query"      (fn [raw input]
+          {"query_async" (fn [raw input]
                           (return [input (xt/x:get-key raw "tag")]))
-           "query_sync" (fn [raw input]
+           "query"      (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return true))}))
-    (sql/query conn "SELECT 1;"))
+    (sql/query-async conn "SELECT 1;"))
   => ["SELECT 1;" "raw"]
 
   (!.lua
     (var conn
          (sql/connection-create
           {"tag" "raw"}
-          {"query"      (fn [raw input]
+          {"query_async" (fn [raw input]
                           (return [input (xt/x:get-key raw "tag")]))
-           "query_sync" (fn [raw input]
+           "query"      (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return true))}))
-    (sql/query conn "SELECT 1;"))
+    (sql/query-async conn "SELECT 1;"))
   => ["SELECT 1;" "raw"]
 
   (!.py
     (var conn
          (sql/connection-create
           {"tag" "raw"}
-          {"query"      (fn [raw input]
+          {"query_async" (fn [raw input]
                           (return [input (xt/x:get-key raw "tag")]))
-           "query_sync" (fn [raw input]
+           "query"      (fn [raw input]
                           (return input))
            "disconnect" (fn [raw]
                           (return true))}))
-    (sql/query conn "SELECT 1;"))
+    (sql/query-async conn "SELECT 1;"))
   => ["SELECT 1;" "raw"])
 
-^{:refer xt.protocol.impl.connection-sql/query-sync :added "4.1"}
+^{:refer xt.protocol.impl.connection-sql/query :added "4.1"}
 (fact "runs sync queries through wrapped sql connections"
 
   (!.js
     (var conn
          (sql/connection-create
           {"tag" "raw"}
-          {"query"      (fn [raw input]
+          {"query_async" (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query"      (fn [raw input]
                           (return [input (xt/x:get-key raw "tag")]))
            "disconnect" (fn [raw]
                           (return true))}))
-    (sql/query-sync conn "SELECT 2;"))
+    (sql/query conn "SELECT 2;"))
   => ["SELECT 2;" "raw"]
 
   (!.lua
     (var conn
          (sql/connection-create
           {"tag" "raw"}
-          {"query"      (fn [raw input]
+          {"query_async" (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query"      (fn [raw input]
                           (return [input (xt/x:get-key raw "tag")]))
            "disconnect" (fn [raw]
                           (return true))}))
-    (sql/query-sync conn "SELECT 2;"))
+    (sql/query conn "SELECT 2;"))
   => ["SELECT 2;" "raw"]
 
   (!.py
     (var conn
          (sql/connection-create
           {"tag" "raw"}
-          {"query"      (fn [raw input]
+          {"query_async" (fn [raw input]
                           (return input))
-           "query_sync" (fn [raw input]
+           "query"      (fn [raw input]
                           (return [input (xt/x:get-key raw "tag")]))
            "disconnect" (fn [raw]
                           (return true))}))
-    (sql/query-sync conn "SELECT 2;"))
+    (sql/query conn "SELECT 2;"))
   => ["SELECT 2;" "raw"])
 
 (comment

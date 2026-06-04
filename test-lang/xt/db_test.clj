@@ -29,7 +29,7 @@
                                   sample/Schema
                                   sample/SchemaLookup
                                   (ut/sqlite-opts nil)))
-                 (dbsql/query-sync (xt/x:get-key DBSQL "instance")
+                 (dbsql/query (xt/x:get-key DBSQL "instance")
                                    (str/join "\n\n"
                                              (manage/table-create-all
                                               sample/Schema

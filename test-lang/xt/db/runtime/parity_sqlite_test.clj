@@ -46,13 +46,13 @@
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (str/join "\n\n"
                                        (manage/table-create-all
                                         sample/Schema
                                         sample/SchemaLookup
                                         (ut/sqlite-opts nil))))
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (raw/raw-insert "Currency"
                                              ["id" "type" "symbol" "native" "decimal"
                                               "name" "plural" "description"]
@@ -89,7 +89,7 @@
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (str/join "\n\n"
                                        (manage/table-create-all
                                         sample/Schema
@@ -132,13 +132,13 @@
     (-> (dbsql/connect (js-sqlite/driver) {})
         (spec-promise/x:promise-then
          (fn [conn]
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (str/join "\n\n"
                                        (manage/table-create-all
                                         sample/Schema
                                         sample/SchemaLookup
                                         (ut/sqlite-opts nil))))
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (raw/raw-insert "Currency"
                                              ["id" "type" "symbol" "native" "decimal"
                                               "name" "plural" "description"]

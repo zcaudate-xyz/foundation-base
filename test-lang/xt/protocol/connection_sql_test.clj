@@ -28,9 +28,9 @@
      sqlp/ISqlRuntimeDriver
      sqlp/ISqlRuntimeConnection])
   => [["connect"]
-      ["disconnect" "query" "query_sync"]
+      ["disconnect" "query" "query_async"]
       ["connect"]
-      ["disconnect" "query" "query_sync"]]
+      ["disconnect" "query" "query_async"]]
 
   (!.lua
     [sqlp/ISqlConnectionDriver
@@ -38,9 +38,9 @@
      sqlp/ISqlRuntimeDriver
      sqlp/ISqlRuntimeConnection])
   => [["connect"]
-      ["disconnect" "query" "query_sync"]
+      ["disconnect" "query" "query_async"]
       ["connect"]
-      ["disconnect" "query" "query_sync"]]
+      ["disconnect" "query" "query_async"]]
 
   (!.py
     [sqlp/ISqlConnectionDriver
@@ -48,9 +48,9 @@
      sqlp/ISqlRuntimeDriver
      sqlp/ISqlRuntimeConnection])
   => [["connect"]
-      ["disconnect" "query" "query_sync"]
+      ["disconnect" "query" "query_async"]
       ["connect"]
-      ["disconnect" "query" "query_sync"]])
+      ["disconnect" "query" "query_async"]])
 
 (comment
   (s/snapto '[xt.protocol.connection-sql])

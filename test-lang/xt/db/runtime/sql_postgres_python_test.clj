@@ -105,7 +105,7 @@
     (impl-sql/sql-pull-sync
      (sql/connection-create
       {}
-      {"query_sync" (fn [_conn _input]
+      {"query" (fn [_conn _input]
                       (return "[{\"id\":\"ENTRY-0\"}]"))})
      (@! fixtures/+schema+)
      ["Entry" ["id"]]
@@ -114,7 +114,7 @@
 
 ^{:refer xt.db.runtime.sql/sql-delete-sync :added "4.1"
   :setup [(fixtures/seed-entry-rows)]}
-(fact "deletes live scratch rows through query-sync"
+(fact "deletes live scratch rows through query"
 
   (!.py
     (var conn (py-pg/wrap-connection
@@ -135,7 +135,7 @@
     (xt/x:set-key state "remote" {})
     (xt/x:set-key state "db" nil)
     (var alpha-id
-         (sql/query-sync
+         (sql/query
           conn
           "SELECT \"id\" FROM \"scratch\".\"Entry\" WHERE \"name\" = 'alpha';"))
     (impl-sql/sql-delete-sync
@@ -172,7 +172,7 @@
                (py-pg/connect-constructor (@! fixtures/+scratch-env+))))
     (var cleared (impl-sql/sql-clear conn))
     (var count
-         (sql/query-sync
+         (sql/query
           conn
           "SELECT COUNT(*)::int FROM \"scratch\".\"Entry\";"))
     (sql/disconnect conn)

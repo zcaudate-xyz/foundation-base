@@ -10,7 +10,7 @@
 (def.xt ISqlConnection
   ["disconnect"
    "query"
-   "query_sync"])
+   "query_async"])
 
 (def.xt ISqlRuntimeDriver
   (proto/iface-combine [-/ISqlConnectionDriver]))

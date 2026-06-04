@@ -198,7 +198,7 @@
                                ["instance" "database"])
       "caching_file" (xtd/get-in (event-node/get-service node "db/caching")
                                  ["instance" "filename"])}))
-  => {"primary_type" "db.sql"
-      "caching_type" "db.sql"
+  => {"primary_type" "db.postgres"
+      "caching_type" "db.sqlite"
       "primary_db" "test-scratch"
       "caching_file" ":memory:"})

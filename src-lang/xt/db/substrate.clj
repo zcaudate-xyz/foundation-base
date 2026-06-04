@@ -68,6 +68,58 @@
                          schema
                          (. prepared ["plan"]))))))
 
+(defn.xt service-dbtype
+  [service]
+  (var tag (xt/x:get-key service "::"))
+  (when (xt/x:not-nil? tag)
+    (return tag))
+  (var kind (xt/x:get-key service "kind"))
+  (cond (or (== kind "cache")
+           (== kind "memory"))
+       (return "db.cache")
+
+       (== kind "supabase")
+       (return "db.supabase")
+
+       (== kind "postgres")
+       (return "db.postgres")
+
+       (== kind "sqlite")
+       (return "db.sqlite")
+
+       :else
+       (return "db.sql")))
+
+(defn.xt init-db-service
+  [node service-id]
+  (var service (substrate/get-service node service-id))
+  (when (xt/x:nil? service)
+    (return nil))
+  (when (xt/x:has-key? service "events")
+    (return service))
+  (var schema (or (xt/x:get-key service "schema")
+                 (xt/x:get-key node "schema")
+                 {}))
+  (var lookup (or (xt/x:get-key service "lookup")
+                 (xt/x:get-key node "lookup")
+                 {}))
+  (var db-opts (or (xt/x:get-key service "db_opts")
+                  nil))
+  (var db (db-system/db-create
+          (xt/x:obj-assign {"::" (-/service-dbtype service)}
+                           service)
+          schema
+          lookup
+          db-opts))
+  (substrate/set-service node service-id db)
+  (return db))
+
+(defn.xt init-db-services
+  [node]
+  (-/init-db-service node "db/primary")
+  (-/init-db-service node "db/caching")
+  (return node))
+
 
 ;; 1. discover how transport works
 ;; 2. figure out how to load models and views with only data 

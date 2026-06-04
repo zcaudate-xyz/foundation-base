@@ -75,7 +75,7 @@
         (fn [err]
           (xt/x:err (xt/x:cat "ERR: - " (xt/x:json-encode err)))))
   (try
-    (var out (sql/query conn q))
+    (var out (sql/query-async conn q))
     (if (spec-promise/x:promise-native? out)
       (return
        (-> (spec-promise/x:promise-then out success-fn)
@@ -115,7 +115,7 @@
                      (return (xt/x:json-encode {:status "error"
                                                 :data err})))))
   (try
-    (var out (sql/query conn q))
+    (var out (sql/query-async conn q))
     (if (spec-promise/x:promise-native? out)
       (return
        (-> (spec-promise/x:promise-then out success-fn)

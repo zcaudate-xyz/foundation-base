@@ -56,7 +56,7 @@
               (return
                (spec-promise/x:promise-then
                 (dbsql/ensure-promise
-                 (dbsql/query conn (xt/x:first queries)))
+                 (dbsql/query-async conn (xt/x:first queries)))
                 (fn [_]
                   (return (run-queries conn
                                        (xt/x:arr-slice queries 1 nil)))))))))

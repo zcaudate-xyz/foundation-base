@@ -2,12 +2,14 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.text.pgrest-graph :as pgrest-graph]
+  {:require [[xt.db.system.client-common :as client-common]
+             [xt.db.text.pgrest-graph :as pgrest-graph]
              [xt.lib.supabase :as supabase]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.protocol.client-fetch :as fetch-if]
-             [xt.protocol.impl.client-fetch :as fetch]]})
+             [xt.protocol.impl.client-fetch :as fetch]
+             [xt.protocol.impl.graphdb :as graphdb]]})
 
 (defn.xt client?
   "checks if a value is a tagged system supabase client"
@@ -53,7 +55,7 @@
   {:added "4.1"}
   [client opts]
   (var raw-client (-/raw-client client))
-  (return (or (xt/x:get-key raw-client "base_url")
+  (return (or (client-common/get-setting raw-client "base_url")
               (xt/x:get-key opts "base_url")
               nil)))
 
@@ -62,7 +64,7 @@
   {:added "4.1"}
   [client opts]
   (var raw-client (-/raw-client client))
-  (return (or (xt/x:get-key raw-client "api_key")
+  (return (or (client-common/get-setting raw-client "api_key")
               (xt/x:get-key opts "api_key")
               nil)))
 
@@ -71,7 +73,7 @@
   {:added "4.1"}
   [client opts]
   (var raw-client (-/raw-client client))
-  (return (or (xt/x:get-key raw-client "auth_token")
+  (return (or (client-common/get-setting raw-client "auth_token")
               (xt/x:get-key opts "auth_token")
               nil)))
 
@@ -80,7 +82,7 @@
   {:added "4.1"}
   [client opts]
   (var raw-client (-/raw-client client))
-  (return (or (xt/x:get-key raw-client "schema_name")
+  (return (or (client-common/get-setting raw-client "schema_name")
               (xt/x:get-key opts "schema_name")
               nil)))
 
@@ -159,23 +161,28 @@
         :else
         (return response)))
 
-(defn.xt client
-  "creates a tagged supabase client"
+(defn.xt normalize-client
+  "normalises a raw value into a tagged supabase client shape"
   {:added "4.1"}
   [raw]
   (when (-/client? raw)
     (return raw))
-  (var source (xt/x:obj-clone (or raw {})))
-  (xt/x:set-key source "::" "db.client.supabase")
-  (when (xt/x:not-nil? (xt/x:get-key source "client"))
-    (xt/x:set-key source "client" (xt/x:get-key source "client")))
+  (var source (client-common/create-client raw
+                                           "db.client.supabase"
+                                           ["base_url"
+                                            "api_key"
+                                            "auth_token"
+                                            "schema_name"
+                                            "headers"
+                                            "client"
+                                            "transport"]))
   (return source))
 
 (defn.xt resolve-client
   "resolves the underlying fetch client"
   {:added "4.1"}
   [client opts]
-  (:= client (-/client client))
+  (:= client (-/normalize-client client))
   (var source (or (xt/x:get-key client "client")
                   (xt/x:get-key opts "client")
                   (xt/x:get-key client "transport")
@@ -197,7 +204,7 @@
   "fetches tree ir data through a PostgREST request"
   {:added "4.1"}
   [client schema tree opts]
-  (:= client (-/client client))
+  (:= client (-/normalize-client client))
   (var compiled (pgrest-graph/select-return schema tree 0 (or opts {})))
   (var fetch-client (-/resolve-client client (or opts {})))
   (var request (-/prepare-request client compiled (or opts {})))
@@ -242,3 +249,24 @@
   {:added "4.1"}
   [client schema table-name ids opts]
   (return (-/unsupported-op "record_delete")))
+
+(defn.xt attach-graphdb
+  "attaches graphdb methods to a supabase client"
+  {:added "4.1"}
+  [client]
+  (return
+   (graphdb/db-create
+   client
+   {"pull" (fn [client schema tree opts]
+             (return (-/pull client schema tree opts)))})))
+
+(defn.xt client
+  "creates a tagged supabase client"
+  {:added "4.1"}
+  [raw]
+  (return (-/attach-graphdb (-/normalize-client raw))))
+
+(def.xt DRIVER
+  (graphdb/driver-create
+   {"create" (fn [m]
+               (return (-/client m)))}))

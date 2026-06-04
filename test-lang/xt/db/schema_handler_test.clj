@@ -51,7 +51,7 @@
                                        schema
                                        lookup
                                        (sql-util/sqlite-opts nil)))
-                              (dbsql/query-sync
+                              (dbsql/query
                                conn
                                (sql-manage/table-create-all
                                 schema
@@ -113,7 +113,7 @@
               schema
               lookup
               (sql-util/sqlite-opts nil)))
-     (dbsql/query-sync
+     (dbsql/query
       conn
       (sql-manage/table-create-all
        schema

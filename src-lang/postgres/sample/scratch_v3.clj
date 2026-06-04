@@ -134,6 +134,11 @@
                             :track o-op})]
     (return o-out)))
 
+
+;;
+;; Generate
+;;
+
 (def +app+ (app/app-create "scratch-v3"))
 (def +lookup+ (bind-pg/bind-app +app+ :time-updated))
 (def +schema+
@@ -151,6 +156,9 @@
     "op_created" {"ident" "op_created" "type" "text" "order" 10}
     "op_updated" {"ident" "op_updated" "type" "text" "order" 11}
     "__deleted__" {"ident" "__deleted__" "type" "boolean" "order" 12}}})
+
+(def +schema+
+  (bind-pg/bind-schema (:schema +app+)))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]]

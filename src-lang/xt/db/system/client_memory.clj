@@ -2,9 +2,11 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.db.system.memory-store :as store]
+  {:require [[xt.db.system.client-common :as client-common]
+             [xt.db.system.memory-store :as store]
              [xt.lang.spec-base :as xt]
-             [xt.lang.spec-promise :as promise]]})
+             [xt.lang.spec-promise :as promise]
+             [xt.protocol.impl.graphdb :as graphdb]]})
 
 (defn.xt client?
   "checks if a value is a memory client"
@@ -14,14 +16,13 @@
                (== "db.client.memory"
                    (xt/x:get-key obj "::")))))
 
-(defn.xt client
-  "creates a tagged in-memory db client"
+(defn.xt normalize-client
+  "normalises a raw value into a tagged in-memory client shape"
   {:added "4.1"}
   [m]
   (when (-/client? m)
     (return m))
-  (var out (xt/x:obj-clone (or m {})))
-  (xt/x:set-key out "::" "db.client.memory")
+  (var out (client-common/create-client m "db.client.memory" []))
   (when (not (xt/x:is-object? (xt/x:get-key out "rows")))
     (xt/x:set-key out "rows" {}))
   (return out))
@@ -30,7 +31,7 @@
   "processes nested data into the memory client"
   {:added "4.1"}
   [client tag data schema lookup opts]
-  (:= client (-/client client))
+  (:= client (-/normalize-client client))
   (cond (== tag "input")
         (return (store/set-input schema data))
 
@@ -41,7 +42,7 @@
   "removes nested data from the memory client"
   {:added "4.1"}
   [client tag data schema lookup opts]
-  (:= client (-/client client))
+  (:= client (-/normalize-client client))
   (cond (== tag "input")
         (return (store/remove-input schema lookup data))
 
@@ -52,7 +53,7 @@
   "fetches tree ir data from the memory client"
   {:added "4.1"}
   [client schema tree opts]
-  (:= client (-/client client))
+  (:= client (-/normalize-client client))
   (return (store/fetch-sync client schema tree opts)))
 
 (defn.xt pull
@@ -67,7 +68,7 @@
   "adds records directly to a single table in the memory client"
   {:added "4.1"}
   [client schema table-name records opts]
-  (:= client (-/client client))
+  (:= client (-/normalize-client client))
   (return (store/set-sync client schema {table-name records} opts)))
 
 (defn.xt record-add
@@ -82,7 +83,7 @@
   "deletes ids directly from a single table in the memory client"
   {:added "4.1"}
   [client schema table-name ids opts]
-  (:= client (-/client client))
+  (:= client (-/normalize-client client))
   (return (store/delete-sync client schema table-name ids opts)))
 
 (defn.xt record-delete
@@ -97,5 +98,32 @@
   "clears the memory client"
   {:added "4.1"}
   [client]
-  (:= client (-/client client))
+  (:= client (-/normalize-client client))
   (return (store/clear client)))
+
+(defn.xt attach-graphdb
+  "attaches graphdb methods to an in-memory client"
+  {:added "4.1"}
+  [client]
+  (return
+   (graphdb/db-create
+    client
+    {"pull"          (fn [client schema tree opts]
+                       (return (-/pull client schema tree opts)))
+     "pull_sync"     (fn [client schema tree opts]
+                       (return (-/pull-sync client schema tree opts)))
+     "record_add"    (fn [client schema table-name records opts]
+                       (return (-/record-add client schema table-name records opts)))
+     "record_delete" (fn [client schema table-name ids opts]
+                       (return (-/record-delete client schema table-name ids opts)))})))
+
+(defn.xt client
+  "creates a tagged in-memory db client"
+  {:added "4.1"}
+  [m]
+  (return (-/attach-graphdb (-/normalize-client m))))
+
+(def.xt DRIVER
+  (graphdb/driver-create
+   {"create" (fn [m]
+               (return (-/client m)))}))

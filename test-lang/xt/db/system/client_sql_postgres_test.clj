@@ -15,7 +15,7 @@
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.system.client-sql :as client]
+   :require [[xt.db.system.base-sql :as client]
              [xt.db.text.sql-util :as ut]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.lang.common-repl :as repl]
@@ -29,7 +29,7 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-^{:refer xt.db.system.client-sql/prepare-sync-input :added "4.1"
+^{:refer xt.db.system.base-sql/prepare-sync-input :added "4.1"
   :setup [(fixtures/seed-entry-rows)]}
 (fact "emits insert sql through prepare-sync-input and roundtrips it through live postgres"
 
@@ -62,14 +62,14 @@
                  (@! fixtures/+lookup+)
                  db-opts))
            (return
-            (-> (sql/query conn "DELETE FROM \"scratch\".\"Entry\" WHERE \"id\" = '00000000-0000-0000-0000-0000000000c3';")
+            (-> (sql/query-async conn "DELETE FROM \"scratch\".\"Entry\" WHERE \"id\" = '00000000-0000-0000-0000-0000000000c3';")
                 (spec-promise/x:promise-then
                  (fn [_]
-                   (return (sql/query conn insert-sql))))
+                   (return (sql/query-async conn insert-sql))))
                 (spec-promise/x:promise-then
                  (fn [_]
                    (return
-                    (sql/query conn
+                    (sql/query-async conn
                                "SELECT \"name\", \"tags\" FROM \"scratch\".\"Entry\" WHERE \"id\" = '00000000-0000-0000-0000-0000000000c3';"))))
                 (spec-promise/x:promise-then
                  (fn [out]
@@ -84,7 +84,7 @@
       "row" {"name" "client-postgres-gamma"
              "tags" ["guide" "client"]}})
 
-^{:refer xt.db.system.client-sql/prepare-event-input :added "4.1"
+^{:refer xt.db.system.base-sql/prepare-event-input :added "4.1"
   :setup [(fixtures/seed-entry-rows)]}
 (fact "emits delete sql through prepare-event-input and applies it through live postgres"
 
@@ -114,17 +114,17 @@
                  (@! fixtures/+lookup+)
                  db-opts))
            (return
-            (-> (sql/query conn "DELETE FROM \"scratch\".\"Entry\" WHERE \"id\" = '00000000-0000-0000-0000-0000000000c3';")
+            (-> (sql/query-async conn "DELETE FROM \"scratch\".\"Entry\" WHERE \"id\" = '00000000-0000-0000-0000-0000000000c3';")
                 (spec-promise/x:promise-then
                  (fn [_]
-                   (return (sql/query conn insert-sql))))
+                   (return (sql/query-async conn insert-sql))))
                 (spec-promise/x:promise-then
                  (fn [_]
-                   (return (sql/query conn remove-sql))))
+                   (return (sql/query-async conn remove-sql))))
                 (spec-promise/x:promise-then
                  (fn [_]
                    (return
-                    (sql/query conn
+                   (sql/query-async conn
                                "SELECT COUNT(*) AS total FROM \"scratch\".\"Entry\" WHERE \"id\" = '00000000-0000-0000-0000-0000000000c3';"))))
                 (spec-promise/x:promise-then
                  (fn [out]

@@ -71,13 +71,13 @@
                            (when (xt/x:nil? query-fn)
                              (xt/x:err "SQL runtime connection missing query implementation"))
                            (return (query-fn raw input)))
-            "query_sync" (fn [self input]
+            "query_async" (fn [self input]
                            (var raw  (xt/x:get-key self "_raw"))
                            (var impl (xt/x:get-key self "_impl"))
-                           (var query-sync-fn (xt/x:get-key impl "query_sync"))
-                           (when (xt/x:nil? query-sync-fn)
-                             (xt/x:err "SQL runtime connection missing query_sync implementation"))
-                           (return (query-sync-fn raw input)))}]])))
+                           (var query-async-fn (xt/x:get-key impl "query_async"))
+                           (when (xt/x:nil? query-async-fn)
+                             (xt/x:err "SQL runtime connection missing query_async implementation"))
+                           (return (query-async-fn raw input)))}]])))
   (var conn {"::" "sql.connection"
              "_raw" raw
              "_impl" impl})
@@ -132,20 +132,20 @@
 
 (defmacro.xt ^{:standalone true}
   query
-  "queries through the runtime sql connection protocol"
+  "runs sync queries through the runtime sql connection protocol"
   {:added "4.1"}
   [conn input]
   (list (list 'xt.lang.spec-base/proto:method conn "query")
         conn
         input))
 
-(defspec.xt query-sync [:fn [:xt/any :xt/any] :xt/any])
+(defspec.xt query-async [:fn [:xt/any :xt/any] :xt/any])
 
 (defmacro.xt ^{:standalone true}
-  query-sync
-  "runs sync queries through the runtime sql connection protocol"
+  query-async
+  "runs async queries through the runtime sql connection protocol"
   {:added "4.1"}
   [conn input]
-  (list (list 'xt.lang.spec-base/proto:method conn "query_sync")
+  (list (list 'xt.lang.spec-base/proto:method conn "query_async")
         conn
         input))

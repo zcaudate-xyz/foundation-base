@@ -24,7 +24,7 @@
   [schema table-name m opts]
   (var cols  (base-schema/table-columns schema table-name))
   (var ks    (xt/x:arr-filter cols (fn:> [col]
-                                  (xt/x:has-key? m col))))
+                                         (xt/x:has-key? m col))))
   (return (raw/raw-insert table-name
                           ks
                           [m]
@@ -45,7 +45,7 @@
   [schema table-name m opts]
   (var cols  (base-schema/table-columns schema table-name))
   (var ks    (xt/x:arr-filter cols (fn:> [col]
-                                  (xt/x:has-key? m col))))
+                                         (xt/x:has-key? m col))))
   (return (raw/raw-upsert table-name
                           "id"
                           ks
@@ -85,8 +85,8 @@
   {:added "4.0"}
   [emit-fn schema lookup flat opts]
   (var ordered (xtd/arr-keep (base-schema/table-order lookup)
-                           (fn [col]
-                             (return (:? (xt/x:has-key? flat col) [col (xt/x:get-key flat col)] nil)))))
+                             (fn [col]
+                               (return (:? (xt/x:has-key? flat col) [col (xt/x:get-key flat col)] nil)))))
   (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
   (var emit-pair-fn
        (fn [pair]
@@ -94,8 +94,8 @@
          (var cols     (base-schema/table-columns schema table-name))
          (var defaults (base-schema/table-defaults schema table-name))
          (var out  (xtd/arr-keepf (xt/x:obj-vals data)
-                                -/table-filter-id
-                                -/table-get-data))
+                                  -/table-filter-id
+                                  -/table-get-data))
          (var sout (xt/x:arr-map out (fn:> [v] (xt/x:obj-assign (xt/x:obj-clone defaults) v))))
          (var #{schema-update} (xt/x:get-key lookup table-name))
          (var #{update-key} opts)
@@ -103,11 +103,11 @@
          (if (and schema-update
                   (xt/x:not-nil? update-key))
            (:= sopts (xt/x:obj-assign {:upsert-clause
-                                    (xt/x:cat "\"excluded\"."
-                                           (column-fn update-key)
-                                           " < "
-                                           (column-fn update-key))}
-                                   opts))
+                                       (xt/x:cat "\"excluded\"."
+                                                 (column-fn update-key)
+                                                 " < "
+                                                 (column-fn update-key))}
+                                      opts))
            (:= sopts (xt/x:obj-clone opts)))
          (when (< 0 (xt/x:len sout))
            (return (emit-fn table-name
@@ -129,4 +129,41 @@
   [schema lookup table-name data opts]
   (var flat (f/flatten schema table-name data {}))
   (return (-/table-emit-flat -/table-emit-upsert schema lookup flat opts)))
+
+
+;;
+;; prep schema inputs
+;;
+
+(defn.xt prepare-sync-input
+  "prepares nested data into sqlite upsert statements"
+  {:added "4.1"}
+  [data schema lookup opts]
+  (var flat (f/flatten-bulk schema data))
+  (var statements (-/table-emit-flat
+                   -/table-emit-upsert
+                   schema
+                   lookup
+                   flat
+                   opts))
+  (return (xt/x:str-join "\n\n" statements)))
+
+(defn.xt prepare-remove-input
+  "prepares nested removals into sqlite delete statements"
+  {:added "4.1"}
+  [data schema lookup opts]
+  (var flat (f/flatten-bulk schema data))
+  (var ordered (xtd/arr-keep (base-schema/table-order lookup)
+                             (fn [table-name]
+                               (return (:? (xt/x:has-key? flat table-name)
+                                           [table-name (xt/x:obj-keys (xt/x:get-key flat table-name))]
+                                           nil)))))
+  (var statements (xtd/arr-mapcat ordered
+                                  (fn [entry]
+                                    (var [table-name ids] entry)
+                                    (return
+                                     (xt/x:arr-map ids
+                                                   (fn [id]
+                                                     (return (raw/raw-delete table-name {"id" id} opts))))))))
+  (return (xt/x:str-join "\n\n" statements)))
 

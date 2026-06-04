@@ -118,7 +118,7 @@
          "dbtype" (. source ["dbtype"])
          "has_db" (xt/x:not-nil? (. source ["db"]))}))))
   => {"live" true
-      "dbtype" "db.sql"
+      "dbtype" "db.sqlite"
       "has_db" true})
 
 ^{:refer xt.db.node/materialize-space :added "4.1"}
@@ -209,7 +209,7 @@
          "dbtype" (. shared ["dbtype"])}))))
   => {"keys" ["primary"]
       "live" true
-      "dbtype" "db.sql"})
+      "dbtype" "db.postgres"})
 
 ^{:refer xt.db.node/remote-payload :added "4.1"}
 (fact "returns the first remote control payload or an empty map"

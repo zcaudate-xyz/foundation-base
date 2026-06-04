@@ -32,7 +32,7 @@
         (return (xt/x:str-join "\n\n" statements))
 
         :else
-        (do (sql/query-sync instance
+        (do (sql/query instance
                             (xt/x:str-join "\n\n" statements))
             (return (xt/x:obj-keys flat)))))
 
@@ -55,7 +55,7 @@
         (return (xt/x:str-join "\n\n" statements))
 
         :else
-        (do (sql/query-sync instance
+        (do (sql/query instance
                             (xt/x:str-join "\n\n" statements))
             (return (xt/x:obj-keys flat)))))
 
@@ -63,7 +63,7 @@
   "runs a pull statement"
   {:added "4.0"}
   [instance schema tree opts]
-  (var output (sql/query-sync
+  (var output (sql/query
                instance
                (sql-graph/select schema tree opts)))
   (when (xt/x:is-string? output)
@@ -77,7 +77,7 @@
   (return
    (promise/x:promise-then
     (sql/ensure-promise
-     (sql/query
+     (sql/query-async
       instance
       (sql-graph/select schema tree opts)))
     (fn [output]
@@ -89,7 +89,7 @@
   "deletes sync data from sql db"
   {:added "4.0"}
   [instance schema table-name ids opts]
-  (return (sql/query-sync
+  (return (sql/query
            instance
            (xt/x:str-join "\n\n" (-/sql-gen-delete table-name ids opts)))))
 
@@ -99,7 +99,7 @@
   [instance schema table-name ids opts]
   (return
    (sql/ensure-promise
-    (sql/query
+    (sql/query-async
      instance
      (xt/x:str-join "\n\n" (-/sql-gen-delete table-name ids opts))))))
 

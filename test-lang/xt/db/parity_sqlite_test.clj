@@ -40,7 +40,7 @@
                         sample/Schema
                         sample/SchemaLookup
                         (ut/sqlite-opts nil)))
-               (dbsql/query-sync (xt/x:get-key db "instance")
+               (dbsql/query (xt/x:get-key db "instance")
                                  (str/join "\n\n"
                                            (manage/table-create-all
                                             sample/Schema
@@ -74,7 +74,7 @@
                         sample/Schema
                         sample/SchemaLookup
                         (ut/sqlite-opts nil)))
-               (dbsql/query-sync (xt/x:get-key db "instance")
+               (dbsql/query (xt/x:get-key db "instance")
                                  (str/join "\n\n"
                                            (manage/table-create-all
                                             sample/Schema

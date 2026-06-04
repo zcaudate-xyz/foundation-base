@@ -49,7 +49,7 @@
             (promise/x:promise-then
              (fn [conn]
                (return
-                (-> (sql/query conn
+                (-> (sql/query-async conn
                                (xt/x:cat
                                 "INSERT INTO \"scratch\".\"Entry\" (name, tags) "
                                 "VALUES ('"

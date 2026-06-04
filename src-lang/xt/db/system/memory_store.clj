@@ -25,18 +25,12 @@
     (xt/x:set-key store "rows" rows))
   (return rows))
 
-(defn.xt set-input
-  "prepares nested input data for in-memory storage"
-  {:added "4.1"}
-  [schema data]
-  (return (f/flatten-bulk schema data)))
-
 (defn.xt set-sync
   "merges nested data into store rows"
   {:added "4.1"}
   [store schema data opts]
   (var rows (-/get-rows store))
-  (var flat (-/set-input schema data))
+  (var flat (f/flatten-bulk schema data))
   (cache-util/merge-bulk rows flat nil)
   (cache-util/add-bulk-links rows schema flat)
   (return (xt/x:obj-keys flat)))

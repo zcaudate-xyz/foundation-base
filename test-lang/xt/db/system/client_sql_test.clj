@@ -10,7 +10,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.protocol.impl.connection-sql :as dbsql]
-             [xt.db.system.client-sql :as client]
+             [xt.db.system.base-sql :as client]
              [xt.db.text.sql-util :as ut]
              [xt.db.helpers.data-main-test :as sample]]})
 
@@ -18,7 +18,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.system.client-sql/client? :added "4.1"}
+^{:refer xt.db.system.base-sql/client? :added "4.1"}
 (fact "detects tagged sql clients"
 
   (!.js
@@ -27,7 +27,7 @@
      (client/client? nil)])
   => [true true false])
 
-^{:refer xt.db.system.client-sql/client :added "4.1"}
+^{:refer xt.db.system.base-sql/client :added "4.1"}
 (fact "creates a tagged sql client"
 
   (!.js
@@ -36,7 +36,7 @@
      (. db ["instance"])])
   => ["db.client.sql" "conn-1"])
 
-^{:refer xt.db.system.client-sql/sql-gen-delete :added "4.1"}
+^{:refer xt.db.system.base-sql/sql-gen-delete :added "4.1"}
 (fact "generates one delete statement per id"
 
   (!.js
@@ -49,7 +49,7 @@
      (. (xt/x:second out) (includes "'USER-1'"))])
   => [2 true true])
 
-^{:refer xt.db.system.client-sql/prepare-sync-input :added "4.1"}
+^{:refer xt.db.system.base-sql/prepare-sync-input :added "4.1"}
 (fact "emits sql upsert statements"
 
   (!.js
@@ -60,7 +60,7 @@
      (ut/sqlite-opts nil)))
   => #"INSERT INTO \"UserAccount\"")
 
-^{:refer xt.db.system.client-sql/process-event-sync :added "4.1"}
+^{:refer xt.db.system.base-sql/process-event-sync :added "4.1"}
 (fact "executes sql upsert statements"
 
   (!.js
@@ -69,7 +69,7 @@
                   "conn"
                   (dbsql/connection-create
                    (. state ["raw"])
-                   {"query_sync" (fn [input_state input]
+                   {"query" (fn [input_state input]
                                    (xt/x:arr-push (. input_state ["queries"]) input)
                                    (return input))}))
     (var touched
@@ -84,7 +84,7 @@
      (xt/x:len (xtd/get-in state ["raw" "queries"]))])
   => [{"UserAccount" true "UserProfile" true} 1])
 
-^{:refer xt.db.system.client-sql/prepare-event-input :added "4.1"}
+^{:refer xt.db.system.base-sql/prepare-event-input :added "4.1"}
 (fact "emits sql delete statements"
 
   (!.js
@@ -95,7 +95,7 @@
     (ut/sqlite-opts nil)))
   => #"DELETE FROM \"UserAccount\"")
 
-^{:refer xt.db.system.client-sql/process-event-remove :added "4.1"}
+^{:refer xt.db.system.base-sql/process-event-remove :added "4.1"}
 (fact "executes sql delete statements"
 
   (!.js
@@ -104,7 +104,7 @@
                   "conn"
                   (dbsql/connection-create
                    (. state ["raw"])
-                   {"query_sync" (fn [input_state input]
+                   {"query" (fn [input_state input]
                                    (xt/x:arr-push (. input_state ["queries"]) input)
                                    (return input))}))
     (var touched
@@ -119,8 +119,8 @@
      (xt/x:len (xtd/get-in state ["raw" "queries"]))])
   => [{"UserAccount" true "UserProfile" true} 1])
 
-^{:refer xt.db.system.client-sql/exec-sync :added "4.1"}
-(fact "executes raw sql through query-sync"
+^{:refer xt.db.system.base-sql/exec-sync :added "4.1"}
+(fact "executes raw sql through query"
 
   (!.js
     (var state {"queries" []})
@@ -129,14 +129,14 @@
           (client/client {"instance"
                           (dbsql/connection-create
                            state
-                           {"query_sync" (fn [input_state input]
+                           {"query" (fn [input_state input]
                                            (xt/x:arr-push (. input_state ["queries"]) input)
                                            (return {"ok" input}))})})
           "SELECT 1;"))
     [(xtd/get-in state ["queries" 0]) out])
   => ["SELECT 1;" {"ok" "SELECT 1;"}])
 
-^{:refer xt.db.system.client-sql/pull-sync :added "4.1"}
+^{:refer xt.db.system.base-sql/pull-sync :added "4.1"}
 (fact "returns decoded pull query results for tree and shorthand query forms"
 
   (!.js
@@ -144,7 +144,7 @@
      (client/client {"instance"
                      (dbsql/connection-create
                       {}
-                      {"query_sync" (fn [_conn _input]
+                      {"query" (fn [_conn _input]
                                       (return [{"id" "USER-0"}]))})})
      sample/Schema
      ["UserAccount" {"where" [] "data" ["id"] "links" [] "custom" []}]
@@ -158,7 +158,7 @@
          (client/client {"instance"
                          (dbsql/connection-create
                           state
-                          {"query_sync" (fn [input_state input]
+                          {"query" (fn [input_state input]
                                           (xt/x:arr-push (. input_state ["queries"]) input)
                                           (return [{"id" "USER-0"}]))})})
          sample/Schema
@@ -170,7 +170,7 @@
   => ["SELECT json_group_array(json_object('id', \"id\")) FROM \"UserAccount\"\n  WHERE \"id\" = 'USER-0'"
      [{"id" "USER-0"}]])
 
-^{:refer xt.db.system.client-sql/pull :added "4.1"}
+^{:refer xt.db.system.base-sql/pull :added "4.1"}
 (fact "runs pulls through async sql semantics"
 
   (notify/wait-on :js
@@ -197,15 +197,15 @@
        (repl/notify err))))
   => [1 [{"id" "USER-0"}]])
 
-^{:refer xt.db.system.client-sql/record-add-sync :added "4.1"}
-(fact "runs add statements through query-sync"
+^{:refer xt.db.system.base-sql/record-add-sync :added "4.1"}
+(fact "runs add statements through query"
 
   (!.js
     (client/record-add-sync
      (client/client {"instance"
                      (dbsql/connection-create
                       {"queries" []}
-                      {"query_sync" (fn [state input]
+                      {"query" (fn [state input]
                                       (xt/x:arr-push (. state ["queries"]) input)
                                       (return input))})})
      sample/Schema
@@ -214,7 +214,7 @@
      (ut/sqlite-opts nil)))
   => #"INSERT INTO \"UserAccount\"")
 
-^{:refer xt.db.system.client-sql/record-add :added "4.1"}
+^{:refer xt.db.system.base-sql/record-add :added "4.1"}
 (fact "runs add statements through async sql semantics"
 
   (notify/wait-on :js
@@ -238,15 +238,15 @@
                      (. sql-input (includes "INSERT INTO \"UserAccount\""))]))))
   => [1 true])
 
-^{:refer xt.db.system.client-sql/record-delete-sync :added "4.1"}
-(fact "runs delete statements through query-sync"
+^{:refer xt.db.system.base-sql/record-delete-sync :added "4.1"}
+(fact "runs delete statements through query"
 
   (!.js
     (client/record-delete-sync
      (client/client {"instance"
                      (dbsql/connection-create
                       {"queries" []}
-                      {"query_sync" (fn [state input]
+                      {"query" (fn [state input]
                                       (xt/x:arr-push (. state ["queries"]) input)
                                       (return input))})})
      sample/Schema
@@ -255,7 +255,7 @@
      (ut/sqlite-opts nil)))
   => #"DELETE FROM \"UserAccount\"")
 
-^{:refer xt.db.system.client-sql/record-delete :added "4.1"}
+^{:refer xt.db.system.base-sql/record-delete :added "4.1"}
 (fact "runs delete statements through async sql semantics"
 
   (notify/wait-on :js

@@ -11,6 +11,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.event.util-throttle :as th]
+             [xt.protocol.impl.graphdb :as graphdb]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.db.system :as instance]
              [xt.db.helpers.data-main-test :as sample]]})
@@ -40,9 +41,9 @@
   (!.js
    (xt/x:is-function?
     (xt/x:get-key
-     (xt/x:get-key (instance/ensure-sql-client {"query_sync" (fn [_] (return true))})
+     (xt/x:get-key (instance/ensure-sql-client {"query" (fn [_] (return true))})
                    "instance")
-     "query_sync")))
+     "query")))
   => true)
 
 ^{:refer xt.db.system/ensure-supabase-client :added "4.1"}
@@ -62,10 +63,10 @@
   => [nil "db.cache"])
 
 ^{:refer xt.db.system/process-event :added "4.1"}
-(fact "dispatches events through the backend implementation map"
+(fact "dispatches events through the backend driver registry"
 
   (!.js
-   (xt/x:set-key instance/IMPL
+   (xt/x:set-key instance/DRIVERS
                  "db.dispatch"
                  {"add" (fn [instance input-tag data schema lookup opts]
                           (return [(. instance ["id"]) input-tag (. data ["value"]) schema lookup (. opts ["flag"])]))})
@@ -140,24 +141,32 @@
 
   ^{:seedgen/base {:lua {:expect (l/as-lua ["db.create" "instance-a" [] {} true true true "test"])}}}
   (!.js
-   (xt/x:set-key instance/IMPL
+   (xt/x:set-key instance/DRIVERS
                  "db.create"
                  {"create" (fn [m]
-                             (return {"id" (. m ["seed"])}))})
+                            (return {"id" (. m ["seed"])
+                                     "schema" (. m ["schema"])
+                                     "lookup" (. m ["lookup"])
+                                     "opts" (. m ["opts"])}))})
    (var db (instance/db-create {"::" "db.create"
                                 :seed "instance-a"}
-                               nil
-                               nil
+                               {"UserAccount" {"primary" ["id"]}}
+                               {"UserAccount" {"position" 0}}
                                {"mode" "test"}))
    [(. db ["::"])
     (xtd/get-in db ["instance" "id"])
+    (xtd/get-in db ["instance" "schema" "UserAccount" "primary" 0])
+    (xtd/get-in db ["instance" "lookup" "UserAccount" "position"])
+    (xtd/get-in db ["instance" "opts" "mode"])
     (. db ["events"])
     (. db ["triggers"])
     (xt/x:is-function? (. db ["handler"]))
     (xt/x:is-function? (. db ["sync_handler"]))
     (xt/x:is-object? (. db ["throttle"]))
+    (xtd/get-in db ["schema" "UserAccount" "primary" 0])
+    (xtd/get-in db ["lookup" "UserAccount" "position"])
     (xtd/get-in db ["opts" "mode"])])
-  => ["db.create" "instance-a" [] {} true true true "test"])
+  => ["db.create" "instance-a" "id" 0 "test" [] {} true true true "id" 0 "test"])
 
 ^{:refer xt.db.system/queue-event :added "4.1"}
 (fact "queues events and hands them to the throttle"
@@ -212,7 +221,7 @@
     {"::" "db.sql"
      :instance (sql/connection-create
                 {"queries" []}
-                {"query_sync" (fn [raw input]
+                {"query" (fn [raw input]
                                 (xt/x:arr-push (. raw ["queries"]) input)
                                 (return input))})}
     "SELECT 1;"))
@@ -229,7 +238,7 @@
 (fact "dispatches pull requests through the configured backend"
 
   (!.js
-   (xt/x:set-key instance/IMPL
+   (xt/x:set-key instance/DRIVERS
                  "db.pull"
                  {"pull_sync" (fn [instance schema tree opts]
                                 (return [(. instance ["id"]) tree (. opts ["mode"])]))})
@@ -254,7 +263,7 @@
 (fact "dispatches async pulls and falls back to sync backends"
 
   (notify/wait-on :js
-    (xt/x:set-key instance/IMPL
+    (xt/x:set-key instance/DRIVERS
                  "db.pull.async"
                  {"pull" (fn [instance schema tree opts]
                            (return
@@ -275,7 +284,7 @@
   => ["pull-async-1" ["UserAccount" ["nickname"]] "async"]
 
   (notify/wait-on :js
-    (xt/x:set-key instance/IMPL
+    (xt/x:set-key instance/DRIVERS
                  "db.pull.fallback"
                  {"pull_sync" (fn [instance schema tree opts]
                                 (return [(. instance ["id"]) tree (. opts ["mode"])]))})
@@ -297,7 +306,7 @@
 (fact "dispatches deletions through the configured backend"
 
   (!.js
-   (xt/x:set-key instance/IMPL
+   (xt/x:set-key instance/DRIVERS
                  "db.delete"
                  {"delete_sync" (fn [instance schema table-name ids opts]
                                    (return [(. instance ["id"]) table-name ids (. opts ["mode"])]))})
@@ -314,7 +323,7 @@
 (fact "clears supported backends and throws for unsupported ones"
 
   (!.js
-   (xt/x:set-key instance/IMPL
+   (xt/x:set-key instance/DRIVERS
                  "db.clear"
                  {"clear" (fn [instance]
                             (return (. instance ["id"])))})
@@ -333,7 +342,7 @@
 (fact "creates view triggers that watch linked tables and pull the view tree"
 
   (!.js
-   (xt/x:set-key instance/IMPL
+   (xt/x:set-key instance/DRIVERS
                  "db.view"
                  {"pull_sync" (fn [_instance _schema tree _opts]
                                 (return tree))})
