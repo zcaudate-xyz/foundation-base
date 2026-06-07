@@ -1,6 +1,10 @@
 (ns kmi.lang.interface-spec
   (:require [hara.lang :as l]))
 
+;;
+;; JS
+;;
+
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]]})
@@ -18,28 +22,6 @@
       (xt/x:set-key out k f)))
   (return out))
 
-(l/script :lua
-  {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-iter :as it]]})
-
-(defn.lua proto-create
-  "creates a prototype map from a spec map"
-  {:added "4.1"}
-  [spec-map]
-  (xt/x:set-key spec-map "__index" spec-map)
-  (return spec-map))
-
-(l/script :python
-  {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-iter :as it]]})
-
-(defn.py proto-create
-  "creates a prototype map from a spec map"
-  {:added "4.1"}
-  [spec-map]
-  (xt/x:set-key spec-map "__index" spec-map)
-  (return spec-map))
-
 (defn.js runtime-attach
   "attaches runtime dispatch using native JS prototype linkage"
   {:added "4.1"}
@@ -53,6 +35,23 @@
   {:added "4.1"}
   [obj]
   (return (Object.getPrototypeOf obj)))
+
+
+;;
+;; LUA
+;;
+
+(l/script :lua
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-iter :as it]]})
+
+(defn.lua proto-create
+  "creates a prototype map from a spec map"
+  {:added "4.1"}
+  [spec-map]
+  (xt/x:set-key spec-map "__index" spec-map)
+  (return spec-map))
+
 
 (defn.lua runtime-attach
   "attaches runtime dispatch using native Lua metatables"
@@ -70,6 +69,22 @@
   [obj]
   (return (getmetatable obj)))
 
+
+;;
+;; PYTHON
+;;
+
+(l/script :python
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-iter :as it]]})
+
+(defn.py proto-create
+  "creates a prototype map from a spec map"
+  {:added "4.1"}
+  [spec-map]
+  (xt/x:set-key spec-map "__index" spec-map)
+  (return spec-map))
+
 (defn.py runtime-attach
   "attaches runtime dispatch for Python-managed objects"
   {:added "4.1"}
@@ -82,6 +97,11 @@
   {:added "4.1"}
   [obj]
   (return (xt/x:get-key obj "_rt_protocol")))
+
+
+;;
+;; DART
+;;
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]
@@ -106,6 +126,11 @@
   {:added "4.1"}
   [obj]
   (return (xt/x:get-key obj "_rt_protocol")))
+
+
+;;
+;; TOP LEVEL
+;;
 
 (l/script :xtalk)
 

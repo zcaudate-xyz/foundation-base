@@ -1,5 +1,8 @@
 (ns xt.db.node.adaptor-base
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [scaffold.supabase.event-host-util :as live]
+            [xt.db.helpers.test-fixtures :as fixtures]
+            [xt.lang.common-notify :as notify]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
@@ -30,6 +33,21 @@
 
 (comment
 
+  (notify/wait-on [:js 10000]
+                  (var settings (xt/x:obj-clone (. (@! live/+live-supabase-config+) ["client"])))
+                  (xt/x:set-key settings "transport" (js-fetch/client {}))
+    (promise/x:promise-then
+     (impl/client-supabase-init
+      (impl/client-supabase
+       (@! fixtures/+schema+)
+       (@! fixtures/+lookup+)
+       {}
+       settings))
+     (fn [client]
+       (repl/notify
+        {"tag" (. client ["::"])
+         "instance" (supabase/client? (. client ["instance"]))}))))
+  
   {"services"
    {"db/common"   {"schema"  {}
                    "lookup"  {}}

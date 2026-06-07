@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]]})
 
 (defn.xt iface-combine
@@ -39,3 +40,12 @@
                          :actual (xtd/obj-keys spec-map)}))))
     (:= acc (xt/x:obj-assign acc spec-map)))
   (return acc))
+
+
+(defn.xt ensure-promise
+  "wraps sync values in a native host promise while passing promises through"
+  {:added "4.1.3"}
+  [value]
+  (if (promise/x:promise-native? value)
+    (return value)
+    (return (promise/x:promise-run value))))

@@ -258,8 +258,8 @@
                      :_end_string   "}"
                      :_sep_string   ", "
                      :_is_ordered   false
-                     :to-iter  -/hashmap-to-iter
-                     :to-array -/hashmap-to-array}]
+                     :to-iter       -/hashmap-to-iter
+                     :to-array      -/hashmap-to-array}]
     [p-edit/IEdit   {:is-mutable    -/hashmap-is-editable
                      :to-mutable    -/hashmap-to-mutable!
                      :is-persistent (fn:> [hashmap] (not (-/hashmap-is-editable hashmap)))
