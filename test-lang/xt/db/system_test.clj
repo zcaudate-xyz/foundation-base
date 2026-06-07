@@ -27,11 +27,11 @@
    (instance/unsupported-op "clear" "db.void"))
   => (throws))
 
-^{:refer xt.db.system/ensure-memory-client :added "4.1"}
+^{:refer xt.db.system/ensure-client-memory :added "4.1"}
 (fact "coerces raw memory backend instances into tagged system clients"
 
   (!.js
-   (xtd/get-in (instance/ensure-memory-client {"rows" {}})
+   (xtd/get-in (instance/ensure-client-memory {"rows" {}})
                ["::"]))
   => "db.client.memory")
 
@@ -46,11 +46,11 @@
      "query")))
   => true)
 
-^{:refer xt.db.system/ensure-supabase-client :added "4.1"}
+^{:refer xt.db.system/ensure-client-supabase :added "4.1"}
 (fact "coerces raw supabase backend instances into tagged system clients"
 
   (!.js
-   (xtd/get-in (instance/ensure-supabase-client {"base_url" "https://db.test"})
+   (xtd/get-in (instance/ensure-client-supabase {"base_url" "https://db.test"})
                ["::"]))
   => "db.client.supabase")
 

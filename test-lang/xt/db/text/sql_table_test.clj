@@ -133,6 +133,65 @@
                        {}))
   => +upserts+)
 
+
+^{:refer xt.db.text.sql-table/prepare-add-input :added "4.1"}
+(fact "prepare add input"
+
+  (!.js
+    (table/prepare-add-input {"UserAccount" [sample/RootUser]}
+                             sample/Schema
+                             sample/SchemaLookup
+                             {}))
+  => (clojure.string/join "\n\n" +upserts+)
+  
+  ;; "id" only will give a blank
+  (!.js
+    (table/prepare-add-input {"Currency" [{"id" "USD"}]}
+                             sample/Schema
+                             sample/SchemaLookup
+                             (ut/sqlite-opts sample/SchemaLookup)))
+
+  
+  (!.js
+    (table/prepare-add-input {"Currency" [{"id" "USD" "name" "US Dollar"}]}
+                             sample/Schema
+                             sample/SchemaLookup
+                             (ut/sqlite-opts sample/SchemaLookup)))
+  => "INSERT INTO \"Currency\"\n (\"id\", \"type\", \"symbol\", \"native\", \"decimal\", \"name\", \"plural\", \"description\")\n VALUES\n ('USD',NULL,NULL,NULL,NULL,'US Dollar',NULL,NULL)\nON CONFLICT (\"id\") DO UPDATE SET\n\"type\"=coalesce(\"excluded\".\"type\",\"type\"),\n\"symbol\"=coalesce(\"excluded\".\"symbol\",\"symbol\"),\n\"native\"=coalesce(\"excluded\".\"native\",\"native\"),\n\"decimal\"=coalesce(\"excluded\".\"decimal\",\"decimal\"),\n\"name\"=coalesce(\"excluded\".\"name\",\"name\"),\n\"plural\"=coalesce(\"excluded\".\"plural\",\"plural\"),\n\"description\"=coalesce(\"excluded\".\"description\",\"description\");"
+
+  (!.js
+    (table/prepare-add-input {"Currency" [{"id" "USD" "name" "US Dollar"}]}
+                             sample/Schema
+                             sample/SchemaLookup
+                             (ut/postgres-opts sample/SchemaLookup)))
+  => "INSERT INTO \"scratch-sample-db\".\"Currency\"\n (\"id\", \"type\", \"symbol\", \"native\", \"decimal\", \"name\", \"plural\", \"description\")\n VALUES\n ('USD',NULL,NULL,NULL,NULL,'US Dollar',NULL,NULL)\nON CONFLICT (\"id\") DO UPDATE SET\n\"type\"=coalesce(\"excluded\".\"type\",\"type\"),\n\"symbol\"=coalesce(\"excluded\".\"symbol\",\"symbol\"),\n\"native\"=coalesce(\"excluded\".\"native\",\"native\"),\n\"decimal\"=coalesce(\"excluded\".\"decimal\",\"decimal\"),\n\"name\"=coalesce(\"excluded\".\"name\",\"name\"),\n\"plural\"=coalesce(\"excluded\".\"plural\",\"plural\"),\n\"description\"=coalesce(\"excluded\".\"description\",\"description\");")
+
+^{:refer xt.db.text.sql-table/prepare-remove-input :added "4.1"}
+(fact "prepare remove input"
+
+  (!.js
+    (table/prepare-remove-input {"Currency" [{"id" "USD"}]}
+                                sample/Schema
+                                sample/SchemaLookup
+                                (ut/sqlite-opts sample/SchemaLookup)))
+  => "DELETE FROM \"Currency\" WHERE \"id\" = 'USD';"
+
+  (!.js
+    (table/prepare-remove-input {"Currency" [{"id" "USD"}
+                                             {"id" "AUD"}]}
+                                sample/Schema
+                                sample/SchemaLookup
+                                (ut/sqlite-opts sample/SchemaLookup)))
+  => "DELETE FROM \"Currency\" WHERE \"id\" = 'USD';\n\nDELETE FROM \"Currency\" WHERE \"id\" = 'AUD';"
+
+  (!.js
+    (table/prepare-remove-input {"Currency" [{"id" "USD"}
+                                             {"id" "AUD"}]}
+                                sample/Schema
+                                sample/SchemaLookup
+                                (ut/postgres-opts sample/SchemaLookup)))
+  => "DELETE FROM \"scratch-sample-db\".\"Currency\" WHERE \"id\" = 'USD';\n\nDELETE FROM \"scratch-sample-db\".\"Currency\" WHERE \"id\" = 'AUD';")
+
 (comment
   (s/pedantic ['xt.db.text.sql-table])
   
@@ -141,3 +200,4 @@
   (s/seedgen-benchadd   '[xt.db.text.sql-table] {:lang [:dart :julia] :write true})
   (s/seedgen-langadd    '[xt.db.text.sql-table] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.db.text.sql-table] {:lang [:lua :python] :write true}))
+

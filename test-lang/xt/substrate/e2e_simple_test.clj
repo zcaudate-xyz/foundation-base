@@ -14,28 +14,65 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.substrate :as event-node]
+             [xt.substrate :as substrate]
              [xt.substrate.transport-memory :as transport-memory]
-             [js.lib.driver-postgres :as js-postgres]
              [xt.protocol.impl.connection-sql :as sql]
              [xt.db.text.sql-call :as call]
-             [xt.db.runtime.driver :as driver]
              [xt.db.substrate :as db-helper]
+             [js.lib.driver-postgres :as js-postgres]
              [postgres.sample.scratch-v0.route-entries :as entries]]})
 
 (fact:global
  {:setup [(l/rt:restart)
-          (l/with:print-all (l/rt:setup :postgres))]
+          (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 
+;; create 
 
+^{:description "create a xt.substrate node"}
+(fact ""
 
+  (!.js
+    (substrate/node-create
+     {"handlers"
+      {"fn/ping"
+       {"fn" (fn [space args request node]
+               (return "pong"))}}}))
+  '  
+  
+  (notify/wait-on :js
+    (-> (substrate/node-create
+         {"handlers"
+          {"fn/ping"
+           {"fn" (fn [space args request node]
+                   (return "pong"))}}})
+        (substrate/request nil
+                           "fn/ping"
+                           []
+                           {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => "pong"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create
+         {"handlers"
+          {"fn/init-db"
+           {"fn" (fn [space args request node]
+                   (substrate/set-service node "db.primary"))}}})
+        (substrate/request nil
+                           "fn/ping"
+                           []
+                           {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out))))))
 
 (comment
   
-
-  (!.js
-    (driver/get-driver "postgres"))
+  
+  
   
   
   (defn )
@@ -52,7 +89,7 @@
 
   (notify/wait-on :js
     (var node
-         (event-node/node-create
+         (substrate/node-create
           {"services"
            {"db/primary"
             {"database" "test-scratch"}}
@@ -70,7 +107,7 @@
   
   
   (notify/wait-on :js
-    (-> (event-node/node-create
+    (-> (substrate/node-create
          {"services"
           {"db/primary"
            {"database" "test-scratch"}}
@@ -83,32 +120,32 @@
                    (return
                     (-> (sql/connect
                          (driver/get-driver "postgres")
-                         (event-node/get-service node "db/primary"))
+                         (substrate/get-service node "db/primary"))
                         (promise/x:promise-then
                          (fn [conn]
                            (return (call/call-raw conn fn-template fn-args)))))))
             "meta" {"kind" "request"}}}})
-        (event-node/request nil
-                            "db/fn.primary"
-                            [{"template" entries/ping
-                              "args" []}]
-                            {})
+        (substrate/request nil
+                           "db/fn.primary"
+                           [{"template" entries/ping
+                             "args" []}]
+                           {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
   
   
   (notify/wait-on :js
-    (-> (event-node/node-create
+    (-> (substrate/node-create
          {"handlers"
           {"db/ping"
            {"fn" (fn [space args request node]
                    (return request))
             "meta" {"kind" "request"}}}})
-        (event-node/request nil
-                            "db/ping"
-                            []
-                            {})
+        (substrate/request nil
+                           "db/ping"
+                           []
+                           {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
@@ -123,7 +160,7 @@
 
   
   (notify/wait-on :js
-    (-> (event-node/node-create
+    (-> (substrate/node-create
          {"handlers"
           {"db/ping"
            {"fn" (fn [space args request node]
@@ -135,10 +172,10 @@
                          (fn [conn]
                            (return (call/call-raw conn entries/ping [])))))))
             "meta" {"kind" "request"}}}})
-        (event-node/request "ANY"
-                            "db/ping"
-                            []
-                            {})
+        (substrate/request "ANY"
+                           "db/ping"
+                           []
+                           {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
@@ -256,7 +293,7 @@
 
   
   (notify/wait-on :js
-    (-> (event-node/node-create
+    (-> (substrate/node-create
          {"handlers"
           {"base/add"
            {"fn" (fn [space args request node]
@@ -267,7 +304,7 @@
                                        (+ a b)))
                                     0)))
             "meta" {"kind" "request"}}}})
-        (event-node/request "ANY"
+        (substrate/request "ANY"
                             "base/add"
                             [1 2 3 4 5]
                             {})
@@ -276,7 +313,7 @@
            (repl/notify out)))))
 
   (!.js
-    (-> (event-node/node-create
+    (-> (substrate/node-create
          {"handlers"
           {"base/add"
            {"fn" (fn [space args request node]
@@ -287,7 +324,7 @@
                                        (+ a b)))
                                     0)))
             "meta" {"kind" "request"}}}})
-        (event-node/get-handler "base/add")))
+        (substrate/get-handler "base/add")))
   (notify/wait-on :js
     )
   
@@ -299,7 +336,7 @@
   
   (notify/wait-on :js
     
-    (-> (event-node/node-create
+    (-> (substrate/node-create
          {"handlers"
           {"base/add"
            {"fn" (fn [space args request node]

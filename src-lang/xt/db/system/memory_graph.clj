@@ -5,9 +5,76 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-sort-by :as xtsb]
-             [xt.db.runtime.cache-pull :as cache-pull]
              [xt.db.text.base-graph :as base-graph]
              [xt.db.text.base-tree :as base-tree]]})
+
+(defn.xt check-in-clause
+  "emulates the sql `in` clause"
+  {:added "4.0"}
+  [x expr]
+  (return (xt/x:arr-some (xt/x:first expr)
+                         (fn [e] (return (== e x))))))
+
+(defn.xt like-char-at
+  "gets a single character from a string"
+  {:added "4.1"}
+  [s i]
+  (return (xt/x:str-substring s
+                              (xt/x:offset i)
+                              (+ i 1))))
+
+(defn.xt check-like-clause
+  "emulates the sql `like` clause"
+  {:added "4.0"}
+  [x expr]
+  (when (or (not (xt/x:is-string? x))
+            (not (xt/x:is-string? expr)))
+    (return false))
+  (var slen (xt/x:str-len x))
+  (var plen (xt/x:str-len expr))
+  (var sidx 0)
+  (var pidx 0)
+  (var star-pidx -1)
+  (var star-sidx -1)
+  (while (< sidx slen)
+    (var sch (-/like-char-at x sidx))
+    (var pch (:? (< pidx plen)
+                 (-/like-char-at expr pidx)
+                 nil))
+    (cond (and (== "\\" pch)
+               (< (+ pidx 1) plen)
+               (== sch (-/like-char-at expr (+ pidx 1))))
+          (do (:= sidx (+ sidx 1))
+              (:= pidx (+ pidx 2)))
+
+          (and (== "\\" pch)
+               (== sch "\\")
+               (== (+ pidx 1) plen))
+          (do (:= sidx (+ sidx 1))
+              (:= pidx (+ pidx 1)))
+
+          (== "%" pch)
+          (do (:= star-pidx pidx)
+              (:= star-sidx sidx)
+              (:= pidx (+ pidx 1)))
+
+          (or (== "_" pch)
+              (== sch pch))
+          (do (:= sidx (+ sidx 1))
+              (:= pidx (+ pidx 1)))
+
+          (< star-pidx 0)
+          (return false)
+
+          :else
+          (do (:= star-sidx (+ star-sidx 1))
+              (:= sidx star-sidx)
+              (:= pidx (+ star-pidx 1)))))
+  (while (< pidx plen)
+    (if (== "%" (-/like-char-at expr pidx))
+      (:= pidx (+ pidx 1))
+      (return false)))
+  (return true))
 
 (def.xt LINK_LOOKUP
   {"forward" "ref_links"
@@ -21,7 +88,7 @@
             (not (xt/x:is-string? expr)))
     (return false))
   (return
-   (cache-pull/check-like-clause
+   (-/check-like-clause
     (xt/x:str-to-lower x)
     (xt/x:str-to-lower expr))))
 
@@ -33,9 +100,9 @@
    "lte"  xt/x:lte
    "gt"   xt/x:gt
    "gte"  xt/x:gte
-   "like" cache-pull/check-like-clause
+   "like" -/check-like-clause
    "ilike" -/check-ilike-clause
-   "in"   cache-pull/check-in-clause
+   "in"   -/check-in-clause
    "is"   (fn [x expr]
             (return (xt/x:eq x expr)))
    "between"  (fn [x start-expr _and end-expr]
@@ -44,8 +111,8 @@
                       (:? (== _and "and")
                           (<= x end-expr)
                           (<= x _and)))))
-   "not_like" (fn:> [x expr] (not (cache-pull/check-like-clause x expr)))
-   "not_in" (fn:> [x expr] (not (cache-pull/check-in-clause x expr)))
+   "not_like" (fn:> [x expr] (not (-/check-like-clause x expr)))
+   "not_in" (fn:> [x expr] (not (-/check-in-clause x expr)))
    "is_null" xt/x:nil?
    "is_not_null"  xt/x:not-nil?})
 
@@ -138,11 +205,11 @@
             (var exprs [(xt/x:unpack clause)])
             (xt/x:arr-pop-first exprs)
             (return (-/check-clause-function
-                      record
-                      link-type
-                      key
-                      (xt/x:get-key -/PULL_CHECK tag)
-                      exprs)))
+                     record
+                     link-type
+                     key
+                     (xt/x:get-key -/PULL_CHECK tag)
+                     exprs)))
 
         (xt/x:is-function? clause)
         (return (-/check-clause-function

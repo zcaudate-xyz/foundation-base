@@ -27,7 +27,7 @@
 
 (l/script :js
   {:require [[js.lib.client-fetch :as js-fetch]
-             [xt.db.runtime.supabase-client :as supabase-client]
+             [xt.db.runtime.client-supabase :as client-supabase]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
@@ -73,7 +73,7 @@
   [opts]
   (var raw (-/merge-api-config opts))
   (xt/x:set-key raw "transport" (js-fetch/client {}))
-  (return (supabase-client/client raw)))
+  (return (client-supabase/client raw)))
 
 (defn.js request-error
   [response tag]
@@ -131,7 +131,7 @@
   [client]
   (return
    (promise/x:promise-then
-    (supabase-client/dispatch-request
+    (client-supabase/dispatch-request
      client
      {"method" "POST"
       "url" "/rest/v1/rpc/ping"}
@@ -140,13 +140,13 @@
       (var error (-/request-error response "demo.xtdb_backbone/ping-failed"))
       (if (xt/x:not-nil? error)
         (return error)
-        (return (supabase-client/unwrap-response response)))))))
+        (return (client-supabase/unwrap-response response)))))))
 
 (defn.js recent-logs-request
   [client]
   (return
    (promise/x:promise-then
-    (supabase-client/dispatch-request
+    (client-supabase/dispatch-request
      client
      {"method" "GET"
       "url" "/rest/v1/Log?select=id,message,author_id&order=id.desc&limit=10"}
@@ -155,13 +155,13 @@
       (var error (-/request-error response "demo.xtdb_backbone/log-select-failed"))
       (if (xt/x:not-nil? error)
         (return error)
-        (return (supabase-client/unwrap-response response)))))))
+        (return (client-supabase/unwrap-response response)))))))
 
 (defn.js log-append-request
   [client message]
   (return
    (promise/x:promise-then
-    (supabase-client/dispatch-request
+    (client-supabase/dispatch-request
      client
      {"method" "POST"
       "url" "/rest/v1/rpc/log_append"
@@ -178,7 +178,7 @@
             (if (and (xt/x:is-object? logs)
                      (== "error" (xt/x:get-key logs "status")))
               (return logs)
-              (return {"append" (supabase-client/unwrap-response response)
+              (return {"append" (client-supabase/unwrap-response response)
                        "logs" logs}))))))))))
 
 (defn.js ping-page-model

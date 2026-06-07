@@ -10,8 +10,7 @@
              [xt.protocol.client-fetch :as fetch-if]
              [xt.protocol.impl.client-fetch :as fetch]]})
 
-
-(defn.xt supabase-client
+(defn.xt client-supabase
   "creates the thin supabase client record with stored context"
   {:added "4.1"}
   [schema lookup opts settings]
@@ -23,7 +22,7 @@
                              (or opts {}))
     {"settings" (or settings {})})))
 
-(defn.xt supabase-client-init
+(defn.xt client-supabase-init
   "creates the underlying supabase transport client and stores it"
   {:added "4.1"}
   [client]

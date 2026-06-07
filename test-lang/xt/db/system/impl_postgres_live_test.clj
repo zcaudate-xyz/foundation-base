@@ -4,6 +4,10 @@
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.event-host-util :as live]))
 
+(l/script- :postgres
+           {:runtime :jdbc.client
+            :require [[postgres.sample.scratch-v0 :as scratch]]})
+
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
@@ -40,8 +44,8 @@
     (try
       (notify/wait-on [:js 10000]
         (promise/x:promise-then
-         (impl/postgres-client-init
-          (impl/postgres-client
+         (impl/client-postgres-init
+          (impl/client-postgres
            (@! fixtures/+schema+)
            (@! fixtures/+lookup+)
            {}
@@ -73,8 +77,8 @@
 
   (notify/wait-on [:js 10000]
     (promise/x:promise-then
-     (impl/postgres-client-init
-      (impl/postgres-client
+     (impl/client-postgres-init
+      (impl/client-postgres
        (@! fixtures/+schema+)
        (@! fixtures/+lookup+)
        {}

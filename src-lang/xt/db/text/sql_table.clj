@@ -91,7 +91,7 @@
   (var emit-pair-fn
        (fn [pair]
          (var [table-name data] pair)
-         (var cols     (base-schema/table-columns schema table-name))
+         (var cols     (base-schema/table-columns  schema table-name))
          (var defaults (base-schema/table-defaults schema table-name))
          (var out  (xtd/arr-keepf (xt/x:obj-vals data)
                                   -/table-filter-id
@@ -114,6 +114,30 @@
                             cols
                             sout
                             sopts)))))
+  (return (xtd/arr-keep ordered emit-pair-fn)))
+
+(defn.xt table-emit-flat-debug
+  "emit util for insert and upsert"
+  {:added "4.0"}
+  [emit-fn schema lookup flat opts]
+  (var ordered (xtd/arr-keep (base-schema/table-order lookup)
+                             (fn [col]
+                               (return (:? (xt/x:has-key? flat col) [col (xt/x:get-key flat col)] nil)))))
+  (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
+  (var emit-pair-fn
+       (fn [pair]
+         (var [table-name data] pair)
+         (var cols     (base-schema/table-columns  schema table-name))
+         (var defaults (base-schema/table-defaults schema table-name))
+         (return [(xt/x:obj-vals data)
+                  (xtd/arr-keepf (xt/x:obj-vals data)
+                                 -/table-filter-id
+                                 -/table-get-data)])
+         #_#_#_(var out  (xtd/arr-keepf (xt/x:obj-vals data)
+                                        -/table-filter-id
+                                        -/table-get-data))
+         (var sout (xt/x:arr-map out (fn:> [v] (xt/x:obj-assign (xt/x:obj-clone defaults) v))))
+         (return sout)))
   (return (xtd/arr-keep ordered emit-pair-fn)))
 
 (defn.xt table-insert

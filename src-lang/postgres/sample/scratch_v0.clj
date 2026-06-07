@@ -7,7 +7,6 @@
   {:require [[postgres.core :as pg]
              [postgres.core.supabase :as s]]
    :import [["uuid-ossp"]]
-   :config {:dbname "test-scratch"}
    :static {:application ["scratch_v0"]
             :seed ["scratch_v0"]
             :all {:schema ["scratch_v0"]}}

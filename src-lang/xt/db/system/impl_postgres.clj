@@ -27,7 +27,49 @@
         (xt/x:err "SQL pull expected decoded structured data"))
       (return output)))))
 
-(defn.xt rpc-call-async
+(defn.xt client-postgres
+  "creates the thin postgres client record with stored context"
+  {:added "4.1"}
+  [schema lookup opts settings]
+  (return
+   (xt/x:obj-assign
+    (impl-common/client-base "db.client.postgres"
+                             schema
+                             lookup
+                             (xt/x:obj-assign
+                              (sql-util/postgres-opts lookup)
+                              (or opts {})))
+    {"settings" (or settings {})})))
+
+(defn.xt client-postgres-init
+  "connects the thin postgres client through a runtime sql driver"
+  {:added "4.1"}
+  [client driver-fn]
+  (var #{settings} client)
+  (var driver (:? (xt/x:is-function? driver-fn)
+                  (driver-fn)
+                  driver-fn))
+  (return
+   (promise/x:promise-then
+    (dbsql/connect driver settings)
+    (fn [instance]
+      (var instance-impl (xt/x:get-key instance "_impl"))
+      (when (and (xt/x:not-nil? instance-impl)
+                 (xt/x:nil? (xt/x:get-key instance-impl "query_async"))
+                 (xt/x:not-nil? (xt/x:get-key instance-impl "query")))
+        (:= instance
+            (dbsql/connection-create
+             (xt/x:get-key instance "_raw")
+             (xt/x:obj-assign
+              (xt/x:obj-clone instance-impl)
+              {"query_async" (xt/x:get-key instance-impl "query")}))))
+      (xt/x:set-key client "instance" instance)
+      (return client)))))
+
+
+(comment
+
+  (defn.xt rpc-call-async
   "calls a postgres rpc function with async semantics"
   {:added "4.1"}
   [client fn-name args]
@@ -70,42 +112,4 @@
                "\"("
                (xt/x:str-join ", " arg-list)
                ");")))))
-
-(defn.xt postgres-client
-  "creates the thin postgres client record with stored context"
-  {:added "4.1"}
-  [schema lookup opts settings]
-  (return
-   (xt/x:obj-assign
-    (impl-common/client-base "db.client.postgres"
-                             schema
-                             lookup
-                             (xt/x:obj-assign
-                              (sql-util/postgres-opts lookup)
-                              (or opts {})))
-    {"settings" (or settings {})})))
-
-(defn.xt postgres-client-init
-  "connects the thin postgres client through a runtime sql driver"
-  {:added "4.1"}
-  [client driver-fn]
-  (var #{settings} client)
-  (var driver (:? (xt/x:is-function? driver-fn)
-                  (driver-fn)
-                  driver-fn))
-  (return
-   (promise/x:promise-then
-    (dbsql/connect driver settings)
-    (fn [instance]
-      (var instance-impl (xt/x:get-key instance "_impl"))
-      (when (and (xt/x:not-nil? instance-impl)
-                 (xt/x:nil? (xt/x:get-key instance-impl "query_async"))
-                 (xt/x:not-nil? (xt/x:get-key instance-impl "query")))
-        (:= instance
-            (dbsql/connection-create
-             (xt/x:get-key instance "_raw")
-             (xt/x:obj-assign
-              (xt/x:obj-clone instance-impl)
-              {"query_async" (xt/x:get-key instance-impl "query")}))))
-      (xt/x:set-key client "instance" instance)
-      (return client)))))
+  )

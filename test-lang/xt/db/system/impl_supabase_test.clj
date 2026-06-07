@@ -18,12 +18,12 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.system.impl-supabase/supabase-client :added "4.1"}
+^{:refer xt.db.system.impl-supabase/client-supabase :added "4.1"}
 (fact "creates the thin supabase client record with stored context"
 
   (!.js
    (var client
-        (impl/supabase-client
+        (impl/client-supabase
          sample/Schema
          sample/SchemaLookup
          {}
@@ -36,13 +36,13 @@
       "has_instance" false
       "base_url" "https://api.test"})
 
-^{:refer xt.db.system.impl-supabase/supabase-client-init :added "4.1"}
-(fact "supabase-client-init stores the underlying supabase client"
+^{:refer xt.db.system.impl-supabase/client-supabase-init :added "4.1"}
+(fact "client-supabase-init stores the underlying supabase client"
 
   (notify/wait-on :js
     (promise/x:promise-then
-     (impl/supabase-client-init
-      (impl/supabase-client
+     (impl/client-supabase-init
+      (impl/client-supabase
        sample/Schema
        sample/SchemaLookup
        {}
@@ -65,7 +65,7 @@
   (notify/wait-on :js
     (var seen {"url" nil})
     (var client
-         (impl/supabase-client
+         (impl/client-supabase
           sample/Schema
           sample/SchemaLookup
           {}
@@ -94,7 +94,7 @@
                "method" nil
                "body" nil})
     (var client
-         (impl/supabase-client
+         (impl/client-supabase
           sample/Schema
           sample/SchemaLookup
           {}

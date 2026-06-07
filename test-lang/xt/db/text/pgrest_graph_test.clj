@@ -270,18 +270,18 @@
        "links" []
        "data" ["id"]}])
 
-  (!.js
-    (g/select-tree
-     sample/Schema
-     ["Currency"
-      {"id" "USD"}
-      ["id"]]
-     {}))
-  => ["Currency"
-      {"custom" []
-       "where" [{"id" "USD"}]
-       "links" []
-       "data" ["id"]}]
+(!.js
+  (g/select-tree
+   sample/Schema
+   ["Currency"
+    {"id" "USD"}
+    ["id"]]
+   {}))
+=> ["Currency"
+    {"custom" []
+     "where" [{"id" "USD"}]
+     "links" []
+     "data" ["id"]}]
 
 ^{:refer xt.db.text.pgrest-graph/select :added "4.1"}
 (fact "wraps select-return at the top level and accepts query forms"
@@ -324,7 +324,7 @@
       "select" "id",
       "filters" [{"id" "USD"}],
       "params" ["select=id"
-               "id=eq.USD"],
+                "id=eq.USD"],
       "query" "select=id&id=eq.USD",
       "url" "/rest/v1/Currency?select=id&id=eq.USD",
       "headers" {}})

@@ -20,7 +20,7 @@
 (fact "adds records directly to the memory client rows"
 
   (!.js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add
@@ -45,7 +45,7 @@
 (fact "pull reads tree and shorthand query forms from the client context"
 
   (!.js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
@@ -68,7 +68,7 @@
        "profile" [{"first_name" "Root"}]}]
 
   (!.js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
@@ -85,7 +85,7 @@
 (fact "record-delete removes ids from memory rows"
 
   (!.js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
@@ -104,7 +104,7 @@
 (fact "pull reads through async semantics"
 
   (!.js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
@@ -121,7 +121,7 @@
 (fact "pull-async resolves through promise semantics"
 
   (notify/wait-on :js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
@@ -141,7 +141,7 @@
 (fact "record-add writes through async semantics"
 
   (!.js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add
@@ -159,7 +159,7 @@
 (fact "record-add-async writes through promise semantics"
 
   (notify/wait-on :js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (-> (impl/record-add-async
@@ -180,7 +180,7 @@
 (fact "record-delete removes ids with async semantics"
 
   (!.js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
@@ -199,7 +199,7 @@
 (fact "record-delete-async removes ids through promise semantics"
 
   (notify/wait-on :js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/record-add client
@@ -221,7 +221,7 @@
 (fact "process-add-event merges nested data into rows and links"
   
   (!.js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (var out
@@ -256,7 +256,7 @@
 (fact "process-remove-event removes nested data in lookup order"
 
   (!.js
-    (var client (impl/memory-client sample/Schema
+    (var client (impl/client-memory sample/Schema
                                     sample/SchemaLookup
                                     nil))
     (impl/process-add-event
@@ -275,11 +275,11 @@
       nil
       nil])
 
-^{:refer xt.db.system.impl-memory/memory-client :added "4.1"}
+^{:refer xt.db.system.impl-memory/client-memory :added "4.1"}
 (fact "creates the thin memory client record with stored schema context"
   
   (!.js
-    (impl/memory-client sample/Schema
+    (impl/client-memory sample/Schema
                         sample/SchemaLookup
                         {"mode" "memory"}))
   => (contains-in

@@ -47,15 +47,15 @@
                   true)
               (l/rt:stop)]})
 
-^{:refer xt.db.system.impl-supabase/supabase-client-init :added "4.1"}
-(fact "supabase-client-init stores a live local supabase client"
+^{:refer xt.db.system.impl-supabase/client-supabase-init :added "4.1"}
+(fact "client-supabase-init stores a live local supabase client"
 
   (notify/wait-on [:js 10000]
     (var settings (xt/x:obj-clone (. (@! live/+live-supabase-config+) ["client"])))
     (xt/x:set-key settings "transport" (js-fetch/client {}))
     (promise/x:promise-then
-     (impl/supabase-client-init
-      (impl/supabase-client
+     (impl/client-supabase-init
+      (impl/client-supabase
        (@! fixtures/+schema+)
        (@! fixtures/+lookup+)
        {}
@@ -77,8 +77,8 @@
         (var settings (xt/x:obj-clone (. (@! live/+live-supabase-config+) ["client"])))
         (xt/x:set-key settings "transport" (js-fetch/client {}))
         (promise/x:promise-then
-         (impl/supabase-client-init
-          (impl/supabase-client
+         (impl/client-supabase-init
+          (impl/client-supabase
            (@! fixtures/+schema+)
            (@! fixtures/+lookup+)
            {}
@@ -106,8 +106,8 @@
     (var settings (xt/x:obj-clone (. (@! live/+live-supabase-config+) ["client"])))
     (xt/x:set-key settings "transport" (js-fetch/client {}))
     (promise/x:promise-then
-     (impl/supabase-client-init
-      (impl/supabase-client
+     (impl/client-supabase-init
+      (impl/client-supabase
        (@! fixtures/+schema+)
        (@! fixtures/+lookup+)
        {}

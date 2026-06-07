@@ -22,7 +22,7 @@
          opts} client)
   (var output
        (dbsql/query instance
-                  (sql-graph/select schema tree opts)))
+                    (sql-graph/select schema tree opts)))
   (when (xt/x:is-string? output)
     (xt/x:err "SQL pull expected decoded structured data"))
   (return output))
@@ -37,7 +37,7 @@
   (return
    (dbsql/ensure-promise
     (dbsql/query-async instance
-                     (sql-graph/select schema tree opts)))))
+                       (sql-graph/select schema tree opts)))))
 
 (defn.xt record-add
   "adds rows directly through stored sqlite context"
@@ -47,28 +47,32 @@
          schema
          lookup
          opts} client)
+  (var input (sql-table/prepare-add-input {table-name records}
+                                             schema
+                                             lookup
+                                             opts))
+  (when (== "" input)
+    (return nil))
   (return
-   (dbsql/query instance
-              (sql-table/prepare-add-input {table-name records}
-                                           schema
-                                           lookup
-                                           opts))))
+   (dbsql/query instance input)))
 
 (defn.xt record-add-async
   "adds rows directly with async sqlite semantics"
   {:added "4.1"}
   [client table-name records]
+  (promise/x:promise)
   (var #{instance
          schema
          lookup
          opts} client)
+  (var input (sql-table/prepare-add-input {table-name records}
+                                          schema
+                                          lookup
+                                          opts))
+  (when (== "" input)
+    (return (promise/x:promise-run nil)))
   (return
-   (dbsql/ensure-promise
-    (dbsql/query-async instance
-                     (sql-table/prepare-add-input {table-name records}
-                                                  schema
-                                                  lookup
-                                                  opts)))))
+   (dbsql/query-async instance input)))
 
 (defn.xt record-delete
   "deletes ids directly through stored sqlite context"
@@ -81,8 +85,7 @@
                      (fn [id]
                        (return (raw/raw-delete table-name {"id" id} opts)))))
   (return
-   (dbsql/query instance
-              (xt/x:str-join "\n\n" statements))))
+   (dbsql/query instance (xt/x:str-join "\n\n" statements))))
 
 (defn.xt record-delete-async
   "deletes ids directly with async sqlite semantics"
@@ -97,7 +100,7 @@
   (return
    (dbsql/ensure-promise
     (dbsql/query-async instance
-                     (xt/x:str-join "\n\n" statements)))))
+                       (xt/x:str-join "\n\n" statements)))))
 
 (defn.xt process-add-event
   "processes nested data into sqlite upserts"
@@ -109,7 +112,7 @@
          opts} client)
   (var flat (f/flatten-bulk schema data))
   (dbsql/query instance
-             (sql-table/prepare-add-input data schema lookup opts))
+               (sql-table/prepare-add-input data schema lookup opts))
   (return (xt/x:obj-keys flat)))
 
 (defn.xt process-remove-event
@@ -122,7 +125,7 @@
          opts} client)
   (var ordered (f/flatten-bulk-ids schema lookup data))
   (dbsql/query instance
-             (sql-table/prepare-remove-input data schema lookup opts))
+               (sql-table/prepare-remove-input data schema lookup opts))
   (return (xt/x:arr-map ordered xt/x:first)))
 
 (defn.xt exec-sync
@@ -132,34 +135,38 @@
   (var #{instance} client)
   (return (dbsql/query instance raw-input)))
 
-(defn.xt sqlite-client
+(defn.xt client-sqlite
   "creates the thin sqlite client record with stored context"
   {:added "4.1"}
-  [schema lookup opts settings]
+  [schema lookup settings]
   (return
    (xt/x:obj-assign
-    (impl-common/client-base "db.client.sqlite"
+    (impl-common/client-sqlite "db.client.sqlite"
                              schema
                              lookup
-                             (xt/x:obj-assign
-                              (sql-util/sqlite-opts lookup)
-                              (or opts {})))
+                             (sql-util/sqlite-opts lookup))
     {"settings" (or settings {"filename" ":memory:"})})))
 
-(defn.xt sqlite-client-init
-  [client driver-fn]
+(defn.xt client-sqlite-init
+  [client driver]
   (var #{schema
          lookup
          settings
          opts} client)
   (return
-   (-> (dbsql/connect (driver-fn) settings)
+   (-> (dbsql/connect driver settings)
        (promise/x:promise-then
         (fn [instance]
           (xt/x:set-key client "instance" instance)
-          (dbsql/query
-           instance
-           (xt/x:str-join
-            "\n\n"
-            (manage/table-create-all schema lookup opts)))
+          (dbsql/query instance
+                       (xt/x:str-join
+                        "\n\n"
+                        (manage/table-create-all schema lookup opts)))
           (return client))))))
+
+(comment
+  (defn.xt client-sqlite
+    [schema lookup opts settings driver-fn]
+    (return
+     (-> (-/client-sqlite schema lookup opts settings)
+         (-/client-sqlite-init driver-fn)))))

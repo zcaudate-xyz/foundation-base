@@ -26,21 +26,48 @@
              [xt.lang.common-promise]]})
 
 (fact:global
- {:setup [(l/rt:restart)]
+ {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.spec-promise/x:promise :added "4.1"}
-(fact "TODO")
+(fact "creates a promise"
+  
+  (notify/wait-on :js
+    (-> (spec-promise/x:promise
+         (fn []
+           (return "hello")))
+        (spec-promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => "hello"
+
+  (notify/wait-on :python
+    (-> (spec-promise/x:promise
+         (fn []
+           (return "hello")))
+        (spec-promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => "hello"
+
+  (notify/wait-on :lua
+    (-> (spec-promise/x:promise
+         (fn []
+           (return "hello")))
+        (spec-promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => "hello")
 
 ^{:refer xt.lang.spec-base/x:async-run :added "4.1"}
 (fact "runs thunks in the host async model"
+
   (notify/wait-on :js
     (do (xt/x:async-run
          (fn []
            (repl/notify 5)))
         nil))
   => 5
-
 
   (notify/wait-on :python
     (do (xt/x:async-run

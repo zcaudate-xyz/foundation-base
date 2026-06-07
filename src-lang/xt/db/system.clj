@@ -47,9 +47,9 @@
                     {}))
   (return out))
 
-(defn.xt ensure-memory-client
+(defn.xt ensure-client-memory
   ([instance]
-   (return (-/ensure-memory-client instance nil)))
+   (return (-/ensure-client-memory instance nil)))
   ([instance input]
    (if (impl-memory/client? instance)
      (return instance)
@@ -63,25 +63,25 @@
      (return instance)
      (return (base-sql/client (-/client-input input instance nil nil nil))))))
 
-(defn.xt ensure-postgres-client
+(defn.xt ensure-client-postgres
   ([instance]
-   (return (-/ensure-postgres-client instance nil)))
+   (return (-/ensure-client-postgres instance nil)))
   ([instance input]
    (if (impl-postgres/client? instance)
      (return instance)
      (return (impl-postgres/client (-/client-input input instance nil nil nil))))))
 
-(defn.xt ensure-sqlite-client
+(defn.xt ensure-client-base
   ([instance]
-   (return (-/ensure-sqlite-client instance nil)))
+   (return (-/ensure-client-base instance nil)))
   ([instance input]
    (if (impl-sqlite/client? instance)
      (return instance)
      (return (impl-sqlite/client (-/client-input input instance nil nil nil))))))
 
-(defn.xt ensure-supabase-client
+(defn.xt ensure-client-supabase
   ([instance]
-   (return (-/ensure-supabase-client instance nil)))
+   (return (-/ensure-client-supabase instance nil)))
   ([instance input]
    (if (impl-supabase/client? instance)
      (return instance)
@@ -114,16 +114,16 @@
         (return nil)
 
         (== dbtype "db.cache")
-        (return (-/ensure-memory-client instance input))
+        (return (-/ensure-client-memory instance input))
 
         (== dbtype "db.supabase")
-        (return (-/ensure-supabase-client instance input))
+        (return (-/ensure-client-supabase instance input))
 
         (== dbtype "db.postgres")
-        (return (-/ensure-postgres-client instance input))
+        (return (-/ensure-client-postgres instance input))
 
         (== dbtype "db.sqlite")
-        (return (-/ensure-sqlite-client instance input))
+        (return (-/ensure-client-base instance input))
 
         (== dbtype "db.sql")
         (return (-/ensure-sql-client instance input))

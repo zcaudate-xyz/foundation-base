@@ -28,13 +28,13 @@
         (main/node-create
          {"services"
           {"db/primary"
-           (pg-impl/postgres-client
+           (pg-impl/client-postgres
             (@! fixtures/+schema+)
             (@! fixtures/+lookup+)
             {}
             {"schema_name" "scratch"})
            "db/caching"
-           (sqlite-impl/sqlite-client
+           (sqlite-impl/client-sqlite
             (@! fixtures/+schema+)
             (@! fixtures/+lookup+)
             nil)}}))
@@ -67,32 +67,32 @@
 (fact "step 01: querying the empty caching service on the xt.substrate node returns an empty result"
 
   (notify/wait-on [:js 10000]
-    (promise/x:promise-then
-     (sqlite-impl/sqlite-client-init
-      (sqlite-impl/sqlite-client
-       (@! fixtures/+schema+)
-       (@! fixtures/+lookup+)
-       nil
-       {"filename" ":memory:"})
-      js-sqlite/driver)
-      (fn [caching-db]
-        (var node
-             (main/node-create
-              {"services"
-               {"db/primary"
-                (pg-impl/postgres-client
-                 (@! fixtures/+schema+)
-                 (@! fixtures/+lookup+)
-                 {}
-                 {"schema_name" "scratch"})
-                "db/caching" caching-db}}))
-        (var result
-             (sqlite-impl/pull (main/get-service node "db/caching")
-                               ["Entry" ["name"]]))
-        (repl/notify
-         {"value" result
-          "count" (xt/x:len result)
-          "dbtype" (. (main/get-service node "db/caching") ["::"])}))))
+    (-> (sqlite-impl/client-sqlite
+         (@! fixtures/+schema+)
+         (@! fixtures/+lookup+)
+         nil
+         {"filename" ":memory:"})
+        (sqlite-impl/client-sqlite-init
+         (js-sqlite/driver))
+        (promise/x:promise-then
+         (fn [caching-db]
+           (var node
+                (main/node-create
+                 {"services"
+                  {"db/primary"
+                   (pg-impl/client-postgres
+                    (@! fixtures/+schema+)
+                    (@! fixtures/+lookup+)
+                    {}
+                    {"schema_name" "scratch"})
+                   "db/caching" caching-db}}))
+           (var result
+                (sqlite-impl/pull (main/get-service node "db/caching")
+                                  ["Entry" ["name"]]))
+           (repl/notify
+            {"value" result
+             "count" (xt/x:len result)
+             "dbtype" (. (main/get-service node "db/caching") ["::"])})))))
   => {"value" []
       "count" 0
       "dbtype" "db.client.sqlite"})
