@@ -2,9 +2,10 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]]
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-protocol :as protocol]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-protocol :as protocol]
+             [xt.net.conn-sql :as conn-sql]]
+   :import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]]})
 
 (defn.js decode-json-scalar
   [value]
@@ -37,7 +38,7 @@
                 "values"  values}]
               values)))
 
-(defn.js make-instance
+(defn.js raw-init
   "creates an sqlite-wasm instance once sqlite3 is loaded"
   {:added "4.1"}
   [sqlite3 opts]
@@ -49,8 +50,7 @@
   (var conn (new (. sqlite3 ["oo1"] ["DB"]) filename flags))
   (return conn))
 
-(defn.js  ^{:static/override true}
-  create-db
+(defn.js client-connect
   "connects to an embedded sqlite-wasm database
 
    (notify/wait-on :js
@@ -60,23 +60,21 @@
                                               (repl/<!)))}))
     => 1"
   {:added "4.1"}
-  [opts]
+  [client opts]
   (var init-module (or (. sqlite3InitModule ["default"])
                        sqlite3InitModule))
   (return
    (. (init-module)
       (then (fn [sqlite3]
-              (return (-/make-instance sqlite3 m)))))))
+              (return (-/raw-init sqlite3 opts))))
+      (then (fn [raw]
+              (xt/x:set-key client "raw" raw)
+              (return client))))))
 
-(defn.js client-methods
+(defn.js create-methods
   []
   (return
-   {"connect"     (fn [client opts]
-                    (return
-                     (. (-/create-db)
-                        (then (fn [raw]
-                                (xt/x:set-key client "raw" raw)
-                                (return client))))))
+   {"connect"     -/client-connect
     "disconnect"  (fn [client]
                     (var #{raw} client)
                     (. raw (close))
@@ -89,4 +87,8 @@
                     (return (protocol/ensure-promise
                              (-/raw-query raw query))))}))
 
-
+(defn.js create
+  []
+  (return
+   (conn-sql/create-base "js.net.conn-sqlite"
+                         (-/create-methods))))

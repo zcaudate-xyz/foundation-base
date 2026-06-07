@@ -26,7 +26,7 @@
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
   [client opts]
-  (var connect-fn (xt/proto:method client "connect"))
+  (var connect-fn (xt/x:get-key client "connect"))
   (return (protocol/ensure-promise
            (connect-fn client opts))))
 
@@ -34,7 +34,7 @@
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
   [client]
-  (var disconnect-fn (xt/proto:method client "disconnect"))
+  (var disconnect-fn (xt/x:get-key client "disconnect"))
   (return (disconnect-fn client opts)))
 
 
@@ -42,14 +42,14 @@
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
   [client input]
-  (var query-fn (xt/proto:method client "query"))
+  (var query-fn (xt/x:get-key client "query"))
   (return (query-fn client input)))
 
 (defn.xt query-async
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
   [client input]
-  (var query-fn (xt/proto:method client "query_async"))
+  (var query-fn (xt/x:get-key client "query_async"))
   (return (protocol/ensure-promise
            (query-fn client input))))
 
