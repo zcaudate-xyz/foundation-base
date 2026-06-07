@@ -88,8 +88,8 @@
   (return (xt/x:arr-map ordered xt/x:first)))
 
 (defn.xt client-memory
-  [schema lookup opts]
+  [schema lookup]
   (return
    (xt/x:obj-assign
-    (impl-common/client-base "db.client.memory" schema lookup opts)
+    (impl-common/client-base "db.client.memory" schema lookup nil)
     {"rows" {}})))

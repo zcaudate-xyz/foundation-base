@@ -8,7 +8,21 @@
              [xt.substrate :as substrate]
              [xt.db.text.sql-call :as call]
              [xt.db.system.impl-sqlite :as impl-sqlite]
-             [xt.db.system.impl-memory :as impl-memory]]})
+             [xt.db.system.impl-memory :as impl-memory]
+             [xt.db.system.impl-supabase :as impl-supabase]]})
+
+(l/script :js
+  {:runtime :basic
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [xt.protocol.impl.connection-sql :as dbsql]
+             [xt.substrate :as substrate]
+             [xt.db.text.sql-call :as call]
+             [xt.db.system.impl-sqlite :as impl-sqlite]
+             [xt.db.system.impl-memory :as impl-memory]
+             [xt.db.system.impl-supabase :as impl-supabase]]})
+
+
 
 ;;
 ;; The xt.db.node.adaptor-base 
@@ -28,29 +42,51 @@
   [node])
 
 (defn.xt ^{:substrate/fn true}
-  db-init-sqlite
-  [node driver schema lookup])
+  set-sqlite-service
+  [node service-id driver schema lookup settings]
+  (return
+   (-> (impl-sqlite/client-sqlite schema lookup settings)
+       (impl-sqlite/client-sqlite-init driver)
+       (promise/x:promise-then
+        (fn [client]
+          (return
+           (substrate/set-service service-id client)))))))
 
 (defn.xt ^{:substrate/fn true}
-  db-init-sqlite
-  [node driver schema lookup]
-  (sql-))
+  set-memory-service
+  [node service-id driver schema lookup settings]
+  (return
+   (promise/x:promise-run
+    (substrate/set-service
+     service-id
+     (impl-memory/client-memory schema lookup)))))
 
 (defn.xt ^{:substrate/fn true}
-  db-init-superbase
-  [space args request node])
+  set-supabase-service
+  [node service-id driver schema lookup settings]
+  (return
+   (promise/x:promise-run
+    (substrate/set-service service-id
+                           (impl-memory/client-memory schema lookup)))))
+
+(impl-supabase/client-supabase)
+
+
+
+(!.js
+  (impl-sqlite/client-sqlite))
+
 
 (defn.xt ^{:substrate/fn true}
-  pair-init-sup
-  [node schema lookup]
-  (impl-sqlite/init-client)
-  
-  (-> (sqlite-impl/client-sqlite
+  db-init
+  [node schema lookup
+   ]
+  (-> (impl-sqlite/client-sqlite
        (@! fixtures/+schema+)
        (@! fixtures/+lookup+)
        nil
        {"filename" ":memory:"})
-      (sqlite-impl/client-sqlite-init
+      (impl-sqlite/client-sqlite-init
        (js-sqlite/driver))
       (promise/x:promise-then
        (fn [caching-db]
@@ -65,7 +101,7 @@
                   {"schema_name" "scratch"})
                  "db/caching" caching-db}}))
          (var result
-              (sqlite-impl/pull (main/get-service node "db/caching")
+              (impl-sqlite/pull (main/get-service node "db/caching")
                                 ["Entry" ["name"]]))
          (repl/notify
           {"value" result

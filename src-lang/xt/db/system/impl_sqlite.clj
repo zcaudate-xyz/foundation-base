@@ -60,7 +60,6 @@
   "adds rows directly with async sqlite semantics"
   {:added "4.1"}
   [client table-name records]
-  (promise/x:promise)
   (var #{instance
          schema
          lookup
@@ -141,7 +140,7 @@
   [schema lookup settings]
   (return
    (xt/x:obj-assign
-    (impl-common/client-sqlite "db.client.sqlite"
+    (impl-common/client-base "db.client.sqlite"
                              schema
                              lookup
                              (sql-util/sqlite-opts lookup))
@@ -163,10 +162,3 @@
                         "\n\n"
                         (manage/table-create-all schema lookup opts)))
           (return client))))))
-
-(comment
-  (defn.xt client-sqlite
-    [schema lookup opts settings driver-fn]
-    (return
-     (-> (-/client-sqlite schema lookup opts settings)
-         (-/client-sqlite-init driver-fn)))))

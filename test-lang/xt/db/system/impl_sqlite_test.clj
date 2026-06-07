@@ -32,7 +32,7 @@
    (-> (impl/client-sqlite sample/Schema
                            sample/SchemaLookup
                            {"filename" ":memory:"})
-       (impl/client-sqlite-init js-sqlite/driver))))
+       (impl/client-sqlite-init (js-sqlite/driver)))))
 
 (fact:global
  {:setup [(l/rt:restart)]
