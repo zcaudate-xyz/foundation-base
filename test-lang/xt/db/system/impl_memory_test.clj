@@ -17,42 +17,42 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.impl-memory/record-add :added "4.1"}
-(fact "adds records directly to the memory client rows"
+(fact "adds records directly to the memory impl client"
 
   (!.js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup
+                                nil))
     (impl/record-add
-     client
+     impl
      "UserAccount"
      [sample/RootUser])
-    [(xtd/get-in client ["rows"
-                         "UserAccount"
-                         "00000000-0000-0000-0000-000000000000"
-                         "record"
-                         "data"
-                         "nickname"])
-     (xtd/get-in client ["rows"
-                         "UserProfile"
-                         "c4643895-b0ce-44cc-b07b-2386bf18d43b"
-                         "record"
-                         "data"
-                         "first_name"])])
+    [(xtd/get-in impl ["client"
+                       "UserAccount"
+                       "00000000-0000-0000-0000-000000000000"
+                       "record"
+                       "data"
+                       "nickname"])
+     (xtd/get-in impl ["client"
+                       "UserProfile"
+                       "c4643895-b0ce-44cc-b07b-2386bf18d43b"
+                       "record"
+                       "data"
+                       "first_name"])])
   => ["root" "Root"])
 
 ^{:refer xt.db.system.impl-memory/pull :added "4.1"}
-(fact "pull reads tree and shorthand query forms from the client context"
+(fact "pull reads tree and shorthand query forms from the impl context"
 
   (!.js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
-    (impl/record-add client
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup
+                                nil))
+    (impl/record-add impl
                      "UserAccount"
                      [sample/RootUser])
     (impl/pull
-     client
+     impl
      ["UserAccount"
       {"where" [{"id" "00000000-0000-0000-0000-000000000000"}]
        "data" ["nickname"]
@@ -68,50 +68,48 @@
        "profile" [{"first_name" "Root"}]}]
 
   (!.js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
-    (impl/record-add client
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup
+                                nil))
+    (impl/record-add impl
                      "UserAccount"
                      [sample/RootUser])
     (impl/pull
-     client
+     impl
      ["UserAccount"
       {"id" "00000000-0000-0000-0000-000000000000"}
       ["nickname"]]))
   => [{"nickname" "root"}])
 
 ^{:refer xt.db.system.impl-memory/record-delete :added "4.1"}
-(fact "record-delete removes ids from memory rows"
+(fact "record-delete removes ids from memory client"
 
   (!.js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
-    (impl/record-add client
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
+    (impl/record-add impl
                      "UserAccount"
                      [sample/RootUser])
     (impl/record-delete
-     client
+     impl
      "UserAccount"
      ["00000000-0000-0000-0000-000000000000"])
-    (xtd/get-in client ["rows"
-                        "UserAccount"
-                        "00000000-0000-0000-0000-000000000000"]))
+    (xtd/get-in impl ["client"
+                      "UserAccount"
+                      "00000000-0000-0000-0000-000000000000"]))
   => nil)
 
 ^{:refer xt.db.system.impl-memory/pull :added "4.1"}
 (fact "pull reads through async semantics"
 
   (!.js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
-    (impl/record-add client
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
+    (impl/record-add impl
                      "UserAccount"
                      [sample/RootUser])
     (impl/pull
-     client
+     impl
      ["UserAccount"
       {"id" "00000000-0000-0000-0000-000000000000"}
       ["nickname"]]))
@@ -121,14 +119,13 @@
 (fact "pull-async resolves through promise semantics"
 
   (notify/wait-on :js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
-    (impl/record-add client
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
+    (impl/record-add impl
                      "UserAccount"
                      [sample/RootUser])
     (-> (impl/pull-async
-         client
+         impl
          ["UserAccount"
           {"id" "00000000-0000-0000-0000-000000000000"}
           ["nickname"]])
@@ -141,112 +138,107 @@
 (fact "record-add writes through async semantics"
 
   (!.js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
     (impl/record-add
-     client
+     impl
      "UserAccount"
      [{"id" "USER-10" "nickname" "echo"}])
-    (xtd/get-in client ["rows"
-                        "UserAccount"
-                        "USER-10"
-                        "record"
-                        "data"]))
+    (xtd/get-in impl ["client"
+                      "UserAccount"
+                      "USER-10"
+                      "record"
+                      "data"]))
   => {"id" "USER-10" "nickname" "echo"})
 
 ^{:refer xt.db.system.impl-memory/record-add-async :added "4.1"}
 (fact "record-add-async writes through promise semantics"
 
   (notify/wait-on :js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
     (-> (impl/record-add-async
-         client
+         impl
          "UserAccount"
          [{"id" "USER-20" "nickname" "delta"}])
         (promise/x:promise-then
          (fn [_]
            (repl/notify
-            (xtd/get-in client ["rows"
-                                "UserAccount"
-                                "USER-20"
-                                "record"
-                                "data"]))))))
+            (xtd/get-in impl ["client"
+                              "UserAccount"
+                              "USER-20"
+                              "record"
+                              "data"]))))))
   => {"id" "USER-20" "nickname" "delta"})
 
 ^{:refer xt.db.system.impl-memory/record-delete :added "4.1"}
 (fact "record-delete removes ids with async semantics"
 
   (!.js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
-    (impl/record-add client
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
+    (impl/record-add impl
                      "UserAccount"
                      [sample/RootUser])
     (impl/record-delete
-     client
+     impl
      "UserAccount"
      ["00000000-0000-0000-0000-000000000000"])
-    (xtd/get-in client ["rows"
-                        "UserAccount"
-                        "00000000-0000-0000-0000-000000000000"]))
+    (xtd/get-in impl ["client"
+                      "UserAccount"
+                      "00000000-0000-0000-0000-000000000000"]))
   => nil)
 
 ^{:refer xt.db.system.impl-memory/record-delete-async :added "4.1"}
 (fact "record-delete-async removes ids through promise semantics"
 
   (notify/wait-on :js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
-    (impl/record-add client
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
+    (impl/record-add impl
                      "UserAccount"
                      [sample/RootUser])
     (-> (impl/record-delete-async
-         client
+         impl
          "UserAccount"
          ["00000000-0000-0000-0000-000000000000"])
         (promise/x:promise-then
          (fn [_]
            (repl/notify
-            (xtd/get-in client ["rows"
-                                "UserAccount"
-                                "00000000-0000-0000-0000-000000000000"]))))))
+            (xtd/get-in impl ["client"
+                              "UserAccount"
+                              "00000000-0000-0000-0000-000000000000"]))))))
   => nil)
 
 ^{:refer xt.db.system.impl-memory/process-add-event :added "4.1"}
-(fact "process-add-event merges nested data into rows and links"
+(fact "process-add-event merges nested data into client and links"
   
   (!.js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
     (var out
          (impl/process-add-event
-          client
+          impl
           {"UserAccount" [sample/RootUser]}))
     [(xt/x:len out)
-     (xtd/get-in client ["rows"
-                         "UserAccount"
-                         "00000000-0000-0000-0000-000000000000"
-                         "record"
-                         "data"
-                         "nickname"])
-     (xtd/get-in client ["rows"
-                         "UserAccount"
-                         "00000000-0000-0000-0000-000000000000"
-                         "record"
-                         "rev_links"
-                         "profile"])
-     (xtd/get-in client ["rows"
-                         "UserProfile"
-                         "c4643895-b0ce-44cc-b07b-2386bf18d43b"
-                         "record"
-                         "ref_links"
-                         "account"])])
+     (xtd/get-in impl ["client"
+                       "UserAccount"
+                       "00000000-0000-0000-0000-000000000000"
+                       "record"
+                       "data"
+                       "nickname"])
+     (xtd/get-in impl ["client"
+                       "UserAccount"
+                       "00000000-0000-0000-0000-000000000000"
+                       "record"
+                       "rev_links"
+                       "profile"])
+     (xtd/get-in impl ["client"
+                       "UserProfile"
+                       "c4643895-b0ce-44cc-b07b-2386bf18d43b"
+                       "record"
+                       "ref_links"
+                       "account"])])
   => [2
       "root"
       {"c4643895-b0ce-44cc-b07b-2386bf18d43b" true}
@@ -256,34 +248,32 @@
 (fact "process-remove-event removes nested data in lookup order"
 
   (!.js
-    (var client (impl/client-memory sample/Schema
-                                    sample/SchemaLookup
-                                    nil))
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
     (impl/process-add-event
-     client
+     impl
      {"UserAccount" [sample/RootUser]})
     [(impl/process-remove-event
-      client
+      impl
       {"UserAccount" [sample/RootUser]})
-     (xtd/get-in client ["rows"
-                         "UserAccount"
-                         "00000000-0000-0000-0000-000000000000"])
-     (xtd/get-in client ["rows"
-                         "UserProfile"
-                         "c4643895-b0ce-44cc-b07b-2386bf18d43b"])])
+     (xtd/get-in impl ["client"
+                       "UserAccount"
+                       "00000000-0000-0000-0000-000000000000"])
+     (xtd/get-in impl ["client"
+                       "UserProfile"
+                       "c4643895-b0ce-44cc-b07b-2386bf18d43b"])])
   => [["UserAccount" "UserProfile"]
       nil
       nil])
 
-^{:refer xt.db.system.impl-memory/client-memory :added "4.1"}
-(fact "creates the thin memory client record with stored schema context"
+^{:refer xt.db.system.impl-memory/impl-memory :added "4.1"}
+(fact "creates the thin memory impl record with stored schema context"
   
   (!.js
-    (impl/client-memory sample/Schema
-                        sample/SchemaLookup
-                        {"mode" "memory"}))
+    (impl/impl-memory sample/Schema
+                      sample/SchemaLookup))
   => (contains-in
-      {"::" "db.client.memory"
+      {"::" "db.impl.memory"
+       "client" {}
        "schema" map?
-       "lookup" map?
-       "opts" {"mode" "memory"}}))
+       "lookup" map?}))

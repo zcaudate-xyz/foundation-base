@@ -15,11 +15,11 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.connection-sql :as dbsql]
+             [xt.net.conn-sql :as conn-sql]
              [xt.db.system.impl-postgres :as impl]
              [xt.db.text.sql-util :as ut]
              [xt.db.helpers.data-main-test :as sample]
-             [js.lib.driver-postgres :as js-pg]]})
+             [js.net.conn-postgres :as js-postgres]]})
 
 (fact:global
   {:setup [(l/rt:restart)
@@ -27,87 +27,20 @@
    :teardown [(l/rt:teardown :postgres)
               (l/rt:stop)]})
 
-(def +app+ (pg/app "scratch_v0"))
-
-(def +tree+
-  (pg/bind-schema (:schema +app+)))
-
-(def.js Schema
-  (@! +tree+))
-
-(def.js SchemaLookup
-  (@! (pg/bind-app +app+)))
-
-^{:refer xt.db.system.impl-postgres/client-postgres :added "4.1"}
-(fact "creates the thin postgres client record with stored context"
-
-  (!.js
-    (impl/client-postgres
-     -/Schema
-     -/SchemaLookup
-     (ut/postgres-opts -/SchemaLookup)
-     {"database" "test-scratch"}))
-  => {"settings" {"database" "test-scratch"},
-      "schema"
-      {"Log"
-       {"message"
-        {"ident" "message",
-         "scope" "data",
-         "order" 1,
-         "required" true,
-         "type" "text",
-         "cardinality" "one"},
-        "author_id"
-        {"ident" "author_id",
-         "scope" "data",
-         "order" 2,
-         "type" "uuid",
-         "cardinality" "one"},
-        "id"
-        {"ident" "id",
-         "primary" true,
-         "scope" "id",
-         "order" 0,
-         "type" "uuid",
-         "cardinality" "one"}}},
-      "lookup"
-      {"Log"
-       {"schema" "scratch_v0",
-        "schema_update" false,
-        "position" 0,
-        "public" true,
-        "schema_primary" {"id" "id", "type" "uuid"}}},
-      "opts"
-      {"values" {"cast" true, "replace" {}},
-       "types"
-       {"map" "jsonb",
-        "image" "jsonb",
-        "long" "bigint",
-        "array" "jsonb",
-        "enum" "text"},
-       "strict" true,
-       "coerce" {}},
-      "::" "db.client.postgres"})
-
 ^{:refer xt.db.system.impl-postgres/pull-async :added "4.1"
   :setup [(scratch/log-append-public "hello")]}
 (fact "pull-async reads through async postgres semantics"
 
   (notify/wait-on :js
-    (-> (impl/client-postgres
-         -/Schema
-         -/SchemaLookup
-         {}
-         {"host" "localhost"
-          "port" "5432"
-          "user" "postgres"
-          "password" "postgres"
-          "database" "test-scratch"})
-        (impl/client-postgres-init js-pg/driver)
+    (-> (impl/impl-postgres
+         (js-postgres/create {:database "test-scratch"})
+         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
+         (@! (pg/bind-app (pg/app "scratch_v0"))))
+        (impl/impl-postgres-init)
         (promise/x:promise-then
-         (fn [client]
+         (fn [impl]
            (return
-            (impl/pull-async client ["Log"]))))
+            (impl/pull-async impl ["Log"]))))
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
@@ -120,26 +53,69 @@
 (fact "rpc-call-async compiles snake_case postgres function calls"
 
   (notify/wait-on :js
-    (var state {"queries" []})
-    (var client
-         (impl/client-postgres
-          sample/Schema
-          sample/SchemaLookup
-          (ut/postgres-opts sample/SchemaLookup)
-          {"schema_name" "scratch"}))
-    (xt/x:set-key client
-                  "instance"
-                  (dbsql/connection-create
-                   state
-                   {"query_async" (fn [input-state input]
-                                    (xt/x:arr-push (. input-state ["queries"]) input)
-                                    (return (promise/x:promise-run 3)))}))
-    (promise/x:promise-then
-     (impl/rpc-call-async
-      client
-      "add-f"
-      {"b" 2 "a" 1})
-     (fn [out]
-       (repl/notify [(xtd/get-in state ["queries" 0]) out]))))
-  => ["SELECT \"scratch\".\"add_f\"(a := '1', b := '2');"
-      3])
+    (-> (impl/impl-postgres
+         (js-postgres/create {:database "test-scratch"})
+         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
+         (@! (pg/bind-app (pg/app "scratch_v0"))))
+        (impl/impl-postgres-init)
+        (promise/x:promise-then
+         (fn [impl]
+           (return
+            (impl/rpc-call-async impl
+                                 {:input [{:symbol "message" :type "text"}]
+                                  :return "jsonb"
+                                  :schema "scratch_v0"
+                                  :id "log_append_public"
+                                  :flags {}}
+                                 ["hello"]))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => (contains-in
+      {"author_id" nil,
+       "id" string?
+       "message" "hello"})
+  
+  (notify/wait-on :js
+    (-> (impl/impl-postgres
+         (js-postgres/create {:database "test-scratch"})
+         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
+         (@! (pg/bind-app (pg/app "scratch_v0"))))
+        (impl/impl-postgres-init)
+        (promise/x:promise-then
+         (fn [impl]
+           (return
+            (impl/rpc-call-async impl
+                                 {:input []
+                                  :return "text"
+                                  :schema "scratch_v0"
+                                  :id "ping"
+                                  :flags {}}
+                                 []))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => "pong")
+
+^{:refer xt.db.system.impl-postgres/impl-postgres :added "4.1"}
+(fact "creates the thin postgres impl record with stored context"
+
+  (!.js
+    (impl/impl-postgres
+     (js-postgres/create {:database "test-scratch"})
+     (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
+     (@! (pg/bind-app (pg/app "scratch_v0")))))
+  => (contains-in
+      {"schema" map?, "lookup" map?,
+       "opts" map?,
+       "::" "db.impl.postgres",
+       "client" {"::" "js.net.conn-postgres", "defaults" {"database" "test-scratch"}}}))
+
+^{:refer xt.db.system.impl-postgres/impl-postgres-init :added "4.1"}
+(fact "initialises a postgres connection")

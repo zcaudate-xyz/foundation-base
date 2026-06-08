@@ -61,12 +61,16 @@
     => 1"
   {:added "4.1"}
   [client opts]
+  (var #{defaults} client)
   (var init-module (or (. sqlite3InitModule ["default"])
                        sqlite3InitModule))
   (return
    (. (init-module)
       (then (fn [sqlite3]
-              (return (-/raw-init sqlite3 opts))))
+              (return (-/raw-init sqlite3
+                                  (-> {}
+                                      (xt/x:obj-assign defaults)
+                                      (xt/x:obj-assign opts))))))
       (then (fn [raw]
               (xt/x:set-key client "raw" raw)
               (return client))))))
@@ -88,7 +92,8 @@
                              (-/raw-query raw query))))}))
 
 (defn.js create
-  []
+  [defaults]
   (return
    (conn-sql/create-base "js.net.conn-sqlite"
-                         (-/create-methods))))
+                         (-/create-methods)
+                         defaults)))

@@ -20,12 +20,8 @@
   (var #{client
          schema
          opts} impl)
-  (var output
-       (conn-sql/query client
-                       (sql-graph/select schema tree opts)))
-  (when (xt/x:is-string? output)
-    (xt/x:err "SQL pull expected decoded structured data"))
-  (return output))
+  (return
+   (conn-sql/query client (sql-graph/select schema tree opts))))
 
 (defn.xt pull-async
   "runs a tree ir pull with async sqlite semantics"
@@ -137,32 +133,30 @@
   (return (conn-sql/query client raw-input)))
 
 ;;
-;; 
+;; impl 
+;;
 
 (defn.xt impl-sqlite
   "creates the thin sqlite impl record with stored context"
   {:added "4.1"}
-  [schema lookup settings]
+  [client schema lookup]
   (return
-   (xt/x:obj-assign
-    (conn-sql/create-base)
-    (impl-common/client-base "db.client.sqlite"
-                             schema
-                             lookup
-                             (sql-util/sqlite-opts lookup))
-    {"settings" (or settings {"filename" ":memory:"})})))
+   (impl-common/impl-base "db.client.sqlite"
+                          client
+                          schema
+                          lookup
+                          (sql-util/sqlite-opts lookup))))
 
 (defn.xt impl-sqlite-init
-  [impl driver]
-  (var #{schema
+  [impl]
+  (var #{client
+         schema
          lookup
-         settings
          opts} impl)
   (return
-   (-> (conn-sql/connect driver settings)
+   (-> (conn-sql/connect client)
        (promise/x:promise-then
         (fn [client]
-          (xt/x:set-key impl "client" client)
           (conn-sql/query client (xt/x:str-join
                                   "\n\n"
                                   (manage/table-create-all schema lookup opts)))
