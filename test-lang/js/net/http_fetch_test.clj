@@ -33,7 +33,19 @@
   (!.js
     (-> (js-fetch/create)
         (fetch/prepare-input {:url "http://www.google.com"})))
-  => {"url" "http://www.google.com", "body" "", "method" "GET", "headers" {}}
+  => {"url" "http://www.google.com", "method" "GET", "headers" {}}
+
+  (notify/wait-on :js
+    (-> (fetch "http://www.google.com"
+               {"method" "GET", "headers" {}})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            (. out status))))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify
+            (. out status))))))
   
   (notify/wait-on :js
     (-> (js-fetch/create)

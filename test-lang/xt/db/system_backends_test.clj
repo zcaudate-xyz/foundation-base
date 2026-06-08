@@ -2,8 +2,23 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [xt.db.helpers.test-fixtures :as fixtures]
-            [scaffold.supabase.event-host-util :as live]))
+            #_[xt.db.helpers.test-fixtures :as fixtures]
+            [scaffold.supabase.docker-min :as docker-min]))
+
+(do
+  (l/script- :postgres
+    {:runtime :jdbc.client
+     :require [[postgres.sample.scratch-v0 :as scratch-v0]
+               [postgres.core :as pg]
+               [postgres.core.supabase :as s]]
+     :config {:host   (-> docker-min/+config+ :db :host)
+              :port   (-> docker-min/+config+ :db :port)
+              :user   (-> docker-min/+config+ :db :user)
+              :pass   (-> docker-min/+config+ :db :password)
+              :dbname (-> docker-min/+config+ :db :database)
+              :startup  docker-min/start-supabase
+              :shutdown docker-min/stop-supabase}
+     :emit {:code {:transforms {:entry [#'s/transform-entry]}}}}))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js
@@ -17,25 +32,17 @@
              [xt.protocol.impl.connection-sql :as dbsql]
              [xt.db.text.sql-util :as sql-util]
              [xt.db.text.sql-manage :as sql-manage]
+             ^{:seedgen/extra true}
              [js.lib.driver-sqlite :as js-sqlite]
              ^{:seedgen/extra true}
              [js.lib.driver-postgres :as js-pg]
-             [js.lib.client-fetch :as js-fetch]
-             [xt.db.helpers.test-fixtures :as fixtures]
-             [scaffold.supabase.event-host-util :as live]]})
+             ^{:seedgen/extra true}
+             [js.lib.client-fetch :as js-fetch]]})
 
 (fact:global
- {:setup [(l/rt:restart)
-          (do (live/init-live-postgres-runtime!)
-              (l/rt:setup (live/pg-rt) live/+postgres-module+)
-              (live/grant-scratch-schema!)
-              (live/reload-postgrest!)
-              (live/refresh-live-supabase-config!)
-              true)]
-  :teardown [(do (l/rt:teardown (live/pg-rt) live/+postgres-module+)
-                 (alter-var-root #'live/+postgres-runtime+ (constantly nil))
-                 (alter-var-root #'live/+live-supabase-config+ (constantly nil))
-                 true)
+ {:setup    [(l/rt:restart)
+             (l/rt:setup :postgres)]
+  :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
 ^{:refer xt.db.system-backends-test/memory-backend :added "4.1"}

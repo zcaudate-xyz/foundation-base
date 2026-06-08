@@ -4,28 +4,26 @@
             [lib.supabase.common :as common]
             [net.openapi.call :as call]
             [scaffold.supabase.config :as supabase-config]
-            [scaffold.supabase.event-host-util :as live]
-            [std.lib.os :as os]
+            [scaffold.supabase.docker-min :as docker-min]
             [std.json :as json]))
 
 (defn ensure-local-supabase!
   []
-  @(os/sh {:args [live/+shell+ "-lc" (live/startup-shell-command)]
-           :root live/+supabase-cli-root+})
+  (docker-min/start-supabase nil)
   true)
-
-(defn supabase-status
-  []
-  (live/parse-shell-env (live/supabase-status-env)))
 
 (defn admin-defaults
   []
-  (let [status (supabase-status)
+  (let [api (:api docker-min/+config+)
         service-key (or (supabase-config/service-key)
-                        (get status "SERVICE_ROLE_KEY"))
+                        (get api :service-key))
         base-url (str (or (supabase-config/api-base-url)
-                          (get status "API_URL")
-                          (supabase-config/resolved-api-base-url))
+                          (get api :base-url)
+                          (str (get api :protocol "http")
+                               "://"
+                               (get api :hostname "127.0.0.1")
+                               ":"
+                               (get api :port)))
                       "/auth/v1")]
     {:base-url base-url
      :headers {"apikey" service-key
@@ -41,7 +39,7 @@
 
 (fact:global
   {:setup [(ensure-local-supabase!)]
-   :teardown [true]})
+   :teardown [(docker-min/stop-supabase nil)]})
 
 ^{:refer lib.supabase.common/admin-create-user :added "4.1"}
 (fact "creates an auth user through the local Supabase admin endpoint"

@@ -3,20 +3,17 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.test-fixtures :as fixtures]
+            [scaffold.supabase.docker-min :as docker-min]
             [scaffold.supabase.event-host-util :as live]))
 
 (def +supabase-pg-config+
-  {:host live/+postgres-host+
-   :port live/+postgres-port+
-   :user "postgres"
-   :pass "postgres"
-   :dbname "postgres"
-   :startup {:args [live/+shell+ "-lc" (live/startup-shell-command)]
-            :root live/+supabase-cli-root+
-            :ignore-errors false}
-   :teardown {:args [live/+shell+ "-lc" (live/supabase-shell-command "stop" "--no-backup" "--yes")]
-             :root live/+supabase-cli-root+
-             :ignore-errors true}})
+  {:host (get-in docker-min/+config+ [:db :host])
+   :port (get-in docker-min/+config+ [:db :port])
+   :user (get-in docker-min/+config+ [:db :user])
+   :pass (get-in docker-min/+config+ [:db :password])
+   :dbname (get-in docker-min/+config+ [:db :database])
+   :startup docker-min/start-supabase
+   :teardown docker-min/stop-supabase})
 
 (def +supabase-pg-rt+
   (l/script- :postgres

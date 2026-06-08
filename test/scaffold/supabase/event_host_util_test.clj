@@ -90,27 +90,23 @@
       :body "ok"})
 
 ^{:refer scaffold.supabase.event-host-util/refresh-live-supabase-config! :added "4.1"}
-(fact "refreshes the cached live supabase config from status env"
+(fact "refreshes the cached live supabase config from docker-min"
   (let [old event-host-util/+live-supabase-config+]
     (try
-      (with-redefs [event-host-util/supabase-status-env
-                    (fn []
-                      "API_URL=http://localhost:54321\nSERVICE_ROLE_KEY=service-key")]
-        [(event-host-util/refresh-live-supabase-config!)
-         event-host-util/+live-supabase-config+])
+      [(event-host-util/refresh-live-supabase-config!)
+       event-host-util/+live-supabase-config+]
       (finally
         (alter-var-root #'event-host-util/+live-supabase-config+ (constantly old)))))
   => [{"::" "db.supabase"
-       "client" {"base_url" "http://localhost:54321"
+       "client" {"base_url" "http://127.0.0.1:55121"
                  "schema_name" "scratch"
-                 "api_key" "service-key"
-                 "auth_token" "service-key"}}
+                 "api_key" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+                 "auth_token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"}}
       {"::" "db.supabase"
-       "client" {"base_url" "http://localhost:54321"
+       "client" {"base_url" "http://127.0.0.1:55121"
                  "schema_name" "scratch"
-                 "api_key" "service-key"
-                 "auth_token" "service-key"}}])
-
+                 "api_key" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"
+                 "auth_token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"}}])
 ^{:refer scaffold.supabase.event-host-util/pg-exec! :added "4.1"}
 (fact "delegates raw sql execution to postgres runtime eval"
   (with-redefs [event-host-util/pg-rt (fn [] {:id "pg"})

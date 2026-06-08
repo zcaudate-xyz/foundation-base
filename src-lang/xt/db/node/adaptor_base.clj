@@ -32,10 +32,13 @@
 ;;
 
 (comment
-
+  
+  (live/refresh-live-supabase-config!)
+  
+  
   (notify/wait-on [:js 10000]
-                  (var settings (xt/x:obj-clone (. (@! live/+live-supabase-config+) ["client"])))
-                  (xt/x:set-key settings "transport" (js-fetch/client {}))
+    (var settings (xt/x:obj-clone (. (@! live/+live-supabase-config+) ["client"])))
+    (xt/x:set-key settings "transport" (js-fetch/client {}))
     (promise/x:promise-then
      (impl/client-supabase-init
       (impl/client-supabase

@@ -16,7 +16,7 @@
   [schema lookup opts settings]
   (return
    (xt/x:obj-assign
-    (impl-common/client-base "db.client.supabase"
+    (impl-common/impl-base "db.impl.supabase"
                              schema
                              lookup
                              (or opts {}))

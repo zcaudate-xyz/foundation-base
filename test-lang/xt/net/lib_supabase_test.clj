@@ -1,13 +1,14 @@
 (ns xt.net.lib-supabase-test
   (:use code.test)
   (:require [hara.lang :as l]
-            [xt.lang.common-notify :as notify]
+            [xt.lang.common-notify :as notify]            
             [scaffold.supabase.docker-min :as docker-min]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
    :require [[postgres.sample.scratch-v0 :as scratch-v0]
-             [postgres.core :as pg]]
+             [postgres.core :as pg]
+             [postgres.core.supabase :as s]]
    :config {:host   (-> docker-min/+config+ :db :host)
             :port   (-> docker-min/+config+ :db :port)
             :user   (-> docker-min/+config+ :db :user)

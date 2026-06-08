@@ -14,14 +14,14 @@
              [xt.net.conn-sql :as conn-sql]]})
 
 (defn.xt pull
-  "runs a tree ir pull against a sqlite client"
+  "runs a tree ir pull against a sqlite impl"
   {:added "4.1"}
-  [client tree]
-  (var #{instance
+  [impl tree]
+  (var #{client
          schema
-         opts} client)
+         opts} impl)
   (var output
-       (conn-sql/query instance
+       (conn-sql/query client
                        (sql-graph/select schema tree opts)))
   (when (xt/x:is-string? output)
     (xt/x:err "SQL pull expected decoded structured data"))
@@ -30,22 +30,21 @@
 (defn.xt pull-async
   "runs a tree ir pull with async sqlite semantics"
   {:added "4.1"}
-  [client tree]
-  (var #{instance
+  [impl tree]
+  (var #{client
          schema
-         opts} client)
+         opts} impl)
   (return
-   (conn-sql/query-async instance
-                         (sql-graph/select schema tree opts))))
+   (conn-sql/query-async client (sql-graph/select schema tree opts))))
 
 (defn.xt record-add
   "adds rows directly through stored sqlite context"
   {:added "4.1"}
-  [client table-name records]
-  (var #{instance
+  [impl table-name records]
+  (var #{client
          schema
          lookup
-         opts} client)
+         opts} impl)
   (var input (sql-table/prepare-add-input {table-name records}
                                           schema
                                           lookup
@@ -53,16 +52,16 @@
   (when (== "" input)
     (return nil))
   (return
-   (conn-sql/query instance input)))
+   (conn-sql/query client input)))
 
 (defn.xt record-add-async
   "adds rows directly with async sqlite semantics"
   {:added "4.1"}
-  [client table-name records]
-  (var #{instance
+  [impl table-name records]
+  (var #{client
          schema
          lookup
-         opts} client)
+         opts} impl)
   (var input (sql-table/prepare-add-input {table-name records}
                                           schema
                                           lookup
@@ -70,45 +69,45 @@
   (when (== "" input)
     (return (promise/x:promise-run nil)))
   (return
-   (conn-sql/query-async instance input)))
+   (conn-sql/query-async client input)))
 
 (defn.xt record-delete
   "deletes ids directly through stored sqlite context"
   {:added "4.1"}
-  [client table-name ids]
-  (var #{instance
-         opts} client)
+  [impl table-name ids]
+  (var #{client
+         opts} impl)
   (var statements
        (xt/x:arr-map ids
                      (fn [id]
                        (return (raw/raw-delete table-name {"id" id} opts)))))
   (return
-   (conn-sql/query instance (xt/x:str-join "\n\n" statements))))
+   (conn-sql/query client (xt/x:str-join "\n\n" statements))))
 
 (defn.xt record-delete-async
   "deletes ids directly with async sqlite semantics"
   {:added "4.1"}
-  [client table-name ids]
-  (var #{instance
-         opts} client)
+  [impl table-name ids]
+  (var #{client
+         opts} impl)
   (var statements
        (xt/x:arr-map ids
                      (fn [id]
                        (return (raw/raw-delete table-name {"id" id} opts)))))
   (return
-   (conn-sql/query-async instance
+   (conn-sql/query-async client
                          (xt/x:str-join "\n\n" statements))))
 
 (defn.xt process-add-event
   "processes nested data into sqlite upserts"
   {:added "4.1"}
-  [client data]
-  (var #{instance
+  [impl data]
+  (var #{client
          schema
          lookup
-         opts} client)
+         opts} impl)
   (var flat (f/flatten-bulk schema data))
-  (conn-sql/query instance
+  (conn-sql/query client
                   (sql-table/prepare-add-input data schema lookup opts))
   (return (xt/x:obj-keys flat)))
 
@@ -120,48 +119,51 @@
 (defn.xt process-remove-event
   "processes nested removals into sqlite delete statements"
   {:added "4.1"}
-  [client data]
-  (var #{instance
+  [impl data]
+  (var #{client
          schema
          lookup
-         opts} client)
+         opts} impl)
   (var ordered (f/flatten-bulk-ids schema lookup data))
-  (conn-sql/query instance
+  (conn-sql/query client
                   (sql-table/prepare-remove-input data schema lookup opts))
   (return (xt/x:arr-map ordered xt/x:first)))
 
 (defn.xt exec-sync
-  "executes raw sql synchronously through the sqlite client"
+  "executes raw sql synchronously through the sqlite impl"
   {:added "4.1"}
-  [client raw-input]
-  (var #{instance} client)
-  (return (conn-sql/query instance raw-input)))
+  [impl raw-input]
+  (var #{client} impl)
+  (return (conn-sql/query client raw-input)))
 
-(defn.xt client-sqlite
-  "creates the thin sqlite client record with stored context"
+;;
+;; 
+
+(defn.xt impl-sqlite
+  "creates the thin sqlite impl record with stored context"
   {:added "4.1"}
   [schema lookup settings]
   (return
    (xt/x:obj-assign
+    (conn-sql/create-base)
     (impl-common/client-base "db.client.sqlite"
                              schema
                              lookup
                              (sql-util/sqlite-opts lookup))
     {"settings" (or settings {"filename" ":memory:"})})))
 
-(defn.xt client-sqlite-init
-  [client driver]
+(defn.xt impl-sqlite-init
+  [impl driver]
   (var #{schema
          lookup
          settings
-         opts} client)
+         opts} impl)
   (return
    (-> (conn-sql/connect driver settings)
        (promise/x:promise-then
-        (fn [instance]
-          (xt/x:set-key client "instance" instance)
-          (conn-sql/query instance
-                          (xt/x:str-join
-                           "\n\n"
-                           (manage/table-create-all schema lookup opts)))
-          (return client))))))
+        (fn [client]
+          (xt/x:set-key impl "client" client)
+          (conn-sql/query client (xt/x:str-join
+                                  "\n\n"
+                                  (manage/table-create-all schema lookup opts)))
+          (return impl))))))

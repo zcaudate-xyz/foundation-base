@@ -200,3 +200,13 @@
     (t/list-map (t/list 1 2 3 4 5)
                 k/inc)))
   => [2 3 4 5 6])
+
+
+(comment
+  
+  
+  (!.js
+    (ic/show
+     (t/list 1 2 3 4 5)))
+  
+  )

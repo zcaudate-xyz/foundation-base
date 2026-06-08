@@ -91,5 +91,5 @@
   [schema lookup]
   (return
    (xt/x:obj-assign
-    (impl-common/client-base "db.client.memory" schema lookup nil)
+    (impl-common/impl-base "db.impl.memory" schema lookup nil)
     {"rows" {}})))

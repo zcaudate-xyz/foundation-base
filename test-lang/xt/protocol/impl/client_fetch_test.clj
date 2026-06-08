@@ -6,6 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-tree :as tree]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.protocol.impl.client-fetch :as fetch]]})
@@ -21,13 +22,28 @@
    (promise/x:promise-native? (fetch/ensure-promise {"ok" true})))
   => true)
 
+
+(comment
+
+  (!.js
+
+    (tree/tree-get-spec
+     (fetch/client-create
+      {"request" (fn [request opts]
+                   (xt/x:arr-push calls ["request" request opts])
+                   (return {"status" "ok"}))
+       "headers" {"x-client" "nested"}}
+      {})))
+  )
+
+
 ^{:refer xt.protocol.impl.client-fetch/client-create :added "4.1.3"}
 (fact "wraps fetch clients with a single request method"
 
   (!.js
    (var calls [])
    (var client
-       (fetch/client-create
+        (fetch/client-create
         {"request" (fn [request opts]
                      (xt/x:arr-push calls ["request" request opts])
                      (return {"status" "ok"}))

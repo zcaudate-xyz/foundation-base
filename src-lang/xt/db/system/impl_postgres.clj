@@ -8,7 +8,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.connection-sql :as dbsql]]})
+             [xt.net.conn-sql :as conn-sql]]})
 
 (defn.xt pull-async
   "runs a tree ir pull with async postgres semantics"
@@ -18,14 +18,12 @@
          schema
          opts} client)
   (return
-   (promise/x:promise-then
-    (dbsql/ensure-promise
-     (dbsql/query-async instance
-                        (sql-graph/select schema tree opts)))
-    (fn [output]
-      (when (xt/x:is-string? output)
-        (xt/x:err "SQL pull expected decoded structured data"))
-      (return output)))))
+   (-> (dbsql/query-async instance (sql-graph/select schema tree opts))
+       (promise/x:promise-then
+        (fn [output]
+          (when (xt/x:is-string? output)
+            (xt/x:err "SQL pull expected decoded structured data"))
+          (return output))))))
 
 (defn.xt client-postgres
   "creates the thin postgres client record with stored context"

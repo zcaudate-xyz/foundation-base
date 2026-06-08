@@ -71,9 +71,9 @@
      (return instance)
      (return (impl-postgres/client (-/client-input input instance nil nil nil))))))
 
-(defn.xt ensure-client-base
+(defn.xt ensure-impl-base
   ([instance]
-   (return (-/ensure-client-base instance nil)))
+   (return (-/ensure-impl-base instance nil)))
   ([instance input]
    (if (impl-sqlite/client? instance)
      (return instance)
@@ -123,7 +123,7 @@
         (return (-/ensure-client-postgres instance input))
 
         (== dbtype "db.sqlite")
-        (return (-/ensure-client-base instance input))
+        (return (-/ensure-impl-base instance input))
 
         (== dbtype "db.sql")
         (return (-/ensure-sql-client instance input))

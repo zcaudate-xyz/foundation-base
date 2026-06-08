@@ -4,7 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]]})
 
-(defn.xt client-base
+(defn.xt impl-base
   "creates the common client record envelope"
   {:added "4.1"}
   [tag schema lookup opts]

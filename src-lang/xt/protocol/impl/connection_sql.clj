@@ -75,7 +75,7 @@
                            (var raw  (xt/x:get-key self "_raw"))
                            (var impl (xt/x:get-key self "_impl"))
                            (var query-async-fn (xt/x:get-key impl "query_async"))
-                           (when (xt/x:nil? query-async-fn)
+                            (when (xt/x:nil? query-async-fn)
                              (xt/x:err "SQL runtime connection missing query_async implementation"))
                            (return (query-async-fn raw input)))}]])))
   (var conn {"::" "sql.connection"

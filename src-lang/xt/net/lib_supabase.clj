@@ -1,6 +1,6 @@
 (ns xt.net.lib-supabase
-  (:require [hara.lang :as l :refer [defspec.xt]]
-            [lib.supabase.api :as api]))
+  (:require [hara.lang :as l]
+            [scaffold.supabase.event-host-util :as live]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-string :as str]
@@ -17,42 +17,35 @@
              [xt.net.http-fetch :as fetch]
              [js.net.http-fetch :as js-fetch]]})
 
-(defn.xt create-http
-  [type methods host port secured basepath apikey]
-  (return
-   (fetch/create-base type methods
-                      {:secured secured
-                       :host (or host "127.0.0.1")
-                       :port (or port "55121")
-                       :headers {"apikey" apikey
-                                 "Content-Type" "application/json"}
-                       :basepath (or basepath "")})))
-
-
-(defn.xt signup
-  [client data opts]
-  (return
-   (fetch/request-http client
-                       {:method "POST"
-                        :path "/auth/v1/signup"
-                        :body (xt/x:json-encode data)}
-                       opts)))
-
-(defn.xt signin-with-password
-  [client data opts])
 
 
 
 (comment
+  (live/refresh-live-supabase-config!)
+  {"::" "db.supabase",
+   "client"
+   {"base_url" "http://127.0.0.1:55121",
+    "schema_name" "scratch",
+    "api_key"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU",
+    "auth_token"
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"}})
 
+(def +token+
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU")
+(defn.xt sign-up
+  [client])
+
+
+(comment
   (xt.lang.common-notify/wait-on :js
     (-> (js-fetch/create
-         {:secured false
-          :host "127.0.0.1"
-          :port "55121"
-          :headers {"apikey" (@! +token+)
-                    "Content-Type" "application/json"}
-          :basepath "/auth/v1"})
+         {:defaults {:secured false
+                     :host "127.0.0.1"
+                     :port "55121"
+                     :headers {"apikey" (@! +token+)
+                               "Content-Type" "application/json"}
+                     :basepath "/auth/v1"}})
         (fetch/request-http {:method "POST"
                              :path "signup"
                              :body (xt/x:json-encode

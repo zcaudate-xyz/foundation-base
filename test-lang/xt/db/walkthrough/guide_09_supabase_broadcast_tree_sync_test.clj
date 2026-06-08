@@ -5,6 +5,7 @@
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.data-main-test :as sample]
             [xt.db.system.event-supabase :as event-supabase]
+            [scaffold.supabase.docker-min :as docker-min]
             [scaffold.supabase.event-host-util :as live]))
 
 (def +live-broadcast-topic+
@@ -52,17 +53,13 @@
       "detail"]]]])
 
 (def +supabase-pg-config+
-  {:host live/+postgres-host+
-   :port live/+postgres-port+
-   :user "postgres"
-   :pass "postgres"
-   :dbname "postgres"
-   :startup {:args [live/+shell+ "-lc" (live/startup-shell-command)]
-             :root live/+supabase-cli-root+
-             :ignore-errors false}
-   :teardown {:args [live/+shell+ "-lc" "true"]
-              :root live/+supabase-cli-root+
-              :ignore-errors true}})
+  {:host (get-in docker-min/+config+ [:db :host])
+   :port (get-in docker-min/+config+ [:db :port])
+   :user (get-in docker-min/+config+ [:db :user])
+   :pass (get-in docker-min/+config+ [:db :password])
+   :dbname (get-in docker-min/+config+ [:db :database])
+   :startup docker-min/start-supabase
+   :teardown docker-min/stop-supabase})
 
 (l/script- :postgres
   {:runtime :jdbc.client
@@ -86,6 +83,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.db.helpers.data-main-test :as sample]
+             [scaffold.supabase.docker-min :as docker-min]
              [scaffold.supabase.event-host-util :as live]]})
 
 (def.js UserTreeQuery
