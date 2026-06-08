@@ -1,77 +1,45 @@
 (ns xt.db.system-backends-v0-test
   (:use code.test)
   (:require [hara.lang :as l]
-            [postgres.core.supabase :as s]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.event-host-util :as live]))
-
-(def +log-message+
-  "copilot_system_backends_v0")
-
-(defn cleanup-log!
-  []
-  (live/pg-exec-best-effort!
-   (str "DELETE FROM \"" live/+scratch-v0-schema+ "\".\"Log\""
-        " WHERE message = "
-        (live/sql-literal +log-message+))))
-
-(defn grant-scratch-v0-schema!
-  []
-  (doseq [sql [(l/emit-as :postgres `[(s/grant-usage ~live/+scratch-v0-schema+)])
-               (str "GRANT ALL ON ALL TABLES IN SCHEMA \"" live/+scratch-v0-schema+
-                    "\" TO anon, authenticated, service_role")
-               (str "GRANT ALL ON ALL SEQUENCES IN SCHEMA \"" live/+scratch-v0-schema+
-                    "\" TO anon, authenticated, service_role")
-               (str "GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA \"" live/+scratch-v0-schema+
-                    "\" TO anon, authenticated, service_role")
-               (str "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA \""
-                    live/+scratch-v0-schema+
-                    "\" GRANT ALL ON TABLES TO anon, authenticated, service_role")
-               (str "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA \""
-                    live/+scratch-v0-schema+
-                    "\" GRANT ALL ON SEQUENCES TO anon, authenticated, service_role")
-               (str "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA \""
-                    live/+scratch-v0-schema+
-                    "\" GRANT EXECUTE ON FUNCTIONS TO anon, authenticated, service_role")]]
-    (live/pg-exec-best-effort! sql)))
+            [scaffold.supabase.docker-min :as docker-min]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
-   :config {:dbname "test-scratch"}
+   :config {:host   (-> docker-min/+config+ :db :host)
+            :port   (-> docker-min/+config+ :db :port)
+            :user   (-> docker-min/+config+ :db :user)
+            :pass   (-> docker-min/+config+ :db :password)
+            :dbname (-> docker-min/+config+ :db :database)
+            :startup  docker-min/start-supabase
+            :teardown docker-min/stop-supabase}
    :require [[postgres.core :as pg]
-             [postgres.sample.scratch-v0 :as v0]]})
+             [postgres.core.supabase :as s]
+             [postgres.sample.scratch-v0 :as v0]]
+   :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
 ^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.db.system :as db-system]
-             [xt.lang.spec-base :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [js.lib.client-fetch :as js-fetch]
-             [scaffold.supabase.event-host-util :as live]]})
+             [js.lib.client-fetch :as js-fetch]]})
 
 (fact:global
  {:setup [(l/rt:restart)
-          (do (live/init-live-postgres-runtime!)
-              (live/grant-scratch-schema!)
-              (l/rt:setup (live/pg-rt) 'postgres.sample.scratch-v0)
-              (grant-scratch-v0-schema!)
-              (live/reload-postgrest! live/+scratch-v0-schema+ "Log")
-              (live/refresh-live-supabase-config!)
-              (cleanup-log!)
-              true)]
-  :teardown [(do (cleanup-log!)
-                 (l/rt:teardown (live/pg-rt) 'postgres.sample.scratch-v0)
-                 (alter-var-root #'live/+postgres-runtime+ (constantly nil))
-                 (alter-var-root #'live/+live-supabase-config+ (constantly nil))
-                 true)
-             (l/rt:stop)]})
+          (l/rt:setup :postgres)]
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system-backends-v0-test/supabase-backend-v0 :added "4.1"}
 (fact "supabase backend v0: query scratch-v0 Log through local postgrest"
 
+  (pg/bind-schema (:schema (pg/app "scratch_v0")))
+  (pg/bind-app (pg/app "scratch_v0"))
+
+  
+  
   (do
     (cleanup-log!)
     (try

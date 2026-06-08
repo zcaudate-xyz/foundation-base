@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.event-host-util :as live]))
+            [scaffold.supabase.docker-min :as docker-min]))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
@@ -72,7 +72,7 @@
   (notify/wait-on :js
     (-> (fetch/create-base "js.net.http-fetch"
                            (js-fetch/create-methods))
-        (fetch/request-http {"url" "http://127.0.0.1:55121/auth/v1/sign-in",
+        (fetch/request-http {"url" "http://127.0.0.1:55121/auth/v1/signup",
                              "method" "POST"
                              "body" (xt/x:json-encode
                                      {"email" "a@oeue.com"

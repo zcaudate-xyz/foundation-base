@@ -3,19 +3,25 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 
+^{:seedgen/root {:all true
+                 :js           {:extra [[js.net.conn-sqlite :as js-sqlite]]}
+                 :lua.nginx    {:extra [[lua.nginx.driver-sqlite :as lua-sqlite]]}
+                 :python       {:extra [[python.net.conn-sqlite :as py-sqlite]]}
+                 :dart         {:extra [[dart.net.conn-sqlite :as dart-sqlite]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.connection-sql :as dbsql]
              [xt.db.system.impl-sqlite :as impl]
              [xt.db.text.sql-util :as ut]
              [xt.db.text.sql-table :as sql-table]
              [xt.db.text.base-flatten :as f]
              [xt.db.helpers.data-main-test :as sample]
-             [js.lib.driver-sqlite :as js-sqlite]]})
+             [xt.net.conn-sql :as conn-sql]
+             ^{:seedgen/extra true}
+             [js.net.conn-sqlite :as js-sqlite]]})
 
 (defn.js mock-client
   [conn settings]

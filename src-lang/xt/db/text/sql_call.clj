@@ -7,7 +7,7 @@
              [xt.lang.spec-promise :as spec-promise]
              [xt.db.text.sql-util :as ut]
              [xt.db.text.base-check :as check]
-             [xt.protocol.impl.connection-sql :as sql]]})
+             [xt.net.conn-sql :as conn-sql]]})
 
 (defn.xt decode-return
   "decodes the return value"
@@ -51,7 +51,7 @@
 (defn.xt call-raw
   "calls a database function"
   {:added "4.0"}
-  [conn spec args]
+  [client spec args]
   (var targs (xt/x:get-key spec "input"))
   (var [l-ok l-err] (check/check-args-length args targs))
   (when (not l-ok)
@@ -74,20 +74,15 @@
   (var error-fn
         (fn [err]
           (xt/x:err (xt/x:cat "ERR: - " (xt/x:json-encode err)))))
-  (try
-    (var out (sql/query-async conn q))
-    (if (spec-promise/x:promise-native? out)
-      (return
-       (-> (spec-promise/x:promise-then out success-fn)
-           (spec-promise/x:promise-catch error-fn)))
-      (return (success-fn out)))
-    (catch err
-      (return (error-fn err)))))
+  (return
+   (-> (conn-sql/query-async client q)
+       (spec-promise/x:promise-then success-fn)
+       (spec-promise/x:promise-catch error-fn))))
 
 (defn.xt call-api
   "results an api style result"
   {:added "4.0"}
-  [conn spec args]
+  [client spec args]
   (var targs (xt/x:get-key spec "input"))
   (var [l-ok l-err] (check/check-args-length args targs))
   (when (not l-ok)
@@ -114,15 +109,10 @@
                      (return (xt/x:json-encode err))
                      (return (xt/x:json-encode {:status "error"
                                                 :data err})))))
-  (try
-    (var out (sql/query-async conn q))
-    (if (spec-promise/x:promise-native? out)
-      (return
-       (-> (spec-promise/x:promise-then out success-fn)
-           (spec-promise/x:promise-catch error-fn)))
-      (return (success-fn out)))
-    (catch err
-      (return (error-fn err)))))
+  (return
+   (-> (conn-sql/query-async client q)
+       (spec-promise/x:promise-then success-fn)
+       (spec-promise/x:promise-catch error-fn))))
 
 (comment
   (./create-tests)

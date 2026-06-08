@@ -11,7 +11,7 @@
              [xt.db.text.sql-raw :as raw]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.connection-sql :as dbsql]]})
+             [xt.net.conn-sql :as conn-sql]]})
 
 (defn.xt pull
   "runs a tree ir pull against a sqlite client"
@@ -21,8 +21,8 @@
          schema
          opts} client)
   (var output
-       (dbsql/query instance
-                    (sql-graph/select schema tree opts)))
+       (conn-sql/query instance
+                       (sql-graph/select schema tree opts)))
   (when (xt/x:is-string? output)
     (xt/x:err "SQL pull expected decoded structured data"))
   (return output))
@@ -35,9 +35,8 @@
          schema
          opts} client)
   (return
-   (dbsql/ensure-promise
-    (dbsql/query-async instance
-                       (sql-graph/select schema tree opts)))))
+   (conn-sql/query-async instance
+                         (sql-graph/select schema tree opts))))
 
 (defn.xt record-add
   "adds rows directly through stored sqlite context"
@@ -48,13 +47,13 @@
          lookup
          opts} client)
   (var input (sql-table/prepare-add-input {table-name records}
-                                             schema
-                                             lookup
-                                             opts))
+                                          schema
+                                          lookup
+                                          opts))
   (when (== "" input)
     (return nil))
   (return
-   (dbsql/query instance input)))
+   (conn-sql/query instance input)))
 
 (defn.xt record-add-async
   "adds rows directly with async sqlite semantics"
@@ -71,7 +70,7 @@
   (when (== "" input)
     (return (promise/x:promise-run nil)))
   (return
-   (dbsql/query-async instance input)))
+   (conn-sql/query-async instance input)))
 
 (defn.xt record-delete
   "deletes ids directly through stored sqlite context"
@@ -84,7 +83,7 @@
                      (fn [id]
                        (return (raw/raw-delete table-name {"id" id} opts)))))
   (return
-   (dbsql/query instance (xt/x:str-join "\n\n" statements))))
+   (conn-sql/query instance (xt/x:str-join "\n\n" statements))))
 
 (defn.xt record-delete-async
   "deletes ids directly with async sqlite semantics"
@@ -97,9 +96,8 @@
                      (fn [id]
                        (return (raw/raw-delete table-name {"id" id} opts)))))
   (return
-   (dbsql/ensure-promise
-    (dbsql/query-async instance
-                       (xt/x:str-join "\n\n" statements)))))
+   (conn-sql/query-async instance
+                         (xt/x:str-join "\n\n" statements))))
 
 (defn.xt process-add-event
   "processes nested data into sqlite upserts"
@@ -110,9 +108,14 @@
          lookup
          opts} client)
   (var flat (f/flatten-bulk schema data))
-  (dbsql/query instance
-               (sql-table/prepare-add-input data schema lookup opts))
+  (conn-sql/query instance
+                  (sql-table/prepare-add-input data schema lookup opts))
   (return (xt/x:obj-keys flat)))
+
+
+;;
+;; PROCESS
+;;
 
 (defn.xt process-remove-event
   "processes nested removals into sqlite delete statements"
@@ -123,8 +126,8 @@
          lookup
          opts} client)
   (var ordered (f/flatten-bulk-ids schema lookup data))
-  (dbsql/query instance
-               (sql-table/prepare-remove-input data schema lookup opts))
+  (conn-sql/query instance
+                  (sql-table/prepare-remove-input data schema lookup opts))
   (return (xt/x:arr-map ordered xt/x:first)))
 
 (defn.xt exec-sync
@@ -132,7 +135,7 @@
   {:added "4.1"}
   [client raw-input]
   (var #{instance} client)
-  (return (dbsql/query instance raw-input)))
+  (return (conn-sql/query instance raw-input)))
 
 (defn.xt client-sqlite
   "creates the thin sqlite client record with stored context"
@@ -153,12 +156,12 @@
          settings
          opts} client)
   (return
-   (-> (dbsql/connect driver settings)
+   (-> (conn-sql/connect driver settings)
        (promise/x:promise-then
         (fn [instance]
           (xt/x:set-key client "instance" instance)
-          (dbsql/query instance
-                       (xt/x:str-join
-                        "\n\n"
-                        (manage/table-create-all schema lookup opts)))
+          (conn-sql/query instance
+                          (xt/x:str-join
+                           "\n\n"
+                           (manage/table-create-all schema lookup opts)))
           (return client))))))

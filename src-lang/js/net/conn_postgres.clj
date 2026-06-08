@@ -50,9 +50,13 @@
   {:added "4.0"}
   [client opts]
   (var #{defaults} client)
-  (var conn (new -/Client (xt/x:obj-assign
-                           (xt/x:obj-clone defaults)
-                           opts)))
+  (var conn (new -/Client (-> {:host "127.0.0.1",
+                               :port 5432
+                               :user "postgres",
+                               :password "postgres"
+                               :database "postgres"},
+                              (xt/x:obj-assign defaults)
+                              (xt/x:obj-assign opts))))
   (return
    (. conn (connect)
       (then (fn []

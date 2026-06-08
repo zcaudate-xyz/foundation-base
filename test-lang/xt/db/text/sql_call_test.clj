@@ -2,8 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [postgres.gen.bind-macro :as gen]
-            [xt.lang.common-notify :as notify]
-            [xt.lang.spec-promise :as spec-promise]))
+            [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/scaffold true}
 (do 
@@ -13,24 +12,24 @@
      :require [[postgres.sample.scratch-v1 :as scratch]]}))
 
 ^{:seedgen/root {:all true
-                 :js           {:extra [[js.lib.driver-postgres :as js-postgres]]}
+                 :js           {:extra [[js.net.conn-postgres :as js-postgres]]}
                  :lua.nginx    {:extra [[lua.nginx.driver-postgres :as lua-postgres]]}
-                 :python       {:extra [[python.lib.driver-postgres :as py-postgres]]}
-                 :dart         {:extra [[dart.lib.driver-postgres :as dart-postgres]]}}}
+                 :python       {:extra [[python.net.conn-postgres :as py-postgres]]}
+                 :dart         {:extra [[dart.net.conn-postgres :as dart-postgres]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as spec-promise]
              [xt.lang.common-repl :as repl]
              [xt.db.text.sql-call :as call]
-             [xt.protocol.impl.connection-sql :as driver]
+             [xt.net.conn-sql :as conn-sql]
              ^{:seedgen/extra true}
-             [js.lib.driver-postgres :as js-postgres]]})
+             [js.net.conn-postgres :as js-postgres]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
-             (do (l/rt:setup :postgres))]
-  :teardown [(do (l/rt:teardown :postgres))
+             (l/rt:setup :postgres)]
+  :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
 ^{:refer xt.db.text.sql-call/decode-return :added "4.0"}
@@ -72,52 +71,61 @@
 ^{:refer xt.db.text.sql-call/call-raw :added "4.0"}
 (fact "calls a database function"
 
-  ^{:seedgen/base {:lua.nginx    {:transform '{(js-postgres/driver) (lua-postgres/driver)}}
-                   :python       {:transform '{(js-postgres/driver) (py-postgres/driver)}}
-                   :dart         {:transform '{(js-postgres/driver) (dart-postgres/driver)}}}}      
+  ^{:seedgen/base {:lua.nginx    {:transform '{js-postgres/create lua-postgres/create}}
+                   :python       {:transform '{js-postgres/create py-postgres/create}}
+                   :dart         {:transform '{js-postgres/create dart-postgres/create}}}}      
   (notify/wait-on :js
-    (spec-promise/x:promise-then
-     (driver/connect (js-postgres/driver)
-                     {:database "test-scratch"})
-     (fn [conn]
-       (return
+    (-> (js-postgres/create {:database "test-scratch"})
+        (conn-sql/connect {:host "127.0.0.1",
+                           :port 5432
+                           :user "postgres",
+                           :password "postgres"})
         (spec-promise/x:promise-then
-         (call/call-raw conn
-                        {:input [{:symbol "x" :type "numeric"}
-                                 {:symbol "y" :type "numeric"}]
-                         :return "numeric"
-                         :schema "scratch"
-                         :id "addf"
-                         :flags {}}
-                        [10 20])
+         (fn [client]
+           (return
+            (call/call-raw client
+                           {:input [{:symbol "x" :type "numeric"}
+                                     {:symbol "y" :type "numeric"}]
+                            :return "numeric"
+                            :schema "scratch"
+                            :id "addf"
+                            :flags {}}
+                           [10 20]))))
+        (spec-promise/x:promise-then
          (fn [x]
-           (repl/notify x)))))))
+           (repl/notify x)))
+        (spec-promise/x:promise-catch
+         (fn [err]
+           (repl/notify (. err message))))))
   => 30)
 
 ^{:refer xt.db.text.sql-call/call-api
   :added "4.0"}
 (fact "results an api style result"
 
-  ^{:seedgen/base {:lua.nginx    {:transform '{(js-postgres/driver) (lua-postgres/driver)}}
-                   :python       {:transform '{(js-postgres/driver) (py-postgres/driver)}}
-                   :dart         {:transform '{(js-postgres/driver) (dart-postgres/driver)}}}}
+  ^{:seedgen/base {:lua.nginx    {:transform '{js-postgres/create lua-postgres/create}}
+                   :python       {:transform '{js-postgres/create py-postgres/create}}
+                   :dart         {:transform '{js-postgres/create dart-postgres/create}}}}
   (notify/wait-on :js
-    (spec-promise/x:promise-then
-     (driver/connect (js-postgres/driver)
-                     {:database "test-scratch"})
-     (fn [conn]
-        (return
-         (spec-promise/x:promise-then
-          (call/call-api conn
-                         {:input [{:symbol "x" :type "numeric"}
-                                  {:symbol "y" :type "numeric"}]
-                          :return "numeric"
-                          :schema "scratch"
-                          :id "addf"
-                          :flags {}}
-                         [10 20])
-          (fn [x]
-            (repl/notify (xt/x:json-decode x))))))))
+    (-> (js-postgres/create {:database "test-scratch"})
+        (conn-sql/connect)
+        (spec-promise/x:promise-then
+         (fn [client]
+           (return
+            (call/call-api client
+                           {:input [{:symbol "x" :type "numeric"}
+                                    {:symbol "y" :type "numeric"}]
+                            :return "numeric"
+                            :schema "scratch"
+                            :id "addf"
+                            :flags {}}
+                           [10 20]))))
+        (spec-promise/x:promise-then
+         (fn [x]
+           (repl/notify (xt/x:json-decode x))))
+        (spec-promise/x:promise-catch
+         (fn [err]
+           (repl/notify (. err message))))))
   => {"status" "ok", "data" 30})
 
 (comment

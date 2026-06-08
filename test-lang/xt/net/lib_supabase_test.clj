@@ -14,7 +14,8 @@
             :pass   (-> docker-min/+config+ :db :password)
             :dbname (-> docker-min/+config+ :db :database)
             :startup  docker-min/start-supabase
-            :shutdown docker-min/stop-supabase}})
+            :shutdown docker-min/stop-supabase}
+   :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
 (l/script :js
   {:runtime :basic
