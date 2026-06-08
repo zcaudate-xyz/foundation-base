@@ -4,7 +4,7 @@
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.net.http-fetch :as http]]})
+             [xt.net.http-fetch :as fetch]]})
 
 (defn.js request-http-raw
   [input]
@@ -25,7 +25,7 @@
 
 (defn.js request-http-client
   [client input opts]
-  (var prepped    (http/prepare-input client input opts))
+  (var prepped  (fetch/prepare-input client input opts))
   (return
    (-/request-http-raw prepped)))
 
@@ -37,7 +37,6 @@
 (defn.js create
   [defaults]
   (return
-   (xt/x:obj-assign
-    (http/create-base "js.net.http-fetch"
-                      (-/create-methods))
-    {"defaults" (or defaults {})})))
+   (fetch/create-base nil
+                      (-/create-methods)
+                      defaults)))

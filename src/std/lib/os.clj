@@ -136,7 +136,10 @@
    (let [[opts args] (if (map? (last args))
                        [(last args) (cons s (butlast args))]
                        [{} (cons s args)])
-         {:keys [print wait trim wrap output inherit root ignore-errors env async]
+         {:keys [print wait trim wrap output inherit root
+                 env async
+                 output-errors
+                 ignore-errors]
           :or {inherit false
                wrap   true
                trim   true}} opts
@@ -163,11 +166,18 @@
          thunk (fn []
                  (let [out-fn (fn [process]
                                 (let [{:keys [out err]} (sh-output process)]
-                                  (cond (and (empty? out)
+                                  (cond output-errors
+                                        (cond-> err
+                                          trim    clojure.string/trim
+                                          wrap    (h/wrapped identity))
+
+
+                                        (and (empty? out)
                                              (not-empty err)
                                              (not ignore-errors))
                                         (h/error err)
-
+                                        
+                                        
                                         :else
                                         (cond-> out
                                           trim    clojure.string/trim

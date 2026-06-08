@@ -17,7 +17,10 @@
              [xt.net.http-fetch :as fetch]
              [js.net.http-fetch :as js-fetch]]})
 
-
+(defn.xt create-http
+  [type methods host port secured apikey]
+  (return
+   ()))
 
 
 (comment
@@ -40,12 +43,12 @@
 (comment
   (xt.lang.common-notify/wait-on :js
     (-> (js-fetch/create
-         {:defaults {:secured false
-                     :host "127.0.0.1"
-                     :port "55121"
-                     :headers {"apikey" (@! +token+)
-                               "Content-Type" "application/json"}
-                     :basepath "/auth/v1"}})
+         {:secured false
+          :host "127.0.0.1"
+          :port "55121"
+          :headers {"apikey" (@! +token+)
+                    "Content-Type" "application/json"}
+          :basepath "/auth/v1"})
         (fetch/request-http {:method "POST"
                              :path "signup"
                              :body (xt/x:json-encode

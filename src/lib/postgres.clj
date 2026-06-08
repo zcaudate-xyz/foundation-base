@@ -15,8 +15,20 @@
   "executes a postgres runtime lifecycle hook using `std.lib.os/sh` arguments"
   {:added "4.1"}
   [rt command]
-  (os/sh command)
-  rt)
+  (cond
+    (fn? command)
+    (do (try
+          (command rt)
+          (catch clojure.lang.ArityException _
+            (command)))
+        rt)
+
+    command
+    (do (os/sh command)
+        rt)
+
+    :else
+    rt))
 
 (defn start-pg-temp-init
   "initialises a temp database"
@@ -36,7 +48,7 @@
   (let [_   (if (zero? limit) (f/error "Database not responsive"))
         res (try (with-open [conn (conn/conn-create (assoc pg :dbname "postgres"))])
                  (catch com.impossibl.postgres.jdbc.PGSQLSimpleException e
-                   (Thread/sleep sleep)
+                   (Thread/sleep ^Long sleep)
                    :error))]
     (if (= res :error)
       (recur pg (dec limit) sleep))))

@@ -12,9 +12,10 @@
    "query_async"])
 
 (defn.xt create-base
-  [type methods]
+  [type methods defaults]
   (return
-   (xt/x:obj-assign {"::" (or type "net.sql")}
+   (xt/x:obj-assign {"::" (or type "net.sql")
+                     "defaults" defaults}
                     (protocol/proto-spec
                      [[-/ISqlClient methods]]))))
 
@@ -36,7 +37,6 @@
   [client]
   (var disconnect-fn (xt/x:get-key client "disconnect"))
   (return (disconnect-fn client opts)))
-
 
 (defn.xt query
   "dispatches request through the wrapped fetch client"

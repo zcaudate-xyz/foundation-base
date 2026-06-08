@@ -1,0 +1,119 @@
+35;77;41M
+(ns xt.net.lib-supabase-test
+  (:use code.test)
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify]
+            [scaffold.supabase.docker-min :as docker-min]))
+
+(l/script- :postgres
+  {:runtime :jdbc.client
+   :require [[postgres.sample.scratch-v0 :as scratch-v0]
+             [postgres.core :as pg]]
+   :config {:host   (-> docker-min/+config+ :db :host)
+            :port   (-> docker-min/+config+ :db :port)
+            :user   (-> docker-min/+config+ :db :user)
+            :pass   (-> docker-min/+config+ :db :password)
+            :dbname (-> docker-min/+config+ :db :database)
+            :startup  docker-min/start-supabase
+            :shutdown docker-min/stop-supabase}})
+
+(l/script :js
+  {:runtime :basic
+   :require [[xt.lang.common-string :as str]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [xt.net.http-fetch :as fetch]
+             [js.net.http-fetch :as js-fetch]]})
+
+(fact:global
+ {:setup [(l/rt:restart)
+          (l/rt:setup :postgres)]
+  :teardown [(l/rt:teardown :postgres)
+             (l/rt:stop)]})
+
+(comment
+  (xt.lang.common-notify/wait-on :js
+    (-> (js-fetch/create
+         {:secured false
+          :host "127.0.0.1"
+          :port "55121"
+          :headers {"apikey" (@! #_(-> docker-min/+config+
+                                       :api
+                                       :anon-key)
+                              (-> docker-min/+config+
+                                  :api
+                                  :service-key))
+                    "Content-Type" "application/json"}
+          :basepath "/auth/v1"})
+        (fetch/request-http {:method "POST"
+                             :path "/signup"
+                             :body (xt/x:json-encode
+                                    {:email "alice@example.com"
+                                     :password "123456789"})})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out))))))
+
+(comment
+  (xt.lang.common-notify/wait-on :js
+    (-> (js-fetch/create
+         {:secured false
+          :host "127.0.0.1"
+          :port "55121"
+          :headers {"apikey" (@! #_(-> docker-min/+config+
+                                       :api
+                                       :anon-key)
+                              (-> docker-min/+config+
+                                  :api
+                                  :service-key))
+                    "Content-Type" "application/json"}
+          :basepath "/auth/v1"})
+        (fetch/request-http {:method "POST"
+                             :path "/signup"
+                             :body (xt/x:json-encode
+                                    {:email "alice@example.com"
+                                     :password "123456789"})})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out))))))
+
+
+
+(comment
+
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU",
+  (fetch "http://127.0.0.1:55121/auth/v1/signup"))
+
+
+
+^{:refer xt.net.lib-supabase/sign-up :added "4.1"}
+(fact "TODO")
+
+
+(!.js
+  (-> (js-fetch/create
+       {:secured false
+        :host "127.0.0.1"
+        :port "55121"
+        :headers {"apikey" (@! (-> docker-min/+config+
+                                   :api
+                                   :anon-key))
+                  "Content-Type" "application/json"}
+        :basepath "/auth/v1"})
+      (fetch/prepare-url {:method "POST"
+                           :path  "/signup"
+                            :body (xt/x:json-encode
+                                   {:email "alice@example.com"
+                                    :password "123456789"})})
+      #_(fetch/prepare-input {:method "POST"
+                            :path "signup"
+                            :body (xt/x:json-encode
+                                   {:email "alice@example.com"
+                                    :password "123456789"})})))

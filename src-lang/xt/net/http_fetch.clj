@@ -30,9 +30,7 @@
   (if (not (xt/x:nil? url))
     (return url))
   
-  (var defaults (or (xt/x:get-key client "defaults")
-                    {}))
-  
+  (var #{defaults} client)
   (var #{secured
          host
          port
@@ -47,8 +45,7 @@
 
 (defn.xt prepare-input
   [client input]
-  (var defaults (or (xt/x:get-key client "defaults")
-                    {}))
+  (var #{defaults} client)
   (var #{body
          method} input)
   (var headers (xt/x:obj-assign
@@ -61,9 +58,10 @@
            :headers headers}))
 
 (defn.xt create-base
-  [type methods]
+  [type methods defaults]
   (return
-   (xt/x:obj-assign {"::" (or type "xt.net.http-fetch")}
+   (xt/x:obj-assign {"::"   (or type "xt.net.http-fetch")
+                     "defaults" (or defaults {})}
                     (protocol/proto-spec
                      [[-/IHttpClient methods]]))))
 

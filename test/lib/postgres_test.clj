@@ -72,6 +72,19 @@
   => [{:args ["supabase" "start"]
        :root "docker/supbase"}])
 
+^{:refer lib.postgres/run-pg-lifecycle :added "4.1"}
+(fact "executes lifecycle callbacks when given a function"
+  (let [calls (atom [])]
+    (with-redefs [os/sh (fn [args]
+                          (swap! calls conj args)
+                          "ok")]
+      (base/run-pg-lifecycle {:dbname "test"}
+                             (fn [rt]
+                               (swap! calls conj [:fn rt])
+                               rt)))
+    @calls)
+  => [[:fn {:dbname "test"}]])
+
 ^{:refer lib.postgres/start-pg :added "4.1"}
 (fact "runs startup shell hooks before opening the postgres connection"
   (let [calls (atom [])]
