@@ -74,3 +74,13 @@
                  "headers" {}
                  "body" (-/decode-body response)
                  "error" nil})))
+
+(defn.xt encode-query-params
+  "encodes a flat query param map"
+  {:added "4.1.4"}
+  [params]
+  (var out [])
+  (xt/for:object [[k v] (or params {})]
+    (when (xt/x:not-nil? v)
+      (xt/x:arr-push out (xt/x:cat k "=" (xt/x:to-string v)))))
+  (return (xt/x:str-join "&" out)))
