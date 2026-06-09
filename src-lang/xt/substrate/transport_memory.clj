@@ -54,6 +54,8 @@
 (defspec.xt memory-network
   [:fn [[:xt/maybe [:xt/dict :xt/str :xt/any]]] MemoryWireNetwork])
 
+;; SHARED HELPERS
+
 (defn.xt event-text
   "normalizes inbound endpoint events into text payloads"
   {:added "4.1"}
@@ -121,6 +123,49 @@
                                           endpoint-ids
                                           (+ index 1))))
 
+(defn.xt memory-endpoint
+  "creates an in-memory text endpoint that forwards writes to its peer listener"
+  {:added "4.1"}
+  [state]
+  (var write-fn
+       (fn [text]
+         (var network (xt/x:get-key state "network"))
+         (var peer-ids (xt/x:get-key state "peers"))
+         (when (xt/x:not-nil? network)
+          (when (== 0 (xt/x:len peer-ids))
+            (xt/x:err "wire endpoint missing peers"))
+          (return (-/deliver-network-loop network
+                                          state
+                                          peer-ids
+                                          text
+                                          0)))
+         (var peer (xt/x:get-key state "peer"))
+         (when (xt/x:nil? peer)
+           (xt/x:err "wire endpoint missing peer"))
+         (var listener (xt/x:get-key peer "listener"))
+         (when (xt/x:nil? listener)
+           (xt/x:err "wire peer not started"))
+         (return
+          (listener
+           {"text" text}
+           {"wire" (xt/x:get-key state "id")
+            "peer" (xt/x:get-key peer "id")}))))
+  (var start-fn
+       (fn [listener]
+         (xt/x:set-key state "listener" listener)
+         (return state)))
+  (var stop-fn
+       (fn [_]
+         (xt/x:set-key state "listener" nil)
+         (return true)))
+  (return
+   {"meta" {"kind" "wire.memory"
+            "id" (xt/x:get-key state "id")}
+    "write_fn" write-fn
+    "start_fn" start-fn
+    "stop_fn" stop-fn}))
+
+
 (defn.xt create-network-endpoints-loop
   "materializes transport endpoints for a shared network"
   {:added "4.1"}
@@ -166,6 +211,8 @@
                                       peer-ids
                                       text
                                       (+ index 1)))))))
+
+;; TEXT ENDPOINT ADAPTER
 
 (defn.xt text-endpoint
   "adapts a line-oriented text endpoint to the node transport contract"
@@ -231,47 +278,7 @@
     "start_fn" start-fn
     "stop_fn" stop-fn}))
 
-(defn.xt memory-endpoint
-  "creates an in-memory text endpoint that forwards writes to its peer listener"
-  {:added "4.1"}
-  [state]
-  (var write-fn
-       (fn [text]
-         (var network (xt/x:get-key state "network"))
-         (var peer-ids (xt/x:get-key state "peers"))
-         (when (xt/x:not-nil? network)
-          (when (== 0 (xt/x:len peer-ids))
-            (xt/x:err "wire endpoint missing peers"))
-          (return (-/deliver-network-loop network
-                                          state
-                                          peer-ids
-                                          text
-                                          0)))
-         (var peer (xt/x:get-key state "peer"))
-         (when (xt/x:nil? peer)
-           (xt/x:err "wire endpoint missing peer"))
-         (var listener (xt/x:get-key peer "listener"))
-         (when (xt/x:nil? listener)
-           (xt/x:err "wire peer not started"))
-         (return
-          (listener
-           {"text" text}
-           {"wire" (xt/x:get-key state "id")
-            "peer" (xt/x:get-key peer "id")}))))
-  (var start-fn
-       (fn [listener]
-         (xt/x:set-key state "listener" listener)
-         (return state)))
-  (var stop-fn
-       (fn [_]
-         (xt/x:set-key state "listener" nil)
-         (return true)))
-  (return
-   {"meta" {"kind" "wire.memory"
-            "id" (xt/x:get-key state "id")}
-    "write_fn" write-fn
-    "start_fn" start-fn
-    "stop_fn" stop-fn}))
+;; PUBLIC CONSTRUCTORS
 
 (defn.xt memory-pair
   "creates a bidirectional in-memory text wire"

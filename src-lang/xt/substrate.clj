@@ -309,6 +309,7 @@
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
        :xt/promise])
 
+
 ;; NODE CORE
 (defn.xt node?
   "checks if a value is a node runtime"
@@ -433,7 +434,7 @@
                         (fn [x] (return x))
                         xt/x:str-lt)))
 
-;; TRANSPORTS
+;; TRANSPORT LOOKUP AND DELIVERY
 (defn.xt get-transport
   "gets an attached transport"
   {:added "4.1"}
@@ -519,55 +520,6 @@
                                stream
                                exclude-id
                                0)))
-
-(defn.xt attach-transport
-  "attaches and optionally starts a transport"
-  {:added "4.1"}
-  [node transport-id transport]
-  (:= transport (:? (-/transport? transport)
-                    transport
-                    (-/transport-create transport-id transport)))
-  (xt/x:set-key (xt/x:get-key node "transports")
-                transport-id
-                transport)
-  (router/register-connection node
-                              transport-id
-                              {:meta (xt/x:get-key transport "meta")})
-  (var start-fn (xt/x:get-key transport "start_fn"))
-  (when (xt/x:nil? start-fn)
-    (return (promise/x:promise-run transport)))
-  (return
-   (promise/x:promise-then
-    (node-request/ensure-promise
-     (start-fn
-      (fn [event ctx]
-        (:= ctx (or ctx {}))
-        (when (xt/x:nil? (xt/x:get-key ctx "transport_id"))
-          (xt/x:set-key ctx "transport_id" transport-id))
-        (return (-/receive-frame node event ctx)))))
-    (fn [listener]
-      (xt/x:set-key transport "listener" listener)
-      (return transport)))))
-
-(defn.xt detach-transport
-  "detaches and optionally stops a transport"
-  {:added "4.1"}
-  [node transport-id]
-  (var transports (xt/x:get-key node "transports"))
-  (var transport (xt/x:get-key transports transport-id))
-  (when (xt/x:nil? transport)
-    (return (promise/x:promise-run nil)))
-  (xt/x:del-key transports transport-id)
-  (router/unregister-connection node transport-id)
-  (var stop-fn (xt/x:get-key transport "stop_fn"))
-  (when (xt/x:nil? stop-fn)
-    (return (promise/x:promise-run transport)))
-  (return
-   (promise/x:promise-then
-    (node-request/ensure-promise
-     (stop-fn (xt/x:get-key transport "listener")))
-    (fn [_]
-      (return transport)))))
 
 ;; REQUEST FLOW
 (defn.xt request-target
@@ -756,6 +708,19 @@
       (fn [_]
         (return event))))))
 
+(defn.xt receive-publish
+  "receives an inbound stream frame"
+  {:added "4.1"}
+  [node stream ctx]
+  (:= ctx (or ctx {}))
+  (return
+   (promise/x:promise-then
+    (node-pubsub/receive-publish node stream)
+    (fn [_]
+      (return (-/route-stream node
+                              stream
+                              (xt/x:get-key ctx "transport_id")))))))
+
 (defn.xt publish
   "publishes a stream frame through node core and subscribed transports"
   {:added "4.1"}
@@ -770,19 +735,6 @@
    (-/receive-publish node
                       stream
                       {:transport_id (xt/x:get-key meta "transport_id")})))
-
-(defn.xt receive-publish
-  "receives an inbound stream frame"
-  {:added "4.1"}
-  [node stream ctx]
-  (:= ctx (or ctx {}))
-  (return
-   (promise/x:promise-then
-    (node-pubsub/receive-publish node stream)
-    (fn [_]
-      (return (-/route-stream node
-                              stream
-                              (xt/x:get-key ctx "transport_id")))))))
 
 (defn.xt receive-frame
   "demultiplexes node frames"
@@ -806,6 +758,56 @@
 
         :else
         (return (promise/x:promise-run event))))
+
+;; TRANSPORT ATTACHMENT
+(defn.xt attach-transport
+  "attaches and optionally starts a transport"
+  {:added "4.1"}
+  [node transport-id transport]
+  (:= transport (:? (-/transport? transport)
+                    transport
+                    (-/transport-create transport-id transport)))
+  (xt/x:set-key (xt/x:get-key node "transports")
+                transport-id
+                transport)
+  (router/register-connection node
+                              transport-id
+                              {:meta (xt/x:get-key transport "meta")})
+  (var start-fn (xt/x:get-key transport "start_fn"))
+  (when (xt/x:nil? start-fn)
+    (return (promise/x:promise-run transport)))
+  (return
+   (promise/x:promise-then
+    (node-request/ensure-promise
+     (start-fn
+      (fn [event ctx]
+        (:= ctx (or ctx {}))
+        (when (xt/x:nil? (xt/x:get-key ctx "transport_id"))
+          (xt/x:set-key ctx "transport_id" transport-id))
+        (return (-/receive-frame node event ctx)))))
+    (fn [listener]
+      (xt/x:set-key transport "listener" listener)
+      (return transport)))))
+
+(defn.xt detach-transport
+  "detaches and optionally stops a transport"
+  {:added "4.1"}
+  [node transport-id]
+  (var transports (xt/x:get-key node "transports"))
+  (var transport (xt/x:get-key transports transport-id))
+  (when (xt/x:nil? transport)
+    (return (promise/x:promise-run nil)))
+  (xt/x:del-key transports transport-id)
+  (router/unregister-connection node transport-id)
+  (var stop-fn (xt/x:get-key transport "stop_fn"))
+  (when (xt/x:nil? stop-fn)
+    (return (promise/x:promise-run transport)))
+  (return
+   (promise/x:promise-then
+    (node-request/ensure-promise
+     (stop-fn (xt/x:get-key transport "listener")))
+    (fn [_]
+      (return transport)))))
 
 ;; CONFIG AND BOOTSTRAP
 (defn.xt config-space-opts

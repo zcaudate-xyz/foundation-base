@@ -16,13 +16,61 @@
   [impl tree]
   (var #{client
          schema
-         opts} impl))
+         lookup
+         opts} impl)
+  (var request (pgrest-graph/select schema tree opts))
+  (var table-name (xt/x:first tree))
+  (var schema-name (xt/x:get-path lookup [table-name "schema"]))
+  (var headers (xt/x:obj-clone (xt/x:get-key request "headers")))
+  (when (xt/x:not-nil? schema-name)
+    (xt/x:set-key headers "Accept-Profile" schema-name)
+    (xt/x:set-key headers "Content-Profile" schema-name))
+  (return
+   (-> (lib-supabase/request-get client
+                                 (xt/x:get-key request "url")
+                                 {"headers" headers})
+       (promise/x:promise-then
+        (fn [response]
+          (var out (xt/x:get-key response "body"))
+          (cond (and (xt/x:is-object? out)
+                     (xt/x:not-nil? (xt/x:get-key out "data")))
+                (return (xt/x:get-key out "data"))
+
+                :else
+                (return out)))))))
 
 (defn.xt rpc-call-async
-  [impl rpc-spec args]
+  [impl rpc-spec args opts]
   (var #{client} impl)
+  (var input-spec (or (xt/x:get-key rpc-spec "input") []))
+  (var body {})
+  (:= opts (or opts {}))
+  (xt/for:array [[i input] input-spec]
+    (var key (or (xt/x:get-key input "symbol")
+                 (xt/x:get-key input "name")
+                 nil))
+    (when (xt/x:not-nil? key)
+      (xt/x:set-key body key (xt/x:get-idx args i))))
+  (var schema  (xt/x:get-key rpc-spec "schema"))
+  (var headers (xt/x:obj-clone (xt/x:get-key opts "headers")))
+  (when (xt/x:not-nil? schema)
+    (xt/x:set-key headers "Content-Profile" schema)
+    (xt/x:set-key headers "Accept-Profile" schema))
   (return
-   (lib-supabase/rpc-call client ....)))
+   (-> (lib-supabase/rpc-call client
+                              (xt/x:get-key rpc-spec "id")
+                              body
+                              (-> (xt/x:obj-clone opts)
+                                  (xt/x:obj-assign {"headers" headers})))
+       (promise/x:promise-then
+        (fn [response]
+          (var out (xt/x:get-key response "body"))
+          (cond (and (xt/x:is-object? out)
+                     (xt/x:not-nil? (xt/x:get-key out "data")))
+                (return (xt/x:get-key out "data"))
+
+                :else
+                (return out)))))))
 
 (defn.xt impl-supabase
   "creates the thin supabase impl record with stored context"

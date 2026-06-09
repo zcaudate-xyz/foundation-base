@@ -160,7 +160,8 @@
                       (xtd/get-in rows ["UserAccount"
                                         "00000000-0000-0000-0000-000000000000"
                                         "record"])
-                      {}))
+                      {}
+                      g/pull-entries))
   => {"nickname" "root"
       "profile" [{"first_name" "Root"}]})
 

@@ -418,6 +418,100 @@
                                  (xt/x:get-key request "id"))
            "ok" true}))
 
+(defn.xt apply-stream
+  "applies an inbound sync stream using configured node.sync handlers"
+  {:added "4.1"}
+  [node stream]
+  (var signal (xt/x:get-key stream "signal"))
+  (var payload (or (xt/x:get-key stream "data")
+                   {}))
+  (var space-id (xt/x:get-key stream "space"))
+  (var space (node-space/ensure-space node space-id nil))
+  (var sync-state (-/ensure-sync-state space))
+  (var opts (-/node-opts node))
+  (var current-state (xt/x:get-key space "state"))
+  (var cursor (or (xt/x:get-key payload "cursor")
+                  (xtd/get-in stream ["meta" "cursor"])))
+  (cond (== signal -/SIGNAL_DELTA)
+        (do
+          (var apply-delta (xt/x:get-key opts "apply_delta"))
+          (var handler (:? (xt/x:is-function? apply-delta)
+                           apply-delta
+                           (fn [state data _stream _node]
+                             (return (or (xt/x:get-key data "delta")
+                                         data)))))
+          (return
+           (promise/x:promise-then
+            (-/ensure-promise
+             (handler current-state payload stream node))
+            (fn [next-state]
+              (xt/x:set-key sync-state "last_error" nil)
+              (when (xt/x:is-number? cursor)
+                (-/set-cursor node space-id cursor))
+              (return (event-node/set-space-state node
+                                                  space-id
+                                                  next-state))))))
+
+        (== signal -/SIGNAL_RESET)
+        (do
+          (var apply-reset (xt/x:get-key opts "apply_reset"))
+          (var handler (:? (xt/x:is-function? apply-reset)
+                           apply-reset
+                           (fn [_state data _stream _node]
+                             (return (or (xt/x:get-key data "snapshot")
+                                         data)))))
+          (return
+           (promise/x:promise-then
+            (-/ensure-promise
+             (handler current-state payload stream node))
+            (fn [next-state]
+              (xt/x:set-key sync-state "last_error" nil)
+              (when (xt/x:is-number? cursor)
+                (-/set-cursor node space-id cursor))
+              (return (event-node/set-space-state node
+                                                  space-id
+                                                  next-state))))))
+
+        (== signal -/SIGNAL_ERROR)
+        (do
+          (var apply-error (xt/x:get-key opts "apply_error"))
+          (var handler (:? (xt/x:is-function? apply-error)
+                           apply-error
+                           (fn [_state data _stream _node]
+                             (return (or (xt/x:get-key data "error")
+                                         data)))))
+          (return
+           (promise/x:promise-then
+            (-/ensure-promise
+             (handler current-state payload stream node))
+            (fn [out]
+              (xt/x:set-key sync-state "last_error" out)
+              (when (xt/x:is-number? cursor)
+                (-/set-cursor node space-id cursor))
+              (return out)))))
+
+        :else
+        (return (promise/x:promise-run nil))))
+
+(defn.xt handle-delta
+  "handles a node sync delta stream"
+  {:added "4.1"}
+  [space stream node]
+  (return (-/apply-stream node stream)))
+
+(defn.xt handle-reset
+  "handles a node sync reset stream"
+  {:added "4.1"}
+  [space stream node]
+  (return (-/apply-stream node stream)))
+
+(defn.xt handle-error
+  "handles a node sync error stream"
+  {:added "4.1"}
+  [space stream node]
+  (return (-/apply-stream node stream)))
+
+
 (defn.xt install
   "installs node sync request handlers on a node"
   {:added "4.1"}
@@ -543,95 +637,3 @@
                       "origin_node" (xt/x:get-key node "id")}
                      (or meta {})))))
 
-(defn.xt apply-stream
-  "applies an inbound sync stream using configured node.sync handlers"
-  {:added "4.1"}
-  [node stream]
-  (var signal (xt/x:get-key stream "signal"))
-  (var payload (or (xt/x:get-key stream "data")
-                   {}))
-  (var space-id (xt/x:get-key stream "space"))
-  (var space (node-space/ensure-space node space-id nil))
-  (var sync-state (-/ensure-sync-state space))
-  (var opts (-/node-opts node))
-  (var current-state (xt/x:get-key space "state"))
-  (var cursor (or (xt/x:get-key payload "cursor")
-                  (xtd/get-in stream ["meta" "cursor"])))
-  (cond (== signal -/SIGNAL_DELTA)
-        (do
-          (var apply-delta (xt/x:get-key opts "apply_delta"))
-          (var handler (:? (xt/x:is-function? apply-delta)
-                           apply-delta
-                           (fn [state data _stream _node]
-                             (return (or (xt/x:get-key data "delta")
-                                         data)))))
-          (return
-           (promise/x:promise-then
-            (-/ensure-promise
-             (handler current-state payload stream node))
-            (fn [next-state]
-              (xt/x:set-key sync-state "last_error" nil)
-              (when (xt/x:is-number? cursor)
-                (-/set-cursor node space-id cursor))
-              (return (event-node/set-space-state node
-                                                  space-id
-                                                  next-state))))))
-
-        (== signal -/SIGNAL_RESET)
-        (do
-          (var apply-reset (xt/x:get-key opts "apply_reset"))
-          (var handler (:? (xt/x:is-function? apply-reset)
-                           apply-reset
-                           (fn [_state data _stream _node]
-                             (return (or (xt/x:get-key data "snapshot")
-                                         data)))))
-          (return
-           (promise/x:promise-then
-            (-/ensure-promise
-             (handler current-state payload stream node))
-            (fn [next-state]
-              (xt/x:set-key sync-state "last_error" nil)
-              (when (xt/x:is-number? cursor)
-                (-/set-cursor node space-id cursor))
-              (return (event-node/set-space-state node
-                                                  space-id
-                                                  next-state))))))
-
-        (== signal -/SIGNAL_ERROR)
-        (do
-          (var apply-error (xt/x:get-key opts "apply_error"))
-          (var handler (:? (xt/x:is-function? apply-error)
-                           apply-error
-                           (fn [_state data _stream _node]
-                             (return (or (xt/x:get-key data "error")
-                                         data)))))
-          (return
-           (promise/x:promise-then
-            (-/ensure-promise
-             (handler current-state payload stream node))
-            (fn [out]
-              (xt/x:set-key sync-state "last_error" out)
-              (when (xt/x:is-number? cursor)
-                (-/set-cursor node space-id cursor))
-              (return out)))))
-
-        :else
-        (return (promise/x:promise-run nil))))
-
-(defn.xt handle-delta
-  "handles a node sync delta stream"
-  {:added "4.1"}
-  [space stream node]
-  (return (-/apply-stream node stream)))
-
-(defn.xt handle-reset
-  "handles a node sync reset stream"
-  {:added "4.1"}
-  [space stream node]
-  (return (-/apply-stream node stream)))
-
-(defn.xt handle-error
-  "handles a node sync error stream"
-  {:added "4.1"}
-  [space stream node]
-  (return (-/apply-stream node stream)))

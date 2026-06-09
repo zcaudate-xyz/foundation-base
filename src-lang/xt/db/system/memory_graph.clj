@@ -281,7 +281,7 @@
 (defn.xt project-record
   "projects one record using tree data and links"
   {:added "4.1"}
-  [rows schema tree record opts]
+  [rows schema tree record opts pull-entries-fn]
   (var params (xtd/second tree))
   (var data (or (xt/x:get-key params "data") []))
   (var links (or (xt/x:get-key params "links") []))
@@ -300,7 +300,7 @@
                                {})
                            (xtd/obj-pick ids)
                            (xt/x:obj-vals)))
-    (var child-output (-/pull-entries rows schema child-tree child-entries opts))
+    (var child-output (pull-entries-fn rows schema child-tree child-entries opts))
     (xt/x:set-key out link-name (:? (and (xt/x:is-array? child-output)
                                          (< 0 (xt/x:len child-output)))
                                     child-output
@@ -349,7 +349,8 @@
                                                      schema
                                                      tree
                                                      (xt/x:get-key entry "record")
-                                                     opts)))))
+                                                     opts
+                                                     -/pull-entries)))))
   (return (-/apply-custom out custom)))
 
 ;;
