@@ -34,7 +34,6 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-
 ^{:refer xt.net.lib-supabase/create-http :added "4.1"}
 (fact "creates a fetch client that works with the supabase api"
 
@@ -78,6 +77,36 @@
   )
 
 ^{:refer xt.net.lib-supabase/signin-with-password :added "4.1"}
+(fact "TODO")
+
+(!.js
+  (-> (js-fetch/create
+       {:secured false
+        :host "127.0.0.1"
+        :port "55121"
+        :headers {"apikey" (@! (-> docker-min/+config+
+                                   :api
+                                   :anon-key))
+                  "Content-Type" "application/json"}
+        :basepath "/auth/v1"})
+      (fetch/prepare-url {:method "POST"
+                           :path  "/signup"
+                            :body (xt/x:json-encode
+                                   {:email "alice@example.com"
+                                    :password "123456789"})})
+      #_(fetch/prepare-input {:method "POST"
+                            :path "signup"
+                            :body (xt/x:json-encode
+                                   {:email "alice@example.com"
+                                    :password "123456789"})})))
+
+^{:refer xt.net.lib-supabase/create-client :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.lib-supabase/health :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.lib-supabase/sign-up :added "4.1"}
 (fact "TODO")
 
 (comment
@@ -132,37 +161,7 @@
          (fn [out]
            (repl/notify out))))))
 
-
-
 (comment
 
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU",
   (fetch "http://127.0.0.1:55121/auth/v1/signup"))
-
-
-
-^{:refer xt.net.lib-supabase/sign-up :added "4.1"}
-(fact "TODO")
-
-
-(!.js
-  (-> (js-fetch/create
-       {:secured false
-        :host "127.0.0.1"
-        :port "55121"
-        :headers {"apikey" (@! (-> docker-min/+config+
-                                   :api
-                                   :anon-key))
-                  "Content-Type" "application/json"}
-        :basepath "/auth/v1"})
-      (fetch/prepare-url {:method "POST"
-                           :path  "/signup"
-                            :body (xt/x:json-encode
-                                   {:email "alice@example.com"
-                                    :password "123456789"})})
-      #_(fetch/prepare-input {:method "POST"
-                            :path "signup"
-                            :body (xt/x:json-encode
-                                   {:email "alice@example.com"
-                                    :password "123456789"})})))
-

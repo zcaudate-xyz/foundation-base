@@ -45,7 +45,6 @@
            "headers" headers
            "body"    (or body "")}))
 
-
 (defn.xt response-normalize
   "normalises the standard fetch response envelope"
   {:added "4.1.3"}
@@ -61,8 +60,7 @@
         (do (var out (xt/x:obj-clone response))
             (xt/x:set-key out
                           "headers"
-                          (-/merge-headers {}
-                                           (xt/x:get-key out "headers")))
+                          (xt/x:obj-assign {} (xt/x:get-key out "headers")))
             (xt/x:set-key out
                           "body"
                           (-/decode-body (xt/x:get-key out "body")))

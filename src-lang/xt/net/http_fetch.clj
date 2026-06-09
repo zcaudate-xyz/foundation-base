@@ -4,7 +4,8 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.lang.common-protocol :as protocol]]})
+             [xt.lang.common-protocol :as protocol]
+             [xt.net.http-util :as util]]})
 
 (def.xt IHttpClient
   ["request_http"])
@@ -73,5 +74,13 @@
   (return (protocol/ensure-promise
            (request-fn client input opts))))
 
+(defn.xt then-normalise
+  [p]
+  (return
+   (-> p
+       (promise/x:promise-then
+        (fn [response]
+          (return
+           (util/response-normalize response)))))))
 
 

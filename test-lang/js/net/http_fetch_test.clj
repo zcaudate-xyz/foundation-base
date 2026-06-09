@@ -130,4 +130,21 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {"body" "{\"users\":[],\"aud\":\"authenticated\"}", "status" 200, "headers" {}})
+  => {"body" "{\"users\":[],\"aud\":\"authenticated\"}", "status" 200, "headers" {}}
+
+  (notify/wait-on :js
+    (-> (js-fetch/create
+         {:headers {"apikey" (@! (-> docker-min/+config+ :api :anon-key))
+                    "Authorization" (xt/x:cat "Bearer " (@! (-> docker-min/+config+ :api :anon-key)))
+                    "Accept-Profile" "scratch_v0"}
+          :host "127.0.0.1",
+          :port "55121"})
+        (js-fetch/request-http-client {:path "/rest/v1/Log?select=id,message,author_id&order=id.desc&limit=20"})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            (xt/x:json-decode (. out body)))))))
+  => (contains-in
+      [{"message" "hello",
+        "author_id" nil,
+        "id" string?}]))
