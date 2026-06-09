@@ -175,11 +175,18 @@
         [:xt/maybe SupabaseRequestOpts]]
    :xt/promise])
 
-(defn.xt rpc-call-api
-  [client rpc_name data opts]
-  (var path (xt/x:cat "/rest/v1/rpc/" (xt/x:str-replace rpc_name "-" "_")))
+(defn.xt rpc-call
+  [client rpc-name data opts]
+  (var path (xt/x:cat "/rest/v1/rpc/" (xt/x:str-replace rpc-name "-" "_")))
   (return
    (-/request-json client path "POST" (or data {}) opts)))
+
+(defn.xt query-table
+  [client table-name query opts]
+  (var path (xt/x:cat "/rest/v1/rpc/" table-name "?" query))
+  (return
+   (-/request-get client path opts)))
+
 
 ;;
 ;; API

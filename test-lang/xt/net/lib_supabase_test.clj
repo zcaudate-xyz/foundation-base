@@ -30,7 +30,7 @@
              [xt.net.lib-supabase :as lib-supabase]]})
 
 (fact:global
- {:setup [(l/rt:restart :js)
+ {:setup [(l/rt:restart)
           (l/rt:setup :postgres)]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
@@ -139,6 +139,40 @@
            (repl/notify [(. out ["status"])
                          (. (. out ["body"]) ["user"] ["email"])])))))
   => (contains-in [200 string?]))
+
+^{:refer xt.net.lib-supabase/rpc-call :added "4.1"}
+(fact "calls an rpc entry"
+
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/rpc-call "ping" {} {"headers" {"Content-Profile" "scratch_v0"}})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => {"body" "pong", "status" 200, "headers" {}}
+
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/rpc-call "log_append_public"
+                               {"i_message" "hello"}
+                               {"headers" {"Content-Profile" "scratch_v0"}})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => {"body" {"message" "permission denied for function log_append_public", "hint" nil, "details" nil, "code" "42501"}, "status" 401, "headers" {}}
+
+  (notify/wait-on :js
+    (-> (-/default-client)
+        (lib-supabase/rpc-call "log_append_public"
+                               {"i_message" "hello"}
+                               {"headers" {"Content-Profile" "scratch_v0"}})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => {"body" {"message" "permission denied for function log_append_public", "hint" nil, "details" nil, "code" "42501"}, "status" 401, "headers" {}})
+
+^{:refer xt.net.lib-supabase/query-table :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.net.lib-supabase/health :added "4.1"}
 (fact "calls the auth health endpoint against local supabase"
