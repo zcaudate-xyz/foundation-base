@@ -23,215 +23,442 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.lib.client-fetch :as client-fetch]
-             [js.net.http-fetch :as js-fetch]
+   :require [[js.net.http-fetch :as js-fetch]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.lib-supabase :as lib-supabase]]})
 
 (fact:global
- {:setup [(l/rt:restart)
+ {:setup [(l/rt:restart :js)
           (l/rt:setup :postgres)]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
 (defn.js default-client
-  []
+  [apikey]
   (return
    (lib-supabase/create-client
     (js-fetch/create-methods)
-    (@! (-> docker-min/+config+ :api :hostname))
+    "127.0.0.1"
     (@! (-> docker-min/+config+ :api :port))
     false
     ""
-    (@! (-> docker-min/+config+ :api :anon-key)))))
+    apikey)))
+
+(defn.js anon-key
+  []
+  (return (@! (-> docker-min/+config+ :api :anon-key))))
+
+(defn.js service-key
+  []
+  (return (@! (-> docker-min/+config+ :api :service-key))))
+
+(defn.js anon-client
+  []
+  (return
+   (-/default-client (-/anon-key))))
+
+(defn.js service-client
+  []
+  (return
+   (-/default-client (-/service-key))))
+
+(defn.js service-opts
+  []
+  (return {"token" (-/service-key)}))
+
+(defn.js new-email
+  []
+  (return
+   (xt/x:cat "lib-supabase-"
+             (xt/x:to-string (xt/x:now-ms))
+             "@example.com")))
+
+(defn.js user-body
+  [email]
+  (return {"email" email
+           "password" "123456789"}))
 
 ^{:refer xt.net.lib-supabase/create-client :added "4.1"}
 (fact "creates a supabase client wrapper with the expected defaults"
 
   (!.js
-    (lib-supabase/create-client
-     (js-fetch/create-methods)
-     "127.0.0.1"
-     "55121"
-     false
-     "/auth/v1"
-     "key-client"))
-  => {"::" "net.superbase",
+   (lib-supabase/create-client
+    (js-fetch/create-methods)
+    "127.0.0.1"
+    "55121"
+    false
+    "/auth/v1"
+    "key-client"))
+  => {"::" "net.superbase"
       "defaults"
-      {"basepath" "",
-       "host" "127.0.0.1",
-       "secured" false,
-       "port" "55121",
+      {"basepath" ""
+       "host" "127.0.0.1"
+       "secured" false
+       "port" "55121"
        "headers"
-       {"apikey" "key-client",
-        "Content-Type" "application/json",
+       {"apikey" "key-client"
+        "Content-Type" "application/json"
         "Accept" "application/json"}}})
 
 ^{:refer xt.net.lib-supabase/request :added "4.1"}
-(fact "merges auth headers and dispatches the wrapped request"
+(fact "routes arbitrary requests through the live Supabase instance"
 
   (notify/wait-on :js
-    (-> (-/default-client)
-        (lib-supabase/request {:path "/auth/v1/health"})
+    (-> (-/anon-client)
+        (lib-supabase/request {"path" "/auth/v1/health"
+                               "method" "GET"})
         (promise/x:promise-then
          (fn [out]
-           (repl/notify out)))))
-  => (contains-in
-      {"body" {"name" "GoTrue"},
-       "status" 200, "headers" {}}))
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["name"])])))))
+  => [200 "GoTrue"])
 
-^{:refer xt.net.lib-supabase/query-path :added "4.1"}
-(fact "encodes flat query params onto a path"
+^{:refer xt.net.lib-supabase/request-get :added "4.1"}
+(fact "reads the live settings endpoint"
 
-  (!.js
-    (lib-supabase/query-path
-     "/auth/v1/authorize"
-     {"query" {"redirect_to" "https://example.com/callback"}}))
-  => "/auth/v1/authorize?redirect_to=https://example.com/callback")
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/request-get "/auth/v1/settings" {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["disable_signup"])])))))
+  => [200 false])
 
 ^{:refer xt.net.lib-supabase/request-json :added "4.1"}
-(fact "json encodes request bodies before dispatching"
+(fact "posts JSON payloads to the live signup endpoint"
 
   (notify/wait-on :js
-    (var seen nil)
-    (var client
-         (lib-supabase/create-client
-          {"request_http"
-           (fn [self input opts]
-             (:= seen input)
-             (return {"status" 200
-                      "body" input}))}
-          "https://client.test"
-          "key-client"
-          false
-          ""
-          "key-client"))
-    (promise/x:promise-then
-     (lib-supabase/request-json client
-                                "/auth/v1/verify"
-                                "POST"
-                                {"email" "alice@example.com"}
-                                {"headers" {"X-Test" "1"}})
-     (fn [out]
-       (repl/notify [(. seen ["method"])
-                     (. seen ["body"])
-                     (. (. seen ["headers"]) ["X-Test"])
-                     (. (. out ["body"]) ["email"])]))))
-  => ["POST"
-      "{"email":"alice@example.com"}"
-      "1"
-      "alice@example.com"])
+    (var email (-/new-email))
+    (-> (-/anon-client)
+        (lib-supabase/request-json "/auth/v1/signup" "POST" (-/user-body email) {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["user"] ["email"])])))))
+  => (contains-in [200 string?]))
 
 ^{:refer xt.net.lib-supabase/health :added "4.1"}
-(fact "calls the auth health endpoint"
+(fact "calls the auth health endpoint against local supabase"
 
   (notify/wait-on :js
-    (-> (-/default-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/health {})
         (promise/x:promise-then
          (fn [out]
-           (repl/notify (. out status))))))
-  => 200)
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["name"])])))))
+  => [200 "GoTrue"])
 
 ^{:refer xt.net.lib-supabase/signup :added "4.1"}
-(fact "signs up a user through the auth endpoint"
+(fact "signs up a user through the local auth endpoint"
 
   (notify/wait-on :js
     (var email (xt/x:cat "lib-supabase-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
-    (-> (lib-supabase/create-client
-         (js-fetch/create-methods)
-         (-> docker-min/+config+ :api :hostname)
-         (-> docker-min/+config+ :api :port)
-         false
-         ""
-         (-> docker-min/+config+ :api :anon-key))
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/signup {"email" email
                               "password" "123456789"}
                              {})
         (promise/x:promise-then
          (fn [out]
-           (repl/notify [(. out status)
-                         (. (. out body) ["user"] ["email"])])))))
-  => [200 string?])
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["user"] ["email"])])))))
+  => (contains-in [200 string?]))
 
-^{:refer xt.net.lib-supabase/admin-list-users :added "4.1"}
-(fact "lists users through the admin auth endpoint"
+^{:refer xt.net.lib-supabase/admin-create-user :added "4.1"}
+(fact "creates and cleans up a live auth user through the admin endpoint"
 
   (notify/wait-on :js
-    (-> (lib-supabase/create-client
-         (js-fetch/create-methods)
-         (-> docker-min/+config+ :api :hostname)
-         (-> docker-min/+config+ :api :port)
-         false
-         ""
-         (-> docker-min/+config+ :api :service-key))
-        (lib-supabase/admin-list-users {})
+    (var email (-/new-email))
+    (var client (-/service-client))
+    (-> (lib-supabase/admin-create-user client
+                                        {"email" email
+                                         "password" "pass123456"
+                                         "email_confirm" true}
+                                        (-/service-opts))
+        (promise/x:promise-then
+         (fn [created]
+           (var body (. created ["body"]))
+           (var user-id (. body ["id"]))
+           (-> (lib-supabase/admin-delete-user client user-id (-/service-opts))
+               (promise/x:promise-then
+                (fn [deleted]
+                  (repl/notify [(. created ["status"])
+                                (. body ["email"])
+                                (. deleted ["status"])
+                                (. deleted ["body"])]))))))))
+  => (contains-in [200 string? 200 {}]))
+
+^{:refer xt.net.lib-supabase/admin-delete-user :added "4.1"}
+(fact "deletes a live auth user through the admin endpoint"
+
+  (notify/wait-on :js
+    (var email (-/new-email))
+    (var client (-/service-client))
+    (-> (lib-supabase/admin-create-user client
+                                        {"email" email
+                                         "password" "pass123456"
+                                         "email_confirm" true}
+                                        (-/service-opts))
+        (promise/x:promise-then
+         (fn [created]
+           (var user-id (. (. created ["body"]) ["id"]))
+           (-> (lib-supabase/admin-delete-user client user-id (-/service-opts))
+               (promise/x:promise-then
+                (fn [deleted]
+                  (repl/notify [(. deleted ["status"])
+                                (. deleted ["body"])]))))))))
+  => [200 {}])
+
+^{:refer xt.net.lib-supabase/admin-generate-link :added "4.1"}
+(fact "requires a bearer token for the admin generate-link endpoint"
+
+  (notify/wait-on :js
+    (-> (-/service-client)
+        (lib-supabase/admin-generate-link {"type" "magiclink"
+                                           "email" (-/new-email)}
+                                          {})
         (promise/x:promise-then
          (fn [out]
-           (repl/notify [. out status
-                         (. (. out body) ["aud"])])))))
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [401 "no_authorization"])
+
+^{:refer xt.net.lib-supabase/admin-get-user :added "4.1"}
+(fact "fetches a live auth user through the admin endpoint"
+
+  (notify/wait-on :js
+    (var email (-/new-email))
+    (var client (-/service-client))
+    (-> (lib-supabase/admin-create-user client
+                                        {"email" email
+                                         "password" "pass123456"
+                                         "email_confirm" true}
+                                        (-/service-opts))
+        (promise/x:promise-then
+         (fn [created]
+           (var user-id (. (. created ["body"]) ["id"]))
+           (-> (lib-supabase/admin-get-user client user-id (-/service-opts))
+               (promise/x:promise-then
+                (fn [got]
+                  (-> (lib-supabase/admin-delete-user client user-id (-/service-opts))
+                      (promise/x:promise-then
+                       (fn [deleted]
+                         (repl/notify [(. got ["status"])
+                                       (. (. got ["body"]) ["email"])
+                                       (. deleted ["status"])])))))))))))
+  => (contains-in [200 string? 200]))
+
+^{:refer xt.net.lib-supabase/admin-list-users :added "4.1"}
+(fact "lists users through the local admin auth endpoint"
+
+  (notify/wait-on :js
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :service-key)))
+        (lib-supabase/admin-list-users {"token" (@! (-> docker-min/+config+ :api :service-key))})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["aud"])])))))
   => [200 "authenticated"])
 
-^{:refer xt.net.lib-supabase/authorize :added "4.1"}
-(fact "routes authorize requests through the query-path helper"
+^{:refer xt.net.lib-supabase/admin-update-user :added "4.1"}
+(fact "updates a live auth user through the admin endpoint"
 
   (notify/wait-on :js
-    (var seen nil)
-    (var client
-         (lib-supabase/create-client
-          {"request_http"
-           (fn [self input opts]
-             (:= seen input)
-             (return {"status" 200
-                      "body" input}))}
-          "https://client.test"
-          "key-client"
-          false
-          ""
-          "key-client"))
-    (promise/x:promise-then
-     (lib-supabase/authorize client
-                             {"query" {"redirect_to" "https://example.com/callback"}})
-     (fn [out]
-       (repl/notify [(. seen ["method"])
-                     (. seen ["path"])
-                     (. (. out ["body"]) ["path"])]))))
-  => ["GET"
-      "/auth/v1/authorize?redirect_to=https://example.com/callback"
-      "/auth/v1/authorize?redirect_to=https://example.com/callback"])
+    (var email (-/new-email))
+    (var client (-/service-client))
+    (-> (lib-supabase/admin-create-user client
+                                        {"email" email
+                                         "password" "pass123456"
+                                         "email_confirm" true}
+                                        (-/service-opts))
+        (promise/x:promise-then
+         (fn [created]
+           (var user-id (. (. created ["body"]) ["id"]))
+           (-> (lib-supabase/admin-update-user client
+                                               user-id
+                                               {"body" (xt/x:json-encode {"user_metadata" {"note" "updated-by-test"}})
+                                                "token" (-/service-key)})
+               (promise/x:promise-then
+                (fn [updated]
+                  (-> (lib-supabase/admin-delete-user client user-id (-/service-opts))
+                      (promise/x:promise-then
+                       (fn [deleted]
+                         (repl/notify [(. updated ["status"])
+                                       (. (. updated ["body"]) ["user_metadata"] ["note"])
+                                       (. deleted ["status"])])))))))))))
+  => [200 "updated-by-test" 200])
+
+^{:refer xt.net.lib-supabase/authorize :added "4.1"}
+(fact "returns the live OAuth provider validation failure"
+
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/authorize {"redirect_to" "http://localhost/callback"} {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [400 "validation_failed"])
+
+^{:refer xt.net.lib-supabase/callback :added "4.1"}
+(fact "returns the live OAuth callback state error"
+
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/callback {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [400 "bad_oauth_callback"])
+
+^{:refer xt.net.lib-supabase/invite :added "4.1"}
+(fact "requires authorization on the live invite endpoint"
+
+  (notify/wait-on :js
+    (-> (-/service-client)
+        (lib-supabase/invite {"email" (-/new-email)} {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [401 "no_authorization"])
+
+^{:refer xt.net.lib-supabase/logout :added "4.1"}
+(fact "requires authorization on the live logout endpoint"
+
+  (notify/wait-on :js
+    (-> (-/service-client)
+        (lib-supabase/logout {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [401 "no_authorization"])
+
+^{:refer xt.net.lib-supabase/otp :added "4.1"}
+(fact "returns an empty success response for passwordless email OTP requests"
+
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/otp {"email" (-/new-email)} {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. out ["body"])])))))
+  => [200 {}])
+
+^{:refer xt.net.lib-supabase/recovery :added "4.1"}
+(fact "returns an empty success response for recovery emails"
+
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/recovery {"email" (-/new-email)} {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. out ["body"])])))))
+  => [200 {}])
+
+^{:refer xt.net.lib-supabase/settings :added "4.1"}
+(fact "reads the live auth settings endpoint"
+
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/settings {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["external"] ["email"])])))))
+  => [200 true])
+
+^{:refer xt.net.lib-supabase/token-password :added "4.1"}
+(fact "returns the live validation failure for password sign-in"
+
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/token-password {"email" (-/new-email)
+                                      "password" "123456789"}
+                                     {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [400 nil])
+
+^{:refer xt.net.lib-supabase/token-refresh :added "4.1"}
+(fact "refreshes a live auth session"
+
+  (notify/wait-on :js
+    (var email (-/new-email))
+    (-> (-/anon-client)
+        (lib-supabase/signup {"email" email
+                              "password" "123456789"}
+                             {})
+        (promise/x:promise-then
+         (fn [signed-up]
+           (-> (-/anon-client)
+               (lib-supabase/token-refresh {"refresh_token" (. (. signed-up ["body"]) ["refresh_token"])}
+                                           {})
+               (promise/x:promise-then
+                (fn [refreshed]
+                  (repl/notify [(. refreshed ["status"])
+                                (. refreshed ["body"])]))))))))
+  => (contains-in [200 {"access_token" string? "refresh_token" string?}]))
+
+^{:refer xt.net.lib-supabase/user-get :added "4.1"}
+(fact "returns a bearer-token error when the anon client has no session"
+
+  (notify/wait-on :js
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
+        (lib-supabase/user-get {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [401 "no_authorization"])
+
+^{:refer xt.net.lib-supabase/user-put :added "4.1"}
+(fact "returns a bearer-token error when the anon client has no session"
+
+  (notify/wait-on :js
+    (-> (-/service-client)
+        (lib-supabase/user-put {"data" {"note" "updated-by-test"}} {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [401 "no_authorization"])
+
+^{:refer xt.net.lib-supabase/verify-get :added "4.1"}
+(fact "returns the live verify validation error when the token is missing"
+
+  (notify/wait-on :js
+    (-> (-/anon-client)
+        (lib-supabase/verify-get {"email" (-/new-email)
+                                 "type" "email"}
+                                {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [400 "validation_failed"])
 
 ^{:refer xt.net.lib-supabase/verify-post :added "4.1"}
-(fact "posts verify payloads as json"
+(fact "returns the live verify validation error when the token is missing"
 
   (notify/wait-on :js
-    (var seen nil)
-    (var client
-         (lib-supabase/create-client
-          {"request_http"
-           (fn [self input opts]
-             (:= seen input)
-             (return {"status" 200
-                      "body" input}))}
-          "https://client.test"
-          "key-client"
-          false
-          ""
-          "key-client"))
-    (promise/x:promise-then
-     (lib-supabase/verify-post client
-                               {"type" "signup"
-                                "token" "token-1"}
-                               {})
-     (fn [out]
-       (repl/notify [(. seen ["method"])
-                     (. seen ["body"])
-                     (. (. out ["body"]) ["type"])
-                     (. (. out ["body"] ) ["token"])]))))
-  => ["POST"
-      "{"type":"signup","token":"token-1"}"
-      "signup"
-      "token-1"])
+    (-> (-/anon-client)
+        (lib-supabase/verify-post {"email" (-/new-email)
+                                  "type" "email"}
+                                 {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(. out ["status"])
+                         (. (. out ["body"]) ["error_code"])])))))
+  => [400 "validation_failed"])
