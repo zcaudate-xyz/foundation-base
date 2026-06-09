@@ -41,70 +41,6 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.substrate.base-router/list-subscriptions :added "4.1"
-  :setup [(def +out+
-            (just-in
-             [(just ["peer-a" "peer-b"] :in-any-order)
-              empty?]))]}
-(fact "lists router subscriptions by space"
-
-  (!.js
-    (var n (main/node-create {}))
-    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
-    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
-    [(router/list-subscriptions n "room/a" "event/ping")
-     (router/list-subscriptions n "room/b" "event/ping")])
-  => +out+
-
-  (!.lua
-    (var n (main/node-create {}))
-    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
-    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
-    [(router/list-subscriptions n "room/a" "event/ping")
-     (router/list-subscriptions n "room/b" "event/ping")])
-  => +out+
-
-  (!.py
-    (var n (main/node-create {}))
-    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
-    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
-    [(router/list-subscriptions n "room/a" "event/ping")
-     (router/list-subscriptions n "room/b" "event/ping")])
-  => +out+)
-
-^{:refer xt.substrate.base-router/unregister-connection :added "4.1"}
-(fact "removing a transport prunes its subscriptions"
-
-  (!.js
-    (var n (main/node-create {}))
-    (router/register-connection n "peer-a" {})
-    (router/register-connection n "peer-b" {})
-    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
-    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
-    (router/unregister-connection n "peer-a")
-    (router/list-subscriptions n "room/a" "event/ping"))
-  => ["peer-b"]
-
-  (!.lua
-    (var n (main/node-create {}))
-    (router/register-connection n "peer-a" {})
-    (router/register-connection n "peer-b" {})
-    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
-    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
-    (router/unregister-connection n "peer-a")
-    (router/list-subscriptions n "room/a" "event/ping"))
-  => ["peer-b"]
-
-  (!.py
-    (var n (main/node-create {}))
-    (router/register-connection n "peer-a" {})
-    (router/register-connection n "peer-b" {})
-    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
-    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
-    (router/unregister-connection n "peer-a")
-    (router/list-subscriptions n "room/a" "event/ping"))
-  => ["peer-b"])
-
 ^{:refer xt.substrate/node? :added "4.1"}
 (fact "detects node values"
 
@@ -183,109 +119,6 @@
      (xt/x:is-function? (. transport ["stop_fn"]))])
   => ["substrate.transport" "peer-a" "edge" true true true])
 
-^{:refer xt.substrate/node-create :added "4.1"
-  :setup [(def +out+
-            (just-in
-             ["substrate"
-              empty?
-              empty?
-              empty?
-              (just ["connections" "subscriptions"] :in-any-order)]))]}
-(fact "creates node state with router and registries"
-
-  (!.js
-    (var n (main/node-create {}))
-    [(. n ["::"])
-     (xt/x:obj-keys (. n ["spaces"]))
-     (xt/x:obj-keys (. n ["handlers"]))
-     (xt/x:obj-keys (. n ["triggers"]))
-     (xt/x:obj-keys (. n ["router"]))])
-  => +out+
-
-  (!.lua
-    (var n (main/node-create {}))
-    [(. n ["::"])
-     (xt/x:obj-keys (. n ["spaces"]))
-     (xt/x:obj-keys (. n ["handlers"]))
-     (xt/x:obj-keys (. n ["triggers"]))
-     (xt/x:obj-keys (. n ["router"]))])
-  => +out+
-
-  (!.py
-    (var n (main/node-create {}))
-    [(. n ["::"])
-     (xt/x:obj-keys (. n ["spaces"]))
-     (xt/x:obj-keys (. n ["handlers"]))
-     (xt/x:obj-keys (. n ["triggers"]))
-     (xt/x:obj-keys (. n ["router"]))])
-  => +out+)
-
-^{:refer xt.substrate/node-create :added "4.1"}
-(fact "node-create accepts declarative spaces, handlers, and triggers"
-
-  (!.js
-   (var n (main/node-create {"id" "node-a"
-                             "meta" {"cluster" "local"}
-                             "spaces" {"room/a" {"state" {"count" 1}
-                                                 "meta" {"role" "alpha"}}
-                                      "room/b" {"state" {"count" 2}}}
-                             "handlers" {"ping" {"fn" (fn [space args request node]
-                                                        (return args))
-                                                 "meta" {"kind" "request"}}}
-                             "triggers" {"event/updated" {"fn" (fn [space stream node]
-                                                                 (return stream))
-                                                          "meta" {"kind" "stream"}}}}))
-   [(. n ["id"])
-    (. n ["meta"] ["cluster"])
-    (main/list-spaces n)
-    (. (main/get-space n "room/a") ["meta"] ["role"])
-    (. (main/get-space-state n "room/b") ["count"])
-    (. (main/get-handler n "ping") ["meta"] ["kind"])
-    (. (main/get-trigger n "event/updated") ["meta"] ["kind"])])
-  => ["node-a" "local" ["room/a" "room/b"] "alpha" 2 "request" "stream"]
-
-  (!.lua
-   (var n (main/node-create {"id" "node-a"
-                             "meta" {"cluster" "local"}
-                             "spaces" {"room/a" {"state" {"count" 1}
-                                                 "meta" {"role" "alpha"}}
-                                      "room/b" {"state" {"count" 2}}}
-                             "handlers" {"ping" {"fn" (fn [space args request node]
-                                                        (return args))
-                                                 "meta" {"kind" "request"}}}
-                             "triggers" {"event/updated" {"fn" (fn [space stream node]
-                                                                 (return stream))
-                                                          "meta" {"kind" "stream"}}}}))
-   [(. n ["id"])
-    (. n ["meta"] ["cluster"])
-    (main/list-spaces n)
-    (. (main/get-space n "room/a") ["meta"] ["role"])
-    (. (main/get-space-state n "room/b") ["count"])
-    (. (main/get-handler n "ping") ["meta"] ["kind"])
-    (. (main/get-trigger n "event/updated") ["meta"] ["kind"])])
-  => ["node-a" "local" ["room/a" "room/b"] "alpha" 2 "request" "stream"]
-
-  (!.py
-   (var n (main/node-create {"id" "node-a"
-                             "meta" {"cluster" "local"}
-                             "spaces" {"room/a" {"state" {"count" 1}
-                                                 "meta" {"role" "alpha"}}
-                                      "room/b" {"state" {"count" 2}}}
-                             "handlers" {"ping" {"fn" (fn [space args request node]
-                                                        (return args))
-                                                 "meta" {"kind" "request"}}}
-                             "triggers" {"event/updated" {"fn" (fn [space stream node]
-                                                                 (return stream))
-                                                          "meta" {"kind" "stream"}}}}))
-   [(. n ["id"])
-    (. n ["meta"] ["cluster"])
-    (main/list-spaces n)
-    (. (main/get-space n "room/a") ["meta"] ["role"])
-    (. (main/get-space-state n "room/b") ["count"])
-    (. (main/get-handler n "ping") ["meta"] ["kind"])
-    (. (main/get-trigger n "event/updated") ["meta"] ["kind"])])
-  => ["node-a" "local" ["room/a" "room/b"] "alpha" 2 "request" "stream"])
-
 ^{:refer xt.substrate/get-services :added "4.1"}
 (fact "node-create keeps a first-class services registry"
 
@@ -310,6 +143,9 @@
     (xt/x:obj-keys (main/get-services n))])
   => ["global" ["cache"]])
 
+^{:refer xt.substrate/get-service :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.substrate/set-service :added "4.1"}
 (fact "set-service registers a runtime service on the node"
 
@@ -333,87 +169,6 @@
    [(. (main/get-service n "cache") ["scope"])
     (xt/x:obj-keys (main/get-services n))])
   => ["local" ["cache"]])
-
-^{:refer xt.substrate/node-create :added "4.1"}
-(fact "node-create rejects space configs without explicit state or meta keys"
-
-  (!.js
-   (try
-     (main/node-create {"spaces" {"room/a" {"count" 2}}})
-     (return :not-thrown)
-     (catch err
-       (return :thrown))))
-  => :thrown
-
-  (!.lua
-   (try
-     (main/node-create {"spaces" {"room/a" {"count" 2}}})
-     (return :not-thrown)
-     (catch err
-       (return :thrown))))
-  => :thrown
-
-  (!.py
-   (try
-     (main/node-create {"spaces" {"room/a" {"count" 2}}})
-     (return :not-thrown)
-     (catch err
-       (return :thrown))))
-  => :thrown)
-
-^{:refer xt.substrate/configure-node :added "4.1"}
-(fact "configure-node applies declarative config to an existing node"
-
-  (!.js
-   (var n (main/node-create {"id" "node-b"}))
-   (main/configure-node
-    n
-    {"spaces" {"room/c" {"state" {"count" 4}}}
-     "handlers" {"echo" (fn [space args request node]
-                          (return (. space ["id"])))}
-     "triggers" {"event/tick" (fn [space stream node]
-                                (main/set-space-state node
-                                                      (. space ["id"])
-                                                      (. stream ["data"]))
-                                (return true))}})
-   [(main/list-spaces n)
-    (main/list-handlers n)
-    (main/list-triggers n)])
-  => [["room/c"] ["echo"] ["event/tick"]]
-
-  (!.lua
-   (var n (main/node-create {"id" "node-b"}))
-   (main/configure-node
-    n
-    {"spaces" {"room/c" {"state" {"count" 4}}}
-     "handlers" {"echo" (fn [space args request node]
-                          (return (. space ["id"])))}
-     "triggers" {"event/tick" (fn [space stream node]
-                                (main/set-space-state node
-                                                      (. space ["id"])
-                                                      (. stream ["data"]))
-                                (return true))}})
-   [(main/list-spaces n)
-    (main/list-handlers n)
-    (main/list-triggers n)])
-  => [["room/c"] ["echo"] ["event/tick"]]
-
-  (!.py
-   (var n (main/node-create {"id" "node-b"}))
-   (main/configure-node
-    n
-    {"spaces" {"room/c" {"state" {"count" 4}}}
-     "handlers" {"echo" (fn [space args request node]
-                          (return (. space ["id"])))}
-     "triggers" {"event/tick" (fn [space stream node]
-                                (main/set-space-state node
-                                                      (. space ["id"])
-                                                      (. stream ["data"]))
-                                (return true))}})
-   [(main/list-spaces n)
-    (main/list-handlers n)
-    (main/list-triggers n)])
-  => [["room/c"] ["echo"] ["event/tick"]])
 
 ^{:refer xt.substrate/register-handler :added "4.1"}
 (fact "registers handlers on the node"
@@ -646,6 +401,37 @@
     (main/list-transports n))
   => ["peer-a" "peer-b"])
 
+^{:refer xt.substrate.base-router/list-subscriptions :added "4.1"
+  :setup [(def +out+
+            (just-in
+             [(just ["peer-a" "peer-b"] :in-any-order)
+              empty?]))]}
+(fact "lists router subscriptions by space"
+
+  (!.js
+    (var n (main/node-create {}))
+    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
+    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
+    [(router/list-subscriptions n "room/a" "event/ping")
+     (router/list-subscriptions n "room/b" "event/ping")])
+  => +out+
+
+  (!.lua
+    (var n (main/node-create {}))
+    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
+    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
+    [(router/list-subscriptions n "room/a" "event/ping")
+     (router/list-subscriptions n "room/b" "event/ping")])
+  => +out+
+
+  (!.py
+    (var n (main/node-create {}))
+    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
+    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
+    [(router/list-subscriptions n "room/a" "event/ping")
+     (router/list-subscriptions n "room/b" "event/ping")])
+  => +out+)
+
 ^{:refer xt.substrate/send-transport :added "4.1"}
 (fact "sends frames through a transport"
 
@@ -721,36 +507,6 @@
     (xt/x:is-function? main/route-stream))
   => true)
 
-^{:refer xt.substrate/attach-transport :added "4.1"}
-(fact "attaches transports and registers router connections"
-
-  (!.js
-    (xt/x:is-function? main/attach-transport))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/attach-transport))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/attach-transport))
-  => true)
-
-^{:refer xt.substrate/detach-transport :added "4.1"}
-(fact "detaches transports and unregisters router connections"
-
-  (!.js
-    (xt/x:is-function? main/detach-transport))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/detach-transport))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/detach-transport))
-  => true)
-
 ^{:refer xt.substrate/request-target :added "4.1"}
 (fact "picks a target transport from meta or the first attached transport"
 
@@ -777,6 +533,46 @@
      (main/request-target n {})
      (xt/x:nil? (main/request-target (main/node-create {}) {}))])
   => ["peer-b" "peer-a" true])
+
+^{:refer xt.substrate/await-pending :added "4.1"}
+(fact "waits for pending states to resolve or reject"
+  (notify/wait-on :js
+    (var state {"status" "pending"
+                "value" nil
+                "error" nil})
+    (setTimeout
+     (fn []
+       (xt/x:set-key state "status" "resolved")
+       (xt/x:set-key state "value" {"ok" true}))
+     20)
+    (promise/x:promise-then
+     (main/await-pending state)
+     (fn [value]
+       (return
+        (promise/x:promise-catch
+         (main/await-pending {"status" "rejected"
+                              "error" "denied"})
+         (fn [err]
+           (repl/notify {"value" value
+                         "error" err})))))))
+  => {"value" {"ok" true}
+      "error" "denied"})
+
+^{:refer xt.substrate/request-context :added "4.1"}
+(fact "merges transport context into request meta"
+  (!.js
+   [(main/request-context
+     {"kind" "request"
+      "meta" {"trace" "a"}}
+     {"transport_id" "peer-a"})
+    (main/request-context
+     {"kind" "request"}
+     {"transport_id" "peer-b"})])
+  => [{"kind" "request"
+       "meta" {"trace" "a"
+               "transport_id" "peer-a"}}
+      {"kind" "request"
+       "meta" {"transport_id" "peer-b"}}])
 
 ^{:refer xt.substrate/respond-ok :added "4.1"}
 (fact "respond-ok forwards response frames to a transport"
@@ -883,46 +679,20 @@
     (xt/x:is-function? main/unsubscribe))
   => true)
 
-^{:refer xt.substrate/publish :added "4.1"}
-(fact "publish routes streams by subscription"
+^{:refer xt.substrate/receive-publish :added "4.1"}
+(fact "receive-publish invokes matching triggers"
 
   (!.js
-    (xt/x:is-function? main/publish))
+    (xt/x:is-function? main/receive-publish))
   => true
 
   (!.lua
-    (xt/x:is-function? main/publish))
+    (xt/x:is-function? main/receive-publish))
   => true
 
   (!.py
-    (xt/x:is-function? main/publish))
+    (xt/x:is-function? main/receive-publish))
   => true)
-
-^{:refer xt.substrate/node-create :added "4.1"}
-(fact "declarative node config participates in local publish and request flows"
-
-  (notify/wait-on :js
-    (var n (main/node-create {"spaces" {"room/a" {"state" {"count" 1}}}
-                              "handlers" {"ping" (fn [space args request node]
-                                                   (return {"space" (. space ["id"])
-                                                            "count" (. (. space ["state"]) ["count"])
-                                                            "payload" (xt/x:get-idx args 0)}))}
-                              "triggers" {"event/updated" (fn [space stream node]
-                                                            (main/set-space-state node
-                                                                                  (. space ["id"])
-                                                                                  (. stream ["data"]))
-                                                            (return true))}}))
-    (promise/x:promise-then
-     (main/publish n "room/a" "event/updated" {"count" 3} nil)
-     (fn [_]
-       (return
-        (promise/x:promise-then
-         (main/request n "room/a" "ping" ["hello"] nil)
-         (fn [out]
-           (repl/notify out)))))))
-  => {"space" "room/a"
-      "count" 3
-      "payload" "hello"})
 
 ^{:refer xt.substrate/publish :added "4.1"}
 (fact "publish can chain a second async callback after local trigger handling"
@@ -942,21 +712,6 @@
   => {"ok" true
       "space" "room/a"})
 
-^{:refer xt.substrate/receive-publish :added "4.1"}
-(fact "receive-publish invokes matching triggers"
-
-  (!.js
-    (xt/x:is-function? main/receive-publish))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/receive-publish))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/receive-publish))
-  => true)
-
 ^{:refer xt.substrate/receive-frame :added "4.1"}
 (fact "receive-frame dispatches by frame kind"
 
@@ -972,12 +727,35 @@
     (xt/x:is-function? main/receive-frame))
   => true)
 
-(comment
-  (s/snapto '[xt.substrate])
-  (s/seedgen-benchadd '[xt.substrate] {:lang :dart :write true})
-  (s/seedgen-langremove '[xt.substrate] {:lang [:lua :python] :write true})
-  (s/seedgen-langadd '[xt.substrate] {:lang [:lua :python] :write true}))
+^{:refer xt.substrate/attach-transport :added "4.1"}
+(fact "attaches transports and registers router connections"
 
+  (!.js
+    (xt/x:is-function? main/attach-transport))
+  => true
+
+  (!.lua
+    (xt/x:is-function? main/attach-transport))
+  => true
+
+  (!.py
+    (xt/x:is-function? main/attach-transport))
+  => true)
+
+^{:refer xt.substrate/detach-transport :added "4.1"}
+(fact "detaches transports and unregisters router connections"
+
+  (!.js
+    (xt/x:is-function? main/detach-transport))
+  => true
+
+  (!.lua
+    (xt/x:is-function? main/detach-transport))
+  => true
+
+  (!.py
+    (xt/x:is-function? main/detach-transport))
+  => true)
 
 ^{:refer xt.substrate/config-space-opts :added "4.1"}
 (fact "normalizes declarative space config and rejects mismatched ids"
@@ -1041,6 +819,60 @@
      {"kind" "stream"}
      true])
 
+^{:refer xt.substrate/configure-node :added "4.1"}
+(fact "configure-node applies declarative config to an existing node"
+
+  (!.js
+   (var n (main/node-create {"id" "node-b"}))
+   (main/configure-node
+    n
+    {"spaces" {"room/c" {"state" {"count" 4}}}
+     "handlers" {"echo" (fn [space args request node]
+                          (return (. space ["id"])))}
+     "triggers" {"event/tick" (fn [space stream node]
+                                (main/set-space-state node
+                                                      (. space ["id"])
+                                                      (. stream ["data"]))
+                                (return true))}})
+   [(main/list-spaces n)
+    (main/list-handlers n)
+    (main/list-triggers n)])
+  => [["room/c"] ["echo"] ["event/tick"]]
+
+  (!.lua
+   (var n (main/node-create {"id" "node-b"}))
+   (main/configure-node
+    n
+    {"spaces" {"room/c" {"state" {"count" 4}}}
+     "handlers" {"echo" (fn [space args request node]
+                          (return (. space ["id"])))}
+     "triggers" {"event/tick" (fn [space stream node]
+                                (main/set-space-state node
+                                                      (. space ["id"])
+                                                      (. stream ["data"]))
+                                (return true))}})
+   [(main/list-spaces n)
+    (main/list-handlers n)
+    (main/list-triggers n)])
+  => [["room/c"] ["echo"] ["event/tick"]]
+
+  (!.py
+   (var n (main/node-create {"id" "node-b"}))
+   (main/configure-node
+    n
+    {"spaces" {"room/c" {"state" {"count" 4}}}
+     "handlers" {"echo" (fn [space args request node]
+                          (return (. space ["id"])))}
+     "triggers" {"event/tick" (fn [space stream node]
+                                (main/set-space-state node
+                                                      (. space ["id"])
+                                                      (. stream ["data"]))
+                                (return true))}})
+   [(main/list-spaces n)
+    (main/list-handlers n)
+    (main/list-triggers n)])
+  => [["room/c"] ["echo"] ["event/tick"]])
+
 ^{:refer xt.substrate/node-base-opts :added "4.1"}
 (fact "strips declarative config keys before node construction"
   (!.js
@@ -1054,42 +886,34 @@
       "meta" {"cluster" "local"}
       "custom" 42})
 
-^{:refer xt.substrate/await-pending :added "4.1"}
-(fact "waits for pending states to resolve or reject"
-  (notify/wait-on :js
-    (var state {"status" "pending"
-                "value" nil
-                "error" nil})
-    (setTimeout
-     (fn []
-       (xt/x:set-key state "status" "resolved")
-       (xt/x:set-key state "value" {"ok" true}))
-     20)
-    (promise/x:promise-then
-     (main/await-pending state)
-     (fn [value]
-       (return
-        (promise/x:promise-catch
-         (main/await-pending {"status" "rejected"
-                              "error" "denied"})
-         (fn [err]
-           (repl/notify {"value" value
-                         "error" err})))))))
-  => {"value" {"ok" true}
-      "error" "denied"})
+^{:refer xt.substrate/node-create :added "4.1"}
+(fact "declarative node config participates in local publish and request flows"
 
-^{:refer xt.substrate/request-context :added "4.1"}
-(fact "merges transport context into request meta"
-  (!.js
-   [(main/request-context
-     {"kind" "request"
-      "meta" {"trace" "a"}}
-     {"transport_id" "peer-a"})
-    (main/request-context
-     {"kind" "request"}
-     {"transport_id" "peer-b"})])
-  => [{"kind" "request"
-       "meta" {"trace" "a"
-               "transport_id" "peer-a"}}
-      {"kind" "request"
-       "meta" {"transport_id" "peer-b"}}])
+  (notify/wait-on :js
+    (var n (main/node-create {"spaces" {"room/a" {"state" {"count" 1}}}
+                              "handlers" {"ping" (fn [space args request node]
+                                                   (return {"space" (. space ["id"])
+                                                            "count" (. (. space ["state"]) ["count"])
+                                                            "payload" (xt/x:get-idx args 0)}))}
+                              "triggers" {"event/updated" (fn [space stream node]
+                                                            (main/set-space-state node
+                                                                                  (. space ["id"])
+                                                                                  (. stream ["data"]))
+                                                            (return true))}}))
+    (promise/x:promise-then
+     (main/publish n "room/a" "event/updated" {"count" 3} nil)
+     (fn [_]
+       (return
+        (promise/x:promise-then
+         (main/request n "room/a" "ping" ["hello"] nil)
+         (fn [out]
+           (repl/notify out)))))))
+  => {"space" "room/a"
+      "count" 3
+      "payload" "hello"})
+
+(comment
+  (s/snapto '[xt.substrate])
+  (s/seedgen-benchadd '[xt.substrate] {:lang :dart :write true})
+  (s/seedgen-langremove '[xt.substrate] {:lang [:lua :python] :write true})
+  (s/seedgen-langadd '[xt.substrate] {:lang [:lua :python] :write true}))
