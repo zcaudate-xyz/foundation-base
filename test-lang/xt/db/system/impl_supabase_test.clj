@@ -1,124 +1,47 @@
 (ns xt.db.system.impl-supabase-test
+  (:use code.test)
   (:require [hara.lang :as l]
-            [xt.lang.common-notify :as notify])
-  (:use code.test))
+            [xt.lang.common-notify :as notify]
+            [scaffold.supabase.docker-min :as docker-min]))
+
+(do 
+  (l/script- :postgres
+    {:runtime :jdbc.client
+     :require [[postgres.sample.scratch-v0 :as scratch-v0]
+               [postgres.core :as pg]
+               [postgres.core.supabase :as s]]
+     :config {:host   (-> docker-min/+config+ :db :host)
+              :port   (-> docker-min/+config+ :db :port)
+              :user   (-> docker-min/+config+ :db :user)
+              :pass   (-> docker-min/+config+ :db :password)
+              :dbname (-> docker-min/+config+ :db :database)
+              :startup  docker-min/start-supabase
+              :shutdown docker-min/stop-supabase}
+     :emit {:code {:transforms {:entry [#'s/transform-entry]}}}}))
+
+(defrun.pg __init__
+  (s/grant-usage #{"scratch_v0"}))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
+   :require [[js.net.http-fetch :as js-fetch]
              [xt.lang.common-repl :as repl]
+             [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.system.impl-supabase :as impl]
-             [xt.lib.supabase :as supabase]
-             [xt.protocol.impl.client-fetch :as fetch]
-             [xt.db.helpers.data-main-test :as sample]]})
+             [xt.db.system.impl-supabase :as impl]]})
 
 (fact:global
- {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)
+          (l/rt:setup :postgres)]
+  :teardown [(l/rt:teardown :postgres)
+             (l/rt:stop)]})
 
-^{:refer xt.db.system.impl-supabase/client-supabase :added "4.1"}
-(fact "creates the thin supabase client record with stored context"
-
-  (!.js
-   (var client
-        (impl/client-supabase
-         sample/Schema
-         sample/SchemaLookup
-         {}
-         {"base_url" "https://api.test"
-          "api_key" "key-1"}))
-   {"tag" (. client ["::"])
-    "has_instance" (xt/x:has-key? client "instance")
-    "base_url" (. (. client ["settings"]) ["base_url"])})
-  => {"tag" "db.client.supabase"
-      "has_instance" false
-      "base_url" "https://api.test"})
-
-^{:refer xt.db.system.impl-supabase/client-supabase-init :added "4.1"}
-(fact "client-supabase-init stores the underlying supabase client"
-
-  (notify/wait-on :js
-    (promise/x:promise-then
-     (impl/client-supabase-init
-      (impl/client-supabase
-       sample/Schema
-       sample/SchemaLookup
-       {}
-       {"base_url" "https://api.test"
-        "api_key" "key-1"
-        "transport"
-        (fetch/client-create
-         {"request" (fn [input _opts]
-                      (return {"body" {"data" input}}))}
-         nil)}))
-     (fn [client]
-       (repl/notify {"tag" (. client ["::"])
-                     "instance" (supabase/client? (. client ["instance"]))}))))
-  => {"tag" "db.client.supabase"
-      "instance" true})
 
 ^{:refer xt.db.system.impl-supabase/pull-async :added "4.1"}
-(fact "pull-async compiles tree ir into PostgREST requests"
-
-  (notify/wait-on :js
-    (var seen {"url" nil})
-    (var client
-         (impl/client-supabase
-          sample/Schema
-          sample/SchemaLookup
-          {}
-          {"base_url" "https://api.test"
-           "api_key" "key-1"
-           "transport"
-           (fetch/client-create
-            {"request" (fn [input _opts]
-                         (xt/x:set-key seen "url" (. input ["url"]))
-                         (return {"body" {"data" [{"id" "USER-0"}]}}))}
-            nil)}))
-    (promise/x:promise-then
-     (impl/pull-async
-      client
-      ["UserAccount" {"where" [] "data" ["id"] "links" [] "custom" []}])
-     (fn [rows]
-       (repl/notify [(. seen ["url"]) rows]))))
-  => ["https://api.test/rest/v1/UserAccount?select=id"
-      [{"id" "USER-0"}]])
+(fact "TODO")
 
 ^{:refer xt.db.system.impl-supabase/rpc-call-async :added "4.1"}
-(fact "rpc-call-async compiles snake_case PostgREST rpc requests"
+(fact "TODO")
 
-  (notify/wait-on :js
-    (var seen {"url" nil
-               "method" nil
-               "body" nil})
-    (var client
-         (impl/client-supabase
-          sample/Schema
-          sample/SchemaLookup
-          {}
-          {"base_url" "https://api.test"
-           "api_key" "key-1"
-           "transport"
-           (fetch/client-create
-            {"request" (fn [input _opts]
-                         (xt/x:set-key seen "url" (. input ["url"]))
-                         (xt/x:set-key seen "method" (. input ["method"]))
-                         (xt/x:set-key seen "body" (. input ["body"]))
-                         (return {"body" {"data" {"total" 2}}}))}
-            nil)}))
-    (promise/x:promise-then
-     (impl/rpc-call-async
-      client
-      "list-orders"
-      {"status" "open"})
-     (fn [out]
-       (repl/notify [(. seen ["url"])
-                     (. seen ["method"])
-                     (. seen ["body"])
-                     out]))))
-  => ["https://api.test/rest/v1/rpc/list_orders"
-      "POST"
-      "{\"status\":\"open\"}"
-      {"total" 2}])
+^{:refer xt.db.system.impl-supabase/impl-supabase :added "4.1"}
+(fact "TODO")

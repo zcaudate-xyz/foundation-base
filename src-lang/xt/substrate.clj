@@ -309,6 +309,7 @@
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
        :xt/promise])
 
+;; NODE CORE
 (defn.xt node?
   "checks if a value is a node runtime"
   {:added "4.1"}
@@ -336,139 +337,6 @@
      :listener nil}
     (or impl {}))))
 
-(defn.xt config-space-opts
-  "normalises declarative space config into create-space opts"
-  {:added "4.1"}
-  [space-id config]
-  (cond (xt/x:nil? config)
-       (return nil)
-
-       (and (xt/x:is-object? config)
-            (or (xt/x:has-key? config "id")
-                (xt/x:has-key? config "state")
-                (xt/x:has-key? config "meta")))
-       (do
-         (when (and (xt/x:has-key? config "id")
-                    (not (== (xt/x:get-key config "id")
-                             space-id)))
-           (xt/x:err (xt/x:cat "space id mismatch - " space-id)))
-         (return {:state (xt/x:get-key config "state")
-                  :meta (or (xt/x:get-key config "meta") {})}))
-
-       :else
-       (xt/x:err (xt/x:cat "invalid space config - " space-id))))
-
-(defn.xt config-handler-entry
-  "normalises declarative handler config into register-handler input"
-  {:added "4.1"}
-  [action config]
-  (cond (xt/x:is-function? config)
-       (return {:fn config
-                :meta {}})
-
-       (and (xt/x:is-object? config)
-            (xt/x:is-function? (xt/x:get-key config "fn")))
-       (do
-         (when (and (xt/x:has-key? config "id")
-                    (not (== (xt/x:get-key config "id")
-                             action)))
-           (xt/x:err (xt/x:cat "handler id mismatch - " action)))
-         (return {:fn (xt/x:get-key config "fn")
-                  :meta (or (xt/x:get-key config "meta") {})}))
-
-       :else
-       (xt/x:err (xt/x:cat "invalid handler config - " action))))
-
-(defn.xt config-trigger-entry
-  "normalises declarative trigger config into register-trigger input"
-  {:added "4.1"}
-  [signal config]
-  (cond (xt/x:is-function? config)
-       (return {:fn config
-                :meta {}})
-
-       (and (xt/x:is-object? config)
-            (xt/x:is-function? (xt/x:get-key config "fn")))
-       (do
-         (when (and (xt/x:has-key? config "id")
-                    (not (== (xt/x:get-key config "id")
-                             signal)))
-           (xt/x:err (xt/x:cat "trigger id mismatch - " signal)))
-         (return {:fn (xt/x:get-key config "fn")
-                  :meta (or (xt/x:get-key config "meta") {})}))
-
-       :else
-       (xt/x:err (xt/x:cat "invalid trigger config - " signal))))
-
-(defn.xt configure-node
-  "applies declarative spaces, handlers, and triggers to a node"
-  {:added "4.1"}
-  [node opts]
-  (:= opts (or opts {}))
-  (xt/for:object [[space-id config] (or (xt/x:get-key opts "spaces") {})]
-   (node-space/create-space node
-                            space-id
-                            (-/config-space-opts space-id config)))
-  (xt/for:object [[action config] (or (xt/x:get-key opts "handlers") {})]
-   (var entry (-/config-handler-entry action config))
-   (-/register-handler node
-                       action
-                       (xt/x:get-key entry "fn")
-                       (xt/x:get-key entry "meta")))
-  (xt/for:object [[signal config] (or (xt/x:get-key opts "triggers") {})]
-   (var entry (-/config-trigger-entry signal config))
-   (-/register-trigger node
-                       signal
-                       (xt/x:get-key entry "fn")
-                       (xt/x:get-key entry "meta")))
-  (return node))
-
-(defn.xt node-base-opts
-  "removes declarative config keys before constructing node state"
-  {:added "4.1"}
-  [opts]
-  (var base (xt/x:obj-clone (or opts {})))
-  (xt/x:del-key base "spaces")
-  (xt/x:del-key base "handlers")
-  (xt/x:del-key base "triggers")
-  (return base))
-
-(defn.xt node-create
-  "creates a transport-agnostic node runtime, optionally from declarative config"
-  {:added "4.1"}
-  [opts]
-  (:= opts (or opts {}))
-  (var node
-   (event-common/blank-container
-    "substrate"
-    (xt/x:obj-assign
-     {:id (or (xt/x:get-key opts "id")
-              (frame/rand-id "node-" 6))
-      :spaces {}
-      :services {}
-      :handlers {}
-      :triggers {}
-      :pending {}
-      :router {:connections {}
-               :subscriptions {}}
-      :transports {}
-      :meta (or (xt/x:get-key opts "meta") {})}
-     (-/node-base-opts opts))))
-  (-/configure-node node opts)
-  (return node))
-
-(defn.xt register-handler
-  "registers a shared request handler"
-  {:added "4.1"}
-  [node action handler meta]
-  (var entry {:id action
-              :fn handler
-              :meta (or meta {})})
-  (xt/x:set-key (xt/x:get-key node "handlers")
-                action
-                entry)
-  (return entry))
-
 (defn.xt get-services
   "gets registered node services"
   {:added "4.1"}
@@ -491,6 +359,19 @@
                 service-id
                 service)
   (return service))
+
+;; NODE REGISTRY
+(defn.xt register-handler
+  "registers a shared request handler"
+  {:added "4.1"}
+  [node action handler meta]
+  (var entry {:id action
+              :fn handler
+              :meta (or meta {})})
+  (xt/x:set-key (xt/x:get-key node "handlers")
+                action
+                entry)
+  (return entry))
 
 (defn.xt unregister-handler
   "unregisters a shared request handler"
@@ -552,6 +433,7 @@
                         (fn [x] (return x))
                         xt/x:str-lt)))
 
+;; TRANSPORTS
 (defn.xt get-transport
   "gets an attached transport"
   {:added "4.1"}
@@ -687,6 +569,7 @@
     (fn [_]
       (return transport)))))
 
+;; REQUEST FLOW
 (defn.xt request-target
   "resolves the outbound request target transport"
   {:added "4.1"}
@@ -923,3 +806,125 @@
 
         :else
         (return (promise/x:promise-run event))))
+
+;; CONFIG AND BOOTSTRAP
+(defn.xt config-space-opts
+  "normalises declarative space config into create-space opts"
+  {:added "4.1"}
+  [space-id config]
+  (cond (xt/x:nil? config)
+       (return nil)
+
+       (and (xt/x:is-object? config)
+            (or (xt/x:has-key? config "id")
+                (xt/x:has-key? config "state")
+                (xt/x:has-key? config "meta")))
+       (do
+         (when (and (xt/x:has-key? config "id")
+                    (not (== (xt/x:get-key config "id")
+                             space-id)))
+           (xt/x:err (xt/x:cat "space id mismatch - " space-id)))
+         (return {:state (xt/x:get-key config "state")
+                  :meta (or (xt/x:get-key config "meta") {})}))
+
+       :else
+       (xt/x:err (xt/x:cat "invalid space config - " space-id))))
+
+(defn.xt config-handler-entry
+  "normalises declarative handler config into register-handler input"
+  {:added "4.1"}
+  [action config]
+  (cond (xt/x:is-function? config)
+       (return {:fn config
+                :meta {}})
+
+       (and (xt/x:is-object? config)
+            (xt/x:is-function? (xt/x:get-key config "fn")))
+       (do
+         (when (and (xt/x:has-key? config "id")
+                    (not (== (xt/x:get-key config "id")
+                             action)))
+           (xt/x:err (xt/x:cat "handler id mismatch - " action)))
+         (return {:fn (xt/x:get-key config "fn")
+                  :meta (or (xt/x:get-key config "meta") {})}))
+
+       :else
+       (xt/x:err (xt/x:cat "invalid handler config - " action))))
+
+(defn.xt config-trigger-entry
+  "normalises declarative trigger config into register-trigger input"
+  {:added "4.1"}
+  [signal config]
+  (cond (xt/x:is-function? config)
+       (return {:fn config
+                :meta {}})
+
+       (and (xt/x:is-object? config)
+            (xt/x:is-function? (xt/x:get-key config "fn")))
+       (do
+         (when (and (xt/x:has-key? config "id")
+                    (not (== (xt/x:get-key config "id")
+                             signal)))
+           (xt/x:err (xt/x:cat "trigger id mismatch - " signal)))
+         (return {:fn (xt/x:get-key config "fn")
+                  :meta (or (xt/x:get-key config "meta") {})}))
+
+       :else
+       (xt/x:err (xt/x:cat "invalid trigger config - " signal))))
+
+(defn.xt configure-node
+  "applies declarative spaces, handlers, and triggers to a node"
+  {:added "4.1"}
+  [node opts]
+  (:= opts (or opts {}))
+  (xt/for:object [[space-id config] (or (xt/x:get-key opts "spaces") {})]
+   (node-space/create-space node
+                            space-id
+                            (-/config-space-opts space-id config)))
+  (xt/for:object [[action config] (or (xt/x:get-key opts "handlers") {})]
+   (var entry (-/config-handler-entry action config))
+   (-/register-handler node
+                       action
+                       (xt/x:get-key entry "fn")
+                       (xt/x:get-key entry "meta")))
+  (xt/for:object [[signal config] (or (xt/x:get-key opts "triggers") {})]
+   (var entry (-/config-trigger-entry signal config))
+   (-/register-trigger node
+                       signal
+                       (xt/x:get-key entry "fn")
+                       (xt/x:get-key entry "meta")))
+  (return node))
+
+(defn.xt node-base-opts
+  "removes declarative config keys before constructing node state"
+  {:added "4.1"}
+  [opts]
+  (var base (xt/x:obj-clone (or opts {})))
+  (xt/x:del-key base "spaces")
+  (xt/x:del-key base "handlers")
+  (xt/x:del-key base "triggers")
+  (return base))
+
+(defn.xt node-create
+  "creates a transport-agnostic node runtime, optionally from declarative config"
+  {:added "4.1"}
+  [opts]
+  (:= opts (or opts {}))
+  (var node
+   (event-common/blank-container
+    "substrate"
+    (xt/x:obj-assign
+     {:id (or (xt/x:get-key opts "id")
+              (frame/rand-id "node-" 6))
+      :spaces {}
+      :services {}
+      :handlers {}
+      :triggers {}
+      :pending {}
+      :router {:connections {}
+               :subscriptions {}}
+      :transports {}
+      :meta (or (xt/x:get-key opts "meta") {})}
+     (-/node-base-opts opts))))
+  (-/configure-node node opts)
+  (return node))

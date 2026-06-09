@@ -46,40 +46,6 @@
     ""
     apikey)))
 
-(defn.js anon-key
-  []
-  (return (@! (-> docker-min/+config+ :api :anon-key))))
-
-(defn.js service-key
-  []
-  (return (@! (-> docker-min/+config+ :api :service-key))))
-
-(defn.js anon-client
-  []
-  (return
-   (-/default-client (-/anon-key))))
-
-(defn.js service-client
-  []
-  (return
-   (-/default-client (-/service-key))))
-
-(defn.js service-opts
-  []
-  (return {"token" (-/service-key)}))
-
-(defn.js new-email
-  []
-  (return
-   (xt/x:cat "lib-supabase-"
-             (xt/x:to-string (xt/x:now-ms))
-             "@example.com")))
-
-(defn.js user-body
-  [email]
-  (return {"email" email
-           "password" "123456789"}))
-
 ^{:refer xt.net.lib-supabase/create-client :added "4.1"}
 (fact "creates a supabase client wrapper with the expected defaults"
 
@@ -106,7 +72,7 @@
 (fact "routes arbitrary requests through the live Supabase instance"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/request {"path" "/auth/v1/health"
                                "method" "GET"})
         (promise/x:promise-then
@@ -119,7 +85,7 @@
 (fact "reads the live settings endpoint"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/request-get "/auth/v1/settings" {})
         (promise/x:promise-then
          (fn [out]
@@ -131,9 +97,9 @@
 (fact "posts JSON payloads to the live signup endpoint"
 
   (notify/wait-on :js
-    (var email (-/new-email))
-    (-> (-/anon-client)
-        (lib-supabase/request-json "/auth/v1/signup" "POST" (-/user-body email) {})
+    (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
+        (lib-supabase/request-json "/auth/v1/signup" "POST" {"email" email "password" "123456789"} {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify [(. out ["status"])
@@ -144,7 +110,7 @@
 (fact "calls an rpc entry"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/rpc-call "ping" {} {"headers" {"Content-Profile" "scratch_v0"}})
         (promise/x:promise-then
          (fn [out]
@@ -152,7 +118,7 @@
   => {"body" "pong", "status" 200, "headers" {}}
 
   (notify/wait-on :js
-    (-> (-/anon-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/rpc-call "log_append_public"
                                {"i_message" "hello"}
                                {"headers" {"Content-Profile" "scratch_v0"}})
@@ -162,7 +128,7 @@
   => {"body" {"message" "permission denied for function log_append_public", "hint" nil, "details" nil, "code" "42501"}, "status" 401, "headers" {}}
 
   (notify/wait-on :js
-    (-> (-/default-client)
+    (-> (-/default-client nil)
         (lib-supabase/rpc-call "log_append_public"
                                {"i_message" "hello"}
                                {"headers" {"Content-Profile" "scratch_v0"}})
@@ -207,18 +173,18 @@
 (fact "creates and cleans up a live auth user through the admin endpoint"
 
   (notify/wait-on :js
-    (var email (-/new-email))
-    (var client (-/service-client))
+    (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
+    (var client (-/default-client (@! (-> docker-min/+config+ :api :service-key))))
     (-> (lib-supabase/admin-create-user client
                                         {"email" email
                                          "password" "pass123456"
                                          "email_confirm" true}
-                                        (-/service-opts))
+                                        {"token" (@! (-> docker-min/+config+ :api :service-key))})
         (promise/x:promise-then
          (fn [created]
            (var body (. created ["body"]))
            (var user-id (. body ["id"]))
-           (-> (lib-supabase/admin-delete-user client user-id (-/service-opts))
+           (-> (lib-supabase/admin-delete-user client user-id {"token" (@! (-> docker-min/+config+ :api :service-key))})
                (promise/x:promise-then
                 (fn [deleted]
                   (repl/notify [(. created ["status"])
@@ -231,17 +197,17 @@
 (fact "deletes a live auth user through the admin endpoint"
 
   (notify/wait-on :js
-    (var email (-/new-email))
-    (var client (-/service-client))
+    (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
+    (var client (-/default-client (@! (-> docker-min/+config+ :api :service-key))))
     (-> (lib-supabase/admin-create-user client
                                         {"email" email
                                          "password" "pass123456"
                                          "email_confirm" true}
-                                        (-/service-opts))
+                                        {"token" (@! (-> docker-min/+config+ :api :service-key))})
         (promise/x:promise-then
          (fn [created]
            (var user-id (. (. created ["body"]) ["id"]))
-           (-> (lib-supabase/admin-delete-user client user-id (-/service-opts))
+           (-> (lib-supabase/admin-delete-user client user-id {"token" (@! (-> docker-min/+config+ :api :service-key))})
                (promise/x:promise-then
                 (fn [deleted]
                   (repl/notify [(. deleted ["status"])
@@ -252,9 +218,9 @@
 (fact "requires a bearer token for the admin generate-link endpoint"
 
   (notify/wait-on :js
-    (-> (-/service-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :service-key)))
         (lib-supabase/admin-generate-link {"type" "magiclink"
-                                           "email" (-/new-email)}
+                                           "email" (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com")}
                                           {})
         (promise/x:promise-then
          (fn [out]
@@ -266,20 +232,20 @@
 (fact "fetches a live auth user through the admin endpoint"
 
   (notify/wait-on :js
-    (var email (-/new-email))
-    (var client (-/service-client))
+    (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
+    (var client (-/default-client (@! (-> docker-min/+config+ :api :service-key))))
     (-> (lib-supabase/admin-create-user client
                                         {"email" email
                                          "password" "pass123456"
                                          "email_confirm" true}
-                                        (-/service-opts))
+                                        {"token" (@! (-> docker-min/+config+ :api :service-key))})
         (promise/x:promise-then
          (fn [created]
            (var user-id (. (. created ["body"]) ["id"]))
-           (-> (lib-supabase/admin-get-user client user-id (-/service-opts))
+           (-> (lib-supabase/admin-get-user client user-id {"token" (@! (-> docker-min/+config+ :api :service-key))})
                (promise/x:promise-then
                 (fn [got]
-                  (-> (lib-supabase/admin-delete-user client user-id (-/service-opts))
+                  (-> (lib-supabase/admin-delete-user client user-id {"token" (@! (-> docker-min/+config+ :api :service-key))})
                       (promise/x:promise-then
                        (fn [deleted]
                          (repl/notify [(. got ["status"])
@@ -303,23 +269,23 @@
 (fact "updates a live auth user through the admin endpoint"
 
   (notify/wait-on :js
-    (var email (-/new-email))
-    (var client (-/service-client))
+    (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
+    (var client (-/default-client (@! (-> docker-min/+config+ :api :service-key))))
     (-> (lib-supabase/admin-create-user client
                                         {"email" email
                                          "password" "pass123456"
                                          "email_confirm" true}
-                                        (-/service-opts))
+                                        {"token" (@! (-> docker-min/+config+ :api :service-key))})
         (promise/x:promise-then
          (fn [created]
            (var user-id (. (. created ["body"]) ["id"]))
            (-> (lib-supabase/admin-update-user client
                                                user-id
                                                {"body" (xt/x:json-encode {"user_metadata" {"note" "updated-by-test"}})
-                                                "token" (-/service-key)})
+                                                "token" (@! (-> docker-min/+config+ :api :service-key))})
                (promise/x:promise-then
                 (fn [updated]
-                  (-> (lib-supabase/admin-delete-user client user-id (-/service-opts))
+                  (-> (lib-supabase/admin-delete-user client user-id {"token" (@! (-> docker-min/+config+ :api :service-key))})
                       (promise/x:promise-then
                        (fn [deleted]
                          (repl/notify [(. updated ["status"])
@@ -331,7 +297,7 @@
 (fact "returns the live OAuth provider validation failure"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/authorize {"redirect_to" "http://localhost/callback"} {})
         (promise/x:promise-then
          (fn [out]
@@ -343,7 +309,7 @@
 (fact "returns the live OAuth callback state error"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/callback {})
         (promise/x:promise-then
          (fn [out]
@@ -355,8 +321,8 @@
 (fact "requires authorization on the live invite endpoint"
 
   (notify/wait-on :js
-    (-> (-/service-client)
-        (lib-supabase/invite {"email" (-/new-email)} {})
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :service-key)))
+        (lib-supabase/invite {"email" (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com")} {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify [(. out ["status"])
@@ -367,7 +333,7 @@
 (fact "requires authorization on the live logout endpoint"
 
   (notify/wait-on :js
-    (-> (-/service-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :service-key)))
         (lib-supabase/logout {})
         (promise/x:promise-then
          (fn [out]
@@ -379,8 +345,8 @@
 (fact "returns an empty success response for passwordless email OTP requests"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
-        (lib-supabase/otp {"email" (-/new-email)} {})
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
+        (lib-supabase/otp {"email" (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com")} {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify [(. out ["status"])
@@ -391,8 +357,8 @@
 (fact "returns an empty success response for recovery emails"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
-        (lib-supabase/recovery {"email" (-/new-email)} {})
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
+        (lib-supabase/recovery {"email" (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com")} {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify [(. out ["status"])
@@ -403,7 +369,7 @@
 (fact "reads the live auth settings endpoint"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/settings {})
         (promise/x:promise-then
          (fn [out]
@@ -415,8 +381,8 @@
 (fact "returns the live validation failure for password sign-in"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
-        (lib-supabase/token-password {"email" (-/new-email)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
+        (lib-supabase/token-password {"email" (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com")
                                       "password" "123456789"}
                                      {})
         (promise/x:promise-then
@@ -429,14 +395,14 @@
 (fact "refreshes a live auth session"
 
   (notify/wait-on :js
-    (var email (-/new-email))
-    (-> (-/anon-client)
+    (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
         (lib-supabase/signup {"email" email
                               "password" "123456789"}
                              {})
         (promise/x:promise-then
          (fn [signed-up]
-           (-> (-/anon-client)
+           (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
                (lib-supabase/token-refresh {"refresh_token" (. (. signed-up ["body"]) ["refresh_token"])}
                                            {})
                (promise/x:promise-then
@@ -461,7 +427,7 @@
 (fact "returns a bearer-token error when the anon client has no session"
 
   (notify/wait-on :js
-    (-> (-/service-client)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :service-key)))
         (lib-supabase/user-put {"data" {"note" "updated-by-test"}} {})
         (promise/x:promise-then
          (fn [out]
@@ -473,8 +439,8 @@
 (fact "returns the live verify validation error when the token is missing"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
-        (lib-supabase/verify-get {"email" (-/new-email)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
+        (lib-supabase/verify-get {"email" (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com")
                                  "type" "email"}
                                 {})
         (promise/x:promise-then
@@ -487,8 +453,8 @@
 (fact "returns the live verify validation error when the token is missing"
 
   (notify/wait-on :js
-    (-> (-/anon-client)
-        (lib-supabase/verify-post {"email" (-/new-email)
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
+        (lib-supabase/verify-post {"email" (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com")
                                   "type" "email"}
                                  {})
         (promise/x:promise-then
