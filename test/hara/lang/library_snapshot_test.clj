@@ -164,6 +164,19 @@
       :form)
   => '(defn sub-fn [a b] (return (fn [] (return ((L.core/identity-fn (fn [x y] (return (- x y)))) a b))))))
 
+(fact "fails unresolved namespaced symbols at save time"
+
+  (snap/set-entry prep/+snap+
+                  (entry/create-code-base
+                   '(defn bad-fn
+                      []
+                      (return (dbsql/query-async conn "SELECT 1;")))
+                   {:lang :lua
+                    :namespace 'L.core
+                    :module 'L.core}
+                   {}))
+  => (throws))
+
 ^{:refer hara.lang.library-snapshot/set-entries :added "4.0"
   :setup [(def +snap-mixed+
             (-> prep/+snap+
@@ -204,18 +217,34 @@
   => '(defn redis-g [] (return G))
 
   (let [[diff snapshot]
-        (snap/set-entries prep/+snap+
+        (snap/set-entries +snap-mixed+
                           [(entry/create-code-base
-                            '(defn sub-g
-                               [a]
-                               (return (- a -/G)))
-                            {:lang :lua
+                            '(defn redis-g
+                               []
+                               (return u/G))
+                            {:lang :lua.redis
                              :namespace (env/ns-sym)
-                             :module 'L.core}
+                             :module 'L.redis}
                             {})])]
     [(boolean (seq diff))
      (snap/snapshot? snapshot)])
-  => [true true])
+  => [true true]
+
+  (snap/set-entries prep/+snap+
+                    [(entry/create-code-base
+                      '(defn sub-g
+                         [a]
+                         (return (- a -/G)))
+                      {:lang :lua
+                       :namespace (env/ns-sym)
+                       :module 'L.core}
+                      {})
+                     (entry/create-fragment
+                      '(def$ G G)
+                      {:lang :lua
+                       :namespace (env/ns-sym)
+                       :module 'L.core})])
+  => (throws))
 
 ^{:refer hara.lang.library-snapshot/delete-entry :added "4.0"}
 (fact "deletes an entry from the snapshot"

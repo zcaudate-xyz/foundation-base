@@ -158,7 +158,8 @@
         {"custom" []
          "where" []
          "links" []
-         "data" ["nickname"]}]])])
+         "data" ["nickname"]}]]
+      g/compile-tree-select-params)])
   => ["status"
       "account(nickname)"])
 

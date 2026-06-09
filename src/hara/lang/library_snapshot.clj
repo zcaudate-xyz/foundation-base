@@ -1,6 +1,7 @@
 (ns hara.lang.library-snapshot
   (:require [hara.lang.book :as book]
             [hara.lang.impl-entry :as entry]
+            [hara.common.emit-template :as impl-template]
             [hara.common.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
@@ -166,13 +167,22 @@
                        :snapshot shadow-snapshot
                        :module (book/get-module book module)}
                       mopts)
-         entry  (if (= section :fragment)
-                  (entry/create-fragment-hydrate entry
-                                                 grammar
-                                                 modules
-                                                 mopts)
-                  
-                  (entry/prepare-code-entry entry))]
+        entry  (cond
+                 (= section :fragment)
+                 (entry/create-fragment-hydrate entry
+                                                grammar
+                                                modules
+                                                mopts)
+
+                 :else
+                 (let [reserved (impl-template/entry-reserved grammar entry)]
+                   (if reserved
+                     (entry/create-code-hydrate entry
+                                                reserved
+                                                grammar
+                                                modules
+                                                mopts)
+                     (entry/prepare-code-entry entry))))]
      (atom/update-diff snapshot [lang :book]
                        book/set-entry entry)))
 

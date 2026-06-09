@@ -165,7 +165,7 @@
 (defn.xt compile-tree-select-item
   "compiles one tree-ir select item"
   {:added "4.1"}
-  [item]
+  [item select-params-fn]
   (cond (xt/x:is-string? item)
         (return item)
 
@@ -174,7 +174,7 @@
              (xt/x:is-string? (xt/x:first item)))
         (return (xt/x:cat (xt/x:first item)
                           "("
-                          (-/compile-tree-select-params (xtd/second (xtd/nth item 2)))
+                          (select-params-fn (xtd/second (xtd/nth item 2)))
                           ")"))
 
         :else
@@ -191,7 +191,10 @@
     (return "count"))
   (var out [])
   (xt/x:arr-assign out (or data []))
-  (xt/x:arr-assign out (xt/x:arr-map (or links []) -/compile-tree-select-item))
+  (xt/x:arr-assign out (xt/x:arr-map (or links [])
+                                     (fn [item]
+                                       (return
+                                        (-/compile-tree-select-item item -/compile-tree-select-params)))))
   (return (:? (> (xt/x:len out) 0)
               (xt/x:str-join "," out)
               "*")))
