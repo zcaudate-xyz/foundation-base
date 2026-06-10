@@ -39,15 +39,16 @@
 
 
 (defn.xt create-impl-init
-  [type impl]
-  (cond (== type "sqlite")
+  [impl]
+  (var type (xt/x:get-key impl "::"))
+  (cond (== type "db.impl.sqlite")
         (return
          (-> (impl-sqlite/impl-sqlite-init impl)
              (promise/x:promise-then
               (fn [client]
                 (return impl)))))
         
-        (== type "postgres")
+        (== type "db.impl.postgres")
         (return
          (-> (impl-postgres/impl-postgres-init impl)
              (promise/x:promise-then
@@ -55,7 +56,8 @@
                 (return impl)))))
 
         :else
-        (promise/x:promise-run impl)))
+        (return
+         (promise/x:promise-run impl))))
 
 (defn.xt get-method
   [impl method-name]
@@ -65,8 +67,8 @@
     (xt/x:err (xt/x:cat "Method Not Supported - "
                         method-name
                         " - "
-                        (xt/x:get-key impl "::")))))
-
+                        (xt/x:get-key impl "::"))))
+  (return impl-fn))
 
 (defn.xt pull
   [impl tree]

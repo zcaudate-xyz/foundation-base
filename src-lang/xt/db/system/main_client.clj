@@ -1,6 +1,13 @@
 (ns xt.db.system.main-client
   (:require [hara.lang :as l]))
 
+
+(l/script :xtalk)
+
+(defabstract.xt create-client
+  [type defaults])
+
+
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
@@ -25,7 +32,7 @@
                    port
                    secured
                    basepath
-                   apikey})
+                   apikey} defaults)
           (return
            (lib-supabase/create-client
             (js-fetch/create-methods)
@@ -34,8 +41,3 @@
             secured
             basepath
             apikey)))))
-
-(l/script :xtalk)
-
-(defabstract.xt create-client
-  [type defaults])

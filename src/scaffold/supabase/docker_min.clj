@@ -8,6 +8,20 @@
 (def +config+
   (config/load +config-file+))
 
+(def +config-supabase-anon+
+  {:host  (-> +config+ :api :hostname)
+   :port (-> +config+ :api :port)
+   :secured false
+   :basepath ""
+   :apikey (-> +config+ :api :anon-key)})
+
+(def +config-supabase-service+
+  {:host  (-> +config+ :api :hostname)
+   :port (-> +config+ :api :port)
+   :secured false
+   :basepath ""
+   :apikey (-> +config+ :api :service-key)})
+
 (defn start-supabase
   [_]
   (os/sh {:args ["docker-compose" "-f" "docker/supabase-min/docker-compose.yml" "up" "-d"]

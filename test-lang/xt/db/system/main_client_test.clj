@@ -24,12 +24,12 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.net.http-fetch :as js-fetch]
-             [xt.lang.common-repl :as repl]
+   :require [[xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.system.impl-supabase :as impl]
-             [xt.net.lib-supabase :as lib-supabase]]})
+             [xt.net.lib-supabase :as lib-supabase]
+             [xt.net.conn-sql :as conn-sql]
+             [xt.db.system.main-client :as main-client]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -37,15 +37,52 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
+^{:refer xt.db.system.main-client/create-client :added "4.1"}
+(fact "returns nil for unsupported client types"
 
-^{:refer xt.db.system.main-client/create-client.memory :added "4.1"}
-(fact "TODO")
+  (!.js
+    (main-client/create-client "memory" {}))
+  => nil)
 
 ^{:refer xt.db.system.main-client/create-client.sqlite :added "4.1"}
-(fact "TODO")
+(fact "creates a sqlite client"
+  
+  (!.js
+    (main-client/create-client "sqlite" {"filename" ":memory:"}))
+  => (contains-in
+      {"::" "js.net.conn-sqlite"
+       "defaults" {"filename" ":memory:"}}))
 
 ^{:refer xt.db.system.main-client/create-client.postgres :added "4.1"}
-(fact "TODO")
+(fact "creates a postgres client"
+
+  (notify/wait-on :js
+    (-> (main-client/create-client "postgres"
+                                   (@! (docker-min/+config+ :db)))
+        (conn-sql/connect {})
+        (promise/x:promise-then
+         (fn [client]
+           (return
+            (conn-sql/query-async client "SELECT 1;"))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => 1)
 
 ^{:refer xt.db.system.main-client/create-client.supabase :added "4.1"}
-(fact "TODO")
+(fact "creates a live supabase client"
+
+  (notify/wait-on :js
+    (-> (main-client/create-client
+         "supabase"
+         {"host" "127.0.0.1"
+          "port" (@! (-> docker-min/+config+ :api :port))
+          "secured" false
+          "basepath" ""
+          "apikey" (@! (-> docker-min/+config+ :api :anon-key))})
+        (lib-supabase/health {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify [(xt/x:get-key out "status")
+                         (xt/x:get-key (xt/x:get-key out "body") "name")])))))
+  => [200 "GoTrue"])
