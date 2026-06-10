@@ -29,43 +29,46 @@
   [node config schema lookup]
   (var #{primary
          caching} config)
-  (-> (promise/x:promise-run node)
-      (promise/x:promise-then
-       (fn [node]
-         (substrate/set-service
-          node
-          "db/common"
-          {:schema schema
-           :lookup lookup})
-         (return node)))
-      (promise/x:promise-then
-       (fn [node]
-         (return
-          (-/set-impl node
-                      "db/primary"
-                      (xt/x:get-key primary "type")
-                      (xt/x:get-key primary "defaults")
-                      schema
-                      lookup))))
-      (promise/x:promise-then
-       (fn [node]
-         (return
-          (-/set-impl node
-                      "db/caching"
-                      (xt/x:get-key caching "type")
-                      (xt/x:get-key caching "defaults")
-                      schema
-                      lookup))))))
+  (return
+   (-> (promise/x:promise-run node)
+       (promise/x:promise-then
+        (fn [node]
+          (substrate/set-service
+           node
+           "db/common"
+           {:schema schema
+            :lookup lookup})
+          (return node)))
+       (promise/x:promise-then
+        (fn [node]
+          (return
+           (-/set-impl node
+                       "db/primary"
+                       (xt/x:get-key primary "type")
+                       (xt/x:get-key primary "defaults")
+                       schema
+                       lookup))))
+       (promise/x:promise-then
+        (fn [node]
+          (return
+           (-/set-impl node
+                       "db/caching"
+                       (xt/x:get-key caching "type")
+                       (xt/x:get-key caching "defaults")
+                       schema
+                       lookup)))))))
 
 (defn.xt call-primary-handler
   [space args request node]
   (var rpc-spec   (xt/x:first args))
   (var fn-args    (xt/x:second args))
   (return
-   (-> (substrate/get-service node "db/primary")
+   (-> (promise/x:promise-run
+        (substrate/get-service node "db/primary"))
        (promise/x:promise-then
         (fn [impl]
           (return (impl-main/rpc-call-async impl rpc-spec fn-args)))))))
+
 
 
 ;;

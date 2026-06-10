@@ -44,12 +44,8 @@
   (return (send-fn client input)))
 
 (defn.xt add-listeners
-  "dispatches request through the wrapped fetch client"
+  "takes the client and a map of handlers"
   {:added "4.1.3"}
-  [client f]
+  [client m]
   (var add-fn (xt/x:get-key client "add_listeners"))
-  (return (add-fn client f)))
-
-(defabstract.xt create-methods [])
-
-(defabstract.xt create [defaults])
+  (return (add-fn client m)))
