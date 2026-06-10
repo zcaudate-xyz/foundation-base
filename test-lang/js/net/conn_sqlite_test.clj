@@ -1,7 +1,8 @@
 (ns js.net.conn-sqlite-test
   (:use code.test)
   (:require [hara.lang :as l]
-            [xt.lang.common-notify :as notify]))
+            [xt.lang.common-notify :as notify]
+            [js.net.conn-sqlite :as js-sqlite]))
 
 (l/script- :js
   {:runtime :basic
@@ -9,8 +10,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.common-tree :as tree]
-             [js.net.conn-sqlite :as js-sqlite]]})
+             [xt.lang.common-tree :as tree]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

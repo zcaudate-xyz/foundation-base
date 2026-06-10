@@ -7,10 +7,11 @@
 (defn.xt impl-base
   "creates the common client record envelope"
   {:added "4.1"}
-  [tag client schema lookup opts]
+  [tag methods client schema lookup opts]
   (return
    {"::" tag
+    "methods"   methods
     "client"   client
     "schema"   schema
     "lookup"   lookup
-    "opts" opts}))
+    "opts"     opts}))

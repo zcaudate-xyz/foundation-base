@@ -19,12 +19,6 @@
                       tree
                       opts)))
 
-(defn.xt pull-sync
-  "fetches tree ir data synchronously from the memory impl"
-  {:added "4.1"}
-  [impl tree]
-  (return (-/pull impl tree)))
-
 (defn.xt pull-async
   "fetches tree ir data with async semantics"
   {:added "4.1"}
@@ -91,7 +85,21 @@
 ;; IMPL
 ;;
 
+(defn.xt impl-methods
+  []
+  (return
+   {"pull"                  -/pull
+    "pull_async"            -/pull-async
+    "record_add"            -/record-add
+    "record_add_async"      -/record-add-async
+    "record_delete"         -/record-delete
+    "record_delete_async"   -/record-delete-async
+    "process_add_event"     -/process-add-event
+    "process_remove_event"  -/process-remove-event}))
+
 (defn.xt impl-memory
   [schema lookup]
   (return
-   (impl-common/impl-base "db.impl.memory" {} schema lookup)))
+   (impl-common/impl-base "db.impl.memory"
+                          (-/impl-methods)
+                          {} schema lookup)))

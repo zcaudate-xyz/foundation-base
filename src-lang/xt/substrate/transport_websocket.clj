@@ -60,6 +60,24 @@
         (do (xt/x:set-key socket (xt/x:cat "on" event) nil)
             (return socket))))
 
+(defn.xt event-text
+  "normalizes websocket message events into text payloads"
+  {:added "4.1"}
+  [event]
+  (return (:? (and (xt/x:is-object? event)
+                   (xt/x:has-key? event "data"))
+              (xt/x:get-key event "data")
+              (:? (and (xt/x:is-object? event)
+                       (xt/x:has-key? event "text"))
+                  (xt/x:get-key event "text")
+                  event))))
+(defn.xt websocket-url
+  "gets the websocket url for a source"
+  {:added "4.1"}
+  [source]
+  (if (xt/x:is-string? source)
+    (return source)
+    (return (xt/x:get-key source "url"))))
 (defn.xt await-open
   [state]
   (var status (xt/x:get-key state "status"))
@@ -81,7 +99,6 @@
               (return nil)))
           (fn [_]
             (return (-/await-open state)))))))
-
 (defn.xt connect-socket
   [socket-source]
   (var connect-fn (xt/x:get-key socket-source "connect_fn"))
@@ -94,7 +111,6 @@
         (when (xt/x:nil? (-/websocket-url socket-source))
           (xt/x:err "websocket source missing url"))
         (return (new ctor (-/websocket-url socket-source))))))
-
 (defn.xt resolve-socket
   [socket-source]
   (cond (xt/x:is-string? socket-source)
@@ -115,27 +131,6 @@
 
         :else
         (return socket-source)))
-
-(defn.xt event-text
-  "normalizes websocket message events into text payloads"
-  {:added "4.1"}
-  [event]
-  (return (:? (and (xt/x:is-object? event)
-                   (xt/x:has-key? event "data"))
-              (xt/x:get-key event "data")
-              (:? (and (xt/x:is-object? event)
-                       (xt/x:has-key? event "text"))
-                  (xt/x:get-key event "text")
-                  event))))
-
-(defn.xt websocket-url
-  "gets the websocket url for a source"
-  {:added "4.1"}
-  [source]
-  (if (xt/x:is-string? source)
-    (return source)
-    (return (xt/x:get-key source "url"))))
-
 (defn.xt websocket-source
   "creates a websocket-backed text endpoint source"
   {:added "4.1"}
@@ -220,7 +215,6 @@
     "write_fn" send-fn
     "start_fn" start-fn
     "stop_fn" stop-fn}))
-
 (defn.xt websocket-endpoint
   "adapts a websocket-like source into a JSON node transport"
   {:added "4.1"}

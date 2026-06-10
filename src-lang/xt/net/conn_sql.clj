@@ -53,4 +53,3 @@
   (return (protocol/ensure-promise
            (query-fn client input))))
 
-

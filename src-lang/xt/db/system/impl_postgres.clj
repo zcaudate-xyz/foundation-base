@@ -27,16 +27,26 @@
   (return
    (sql-call/call-raw client rpc-spec args)))
 
+(defn.xt impl-methods
+  []
+  (return
+   {"pull_async" -/pull-async
+    "rpc_call_async"  -/rpc-call-async}))
+
 (defn.xt impl-postgres
   "creates the thin postgres impl record with stored context"
   {:added "4.1"}
   [client schema lookup]
   (return
    (impl-common/impl-base "db.impl.postgres"
+                          (-/impl-methods)
                           client
                           schema
                           lookup
                           (sql-util/postgres-opts lookup))))
+
+
+
 
 (defn.xt impl-postgres-init
   "connects the thin postgres impl through a runtime sql driver"
@@ -51,6 +61,3 @@
        (promise/x:promise-then
         (fn [client]
           (return impl))))))
-
-
-

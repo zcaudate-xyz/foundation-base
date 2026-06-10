@@ -72,12 +72,19 @@
                 :else
                 (return out)))))))
 
+(defn.xt impl-methods
+  []
+  (return
+   {"pull_async" -/pull-async
+    "rpc_call_async"  -/rpc-call-async}))
+
 (defn.xt impl-supabase
   "creates the thin supabase impl record with stored context"
   {:added "4.1"}
   [client schema lookup]
   (return
    (impl-common/impl-base "db.impl.supabase"
+                          (-/impl-methods)
                           client
                           schema
                           lookup

@@ -17,10 +17,10 @@
               :dbname (-> docker-min/+config+ :db :database)
               :startup  docker-min/start-supabase
               :shutdown docker-min/stop-supabase}
-     :emit {:code {:transforms {:entry [#'s/transform-entry]}}}}))
+     :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
-(defrun.pg __init__
-  (s/grant-usage #{"scratch_v0"}))
+  (defrun.pg __init__
+    (s/grant-usage #{"scratch_v0"})))
 
 (l/script- :js
   {:runtime :basic
@@ -91,7 +91,6 @@
         (promise/x:promise-catch
          (fn [out]
            (repl/notify (. out message))))))
-  ;; "fetch failed"
   => "pong"
 
   (notify/wait-on :js
@@ -119,12 +118,10 @@
         (promise/x:promise-catch
          (fn [out]
            (repl/notify (. out message))))))
-  ;; {"message" "permission denied for function log_append_public", "hint" nil, "details" nil, "code" "42501"}
-  ;; "fetch failed"
   => (contains-in
       {"author_id" nil,
        "id" string?
        "message" "hello"}))
 
 ^{:refer xt.db.system.impl-supabase/impl-supabase :added "4.1"}
-(fact "TODO")
+(fact "creates a supabase implementation")

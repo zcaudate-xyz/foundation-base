@@ -94,6 +94,12 @@
    (conn-sql/query-async client
                          (xt/x:str-join "\n\n" statements))))
 
+
+
+;;
+;; PROCESS
+;;
+
 (defn.xt process-add-event
   "processes nested data into sqlite upserts"
   {:added "4.1"}
@@ -106,11 +112,6 @@
   (conn-sql/query client
                   (sql-table/prepare-add-input data schema lookup opts))
   (return (xt/x:obj-keys flat)))
-
-
-;;
-;; PROCESS
-;;
 
 (defn.xt process-remove-event
   "processes nested removals into sqlite delete statements"
@@ -125,23 +126,31 @@
                   (sql-table/prepare-remove-input data schema lookup opts))
   (return (xt/x:arr-map ordered xt/x:first)))
 
-(defn.xt exec-sync
-  "executes raw sql synchronously through the sqlite impl"
-  {:added "4.1"}
-  [impl raw-input]
-  (var #{client} impl)
-  (return (conn-sql/query client raw-input)))
 
 ;;
-;; impl 
+;; IMPL
 ;;
+
+
+(defn.xt impl-methods
+  []
+  (return
+   {"pull"                  -/pull
+    "pull_async"            -/pull-async
+    "record_add"            -/record-add
+    "record_add_async"      -/record-add-async
+    "record_delete"         -/record-delete
+    "record_delete_async"   -/record-delete-async
+    "process_add_event"     -/process-add-event
+    "process_remove_event"  -/process-remove-event}))
 
 (defn.xt impl-sqlite
   "creates the thin sqlite impl record with stored context"
   {:added "4.1"}
   [client schema lookup]
   (return
-   (impl-common/impl-base "db.client.sqlite"
+   (impl-common/impl-base "db.impl.sqlite"
+                          (-/impl-methods)
                           client
                           schema
                           lookup

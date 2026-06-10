@@ -38,8 +38,6 @@
       {"fn/ping"
        {"fn" (fn [space args request node]
                (return "pong"))}}}))
-  '  
-  
   (notify/wait-on :js
     (-> (substrate/node-create
          {"handlers"
@@ -62,7 +60,7 @@
            {"fn" (fn [space args request node]
                    (substrate/set-service node "db.primary"))}}})
         (substrate/request nil
-                           "fn/ping"
+                           "fn/init-db"
                            []
                            {})
         (promise/x:promise-then

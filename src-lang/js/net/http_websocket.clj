@@ -6,24 +6,6 @@
              [xt.lang.spec-promise :as promise]
              [xt.net.http-websocket :as websocket]]})
 
-(defn.js request-http-raw
-  [input]
-  (var #{url
-         method
-         headers
-         body} input)
-  (return (. (websocket url {"method" method
-                             "headers" headers
-                             "body" body})
-             (then (fn [res]
-                     (return (. res
-                                (text)
-                                (then (fn [text]
-                                        (return {"status" (. res ["status"])
-                                                 "headers" (. res ["headers"])
-                                                 "body" text}))))))))))
-
-
 (defn.js connect-ws
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}

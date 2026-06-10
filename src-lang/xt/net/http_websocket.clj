@@ -49,3 +49,7 @@
   [client f]
   (var add-fn (xt/x:get-key client "add_listeners"))
   (return (add-fn client f)))
+
+(defabstract.xt create-methods [])
+
+(defabstract.xt create [defaults])

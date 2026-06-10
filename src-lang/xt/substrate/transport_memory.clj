@@ -122,7 +122,36 @@
                                           links
                                           endpoint-ids
                                           (+ index 1))))
-
+(defn.xt deliver-network-loop
+  "delivers text to each configured peer in order"
+  {:added "4.1"}
+  [network state peer-ids text index]
+  (when (>= index (xt/x:len peer-ids))
+    (return (promise/x:promise-run true)))
+  (var peer-id (xt/x:get-idx peer-ids (xt/x:offset index)))
+  (var peer (xt/x:get-key (xt/x:get-key network "states")
+                          peer-id))
+  (when (xt/x:nil? peer)
+    (xt/x:err (xt/x:cat "wire peer not found - " peer-id)))
+  (var listener (xt/x:get-key peer "listener"))
+  (when (xt/x:nil? listener)
+    (xt/x:err (xt/x:cat "wire peer not started - " peer-id)))
+  (var output
+       (listener
+        {"text" text}
+        {"wire" (xt/x:get-key state "id")
+         "peer" peer-id}))
+  (return
+   (promise/x:promise-then
+    (:? (promise/x:promise-native? output)
+        output
+        (promise/x:promise-run output))
+    (fn [_]
+      (return (-/deliver-network-loop network
+                                      state
+                                      peer-ids
+                                      text
+                                      (+ index 1)))))))
 (defn.xt memory-endpoint
   "creates an in-memory text endpoint that forwards writes to its peer listener"
   {:added "4.1"}
@@ -164,8 +193,6 @@
     "write_fn" write-fn
     "start_fn" start-fn
     "stop_fn" stop-fn}))
-
-
 (defn.xt create-network-endpoints-loop
   "materializes transport endpoints for a shared network"
   {:added "4.1"}
@@ -180,38 +207,6 @@
                                            endpoint-ids
                                            out
                                            (+ index 1))))
-
-(defn.xt deliver-network-loop
-  "delivers text to each configured peer in order"
-  {:added "4.1"}
-  [network state peer-ids text index]
-  (when (>= index (xt/x:len peer-ids))
-    (return (promise/x:promise-run true)))
-  (var peer-id (xt/x:get-idx peer-ids (xt/x:offset index)))
-  (var peer (xt/x:get-key (xt/x:get-key network "states")
-                          peer-id))
-  (when (xt/x:nil? peer)
-    (xt/x:err (xt/x:cat "wire peer not found - " peer-id)))
-  (var listener (xt/x:get-key peer "listener"))
-  (when (xt/x:nil? listener)
-    (xt/x:err (xt/x:cat "wire peer not started - " peer-id)))
-  (var output
-       (listener
-        {"text" text}
-        {"wire" (xt/x:get-key state "id")
-         "peer" peer-id}))
-  (return
-   (promise/x:promise-then
-    (:? (promise/x:promise-native? output)
-        output
-        (promise/x:promise-run output))
-    (fn [_]
-      (return (-/deliver-network-loop network
-                                      state
-                                      peer-ids
-                                      text
-                                      (+ index 1)))))))
-
 ;; TEXT ENDPOINT ADAPTER
 
 (defn.xt text-endpoint
