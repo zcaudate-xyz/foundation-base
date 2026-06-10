@@ -3,7 +3,6 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.docker-min :as docker-min]))
-
 (do 
   (l/script- :postgres
     {:runtime :jdbc.client
@@ -30,11 +29,8 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.system.impl-memory :as impl-memory]
-             [xt.db.system.impl-postgres :as impl-postgres]
-             [xt.db.system.impl-sqlite :as impl-sqlite]
-             [xt.db.system.impl-supabase :as impl-supabase]
-             [xt.db.node.adaptor-base :as impl]
+             [xt.db.system.main :as main]
+             [xt.db.node.adaptor-base :as adaptor]
              [xt.net.lib-supabase :as lib-supabase]
              [xt.substrate :as substrate]]})
 
@@ -44,100 +40,14 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-^{:refer xt.db.node.adaptor-base/set-sqlite-service :added "4.1"}
-(fact "set-sqlite-service registers an initialised sqlite service on the node"
+^{:refer xt.db.node.adaptor-base/set-impl :added "4.1"}
+(fact "TODO")
 
-  (notify/wait-on :js
-    (-> (impl/set-sqlite-service
-         (substrate/node-create {"services" {}})
-         "db/caching"
-         (js-sqlite/create {"filename" ":memory:"})
-         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
-         (@! (pg/bind-app (pg/app "scratch_v0"))))
-        (promise/x:promise-then
-         (fn [node]
-           (repl/notify
-            {"service_tag" (. (substrate/get-service node "db/caching") ["::"])
-             "service_client" (. (. (substrate/get-service node "db/caching") ["client"]) ["::"])
-             "service_count" (xt/x:len (xt/x:obj-keys (substrate/get-services node)))})))))
-  => {"service_tag" "db.client.sqlite"
-      "service_client" "js.net.conn-sqlite"
-      "service_count" 1})
+^{:refer xt.db.node.adaptor-base/init-db :added "4.1"}
+(fact "TODO")
 
-^{:refer xt.db.node.adaptor-base/set-postgres-service :added "4.1"}
-(fact "set-postgres-service registers an initialised postgres service on the node"
+^{:refer xt.db.node.adaptor-base/call-primary-handler :added "4.1"}
+(fact "TODO")
 
-  (notify/wait-on :js
-    (-> (impl/set-postgres-service
-         (substrate/node-create {"services" {}})
-         "db/primary"
-         (js-postgres/create {"database" "test-scratch"})
-         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
-         (@! (pg/bind-app (pg/app "scratch_v0"))))
-        (promise/x:promise-then
-         (fn [node]
-           (repl/notify
-            {"service_tag" (. (substrate/get-service node "db/primary") ["::"])
-             "service_client" (. (. (substrate/get-service node "db/primary") ["client"]) ["::"])
-             "service_count" (xt/x:len (xt/x:obj-keys (substrate/get-services node)))})))))
-  => {"service_tag" "db.client.postgres"
-      "service_client" "js.net.conn-postgres"
-      "service_count" 1})
-
-^{:refer xt.db.node.adaptor-base/set-memory-service :added "4.1"}
-(fact "set-memory-service registers a memory service on the node"
-
-  (notify/wait-on :js
-    (-> (impl/set-memory-service
-         (substrate/node-create {"services" {}})
-         "db/cache"
-         nil
-         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
-         (@! (pg/bind-app (pg/app "scratch_v0"))))
-        (promise/x:promise-then
-         (fn [node]
-           (repl/notify
-            {"service_tag" (. (substrate/get-service node "db/cache") ["::"])
-             "service_count" (xt/x:len (xt/x:obj-keys (substrate/get-services node)))})))))
-  => {"service_tag" "db.impl.memory"
-      "service_count" 1})
-
-^{:refer xt.db.node.adaptor-base/set-supabase-service :added "4.1"}
-(fact "set-supabase-service registers a supabase service on the node"
-
-  (notify/wait-on :js
-    (-> (impl/set-supabase-service
-         (substrate/node-create {"services" {}})
-         "db/primary"
-         (lib-supabase/create-client
-          (js-fetch/create-methods)
-          "127.0.0.1"
-          (@! (-> docker-min/+config+ :api :port))
-          false
-          ""
-          (@! (-> docker-min/+config+ :api :anon-key)))
-         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
-         (@! (pg/bind-app (pg/app "scratch_v0"))))
-        (promise/x:promise-then
-         (fn [node]
-           (repl/notify
-            {"service_tag" (. (substrate/get-service node "db/primary") ["::"])
-             "service_client" (. (. (substrate/get-service node "db/primary") ["client"]) ["::"])
-             "service_count" (xt/x:len (xt/x:obj-keys (substrate/get-services node)))})))))
-  => {"service_tag" "db.impl.supabase"
-      "service_client" "net.superbase"
-      "service_count" 1})
-
-^{:refer xt.db.node.adaptor-base/db-init :added "4.1"}
-(fact "TODO"
-
-  
-  
-  {"services"
-   {"db/common"   {"schema"  {}
-                   "lookup"  {}}
-    "db/primary"  'client
-    "db/caching"  'client}})
-
-^{:refer xt.db.node.adaptor-base/call-db-handler :added "4.1"}
+^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
 (fact "TODO")
