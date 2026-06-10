@@ -28,6 +28,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [postgres.core :as pg]
              [xt.db.system.impl-postgres :as impl-postgres]
              [xt.db.system.main :as main]]})
 
@@ -87,6 +88,15 @@
            (repl/notify (xt/x:get-key impl "client"))))))
   => map?)
 
+^{:refer xt.db.system.main/get-method :added "4.1"}
+(fact "gets the method for a given implementation"
+
+  (!.js
+    (-> (main/create-impl "sqlite" {} -/Schema -/SchemaLookup)
+        (main/get-method "pull")
+        (xt/x:is-function?)))
+  => true)
+
 ^{:refer xt.db.system.main/pull :added "4.1"}
 (fact "pull reads from the local memory impl"
 
@@ -97,12 +107,12 @@
          (fn [impl]
            (main/record-add impl
                      "Log"
-                     [{"id" "USD" "message" "USD"}
-                      {"id" "AUD" "message" "AUD"}])
+                     [{"id" "LOG-10" "message" "hello"}
+                      {"id" "LOG-20" "message" "world"}])
            (repl/notify
             (main/pull impl ["Log"]))))))
-  => (contains [(contains {"id" "USD" "message" "USD"})
-                (contains {"id" "AUD" "message" "AUD"})]
+  => (contains [(contains {"id" "LOG-10" "message" "hello"})
+                (contains {"id" "LOG-20" "message" "world"})]
                :in-any-order)
   
   (notify/wait-on :js
@@ -112,13 +122,55 @@
          (fn [impl]
            (main/record-add impl
                      "Log"
-                     [{"id" "USD" "message" "USD"}
-                      {"id" "AUD" "message" "AUD"}])
+                     [{"id" "LOG-10" "message" "hello"}
+                      {"id" "LOG-20" "message" "world"}])
            (repl/notify
             (main/pull impl ["Log"]))))))
-  => (contains [(contains {"id" "USD" "message" "USD"})
-                (contains {"id" "AUD" "message" "AUD"})]
+  => (contains [(contains {"id" "LOG-10" "message" "hello"})
+                (contains {"id" "LOG-20" "message" "world"})]
                :in-any-order))
+
+^{:refer xt.db.system.main/pull-async :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)
+          (scratch-v0/log-append "hello")
+          (scratch-v0/log-append "world")]}
+(fact "getting same semantics for supabase and postgres"
+  
+  (notify/wait-on :js
+    (-> (main/create-impl "postgres"
+                          (@! (:db docker-min/+config+))
+                          -/Schema
+                          -/SchemaLookup)
+        (main/create-impl-init)
+        (promise/x:promise-then
+         (fn [impl]
+           (return
+            (main/pull-async impl ["Log"]))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => (contains
+      [(contains {"message" "hello", "author_id" nil, "id" string?})
+       (contains {"message" "world", "author_id" nil, "id" string?})]
+      :in-any-order)
+
+  (notify/wait-on :js
+    (-> (main/create-impl "supabase"
+                          (@! docker-min/+config-supabase-anon+)
+                          -/Schema
+                          -/SchemaLookup)
+        (main/create-impl-init)
+        (promise/x:promise-then
+         (fn [impl]
+           (return
+            (main/pull-async impl ["Log"]))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => (contains
+      [(contains {"message" "hello", "author_id" nil, "id" string?})
+       (contains {"message" "world", "author_id" nil, "id" string?})]
+      :in-any-order))
 
 ^{:refer xt.db.system.main/rpc-call-async :added "4.1"
   :setup [(l/rt:restart :js)]}
@@ -126,7 +178,8 @@
 
   ;; POSTGRES
   (notify/wait-on :js
-    (-> (main/create-impl "postgres" (@! (:db docker-min/+config+))
+    (-> (main/create-impl "postgres"
+                          (@! (:db docker-min/+config+))
                           -/Schema
                           -/SchemaLookup)
         (main/create-impl-init)
@@ -169,97 +222,103 @@
 
   (!.js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
-    (main/record-add impl "UserAccount" [{"id" "USER-10" "nickname" "echo"}]))
-  => {"id" "USER-10" "nickname" "echo"})
+    (main/record-add impl "Log" [{"id" "LOG-10" "message" "echo"}]))
+  => [])
 
 ^{:refer xt.db.system.main/record-add-async :added "4.1"}
 (fact "record-add-async writes through promise semantics"
 
   (notify/wait-on :js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
-    (-> (main/record-add-async impl
-                               "UserAccount"
-                               [{"id" "USER-20" "nickname" "delta"}])
-        (promise/x:promise-then
+    (->  (main/create-impl-init impl)
+         (promise/x:promise-then
+          (fn [impl]
+            (main/record-add-async impl
+                                   "Log"
+                                   [{"id" "00000000-0000-0000-0000-000000000000"
+                                     "author_id" "00000000-0000-0000-0000-000000000000"
+                                     "message" "delta"}])))
+         (promise/x:promise-then
          (fn [_]
            (repl/notify
-            (xtd/get-in impl ["client"
-                              "UserAccount"
-                              "USER-20"
-                              "record"
-                              "data"]))))))
-  => {"id" "USER-20" "nickname" "delta"})
+            (main/pull impl ["Log"]))))))
+  => [{"id" "00000000-0000-0000-0000-000000000000"
+       "message" "delta"}]
+  
+  (notify/wait-on :js
+    (var impl (main/create-impl "sqlite" {} -/Schema -/SchemaLookup))
+    (->  (main/create-impl-init impl)
+         (promise/x:promise-then
+          (fn [impl]
+            (main/record-add-async impl
+                                   "Log"
+                                   [{"id" "00000000-0000-0000-0000-000000000000"
+                                     "author_id" "00000000-0000-0000-0000-000000000000"
+                                     "message" "delta"}])))
+         (promise/x:promise-then
+         (fn [_]
+           (repl/notify
+            (main/pull impl ["Log"]))))))
+  => [{"id" "00000000-0000-0000-0000-000000000000"
+       "author_id" "00000000-0000-0000-0000-000000000000"
+       "message" "delta"}])
 
 ^{:refer xt.db.system.main/record-delete :added "4.1"}
 (fact "record-delete removes ids through the local memory impl"
+
   (!.js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
-    (main/record-add impl "UserAccount" [sample/RootUser])
+    (main/record-add impl "Log" [{"id" "LOG-30" "message" "root"}])
     (main/record-delete impl
-                        "UserAccount"
-                        ["00000000-0000-0000-0000-000000000000"])
+                        "Log"
+                        ["LOG-30"])
     (xtd/get-in impl ["client"
-                      "UserAccount"
-                      "00000000-0000-0000-0000-000000000000"]))
+                      "Log"
+                      "LOG-30"]))
   => nil)
 
 ^{:refer xt.db.system.main/record-delete-async :added "4.1"}
 (fact "record-delete-async removes ids through promise semantics"
+
   (notify/wait-on :js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
-    (main/record-add impl "UserAccount" [sample/RootUser])
+    (main/record-add impl "Log" [{"id" "LOG-40" "message" "root"}])
     (-> (main/record-delete-async impl
-                                  "UserAccount"
-                                  ["00000000-0000-0000-0000-000000000000"])
+                                  "Log"
+                                  ["LOG-40"])
         (promise/x:promise-then
          (fn [_]
            (repl/notify
             (xtd/get-in impl ["client"
-                              "UserAccount"
-                              "00000000-0000-0000-0000-000000000000"]))))))
+                              "Log"
+                              "LOG-40"]))))))
   => nil)
 
 ^{:refer xt.db.system.main/process-add-event :added "4.1"}
 (fact "process-add-event merges nested data into the local memory impl"
+
   (!.js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
-    (var out (main/process-add-event impl {"UserAccount" [sample/RootUser]}))
+    (var out (main/process-add-event impl {"Log" [{"id" "LOG-50" "message" "root"}]}))
     [(xt/x:len out)
      (xtd/get-in impl ["client"
-                       "UserAccount"
-                       "00000000-0000-0000-0000-000000000000"
+                       "Log"
+                       "LOG-50"
                        "record"
                        "data"
-                       "nickname"])
-     (xtd/get-in impl ["client"
-                       "UserAccount"
-                       "00000000-0000-0000-0000-000000000000"
-                       "record"
-                       "rev_links"
-                       "profile"])
-     (xtd/get-in impl ["client"
-                       "UserProfile"
-                       "c4643895-b0ce-44cc-b07b-2386bf18d43b"
-                       "record"
-                       "ref_links"
-                       "account"])])
-  => [2
-      "root"
-      {"c4643895-b0ce-44cc-b07b-2386bf18d43b" true}
-      {"00000000-0000-0000-0000-000000000000" true}])
+                       "message"])])
+  => [0
+      "root"])
 
 ^{:refer xt.db.system.main/process-remove-event :added "4.1"}
 (fact "process-remove-event removes nested data in lookup order"
+
   (!.js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
-    (main/process-add-event impl {"UserAccount" [sample/RootUser]})
-    [(main/process-remove-event impl {"UserAccount" [sample/RootUser]})
+    (main/process-add-event impl {"Log" [{"id" "LOG-60" "message" "root"}]})
+    [(main/process-remove-event impl {"Log" [{"id" "LOG-60" "message" "root"}]})
      (xtd/get-in impl ["client"
-                       "UserAccount"
-                       "00000000-0000-0000-0000-000000000000"])
-     (xtd/get-in impl ["client"
-                       "UserProfile"
-                       "c4643895-b0ce-44cc-b07b-2386bf18d43b"])])
-  => [["UserAccount" "UserProfile"]
-      nil
+                       "Log"
+                       "LOG-60"])])
+  => [["Log"]
       nil])

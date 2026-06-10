@@ -13,12 +13,13 @@
              [xt.db.system.impl-supabase :as impl-supabase]
              [xt.db.system.main-client :as main-client]]})
 
-
 ;;
 ;; The xt.db.node.adaptor-base 
 ;;
 
 (defn.xt create-impl
+  "creates impls for local and live backends"
+  {:added "4.1"}
   [type defaults schema lookup]
   (var client (main-client/create-client type defaults))
   (cond (== type "memory")
@@ -39,6 +40,8 @@
 
 
 (defn.xt create-impl-init
+  "initialises postgres impls and leaves the wrapper output usable"
+  {:added "4.1"}
   [impl]
   (var type (xt/x:get-key impl "::"))
   (cond (== type "db.impl.sqlite")
@@ -60,6 +63,8 @@
          (promise/x:promise-run impl))))
 
 (defn.xt get-method
+  "gets the method for a given implementation"
+  {:added "4.1"}
   [impl method-name]
   (var #{methods} impl)
   (var impl-fn (xt/x:get-key methods method-name))
@@ -71,42 +76,62 @@
   (return impl-fn))
 
 (defn.xt pull
+  "pull reads from the local memory impl"
+  {:added "4.1"}
   [impl tree]
   (return ((-/get-method impl "pull") impl tree)))
 
 (defn.xt pull-async
+  "getting same semantics for supabase and postgres"
+  {:added "4.1"}
   [impl tree]
   (return ((-/get-method impl "pull_async") impl tree)))
 
 (defn.xt rpc-call-async
+  "rpc-call-async reaches the live supabase rpc endpoint"
+  {:added "4.1"}
   [impl rpc-spec args]
   (return ((-/get-method impl "rpc_call_async") impl rpc-spec args)))
 
 (defn.xt pull-async
+  "getting same semantics for supabase and postgres"
+  {:added "4.1"}
   [impl tree]
   (return ((-/get-method impl "pull_async") impl tree)))
 
 (defn.xt record-add
+  "record-add writes through the local memory impl"
+  {:added "4.1"}
   [impl table-name records]
   (return ((-/get-method impl "record_add") impl table-name records)))
 
 (defn.xt record-add-async
+  "record-add-async writes through promise semantics"
+  {:added "4.1"}
   [impl table-name records]
   (return ((-/get-method impl "record_add_async") impl table-name records)))
 
 (defn.xt record-delete
+  "record-delete removes ids through the local memory impl"
+  {:added "4.1"}
   [impl table-name ids]
   (return ((-/get-method impl "record_delete") impl table-name ids)))
 
 (defn.xt record-delete-async
+  "record-delete-async removes ids through promise semantics"
+  {:added "4.1"}
   [impl table-name ids]
   (return ((-/get-method impl "record_delete_async") impl table-name ids)))
 
 (defn.xt process-add-event
+  "process-add-event merges nested data into the local memory impl"
+  {:added "4.1"}
   [impl data]
   (return ((-/get-method impl "process_add_event") impl data)))
 
 (defn.xt process-remove-event
+  "process-remove-event removes nested data in lookup order"
+  {:added "4.1"}
   [impl data]
   (return ((-/get-method impl "process_remove_event") impl data)))
 
