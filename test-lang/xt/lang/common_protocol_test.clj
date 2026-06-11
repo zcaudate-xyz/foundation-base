@@ -21,7 +21,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-protocol/iface-combine :added "4.1"}
 (fact "combines interface vectors without duplicates"
@@ -98,7 +98,7 @@
       (proto/proto-spec [[["disconnect" "exec"]
                           {"disconnect" "disconnect-fn"}]])
       (catch err
-        (:= invalid (xt/x:ex-message err))))
+          (:= invalid (xt/x:ex-message err))))
     invalid)
   => "Invalid Key"
 
@@ -117,7 +117,7 @@
       (proto/proto-spec [[["disconnect" "exec"]
                           {"disconnect" "disconnect-fn"}]])
       (catch err
-        (:= invalid (xt/x:ex-message err))))
+          (:= invalid (xt/x:ex-message err))))
     invalid)
   => "Invalid Key"
 
@@ -136,12 +136,75 @@
       (proto/proto-spec [[["disconnect" "exec"]
                           {"disconnect" "disconnect-fn"}]])
       (catch err
-        (:= invalid (xt/x:ex-message err))))
+          (:= invalid (xt/x:ex-message err))))
     invalid)
   => "Invalid Key")
+
+^{:refer xt.lang.common-protocol/ensure-promise :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-protocol/create-protocol-fn :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-protocol/format-defprotocol-xt :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-protocol/defprotocol.xt :added "4.1"}
+(fact "TODO"
+
+  (defprotocol.xt IHello
+    (hello-str [impl])))
 
 (comment
   (s/snapto '[xt.lang.common-protocol])
   
   (s/seedgen-langadd '[xt.lang.common-protocol] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.lang.common-protocol] {:lang [:lua :python] :write true}))
+
+
+
+(comment
+
+  
+  ;;
+  ;; design of protocol and class
+  ;;
+
+  (defn.xt create-protocol-fn
+    [name])
+
+
+  (defn format-defprotocol-xt
+    [name opts+sigs])
+
+  (defmacro defprotocol.xt
+    [name & opts+sigs]
+    (list 'def.xt name
+          (list `create-protocol-fn
+                (format-defprotocol-xt name opts+sigs))))
+
+
+
+
+  (defprotocol.xt IHello
+    (hello-prn [impl])
+    (hello-str [impl]))
+  
+  (!.js
+    -/IHello)
+
+  => {"::" "type/protocol"
+      "on" "xt.lang.common-protocol/IHello"
+      "sigs" {"hello_prn" {"arglist" ["impl"]
+                           :name "hello_prn"}
+              "hello_str" {"arglist" ["impl"]
+                           :name "hello_prn"}}
+      "impl" {}}
+  
+  (defimpl.xt Hello
+    {:keys       [state]
+     :protocols  [-/IHello
+                  {hello-prn -/hello-prn-fn
+                   hello-str -/hello-str-fn}]}))
+
+
