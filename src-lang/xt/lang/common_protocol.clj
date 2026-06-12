@@ -7,6 +7,8 @@
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]]})
 
+(def.xt REGISTRY {})
+
 (defn.xt iface-combine
   "combines interface vectors without duplicates"
   {:added "4.1"}
@@ -55,40 +57,133 @@
 ;; design of protocol and class
 ;;
 
+(defn.xt protocol-method
+  [obj on method]
+  (var type           (xt/x:get-key obj "::"))
+  (var override-map   (xt/x:get-key obj "::/override"))
+  (var override-proto (xt/x:get-key override-map on))
+  (var override-fn    (xt/x:get-key override-proto method))
+  (when (not (xt/x:nil? override-fn))
+    (return override-fn))
+
+  (var protocol (xt/x:get-key -/REGISTRY on))
+  (when (xt/x:nil? protocol)
+    (xt/x:err (xt/x:cat "Missing protocol " on)))
+  (var impls    (xt/x:get-key protocol "impls"))
+  (var impl-map (xt/x:get-key impls type))
+  (when (xt/x:nil? impl-map)
+    (xt/x:err (xt/x:cat "Missing protocol " on " for " type)))
+
+  (var method-fn (xt/x:get-key impl-map method))
+  (when (xt/x:nil? method-fn)
+    (xt/x:err (xt/x:cat "Missing protocol method " on "/" method)))
+  (return method-fn))
+
+(defn.xt register-protocol-impl
+  [protocol-or-on type impl-map]
+  (var on (if (xt/x:is-object? protocol-or-on)
+            (xt/x:get-key protocol-or-on "on")
+            protocol-or-on))
+  (var protocol (xt/x:get-key -/REGISTRY on))
+  (when (xt/x:nil? protocol)
+    (xt/x:err (xt/x:cat "Missing protocol " on)))
+  (var impls (xt/x:get-key protocol "impls"))
+  (xt/x:set-key impls type impl-map)
+  (return impl-map))
+
 (defn.xt create-protocol-fn
   "creates a runtime protocol descriptor"
   {:added "4.1"}
   [on sig-map]
-  (return
-   {"::" "type/protocol"
-    "on"    on    
-    "sigs"  sig-map
-    "impls" {}}))
+  (var protocol
+       {"::" "type/protocol"
+        "on"    on
+        "sigs"  sig-map
+        "impls" {}})
+  (xt/x:set-key -/REGISTRY on protocol)
+  (return protocol))
+
+
+;;
+;; defprotocol.xt
+;;
+
+(defn format-defprotocol-method-xt
+  [on-str sig-sym arglist]
+  (let [sig-name (case/snake-case (name sig-sym))]
+    (list 'defn.xt sig-sym arglist
+          (list 'var 'method-fn (list `protocol-method (first arglist) on-str sig-name))
+          (list 'return (cons 'method-fn arglist)))))
 
 (defn format-defprotocol-xt
   "formats a defprotocol.xt form into a runtime protocol descriptor"
   {:added "4.1"}
   [sym opts+sigs]
-  (let [curr-ns   (case/snake-case (name (:module (l/rt :xtalk))))
+  (let [curr-ns   (case/snake-case (name (ns-name *ns*)))
         curr-sym  (name sym)
         name-fn   (fn [s] (case/snake-case (name s)))
-        on-str    (str curr-ns "/" curr-sym)        
+        on-str    (str curr-ns "/" curr-sym)
         sig-map   (cons 'tab
-                        (mapcat (fn [[sig-sym arglist]]
-                                  (let [sig-name (name-fn sig-sym)]
-                                    [sig-name {"name" sig-name
-                                               "arglist" (mapv name-fn arglist)}
-                                     {}]))
-                                opts+sigs))]
+                        (map (fn [[sig-sym arglist]]
+                               (let [sig-name (name-fn sig-sym)]
+                                 [sig-name {"name" sig-name
+                                            "arglist" (mapv name-fn arglist)}]))
+                             opts+sigs))]
     (list `create-protocol-fn on-str sig-map)))
 
 (defmacro defprotocol.xt
-  "defines a protocol descriptor"
-  {:added "4.1"}
   [sym & opts+sigs]
-  (list 'def.xt sym
-        (format-defprotocol-xt sym opts+sigs)))
+  (let [curr-ns (case/snake-case (name (ns-name *ns*)))
+        on-str  (str curr-ns "/" (name sym))
+        methods (mapv (fn [[sig-sym arglist]]
+                        (format-defprotocol-method-xt on-str sig-sym arglist))
+                      opts+sigs)]
+    (concat ['do]
+            [(list 'def.xt sym (format-defprotocol-xt sym opts+sigs))]
+            methods)))
 
+;;
+;; defimpl.xt
+;;
+
+(defn- normalize-protocol-impl-map
+  [impl-map]
+  (into {}
+        (map (fn [[k v]]
+               [(case/snake-case (name k)) v])
+             impl-map)))
+
+(defn format-defimpl-xt
+  [type-sym impl-fields protocols]
+  (let [curr-ns     (case/snake-case (name (ns-name *ns*)))
+        type-name   (str curr-ns "/" (name type-sym))
+        impl-fields (mapv name impl-fields)
+        ctor-map    (into {"::" type-name}
+                          (concat (map (fn [f] [f (symbol f)]) impl-fields)
+                                  [["::/impls" {}]]))
+        proto-forms  (mapv (fn [[proto-sym impl-map]]
+                             (list `register-protocol-impl
+                                   proto-sym
+                                   type-name
+                                   (normalize-protocol-impl-map impl-map)))
+                           protocols)]
+    (concat
+     [(list 'def.xt (symbol (str (name type-sym) "-init"))
+            proto-forms)]
+     [(list 'defn.xt type-sym impl-fields
+            (list 'return ctor-map))])))
+
+(defmacro defimpl.xt
+  [type-sym & args]
+  (cond (and (= 2 (count args))
+             (vector? (first args))
+             (vector? (second args)))
+        (format-defimpl-xt type-sym (first args) (second args))
+
+        :else
+        (throw (ex-info "Invalid defimpl.xt form"
+                        {:type-sym type-sym
+                         :args args}))))
 
 ;;
 ;;
