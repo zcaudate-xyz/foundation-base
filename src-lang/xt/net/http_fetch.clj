@@ -1,5 +1,6 @@
 (ns xt.net.http-fetch
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :refer [defprotocol.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
@@ -7,8 +8,8 @@
              [xt.lang.common-protocol :as protocol]
              [xt.net.http-util :as util]]})
 
-(def.xt IHttpClient
-  ["request_http"])
+(defprotocol.xt IHttpClient
+  (request-http [client input opts]))
 
 (def.xt REQUEST_FIELDS
   ["method"
@@ -61,18 +62,9 @@
 (defn.xt create-base
   [type methods defaults]
   (return
-   (xt/x:obj-assign {"::"   (or type "xt.net.http-fetch")
-                     "defaults" (or defaults {})}
-                    (protocol/proto-spec
-                     [[-/IHttpClient methods]]))))
-
-(defn.xt request-http
-  "dispatches request through the wrapped fetch client"
-  {:added "4.1.3"}
-  [client input opts]
-  (var request-fn (xt/x:get-key client "request_http"))
-  (return (protocol/ensure-promise
-           (request-fn client input opts))))
+   (xt/x:obj-assign {"::" (or type "xt.net.http-fetch")
+                     "defaults" (or defaults {})
+                     "::/override" (or methods {})} {})))
 
 (defn.xt then-normalise
   [p]

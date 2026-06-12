@@ -45,7 +45,7 @@
   (return acc))
 
 (defn.xt ensure-promise
-  "TODO"
+  "wraps raw values in a promise and preserves native promises"
   {:added "4.1"}
   [value]
   (if (promise/x:promise-native? value)
@@ -58,6 +58,8 @@
 ;;
 
 (defn.xt protocol-method
+  "looks up the registered method by protocol and implementation type"
+  {:added "4.1"}
   [obj on method]
   (var type           (xt/x:get-key obj "::"))
   (var override-map   (xt/x:get-key obj "::/override"))
@@ -67,19 +69,29 @@
     (return override-fn))
 
   (var protocol (xt/x:get-key -/REGISTRY on))
-  (when (xt/x:nil? protocol)
-    (xt/x:err (xt/x:cat "Missing protocol " on)))
-  (var impls    (xt/x:get-key protocol "impls"))
-  (var impl-map (xt/x:get-key impls type))
-  (when (xt/x:nil? impl-map)
-    (xt/x:err (xt/x:cat "Missing protocol " on " for " type)))
+  (when (not (xt/x:nil? protocol))
+    (var protocol-impls (xt/x:get-key protocol "impls"))
+    (var protocol-impl-map (xt/x:get-key protocol-impls type))
+    (when (not (xt/x:nil? protocol-impl-map))
+      (var method-fn (xt/x:get-key protocol-impl-map method))
+      (when (not (xt/x:nil? method-fn))
+        (return method-fn)))
 
-  (var method-fn (xt/x:get-key impl-map method))
-  (when (xt/x:nil? method-fn)
-    (xt/x:err (xt/x:cat "Missing protocol method " on "/" method)))
-  (return method-fn))
+  (var direct-fn (xt/x:get-key obj method))
+  (when (not (xt/x:nil? direct-fn))
+    (return direct-fn))
+
+  (var local-impls (xt/x:get-key obj "::/impls"))
+  (var local-proto (xt/x:get-key local-impls on))
+  (var local-fn (xt/x:get-key local-proto method))
+  (when (not (xt/x:nil? local-fn))
+    (return local-fn))
+
+  (xt/x:err (xt/x:cat "Missing protocol method " on "/" method)))
 
 (defn.xt register-protocol-impl
+  "registers protocol implementations in the registry"
+  {:added "4.1"}
   [protocol-or-on type impl-map]
   (var on (if (xt/x:is-object? protocol-or-on)
             (xt/x:get-key protocol-or-on "on")
@@ -109,6 +121,8 @@
 ;;
 
 (defn format-defprotocol-method-xt
+  "formats a protocol method wrapper"
+  {:added "4.1"}
   [on-str sig-sym arglist]
   (let [sig-name (case/snake-case (name sig-sym))]
     (list 'defn.xt sig-sym arglist
@@ -132,15 +146,16 @@
     (list `create-protocol-fn on-str sig-map)))
 
 (defmacro defprotocol.xt
+  "expands to a protocol value and method wrappers"
+  {:added "4.1"}
   [sym & opts+sigs]
   (let [curr-ns (case/snake-case (name (ns-name *ns*)))
         on-str  (str curr-ns "/" (name sym))
         methods (mapv (fn [[sig-sym arglist]]
                         (format-defprotocol-method-xt on-str sig-sym arglist))
                       opts+sigs)]
-    (concat ['do]
-            [(list 'def.xt sym (format-defprotocol-xt sym opts+sigs))]
-            methods)))
+    (vec (cons (list 'def.xt sym (format-defprotocol-xt sym opts+sigs))
+               methods))))
 
 ;;
 ;; defimpl.xt
@@ -154,36 +169,33 @@
              impl-map)))
 
 (defn format-defimpl-xt
+  "formats a defimpl.xt constructor and protocol registration"
+  {:added "4.1"}
   [type-sym impl-fields protocols]
   (let [curr-ns     (case/snake-case (name (ns-name *ns*)))
         type-name   (str curr-ns "/" (name type-sym))
         impl-fields (mapv name impl-fields)
         ctor-map    (into {"::" type-name}
                           (concat (map (fn [f] [f (symbol f)]) impl-fields)
-                                  [["::/impls" {}]]))
+                                  [["::/override" {}]]))
         proto-forms  (mapv (fn [[proto-sym impl-map]]
                              (list `register-protocol-impl
                                    proto-sym
                                    type-name
                                    (normalize-protocol-impl-map impl-map)))
                            protocols)]
-    (concat
-     [(list 'def.xt (symbol (str (name type-sym) "-init"))
-            proto-forms)]
-     [(list 'defn.xt type-sym impl-fields
-            (list 'return ctor-map))])))
+    [(list 'def.xt (symbol (str (name type-sym) "-init"))
+           proto-forms)
+     (list 'defn.xt type-sym impl-fields
+           (list 'return ctor-map))]))
 
 (defmacro defimpl.xt
-  [type-sym & args]
-  (cond (and (= 2 (count args))
-             (vector? (first args))
-             (vector? (second args)))
-        (format-defimpl-xt type-sym (first args) (second args))
-
-        :else
-        (throw (ex-info "Invalid defimpl.xt form"
-                        {:type-sym type-sym
-                         :args args}))))
+  "expands to a constructor and protocol registrations"
+  {:added "4.1"}
+  [type-sym arglist & impls]
+  (format-defimpl-xt type-sym
+                     arglist
+                     (partition-all 2 impls)))
 
 ;;
 ;;

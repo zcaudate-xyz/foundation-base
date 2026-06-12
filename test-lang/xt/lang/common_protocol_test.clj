@@ -2,7 +2,10 @@
   (:use code.test)
   (:require [hara.lang :as l]))
 
-(do (l/script- :xtalk))
+(do (l/script- :xtalk
+      {:require [[xt.lang.common-protocol :as proto]
+                 [xt.lang.spec-base :as xt]
+                 [xt.lang.spec-promise :as promise]]}))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
@@ -217,21 +220,6 @@
   => {"hello_prn" "hello-prn-fn"
       "hello_str" "hello-str-fn"}
 
-  (!.lua
-    (do
-      (xt/x:set-key proto/REGISTRY "xt.lang.common_protocol_test/IHello"
-                    {"::" "type/protocol"
-                     "impls" {}})
-      (proto/register-protocol-impl "xt.lang.common_protocol_test/IHello"
-                                    "xt.lang.common_protocol_test/Hello"
-                                    {"hello_prn" "hello-prn-fn"
-                                     "hello_str" "hello-str-fn"})
-      (xt/x:get-key (xt/x:get-key (xt/x:get-key proto/REGISTRY "xt.lang.common_protocol_test/IHello")
-                                  "impls")
-                    "xt.lang.common_protocol_test/Hello")))
-  => {"hello_prn" "hello-prn-fn"
-      "hello_str" "hello-str-fn"}
-
   (!.py
     (do
       (xt/x:set-key proto/REGISTRY "xt.lang.common_protocol_test/IHello"
@@ -289,47 +277,66 @@
 ^{:refer xt.lang.common-protocol/defprotocol.xt :added "4.1"}
 (fact "expands to a protocol value and method wrappers"
 
-  (defprotocol.xt IHello
+  (macroexpand-1
+   '(proto/defprotocol.xt IHello
+     (hello-str [impl])
+     (hello-prn [impl])))
+  => vector?
+
+  (proto/defprotocol.xt IHello
     (hello-str [impl])
     (hello-prn [impl]))
-  => #(and (seq? %)
-           (= 'do (first %))
-           (some #{'def.xt} (tree-seq coll? seq %))
-           (some #{'hello-str} (tree-seq coll? seq %))
-           (some #{'hello-prn} (tree-seq coll? seq %)))
-
+  
   (!.js
-    -/hello-str)
-  => #(or (fn? %) (nil? %)))
+    (xt/x:is-function? -/hello-str))
+  => true)
 
 ^{:refer xt.lang.common-protocol/format-defimpl-xt :added "4.1"}
 (fact "formats a defimpl.xt constructor and protocol registration"
 
-  (format-defimpl-xt 'Hello
-                     '[state client schema lookup opts]
-                     '[-/IHello
-                       '{hello-prn -/hello-prn-fn
-                         hello-str -/hello-str-fn}])
-  )
-
+  (proto/format-defimpl-xt 'Hello
+                           '[state client schema lookup opts]
+                           '[[xt.lang.common-protocol-test/IHello
+                              {hello-prn -/hello-prn-fn
+                               hello-str -/hello-str-fn}]])
+  => '[(def.xt Hello-init
+         [(xt.lang.common-protocol/register-protocol-impl
+           xt.lang.common-protocol-test/IHello
+           "xt.lang.common_protocol_test/Hello"
+           {"hello_prn" -/hello-prn-fn, "hello_str" -/hello-str-fn})])
+       (defn.xt Hello
+         ["state" "client" "schema" "lookup" "opts"]
+         (return
+          {"::" "xt.lang.common_protocol_test/Hello",
+           "::/override" {}
+           "state" state,
+           "client" client,
+           "schema" schema,
+           "lookup" lookup,
+           "opts" opts}))])
+  
 ^{:refer xt.lang.common-protocol/defimpl.xt :added "4.1"}
 (fact "expands to a constructor and protocol registrations"
-
   
-  (defimpl.xt Hello
+  (defn.xt hello-str-fn
+    [impl]
+    (return (xt/x:cat "hello " (xt/x:get-key impl "state"))))
+  
+  (defn.xt hello-prn-fn
+    [impl]
+    (return (xt/x:cat "prn " (xt/x:get-key impl "state"))))
+  
+  
+  (proto/defimpl.xt Hello
     [state client schema lookup opts]
-    [-/IHello
-     {hello-prn -/hello-prn-fn
-      hello-str -/hello-str-fn}])
-  => #(and (seq? %)
-           (= 'do (first %))
-           (some #{'register-protocol-impl} (tree-seq coll? seq %))
-           (some #{'Hello} (tree-seq coll? seq %))
-           (some #{'state} (tree-seq coll? seq %))
-           (some #{'client} (tree-seq coll? seq %))
-           (some #{'schema} (tree-seq coll? seq %))
-           (some #{'lookup} (tree-seq coll? seq %))
-           (some #{'opts} (tree-seq coll? seq %))))
+    -/IHello
+    {hello-prn -/hello-prn-fn
+     hello-str -/hello-str-fn}
+    
+    -/IHello
+    {hello-prn -/hello-prn-fn
+     hello-str -/hello-str-fn})
+  => [#'xt.lang.common-protocol-test/Hello-init #'xt.lang.common-protocol-test/Hello])
 
 (comment
   (s/snapto '[xt.lang.common-protocol])

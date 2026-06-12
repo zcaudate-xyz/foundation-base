@@ -1,11 +1,13 @@
 (ns js.net.conn-postgres
   (:require [hara.lang :as l]
-            [std.lib.foundation :as f])
+            [std.lib.foundation :as f]
+            [xt.lang.common-protocol :refer [defimpl.xt]])
   (:refer-clojure :exclude [print send]))
 
 (l/script :js
   {:require [[xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
+             [xt.lang.common-protocol :as protocol]
              [xt.net.conn-sql :as conn-sql]]
    :import [["pg" :as [* Postgres]]]})
 
@@ -63,30 +65,28 @@
               (xt/x:set-key client "raw" conn)
               (return client))))))
 
-(defn.js create-methods
-  []
-  (return
-   {"connect"     -/client-connect
-    "disconnect"  (fn [client]
-                    (var #{raw} client)
-                    (. raw (end))
-                    (xt/x:del-key client "raw")
-                    (return client))
-    "query"       (fn [client input]
-                    (throw "Not Allowed"))
-    "query_async" (fn [client input]
-                    (var #{raw} client)
-                    (return
-                     (. raw
-                        (query input)
-                        (then -/normalise-query-output))))}))
+(defimpl.xt PostgresClient
+  [defaults raw]
+  [conn-sql/ISqlClient
+   {conn-sql/connect -/client-connect
+    conn-sql/disconnect (fn [client]
+                          (var #{raw} client)
+                          (. raw (end))
+                          (xt/x:del-key client "raw")
+                          (return client))
+    conn-sql/query (fn [client input]
+                     (throw "Not Allowed"))
+    conn-sql/query-async (fn [client input]
+                           (var #{raw} client)
+                           (return
+                            (. raw
+                               (query input)
+                               (then -/normalise-query-output))))}])
 
 (defn.js create
   [defaults]
   (return
-   (conn-sql/create-base "js.net.conn-postgres"
-                         (-/create-methods)
-                         defaults)))
+   (-/PostgresClient defaults nil)))
 
 
 

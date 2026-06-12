@@ -1,5 +1,6 @@
 (ns js.net.conn-sqlite
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
@@ -75,25 +76,23 @@
               (xt/x:set-key client "raw" raw)
               (return client))))))
 
-(defn.js create-methods
-  []
-  (return
-   {"connect"     -/client-connect
-    "disconnect"  (fn [client]
-                    (var #{raw} client)
-                    (. raw (close))
-                    (return true))
-    "query"       (fn [client query]
-                    (var #{raw} client)
-                    (return (-/raw-query raw query)))
-    "query_async" (fn [client query]
-                    (var #{raw} client)
-                    (return (protocol/ensure-promise
-                             (-/raw-query raw query))))}))
+(defimpl.xt SqliteClient
+  [defaults raw]
+  [conn-sql/ISqlClient
+   {conn-sql/connect -/client-connect
+    conn-sql/disconnect (fn [client]
+                          (var #{raw} client)
+                          (. raw (close))
+                          (return true))
+    conn-sql/query (fn [client query]
+                     (var #{raw} client)
+                     (return (-/raw-query raw query)))
+    conn-sql/query-async (fn [client query]
+                           (var #{raw} client)
+                           (return (protocol/ensure-promise
+                                    (-/raw-query raw query))))}])
 
 (defn.js create
   [defaults]
   (return
-   (conn-sql/create-base "js.net.conn-sqlite"
-                         (-/create-methods)
-                         defaults)))
+   (-/SqliteClient defaults nil)))

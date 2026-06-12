@@ -1,9 +1,11 @@
 (ns js.net.http-fetch
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-protocol :as protocol]
              [xt.net.http-fetch :as fetch]]})
 
 (defn.js request-http-raw
@@ -25,18 +27,16 @@
 
 (defn.js request-http-client
   [client input opts]
-  (var prepped  (fetch/prepare-input client input opts))
+  (var prepped  (fetch/prepare-input client input))
   (return
    (-/request-http-raw prepped)))
 
-(defn.js create-methods
-  []
-  (return
-   {"request_http" -/request-http-client}))
+(defimpl.xt HttpFetchClient
+  [defaults]
+  [fetch/IHttpClient
+   {fetch/request-http -/request-http-client}])
 
 (defn.js create
   [defaults]
   (return
-   (fetch/create-base nil
-                      (-/create-methods)
-                      defaults)))
+   (-/HttpFetchClient defaults)))

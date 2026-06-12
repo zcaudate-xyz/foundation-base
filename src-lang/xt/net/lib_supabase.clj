@@ -98,7 +98,7 @@
    ["email" [:xt/maybe :xt/str]]])
 
 (defspec.xt create-client
-  [:fn [:xt/any :xt/str :xt/str :xt/bool :xt/str :xt/str]
+  [:fn [:xt/str :xt/str :xt/bool :xt/str :xt/str]
    SupabaseClient])
 
 (defspec.xt request
@@ -125,18 +125,44 @@
 ;; HELPERS
 ;;
 
-(defn.xt create-client
-  [methods host port secured basepath apikey]
+(defn.xt request-http
+  [client input opts]
+  (var http-client (xt/x:get-key client "_http"))
   (return
-   (fetch/create-base "net.superbase"
-                      methods
-                      {:secured secured
-                       :host host
-                       :port port
-                       :headers {"apikey" apikey
-                                 "Content-Type" "application/json"
-                                 "Accept" "application/json"}
-                       :basepath ""})))
+   (fetch/request-http
+    http-client
+    input
+    opts)))
+
+(defn.xt create-client
+  [host port secured basepath apikey]
+  (var http-defaults
+       {"secured" secured
+        "host" host
+        "port" port
+        "basepath" basepath
+        "headers" {"apikey" apikey
+                    "Content-Type" "application/json"
+                    "Accept" "application/json"}})
+  (var http-client
+       (fetch/create-base "js.net.http_fetch/HttpFetchClient"
+                          nil
+                          http-defaults))
+  (var client
+       (fetch/create-base "net.superbase"
+                          nil
+                          {"secured" secured
+                           "host" host
+                           "port" port
+                           "headers" {"apikey" apikey
+                                       "Content-Type" "application/json"
+                                       "Accept" "application/json"}
+                           "basepath" basepath}))
+  (xt/x:set-key client "_http" http-client)
+  (xt/x:set-key client "::/override"
+                {(xt/x:get-key fetch/IHttpClient "on")
+                 {"request_http" -/request-http}})
+  (return client))
 
 (defn.xt request
   [client opts]

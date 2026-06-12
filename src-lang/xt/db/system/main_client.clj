@@ -14,8 +14,7 @@
              [xt.net.lib-supabase :as lib-supabase]
              [xt.net.conn-sql :as conn-sql]
              [js.net.conn-sqlite :as js-sqlite]
-             [js.net.conn-postgres :as js-postgres]
-             [js.net.http-fetch :as js-fetch]]})
+             [js.net.conn-postgres :as js-postgres]]})
 
 (defn.js create-client
   [type defaults]
@@ -35,7 +34,6 @@
                    apikey} defaults)
           (return
            (lib-supabase/create-client
-            (js-fetch/create-methods)
             host
             port
             secured
