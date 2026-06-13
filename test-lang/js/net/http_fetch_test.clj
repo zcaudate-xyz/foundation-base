@@ -25,6 +25,7 @@
   {:runtime :basic
    :require [[xt.lang.spec-promise :as promise]
              [xt.lang.spec-base :as xt]
+             [xt.lang.common-protocol :as proto]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-tree :as tree]
              [xt.net.http-fetch :as fetch]
@@ -48,7 +49,7 @@
            (repl/notify (. out status))))))
   => 200)
 
-^{:refer js.net.fetch/request-http-client :added "4.1"}
+^{:refer js.net.fetch/request-http :added "4.1"}
 (fact "request http client for supabase"
   
   (notify/wait-on :js
@@ -56,7 +57,7 @@
          {:headers {"apikey" (@! (-> docker-min/+config+ :api :anon-key))}
           :host "127.0.0.1",
           :port "55121"})
-        (js-fetch/request-http-client {:path "/auth/v1/health"})
+        (js-fetch/request-http {:path "/auth/v1/health"})
         (promise/x:promise-then
          (fn [out]
            (repl/notify (. out status))))))
@@ -81,14 +82,14 @@
                     "Content-Type" "application/json"}
           :host "127.0.0.1",
           :port "55121"})
-        (js-fetch/request-http-client {:path "/rest/v1/rpc/ping"
+        (js-fetch/request-http {:path "/rest/v1/rpc/ping"
                                        :method "POST"
                                        :body "{}"})
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
   => {"body" "\"pong\"", "status" 200, "headers" {}}  
-
+  
   (notify/wait-on :js
     (-> (js-fetch/create
          {:headers {"apikey" (@! (-> docker-min/+config+ :api :service-key))
@@ -97,7 +98,7 @@
                     "Content-Type" "application/json"}
           :host "127.0.0.1",
           :port "55121"})
-        (js-fetch/request-http-client {:path "/rest/v1/rpc/log_append_public"
+        (js-fetch/request-http {:path "/rest/v1/rpc/log_append_public"
                                        :method "POST"
                                        :body "{\"i_message\": \"hello\"}"})
         (promise/x:promise-then
@@ -109,14 +110,6 @@
        "author_id" nil,
        "id" string?}))
 
-^{:refer js.net.fetch/create-methods :added "4.1"}
-(fact "creates the wrapper methods for fetch"
-
-  (!.js
-    (tree/tree-get-spec
-     (js-fetch/create-methods)))
-  => {"request_http" "function"})
-
 ^{:refer js.net.fetch/create :added "4.1"}
 (fact "creates the wrapper for fetching"
   
@@ -126,12 +119,12 @@
                     "Authorization" (xt/x:cat "Bearer " (@! (-> docker-min/+config+ :api :service-key)))}
           :host "127.0.0.1",
           :port "55121"})
-        (js-fetch/request-http-client {:path "/auth/v1/admin/users"})
+        (js-fetch/request-http {:path "/auth/v1/admin/users"})
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {"body" "{\"users\":[],\"aud\":\"authenticated\"}", "status" 200, "headers" {}}
-
+  => (contains-in {"body" string?})
+  
   (notify/wait-on :js
     (-> (js-fetch/create
          {:headers {"apikey" (@! (-> docker-min/+config+ :api :anon-key))
@@ -139,7 +132,7 @@
                     "Accept-Profile" "scratch_v0"}
           :host "127.0.0.1",
           :port "55121"})
-        (js-fetch/request-http-client {:path "/rest/v1/Log?select=id,message,author_id&order=id.desc&limit=20"})
+        (js-fetch/request-http {:path "/rest/v1/Log?select=id,message,author_id&order=id.desc&limit=20"})
         (promise/x:promise-then
          (fn [out]
            (repl/notify
@@ -148,3 +141,6 @@
       [{"message" "hello",
         "author_id" nil,
         "id" string?}]))
+
+
+

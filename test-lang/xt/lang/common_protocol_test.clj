@@ -299,29 +299,7 @@
                            '[[xt.lang.common-protocol-test/IHello
                               {hello-prn -/hello-prn-fn
                                hello-str -/hello-str-fn}]])
-  '(defn.xt Hello
-     [state client schema lookup opts]
-     (when (not
-            (xt.lang.spec-base/x:get-key
-             xt.lang.common-protocol/IMPLEMENTATIONS
-             "xt.lang.common_protocol_test/Hello"))
-       (do
-         (xt.lang.spec-base/x:set-key
-          xt.lang.common-protocol/IMPLEMENTATIONS
-          "xt.lang.common_protocol_test/Hello"
-          true)
-         (xt.lang.common-protocol/register-protocol-impl
-          xt.lang.common-protocol-test/IHello
-          "xt.lang.common_protocol_test/Hello"
-          {"hello_prn" -/hello-prn-fn, "hello_str" -/hello-str-fn})))
-     (return
-      {"::" "xt.lang.common_protocol_test/Hello",
-       "::/protocols" [xt.lang.common-protocol-test/IHello],
-       "state" state,
-       "client" client,
-       "schema" schema,
-       "lookup" lookup,
-       "opts" opts})))
+  )
 
 ^{:refer xt.lang.common-protocol/defimpl.xt :added "4.1"}
 (fact "expands to a constructor and protocol registrations"

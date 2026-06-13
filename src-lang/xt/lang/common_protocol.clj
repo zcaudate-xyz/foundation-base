@@ -87,13 +87,13 @@
   
   (var protocol (xt/x:get-key -/PROTOCOLS on))
   (when (xt/x:nil? protocol)
-    (xt/x:err (xt/x:cat "Missing protocol " on)))
+    (xt/x:err (xt/x:cat "Missing protocol entry " on)))
   
   (var protocol-impls (xt/x:get-key protocol "impls"))
   (var protocol-impl-map (xt/x:get-key protocol-impls type))
 
   (when (xt/x:nil? protocol-impl-map)
-    (xt/x:err (xt/x:cat "Missing protocol " on " for " type)))
+    (xt/x:err (xt/x:cat "Missing protocol implementation " on " for " type)))
   
   (var method-fn (xt/x:get-key protocol-impl-map method))
   
@@ -105,15 +105,12 @@
 (defn.xt register-protocol-impl
   "registers protocol implementations in the registry"
   {:added "4.1"}
-  [protocol-or-on type impl-map]
-  (var on (:? (xt/x:is-object? protocol-or-on)
-              (xt/x:get-key protocol-or-on "on")
-              protocol-or-on))
-  (var protocol (xt/x:get-key -/PROTOCOLS on))
+  [protocolname typename impl-map]
+  (var protocol (xt/x:get-key -/PROTOCOLS protocolname))
   (when (xt/x:nil? protocol)
-    (xt/x:err (xt/x:cat "Missing protocol " on)))
+    (xt/x:err (xt/x:cat "Missing protocol " protocolname)))
   (var impls (xt/x:get-key protocol "impls"))
-  (xt/x:set-key impls type impl-map)
+  (xt/x:set-key impls typename impl-map)
   (return impl-map))
 
 (defn.xt create-protocol-fn
@@ -194,17 +191,27 @@
   "formats a defimpl.xt constructor and protocol registration"
   {:added "4.1"}
   [type-sym impl-fields protocols]
-  (let [curr-ns     (case/snake-case (name (ns-name *ns*)))
-        typename   (str curr-ns "/" (name type-sym))
+  (let [sym-fn      (fn [ns sym]
+                      (str (case/snake-case (name ns))
+                           "/"
+                           (name sym)))
+        typename   (sym-fn (ns-name *ns*) type-sym)
+        
         ctor-map    (into {"::" typename
                            "::/protocols" (mapv first protocols)}
                           (map (fn [x] [(name x) x]) impl-fields))
+
         proto-forms  (mapv (fn [[proto-sym impl-map]]
-                             (list `register-protocol-impl
-                                   proto-sym
-                                   typename
-                                   (normalize-protocol-impl-map impl-map)))
+                             (let [_  (std.lib/prn proto-sym)
+                                   entry @(resolve proto-sym)]
+                               
+                               (list `register-protocol-impl
+                                     (sym-fn (:module entry)
+                                             (:id entry))
+                                     typename
+                                     (normalize-protocol-impl-map impl-map))))
                            protocols)]
+    
     (list (format-defimpl-xt-symbol type-sym "defn")
           type-sym impl-fields
           (list 'when (list 'not (list `xt/x:get-key `-/IMPLEMENTATIONS typename))
