@@ -11,30 +11,49 @@
 (defn.js connect-ws
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
-  [client opts])
+  [client opts]
+  (var url  (websocket/prepare-url client input))
+  (var raw (new WebSocket url))
+  (xt/x:set-key client "raw" raw)
+  (return client))
 
 (defn.js disconnect-ws
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
-  [client])
+  [client]
+  (var #{raw} client)
+  (when raw
+    (. raw (close 1000 "done")))
+  (xt/x:set-key client "raw" nil)
+  (return client))
 
 (defn.js send-ws
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
-  [client input])
+  [client input]
+  (var #{raw} client)
+  (when raw
+    (return
+     (. raw (send input)))))
 
 (defn.js add-listeners-ws
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
-  [client m])
+  [client m]
+  (var #{raw} client)
+  (when raw
+    (xt/for:object [[k handler] m]
+      (. raw (addEventListener k handler)))
+    (return (xt/x:obj-keys m))))
 
-(defimpl.xt HttpWebsocketClient
+(defimpl.xt ^{:lang :js}
+  HttpWebsocketClient
   [defaults]
-  [websocket/IWebsocket
-   {websocket/connect -/connect-ws
-    websocket/disconnect -/disconnect-ws
-    websocket/send -/send-ws
-    websocket/add-listeners -/add-listeners-ws}])
+  websocket/IWebsocket
+  {websocket/connect -/connect-ws
+   websocket/disconnect -/disconnect-ws
+   websocket/send -/send-ws
+   websocket/add-listeners -/add-listeners-ws})
 
 (defn.js create
   [defaults]

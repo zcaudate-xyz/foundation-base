@@ -14,4 +14,23 @@
   (send [client input])
   (add-listeners [client m]))
 
+(defn.xt prepare-url
+  [client input]
+  (var #{url path} input)
+  (if (not (xt/x:nil? url))
+    (return url))
+  
+  (var #{defaults} client)
+  (var #{secured
+         host
+         port
+         basepath} defaults)
+  
+  (return (xt/x:cat "ws" (:? secured "s" "")
+                    "://" host
+                    ":"
+                    (or port "80")
+                    (or basepath "")
+                    (or path ""))))
+
 
