@@ -304,17 +304,16 @@
            xt.lang.common-protocol-test/IHello
            "xt.lang.common_protocol_test/Hello"
            {"hello_prn" -/hello-prn-fn, "hello_str" -/hello-str-fn})])
-       (defn.xt Hello
-         ["state" "client" "schema" "lookup" "opts"]
+       (def.xt Hello
+         [state client schema lookup opts]
          (return
           {"::" "xt.lang.common_protocol_test/Hello",
-           "::/override" {}
            "state" state,
            "client" client,
            "schema" schema,
            "lookup" lookup,
            "opts" opts}))])
-  
+
 ^{:refer xt.lang.common-protocol/defimpl.xt :added "4.1"}
 (fact "expands to a constructor and protocol registrations"
   

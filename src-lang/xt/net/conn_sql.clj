@@ -12,10 +12,4 @@
   (query [client input])
   (query-async [client input]))
 
-(defn.xt create-base
-  [type defaults]
-  (return
-   {"::" type
-    "defaults" defaults
-    "::/override" {}}))
 

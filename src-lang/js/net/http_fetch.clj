@@ -25,16 +25,17 @@
                                                  "headers" (. res ["headers"])
                                                  "body" text}))))))))))
 
-(defn.js request-http-client
-  [client input opts]
+(defn.js request-http
+  [client input]
   (var prepped  (fetch/prepare-input client input))
   (return
    (-/request-http-raw prepped)))
 
-(defimpl.xt HttpFetchClient
+(defimpl.xt ^{:lang :js}
+  HttpFetchClient
   [defaults]
   [fetch/IHttpClient
-   {fetch/request-http -/request-http-client}])
+   {fetch/request-http -/request-http}])
 
 (defn.js create
   [defaults]

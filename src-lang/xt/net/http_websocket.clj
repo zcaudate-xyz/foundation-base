@@ -14,10 +14,4 @@
   (send [client input])
   (add-listeners [client m]))
 
-(defn.xt create-base
-  [type methods defaults]
-  (return
-   (xt/x:obj-assign {"::" (or type "xt.net.http-websocket")
-                     "defaults" (or defaults {})
-                     "::/override" (or methods {})} {})))
 

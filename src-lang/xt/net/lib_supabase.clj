@@ -1,8 +1,10 @@
 (ns xt.net.lib-supabase
-  (:require [hara.lang :as l :refer [defspec.xt]]))
+  (:require [hara.lang :as l :refer [defspec.xt]]
+            [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-string :as str]
+             [xt.lang.common-protocol :as proto :refer [defimpl.xt]]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as fetch]
@@ -122,77 +124,49 @@
 
 
 ;;
-;; HELPERS
+;;
 ;;
 
 (defn.xt request-http
-  [client input opts]
-  (var http-client (xt/x:get-key client "_http"))
+  [client input]
+  (var #{http defaults} client)
+  (var apikey  (or (xt/x:get-key inputs "apikey")
+                   (xt/x:get-key defaults "apikey")))
+  (var token   (or (xt/x:get-key inputs "token")
+                   (xt/x:get-key defaults "token")))
+  (var headers (-> {"Content-Type" "application/json"
+                    "Accept" "application/json"}
+                   (xt/x:obj-assign (xt/x:get-key defaults "headers"))
+                   (xt/x:obj-assign (xt/x:get-key input "headers"))
+                   (xt/x:obj-assign (:? token  {"Authorization" (xt/x:cat "Bearer " token)}))
+                   (xt/x:obj-assign (:? apikey {"apikey" apikey} ))))
+  (var http-input (-> {}
+                      (xt/x:obj-assign defaults)
+                      (xt/x:obj-assign {"headers" headers})
+                      (xt/x:obj-assign input)))
   (return
-   (fetch/request-http
-    http-client
-    input
-    opts)))
-
-(defn.xt create-client
-  [host port secured basepath apikey]
-  (var http-defaults
-       {"secured" secured
-        "host" host
-        "port" port
-        "basepath" basepath
-        "headers" {"apikey" apikey
-                    "Content-Type" "application/json"
-                    "Accept" "application/json"}})
-  (var http-client
-       (fetch/create-base "js.net.http_fetch/HttpFetchClient"
-                          nil
-                          http-defaults))
-  (var client
-       (fetch/create-base "net.superbase"
-                          nil
-                          {"secured" secured
-                           "host" host
-                           "port" port
-                           "headers" {"apikey" apikey
-                                       "Content-Type" "application/json"
-                                       "Accept" "application/json"}
-                           "basepath" basepath}))
-  (xt/x:set-key client "_http" http-client)
-  (xt/x:set-key client "::/override"
-                {(xt/x:get-key fetch/IHttpClient "on")
-                 {"request_http" -/request-http}})
-  (return client))
-
-(defn.xt request
-  [client opts]
-  (:= opts (or opts {}))
-  (var #{token
-         apikey} opts)
-  (var headers (xt/x:obj-clone (or (xt/x:get-key opts "headers") {})))
-  (when token
-    (xt/x:set-key headers "Authorization" (xt/x:cat "Bearer " token)))
-  (when apikey
-    (xt/x:set-key headers "apikey" apikey))
-  (return
-   (-> (fetch/request-http client (xt/x:obj-assign opts
-                                                   {:headers headers}))
+   (-> (fetch/request-http http http-input)
        (fetch/then-normalise))))
+
+(defimpl.xt HttpSupabaseClient
+  [http defaults]
+  [fetch/IHttpClient
+   {fetch/request-http -/request-http}])
 
 (defn.xt request-get
   [client path opts]
   (return
-   (-/request client (xt/x:obj-assign {:path path
-                                       :method "GET"}
-                                      opts))))
+   (fetch/request-http client (xt/x:obj-assign {:path path
+                                                :method "GET"}
+                                               opts))))
 
 (defn.xt request-json
   [client path method data opts]
   (return
-   (-/request client (xt/x:obj-assign {:path path
-                                       :method method
-                                       :body (xt/x:json-encode data)}
-                                      opts))))
+   (fetch/request-http client (xt/x:obj-assign {:path path
+                                                :method method
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt rpc-call-api
   [:fn [SupabaseClient
@@ -203,7 +177,7 @@
 
 (defn.xt rpc-call
   [client rpc-name data opts]
-  (var path (xt/x:cat "/rest/v1/rpc/" (xt/x:str-replace rpc-name "-" "_")))
+  (var path (xt/x:cat "/rest/v1/rpc/" rpc-name))
   (return
    (-/request-json client path "POST" (or data {}) opts)))
 

@@ -9,7 +9,7 @@
              [xt.net.http-util :as util]]})
 
 (defprotocol.xt IHttpClient
-  (request-http [client input opts]))
+  (request-http [client input]))
 
 (def.xt REQUEST_FIELDS
   ["method"
@@ -50,21 +50,13 @@
   (var #{defaults} client)
   (var #{body
          method} input)
-  (var headers (xt/x:obj-assign
-                (xt/x:obj-clone
-                 (xt/x:get-key defaults "headers"))
-                (xt/x:get-key input "headers")))
+  (var headers (->  {}
+                    (xt/x:obj-assign (xt/x:get-key defaults "headers"))
+                    (xt/x:obj-assign (xt/x:get-key input "headers"))))
   (return {:url     (-/prepare-url client input)
            :body    body
            :method  (or method "GET")
            :headers headers}))
-
-(defn.xt create-base
-  [type methods defaults]
-  (return
-   (xt/x:obj-assign {"::" (or type "xt.net.http-fetch")
-                     "defaults" (or defaults {})
-                     "::/override" (or methods {})} {})))
 
 (defn.xt then-normalise
   [p]

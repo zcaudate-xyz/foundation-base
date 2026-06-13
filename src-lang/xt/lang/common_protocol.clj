@@ -57,6 +57,15 @@
 ;; design of protocol and class
 ;;
 
+(defn.xt raw-method
+  [on type method]
+  (return
+   (xtd/get-in -/REGISTRY
+               [on
+                "impls"
+                type
+                method])))
+
 (defn.xt protocol-method
   "looks up the registered method by protocol and implementation type"
   {:added "4.1"}
@@ -70,32 +79,29 @@
 
   (var protocol (xt/x:get-key -/REGISTRY on))
   (when (not (xt/x:nil? protocol))
-    (var protocol-impls (xt/x:get-key protocol "impls"))
-    (var protocol-impl-map (xt/x:get-key protocol-impls type))
-    (when (not (xt/x:nil? protocol-impl-map))
-      (var method-fn (xt/x:get-key protocol-impl-map method))
-      (when (not (xt/x:nil? method-fn))
-        (return method-fn)))
+    (xt/x:err (xt/x:cat "Missing protocol " on)))
+  
+  
+  (var protocol-impls (xt/x:get-key protocol "impls"))
+  (var protocol-impl-map (xt/x:get-key protocol-impls type))
 
-  (var direct-fn (xt/x:get-key obj method))
-  (when (not (xt/x:nil? direct-fn))
-    (return direct-fn))
+  (when (xt/x:nil? protocol-impl-map)
+    (xt/x:err (xt/x:cat "Missing protocol " on " for " type)))
+  
+  (var method-fn (xt/x:get-key protocol-impl-map method))
+  
+  (when (xt/x:nil? method-fn)
+    (xt/x:err (xt/x:cat "Missing protocol method " on "/" method " for " type)))
 
-  (var local-impls (xt/x:get-key obj "::/impls"))
-  (var local-proto (xt/x:get-key local-impls on))
-  (var local-fn (xt/x:get-key local-proto method))
-  (when (not (xt/x:nil? local-fn))
-    (return local-fn))
-
-  (xt/x:err (xt/x:cat "Missing protocol method " on "/" method)))
+  (return method-fn))
 
 (defn.xt register-protocol-impl
   "registers protocol implementations in the registry"
   {:added "4.1"}
   [protocol-or-on type impl-map]
-  (var on (if (xt/x:is-object? protocol-or-on)
-            (xt/x:get-key protocol-or-on "on")
-            protocol-or-on))
+  (var on (:? (xt/x:is-object? protocol-or-on)
+              (xt/x:get-key protocol-or-on "on")
+              protocol-or-on))
   (var protocol (xt/x:get-key -/REGISTRY on))
   (when (xt/x:nil? protocol)
     (xt/x:err (xt/x:cat "Missing protocol " on)))
@@ -114,6 +120,7 @@
         "impls" {}})
   (xt/x:set-key -/REGISTRY on protocol)
   (return protocol))
+
 
 
 ;;
@@ -168,25 +175,32 @@
                [(case/snake-case (name k)) v])
              impl-map)))
 
+(defn format-defimpl-xt-symbol
+  [type-sym]
+  (let [lang  (or (:lang (meta type-sym))
+                  :xtalk)
+        tag   (or (:tag (l/grammar lang))
+                  (throw (ex-info "Unknown language" {:lang lang})))]
+    (symbol (str "def." (name tag)))))
+
 (defn format-defimpl-xt
   "formats a defimpl.xt constructor and protocol registration"
   {:added "4.1"}
   [type-sym impl-fields protocols]
   (let [curr-ns     (case/snake-case (name (ns-name *ns*)))
         type-name   (str curr-ns "/" (name type-sym))
-        impl-fields (mapv name impl-fields)
         ctor-map    (into {"::" type-name}
-                          (concat (map (fn [f] [f (symbol f)]) impl-fields)
-                                  [["::/override" {}]]))
+                          (map (fn [x] [(name x) x]) impl-fields))
         proto-forms  (mapv (fn [[proto-sym impl-map]]
                              (list `register-protocol-impl
                                    proto-sym
                                    type-name
                                    (normalize-protocol-impl-map impl-map)))
-                           protocols)]
-    [(list 'def.xt (symbol (str (name type-sym) "-init"))
+                           protocols)
+        defsym  (format-defimpl-xt-symbol type-sym)]
+    [(list defsym (symbol (str (name type-sym) "-init"))
            proto-forms)
-     (list 'defn.xt type-sym impl-fields
+     (list defsym type-sym impl-fields
            (list 'return ctor-map))]))
 
 (defmacro defimpl.xt
