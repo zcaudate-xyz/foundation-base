@@ -86,7 +86,26 @@
 
 
 ^{:refer xt.net.lib-supabase/query-table :added "4.1"}
-(fact "TODO")
+(fact "queries a live table through the rest endpoint"
+
+  (notify/wait-on :js
+    (var message (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms))))
+    (-> (-/default-client (@! (-> docker-min/+config+ :api :service-key)))
+        (lib-supabase/rpc-call "log_append_public"
+                               {"i_message" message}
+                               {"headers" {"Content-Profile" "scratch_v0"}})
+        (promise/x:promise-then
+         (fn [_created]
+           (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
+               (lib-supabase/query-table
+                "Log"
+                "select=id,message,author_id&order=id.desc&limit=1"
+                {"headers" {"Accept-Profile" "scratch_v0"}})
+               (promise/x:promise-then
+                (fn [out]
+                  (repl/notify [(. out ["status"])
+                                (xt/x:is-array? (. out ["body"]))]))))))))
+  => [200 true])
 
 ^{:refer xt.net.lib-supabase/health :added "4.1"}
 (fact "calls the auth health endpoint against local supabase"

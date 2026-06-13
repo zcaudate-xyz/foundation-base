@@ -92,8 +92,7 @@
   {impl-common/pull-async      -/pull-async
    impl-common/rpc-call-async  -/rpc-call-async})
 
-
 (defn.xt impl-memory
-  [rows schema lookup]
+  [schema lookup]
   (return
-   (-/ImplMemory rows schema lookup)))
+   (-/ImplMemory {} schema lookup)))

@@ -7,6 +7,7 @@
              [xt.protocol.impl.connection-sql :as dbsql]
              [xt.substrate :as substrate]
              [xt.db.text.sql-call :as call]
+             [xt.db.system.impl-common :as impl-common]
              [xt.db.system.main :as impl-main]]})
 
 ;;
@@ -67,7 +68,7 @@
         (substrate/get-service node "db/primary"))
        (promise/x:promise-then
         (fn [impl]
-          (return (impl-main/rpc-call-async impl rpc-spec fn-args)))))))
+          (return (impl-common/rpc-call-async impl rpc-spec fn-args)))))))
 
 
 
@@ -80,7 +81,6 @@
 (defn.xt ^{:substrate/fn true}
   init-handlers
   [node db-map])
-
 
 
 

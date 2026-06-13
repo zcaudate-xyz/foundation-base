@@ -132,7 +132,7 @@
   "sqlite impl does not support remote rpc calls"
   {:added "4.1"}
   [_impl _rpc-spec _args]
-  (xt/x:err "db.impl.sqlite does not support rpc_call_async"))
+  (xt/x:err "ImplSqlite does not support rpc_call_async"))
 
 
 ;;

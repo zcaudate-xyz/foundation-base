@@ -137,6 +137,11 @@
   fetch/IHttpClient
   {fetch/request-http -/request-http})
 
+(defn.xt create
+  [http defaults]
+  (return
+   (-/HttpSupabaseClient http defaults)))
+
 ;;
 ;; RPC call api
 ;;

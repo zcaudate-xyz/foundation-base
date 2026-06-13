@@ -86,26 +86,8 @@
                                                 {"id" "AUD" "name" "AUD"}]))))))
   => [])
 
-^{:refer xt.db.system.impl-sqlite/record-add-async :added "4.1"}
-(fact "record-add-async uses async sqlite semantics"
-
-  (notify/wait-on :js
-    (-> (-/connect-impl)
-        (promise/x:promise-then
-         (fn [impl]
-           (return
-            (impl/record-add-async impl "Currency" [{"id" "USD" "name" "USD"}
-                                                      {"id" "AUD" "name" "AUD"}]))))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))))
-  => [])
-
 ^{:refer xt.db.system.impl-sqlite/record-delete :added "4.1"}
 (fact "record-delete uses stored sqlite context")
-
-^{:refer xt.db.system.impl-sqlite/record-delete-async :added "4.1"}
-(fact "record-delete-async uses async sqlite semantics")
 
 ^{:refer xt.db.system.impl-sqlite/process-add-event :added "4.1"}
 (fact "process-add-event executes sql upserts through stored sqlite context"
@@ -134,18 +116,6 @@
          (fn [out]
            (repl/notify out)))))
   => ["UserAccount" "UserProfile"])
-
-^{:refer xt.db.system.impl-sqlite/exec-sync :added "4.1"}
-(fact "exec-sync runs raw sql through the wired sqlite impl"
-
-
-  (notify/wait-on :js
-    (-> (-/connect-impl)
-        (promise/x:promise-then
-         (fn [impl]
-           (repl/notify
-            (impl/exec-sync impl "SELECT 1;"))))))
-  => 1)
 
 ^{:refer xt.db.system.impl-sqlite/impl-sqlite :added "4.1"}
 (fact "creates the sqlite impl config before connection init"

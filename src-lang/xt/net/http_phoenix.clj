@@ -77,7 +77,11 @@
   (var topic (xt/x:get-key opts "topic"))
   (when (xt/x:nil? topic)
     (xt/x:err "Phoenix channel missing topic"))
-  (return (-/make-frame topic "phx_join" (or payload {}) opts)))
+  (return (-/make-frame client
+                        topic
+                        "phx_join"
+                        (or payload {})
+                        (or opts {}))))
 
 (defn.xt make-frame-leave
   "creates a phoenix leave frame"
@@ -86,7 +90,12 @@
   (var topic (xt/x:get-key opts "topic"))
   (when (xt/x:nil? topic)
     (xt/x:err "Phoenix channel missing topic"))
-  (return (-/make-frame topic "phx_leave" (or payload {}) opts)))
+  (return (-/make-frame client topic "phx_leave" {} (or opts {}))))
+
+
+;;
+;;
+;;
 
 (defn.xt send-join
   "sends a phoenix join frame"
