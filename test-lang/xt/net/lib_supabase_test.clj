@@ -47,18 +47,20 @@
      :basepath ""
      :apikey apikey})))
 
-^{:refer xt.net.lib-supabase/request-http :added "4.1"}
+^{:refer xt.net.lib-supabase/request-http :added "4.1"
+  :setup [(l/rt:restart :js)]}
 (fact "TODO"
 
   (notify/wait-on :js
     (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
     (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
-        (lib-supabase/request-http {"path" "/auth/v1/signup" "method" "POST" "body" {"email" email "password" "123456789"}})
-       (promise/x:promise-then
-        (fn [out]
-           (repl/notify [(. out ["status"])
-                         (. (. out ["body"]) ["user"] ["email"])])))))
-  => (contains-in [200 string?]))
+        (lib-supabase/request-http {"path" "/auth/v1/signup" "method" "POST"
+                                    "body" (xt/x:json-encode {"email" email "password" "123456789"})})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => (contains-in
+      {"body" map?, "status" 200, "headers" {}}))
 
 
 

@@ -56,6 +56,10 @@
                  "body" nil
                  "error" nil})
 
+        (not (== 200 (xt/x:get-key response "status")))
+        (return response)
+
+        
         (and (xt/x:is-object? response)
              (xt/x:has-key? response "body"))
         (do (var out (xt/x:obj-clone response))

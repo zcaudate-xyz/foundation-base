@@ -123,8 +123,13 @@
                       (xt/x:obj-assign defaults)
                       (xt/x:obj-assign {"headers" headers})
                       (xt/x:obj-assign input)))
+  (var http-client (xt/x:obj-assign
+                    http
+                    {"defaults" (xt/x:obj-assign
+                                 (or (xt/x:get-key http "defaults") {})
+                                 defaults)}))
   (return
-   (-> (fetch/request-http http http-input)
+   (-> (fetch/request-http http-client http-input)
        (fetch/then-normalise))))
 
 (defimpl.xt HttpSupabaseClient
