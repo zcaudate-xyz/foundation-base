@@ -68,38 +68,16 @@
         "Content-Type" "application/json"
         "Accept" "application/json"}}})
 
+^{:refer xt.net.lib-supabase/request-http :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.net.lib-supabase/request :added "4.1"}
-(fact "routes arbitrary requests through the live Supabase instance"
-
-  (notify/wait-on :js
-    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
-        (lib-supabase/request {"path" "/auth/v1/health"
-                               "method" "GET"})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["status"])
-                         (. (. out ["body"]) ["name"])])))))
-  => [200 "GoTrue"])
-
-^{:refer xt.net.lib-supabase/request-get :added "4.1"}
-(fact "reads the live settings endpoint"
-
-  (notify/wait-on :js
-    (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
-        (lib-supabase/request-get "/auth/v1/settings" {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["status"])
-                         (. (. out ["body"]) ["disable_signup"])])))))
-  => [200 false])
-
-^{:refer xt.net.lib-supabase/request-json :added "4.1"}
 (fact "posts JSON payloads to the live signup endpoint"
 
   (notify/wait-on :js
     (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
     (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
-        (lib-supabase/request-json "/auth/v1/signup" "POST" {"email" email "password" "123456789"} {})
+       (lib-supabase/request {"path" "/auth/v1/signup" "method" "POST" "body" {"email" email "password" "123456789"}})
         (promise/x:promise-then
          (fn [out]
            (repl/notify [(. out ["status"])

@@ -26,9 +26,8 @@
     (xt/x:set-key headers "Accept-Profile" schema-name)
     (xt/x:set-key headers "Content-Profile" schema-name))
   (return
-   (-> (lib-supabase/request-get client
-                                 (xt/x:get-key request "url")
-                                 {"headers" headers})
+   (-> (http-fetch/request-http client (xt/x:obj-assign {:path (xt/x:get-key request "url")\n                                                         :method "GET"}
+                                                        {"headers" headers}))
        (promise/x:promise-then
         (fn [response]
           (var out (xt/x:get-key response "body"))

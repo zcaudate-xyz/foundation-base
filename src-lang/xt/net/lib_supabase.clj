@@ -23,6 +23,28 @@
 (defspec.xt SupabaseBody
   [:xt/dict :xt/str :xt/any])
 
+(defspec.xt create-client
+  [:fn [:xt/any
+        :xt/str
+        :xt/str
+        :xt/bool
+        :xt/str
+        :xt/str]
+   SupabaseClient])
+
+(defn.xt create-client
+  [methods host port secured basepath apikey]
+  (return
+   (fetch/create-base "net.superbase"
+                      methods
+                      {:secured secured
+                       :host host
+                       :port port
+                       :headers {"apikey" apikey
+                                 "Content-Type" "application/json"
+                                 "Accept" "application/json"}
+                       :basepath ""})))
+
 (defspec.xt SupabaseAuthorizeQuery
   [:xt/record
    ["redirect_to" [:xt/maybe :xt/str]]])
@@ -99,40 +121,19 @@
    ["data" [:xt/maybe [:xt/dict :xt/str :xt/any]]]
    ["email" [:xt/maybe :xt/str]]])
 
-(defspec.xt create-client
-  [:fn [:xt/str :xt/str :xt/bool :xt/str :xt/str]
-   SupabaseClient])
-
-(defspec.xt request
-  [:fn [SupabaseClient
-        [:xt/maybe SupabaseRequestOpts]]
-   :xt/promise])
-
-(defspec.xt request-get
-  [:fn [SupabaseClient
-        :xt/str
-        [:xt/maybe SupabaseRequestOpts]]
-   :xt/promise])
-
-(defspec.xt request-json
-  [:fn [SupabaseClient
-        :xt/str
-        :xt/str
-        [:xt/maybe SupabaseBody]
-        [:xt/maybe SupabaseRequestOpts]]
-   :xt/promise])
-
 
 ;;
 ;;
 ;;
 
 (defn.xt request-http
+  "TODO"
+  {:added "4.1"}
   [client input]
   (var #{http defaults} client)
-  (var apikey  (or (xt/x:get-key inputs "apikey")
+  (var apikey  (or (xt/x:get-key input "apikey")
                    (xt/x:get-key defaults "apikey")))
-  (var token   (or (xt/x:get-key inputs "token")
+  (var token   (or (xt/x:get-key input "token")
                    (xt/x:get-key defaults "token")))
   (var headers (-> {"Content-Type" "application/json"
                     "Accept" "application/json"}
@@ -148,25 +149,21 @@
    (-> (fetch/request-http http http-input)
        (fetch/then-normalise))))
 
+(defn.xt request
+  [client opts]
+  (return
+   (-/request-http client opts)))
+
 (defimpl.xt HttpSupabaseClient
   [http defaults]
   [fetch/IHttpClient
    {fetch/request-http -/request-http}])
 
-(defn.xt request-get
-  [client path opts]
-  (return
-   (fetch/request-http client (xt/x:obj-assign {:path path
-                                                :method "GET"}
-                                               opts))))
 
-(defn.xt request-json
-  [client path method data opts]
-  (return
-   (fetch/request-http client (xt/x:obj-assign {:path path
-                                                :method method
-                                                :body (xt/x:json-encode data)}
-                                               opts))))
+;;
+;; RPC call api
+;;
+
 
 (defspec.xt rpc-call-api
   [:fn [SupabaseClient
@@ -176,16 +173,25 @@
    :xt/promise])
 
 (defn.xt rpc-call
+  "calls an rpc entry"
+  {:added "4.1"}
   [client rpc-name data opts]
   (var path (xt/x:cat "/rest/v1/rpc/" rpc-name))
   (return
-   (-/request-json client path "POST" (or data {}) opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path path
+                                                :method "POST"
+                                                :body (xt/x:json-encode (or data {}))}
+                                               opts))))
 
 (defn.xt query-table
+  "TODO"
+  {:added "4.1"}
   [client table-name query opts]
   (var path (xt/x:cat "/rest/v1/rpc/" table-name "?" query))
   (return
-   (-/request-get client path opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path path
+                                                :method "GET"}
+                                               opts))))
 
 
 ;;
@@ -198,9 +204,13 @@
    :xt/promise])
 
 (defn.xt health
+  "calls the auth health endpoint against local supabase"
+  {:added "4.1"}
   [client opts]
   (return
-   (-/request-get client "/auth/v1/health" opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/health"
+                                                :method "GET"}
+                                               opts))))
 
 (defspec.xt signup
   [:fn [SupabaseClient
@@ -209,9 +219,14 @@
    :xt/promise])
 
 (defn.xt signup
+  "signs up a user through the local auth endpoint"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client "/auth/v1/signup" "POST" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/signup"
+                                                :method "POST"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt admin-create-user
   [:fn [SupabaseClient
@@ -220,9 +235,14 @@
    :xt/promise])
 
 (defn.xt admin-create-user
+  "creates and cleans up a live auth user through the admin endpoint"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client "/auth/v1/admin/users" "POST" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/admin/users"
+                                                :method "POST"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt admin-delete-user
   [:fn [SupabaseClient
@@ -231,11 +251,13 @@
    :xt/promise])
 
 (defn.xt admin-delete-user
+  "deletes a live auth user through the admin endpoint"
+  {:added "4.1"}
   [client user_id opts]
   (return
-   (-/request client (xt/x:obj-assign {:path (xt/x:cat "/auth/v1/admin/users/" user_id)
-                                       :method "DELETE"}
-                                      opts))))
+   (fetch/request-http client (xt/x:obj-assign {:path (xt/x:cat "/auth/v1/admin/users/" user_id)
+                                                :method "DELETE"}
+                                               opts))))
 
 (defspec.xt admin-generate-link
   [:fn [SupabaseClient
@@ -244,9 +266,14 @@
    :xt/promise])
 
 (defn.xt admin-generate-link
+  "requires a bearer token for the admin generate-link endpoint"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client "/auth/v1/admin/generate_link" "POST" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/admin/generate_link"
+                                                :method "POST"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt admin-get-user
   [:fn [SupabaseClient
@@ -255,9 +282,13 @@
    :xt/promise])
 
 (defn.xt admin-get-user
+  "fetches a live auth user through the admin endpoint"
+  {:added "4.1"}
   [client user_id opts]
   (return
-   (-/request-get client (xt/x:cat "/auth/v1/admin/users/" user_id) opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path (xt/x:cat "/auth/v1/admin/users/" user_id)
+                                                :method "GET"}
+                                               opts))))
 
 (defspec.xt admin-list-users
   [:fn [SupabaseClient
@@ -265,9 +296,13 @@
    :xt/promise])
 
 (defn.xt admin-list-users
+  "lists users through the local admin auth endpoint"
+  {:added "4.1"}
   [client opts]
   (return
-   (-/request-get client "/auth/v1/admin/users" opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/admin/users"
+                                                :method "GET"}
+                                               opts))))
 
 (defspec.xt admin-update-user
   [:fn [SupabaseClient
@@ -276,11 +311,13 @@
    :xt/promise])
 
 (defn.xt admin-update-user
+  "updates a live auth user through the admin endpoint"
+  {:added "4.1"}
   [client user_id opts]
   (return
-   (-/request client (xt/x:obj-assign {:path (xt/x:cat "/auth/v1/admin/users/" user_id)
-                                       :method "PUT"}
-                                      opts))))
+   (fetch/request-http client (xt/x:obj-assign {:path (xt/x:cat "/auth/v1/admin/users/" user_id)
+                                                :method "PUT"}
+                                               opts))))
 
 (defspec.xt authorize
   [:fn [SupabaseClient
@@ -289,9 +326,13 @@
    :xt/promise])
 
 (defn.xt authorize
+  "returns the live OAuth provider validation failure"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-get client (xt/x:cat "/auth/v1/authorize?" (ut/encode-query-params data)) opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path (xt/x:cat "/auth/v1/authorize?" (ut/encode-query-params data))
+                                                :method "GET"}
+                                               opts))))
 
 (defspec.xt callback
   [:fn [SupabaseClient
@@ -299,9 +340,13 @@
    :xt/promise])
 
 (defn.xt callback
+  "returns the live OAuth callback state error"
+  {:added "4.1"}
   [client opts]
   (return
-   (-/request-get client "/auth/v1/callback" opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/callback"
+                                                :method "GET"}
+                                               opts))))
 
 (defspec.xt invite
   [:fn [SupabaseClient
@@ -310,9 +355,14 @@
    :xt/promise])
 
 (defn.xt invite
+  "requires authorization on the live invite endpoint"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client "/auth/v1/invite" "POST" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/invite"
+                                                :method "POST"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt logout
   [:fn [SupabaseClient
@@ -320,11 +370,13 @@
    :xt/promise])
 
 (defn.xt logout
+  "requires authorization on the live logout endpoint"
+  {:added "4.1"}
   [client opts]
   (return
-   (-/request client (xt/x:obj-assign {:path "/auth/v1/logout"
-                                       :method "POST"}
-                                      opts))))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/logout"
+                                                :method "POST"}
+                                               opts))))
 
 (defspec.xt otp
   [:fn [SupabaseClient
@@ -333,9 +385,14 @@
    :xt/promise])
 
 (defn.xt otp
+  "returns an empty success response for passwordless email OTP requests"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client "/auth/v1/otp" "POST" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/otp"
+                                                :method "POST"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt recovery
   [:fn [SupabaseClient
@@ -344,9 +401,14 @@
    :xt/promise])
 
 (defn.xt recovery
+  "returns an empty success response for recovery emails"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client "/auth/v1/recover" "POST" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/recover"
+                                                :method "POST"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt settings
   [:fn [SupabaseClient
@@ -354,9 +416,13 @@
    :xt/promise])
 
 (defn.xt settings
+  "reads the live auth settings endpoint"
+  {:added "4.1"}
   [client opts]
   (return
-   (-/request-get client "/auth/v1/settings" opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/settings"
+                                                :method "GET"}
+                                               opts))))
 
 (defspec.xt token-password
   [:fn [SupabaseClient
@@ -365,11 +431,14 @@
    :xt/promise])
 
 (defn.xt token-password
+  "returns the live validation failure for password sign-in"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client
-                   "/auth/v1/token?grant_type=password"
-                   "POST" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/token?grant_type=password"
+                                                :method "POST"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt token-refresh
   [:fn [SupabaseClient
@@ -378,11 +447,14 @@
    :xt/promise])
 
 (defn.xt token-refresh
+  "refreshes a live auth session"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client
-                   "/auth/v1/token?grant_type=refresh_token"
-                   "POST" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/token?grant_type=refresh_token"
+                                                :method "POST"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt user-get
   [:fn [SupabaseClient
@@ -390,9 +462,13 @@
    :xt/promise])
 
 (defn.xt user-get
+  "returns a bearer-token error when the anon client has no session"
+  {:added "4.1"}
   [client opts]
   (return
-   (-/request-get client "/auth/v1/user" opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/user"
+                                                :method "GET"}
+                                               opts))))
 
 (defspec.xt user-put
   [:fn [SupabaseClient
@@ -401,9 +477,14 @@
    :xt/promise])
 
 (defn.xt user-put
+  "returns a bearer-token error when the anon client has no session"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client "/auth/v1/user" "PUT" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/user"
+                                                :method "PUT"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))
 
 (defspec.xt verify-get
   [:fn [SupabaseClient
@@ -412,9 +493,13 @@
    :xt/promise])
 
 (defn.xt verify-get
+  "returns the live verify validation error when the token is missing"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-get client (xt/x:cat "/auth/v1/verify?" (ut/encode-query-params data)) opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path (xt/x:cat "/auth/v1/verify?" (ut/encode-query-params data))
+                                                :method "GET"}
+                                               opts))))
 
 (defspec.xt verify-post
   [:fn [SupabaseClient
@@ -423,6 +508,11 @@
    :xt/promise])
 
 (defn.xt verify-post
+  "returns the live verify validation error when the token is missing"
+  {:added "4.1"}
   [client data opts]
   (return
-   (-/request-json client "/auth/v1/verify" "POST" data opts)))
+   (fetch/request-http client (xt/x:obj-assign {:path "/auth/v1/verify"
+                                                :method "POST"
+                                                :body (xt/x:json-encode data)}
+                                               opts))))

@@ -170,7 +170,7 @@
 
   (!.js
     (do
-      (xt/x:set-key proto/REGISTRY
+      (xt/x:set-key proto/PROTOCOLS
                     "xt.lang.common_protocol_test/IHello"
                     {"::" "type/protocol"
                      "impls" {"xt.lang.common_protocol_test/Hello"
@@ -182,7 +182,7 @@
 
   (!.lua
     (do
-      (xt/x:set-key proto/REGISTRY "xt.lang.common_protocol_test/IHello"
+      (xt/x:set-key proto/PROTOCOLS "xt.lang.common_protocol_test/IHello"
                     {"::" "type/protocol"
                      "impls" {"xt.lang.common_protocol_test/Hello"
                                {"hello_str" "hello-str-fn"}}})
@@ -193,7 +193,7 @@
 
   (!.py
     (do
-      (xt/x:set-key proto/REGISTRY "xt.lang.common_protocol_test/IHello"
+      (xt/x:set-key proto/PROTOCOLS "xt.lang.common_protocol_test/IHello"
                     {"::" "type/protocol"
                      "impls" {"xt.lang.common_protocol_test/Hello"
                                {"hello_str" "hello-str-fn"}}})
@@ -207,14 +207,14 @@
 
   (!.js
     (do
-      (xt/x:set-key proto/REGISTRY "xt.lang.common_protocol_test/IHello"
+      (xt/x:set-key proto/PROTOCOLS "xt.lang.common_protocol_test/IHello"
                     {"::" "type/protocol"
                      "impls" {}})
       (proto/register-protocol-impl "xt.lang.common_protocol_test/IHello"
                                     "xt.lang.common_protocol_test/Hello"
                                     {"hello_prn" "hello-prn-fn"
                                      "hello_str" "hello-str-fn"})
-      (xt/x:get-key (xt/x:get-key (xt/x:get-key proto/REGISTRY "xt.lang.common_protocol_test/IHello")
+      (xt/x:get-key (xt/x:get-key (xt/x:get-key proto/PROTOCOLS "xt.lang.common_protocol_test/IHello")
                                   "impls")
                     "xt.lang.common_protocol_test/Hello")))
   => {"hello_prn" "hello-prn-fn"
@@ -222,14 +222,14 @@
 
   (!.py
     (do
-      (xt/x:set-key proto/REGISTRY "xt.lang.common_protocol_test/IHello"
+      (xt/x:set-key proto/PROTOCOLS "xt.lang.common_protocol_test/IHello"
                     {"::" "type/protocol"
                      "impls" {}})
       (proto/register-protocol-impl "xt.lang.common_protocol_test/IHello"
                                     "xt.lang.common_protocol_test/Hello"
                                     {"hello_prn" "hello-prn-fn"
                                      "hello_str" "hello-str-fn"})
-      (xt/x:get-key (xt/x:get-key (xt/x:get-key proto/REGISTRY "xt.lang.common_protocol_test/IHello")
+      (xt/x:get-key (xt/x:get-key (xt/x:get-key proto/PROTOCOLS "xt.lang.common_protocol_test/IHello")
                                   "impls")
                     "xt.lang.common_protocol_test/Hello")))
   => {"hello_prn" "hello-prn-fn"
@@ -299,20 +299,29 @@
                            '[[xt.lang.common-protocol-test/IHello
                               {hello-prn -/hello-prn-fn
                                hello-str -/hello-str-fn}]])
-  => '[(def.xt Hello-init
-         [(xt.lang.common-protocol/register-protocol-impl
-           xt.lang.common-protocol-test/IHello
-           "xt.lang.common_protocol_test/Hello"
-           {"hello_prn" -/hello-prn-fn, "hello_str" -/hello-str-fn})])
-       (def.xt Hello
-         [state client schema lookup opts]
-         (return
-          {"::" "xt.lang.common_protocol_test/Hello",
-           "state" state,
-           "client" client,
-           "schema" schema,
-           "lookup" lookup,
-           "opts" opts}))])
+  '(defn.xt Hello
+     [state client schema lookup opts]
+     (when (not
+            (xt.lang.spec-base/x:get-key
+             xt.lang.common-protocol/IMPLEMENTATIONS
+             "xt.lang.common_protocol_test/Hello"))
+       (do
+         (xt.lang.spec-base/x:set-key
+          xt.lang.common-protocol/IMPLEMENTATIONS
+          "xt.lang.common_protocol_test/Hello"
+          true)
+         (xt.lang.common-protocol/register-protocol-impl
+          xt.lang.common-protocol-test/IHello
+          "xt.lang.common_protocol_test/Hello"
+          {"hello_prn" -/hello-prn-fn, "hello_str" -/hello-str-fn})))
+     (return
+      {"::" "xt.lang.common_protocol_test/Hello",
+       "::/protocols" [xt.lang.common-protocol-test/IHello],
+       "state" state,
+       "client" client,
+       "schema" schema,
+       "lookup" lookup,
+       "opts" opts})))
 
 ^{:refer xt.lang.common-protocol/defimpl.xt :added "4.1"}
 (fact "expands to a constructor and protocol registrations"
@@ -324,8 +333,7 @@
   (defn.xt hello-prn-fn
     [impl]
     (return (xt/x:cat "prn " (xt/x:get-key impl "state"))))
-  
-  
+    
   (proto/defimpl.xt Hello
     [state client schema lookup opts]
     -/IHello
@@ -335,7 +343,7 @@
     -/IHello
     {hello-prn -/hello-prn-fn
      hello-str -/hello-str-fn})
-  => [#'xt.lang.common-protocol-test/Hello-init #'xt.lang.common-protocol-test/Hello])
+  => #'xt.lang.common-protocol-test/Hello)
 
 (comment
   (s/snapto '[xt.lang.common-protocol])
@@ -343,50 +351,3 @@
   (s/seedgen-langadd '[xt.lang.common-protocol] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.lang.common-protocol] {:lang [:lua :python] :write true}))
 
-(comment
-
-  
-  ;;
-  ;; design of protocol and class
-  ;;
-
-  (defn.xt create-protocol-fn
-    [name])
-
-
-  (defn format-defprotocol-xt
-    [name opts+sigs])
-
-  (defmacro defprotocol.xt
-    [name & opts+sigs]
-    (list 'def.xt name
-          (list `create-protocol-fn
-                (format-defprotocol-xt name opts+sigs))))
-
-
-
-
-  (defprotocol.xt IHello
-    (hello-prn [impl])
-    (hello-str [impl]))
-  
-  (!.js
-    -/IHello)
-  
-  => {"::" "type/protocol"
-      "on" "xt.lang.common-protocol/IHello"
-      "sigs" {"hello_prn" {"arglist" ["impl"]
-                           :name "hello_prn"}
-              "hello_str" {"arglist" ["impl"]
-                           :name "hello_prn"}}
-      "impl" {}}
-  
-  (defimpl.xt Hello {:impl       [state client client schema lookup opts]
-                     :protocols  [-/IHello
-                                  {hello-prn -/hello-prn-fn
-                                   hello-str -/hello-str-fn}]})
-
-
-  {"::"       "xt./IHello" "::/impls"  {"xt.lang.common-protocol/IHello" {}}}
-  
-  )

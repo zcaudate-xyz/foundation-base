@@ -7,7 +7,9 @@
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]]})
 
-(def.xt REGISTRY {})
+(def.xt PROTOCOLS {})
+
+(def.xt IMPLEMENTATIONS {})
 
 (defn.xt iface-combine
   "combines interface vectors without duplicates"
@@ -57,30 +59,35 @@
 ;; design of protocol and class
 ;;
 
+
 (defn.xt raw-method
-  [on type method]
+  [on typename method]
   (return
-   (xtd/get-in -/REGISTRY
+   (xtd/get-in -/PROTOCOLS
                [on
                 "impls"
-                type
+                typename
                 method])))
+
+(defn.xt protocol-exists
+  [typename]
+  (return
+   (xt/x:has-key? -/IMPLEMENTATIONS typename)))
 
 (defn.xt protocol-method
   "looks up the registered method by protocol and implementation type"
   {:added "4.1"}
   [obj on method]
-  (var type           (xt/x:get-key obj "::"))
+  (var type           (xt/x:get-key obj "::"))  
   (var override-map   (xt/x:get-key obj "::/override"))
-  (var override-proto (xt/x:get-key override-map on))
-  (var override-fn    (xt/x:get-key override-proto method))
-  (when (not (xt/x:nil? override-fn))
-    (return override-fn))
-
-  (var protocol (xt/x:get-key -/REGISTRY on))
-  (when (not (xt/x:nil? protocol))
-    (xt/x:err (xt/x:cat "Missing protocol " on)))
+  (when (not (xt/x:nil? override-map))
+    (var override-fn    (xt/x:get-key override-map method))
+    (when (not (xt/x:nil? override-fn))
+      (return override-fn)))
   
+  (var protocol (xt/x:get-key -/PROTOCOLS on))
+  (when (xt/x:nil? protocol)
+    (xt/x:err (xt/x:cat "Missing protocol " on)))
   
   (var protocol-impls (xt/x:get-key protocol "impls"))
   (var protocol-impl-map (xt/x:get-key protocol-impls type))
@@ -102,7 +109,7 @@
   (var on (:? (xt/x:is-object? protocol-or-on)
               (xt/x:get-key protocol-or-on "on")
               protocol-or-on))
-  (var protocol (xt/x:get-key -/REGISTRY on))
+  (var protocol (xt/x:get-key -/PROTOCOLS on))
   (when (xt/x:nil? protocol)
     (xt/x:err (xt/x:cat "Missing protocol " on)))
   (var impls (xt/x:get-key protocol "impls"))
@@ -118,7 +125,7 @@
         "on"    on
         "sigs"  sig-map
         "impls" {}})
-  (xt/x:set-key -/REGISTRY on protocol)
+  (xt/x:set-key -/PROTOCOLS on protocol)
   (return protocol))
 
 
@@ -176,32 +183,34 @@
              impl-map)))
 
 (defn format-defimpl-xt-symbol
-  [type-sym]
+  [type-sym & [prefix]]
   (let [lang  (or (:lang (meta type-sym))
                   :xtalk)
         tag   (or (:tag (l/grammar lang))
                   (throw (ex-info "Unknown language" {:lang lang})))]
-    (symbol (str "def." (name tag)))))
+    (symbol (str (or prefix "def") "."  (name tag)))))
 
 (defn format-defimpl-xt
   "formats a defimpl.xt constructor and protocol registration"
   {:added "4.1"}
   [type-sym impl-fields protocols]
   (let [curr-ns     (case/snake-case (name (ns-name *ns*)))
-        type-name   (str curr-ns "/" (name type-sym))
-        ctor-map    (into {"::" type-name}
+        typename   (str curr-ns "/" (name type-sym))
+        ctor-map    (into {"::" typename
+                           "::/protocols" (mapv first protocols)}
                           (map (fn [x] [(name x) x]) impl-fields))
         proto-forms  (mapv (fn [[proto-sym impl-map]]
                              (list `register-protocol-impl
                                    proto-sym
-                                   type-name
+                                   typename
                                    (normalize-protocol-impl-map impl-map)))
-                           protocols)
-        defsym  (format-defimpl-xt-symbol type-sym)]
-    [(list defsym (symbol (str (name type-sym) "-init"))
-           proto-forms)
-     (list defsym type-sym impl-fields
-           (list 'return ctor-map))]))
+                           protocols)]
+    (list (format-defimpl-xt-symbol type-sym "defn")
+          type-sym impl-fields
+          (list 'when (list 'not (list `xt/x:get-key `-/IMPLEMENTATIONS typename))
+                (concat ['do (list `xt/x:set-key `-/IMPLEMENTATIONS typename true)]
+                        proto-forms))
+          (list 'return ctor-map))))
 
 (defmacro defimpl.xt
   "expands to a constructor and protocol registrations"

@@ -31,12 +31,14 @@
   (return
    (-/request-http-raw prepped)))
 
+
 (defimpl.xt ^{:lang :js}
   HttpFetchClient
   [defaults]
   [fetch/IHttpClient
    {fetch/request-http -/request-http}])
 
+[#'js.net.http-fetch/HttpFetchClient-init js.net.http-fetch/HttpFetchClient]
 (defn.js create
   [defaults]
   (return
