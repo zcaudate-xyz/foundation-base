@@ -3,7 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.spec-promise :as promise]]})
+             [xt.lang.spec-promise :as promise]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt request-body
   "encodes request bodies using json for structured values"

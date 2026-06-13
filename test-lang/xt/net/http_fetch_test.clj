@@ -75,17 +75,14 @@
   => {"url" "http://127.0.0.1:55121/auth/v1/sign-in", "method" "GET", "headers" {"apikey" "TOKEN", "Content-Type" "application/json"}})
 
 ^{:refer xt.net.http-fetch/request-http :added "4.1"}
-(fact "TODO"
+(fact "dispatches request through the wrapped fetch client"
   
   (notify/wait-on :js
-    (-> (js-fetch/create {})
-        (fetch/request-http {"url" "http://127.0.0.1:55121/auth/v1/signup",
-                             "method" "POST"
-                             "body" (xt/x:json-encode
-                                     {"email" "a@oeue.com"
-                                      "password" "12345678"})
-                             "headers" {"apikey" (@! (-> docker-min/+config+ :api :anon-key))
-                                        "Content-Type" "application/json"}})
+    (-> (js-fetch/create
+         {:headers {"apikey" (@! (-> docker-min/+config+ :api :anon-key))}
+          :host "127.0.0.1"
+          :port "55121"})
+        (fetch/request-http {"path" "/auth/v1/health"})
         (promise/x:promise-then
          (fn [out]
            (repl/notify (. out status))))
@@ -95,4 +92,19 @@
                          (. out message)]))))))
 
 ^{:refer xt.net.http-fetch/then-normalise :added "4.1"}
-(fact "TODO")
+(fact "normalises promise results through the shared fetch response envelope"
+
+  (notify/wait-on :js
+    (-> (promise/x:promise-run
+         {"status" 200
+          "headers" {"content-type" "application/json"}
+          "body" "{\"id\":\"ord-1\"}"
+          "error" nil})
+        (fetch/then-normalise)
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => {"status" 200
+      "headers" {"content-type" "application/json"}
+      "body" {"id" "ord-1"}
+      "error" nil})

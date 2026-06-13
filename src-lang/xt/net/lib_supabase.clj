@@ -23,15 +23,6 @@
 (defspec.xt SupabaseBody
   [:xt/dict :xt/str :xt/any])
 
-(defspec.xt create-client
-  [:fn [:xt/any
-        :xt/str
-        :xt/str
-        :xt/bool
-        :xt/str
-        :xt/str]
-   SupabaseClient])
-
 (defspec.xt SupabaseAuthorizeQuery
   [:xt/record
    ["redirect_to" [:xt/maybe :xt/str]]])
@@ -135,12 +126,6 @@
   (return
    (-> (fetch/request-http http http-input)
        (fetch/then-normalise))))
-
-(defn.xt request
-  [client opts]
-  (return
-   (-/request-http client opts)))
-
 
 (defimpl.xt HttpSupabaseClient
   [http defaults]

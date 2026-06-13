@@ -1,8 +1,7 @@
 (ns scaffold.supabase.docker-min
   (:require [std.config :as config]
             [std.lib.os :as os]
-            [std.lib.network :as network]
-            [scaffold.supabase.event-host-util :as event-host-util]))
+            [std.lib.network :as network]))
 
 (def +config-file+
   "config/scaffold/supabase-min.edn")

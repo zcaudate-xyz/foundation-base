@@ -4,22 +4,23 @@
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.docker-min :as docker-min]))
 
-(l/script- :postgres
-  {:runtime :jdbc.client
-   :require [[postgres.sample.scratch-v0 :as scratch-v0]
-             [postgres.core :as pg]
-             [postgres.core.supabase :as s]]
-   :config {:host   (-> docker-min/+config+ :db :host)
-            :port   (-> docker-min/+config+ :db :port)
-            :user   (-> docker-min/+config+ :db :user)
-            :pass   (-> docker-min/+config+ :db :password)
-            :dbname (-> docker-min/+config+ :db :database)
-            :startup  docker-min/start-supabase
-            :shutdown docker-min/stop-supabase}
-   :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
+(do 
+  (l/script- :postgres
+    {:runtime :jdbc.client
+     :require [[postgres.sample.scratch-v0 :as scratch-v0]
+               [postgres.core :as pg]
+               [postgres.core.supabase :as s]]
+     :config {:host   (-> docker-min/+config+ :db :host)
+              :port   (-> docker-min/+config+ :db :port)
+              :user   (-> docker-min/+config+ :db :user)
+              :pass   (-> docker-min/+config+ :db :password)
+              :dbname (-> docker-min/+config+ :db :database)
+              :startup  docker-min/start-supabase
+              :shutdown docker-min/stop-supabase}
+     :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
-(defrun.pg __init__
-  (s/grant-usage #{"scratch_v0"}))
+  (defrun.pg __init__
+    (s/grant-usage #{"scratch_v0"})))
 
 (l/script- :js
   {:runtime :basic
@@ -38,51 +39,28 @@
 (defn.js default-client
   [apikey]
   (return
-   (lib-supabase/create-client
-    (js-fetch/create-methods)
-    "127.0.0.1"
-    (@! (-> docker-min/+config+ :api :port))
-    false
-    ""
-    apikey)))
-
-^{:refer xt.net.lib-supabase/create-client :added "4.1"}
-(fact "creates a supabase client wrapper with the expected defaults"
-
-  (!.js
-   (lib-supabase/create-client
-    (js-fetch/create-methods)
-    "127.0.0.1"
-    "55121"
-    false
-    "/auth/v1"
-    "key-client"))
-  => {"::" "net.superbase"
-      "defaults"
-      {"basepath" ""
-       "host" "127.0.0.1"
-       "secured" false
-       "port" "55121"
-       "headers"
-       {"apikey" "key-client"
-        "Content-Type" "application/json"
-        "Accept" "application/json"}}})
+   (lib-supabase/HttpSupabaseClient
+    (js-fetch/create {})
+    {:host "127.0.0.1"
+     :port (@! (-> docker-min/+config+ :api :port))
+     :secured false
+     :basepath ""
+     :apikey apikey})))
 
 ^{:refer xt.net.lib-supabase/request-http :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.net.lib-supabase/request :added "4.1"}
-(fact "posts JSON payloads to the live signup endpoint"
+(fact "TODO"
 
   (notify/wait-on :js
     (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
     (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
-       (lib-supabase/request {"path" "/auth/v1/signup" "method" "POST" "body" {"email" email "password" "123456789"}})
-        (promise/x:promise-then
-         (fn [out]
+        (lib-supabase/request-http {"path" "/auth/v1/signup" "method" "POST" "body" {"email" email "password" "123456789"}})
+       (promise/x:promise-then
+        (fn [out]
            (repl/notify [(. out ["status"])
                          (. (. out ["body"]) ["user"] ["email"])])))))
   => (contains-in [200 string?]))
+
+
 
 ^{:refer xt.net.lib-supabase/rpc-call :added "4.1"}
 (fact "calls an rpc entry"
