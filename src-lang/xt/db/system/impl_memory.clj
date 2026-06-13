@@ -1,11 +1,13 @@
 (ns xt.db.system.impl-memory
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :as proto :refer [defimpl.xt]]))
 
 (l/script :xtalk
   {:require [[xt.db.system.impl-common :as impl-common]
              [xt.db.system.memory-util :as util]
              [xt.db.system.memory-graph :as graph]
              [xt.db.text.base-flatten :as f]
+             [xt.lang.common-protocol :as proto]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
 
@@ -35,13 +37,6 @@
   (return
    (util/add-bulk client schema {table-name records})))
 
-(defn.xt record-add-async
-  "adds records directly with async semantics"
-  {:added "4.1"}
-  [impl table-name records]
-  (return
-   (promise/x:promise-run
-    (-/record-add impl table-name records))))
 
 (defn.xt record-delete
   "deletes ids directly from a single table in the memory impl"
@@ -52,14 +47,6 @@
                             schema
                             table-name
                             ids)))
-
-(defn.xt record-delete-async
-  "deletes ids directly with async semantics"
-  {:added "4.1"}
-  [impl table-name ids]
-  (return
-   (promise/x:promise-run
-    (-/record-delete impl table-name ids))))
 
 
 ;;
@@ -81,25 +68,27 @@
     (util/remove-bulk client schema table-name ids))
   (return (xt/x:arr-map ordered xt/x:first)))
 
+(defn.xt rpc-call-async
+  "memory impl does not support remote rpc calls"
+  {:added "4.1"}
+  [_impl _rpc-spec _args]
+  (xt/x:err "db.impl.memory does not support rpc_call_async"))
+
 ;;
 ;; IMPL
 ;;
 
-(defn.xt impl-methods
-  []
-  (return
-   {"pull"                  -/pull
-    "pull_async"            -/pull-async
-    "record_add"            -/record-add
-    "record_add_async"      -/record-add-async
-    "record_delete"         -/record-delete
-    "record_delete_async"   -/record-delete-async
-    "process_add_event"     -/process-add-event
-    "process_remove_event"  -/process-remove-event}))
+(defimpl.xt ImplMemory
+  [schema lookup opts]
 
-(defn.xt impl-memory
-  [schema lookup]
-  (return
-   (impl-common/impl-base "db.impl.memory"
-                          (-/impl-methods)
-                          {} schema lookup)))
+  impl-common/ISourceLocal
+  {impl-common/pull                 -/pull
+   impl-common/record-add           -/record-add
+   impl-common/record-delete        -/record-delete
+   impl-common/process-add-event    -/process-add-event
+   impl-common/process-remove-event -/process-remove-event}
+
+  impl-common/ISourceRemote
+  {impl-common/pull-async      -/pull-async
+   impl-common/rpc-call-async  -/rpc-call-async})
+
