@@ -1,6 +1,7 @@
 (ns scaffold.supabase.docker-min
   (:require [std.config :as config]
             [std.lib.os :as os]
+            [std.lib.network :as network]
             [scaffold.supabase.event-host-util :as event-host-util]))
 
 (def +config-file+
@@ -38,26 +39,7 @@
                       (get-in +config+ [:api :port] 55121)
                       path)
         started (System/currentTimeMillis)]
-    (loop [attempt 0]
-      (let [response (try
-                       (event-host-util/http-get base-url headers)
-                       (catch Throwable _
-                         nil))
-            ready? (and response
-                        (= 200 (:status response)))]
-        (cond ready?
-              response
-
-              (or (nil? timeout)
-                  (< (- (System/currentTimeMillis) started) timeout))
-              (do (Thread/sleep (long pause))
-                  (recur (inc attempt)))
-
-              :else
-              (throw (ex-info "Timed out waiting for Supabase HTTP readiness"
-                              {:url base-url
-                               :attempts attempt
-                               :response response})))))))
+    ))
 
 (defn start-supabase
   ([]
@@ -67,7 +49,10 @@
      (os/sh {:args ["docker-compose" "-f" "docker/supabase-min/docker-compose.yml" "up" "-d"]
              :output-errors true})
      (when (not (= false (:wait-http opts)))
-       (wait-for-http-ready! (select-keys opts [:timeout :pause :path :headers])))
+       (std.lib.network/wait-for-port
+        (get-in +config+ [:api :hostname])
+        (get-in +config+ [:api :port]))
+       (Thread/sleep 2000))
      true)))
 
 (defn stop-supabase
