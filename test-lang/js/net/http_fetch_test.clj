@@ -32,7 +32,7 @@
              [js.net.http-fetch :as js-fetch]]})
 
 (fact:global
- {:setup    [(l/rt:restart :js)
+ {:setup    [(l/rt:restart)
              (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 

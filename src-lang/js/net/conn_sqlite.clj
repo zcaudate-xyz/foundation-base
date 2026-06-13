@@ -76,21 +76,31 @@
               (xt/x:set-key client "raw" raw)
               (return client))))))
 
-(defimpl.xt SqliteClient
+(defn.js client-disconnect
+  [client]
+  (var #{raw} client)
+  (. raw (close))
+  (return true))
+
+(defn.js client-query
+  [client query]
+  (var #{raw} client)
+  (return (-/raw-query raw query)))
+
+(defn.js client-query-async
+  [client query]
+  (var #{raw} client)
+  (return (protocol/ensure-promise
+           (-/raw-query raw query))))
+
+(defimpl.xt ^{:lang :js}
+  SqliteClient
   [defaults raw]
-  [conn-sql/ISqlClient
-   {conn-sql/connect -/client-connect
-    conn-sql/disconnect (fn [client]
-                          (var #{raw} client)
-                          (. raw (close))
-                          (return true))
-    conn-sql/query (fn [client query]
-                     (var #{raw} client)
-                     (return (-/raw-query raw query)))
-    conn-sql/query-async (fn [client query]
-                           (var #{raw} client)
-                           (return (protocol/ensure-promise
-                                    (-/raw-query raw query))))}])
+  conn-sql/ISqlClient
+  {conn-sql/connect -/client-connect
+   conn-sql/disconnect -/client-disconnect
+   conn-sql/query -/client-query
+   conn-sql/query-async -/client-query-async})
 
 (defn.js create
   [defaults]

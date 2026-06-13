@@ -32,19 +32,6 @@
         :xt/str]
    SupabaseClient])
 
-(defn.xt create-client
-  [methods host port secured basepath apikey]
-  (return
-   (fetch/create-base "net.superbase"
-                      methods
-                      {:secured secured
-                       :host host
-                       :port port
-                       :headers {"apikey" apikey
-                                 "Content-Type" "application/json"
-                                 "Accept" "application/json"}
-                       :basepath ""})))
-
 (defspec.xt SupabaseAuthorizeQuery
   [:xt/record
    ["redirect_to" [:xt/maybe :xt/str]]])
@@ -154,11 +141,11 @@
   (return
    (-/request-http client opts)))
 
+
 (defimpl.xt HttpSupabaseClient
   [http defaults]
-  [fetch/IHttpClient
-   {fetch/request-http -/request-http}])
-
+  fetch/IHttpClient
+  {fetch/request-http -/request-http})
 
 ;;
 ;; RPC call api

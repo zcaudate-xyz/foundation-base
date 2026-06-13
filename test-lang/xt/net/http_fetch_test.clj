@@ -4,6 +4,24 @@
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.docker-min :as docker-min]))
 
+(do 
+  (l/script- :postgres
+    {:runtime :jdbc.client
+     :require [[postgres.sample.scratch-v0 :as scratch-v0]
+               [postgres.core :as pg]
+               [postgres.core.supabase :as s]]
+     :config {:host   (-> docker-min/+config+ :db :host)
+              :port   (-> docker-min/+config+ :db :port)
+              :user   (-> docker-min/+config+ :db :user)
+              :pass   (-> docker-min/+config+ :db :password)
+              :dbname (-> docker-min/+config+ :db :database)
+              :startup  docker-min/start-supabase
+              :shutdown docker-min/stop-supabase}
+     :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
+
+  (defrun.pg __init__
+    (s/grant-usage #{"scratch_v0"})))
+
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
@@ -54,61 +72,27 @@
                            "Content-Type" "application/json"}
                  :basepath "/auth/v1"}}
      {:path "/sign-in"}))
-  => {"url" "http://127.0.0.1:55121/auth/v1/sign-in",
-      "body" "", "method" "GET",
-      "headers" {"apikey" "TOKEN", "Content-Type" "application/json"}})
-
-^{:refer xt.net.http-fetch/create-base :added "4.1"}
-(fact "creates the http base"
-
-  (!.js
-    (fetch/create-base "js.net.http-fetch"
-                       (js-fetch/create-methods)))
-  => {"::" "js.net.http-fetch"})
+  => {"url" "http://127.0.0.1:55121/auth/v1/sign-in", "method" "GET", "headers" {"apikey" "TOKEN", "Content-Type" "application/json"}})
 
 ^{:refer xt.net.http-fetch/request-http :added "4.1"}
 (fact "TODO"
   
   (notify/wait-on :js
-    (-> (fetch/create-base "js.net.http-fetch"
-                           (js-fetch/create-methods))
+    (-> (js-fetch/create {})
         (fetch/request-http {"url" "http://127.0.0.1:55121/auth/v1/signup",
                              "method" "POST"
                              "body" (xt/x:json-encode
                                      {"email" "a@oeue.com"
                                       "password" "12345678"})
-                             "headers" {"apikey" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU", "Content-Type" "application/json"}})
+                             "headers" {"apikey" (@! (-> docker-min/+config+ :api :anon-key))
+                                        "Content-Type" "application/json"}})
         (promise/x:promise-then
          (fn [out]
            (repl/notify (. out status))))
         (promise/x:promise-catch
          (fn [out]
            (repl/notify [(. out status)
-                         (. out message)])))))
-  => {"::" "js.net.http-fetch"}
+                         (. out message)]))))))
 
-  (notify/wait-on :js
-    (-> (fetch "http://127.0.0.1:55121/auth/v1/sign-in",
-               )
-        
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify (. out status))))
-        (promise/x:promise-catch
-         (fn [out]
-           (repl/notify (. out status))))))
-
-  (notify/wait-on :js
-    (-> (fetch "https://www.google.com",
-               )
-        
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify (. out status))))
-        (promise/x:promise-catch
-         (fn [out]
-           (repl/notify (. out status)))))))
-
-(comment
-  (live/refresh-live-supabase-config!)
-  {"::" "db.supabase", "client" {"base_url" "http://127.0.0.1:55121", "schema_name" "scratch", "api_key" "", "auth_token" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU"}})
+^{:refer xt.net.http-fetch/then-normalise :added "4.1"}
+(fact "TODO")

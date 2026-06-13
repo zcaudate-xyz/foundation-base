@@ -65,23 +65,30 @@
               (xt/x:set-key client "raw" conn)
               (return client))))))
 
-(defimpl.xt PostgresClient
+(defn.js client-disconnect
+  [client]
+  (var #{raw} client)
+  (. raw (end))
+  (xt/x:del-key client "raw")
+  (return client))
+
+(defn.js client-query-async
+  [client input]
+  (var #{raw} client)
+  (return
+   (. raw
+      (query input)
+      (then -/normalise-query-output))))
+
+(defimpl.xt ^{:lang :js}
+  PostgresClient
   [defaults raw]
-  [conn-sql/ISqlClient
-   {conn-sql/connect -/client-connect
-    conn-sql/disconnect (fn [client]
-                          (var #{raw} client)
-                          (. raw (end))
-                          (xt/x:del-key client "raw")
-                          (return client))
-    conn-sql/query (fn [client input]
-                     (throw "Not Allowed"))
-    conn-sql/query-async (fn [client input]
-                           (var #{raw} client)
-                           (return
-                            (. raw
-                               (query input)
-                               (then -/normalise-query-output))))}])
+  conn-sql/ISqlClient
+  {conn-sql/connect      -/client-connect
+   conn-sql/disconnect   -/client-disconnect
+   conn-sql/query        (fn [client input]
+                           (throw "Not Allowed"))
+   conn-sql/query-async   -/client-query-async})
 
 (defn.js create
   [defaults]

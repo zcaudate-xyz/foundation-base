@@ -75,15 +75,41 @@
         (promise/x:promise-then
          (fn [out]
            (return
-            (repl/notify out)))))))
+            (repl/notify out))))))
+  => map?)
 
-^{:refer js.net.conn-postgres/create-methods :added "4.1"}
-(fact "create methods for connecting"
-  
-  (!.js
-    (tree/tree-get-spec
-     (js-postgres/create-methods)))
-  => {"query_async" "function", "disconnect" "function", "query" "function", "connect" "function"})
+^{:refer js.net.conn-postgres/client-disconnect :added "4.1"}
+(fact "disconnects the underlying raw client"
+
+  (notify/wait-on :js
+    (-> (js-postgres/create
+         (@! (docker-min/+config+ :db)))
+        (conn-sql/connect)
+        (promise/x:promise-then
+         (fn [client]
+           (return
+            (js-postgres/client-disconnect client))))
+        (promise/x:promise-then
+         (fn [client]
+           (repl/notify (xt/x:has-key? client "raw"))))))
+  => false)
+
+^{:refer js.net.conn-postgres/client-query-async :added "4.1"}
+(fact "runs an async query against the live postgres connection"
+
+  (notify/wait-on :js
+    (-> (js-postgres/create
+         (@! (docker-min/+config+ :db)))
+        (conn-sql/connect)
+        (promise/x:promise-then
+         (fn [client]
+           (return
+            (js-postgres/client-query-async client "SELECT 1;"))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (repl/notify out))))))
+  => 1)
 
 ^{:refer js.net.conn-postgres/create :added "4.1"}
 (fact "creates a postgres connection"
@@ -91,8 +117,16 @@
   (!.js
     (js-postgres/create
      (@! (docker-min/+config+ :db))))
-  => {"::" "js.net.conn-postgres",
-      "defaults" {"host" "127.0.0.1", "user" "postgres", "database" "postgres", "port" 55122, "password" "postgres"}}
+  => {"::" "js.net.conn_postgres/PostgresClient",
+      "::/protocols" ["xt.net.conn_sql/ISqlClient"],
+      "raw" nil,
+      "defaults"
+      {"host" "127.0.0.1",
+       "user" "postgres",
+       "database" "postgres",
+       "port" 55122,
+       "password" "postgres"}}
+  
 
   (notify/wait-on :js
     (-> (js-postgres/create

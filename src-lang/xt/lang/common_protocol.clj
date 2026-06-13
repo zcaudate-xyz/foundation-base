@@ -198,13 +198,13 @@
         typename   (sym-fn (ns-name *ns*) type-sym)
         
         ctor-map    (into {"::" typename
-                           "::/protocols" (mapv first protocols)}
+                           "::/protocols" (mapv (fn [[proto-sym impl-map]]
+                                                  (list `xt/x:get-key proto-sym "on"))
+                                                protocols)}
                           (map (fn [x] [(name x) x]) impl-fields))
 
         proto-forms  (mapv (fn [[proto-sym impl-map]]
-                             (let [_  (std.lib/prn proto-sym)
-                                   entry @(resolve proto-sym)]
-                               
+                             (let [entry @(resolve proto-sym)]
                                (list `register-protocol-impl
                                      (sym-fn (:module entry)
                                              (:id entry))
