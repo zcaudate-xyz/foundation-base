@@ -15,8 +15,8 @@
   "fetches tree ir data from the memory impl"
   {:added "4.1"}
   [impl tree]
-  (var #{client schema opts} impl)
-  (return (graph/pull client
+  (var #{rows schema opts} impl)
+  (return (graph/pull rows
                       schema
                       tree
                       opts)))
@@ -33,17 +33,17 @@
   "adds records directly to a single table in the memory impl"
   {:added "4.1"}
   [impl table-name records]
-  (var #{client schema opts} impl)
+  (var #{rows schema opts} impl)
   (return
-   (util/add-bulk client schema {table-name records})))
+   (util/add-bulk rows schema {table-name records})))
 
 
 (defn.xt record-delete
   "deletes ids directly from a single table in the memory impl"
   {:added "4.1"}
   [impl table-name ids]
-  (var #{client schema opts} impl)
-  (return (util/remove-bulk client
+  (var #{rows schema opts} impl)
+  (return (util/remove-bulk rows
                             schema
                             table-name
                             ids)))
@@ -55,17 +55,17 @@
 
 (defn.xt process-add-event
   [impl data]
-  (var #{client schema} impl)
+  (var #{rows schema} impl)
   (return
-   (util/add-bulk client schema data)))
+   (util/add-bulk rows schema data)))
 
 (defn.xt process-remove-event
   [impl data]
-  (var #{client schema lookup} impl)
+  (var #{rows schema lookup} impl)
   (var ordered (f/flatten-bulk-ids schema lookup data))
   (xt/for:array [entry ordered]
     (var [table-name ids] entry)
-    (util/remove-bulk client schema table-name ids))
+    (util/remove-bulk rows schema table-name ids))
   (return (xt/x:arr-map ordered xt/x:first)))
 
 (defn.xt rpc-call-async
@@ -79,7 +79,7 @@
 ;;
 
 (defimpl.xt ImplMemory
-  [schema lookup opts]
+  [rows schema lookup]
 
   impl-common/ISourceLocal
   {impl-common/pull                 -/pull
@@ -92,3 +92,8 @@
   {impl-common/pull-async      -/pull-async
    impl-common/rpc-call-async  -/rpc-call-async})
 
+
+(defn.xt impl-memory
+  [rows schema lookup]
+  (return
+   (-/ImplMemory rows schema lookup)))

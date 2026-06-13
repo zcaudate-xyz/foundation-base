@@ -1,5 +1,6 @@
 (ns xt.db.system.impl-sqlite
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :as proto :refer [defimpl.xt]]))
 
 (l/script :xtalk
   {:require [[xt.db.system.impl-common :as impl-common]
@@ -9,6 +10,7 @@
              [xt.db.text.sql-util :as sql-util]
              [xt.db.text.sql-manage :as manage]
              [xt.db.text.sql-raw :as raw]
+             [xt.lang.common-protocol :as proto]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.conn-sql :as conn-sql]]})
@@ -126,35 +128,37 @@
                   (sql-table/prepare-remove-input data schema lookup opts))
   (return (xt/x:arr-map ordered xt/x:first)))
 
+(defn.xt rpc-call-async
+  "sqlite impl does not support remote rpc calls"
+  {:added "4.1"}
+  [_impl _rpc-spec _args]
+  (xt/x:err "db.impl.sqlite does not support rpc_call_async"))
+
 
 ;;
 ;; IMPL
 ;;
 
 
-(defn.xt impl-methods
-  []
-  (return
-   {"pull"                  -/pull
-    "pull_async"            -/pull-async
-    "record_add"            -/record-add
-    "record_add_async"      -/record-add-async
-    "record_delete"         -/record-delete
-    "record_delete_async"   -/record-delete-async
-    "process_add_event"     -/process-add-event
-    "process_remove_event"  -/process-remove-event}))
+(defimpl.xt ImplSqlite
+  [client schema lookup opts]
+
+  impl-common/ISourceLocal
+  {impl-common/pull                 -/pull
+   impl-common/record-add           -/record-add
+   impl-common/record-delete        -/record-delete
+   impl-common/process-add-event    -/process-add-event
+   impl-common/process-remove-event -/process-remove-event}
+
+  impl-common/ISourceRemote
+  {impl-common/pull-async     -/pull-async
+   impl-common/rpc-call-async -/rpc-call-async})
 
 (defn.xt impl-sqlite
-  "creates the thin sqlite impl record with stored context"
-  {:added "4.1"}
   [client schema lookup]
   (return
-   (impl-common/impl-base "db.impl.sqlite"
-                          (-/impl-methods)
-                          client
-                          schema
-                          lookup
-                          (sql-util/sqlite-opts lookup))))
+   (-/ImplSqlite client schema lookup
+                 (sql-util/sqlite-opts lookup))))
 
 (defn.xt impl-sqlite-init
   [impl]

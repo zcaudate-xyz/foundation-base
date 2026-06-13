@@ -1,10 +1,12 @@
 (ns xt.db.system.impl-supabase
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :as proto :refer [defimpl.xt]]))
 
 (l/script :xtalk
   {:require [[xt.db.system.impl-common :as impl-common]
              [xt.db.text.pgrest-graph :as pgrest-graph]
              [xt.db.text.pgrest-tree :as pgrest-tree]
+             [xt.lang.common-protocol :as proto]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as http-fetch]
@@ -21,13 +23,16 @@
   (var request (pgrest-graph/select schema tree opts))
   (var table-name (xt/x:first tree))
   (var schema-name (xt/x:get-path lookup [table-name "schema"]))
-  (var headers (xt/x:obj-clone (xt/x:get-key request "headers")))
-  (when (xt/x:not-nil? schema-name)
-    (xt/x:set-key headers "Accept-Profile" schema-name)
-    (xt/x:set-key headers "Content-Profile" schema-name))
+  (var headers (-> {}
+                   (xt/x:obj-assign (xt/x:get-key request "headers"))
+                   (xt/x:obj-assign (:? schema-name
+                                        {"Accept-Profile" schema-name
+                                         "Content-Profile" schema-name}))))
   (return
-   (-> (http-fetch/request-http client (xt/x:obj-assign {:path (xt/x:get-key request "url")\n                                                         :method "GET"}
-                                                        {"headers" headers}))
+   (-> (http-fetch/request-http client
+                                (xt/x:obj-assign {:path (xt/x:get-key request "url")
+                                                  :method "GET"}
+                                                 {"headers" headers}))
        (promise/x:promise-then
         (fn [response]
           (var out (xt/x:get-key response "body"))
@@ -71,20 +76,16 @@
                 :else
                 (return out)))))))
 
-(defn.xt impl-methods
-  []
-  (return
-   {"pull_async" -/pull-async
-    "rpc_call_async"  -/rpc-call-async}))
+(defimpl.xt ImplSupabase
+  [client schema lookup opts]
+
+  impl-common/ISourceRemote
+  {impl-common/pull-async     -/pull-async
+   impl-common/rpc-call-async -/rpc-call-async})
 
 (defn.xt impl-supabase
-  "creates the thin supabase impl record with stored context"
-  {:added "4.1"}
   [client schema lookup]
   (return
-   (impl-common/impl-base "db.impl.supabase"
-                          (-/impl-methods)
-                          client
-                          schema
-                          lookup
-                          {})))
+   (-/ImplSupabase client schema lookup {})))
+
+
