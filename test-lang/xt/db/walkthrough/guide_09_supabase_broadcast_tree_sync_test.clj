@@ -5,8 +5,7 @@
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.data-main-test :as sample]
             [xt.db.system.event-supabase :as event-supabase]
-            [scaffold.supabase.docker-min :as docker-min]
-            [scaffold.supabase.event-host-util :as live]))
+            [scaffold.supabase.docker-min :as live]))
 
 (def +live-broadcast-topic+
   "room:users-tree")
@@ -52,14 +51,25 @@
       "first_name"
       "detail"]]]])
 
+(defn primary-supabase-config
+  []
+  {"::" "db.supabase"
+   "client" {"base_url" (str (or (-> live/+config+ :api :protocol) "http")
+                             "://"
+                             (or (-> live/+config+ :api :hostname) "127.0.0.1")
+                             ":"
+                             (or (-> live/+config+ :api :port) 55121))
+             "api_key" (-> live/+config+ :api :service-key)
+             "auth_token" (-> live/+config+ :api :service-key)}})
+
 (def +supabase-pg-config+
-  {:host (get-in docker-min/+config+ [:db :host])
-   :port (get-in docker-min/+config+ [:db :port])
-   :user (get-in docker-min/+config+ [:db :user])
-   :pass (get-in docker-min/+config+ [:db :password])
-   :dbname (get-in docker-min/+config+ [:db :database])
-   :startup docker-min/start-supabase
-   :teardown docker-min/stop-supabase})
+  {:host (get-in live/+config+ [:db :host])
+   :port (get-in live/+config+ [:db :port])
+   :user (get-in live/+config+ [:db :user])
+   :pass (get-in live/+config+ [:db :password])
+   :dbname (get-in live/+config+ [:db :database])
+   :startup live/start-supabase
+   :teardown live/stop-supabase})
 
 (l/script- :postgres
   {:runtime :jdbc.client
@@ -83,8 +93,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.db.helpers.data-main-test :as sample]
-             [scaffold.supabase.docker-min :as docker-min]
-             [scaffold.supabase.event-host-util :as live]]})
+             [scaffold.supabase.docker-min :as live]]})
 
 (def.js UserTreeQuery
   (@! +user-tree-query+))
@@ -138,16 +147,8 @@
 
 (fact:global
   {:setup [(l/rt:restart)
-          (l/rt:setup :postgres)
-          (do (live/init-live-postgres-runtime!)
-               (l/rt:setup (live/pg-rt) live/+postgres-module+)
-               (live/refresh-live-supabase-config!)
-               true)]
-   :teardown [(do (l/rt:teardown (live/pg-rt) live/+postgres-module+)
-                  (alter-var-root #'live/+postgres-runtime+ (constantly nil))
-                  (alter-var-root #'live/+live-supabase-config+ (constantly nil))
-                  true)
-              (l/rt:teardown :postgres)
+           (l/rt:setup :postgres)]
+   :teardown [(l/rt:teardown :postgres)
               (l/rt:stop)]})
 
 ^{:refer xt.db.walkthrough.guide-09-supabase-broadcast-tree-sync/STEP.00-broadcast-tree-into-sqlite-cache
@@ -185,7 +186,7 @@
        false)]))
 
   (notify/wait-on [:js 15000]
-    (var primary-config (xt/x:obj-clone (@! live/+live-supabase-config+)))
+    (var primary-config (xt/x:obj-clone (@! (primary-supabase-config))))
     (var primary-client (xt/x:obj-clone (. primary-config ["client"])))
     (xt/x:set-key primary-client "transport" (js-fetch/client {}))
     (xt/x:set-key primary-config "client" primary-client)
@@ -294,7 +295,7 @@
        false)]))
 
   (notify/wait-on [:js 15000]
-    (var primary-config (xt/x:obj-clone (@! live/+live-supabase-config+)))
+    (var primary-config (xt/x:obj-clone (@! (primary-supabase-config))))
     (var primary-client (xt/x:obj-clone (. primary-config ["client"])))
     (xt/x:set-key primary-client "transport" (js-fetch/client {}))
     (xt/x:set-key primary-config "client" primary-client)

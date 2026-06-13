@@ -121,8 +121,8 @@
                    (xt/x:obj-assign (:? apikey {"apikey" apikey} ))))
   (var http-input (-> {}
                       (xt/x:obj-assign defaults)
-                      (xt/x:obj-assign {"headers" headers})
-                      (xt/x:obj-assign input)))
+                      (xt/x:obj-assign input)
+                      (xt/x:obj-assign {"headers" headers})))
   (var http-client (xt/x:obj-assign
                     http
                     {"defaults" (xt/x:obj-assign

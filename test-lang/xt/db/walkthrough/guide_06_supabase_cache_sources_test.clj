@@ -3,19 +3,18 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.test-fixtures :as fixtures]
-            [scaffold.supabase.docker-min :as docker-min]
-            [scaffold.supabase.event-host-util :as live]
+            [scaffold.supabase.docker-min :as live]
             [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch]))
 
 (def +supabase-pg-config+
-  {:host (get-in docker-min/+config+ [:db :host])
-   :port (get-in docker-min/+config+ [:db :port])
-   :user (get-in docker-min/+config+ [:db :user])
-   :pass (get-in docker-min/+config+ [:db :password])
-   :dbname (get-in docker-min/+config+ [:db :database])
-   :startup docker-min/start-supabase
-   :teardown docker-min/stop-supabase})
+  {:host (get-in live/+config+ [:db :host])
+   :port (get-in live/+config+ [:db :port])
+   :user (get-in live/+config+ [:db :user])
+   :pass (get-in live/+config+ [:db :password])
+   :dbname (get-in live/+config+ [:db :database])
+   :startup live/start-supabase
+   :teardown live/stop-supabase})
 
 (def +supabase-pg-rt+
   (l/script- :postgres
@@ -34,30 +33,21 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.db.helpers.test-fixtures :as fixtures]
-             [scaffold.supabase.docker-min :as docker-min]
-             [scaffold.supabase.event-host-util :as live]]})
+             [scaffold.supabase.docker-min :as live]]})
 
 (fact:global
   {:setup [(l/rt:restart)
-          (do (live/init-live-postgres-runtime!)
-              (l/rt:setup (live/pg-rt) live/+postgres-module+)
-              (live/grant-scratch-schema!)
-              (live/reload-postgrest!)
-              (live/refresh-live-supabase-config!)
-              true)]
-  :teardown [(do (l/rt:teardown (live/pg-rt) live/+postgres-module+)
-                 (alter-var-root #'live/+postgres-runtime+ (constantly nil))
-                 (alter-var-root #'live/+live-supabase-config+ (constantly nil))
-                 true)
+           (l/rt:setup :postgres)]
+   :teardown [(l/rt:teardown :postgres)
               (l/rt:stop)]})
 
 ^{:refer xt.db.walkthrough.guide-06-supabase-cache-sources/STEP.00-source-descriptors :added "4.1"
-  :setup [(l/with:rt [(live/pg-rt)]
+  :setup [(l/with:rt [:postgres]
            (fixtures/seed-entry-rows))
          (Thread/sleep 400)]}
 (fact "step 00: keep live supabase primary and cache caching as stable model source bindings"
 
-  (l/with:rt [(live/pg-rt)]
+  (l/with:rt [:postgres]
     (pg/t:select scratch/Entry))
   => (contains-in
      [{:tags ["guide" "sql"]
@@ -71,10 +61,17 @@
        :time-created nil
        :id string?}])
 
-  (live/refresh-live-supabase-config!)
-
   (notify/wait-on [:js 10000]
-    (var primary-config (xt/x:obj-clone (@! live/+live-supabase-config+)))
+    (var primary-config
+         {"::" "db.supabase"
+          "client" {"base_url" (str (or (-> live/+config+ :api :protocol) "http")
+                                     "://"
+                                     (or (-> live/+config+ :api :hostname) "127.0.0.1")
+                                     ":"
+                                     (or (-> live/+config+ :api :port) 55121))
+                    "schema_name" "scratch"
+                    "api_key" (@! (-> live/+config+ :api :service-key))
+                    "auth_token" (@! (-> live/+config+ :api :service-key))}})
     (var client-config (xt/x:obj-clone (. primary-config ["client"])))
     (xt/x:set-key client-config "transport" (js-fetch/client {}))
     (xt/x:set-key primary-config "client" client-config)

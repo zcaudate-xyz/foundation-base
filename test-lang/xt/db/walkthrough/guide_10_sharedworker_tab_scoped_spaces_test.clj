@@ -1,13 +1,131 @@
 (ns xt.db.walkthrough.guide-10-sharedworker-tab-scoped-spaces-test
   (:use code.test)
-  (:require [clojure.walk :as walk]
+  (:require [clojure.string :as str]
+            [clojure.walk :as walk]
             [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [js.worker.link]
             [js.worker.sharedworker :as worker-shared]
-            [scaffold.supabase.event-host-util :as live]
+            [scaffold.supabase.docker-min :as live]
+            [postgres.core :as pg]
             [xt.db.helpers.test-fixtures :as fixtures]
             [xt.lang.common-notify :as notify]))
+
+(def +public-schema+
+  "public")
+
+(def +scratch-entry-table+
+  "Entry")
+
+(defn primary-supabase-config
+  []
+  {"::" "db.supabase"
+   "client" {"base_url" (str (or (-> live/+config+ :api :protocol) "http")
+                             "://"
+                             (or (-> live/+config+ :api :hostname) "127.0.0.1")
+                             ":"
+                             (or (-> live/+config+ :api :port) 55121))
+             "api_key" (-> live/+config+ :api :service-key)
+             "auth_token" (-> live/+config+ :api :service-key)}})
+
+(defn sql-literal
+  [s]
+  (str "'" (str/replace s "'" "''") "'"))
+
+(defn pg-exec!
+  [sql]
+  (pg/raw-eval (l/rt-resolve :postgres) sql))
+
+(defn pg-exec-best-effort!
+  [sql]
+  (try
+    (pg-exec! sql)
+    (catch Throwable _
+      nil)))
+
+(defn ensure-public-entry-table!
+  []
+  (pg-exec!
+   (str "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";\n"
+        "CREATE TABLE IF NOT EXISTS \"" +public-schema+ "\".\"" +scratch-entry-table+ "\" (\n"
+        "  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),\n"
+        "  name text NOT NULL UNIQUE,\n"
+        "  tags jsonb NOT NULL DEFAULT '[]'::jsonb\n"
+        ");\n"
+        "GRANT ALL ON TABLE \"" +public-schema+ "\".\"" +scratch-entry-table+ "\" TO anon, authenticated, service_role;")))
+
+(defn enable-public-entry-realtime!
+  []
+  (pg-exec!
+   (str "DO $$\n"
+        "BEGIN\n"
+        "  IF NOT EXISTS (\n"
+        "    SELECT 1\n"
+        "    FROM pg_publication_tables\n"
+        "    WHERE pubname = 'supabase_realtime'\n"
+        "      AND schemaname = '" +public-schema+ "'\n"
+        "      AND tablename = '" +scratch-entry-table+ "'\n"
+        "  ) THEN\n"
+        "    EXECUTE 'ALTER PUBLICATION supabase_realtime ADD TABLE \"" +public-schema+ "\".\"" +scratch-entry-table+ "\"';\n"
+        "  END IF;\n"
+        "END $$;")))
+
+(defn cleanup-public-entry!
+  [name]
+  (pg-exec-best-effort!
+   (str "DELETE FROM \"" +public-schema+ "\".\"" +scratch-entry-table+
+        "\" WHERE name = " (sql-literal name))))
+
+(defn wait-postgrest-schema!
+  ([schema-name]
+   (wait-postgrest-schema! schema-name +scratch-entry-table+))
+  ([schema-name table-name]
+   (let [api (:api live/+config+)
+         base-url (str (or (:protocol api) "http")
+                       "://"
+                       (or (:hostname api) "127.0.0.1")
+                       ":"
+                       (or (:port api) 55121))
+         api-key (or (:service-key api) "")
+         url (str base-url "/rest/v1/" table-name "?select=*&limit=1")]
+     (loop [attempt 0]
+       (let [response (try
+                        (let [builder (java.net.http.HttpRequest/newBuilder (java.net.URI/create url))]
+                          (doseq [[k v] {"apikey" api-key
+                                         "Authorization" (str "Bearer " api-key)
+                                         "Accept-Profile" schema-name
+                                         "Content-Profile" schema-name}]
+                            (.header builder k v))
+                          (let [request (.build (.GET builder))
+                                response (.send (java.net.http.HttpClient/newHttpClient)
+                                                request
+                                                (java.net.http.HttpResponse$BodyHandlers/ofString))]
+                            {:status (.statusCode response)
+                             :body (.body response)}))
+                        (catch Throwable _
+                          nil))
+             ready? (and response
+                         (== 200 (:status response)))]
+         (cond ready?
+               true
+
+               (< attempt 89)
+               (do (Thread/sleep 1000)
+                   (recur (inc attempt)))
+
+               :else
+               (throw (ex-info "Timed out waiting for PostgREST schema cache"
+                               {:schema schema-name
+                                :table table-name
+                                :response response}))))))))
+
+(defn reload-postgrest!
+  ([] (reload-postgrest! +public-schema+ +scratch-entry-table+))
+  ([schema-name]
+   (reload-postgrest! schema-name +scratch-entry-table+))
+  ([schema-name table-name]
+   (pg-exec-best-effort! "NOTIFY pgrst, 'reload schema'")
+   (wait-postgrest-schema! schema-name table-name)))
 
 ^{:seedgen/root {:all true}}
 (l/script :js
@@ -23,8 +141,8 @@
 
 (defn make-sharedworker-script
   []
-  (let [primary-config (-> (live/refresh-live-supabase-config!)
-                          (assoc-in ["client" "schema_name"] live/+public-schema+))
+  (let [primary-config (-> (primary-supabase-config)
+                           (assoc-in ["client" "schema_name"] +public-schema+))
         node-init-template
         '(xt.db.node/create
          {"node_id" "xtdb-shared-worker"
@@ -59,30 +177,27 @@
 (fact:global
   {:setup [(l/rt:restart :js)
            (l/rt:scaffold-imports :js)
-           (do (live/init-live-postgres-runtime!)
-               (l/rt:setup (live/pg-rt) live/+postgres-module+)
-               (live/ensure-public-entry-table!)
-               (live/reload-postgrest! live/+public-schema+)
-               (live/refresh-live-supabase-config!)
-               (live/cleanup-public-entry! "alpha")
-               (live/cleanup-public-entry! "beta")
-               true)
-           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
-                              4000)]
+           (l/rt:setup :postgres)
+           (ensure-public-entry-table!)
+           (enable-public-entry-realtime!)
+           (reload-postgrest! +public-schema+)
+           (cleanup-public-entry! "alpha")
+           (cleanup-public-entry! "beta")
+           (do (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
+                                  4000)
+               true)]
    :teardown [(do
-                (live/cleanup-public-entry! "alpha")
-                (live/cleanup-public-entry! "beta")
-                (l/rt:teardown (live/pg-rt) live/+postgres-module+)
-                (alter-var-root #'live/+postgres-runtime+ (constantly nil))
-                (alter-var-root #'live/+live-supabase-config+ (constantly nil))
+                (cleanup-public-entry! "alpha")
+                (cleanup-public-entry! "beta")
+                (l/rt:teardown :postgres)
                 true)
               (l/rt:stop)]})
 
 ^{:refer xt.db.walkthrough.guide-10-sharedworker-tab-scoped-spaces/STEP.00-prefix-browser-tabs-into-shared-worker-spaces
   :added "4.1"
-  :setup [(do (live/cleanup-public-entry! "alpha")
-              (live/cleanup-public-entry! "beta")
-              (live/pg-exec!
+  :setup [(do (cleanup-public-entry! "alpha")
+              (cleanup-public-entry! "beta")
+              (pg-exec!
                (str "INSERT INTO \"public\".\"Entry\" (id, name, tags) VALUES "
                     "('00000000-0000-0000-0000-0000000000d1', 'alpha', '[\"guide\",\"sql\"]'::jsonb), "
                     "('00000000-0000-0000-0000-0000000000d2', 'beta', '[\"guide\"]'::jsonb);"))

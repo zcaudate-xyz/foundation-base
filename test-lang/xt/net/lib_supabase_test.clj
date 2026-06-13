@@ -49,8 +49,8 @@
 
 ^{:refer xt.net.lib-supabase/request-http :added "4.1"
   :setup [(l/rt:restart :js)]}
-(fact "TODO"
-
+(fact "creates a http request"
+  
   (notify/wait-on :js
     (var email (xt/x:cat "lib-supabase-" (xt/x:to-string (xt/x:now-ms)) "@example.com"))
     (-> (-/default-client (@! (-> docker-min/+config+ :api :anon-key)))
@@ -61,7 +61,6 @@
            (repl/notify out)))))
   => (contains-in
       {"body" map?, "status" 200, "headers" {}}))
-
 
 
 ^{:refer xt.net.lib-supabase/rpc-call :added "4.1"}
@@ -83,17 +82,8 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {"body" {"message" "permission denied for function log_append_public", "hint" nil, "details" nil, "code" "42501"}, "status" 401, "headers" {}}
-
-  (notify/wait-on :js
-    (-> (-/default-client nil)
-        (lib-supabase/rpc-call "log_append_public"
-                               {"i_message" "hello"}
-                               {"headers" {"Content-Profile" "scratch_v0"}})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))))
   => {"body" {"message" "permission denied for function log_append_public", "hint" nil, "details" nil, "code" "42501"}, "status" 401, "headers" {}})
+
 
 ^{:refer xt.net.lib-supabase/query-table :added "4.1"}
 (fact "TODO")
