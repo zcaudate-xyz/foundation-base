@@ -1,4 +1,4 @@
-(ns xt.net.http-phoenix-test
+(ns xt.net.ws-phoenix-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
@@ -29,8 +29,8 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.protocol.impl.client-websocket :as ws]
-             [xt.net.http-websocket :as websocket]
-             [xt.net.http-phoenix :as phoenix]]})
+             [xt.net.ws-native :as websocket]
+             [xt.net.ws-phoenix :as phoenix]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -42,7 +42,7 @@
   ())
 
 
-^{:refer xt.net.http-phoenix/extract-message-data :added "4.1"}
+^{:refer xt.net.ws-phoenix/extract-message-data :added "4.1"}
 (fact "extracts text from raw websocket payload wrappers"
 
   (!.js
@@ -51,22 +51,28 @@
      (phoenix/extract-message-data {"body" "fallback"})])
   => ["plain" "{\"ok\":true}" "fallback"])
 
-^{:refer xt.net.http-phoenix/decode-frame :added "4.1"}
+^{:refer xt.net.ws-phoenix/decode-frame :added "4.1"}
 (fact "decodes websocket payload text into a phoenix frame"
 
   (!.js
     [(phoenix/decode-frame "{\"event\":\"phx_reply\",\"topic\":\"realtime:room:test\"}")
      (phoenix/decode-frame {"data" "{\"payload\":{\"status\":\"ok\"}}"})])
-  => [{"event" "phx_reply", "topic" "realtime:room:test"} {"payload" {"status" "ok"}}])
+  => [{"event" "phx_reply",
+       "topic" "realtime:room:test"}
+      {"payload" {"status" "ok"}}])
 
 ^{:refer xt.net.http-phoenix/get-frame-ref :added "4.1"}
 (fact "uses the explicit ref when provided"
-  (phoenix/get-frame-ref nil {"ref" "join-1"})
+
+  (!.js
+    (phoenix/get-frame-ref nil {"ref" "join-1"}))
   => "join-1")
 
 ^{:refer xt.net.http-phoenix/make-frame :added "4.1"}
 (fact "builds a generic phoenix frame"
-  (phoenix/make-frame nil "realtime:room:test" "broadcast" {"hello" true} {"ref" "push-1"})
+
+  (!.js
+    (phoenix/make-frame nil "realtime:room:test" "broadcast" {"hello" true} {"ref" "push-1"}))
   => {"topic" "realtime:room:test"
       "event" "broadcast"
       "payload" {"hello" true}
@@ -76,7 +82,11 @@
 ^{:refer xt.net.http-phoenix/make-frame-join :added "4.1"}
 (fact "builds a join frame from a topic and payload"
 
-  (phoenix/make-frame-join nil {"config" {}} {"topic" "realtime:room:test" "ref" "join-1"})
+  (!.js
+    (phoenix/make-frame-join nil
+                             {"config" {}}
+                             {"topic" "realtime:room:test"
+                              "ref" "join-1"}))
   => {"topic" "realtime:room:test"
       "event" "phx_join"
       "payload" {"config" {}}
@@ -85,7 +95,10 @@
 
 ^{:refer xt.net.http-phoenix/make-frame-leave :added "4.1"}
 (fact "builds a leave frame from a topic"
-  (phoenix/make-frame-leave nil {"topic" "realtime:room:test" "ref" "leave-1"})
+
+  (!.js
+    (phoenix/make-frame-leave nil
+                              {"topic" "realtime:room:test" "ref" "leave-1"}))
   => {"topic" "realtime:room:test"
       "event" "phx_leave"
       "payload" {}
@@ -94,18 +107,21 @@
 
 ^{:refer xt.net.http-phoenix/send-join :added "4.1"}
 (fact "serialises and sends a join frame"
+
+  (!.js)
+  
   (!.js
-   (var sent [])
-   (with-redefs [websocket/send
-                 (fn [_ input]
-                   (xt/x:arr-push sent input)
-                   (return input))]
-     (phoenix/send-join
-      {}
-      {"config" {"broadcast" {"ack" false "self" false}}
-       "access_token" "token-1"}
-      {"topic" "realtime:room:test" "ref" "join-1"})
-     (xt/x:first sent)))
+    (var sent [])
+    (with-redefs [websocket/send
+                  (fn [_ input]
+                    (xt/x:arr-push sent input)
+                    (return input))]
+      (phoenix/send-join
+       {}
+       {"config" {"broadcast" {"ack" false "self" false}}
+        "access_token" "token-1"}
+       {"topic" "realtime:room:test" "ref" "join-1"})
+      (xt/x:first sent)))
   => "{\"topic\":\"realtime:room:test\",\"event\":\"phx_join\",\"payload\":{\"config\":{\"broadcast\":{\"ack\":false,\"self\":false}},\"access_token\":\"token-1\"},\"ref\":\"join-1\",\"join_ref\":\"join-1\"}")
 
 ^{:refer xt.net.http-phoenix/send-leave :added "4.1"}

@@ -10,7 +10,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as http-fetch]
-             [xt.net.lib-supabase :as lib-supabase]]})
+             [xt.net.http-supabase :as lib-supabase]]})
 
 (defn.xt pull-async
   "runs a tree ir pull with async supabase semantics"

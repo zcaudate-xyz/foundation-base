@@ -1,4 +1,4 @@
-(ns xt.net.lib-supabase
+(ns xt.net.http-supabase
   (:require [hara.lang :as l :refer [defspec.xt]]
             [xt.lang.common-protocol :refer [defimpl.xt]]))
 

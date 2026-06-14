@@ -114,8 +114,8 @@
   => (contains-in
       {"schema" map?, "lookup" map?,
        "opts" map?,
-       "::" "xt.db.system.impl_postgres/ImplPostgres",
-       "client" {"::" "js.net.conn_postgres/PostgresClient", "defaults" {"database" "test-scratch"}}}))
+       "::" "db.impl.postgres",
+       "client" {"::" "js.net.conn-postgres", "defaults" {"database" "test-scratch"}}}))
 
 ^{:refer xt.db.system.impl-postgres/impl-postgres-init :added "4.1"}
 (fact "initialises a postgres connection")

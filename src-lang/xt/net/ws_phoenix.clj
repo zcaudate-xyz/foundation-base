@@ -1,9 +1,9 @@
-(ns xt.net.http-phoenix
+(ns xt.net.ws-phoenix
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.net.http-websocket :as websocket]]})
+             [xt.net.ws-native :as websocket]]})
 
 (def.xt IPhxFrame
   ["encode_frame"

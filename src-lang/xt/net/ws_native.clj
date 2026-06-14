@@ -1,4 +1,4 @@
-(ns xt.net.http-websocket
+(ns xt.net.ws-native
   (:require [hara.lang :as l]
             [xt.lang.common-protocol :refer [defprotocol.xt]]))
 
@@ -12,7 +12,9 @@
   (connect [client opts])
   (disconnect [client])
   (send [client input])
-  (add-listeners [client m]))
+  (add-listeners [client m])
+  (start-heartbeat [client name f interval])
+  (stop-heartbeat [client name]))
 
 (defn.xt prepare-url
   [client input]
@@ -32,5 +34,3 @@
                     (or port "80")
                     (or basepath "")
                     (or path ""))))
-
-
