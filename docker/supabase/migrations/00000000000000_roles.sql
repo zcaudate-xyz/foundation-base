@@ -14,6 +14,7 @@ $$;
 
 ALTER ROLE authenticator WITH LOGIN PASSWORD 'postgres';
 ALTER ROLE supabase_auth_admin WITH LOGIN PASSWORD 'postgres';
+ALTER ROLE supabase_admin WITH LOGIN PASSWORD 'postgres';
 
 DO $$
 DECLARE
