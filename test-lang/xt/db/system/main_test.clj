@@ -41,9 +41,9 @@
 
 (fact:global
  {:setup [(l/rt:restart)
+          (l/rt:teardown :postgres)
           (l/rt:setup :postgres)]
-  :teardown [(l/rt:teardown :postgres)
-             (l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.main/create-impl :added "4.1"}
 (fact "creates impls for local and live backends"

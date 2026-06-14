@@ -38,6 +38,11 @@
      true)))
 
 (defn stop-supabase
+  [_])
+
+(defn shutdown-supabase
   [_]
-  (os/sh {:args ["supabase" "stop" "--workdir" "docker/local-min"]
+  (os/sh {:args ["supabase" "stop" "--workdir" "docker/local-min" "--no-backup"]
           :output-errors true}))
+
+

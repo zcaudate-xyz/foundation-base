@@ -41,9 +41,9 @@
 
 (fact:global
  {:setup [(l/rt:restart)
+          (l/rt:teardown :postgres)
           (l/rt:setup :postgres)]
-  :teardown [(l/rt:teardown :postgres)
-             (l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.node.adaptor-base/set-impl :added "4.1"}
 (fact "set-impl installs a live impl on the node"
