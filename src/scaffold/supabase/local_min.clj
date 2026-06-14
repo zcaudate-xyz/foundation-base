@@ -1,4 +1,4 @@
-(ns scaffold.supabase.docker-min
+(ns scaffold.supabase.local-min
   (:require [std.config :as config]
             [std.lib.os :as os]
             [std.lib.network :as network]))
@@ -45,10 +45,10 @@
    (start-supabase nil))
   ([_opts]
    (let [opts (or _opts {})]
-     (os/sh {:args ["docker-compose" "-f" "docker/supabase-min/docker-compose.yml" "up" "-d"]
+     (os/sh {:args ["supabase" "start" "--workdir" "docker/supabase-min"]
              :output-errors true})
      (when (not (= false (:wait-http opts)))
-       (std.lib.network/wait-for-port
+       (network/wait-for-port
         (get-in +config+ [:api :hostname])
         (get-in +config+ [:api :port]))
        (Thread/sleep 2000))
@@ -56,7 +56,5 @@
 
 (defn stop-supabase
   [_]
-  (os/sh {:args ["docker-compose" "-f" "docker/supabase-min/docker-compose.yml" "stop"]
-          :output-errors true})
-  (os/sh {:args ["docker-compose" "-f" "docker/supabase-min/docker-compose.yml" "down"]
+  (os/sh {:args ["supabase" "start" "--workdir" "docker/supabase-min"]
           :output-errors true}))

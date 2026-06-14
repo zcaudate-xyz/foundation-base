@@ -5,7 +5,7 @@
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.data-main-test :as sample]
             [xt.db.system.event-supabase :as event-supabase]
-            [scaffold.supabase.docker-min :as live]))
+            [scaffold.supabase.local-min :as live]))
 
 (def +live-broadcast-topic+
   "room:users-tree")
@@ -93,7 +93,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.db.helpers.data-main-test :as sample]
-             [scaffold.supabase.docker-min :as live]]})
+             [scaffold.supabase.local-min :as live]]})
 
 (def.js UserTreeQuery
   (@! +user-tree-query+))

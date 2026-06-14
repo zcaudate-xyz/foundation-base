@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.docker-min :as docker-min]))
+            [scaffold.supabase.local-min :as local-min]))
 
 (do 
   (l/script- :postgres
@@ -10,13 +10,13 @@
      :require [[postgres.sample.scratch-v0 :as scratch-v0]
                [postgres.core :as pg]
                [postgres.core.supabase :as s]]
-     :config {:host   (-> docker-min/+config+ :db :host)
-              :port   (-> docker-min/+config+ :db :port)
-              :user   (-> docker-min/+config+ :db :user)
-              :pass   (-> docker-min/+config+ :db :password)
-              :dbname (-> docker-min/+config+ :db :database)
-              :startup  docker-min/start-supabase
-              :shutdown docker-min/stop-supabase}
+     :config {:host   (-> local-min/+config+ :db :host)
+              :port   (-> local-min/+config+ :db :port)
+              :user   (-> local-min/+config+ :db :user)
+              :pass   (-> local-min/+config+ :db :password)
+              :dbname (-> local-min/+config+ :db :database)
+              :startup  local-min/start-supabase
+              :shutdown local-min/stop-supabase}
      :emit {:code {:transforms {:entry [#'s/transform-entry]}}}}))
 
 (defrun.pg __init__
@@ -31,6 +31,32 @@
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]
              [js.net.ws-native :as js-websocket]]})
+
+(defn.js client-init
+  [topic callback frames]
+  (var client
+       (js-websocket/create {:host (@! (-> docker-min/+config+ :api :hostname))
+                             :port (@! (-> docker-min/+config+ :api :port))}))
+  (-> client
+      (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=2.0.0&apikey="
+                                         (@! (-> docker-min/+config+ :api :anon-key)))})
+      (js-websocket/add-listeners-ws
+       {"open"
+        (fn [_]
+          (phoenix/send-join
+           client
+           {"config" {"broadcast" {"ack" false "self" false}}}
+           {"topic" topic
+            "ref" "::INIT"}))
+        "message"
+        (fn [event]
+          (var frame (phoenix/decode-frame event))
+          (when frames
+            (xt/x:arr-push frames frame))
+          #_(callback frame)
+          (when (== "::INIT" (xt/x:get-key frame "ref"))
+            (callback frame)))}))
+  (return client))
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -101,111 +127,152 @@
       "ref" "leave-1"
       "join_ref" "leave-1"})
 
-^{:refer xt.net.ws-phoenix/send-join :added "4.1"}
-(fact "serialises and sends a join frame"
+^{:refer xt.net.ws-phoenix/wrap-phoenix :added "4.1"}
+(fact "decodes phoenix frames and dispatches by event name"
 
   (!.js
-    (var sent [])
-    (with-redefs [websocket/send
-                  (fn [_ input]
-                    (xt/x:arr-push sent input)
-                    (return input))]
-      (phoenix/send-join
-       {}
-       {"config" {"broadcast" {"ack" false "self" false}}
-        "access_token" "token-1"}
-       {"topic" "realtime:room:test" "ref" "join-1"})
-      (xt/x:first sent)))
-  => "[\"join-1\",\"join-1\",\"realtime:room:test\",\"phx_join\",{\"config\":{\"broadcast\":{\"ack\":false,\"self\":false}},\"access_token\":\"token-1\"}]")
+    (var results [])
+    (var handler
+         (phoenix/wrap-phoenix
+          {"phx_reply" (fn [frame] (xt/x:arr-push results ["reply" frame]))
+           "presence_state" (fn [frame] (xt/x:arr-push results ["presence" frame]))}))
+    (handler "[\"join-1\",\"join-1\",\"realtime:room:test\",\"phx_reply\",{\"status\":\"ok\"}]")
+    (handler "[\"join-1\",null,\"realtime:room:test\",\"presence_state\",{}]")
+    (handler "[\"join-1\",null,\"realtime:room:test\",\"broadcast\",{}]")
+    results)
+  => [["reply" {"join_ref" "join-1", "ref" "join-1",
+                "topic" "realtime:room:test", "event" "phx_reply",
+                "payload" {"status" "ok"}}]
+      ["presence" {"join_ref" "join-1", "ref" nil,
+                   "topic" "realtime:room:test", "event" "presence_state",
+                   "payload" {}}]])
 
-^{:refer xt.net.ws-phoenix/send-leave :added "4.1"}
-(fact "serialises and sends a leave frame"
-  (!.js
-   (var sent [])
-   (with-redefs [websocket/send
-                 (fn [_ input]
-                   (xt/x:arr-push sent input)
-                   (return input))]
-     (phoenix/send-leave
-      {}
-      {"topic" "realtime:room:test" "ref" "leave-1"})
-     (xt/x:first sent)))
-  => "[\"leave-1\",\"leave-1\",\"realtime:room:test\",\"phx_leave\",{}]")
+^{:refer xt.net.ws-phoenix/send-join :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "connects to the local Supabase realtime websocket and joins a channel"
 
-^{:refer xt.net.ws-phoenix/send :added "4.1"}
-(fact "serialises and sends a push frame"
-  (!.js
-   (var sent [])
-   (with-redefs [websocket/send
-                 (fn [_ input]
-                   (xt/x:arr-push sent input)
-                   (return input))]
-     (phoenix/send
-      {}
-      "broadcast"
-      {"hello" true}
-      {"topic" "realtime:room:test" "ref" "push-1"})
-     (xt/x:first sent)))
-  => "[\"push-1\",\"push-1\",\"realtime:room:test\",\"broadcast\",{\"hello\":true}]")
+  (notify/wait-on [:js 2000]
+    (var client
+         (js-websocket/create {:host (@! (-> docker-min/+config+ :api :hostname))
+                               :port (@! (-> docker-min/+config+ :api :port))}))
+    (var joined false)
+    (-> client
+        (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=2.0.0&apikey="
+                                           (@! (-> docker-min/+config+ :api :anon-key)))})
+        (websocket/add-listeners
+         {"open"
+          (fn [_]
+            (phoenix/send-join
+             client
+             {"config" {"broadcast" {"ack" false "self" false}}}
+             {"topic" "realtime:room:send-join-test"
+              "ref" "join-1"}))
+          "message"
+          (phoenix/wrap-phoenix
+           {"phx_reply"
+            (fn [frame]
+              (when (and (== "ok" (xtd/get-in frame ["payload" "status"]))
+                         (not joined))
+                (:= joined true)
+                (websocket/disconnect client)
+                (repl/notify frame)))})}))
+    true)
+  => {"join_ref" "join-1",
+      "event" "phx_reply",
+      "ref" "join-1",
+      "payload" {"status" "ok",
+                 "response" {"postgres_changes" []}},
+      "topic" "realtime:room:send-join-test"})
+
+^{:refer xt.net.ws-phoenix/send-leave :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "connects to the local Supabase realtime websocket and leaves a channel"
+
+  (notify/wait-on [:js 1000]
+    (var client
+         (js-websocket/create {:host (@! (-> docker-min/+config+ :api :hostname))
+                               :port (@! (-> docker-min/+config+ :api :port))}))
+    (var joined false)
+    (var frames [])
+    (-> client
+        (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=2.0.0&apikey="
+                                           (@! (-> docker-min/+config+ :api :anon-key)))})
+        (websocket/add-listeners
+         {"open"
+          (fn [_]
+            (phoenix/send-join
+             client
+             {"config" {"broadcast" {"ack" false "self" false}}}
+             {"topic" "realtime:room:send-leave-test"
+              "ref" "join-1"}))
+          "message"
+          (phoenix/wrap-phoenix
+           {"phx_reply"
+            (fn [frame]
+              (when (and (== "ok" (xtd/get-in frame ["payload" "status"]))
+                         (not joined))
+                (:= joined true)
+                (xt/x:arr-push frames frame)
+                (phoenix/send-leave
+                 client
+                 {"topic" "realtime:room:send-leave-test"
+                  "ref" "leave-1"})))
+            "presence_state"
+            (fn [frame]
+              (xt/x:arr-push frames frame)
+              (repl/notify frames))})}))
+    true)
+  => [{"join_ref" "join-1",
+       "event" "phx_reply",
+       "ref" "join-1",
+       "payload" {"status" "ok", "response"
+                  {"postgres_changes" []}},
+       "topic" "realtime:room:send-leave-test"}
+      {"join_ref" "join-1", "event" "presence_state", "ref" nil, "payload" {},
+       "topic" "realtime:room:send-leave-test"}])
 
 ^{:refer xt.net.ws-phoenix/send :added "4.1"
-  :setup []}
+  :setup [(l/rt:restart :js)]}
 (fact "connects to the local Supabase realtime websocket and receives a broadcast after a pg send"
-  (notify/wait-on [:js 10000]
-    (var cache
-         (db-main/create-impl
-          "memory"
-          {}
-          (@! fixtures/+schema+)
-          (@! fixtures/+lookup+)))
-    (var topic "room:ws-phoenix")
-    (var requests [])
-    (var statuses [])
-    (var client
-         (event-supabase/broadcast-client
-           {"transport" (js-ws/driver {})
-           "base_url" (xt/x:cat (or (-> docker-min/+config+ :api :protocol) "http")
-                                 "://"
-                                 (or (-> docker-min/+config+ :api :hostname) "127.0.0.1")
-                                 ":"
-                                 (or (-> docker-min/+config+ :api :port) 55121))
-            "api_key" (-> docker-min/+config+ :api :service-key)
-            "auth_token" (-> docker-min/+config+ :api :service-key)
-            "topic" topic}))
-    (future
-      (Thread/sleep 1500)
-      (!.pg
-       [:select
-        (realtime.send
-         (js {"db/sync"
-              {"Entry"
-               [{"id" "00000000-0000-0000-0000-0000000000aa"
-                 "name" "ws-phoenix"
-                 "tags" ["websocket"]}]}})
-         "db/sync"
-         topic
-         false)]))
-    (promise/x:promise-then
-     (realtime/subscribe-broadcast
-      {"client" client}
-      cache
-      {"on_status" (fn [status _frame]
-                     (xt/x:arr-push statuses status))
-       "on_request" (fn [request payload frame]
-                      (xt/x:arr-push requests request)
-                      (when request
-                        (repl/notify
-                         {"status" (xt/x:first statuses)
-                          "topic" (xt/x:get-key frame "topic")
-                          "frame_event" (xt/x:get-key frame "event")
-                          "request_name" (xtd/get-in request ["db/sync" "Entry" 0 "name"])
-                          "request_tags" (xtd/get-in request ["db/sync" "Entry" 0 "tags"])
-                          "payload_event" (xt/x:get-key frame "event")})))})
-     (fn [subscription]
-       (return subscription))))
-  => {"status" "SUBSCRIBED"
-      "topic" "realtime:room:ws-phoenix"
-      "frame_event" "broadcast"
-      "request_name" "ws-phoenix"
-      "request_tags" ["websocket"]
-      "payload_event" "broadcast"})
+
+  
+  (notify/wait-on [:js 2000]
+    (:= (!:G FRAMES) [])
+    (:= (!:G CLIENT) (-/client-init "realtime:room:db-send"
+                                    (fn [out]
+                                      (repl/notify out))
+                                    (!:G FRAMES))))
+  {"join_ref" "::INIT", "event" "phx_reply", "ref" "::INIT", "payload" {"status" "error", "response" {"reason" "Unknown Error on Channel"}}, "topic" "realtime:room:db-send"}
+  (!.js FRAMES)
+  
+  (!.pg
+    (s/realtime-send "room:db-send" "my-event" {"hello" "from postgres"}))
+  
+  (!.pg
+    (s/realtime-send "room:db-send" "my-event" {"hello" "from postgres"}))
+  
+  
+  (!.js
+    CLIENT)
+  
+  (notify/wait-on [:js 2000]
+    (-/client-init (fn [out]
+                     (repl/notify out))))
+  
+  (!.js (+ 1 2))
+  
+  
+  
+  (!.js
+    (-/client-init (fn [out]
+                     out)))
+  )
+
+
+(fact "send stuff"
+  
+  (!.pg
+    [:select (realtime.send {"hello" "from postgres"}
+                            (:text "my-event")
+                            (:text "room:db-send")
+                            false)]))

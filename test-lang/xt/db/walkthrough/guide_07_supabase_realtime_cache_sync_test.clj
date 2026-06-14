@@ -5,7 +5,7 @@
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.test-fixtures :as fixtures]
             [postgres.core :as pg]
-            [scaffold.supabase.docker-min :as live])
+            [scaffold.supabase.local-min :as live])
   (:import (java.net URI)
            (java.net.http HttpClient HttpRequest HttpResponse$BodyHandlers)))
 

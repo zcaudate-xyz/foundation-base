@@ -6,7 +6,7 @@
             [hara.runtime.chromedriver :as chromedriver]
             [js.worker.link]
             [js.worker.sharedworker :as worker-shared]
-            [scaffold.supabase.docker-min :as live]
+            [scaffold.supabase.local-min :as live]
             [postgres.core :as pg]
             [xt.db.helpers.test-fixtures :as fixtures]
             [xt.lang.common-notify :as notify]))

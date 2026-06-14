@@ -165,3 +165,16 @@
                                       (xt/x:get-key opts "topic")
                                       event
                                       payload opts))))
+
+(defn.xt wrap-phoenix
+  "returns a websocket 'message' listener that decodes phoenix frames
+   and dispatches to the handler keyed by the frame's event name.
+   Useful with websocket/add-listeners to route phx_reply, phx_join,
+   phx_leave, presence_state, broadcast, and other channel events."
+  {:added "4.1.4"}
+  [handlers]
+  (return (fn [event]
+            (var frame (-/decode-frame event))
+            (var handler (xt/x:get-key handlers (xt/x:get-key frame "event")))
+            (when (xt/x:is-function? handler)
+              (handler frame)))))

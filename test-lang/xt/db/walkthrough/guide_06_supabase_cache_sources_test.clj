@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.db.helpers.test-fixtures :as fixtures]
-            [scaffold.supabase.docker-min :as live]
+            [scaffold.supabase.local-min :as live]
             [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch]))
 
@@ -33,7 +33,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.db.helpers.test-fixtures :as fixtures]
-             [scaffold.supabase.docker-min :as live]]})
+             [scaffold.supabase.local-min :as live]]})
 
 (fact:global
   {:setup [(l/rt:restart)

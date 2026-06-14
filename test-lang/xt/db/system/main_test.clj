@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.docker-min :as docker-min]))
+            [scaffold.supabase.local-min :as local-min]))
 
 (do 
   (l/script- :postgres
@@ -10,13 +10,13 @@
      :require [[postgres.sample.scratch-v0 :as scratch-v0]
                [postgres.core :as pg]
                [postgres.core.supabase :as s]]
-     :config {:host   (-> docker-min/+config+ :db :host)
-              :port   (-> docker-min/+config+ :db :port)
-              :user   (-> docker-min/+config+ :db :user)
-              :pass   (-> docker-min/+config+ :db :password)
-              :dbname (-> docker-min/+config+ :db :database)
-              :startup  docker-min/start-supabase
-              :shutdown docker-min/stop-supabase}
+     :config {:host   (-> local-min/+config+ :db :host)
+              :port   (-> local-min/+config+ :db :port)
+              :user   (-> local-min/+config+ :db :user)
+              :pass   (-> local-min/+config+ :db :password)
+              :dbname (-> local-min/+config+ :db :database)
+              :startup  local-min/start-supabase
+              :shutdown local-min/stop-supabase}
      :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
   (defrun.pg __init__
@@ -56,16 +56,16 @@
                                        -/SchemaLookup)
                      ["::"]))
    (!.js (xtd/get-in (main/create-impl "postgres"
-                                       (@! (docker-min/+config+ :db))
+                                       (@! (local-min/+config+ :db))
                                        -/Schema
                                        -/SchemaLookup)
                      ["::"]))
    (!.js (xtd/get-in (main/create-impl "supabase"
                                        {"host" "127.0.0.1"
-                                        "port" (@! (-> docker-min/+config+ :api :port))
+                                        "port" (@! (-> local-min/+config+ :api :port))
                                         "secured" false
                                         "basepath" ""
-                                        "apikey" (@! (-> docker-min/+config+ :api :service-key))}
+                                        "apikey" (@! (-> local-min/+config+ :api :service-key))}
                                        -/Schema
                                        -/SchemaLookup)
                      ["::"]))]
@@ -80,7 +80,7 @@
   (notify/wait-on :js
     (-> (main/create-impl
          "postgres"
-          (@! (docker-min/+config+ :db))
+          (@! (local-min/+config+ :db))
           -/Schema
           -/SchemaLookup)
         (main/create-impl-init)
@@ -130,7 +130,7 @@
   
   (notify/wait-on :js
     (-> (main/create-impl "postgres"
-                          (@! (:db docker-min/+config+))
+                          (@! (:db local-min/+config+))
                           -/Schema
                           -/SchemaLookup)
         (main/create-impl-init)
@@ -148,7 +148,7 @@
 
   (notify/wait-on :js
     (-> (main/create-impl "supabase"
-                          (@! docker-min/+config-supabase-anon+)
+                          (@! local-min/+config-supabase-anon+)
                           -/Schema
                           -/SchemaLookup)
         (main/create-impl-init)
@@ -171,7 +171,7 @@
   ;; POSTGRES
   (notify/wait-on :js
     (-> (main/create-impl "postgres"
-                          (@! (:db docker-min/+config+))
+                          (@! (:db local-min/+config+))
                           -/Schema
                           -/SchemaLookup)
         (main/create-impl-init)
@@ -191,7 +191,7 @@
 
   ;; SUPABASE
   (notify/wait-on :js
-    (-> (main/create-impl "supabase" (@! docker-min/+config-supabase-anon+)
+    (-> (main/create-impl "supabase" (@! local-min/+config-supabase-anon+)
                           -/Schema
                           -/SchemaLookup)
         (main/create-impl-init)

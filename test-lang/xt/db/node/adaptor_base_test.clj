@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.docker-min :as docker-min]))
+            [scaffold.supabase.local-min :as local-min]))
 
 (do 
   (l/script- :postgres
@@ -10,13 +10,13 @@
      :require [[postgres.sample.scratch-v0 :as scratch-v0]
                [postgres.core :as pg]
                [postgres.core.supabase :as s]]
-     :config {:host   (-> docker-min/+config+ :db :host)
-              :port   (-> docker-min/+config+ :db :port)
-              :user   (-> docker-min/+config+ :db :user)
-              :pass   (-> docker-min/+config+ :db :password)
-              :dbname (-> docker-min/+config+ :db :database)
-              :startup  docker-min/start-supabase
-              :shutdown docker-min/stop-supabase}
+     :config {:host   (-> local-min/+config+ :db :host)
+              :port   (-> local-min/+config+ :db :port)
+              :user   (-> local-min/+config+ :db :user)
+              :pass   (-> local-min/+config+ :db :password)
+              :dbname (-> local-min/+config+ :db :database)
+              :startup  local-min/start-supabase
+              :shutdown local-min/stop-supabase}
      :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
   (defrun.pg __init__
@@ -53,7 +53,7 @@
     (-> (adaptor/set-impl node
                           "db/primary"
                           "postgres"
-                          (@! (docker-min/+config+ :db))
+                          (@! (local-min/+config+ :db))
                           -/Schema
                           -/SchemaLookup)
         (promise/x:promise-then
@@ -73,7 +73,7 @@
   (notify/wait-on :js
     (-> (substrate/node-create {})
         (adaptor/init-db {"primary" {"type" "postgres"
-                                     "defaults" (@! (docker-min/+config+ :db))}
+                                     "defaults" (@! (local-min/+config+ :db))}
                           "caching" {"type" "sqlite"
                                      "defaults" {"filename" ":memory:"}}}
                          -/Schema
@@ -102,7 +102,7 @@
     (-> (substrate/node-create {})
         (adaptor/set-impl "db/primary"
                           "postgres"
-                          (@! (docker-min/+config+ :db))
+                          (@! (local-min/+config+ :db))
                           -/Schema
                           -/SchemaLookup)
         (promise/x:promise-then

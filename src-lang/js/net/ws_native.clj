@@ -13,7 +13,11 @@
   {:added "4.1.3"}
   [client opts]
   (var url  (websocket/prepare-url client (or opts {})))
+  (var listeners (xt/x:get-key opts "listeners"))
   (var raw (new WebSocket url))
+  (when (xt/x:not-nil? listeners)
+    (xt/for:object [[k handler] listeners]
+      (. raw (addEventListener k handler))))
   (xt/x:set-key client "raw" raw)
   (return client))
 

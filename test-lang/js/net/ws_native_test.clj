@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [net.http.websocket :as ws]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.docker-min :as docker-min]))
+            [scaffold.supabase.local-min :as local-min]))
 
 (do
   (l/script- :postgres
@@ -11,13 +11,13 @@
      :require [[postgres.sample.scratch-v0 :as scratch-v0]
                [postgres.core :as pg]
                [postgres.core.supabase :as s]]
-     :config {:host   (-> docker-min/+config+ :db :host)
-              :port   (-> docker-min/+config+ :db :port)
-              :user   (-> docker-min/+config+ :db :user)
-              :pass   (-> docker-min/+config+ :db :password)
-              :dbname (-> docker-min/+config+ :db :database)
-              :startup  docker-min/start-supabase
-              :shutdown docker-min/stop-supabase}
+     :config {:host   (-> local-min/+config+ :db :host)
+              :port   (-> local-min/+config+ :db :port)
+              :user   (-> local-min/+config+ :db :user)
+              :pass   (-> local-min/+config+ :db :password)
+              :dbname (-> local-min/+config+ :db :database)
+              :startup  local-min/start-supabase
+              :shutdown local-min/stop-supabase}
      :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
   (defrun.pg __init__
@@ -42,7 +42,7 @@
 
 (comment
 
-  @(ws/websocket (str "ws://127.0.0.1:55121/realtime/v1/websocket?vsn=2.0.0&apikey=" (-> docker-min/+config+ :api :anon-key))
+  @(ws/websocket (str "ws://127.0.0.1:55121/realtime/v1/websocket?vsn=2.0.0&apikey=" (-> local-min/+config+ :api :anon-key))
                 {:on-open (fn [& args] (std.lib/prn args))})
   
   (notify/wait-on :js
@@ -50,8 +50,8 @@
          (js-ws/create
           {:host  "127.0.0.1"
            :port  55121
-           :path  (+ "/realtime/v1/websocket?vsn=2.0.0&apikey=" (@! (-> docker-min/+config+ :api :anon-key)))
-           :token (@! (-> docker-min/+config+ :api :anon-key))}))
+           :path  (+ "/realtime/v1/websocket?vsn=2.0.0&apikey=" (@! (-> local-min/+config+ :api :anon-key)))
+           :token (@! (-> local-min/+config+ :api :anon-key))}))
     (js-ws/connect-ws client)
     (js-ws/add-listeners-ws client
                             {"open"
@@ -63,13 +63,13 @@
                                  "ref"    "join-1"})
                                (repl/notify "opened"))}))
   
-  {"base_url" (xt/x:cat (or (-> docker-min/+config+ :api :protocol) "http")
+  {"base_url" (xt/x:cat (or (-> local-min/+config+ :api :protocol) "http")
                            "://"
-                           (or (-> docker-min/+config+ :api :hostname) "127.0.0.1")
+                           (or (-> local-min/+config+ :api :hostname) "127.0.0.1")
                            ":"
-                           (or (-> docker-min/+config+ :api :port) 55121))
-      "api_key" (-> docker-min/+config+ :api :service-key)
-      "auth_token" (-> docker-min/+config+ :api :service-key)
+                           (or (-> local-min/+config+ :api :port) 55121))
+      "api_key" (-> local-min/+config+ :api :service-key)
+      "auth_token" (-> local-min/+config+ :api :service-key)
       "topic" topic}
   
   )
@@ -79,7 +79,7 @@
 (fact "connects to the local Supabase realtime websocket and receives a Phoenix broadcast"
   (notify/wait-on [:js 15000]
     (var topic "room:http-websocket")
-    (var api (-> docker-min/+config+ :api))
+    (var api (-> local-min/+config+ :api))
     (var protocol (or (xt/x:get-key api "protocol") "http"))
     (var websocket-url
          (xt/x:cat (:? (== protocol "https") "wss" "ws")
@@ -91,13 +91,13 @@
                    (xt/x:get-key api "service-key")))
     (var client
          (js-ws/create
-          {"base_url" (xt/x:cat (or (-> docker-min/+config+ :api :protocol) "http")
+          {"base_url" (xt/x:cat (or (-> local-min/+config+ :api :protocol) "http")
                                 "://"
-                                (or (-> docker-min/+config+ :api :hostname) "127.0.0.1")
+                                (or (-> local-min/+config+ :api :hostname) "127.0.0.1")
                                 ":"
-                                (or (-> docker-min/+config+ :api :port) 55121))
-           "api_key" (-> docker-min/+config+ :api :service-key)
-           "auth_token" (-> docker-min/+config+ :api :service-key)
+                                (or (-> local-min/+config+ :api :port) 55121))
+           "api_key" (-> local-min/+config+ :api :service-key)
+           "auth_token" (-> local-min/+config+ :api :service-key)
            "topic" topic}))
     (var joined false)
     (var raw (new WebSocket websocket-url))

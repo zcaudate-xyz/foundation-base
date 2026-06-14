@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.docker-min :as docker-min]))
+            [scaffold.supabase.local-min :as local-min]))
 
 (do 
   (l/script- :postgres
@@ -10,13 +10,13 @@
      :require [[postgres.sample.scratch-v0 :as scratch-v0]
                [postgres.core :as pg]
                [postgres.core.supabase :as s]]
-     :config {:host   (-> docker-min/+config+ :db :host)
-              :port   (-> docker-min/+config+ :db :port)
-              :user   (-> docker-min/+config+ :db :user)
-              :pass   (-> docker-min/+config+ :db :password)
-              :dbname (-> docker-min/+config+ :db :database)
-              :startup  docker-min/start-supabase
-              :shutdown docker-min/stop-supabase}
+     :config {:host   (-> local-min/+config+ :db :host)
+              :port   (-> local-min/+config+ :db :port)
+              :user   (-> local-min/+config+ :db :user)
+              :pass   (-> local-min/+config+ :db :password)
+              :dbname (-> local-min/+config+ :db :database)
+              :startup  local-min/start-supabase
+              :shutdown local-min/stop-supabase}
      :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
   (defrun.pg __init__
@@ -27,7 +27,7 @@
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.net.lib-supabase :as lib-supabase]
+             [xt.net.http-supabase :as lib-supabase]
              [xt.net.conn-sql :as conn-sql]
              [xt.db.system.main-client :as main-client]]})
 
@@ -58,7 +58,7 @@
 
   (notify/wait-on :js
     (-> (main-client/create-client "postgres"
-                                   (@! (docker-min/+config+ :db)))
+                                   (@! (local-min/+config+ :db)))
         (conn-sql/connect {})
         (promise/x:promise-then
          (fn [client]
@@ -76,10 +76,10 @@
     (-> (main-client/create-client
          "supabase"
          {"host" "127.0.0.1"
-          "port" (@! (-> docker-min/+config+ :api :port))
+          "port" (@! (-> local-min/+config+ :api :port))
           "secured" false
           "basepath" ""
-          "apikey" (@! (-> docker-min/+config+ :api :anon-key))})
+          "apikey" (@! (-> local-min/+config+ :api :anon-key))})
         (lib-supabase/health {})
         (promise/x:promise-then
          (fn [out]
