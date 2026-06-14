@@ -18,7 +18,7 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - foundation-supabase-min-db-data:/var/lib/postgresql/data
-      - ./migrations/00000000000000_roles.sql:/docker-entrypoint-initdb.d/migrations/99999999999999_roles.sql:ro
+      - ./migrations:/docker-entrypoint-initdb.d/migrations:ro
     networks:
       - foundation-supabase-min-network
 
@@ -109,7 +109,7 @@ services:
       DB_NAME: postgres
       DB_SSL: "false"
       DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
-      DB_ENC_KEY: ${POSTGRES_PASSWORD:-postgres}
+      DB_ENC_KEY: 1234567890abcdef
       SECRET_KEY_BASE: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
       ERL_AFLAGS: -proto_dist inet_tcp
       DNS_NODES: "''"

@@ -119,7 +119,7 @@ services:
       DB_NAME: postgres
       DB_SSL: "false"
       DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
-      DB_ENC_KEY: ${POSTGRES_PASSWORD:-postgres}
+      DB_ENC_KEY: 1234567890abcdef
       SECRET_KEY_BASE: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
       ERL_AFLAGS: -proto_dist inet_tcp
       DNS_NODES: "''"
@@ -217,10 +217,6 @@ services:
       POSTGRES_BACKEND_SCHEMA: _analytics
       LOGFLARE_API_KEY: ${LOGFLARE_API_KEY:-postgres}
       LOGFLARE_MIN_CLUSTER_SIZE: "1"
-    networks:
-      - foundation-supabase-network
-    depends_on:
-      - db
 
 volumes:
   foundation-supabase-db-data:
