@@ -1,4 +1,4 @@
-project_id = "foundation-min"
+project_id = "foundation-base-local"
 
 [api]
 enabled = true
@@ -13,16 +13,9 @@ shadow_port = 55120
 major_version = 15
 
 [studio]
-enabled = false
+enabled = true
+port = 55123
 
 [inbucket]
-enabled = false
-
-[storage]
-enabled = false
-
-[analytics]
-enabled = false
-
-[edge_runtime]
-enabled = false
+enabled = true
+port = 55124
