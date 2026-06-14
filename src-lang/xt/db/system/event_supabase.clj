@@ -113,7 +113,7 @@
   (return
    (xt/x:obj-assign
     (xt/x:obj-assign
-     {"vsn" "1.0.0"}
+     {"vsn" "2.0.0"}
      (or (xt/x:get-key raw-client "params") {}))
     (or (xt/x:get-key opts "params") {}))))
 

@@ -4,43 +4,39 @@
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.docker-min :as docker-min]))
 
-(l/script- :postgres
-  {:runtime :jdbc.client
-   :require [[postgres.sample.scratch-v0 :as scratch-v0]
-             [postgres.core :as pg]
-             [postgres.core.supabase :as s]]
-   :config {:host   (-> docker-min/+config+ :db :host)
-            :port   (-> docker-min/+config+ :db :port)
-            :user   (-> docker-min/+config+ :db :user)
-            :pass   (-> docker-min/+config+ :db :password)
-            :dbname (-> docker-min/+config+ :db :database)
-            :startup  docker-min/start-supabase
-            :shutdown docker-min/stop-supabase}
-   :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
+(do 
+  (l/script- :postgres
+    {:runtime :jdbc.client
+     :require [[postgres.sample.scratch-v0 :as scratch-v0]
+               [postgres.core :as pg]
+               [postgres.core.supabase :as s]]
+     :config {:host   (-> docker-min/+config+ :db :host)
+              :port   (-> docker-min/+config+ :db :port)
+              :user   (-> docker-min/+config+ :db :user)
+              :pass   (-> docker-min/+config+ :db :password)
+              :dbname (-> docker-min/+config+ :db :database)
+              :startup  docker-min/start-supabase
+              :shutdown docker-min/stop-supabase}
+     :emit {:code {:transforms {:entry [#'s/transform-entry]}}}}))
 
 (defrun.pg __init__
   (s/grant-usage #{"scratch_v0"}))
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.lib.client-websocket :as js-ws]
-             [xt.lang.common-data :as xtd]
+   :require [[xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.client-websocket :as ws]
              [xt.net.ws-native :as websocket]
-             [xt.net.ws-phoenix :as phoenix]]})
+             [xt.net.ws-phoenix :as phoenix]
+             [js.net.ws-native :as js-websocket]]})
 
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:setup :postgres)]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
-
-(!.pg
-  ())
-
 
 ^{:refer xt.net.ws-phoenix/extract-message-data :added "4.1"}
 (fact "extracts text from raw websocket payload wrappers"
@@ -61,14 +57,14 @@
        "topic" "realtime:room:test"}
       {"payload" {"status" "ok"}}])
 
-^{:refer xt.net.http-phoenix/get-frame-ref :added "4.1"}
+^{:refer xt.net.ws-phoenix/get-frame-ref :added "4.1"}
 (fact "uses the explicit ref when provided"
 
   (!.js
     (phoenix/get-frame-ref nil {"ref" "join-1"}))
   => "join-1")
 
-^{:refer xt.net.http-phoenix/make-frame :added "4.1"}
+^{:refer xt.net.ws-phoenix/make-frame :added "4.1"}
 (fact "builds a generic phoenix frame"
 
   (!.js
@@ -79,7 +75,7 @@
       "ref" "push-1"
       "join_ref" "push-1"})
 
-^{:refer xt.net.http-phoenix/make-frame-join :added "4.1"}
+^{:refer xt.net.ws-phoenix/make-frame-join :added "4.1"}
 (fact "builds a join frame from a topic and payload"
 
   (!.js
@@ -93,7 +89,7 @@
       "ref" "join-1"
       "join_ref" "join-1"})
 
-^{:refer xt.net.http-phoenix/make-frame-leave :added "4.1"}
+^{:refer xt.net.ws-phoenix/make-frame-leave :added "4.1"}
 (fact "builds a leave frame from a topic"
 
   (!.js
@@ -105,11 +101,9 @@
       "ref" "leave-1"
       "join_ref" "leave-1"})
 
-^{:refer xt.net.http-phoenix/send-join :added "4.1"}
+^{:refer xt.net.ws-phoenix/send-join :added "4.1"}
 (fact "serialises and sends a join frame"
 
-  (!.js)
-  
   (!.js
     (var sent [])
     (with-redefs [websocket/send
@@ -122,9 +116,9 @@
         "access_token" "token-1"}
        {"topic" "realtime:room:test" "ref" "join-1"})
       (xt/x:first sent)))
-  => "{\"topic\":\"realtime:room:test\",\"event\":\"phx_join\",\"payload\":{\"config\":{\"broadcast\":{\"ack\":false,\"self\":false}},\"access_token\":\"token-1\"},\"ref\":\"join-1\",\"join_ref\":\"join-1\"}")
+  => "[\"join-1\",\"join-1\",\"realtime:room:test\",\"phx_join\",{\"config\":{\"broadcast\":{\"ack\":false,\"self\":false}},\"access_token\":\"token-1\"}]")
 
-^{:refer xt.net.http-phoenix/send-leave :added "4.1"}
+^{:refer xt.net.ws-phoenix/send-leave :added "4.1"}
 (fact "serialises and sends a leave frame"
   (!.js
    (var sent [])
@@ -136,9 +130,9 @@
       {}
       {"topic" "realtime:room:test" "ref" "leave-1"})
      (xt/x:first sent)))
-  => "{\"topic\":\"realtime:room:test\",\"event\":\"phx_leave\",\"payload\":{},\"ref\":\"leave-1\",\"join_ref\":\"leave-1\"}")
+  => "[\"leave-1\",\"leave-1\",\"realtime:room:test\",\"phx_leave\",{}]")
 
-^{:refer xt.net.http-phoenix/send :added "4.1"}
+^{:refer xt.net.ws-phoenix/send :added "4.1"}
 (fact "serialises and sends a push frame"
   (!.js
    (var sent [])
@@ -152,9 +146,9 @@
       {"hello" true}
       {"topic" "realtime:room:test" "ref" "push-1"})
      (xt/x:first sent)))
-  => "{\"topic\":\"realtime:room:test\",\"event\":\"broadcast\",\"payload\":{\"hello\":true},\"ref\":\"push-1\",\"join_ref\":\"push-1\"}")
+  => "[\"push-1\",\"push-1\",\"realtime:room:test\",\"broadcast\",{\"hello\":true}]")
 
-^{:refer xt.net.http-phoenix/send :added "4.1"
+^{:refer xt.net.ws-phoenix/send :added "4.1"
   :setup []}
 (fact "connects to the local Supabase realtime websocket and receives a broadcast after a pg send"
   (notify/wait-on [:js 10000]
@@ -164,7 +158,7 @@
           {}
           (@! fixtures/+schema+)
           (@! fixtures/+lookup+)))
-    (var topic "room:http-phoenix")
+    (var topic "room:ws-phoenix")
     (var requests [])
     (var statuses [])
     (var client
@@ -186,7 +180,7 @@
          (js {"db/sync"
               {"Entry"
                [{"id" "00000000-0000-0000-0000-0000000000aa"
-                 "name" "http-phoenix"
+                 "name" "ws-phoenix"
                  "tags" ["websocket"]}]}})
          "db/sync"
          topic
@@ -208,10 +202,10 @@
                           "request_tags" (xtd/get-in request ["db/sync" "Entry" 0 "tags"])
                           "payload_event" (xt/x:get-key frame "event")})))})
      (fn [subscription]
-       (return subscription)))))
+       (return subscription))))
   => {"status" "SUBSCRIBED"
-      "topic" "realtime:room:http-phoenix"
+      "topic" "realtime:room:ws-phoenix"
       "frame_event" "broadcast"
-      "request_name" "http-phoenix"
+      "request_name" "ws-phoenix"
       "request_tags" ["websocket"]
       "payload_event" "broadcast"})

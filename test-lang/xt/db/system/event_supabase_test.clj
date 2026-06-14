@@ -272,8 +272,8 @@
      (event-supabase/client {"websocket_url" "wss://socket.test/realtime"
                              "params" {"tenant" "main"}})
      {})])
-  => ["wss://db.test/realtime/v1/websocket?vsn=1.0.0&apikey=key-1"
-      "wss://socket.test/realtime?vsn=1.0.0&tenant=main"])
+  => ["wss://db.test/realtime/v1/websocket?vsn=2.0.0&apikey=key-1"
+      "wss://socket.test/realtime?vsn=2.0.0&tenant=main"])
 
 ^{:refer xt.db.system.event-supabase/resolve-topic :added "4.1"}
 (fact "resolves direct or derived realtime topics"
@@ -443,7 +443,7 @@
         {"client" (ws/client? socket)
          "url" (xtd/get-in urls [0])}))))
   => {"client" true
-      "url" "wss://db.test/realtime/v1/websocket?vsn=1.0.0&apikey=key-1"})
+      "url" "wss://db.test/realtime/v1/websocket?vsn=2.0.0&apikey=key-1"})
 
 ^{:refer xt.db.system.event-supabase/extract-message-data :added "4.1"}
 (fact "extracts payload text from websocket events"

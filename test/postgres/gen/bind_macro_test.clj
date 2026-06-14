@@ -1,11 +1,11 @@
 (ns postgres.gen.bind-macro-test
+  (:use code.test)
   (:require [postgres.core :as pg]
             [postgres.gen.bind-macro :as gen]
             [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
             [xt.db.helpers.seed-system-test :as data]
-            [xt.db.helpers.seed-user-test :as user])
-  (:use code.test))
+            [xt.db.helpers.seed-user-test :as user]))
 
 (l/script- :js
   {:runtime :basic

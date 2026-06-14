@@ -42,7 +42,7 @@
 
 (comment
 
-  @(ws/websocket (str "ws://127.0.0.1:55121/realtime/v1/websocket?vsn=1.0.0&apikey=" (-> docker-min/+config+ :api :anon-key))
+  @(ws/websocket (str "ws://127.0.0.1:55121/realtime/v1/websocket?vsn=2.0.0&apikey=" (-> docker-min/+config+ :api :anon-key))
                 {:on-open (fn [& args] (std.lib/prn args))})
   
   (notify/wait-on :js
@@ -50,7 +50,7 @@
          (js-ws/create
           {:host  "127.0.0.1"
            :port  55121
-           :path  (+ "/realtime/v1/websocket?vsn=1.0.0&apikey=" (@! (-> docker-min/+config+ :api :anon-key)))
+           :path  (+ "/realtime/v1/websocket?vsn=2.0.0&apikey=" (@! (-> docker-min/+config+ :api :anon-key)))
            :token (@! (-> docker-min/+config+ :api :anon-key))}))
     (js-ws/connect-ws client)
     (js-ws/add-listeners-ws client
@@ -87,7 +87,7 @@
                    (or (xt/x:get-key api "hostname") "127.0.0.1")
                    ":"
                    (or (xt/x:get-key api "port") 55121)
-                   "/realtime/v1/websocket?vsn=1.0.0&apikey="
+                   "/realtime/v1/websocket?vsn=2.0.0&apikey="
                    (xt/x:get-key api "service-key")))
     (var client
          (js-ws/create

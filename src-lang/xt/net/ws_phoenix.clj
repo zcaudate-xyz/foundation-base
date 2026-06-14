@@ -35,13 +35,23 @@
         (return message)))
 
 (defn.xt decode-frame
-  "decodes websocket message data into a phoenix frame"
+  "decodes websocket message data into a phoenix frame.
+   Phoenix v2 wire format is a JSON array: [join_ref, ref, topic, event, payload].
+   This normalizes it back to the map representation used by callers."
   {:added "4.1.4"}
   [message]
   (var data (-/extract-message-data message))
   (when (not (xt/x:is-string? data))
     (return data))
-  (return (xt/x:json-decode data)))
+  (var decoded (xt/x:json-decode data))
+  (when (and (xt/x:is-array? decoded)
+             (>= (xt/x:len decoded) 4))
+    (return {"join_ref" (xt/x:get-idx decoded 0)
+             "ref"      (xt/x:get-idx decoded 1)
+             "topic"    (xt/x:get-idx decoded 2)
+             "event"    (xt/x:get-idx decoded 3)
+             "payload"  (or (xt/x:get-idx decoded 4) {})}))
+  (return decoded))
 
 
 ;;
@@ -58,7 +68,7 @@
                (xt/x:now-ms)))))
 
 (defn.xt make-frame
-  "creates a generic phoenix frame"
+  "creates a generic phoenix frame as a map"
   {:added "4.1.4"}
   [client topic event payload opts]
   (var ref      (-/get-frame-ref client opts))
@@ -92,31 +102,66 @@
     (xt/x:err "Phoenix channel missing topic"))
   (return (-/make-frame client topic "phx_leave" {} (or opts {}))))
 
+(defn.xt make-frame-heartbeat
+  "creates a phoenix heartbeat frame"
+  {:added "4.1.4"}
+  [client opts]
+  (var ref (-/get-frame-ref client (or opts {})))
+  (return {"topic" "phoenix"
+           "event" "heartbeat"
+           "payload" {}
+           "ref" ref
+           "join_ref" ref}))
+
+(defn.xt encode-frame
+  "encodes a phoenix frame map to the v2 wire array:
+   [join_ref, ref, topic, event, payload]"
+  {:added "4.1.4"}
+  [frame]
+  (return [(or (xt/x:get-key frame "join_ref")
+               (xt/x:get-key frame "ref"))
+           (xt/x:get-key frame "ref")
+           (xt/x:get-key frame "topic")
+           (xt/x:get-key frame "event")
+           (or (xt/x:get-key frame "payload") {})]))
 
 ;;
 ;;
 ;;
+
+(defn.xt send-frame
+  "sends an encoded phoenix v2 frame over the websocket"
+  {:added "4.1.4"}
+  [client frame]
+  (return (websocket/send client (xt/x:json-encode (-/encode-frame frame)))))
 
 (defn.xt send-join
   "sends a phoenix join frame"
   {:added "4.1.4"}
   [client payload opts]
-  (return (websocket/send client (xt/x:json-encode
-                                  (-/make-frame-join client payload opts)))))
+  (return (-/send-frame client
+                        (-/make-frame-join client payload opts))))
 
 (defn.xt send-leave
   "sends a phoenix leave frame"
   {:added "4.1.4"}
   [client opts]
-  (return (websocket/send client (xt/x:json-encode
-                                  (-/make-frame-leave client opts)))))
+  (return (-/send-frame client
+                        (-/make-frame-leave client opts))))
+
+(defn.xt send-heartbeat
+  "sends a phoenix heartbeat frame"
+  {:added "4.1.4"}
+  [client opts]
+  (return (-/send-frame client
+                        (-/make-frame-heartbeat client (or opts {})))))
 
 (defn.xt send
   "sends a phoenix push frame"
   {:added "4.1.4"}
   [client event payload opts]
-  (return (websocket/send client (xt/x:json-encode
-                                  (-/make-frame client
-                                                (xt/x:get-key opts "topic")
-                                                event
-                                                payload opts)))))
+  (return (-/send-frame client
+                        (-/make-frame client
+                                      (xt/x:get-key opts "topic")
+                                      event
+                                      payload opts))))
