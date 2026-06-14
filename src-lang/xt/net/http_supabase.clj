@@ -169,7 +169,7 @@
   "TODO"
   {:added "4.1"}
   [client table-name query opts]
-  (var path (xt/x:cat "/rest/v1/rpc/" table-name "?" query))
+  (var path (xt/x:cat "/rest/v1/" table-name "?" query))
   (return
    (fetch/request-http client (xt/x:obj-assign {:path path
                                                 :method "GET"}

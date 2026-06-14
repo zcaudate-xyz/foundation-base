@@ -29,7 +29,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.db.system.impl-supabase :as impl]
-             [xt.net.http-supabase :as lib-supabase]]})
+             [xt.net.http-supabase :as http-supabase]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -43,7 +43,7 @@
   
   (notify/wait-on :js
     (-> (impl/impl-supabase
-         (lib-supabase/create-client
+         (http-supabase/create-client
           (js-fetch/create-methods)
           "127.0.0.1"
           (@! (-> local-min/+config+ :api :port))
@@ -69,7 +69,7 @@
 
   (notify/wait-on :js
     (-> (impl/impl-supabase
-         (lib-supabase/create-client
+         (http-supabase/create-client
           (js-fetch/create-methods)
           "127.0.0.1"
           (@! (-> local-min/+config+ :api :port))
@@ -95,7 +95,7 @@
 
   (notify/wait-on :js
     (-> (impl/impl-supabase
-         (lib-supabase/create-client
+         (http-supabase/create-client
           (js-fetch/create-methods)
           "127.0.0.1"
           (@! (-> local-min/+config+ :api :port))

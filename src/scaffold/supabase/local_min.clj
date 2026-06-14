@@ -4,7 +4,7 @@
             [std.lib.network :as network]))
 
 (def +config-file+
-  "config/scaffold/supabase-min.edn")
+  "config/scaffold/supabase-local.edn")
 
 (def +config+
   (config/load +config-file+))
@@ -23,29 +23,12 @@
    :basepath ""
    :apikey (-> +config+ :api :service-key)})
 
-(defn wait-for-http-ready!
-  "waits for the Supabase HTTP endpoint to return a 200 health response"
-  [opts]
-  (let [{:keys [timeout pause path headers]
-         :or {timeout 30000
-              pause 1000
-              path "/auth/v1/health"
-              headers {}}} (or opts {})
-        base-url (str (get-in +config+ [:api :protocol] "http")
-                      "://"
-                      (get-in +config+ [:api :hostname] "127.0.0.1")
-                      ":"
-                      (get-in +config+ [:api :port] 55121)
-                      path)
-        started (System/currentTimeMillis)]
-    ))
-
 (defn start-supabase
   ([]
    (start-supabase nil))
   ([_opts]
    (let [opts (or _opts {})]
-     (os/sh {:args ["supabase" "start" "--workdir" "docker/supabase-min"]
+     (os/sh {:args ["supabase" "start" "--workdir" "docker/local-min"]
              :output-errors true})
      (when (not (= false (:wait-http opts)))
        (network/wait-for-port
@@ -56,5 +39,5 @@
 
 (defn stop-supabase
   [_]
-  (os/sh {:args ["supabase" "start" "--workdir" "docker/supabase-min"]
+  (os/sh {:args ["supabase" "stop" "--workdir" "docker/local-min"]
           :output-errors true}))

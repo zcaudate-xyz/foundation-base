@@ -1,15 +1,9 @@
 (ns xt.net.ws-phoenix-integration-test
   (:use code.test)
   (:require [hara.lang :as l]
-            [xt.lang.common-notify :as notify]
-            [xt.lang.common-data :as xtd]
-            [xt.lang.common-repl :as repl]
-            [xt.lang.spec-base :as xt]
-            [xt.net.ws-native :as websocket]
-            [xt.net.ws-phoenix :as phoenix]
-            [js.net.ws-native :as js-websocket]
             [scaffold.supabase.local-min :as local-min]
-            [postgres.core.supabase :as s]))
+            [postgres.core.supabase :as s]
+            [xt.lang.common-notify :as notify]))
 
 (do
   (l/script- :postgres
@@ -36,8 +30,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)
-          (l/rt:setup :postgres)
-          (Thread/sleep 5000)]
+          (l/rt:setup :postgres)]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
@@ -56,7 +49,7 @@
        (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
                              :port (@! (-> local-min/+config+ :api :port))}))
   (-> client
-      (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=2.0.0&apikey="
+      (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
                                          (@! (-> local-min/+config+ :api :anon-key)))
                                 "listeners" listeners}))
   (return client))
@@ -65,8 +58,8 @@
   :setup [(l/rt:restart :js)
           (Thread/sleep 2000)]}
 (fact "connects to the local Supabase realtime websocket and joins a channel"
-
-  (notify/wait-on [:js 15000]
+  
+  (notify/wait-on [:js 2000]
     (var client
          (-/make-client
           {"open"

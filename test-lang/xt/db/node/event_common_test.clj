@@ -31,7 +31,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.system.main :as main]
              [xt.db.node.adaptor-base :as adaptor]
-             [xt.net.http-supabase :as lib-supabase]
+             [xt.net.http-supabase :as http-supabase]
              [xt.substrate :as substrate]]})
 
 (fact:global

@@ -10,7 +10,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as http-fetch]
-             [xt.net.http-supabase :as lib-supabase]]})
+             [xt.net.http-supabase :as http-supabase]]})
 
 (defn.xt pull-async
   "runs a tree ir pull with async supabase semantics"
@@ -61,7 +61,7 @@
     (xt/x:set-key headers "Content-Profile" schema)
     (xt/x:set-key headers "Accept-Profile" schema))
   (return
-   (-> (lib-supabase/rpc-call client
+   (-> (http-supabase/rpc-call client
                               (xt/x:get-key rpc-spec "id")
                               body
                               (-> (xt/x:obj-clone opts)

@@ -10,7 +10,7 @@
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.net.http-supabase :as lib-supabase]
+             [xt.net.http-supabase :as http-supabase]
              [xt.net.conn-sql :as conn-sql]
              [js.net.http-fetch :as js-fetch]
              [js.net.conn-sqlite :as js-sqlite]
@@ -28,4 +28,4 @@
 
         (== type "supabase")
         (return
-         (lib-supabase/create (js-fetch/create {}) defaults))))
+         (http-supabase/create (js-fetch/create {}) defaults))))
