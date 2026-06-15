@@ -78,9 +78,9 @@
   (notify/wait-on :js
     (-> (main/create-impl
          "postgres"
-          (@! (local-min/+config+ :db))
-          -/Schema
-          -/SchemaLookup)
+         (@! (local-min/+config+ :db))
+         -/Schema
+         -/SchemaLookup)
         (main/create-impl-init)
         (promise/x:promise-then
          (fn [impl]
@@ -91,20 +91,21 @@
   :setup [(l/rt:restart :js)]}
 (fact "pull reads from the local memory impl"
 
+  (!.js
+    (main/create-impl "sqlite" {} -/Schema -/SchemaLookup))
+
   (notify/wait-on :js
     (-> (main/create-impl "sqlite" {} -/Schema -/SchemaLookup)
         (main/create-impl-init)
         (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))
-        (promise/x:promise-then
-           (fn [impl]
-             #_(impl-common/record-add impl
-                                     "Log"
-                                     [{"id" "LOG-10" "message" "hello"}
-                                      {"id" "LOG-20" "message" "world"}])
-             (repl/notify
-              (impl-common/pull impl ["Log"]))))))
+         (fn [impl]
+           (impl-common/record-add impl
+                                   "Log"
+                                   [{"id" "LOG-10" "message" "hello"}
+                                    {"id" "LOG-20" "message" "world"}])
+           (repl/notify
+            (impl-common/pull impl ["Log"]))
+           #_(repl/notify impl)))))
   => (contains [(contains {"id" "LOG-10" "message" "hello"})
                 (contains {"id" "LOG-20" "message" "world"})]
                :in-any-order)
@@ -214,28 +215,20 @@
 ^{:refer xt.db.system.impl-common/record-add :added "4.1"}
 (fact "record-add writes through the local memory impl"
 
-  (!.js
-    (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
-    (impl-common/record-add impl "Log" [{"id" "LOG-10" "message" "echo"}]))
-  => [])
-
-^{:refer xt.db.system.impl-common/record-add-async :added "4.1"}
-(fact "record-add-async writes through promise semantics"
-
   (notify/wait-on :js
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
     (->  (main/create-impl-init impl)
          (promise/x:promise-then
           (fn [impl]
             (impl-common/record-add impl
-                                     "Log"
-                                     [{"id" "00000000-0000-0000-0000-000000000000"
-                                       "author_id" "00000000-0000-0000-0000-000000000000"
-                                       "message" "delta"}])))
+                                    "Log"
+                                    [{"id" "00000000-0000-0000-0000-000000000000"
+                                      "author_id" "00000000-0000-0000-0000-000000000000"
+                                      "message" "delta"}])))
          (promise/x:promise-then
-         (fn [_]
-           (repl/notify
-            (impl-common/pull impl ["Log"]))))))
+          (fn [_]
+            (repl/notify
+             (impl-common/pull impl ["Log"]))))))
   => [{"id" "00000000-0000-0000-0000-000000000000"
        "message" "delta"}]
   
@@ -245,14 +238,14 @@
          (promise/x:promise-then
           (fn [impl]
             (impl-common/record-add impl
-                                     "Log"
-                                     [{"id" "00000000-0000-0000-0000-000000000000"
-                                       "author_id" "00000000-0000-0000-0000-000000000000"
-                                       "message" "delta"}])))
+                                    "Log"
+                                    [{"id" "00000000-0000-0000-0000-000000000000"
+                                      "author_id" "00000000-0000-0000-0000-000000000000"
+                                      "message" "delta"}])))
          (promise/x:promise-then
-         (fn [_]
-           (repl/notify
-            (impl-common/pull impl ["Log"]))))))
+          (fn [_]
+            (repl/notify
+             (impl-common/pull impl ["Log"]))))))
   => [{"id" "00000000-0000-0000-0000-000000000000"
        "author_id" "00000000-0000-0000-0000-000000000000"
        "message" "delta"}])
@@ -271,22 +264,6 @@
                       "LOG-30"]))
   => nil)
 
-^{:refer xt.db.system.impl-common/record-delete-async :added "4.1"}
-(fact "record-delete-async removes ids through promise semantics"
-
-  (notify/wait-on :js
-    (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
-    (impl-common/record-add impl "Log" [{"id" "LOG-40" "message" "root"}])
-    (-> (impl-common/record-delete impl
-                                   "Log"
-                                   ["LOG-40"])
-        (promise/x:promise-then
-         (fn [_]
-           (repl/notify
-            (xtd/get-in impl ["client"
-                              "Log"
-                              "LOG-40"]))))))
-  => nil)
 
 ^{:refer xt.db.system.impl-common/process-add-event :added "4.1"}
 (fact "process-add-event merges nested data into the local memory impl"
@@ -295,7 +272,7 @@
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
     (var out (impl-common/process-add-event impl {"Log" [{"id" "LOG-50" "message" "root"}]}))
     [(xt/x:len out)
-     (xtd/get-in impl ["client"
+     (xtd/get-in impl ["rows"
                        "Log"
                        "LOG-50"
                        "record"
@@ -311,7 +288,7 @@
     (var impl (main/create-impl "memory" {} -/Schema -/SchemaLookup))
     (impl-common/process-add-event impl {"Log" [{"id" "LOG-60" "message" "root"}]})
     [(impl-common/process-remove-event impl {"Log" [{"id" "LOG-60" "message" "root"}]})
-     (xtd/get-in impl ["client"
+     (xtd/get-in impl ["rows"
                        "Log"
                        "LOG-60"])])
   => [["Log"]

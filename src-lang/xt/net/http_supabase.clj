@@ -104,6 +104,11 @@
 ;;
 ;;
 
+(defn.xt wrap-supabase-apikey
+  [client handler]
+  (var #{defaults} client)
+  (var api-key ))
+
 (defn.xt request-http
   "TODO"
   {:added "4.1"}

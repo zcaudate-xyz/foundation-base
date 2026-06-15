@@ -40,17 +40,11 @@
   (var type (xt/x:get-key impl "::"))
   (cond (== type "xt.db.system.impl_sqlite/ImplSqlite")
         (return
-         (-> (impl-sqlite/impl-sqlite-init impl)
-             (promise/x:promise-then
-              (fn [client]
-                (return (impl-sqlite/impl-sqlite client schema lookup))))))
+         (impl-sqlite/impl-sqlite-init impl))
 
         (== type "xt.db.system.impl_postgres/ImplPostgres")
         (return
-         (-> (impl-postgres/impl-postgres-init impl)
-             (promise/x:promise-then
-              (fn [client]
-                (return (impl-postgres/impl-postgres client schema lookup))))))
+         (impl-postgres/impl-postgres-init impl))
 
         :else
         (return

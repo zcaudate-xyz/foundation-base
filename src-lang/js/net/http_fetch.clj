@@ -9,7 +9,7 @@
              [xt.net.http-fetch :as fetch]]})
 
 (defn.js request-http-raw
-  [input]
+  [client input]
   (var #{url
          method
          headers
@@ -27,22 +27,21 @@
 
 (defn.js request-http
   [client input]
-  (var prepped  (fetch/prepare-input client input))
+  (var handler  (fetch/prepare-middleware client -/request-http-raw))
   (return
-   (-/request-http-raw prepped)))
-
+   (handler client input)))
 
 (defimpl.xt ^{:lang :js}
   HttpFetchClient
-  [defaults]
-  
+  [defaults middleware]
   fetch/IHttpClient
   {fetch/request-http -/request-http})
 
 (defn.js create
-  [defaults]
+  [defaults middleware]
   (return
-   (-/HttpFetchClient defaults)))
+   (-/HttpFetchClient defaults (or middleware
+                                   [fetch/wrap-prepare-input]))))
 
 (comment
   (:id @fetch/IHttpClient)

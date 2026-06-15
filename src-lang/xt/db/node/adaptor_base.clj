@@ -6,6 +6,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.protocol.impl.connection-sql :as dbsql]
              [xt.substrate :as substrate]
+             [xt.net.http-fetch :as http-fetch]
              [xt.db.text.sql-call :as call]
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.main :as impl-main]]})
@@ -70,7 +71,33 @@
         (fn [impl]
           (return (impl-common/rpc-call-async impl rpc-spec fn-args)))))))
 
+(defn.xt call-rpc-handler
+  [space args request node]
+  (var service-id   (xt/x:first args))
+  (var rpc-spec     (xt/x:second args))
+  (var fn-args      (xt/x:get-idx args (xt/x:offset 2)))
+  (return
+   (-> (promise/x:promise-run
+        (substrate/get-service node service-id))
+       (promise/x:promise-then
+        (fn [impl]
+          (return (impl-common/rpc-call-async impl rpc-spec fn-args)))))))
 
+;;
+;;
+;;
+
+
+(defn.xt call-fetch-handler
+  [space args request node]
+  (var service-id   (xt/x:first  args))
+  (var fetch-input  (xt/x:second args))
+  (return
+   (-> (promise/x:promise-run
+        (substrate/get-service node service-id))
+       (promise/x:promise-then
+        (fn [client]
+          (return (http-fetch/request-http client fetch-input)))))))
 
 ;;
 ;;

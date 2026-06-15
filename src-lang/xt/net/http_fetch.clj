@@ -58,13 +58,29 @@
            :method  (or method "GET")
            :headers headers}))
 
-(defn.xt then-normalise
-  [p]
+(defn.xt wrap-prepare-input
+  [handler]
   (return
-   (-> p
-       (promise/x:promise-then
-        (fn [response]
-          (return
-           (util/response-normalize response)))))))
+   (fn [client input]
+     (var prepped (-/prepare-input client input))
+     (return
+      (handler client prepped)))))
 
+(defn.xt wrap-normalise
+  [handler]
+  (return
+   (fn [client input]
+     (return
+      (-> (handler client input)
+          (promise/x:promise-then
+           (fn [response]
+             (return
+              (util/response-normalize response)))))))))
+
+(defn.xt prepare-middleware
+  [client handler]
+  (var #{middleware} client)
+  (xt/for:array [wrapper (or middleware [])]
+    (:= handler (wrapper handler)))
+  (return handler))
 

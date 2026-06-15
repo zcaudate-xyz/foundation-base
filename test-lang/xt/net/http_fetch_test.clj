@@ -108,3 +108,7 @@
       "headers" {"content-type" "application/json"}
       "body" {"id" "ord-1"}
       "error" nil})
+
+
+^{:refer xt.net.http-fetch/prepare-handler :added "4.1"}
+(fact "TODO")

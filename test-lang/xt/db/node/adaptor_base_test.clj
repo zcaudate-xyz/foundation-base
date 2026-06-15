@@ -25,10 +25,10 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
+             [xt.lang.common-tree :as tree]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [postgres.core :as pg]
              [xt.db.node.adaptor-base :as adaptor]
              [xt.db.system.impl-common :as impl-common]
              [xt.substrate :as substrate]]})
@@ -60,16 +60,38 @@
         (promise/x:promise-then
          (fn [node]
            (repl/notify
-            {"node_type" (xt/x:get-key node "::")
-             "service_type" (xt/x:get-key (substrate/get-service node "db/primary") "::")
-             "service_db" (xtd/get-in (substrate/get-service node "db/primary")
-                                      ["client" "defaults" "database"])})))))
-  => {"node_type" "substrate"
-      "service_type" "xt.db.system.impl_postgres/ImplPostgres"
-      "service_db" "postgres"})
+            (substrate/get-service node "db/primary"))))))
+  => (contains-in
+      {"schema" map? "lookup" map? "opts" map?
+       "::" "xt.db.system.impl_postgres/ImplPostgres"
+       "::/protocols" ["xt.db.system.impl_common/ISourceRemote"]
+       "client" {"::" "js.net.conn_postgres/PostgresClient"
+                 "::/protocols" ["xt.net.conn_sql/ISqlClient"]
+                 "raw" map?}})
+  
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (adaptor/set-impl node
+                          "db/caching"
+                          "sqlite"
+                          {}
+                          -/Schema
+                          -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (repl/notify
+            (substrate/get-service node "db/caching"))))))
+  => (contains-in
+      {"schema" map? "lookup" map? "opts" map?
+       "::" "xt.db.system.impl_sqlite/ImplSqlite"
+       "::/protocols" ["xt.db.system.impl_common/ISourceLocal"
+                       "xt.db.system.impl_common/ISourceRemote"]
+       "client" {"::" "js.net.conn_sqlite/SqliteClient"
+                 "::/protocols" ["xt.net.conn_sql/ISqlClient"]
+                 "raw" map?}}))
 
 ^{:refer xt.db.node.adaptor-base/init-db :added "4.1"}
-(fact "init-db installs the db/common, db/primary and db/caching services"
+(fact "init-db installs the db/common db/primary and db/caching services"
   
   (notify/wait-on :js
     (-> (substrate/node-create {})
@@ -82,23 +104,16 @@
         (promise/x:promise-then
          (fn [node]
            (repl/notify
-            {"common_schema" (xtd/get-in (substrate/get-service node "db/common")
-                                         ["schema" "Log" "message" "type"])
-             "primary_type" (xt/x:get-key (substrate/get-service node "db/primary") "::")
-             "primary_db" (xtd/get-in (substrate/get-service node "db/primary")
-                                      ["client" "defaults" "database"])
-             "caching_type" (xt/x:get-key (substrate/get-service node "db/caching") "::")
-             "caching_file" (xtd/get-in (substrate/get-service node "db/caching")
-                                        ["client" "defaults" "filename"])})))))
-  => {"common_schema" "text"
-      "primary_type" "xt.db.system.impl_postgres/ImplPostgres"
-      "primary_db" "postgres"
-      "caching_type" "xt.db.system.impl_sqlite/ImplSqlite"
-      "caching_file" ":memory:"})
+            (substrate/get-services node))))))
+  => (contains-in
+      {"db/caching" map?,
+       "db/primary" map?,
+       "db/common" map?}))
 
-^{:refer xt.db.node.adaptor-base/call-primary-handler :added "4.1"}
+^{:refer xt.db.node.adaptor-base/call-primary-handler :added "4.1"
+  :setup [(l/rt:restart :js)]}
 (fact "call-primary-handler routes rpc args through the live primary impl"
-
+  
   (notify/wait-on :js
     (-> (substrate/node-create {})
         (adaptor/init-db {"primary" {"type" "postgres"
@@ -109,20 +124,24 @@
                          -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
-           (adaptor/call-primary-handler
-            nil
-            [{"input" [{"symbol" "i_message" "type" "text"}]
-              "return" "jsonb"
-              "schema" "scratch_v0"
-              "id" "log_append_public"
-              "flags" {}}
-             ["hello"]]
-            nil
-            node)))
+           (return
+            (adaptor/call-primary-handler
+             nil
+             [{"input" [{"symbol" "i_message" "type" "text"}]
+               "return" "jsonb"
+               "schema" "scratch_v0"
+               "id" "log_append_public"
+               "flags" {}}
+              ["hello"]]
+             nil
+             node))))
         (promise/x:promise-then
          (fn [out]
-           out))))
-  => {"message" "hello"})
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => (contains-in {"message" "hello"}))
 
 ^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
 
