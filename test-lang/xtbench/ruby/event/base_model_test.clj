@@ -10,7 +10,7 @@
   
   (defn.xt make-basic-view []
     (return
-     (model/create-view
+     (model/create-model
       (fn:> [x] {:value x})
       {}
       [3]
@@ -20,7 +20,7 @@
   
   (defn.xt make-processed-view []
     (return
-     (model/create-view
+     (model/create-model
       (fn:> [x] x)
       {}
       [3]
@@ -30,7 +30,7 @@
   
   (defn.xt make-remote-view []
     (return
-     (model/create-view
+     (model/create-model
       nil
       {:remote {:handler (fn:> [x] {:value x})}}
       [3]
@@ -40,7 +40,7 @@
   
   (defn.xt make-sync-view []
     (return
-     (model/create-view
+     (model/create-model
       nil
       {:sync {:handler (fn:> [x] {:value x})}}
       [3]
@@ -92,11 +92,11 @@
     (model/parse-args {:input {:data [1 2 3]}}))
   => [1 2 3])
 
-^{:refer xt.event.base-model/create-view :added "4.1"}
+^{:refer xt.event.base-model/create-model :added "4.1"}
 (fact "manages view listeners"
 
   (!.rb
-    (var v (model/create-view
+    (var v (model/create-model
             (fn:> [x] {:value x})
             {}
             [3]

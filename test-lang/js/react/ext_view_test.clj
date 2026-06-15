@@ -53,7 +53,7 @@
 
   (j/<!
    (do:>
-    (var v (event-model/create-view
+    (var v (event-model/create-model
             (fn:> [x] (j/future-delayed [100]
                         (return {:value x})))
             {}
@@ -71,7 +71,7 @@
 
   (j/<!
    (do:>
-    (var v (event-model/create-view
+    (var v (event-model/create-model
             (fn:> [x] (j/future-delayed [100]
                         (return {:value x})))
             {}

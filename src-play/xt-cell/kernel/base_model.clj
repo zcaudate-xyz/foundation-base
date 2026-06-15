@@ -80,7 +80,7 @@
   [:fn [xt.cell.kernel.spec/CellRecord :xt/str [:xt/maybe :xt/any]]
    :xt/any])
 
-(defspec.xt create-view
+(defspec.xt create-model
   [:fn [xt.cell.kernel.spec/CellRecord :xt/str :xt/str xt.cell.kernel.spec/ViewSpec]
    xt.cell.kernel.spec/ViewRecord])
 
@@ -367,7 +367,7 @@
                            (return err))))))
     xt/x:now-ms)))
 
-(defn.xt create-view
+(defn.xt create-model
   "creates a view"
   {:added "4.0"}
   [cell model-id view-id
@@ -380,7 +380,7 @@
      defaultInit
      trigger
      options}]
-  (var view (event-model/create-view
+  (var view (event-model/create-model
              nil
               (xtd/obj-assign-nested
                {:main   {:handler handler
@@ -419,7 +419,7 @@
                   model-deps))
   (var model-views {})
   (xt/for:object [[view-id view] views]
-    (xt/x:set-key model-views view-id (-/create-view cell model-id view-id view)))
+    (xt/x:set-key model-views view-id (-/create-model cell model-id view-id view)))
   (var model {:name     model-id
               :views    model-views
               :throttle model-throttle

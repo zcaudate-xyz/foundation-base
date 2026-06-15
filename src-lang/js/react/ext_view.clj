@@ -129,7 +129,7 @@
    default-output
    default-process
    options]
-  (var view (event-model/create-view
+  (var view (event-model/create-model
              main-handler
              pipeline
              default-args

@@ -364,11 +364,11 @@
   (var trigger (xt/x:get-key opts "trigger"))
   (var options (xt/x:get-key opts "options"))
   (var model
-       (event-model/create-view
+       (event-model/create-model
         nil
         (xtd/obj-assign-nested
-         {"main" {"handler" handler
-                  "wrapper" -/wrap-space-args}
+         {"main"   {"handler" handler
+                    "wrapper" -/wrap-space-args}
           "remote" {"handler" remote-handler
                     "wrapper" -/wrap-space-args}}
          pipeline)

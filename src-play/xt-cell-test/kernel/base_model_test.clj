@@ -441,7 +441,7 @@
     nil))
   => {"queued" {}, "active" {}})
 
-^{:refer xt.cell.kernel.base-model/create-view :added "4.0"
+^{:refer xt.cell.kernel.base-model/create-model :added "4.0"
   :setup [(fact:global :setup)
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
@@ -449,7 +449,7 @@
 (fact "creates a view"
 
   (!.js
-   (base-model/create-view
+   (base-model/create-model
     (-/CELL)
     "hello"
     "ping"

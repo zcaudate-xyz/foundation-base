@@ -250,7 +250,7 @@
            '[std.image.awt.display :as d])
 
   (do (def -i- 10)
-      (def -viewer- (d/create-viewer)))
+      (def -viewer- (d/create-modeler)))
   (def -p-
     (future
       (dotimes [-i- 100]

@@ -60,7 +60,7 @@
 (defspec.xt parse-args
   [:fn [ModelContext] [:xt/maybe :xt/any]])
 
-(defspec.xt create-view
+(defspec.xt create-model
   [:fn [ModelHandler
         ModelPipeline
         :xt/any
@@ -197,7 +197,7 @@
   (var #{input} context)
   (return (xt/x:get-key input "data")))
 
-(defn.xt create-view
+(defn.xt create-model
   "creates a view"
   {:added "4.0"}
   [main-handler

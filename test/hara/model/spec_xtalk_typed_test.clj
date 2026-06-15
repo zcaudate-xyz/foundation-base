@@ -602,7 +602,7 @@
   (typed/analyze-and-register! 'xt.event.base-box)
   [(analysis/get-function-output-type 'xt.event.base-route/make-route)
    (analysis/get-function-output-type 'xt.event.base-route/get-param)
-   (analysis/get-function-output-type 'xt.event.base-model/create-view)
+   (analysis/get-function-output-type 'xt.event.base-model/create-model)
    (analysis/get-function-output-type 'xt.event.base-model/pipeline-prep)
    (analysis/get-function-output-type 'xt.event.base-box/make-box)]
   => '[{:kind :named :name xt.event.base-route/EventRoute}
@@ -645,7 +645,7 @@
    (-> (typed/get-spec 'js.cell.kernel.base-impl/new-cell)
        :type
        types/type->data)
-   (-> (typed/get-spec 'js.cell.kernel.base-model/create-view)
+   (-> (typed/get-spec 'js.cell.kernel.base-model/create-model)
        :type
        types/type->data)
    (-> (typed/get-spec 'js.cell.kernel.worker-state/fn-get-action-entry)

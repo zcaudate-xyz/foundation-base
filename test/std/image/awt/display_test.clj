@@ -3,10 +3,10 @@
             [std.image.awt.io :as io])
   (:use code.test))
 
-^{:refer std.image.awt.display/create-viewer :added "3.0" :unit #{:gui}}
+^{:refer std.image.awt.display/create-modeler :added "3.0" :unit #{:gui}}
 (fact "creates a viewer for the awt image"
   (let [viewer (try
-                 (create-viewer "hello")
+                 (create-modeler "hello")
                  (catch java.awt.HeadlessException _
                     :headless))]
     (if (= viewer :headless)
