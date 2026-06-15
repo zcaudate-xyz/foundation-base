@@ -1353,3 +1353,10 @@
   (s/seedgen-benchadd '[xt.event.base-model] {:lang [:ruby :dart] :write true})
   (s/seedgen-langadd '[xt.event.base-model]  {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.event.base-model]  {:lang [:lua :python] :write true}))
+
+
+^{:refer xt.event.base-model/async-fn-basic :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.event.base-model/async-fn-promise :added "4.1"}
+(fact "TODO")

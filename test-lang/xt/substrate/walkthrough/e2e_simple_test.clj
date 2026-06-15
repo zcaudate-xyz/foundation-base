@@ -82,7 +82,7 @@
                        "entries/ping"
                        "db/fn.primary"
                        "action/ping.primary")
-            "defaults" {"args" []}})
+            "defaults" {"args" []}}})
   
 
   (notify/wait-on :js

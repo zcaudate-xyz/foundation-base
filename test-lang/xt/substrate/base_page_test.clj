@@ -444,3 +444,7 @@
      "meta" (. prev ["meta"])})
   => {"id" "@/raw/page/space/a"
       "meta" {"space_id" "space/a"}})
+
+
+^{:refer xt.substrate.base-page/trigger-listeners :added "4.1"}
+(fact "TODO")

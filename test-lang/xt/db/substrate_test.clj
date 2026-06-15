@@ -68,7 +68,7 @@
                                                                                 "db/fn.primary"
                                                                                 "action/ping.primary"
                                                                                 {})
-                                         "defaults" {"args" []}})
+                                         "defaults" {"args" []}}})
     (var [_group model] (base-page/model-ensure node nil "page" "ping"))
     (repl/notify model))
   => (contains-in
@@ -102,7 +102,7 @@
                                                                                 "db/fn.primary"
                                                                                 "action/ping.primary"
                                                                                 {})
-                                         "defaults" {"args" []}})
+                                         "defaults" {"args" []}}})
     (-> (event-node/page-model-update node nil "page" "ping" {})
         (promise/x:promise-then
          (fn [out]
@@ -129,7 +129,7 @@
                                                                                 "db/fn.primary"
                                                                                 "action/ping.primary"
                                                                                 {})
-                                         "defaults" {"args" []}})
+                                         "defaults" {"args" []}}})
     (-> (event-node/page-model-update node nil "page" "ping" {})
         (promise/x:promise-then
          (fn [_]

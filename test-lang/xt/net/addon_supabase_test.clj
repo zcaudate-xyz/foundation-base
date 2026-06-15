@@ -536,3 +536,10 @@
                                        (. (. updated ["body"]) ["user_metadata"] ["note"])
                                        (. deleted ["status"])])))))))))))
   => [200 "updated-by-test" 200])
+
+
+^{:refer xt.net.addon-supabase/cmd-rpc-call :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.addon-supabase/cmd-query-table :added "4.1"}
+(fact "TODO")

@@ -441,3 +441,10 @@
            (repl/notify [(. out ["status"])
                          (. (. out ["body"]) ["error_code"])])))))
   => [400 "validation_failed"])
+
+
+^{:refer xt.net.http-supabase/wrap-supabase-apikey :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.http-supabase/create :added "4.1"}
+(fact "TODO")

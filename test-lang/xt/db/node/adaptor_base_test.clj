@@ -156,3 +156,13 @@
                             "services" {}})
     {}))
   => nil)
+
+
+^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/call-fetch-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/_ :added "4.1"}
+(fact "TODO")

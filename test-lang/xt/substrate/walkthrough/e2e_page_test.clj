@@ -32,7 +32,7 @@
                                                   (var args (. context ["args"]))
                                                   (return (xt/x:cat "hello "
                                                                     (xt/x:get-idx args 0))))
-                                      "defaults" {"args" ["world"]}}))
+                                      "defaults" {"args" ["world"]}}}))
     (-> (. group ["init"])
         (promise/x:promise-then
          (fn [_]
@@ -56,7 +56,7 @@
                                               (var args (. context ["args"]))
                                               (return (xt/x:cat "hello "
                                                                 (xt/x:get-idx args 0))))
-                                  "defaults" {"args" ["world"]}})
+                                  "defaults" {"args" ["world"]}}})
     (-> (substrate/page-model-update node nil "page" "greet" {})
         (promise/x:promise-then
          (fn [_]
@@ -75,7 +75,7 @@
                                               (var args (. context ["args"]))
                                               (return (xt/x:cat "hello "
                                                                 (xt/x:get-idx args 0))))
-                                  "defaults" {"args" ["world"]}})
+                                  "defaults" {"args" ["world"]}}})
     (-> (substrate/page-model-set-input node nil "page" "greet" {"data" ["substrate"]} {})
         (promise/x:promise-then
          (fn [_]
@@ -164,7 +164,7 @@
                                                        "demo/echo"
                                                        args
                                                        {"transport_id" "server"})))
-                                         "defaults" {"args" ["ping"]}})
+                                         "defaults" {"args" ["ping"]}}})
            (return (substrate/page-model-update client nil "page" "echo" {}))))
         (promise/x:promise-then
          (fn [_]
@@ -188,7 +188,7 @@
                                               (return "local-value"))
                                   "pipeline" {"remote" {"handler" (fn [_]
                                                                     (return "remote-value"))}}
-                                  "defaults" {"args" []}})
+                                  "defaults" {"args" []}}})
     (-> (substrate/page-model-update node nil "page" "both" {})
         (promise/x:promise-then
          (fn [_]
@@ -210,7 +210,7 @@
                                               (return "local-value"))
                                   "pipeline" {"remote" {"handler" (fn [_]
                                                                     (return "remote-value"))}}
-                                  "defaults" {"args" []}})
+                                  "defaults" {"args" []}}})
     (-> (substrate/page-model-update node nil "page" "both" {})
         (promise/x:promise-then
          (fn [_]

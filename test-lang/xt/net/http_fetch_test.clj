@@ -112,3 +112,12 @@
 
 ^{:refer xt.net.http-fetch/prepare-handler :added "4.1"}
 (fact "TODO")
+
+^{:refer xt.net.http-fetch/wrap-prepare-input :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.http-fetch/wrap-normalise :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.http-fetch/prepare-middleware :added "4.1"}
+(fact "TODO")
