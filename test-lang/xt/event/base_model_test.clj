@@ -1,7 +1,7 @@
 (ns xt.event.base-model-test
+  (:use code.test)
   (:require [hara.lang :as l]
-            [xt.lang.common-notify :as notify])
-  (:use code.test))
+            [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/scaffold {:all true}}
 (do 
@@ -53,25 +53,6 @@
       nil
       nil)))
 
-  (defn.xt async-fn
-    [handler context callbacks]
-    (var success (xt/x:get-key callbacks "success"))
-    (var error (xt/x:get-key callbacks "error"))
-    (try
-      (var output (handler context))
-      (if (promise/x:promise-native? output)
-        (return
-         (promise/x:promise-catch
-          (promise/x:promise-then output success)
-          error))
-        (return (promise/x:promise-run (success output))))
-      (catch err
-          (return (promise/x:promise-run (error err))))))
-  
-  (defn.xt success-async
-    [handler-fn context cb]
-    (return ((xt/x:get-key cb "success") (handler-fn context)))))
-
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
@@ -104,8 +85,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-
-^{:refer xt.lang.event-view/list-listeners :adopt true :added "4.0"}
+^{:refer xt.lang.event-model/pipeline-run.success :adopt true :added "4.0"}
 (fact "lists all listeners"
   
   (!.js
@@ -178,14 +158,38 @@
     (var [context disabled] (model/pipeline-prep v))
     (-> (model/pipeline-run context
                             nil
-                            -/async-fn
+                            model/async-fn-promise
                             (fn [])
                             (fn [x] (return x)))
         (promise/x:promise-then
          (fn [out]
            (repl/notify context.acc)))))
-  => {"post" [false], "::" "model.run", "main" [true {"value" 3}], "pre" [false]})
+  => {"post" [false], "::" "model.run", "main" [true {"value" 3}], "pre" [false]}
 
+  (notify/wait-on :js
+    (var v (model/create-model
+            nil
+            {:remote {:handler
+                      (fn [x]
+                        (return
+                         (promise/x:with-delay 100
+                                               (fn []
+                                                 (return {:value x})))))}}
+            {}
+            [3]
+            {:value 0}))
+    (model/init-model v)
+    (var [context disabled] (model/pipeline-prep v))
+    (-> (model/pipeline-run-remote
+         context
+         nil
+         model/async-fn-promise
+         (fn [])
+         (fn [x] (return x)))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify context.acc)))))
+  => {"error" true, "remote" [true {} true], "post" [false], "::" "model.run", "pre" [false]})
 
 
 ^{:refer xt.lang.event-model/pipeline-run-remote.errored :adopt true :added "4.0"}
@@ -194,60 +198,85 @@
   (notify/wait-on :js
     (var v (model/create-model
             nil
-            {:remote {:handler (fn [x]
-                                 (return
-                                  (promise/x:with-delay
-                                   100
-                                   (fn []
-                                     (xt/x:throw "ERRORED")))))}}
+            {:remote {:handler
+                      (fn [x]
+                        (return
+                         (promise/x:with-delay
+                          100
+                          (fn []
+                            (xt/x:throw "ERRORED")))))}}
             [3]
             ["BLAH"]
             xt/x:first))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v))
-    (var async-fn
-         (fn [handler-fn context #{success error}]
-           (return (. (new Promise
-                           (fn [resolve reject]
-                             (resolve (handler-fn context))))
-                      (then success)
-                      (catch error)))))
-    (j/notify (. (model/pipeline-run-remote context
-                                            true
-                                            async-fn
-                                            (fn:>)
-                                            k/identity)
-                 (then (fn:> context.acc)))))
-  => {"error" true,
-      "remote" [true "ERRORED" true],
-      "post" [false],
-      "pre" [false],
-      "::" "model.run"}
-  
-  (notify/wait-on :js
-    (var v (model/create-model
-            nil
-            {:remote {:handler (fn:> [x] (j/future-delayed [100]
-                                                           (return nil)))}}
-            [3]
-            ["BLAH"]
-            k/first))
-    (model/init-model v)
-    (var [context disabled] (model/pipeline-prep v))
-    (var async-fn
-         (fn [handler-fn context #{success error}]
-           (return (. (new Promise
-                           (fn [resolve reject]
-                             (resolve (handler-fn context))))
-                      (then success)
-                      (catch error)))))
-    (j/notify (. (model/pipeline-run-remote context
-                                            true
-                                            async-fn
-                                            (fn:>)
-                                            k/identity)
-                 (then (fn:> (model/get-output v)))))))
+    (-> (model/pipeline-run-remote context
+                                   nil
+                                   model/async-fn-promise
+                                   (fn [])
+                                   (fn [x] (return x)))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify context.acc)))))
+  => {"error" true, "remote" [true "ERRORED" true], "post" [false], "::" "model.run", "pre" [false]})
 
+^{:refer xt.event.base-model/async-fn-basic :added "4.1"}
+(fact "executes a synchronous handler and dispatches callbacks"
+
+  (!.js
+    (var out nil)
+    (model/async-fn-basic (fn:> [ctx] {:value 3})
+                          {}
+                          {"success" (fn [res] (:= out res))
+                           "error"   (fn [err] (:= out err))})
+    out)
+  => {"value" 3}
+
+  (!.lua
+    (var out nil)
+    (model/async-fn-basic (fn:> [ctx] {:value 3})
+                          {}
+                          {"success" (fn [res] (:= out res))
+                           "error"   (fn [err] (:= out err))})
+    out)
+  => {"value" 3}
+
+  (!.py
+    (var out nil)
+    (model/async-fn-basic (fn:> [ctx] {:value 3})
+                          {}
+                          {"success" (fn [res] (:= out res))
+                           "error"   (fn [err] (:= out err))})
+    out)
+  => {"value" 3})
+
+^{:refer xt.event.base-model/async-fn-promise :added "4.1"}
+(fact "executes handlers through promise resolution"
+
+  (notify/wait-on :js
+    (var out nil)
+    (-> (model/async-fn-promise
+         (fn [ctx]
+           (return (promise/x:with-delay 10 (fn:> [] {:value 3}))))
+         {}
+         {"success" (fn [res] (:= out res))
+          "error"   (fn [err] (:= out err))})
+        (promise/x:promise-then
+         (fn [] (repl/notify out)))))
+  => {"value" 3})
+=> {:value 3}
+
+  (notify/wait-on :lua
+    (var out nil)
+    (-> (model/async-fn-promise
+         (fn [ctx]
+           (return (promise/x:with-delay 10 (fn:> [] {:value 3}))))
+         {}
+         {"success" (fn [res] (:= out res))
+          "error"   (fn [err] (:= out err))})
+        (promise/x:promise-then
+         (fn [] (repl/notify out)))))
+  => {"value" 3})
 
 ^{:refer xt.event.base-model/wrap-args :added "4.1"}
 (fact "provides the core model helpers"
@@ -983,7 +1012,7 @@
     (var v (-/make-basic-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-call context "main" disabled -/success-async nil nil)
+    (model/pipeline-call context "main" disabled model/async-fn-basic nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "main" [true {"value" 3}]}
@@ -992,7 +1021,7 @@
     (var v (-/make-basic-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-call context "main" disabled -/success-async nil nil)
+    (model/pipeline-call context "main" disabled model/async-fn-basic nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "main" [true {"value" 3}]}
@@ -1001,7 +1030,7 @@
     (var v (-/make-basic-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-call context "main" disabled -/success-async nil nil)
+    (model/pipeline-call context "main" disabled model/async-fn-basic nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "main" [true {"value" 3}]})
@@ -1017,7 +1046,7 @@
      context
      ["main"]
      0
-     -/success-async
+     model/async-fn-basic
      nil
      (fn [ctx] (return (. ctx ["acc"])))
      nil))
@@ -1032,7 +1061,7 @@
      context
      ["main"]
      0
-     -/success-async
+     model/async-fn-basic
      nil
      (fn [ctx] (return (. ctx ["acc"])))
      nil))
@@ -1046,7 +1075,7 @@
     (var v (-/make-basic-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run context disabled -/success-async nil nil nil)
+    (model/pipeline-run context disabled model/async-fn-basic nil nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "pre" [false]
@@ -1057,7 +1086,7 @@
     (var v (-/make-basic-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run context disabled -/success-async nil nil nil)
+    (model/pipeline-run context disabled model/async-fn-basic nil nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "pre" [false]
@@ -1068,7 +1097,7 @@
     (var v (-/make-basic-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run context disabled -/success-async nil nil nil)
+    (model/pipeline-run context disabled model/async-fn-basic nil nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "pre" [false]
@@ -1082,7 +1111,7 @@
     (var v (-/make-remote-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run-force context true -/success-async nil nil "remote")
+    (model/pipeline-run-force context true model/async-fn-basic nil nil "remote")
     [(. context ["acc"])
      (model/get-current v "remote")
      (model/get-current v)])
@@ -1097,7 +1126,7 @@
     (var v (-/make-remote-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run-force context true -/success-async nil nil "remote")
+    (model/pipeline-run-force context true model/async-fn-basic nil nil "remote")
     [(. context ["acc"])
      (model/get-current v "remote")
      (model/get-current v nil)])
@@ -1115,7 +1144,7 @@
     (var v (-/make-remote-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run-remote context true -/success-async nil nil)
+    (model/pipeline-run-remote context true model/async-fn-basic nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "pre" [false]
@@ -1126,7 +1155,7 @@
     (var v (-/make-remote-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run-remote context true -/success-async nil nil)
+    (model/pipeline-run-remote context true model/async-fn-basic nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "pre" [false]
@@ -1137,7 +1166,7 @@
     (var v (-/make-remote-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run-remote context true -/success-async nil nil)
+    (model/pipeline-run-remote context true model/async-fn-basic nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "pre" [false]
@@ -1151,7 +1180,7 @@
     (var v (-/make-sync-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run-sync context true -/success-async nil nil)
+    (model/pipeline-run-sync context true model/async-fn-basic nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "pre" [false]
@@ -1162,7 +1191,7 @@
     (var v (-/make-sync-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run-sync context true -/success-async nil nil)
+    (model/pipeline-run-sync context true model/async-fn-basic nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "pre" [false]
@@ -1173,7 +1202,7 @@
     (var v (-/make-sync-model))
     (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
-    (model/pipeline-run-sync context true -/success-async nil nil)
+    (model/pipeline-run-sync context true model/async-fn-basic nil nil)
     (. context ["acc"]))
   => {"::" "model.run"
       "pre" [false]

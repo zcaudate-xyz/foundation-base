@@ -32,7 +32,7 @@
                                                   (var args (. context ["args"]))
                                                   (return (xt/x:cat "hello "
                                                                     (xt/x:get-idx args 0))))
-                                      "defaultArgs" ["world"]}}))
+                                      "defaults" {"args" ["world"]}}))
     (-> (. group ["init"])
         (promise/x:promise-then
          (fn [_]
@@ -56,7 +56,7 @@
                                               (var args (. context ["args"]))
                                               (return (xt/x:cat "hello "
                                                                 (xt/x:get-idx args 0))))
-                                  "defaultArgs" ["world"]}})
+                                  "defaults" {"args" ["world"]}})
     (-> (substrate/page-model-update node nil "page" "greet" {})
         (promise/x:promise-then
          (fn [_]
@@ -75,7 +75,7 @@
                                               (var args (. context ["args"]))
                                               (return (xt/x:cat "hello "
                                                                 (xt/x:get-idx args 0))))
-                                  "defaultArgs" ["world"]}})
+                                  "defaults" {"args" ["world"]}})
     (-> (substrate/page-model-set-input node nil "page" "greet" {"data" ["substrate"]} {})
         (promise/x:promise-then
          (fn [_]
@@ -97,7 +97,7 @@
                                 {"source"
                                  {"handler" (fn [_]
                                               (return "beta"))
-                                  "defaultArgs" []}
+                                  "defaults" {"args" []}}
                                  "derived"
                                  {"handler" (fn [context]
                                               (var local-node (. context ["node"]))
@@ -111,7 +111,7 @@
                                                  (xt/x:get-idx source-result 1)
                                                  nil))
                                               (return (xt/x:cat "derived-" source-val)))
-                                  "defaultArgs" []
+                                  "defaults" {"args" []}
                                   "deps" ["source"]}})
     (-> (substrate/page-model-update node nil "page" "source" {})
         (promise/x:promise-then
@@ -164,7 +164,7 @@
                                                        "demo/echo"
                                                        args
                                                        {"transport_id" "server"})))
-                                         "defaultArgs" ["ping"]}})
+                                         "defaults" {"args" ["ping"]}})
            (return (substrate/page-model-update client nil "page" "echo" {}))))
         (promise/x:promise-then
          (fn [_]
@@ -186,9 +186,9 @@
                                 {"both"
                                  {"handler" (fn [_]
                                               (return "local-value"))
-                                  "remoteHandler" (fn [_]
-                                                    (return "remote-value"))
-                                  "defaultArgs" []}})
+                                  "pipeline" {"remote" {"handler" (fn [_]
+                                                                    (return "remote-value"))}}
+                                  "defaults" {"args" []}})
     (-> (substrate/page-model-update node nil "page" "both" {})
         (promise/x:promise-then
          (fn [_]
@@ -208,9 +208,9 @@
                                 {"both"
                                  {"handler" (fn [_]
                                               (return "local-value"))
-                                  "remoteHandler" (fn [_]
-                                                    (return "remote-value"))
-                                  "defaultArgs" []}})
+                                  "pipeline" {"remote" {"handler" (fn [_]
+                                                                    (return "remote-value"))}}
+                                  "defaults" {"args" []}})
     (-> (substrate/page-model-update node nil "page" "both" {})
         (promise/x:promise-then
          (fn [_]

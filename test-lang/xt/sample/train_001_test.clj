@@ -4,6 +4,7 @@
             [xt.lang.common-protocol :as proto :refer [defprotocol.xt
                                                        defimpl.xt]]))
 
+^{:seedgen/root {:all true}}
 (l/script- :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-protocol :as proto]]})

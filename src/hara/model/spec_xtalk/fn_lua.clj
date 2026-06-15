@@ -417,6 +417,35 @@
                    (return "object")
                    (return "array"))
                  (return t))))
+        (var json-filter
+             (fn [obj]
+               (var t (type obj))
+               (if (== t "table")
+                 (do (var mt (getmetatable obj))
+                     (if (== mt (. cjson ["array_mt"]))
+                       (do (var out {})
+                           (var max 0)
+                           (for:object [[k v] obj]
+                             (when (== "number" (type k))
+                               (when (> k max)
+                                 (:= max k))))
+                           (for:index [i [1 max]]
+                             (var v (. obj [i]))
+                             (if (== nil v)
+                               (:= (. out [i]) (. cjson ["null"]))
+                               (if (== "function" (type v))
+                                 (:= (. out [i]) (. cjson ["null"]))
+                                 (:= (. out [i]) (json-filter v)))))
+                           (setmetatable out mt)
+                           (return out))
+                       (do (var out {})
+                           (for:object [[k v] obj]
+                             (when (not= "function" (type v))
+                               (:= (. out [k]) (json-filter v))))
+                           (return out))))
+                 (if (== t "function")
+                   (return (. cjson ["null"]))
+                   (return obj)))))
         (var '[r-ok r-err]
              (pcall (fn []
                       (cond (== nil ~out)
@@ -431,7 +460,7 @@
                                                    :key ~key
                                                    :return (type-fn ~out)
                                                    :type "data"
-                                                   :value ~out}))))))
+                                                   :value (json-filter ~out)}))))))
         (cond r-err
               (return (cjson.encode {:id  ~id
                                      :key ~key

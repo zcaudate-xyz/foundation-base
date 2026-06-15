@@ -365,8 +365,8 @@
         (xtd/obj-assign-nested
          {"main"   {"handler" handler
                     "wrapper" -/wrap-space-args}
-          "remote" {"handler" remote-handler
-                    "wrapper" -/wrap-space-args}}
+          "remote" {"wrapper" -/wrap-space-args}
+          "sync"   {"wrapper" -/wrap-space-args}}
          pipeline)
         (xt/x:get-key defaults "args")
         (xt/x:get-key defaults "output")

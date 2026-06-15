@@ -4,6 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
              [xt.event.base-listener :as event-common]]})
 
@@ -160,6 +161,37 @@
 
 (defspec.xt group-by-lookup
   [:fn [:xt/str] [:fn [[:xt/array :xt/any]] [:xt/dict :xt/str :xt/any]]])
+
+
+;;
+;; ASYNC
+;;
+
+(defn.xt async-fn-basic
+  [handler context callbacks]
+  (var success (xt/x:get-key callbacks "success"))
+  (var error (xt/x:get-key callbacks "error"))
+  (try
+    (var output (handler context))
+    (return
+     (success output))
+    (catch err (return (error err)))))
+
+(defn.xt async-fn-promise
+  [handler context callbacks]
+  (var success (xt/x:get-key callbacks "success"))
+  (var error (xt/x:get-key callbacks "error"))
+  (try
+    (var output (handler context))
+    (if (promise/x:promise-native? output)
+      (return
+       (promise/x:promise-catch
+        (promise/x:promise-then output success)
+        error))
+      (return (promise/x:promise-run (success output))))
+    (catch err
+        (return (promise/x:promise-run (error err))))))
+
 
 ;;
 ;; CREATE
@@ -616,7 +648,7 @@
             (return
              (-/pipeline-call
               context
-              (xt/x:get-key stages index)
+              (xt/x:get-idx stages index)
               false
               async-fn
               next-hook

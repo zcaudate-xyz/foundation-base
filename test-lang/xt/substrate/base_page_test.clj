@@ -4,7 +4,11 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.substrate :as substrate]
+   :require [[xt.lang.common-notify :as notify]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [xt.substrate :as substrate]
              [xt.substrate.base-page :as base-page]
              [xt.substrate.base-space :as node-space]]})
 
@@ -24,19 +28,20 @@
 ^{:refer xt.substrate.base-page/async-fn :added "4.1"}
 (fact "runs the success callback for plain values"
 
-  ^*(!.js
+  (notify/wait-on :js
     (var out nil)
-    (base-page/async-fn
-     (fn [ctx]
-       (return (. ctx ["value"])))
-     {"value" 3}
-     {"success" (fn [value]
-                  (:= out ["success" value])
-                  (return value))
-      "error" (fn [err]
-                (:= out ["error" err])
-                (return err))})
-    out)
+    (-> (base-page/async-fn
+         (fn [ctx]
+           (return (. ctx ["value"])))
+         {"value" 3}
+         {"success" (fn [value]
+                      (:= out ["success" value])
+                      (return value))
+          "error" (fn [err]
+                    (:= out ["error" err])
+                    (return err))})
+        (promise/x:promise-then
+         (fn [] (repl/notify out)))))
   => ["success" 3])
 
 ^{:refer xt.substrate.base-page/wrap-space-args :added "4.1"}
@@ -132,7 +137,7 @@
      "page"
      {"ping" {"handler" (fn [space args request node]
                           (return {"args" args}))
-              "defaultArgs" [1 2]}})
+              "defaults" {"args" [1 2]}}})
     (var group (base-page/group-get node "space/a" "page"))
     (. group ["name"]))
   => "page")
@@ -158,13 +163,13 @@
      "page"
      {"ping" {"handler" (fn [space args request node]
                           (return {"args" args}))
-              "defaultArgs" [1 2]}})
+              "defaults" {"args" [1 2]}}})
     (var [group model] (base-page/model-ensure node "space/a" "page" "ping"))
     {"group" (. group ["name"])
      "model" (. model ["::"])
      "input" (. (. model ["input"]) ["current"])} )
   => {"group" "page"
-      "model" "event.view"
+      "model" "event.model"
       "input" {"data" [1 2]}})
 
 ^{:refer xt.substrate.base-page/prep-model :added "4.1"}
@@ -181,17 +186,17 @@
      "source"
      {"a" {"handler" (fn [space args request node]
                        (return {"args" args}))
-           "defaultArgs" []}
+           "defaults" {"args" []}}
       "b" {"handler" (fn [space args request node]
                        (return {"args" args}))
-           "defaultArgs" []}})
+           "defaults" {"args" []}}})
     (base-page/add-group-attach
      node
      "space/a"
      "consumer"
      {"c" {"handler" (fn [space args request node]
                        (return {"args" args}))
-           "defaultArgs" []
+           "defaults" {"args" []}
            "deps" [["source" "a"]]}})
     (base-page/get-model-dependents node "space/a" "source" "a"))
   => {"consumer" ["c"]})
@@ -207,14 +212,14 @@
      "source"
      {"a" {"handler" (fn [space args request node]
                        (return {"args" args}))
-           "defaultArgs" []}})
+           "defaults" {"args" []}}})
     (base-page/add-group-attach
      node
      "space/a"
      "consumer"
      {"c" {"handler" (fn [space args request node]
                        (return {"args" args}))
-           "defaultArgs" []
+           "defaults" {"args" []}
            "deps" [["source" "a"]]}})
     (base-page/get-group-dependents node "space/a" "source"))
   => {"consumer" true})
@@ -266,7 +271,7 @@
     "other"
     {"remote" {"handler" (fn [space args request node]
                            (return (. space ["state"] ["label"])))
-               "defaultArgs" []}})
+               "defaults" {"args" []}}})
    (base-page/get-unknown-deps
     node
     "space/a"
@@ -295,16 +300,16 @@
           {"handler" (fn [space args request node]
                        (return {"space" (. space ["id"])
                                 "args" args}))
-           "defaultArgs" [1 2]
-           "defaultOutput" {"value" 0}}))
+           "defaults" {"args" [1 2]
+                     "output" {"value" 0}}}))
     {"type" (. model ["::"])
      "input" (. (. model ["input"]) ["current"])
      "output" (. (. model ["output"]) ["type"])
      "listener" (. (. (. model ["listeners"]) ["@/page"]) ["meta"] ["listener/type"])} )
-  => {"type" "event.view"
+  => {"type" "event.model"
       "input" {"data" [1 2]}
       "output" "output"
-      "listener" "view"})
+      "listener" "model"})
 
 ^{:refer xt.substrate.base-page/add-group-attach :added "4.1"}
 (fact "registers a group with its models"
@@ -318,14 +323,14 @@
           "page"
           {"ping" {"handler" (fn [space args request node]
                                (return {"args" args}))
-                   "defaultArgs" [1 2]}
+                   "defaults" {"args" [1 2]}}
            "pong" {"handler" (fn [space args request node]
                                (return {"args" args}))
-                   "defaultArgs" []}}))
+                   "defaults" {"args" []}}}))
     {"name" (. group ["name"])
      "models" (. (. group ["models"]) ["ping"] ["::"])})
   => {"name" "page"
-      "models" "event.view"})
+      "models" "event.model"})
 
 ^{:refer xt.substrate.base-page/add-group :added "4.1"}
 (fact "TODO")
@@ -356,15 +361,15 @@
      "page"
      {"always" {"handler" (fn [space args request node]
                             (return {"args" args}))
-                "defaultArgs" []
+                "defaults" {"args" []}
                 "trigger" true}
       "match" {"handler" (fn [space args request node]
                            (return {"args" args}))
-               "defaultArgs" []
+               "defaults" {"args" []}
                "trigger" "go"}
       "skip" {"handler" (fn [space args request node]
                           (return {"args" args}))
-              "defaultArgs" []
+              "defaults" {"args" []}
               "trigger" "other"}})
     (var group (base-page/group-ensure node "space/a" "page"))
     (base-page/trigger-group-raw node "space/a" group "go" {"value" 9}))
@@ -413,9 +418,9 @@
      {"kind" "test"})
     (var prev (base-page/unregister-page-trigger node "signal/a"))
     {"id" (. prev ["id"])
-     "remaining" (. (. node ["triggers"]) ["signal/a"])} )
+     "remaining" (== nil (xt/x:get-key (. node ["triggers"]) "signal/a"))} )
   => {"id" "signal/a"
-      "remaining" nil})
+      "remaining" true})
 
 ^{:refer xt.substrate.base-page/add-raw-callback :added "4.1"}
 (fact "registers a stable raw callback per space"

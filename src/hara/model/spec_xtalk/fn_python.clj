@@ -544,13 +544,34 @@
                      
                      :else
                      (return (str (type obj))))))
+        (var json-filter
+             (fn [obj]
+               (cond (isinstance obj '(dict))
+                     (do (var out {})
+                         (for:object [[k v] obj]
+                           (when (not (callable v))
+                             (:= (. out [k]) (json-filter v))))
+                         (return out))
+                     
+                     (isinstance obj '(list))
+                     (do (var out [])
+                         (for:array [v obj]
+                           (when (not (callable v))
+                             (. out (append (json-filter v)))))
+                         (return out))
+                     
+                     (callable obj)
+                     (return nil)
+                     
+                     :else
+                     (return obj))))
         (var ts (type-fn ~out))
         (try
           (return (json.dumps {:id  ~id
                                :key ~key
                                :type  "data"
                                :return ts
-                               :value  ~out}))
+                               :value  (json-filter ~out)}))
           (catch Exception
               (return (json.dumps {:id ~id
                                    :key ~key

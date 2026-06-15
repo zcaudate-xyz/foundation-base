@@ -68,7 +68,7 @@
                                                                                 "db/fn.primary"
                                                                                 "action/ping.primary"
                                                                                 {})
-                                         "defaultArgs" []}})
+                                         "defaults" {"args" []}})
     (var [_group model] (base-page/model-ensure node nil "page" "ping"))
     (repl/notify model))
   => (contains-in
@@ -76,14 +76,14 @@
        {"elapsed" nil, "current" nil, "type" "output", "updated" nil},
        "remote"
        {"elapsed" nil, "current" nil, "type" "remote", "updated" nil},
-       "::" "event.view",
+       "::" "event.model",
        "pipeline" {"remote" {}, "main" {}, "sync" {}},
        "input" {"current" {"data" []}, "updated" number?},
        "options" {},
        "listeners"
        {"@/page"
         {"pred" nil,
-         "meta" {"listener/id" "@/page", "listener/type" "view"}}}})
+         "meta" {"listener/id" "@/page", "listener/type" "model"}}}})
   
   (notify/wait-on :js
     (var node
@@ -102,7 +102,7 @@
                                                                                 "db/fn.primary"
                                                                                 "action/ping.primary"
                                                                                 {})
-                                         "defaultArgs" []}})
+                                         "defaults" {"args" []}})
     (-> (event-node/page-model-update node nil "page" "ping" {})
         (promise/x:promise-then
          (fn [out]
@@ -129,7 +129,7 @@
                                                                                 "db/fn.primary"
                                                                                 "action/ping.primary"
                                                                                 {})
-                                         "defaultArgs" []}})
+                                         "defaults" {"args" []}})
     (-> (event-node/page-model-update node nil "page" "ping" {})
         (promise/x:promise-then
          (fn [_]
@@ -145,14 +145,14 @@
            "updated" number?},
           "remote"
           {"elapsed" nil, "current" nil, "type" "remote", "updated" nil},
-          "::" "event.view",
+          "::" "event.model",
           "pipeline" {"remote" {}, "main" {}, "sync" {}},
           "input" {"current" {"data" []}, "updated" number?},
           "options" {},
           "listeners"
           {"@/page"
            {"pred" nil,
-            "meta" {"listener/id" "@/page", "listener/type" "view"}}}}},
+            "meta" {"listener/id" "@/page", "listener/type" "model"}}}}},
         "deps" {},
         "throttle" {"queued" {}, "active" {}}}
        {"output"
@@ -162,14 +162,14 @@
          "updated" number?},
         "remote"
         {"elapsed" nil, "current" nil, "type" "remote", "updated" nil},
-        "::" "event.view",
+        "::" "event.model",
         "pipeline" {"remote" {}, "main" {}, "sync" {}},
         "input" {"current" {"data" []}, "updated" number?},
         "options" {},
         "listeners"
         {"@/page"
          {"pred" nil,
-          "meta" {"listener/id" "@/page", "listener/type" "view"}}}}]))
+          "meta" {"listener/id" "@/page", "listener/type" "model"}}}}]))
 
 ^{:refer xt.db.substrate/init-db-services :added "4.1"}
 (fact "initializes db/primary and db/caching services from node service config"
