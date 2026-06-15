@@ -608,9 +608,9 @@
   => '[{:kind :named :name xt.event.base-route/EventRoute}
        {:kind :maybe
          :item {:kind :primitive :name :xt/str}}
-       {:kind :named :name xt.event.base-view/EventView}
+       {:kind :named :name xt.event.base-model/EventModel}
        {:kind :tuple
-        :types [{:kind :named :name xt.event.base-view/ViewContext}
+        :types [{:kind :named :name xt.event.base-model/ModelContext}
                 {:kind :primitive :name :xt/bool}]}
        {:kind :named :name xt.event.base-box/EventBox}])
 

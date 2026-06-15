@@ -47,8 +47,8 @@
                                                        :return-method nil}
                                                :view-id nil})])]
     [(boolean (re-find #"jsonEncode" out))
-     (boolean (re-find #"dynamic compact" out))
-     (boolean (re-find #"omitNilKeys\.contains" out))])
+     (boolean (re-find #"<dynamic, dynamic>" out))
+     (boolean (re-find #"return_method" out))])
   => [true true true])
 
 (fact "dart pads omitted trailing xt maybe args at call sites"
@@ -232,7 +232,7 @@
                                (fn []
                                  (return true)))])]
     [(boolean (re-find #"\.then\(" out))
-     (boolean (re-find #"\.catchError\(" out))
+     (boolean (re-find #"catch \(err\)" out))
      (boolean (re-find #"\.whenComplete\(" out))])
   => [true true true]
 

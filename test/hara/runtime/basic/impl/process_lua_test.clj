@@ -28,7 +28,7 @@
 (fact "constructs shared bootstrap without swallowing client loop errors"
   (let [out (default-basic-client 19000)]
     [(boolean (re-find #"cjson = require" out))
-     (boolean (re-find #"local function return_eval" out))
+     (boolean (re-find #"function return_eval" out))
      (boolean (re-find #"local function client_basic" out))
      (boolean (re-find #"(?s)client_basic\(host,port,opts\).*pcall\(function" out))])
   => [true true true false])

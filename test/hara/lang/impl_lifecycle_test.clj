@@ -125,10 +125,10 @@
                       :root-ns 'js.blessed.ui-core
                       }}}))
 
-  => (contains ["import * as xtd from '@/libs/xt/lang/common-data'"
-                "import * as ui_style from '@/blessed/ui-style'"
-                "import * as k from '@/libs/xt/lang/common-lib'"
-                "import * as r from '@/react'"] :in-any-order)
+  => (contains ["import * as xtd from './@/libs/xt/lang/common-data'"
+                "import * as ui_style from './@/blessed/ui-style'"
+                "import * as k from './@/libs/xt/lang/common-lib'"
+                "import * as r from './@/react'"] :in-any-order)
 
   (emit-module-setup-link-arr
    {:emit {:code   {:link {:path-separator "|"
@@ -146,10 +146,10 @@
      :emit {:compile {:type :graph
                       :base    'js
                       :root-ns 'js.blessed.ui-core}}}))
-  => (contains ["import * as xtd from '@|libs|xt|lang|common-data'"
-                "import * as ui_style from '@|blessed|ui-style'"
-                "import * as k from '@|libs/xt/lang|common-lib'"
-                "import * as r from '@|react'"] :in-any-order))
+  => (contains ["import * as xtd from './@|libs|xt|lang|common-data'"
+                "import * as ui_style from './@|blessed|ui-style'"
+                "import * as k from './@|libs/xt/lang|common-lib'"
+                "import * as r from './@|react'"] :in-any-order))
 
 ^{:refer hara.lang.impl-lifecycle/emit-module-setup-export-body :added "4.0"}
 (fact "the code for exporting the body"

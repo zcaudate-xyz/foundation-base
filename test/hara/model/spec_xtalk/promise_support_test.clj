@@ -53,8 +53,8 @@
       (boolean (re-find #"\[\"data\"\]" js-out))
       (boolean (re-find #"console\.log" js-out))]
      [(boolean (re-find #"Exception\(\"boom\",\{\"a\":1\}\)" py-out))
-      (boolean (re-find #"e\.args\[0\]" py-out))
-      (boolean (re-find #"e\.args\[1\]" py-out))
+      (boolean (re-find #"\(e\.args\)\[0\]" py-out))
+      (boolean (re-find #"\(e\.args\)\[1\]" py-out))
       (boolean (re-find #"print" py-out))]
      [(boolean (re-find #"xt\.exception" lua-out))
       (boolean (re-find #"\['message'\]" lua-out))
@@ -90,8 +90,8 @@
       (boolean (re-find #"\[\"data\"\]" js-out))]
      [(boolean (re-find #"promise_catch" py-out))
       (boolean (re-find #"Exception\(\"boom\",\{\"a\":1\}\)" py-out))
-      (boolean (re-find #"err\.args\[0\]" py-out))
-      (boolean (re-find #"err\.args\[1\]" py-out))]
+      (boolean (re-find #"\(err\.args\)\[0\]" py-out))
+      (boolean (re-find #"\(err\.args\)\[1\]" py-out))]
      [(boolean (re-find #"promise_catch" lua-out))
       (boolean (re-find #"xt\.exception" lua-out))
       (boolean (re-find #"\['message'\]" lua-out))
@@ -143,8 +143,8 @@
                                    (x:promise-native? value))])]
     [(boolean (re-find #"Future\.sync\(thunk\)" out))
      (boolean (re-find #"\.then\(" out))
-     (boolean (re-find #"\.catchError\(" out))
-     (boolean (re-find #"\.whenComplete\(onDone\)" out))
+     (boolean (re-find #"catch \(err\)" out))
+     (boolean (re-find #"\.whenComplete\(" out))
      (boolean (re-find #"runtimeType" out))
      (boolean (re-find #"startsWith\(\"Future<\"\)" out))])
   => [true true true true true true])

@@ -7,7 +7,7 @@
               [hara.lang.impl-entry :as entry]
               [hara.lang.library :as lib]
               [hara.lang.library-snapshot :as snap]
-              [xt.event.node-frame]
+              [xt.substrate.base-frame]
               [hara.lang.library-snapshot-prep-test :as lprep]
                [std.lib.env :as env])
   (:use code.test))
@@ -59,7 +59,7 @@
 
   (let [library (impl/clone-default-library)
         book    (lib/get-book library :lua)]
-    (b/get-code-deps book 'xt.event.node-frame/frame))
+    (b/get-code-deps book 'xt.substrate.base-frame/frame))
   => '#{xt.lang.common-data/obj-assign})
 
 (fact "entry emit failures include entry context"

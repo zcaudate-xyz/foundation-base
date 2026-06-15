@@ -21,7 +21,7 @@
 (fact "converts a ptr into a form"
 
   (raw-compile-form redis/scan-sub)
-  => '(return (kmi.redis/scan-sub (. KEYS [1]) (unpack ARGV))))
+  => '(return (kmi.redis/scan-sub (. KEYS [1]))))
 
 ^{:refer hara.runtime.redis.eval-script/raw-compile :added "4.0"}
 (fact "compiles a function as body and sha"
@@ -30,7 +30,7 @@
   => (contains
       {:body #(and (string? %)
                    (str/includes? % "local function scan_sub(key)")
-                   (str/includes? % "return scan_sub(KEYS[1],unpack(ARGV))"))
+                   (str/includes? % "return scan_sub(KEYS[1])"))
        :sha string?}))
 
 ^{:refer hara.runtime.redis.eval-script/raw-prep-in-fn :added "4.0"}

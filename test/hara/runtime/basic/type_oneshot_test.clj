@@ -212,7 +212,7 @@
        "  except Exception:"
        "    err = traceback.format_exc()"
        "  raise Exception(err)"
-       "globals()[\"OUT\"] = OUT_FN()")
+       "(globals())[\"OUT\"] = OUT_FN()")
       {"key" nil, "id" nil, "return" "number", "value" 10, "type" "data"}
       10])
 

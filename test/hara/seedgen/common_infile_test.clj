@@ -7,7 +7,7 @@
 (fact "returns an explicit error result when the test file is missing"
   (project/in-context
    (seed-infile/seedgen-root 'xt.sample.train-001-test {}))
-  => :js
+  => :xtalk
 
   (project/in-context
    (seed-infile/seedgen-root 'xt.sample.missing-test {}))
