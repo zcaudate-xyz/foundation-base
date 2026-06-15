@@ -109,3 +109,6 @@
 
 ^{:refer hara.seedgen.common-util/seedgen-coverage-langs :added "4.1"}
 (fact "TODO")
+
+^{:refer hara.seedgen.common-util/seedgen-display-lang :added "4.1"}
+(fact "TODO")

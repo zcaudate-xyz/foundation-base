@@ -194,3 +194,10 @@
 (fact "returns xtalk ops not assigned to any profile"
   (xtalk-unclassified-ops)
   => [])
+
+
+^{:refer hara.common.grammar-xtalk-system/xtalk-op-polyfill-symbol :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.common.grammar-xtalk-system/xtalk-ops-polyfill-modules :added "4.1"}
+(fact "TODO")

@@ -21,10 +21,10 @@
 (def +str-type+     {:kind :primitive :name :xt/str})
 (def +kw-type+      {:kind :primitive :name :xt/kw})
 
-(defrecord XtSpecDef [ns name type spec-meta])
+(defrecord XtSpecDef [ns name type spec-meta file line column])
 (defrecord XtArg [name type modifiers])
-(defrecord XtFnDef [ns name inputs output body-meta raw-body spec])
-(defrecord XtValueDef [ns name type body-meta raw-value spec])
+(defrecord XtFnDef [ns name inputs output body-meta raw-body spec file line column])
+(defrecord XtValueDef [ns name type body-meta raw-value spec file line column])
 (defrecord XtRegistryEntry [symbol spec fn macro value])
 
 (defonce ^:dynamic *type-registry* (atom {}))
@@ -51,11 +51,8 @@
                               (:types type)
                               [type])))
                   (remove nil?)
-                  (reduce (fn [out type]
-                            (if (some #(= % type) out)
-                              out
-                              (conj out type)))
-                          []))]
+                  distinct
+                  vec)]
     (cond
       (empty? flat) +unknown-type+
       (= 1 (count flat)) (first flat)
@@ -193,21 +190,39 @@
   [sym value-def]
   (register-entry! sym :value value-def))
 
+(defn source-loc
+  ([form]
+   (source-loc form (some-> form meta :file)))
+  ([form file]
+   (merge {:file (or file
+                     (some-> form meta :file)
+                     "UNKNOWN")}
+          (select-keys (meta form) [:line :column]))))
+
 (defn make-spec-def
-  [ns-sym type-name type spec-meta]
-  (->XtSpecDef (some-> ns-sym str) (name type-name) type spec-meta))
+  ([ns-sym type-name type spec-meta loc]
+   (->XtSpecDef (some-> ns-sym str) (name type-name) type spec-meta
+                (:file loc) (:line loc) (:column loc)))
+  ([ns-sym type-name type spec-meta]
+   (make-spec-def ns-sym type-name type spec-meta (source-loc nil))))
 
 (defn make-arg
   [name type modifiers]
   (->XtArg name type (vec modifiers)))
 
 (defn make-fn-def
-  [ns-sym fn-name inputs output body-meta raw-body spec]
-  (->XtFnDef (some-> ns-sym str) (name fn-name) (vec inputs) output body-meta (vec raw-body) spec))
+  ([ns-sym fn-name inputs output body-meta raw-body spec loc]
+   (->XtFnDef (some-> ns-sym str) (name fn-name) (vec inputs) output body-meta (vec raw-body) spec
+              (:file loc) (:line loc) (:column loc)))
+  ([ns-sym fn-name inputs output body-meta raw-body spec]
+   (make-fn-def ns-sym fn-name inputs output body-meta raw-body spec (source-loc nil))))
 
 (defn make-value-def
-  [ns-sym value-name type body-meta raw-value spec]
-  (->XtValueDef (some-> ns-sym str) (name value-name) type body-meta raw-value spec))
+  ([ns-sym value-name type body-meta raw-value spec loc]
+   (->XtValueDef (some-> ns-sym str) (name value-name) type body-meta raw-value spec
+                 (:file loc) (:line loc) (:column loc)))
+  ([ns-sym value-name type body-meta raw-value spec]
+   (make-value-def ns-sym value-name type body-meta raw-value spec (source-loc nil))))
 
 (defn spec-def?
   [x]

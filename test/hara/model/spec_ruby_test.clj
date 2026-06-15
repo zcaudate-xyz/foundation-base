@@ -345,3 +345,13 @@
 
 ^{:refer hara.model.spec-ruby/tf-for-index :added "4.1"}
 (fact "TODO")
+
+
+^{:refer hara.model.spec-ruby/ruby-string :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-ruby/ruby-throw :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-ruby/ruby-def :added "4.1"}
+(fact "TODO")

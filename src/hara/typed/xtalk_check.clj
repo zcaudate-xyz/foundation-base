@@ -1,6 +1,7 @@
 (ns hara.typed.xtalk-check
   (:require [hara.typed.xtalk-common :as types]
-            [hara.typed.xtalk-infer :as infer]))
+            [hara.typed.xtalk-compat :as compat]
+            [hara.typed.xtalk-form :as form]))
 
 (defn function-env
   [fn-def]
@@ -14,17 +15,20 @@
   (let [ctx {:env (function-env fn-def)
              :ns (symbol (:ns fn-def))
              :aliases (get (:body-meta fn-def) :aliases)
-             :function fn-def}
-        inferred (infer/infer-body (:raw-body fn-def) ctx)
+             :function fn-def
+             :infer (requiring-resolve 'hara.typed.xtalk-infer/infer-type)
+             :loc (select-keys fn-def [:file :line :column])}
+        inferred (form/infer-body (:raw-body fn-def) ctx)
         return-type (:type inferred)
         errors (cond-> (vec (:errors inferred))
                  (and (:output fn-def)
                       (not= (:output fn-def) types/+unknown-type+)
-                      (not (infer/compatible-type? return-type (:output fn-def) ctx)))
+                      (not (compat/compatible-type? return-type (:output fn-def) ctx)))
                  (conj {:tag :return-type-mismatch
                         :function (types/current-function-symbol fn-def)
                         :expected (types/type->data (:output fn-def))
-                        :actual (types/type->data return-type)}))]
+                        :actual (types/type->data return-type)
+                        :loc (select-keys fn-def [:file :line :column])}))]
     {:function (types/current-function-symbol fn-def)
      :declared {:inputs (mapv (fn [arg]
                                 {:name (:name arg)

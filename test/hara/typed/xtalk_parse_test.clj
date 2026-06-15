@@ -14,7 +14,8 @@
                       ([arr idx default]
                        (list (quote x:get-idx) arr idx default)))
                    'sample.route
-                   {})]
+                   {}
+                   "sample.clj")]
     {:name (:name macro-def)
      :inputs (mapv :name (:inputs macro-def))
      :standalone (get-in macro-def [:body-meta :standalone])
@@ -31,6 +32,14 @@
 (fact "reads forms from files"
   (pos? (count (read-forms "test/hara.lang/model/spec_xtalk_typed_fixture.clj")))
   => true)
+
+(fact "attaches file and source position metadata to read forms"
+  (let [forms (read-forms "test/hara.lang/model/spec_xtalk_typed_fixture.clj")
+        first-form (first forms)]
+    [(some-> first-form meta :file string?)
+     (integer? (some-> first-form meta :line))
+     (integer? (some-> first-form meta :column))])
+  => [true true true])
 
 ^{:refer hara.typed.xtalk-parse/ns-form? :added "4.1"}
 (fact "detects ns forms"
@@ -113,7 +122,7 @@
 
 ^{:refer hara.typed.xtalk-parse/parse-spec-decl :added "4.1"}
 (fact "parses spec declarations"
-  (-> (parse-spec-decl 'sample.route 'User '[:xt/record ["id" :xt/str]] {:docstring "user"} {}) :type types/type->data)
+  (-> (parse-spec-decl 'sample.route 'User '[:xt/record ["id" :xt/str]] {:docstring "user"} {} "sample.clj") :type types/type->data)
   => '{:kind :record :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}]})
 
 ^{:refer hara.typed.xtalk-parse/parse-decl-preamble :added "4.1"}
@@ -126,7 +135,7 @@
 
 ^{:refer hara.typed.xtalk-parse/parse-defspec :added "4.1"}
 (fact "parses defspec forms"
-  (:name (parse-defspec '(defspec.xt User :xt/str) 'sample.route {}))
+  (:name (parse-defspec '(defspec.xt User :xt/str) 'sample.route {} "sample.clj"))
   => "User")
 
 ^{:refer hara.typed.xtalk-parse/parse-callable-items :added "4.1"}
@@ -141,7 +150,7 @@
 
 ^{:refer hara.typed.xtalk-parse/parse-defn :added "4.1"}
 (fact "parses defn.xt forms"
-  (let [fn-def (parse-defn '(defn.xt ^{:- [:xt/maybe User]} find-user [UserMap users :xt/str id] (return id)) 'sample.route {})]
+  (let [fn-def (parse-defn '(defn.xt ^{:- [:xt/maybe User]} find-user [UserMap users :xt/str id] (return id)) 'sample.route {} "sample.clj")]
     [(mapv :name (:inputs fn-def))
      (types/type->data (:output fn-def))])
   => '[[users id]
@@ -149,12 +158,12 @@
 
 ^{:refer hara.typed.xtalk-parse/parse-defmacro :added "4.1"}
 (fact "parses defmacro.xt forms"
-  (get-in (parse-defmacro '(defmacro.xt add [a b] (list '+ a b)) 'sample.route {}) [:body-meta :macro])
+  (get-in (parse-defmacro '(defmacro.xt add [a b] (list '+ a b)) 'sample.route {} "sample.clj") [:body-meta :macro])
   => true)
 
 ^{:refer hara.typed.xtalk-parse/parse-defvalue :added "4.1"}
 (fact "parses def.xt forms"
-  (types/type->data (:type (parse-defvalue '(def.xt ^{:- [:xt/dict :xt/str :xt/num]} ScopeMap {:a 1}) 'sample.route {})))
+  (types/type->data (:type (parse-defvalue '(def.xt ^{:- [:xt/dict :xt/str :xt/num]} ScopeMap {:a 1}) 'sample.route {} "sample.clj")))
   => '{:kind :dict
        :key {:kind :primitive :name :xt/str}
        :value {:kind :primitive :name :xt/num}})
@@ -169,14 +178,14 @@
 ^{:refer hara.typed.xtalk-parse/attach-function-spec :added "4.1"}
 (fact "attaches callable specs to fn defs"
   (let [fn-def (types/make-fn-def 'sample.route 'find-user [(types/make-arg 'id types/+unknown-type+ [])] types/+unknown-type+ {} ['id] nil)
-        spec (parse-spec-decl 'sample.route 'find-user '[:fn [:xt/str] :xt/bool] {} {})]
+        spec (parse-spec-decl 'sample.route 'find-user '[:fn [:xt/str] :xt/bool] {} {} "sample.clj")]
     (types/type->data (:output (attach-function-spec fn-def spec))))
   => '{:kind :primitive :name :xt/bool})
 
 ^{:refer hara.typed.xtalk-parse/attach-value-spec :added "4.1"}
 (fact "attaches value specs to value defs"
   (let [value-def (types/make-value-def 'sample.route 'ScopeMap types/+unknown-type+ {} {:a 1} nil)
-        spec (parse-spec-decl 'sample.route 'ScopeMap '[:xt/dict :xt/str :xt/int] {} {})]
+        spec (parse-spec-decl 'sample.route 'ScopeMap '[:xt/dict :xt/str :xt/int] {} {} "sample.clj")]
     (types/type->data (:type (attach-value-spec value-def spec))))
   => '{:kind :dict
        :key {:kind :primitive :name :xt/str}
@@ -184,7 +193,7 @@
 
 ^{:refer hara.typed.xtalk-parse/spec-map-by-kind :added "4.1"}
 (fact "indexes filtered specs by type key"
-  (keys (spec-map-by-kind [(parse-spec-decl 'sample.route 'find-user '[:fn [:xt/str] :xt/bool] {} {})]
+  (keys (spec-map-by-kind [(parse-spec-decl 'sample.route 'find-user '[:fn [:xt/str] :xt/bool] {} {} "sample.clj")]
                           #(= :fn (get-in % [:type :kind]))))
   => '(sample.route/find-user))
 
@@ -228,3 +237,13 @@
 (fact "finds source files for namespaces"
   (count (:functions (analyze-namespace 'hara.model.spec-xtalk-typed-fixture)))
   => 3)
+
+
+^{:refer hara.typed.xtalk-parse/existing-file-path :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.typed.xtalk-parse/file-path-candidates :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.typed.xtalk-parse/resolve-file-path :added "4.1"}
+(fact "TODO")

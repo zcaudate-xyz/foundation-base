@@ -23,3 +23,10 @@
                 *server* (atom {:process {}})]
     (stop-ganache-server))
   => map?)
+
+
+^{:refer hara.runtime.solidity.env-ganache/start-hardhat-server :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.solidity.env-ganache/stop-hardhat-server :added "4.1"}
+(fact "TODO")

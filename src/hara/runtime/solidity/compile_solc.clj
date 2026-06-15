@@ -15,6 +15,7 @@
             [std.make.compile :as compile]
             [std.string.prose :as prose]
             [xt.lang.common-notify :as notify]
+            [xt.lang.common-repl]
             [xt.lang.common-lib :as lib]))
 
 (defn compile-base-emit
@@ -194,7 +195,7 @@
   [rt form & [f]]
   (let [output (notify/wait-on-fn
                 rt
-                [(list 'js.core/notify form
+                [(list 'xt.lang.common-repl/notify form
                        (or f
                            (if common/*stringify*
                              'JSON.stringify

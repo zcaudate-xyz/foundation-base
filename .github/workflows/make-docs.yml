@@ -42,11 +42,11 @@ jobs:
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci 
           lein exec -ep "(require '[code.doc :as doc]
                                   '[code.doc.executive :as exec])
-                          (doc/init-template :std.lang {:write true})
-                          (doc/deploy-template :std.lang {:write true})
+                          (doc/init-template :hara {:write true})
+                          (doc/deploy-template :hara {:write true})
                           (let [project (doc/make-project)
                                 lookup  (exec/all-pages project)]
-                            (doseq [k (sort (filter #(= \"std.lang\" (namespace %))
+                            (doseq [k (sort (filter #(= \"hara\" (namespace %))
                                                     (keys lookup)))]
                               (exec/render k {:write true} lookup project)))"
           

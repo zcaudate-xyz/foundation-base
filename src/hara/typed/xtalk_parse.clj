@@ -1,10 +1,12 @@
 (ns hara.typed.xtalk-parse
-  (:require [code.project :as project]
+  (:require [clojure.tools.reader :as reader]
+            [clojure.tools.reader.reader-types :as reader-types]
+            [code.project :as project]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [hara.typed.xtalk-common :as types]))
 
-(defn- existing-file-path
+(defn existing-file-path
   [paths]
   (some (fn [path]
           (let [path-str (some-> path str)]
@@ -12,26 +14,28 @@
               path-str)))
         paths))
 
-(defn- file-path-candidates
+(defn file-path-candidates
   [file-path]
   (let [hara-path  (str/replace file-path "hara.lang/" "hara/")
         annex-path (str/replace hara-path "model_annex/" "model/annex/")]
     (distinct [file-path hara-path annex-path])))
 
-(defn- resolve-file-path
+(defn resolve-file-path
   [file-path]
   (or (existing-file-path (file-path-candidates file-path))
       (str file-path)))
 
 (defn read-forms
   [file-path]
-  (with-open [r (java.io.PushbackReader. (io/reader (resolve-file-path file-path)))]
-    (let [eof (Object.)]
+  (with-open [r (reader-types/indexing-push-back-reader (io/reader (resolve-file-path file-path)))]
+    (let [eof (Object.)
+          file-str (some-> file-path str)]
       (loop [forms []]
-        (let [form (read {:eof eof :read-cond :allow} r)]
+        (let [form (reader/read {:eof eof :read-cond :allow} r)]
           (if (identical? form eof)
             forms
-            (recur (conj forms form))))))))
+            (recur (conj forms (cond-> form
+                                 file-str (vary-meta assoc :file file-str))))))))))
 
 (defn ns-form?
   [form]
@@ -214,12 +218,13 @@
                        :args args-form})))))
 
 (defn parse-spec-decl
-  [ns-sym spec-sym type-form spec-meta aliases]
+  [ns-sym spec-sym type-form spec-meta aliases loc]
   (let [ctx {:ns ns-sym
              :aliases aliases}]
     (types/make-spec-def ns-sym spec-sym
                          (types/normalize-type type-form ctx)
-                         spec-meta)))
+                         spec-meta
+                         loc)))
 
 (defn parse-decl-preamble
   [items form-sym]
@@ -237,11 +242,12 @@
              docstring (assoc :docstring docstring))}))
 
 (defn parse-defspec
-  [form ns-sym aliases]
+  [form ns-sym aliases file]
   (let [[_ spec-sym & more] form
         {:keys [meta items]} (parse-decl-preamble more spec-sym)
         type-form (first items)]
-    (parse-spec-decl ns-sym spec-sym type-form meta aliases)))
+    (parse-spec-decl ns-sym spec-sym type-form meta aliases
+                     (types/source-loc form file))))
 
 (defn parse-callable-items
   [items]
@@ -265,7 +271,7 @@
                items)))
 
 (defn parse-defn
-  [form ns-sym aliases]
+  [form ns-sym aliases file]
   (let [[def-op fn-sym & more] form
         {:keys [meta items]} (parse-decl-preamble more fn-sym)
         [args-form body] (parse-callable-items items)
@@ -281,10 +287,11 @@
                                :aliases aliases
                                :generator (= "defgen.xt" (name def-op)))
                         body
-                        nil)))
+                        nil
+                        (types/source-loc form file))))
 
 (defn parse-defmacro
-  [form ns-sym aliases]
+  [form ns-sym aliases file]
   (let [[_ macro-sym & more] form
          {:keys [meta items]} (parse-decl-preamble more macro-sym)
          [args-form body] (parse-callable-items items)
@@ -299,10 +306,11 @@
                         (assoc meta :aliases aliases
                                     :macro true)
                         raw-body
-                        nil)))
+                        nil
+                        (types/source-loc form file))))
 
 (defn parse-defvalue
-  [form ns-sym aliases]
+  [form ns-sym aliases file]
   (let [[_ value-sym & more] form
         {:keys [meta items]} (parse-decl-preamble more value-sym)
         ctx {:ns ns-sym
@@ -314,7 +322,8 @@
                           (assoc meta :aliases aliases
                                      :def true)
                           (first items)
-                          nil)))
+                          nil
+                          (types/source-loc form file))))
 
 (defn merge-spec-inputs
   [inputs spec-inputs]
@@ -398,10 +407,10 @@
                        (extract-script-aliases forms))]
     (-> (reduce (fn [acc form]
                    (cond
-                     (defspec? form) (update acc :specs conj (parse-defspec form ns-sym aliases))
-                     (defn? form) (update acc :functions conj (parse-defn form ns-sym aliases))
-                     (defmacro? form) (update acc :macros conj (parse-defmacro form ns-sym aliases))
-                     (defvalue? form) (update acc :values conj (parse-defvalue form ns-sym aliases))
+                     (defspec? form) (update acc :specs conj (parse-defspec form ns-sym aliases file-path))
+                     (defn? form) (update acc :functions conj (parse-defn form ns-sym aliases file-path))
+                     (defmacro? form) (update acc :macros conj (parse-defmacro form ns-sym aliases file-path))
+                     (defvalue? form) (update acc :values conj (parse-defvalue form ns-sym aliases file-path))
                      :else acc))
                   {:ns ns-sym
                    :aliases aliases

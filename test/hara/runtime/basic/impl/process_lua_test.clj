@@ -71,3 +71,6 @@
                                                 (add-10 5))
                                           {})])
   => #"local function add_10\(x\)")
+
+^{:refer hara.runtime.basic.impl.process-lua/lua-basic-script-globalize-entry :added "4.1"}
+(fact "TODO")

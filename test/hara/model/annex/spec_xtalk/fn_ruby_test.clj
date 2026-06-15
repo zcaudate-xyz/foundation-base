@@ -437,3 +437,10 @@
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-return-eval :added "4.1"}
 (fact "TODO")
+
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tv-x-get-key :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-del-key :added "4.1"}
+(fact "TODO")

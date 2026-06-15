@@ -496,3 +496,36 @@
      (boolean (re-find #"stdout" out))
      (boolean (re-find #"catchError" out))])
   => [true true true true])
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-call :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-string-compare-expr :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-comparison-form :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-lt :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-lte :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-gt :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-gte :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-json-compact-expr :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-obj-keys :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-obj-vals :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-obj-pairs :added "4.1"}
+(fact "TODO")

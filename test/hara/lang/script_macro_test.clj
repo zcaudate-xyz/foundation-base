@@ -457,3 +457,7 @@
 
 ^{:refer hara.lang.script-macro/defmacro.! :added "4.0"}
 (fact "macro for runtime lang macros")
+
+
+^{:refer hara.lang.script-macro/hydrate-top-level-entry :added "4.1"}
+(fact "TODO")

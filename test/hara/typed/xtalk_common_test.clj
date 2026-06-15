@@ -3,19 +3,24 @@
   (:require [hara.typed.xtalk-common :refer :all]))
 
 (defn sample-spec []
-  (make-spec-def 'sample.route 'User +str-type+ {:doc "user"}))
+  (make-spec-def 'sample.route 'User +str-type+ {:doc "user"}
+                 {:file "sample.clj" :line 10 :column 5}))
 
 (defn sample-fn []
-  (make-fn-def 'sample.route 'find-user [(make-arg 'id +str-type+ [])] +str-type+ {} ['id] nil))
+  (make-fn-def 'sample.route 'find-user [(make-arg 'id +str-type+ [])] +str-type+ {} ['id] nil
+               {:file "sample.clj" :line 12 :column 5}))
 
 (defn sample-macro []
-  (make-fn-def 'sample.route 'expand [(make-arg 'x +unknown-type+ [])] +unknown-type+ {:macro true} ['x] nil))
+  (make-fn-def 'sample.route 'expand [(make-arg 'x +unknown-type+ [])] +unknown-type+ {:macro true} ['x] nil
+               {:file "sample.clj" :line 14 :column 5}))
 
 (defn sample-generator []
-  (make-fn-def 'sample.route 'stream [] +unknown-type+ {:generator true} [] nil))
+  (make-fn-def 'sample.route 'stream [] +unknown-type+ {:generator true} [] nil
+               {:file "sample.clj" :line 16 :column 5}))
 
 (defn sample-value []
-  (make-value-def 'sample.route 'ScopeMap +int-type+ {:def true} {:a 1} nil))
+  (make-value-def 'sample.route 'ScopeMap +int-type+ {:def true} {:a 1} nil
+                  {:file "sample.clj" :line 18 :column 5}))
 
 (defn populate! []
   (clear-registry!)
@@ -44,6 +49,13 @@
   (union-type [+str-type+ +str-type+ +int-type+])
   => '{:kind :union :types [{:kind :primitive :name :xt/str}
                             {:kind :primitive :name :xt/int}]})
+
+^{:refer hara.typed.xtalk-common/source-loc :added "4.1"}
+(fact "builds location maps from form metadata"
+  [(source-loc (with-meta 'x {:line 10 :column 5}) "sample.clj")
+   (source-loc nil)]
+  => '[{:file "sample.clj" :line 10 :column 5}
+       {:file "UNKNOWN"}])
 
 ^{:refer hara.typed.xtalk-common/type-key :added "4.1"}
 (fact "builds namespaced type keys"
@@ -178,7 +190,8 @@
 ^{:refer hara.typed.xtalk-common/make-spec-def :added "4.1"}
 (fact "constructs spec defs"
   (sample-spec)
-  => '{:ns "sample.route" :name "User" :type {:kind :primitive :name :xt/str} :spec-meta {:doc "user"}})
+  => '{:ns "sample.route" :name "User" :type {:kind :primitive :name :xt/str} :spec-meta {:doc "user"}
+       :file "sample.clj" :line 10 :column 5})
 
 ^{:refer hara.typed.xtalk-common/make-arg :added "4.1"}
 (fact "constructs args"

@@ -143,3 +143,6 @@
 
 ^{:refer hara.model.spec-lua/variant-grammar :added "4.1"}
 (fact "TODO")
+
+^{:refer hara.model.spec-lua/lua-vector :added "4.1"}
+(fact "TODO")

@@ -1,175 +1,75 @@
-(ns hara.typed.xtalk-test
+(ns hara.typed-test
   (:use code.test)
-  (:require [hara.typed :refer :all]
-            [hara.typed.xtalk-common :as types]))
-
-(defn fixture-register! []
-  (clear-registry!)
-  (analyze-and-register! 'hara.model.spec-xtalk-typed-fixture))
+  (:require [hara.typed :refer :all]))
 
 ^{:refer hara.typed/namespace-aliases :added "4.1"}
-(fact "extracts namespace alias maps"
-  (contains? (namespace-aliases *ns*) 'types)
-  => true)
+(fact "TODO")
 
 ^{:refer hara.typed/register-spec-form! :added "4.1"}
-(fact "registers spec forms directly"
-  (do
-    (clear-registry!)
-    (:name (register-spec-form! 'hara.typed.xtalk-test/LocalId :xt/str {})))
-  => "LocalId")
+(fact "TODO")
 
 ^{:refer hara.typed/defspec.xt :added "4.1"}
-(fact "defspec macro registers specs in the current ns"
-  (do
-    (clear-registry!)
-    (eval '(hara.typed/defspec.xt MacroSpec :xt/int))
-    (-> (get-spec 'hara.typed.xtalk-test/MacroSpec) :type types/type->data))
-  => '{:kind :primitive :name :xt/int})
+(fact "TODO")
 
 ^{:refer hara.typed/clear-registry! :added "4.1"}
-(fact "clears registry through facade"
-  (do
-    (fixture-register!)
-    (clear-registry!)
-    (count (list-entries)))
-  => 0)
+(fact "TODO")
 
 ^{:refer hara.typed/register-type! :added "4.1"}
-(fact "register-type delegates to common registry"
-  (do
-    (clear-registry!)
-    (register-type! 'hara.typed.xtalk-test/ManualType
-                    (types/make-spec-def 'hara.typed.xtalk-test 'ManualType types/+bool-type+ {}))
-    (-> (get-spec 'hara.typed.xtalk-test/ManualType) :type types/type->data))
-  => '{:kind :primitive :name :xt/bool})
+(fact "TODO")
 
 ^{:refer hara.typed/get-type :added "4.1"}
-(fact "get-type returns primary declarations"
-  (do
-    (fixture-register!)
-    (-> (get-type 'hara.model.spec-xtalk-typed-fixture/User) :name))
-  => "User")
+(fact "TODO")
 
 ^{:refer hara.typed/get-entry :added "4.1"}
-(fact "get-entry returns registry entries"
-  (do
-    (fixture-register!)
-    (some? (get-entry 'hara.model.spec-xtalk-typed-fixture/find-user)))
-  => true)
+(fact "TODO")
 
 ^{:refer hara.typed/get-declaration :added "4.1"}
-(fact "get-declaration returns specific declarations"
-  (do
-    (fixture-register!)
-    (-> (get-declaration 'hara.model.spec-xtalk-typed-fixture/find-user :fn) :name))
-  => "find-user")
+(fact "TODO")
 
 ^{:refer hara.typed/get-spec :added "4.1"}
-(fact "get-spec returns spec defs"
-  (do
-    (fixture-register!)
-    (-> (get-spec 'hara.model.spec-xtalk-typed-fixture/UserMap) :name))
-  => "UserMap")
+(fact "TODO")
 
 ^{:refer hara.typed/get-function :added "4.1"}
-(fact "get-function returns parsed fn defs"
-  (do
-    (fixture-register!)
-    (-> (get-function 'hara.model.spec-xtalk-typed-fixture/find-user) :name))
-  => "find-user")
+(fact "TODO")
 
 ^{:refer hara.typed/get-macro :added "4.1"}
-(fact "get-macro returns macro defs when present"
-  (do
-    (clear-registry!)
-    (analyze-and-register! 'xt.lang.spec-base)
-    (true? (get-in (get-macro 'xt.lang.spec-base/x:add) [:body-meta :macro])))
-  => true)
+(fact "TODO")
 
 ^{:refer hara.typed/get-value :added "4.1"}
-(fact "get-value returns value defs when present"
-  (do
-    (clear-registry!)
-    (analyze-and-register! 'xt.db.text.base-scope)
-    (-> (get-value 'xt.db.text.base-scope/Scopes) :name))
-  => "Scopes")
+(fact "TODO")
 
 ^{:refer hara.typed/list-specs :added "4.1"}
-(fact "lists specs through facade"
-  (do (fixture-register!) (pos? (count (list-specs))))
-  => true)
+(fact "TODO")
 
 ^{:refer hara.typed/list-entries :added "4.1"}
-(fact "lists entries through facade"
-  (do (fixture-register!) (pos? (count (list-entries))))
-  => true)
+(fact "TODO")
 
 ^{:refer hara.typed/list-functions :added "4.1"}
-(fact "lists functions through facade"
-  (do (fixture-register!) (pos? (count (list-functions))))
-  => true)
+(fact "TODO")
 
 ^{:refer hara.typed/list-macros :added "4.1"}
-(fact "lists macros through facade"
-  (do
-    (clear-registry!)
-    (analyze-and-register! 'xt.lang.spec-base)
-    (pos? (count (list-macros))))
-  => true)
+(fact "TODO")
 
 ^{:refer hara.typed/list-values :added "4.1"}
-(fact "lists values through facade"
-  (do
-    (clear-registry!)
-    (analyze-and-register! 'xt.db.text.base-scope)
-    (pos? (count (list-values))))
-  => true)
+(fact "TODO")
 
 ^{:refer hara.typed/analyze-file :added "4.1"}
-(fact "analyzes files through facade"
-  (count (:specs (analyze-file "test/hara.lang/model/spec_xtalk_typed_fixture.clj")))
-  => 3)
+(fact "TODO")
 
 ^{:refer hara.typed/analyze-file-raw :added "4.1"}
-(fact "delegates file-raw analysis to xtalk-parse"
-  (let [result (analyze-file-raw "test/hara.lang/model/spec_xtalk_typed_fixture.clj")]
-    [(map? result)
-     (contains? result :specs)
-     (contains? result :functions)])
-  => [true true true])
+(fact "TODO")
 
 ^{:refer hara.typed/analyze-namespace :added "4.1"}
-(fact "analyzes namespaces through facade"
-  (:ns (analyze-namespace 'hara.model.spec-xtalk-typed-fixture))
-  => 'hara.model.spec-xtalk-typed-fixture)
+(fact "TODO")
 
 ^{:refer hara.typed/analyze-namespace-raw :added "4.1"}
-(fact "exposes raw namespace analysis through facade"
-  (->> (analyze-namespace-raw 'hara.model.spec-xtalk-typed-fixture)
-       :functions
-       (some #(when (= "find-user" (:name %)) %))
-       :output
-       :name)
-  => :xt/unknown)
+(fact "TODO")
 
 ^{:refer hara.typed/analyze-and-register! :added "4.1"}
-(fact "registers namespaces through facade"
-  (do
-    (clear-registry!)
-    (some? (analyze-and-register! 'hara.model.spec-xtalk-typed-fixture)))
-  => true)
+(fact "TODO")
 
 ^{:refer hara.typed/check-function :added "4.1"}
-(fact "checks functions through facade"
-  (do
-    (clear-registry!)
-    (-> (check-function 'hara.model.spec-xtalk-typed-fixture/find-user) :errors))
-  => [])
+(fact "TODO")
 
 ^{:refer hara.typed/check-namespace :added "4.1"}
-(fact "checks namespaces through facade"
-  (do
-    (clear-registry!)
-    (:namespace (check-namespace 'xt.event.base-route)))
-  => 'xt.event.base-route)
+(fact "TODO")

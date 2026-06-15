@@ -3,6 +3,7 @@
    [hara.typed :as typed]
    [hara.typed.xtalk-analysis :as analysis]
    [hara.typed.xtalk-common :as types]
+   [hara.typed.xtalk-compat :as compat]
    [hara.typed.xtalk-infer :as infer]
    [hara.typed.xtalk-lower :as lower]
    [hara.typed.xtalk-ops :as ops]
@@ -191,7 +192,7 @@
        {:kind :primitive :name :xt/str}])
 
 (fact "treats callable unions and unknown fn args permissively"
-  [(infer/compatible-type?
+  [(compat/compatible-type?
     {:kind :fn
      :inputs [types/+unknown-type+]
      :output types/+str-type+}
@@ -217,12 +218,12 @@
        {:kind :primitive :name :xt/bool}])
 
 (fact "treats unknown and nil unions compatibly"
-  [(infer/compatible-type?
+  [(compat/compatible-type?
     types/+unknown-type+
     {:kind :named :name 'sample.route/RoutePath}
     {:ns 'sample.route
      :aliases {}})
-   (infer/compatible-type?
+   (compat/compatible-type?
     {:kind :union
      :types [types/+nil-type+
              {:kind :array
@@ -260,7 +261,7 @@
        []])
 
 (fact "supports maybe-callables, tuples, and optional trailing args"
-  [(infer/compatible-type?
+  [(compat/compatible-type?
     {:kind :maybe
      :item {:kind :fn
             :inputs [{:kind :named :name 'sample.route/ViewEvent}]
@@ -367,7 +368,7 @@
        :output {:kind :primitive :name :xt/str}})
 
 (fact "zero-arg callbacks satisfy wider callback slots"
-  (infer/compatible-type?
+  (compat/compatible-type?
    {:kind :fn
     :inputs []
     :output {:kind :primitive :name :xt/bool}}
@@ -398,7 +399,8 @@
                    ([m]
                     (x:prototype-create m)))
                 'xt.lang.common-lib
-                {})]
+                {}
+                "sample.clj")]
     {:inputs (mapv (comp types/type->data :type) (:inputs fn-def))
      :body (:raw-body fn-def)})
   => '{:inputs [{:kind :primitive :name :xt/unknown}]
@@ -410,7 +412,8 @@
                    [& [m]]
                    (return m))
                 'xt.lang.common-lib
-                {})]
+                {}
+                "sample.clj")]
     (mapv :name (:inputs fn-def)))
   => '[m])
 
@@ -421,7 +424,8 @@
                    (while true
                      (yield (f))))
                 'sample.route
-                {})]
+                {}
+                "sample.clj")]
     (true? (types/generator-def? fn-def)))
   => true)
 
@@ -434,7 +438,8 @@
                       [a b]
                       (list '+ a b))
                    'sample.route
-                   {})]
+                   {}
+                   "sample.clj")]
     [(:name macro-def)
      (mapv :name (:inputs macro-def))
      (get-in macro-def [:body-meta :macro])
@@ -450,7 +455,8 @@
                       ScopeMap
                       {:a 1})
                    'sample.route
-                   {})]
+                   {}
+                   "sample.clj")]
     [(:name value-def)
      (types/type->data (:type value-def))
      (get-in value-def [:body-meta :def])
@@ -466,11 +472,13 @@
   (let [spec (parse/parse-spec-decl 'sample.route 'ScopeMap
                                     '[:xt/dict :xt/str :xt/num]
                                     {}
-                                    {})
+                                    {}
+                                    "sample.clj")
         value-def (parse/parse-defvalue
                    '(def.xt ScopeMap {:a 1})
                    'sample.route
-                   {})
+                   {}
+                   "sample.clj")
         attached (parse/attach-value-spec value-def spec)]
     [(types/type->data (:type attached))
      (some? (:spec attached))])

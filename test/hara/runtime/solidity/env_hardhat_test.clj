@@ -14,3 +14,10 @@
   (with-redefs [env-ganache/stop-hardhat-server (fn [] {:type "hardhat"})]
     (stop-hardhat-server))
   => {:type "hardhat"})
+
+
+^{:refer hara.runtime.solidity.env-hardhat/start-ganache-server :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.solidity.env-hardhat/stop-ganache-server :added "4.1"}
+(fact "TODO")

@@ -16,7 +16,8 @@
   ([sym type-form spec-meta aliases]
    (let [ns-sym (some-> sym namespace symbol)
          spec-sym (symbol (name sym))
-         spec (parse/parse-spec-decl ns-sym spec-sym type-form spec-meta aliases)]
+         spec (parse/parse-spec-decl ns-sym spec-sym type-form spec-meta aliases
+                                   {:file (or *file* "UNKNOWN")})]
      (types/register-spec! sym spec)
      spec)))
 
