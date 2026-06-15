@@ -210,6 +210,7 @@
   (when (xt/x:nil? options)
     (:= options {}))
   (var default-args-fn default-args)
+
   (when (not (xt/x:is-function? default-args-fn))
     (var args-value default-args-fn)
     (:= default-args-fn
@@ -324,9 +325,7 @@
   {:added "4.0"}
   [model]
   (var #{input} model)
-  (var out (xtd/obj-clone input))
-  (xt/x:del-key out "default")
-  (return out))
+  (return input))
 
 (defn.xt get-output
   "gets the model output record"
@@ -334,10 +333,7 @@
   [model dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var out (xtd/obj-clone (. model [dest-key])))
-  (xt/x:del-key out "process")
-  (xt/x:del-key out "default")
-  (return out))
+  (return (. model [dest-key])))
 
 (defn.xt get-current
   "gets the current model output"
@@ -399,13 +395,13 @@
   [model dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var output (. model [dest-key]))
+  (var output (xt/x:get-key model dest-key))
   (var #{process} output)
   (if (== true (xt/x:get-key output "errored"))
-    (return (process ((. output ["default"]))))
-    (do (var current (. output ["current"]))
+    (return (process ((xt/x:get-key output "default"))))
+    (do (var current (xt/x:get-key output "current"))
         (when (xt/x:nil? current)
-          (:= current (process ((. output ["default"])))))
+          (:= current (process ((xt/x:get-key output "default")))))
         (return current))))
 
 (defn.xt set-input
@@ -417,7 +413,7 @@
   (xt/x:obj-assign input {:current current
                           :updated (xt/x:now-ms)})
   (-/trigger-listeners model "model.input" (-/get-input model))
-  (return (-/get-input model)))
+  (return input))
 
 (defn.xt set-output
   "sets the output"
@@ -425,7 +421,8 @@
   [model current errored tag dest-key meta]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var output (. model [dest-key]))
+  (var output (xt/x:get-key model dest-key))
+
   (var #{options
          callback} model)
   (var #{accumulate} options)
@@ -445,7 +442,7 @@
 
          :else
          (xt/x:set-key output "current" current))
-  (-/trigger-listeners model "model.output" (-/get-output model dest-key))
+  (-/trigger-listeners model "model.output" output)
   (return current))
 
 (defn.xt set-output-disabled
@@ -454,14 +451,14 @@
   [model value dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var output (. model [dest-key]))
+  (var output (xt/x:get-key model dest-key))
   (var #{callback} model)
   (if value
     (xt/x:set-key output "disabled" value)
     (when (xt/x:has-key? output "disabled")
       (xt/x:del-key output "disabled")))
-  (-/trigger-listeners model "model.disabled" (-/get-output model dest-key))
-  (return (-/get-output model dest-key)))
+  (-/trigger-listeners model "model.disabled" output)
+  (return output))
 
 (defn.xt set-pending
   "sets the output pending time"
@@ -469,13 +466,13 @@
   [model value dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var output (. model [dest-key]))
+  (var output (xt/x:get-key model dest-key))
   (if value
     (xt/x:set-key output "pending" value)
     (when (xt/x:has-key? output "pending")
       (xt/x:del-key output "pending")))
-  (-/trigger-listeners model "model.pending" (-/get-output model dest-key))
-  (return (-/get-output model dest-key)))
+  (-/trigger-listeners model "model.pending" output)
+  (return output))
 
 (defn.xt set-elapsed
   "sets the output elapsed time"
@@ -488,8 +485,8 @@
     (xt/x:set-key output "elapsed" value)
     (when (xt/x:has-key? output "elapsed")
       (xt/x:del-key output "elapsed")))
-  (-/trigger-listeners model "model.elapsed" (-/get-output model dest-key))
-  (return (-/get-output model dest-key)))
+  (-/trigger-listeners model "model.elapsed" output)
+  (return output))
 
 (defn.xt init-model
   "initialises model"
@@ -497,7 +494,7 @@
   [model]
   (var #{input options} model)
   (var #{init} options)
-  (var data ((. input ["default"])))
+  (var data ((xt/x:get-key input "default")))
   (return (-/set-input model (xt/x:obj-assign {:data data}
                                              init))))
 
@@ -523,11 +520,6 @@
   
   (xt/x:set-key context "args" (xtd/arrayify args))
   (xt/x:set-key context "acc"  {"::" "model.run"})
-  #_(when (. context name)
-      #_(when (xt/x:nil? (. context input data))
-          (xt/x:throw "NO DATA"))
-      (xt/x:LOG! context))
-  
   (return [context disabled]))
 
 (defn.xt pipeline-set
@@ -624,7 +616,7 @@
             (return
              (-/pipeline-call
               context
-              (. stages [index])
+              (xt/x:get-key stages index)
               false
               async-fn
               next-hook
@@ -643,7 +635,7 @@
   (var dest-tag dest-key)
   (when (== dest-key "output")
     (:= dest-tag "main"))
-  (var output (. model [dest-key]))
+  (var output (xt/x:get-key model dest-key))
   (var started (xt/x:now-ms))
   (when (xt/x:has-key? output "elapsed")
     (xt/x:del-key output "elapsed"))
@@ -794,44 +786,3 @@
        :lookup (xtd/arr-group-by results
                                  (fn [e] (return (xt/x:get-key e key)))
                                  (fn [x] (return x)))}))))
-
-(comment
-  (defn.xt pipeline-run-remote
-    "runs the pipeline"
-    {:added "4.0"}
-    [context save-output async-fn hook-fn complete-fn]
-    (var #{acc} context)
-    (return
-     (-/pipeline-run-impl context ["pre"
-                                   "remote"
-                                   "post"]
-                          (xt/x:offset 0)
-                          async-fn
-                          (fn [acc tag]
-                            (when hook-fn
-                              (hook-fn acc tag))
-                            (when (and (== tag "remote")
-                                       save-output)
-                              (-/pipeline-set context tag acc "output")))
-                          complete-fn
-                          {:remote true})))
-
-  (defn.xt pipeline-run-sync
-    "runs the sync pipeline"
-    {:added "4.0"}
-    [context save-output async-fn hook-fn complete-fn]
-    (var #{acc} context)
-    (return
-     (-/pipeline-run-impl context ["pre"
-                                   "sync"
-                                   "post"]
-                          (xt/x:offset 0)
-                          async-fn
-                          (fn [acc tag]
-                            (when hook-fn
-                              (hook-fn acc tag))
-                            (when (and (== tag "sync")
-                                       save-output)
-                              (-/pipeline-set context tag acc "output")))
-                          complete-fn
-                          {:sync true}))))

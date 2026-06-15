@@ -1,12 +1,17 @@
 (ns xt.event.base-model-test
-  (:require [hara.lang :as l])
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 ^{:seedgen/scaffold {:all true}}
 (do 
   (l/script- :xtalk
-    {:require [[xt.event.base-model :as model]
-               [xt.lang.spec-base :as xt]]})
+    {:require [[xt.lang.common-lib :as k]
+               [xt.lang.common-repl :as repl]
+               [xt.lang.common-tree :as tree]
+               [xt.lang.spec-base :as xt]
+               [xt.lang.spec-promise :as promise]
+               [xt.event.base-model :as model]]})
   
   (defn.xt make-basic-model []
     (return
@@ -48,6 +53,21 @@
       nil
       nil)))
 
+  (defn.xt async-fn
+    [handler context callbacks]
+    (var success (xt/x:get-key callbacks "success"))
+    (var error (xt/x:get-key callbacks "error"))
+    (try
+      (var output (handler context))
+      (if (promise/x:promise-native? output)
+        (return
+         (promise/x:promise-catch
+          (promise/x:promise-then output success)
+          error))
+        (return (promise/x:promise-run (success output))))
+      (catch err
+          (return (promise/x:promise-run (error err))))))
+  
   (defn.xt success-async
     [handler-fn context cb]
     (return ((xt/x:get-key cb "success") (handler-fn context)))))
@@ -56,24 +76,178 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-tree :as tree]
              [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.event.base-model :as model]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-tree :as tree]
              [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.event.base-model :as model]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-tree :as tree]
              [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.event.base-model :as model]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
+
+
+^{:refer xt.lang.event-view/list-listeners :adopt true :added "4.0"}
+(fact "lists all listeners"
+  
+  (!.js
+    (var v (model/create-model
+            (fn [x]
+              (return
+               (promise/x:with-delay 100
+                                     (fn []
+                                       (return {:value x})))))
+            {}
+            [3]
+            {:value 0}))
+    (model/add-listener v "a1" (fn []))
+    (model/add-listener v "b2" (fn []))
+    (model/add-listener v "c3" (fn []))
+    (model/list-listeners v))
+  => (contains ["a1" "b2" "c3"] :in-any-order)
+
+
+  (!.js
+    (var v (model/create-model
+            (fn [x]
+              (return
+               (promise/x:with-delay 100
+                                     (fn []
+                                       (return {:value x})))))
+            {}
+            [3]
+            {:value 0}))
+    (model/init-model v))
+  => (contains-in {"current" {"data" [3]}, "updated" number?})
+
+  (!.js
+    (var v (model/create-model
+            (fn [x]
+              (return
+               (promise/x:with-delay 100
+                                     (fn []
+                                       (return {:value x})))))
+            {}
+            [3]
+            {:value 0}))
+    (model/init-model v)
+    (model/pipeline-prep v))
+  => (contains-in
+      [{"model"
+        {"output"
+         {"elapsed" nil, "current" nil, "type" "output", "updated" nil},
+         "::" "event.model",
+         "pipeline" {"remote" {}, "main" {}, "sync" {}},
+         "input" {"current" {"data" [3]}, "updated" number?},
+         "options" {},
+         "listeners" {}},
+        "args" [3],
+        "input" {"data" [3]},
+        "acc" {"::" "model.run"}}
+       false])
+  
+  (notify/wait-on :js
+    (var v (model/create-model
+            (fn [x]
+              (return
+               (promise/x:with-delay 100
+                                     (fn []
+                                       (return {:value x})))))
+            {}
+            [3]
+            {:value 0}))
+    (model/init-model v)
+    (var [context disabled] (model/pipeline-prep v))
+    (-> (model/pipeline-run context
+                            nil
+                            -/async-fn
+                            (fn [])
+                            (fn [x] (return x)))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify context.acc)))))
+  => {"post" [false], "::" "model.run", "main" [true {"value" 3}], "pre" [false]})
+
+
+
+^{:refer xt.lang.event-model/pipeline-run-remote.errored :adopt true :added "4.0"}
+(fact "runs the pipeline"
+  
+  (notify/wait-on :js
+    (var v (model/create-model
+            nil
+            {:remote {:handler (fn [x]
+                                 (return
+                                  (promise/x:with-delay
+                                   100
+                                   (fn []
+                                     (xt/x:throw "ERRORED")))))}}
+            [3]
+            ["BLAH"]
+            xt/x:first))
+    (model/init-model v)
+    (var [context disabled] (model/pipeline-prep v))
+    (var async-fn
+         (fn [handler-fn context #{success error}]
+           (return (. (new Promise
+                           (fn [resolve reject]
+                             (resolve (handler-fn context))))
+                      (then success)
+                      (catch error)))))
+    (j/notify (. (model/pipeline-run-remote context
+                                            true
+                                            async-fn
+                                            (fn:>)
+                                            k/identity)
+                 (then (fn:> context.acc)))))
+  => {"error" true,
+      "remote" [true "ERRORED" true],
+      "post" [false],
+      "pre" [false],
+      "::" "model.run"}
+  
+  (notify/wait-on :js
+    (var v (model/create-model
+            nil
+            {:remote {:handler (fn:> [x] (j/future-delayed [100]
+                                                           (return nil)))}}
+            [3]
+            ["BLAH"]
+            k/first))
+    (model/init-model v)
+    (var [context disabled] (model/pipeline-prep v))
+    (var async-fn
+         (fn [handler-fn context #{success error}]
+           (return (. (new Promise
+                           (fn [resolve reject]
+                             (resolve (handler-fn context))))
+                      (then success)
+                      (catch error)))))
+    (j/notify (. (model/pipeline-run-remote context
+                                            true
+                                            async-fn
+                                            (fn:>)
+                                            k/identity)
+                 (then (fn:> (model/get-output v)))))))
+
 
 ^{:refer xt.event.base-model/wrap-args :added "4.1"}
 (fact "provides the core model helpers"
@@ -84,7 +258,7 @@
      (model/check-disabled {})
      (model/check-disabled {:input {:data [3]}})
      (model/check-disabled {:input {:data [3]
-                                   :disabled true}})
+                                    :disabled true}})
      (model/parse-args {:input {:data [1 2 3]}})])
   => [1 true false true [1 2 3]]
 
@@ -94,7 +268,7 @@
      (model/check-disabled {})
      (model/check-disabled {:input {:data [3]}})
      (model/check-disabled {:input {:data [3]
-                                   :disabled true}})
+                                    :disabled true}})
      (model/parse-args {:input {:data [1 2 3]}})])
   => [1 true false true [1 2 3]]
 
@@ -104,7 +278,7 @@
      (model/check-disabled {})
      (model/check-disabled {:input {:data [3]}})
      (model/check-disabled {:input {:data [3]
-                                   :disabled true}})
+                                    :disabled true}})
      (model/parse-args {:input {:data [1 2 3]}})])
   => [1 true false true [1 2 3]])
 
@@ -115,21 +289,21 @@
     [(model/check-disabled {})
      (model/check-disabled {:input {:data [3]}})
      (model/check-disabled {:input {:data [3]
-                                   :disabled true}})])
+                                    :disabled true}})])
   => [true false true]
 
   (!.lua
     [(model/check-disabled {})
      (model/check-disabled {:input {:data [3]}})
      (model/check-disabled {:input {:data [3]
-                                   :disabled true}})])
+                                    :disabled true}})])
   => [true false true]
 
   (!.py
     [(model/check-disabled {})
      (model/check-disabled {:input {:data [3]}})
      (model/check-disabled {:input {:data [3]
-                                   :disabled true}})])
+                                    :disabled true}})])
   => [true false true])
 
 ^{:refer xt.event.base-model/parse-args :added "4.1"}
