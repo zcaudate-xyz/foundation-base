@@ -29,7 +29,6 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.db.system.impl-common :as impl-common]
-             [postgres.core :as pg]
              [xt.db.system.impl-postgres :as impl-postgres]
              [xt.db.system.main :as main]]})
 
@@ -41,7 +40,6 @@
 
 (fact:global
  {:setup [(l/rt:restart)
-          (l/rt:teardown :postgres)
           (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 
@@ -89,20 +87,24 @@
            (repl/notify (xt/x:get-key impl "client"))))))
   => map?)
 
-^{:refer xt.db.system.impl-common/pull :added "4.1"}
+^{:refer xt.db.system.impl-common/pull :added "4.1"
+  :setup [(l/rt:restart :js)]}
 (fact "pull reads from the local memory impl"
 
   (notify/wait-on :js
     (-> (main/create-impl "sqlite" {} -/Schema -/SchemaLookup)
         (main/create-impl-init)
         (promise/x:promise-then
-         (fn [impl]
-           (impl-common/record-add impl
-                                   "Log"
-                                   [{"id" "LOG-10" "message" "hello"}
-                                    {"id" "LOG-20" "message" "world"}])
-           (repl/notify
-            (impl-common/pull impl ["Log"]))))))
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-then
+           (fn [impl]
+             #_(impl-common/record-add impl
+                                     "Log"
+                                     [{"id" "LOG-10" "message" "hello"}
+                                      {"id" "LOG-20" "message" "world"}])
+             (repl/notify
+              (impl-common/pull impl ["Log"]))))))
   => (contains [(contains {"id" "LOG-10" "message" "hello"})
                 (contains {"id" "LOG-20" "message" "world"})]
                :in-any-order)

@@ -8,9 +8,9 @@
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
              [xt.db.text.base-flatten :as f]
-             [xt.db.runtime.cache-util :as util]
              [xt.db.text.sql-util :as ut]
              [xt.db.system.memory-graph :as g]
+             [xt.db.system.memory-util :as util]
              [xt.db.helpers.data-main-test :as sample]]})
 
 (fact:global

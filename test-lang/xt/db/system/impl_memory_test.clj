@@ -61,7 +61,7 @@
      impl
      "UserAccount"
      [{"id" "USER-10" "nickname" "echo"}])
-    (xtd/get-in impl ["client"
+    (xtd/get-in impl ["rows"
                       "UserAccount"
                       "USER-10"
                       "record"
@@ -81,7 +81,7 @@
      impl
      "UserAccount"
      ["00000000-0000-0000-0000-000000000000"])
-    (xtd/get-in impl ["client"
+    (xtd/get-in impl ["rows"
                       "UserAccount"
                       "00000000-0000-0000-0000-000000000000"]))
   => nil)
@@ -97,19 +97,19 @@
           impl
           {"UserAccount" [sample/RootUser]}))
     [(xt/x:len out)
-     (xtd/get-in impl ["client"
+     (xtd/get-in impl ["rows"
                        "UserAccount"
                        "00000000-0000-0000-0000-000000000000"
                        "record"
                        "data"
                        "nickname"])
-     (xtd/get-in impl ["client"
+     (xtd/get-in impl ["rows"
                        "UserAccount"
                        "00000000-0000-0000-0000-000000000000"
                        "record"
                        "rev_links"
                        "profile"])
-     (xtd/get-in impl ["client"
+     (xtd/get-in impl ["rows"
                        "UserProfile"
                        "c4643895-b0ce-44cc-b07b-2386bf18d43b"
                        "record"
@@ -132,10 +132,10 @@
     [(impl/process-remove-event
       impl
       {"UserAccount" [sample/RootUser]})
-     (xtd/get-in impl ["client"
+     (xtd/get-in impl ["rows"
                        "UserAccount"
                        "00000000-0000-0000-0000-000000000000"])
-     (xtd/get-in impl ["client"
+     (xtd/get-in impl ["rows"
                        "UserProfile"
                        "c4643895-b0ce-44cc-b07b-2386bf18d43b"])])
   => [["UserAccount" "UserProfile"]
@@ -155,6 +155,6 @@
                       {}))
   => (contains-in
       {"::" "xt.db.system.impl_memory/ImplMemory"
-       "client" {}
+       "rows" {}
        "schema" map?
        "lookup" map?}))

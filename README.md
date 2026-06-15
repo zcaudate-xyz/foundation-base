@@ -14,6 +14,7 @@ Detailed usage guides and scenarios for core libraries can be found in the `guid
 - [std.task](guides/std.task.md): Task definition and execution engine.
 - [std.block](guides/std.block.md): Source code block parsing and layout.
 - [code.query](guides/code.query.md): Pattern matching and structural editing for code.
+- [xt.db.node.adaptor-base](guides/xt.db.node.adaptor_base.md): Node bootstrap and RPC routing for live database services.
 - [std.timeseries](guides/std.timeseries.md): Time-series data management and aggregation.
 - [std.scheduler](guides/std.scheduler.md): Concurrent task scheduling and scaling.
 

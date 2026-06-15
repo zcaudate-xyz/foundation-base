@@ -34,8 +34,7 @@
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:setup :postgres)]
-  :teardown [(l/rt:teardown :postgres)
-             (l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.main-client/create-client :added "4.1"}
 (fact "returns nil for unsupported client types"
@@ -49,9 +48,10 @@
   
   (!.js
     (main-client/create-client "sqlite" {"filename" ":memory:"}))
-  => (contains-in
-      {"::" "js.net.conn-sqlite"
-       "defaults" {"filename" ":memory:"}}))
+  => {"::" "js.net.conn_sqlite/SqliteClient",
+      "::/protocols" ["xt.net.conn_sql/ISqlClient"],
+      "raw" nil,
+      "defaults" {"filename" ":memory:"}})
 
 ^{:refer xt.db.system.main-client/create-client.postgres :added "4.1"}
 (fact "creates a postgres client"

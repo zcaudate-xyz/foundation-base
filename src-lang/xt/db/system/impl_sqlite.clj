@@ -157,8 +157,7 @@
 (defn.xt impl-sqlite
   [client schema lookup]
   (return
-   (-/ImplSqlite client schema lookup
-                 (sql-util/sqlite-opts lookup))))
+   (-/ImplSqlite client schema lookup (sql-util/sqlite-opts lookup))))
 
 (defn.xt impl-sqlite-init
   [impl]

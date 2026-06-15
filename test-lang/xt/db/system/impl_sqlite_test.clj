@@ -23,12 +23,6 @@
              ^{:seedgen/extra true}
              [js.net.conn-sqlite :as js-sqlite]]})
 
-(defn.js mock-impl
-  [conn]
-  (return (impl/impl-sqlite client
-                            sample/Schema
-                            sample/SchemaLookup)))
-
 (defn.js connect-impl
   []
   (return
@@ -128,14 +122,15 @@
 
 ^{:refer xt.db.system.impl-sqlite/impl-sqlite-init :added "4.1"}
 (fact "impl-sqlite-init wires up js.lib.driver-sqlite and stores the connection"
-
+  
   (notify/wait-on [:js 5000]
     (-> (impl/impl-sqlite (js-sqlite/create {"filename" ":memory:"})
-                         sample/Schema
-                         sample/SchemaLookup)
+                          sample/Schema
+                          sample/SchemaLookup)
         (impl/impl-sqlite-init)
         (promise/x:promise-then
          (fn [impl]
+           (var #{client} impl)
            (repl/notify
-            (impl/exec-sync impl "SELECT 1;"))))))
+            (conn-sql/query client "SELECT 1;"))))))
   => 1)

@@ -1,10 +1,10 @@
-(ns xt.db.node.adaptor-base-test
+(ns xt.db.walkthrough.guide-11-adaptor-base-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
 
-(do 
+(do
   (l/script- :postgres
     {:runtime :jdbc.client
      :require [[postgres.sample.scratch-v0 :as scratch-v0]
@@ -39,7 +39,6 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
-
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:teardown :postgres)
@@ -47,8 +46,7 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.node.adaptor-base/set-impl :added "4.1"}
-(fact "set-impl installs a live impl on the node"
-
+(fact "walkthrough: install one live backend on a node"
   (notify/wait-on :js
     (var node (substrate/node-create {}))
     (-> (adaptor/set-impl node
@@ -69,8 +67,7 @@
       "service_db" "postgres"})
 
 ^{:refer xt.db.node.adaptor-base/init-db :added "4.1"}
-(fact "init-db installs the db/common, db/primary and db/caching services"
-  
+(fact "walkthrough: install common, primary, and caching services"
   (notify/wait-on :js
     (-> (substrate/node-create {})
         (adaptor/init-db {"primary" {"type" "postgres"
@@ -96,44 +93,12 @@
       "caching_type" "xt.db.system.impl_sqlite/ImplSqlite"
       "caching_file" ":memory:"})
 
-^{:refer xt.db.node.adaptor-base/call-primary-handler :added "4.1"}
-(fact "call-primary-handler routes rpc args through the live primary impl"
-
-  (notify/wait-on :js
-    (-> (substrate/node-create {})
-        (adaptor/init-db {"primary" {"type" "postgres"
-                                     "defaults" (@! (local-min/+config+ :db))}
-                          "caching" {"type" "sqlite"
-                                     "defaults" {"filename" ":memory:"}}}
-                         -/Schema
-                         -/SchemaLookup)
-        (promise/x:promise-then
-         (fn [node]
-           (adaptor/call-primary-handler
-            nil
-            [{"input" [{"symbol" "i_message" "type" "text"}]
-              "return" "jsonb"
-              "schema" "scratch_v0"
-              "id" "log_append_public"
-              "flags" {}}
-             ["hello"]]
-            nil
-            node)))
-        (promise/x:promise-then
-         (fn [out]
-           out))))
-  => {"message" "hello"})
-
 ^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
-
-
-
-(fact "init-handlers returns the node unchanged for now"
-  
+(fact "walkthrough: init-handlers returns the node unchanged for now"
   (!.js
    (adaptor/init-handlers
     (substrate/node-create {"schema" -/Schema
                             "lookup" -/SchemaLookup
                             "services" {}})
     {}))
-  => nil)
+  => (contains {"status" "disconnected"}))

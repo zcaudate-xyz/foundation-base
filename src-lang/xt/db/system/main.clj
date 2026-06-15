@@ -38,16 +38,14 @@
   [impl]
   (var #{schema lookup} impl)
   (var type (xt/x:get-key impl "::"))
-  (cond (or (== type "xt.db.system.impl_sqlite/impl-sqlite")
-            (== type "db.impl.sqlite"))
+  (cond (== type "xt.db.system.impl_sqlite/ImplSqlite")
         (return
          (-> (impl-sqlite/impl-sqlite-init impl)
              (promise/x:promise-then
               (fn [client]
                 (return (impl-sqlite/impl-sqlite client schema lookup))))))
 
-        (or (== type "xt.db.system.impl_postgres/impl-postgres")
-            (== type "db.impl.postgres"))
+        (== type "xt.db.system.impl_postgres/ImplPostgres")
         (return
          (-> (impl-postgres/impl-postgres-init impl)
              (promise/x:promise-then

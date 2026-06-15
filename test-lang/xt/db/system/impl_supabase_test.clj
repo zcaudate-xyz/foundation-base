@@ -34,8 +34,7 @@
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:setup :postgres)]
-  :teardown [(l/rt:teardown :postgres)
-             (l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.impl-supabase/pull-async :added "4.1"
   :setup [(scratch-v0/log-append-public "hello")]}
@@ -43,13 +42,11 @@
   
   (notify/wait-on :js
     (-> (impl/impl-supabase
-         (http-supabase/create-client
-          (js-fetch/create-methods)
-          "127.0.0.1"
-          (@! (-> local-min/+config+ :api :port))
-          false
-          ""
-          (@! (-> local-min/+config+ :api :service-key)))
+         (http-supabase/create
+          (js-fetch/create)
+          {:host (@! (-> local-min/+config+ :api :hostname))
+           :port (@! (-> local-min/+config+ :api :port))
+           :apikey (@! (-> local-min/+config+ :api :service-key))})
          (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
          (@! (pg/bind-app (pg/app "scratch_v0"))))
         (impl/pull-async ["Log"])
@@ -69,13 +66,11 @@
 
   (notify/wait-on :js
     (-> (impl/impl-supabase
-         (http-supabase/create-client
-          (js-fetch/create-methods)
-          "127.0.0.1"
-          (@! (-> local-min/+config+ :api :port))
-          false
-          ""
-          (@! (-> local-min/+config+ :api :anon-key)))
+         (http-supabase/create
+          (js-fetch/create)
+          {:host (@! (-> local-min/+config+ :api :hostname))
+           :port (@! (-> local-min/+config+ :api :port))
+           :apikey (@! (-> local-min/+config+ :api :service-key))})
          (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
          (@! (pg/bind-app (pg/app "scratch_v0"))))
         (impl/rpc-call-async  {:input []
@@ -95,13 +90,11 @@
 
   (notify/wait-on :js
     (-> (impl/impl-supabase
-         (http-supabase/create-client
-          (js-fetch/create-methods)
-          "127.0.0.1"
-          (@! (-> local-min/+config+ :api :port))
-          false
-          ""
-          (@! (-> local-min/+config+ :api :service-key)))
+         (http-supabase/create
+          (js-fetch/create)
+          {:host (@! (-> local-min/+config+ :api :hostname))
+           :port (@! (-> local-min/+config+ :api :port))
+           :apikey (@! (-> local-min/+config+ :api :service-key))})
          (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
          (@! (pg/bind-app (pg/app "scratch_v0"))))
         (impl/rpc-call-async  {:input [{:symbol "i_message" :type "text"}]
@@ -124,4 +117,24 @@
        "message" "hello"}))
 
 ^{:refer xt.db.system.impl-supabase/impl-supabase :added "4.1"}
-(fact "creates a supabase implementation")
+(fact "creates a supabase implementation"
+
+  (!.js
+    (impl/impl-supabase
+     (http-supabase/create
+      (js-fetch/create)
+      {:host (@! (-> local-min/+config+ :api :hostname))
+       :port (@! (-> local-min/+config+ :api :port))
+       :apikey (@! (-> local-min/+config+ :api :service-key))})
+     (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
+     (@! (pg/bind-app (pg/app "scratch_v0")))))
+  => (contains-in
+      {"schema" map?, "lookup" map?,
+       "opts" {},
+       "::" "xt.db.system.impl_supabase/ImplSupabase",
+       "::/protocols" ["xt.db.system.impl_common/ISourceRemote"],
+       "client" {"http" {"::" "js.net.http_fetch/HttpFetchClient",
+                         "::/protocols" ["xt.net.http_fetch/IHttpClient"]},
+                 "::" "xt.net.http_supabase/HttpSupabaseClient",
+                 "::/protocols" ["xt.net.http_fetch/IHttpClient"],
+                 "defaults" map?}}))

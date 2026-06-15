@@ -30,7 +30,7 @@
    (sql-call/call-raw client rpc-spec args)))
 
 (defimpl.xt ImplPostgres
-  [client schema lookup]
+  [client schema lookup opts]
 
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
@@ -39,8 +39,7 @@
 (defn.xt impl-postgres
   [client schema lookup]
   (return
-   (-/ImplPostgres client schema lookup
-                 (sql-util/postgres-opts lookup))))
+   (-/ImplPostgres client schema lookup (sql-util/postgres-opts lookup))))
 
 (defn.xt impl-postgres-init
   "connects the thin postgres impl through a runtime sql driver"

@@ -23,12 +23,13 @@
 
 (fact:global
   {:setup [(l/rt:restart)
+           (l/rt:teardown :postgres)
            (l/rt:setup :postgres)]
-   :teardown [(l/rt:teardown :postgres)
-              (l/rt:stop)]})
+   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.impl-postgres/pull-async :added "4.1"
-  :setup [(scratch/log-append-public "hello")]}
+  :setup [(scratch/log-append-public "hello")
+          (l/rt:restart :js)]}
 (fact "pull-async reads through async postgres semantics"
 
   (notify/wait-on :js
@@ -105,7 +106,7 @@
 
 ^{:refer xt.db.system.impl-postgres/impl-postgres :added "4.1"}
 (fact "creates the thin postgres impl record with stored context"
-
+  
   (!.js
     (impl/impl-postgres
      (js-postgres/create {:database "test-scratch"})
@@ -114,8 +115,11 @@
   => (contains-in
       {"schema" map?, "lookup" map?,
        "opts" map?,
-       "::" "db.impl.postgres",
-       "client" {"::" "js.net.conn-postgres", "defaults" {"database" "test-scratch"}}}))
+       "::" "xt.db.system.impl_postgres/ImplPostgres",
+       "::/protocols" ["xt.db.system.impl_common/ISourceRemote"],
+       "client" {"::" "js.net.conn_postgres/PostgresClient",
+                 "::/protocols" ["xt.net.conn_sql/ISqlClient"],
+                 "defaults" {"database" "test-scratch"}}}))
 
 ^{:refer xt.db.system.impl-postgres/impl-postgres-init :added "4.1"}
 (fact "initialises a postgres connection")
