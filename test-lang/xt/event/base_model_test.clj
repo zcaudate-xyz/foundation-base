@@ -8,7 +8,7 @@
     {:require [[xt.event.base-model :as model]
                [xt.lang.spec-base :as xt]]})
   
-  (defn.xt make-basic-view []
+  (defn.xt make-basic-model []
     (return
      (model/create-model
       (fn:> [x] {:value x})
@@ -18,7 +18,7 @@
       nil
       nil)))
   
-  (defn.xt make-processed-view []
+  (defn.xt make-processed-model []
     (return
      (model/create-model
       (fn:> [x] x)
@@ -28,7 +28,7 @@
       (fn [x] (return (+ x 10)))
       nil)))
   
-  (defn.xt make-remote-view []
+  (defn.xt make-remote-model []
     (return
      (model/create-model
       nil
@@ -38,7 +38,7 @@
       nil
       nil)))
   
-  (defn.xt make-sync-view []
+  (defn.xt make-sync-model []
     (return
      (model/create-model
       nil
@@ -76,7 +76,7 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.base-model/wrap-args :added "4.1"}
-(fact "provides the core view helpers"
+(fact "provides the core model helpers"
 
   (!.js
     [((model/wrap-args k/identity)
@@ -109,7 +109,7 @@
   => [1 true false true [1 2 3]])
 
 ^{:refer xt.event.base-model/check-disabled :added "4.1"}
-(fact "checks disabled state from view context"
+(fact "checks disabled state from model context"
 
   (!.js
     [(model/check-disabled {})
@@ -148,13 +148,13 @@
   => [1 2 3])
 
 ^{:refer xt.event.base-model/create-model :added "4.1"}
-(fact "manages view listeners"
+(fact "manages model listeners"
 
   ^{:seedgen/base {:lua {:expect (just-in
                                   [{"type" "output"}
                                    (just ["a1" "b2"] :in-any-order)
                                    {"listener/id" "b2"
-                                    "listener/type" "view"}
+                                    "listener/type" "model"}
                                    ["a1"]])}}}
   (!.js
     (var v (model/create-model
@@ -177,7 +177,7 @@
         "updated" nil}
        (just ["a1" "b2"] :in-any-order)
        {"listener/id" "b2"
-        "listener/type" "view"}
+        "listener/type" "model"}
        ["a1"]])
 
   (!.lua
@@ -194,7 +194,7 @@
      (model/list-listeners v)
      (. (model/remove-listener v "b2") ["meta"])
      (model/list-listeners v)])
-  => (just-in [{"type" "output"} (just ["a1" "b2"] :in-any-order) {"listener/id" "b2", "listener/type" "view"} ["a1"]])
+  => (just-in [{"type" "output"} (just ["a1" "b2"] :in-any-order) {"listener/id" "b2", "listener/type" "model"} ["a1"]])
 
   (!.py
     (var v (model/create-model
@@ -217,43 +217,43 @@
         "updated" nil}
        (just ["a1" "b2"] :in-any-order)
        {"listener/id" "b2"
-        "listener/type" "view"}
+        "listener/type" "model"}
        ["a1"]]))
 
-^{:refer xt.event.base-model/view-context :added "4.1"}
-(fact "builds a view context with view and input"
+^{:refer xt.event.base-model/model-context :added "4.1"}
+(fact "builds a model context with model and input"
 
   (!.js
-    (var v (-/make-basic-view))
-    (model/init-view v)
-    [(xt/x:has-key? (model/view-context v) "view")
-     (xt/x:has-key? (model/view-context v) "input")])
+    (var v (-/make-basic-model))
+    (model/init-model v)
+    [(xt/x:has-key? (model/model-context v) "model")
+     (xt/x:has-key? (model/model-context v) "input")])
   => [true true]
 
   (!.lua
-    (var v (-/make-basic-view))
-    (model/init-view v)
-    [(xt/x:has-key? (model/view-context v) "view")
-     (xt/x:has-key? (model/view-context v) "input")])
+    (var v (-/make-basic-model))
+    (model/init-model v)
+    [(xt/x:has-key? (model/model-context v) "model")
+     (xt/x:has-key? (model/model-context v) "input")])
   => [true true]
 
   (!.py
-    (var v (-/make-basic-view))
-    (model/init-view v)
-    [(xt/x:has-key? (model/view-context v) "view")
-     (xt/x:has-key? (model/view-context v) "input")])
+    (var v (-/make-basic-model))
+    (model/init-model v)
+    [(xt/x:has-key? (model/model-context v) "model")
+     (xt/x:has-key? (model/model-context v) "input")])
   => [true true])
 
 ^{:refer xt.event.base-model/add-listener :added "4.1"}
-(fact "adds a view listener"
+(fact "adds a model listener"
 
   ^{:seedgen/base {:lua {:expect {"id" "a1"
                                   "data" {"data" {"value" 0}
                                           "type" "output"}
                                   "meta" {"listener/id" "a1"
-                                          "listener/type" "view"}}}}}
+                                          "listener/type" "model"}}}}}
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var out nil)
     (model/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (model/trigger-listeners v "output" {:value 0})
@@ -263,18 +263,18 @@
               "type" "output"}
       "t" nil
       "meta" {"listener/id" "a1"
-              "listener/type" "view"}}
+              "listener/type" "model"}}
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var out nil)
     (model/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (model/trigger-listeners v "output" {:value 0})
     out)
-  => {"id" "a1", "meta" {"listener/id" "a1", "listener/type" "view"}, "data" {"type" "output", "data" {"value" 0}}}
+  => {"id" "a1", "meta" {"listener/id" "a1", "listener/type" "model"}, "data" {"type" "output", "data" {"value" 0}}}
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var out nil)
     (model/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (model/trigger-listeners v "output" {:value 0})
@@ -284,7 +284,7 @@
               "type" "output"}
       "t" nil
       "meta" {"listener/id" "a1"
-              "listener/type" "view"}})
+              "listener/type" "model"}})
 
 ^{:refer xt.event.base-model/remove-listener :added "4.1"}
 (fact "TODO")
@@ -297,10 +297,10 @@
             (just-in
              [(just ["a1" "b2"] :in-any-order)
               (just ["a1" "b2"] :in-any-order)]))]}
-(fact "triggers all registered view listeners"
+(fact "triggers all registered model listeners"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var calls [])
     (model/add-listener v "a1" (fn [id data t meta] (xt/x:arr-push calls "a1")) nil nil)
     (model/add-listener v "b2" (fn [id data t meta] (xt/x:arr-push calls "b2")) nil nil)
@@ -309,7 +309,7 @@
   => +out+
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var calls [])
     (model/add-listener v "a1" (fn [id data t meta] (xt/x:arr-push calls "a1")) nil nil)
     (model/add-listener v "b2" (fn [id data t meta] (xt/x:arr-push calls "b2")) nil nil)
@@ -318,7 +318,7 @@
   => +out+
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var calls [])
     (model/add-listener v "a1" (fn [id data t meta] (xt/x:arr-push calls "a1")) nil nil)
     (model/add-listener v "b2" (fn [id data t meta] (xt/x:arr-push calls "b2")) nil nil)
@@ -330,22 +330,22 @@
 (fact "gets the current input record"
 
   (!.js
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (model/get-input v))
   => (contains-in {"current" {"data" [3]}
                    "updated" integer?})
 
   (!.lua
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (model/get-input v))
   => (contains-in {"current" {"data" [3]}
                    "updated" integer?})
 
   (!.py
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (model/get-input v))
   => (contains-in {"current" {"data" [3]}
                    "updated" integer?}))
@@ -355,8 +355,8 @@
 
   ^{:seedgen/base {:lua {:expect {"type" "output"}}}}
   (!.js
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (model/get-output v))
   => {"current" nil
       "elapsed" nil
@@ -364,14 +364,14 @@
       "updated" nil}
 
   (!.lua
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (model/get-output v))
   => {"type" "output"}
 
   (!.py
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (model/get-output v nil))
   => {"current" nil
       "elapsed" nil
@@ -382,46 +382,46 @@
 (fact "gets the current output value"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-output v 1 nil nil nil nil)
     (model/get-current v))
   => 1
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-output v 1 nil nil nil nil)
     (model/get-current v))
   => 1
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-output v 1 nil nil nil nil)
     (model/get-current v nil))
   => 1)
 
 ^{:refer xt.event.base-model/is-disabled :added "4.1"}
-(fact "checks whether the view is disabled"
+(fact "checks whether the model is disabled"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var before (model/is-disabled v))
-    (model/init-view v)
+    (model/init-model v)
     [before
      (model/is-disabled v)])
   => [true false]
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var before (model/is-disabled v))
-    (model/init-view v)
+    (model/init-model v)
     [before
      (model/is-disabled v)])
   => [true false]
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var before (model/is-disabled v))
-    (model/init-view v)
+    (model/init-model v)
     [before
      (model/is-disabled v)])
   => [true false])
@@ -430,19 +430,19 @@
 (fact "checks whether the output is errored"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-output v 1 true nil nil nil)
     (model/is-errored v))
   => true
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-output v 1 true nil nil nil)
     (model/is-errored v))
   => true
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-output v 1 true nil nil nil)
     (model/is-errored v nil))
   => true)
@@ -451,19 +451,19 @@
 (fact "checks whether the output is pending"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-pending v true nil)
     (model/is-pending v))
   => true
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-pending v true nil)
     (model/is-pending v))
   => true
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-pending v true nil)
     (model/is-pending v nil))
   => true)
@@ -472,19 +472,19 @@
 (fact "gets elapsed time for the output"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-elapsed v 20 nil)
     (model/get-time-elapsed v))
   => 20
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-elapsed v 20 nil)
     (model/get-time-elapsed v))
   => 20
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-elapsed v 20 nil)
     (model/get-time-elapsed v nil))
   => 20)
@@ -493,19 +493,19 @@
 (fact "gets the last output update time"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-output v 1 nil nil nil nil)
     (model/get-time-updated v))
   => integer?
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-output v 1 nil nil nil nil)
     (model/get-time-updated v))
   => integer?
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (model/set-output v 1 nil nil nil nil)
     (model/get-time-updated v nil))
   => integer?)
@@ -514,7 +514,7 @@
 (fact "returns current output or processed default value"
 
   (!.js
-    (var v (-/make-processed-view))
+    (var v (-/make-processed-model))
     (var initial (model/get-success v nil))
     (model/set-output v 3 nil nil nil nil)
     (var current (model/get-success v nil))
@@ -525,7 +525,7 @@
   => [11 3 11]
 
   (!.lua
-    (var v (-/make-processed-view))
+    (var v (-/make-processed-model))
     (var initial (model/get-success v nil))
     (model/set-output v 3 nil nil nil nil)
     (var current (model/get-success v nil))
@@ -536,7 +536,7 @@
   => [11 3 11]
 
   (!.py
-    (var v (-/make-processed-view))
+    (var v (-/make-processed-model))
     (var initial (model/get-success v nil))
     (model/set-output v 3 nil nil nil nil)
     (var current (model/get-success v nil))
@@ -547,10 +547,10 @@
   => [11 3 11])
 
 ^{:refer xt.event.base-model/set-input :added "4.1"}
-(fact "sets view input and notifies listeners"
+(fact "sets model input and notifies listeners"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var out nil)
     (model/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (model/set-input v {:data [1]})
@@ -561,14 +561,14 @@
         {"id" "a1"
          "t" nil
          "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "data" {"type" "view.input"
+                 "listener/type" "model"}
+         "data" {"type" "model.input"
                  "data" {"current" {"data" [1]}
                          "updated" integer?}}})
        {"data" [1]}])
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var out nil)
     (model/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (model/set-input v {:data [1]})
@@ -579,14 +579,14 @@
         {"id" "a1"
          "t" nil
          "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "data" {"type" "view.input"
+                 "listener/type" "model"}
+         "data" {"type" "model.input"
                  "data" {"current" {"data" [1]}
                          "updated" integer?}}})
        {"data" [1]}])
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var out nil)
     (model/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (model/set-input v {:data [1]})
@@ -597,8 +597,8 @@
         {"id" "a1"
          "t" nil
          "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "data" {"type" "view.input"
+                 "listener/type" "model"}
+         "data" {"type" "model.input"
                  "data" {"current" {"data" [1]}
                          "updated" integer?}}})
        {"data" [1]}]))
@@ -607,7 +607,7 @@
 (fact "sets output and notifies listeners"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var out nil)
     (model/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (model/set-output v 1 nil nil nil nil)
@@ -618,8 +618,8 @@
         {"id" "a1"
          "t" nil
          "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "data" {"type" "view.output"
+                 "listener/type" "model"}
+         "data" {"type" "model.output"
                  "data" {"current" 1
                          "elapsed" nil
                          "tag" nil
@@ -628,7 +628,7 @@
        1])
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var out nil)
     (model/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (model/set-output v 1 nil nil nil nil)
@@ -639,8 +639,8 @@
         {"id" "a1"
          "t" nil
          "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "data" {"type" "view.output"
+                 "listener/type" "model"}
+         "data" {"type" "model.output"
                  "data" {"current" 1
                          "elapsed" nil
                          "tag" nil
@@ -649,7 +649,7 @@
        1])
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     (var out nil)
     (model/add-listener v "a1" (fn [id data t meta] (:= out {"id" id "data" data "t" t "meta" meta})) nil nil)
     (model/set-output v 1 nil nil nil nil)
@@ -660,8 +660,8 @@
         {"id" "a1"
          "t" nil
          "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "data" {"type" "view.output"
+                 "listener/type" "model"}
+         "data" {"type" "model.output"
                  "data" {"current" 1
                          "elapsed" nil
                          "tag" nil
@@ -673,19 +673,19 @@
 (fact "sets the output disabled flag"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     [(. (model/set-output-disabled v true nil) ["disabled"])
      (. (model/get-output v) ["disabled"])])
   => [true true]
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     [(. (model/set-output-disabled v true nil) ["disabled"])
      (. (model/get-output v) ["disabled"])])
   => [true true]
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     [(. (model/set-output-disabled v true nil) ["disabled"])
      (. (model/get-output v nil) ["disabled"])])
   => [true true])
@@ -694,19 +694,19 @@
 (fact "sets the pending flag"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     [(. (model/set-pending v true nil) ["pending"])
      (model/is-pending v)])
   => [true true]
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     [(. (model/set-pending v true nil) ["pending"])
      (model/is-pending v)])
   => [true true]
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     [(. (model/set-pending v true nil) ["pending"])
      (model/is-pending v nil)])
   => [true true])
@@ -715,41 +715,41 @@
 (fact "sets elapsed time on the output"
 
   (!.js
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     [(. (model/set-elapsed v 25 nil) ["elapsed"])
      (model/get-time-elapsed v)])
   => [25 25]
 
   (!.lua
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     [(. (model/set-elapsed v 25 nil) ["elapsed"])
      (model/get-time-elapsed v)])
   => [25 25]
 
   (!.py
-    (var v (-/make-basic-view))
+    (var v (-/make-basic-model))
     [(. (model/set-elapsed v 25 nil) ["elapsed"])
      (model/get-time-elapsed v nil)])
   => [25 25])
 
-^{:refer xt.event.base-model/init-view :added "4.1"}
+^{:refer xt.event.base-model/init-model :added "4.1"}
 (fact "initialises default input data"
 
   (!.js
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (. (model/get-input v) ["current"]))
   => {"data" [3]}
 
   (!.lua
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (. (model/get-input v) ["current"]))
   => {"data" [3]}
 
   (!.py
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (. (model/get-input v) ["current"]))
   => {"data" [3]})
 
@@ -757,46 +757,46 @@
 (fact "prepares a context and accumulator for execution"
 
   (!.js
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     [(. context ["args"])
      disabled
      (. (. context ["acc"]) ["::"])])
-  => [[3] false "view.run"]
+  => [[3] false "model.run"]
 
   (!.lua
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     [(. context ["args"])
      disabled
      (. (. context ["acc"]) ["::"])])
-  => [[3] false "view.run"]
+  => [[3] false "model.run"]
 
   (!.py
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     [(. context ["args"])
      disabled
      (. (. context ["acc"]) ["::"])])
-  => [[3] false "view.run"])
+  => [[3] false "model.run"])
 
 ^{:refer xt.event.base-model/pipeline-set :added "4.1" :seedgen/base {:lua {:suppress true}}}
-(fact "writes pipeline output back to the view"
+(fact "writes pipeline output back to the model"
 
   (!.js
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-set context "main" {"main" [true {"value" 3}]} nil)
     (model/get-current v))
   => {"value" 3}
 
   (!.py
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-set context "main" {"main" [true {"value" 3}]} nil)
     (model/get-current v nil))
@@ -806,38 +806,38 @@
 (fact "invokes a pipeline stage through the async adapter"
 
   (!.js
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-call context "main" disabled -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "main" [true {"value" 3}]}
 
   (!.lua
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-call context "main" disabled -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "main" [true {"value" 3}]}
 
   (!.py
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-call context "main" disabled -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "main" [true {"value" 3}]})
 
 ^{:refer xt.event.base-model/pipeline-run-impl :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "runs an explicit list of pipeline stages"
 
   (!.js
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-impl
      context
@@ -847,12 +847,12 @@
      nil
      (fn [ctx] (return (. ctx ["acc"])))
      nil))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "main" [true {"value" 3}]}
 
   (!.py
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-impl
      context
@@ -862,41 +862,41 @@
      nil
      (fn [ctx] (return (. ctx ["acc"])))
      nil))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "main" [true {"value" 3}]})
 
 ^{:refer xt.event.base-model/pipeline-run :added "4.1"}
 (fact "runs the default main pipeline"
 
   (!.js
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run context disabled -/success-async nil nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "main" [true {"value" 3}]
       "post" [false]}
 
   (!.lua
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run context disabled -/success-async nil nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "main" [true {"value" 3}]
       "post" [false]}
 
   (!.py
-    (var v (-/make-basic-view))
-    (model/init-view v)
+    (var v (-/make-basic-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run context disabled -/success-async nil nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "main" [true {"value" 3}]
       "post" [false]})
@@ -905,14 +905,14 @@
 (fact "runs a forced remote or sync pipeline and can save to output"
 
   (!.js
-    (var v (-/make-remote-view))
-    (model/init-view v)
+    (var v (-/make-remote-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-force context true -/success-async nil nil "remote")
     [(. context ["acc"])
      (model/get-current v "remote")
      (model/get-current v)])
-  => [{"::" "view.run"
+  => [{"::" "model.run"
        "pre" [false]
        "remote" [true {"value" 3}]
        "post" [false]}
@@ -920,14 +920,14 @@
       {"value" 3}]
 
   (!.py
-    (var v (-/make-remote-view))
-    (model/init-view v)
+    (var v (-/make-remote-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-force context true -/success-async nil nil "remote")
     [(. context ["acc"])
      (model/get-current v "remote")
      (model/get-current v nil)])
-  => [{"::" "view.run"
+  => [{"::" "model.run"
        "pre" [false]
        "remote" [true {"value" 3}]
        "post" [false]}
@@ -938,34 +938,34 @@
 (fact "runs the remote pipeline"
 
   (!.js
-    (var v (-/make-remote-view))
-    (model/init-view v)
+    (var v (-/make-remote-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-remote context true -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "remote" [true {"value" 3}]
       "post" [false]}
 
   (!.lua
-    (var v (-/make-remote-view))
-    (model/init-view v)
+    (var v (-/make-remote-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-remote context true -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "remote" [true {"value" 3}]
       "post" [false]}
 
   (!.py
-    (var v (-/make-remote-view))
-    (model/init-view v)
+    (var v (-/make-remote-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-remote context true -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "remote" [true {"value" 3}]
       "post" [false]})
@@ -974,34 +974,34 @@
 (fact "runs the sync pipeline"
 
   (!.js
-    (var v (-/make-sync-view))
-    (model/init-view v)
+    (var v (-/make-sync-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-sync context true -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "sync" [true {"value" 3}]
       "post" [false]}
 
   (!.lua
-    (var v (-/make-sync-view))
-    (model/init-view v)
+    (var v (-/make-sync-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-sync context true -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "sync" [true {"value" 3}]
       "post" [false]}
 
   (!.py
-    (var v (-/make-sync-view))
-    (model/init-view v)
+    (var v (-/make-sync-model))
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-sync context true -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "sync" [true {"value" 3}]
       "post" [false]})

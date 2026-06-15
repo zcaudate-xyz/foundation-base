@@ -33,7 +33,7 @@
 
 (defspec.xt ModelContext
   [:xt/record
-   ["view" EventModel]
+   ["model" EventModel]
    ["input" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
 
 (defspec.xt ModelEvent
@@ -69,7 +69,7 @@
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
        EventModel])
 
-(defspec.xt view-context
+(defspec.xt model-context
   [:fn [EventModel] ModelContext])
 
 (defspec.xt add-listener
@@ -125,7 +125,7 @@
 (defspec.xt set-elapsed
   [:fn [EventModel :xt/any [:xt/maybe :xt/str]] ModelOutput])
 
-(defspec.xt init-view
+(defspec.xt init-model
   [:fn [EventModel] ModelInput])
 
 (defspec.xt pipeline-prep
@@ -178,7 +178,7 @@
   (return wrapped-fn))
 
 (defn.xt check-disabled
-  "checks that view is disabled"
+  "checks that model is disabled"
   {:added "4.0"}
   [context]
   (var #{input} context)
@@ -198,7 +198,7 @@
   (return (xt/x:get-key input "data")))
 
 (defn.xt create-model
-  "creates a view"
+  "creates a model"
   {:added "4.0"}
   [main-handler
    pipeline
@@ -260,51 +260,51 @@
                                 :default default-output-fn}))
   (return
    (event-common/blank-container
-    "event.view"
+    "event.model"
     entry)))
 
-(defn.xt view-context
-  "gets the view-context"
+(defn.xt model-context
+  "gets the model-context"
   {:added "4.0"}
-  [view]
-  (var #{pipeline options} view)
-  (var #{input} view)
+  [model]
+  (var #{pipeline options} model)
+  (var #{input} model)
   (var context  (xt/x:obj-assign
-                 {:view  view
+                 {:model  model
                   :input (. input ["current"])}
                  (xt/x:get-key options "context")))
   (return context))
 
 (defn.xt add-listener
-  "adds a listener to the view"
+  "adds a listener to the model"
   {:added "4.0"}
-  [view listener-id callback meta pred]
+  [model listener-id callback meta pred]
   (return
    (event-common/add-listener
-    view listener-id "view"
+    model listener-id "model"
     callback
     meta
     pred)))
 
 (defn.xt remove-listener
-  "removes a listener from the view"
+  "removes a listener from the model"
   {:added "4.0"}
-  [view listener-id]
-  (return (event-common/remove-listener view listener-id)))
+  [model listener-id]
+  (return (event-common/remove-listener model listener-id)))
 
 (defn.xt list-listeners
-  "lists all view listeners"
+  "lists all model listeners"
   {:added "4.0"}
-  [view]
-  (return (event-common/list-listeners view)))
+  [model]
+  (return (event-common/list-listeners model)))
 
 (defn.xt trigger-listeners
   "triggers listeners to activate"
   {:added "4.0"}
-  [view type-name data]
+  [model type-name data]
   (return
    (event-common/trigger-listeners
-    view {:type type-name
+    model {:type type-name
           :data data})))
 
 (def.xt PIPELINE
@@ -320,86 +320,86 @@
              :handler    nil}})
 
 (defn.xt get-input
-  "gets the view input record"
+  "gets the model input record"
   {:added "4.0"}
-  [view]
-  (var #{input} view)
+  [model]
+  (var #{input} model)
   (var out (xtd/obj-clone input))
   (xt/x:del-key out "default")
   (return out))
 
 (defn.xt get-output
-  "gets the view output record"
+  "gets the model output record"
   {:added "4.0"}
-  [view dest-key]
+  [model dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var out (xtd/obj-clone (. view [dest-key])))
+  (var out (xtd/obj-clone (. model [dest-key])))
   (xt/x:del-key out "process")
   (xt/x:del-key out "default")
   (return out))
 
 (defn.xt get-current
-  "gets the current view output"
+  "gets the current model output"
   {:added "4.0"}
-  [view dest-key]
+  [model dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (return (xtd/get-in view [dest-key
+  (return (xtd/get-in model [dest-key
                             "current"])))
 
 (defn.xt is-disabled
-  "checks that the view is disabled"
+  "checks that the model is disabled"
   {:added "4.0"}
-  [view]
-  (var #{pipeline} view)
+  [model]
+  (var #{pipeline} model)
   (var #{check-disabled} pipeline)
-  (var context (-/view-context view))
+  (var context (-/model-context model))
   (return (check-disabled context)))
 
 (defn.xt is-errored
   "checks that output is errored"
   {:added "4.0"}
-  [view dest-key]
+  [model dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (return (== true (xtd/get-in view [dest-key
+  (return (== true (xtd/get-in model [dest-key
                                      "errored"]))))
 
 (defn.xt is-pending
   "checks that output is pending"
   {:added "4.0"}
-  [view dest-key]
+  [model dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (return (== true (xtd/get-in view [dest-key
+  (return (== true (xtd/get-in model [dest-key
                                      "pending"]))))
 
 (defn.xt get-time-elapsed
   "gets time elapsed of output"
   {:added "4.0"}
-  [view dest-key]
+  [model dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (return (xtd/get-in view [dest-key
+  (return (xtd/get-in model [dest-key
                             "elapsed"])))
 
 (defn.xt get-time-updated
   "gets time updated of output"
   {:added "4.0"}
-  [view dest-key]
+  [model dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (return (xtd/get-in view [dest-key
+  (return (xtd/get-in model [dest-key
                             "updated"])))
 
 (defn.xt get-success
   "gets either the current or default value if errored"
   {:added "4.0"}
-  [view dest-key]
+  [model dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var output (. view [dest-key]))
+  (var output (. model [dest-key]))
   (var #{process} output)
   (if (== true (xt/x:get-key output "errored"))
     (return (process ((. output ["default"]))))
@@ -411,23 +411,23 @@
 (defn.xt set-input
   "sets the input"
   {:added "4.0"}
-  [view current]
+  [model current]
   (var #{input
-         callback} view)
+         callback} model)
   (xt/x:obj-assign input {:current current
                           :updated (xt/x:now-ms)})
-  (-/trigger-listeners view "view.input" (-/get-input view))
-  (return (-/get-input view)))
+  (-/trigger-listeners model "model.input" (-/get-input model))
+  (return (-/get-input model)))
 
 (defn.xt set-output
   "sets the output"
   {:added "4.0"}
-  [view current errored tag dest-key meta]
+  [model current errored tag dest-key meta]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var output (. view [dest-key]))
+  (var output (. model [dest-key]))
   (var #{options
-         callback} view)
+         callback} model)
   (var #{accumulate} options)
   (if errored
     (xt/x:set-key output "errored" true)
@@ -445,60 +445,60 @@
 
          :else
          (xt/x:set-key output "current" current))
-  (-/trigger-listeners view "view.output" (-/get-output view dest-key))
+  (-/trigger-listeners model "model.output" (-/get-output model dest-key))
   (return current))
 
 (defn.xt set-output-disabled
   "sets the output disabled flag"
   {:added "4.0"}
-  [view value dest-key]
+  [model value dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var output (. view [dest-key]))
-  (var #{callback} view)
+  (var output (. model [dest-key]))
+  (var #{callback} model)
   (if value
     (xt/x:set-key output "disabled" value)
     (when (xt/x:has-key? output "disabled")
       (xt/x:del-key output "disabled")))
-  (-/trigger-listeners view "view.disabled" (-/get-output view dest-key))
-  (return (-/get-output view dest-key)))
+  (-/trigger-listeners model "model.disabled" (-/get-output model dest-key))
+  (return (-/get-output model dest-key)))
 
 (defn.xt set-pending
   "sets the output pending time"
   {:added "4.0"}
-  [view value dest-key]
+  [model value dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var output (. view [dest-key]))
+  (var output (. model [dest-key]))
   (if value
     (xt/x:set-key output "pending" value)
     (when (xt/x:has-key? output "pending")
       (xt/x:del-key output "pending")))
-  (-/trigger-listeners view "view.pending" (-/get-output view dest-key))
-  (return (-/get-output view dest-key)))
+  (-/trigger-listeners model "model.pending" (-/get-output model dest-key))
+  (return (-/get-output model dest-key)))
 
 (defn.xt set-elapsed
   "sets the output elapsed time"
   {:added "4.0"}
-  [view value dest-key]
+  [model value dest-key]
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var output (. view [dest-key]))
+  (var output (. model [dest-key]))
   (if (xt/x:is-number? value)
     (xt/x:set-key output "elapsed" value)
     (when (xt/x:has-key? output "elapsed")
       (xt/x:del-key output "elapsed")))
-  (-/trigger-listeners view "view.elapsed" (-/get-output view dest-key))
-  (return (-/get-output view dest-key)))
+  (-/trigger-listeners model "model.elapsed" (-/get-output model dest-key))
+  (return (-/get-output model dest-key)))
 
-(defn.xt init-view
-  "initialises view"
+(defn.xt init-model
+  "initialises model"
   {:added "4.0"}
-  [view]
-  (var #{input options} view)
+  [model]
+  (var #{input options} model)
   (var #{init} options)
   (var data ((. input ["default"])))
-  (return (-/set-input view (xt/x:obj-assign {:data data}
+  (return (-/set-input model (xt/x:obj-assign {:data data}
                                              init))))
 
 ;;
@@ -508,10 +508,10 @@
 (defn.xt pipeline-prep
   "prepares the pipeline"
   {:added "4.0"}
-  [view opts]
-  (var #{pipeline} view)
+  [model opts]
+  (var #{pipeline} model)
   (var #{check-args check-disabled} pipeline)
-  (var context  (xt/x:obj-assign (-/view-context view)
+  (var context  (xt/x:obj-assign (-/model-context model)
                                  opts))
   (var disabled (check-disabled context))
   (var args (xt/x:get-key context "args"))
@@ -522,7 +522,7 @@
     (:= disabled true))
   
   (xt/x:set-key context "args" (xtd/arrayify args))
-  (xt/x:set-key context "acc"  {"::" "view.run"})
+  (xt/x:set-key context "acc"  {"::" "model.run"})
   #_(when (. context name)
       #_(when (xt/x:nil? (. context input data))
           (xt/x:throw "NO DATA"))
@@ -534,10 +534,10 @@
   "sets the pipeline"
   {:added "4.0"}
   [context tag acc dest-key]
-  (var #{view} context)
+  (var #{model} context)
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
-  (var process (xtd/get-in view [dest-key
+  (var process (xtd/get-in model [dest-key
                                  "process"]))
   (var record (xt/x:get-key acc tag))
   (var should-update nil)
@@ -550,14 +550,14 @@
   (when (< 2 (xt/x:len record))
     (:= errored (. record [2])))
   (when (xt/x:nil? current)
-    (:= current ((xtd/get-in view [dest-key
+    (:= current ((xtd/get-in model [dest-key
                                    "default"]))))
   
   (when should-update
     (var output current)
     (when (not errored)
       (:= output (process current)))
-    (-/set-output view
+    (-/set-output model
                   output
                   errored
                   tag
@@ -575,8 +575,8 @@
     (:= skip-guard {}))
   (when (xt/x:nil? hook-fn)
     (:= hook-fn identity-hook))
-  (var #{cell model view args acc} context)
-  (var #{pipeline} view)
+  (var #{model args acc} context)
+  (var #{pipeline} model)
   (var stage (xt/x:get-key pipeline tag))
   (when (xt/x:nil? stage)
     (:= stage {}))
@@ -637,13 +637,13 @@
   "runs the pipeline"
   {:added "4.0"}
   [context disabled async-fn hook-fn complete-fn dest-key]
-  (var #{view acc} context)
+  (var #{model acc} context)
   (when (xt/x:nil? dest-key)
     (:= dest-key "output"))
   (var dest-tag dest-key)
   (when (== dest-key "output")
     (:= dest-tag "main"))
-  (var output (. view [dest-key]))
+  (var output (. model [dest-key]))
   (var started (xt/x:now-ms))
   (when (xt/x:has-key? output "elapsed")
     (xt/x:del-key output "elapsed"))
@@ -654,7 +654,7 @@
                      (hook-fn acc tag))
                    (when complete-fn
                      (complete-fn acc))))
-             (-/set-output-disabled view true dest-key)
+             (-/set-output-disabled model true dest-key)
              (return (-/pipeline-call context
                                       dest-tag
                                       true
@@ -673,11 +673,11 @@
                  (fn [acc]
                    (when complete-fn
                      (complete-fn acc))
-                   (-/set-elapsed view (- (xt/x:now-ms) started) dest-key)
-                   (-/set-pending view false dest-key)))
+                   (-/set-elapsed model (- (xt/x:now-ms) started) dest-key)
+                   (-/set-pending model false dest-key)))
             (when (xt/x:get-key output "disabled")
-              (-/set-output-disabled view false dest-key))
-            (-/set-pending view true dest-key)
+              (-/set-output-disabled model false dest-key))
+            (-/set-pending model true dest-key)
             (return
              (-/pipeline-run-impl context ["pre"
                                            dest-tag
@@ -692,7 +692,7 @@
   "runs the pipeline via sync or remote paths"
   {:added "4.0"}
   [context save-output async-fn hook-fn complete-fn dest-key]
-  (var #{acc view} context)
+  (var #{acc model} context)
   (var started (xt/x:now-ms))
   (var force-hook
        (fn [acc tag]
@@ -706,9 +706,9 @@
        (fn [acc]
          (when complete-fn
            (complete-fn acc))
-         (-/set-elapsed view (- (xt/x:now-ms) started) dest-key)
-         (-/set-pending view false dest-key)))
-  (-/set-pending view true dest-key)
+         (-/set-elapsed model (- (xt/x:now-ms) started) dest-key)
+         (-/set-pending model false dest-key)))
+  (-/set-pending model true dest-key)
   (return
    (-/pipeline-run-impl context ["pre"
                                  dest-key
@@ -733,7 +733,7 @@
 
 
 ;;
-;; VIEW UTILS
+;; MODEL UTILS
 ;;
 
 
