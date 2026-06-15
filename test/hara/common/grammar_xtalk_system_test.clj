@@ -121,7 +121,18 @@
        :symbols #{}
        :profiles #{}
        :polyfill-modules #{}
-        :template? true})
+        :template? true}
+
+  (scan-xtalk '(do (x:promise fn)
+                   (x:promise-then p f)
+                   (x:promise-catch p f))
+              {:reserved {'x:promise       {:emit :macro}
+                          'x:promise-then  {:emit :macro}
+                          'x:promise-catch {:emit :macro}}})
+  => '{:ops #{:x-promise :x-promise-then :x-promise-catch}
+       :symbols #{x:promise x:promise-then x:promise-catch}
+       :profiles #{:xtalk-runtime-specific}
+       :polyfill-modules #{}})
 
 ^{:refer hara.common.grammar-xtalk-system/xtalk-ops-polyfill-symbols :added "4.1"}
 (fact "returns hard-link helper symbols for xtalk ops"
@@ -129,6 +140,19 @@
                                 :x-promise})
   => '#{xt.lang.common-data/obj-keys
         xt.lang.common-promise/promise})
+
+^{:refer hara.common.grammar-xtalk-system/xtalk-ops-polyfill-symbols :added "4.1"}
+(fact "respects grammar overrides when finding polyfill symbols"
+  (let [js-grammar {:reserved {'x:promise       {:emit :macro}
+                               'x:promise-then  {:emit :macro}
+                               'x:promise-catch {:emit :macro}}}]
+    (xtalk-ops-polyfill-symbols #{:x-promise :x-promise-then :x-promise-catch}
+                                js-grammar)
+    => '#{}
+
+    (xtalk-ops-polyfill-symbols #{:x-obj-keys :x-promise}
+                                js-grammar)
+    => '#{xt.lang.common-data/obj-keys}))
 
 ^{:refer hara.common.grammar-xtalk-system/xtalk-grammar-supported-ops :added "4.1"}
 (fact "returns supported ops from reserved grammar entries"

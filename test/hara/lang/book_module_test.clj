@@ -77,7 +77,27 @@
                   :lang :python
                   :code '{promise-wrap {:deps #{}
                                         :xtalk-ops #{:x-promise}}}}))
-  => '#{xt.lang.common-promise})
+  => '#{xt.lang.common-promise}
+
+  (module-deps-code
+   {:grammar {:reserved '{x:promise {:op :x-promise
+                                     :emit :macro}}}}
+    (book-module {:id 'demo.promise
+                  :lang :js
+                  :code '{promise-wrap {:deps #{}
+                                        :xtalk-ops #{:x-promise}}}}))
+  => '#{}
+
+  (impl/with:library [+library+]
+    (module-deps-code
+     (l/get-book +library+ :js)
+     (book-module {:id 'demo.promise
+                   :lang :js
+                   :code '{promise-wrap {:deps #{}
+                                         :xtalk-ops #{:x-promise
+                                                      :x-promise-then
+                                                      :x-promise-catch}}}}))
+    => '#{}))
 
 ^{:refer hara.lang.book-module/module-deps-all :added "4.1"}
 (fact "gets all module dependencies including explicit links"

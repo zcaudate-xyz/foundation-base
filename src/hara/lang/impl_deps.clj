@@ -127,9 +127,9 @@
                                     (:grammar book)
                                     (assoc mopts :book book))
         polyfill-sym-ids (-> form
-                             xtalk-system/scan-xtalk
+                             (xtalk-system/scan-xtalk (:grammar book))
                              :ops
-                             xtalk-system/xtalk-ops-polyfill-symbols)
+                             (xtalk-system/xtalk-ops-polyfill-symbols (:grammar book)))
         [entries module-lu] (collect-script-entries book
                                                     (concat sym-ids
                                                             polyfill-sym-ids))

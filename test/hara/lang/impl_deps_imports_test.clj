@@ -255,7 +255,6 @@
          :direct #{xt.lang.common-data
                    xt.lang.common-lib
                    xt.lang.common-math
-                   xt.lang.common-promise
                    xt.lang.common-string
                    xt.lang.common-tree}}
 
@@ -328,7 +327,6 @@
                 xt.lang.common-lib
                 xt.lang.common-data
                 xt.lang.common-math
-                xt.lang.common-promise
                 xt.lang.common-string
                 xt.lang.common-tree
                 js.react
@@ -347,7 +345,6 @@
                  xt.lang.common-lib        #{}
                  xt.lang.common-data       #{}
                  xt.lang.common-math       #{}
-                 xt.lang.common-promise    #{}
                  xt.lang.common-string     #{}
                  xt.lang.common-tree       #{xt.lang.common-data
                                              xt.lang.common-lib}
@@ -359,7 +356,6 @@
                  js.react                  #{xt.lang.common-data
                                              xt.lang.common-lib
                                              xt.lang.common-math
-                                             xt.lang.common-promise
                                              xt.lang.common-string
                                              xt.lang.common-tree}}}
 
@@ -373,18 +369,15 @@
                xt.lang.common-data
                xt.lang.common-lib
                xt.lang.common-math
-               xt.lang.common-promise
-                xt.lang.common-string
+               xt.lang.common-string
                xt.lang.common-tree},
           :graph {js.react #{xt.lang.common-data
                              xt.lang.common-lib
                              xt.lang.common-math
-                             xt.lang.common-promise
                              xt.lang.common-string
                              xt.lang.common-tree},
                     xt.lang.common-lib #{},
                     xt.lang.common-data #{}
-                    xt.lang.common-promise #{}
                     xt.lang.common-math #{}
                     xt.lang.common-string #{}
                     xt.lang.common-tree #{xt.lang.common-data

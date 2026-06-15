@@ -215,29 +215,38 @@
 (defn xtalk-op-polyfill-symbol
   "returns the hard-link raw symbol for an xtalk op when it maps to a namespaced helper"
   {:added "4.1"}
-  [op]
-  (let [{:keys [emit raw]} (xtalk-op-entry op)]
-    (when (and (= :hard-link emit)
-               (symbol? raw)
-               (namespace raw))
-      raw)))
+  ([op]
+   (xtalk-op-polyfill-symbol op nil))
+  ([op grammar]
+   (let [reserved (or (:reserved grammar) grammar)
+         abstract-entry (xtalk-op-entry op)
+         reserved-entry (and reserved
+                             (some #(get reserved %) (:symbol abstract-entry)))
+         {:keys [emit raw]} (merge abstract-entry reserved-entry)]
+     (when (and (= :hard-link emit)
+                (symbol? raw)
+                (namespace raw))
+       raw))))
 
 (defn xtalk-ops-polyfill-symbols
   "returns all hard-link helper symbols referenced by a collection of xtalk ops"
   {:added "4.1"}
-  [ops]
-  (->> ops
-       (keep xtalk-op-polyfill-symbol)
-       set))
+  ([ops]
+   (xtalk-ops-polyfill-symbols ops nil))
+  ([ops grammar]
+   (->> ops
+        (keep #(xtalk-op-polyfill-symbol % grammar))
+        set)))
 
 (defn xtalk-ops-polyfill-modules
   "returns the helper module namespaces referenced by a collection of xtalk ops"
   {:added "4.1"}
-  [ops]
-  (->> ops
-       xtalk-ops-polyfill-symbols
-       (keep (comp symbol namespace))
-       set))
+  ([ops]
+   (xtalk-ops-polyfill-modules ops nil))
+  ([ops grammar]
+   (->> (xtalk-ops-polyfill-symbols ops grammar)
+        (keep (comp symbol namespace))
+        set)))
 
 (defn scan-xtalk
   "scans a form for xtalk op usage, linked hard-link modules, and template restaging"
@@ -265,7 +274,7 @@
         (cond-> {:ops xtalk-ops
                  :symbols @symbols
                  :profiles (xtalk-ops-profiles xtalk-ops)
-                 :polyfill-modules (xtalk-ops-polyfill-modules xtalk-ops)}
+                 :polyfill-modules (xtalk-ops-polyfill-modules xtalk-ops reserved)}
           @template? (assoc :template? true))))))
 
 (defn xtalk-grammar-supported-ops

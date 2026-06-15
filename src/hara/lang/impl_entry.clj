@@ -188,7 +188,7 @@
                                                   grammar
                                                   modules
                                                   mopts)
-           {:keys [ops profiles polyfill-modules]} (xtalk-system/scan-xtalk form)]
+           {:keys [ops profiles polyfill-modules]} (xtalk-system/scan-xtalk form grammar)]
        (assoc entry
               :deps #{}
               :deps-fragment deps-fragment

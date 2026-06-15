@@ -45,9 +45,9 @@
                                             grammar
                                             context)
         {:keys [ops profiles polyfill-modules]}
-        (xtalk-system/scan-xtalk form-rewrite)
+        (xtalk-system/scan-xtalk form-rewrite grammar)
         deps (into (or deps #{})
-                   (xtalk-system/xtalk-ops-polyfill-symbols ops))]
+                   (xtalk-system/xtalk-ops-polyfill-symbols ops grammar))]
     {:hmeta hmeta
       :form form-rewrite
       :deps deps
