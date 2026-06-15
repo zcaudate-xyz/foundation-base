@@ -26,9 +26,9 @@
        (promise/x:promise-catch
         (promise/x:promise-then output success)
         error))
-      (return (success output)))
+      (return (promise/x:promise-run (success output))))
     (catch err
-      (return (error err)))))
+      (return (promise/x:promise-run (error err))))))
 
 (defn.xt wrap-space-args
   "puts the model context as first argument"
@@ -354,15 +354,11 @@
   {:added "4.1"}
   [node space-id group-id model-id
    opts]
-  (var handler (xt/x:get-key opts "handler"))
-  (var remote-handler (xt/x:get-key opts "remoteHandler"))
+  (var handler  (xt/x:get-key opts "handler"))
   (var pipeline (xt/x:get-key opts "pipeline"))
-  (var default-args (xt/x:get-key opts "defaultArgs"))
-  (var default-output (xt/x:get-key opts "defaultOutput"))
-  (var default-process (xt/x:get-key opts "defaultProcess"))
-  (var default-init (xt/x:get-key opts "defaultInit"))
-  (var trigger (xt/x:get-key opts "trigger"))
-  (var options (xt/x:get-key opts "options"))
+  (var defaults (xt/x:get-key opts "defaults"))
+  (var trigger  (xt/x:get-key opts "trigger"))
+  (var options  (xt/x:get-key opts "options"))
   (var model
        (event-model/create-model
         nil
@@ -372,13 +368,13 @@
           "remote" {"handler" remote-handler
                     "wrapper" -/wrap-space-args}}
          pipeline)
-        default-args
-        default-output
-        default-process
+        (xt/x:get-key defaults "args")
+        (xt/x:get-key defaults "output")
+        (xt/x:get-key defaults "process")
         (xt/x:obj-assign {"trigger" trigger
-                          "init" default-init}
+                          "init"   (xt/x:get-key defaults "init")}
                          options)))
-  (event-model/init-view model)
+  (event-model/init-model model)
   (event-model/add-listener
    model
    "@/page"

@@ -359,7 +359,7 @@
              (j/assign {:trigger trigger
                         :init defaultInit}
                        options)))
-  (event-model/init-view view)
+  (event-model/init-model view)
   (event-model/add-listener
    view
    "@/cell"

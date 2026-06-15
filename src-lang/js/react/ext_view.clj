@@ -136,7 +136,7 @@
              default-output
              default-process
              options))
-  (event-model/init-view view)
+  (event-model/init-model view)
   (xt/x:set-key view "init" (-/refresh-view view))
   (return view))
 
