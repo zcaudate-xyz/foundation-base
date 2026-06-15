@@ -29,24 +29,48 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.db.system.impl-supabase :as impl]
-             [xt.net.http-supabase :as http-supabase]]})
+             [xt.net.addon-supabase :as addon]]})
 
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.db.system.impl-supabase/normalise-body :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase/cmd-pull-async :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.db.system.impl-supabase/pull-async :added "4.1"
   :setup [(scratch-v0/log-append-public "hello")]}
 (fact "pulls data "
+
+  (notify/wait-on :js
+    (-> (impl/impl-supabase
+         (js-fetch/create
+          {:host (@! (-> local-min/+config+ :api :hostname))
+           :port (@! (-> local-min/+config+ :api :port))
+           :apikey (@! (-> local-min/+config+ :api :service-key))}
+          (addon/middleware-supabase))
+         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
+         (@! (pg/bind-app (pg/app "scratch_v0"))))
+        (impl/pull-async ["Log"])
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => [{"message" "hello", "author_id" nil, "id" "50636885-66c3-4d8d-b42d-422cc71517aa"}]
   
   (notify/wait-on :js
     (-> (impl/impl-supabase
-         (http-supabase/create
-          (js-fetch/create)
+         (js-fetch/create
           {:host (@! (-> local-min/+config+ :api :hostname))
            :port (@! (-> local-min/+config+ :api :port))
-           :apikey (@! (-> local-min/+config+ :api :service-key))})
+           :apikey (@! (-> local-min/+config+ :api :service-key))}
+          (addon/middleware-supabase))
          (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
          (@! (pg/bind-app (pg/app "scratch_v0"))))
         (impl/pull-async ["Log"])
@@ -61,16 +85,19 @@
         "id" string?
         "message" "hello"}]))
 
+^{:refer xt.db.system.impl-supabase/cmd-rpc-call-async :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.db.system.impl-supabase/rpc-call-async :added "4.1"}
 (fact "performs an rpc call"
 
   (notify/wait-on :js
     (-> (impl/impl-supabase
-         (http-supabase/create
-          (js-fetch/create)
+         (js-fetch/create
           {:host (@! (-> local-min/+config+ :api :hostname))
            :port (@! (-> local-min/+config+ :api :port))
-           :apikey (@! (-> local-min/+config+ :api :service-key))})
+           :apikey (@! (-> local-min/+config+ :api :service-key))}
+          (addon/middleware-supabase))
          (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
          (@! (pg/bind-app (pg/app "scratch_v0"))))
         (impl/rpc-call-async  {:input []
@@ -90,11 +117,11 @@
 
   (notify/wait-on :js
     (-> (impl/impl-supabase
-         (http-supabase/create
-          (js-fetch/create)
+         (js-fetch/create
           {:host (@! (-> local-min/+config+ :api :hostname))
            :port (@! (-> local-min/+config+ :api :port))
-           :apikey (@! (-> local-min/+config+ :api :service-key))})
+           :apikey (@! (-> local-min/+config+ :api :service-key))}
+          (addon/middleware-supabase))
          (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
          (@! (pg/bind-app (pg/app "scratch_v0"))))
         (impl/rpc-call-async  {:input [{:symbol "i_message" :type "text"}]
@@ -121,20 +148,15 @@
 
   (!.js
     (impl/impl-supabase
-     (http-supabase/create
-      (js-fetch/create)
-      {:host (@! (-> local-min/+config+ :api :hostname))
-       :port (@! (-> local-min/+config+ :api :port))
-       :apikey (@! (-> local-min/+config+ :api :service-key))})
+     (js-fetch/create
+          {:host (@! (-> local-min/+config+ :api :hostname))
+           :port (@! (-> local-min/+config+ :api :port))
+           :apikey (@! (-> local-min/+config+ :api :service-key))}
+          (addon/middleware-supabase))
      (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
      (@! (pg/bind-app (pg/app "scratch_v0")))))
   => (contains-in
-      {"schema" map?, "lookup" map?,
-       "opts" {},
+      {"schema" map?, "lookup" map?, "opts" {},
        "::" "xt.db.system.impl_supabase/ImplSupabase",
        "::/protocols" ["xt.db.system.impl_common/ISourceRemote"],
-       "client" {"http" {"::" "js.net.http_fetch/HttpFetchClient",
-                         "::/protocols" ["xt.net.http_fetch/IHttpClient"]},
-                 "::" "xt.net.http_supabase/HttpSupabaseClient",
-                 "::/protocols" ["xt.net.http_fetch/IHttpClient"],
-                 "defaults" map?}}))
+       "client" map?}))

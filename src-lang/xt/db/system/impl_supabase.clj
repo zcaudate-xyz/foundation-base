@@ -10,9 +10,19 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as http-fetch]
-             [xt.net.http-supabase :as http-supabase]]})
+             [xt.net.addon-supabase :as addon]]})
 
-(defn.xt pull-async
+(defn.xt normalise-body
+  [response]
+  (var out (xt/x:get-key response "body"))
+  (cond (and (xt/x:is-object? out)
+             (xt/x:not-nil? (xt/x:get-key out "data")))
+        (return (xt/x:get-key out "data"))
+        
+        :else
+        (return out)))
+
+(defn.xt cmd-pull-async
   "runs a tree ir pull with async supabase semantics"
   {:added "4.1"}
   [impl tree]
@@ -29,23 +39,22 @@
                                         {"Accept-Profile" schema-name
                                          "Content-Profile" schema-name}))))
   (return
-   (-> (http-fetch/request-http client
-                                (xt/x:obj-assign {:path (xt/x:get-key request "url")
-                                                  :method "GET"}
-                                                 {"headers" headers}))
-       (promise/x:promise-then
-        (fn [response]
-          (var out (xt/x:get-key response "body"))
-          (cond (and (xt/x:is-object? out)
-                     (xt/x:not-nil? (xt/x:get-key out "data")))
-                (return (xt/x:get-key out "data"))
+   (xt/x:obj-assign {:path (xt/x:get-key request "url")
+                     :method "GET"}
+                    {"headers" headers})))
 
-                :else
-                (return out)))))))
-
-(defn.xt rpc-call-async
-  [impl rpc-spec args opts]
+(defn.xt pull-async
+  "runs a tree ir pull with async supabase semantics"
+  {:added "4.1"}
+  [impl tree]
   (var #{client} impl)
+  (var input (-/cmd-pull-async impl tree))
+  (return
+   (-> (http-fetch/request-http client input)
+       (promise/x:promise-then -/normalise-body))))
+
+(defn.xt cmd-rpc-call-async
+  [impl rpc-spec args opts]
   (var input-spec (or (xt/x:get-key rpc-spec "input") []))
   (var body {})
   (:= opts (or opts {}))
@@ -61,24 +70,21 @@
     (xt/x:set-key headers "Content-Profile" schema)
     (xt/x:set-key headers "Accept-Profile" schema))
   (return
-   (-> (http-supabase/rpc-call client
-                              (xt/x:get-key rpc-spec "id")
-                              body
-                              (-> (xt/x:obj-clone opts)
-                                  (xt/x:obj-assign {"headers" headers})))
-       (promise/x:promise-then
-        (fn [response]
-          (var out (xt/x:get-key response "body"))
-          (cond (and (xt/x:is-object? out)
-                     (xt/x:not-nil? (xt/x:get-key out "data")))
-                (return (xt/x:get-key out "data"))
+   (addon/cmd-rpc-call (xt/x:get-key rpc-spec "id")
+                       body
+                       (-> (xt/x:obj-clone opts)
+                           (xt/x:obj-assign {"headers" headers})))))
 
-                :else
-                (return out)))))))
+(defn.xt rpc-call-async
+  [impl rpc-spec args opts]
+  (var #{client} impl)
+  (var input (-/cmd-rpc-call-async impl rpc-spec args opts))
+  (return
+   (-> (http-fetch/request-http client input)
+       (promise/x:promise-then -/normalise-body))))
 
 (defimpl.xt ImplSupabase
-  [client schema lookup opts]
-
+  [client schema lookup session opts]
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
    impl-common/rpc-call-async -/rpc-call-async})
@@ -86,6 +92,6 @@
 (defn.xt impl-supabase
   [client schema lookup]
   (return
-   (-/ImplSupabase client schema lookup {})))
+   (-/ImplSupabase client schema lookup nil {})))
 
 

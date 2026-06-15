@@ -37,6 +37,33 @@
     fetch/wrap-normalise]))
 
 
+
+;;
+;; RPC call api
+;;
+
+(defn.xt cmd-rpc-call
+  "calls an rpc entry"
+  {:added "4.1"}
+  [rpc-name data opts]
+  (var path (xt/x:cat "/rest/v1/rpc/" rpc-name))
+  (return
+   (xt/x:obj-assign {:path path
+                     :method "POST"
+                     :body (xt/x:json-encode (or data {}))}
+                    opts)))
+
+(defn.xt cmd-query-table
+  "TODO"
+  {:added "4.1"}
+  [table-name query opts]
+  (var path (xt/x:cat "/rest/v1/" table-name "?" query))
+  (return
+   (xt/x:obj-assign {:path path
+                     :method "GET"}
+                    opts)))
+
+
 (defn.xt cmd-health
   "calls the auth health endpoint against local supabase"
   {:added "4.1"}
