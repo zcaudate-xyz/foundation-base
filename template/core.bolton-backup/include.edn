@@ -1,0 +1,6 @@
+{:site           "stark"
+ :icon           "favicon"
+ :tracking-enabled "false"
+ :render         "article.html"
+ :theme-base     "theme-base-0b"
+ :logo-white     "img/logo-white.png"}

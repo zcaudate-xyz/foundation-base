@@ -1,5 +1,5 @@
 {:theme    "bolton"
- :output   "public"
+ :output   "public/std-lib"
  :pages    {index
             {:base  "home.html"
              :input "src-doc/documentation/main_index.clj"

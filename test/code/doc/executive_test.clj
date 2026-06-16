@@ -7,7 +7,7 @@
 ^{:refer code.doc.executive/all-pages :added "3.0"}
 (fact "finds and creates entries for all documents"
 
-  (-> (all-pages {:publish (config/load "config/code.doc.edn")})
+  (-> (all-pages {:publish (config/load "config/publish.edn")})
       keys
       sort
       vec)

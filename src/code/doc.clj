@@ -160,7 +160,7 @@
           :main {:fn #'manage/missing-namespaces}}])
 
 (comment
-  ;; Currently have to change `config/code.doc.edn` manually
+  ;; Currently have to change `config/publish.edn` manually
   (publish '[core] {:write true})
   (publish '[core])
   

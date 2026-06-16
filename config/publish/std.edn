@@ -1,0 +1,42 @@
+{:theme    "foundation"
+ :output   "public/std"
+ :pages    {index
+            {:base  "home.html"
+             :input "src-doc/documentation/std/std_index.clj"
+             :title "std"
+             :subtitle "standard libraries for foundation"}
+
+            std-lib-apply
+            {:input "src-doc/documentation/std/std_lib_apply.clj"
+             :title "std.lib.apply"
+             :subtitle "applicative invocation"}
+
+            std-lib-atom
+            {:input "src-doc/documentation/std/std_lib_atom.clj"
+             :title "std.lib.atom"
+             :subtitle "enhanced atom operations"}
+
+            std-lib-collection
+            {:input "src-doc/documentation/std/std_lib_collection.clj"
+             :title "std.lib.collection"
+             :subtitle "collection utilities"}
+
+            std-lib-env
+            {:input "src-doc/documentation/std/std_lib_env.clj"
+             :title "std.lib.env"
+             :subtitle "environment and system utilities"}
+
+            std-lib-foundation
+            {:input "src-doc/documentation/std/std_lib_foundation.clj"
+             :title "std.lib.foundation"
+             :subtitle "basic functionality for foundation"}
+
+            std-lib-stream
+            {:input "src-doc/documentation/std/std_lib_stream.clj"
+             :title "std.lib.stream"
+             :subtitle "streams and transducers"}
+
+            std-block
+            {:input "src-doc/documentation/std/std_block.clj"
+             :title "std.block"
+             :subtitle "code representation"}}}

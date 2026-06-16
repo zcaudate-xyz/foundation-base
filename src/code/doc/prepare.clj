@@ -19,7 +19,7 @@
    (let [project (publish/make-project)
          lookup  (executive/all-pages project)]
      (sort (keys (prepare 'hara/index {} lookup project))))
-   => '(:anchors :anchors-lu :articles :global :namespaces :project :references)"
+   => '(:anchors :anchors-lu :articles :base :global :id :input :name :namespaces :ns :output :project :references :subtitle :theme :title)"
   {:added "3.0"}
   ([key params lookup {:keys [root] :as project}]
    (let [{:keys [name input] :as meta} (lookup key)

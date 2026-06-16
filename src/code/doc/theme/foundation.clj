@@ -16,6 +16,8 @@
    :manifest ["article.html"
               "home.html"
               "assets/css/foundation.css"
+              "assets/css/foundation-highlight.css"
+              "assets/js/highlight.min.js"
               "deploy.edn"
               "include.edn"]})
 

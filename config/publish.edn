@@ -3,9 +3,9 @@
             :site   "foundation"
             :tracking-enabled "true"
             :tracking "UA-31320512-2"}
- :snippets "config/snippets"
+ :snippets "src-doc/snippets"
  :sites      {:core         [:include "config/publish/foundation.core.edn" {:type :edn}]
               :hara         [:include "config/publish/hara.edn" {:type :edn}]
               :foundation.code [:include "config/publish/foundation.code.edn" {:type :edn}]
-              :std.lib      [:include "config/publish/std.lib.edn" {:type :edn}]
+              :std          [:include "config/publish/std.edn" {:type :edn}]
               :test-site    [:include "config/publish/test.site.edn" {:type :edn}]}}

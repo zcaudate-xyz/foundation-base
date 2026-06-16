@@ -2,7 +2,7 @@
  :output "public/foundation-code"
  :pages  {index
           {:base  "home.html"
-           :input "src-doc/documentation/main_index.clj"
+           :input "src-doc/documentation/code_index.clj"
            :title "foundation-code"
            :subtitle "static docs for serious libraries"}
 

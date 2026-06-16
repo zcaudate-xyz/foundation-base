@@ -91,7 +91,7 @@
   :include [[js.lib.bitcoin :complete]]}
  
  xyz.zcaudate/js.lib.chalk
- {:description "js util libraries" 
+ {:description "js network driver libraries" 
   :include [[js.lib.chalk :complete]]}
 
  xyz.zcaudate/js.lib.color
@@ -106,12 +106,13 @@
  {:description "js util libraries" 
   :include [[js.lib.datetime :complete]]}
  
-  xyz.zcaudate/js.lib.driver
+  xyz.zcaudate/js.net.driver
   {:description "js util libraries" 
-   :include [[js.lib.driver-postgres :complete]
-             [js.lib.driver-redis :complete]
-             [js.lib.driver-sqlite :complete]
-             [js.lib.driver-sqlite-wasm :complete]]}
+   :include [[js.net.conn-postgres :complete]
+             [js.net.conn-redis :complete]
+             [js.net.conn-sqlite :complete]
+             [js.net.http-fetch :complete]
+             [js.net.ws-native :complete]]}
 
  xyz.zcaudate/js.lib.ethereum
  {:description "js ethereum and solc" 

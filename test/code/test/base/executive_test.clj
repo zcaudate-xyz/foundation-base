@@ -217,3 +217,10 @@
                                                                  }})))
           nil))
   (project/in-context (run 'platform.storage)))
+
+
+^{:refer code.test.base.executive/history-file-path :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.executive/save-run-history :added "4.1"}
+(fact "TODO")
