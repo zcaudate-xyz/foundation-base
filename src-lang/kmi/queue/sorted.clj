@@ -5,8 +5,8 @@
   {:runtime :redis
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [kmi.redis :as r]
-              [kmi.queue.common :as q]]
+             [kmi.redis :as r]
+             [kmi.queue.common :as q]]
    :static {:lang/lint-globals #{redis}}})
 
 ;;
@@ -50,9 +50,9 @@
    (return (-> (r/call "ZRANGEBYSCORE"
                        k-queue idx-0 idx-1 "WITHSCORES" "LIMIT" 0 count)
                (xtd/from-flat (fn [out k v]
- 		               (table.insert out [(cat partition "-" v) k])
- 			       (return out))
-                             [])))))
+ 		                (table.insert out [(cat partition "-" v) k])
+ 			        (return out))
+                              [])))))
 
 (defn.lua ^{:rt/redis {}} mq-sorted-queue-get
   "gets the queue element"
@@ -133,11 +133,11 @@
                         "WITHSCORES", "LIMIT", 0, count))
 
    (local '[res keys] '[[] []])
-    (xt/for:index [i [1 (/ (len items) 2)]]
-      (local idx (. items [(* i 2)]))
-      (local key (cat partition "-" idx))
-     (:= (. res [i]) [key, (. items [(- (* i 2) 1)])])
-     (:= (. keys [i]) key))
+   (xt/for:index [i [1 (/ (len items) 2)]]
+                 (local idx (. items [(* i 2)]))
+                 (local key (cat partition "-" idx))
+                 (:= (. res [i]) [key, (. items [(- (* i 2) 1)])])
+                 (:= (. keys [i]) key))
 
    (if (< 0 (len keys))
      (do (r/call "SADD" k-pending (unpack keys))
@@ -168,8 +168,8 @@
   {:added "3.0"}
   ([key group status]
    (return (q/mq-select-key key
-                         q/mq-common-group-not-exists [group]
-                         -/mq-sorted-group-init [group (or status "latest")]))))
+                            q/mq-common-group-not-exists [group]
+                            -/mq-sorted-group-init [group (or status "latest")]))))
 
 (defn.lua ^{:rt/redis {}} mq-sorted-group-init-all
   "initialises all partitions"

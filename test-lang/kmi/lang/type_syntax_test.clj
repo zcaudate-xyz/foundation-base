@@ -7,6 +7,7 @@
   {:runtime :basic
    :require [[kmi.lang.type-syntax :as syn]
              [kmi.lang.common-util :as tc]
+             [xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
@@ -14,6 +15,7 @@
   {:runtime :basic
    :require [[kmi.lang.type-syntax :as syn]
              [kmi.lang.common-util :as tc]
+             [xt.lang.common-lib :as k]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 

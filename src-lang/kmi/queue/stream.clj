@@ -4,8 +4,8 @@
 (l/script :lua
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [kmi.redis :as r]
-              [kmi.queue.common :as q]]
+             [kmi.redis :as r]
+             [kmi.queue.common :as q]]
    :static {:lang/lint-globals #{redis}}})
 
 ;;
@@ -132,7 +132,7 @@
   ([key partition group]
    (local k-queue (q/mq-path key partition))
    (return (xtd/arr-map (r/call "XPENDING" k-queue group "-" "+" 100)
-                   xtd/first))))
+                        xtd/first))))
 
 (defn.lua ^{:rt/redis {}
             :rt/db {:in  [:text :text :text]
@@ -144,7 +144,7 @@
    (local k-queue (q/mq-path key partition))
    (local '[info-groups mq-common-group-id] '[(r/call "XINFO" "GROUPS" k-queue) "0-0"])
    (xt/for:array [[i arr] info-groups]
-     (if (== group (. arr [2])) (:= mq-common-group-id (. arr [8]))))
+                 (if (== group (. arr [2])) (:= mq-common-group-id (. arr [8]))))
    (return mq-common-group-id)))
 
 (defn.lua ^{:rt/redis {}
@@ -180,7 +180,7 @@
    (local k-queue (q/mq-path key partition))
    (local '[groups exists] '[(r/call "XINFO" "GROUPS" k-queue) false])
    (xt/for:array [[i arr] groups]
-     (if (== group (. arr [2])) (:= exists true)))
+                 (if (== group (. arr [2])) (:= exists true)))
    (return exists)))
 
 (defn.lua ^{:rt/redis {}
@@ -217,9 +217,9 @@
                       (return)))
 
    (return (-> (r/call "XINFO" "GROUPS" k-queue)
-                (xtd/arr-filter (fn [arr]
-                             (return (== group (xtd/second arr)))))
-                (xtd/first)))))
+               (xtd/arr-filter (fn [arr]
+                                 (return (== group (xtd/second arr)))))
+               (xtd/first)))))
 
 (defn.lua ^{:rt/redis {}
             :rt/db {:in  [:text :text :text]
@@ -286,7 +286,7 @@
         (do (local k-last (r/call "XREVRANGE" k-queue "+" "-" "COUNT" "2"))
             (-/mq-stream-group-create k-queue group
                                       (xtd/first (or (xtd/second k-last)
-                                                   {}))))
+                                                     {}))))
         
         (or (== nil mode)
             (== mode "start"))
@@ -305,11 +305,11 @@
    (local '[success err] (pcall res-fn))
    (if err
      (if (== "NOGROUP" (string.sub err 1 7))
-        (do (:= res (-/mq-stream-read-init key partition group
-                                           (xtd/obj-assign {:consumer consumer
-                                                            :count count}
-                                                           opts))))
-        (error err)))
+       (do (:= res (-/mq-stream-read-init key partition group
+                                          (xtd/obj-assign {:consumer consumer
+                                                           :count count}
+                                                          opts))))
+       (error err)))
    (return (:? res (. res [1] [2]) res))))
 
 (defn.lua ^{:rt/redis {}
@@ -473,9 +473,9 @@
    (var entries (cjson.decode entry-list))
    (var out [])
    (xt/for:array [e entries]
-     (var partition (xtd/first e))
-     (var pkg (xtd/second e))
-     (table.insert out (r/call "XADD" (cat key ":_:" partition) "*" "_" (cjson.encode pkg))))
+                 (var partition (xtd/first e))
+                 (var pkg (xtd/second e))
+                 (table.insert out (r/call "XADD" (cat key ":_:" partition) "*" "_" (cjson.encode pkg))))
    (when ids
      (r/call "PUBLISH" key ids))
    (return (cjson.encode out))))
@@ -511,4 +511,4 @@
    "read_release"         -/mq-stream-read-release
    "queue_items"          -/mq-stream-queue-items
    "queue_get"            -/mq-stream-queue-get})
-  
+

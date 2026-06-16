@@ -8,6 +8,7 @@
    :require [[kmi.lang.type-hashset :as hs]
              [kmi.lang.type-hashmap :as hm]
              [kmi.lang.common-util :as ic]
+             [kmi.lang.protocol-base :as p]
              [xt.lang.common-iter :as it]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
@@ -17,6 +18,7 @@
    :require [[kmi.lang.type-hashset :as hs]
              [kmi.lang.type-hashmap :as hm]
              [kmi.lang.common-util :as ic]
+             [kmi.lang.protocol-base :as p]
              [xt.lang.common-iter :as it]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
@@ -107,7 +109,7 @@
                 (hs/hashset-push! "b")
                 (hs/hashset-dissoc! "a")
                 (hs/hashset-to-persistent!)))
-   [(ic/is-persistent? out)
+   [(p/is-persistent out)
     (hs/hashset-has? out "a")
     (hs/hashset-has? out "b")
     (. out _size)])
@@ -119,7 +121,7 @@
                 (hs/hashset-push! "b")
                 (hs/hashset-dissoc! "a")
                 (hs/hashset-to-persistent!)))
-   [(ic/is-persistent? out)
+   [(p/is-persistent out)
     (hs/hashset-has? out "a")
     (hs/hashset-has? out "b")
     (. out _size)])
@@ -267,7 +269,7 @@
    (var s1 (hs/hashset "a" "b"))
    (var s2 (hs/hashset "b" "a"))
    [(== (hs/hashset-hash s1)
-        (. s1 (hash)))
+        (p/hash s1))
     (== (hs/hashset-hash s1)
         (hs/hashset-hash s2))])
   => [true true]
@@ -276,7 +278,7 @@
    (var s1 (hs/hashset "a" "b"))
    (var s2 (hs/hashset "b" "a"))
    [(== (hs/hashset-hash s1)
-        (. s1 (hash)))
+        (p/hash s1))
     (== (hs/hashset-hash s1)
         (hs/hashset-hash s2))])
   => [true true])
@@ -288,16 +290,16 @@
    (var s1 (hs/hashset "a" "b"))
    (var s2 (hs/hashset "b" "a"))
    [(hs/hashset-eq s1 s2)
-    (== (. s1 (hash))
-        (. s2 (hash)))])
+    (== (p/hash s1)
+        (p/hash s2))])
   => [true true]
 
   (!.lua
    (var s1 (hs/hashset "a" "b"))
    (var s2 (hs/hashset "b" "a"))
    [(hs/hashset-eq s1 s2)
-    (== (. s1 (hash))
-        (. s2 (hash)))])
+    (== (p/hash s1)
+        (p/hash s2))])
   => [true true])
 
 ^{:refer kmi.lang.type-hashset/hashset-show :added "4.1"}

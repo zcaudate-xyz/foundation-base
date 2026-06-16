@@ -5,8 +5,8 @@
   {:runtime :redis
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-              [kmi.redis :as r]
-              [kmi.queue.common :as q]]
+             [kmi.redis :as r]
+             [kmi.queue.common :as q]]
    :static {:lang/lint-globals #{redis}}})
 
 ;;
@@ -152,9 +152,9 @@
                         (- (+ start count) 1)))
 
    (local '[keys n] '[{} 0])
-    (xt/for:object [[k v] items]
-      (:= n (+ n 1))
-      (:= (. keys [n]) (cat partition "-" (- (+ k counter) 1))))
+   (xt/for:object [[k v] items]
+                  (:= n (+ n 1))
+                  (:= (. keys [n]) (cat partition "-" (- (+ k counter) 1))))
 
    (if (< 0 (len keys))
      (do (r/call "SADD" k-pending (unpack keys))
@@ -195,7 +195,7 @@
   {:added "3.0"}
   ([key group status]
    (return (q/mq-map-key key -/mq-list-group-init group
-                           (or status "latest")))))
+                         (or status "latest")))))
 
 (defn.lua ^{:rt/redis {}} mq-list-group-outdated-all
   "returns all outdated partitions on a queue"

@@ -8,6 +8,7 @@
    :require [[kmi.lang.type-hashmap :as hm]
              [kmi.lang.type-hashmap-node :as node]
              [kmi.lang.common-util :as ic]
+             [kmi.lang.protocol-base :as p]
              [xt.lang.common-iter :as it]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
@@ -17,6 +18,7 @@
    :require [[kmi.lang.type-hashmap :as hm]
              [kmi.lang.type-hashmap-node :as node]
              [kmi.lang.common-util :as ic]
+             [kmi.lang.protocol-base :as p]
              [xt.lang.common-iter :as it]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
@@ -126,7 +128,7 @@
                 (hm/hashmap-assoc! "b" 2)
                 (hm/hashmap-dissoc! "a")
                 (hm/hashmap-to-persistent!)))
-   [(ic/is-persistent? out)
+   [(p/is-persistent out)
     (hm/hashmap-lookup-key out "a" "missing")
     (hm/hashmap-lookup-key out "b" "missing")
     (. out _size)])
@@ -138,7 +140,7 @@
                 (hm/hashmap-assoc! "b" 2)
                 (hm/hashmap-dissoc! "a")
                 (hm/hashmap-to-persistent!)))
-   [(ic/is-persistent? out)
+   [(p/is-persistent out)
     (hm/hashmap-lookup-key out "a" "missing")
     (hm/hashmap-lookup-key out "b" "missing")
     (. out _size)])
@@ -316,7 +318,7 @@
    (var h1 (hm/hashmap "a" 1 "b" 2))
    (var h2 (hm/hashmap "b" 2 "a" 1))
    [(hm/hashmap-hash h1)
-    (. h1 (hash))
+    (p/hash h1)
     (== (hm/hashmap-hash h1)
         (hm/hashmap-hash h2))])
   => [1875325 1875325 true]
@@ -325,7 +327,7 @@
    (var h1 (hm/hashmap "a" 1 "b" 2))
    (var h2 (hm/hashmap "b" 2 "a" 1))
    [(hm/hashmap-hash h1)
-    (. h1 (hash))
+    (p/hash h1)
     (== (hm/hashmap-hash h1)
         (hm/hashmap-hash h2))])
   => [1875325 1875325 true])
@@ -337,16 +339,16 @@
    (var h1 (hm/hashmap "a" 1 "b" 2))
    (var h2 (hm/hashmap "b" 2 "a" 1))
    [(hm/hashmap-eq h1 h2)
-    (== (. h1 (hash))
-        (. h2 (hash)))])
+    (== (p/hash h1)
+        (p/hash h2))])
   => [true true]
 
   (!.lua
    (var h1 (hm/hashmap "a" 1 "b" 2))
    (var h2 (hm/hashmap "b" 2 "a" 1))
    [(hm/hashmap-eq h1 h2)
-    (== (. h1 (hash))
-        (. h2 (hash)))])
+    (== (p/hash h1)
+        (p/hash h2))])
   => [true true])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-show :added "4.1"}

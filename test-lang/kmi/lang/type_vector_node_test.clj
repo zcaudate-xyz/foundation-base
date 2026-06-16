@@ -131,7 +131,7 @@
 
   (!.lua
    (node/ensure-persistent (node/node-create 1 [])))
-  => {"children" {}, "::" "vector.node"})
+  => {"children" [], "::" "vector.node"})
 
 ^{:refer kmi.lang.type-vector-node/node-array-for :added "4.0"}
 (fact "gets the node array"

@@ -28,6 +28,8 @@
   "gets the hash of an object"
   {:added "4.0"}
   [x]
+  (when (-/is-managed? x)
+    (return (p/hash x)))
   (var hash-id (common-hash/hash-native x))
   (if (xt/x:is-number? hash-id)
     (return hash-id)
