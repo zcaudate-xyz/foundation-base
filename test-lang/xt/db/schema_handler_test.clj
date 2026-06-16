@@ -15,9 +15,8 @@
              [xt.db.system :as db-system]
              [xt.db.text.sql-manage :as sql-manage]
              [xt.db.text.sql-util :as sql-util]
-             [xt.protocol.impl.connection-sql :as dbsql]
-             [js.lib.driver-sqlite :as js-sqlite]
-             [js.lib.driver-sqlite-wasm :as js-sqlite-wasm]]})
+             [xt.net.conn-sql :as dbsql]
+             [js.net.conn-sqlite :as js-sqlite]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -31,7 +30,7 @@
             {"id" "node-schema"
              "services"
              {"db/primary"
-              {"driver" (js-sqlite/driver)
+              {"driver" (js-sqlite/create {})
                "filename" ":memory:"}}
              "handlers"
              {"db/install-schema"
@@ -79,7 +78,7 @@
 (comment
 
   (notify/wait-on :js
-    (-> (dbsql/connect (js-sqlite/driver) {})
+    (-> (dbsql/connect (js-sqlite/create {}) {})
         (promise/x:promise-then
          (fn [conn]
            (repl/notify
@@ -92,7 +91,7 @@
 
 
   (notify/wait-on :js
-    (-> (dbsql/connect (js-sqlite/driver) {})
+    (-> (dbsql/connect (js-sqlite/create {}) {})
         (promise/x:promise-then
          (fn [conn]
            (repl/notify

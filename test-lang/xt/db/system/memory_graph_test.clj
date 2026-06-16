@@ -329,3 +329,13 @@
        "description" "Default Currency for the Stellar Blockchain"}
       {"id" "XLM.T"
        "description" "Default Currency for the Stellar TestNet Blockchain"}])
+
+
+^{:refer xt.db.system.memory-graph/check-in-clause :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.memory-graph/like-char-at :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.memory-graph/check-like-clause :added "4.1"}
+(fact "TODO")

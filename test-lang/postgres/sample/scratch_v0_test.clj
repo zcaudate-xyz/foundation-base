@@ -38,3 +38,7 @@
 
   (l/emit-as :postgres `[(scratch/log-append "hello")])
   => "\"scratch_v0\".log_append('hello')")
+
+
+^{:refer postgres.sample.scratch-v0/log-append-public :added "4.1"}
+(fact "TODO")

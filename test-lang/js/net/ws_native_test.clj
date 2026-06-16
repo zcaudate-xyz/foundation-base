@@ -189,5 +189,12 @@
 ^{:refer js.net.ws-native/create :added "4.1"}
 (fact "creates a websocket wrapper"
   (!.js
-   (xt/x:get-key (js-ws/create {"topic" "room:http-websocket"}) "topic"))
+   (xt/x:get-key (xt/x:get-key (js-ws/create {"topic" "room:http-websocket"}) "defaults") "topic"))
   => "room:http-websocket")
+
+
+^{:refer js.net.ws-native/start-heartbeat-ws :added "4.1"}
+(fact "TODO")
+
+^{:refer js.net.ws-native/stop-heartbeat-ws :added "4.1"}
+(fact "TODO")

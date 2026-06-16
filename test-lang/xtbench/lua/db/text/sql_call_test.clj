@@ -17,8 +17,8 @@
           [xt.lang.spec-promise :as spec-promise]
           [xt.lang.common-repl :as repl]
           [xt.db.text.sql-call :as call]
-          [xt.protocol.impl.connection-sql :as driver]
-          [lua.nginx.driver-postgres :as lua-postgres]]
+          [xt.net.conn-sql :as conn-sql]
+          [lua.nginx.conn-postgres :as lua-postgres]]
           :runtime :basic})
 
 (fact:global
@@ -68,8 +68,8 @@
 
   (notify/wait-on :lua.nginx
     (spec-promise/x:promise-then
-     (driver/connect (lua-postgres/driver)
-                     {:database "test-scratch"})
+     (conn-sql/connect (lua-postgres/create {:database "test-scratch"})
+                     {})
      (fn [conn]
        (return
         (spec-promise/x:promise-then

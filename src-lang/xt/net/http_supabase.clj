@@ -107,7 +107,9 @@
 (defn.xt wrap-supabase-apikey
   [client handler]
   (var #{defaults} client)
-  (var api-key ))
+  (var api-key (xt/x:get-key defaults "api_key"))
+  (return (fn [input]
+            (return (handler (xt/x:obj-assign input {"apikey" api-key}))))))
 
 (defn.xt request-http
   "TODO"

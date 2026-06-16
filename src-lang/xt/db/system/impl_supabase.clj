@@ -33,6 +33,16 @@
                      :method "GET"}
                     {"headers" headers})))
 
+(defn.xt normalise-body
+  [response]
+  (var out (xt/x:get-key response "body"))
+  (cond (and (xt/x:is-object? out)
+             (xt/x:not-nil? (xt/x:get-key out "data")))
+        (return (xt/x:get-key out "data"))
+        
+        :else
+        (return out)))
+
 (defn.xt pull-async
   "runs a tree ir pull with async supabase semantics"
   {:added "4.1"}
@@ -72,18 +82,6 @@
   (return
    (-> (http-fetch/request-http client input)
        (promise/x:promise-then -/normalise-body))))
-
-
-
-(defn.xt normalise-body
-  [response]
-  (var out (xt/x:get-key response "body"))
-  (cond (and (xt/x:is-object? out)
-             (xt/x:not-nil? (xt/x:get-key out "data")))
-        (return (xt/x:get-key out "data"))
-        
-        :else
-        (return out)))
 
 (defimpl.xt ImplSupabase
   [client schema lookup session refresh opts]

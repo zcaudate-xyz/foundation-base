@@ -374,3 +374,24 @@
      (contains? entry :header-params)
      (contains? entry :cookie-params)])
   => [true false false false])
+
+^{:refer net.openapi.read/resource-path :added "4.1"}
+(fact "TODO")
+
+^{:refer net.openapi.read/vendor-extension-map :added "4.1"}
+(fact "TODO")
+
+^{:refer net.openapi.read/normalize-properties :added "4.1"}
+(fact "TODO")
+
+^{:refer net.openapi.read/select-filter :added "4.1"}
+(fact "TODO")
+
+^{:refer net.openapi.read/select-operations :added "4.1"}
+(fact "TODO")
+
+^{:refer net.openapi.read/remove-empty-options :added "4.1"}
+(fact "TODO")
+
+^{:refer net.openapi.read/format-operations :added "4.1"}
+(fact "TODO")

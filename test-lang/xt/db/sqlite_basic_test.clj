@@ -11,10 +11,10 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
              [xt.lang.common-repl :as repl]
-             [xt.protocol.impl.connection-sql :as dbsql]
+             [xt.net.conn-sql :as dbsql]
              [xt.db.text.sql-util :as sql-util]
              [xt.db.text.sql-manage :as sql-manage]
-             [js.lib.driver-sqlite :as js-sqlite]]})
+             [js.net.conn-sqlite :as js-sqlite]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -25,7 +25,7 @@
 (fact "connects to sqlite, creates db runtime, installs schema, seeds and queries"
 
   (notify/wait-on [:js 5000]
-    (. (dbsql/connect (js-sqlite/driver) {})
+    (. (dbsql/connect (js-sqlite/create {}) {})
        (then (fn [conn]
                ;; 1. Create the db runtime
                (var db (db-system/db-create

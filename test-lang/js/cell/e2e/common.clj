@@ -57,13 +57,13 @@
               [js.cell.service :as service]
               [js.cell.service.db-query :as db-query]
               [js.cell.service.db-sync :as db-sync]
-              [js.lib.driver-sqlite-wasm :as sqlite-wasm]
+              [js.net.conn-sqlite :as sqlite-wasm]
                [xt.db.system :as xdb]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-resource :as rt :with [defsingleton.js]]
               [xt.event.base-model :as event-model]
-              [xt.protocol.impl.connection-sql :as dbsql]]})
+              [xt.net.conn-sql :as dbsql]]})
 
 (defn node-remote-script
   []
@@ -324,7 +324,7 @@
 
 (defn.js connect-sqlite
   [callback]
-  (var promise (dbsql/connect (sqlite-wasm/driver) {}))
+  (var promise (dbsql/connect (sqlite-wasm/create {}) {}))
   (when callback
     (. promise
        (then (fn [conn]

@@ -6,7 +6,7 @@
              [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.client-websocket :as ws]]})
+             [xt.net.ws-legacy :as ws]]})
 
 (defn.xt client?
   "checks if a value is a wrapped nchan client descriptor"
@@ -225,17 +225,6 @@
   [source opts]
   (return (common/resolve-request-transform source opts "nchan.client")))
 
-(defn.xt resolve-client
-  "resolves the nchan client descriptor from db or opts"
-  {:added "4.1.4"}
-  [db opts]
-  (var source (common/resolve-client-source db opts))
-  (when (xt/x:nil? source)
-    (xt/x:err "Nchan missing client"))
-  (if (-/client? source)
-    (return source)
-    (return (-/client source))))
-
 (defn.xt client
   "wraps raw nchan config into the standard client descriptor.
 
@@ -253,6 +242,17 @@
   {:added "4.1.4"}
   [raw]
   (return (common/wrap-client raw "nchan.client")))
+
+(defn.xt resolve-client
+  "resolves the nchan client descriptor from db or opts"
+  {:added "4.1.4"}
+  [db opts]
+  (var source (common/resolve-client-source db opts))
+  (when (xt/x:nil? source)
+    (xt/x:err "Nchan missing client"))
+  (if (-/client? source)
+    (return source)
+    (return (-/client source))))
 
 (defn.xt connect
   "connects the nchan client through the websocket protocol"

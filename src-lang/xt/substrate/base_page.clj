@@ -13,6 +13,27 @@
 (def$.xt STATE_TAG "substrate.page")
 (def$.xt STATE_SLOT "page")
 
+(def.xt REMOTE_DISPATCHER nil)
+
+(defn.xt set-remote-dispatcher
+  "sets the remote operation dispatcher"
+  {:added "4.1"}
+  [dispatcher]
+  (:= -/REMOTE_DISPATCHER dispatcher)
+  (return dispatcher))
+
+(defn.xt get-remote-dispatcher
+  "gets the remote operation dispatcher"
+  {:added "4.1"}
+  []
+  (return -/REMOTE_DISPATCHER))
+
+(defn.xt remote-group?
+  "checks if a group is a remote proxy"
+  {:added "4.1"}
+  [group]
+  (return (xt/x:get-key group "remote")))
+
 (defn.xt async-fn
   "normalises model stage execution across plain values and xt.promise results"
   {:added "4.1"}
@@ -453,6 +474,8 @@
   {:added "4.1"}
   [node space-id group-id event]
   (var group (-/group-ensure node space-id group-id))
+  (when (and (-/remote-group? group) -/REMOTE_DISPATCHER)
+    (return (-/REMOTE_DISPATCHER "group-update" node space-id group-id [event])))
   (var throttle (xt/x:get-key group "throttle"))
   (var models (xt/x:get-key group "models"))
   (var out [])
@@ -471,6 +494,8 @@
   {:added "4.1"}
   [node space-id group-id model-id event]
   (var [group model] (-/model-ensure node space-id group-id model-id))
+  (when (and (-/remote-group? group) -/REMOTE_DISPATCHER)
+    (return (-/REMOTE_DISPATCHER "model-update" node space-id group-id [model-id event])))
   (var throttle (xt/x:get-key group "throttle"))
   (var entry (th/throttle-run throttle model-id [(or event {})]))
   (return (xt/x:get-key entry "promise")))
@@ -480,6 +505,8 @@
   {:added "4.1"}
   [node space-id group-id model-id current event]
   (var [group model] (-/model-ensure node space-id group-id model-id))
+  (when (and (-/remote-group? group) -/REMOTE_DISPATCHER)
+    (return (-/REMOTE_DISPATCHER "model-set-input" node space-id group-id [model-id current event])))
   (event-model/set-input model current)
   (return (-/model-update node space-id group-id model-id (or event {}))))
 
@@ -508,6 +535,8 @@
   {:added "4.1"}
   [node space-id group-id signal event]
   (var group (-/group-ensure node space-id group-id))
+  (when (and (-/remote-group? group) -/REMOTE_DISPATCHER)
+    (return (-/REMOTE_DISPATCHER "trigger-group" node space-id group-id [signal event])))
   (return (-/trigger-group-raw node space-id group signal event)))
 
 (defn.xt trigger-model
@@ -515,6 +544,8 @@
   {:added "4.1"}
   [node space-id group-id model-id signal event]
   (var [group model] (-/model-ensure node space-id group-id model-id))
+  (when (and (-/remote-group? group) -/REMOTE_DISPATCHER)
+    (return (-/REMOTE_DISPATCHER "trigger-model" node space-id group-id [model-id signal event])))
   (var options (xt/x:get-key model "options"))
   (var trigger (xt/x:get-key options "trigger"))
   (when (-/check-event trigger signal event {"model" model
@@ -536,7 +567,9 @@
   (xt/for:object [[group-id group] groups]
     (xt/x:set-key out
                   group-id
-                  (-/trigger-group-raw node space-id group signal event)))
+                  (:? (and (-/remote-group? group) -/REMOTE_DISPATCHER)
+                      (-/REMOTE_DISPATCHER "trigger-group" node space-id group-id [signal event])
+                      (-/trigger-group-raw node space-id group signal event))))
   (return out))
 
 (defn.xt raw-callback-id

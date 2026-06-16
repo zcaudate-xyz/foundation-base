@@ -13,7 +13,7 @@
 
 ^{:seedgen/root {:all true
                  :js           {:extra [[js.net.conn-postgres :as js-postgres]]}
-                 :lua.nginx    {:extra [[lua.nginx.driver-postgres :as lua-postgres]]}
+                 :lua.nginx    {:extra [[lua.nginx.conn-postgres :as lua-postgres]]}
                  :python       {:extra [[python.net.conn-postgres :as py-postgres]]}
                  :dart         {:extra [[dart.net.conn-postgres :as dart-postgres]]}}}
 (l/script- :js

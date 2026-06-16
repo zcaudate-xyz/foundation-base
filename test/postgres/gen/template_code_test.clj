@@ -94,3 +94,7 @@
                (str/includes? % ":url \"api/scratch-v0/log-append\""))
       (finally
         (fs/delete tmpdir)))))
+
+
+^{:refer postgres.gen.template-code/route-entry-input :added "4.1"}
+(fact "TODO")

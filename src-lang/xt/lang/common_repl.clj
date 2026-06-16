@@ -9,6 +9,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-link :as xt-link]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.common-lib :as xt-lib]]})
 
 ;;
@@ -142,26 +143,43 @@
 
 (defmacro.xt ^{:standalone true}
   notify
-  "sends a message to the notify server"
-  {:added "4.0"}
-  [value & [id tag]]
-  (xt.lang.common-repl/notify-form (or id
-                                       xt.lang.common-notify/*override-id*
-                                       (std.lib.foundation/error "No ID for Notify"))
-                                   value {:tag tag}))
+  "sends a message to the notify server, waiting for promises"
+  {:added "4.1"}
+  [value & [f]]
+  (let [notify-id (or xt.lang.common-notify/*override-id*
+                      (std.lib.foundation/error "No ID for Notify"))
+        v-sym      'v
+        resolved-sym 'resolved
+        err-sym    'err
+        transform  (fn [sym] (if f (list f sym) sym))
+        notify-cb  (fn [sym]
+                     (list 'return
+                           (xt.lang.common-repl/notify-form
+                            notify-id (transform sym) {})))]
+    (list 'do:>
+          (list 'var v-sym value)
+          (list 'if (list 'x:promise-native? v-sym)
+                (list 'return
+                      (list 'x:promise-catch
+                            (list 'x:promise-then
+                                  v-sym
+                                  (list 'fn [resolved-sym]
+                                        (notify-cb resolved-sym)))
+                            (list 'fn [err-sym]
+                                  (notify-cb err-sym))))
+                (xt.lang.common-repl/notify-form notify-id (transform v-sym) {})))))
 
 (defmacro.xt ^{:standalone true}
   >notify
   "creates a callback function"
   {:added "4.0"}
-  ([] '(fn [val]
-         (return (xt.lang.common-repl/notify val))))
+  ([] (list 'fn '[val]
+            (list 'return
+                  (list 'xt.lang.common-repl/notify 'val))))
   ([f]
-   (list 'fn
-         '[val]
+   (list 'fn '[val]
          (list 'return
-               (list 'xt.lang.common-repl/notify
-                     (list f 'val))))))
+               (list 'xt.lang.common-repl/notify 'val f)))))
 
 (defmacro.xt ^{:standalone true}
   <!

@@ -16,10 +16,10 @@
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
              [xt.substrate.transport-memory :as transport-memory]
-             [xt.protocol.impl.connection-sql :as sql]
+             [xt.net.conn-sql :as conn-sql]
              [xt.db.text.sql-call :as call]
              [xt.db.substrate :as db-helper]
-             [js.lib.driver-postgres :as js-postgres]
+             [js.net.conn-postgres :as js-postgres]
              [postgres.sample.scratch-v0.route-entries :as entries]]})
 
 (fact:global
@@ -93,7 +93,7 @@
             {"database" "test-scratch"}}
            "handlers"
            {"db/fn.primary"
-            {"fn"   (db-helper/call-db-handler js-postgres/driver "db/primary")
+            {"fn"   (db-helper/call-db-handler (js-postgres/create {:database "test-scratch"}) "db/primary")
              "meta" {"kind" "request"}}}}))
     (base-page/add-group-attach node
                                 nil
@@ -116,7 +116,7 @@
                    (var fn-template (. opts ["template"]))
                    (var fn-args     (. opts ["args"]))
                    (return
-                    (-> (sql/connect
+                    (-> (conn-sql/connect
                          (driver/get-driver "postgres")
                          (substrate/get-service node "db/primary"))
                         (promise/x:promise-then
@@ -163,7 +163,7 @@
           {"db/ping"
            {"fn" (fn [space args request node]
                    (return
-                    (-> (sql/connect
+                    (-> (conn-sql/connect
                          (js-postgres/driver)
                          {:database "test-scratch"})
                         (promise/x:promise-then
@@ -188,7 +188,7 @@
 (comment
   
   (notify/wait-on :js
-    (-> (sql/connect (js-postgres/driver)
+    (-> (conn-sql/connect (js-postgres/driver)
                      {:database "test-scratch"})
         (promise/x:promise-then
          (fn [conn]
@@ -198,7 +198,7 @@
            (repl/notify out)))))
   
   (notify/wait-on :js
-    (-> (sql/connect (js-postgres/driver)
+    (-> (conn-sql/connect (js-postgres/driver)
                      {:database "test-scratch"})
         (promise/x:promise-then
          (fn [conn]
@@ -208,7 +208,7 @@
            (repl/notify out)))))
 
   (notify/wait-on :js
-    (-> (sql/connect (js-postgres/driver)
+    (-> (conn-sql/connect (js-postgres/driver)
                      {:database "test-scratch"})
         (promise/x:promise-then
          (fn [conn]
@@ -219,7 +219,7 @@
   
   
   (notify/wait-on :js
-    (-> (sql/connect (js-postgres/driver)
+    (-> (conn-sql/connect (js-postgres/driver)
                      {:database "test-scratch"})
         (promise/x:promise-then
          (fn [conn]
@@ -230,7 +230,7 @@
   => "pong"
   
   (notify/wait-on :js
-    (-> (sql/connect (js-postgres/driver)
+    (-> (conn-sql/connect (js-postgres/driver)
                      {:database "test-scratch"})
         (promise/x:promise-then
          (fn [conn]
@@ -251,43 +251,39 @@
   (v0/ping)
   
   (notify/wait-on :js
-    (-> (js-postgres/connect-constructor {:database "test-scratch"})
-        (promise/x:promise-then
-         (fn [raw]
-           (return (js-postgres/wrap-connection raw))))
+    (-> (js-postgres/create {:database "test-scratch"})
+        (conn-sql/connect)
         (promise/x:promise-then
          (fn [conn]
-           (return (sql/query conn "SELECT scratch_v0.ping()"))))
+           (return (conn-sql/query conn "SELECT scratch_v0.ping()"))))
         (promise/x:promise-then
          (fn [result]
            (repl/notify result)))))
   
   (notify/wait-on :js
-    (-> (js-postgres/connect-constructor {:database "test-scratch"})
-        (promise/x:promise-then
-         (fn [raw]
-           (return (js-postgres/wrap-connection raw))))
+    (-> (js-postgres/create {:database "test-scratch"})
+        (conn-sql/connect)
         (promise/x:promise-then
          (fn [conn]
-           (return (sql/query conn "SELECT * from \"scratch_v0\".\"Log\""))))
+           (return (conn-sql/query conn "SELECT * from \"scratch_v0\".\"Log\""))))
         (promise/x:promise-then
          (fn [result]
            (repl/notify result)))))
   
   (repl/notify conn)
   (notify/wait-on [:js 5000]
-    (promise/x:promise-then
-     (js-postgres/connect-constructor {:database "test-scratch"})
-     (fn [raw]
-       (var conn (js-postgres/wrap-connection raw))
-       (spec-promise/x:promise-then
-        (sql/query conn "SELECT \"scratch\".addf(1,2);")
-        (fn [out]
-          (spec-promise/x:promise-then
-           (sql/disconnect conn)
-           (fn [_]
-             (repl/notify [(sql/connection? conn)
-                           out]))))))))
+    (-> (js-postgres/create {:database "test-scratch"})
+     (conn-sql/connect)
+     (spec-promise/x:promise-then
+      (fn [conn]
+        (spec-promise/x:promise-then
+         (conn-sql/query conn "SELECT \"scratch\".addf(1,2);")
+         (fn [out]
+           (spec-promise/x:promise-then
+            (conn-sql/disconnect conn)
+            (fn [_]
+              (repl/notify [true
+                            out])))))))))
 
   
   (notify/wait-on :js

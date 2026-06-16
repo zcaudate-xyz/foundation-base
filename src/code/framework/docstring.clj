@@ -43,6 +43,7 @@
                (let [res (block/string node)]
                  (cond (and (not (block/void? node))
                             (not (block/comment? node))
+                            (not (block/modifier? node))
                             (string? (block/value node)))
                        (prose/escape-newlines res)
 

@@ -274,30 +274,17 @@
   "notify on future"
   {:added "4.0"}
   [val & [f]]
-  (template/$ (do:>
-        (var out ~val)
-        (if (and (not= nil out)
-                 (== "Promise" (. out ["constructor"] ["name"])))
-          (return (. out
-                     (then  (xt.lang.common-repl/>notify ~f))
-                     (catch (xt.lang.common-repl/>notify ~f))))
-          (return (xt.lang.common-repl/notify out))))))
+  (list 'xt.lang.common-repl/notify val f))
 
 (defmacro.js ^{:standalone true}
   notify-api
   "notify on api return"
   {:added "4.0"}
   [val]
-  (template/$ (do:>
-        (var out ~val)
-        (if (== "Promise" (. out ["constructor"] ["name"]))
-          (return (. out
-                     (then (fn [res]
-                             (if (== (. res ["status"])
-                                       "ok")
-                                (xt.lang.common-repl/notify (. res ["data"]))
-                                (xt.lang.common-repl/notify res))))))
-          (return (xt.lang.common-repl/notify out)))))) 
+  (list 'xt.lang.common-repl/notify
+        (list 'if (list '== (list '. val ["status"]) "ok")
+              (list '. val ["data"])
+              val)))
 
 (defmacro.js STACKTRACE!
   "Adds a trace entry with stack infomation"
@@ -335,7 +322,7 @@
   {:added "4.0"}
   [body & [f]]
   (list 'xt.lang.common-notify/wait-on [:js 5000]
-        (with-meta (list 'js.core/notify body f)
+        (with-meta (list 'xt.lang.common-repl/notify body f)
           (meta &form))))
 
 (defmacro <api

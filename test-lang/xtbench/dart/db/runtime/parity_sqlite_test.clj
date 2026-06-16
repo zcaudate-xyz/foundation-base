@@ -12,13 +12,13 @@
           [xt.lang.common-string :as str]
           [xt.lang.common-repl :as repl]
           [xt.lang.spec-promise :as spec-promise]
-          [xt.protocol.impl.connection-sql :as dbsql]
+          [xt.net.conn-sql :as dbsql]
           [xt.db.runtime.sql :as impl-sql]
           [xt.db.text.sql-util :as ut]
           [xt.db.text.sql-raw :as raw]
           [xt.db.text.sql-manage :as manage]
           [xt.db.helpers.data-main-test :as sample]
-          [dart.lib.driver-sqlite :as dart-sqlite]]
+          [dart.net.conn-sqlite :as dart-sqlite]]
           :runtime :twostep})
 
 (fact:global
@@ -31,16 +31,16 @@
 (fact "js runtime reports the touched sqlite tables"
 
   (notify/wait-on [:dart 5000]
-    (-> (dbsql/connect (dart-sqlite/driver) {})
+    (-> (dbsql/connect (dart-sqlite/create {}) {})
         (spec-promise/x:promise-then
          (fn [conn]
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (str/join "\n\n"
                                        (manage/table-create-all
                                         sample/Schema
                                         sample/SchemaLookup
                                         (ut/sqlite-opts nil))))
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (raw/raw-insert "Currency"
                                              ["id" "type" "symbol" "native" "decimal"
                                               "name" "plural" "description"]
@@ -70,10 +70,10 @@
 (fact "js runtime pulls nested sqlite sample data"
 
   (notify/wait-on [:dart 5000]
-    (-> (dbsql/connect (dart-sqlite/driver) {})
+    (-> (dbsql/connect (dart-sqlite/create {}) {})
         (spec-promise/x:promise-then
          (fn [conn]
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (str/join "\n\n"
                                        (manage/table-create-all
                                         sample/Schema
@@ -109,16 +109,16 @@
 (fact "js runtime pulls sorted sqlite currencies"
 
   (notify/wait-on [:dart 5000]
-    (-> (dbsql/connect (dart-sqlite/driver) {})
+    (-> (dbsql/connect (dart-sqlite/create {}) {})
         (spec-promise/x:promise-then
          (fn [conn]
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (str/join "\n\n"
                                        (manage/table-create-all
                                         sample/Schema
                                         sample/SchemaLookup
                                         (ut/sqlite-opts nil))))
-           (dbsql/query-sync conn
+           (dbsql/query conn
                              (raw/raw-insert "Currency"
                                              ["id" "type" "symbol" "native" "decimal"
                                               "name" "plural" "description"]

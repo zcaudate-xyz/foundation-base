@@ -117,3 +117,10 @@
       (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
       (@! (pg/bind-app (pg/app "scratch_v0"))))))
   => true)
+
+
+^{:refer xt.db.system.impl-supabase-js/response->body :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-js/schema-client :added "4.1"}
+(fact "TODO")

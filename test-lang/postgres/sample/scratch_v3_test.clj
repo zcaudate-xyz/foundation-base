@@ -147,3 +147,19 @@
        "type" "fiat"
        "name" "US Dollar"
        "time_updated" 2}])
+
+
+^{:refer postgres.sample.scratch-v3/insert-currency :added "4.1"}
+(fact "TODO")
+
+^{:refer postgres.sample.scratch-v3/update-currency :added "4.1"}
+(fact "TODO")
+
+^{:refer postgres.sample.scratch-v3/delete-currency :added "4.1"}
+(fact "TODO")
+
+^{:refer postgres.sample.scratch-v3/get-schema :added "4.1"}
+(fact "TODO")
+
+^{:refer postgres.sample.scratch-v3/get-schema-lookup :added "4.1"}
+(fact "TODO")

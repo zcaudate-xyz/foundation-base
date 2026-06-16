@@ -4,7 +4,6 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.connection-sql :as dbsql]
              [xt.substrate :as substrate]
              [xt.net.http-fetch :as http-fetch]
              [xt.db.text.sql-call :as call]

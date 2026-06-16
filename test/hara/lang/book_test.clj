@@ -434,27 +434,27 @@
   (let [source (-> +sample+
                    (b/set-module
                     (module/book-module
-                     '{:id example.xt.cache.custom-cache
+                     '{:id L.custom-cache
                        :lang :lua
-                       :link {- example.xt.cache.custom-cache}}))
+                       :link {- L.custom-cache}}))
                    second
                    (b/put-module
                     (merge (b/get-module +sample+ 'L.core)
                            {:link '{- L.core
-                                    cache example.xt.protocol.cache}
+                                    cache L.cache}
                             :internal '{L.core -
-                                        example.xt.protocol.cache cache}}))
+                                        L.cache cache}}))
                    second)
         cloned (b/module-specialize source
                                     'L.core
                                     'L.alt
-                                    {:bindings {'example.xt.protocol.cache
-                                                'example.xt.cache.custom-cache}})]
+                                    {:bindings {'L.cache
+                                                'L.custom-cache}})]
     [(:id cloned)
      (:module (get-in cloned [:code 'identity-fn]))
      (:link cloned)])
   => ['L.alt 'L.alt '{- L.alt
-                      cache example.xt.cache.custom-cache}])
+                      cache L.custom-cache}])
 
 ^{:refer hara.lang.book/module-create :added "4.0"}
 (fact "creates a module given book and options"

@@ -26,7 +26,7 @@
   (config/supabase-config))
 
 (l/script :js
-  {:require [[js.lib.client-fetch :as js-fetch]
+  {:require [[js.net.http-fetch :as js-fetch]
              [xt.db.runtime.client-supabase :as client-supabase]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
@@ -72,7 +72,7 @@
 (defn.js create-client
   [opts]
   (var raw (-/merge-api-config opts))
-  (xt/x:set-key raw "transport" (js-fetch/client {}))
+  (xt/x:set-key raw "transport" (js-fetch/create {} {}))
   (return (client-supabase/client raw)))
 
 (defn.js request-error

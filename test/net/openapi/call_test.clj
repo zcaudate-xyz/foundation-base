@@ -210,3 +210,6 @@
      (get-in @captured [:headers "apikey"])])
   => ["http://localhost:54321/auth/v1/admin/users"
       "default-key"])
+
+^{:refer net.openapi.call/merge-value :added "4.1"}
+(fact "TODO")

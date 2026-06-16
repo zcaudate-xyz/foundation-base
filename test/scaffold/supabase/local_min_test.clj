@@ -20,3 +20,7 @@
 
 ^{:refer scaffold.supabase.local-min/stop-supabase :added "4.1"}
 (fact "stops the supabase")
+
+
+^{:refer scaffold.supabase.local-min/shutdown-supabase :added "4.1"}
+(fact "TODO")

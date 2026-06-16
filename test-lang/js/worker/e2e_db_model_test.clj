@@ -55,7 +55,7 @@
          (then
           (fn [sqlite3]
             (var raw (new (. sqlite3 ["oo1"] ["DB"]) ":memory:" "c"))
-            (var conn (xt.protocol.impl.connection-sql/connection-create
+            (var conn (xt.net.conn-sql/connection-create
                        raw
                        {"disconnect" (fn [inner]
                                        (. inner (close))

@@ -77,6 +77,12 @@
              (return
               (util/response-normalize response)))))))))
 
+(defn.xt then-normalise
+  "normalises a promise of a fetch response envelope"
+  {:added "4.1"}
+  [promise]
+  (return (promise/x:promise-then promise util/response-normalize)))
+
 (defn.xt prepare-middleware
   [client handler]
   (var #{middleware} client)

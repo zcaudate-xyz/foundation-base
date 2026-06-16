@@ -10,7 +10,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-string :as str]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.connection-sql :as sql]
+             [xt.net.conn-sql :as sql]
              [xt.db.system :as db-instance]
              [xt.db.node :as db-node]
              [xt.db.helpers.test-fixtures :as fixtures]
@@ -55,7 +55,7 @@
          (then
           (fn [sqlite3]
             (var raw (new (. sqlite3 ["oo1"] ["DB"]) ":memory:" "c"))
-            (var conn (xt.protocol.impl.connection-sql/connection-create
+            (var conn (xt.net.conn-sql/connection-create
                        raw
                        {"disconnect" (fn [inner]
                                        (. inner (close))

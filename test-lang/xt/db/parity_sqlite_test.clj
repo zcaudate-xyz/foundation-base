@@ -13,12 +13,12 @@
              [xt.lang.common-string :as str]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as spec-promise]
-             [xt.protocol.impl.connection-sql :as dbsql]
+             [xt.net.conn-sql :as dbsql]
              [xt.db.text.sql-util :as ut]
              [xt.db.text.sql-manage :as manage]
              [xt.db.helpers.data-main-test :as sample]
-             [js.lib.driver-sqlite :as js-sqlite]
-             [js.lib.driver-sqlite-wasm :as js-sqlite-wasm]]})
+             [js.net.conn-sqlite :as js-sqlite]
+             [js.net.conn-sqlite :as js-sqlite-wasm]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -47,11 +47,11 @@
                                             sample/SchemaLookup
                                             (ut/sqlite-opts nil))))
                (return db))))))
-    (-> (init-system-db (js-sqlite/driver))
+    (-> (init-system-db (js-sqlite/create {}))
         (spec-promise/x:promise-then
          (fn [sqlite-db]
            (var sqlite-out (impl/db-exec-sync sqlite-db "SELECT 1;"))
-           (-> (init-system-db (js-sqlite-wasm/driver))
+           (-> (init-system-db (js-sqlite-wasm/create {}))
                (spec-promise/x:promise-then
                 (fn [wasm-db]
                   (var wasm-out (impl/db-exec-sync wasm-db "SELECT 1;"))
@@ -81,7 +81,7 @@
                                             sample/SchemaLookup
                                             (ut/sqlite-opts nil))))
                (return db))))))
-    (-> (init-system-db (js-sqlite/driver))
+    (-> (init-system-db (js-sqlite/create {}))
         (spec-promise/x:promise-then
          (fn [sqlite-db]
            (impl/sync-event sqlite-db
@@ -103,7 +103,7 @@
                                 ["nickname"
                                       ["profile"
                                        ["first_name"]]]])])
-           (-> (init-system-db (js-sqlite-wasm/driver))
+           (-> (init-system-db (js-sqlite-wasm/create {}))
                (spec-promise/x:promise-then
                 (fn [wasm-db]
                   (impl/sync-event wasm-db

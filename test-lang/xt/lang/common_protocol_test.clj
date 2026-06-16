@@ -317,7 +317,9 @@
              {"hello_prn" -/hello-prn-fn, "hello_str" -/hello-str-fn})))
         (return
          {"::" "xt.lang.common_protocol_test/Hello",
-          "::/protocols" ["xt.lang.common_protocol_test/IHello",],
+          "::/protocols" [(xt.lang.spec-base/x:get-key
+                           xt.lang.common-protocol-test/IHello
+                           "on")],
           "state" state,
           "client" client,
           "schema" schema,
@@ -352,3 +354,13 @@
   (s/seedgen-langadd '[xt.lang.common-protocol] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.lang.common-protocol] {:lang [:lua :python] :write true}))
 
+
+
+^{:refer xt.lang.common-protocol/raw-method :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-protocol/protocol-exists :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-protocol/format-defimpl-xt-symbol :added "4.1"}
+(fact "TODO")

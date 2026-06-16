@@ -7,7 +7,7 @@
              [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.client-websocket :as ws]]})
+             [xt.net.ws-legacy :as ws]]})
 
 (defn.xt client?
   "checks if a value is a wrapped transport client descriptor for a given tag"

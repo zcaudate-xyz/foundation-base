@@ -552,9 +552,9 @@
         :else
         (return
          (promise/x:promise-then
-          (promise/x:with-delay 1
-            (fn []
-              (return nil)))
+          (xt/x:async-run
+           (fn []
+             (return nil)))
           (fn [_]
             (return (-/await-pending state)))))))
 
@@ -583,6 +583,10 @@
                  data
                  meta))
   (var transport-id (xt/x:get-key ctx "transport_id"))
+  (when (xt/x:nil? transport-id)
+    (var request-meta (xt/x:get-key request "meta"))
+    (when (xt/x:not-nil? request-meta)
+      (:= transport-id (xt/x:get-key request-meta "transport_id"))))
   (if (xt/x:nil? transport-id)
     (return (promise/x:promise-run response))
     (return
@@ -601,6 +605,10 @@
                  error
                  meta))
   (var transport-id (xt/x:get-key ctx "transport_id"))
+  (when (xt/x:nil? transport-id)
+    (var request-meta (xt/x:get-key request "meta"))
+    (when (xt/x:not-nil? request-meta)
+      (:= transport-id (xt/x:get-key request-meta "transport_id"))))
   (if (xt/x:nil? transport-id)
     (return (promise/x:promise-run response))
     (return

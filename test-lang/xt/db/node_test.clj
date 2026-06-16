@@ -9,7 +9,7 @@
   {:runtime :basic
    :require [[xt.db.node :as node]
              [xt.db.helpers.test-fixtures :as fixtures]
-             [js.lib.driver-sqlite :as js-sqlite]
+             [js.net.conn-sqlite :as js-sqlite]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
@@ -106,7 +106,7 @@
      {"sources"
       {"primary"
        {"kind" "sqlite"
-        "config" {"driver" (js-sqlite/driver)
+        "config" {"driver" (js-sqlite/create {})
                   "filename" ":memory:"}
         "setup" {"schema" true
                  "seed" (@! fixtures/+entry-seed+)}}}})
@@ -132,7 +132,7 @@
      "main"
      "Task"
      {"sources" {"primary" {"kind" "sqlite"
-                            "config" {"driver" (js-sqlite/driver)
+                            "config" {"driver" (js-sqlite/create {})
                                       "filename" ":memory:"}
                             "setup" {"schema" true
                                      "seed" (@! fixtures/+entry-seed+)}}
@@ -161,7 +161,7 @@
      "main"
      "Task"
      {"sources" {"primary" {"kind" "sqlite"
-                            "config" {"driver" (js-sqlite/driver)
+                            "config" {"driver" (js-sqlite/create {})
                                       "filename" ":memory:"}
                             "setup" {"schema" true
                                      "seed" (@! fixtures/+entry-seed+)}}
@@ -186,7 +186,7 @@
      "source"
      "Task"
      {"sources" {"primary" {"kind" "sqlite"
-                            "config" {"driver" (js-sqlite/driver)
+                            "config" {"driver" (js-sqlite/create {})
                                       "filename" ":memory:"}
                             "setup" {"schema" true
                                      "seed" (@! fixtures/+entry-seed+)}}}})
@@ -195,7 +195,7 @@
      "target"
      "Task"
      {"sources" {"primary" {"kind" "sqlite"
-                            "config" {"driver" (js-sqlite/driver)
+                            "config" {"driver" (js-sqlite/create {})
                                       "filename" ":memory:"}
                             "setup" {"schema" true}}}})
     (promise/x:promise-then
@@ -240,7 +240,7 @@
                          "sources"
                          {"primary"
                           {"kind" "sqlite"
-                           "config" {"driver" (js-sqlite/driver)
+                           "config" {"driver" (js-sqlite/create {})
                                      "filename" ":memory:"}
                            "setup" {"schema" true
                                     "seed" (@! fixtures/+entry-seed+)}}}}
@@ -269,7 +269,7 @@
                          "sources"
                          {"primary"
                           {"kind" "sqlite"
-                           "config" {"driver" (js-sqlite/driver)
+                           "config" {"driver" (js-sqlite/create {})
                                      "filename" ":memory:"}
                            "setup" {"schema" true
                                     "seed" (@! fixtures/+entry-seed+)}}}}

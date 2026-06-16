@@ -57,3 +57,49 @@
                    {:path-params {:id 42}}))
   => {:uri "https://api.test/users/42"
       :method :get})
+
+
+^{:refer net.http.api/normalize-key :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/param->str :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/normalize-param :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/normalize-params :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/cookie-header :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/json-content-type? :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/form-content-type? :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/url-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/make-url :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/encode-query-params :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/append-query-string :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/map-lookup :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/normalize-cookie-params :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/canonical-opts :added "4.1"}
+(fact "TODO")
+
+^{:refer net.http.api/encode-body :added "4.1"}
+(fact "TODO")

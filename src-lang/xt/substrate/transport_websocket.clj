@@ -6,7 +6,7 @@
              [xt.substrate.transport-memory :as json-transport]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.client-websocket :as wsrt]]})
+             [xt.net.ws-legacy :as wsrt]]})
 
 (defspec.xt event-text
   [:fn [:xt/any] :xt/any])

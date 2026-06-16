@@ -17,8 +17,8 @@
              [xt.substrate :as substrate]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.transport-memory :as transport-memory]
-             [js.lib.driver-postgres :as js-postgres]
-             [xt.protocol.impl.connection-sql :as sql]
+             [js.net.conn-postgres :as js-postgres]
+             [xt.net.conn-sql :as conn-sql]
              [xt.db.text.sql-call :as call]
              [xt.db.runtime.driver :as driver]
              [xt.db.substrate :as db-helper]
@@ -222,7 +222,7 @@
                    (var fn-template (. opts ["template"]))
                    (var fn-args     (. opts ["args"]))
                    (return
-                    (-> (sql/connect
+                    (-> (conn-sql/connect
                          (driver/get-driver "postgres")
                          (substrate/get-service node "db/primary"))
                         (promise/x:promise-then

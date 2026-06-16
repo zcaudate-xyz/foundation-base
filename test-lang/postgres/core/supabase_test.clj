@@ -387,3 +387,10 @@
       (finally
         (support/clear-log! message))))
   => (throws clojure.lang.ExceptionInfo "Supabase API request failed"))
+
+
+^{:refer postgres.core.supabase/resolve-literal :added "4.1"}
+(fact "TODO")
+
+^{:refer postgres.core.supabase/normalize-realtime-payload :added "4.1"}
+(fact "TODO")

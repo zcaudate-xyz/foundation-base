@@ -121,7 +121,7 @@
   => map?)
 
 ^{:refer xt.db.system.impl-sqlite/impl-sqlite-init :added "4.1"}
-(fact "impl-sqlite-init wires up js.lib.driver-sqlite and stores the connection"
+(fact "impl-sqlite-init wires up js.net.conn-sqlite and stores the connection"
   
   (notify/wait-on [:js 5000]
     (-> (impl/impl-sqlite (js-sqlite/create {"filename" ":memory:"})
@@ -134,3 +134,13 @@
            (repl/notify
             (conn-sql/query client "SELECT 1;"))))))
   => 1)
+
+
+^{:refer xt.db.system.impl-sqlite/record-add-async :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-sqlite/record-delete-async :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-sqlite/rpc-call-async :added "4.1"}
+(fact "TODO")

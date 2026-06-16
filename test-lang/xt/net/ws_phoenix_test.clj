@@ -35,11 +35,11 @@
 (defn.js client-init
   [topic callback frames]
   (var client
-       (js-websocket/create {:host (@! (-> docker-min/+config+ :api :hostname))
-                             :port (@! (-> docker-min/+config+ :api :port))}))
+       (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
+                             :port (@! (-> local-min/+config+ :api :port))}))
   (-> client
-      (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=2.0.0&apikey="
-                                         (@! (-> docker-min/+config+ :api :anon-key)))})
+      (js-websocket/connect-ws {:path (xt/x:cat "/realtime/v1/websocket?vsn=2.0.0&apikey="
+                                             (@! (-> local-min/+config+ :api :anon-key)))})
       (js-websocket/add-listeners-ws
        {"open"
         (fn [_]
@@ -153,12 +153,12 @@
 
   (notify/wait-on [:js 2000]
     (var client
-         (js-websocket/create {:host (@! (-> docker-min/+config+ :api :hostname))
-                               :port (@! (-> docker-min/+config+ :api :port))}))
+         (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
+                               :port (@! (-> local-min/+config+ :api :port))}))
     (var joined false)
     (-> client
         (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=2.0.0&apikey="
-                                           (@! (-> docker-min/+config+ :api :anon-key)))})
+                                           (@! (-> local-min/+config+ :api :anon-key)))})
         (websocket/add-listeners
          {"open"
           (fn [_]
@@ -190,13 +190,13 @@
 
   (notify/wait-on [:js 1000]
     (var client
-         (js-websocket/create {:host (@! (-> docker-min/+config+ :api :hostname))
-                               :port (@! (-> docker-min/+config+ :api :port))}))
+         (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
+                               :port (@! (-> local-min/+config+ :api :port))}))
     (var joined false)
     (var frames [])
     (-> client
         (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=2.0.0&apikey="
-                                           (@! (-> docker-min/+config+ :api :anon-key)))})
+                                           (@! (-> local-min/+config+ :api :anon-key)))})
         (websocket/add-listeners
          {"open"
           (fn [_]
@@ -276,3 +276,16 @@
                             (:text "my-event")
                             (:text "room:db-send")
                             false)]))
+
+
+^{:refer xt.net.ws-phoenix/make-frame-heartbeat :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.ws-phoenix/encode-frame :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.ws-phoenix/send-frame :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.ws-phoenix/send-heartbeat :added "4.1"}
+(fact "TODO")

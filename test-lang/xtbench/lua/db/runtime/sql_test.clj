@@ -11,7 +11,7 @@
              [xt.lang.common-string :as str]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as spec-promise]
-             [xt.protocol.impl.connection-sql :as dbsql]
+             [xt.net.conn-sql :as dbsql]
              [xt.db.runtime.sql :as impl-sql]
              [xt.db.text.sql-util :as ut]
              [xt.db.text.sql-raw :as raw]

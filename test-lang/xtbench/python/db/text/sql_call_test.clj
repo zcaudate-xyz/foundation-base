@@ -17,8 +17,8 @@
           [xt.lang.spec-promise :as spec-promise]
           [xt.lang.common-repl :as repl]
           [xt.db.text.sql-call :as call]
-          [xt.protocol.impl.connection-sql :as driver]
-          [python.lib.driver-postgres :as py-postgres]]
+          [xt.net.conn-sql :as conn-sql]
+          [python.net.conn-postgres :as py-postgres]]
           :runtime :basic})
 
 (fact:global
@@ -68,8 +68,8 @@
 
   (notify/wait-on :python
     (spec-promise/x:promise-then
-     (driver/connect (py-postgres/driver)
-                     {:database "test-scratch"})
+     (conn-sql/connect (py-postgres/create {:database "test-scratch"})
+                     {})
      (fn [conn]
        (return
         (spec-promise/x:promise-then

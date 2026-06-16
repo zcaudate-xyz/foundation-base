@@ -7,7 +7,7 @@
              [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.protocol.impl.client-websocket :as ws]]})
+             [xt.net.ws-legacy :as ws]]})
 
 (defn.xt client?
   "checks if a value is a wrapped supabase realtime client descriptor"
@@ -313,17 +313,6 @@
            "ref" ref
            "join_ref" ref}))
 
-(defn.xt resolve-client
-  "resolves the supabase realtime client descriptor from db or opts"
-  {:added "4.1.4"}
-  [db opts]
-  (var source (event-common/resolve-client-source db opts))
-  (when (xt/x:nil? source)
-    (xt/x:err "Supabase realtime missing client"))
-  (if (-/client? source)
-    (return source)
-    (return (-/client source))))
-
 (defn.xt client
   "wraps raw realtime config into the standard supabase realtime client descriptor.
 
@@ -344,6 +333,17 @@
   {:added "4.1.4"}
   [raw]
   (return (event-common/wrap-client raw "supabase.realtime.client")))
+
+(defn.xt resolve-client
+  "resolves the supabase realtime client descriptor from db or opts"
+  {:added "4.1.4"}
+  [db opts]
+  (var source (event-common/resolve-client-source db opts))
+  (when (xt/x:nil? source)
+    (xt/x:err "Supabase realtime missing client"))
+  (if (-/client? source)
+    (return source)
+    (return (-/client source))))
 
 (defn.xt connect
   "connects the realtime client through the websocket protocol"

@@ -17,7 +17,7 @@
              [xt.event.base-model :as event-model]
              [xt.substrate :as event-node]
              [xt.substrate.base-page :as base-page]
-             [js.lib.driver-postgres :as js-postgres]
+             [js.net.conn-postgres :as js-postgres]
              [xt.db.substrate :as db-helper]
              [postgres.sample.scratch-v0.route-entries :as entries]]})
 
@@ -36,7 +36,7 @@
            {"database" "test-scratch"}}
           "handlers"
           {"db/fn.primary"
-           {"fn"   (db-helper/call-db-handler js-postgres/driver "db/primary")
+           {"fn"   (db-helper/call-db-handler (fn [] (js-postgres/create {:database "test-scratch"})) "db/primary")
             "meta" {"kind" "request"}}}})
         (event-node/request nil
                             "db/fn.primary"
@@ -59,7 +59,7 @@
             {"database" "test-scratch"}}
            "handlers"
            {"db/fn.primary"
-            {"fn"   (db-helper/call-db-handler js-postgres/driver "db/primary")
+            {"fn"   (db-helper/call-db-handler (fn [] (js-postgres/create {:database "test-scratch"})) "db/primary")
              "meta" {"kind" "request"}}}}))
     (base-page/add-group-attach node
                                 nil
@@ -93,7 +93,7 @@
             {"database" "test-scratch"}}
            "handlers"
            {"db/fn.primary"
-            {"fn"   (db-helper/call-db-handler js-postgres/driver "db/primary")
+            {"fn"   (db-helper/call-db-handler (fn [] (js-postgres/create {:database "test-scratch"})) "db/primary")
              "meta" {"kind" "request"}}}}))
     (base-page/add-group-attach node
                                 nil
@@ -120,7 +120,7 @@
             {"database" "test-scratch"}}
            "handlers"
            {"db/fn.primary"
-            {"fn"   (db-helper/call-db-handler js-postgres/driver "db/primary")
+            {"fn"   (db-helper/call-db-handler (fn [] (js-postgres/create {:database "test-scratch"})) "db/primary")
              "meta" {"kind" "request"}}}}))
     (base-page/add-group-attach node
                                 nil

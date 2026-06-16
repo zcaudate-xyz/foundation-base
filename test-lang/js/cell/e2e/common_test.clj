@@ -14,7 +14,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-resource :as rt :with [defsingleton.js]]
-             [xt.protocol.impl.connection-sql :as dbsql]
+             [xt.net.conn-sql :as dbsql]
              [xt.event.base-model :as event-model]
              [js.cell.kernel :as cl]
              [js.cell.e2e.common :as common]
@@ -249,13 +249,13 @@
     (common/connect-sqlite
      {:success (fn [conn]
                   (repl/notify
-                   {"wrapped?" (dbsql/connection? conn)
+                   {"wrapped?" (xt/x:is-object? conn)
                     "keys" (common/sort-strings
-                            (xtd/obj-keys conn))}))
+                            (xtd/obj-keys conn))))
        :error (fn [err]
                 (repl/notify {"error" err}))}))
   => {"wrapped?" true
-      "keys" ["::" "_impl" "_raw"]})
+      "keys" ["::" "::/protocols" "defaults" "raw"]})
 
 ^{:refer js.cell.e2e.common/sqlite-exec :added "4.1"}
 (fact "runs a synchronous sqlite query"

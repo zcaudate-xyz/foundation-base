@@ -207,3 +207,22 @@
   => [true
       "Order"
       "/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1"])
+
+
+^{:refer js.cell.service.db-supabase/normalize-db :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell.service.db-supabase/compile-query-fallback :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell.service.db-supabase/compile-query-plan :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell.service.db-supabase/preserve-legacy-select :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell.service.db-supabase/prepare-request :added "4.1"}
+(fact "TODO")
+
+^{:refer js.cell.service.db-supabase/execute-request :added "4.1"}
+(fact "TODO")

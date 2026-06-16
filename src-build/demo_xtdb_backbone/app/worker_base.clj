@@ -2,8 +2,8 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.lib.client-fetch :as js-fetch]
-             [js.lib.driver-sqlite-wasm :as sqlite-wasm]
+  {:require [[js.net.http-fetch :as js-fetch]
+             [js.net.conn-sqlite :as sqlite-wasm]
              [xt.db.node :as db-node]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
@@ -48,7 +48,7 @@
                (or (xt/x:get-key primary-config "client")
                    {})))
   (when (xt/x:nil? (xt/x:get-key client "transport"))
-    (xt/x:set-key client "transport" (js-fetch/client {})))
+    (xt/x:set-key client "transport" (js-fetch/create {} {})))
   (xt/x:set-key primary "kind" (or (xt/x:get-key primary "kind")
                                    "supabase"))
   (xt/x:set-key primary-config "client" client)
@@ -72,7 +72,7 @@
                       (or (xt/x:get-key caching "setup")
                           {})))
   (when (xt/x:nil? (xt/x:get-key caching-config "driver"))
-    (xt/x:set-key caching-config "driver" (sqlite-wasm/driver)))
+    (xt/x:set-key caching-config "driver" (sqlite-wasm/create {})))
   (xt/x:set-key caching "kind" (or (xt/x:get-key caching "kind")
                                    "sqlite"))
   (xt/x:set-key caching "config" caching-config)

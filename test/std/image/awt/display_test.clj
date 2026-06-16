@@ -27,3 +27,7 @@
       true
       (contains? result :frame)))
   => true)
+
+
+^{:refer std.image.awt.display/create-viewer :added "4.1"}
+(fact "TODO")

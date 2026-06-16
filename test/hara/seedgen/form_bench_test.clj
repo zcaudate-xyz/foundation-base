@@ -299,13 +299,13 @@
                       "  (:require [hara.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true\n"
                       "                 :langs [:lua.nginx]\n"
-                      "                 :js        {:extra [[js.lib.driver-sqlite :as js-sqlite]]}\n"
-                      "                 :lua.nginx {:extra [[lua.nginx.driver-sqlite :as lua-sqlite]]}}}\n"
+                      "                 :js        {:extra [[js.net.conn-sqlite :as js-sqlite]]}\n"
+                      "                 :lua.nginx {:extra [[lua.nginx.conn-sqlite :as lua-sqlite]]}}}\n"
                       "(l/script- :js\n"
                       "  {:runtime :basic\n"
                       "   :require [[xt.lang.spec-base :as xt]\n"
                       "             ^{:seedgen/extra true}\n"
-                      "             [js.lib.driver-sqlite :as js-sqlite]]})\n\n"
+                      "             [js.net.conn-sqlite :as js-sqlite]]})\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"variant dispatch\"\n"
                       "  (!.js (+ 1 2 3))\n"
@@ -345,14 +345,14 @@
                       "  (:require [hara.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true\n"
                       "                 :langs [:lua.nginx :dart]\n"
-                      "                 :js        {:extra [[js.lib.driver-sqlite :as js-sqlite]]}\n"
-                      "                 :lua.nginx {:extra [[lua.nginx.driver-sqlite :as lua-sqlite]]}\n"
-                      "                 :dart      {:extra [[dart.lib.driver-sqlite :as dart-sqlite]]}}}\n"
+                      "                 :js        {:extra [[js.net.conn-sqlite :as js-sqlite]]}\n"
+                      "                 :lua.nginx {:extra [[lua.nginx.conn-sqlite :as lua-sqlite]]}\n"
+                      "                 :dart      {:extra [[dart.net.conn-sqlite :as dart-sqlite]]}}}\n"
                       "(l/script- :js\n"
                       "  {:runtime :basic\n"
                       "   :require [[xt.lang.spec-base :as xt]\n"
                       "             ^{:seedgen/extra true}\n"
-                      "             [js.lib.driver-sqlite :as js-sqlite]]})\n"))
+                      "             [js.net.conn-sqlite :as js-sqlite]]})\n"))
       (let [output (form-bench/seedgen-benchadd 'xt.db.runtime.parity-sqlite-test
                                                 {:lang [:lua :dart]
                                                  :write true}
@@ -386,13 +386,13 @@
                       "  (:require [hara.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true\n"
                       "                 :langs [:lua.nginx]\n"
-                      "                 :js        {:extra [[js.lib.driver-sqlite :as js-sqlite]]}\n"
-                      "                 :lua.nginx {:extra [[lua.nginx.driver-sqlite :as lua-sqlite]]}}}\n"
+                      "                 :js        {:extra [[js.net.conn-sqlite :as js-sqlite]]}\n"
+                      "                 :lua.nginx {:extra [[lua.nginx.conn-sqlite :as lua-sqlite]]}}}\n"
                       "(l/script- :js\n"
                       "  {:runtime :basic\n"
                       "   :require [[xt.lang.spec-base :as xt]\n"
                       "             ^{:seedgen/extra true}\n"
-                      "             [js.lib.driver-sqlite :as js-sqlite]]})\n"))
+                      "             [js.net.conn-sqlite :as js-sqlite]]})\n"))
       (let [output (form-bench/seedgen-benchadd 'xt.db.runtime.parity-roundtrip-test
                                                 {:lang [:lua]
                                                  :write true}
@@ -421,12 +421,12 @@
                       "  (:require [hara.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true\n"
                       "                 :langs [:ruby]\n"
-                      "                 :js {:extra [[js.lib.driver-sqlite :as js-sqlite]]}}}\n"
+                      "                 :js {:extra [[js.net.conn-sqlite :as js-sqlite]]}}}\n"
                       "(l/script- :js\n"
                       "  {:runtime :basic\n"
                       "   :require [[xt.lang.spec-base :as xt]\n"
                       "             ^{:seedgen/extra true}\n"
-                      "             [js.lib.driver-sqlite :as js-sqlite]]})\n"))
+                      "             [js.net.conn-sqlite :as js-sqlite]]})\n"))
       (let [output (form-bench/seedgen-benchadd 'xt.db.runtime.parity-roundtrip-test
                                                 {:lang [:ruby]
                                                  :write true}
