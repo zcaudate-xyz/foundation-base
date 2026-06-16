@@ -252,7 +252,7 @@
          :else
          (return (type-pair/pair
                   idx
-                  (. vector (nth idx))))))
+                  (p/nth vector idx)))))
 
 (defn.xt vector-lookup-idx
   "finds the value"
@@ -264,7 +264,7 @@
         (return defaultVal)
 
         :else
-        (return (. vector (nth idx)))))
+        (return (p/nth vector idx))))
 
 ;;
 ;; ITEROP

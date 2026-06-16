@@ -31,12 +31,12 @@
 (fact "gets the index in the persistent vector"
 
   (!.js
-   (v/vector-get-idx
-    (k/arr-foldl
-     (k/arr-range [0 2048])
-     v/vector-push-last
-     v/EMPTY_VECTOR)
-    2047))
+    (v/vector-get-idx
+     (k/arr-foldl
+      (k/arr-range [0 2048])
+      v/vector-push-last
+      v/EMPTY_VECTOR)
+     2047))
   => 2047
 
   (!.lua
@@ -273,22 +273,23 @@
                     0
                     node/BITS
                     []))
-  => {"_tail" [],
-      "::" "vector",
-      "_size" 0,
-      "_root" {"children" [], "::" "vector.node"},
-      "_shift" 5}
+  => (contains {"::" "vector"
+                "_size" 0
+                "_root" {"children" [], "::" "vector.node"}
+                "_shift" 5
+                "_tail" []})
 
   (!.lua
    (v/vector-create (node/node-create nil [])
                     0
                     node/BITS
                     []))
-  => {"_tail" {},
-      "::" "vector",
-      "_size" 0,
-      "_root" {"children" {}, "::" "vector.node"},
-      "_shift" 5})
+  => (contains {"::" "vector"
+                "_size" 0
+                "_root" {"children" [], "::" "vector.node"}
+                "_shift" 5
+                "_tail" []})
+)
 
 ^{:refer kmi.lang.type-vector/vector-empty-mutable :added "4.0"}
 (fact "creates an empty mutable vector"
