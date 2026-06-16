@@ -14,23 +14,25 @@
          :lead "std.block turns Clojure source into a tree of typed blocks that preserve whitespace, comments, reader macros, and exact token strings. It is the foundation for parsing, layout, healing, templating, and source-level refactoring in foundation-base."
          :actions [{:label "Back to std" :href "index.html" :variant :primary}]}]]
 
-[[:chapter {:title "1. The Block Model" :link "std.block"}]]
+[[:chapter {:title "The Block Model" :link "std.block"}]]
 
-[[:section {:title "1.1 Why std.block exists"}]]
+[[:section {:title "Why std.block exists"}]]
 
 "Most Clojure readers discard formatting when they turn source into data. `read-string` gives you values, but it loses comments, extra spaces, and reader macros. `std.block` keeps those details as first-class nodes so code can be analyzed, transformed, and printed back out without destroying the programmer's formatting."
 
 (fact "read-string loses whitespace; std.block keeps it"
+  
   (-> (parse/parse-string "[1   2]")
       str)
   => "[1   2]")
 
 (fact "comments survive a parse/string round trip"
+
   (-> (parse/parse-root ";; hello\n[1 2]")
       str)
   => ";; hello\n[1 2]")
 
-[[:section {:title "1.2 The five block types"}]]
+[[:section {:title "The five block types"}]]
 
 "Every block has a `:type`. The five types are:
 
@@ -55,7 +57,7 @@
       base/block-type)
   => :comment)
 
-[[:section {:title "1.3 Block tags refine the type"}]]
+[[:section {:title "Block tags refine the type"}]]
 
 "A `:tag` narrows the type. Tokens can be `:long`, `:double`, `:boolean`, `:string`, `:keyword`, `:symbol`, and so on. Containers carry tags like `:list`, `:vector`, `:map`, `:set`, `:quote`, `:deref`, `:meta`, `:fn`, etc."
 
@@ -72,7 +74,7 @@
   => (contains {:type :collection
                 :tag  :set}))
 
-[[:section {:title "1.4 Block info summarises a node"}]]
+[[:section {:title "Block info summarises a node"}]]
 
 "`base/block-info` returns the type, tag, string, width, and height of any block. It is the quickest way to inspect a node without reaching into implementation details."
 
@@ -91,7 +93,7 @@
                 :width 7
                 :height 0}))
 
-[[:section {:title "1.5 Tokens carry values"}]]
+[[:section {:title "Tokens carry values"}]]
 
 "Expression blocks (tokens and containers) can produce a Clojure value with `base/block-value`. Tokens that are not expressions, such as whitespace, have no value."
 
@@ -110,7 +112,7 @@
       base/block-value)
   => "hello")
 
-[[:section {:title "1.6 Containers have children"}]]
+[[:section {:title "Containers have children"}]]
 
 "Containers store a vector of child blocks. The child list preserves every space, newline, and comment that appeared between the delimiters. Use `base/block-children` to access them and `base/replace-children` to create a new container."
 
@@ -128,7 +130,7 @@
       str)
   => "[3 4]")
 
-[[:section {:title "1.7 Void blocks model whitespace"}]]
+[[:section {:title "Void blocks model whitespace"}]]
 
 "`:void` blocks represent spaces, tabs, newlines, carriage returns, form feeds, and EOF. Their string representation is the literal character, but `str` on a space void returns the visible placeholder `␣` to make whitespace observable in tests."
 
@@ -144,7 +146,7 @@
   (str (construct/tab))
   => "\\t")
 
-[[:section {:title "1.8 Comments are first-class blocks"}]]
+[[:section {:title "Comments are first-class blocks"}]]
 
 "A semicolon comment becomes a single `:comment` block. Because it is a node in the tree, comments can be preserved, moved, or deleted during transformations."
 
@@ -158,7 +160,7 @@
        (map base/block-type))
   => '(:token :void :comment :void :void :token))
 
-[[:section {:title "1.9 Modifiers attach behaviour"}]]
+[[:section {:title "Modifiers attach behaviour"}]]
 
 "`:modifier` blocks currently implement `#_` (uneval) and `#|` (cursor). A modifier can modify an accumulator when evaluated. `#_` suppresses the next expression during value extraction."
 
@@ -172,7 +174,7 @@
       base/block-value)
   => [1 3])
 
-[[:section {:title "1.10 Dimensions: width, height, length"}]]
+[[:section {:title "Dimensions: width, height, length"}]]
 
 "Every block knows its on-screen width, its height in lines, and the length of its raw string. These dimensions power layout and navigation."
 
@@ -186,9 +188,9 @@
       ((juxt base/block-width base/block-height)))
   => [2 1])
 
-[[:chapter {:title "2. Parsing Source Code" :link "std.block.parse"}]]
+[[:chapter {:title "Parsing Source Code" :link "std.block.parse"}]]
 
-[[:section {:title "2.1 parse-string reads one form"}]]
+[[:section {:title "parse-string reads one form"}]]
 
 "`parse/parse-string` reads a single top-level form from a string. It is the simplest entry point for converting source text into a block tree."
 
@@ -202,7 +204,7 @@
       str)
   => "{:a [1 2]}")
 
-[[:section {:title "2.2 parse-root reads many forms"}]]
+[[:section {:title "parse-root reads many forms"}]]
 
 "`parse/parse-root` reads every form until EOF and wraps them in a `:root` container. Use it when you want to represent an entire file or snippet."
 
@@ -216,7 +218,7 @@
       str)
   => "a\n\n  b")
 
-[[:section {:title "2.3 parse-first returns the first expression"}]]
+[[:section {:title "parse-first returns the first expression"}]]
 
 "`parse/parse-first` skips leading whitespace and returns the first code expression. It is useful when you only care about the initial form."
 
@@ -232,7 +234,7 @@
                 :tag  :long
                 :string "1"}))
 
-[[:section {:title "2.4 Reading collections"}]]
+[[:section {:title "Reading collections"}]]
 
 "The parser recognises the four Clojure collection types: lists `()`, vectors `[]`, maps `{}`, and sets `#{}`. Each becomes a `:container` with the matching tag."
 
@@ -256,7 +258,7 @@
       base/block-value)
   => #{1 2 3})
 
-[[:section {:title "2.5 Reading cons forms"}]]
+[[:section {:title "Reading cons forms"}]]
 
 "Reader macros that prepend a single expression (`'`, `@`, `` ` ``, `~`, `~@`) and metadata (`^` and `#^`) become `:container` blocks tagged as `:quote`, `:deref`, `:syntax`, `:unquote`, `:unquote-splice`, or `:meta`."
 
@@ -277,7 +279,7 @@
       base/block-value)
   => [1])
 
-[[:section {:title "2.6 Reading hash dispatch"}]]
+[[:section {:title "Reading hash dispatch"}]]
 
 "The `#` reader dispatch recognises sets, anonymous functions, regexes, vars, keywords, metadata, eval, conditional read, uneval, and cursor markers."
 
@@ -302,7 +304,7 @@
       base/block-value)
   => #:person{:name "A"})
 
-[[:section {:title "2.7 Preserving whitespace"}]]
+[[:section {:title "Preserving whitespace"}]]
 
 "Spaces, tabs, newlines, commas, and EOF are all modelled as void blocks. This is why round-tripping source through `parse-root` followed by `str` gives back the exact original text."
 
@@ -316,7 +318,7 @@
       str)
   => "[1,2]")
 
-[[:section {:title "2.8 Preserving comments"}]]
+[[:section {:title "Preserving comments"}]]
 
 "Comments are parsed as `:comment` blocks and kept inside containers. They participate in the child list just like whitespace."
 
@@ -330,7 +332,7 @@
       str)
   => ";; header\n(+ 1 2)")
 
-[[:section {:title "2.9 Reader conditionals"}]]
+[[:section {:title "Reader conditionals"}]]
 
 "`#?` and `#?@` are parsed as `:select` and `:select-splice` containers. Their values are represented as `(? ...)` and `(?-splicing ...)` forms."
 
@@ -344,7 +346,7 @@
       base/block-value)
   => '(?-splicing {:cljs [a b]}))
 
-[[:section {:title "2.10 Parsing errors"}]]
+[[:section {:title "Parsing errors"}]]
 
 "Unmatched delimiters raise reader errors with the offending character. EOF inside a string or collection is also detected."
 
@@ -356,9 +358,9 @@
   (parse/parse-string "(1 2")
   => (throws))
 
-[[:chapter {:title "3. Constructing and Modifying Blocks" :link "std.block.construct"}]]
+[[:chapter {:title "Constructing and Modifying Blocks" :link "std.block.construct"}]]
 
-[[:section {:title "3.1 The block helper"}]]
+[[:section {:title "The block helper"}]]
 
 "`construct/block` is the universal constructor. Pass it a primitive, a collection, or an existing block and it returns the appropriate block type."
 
@@ -384,7 +386,7 @@
     (= b (construct/block b)))
   => true)
 
-[[:section {:title "3.2 Constructing tokens"}]]
+[[:section {:title "Constructing tokens"}]]
 
 "`construct/token` builds a token from any Clojure value. `construct/token-from-string` builds a token from source text and infers the value. `construct/string-token` is used internally for strings."
 
@@ -405,7 +407,7 @@
       base/block-value)
   => 1.5)
 
-[[:section {:title "3.3 Constructing void blocks"}]]
+[[:section {:title "Constructing void blocks"}]]
 
 "Use `construct/space`, `construct/newline`, `construct/tab`, and the general `construct/void` to create whitespace. Bulk constructors like `construct/spaces` and `construct/newlines` repeat a void block."
 
@@ -421,7 +423,7 @@
   (str (construct/void \newline))
   => "\\n")
 
-[[:section {:title "3.4 Constructing comments"}]]
+[[:section {:title "Constructing comments"}]]
 
 "`construct/comment` creates a comment block from a string. The string must begin with `;`."
 
@@ -433,7 +435,7 @@
   (construct/comment "not a comment")
   => (throws))
 
-[[:section {:title "3.5 Constructing containers"}]]
+[[:section {:title "Constructing containers"}]]
 
 "`construct/container` builds a container from a tag and a vector of children. The tag must be one of the known container tags such as `:list`, `:vector`, `:map`, `:set`, `:quote`, `:meta`, etc."
 
@@ -452,7 +454,7 @@
   (str (construct/container :set [(construct/token 1)]))
   => "#{1}")
 
-[[:section {:title "3.6 Adding children"}]]
+[[:section {:title "Adding children"}]]
 
 "`construct/add-child` appends a block to a container's children. It does not insert spacing automatically, so you usually interleave spaces or newlines yourself."
 
@@ -471,7 +473,7 @@
       str)
   => "[1 2]")
 
-[[:section {:title "3.7 Replacing children"}]]
+[[:section {:title "Replacing children"}]]
 
 "`base/replace-children` swaps the entire child vector. This is the low-level primitive used by `add-child` and by navigational updates."
 
@@ -489,7 +491,7 @@
       str)
   => "[[2 3]]")
 
-[[:section {:title "3.8 Building root blocks"}]]
+[[:section {:title "Building root blocks"}]]
 
 "`construct/root` wraps a sequence of children in a `:root` container. Use it when you need a top-level node that can hold multiple forms."
 
@@ -505,7 +507,7 @@
       str)
   => "a b")
 
-[[:section {:title "3.9 Reading contents back"}]]
+[[:section {:title "Reading contents back"}]]
 
 "`construct/contents` converts a container's children back into Clojure forms. It is useful when you want the data inside a container without the container itself."
 
@@ -517,7 +519,7 @@
   (construct/contents (construct/block '(+ 1 2)))
   => '(+ ␣ 1 ␣ 2))
 
-[[:section {:title "3.10 Indentation helpers"}]]
+[[:section {:title "Indentation helpers"}]]
 
 "`construct/indent-body` re-indents a multi-line container's children by a given offset. `construct/max-width` and `construct/line-width` measure block dimensions for layout tasks."
 
@@ -533,9 +535,9 @@
   (construct/max-width (construct/block [1 2 3]))
   => 7)
 
-[[:chapter {:title "4. Navigating and Transforming Blocks" :link "std.block.navigate"}]]
+[[:chapter {:title "Navigating and Transforming Blocks" :link "std.block.navigate"}]]
 
-[[:section {:title "4.1 Creating navigators"}]]
+[[:section {:title "Creating navigators"}]]
 
 "`std.block.navigate` wraps a block tree in a zipper. `nav/navigator` turns a block into a navigator; `nav/parse-string`, `nav/parse-root`, and `nav/parse-first` parse source and return a navigator in one step."
 
@@ -554,7 +556,7 @@
       nav/root-string)
   => "a b")
 
-[[:section {:title "4.2 Up, down, left, and right"}]]
+[[:section {:title "Up, down, left, and right"}]]
 
 "Navigators move through the tree. `down` enters the current container, `up` exits to the parent, and `left`/`right` move between expressions at the same level. The starred variants `left*` and `right*` include whitespace blocks."
 
@@ -579,7 +581,7 @@
       nav/value)
   => '(+ 1 2))
 
-[[:section {:title "4.3 Expression-aware navigation"}]]
+[[:section {:title "Expression-aware navigation"}]]
 
 "`left` and `right` skip whitespace and stop at the next expression. `left-most` and `right-most` jump to the ends of the current level."
 
@@ -598,7 +600,7 @@
       nav/value)
   => 3)
 
-[[:section {:title "4.4 Token navigation"}]]
+[[:section {:title "Token navigation"}]]
 
 "`left-token`, `right-token`, `prev-token`, and `next-token` move specifically between `:token` blocks. This is handy when you are searching for a keyword or symbol."
 
@@ -622,7 +624,7 @@
       nav/value)
   => 2)
 
-[[:section {:title "4.5 Finding by predicate"}]]
+[[:section {:title "Finding by predicate"}]]
 
 "`find-next`, `find-prev`, `find-next-token`, and `find-prev-token` search the zipper for blocks matching a predicate or token value. They are the backbone of refactoring recipes."
 
@@ -639,7 +641,7 @@
       nav/value)
   => :key)
 
-[[:section {:title "4.6 Inserting elements"}]]
+[[:section {:title "Inserting elements"}]]
 
 "`insert-token-to-right`, `insert-token-to-left`, and `insert-token` add new expressions with appropriate spacing. `insert-empty` is used when the container has no expressions."
 
@@ -664,7 +666,7 @@
       nav/root-string)
   => "[1 2 3]")
 
-[[:section {:title "4.7 Deleting elements"}]]
+[[:section {:title "Deleting elements"}]]
 
 "`delete` removes the current expression, `delete-left` removes the expression to the left, and `delete-right` removes the expression to the right. `backspace` combines tightening and deletion."
 
@@ -685,7 +687,7 @@
       nav/root-string)
   => "[1 3]")
 
-[[:section {:title "4.8 Replacing and splicing"}]]
+[[:section {:title "Replacing and splicing"}]]
 
 "`replace` swaps the current expression for a single block. `replace-splice` swaps it for a sequence of blocks, expanding them in place. `swap` applies a function to the current value and replaces it."
 
@@ -713,7 +715,7 @@
       nav/root-string)
   => "[2]")
 
-[[:section {:title "4.9 Tightening whitespace"}]]
+[[:section {:title "Tightening whitespace"}]]
 
 "`tighten-left`, `tighten-right`, and `tighten` normalise spacing around the cursor. They collapse multiple spaces to a single space and ensure comments are followed by newlines."
 
@@ -733,7 +735,7 @@
       nav/root-string)
   => "[1 2]")
 
-[[:section {:title "4.10 Line information"}]]
+[[:section {:title "Line information"}]]
 
 "`nav/line-info` returns the row and column of the current block based on its position in the source. This is used by `code.query` and other tools to report locations."
 
@@ -750,9 +752,9 @@
       nav/line-info)
   => (contains {:row 2 :col 3}))
 
-[[:chapter {:title "5. Layout, Healing, Templating, and Real-World Usage" :link "std.block"}]]
+[[:chapter {:title "Layout, Healing, Templating, and Real-World Usage" :link "std.block"}]]
 
-[[:section {:title "5.1 Layout overview"}]]
+[[:section {:title "Layout overview"}]]
 
 "`block/layout` (alias for `std.block.layout/layout-main`) turns a Clojure form into a formatted block tree. It decides whether each collection fits on one line or needs multi-line formatting, then applies specialised rules for bindings, definitions, pairs, and hiccup-like vectors."
 
@@ -766,7 +768,7 @@
       str)
   => "[1\n 2\n 3\n 4\n 5\n 6\n 7\n 8\n 9\n 10\n 11\n 12\n 13\n 14\n 15]")
 
-[[:section {:title "5.2 Layout special forms"}]]
+[[:section {:title "Layout special forms"}]]
 
 "The layout engine recognises `defn`, `let`, `cond`, `assoc`, `case`, and many `with-*` forms. It aligns bindings into columns and indents bodies consistently."
 
@@ -785,7 +787,7 @@
       str)
   => "(defn hello\n  [x]\n  (println x)\n  (+ x 1))")
 
-[[:section {:title "5.3 Healing unbalanced delimiters"}]]
+[[:section {:title "Healing unbalanced delimiters"}]]
 
 "`block/heal` parses delimiter pairs and repairs mismatched or missing delimiters. It is used by file watchers and LLM output cleanup to keep source files readable."
 
@@ -797,7 +799,7 @@
   (block/heal "(1 2]}")
   => "(1 2)")
 
-[[:section {:title "5.4 Rainbow output for debugging"}]]
+[[:section {:title "Rainbow output for debugging"}]]
 
 "`heal/rainbow` prints delimiters in alternating colours so you can spot nesting errors. `heal/print-rainbow` writes the result to `*out*`."
 
@@ -811,7 +813,7 @@
       (clojure.string/replace #"\u001B\[[0-9;]*m" ""))
   => "(1 (2))")
 
-[[:section {:title "5.5 Code templates"}]]
+[[:section {:title "Code templates"}]]
 
 "`std.block.template` provides fill-in-the-blank code generation. `get-template` parses a snippet and finds `~param` and `~@param` holes. `fill-template` substitutes values for those holes."
 
@@ -832,7 +834,7 @@
     (template/fill-template t {'items [1 2 3]}))
   => "[1 2 3]")
 
-[[:section {:title "5.6 Real-world usage: code.query"}]]
+[[:section {:title "Real-world usage: code.query"}]]
 
 "`code.query` is the source-pattern matching layer used across foundation-base. It converts files and strings into `std.block.navigate` navigators, then matches, selects, and modifies forms with patterns. `code.query/context-zloc` is the entry point."
 
@@ -853,7 +855,7 @@
       nav/root-string)
   => "(defn a [x])")
 
-[[:section {:title "5.7 Real-world usage: code.framework"}]]
+[[:section {:title "Real-world usage: code.framework"}]]
 
 "`code.framework/analyse-source-code` parses an entire source file with `nav/parse-root`, then uses `code.query` to find top-level definitions and test facts. This is how the test runner and doc generator understand the codebase."
 
@@ -869,7 +871,7 @@
        count)
   => 2)
 
-[[:section {:title "5.8 Real-world usage: std.pretty"}]]
+[[:section {:title "Real-world usage: std.pretty"}]]
 
 "`std.pretty` pretty-prints values by routing them through `block/layout` and then adding rainbow delimiters. This gives the REPL output consistent indentation and visually balanced parentheses."
 
@@ -888,7 +890,7 @@
       string?)
   => true)
 
-[[:section {:title "5.9 Real-world usage: healing and cleanup"}]]
+[[:section {:title "Real-world usage: healing and cleanup"}]]
 
 "`std.make.project/file-watcher-heal` runs `block/heal` on changed source files. `indigo.server.api_prompt` runs LLM-generated DSL output through `block/heal` before using it. Both rely on the same simple contract: broken string in, balanced string out."
 
@@ -900,7 +902,7 @@
   (block/heal "(+ 1 2]}")
   => "(+ 1 2)")
 
-[[:section {:title "5.10 Recipe: a tiny refactoring tool"}]]
+[[:section {:title "Recipe: a tiny refactoring tool"}]]
 
 "Combining parsing, navigation, and replacement makes it easy to write small refactorings. The example below rewrites `(if (not x) then else)` into `(if-not x then else)`."
 
@@ -922,9 +924,9 @@
       nav/root-string)
   => "(defn hello \"docstring\" [x])")
 
-[[:chapter {:title "6. Reference" :link "std.block"}]]
+[[:chapter {:title "Reference" :link "std.block"}]]
 
-[[:section {:title "6.1 Public façade"}]]
+[[:section {:title "Public façade"}]]
 
 "`std.block` interns the most commonly used functions from the sub-namespaces. Most day-to-day work can be done through this single require."
 
@@ -941,7 +943,7 @@
                void? code? space? linebreak? linespace? eof?
                comment? token? container? modifier?]}]]
 
-[[:section {:title "6.2 Base predicates and accessors"}]]
+[[:section {:title "Base predicates and accessors"}]]
 
 "`std.block.base` defines the block taxonomy and the generic accessors used by every other namespace."
 
@@ -953,7 +955,7 @@
                block-value-string block-children replace-children
                block-info]}]]
 
-[[:section {:title "6.3 Construction"}]]
+[[:section {:title "Construction"}]]
 
 "`std.block.construct` builds blocks from Clojure data and from raw components."
 
@@ -965,7 +967,7 @@
                add-child replace-children
                max-width line-width indent-body]}]]
 
-[[:section {:title "6.4 Parsing"}]]
+[[:section {:title "Parsing"}]]
 
 "`std.block.parse` converts source strings into block trees."
 
@@ -976,7 +978,7 @@
                parse-collection parse-cons parse-hash
                eof-block? delimiter-block?]}]]
 
-[[:section {:title "6.5 Navigation"}]]
+[[:section {:title "Navigation"}]]
 
 "`std.block.navigate` provides the zipper API for editing block trees."
 
@@ -994,7 +996,7 @@
                tighten tighten-left tighten-right
                line-info]}]]
 
-[[:section {:title "6.6 Layout and healing"}]]
+[[:section {:title "Layout and healing"}]]
 
 "`std.block.layout` formats forms; `std.block.heal` repairs delimiters."
 
@@ -1005,7 +1007,7 @@
 [[:api {:namespace "std.block.heal"
         :only [heal rainbow print-rainbow]}]]
 
-[[:section {:title "6.7 Templates"}]]
+[[:section {:title "Templates"}]]
 
 "`std.block.template` generates code from snippets with unquote holes."
 

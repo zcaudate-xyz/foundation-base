@@ -48,29 +48,72 @@
      (-> (.substring s 1 (dec (.length s)))
          (.replaceFirst (str symbol "(\\s+)?") "")))))
 
+(defn fact-caption
+  "extracts the leading string caption from a fact/facts form, if present
+ 
+   (-> (nav/parse-string \"(fact \\\"hello world\\\" (+ 1 1) \\n => 2)\")
+       (fact-caption))
+   => \"hello world\""
+  {:added "3.0"}
+  ([nav]
+   (let [first-arg (-> nav nav/down nav/right)]
+     (when (and first-arg (string? (nav/value first-arg)))
+       (str/trim (nav/value first-arg))))))
+
+(defn fact-code-string
+  "returns the code body of a fact/facts form, stripping the leading caption string if present
+ 
+   (-> (nav/parse-string \"(fact \\\"hello world\\\" (+ 1 1) \\n => 2)\")
+       (fact-code-string 'fact))
+   => \"(+ 1 1) \\n => 2\"
+ 
+   (-> (nav/parse-string \"(facts (+ 1 1) \\n => 2)\")
+       (fact-code-string 'facts))
+   => \"(+ 1 1) \\n => 2\""
+  {:added "3.0"}
+  ([nav symbol]
+   (let [body (code-form nav (str symbol))
+         first-arg (-> nav nav/down nav/right)]
+     (if (and first-arg (string? (nav/value first-arg)))
+       (let [pattern (re-pattern (str "^" (java.util.regex.Pattern/quote (nav/string first-arg)) "\\s*"))]
+         (str/triml (str/replace-first body pattern "")))
+       body))))
+
 (defn parse-fact-form
   "convert a fact zipper into an element
  
    (-> (nav/parse-string \"(fact (+ 1 1) \\n => 2)\")
        (parse-fact-form))
-   => {:type :test :indentation 2 :code \"(+ 1 1) \\n => 2\"}"
+   => {:type :test :indentation 2 :code \"(+ 1 1) \\n => 2\"}
+ 
+   (-> (nav/parse-string \"(fact \\\"hello world\\\" (+ 1 1) \\n => 2)\")
+       (parse-fact-form))
+   => {:type :test :indentation 2 :caption \"hello world\" :code \"(+ 1 1) \\n => 2\"}"
   {:added "3.0"}
   ([nav]
-   {:type :test
-    :indentation (+ *indentation* *spacing*)
-    :code (code-form nav "fact")}))
+   (let [caption (fact-caption nav)]
+     (cond-> {:type :test
+              :indentation (+ *indentation* *spacing*)
+              :code (fact-code-string nav 'fact)}
+       (seq caption) (assoc :caption caption)))))
 
 (defn parse-facts-form
   "converts a facts zipper into an element
  
    (-> (nav/parse-string \"(facts (+ 1 1) \\n => 2)\")
        (parse-facts-form))
-   => {:type :test :indentation 2 :code \"(+ 1 1) \\n => 2\"}"
+   => {:type :test :indentation 2 :code \"(+ 1 1) \\n => 2\"}
+ 
+   (-> (nav/parse-string \"(facts \\\"hello world\\\" (+ 1 1) \\n => 2)\")
+       (parse-facts-form))
+   => {:type :test :indentation 2 :caption \"hello world\" :code \"(+ 1 1) \\n => 2\"}"
   {:added "3.0"}
   ([nav]
-   {:type :test
-    :indentation (+ *indentation* *spacing*)
-    :code (code-form nav "facts")}))
+   (let [caption (fact-caption nav)]
+     (cond-> {:type :test
+              :indentation (+ *indentation* *spacing*)
+              :code (fact-code-string nav 'facts)}
+       (seq caption) (assoc :caption caption)))))
 
 (defn parse-comment-form
   "convert a comment zipper into an element

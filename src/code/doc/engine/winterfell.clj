@@ -156,13 +156,16 @@
     [:p]]))
 
 (defmethod page-element :code
-  ([{:keys [tag number title code lang indentation failed path] :as elem}]
+  ([{:keys [tag number title code lang indentation failed path caption] :as elem}]
    [:div {:class "code"}
     (if tag [:a {:id tag}])
     (if number
       [:h4 [:i (str "e."
                     number
                     (if title (str "  &nbsp;-&nbsp; " title)))]])
+    (if caption
+      [:p {:class "code-caption"}
+       (util/basic-html-escape caption)])
     [:pre
      [:code {:class (or lang "clojure")}
       (-> code
@@ -201,28 +204,27 @@
   {:added "3.0"}
   ([{:keys [tag title number elements
             link table only exclude] :as elem}]
-   (apply vector
-          :li
-          [:a {:class "chapter"
-               :data-scroll ""
-               :href (str "#" tag)}
-           [:h4 (str number " &nbsp; " title)]]
-          (cond (and link table)
-                (let [entries (api/select-entries elem)]
-                  (mapv (fn [entry]
+   (let [sections (mapv (fn [{:keys [tag title number] :as elem}]
                           [:a {:class "section"
                                :data-scroll ""
-                               :href (str "#" (api/entry-tag link entry))}
-                           [:h5 [:i (str entry)]]])
-                        entries))
-
-                :else
-                (mapv (fn [{:keys [tag title number] :as elem}]
-                        [:a {:class "section"
-                             :data-scroll ""
-                             :href (str "#" tag)}
-                         [:h5 [:i (str number " &nbsp; " title)]]])
-                      elements)))))
+                               :href (str "#" tag)}
+                           [:h5 [:i (str number " &nbsp; " title)]]])
+                        elements)
+         api-entries (when (and (empty? sections) link table)
+                       (let [entries (api/select-entries elem)]
+                         (mapv (fn [entry]
+                                 [:a {:class "section"
+                                      :data-scroll ""
+                                      :href (str "#" (api/entry-tag link entry))}
+                                  [:h5 [:i (str entry)]]])
+                               entries)))]
+     (apply vector
+            :li
+            [:a {:class "chapter"
+                 :data-scroll ""
+                 :href (str "#" tag)}
+             [:h4 (str number " &nbsp; " title)]]
+            (concat sections api-entries)))))
 
 (defmulti nav-element
   "seed function for rendering a navigation element"

@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "clojure-light": {
+      "command": "/home/hoebat/Development/greenways/gw-v2/ref/foundation/.kimi/mcp-clojure-light/.venv/bin/python3",
+      "args": [
+        "/home/hoebat/Development/greenways/gw-v2/ref/foundation/.kimi/mcp-clojure-light/server.py"
+      ]
+    }
+  }
+}

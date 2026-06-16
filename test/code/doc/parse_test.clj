@@ -28,14 +28,22 @@
 
   (-> (nav/parse-string "(fact (+ 1 1) \n => 2)")
       (parse-fact-form))
-  => {:type :test :indentation 2 :code "(+ 1 1) \n => 2"})
+  => {:type :test :indentation 2 :code "(+ 1 1) \n => 2"}
+
+  (-> (nav/parse-string "(fact \"hello world\" (+ 1 1) \n => 2)")
+      (parse-fact-form))
+  => {:type :test :indentation 2 :caption "hello world" :code "(+ 1 1) \n => 2"})
 
 ^{:refer code.doc.parse/parse-facts-form :added "3.0"}
 (fact "converts a facts zipper into an element"
 
   (-> (nav/parse-string "(facts (+ 1 1) \n => 2)")
       (parse-facts-form))
-  => {:type :test :indentation 2 :code "(+ 1 1) \n => 2"})
+  => {:type :test :indentation 2 :code "(+ 1 1) \n => 2"}
+
+  (-> (nav/parse-string "(facts \"hello world\" (+ 1 1) \n => 2)")
+      (parse-facts-form))
+  => {:type :test :indentation 2 :caption "hello world" :code "(+ 1 1) \n => 2"})
 
 ^{:refer code.doc.parse/parse-comment-form :added "3.0"}
 (fact "convert a comment zipper into an element"
