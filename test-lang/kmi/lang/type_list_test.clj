@@ -6,18 +6,18 @@
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.type-list :as t]
-             [kmi.lang.interface-common :as ic]
-             [kmi.lang.interface-collection :as coll]
-             [xt.lang.spec-base :as xt]
+             [kmi.lang.common-coll :as coll]
+             [kmi.lang.protocol-base :as p]
+             [xt.lang.common-lib :as k]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[kmi.lang.type-list :as t]
-             [kmi.lang.interface-common :as ic]
-             [kmi.lang.interface-collection :as coll]
-             [xt.lang.spec-base :as xt]
+             [kmi.lang.common-coll :as coll]
+             [kmi.lang.protocol-base :as p]
+             [xt.lang.common-lib :as k]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
 
@@ -29,10 +29,10 @@
 (fact "list from array"
 
   (!.js
-   (t/list-to-array
-    (coll/coll-into-array
-     (t/list)
-     [1 2 3 4])))
+    (t/list-to-array
+     (coll/coll-into-array
+      (t/list)
+      [1 2 3 4])))
   => [4 3 2 1]
 
   (!.lua
@@ -164,15 +164,18 @@
 (fact "creates a list"
 
   (!.lua
-   [(ic/show
-     (->> t/EMPTY_LIST
-          (t/list-create 3)
-          (t/list-create 2)
-          (t/list-create 1)))])
+    (p/show (t/list-create 3 t/EMPTY_LIST)))
+  
+  (!.lua
+    [(ic/show
+      (->> t/EMPTY_LIST
+           (t/list-create 3)
+           (t/list-create 2)
+           (t/list-create 1)))])
   => ["(1, 2, 3)"]
 
   (!.js
-   [(ic/show
+    [(ic/show
      (->> t/EMPTY_LIST
           (t/list-create 3)
           (t/list-create 2)

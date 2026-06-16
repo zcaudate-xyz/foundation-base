@@ -1,30 +1,12 @@
-(ns kmi.lang.interface-common
+(ns kmi.lang.common-util
   (:require [hara.lang :as l])
   (:refer-clojure :exclude [hash count pop nth assoc dissoc to-array find empty keyword symbol vector]))
 
 (l/script :xtalk
   {:require [[kmi.lang.protocol-base :as p]
-             [xt.lang.spec-base :as xt]
+             [kmi.lang.common-hash :as common-hash]
              [xt.lang.common-iter :as it]
-             [kmi.lang.common-hash :as common-hash]]})
-
-(def.xt NIL  {})
-
-(defn.xt impl-normalise
-  "normalises the value"
-  {:added "4.0"}
-  [x]
-  (if (not= x nil)
-    (return x)
-    (return -/NIL)))
-
-(defn.xt impl-denormalise
-  "denormalises the value"
-  {:added "4.0"}
-  [x]
-  (if (not= x -/NIL)
-    (return x)
-    (return nil)))
+             [xt.lang.spec-base :as xt]]})
 
 (defn.xt is-managed?
   "checks if object is managed via the runtime"
@@ -134,104 +116,23 @@
         (-/is-managed? x)
         (return (p/size x))))
 
-(defn.xt is-persistent?
-  "checks if collection is persistent"
-  {:added "4.0"}
-  [coll]
-  (return (p/is_persistent coll)))
+(comment
+  
+  (def.xt NIL  {})
 
-(defn.xt is-mutable?
-  "checks if collection is mutable"
-  {:added "4.0"}
-  [coll]
-  (return (p/is_mutable coll)))
+  (defn.xt impl-normalise
+    "normalises the value"
+    {:added "4.0"}
+    [x]
+    (if (not= x nil)
+      (return x)
+      (return -/NIL)))
 
-(defn.xt to-persistent
-  "converts to persistent"
-  {:added "4.0"}
-  [coll]
-  (return (p/to_persistent coll)))
-
-(defn.xt to-mutable
-  "converts to mutable"
-  {:added "4.0"}
-  [coll]
-  (return (p/to_mutable coll)))
-
-(defn.xt push
-  "pushs elements"
-  {:added "4.0"}
-  [coll x]
-  (return (p/push coll x)))
-
-(defn.xt pop
-  "pops element from collection"
-  {:added "4.0"}
-  [coll]
-  (return (p/pop coll)))
-
-(defn.xt nth
-  "nth coll"
-  {:added "4.0"}
-  [coll idx]
-  (return (p/nth coll idx)))
-
-(defn.xt push-mutable
-  "pushes an element into an editable collection"
-  {:added "4.0"}
-  [coll x]
-  (return (p/push_mutable coll x)))
-
-(defn.xt pop-mutable
-  "pops an element from an editable collection"
-  {:added "4.0"}
-  [coll]
-  (return (p/pop_mutable coll)))
-
-(defn.xt assoc
-  "associates a key value pair into a persistent collection"
-  {:added "4.0"}
-  [coll k v]
-  (return (p/assoc coll k v)))
-
-(defn.xt dissoc
-  "disassociates a key from aa persistent collection"
-  {:added "4.0"}
-  [coll k]
-  (return (p/dissoc coll k)))
-
-(defn.xt assoc-mutable
-  "associates a key value pair into a mutable collection"
-  {:added "4.0"}
-  [coll k v]
-  (return (p/assoc_mutable coll k v)))
-
-(defn.xt dissoc-mutable
-  "disassociates a key pair from a mutable collection"
-  {:added "4.0"}
-  [coll k]
-  (return (p/dissoc_mutable coll k)))
-
-(defn.xt to-iter
-  "to iter"
-  {:added "4.0"}
-  [coll]
-  (return (p/to_iter coll)))
-
-(defn.xt to-array
-  "to array"
-  {:added "4.0"}
-  [coll]
-  (return (p/to_array coll)))
-
-(defn.xt find
-  "find coll"
-  {:added "4.0"}
-  [coll idx]
-  (return (p/find coll idx)))
-
-(defn.xt empty
-  "empty coll"
-  {:added "4.0"}
-  [coll]
-  (return (p/empty coll)))
+  (defn.xt impl-denormalise
+    "denormalises the value"
+    {:added "4.0"}
+    [x]
+    (if (not= x -/NIL)
+      (return x)
+      (return nil)))
+  )

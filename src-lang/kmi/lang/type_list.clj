@@ -3,12 +3,13 @@
   (:refer-clojure :exclude [list]))
 
 (l/script :xtalk
-  {:require [[kmi.lang.protocol-base :as p]
-             [xt.lang.spec-base :as xt]
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
              [xt.lang.common-iter :as it]
              [xt.lang.common-protocol :as proto]
-             [kmi.lang.interface-common :as interface-common]
-             [kmi.lang.interface-collection :as interface-collection]]})
+             [kmi.lang.protocol-base :as p]
+             [kmi.lang.common-util :as util]
+             [kmi.lang.common-coll :as coll]]})
 
 (def.xt EMPTY_MARKER
   {})
@@ -39,7 +40,7 @@
             -/EMPTY_MARKER)
         (return 0)
 
-        :else (return (+ 1 (. list _rest (size))))))  
+        :else (return (+ 1 (util/count (. list _rest))))))  
 
 (defn.xt list-new
   "creates a new list"
@@ -77,17 +78,16 @@
    :to-iter        -/list-to-iter
    :to-array       -/list-to-array}
   p/IEdit
-  {:is-mutable    (fn:> true)
-   :to-mutable    (fn [x] (return x))
-   :is-persistent (fn:> true)
-   :to-persistent (fn [x] (return x))}
+  {:is-mutable    k/T
+   :to-mutable    k/identity
+   :is-persistent k/T
+   :to-persistent k/identity}
   p/IEmpty
   {:empty -/list-empty}
   p/IEq
-  {:eq interface-collection/coll-eq}
+  {:eq coll/coll-eq}
   p/IHash
-  {:hash (interface-common/wrap-with-cache
-          interface-collection/coll-hash-unordered)}
+  {:hash (util/wrap-with-cache coll/coll-hash-unordered)}
   p/IPush
   {:push -/list-push}
   p/IPushMutable
@@ -99,7 +99,7 @@
   p/ISize
   {:size -/list-size}
   p/IShow
-  {:show interface-collection/coll-show})
+  {:show coll/coll-show})
 
 (defn.xt list-create
   "creates a list"
