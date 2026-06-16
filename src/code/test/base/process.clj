@@ -74,6 +74,17 @@
                     function (assoc :function function))]
      (assoc result :meta meta-map))))
 
+(defn evaluate-debug
+  "evaluates a debug form attached to metadata.
+
+   Returns the raw evaluation result, preserving the same namespace and
+   timeout context as the original form."
+  {:added "4.1"}
+  ([meta]
+   (if-let [debug-form (:debug meta)]
+     (evaluate {:form debug-form :meta meta})
+     nil)))
+
 (defmulti process
   "processes a form or a check
    (defn view-signal [op]
@@ -110,6 +121,10 @@
    (let [result (-> (evaluate op)
                     (attach-meta meta form)
                     (assoc :original original))
+         result (if (and (= :exception (:status result))
+                         (:debug meta))
+                  (assoc result :debug (evaluate-debug meta))
+                  result)
           _    (intern *ns* (with-meta '*last* {:dynamic true})
                        result)]
       (signal/signal {:test :form :result result})
@@ -127,6 +142,11 @@
                           :form (:form expected))
           result   (-> (checker/verify checker actual)
                        (attach-meta meta (:form input)))
+          result   (if (and (:debug meta)
+                            (or (= :exception (:status result))
+                                (false? (:data result))))
+                     (assoc result :debug (evaluate-debug meta))
+                     result)
           _    (intern *ns* (with-meta '*last* {:dynamic true})
                        (:data actual))
           _    (after)]

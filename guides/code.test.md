@@ -130,6 +130,27 @@ You can use the `capture` checker to inspect intermediate values during test dev
 ;; After running, `my-var` will hold the value 3 in the test namespace.
 ```
 
+#### 7. Attaching Debug Forms to Failing Expressions
+
+For expressions that are hard to diagnose when they throw or fail an assertion,
+you can attach a debug form via metadata. If the expression errors or its `=>`
+check fails, the debug form is evaluated and its result is printed in the
+failure report.
+
+```clojure
+(fact "debug on throw"
+  ^{:debug (prn :troubleshooting)}
+  (risky-op))
+
+(fact "debug on failed assertion"
+  ^{:debug (l/with:print (compute-context))}
+  (computed-value) => expected-value)
+```
+
+The debug form runs only when the main expression throws an exception or when
+the assertion returns `false`. Its result appears in the `THROW` or `FAILED`
+output under a `Debug:` label.
+
 ### Running Tests
 
 - **All**: `lein test`

@@ -52,7 +52,8 @@
     :checker  (-> result :checker)
     :actual   (-> result :actual)
     :data     (-> result :actual :data)
-    :parent   (-> result :meta :parent-form)}))
+    :parent   (-> result :meta :parent-form)
+    :debug    (-> result :debug)}))
 
 (defn summarise-evaluate
   "extract the form into a valid format"
@@ -68,7 +69,8 @@
     :desc     (-> result :meta :desc)
     :form     (-> result :form)
     :original (-> result :original)
-    :data     (-> result :data)}))
+    :data     (-> result :data)
+    :debug    (-> result :debug)}))
 
 (defn form-printer
   "prints out result for each form"

@@ -46,6 +46,28 @@
                  "THROW")
   => true)
 
+^{:refer code.test.base.print/print-throw :added "4.1"}
+(fact "prints debug info on throw"
+
+  (clojure.string/includes? (env/with-out-str
+                   (print-throw {:name "test"
+                                 :data (ex-info "error" {})
+                                 :debug {:status :success :data "debug-value"}}))
+                 "Debug:")
+  => true)
+
+^{:refer code.test.base.print/print-failed :added "4.1"}
+(fact "prints debug info on failure"
+
+  (clojure.string/includes? (env/with-out-str
+                   (print-failed {:name "test"
+                                  :actual {:data 1}
+                                  :check "check"
+                                  :checker (fn [x] false)
+                                  :debug {:status :success :data "debug-value"}}))
+                 "Debug:")
+  => true)
+
 ^{:refer code.test.base.print/print-timeout :added "4.0"}
 (fact "prints timeout info"
 

@@ -40,7 +40,8 @@
       :checker {:form "check"}
       :actual {:form "actual"}
       :data nil
-      :parent "parent"})
+      :parent "parent"
+      :debug nil})
 
 ^{:refer code.test.base.listener/summarise-evaluate :added "3.0"}
 (fact "extract the form into a valid format"
@@ -56,7 +57,8 @@
       :desc "desc"
       :form "form"
       :original "original"
-      :data "data"})
+      :data "data"
+      :debug nil})
 
 ^{:refer code.test.base.listener/form-printer :added "3.0"}
 (fact "prints out result for each form"

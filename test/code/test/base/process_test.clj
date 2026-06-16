@@ -82,3 +82,47 @@
 
   (run-check {} [])
   => true)
+
+^{:refer code.test.base.process/evaluate-debug :added "4.1"}
+(fact "evaluates a debug form using the same context"
+  (-> (evaluate-debug {:debug '(+ 1 2 3) :ns 'user})
+      (into {}))
+  => (contains {:status :success :data 6}))
+
+^{:refer code.test.base.process/process :added "4.1"}
+(fact "attaches debug result when a form throws"
+  (binding [ctx/*eval-check* {:before (fn []) :after (fn [])}
+            ctx/*timeout* 5000
+            ctx/*results* nil
+            signal/*manager* (atom (signal/manager))]
+    (-> (process {:type :form
+                  :form '(throw (ex-info "oops" {}))
+                  :meta {:line 10 :debug '(+ 1 2 3)}})
+        :debug
+        (into {})))
+  => (contains {:status :success :data 6}))
+
+^{:refer code.test.base.process/process :added "4.1"}
+(fact "attaches debug result when a check fails"
+  (binding [ctx/*eval-check* {:before (fn []) :after (fn [])}
+            ctx/*timeout* 5000
+            ctx/*results* nil
+            signal/*manager* (atom (signal/manager))]
+    (-> (process {:type :test-equal
+                  :input  {:form '(+ 1 2)}
+                  :output {:form 4}
+                  :meta {:line 10 :debug '(+ 1 2 3)}})
+        :debug
+        (into {})))
+  => (contains {:status :success :data 6})
+
+  (binding [ctx/*eval-check* {:before (fn []) :after (fn [])}
+            ctx/*timeout* 5000
+            ctx/*results* nil
+            signal/*manager* (atom (signal/manager))]
+    (-> (process {:type :test-equal
+                  :input  {:form '(+ 1 2)}
+                  :output {:form 3}
+                  :meta {:line 10 :debug '(+ 1 2 3)}})
+        :debug))
+  => nil)
