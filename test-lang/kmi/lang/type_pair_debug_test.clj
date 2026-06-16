@@ -5,7 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.type-pair :as pair]
-             [kmi.lang.interface-common :as ic]]})
+             [kmi.lang.common-util :as ic]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

@@ -6,8 +6,8 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-protocol :as proto]
-             [kmi.lang.interface-common :as interface-common]
-             [kmi.lang.interface-collection :as interface-collection]]})
+             [kmi.lang.common-util :as util]
+             [kmi.lang.common-coll :as coll]]})
 
 (defgen.xt pair-to-iter
   "pair to iterator"
@@ -39,16 +39,16 @@
   {to-iter -/pair-to-iter
    to-array -/pair-to-array}
   p/IEq
-  {eq interface-collection/coll-eq}
+  {eq coll/coll-eq}
   p/IHash
-  {hash (interface-common/wrap-with-cache
-         interface-collection/coll-hash-ordered)}
+  {hash (util/wrap-with-cache
+         coll/coll-hash-ordered)}
   p/INth
   {nth -/pair-nth}
   p/ISize
   {size (fn:> [e] 2)}
   p/IShow
-  {show interface-collection/coll-show})
+  {show coll/coll-show})
 
 (defn.xt pair
   "creates a pair"

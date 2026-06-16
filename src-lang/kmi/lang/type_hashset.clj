@@ -8,8 +8,8 @@
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
-             [kmi.lang.interface-common :as interface-common]
-             [kmi.lang.interface-collection :as interface-collection]
+             [kmi.lang.common-util :as util]
+             [kmi.lang.common-coll :as coll]
              [kmi.lang.type-hashmap :as hashmap]]})
 
 (def.xt NOT_FOUND {})
@@ -117,7 +117,7 @@
   "hashes the hashset"
   {:added "4.1"}
   [hashset]
-  (return (interface-collection/coll-hash-unordered hashset)))
+  (return (coll/coll-hash-unordered hashset)))
 
 (defn.xt hashset-eq
   "checks hashset equality independent of insertion order"
@@ -140,7 +140,7 @@
     (do (var s "#{")
         (xt/for:array [entry entries]
           (:= s (xt/x:cat s
-                          (interface-common/show entry)
+                          (util/show entry)
                           ", ")))
         (return (xt/x:cat (xt/x:str-substring s 0 (- (xt/x:len s) 2))
                           "}")))))
@@ -164,7 +164,7 @@
   p/IEq
   {:eq -/hashset-eq}
   p/IHash
-  {:hash (interface-common/wrap-with-cache
+  {:hash (util/wrap-with-cache
           -/hashset-hash
           -/hashset-is-editable)}
   p/IFind
@@ -178,7 +178,7 @@
   p/IDissocMutable
   {:dissoc-mutable -/hashset-dissoc!}
   p/ISize
-  {:size interface-collection/coll-size}
+  {:size coll/coll-size}
   p/IShow
   {:show -/hashset-show})
 
@@ -207,4 +207,4 @@
     (do (var out (-/hashset-empty-mutable))
         (xt/for:array [entry input]
           (-/hashset-push! out entry))
-        (return (interface-common/to-persistent out)))))
+        (return (p/to-persistent out)))))

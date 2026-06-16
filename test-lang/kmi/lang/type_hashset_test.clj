@@ -7,7 +7,7 @@
   {:runtime :basic
    :require [[kmi.lang.type-hashset :as hs]
              [kmi.lang.type-hashmap :as hm]
-             [kmi.lang.interface-common :as ic]
+             [kmi.lang.common-util :as ic]
              [xt.lang.common-iter :as it]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
@@ -16,7 +16,7 @@
   {:runtime :basic
    :require [[kmi.lang.type-hashset :as hs]
              [kmi.lang.type-hashmap :as hm]
-             [kmi.lang.interface-common :as ic]
+             [kmi.lang.common-util :as ic]
              [xt.lang.common-iter :as it]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})

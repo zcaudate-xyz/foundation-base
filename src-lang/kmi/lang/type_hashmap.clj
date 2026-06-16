@@ -7,8 +7,8 @@
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
-             [kmi.lang.interface-common :as interface-common]
-             [kmi.lang.interface-collection :as interface-collection]
+             [kmi.lang.common-util :as util]
+             [kmi.lang.common-coll :as coll]
              [kmi.lang.type-hashmap-node :as node]
              [kmi.lang.type-pair :as type-pair]]})
 
@@ -21,13 +21,13 @@
     (cond (== tag "hashmap.leaf")
           (xt/x:arr-push out
                          (type-pair/pair (. child _key)
-                                         (interface-common/impl-denormalise (. child _val))))
+                                         (util/impl-denormalise (. child _val))))
 
           (== tag "hashmap.collision")
           (xt/for:array [leaf (. child children)]
             (xt/x:arr-push out
                            (type-pair/pair (. leaf _key)
-                                           (interface-common/impl-denormalise (. leaf _val)))))
+                                           (util/impl-denormalise (. leaf _val)))))
 
           :else
           (-/hashmap-collect-pairs child out)))
@@ -95,11 +95,11 @@
   [hashmap key]
   (var leaf (node/node-find-leaf (. hashmap _root)
                                  0
-                                 (interface-common/hash key)
+                                 (util/hash key)
                                  key))
   (when leaf
     (return (type-pair/pair (. leaf _key)
-                            (interface-common/impl-denormalise (. leaf _val))))))
+                            (util/impl-denormalise (. leaf _val))))))
 
 (defn.xt hashmap-lookup-key
   "looks up a key in the hashmap"
@@ -107,7 +107,7 @@
   [hashmap key default-val]
   (return (node/node-lookup (. hashmap _root)
                             0
-                            (interface-common/hash key)
+                            (util/hash key)
                             key
                             default-val)))
 
@@ -136,7 +136,7 @@
   (var result (node/node-assoc (. hashmap _root)
                                nil
                                0
-                               (interface-common/hash key)
+                               (util/hash key)
                                key
                                val))
   (return (-/hashmap-new (. result node)
@@ -154,7 +154,7 @@
   (var result (node/node-assoc root
                                edit-id
                                0
-                               (interface-common/hash key)
+                               (util/hash key)
                                key
                                val))
   (xt/x:set-key hashmap "_root" (. result node))
@@ -169,7 +169,7 @@
   (var result (node/node-dissoc (. hashmap _root)
                                 nil
                                 0
-                                (interface-common/hash key)
+                                (util/hash key)
                                 key))
   (return (-/hashmap-new (or (. result node)
                              node/EMPTY_HASHMAP_NODE)
@@ -187,7 +187,7 @@
   (var result (node/node-dissoc root
                                 edit-id
                                 0
-                                (interface-common/hash key)
+                                (util/hash key)
                                 key))
   (xt/x:set-key hashmap "_root" (or (. result node)
                                     (node/node-create edit-id 0 [])))
@@ -200,7 +200,7 @@
   {:added "4.1"}
   [hashmap]
   (return
-   (interface-collection/coll-hash-unordered hashmap)))
+   (coll/coll-hash-unordered hashmap)))
 
 (defn.xt hashmap-eq
   "checks hashmap equality independent of insertion order"
@@ -211,7 +211,7 @@
   (xt/for:iter [entry (-/hashmap-to-iter m1)]
     (var actual (-/hashmap-lookup-key m2 (. entry _key) -/NOT_FOUND))
     (when (or (== actual -/NOT_FOUND)
-              (not (interface-common/eq actual (. entry _val))))
+              (not (util/eq actual (. entry _val))))
       (return false)))
   (return true))
 
@@ -225,9 +225,9 @@
     (do (var s "{")
         (xt/for:array [entry entries]
           (:= s (xt/x:cat s
-                          (interface-common/show (xt/x:first entry))
+                          (util/show (xt/x:first entry))
                           " "
-                          (interface-common/show (xt/x:second entry))
+                          (util/show (xt/x:second entry))
                           ", ")))
         (return (xt/x:cat (xt/x:str-substring s 0 (- (xt/x:len s) 2))
                           "}")))))
@@ -251,7 +251,7 @@
   p/IEq
   {:eq -/hashmap-eq}
   p/IHash
-  {:hash (interface-common/wrap-with-cache
+  {:hash (util/wrap-with-cache
           -/hashmap-hash
           -/hashmap-is-editable)}
   p/IAssoc
@@ -269,7 +269,7 @@
    :vals   -/hashmap-vals
    :lookup -/hashmap-lookup-key}
   p/ISize
-  {:size interface-collection/coll-size}
+  {:size coll/coll-size}
   p/IShow
   {:show -/hashmap-show})
 
@@ -305,4 +305,4 @@
                             (xt/x:get-idx input (xt/x:offset idx))
                             (xt/x:get-idx input (xt/x:offset (+ idx 1))))
           (:= idx (+ idx 2)))
-        (return (interface-common/to-persistent out)))))
+        (return (p/to-persistent out)))))

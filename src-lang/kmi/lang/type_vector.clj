@@ -8,8 +8,8 @@
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
-             [kmi.lang.interface-common :as interface-common]
-             [kmi.lang.interface-collection :as interface-collection]
+             [kmi.lang.common-util :as util]
+             [kmi.lang.common-coll :as coll]
              [kmi.lang.type-vector-node :as node]
              [kmi.lang.type-pair :as type-pair]]})
 
@@ -22,7 +22,7 @@
   
   (when arr
     (var out (xt/x:get-idx arr (xt/x:offset (node/impl-mask idx))))
-    (return (interface-common/impl-denormalise out))))
+    (return (util/impl-denormalise out))))
 
 (defgen.xt vector-to-iter
   "converts vector to iterator"
@@ -50,7 +50,11 @@
            "_root" root
            "_size" size
            "_shift" shift
-           "_tail" tail}))
+           "_tail" tail
+           "_start_string" "["
+           "_end_string" "]"
+           "_sep_string" ", "
+           "_is_ordered" true}))
 
 (defn.xt vector-empty
   "creates an empty vector from current"
@@ -78,7 +82,7 @@
   (when (< (- _size (node/impl-offset _size))
            node/WIDTH)
     (var n_tail (xt/x:arr-clone _tail))
-    (xt/x:arr-push n_tail (interface-common/impl-normalise x))
+    (xt/x:arr-push n_tail (util/impl-normalise x))
     (return (-/vector-new (node/ensure-persistent _root)
                           (+ _size 1)
                           _shift
@@ -98,7 +102,7 @@
   (return (-/vector-new n_root
                         (+ 1 _size)
                         n_shift
-                        [(interface-common/impl-normalise x)])))
+                        [(util/impl-normalise x)])))
 
 (defn.xt vector-pop-last
   "pops the last element off vector"
@@ -190,7 +194,7 @@
   (node/ensure-editable _root)
   (when (< (- _size (node/impl-offset _size))
            node/WIDTH)
-    (xt/x:arr-push _tail (interface-common/impl-normalise x))
+    (xt/x:arr-push _tail (util/impl-normalise x))
     (xt/x:set-key vector "_size" (+ _size 1))
     (return vector))
   
@@ -205,7 +209,7 @@
         :else
         (xt/x:set-key vector "_root"
                    (node/node-push-tail edit-id _size _shift _root _tail-node true)))
-  (xt/x:set-key vector "_tail" [(interface-common/impl-normalise x)])
+  (xt/x:set-key vector "_tail" [(util/impl-normalise x)])
   (xt/x:set-key vector "_size" (+ _size 1))
   (return vector))
 
@@ -240,7 +244,7 @@
   "finds the pair entry"
   {:added "4.0"}
   [vector idx]
-  (var size (interface-collection/coll-size vector))
+  (var size (coll/coll-size vector))
   (cond (or (< idx 0)
             (>= idx size))
          (return nil)
@@ -254,7 +258,7 @@
   "finds the value"
   {:added "4.0"}
   [vector idx defaultVal]
-  (var size (interface-collection/coll-size vector))
+  (var size (coll/coll-size vector))
   (cond (or (< idx 0)
             (>= idx size))
         (return defaultVal)
@@ -267,7 +271,7 @@
 ;;
 
 (proto/defimpl.xt ^{:rt/tag "vector"} Vector
-  [_root _size _shift _tail]
+  [_root _size _shift _tail _start_string _end_string _sep_string _is_ordered]
   p/IColl
   {:_start_string "["
    :_end_string   "]"
@@ -283,10 +287,10 @@
   p/IEmpty
   {:empty -/vector-empty}
   p/IEq
-  {:eq interface-collection/coll-eq}
+  {:eq coll/coll-eq}
   p/IHash
-  {:hash (interface-common/wrap-with-cache
-          interface-collection/coll-hash-ordered
+  {:hash (util/wrap-with-cache
+          coll/coll-hash-ordered
           -/vector-is-editable)}
   p/IFind
   {:find -/vector-find-idx}
@@ -301,15 +305,15 @@
   p/INth
   {:nth -/vector-get-idx}
   p/ISize
-  {:size interface-collection/coll-size}
+  {:size coll/coll-size}
   p/IShow
-  {:show interface-collection/coll-show})
+  {:show coll/coll-show})
 
 (defn.xt vector-create
   "creates a vector"
   {:added "4.0"}
   [root size shift tail]
-  (return (-/Vector root size shift tail)))
+  (return (-/Vector root size shift tail "[" "]" ", " true)))
 
 ;;
 ;;
@@ -340,8 +344,8 @@
 
         :else
         (return
-         (interface-common/to-persistent
-          (interface-collection/coll-into-array
+         (p/to-persistent
+          (coll/coll-into-array
            (-/vector-empty-mutable)
            input)))))
 

@@ -4,7 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
-             [kmi.lang.interface-common :as interface-common]]})
+             [kmi.lang.common-util :as util]]})
 
 (def.xt BITS 5)
 (def.xt WIDTH (xt/x:m-pow 2 -/BITS))
@@ -58,7 +58,7 @@
   (return {"::" "hashmap.leaf"
            :_hash hash
            :_key key
-           :_val (interface-common/impl-normalise val)}))
+           :_val (util/impl-normalise val)}))
 
 (defn.xt collision-create
   "creates a hash collision node"
@@ -73,7 +73,7 @@
 
 (defn.xt leaf-value
   [leaf]
-  (return (interface-common/impl-denormalise (. leaf _val))))
+  (return (util/impl-denormalise (. leaf _val))))
 
 (defn.xt node-clone
   "clones a node/collision"
@@ -164,7 +164,7 @@
 (defn.xt collision-find-leaf
   [collision key]
   (xt/for:array [leaf (. collision children)]
-    (when (interface-common/eq (. leaf _key) key)
+    (when (util/eq (. leaf _key) key)
       (return leaf)))
   (return nil))
 
@@ -174,7 +174,7 @@
   (var nchildren [])
   (var replaced false)
   (xt/for:array [child children]
-    (if (interface-common/eq (. child _key) (. leaf _key))
+    (if (util/eq (. child _key) (. leaf _key))
       (do (xt/x:arr-push nchildren leaf)
           (:= replaced true))
       (xt/x:arr-push nchildren child)))
@@ -190,7 +190,7 @@
   (var nchildren [])
   (var removed false)
   (xt/for:array [child (. collision children)]
-    (if (interface-common/eq (. child _key) key)
+    (if (util/eq (. child _key) key)
       (:= removed true)
       (xt/x:arr-push nchildren child)))
   (cond (not removed)
@@ -241,7 +241,7 @@
   (var child (xt/x:get-idx (. node children) (xt/x:offset idx)))
   (var tag (xt/x:get-key child "::"))
   (cond (== tag "hashmap.leaf")
-        (if (interface-common/eq (. child _key) key)
+        (if (util/eq (. child _key) key)
           (return (-/leaf-value child))
           (return default-val))
 
@@ -267,7 +267,7 @@
   (var child (xt/x:get-idx (. node children) (xt/x:offset idx)))
   (var tag (xt/x:get-key child "::"))
   (cond (== tag "hashmap.leaf")
-        (if (interface-common/eq (. child _key) key)
+        (if (util/eq (. child _key) key)
           (return child)
           (return nil))
 
@@ -299,7 +299,7 @@
   (var child (xt/x:get-idx (. node children) (xt/x:offset idx)))
   (var tag (xt/x:get-key child "::"))
   (cond (== tag "hashmap.leaf")
-        (if (interface-common/eq (. child _key) key)
+        (if (util/eq (. child _key) key)
           (do (var nchildren (xt/x:arr-clone (. node children)))
               (xt/x:set-idx nchildren (xt/x:offset idx) leaf)
               (return {:node (-/node-create edit-id bitmap nchildren)
@@ -344,7 +344,7 @@
   (var child (xt/x:get-idx (. node children) (xt/x:offset idx)))
   (var tag (xt/x:get-key child "::"))
   (cond (== tag "hashmap.leaf")
-        (if (interface-common/eq (. child _key) key)
+        (if (util/eq (. child _key) key)
           (do (var nbitmap (xt/x:bit-and bitmap
                                          (xt/x:bit-xor -1 bitpos)))
               (var nchildren (xt/x:arr-clone (. node children)))

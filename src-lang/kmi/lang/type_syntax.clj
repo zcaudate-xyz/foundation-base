@@ -5,7 +5,7 @@
   {:require [[kmi.lang.protocol-base :as p]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-protocol :as proto]
-             [kmi.lang.interface-common :as interface-common]
+             [kmi.lang.common-util :as util]
              [kmi.lang.common-hash :as common-hash]]})
 
 (defn.xt syntax-wrap
@@ -19,41 +19,41 @@
 (proto/defimpl.xt ^{:rt/tag "syntax"} Syntax
   [_value _metadata]
   p/IAssoc
-  {:assoc (-/syntax-wrap interface-common/assoc)}
+  {:assoc (-/syntax-wrap p/assoc)}
   p/IAssocMutable
-  {:assoc-mutable (-/syntax-wrap interface-common/assoc-mutable)}
+  {:assoc-mutable (-/syntax-wrap p/assoc-mutable)}
   p/IColl
-  {:to-iter  (-/syntax-wrap interface-common/to-iter)
-   :to-array (-/syntax-wrap interface-common/to-array)}
+  {:to-iter  (-/syntax-wrap p/to-iter)
+   :to-array (-/syntax-wrap p/to-array)}
   p/IDissoc
-  {:dissoc (-/syntax-wrap interface-common/dissoc)}
+  {:dissoc (-/syntax-wrap p/dissoc)}
   p/IDissocMutable
-  {:dissoc-mutable (-/syntax-wrap interface-common/dissoc-mutable)}
+  {:dissoc-mutable (-/syntax-wrap p/dissoc-mutable)}
   p/IEmpty
-  {:empty (-/syntax-wrap interface-common/empty)}
+  {:empty (-/syntax-wrap p/empty)}
   p/IEq
-  {:eq (-/syntax-wrap interface-common/eq)}
+  {:eq (-/syntax-wrap util/eq)}
   p/IFind
-  {:find (-/syntax-wrap interface-common/find)}
+  {:find (-/syntax-wrap p/find)}
   p/IHash
-  {:hash (-/syntax-wrap interface-common/hash)}
+  {:hash (-/syntax-wrap util/hash)}
   p/INth
-  {:nth (-/syntax-wrap interface-common/nth)}
+  {:nth (-/syntax-wrap p/nth)}
   p/IPush
-  {:push (-/syntax-wrap interface-common/push)}
+  {:push (-/syntax-wrap p/push)}
   p/IPushMutable
-  {:push-mutable (-/syntax-wrap interface-common/push-mutable)}
+  {:push-mutable (-/syntax-wrap p/push-mutable)}
   p/IPop
-  {:pop (-/syntax-wrap interface-common/pop)}
+  {:pop (-/syntax-wrap p/pop)}
   p/IPopMutable
-  {:pop-mutable (-/syntax-wrap interface-common/pop-mutable)}
+  {:pop-mutable (-/syntax-wrap p/pop-mutable)}
   p/INamespaced
-  {:name      (-/syntax-wrap interface-common/get-name)
-   :namespace (-/syntax-wrap interface-common/get-namespace)}
+  {:name      (-/syntax-wrap util/get-name)
+   :namespace (-/syntax-wrap util/get-namespace)}
   p/ISize
-  {:size (-/syntax-wrap interface-common/count)}
+  {:size (-/syntax-wrap util/count)}
   p/IShow
-  {:show (-/syntax-wrap interface-common/show)})
+  {:show (-/syntax-wrap util/show)})
 
 (defn.xt syntax-create
   "creates a syntax
@@ -69,7 +69,7 @@
   "gets metadata"
   {:added "4.0"}
   [x]
-  (return (:? (interface-common/is-syntax? x)
+  (return (:? (util/is-syntax? x)
               (. x _metadata)
               nil)))
 
@@ -77,7 +77,7 @@
   "creates a syntax"
   {:added "4.0"}
   [x metadata]
-  (var v (:? (interface-common/is-syntax? x)
+  (var v (:? (util/is-syntax? x)
              (. x _value)
              x))
   (return (:? (xt/x:nil? metadata)

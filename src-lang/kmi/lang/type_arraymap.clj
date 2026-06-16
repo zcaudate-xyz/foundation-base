@@ -4,7 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
-             [kmi.lang.interface-common :as interface-common]
-             [kmi.lang.interface-collection :as interface-collection]
+             [kmi.lang.common-util :as util]
+             [kmi.lang.common-coll :as coll]
              [kmi.lang.type-vector-node :as node]]})
 

@@ -7,6 +7,7 @@
   {:runtime :basic
    :require [[js.core :as j]
              [xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global

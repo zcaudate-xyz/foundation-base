@@ -4,7 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
-             [kmi.lang.interface-common :as interface-common]]})
+             [kmi.lang.common-util :as util]]})
 
 (def.xt BITS 5)
 (def.xt WIDTH (xt/x:m-pow 2 -/BITS))

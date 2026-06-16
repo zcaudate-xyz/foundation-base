@@ -6,14 +6,14 @@
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.type-keyword :as kw]
-             [kmi.lang.interface-common :as tc]
+             [kmi.lang.common-util :as tc]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[kmi.lang.type-keyword :as kw]
-             [kmi.lang.interface-common :as tc]
+             [kmi.lang.common-util :as tc]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 

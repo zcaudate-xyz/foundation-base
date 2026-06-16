@@ -7,8 +7,8 @@
   {:runtime :basic
    :require [[kmi.lang.type-vector :as v]
              [kmi.lang.type-vector-node :as node]
-             [kmi.lang.interface-common :as ic]
-             [kmi.lang.interface-collection :as coll]
+             [kmi.lang.common-util :as ic]
+             [kmi.lang.common-coll :as coll]
              [xt.lang.common-data :as k]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
@@ -17,8 +17,8 @@
   {:runtime :basic
    :require [[kmi.lang.type-vector :as v]
              [kmi.lang.type-vector-node :as node]
-             [kmi.lang.interface-common :as ic]
-             [kmi.lang.interface-collection :as coll]
+             [kmi.lang.common-util :as ic]
+             [kmi.lang.common-coll :as coll]
              [xt.lang.common-data :as k]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
@@ -77,8 +77,7 @@
    (var out (v/vector-new (node/node-create nil [])
                           2
                           node/BITS
-                          [1 2]
-                          nil))
+                          [1 2]))
    [(. out ["::"])
     (. out _size)
     (. out _shift)
@@ -89,8 +88,7 @@
    (var out (v/vector-new (node/node-create nil [])
                           2
                           node/BITS
-                          [1 2]
-                          nil))
+                          [1 2]))
    [(. out ["::"])
     (. out _size)
     (. out _shift)

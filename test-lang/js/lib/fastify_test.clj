@@ -7,6 +7,7 @@
 (l/script- :js
    {:runtime :basic
     :require [[xt.lang.spec-base :as xt]
+               [xt.lang.common-lib :as k]
                [xt.lang.common-repl :as repl]
                [js.lib.fastify :as http]
                [js.core :as j]]})

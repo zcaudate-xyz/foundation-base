@@ -18,7 +18,6 @@
               [js.react-native.physical-addon :as physical-addon]
               [js.react-native.ui-autocomplete :as ui-autocomplete]
               [js.react-native.ui-input :as ui-input]
-              [xt.lang.spec-base :as xt]
               [xt.lang.spec-base :as xt]]
    })
 

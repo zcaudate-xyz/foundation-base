@@ -7,14 +7,14 @@
   {:runtime :basic
    :require [[kmi.lang.type-hashmap-node :as node]
              [xt.lang.spec-base :as xt]
-             [kmi.lang.interface-common :as ic]
+             [kmi.lang.common-util :as ic]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[kmi.lang.type-hashmap-node :as node]
              [xt.lang.spec-base :as xt]
-             [kmi.lang.interface-common :as ic]
+             [kmi.lang.common-util :as ic]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global

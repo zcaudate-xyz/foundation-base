@@ -116,23 +116,20 @@
         (-/is-managed? x)
         (return (p/size x))))
 
-(comment
-  
-  (def.xt NIL  {})
+(def.xt NIL  {})
 
-  (defn.xt impl-normalise
-    "normalises the value"
-    {:added "4.0"}
-    [x]
-    (if (not= x nil)
-      (return x)
-      (return -/NIL)))
+(defn.xt impl-normalise
+  "normalises the value"
+  {:added "4.0"}
+  [x]
+  (if (not= x nil)
+    (return x)
+    (return -/NIL)))
 
-  (defn.xt impl-denormalise
-    "denormalises the value"
-    {:added "4.0"}
-    [x]
-    (if (not= x -/NIL)
-      (return x)
-      (return nil)))
-  )
+(defn.xt impl-denormalise
+  "denormalises the value"
+  {:added "4.0"}
+  [x]
+  (if (not= x -/NIL)
+    (return x)
+    (return nil)))

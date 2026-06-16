@@ -6,7 +6,7 @@
   {:require [[kmi.lang.protocol-base :as p]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-protocol :as proto]
-             [kmi.lang.interface-common :as interface-common]
+             [kmi.lang.common-util :as util]
              [kmi.lang.common-hash :as common-hash]]})
 
 (def.xt KEYWORD_LOOKUP
@@ -50,10 +50,10 @@
   p/IEq
   {eq -/keyword-eq}
   p/IHash
-  {hash (interface-common/wrap-with-cache -/keyword-hash)}
+  {hash (util/wrap-with-cache -/keyword-hash)}
   p/INamespaced
-  {name      interface-common/get-name
-   namespace interface-common/get-namespace}
+  {name      util/get-name
+   namespace util/get-namespace}
   p/IShow
   {show -/keyword-show})
 
