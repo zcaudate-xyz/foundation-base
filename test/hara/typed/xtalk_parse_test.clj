@@ -146,7 +146,10 @@
        [(([x] (+ x 1))) ()]])
 
 ^{:refer hara.typed.xtalk-parse/multi-callable-items? :added "4.1"}
-(fact "TODO")
+(fact "detects multi-arity callable item lists"
+  [(multi-callable-items? '(([a] 1) ([a b] 2)))
+   (multi-callable-items? '([a] 1))]
+  => [true false])
 
 ^{:refer hara.typed.xtalk-parse/parse-defn :added "4.1"}
 (fact "parses defn.xt forms"
@@ -240,10 +243,19 @@
 
 
 ^{:refer hara.typed.xtalk-parse/existing-file-path :added "4.1"}
-(fact "TODO")
+(fact "returns the first existing path or nil"
+  [(existing-file-path ["src/hara/typed.clj" "missing"])
+   (existing-file-path ["missing-1" "missing-2"])]
+  => ["src/hara/typed.clj" nil])
 
 ^{:refer hara.typed.xtalk-parse/file-path-candidates :added "4.1"}
-(fact "TODO")
+(fact "returns candidate paths for a file path"
+  (file-path-candidates "src/hara.lang/model_annex/foo.clj")
+  => ["src/hara.lang/model_annex/foo.clj"
+      "src/hara/model_annex/foo.clj"
+      "src/hara/model/annex/foo.clj"])
 
 ^{:refer hara.typed.xtalk-parse/resolve-file-path :added "4.1"}
-(fact "TODO")
+(fact "resolves a file path via candidates"
+  (resolve-file-path "test/hara.lang/model/spec_xtalk_typed_fixture.clj")
+  => "test/hara/model/spec_xtalk_typed_fixture.clj")
