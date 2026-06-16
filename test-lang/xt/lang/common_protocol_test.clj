@@ -30,141 +30,6 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-protocol/iface-combine :added "4.1"}
-(fact "combines interface vectors without duplicates"
-
-  (!.js
-   (proto/iface-combine [["connect" "disconnect"]
-                         ["disconnect" "exec"]
-                         ["connect" "subscribe"]]))
-  => ["connect" "disconnect" "exec" "subscribe"]
-
-  (!.lua
-   (proto/iface-combine [["connect" "disconnect"]
-                         ["disconnect" "exec"]
-                         ["connect" "subscribe"]]))
-  => ["connect" "disconnect" "exec" "subscribe"]
-
-  (!.py
-   (proto/iface-combine [["connect" "disconnect"]
-                         ["disconnect" "exec"]
-                         ["connect" "subscribe"]]))
-  => ["connect" "disconnect" "exec" "subscribe"])
-
-^{:refer xt.lang.common-protocol/proto-group :added "4.1"}
-(fact "pairs the combined protocol surface with the implementation map"
-
-  (!.js
-   (proto/proto-group [["connect"]
-                       ["disconnect" "exec"]]
-                      {"connect" "connect-fn"
-                       "disconnect" "disconnect-fn"
-                       "exec" "exec-fn"}))
-  => [["connect" "disconnect" "exec"]
-      {"connect" "connect-fn"
-       "disconnect" "disconnect-fn"
-       "exec" "exec-fn"}]
-
-  (!.lua
-   (proto/proto-group [["connect"]
-                       ["disconnect" "exec"]]
-                      {"connect" "connect-fn"
-                       "disconnect" "disconnect-fn"
-                       "exec" "exec-fn"}))
-  => [["connect" "disconnect" "exec"]
-      {"connect" "connect-fn"
-       "disconnect" "disconnect-fn"
-       "exec" "exec-fn"}]
-
-  (!.py
-   (proto/proto-group [["connect"]
-                       ["disconnect" "exec"]]
-                      {"connect" "connect-fn"
-                       "disconnect" "disconnect-fn"
-                       "exec" "exec-fn"}))
-  => [["connect" "disconnect" "exec"]
-      {"connect" "connect-fn"
-       "disconnect" "disconnect-fn"
-       "exec" "exec-fn"}])
-
-^{:refer xt.lang.common-protocol/proto-spec :added "4.1"}
-(fact "merges protocol groups and rejects missing required methods"
-
-  (!.js
-   (proto/proto-spec [[["connect"] {"connect" "connect-fn"}]
-                      [["disconnect" "exec"]
-                       {"disconnect" "disconnect-fn"
-                        "exec" "exec-fn"}]]))
-  => {"connect" "connect-fn"
-      "disconnect" "disconnect-fn"
-      "exec" "exec-fn"}
-
-  (!.js
-   (var invalid nil)
-   (try
-     (proto/proto-spec [[["disconnect" "exec"]
-                         {"disconnect" "disconnect-fn"}]])
-     (catch err
-         (:= invalid (xt/x:ex-message err))))
-   invalid)
-  => "Invalid Key"
-
-  (!.lua
-   (proto/proto-spec [[["connect"] {"connect" "connect-fn"}]
-                      [["disconnect" "exec"]
-                       {"disconnect" "disconnect-fn"
-                        "exec" "exec-fn"}]]))
-  => {"connect" "connect-fn"
-      "disconnect" "disconnect-fn"
-      "exec" "exec-fn"}
-
-  (!.lua
-   (var invalid nil)
-   (try
-     (proto/proto-spec [[["disconnect" "exec"]
-                         {"disconnect" "disconnect-fn"}]])
-     (catch err
-         (:= invalid (xt/x:ex-message err))))
-   invalid)
-  => "Invalid Key"
-
-  (!.py
-   (proto/proto-spec [[["connect"] {"connect" "connect-fn"}]
-                      [["disconnect" "exec"]
-                       {"disconnect" "disconnect-fn"
-                        "exec" "exec-fn"}]]))
-  => {"connect" "connect-fn"
-      "disconnect" "disconnect-fn"
-      "exec" "exec-fn"}
-
-  (!.py
-   (var invalid nil)
-   (try
-     (proto/proto-spec [[["disconnect" "exec"]
-                         {"disconnect" "disconnect-fn"}]])
-     (catch err
-         (:= invalid (xt/x:ex-message err))))
-   invalid)
-  => "Invalid Key")
-
-^{:refer xt.lang.common-protocol/ensure-promise :added "4.1"}
-(fact "wraps raw values in a promise and preserves native promises"
-
-  (!.js
-   [(promise/x:promise-native? (proto/ensure-promise (promise/x:promise-run 1)))
-    (promise/x:promise-native? (proto/ensure-promise 1))])
-  => [true true]
-
-  (!.lua
-   [(promise/x:promise-native? (proto/ensure-promise (promise/x:promise-run 1)))
-    (promise/x:promise-native? (proto/ensure-promise 1))])
-  => [true true]
-
-  (!.py
-   [(promise/x:promise-native? (proto/ensure-promise (promise/x:promise-run 1)))
-    (promise/x:promise-native? (proto/ensure-promise 1))])
-  => [true true])
-
 ^{:refer xt.lang.common-protocol/protocol-method :added "4.1"}
 (fact "looks up the registered method by protocol and implementation type"
 
@@ -312,7 +177,9 @@
              "xt.lang.common_protocol_test/Hello"
              true)
             (xt.lang.common-protocol/register-protocol-impl
-             "xt.lang.common_protocol_test/IHello"
+             (xt.lang.spec-base/x:get-key
+              xt.lang.common-protocol-test/IHello
+              "on")
              "xt.lang.common_protocol_test/Hello"
              {"hello_prn" -/hello-prn-fn, "hello_str" -/hello-str-fn})))
         (return

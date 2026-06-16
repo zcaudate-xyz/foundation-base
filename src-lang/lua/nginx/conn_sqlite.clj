@@ -1,13 +1,13 @@
 (ns lua.nginx.conn-sqlite
   (:require [hara.lang :as l]
-            [std.lib.foundation :as f]))
+            [std.lib.foundation :as f]
+            [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :lua.nginx
   {:import [["lsqlite3" :as ngxsqlite]]
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-protocol :as protocol]
              [xt.net.conn-sql :as conn-sql]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
@@ -125,7 +125,8 @@
 
 (defn.lua client-query-async
   [client input]
-  (return (protocol/ensure-promise (-/client-query client input))))
+  (return (promise/x:promise-run
+           (-/client-query client input))))
 
 (defimpl.xt ^{:lang :lua}
   LuaNginxSqliteClient

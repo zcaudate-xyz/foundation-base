@@ -2,24 +2,11 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
+  {:require [[kmi.lang.protocol-base :as p]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.icoll :as p-coll]
-             [kmi.protocol.iedit :as p-edit]
-             [kmi.protocol.iempty :as p-empty]
-             [kmi.protocol.ieq :as p-eq]
-             [kmi.protocol.ihash :as p-hash]
-             [kmi.protocol.iassoc :as p-assoc]
-             [kmi.protocol.iassoc-mutable :as p-assoc-mutable]
-             [kmi.protocol.idissoc :as p-dissoc]
-             [kmi.protocol.idissoc-mutable :as p-dissoc-mutable]
-             [kmi.protocol.ifind :as p-find]
-             [kmi.protocol.ilookup :as p-lookup]
-             [kmi.protocol.isize :as p-size]
-             [kmi.protocol.ishow :as p-show]
-             [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-collection :as interface-collection]
              [kmi.lang.type-hashmap-node :as node]
@@ -66,19 +53,17 @@
 (defn.xt hashmap-new
   "creates a new hashmap"
   {:added "4.1"}
-  [root size protocol]
-  (var hashmap {"::" "hashmap"
-                :_root root
-                :_size size})
-  (return (spec/runtime-attach hashmap protocol)))
+  [root size]
+  (return {"::" "hashmap"
+           "_root" root
+           "_size" size}))
 
 (defn.xt hashmap-empty
   "creates an empty hashmap from the current hashmap"
   {:added "4.1"}
   [hashmap]
   (return (-/hashmap-new node/EMPTY_HASHMAP_NODE
-                         0
-                         (spec/runtime-protocol hashmap))))
+                         0)))
 
 (defn.xt hashmap-is-editable
   "checks if hashmap is editable"
@@ -93,8 +78,7 @@
   (if (-/hashmap-is-editable hashmap)
     (return hashmap)
     (return (-/hashmap-new (node/node-editable-root (. hashmap _root))
-                           (. hashmap _size)
-                           (spec/runtime-protocol hashmap)))))
+                           (. hashmap _size)))))
 
 (defn.xt hashmap-to-persistent!
   "creates a persistent hashmap"
@@ -102,8 +86,7 @@
   [hashmap]
   (if (-/hashmap-is-editable hashmap)
     (return (-/hashmap-new (node/ensure-persistent (. hashmap _root))
-                           (. hashmap _size)
-                           (spec/runtime-protocol hashmap)))
+                           (. hashmap _size)))
     (return hashmap)))
 
 (defn.xt hashmap-find-key
@@ -150,7 +133,6 @@
   "associates a key/value pair into a persistent hashmap"
   {:added "4.1"}
   [hashmap key val]
-  (var protocol (spec/runtime-protocol hashmap))
   (var result (node/node-assoc (. hashmap _root)
                                nil
                                0
@@ -159,8 +141,7 @@
                                val))
   (return (-/hashmap-new (. result node)
                          (+ (. hashmap _size)
-                            (:? (. result added) 1 0))
-                         protocol)))
+                            (:? (. result added) 1 0)))))
 
 (defn.xt hashmap-assoc!
   "associates a key/value pair into a mutable hashmap"
@@ -185,7 +166,6 @@
   "dissociates a key from a persistent hashmap"
   {:added "4.1"}
   [hashmap key]
-  (var protocol (spec/runtime-protocol hashmap))
   (var result (node/node-dissoc (. hashmap _root)
                                 nil
                                 0
@@ -194,8 +174,7 @@
   (return (-/hashmap-new (or (. result node)
                              node/EMPTY_HASHMAP_NODE)
                          (+ (. hashmap _size)
-                            (:? (. result removed) -1 0))
-                         protocol)))
+                            (:? (. result removed) -1 0)))))
 
 (defn.xt hashmap-dissoc!
   "dissociates a key from a mutable hashmap"
@@ -253,43 +232,52 @@
         (return (xt/x:cat (xt/x:str-substring s 0 (- (xt/x:len s) 2))
                           "}")))))
 
-(def.xt HASHMAP_SPEC
-   [[p-coll/IColl   {:_start_string "{"
-                     :_end_string   "}"
-                     :_sep_string   ", "
-                     :_is_ordered   false
-                     :to-iter       -/hashmap-to-iter
-                     :to-array      -/hashmap-to-array}]
-    [p-edit/IEdit   {:is-mutable    -/hashmap-is-editable
-                     :to-mutable    -/hashmap-to-mutable!
-                     :is-persistent (fn:> [hashmap] (not (-/hashmap-is-editable hashmap)))
-                     :to-persistent -/hashmap-to-persistent!}]
-    [p-empty/IEmpty  {:empty         -/hashmap-empty}]
-    [p-eq/IEq     {:eq            -/hashmap-eq}]
-    [p-hash/IHash   {:hash          (interface-common/wrap-with-cache
-                                     -/hashmap-hash
-                                     -/hashmap-is-editable)}]
-    [p-assoc/IAssoc  {:assoc         -/hashmap-assoc}]
-    [p-assoc-mutable/IAssocMutable  {:assoc-mutable -/hashmap-assoc!}]
-    [p-dissoc/IDissoc {:dissoc        -/hashmap-dissoc}]
-    [p-dissoc-mutable/IDissocMutable {:dissoc-mutable -/hashmap-dissoc!}]
-    [p-find/IFind   {:find          -/hashmap-find-key}]
-    [p-lookup/ILookup {:keys          -/hashmap-keys
-                     :vals          -/hashmap-vals
-                     :lookup        -/hashmap-lookup-key}]
-    [p-size/ISize   {:size          interface-collection/coll-size}]
-    [p-show/IShow   {:show          -/hashmap-show}]])
-
-(def.xt HASHMAP_PROTOTYPE
-  (-> -/HASHMAP_SPEC
-      (proto/proto-spec)
-      (spec/proto-create)))
+(proto/defimpl.xt ^{:rt/tag "hashmap"} Hashmap
+  [_root _size]
+  p/IColl
+  {:_start_string "{"
+   :_end_string   "}"
+   :_sep_string   ", "
+   :_is_ordered   false
+   :to-iter       -/hashmap-to-iter
+   :to-array      -/hashmap-to-array}
+  p/IEdit
+  {:is-mutable    -/hashmap-is-editable
+   :to-mutable    -/hashmap-to-mutable!
+   :is-persistent (fn:> [hashmap] (not (-/hashmap-is-editable hashmap)))
+   :to-persistent -/hashmap-to-persistent!}
+  p/IEmpty
+  {:empty -/hashmap-empty}
+  p/IEq
+  {:eq -/hashmap-eq}
+  p/IHash
+  {:hash (interface-common/wrap-with-cache
+          -/hashmap-hash
+          -/hashmap-is-editable)}
+  p/IAssoc
+  {:assoc -/hashmap-assoc}
+  p/IAssocMutable
+  {:assoc-mutable -/hashmap-assoc!}
+  p/IDissoc
+  {:dissoc -/hashmap-dissoc}
+  p/IDissocMutable
+  {:dissoc-mutable -/hashmap-dissoc!}
+  p/IFind
+  {:find -/hashmap-find-key}
+  p/ILookup
+  {:keys   -/hashmap-keys
+   :vals   -/hashmap-vals
+   :lookup -/hashmap-lookup-key}
+  p/ISize
+  {:size interface-collection/coll-size}
+  p/IShow
+  {:show -/hashmap-show})
 
 (defn.xt hashmap-create
   "creates a hashmap with the default prototype"
   {:added "4.1"}
   [root size]
-  (return (-/hashmap-new root size -/HASHMAP_PROTOTYPE)))
+  (return (-/Hashmap root size)))
 
 (defn.xt hashmap-empty-mutable
   "creates an empty mutable hashmap"

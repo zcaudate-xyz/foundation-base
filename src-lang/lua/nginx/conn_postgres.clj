@@ -1,5 +1,6 @@
 (ns lua.nginx.conn-postgres
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :lua.nginx
   {:import [["pgmoon" :as ngxpg]]
@@ -7,7 +8,6 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-protocol :as protocol]
              [xt.lang.common-resource :as rt]
              [xt.net.conn-sql :as conn-sql]]})
 
@@ -174,7 +174,7 @@
 
 (defn.lua client-query-async
   [client input]
-  (return (protocol/ensure-promise (-/client-query client input))))
+  (return (promise/x:promise-run (-/client-query client input))))
 
 (defimpl.xt ^{:lang :lua}
   LuaNginxPostgresClient

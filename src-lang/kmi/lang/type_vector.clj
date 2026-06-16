@@ -3,25 +3,12 @@
   (:refer-clojure :exclude [vector]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
+  {:require [[kmi.lang.protocol-base :as p]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.icoll :as p-coll]
-             [kmi.protocol.iedit :as p-edit]
-             [kmi.protocol.iempty :as p-empty]
-             [kmi.protocol.ieq :as p-eq]
-             [kmi.protocol.ihash :as p-hash]
-             [kmi.protocol.ifind :as p-find]
-             [kmi.protocol.ipush :as p-push]
-             [kmi.protocol.ipush-mutable :as p-push-mutable]
-             [kmi.protocol.ipop :as p-pop]
-             [kmi.protocol.ipop-mutable :as p-pop-mutable]
-             [kmi.protocol.inth :as p-nth]
-             [kmi.protocol.isize :as p-size]
-             [kmi.protocol.ishow :as p-show]
              [kmi.lang.interface-common :as interface-common]
-             [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-collection :as interface-collection]
              [kmi.lang.type-vector-node :as node]
              [kmi.lang.type-pair :as type-pair]]})
@@ -58,20 +45,18 @@
 (defn.xt vector-new
   "creates a new vector"
   {:added "4.0"}
-  [root size shift tail protocol]
-  (var vector {"::" "vector"
-               :_root root
-               :_size size
-               :_shift shift
-               :_tail tail})
-  (return (spec/runtime-attach vector protocol)))
+  [root size shift tail]
+  (return {"::" "vector"
+           "_root" root
+           "_size" size
+           "_shift" shift
+           "_tail" tail}))
 
 (defn.xt vector-empty
   "creates an empty vector from current"
   {:added "4.0"}
   [vector]
-  (var protocol (spec/runtime-protocol vector))
-  (return (-/vector-new node/EMPTY_VECTOR_NODE 0 node/BITS [] protocol)))
+  (return (-/vector-new node/EMPTY_VECTOR_NODE 0 node/BITS [])))
 
 (defn.xt vector-is-editable
   "checks that vector is editable"
@@ -89,7 +74,6 @@
   "push-lastoins an element to the vector"
   {:added "4.0"}
   [vector x]
-  (var protocol (spec/runtime-protocol vector))
   (var #{_root _size _shift _tail} vector)
   (when (< (- _size (node/impl-offset _size))
            node/WIDTH)
@@ -98,8 +82,7 @@
     (return (-/vector-new (node/ensure-persistent _root)
                           (+ _size 1)
                           _shift
-                          n_tail
-                          protocol)))
+                          n_tail)))
   
   (var n_root)
   (var _tail-node (node/node-create nil _tail))
@@ -115,14 +98,12 @@
   (return (-/vector-new n_root
                         (+ 1 _size)
                         n_shift
-                        [(interface-common/impl-normalise x)]
-                        protocol)))
+                        [(interface-common/impl-normalise x)])))
 
 (defn.xt vector-pop-last
   "pops the last element off vector"
   {:added "4.0"}
   [vector]
-  (var protocol (spec/runtime-protocol vector))
   (var #{_root _size _shift _tail} vector)
   (when (== _size 0)
     (return vector))
@@ -134,8 +115,7 @@
     (return (-/vector-new (node/ensure-persistent _root)
                              (- _size 1)
                              _shift
-                             n_tail
-                             protocol)))
+                             n_tail)))
 
   (var n_tail (node/node-array-for _root _size _shift _tail (- _size 2) false))
   (var n_root (node/node-pop-tail nil _size _shift _root false))
@@ -148,16 +128,14 @@
         (-/vector-new (xt/x:first children)
                          (- _size 1)
                          (- _shift node/BITS)
-                         n_tail
-                         protocol)
+                         n_tail)
         
         :else
         (return (-/vector-new (or n_root
                                   node/EMPTY_VECTOR_NODE)
                               (- _size 1)
                               _shift
-                              n_tail
-                              protocol))))
+                              n_tail))))
 
 ;;
 ;; mutable
@@ -235,7 +213,6 @@
   "mutates the vector"
   {:added "4.0"}
   [vector]
-  (var protocol (spec/runtime-protocol vector))
   (var #{_root _size _shift _tail} vector)
   (var #{edit-id} _root)
   (cond (xt/x:not-nil? edit-id)
@@ -245,22 +222,19 @@
         (return (-/vector-new (node/node-editable-root _root)
                               _size
                               _shift
-                              _tail
-                              protocol))))
+                              _tail))))
 
 (defn.xt vector-to-persistent!
   "creates persistent vector"
   {:added "4.0"}
   [vector]
-  (var protocol (spec/runtime-protocol vector))
   (var #{_root _size _shift _tail} vector)
   (node/ensure-editable _root)
   (var #{children} _root)
   (return (-/vector-new (node/node-create nil (xt/x:arr-clone children))
                         _size
                         _shift
-                        _tail
-                        protocol)))
+                        _tail)))
 
 (defn.xt vector-find-idx
   "finds the pair entry"
@@ -292,41 +266,50 @@
 ;; ITEROP
 ;;
 
-(def.xt VECTOR_SPEC
-   [[p-coll/IColl   {:_start_string  "["
-                     :_end_string    "]"
-                     :_sep_string    ", "
-                     :_is_ordered    true
-                     :to-iter  -/vector-to-iter
-                     :to-array -/vector-to-array}]
-    [p-edit/IEdit   {:is-mutable -/vector-is-editable
-                     :to-mutable -/vector-to-mutable!
-                     :is-persistent (fn:> [vector] (not (-/vector-is-editable vector)))
-                     :to-persistent -/vector-to-persistent!}]
-    [p-empty/IEmpty  {:empty  -/vector-empty}]
-    [p-eq/IEq     {:eq     interface-collection/coll-eq}]
-    [p-hash/IHash   {:hash   (interface-common/wrap-with-cache
-                              interface-collection/coll-hash-ordered
-                              -/vector-is-editable)}]
-    [p-find/IFind   {:find  -/vector-find-idx}]
-    [p-push/IPush   {:push  -/vector-push-last}]
-    [p-push-mutable/IPushMutable   {:push-mutable   -/vector-push-last!}]
-    [p-pop/IPop    {:pop    -/vector-pop-last}]
-    [p-pop-mutable/IPopMutable    {:pop-mutable    -/vector-pop-last!}]
-    [p-nth/INth    {:nth  -/vector-get-idx}]
-    [p-size/ISize   {:size   interface-collection/coll-size}]
-    [p-show/IShow   {:show   interface-collection/coll-show}]])
-
-(def.xt VECTOR_PROTOTYPE
-  (-> -/VECTOR_SPEC
-      (proto/proto-spec)
-      (spec/proto-create)))
+(proto/defimpl.xt ^{:rt/tag "vector"} Vector
+  [_root _size _shift _tail]
+  p/IColl
+  {:_start_string "["
+   :_end_string   "]"
+   :_sep_string   ", "
+   :_is_ordered   true
+   :to-iter       -/vector-to-iter
+   :to-array      -/vector-to-array}
+  p/IEdit
+  {:is-mutable    -/vector-is-editable
+   :to-mutable    -/vector-to-mutable!
+   :is-persistent (fn:> [vector] (not (-/vector-is-editable vector)))
+   :to-persistent -/vector-to-persistent!}
+  p/IEmpty
+  {:empty -/vector-empty}
+  p/IEq
+  {:eq interface-collection/coll-eq}
+  p/IHash
+  {:hash (interface-common/wrap-with-cache
+          interface-collection/coll-hash-ordered
+          -/vector-is-editable)}
+  p/IFind
+  {:find -/vector-find-idx}
+  p/IPush
+  {:push -/vector-push-last}
+  p/IPushMutable
+  {:push-mutable -/vector-push-last!}
+  p/IPop
+  {:pop -/vector-pop-last}
+  p/IPopMutable
+  {:pop-mutable -/vector-pop-last!}
+  p/INth
+  {:nth -/vector-get-idx}
+  p/ISize
+  {:size interface-collection/coll-size}
+  p/IShow
+  {:show interface-collection/coll-show})
 
 (defn.xt vector-create
   "creates a vector"
   {:added "4.0"}
   [root size shift tail]
-  (return (-/vector-new root size shift tail -/VECTOR_PROTOTYPE)))
+  (return (-/Vector root size shift tail)))
 
 ;;
 ;;

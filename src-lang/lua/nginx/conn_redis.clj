@@ -1,6 +1,7 @@
 (ns lua.nginx.conn-redis
   (:require [hara.lang :as l]
-            [std.lib.foundation :as f]))
+            [std.lib.foundation :as f]
+            [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :lua.nginx
   {:import [["resty.redis" :as ngxredis]

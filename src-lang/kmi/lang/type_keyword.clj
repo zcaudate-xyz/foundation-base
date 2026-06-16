@@ -3,14 +3,10 @@
   (:refer-clojure :exclude [keyword]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
+  {:require [[kmi.lang.protocol-base :as p]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.ieq :as p-eq]
-             [kmi.protocol.ihash :as p-hash]
-             [kmi.protocol.inamespaced :as p-namespaced]
-             [kmi.protocol.ishow :as p-show]
              [kmi.lang.interface-common :as interface-common]
-             [kmi.lang.interface-spec :as spec]
              [kmi.lang.common-hash :as common-hash]]})
 
 (def.xt KEYWORD_LOOKUP
@@ -49,27 +45,23 @@
                (== (. sym _ns)   (. o _ns))
                (== (. sym _name) (. o _name)))))
 
-(def.xt KEYWORD_SPEC
-  [[p-eq/IEq         {:eq        -/keyword-eq}]
-   [p-hash/IHash       {:hash      (interface-common/wrap-with-cache
-                                    -/keyword-hash)}]
-   [p-namespaced/INamespaced {:name      interface-common/get-name
-                        :namespace interface-common/get-namespace} ]
-   [p-show/IShow       {:show      -/keyword-show}]])
-
-(def.xt KEYWORD_PROTOTYPE
-  (-> -/KEYWORD_SPEC
-      (proto/proto-spec)
-      (spec/proto-create)))
+(proto/defimpl.xt ^{:rt/tag "keyword"} Keyword
+  [_ns _name]
+  p/IEq
+  {eq -/keyword-eq}
+  p/IHash
+  {hash (interface-common/wrap-with-cache -/keyword-hash)}
+  p/INamespaced
+  {name      interface-common/get-name
+   namespace interface-common/get-namespace}
+  p/IShow
+  {show -/keyword-show})
 
 (defn.xt keyword-create
   "creates a keyword"
   {:added "4.0"}
   [ns name]
-  (var sym {"::" "keyword"
-            :_ns   ns
-            :_name name})
-  (return (spec/runtime-attach sym -/KEYWORD_PROTOTYPE)))
+  (return (-/Keyword ns name)))
 
 (defn.xt keyword
   "creates the keyword or pulls it from cache"

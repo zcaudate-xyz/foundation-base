@@ -91,20 +91,25 @@
                                              "right_id" "peer"}))
     (var outbound [])
     (var inbound [])
-    ((. (. wire ["left"]) ["start_fn"])
+    (var left-endpoint (xt/x:get-key wire "left"))
+    (var left-start (xt/x:get-key left-endpoint "start_fn"))
+    (left-start
      (fn [event ctx]
        (xt/x:arr-push outbound {"text" (transport-memory/event-text event)
                                 "ctx" ctx})
        (return true)))
-    (var endpoint (transport-memory/text-endpoint (. wire ["right"])))
-    ((. endpoint ["start_fn"])
+    (var right-endpoint (transport-memory/text-endpoint (xt/x:get-key wire "right")))
+    (var right-start (xt/x:get-key right-endpoint "start_fn"))
+    (right-start
      (fn [frame ctx]
        (xt/x:arr-push inbound {"frame" frame
                                "ctx" ctx})
        (return true)))
-    ((. endpoint ["send_fn"])
+    (var right-send (xt/x:get-key right-endpoint "send_fn"))
+    (right-send
      (frame/stream-frame "room/a" "event/pinged" {"count" 1} nil nil))
-    ((. (. wire ["left"]) ["write_fn"])
+    (var left-write (xt/x:get-key left-endpoint "write_fn"))
+    (left-write
      (node-json/encode-frame
       (frame/request-frame "room/a" "demo/echo" [{"ping" 1}] {"id" "req-echo"})))
     (repl/notify
@@ -121,25 +126,30 @@
                    "args" [{"ping" 1}]
                    "id" "req-echo"}})
   
-  (notify/wait-on :lua
+  (notify/wait-on :js
     (var wire (transport-memory/memory-pair {"left_id" "host"
                                              "right_id" "peer"}))
     (var outbound [])
     (var inbound [])
-    ((. (. wire ["left"]) ["start_fn"])
+    (var left-endpoint (xt/x:get-key wire "left"))
+    (var left-start (xt/x:get-key left-endpoint "start_fn"))
+    (left-start
      (fn [event ctx]
        (xt/x:arr-push outbound {"text" (transport-memory/event-text event)
                                 "ctx" ctx})
        (return true)))
-    (var endpoint (transport-memory/text-endpoint (. wire ["right"])))
-    ((. endpoint ["start_fn"])
+    (var right-endpoint (transport-memory/text-endpoint (xt/x:get-key wire "right")))
+    (var right-start (xt/x:get-key right-endpoint "start_fn"))
+    (right-start
      (fn [frame ctx]
        (xt/x:arr-push inbound {"frame" frame
                                "ctx" ctx})
        (return true)))
-    ((. endpoint ["send_fn"])
+    (var right-send (xt/x:get-key right-endpoint "send_fn"))
+    (right-send
      (frame/stream-frame "room/a" "event/pinged" {"count" 1} nil nil))
-    ((. (. wire ["left"]) ["write_fn"])
+    (var left-write (xt/x:get-key left-endpoint "write_fn"))
+    (left-write
      (node-json/encode-frame
       (frame/request-frame "room/a" "demo/echo" [{"ping" 1}] {"id" "req-echo"})))
     (repl/notify
@@ -156,25 +166,30 @@
                    "args" [{"ping" 1}]
                    "id" "req-echo"}})
 
-  (notify/wait-on :python
+  (notify/wait-on :js
     (var wire (transport-memory/memory-pair {"left_id" "host"
                                              "right_id" "peer"}))
     (var outbound [])
     (var inbound [])
-    ((. (. wire ["left"]) ["start_fn"])
+    (var left-endpoint (xt/x:get-key wire "left"))
+    (var left-start (xt/x:get-key left-endpoint "start_fn"))
+    (left-start
      (fn [event ctx]
        (xt/x:arr-push outbound {"text" (transport-memory/event-text event)
                                 "ctx" ctx})
        (return true)))
-    (var endpoint (transport-memory/text-endpoint (. wire ["right"])))
-    ((. endpoint ["start_fn"])
+    (var right-endpoint (transport-memory/text-endpoint (xt/x:get-key wire "right")))
+    (var right-start (xt/x:get-key right-endpoint "start_fn"))
+    (right-start
      (fn [frame ctx]
        (xt/x:arr-push inbound {"frame" frame
                                "ctx" ctx})
        (return true)))
-    ((. endpoint ["send_fn"])
+    (var right-send (xt/x:get-key right-endpoint "send_fn"))
+    (right-send
      (frame/stream-frame "room/a" "event/pinged" {"count" 1} nil nil))
-    ((. (. wire ["left"]) ["write_fn"])
+    (var left-write (xt/x:get-key left-endpoint "write_fn"))
+    (left-write
      (node-json/encode-frame
       (frame/request-frame "room/a" "demo/echo" [{"ping" 1}] {"id" "req-echo"})))
     (repl/notify
@@ -200,21 +215,27 @@
                    "peer-a" ["hub"]
                    "peer-b" ["hub"]}))
     (var seen [])
-    ((. (. network ["peer-a"]) ["start_fn"])
+    (var peer-a-endpoint (xt/x:get-key network "peer-a"))
+    (var peer-a-start (xt/x:get-key peer-a-endpoint "start_fn"))
+    (peer-a-start
      (fn [event ctx]
        (xt/x:arr-push seen {"id" "peer-a"
                             "text" (transport-memory/event-text event)
                             "wire" (. ctx ["wire"])
                             "peer" (. ctx ["peer"])})
        (return true)))
-    ((. (. network ["peer-b"]) ["start_fn"])
+    (var peer-b-endpoint (xt/x:get-key network "peer-b"))
+    (var peer-b-start (xt/x:get-key peer-b-endpoint "start_fn"))
+    (peer-b-start
      (fn [event ctx]
        (xt/x:arr-push seen {"id" "peer-b"
                             "text" (transport-memory/event-text event)
                             "wire" (. ctx ["wire"])
                             "peer" (. ctx ["peer"])})
        (return true)))
-    (-> ((. (. network ["hub"]) ["write_fn"]) "ping")
+    (var hub-endpoint (xt/x:get-key network "hub"))
+    (var hub-write (xt/x:get-key hub-endpoint "write_fn"))
+    (-> (hub-write "ping")
         (promise/x:promise-then
          (fn [_]
            (repl/notify seen)))))
@@ -227,27 +248,33 @@
        "wire" "hub"
        "peer" "peer-b"}]
 
-  (notify/wait-on :lua
+  (notify/wait-on :js
     (var network (transport-memory/memory-network
                   {"hub" ["peer-a" "peer-b"]
                    "peer-a" ["hub"]
                    "peer-b" ["hub"]}))
     (var seen [])
-    ((. (. network ["peer-a"]) ["start_fn"])
+    (var peer-a-endpoint (xt/x:get-key network "peer-a"))
+    (var peer-a-start (xt/x:get-key peer-a-endpoint "start_fn"))
+    (peer-a-start
      (fn [event ctx]
        (xt/x:arr-push seen {"id" "peer-a"
                             "text" (transport-memory/event-text event)
                             "wire" (. ctx ["wire"])
                             "peer" (. ctx ["peer"])})
        (return true)))
-    ((. (. network ["peer-b"]) ["start_fn"])
+    (var peer-b-endpoint (xt/x:get-key network "peer-b"))
+    (var peer-b-start (xt/x:get-key peer-b-endpoint "start_fn"))
+    (peer-b-start
      (fn [event ctx]
        (xt/x:arr-push seen {"id" "peer-b"
                             "text" (transport-memory/event-text event)
                             "wire" (. ctx ["wire"])
                             "peer" (. ctx ["peer"])})
        (return true)))
-    (-> ((. (. network ["hub"]) ["write_fn"]) "ping")
+    (var hub-endpoint (xt/x:get-key network "hub"))
+    (var hub-write (xt/x:get-key hub-endpoint "write_fn"))
+    (-> (hub-write "ping")
         (promise/x:promise-then
          (fn [_]
            (repl/notify seen)))))
@@ -260,27 +287,33 @@
        "wire" "hub"
        "peer" "peer-b"}]
 
-  (notify/wait-on :python
+  (notify/wait-on :js
     (var network (transport-memory/memory-network
                   {"hub" ["peer-a" "peer-b"]
                    "peer-a" ["hub"]
                    "peer-b" ["hub"]}))
     (var seen [])
-    ((. (. network ["peer-a"]) ["start_fn"])
+    (var peer-a-endpoint (xt/x:get-key network "peer-a"))
+    (var peer-a-start (xt/x:get-key peer-a-endpoint "start_fn"))
+    (peer-a-start
      (fn [event ctx]
        (xt/x:arr-push seen {"id" "peer-a"
                             "text" (transport-memory/event-text event)
                             "wire" (. ctx ["wire"])
                             "peer" (. ctx ["peer"])})
        (return true)))
-    ((. (. network ["peer-b"]) ["start_fn"])
+    (var peer-b-endpoint (xt/x:get-key network "peer-b"))
+    (var peer-b-start (xt/x:get-key peer-b-endpoint "start_fn"))
+    (peer-b-start
      (fn [event ctx]
        (xt/x:arr-push seen {"id" "peer-b"
                             "text" (transport-memory/event-text event)
                             "wire" (. ctx ["wire"])
                             "peer" (. ctx ["peer"])})
        (return true)))
-    (-> ((. (. network ["hub"]) ["write_fn"]) "ping")
+    (var hub-endpoint (xt/x:get-key network "hub"))
+    (var hub-write (xt/x:get-key hub-endpoint "write_fn"))
+    (-> (hub-write "ping")
         (promise/x:promise-then
          (fn [_]
            (repl/notify seen)))))

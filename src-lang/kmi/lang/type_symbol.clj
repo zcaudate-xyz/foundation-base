@@ -3,14 +3,10 @@
   (:refer-clojure :exclude [symbol]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
+  {:require [[kmi.lang.protocol-base :as p]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.ieq :as p-eq]
-             [kmi.protocol.ihash :as p-hash]
-             [kmi.protocol.inamespaced :as p-namespaced]
-             [kmi.protocol.ishow :as p-show]
              [kmi.lang.interface-common :as interface-common]
-             [kmi.lang.interface-spec :as spec]
              [kmi.lang.common-hash :as common-hash]]})
 
 (def.xt SYMBOL_LOOKUP
@@ -48,27 +44,23 @@
                (== (. sym _ns) (. o _ns))
                (== (. sym _name) (. o _name)))))
 
-(def.xt SYMBOL_SPEC
-  [[p-eq/IEq         {:eq        -/symbol-eq}]
-   [p-hash/IHash       {:hash      (interface-common/wrap-with-cache
-                                    -/symbol-hash)}]
-   [p-namespaced/INamespaced {:name      interface-common/get-name
-                        :namespace interface-common/get-namespace} ]
-   [p-show/IShow       {:show      -/symbol-show}]])
-
-(def.xt SYMBOL_PROTOTYPE
-  (-> -/SYMBOL_SPEC
-      (proto/proto-spec)
-      (spec/proto-create)))
+(proto/defimpl.xt ^{:rt/tag "symbol"} Symbol
+  [_ns _name]
+  p/IEq
+  {eq -/symbol-eq}
+  p/IHash
+  {hash (interface-common/wrap-with-cache -/symbol-hash)}
+  p/INamespaced
+  {name      interface-common/get-name
+   namespace interface-common/get-namespace}
+  p/IShow
+  {show -/symbol-show})
 
 (defn.xt symbol-create
   "creates a symbol"
   {:added "4.0"}
   [ns name]
-  (var sym {"::" "symbol"
-            :_ns   ns
-            :_name name})
-  (return (spec/runtime-attach sym -/SYMBOL_PROTOTYPE)))
+  (return (-/Symbol ns name)))
 
 (defn.xt symbol
   "creates the symbol or pulls it from cache"

@@ -20,7 +20,6 @@
              [js.net.conn-postgres :as js-postgres]
              [xt.net.conn-sql :as conn-sql]
              [xt.db.text.sql-call :as call]
-             [xt.db.runtime.driver :as driver]
              [xt.db.substrate :as db-helper]
              [postgres.sample.scratch-v0.route-entries :as entries]]})
 
@@ -223,7 +222,7 @@
                    (var fn-args     (. opts ["args"]))
                    (return
                     (-> (conn-sql/connect
-                         (driver/get-driver "postgres")
+                         (js-postgres/driver)
                          (substrate/get-service node "db/primary"))
                         (promise/x:promise-then
                          (fn [conn]

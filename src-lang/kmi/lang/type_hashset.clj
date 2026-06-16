@@ -3,23 +3,11 @@
   (:refer-clojure :exclude [hashset]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
+  {:require [[kmi.lang.protocol-base :as p]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.icoll :as p-coll]
-             [kmi.protocol.iedit :as p-edit]
-             [kmi.protocol.iempty :as p-empty]
-             [kmi.protocol.ieq :as p-eq]
-             [kmi.protocol.ihash :as p-hash]
-             [kmi.protocol.ifind :as p-find]
-             [kmi.protocol.ipush :as p-push]
-             [kmi.protocol.ipush-mutable :as p-push-mutable]
-             [kmi.protocol.idissoc :as p-dissoc]
-             [kmi.protocol.idissoc-mutable :as p-dissoc-mutable]
-             [kmi.protocol.isize :as p-size]
-             [kmi.protocol.ishow :as p-show]
-             [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-collection :as interface-collection]
              [kmi.lang.type-hashmap :as hashmap]]})
@@ -42,18 +30,16 @@
 (defn.xt hashset-new
   "creates a new hashset"
   {:added "4.1"}
-  [m protocol]
-  (var hashset {"::" "hashset"
-                :_map m
-                :_size (. m _size)})
-  (return (spec/runtime-attach hashset protocol)))
+  [m]
+  (return {"::" "hashset"
+           "_map" m
+           "_size" (. m _size)}))
 
 (defn.xt hashset-empty
   "creates an empty hashset from current"
   {:added "4.1"}
   [hashset]
-  (return (-/hashset-new hashmap/EMPTY_HASHMAP
-                         (spec/runtime-protocol hashset))))
+  (return (-/hashset-new hashmap/EMPTY_HASHMAP)))
 
 (defn.xt hashset-is-editable
   "checks if hashset is editable"
@@ -67,16 +53,14 @@
   [hashset]
   (if (-/hashset-is-editable hashset)
     (return hashset)
-    (return (-/hashset-new (hashmap/hashmap-to-mutable! (. hashset _map))
-                           (spec/runtime-protocol hashset)))))
+    (return (-/hashset-new (hashmap/hashmap-to-mutable! (. hashset _map))))))
 
 (defn.xt hashset-to-persistent!
   "creates a persistent hashset"
   {:added "4.1"}
   [hashset]
   (if (-/hashset-is-editable hashset)
-    (return (-/hashset-new (hashmap/hashmap-to-persistent! (. hashset _map))
-                           (spec/runtime-protocol hashset)))
+    (return (-/hashset-new (hashmap/hashmap-to-persistent! (. hashset _map))))
     (return hashset)))
 
 (defn.xt hashset-find
@@ -101,8 +85,7 @@
   "adds a value to the persistent hashset"
   {:added "4.1"}
   [hashset value]
-  (return (-/hashset-new (hashmap/hashmap-assoc (. hashset _map) value true)
-                         (spec/runtime-protocol hashset))))
+  (return (-/hashset-new (hashmap/hashmap-assoc (. hashset _map) value true))))
 
 (defn.xt hashset-push!
   "adds a value to the mutable hashset"
@@ -118,8 +101,7 @@
   "removes a value from the persistent hashset"
   {:added "4.1"}
   [hashset value]
-  (return (-/hashset-new (hashmap/hashmap-dissoc (. hashset _map) value)
-                         (spec/runtime-protocol hashset))))
+  (return (-/hashset-new (hashmap/hashmap-dissoc (. hashset _map) value))))
 
 (defn.xt hashset-dissoc!
   "removes a value from the mutable hashset"
@@ -163,40 +145,48 @@
         (return (xt/x:cat (xt/x:str-substring s 0 (- (xt/x:len s) 2))
                           "}")))))
 
-(def.xt HASHSET_SPEC
-   [[p-coll/IColl {:_start_string "#{" 
-                   :_end_string "}"
-                   :_sep_string ", "
-                   :_is_ordered false
-                   :to-iter -/hashset-to-iter
-                   :to-array -/hashset-to-array}]
-    [p-edit/IEdit {:is-mutable -/hashset-is-editable
-                   :to-mutable -/hashset-to-mutable!
-                   :is-persistent (fn:> [hashset] (not (-/hashset-is-editable hashset)))
-                   :to-persistent -/hashset-to-persistent!}]
-    [p-empty/IEmpty {:empty -/hashset-empty}]
-    [p-eq/IEq {:eq -/hashset-eq}]
-    [p-hash/IHash {:hash (interface-common/wrap-with-cache
-                          -/hashset-hash
-                          -/hashset-is-editable)}]
-    [p-find/IFind {:find -/hashset-find}]
-    [p-push/IPush {:push -/hashset-push}]
-    [p-push-mutable/IPushMutable {:push-mutable -/hashset-push!}]
-    [p-dissoc/IDissoc {:dissoc -/hashset-dissoc}]
-    [p-dissoc-mutable/IDissocMutable {:dissoc-mutable -/hashset-dissoc!}]
-    [p-size/ISize {:size interface-collection/coll-size}]
-    [p-show/IShow {:show -/hashset-show}]])
-
-(def.xt HASHSET_PROTOTYPE
-  (-> -/HASHSET_SPEC
-      (proto/proto-spec)
-      (spec/proto-create)))
+(proto/defimpl.xt ^{:rt/tag "hashset"} Hashset
+  [_map _size]
+  p/IColl
+  {:_start_string "#{"
+   :_end_string   "}"
+   :_sep_string   ", "
+   :_is_ordered   false
+   :to-iter       -/hashset-to-iter
+   :to-array      -/hashset-to-array}
+  p/IEdit
+  {:is-mutable    -/hashset-is-editable
+   :to-mutable    -/hashset-to-mutable!
+   :is-persistent (fn:> [hashset] (not (-/hashset-is-editable hashset)))
+   :to-persistent -/hashset-to-persistent!}
+  p/IEmpty
+  {:empty -/hashset-empty}
+  p/IEq
+  {:eq -/hashset-eq}
+  p/IHash
+  {:hash (interface-common/wrap-with-cache
+          -/hashset-hash
+          -/hashset-is-editable)}
+  p/IFind
+  {:find -/hashset-find}
+  p/IPush
+  {:push -/hashset-push}
+  p/IPushMutable
+  {:push-mutable -/hashset-push!}
+  p/IDissoc
+  {:dissoc -/hashset-dissoc}
+  p/IDissocMutable
+  {:dissoc-mutable -/hashset-dissoc!}
+  p/ISize
+  {:size interface-collection/coll-size}
+  p/IShow
+  {:show -/hashset-show})
 
 (defn.xt hashset-create
   "creates a hashset"
   {:added "4.1"}
   [m]
-  (return (-/hashset-new m -/HASHSET_PROTOTYPE)))
+  (return (-/Hashset m (. m _size))))
 
 (def.xt EMPTY_HASHSET
   (-/hashset-create hashmap/EMPTY_HASHMAP))

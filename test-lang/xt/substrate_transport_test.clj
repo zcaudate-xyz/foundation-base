@@ -56,7 +56,7 @@
        "kind" "request"
        "meta" {}})
 
-  (notify/wait-on [:lua 10000]
+  (notify/wait-on [:js 10000]
     (var server (event-node/node-create
                  {"id" "server"
                   "handlers"
@@ -80,7 +80,7 @@
        "kind" "request"
        "meta" {}})
 
-  (notify/wait-on :python
+  (notify/wait-on :js
     (var server (event-node/node-create
                  {"id" "server"
                   "handlers"
@@ -147,7 +147,7 @@
            (repl/notify out)))))
   => {"space" "room/a" "server" "server"}
 
-  (notify/wait-on :python
+  (notify/wait-on :js
     (var client (event-node/node-create
                  {"id" "client"}))
     (var server (event-node/node-create

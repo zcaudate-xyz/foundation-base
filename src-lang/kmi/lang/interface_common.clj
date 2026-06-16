@@ -3,7 +3,8 @@
   (:refer-clojure :exclude [hash count pop nth assoc dissoc to-array find empty keyword symbol vector]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
+  {:require [[kmi.lang.protocol-base :as p]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [kmi.lang.common-hash :as common-hash]]})
 
@@ -48,7 +49,7 @@
   (var hash-id (common-hash/hash-native x))
   (if (xt/x:is-number? hash-id)
     (return hash-id)
-    (return (. x (hash)))))
+    (return (p/hash x))))
 
 (defn.xt get-name
   "gets the name of a symbol, keyword or var"
@@ -94,9 +95,7 @@
         (return (xt/x:cat "\"" x "\""))
         
         (-/is-managed? x)
-        (if (. x show)
-          (return (. x (show)))
-          (return (xt/x:to-string x)))
+        (return (p/show x))
         
         :else
         (return (xt/x:to-string x))))
@@ -113,13 +112,11 @@
         (return (-/eq (. o2 _value)
                       o1))
 
-        (and (-/is-managed? o1)
-             (. o1 eq))
-        (return (. o1 (eq o2)))
+        (-/is-managed? o1)
+        (return (p/eq o1 o2))
         
-        (and (-/is-managed? o2)
-             (. o2 eq))
-        (return (. o2 (eq o1)))
+        (-/is-managed? o2)
+        (return (p/eq o2 o1))
 
         :else
         (return (== o1 o2))))
@@ -128,131 +125,113 @@
   "gets the count for a"
   {:added "4.0"}
   [x]
-  (cond (and (-/is-managed? x)
-             (. x size))
-        (return (. x (size)))
-        
-        (xt/x:is-string? x)
+  (cond (xt/x:is-string? x)
         (return (xt/x:str-len x))
 
         (xt/x:is-array? x)
-        (return (xt/x:len x))))
+        (return (xt/x:len x))
 
-(defmacro.xt ^{:standalone true}
-  is-persistent?
+        (-/is-managed? x)
+        (return (p/size x))))
+
+(defn.xt is-persistent?
   "checks if collection is persistent"
   {:added "4.0"}
   [coll]
-  (list '. coll '(is-persistent)))
+  (return (p/is_persistent coll)))
 
-(defmacro.xt  ^{:standalone true}
-  is-mutable?
+(defn.xt is-mutable?
   "checks if collection is mutable"
   {:added "4.0"}
   [coll]
-  (list '. coll '(is-mutable)))
+  (return (p/is_mutable coll)))
 
-(defmacro.xt ^{:standalone true}
-  to-persistent
+(defn.xt to-persistent
   "converts to persistent"
   {:added "4.0"}
   [coll]
-  (list '. coll '(to-persistent)))
+  (return (p/to_persistent coll)))
 
-(defmacro.xt  ^{:standalone true}
-  to-mutable
+(defn.xt to-mutable
   "converts to mutable"
   {:added "4.0"}
   [coll]
-  (list '. coll '(to-mutable)))
+  (return (p/to_mutable coll)))
 
-(defmacro.xt  ^{:standalone true}
-  push
+(defn.xt push
   "pushs elements"
   {:added "4.0"}
   [coll x]
-  (list '. coll (list 'push x)))
+  (return (p/push coll x)))
 
-(defmacro.xt  ^{:standalone true}
-  pop
+(defn.xt pop
   "pops element from collection"
   {:added "4.0"}
   [coll]
-  (list '. coll '(pop)))
+  (return (p/pop coll)))
 
-(defmacro.xt  ^{:standalone true}
-  nth
+(defn.xt nth
   "nth coll"
   {:added "4.0"}
   [coll idx]
-  (list '. coll (list 'nth idx)))
+  (return (p/nth coll idx)))
 
-(defmacro.xt  ^{:standalone true}
-  push-mutable
+(defn.xt push-mutable
   "pushes an element into an editable collection"
   {:added "4.0"}
   [coll x]
-  (list '. coll (list 'push-mutable x)))
+  (return (p/push_mutable coll x)))
 
-(defmacro.xt  ^{:standalone true}
-  pop-mutable
+(defn.xt pop-mutable
   "pops an element from an editable collection"
   {:added "4.0"}
   [coll]
-  (list '. coll '(pop-mutable)))
+  (return (p/pop_mutable coll)))
 
-(defmacro.xt  ^{:standalone true}
-  assoc
+(defn.xt assoc
   "associates a key value pair into a persistent collection"
   {:added "4.0"}
   [coll k v]
-  (list '. coll (list 'assoc k v)))
+  (return (p/assoc coll k v)))
 
-(defmacro.xt  ^{:standalone true}
-  dissoc
+(defn.xt dissoc
   "disassociates a key from aa persistent collection"
   {:added "4.0"}
   [coll k]
-  (list '. coll (list 'dissoc k)))
+  (return (p/dissoc coll k)))
 
-(defmacro.xt  ^{:standalone true}
-  assoc-mutable
+(defn.xt assoc-mutable
   "associates a key value pair into a mutable collection"
   {:added "4.0"}
   [coll k v]
-  (list '. coll (list 'assoc-mutable k v)))
+  (return (p/assoc_mutable coll k v)))
 
-(defmacro.xt  ^{:standalone true}
-  dissoc-mutable
+(defn.xt dissoc-mutable
   "disassociates a key pair from a mutable collection"
   {:added "4.0"}
   [coll k]
-  (list '. coll (list 'dissoc-mutable k)))
+  (return (p/dissoc_mutable coll k)))
 
-(defmacro.xt  ^{:standalone true}
-  to-iter
+(defn.xt to-iter
   "to iter"
   {:added "4.0"}
   [coll]
-  (list '. coll (list 'to-iter)))
+  (return (p/to_iter coll)))
 
-(defmacro.xt  ^{:standalone true}
-  to-array
+(defn.xt to-array
   "to array"
   {:added "4.0"}
   [coll]
-  (list '. coll (list 'to-array)))
+  (return (p/to_array coll)))
 
-(defmacro.xt  ^{:standalone true}
-  find
+(defn.xt find
   "find coll"
   {:added "4.0"}
   [coll idx]
-  (list '. coll (list 'find idx)))
+  (return (p/find coll idx)))
 
-(defmacro.xt  ^{:standalone true}
-  empty
+(defn.xt empty
   "empty coll"
   {:added "4.0"}
   [coll]
-  (list '. coll '(empty)))
+  (return (p/empty coll)))

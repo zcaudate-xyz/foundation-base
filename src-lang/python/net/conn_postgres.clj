@@ -7,7 +7,6 @@
              [xt.lang.common-resource :as rt]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.lang.common-protocol :as protocol]
              [python.core :as py]
              [xt.net.conn-sql :as conn-sql]]})
 

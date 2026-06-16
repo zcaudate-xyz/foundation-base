@@ -3,21 +3,10 @@
   (:refer-clojure :exclude [list]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
+  {:require [[kmi.lang.protocol-base :as p]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-protocol :as proto]
-             [kmi.protocol.icoll :as p-coll]
-             [kmi.protocol.iedit :as p-edit]
-             [kmi.protocol.iempty :as p-empty]
-             [kmi.protocol.ieq :as p-eq]
-             [kmi.protocol.ihash :as p-hash]
-             [kmi.protocol.ipush :as p-push]
-             [kmi.protocol.ipush-mutable :as p-push-mutable]
-             [kmi.protocol.ipop :as p-pop]
-             [kmi.protocol.ipop-mutable :as p-pop-mutable]
-             [kmi.protocol.isize :as p-size]
-             [kmi.protocol.ishow :as p-show]
-             [kmi.lang.interface-spec :as spec]
              [kmi.lang.interface-common :as interface-common]
              [kmi.lang.interface-collection :as interface-collection]]})
 
@@ -55,17 +44,16 @@
 (defn.xt list-new
   "creates a new list"
   {:added "4.0"}
-  [head rest prototype]
-  (var list {"::" "list"
-             :_head head
-             :_rest rest})
-  (return (spec/runtime-attach list prototype)))
+  [head rest]
+  (return {"::" "list"
+           "_head" head
+           "_rest" rest}))
 
 (defn.xt list-push
   "pushs onto the front of the list"
   {:added "4.0"}
   [list x]
-  (return (-/list-new x list (spec/runtime-protocol list))))
+  (return (-/list-new x list)))
 
 (defn.xt list-pop
   "pops an element from front of list"
@@ -77,44 +65,47 @@
   "gets the empty list"
   {:added "4.0"}
   [list]
-  (return (-/list-new -/EMPTY_MARKER nil (spec/runtime-protocol list))))
+  (return (-/list-new -/EMPTY_MARKER nil)))
 
-(def.xt LIST_SPEC
-   [[p-coll/IColl   {:_start_string  "("
-                     :_end_string    ")"
-                     :_sep_string    ", "
-                     :_is_ordered    false
-                     :to-iter  -/list-to-iter
-                     :to-array -/list-to-array}]
-    [p-edit/IEdit   {:is-mutable (fn:> true)
-                     :to-mutable (fn [x] (return x))
-                     :is-persistent (fn:> true)
-                     :to-persistent (fn [x] (return x))}]
-    [p-empty/IEmpty  {:empty  -/list-empty}]
-    [p-eq/IEq     {:eq     interface-collection/coll-eq}]
-    [p-hash/IHash   {:hash   (interface-common/wrap-with-cache
-                              interface-collection/coll-hash-unordered)}]
-    [p-push/IPush   {:push   -/list-push}]
-    [p-push-mutable/IPushMutable   {:push-mutable   -/list-push}]
-    [p-pop/IPop    {:pop    -/list-pop}]
-    [p-pop-mutable/IPopMutable    {:pop-mutable    -/list-pop}]
-    [p-size/ISize   {:size   -/list-size}]
-    [p-show/IShow   {:show   interface-collection/coll-show}]])
-
-(def.xt LIST_PROTOTYPE
-  (-> -/LIST_SPEC
-      (proto/proto-spec)
-      (spec/proto-create)))
+(proto/defimpl.xt ^{:rt/tag "list"} List
+  [_head _rest]
+  p/IColl
+  {:_start_string  "("
+   :_end_string    ")"
+   :_sep_string    ", "
+   :_is_ordered    false
+   :to-iter        -/list-to-iter
+   :to-array       -/list-to-array}
+  p/IEdit
+  {:is-mutable    (fn:> true)
+   :to-mutable    (fn [x] (return x))
+   :is-persistent (fn:> true)
+   :to-persistent (fn [x] (return x))}
+  p/IEmpty
+  {:empty -/list-empty}
+  p/IEq
+  {:eq interface-collection/coll-eq}
+  p/IHash
+  {:hash (interface-common/wrap-with-cache
+          interface-collection/coll-hash-unordered)}
+  p/IPush
+  {:push -/list-push}
+  p/IPushMutable
+  {:push-mutable -/list-push}
+  p/IPop
+  {:pop -/list-pop}
+  p/IPopMutable
+  {:pop-mutable -/list-pop}
+  p/ISize
+  {:size -/list-size}
+  p/IShow
+  {:show interface-collection/coll-show})
 
 (defn.xt list-create
   "creates a list"
   {:added "4.0"}
   [head rest]  
-  (var list {"::" "list"
-             :_head head})
-  (when rest
-    (xt/x:set-key list "_rest" rest))
-  (return (spec/runtime-attach list -/LIST_PROTOTYPE)))
+  (return (-/List head rest)))
 
 (def.xt EMPTY_LIST
   (-/list-create -/EMPTY_MARKER nil))

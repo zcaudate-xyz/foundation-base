@@ -35,7 +35,7 @@
 (defn.xt coll-reduce
   [coll f init]
   (return
-   (it/collect (. coll (to-iter))
+   (it/collect (interface-common/to-iter coll)
                f
                init)))
 
@@ -52,7 +52,7 @@
   [coll]
   (return
    (common-hash/hash-iter
-    (. coll (to-iter))
+    (interface-common/to-iter coll)
     interface-common/hash)))
 
 (defn.xt coll-hash-unordered
@@ -61,7 +61,7 @@
   [coll]
   (return
    (common-hash/hash-iter-unordered
-    (. coll (to-iter))
+    (interface-common/to-iter coll)
     interface-common/hash)))
 
 (defn.xt coll-show
@@ -73,7 +73,7 @@
   (if (== 0 (-/coll-size coll))
     (return (xt/x:cat s
                       (-/end-string coll)))
-    (do (xt/for:iter [e (. coll (to-iter))]
+    (do (xt/for:iter [e (interface-common/to-iter coll)]
           (:= s (xt/x:cat s
                           (interface-common/show e)
                           sep)))
@@ -112,8 +112,8 @@
   {:added "4.0"}
   [o1 o2]
   (return
-   (it/iter-eq (. o1 (to-iter))
-               (. o2 (to-iter))
+   (it/iter-eq (interface-common/to-iter o1)
+               (interface-common/to-iter o2)
                interface-common/eq)))
 
 

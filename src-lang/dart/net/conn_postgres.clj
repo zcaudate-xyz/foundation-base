@@ -6,7 +6,6 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-protocol :as protocol]
              [xt.net.conn-sql :as conn-sql]]
    :import [["package:postgres/postgres.dart" :as pg]]})
 
@@ -45,7 +44,7 @@
 
 (defn.dt client-query-async
   [client query]
-  (return (protocol/ensure-promise (-/client-query client query))))
+  (return (promise/x:promise-run (-/client-query client query))))
 
 (defimpl.xt ^{:lang :dart}
   DartPostgresClient
