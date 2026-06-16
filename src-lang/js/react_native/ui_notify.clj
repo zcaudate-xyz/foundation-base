@@ -14,7 +14,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.model-context :as model-context]
              [js.react-native.helper-transition :as helper-transition]
-             [xt.lang.common-lib :as k]]})
+             [xt.lang.spec-base :as xt]]})
 
 (defn.js NotifyInner
   "creates the inner notification element"

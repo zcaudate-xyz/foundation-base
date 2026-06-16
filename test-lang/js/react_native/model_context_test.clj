@@ -6,7 +6,7 @@
   {:runtime :basic
    :require [[js.react-native.model-context :as  model-context]
              [js.core :as j]
-             [xt.lang.common-lib :as k]]})
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

@@ -9,14 +9,13 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react :as r]
-              [js.react-native :as n :include [:fn]]
-               [xt.lang.spec-base :as xt]
-               [xt.lang.common-lib :as k]
-               [xt.lang.common-data :as xtd]
-               [xt.lang.common-tree :as xtt]]
-    })
+   :require [[js.core :as j]
+             [js.react :as r]
+             [js.react-native :as n :include [:fn]]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-tree :as xtt]]})
 
 (defn.js nest-tree
   [obj prefix]
@@ -173,8 +172,8 @@
     []
     (return
      (n/EnclosedCode
-{:label "js.react-native/Fill"}
-[:% n/Row
+      {:label "js.react-native/Fill"}
+      [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/Text "HELLO"]
        [:% n/Fill {:style {:backgroundColor "red"}}]
@@ -187,8 +186,8 @@
     []
     (return
      (n/EnclosedCode
-{:label "js.react-native/H1"}
-[:% n/Row
+      {:label "js.react-native/H1"}
+      [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H1 {:text "HELLO WORLD"}]]))))
 
@@ -199,8 +198,8 @@
     []
     (return
      (n/EnclosedCode
-{:label "js.react-native/H2"}
-[:% n/Row
+      {:label "js.react-native/H2"}
+      [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H2 {:text "HELLO WORLD"}]]))))
 
@@ -211,8 +210,8 @@
     []
     (return
      (n/EnclosedCode
-{:label "js.react-native/H3"}
-[:% n/Row
+      {:label "js.react-native/H3"}
+      [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H3 {:text "HELLO WORLD"}]]))))
 
@@ -223,8 +222,8 @@
     []
     (return
      (n/EnclosedCode
-{:label "js.react-native/H4"}
-[:% n/Row
+      {:label "js.react-native/H4"}
+      [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H4 {:text "HELLO WORLD"}]]))))
 
@@ -235,8 +234,8 @@
     []
     (return
      (n/EnclosedCode
-{:label "js.react-native/H5"}
-[:% n/Row
+      {:label "js.react-native/H5"}
+      [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/H5 {:text "HELLO WORLD"}]]))))
 
@@ -247,8 +246,8 @@
     []
     (return
      (n/EnclosedCode
-{:label "js.react-native/Caption"}
-[:% n/Row
+      {:label "js.react-native/Caption"}
+      [:% n/Row
        {:style {:backgroundColor "orange"}}
        [:% n/Caption {:text "HELLO WORLD"}]]))))
 
@@ -268,8 +267,8 @@
                         :padding 2})
     (return
      (n/EnclosedCode
-{:label "js.react-native/TabsIndexed"}
-[:% n/TabsIndexed
+      {:label "js.react-native/TabsIndexed"}
+      [:% n/TabsIndexed
        {:items ["A" "B" "C" "D"]
         :checkIndex (fn:> true)
         :setIndex   setIndex
@@ -277,7 +276,7 @@
         :styleSelected styleSelected
         :index index
         :format (fn:> [s] (+ " " s " "))}]
-[:% n/Caption
+      [:% n/Caption
        {:text (xt/x:json-encode #{index})
         :style {:marginTop 10}}]))))
 
@@ -289,13 +288,13 @@
     (var [value setValue] (r/local "A"))
     (return
      (n/EnclosedCode
-{:label "js.react-native/Tabs"}
-[:% n/Tabs
+      {:label "js.react-native/Tabs"}
+      [:% n/Tabs
        {:data ["A" "B" "C" "D"]
         :value value
         :setValue setValue
         :format (fn:> [s] (+ " " s " "))}]
-[:% n/Caption
+      [:% n/Caption
        {:text (xt/x:json-encode #{value})
         :style {:marginTop 10}}]))))
 
@@ -307,8 +306,8 @@
     (var [initial setInitial] (r/local "a"))
     (return
      (n/EnclosedCode
-{:label "js.react-native/TabsPane"}
-[:% n/TabsPane
+      {:label "js.react-native/TabsPane"}
+      [:% n/TabsPane
        {:tree  {:a "1"
                 :b "2"
                 :c "3"
@@ -317,7 +316,7 @@
         :setInitial setInitial
         :tabsFormat (fn:> [s] (+ " " (j/toUpperCase s) " "))
         :formatFn k/identity}]
-[:% n/Caption
+      [:% n/Caption
        {:text (xt/x:json-encode #{initial})
         :style {:marginTop 10}}]))))
 
@@ -329,14 +328,14 @@
     (var [index setIndex] (r/local 3))
     (return
      (n/EnclosedCode
-{:label "js.react-native/ListIndexed"}
-[:% n/ListIndexed
+      {:label "js.react-native/ListIndexed"}
+      [:% n/ListIndexed
        {:items ["A" "B" "C" "D"]
         :checkIndex (fn:> true)
         :setIndex   setIndex
         :index index
         :format (fn:> [s] (+ " " s " "))}]
-[:% n/Caption
+      [:% n/Caption
        {:text (xt/x:json-encode #{index})
         :style {:marginTop 10}}]))))
 
@@ -348,13 +347,13 @@
     (var [value setValue] (r/local "A"))
     (return
      (n/EnclosedCode
-{:label "js.react-native/List"}
-[:% n/List
+      {:label "js.react-native/List"}
+      [:% n/List
        {:data ["A" "B" "C" "D"]
         :value value
         :setValue setValue
         :format (fn:> [s] (+ " " s " "))}]
-[:% n/Caption
+      [:% n/Caption
        {:text (xt/x:json-encode #{value})
         :style {:marginTop 10}}]))))
 
@@ -366,8 +365,8 @@
     (var [initial setInitial] (r/local "a"))
     (return
      (n/EnclosedCode
-{:label "js.react-native/ListPane"}
-[:% n/ListPane
+      {:label "js.react-native/ListPane"}
+      [:% n/ListPane
        {:tree  {:a "1"
                 :b "2"
                 :c "3"
@@ -377,7 +376,7 @@
         :listWidth 30
         :listFormat j/toUpperCase
         :formatFn k/identity}]
-[:% n/Caption
+      [:% n/Caption
        {:text (xt/x:json-encode #{initial})
         :style {:marginTop 10}}]))))
 
@@ -394,15 +393,15 @@
                         :padding 2})
     (return
      (n/EnclosedCode
-{:label "js.react-native/TabsMultiIndexed"}
-[:% n/TabsMultiIndexed
+      {:label "js.react-native/TabsMultiIndexed"}
+      [:% n/TabsMultiIndexed
        {:items ["A" "B" "C" "D"]
         :setIndices   setIndices
         :styleNormal   styleNormal
         :styleSelected styleSelected
         :indices indices
         :format (fn:> [s] (+ " " s " "))}]
-[:% n/Caption
+      [:% n/Caption
        {:text (xt/x:json-encode #{indices})
         :style {:marginTop 10}}]))))
 
@@ -414,13 +413,13 @@
     (var [values setValues] (r/local ["A" "C"]))
     (return
      (n/EnclosedCode
-{:label "js.react-native/TabsMulti"}
-[:% n/TabsMulti
+      {:label "js.react-native/TabsMulti"}
+      [:% n/TabsMulti
        {:data ["A" "B" "C" "D"]
         :values values
         :setValues setValues
         :format (fn:> [s] (+ " " s " "))}]
-[:% n/Caption
+      [:% n/Caption
        {:text (xt/x:json-encode #{values})
         :style {:marginTop 10}}]))))
 
@@ -435,8 +434,8 @@
     (var [l3 setL3] (r/local))
     (return
      (n/EnclosedCode
-{:label "js.react-native/TreePane"}
-[:% n/TreePane
+      {:label "js.react-native/TreePane"}
+      [:% n/TreePane
        {:tree  {:x (-/nest-tree -/TREEDATA "x")
                 :y (-/nest-tree -/TREEDATA "y")
                 :z (-/nest-tree -/TREEDATA "z")
@@ -465,7 +464,7 @@
                   :setInitial setL3
                   :tabsFormat j/toUpperCase
                   :formatFn xt/x:json-encode}]}]
-[:% n/Caption
+      [:% n/Caption
        {:text (xt/x:json-encode #{initial l1 l2 l3})
         :style {:marginTop 10}}]))))
 
@@ -479,8 +478,8 @@
     []
     (return
      (n/EnclosedCode
-{:label "js.react-native/BaseIndicator"}
-[:% n/BaseIndicator
+      {:label "js.react-native/BaseIndicator"}
+      [:% n/BaseIndicator
        {:color "black"
         :label "TEST"
         :content "Hello World"}]))))
@@ -493,8 +492,8 @@
     (var [active setActive] (r/local true))
     (return
      (n/EnclosedCode
-{:label "js.react-native/ToggleIndicator"}
-[:% n/ToggleIndicator
+      {:label "js.react-native/ToggleIndicator"}
+      [:% n/ToggleIndicator
        {:active active
         :onPress (fn:> (setActive (not active)))
         :label "TEST"}]))))
@@ -507,8 +506,8 @@
     (var [active setActive] (r/local true))
     (return
      (n/EnclosedCode
-{:label "js.react-native/RecordList"}
-[:% n/RecordList
+      {:label "js.react-native/RecordList"}
+      [:% n/RecordList
        {:entry {:first "John"
                 :last  "Smith"}
         :columns [["First Name"  "first"]
@@ -522,8 +521,8 @@
     (var [active setActive] (r/local true))
     (return
      (n/EnclosedCode
-{:label "js.react-native/TextDisplay"}
-[:% n/TextDisplay
+      {:label "js.react-native/TextDisplay"}
+      [:% n/TextDisplay
        {:content "ABC"}]))))
 
 ^{:refer js.react-native/defaultGlobal :added "4.0" :unchecked true}
@@ -576,8 +575,8 @@
     []
     (return
      (n/EnclosedCode
-{:label "js.react-native/Portal"}
-[:% n/PortalProvider
+      {:label "js.react-native/Portal"}
+      [:% n/PortalProvider
        [:% n/Row
         [:% n/View
          {:style {:backgroundColor "red"
@@ -642,8 +641,8 @@
     (var [layouts setLayouts] (r/local {}))
     (return
      (n/EnclosedCode
-{:label "js.react-native/usePortalLayouts"}
-[:% n/PortalProvider
+      {:label "js.react-native/usePortalLayouts"}
+      [:% n/PortalProvider
        [:% n/Row
         [:% n/Row
          {:style {:backgroundColor "red"
@@ -660,7 +659,7 @@
            [:% n/Button
             {:title "CHANGE"
              :onPress (fn:>
-                        (setOffset (j/floor (* 100 (j/random)))))}]
+                       (setOffset (j/floor (* 100 (j/random)))))}]
            [:% -/UsePortalLayoutsView
             #{offset setOffset
               layouts setLayouts}]]]]

@@ -6,7 +6,7 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.common-repl :as repl]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.db.runtime.cache-util :as data]
              [xt.db.text.base-flatten :as f]

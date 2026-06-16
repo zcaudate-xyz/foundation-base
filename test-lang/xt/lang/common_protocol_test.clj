@@ -146,7 +146,7 @@
    '(proto/defprotocol.xt IHello
       (hello-str [impl])
       (hello-prn [impl])))
-  => vector?
+  => seq?
 
   (proto/defprotocol.xt IHello
     (hello-str [impl])

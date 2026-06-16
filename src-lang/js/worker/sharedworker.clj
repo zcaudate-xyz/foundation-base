@@ -2,7 +2,7 @@
   "SharedWorker bootstrap and remote xt.db.node helpers."
   (:require [clojure.walk :as walk]
             [hara.lang :as l]
-            [js.net.http-fetch]
+            [js.lib.client-fetch]
             [xt.db.node]
             [xt.lang.common-data]
             [xt.lang.spec-base]

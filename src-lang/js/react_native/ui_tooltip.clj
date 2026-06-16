@@ -15,7 +15,7 @@
               [js.react-native.model-geom :as model-geom]
               [js.react-native.model-context :as model-context]
               [xt.lang.spec-base :as xt]
-              [xt.lang.common-lib :as k]]})
+              [xt.lang.spec-base :as xt]]})
 
 (defn.js tooltipPortalOffset
   "calculates the portal offset"

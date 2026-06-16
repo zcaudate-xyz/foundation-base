@@ -4,7 +4,7 @@
 
 (l/script :lua.nginx
   {:import [["pgmoon" :as ngxpg]]
-   :require [[xt.lang.common-lib :as k]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]

@@ -13,7 +13,7 @@
 ;;
 
 (l/script- :js
-  {:require [[xt.lang.common-lib :as k]]})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 ;;
 ;; !.js creates a free context where expressions can be evaluated

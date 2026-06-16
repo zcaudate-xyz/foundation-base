@@ -8,7 +8,7 @@
    :require [[kmi.lang.type-list :as t]
              [kmi.lang.interface-common :as ic]
              [kmi.lang.interface-collection :as coll]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
 
@@ -17,7 +17,7 @@
    :require [[kmi.lang.type-list :as t]
              [kmi.lang.interface-common :as ic]
              [kmi.lang.interface-collection :as coll]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
 

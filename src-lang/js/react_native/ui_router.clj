@@ -14,7 +14,7 @@
               [js.react-native.physical-base :as physical-base]
               [js.react-native.model-context :as model-context]
               [xt.lang.common-data :as xtd]
-              [xt.lang.common-lib :as k]]})
+              [xt.lang.spec-base :as xt]]})
 
 (defn.js useTransition
   "creates all props involved with transition"

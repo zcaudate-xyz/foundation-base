@@ -16,7 +16,7 @@
               [js.react-native.animate :as a]
               [xt.event.base-animate :as event-animate]
               [xt.lang.spec-base :as xt]
-              [xt.lang.common-lib :as k]]
+              [xt.lang.spec-base :as xt]]
    })
 
 ^{:refer js.react-native.animate/val :added "4.0" :unchecked true}

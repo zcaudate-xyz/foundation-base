@@ -15,7 +15,7 @@
               [js.react-native.model-context :as model-context]
               [js.react-native.helper-transition :as helper-transition]
               [xt.lang.common-data :as xtd]
-              [xt.lang.common-lib :as k]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-trace :as trace]]})
 
 (defn.js ModalBackdrop

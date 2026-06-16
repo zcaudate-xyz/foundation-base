@@ -19,7 +19,7 @@
               [js.react-native.ui-autocomplete :as ui-autocomplete]
               [js.react-native.ui-input :as ui-input]
               [xt.lang.spec-base :as xt]
-              [xt.lang.common-lib :as k]]
+              [xt.lang.spec-base :as xt]]
    })
 
 ^{:refer js.react-native.ui-autocomplete/AutocompleteModal :added "4.0" :unchecked true}

@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.event.base-form :as base-form]
              [js.react :as r]
              [js.react.ext-form :as ext-form]

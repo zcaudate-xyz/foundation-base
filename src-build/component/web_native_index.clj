@@ -15,7 +15,7 @@
              [js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.lib.rn-expo :as x :include [:lib]]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.debug-client :as client]
              [xt.old.event-box :as base-box]
              [component.web-native :as web-native]]

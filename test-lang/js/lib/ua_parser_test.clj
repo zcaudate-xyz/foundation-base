@@ -8,7 +8,7 @@
   {:runtime :basic
    :require [[js.lib.ua-parser :as ua]
              [js.core :as j]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global

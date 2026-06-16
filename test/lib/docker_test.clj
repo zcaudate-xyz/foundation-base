@@ -113,7 +113,7 @@
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}
      :require [[xt.lang.common-repl :as repl]
-               [xt.lang.common-lib :as k]
+               [xt.lang.spec-base :as xt]
                [kmi.redis :as r]]})
   
   (hara.lang/script :lua

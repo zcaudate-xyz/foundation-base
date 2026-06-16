@@ -613,8 +613,12 @@
 (defn js-tf-x-async-run
   [[_ thunk]]
   (template/$
-   (. (. Promise (resolve))
-      (then ~thunk))))
+   (new Promise
+        (fn [resolve reject]
+          (setTimeout (fn []
+                        (. (. Promise (resolve (~thunk)))
+                           (then resolve reject)))
+                      0)))))
 
 (defn js-tf-x-with-delay
   ([[_  ms thunk]]

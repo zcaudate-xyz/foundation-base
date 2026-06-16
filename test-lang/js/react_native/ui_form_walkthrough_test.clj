@@ -20,7 +20,7 @@
               [js.react-native.ui-input :as ui-input]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-math :as math]
-              [xt.lang.common-lib :as k]]
+              [xt.lang.spec-base :as xt]]
     })
 
 (defn.js placeHolderBottom

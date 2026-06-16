@@ -4,7 +4,7 @@
              [std.lib.foundation :as f]
              [std.lib.walk :as walk]
              [std.string.case :as case]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd])
   (:refer-clojure :exclude [compile]))
 

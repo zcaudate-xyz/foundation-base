@@ -7,7 +7,7 @@
      :require [[js.react-native.model-roller :as  model-roller]
                 [js.core :as j]
                 [xt.lang.common-data :as xtd]
-                [xt.lang.common-lib :as k]]})
+                [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

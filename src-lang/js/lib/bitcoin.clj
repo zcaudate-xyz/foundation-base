@@ -11,7 +11,7 @@
             ["wif" :as WIF]
             ["safe-buffer" :as SafeBuffer]]
    :require [[js.core :as j]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]]})
 

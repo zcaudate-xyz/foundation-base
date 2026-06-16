@@ -14,7 +14,7 @@
                                                 :message
                                                 :safe-buffer]]
                [xt.lang.common-data :as xtd]
-               [xt.lang.common-lib :as k]]
+               [xt.lang.spec-base :as xt]]
    :export  [MODULE]})
 
 (fact:global

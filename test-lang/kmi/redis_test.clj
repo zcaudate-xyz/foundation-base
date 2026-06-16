@@ -9,7 +9,7 @@
    :config {:rt/id :test.exchange
             :port 17001
             :bench true}
-   :require [[xt.lang.common-lib :as k]
+   :require [[xt.lang.spec-base :as xt]
              [kmi.redis :as r]]})
 
 (fact:global

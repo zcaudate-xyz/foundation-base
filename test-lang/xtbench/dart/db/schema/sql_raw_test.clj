@@ -6,7 +6,7 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.db.text.sql-raw :as raw]
-             [xt.lang.common-lib :as k]]})
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

@@ -7,7 +7,7 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.db.text.base-check :as chk]
-             [xt.lang.common-lib :as k]]})
+             [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

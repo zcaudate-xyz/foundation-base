@@ -7,14 +7,14 @@
   {:runtime :basic
    :require [[kmi.lang.type-syntax :as syn]
              [kmi.lang.interface-common :as tc]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[kmi.lang.type-syntax :as syn]
              [kmi.lang.interface-common :as tc]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global

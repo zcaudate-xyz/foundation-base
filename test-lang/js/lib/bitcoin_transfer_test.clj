@@ -10,7 +10,7 @@
                                                :bip39
                                                :wif
                                                :safe-buffer]]
-              [xt.lang.common-lib :as k]]
+              [xt.lang.spec-base :as xt]]
    :export  [MODULE]})
 
 (fact:global

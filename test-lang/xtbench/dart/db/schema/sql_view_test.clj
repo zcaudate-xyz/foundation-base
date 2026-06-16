@@ -11,7 +11,7 @@
    :require [[xt.db.text.sql-view :as v]
              [xt.db.text.sql-util :as ut]
              [xt.db.text.sql-raw :as raw]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.db.text.base-schema :as sch]
              [xt.db.text.base-scope :as scope]
              [xt.db.helpers.data-main-test :as sample]]})

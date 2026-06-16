@@ -10,7 +10,7 @@
   {:runtime :nginx.instance
    :require [[lua.nginx :as n]
               [lua.nginx.websocket :as ws]
-              [xt.lang.common-lib :as k]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]
               [lua.nginx.common-cache :as cache]]})
 

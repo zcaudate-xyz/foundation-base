@@ -9,7 +9,7 @@
 
 (l/script :js
   {:import [["react" :as React] ["react-dom/client" :as ReactDOM] ["react-nil" :as ReactNIL]]
-   :require [[xt.lang.common-lib :as k]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as xtt]

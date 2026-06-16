@@ -36,25 +36,3 @@
 (fact "requires a node init form"
   (sharedworker/script {})
   => (throws))
-
-
-^{:refer js.worker.sharedworker/request :added "4.1"}
-(fact "TODO")
-
-^{:refer js.worker.sharedworker/connect :added "4.1"}
-(fact "TODO")
-
-^{:refer js.worker.sharedworker/disconnect :added "4.1"}
-(fact "TODO")
-
-^{:refer js.worker.sharedworker/ensure-model :added "4.1"}
-(fact "TODO")
-
-^{:refer js.worker.sharedworker/query-view :added "4.1"}
-(fact "TODO")
-
-^{:refer js.worker.sharedworker/open-tab :added "4.1"}
-(fact "TODO")
-
-^{:refer js.worker.sharedworker/node-summary :added "4.1"}
-(fact "TODO")

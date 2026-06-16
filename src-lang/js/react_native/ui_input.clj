@@ -12,7 +12,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]
-             [xt.lang.common-lib :as k]]})
+             [xt.lang.spec-base :as xt]]})
 
 (defn.js inputTheme
   "creates the input theme"

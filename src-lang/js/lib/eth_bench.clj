@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify]))
 
 (l/script :js
-  {:require [[js.lib.eth-lib :as eth-lib] [js.lib.eth-solc :as eth-solc] [xt.lang.common-lib :as k] [js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-tree :as xtt]]})
+  {:require [[js.lib.eth-lib :as eth-lib] [js.lib.eth-solc :as eth-solc] [xt.lang.spec-base :as xt] [js.core :as j] [xt.lang.spec-base :as xt] [xt.lang.common-tree :as xtt]]})
 
 (defn.js send-wei
   "sends currency for bench"

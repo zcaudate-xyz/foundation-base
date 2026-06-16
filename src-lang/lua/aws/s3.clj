@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :lua
-  {:require [[lua.aws.common :as common] [lua.nginx :as n] [xt.lang.common-lib :as k] [xt.lang.parser-xml :as xml] [xt.lang.spec-base :as xt]]})
+  {:require [[lua.aws.common :as common] [lua.nginx :as n] [xt.lang.spec-base :as xt] [xt.lang.parser-xml :as xml] [xt.lang.spec-base :as xt]]})
 
 (defn.lua policy-public-read-only
   "creates bucket read only policy"

@@ -152,7 +152,7 @@
   (var [context disabled] (event-model/pipeline-prep view
                                                    (j/assign {:path  path
                                                               :cell  cell
-                                                              :model  model}
+                                                              :cell-model  model}
                                                              opts)))
   (return [path context disabled]))
 

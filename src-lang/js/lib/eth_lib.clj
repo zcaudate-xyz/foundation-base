@@ -5,7 +5,7 @@
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
+  {:require [[xt.lang.spec-base :as xt]
               [xt.lang.common-tree :as xtt]
               [js.core :as j]]})
 

@@ -11,7 +11,7 @@
     :require [[js.react :as r]
               [js.react-native :as n]
               [js.react-native.animate :as a]
-              [xt.lang.common-lib :as k]
+              [xt.lang.spec-base :as xt]
               [xt.lang.common-math :as math]]})
 
 (defn.js ScrollViewImpl

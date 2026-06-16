@@ -7,7 +7,7 @@
 
 (l/script- :python
   {:require [[xt.lang.spec-base :as xt]
-          [xt.lang.common-lib :as k]
+          [xt.lang.spec-base :as xt]
           [xt.lang.common-data :as xtd]
           [xt.lang.common-string :as str]
           [xt.lang.common-repl :as repl]

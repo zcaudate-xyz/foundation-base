@@ -5,7 +5,7 @@
             [hara.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-lib :as k]
+  {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as common-data]]})
 
 (defspec.xt UserId

@@ -6,7 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.interface-common :as v]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]
              [kmi.lang.type-hashmap :as hm]
@@ -19,7 +19,7 @@
 (l/script- :lua
   {:runtime :basic
    :require [[kmi.lang.interface-common :as v]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]
              [kmi.lang.type-hashmap :as hm]

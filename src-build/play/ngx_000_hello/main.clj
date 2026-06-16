@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :lua
-  {:require [[xt.lang.common-lib :as k]
+  {:require [[xt.lang.spec-base :as xt]
              [lua.nginx :as n]]})
 
 (defn.lua main

@@ -19,7 +19,7 @@
 (defn.xt raw-method
   [on typename method]
   (return
-   (xtd/get-in -/PROTOCOLS
+   (xtd/get-in xt.lang.common-protocol/PROTOCOLS
                [on
                 "impls"
                 typename
@@ -28,7 +28,7 @@
 (defn.xt protocol-exists
   [typename]
   (return
-   (xt/x:has-key? -/IMPLEMENTATIONS typename)))
+   (xt/x:has-key? xt.lang.common-protocol/IMPLEMENTATIONS typename)))
 
 (defn.xt protocol-method
   "looks up the registered method by protocol and implementation type"
@@ -41,7 +41,7 @@
     (when (not (xt/x:nil? override-fn))
       (return override-fn)))
   
-  (var protocol (xt/x:get-key -/PROTOCOLS on))
+  (var protocol (xt/x:get-key xt.lang.common-protocol/PROTOCOLS on))
   (when (xt/x:nil? protocol)
     (xt/x:err (xt/x:cat "Missing protocol entry " on)))
   
@@ -62,12 +62,21 @@
   "registers protocol implementations in the registry"
   {:added "4.1"}
   [protocolname typename impl-map]
-  (var protocol (xt/x:get-key -/PROTOCOLS protocolname))
+  (var protocol (xt/x:get-key xt.lang.common-protocol/PROTOCOLS protocolname))
   (when (xt/x:nil? protocol)
     (xt/x:err (xt/x:cat "Missing protocol " protocolname)))
   (var impls (xt/x:get-key protocol "impls"))
   (xt/x:set-key impls typename impl-map)
   (return impl-map))
+
+(defn.xt register-protocol
+  "registers a protocol descriptor in the global protocol registry"
+  {:added "4.1"}
+  [protocol]
+  (xt/x:set-key xt.lang.common-protocol/PROTOCOLS
+                (xt/x:get-key protocol "on")
+                protocol)
+  (return protocol))
 
 (defn.xt create-protocol-fn
   "creates a runtime protocol descriptor"
@@ -78,8 +87,7 @@
         "on"    on
         "sigs"  sig-map
         "impls" {}})
-  (xt/x:set-key -/PROTOCOLS on protocol)
-  (return protocol))
+  (return (-/register-protocol protocol)))
 
 
 
@@ -120,9 +128,12 @@
         on-str  (str curr-ns "/" (name sym))
         methods (mapv (fn [[sig-sym arglist]]
                         (format-defprotocol-method-xt on-str sig-sym arglist))
-                      opts+sigs)]
-    (vec (cons (list 'def.xt sym (format-defprotocol-xt sym opts+sigs))
-               methods))))
+                      opts+sigs)
+        proto-sym (symbol (str "-/" sym))]
+    (cons 'do
+          (cons (list 'def.xt sym (format-defprotocol-xt sym opts+sigs))
+                (cons (list `register-protocol proto-sym)
+                      methods)))))
 
 ;;
 ;; defimpl.xt
@@ -151,7 +162,8 @@
                       (str (case/snake-case (name ns))
                            "/"
                            (name sym)))
-        typename   (sym-fn (ns-name *ns*) type-sym)
+        typename   (or (:rt/tag (meta type-sym))
+                       (sym-fn (ns-name *ns*) type-sym))
         
         ctor-map    (into {"::" typename
                            "::/protocols" (mapv (fn [[proto-sym impl-map]]
@@ -160,18 +172,16 @@
                           (map (fn [x] [(name x) x]) impl-fields))
 
         proto-forms  (mapv (fn [[proto-sym impl-map]]
-                             (let [entry @(resolve proto-sym)]
-                               (list `register-protocol-impl
-                                     (sym-fn (:module entry)
-                                             (:id entry))
-                                     typename
-                                     (normalize-protocol-impl-map impl-map))))
+                             (list `register-protocol-impl
+                                   (list `xt/x:get-key proto-sym "on")
+                                   typename
+                                   (normalize-protocol-impl-map impl-map)))
                            protocols)]
     
     (list (format-defimpl-xt-symbol type-sym "defn")
           type-sym impl-fields
-          (list 'when (list 'not (list `xt/x:get-key `-/IMPLEMENTATIONS typename))
-                (concat ['do (list `xt/x:set-key `-/IMPLEMENTATIONS typename true)]
+          (list 'when (list 'not (list `xt/x:get-key `xt.lang.common-protocol/IMPLEMENTATIONS typename))
+                (concat ['do (list `xt/x:set-key `xt.lang.common-protocol/IMPLEMENTATIONS typename true)]
                         proto-forms))
           (list 'return ctor-map))))
 

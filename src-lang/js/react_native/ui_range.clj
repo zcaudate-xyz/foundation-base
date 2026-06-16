@@ -9,7 +9,7 @@
              [js.react-native.physical-edit :as physical-edit]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]
-             [xt.lang.common-lib :as k]]})
+             [xt.lang.spec-base :as xt]]})
 
 (defn.js rangeTheme
   "creates the range theme"

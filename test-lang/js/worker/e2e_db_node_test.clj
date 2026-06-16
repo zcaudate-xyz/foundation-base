@@ -10,8 +10,8 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-string :as str]
              [xt.lang.spec-promise :as promise]
-             [xt.net.conn-sql :as sql]
-             [xt.db.system :as db-instance]
+             [xt.protocol.impl.connection-sql :as sql]
+             [xt.db.runtime :as db-instance]
              [xt.db.node :as db-node]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.db.text.sql-manage :as sql-manage]
@@ -55,7 +55,7 @@
          (then
           (fn [sqlite3]
             (var raw (new (. sqlite3 ["oo1"] ["DB"]) ":memory:" "c"))
-            (var conn (xt.net.conn-sql/connection-create
+            (var conn (xt.protocol.impl.connection-sql/connection-create
                        raw
                        {"disconnect" (fn [inner]
                                        (. inner (close))
@@ -65,13 +65,13 @@
                         "query_sync" (fn [inner query]
                                        (return (raw-query inner query)))}))
             (var db-opts (xt.db.text.sql-util/sqlite-opts nil))
-            (var db (xt.db.system/db-create
+            (var db (xt.db.runtime/db-create
                      {"::" "db.sql"
                       :instance conn}
                      xt.db.helpers.test-fixtures/Schema
                      xt.db.helpers.test-fixtures/Lookup
                      db-opts))
-            (xt.db.system/db-exec-sync
+            (xt.db.runtime/db-exec-sync
              db
              (xt.lang.common-string/join
               "\n\n"
@@ -79,7 +79,7 @@
                xt.db.helpers.test-fixtures/Schema
                xt.db.helpers.test-fixtures/Lookup
                db-opts)))
-            (xt.db.system/db-exec-sync
+            (xt.db.runtime/db-exec-sync
              db
              "INSERT INTO \"Order\" (\"id\", \"status\") VALUES ('ord-1', 'open');")
             (xt.db.node/install

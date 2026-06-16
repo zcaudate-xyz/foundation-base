@@ -7,7 +7,7 @@
   {:runtime :basic
    :require [[kmi.lang.type-vector-node :as node]
              [xt.lang.spec-base :as xt]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
 
@@ -15,7 +15,7 @@
   {:runtime :basic
    :require [[kmi.lang.type-vector-node :as node]
              [xt.lang.spec-base :as xt]
-             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
 

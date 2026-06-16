@@ -4,7 +4,7 @@
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-protocol :as protocol]
+             [xt.lang.spec-promise :as promise]
              [xt.net.conn-sql :as conn-sql]]
    :import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]]})
 
@@ -90,7 +90,7 @@
 (defn.js client-query-async
   [client query]
   (var #{raw} client)
-  (return (protocol/ensure-promise
+  (return (promise/x:promise-run
            (-/raw-query raw query))))
 
 (defimpl.xt ^{:lang :js}
