@@ -94,7 +94,7 @@
           (if name (str "\n" (ansi/style (pad-left 8 "###") #{:green :bold}) "  " (ansi/style name #{:green :bold})) "")
           "\n"))))
 
-(defn- debug-string
+(defn- on-error-string
   "formats a debug result for display"
   {:added "4.1"}
   [debug]
@@ -107,19 +107,19 @@
             :else
             (pr-str data)))))
 
-(defn print-debug
+(defn print-on-error
   "prints debug info"
   {:added "4.1"}
-  ([color debug]
-   (if debug
-     (str "\n" (ansi/style (pad-left 8 "Debug:") #{color :bold})
-          "  " (prose/indent-rest (debug-string debug) 10))
+  ([color on-error]
+   (if on-error
+     (str "\n" (ansi/style (pad-left 9 "On Error:") #{color :bold})
+          "  " (prose/indent-rest (on-error-string on-error) 11))
      "")))
 
 (defn print-throw
   "prints throw info"
   {:added "4.1"}
-  ([{:keys [name data debug] :as summary}]
+  ([{:keys [name data on-error] :as summary}]
    (print/println
     (str (print-preliminary "THROW" :yellow summary)
          (str "\n" (ansi/style (pad-left 8 "ERROR") #{:yellow :bold})
@@ -128,7 +128,7 @@
                      (take 20 (clojure.string/split-lines
                                (pr-str data))))
                     10))
-         (print-debug :yellow debug)
+         (print-on-error :yellow on-error)
          (if name (str "\n" (ansi/style (pad-left 8 "###") #{:yellow :bold}) "  " (ansi/style name #{:yellow  :bold})) "")
          "\n"))))
 
@@ -150,7 +150,7 @@
 (defn print-failed
   "prints failed info"
   {:added "4.1"}
-  ([{:keys [name actual check parent checker debug] :as summary}]
+  ([{:keys [name actual check parent checker on-error] :as summary}]
    (let [result (:data actual)
          diff   (try (diff/diff checker result) (catch Throwable _ nil))]
      (print/println
@@ -167,7 +167,7 @@
                                                                                 (take 20 (clojure.string/split-lines
                                                                                           (pr-str result))))
                                                                                10)))
-           (print-debug :red debug)
+           (print-on-error :red on-error)
            (if name (str "\n" (ansi/style (pad-left 8 "###") #{:red :bold}) "  " (ansi/style name #{:red :bold})) "")
            "\n")))))
 

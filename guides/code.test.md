@@ -139,17 +139,19 @@ failure report.
 
 ```clojure
 (fact "debug on throw"
-  ^{:debug (prn :troubleshooting)}
+  ^{:on-error '(prn :troubleshooting)}
   (risky-op))
 
 (fact "debug on failed assertion"
-  ^{:debug (l/with:print (compute-context))}
+  ^{:on-error '(l/with:print (compute-context))}
   (computed-value) => expected-value)
 ```
 
-The debug form runs only when the main expression throws an exception or when
-the assertion returns `false`. Its result appears in the `THROW` or `FAILED`
-output under a `Debug:` label.
+**Important:** the value of `:on-error` must be a *quoted* form. Metadata map
+values are evaluated when the `fact` is read, so an unquoted form would run
+even when the test passes. The debug form runs only when the main expression
+throws an exception or when the assertion returns `false`. Its result appears
+in the `THROW` or `FAILED` output under an `On Error:` label.
 
 ### Running Tests
 

@@ -53,7 +53,7 @@
     :actual   (-> result :actual)
     :data     (-> result :actual :data)
     :parent   (-> result :meta :parent-form)
-    :debug    (-> result :debug)}))
+    :on-error    (-> result :on-error)}))
 
 (defn summarise-evaluate
   "extract the form into a valid format"
@@ -70,7 +70,7 @@
     :form     (-> result :form)
     :original (-> result :original)
     :data     (-> result :data)
-    :debug    (-> result :debug)}))
+    :on-error    (-> result :on-error)}))
 
 (defn form-printer
   "prints out result for each form"

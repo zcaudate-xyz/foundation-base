@@ -83,9 +83,9 @@
   (run-check {} [])
   => true)
 
-^{:refer code.test.base.process/evaluate-debug :added "4.1"}
+^{:refer code.test.base.process/evaluate-on-error :added "4.1"}
 (fact "evaluates a debug form using the same context"
-  (-> (evaluate-debug {:debug '(+ 1 2 3) :ns 'user})
+  (-> (evaluate-on-error {:on-error '(+ 1 2 3) :ns 'user})
       (into {}))
   => (contains {:status :success :data 6}))
 
@@ -97,8 +97,8 @@
             signal/*manager* (atom (signal/manager))]
     (-> (process {:type :form
                   :form '(throw (ex-info "oops" {}))
-                  :meta {:line 10 :debug '(+ 1 2 3)}})
-        :debug
+                  :meta {:line 10 :on-error '(+ 1 2 3)}})
+        :on-error
         (into {})))
   => (contains {:status :success :data 6}))
 
@@ -111,8 +111,8 @@
     (-> (process {:type :test-equal
                   :input  {:form '(+ 1 2)}
                   :output {:form 4}
-                  :meta {:line 10 :debug '(+ 1 2 3)}})
-        :debug
+                  :meta {:line 10 :on-error '(+ 1 2 3)}})
+        :on-error
         (into {})))
   => (contains {:status :success :data 6})
 
@@ -123,6 +123,6 @@
     (-> (process {:type :test-equal
                   :input  {:form '(+ 1 2)}
                   :output {:form 3}
-                  :meta {:line 10 :debug '(+ 1 2 3)}})
-        :debug))
+                  :meta {:line 10 :on-error '(+ 1 2 3)}})
+        :on-error))
   => nil)

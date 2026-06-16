@@ -41,7 +41,7 @@
       :actual {:form "actual"}
       :data nil
       :parent "parent"
-      :debug nil})
+      :on-error nil})
 
 ^{:refer code.test.base.listener/summarise-evaluate :added "3.0"}
 (fact "extract the form into a valid format"
@@ -58,7 +58,7 @@
       :form "form"
       :original "original"
       :data "data"
-      :debug nil})
+      :on-error nil})
 
 ^{:refer code.test.base.listener/form-printer :added "3.0"}
 (fact "prints out result for each form"
