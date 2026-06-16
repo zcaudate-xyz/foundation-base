@@ -48,7 +48,11 @@
   [head rest]
   (return {"::" "list"
            "_head" head
-           "_rest" rest}))
+           "_rest" rest
+           "_start_string" "("
+           "_end_string" ")"
+           "_sep_string" ", "
+           "_is_ordered" false}))
 
 (defn.xt list-push
   "pushs onto the front of the list"
@@ -69,7 +73,7 @@
   (return (-/list-new -/EMPTY_MARKER nil)))
 
 (proto/defimpl.xt ^{:rt/tag "list"} List
-  [_head _rest]
+  [_head _rest _start_string _end_string _sep_string _is_ordered]
   p/IColl
   {:_start_string  "("
    :_end_string    ")"
@@ -105,7 +109,7 @@
   "creates a list"
   {:added "4.0"}
   [head rest]  
-  (return (-/List head rest)))
+  (return (-/List head rest "(" ")" ", " false)))
 
 (def.xt EMPTY_LIST
   (-/list-create -/EMPTY_MARKER nil))

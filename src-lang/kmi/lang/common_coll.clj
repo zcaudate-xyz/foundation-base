@@ -74,7 +74,7 @@
                       end-string))
     (do (xt/for:iter [e (p/to-iter coll)]
           (:= s (xt/x:cat s
-                          (p/show e)
+                          (common-util/show e)
                           sep-string)))
         (return (xt/x:cat (xt/x:str-substring s 0 (- (xt/x:len s)
                                                      (xt/x:len sep-string)))

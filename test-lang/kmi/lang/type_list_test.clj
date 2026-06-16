@@ -7,6 +7,7 @@
   {:runtime :basic
    :require [[kmi.lang.type-list :as t]
              [kmi.lang.common-coll :as coll]
+             [kmi.lang.common-util :as util]
              [kmi.lang.protocol-base :as p]
              [xt.lang.common-lib :as k]
              [xt.lang.common-iter :as it]
@@ -28,6 +29,11 @@
 ^{:refer kmi.lang.type-collection/coll-into-array :adopt true :added "4.0"}
 (fact "list from array"
 
+  (!.js
+    (coll/coll-into-array
+     (t/list)
+     [1 2 3 4]))
+  
   (!.js
     (t/list-to-array
      (coll/coll-into-array
@@ -162,12 +168,9 @@
 
 ^{:refer kmi.lang.type-list/list-create :added "4.0"}
 (fact "creates a list"
-
-  (!.lua
-    (p/show (t/list-create 3 t/EMPTY_LIST)))
   
   (!.lua
-    [(ic/show
+    [(p/show
       (->> t/EMPTY_LIST
            (t/list-create 3)
            (t/list-create 2)
@@ -175,11 +178,11 @@
   => ["(1, 2, 3)"]
 
   (!.js
-    [(ic/show
-     (->> t/EMPTY_LIST
-          (t/list-create 3)
-          (t/list-create 2)
-          (t/list-create 1)))])
+    [(p/show
+      (->> t/EMPTY_LIST
+           (t/list-create 3)
+           (t/list-create 2)
+           (t/list-create 1)))])
   => ["(1, 2, 3)"])
 
 ^{:refer kmi.lang.type-list/list :added "4.0"}
