@@ -1,11 +1,13 @@
 (ns dart.net.http-fetch
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-protocol :as protocol]
-             [xt.net.http-fetch :as fetch]]
+             [xt.net.http-fetch :as fetch]
+             [xt.net.http-util :as util]]
    :import [["dart:convert" :as convert]
             ["dart:io" :as io]]})
 
@@ -17,7 +19,7 @@
   (var request-fn (xt/x:get-key raw "request"))
   (if (xt/x:is-function? request-fn)
     (do (var output (request-fn request {}))
-        (return (fetch/response-normalize output)))
+        (return (util/response-normalize output)))
     (do (var http-client (io.HttpClient))
         (var uri (. Uri (parse (xt/x:get-key request "url"))))
         (return
@@ -42,7 +44,7 @@
                           (fn [body]
                             (return {"status" (. res statusCode)
                                      "headers" {}
-                                     "body" (fetch/decode-body body)})))))))))))))))
+                                     "body" (util/decode-body body)}))))))))))))))))
 
 (defn.dt request-http
   [client input]

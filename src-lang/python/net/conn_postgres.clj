@@ -1,5 +1,6 @@
 (ns python.net.conn-postgres
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :python
   {:require [[xt.lang.common-data :as xtd]

@@ -1,5 +1,6 @@
 (ns python.net.conn-redis
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :python
   {:require [[xt.lang.spec-base :as xt]
@@ -40,7 +41,7 @@
   (var method (getattr raw command nil))
   (when (xt/x:nil? method)
     (xt/x:err (xt/x:cat "Unknown redis command " command)))
-  (return (method *args))
+  (return (xt/x:apply method args)))
 
 (defimpl.xt ^{:lang :python}
   PythonRedisClient
