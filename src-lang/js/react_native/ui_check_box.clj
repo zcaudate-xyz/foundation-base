@@ -19,8 +19,8 @@
   [#{[theme
       themePipeline
       (:.. rprops)]}]
-  (var __theme (xt/x:obj-assign {} helper-theme-default/CheckBoxDefaultTheme theme))
-  (var __themePipeline (xt/x:obj-assign {} helper-theme-default/BinaryDefaultPipeline themePipeline))
+  (var __theme (Object.assign {} helper-theme-default/CheckBoxDefaultTheme theme))
+  (var __themePipeline (Object.assign {} helper-theme-default/BinaryDefaultPipeline themePipeline))
   (var [styleStatic transformFn]
        (helper-theme/prepThemeCombined
         #{[:theme __theme

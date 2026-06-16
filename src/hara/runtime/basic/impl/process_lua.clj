@@ -133,7 +133,7 @@
   {:added "4.1"}
   [body {:keys [entry]}]
   (case (:op-key entry)
-    :defn (clojure.string/replace body #"^local function " "function ")
+    (:defn :defgen) (clojure.string/replace body #"^local function " "function ")
     :def  (clojure.string/replace body #"^local " "")
     body))
 

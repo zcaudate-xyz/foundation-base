@@ -21,8 +21,8 @@
    side
    layout
    length]
-  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (xt/x:obj-assign {}
+  (var __theme (Object.assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (Object.assign {}
                                  helper-theme-default/PressDefaultPipeline
                                  themePipeline))
   (var [fgStyleStatic fgTransformFn]
@@ -189,7 +189,7 @@
                          {:borderRadius 3}
                          (:.. (xtd/arrayify axisStyle))]}
                 axisProps)
-               (xt/x:obj-assign
+               (Object.assign
                 {:component n/View
                  :key "knobLower"
                  :style [(:? (== layout "horizontal")
@@ -217,7 +217,7 @@
                                          (xt/x:obj-assign indicators
                                                    {:upper touchableUpper.indicators.position})})))
                 knobProps)
-               (xt/x:obj-assign
+               (Object.assign
                 {:component n/View
                  :key "knobUpper"
                  :style [(:? (== layout "horizontal")

@@ -20,8 +20,8 @@
   [#{[theme
       themePipeline
       (:.. rprops)]}]
-  (var __theme (xt/x:obj-assign {} helper-theme-default/InputDefaultTheme theme))
-  (var __themePipeline (xt/x:obj-assign {} helper-theme-default/InputDefaultPipeline themePipeline))
+  (var __theme (Object.assign {} helper-theme-default/InputDefaultTheme theme))
+  (var __themePipeline (Object.assign {} helper-theme-default/InputDefaultPipeline themePipeline))
   (var [fgStyleStatic fgTransformFn]
        (helper-theme/prepThemeSingle
         #{[:theme __theme

@@ -20,8 +20,8 @@
       (:.. rprops)]}
    layout
    length]
-  (var __theme (xt/x:obj-assign {} helper-theme-default/ButtonDefaultTheme theme))
-  (var __themePipeline (xt/x:obj-assign {} helper-theme-default/PressDefaultPipeline themePipeline))
+  (var __theme (Object.assign {} helper-theme-default/ButtonDefaultTheme theme))
+  (var __themePipeline (Object.assign {} helper-theme-default/PressDefaultPipeline themePipeline))
   (var #{knob axis} transformations)
   (var [bgStyleStatic bgTransformFn]
        (helper-theme/prepThemeCombined
@@ -142,7 +142,7 @@
                          (:.. (xtd/arrayify axisStyle))]
                  :transformations bgTransformFn}
                 axisProps)
-               (xt/x:obj-assign
+               (Object.assign
                 {:component n/View
                  :key "knob"
                  :style [(:? (== layout "horizontal")

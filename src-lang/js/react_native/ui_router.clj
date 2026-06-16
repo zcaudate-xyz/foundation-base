@@ -101,7 +101,7 @@
        (model-context/animateIn chord))
   (var outFn
        (model-context/animateOut
-         (xt/x:obj-assign {} chord {:transition (xtd/get-in model-context/ANIMATE
+         (Object.assign {} chord {:transition (xtd/get-in model-context/ANIMATE
                                                    [transition "counter"])})))
   (var evenFn
        (fn [progress chord]

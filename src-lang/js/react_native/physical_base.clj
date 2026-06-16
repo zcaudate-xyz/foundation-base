@@ -72,7 +72,7 @@
                                 getChord))
      (var tchildren [(:.. (xtd/arrayify children))
                      (:.. (-/transformInner indicators chord inner -/transformProps))])
-     (return (xt/x:obj-assign
+     (return (Object.assign
               {(:? (or allowRef
                        (not (k/is-function? component)))
                    "ref"
@@ -255,7 +255,7 @@
                                hoverable
                                #{indicators
                                  chord}]))
-  (var props (xt/x:obj-assign {} rprops merged))
+  (var props (Object.assign {} rprops merged))
   (-/useIndicatorCapture props)
   (return props))
 
@@ -311,7 +311,7 @@
                                pressable
                                #{indicators
                                  chord}]))
-  (var props (xt/x:obj-assign {} rprops merged))
+  (var props (Object.assign {} rprops merged))
   (-/useIndicatorCapture props)
   (return props))
 
@@ -395,8 +395,8 @@
                                             {:default {:duration 300}})))
   (return
    [:% -/TouchableBasePressing
-    #{[:chord      (xt/x:obj-assign {} chord #{active})
-       :indicators (xt/x:obj-assign {} indicators {:active aindicator})
+    #{[:chord      (Object.assign {} chord #{active})
+       :indicators (Object.assign {} indicators {:active aindicator})
        :indicatorParams indicatorParams
        (:.. rprops)]}]))
 
@@ -418,7 +418,7 @@
                                    emptyable
                                    #{indicators
                                  chord}]))
-  (var props (xt/x:obj-assign {} rprops merged))
+  (var props (Object.assign {} rprops merged))
   (-/useIndicatorCapture props)
   (return props))
 

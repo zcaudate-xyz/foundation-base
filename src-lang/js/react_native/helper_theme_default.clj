@@ -93,7 +93,7 @@
    :fgActive        "white"})
 
 (def.js BaseTheme
-  (xt/x:obj-assign {}
+  (Object.assign {}
             -/BaseBg
             -/BaseFg))
 
@@ -102,18 +102,18 @@
 ;;
 
 (def.js InputDefaultFgTheme
-  (xt/x:obj-assign {}
+  (Object.assign {}
             -/BaseFg
             {:fgActive       "white"
              :bgActive       "#333"}))
 
 (def.js InputDefaultBgTheme
-  (xt/x:obj-assign {}
+  (Object.assign {}
             -/BaseBg
             {:bgActive       "#333"}))
 
 (def.js InputDefaultTheme
-  (xt/x:obj-assign {}
+  (Object.assign {}
             -/InputDefaultBgTheme
             -/InputDefaultFgTheme))
 
