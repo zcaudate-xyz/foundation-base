@@ -33,10 +33,30 @@
             (apply list 'defn (with-meta decl {:inner true})
                    (rest bound))
 
+            (vector? decl)
+            (let [tmp (gensym "value__")]
+              (apply list 'do*
+                     (cons (list 'var* :local tmp := bound)
+                           (map-indexed (fn [i sym]
+                                          (list 'var* :local sym := (list 'getindex tmp (inc i))))
+                                        decl))))
+
+            (set? decl)
+            (apply list 'do*
+                   (map (fn [sym]
+                          (list 'var* :local sym := (list 'getindex (list 'Dict bound) (ut/sym-default-str sym))))
+                        (sort-by ut/sym-default-str decl)))
+
             :else
             (if (= op 'local)
               (list 'var* :local decl := bound)
               (list ':= decl bound))))))
+
+(defn tf-ternary
+  "expands ternary (:?) to block-style if-else so Julia can return non-boolean values"
+  {:added "4.1"}
+  [[_ test then else]]
+  (list 'if test then else))
 
 (defn julia-map-key
   "custom julia map key"
@@ -50,24 +70,27 @@
 
 (defn julia-symbol-global
   [key _grammar _mopts]
-  (list 'convert 'Any (list 'get 'XT_GLOBALS (ut/sym-default-str key) nil)))
+  (list 'get 'XT_GLOBALS (ut/sym-default-str key) nil))
 
 (defn tf-for-array
   "for array transform"
   {:added "4.0"}
   [[_ [e arr] & body]]
-  (let [idx (gensym "idx__")]
+  (let [idx (gensym "idx__")
+        arr-sym (gensym "arr__")]
     (if (vector? e)
       (let [[i v] e]
         (template/$
-         (for [~idx :in (to 1 1 (length ~arr))]
-           (local ~i ~idx)
-           (local ~v (getindex ~arr ~idx))
-           ~@body)))
+         (do (local ~arr-sym ~arr)
+             (for [~idx :in (to 1 1 (length ~arr-sym))]
+               (local ~i ~idx)
+               (local ~v (getindex ~arr-sym ~idx))
+               ~@body))))
       (template/$
-       (for [~idx :in (to 1 1 (length ~arr))]
-         (local ~e (getindex ~arr ~idx))
-         ~@body)))))
+       (do (local ~arr-sym ~arr)
+           (for [~idx :in (to 1 1 (length ~arr-sym))]
+             (local ~e (getindex ~arr-sym ~idx))
+             ~@body))))))
 
 (defn tf-for-object
   "for object transform"
@@ -124,6 +147,12 @@
       (str start ":" end)
       (str start ":" step ":" end))))
 
+(defn emit-throw
+  "emits throw with parentheses for complex expressions"
+  {:added "4.1"}
+  [[_ expr] grammar mopts]
+  (str "throw(" (common/*emit-fn* expr grammar mopts) ")"))
+
 (def +features+
   (-> (grammar/build :include [:builtin
                                :builtin-global
@@ -135,12 +164,14 @@
                                :compare
                                :logic
                                :return
+                               :throw
                                :data-table
                                :data-shortcuts
                                :vars
                                :fn
                                :control-base
                                :control-general
+                               :control-try-catch
                                :top-base
                                :top-global
                                :top-declare
@@ -159,10 +190,12 @@
         :mod    {:raw "%"}
         :pow    {:raw "^"}
         :with-global {:value true :raw "XT_GLOBALS"}
+        :inif   {:macro #'tf-ternary :emit :macro}
         :for-array  {:macro #'tf-for-array   :emit :macro}
         :for-object {:macro #'tf-for-object  :emit :macro}
         :for-iter   {:macro #'tf-for-iter    :emit :macro}
-        :for-index  {:macro #'tf-for-index   :emit :macro}})
+        :for-index  {:macro #'tf-for-index   :emit :macro}
+        :throw {:op :throw :symbol #{'throw} :emit #'emit-throw}})
       (grammar/build:override fn/+julia+)
       (grammar/build:extend
        {:cat   {:op :cat   :symbol '#{cat}       :raw "*"      :emit :infix}
@@ -173,9 +206,16 @@
         :push! {:op :push! :symbol '#{push!}     :raw "push!"  :emit :invoke}
         :xor   {:op :xor   :symbol '#{xor}       :raw "⊻"      :emit :infix}
         :bxor  {:op :bxor  :symbol '#{b:xor}     :raw "⊻"      :emit :infix}
+        :bsl   {:op :bsl   :symbol '#{b:<<}      :raw "<<"     :emit :bi}
+        :bsr   {:op :bsr   :symbol '#{b:>>}      :raw ">>"     :emit :bi}
         :splat {:op :splat :symbol '#{...}       :raw "..."    :emit :post}
         :%     {:op :%     :symbol #{:%}         :emit :squash}
-        :to    {:op :to    :symbol #{'to}        :emit #'emit-to}})))
+        :to    {:op :to    :symbol #{'to}        :emit #'emit-to}
+        :prototype-create {:op :prototype-create :symbol #{'proto:create} :macro #'fn/julia-tf-x-prototype-create :emit :macro}
+        :prototype-set    {:op :prototype-set    :symbol #{'proto:set}    :macro #'fn/julia-tf-x-prototype-set    :emit :macro}
+        :prototype-get    {:op :prototype-get    :symbol #{'proto:get}    :macro #'fn/julia-tf-x-prototype-get    :emit :macro}
+        :prototype-method {:op :prototype-method :symbol #{'proto:method} :macro #'fn/julia-tf-x-prototype-method :emit :macro}
+        :prototype-tostring {:op :prototype-tostring :symbol #{'proto:tostring} :macro #'fn/julia-tf-x-prototype-tostring :emit :macro}})))
 
 (def +template+
   (->> {:banned #{:set :regex}
@@ -196,21 +236,23 @@
          :token  {:nil       {:as "nothing"}
                   :string    {:quote :double}
                   :symbol    {:global #'julia-symbol-global
-                              :replace (assoc helper/+sym-replace+ \! "!")}}
+                              :replace (assoc helper/+sym-replace+
+                                              \! "!"
+                                              \: "_")}}
          :data   {:map-entry {:start ""  :end ""  :space "" :assign " => " :keyword :string
                               :key-fn #'julia-map-key}
-                  :map       {:start "Dict(" :end ")"}
+                  :map       {:start "Dict{Any,Any}(" :end ")"}
                   :vector    {:start "Any[" :end "]" :space ", "}}
          :rewrite {:staging [#'rewrite/julia-rewrite-stage]}
          :block  {:for       {:body    {:start "" :end "end"}
                               :parameter {:start " " :end "" :space " "}}
                   :try      {:wrap    {:start "" :end "end"}
-                             :body    {:start "" :end ""}
+                             :body    {:start "" :end "" :append true}
                             :control {:catch   {:raw "catch"
                                                 :parameter {:start " " :end ""}
-                                                :body {:start "" :end ""}}
+                                                :body {:start "" :end "" :append true}}
                                       :finally {:raw "finally"
-                                                :body {:start "" :end ""}}}}
+                                                :body {:start "" :end "" :append true}}}}
                  :while     {:body    {:start "" :end "end"}}
                  :branch    {:wrap    {:start "" :end "end"}
                              :control {:default {:parameter  {:start " " :end ""}

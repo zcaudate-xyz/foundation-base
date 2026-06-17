@@ -290,6 +290,44 @@
    :x-obj-assign  {:macro #'julia-tf-x-obj-assign :emit :macro}})
 
 ;;
+;; PROTO
+;;
+
+(defn julia-tf-x-prototype-create
+  [[_ m]]
+  m)
+
+(defn julia-tf-x-prototype-get
+  [[_ obj]]
+  (list 'get obj "__proto__" nil))
+
+(defn julia-tf-x-prototype-set
+  [[_ obj proto]]
+  (list ':= (list '. obj ["__proto__"]) proto))
+
+(defn julia-tf-x-prototype-method
+  [[_ obj key]]
+  (julia-free-iife
+   (template/$
+    (do (var proto (x:get-key ~obj "__proto__"))
+        (return (:? (x:has-key? ~obj ~key)
+                    (x:get-key ~obj ~key)
+                    (:? (x:nil? proto)
+                        nil
+                        (x:get-key proto ~key))))))))
+
+(defn julia-tf-x-prototype-tostring
+  [_]
+  "__tostring")
+
+(def +julia-proto+
+  {:prototype-create {:macro #'julia-tf-x-prototype-create :emit :macro}
+   :prototype-get    {:macro #'julia-tf-x-prototype-get    :emit :macro}
+   :prototype-set    {:macro #'julia-tf-x-prototype-set    :emit :macro}
+   :prototype-method {:macro #'julia-tf-x-prototype-method :emit :macro}
+   :prototype-tostring {:macro #'julia-tf-x-prototype-tostring :emit :macro}})
+
+;;
 ;; ARR
 ;;
 
@@ -339,17 +377,18 @@
 
 (defn julia-tf-x-str-index-of
   ([[_ s tok & [start]]]
-   (template/$
-    (do (var start-idx (:? (or (== ~start nil)
-                               (< ~start 1))
-                           1
-                           ~start))
-        (var idx (findnext ~tok ~s start-idx))
-        (return (:? (== idx nothing)
-                    -1
-                    (:? (isa idx Integer)
-                        (Int idx)
-                        (Int (first idx)))))))))
+   (julia-free-iife
+    (template/$
+     (do (var start-idx (:? (or (== ~start nil)
+                                (< ~start 1))
+                            1
+                            ~start))
+         (var idx (findnext ~tok ~s start-idx))
+         (return (:? (== idx nothing)
+                     -1
+                     (:? (isa idx Integer)
+                         (- (Int idx) 1)
+                         (- (Int (first idx)) 1)))))))))
 
 (defn julia-tf-x-str-substring
   ([[_ s start & [end]]]
@@ -415,11 +454,39 @@
   [[_ key]]
   (list 'haskey 'XT_GLOBALS (julia-global-key key)))
 
+(defn julia-tf-x-ex-native?
+  [[_ err]]
+  (list 'and
+        (list 'isa err 'AbstractDict)
+        (list '== "xt.error" (list 'get err "__type__" nil))))
+
+(defn julia-tf-x-ex-new
+  [[_ message & [data]]]
+  (if (some? data)
+    {"__type__" "xt.error"
+     "message" message
+     "data" data}
+    {"__type__" "xt.error"
+     "message" message
+     "data" nil}))
+
+(defn julia-tf-x-ex-message
+  [[_ err]]
+  (list 'get err "message" nil))
+
+(defn julia-tf-x-ex-data
+  [[_ err]]
+  (list 'get err "data" nil))
+
 (def +julia-custom+
   {:x-has-key?    {:macro #'julia-tf-x-has-key?    :emit :macro}
    :x-global-set  {:macro #'julia-tf-x-global-set  :emit :macro}
    :x-global-del  {:macro #'julia-tf-x-global-del  :emit :macro}
-   :x-global-has? {:macro #'julia-tf-x-global-has? :emit :macro}})
+   :x-global-has? {:macro #'julia-tf-x-global-has? :emit :macro}
+   :x-ex-native?  {:macro #'julia-tf-x-ex-native?  :emit :macro}
+   :x-ex-new      {:macro #'julia-tf-x-ex-new      :emit :macro}
+   :x-ex-message  {:macro #'julia-tf-x-ex-message  :emit :macro}
+   :x-ex-data     {:macro #'julia-tf-x-ex-data     :emit :macro}})
 
 ;;
 ;; SOCKET
@@ -539,8 +606,15 @@
    :x-iter-native?   {:macro #'julia-tf-x-iter-native? :emit :macro}})
 
 
-(def +python-promise+
-  {:x-promise          {:emit :hard-link :raw 'xt.lang.common-promise/promise}
+(defn julia-tf-x-async-run
+  "runs a thunk asynchronously in Julia"
+  {:added "4.1"}
+  [[_ thunk]]
+  (list ':- "@async (" thunk ")()"))
+
+(def +julia-promise+
+  {:x-async-run        {:macro #'julia-tf-x-async-run        :emit :macro}
+   :x-promise          {:emit :hard-link :raw 'xt.lang.common-promise/promise}
    :x-promise-all      {:emit :hard-link :raw 'xt.lang.common-promise/promise-all}
    :x-promise-then     {:emit :hard-link :raw 'xt.lang.common-promise/promise-then}
    :x-promise-catch    {:emit :hard-link :raw 'xt.lang.common-promise/promise-catch}
@@ -710,7 +784,7 @@
          +julia-socket+
          +julia-http+
          +julia-iter+
-         #_+julia-promise+
+         +julia-promise+
          +julia-shell+
          +julia-file+
          +julia-bit+

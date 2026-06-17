@@ -12,10 +12,44 @@
 
 (def ^:private +julia-rewriter+
   (hoist/create-rewriter
-   {:symbol-prefix "julia_callback__"}))
+   {:symbol-prefix "julia_callback__"
+    :lambda-compatible? (fn [_ _] true)}))
+
+(def ^:private +julia-statement-heads+
+  '#{do
+     do*
+     let
+     let*
+     var
+     var*
+     :=
+     return
+     if
+     cond
+     when
+     while
+     try
+     for
+     for:async
+     for:index
+     for:object
+     for:array
+     for:iter
+     br*
+     throw
+     x:throw
+     x:err
+     break
+     continue
+     defn
+     defn-
+     defgen
+     fn})
 
 (def ^:private +julia-boolish-ops+
-  '#{<
+  '#{and
+     not
+     <
      <=
      ==
      >
@@ -51,6 +85,7 @@
 (declare julia-rewrite-statement)
 (declare julia-rewrite-statements)
 (declare julia-rewrite-conditional-expression)
+(declare rewrite-fn)
 
 (def ^:private with-form-meta
   walk/with-form-meta)
@@ -62,14 +97,66 @@
                          :recursive-not? true
                          :recursive-and-or? true}))
 
+(defn- simple-truthy-source?
+  [form]
+  (or (symbol? form)
+      (keyword? form)
+      (string? form)
+      (number? form)
+      (boolean? form)
+      (nil? form)))
+
+(defn- julia-wrap-truthy-check
+  [source form grammar]
+  (if (simple-truthy-source? form)
+    (truthy/wrap-truthy-check source form)
+    (let [value (gensym "julia_truthy__")]
+      (with-form-meta
+        source
+        (list (rewrite-fn
+               (list 'fn []
+                     (list 'var value form)
+                     (list 'return
+                           (truthy/truthy-check-form value)))
+               grammar))))))
+
 (defn- julia-truthy-form
-  [source form]
-  (truthy/truthy-form source form julia-boolish-form?))
+  [source form grammar]
+  (truthy/truthy-form source
+                      form
+                      julia-boolish-form?
+                      #(julia-wrap-truthy-check %1 %2 grammar)))
+
+(defn- ensure-return
+  [stmt]
+  (cond
+    (and (collection/form? stmt)
+         (contains? +julia-statement-heads+ (first stmt)))
+    (if (#{'do 'do*} (first stmt))
+      (let [prefix (butlast (rest stmt))
+            tail   (last stmt)]
+        (with-form-meta
+          stmt
+          (apply list (first stmt)
+                 (concat prefix
+                         [(ensure-return tail)]))))
+      stmt)
+
+    :else
+    (list 'return stmt)))
+
+(defn- ensure-tail-return
+  [stmts]
+  (if (seq stmts)
+    (concat (butlast stmts)
+            [(ensure-return (last stmts))])
+    stmts))
 
 (defn- rewrite-fn
   [form grammar]
   (fnrw/rewrite-fn-form form
-                        #(julia-rewrite-statements % grammar)))
+                        #(julia-rewrite-statements % grammar)
+                        {:prepare-body ensure-tail-return}))
 
 (defn- rewrite-for-statement
   [form grammar]
@@ -118,6 +205,49 @@
               (peek args*)
               (reverse (pop args*))))))
 
+(defn- rewrite-and-step
+  [source lhs rhs grammar]
+  (if (simple-truthy-source? lhs)
+    (with-form-meta
+      source
+      (list ':?
+            (julia-truthy-form source lhs grammar)
+            rhs
+            lhs))
+    (let [value (gensym "julia_and__")]
+      (with-form-meta
+        source
+        (list (rewrite-fn
+               (list 'fn []
+                     (list 'var value lhs)
+                     (list 'return
+                           (list ':?
+                                 (truthy/truthy-check-form value)
+                                 rhs
+                                 value)))
+               grammar))))))
+
+(defn- rewrite-and-expression
+  [form grammar]
+  (let [args* (vec (walk/rewrite-coll (rest form)
+                                      #(julia-rewrite-expression % grammar)))]
+    (cond
+      (empty? args*)
+      true
+
+      (= 1 (count args*))
+      (first args*)
+
+      (every? julia-boolish-form? args*)
+      (with-form-meta
+        form
+        (apply list 'and args*))
+
+      :else
+      (reduce #(rewrite-and-step form %1 %2 grammar)
+              (first args*)
+              (rest args*)))))
+
 (defn- rewrite-ternary-expression
   [form grammar]
   (let [[_ test then else] form
@@ -159,6 +289,9 @@
     fn
     (rewrite-fn form grammar)
 
+    and
+    (rewrite-and-expression form grammar)
+
     or
     (rewrite-or-expression form grammar)
 
@@ -181,7 +314,7 @@
    form
    #(rewrite-conditional-expression-list % grammar)
    #(julia-rewrite-expression % grammar)
-   julia-truthy-form))
+   #(julia-truthy-form %1 %2 grammar)))
 
 (defn julia-rewrite-expression
   [form grammar]
@@ -215,12 +348,27 @@
                                            [value])))
                           (destruct/destructure-bindings target temp ut/sym-default-str)))))))
 
+(defn- julia-global-assign?
+  [target]
+  (and (collection/form? target)
+       (= '!:G (first target))
+       (= 2 (count target))))
+
 (defn- rewrite-var-statement
   [form grammar]
   (let [[tag target & args] form]
     (cond
       (empty? args)
       form
+
+      (and (= tag :=)
+           (julia-global-assign? target))
+      (let [[_ key] target]
+        (with-form-meta
+          form
+          (list ':=
+                (list '. 'XT_GLOBALS [(ut/sym-default-str key)])
+                (julia-rewrite-expression (last args) grammar))))
 
       (destruct/destructure-target? target)
       (rewrite-destructuring-var form grammar)

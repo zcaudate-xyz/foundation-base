@@ -48,6 +48,8 @@
          [:js     :verify]             'hara.runtime.basic.impl.process-js
          [:js     :chromedriver]        'hara.runtime.chromedriver
          [:js     :chromedriver.instance] 'hara.runtime.chromedriver
+         [:js     :vscode]             'hara.runtime.vscode
+         [:js     :vscode.instance]    'hara.runtime.vscode
          
          [:python :oneshot]            'hara.runtime.basic.impl.process-python
          [:python :basic]              'hara.runtime.basic.impl.process-python
