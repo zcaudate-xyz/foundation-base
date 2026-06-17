@@ -1,0 +1,14 @@
+{
+  "name": "vscode-hara-runtime",
+  "displayName": "Hara Runtime for VS Code",
+  "description": "Socket-based eval host for the Hara/Foundatio runtime system",
+  "version": "0.1.0",
+  "publisher": "foundation",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": ["*"],
+  "main": "./extension.js",
+  "contributes": {}
+}
