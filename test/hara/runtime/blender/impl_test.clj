@@ -1,5 +1,6 @@
 (ns hara.runtime.blender.impl-test
   (:require [hara.lang :as h]
+            [hara.lang.type-shared :as shared]
             [hara.runtime.blender.impl :as impl]
             [std.lib.env :as env])
   (:use code.test))
@@ -81,4 +82,43 @@
       (boolean rt)
       (finally
         (impl/stop-blender rt))))
+  => true)
+
+^{:refer hara.runtime.blender.impl/blender-shared :added "4.1"}
+(fact "two shared blender runtimes with the same id share the process"
+  (let [rt1 (impl/blender-shared:create {:id :shared-blender-test})
+        rt2 (impl/blender-shared:create {:id :shared-blender-test})]
+    (try
+      (std.lib.component/start rt1)
+      (std.lib.component/start rt2)
+      [(= (shared/rt-get-inner rt1) (shared/rt-get-inner rt2))
+       (boolean (:process (shared/rt-get-inner rt1)))
+       (impl/raw-eval-blender (shared/rt-get-inner rt1) "OUT = 1 + 2 + 3")]
+      (finally
+        (std.lib.component/stop rt1)
+        (std.lib.component/stop rt2))))
+  => [true true 6])
+
+(fact "stopping one shared blender runtime keeps the process alive"
+  (let [rt1 (impl/blender-shared:create {:id :shared-blender-ref-test})
+        rt2 (impl/blender-shared:create {:id :shared-blender-ref-test})]
+    (try
+      (std.lib.component/start rt1)
+      (std.lib.component/start rt2)
+      (std.lib.component/stop rt1)
+      (impl/raw-eval-blender (shared/rt-get-inner rt2) "OUT = 1 + 2 + 3")
+      (finally
+        (std.lib.component/stop rt2))))
+  => 6)
+
+(fact "shared blender runtimes with different ids do not share a process"
+  (let [rt1 (impl/blender-shared:create {:id :blender-a})
+        rt2 (impl/blender-shared:create {:id :blender-b})]
+    (try
+      (std.lib.component/start rt1)
+      (std.lib.component/start rt2)
+      (not= (shared/rt-get-inner rt1) (shared/rt-get-inner rt2))
+      (finally
+        (std.lib.component/stop rt1)
+        (std.lib.component/stop rt2))))
   => true)

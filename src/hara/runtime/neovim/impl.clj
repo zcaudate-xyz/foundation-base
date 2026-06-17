@@ -4,9 +4,12 @@
             [std.lib.foundation :as f]
             [std.lib.impl :as std-impl]
             [hara.lang.runtime :as rt]
+            [hara.lang.type-shared :as shared]
             [hara.runtime.basic.impl.process-lua :as process-lua]
-            [hara.runtime.basic.type-common :as common])
+            [hara.runtime.basic.type-common :as common]
+            [std.lib.network :as network])
   (:import [java.io BufferedInputStream ByteArrayOutputStream]
+           [java.net Socket]
            [java.util ArrayList Map$Entry]
            [org.msgpack MessagePack]
            [org.msgpack.type Value]))
@@ -66,25 +69,39 @@
       "nvim"))
 
 (defn start-neovim
-  "Starts a headless nvim --embed process."
+  "Starts a headless nvim --listen server and connects a client socket."
   {:added "4.1"}
-  [{:keys [id exec] :as rt}]
+  [{:keys [id exec port] :as rt}]
   (let [exec (or exec (neovim-exec))
+        ^String host "127.0.0.1"
+        ^Integer port (or port (network/port:check-available 0))
+        address (str host ":" port)
         proc (.start (ProcessBuilder. ^"[Ljava.lang.String;"
-                                      (into-array String [exec "--embed" "--headless"])))
-        in   (BufferedInputStream. (.getInputStream proc))
-        out  (.getOutputStream proc)
-        unpacker (.createUnpacker msgpack in)]
-    (assoc rt
-           :process proc
-           :output out
-           :unpacker unpacker
-           :msgid (atom 0))))
+                                      (into-array String [exec
+                                                          "--headless"
+                                                          "--listen"
+                                                          address])))]
+    (network/wait-for-port host port {:timeout 30000})
+    (let [socket (Socket. host port)
+          in   (BufferedInputStream. (.getInputStream socket))
+          out  (.getOutputStream socket)
+          unpacker (.createUnpacker msgpack in)]
+      (assoc rt
+             :process proc
+             :host host
+             :port port
+             :socket socket
+             :output out
+             :unpacker unpacker
+             :msgid (atom 0)))))
 
 (defn stop-neovim
-  "Stops the nvim process."
+  "Stops the nvim process and socket."
   {:added "4.1"}
-  [{:keys [^Process process] :as rt}]
+  [{:keys [^Process process ^Socket socket] :as rt}]
+  (when socket
+    (try (.close socket)
+         (catch Throwable _)))
   (when process
     (try (.destroyForcibly process)
          (catch Throwable _)))
@@ -107,21 +124,22 @@
            ^org.msgpack.unpacker.Unpacker unpacker]
     :as rt}
    method params]
-  (let [msgid (next-msgid rt)
-        ^bytes req-bytes (pack-request msgid method params)]
-    (.write output req-bytes 0 (alength req-bytes))
-    (.flush output)
-    (loop []
-      (let [response (value->clj (.read unpacker Value))]
-        (if (and (vector? response)
-                 (= 4 (count response))
-                 (= 1 (first response))
-                 (= msgid (second response)))
-          (let [[_ _ err result] response]
-            (if err
-              (throw (ex-info "Neovim RPC error" {:method method :params params :error err}))
-              result))
-          (recur))))))
+  (locking (:lock rt)
+    (let [msgid (next-msgid rt)
+          ^bytes req-bytes (pack-request msgid method params)]
+      (.write output req-bytes 0 (alength req-bytes))
+      (.flush output)
+      (loop []
+        (let [response (value->clj (.read unpacker Value))]
+          (if (and (vector? response)
+                   (= 4 (count response))
+                   (= 1 (first response))
+                   (= msgid (second response)))
+            (let [[_ _ err result] response]
+              (if err
+                (throw (ex-info "Neovim RPC error" {:method method :params params :error err}))
+                result))
+            (recur)))))))
 
 ;;
 ;; EVAL
@@ -197,6 +215,7 @@
                        {:id (or id (f/sid))
                         :tag :neovim
                         :exec exec
+                        :lock (Object.)
                         :lifecycle {:main {}
                                     :emit {}
                                     :json :full}}
@@ -211,9 +230,28 @@
    (-> (neovim:create m)
        (component/start))))
 
+(defn neovim-shared:create
+  "Creates a shared Neovim runtime client.
+
+   A flat :id is promoted to :rt/id so that `(script :lua {:runtime :neovim
+   :id :shared})` shares the same process across namespaces."
+  {:added "4.1"}
+  [m]
+  (-> {:rt/client {:type :hara/rt.neovim
+                   :constructor neovim:create}
+       :rt/temp true}
+      (merge m)
+      (cond-> (:id m) (assoc :rt/id (:id m)))
+      (shared/rt-shared:create)))
+
 (def +init+
   [(rt/install-type!
-    :lua :neovim
+    :lua :neovim.instance
     {:type :hara/rt.neovim
      :config {:layout :full}
-     :instance {:create neovim:create}})])
+     :instance {:create neovim:create}})
+   (rt/install-type!
+    :lua :neovim
+    {:type :hara/rt.neovim.shared
+     :config {:layout :full}
+     :instance {:create neovim-shared:create}})])

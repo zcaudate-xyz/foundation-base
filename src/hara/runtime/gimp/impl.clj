@@ -9,7 +9,6 @@
             [hara.runtime.basic.impl.process-python :as process-python]
             [hara.runtime.basic.type-common :as common]
             [std.lib.network :as network]
-            [std.fs :as fs]
             [xt.lang.common-lib :as lib])
   (:import [java.io BufferedReader InputStreamReader]
            [java.net Socket]
@@ -26,9 +25,6 @@
       (:- :import socket)
       (:- :import threading)
       (:- :import sys)
-      (try
-        (:- :import gimpfu)
-        (catch Exception (pass)))
       (defn client-gimp [conn]
         (while true
           (let [buf (bytearray)
@@ -46,7 +42,7 @@
                     (let [input (json.loads line)
                           body  (. input ["body"])
                           id    (. input (get "id"))
-                          out   (return-eval (+ "from gimpfu import *\n" body))]
+                          out   (return-eval body)]
                       (conn.sendall (. (json.dumps {:id id :status "ok" :body out}) (encode "utf-8")))
                       (conn.sendall (:% b "\n"))))))))
       (let [server (socket.socket)]
@@ -61,31 +57,6 @@
                         :target (fn [] (client-gimp conn)))]
             (. thd (setDaemon true))
             (. thd (start))))))])
-
-(defn- script-fu-escape
-  "Escapes a string for safe embedding in a Script-Fu string literal."
-  {:added "4.1"}
-  [s]
-  (-> s
-      (str/replace "\\" "\\\\")
-      (str/replace "\"" "\\\"")))
-
-(defn- gimp-startup-script
-  "Returns a Script-Fu snippet that reads the Python bootstrap file and evaluates it via Python-Fu."
-  {:added "4.1"}
-  [python-file]
-  (str "(let* (\n"
-       "    (file \"" (script-fu-escape python-file) "\")\n"
-       "    (port (open-input-file file))\n"
-       "    (code \"\")\n"
-       "    (ch #\\space)\n"
-       "  )\n"
-       "  (while (not (eof-object? (set! ch (read-char port))))\n"
-       "    (set! code (string-append code (string ch)))\n"
-       "  )\n"
-       "  (close-input-port port)\n"
-       "  (python-fu-eval RUN-NONINTERACTIVE code)\n"
-       ")\n"))
 
 (defn gimp-bootstrap
   "Python bootstrap that runs inside GIMP and starts a TCP server on PORT."
@@ -115,8 +86,8 @@
       (some (fn [cmd]
               (when (common/program-exists? cmd)
                 cmd))
-            ["gimp-console" "gimp"])
-      "gimp-console"))
+            ["gimp" "gimp-console"])
+      "gimp"))
 
 (defn- wait-for-gimp-ready
   "Reads GIMP stdout until the ready line appears."
@@ -140,16 +111,13 @@
   (let [exec (or exec (gimp-exec))
         port (or port (network/port:check-available 0))
         bootstrap (gimp-bootstrap port)
-        python-file (fs/create-tmpfile bootstrap)
-        python-path (str python-file)
-        startup (gimp-startup-script python-path)
-        startup-file (fs/create-tmpfile startup)
-        startup-path (str startup-file)
         proc (.start (ProcessBuilder. ^"[Ljava.lang.String;"
                                       (into-array String [exec
                                                           "-i"
+                                                          "--batch-interpreter"
+                                                          "python-fu-eval"
                                                           "-b"
-                                                          (str "(load \"" (script-fu-escape startup-path) "\")")])))]
+                                                          bootstrap])))]
     (wait-for-gimp-ready proc 60000)
     (network/wait-for-port "127.0.0.1" port {:timeout 30000})
     (let [socket (Socket. "127.0.0.1" ^Integer port)
@@ -160,25 +128,17 @@
              :socket socket
              :reader in
              :output out
-             :msgid (AtomicInteger. 0)
-             :python-file python-file
-             :startup-file startup-file))))
+             :msgid (AtomicInteger. 0)))))
 
 (defn stop-gimp
   "Stops the GIMP process and socket."
   {:added "4.1"}
-  [{:keys [^Process process ^Socket socket python-file startup-file] :as rt}]
+  [{:keys [^Process process ^Socket socket] :as rt}]
   (when socket
     (try (.close socket)
          (catch Throwable _)))
   (when process
     (try (.destroyForcibly process)
-         (catch Throwable _)))
-  (when startup-file
-    (try (.delete ^java.io.File startup-file)
-         (catch Throwable _)))
-  (when python-file
-    (try (.delete ^java.io.File python-file)
          (catch Throwable _)))
   rt)
 

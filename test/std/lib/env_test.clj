@@ -77,6 +77,33 @@
   (program-exists? "ls")
   => true)
 
+^{:refer std.lib.env/program-version :added "4.0"}
+(fact "returns the version output of a program"
+  (program-version "ls")
+  => string?
+
+  (program-version "definitely-not-a-real-program-12345")
+  => nil?)
+
+^{:refer std.lib.env/version-ints :added "4.0"}
+(fact "parses a version string into integers"
+  (version-ints "docker version 24.0.7, build abcdef")
+  => [24 0 7])
+
+^{:refer std.lib.env/version>= :added "4.0"}
+(fact "compares version strings or vectors"
+  (version>= "1.2.3" "1.2.0")
+  => true
+
+  (version>= "1.2.0" "1.2.3")
+  => false
+
+  (version>= "1.2.0" "1.2.0")
+  => true
+
+  (version>= [24 0 7] [24 0 0])
+  => true)
+
 ^{:refer std.lib.env/close :added "3.0"}
 (fact "closes any object implementing `java.io.Closable`"
   (close (java.io.StringReader. "hello"))

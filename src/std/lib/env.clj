@@ -85,6 +85,49 @@
        (not= "" (clojure.string/trim (slurp (.getInputStream process)))))
      (catch Exception _ false))))
 
+(defn program-version
+  "returns the version output of a program, or nil if unavailable
+
+   (program-version \"ls\")
+   => string?"
+  {:added "4.0"}
+  ([exec]
+   (program-version exec ["--version"]))
+  ([exec args]
+   (try
+     (let [^Process process (.start (ProcessBuilder. ^"[Ljava.lang.String;" (into-array String (cons exec args))))]
+       (.waitFor process)
+       (not-empty (clojure.string/trim (slurp (.getInputStream process)))))
+     (catch Exception _ nil))))
+
+(defn version-ints
+  "parses a version string into a vector of integers
+
+   (version-ints \"docker version 24.0.7, build afdd53b\")
+   => [24 0 7]"
+  {:added "4.0"}
+  [s]
+  (vec (map #(Integer/parseInt %) (re-seq #"\d+" s))))
+
+(defn version>=
+  "checks if version a is greater than or equal to version b.
+   Accepts version strings or integer vectors.
+
+   (version>= \"1.2.3\" \"1.2.0\")
+   => true"
+  {:added "4.0"}
+  [a b]
+  (let [a-ints (if (string? a) (version-ints a) a)
+        b-ints (if (string? b) (version-ints b) b)]
+    (loop [a a-ints b b-ints]
+      (cond
+        (and (empty? a) (empty? b)) true
+        (empty? a) false
+        (empty? b) true
+        (> (first a) (first b)) true
+        (< (first a) (first b)) false
+        :else (recur (rest a) (rest b))))))
+
 (defn ^java.net.URL sys:resource
   "finds a resource on class path"
   {:added "3.0"}
