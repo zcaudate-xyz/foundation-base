@@ -1,6 +1,6 @@
 (ns hara.runtime.basic.docker.impl-erlang-test
   (:require [hara.runtime.basic.docker.registry :as registry]
-            [hara.runtime.basic.type-common :as common]
+            [std.lib.env :as env]
             [hara.lang :as l]
             [hara.lang.script :as script])
   (:use code.test))
@@ -16,45 +16,38 @@
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-erlang-test
 ;;
 
-(def CANARY-DOCKER
-  (and (common/program-exists? "docker")
-       (some? (System/getenv "RT_BASIC_DOCKER_TESTS"))))
-
-(when CANARY-DOCKER
+(when (and (env/program-exists? "docker")
+           (System/getenv "RT_BASIC_DOCKER_TESTS"))
   (script/script-ext [:erl.docker :erlang]
     {:runtime :basic
      :config  (registry/registry-config :erlang)}))
 
 (fact:global
- {:setup    [(when CANARY-DOCKER (l/annex:start-all))]
-  :teardown [(when CANARY-DOCKER (l/annex:stop-all))]})
+ {:skip (or (not (env/program-exists? "docker"))
+            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
+  :setup [(l/annex:start-all)]
+  :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.runtime.basic.docker.impl-erlang-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :erl.docker :adopt true :added "4.0"}
 (fact "erlang :basic evaluates arithmetic expressions in docker"
-  (if CANARY-DOCKER
-    [(l/! [:erl.docker]
-       (+ 1 2 3))
+  [(l/! [:erl.docker]
+     (+ 1 2 3))
 
-     (l/! [:erl.docker]
-       (* 6 7))
+   (l/! [:erl.docker]
+     (* 6 7))
 
-     (l/! [:erl.docker]
-       (- 100 1))]
-    :docker-unavailable)
-  => (any [6 42 99]
-          :docker-unavailable))
+   (l/! [:erl.docker]
+     (- 100 1))]
+  => [6 42 99])
 
-^{:refer hara.runtime.basic.docker.impl-erlang-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :erl.docker :adopt true :added "4.0"}
 (fact "erlang docker container evaluates list and stdlib operations"
-  (if CANARY-DOCKER
-    [(l/! [:erl.docker]
-       (lists:sum [1 2 3 4 5]))
+  [(l/! [:erl.docker]
+     (lists:sum [1 2 3 4 5]))
 
-     (l/! [:erl.docker]
-       (length [10 20 30 40 50 60 70]))]
-    :docker-unavailable)
-  => (any [15 7]
-          :docker-unavailable))
+   (l/! [:erl.docker]
+     (length [10 20 30 40 50 60 70]))]
+  => [15 7])
 
 (comment
   (l/annex:start-all)

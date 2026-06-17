@@ -1,6 +1,6 @@
 (ns hara.runtime.basic.docker.impl-python-test
   (:require [hara.runtime.basic.docker.registry :as registry]
-            [hara.runtime.basic.type-common :as common]
+            [std.lib.env :as env]
             [hara.lang :as l]
             [hara.lang.script :as script])
   (:use code.test))
@@ -18,56 +18,47 @@
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-python-test
 ;;
 
-(def CANARY-DOCKER
-  (and (common/program-exists? "docker")
-       (some? (System/getenv "RT_BASIC_DOCKER_TESTS"))))
-
-(when CANARY-DOCKER
+(when (and (env/program-exists? "docker")
+           (System/getenv "RT_BASIC_DOCKER_TESTS"))
   (script/script-ext [:py.docker :python]
     {:runtime :basic
      :config  (registry/registry-config :python)}))
 
 (fact:global
- {:setup    [(when CANARY-DOCKER (l/annex:start-all))]
-  :teardown [(when CANARY-DOCKER (l/annex:stop-all))]})
+ {:skip (or (not (env/program-exists? "docker"))
+            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
+  :setup [(l/annex:start-all)]
+  :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.runtime.basic.docker.impl-python-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :py.docker :adopt true :added "4.0"}
 (fact "python :basic evaluates arithmetic expressions in docker"
-  (if CANARY-DOCKER
-    [(l/! [:py.docker]
-       (+ 1 2 3))
+  [(l/! [:py.docker]
+     (+ 1 2 3))
 
-     (l/! [:py.docker]
-       (* 6 7))
+   (l/! [:py.docker]
+     (* 6 7))
 
-     (l/! [:py.docker]
-       (- 100 1))]
-    :docker-unavailable)
-  => (any [6 42 99]
-          :docker-unavailable))
+   (l/! [:py.docker]
+     (- 100 1))]
+  => [6 42 99])
 
-^{:refer hara.runtime.basic.docker.impl-python-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :py.docker :adopt true :added "4.0"}
 (fact "python docker container defines and calls inline functions"
-  (if CANARY-DOCKER
-    [(l/! [:py.docker]
-       (do (var add-10 (fn [x] (return (+ x 10))))
-           (add-10 5)))
+  [(l/! [:py.docker]
+     (do (var add-10 (fn [x] (return (+ x 10))))
+         (add-10 5)))
 
-     (l/! [:py.docker]
-       (do (var mul-xy (fn [x y] (return (* x y))))
-           (mul-xy 6 7)))]
-    :docker-unavailable)
-  => (any [15 42]
-          :docker-unavailable))
+   (l/! [:py.docker]
+     (do (var mul-xy (fn [x y] (return (* x y))))
+         (mul-xy 6 7)))]
+  => [15 42])
 
-^{:refer hara.runtime.basic.docker.impl-python-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :py.docker :adopt true :added "4.0"}
 (fact "python docker container handles string operations"
-  (if CANARY-DOCKER
-    (l/! [:py.docker]
-      (do (var greet (fn [name] (return (+ "hello " name))))
-          (greet "world")))
-    :docker-unavailable)
-  => (any "hello world" :docker-unavailable))
+  (l/! [:py.docker]
+    (do (var greet (fn [name] (return (+ "hello " name))))
+        (greet "world")))
+  => "hello world")
 
 (comment
   (l/annex:start-all)

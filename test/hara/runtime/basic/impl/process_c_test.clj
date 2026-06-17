@@ -1,6 +1,6 @@
 (ns hara.runtime.basic.impl.process-c-test
   (:require [hara.runtime.basic.impl.process-c :refer :all]
-            [hara.runtime.basic.type-common :as common]
+            [std.lib.env :as env]
             [hara.lang :as l])
   (:use code.test))
 
@@ -30,36 +30,32 @@
   (return (-/sub (-/add 1 2)
                  10)))
 
-(def CANARY-TCC
-  (common/program-exists? "tcc"))
+(fact:global {:skip (not (env/program-exists? "tcc"))})
 
-^{:refer hara.runtime.basic.impl.process-c-test/CANARY-TCC :guard true :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-c-test/CANARY-TCC :adopt true :added "4.0"}
 (fact "EVALUATE tcc in c"
 
-  (if CANARY-TCC
-    [(str (!.c (printf "hello world")))
-     [(-/add 1 2)
-      (!.c
-       (-/add 1 2))]
-     [(-/sub 1 2)
-      (!.c
-       (-/sub 1 2))]
-     (!.c
-      (-/add 1 (-/sub 3 4)))
-     [(-/hello)
-      (!.c
-       (-/hello))]
-     [(-/main)
-      (!.c
-       (-/main))]]
-    :tcc-unavailable)
-  => (any ["\nhello world"
-           [3 3]
-           [-1 -1]
-           0
-           ["hello world" "hello world"]
-           [-7 -7]]
-          :tcc-unavailable))
+  [(str (!.c (printf "hello world")))
+   [(-/add 1 2)
+    (!.c
+     (-/add 1 2))]
+   [(-/sub 1 2)
+    (!.c
+     (-/sub 1 2))]
+   (!.c
+    (-/add 1 (-/sub 3 4)))
+   [(-/hello)
+    (!.c
+     (-/hello))]
+   [(-/main)
+    (!.c
+     (-/main))]]
+  => ["\nhello world"
+      [3 3]
+      [-1 -1]
+      0
+      ["hello world" "hello world"]
+      [-7 -7]])
 
 ^{:refer hara.runtime.basic.impl.process-c/get-format-string :added "4.0"}
 (fact "gets the format string given entry"

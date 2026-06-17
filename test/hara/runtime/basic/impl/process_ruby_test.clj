@@ -1,10 +1,10 @@
 (ns hara.runtime.basic.impl.process-ruby-test
   (:require [hara.runtime.basic.impl.process-ruby :refer :all]
-              [hara.runtime.basic.type-common :as common]
-              [hara.common.preprocess-staging :as staging]
-              [hara.lang.runtime :as rt]
-              [hara.lang :as l]
-              [xt.lang.spec-primitive :as primitive])
+            [std.lib.env :as env]
+            [hara.common.preprocess-staging :as staging]
+            [hara.lang.runtime :as rt]
+            [hara.lang :as l]
+            [xt.lang.spec-primitive :as primitive])
   (:use code.test))
 
 (l/script- :ruby
@@ -12,28 +12,22 @@
    :require [[xt.lang.spec-primitive :as primitive]]})
 
 (fact:global
- {:setup    [(l/annex:start-all)]
+ {:skip (not (env/program-exists? "ruby"))
+  :setup    [(l/annex:start-all)]
   :teardown [(l/annex:stop-all)]})
-
-(def CANARY-RUBY
-  (common/program-exists? "ruby"))
 
 ^{:refer hara.runtime.basic.impl.process-ruby/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE ruby code"
 
-  (if CANARY-RUBY
-    (!.rb
-      (. (fn []
-           (+ 1 2))
-          (call)))
-    :ruby-unavailable)
-  => (any 3 :ruby-unavailable)
+  (!.rb
+    (. (fn []
+         (+ 1 2))
+        (call)))
+  => 3
 
-  (if CANARY-RUBY
-    (!.rb
-      (primitive/+ 1 2 3 4))
-    :ruby-unavailable)
-  => (any 10 :ruby-unavailable)
+  (!.rb
+    (primitive/+ 1 2 3 4))
+  => 10
 
   (default-oneshot-wrap "1")
   => #"is_a\?\(Proc\)")

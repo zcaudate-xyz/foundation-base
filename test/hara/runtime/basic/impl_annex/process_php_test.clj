@@ -1,34 +1,29 @@
 (ns hara.runtime.basic.impl-annex.process-php-test
   (:require [hara.runtime.basic.impl-annex.process-php :refer :all]
-            [hara.runtime.basic.type-common :as common]
+            [std.lib.env :as env]
             [hara.runtime.basic.type-oneshot :as p]
             [std.json :as json]
             [hara.lang :as l])
   (:use code.test))
 
-(def CANARY-PHP
-  (common/program-exists? "php"))
+(fact:global {:skip (not (env/program-exists? "php"))})
 
 ^{:refer hara.runtime.basic.impl-annex.process-php-test/CANARY-PHP :adopt true :added "4.0"}
 (fact "EVALUATE php code"
 
-  (if CANARY-PHP
-    (-> (p/rt-oneshot {:lang :php})
-        (p/raw-eval-oneshot (default-oneshot-wrap '(+ 1 2 3 4)))
-        (json/read json/+keyword-mapper+)
-        :value)
-    :php-unavailable)
-  => (any 10 :php-unavailable))
+  (-> (p/rt-oneshot {:lang :php})
+      (p/raw-eval-oneshot (default-oneshot-wrap '(+ 1 2 3 4)))
+      (json/read json/+keyword-mapper+)
+      :value)
+  => 10)
 
 ^{:refer hara.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.1"}
 (fact "captures php eval errors without crashing the wrapper"
-  (if CANARY-PHP
-    (let [out (-> (p/rt-oneshot {:lang :php})
-                  (p/raw-eval-oneshot (default-oneshot-wrap '(not_a_real_php_fn)))
-                  (json/read json/+keyword-mapper+))]
-      [(:type out) (string? (:value out))])
-    :php-unavailable)
-  => (any ["error" true] :php-unavailable))
+  (let [out (-> (p/rt-oneshot {:lang :php})
+                (p/raw-eval-oneshot (default-oneshot-wrap '(not_a_real_php_fn)))
+                (json/read json/+keyword-mapper+))]
+    [(:type out) (string? (:value out))])
+  => ["error" true])
 
 ^{:refer hara.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"}
 (fact "creates the oneshot bootstrap form"

@@ -1,13 +1,13 @@
 (ns hara.runtime.basic.type-twostep-gcc-test
   (:use code.test)
-  (:require [hara.runtime.basic.type-common :as common]
+  (:require [std.lib.env :as env]
             [hara.lang :as l]))
 
 (l/script- :c
   {:runtime :twostep})
 
-(def CANARY-GCC
-  (common/program-exists? "gcc"))
+(fact:global
+ {:skip (not (env/program-exists? "gcc"))})
 
 (defn.c ^{:- [:int]}
   add-10
@@ -20,17 +20,14 @@
   (return (+ x 20)))
 
 (fact "gcc twostep can return values"
-  (if CANARY-GCC
-    [(!.c
-       (+ 1 2 3))
+  [(!.c
+     (+ 1 2 3))
 
-     (add-10 6)
+   (add-10 6)
 
-     (!.c
-       (-/add-20 (-/add-10 6)))
+   (!.c
+     (-/add-20 (-/add-10 6)))
 
-     (!.c
-       (-/add-20 10))]
-    :gcc-unavailable)
-  => (any [6 16 36 30]
-           :gcc-unavailable))
+   (!.c
+     (-/add-20 10))]
+  => [6 16 36 30])

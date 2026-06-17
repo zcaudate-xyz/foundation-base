@@ -64,7 +64,7 @@
        :runtime :twostep
        :available []}])
 
-^{:refer hara.runtime.basic.type-common/program-exists? :added "4.0"}
+^{:refer std.lib.env/program-exists? :added "4.0"}
 (fact  "checks if an executable exists"
 
   (program-exists? "ls")

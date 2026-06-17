@@ -1,6 +1,6 @@
 (ns hara.runtime.basic.docker.impl-ruby-test
   (:require [hara.runtime.basic.docker.registry :as registry]
-            [hara.runtime.basic.type-common :as common]
+            [std.lib.env :as env]
             [hara.lang :as l]
             [hara.lang.script :as script])
   (:use code.test))
@@ -15,60 +15,50 @@
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-ruby-test
 ;;
 
-(def CANARY-DOCKER
-  (and (common/program-exists? "docker")
-       (some? (System/getenv "RT_BASIC_DOCKER_TESTS"))))
-
-(when CANARY-DOCKER
+(when (and (env/program-exists? "docker")
+           (System/getenv "RT_BASIC_DOCKER_TESTS"))
   (script/script-ext [:rb.docker :ruby]
     {:runtime :basic
      :config  (registry/registry-config :ruby)}))
 
 (fact:global
- {:setup    [(when CANARY-DOCKER (l/annex:start-all))]
-  :teardown [(when CANARY-DOCKER (l/annex:stop-all))]})
+ {:skip (or (not (env/program-exists? "docker"))
+            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
+  :setup [(l/annex:start-all)]
+  :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.runtime.basic.docker.impl-ruby-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :rb.docker :adopt true :added "4.0"}
 (fact "ruby :basic evaluates arithmetic expressions in docker"
-  (if CANARY-DOCKER
-    [(l/! [:rb.docker]
-       (+ 1 2 3))
+  [(l/! [:rb.docker]
+     (+ 1 2 3))
 
-     (l/! [:rb.docker]
-       (* 6 7))
+   (l/! [:rb.docker]
+     (* 6 7))
 
-     (l/! [:rb.docker]
-       (- 100 1))]
-    :docker-unavailable)
-  => (any [6 42 99]
-          :docker-unavailable))
+   (l/! [:rb.docker]
+     (- 100 1))]
+  => [6 42 99])
 
-^{:refer hara.runtime.basic.docker.impl-ruby-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :rb.docker :adopt true :added "4.0"}
 (fact "ruby docker container defines and calls inline functions"
-  (if CANARY-DOCKER
-    [(l/! [:rb.docker]
-       (do (defn add-10 [x] (return (+ x 10)))
-           (add-10 5)))
+  [(l/! [:rb.docker]
+     (do (defn add-10 [x] (return (+ x 10)))
+         (add-10 5)))
 
-     (l/! [:rb.docker]
-       (do (defn mul-xy [x y] (return (* x y)))
-           (mul-xy 6 7)))]
-    :docker-unavailable)
-  => (any [15 42]
-          :docker-unavailable))
+   (l/! [:rb.docker]
+     (do (defn mul-xy [x y] (return (* x y)))
+         (mul-xy 6 7)))]
+  => [15 42])
 
-^{:refer hara.runtime.basic.docker.impl-ruby-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :rb.docker :adopt true :added "4.0"}
 (fact "ruby docker container handles string operations"
-  (if CANARY-DOCKER
-    [(l/! [:rb.docker]
-       (+ "hello " "world"))
+  [(l/! [:rb.docker]
+     (+ "hello " "world"))
 
-     (l/! [:rb.docker]
-       (do (defn greet [name] (return (+ "hi " name)))
-           (greet "ruby")))]
-    :docker-unavailable)
-  => (any ["hello world" "hi ruby"]
-          :docker-unavailable))
+   (l/! [:rb.docker]
+     (do (defn greet [name] (return (+ "hi " name)))
+         (greet "ruby")))]
+  => ["hello world" "hi ruby"])
 
 (comment
   (l/annex:start-all)

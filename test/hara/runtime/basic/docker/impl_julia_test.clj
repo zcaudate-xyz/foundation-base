@@ -1,7 +1,7 @@
 (ns hara.runtime.basic.docker.impl-julia-test
   (:require [hara.runtime.basic.docker.registry :as registry]
             [hara.runtime.basic.impl-annex.process-julia]
-            [hara.runtime.basic.type-common :as common]
+            [std.lib.env :as env]
             [hara.lang :as l]
             [hara.lang.script :as script])
   (:use code.test))
@@ -18,60 +18,51 @@
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-julia-test
 ;;
 
-(def CANARY-DOCKER
-  (and (common/program-exists? "docker")
-       (some? (System/getenv "RT_BASIC_DOCKER_TESTS"))))
-
-(when CANARY-DOCKER
+(when (and (env/program-exists? "docker")
+           (System/getenv "RT_BASIC_DOCKER_TESTS"))
   (script/script-ext [:jl.docker :julia]
     {:runtime :basic
      :config  (registry/registry-config :julia)}))
 
 (fact:global
- {:setup    [(when CANARY-DOCKER (l/annex:start-all))]
-  :teardown [(when CANARY-DOCKER (l/annex:stop-all))]})
+ {:skip (or (not (env/program-exists? "docker"))
+            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
+  :setup [(l/annex:start-all)]
+  :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.runtime.basic.docker.impl-julia-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :jl.docker :adopt true :added "4.0"}
 (fact "julia :basic evaluates arithmetic expressions in docker"
-  (if CANARY-DOCKER
-    [(l/! [:jl.docker]
-       (+ 1 2 3))
+  [(l/! [:jl.docker]
+     (+ 1 2 3))
 
-     (l/! [:jl.docker]
-       (pow 3 4))
+   (l/! [:jl.docker]
+     (pow 3 4))
 
-     (l/! [:jl.docker]
-       (* 6 7))]
-    :docker-unavailable)
-  => (any [6 81 42]
-          :docker-unavailable))
+   (l/! [:jl.docker]
+     (* 6 7))]
+  => [6 81 42])
 
-^{:refer hara.runtime.basic.docker.impl-julia-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :jl.docker :adopt true :added "4.0"}
 (fact "julia docker container defines and calls inline functions"
-  (if CANARY-DOCKER
-    [(l/! [:jl.docker]
-       (do (var add-10 (fn [x] (return (+ x 10))))
-           (add-10 5)))
+  [(l/! [:jl.docker]
+     (do (var add-10 (fn [x] (return (+ x 10))))
+         (add-10 5)))
 
-     (l/! [:jl.docker]
-       (do (var mul-xy (fn [x y] (return (* x y))))
-           (mul-xy 6 7)))]
-    :docker-unavailable)
-  => (any [15 42]
-          :docker-unavailable))
+   (l/! [:jl.docker]
+     (do (var mul-xy (fn [x y] (return (* x y))))
+         (mul-xy 6 7)))]
+  => [15 42])
 
-^{:refer hara.runtime.basic.docker.impl-julia-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :jl.docker :adopt true :added "4.0"}
 (fact "julia docker container handles recursive inline functions"
-  (if CANARY-DOCKER
-    (l/! [:jl.docker]
-      (do (var fib (fn [n]
-                     (if (<= n 1)
-                       (return n)
-                       (return (+ (fib (- n 1))
-                                  (fib (- n 2)))))))
-          (fib 10)))
-    :docker-unavailable)
-  => (any 55 :docker-unavailable))
+  (l/! [:jl.docker]
+    (do (var fib (fn [n]
+                   (if (<= n 1)
+                     (return n)
+                     (return (+ (fib (- n 1))
+                                (fib (- n 2)))))))
+        (fib 10)))
+  => 55)
 
 (comment
   (l/annex:start-all)

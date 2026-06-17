@@ -1,9 +1,9 @@
 (ns hara.runtime.basic.docker.type-twostep-rustc-test
   (:use code.test)
   (:require [hara.runtime.basic.impl-annex.process-rust]
-            [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
-            [hara.lang :as l]))
+            [hara.lang :as l]
+            [std.lib.env :as env]))
 
 (l/script- :rust
   {:runtime :twostep
@@ -11,9 +11,8 @@
              :container {:image "foundation-base/rt-twostep-rust:latest"}
              :exec-fn #'twostep/sh-exec-portable}})
 
-(def CANARY-DOCKER
-  (and (common/program-exists? "docker")
-       (some? (System/getenv "RT_TWOSTEP_DOCKER_TESTS"))))
+(fact:global {:skip (or (not (env/program-exists? "docker"))
+                        (not (System/getenv "RT_TWOSTEP_DOCKER_TESTS")))})
 
 (defn.rs ^{:- [:i32]}
   add-10
@@ -26,17 +25,14 @@
   (return (+ x 20)))
 
 (fact "rust twostep can return values in docker"
-  (if CANARY-DOCKER
-    [(!.rs
-       (+ 1 2 3))
+  [(!.rs
+     (+ 1 2 3))
 
-     (add-10 6)
+   (add-10 6)
 
-     (!.rs
-       (-/add-20 (-/add-10 6)))
+   (!.rs
+     (-/add-20 (-/add-10 6)))
 
-     (!.rs
-       (-/add-20 10))]
-    :docker-unavailable)
-  => (any [6 16 36 30]
-          :docker-unavailable))
+   (!.rs
+     (-/add-20 10))]
+  => [6 16 36 30])

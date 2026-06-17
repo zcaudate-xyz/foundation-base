@@ -1,16 +1,16 @@
 (ns hara.runtime.basic.docker.impl-r-test
   (:require [hara.runtime.basic.docker.registry :as registry]
             [hara.runtime.basic.impl-annex.process-r :as r]
-            [hara.runtime.basic.type-common :as common]
+            [std.lib.env :as env]
             [hara.lang :as l]
-            [hara.lang.script :as script])
+            [hara.lang.script :as script]
+            [clojure.string :as str])
   (:use code.test))
 
 ;;
 ;; R basic runtime in a Docker container.
 ;;
 ;; Uses the project-owned hara.runtime.basic R image.
-;;
 ;; The canonical registry entry is based on `rocker/r-ver:4.3`,
 ;; which includes jsonlite and can connect back to the JVM host.
 ;;
@@ -28,61 +28,52 @@
        "}\n\n"
        (r/default-basic-client port opts)))
 
-(def CANARY-DOCKER
-  (and (common/program-exists? "docker")
-       (some? (System/getenv "RT_BASIC_DOCKER_TESTS"))))
-
-(when CANARY-DOCKER
+(when (and (env/program-exists? "docker")
+           (System/getenv "RT_BASIC_DOCKER_TESTS"))
   (script/script-ext [:r.docker :r]
     {:runtime :basic
      :config  (registry/registry-config :r)}))
 
 (fact:global
- {:setup    [(when CANARY-DOCKER (l/annex:start-all))]
-  :teardown [(when CANARY-DOCKER (l/annex:stop-all))]})
+ {:skip (or (not (env/program-exists? "docker"))
+            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
+  :setup [(l/annex:start-all)]
+  :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.runtime.basic.docker.impl-r-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :r.docker :adopt true :added "4.0"}
 (fact "r :basic evaluates arithmetic expressions in docker"
-  (if CANARY-DOCKER
-    [(l/! [:r.docker]
-       (+ 1 2 3))
+  [(l/! [:r.docker]
+     (+ 1 2 3))
 
-     (l/! [:r.docker]
-       (* 6 7))
+   (l/! [:r.docker]
+     (* 6 7))
 
-     (l/! [:r.docker]
-       (- 100 1))]
-    :docker-unavailable)
-  => (any [6 42 99]
-          :docker-unavailable))
+   (l/! [:r.docker]
+     (- 100 1))]
+  => [6 42 99])
 
-^{:refer hara.runtime.basic.docker.impl-r-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :r.docker :adopt true :added "4.0"}
 (fact "r docker container defines and calls inline functions"
-  (if CANARY-DOCKER
-    [(l/! [:r.docker]
-       (do (var add-10 (fn [x] (return (+ x 10))))
-           (add-10 5)))
+  [(l/! [:r.docker]
+     (do (var add-10 (fn [x] (return (+ x 10))))
+         (add-10 5)))
 
-     (l/! [:r.docker]
-       (do (var mul-xy (fn [x y] (return (* x y))))
-           (mul-xy 6 7)))]
-    :docker-unavailable)
-  => (any [15 42]
-          :docker-unavailable))
+   (l/! [:r.docker]
+     (do (var mul-xy (fn [x y] (return (* x y))))
+         (mul-xy 6 7)))]
+  => [15 42])
 
-^{:refer hara.runtime.basic.docker.impl-r-test/CANARY-DOCKER :adopt true :added "4.0"}
+^{:refer :r.docker :adopt true :added "4.0"}
 (fact "r docker container handles vector operations"
-  (if CANARY-DOCKER
-    (l/! [:r.docker]
-      (sum [1 2 3 4 5]))
-    :docker-unavailable)
-  => (any 15 :docker-unavailable))
+  (l/! [:r.docker]
+    (sum [1 2 3 4 5]))
+  => 15)
 
 ^{:refer hara.runtime.basic.docker.impl-r-test/r-docker-bootstrap :added "4.0"}
 (fact "r docker bootstrap wraps default-basic-client with jsonlite install"
   (let [src (r-docker-bootstrap 9999 {})]
-    [(clojure.string/includes? src "install.packages")
-     (clojure.string/includes? src "jsonlite")
+    [(str/includes? src "install.packages")
+     (str/includes? src "jsonlite")
      (string? src)])
   => [true true true])
 

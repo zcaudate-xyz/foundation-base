@@ -1,9 +1,9 @@
 (ns hara.runtime.basic.docker.type-twostep-gcc-test
   (:use code.test)
   (:require [hara.runtime.basic.impl.process-c]
-            [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
-            [hara.lang :as l]))
+            [hara.lang :as l]
+            [std.lib.env :as env]))
 
 (l/script- :c
   {:runtime :twostep
@@ -11,9 +11,8 @@
              :container {:image "foundation-base/rt-twostep-c:latest"}
              :exec-fn #'twostep/sh-exec-portable}})
 
-(def CANARY-DOCKER
-  (and (common/program-exists? "docker")
-       (some? (System/getenv "RT_TWOSTEP_DOCKER_TESTS"))))
+(fact:global {:skip (or (not (env/program-exists? "docker"))
+                        (not (System/getenv "RT_TWOSTEP_DOCKER_TESTS")))})
 
 (defn.c ^{:- [:int]}
   add-10
@@ -26,17 +25,14 @@
   (return (+ x 20)))
 
 (fact "gcc twostep can return values in docker"
-  (if CANARY-DOCKER
-    [(!.c
-       (+ 1 2 3))
+  [(!.c
+     (+ 1 2 3))
 
-     (add-10 6)
+   (add-10 6)
 
-     (!.c
-       (-/add-20 (-/add-10 6)))
+   (!.c
+     (-/add-20 (-/add-10 6)))
 
-     (!.c
-       (-/add-20 10))]
-    :docker-unavailable)
-  => (any [6 16 36 30]
-          :docker-unavailable))
+   (!.c
+     (-/add-20 10))]
+  => [6 16 36 30])

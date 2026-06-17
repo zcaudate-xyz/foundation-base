@@ -1,13 +1,13 @@
 (ns hara.runtime.basic.type-twostep-rustc-test
   (:use code.test)
-  (:require [hara.runtime.basic.type-common :as common]
+  (:require [std.lib.env :as env]
             [hara.lang :as l]))
 
 (l/script- :rust
   {:runtime :twostep})
 
-(def CANARY-RUSTC
-  (common/program-exists? "rustc"))
+(fact:global
+ {:skip (not (env/program-exists? "rustc"))})
 
 (defn.rs ^{:- [:i32]}
   add-10
@@ -20,17 +20,14 @@
   (return (+ x 20)))
 
 (fact "rustc twostep can return values"
-  (if CANARY-RUSTC
-    [(!.rs
-       (+ 1 2 3))
+  [(!.rs
+     (+ 1 2 3))
 
-     (add-10 6)
+   (add-10 6)
 
-     (!.rs
-       (-/add-20 (-/add-10 6)))
+   (!.rs
+     (-/add-20 (-/add-10 6)))
 
-     (!.rs
-       (-/add-20 10))]
-    :rustc-unavailable)
-  => (any [6 16 36 30]
-          :rustc-unavailable))
+   (!.rs
+     (-/add-20 10))]
+  => [6 16 36 30])

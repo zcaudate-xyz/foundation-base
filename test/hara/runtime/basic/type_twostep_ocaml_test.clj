@@ -1,7 +1,7 @@
 (ns hara.runtime.basic.type-twostep-ocaml-test
   (:use code.test)
-  (:require [hara.runtime.basic.impl-annex.process-ocaml]
-            [hara.runtime.basic.type-common :as common]
+  (:require [std.lib.env :as env]
+            [hara.runtime.basic.impl-annex.process-ocaml]
             [hara.lang :as l]))
 
 (do hara.runtime.basic.impl-annex.process-ocaml/+ocaml-twostep+)
@@ -9,16 +9,13 @@
 (l/script- :ocaml
   {:runtime :twostep})
 
-(def CANARY-OCAMLC
-  (common/program-exists? "ocamlc"))
+(fact:global
+ {:skip (not (env/program-exists? "ocamlc"))})
 
 (fact "ocamlc twostep can return values"
-  (if CANARY-OCAMLC
-    [(!.ml
-       (+ 1 2 3))
+  [(!.ml
+     (+ 1 2 3))
 
-     (!.ml
-       (* (+ 2 3) 4))]
-    :ocamlc-unavailable)
-  => (any [6 20]
-          :ocamlc-unavailable))
+   (!.ml
+     (* (+ 2 3) 4))]
+  => [6 20])

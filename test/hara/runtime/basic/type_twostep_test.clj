@@ -4,14 +4,13 @@
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as p]
             [std.fs :as fs]
-            [std.lib.os :as os])
+            [std.lib.os :as os]
+            [std.lib.env :as env])
   (:use code.test))
 
-(def CANARY-GCC
-  (common/program-exists? "gcc"))
-
-(def CANARY-RUSTC
-  (common/program-exists? "rustc"))
+(fact:global
+ {:skip (not (and (env/program-exists? "gcc")
+                  (env/program-exists? "rustc")))})
 
 (fact "returns compile stderr when compilation fails"
 
@@ -25,7 +24,7 @@
     (p/sh-exec ["cmd"] "body" {:extension "ext" :stderr true}))
   => "compile failed")
 
-(^{:refer hara.runtime.basic.type-twostep-test/CANARY-GCC :guard true :adopt true :added "4.0"}
+(^{:refer hara.runtime.basic.type-twostep-test/CANARY-GCC :adopt true :added "4.0"}
  fact "runs a full compile and execution cycle for c twostep"
 
   (p/raw-eval-twostep
@@ -34,7 +33,7 @@
    "#include <stdio.h>\nint main(){ printf(\"%d\", 2 + 3); return 0; }")
   => "5")
 
-(^{:refer hara.runtime.basic.type-twostep-test/CANARY-RUSTC :guard true :adopt true :added "4.0"}
+(^{:refer hara.runtime.basic.type-twostep-test/CANARY-RUSTC :adopt true :added "4.0"}
  fact "runs a full compile and execution cycle for rust twostep"
 
   (p/raw-eval-twostep
