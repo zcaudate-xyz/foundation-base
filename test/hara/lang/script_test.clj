@@ -149,6 +149,23 @@
   (script/script- :lua)
   => map?)
 
+^{:refer hara.lang.script/script-test-mode? :added "4.0"}
+(fact "detects test mode from :test-mode and eval-mode"
+
+  (script/script-test-mode? {})
+  => false
+
+  (script/script-test-mode? {:test-mode true})
+  => false
+
+  (binding [code.test.base.context/*eval-mode* false]
+    (script/script-test-mode? {:test-mode true}))
+  => true
+
+  (binding [code.test.base.context/*eval-mode* false]
+    (script/script-test-mode? {}))
+  => false)
+
 ^{:refer hara.lang.script/script-ext :added "4.0"}
 (fact "the `script+` function call"
 

@@ -13,6 +13,7 @@
             [hara.lang.script-control :as control]
             [hara.lang.script-macro :as macro]
             [hara.common.util :as ut]
+            [code.test.base.context :as tctx]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
             [std.lib.component :as component]
@@ -45,7 +46,10 @@
    :bundle
    :file
    :export
-   :static])
+   :static
+
+   ;; test mode
+   :test-mode])
 
 (def +runtime-keys+
   [:runtime
@@ -317,7 +321,8 @@
                                                                     :runtime
                                                                     :config
                                                                     :layout
-                                                                    :emit))
+                                                                    :emit
+                                                                    :test-mode))
          book       (snap/get-book-raw snapshot lang)
          module     (get-in book [:modules module-id])
          macros     (script-macro-import book)]
@@ -375,14 +380,24 @@
      (binding [book/*skip-check* true]
        (script-fn-base lang module-id config lib)))))
 
+(defn script-test-mode?
+  "Returns true only when the caller opted in with :test-mode true
+   and we are in a code.test load phase (*eval-mode* false)."
+  {:added "4.0"}
+  [config]
+  (boolean
+   (and (:test-mode config)
+        (not tctx/*eval-mode*))))
+
 (defn script-test
   "the `script-` function call"
   {:added "4.0"}
   ([lang config]
    (let [rt-config (script-test-prep lang config)]
-     (control/script-rt-get lang
-                            (:runtime config)
-                            rt-config))))
+     (when-not (script-test-mode? config)
+       (control/script-rt-get lang
+                              (:runtime config)
+                              rt-config)))))
 
 (defmacro ^{:style/indent 1}
   script-
@@ -405,18 +420,21 @@
    (let [{:keys [runtime]} config
          rt-config (script-test-prep lang config)
          ns (:module rt-config)
-         _  (control/script-rt-get lang
-                                   (:runtime config)
-                                   rt-config)
-         _  (annex/register-annex-tag ns tag lang runtime config)
-         rt (annex/get-annex-runtime ns tag)]
-      (if (or (not rt)
-              (not (annex/same-runtime? rt lang (or runtime :default) rt-config)))
-        (annex/add-annex-runtime ns tag
-                                 (annex/start-runtime lang
-                                                      (or runtime :default)
-                                                      rt-config))
-        [rt]))))
+         test-mode? (script-test-mode? config)]
+     (when-not test-mode?
+       (control/script-rt-get lang
+                              (:runtime config)
+                              rt-config))
+     (annex/register-annex-tag ns tag lang runtime config)
+     (when-not test-mode?
+       (let [rt (annex/get-annex-runtime ns tag)]
+         (if (or (not rt)
+                 (not (annex/same-runtime? rt lang (or runtime :default) rt-config)))
+           (annex/add-annex-runtime ns tag
+                                    (annex/start-runtime lang
+                                                         (or runtime :default)
+                                                         rt-config))
+           [rt]))))))
 
 (defmacro ^{:style/indent 1}
   script+

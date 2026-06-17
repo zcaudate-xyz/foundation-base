@@ -62,7 +62,10 @@
          [:ruby   :oneshot]            'hara.runtime.basic.impl.process-ruby
          [:ruby   :basic]              'hara.runtime.basic.impl.process-ruby
 
-         [:gdscript :oneshot]          'hara.runtime.basic.impl.process-gdscript
+         [:gdscript :twostep]          'hara.runtime.basic.impl.process-gdscript
+         [:gdscript :godot]            'hara.runtime.godot
+
+         [:glsl   :oneshot]            'hara.runtime.basic.impl.process-glsl
 
          [:perl   :oneshot]            'hara.runtime.basic.impl-annex.process-perl
          [:perl   :basic]              'hara.runtime.basic.impl-annex.process-perl
@@ -72,6 +75,9 @@
          
          [:r      :oneshot]            'hara.runtime.basic.impl-annex.process-r
          [:r      :basic]              'hara.runtime.basic.impl-annex.process-r
+
+         [:octave :oneshot]            'hara.runtime.basic.impl-annex.process-octave
+         [:octave :basic]              'hara.runtime.basic.impl-annex.process-octave
 
          [:julia  :oneshot]            'hara.runtime.basic.impl-annex.process-julia
          [:julia  :basic]              'hara.runtime.basic.impl-annex.process-julia
@@ -88,6 +94,10 @@
          [:c      :jocl]               'hara.runtime.jocl
          [:c      :oneshot]            'hara.runtime.basic.impl.process-c
          [:c      :twostep]            'hara.runtime.basic.impl.process-c
+
+         [:circom :twostep]            'hara.runtime.basic.impl-annex.process-circom
+
+         [:verilog :twostep]           'hara.runtime.basic.impl.process-verilog
 
          [:dart   :twostep]            'hara.runtime.basic.impl.process-dart
          [:go     :twostep]            'hara.runtime.basic.impl.process-go
@@ -181,6 +191,9 @@
                                         :book '+book+
                                         :parent :xtalk}
          [:r        :default]          {:ns 'hara.model.annex.spec-r
+                                        :book '+book+
+                                        :parent :xtalk}
+         [:octave   :default]          {:ns 'hara.model.annex.spec-octave
                                         :book '+book+
                                         :parent :xtalk}
          [:ruby     :default]          {:ns 'hara.model.spec-ruby
