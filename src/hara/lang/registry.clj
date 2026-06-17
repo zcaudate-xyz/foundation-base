@@ -62,6 +62,9 @@
          [:ruby   :oneshot]            'hara.runtime.basic.impl.process-ruby
          [:ruby   :basic]              'hara.runtime.basic.impl.process-ruby
 
+         [:gdscript :oneshot]          'hara.runtime.basic.impl.process-gdscript
+         [:gdscript :basic]            'hara.runtime.basic.impl.process-gdscript
+
          [:perl   :oneshot]            'hara.runtime.basic.impl-annex.process-perl
          [:perl   :basic]              'hara.runtime.basic.impl-annex.process-perl
 
@@ -130,6 +133,9 @@
                                         :book '+book+
                                         :parent :xtalk}
          [:elisp    :default]          {:ns 'hara.model.spec-elisp
+                                        :book '+book+
+                                        :parent :xtalk}
+         [:gdscript :default]          {:ns 'hara.model.spec-gdscript
                                         :book '+book+
                                         :parent :xtalk}
           [:scheme   :default]          {:ns 'hara.model.spec-scheme
