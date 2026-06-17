@@ -1,8 +1,6 @@
 (ns xt.lang.common-repl
   (:require [hara.lang :as l]
-            [hara.typed :refer [defspec.xt]]
             [std.lib.foundation :as f]
-            [std.lib.template :as template]
             [xt.lang.common-notify :as notify])
   (:refer-clojure :exclude [print]))
 
@@ -11,6 +9,23 @@
              [xt.lang.spec-link :as xt-link]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-lib :as xt-lib]]})
+
+(defn.xt notify-with-promise
+  "promise-compatible socket notification"
+  {:added "4.1"}
+  [notify-fn host port value id key opts]
+  (if (not (promise/x:promise-native? value))
+    (return
+     (notify-fn host port value id key opts))
+    (-> value
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (-/notify-with-promise notify-fn host port out id key opts))))
+        (promise/x:promise-catch
+         (fn [err]
+           (return
+            (notify-fn host port err id key opts)))))))
 
 ;;
 ;; SOCKET
@@ -62,6 +77,13 @@
            {:success (fn [conn]
                        (return (-/notify-socket-handler conn out)))})))
 
+(defn.xt notify-socket-full
+  "promise-compatible socket notification"
+  {:added "4.1"}
+  [host port value id key opts]
+  (return
+   (-/notify-with-promise -/notify-socket host port value id key opts)))
+
 (defn.xt notify-socket-http-handler
   "helper function for `notify-socket-http`"
   {:added "4.0"}
@@ -101,6 +123,13 @@
   (return
    (xt-link/x:notify-http host port value id key opts)))
 
+(defn.xt notify-http-full
+  "promise-compatible http notification"
+  {:added "4.1"}
+  [host port value id key opts]
+  (return
+   (-/notify-with-promise -/notify-http host port value id key opts)))
+
 (defn notify-form
   "creates the notify form"
   {:added "4.0"}
@@ -118,8 +147,8 @@
                                      :id id}
                                     meta)]]
     (list (case protocol
-            :socket `-/notify-socket
-            :http   `-/notify-http)
+            :socket `-/notify-socket-full
+            :http   `-/notify-http-full)
           host
           port
           value
@@ -141,33 +170,17 @@
   [value & [tag]]
   (xt.lang.common-repl/notify-form "capture" value {:tag tag}))
 
+
 (defmacro.xt ^{:standalone true}
   notify
-  "sends a message to the notify server, waiting for promises"
-  {:added "4.1"}
-  [value & [f]]
-  (let [notify-id (or xt.lang.common-notify/*override-id*
-                      (std.lib.foundation/error "No ID for Notify"))
-        v-sym      'v
-        resolved-sym 'resolved
-        err-sym    'err
-        transform  (fn [sym] (if f (list f sym) sym))
-        notify-cb  (fn [sym]
-                     (list 'return
-                           (xt.lang.common-repl/notify-form
-                            notify-id (transform sym) {})))]
-    (list 'do:>
-          (list 'var v-sym value)
-          (list 'if (list 'x:promise-native? v-sym)
-                (list 'return
-                      (list 'x:promise-catch
-                            (list 'x:promise-then
-                                  v-sym
-                                  (list 'fn [resolved-sym]
-                                        (notify-cb resolved-sym)))
-                            (list 'fn [err-sym]
-                                  (notify-cb err-sym))))
-                (xt.lang.common-repl/notify-form notify-id (transform v-sym) {})))))
+  "sends a message to the notify server"
+  {:added "4.0"}
+  [value & [id tag]]
+  (notify-form (or id
+                   notify/*override-id*
+                   (f/error "No ID for Notify"))
+               value {:tag tag}))
+
 
 (defmacro.xt ^{:standalone true}
   >notify
