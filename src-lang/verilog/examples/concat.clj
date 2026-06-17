@@ -4,7 +4,7 @@
 (l/script :verilog
   {})
 
-(defn.v byte-merge
+(defn.verilog byte-merge
   "Concatenates two 4-bit nibbles into an 8-bit bus."
   [hi lo out]
   (input [3 0] hi)

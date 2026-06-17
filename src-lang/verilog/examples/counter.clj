@@ -4,7 +4,7 @@
 (l/script :verilog
   {})
 
-(defn.v counter
+(defn.verilog counter
   "A 4-bit counter with synchronous reset."
   [clk rst out]
   (input clk)

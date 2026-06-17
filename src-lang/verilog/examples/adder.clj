@@ -4,7 +4,7 @@
 (l/script :verilog
   {})
 
-(defn.v adder
+(defn.verilog adder
   "A clocked 4-bit adder with 5-bit output to capture carry."
   [clk a b out]
   (input clk)

@@ -4,7 +4,7 @@
 (l/script :verilog
   {})
 
-(defn.v hello
+(defn.verilog hello
   "A minimal testbench that prints a message and stops simulation."
   []
   (initial
@@ -12,7 +12,10 @@
    ($finish)))
 
 (comment
+  ;; Print the generated module source:
+  ;; (l/ptr-print hello)
+  ;;
   ;; With iverilog/vvp installed:
-  ;; (!.v hello)
+  ;; (!.verilog ($display "hello from verilog"))
   ;; => "hello from verilog"
   (l/emit-as :verilog '[hello]))

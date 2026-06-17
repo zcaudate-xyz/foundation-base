@@ -504,7 +504,8 @@
 
  xyz.zcaudate/verilog
  {:description "verilog language and runtime support"
-  :include [[hara.model.annex.spec-verilog :complete]
+  :include [[verilog :complete]
+            [hara.model.annex.spec-verilog :complete]
             [hara.runtime.basic.impl.process-verilog :complete]]}
     
  xyz.zcaudate/std.lib

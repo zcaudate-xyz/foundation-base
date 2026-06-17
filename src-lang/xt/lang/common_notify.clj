@@ -52,7 +52,7 @@
       (f/error "Runtime Id Required." {:runtime runtime})
       (let [app (l/default-notify)
             notify (notify-defaults notify)
-            [protocol port] (case (or type (:tag runtime))
+            [protocol port] (case (or (:tag runtime) type)
                               (:websocket
                                :javafx
                                :browser

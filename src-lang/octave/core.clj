@@ -1,8 +1,12 @@
 (ns octave.core
-  (:require [hara.lang :as l]))
+  (:require [octave.core.builtin :as builtin]
+            [hara.lang :as l]
+            [std.lib.foundation :as f]))
 
 (l/script :octave
   {:require [[xt.lang.common-lib :as lib]]})
+
+(f/intern-all octave.core.builtin)
 
 (defn.octave add
   "adds two numbers or arrays"

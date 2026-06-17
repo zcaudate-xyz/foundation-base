@@ -34,3 +34,16 @@
 
   (!.octave (y/zeros-3x3))
   => [[0 0 0] [0 0 0] [0 0 0]])
+
+(fact "live builtin calls work"
+  (!.octave (abs -3))
+  => 3
+
+  (!.octave (sqrt 16))
+  => 4
+
+  (!.octave (mean [1 2 3 4]))
+  => 2.5
+
+  (!.octave (sum [1 2 3 4]))
+  => 10)
