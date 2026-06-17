@@ -1,8 +1,7 @@
 (ns gdscript.tutorial.example-core
   (:require [hara.lang :as l]))
 
-(l/script :gdscript {:runtime :godot
-                     :config {:bench :scratch}})
+(l/script :gdscript)
 
 (defn.gd add
   "Adds two numbers and returns the result."
@@ -34,6 +33,11 @@
   (return [x y z]))
 
 (comment
+  (l/rt:restart)
+
+  
+  (c/hello)
+  
   ;; Eval these forms in a REPL with the :godot runtime active.
   (!.gd (gdscript.tutorial.example-core/add 2 3))
   (!.gd (gdscript.tutorial.example-core/factorial 5))

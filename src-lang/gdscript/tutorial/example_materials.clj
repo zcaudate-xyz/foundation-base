@@ -1,9 +1,7 @@
 (ns gdscript.tutorial.example-materials
   (:require [hara.lang :as l]))
 
-(l/script :gdscript {:runtime :godot
-                     :config {:bench :scratch}
-                     :require [[gdscript.tutorial.example-3d]]})
+(l/script :gdscript)
 
 (defn.gd build-material-sphere
   "Builds a red sphere with a StandardMaterial3D, light and camera.

@@ -1,8 +1,7 @@
 (ns gdscript.tutorial.example-3d
   (:require [hara.lang :as l]))
 
-(l/script :gdscript {:runtime :godot
-                     :config {:bench :scratch}})
+(l/script :gdscript)
 
 (defn.gd clear-scene
   "Removes all children from the eval node and returns the remaining child count."

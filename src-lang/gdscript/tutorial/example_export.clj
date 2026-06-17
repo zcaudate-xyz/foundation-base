@@ -1,9 +1,7 @@
 (ns gdscript.tutorial.example-export
   (:require [hara.lang :as l]))
 
-(l/script :gdscript {:runtime :godot
-                     :config {:bench :scratch}
-                     :require [[gdscript.tutorial.example-3d]]})
+(l/script :gdscript)
 
 (defn.gd export-scene
   "Builds a simple cube scene and saves it as a Godot scene file.

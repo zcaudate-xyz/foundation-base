@@ -1,13 +1,12 @@
 (ns godot.examples.gaussian-splat
   "Gaussian splat rendering example using the xtalk Godot/GDScript DSL.
 
-   Evaluating `build-gaussian-splat-demo` from a REPL with the :godot runtime
+   Evaluating `build-gaussian-splat-demo` from a REPL with the :default runtime
    active will generate a `splat.gdshader` file and a `gaussian_splat.tscn`
    scene file at the paths you provide."
   (:require [hara.lang :as l]))
 
-(l/script :gdscript {:runtime :godot
-                     :config {:bench :scratch}})
+(l/script :gdscript)
 
 (defn.gd save-splat-shader
   "Writes the Gaussian splat billboard shader to filepath. Returns filepath."
@@ -69,7 +68,7 @@
   ;; Each splat instance is a 1x1 quad expanded by the vertex shader.
   (var quad (. QuadMesh (new)))
   (:= (. quad size) (Vector2 1.0 1.0))
-
+  
   ;; MultiMesh stores per-instance transform, color, and custom data.
   (var mm (. MultiMesh (new)))
   (:= (. mm transform_format) (. MultiMesh TRANSFORM_3D))
@@ -124,7 +123,7 @@
   (:= (. cam position) cam-pos)
   (. cam (look_at_from_position cam-pos (Vector3 0.0 0.0 0.0)))
   (. self (add_child cam))
-
+  
   ;; Save the assembled scene to disk.
   (var packer (. PackedScene (new)))
   (. packer (pack self))

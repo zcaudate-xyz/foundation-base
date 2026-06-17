@@ -1,9 +1,7 @@
 (ns gdscript.tutorial.example-cube
   (:require [hara.lang :as l]))
 
-(l/script :gdscript {:runtime :godot
-                     :config {:bench :scratch}
-                     :require [[gdscript.tutorial.example-3d]]})
+(l/script :gdscript)
 
 (defn.gd build-cube-scene
   "Builds a simple cube scene with a light and camera. Returns the node count."

@@ -1,9 +1,7 @@
 (ns gdscript.tutorial.example-sphere
   (:require [hara.lang :as l]))
 
-(l/script :gdscript {:runtime :godot
-                     :config {:bench :scratch}
-                     :require [[gdscript.tutorial.example-3d]]})
+(l/script :gdscript)
 
 (defn.gd build-sphere-scene
   "Builds a sphere scene with a light and camera. Returns the node count."
