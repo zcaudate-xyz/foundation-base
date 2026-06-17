@@ -9,6 +9,7 @@
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-lib :as xtl]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.spec-link :as spec-link]
              [xt.lang.spec-base :as xt]]})
 
@@ -16,6 +17,7 @@
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-lib :as xtl]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.spec-link :as spec-link]
              [xt.lang.spec-base :as xt]]})
 
@@ -23,12 +25,16 @@
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-lib :as xtl]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.spec-link :as spec-link]
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
+
+^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.lang.common-repl/socket-connect-base :added "4.0"}
 (fact "base connect call")
@@ -136,6 +142,39 @@
                             {}))))
   => "hello")
 
+^{:refer xt.lang.common-repl/notify-socket-full :added "4.1"}
+(fact "waits for promises before socket notification"
+
+  (notify/wait-on-call
+   (fn [] (!.js
+           (repl/notify-socket-full
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello"
+
+  (notify/wait-on-call
+   (fn [] (!.lua
+           (repl/notify-socket-full
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello"
+
+  (notify/wait-on-call
+   (fn [] (!.py
+           (repl/notify-socket-full
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello")
+
 ^{:refer xt.lang.common-repl/notify-socket-http-handler :added "4.0"}
 (fact "helper function for `notify-socket-http`")
 
@@ -204,6 +243,39 @@
                               (@! notify/*override-id*)
                               nil
                               {}))))
+  => "hello")
+
+^{:refer xt.lang.common-repl/notify-http-full :added "4.1"}
+(fact "waits for promises before http notification"
+
+  (notify/wait-on-call
+   (fn [] (!.js
+           (repl/notify-http-full
+            "127.0.0.1" (@! (:http-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello"
+
+  (notify/wait-on-call
+   (fn [] (!.lua
+           (repl/notify-http-full
+            "127.0.0.1" (@! (:http-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello"
+
+  (notify/wait-on-call
+   (fn [] (!.py
+           (repl/notify-http-full
+            "127.0.0.1" (@! (:http-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
   => "hello")
 
 ^{:refer xt.lang.common-repl/notify-form :added "4.0"}
