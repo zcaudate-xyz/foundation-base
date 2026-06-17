@@ -10,7 +10,13 @@
 (fact "EVALUATE r code"
   
   (!.R (+ 1 2 3 4))
-  => 10)
+  => 10
+
+  (!.R [1 2 3 4])
+  => [1 2 3 4]
+
+  (!.R (mean [1 2 3 4]))
+  => 2.5)
 
 ^{:refer hara.runtime.basic.impl-annex.process-r/default-oneshot-wrap  :adopt true :added "4.0"}
 (fact "creates the oneshot form"
@@ -27,5 +33,27 @@
 ^{:refer hara.runtime.basic.impl-annex.process-r/default-oneshot-trim :added "4.0"}
 (fact "trim for oneshot"
 
-  (default-oneshot-trim "[1] \"1\"")
-  => "1")
+  (default-oneshot-trim "{\"type\":\"data\",\"return\":\"number\",\"value\":1}")
+  => "{\"type\":\"data\",\"return\":\"number\",\"value\":1}")
+
+^{:refer hara.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.1"}
+(fact "R grammar additions"
+  (!.R (df {:a [1 2] :b [3 4]}))
+  => [{:a 1, :b 3} {:a 2, :b 4}]
+
+  (!.R (formula mpg cyl))
+  => "~ mpg cyl"
+
+  (!.R (|> [1 2 3 4] (mean)))
+  => 2.5
+
+  (!.R (%in% 2 [1 2 3]))
+  => true
+
+  (!.R [NA NaN Inf])
+  => [nil NaN Inf])
+
+^{:refer hara.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.1"}
+(fact "R errors are propagated"
+  (!.R (throw "boom"))
+  => (throws clojure.lang.ExceptionInfo))

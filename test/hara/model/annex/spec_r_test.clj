@@ -58,4 +58,34 @@
 
 
 ^{:refer hara.model.annex.spec-r/r-map :added "4.1"}
-(fact "TODO")
+(fact "R empty map literal"
+  (r-map {} nil nil)
+  => "structure(list(), names=character())")
+
+^{:refer hara.model.annex.spec-r/tf-formula :added "4.1"}
+(fact "transform for formula"
+  (tf-formula '(formula y x))
+  => '(:- "y ~ x"))
+
+^{:refer hara.model.annex.spec-r/tf-library :added "4.1"}
+(fact "transform for library"
+  (tf-library '(library jsonlite))
+  => '(:- "library(\"jsonlite\")"))
+
+^{:refer hara.model.annex.spec-r/tf-df :added "4.1"}
+(fact "transform for data frame"
+  (tf-df '(df {:a [1 2] :b [3 4]}))
+  => '(data.frame :a (c 1 2) :b (c 3 4)))
+
+(fact "New grammar additions"
+  (l/emit-as :R '[NA])
+  => "NA"
+
+  (l/emit-as :R '[NaN])
+  => "NaN"
+
+  (l/emit-as :R '[Inf])
+  => "Inf"
+
+  (l/emit-as :R '[(throw "boom")])
+  => "stop('boom')")

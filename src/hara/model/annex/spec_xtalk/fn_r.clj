@@ -897,7 +897,9 @@
             :error (fn [err]
                      (toJSON {:type "error"
                               :return "error"
-                             :value (toString err)}
+                              :message (conditionMessage err)
+                              :call (toString (conditionCall err))
+                              :value (toString err)}
                             :auto-unbox true :null "null")))))))
 
 (defn r-tf-x-return-eval

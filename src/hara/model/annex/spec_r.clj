@@ -20,7 +20,7 @@
 (declare r-apply-optional-defaults)
 
 (defn tf-defn
-  "function declaration for python
+  "function declaration for R
  
    (tf-defn '(defn hello [x y] (return (+ x y))))
    => '(def hello (fn [x y] (return (+ x y))))
@@ -86,11 +86,11 @@
          (if (vector? (first args))
            (apply list (list :- "`if`") expr (first args))
            (list (list :- "`if`") expr (first args)))
-         
+
          (= 2 (count args))
          (apply list (list :- "`if`") expr args)
-         
-         (<= 2 (count args))
+
+         (< 2 (count args))
          (list (list :- "`if`") expr (first args)
                (tf-infix-if (cons nil (rest (remove #(= % :else)
                                                     args))))))))
@@ -146,6 +146,33 @@
     "structure(list(), names=character())"
     (data/emit-coll :map m grammar mopts)))
 
+(defn tf-formula
+  "transforms `(formula lhs rhs)` to an R formula: lhs ~ rhs"
+  {:added "4.1"}
+  [[_ lhs rhs]]
+  (list :- (str (name lhs) " ~ " (name rhs))))
+
+(defn tf-library
+  "transforms `(library pkg)` to library(\"pkg\")"
+  {:added "4.1"}
+  [[_ pkg]]
+  (list :- (str "library(\"" (name pkg) "\")")))
+
+(defn tf-df
+  "transforms `(df {:a [1 2] :b [3 4]})` to data.frame(a=c(1,2), b=c(3,4))"
+  {:added "4.1"}
+  [[_ & args]]
+  (let [m (if (map? (first args))
+            (first args)
+            (apply hash-map args))]
+    (apply list 'data.frame
+           (mapcat (fn [[k v]]
+                     [(keyword k)
+                      (if (vector? v)
+                        (apply list 'c v)
+                        v)])
+                   m))))
+
 (def +features+
   (-> (merge (grammar/build :include [:builtin
                                       :builtin-global
@@ -188,16 +215,23 @@
           :x-obj-vals  {:macro #'fn/r-tf-x-obj-vals  :emit :macro}
           :x-obj-pairs {:macro #'fn/r-tf-x-obj-pairs :emit :macro}})
        (grammar/build:extend
-         {;;:na     {:op :na    :symbol '#{NA}    :raw "NA"    :value true :emit :throw}
-          :next   {:op :next  :symbol '#{:next} :raw "next"  :emit :return}
-         :throw  {:op :next  :symbol '#{throw} :raw 'stop :emit :alias}
-         :repeat {:op :repeat
-                  :symbol '#{repeat}
-                  :type :block
-                  :block {:raw "repeat"
-                          :main #{:body}
-                          :control [[:until {:required true
-                                             :input #{:parameter}}]]}}})))
+         {:na      {:op :na     :symbol '#{NA}    :raw "NA"    :value true :emit :unit}
+          :nan     {:op :nan    :symbol '#{NaN}   :raw "NaN"   :value true :emit :unit}
+          :inf     {:op :inf    :symbol '#{Inf}   :raw "Inf"   :value true :emit :unit}
+          :pipe    {:op :pipe   :symbol '#{|>}    :raw "|>"    :emit :infix}
+          :in      {:op :in     :symbol '#{%in%}  :raw "%in%"  :emit :infix}
+          :formula {:op :formula :symbol '#{formula} :macro #'tf-formula :emit :macro}
+          :library {:op :library :symbol '#{library} :macro #'tf-library :emit :macro}
+          :df      {:op :df     :symbol '#{df}    :macro #'tf-df :emit :macro}
+          :next    {:op :next   :symbol '#{:next} :raw "next"  :emit :return}
+          :throw   {:op :throw  :symbol '#{throw} :raw 'stop   :emit :alias}
+          :repeat  {:op :repeat
+                    :symbol '#{repeat}
+                    :type :block
+                    :block {:raw "repeat"
+                            :main #{:body}
+                            :control [[:until {:required true
+                                               :input #{:parameter}}]]}}})))
 
 (def +template+
   (->> {:banned #{:set :keyword}
