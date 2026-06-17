@@ -2,7 +2,7 @@
   (:require [clojure.string]
             [xt.lang.common-promise]
             [hara.runtime.basic.type-common :as common]
-            [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-twostep :as twostep]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
             [hara.model.spec-gdscript :as spec]
@@ -15,13 +15,13 @@
 
 (def +program-init+
   (common/put-program-options
-   :gdscript {:default {:oneshot   :godot-4
+   :gdscript {:default {:twostep   :godot-4
                         :interactive :godot-4}
               :env {:godot-4 {:exec  "godot-4"
-                              :flags {:oneshot     ["--headless" "--script"]
+                              :flags {:twostep     ["--headless" "--script"]
                                       :interactive ["--script"]}}
                     :godot   {:exec  "godot"
-                              :flags {:oneshot     ["--headless" "--script"]
+                              :flags {:twostep     ["--headless" "--script"]
                                       :interactive ["--script"]}}}}))
 
 ;;
@@ -107,7 +107,7 @@
        "  quit()\n"))
 
 (defn- spit-sync
-  "writes content to file and forces an fsync so subprocesses see it immediately"
+  "writes content to file and forces an fsync so subprocesses see it"
   [file content]
   (let [file (if (string? file) (java.io.File. file) file)]
     (with-open [out (java.io.FileOutputStream. file)]
@@ -143,19 +143,67 @@
            (remove clojure.string/blank?)
            last)))
 
-(def +gdscript-oneshot-config+
+(defn- normalize-process
+  "flattens a nested :process block into the top-level process map"
+  [process]
+  (if (map? process)
+    (merge (:process process)
+           (dissoc process :process))
+    process))
+
+(defn sh-exec-gdscript
+  "basic function for executing a GDScript process"
+  {:added "4.1"}
+  [input-args input-body process]
+  (let [process (normalize-process process)
+        {:keys [pipe
+                trim
+                stderr
+                raw
+                root
+                shell]
+         :or {trim clojure.string/trim-newline}} process]
+    (try (let [args (if pipe
+                      input-args
+                      (conj input-args input-body))
+               proc (os/sh (merge shell
+                                  {:wait false
+                                   :args args
+                                   :root root}))
+               _    (cond-> proc
+                      pipe  (doto (os/sh-write input-body) (os/sh-close))
+                      :then (os/sh-wait))
+               {:keys [err out exit] :as ret} (os/sh-output proc)]
+           (cond raw
+                 (let [out-lines (->> (clojure.string/split-lines (trim out))
+                                      (remove empty?)
+                                      seq)
+                       err-lines (->> (clojure.string/split-lines (trim err))
+                                      (remove empty?)
+                                      seq)]
+                   [exit (or out-lines err-lines [])])
+
+                 :else
+                 (trim out)))
+         (catch Throwable t
+           (if stderr
+             (trim (.getMessage t))
+             (throw t))))))
+
+(def +gdscript-twostep-config+
   (common/set-context-options
-   [:gdscript :oneshot :default]
+   [:gdscript :twostep :default]
    {:main  {:in    #'default-oneshot-in
             :out   #'default-oneshot-out}
     :emit  {:body  {:transform #'default-body-transform}}
-    :process {:root +gdscript-runtime-dir+
-              :pipe false}
+    :root  +gdscript-runtime-dir+
+    :pipe  false
+    :exec-fn #'sh-exec-gdscript
     :json :full}))
 
-(def +gdscript-oneshot+
+(def +gdscript-twostep+
   [(rt/install-type!
-    :gdscript :oneshot
-    {:type :hara/rt.oneshot
-     :instance {:create #'oneshot/rt-oneshot:create}})])
+    :gdscript :twostep
+    {:type :hara/rt.twostep
+     :instance {:create #'twostep/rt-twostep:create}})])
 
