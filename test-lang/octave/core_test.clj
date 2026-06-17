@@ -17,13 +17,15 @@
   (l/emit-as :octave '[[1 2 3]])
   => "[1, 2, 3]")
 
-(fact "octave.core exposes builtin outlines"
+(fact "octave.core exposes builtin outlines with signatures"
   y/+count+ => 1654
   (count y/+all+) => 1654
-  (boolean (some #{"abs"} y/+all+)) => true
-  (boolean (some #{"plot"} y/+plot+)) => true
-  (boolean (some #{"mean"} y/+statistics+)) => true
-  (boolean (some #{"convhull"} y/+geometry+)) => true)
+  (boolean (some #(= "abs" (:name %)) y/+all+)) => true
+  (boolean (some #(= "plot" (:name %)) y/+plot+)) => true
+  (boolean (some #(= "mean" (:name %)) y/+statistics+)) => true
+  (boolean (some #(= "convhull" (:name %)) y/+geometry+)) => true
+  (boolean (seq (:signatures (first (filter #(= "abs" (:name %)) y/+core+))))) => true
+  (boolean (seq (:signatures (first (filter #(= "sum" (:name %)) y/+core+))))) => true)
 
 (fact "emits octave function definitions"
   (l/emit-as :octave '[(defn add [a b] (+ a b))])

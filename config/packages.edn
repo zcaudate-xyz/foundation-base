@@ -458,8 +458,10 @@
                              hara.runtime.solidity
                              hara.runtime.nginx
                              hara.runtime.basic.impl.process-verilog
+                             hara.runtime.basic.impl-annex.process-r
                              hara.model.spec-postgres
-                             hara.model.spec-solidity]]
+                             hara.model.spec-solidity
+                             hara.model.annex.spec-r]]
              [xt.lang :complete]]}
 
  xyz.zcaudate/hara.runtime.libpython
@@ -507,6 +509,12 @@
   :include [[verilog :complete]
             [hara.model.annex.spec-verilog :complete]
             [hara.runtime.basic.impl.process-verilog :complete]]}
+
+ xyz.zcaudate/r
+ {:description "R language and runtime support"
+  :include [[r.core :complete]
+            [hara.model.annex.spec-r :complete]
+            [hara.runtime.basic.impl-annex.process-r :complete]]}
     
  xyz.zcaudate/std.lib
  {:description "simple string methods for searching"

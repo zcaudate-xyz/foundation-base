@@ -11,7 +11,8 @@
     :equation :citation
     :html :api :manage
     :hero :callout :card-grid
-    :quote :demo :badge})
+    :quote :demo :badge
+    :shader})
 
 (defn wrap-meta
   "helper function for navigating `^:meta` tags

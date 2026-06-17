@@ -65,7 +65,9 @@
                 (catch e
                   (try
                     (:= (. (. n outputs [key]) default_value) value)
-                    (catch e (pass)))))))))
+                    (catch e (pass)))))
+              (pass))))
+  (return tree))
 
 (defn.py link
   "Links from-node.from-socket to to-node.to-socket and returns tree."

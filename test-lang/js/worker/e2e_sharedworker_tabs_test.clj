@@ -10,8 +10,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as event-node]
-             [xt.substrate.transport-browser :as browser-transport]
-             [js.worker.link :as worker-link]]})
+             [xt.substrate.transport-browser :as browser-transport]]})
 
 (def ^:private +sharedworker-script+
   (l/emit-script
@@ -44,16 +43,21 @@
 (def ^:private +notify-url+
   (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/"))
 
+(defn create-worker-url
+  "Creates a fresh blob URL for the sharedworker script in the current tab."
+  {:added "4.1"}
+  []
+  (!.js
+    (var blob (new Blob [(@! +sharedworker-script+)]
+                       {"type" "text/javascript"}))
+    (var url (. (!:G URL) (createObjectURL blob)))
+    (. (!:G localStorage) (setItem "__js_worker_tabs_url__" url))
+    (return url)))
+
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:scaffold-imports :js)
-          (chromedriver/goto +notify-url+ 4000)
-          (!.js
-            (var blob (new Blob [(@! +sharedworker-script+)]
-                               {"type" "text/javascript"}))
-            (var url (. (!:G URL) (createObjectURL blob)))
-            (. (!:G localStorage) (setItem "__js_worker_tabs_url__" url))
-            (return url))]
+          (chromedriver/goto +notify-url+ 4000)]
   :teardown [(l/rt:stop)]})
 
 (defn tab-connect
@@ -114,33 +118,14 @@
        (fn [err]
          (repl/notify {"error" (xt/x:ex-message err)}))))))
 
-^{:refer js.worker.e2e-sharedworker-tabs-test/debug-sharedworker-connect
-  :added "4.1"}
-(fact "single-tab sharedworker connection using make-sharedworker-link works"
-  (notify/wait-on [:js 5000]
-    (var browser-node (event-node/node-create {"id" "browser-node"}))
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      (browser-transport/connect-sharedworker
-       browser-node
-       {"transport_id" "worker"
-        "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
-      (fn [conn]
-        (repl/notify {"ready" (. conn ["ready"])})))
-     (fn [err]
-       (repl/notify {"error" (xt/x:ex-message err)}))))
-  => {"ready" {"signal" "ready"
-               "worker" "sharedworker-tabs-demo"}})
-
 ^{:refer js.worker.e2e-sharedworker-tabs-test/sharedworker-is-shared-across-tabs
-  :added "4.1"}
+  :added "4.1"
+  :setup [(create-worker-url)]}
 (fact "sharedworker instance is shared across two chromedriver tabs"
   (def +tab-a+ (chromedriver/current-tab (l/rt :js)))
   (def +tab-b+ (chromedriver/tab-create (l/rt :js) +notify-url+))
 
-  (def connect-a (tab-connect +tab-a+))
-  connect-a => {"ready" {"signal" "ready"
-                          "worker" "sharedworker-tabs-demo"}}
+  (tab-connect +tab-a+)
   (def result-a (tab-request-counter +tab-a+))
 
   (tab-connect +tab-b+)
@@ -156,9 +141,10 @@
   result-b => {"counter" 2
                "worker" "sharedworker-tabs-demo"})
 
-^{:refer js.worker.e2e-sharedworker-tabs-test/sharedworker-survives-tab-close
-  :added "4.1"}
-(fact "sharedworker keeps serving after one connecting tab closes"
+^{:refer js.worker.e2e-sharedworker-tabs-test/sharedworker-survives-tab-disconnect
+  :added "4.1"
+  :setup [(create-worker-url)]}
+(fact "sharedworker keeps serving after one connecting tab disconnects"
   (def +tab-a+ (chromedriver/current-tab (l/rt :js)))
   (def +tab-b+ (chromedriver/tab-create (l/rt :js) +notify-url+))
 

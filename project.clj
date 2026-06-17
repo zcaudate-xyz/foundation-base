@@ -8,6 +8,7 @@
    "manage"  ["run" "-m" "code.manage"]
    #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
+   "serve"       ["run" "-m" "code.doc.server" "8080"]
    "incomplete"  ["exec" "-ep" "(use 'code.manage)  (incomplete :all) (System/exit 0)"]
    "install"     ["exec" "-ep" "(use 'code.tool.maven)   (install :all {:tag :all}) (System/exit 0)"]
    "deploy"      ["exec" "-ep" "(use 'code.tool.maven)   (deploy :all {:tag :all}) (System/exit 0)"]

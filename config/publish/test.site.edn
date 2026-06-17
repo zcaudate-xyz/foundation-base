@@ -4,4 +4,9 @@
             {:base  "home.html"
              :input "src-doc/test_site/index.clj"
              :title "Test Site"
-             :subtitle "A generated test site"}}}
+             :subtitle "A generated test site"}
+           glsl-effects
+            {:base  "article.html"
+             :input "src-doc/test_site/glsl_effects.clj"
+             :title "GLSL Effects"
+             :subtitle "Live shader previews"}}}

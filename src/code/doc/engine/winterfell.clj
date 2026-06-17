@@ -8,6 +8,89 @@
   {:added "3.0"}
   :type)
 
+;;
+;; SHADER DIRECTIVE
+;;
+
+(def ^:private +default-shader-size+ 256)
+
+(defn- parse-refer
+  "splits a 'namespace/var' refer string"
+  {:added "4.0"}
+  [s]
+  (let [[ns-str var-str] (clojure.string/split s #"/" 2)]
+    [(symbol ns-str) (symbol var-str)]))
+
+(defn- js-string-literal
+  "escapes a string for use as a single-quoted JS literal"
+  {:added "4.0"}
+  [s]
+  (-> s
+      (clojure.string/replace "\\" "\\\\")
+      (clojure.string/replace "'" "\\'")
+      (clojure.string/replace "\n" "\\n")
+      (clojure.string/replace "\r" "\\r")
+      (clojure.string/replace "\t" "\\t")))
+
+(defn- emit-glsl-source
+  "resolves a shader pointer and returns its emitted GLSL source"
+  {:added "4.0"}
+  [refer]
+  (let [[ns-sym var-sym] (parse-refer refer)]
+    (require ns-sym)
+    (require 'hara.runtime.glsl)
+    (when-let [display-fn (requiring-resolve 'hara.lang.workspace/ptr-display-str)]
+      (when-let [v (find-var (symbol (str ns-sym) (str var-sym)))]
+        (display-fn @v)))))
+
+(defn- shader-preview-script
+  "returns inline JS that renders the shader on a canvas"
+  {:added "4.0"}
+  [canvas-id frag-src]
+  (str "(function(canvasId, fragSrc){\n"
+       "  var canvas = document.getElementById(canvasId);\n"
+       "  if(!canvas) return;\n"
+       "  var gl = canvas.getContext('webgl');\n"
+       "  if(!gl){ console.error('WebGL not supported'); return; }\n"
+       "  function compile(type, src){\n"
+       "    var s = gl.createShader(type);\n"
+       "    gl.shaderSource(s, src);\n"
+       "    gl.compileShader(s);\n"
+       "    if(!gl.getShaderParameter(s, gl.COMPILE_STATUS)){\n"
+       "      console.error(gl.getShaderInfoLog(s));\n"
+       "    }\n"
+       "    return s;\n"
+       "  }\n"
+       "  var vs = compile(gl.VERTEX_SHADER, 'attribute vec2 a_position;\\nvoid main(){ gl_Position = vec4(a_position, 0.0, 1.0); }');\n"
+       "  var fs = compile(gl.FRAGMENT_SHADER, 'precision mediump float;\\n' + fragSrc.replace(/^#version[^\\n]*\\n?/gm, ''));\n"
+       "  var prog = gl.createProgram();\n"
+       "  gl.attachShader(prog, vs);\n"
+       "  gl.attachShader(prog, fs);\n"
+       "  gl.linkProgram(prog);\n"
+       "  if(!gl.getProgramParameter(prog, gl.LINK_STATUS)){\n"
+       "    console.error(gl.getProgramInfoLog(prog)); return;\n"
+       "  }\n"
+       "  gl.useProgram(prog);\n"
+       "  var buf = gl.createBuffer();\n"
+       "  gl.bindBuffer(gl.ARRAY_BUFFER, buf);\n"
+       "  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,3,-1,-1,3]), gl.STATIC_DRAW);\n"
+       "  var loc = gl.getAttribLocation(prog, 'a_position');\n"
+       "  gl.enableVertexAttribArray(loc);\n"
+       "  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);\n"
+       "  var uRes = gl.getUniformLocation(prog, 'u_resolution');\n"
+       "  var uTime = gl.getUniformLocation(prog, 'u_time');\n"
+       "  function draw(t){\n"
+       "    gl.viewport(0,0,canvas.width,canvas.height);\n"
+       "    gl.clearColor(0,0,0,1);\n"
+       "    gl.clear(gl.COLOR_BUFFER_BIT);\n"
+       "    if(uRes) gl.uniform2f(uRes, canvas.width, canvas.height);\n"
+       "    if(uTime) gl.uniform1f(uTime, (t || 0) * 0.001);\n"
+       "    gl.drawArrays(gl.TRIANGLES, 0, 3);\n"
+       "    requestAnimationFrame(draw);\n"
+       "  }\n"
+       "  requestAnimationFrame(draw);\n"
+       "})('" canvas-id "', '" (js-string-literal frag-src) "');\n"))
+
 (defmethod page-element :html
   ([{:keys [src]}]
    src))
@@ -154,6 +237,27 @@
     [:div {:class "img"}
      [:img (dissoc elem :number :type :tag)]]
     [:p]]))
+
+(defmethod page-element :shader
+  ([{:keys [refer live width height line] :as elem}]
+   (let [source   (or (emit-glsl-source refer)
+                      (str ";; could not emit shader: " refer))
+         live?    (if (nil? live) true live)
+         w        (or width +default-shader-size+)
+         h        (or height +default-shader-size+)
+         cid      (str "shader-canvas-" line)]
+     (into
+      [:div {:class "shader-block"}]
+      (concat
+       [[:pre
+         [:code {:class "glsl"}
+          (-> source
+              clojure.string/trim
+              util/basic-html-escape)]]]
+       (when live?
+         [[:canvas {:id cid :width w :height h}]
+          [:script {:type "text/javascript"}
+           (shader-preview-script cid source)]]))))))
 
 (defmethod page-element :code
   ([{:keys [tag number title code lang indentation failed path caption] :as elem}]
