@@ -1,16 +1,16 @@
 ^{:no-test true}
 (ns js.react
   (:require [js.react.compile :as compile]
-             [hara.lang :as l]
-             [std.lib.foundation :as f]
-             [std.lib.walk :as walk]
-             [std.string.case :as case])
+            [hara.lang :as l]
+            [std.lib.foundation :as f]
+            [std.lib.walk :as walk]
+            [std.string.case :as case])
   (:refer-clojure :exclude [> ref derive sync get set]))
 
 (l/script :js
   {:import [["react" :as React] ["react-dom/client" :as ReactDOM] ["react-nil" :as ReactNIL]]
    :require [[xt.lang.spec-base :as xt]
-             [xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as xtt]
              [xt.lang.common-string :as str]
@@ -19,7 +19,7 @@
              [xt.lang.spec-promise :as promise]]})
 
 #_(defrun.js __init__
-  (:# "eslint-disable react-hooks/rules-of-hooks"))
+    (:# "eslint-disable react-hooks/rules-of-hooks"))
 
 ;;
 ;; React
@@ -178,8 +178,8 @@
   [domNode]
   (var internalKey
        (xtd/arr-find (xtd/obj-keys domNode)
-                    (fn [key]
-                      (return (. key (startsWith "__reactContainer$"))))))
+                     (fn [key]
+                       (return (. key (startsWith "__reactContainer$"))))))
   
   (if (> internalKey 0)
     (return (. domNode [internalKey])))
@@ -236,11 +236,11 @@
   "method takes a `setDone` function, usually for watching a previous step"
   {:added "4.0"}
   [f]
-    (var [done setDone] (-/local false))
-    (-/run []
-      (when (not done)
-        (return (f setDone))))
-    (return [done setDone]))
+  (var [done setDone] (-/local false))
+  (-/run []
+    (when (not done)
+      (return (f setDone))))
+  (return [done setDone]))
 
 (defn.js makeLazy
   "makes the lazy component"
@@ -290,7 +290,7 @@
   (var valueRef (-/ref (f value)))
   (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (-/watch [value]
-    (-/curr:set valueRef (f value)))
+           (-/curr:set valueRef (f value)))
   (return valueRef))
 
 ;;
@@ -304,8 +304,8 @@
    (var mountedRef  (-/ref   true))
    (var isMounted  (-/const (fn:> (return (-/curr mountedRef)))))
    (-/init []
-     (return (fn []
-               (-/curr:set mountedRef false))))
+           (return (fn []
+                     (-/curr:set mountedRef false))))
    (return isMounted)))
 
 (defn.js useIsMountedWrap
@@ -325,11 +325,11 @@
   [cb]
   (var cbRef (-/useFollowRef cb))
   (-/init []
-    (when (-/curr cbRef)
-      ((-/curr cbRef) true))
-    (return (fn []
-              (when (-/curr cbRef)
-                ((-/curr cbRef) false))))))
+          (when (-/curr cbRef)
+            ((-/curr cbRef) true))
+          (return (fn []
+                    (when (-/curr cbRef)
+                      ((-/curr cbRef) false))))))
 
 (defn.js useFollowDelayed
   "sets a value after a given delay"
@@ -341,20 +341,20 @@
   (var [delayed setDelayed] (-/local value))
   (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (-/watch [value]
-    (promise/x:with-delay delay
-      (fn []
-      (when (isMounted)
-        (setDelayed value)))))
+           (promise/x:with-delay delay
+                                 (fn []
+                                   (when (isMounted)
+                                     (setDelayed value)))))
   (return [delayed setDelayed]))
 
 (defn.js useStablized
   [input isStabilized]
   (var [output setOutput] (-/local input))
   (-/watch [input]
-    (when (and isStabilized
-               (xt/x:not-nil? input)
-               (xtt/eq-nested input output))
-      (setOutput input)))
+           (when (and isStabilized
+                      (xt/x:not-nil? input)
+                      (xtt/eq-nested input output))
+             (setOutput input)))
   (return (:? isStabilized
               output
               input)))
@@ -401,8 +401,8 @@
         (-/const
          (fn:> (-/runIntervalStart fRef msRef intervalRef))))
    (-/watch [ms]
-     (startInterval)
-     (return stopInterval))
+            (startInterval)
+            (return stopInterval))
    (return #{stopInterval
              startInterval})))
 
@@ -444,9 +444,9 @@
    (var startTimeout (-/const
                       (fn:> (-/runTimeoutStart fRef msRef timeoutRef))))
    (-/init []
-     (when (not= false init)
-       (startTimeout))
-     (return stopTimeout))
+           (when (not= false init)
+             (startTimeout))
+           (return stopTimeout))
    (return #{stopTimeout
              startTimeout})))
 
@@ -464,15 +464,15 @@
   (var [current setCurrent] (-/local initial))
   (var #{stopInterval
          startInterval} (-/useInterval
-                        (fn []
-                          (cond (> current to)
-                                (setCurrent (- current step))
+                         (fn []
+                           (cond (> current to)
+                                 (setCurrent (- current step))
 
-                                :else
-                                (do (stopInterval)
-                                    (when onComplete
-                                      (onComplete current)))))
-                        interval))
+                                 :else
+                                 (do (stopInterval)
+                                     (when onComplete
+                                       (onComplete current)))))
+                         interval))
   (return [current
            setCurrent
            {:startCountdown startInterval
@@ -490,7 +490,7 @@
   (var #{stopInterval
          startInterval} (-/useInterval
                          (fn []
-                            (setNow (xt/x:now-ms)))
+                           (setNow (xt/x:now-ms)))
                          (or interval 1000)))
   (return [now {:startNow startInterval
                 :stopNow stopInterval}]))
@@ -521,19 +521,19 @@
                      (then (fn [res]
                              (when (isMounted)
                                (setResult (onSuccess res)))
+                             (setTimeout
+                              (fn []
+                                (when (isMounted)
+                                  (setWaiting false)))
+                              delay)))
+                     (catch (fn [err]
                               (setTimeout
                                (fn []
                                  (when (isMounted)
                                    (setWaiting false)))
-                               delay)))
-                     (catch (fn [err]
-                               (setTimeout
-                                (fn []
-                                  (when (isMounted)
-                                    (setWaiting false)))
-                                delay)
-                               (when (isMounted)
-                                 (setResult (onError err))))))))
+                               delay)
+                              (when (isMounted)
+                                (setResult (onError err))))))))
   (var errored (and result (== "error" (. result ["status"]))))
   (return
    #{waiting setWaiting
@@ -554,7 +554,7 @@
                              (-/local)
                              [result setResult]))
   (-/watch [result]
-    (when onResult (onResult result)))
+           (when onResult (onResult result)))
   (var #{waiting setWaiting
          onAction
          errored} (-/useSubmit #{onSubmit
@@ -592,7 +592,7 @@
   (var reverseFn (fn [label]
                    (var idx (xtd/arr-find (xtd/arr-map data valueFn)
                                           (fn:> [item]
-                                            (== item label))))
+                                                (== item label))))
                    (return (:? allowNotFound idx (math/max 0 idx)))))
   (var setIndex (fn [idx] (setValue (forwardFn idx))))
   (var index    (reverseFn value))
@@ -617,15 +617,15 @@
       (:= valueFn k/identity)
       indexFn]}]
   (var forwardFn (fn [idx]
-                    (var out (and data (. data [(math/mod-pos (or idx 0)
-                                                            (xt/x:len data))])))
+                   (var out (and data (. data [(math/mod-pos (or idx 0)
+                                                             (xt/x:len data))])))
                    (return (:? out (valueFn out)))))
   (var reverseFn (fn [label]
                    (var pval (indexFn))
                    (var nval (math/max 0 (xtd/arr-find (xtd/arr-map data valueFn)
                                                        (fn:> [item]
-                                                         (== item label)))))
-                     (var offset (math/mod-offset pval nval (xt/x:len data)))
+                                                             (== item label)))))
+                   (var offset (math/mod-offset pval nval (xt/x:len data)))
                    (return (+ pval offset))))
   (var setIndex (fn [idx] (setValue (forwardFn idx))))
   (var index    (reverseFn value))
@@ -643,16 +643,16 @@
       (:= valueFn k/identity)]}]
   (var forwardFn (fn [indices]
                    (var out [])
-                     (xt/for:array [[i e] indices]
-                      (when e
-                        (x:arr-push out (. data [i]))))
-                    (return out)))
+                   (xt/for:array [[i e] indices]
+                                 (when e
+                                   (x:arr-push out (. data [i]))))
+                   (return out)))
   (var reverseFn  (fn:> [values]
-                     (xtd/arr-map data
-                                  (fn:> [e]
-                                    (<= 0 (xtd/arr-find values
-                                                        (fn:> [item]
-                                                          (== item e))))))))
+                        (xtd/arr-map data
+                                     (fn:> [e]
+                                           (<= 0 (xtd/arr-find values
+                                                               (fn:> [item]
+                                                                     (== item e))))))))
   (var setIndices (fn [indices] (setValues (forwardFn indices))))
   (var indices    (reverseFn values))
   (var items      (xtd/arr-map data valueFn))
@@ -689,12 +689,12 @@
   (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (var [value setValue] (or state (-/local (f data))))
   (-/watch [(xt/x:json-encode data)]
-    (when (and (xtd/not-empty? data)
-               (or (xt/x:nil? value)
-                   (> 0 (xtd/arr-find data
-                                      (fn:> [item]
-                                        (== item value))))))
-      (setValue (f data))))
+           (when (and (xtd/not-empty? data)
+                      (or (xt/x:nil? value)
+                          (> 0 (xtd/arr-find data
+                                             (fn:> [item]
+                                                   (== item value))))))
+             (setValue (f data))))
   (return [value setValue]))
 
 (defn.js useTree
@@ -711,30 +711,30 @@
      displayFn}]
   (:= branchesFn (or branchesFn
                      (fn [tree _parents _root]
-                        (if tree
-                          (do (var out (xtd/obj-keys tree))
-                              (. out (sort))
-                              (return out))
-                          (return [])))))
+                       (if tree
+                         (do (var out (xtd/obj-keys tree))
+                             (. out (sort))
+                             (return out))
+                         (return [])))))
   (:= targetFn   (or targetFn
                      (fn [tree branch _parents _root]
-                        (if tree
-                          (return (xt/x:get-key tree branch))
-                          (return nil)))))
+                       (if tree
+                         (return (xt/x:get-key tree branch))
+                         (return nil)))))
   (var branches  (branchesFn tree parents root))
   (var [branch setBranch] (-/local (or initial (xtd/first branches))))
   (var target (:? (and tree branch)
                   (targetFn tree branch parents root)))
   (-/watch [branch initial]
-    (when (and (xt/x:not-nil? branch)
-               (xt/x:nil? target)
-                 (xtd/not-empty? branches)
-                 (targetFn tree (xtd/first branches) parents root))
-      (setBranch (xtd/first branches)))
-    (when (and (xt/x:not-nil? branch)
-                setInitial
-                (not= initial branch))
-      (setInitial branch)))
+           (when (and (xt/x:not-nil? branch)
+                      (xt/x:nil? target)
+                      (xtd/not-empty? branches)
+                      (targetFn tree (xtd/first branches) parents root))
+             (setBranch (xtd/first branches)))
+           (when (and (xt/x:not-nil? branch)
+                      setInitial
+                      (not= initial branch))
+             (setInitial branch)))
   (var view (displayFn target branch parents root))
   (return #{branch
             setBranch

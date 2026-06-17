@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.spec-base :as xt] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.spec-base :as xt] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k]]})
 
 (def.js lineNormal
   {:hover {:fg "black"

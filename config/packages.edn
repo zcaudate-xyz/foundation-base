@@ -494,27 +494,19 @@
  
  xyz.zcaudate/postgres
  {:description "postgres language and runtime support"
-  :include [[postgres :complete]
-            [hara.model.spec-postgres :complete]
-            [hara.runtime.postgres :complete]]}
+  :include [[postgres :complete]]}
 
  xyz.zcaudate/solidity
  {:description "solidity language and runtime support"
-  :include [[solidity.core :complete]
-            [hara.model.spec-solidity :complete]
-            [hara.runtime.solidity :complete]]}
+  :include [[solidity.core :complete]]}
 
  xyz.zcaudate/verilog
  {:description "verilog language and runtime support"
-  :include [[verilog :complete]
-            [hara.model.annex.spec-verilog :complete]
-            [hara.runtime.basic.impl.process-verilog :complete]]}
+  :include [[verilog :complete]]}
 
  xyz.zcaudate/r
  {:description "R language and runtime support"
-  :include [[r.core :complete]
-            [hara.model.annex.spec-r :complete]
-            [hara.runtime.basic.impl-annex.process-r :complete]]}
+  :include [[r.core :complete]]}
     
  xyz.zcaudate/std.lib
  {:description "simple string methods for searching"

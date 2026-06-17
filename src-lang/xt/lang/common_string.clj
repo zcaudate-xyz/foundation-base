@@ -195,7 +195,7 @@
   (var total (xt/x:str-len s))
   (var lines (xt/x:m-ceil (/ total line-len)))
   (var out [])
-  (xt/for:index [i [0 lines 1]]
+  (xt/for:index [i [0 (xt/x:offset-rlen lines)]]
     (var line (-/substring s
                            (* i line-len)
                            (* (+ i 1) line-len)))

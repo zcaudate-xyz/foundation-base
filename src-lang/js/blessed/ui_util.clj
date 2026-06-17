@@ -2,7 +2,11 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-data :as xtd] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-data :as xtd]
+             [js.react :as r]
+             [js.blessed :as b]
+             [js.blessed.ui-style :as ui-style]
+             [xt.lang.spec-base :as xt]]})
 
 (defn.js ^{:static/lint-globals '#{process}}
   copyClipboard
