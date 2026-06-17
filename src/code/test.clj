@@ -42,6 +42,7 @@
               task/run:load
               task/run:unload
               task/run:test
+              task/run:report
               task/run-errored
               task/print-options
               task/-main

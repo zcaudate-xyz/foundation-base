@@ -263,6 +263,32 @@
     (output/println line))
   artifacts)
 
+(defn load-report
+  "loads a saved test report edn file"
+  {:added "4.1"}
+  ([path]
+   (let [file (fs/path path)]
+     (when-not (fs/exists? file)
+       (throw (ex-info "Report file not found" {:path path})))
+     (-> (slurp path)
+         (read-string)))))
+
+(defn report-failed-facts
+  "groups failed/throw/timeout report entries by namespace,
+   returning a map of namespace -> set of refer symbols"
+  {:added "4.1"}
+  ([report]
+   (->> (concat (:failed report)
+                (:throw report)
+                (:timeout report))
+        (group-by :ns)
+        (reduce (fn [out [ns entries]]
+                  (assoc out ns (->> entries
+                                     (map :function)
+                                     (remove nil?)
+                                     (set))))
+                {}))))
+
 (defn accumulate
   "accumulates test results from various facts and files into a single data structure"
   {:added "3.0"}
@@ -331,9 +357,8 @@
   {:added "3.0"}
   ([items]
    (let [skipped-ns (:skipped-ns items)
-         summary (-> (dissoc items :skipped-ns)
-                     (#(collection/map-vals count %))
-                     (merge {:failed 0 :throw 0 :timeout 0}))
+         summary (merge {:failed 0 :throw 0 :timeout 0}
+                        (collection/map-vals count (dissoc items :skipped-ns)))
          summary (cond-> summary
                    skipped-ns (assoc :skipped-ns true))]
      #_(when (:print-bulk context/*print*)
@@ -469,35 +494,41 @@
    (binding [context/*root*     (:root project)
              context/*errors*   (atom {})
              context/*settings* (merge context/*settings* params)]
-     (let [run-id  (or run-id (f/uuid))
-           test-ns (if context/*eval-current-ns*
-                     ns
-                     (project/test-ns ns))
-           sort-fn (case (:order test)
-                     :random shuffle
-                     (partial sort-by :line))
-           tests   (->> (rt/all-facts test-ns)
-                        (vals)
-                        (sort-fn))
-           skip?   (when-let [skip (rt/get-global ns :skip)]
-                     (rt/eval-in-ns test-ns skip))
-           facts   (accumulate (fn []
-                                 (binding [*ns* (the-ns test-ns)]
-                                   (if skip?
-                                     (doall (mapv #(process/skip-check %) tests))
-                                     (let [_       (rt/eval-in-ns test-ns (rt/get-global ns :prelim))
-                                           _       (rt/eval-in-ns test-ns (rt/get-global ns :setup))
-                                           map-fn  (if (:parallel test)
-                                                     pmap
-                                                     map)
-                                           output  (doall (map-fn #(%) tests))
-                                           _       (rt/eval-in-ns test-ns (rt/get-global ns :teardown))]
-                                       output))))
-                                run-id)
-            _       (rt/get-global ns :teardown)
-            results (-> (interim facts)
-                        (assoc :queued (repeat (count tests) true))
-                        (cond-> skip? (assoc :skipped-ns true)))]
+     (let [run-id       (or run-id (f/uuid))
+           test-ns      (if context/*eval-current-ns*
+                          ns
+                          (project/test-ns ns))
+           sort-fn      (case (:order test)
+                          :random shuffle
+                          (partial sort-by :line))
+           filter-refs  (when-let [fact-filter (:filter params)]
+                          (get fact-filter test-ns))
+           fact-pred    (fn [fact]
+                          (or (nil? filter-refs)
+                              (filter-refs (:refer fact))))
+           tests        (->> (rt/all-facts test-ns)
+                             (vals)
+                             (filter fact-pred)
+                             (sort-fn))
+           skip?       (when-let [skip (rt/get-global ns :skip)]
+                         (rt/eval-in-ns test-ns skip))
+           facts       (accumulate (fn []
+                                     (binding [*ns* (the-ns test-ns)]
+                                       (if skip?
+                                         (doall (mapv #(process/skip-check %) tests))
+                                         (let [_       (rt/eval-in-ns test-ns (rt/get-global ns :prelim))
+                                               _       (rt/eval-in-ns test-ns (rt/get-global ns :setup))
+                                               map-fn  (if (:parallel test)
+                                                         pmap
+                                                         map)
+                                               output  (doall (map-fn #(%) tests))
+                                               _       (rt/eval-in-ns test-ns (rt/get-global ns :teardown))]
+                                           output))))
+                                   run-id)
+            _           (rt/get-global ns :teardown)
+            results     (-> (interim facts)
+                            (assoc :queued (repeat (count tests) true))
+                            (cond-> skip? (assoc :skipped-ns true)))]
         (when-not (:bulk params)
           (save-report results ns params))
         results))))

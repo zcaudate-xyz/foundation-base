@@ -183,6 +183,24 @@
                   (set (map (comp :ns :meta) (:timeout latest))))
          (run)))))
 
+(defn run:report
+  "runs only failed tests recorded in a saved report file
+ 
+   (task/run:report \".hara/runs/run-1781734545292.edn\")"
+  {:added "4.1"}
+  ([path]
+   (run:report path {}))
+  ([path params]
+   (run:report path params (project/project)))
+  ([path params project]
+   (let [path   (str path)
+         report (executive/load-report path)
+         failed (executive/report-failed-facts report)
+         nss    (vec (sort (keys failed)))]
+     (when (empty? nss)
+       (throw (ex-info "No failed tests found in report" {:path path})))
+     (run nss (assoc params :filter failed) project))))
+
 (defn print-options
   "output options for test results
  
@@ -229,13 +247,22 @@
   ([& args]
    (let [opts    (task/process-ns-args args)
          project (project/project)
-         input   (cond
-                   (:files opts) (resolve-files (:files opts) project)
-                   (:ns opts)    (:ns opts)
-                   :else         :all)
-         {:keys [throw failed timeout] :as stats} (run input
-                                                       (dissoc opts :ns)
-                                                       project)
+         {:keys [throw failed timeout] :as stats}
+         (cond
+           (:files opts)
+           (run (resolve-files (:files opts) project)
+                (dissoc opts :files)
+                project)
+
+           (:report opts)
+           (run:report (:report opts)
+                       (dissoc opts :report)
+                       project)
+
+           :else
+           (run (cond (:ns opts) (:ns opts) :else :all)
+                (dissoc opts :ns)
+                project))
          res (+ (or throw 0) (or failed 0) (or timeout 0))]
       (if (get opts :no-exit)
         res
