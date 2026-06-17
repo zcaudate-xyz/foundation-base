@@ -16,7 +16,7 @@
 (defn haxe-tf-x-del
       "Removes a field from a Dynamic object."
       [[_ obj key]]
-      (template/$ (Reflect.deleteField ~obj ~(str key))))
+      (template/$ (Reflect.deleteField ~obj ~(name key))))
 
 (defn haxe-tf-x-del-key
       "Removes a key from a Map."
@@ -45,7 +45,7 @@
       "Map key existence."
       [[_ obj key check]]
       (if check
-          (list '== check (template/$ (. ~obj (get ~key))))
+          (list '== check (template/$ (. ~obj (get ~(name key)))))
           (template/$ (. ~obj (exists ~key)))))
 
 (defn haxe-tf-x-err
@@ -317,7 +317,7 @@
                                (for [(var* ~i := 0) (< ~i (. ~arr-sym length)) (:++ ~i)]
                                     (var* ~v := (. ~arr-sym [~i]))
                                     ~@body))))
-          (apply list 'for [(list 'var* e) :in arr]
+          (apply list 'for [e :in arr]
                  body)))
 
 (defn haxe-symbol
@@ -347,8 +347,10 @@
       "Map keys in Haxe must be strings for StringMap."
       [key grammar mopts]
       (cond
-       (or (keyword? key)
-           (string? key)
+       (keyword? key)
+       (common/*emit-fn* (name key) grammar mopts)
+
+       (or (string? key)
            (symbol? key)
            (number? key)
            (boolean? key)
@@ -364,7 +366,7 @@
                                   :data-set])
          (grammar/build:override
           {:fn          {:macro #'haxe-fn :emit :macro}
-           :var         {:symbol '#{var*} :raw "var"}
+           :var         {:symbol '#{var var*} :raw "var" :assign "="}
            :pow         {:emit :alias :raw 'Math.pow :value true}
            :defn        {:symbol '#{defn}}
            :new         {:symbol '#{new} :raw "new" :emit :new}
@@ -381,7 +383,7 @@
           {:banned #{:set :regex}
            :highlight '#{return break continue}
            :default {:common    {:statement ";"}
-                     :function  {:prefix "function "
+                     :function  {:prefix "function"
                                  :raw ""
                                  :args {:sep ", "}}
                      :invoke    {:reversed true :hint ""}
@@ -394,7 +396,9 @@
            :data    {:vector {:start "[" :end "]" :space ""}
                      :map    {:start "[" :end "]" :space ""
                               :sep " => "}
-                     :map-entry {:key-fn #'haxe-map-key}}})))
+                     :map-entry {:start "" :end ""
+                                 :assign " => "
+                                 :key-fn #'haxe-map-key}}})))
 
 (def +grammar+
      (grammar/grammar :hx

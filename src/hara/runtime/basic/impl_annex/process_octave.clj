@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [std.json :as json]
             [hara.lang.runtime :as rt]
             [hara.model.annex.spec-octave :as spec]))
@@ -10,10 +11,14 @@
 (def +octave-init+
   (common/put-program-options
    :octave {:default  {:oneshot     :octave-cli
+                       :verify      :octave-cli
                        :basic       :octave-cli}
             :env      {:octave-cli  {:exec    "octave-cli"
                                      :output  {}
+                                     :extension "m"
                                      :flags   {:oneshot ["--no-gui" "--eval"]
+                                               :verify  ["--no-gui" "--eval"
+                                                         "try; eval(fileread(\"__FILE__\")); catch; quit(1); end_try_catch;"]
                                                :basic   ["--no-gui" "--eval"]}}
                        :octave      {:exec    "octave"
                                      :output  {}
@@ -80,28 +85,48 @@
   "wraps an octave expression body for one-shot eval"
   {:added "4.0"}
   [body]
-  (str +octave-bootstrap+
-       "\n\n"
-       body
-       "\n\ndisp(xt_return_encode(ans))\n"))
+  (let [parts (->> (str/split (str +octave-bootstrap+ "\n\n" body)
+                              #"\n\s*\n")
+                   (map str/trim)
+                   (remove empty?))
+        expr  (last parts)
+        defs  (butlast parts)]
+    (str "1;\n\n"
+         (when (seq defs)
+           (str (str/join "\n\n" defs) "\n\n"))
+         "disp(xt_return_encode(" expr "))\n")))
 
 (defn default-oneshot-trim
-  "parses the json returned by octave"
+  "passes the raw output returned by octave to the json parser"
   {:added "4.0"}
   [s]
-  (json/read (str/trim s)))
+  (str/trim s))
 
 (def +octave-oneshot-config+
   (common/set-context-options
    [:octave :oneshot :default]
    {:main  {:in  #'default-oneshot-wrap
             :out #'default-oneshot-trim}
-    :emit  {:body  {:transform identity}}
+    :emit  {:body  {:transform (fn [form _] form)}}
     :json :full}))
+
+(def +octave-verify-config+
+  (common/set-context-options
+   [:octave :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
 
 (def +octave-oneshot+
   [(rt/install-type!
     :octave :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +octave-verify+
+  [(rt/install-type!
+    :octave :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
@@ -130,7 +155,8 @@
   "returns the octave source for the basic tcp client"
   {:added "4.0"}
   [port & [{:keys [host]}]]
-  (str +octave-bootstrap+
+  (str "1;\n\n"
+       +octave-bootstrap+
        "\n\n"
        +client-basic+
        "\n\n"
@@ -141,7 +167,7 @@
    [:octave :basic :default]
    {:bootstrap #'default-basic-client
     :main  {}
-    :emit  {:body  {:transform identity}}
+    :emit  {:body  {:transform (fn [form _] form)}}
     :json :full
     :encode :json
     :timeout 2000}))

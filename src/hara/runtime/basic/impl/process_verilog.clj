@@ -2,6 +2,7 @@
   (:require [clojure.string]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.runtime :as rt]
             [std.fs :as fs]
             [std.lib.foundation :as f]
@@ -13,12 +14,14 @@
 
 (def +program-init+
   (common/put-program-options
-   :verilog {:default {:twostep :iverilog}
+   :verilog {:default {:twostep :iverilog
+                       :verify  :iverilog}
              :env {:iverilog {:exec "iverilog"
                               :extension "v"
                               :output-flag "-o"
                               :stderr true
-                              :flags {:twostep []}}
+                              :flags {:twostep []
+                                      :verify  ["-g2012" "-o" "/dev/null"]}}
                    :vvp     {:exec "vvp"}}}))
 
 ;;
@@ -40,28 +43,43 @@
 (defn transform-form
   "Normalises Verilog forms for execution.
 
-   Module definitions are emitted at the top level. Any remaining top-level
-   statements are wrapped in a temporary testbench module. If the statements
-   already contain an initial/always block they are placed directly inside the
-   module body; otherwise they are wrapped in an initial block and $finish is
-   appended so the simulator terminates."
+   - A single symbol (usually a module pointer) is emitted as-is.
+   - A single module definition is emitted as-is.
+   - A single non-module statement is wrapped in a temporary testbench module.
+   - A sequence of forms keeps module definitions at the top level and wraps
+     the remaining statements in a testbench module.
+
+   If the wrapped statements already contain an initial/always block they are
+   placed directly inside the module body; otherwise they are wrapped in an
+   initial block and $finish is appended so the simulator terminates."
   {:added "4.1"}
   [forms opts]
-  (let [forms (if (symbol? (first forms))
-                [forms]
-                forms)
-        modules (filter module-def? forms)
-        stmts   (remove module-def? forms)]
-    (if (seq stmts)
-      (let [procedural? (some top-level-block? stmts)
-            body (if procedural?
-                   (apply list 'do stmts)
-                   (list 'initial
-                         (apply list 'do
-                                (concat stmts [(list '$finish)]))))]
-        (concat modules
-                [(list 'defn '__hara_tb__ [] body)]))
-      forms)))
+  (cond
+    (symbol? forms)
+    [forms]
+
+    (module-def? forms)
+    [forms]
+
+    (and (seq? forms) (symbol? (first forms)))
+    [(list 'defn '__hara_tb__ []
+           (list 'initial
+                 (apply list 'do
+                        (concat [forms] [(list '$finish)]))))]
+
+    :else
+    (let [modules (filter module-def? forms)
+          stmts   (remove module-def? forms)]
+      (if (seq stmts)
+        (let [procedural? (some top-level-block? stmts)
+              body (if procedural?
+                     (apply list 'do stmts)
+                     (list 'initial
+                           (apply list 'do
+                                  (concat stmts [(list '$finish)]))))]
+          (concat modules
+                  [(list 'defn '__hara_tb__ [] body)]))
+        forms))))
 
 ;;
 ;; EXECUTION
@@ -148,8 +166,22 @@
    {:exec-fn #'sh-exec-verilog
     :emit  {:body {:transform #'transform-form}}}))
 
+(def +verilog-verify-config+
+  (common/set-context-options
+   [:verilog :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +verilog-twostep+
   [(rt/install-type!
     :verilog :twostep
+    {:type :hara/rt.twostep
+     :instance {:create twostep/rt-twostep:create}})])
+
+(def +verilog-verify+
+  [(rt/install-type!
+    :verilog :verify
     {:type :hara/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

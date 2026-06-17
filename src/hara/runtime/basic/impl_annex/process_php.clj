@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
             [hara.model.annex.spec-php :as spec]))
@@ -10,10 +11,13 @@
 (def +php-init+
   (common/put-program-options
    :php  {:default  {:oneshot    :php
-                      :basic      :php}
-           :env      {:php    {:exec   "php"
-                                :flags  {:oneshot   ["-r"]
-                                        :basic     ["-r"]}}}}))
+                     :verify     :php
+                     :basic      :php}
+          :env      {:php    {:exec   "php"
+                              :extension "php"
+                              :flags  {:oneshot   ["-r"]
+                                       :verify    ["-l"]
+                                       :basic     ["-r"]}}}}))
 
 ;;
 ;; ONESHOT
@@ -92,9 +96,23 @@
     :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
+(def +php-verify-config+
+  (common/set-context-options
+   [:php :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +php-oneshot+
   [(rt/install-type!
     :php :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +php-verify+
+  [(rt/install-type!
+    :php :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 

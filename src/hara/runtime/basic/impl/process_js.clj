@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.runtime.basic.type-websocket :as websocket]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
@@ -31,15 +32,18 @@
 (def +program-init+
   (common/put-program-options
    :js  {:default  {:oneshot    :nodejs
+                    :verify     :nodejs
                     :basic      :nodejs
                     :websocket  :nodejs}
          :env      {:nodejs    {:exec   "node"
                                 :env    +node-shell-env+
                                 :bench  {:shell {:env +node-shell-env+}}
-                                 :flags  {:oneshot   ["-e"]
-                                          :basic     ["-e"]
-                                          :websocket ["-e"]
-                                          :interactive ["-i"]
+                                :extension "js"
+                                :flags  {:oneshot   ["-e"]
+                                         :verify    ["--check"]
+                                         :basic     ["-e"]
+                                         :websocket ["-e"]
+                                         :interactive ["-i"]
                                          :json ["JSON" :builtin]
                                          :bench {:websocket ["ws" :install]}}}
                     :qjs       {:exec   "qjs"
@@ -92,10 +96,23 @@
     :emit  {:body  {:transform #'rt/return-transform}}
     :json :full}))
 
+(def +js-verify-config+
+  (common/set-context-options
+   [:js :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
 
 (def +js-oneshot+
   [(rt/install-type!
     :js :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +js-verify+
+  [(rt/install-type!
+    :js :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 

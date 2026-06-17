@@ -4,6 +4,7 @@
              [hara.runtime.basic.type-basic :as basic]
              [hara.runtime.basic.type-common :as common]
              [hara.runtime.basic.type-oneshot :as oneshot]
+             [hara.runtime.basic.type-verify :as type-verify]
              [hara.runtime.basic.type-websocket :as websocket]
              [hara.lang.impl :as impl]
              [hara.lang.runtime :as rt]
@@ -49,6 +50,7 @@
 (def +program-init+
   (common/put-program-options
    :lua {:default {:oneshot   :luajit
+                   :verify    :luac
                    :basic     :luajit
                    :websocket :resty}
          :env {:lua {:exec  "lua"
@@ -80,7 +82,11 @@
                                :interactive false
                                :json       ["cjson" :builtin]
                                :bench      {:basic     ["resty.socket" :builtin]
-                                            :websocket ["resty.websocket.client" :builtin]}}}}}))
+                                            :websocket ["resty.websocket.client" :builtin]}}}
+               :luac {:exec "luac"
+                      :extension "lua"
+                      :flags {:verify ["-p"]}}}
+         }))
 
 (def +program-init-nginx+
   "registers nginx Lua programs with the same executable matrix as base Lua,
@@ -167,6 +173,22 @@
     :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
+(def +lua-verify-config+
+  (common/set-context-options
+   [:lua :verify :default]
+   {:main    {}
+    :emit    {:body {:transform #'default-body-transform}}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
+(def +lua-nginx-verify-config+
+  (common/set-context-options
+   [:lua.nginx :verify :default]
+   {:main    {}
+    :emit    {:body {:transform #'default-body-transform}}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +lua-oneshot+
   [(rt/install-type!
     :lua :oneshot
@@ -175,6 +197,18 @@
      :config {:layout :full}})
    (rt/install-type!
     :lua.nginx :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create #'oneshot/rt-oneshot:create}
+     :config {:layout :full}})])
+
+(def +lua-verify+
+  [(rt/install-type!
+    :lua :verify
+    {:type :hara/rt.oneshot
+     :instance {:create #'oneshot/rt-oneshot:create}
+     :config {:layout :full}})
+   (rt/install-type!
+    :lua.nginx :verify
     {:type :hara/rt.oneshot
      :instance {:create #'oneshot/rt-oneshot:create}
      :config {:layout :full}})])

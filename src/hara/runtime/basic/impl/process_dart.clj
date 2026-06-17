@@ -2,6 +2,7 @@
   (:require [clojure.string :as str]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
+            [hara.runtime.basic.type-verify :as type-verify]
             [std.fs :as fs]
             [hara.lang.runtime :as rt]
             [hara.model.spec-dart]
@@ -650,12 +651,13 @@
 
 (def +program-init+
   (common/put-program-options
-   :dart {:default {:twostep :dart}
+   :dart {:default {:twostep :dart
+                    :verify  :dart}
            :env     {:dart {:exec (dart-exec)
                              :extension "dart"
-                             :exec-fn sh-exec-dart
                              :stderr true
                             :flags {:twostep ["compile" "exe"]
+                                    :verify  ["compile" "kernel"]
                                     :interactive false
                                     :json false
                                     :ws-client false}
@@ -665,11 +667,26 @@
   (common/set-context-options
    [:dart :twostep :default]
    {:emit {:body {:transform #'transform-form}}
+    :exec-fn #'sh-exec-dart
     :output/preserve-payload true
     :json :full}))
+
+(def +dart-verify-config+
+  (common/set-context-options
+   [:dart :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
 
 (def +dart-twostep+
   [(rt/install-type!
     :dart :twostep
+    {:type :hara/rt.twostep
+     :instance {:create twostep/rt-twostep:create}})])
+
+(def +dart-verify+
+  [(rt/install-type!
+    :dart :verify
     {:type :hara/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

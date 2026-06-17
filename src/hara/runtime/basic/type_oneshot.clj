@@ -52,7 +52,7 @@
   {:added "4.0"}
   ([{:keys [exec
             process] :as rt} body]
-   (sh-exec exec body process)))
+   ((or (:exec-fn process) sh-exec) exec body process)))
 
 (defn invoke-ptr-oneshot
   "gets the oneshow invoke working"
@@ -95,10 +95,10 @@
            program
            process] :as m
     :or {runtime :oneshot}}]
-  (let [[program process exec] (rt-oneshot-setup lang program process exec :oneshot)
+  (let [[program process exec] (rt-oneshot-setup lang program process exec runtime)
         flags   (common/get-program-flags lang program)
-        _   (cond (not (:oneshot flags))
-                  (f/error "Program does not support oneshot runtime"
+        _   (cond (not (get flags runtime))
+                  (f/error "Program does not support runtime"
                            {:lang lang
                             :runtime runtime
                             :flags flags

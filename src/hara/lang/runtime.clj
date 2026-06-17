@@ -226,6 +226,7 @@
   ([lang runtime {:keys [type config] :as spec}]
    (let [ctx    (ut/lang-context lang)
          spec   (dissoc spec :config)
+         config (merge {:runtime runtime} config)
          r-spec (when (or (not (f/suppress (resource/res:spec-get type)))
                           (seq (dissoc spec :type)))
                   (resource/res:spec-add spec))

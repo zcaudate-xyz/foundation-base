@@ -3,6 +3,7 @@
             [hara.lang.book :as book]
             [hara.common.emit :as emit]
             [hara.common.grammar :as grammar]
+            [hara.common.preprocess-base :as preprocess]
             [hara.lang.impl :as impl]
             [hara.lang.script :as script]
             [hara.model.spec-xtalk]
@@ -15,15 +16,40 @@
   [bool]
   (if bool "true" "false"))
 
+(defn- octave-sym-str
+  "sanitizes a symbol name for octave identifiers"
+  {:added "4.0"}
+  [s]
+  (-> s
+      (clojure.string/replace #"[.\-]" "_")
+      (clojure.string/replace #"\?" "p")
+      (clojure.string/replace #"!" "f")))
+
+(defn- octave-module-name
+  "returns the function prefix for the current module, if any"
+  {:added "4.0"}
+  []
+  (when-let [module-id (get-in (preprocess/macro-opts) [:module :id])]
+    (octave-sym-str (name module-id))))
+
+(defn- octave-qualified-name
+  "returns the octave-visible name for an xtalk function symbol"
+  {:added "4.0"}
+  [sym]
+  (if-let [prefix (octave-module-name)]
+    (str prefix "_" (octave-sym-str (name sym)))
+    (octave-sym-str (name sym))))
+
 (defn tf-defn
   "transforms defn to a raw octave function definition"
   {:added "4.0"}
   [[_ sym args & body]]
-  (let [arg-str   (clojure.string/join ", " (map name args))
+  (let [fn-name   (octave-qualified-name sym)
+        arg-str   (clojure.string/join ", " (map (comp octave-sym-str name) args))
         body-strs (mapv #(impl/emit-as :octave [%]) body)
         body-lines (concat (butlast body-strs)
-                           [(str (name sym) " = " (last body-strs) ";")])]
-    (list ':- (str "function " (name sym) "(" arg-str ")\n"
+                           [(str fn-name " = " (last body-strs) ";")])]
+    (list ':- (str "function " fn-name " = " fn-name "(" arg-str ")\n"
                    (clojure.string/join "\n" body-lines)
                    "\nend"))))
 
@@ -69,7 +95,9 @@
         :highlight '#{return break end for if while function}
         :default {:comment   {:prefix "%"}
                   :common    {:statement ";"
-                              :assign "="}
+                              :assign "="
+                              :namespace "_"
+                              :namespace-full "_"}
                   :invoke    {:space ""}
                   :function  {:raw "function"
                               :body {:start ""
@@ -81,11 +109,15 @@
                   :block     {:parameter {:start " ("
                                           :end ")"}
                               :body {:start ""
-                                     :end "end"}}}
+                                     :end "end"}}
+                  :symbol    {:full {:replace {\. "_"
+                                               \- "_"}
+                                    :sep "_"}}}
          :token  {:nil       {:as "NA"}
                   :boolean   {:as #'octave-token-boolean}
                   :string    {:quote :double}
-                  :symbol    {:replace {\- "_"
+                  :symbol    {:replace {\. "_"
+                                        \- "_"
                                         \? "p"
                                         \! "f"}}}
          :data   {:vector    {:start "[" :end "]" :sep ", "}

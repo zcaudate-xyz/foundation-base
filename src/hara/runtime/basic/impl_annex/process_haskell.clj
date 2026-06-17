@@ -1,6 +1,7 @@
 (ns hara.runtime.basic.impl-annex.process-haskell
   (:require [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.runtime :as rt]
             [hara.model.annex.spec-haskell :as spec]))
 
@@ -21,12 +22,14 @@
 (def +program-init+
   (common/put-program-options
    :haskell {:default  {:twostep     :ghc
+                        :verify      :ghc
                         :interactive false
                         :ws-client   false}
              :env      {:ghc      {:exec "ghc"
                                    :extension   "hs"
                                    :stderr true
                                    :flags  {:twostep []
+                                            :verify  ["-fno-code"]
                                             :interactive false
                                              :json false
                                              :ws-client false}
@@ -42,8 +45,22 @@
     :emit {:body {:transform #'transform-form}}
     :json :string}))
 
+(def +haskell-verify-config+
+  (common/set-context-options
+   [:haskell :verify :default]
+   {:main    {}
+    :emit    {:body {:transform #'transform-form}}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +haskell-twostep+
   [(rt/install-type!
     :haskell :twostep
+    {:type :hara/rt.twostep
+     :instance {:create twostep/rt-twostep:create}})])
+
+(def +haskell-verify+
+  [(rt/install-type!
+    :haskell :verify
     {:type :hara/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

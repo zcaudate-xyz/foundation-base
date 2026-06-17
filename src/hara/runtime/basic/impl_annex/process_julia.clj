@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [std.json :as json]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
@@ -12,10 +13,13 @@
 (def +julia-init+
   (common/put-program-options
    :julia  {:default  {:oneshot     :julia
+                       :verify      :julia
                        :basic       :julia}
             :env      {:julia     {:exec    "julia"
-                                    :flags   {:oneshot   ["-e"]
-                                              :basic     ["-e"]}}}}))
+                                   :pipe    true
+                                   :flags   {:oneshot   ["-e"]
+                                             :verify    ["-e" "try; Meta.parseall(String(read(stdin))); catch; exit(1); end;"]
+                                             :basic     ["-e"]}}}}))
 
 (def ^:private +julia-oneshot-prefix+
   "using JSON;\nusing Sockets;\nusing Printf;\nXT_GLOBALS = Dict()\n\n")
@@ -68,9 +72,23 @@
     :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
+(def +julia-verify-config+
+  (common/set-context-options
+   [:julia :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-oneshot}))
+
 (def +julia-oneshot+
   [(rt/install-type!
     :julia :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +julia-verify+
+  [(rt/install-type!
+    :julia :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 

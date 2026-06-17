@@ -2,6 +2,7 @@
   (:require [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
             [hara.runtime.basic.type-twostep :as twostep]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.book :as book]
             [hara.lang.impl :as impl]
             [hara.lang.pointer :as ptr]
@@ -14,6 +15,7 @@
   (common/put-program-options
    :c  {:default  {:oneshot     :tcc
                    :twostep     :gcc
+                   :verify      :gcc
                    :interactive false
                    :ws-client   false}
         :env      {:tcc    {:exec "tcc"
@@ -27,6 +29,7 @@
                             :extension   "c"
                             :stderr true
                             :flags  {:twostep []
+                                     :verify  ["-fsyntax-only"]
                                      :interactive false
                                      :json false
                                      :ws-client false}
@@ -117,9 +120,23 @@
      #_#_
      :json :string}))
 
+(def +c-verify-config+
+  (common/set-context-options
+   [:c :verify :default]
+   {:main    {}
+    :emit    {:body {:transform #'transform-form}}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +c-twostep+
   [(rt/install-type!
     :c :twostep
+    {:type :hara/rt.twostep
+     :instance {:create twostep/rt-twostep:create}})])
+
+(def +c-verify+
+  [(rt/install-type!
+    :c :verify
     {:type :hara/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
   

@@ -51,4 +51,4 @@
 (fact "trim for oneshot"
 
   (default-oneshot-trim "{\"type\":\"data\",\"return\":\"number\",\"value\":10}")
-  => {"type" "data" "return" "number" "value" 10})
+  => "{\"type\":\"data\",\"return\":\"number\",\"value\":10}")

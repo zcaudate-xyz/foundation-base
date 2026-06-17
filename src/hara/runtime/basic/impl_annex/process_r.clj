@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [std.json :as json]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
@@ -12,14 +13,19 @@
 (def +program-init+
   (common/put-program-options
    :r   {:default  {:oneshot      :rlang
+                    :verify       :rscript
                     :basic        :rlang
                     :interactive  :rlang}
          :env      {:rlang     {:exec    "R"
-                                 :output  {}
-                                 :flags   {:oneshot ["-s" "-e"]
-                                           :basic ["-s" "-e"]
+                                :output  {}
+                                :flags   {:oneshot ["-s" "-e"]
+                                          :basic ["-s" "-e"]
                                           :interactive ["-i"]
-                                          :json ["rjsonlite" :instal]}}}}))
+                                          :json ["rjsonlite" :instal]}}
+                    :rscript   {:exec    "Rscript"
+                                :extension "R"
+                                :flags   {:verify ["--vanilla" "-e"
+                                                   "tryCatch(parse(\"__FILE__\"), error=function(e) quit(status=1))"]}}}}))
 
 (def ^{:arglists '([body])}
   default-oneshot-wrap
@@ -52,9 +58,23 @@
     :emit  {:body  {:transform #'rt/return-transform}}
     :json :full}))
 
+(def +r-verify-config+
+  (common/set-context-options
+   [:r :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +r-oneshot+
   [(rt/install-type!
     :r :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +r-verify+
+  [(rt/install-type!
+    :r :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 

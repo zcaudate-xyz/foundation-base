@@ -2,6 +2,7 @@
   (:require [clojure.string]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
             [hara.model.spec-xtalk :as spec]
@@ -10,13 +11,16 @@
 (def +program-init+
   (common/put-program-options
    :xtalk  {:default  {:oneshot     :chez
+                       :verify      :chez
                        :interactive false
                        :ws-client   false}
             :env      {:chez    {:exec "chez"
                                  :pipe true
                                  :stderr true
                                  :raw true
+                                 :extension "scm"
                                  :flags  {:oneshot ["-q"]
+                                          :verify ["--script"]
                                           :interactive false
                                           :ws-client false}}}}))
 
@@ -47,9 +51,23 @@
    {:default  {:emit  {:body  {:transform #'transform-form}
                        :json  #'read-output}}}))
 
+(def +xtalk-verify-config+
+  (common/set-context-options
+   [:xtalk :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +xtalk-oneshot+
   [(rt/install-type!
     :xtalk :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +xtalk-verify+
+  [(rt/install-type!
+    :xtalk :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
   

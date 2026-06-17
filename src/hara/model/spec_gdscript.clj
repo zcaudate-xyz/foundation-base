@@ -167,7 +167,6 @@
          :index       {:macro #'gdscript-dot :emit :macro}
          :fn          {:macro  #'gdscript-fn   :emit :macro}
          :var         {:symbol #{'var*} :raw "var"}
-         :var.inner   {:raw "var"}
          :for-object  {:macro #'tf-for-object :emit :macro}
          :for-array   {:macro #'tf-for-array  :emit :macro}
          :for-iter    {:macro #'tf-for-iter   :emit :macro}

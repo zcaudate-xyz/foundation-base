@@ -6,10 +6,11 @@
          [:postgres :jdbc.client]      'hara.runtime.postgres.base.client
          
          [:solidity :default]          'hara.runtime.solidity
-	 
+		 
          [:bash   :oneshot]            'hara.runtime.basic.impl.process-bash
          [:bash   :basic]              'hara.runtime.shell
          [:bash   :remote]             'hara.runtime.shell
+         [:bash   :verify]             'hara.runtime.basic.impl.process-bash
          
          [:lua    :oneshot]            'hara.runtime.basic.impl.process-lua
          [:lua    :basic]              'hara.runtime.basic.impl.process-lua
@@ -28,9 +29,11 @@
          [:lua.nginx :nginx.instance]  'hara.runtime.nginx
          [:lua.nginx :remote-port]     'hara.runtime.basic.impl.process-lua
          [:lua.nginx :remote-ws]       'hara.runtime.basic.impl.process-lua
+         [:lua.nginx :verify]          'hara.runtime.basic.impl.process-lua
          [:lua    :remote-port]        'hara.runtime.basic.impl.process-lua
          [:lua    :remote-ws]          'hara.runtime.basic.impl.process-lua
          [:lua    :neovim]             'hara.runtime.neovim
+         [:lua    :verify]             'hara.runtime.basic.impl.process-lua
          
          [:js     :oneshot]            'hara.runtime.basic.impl.process-js
          [:js     :basic]              'hara.runtime.basic.impl.process-js
@@ -41,6 +44,7 @@
          [:js     :browser]            'hara.runtime.browser
          [:js     :remote-port]        'hara.runtime.basic.impl.process-js
          [:js     :remote-ws]          'hara.runtime.basic.impl.process-js
+         [:js     :verify]             'hara.runtime.basic.impl.process-js
          
          [:python :oneshot]            'hara.runtime.basic.impl.process-python
          [:python :basic]              'hara.runtime.basic.impl.process-python
@@ -50,60 +54,82 @@
          [:python :jep]                'hara.runtime.jep
          [:python :libpython]          'hara.runtime.libpython
          [:python :blender]            'hara.runtime.blender
+         [:python :gimp]               'hara.runtime.gimp
          [:python :remote-port]        'hara.runtime.basic.impl.process-python
          [:python :remote-ws]          'hara.runtime.basic.impl.process-python
+         [:python :verify]             'hara.runtime.basic.impl.process-python
 
          [:scheme :oneshot]            'hara.runtime.basic.impl.process-scheme
          [:scheme :basic]              'hara.runtime.basic.impl.process-scheme
+         [:scheme :verify]             'hara.runtime.basic.impl.process-scheme
 
          [:elisp  :oneshot]            'hara.runtime.basic.impl.process-elisp
          [:elisp  :basic]              'hara.runtime.basic.impl.process-elisp
+         [:elisp  :verify]             'hara.runtime.basic.impl.process-elisp
 
          [:ruby   :oneshot]            'hara.runtime.basic.impl.process-ruby
          [:ruby   :basic]              'hara.runtime.basic.impl.process-ruby
+         [:ruby   :verify]             'hara.runtime.basic.impl.process-ruby
 
          [:gdscript :twostep]          'hara.runtime.basic.impl.process-gdscript
          [:gdscript :godot]            'hara.runtime.godot
+         [:gdscript :verify]           'hara.runtime.basic.impl.process-gdscript
 
          [:glsl   :oneshot]            'hara.runtime.basic.impl.process-glsl
          [:glsl   :verify]             'hara.runtime.basic.impl.process-glsl
 
          [:perl   :oneshot]            'hara.runtime.basic.impl-annex.process-perl
          [:perl   :basic]              'hara.runtime.basic.impl-annex.process-perl
+         [:perl   :verify]             'hara.runtime.basic.impl-annex.process-perl
 
          [:php    :oneshot]            'hara.runtime.basic.impl-annex.process-php
          [:php    :basic]              'hara.runtime.basic.impl-annex.process-php
+         [:php    :verify]             'hara.runtime.basic.impl-annex.process-php
          
          [:r      :oneshot]            'hara.runtime.basic.impl-annex.process-r
          [:r      :basic]              'hara.runtime.basic.impl-annex.process-r
+         [:r      :verify]             'hara.runtime.basic.impl-annex.process-r
 
          [:octave :oneshot]            'hara.runtime.basic.impl-annex.process-octave
          [:octave :basic]              'hara.runtime.basic.impl-annex.process-octave
+         [:octave :verify]             'hara.runtime.basic.impl-annex.process-octave
 
          [:julia  :oneshot]            'hara.runtime.basic.impl-annex.process-julia
          [:julia  :basic]              'hara.runtime.basic.impl-annex.process-julia
+         [:julia  :verify]             'hara.runtime.basic.impl-annex.process-julia
 
          [:erlang :oneshot]            'hara.runtime.basic.impl-annex.process-erlang
          [:erlang :basic]              'hara.runtime.basic.impl-annex.process-erlang
+         [:erlang :verify]             'hara.runtime.basic.impl-annex.process-erlang
          
          [:haskell :twostep]           'hara.runtime.basic.impl-annex.process-haskell
          [:lean    :twostep]           'hara.runtime.basic.impl-annex.process-lean
          [:ocaml   :twostep]           'hara.runtime.basic.impl-annex.process-ocaml
+         [:haskell :verify]            'hara.runtime.basic.impl-annex.process-haskell
+         [:lean    :verify]            'hara.runtime.basic.impl-annex.process-lean
+         [:ocaml   :verify]            'hara.runtime.basic.impl-annex.process-ocaml
          
          [:rust   :twostep]            'hara.runtime.basic.impl-annex.process-rust
+         [:rust   :verify]             'hara.runtime.basic.impl-annex.process-rust
          
          [:c      :jocl]               'hara.runtime.jocl
          [:c      :oneshot]            'hara.runtime.basic.impl.process-c
          [:c      :twostep]            'hara.runtime.basic.impl.process-c
+         [:c      :verify]             'hara.runtime.basic.impl.process-c
 
          [:circom :twostep]            'hara.runtime.basic.impl-annex.process-circom
+         [:circom :verify]             'hara.runtime.basic.impl-annex.process-circom
 
          [:verilog :twostep]           'hara.runtime.basic.impl.process-verilog
+         [:verilog :verify]            'hara.runtime.basic.impl.process-verilog
 
          [:dart   :twostep]            'hara.runtime.basic.impl.process-dart
+         [:dart   :verify]             'hara.runtime.basic.impl.process-dart
          [:go     :twostep]            'hara.runtime.basic.impl.process-go
-	 
-         [:xtalk  :oneshot]            'hara.runtime.basic.impl.process-xtalk}))
+         [:go     :verify]             'hara.runtime.basic.impl.process-go
+		 
+         [:xtalk  :oneshot]            'hara.runtime.basic.impl.process-xtalk
+         [:xtalk  :verify]             'hara.runtime.basic.impl.process-xtalk}))
 
 (def +book-registry+
   (atom {[:xtalk    :default]          {:ns 'hara.model.spec-xtalk

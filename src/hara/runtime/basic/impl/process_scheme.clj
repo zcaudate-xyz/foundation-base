@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.runtime :as rt]
             [hara.model.spec-scheme :as spec]))
 
@@ -15,11 +16,14 @@
   (common/put-program-options
    :scheme (let [root (scheme-root)]
              {:default {:oneshot :racket
+                        :verify  :racket
                         :basic   :racket}
               :env     {:racket {:exec  "racket"
                                  :root  root
                                  :env   {"PWD" root}
+                                 :extension "rkt"
                                  :flags {:oneshot ["-e"]
+                                         :verify  ["-e" "(with-handlers ([exn:fail? (lambda (e) (displayln (exn-message e)) (exit 1))]) (parameterize ([read-accept-reader #t]) (let ([p (open-input-file \"__FILE__\")]) (let loop () (define v (read p)) (unless (eof-object? v) (loop))))))"]
                                          :basic   ["-e"]}}}})))
 
 (defn- scheme-bootstrap
@@ -357,9 +361,23 @@
    {:main {:in #'default-oneshot-wrap}
     :json :full}))
 
+(def +scheme-verify-config+
+  (common/set-context-options
+   [:scheme :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +scheme-oneshot+
   [(rt/install-type!
     :scheme :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +scheme-verify+
+  [(rt/install-type!
+    :scheme :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 

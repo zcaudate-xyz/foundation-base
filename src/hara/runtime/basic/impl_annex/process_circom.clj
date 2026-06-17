@@ -1,6 +1,7 @@
 (ns hara.runtime.basic.impl-annex.process-circom
   (:require [hara.runtime.basic.type-common :as common]
              [hara.runtime.basic.type-twostep :as twostep]
+             [hara.runtime.basic.type-verify :as type-verify]
              [std.fs :as fs]
              [hara.lang.book :as book]
              [hara.lang.impl :as impl]
@@ -43,13 +44,14 @@
 (def +program-init+
   (common/put-program-options
    :circom {:default  {:twostep     :circom
+                       :verify      :circom
                        :interactive false
                        :ws-client   false}
             :env      {:circom   {:exec "circom"
                                   :extension   "circom"
-                                  :exec-fn sh-exec-circom
                                   :stderr true
                                   :flags  {:twostep []
+                                           :verify  []
                                            :interactive false
                                            :json false
                                            :ws-client false}}}}))
@@ -69,8 +71,22 @@
    {:exec-fn #'sh-exec-circom
     :emit  {:body {:transform #'transform-form}}}))
 
+(def +circom-verify-config+
+  (common/set-context-options
+   [:circom :verify :default]
+   {:main    {}
+    :emit    {:body {:transform #'transform-form}}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +circom-twostep+
   [(rt/install-type!
     :circom :twostep
+    {:type :hara/rt.twostep
+     :instance {:create twostep/rt-twostep:create}})])
+
+(def +circom-verify+
+  [(rt/install-type!
+    :circom :verify
     {:type :hara/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

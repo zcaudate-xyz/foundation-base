@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
             [hara.model.annex.spec-perl :as spec]
@@ -11,9 +12,12 @@
 (def +perl-init+
   (common/put-program-options
    :perl  {:default  {:oneshot    :perl
+                      :verify     :perl
                       :basic      :perl}
            :env      {:perl    {:exec   "perl"
+                                :extension "pl"
                                 :flags  {:oneshot   ["-e"]
+                                         :verify    ["-c"]
                                          :basic     ["-e"]}}}}))
 
 ;;
@@ -62,9 +66,23 @@
     :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
+(def +perl-verify-config+
+  (common/set-context-options
+   [:perl :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +perl-oneshot+
   [(rt/install-type!
     :perl :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +perl-verify+
+  [(rt/install-type!
+    :perl :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 

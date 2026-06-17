@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.runtime :as rt]
             [hara.model.spec-elisp :as spec]))
 
@@ -15,11 +16,14 @@
   (common/put-program-options
    :elisp (let [root (elisp-root)]
             {:default {:oneshot :emacs
+                       :verify  :emacs
                        :basic   :emacs}
              :env     {:emacs {:exec  "emacs"
                                :root  root
                                :env   {"PWD" root}
+                               :extension "el"
                                :flags {:oneshot ["--quick" "--batch" "--eval"]
+                                       :verify  ["--quick" "--batch" "--eval" "(progn (require 'bytecomp) (batch-byte-compile-file \"__FILE__\"))"]
                                        :basic   ["--quick" "--batch" "--eval"]}}}})))
 
 (defn- elisp-bootstrap
@@ -321,9 +325,23 @@
    {:main {:in #'default-oneshot-wrap}
     :json :full}))
 
+(def +elisp-verify-config+
+  (common/set-context-options
+   [:elisp :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +elisp-oneshot+
   [(rt/install-type!
     :elisp :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +elisp-verify+
+  [(rt/install-type!
+    :elisp :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 

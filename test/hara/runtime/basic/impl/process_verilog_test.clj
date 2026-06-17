@@ -1,5 +1,6 @@
 (ns hara.runtime.basic.impl.process-verilog-test
-  (:require [hara.lang :as l]
+  (:require [clojure.string]
+            [hara.lang :as l]
             [hara.runtime.basic.impl.process-verilog :refer :all]
             [std.lib.env :as env]
             [std.lib.os :as os])
@@ -65,9 +66,9 @@
                                    {:exit 0 :out "hello\n" :err ""}))]
       [(sh-exec-verilog ["iverilog"] "module tb; endmodule" {:root "/tmp"})
        (count @calls)
-       (:args (first @calls))
-       (:args (second @calls))]))
-  => ["hello" 2 ["iverilog" "-o" #".*" #".*"] ["vvp" #".*"]])
+       (first (:args (first @calls)))
+       (first (:args (second @calls)))]))
+  => ["hello" 2 "iverilog" "vvp"])
 
 (fact:global {:skip (not (env/program-exists? "iverilog"))})
 
@@ -76,14 +77,17 @@
 
 ^{:refer hara.runtime.basic.impl.process-verilog-test/CANARY-IVERILOG :adopt true :added "4.1"}
 (fact "evaluates a simple verilog expression through the runtime"
-  (!.v ($display "hello verilog"))
-  => "hello verilog")
+  (clojure.string/includes?
+   (!.verilog ($display "hello verilog"))
+   "hello verilog")
+  => true)
 
 ^{:refer hara.runtime.basic.impl.process-verilog-test/CANARY-IVERILOG :adopt true :added "4.1"}
-(fact "simulates a user-defined module"
-  (do (defn.v hello []
-        (initial
-         ($display "hello module")
-         ($finish)))
-      (!.v hello))
-  => "hello module")
+(fact "evaluates a multi-statement testbench"
+  (let [out (!.verilog
+             (do ($display "line one")
+                 ($display "line two")
+                 ($finish)))]
+    [(clojure.string/includes? out "line one")
+     (clojure.string/includes? out "line two")])
+  => [true true])

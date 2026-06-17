@@ -10,15 +10,13 @@
              [xt.lang.common-resource :as rt]]})
 
 (fact:global
- {:setup [(l/rt:restart :js)
-          (l/rt:scaffold-imports :js)]
+ {:setup [(l/rt:restart :js)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.chromedriver.e2e-tabs-test/workflow-basic-switch :added "4.0"
   :setup [(chromedriver/goto "data:text/html,<title>Home</title>" 4000 (l/rt :js))
-          (def +home+ (chromedriver/current-tab (l/rt :js)))
-          (def +other+
-            (chromedriver/tab-create (l/rt :js) "data:text/html,<title>Other</title>"))]
+          (def +home+  (chromedriver/current-tab (l/rt :js)))
+          (def +other+ (chromedriver/tab-create (l/rt :js) "data:text/html,<title>Other</title>"))]
   :teardown [(chromedriver/tab-close (l/rt :js) +other+)
              (chromedriver/tab-switch (l/rt :js) +home+ {:bootstrap false})]}
 (fact "switches to another tab and back with with-tab"

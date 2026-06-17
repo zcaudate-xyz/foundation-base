@@ -274,10 +274,10 @@
            program
            process] :as m
     :or {runtime :twostep}}]
-  (let [[program process exec] (rt-twostep-setup lang program process exec :twostep)
+  (let [[program process exec] (rt-twostep-setup lang program process exec runtime)
         flags   (common/get-program-flags lang program)
-        _   (cond (not (:twostep flags))
-                  (f/error "Program does not support twostep runtime"
+        _   (cond (not (get flags runtime))
+                  (f/error "Program does not support runtime"
                            {:lang lang
                             :runtime runtime
                             :flags flags

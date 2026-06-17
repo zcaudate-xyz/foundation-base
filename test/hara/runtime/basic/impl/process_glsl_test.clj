@@ -38,5 +38,7 @@
   (do (defrun.gl test-shader
         (fn ^{:- [:void]} main []
           (:= gl_FragColor (:vec4 0.2 0.5 0.8 1.0))))
-      (string? (!.gl test-shader)))
+      (let [out (str (!.gl test-shader))]
+        (and (string? out)
+             (boolean (re-find #"^pixel: \d+\.\d+ \d+\.\d+ \d+\.\d+ \d+\.\d+$" out)))))
   => true)

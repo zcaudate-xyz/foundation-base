@@ -86,24 +86,39 @@
       (first form))))
 
 (defn- shorten-defn-name
-  "Changes a namespaced GDScript function definition to use its short name."
+  "Changes a namespaced GDScript function definition to use its short name,
+   while keeping recursive calls pointing to the namespaced name."
   {:added "4.1"}
   [def-code short-name]
-  (clojure.string/replace-first def-code #"func\s+\w+" (str "func " short-name)))
+  (if-let [[_ original-name] (re-find #"func\s+(\w+)" def-code)]
+    (clojure.string/replace def-code (re-pattern (str "\\b" short-name "\\b")) original-name)
+    def-code))
 
-(defn- ptr-defn-form
-  "Returns the emitted GDScript for the pointer's definition, if any."
+(defn- namespaced-gd-name
+  "Builds the GDScript namespaced function name from a Clojure module/id pair."
   {:added "4.1"}
-  [ptr meta]
-  (when-let [sym (ptr-call-symbol ptr)]
-    (let [module-id (symbol (or (namespace sym)
-                                (str (:module ptr))))
-          id        (symbol (name sym))
-          section   (or (:section @ptr) :code)]
-      (when-let [entry (get-in (:book meta) [:modules module-id section id])]
-        (when-let [form (:form entry)]
-          (shorten-defn-name (impl/emit-script form meta)
-                             (clojure.string/replace (name sym) "-" "_")))))))
+  [module id]
+  (let [norm #(-> %
+                  (clojure.string/replace #"\." "_")
+                  (clojure.string/replace #"-" "_"))]
+    (str (norm module) "____" (norm id))))
+
+(defn- fix-recursive-calls
+  "Rewrites recursive calls inside a generated GDScript body so they point to
+   the namespaced function name. ptr-invoke-script emits the function with a
+   namespaced definition but keeps recursive calls as short names; this fixes
+   those references."
+  {:added "4.1"}
+  [body ptr]
+  (if-let [sym (ptr-call-symbol ptr)]
+    (let [short-name (clojure.string/replace (name sym) "-" "_")
+          long-name  (namespaced-gd-name (or (namespace sym)
+                                             (str (:module ptr)))
+                                         (name sym))]
+      (clojure.string/replace body
+                              (re-pattern (str "\\b" short-name "\\("))
+                              (str long-name "(")))
+    body))
 
 (defn invoke-ptr-godot
   "Invokes a pointer in the Godot runtime."
@@ -113,12 +128,7 @@
                                           :emit
                                           (fnil merge {})
                                           {:body {:transform #'gdscript/default-body-transform}}))
-         call     (ptr/ptr-invoke-script ptr args meta)
-
-         def-code (ptr-defn-form ptr meta)
-         body     (if def-code
-                    (str def-code "\n" call)
-                    call)
+         body     (fix-recursive-calls (ptr/ptr-invoke-script ptr args meta) ptr)
          in-fn    (fn [body]
                     (gdscript/wrap-godot-eval
                      ((get-in rt [:main :in] identity) body)))

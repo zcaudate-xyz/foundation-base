@@ -31,3 +31,11 @@
 (fact "builds a vector"
   (in-core '(!.gd (gdscript.tutorial.example-core/build-vector 1 2 3)))
   => [1 2 3])
+
+^{:refer gdscript.tutorial.example-core/add :added "4.1"}
+(fact "runtime persists across multiple calls"
+  (in-core '(!.gd (gdscript.tutorial.example-core/add 1 1)))
+  => 2
+
+  (in-core '(!.gd (gdscript.tutorial.example-core/add 10 20)))
+  => 30)

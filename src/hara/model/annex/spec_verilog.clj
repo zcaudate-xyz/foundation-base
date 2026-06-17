@@ -136,7 +136,7 @@
                               (number? x) (str x)
                               :else (ut/sym-default-str x)))
                       args)]
-    (list :- (str "$display(" (clojure.string/join ", " arg-strs) ")"))))
+    (list :- (str "$display(" (clojure.string/join ", " arg-strs) ");"))))
 
 (defn tf-finish
   "transforms $finish"

@@ -1,6 +1,7 @@
 (ns hara.runtime.basic.impl-annex.process-rust
   (:require [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.book :as book]
             [hara.lang.impl :as impl]
             [hara.lang.pointer :as ptr]
@@ -11,12 +12,14 @@
 (def +program-init+
   (common/put-program-options
    :rust  {:default  {:twostep     :rustc
+                      :verify      :rustc
                       :interactive false
                       :ws-client   false}
            :env      {:rustc    {:exec "rustc"
                                  :extension   "rs"
                                  :stderr true
                                  :flags  {:twostep []
+                                          :verify  ["--emit=metadata"]
                                           :interactive false
                                           :json false
                                           :ws-client false}}}}))
@@ -49,8 +52,22 @@
      :json :string
      }))
 
+(def +rust-verify-config+
+  (common/set-context-options
+   [:rust :verify :default]
+   {:main    {}
+    :emit    {:body {:transform #'transform-form}}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +c-twostep+
   [(rt/install-type!
     :rust :twostep
+    {:type :hara/rt.twostep
+     :instance {:create twostep/rt-twostep:create}})])
+
+(def +rust-verify+
+  [(rt/install-type!
+    :rust :verify
     {:type :hara/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

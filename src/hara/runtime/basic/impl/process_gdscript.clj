@@ -3,6 +3,7 @@
             [xt.lang.common-promise]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
             [hara.model.spec-gdscript :as spec]
@@ -16,9 +17,12 @@
 (def +program-init+
   (common/put-program-options
    :gdscript {:default {:twostep   :godot-4
+                        :verify    :godot-4
                         :interactive :godot-4}
               :env {:godot-4 {:exec  "godot-4"
+                              :extension "gd"
                               :flags {:twostep     ["--headless" "--script"]
+                                      :verify      ["--headless" "--script"]
                                       :interactive ["--script"]}}
                     :godot   {:exec  "godot"
                               :flags {:twostep     ["--headless" "--script"]
@@ -111,7 +115,7 @@
   [body output-path]
   (let [[defs wrapped-body] (split-body body)]
     (str "extends SceneTree\n\n"
-         defs "\n\n"
+         (when (seq defs) (str defs "\n\n"))
          "func OUT_FN():\n"
          wrapped-body "\n\n"
          "func _init():\n"
@@ -134,6 +138,18 @@
          defs "\n\n"
          "func eval():\n"
          wrapped-body "\n")))
+
+(defn transform-form-verify
+  "wraps emitted GDScript in a minimal SceneTree script for syntax checking"
+  {:added "4.0"}
+  [forms opts]
+  (let [body (impl/emit-as :gdscript forms)
+        [defs wrapped-body] (split-body body)]
+    `(:- ~(str "extends SceneTree\n\n"
+               defs
+               "\n\n"
+               "func _init():\n"
+               wrapped-body))))
 
 (defn- spit-sync
   "writes content to file and forces an fsync so subprocesses see it"
@@ -230,9 +246,33 @@
     :exec-fn #'sh-exec-gdscript
     :json :full}))
 
+(defn verify-exec-gdscript
+  "writes the generated GDScript into the runtime project and runs Godot's
+   headless syntax check, returning the source body on success."
+  {:added "4.0"}
+  [input-args input-body process]
+  (ensure-project!)
+  (type-verify/verify-exec-file input-args input-body process))
+
+(def +gdscript-verify-config+
+  (common/set-context-options
+   [:gdscript :verify :default]
+   {:main    {}
+    :emit    {:body {:transform #'transform-form-verify}}
+    :root    +gdscript-runtime-dir+
+    :pipe    false
+    :json    false
+    :exec-fn #'verify-exec-gdscript}))
+
 (def +gdscript-twostep+
   [(rt/install-type!
     :gdscript :twostep
+    {:type :hara/rt.twostep
+     :instance {:create #'twostep/rt-twostep:create}})])
+
+(def +gdscript-verify+
+  [(rt/install-type!
+    :gdscript :verify
     {:type :hara/rt.twostep
      :instance {:create #'twostep/rt-twostep:create}})])
 

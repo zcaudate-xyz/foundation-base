@@ -5,6 +5,7 @@
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
             [hara.runtime.basic.type-remote-port :as remote-port]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.runtime.basic.type-websocket :as websocket]
             [std.json :as json]
             [hara.lang.impl :as impl]
@@ -16,6 +17,7 @@
 (def +python-init+
   (common/put-program-options
    :python  {:default  {:oneshot     :cpython
+                        :verify      :cpython
                         :basic       :cpython
                         :interactive :cpython
                         :websocket   :cpython}
@@ -27,7 +29,9 @@
                                               :json ["json" :builtin]
                                               :ws-client ["websocket" :installed]}}
                         :cpython   {:exec    "python3"
+                                    :extension "py"
                                     :flags   {:oneshot   ["-c"]
+                                              :verify    ["-m" "py_compile"]
                                               :basic     ["-c"]
                                               :websocket ["-c"]
                                               :interactive ["-i"]
@@ -107,9 +111,23 @@
     :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
+(def +python-verify-config+
+  (common/set-context-options
+   [:python :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +python-oneshot+
   [(rt/install-type!
     :python :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +python-verify+
+  [(rt/install-type!
+    :python :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 

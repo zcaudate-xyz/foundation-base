@@ -11,7 +11,7 @@
   => "1 + 2"
 
   (l/emit-as :gdscript '[(var x 10)])
-  => "x = 10"
+  => "var x = 10"
 
   (l/emit-as :gdscript '[(defn add [a b] (return (+ a b)))])
   => "func add(a,b):\n  return a + b"

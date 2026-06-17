@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
             [hara.model.annex.spec-erlang :as spec]
@@ -11,10 +12,14 @@
 (def +erlang-init+
   (common/put-program-options
    :erlang {:default  {:oneshot     :erlang
+                       :verify      :erlc
                        :basic       :erlang}
             :env      {:erlang    {:exec    "escript"
                                    :flags   {:oneshot   []
-                                             :basic     []}}}}))
+                                             :basic     []}}
+                       :erlc      {:exec    "erlc"
+                                   :extension "erl"
+                                   :flags   {:verify    ["-o" "/tmp"]}}}}))
 
 ;;
 ;; EVAL
@@ -42,9 +47,23 @@
     :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
+(def +erlang-verify-config+
+  (common/set-context-options
+   [:erlang :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +erlang-oneshot+
   [(rt/install-type!
     :erlang :oneshot
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +erlang-verify+
+  [(rt/install-type!
+    :erlang :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 

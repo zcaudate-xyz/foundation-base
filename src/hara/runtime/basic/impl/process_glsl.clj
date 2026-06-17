@@ -2,10 +2,18 @@
   (:require [clojure.string]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
-            [hara.runtime.basic.type-twostep :as twostep]
             [hara.lang.impl :as impl]
             [hara.lang.pointer :as ptr]
-            [hara.lang.runtime :as rt]))
+            [hara.lang.runtime :as runtime]
+            [hara.lang.book :as book]
+            [hara.common.util :as ut]
+            [std.fs :as fs]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl-std]
+            [std.lib.os :as os]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]))
 
 ;;
 ;; PROGRAM OPTIONS
@@ -18,48 +26,52 @@
            :env      {:glslang-vert  {:exec   "glslangValidator"
                                       :pipe   true
                                       :stderr true
-                                      :flags  {:oneshot      ["--stdin" "-S" "vert"]
+                                      :flags  {:oneshot      false
+                                               :verify       ["--stdin" "-S" "vert"]
                                                :interactive  false
                                                :json         false
                                                :ws-client    false}}
                       :glslang-frag  {:exec   "glslangValidator"
                                       :pipe   true
                                       :stderr true
-                                      :flags  {:oneshot      ["--stdin" "-S" "frag"]
+                                      :flags  {:oneshot      false
+                                               :verify       ["--stdin" "-S" "frag"]
                                                :interactive  false
                                                :json         false
                                                :ws-client    false}}
                       :glslang-geom  {:exec   "glslangValidator"
                                       :pipe   true
                                       :stderr true
-                                      :flags  {:oneshot      ["--stdin" "-S" "geom"]
+                                      :flags  {:oneshot      false
+                                               :verify       ["--stdin" "-S" "geom"]
                                                :interactive  false
                                                :json         false
                                                :ws-client    false}}
                       :glslang-comp  {:exec   "glslangValidator"
                                       :pipe   true
                                       :stderr true
-                                      :flags  {:oneshot      ["--stdin" "-S" "comp"]
+                                      :flags  {:oneshot      false
+                                               :verify       ["--stdin" "-S" "comp"]
                                                :interactive  false
                                                :json         false
                                                :ws-client    false}}
                       :gcc-egl-vert  {:exec   "gcc"
                                       :extension   "c"
                                       :stderr true
-                                      :flags  {:twostep     ["-lEGL" "-lGL"]
+                                      :flags  {:oneshot     []
                                                :interactive false
                                                :json        false
                                                :ws-client   false}}
                       :gcc-egl-frag  {:exec   "gcc"
                                       :extension   "c"
                                       :stderr true
-                                      :flags  {:twostep     ["-lEGL" "-lGL"]
+                                      :flags  {:oneshot     []
                                                :interactive false
                                                :json        false
                                                :ws-client   false}}}}))
 
 ;;
-;; VERIFY (previously :oneshot validation)
+;; VERIFY (validation only)
 ;;
 
 (defn transform-form-verify
@@ -77,20 +89,6 @@
                    (cons 'do body-forms))]
     ['(:- "#version 460")
      body]))
-
-(def +glsl-verify-config+
-  (common/set-context-options
-   [:glsl :verify :default]
-   {:main  {}
-    :emit  {:body  {:transform #'transform-form-verify}}
-    :json  false}))
-
-(def +glsl-verify+
-  [(rt/install-type!
-    :glsl :verify
-    {:type :hara/rt.oneshot
-     :config {:runtime :verify}
-     :instance {:create oneshot/rt-oneshot:create}})])
 
 ;;
 ;; RUN (execute shader via EGL/GL harness)
@@ -197,14 +195,159 @@
          "  return 0;\n"
          "}\n")))
 
+(defn- resolve-glsl-form
+  "resolves a bare symbol to the body of a defrun entry"
+  {:added "4.0"}
+  [form {:keys [book module] :as opts}]
+  (if (and (symbol? form) book module)
+    (let [module-id (ut/module-id module)
+          id (symbol (name module-id) (name form))]
+      (try (let [entry (book/get-code-entry book id)]
+             (if (= :defrun (:op-key entry))
+               (apply list 'do (drop 2 (:form entry)))
+               form))
+           (catch Throwable _
+             form)))
+    form))
+
 (defn transform-form-run
   "generates a C/EGL harness for the emitted GLSL shader"
   {:added "4.0"}
   [form opts]
   (let [stage (or (-> opts :emit :runtime :process :stage)
                   :frag)
-        user-glsl (emit-glsl-string form)]
+        user-glsl (emit-glsl-string (resolve-glsl-form form opts))]
     `(:- ~(host-c-source user-glsl stage))))
+
+(defn glsl-sh-exec
+  "compile and run helper that puts linker flags after the source file"
+  {:added "4.0"}
+  [input-args input-body {:keys [trim stderr raw root extension libs]
+                          :as opts
+                          :or {trim clojure.string/trim-newline}}]
+  (let [tmp-exec (java.io.File/createTempFile "tmp" "")
+        tmp-file (str tmp-exec
+                      "."
+                      (or extension
+                          (f/error "Requires File Extension"
+                                   opts)))
+        root-dir   (str (or root (fs/parent tmp-file)))
+        compile-args (vec (concat input-args
+                                  ["-o" (str tmp-exec) (str tmp-file)]
+                                  libs))
+        run-args   [(str tmp-exec)]
+        run!       (fn [args]
+                     (let [proc (os/sh {:wait false
+                                        :output false
+                                        :args args
+                                        :root root-dir})]
+                       (os/sh-wait proc)
+                       (os/sh-output proc)))
+        raw-output (fn [{:keys [exit out err]}]
+                     (let [out-lines (->> (clojure.string/split-lines (trim out))
+                                          (remove empty?)
+                                          seq)
+                           err-lines (->> (clojure.string/split-lines (trim err))
+                                          (remove empty?)
+                                          seq)]
+                       [exit (or out-lines err-lines [])]))
+        stderr-output (fn [{:keys [out err]}]
+                        (trim (or (not-empty err)
+                                  out
+                                  "")))]
+    (try
+      (spit tmp-file input-body)
+      (let [compile-ret (run! compile-args)]
+        (cond raw
+              (if (zero? (:exit compile-ret))
+                (raw-output (run! run-args))
+                (raw-output compile-ret))
+
+              (not (zero? (:exit compile-ret)))
+              (if stderr
+                (stderr-output compile-ret)
+                (f/error "GLSL run compile failed"
+                         {:args compile-args
+                          :root root-dir
+                          :file tmp-file
+                          :exec (str tmp-exec)
+                          :result compile-ret}))
+
+              :else
+              (let [run-ret (run! run-args)]
+                (if (zero? (:exit run-ret))
+                  (trim (:out run-ret))
+                  (if stderr
+                    (stderr-output run-ret)
+                    (f/error "GLSL run execution failed"
+                             {:args run-args
+                              :root root-dir
+                              :file tmp-file
+                              :exec (str tmp-exec)
+                              :result run-ret}))))))
+      (catch Throwable t
+        (if stderr
+          (trim (.getMessage t))
+          (throw t)))
+      (finally
+        (doseq [path [tmp-file (str tmp-exec)]]
+          (try (fs/delete path)
+               (catch Throwable _)))))))
+
+(def +glsl-run-config+
+  (common/set-context-options
+   [:glsl :run :default]
+   {:main    {}
+    :emit    {:body {:transform #'transform-form-run}}
+    :json    false
+    :exec-fn #'glsl-sh-exec
+    :libs    ["-lEGL" "-lGL"]}))
+
+(defn- rt-glsl-string [{:keys [lang runtime program]}]
+  (str "#rt.glsl" [lang runtime program]))
+
+(defn raw-eval-glsl
+  "compiles and runs the generated C/EGL harness"
+  {:added "4.0"}
+  [{:keys [exec process] :as rt} body]
+  (glsl-sh-exec exec body process))
+
+(defn invoke-ptr-glsl
+  "invokes a glsl pointer through the run harness"
+  {:added "4.0"}
+  [{:keys [process lang layout] :as rt :or {layout :full}} ptr args]
+  (runtime/default-invoke-script (assoc rt :layout layout)
+                                 ptr args
+                                 raw-eval-glsl
+                                 process))
+
+(impl-std/defimpl RuntimeGlsl [id]
+  :string rt-glsl-string
+  :protocols [protocol.context/IContext
+              :prefix "runtime/default-"
+              :method {-raw-eval    raw-eval-glsl
+                       -invoke-ptr  invoke-ptr-glsl}
+              protocol.component/IComponent
+              :body {-start  component
+                     -stop   component
+                     -kill   component}])
+
+(defn rt-glsl:create
+  "creates a glsl run runtime"
+  {:added "4.0"}
+  [{:keys [id lang runtime exec program process] :as m
+    :or {runtime :oneshot}}]
+  (let [program (common/get-program-default lang runtime program)
+        process (collection/merge-nested (common/get-options lang runtime program)
+                                         process)
+        exec    (or exec
+                    (common/get-program-exec lang runtime program))]
+    (map->RuntimeGlsl (assoc m
+                             :id (or id (f/sid))
+                             :runtime runtime
+                             :program program
+                             :exec exec
+                             :process process))))
 
 (def +glsl-oneshot-config+
   (common/set-context-options
@@ -212,14 +355,27 @@
    {:main    {}
     :emit    {:body {:transform #'transform-form-run}}
     :json    false
-    :exec-fn #'twostep/sh-exec}))
+    :exec-fn #'glsl-sh-exec
+    :libs    ["-lEGL" "-lGL"]}))
+
+(def +glsl-verify-config+
+  (common/set-context-options
+   [:glsl :verify :default]
+   {:main  {}
+    :emit  {:body  {:transform #'transform-form-verify}}
+    :json  false}))
 
 (def +glsl-oneshot+
-  [(rt/install-type!
+  [(runtime/install-type!
     :glsl :oneshot
-    {:type :hara/rt.twostep
-     :config {:runtime :oneshot}
-     :instance {:create twostep/rt-twostep:create}})])
+    {:type :hara/rt.glsl
+     :instance {:create rt-glsl:create}})])
+
+(def +glsl-verify+
+  [(runtime/install-type!
+    :glsl :verify
+    {:type :hara/rt.oneshot
+     :instance {:create oneshot/rt-oneshot:create}})])
 
 (comment
   (./create-tests))

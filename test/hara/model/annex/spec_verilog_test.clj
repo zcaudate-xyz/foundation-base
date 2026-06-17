@@ -90,8 +90,8 @@
 (fact "transforms $display calls"
   [(tf-display '($display "hello"))
    (tf-display '($display a b))]
-  => ['(:- "$display(\"hello\")")
-      '(:- "$display(a, b)")])
+  => ['(:- "$display(\"hello\");")
+      '(:- "$display(a, b);")])
 
 ^{:refer hara.model.annex.spec-verilog/tf-finish :added "4.1"}
 (fact "transforms $finish"

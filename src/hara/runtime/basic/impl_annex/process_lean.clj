@@ -2,6 +2,7 @@
   (:require [clojure.string]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
+            [hara.runtime.basic.type-verify :as type-verify]
             [std.fs :as fs]
             [hara.lang.runtime :as rt]
             [hara.model.annex.spec-lean :as spec]
@@ -176,11 +177,13 @@
 
 (def +program-init+
   (common/put-program-options
-   :lean {:default {:twostep :lean}
+   :lean {:default {:twostep :lean
+                    :verify  :lean}
           :env     {:lean {:exec "lean"
                            :extension "lean"
                            :stderr true
                            :flags {:twostep []
+                                   :verify  []
                                    :interactive false
                                    :json false
                                    :ws-client false}}}}))
@@ -195,8 +198,22 @@
     :emit {:body {:transform #'transform-form}}
     :json :string}))
 
+(def +lean-verify-config+
+  (common/set-context-options
+   [:lean :verify :default]
+   {:main    {}
+    :emit    {:body {:transform #'transform-form}}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +lean-twostep+
   [(rt/install-type!
     :lean :twostep
+    {:type :hara/rt.twostep
+     :instance {:create twostep/rt-twostep:create}})])
+
+(def +lean-verify+
+  [(rt/install-type!
+    :lean :verify
     {:type :hara/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

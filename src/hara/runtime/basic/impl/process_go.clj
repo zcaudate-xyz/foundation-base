@@ -1,6 +1,7 @@
 (ns hara.runtime.basic.impl.process-go
   (:require [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-twostep :as twostep]
+            [hara.runtime.basic.type-verify :as type-verify]
             [hara.lang.runtime :as rt]
             [hara.model.spec-go]))
 
@@ -29,11 +30,13 @@
 
 (def +program-init+
   (common/put-program-options
-   :go {:default {:twostep :go}
+   :go {:default {:twostep :go
+                  :verify  :go}
          :env     {:go {:exec "go"
                         :extension "go"
                         :stderr true
                         :flags {:twostep ["build"]
+                                :verify ["build" "-o" "/dev/null"]
                                 :interactive false
                                 :json false
                                 :ws-client false}
@@ -46,8 +49,22 @@
     :emit {:body {:transform #'transform-form}}
     :json :string}))
 
+(def +go-verify-config+
+  (common/set-context-options
+   [:go :verify :default]
+   {:main    {}
+    :emit    {}
+    :json    false
+    :exec-fn #'type-verify/verify-exec-file}))
+
 (def +go-twostep+
   [(rt/install-type!
     :go :twostep
+    {:type :hara/rt.twostep
+     :instance {:create twostep/rt-twostep:create}})])
+
+(def +go-verify+
+  [(rt/install-type!
+    :go :verify
     {:type :hara/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
