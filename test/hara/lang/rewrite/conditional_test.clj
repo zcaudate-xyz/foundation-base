@@ -23,6 +23,5 @@
        '(:? (test a) (expr b) (expr c))
        '((expr (f x)) (expr a))])
 
-
 ^{:refer hara.lang.rewrite.conditional/rewrite-conditional-expression :added "4.1"}
 (fact "TODO")

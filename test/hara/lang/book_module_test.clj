@@ -96,8 +96,8 @@
                    :code '{promise-wrap {:deps #{}
                                          :xtalk-ops #{:x-promise
                                                       :x-promise-then
-                                                      :x-promise-catch}}}}))
-    => '#{}))
+                                                      :x-promise-catch}}}})))
+  => '#{})
 
 ^{:refer hara.lang.book-module/module-deps-all :added "4.1"}
 (fact "gets all module dependencies including explicit links"
