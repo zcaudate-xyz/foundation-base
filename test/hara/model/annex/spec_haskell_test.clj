@@ -43,6 +43,7 @@
   => "[1,2,3]")
 
 (fact "types emit"
+
   (impl/emit-as :haskell ['[:> List Int]])
   => "List Int"
 

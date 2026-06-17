@@ -40,6 +40,7 @@
              :type {:kind :named :name 'sample.user/User}}]})
 
 (fact "does not duplicate same-name callable specs in declaration output"
+
   (let [out (-> 'hara.model.spec-xtalk-typed-fixture
                 xtalk-parse/analyze-namespace
                 emit-analysis-declarations)]

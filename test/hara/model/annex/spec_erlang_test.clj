@@ -4,6 +4,7 @@
   (:use code.test))
 
 (fact "erlang data structures"
+
   (l/emit-as :erlang
     [[1 2 3]])
   => "[1, 2, 3]")

@@ -855,7 +855,7 @@
 
   (!.julia
     (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
-  => 5)
+  => 6)
 
 ^{:refer xt.lang.spec-base/x:str-substring :added "4.1"}
 (fact "gets a substring"

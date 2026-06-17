@@ -2003,7 +2003,8 @@
 ^{:refer xt.lang.spec-base/x:str-index-of :added "4.1"}
 (fact "finds the index of a substring"
 
-  ^{:seedgen/base    {:lua  {:expect 6}}}
+  ^{:seedgen/base    {:lua  {:expect 6}
+                      :julia {:expect 6}}}
   (!.js
     (xt/x:str-index-of "hello/world" "/" (xt/x:offset 0)))
   => 5

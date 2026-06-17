@@ -9,9 +9,12 @@
 (l/script- :solidity
   {:runtime :web3
    :require [[hara.runtime.solidity :as sol]]
-   :static  {:contract ["Hello"]}})
+   :static  {:contract ["Hello"]}
+   :test-mode true})
 
-;; Removed global setup
+(fact:global
+ {:setup    [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.solidity/exec-rt-web3 :added "4.0"}
 (fact "helper function for executing a command via node"

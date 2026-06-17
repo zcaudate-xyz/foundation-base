@@ -6,7 +6,7 @@
   {:runtime :twostep
    :require [[xt.lang.common-iter :as it]
              [xt.lang.spec-base :as xt]
-             [xt.lang.spec-base :as xt]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

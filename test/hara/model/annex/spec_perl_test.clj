@@ -6,6 +6,7 @@
 (l/script :perl)
 
 (fact "test perl emission"
+
   (l/emit-as :perl
    '[(do
       (var a 10)
@@ -13,66 +14,94 @@
       (if (> a b)
         (return a)
         (return b)))])
-  => "my $a = 10;\nmy $b = 20;\nif($a > $b){\n  return $a;\n}\nelse{\n  return $b;\n}")
+  => "my $a = 10;
+     my $b = 20;
+     if($a > $b){
+       return $a;
+     }
+     else{
+       return $b;
+     }")
 
 (fact "test perl functions"
+
   (l/emit-as :perl
    '[(defn add [a b]
       (return (+ a b)))])
-  => "sub add {\nmy $a = shift;\nmy $b = shift;\nreturn $a + $b;\n}")
+  => "sub add {
+     my $a = shift;
+     my $b = shift;
+     return $a + $b;
+     }")
 
 (fact "test perl arrays"
+
   (l/emit-as :perl
    '[(var arr [1 2 3])])
   => "my $arr = [1, 2, 3]")
 
 (fact "test perl maps"
+
   (l/emit-as :perl
    '[(var m {"a" 1 "b" 2})])
-  => "my $m = {\"a\" => 1, \"b\" => 2}")
+  => "my $m = {"a" => 1, "b" => 2}")
 
 (fact "test perl invoke"
+
   (l/emit-as :perl
    '[(do
       (print "Hello")
       (add 1 2))])
-  => "print(\"Hello\");\nadd(1, 2);")
+  => "print("Hello");
+     add(1, 2);")
 
 (fact "test perl concat"
+
   (l/emit-as :perl
    '[(var s (concat "a" "b"))])
-  => "my $s = \"a\" . \"b\"")
+  => "my $s = "a" . "b"")
 
 (fact "test perl xtalk core"
+
   (l/emit-as :perl
    '[(do
       (x:len arr)
       (x:cat "a" "b")
       (x:print "hello"))])
-  => "scalar($arr);\n\"a\" . \"b\";\nprint(\"hello\", \"\\n\");")
+  => "scalar($arr);
+     "a" . "b";
+     print("hello", "\n");")
 
 (fact "test perl xtalk math"
+
   (l/emit-as :perl
    '[(do
       (x:m-abs -1)
       (x:m-pow 2 3)
       (x:m-sqrt 9))])
-  => "abs(-1);\n2 ** 3;\nsqrt(9);")
+  => "abs(-1);
+     2 ** 3;
+     sqrt(9);")
 
 (fact "test perl xtalk array"
+
   (l/emit-as :perl
    '[(do
       (x:arr-push arr 1)
       (x:arr-pop arr))])
-  => "push($arr, 1);\npop($arr);")
+  => "push($arr, 1);
+     pop($arr);")
 
 (fact "test perl xtalk string"
+
   (l/emit-as :perl
    '[(do
       (x:str-split "a,b" ",")
       (x:str-to-upper "a")
       (x:str-join "," arr))])
-  => "split(\",\", \"a,b\");\nuc(\"a\");\njoin(\",\", $arr);")
+  => "split(",", "a,b");
+     uc("a");
+     join(",", $arr);")
 
 ^{:refer hara.model.annex.spec-perl/perl-var :added "4.1"}
 (fact "emit perl variable declaration"

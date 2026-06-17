@@ -106,7 +106,6 @@
   (perl-tf-x-str-to-lower '(:x-str-to-lower s))
   => '(lc s))
 
-
 ^{:refer hara.model.annex.spec-xtalk.fn-perl/perl-tf-x-return-encode :added "4.1"}
 (fact "return encode"
   (pr-str (perl-tf-x-return-encode '[_ out id key]))

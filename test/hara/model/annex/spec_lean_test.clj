@@ -24,7 +24,6 @@
   (impl/emit-as :lean ['(fn [x] (+ x 1))])
   => "fun x => x + 1")
 
-
 ^{:refer hara.model.annex.spec-lean/emit-raw-str :added "4.1"}
 (fact "TODO")
 

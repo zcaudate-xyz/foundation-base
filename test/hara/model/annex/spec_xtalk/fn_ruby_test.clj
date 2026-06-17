@@ -22,6 +22,7 @@
       'xt.lang.common-promise/with-delay])
 
 (fact "simple helper rewrites stay structural and avoid the old raw helper"
+
   [(ruby-tf-x-is-function? '(:x-is-function? e))
     (ruby-tf-x-lu-set '(:x-lu-set h k v))
     (ruby-tf-x-lu-eq '(:x-lu-eq a b))
@@ -29,22 +30,30 @@
     (ruby-tf-x-unpack '(:x-unpack arr))
     (str/includes? (slurp "src/hara/model/annex/spec_xtalk/fn_ruby.clj")
                    (str "ruby" "-raw"))]
-  => ['(. e (respond_to? :call))
-      '(:=
-        (. h [(. (fn []
-                   (if (or (. k nil?)
-                           (. k (is_a? Numeric))
-                           (. k (is_a? String))
-                           (. k (is_a? Symbol))
-                           (. k (is_a? TrueClass))
-                           (. k (is_a? FalseClass)))
-                     (return k)
-                     (return (. k object_id))))
-                 (call))])
-        v)
-      '(== (. a object_id) (. b object_id))
-      '(or (. ENV ["PWD"]) (. Dir pwd))
-      '(:.. arr)
+  => [(. e (respond_to? :call))
+      (:=
+       (.
+        h
+        [(.
+          (fn
+           []
+           (if
+            (or
+             (. k nil?)
+             (. k (is_a? Numeric))
+             (. k (is_a? String))
+             (. k (is_a? Symbol))
+             (. k (is_a? TrueClass))
+             (. k (is_a? FalseClass)))
+            (return k)
+            (return (. k object_id))))
+          (call))])
+       v)
+      (== (. a object_id)
+          (. b object_id))
+      (or (. ENV ["PWD"])
+          (. Dir pwd))
+      (:.. arr)
       false])
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-concurrent-promise-run :added "4.1"}
@@ -437,7 +446,6 @@
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-return-eval :added "4.1"}
 (fact "TODO")
-
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tv-x-get-key :added "4.1"}
 (fact "TODO")

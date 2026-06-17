@@ -34,6 +34,7 @@
   => #"exists\(")
 
 (fact "emits lookup mutation and identity helpers for the R runtime"
+
   (let [create-out (pr-str (r-tf-x-lu-create '(_)))
         set-out    (pr-str (r-tf-x-lu-set '(_ lu "a" 1)))
         get-out    (pr-str (r-tf-x-lu-get '(_ lu "a" nil)))
@@ -63,22 +64,31 @@
   => #"floor")
 
 (fact "uses base R collection primitives for array, object, and iterator helpers"
+
   (l/emit-as :r [(r-tf-x-arr-map '(_ arr f))])
-  => #"lapply"
+  => "unname(lapply(as.list(arr),f))"
 
   (l/emit-as :r [(r-tf-x-arr-filter '(_ arr pred))])
-  => #"Filter"
+  => "unname(Filter(pred,as.list(arr)))"
 
   (l/emit-as :r [(r-tf-x-arr-foldl '(_ arr f init))])
-  => #"Reduce"
+  => "Reduce(f,as.list(arr),init=init)"
 
   (l/emit-as :r [(r-tf-x-obj-pairs '(_ obj))])
-  => #"Map"
+  => "`if`(
+       is.null(obj),
+       list(),
+       unname(Map(list,as.list(names(obj)),unname(as.list(obj))))
+     )"
 
   (l/emit-as :r [(r-tf-x-iter-from-obj '(_ obj))])
-  => #"Map")
+  => "structure(
+       unname(Map(list,as.list(names(obj)),unname(as.list(obj)))),
+       class='xt_iterator'
+     )")
 
 (fact "supports key R backend runtime helpers"
+
   (!.R
    [(xt/x:is-array? [1 2 3])
     (xt/x:is-array? {:a 1})
@@ -103,23 +113,35 @@
      (xts/trim " \n  hello \n  ")
      (xts/trim-left "  hello  ")
     (xts/trim-right "  hello  ")])
-  => ["1.200" "hello" "hello  " "  hello"]
+  => ["1.200"
+      "hello"
+      "hello  "
+      "  hello"]
 
   (!.R
    (xts/pad-lines (xts/join "\n" ["hello" "world"]) 2 " "))
-  => "  hello\n  world"
+  => "  hello
+       world"
 
   (!.R
    (xt/x:json-decode (k/return-encode 1 "id-A" "key-A")))
-  => {"return" "number", "key" "key-A", "id" "id-A", "value" 1, "type" "data"}
+  => {"return" "number"
+      "key" "key-A"
+      "id" "id-A"
+      "value" 1
+      "type" "data"}
 
   (!.R
     (xt/x:json-decode (k/return-wrap (fn [] (return 3)))))
-  => (contains {"return" "number", "value" 3, "type" "data"})
+  => {"return" "number"
+      "value" 3
+      "type" "data"}
 
   (!.R
     (xt/x:json-decode (k/return-eval "1+1")))
-  => {"return" "number", "value" 2, "type" "data"}
+  => {"return" "number"
+      "value" 2
+      "type" "data"}
 
   (!.R
     [(xt/x:bit-and 6 3)
@@ -149,11 +171,17 @@
   [(r-tf-x-obj-keys '(_ obj))
    (r-tf-x-obj-vals '(_ obj))
    (r-tf-x-obj-pairs '(_ obj))]
-  => '[(:? (x:nil? obj) [] (as.list (names obj)))
-       (:? (x:nil? obj) [] (unname (as.list obj)))
-       (:? (x:nil? obj)
-           []
-           (unname (Map list
-                        (as.list (names obj))
-                        (unname (as.list obj)))))]
-  )
+  => [(:? (x:nil? obj)
+          []
+          (as.list (names obj)))
+      (:? (x:nil? obj)
+          []
+          (unname (as.list obj)))
+      (:?
+       (x:nil? obj)
+       []
+       (unname
+        (Map
+         list
+         (as.list (names obj))
+         (unname (as.list obj)))))])

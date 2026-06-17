@@ -6,8 +6,9 @@
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
-              [xt.lang.common-tree :as xtt]
-              [js.core :as j]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-tree :as xtt]
+             [js.core :as j]]})
 
 (defn.js get-ethers
   []
@@ -72,66 +73,66 @@
 (f/template-entries [l/tmpl-macro {:base "Provider"
                                    :inst "p"
                                    :tag "js"}]
-  [;; Accounts
-   [getBalance   [address]     {:optional [blockTag]}]
-   [getCode      [address]     {:optional [blockTag]}]
-   [getStorageAt [address pos] {:optional [blockTag]}]
-   [getTransactionCount  [address]     {:optional [blockTag]}]
+                    [;; Accounts
+                     [getBalance   [address]     {:optional [blockTag]}]
+                     [getCode      [address]     {:optional [blockTag]}]
+                     [getStorageAt [address pos] {:optional [blockTag]}]
+                     [getTransactionCount  [address]     {:optional [blockTag]}]
 
-   ;; Blocks
-   [getBlock     [blknum]]
-   [getBlockWithTransactions   [blknum]]
+                     ;; Blocks
+                     [getBlock     [blknum]]
+                     [getBlockWithTransactions   [blknum]]
 
-   ;; ENS
-   [getAvatar    [name]]
-   [getResolver  [name]]
-   [lookupAddress  [name]]
-   [resolveName  [name]]
+                     ;; ENS
+                     [getAvatar    [name]]
+                     [getResolver  [name]]
+                     [lookupAddress  [name]]
+                     [resolveName  [name]]
 
-   ;; Logs
-   [getLogs      [filt]]
+                     ;; Logs
+                     [getLogs      [filt]]
 
-   ;; Network
-   [getNetwork   []]
-   [getBlockNumber   []]
-   [getGasPrice   []]
-   [getFeeData   []]
+                     ;; Network
+                     [getNetwork   []]
+                     [getBlockNumber   []]
+                     [getGasPrice   []]
+                     [getFeeData   []]
 
-   ;; Transaction
-   [call         [tx] {:optional [blockTag]}]
-   [estimateGas  [tx]]
-   [getTransaction [hash]]
-   [getTransactionReceipt [hash]]
-   [sendTransaction [tx]]
-   [waitForTransaction [hash] {:optional [confirm timeout]}]
+                     ;; Transaction
+                     [call         [tx] {:optional [blockTag]}]
+                     [estimateGas  [tx]]
+                     [getTransaction [hash]]
+                     [getTransactionReceipt [hash]]
+                     [sendTransaction [tx]]
+                     [waitForTransaction [hash] {:optional [confirm timeout]}]
 
-   ;; Events
-   [on       [name listener]]
-   [once     [name listener]]
-   [emit     [name] {:vargs args}]
-   [off      [name listener]]
-   [removeAllListeners [name]]
-   [listenerCount [name]]
-   [listeners [name]]])
+                     ;; Events
+                     [on       [name listener]]
+                     [once     [name listener]]
+                     [emit     [name] {:vargs args}]
+                     [off      [name listener]]
+                     [removeAllListeners [name]]
+                     [listenerCount [name]]
+                     [listeners [name]]])
 
 (f/template-entries [l/tmpl-macro {:base "Signer"
                                    :inst "signer"
                                    :tag "js"}]
-  [;; Accounts
-   [connect     [provider]]
-   [getAddress  [] {:optional [provider]}]
-   [signMessage  [message]]
-   [signMessage  [message]]
-   [sendTransaction  [tx]]
-   [checkTransaction  [tx]]
-   [populateTransaction  [tx]]])
+                    [;; Accounts
+                     [connect     [provider]]
+                     [getAddress  [] {:optional [provider]}]
+                     [signMessage  [message]]
+                     [signMessage  [message]]
+                     [sendTransaction  [tx]]
+                     [checkTransaction  [tx]]
+                     [populateTransaction  [tx]]])
 
 (f/template-entries [l/tmpl-macro {:base "ContractFactory"
                                    :inst "factory"
                                    :tag "js"}]
-  [;; Deploy
-   [getDeployTransaction [] {:vargs args}]
-   [deploy []  {:vargs args}]])
+                    [;; Deploy
+                     [getDeployTransaction [] {:vargs args}]
+                     [deploy []  {:vargs args}]])
 
 (defn.js to-bignum-pow10
   "number with base 10 exponent"
@@ -238,14 +239,14 @@
   [signer to-address amount gas-limit]
   (var tx {:gasLimit (-/to-bignum (or gas-limit 21000))
            :to to-address
-            :value (-/to-bignum amount)})
+           :value (-/to-bignum amount)})
   (return (. (-/sendTransaction signer tx)
              (then (fn:> [resp]
-                     {:hash (. resp hash)
-                      :from (. resp from)
-                      :to (. resp to)
-                      :chainId (-/to-number (. resp chainId))
-                      :gasLimit (j/toString (. resp gasLimit))})))))
+                         {:hash (. resp hash)
+                          :from (. resp from)
+                          :to (. resp to)
+                          :chainId (-/to-number (. resp chainId))
+                          :gasLimit (j/toString (. resp gasLimit))})))))
 
 (defn.js contract-deploy
   "deploys the contract"
@@ -253,12 +254,12 @@
   [signer abi bytecode init-args overrides]
   (var factory (-/new-contract-factory abi bytecode signer))
   (return (. (. factory (deploy (:.. (or init-args []))
-                                 overrides))
+                                overrides))
              (then (fn:> [contract]
-                      (. (. contract (waitForDeployment))
-                         (then (fn:> [_]
-                                 {:target (. contract target)
-                                  :contractAddress (. contract target)}))))))))
+                         (. (. contract (waitForDeployment))
+                            (then (fn:> [_]
+                                        {:target (. contract target)
+                                         :contractAddress (. contract target)}))))))))
 ;;
 ;;
 ;;
@@ -270,18 +271,18 @@
   (var contract (-/new-contract address abi signer))
   (var normalize
        (fn:> [value]
-         (return
-           (xtt/tree-walk value
-                         (fn:> [o]
-                            (return
-                             (:? (== "bigint"
-                                    (k/type-native o))
-                                (j/toString o)
-                                (:? (== "BigNumber"
-                                        (k/type-native o))
-                                    (j/toString o)
-                                    o))))
-                         k/identity))))
+             (return
+              (xtt/tree-walk value
+                             (fn:> [o]
+                                   (return
+                                    (:? (== "bigint"
+                                            (k/type-native o))
+                                        (j/toString o)
+                                        (:? (== "BigNumber"
+                                                (k/type-native o))
+                                            (j/toString o)
+                                            o))))
+                             k/identity))))
   (var output
        (:? overrides
            ((. contract [fn-name])
@@ -291,11 +292,11 @@
             (:.. (or args [])))))
   (return (. output
              (then (fn:> [res]
-                     (:? (and (k/is-object? res)
-                              (. res wait))
-                         (. (. res (wait))
-                            (then normalize))
-                         (normalize res)))))))
+                         (:? (and (k/is-object? res)
+                                  (. res wait))
+                             (. (. res (wait))
+                                (then normalize))
+                             (normalize res)))))))
 
 (defn.js subscribe-event
   "subscribes to events"

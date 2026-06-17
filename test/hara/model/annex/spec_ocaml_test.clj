@@ -29,7 +29,6 @@
   (impl/emit-as :ocaml ['(fn [x] (+ x 1))])
   => "fun x -> x + 1")
 
-
 ^{:refer hara.model.annex.spec-ocaml/emit-raw-str :added "4.1"}
 (fact "TODO")
 

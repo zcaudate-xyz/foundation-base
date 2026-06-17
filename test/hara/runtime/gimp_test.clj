@@ -6,10 +6,14 @@
   (:use code.test))
 
 (l/script- :python
-  {:runtime :gimp})
+  {:runtime :gimp
+   :test-mode true})
 
-(fact:global {:skip (not (or (env/program-exists? "gimp")
-                             (env/program-exists? "gimp-console")))})
+(fact:global
+ {:skip (not (or (env/program-exists? "gimp")
+                 (env/program-exists? "gimp-console")))
+  :setup    [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 
 ^{:refer hara.runtime.gimp.impl/gimp :added "4.1"}
