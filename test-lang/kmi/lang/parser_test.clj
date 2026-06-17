@@ -6,7 +6,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [kmi.lang.interface-common :as ic]
+             [kmi.lang.common-util :as ic]
+             [kmi.lang.protocol-base :as proto]
              [kmi.lang.parser-common :as pc]
              [kmi.lang.parser :as p]
              [kmi.lang.reader :as rdr]
@@ -22,7 +23,8 @@
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [kmi.lang.interface-common :as ic]
+             [kmi.lang.common-util :as ic]
+             [kmi.lang.protocol-base :as proto]
              [kmi.lang.parser-common :as pc]
              [kmi.lang.parser :as p]
              [kmi.lang.reader :as rdr]
@@ -330,8 +332,8 @@
    (var list-out (p/read (rdr/create "(1 2 3)")))
    (var vec-out (p/read (rdr/create "[1 2 3]")))
    [(list/list-to-array list-out)
-     (. vec-out (to-array))
-     (p/read (rdr/create "true"))])
+    (proto/to-array vec-out)
+    (p/read (rdr/create "true"))])
   => [[1 2 3] [1 2 3] true])
 
 ^{:refer kmi.lang.parser/read-delimited :added "4.1"}
@@ -353,7 +355,7 @@
 (fact "reads vector forms"
 
   (!.js
-   (. (p/read-vector (rdr/create "1 2 3]")) (to-array)))
+   (proto/to-array (p/read-vector (rdr/create "1 2 3]"))))
   => [1 2 3])
 
 ^{:refer kmi.lang.parser/read-map :added "4.1"}
@@ -466,6 +468,6 @@
   (!.js
    (var out (p/read-string "  ; ignore\n^{:tag true} [1 2]"))
    (var meta (syn/get-metadata out))
-   [(. (syn/syntax out nil) (to-array))
+   [(proto/to-array (syn/syntax out nil))
     (. meta _size)])
   => [[1 2] 1])

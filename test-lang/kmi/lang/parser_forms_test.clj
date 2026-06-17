@@ -6,12 +6,13 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
-             [kmi.lang.interface-common :as ic]
+             [kmi.lang.common-util :as ic]
              [kmi.lang.parser-core :as core]
              [kmi.lang.parser-forms :as forms]
              [kmi.lang.reader :as rdr]
              [kmi.lang.type-hashmap :as hm]
              [kmi.lang.type-hashset :as hs]
+             [kmi.lang.protocol-base :as p]
              [kmi.lang.type-keyword :as kw]
              [kmi.lang.type-list :as list]
              [kmi.lang.type-syntax :as syn]
@@ -34,7 +35,7 @@
 
 ^{:refer kmi.lang.parser-forms/read-vector :added "4.1"}
 (fact
-  (!.js (. (forms/read-vector (rdr/create "1 2 3]") core/read) (to-array)))
+  (!.js (p/to-array (forms/read-vector (rdr/create "1 2 3]") core/read)))
   => [1 2 3])
 
 ^{:refer kmi.lang.parser-forms/read-map :added "4.1"}
