@@ -166,7 +166,8 @@
          :throw       {:raw "push_error" :emit :prefix}
          :index       {:macro #'gdscript-dot :emit :macro}
          :fn          {:macro  #'gdscript-fn   :emit :macro}
-         :var         {:symbol #{'var*}}
+         :var         {:symbol #{'var*} :raw "var"}
+         :var.inner   {:raw "var"}
          :for-object  {:macro #'tf-for-object :emit :macro}
          :for-array   {:macro #'tf-for-array  :emit :macro}
          :for-iter    {:macro #'tf-for-iter   :emit :macro}
@@ -215,6 +216,7 @@
                    :free      {:start ""  :end "" :space ""}}
         :rewrite  {:staging [#'rewrite/gdscript-rewrite-stage]}
         :function {:defn        {:raw "func"
+                                 :symbol {:layout :flat}
                                  :args  {:start "(" :end "):" :space ""}}
                    :fn.inner    {:raw "func"
                                  :symbol {:layout :flat}

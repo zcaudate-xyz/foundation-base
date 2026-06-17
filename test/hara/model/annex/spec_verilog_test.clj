@@ -66,3 +66,44 @@
 (fact "transforms concatenation expressions"
   (tf-concatenation '(cat a b c))
   => '(:- "{a, b, c}"))
+
+^{:refer hara.model.annex.spec-verilog/tf-input :added "4.1"}
+(fact "transforms input declarations"
+  [(tf-input '(input clk))
+   (tf-input '(input [7 0] bus))]
+  => ['(:- "input" "clk;")
+      '(:- "input" "[7:0] bus;")])
+
+^{:refer hara.model.annex.spec-verilog/tf-output :added "4.1"}
+(fact "transforms output declarations"
+  [(tf-output '(output out))
+   (tf-output '(output [3 0] out))]
+  => ['(:- "output" "out;")
+      '(:- "output" "[3:0] out;")])
+
+^{:refer hara.model.annex.spec-verilog/tf-inout :added "4.1"}
+(fact "transforms inout declarations"
+  (tf-inout '(inout [1 0] io))
+  => '(:- "inout" "[1:0] io;"))
+
+^{:refer hara.model.annex.spec-verilog/tf-display :added "4.1"}
+(fact "transforms $display calls"
+  [(tf-display '($display "hello"))
+   (tf-display '($display a b))]
+  => ['(:- "$display(\"hello\")")
+      '(:- "$display(a, b)")])
+
+^{:refer hara.model.annex.spec-verilog/tf-finish :added "4.1"}
+(fact "transforms $finish"
+  (tf-finish '$finish)
+  => '(:- "$finish;"))
+
+^{:refer hara.model.annex.spec-verilog/tf-parameter :added "4.1"}
+(fact "transforms parameter declarations"
+  (tf-parameter '(parameter WIDTH 8))
+  => '(:- "parameter" "WIDTH = 8;"))
+
+^{:refer hara.model.annex.spec-verilog/tf-localparam :added "4.1"}
+(fact "transforms localparam declarations"
+  (tf-localparam '(localparam MASK 8))
+  => '(:- "localparam" "MASK = 8;"))

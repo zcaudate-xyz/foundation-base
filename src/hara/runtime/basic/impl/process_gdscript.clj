@@ -90,21 +90,50 @@
                 (str "  " line))))
        (clojure.string/join "\n")))
 
+(defn- split-body
+  "Splits emitted GDScript into top-level function definitions and the
+   remaining executable body. GDScript does not allow nested functions,
+   so definitions must be emitted at the top level of the script."
+  [body]
+  (let [lines (clojure.string/split-lines body)
+        part-of-def? (fn [line]
+                       (or (clojure.string/blank? line)
+                           (clojure.string/starts-with? line "func ")
+                           (clojure.string/starts-with? line " ")))
+        [defs remaining] (split-with part-of-def? lines)]
+    [(clojure.string/join "\n" defs)
+     (indent-body (clojure.string/join "\n" remaining))]))
+
 (defn default-oneshot-wrap
-  "wraps emitted GDScript body in a SceneTree script"
+  "wraps emitted GDScript body in a SceneTree script, lifting top-level
+   function definitions out of OUT_FN so GDScript parses correctly."
   {:added "4.1"}
   [body output-path]
-  (str "extends SceneTree\n\n"
-       "func OUT_FN():\n"
-       (indent-body body) "\n\n"
-       "func _init():\n"
-       "  var __result__ = OUT_FN()\n"
-       "  var __json__ = JSON.stringify({\"type\": \"data\", \"value\": __result__})\n"
-       "  var __file__ = FileAccess.open(\"" output-path "\", FileAccess.WRITE)\n"
-       "  __file__.store_string(__json__)\n"
-       "  __file__.close()\n"
-       "  print(__json__)\n"
-       "  quit()\n"))
+  (let [[defs wrapped-body] (split-body body)]
+    (str "extends SceneTree\n\n"
+         defs "\n\n"
+         "func OUT_FN():\n"
+         wrapped-body "\n\n"
+         "func _init():\n"
+         "  var __result__ = OUT_FN()\n"
+         "  var __json__ = JSON.stringify({\"type\": \"data\", \"value\": __result__})\n"
+         "  var __file__ = FileAccess.open(\"" output-path "\", FileAccess.WRITE)\n"
+         "  __file__.store_string(__json__)\n"
+         "  __file__.close()\n"
+         "  print(__json__)\n"
+         "  quit()\n")))
+
+(defn wrap-godot-eval
+  "Takes emitted GDScript body (function defs + executable statements) and
+   wraps it in a Node script with a top-level eval() function suitable for
+   the persistent :godot runtime."
+  {:added "4.1"}
+  [body]
+  (let [[defs wrapped-body] (split-body body)]
+    (str "extends Node\n\n"
+         defs "\n\n"
+         "func eval():\n"
+         wrapped-body "\n")))
 
 (defn- spit-sync
   "writes content to file and forces an fsync so subprocesses see it"

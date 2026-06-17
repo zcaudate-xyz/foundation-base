@@ -85,35 +85,40 @@
     (when (seq? form)
       (first form))))
 
+(defn- shorten-defn-name
+  "Changes a namespaced GDScript function definition to use its short name."
+  {:added "4.1"}
+  [def-code short-name]
+  (clojure.string/replace-first def-code #"func\s+\w+" (str "func " short-name)))
+
 (defn- ptr-defn-form
   "Returns the emitted GDScript for the pointer's definition, if any."
   {:added "4.1"}
   [ptr meta]
-  (clojure.core/println "CALL-SYM:" (pr-str (ptr-call-symbol ptr)))
-  (clojure.core/println "FORM-TYPE:" (type (:form @ptr)))
   (when-let [sym (ptr-call-symbol ptr)]
     (let [module-id (symbol (or (namespace sym)
                                 (str (:module ptr))))
           id        (symbol (name sym))
           section   (or (:section @ptr) :code)]
       (when-let [entry (get-in (:book meta) [:modules module-id section id])]
-        (when-let [form (:form @entry)]
-          (impl/emit-script form meta))))))
+        (when-let [form (:form entry)]
+          (shorten-defn-name (impl/emit-script form meta)
+                             (clojure.string/replace (name sym) "-" "_")))))))
 
 (defn invoke-ptr-godot
   "Invokes a pointer in the Godot runtime."
   {:added "4.1"}
   ([rt ptr args]
-   (let [meta     (ptr/ptr-invoke-meta ptr (select-keys rt [:library :lang :layout]))
+   (let [meta     (ptr/ptr-invoke-meta ptr (update (select-keys rt [:library :lang :layout :emit])
+                                          :emit
+                                          (fnil merge {})
+                                          {:body {:transform #'gdscript/default-body-transform}}))
          call     (ptr/ptr-invoke-script ptr args meta)
-         _        (clojure.core/println "META-KEYS:" (keys meta))
-         _        (clojure.core/println "PTR-KEYS:" (keys @ptr))
+
          def-code (ptr-defn-form ptr meta)
-         _        (clojure.core/println "DEF-CODE:" (pr-str def-code))
          body     (if def-code
                     (str def-code "\n" call)
                     call)
-         _        (clojure.core/println "GODOT-BODY:" "\n" body)
          in-fn    (fn [body]
                     (gdscript/wrap-godot-eval
                      ((get-in rt [:main :in] identity) body)))

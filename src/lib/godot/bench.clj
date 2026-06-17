@@ -17,7 +17,9 @@
   "extends SceneTree
 
 var server = TCPServer.new()
+var thread = Thread.new()
 var port = 0
+var running = true
 
 func _init():
     var args = OS.get_cmdline_user_args()
@@ -33,7 +35,14 @@ func _init():
         quit()
         return
     print(\"HARA_GODOT_READY\")
-    while true:
+    thread.start(server_loop)
+
+func _exit_tree():
+    running = false
+    thread.wait_to_finish()
+
+func server_loop():
+    while running:
         if server.is_connection_available():
             var conn = server.take_connection()
             handle_connection(conn)
@@ -87,10 +96,10 @@ func eval_body(body):
         return {\"type\": \"error\", \"value\": \"compile error\"}
     var node = Node.new()
     node.set_script(script)
-    var result
     if not node.has_method(\"eval\"):
         return {\"type\": \"error\", \"value\": \"missing eval method\"}
-    result = node.eval()
+    var result = node.eval()
+    node.queue_free()
     return {\"type\": \"data\", \"value\": result}
 ")
 

@@ -54,6 +54,13 @@ Use `fact:global` with `:skip` to skip every fact in a namespace when a runtime 
 
 When `:skip` is truthy, namespace setup and teardown are also bypassed, so missing dependencies cannot cause setup failures.
 
+Version-based skips are also supported using `program-version` and `version>=`:
+
+```clojure
+(fact:global
+ {:skip (not (env/version>= (env/program-version "docker") "24.0"))})
+```
+
 ## code.doc - Documentation System
 
 `code.doc` is the documentation generation system. It generates HTML documentation from Clojure source files.

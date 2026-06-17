@@ -1,11 +1,16 @@
 (ns hara.runtime.gimp-test
-  (:require [hara.runtime.gimp.impl :as impl]
+  (:require [hara.lang :as l]
+            [hara.runtime.gimp.impl :as impl]
             [std.lib.component :as component]
             [std.lib.env :as env])
   (:use code.test))
 
+(l/script- :python
+  {:runtime :gimp})
+
 (fact:global {:skip (not (or (env/program-exists? "gimp")
                              (env/program-exists? "gimp-console")))})
+
 
 ^{:refer hara.runtime.gimp.impl/gimp :added "4.1"}
 (fact "starts and stops a gimp runtime"
@@ -21,7 +26,16 @@
   (let [rt (impl/gimp {})]
     (try
       [(impl/raw-eval-gimp rt "OUT = 1 + 2 + 3")
-       (string? (impl/raw-eval-gimp rt "OUT = str(pdb.gimp_version())"))]
+       (string? (impl/raw-eval-gimp rt "OUT = str(Gimp.version())"))]
       (finally
         (component/stop rt))))
+  => [6 true])
+
+^{:refer hara.lang/script- :added "4.1"}
+(fact "uses gimp runtime through hara.lang"
+  (try
+    [(!.py (+ 1 2 3))
+     (string? @(!.py (str (Gimp.version))))]
+    (finally
+      (l/rt:stop :python)))
   => [6 true])

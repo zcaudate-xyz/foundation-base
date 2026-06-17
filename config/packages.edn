@@ -457,6 +457,7 @@
                              hara.runtime.redis
                              hara.runtime.solidity
                              hara.runtime.nginx
+                             hara.runtime.basic.impl.process-verilog
                              hara.model.spec-postgres
                              hara.model.spec-solidity]]
              [xt.lang :complete]]}
@@ -500,6 +501,11 @@
   :include [[solidity.core :complete]
             [hara.model.spec-solidity :complete]
             [hara.runtime.solidity :complete]]}
+
+ xyz.zcaudate/verilog
+ {:description "verilog language and runtime support"
+  :include [[hara.model.annex.spec-verilog :complete]
+            [hara.runtime.basic.impl.process-verilog :complete]]}
     
  xyz.zcaudate/std.lib
  {:description "simple string methods for searching"

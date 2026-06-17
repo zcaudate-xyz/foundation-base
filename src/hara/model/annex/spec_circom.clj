@@ -85,7 +85,7 @@
 (defn tf-constraint
   "Transforms constraints to add semicolon"
   [[op & args]]
-  (list :% (list :- (first args) (str op) (second args)) (list :- ";")))
+  (list :% (list :- (first args) (str op) (second args))))
 
 (defn tf-for
   "Transforms for loop.
@@ -134,7 +134,7 @@
 (def +template+
   (->> {:banned #{:set :map :regex}
         :highlight '#{return break template component signal var include pragma main}
-        :default {:function  {:raw ""}}
+        :default {:function  {:raw "template"}}
         :data    {:vector    {:start "[" :end "]" :space ","}
                   :tuple     {:start "(" :end ")" :space ","}}
         :block  {:for       {:parameter {:sep ";"}}

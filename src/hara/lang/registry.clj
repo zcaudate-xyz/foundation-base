@@ -66,6 +66,7 @@
          [:gdscript :godot]            'hara.runtime.godot
 
          [:glsl   :oneshot]            'hara.runtime.basic.impl.process-glsl
+         [:glsl   :verify]             'hara.runtime.basic.impl.process-glsl
 
          [:perl   :oneshot]            'hara.runtime.basic.impl-annex.process-perl
          [:perl   :basic]              'hara.runtime.basic.impl-annex.process-perl

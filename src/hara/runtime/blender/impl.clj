@@ -6,6 +6,7 @@
             [std.lib.impl :as std-impl]
             [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
+            [hara.lang.type-shared :as shared]
             [hara.runtime.basic.impl.process-python :as process-python]
             [hara.runtime.basic.type-common :as common]
             [std.lib.network :as network]
@@ -110,7 +111,7 @@
   {:added "4.1"}
   [{:keys [id exec port] :as rt}]
   (let [exec (or exec (blender-exec))
-        port (or port (network/port:check-available 0))
+        ^Integer port (or port (network/port:check-available 0))
         bootstrap (blender-bootstrap port)
         proc (.start (ProcessBuilder. ^"[Ljava.lang.String;"
                                       (into-array String [exec
@@ -124,6 +125,7 @@
           out (.getOutputStream socket)]
       (assoc rt
              :process proc
+             :port port
              :socket socket
              :reader in
              :output out
@@ -158,21 +160,22 @@
            ^java.io.OutputStream output]
     :as rt}
    code]
-  (let [id (next-msgid rt)
-        req (json/write {:id id :body code})
-        _ (doto output
-            (.write (.getBytes (str req "\n")))
-            (.flush))
-        response (.readLine reader)
-        parsed (json/read response json/+keyword-mapper+)]
-    (if (= id (:id parsed))
-      (if (= "ok" (:status parsed))
-        (let [inner (json/read (:body parsed) json/+keyword-mapper+)]
-          (if (= "error" (:type inner))
-            (throw (ex-info "Blender Python error" {:code code :error (:value inner)}))
-            (:value inner)))
-        (throw (ex-info "Blender Python error" {:code code :error (:body parsed)})))
-      (throw (ex-info "Blender response id mismatch" {:expected id :response parsed})))))
+  (locking (:lock rt)
+    (let [id (next-msgid rt)
+          req (json/write {:id id :body code})
+          _ (doto output
+              (.write (.getBytes (str req "\n")))
+              (.flush))
+          response (.readLine reader)
+          parsed (json/read response json/+keyword-mapper+)]
+      (if (= id (:id parsed))
+        (if (= "ok" (:status parsed))
+          (let [inner (json/read (:body parsed) json/+keyword-mapper+)]
+            (if (= "error" (:type inner))
+              (throw (ex-info "Blender Python error" {:code code :error (:value inner)}))
+              (:value inner)))
+          (throw (ex-info "Blender Python error" {:code code :error (:body parsed)})))
+        (throw (ex-info "Blender response id mismatch" {:expected id :response parsed}))))))
 
 (defn invoke-ptr-blender
   "Invokes a pointer in the Blender runtime."
@@ -215,6 +218,7 @@
                         {:id (or id (f/sid))
                          :tag :blender
                          :exec exec
+                         :lock (Object.)
                          :lifecycle {:main {}
                                     :emit {}
                                     :json :full}}
@@ -229,9 +233,28 @@
    (-> (blender:create m)
        (component/start))))
 
+(defn blender-shared:create
+  "Creates a shared Blender runtime client.
+
+   A flat :id is promoted to :rt/id so that `(script :python {:runtime :blender
+   :id :shared})` shares the same process across namespaces."
+  {:added "4.1"}
+  [m]
+  (-> {:rt/client {:type :hara/rt.blender
+                   :constructor blender:create}
+       :rt/temp true}
+      (merge m)
+      (cond-> (:id m) (assoc :rt/id (:id m)))
+      (shared/rt-shared:create)))
+
 (def +init+
   [(rt/install-type!
-    :python :blender
+    :python :blender.instance
     {:type :hara/rt.blender
      :config {:layout :full}
-     :instance {:create blender:create}})])
+     :instance {:create blender:create}})
+   (rt/install-type!
+    :python :blender
+    {:type :hara/rt.blender.shared
+     :config {:layout :full}
+     :instance {:create blender-shared:create}})])

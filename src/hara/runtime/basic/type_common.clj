@@ -58,6 +58,7 @@
 (def +valid-contexts+
   #{:oneshot
     :twostep
+    :verify
     :interactive
     :basic
     :websocket
