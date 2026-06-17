@@ -63,7 +63,6 @@
          [:ruby   :basic]              'hara.runtime.basic.impl.process-ruby
 
          [:gdscript :oneshot]          'hara.runtime.basic.impl.process-gdscript
-         [:gdscript :basic]            'hara.runtime.basic.impl.process-gdscript
 
          [:perl   :oneshot]            'hara.runtime.basic.impl-annex.process-perl
          [:perl   :basic]              'hara.runtime.basic.impl-annex.process-perl
