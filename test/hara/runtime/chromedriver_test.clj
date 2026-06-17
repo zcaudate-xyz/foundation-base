@@ -34,3 +34,46 @@
 
   (h/p:rt-raw-eval +browser+ "1+1")
   => 2)
+
+^{:refer hara.runtime.chromedriver/tab-create :added "4.0"
+  :setup [(def +browser+ (chromedriver/browser {:port 19223}))]
+  :teardown [(h/stop +browser+)]}
+(fact "creates, switches, and closes tabs"
+
+  (chromedriver/goto "data:text/html,<title>Tab One</title>" 4000 +browser+)
+  (def +one+ (chromedriver/current-tab +browser+))
+  (def +two+ (chromedriver/tab-create +browser+ "data:text/html,<title>Tab Two</title>"))
+
+  (chromedriver/tab-switch +browser+ +two+)
+  @(chromedriver/evaluate +browser+ "document.title")
+  => (contains {"value" "Tab Two"})
+
+  (chromedriver/with-tab +browser+ +one+
+    @(chromedriver/evaluate +browser+ "document.title"))
+  => (contains {"value" "Tab One"})
+
+  (chromedriver/tab-switch +browser+ +one+ {:bootstrap false})
+  (chromedriver/tab-close +browser+ +two+)
+
+  (chromedriver/tab-list +browser+)
+  => vector?)
+
+^{:refer hara.runtime.chromedriver/with-tab :added "4.0"
+  :setup [(def +main+
+            (do (chromedriver/goto "data:text/html,<title>Main</title>" 4000 (l/rt :js))
+                (chromedriver/current-tab (l/rt :js))))
+          (def +other+
+            (chromedriver/tab-create (l/rt :js) "data:text/html,<title>Other</title>"))]
+  :teardown [(chromedriver/tab-close (l/rt :js) +other+)
+             (chromedriver/tab-switch (l/rt :js) +main+ {:bootstrap false})]}
+(fact "with-tab works with !.js forms"
+
+  (!.js document.title)
+  => "Main"
+
+  (chromedriver/with-tab (l/rt :js) +other+
+    (!.js document.title))
+  => "Other"
+
+  (!.js document.title)
+  => "Main")

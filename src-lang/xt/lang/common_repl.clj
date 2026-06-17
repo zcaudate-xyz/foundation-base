@@ -31,8 +31,6 @@
 ;; SOCKET
 ;;
 
-
-
 (defn.xt socket-connect-base
   [host port opts cb]
   (return

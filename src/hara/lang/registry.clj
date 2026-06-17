@@ -30,6 +30,7 @@
          [:lua.nginx :remote-ws]       'hara.runtime.basic.impl.process-lua
          [:lua    :remote-port]        'hara.runtime.basic.impl.process-lua
          [:lua    :remote-ws]          'hara.runtime.basic.impl.process-lua
+         [:lua    :neovim]             'hara.runtime.neovim
          
          [:js     :oneshot]            'hara.runtime.basic.impl.process-js
          [:js     :basic]              'hara.runtime.basic.impl.process-js
@@ -48,6 +49,7 @@
          [:python :graal]              'hara.runtime.graal
          [:python :jep]                'hara.runtime.jep
          [:python :libpython]          'hara.runtime.libpython
+         [:python :blender]            'hara.runtime.blender
          [:python :remote-port]        'hara.runtime.basic.impl.process-python
          [:python :remote-ws]          'hara.runtime.basic.impl.process-python
 

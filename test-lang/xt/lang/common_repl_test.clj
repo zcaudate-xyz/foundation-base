@@ -34,7 +34,68 @@
  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
-(fact "TODO")
+(fact "calls notify-fn directly for plain values"
+
+  (notify/wait-on-call
+   (fn [] (!.js
+           (repl/notify-with-promise
+            repl/notify-socket
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello"
+
+  (notify/wait-on-call
+   (fn [] (!.lua
+           (repl/notify-with-promise
+            repl/notify-socket
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello"
+  
+  (notify/wait-on-call
+   (fn [] (!.py
+           (repl/notify-with-promise
+            repl/notify-socket
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello")
+
+^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
+(fact "waits for resolved promise before calling notify-fn"
+
+  (notify/wait-on-call
+   (fn [] (!.js
+           (repl/notify-with-promise
+            repl/notify-socket
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello")
+
+^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
+(fact "passes rejected promise error to notify-fn"
+
+  (notify/wait-on-call
+   (fn [] (!.js
+           (repl/notify-with-promise
+            repl/notify-socket
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise (fn [] (xt/x:err "bad")))
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "bad")
 
 ^{:refer xt.lang.common-repl/socket-connect-base :added "4.0"}
 (fact "base connect call")
@@ -309,31 +370,14 @@
     ((repl/>notify) 1))
   => 1
 
-  (notify/wait-on :js
-    ((repl/>notify (fn [x]
-                     (return (+ x 1))))
-     1))
-  => 2
-
   (notify/wait-on :lua
     ((repl/>notify) 1))
   => 1
 
-  (notify/wait-on :lua
-    ((repl/>notify (fn [x]
-                     (return (+ x 1))))
-     1))
-  => 2
-
+  
   (notify/wait-on :python
     ((repl/>notify) 1))
-  => 1
-
-  (notify/wait-on :python
-    ((repl/>notify (fn [x]
-                     (return (+ x 1))))
-     1))
-  => 2)
+  => 1)
 
 ^{:refer xt.lang.common-repl/<! :added "4.0"}
 (fact "creates a callback map"

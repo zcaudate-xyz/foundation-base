@@ -32,3 +32,62 @@
     @(page-navigate rt url {} (or timeout 5000))
     @(evaluate rt impl/+bootstrap+)
     @(target-info rt)))
+
+;;
+;; TAB MANAGEMENT
+;;
+
+(defn current-tab
+  "returns the active tab handle of the browser"
+  {:added "4.0"}
+  [browser]
+  (select-keys @(:state browser) [:target-id :session-id]))
+
+(defn tab-list
+  "lists all open tabs"
+  {:added "4.0"}
+  [browser]
+  (get @(conn/send @(:state browser) "Target.getTargets") "targetInfos"))
+
+(defn tab-create
+  "creates a new tab and returns a tab handle"
+  {:added "4.0"}
+  [browser url & [opts timeout extra-opts]]
+  (let [conn @(:state browser)
+        {:strs [targetId]} @(util/target-create conn url opts timeout extra-opts)
+        {:strs [sessionId]} @(conn/send conn "Target.attachToTarget"
+                                       {:targetId targetId
+                                        :flatten true})]
+    {:target-id targetId
+     :session-id sessionId}))
+
+(defn tab-switch
+  "switches the browser runtime to the given tab handle.
+   bootstraps the tab by default so that !.js forms work there."
+  {:added "4.0"}
+  [browser tab & [{:keys [bootstrap] :or {bootstrap true}}]]
+  (swap! (:state browser) assoc
+         :target-id (:target-id tab)
+         :session-id (:session-id tab))
+  (when bootstrap
+    @(evaluate browser impl/+bootstrap+))
+  tab)
+
+(defn tab-close
+  "closes the given tab"
+  {:added "4.0"}
+  [browser tab]
+  @(conn/send @(:state browser) "Target.closeTarget"
+              {:targetId (:target-id tab)}))
+
+(defmacro with-tab
+  "evaluates body with the browser switched to tab, then restores the
+   previously active tab"
+  {:added "4.0"}
+  [browser tab & body]
+  `(let [prev# (current-tab ~browser)]
+     (tab-switch ~browser ~tab)
+     (try
+       ~@body
+       (finally
+         (tab-switch ~browser prev# {:bootstrap false})))))

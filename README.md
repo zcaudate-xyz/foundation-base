@@ -93,7 +93,8 @@ As features crept into the library, it slowly evolved into what it is now. More 
   - jocl        (c, gpu kernel)  
   - websockets  (js, lua, python)
   - browser     (js, through chrome driver)
-  - blender     (python, seeking implementations)
+  - neovim      (lua, through msgpack-rpc)
+  - blender     (python, through embedded socket server)
 - [xtalk](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang/base/grammar_xtalk.clj) (crosstalk), a template language transpiling across dynamic language targets (lua, js, python)
 - various helpers across different environments
 - [js](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src/js), [lua](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src/lua) and [xtalk](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src/xt) utility libaries.
