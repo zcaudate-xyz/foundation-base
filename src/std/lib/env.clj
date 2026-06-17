@@ -72,6 +72,19 @@
          (catch Exception e))
        boolean)))
 
+(defn program-exists?
+  "checks if an executable exists on PATH
+
+   (program-exists? \"ls\")
+   => true"
+  {:added "4.0"}
+  ([exec]
+   (try
+     (let [^Process process (.start (ProcessBuilder. ^"[Ljava.lang.String;" (into-array String ["which" exec])))]
+       (.waitFor process)
+       (not= "" (clojure.string/trim (slurp (.getInputStream process)))))
+     (catch Exception _ false))))
+
 (defn ^java.net.URL sys:resource
   "finds a resource on class path"
   {:added "3.0"}

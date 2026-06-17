@@ -44,7 +44,7 @@ Use `fact:global` with `:skip` to skip every fact in a namespace when a runtime 
 
 ```clojure
 (fact:global
- {:skip (not (hara.runtime.basic.type-common/program-exists? "tcc"))})
+ {:skip (not (std.lib.env/program-exists? "tcc"))})
 
 ^{:refer my.namespace/function-name :added "3.0"}
 (fact "tests functionality requiring tcc"

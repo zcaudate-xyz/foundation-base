@@ -98,13 +98,12 @@
 
 (defn program-exists?
   "checks if an executable exists
-   
+
    (program-exists? \"gcc\")
    => true"
   {:added "4.0"}
   ([exec]
-   (->> @(os/sh "which" exec {:inherit false})
-        (not= ""))))
+   (std.lib.env/program-exists? exec)))
 
 (defn get-program-options
   "gets all program options"

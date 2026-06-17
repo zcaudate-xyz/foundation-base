@@ -72,6 +72,11 @@
   (sys:ns-dir 'std.lib.env)
   => string?)
 
+^{:refer std.lib.env/program-exists? :added "4.0"}
+(fact "checks if an executable exists"
+  (program-exists? "ls")
+  => true)
+
 ^{:refer std.lib.env/close :added "3.0"}
 (fact "closes any object implementing `java.io.Closable`"
   (close (java.io.StringReader. "hello"))
