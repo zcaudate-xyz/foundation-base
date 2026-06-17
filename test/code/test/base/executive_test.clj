@@ -171,6 +171,37 @@
     (executive/test-namespace 'my.ns {} (fn [_] "path") {:root "."}))
   => '{:queued ()})
 
+^{:refer code.test.base.executive/test-namespace :added "4.1"}
+(fact "skips all facts when :skip is set in fact:global"
+
+  (let [executed (atom false)
+        fact-obj (fn [] (reset! executed true) :ran)]
+    (with-redefs [rt/all-facts (fn [_] {'test-fact fact-obj})
+                  rt/get-global (fn [ns k]
+                                  (case k
+                                    :skip true
+                                    nil))
+                  project/test-ns (fn [ns] 'user)
+                  executive/accumulate (fn [f id] (f))
+                  executive/interim (fn [facts] {:facts facts})]
+      [(executive/test-namespace 'my.ns {:bulk true} (fn [_] "path") {:root "."})
+       @executed]))
+  => [{:facts [:skipped] :queued '(true)} false])
+
+^{:refer code.test.base.executive/test-namespace :added "4.1"}
+(fact "runs facts normally when :skip is not set"
+
+  (let [executed (atom false)
+        fact-obj (fn [] (reset! executed true) :ran)]
+    (with-redefs [rt/all-facts (fn [_] {'test-fact fact-obj})
+                  rt/get-global (fn [ns k] nil)
+                  project/test-ns (fn [ns] 'user)
+                  executive/accumulate (fn [f id] (f))
+                  executive/interim (fn [facts] {:facts facts})]
+      [(executive/test-namespace 'my.ns {:bulk true} (fn [_] "path") {:root "."})
+       @executed]))
+  => [{:facts [:ran] :queued '(true)} true])
+
 ^{:refer code.test.base.executive/run-namespace :added "3.0"}
 (fact "loads and run the namespace"
 

@@ -4,6 +4,7 @@
             [code.test.base.context :as context]
             [code.test.base.listener :as listener]
             [code.test.base.print :as print]
+            [code.test.base.process :as process]
             [code.test.base.runtime :as rt]
             [code.test.checker.common :as checker]
             [std.fs :as fs]
@@ -454,14 +455,16 @@
                         (sort-fn))
            facts   (accumulate (fn []
                                  (binding [*ns* (the-ns test-ns)]
-                                   (let [_       (rt/eval-in-ns test-ns (rt/get-global ns :prelim))
-                                         _       (rt/eval-in-ns test-ns (rt/get-global ns :setup))
-                                         map-fn  (if (:parallel test)
-                                                   pmap
-                                                   map)
-                                         output  (doall (map-fn #(%) tests))
-                                         _       (rt/eval-in-ns test-ns (rt/get-global ns :teardown))]
-                                          output)))
+                                   (if (rt/get-global ns :skip)
+                                     (doall (mapv #(process/skip-check %) tests))
+                                     (let [_       (rt/eval-in-ns test-ns (rt/get-global ns :prelim))
+                                           _       (rt/eval-in-ns test-ns (rt/get-global ns :setup))
+                                           map-fn  (if (:parallel test)
+                                                     pmap
+                                                     map)
+                                           output  (doall (map-fn #(%) tests))
+                                           _       (rt/eval-in-ns test-ns (rt/get-global ns :teardown))]
+                                       output))))
                                 run-id)
             _       (rt/get-global ns :teardown)
             results (-> (interim facts)
