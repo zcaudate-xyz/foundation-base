@@ -38,6 +38,22 @@ Tests use the `fact` macro and `=>` arrow assertions:
   => expected-result)
 ```
 
+### Conditional Namespace Skipping
+
+Use `fact:global` with `:skip` to skip every fact in a namespace when a runtime condition is not met (for example, an external OS program is missing). Skipped facts are reported as skipped and their bodies are not executed.
+
+```clojure
+(fact:global
+ {:skip (not (hara.runtime.basic.type-common/program-exists? "tcc"))})
+
+^{:refer my.namespace/function-name :added "3.0"}
+(fact "tests functionality requiring tcc"
+  ...
+  => expected-result)
+```
+
+When `:skip` is truthy, namespace setup and teardown are also bypassed, so missing dependencies cannot cause setup failures.
+
 ## code.doc - Documentation System
 
 `code.doc` is the documentation generation system. It generates HTML documentation from Clojure source files.
