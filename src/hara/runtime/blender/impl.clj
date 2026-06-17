@@ -4,9 +4,12 @@
             [std.lib.component :as component]
             [std.lib.foundation :as f]
             [std.lib.impl :as std-impl]
+            [hara.lang.impl :as impl]
             [hara.lang.runtime :as rt]
             [hara.runtime.basic.impl.process-python :as process-python]
-            [hara.runtime.basic.type-common :as common])
+            [hara.runtime.basic.type-common :as common]
+            [std.lib.network :as network]
+            [xt.lang.common-lib :as lib])
   (:import [java.io BufferedReader InputStreamReader]
            [java.net Socket]
            [java.util.concurrent.atomic AtomicInteger]))
@@ -15,58 +18,62 @@
 ;; BOOTSTRAP
 ;;
 
-(def +blender-bootstrap+
-  "Python bootstrap that runs inside Blender and starts a TCP server."
-  (str "import socket\n"
-       "import threading\n"
-       "import json\n"
-       "import sys\n"
-       "\n"
-       "def _hara_return_eval(body):\n"
-       "    g = globals()\n"
-       "    try:\n"
-       "        exec('import bpy\\n' + body, g, g)\n"
-       "        out = g.get('OUT')\n"
-       "        try:\n"
-       "            json.dumps(out)\n"
-       "            return {'status': 'ok', 'body': out}\n"
-       "        except Exception:\n"
-       "            return {'status': 'ok', 'body': str(out)}\n"
-       "    except Exception as e:\n"
-       "        return {'status': 'error', 'body': str(e)}\n"
-       "\n"
-       "def _hara_client(conn):\n"
-       "    while True:\n"
-       "        buf = bytearray()\n"
-       "        ch = conn.recv(1)\n"
-       "        if ch == b'':\n"
-       "            break\n"
-       "        while ch != b'\\n':\n"
-       "            buf.extend(ch)\n"
-       "            ch = conn.recv(1)\n"
-       "        line = buf.decode('utf-8')\n"
-       "        if line == '<PING>':\n"
-       "            continue\n"
-       "        try:\n"
-       "            req = json.loads(line)\n"
-       "            out = _hara_return_eval(req['body'])\n"
-       "            out['id'] = req.get('id')\n"
-       "        except Exception as e:\n"
-       "            out = {'status': 'error', 'body': str(e)}\n"
-       "        conn.sendall((json.dumps(out) + '\\n').encode('utf-8'))\n"
-       "\n"
-       "_hara_server = socket.socket()\n"
-       "_hara_server.bind(('127.0.0.1', 0))\n"
-       "_hara_server.listen(1)\n"
-       "_hara_port = _hara_server.getsockname()[1]\n"
-       "print('HARA_BLENDER_READY ' + str(_hara_port))\n"
-       "sys.stdout.flush()\n"
-       "\n"
-       "while True:\n"
-       "    _hara_conn, _ = _hara_server.accept()\n"
-       "    _hara_thread = threading.Thread(target=_hara_client, args=(_hara_conn,))\n"
-       "    _hara_thread.daemon = True\n"
-       "    _hara_thread.start()\n"))
+(def +server-blender+
+  '[(defn server-blender
+      [port opts]
+      (:- :import bpy)
+      (:- :import json)
+      (:- :import socket)
+      (:- :import threading)
+      (:- :import sys)
+      (defn client-blender [conn]
+        (while true
+          (let [buf (bytearray)
+                ch  (conn.recv 1)]
+            (if (== ch (:% b ""))
+              (break))
+            (while (not= ch (:% b "\n"))
+              (. buf (extend ch))
+              (:= ch (conn.recv 1)))
+            (let [line (buf.decode "utf-8")]
+              (cond (== line "<PING>")
+                    (pass)
+
+                    :else
+                    (let [input (json.loads line)
+                          body  (. input ["body"])
+                          id    (. input (get "id"))
+                          out   (return-eval (+ "import bpy\n" body))]
+                      (conn.sendall (. (json.dumps {:id id :status "ok" :body out}) (encode "utf-8")))
+                      (conn.sendall (:% b "\n"))))))))
+      (let [server (socket.socket)]
+        (. server (bind '("127.0.0.1" port)))
+        (. server (listen 1))
+        (print "HARA_BLENDER_READY")
+        (. sys (stdout.flush))
+        (while true
+          (let [result (. server (accept))
+                conn   (. result [0])
+                thd    (threading.Thread
+                        :target (fn [] (client-blender conn)))]
+            (. thd (setDaemon true))
+            (. thd (start))))))])
+
+(defn blender-bootstrap
+  "Python bootstrap that runs inside Blender and starts a TCP server on PORT."
+  {:added "4.1"}
+  [port]
+  (let [bootstrap (->> [(impl/emit-entry-deps
+                         lib/return-eval
+                         {:lang :python
+                          :layout :flat})
+                        (impl/emit-as
+                         :python +server-blender+)]
+                       (clojure.string/join "\n\n"))]
+    (str bootstrap
+         "\n\n"
+         (impl/emit-as
+          :python [(list 'server-blender port {})]))))
 
 ;;
 ;; PROCESS
@@ -83,8 +90,8 @@
             ["blender"])
       "blender"))
 
-(defn- wait-for-blender-port
-  "Reads Blender stdout until the ready line appears, returning the port."
+(defn- wait-for-blender-ready
+  "Reads Blender stdout until the ready line appears."
   {:added "4.1"}
   [^Process process timeout-ms]
   (let [reader (BufferedReader. (InputStreamReader. (.getInputStream process)))
@@ -92,24 +99,27 @@
     (loop []
       (when (< (System/currentTimeMillis) deadline)
         (if-let [line (.readLine reader)]
-          (if (str/starts-with? line "HARA_BLENDER_READY ")
-            (Long/parseLong (subs line (count "HARA_BLENDER_READY ")))
+          (if (str/starts-with? line "HARA_BLENDER_READY")
+            true
             (recur))
           (do (Thread/sleep 50)
-              (recur))))))))
+              (recur)))))))
 
 (defn start-blender
   "Starts a headless blender process with a Python socket server."
   {:added "4.1"}
-  [{:keys [id exec] :as rt}]
+  [{:keys [id exec port] :as rt}]
   (let [exec (or exec (blender-exec))
+        port (or port (network/port:check-available 0))
+        bootstrap (blender-bootstrap port)
         proc (.start (ProcessBuilder. ^"[Ljava.lang.String;"
                                       (into-array String [exec
                                                           "--background"
                                                           "--python-expr"
-                                                          +blender-bootstrap+])))]
-    (let [port (wait-for-blender-port proc 60000)
-          socket (Socket. "127.0.0.1" port)
+                                                          bootstrap])))]
+    (wait-for-blender-ready proc 60000)
+    (network/wait-for-port "127.0.0.1" port {:timeout 30000})
+    (let [socket (Socket. "127.0.0.1" port)
           in  (BufferedReader. (InputStreamReader. (.getInputStream socket)))
           out (.getOutputStream socket)]
       (assoc rt
@@ -157,7 +167,10 @@
         parsed (json/read response json/+keyword-mapper+)]
     (if (= id (:id parsed))
       (if (= "ok" (:status parsed))
-        (:body parsed)
+        (let [inner (json/read (:body parsed) json/+keyword-mapper+)]
+          (if (= "error" (:type inner))
+            (throw (ex-info "Blender Python error" {:code code :error (:value inner)}))
+            (:value inner)))
         (throw (ex-info "Blender Python error" {:code code :error (:body parsed)})))
       (throw (ex-info "Blender response id mismatch" {:expected id :response parsed})))))
 
@@ -203,8 +216,8 @@
                          :tag :blender
                          :exec exec
                          :lifecycle {:main {}
-                                     :emit {}
-                                     :json :full}}
+                                    :emit {}
+                                    :json :full}}
                         m)))
 
 (defn blender

@@ -1,8 +1,8 @@
 (ns hara.runtime.neovim-test
+  (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.neovim.impl :as impl]
-            [hara.runtime.basic.type-common :as common])
-  (:use code.test))
+            [hara.runtime.basic.type-common :as common]))
 
 (def +nvim-available+
   (delay (common/program-exists? "nvim")))

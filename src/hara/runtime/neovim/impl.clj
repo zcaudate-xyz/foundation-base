@@ -18,7 +18,7 @@
 (def ^:private ^MessagePack msgpack
   (MessagePack.))
 
-(defn- value->clj
+(defn value->clj
   "Converts an org.msgpack.type.Value into Clojure data."
   {:added "4.1"}
   [^Value v]
@@ -35,7 +35,7 @@
                                       (.entrySet (.asMapValue v))))
         :else v))
 
-(defn- pack-request
+(defn pack-request
   "Packs a MessagePack-RPC request into bytes."
   {:added "4.1"}
   [msgid method params]
@@ -94,13 +94,13 @@
 ;; RPC
 ;;
 
-(defn- next-msgid
+(defn next-msgid
   "Returns the next request id and increments the counter."
   {:added "4.1"}
   [rt]
   (swap! (:msgid rt) inc))
 
-(defn- send-request
+(defn send-request
   "Sends a msgpack-rpc request and waits for the matching response."
   {:added "4.1"}
   [{:keys [^java.io.OutputStream output
@@ -170,7 +170,7 @@
 ;; RUNTIME RECORD
 ;;
 
-(defn- rt-neovim-string
+(defn rt-neovim-string
   "String representation of the neovim runtime."
   {:added "4.1"}
   [{:keys [id]}]
