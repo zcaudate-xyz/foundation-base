@@ -11,6 +11,7 @@
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.print :as output]
+            [std.print.ansi :as ansi]
             [std.lib.time :as t]
             [std.task :as task]))
 
@@ -329,8 +330,12 @@
   "creates a summary of given results"
   {:added "3.0"}
   ([items]
-   (let [summary (collection/map-vals count items)
-         summary (merge {:failed 0 :throw 0 :timeout 0} summary)]
+   (let [skipped-ns (:skipped-ns items)
+         summary (-> (dissoc items :skipped-ns)
+                     (#(collection/map-vals count %))
+                     (merge {:failed 0 :throw 0 :timeout 0}))
+         summary (cond-> summary
+                   skipped-ns (assoc :skipped-ns true))]
      #_(when (:print-bulk context/*print*)
        (doseq [item  (:failed items)]
          (-> item
@@ -354,7 +359,7 @@
             :failed  (:failed items)
             :throw   (:throw items)
             :timeout (:timeout items))
-     (with-meta summary {:data items}))))
+     (with-meta summary {:data (dissoc items :skipped-ns)}))))
 
 (defn save-report
   "saves the report to .hara/runs"
@@ -391,12 +396,29 @@
           out
           +bulk-report-keys+))
 
+(defn- print-skipped-namespaces
+  "prints a list of skipped namespaces"
+  {:added "4.1"}
+  [skipped]
+  (when (seq skipped)
+    (output/println)
+    (output/println (str (ansi/style "SKIPPED" #{:bold :yellow})
+                         " (" (count skipped) ")"))
+    (doseq [ns (sort skipped)]
+      (output/println (str "  " ns)))))
+
 (defn summarise-bulk
   "creates a summary of all bulk results"
   {:added "3.0"}
   ([_ items _]
    (let [_           (reset! +latest+ {})
          item-entries (if (map? items) items (seq items))
+         skipped-ns   (->> item-entries
+                           (filter (fn [[ns item]]
+                                     (let [summary (:data item)]
+                                       (or (:skipped-ns summary)
+                                           (:skipped-ns (meta summary))))))
+                           (mapv first))
          all-items    (reduce (fn [out [id item]]
                                 (merge-bulk-report-data out item))
                               {}
@@ -405,13 +427,17 @@
                                           (swap! +latest+ update-in [:errored] conj ns)
                                           true))
                                       item-entries))]
+       (print-skipped-namespaces skipped-ns)
        (let [artifacts (save-report-paths all-items
                                           (mapv first item-entries)
                                           context/*settings*)
              notices   (artifact-notices artifacts)]
          (cond-> (summarise all-items)
-          (seq notices)
-          (vary-meta assoc :std.task/after-summary notices))))))
+           (seq skipped-ns)
+           (assoc :skipped (count skipped-ns))
+
+           (seq notices)
+           (vary-meta assoc :std.task/after-summary notices))))))
 
 (defn unload-namespace
   "unloads a given namespace for testing"
@@ -453,9 +479,11 @@
            tests   (->> (rt/all-facts test-ns)
                         (vals)
                         (sort-fn))
+           skip?   (when-let [skip (rt/get-global ns :skip)]
+                     (rt/eval-in-ns test-ns skip))
            facts   (accumulate (fn []
                                  (binding [*ns* (the-ns test-ns)]
-                                   (if (rt/get-global ns :skip)
+                                   (if skip?
                                      (doall (mapv #(process/skip-check %) tests))
                                      (let [_       (rt/eval-in-ns test-ns (rt/get-global ns :prelim))
                                            _       (rt/eval-in-ns test-ns (rt/get-global ns :setup))
@@ -468,7 +496,8 @@
                                 run-id)
             _       (rt/get-global ns :teardown)
             results (-> (interim facts)
-                        (assoc :queued (repeat (count tests) true)))]
+                        (assoc :queued (repeat (count tests) true))
+                        (cond-> skip? (assoc :skipped-ns true)))]
         (when-not (:bulk params)
           (save-report results ns params))
         results))))

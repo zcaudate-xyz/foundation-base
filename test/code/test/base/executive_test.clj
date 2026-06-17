@@ -144,6 +144,31 @@
       ['demo.alpha-test 'demo.beta-test]
       {:save-run false}])
 
+^{:refer code.test.base.executive/summarise-bulk :added "4.1"}
+(fact "prints and counts skipped namespaces"
+  (let [output   (atom [])
+        summary-a (with-meta {:passed 2 :failed 0 :throw 0 :timeout 0 :skipped-ns true}
+                    {:data {:passed [:ok-a :ok-b]
+                            :failed []
+                            :throw []
+                            :timeout []}})
+        summary-b (with-meta {:passed 1 :failed 0 :throw 0 :timeout 0}
+                    {:data {:passed [:ok-c]
+                            :failed []
+                            :throw []
+                            :timeout []}})]
+    (binding [context/*settings* {:save-run false}]
+      (with-redefs [executive/save-report-paths (fn [& _] {})
+                    std.print/println (fn [& args] (swap! output conj (apply str args)))]
+        (let [result (executive/summarise-bulk nil
+                                               {'demo.skipped-test {:data summary-a}
+                                                'demo.normal-test  {:data summary-b}}
+                                               nil)]
+          [(:skipped result)
+           (boolean (some #(re-find #"SKIPPED" %) @output))
+           (boolean (some #(re-find #"demo\.skipped-test" %) @output))]))))
+  => [1 true true])
+
 ^{:refer code.test.base.executive/unload-namespace :added "3.0"}
 (fact "unloads a given namespace for testing"
 
@@ -172,29 +197,32 @@
   => '{:queued ()})
 
 ^{:refer code.test.base.executive/test-namespace :added "4.1"}
-(fact "skips all facts when :skip is set in fact:global"
+(fact "skips all facts when :skip form evaluates to true"
 
   (let [executed (atom false)
         fact-obj (fn [] (reset! executed true) :ran)]
     (with-redefs [rt/all-facts (fn [_] {'test-fact fact-obj})
                   rt/get-global (fn [ns k]
                                   (case k
-                                    :skip true
+                                    :skip '(not false)
                                     nil))
                   project/test-ns (fn [ns] 'user)
                   executive/accumulate (fn [f id] (f))
                   executive/interim (fn [facts] {:facts facts})]
       [(executive/test-namespace 'my.ns {:bulk true} (fn [_] "path") {:root "."})
        @executed]))
-  => [{:facts [:skipped] :queued '(true)} false])
+  => [{:facts [:skipped] :queued '(true) :skipped-ns true} false])
 
 ^{:refer code.test.base.executive/test-namespace :added "4.1"}
-(fact "runs facts normally when :skip is not set"
+(fact "runs facts normally when :skip form evaluates to false"
 
   (let [executed (atom false)
         fact-obj (fn [] (reset! executed true) :ran)]
     (with-redefs [rt/all-facts (fn [_] {'test-fact fact-obj})
-                  rt/get-global (fn [ns k] nil)
+                  rt/get-global (fn [ns k]
+                                  (case k
+                                    :skip '(not true)
+                                    nil))
                   project/test-ns (fn [ns] 'user)
                   executive/accumulate (fn [f id] (f))
                   executive/interim (fn [facts] {:facts facts})]
