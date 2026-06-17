@@ -8,6 +8,7 @@
             [std.lib.impl :as std-impl]
             [std.lib.network :as network]
             [std.lib.os :as os]
+            [std.fs :as fs]
             [hara.lang.runtime :as rt]
             [hara.lang.type-shared :as shared]
             [hara.runtime.basic.type-common :as common]
@@ -21,19 +22,27 @@
 ;;
 
 (defn vscode-exec
-  "Resolves the VS Code executable."
+  "Resolves the VS Code executable.
+
+   In a headless environment (no DISPLAY) with xvfb-run available, wraps the
+   launch with xvfb-run so the Electron UI can start."
   {:added "4.1"}
   []
   (or (System/getenv "VSCODE_EXEC")
-      (some (fn [cmd]
-              (when (common/program-exists? cmd)
-                cmd))
-            ["code"
-             "code-oss"
-             "code-insiders"
-             "codium"
-             "cursor"])
-      "code"))
+      (let [cmd (some (fn [cmd]
+                        (when (common/program-exists? cmd)
+                          cmd))
+                      ["code"
+                       "code-oss"
+                       "code-insiders"
+                       "codium"
+                       "cursor"])]
+        (if cmd
+          (if (and (nil? (System/getenv "DISPLAY"))
+                   (common/program-exists? "xvfb-run"))
+            ["xvfb-run" "-a" cmd]
+            cmd)
+          "code"))))
 
 (defn- extension-path
   "Returns the absolute path to the companion VS Code extension."
@@ -69,23 +78,28 @@
   "Starts a VS Code instance with the Hara runtime extension and connects a client socket."
   {:added "4.1"}
   [{:keys [id exec port] :as rt}]
-  (let [exec     (or exec (vscode-exec))
+  (let [exec         (or exec (vscode-exec))
         ^String host "127.0.0.1"
         ^Integer port (or port (network/port:check-available 0))
-        address  (str host ":" port)
-        args     [exec
-                  "--extensionDevelopmentPath" (extension-path)
-                  "--disable-extensions"
-                  "--disable-workspace-trust"
-                  "--new-window"
-                  "--wait"
-                  "--disable-gpu"
-                  "--no-sandbox"
-                  "--disable-dev-shm-usage"]
-        proc     (os/sh {:args args
-                         :wait false
-                         :env {"HARA_VSCODE_PORT" (str port)}})]
-    (network/wait-for-port host port {:timeout 30000})
+        address      (str host ":" port)
+        user-data    (str (java.io.File/createTempFile "vscode-" "-userdata"))
+        _            (.delete (java.io.File. user-data))
+        _            (.mkdirs (java.io.File. user-data))
+        base         (if (vector? exec) exec [exec])
+        args         (vec (concat base
+                                  ["--user-data-dir" user-data
+                                   "--extensionDevelopmentPath" (extension-path)
+                                   "--disable-extensions"
+                                   "--disable-workspace-trust"
+                                   "--new-window"
+                                   "--wait"
+                                   "--disable-gpu"
+                                   "--no-sandbox"
+                                   "--disable-dev-shm-usage"]))
+        proc         (os/sh {:args args
+                             :wait false
+                             :env {"HARA_VSCODE_PORT" (str port)}})]
+    (network/wait-for-port host port {:timeout 60000})
     (let [socket (Socket. host port)
           in     (BufferedReader. (InputStreamReader. (.getInputStream socket)))
           out    (PrintWriter. (.getOutputStream socket) true)]
@@ -93,6 +107,7 @@
              :process proc
              :host host
              :port port
+             :user-data-dir user-data
              :socket socket
              :input in
              :output out
@@ -101,7 +116,7 @@
 (defn stop-vscode
   "Stops the VS Code process and closes the client socket."
   {:added "4.1"}
-  [{:keys [^Process process ^Socket socket ^PrintWriter output ^BufferedReader input] :as rt}]
+  [{:keys [^Process process ^Socket socket ^PrintWriter output ^BufferedReader input user-data-dir] :as rt}]
   (when input
     (try (.close input)
          (catch Throwable _)))
@@ -113,6 +128,9 @@
          (catch Throwable _)))
   (when process
     (try (.destroyForcibly process)
+         (catch Throwable _)))
+  (when user-data-dir
+    (try (std.fs/delete user-data-dir)
          (catch Throwable _)))
   rt)
 
@@ -154,8 +172,7 @@
   [code]
   (str "(() => {\n"
        "  try {\n"
-       "    const _hara_result = (" code ");\n"
-       "    return _hara_result;\n"
+       "    return eval(" (json/write code) ");\n"
        "  } catch (_hara_err) {\n"
        "    throw _hara_err;\n"
        "  }\n"

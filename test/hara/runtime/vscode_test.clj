@@ -8,7 +8,7 @@
 
 (fact:global {:skip (not (env/program-exists? "code"))})
 
-^{:refer hara.runtime.vscode/vscode :added "4.1"}
+^{:refer hara.runtime.vscode/vscode :added "4.1" :timeout 60000}
 (fact "starts and stops a vscode runtime"
   (let [rt (vscode/vscode {})]
     [(boolean rt)
@@ -17,7 +17,7 @@
          true)])
   => [true true true])
 
-^{:refer hara.runtime.vscode/raw-eval-vscode :added "4.1"}
+^{:refer hara.runtime.vscode/raw-eval-vscode :added "4.1" :timeout 60000}
 (fact "evaluates js in vscode"
   (let [rt (vscode/vscode {})]
     (try
@@ -27,7 +27,7 @@
         (std.lib.component/stop rt))))
   => [6 "function"])
 
-^{:refer hara.runtime.vscode.impl/vscode-shared:create :added "4.1"}
+^{:refer hara.runtime.vscode.impl/vscode-shared:create :added "4.1" :timeout 60000}
 (fact "two shared vscode runtimes with the same id share the process"
   (let [rt1 (impl/vscode-shared:create {:id :shared-vscode-test})
         rt2 (impl/vscode-shared:create {:id :shared-vscode-test})]
@@ -42,6 +42,7 @@
         (std.lib.component/stop rt2))))
   => [true true 6])
 
+^{:timeout 60000}
 (fact "stopping one shared vscode runtime keeps the process alive"
   (let [rt1 (impl/vscode-shared:create {:id :shared-vscode-ref-test})
         rt2 (impl/vscode-shared:create {:id :shared-vscode-ref-test})]
@@ -54,6 +55,7 @@
         (std.lib.component/stop rt2))))
   => 6)
 
+^{:timeout 120000}
 (fact "shared vscode runtimes with different ids do not share a process"
   (let [rt1 (impl/vscode-shared:create {:id :vscode-a})
         rt2 (impl/vscode-shared:create {:id :vscode-b})]

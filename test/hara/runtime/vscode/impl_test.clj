@@ -8,17 +8,20 @@
 
 ^{:refer hara.runtime.vscode.impl/vscode-exec :added "4.1"}
 (fact "resolves the vscode executable"
-  (impl/vscode-exec)
-  => string?)
+  (let [exec (impl/vscode-exec)]
+    (or (string? exec)
+        (and (vector? exec)
+             (every? string? exec))))
+  => true)
 
 ^{:refer hara.runtime.vscode.impl/js-eval-wrap :added "4.1"}
 (fact "wraps js code for eval"
   (let [wrapped (impl/js-eval-wrap "1 + 2 + 3")]
-    [(boolean (re-find #"_hara_result" wrapped))
+    [(boolean (re-find #"eval" wrapped))
      (boolean (re-find #"1 \+ 2 \+ 3" wrapped))])
   => [true true])
 
-^{:refer hara.runtime.vscode.impl/start-vscode :added "4.1"}
+^{:refer hara.runtime.vscode.impl/start-vscode :added "4.1" :timeout 60000}
 (fact "starts and stops a vscode process"
   (let [rt (-> (impl/vscode:create {})
                (impl/start-vscode))
@@ -30,7 +33,7 @@
     result)
   => [true true true true])
 
-^{:refer hara.runtime.vscode.impl/raw-eval-vscode :added "4.1"}
+^{:refer hara.runtime.vscode.impl/raw-eval-vscode :added "4.1" :timeout 60000}
 (fact "evaluates js code via vscode"
   (let [rt (impl/vscode {})]
     (try
@@ -40,7 +43,7 @@
         (impl/stop-vscode rt))))
   => [6 "function"])
 
-^{:refer hara.runtime.vscode.impl/raw-eval-vscode :added "4.1"}
+^{:refer hara.runtime.vscode.impl/raw-eval-vscode :added "4.1" :timeout 60000}
 (fact "propagates js errors"
   (let [rt (impl/vscode {})]
     (try
@@ -51,7 +54,7 @@
         (impl/stop-vscode rt))))
   => #"hello error")
 
-^{:refer hara.runtime.vscode.impl/invoke-ptr-vscode :added "4.1"}
+^{:refer hara.runtime.vscode.impl/invoke-ptr-vscode :added "4.1" :timeout 60000}
 (fact "invokes a pointer through the vscode runtime"
   (let [rt (impl/vscode {})]
     (try
@@ -70,7 +73,7 @@
      (= :vscode (:tag rt))])
   => [true true])
 
-^{:refer hara.runtime.vscode.impl/vscode :added "4.1"}
+^{:refer hara.runtime.vscode.impl/vscode :added "4.1" :timeout 60000}
 (fact "creates and starts a vscode runtime"
   (let [rt (impl/vscode {})]
     (try
