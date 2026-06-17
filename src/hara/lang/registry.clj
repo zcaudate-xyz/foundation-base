@@ -33,6 +33,7 @@
          [:lua    :remote-port]        'hara.runtime.basic.impl.process-lua
          [:lua    :remote-ws]          'hara.runtime.basic.impl.process-lua
          [:lua    :neovim]             'hara.runtime.neovim
+         [:lua    :neovim.instance]    'hara.runtime.neovim
          [:lua    :verify]             'hara.runtime.basic.impl.process-lua
          
          [:js     :oneshot]            'hara.runtime.basic.impl.process-js
@@ -45,6 +46,8 @@
          [:js     :remote-port]        'hara.runtime.basic.impl.process-js
          [:js     :remote-ws]          'hara.runtime.basic.impl.process-js
          [:js     :verify]             'hara.runtime.basic.impl.process-js
+         [:js     :chromedriver]        'hara.runtime.chromedriver
+         [:js     :chromedriver.instance] 'hara.runtime.chromedriver
          
          [:python :oneshot]            'hara.runtime.basic.impl.process-python
          [:python :basic]              'hara.runtime.basic.impl.process-python
@@ -54,7 +57,10 @@
          [:python :jep]                'hara.runtime.jep
          [:python :libpython]          'hara.runtime.libpython
          [:python :blender]            'hara.runtime.blender
+         [:python :blender.instance]   'hara.runtime.blender
          [:python :gimp]               'hara.runtime.gimp
+         [:python :unreal]             'hara.runtime.unreal.impl
+         [:python :unreal.instance]    'hara.runtime.unreal.impl
          [:python :remote-port]        'hara.runtime.basic.impl.process-python
          [:python :remote-ws]          'hara.runtime.basic.impl.process-python
          [:python :verify]             'hara.runtime.basic.impl.process-python
@@ -73,6 +79,7 @@
 
          [:gdscript :twostep]          'hara.runtime.basic.impl.process-gdscript
          [:gdscript :godot]            'hara.runtime.godot
+         [:gdscript :godot.instance]   'hara.runtime.godot
          [:gdscript :verify]           'hara.runtime.basic.impl.process-gdscript
 
          [:glsl   :oneshot]            'hara.runtime.basic.impl.process-glsl
@@ -128,6 +135,8 @@
          [:go     :twostep]            'hara.runtime.basic.impl.process-go
          [:go     :verify]             'hara.runtime.basic.impl.process-go
 		 
+         [:haxe   :haxe]               'hara.runtime.haxe
+
          [:xtalk  :oneshot]            'hara.runtime.basic.impl.process-xtalk
          [:xtalk  :verify]             'hara.runtime.basic.impl.process-xtalk}))
 

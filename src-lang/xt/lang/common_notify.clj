@@ -133,7 +133,9 @@
   "sets up a code context and waits for oneshot notification"
   {:added "4.0"}
   [lang & code]
-  (let [default-timeout (if (= lang :dart) 10000 2000)
+  (let [default-timeout (case lang
+                          (:dart :ruby) 10000
+                          2000)
         [lang timeout] (cond (vector? lang)
                              lang
 

@@ -150,18 +150,43 @@
         (body-expr body)))
 
 (def +features+
-  (-> (merge (grammar/build :exclude [:control-try-catch
+  (-> (merge (grammar/build :include [:builtin
+                                      :builtin-global
+                                      :builtin-module
+                                      :builtin-helper
+                                      :free-control
+                                      :free-literal
+                                      :math
+                                      :compare
+                                      :logic
+                                      :return
+                                      :block
+                                      :data-shortcuts
+                                      :data-range
+                                      :vars
+                                      :fn
+                                      :top-base
+                                      :top-global
+                                      :top-declare
+                                      :functional-core
+                                      :macro])
+             (grammar/build :exclude [:control-try-catch
                                       :class
                                       :macro-arrow
                                       :macro-let
-                                      :macro-case])
-             (grammar/build :include [:functional-core]))
+                                      :macro-case
+                                      :control-base
+                                      :control-general]))
       (grammar/build:override
        {:defn    {:macro #'tf-defn :emit :macro}
         :fn      {:macro #'tf-lambda :emit :macro}
         :if      {:op :if :symbol #{'if} :emit :macro :macro #'tf-if}
         :match   {:op :match :symbol #{'match} :emit :macro :macro #'tf-match :type :block}
-        :letrec  {:op :letrec :symbol #{'letrec 'letfn} :emit :macro :macro #'tf-letrec :type :block}})
+        :letrec  {:op :letrec :symbol #{'letrec 'letfn} :emit :macro :macro #'tf-letrec :type :block}
+        :eq      {:op :eq :symbol #{'==} :emit :bi :raw "="}
+        :neq     {:op :neq :symbol #{'not=} :emit :bi :raw "<>"}
+        :not     {:op :not :symbol #{'not} :emit :pre :raw "not "}
+        :mod     {:op :mod :symbol #{'mod} :emit :bi :raw "mod"}})
       (grammar/build:extend
        {:ml-args     {:op :ml-args :symbol #{:ml-args} :emit #'ml-args}
         :raw-str     {:op :raw-str :symbol #{:raw-str} :emit #'emit-raw-str}
@@ -194,7 +219,6 @@
 
 (def +book+
   (book/book {:lang :ocaml
-              :parent :xtalk
               :meta +meta+
               :grammar +grammar+}))
 

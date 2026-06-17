@@ -863,7 +863,11 @@
 
 (defn ruby-tf-x-with-delay
   [[_ ms thunk]]
-  (list 'xt.lang.common-promise/with-delay ms thunk))
+  (template/$
+   (x:promise
+    (fn []
+      (sleep (/ ~ms 1000.0))
+      (. ~thunk (call))))))
 
 (def +ruby-promise+
   {:x-async-run        {:macro #'ruby-tf-x-async-run       :emit :macro}
@@ -873,7 +877,7 @@
    :x-promise-catch    {:raw 'xt.lang.common-promise/promise-catch   :emit :hard-link}
    :x-promise-finally  {:raw 'xt.lang.common-promise/promise-finally :emit :hard-link}
    :x-promise-native?  {:raw 'xt.lang.common-promise/promise-native? :emit :hard-link}
-   :x-with-delay       {:raw 'xt.lang.common-promise/with-delay      :emit :hard-link}})
+   :x-with-delay       {:macro #'ruby-tf-x-with-delay       :emit :macro}})
 
 
 ;; ITER

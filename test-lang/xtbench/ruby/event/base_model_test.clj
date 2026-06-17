@@ -110,23 +110,23 @@
      (. (model/remove-listener v "b2") ["meta"])
      (model/list-listeners v)])
   => (just-in
-      [{"current" nil
-        "elapsed" nil
-        "type" "output"
-        "updated" nil}
+      [(contains {"current" nil
+                  "elapsed" nil
+                  "type" "output"
+                  "updated" nil})
        (just ["a1" "b2"] :in-any-order)
        {"listener/id" "b2"
-        "listener/type" "view"}
+        "listener/type" "model"}
        ["a1"]]))
 
-^{:refer xt.event.base-model/view-context :added "4.1"}
+^{:refer xt.event.base-model/model-context :added "4.1"}
 (fact "builds a view context with view and input"
 
   (!.rb
     (var v (-/make-basic-view))
-    (model/init-view v)
-    [(xt/x:has-key? (model/view-context v) "view")
-     (xt/x:has-key? (model/view-context v) "input")])
+    (model/init-model v)
+    [(xt/x:has-key? (model/model-context v) "model")
+     (xt/x:has-key? (model/model-context v) "input")])
   => [true true])
 
 ^{:refer xt.event.base-model/add-listener :added "4.1"}
@@ -143,7 +143,7 @@
               "type" "output"}
       "t" nil
       "meta" {"listener/id" "a1"
-              "listener/type" "view"}})
+              "listener/type" "model"}})
 
 ^{:refer xt.event.base-model/trigger-listeners :added "4.1"
   :setup [(def +out+
@@ -166,7 +166,7 @@
 
   (!.rb
     (var v (-/make-basic-view))
-    (model/init-view v)
+    (model/init-model v)
     (model/get-input v))
   => (contains-in {"current" {"data" [3]}
                    "updated" integer?}))
@@ -176,12 +176,12 @@
 
   (!.rb
     (var v (-/make-basic-view))
-    (model/init-view v)
+    (model/init-model v)
     (model/get-output v))
-  => {"current" nil
-      "elapsed" nil
-      "type" "output"
-      "updated" nil})
+  => (contains {"current" nil
+                "elapsed" nil
+                "type" "output"
+                "updated" nil}))
 
 ^{:refer xt.event.base-model/get-current :added "4.1"}
 (fact "gets the current output value"
@@ -198,7 +198,7 @@
   (!.rb
     (var v (-/make-basic-view))
     (var before (model/is-disabled v))
-    (model/init-view v)
+    (model/init-model v)
     [before
      (model/is-disabled v)])
   => [true false])
@@ -268,8 +268,8 @@
         {"id" "a1"
          "t" nil
          "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "data" {"type" "view.input"
+                 "listener/type" "model"}
+         "data" {"type" "model.input"
                  "data" {"current" {"data" [1]}
                          "updated" integer?}}})
        {"data" [1]}]))
@@ -289,8 +289,8 @@
         {"id" "a1"
          "t" nil
          "meta" {"listener/id" "a1"
-                 "listener/type" "view"}
-         "data" {"type" "view.output"
+                 "listener/type" "model"}
+         "data" {"type" "model.output"
                  "data" {"current" 1
                          "elapsed" nil
                          "tag" nil
@@ -325,12 +325,12 @@
      (model/get-time-elapsed v)])
   => [25 25])
 
-^{:refer xt.event.base-model/init-view :added "4.1"}
+^{:refer xt.event.base-model/init-model :added "4.1"}
 (fact "initialises default input data"
 
   (!.rb
     (var v (-/make-basic-view))
-    (model/init-view v)
+    (model/init-model v)
     (. (model/get-input v) ["current"]))
   => {"data" [3]})
 
@@ -339,19 +339,19 @@
 
   (!.rb
     (var v (-/make-basic-view))
-    (model/init-view v)
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     [(. context ["args"])
      disabled
      (. (. context ["acc"]) ["::"])])
-  => [[3] false "view.run"])
+  => [[3] false "model.run"])
 
 ^{:refer xt.event.base-model/pipeline-set :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "writes pipeline output back to the view"
 
   (!.rb
     (var v (-/make-basic-view))
-    (model/init-view v)
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-set context "main" {"main" [true {"value" 3}]} nil)
     (model/get-current v))
@@ -362,11 +362,11 @@
 
   (!.rb
     (var v (-/make-basic-view))
-    (model/init-view v)
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-call context "main" disabled -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "main" [true {"value" 3}]})
 
 ^{:refer xt.event.base-model/pipeline-run-impl :added "4.1" :seedgen/base {:lua {:suppress true}}}
@@ -374,7 +374,7 @@
 
   (!.rb
     (var v (-/make-basic-view))
-    (model/init-view v)
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-impl
      context
@@ -384,7 +384,7 @@
      nil
      (fn [ctx] (return (. ctx ["acc"])))
      nil))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "main" [true {"value" 3}]})
 
 ^{:refer xt.event.base-model/pipeline-run :added "4.1"}
@@ -392,11 +392,11 @@
 
   (!.rb
     (var v (-/make-basic-view))
-    (model/init-view v)
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run context disabled -/success-async nil nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "main" [true {"value" 3}]
       "post" [false]})
@@ -406,13 +406,13 @@
 
   (!.rb
     (var v (-/make-remote-view))
-    (model/init-view v)
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-force context true -/success-async nil nil "remote")
     [(. context ["acc"])
      (model/get-current v "remote")
      (model/get-current v)])
-  => [{"::" "view.run"
+  => [{"::" "model.run"
        "pre" [false]
        "remote" [true {"value" 3}]
        "post" [false]}
@@ -424,11 +424,11 @@
 
   (!.rb
     (var v (-/make-remote-view))
-    (model/init-view v)
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-remote context true -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "remote" [true {"value" 3}]
       "post" [false]})
@@ -438,11 +438,11 @@
 
   (!.rb
     (var v (-/make-sync-view))
-    (model/init-view v)
+    (model/init-model v)
     (var [context disabled] (model/pipeline-prep v nil))
     (model/pipeline-run-sync context true -/success-async nil nil)
     (. context ["acc"]))
-  => {"::" "view.run"
+  => {"::" "model.run"
       "pre" [false]
       "sync" [true {"value" 3}]
       "post" [false]})

@@ -171,20 +171,41 @@
                    args))))
 
 (def +features+
-  (-> (merge (grammar/build :exclude [:control-try-catch
+  (-> (merge (grammar/build :include [:builtin
+                                      :builtin-global
+                                      :builtin-module
+                                      :builtin-helper
+                                      :free-control
+                                      :free-literal
+                                      :math
+                                      :compare
+                                      :logic
+                                      :return
+                                      :block
+                                      :data-shortcuts
+                                      :data-range
+                                      :vars
+                                      :fn
+                                      :top-base
+                                      :top-global
+                                      :top-declare
+                                      :functional-core
+                                      :macro])
+             (grammar/build :exclude [:control-try-catch
                                       :class
                                       :macro-arrow
                                       :macro-let
                                       :macro-case
                                       :control-base
-                                      :control-general])
-             (grammar/build :include [:functional-core]))
+                                      :control-general]))
       (grammar/build:override
        {:defn    {:macro #'tf-defn :emit :macro}
         :fn      {:macro #'tf-lambda :emit :macro}
         :if      {:op :if :symbol #{'if} :emit :macro :macro #'tf-if}
         :match   {:op :match :symbol #{'match} :emit :macro :macro #'tf-match :type :block}
-        :letrec  {:op :letrec :symbol #{'letrec 'letfn} :emit :macro :macro #'tf-letrec :type :block}})
+        :letrec  {:op :letrec :symbol #{'letrec 'letfn} :emit :macro :macro #'tf-letrec :type :block}
+        :not     {:op :not :symbol #{'not} :emit :pre :raw "not"}
+        :neq     {:op :neq :symbol #{'not=} :emit :bi :raw "/="}})
       (grammar/build:extend
        {:do      {:op :do :symbol #{'do} :emit :macro :macro #'tf-do}
         :cons    {:op :cons :symbol #{'cons} :emit :infix :raw ":"}
