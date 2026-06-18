@@ -9,7 +9,7 @@
             [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]
-            [std.lib.context.registry]
+            [std.lib.context.registry :as ctx-reg]
             [std.lib.context.space :as space]
             [std.lib.env :as env])
   (:refer-clojure :exclude [test]))
@@ -20,7 +20,7 @@
 ;; Runtime
 ;;
 
-(defn script-rt-get
+(defn script-rt-prep
   "gets the current runtime
  
    (script-rt-get :lua :default {})
@@ -56,9 +56,28 @@
          _  (when (and started? changed?)
               (space/space:rt-stop sp ctx))
          _  (if (or (empty? placement) changed?)
-              (space/space:context-set sp ctx key config))
-         rt (space/space:rt-start sp ctx)]
-     rt)))
+              (space/space:context-set sp ctx key config))]
+     [sp ctx])))
+
+(defn script-rt-get
+  "gets the current runtime
+ 
+   (script-rt-get :lua :default {})
+   => rt/rt-default?
+ 
+   (h/p:space-context-list)
+   => (contains '[:lang/lua])
+ 
+   (h/p:registry-rt-list :lang/lua)
+   => (contains '(:default))
+ 
+   
+   (do (script-rt-stop :lua)
+       (h/p:space-rt-active))
+   => []"
+  {:added "4.0"}
+  ([lang key config]
+   (apply space/space:rt-start (script-rt-prep lang key config))))
 
 (defn script-rt-stop
   "stops the current runtime"
