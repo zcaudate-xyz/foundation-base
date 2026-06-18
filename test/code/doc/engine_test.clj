@@ -14,5 +14,6 @@
 ^{:refer code.doc.engine/engine :added "3.0"}
 (fact "dynamically loads the templating engine for publishing"
 
-  (set (keys (engine "winterfell")))
-  => (contains [:page-element :render-chapter :nav-element]))
+  (clojure.set/subset? #{:page-element :render-chapter :nav-element}
+                       (set (keys (engine "winterfell"))))
+  => true)

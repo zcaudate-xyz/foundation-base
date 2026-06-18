@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.common-promise-test
+(ns xtbench.jl.lang.common-promise-test
   (:require [hara.lang              :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
@@ -17,7 +17,7 @@
 ^{:refer xt.lang.common-promise/promise-native? :added "4.1"}
 (fact "detects the xt.promise wrapper"
 
-  (!.julia
+  (!.jl
     [(common-promise/promise-native? (common-promise/make-resolve-state 1))
      (common-promise/promise-native? {"::" "not.promise"})
      (common-promise/promise-native? 1)])
@@ -26,7 +26,7 @@
 ^{:refer xt.lang.common-promise/make-resolve-state :added "4.1"}
 (fact "creates a resolved wrapper"
 
-  (!.julia
+  (!.jl
     (var p (common-promise/make-resolve-state 7))
     [(xt/x:get-key p "::")
      (xt/x:get-key p "status")
@@ -36,7 +36,7 @@
 ^{:refer xt.lang.common-promise/make-rejected-state :added "4.1"}
 (fact "creates a rejected wrapper"
 
-  (!.julia
+  (!.jl
     (var p (common-promise/make-rejected-state "boom"))
     [(xt/x:get-key p "::")
      (xt/x:get-key p "status")
@@ -46,7 +46,7 @@
 ^{:refer xt.lang.common-promise/make-pending-state :added "4.1"}
 (fact "creates a pending wrapper with children"
 
-  (!.julia
+  (!.jl
     (var p (common-promise/make-pending-state false))
     [(xt/x:get-key p "::")
      (xt/x:get-key p "status")
@@ -57,7 +57,7 @@
 ^{:refer xt.lang.common-promise/internal-settle-action :added "4.1"}
 (fact "settles a pending promise and dispatches subscribed children"
 
-  (!.julia
+  (!.jl
     (var seen [])
     (var p (common-promise/make-pending-state nil))
     (xt/x:arr-push
@@ -80,7 +80,7 @@
 ^{:refer xt.lang.common-promise/internal-link-action :added "4.1"}
 (fact "subscribes child promises to pending parents"
 
-  (!.julia
+  (!.jl
     (var parent (common-promise/make-pending-state nil))
     (var child (common-promise/make-pending-state nil))
     (common-promise/internal-link-action
@@ -99,7 +99,7 @@
 ^{:refer xt.lang.common-promise/internal-adopt-action :added "4.1"}
 (fact "adopts raw values and resolved wrappers"
 
-  (!.julia
+  (!.jl
     (var raw-target (common-promise/make-pending-state nil))
     (var wrapped-target (common-promise/make-pending-state nil))
     (common-promise/internal-adopt-action
@@ -119,7 +119,7 @@
 ^{:refer xt.lang.common-promise/internal-drive-action :added "4.1"}
 (fact "drives resolved and rejected parent states into child promises"
 
-  (!.julia
+  (!.jl
     (var resolved-parent (common-promise/make-resolve-state 5))
     (var resolved-child (common-promise/make-pending-state nil))
     (common-promise/internal-drive-action
@@ -145,7 +145,7 @@
 ^{:refer xt.lang.common-promise/promise :added "4.1"}
 (fact "wraps thunk execution in the common promise model"
 
-  (!.julia
+  (!.jl
     (common-promise/promise-native?
      (common-promise/promise
       (fn []
@@ -163,7 +163,7 @@
 ^{:refer xt.lang.common-promise/promise-run :added "4.1"}
 (fact "common promise helpers use the :: xt.promise wrapper"
 
-  (!.julia
+  (!.jl
     (var p (common-promise/promise-run 5))
     [(common-promise/promise-native? p)
      (xt/x:get-key p "::")

@@ -9,30 +9,30 @@
 
 (fact:global {:skip (not (env/program-exists? "julia"))})
 
-(defn.julia add-10 [x]
+(defn.jl add-10 [x]
   (return (+ x 10)))
 
-(defn.julia add-20 [x]
+(defn.jl add-20 [x]
   (return (+ x 20)))
 
 (fact "basic julia runtime can return values"
 
-  (!.julia
+  (!.jl
     (+ 1 2 3))
 
 
-  (!.julia
+  (!.jl
     (pow 3 4))
   => 81
 
   (add-10 10)
   => 20
 
-  (!.julia
+  (!.jl
     (-/add-10 (-/add-10 10)))
   => 30
 
-  (!.julia
+  (!.jl
     (var add-10
          (fn [x]
            (return (+ x 10))))

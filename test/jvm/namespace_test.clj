@@ -187,7 +187,7 @@
 
 ^{:refer jvm.namespace/reload-task :added "4.1"}
 (fact "reload task delegates to namespace reload"
-  (with-redefs [common/ns-reload identity]
+  (with-redefs [common/ns-reload (fn [ns] nil)]
     (ns/reload-task '[jvm.namespace] {:return :summary}))
   => map?)
 
@@ -200,7 +200,7 @@
 
 ^{:refer jvm.namespace/reload-all :added "3.0"}
 (fact "reloads all listed namespaces and dependents"
-  (with-redefs [common/ns-reload-all identity]
+  (with-redefs [common/ns-reload-all (fn [ns] nil)]
     (ns/reload-all '[jvm.namespace] {:return :summary}))
   => map?)
 

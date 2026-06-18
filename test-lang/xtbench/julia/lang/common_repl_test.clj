@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.common-repl-test
+(ns xtbench.jl.lang.common-repl-test
   (:use code.test)
   (:require [std.json :as json]
             [hara.lang :as l]
@@ -20,7 +20,7 @@
 (fact "passes rejected promise error to notify-fn"
 
   (notify/wait-on-call
-   (fn [] (!.julia
+   (fn [] (!.jl
            (repl/notify-with-promise
             repl/notify-socket
             "127.0.0.1" (@! (:socket-port (l/default-notify)))
@@ -34,7 +34,7 @@
 (fact "passes rejected promise error to notify-fn"
 
   (notify/wait-on-call
-   (fn [] (!.julia
+   (fn [] (!.jl
            (repl/notify-with-promise
             repl/notify-socket
             "127.0.0.1" (@! (:socket-port (l/default-notify)))
@@ -48,7 +48,7 @@
 (fact "passes rejected promise error to notify-fn"
 
   (notify/wait-on-call
-   (fn [] (!.julia
+   (fn [] (!.jl
            (repl/notify-with-promise
             repl/notify-socket
             "127.0.0.1" (@! (:socket-port (l/default-notify)))
@@ -76,7 +76,7 @@
 
   (notify/wait-on-call
    (fn []
-     (!.julia
+     (!.jl
        (repl/socket-connect
         "127.0.0.1"
         (@! (:socket-port (l/default-notify)))
@@ -91,7 +91,7 @@
 (fact "notifies the socket of a value"
 
   (notify/wait-on-call
-   (fn [] (!.julia
+   (fn [] (!.jl
            (repl/notify-socket "127.0.0.1" (@! (:socket-port (l/default-notify)))
                             "hello"
                             (@! notify/*override-id*)
@@ -103,7 +103,7 @@
 (fact "waits for promises before socket notification"
 
   (notify/wait-on-call
-   (fn [] (!.julia
+   (fn [] (!.jl
            (repl/notify-socket-full
             "127.0.0.1" (@! (:socket-port (l/default-notify)))
             (promise/x:promise-run "hello")
@@ -116,7 +116,7 @@
 (fact "using the base socket implementation to notify on http protocol"
 
   (notify/wait-on-call
-   (fn [] (!.julia
+   (fn [] (!.jl
            (repl/notify-socket-http
             "127.0.0.1" (@! (:http-port (l/default-notify)))
             "hello"
@@ -129,7 +129,7 @@
 (fact "call a http notify function."
 
   (notify/wait-on-call
-   (fn [] (!.julia
+   (fn [] (!.jl
             (repl/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
                               "hello"
                               (@! notify/*override-id*)
@@ -141,7 +141,7 @@
 (fact "waits for promises before http notification"
 
   (notify/wait-on-call
-   (fn [] (!.julia
+   (fn [] (!.jl
            (repl/notify-http-full
             "127.0.0.1" (@! (:http-port (l/default-notify)))
             (promise/x:promise-run "hello")

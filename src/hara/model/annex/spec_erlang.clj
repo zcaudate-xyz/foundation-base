@@ -146,7 +146,7 @@
        (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
-  (grammar/grammar :erlang
+  (grammar/grammar :erl
     (grammar/to-reserved +features+)
     +template+))
 

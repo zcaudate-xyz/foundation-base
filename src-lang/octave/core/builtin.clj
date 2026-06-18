@@ -1,14 +1,14 @@
-(ns octave.core.builtin
-  "Generated outline of GNU Octave 8.4 builtins with signatures, from /usr/share/octave/8.4.0/etc/doc-cache."
+matlab/core/builtin.clj:1:(ns matlab.core.builtin
+matlab/core/builtin.clj:2:  "Generated outline of GNU Matlab 8.4 builtins with signatures, from /usr/share/matlab/8.4.0/etc/doc-cache."
   (:require [hara.lang :as l]
             [std.lib.foundation :as f]))
 
-(l/script :octave
-  octave.core
+matlab/core/builtin.clj:6:(l/script :matlab
+matlab/core/builtin.clj:7:  matlab.core
   {:macro-only true})
 
 (def +containers+
-  "Octave builtins from the `+containers` category, with signatures."
+matlab/core/builtin.clj:11:  "Matlab builtins from the `+containers` category, with signatures."
   [
     {:name "containers.Map"
       :signatures [
@@ -20,7 +20,7 @@
   ])
 
 (def +matlab+
-  "Octave builtins from the `+matlab` category, with signatures."
+matlab/core/builtin.clj:23:  "Matlab builtins from the `+matlab` category, with signatures."
   [
     {:name "matlab.lang.makeUniqueStrings"
       :signatures [
@@ -47,7 +47,7 @@
   ])
 
 (def +ftp+
-  "Octave builtins from the `@ftp` category, with signatures."
+matlab/core/builtin.clj:50:  "Matlab builtins from the `@ftp` category, with signatures."
   [
     {:name "@ftp/ascii"
       :signatures [
@@ -115,7 +115,7 @@
   ])
 
 (def +audio+
-  "Octave builtins from the `audio` category, with signatures."
+matlab/core/builtin.clj:118:  "Matlab builtins from the `audio` category, with signatures."
   [
     {:name "@audioplayer/audioplayer"
       :signatures [
@@ -280,7 +280,7 @@
   ])
 
 (def ^:private +core-1+
-  "Chunk 1 of Octave builtins from the `core` category, with signatures."
+matlab/core/builtin.clj:283:  "Chunk 1 of Matlab builtins from the `core` category, with signatures."
   [
     {:name "!"
       :signatures [
@@ -506,17 +506,17 @@
         "VAL = NaN (..., \"like\", VAR)"
         "VAL = NaN (..., CLASS)"
       ]}
-    {:name "OCTAVE_EXEC_HOME"
+matlab/core/builtin.clj:509:    {:name "MATLAB_EXEC_HOME"
       :signatures [
-        "DIR = OCTAVE_EXEC_HOME ()"
+matlab/core/builtin.clj:511:        "DIR = MATLAB_EXEC_HOME ()"
       ]}
-    {:name "OCTAVE_HOME"
+matlab/core/builtin.clj:513:    {:name "MATLAB_HOME"
       :signatures [
-        "DIR = OCTAVE_HOME ()"
+matlab/core/builtin.clj:515:        "DIR = MATLAB_HOME ()"
       ]}
-    {:name "OCTAVE_VERSION"
+matlab/core/builtin.clj:517:    {:name "MATLAB_VERSION"
       :signatures [
-        "VERSTR = OCTAVE_VERSION ()"
+matlab/core/builtin.clj:519:        "VERSTR = MATLAB_VERSION ()"
       ]}
     {:name "O_APPEND"
       :signatures [
@@ -971,7 +971,7 @@
   ])
 
 (def ^:private +core-2+
-  "Chunk 2 of Octave builtins from the `core` category, with signatures."
+matlab/core/builtin.clj:974:  "Chunk 2 of Matlab builtins from the `core` category, with signatures."
   [
     {:name "cell"
       :signatures [
@@ -1159,11 +1159,11 @@
       :signatures [
         "[TOTAL, USER, SYSTEM] = cputime ();"
       ]}
-    {:name "crash_dumps_octave_core"
+matlab/core/builtin.clj:1162:    {:name "crash_dumps_matlab_core"
       :signatures [
-        "VAL = crash_dumps_octave_core ()"
-        "OLD_VAL = crash_dumps_octave_core (NEW_VAL)"
-        "OLD_VAL = crash_dumps_octave_core (NEW_VAL, \"local\")"
+matlab/core/builtin.clj:1164:        "VAL = crash_dumps_matlab_core ()"
+matlab/core/builtin.clj:1165:        "OLD_VAL = crash_dumps_matlab_core (NEW_VAL)"
+matlab/core/builtin.clj:1166:        "OLD_VAL = crash_dumps_matlab_core (NEW_VAL, \"local\")"
       ]}
     {:name "csymamd"
       :signatures [
@@ -1767,7 +1767,7 @@
   ])
 
 (def ^:private +core-3+
-  "Chunk 3 of Octave builtins from the `core` category, with signatures."
+matlab/core/builtin.clj:1770:  "Chunk 3 of Matlab builtins from the `core` category, with signatures."
   [
     {:name "filesep"
       :signatures [
@@ -2468,7 +2468,7 @@
   ])
 
 (def ^:private +core-4+
-  "Chunk 4 of Octave builtins from the `core` category, with signatures."
+matlab/core/builtin.clj:2471:  "Chunk 4 of Matlab builtins from the `core` category, with signatures."
   [
     {:name "kill"
       :signatures [
@@ -2841,23 +2841,23 @@
       :signatures [
         "N = nzmax (SM)"
       ]}
-    {:name "octave_core_file_limit"
+matlab/core/builtin.clj:2844:    {:name "matlab_core_file_limit"
       :signatures [
-        "VAL = octave_core_file_limit ()"
-        "OLD_VAL = octave_core_file_limit (NEW_VAL)"
-        "OLD_VAL = octave_core_file_limit (NEW_VAL, \"local\")"
+matlab/core/builtin.clj:2846:        "VAL = matlab_core_file_limit ()"
+matlab/core/builtin.clj:2847:        "OLD_VAL = matlab_core_file_limit (NEW_VAL)"
+matlab/core/builtin.clj:2848:        "OLD_VAL = matlab_core_file_limit (NEW_VAL, \"local\")"
       ]}
-    {:name "octave_core_file_name"
+matlab/core/builtin.clj:2850:    {:name "matlab_core_file_name"
       :signatures [
-        "VAL = octave_core_file_name ()"
-        "OLD_VAL = octave_core_file_name (NEW_VAL)"
-        "OLD_VAL = octave_core_file_name (NEW_VAL, \"local\")"
+matlab/core/builtin.clj:2852:        "VAL = matlab_core_file_name ()"
+matlab/core/builtin.clj:2853:        "OLD_VAL = matlab_core_file_name (NEW_VAL)"
+matlab/core/builtin.clj:2854:        "OLD_VAL = matlab_core_file_name (NEW_VAL, \"local\")"
       ]}
-    {:name "octave_core_file_options"
+matlab/core/builtin.clj:2856:    {:name "matlab_core_file_options"
       :signatures [
-        "VAL = octave_core_file_options ()"
-        "OLD_VAL = octave_core_file_options (NEW_VAL)"
-        "OLD_VAL = octave_core_file_options (NEW_VAL, \"local\")"
+matlab/core/builtin.clj:2858:        "VAL = matlab_core_file_options ()"
+matlab/core/builtin.clj:2859:        "OLD_VAL = matlab_core_file_options (NEW_VAL)"
+matlab/core/builtin.clj:2860:        "OLD_VAL = matlab_core_file_options (NEW_VAL, \"local\")"
       ]}
     {:name "onCleanup"
       :signatures [
@@ -3298,7 +3298,7 @@
   ])
 
 (def ^:private +core-5+
-  "Chunk 5 of Octave builtins from the `core` category, with signatures."
+matlab/core/builtin.clj:3301:  "Chunk 5 of Matlab builtins from the `core` category, with signatures."
   [
     {:name "reset"
       :signatures [
@@ -3430,11 +3430,11 @@
       :signatures [
         "[STATUS, MSG] = setpwent ()"
       ]}
-    {:name "sighup_dumps_octave_core"
+matlab/core/builtin.clj:3433:    {:name "sighup_dumps_matlab_core"
       :signatures [
-        "VAL = sighup_dumps_octave_core ()"
-        "OLD_VAL = sighup_dumps_octave_core (NEW_VAL)"
-        "OLD_VAL = sighup_dumps_octave_core (NEW_VAL, \"local\")"
+matlab/core/builtin.clj:3435:        "VAL = sighup_dumps_matlab_core ()"
+matlab/core/builtin.clj:3436:        "OLD_VAL = sighup_dumps_matlab_core (NEW_VAL)"
+matlab/core/builtin.clj:3437:        "OLD_VAL = sighup_dumps_matlab_core (NEW_VAL, \"local\")"
       ]}
     {:name "sign"
       :signatures [
@@ -3444,17 +3444,17 @@
       :signatures [
         "Y = signbit (X)"
       ]}
-    {:name "sigquit_dumps_octave_core"
+matlab/core/builtin.clj:3447:    {:name "sigquit_dumps_matlab_core"
       :signatures [
-        "VAL = sigquit_dumps_octave_core ()"
-        "OLD_VAL = sigquit_dumps_octave_core (NEW_VAL)"
-        "OLD_VAL = sigquit_dumps_octave_core (NEW_VAL, \"local\")"
+matlab/core/builtin.clj:3449:        "VAL = sigquit_dumps_matlab_core ()"
+matlab/core/builtin.clj:3450:        "OLD_VAL = sigquit_dumps_matlab_core (NEW_VAL)"
+matlab/core/builtin.clj:3451:        "OLD_VAL = sigquit_dumps_matlab_core (NEW_VAL, \"local\")"
       ]}
-    {:name "sigterm_dumps_octave_core"
+matlab/core/builtin.clj:3453:    {:name "sigterm_dumps_matlab_core"
       :signatures [
-        "VAL = sigterm_dumps_octave_core ()"
-        "OLD_VAL = sigterm_dumps_octave_core (NEW_VAL)"
-        "OLD_VAL = sigterm_dumps_octave_core (NEW_VAL, \"local\")"
+matlab/core/builtin.clj:3455:        "VAL = sigterm_dumps_matlab_core ()"
+matlab/core/builtin.clj:3456:        "OLD_VAL = sigterm_dumps_matlab_core (NEW_VAL)"
+matlab/core/builtin.clj:3457:        "OLD_VAL = sigterm_dumps_matlab_core (NEW_VAL, \"local\")"
       ]}
     {:name "silent_functions"
       :signatures [
@@ -4058,11 +4058,11 @@
   ])
 
 (def +core+
-  "Octave builtins from the `core` category, with signatures."
+matlab/core/builtin.clj:4061:  "Matlab builtins from the `core` category, with signatures."
   (vec (concat +core-1+ +core-2+ +core-3+ +core-4+ +core-5+)))
 
 (def +deprecated+
-  "Octave builtins from the `deprecated` category, with signatures."
+matlab/core/builtin.clj:4065:  "Matlab builtins from the `deprecated` category, with signatures."
   [
     {:name "disable_diagonal_matrix"
       :signatures [
@@ -4096,7 +4096,7 @@
   ])
 
 (def +elfun+
-  "Octave builtins from the `elfun` category, with signatures."
+matlab/core/builtin.clj:4099:  "Matlab builtins from the `elfun` category, with signatures."
   [
     {:name "acosd"
       :signatures [
@@ -4209,7 +4209,7 @@
   ])
 
 (def +external+
-  "Octave builtins from the `external` category, with signatures."
+matlab/core/builtin.clj:4212:  "Matlab builtins from the `external` category, with signatures."
   [
     {:name "audiodevinfo"
       :signatures [
@@ -4270,7 +4270,7 @@
   ])
 
 (def +general+
-  "Octave builtins from the `general` category, with signatures."
+matlab/core/builtin.clj:4273:  "Matlab builtins from the `general` category, with signatures."
   [
     {:name "accumarray"
       :signatures [
@@ -4672,7 +4672,7 @@
   ])
 
 (def +geometry+
-  "Octave builtins from the `geometry` category, with signatures."
+matlab/core/builtin.clj:4675:  "Matlab builtins from the `geometry` category, with signatures."
   [
     {:name "convhull"
       :signatures [
@@ -4770,7 +4770,7 @@
   ])
 
 (def +gui+
-  "Octave builtins from the `gui` category, with signatures."
+matlab/core/builtin.clj:4773:  "Matlab builtins from the `gui` category, with signatures."
   [
     {:name "dialog"
       :signatures [
@@ -4998,7 +4998,7 @@
   ])
 
 (def +help+
-  "Octave builtins from the `help` category, with signatures."
+matlab/core/builtin.clj:5001:  "Matlab builtins from the `help` category, with signatures."
   [
     {:name "bessel"
       :signatures [
@@ -5066,7 +5066,7 @@
   ])
 
 (def +image+
-  "Octave builtins from the `image` category, with signatures."
+matlab/core/builtin.clj:5069:  "Matlab builtins from the `image` category, with signatures."
   [
     {:name "autumn"
       :signatures [
@@ -5350,7 +5350,7 @@
   ])
 
 (def +io+
-  "Octave builtins from the `io` category, with signatures."
+matlab/core/builtin.clj:5353:  "Matlab builtins from the `io` category, with signatures."
   [
     {:name "beep"
       :signatures [
@@ -5393,7 +5393,7 @@
   ])
 
 (def +java+
-  "Octave builtins from the `java` category, with signatures."
+matlab/core/builtin.clj:5396:  "Matlab builtins from the `java` category, with signatures."
   [
     {:name "javaArray"
       :signatures [
@@ -5445,7 +5445,7 @@
   ])
 
 (def +legacy+
-  "Octave builtins from the `legacy` category, with signatures."
+matlab/core/builtin.clj:5448:  "Matlab builtins from the `legacy` category, with signatures."
   [
     {:name "@inline/argnames"
       :signatures [
@@ -5574,7 +5574,7 @@
   ])
 
 (def +linear-algebra+
-  "Octave builtins from the `linear-algebra` category, with signatures."
+matlab/core/builtin.clj:5577:  "Matlab builtins from the `linear-algebra` category, with signatures."
   [
     {:name "bandwidth"
       :signatures [
@@ -5761,7 +5761,7 @@
   ])
 
 (def +miscellaneous+
-  "Octave builtins from the `miscellaneous` category, with signatures."
+matlab/core/builtin.clj:5764:  "Matlab builtins from the `miscellaneous` category, with signatures."
   [
     {:name "bug_report"
       :signatures [
@@ -6249,7 +6249,7 @@
     {:name "ver"
       :signatures [
         "ver"
-        "ver Octave"
+matlab/core/builtin.clj:6252:        "ver Matlab"
         "ver PACKAGE"
         "v = ver (...)"
       ]}
@@ -6277,7 +6277,7 @@
   ])
 
 (def +ode+
-  "Octave builtins from the `ode` category, with signatures."
+matlab/core/builtin.clj:6280:  "Matlab builtins from the `ode` category, with signatures."
   [
     {:name "decic"
       :signatures [
@@ -6345,7 +6345,7 @@
   ])
 
 (def +optimization+
-  "Octave builtins from the `optimization` category, with signatures."
+matlab/core/builtin.clj:6348:  "Matlab builtins from the `optimization` category, with signatures."
   [
     {:name "fminbnd"
       :signatures [
@@ -6451,7 +6451,7 @@
   ])
 
 (def +path+
-  "Octave builtins from the `path` category, with signatures."
+matlab/core/builtin.clj:6454:  "Matlab builtins from the `path` category, with signatures."
   [
     {:name "import"
       :signatures [
@@ -6478,7 +6478,7 @@
   ])
 
 (def +pkg+
-  "Octave builtins from the `pkg` category, with signatures."
+matlab/core/builtin.clj:6481:  "Matlab builtins from the `pkg` category, with signatures."
   [
     {:name "pkg"
       :signatures [
@@ -6489,7 +6489,7 @@
   ])
 
 (def ^:private +plot-1+
-  "Chunk 1 of Octave builtins from the `plot` category, with signatures."
+matlab/core/builtin.clj:6492:  "Chunk 1 of Matlab builtins from the `plot` category, with signatures."
   [
     {:name "allchild"
       :signatures [
@@ -7684,7 +7684,7 @@
   ])
 
 (def ^:private +plot-2+
-  "Chunk 2 of Octave builtins from the `plot` category, with signatures."
+matlab/core/builtin.clj:7687:  "Chunk 2 of Matlab builtins from the `plot` category, with signatures."
   [
     {:name "stem3"
       :signatures [
@@ -8023,11 +8023,11 @@
   ])
 
 (def +plot+
-  "Octave builtins from the `plot` category, with signatures."
+matlab/core/builtin.clj:8026:  "Matlab builtins from the `plot` category, with signatures."
   (vec (concat +plot-1+ +plot-2+)))
 
 (def +polynomial+
-  "Octave builtins from the `polynomial` category, with signatures."
+matlab/core/builtin.clj:8030:  "Matlab builtins from the `polynomial` category, with signatures."
   [
     {:name "compan"
       :signatures [
@@ -8171,7 +8171,7 @@
   ])
 
 (def +prefs+
-  "Octave builtins from the `prefs` category, with signatures."
+matlab/core/builtin.clj:8174:  "Matlab builtins from the `prefs` category, with signatures."
   [
     {:name "addpref"
       :signatures [
@@ -8215,7 +8215,7 @@
   ])
 
 (def +profiler+
-  "Octave builtins from the `profiler` category, with signatures."
+matlab/core/builtin.clj:8218:  "Matlab builtins from the `profiler` category, with signatures."
   [
     {:name "profexplore"
       :signatures [
@@ -8248,7 +8248,7 @@
   ])
 
 (def +set+
-  "Octave builtins from the `set` category, with signatures."
+matlab/core/builtin.clj:8251:  "Matlab builtins from the `set` category, with signatures."
   [
     {:name "intersect"
       :signatures [
@@ -8318,7 +8318,7 @@
   ])
 
 (def +signal+
-  "Octave builtins from the `signal` category, with signatures."
+matlab/core/builtin.clj:8321:  "Matlab builtins from the `signal` category, with signatures."
   [
     {:name "arch_fit"
       :signatures [
@@ -8496,7 +8496,7 @@
   ])
 
 (def +sparse+
-  "Octave builtins from the `sparse` category, with signatures."
+matlab/core/builtin.clj:8499:  "Matlab builtins from the `sparse` category, with signatures."
   [
     {:name "bicg"
       :signatures [
@@ -8685,7 +8685,7 @@
   ])
 
 (def +specfun+
-  "Octave builtins from the `specfun` category, with signatures."
+matlab/core/builtin.clj:8688:  "Matlab builtins from the `specfun` category, with signatures."
   [
     {:name "beta"
       :signatures [
@@ -8790,7 +8790,7 @@
   ])
 
 (def +special-matrix+
-  "Octave builtins from the `special-matrix` category, with signatures."
+matlab/core/builtin.clj:8793:  "Matlab builtins from the `special-matrix` category, with signatures."
   [
     {:name "gallery"
       :signatures [
@@ -8960,7 +8960,7 @@
   ])
 
 (def +statistics+
-  "Octave builtins from the `statistics` category, with signatures."
+matlab/core/builtin.clj:8963:  "Matlab builtins from the `statistics` category, with signatures."
   [
     {:name "bounds"
       :signatures [
@@ -9251,7 +9251,7 @@
   ])
 
 (def +strings+
-  "Octave builtins from the `strings` category, with signatures."
+matlab/core/builtin.clj:9254:  "Matlab builtins from the `strings` category, with signatures."
   [
     {:name "base2dec"
       :signatures [
@@ -9418,7 +9418,7 @@
   ])
 
 (def +testfun+
-  "Octave builtins from the `testfun` category, with signatures."
+matlab/core/builtin.clj:9421:  "Matlab builtins from the `testfun` category, with signatures."
   [
     {:name "assert"
       :signatures [
@@ -9481,7 +9481,7 @@
   ])
 
 (def +time+
-  "Octave builtins from the `time` category, with signatures."
+matlab/core/builtin.clj:9484:  "Matlab builtins from the `time` category, with signatures."
   [
     {:name "addtodate"
       :signatures [
@@ -9562,7 +9562,7 @@
   ])
 
 (def +web+
-  "Octave builtins from the `web` category, with signatures."
+matlab/core/builtin.clj:9565:  "Matlab builtins from the `web` category, with signatures."
   [
     {:name "web"
       :signatures [
@@ -9592,9 +9592,9 @@
   ])
 
 (def +all+
-  "All documented Octave builtins with signatures (1654 total)."
+matlab/core/builtin.clj:9595:  "All documented Matlab builtins with signatures (1654 total)."
   (vec (concat +containers+ +matlab+ +ftp+ +audio+ +core+ +deprecated+ +elfun+ +external+ +general+ +geometry+ +gui+ +help+ +image+ +io+ +java+ +legacy+ +linear-algebra+ +miscellaneous+ +ode+ +optimization+ +path+ +pkg+ +plot+ +polynomial+ +prefs+ +profiler+ +set+ +signal+ +sparse+ +specfun+ +special-matrix+ +statistics+ +strings+ +testfun+ +time+ +web+)))
 
 (def +count+
-  "Total number of documented Octave builtins."
+matlab/core/builtin.clj:9599:  "Total number of documented Matlab builtins."
   1654)

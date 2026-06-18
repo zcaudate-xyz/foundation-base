@@ -1,47 +1,47 @@
-(ns octave.live-test
+matlab/live_test.clj:1:(ns matlab.live-test
   (:use code.test)
   (:require [hara.lang :as l]
             [std.lib.env :as env]))
 
 (fact:global
- {:skip (not (or (env/program-exists? "octave-cli")
-                 (env/program-exists? "octave")))})
+matlab/live_test.clj:7: {:skip (not (or (env/program-exists? "matlab-cli")
+matlab/live_test.clj:8:                 (env/program-exists? "matlab")))})
 
-(l/script- :octave
+matlab/live_test.clj:10:(l/script- :matlab
   {:runtime :oneshot
-   :require [[octave.core :as y]]})
+matlab/live_test.clj:12:   :require [[matlab.core :as y]]})
 
-(fact "live octave core examples"
-  (!.octave (y/add 1 2))
+matlab/live_test.clj:14:(fact "live matlab core examples"
+matlab/live_test.clj:15:  (!.matlab (y/add 1 2))
   => 3
 
-  (!.octave (y/scale 5 3))
+matlab/live_test.clj:18:  (!.matlab (y/scale 5 3))
   => 15
 
-  (!.octave (y/square 4))
+matlab/live_test.clj:21:  (!.matlab (y/square 4))
   => 16
 
-  (!.octave (y/sum-of [1 2 3 4]))
+matlab/live_test.clj:24:  (!.matlab (y/sum-of [1 2 3 4]))
   => 10
 
-  (!.octave (y/mean-of [1 2 3 4]))
+matlab/live_test.clj:27:  (!.matlab (y/mean-of [1 2 3 4]))
   => 2.5
 
-  (!.octave (y/linspace-5))
+matlab/live_test.clj:30:  (!.matlab (y/linspace-5))
   => [0 0.25 0.5 0.75 1.0]
 
-  (!.octave (y/zeros-3x3))
+matlab/live_test.clj:33:  (!.matlab (y/zeros-3x3))
   => [[0 0 0] [0 0 0] [0 0 0]])
 
 (fact "live builtin calls work"
-  (!.octave (abs -3))
+matlab/live_test.clj:37:  (!.matlab (abs -3))
   => 3
 
-  (!.octave (sqrt 16))
+matlab/live_test.clj:40:  (!.matlab (sqrt 16))
   => 4
 
-  (!.octave (mean [1 2 3 4]))
+matlab/live_test.clj:43:  (!.matlab (mean [1 2 3 4]))
   => 2.5
 
-  (!.octave (sum [1 2 3 4]))
+matlab/live_test.clj:46:  (!.matlab (sum [1 2 3 4]))
   => 10)

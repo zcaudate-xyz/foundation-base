@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.common-sort-by-test
+(ns xtbench.jl.lang.common-sort-by-test
   (:use code.test)
   (:require [hara.lang :as l]))
 
@@ -15,7 +15,7 @@
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts string keys lexicographically"
 
-  (!.julia
+  (!.jl
    (xtsb/sort-by
     [{"id" "a" "name" "beta"}
      {"id" "b" "name" "alpha"}
@@ -28,7 +28,7 @@
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts string keys lexicographically"
 
-  (!.julia
+  (!.jl
    (xtsb/sort-by
     [{"id" "a" "name" "beta"}
      {"id" "b" "name" "alpha"}
@@ -41,7 +41,7 @@
 ^{:refer xt.lang.common-sort-by/sort-by :added "4.1"}
 (fact "sorts string keys lexicographically"
 
-  (!.julia
+  (!.jl
    (xtsb/sort-by
     [{"id" "a" "name" "beta"}
      {"id" "b" "name" "alpha"}

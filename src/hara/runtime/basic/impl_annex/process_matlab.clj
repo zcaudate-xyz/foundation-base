@@ -1,4 +1,4 @@
-(ns hara.runtime.basic.impl-annex.process-octave
+(ns hara.runtime.basic.impl-annex.process-matlab
   (:require [clojure.string :as str]
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
@@ -6,11 +6,11 @@
             [hara.runtime.basic.type-verify :as type-verify]
             [std.json :as json]
             [hara.lang.runtime :as rt]
-            [hara.model.annex.spec-octave :as spec]))
+            [hara.model.annex.spec-matlab :as spec]))
 
-(def +octave-init+
+(def +matlab-init+
   (common/put-program-options
-   :octave {:default  {:oneshot     :octave-cli
+   :matlab {:default  {:oneshot     :octave-cli
                        :verify      :octave-cli
                        :basic       :octave-cli}
             :env      {:octave-cli  {:exec    "octave-cli"
@@ -20,14 +20,13 @@
                                                :verify  ["--no-gui" "--eval"
                                                          "try; eval(fileread(\"__FILE__\")); catch; quit(1); end_try_catch;"]
                                                :basic   ["--no-gui" "--eval"]}}
-                       :octave      {:exec    "octave"
+                       :matlab      {:exec    "matlab"
                                      :output  {}
                                      :flags   {:oneshot ["--no-gui" "--eval"]
-                                               :basic   ["--no-gui" "--eval"]}}}
-   }))
+                                               :basic   ["--no-gui" "--eval"]}}}}))
 
 
-(def +octave-bootstrap+
+(def +matlab-bootstrap+
   (str "function out = xt_return_encode(out0, id, key)\n"
        "  if nargin < 2, id = []; endif\n"
        "  if nargin < 3, key = []; endif\n"
@@ -82,10 +81,10 @@
        "endfunction"))
 
 (defn default-oneshot-wrap
-  "wraps an octave expression body for one-shot eval"
+  "wraps an matlab expression body for one-shot eval"
   {:added "4.0"}
   [body]
-  (let [parts (->> (str/split (str +octave-bootstrap+ "\n\n" body)
+  (let [parts (->> (str/split (str +matlab-bootstrap+ "\n\n" body)
                               #"\n\s*\n")
                    (map str/trim)
                    (remove empty?))
@@ -97,36 +96,36 @@
          "disp(xt_return_encode(" expr "))\n")))
 
 (defn default-oneshot-trim
-  "passes the raw output returned by octave to the json parser"
+  "passes the raw output returned by matlab to the json parser"
   {:added "4.0"}
   [s]
   (str/trim s))
 
-(def +octave-oneshot-config+
+(def +matlab-oneshot-config+
   (common/set-context-options
-   [:octave :oneshot :default]
+   [:matlab :oneshot :default]
    {:main  {:in  #'default-oneshot-wrap
             :out #'default-oneshot-trim}
     :emit  {:body  {:transform (fn [form _] form)}}
     :json :full}))
 
-(def +octave-verify-config+
+(def +matlab-verify-config+
   (common/set-context-options
-   [:octave :verify :default]
+   [:matlab :verify :default]
    {:main    {}
     :emit    {}
     :json    false
     :exec-fn #'type-verify/verify-exec-file}))
 
-(def +octave-oneshot+
+(def +matlab-oneshot+
   [(rt/install-type!
-    :octave :oneshot
+    :matlab :oneshot
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
-(def +octave-verify+
+(def +matlab-verify+
   [(rt/install-type!
-    :octave :verify
+    :matlab :verify
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
@@ -152,19 +151,19 @@
        "endfunction"))
 
 (defn default-basic-client
-  "returns the octave source for the basic tcp client"
+  "returns the matlab source for the basic tcp client"
   {:added "4.0"}
   [port & [{:keys [host]}]]
   (str "1;\n\n"
-       +octave-bootstrap+
+       +matlab-bootstrap+
        "\n\n"
        +client-basic+
        "\n\n"
        "client_basic(\"" (or host "127.0.0.1") "\", " port ", struct());"))
 
-(def +octave-basic-config+
+(def +matlab-basic-config+
   (common/set-context-options
-   [:octave :basic :default]
+   [:matlab :basic :default]
    {:bootstrap #'default-basic-client
     :main  {}
     :emit  {:body  {:transform (fn [form _] form)}}
@@ -172,9 +171,9 @@
     :encode :json
     :timeout 2000}))
 
-(def +octave-basic+
+(def +matlab-basic+
   [(rt/install-type!
-    :octave :basic
+    :matlab :basic
     {:type :hara/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])

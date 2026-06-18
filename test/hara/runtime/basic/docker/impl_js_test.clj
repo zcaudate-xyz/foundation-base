@@ -26,7 +26,7 @@
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer :js.docker :adopt true :added "4.0"}
+^{:refer js/vectors :adopt true :added "4.0"}
 (fact "js :basic evaluates arithmetic expressions in docker"
 
   [(!.js
@@ -39,7 +39,7 @@
      (- 100 1))]
   => [6 42 99])
 
-^{:refer :js.docker :adopt true :added "4.0"}
+^{:refer js/functions :adopt true :added "4.0"}
 (fact "js docker container defines and calls inline functions"
 
   [(!.js
@@ -51,7 +51,7 @@
          (mul-xy 6 7)))]
   => [15 42])
 
-^{:refer :js.docker :adopt true :added "4.0"}
+^{:refer js/fn :adopt true :added "4.0"}
 (fact "js docker container handles string operations"
 
   (!.js
@@ -59,7 +59,7 @@
         (greet "world")))
   => "hello world")
 
-^{:refer :js.docker :adopt true :added "4.0"}
+^{:refer js/native :adopt true :added "4.0"}
 (fact "js docker container handles array operations"
 
   (!.js

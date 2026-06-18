@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.spec-os-test
+(ns xtbench.jl.lang.spec-os-test
   (:use code.test)
   (:require [clojure.set :as set]
             [hara.lang :as l]
@@ -17,7 +17,7 @@
 ^{:refer xt.lang.spec-os/x:pwd :added "4.1"}
 (fact "gets the current pwd"
 
-  (!.julia
+  (!.jl
     (spec-os/x:pwd))
   => string?)
 
@@ -38,7 +38,7 @@
 ^{:refer xt.lang.spec-os/x:file-resolve :added "4.1"}
 (fact "file-resolve"
 
-  (!.julia
+  (!.jl
     (var resolve-fn
          (fn [path]
            (return

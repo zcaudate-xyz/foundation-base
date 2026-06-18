@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.common-color-test
+(ns xtbench.jl.lang.common-color-test
   (:require [std.json :as json]
             [hara.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -17,7 +17,7 @@
 ^{:refer xt.lang.common-color/named->rgb :added "4.0"}
 (fact "named color to rgb"
 
-  (!.julia
+  (!.jl
     [(color/named->rgb "aqua")
      (color/named->rgb "magenta")
      (color/named->rgb "WRONG")])
@@ -26,7 +26,7 @@
 ^{:refer xt.lang.common-color/hex->n :added "4.0"}
 (fact "hex to rgb val"
 
-  (!.julia
+  (!.jl
     [(color/hex->n "0")
      (color/hex->n "1")
      (color/hex->n "2")
@@ -38,7 +38,7 @@
 ^{:refer xt.lang.common-color/n->hex :added "4.0"}
 (fact "converts an rgb to hex"
 
-  (!.julia
+  (!.jl
     [(color/n->hex 13)
      (color/n->hex 113)
      (color/n->hex 256)
@@ -48,7 +48,7 @@
 ^{:refer xt.lang.common-color/hex->rgb :added "4.0"}
 (fact "converts a hex value to rgb array"
 
-  (!.julia
+  (!.jl
     [(color/hex->rgb "#aaa")
      (color/hex->rgb "#45f981")
      (color/hex->rgb "#222222")])
@@ -57,7 +57,7 @@
 ^{:refer xt.lang.common-color/rgb->hex :added "4.0"}
 (fact "converts rgb to hex"
 
-  (!.julia
+  (!.jl
     [(color/rgb->hex (color/hex->rgb "#aaa"))
      (color/rgb->hex (color/hex->rgb "#45f981"))
      (color/rgb->hex (color/hex->rgb "#222222"))])
@@ -74,7 +74,7 @@
               [(approx 120) 100 (approx 25.098)]]))]}
 (fact "converts rgb to hsl"
 
-  (!.julia [(color/rgb->hsl [0 100 100] nil)
+  (!.jl [(color/rgb->hsl [0 100 100] nil)
          (color/rgb->hsl [0 0 0] nil)
          (color/rgb->hsl [255 255 255] nil)
          (color/rgb->hsl [254 254 254] nil)
@@ -85,7 +85,7 @@
 ^{:refer xt.lang.common-color/hsl->rgb :added "4.0"}
 (fact "converts hsl to rgb"
 
-  (!.julia [(color/hsl->rgb (color/rgb->hsl [0 100 100] nil))
+  (!.jl [(color/hsl->rgb (color/rgb->hsl [0 100 100] nil))
          (color/hsl->rgb (color/rgb->hsl [0 0 0] nil))
          (color/hsl->rgb (color/rgb->hsl [255 255 255] nil))
          (color/hsl->rgb (color/rgb->hsl [128 128 0] nil))
@@ -95,21 +95,21 @@
 ^{:refer xt.lang.common-color/named->hsl :added "4.0"}
 (fact "converts a named color to hsl"
 
-  (!.julia
+  (!.jl
     (color/named->hsl "firebrick"))
   => (contains [(approx 0) (approx 67.9245) (approx 41.5686)]))
 
 ^{:refer xt.lang.common-color/named->hex :added "4.0"}
 (fact "converts a named color to hex"
 
-  (!.julia
+  (!.jl
     (color/named->hex "firebrick"))
   => "#B22222")
 
 ^{:refer xt.lang.common-color/hex->hsl :added "4.0"}
 (fact "converts a hex to hsl"
 
-  (!.julia
+  (!.jl
     (color/hex->hsl "#B22222"))
   => (contains [(approx 0) (approx 67.9245) (approx 41.5686)]))
 

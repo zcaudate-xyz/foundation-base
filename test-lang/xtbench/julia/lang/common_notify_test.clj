@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.common-notify-test
+(ns xtbench.jl.lang.common-notify-test
   (:require [net.http :as http]
             [std.json :as json]
             [hara.lang :as l]

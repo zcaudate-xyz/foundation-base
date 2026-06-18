@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.common-sort-topo-test
+(ns xtbench.jl.lang.common-sort-topo-test
   (:use code.test)
   (:require [hara.lang :as l]))
 
@@ -13,7 +13,7 @@
 ^{:refer xt.lang.common-sort-topo/sort-edges-build :added "4.1"}
 (fact "builds an edge with links"
 
-  (!.julia
+  (!.jl
     (var out {})
     (topo/sort-edges-build out ["a" "b"])
     out)
@@ -23,7 +23,7 @@
 ^{:refer xt.lang.common-sort-topo/sort-edges-visit :added "4.1"}
 (fact "visits nodes and pushes the sorted ids"
 
-  (!.julia
+  (!.jl
     (var nodes {"a" {"id" "a", "links" ["b"]}
                 "b" {"id" "b", "links" ["c"]}
                 "c" {"id" "c", "links" []}})
@@ -37,14 +37,14 @@
 ^{:refer xt.lang.common-sort-topo/sort-edges :added "4.1"}
 (fact "sorts edges given a list"
 
-  (!.julia
+  (!.jl
     (topo/sort-edges [["a" "b"] ["b" "c"] ["c" "d"] ["d" "e"]]))
   => ["a" "b" "c" "d" "e"])
 
 ^{:refer xt.lang.common-sort-topo/sort-topo :added "4.1"}
 (fact "sorts in topological order"
 
-  (!.julia
+  (!.jl
     (topo/sort-topo [["a" ["b" "c"]] ["c" ["b"]]]))
   => ["b" "c" "a"])
 

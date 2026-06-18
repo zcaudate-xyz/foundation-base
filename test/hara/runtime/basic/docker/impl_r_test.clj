@@ -28,44 +28,43 @@
        "}\n\n"
        (r/default-basic-client port opts)))
 
-(when (and (env/program-exists? "docker")
-           (System/getenv "RT_BASIC_DOCKER_TESTS"))
-  (script/script-ext [:r.docker :r]
-    {:runtime :basic
-     :config  (registry/registry-config :r)}))
+(l/script- :r
+  {:runtime :basic
+   :config  (registry/registry-config :r)
+   :test-mode true})
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
-            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
-  :setup [(l/annex:start-all)]
-  :teardown [(l/annex:stop-all)]})
+            (System/getenv "HARA_NO_DOCKER"))
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
-^{:refer :r.docker :adopt true :added "4.0"}
+^{:refer r/vectors :adopt true :added "4.0"}
 (fact "r :basic evaluates arithmetic expressions in docker"
-  [(l/! [:r.docker]
+  [(!.R
      (+ 1 2 3))
 
-   (l/! [:r.docker]
+   (!.R
      (* 6 7))
 
-   (l/! [:r.docker]
+   (!.R
      (- 100 1))]
   => [6 42 99])
 
-^{:refer :r.docker :adopt true :added "4.0"}
+^{:refer r/functions :adopt true :added "4.0"}
 (fact "r docker container defines and calls inline functions"
-  [(l/! [:r.docker]
+  [(!.R
      (do (var add-10 (fn [x] (return (+ x 10))))
          (add-10 5)))
 
-   (l/! [:r.docker]
+   (!.R
      (do (var mul-xy (fn [x y] (return (* x y))))
          (mul-xy 6 7)))]
   => [15 42])
 
-^{:refer :r.docker :adopt true :added "4.0"}
+^{:refer r/vector-ops :adopt true :added "4.0"}
 (fact "r docker container handles vector operations"
-  (l/! [:r.docker]
+  (!.R
     (sum [1 2 3 4 5]))
   => 15)
 
@@ -78,7 +77,7 @@
   => [true true true])
 
 (comment
-  (l/annex:start-all)
-  (l/annex:stop-all)
-  (l/! [:r.docker] (+ 1 2 3))
+  (l/rt:restart)
+  (l/rt:stop)
+  (!.R (+ 1 2 3))
   )

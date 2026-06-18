@@ -15,53 +15,52 @@
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-php-test
 ;;
 
-(when (and (env/program-exists? "docker")
-           (System/getenv "RT_BASIC_DOCKER_TESTS"))
-  (script/script-ext [:php.docker :php]
-    {:runtime :basic
-     :config  (registry/registry-config :php)}))
+(l/script- :php
+  {:runtime :basic
+   :config  (registry/registry-config :php)
+   :test-mode true})
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
             (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
-  :setup [(l/annex:start-all)]
-  :teardown [(l/annex:stop-all)]})
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
-^{:refer :php.docker :adopt true :added "4.0"}
+^{:refer php/vectors :adopt true :added "4.0"}
 (fact "php :basic evaluates arithmetic expressions in docker"
-  [(l/! [:php.docker]
+  [(!.php
      (+ 1 2 3))
 
-   (l/! [:php.docker]
+   (!.php
      (* 6 7))
 
-   (l/! [:php.docker]
+   (!.php
      (- 100 1))]
   => [6 42 99])
 
-^{:refer :php.docker :adopt true :added "4.0"}
+^{:refer php/functions :adopt true :added "4.0"}
 (fact "php docker container defines and calls inline functions"
-  [(l/! [:php.docker]
+  [(!.php
      (do (defn add-10 [x] (return (+ x 10)))
          (add-10 5)))
 
-   (l/! [:php.docker]
+   (!.php
      (do (defn mul-xy [x y] (return (* x y)))
          (mul-xy 6 7)))]
   => [15 42])
 
-^{:refer :php.docker :adopt true :added "4.0"}
+^{:refer php/strings :adopt true :added "4.0"}
 (fact "php docker container handles string operations"
-  [(l/! [:php.docker]
+  [(!.php
      (concat "hello " "world"))
 
-   (l/! [:php.docker]
+   (!.php
      (do (defn greet [name] (return name))
          (greet "hello php")))]
   => ["hello world" "hello php"])
 
 (comment
-  (l/annex:start-all)
-  (l/annex:stop-all)
-  (l/! [:php.docker] (+ 1 2 3))
+  (l/rt:restart)
+  (l/rt:stop)
+  (!.php (+ 1 2 3))
   )

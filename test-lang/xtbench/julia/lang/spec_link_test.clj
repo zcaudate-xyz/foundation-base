@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.spec-link-test
+(ns xtbench.jl.lang.spec-link-test
   (:use code.test)
   (:require [clojure.set :as set]
             [hara.lang :as l]
@@ -34,7 +34,7 @@
 (fact "posts encoded values through fetch"
 
   (notify/wait-on-call
-   (fn [] (!.julia
+   (fn [] (!.jl
             (var notify-fn
                  (fn [host port value id key opts]
                    (return

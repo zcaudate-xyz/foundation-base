@@ -302,7 +302,7 @@
     :teardown-ptr   (fn [ptr] (list := (ut/sym-full ptr) nil))}))
 
 (def +grammar+
-  (grammar/grammar :julia
+  (grammar/grammar :jl
     (grammar/to-reserved +features+)
     +template+))
 

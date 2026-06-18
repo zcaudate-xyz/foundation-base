@@ -18,6 +18,7 @@
             [std.lib.collection :as collection]
             [std.lib.component :as component]
             [std.lib.context.pointer :as ptr]
+            [std.lib.context.space :as space]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.lib.future :as future]))
@@ -394,7 +395,10 @@
   {:added "4.0"}
   ([lang config]
    (let [rt-config (script-test-prep lang config)]
-     (when-not (script-test-mode? config)
+     (if (script-test-mode? config)
+       (let [ctx (ut/lang-context lang)
+             sp  (space/space (env/ns-sym))]
+         (space/space:context-set sp ctx (or (:runtime config) :default) rt-config))
        (control/script-rt-get lang
                               (:runtime config)
                               rt-config)))))

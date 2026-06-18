@@ -99,9 +99,9 @@
          [:r      :basic]              'hara.runtime.basic.impl-annex.process-r
          [:r      :verify]             'hara.runtime.basic.impl-annex.process-r
 
-         [:octave :oneshot]            'hara.runtime.basic.impl-annex.process-octave
-         [:octave :basic]              'hara.runtime.basic.impl-annex.process-octave
-         [:octave :verify]             'hara.runtime.basic.impl-annex.process-octave
+         [:matlab :oneshot]            'hara.runtime.basic.impl-annex.process-matlab
+         [:matlab :basic]              'hara.runtime.basic.impl-annex.process-matlab
+         [:matlab :verify]             'hara.runtime.basic.impl-annex.process-matlab
 
          [:julia  :oneshot]            'hara.runtime.basic.impl-annex.process-julia
          [:julia  :basic]              'hara.runtime.basic.impl-annex.process-julia
@@ -231,7 +231,7 @@
          [:r        :default]          {:ns 'hara.model.annex.spec-r
                                         :book '+book+
                                         :parent :xtalk}
-         [:octave   :default]          {:ns 'hara.model.annex.spec-octave
+         [:matlab   :default]          {:ns 'hara.model.annex.spec-matlab
                                         :book '+book+
                                         :parent :xtalk}
          [:ruby     :default]          {:ns 'hara.model.spec-ruby

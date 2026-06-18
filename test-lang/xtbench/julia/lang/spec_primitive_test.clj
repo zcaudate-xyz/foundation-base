@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.spec-primitive-test
+(ns xtbench.jl.lang.spec-primitive-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
@@ -18,7 +18,7 @@
 ^{:refer xt.lang.spec-primitive/!:G :added "4.1"}
 (fact "reads and writes global values"
 
-  (!.julia
+  (!.jl
     (:= (!:G __PRIMITIVE_TEST__) "alpha")
     (var out (!:G __PRIMITIVE_TEST__))
     out)
@@ -27,28 +27,28 @@
 ^{:refer xt.lang.spec-primitive/% :added "4.1"}
 (fact "emits internal expressions directly"
 
-  (!.julia
+  (!.jl
     (% [(+ 1 2) 4]))
   => [3 4])
 
 ^{:refer xt.lang.spec-primitive/* :added "4.1"}
 (fact "multiplies values"
 
-  (!.julia
+  (!.jl
     (* 2 3 4))
   => 24)
 
 ^{:refer xt.lang.spec-primitive/+ :added "4.1"}
 (fact "adds values"
 
-  (!.julia
+  (!.jl
     (+ 1 2 3 4))
   => 10)
 
 ^{:refer xt.lang.spec-primitive/- :added "4.1"}
 (fact "subtracts values"
 
-  (!.julia
+  (!.jl
     [(- 10 3 2)
      (- 5)])
   => [5 -5])
@@ -56,7 +56,7 @@
 ^{:refer xt.lang.spec-primitive/. :added "4.1"}
 (fact "indexes values"
 
-  (!.julia
+  (!.jl
     [(. {:a 1 :b 2} ["b"])
      (. [1 2 3] [1])])
   => [2 2])
@@ -64,7 +64,7 @@
 ^{:refer xt.lang.spec-primitive// :added "4.1"}
 (fact "divides values"
 
-  (!.julia
+  (!.jl
     [(/ 12 3)
      (/ 20 5 2)])
   => [4 2])
@@ -72,7 +72,7 @@
 ^{:refer xt.lang.spec-primitive/< :added "4.1"}
 (fact "compares less-than"
 
-  (!.julia
+  (!.jl
     [(< 1 2)
      (< 2 1)])
   => [true false])
@@ -80,7 +80,7 @@
 ^{:refer xt.lang.spec-primitive/<= :added "4.1"}
 (fact "compares less-than-or-equal"
 
-  (!.julia
+  (!.jl
     [(<= 2 2)
      (<= 3 2)])
   => [true false])
@@ -88,7 +88,7 @@
 ^{:refer xt.lang.spec-primitive/== :added "4.1"}
 (fact "compares equality"
 
-  (!.julia
+  (!.jl
     [(== 2 2)
      (== 2 3)])
   => [true false])
@@ -96,7 +96,7 @@
 ^{:refer xt.lang.spec-primitive/> :added "4.1"}
 (fact "compares greater-than"
 
-  (!.julia
+  (!.jl
     [(> 3 2)
      (> 2 3)])
   => [true false])
@@ -104,7 +104,7 @@
 ^{:refer xt.lang.spec-primitive/>= :added "4.1"}
 (fact "compares greater-than-or-equal"
 
-  (!.julia
+  (!.jl
     [(>= 3 3)
      (>= 2 3)])
   => [true false])
@@ -112,28 +112,28 @@
 ^{:refer xt.lang.spec-primitive/b:<< :added "4.1"}
 (fact "bit-shifts left"
 
-  (!.julia
+  (!.jl
     (b:<< 3 2))
   => 12)
 
 ^{:refer xt.lang.spec-primitive/b:>> :added "4.1"}
 (fact "bit-shifts right"
 
-  (!.julia
+  (!.jl
     (b:>> 12 2))
   => 3)
 
 ^{:refer xt.lang.spec-primitive/b:xor :added "4.1"}
 (fact "bitwise xors values"
 
-  (!.julia
+  (!.jl
     (b:xor 6 3))
   => 5)
 
 ^{:refer xt.lang.spec-primitive/br* :added "4.1"}
 (fact "branches across control clauses"
 
-  (!.julia
+  (!.jl
     ((fn []
        (br*
         (if false
@@ -147,7 +147,7 @@
 ^{:refer xt.lang.spec-primitive/break :added "4.1"}
 (fact "breaks out of loops"
 
-  (!.julia
+  (!.jl
     (var out [])
     (var entries [0 1 2 3 4 5])
     (for:array [i entries]
@@ -160,7 +160,7 @@
 ^{:refer xt.lang.spec-primitive/do:> :added "4.1"}
 (fact "runs deferred blocks immediately"
 
-  (!.julia
+  (!.jl
     (do:>
      (var a 1)
      (var b 2)
@@ -170,7 +170,7 @@
 ^{:refer xt.lang.spec-primitive/fn:> :added "4.1"}
 (fact "creates arrow functions"
 
-  (!.julia
+  (!.jl
     ((fn:> [x]
            (return (+ x 1)))
      2))
@@ -179,14 +179,14 @@
 ^{:refer xt.lang.spec-primitive/mod :added "4.1"}
 (fact "calculates modulo"
 
-  (!.julia
+  (!.jl
     (mod 17 5))
   => 2)
 
 ^{:refer xt.lang.spec-primitive/not= :added "4.1"}
 (fact "compares inequality"
 
-  (!.julia
+  (!.jl
     [(not= 2 3)
      (not= 2 2)])
   => [true false])
@@ -194,14 +194,14 @@
 ^{:refer xt.lang.spec-primitive/pow :added "4.1"}
 (fact "raises powers"
 
-  (!.julia
+  (!.jl
     (pow 2 5))
   => 32)
 
 ^{:refer xt.lang.spec-primitive/tab :added "4.1"}
 (fact "creates tables from pairs"
 
-  (!.julia
+  (!.jl
     (tab [:a 1]
          [:b 2]))
   => {"a" 1
@@ -210,7 +210,7 @@
 ^{:refer xt.lang.spec-primitive/throw :added "4.1"}
 (fact "throws values"
 
-  (!.julia
+  (!.jl
     (do:>
      (try
        (throw "boom")
@@ -221,7 +221,7 @@
 ^{:refer xt.lang.spec-primitive/xor :added "4.1"}
 (fact "computes logical xor"
 
-  (!.julia
+  (!.jl
     [(xor true false)
      (xor true true)])
   => [false true])
@@ -229,7 +229,7 @@
 ^{:refer xt.lang.spec-primitive/-> :added "4.1"}
 (fact "threads the first argument"
 
-  (!.julia
+  (!.jl
     (-> 5
         (+ 2)
         (* 3)))
@@ -238,7 +238,7 @@
 ^{:refer xt.lang.spec-primitive/->> :added "4.1"}
 (fact "threads the last argument"
 
-  (!.julia
+  (!.jl
     (->> 5
          (- 10)))
   => 5)
@@ -246,7 +246,7 @@
 ^{:refer xt.lang.spec-primitive/and :added "4.1"}
 (fact "computes logical and"
 
-  (!.julia
+  (!.jl
     [(and true 1)
      (and true false)])
   => [1 false])
@@ -254,7 +254,7 @@
 ^{:refer xt.lang.spec-primitive/comment :added "4.1"}
 (fact "discards commented forms"
 
-  (!.julia
+  (!.jl
     (do
       (comment (throw "boom"))
       1))
@@ -263,7 +263,7 @@
 ^{:refer xt.lang.spec-primitive/cond :added "4.1"}
 (fact "selects the first matching branch"
 
-  (!.julia
+  (!.jl
     (do:>
      (cond
        false (return "a")
@@ -274,7 +274,7 @@
 ^{:refer xt.lang.spec-primitive/do :added "4.1"}
 (fact "runs sequential expressions"
 
-  (!.julia
+  (!.jl
     (do
       (var out [])
       (xt/x:arr-push out 1)
@@ -285,7 +285,7 @@
 ^{:refer xt.lang.spec-primitive/if :added "4.1"}
 (fact "selects between branches"
 
-  (!.julia
+  (!.jl
     (do:>
      (if true
        (return "yes")
@@ -295,7 +295,7 @@
 ^{:refer xt.lang.spec-primitive/let :added "4.1"}
 (fact "binds locals"
 
-  (!.julia
+  (!.jl
     (do:>
      (let [a 2
            b 3]
@@ -305,7 +305,7 @@
 ^{:refer xt.lang.spec-primitive/not :added "4.1"}
 (fact "negates truthiness"
 
-  (!.julia
+  (!.jl
     [(not true)
      (not false)])
   => [false true])
@@ -313,7 +313,7 @@
 ^{:refer xt.lang.spec-primitive/or :added "4.1"}
 (fact "computes logical or"
 
-  (!.julia
+  (!.jl
     [(or nil "fallback")
      (or 1 2)])
   => ["fallback" 1])
@@ -321,7 +321,7 @@
 ^{:refer xt.lang.spec-primitive/quote :added "4.1"}
 (fact "returns quoted literals"
 
-  (!.julia
+  (!.jl
     (quote {:a 1
             :b [2 3]}))
   => {"a" 1
@@ -330,7 +330,7 @@
 ^{:refer xt.lang.spec-primitive/try :added "4.1"}
 (fact "runs catch and finally handlers"
 
-  (!.julia
+  (!.jl
     (var out [])
     (try
       (throw "boom")
@@ -344,7 +344,7 @@
 ^{:refer xt.lang.spec-primitive/when :added "4.1"}
 (fact "runs truthy branches"
 
-  (!.julia
+  (!.jl
     (var out [])
     (when true
       (xt/x:arr-push out 1)
@@ -355,7 +355,7 @@
 ^{:refer xt.lang.spec-primitive/while :added "4.1"}
 (fact "loops while conditions hold"
 
-  (!.julia
+  (!.jl
     (var i 0)
     (var out [])
     (while (< i 3)
@@ -367,7 +367,7 @@
 ^{:refer xt.lang.spec-primitive/fn :added "4.1"}
 (fact "creates functions"
 
-  (!.julia
+  (!.jl
     ((fn [x]
        (return (+ x 1)))
      2))

@@ -9,37 +9,37 @@
 (script/script- :julia)
 
 (fact "Basic Julia generation"
-  (!.julia
+  (!.jl
    (var a 10)
    (return a))
   => "a = 10\nreturn a"
 
-  (!.julia
+  (!.jl
    (defn hello [a b]
      (return (+ a b))))
   => "function hello(a,b)\n  return a + b\nend"
 
-  (!.julia
+  (!.jl
    (if true
      (println "Yes")
      (println "No")))
   => "if true\n  println(\"Yes\")\nelse\n  println(\"No\")\nend"
 
-  (!.julia
+  (!.jl
     (for [i :in (to 1 1 3)]
       (println i)))
    => "for i in 1:3\n  println(i)\nend"
 
-   (!.julia
+   (!.jl
     (for:iter [e iter]
       e))
    => "for e in iter\n  e\nend"
 
-   (!.julia
+   (!.jl
      (push! arr 1))
    => "push!(arr,1)"
 
-   (!.julia
+   (!.jl
     (delete! obj "a"))
     => "delete!(obj,\"a\")")
 
@@ -68,37 +68,37 @@
   => [true true true true true true])
 
 (fact "Xtalk Julia mappings"
-  (!.julia (x:print "Hello"))
+  (!.jl (x:print "Hello"))
   => "println(\"Hello\")"
 
-  (!.julia (x:len [1 2 3]))
+  (!.jl (x:len [1 2 3]))
   => "length(Any[1,2,3])"
 
-  (!.julia (x:cat "a" "b"))
+  (!.jl (x:cat "a" "b"))
   => "\"a\" * \"b\""
 
-  (!.julia (x:offset 10))
+  (!.jl (x:offset 10))
   => "11"
 
-  (!.julia (x:get-idx arr (x:offset 0)))
+  (!.jl (x:get-idx arr (x:offset 0)))
   => "arr[1]"
 
-  (!.julia (x:set-idx arr (x:offset 1) value))
+  (!.jl (x:set-idx arr (x:offset 1) value))
   => "arr[2] = value"
 
-  (!.julia (x:get-key (dict :a 1) "a" 0))
+  (!.jl (x:get-key (dict :a 1) "a" 0))
   => "get(Dict(\"a\" => 1),\"a\",0)"
 
-  (!.julia (x:random))
+  (!.jl (x:random))
   => "rand()"
 
-  (!.julia (x:m-sin 1))
+  (!.jl (x:m-sin 1))
   => "sin(1)"
 
-  (!.julia (x:str-join ", " ["a" "b"]))
+  (!.jl (x:str-join ", " ["a" "b"]))
   => "join(Any[\"a\",\"b\"],\", \")"
 
-  (!.julia (x:arr-push [1] 2))
+  (!.jl (x:arr-push [1] 2))
   => "push!(Any[1],2)")
 
 ^{:refer hara.model.annex.spec-julia/tf-local :added "4.0"}

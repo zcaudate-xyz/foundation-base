@@ -17,43 +17,42 @@
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-lua-test
 ;;
 
-(when (and (env/program-exists? "docker")
-           (System/getenv "RT_BASIC_DOCKER_TESTS"))
-  (script/script-ext [:lua.docker :lua]
-    {:runtime :basic
-     :config  (registry/registry-config :lua)}))
+(l/script- :lua
+  {:runtime :basic
+   :config  (registry/registry-config :lua)
+   :test-mode true})
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
             (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
-  :setup [(l/annex:start-all)]
-  :teardown [(l/annex:stop-all)]})
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
-^{:refer :lua.docker :adopt true :added "4.0"}
+^{:refer lua/vectors :adopt true :added "4.0"}
 (fact "lua :basic evaluates arithmetic expressions in docker"
-  [(l/! [:lua.docker]
+  [(!.lua
      (+ 1 2 3))
 
-   (l/! [:lua.docker]
+   (!.lua
      (* 6 7))
 
-   (l/! [:lua.docker]
+   (!.lua
      (- 100 1))]
   => [6 42 99])
 
-^{:refer :lua.docker :adopt true :added "4.0"}
+^{:refer lua/functions :adopt true :added "4.0"}
 (fact "lua docker container defines and calls inline functions"
-  [(l/! [:lua.docker]
+  [(!.lua
      (do (defn add-10 [x] (return (+ x 10)))
          (add-10 5)))
 
-   (l/! [:lua.docker]
+   (!.lua
      (do (defn mul-xy [x y] (return (* x y)))
          (mul-xy 6 7)))]
   => [15 42])
 
 (comment
-  (l/annex:start-all)
-  (l/annex:stop-all)
-  (l/! [:lua.docker] (+ 1 2 3))
+  (l/rt:restart)
+  (l/rt:stop)
+  (!.lua (+ 1 2 3))
   )

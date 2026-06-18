@@ -3,7 +3,7 @@
 
    This file is a hand-curated outline of the most commonly used `bpy` module
    members, similar in purpose to `postgres.core.builtin` and
-   `octave.core.builtin`.  It is not an exhaustive introspection of the bpy API;
+   `matlab.core.builtin`.  It is not an exhaustive introspection of the bpy API;
    new entries can be added here as needed."
   (:require [hara.lang :as l])
   (:refer-clojure :exclude [eval]))

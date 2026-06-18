@@ -16,8 +16,8 @@
 (fact:global
  {:skip (not (env/program-exists? "julia"))})
 
-^{:refer hara.runtime.basic.impl.process-julia/!.julia :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-julia/!.jl :added "4.0"}
 (fact "validates a simple julia expression through the runtime"
-  (do (defrun.julia test-expr [] (+ 1 2 3))
-      (string? (!.julia test-expr)))
+  (do (defrun.jl test-expr [] (+ 1 2 3))
+      (string? (!.jl test-expr)))
   => true)

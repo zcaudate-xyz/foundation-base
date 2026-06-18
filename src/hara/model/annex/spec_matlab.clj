@@ -1,4 +1,4 @@
-(ns hara.model.annex.spec-octave
+(ns hara.model.annex.spec-matlab
   (:require [clojure.string]
             [hara.lang.book :as book]
             [hara.common.emit :as emit]
@@ -10,14 +10,14 @@
             [std.lib.collection :as collection])
   (:refer-clojure :exclude [for while]))
 
-(defn octave-token-boolean
+(defn matlab-token-boolean
   "emits true/false"
   {:added "4.0"}
   [bool]
   (if bool "true" "false"))
 
-(defn octave-sym-str
-  "sanitizes a symbol name for octave identifiers"
+(defn matlab-sym-str
+  "sanitizes a symbol name for matlab identifiers"
   {:added "4.0"}
   [s]
   (-> s
@@ -25,28 +25,28 @@
       (clojure.string/replace #"\?" "p")
       (clojure.string/replace #"!" "f")))
 
-(defn octave-module-name
+(defn matlab-module-name
   "returns the function prefix for the current module, if any"
   {:added "4.0"}
   []
   (when-let [module-id (get-in (preprocess/macro-opts) [:module :id])]
-    (octave-sym-str (name module-id))))
+    (matlab-sym-str (name module-id))))
 
-(defn octave-qualified-name
-  "returns the octave-visible name for an xtalk function symbol"
+(defn matlab-qualified-name
+  "returns the matlab-visible name for an xtalk function symbol"
   {:added "4.0"}
   [sym]
-  (if-let [prefix (octave-module-name)]
-    (str prefix "_" (octave-sym-str (name sym)))
-    (octave-sym-str (name sym))))
+  (if-let [prefix (matlab-module-name)]
+    (str prefix "_" (matlab-sym-str (name sym)))
+    (matlab-sym-str (name sym))))
 
 (defn tf-defn
-  "transforms defn to a raw octave function definition"
+  "transforms defn to a raw matlab function definition"
   {:added "4.0"}
   [[_ sym args & body]]
-  (let [fn-name   (octave-qualified-name sym)
-        arg-str   (clojure.string/join ", " (map (comp octave-sym-str name) args))
-        body-strs (mapv #(impl/emit-as :octave [%]) body)
+  (let [fn-name   (matlab-qualified-name sym)
+        arg-str   (clojure.string/join ", " (map (comp matlab-sym-str name) args))
+        body-strs (mapv #(impl/emit-as :matlab [%]) body)
         body-lines (concat (butlast body-strs)
                            [(str fn-name " = " (last body-strs) ";")])]
     (list ':- (str "function " fn-name " = " fn-name "(" arg-str ")\n"
@@ -114,7 +114,7 @@
                                                \- "_"}
                                     :sep "_"}}}
          :token  {:nil       {:as "NA"}
-                  :boolean   {:as #'octave-token-boolean}
+                  :boolean   {:as #'matlab-token-boolean}
                   :string    {:quote :double}
                   :symbol    {:replace {\. "_"
                                         \- "_"
@@ -129,7 +129,7 @@
         (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
-  (grammar/grammar :octave
+  (grammar/grammar :mat
     (grammar/to-reserved +features+)
     +template+))
 
@@ -143,7 +143,7 @@
     :module-export  (fn [name {:keys [as]} opts])}))
 
 (def +book+
-  (book/book {:lang :octave
+  (book/book {:lang :matlab
               :parent :xtalk
               :meta +meta+
               :grammar +grammar+}))

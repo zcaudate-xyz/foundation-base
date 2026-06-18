@@ -24,11 +24,11 @@
                                                 :interactive ["-i"]
                                                 :json ["json" true]
                                                 :ws-client ["faye-websocket" false]}}}}
-   :matlab    {:default  {:eval.raw   :octave
-                          :eval       :octave
+   :matlab    {:default  {:eval.raw   :matlab
+                          :eval       :matlab
                           :shell      false
                           :ws-client  false}
-               :env      {:octave    {:exec   "octave"
+               :env      {:matlab    {:exec   "matlab"
                                       :support {:oneshot ["--no-gui" "-W" "--eval"]
                                                 :interactive ["--no-gui" "-W" "-i"]
                                                 :json false

@@ -494,11 +494,13 @@
  
  xyz.zcaudate/postgres
  {:description "postgres language and runtime support"
-  :include [[postgres :exclude [postgres.sample]]]}
+  :include [[postgres :exclude [postgres.sample]]
+            [hara.runtime.postgres :complete]]}
 
  xyz.zcaudate/solidity
  {:description "solidity language and runtime support"
-  :include [[solidity.core :complete]]}
+  :include [[solidity.core :complete]
+            [hara.runtime.solidity :complete]]}
 
  xyz.zcaudate/verilog
  {:description "verilog language and runtime support"

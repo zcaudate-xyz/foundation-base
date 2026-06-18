@@ -18,50 +18,49 @@
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-python-test
 ;;
 
-(when (and (env/program-exists? "docker")
-           (System/getenv "RT_BASIC_DOCKER_TESTS"))
-  (script/script-ext [:py.docker :python]
-    {:runtime :basic
-     :config  (registry/registry-config :python)}))
+(l/script- :python
+  {:runtime :basic
+   :config  (registry/registry-config :python)
+   :test-mode true})
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
             (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
-  :setup [(l/annex:start-all)]
-  :teardown [(l/annex:stop-all)]})
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
-^{:refer :py.docker :adopt true :added "4.0"}
+^{:refer python/vectors :adopt true :added "4.0"}
 (fact "python :basic evaluates arithmetic expressions in docker"
-  [(l/! [:py.docker]
+  [(!.python
      (+ 1 2 3))
 
-   (l/! [:py.docker]
+   (!.python
      (* 6 7))
 
-   (l/! [:py.docker]
+   (!.python
      (- 100 1))]
   => [6 42 99])
 
-^{:refer :py.docker :adopt true :added "4.0"}
+^{:refer python/functions :adopt true :added "4.0"}
 (fact "python docker container defines and calls inline functions"
-  [(l/! [:py.docker]
+  [(!.python
      (do (var add-10 (fn [x] (return (+ x 10))))
          (add-10 5)))
 
-   (l/! [:py.docker]
+   (!.python
      (do (var mul-xy (fn [x y] (return (* x y))))
          (mul-xy 6 7)))]
   => [15 42])
 
-^{:refer :py.docker :adopt true :added "4.0"}
+^{:refer python/strings :adopt true :added "4.0"}
 (fact "python docker container handles string operations"
-  (l/! [:py.docker]
+  (!.python
     (do (var greet (fn [name] (return (+ "hello " name))))
         (greet "world")))
   => "hello world")
 
 (comment
-  (l/annex:start-all)
-  (l/annex:stop-all)
-  (l/! [:py.docker] (+ 1 2 3))
+  (l/rt:restart)
+  (l/rt:stop)
+  (!.python (+ 1 2 3))
   )

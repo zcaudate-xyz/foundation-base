@@ -1,6 +1,5 @@
 (ns hara.runtime.basic.docker.impl-julia-test
   (:require [hara.runtime.basic.docker.registry :as registry]
-            [hara.runtime.basic.impl-annex.process-julia]
             [std.lib.env :as env]
             [hara.lang :as l]
             [hara.lang.script :as script])
@@ -18,44 +17,43 @@
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-julia-test
 ;;
 
-(when (and (env/program-exists? "docker")
-           (System/getenv "RT_BASIC_DOCKER_TESTS"))
-  (script/script-ext [:jl.docker :julia]
-    {:runtime :basic
-     :config  (registry/registry-config :julia)}))
+(l/script- :julia
+  {:runtime :basic
+   :config  (registry/registry-config :julia)
+   :test-mode true})
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
-            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
-  :setup [(l/annex:start-all)]
-  :teardown [(l/annex:stop-all)]})
+            (System/getenv "HARA_NO_DOCKER"))
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
-^{:refer :jl.docker :adopt true :added "4.0"}
+^{:refer julia/vectors :adopt true :added "4.0"}
 (fact "julia :basic evaluates arithmetic expressions in docker"
-  [(l/! [:jl.docker]
+  [(!.jl
      (+ 1 2 3))
 
-   (l/! [:jl.docker]
+   (!.jl
      (pow 3 4))
 
-   (l/! [:jl.docker]
+   (!.jl
      (* 6 7))]
   => [6 81 42])
 
-^{:refer :jl.docker :adopt true :added "4.0"}
+^{:refer julia/functions :adopt true :added "4.0"}
 (fact "julia docker container defines and calls inline functions"
-  [(l/! [:jl.docker]
+  [(!.jl
      (do (var add-10 (fn [x] (return (+ x 10))))
          (add-10 5)))
 
-   (l/! [:jl.docker]
+   (!.jl
      (do (var mul-xy (fn [x y] (return (* x y))))
          (mul-xy 6 7)))]
   => [15 42])
 
-^{:refer :jl.docker :adopt true :added "4.0"}
+^{:refer julia/recursive :adopt true :added "4.0"}
 (fact "julia docker container handles recursive inline functions"
-  (l/! [:jl.docker]
+  (!.jl
     (do (var fib (fn [n]
                    (if (<= n 1)
                      (return n)
@@ -65,7 +63,7 @@
   => 55)
 
 (comment
-  (l/annex:start-all)
-  (l/annex:stop-all)
-  (l/! [:jl.docker] (+ 1 2 3))
+  (l/rt:restart)
+  (l/rt:stop)
+  (!.jl (+ 1 2 3))
   )

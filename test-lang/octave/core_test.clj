@@ -1,23 +1,23 @@
-(ns octave.core-test
+matlab/core_test.clj:1:(ns matlab.core-test
   (:require [hara.lang :as l]
-            [hara.model.annex.spec-octave]
-            [octave.core :as y])
+matlab/core_test.clj:3:            [hara.model.annex.spec-matlab]
+matlab/core_test.clj:4:            [matlab.core :as y])
   (:use code.test))
 
-(fact "emits basic octave syntax"
-  (l/emit-as :octave '[(+ 1 2 3)])
+matlab/core_test.clj:7:(fact "emits basic matlab syntax"
+matlab/core_test.clj:8:  (l/emit-as :matlab '[(+ 1 2 3)])
   => "1 + 2 + 3"
 
-  (l/emit-as :octave '[(mod 10 3)])
+matlab/core_test.clj:11:  (l/emit-as :matlab '[(mod 10 3)])
   => "mod(10,3)"
 
-  (l/emit-as :octave '[{:a 1 :b 2}])
+matlab/core_test.clj:14:  (l/emit-as :matlab '[{:a 1 :b 2}])
   => "struct(\"a\", 1, \"b\", 2)"
 
-  (l/emit-as :octave '[[1 2 3]])
+matlab/core_test.clj:17:  (l/emit-as :matlab '[[1 2 3]])
   => "[1, 2, 3]")
 
-(fact "octave.core exposes builtin outlines with signatures"
+matlab/core_test.clj:20:(fact "matlab.core exposes builtin outlines with signatures"
   y/+count+ => 1654
   (count y/+all+) => 1654
   (boolean (some #(= "abs" (:name %)) y/+all+)) => true
@@ -27,9 +27,9 @@
   (boolean (seq (:signatures (first (filter #(= "abs" (:name %)) y/+core+))))) => true
   (boolean (seq (:signatures (first (filter #(= "sum" (:name %)) y/+core+))))) => true)
 
-(fact "emits octave function definitions"
-  (l/emit-as :octave '[(defn add [a b] (+ a b))])
+matlab/core_test.clj:30:(fact "emits matlab function definitions"
+matlab/core_test.clj:31:  (l/emit-as :matlab '[(defn add [a b] (+ a b))])
   => "function add = add(a, b)\nadd = a + b;\nend"
 
-  (l/emit-as :octave '[(defn scale [x s] (* x s))])
+matlab/core_test.clj:34:  (l/emit-as :matlab '[(defn scale [x s] (* x s))])
   => "function scale = scale(x, s)\nscale = x * s;\nend")

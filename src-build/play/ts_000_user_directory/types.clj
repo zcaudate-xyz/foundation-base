@@ -3,7 +3,8 @@
             [hara.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defspec.xt UserId
   :xt/str)
@@ -21,14 +22,14 @@
   lookupUser
   [UserMap users
    UserId id]
-  (return (k/get-key users id)))
+  (return (xt/x:get-key users id)))
 
 (defn.xt ^{:- [[:xt/array UserId]]}
   userIds
   [UserMap users]
-  (return (k/arr-map (k/obj-keys users)
-                     (fn [id]
-                       (return id)))))
+  (return (xt/x:arr-map (xt/x:obj-keys users)
+                        (fn [id]
+                          (return id)))))
 
 (def.xt ^{:- [:xt/int]}
   DEFAULT_PAGE_SIZE

@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.parser-xml-test
+(ns xtbench.jl.lang.parser-xml-test
   (:require [hara.lang :as l]
             [std.string.prose :as prose])
   (:use code.test))
@@ -15,7 +15,7 @@
 ^{:refer xt.lang.parser-xml/parse-xml-params :added "4.0"}
 (fact "parses the args"
 
-  (!.julia (xml/parse-xml-params "a='123', b=\"456\" "))
+  (!.jl (xml/parse-xml-params "a='123', b=\"456\" "))
   => {"a" "123", "b" "456"})
 
 ^{:refer xt.lang.parser-xml/parse-xml-stack :added "4.0"
@@ -41,7 +41,7 @@
               {"tag" "a", "close" true}]])]}
 (fact "parses the xml into a ast stack"
 
-  (!.julia 
+  (!.jl 
     [(xml/parse-xml-stack "<a/>")
      (xml/parse-xml-stack "<a></a>")
      (xml/parse-xml-stack "<a>1</a>")
@@ -63,7 +63,7 @@
               "tag" "a"}])]}
 (fact "transforms stack to node"
 
-  (!.julia
+  (!.jl
     [(xml/to-node
       [{"tag" "a", "empty" true}])
      (xml/to-node
@@ -106,7 +106,7 @@
                "tag" "a"}])]}
 (fact "parses xml"
 
-  (!.julia
+  (!.jl
     [(xml/parse-xml "<a/>")
      (xml/parse-xml "<a></a>")
      (xml/parse-xml "<a>1</a>")
@@ -133,7 +133,7 @@
                ["C4" ["C41" "Empat-Satu"]]]]])]}
 (fact "to node to tree"
 
-  (!.julia
+  (!.jl
    [(xml/to-tree
      (xml/parse-xml "<a/>"))
     (xml/to-tree
@@ -185,7 +185,7 @@
              "tag" "helo:test"})]}
 (fact "creates nodes from tree"
 
-  (!.julia
+  (!.jl
     (xml/from-tree
      ["helo:test"
       ["ErrorCode" "ESB-00-000"]
@@ -220,7 +220,7 @@
                        "code" "BucketAlreadyOwnedByYou"}})]}
 (fact "xml to a more readable form"
 
-  (!.julia
+  (!.jl
    (xml/to-brief
     (xml/parse-xml
      (@! (prose/|
@@ -240,7 +240,7 @@
           "</helo:test>")))))
   => +out-error+
 
-  (!.julia
+  (!.jl
    (xml/to-brief
     (xml/parse-xml
      (@! (std.html/html
@@ -257,7 +257,7 @@
 ^{:refer xt.lang.parser-xml/to-string-value :added "4.1"}
 (fact "TODO"
 
-  (!.julia
+  (!.jl
     [(xml/to-string-value true)
      (xml/to-string-value 1)
      (xml/to-string-value "a")])
@@ -266,7 +266,7 @@
 ^{:refer xt.lang.parser-xml/to-string-params :added "4.0"}
 (fact "to node params"
 
-  (!.julia
+  (!.jl
    (xml/to-string-params (tab [:a 1])))
   => " a=1")
 
@@ -293,7 +293,7 @@
               "tag" "Delete"}])]}
 (fact "node to string"
 
-  (!.julia
+  (!.jl
     [(xml/to-string
       {"tag" "helo:test"
        "params" {},

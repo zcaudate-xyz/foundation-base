@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.common-protocol-test
+(ns xtbench.jl.lang.common-protocol-test
   (:use code.test)
   (:require [hara.lang :as l]))
 
@@ -20,7 +20,7 @@
 ^{:refer xt.lang.common-protocol/protocol-method :added "4.1"}
 (fact "looks up the registered method by protocol and implementation type"
 
-  (!.julia
+  (!.jl
    (do
      (xt/x:set-key proto/PROTOCOLS
                    "xt.lang.common_protocol_test/IHello"
@@ -35,7 +35,7 @@
 ^{:refer xt.lang.common-protocol/register-protocol-impl :added "4.1"}
 (fact "registers protocol implementations in the registry"
 
-  (!.julia
+  (!.jl
    (do
      (xt/x:set-key proto/PROTOCOLS "xt.lang.common_protocol_test/IHello"
                    {"::" "type/protocol"
@@ -53,7 +53,7 @@
 ^{:refer xt.lang.common-protocol/create-protocol-fn :added "4.1"}
 (fact "creates a runtime protocol descriptor"
 
-  (!.julia
+  (!.jl
    (proto/create-protocol-fn "xt.lang.common_protocol_test/IHello"
                              {"hello_prn" {"name" "hello_prn"
                                            "arglist" ["impl"]}}))
@@ -66,7 +66,7 @@
 ^{:refer xt.lang.common-protocol/defprotocol.xt :added "4.1"}
 (fact "expands to a protocol value and method wrappers"
 
-  (!.julia
+  (!.jl
    (xt/x:is-function? -/hello-str))
   => true)
 

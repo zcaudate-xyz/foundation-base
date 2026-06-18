@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.common-trace-test
+(ns xtbench.jl.lang.common-trace-test
   (:use code.test)
   (:require [hara.lang             :as l]
             [xt.lang.common-trace :as trace]))
@@ -15,7 +15,7 @@
 ^{:refer xt.lang.common-trace/meta:info :added "4.1"}
 (fact "injects metadata into emitted js values"
 
-  (!.julia
+  (!.jl
     (var info (trace/meta:info {:sample true}))
     [(xt/x:get-key info "sample")
      (xt/x:not-nil? (xt/x:get-key info "meta/fn"))
@@ -25,14 +25,14 @@
 ^{:refer xt.lang.common-trace/LOG! :added "4.1"}
 (fact "prints and returns nil in js"
 
-  (!.julia
+  (!.jl
     (xt/x:nil? (trace/LOG! "hello")))
   => true)
 
 ^{:refer xt.lang.common-trace/trace-log :added "4.1"}
 (fact "returns the current trace log"
 
-  (!.julia
+  (!.jl
     (trace/trace-log-clear)
     (trace/trace-log))
   => [])
@@ -40,7 +40,7 @@
 ^{:refer xt.lang.common-trace/trace-log-clear :added "4.1"}
 (fact "clears the trace log"
 
-  (!.julia
+  (!.jl
     (trace/trace-log-add "a" "one" {})
     (trace/trace-log-add "b" "two" {})
     (trace/trace-log-clear))
@@ -49,7 +49,7 @@
 ^{:refer xt.lang.common-trace/trace-log-add :added "4.1"}
 (fact "adds a trace entry and merges options"
 
-  (!.julia
+  (!.jl
     (trace/trace-log-clear)
     (var n (trace/trace-log-add {"a" 1} "alpha" {"extra" 2}))
     (var entry (trace/trace-last-entry nil))
@@ -62,7 +62,7 @@
 ^{:refer xt.lang.common-trace/trace-filter :added "4.1"}
 (fact "filters trace entries by tag"
 
-  (!.julia
+  (!.jl
     (trace/trace-log-clear)
     (trace/trace-log-add 1 "alpha" {})
     (trace/trace-log-add 2 "beta" {})
@@ -76,7 +76,7 @@
 ^{:refer xt.lang.common-trace/trace-last-entry :added "4.1"}
 (fact "returns the last entry overall or for a tag"
 
-  (!.julia
+  (!.jl
     (trace/trace-log-clear)
     (trace/trace-log-add 1 "alpha" {})
     (trace/trace-log-add 2 "beta" {})
@@ -90,7 +90,7 @@
 ^{:refer xt.lang.common-trace/trace-data :added "4.1"}
 (fact "returns the logged data values in order"
 
-  (!.julia
+  (!.jl
     (trace/trace-log-clear)
     (trace/trace-log-add 1 "alpha" {})
     (trace/trace-log-add 2 "beta" {})
@@ -100,7 +100,7 @@
 ^{:refer xt.lang.common-trace/trace-last :added "4.1"}
 (fact "returns the last logged data overall or for a tag"
 
-  (!.julia
+  (!.jl
     (trace/trace-log-clear)
     (trace/trace-log-add 1 "alpha" {})
     (trace/trace-log-add 2 "beta" {})
@@ -111,7 +111,7 @@
 ^{:refer xt.lang.common-trace/TRACE! :added "4.1"}
 (fact "records trace entries with metadata"
 
-  (!.julia
+  (!.jl
     (trace/trace-log-clear)
     (var count (trace/TRACE! "hello" "alpha"))
     (var entry (trace/trace-last-entry "alpha"))
@@ -126,7 +126,7 @@
 ^{:refer xt.lang.common-trace/trace-run :added "4.1"}
 (fact "runs a function after clearing the trace log"
 
-  (!.julia
+  (!.jl
     (trace/trace-log-add "stale" "old" {})
     (var out
          (trace/trace-run

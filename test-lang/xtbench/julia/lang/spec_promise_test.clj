@@ -1,4 +1,4 @@
-(ns xtbench.julia.lang.spec-promise-test
+(ns xtbench.jl.lang.spec-promise-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-base :as xt])
@@ -118,7 +118,7 @@
 ^{:refer xt.lang.spec-promise/x:promise-native? :added "4.1"}
 (fact "detects native js promises"
 
-  (!.julia
+  (!.jl
     (var p
          (spec-promise/x:promise
           (fn []

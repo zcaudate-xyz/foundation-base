@@ -47,3 +47,9 @@
              (nav/navigator code)
              params))))
 
+(defn defn-form
+  [{:syms [fsym doc base-args opts-args body-form]}]
+  `(~'defn ~fsym ~doc
+    (~base-args (~fsym ~@base-args {}))
+    (~opts-args ~body-form)))
+

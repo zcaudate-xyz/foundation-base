@@ -42,7 +42,7 @@
 
 ^{:refer code.framework.link/collect-entries-single :added "4.0"}
 (fact "supports subtree exclusions when collecting package entries"
-  (->> (collect-entries-single {:include [[foo :exclude [foo.bar]]]}
+  (->> (collect-entries-single '{:include [[foo :exclude [foo.bar]]]}
                                '{foo ""
                                  foo.alpha ""
                                  foo.bar ""
@@ -65,9 +65,9 @@
         postgres-entries (set (get-in entries '[xyz.zcaudate/postgres :entries]))
         solidity-entries (set (get-in entries '[xyz.zcaudate/solidity :entries]))
         nginx-entries    (set (get-in entries '[xyz.zcaudate/hara.runtime.nginx :entries]))
-        graal-entries    (set (get-in entries '[xyz.zcaudate/rt.graal :entries]))
-        jep-entries      (set (get-in entries '[xyz.zcaudate/rt.jep :entries]))
-        redis-entries    (set (get-in entries '[xyz.zcaudate/rt.redis :entries]))]
+        graal-entries    (set (get-in entries '[xyz.zcaudate/hara.runtime.graal :entries]))
+        jep-entries      (set (get-in entries '[xyz.zcaudate/hara.runtime.jep :entries]))
+        redis-entries    (set (get-in entries '[xyz.zcaudate/hara.runtime.redis :entries]))]
     [(boolean (hara-entries [:clj 'hara.runtime.postgres]))
      (boolean (hara-entries [:clj 'hara.runtime.solidity]))
      (boolean (hara-entries [:clj 'hara.runtime.solidity.client]))
