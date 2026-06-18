@@ -2,14 +2,12 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
-            [js.worker.link]
             [xt.substrate.transport-browser]
             [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[js.worker.link :as worker-link]
-             [xt.lang.spec-base :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.substrate :as event-node]
              [xt.substrate.base-frame :as event-frame]
              [xt.substrate.transport-browser :as browser-transport]
@@ -71,6 +69,36 @@
    {:lang :js
     :layout :full}))
 
+(defn.js make-webworker
+  "Creates a WebWorker from the test script."
+  {:added "4.1"}
+  []
+  (var blob (new Blob [(@! +webworker-script+)]
+                     {"type" "text/javascript"}))
+  (var url (. (!:G URL) (createObjectURL blob)))
+  (try
+    (var worker (new Worker url))
+    (. (!:G URL) (revokeObjectURL url))
+    (return worker)
+    (catch err
+      (. (!:G URL) (revokeObjectURL url))
+      (throw err))))
+
+(defn.js make-sharedworker
+  "Creates a SharedWorker from the test script."
+  {:added "4.1"}
+  []
+  (var blob (new Blob [(@! +sharedworker-script+)]
+                     {"type" "text/javascript"}))
+  (var url (. (!:G URL) (createObjectURL blob)))
+  (try
+    (var shared (new SharedWorker url))
+    (. (!:G URL) (revokeObjectURL url))
+    (return shared)
+    (catch err
+      (. (!:G URL) (revokeObjectURL url))
+      (throw err))))
+
 (fact:global
   {:setup [(l/rt:restart :js)
           (l/rt:scaffold-imports :js)
@@ -86,7 +114,7 @@
       (browser-transport/connect-worker
        browser-node
        {"transport_id" "worker"
-        "source" (worker-link/make-webworker-link (@! +webworker-script+))})
+        "worker" (-/make-webworker)})
       (fn [conn]
         (return
          (promise/x:promise-then
@@ -121,7 +149,7 @@
      (browser-transport/connect-sharedworker
       browser-node
       {"transport_id" "worker"
-       "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
+       "sharedworker" (-/make-sharedworker)})
      (fn [conn]
        (return
         (promise/x:promise-then

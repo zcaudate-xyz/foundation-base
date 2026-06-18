@@ -10,53 +10,82 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as event-node]
-             [xt.substrate.transport-browser :as browser-transport]]})
+             [xt.substrate.transport-browser :as browser-transport]
+             [js.worker.link :as worker-link]]})
 
 (def ^:private +sharedworker-script+
   (l/emit-script
    '(do
-      (:= (. globalThis ["__js_worker_tabs_counter__"]) 0)
+      ;; single node shared across all tab connections
+      (var node (xt.substrate/node-create {"id" "sharedworker-tabs-demo"}))
+
+      ;; shared counter lives in a node space instead of globalThis
+      (xt.substrate/create-space node "shared" {:state {"counter" 0}})
+
+      ;; register the handlers once on the global node
+      (xt.substrate/register-handler
+       node
+       "demo/counter"
+       (fn [space args request worker-node]
+         (var state (xt.substrate/get-space-state worker-node "shared"))
+         (return {"counter" (xt.lang.spec-base/x:get-key state "counter")
+                  "worker" (. worker-node ["id"])}))
+       nil)
+
+      (xt.substrate/register-handler
+       node
+       "demo/disconnect"
+       (fn [space args request worker-node]
+         (xt.substrate/update-space-state
+          worker-node
+          "shared"
+          (fn [state]
+            (return {"counter" (- (or (xt.lang.spec-base/x:get-key state "counter") 0) 1)})))
+         (return {"status" "disconnected"}))
+       nil)
+
+      ;; onconnect fires for every tab and attaches a new transport
       (:= (. globalThis ["onconnect"])
           (fn [e]
-            (var node (xt.substrate/node-create {"id" "sharedworker-tabs-demo"}))
             (var port (. e ["ports"] [0]))
             (. port (start))
-            (var counter (+ 1 (. globalThis ["__js_worker_tabs_counter__"])))
-            (:= (. globalThis ["__js_worker_tabs_counter__"]) counter)
-            (xt.substrate/register-handler
-             node
-             "demo/counter"
-             (fn [space args request worker-node]
-               (return {"counter" (. globalThis ["__js_worker_tabs_counter__"])
-                        "worker" (. worker-node ["id"])}))
-             nil)
+
+            ;; increment the connection counter inside the node space
+            (var new-state
+                 (xt.substrate/update-space-state
+                  node
+                  "shared"
+                  (fn [state]
+                    (return {"counter" (+ 1 (or (xt.lang.spec-base/x:get-key state "counter") 0))}))))
+
+            ;; each connection needs a unique transport id on the same node
+            (var transport-id
+                 (xt.lang.spec-base/x:cat
+                  "host-"
+                  (xt.lang.spec-base/x:get-key new-state "counter")))
+
             (xt.substrate.transport-browser/boot-self
              node
-             {"transport_id" "host"
+             {"transport_id" transport-id
               "target" port
               "ready" {"signal" "ready"
-                       "worker" "sharedworker-tabs-demo"}})
-            (return node))))
+                       "worker" "sharedworker-tabs-demo"}}))))
    {:lang :js
     :layout :full}))
 
 (def ^:private +notify-url+
   (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/"))
 
-(defn create-worker-url
-  "Creates a fresh blob URL for the sharedworker script in the current tab."
+(defn.js store-worker-url
+  "Creates a fresh blob URL for the sharedworker script and stores it in localStorage."
   {:added "4.1"}
   []
-  (!.js
-    (var blob (new Blob [(@! +sharedworker-script+)]
-                       {"type" "text/javascript"}))
-    (var url (. (!:G URL) (createObjectURL blob)))
-    (. (!:G localStorage) (setItem "__js_worker_tabs_url__" url))
-    (return url)))
+  (var url (worker-link/make-blob-url (@! +sharedworker-script+)))
+  (. (!:G localStorage) (setItem "__js_worker_tabs_url__" url))
+  (return url))
 
 (fact:global
  {:setup [(l/rt:restart :js)
-          (l/rt:scaffold-imports :js)
           (chromedriver/goto +notify-url+ 4000)]
   :teardown [(l/rt:stop)]})
 
@@ -68,13 +97,12 @@
     (notify/wait-on [:js 5000]
       (var browser-node (event-node/node-create {"id" "browser-node"}))
       (var worker-url (. (!:G localStorage) (getItem "__js_worker_tabs_url__")))
-      (var shared (new SharedWorker worker-url))
       (promise/x:promise-catch
        (promise/x:promise-then
         (browser-transport/connect-sharedworker
          browser-node
          {"transport_id" "worker"
-          "sharedworker" shared})
+          "source" (worker-link/make-sharedworker-link-from-url worker-url)})
         (fn [conn]
           (:= (. globalThis ["__conn__"]) conn)
           (repl/notify {"ready" (. conn ["ready"])})))
@@ -103,6 +131,10 @@
        (fn [err]
          (repl/notify {"error" (xt/x:ex-message err)}))))))
 
+
+(defn.js node-disconnect
+  [node])
+
 (defn tab-disconnect
   "Disconnects the stored sharedworker connection on `tab`."
   {:added "4.1"}
@@ -110,17 +142,26 @@
   (chromedriver/with-tab (l/rt :js) tab
     (notify/wait-on [:js 5000]
       (var conn (. globalThis ["__conn__"]))
+      (var browser-node (. conn ["node"]))
       (promise/x:promise-catch
        (promise/x:promise-then
-        (browser-transport/disconnect conn)
+        (event-node/request
+         browser-node
+         "room/a"
+         "demo/disconnect"
+         []
+         {"transport_id" (. conn ["transport_id"])})
         (fn [_]
-          (repl/notify {"status" "disconnected"})))
+          (promise/x:promise-then
+           (browser-transport/disconnect conn)
+           (fn [_]
+             (repl/notify {"status" "disconnected"})))))
        (fn [err]
          (repl/notify {"error" (xt/x:ex-message err)}))))))
 
 ^{:refer js.worker.e2e-sharedworker-tabs-test/sharedworker-is-shared-across-tabs
   :added "4.1"
-  :setup [(create-worker-url)]}
+  :setup [(store-worker-url)]}
 (fact "sharedworker instance is shared across two chromedriver tabs"
   (def +tab-a+ (chromedriver/current-tab (l/rt :js)))
   (def +tab-b+ (chromedriver/tab-create (l/rt :js) +notify-url+))
@@ -143,20 +184,20 @@
 
 ^{:refer js.worker.e2e-sharedworker-tabs-test/sharedworker-survives-tab-disconnect
   :added "4.1"
-  :setup [(create-worker-url)]}
+  :setup [(store-worker-url)]}
 (fact "sharedworker keeps serving after one connecting tab disconnects"
   (def +tab-a+ (chromedriver/current-tab (l/rt :js)))
   (def +tab-b+ (chromedriver/tab-create (l/rt :js) +notify-url+))
-
+  
   (tab-connect +tab-a+)
   (tab-connect +tab-b+)
-
+  
   ;; disconnect tab a, but leave it open so the blob url stays valid
   (tab-disconnect +tab-a+)
-
+  
   (def result-b (tab-request-counter +tab-b+))
-
+  
   (tab-disconnect +tab-b+)
 
-  result-b => {"counter" 2
+  result-b => {"counter" 1
                "worker" "sharedworker-tabs-demo"})
