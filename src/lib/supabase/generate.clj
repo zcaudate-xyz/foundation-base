@@ -79,7 +79,7 @@
   "
 (defn ~fn-name
   ~args-form
-  (call/call (get lib.supabase.api/+admin+ ~operation-id)
+  (call/call (get api/+admin+ ~operation-id)
              ~input-form
              ~client-sym))")
 

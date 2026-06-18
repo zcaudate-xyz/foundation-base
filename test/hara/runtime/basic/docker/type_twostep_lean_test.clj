@@ -10,10 +10,12 @@
   {:runtime :twostep
    :process {:force-container true
              :container {:image "foundation-base/rt-twostep-lean:latest"}
-             :exec-fn #'rt.basic.impl-annex.process-lean/sh-exec-lean-portable}})
+             :exec-fn #'rt.basic.impl-annex.process-lean/sh-exec-lean-portable} :test-mode true})
 
 (fact:global {:skip (or (not (env/program-exists? "docker"))
-                        (not (System/getenv "RT_TWOSTEP_DOCKER_TESTS")))})
+                        (not (System/getenv "RT_TWOSTEP_DOCKER_TESTS")))
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 (fact "lean twostep can return values in docker"
   [(!.lean

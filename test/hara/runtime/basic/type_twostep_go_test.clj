@@ -4,10 +4,9 @@
             [hara.lang :as l]))
 
 (l/script- :go
-  {:runtime :twostep})
+  {:runtime :twostep :test-mode true})
 
-(fact:global
- {:skip (not (env/program-exists? "go"))})
+(fact:global {:skip (not (env/program-exists? "go")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (defn.go ^{:- [:int]}
   add-10

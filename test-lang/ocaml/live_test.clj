@@ -5,12 +5,11 @@
             [std.lib.env :as env])
   (:use code.test))
 
-(fact:global
- {:skip (not (env/program-exists? "ocaml"))})
+(fact:global {:skip (not (env/program-exists? "ocaml")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (l/script- :ocaml
   {:runtime :twostep
-   :require [[ocaml.core :as y]]})
+   :require [[ocaml.core :as y]] :test-mode true})
 
 (fact "live ocaml prelude calls work"
   (!.ocaml (List.length [1 2 3 4]))

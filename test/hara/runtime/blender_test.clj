@@ -5,9 +5,9 @@
   (:use code.test))
 
 (l/script- :python
-  {:runtime :blender})
+  {:runtime :blender :test-mode true})
 
-(fact:global {:skip (not (env/program-exists? "blender"))})
+(fact:global {:skip (not (env/program-exists? "blender")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.blender.impl/blender :added "4.1"}
 (fact "starts and stops a blender runtime"

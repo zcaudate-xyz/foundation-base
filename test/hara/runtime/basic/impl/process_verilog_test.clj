@@ -70,10 +70,10 @@
        (first (:args (second @calls)))]))
   => ["hello" 2 "iverilog" "vvp"])
 
-(fact:global {:skip (not (env/program-exists? "iverilog"))})
+(fact:global {:skip (not (env/program-exists? "iverilog")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (l/script- :verilog
-  {:runtime :twostep})
+  {:runtime :twostep :test-mode true})
 
 ^{:refer hara.runtime.basic.impl.process-verilog-test/CANARY-IVERILOG :adopt true :added "4.1"}
 (fact "evaluates a simple verilog expression through the runtime"

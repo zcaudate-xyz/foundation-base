@@ -5,7 +5,7 @@
   (:use code.test))
 
 (l/script- :c
-  {:runtime :oneshot})
+  {:runtime :oneshot :test-mode true})
 
 (defn.c ^{:- [:int]}
   add
@@ -30,7 +30,7 @@
   (return (-/sub (-/add 1 2)
                  10)))
 
-(fact:global {:skip (not (env/program-exists? "tcc"))})
+(fact:global {:skip (not (env/program-exists? "tcc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.basic.impl.process-c-test/CANARY-TCC :adopt true :added "4.0"}
 (fact "EVALUATE tcc in c"

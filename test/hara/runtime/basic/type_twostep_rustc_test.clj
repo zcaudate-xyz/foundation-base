@@ -4,10 +4,9 @@
             [hara.lang :as l]))
 
 (l/script- :rust
-  {:runtime :twostep})
+  {:runtime :twostep :test-mode true})
 
-(fact:global
- {:skip (not (env/program-exists? "rustc"))})
+(fact:global {:skip (not (env/program-exists? "rustc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (defn.rs ^{:- [:i32]}
   add-10

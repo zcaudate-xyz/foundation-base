@@ -1,13 +1,12 @@
 (ns postgres.core.supabase
   (:require [clojure.string]
-            [hara.model.spec-postgres.common :as common]
-            [lib.supabase :as supabase]
-            [postgres.core.addon :as addon]
-            [hara.lang :as l]
-            [hara.lang.impl :as impl]
             [std.lib.context.pointer :as ptr]
             [std.lib.foundation :as f]
-            [std.json :as json]))
+            [std.json :as json]
+            [hara.lang :as l]
+            [hara.lang.impl :as impl]
+            [hara.model.spec-postgres.common :as common]
+            [postgres.core.addon :as addon]))
 
 (l/script :postgres
   {:macro-only true})
@@ -495,16 +494,3 @@
     :deftype (transform-entry-deftype body env)
     body))
 
-
-;;
-;; api calls
-;;
-
-(def ^{:added "4.0"} api-call supabase/api-call)
-(def ^{:added "4.0"} api-rpc supabase/api-rpc)
-(def ^{:added "4.0"} api-select-all supabase/api-select-all)
-(def ^{:added "4.0"} api-signup supabase/api-signup)
-(def ^{:added "4.0"} api-signin supabase/api-signin)
-(def ^{:added "4.0"} api-signup-create supabase/api-signup-create)
-(def ^{:added "4.0"} api-signup-delete supabase/api-signup-delete)
-(def ^{:added "4.0"} api-impersonate supabase/api-impersonate)

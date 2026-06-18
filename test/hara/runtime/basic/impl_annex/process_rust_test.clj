@@ -5,7 +5,7 @@
   (:use code.test))
 
 (l/script- :rust
-  {:runtime :twostep})
+  {:runtime :twostep :test-mode true})
 
 (defn.rs ^{:- [:i32]}
   add1
@@ -18,7 +18,7 @@
   (return (+ (-/add1 x)
              (-/add1 x))))
 
-(fact:global {:skip (not (env/program-exists? "rustc"))})
+(fact:global {:skip (not (env/program-exists? "rustc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.basic.impl-annex.process-rust/transform-form :added "4.0"}
 (fact "transforms the rust form"

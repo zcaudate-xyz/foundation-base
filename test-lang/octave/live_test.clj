@@ -9,7 +9,7 @@ matlab/live_test.clj:8:                 (env/program-exists? "matlab")))})
 
 matlab/live_test.clj:10:(l/script- :matlab
   {:runtime :oneshot
-matlab/live_test.clj:12:   :require [[matlab.core :as y]]})
+matlab/live_test.clj:12:   :require [[matlab.core :as y]] :test-mode true})
 
 matlab/live_test.clj:14:(fact "live matlab core examples"
 matlab/live_test.clj:15:  (!.matlab (y/add 1 2))

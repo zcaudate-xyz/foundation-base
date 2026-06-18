@@ -9,10 +9,12 @@
   {:runtime :twostep
    :process {:force-container true
              :container {:image "foundation-base/rt-twostep-rust:latest"}
-             :exec-fn #'twostep/sh-exec-portable}})
+             :exec-fn #'twostep/sh-exec-portable} :test-mode true})
 
 (fact:global {:skip (or (not (env/program-exists? "docker"))
-                        (not (System/getenv "RT_TWOSTEP_DOCKER_TESTS")))})
+                        (not (System/getenv "RT_TWOSTEP_DOCKER_TESTS")))
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 (defn.rs ^{:- [:i32]}
   add-10

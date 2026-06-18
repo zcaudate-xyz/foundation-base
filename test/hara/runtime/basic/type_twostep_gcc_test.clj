@@ -4,10 +4,9 @@
             [hara.lang :as l]))
 
 (l/script- :c
-  {:runtime :twostep})
+  {:runtime :twostep :test-mode true})
 
-(fact:global
- {:skip (not (env/program-exists? "gcc"))})
+(fact:global {:skip (not (env/program-exists? "gcc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (defn.c ^{:- [:int]}
   add-10

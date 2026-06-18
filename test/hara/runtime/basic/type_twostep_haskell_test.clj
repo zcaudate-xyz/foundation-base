@@ -7,10 +7,9 @@
 (do hara.runtime.basic.impl-annex.process-haskell/+haskell-twostep+)
 
 (l/script- :haskell
-  {:runtime :twostep})
+  {:runtime :twostep :test-mode true})
 
-(fact:global
- {:skip (not (env/program-exists? "ghc"))})
+(fact:global {:skip (not (env/program-exists? "ghc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (fact "ghc twostep can return values"
   [(!.hs

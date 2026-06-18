@@ -6,10 +6,9 @@
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.lang.common-lib :as lib]]})
+   :require [[xt.lang.common-lib :as lib]] :test-mode true})
 
-(fact:global
- {:skip (not (env/program-exists? "dart"))})
+(fact:global {:skip (not (env/program-exists? "dart")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (defn.dt add-10
   [x]

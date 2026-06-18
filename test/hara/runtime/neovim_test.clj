@@ -6,17 +6,21 @@
             [std.lib.env :as env]))
 
 (l/script- :lua
-  {:runtime :neovim})
+  {:runtime :neovim
+   :test-mode true})
 
-(fact:global {:skip (not (env/program-exists? "nvim"))})
+(fact:global {:skip (not (env/program-exists? "nvim"))
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.neovim.impl/neovim :added "4.1"}
 (fact "starts and stops a neovim runtime"
-  (let [rt (impl/neovim {})]
-    [(boolean rt)
-     (boolean (impl/raw-eval-neovim rt "return 42"))
-     (do (std.lib.component/stop rt)
-         true)])
+
+      (let [rt (impl/neovim {})]
+        [(boolean rt)
+         (boolean (impl/raw-eval-neovim rt "return 42"))
+         (do (std.lib.component/stop rt)
+             true)])
   => [true true true])
 
 ^{:refer hara.runtime.neovim.impl/raw-eval-neovim :added "4.1"}

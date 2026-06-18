@@ -5,12 +5,11 @@
             [std.lib.env :as env])
   (:use code.test))
 
-(fact:global
- {:skip (not (env/program-exists? "ghc"))})
+(fact:global {:skip (not (env/program-exists? "ghc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (l/script- :haskell
   {:runtime :twostep
-   :require [[haskell.core :as h]]})
+   :require [[haskell.core :as h]] :test-mode true})
 
 (fact "live haskell prelude calls work"
   (!.hs (sum [1 2 3 4]))

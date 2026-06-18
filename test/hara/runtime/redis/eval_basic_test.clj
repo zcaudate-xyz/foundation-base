@@ -9,11 +9,13 @@
 
 (l/script- :lua
   {:runtime :redis.client
-   :config {:port 17001}})
+   :config {:port 17001} :test-mode true})
 
 (fact:global
- {:setup [(bench/start-redis-array [17001])]
-  :teardown [(bench/stop-redis-array [17001])]})
+ {:setup [(bench/start-redis-array [17001])
+          (l/rt:restart)]
+  :teardown [(bench/stop-redis-array [17001])
+             (l/rt:stop)]})
 
 ^{:refer hara.runtime.redis.eval-basic/rt-exception :added "4.0"}
 (fact "processes an exception"

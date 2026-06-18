@@ -4,12 +4,13 @@
             [hara.lang :as l])
   (:use code.test))
 
-(fact:global
- {:skip (not (or (env/program-exists? "octave-cli")
-                 (env/program-exists? "octave")))})
+(fact:global {:skip (not (or (env/program-exists? "octave-cli")
+                 (env/program-exists? "octave")))
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 (l/script- :matlab
-  {:runtime :oneshot})
+  {:runtime :oneshot :test-mode true})
 
 ^{:refer hara.runtime.basic.impl-annex.process-matlab/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE matlab code"

@@ -7,10 +7,9 @@
 (do hara.runtime.basic.impl-annex.process-ocaml/+ocaml-twostep+)
 
 (l/script- :ocaml
-  {:runtime :twostep})
+  {:runtime :twostep :test-mode true})
 
-(fact:global
- {:skip (not (env/program-exists? "ocamlc"))})
+(fact:global {:skip (not (env/program-exists? "ocamlc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (fact "ocamlc twostep can return values"
   [(!.ml

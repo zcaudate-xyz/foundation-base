@@ -7,10 +7,9 @@
 (do hara.runtime.basic.impl-annex.process-lean/+lean-twostep+)
 
 (l/script- :lean
-  {:runtime :twostep})
+  {:runtime :twostep :test-mode true})
 
-(fact:global
- {:skip (not (env/program-exists? "lean"))})
+(fact:global {:skip (not (env/program-exists? "lean")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
 (fact "lean twostep can return values"
   [(!.lean
