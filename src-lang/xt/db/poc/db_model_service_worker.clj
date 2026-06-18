@@ -1,7 +1,7 @@
 (ns xt.db.poc.db-model-service-worker
   (:require [hara.lang :as l]))
 
-(l/script :xtalk
+(l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
@@ -11,7 +11,7 @@
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-memory :as impl-memory]]})
 
-(defn.xt create-impl
+(defn.js create-impl
   "Creates a db impl directly, avoiding the full impl-main dispatch so that
    worker bundles do not pull in unused native drivers (e.g. sqlite)."
   {:added "4.1"}
@@ -22,7 +22,7 @@
         :else
         (xt/x:err (+ "unsupported worker db type: " type))))
 
-(defn.xt init-services
+(defn.js init-services
   "Initialises db/primary and db/caching services on a node. For the worker POC
    only memory-backed impls are provided out of the box; a supabase impl can be
    injected by passing an already-created service object as :primary or :caching."
@@ -40,7 +40,7 @@
   (substrate/set-service node "db/caching" caching-impl)
   (return (promise/x:promise-run node)))
 
-(defn.xt create-page-model
+(defn.js create-page-model
   "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
   {:added "4.1"}
   [model-id tree opts]
@@ -60,7 +60,7 @@
            "defaults" {"args" [tree]}
            "options" opts}))
 
-(defn.xt install-page-models
+(defn.js install-page-models
   "Attaches a group of db-model-service page models to a node space."
   {:added "4.1"}
   [node space-id group-id models]
@@ -69,13 +69,7 @@
     (xt/x:set-key model-map model-id model-spec))
   (return (page-core/add-group-attach node space-id group-id model-map)))
 
-(defn.xt has-group?
-  "Checks if a page group exists on the node."
-  {:added "4.1"}
-  [node space-id group-id]
-  (return (xt/x:not-nil? (page-core/group-get node space-id group-id))))
-
-(defn.xt create-server-node
+(defn.js create-server-node
   "Creates the worker server node and installs db/primary and db/caching services."
   {:added "4.1"}
   [config schema lookup]
@@ -84,13 +78,7 @@
                            schema
                            lookup)))
 
-(defn.xt install-server-models
-  "Installs db-model-service page models on the server node."
-  {:added "4.1"}
-  [node space-id group-id model-specs]
-  (return (-/install-page-models node space-id group-id model-specs)))
-
-(defn.xt boot-worker-server
+(defn.js boot-worker-server
   "Boots the server node on a worker self object (SharedWorker port, webworker self, etc.).
 
    The ready payload is posted back to the client once the transport is attached."
@@ -104,16 +92,22 @@
      "target" worker-self
      "ready" ready-payload})))
 
-(defn.xt run-server
+(defn.js run-server
   "High-level helper that creates the server node, installs services and models,
-   then boots the worker transport. Designed to be called from a worker entry script."
+   then boots the worker transport. Designed to be called from a worker entry script.
+
+   `seed-fn` is called with the node after services are installed but before page
+   models are attached, so that the initial refresh sees seeded data. Pass `nil`
+   when no seeding is required."
   {:added "4.1"}
-  [worker-self config schema lookup space-id group-id models ready-payload]
+  [worker-self config schema lookup space-id group-id models ready-payload seed-fn]
   (return
    (promise/x:promise-then
     (-/create-server-node config schema lookup)
     (fn [node]
       (page-remote/install node)
+      (when (xt/x:is-function? seed-fn)
+        (seed-fn node))
       (xt/for:object [[model-id tree] models]
         (-/install-page-models
          node
@@ -125,7 +119,7 @@
         (-/boot-worker-server node worker-self ready-payload)
         (fn [_] (return node))))))))
 
-(defn.xt create-client-node
+(defn.js create-client-node
   "Creates a client node with page-remote installed."
   {:added "4.1"}
   []
@@ -133,7 +127,7 @@
   (page-remote/install node)
   (return node))
 
-(defn.xt connect-client
+(defn.js connect-client
   "Connects a client node to a worker source."
   {:added "4.1"}
   [client source opts]
