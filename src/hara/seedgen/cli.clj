@@ -285,8 +285,9 @@
       (seedgen-test selector langs))
 
     "compatible"
-    (let [{:keys [selector]} (parse-command-args args)
-          selector (or selector :all)
+    (let [selector (if (seq args)
+                     (:selector (parse-command-args args))
+                     :all)
           report (compatible-report selector)]
       (println (str "\n[seedgen] compatible namespaces" (if (= :all selector) "" (str " for " selector)) ":"))
       (pprint/pprint report)

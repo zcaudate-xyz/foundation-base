@@ -225,14 +225,18 @@
   => '(join arr "-")
 
   (julia-tf-x-str-index-of '(:x-str-index-of s "abc"))
-  => '(do
-        (var start-idx (:? (or (== nil nil) (< nil 1)) 1 nil))
-        (var idx (findnext "abc" s start-idx))
-        (return
-         (:?
-          (== idx nothing)
-          -1
-          (:? (isa idx Integer) (Int idx) (Int (first idx))))))
+  => '(:- "(function()\n"
+        (% (do
+             (var start-idx (:? (or (== nil nil) (< nil 1)) 1 nil))
+             (var idx (findnext "abc" s start-idx))
+             (return
+              (:?
+               (== idx nothing)
+               -1
+               (:? (isa idx Integer)
+                   (- (Int idx) 1)
+                   (- (Int (first idx)) 1))))))
+        "\nend)()")
 
   (julia-tf-x-str-substring '(:x-str-substring s start end))
   => '(. s [(to (max 1 start) 1 end)])

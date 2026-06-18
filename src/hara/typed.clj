@@ -1,7 +1,8 @@
 (ns hara.typed
   (:require [hara.typed.xtalk-analysis :as analysis]
             [hara.typed.xtalk-common :as types]
-            [hara.typed.xtalk-parse :as parse]))
+            [hara.typed.xtalk-parse :as parse]
+            [std.lib.foundation :as f]))
 
 (defn namespace-aliases
   [ns-obj]
@@ -17,7 +18,7 @@
    (let [ns-sym (some-> sym namespace symbol)
          spec-sym (symbol (name sym))
          spec (parse/parse-spec-decl ns-sym spec-sym type-form spec-meta aliases
-                                   {:file (or *file* "UNKNOWN")})]
+                                     {:file (or *file* "UNKNOWN")})]
      (types/register-spec! sym spec)
      spec)))
 
@@ -42,86 +43,24 @@
          '~aliases)
         nil)))
 
-(defn clear-registry!
-  []
-  (types/clear-registry!))
-
-(defn register-type!
-  [sym type-def]
-  (types/register-spec! sym type-def))
-
-(defn get-type
-  [sym]
-  (types/get-type sym))
-
-(defn get-entry
-  [sym]
-  (types/get-entry sym))
-
-(defn get-declaration
-  [sym kind]
-  (types/get-declaration sym kind))
-
-(defn get-spec
-  [sym]
-  (types/get-spec sym))
-
-(defn get-function
-  [sym]
-  (types/get-function sym))
-
-(defn get-macro
-  [sym]
-  (types/get-macro sym))
-
-(defn get-value
-  [sym]
-  (types/get-value sym))
-
-(defn list-specs
-  []
-  (types/list-specs))
-
-(defn list-entries
-  []
-  (types/list-entries))
-
-(defn list-functions
-  []
-  (types/list-functions))
-
-(defn list-macros
-  []
-  (types/list-macros))
-
-(defn list-values
-  []
-  (types/list-values))
-
-(defn analyze-file
-  [file-path]
-  (analysis/analyze-file file-path))
-
-(defn analyze-file-raw
-  [file-path]
-  (analysis/analyze-file-raw file-path))
-
-(defn analyze-namespace
-  [ns-sym]
-  (analysis/analyze-namespace ns-sym))
-
-(defn analyze-namespace-raw
-  [ns-sym]
-  (analysis/analyze-namespace-raw ns-sym))
-
-(defn analyze-and-register!
-  [ns-sym]
-  (analysis/analyze-and-register! ns-sym))
-
-(defn check-function
-  [fn-ref]
-  (analysis/get-function-report fn-ref))
-
-(defn check-namespace
-  [ns-sym]
-  (analysis/check-namespace ns-sym))
+(f/intern-in types/clear-registry!
+             [register-type! types/register-spec!]
+             types/get-type
+             types/get-entry
+             types/get-declaration
+             types/get-spec
+             types/get-function
+             types/get-macro
+             types/get-value
+             types/list-specs
+             types/list-entries
+             types/list-functions
+             types/list-macros
+             types/list-values
+             analysis/analyze-file
+             analysis/analyze-file-raw
+             analysis/analyze-namespace
+             analysis/analyze-namespace-raw
+             analysis/analyze-and-register!
+             [check-function analysis/get-function-report]
+             analysis/check-namespace)

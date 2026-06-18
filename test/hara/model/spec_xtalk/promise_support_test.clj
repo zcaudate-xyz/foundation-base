@@ -106,15 +106,17 @@
         dart-out (l/emit-as :dart ['(x:async-run thunk)])
         py-out (l/emit-as :python ['(x:async-run thunk)])
         lua-out (l/emit-as :lua ['(x:async-run thunk)])]
-    [[(boolean (re-find #"Promise\.resolve\(\)" js-out))
-      (boolean (re-find #"\.then\(thunk\)" js-out))]
+    [[(boolean (re-find #"(?s)new Promise" js-out))
+      (boolean (re-find #"(?s)setTimeout" js-out))
+      (boolean (re-find #"(?s)Promise\.resolve" js-out))
+      (boolean (re-find #"(?s)thunk" js-out))]
      [(boolean (re-find #"Future\.sync\(thunk\)" dart-out))]
      [(boolean (re-find #"threading" py-out))
       (boolean (re-find #"Thread" py-out))
       (boolean (re-find #"target=thunk|:target thunk" py-out))]
      [(boolean (re-find #"coroutine\.create" lua-out))
       (boolean (re-find #"coroutine\.resume" lua-out))]])
-  => [[true true]
+  => [[true true true true]
       [true]
       [true true true]
       [true true]])

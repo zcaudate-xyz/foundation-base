@@ -405,12 +405,12 @@
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-async-run :added "4.1"}
 (fact "async run emits a native promise start"
   (l/emit-as :js [(js-tf-x-async-run '[_ thunk])])
-  => #"(?s)Promise\.resolve\(\).*then\(thunk\)")
+  => #"(?s)new Promise.*setTimeout.*Promise\.resolve.*thunk")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-with-delay :added "4.0"}
 (fact "with delay"
-  (spit "/tmp/xwithdelay.js" (l/emit-as :js [(js-tf-x-with-delay '[_ 100 thunk])]))
-  => #"setTimeout")
+  (l/emit-as :js [(js-tf-x-with-delay '[_ 100 thunk])])
+  => #"(?s)setTimeout.*new Promise")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise :added "4.1"}
 (fact "TODO")
