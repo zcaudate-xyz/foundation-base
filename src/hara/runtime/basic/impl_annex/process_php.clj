@@ -29,16 +29,69 @@
   [input mopts]
   (rt/return-transform input mopts))
 
+(defn php-prefix-params
+  "Prefixes bare function parameter symbols with `$` for valid PHP emission.
+   Handles `fn` and `defn` forms with simple lexical scoping."
+  {:added "4.1"}
+  [form]
+  (letfn [(param-sym? [x]
+            (and (symbol? x)
+                 (not (str/starts-with? (name x) "$"))))
+          (prefix-param [x]
+            (if (param-sym? x)
+              (symbol (str "$" (name x)))
+              x))
+          (params-of [params-vec]
+            (set (filter param-sym? params-vec)))
+          (walk [form params]
+            (cond
+              (and (seq? form)
+                   ('#{fn} (first form)))
+              (let [[op params-vec & body] form
+                    new-params (into params (params-of params-vec))]
+                (list* op
+                       (vec (map prefix-param params-vec))
+                       (map #(walk % new-params) body)))
+
+              (and (seq? form)
+                   ('#{defn defn-} (first form)))
+              (let [[op name params-vec & body] form
+                    name (with-meta name {:inner true})
+                    new-params (into params (params-of params-vec))]
+                (list* op
+                       name
+                       (vec (map prefix-param params-vec))
+                       (map #(walk % new-params) body)))
+
+              (symbol? form)
+              (if (params form)
+                (prefix-param form)
+                form)
+
+              (seq? form)
+              (map #(walk % params) form)
+
+              (vector? form)
+              (vec (map #(walk % params) form))
+
+              (map? form)
+              (into {} (map (fn [[k v]]
+                              [(walk k params) (walk v params)])
+                            form))
+
+              :else form))]
+    (walk form #{})))
+
 (defn php-body-source
   "creates a single-line php source string for runtime eval"
   {:added "4.1"}
   [input mopts]
   (-> (impl/emit-as
-       :php [(default-body-transform input mopts)])
+       :php [(php-prefix-params (default-body-transform input mopts))])
       (str/replace #"(?s)<\?php\s*" "")
       (str/replace #"(?s)\s*\?>" "")
        (str/replace #"\n+" " ")
-       (str/trim)))
+      (str/trim)))
 
 (def +return-bootstrap+
   (str/join

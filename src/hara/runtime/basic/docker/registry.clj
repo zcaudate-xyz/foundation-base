@@ -81,9 +81,9 @@
     :r
      {:image      "foundation-base/rt-basic-r:latest"
       :notes      "project-owned R basic runtime image based on rocker/r-ver with jsonlite available"
-      :config     {:container {:image "foundation-base/rt-basic-r:latest"}
-                   :process   {:timeout 30000}}
-      :r-base-bootstrap #'r-bootstrap}
+      :config     {:container {:image     "foundation-base/rt-basic-r:latest"
+                               :bootstrap #'r-bootstrap}
+                   :process   {:timeout 30000}}}
 
      :erlang
      {:image      "foundation-base/rt-basic-erlang:latest"

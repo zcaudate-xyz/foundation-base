@@ -56,6 +56,16 @@
          (at/atom:set state [ctx :instance] instance)
          instance))))
 
+(defn space-rt-create
+  "creates a runtime record for the context without starting it"
+  {:added "4.1"}
+  ([{:keys [state] :as sp} ctx]
+   (let [{:keys [config resource variant]} (space-context-get sp ctx)
+         {:keys [instance] :as spec} (res/res:variant-get resource variant)
+         create (-> instance :create)
+         full-config (c/merge-nested (:config spec) config)]
+     (create full-config))))
+
 (defn space-rt-stop
   "stops the context runtime"
   {:added "3.0"}

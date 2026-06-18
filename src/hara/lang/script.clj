@@ -395,13 +395,10 @@
   {:added "4.0"}
   ([lang config]
    (let [rt-config (script-test-prep lang config)]
-     (if (script-test-mode? config)
-       (let [ctx (ut/lang-context lang)
-             sp  (space/space (env/ns-sym))]
-         (space/space:context-set sp ctx (or (:runtime config) :default) rt-config))
-       (control/script-rt-get lang
-                              (:runtime config)
-                              rt-config)))))
+     (control/script-rt-get lang
+                            (:runtime config)
+                            rt-config
+                            (script-test-mode? config)))))
 
 (defmacro ^{:style/indent 1}
   script-
@@ -425,10 +422,10 @@
          rt-config (script-test-prep lang config)
          ns (:module rt-config)
          test-mode? (script-test-mode? config)]
-     (when-not test-mode?
-       (control/script-rt-get lang
-                              (:runtime config)
-                              rt-config))
+     (control/script-rt-get lang
+                            (:runtime config)
+                            rt-config
+                            test-mode?)
      (annex/register-annex-tag ns tag lang runtime config)
      (when-not test-mode?
        (let [rt (annex/get-annex-runtime ns tag)]

@@ -60,7 +60,7 @@
      [sp ctx])))
 
 (defn script-rt-get
-  "gets the current runtime
+  "gets the current runtime, optionally without starting it
  
    (script-rt-get :lua :default {})
    => rt/rt-default?
@@ -77,7 +77,14 @@
    => []"
   {:added "4.0"}
   ([lang key config]
-   (apply space/space:rt-start (script-rt-prep lang key config))))
+   (script-rt-get lang key config false))
+  ([lang key config no-start?]
+   (let [[sp ctx] (script-rt-prep lang key config)]
+     (if no-start?
+       (let [rt (space/space-rt-create sp ctx)]
+         (ctx-reg/registry-scratch-set! ctx rt)
+         rt)
+       (space/space:rt-start sp ctx)))))
 
 (defn script-rt-stop
   "stops the current runtime"

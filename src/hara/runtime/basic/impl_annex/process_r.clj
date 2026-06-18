@@ -94,6 +94,11 @@
   {:added "4.0"}
   [input mopts]
   (let [forms (->> (rt/normalize-body-forms input mopts)
+                   (mapcat (fn [form]
+                             (if (and (seq? form)
+                                      ('#{do do*} (first form)))
+                               (rest form)
+                               [form])))
                    (map mark-local-defn))
         forms (if (empty? forms)
                 [nil]
@@ -155,7 +160,7 @@
   default-basic-client
   (let [root      (or (System/getenv "PWD")
                       (System/getProperty "user.dir"))
-        bootstrap (->> [(str "setwd(" (pr-str root) ")")
+        bootstrap (->> [(str "tryCatch(setwd(" (pr-str root) "), error = function(e) {})")
                          "suppressPackageStartupMessages(library(jsonlite))"
                          (impl/emit-entry-deps
                           lib/return-eval

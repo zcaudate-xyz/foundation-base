@@ -143,4 +143,11 @@
   ([ctx]
    (:scratch (registry-get ctx))))
 
+(defn registry-scratch-set!
+  "sets the scratch runtime for a registered context"
+  {:added "4.1"}
+  ([ctx scratch]
+   (-> (at/atom:set *registry* [ctx :scratch] scratch)
+       (at/atom:set-changed))))
+
 (def +init+ (registry-install :null {:scratch (map->RuntimeNull {})}))
