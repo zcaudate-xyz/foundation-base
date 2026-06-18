@@ -6,39 +6,40 @@
 
 (script/script- :jq)
 
+
 (fact "basic emit tests"
 
   (!.jq
-   (def foo [x]
-     (+ x 1)))
+    (def foo [x]
+      (+ x 1)))
   => "def foo(x): x + 1;"
 
   (!.jq
-   (| . foo))
+    (| . foo))
   => ". | foo"
 
   (!.jq
-   (if (> . 5)
-     "big"
-     "small"))
-  => "if . > 5 then "big" else "small" end"
+    (if (> . 5)
+      "big"
+      "small"))
+  => "if . > 5 then \"big\" else \"small\" end"
 
   (!.jq
-   (reduce inputs item 0
-     (+ . $item)))
+    (reduce inputs item 0
+            (+ . $item)))
   => "reduce inputs as $item (0; . + $item)"
 
   (!.jq
-   (try error .))
+    (try error .))
   => "try error catch ."
 
   (!.jq
-   (| (label out) (break out)))
+    (| (label out) (break out)))
   => "label $out | break $out"
-
+  
   (!.jq
-   {:a 1 :b 2})
-  => "{"a":1,"b":2}")
+    {:a 1 :b 2})
+  => "{\"a\":1,\"b\":2}")
 
 ^{:refer hara.model.annex.spec-jq/jq-args :added "4.0"}
 (fact "custom args for jq"

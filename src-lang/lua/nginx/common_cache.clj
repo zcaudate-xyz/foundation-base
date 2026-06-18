@@ -5,7 +5,7 @@
 (l/script :lua.nginx
   {:import [["cjson" :as cjson]]
    :require [[xt.lang.spec-base :as xt]
-             [xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
              [lua.nginx :as n]]})
 
 (defn.lua cache

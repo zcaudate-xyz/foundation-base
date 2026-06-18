@@ -109,6 +109,7 @@
                   (network/wait-for-port "127.0.0.1" +default-port+
                                     {:timeout 1000})))
         (let [_    (fs/create-directory +default-dir+)
+              _    (fs/create-directory "artifacts/build-info")
               _    (clear-contracts)]
           (-> (if (not @*server*)
                 (swap! *server*
@@ -118,7 +119,8 @@
                                                              " --hostname 0.0.0.0"
                                                              " --port " +default-port+)]
                                                  :wait false
-                                                 :root +default-root+})
+                                                 :root +default-root+
+                                                 :env {"CHOKIDAR_USEPOLLING" "true"}})
                                  thread  (-> (future/future
                                                (os/sh-wait process))
                                              (future/on:complete

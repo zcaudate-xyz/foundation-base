@@ -16,7 +16,7 @@
   [bool]
   (if bool "true" "false"))
 
-(defn- octave-sym-str
+(defn octave-sym-str
   "sanitizes a symbol name for octave identifiers"
   {:added "4.0"}
   [s]
@@ -25,14 +25,14 @@
       (clojure.string/replace #"\?" "p")
       (clojure.string/replace #"!" "f")))
 
-(defn- octave-module-name
+(defn octave-module-name
   "returns the function prefix for the current module, if any"
   {:added "4.0"}
   []
   (when-let [module-id (get-in (preprocess/macro-opts) [:module :id])]
     (octave-sym-str (name module-id))))
 
-(defn- octave-qualified-name
+(defn octave-qualified-name
   "returns the octave-visible name for an xtalk function symbol"
   {:added "4.0"}
   [sym]

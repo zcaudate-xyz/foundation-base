@@ -100,6 +100,22 @@
                             (. (!:G URL) (revokeObjectURL url))
                             (throw err))))}))
 
+(defn.js make-sharedworker-link-from-url
+  "creates a worker-url object backed by a browser SharedWorker,
+   reusing an existing URL so multiple tabs connect to the same worker"
+  {:added "4.1"}
+  [url]
+  (return {:create-fn (fn [listener]
+                        (var shared (new SharedWorker url))
+                        (var port (. shared ["port"]))
+                        (. port (start))
+                        (. port (addEventListener
+                                 "message"
+                                 (fn [e]
+                                   (listener e.data))
+                                 false))
+                        (return port))}))
+
 (defn.js make-link
   "dispatches to a runtime-specific worker link helper"
   {:added "4.1"}

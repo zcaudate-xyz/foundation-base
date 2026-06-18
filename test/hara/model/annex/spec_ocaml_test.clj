@@ -5,6 +5,7 @@
 
 ^{:refer hara.model.annex.spec-ocaml/CANARY :adopt true :added "4.1"}
 (fact "basic emit"
+
   (impl/emit-script '(defn hello [x] x) {:lang :ocaml})
   => "let rec hello x = x"
 
