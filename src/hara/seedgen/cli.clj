@@ -15,7 +15,10 @@
    lein seedgen benchadd '[xt.sample] :lang python :write true
    lein seedgen benchremove '[xt.sample] :lang python :write true
    lein seedgen compatible
-   lein seedgen compatible '[xt.lang]"
+   lein seedgen compatible '[xt.lang]
+
+   lein seedgen todos '[hara.runtime]
+   lein seedgen todos '[hara.runtime] :write true"
   (:require [clojure.edn :as edn]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
@@ -23,6 +26,7 @@
             [code.test.base.executive :as executive]
             [code.test.task :as test-task]
             [hara.seedgen :as seedgen]
+            [hara.seedgen.common-infile :as common-infile]
             [hara.seedgen.common-util :as common]
             [std.fs :as fs]
             [std.lib.result :as res]))
@@ -278,6 +282,89 @@
         (recur (assoc opts k v) args))
       opts)))
 
+(defn- project-lookup
+  "returns a merged ns->path lookup for source and test paths"
+  {:added "4.1"}
+  [project]
+  (let [src  (project/all-files (:source-paths project) {} project)
+        test (project/all-files (:test-paths project) {} project)]
+    (merge src test)))
+
+(defn- source-namespaces-for
+  "returns source namespaces matching the selector"
+  {:added "4.1"}
+  [selector project]
+  (->> (project/all-files (:source-paths project) {} project)
+       keys
+       (remove #(str/ends-with? (str %) "-test"))
+       (filter #(prefix-matches? % (selector-prefixes selector)))
+       sort
+       vec))
+
+(defn- test-file-for
+  "returns the test file path for a source namespace, or nil"
+  {:added "4.1"}
+  [source-ns lookup]
+  (lookup (project/test-ns source-ns)))
+
+(defn- ensure-test-file!
+  "creates or appends TODO facts for incomplete functions in a test file"
+  {:added "4.1"}
+  [source-ns fns write?]
+  (let [project   (project/project)
+        lookup    (project-lookup project)
+        test-ns   (project/test-ns source-ns)
+        path      (or (test-file-for source-ns lookup)
+                      (str "test/" (-> (str test-ns)
+                                       (str/replace "-" "_")
+                                       (str/replace "." "/"))
+                           "_test.clj"))
+        file      (java.io.File. path)]
+    (if (seq fns)
+      (let [exists? (.exists file)
+            facts   (->> fns
+                         (map (fn [refer]
+                                (str "^{:refer " refer " :added \"4.1\"}\n"
+                                     "(fact \"TODO\")")))
+                         (str/join "\n\n"))]
+        (println (str (if write? "[WRITE] " "[DRY-RUN] ")
+                      (count fns) " TODO fact" (when (> (count fns) 1) "s")
+                      " for " test-ns " -> " path))
+        (when write?
+          (when-not exists?
+            (.mkdirs (.getParentFile file))
+            (spit file (str "(ns " test-ns "\n  (:use code.test))\n\n")))
+          (spit file (str (when exists? "\n") facts "\n") :append true))
+        (count fns))
+      0)))
+
+(defn seedgen-todos
+  "generates TODO facts for functions without test coverage"
+  {:added "4.1"}
+  ([selector] (seedgen-todos selector {}))
+  ([selector params]
+   (let [project (project/project)
+         lookup  (project-lookup project)
+         nss     (source-namespaces-for selector project)
+         write?  (true? (:write params))]
+     (println (str "\n[seedgen] scanning " (count nss)
+                   " namespace" (when (> (count nss) 1) "s") " for incomplete tests"))
+     (let [total (reduce (fn [acc ns]
+                           (let [incomplete (common-infile/seedgen-incomplete ns {} lookup project)]
+                             (cond (res/result? incomplete)
+                                   (do (println "  [skip]" ns "-" (:data incomplete))
+                                       acc)
+
+                                   (seq incomplete)
+                                   (+ acc (ensure-test-file! ns (keys incomplete) write?))
+
+                                   :else acc)))
+                         0
+                         nss)]
+       (println (str "\n[seedgen] " (if write? "wrote" "would write")
+                     " " total " TODO fact" (when (> total 1) "s")))
+       total))))
+
 (defn parse-command-args
   "parses namespace selector and options for a generic seedgen command"
   {:added "4.1"}
@@ -304,6 +391,11 @@
       (pprint/pprint report)
       report)
 
+    "todos"
+    (let [{:keys [selector params]} (parse-command-args args)
+          selector (or selector :all)]
+      (seedgen-todos selector params))
+
     (if-let [{:keys [fn lang?]} (get commands command)]
       (let [{:keys [selector params]} (parse-command-args args)
             params (-> params
@@ -314,7 +406,7 @@
                           {:command command :params params})))
         (fn selector params))
       (throw (ex-info "Unknown seedgen command"
-                      {:command command :available (conj (sort (keys commands)) "compatible" "test")})))))
+                      {:command command :available (conj (sort (keys commands)) "compatible" "test" "todos")})))))
 
 (defn -main
   "main entry point for lein seedgen"
@@ -331,5 +423,5 @@
             (pprint/pprint data))
           (System/exit 1)))
       (do (println "Usage: lein seedgen <command> <selector> [options]")
-          (println "Commands:" (str/join ", " (conj (sort (keys commands)) "compatible" "test")))
+          (println "Commands:" (str/join ", " (conj (sort (keys commands)) "compatible" "test" "todos")))
           (System/exit 1)))))

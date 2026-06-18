@@ -85,3 +85,78 @@
 
   (generate-common-file)
   => (fn [s] (str/includes? s "(defn admin-create-user")))
+
+
+^{:refer lib.supabase.generate/entry->path-keys :added "4.1"}
+(fact "extracts path params as kebab-cased symbols"
+  (entry->path-keys (get lib.supabase.api/+admin+ "admin-delete-user"))
+  => '[user-id]
+
+  (entry->path-keys (get lib.supabase.api/+admin+ "admin-get-user"))
+  => '[user-id]
+
+  (entry->path-keys (get lib.supabase.api/+admin+ "health"))
+  => '[])
+
+^{:refer lib.supabase.generate/entry->query-keys :added "4.1"}
+(fact "extracts query params as kebab-cased symbols"
+  (entry->query-keys (get lib.supabase.api/+admin+ "verify-get"))
+  => '[type token email phone redirect-to]
+
+  (entry->query-keys (get lib.supabase.api/+admin+ "authorize"))
+  => '[redirect-to]
+
+  (entry->query-keys (get lib.supabase.api/+admin+ "health"))
+  => '[])
+
+^{:refer lib.supabase.generate/entry->body-keys :added "4.1"}
+(fact "extracts body property names as kebab-cased symbols"
+  (entry->body-keys (get lib.supabase.api/+admin+ "admin-create-user"))
+  => '[role aud ban-duration email-confirm email user-metadata app-metadata phone phone-confirm password]
+
+  (entry->body-keys (get lib.supabase.api/+admin+ "recovery"))
+  => '[email]
+
+  (entry->body-keys (get lib.supabase.api/+admin+ "health"))
+  => '[])
+
+^{:refer lib.supabase.generate/entry->template-input :added "4.1"}
+(fact "builds template parameters for an endpoint"
+  (entry->template-input ["health" (get lib.supabase.api/+admin+ "health")])
+  => (fn [m] (and (map? m)
+                  (= 'health (get m 'fn-name))
+                  (= "health" (get m 'operation-id))
+                  (= '[client] (get m 'args-form))
+                  (= {} (get m 'input-form))
+                  (= 'client (get m 'client-sym))))
+
+  (entry->template-input ["admin-create-user" (get lib.supabase.api/+admin+ "admin-create-user")])
+  => (fn [m] (and (map? m)
+                  (= 'admin-create-user (get m 'fn-name))
+                  (= "admin-create-user" (get m 'operation-id))
+                  (= 'client (get m 'client-sym))
+                  (vector? (get m 'args-form))
+                  (map? (get m 'input-form)))))
+
+^{:refer lib.supabase.generate/generate-admin-functions :added "4.1"}
+(fact "emits wrapper source for all admin endpoints"
+  (generate-admin-functions)
+  => (fn [s] (and (string? s)
+                  (str/includes? s "(defn admin-create-user")
+                  (str/includes? s "(defn admin-delete-user")
+                  (str/includes? s "(defn verify-get")
+                  (str/includes? s "(defn health")))
+
+  (generate-admin-functions)
+  => (fn [s] (str/includes? s "\n\n")))
+
+^{:refer lib.supabase.generate/write-common-file! :added "4.1"}
+(fact "writes generated source to the common namespace file"
+  (let [calls (atom [])]
+    (with-redefs [spit (fn [path content] (swap! calls conj [path content]))]
+      (write-common-file!))
+    @calls)
+  => (fn [calls] (and (= 1 (count calls))
+                      (= "src/lib/supabase/common.clj" (ffirst calls))
+                      (string? (second (first calls)))
+                      (str/includes? (second (first calls)) "(ns lib.supabase.common"))))

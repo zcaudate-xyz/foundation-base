@@ -64,3 +64,5 @@
                 output-file (conj output-file))]
      (os/sh {:root +root-dir+
             :args args}))))
+
+(def generate-ast translate-ast)
