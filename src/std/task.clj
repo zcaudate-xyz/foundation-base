@@ -120,6 +120,37 @@
          (catch Throwable _
            raw))))
 
+(defn read-cli-arg
+  "reads a CLI string as an EDN value, falling back to the raw string"
+  {:added "4.1"}
+  [s]
+  (try (read-string s)
+       (catch Throwable _
+         s)))
+
+(defn keyword-cli-arg?
+  "checks whether a CLI string reads as a keyword"
+  {:added "4.1"}
+  [s]
+  (keyword? (read-cli-arg s)))
+
+(defn collapse-only
+  "collapses multiple namespace arguments following :only into a single
+   vector literal string, allowing process-ns-args to read them as an :ns vector"
+  {:added "4.1"}
+  [args]
+  (loop [result []
+         [k & more] args]
+    (if-not k
+      result
+      (if (= :only (read-cli-arg k))
+        (let [vals (take-while (complement keyword-cli-arg?) more)]
+          (if (seq vals)
+            (recur (conj result k (pr-str (mapv read-cli-arg vals)))
+                   (drop (count vals) more))
+            (recur (conj result k) more)))
+        (recur (conj result k) more)))))
+
 (defn process-ns-args
   "processes arguments for tasks"
   {:added "4.0"}

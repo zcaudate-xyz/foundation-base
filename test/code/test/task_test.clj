@@ -64,6 +64,18 @@
     :print-throw
     :print-success})
 
+^{:refer code.test.task/process-test-args :added "4.1"}
+(fact "parses code.test CLI args, including multiple :only namespaces"
+
+  (task/process-test-args [":only" "foo"])
+  => {:ns '[foo]}
+
+  (task/process-test-args [":only" "foo" "bar" "baz"])
+  => {:ns '[foo bar baz]}
+
+  (task/process-test-args [":only" "foo" "bar" ":timeout" "100"])
+  => {:ns '[foo bar] :timeout 100})
+
 ^{:refer code.test.task/-main :added "3.0" :class [:test/general]}
 (comment "main entry point for leiningen"
 

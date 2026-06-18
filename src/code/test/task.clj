@@ -239,13 +239,19 @@
 
 ;;(print-options (print-options :default))
 
+(defn process-test-args
+  "parses CLI args for code.test, supporting multiple namespaces after :only"
+  {:added "4.1"}
+  [args]
+  (task/process-ns-args (task/collapse-only args)))
+
 (defn -main
   "main entry point for leiningen
   
    (task/-main)"
   {:added "3.0"}
   ([& args]
-   (let [opts    (task/process-ns-args args)
+   (let [opts    (process-test-args args)
          project (project/project)
          {:keys [throw failed timeout] :as stats}
          (cond

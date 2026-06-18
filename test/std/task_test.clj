@@ -105,6 +105,33 @@
   => {:files ["test/code/project_test.clj"
               "test/std/task_test.clj"]})
 
+^{:refer std.task/collapse-only :added "4.1"}
+(fact "collapses multiple :only namespace args into a vector literal"
+
+  (collapse-only [":only" "foo"])
+  => [":only" "[foo]"]
+
+  (collapse-only [":only" "foo" "bar" "baz"])
+  => [":only" "[foo bar baz]"]
+
+  (collapse-only [":only" "foo" "bar" ":timeout" "100"])
+  => [":only" "[foo bar]" ":timeout" "100"]
+
+  (collapse-only [":only"])
+  => [":only"]
+
+  (collapse-only [":only" ":verbose"])
+  => [":only" ":verbose"]
+
+  (process-ns-args (collapse-only [":only" "foo"]))
+  => {:ns '[foo]}
+
+  (process-ns-args (collapse-only [":only" "foo" "bar" "baz"]))
+  => {:ns '[foo bar baz]}
+
+  (process-ns-args (collapse-only [":only" "foo" "bar" ":timeout" "100"]))
+  => {:ns '[foo bar] :timeout 100})
+
 
 (comment
 

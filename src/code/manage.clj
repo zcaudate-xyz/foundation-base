@@ -726,7 +726,7 @@
     (if (not cmd)
       (print-fn)
       
-      (let [opts (task/process-ns-args args)
+      (let [opts (task/process-ns-args (task/collapse-only args))
             func (ns-resolve (find-ns 'code.manage) (symbol cmd))
             args (mapv (fn [x] (try (read-string x) (catch Throwable _ x))) args)]
         (if func
