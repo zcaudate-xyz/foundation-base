@@ -39,5 +39,5 @@
     (with-redefs [make/build-all (fn [target] target)
                   os/sh (fn [{:keys [args] :as opts}]
                           (assoc opts :out ast-json))]
-      (json/read (:out (js-ast/translate-ast (str tmp-input))))))
+      (json/read (:out (js-ast/generate-ast (str tmp-input))))))
   => {"type" "File" "program" {"type" "Program" "body" []} "comments" []})

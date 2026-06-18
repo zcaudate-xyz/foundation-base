@@ -152,10 +152,29 @@
                            :write false}))
 
 ^{:refer code.manage/factcheck-remove :added "4.1"}
-(fact "TODO")
+(fact "removes `=>` expectations from fact tests"
+  (task/task? factcheck-remove)
+  => true
+
+  (let [task (into {} factcheck-remove)]
+    [(:template task)
+     (-> task :params :title)
+     (fn? (-> task :main :fn))])
+  => [:code.transform "REMOVE FACT CHECKS" true]
+
+  (factcheck-remove '[code.manage] {:write false})
+  => map?)
 
 ^{:refer code.manage/factcheck-generate :added "4.1"}
-(fact "TODO")
+(fact "regenerates `=>` expectations for fact tests"
+  (task/task? factcheck-generate)
+  => true
+
+  (let [task (into {} factcheck-generate)]
+    [(:template task)
+     (-> task :params :title)
+     (fn? (-> task :main :fn))])
+  => [:code.transform "GENERATE FACT CHECKS" true])
 
 ^{:refer code.manage/snapto :added "4.1"}
 (fact "formats fact tests into snap-to layout"

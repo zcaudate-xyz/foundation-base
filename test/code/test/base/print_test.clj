@@ -36,7 +36,12 @@
   => true)
 
 ^{:refer code.test.base.print/print-success :added "3.0"}
-(fact "outputs the description for a successful test")
+(fact "outputs the description for a successful test"
+
+  (clojure.string/includes? (env/with-out-str
+                   (print-success {:name "test" :check "check" :desc "desc"}))
+                 "SUCCESS")
+  => true)
 
 ^{:refer code.test.base.print/print-throw :added "4.1"}
 (fact "prints throw info"
@@ -85,7 +90,29 @@
   => true)
 
 ^{:refer code.test.base.print/print-fact :added "3.0"}
-(fact "outputs the description for a fact form that contains many statements")
+(fact "outputs the description for a fact form that contains many statements"
+
+  (clojure.string/includes? (env/with-out-str
+                   (print-fact {:path "test.clj" :line 10 :name "my-fact" :desc "desc"}
+                               [{:from :verify :status :success :data true}]))
+                 "Fact")
+  => true)
 
 ^{:refer code.test.base.print/print-summary :added "3.0"}
-(fact "outputs the description for an entire test run")
+(fact "outputs the description for an entire test run"
+
+  (clojure.string/includes? (env/with-out-str
+                   (print-summary {:files 1 :facts 2 :checks 3 :passed 3 :failed 0 :timeout 0 :throw 0}))
+                 "Summary")
+  => true)
+
+
+^{:refer code.test.base.print/print-on-error :added "4.1"}
+(fact "formats debug info for display"
+
+  (print-on-error :yellow nil)
+  => ""
+
+  (clojure.string/includes? (print-on-error :yellow {:status :success :data "debug"})
+                 "On Error:")
+  => true)

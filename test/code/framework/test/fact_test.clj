@@ -57,4 +57,21 @@
 
 
 ^{:refer code.framework.test.fact/top-level-fact-navs :added "4.1"}
-(fact "TODO")
+(fact "collects top-level `fact` and `comment` navigators from a parsed root"
+  (->> "^{:refer a/b :added \"1\"}
+        (fact \"hi\" 1 => 1)
+        (comment x y)
+        (+ 1 2)
+        (fact \"two\" 2 => 2)"
+       nav/parse-root
+       nav/down
+       top-level-fact-navs
+       (map nav/value))
+  => '((fact "hi" 1 => 1)
+       (comment x y)
+       (fact "two" 2 => 2)))
+
+^{:refer code.framework.test.fact/top-level-fact-navs :added "4.1"}
+(fact "returns an empty vector for nil input"
+  (top-level-fact-navs nil)
+  => [])

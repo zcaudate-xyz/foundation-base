@@ -60,7 +60,27 @@
   => 'code.project)
 
 ^{:refer code.project/test-root :added "4.1"}
-(fact "TODO")
+(fact "returns the preferred test root for a path within the project"
+
+  (test-root "test/code/project_test.clj" {:root "."
+                                            :source-paths ["src" "src-lang"]
+                                            :test-paths ["test" "test-lang"]})
+  => "test"
+
+  (test-root "src/code/project.clj" {:root "."
+                                      :source-paths ["src" "src-lang"]
+                                      :test-paths ["test" "test-lang"]})
+  => "test"
+
+  (test-root "src-lang/js/react_native/physical_addon.clj" {:root "."
+                                                               :source-paths ["src" "src-lang"]
+                                                               :test-paths ["test" "test-lang"]})
+  => "test-lang"
+
+  (test-root "foo/bar.clj" {:root "."
+                             :source-paths ["src"]
+                             :test-paths ["test" "test-lang"]})
+  => "test")
 
 ^{:refer code.project/get-path :added "4.1"
   :setup [(reset! code.project.common/*lookup* {})]}

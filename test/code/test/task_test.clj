@@ -4,7 +4,12 @@
   (:use code.test))
 
 ^{:refer code.test.task/run:interrupt :added "4.0"}
-(fact "interrupts the test")
+(fact "interrupts the test"
+
+  (with-redefs [std.task.process/*interrupt* false]
+    (task/run:interrupt)
+    std.task.process/*interrupt*)
+  => true)
 
 ^{:refer code.test.task/resolve-files :added "4.1"}
 (fact "resolves source and test file paths to test namespaces"
@@ -30,16 +35,52 @@
   => map?)
 
 ^{:refer code.test.task/run:current :added "4.0"}
-(fact "runs the current namespace")
+(fact "runs the current namespace"
+
+  (:type (deref #'task/run:current))
+  => :test
+
+  (get-in (deref #'task/run:current) [:params :title])
+  => "TEST CURRENT"
+
+  (sequential? (task/run:current :list))
+  => true)
 
 ^{:refer code.test.task/run:test :added "3.0"}
-(fact "executes tests that are currently loaded in the runtime")
+(fact "executes tests that are currently loaded in the runtime"
+
+  (:type (deref #'task/run:test))
+  => :test
+
+  (get-in (deref #'task/run:test) [:params :title])
+  => "TEST EVAL"
+
+  (sequential? (task/run:test :list))
+  => true)
 
 ^{:refer code.test.task/run:unload :added "3.0"}
-(fact "unloads the test namespace")
+(fact "unloads the test namespace"
+
+  (:type (deref #'task/run:unload))
+  => :test
+
+  (get-in (deref #'task/run:unload) [:params :title])
+  => "TEST UNLOADED"
+
+  (sequential? (task/run:unload :list))
+  => true)
 
 ^{:refer code.test.task/run:load :added "3.0"}
-(fact "load test namespace")
+(fact "load test namespace"
+
+  (:type (deref #'task/run:load))
+  => :test
+
+  (get-in (deref #'task/run:load) [:params :title])
+  => "TEST LOADED"
+
+  (sequential? (task/run:load :list))
+  => true)
 
 ^{:refer code.test.task/run-errored :added "3.0" :class [:test/general]}
 (comment "runs only the tests that have errored"
@@ -80,3 +121,20 @@
 (comment "main entry point for leiningen"
 
   (task/-main))
+
+^{:refer code.test.task/run:report :added "4.1"}
+(fact "reruns failed tests recorded in a saved report"
+
+  (let [calls (atom nil)]
+    (with-redefs [code.test.base.executive/load-report (fn [path]
+                                                         {:path path})
+                  code.test.base.executive/report-failed-facts (fn [report]
+                                                                 {'my.ns '#{my.fn}})
+                  task/run (fn [nss params project]
+                             (reset! calls {:nss nss :params params :project project})
+                             {:passed 1})]
+      (task/run:report "/tmp/report.edn" {} {:root "/tmp"})
+      @calls))
+  => (contains {:nss '[my.ns]
+                :params (contains {:filter {'my.ns '#{my.fn}}})
+                :project (contains {:root "/tmp"})}))

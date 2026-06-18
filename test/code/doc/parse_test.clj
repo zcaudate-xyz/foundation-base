@@ -237,3 +237,29 @@
   => (contains [{:type :chapter :title "Chapter"}
                 {:type :paragraph :text "\ncontent\n"}
                 {:type :section :title "Section"}]))
+
+^{:refer code.doc.parse/fact-caption :added "4.1"}
+(fact "extracts the leading string caption from a fact/facts form, if present"
+
+  (-> (nav/parse-string "(fact \"hello world\" (+ 1 1) \n => 2)")
+      (fact-caption))
+  => "hello world"
+
+  (-> (nav/parse-string "(fact (+ 1 1) \n => 2)")
+      (fact-caption))
+  => nil)
+
+^{:refer code.doc.parse/fact-code-string :added "4.1"}
+(fact "returns the code body of a fact/facts form, stripping the leading caption string if present"
+
+  (-> (nav/parse-string "(fact \"hello world\" (+ 1 1) \n => 2)")
+      (fact-code-string 'fact))
+  => "(+ 1 1) \n => 2"
+
+  (-> (nav/parse-string "(fact (+ 1 1) \n => 2)")
+      (fact-code-string 'fact))
+  => "(+ 1 1) \n => 2"
+
+  (-> (nav/parse-string "(facts \"hello world\" (+ 1 1) \n => 2)")
+      (fact-code-string 'facts))
+  => "(+ 1 1) \n => 2")

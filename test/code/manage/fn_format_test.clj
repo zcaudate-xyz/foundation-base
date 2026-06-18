@@ -52,7 +52,11 @@
   => "(defn foo\n  ([x] (+ x 1)))")
 
 ^{:refer code.manage.fn-format/fn:list-forms :added "4.1"}
-(fact "TODO")
+(fact "query to find `defn` and `defmacro` forms with a vector"
+  (-> (nav/parse-string "(defn foo [x] 1)")
+      (fn:list-forms)
+      (nav/root-string))
+  => "(defn foo\n  ([x] 1))")
 
 ^{:refer code.manage.fn-format/fn:defmethod-forms :added "3.0"}
 (fact "query to find `defmethod` forms with a vector"

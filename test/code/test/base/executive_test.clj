@@ -14,37 +14,120 @@
   (reset! context/*accumulator* data))
 
 ^{:refer code.test.base.executive/report-edn-safe? :added "4.1"}
-(fact "TODO")
+(fact "checks whether a value can be serialized to EDN without coercion"
+
+  (executive/report-edn-safe? :hello)
+  => true
+
+  (executive/report-edn-safe? (atom 1))
+  => false)
 
 ^{:refer code.test.base.executive/report-edn :added "4.1"}
-(fact "TODO")
+(fact "coerces values into an EDN-safe representation"
+
+  (executive/report-edn :ok)
+  => :ok
+
+  (executive/report-edn [(ex-info "boom" {:x 1}) #{1 2}])
+  => [{:tag :throwable
+       :class "clojure.lang.ExceptionInfo"
+       :message "boom"
+       :data {:x 1}}
+      #{1 2}])
 
 ^{:refer code.test.base.executive/report-file-path :added "4.1"}
-(fact "TODO")
+(fact "generates a timestamped report path under the run directory"
+
+  (binding [context/*root* "/tmp/proj"]
+    (with-redefs [std.lib.time/system-ms (fn [] 12345)]
+      (executive/report-file-path)))
+  => "/tmp/proj/.hara/runs/run-12345.edn")
 
 ^{:refer code.test.base.executive/report->run-path :added "4.1"}
-(fact "TODO")
+(fact "derives the repl helper path from a report path"
+
+  (executive/report->run-path "/tmp/.hara/runs/run-1.edn")
+  => "/tmp/.hara/runs/run-1.run.edn")
 
 ^{:refer code.test.base.executive/run-file-path :added "4.1"}
-(fact "TODO")
+(fact "resolves the repl helper path from params"
+
+  (binding [context/*root* "/tmp/proj"]
+    (executive/run-file-path "/tmp/proj/.hara/runs/run-1.edn" {:save-run true}))
+  => "/tmp/proj/.hara/runs/run-1.run.edn"
+
+  (binding [context/*root* "/tmp/proj"]
+    (executive/run-file-path nil {:save-run "custom.run.edn"}))
+  => "/tmp/proj/custom.run.edn")
 
 ^{:refer code.test.base.executive/run-file-params :added "4.1"}
-(fact "TODO")
+(fact "strips internal params while preserving custom settings"
+
+  (executive/run-file-params {:title "X"
+                              :run-command 'code.test/run
+                              :ns 'demo.core
+                              :test {:parallel true}})
+  => {:test {:parallel true}})
 
 ^{:refer code.test.base.executive/run-file-form :added "4.1"}
-(fact "TODO")
+(fact "defaults to code.test/run when no run command is supplied"
+
+  (executive/run-file-form 'demo.core {})
+  => '(do (require (quote code.test))
+          (code.test/run (quote demo.core))))
 
 ^{:refer code.test.base.executive/save-artifact :added "4.1"}
-(fact "TODO")
+(fact "creates parent directories and writes content to the given path"
+
+  (let [calls (atom [])]
+    (with-redefs [std.fs/create-directory (fn [path]
+                                            (swap! calls conj [:mkdir (str path)]))
+                  clojure.core/spit (fn [path content & _]
+                                      (swap! calls conj [:spit path content]))]
+      (executive/save-artifact "Artifact" "/tmp/art/demo.txt" "hello"))
+    @calls)
+  => [[:mkdir "/tmp/art"]
+      [:spit "/tmp/art/demo.txt" "hello"]])
 
 ^{:refer code.test.base.executive/artifact-notices :added "4.1"}
-(fact "TODO")
+(fact "returns formatted notices for saved artifact paths"
+
+  (executive/artifact-notices {:report-path "a.edn"
+                               :run-path "a.run.edn"})
+  => ["Report saved to a.edn"
+      "Run helper saved to a.run.edn"])
 
 ^{:refer code.test.base.executive/save-report-paths :added "4.1"}
-(fact "TODO")
+(fact "writes a run helper even when there are no failures"
+
+  (let [captured (atom [])]
+    (binding [context/*root* "/tmp/proj"]
+      (with-redefs [executive/save-artifact (fn [label path _]
+                                              (swap! captured conj [label path]))
+                    executive/save-run-history (fn [& _]
+                                                 "/tmp/proj/.hara/runs/run-history.csv")
+                    std.lib.time/system-ms (fn [] 1)]
+        [(executive/save-report-paths {:passed [] :failed [] :throw [] :timeout []}
+                                      'demo.core
+                                      {:save-run true})
+         (count @captured)
+         (first @captured)])))
+  => [{:report-path nil
+       :run-path "/tmp/proj/.hara/runs/run-1.run.edn"
+       :history-path "/tmp/proj/.hara/runs/run-history.csv"}
+      1
+      ["Run helper" "/tmp/proj/.hara/runs/run-1.run.edn"]])
 
 ^{:refer code.test.base.executive/announce-artifacts :added "4.1"}
-(fact "TODO")
+(fact "prints notices and returns the artifact map"
+
+  (let [out (atom [])]
+    (with-redefs [std.print/println (fn [& args]
+                                      (swap! out conj (apply str args)))]
+      [(executive/announce-artifacts {:report-path "r.edn"})
+       @out]))
+  => [{:report-path "r.edn"}
+      ["Report saved to r.edn"]])
 
 ^{:refer code.test.base.executive/accumulate :added "3.0"}
 (fact "accumulates test results from various facts and files into a single data structure"
@@ -279,7 +362,54 @@
 
 
 ^{:refer code.test.base.executive/history-file-path :added "4.1"}
-(fact "TODO")
+(fact "returns nil when no run path and no custom history path is provided"
+
+  (executive/history-file-path nil {:save-run {:path "x.run.edn"}})
+  => nil)
 
 ^{:refer code.test.base.executive/save-run-history :added "4.1"}
-(fact "TODO")
+(fact "appends a csv row describing the run"
+
+  (let [calls (atom [])]
+    (with-redefs [std.fs/exists? (fn [_] false)
+                  std.fs/create-directory (fn [path]
+                                            (swap! calls conj [:mkdir (str path)]))
+                  clojure.core/spit (fn [path content & _]
+                                      (swap! calls conj [:spit path content]))
+                  std.lib.time/system-ms (fn [] 123456789)]
+      [(executive/save-run-history {:failed [{:meta {}}] :throw [] :timeout []}
+                                   'demo.core
+                                   {:save-run true :run-command 'code.test/run}
+                                   {:run-path "/tmp/.hara/runs/run-1.run.edn"})
+       (let [[mkdir [_ _ content]] @calls]
+         [mkdir
+          (boolean (re-find #"time,command,failures,report" content))
+          (boolean (re-find #",1," content))
+          (clojure.string/ends-with? content "\n")])]))
+  => ["/tmp/.hara/runs/run-history.csv"
+      [[:mkdir "/tmp/.hara/runs"] true true true]])
+
+^{:refer code.test.base.executive/load-report :added "4.1"}
+(fact "reads EDN from an existing report file"
+
+  (with-redefs [std.fs/exists? (fn [_] true)
+                clojure.core/slurp (fn [_] "{:failed [1 2]}")]
+    (executive/load-report "/tmp/report.edn"))
+  => {:failed [1 2]}
+
+  (with-redefs [std.fs/exists? (fn [_] false)]
+    (executive/load-report "/tmp/missing.edn"))
+  => (throws))
+
+^{:refer code.test.base.executive/report-failed-facts :added "4.1"}
+(fact "groups failed, throw, timeout and errored entries by namespace"
+
+  (executive/report-failed-facts
+   {:failed [{:ns 'demo.core-test :function 'demo/f}
+             {:ns 'demo.core-test :function 'demo/g}]
+    :throw [{:ns 'demo.other-test :function 'demo/h}]
+    :timeout [{:ns 'demo.other-test}]
+    :errored [{:ns 'demo.err-test}]})
+  => {'demo.core-test #{'demo/f 'demo/g}
+      'demo.other-test #{'demo/h}
+      'demo.err-test #{}})
