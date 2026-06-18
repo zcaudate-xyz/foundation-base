@@ -6,115 +6,128 @@
 
 (def ^:dynamic *default*)
 
+(defn callback
+  [client]
+  (call/call (get lib.supabase.api/+admin+ "callback")
+             {}
+             client))
+
+(defn authorize
+  [{:as query :keys [redirect-to]} client]
+  (call/call (get lib.supabase.api/+admin+ "authorize")
+             {:query query}
+             client))
+
+(defn admin-generate-link
+  [{:as body :keys [data email new-email password redirect-to type]} client]
+  (call/call (get lib.supabase.api/+admin+ "admin-generate-link")
+             {:body body}
+             client))
+
+(defn settings
+  [client]
+  (call/call (get lib.supabase.api/+admin+ "settings")
+             {}
+             client))
+
+(defn health
+  [client]
+  (call/call (get lib.supabase.api/+admin+ "health")
+             {}
+             client))
+
+(defn otp
+  [{:as body :keys [create-user data email phone]} client]
+  (call/call (get lib.supabase.api/+admin+ "otp")
+             {:body body}
+             client))
+
+(defn verify-post
+  [{:as body :keys [email phone redirect-to token type]} client]
+  (call/call (get lib.supabase.api/+admin+ "verify-post")
+             {:body body}
+             client))
+
+(defn token-password
+  [{:as body :keys [email password phone]} client]
+  (call/call (get lib.supabase.api/+admin+ "token-password")
+             {:body body}
+             client))
+
 (defn admin-create-user
-  [{:keys [email password email-confirm]
-    :as body}
-   client   ;; schema, host, port etc
-   ]
+  [{:as body :keys [role aud ban-duration email-confirm email user-metadata app-metadata phone phone-confirm password]} client]
   (call/call (get lib.supabase.api/+admin+ "admin-create-user")
-               {:body body}
-               lib.supabase.common/*default*))
+             {:body body}
+             client))
 
+(defn invite
+  [{:as body :keys [data email]} client]
+  (call/call (get lib.supabase.api/+admin+ "invite")
+             {:body body}
+             client))
 
+(defn recovery
+  [{:as body :keys [email]} client]
+  (call/call (get lib.supabase.api/+admin+ "recovery")
+             {:body body}
+             client))
 
+(defn signup
+  [{:as body :keys [data email password phone]} client]
+  (call/call (get lib.supabase.api/+admin+ "signup")
+             {:body body}
+             client))
 
-(comment
+(defn user-get
+  [client]
+  (call/call (get lib.supabase.api/+admin+ "user-get")
+             {}
+             client))
 
-  ;;
-  ;; what I'd like to do is to read the openapi spec
-  ;; 1. read the api spec and have a net.openapi.read/read function convert the
+(defn token-refresh
+  [{:as body :keys [refresh-token]} client]
+  (call/call (get lib.supabase.api/+admin+ "token-refresh")
+             {:body body}
+             client))
 
-  (comment
-    (net.openapi.read/read-spec "resources/assets/lib.supabase/openapi.json")
-    => {"create-user"
-        {:fn-name "create-user"
-         :method :post
-         :path "/auth/v1/admin/users"
-         :path-params []
-         :query-params []
-         :header-params []
-         :body {:required true
-                :fields ["email" "password" "email_confirm"]}}})
+(defn admin-get-user
+  [{:as path :keys [user-id]} client]
+  (call/call (get lib.supabase.api/+admin+ "admin-get-user")
+             {:path path}
+             client))
 
+(defn admin-delete-user
+  [{:as path :keys [user-id]} client]
+  (call/call (get lib.supabase.api/+admin+ "admin-delete-user")
+             {:path path}
+             client))
 
-  ;; 2. net.openapi.call/call function that takes an entry and sets up the net.http client to 
+(defn user-put
+  [{:as body :keys [app-metadata data email nonce password phone]} client]
+  (call/call (get lib.supabase.api/+admin+ "user-put")
+             {:body body}
+             client))
 
-  (comment
+(defn logout
+  [client]
+  (call/call (get lib.supabase.api/+admin+ "logout")
+             {}
+             client))
 
-    (net.openapi.call/call
-     {:fn-name "create-user"
-      :method :post
-      :path "/auth/v1/admin/users"
-      :path-params []
-      :query-params []
-      :header-params []
-      :body {:required true
-             :fields ["email" "password" "email_confirm"]}}
-     {:path []
-      :params {}
-      :body   {"email" "email"
-               "password" "password"
-               "email_confirm" "email_confirm"}})
-    )
+(defn admin-update-user
+  [{:as path :keys [user-id]} client]
+  (call/call (get lib.supabase.api/+admin+ "admin-update-user")
+             {:path path}
+             client))
 
+(defn admin-list-users
+  [client]
+  (call/call (get lib.supabase.api/+admin+ "admin-list-users")
+             {}
+             client))
 
-  ;; 3. 
-  ;; 
-  ;;
-
-
-  ;;
-  (def +routes+
-    {"create-user"
-     {:fn-name "create-user"
-      :method :post
-      :path "/auth/v1/admin/users"
-      :path-params   []
-      :query-params   []
-      :header-params []
-      :body {:required true
-             :fields ["email" "password" "email_confirm"]}}})
-
-
-
-  (comment
-    (filter
-     (fn [[k v]]
-       (some (fn [k]
-               (not-empty (get v k)))
-             
-             [:cookie-params
-              :query-params
-              :header-params
-              :path-params]),
-       )
-     lib.supabase.api/+admin+)
-    
-    )
-
-  (get lib.supabase.api/+admin+ "admin-create-user")
-
-  (comment
-    (template2)
-
-    
-    (defn admin-create-user
-      [{:keys [email password email-confirm]
-        :as body}
-       client ;; schema, host, port etc
-       ]
-      (call/call (get lib.supabase.api/+admin+ "admin-create-user")
-                 {:body body}
-                 lib.supabase.common/*default))
-    
-    (defn verify-get
-      [{:keys [type email token phone redirect-to]
-        :as query}
-       entry]
-      (call/call entry
-                 {:query query}
-                 lib.supabase.common/*default*)
-
-
-      ))
-  )
+(defn verify-get
+  [{:as query :keys [type token email phone redirect-to]} client]
+  (call/call (get lib.supabase.api/+admin+ "verify-get")
+             {:query query}
+             client))

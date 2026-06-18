@@ -16,8 +16,8 @@
   [{:keys [host port user pass dbname]
     :as m}]
   (let [ds (doto (PGConnectionPoolDataSource.)
-             (.setServerName host)
-             (.setPortNumber port)
+             (.setServerName (or host "localhost"))
+             (.setPortNumber (or port 5432))
              (cond-> dbname (.setDatabaseName dbname)))
         ds (cond-> ds
              user (doto (.setUser user))

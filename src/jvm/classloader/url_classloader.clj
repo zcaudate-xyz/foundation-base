@@ -14,7 +14,9 @@
 
 (defonce ucp-access-lmap (reflect/query-class +ucp-type+ ["lmap" :#]))
 
-(defonce ucp-access-urls (reflect/query-class +ucp-type+ ["urls" :#]))
+(defonce ucp-access-urls
+  (or (reflect/query-class +ucp-type+ ["urls" :#])
+      (reflect/query-class +ucp-type+ ["unopenedUrls" :#])))
 
 (defonce ucp-access-path (reflect/query-class +ucp-type+ ["path" :#]))
 
@@ -29,7 +31,7 @@
   {:added "4.0"}
   [ucp ^URL entry]
   (let [^java.util.ArrayList paths (ucp-access-path ucp)      ;; util.ArrayList
-        ^java.util.Stack urls (ucp-access-urls ucp)       ;; util.Stack
+        ^java.util.Collection urls (ucp-access-urls ucp)       ;; util.Stack (JDK <=17) or java.util.ArrayDeque (JDK 21+)
         ^java.util.ArrayList loaders (ucp-access-loaders ucp) ;; util.ArrayList 
         ^java.util.HashMap lmap (ucp-access-lmap ucp)       ;; util.HashMap
 

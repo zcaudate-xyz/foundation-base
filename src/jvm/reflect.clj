@@ -7,6 +7,7 @@
             [std.object.query :as query]
             [std.object.query.input :as input]
             [std.pretty :as pretty]
+            [std.print.format :as fmt]
             [std.print.format.report :as report])
   (:refer-clojure :exclude [.% .%> .? .?* .?> .* .*> .&]))
 
@@ -23,16 +24,18 @@
   "helper function to `.%>`"
   {:added "3.0"}
   ([tree]
-   (-> (walk/postwalk (fn [form]
-                     (cond (class? form)
-                           (.getName ^Class form)
+   (let [out (-> (walk/postwalk (fn [form]
+                                  (cond (class? form)
+                                        (.getName ^Class form)
 
-                           (set? form)
-                           (vec (sort form))
+                                        (set? form)
+                                        (vec (sort form))
 
-                           :else form))
-                   tree)
-       (std.print/print-tree-graph))))
+                                        :else form))
+                                tree)
+                 (fmt/tree-graph))]
+     (env/local :println out)
+     out)))
 
 (defmacro .%>
   "Lists the class and interface hierarchy for the class
@@ -57,8 +60,9 @@
    (.& {:a 1 :b 2 :c 3})"
   {:added "3.0"}
   ([obj]
-   `(let [~'res (query/delegate ~obj)]
-      (env/local :println (str "\n#" (type ~obj)))
+   `(let [~'o ~obj
+          ~'res (if (map? ~'o) ~'o (query/delegate ~'o))]
+      (env/local :println (str "\n#" (type ~'o)))
       (doto ~'res
         (->> (into {})
              (pretty/pprint-str)

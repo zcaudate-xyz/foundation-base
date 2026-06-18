@@ -9,7 +9,7 @@
 (fact "starts the ganache service"
   (with-redefs [os/sh (fn [& _] {})
                 network/wait-for-port (fn [& _] nil)
-                future/future (fn [_] nil)
+                future/future:run (fn [& _] nil)
                 future/on:complete (fn [_ _] nil)
                 *server* (atom nil)]
     (start-ganache-server))

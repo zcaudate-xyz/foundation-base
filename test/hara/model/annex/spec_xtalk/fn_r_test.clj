@@ -11,7 +11,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
               [xt.lang.common-string :as xts]
-              [xt.lang.spec-base :as xt]]})
+              [xt.lang.spec-base :as xt]] :test-mode true})
 
 (fact:global
  {:setup [(l/rt:restart)]

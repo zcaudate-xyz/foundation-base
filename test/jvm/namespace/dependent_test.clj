@@ -12,21 +12,21 @@
 (fact "checks if current namespace depends on `test`"
 
   (ns-has-deps 'jvm.namespace.dependent
-               'std.lib)
+               'std.lib.sort)
   => true)
 
 ^{:refer jvm.namespace.dependent/ns-dependents :added "3.0"}
 (fact "finds dependent namespaces"
-  (ns-dependents 'std.lib
+  (ns-dependents 'std.lib.sort
                  '#{jvm.namespace.dependent})
   => '#{jvm.namespace.dependent})
 
 ^{:refer jvm.namespace.dependent/ns-level-dependents :added "3.0"}
 (fact "arranges dependent namespaces in map"
 
-  (ns-level-dependents '#{std.lib}
+  (ns-level-dependents '#{std.lib.sort}
                        '#{jvm.namespace.dependent})
-  => '{std.lib #{jvm.namespace.dependent}})
+  => '{std.lib.sort #{jvm.namespace.dependent}})
 
 ^{:refer jvm.namespace.dependent/ns-all-dependents :added "3.0"}
 (fact "gets all dependencies"

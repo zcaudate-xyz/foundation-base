@@ -7,7 +7,7 @@
 (l/script- :solidity
   {:runtime :web3
    :require [[hara.runtime.solidity :as s]
-              [solidity.core.util :as util]]})
+              [solidity.core.util :as util]] :test-mode true})
 
 (fact:global
  {:setup    [(l/rt:restart)

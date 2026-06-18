@@ -10,7 +10,8 @@
    :config  {:dbname "test-scratch"}
    :require [[postgres.core :as pg]
              [postgres.core.system :as sys]
-             [postgres.sample.scratch-v1 :as scratch]]})
+             [postgres.sample.scratch-v1 :as scratch]]
+   :test-mode true})
 
 (fact:global
  {:setup    [(l/rt:restart)

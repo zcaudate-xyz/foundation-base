@@ -24,9 +24,9 @@
   (let [{:keys [id suffix host no-reap]} container
         {:keys [lang tag module]} rt
         start-fn (if no-reap
-                   common/start-container
-                   (do (ryuk/start-ryuk)
-                       ryuk/start-reaped))
+                   start-container
+                   (do (start-ryuk)
+                       start-reaped))
         container (assoc container
                          :id (or id (str (name tag) "-" suffix))
                          :labels {"rt/lang"   (name lang)
@@ -46,5 +46,5 @@
     
     (when (and (not permanent)
                (not secondary))
-      (common/stop-container container))
+      (stop-container container))
     rt))

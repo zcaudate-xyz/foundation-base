@@ -21,7 +21,7 @@
                   fs/create-directory (fn [_] nil)
                   os/sh (fn [& _] :process)
                   os/sh-wait (fn [_] nil)
-                  future/future (fn [& _] :thread)
+                  future/future:run (fn [& _] :thread)
                   future/on:complete (fn [thread _] thread)
                   network/wait-for-port (fn [& _] true)]
       (start-minio-server {} :bench "/tmp/minio-root")))

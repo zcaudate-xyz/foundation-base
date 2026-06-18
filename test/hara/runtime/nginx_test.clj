@@ -16,7 +16,7 @@
   {:runtime :nginx.instance
    :require [[xt.lang.common-lib :as k]
              [lua.nginx.common-cache :as cache]
-             [lua.nginx :as n]]})
+             [lua.nginx :as n]] :test-mode true})
 
 (fact:global
  {:setup    [(l/rt:restart)]

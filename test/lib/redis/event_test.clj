@@ -78,7 +78,7 @@
   (with-redefs [cc/pool:acquire (constantly [:raw-id :raw])
                 action:get (constantly {:args (constantly []) :subscribe "SUB" :wrap (constantly identity)})
                 wire/call (constantly nil)
-                future/future (constantly :future)]
+                listener-loop (constantly nil)]
     (listener:create |client| :test :id "in" identity))
   => listener?)
 

@@ -23,7 +23,7 @@
   "checks if current namespace depends on `test`
  
    (ns-has-deps 'jvm.namespace.dependent
-                'std.lib)
+                'std.lib.sort)
    => true"
   {:added "3.0"}
   ([ns test]
@@ -34,7 +34,7 @@
 
 (defn ns-dependents
   "finds dependent namespaces
-   (ns-dependents 'std.lib
+   (ns-dependents 'std.lib.sort
                   '#{jvm.namespace.dependent})
    => '#{jvm.namespace.dependent}"
   {:added "3.0"}
@@ -44,9 +44,9 @@
 (defn ns-level-dependents
   "arranges dependent namespaces in map
  
-   (ns-level-dependents '#{std.lib}
+   (ns-level-dependents '#{std.lib.sort}
                         '#{jvm.namespace.dependent})
-   => '{std.lib #{jvm.namespace.dependent}}"
+   => '{std.lib.sort #{jvm.namespace.dependent}}"
   {:added "3.0"}
   ([nss input]
    (reduce (fn [out ns]
@@ -122,8 +122,8 @@
 (defn sort-topo
   "topologically sorts a collection of namespaces
    
-   (sort-topo '[jvm.namespace.dependent std.lib])
-   => '[std.lib jvm.namespace.dependent]"
+   (sort-topo '[jvm.namespace.dependent std.lib.sort])
+   => '[std.lib.sort jvm.namespace.dependent]"
   {:added "3.0"}
   [nss]
   (let [nss (set (map symbol nss))

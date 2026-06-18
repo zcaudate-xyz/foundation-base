@@ -9,7 +9,7 @@
 
 (l/script- :ruby
   {:runtime :oneshot
-   :require [[xt.lang.spec-primitive :as primitive]]})
+   :require [[xt.lang.spec-primitive :as primitive]] :test-mode true})
 
 (fact:global
  {:skip (not (env/program-exists? "ruby"))

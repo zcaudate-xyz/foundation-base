@@ -6,7 +6,7 @@
   (:use code.test))
 
 (l/script- :circom
-  {:runtime :twostep})
+  {:runtime :twostep :test-mode true})
 
 (defn.circom Multiplier2
   "a multiplier template used by the runtime test"

@@ -4,6 +4,8 @@
 
 ^{:refer jvm.namespace.eval/eval-ns :added "3.0"}
 (fact "Evaluates a list of forms in an existing namespace"
+
+  (require '[std.lib])
   (eval-ns 'std.lib
            '[(long? 1)])
   => true)

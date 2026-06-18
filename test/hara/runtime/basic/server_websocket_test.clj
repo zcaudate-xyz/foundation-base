@@ -8,7 +8,8 @@
 
 (l/script- :js
   {:runtime :websocket
-   :config {:bench true}})
+   :config {:bench true}
+   :test-mode true})
 
 (fact:global
  {:setup [(l/rt:restart :js)]
