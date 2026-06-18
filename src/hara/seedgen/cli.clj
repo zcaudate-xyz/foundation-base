@@ -301,45 +301,72 @@
        sort
        vec))
 
+(defn- source-vars
+  "returns the defn vars defined in a source namespace"
+  {:added "4.1"}
+  [source-ns lookup]
+  (when-let [path (lookup source-ns)]
+    (let [analysis (framework/analyse-file [:source path])]
+      (->> (get analysis source-ns)
+           keys
+           sort
+           vec))))
+
 (defn- test-file-for
   "returns the test file path for a source namespace, or nil"
   {:added "4.1"}
   [source-ns lookup]
   (lookup (project/test-ns source-ns)))
 
-(defn- ensure-test-file!
-  "creates or appends TODO facts for incomplete functions in a test file"
+(defn- inferred-test-path
+  "computes the conventional test file path for a source namespace"
   {:added "4.1"}
-  [source-ns fns write?]
-  (let [project   (project/project)
-        lookup    (project-lookup project)
-        test-ns   (project/test-ns source-ns)
-        path      (or (test-file-for source-ns lookup)
-                      (str "test/" (-> (str test-ns)
-                                       (str/replace "-" "_")
-                                       (str/replace "." "/"))
-                           "_test.clj"))
-        file      (java.io.File. path)]
-    (if (seq fns)
+  [source-ns]
+  (str "test/" (-> (str source-ns)
+                   (str/replace "-" "_")
+                   (str/replace "." "/"))
+       "_test.clj"))
+
+(defn- existing-fact-refers
+  "returns the set of :refer symbols already present in a test file"
+  {:added "4.1"}
+  [test-file]
+  (if test-file
+    (->> (common/seedgen-fact-forms test-file)
+         keys
+         set)
+    #{}))
+
+(defn- ensure-test-file!
+  "creates or appends TODO facts for source vars missing facts"
+  {:added "4.1"}
+  [source-ns missing write?]
+  (let [project (project/project)
+        lookup  (project-lookup project)
+        test-ns (project/test-ns source-ns)
+        path    (or (test-file-for source-ns lookup)
+                    (inferred-test-path source-ns))
+        file    (java.io.File. path)]
+    (if (seq missing)
       (let [exists? (.exists file)
-            facts   (->> fns
-                         (map (fn [refer]
-                                (str "^{:refer " refer " :added \"4.1\"}\n"
+            facts   (->> missing
+                         (map (fn [var]
+                                (str "^{:refer " source-ns "/" var " :added \"4.1\"}\n"
                                      "(fact \"TODO\")")))
                          (str/join "\n\n"))]
         (println (str (if write? "[WRITE] " "[DRY-RUN] ")
-                      (count fns) " TODO fact" (when (> (count fns) 1) "s")
+                      (count missing) " TODO fact" (when (> (count missing) 1) "s")
                       " for " test-ns " -> " path))
         (when write?
           (when-not exists?
             (.mkdirs (.getParentFile file))
             (spit file (str "(ns " test-ns "\n  (:use code.test))\n\n")))
           (spit file (str (when exists? "\n") facts "\n") :append true))
-        (count fns))
+        (count missing))
       0)))
 
 (defn seedgen-todos
-  "generates TODO facts for functions without test coverage"
+  "generates TODO facts for defn vars without a corresponding fact"
   {:added "4.1"}
   ([selector] (seedgen-todos selector {}))
   ([selector params]
@@ -348,17 +375,24 @@
          nss     (source-namespaces-for selector project)
          write?  (true? (:write params))]
      (println (str "\n[seedgen] scanning " (count nss)
-                   " namespace" (when (> (count nss) 1) "s") " for incomplete tests"))
-     (let [total (reduce (fn [acc ns]
-                           (let [incomplete (common-infile/seedgen-incomplete ns {} lookup project)]
-                             (cond (res/result? incomplete)
-                                   (do (println "  [skip]" ns "-" (:data incomplete))
+                   " namespace" (when (> (count nss) 1) "s") " for missing TODO facts"))
+     (let [total (reduce (fn [acc source-ns]
+                           (let [vars     (source-vars source-ns lookup)
+                                 tpath    (test-file-for source-ns lookup)
+                                 existing (existing-fact-refers tpath)
+                                 missing  (->> vars
+                                               (remove #(existing (symbol (str source-ns) (str %))))
+                                               vec)]
+                             (cond (empty? vars)
+                                   (do (println "  [skip]" source-ns "- no source vars")
                                        acc)
 
-                                   (seq incomplete)
-                                   (+ acc (ensure-test-file! ns (keys incomplete) write?))
+                                   (and (nil? tpath) (not write?))
+                                   (do (println "  [skip]" source-ns "- no test file (pass :write true to create)")
+                                       acc)
 
-                                   :else acc)))
+                                   :else
+                                   (+ acc (ensure-test-file! source-ns missing write?)))))
                          0
                          nss)]
        (println (str "\n[seedgen] " (if write? "wrote" "would write")

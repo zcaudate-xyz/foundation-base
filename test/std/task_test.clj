@@ -138,3 +138,40 @@
   (deftask -inc-
     {:template :default
      :main {:fn clojure.core/inc}}))
+
+
+^{:refer std.task/read-cli-arg :added "4.1"}
+(fact "reads a CLI string as an EDN value, falling back to raw string"
+
+  (read-cli-arg "1")
+  => 1
+
+  (read-cli-arg ":foo")
+  => :foo
+
+  (read-cli-arg "[1 2 3]")
+  => [1 2 3]
+
+  (read-cli-arg "hello")
+  => 'hello
+
+  (read-cli-arg "hello world")
+  => 'hello)
+
+^{:refer std.task/keyword-cli-arg? :added "4.1"}
+(fact "checks whether a CLI string reads as a keyword"
+
+  (keyword-cli-arg? ":foo")
+  => true
+
+  (keyword-cli-arg? ":foo/bar")
+  => true
+
+  (keyword-cli-arg? "foo")
+  => false
+
+  (keyword-cli-arg? "1")
+  => false
+
+  (keyword-cli-arg? "[1 2]")
+  => false)
