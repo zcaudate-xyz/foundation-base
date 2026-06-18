@@ -6,6 +6,18 @@
 
 (def ^:dynamic *default*)
 
+(defn- kebab->snake
+  [k]
+  (-> (name k)
+      (str/replace #"-" "_")))
+
+(defn- map->snake
+  [m]
+  (->> m
+       (map (fn [[k v]]
+              [(keyword (kebab->snake k)) v]))
+       (into {})))
+
 (defn callback
   [client]
   (call/call (get api/+admin+ "callback")
@@ -15,13 +27,13 @@
 (defn authorize
   [{:as query :keys [redirect-to]} client]
   (call/call (get api/+admin+ "authorize")
-             {:query query}
+             {:query (map->snake query)}
              client))
 
 (defn admin-generate-link
   [{:as body :keys [data email new-email password redirect-to type]} client]
   (call/call (get api/+admin+ "admin-generate-link")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn settings
@@ -39,43 +51,43 @@
 (defn otp
   [{:as body :keys [create-user data email phone]} client]
   (call/call (get api/+admin+ "otp")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn verify-post
   [{:as body :keys [email phone redirect-to token type]} client]
   (call/call (get api/+admin+ "verify-post")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn token-password
   [{:as body :keys [email password phone]} client]
   (call/call (get api/+admin+ "token-password")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn admin-create-user
   [{:as body :keys [role aud ban-duration email-confirm email user-metadata app-metadata phone phone-confirm password]} client]
   (call/call (get api/+admin+ "admin-create-user")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn invite
   [{:as body :keys [data email]} client]
   (call/call (get api/+admin+ "invite")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn recovery
   [{:as body :keys [email]} client]
   (call/call (get api/+admin+ "recovery")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn signup
   [{:as body :keys [data email password phone]} client]
   (call/call (get api/+admin+ "signup")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn user-get
@@ -87,25 +99,25 @@
 (defn token-refresh
   [{:as body :keys [refresh-token]} client]
   (call/call (get api/+admin+ "token-refresh")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn admin-get-user
   [{:as path :keys [user-id]} client]
   (call/call (get api/+admin+ "admin-get-user")
-             {:path path}
+             {:path (map->snake path)}
              client))
 
 (defn admin-delete-user
   [{:as path :keys [user-id]} client]
   (call/call (get api/+admin+ "admin-delete-user")
-             {:path path}
+             {:path (map->snake path)}
              client))
 
 (defn user-put
   [{:as body :keys [app-metadata data email nonce password phone]} client]
   (call/call (get api/+admin+ "user-put")
-             {:body body}
+             {:body (map->snake body) :content-type "application/json"}
              client))
 
 (defn logout
@@ -115,9 +127,9 @@
              client))
 
 (defn admin-update-user
-  [{:as path :keys [user-id]} client]
+  [{:as path :keys [user-id]} {:as body :keys [app-metadata data email nonce password phone]} client]
   (call/call (get api/+admin+ "admin-update-user")
-             {:path path}
+             {:body (map->snake body) :content-type "application/json" :path (map->snake path)}
              client))
 
 (defn admin-list-users
@@ -129,5 +141,5 @@
 (defn verify-get
   [{:as query :keys [type token email phone redirect-to]} client]
   (call/call (get api/+admin+ "verify-get")
-             {:query query}
+             {:query (map->snake query)}
              client))

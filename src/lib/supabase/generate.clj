@@ -55,15 +55,19 @@
                  ['client]))))
 
 (defn entry->input-form
-  "Builds the input map passed to `call/call`."
+  "Builds the input map passed to `call/call`.
+   Path, query and body maps are converted from kebab-case keywords back to
+   snake_case keywords so that they match the OpenAPI path templates and the
+   JSON keys the Supabase API expects."
   [entry]
   (let [path-keys  (entry->path-keys entry)
         query-keys (entry->query-keys entry)
         body-keys  (entry->body-keys entry)]
     (cond-> {}
-      (seq path-keys)  (assoc :path 'path)
-      (seq query-keys) (assoc :query 'query)
-      (seq body-keys)  (assoc :body 'body))))
+      (seq path-keys)  (assoc :path  (list 'map->snake 'path))
+      (seq query-keys) (assoc :query (list 'map->snake 'query))
+      (seq body-keys)  (assoc :body  (list 'map->snake 'body)
+                              :content-type "application/json"))))
 
 (defn entry->template-input
   "Converts a `+admin+` map entry into template parameter values."
@@ -100,7 +104,7 @@
        (str/join "\n\n")))
 
 (def ^:private ns-header
-  "(ns lib.supabase.common\n  (:require [clojure.string :as str]\n            [std.lib.foundation :as f]\n            [lib.supabase.api :as api]\n            [net.openapi.call :as call]))\n\n(def ^:dynamic *default*)\n\n")
+  "(ns lib.supabase.common\n  (:require [clojure.string :as str]\n            [std.lib.foundation :as f]\n            [lib.supabase.api :as api]\n            [net.openapi.call :as call]))\n\n(def ^:dynamic *default*)\n\n(defn- kebab->snake\n  [k]\n  (-> (name k)\n      (str/replace #\"-\" \"_\")))\n\n(defn- map->snake\n  [m]\n  (->> m\n       (map (fn [[k v]]\n              [(keyword (kebab->snake k)) v]))\n       (into {})))\n\n")
 
 (defn generate-common-file
   "Generates the full source for `lib.supabase.common`."
