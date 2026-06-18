@@ -1,7 +1,7 @@
 (ns xt.db.poc.db-model-service-worker
   (:require [hara.lang :as l]))
 
-(l/script :js
+(l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
@@ -11,7 +11,7 @@
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-memory :as impl-memory]]})
 
-(defn.js create-impl
+(defn.xt create-impl
   "Creates a db impl directly, avoiding the full impl-main dispatch so that
    worker bundles do not pull in unused native drivers (e.g. sqlite)."
   {:added "4.1"}
@@ -22,7 +22,7 @@
         :else
         (xt/x:err (+ "unsupported worker db type: " type))))
 
-(defn.js init-services
+(defn.xt init-services
   "Initialises db/primary and db/caching services on a node. For the worker POC
    only memory-backed impls are provided out of the box; a supabase impl can be
    injected by passing an already-created service object as :primary or :caching."
@@ -40,7 +40,7 @@
   (substrate/set-service node "db/caching" caching-impl)
   (return (promise/x:promise-run node)))
 
-(defn.js create-page-model
+(defn.xt create-page-model
   "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
   {:added "4.1"}
   [model-id tree opts]
@@ -60,7 +60,7 @@
            "defaults" {"args" [tree]}
            "options" opts}))
 
-(defn.js install-page-models
+(defn.xt install-page-models
   "Attaches a group of db-model-service page models to a node space."
   {:added "4.1"}
   [node space-id group-id models]
@@ -69,7 +69,13 @@
     (xt/x:set-key model-map model-id model-spec))
   (return (page-core/add-group-attach node space-id group-id model-map)))
 
-(defn.js create-server-node
+(defn.xt has-group?
+  "Checks if a page group exists on the node."
+  {:added "4.1"}
+  [node space-id group-id]
+  (return (xt/x:not-nil? (page-core/group-get node space-id group-id))))
+
+(defn.xt create-server-node
   "Creates the worker server node and installs db/primary and db/caching services."
   {:added "4.1"}
   [config schema lookup]
@@ -78,13 +84,13 @@
                            schema
                            lookup)))
 
-(defn.js install-server-models
+(defn.xt install-server-models
   "Installs db-model-service page models on the server node."
   {:added "4.1"}
   [node space-id group-id model-specs]
   (return (-/install-page-models node space-id group-id model-specs)))
 
-(defn.js boot-worker-server
+(defn.xt boot-worker-server
   "Boots the server node on a worker self object (SharedWorker port, webworker self, etc.).
 
    The ready payload is posted back to the client once the transport is attached."
@@ -98,7 +104,7 @@
      "target" worker-self
      "ready" ready-payload})))
 
-(defn.js run-server
+(defn.xt run-server
   "High-level helper that creates the server node, installs services and models,
    then boots the worker transport. Designed to be called from a worker entry script."
   {:added "4.1"}
@@ -119,7 +125,7 @@
         (-/boot-worker-server node worker-self ready-payload)
         (fn [_] (return node))))))))
 
-(defn.js create-client-node
+(defn.xt create-client-node
   "Creates a client node with page-remote installed."
   {:added "4.1"}
   []
@@ -127,7 +133,7 @@
   (page-remote/install node)
   (return node))
 
-(defn.js connect-client
+(defn.xt connect-client
   "Connects a client node to a worker source."
   {:added "4.1"}
   [client source opts]

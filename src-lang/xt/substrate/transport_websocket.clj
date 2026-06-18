@@ -131,18 +131,12 @@
 
         :else
         (return socket-source)))
-(defn.xt ensure-websocket-client
-  "wraps a raw socket or ws-native source in a ws-native client"
+(defn.xt websocket-native?
+  "checks whether a socket source is already a ws-native client"
   {:added "4.1"}
-  [socket-source]
-  (cond (ws/client? socket-source)
-        (return socket-source)
-
-        (xt/x:is-object? socket-source)
-        (return (ws/RawWebsocketClient (or socket-source {}) socket-source))
-
-        :else
-        (return (ws/RawWebsocketClient {} socket-source))))
+  [socket]
+  (return (and (xt/x:is-object? socket)
+               (xt/x:not-nil? (xt/x:get-key socket "::")))))
 (defn.xt ensure-promise
   "wraps sync values in a native promise while passing promises through"
   {:added "4.1"}
@@ -154,79 +148,126 @@
   "creates a websocket-backed text endpoint source"
   {:added "4.1"}
   [socket-source]
-  (var current-client nil)
-  (var current-raw nil)
+  (var current-socket nil)
+  (var current-native nil)
   (var current-message-callback nil)
   (var current-open-callback nil)
   (var current-error-callback nil)
   (var current-close-callback nil)
   (var send-fn
        (fn [text]
-         (when (xt/x:nil? current-client)
+         (when (xt/x:nil? current-socket)
            (xt/x:err "websocket endpoint not started"))
-         (return (ws/send current-client text))))
+         (if (xt/x:not-nil? current-native)
+           (return (ws/send current-native text))
+           (return (. current-socket (send text))))))
   (var start-fn
        (fn [listener]
          (return
           (promise/x:promise-then
            (-/ensure-promise (-/resolve-socket socket-source))
            (fn [socket]
-             (var client (-/ensure-websocket-client socket))
-             (:= current-client client)
-             (:= current-raw (or (xt/x:get-key client "raw") socket))
+             (:= current-socket socket)
+             (:= current-native (:? (-/websocket-native? socket)
+                                    socket
+                                    nil))
              (:= current-message-callback
                  (fn [event]
                    (return (listener event nil))))
-             (ws/add-listeners client {"message" current-message-callback})
-             (if (-/socket-open? current-raw)
-               (return current-raw)
-               (do (var state {"status" "opening"
-                               "socket" current-raw
-                               "error" "websocket failed to open"})
-                   (:= current-open-callback
-                       (fn [_event]
-                         (xt/x:set-key state "status" "open")
-                         (return current-raw)))
-                   (:= current-error-callback
-                       (fn [event]
-                         (xt/x:set-key state "status" "error")
-                         (xt/x:set-key state "error" event)
-                         (return event)))
-                   (:= current-close-callback
-                       (fn [event]
-                         (when (not (== (xt/x:get-key state "status") "open"))
-                           (xt/x:set-key state "status" "error")
-                           (xt/x:set-key state "error"
-                                         (:? (xt/x:nil? event)
-                                             "websocket closed before open"
-                                             event)))
-                         (return event)))
-                   (ws/add-listeners client {"open" current-open-callback
-                                             "error" current-error-callback
-                                             "close" current-close-callback})
-                   (return
-                    (promise/x:promise-then
-                     (-/await-open state)
-                     (fn [_]
-                       (return current-raw)))))))))))
+             (if (xt/x:not-nil? current-native)
+               (do (ws/add-listeners current-native {"message" current-message-callback})
+                   (if (-/socket-open? current-socket)
+                     (return current-socket)
+                     (do (var state {"status" "opening"
+                                     "socket" current-socket
+                                     "error" "websocket failed to open"})
+                         (:= current-open-callback
+                             (fn [_event]
+                               (xt/x:set-key state "status" "open")
+                               (return current-socket)))
+                         (:= current-error-callback
+                             (fn [event]
+                               (xt/x:set-key state "status" "error")
+                               (xt/x:set-key state "error" event)
+                               (return event)))
+                         (:= current-close-callback
+                             (fn [event]
+                               (when (not (== (xt/x:get-key state "status") "open"))
+                                 (xt/x:set-key state "status" "error")
+                                 (xt/x:set-key state "error"
+                                               (:? (xt/x:nil? event)
+                                                   "websocket closed before open"
+                                                   event)))
+                               (return event)))
+                         (ws/add-listeners current-native {"open" current-open-callback
+                                                           "error" current-error-callback
+                                                           "close" current-close-callback})
+                         (return
+                          (promise/x:promise-then
+                           (-/await-open state)
+                           (fn [_]
+                             (return current-socket)))))))
+               (do (-/add-socket-listener current-socket "message" current-message-callback)
+                   (if (-/socket-open? current-socket)
+                     (return current-socket)
+                     (do (var state {"status" "opening"
+                                     "socket" current-socket
+                                     "error" "websocket failed to open"})
+                         (:= current-open-callback
+                             (fn [_event]
+                               (xt/x:set-key state "status" "open")
+                               (return current-socket)))
+                         (:= current-error-callback
+                             (fn [event]
+                               (xt/x:set-key state "status" "error")
+                               (xt/x:set-key state "error" event)
+                               (return event)))
+                         (:= current-close-callback
+                             (fn [event]
+                               (when (not (== (xt/x:get-key state "status") "open"))
+                                 (xt/x:set-key state "status" "error")
+                                 (xt/x:set-key state "error"
+                                               (:? (xt/x:nil? event)
+                                                   "websocket closed before open"
+                                                   event)))
+                               (return event)))
+                         (-/add-socket-listener current-socket "open" current-open-callback)
+                         (-/add-socket-listener current-socket "error" current-error-callback)
+                         (-/add-socket-listener current-socket "close" current-close-callback)
+                         (return
+                          (promise/x:promise-then
+                           (-/await-open state)
+                           (fn [_]
+                             (return current-socket)))))))))))))
   (var stop-fn
        (fn [_]
-         (when (and (xt/x:not-nil? current-raw)
+         (when (and (xt/x:not-nil? current-socket)
                     (xt/x:not-nil? current-message-callback))
-           (-/remove-socket-listener current-raw "message" current-message-callback))
-         (when (and (xt/x:not-nil? current-raw)
+           (if (xt/x:not-nil? current-native)
+             (ws/add-listeners current-native {"message" nil})
+             (-/remove-socket-listener current-socket "message" current-message-callback)))
+         (when (and (xt/x:not-nil? current-socket)
                     (xt/x:not-nil? current-open-callback))
-           (-/remove-socket-listener current-raw "open" current-open-callback))
-         (when (and (xt/x:not-nil? current-raw)
+           (if (xt/x:not-nil? current-native)
+             (ws/add-listeners current-native {"open" nil})
+             (-/remove-socket-listener current-socket "open" current-open-callback)))
+         (when (and (xt/x:not-nil? current-socket)
                     (xt/x:not-nil? current-error-callback))
-           (-/remove-socket-listener current-raw "error" current-error-callback))
-         (when (and (xt/x:not-nil? current-raw)
+           (if (xt/x:not-nil? current-native)
+             (ws/add-listeners current-native {"error" nil})
+             (-/remove-socket-listener current-socket "error" current-error-callback)))
+         (when (and (xt/x:not-nil? current-socket)
                     (xt/x:not-nil? current-close-callback))
-           (-/remove-socket-listener current-raw "close" current-close-callback))
-         (when (xt/x:not-nil? current-client)
-           (ws/disconnect current-client))
-         (:= current-client nil)
-         (:= current-raw nil)
+           (if (xt/x:not-nil? current-native)
+             (ws/add-listeners current-native {"close" nil})
+             (-/remove-socket-listener current-socket "close" current-close-callback)))
+         (if (xt/x:not-nil? current-native)
+           (ws/disconnect current-native)
+           (when (and (xt/x:not-nil? current-socket)
+                      (xt/x:is-function? (xt/x:get-key current-socket "close")))
+             (. current-socket (close))))
+         (:= current-socket nil)
+         (:= current-native nil)
          (:= current-message-callback nil)
          (:= current-open-callback nil)
          (:= current-error-callback nil)

@@ -278,10 +278,9 @@
   (:= opts (or opts {}))
   (var config (-/realtime-config impl topic opts))
   (var ws-url (-/prepare-connect-url config))
-  (var client (websocket/RawWebsocketClient
-               (xt/x:obj-assign config
-                                {"url" ws-url})
-               nil))
+  (var client {"::" "js.net.ws_native/http_websocket_client"
+               "defaults" (xt/x:obj-assign config {"url" ws-url})
+               "heartbeats" {}})
   (websocket/connect client {})
   (var resolved-topic (-/resolve-topic config))
   (var join-frame (phoenix/make-frame-join client

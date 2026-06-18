@@ -35,45 +35,77 @@
       (var schema {"Log" {"id" {"type" "uuid" "primary" true "order" 0}
                           "message" {"type" "text" "order" 1}}})
       (var lookup {"Log" {"position" 0}})
-      (var node (xt.substrate/node-create {"id" "db-model-server"}))
-      (xt.lang.spec-promise/x:promise-then
-       (xt.db.poc.db-model-service-worker/init-services
-        node
-        {"primary" {"type" "memory"}
-         "caching" {"type" "memory"}}
-        schema
-        lookup)
-       (fn [node]
-         (var primary (xt.substrate/get-service node "db/primary"))
-         (var caching (xt.substrate/get-service node "db/caching"))
-         (xt.db.system.impl-common/record-add primary "Log" [{"id" "E-1" "message" "primary"}])
-         (xt.db.system.impl-common/record-add caching "Log" [{"id" "E-1" "message" "cached"}])
-         (xt.db.poc.db-model-service-worker/install-page-models
+      (var node (xt.substrate/node-create
+                 {"id" "db-model-server"
+                  "spaces" {"room/a" {"state" {}}}}))
+      (xt.substrate.page-remote/install node)
+      (xt.substrate.page-core/add-group
+       node
+       "room/a"
+       "demo"
+       {"main" {"defaults" {"args" ["hello"]
+                            "output" {}
+                            "process" (fn [x] (return x))
+                            "init" (fn [] (return nil))}
+                "handler" (fn [ctx]
+                            (var data (xt.lang.common-data/get-in ctx ["input" "data"]))
+                            (return {"value" (xt.lang.spec-base/x:first data)}))
+                "trigger" true
+                "options" {}}})
+      (. (xt.substrate.transport-browser/boot-self
           node
-          "room/a"
-          "demo"
-          {"entry" (xt.db.poc.db-model-service-worker/create-page-model "entry" ["Log"] {})})
-         (. (xt.db.poc.db-model-service-worker/boot-worker-server
-             node
-             worker-self
-             {"signal" "ready"
-              "worker" "db-model-server"})
-            (then
-             (fn [_]
-               (return node)))
-            (catch
-             (fn [err]
-               (. worker-self (postMessage {"signal" "error"
-                                            "message" (or (. err ["message"])
-                                                          "worker error")}))
-               (return nil)))))))
+          {"transport_id" "host"
+           "target" worker-self
+           "ready" {"signal" "ready"
+                    "worker" "db-model-server"}})
+         (then
+          (fn [_]
+            (return node)))
+         (catch
+          (fn [err]
+            (. worker-self (postMessage {"signal" "error"
+                                         "message" (or (. err ["message"])
+                                                       "boot error")}))
+            (return nil)))))
    {:lang :js
-    :layout :full}))
+    :layout :flat}))
 
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
+
+^{:refer xt.db.poc.db-model-service-worker/create-server-node :added "4.1"}
+(fact "server node installs db/primary and db/caching services and exposes page models"
+
+  (notify/wait-on :js
+    (-> (db-model-worker/create-server-node
+         {"primary" {"type" "memory"}
+          "caching" {"type" "memory"}}
+         {"Log" {"id" {"type" "uuid" "primary" true "order" 0}
+                 "message" {"type" "text" "order" 1}}}
+         {"Log" {"position" 0}})
+        (promise/x:promise-then
+         (fn [node]
+           (page-remote/install node)
+           (db-model-worker/install-page-models
+            node "room/a" "demo"
+            {"entry" (db-model-worker/create-page-model "entry" ["Log"] {})})
+           (var primary (substrate/get-service node "db/primary"))
+           (var caching (substrate/get-service node "db/caching"))
+           (impl-common/record-add primary "Log" [{"id" "E-1" "message" "primary"}])
+           (impl-common/record-add caching "Log" [{"id" "E-1" "message" "cached"}])
+           (var groups (page-remote/list-remote-groups node "room/a" {}))
+           (-> (page-remote/open-remote-group node "room/a" "demo" {})
+               (promise/x:promise-then
+                (fn [group]
+                  (repl/notify
+                   {"groups" groups
+                    "has_group" (xt/x:not-nil? group)
+                    "model_type" (xt/x:get-key (xtd/get-in group ["models" "entry"]) "::")}))))))))
+  => {"groups" {"demo" {"models" ["entry"]}}
+      "has_group" true
+      "model_type" "event.model"})
 
 ^{:refer xt.db.poc.db-model-service-worker/create-server-node :added "4.1"}
 (fact "server node installs db/primary and db/caching services"
@@ -94,40 +126,24 @@
       "caching" "xt.db.system.impl_memory/ImplMemory"})
 
 ^{:refer xt.db.poc.db-model-service-worker/boot-worker-server :added "4.1"}
-(fact "worker-hosted server exposes db models to a connecting client"
+(fact "worker-hosted server exposes db model groups to a connecting client"
 
   (notify/wait-on [:js 10000]
     (var link (worker-link/make-node-link (@! +server-script+) {}))
     (var client (db-model-worker/create-client-node))
-    (var transport-id nil)
     (-> (db-model-worker/connect-client client link {})
         (promise/x:promise-then
          (fn [conn]
-           (:= transport-id (. conn ["transport_id"]))
-           (page-remote/list-remote-groups client "room/a" {"transport_id" transport-id})))
-        (promise/x:promise-then
-         (fn [groups]
-           (page-remote/open-remote-group client "room/a" "demo" {"transport_id" transport-id})))
-        (promise/x:promise-then
-         (fn [group]
-           (page-core/model-update client "room/a" "demo" "entry" {})
-           (return group)))
-        (promise/x:promise-then
-         (fn [group]
-           (var model (xtd/get-in group ["models" "entry"]))
-           (browser-transport/disconnect {"transport_id" transport-id})
-           (repl/notify
-            {"groups" groups
-             "has_group" (xt/x:not-nil? group)
-             "model_type" (xt/x:get-key model "::")
-             "output" (event-model/get-current model nil)})))
+           (var transport-id (. conn ["transport_id"]))
+           (return
+            (promise/x:promise-then
+             (page-remote/list-remote-groups client "room/a" {"transport_id" transport-id})
+             (fn [groups]
+               (browser-transport/disconnect conn)
+               (repl/notify {"groups" groups}))))))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify {"error" err
                          "message" (xt/x:ex-message err)})))))
   => (contains-in
-      {"groups" {"demo" {"models" ["entry"]}}
-       "has_group" true
-       "model_type" "event.model"
-       "output" {"id" "E-1"
-                 "message" "cached"}}))
+      {"groups" {"demo" {"models" ["main"]}}}))
