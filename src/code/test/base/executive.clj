@@ -238,6 +238,12 @@
                                out)))
                          {}
                          [:failed :throw :timeout])
+        errored  (when (sequential? selector)
+                   (seq (:errored @+latest+)))
+        failures (if errored
+                   (assoc failures :errored
+                          (mapv #(report-edn {:ns %}) errored))
+                   failures)
         report-path (when (seq failures)
                       (report-file-path))
         run-path    (run-file-path report-path params)]
@@ -274,20 +280,25 @@
          (read-string)))))
 
 (defn report-failed-facts
-  "groups failed/throw/timeout report entries by namespace,
+  "groups failed/throw/timeout/errored report entries by namespace,
    returning a map of namespace -> set of refer symbols"
   {:added "4.1"}
   ([report]
-   (->> (concat (:failed report)
-                (:throw report)
-                (:timeout report))
-        (group-by :ns)
-        (reduce (fn [out [ns entries]]
-                  (assoc out ns (->> entries
-                                     (map :function)
-                                     (remove nil?)
-                                     (set))))
-                {}))))
+   (let [by-function (->> (concat (:failed report)
+                                  (:throw report)
+                                  (:timeout report))
+                          (group-by :ns)
+                          (reduce (fn [out [ns entries]]
+                                    (assoc out ns (->> entries
+                                                       (map :function)
+                                                       (remove nil?)
+                                                       (set))))
+                                  {}))]
+     (reduce (fn [out entry]
+               (let [ns (:ns entry)]
+                 (assoc out ns #{})))
+             by-function
+             (:errored report)))))
 
 (defn accumulate
   "accumulates test results from various facts and files into a single data structure"
@@ -505,6 +516,7 @@
                           (get fact-filter test-ns))
            fact-pred    (fn [fact]
                           (or (nil? filter-refs)
+                              (empty? filter-refs)
                               (filter-refs (:refer fact))))
            tests        (->> (rt/all-facts test-ns)
                              (vals)
