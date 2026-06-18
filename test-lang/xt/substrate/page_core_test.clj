@@ -8,6 +8,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.event.base-listener :as event-common]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
              [xt.substrate.base-space :as node-space]]})
@@ -228,31 +229,186 @@
   => {"consumer" true})
 
 ^{:refer xt.substrate.page-core/run-tail-call :added "4.1"}
-(fact "TODO")
+(fact "returns the accumulated run state"
+
+  (!.js
+    (var context {"acc" {"value" 1}
+                  "path" ["page" "ping"]
+                  "node" {}
+                  "space" {"id" "space/a"}})
+    (page-core/run-tail-call context nil))
+  => {"value" 1})
 
 ^{:refer xt.substrate.page-core/run-remote :added "4.1"}
-(fact "TODO")
+(fact "runs the remote pipeline and returns the accumulator"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"main" true}))
+              "pipeline" {"remote" {"handler" (fn [ctx] (return {"remote" true}))}}
+              "defaults" {"args" []}}})
+    (var [path context disabled]
+         (page-core/prep-model node "space/a" "page" "ping" {}))
+    (-> (page-core/run-remote context true path nil)
+        (promise/x:promise-then
+         (fn [acc]
+           (repl/notify {"remote" (. acc ["remote"])
+                         "path" (. acc ["path"])})))))
+  => {"remote" [true {"remote" true}]
+      "path" ["page" "ping"]})
 
 ^{:refer xt.substrate.page-core/remote-call :added "4.1"}
-(fact "TODO")
+(fact "invokes a remote handler through the model"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"main" true}))
+              "pipeline" {"remote" {"handler" (fn [ctx] (return {"remote" true}))}}
+              "defaults" {"args" []}}})
+    (-> (page-core/remote-call node "space/a" "page" "ping" [] true)
+        (promise/x:promise-then
+         (fn [acc]
+           (repl/notify {"remote" (. acc ["remote"])
+                         "path" (. acc ["path"])})))))
+  => {"remote" [true {"remote" true}]
+      "path" ["page" "ping"]})
 
 ^{:refer xt.substrate.page-core/run-refresh :added "4.1"}
-(fact "TODO")
+(fact "runs the main pipeline and returns the accumulator"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"refreshed" true}))
+              "defaults" {"args" []}}})
+    (var [path context disabled]
+         (page-core/prep-model node "space/a" "page" "ping" {}))
+    (-> (page-core/run-refresh context disabled path nil)
+        (promise/x:promise-then
+         (fn [acc]
+           (repl/notify {"main" (. acc ["main"])
+                         "path" (. acc ["path"])})))))
+  => {"main" [true {"refreshed" true}]
+      "path" ["page" "ping"]})
 
 ^{:refer xt.substrate.page-core/refresh-model-dependents :added "4.1"}
-(fact "TODO")
+(fact "returns the map of dependent models"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "source"
+     {"a" {"handler" (fn [space args request node]
+                       (return {"args" args}))
+           "defaults" {"args" []}}})
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "consumer"
+     {"c" {"handler" (fn [space args request node]
+                       (return {"args" args}))
+           "defaults" {"args" []}
+           "deps" [["source" "a"]]}})
+    (page-core/refresh-model-dependents node "space/a" "source" "a"))
+  => {"consumer" ["c"]})
 
 ^{:refer xt.substrate.page-core/refresh-model :added "4.1"}
-(fact "TODO")
+(fact "refreshes a single model and returns the run accumulator"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"refreshed" true}))
+              "defaults" {"args" []}}})
+    (-> (page-core/refresh-model node "space/a" "page" "ping" {} nil)
+        (promise/x:promise-then
+         (fn [acc]
+           (repl/notify {"main" (. acc ["main"])
+                         "path" (. acc ["path"])})))))
+  => {"main" [true {"refreshed" true}]
+      "path" ["page" "ping"]})
 
 ^{:refer xt.substrate.page-core/refresh-model-remote :added "4.1"}
-(fact "TODO")
+(fact "refreshes the remote stage of a model"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"main" true}))
+              "pipeline" {"remote" {"handler" (fn [ctx] (return {"remote" true}))}}
+              "defaults" {"args" []}}})
+    (-> (page-core/refresh-model-remote node "space/a" "page" "ping" nil)
+        (promise/x:promise-then
+         (fn [acc]
+           (repl/notify {"remote" (. acc ["remote"])
+                         "path" (. acc ["path"])})))))
+  => {"remote" [true {"remote" true}]
+      "path" ["page" "ping"]})
 
 ^{:refer xt.substrate.page-core/refresh-model-dependents-unthrottled :added "4.1"}
-(fact "TODO")
+(fact "refreshes dependents without using the throttle"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "source"
+     {"a" {"handler" (fn [ctx] (return {"source" true}))
+           "defaults" {"args" []}}})
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "consumer"
+     {"c" {"handler" (fn [ctx] (return {"consumer" true}))
+           "defaults" {"args" []}
+           "deps" [["source" "a"]]}})
+    (-> (page-core/refresh-model-dependents-unthrottled
+         node "space/a" "source" "a" nil)
+        (promise/x:promise-then
+         (fn [arr]
+           (repl/notify {"count" (xt/x:len arr)
+                         "first" (. (. (xt/x:get-idx arr 0) ["main"]) [1])})))))
+  => {"count" 1
+      "first" {"consumer" true}})
 
 ^{:refer xt.substrate.page-core/refresh-group :added "4.1"}
-(fact "TODO")
+(fact "refreshes every model in the group"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"ping" true}))
+              "defaults" {"args" []}}
+      "pong" {"handler" (fn [ctx] (return {"pong" true}))
+              "defaults" {"args" []}}})
+    (-> (page-core/refresh-group node "space/a" "page" {} nil)
+        (promise/x:promise-then
+         (fn [arr]
+           (repl/notify {"count" (xt/x:len arr)})))))
+  => {"count" 2})
 
 ^{:refer xt.substrate.page-core/get-group-deps :added "4.1"}
 (fact "compiles local and cross-model dependencies"
@@ -287,7 +443,17 @@
       ["other" "unknown"]])
 
 ^{:refer xt.substrate.page-core/create-throttle :added "4.1"}
-(fact "TODO")
+(fact "creates a throttle for the group"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (var throttle (page-core/create-throttle node "space/a" "page" nil))
+    {"has-handler" (xt/x:is-function? (. throttle ["handler"]))
+     "active" (. throttle ["active"])
+     "queued" (. throttle ["queued"])})
+  => {"has-handler" true
+      "active" {}
+      "queued" {}})
 
 ^{:refer xt.substrate.page-core/create-model :added "4.1"}
 (fact "creates an initialized view model"
@@ -336,22 +502,168 @@
       "models" "event.model"})
 
 ^{:refer xt.substrate.page-core/add-group :added "4.1"}
-(fact "TODO")
+(fact "attaches a group and triggers initial refresh"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (var group (page-core/add-group
+                node
+                "space/a"
+                "page"
+                {"ping" {"handler" (fn [ctx] (return {"ping" true}))
+                         "defaults" {"args" []}}
+                 "pong" {"handler" (fn [ctx] (return {"pong" true}))
+                         "defaults" {"args" []}}}))
+    (-> (. group ["init"])
+        (promise/x:promise-then
+         (fn [arr]
+           (repl/notify {"name" (. group ["name"])
+                         "model-count" (xt/x:len (xt/x:obj-keys (. group ["models"])))
+                         "init-count" (xt/x:len arr)})))))
+  => {"name" "page"
+      "model-count" 2
+      "init-count" 2})
 
 ^{:refer xt.substrate.page-core/remove-group :added "4.1"}
-(fact "TODO")
+(fact "removes a group from the runtime"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [space args request node]
+                          (return {"args" args}))
+              "defaults" {"args" []}}})
+    (var removed (page-core/remove-group node "space/a" "page"))
+    {"removed-name" (. removed ["name"])
+     "remaining" (page-core/group-get node "space/a" "page")})
+  => {"removed-name" "page"
+      "remaining" nil})
+
+^{:refer xt.substrate.page-core/remove-group :added "4.1"}
+(fact "throws when dependents exist"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "source"
+     {"a" {"handler" (fn [space args request node]
+                       (return {"args" args}))
+           "defaults" {"args" []}}})
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "consumer"
+     {"c" {"handler" (fn [space args request node]
+                       (return {"args" args}))
+           "defaults" {"args" []}
+           "deps" [["source" "a"]]}})
+    (page-core/remove-group node "space/a" "source"))
+  => (throws))
 
 ^{:refer xt.substrate.page-core/remove-model :added "4.1"}
-(fact "TODO")
+(fact "removes a model from its group"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [space args request node]
+                          (return {"args" args}))
+              "defaults" {"args" []}}
+      "pong" {"handler" (fn [space args request node]
+                          (return {"args" args}))
+              "defaults" {"args" []}}})
+    (var removed (page-core/remove-model node "space/a" "page" "ping"))
+    {"removed-type" (. removed ["::"])
+     "remaining" (xt/x:obj-keys (. (. (page-core/group-get node "space/a" "page") ["models"])))})
+  => {"removed-type" "event.model"
+      "remaining" ["pong"]})
+
+^{:refer xt.substrate.page-core/remove-model :added "4.1"}
+(fact "throws when model dependents exist"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "source"
+     {"a" {"handler" (fn [space args request node]
+                       (return {"args" args}))
+           "defaults" {"args" []}}})
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "consumer"
+     {"c" {"handler" (fn [space args request node]
+                       (return {"args" args}))
+           "defaults" {"args" []}
+           "deps" [["source" "a"]]}})
+    (page-core/remove-model node "space/a" "source" "a"))
+  => (throws))
 
 ^{:refer xt.substrate.page-core/group-update :added "4.1"}
-(fact "TODO")
+(fact "updates every model in the group"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"ping" true}))
+              "defaults" {"args" []}}
+      "pong" {"handler" (fn [ctx] (return {"pong" true}))
+              "defaults" {"args" []}}})
+    (-> (page-core/group-update node "space/a" "page" {})
+        (promise/x:promise-then
+         (fn [result]
+           (repl/notify {"ping" (. (. (. result ["ping"]) ["main"]) [1])
+                         "pong" (. (. (. result ["pong"]) ["main"]) [1])})))))
+  => {"ping" {"ping" true}
+      "pong" {"pong" true}})
 
 ^{:refer xt.substrate.page-core/model-update :added "4.1"}
-(fact "TODO")
+(fact "updates a single model"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"updated" true}))
+              "defaults" {"args" []}}})
+    (-> (page-core/model-update node "space/a" "page" "ping" {})
+        (promise/x:promise-then
+         (fn [acc]
+           (repl/notify {"main" (. acc ["main"])})))))
+  => {"main" [true {"updated" true}]})
 
 ^{:refer xt.substrate.page-core/model-set-input :added "4.1"}
-(fact "TODO")
+(fact "sets input and refreshes the model"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx]
+                           (return {"data" (. (. ctx ["input"]) ["data"])}))
+              "defaults" {"args" []}}})
+    (-> (page-core/model-set-input node "space/a" "page" "ping" {"data" [1 2 3]} {})
+        (promise/x:promise-then
+         (fn [acc]
+           (repl/notify {"main" (. acc ["main"])})))))
+  => {"main" [true {"data" [1 2 3]}]})
 
 ^{:refer xt.substrate.page-core/trigger-group-raw :added "4.1"}
 (fact "only triggers matching models"
@@ -379,16 +691,80 @@
   => ["always" "match"])
 
 ^{:refer xt.substrate.page-core/trigger-group :added "4.1"}
-(fact "TODO")
+(fact "resolves the group and triggers matching models"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"always" {"handler" (fn [space args request node]
+                            (return {"args" args}))
+                "defaults" {"args" []}
+                "trigger" true}
+      "match" {"handler" (fn [space args request node]
+                           (return {"args" args}))
+               "defaults" {"args" []}
+               "trigger" "go"}
+      "skip" {"handler" (fn [space args request node]
+                          (return {"args" args}))
+              "defaults" {"args" []}
+              "trigger" "other"}})
+    (page-core/trigger-group node "space/a" "page" "go" {"value" 9}))
+  => ["always" "match"])
 
 ^{:refer xt.substrate.page-core/trigger-model :added "4.1"}
-(fact "TODO")
+(fact "triggers a single model when signal matches"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"triggered" true}))
+              "defaults" {"args" []}
+              "trigger" "go"}})
+    (-> (page-core/trigger-model node "space/a" "page" "ping" "go" {"value" 9})
+        (promise/x:promise-then
+         (fn [acc]
+           (repl/notify {"main" (. acc ["main"])})))))
+  => {"main" [true {"triggered" true}]})
 
 ^{:refer xt.substrate.page-core/trigger-all :added "4.1"}
-(fact "TODO")
+(fact "triggers all groups in the space"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [space args request node]
+                          (return {"args" args}))
+              "defaults" {"args" []}
+              "trigger" "go"}})
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "other"
+     {"pong" {"handler" (fn [space args request node]
+                          (return {"args" args}))
+              "defaults" {"args" []}
+              "trigger" "go"}})
+    (page-core/trigger-all node "space/a" "go" {}))
+  => {"page" ["ping"]
+      "other" ["pong"]})
 
 ^{:refer xt.substrate.page-core/raw-callback-id :added "4.1"}
-(fact "TODO")
+(fact "builds a stable trigger id for a space"
+
+  (!.js
+    [(page-core/raw-callback-id "space/a")
+     (page-core/raw-callback-id nil)])
+  => ["@/raw/page/space/a"
+      "@/raw/page/"])
 
 ^{:refer xt.substrate.page-core/register-page-trigger :added "4.1"}
 (fact "stores a keyed trigger entry on the node"
@@ -450,4 +826,26 @@
 
 
 ^{:refer xt.substrate.page-core/trigger-listeners :added "4.1"}
-(fact "TODO")
+(fact "dispatches events to keyed listeners on the node"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (var captured [])
+    (event-common/add-keyed-listener
+     node
+     (xt/x:json-encode ["space/a" ["page" "ping"]])
+     "listener/a"
+     "page"
+     (fn [_id data _t _meta]
+       (xt/x:arr-push captured data)
+       (return data))
+     {}
+     nil)
+    (var triggered (page-core/trigger-listeners
+                    node "space/a" ["page" "ping"] {"value" 9}))
+    {"triggered" triggered
+     "captured" captured})
+  => {"triggered" ["listener/a"]
+      "captured" [{"space_id" "space/a"
+                   "path" ["page" "ping"]
+                   "value" 9}]})

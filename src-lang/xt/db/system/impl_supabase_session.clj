@@ -1,12 +1,32 @@
+(ns xt.db.system.impl-supabase-session
+  (:require [hara.lang :as l]))
 
+(l/script :xtalk
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [xt.net.http-fetch :as http-fetch]
+             [xt.net.addon-supabase :as addon]]})
+
+(defn.xt normalise-body
+  "extracts the data payload from a supabase http response"
+  {:added "4.1"}
+  [response]
+  (var out (xt/x:get-key response "body"))
+  (cond (and (xt/x:is-object? out)
+             (xt/x:not-nil? (xt/x:get-key out "data")))
+        (return (xt/x:get-key out "data"))
+
+        :else
+        (return out)))
 
 (defn.xt sync-session-token!
+  "syncs the session access token into the wrapped http client defaults"
+  {:added "4.1"}
   [impl]
-  (var #{client session} impl)
+  (var session (xt/x:get-key impl "session"))
+  (var client (xt/x:get-key impl "client"))
   (var access-token (or (xt/x:get-key session "access_token")
-                        (xt/x:get-key session "access-token")
                         (xt/x:get-key session "token")
-                        (xt/x:get-key session "auth_token")
                         nil))
   (when (xt/x:not-nil? access-token)
     (var defaults (or (xt/x:get-key client "defaults") {}))
@@ -15,23 +35,30 @@
   (return access-token))
 
 (defn.xt set-session!
+  "sets the active session on the supabase impl and syncs the bearer token"
+  {:added "4.1"}
   [impl session]
   (xt/x:set-key impl "session" session)
   (-/sync-session-token! impl)
   (return impl))
 
+(defn.xt get-session
+  "returns the current session stored on the supabase impl"
+  {:added "4.1"}
+  [impl]
+  (return (xt/x:get-key impl "session")))
+
 (defn.xt resolve-refresh-interval
+  "resolves the auto-refresh interval in milliseconds"
+  {:added "4.1"}
   [impl opts]
   (var session (xt/x:get-key impl "session"))
-  (var explicit (or (xt/x:get-key opts "interval")
-                    (xt/x:get-key opts "refresh_interval")
-                    (xt/x:get-key opts "ms")
+  (var explicit (or (xt/x:get-key opts "refresh_interval")
+                    (xt/x:get-key opts "interval")
                     nil))
   (when (xt/x:not-nil? explicit)
     (return explicit))
-  (var expires-in (or (xt/x:get-key session "expires_in")
-                      (xt/x:get-key session "expires-in")
-                      nil))
+  (var expires-in (xt/x:get-key session "expires_in"))
   (cond (xt/x:not-nil? expires-in)
         (return (:? (>= (* expires-in 1000) 60000)
                     (- (* expires-in 1000) 60000)
@@ -40,13 +67,13 @@
         :else
         (return 300000)))
 
-
 (defn.xt session-info
   "returns the current authenticated user information for the active session"
   {:added "4.1"}
   [impl]
   (-/sync-session-token! impl)
-  (var #{client session} impl)
+  (var client (xt/x:get-key impl "client"))
+  (var session (xt/x:get-key impl "session"))
   (cond (xt/x:nil? (xt/x:get-key session "access_token"))
         (return (promise/x:promise-run session))
 
@@ -67,10 +94,9 @@
   "refreshes the active session token using the stored refresh token"
   {:added "4.1"}
   [impl]
-  (var #{client session} impl)
-  (var refresh-token (or (xt/x:get-key session "refresh_token")
-                         (xt/x:get-key session "refresh-token")
-                         nil))
+  (var client (xt/x:get-key impl "client"))
+  (var session (xt/x:get-key impl "session"))
+  (var refresh-token (xt/x:get-key session "refresh_token"))
   (cond (xt/x:nil? refresh-token)
         (return (promise/x:promise-run session))
 

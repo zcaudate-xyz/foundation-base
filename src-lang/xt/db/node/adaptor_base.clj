@@ -102,10 +102,6 @@
 ;;
 ;;
 
-(defn.xt )
-
-
-
 (defn.xt ^{:substrate/fn true}
   init-handlers
   [node db-map])

@@ -8,7 +8,7 @@
              [xt.event.base-listener :as event-common]
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
-             [xt.substrate.page-core :as base-page]
+             [xt.substrate.page-core :as page-core]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-space :as node-space]]})
 
