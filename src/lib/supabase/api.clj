@@ -37,7 +37,7 @@
         ["admin-delete-user"
          {:description nil,
           :response-content-types ["application/json"],
-          :path "/admin/user/{user_id}",
+          :path "/admin/users/{user_id}",
           :tags ["admin"],
           :method :delete,
           :operation-id "admin-delete-user",
@@ -76,7 +76,7 @@
         ["admin-get-user"
          {:description nil,
           :response-content-types ["application/json"],
-          :path "/admin/user/{user_id}",
+          :path "/admin/users/{user_id}",
           :tags ["admin"],
           :method :get,
           :operation-id "admin-get-user",
@@ -102,7 +102,7 @@
         ["admin-update-user"
          {:description nil,
           :response-content-types ["application/json"],
-          :path "/admin/user/{user_id}",
+          :path "/admin/users/{user_id}",
           :tags ["admin"],
           :method :put,
           :operation-id "admin-update-user",
@@ -112,7 +112,18 @@
           [{:name "user_id",
             :required true,
             :description "The user's id"}],
-          :body nil,
+          :body
+          {:required false,
+           :content-types [],
+           :type "object",
+           :properties
+           {"app_metadata" {:type "object", :custom {"x-go-name" "AppData"}},
+            "data" {:type "object", :custom {"x-go-name" "Data"}},
+            "email" {:type "string", :custom {"x-go-name" "Email"}},
+            "nonce" {:type "string", :custom {"x-go-name" "Nonce"}},
+            "password" {:type "string", :custom {"x-go-name" "Password"}},
+            "phone" {:type "string", :custom {"x-go-name" "Phone"}}},
+           :custom {"x-go-package" "github.com/netlify/gotrue/api"}},
           :auth-names ["bearer"]}]
         ["authorize"
          {:description nil,

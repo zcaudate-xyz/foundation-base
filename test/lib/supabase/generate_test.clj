@@ -41,13 +41,14 @@
 ^{:refer lib.supabase.generate/entry->input-form :added "4.1"}
 (fact "builds call/call input map from endpoint metadata"
   (entry->input-form (get lib.supabase.api/+admin+ "admin-create-user"))
-  => {:body 'body}
+  => {:body '(map->snake body)
+      :content-type "application/json"}
 
   (entry->input-form (get lib.supabase.api/+admin+ "admin-delete-user"))
-  => {:path 'path}
+  => {:path '(map->snake path)}
 
   (entry->input-form (get lib.supabase.api/+admin+ "verify-get"))
-  => {:query 'query}
+  => {:query '(map->snake query)}
 
   (entry->input-form (get lib.supabase.api/+admin+ "health"))
   => {})
@@ -60,11 +61,15 @@
   (generate-admin-fn ["admin-create-user" (get lib.supabase.api/+admin+ "admin-create-user")])
   => (fn [s] (str/includes? s "(call/call (get api/+admin+ \"admin-create-user\")"))
 
+  (generate-admin-fn ["admin-create-user" (get lib.supabase.api/+admin+ "admin-create-user")])
+  => (fn [s] (and (str/includes? s "{:body (map->snake body)")
+                  (str/includes? s ":content-type \"application/json\"}")))
+
   (generate-admin-fn ["admin-delete-user" (get lib.supabase.api/+admin+ "admin-delete-user")])
-  => (fn [s] (str/includes? s "{:path path}"))
+  => (fn [s] (str/includes? s "{:path (map->snake path)}"))
 
   (generate-admin-fn ["verify-get" (get lib.supabase.api/+admin+ "verify-get")])
-  => (fn [s] (str/includes? s "{:query query}"))
+  => (fn [s] (str/includes? s "{:query (map->snake query)}"))
 
   (generate-admin-fn ["health" (get lib.supabase.api/+admin+ "health")])
   => (fn [s] (and (str/includes? s "[client]")
