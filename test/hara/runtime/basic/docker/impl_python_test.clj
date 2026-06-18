@@ -25,36 +25,36 @@
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
-            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
+            (System/getenv "HARA_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer python/vectors :adopt true :added "4.0"}
 (fact "python :basic evaluates arithmetic expressions in docker"
-  [(!.python
+  [(!.py
      (+ 1 2 3))
 
-   (!.python
+   (!.py
      (* 6 7))
 
-   (!.python
+   (!.py
      (- 100 1))]
   => [6 42 99])
 
 ^{:refer python/functions :adopt true :added "4.0"}
 (fact "python docker container defines and calls inline functions"
-  [(!.python
+  [(!.py
      (do (var add-10 (fn [x] (return (+ x 10))))
          (add-10 5)))
 
-   (!.python
+   (!.py
      (do (var mul-xy (fn [x y] (return (* x y))))
          (mul-xy 6 7)))]
   => [15 42])
 
 ^{:refer python/strings :adopt true :added "4.0"}
 (fact "python docker container handles string operations"
-  (!.python
+  (!.py
     (do (var greet (fn [name] (return (+ "hello " name))))
         (greet "world")))
   => "hello world")
@@ -62,5 +62,5 @@
 (comment
   (l/rt:restart)
   (l/rt:stop)
-  (!.python (+ 1 2 3))
+  (!.py (+ 1 2 3))
   )

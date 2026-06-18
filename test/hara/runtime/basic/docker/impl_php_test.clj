@@ -21,8 +21,8 @@
    :test-mode true})
 
 (fact:global
- {:skip (or (not (env/program-exists? "docker"))
-            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
+ {:skip   (or (not (env/program-exists? "docker"))
+              (System/getenv "HARA_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
@@ -53,7 +53,7 @@
 (fact "php docker container handles string operations"
   [(!.php
      (concat "hello " "world"))
-
+   
    (!.php
      (do (defn greet [name] (return name))
          (greet "hello php")))]

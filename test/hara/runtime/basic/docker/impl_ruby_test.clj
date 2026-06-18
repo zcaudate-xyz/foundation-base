@@ -22,39 +22,39 @@
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
-            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
+            (System/getenv "HARA_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer ruby/vectors :adopt true :added "4.0"}
 (fact "ruby :basic evaluates arithmetic expressions in docker"
-  [(!.ruby
+  [(!.rb
      (+ 1 2 3))
 
-   (!.ruby
+   (!.rb
      (* 6 7))
 
-   (!.ruby
+   (!.rb
      (- 100 1))]
   => [6 42 99])
 
 ^{:refer ruby/functions :adopt true :added "4.0"}
 (fact "ruby docker container defines and calls inline functions"
-  [(!.ruby
+  [(!.rb
      (do (defn add-10 [x] (return (+ x 10)))
          (add-10 5)))
 
-   (!.ruby
+   (!.rb
      (do (defn mul-xy [x y] (return (* x y)))
          (mul-xy 6 7)))]
   => [15 42])
 
 ^{:refer ruby/strings :adopt true :added "4.0"}
 (fact "ruby docker container handles string operations"
-  [(!.ruby
+  [(!.rb
      (+ "hello " "world"))
 
-   (!.ruby
+   (!.rb
      (do (defn greet [name] (return (+ "hi " name)))
          (greet "ruby")))]
   => ["hello world" "hi ruby"])
@@ -62,5 +62,5 @@
 (comment
   (l/rt:restart)
   (l/rt:stop)
-  (!.ruby (+ 1 2 3))
+  (!.rb (+ 1 2 3))
   )

@@ -28,6 +28,7 @@
   [:i32 x]
   (return (+ x 20)))
 
+
 (fact "rust twostep can return values in docker"
   [(!.rs
      (+ 1 2 3))

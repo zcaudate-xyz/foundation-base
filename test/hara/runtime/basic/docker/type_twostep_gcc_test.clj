@@ -5,12 +5,12 @@
             [hara.lang :as l]
             [std.lib.env :as env]))
 
-
 (l/script- :c
-           {:runtime :twostep
-            :process {:force-container true
-                      :container {:image "foundation-base/rt-twostep-c:latest"}
-                      :exec-fn #'twostep/sh-exec-portable}})
+  {:runtime :twostep
+   :process {:force-container true
+             :container {:image "foundation-base/rt-twostep-c:latest"}
+             :exec-fn #'twostep/sh-exec-portable}
+   :test-mode true})
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
