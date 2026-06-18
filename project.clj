@@ -164,7 +164,6 @@
    [com.googlecode.java-diff-utils/diffutils "1.3.0"]
 
    ;; mcp server
-   [cheshire "5.13.0"]
    [com.fasterxml.jackson.core/jackson-core "2.20.0"]
    [com.fasterxml.jackson.core/jackson-databind "2.15.2"]
    [io.modelcontextprotocol.sdk/mcp "0.11.2"]

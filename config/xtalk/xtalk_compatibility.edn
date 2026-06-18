@@ -1,10 +1,14 @@
 {:dart   {:include :all
-          :exclude [xt.db]}
- :js     {:include [xt.sample]}
+          :exclude [xt.sample]}
+ :js     {:include :all
+          :exclude [xt.sample]}
+ :lua    {:include :all
+          :exclude [xt.sample]}
+ :python {:include :all
+          :exclude [xt.sample]}
  :julia  {:include [xt.lang
-                    xt.event]}
- :lua    {:include [xt.db
-                    xt.sample]}
- :python {:include [xt.db]}
+                    xt.event]
+          :exclude [xt.sample]}
  :ruby   {:include [xt.lang
-                    xt.event]}}
+                    xt.event]
+          :exclude [xt.sample]}}

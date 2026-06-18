@@ -1,5 +1,7 @@
 (ns hara.runtime.gimp-test
   (:require [hara.lang :as l]
+            [hara.lang.script-control :as script-control]
+            [hara.runtime.gimp :as gimp]
             [hara.runtime.gimp.impl :as impl]
             [std.lib.component :as component]
             [std.lib.env :as env])
@@ -9,11 +11,19 @@
   {:runtime :gimp
    :test-mode true})
 
+(defn- gimp-runtime-available? []
+  (try
+    (and (or (env/program-exists? "gimp")
+             (env/program-exists? "gimp-console"))
+         (do (script-control/script-rt-get :python :gimp {})
+             true))
+    (catch Throwable _
+      false)))
+
 (fact:global
- {:skip (not (or (env/program-exists? "gimp")
-                 (env/program-exists? "gimp-console")))
-  :setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:skip (not (gimp-runtime-available?))
+  :setup    [(l/rt:restart :python)]
+  :teardown [(l/rt:stop :python)]})
 
 
 ^{:refer hara.runtime.gimp.impl/gimp :added "4.1"}
@@ -37,9 +47,6 @@
 
 ^{:refer hara.lang/script- :added "4.1"}
 (fact "uses gimp runtime through hara.lang"
-  (try
-    [(!.py (+ 1 2 3))
-     (string? @(!.py (str (Gimp.version))))]
-    (finally
-      (l/rt:stop :python)))
+  [(!.py (+ 1 2 3))
+   (string? @(!.py (str (Gimp.version))))]
   => [6 true])

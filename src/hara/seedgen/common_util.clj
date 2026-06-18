@@ -43,6 +43,16 @@
                      (second form)))))
          vec)))
 
+(defn seedgen-skip?
+  "returns true if the test file's ns form is marked ^{:seedgen/skip true}"
+  {:added "4.1"}
+  [test-file]
+  (try
+    (let [forms (fs/read-code test-file)]
+      (true? (:seedgen/skip (meta (first forms)))))
+    (catch Throwable _
+      false)))
+
 ;; --------------------------------------------------
 ;; runtime dispatch discovery
 ;; --------------------------------------------------

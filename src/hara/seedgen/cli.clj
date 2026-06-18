@@ -23,6 +23,7 @@
             [code.test.base.executive :as executive]
             [code.test.task :as test-task]
             [hara.seedgen :as seedgen]
+            [hara.seedgen.common-util :as common]
             [std.fs :as fs]
             [std.lib.result :as res]))
 
@@ -65,11 +66,13 @@
   (edn/read-string (slurp +compatibility-path+)))
 
 (defn- source-namespaces
-  "returns all xt.* source test namespaces"
+  "returns all xt.* source test namespaces that are not marked as seedgen/skip"
   {:added "4.1"}
   ([] (source-namespaces (project/project)))
   ([project]
    (->> (project/all-files ["test-lang/xt"] {} project)
+        (remove (fn [[ns path]]
+                  (common/seedgen-skip? path)))
         keys
         sort
         vec)))

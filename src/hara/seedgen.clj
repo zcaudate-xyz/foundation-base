@@ -3,6 +3,7 @@
             [code.project :as project]
             [code.manage.unit.template :as template]
             [hara.seedgen.common-infile :as common-infile]
+            [hara.seedgen.common-util :as common]
             [hara.seedgen.form-bench :as form-bench]
             [hara.seedgen.form-parse :as form-parse]
             [hara.seedgen.form-infile :as form-infile]
@@ -59,6 +60,7 @@
   (->> lookup
        keys
        (filter #(= % (project/test-ns %)))
+       (remove #(common/seedgen-skip? (lookup %)))
        sort
        vec))
 
@@ -90,7 +92,8 @@
                    :sorted true
                    :print {:result false :summary false}}
           :main {:fn #'common-infile/seedgen-root}
-          :item {:display identity}
+          :item {:list seedgen-test-namespaces
+                 :display identity}
           :result {:ignore scalar-result-ignore?
                    :keys {:count scalar-result-count}
                    :columns (template/code-default-columns :data #{:bold})}}])
@@ -110,7 +113,8 @@
                    :sorted true
                    :print {:result false :summary false}}
           :main {:fn #'common-infile/seedgen-list}
-          :item {:display identity}
+          :item {:list seedgen-test-namespaces
+                 :display identity}
           :result {:columns (template/code-default-columns :data #{:bold})}}])
 
 (comment (hara.seedgen/seedgen-list
@@ -124,7 +128,8 @@
                    :print {:result false :summary false}
                    :sorted true}
           :main {:fn #'form-parse/seedgen-readforms}
-          :item {:display seedgen-readforms-vars}
+          :item {:list seedgen-test-namespaces
+                 :display seedgen-readforms-vars}
           :result {:ignore nil
                    :keys {:count (comp count seedgen-readforms-vars)
                           :functions seedgen-readforms-vars}
@@ -141,7 +146,8 @@
                    :print {:result false :summary false}
                    :sorted true}
           :main {:fn #'form-bench/seedgen-benchlist}
-          :item {:display identity}
+          :item {:list seedgen-test-namespaces
+                 :display identity}
           :result {:columns (template/code-default-columns :data #{:bold})}}])
 
 (comment (hara.seedgen/seedgen-benchlist
@@ -155,7 +161,8 @@
                    :sorted true
                    :print {:item false}}
           :main {:fn #'seedgen-incomplete-summary}
-          :item {:display identity}
+          :item {:list seedgen-test-namespaces
+                 :display identity}
           :result {:columns (template/code-default-columns #{:bold :green})}}])
 
 (comment (hara.seedgen/seedgen-incomplete

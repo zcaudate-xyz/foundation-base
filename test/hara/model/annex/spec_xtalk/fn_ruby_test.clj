@@ -23,10 +23,10 @@
 
 (fact "simple helper rewrites stay structural and avoid the old raw helper"
   (ruby-tf-x-is-function? '(:x-is-function? e))
-  => (. e (respond_to? :call))
+  => '(. e (respond_to? :call))
 
   (ruby-tf-x-lu-set '(:x-lu-set h k v))
-  => (:=
+  => '(:=
       (.
        h
        [(.
@@ -46,13 +46,13 @@
       v)
 
   (ruby-tf-x-lu-eq '(:x-lu-eq a b))
-  => (== (. a object_id) (. b object_id))
+  => '(== (. a object_id) (. b object_id))
 
   (ruby-tf-x-pwd '(:x-pwd))
-  => (or (. ENV ["PWD"]) (. Dir pwd))
+  => '(or (. ENV ["PWD"]) (. Dir pwd))
 
   (ruby-tf-x-unpack '(:x-unpack arr))
-  => (:.. arr)
+  => '(:.. arr)
 
   (str/includes? (slurp "src/hara/model/annex/spec_xtalk/fn_ruby.clj")
                  (str "ruby" "-raw"))

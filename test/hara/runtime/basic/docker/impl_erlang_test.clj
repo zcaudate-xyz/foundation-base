@@ -1,9 +1,9 @@
 (ns hara.runtime.basic.docker.impl-erlang-test
+  (:use code.test)
   (:require [hara.runtime.basic.docker.registry :as registry]
             [std.lib.env :as env]
             [hara.lang :as l]
-            [hara.lang.script :as script])
-  (:use code.test))
+            [hara.lang.script :as script]))
 
 ;;
 ;; Erlang basic runtime in a Docker container.

@@ -57,10 +57,13 @@
    into a sequence of body forms without touching nested data literals.
  
    A vector arriving here is a single data-literal form (the runtime already
-   normalised multi-form vectors to `do`)."
+   normalised multi-form vectors to `do`). Single-element vectors are
+   unwrapped so that bulk-wrapped oneshot args become the single body form."
   [input]
   (cond (vector? input)
-        [input]
+        (if (= 1 (count input))
+          [(first input)]
+          [input])
 
         (and (seq? input)
              ('#{do do*} (first input)))
@@ -86,15 +89,16 @@
  
    Ensures multi-form scripts are treated as a sequence rather than a
    single vector, so function definitions can appear in top-level blocks.
-   The last form's value is returned automatically by R."
+   The last form is wrapped in an explicit `return` for consistent
+   cross-runtime behaviour."
   {:added "4.0"}
   [input mopts]
-  (let [forms (->> (flatten-body-forms input)
+  (let [forms (->> (rt/normalize-body-forms input mopts)
                    (map mark-local-defn))
         forms (if (empty? forms)
                 [nil]
                 forms)]
-    (list (apply list 'fn [] forms))))
+    (list (apply list 'fn [] (rt/return-format forms)))))
 
 (def +r-oneshot-config+
   (common/set-context-options
