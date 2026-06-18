@@ -3,13 +3,63 @@
   (:require [clojure.string :as str]
             [hara.seedgen.common-util :as common]
             [hara.seedgen.common-infile :as common-infile]
-            [hara.seedgen.form-infile :as form-infile]))
+            [hara.seedgen.form-infile :as form-infile]
+            [hara.seedgen.form-parse :as form-parse]
+            [std.fs :as fs]))
 
 ^{:refer hara.seedgen.form-infile/root-script-meta-langs :added "4.1"}
-(fact "TODO")
+(fact "extracts declared target languages from the root script meta"
+  (let [tmp (java.io.File/createTempFile "seedgen-root-script-meta-langs" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.metatest-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.metatest-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [hara.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true :langs [:js :lua]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer sample/hello :added \"4.1\"}\n"
+                      "(fact \"TODO\")\n"))
+      (let [output (form-parse/seedgen-readforms 'sample.metatest {} lookup project)]
+        (#'form-infile/root-script-meta-langs output))
+      (finally (.delete tmp))))
+  => [:js :lua])
+
+(defn- run-render-target []
+  (let [root      (.toFile (java.nio.file.Files/createTempDirectory "seedgen-render-target"
+                                                                    (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir  (doto (java.io.File. root "test/sample")
+                    (.mkdirs))
+        path      (.getAbsolutePath (java.io.File. test-dir "target_test.clj"))
+        lookup    {'sample.target-test path}
+        project   {:root (.getAbsolutePath root)
+                   :test-paths ["test"]}]
+    (try
+      (spit path (str "(ns sample.target-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [hara.lang :as l]\n"
+                      "            [xt.lang.spec-base :as xt]))\n\n"
+                      "^{:seedgen/root {:all true :langs [:js :lua]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+                      "(fact \"target\"\n"
+                      "  (!.js (+ 1 2 3))\n"
+                      "  => 6)\n"))
+      (let [output   (form-parse/seedgen-readforms 'sample.target {} lookup project)
+            text     (slurp path)
+            rendered (form-infile/render-top-level-target output text :lua 'samplebench.lua.target-test)]
+        [(string? rendered)
+         (str/includes? rendered "(ns samplebench.lua.target-test")
+         (str/includes? rendered "(l/script- :lua")
+         (str/includes? rendered "(!.lua (+ 1 2 3))")])
+      (finally
+        (fs/delete root {:recursive true})))))
 
 ^{:refer hara.seedgen.form-infile/render-top-level-target :added "4.1"}
-(fact "TODO")
+(fact "renders a file for a single target language"
+  (run-render-target) => [true true true true])
 
 ^{:refer hara.seedgen.form-infile/seedgen-langadd :added "4.1" :timeout 300000}
 (fact "adds seedgen runtimes back from the seedgen root form"
@@ -844,4 +894,25 @@
   )
 
 ^{:refer hara.seedgen.form-infile/seedgen-langremove :added "4.1"}
-(fact "TODO")
+(fact "is a no-op when the target language is not present"
+  (let [tmp (java.io.File/createTempFile "seedgen-langremove-noop" ".clj")
+        path (.getAbsolutePath tmp)
+        root (.getParent tmp)
+        lookup {'sample.noop-test path}
+        project {:root root}]
+    (try
+      (spit path (str "(ns sample.noop-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [hara.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer sample/example :added \"4.1\"}\n"
+                      "(fact \"hello\"\n"
+                      "  (!.js 1) => 1)\n"))
+      (form-infile/seedgen-langremove 'sample.noop-test {:lang [:lua] :write true} lookup project)
+      (slurp path)
+      (finally (.delete tmp))))
+  => (fn [s]
+       (and (str/includes? s "(l/script- :js")
+            (str/includes? s "(!.js 1)")
+            (not (str/includes? s "(l/script- :lua")))))

@@ -22,11 +22,11 @@
   (:require [clojure.edn :as edn]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
+            [code.framework :as framework]
             [code.project :as project]
             [code.test.base.executive :as executive]
             [code.test.task :as test-task]
             [hara.seedgen :as seedgen]
-            [hara.seedgen.common-infile :as common-infile]
             [hara.seedgen.common-util :as common]
             [std.fs :as fs]
             [std.lib.result :as res]))

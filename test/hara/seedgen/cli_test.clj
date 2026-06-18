@@ -45,3 +45,14 @@
   (cli/parse-command-args ["'xt.foo" ":lang" "python"])
   => {:selector 'xt.foo
       :params   {:lang 'python}})
+
+
+^{:refer hara.seedgen.cli/seedgen-test :added "4.1"}
+(fact "is the bench-test runner entry point"
+  (var? #'cli/seedgen-test) => true
+  (:doc (meta #'cli/seedgen-test)) => "generates and runs xtbench tests for the given selector and languages")
+
+^{:refer hara.seedgen.cli/-main :added "4.1"}
+(fact "is the CLI entry point"
+  (var? #'cli/-main) => true
+  (:doc (meta #'cli/-main)) => "main entry point for lein seedgen")

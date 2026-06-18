@@ -137,13 +137,14 @@
 
 (defn seedgen-normalize-runtime-lang
   [lang]
-  (let [dispatch-map (seedgen-dispatch-map)
-        lang (cond (keyword? lang) lang
-                   (symbol? lang) (keyword (name lang))
-                   (string? lang) (keyword lang)
-                   :else lang)]
-    (or (get dispatch-map (name lang))
-        lang)))
+  (when lang
+    (let [dispatch-map (seedgen-dispatch-map)
+          lang (cond (keyword? lang) lang
+                     (symbol? lang) (keyword (name lang))
+                     (string? lang) (keyword lang)
+                     :else lang)]
+      (or (get dispatch-map (name lang))
+          lang))))
 
 (defn seedgen-dispatch-tag
   [lang]
@@ -161,17 +162,18 @@
 
 (defn seedgen-display-lang
   [lang]
-  (let [lang  (-> lang
-                  runtime/normalize-runtime-lang
-                  seedgen-normalize-runtime-lang)
-        n     (name lang)
-        idx   (.indexOf ^String n ".")
-        base  (when (pos? idx)
-                (keyword (subs n 0 idx)))]
-    (or (runtime/runtime-script-lang lang)
-        base
-        (seedgen-dispatch-tag lang)
-        lang)))
+  (when lang
+    (let [lang  (-> lang
+                    runtime/normalize-runtime-lang
+                    seedgen-normalize-runtime-lang)
+          n     (name lang)
+          idx   (.indexOf ^String n ".")
+          base  (when (pos? idx)
+                  (keyword (subs n 0 idx)))]
+      (or (runtime/runtime-script-lang lang)
+          base
+          (seedgen-dispatch-tag lang)
+          lang))))
 
 (defn seedgen-default-runtime
   [lang]

@@ -275,7 +275,13 @@
                 :total number?}))
 
 ^{:refer hara.seedgen/seedgen-list :added "4.1"}
-(fact "TODO")
+(fact "returns summary information for seedgen list tasks"
+  (seedgen-list '[xt.sample] {:return :summary})
+  => (contains {:errors 0
+                :warnings 0
+                :items number?
+                :results number?
+                :total number?}))
 
 ^{:refer hara.seedgen/seedgen-readforms :added "4.1"}
 (fact "returns summary information for public seedgen readforms analysis"
@@ -287,7 +293,13 @@
                 :total number?}))
 
 ^{:refer hara.seedgen/seedgen-benchlist :added "4.1"}
-(fact "TODO")
+(fact "returns summary information for seedgen benchlist tasks"
+  (seedgen-benchlist '[xt.sample] {:return :summary})
+  => (contains {:errors 0
+                :warnings 0
+                :items number?
+                :results number?
+                :total number?}))
 
 ^{:refer hara.seedgen/seedgen-incomplete :added "4.1"}
 (fact "returns summary information for incomplete seedgen tasks"
@@ -641,4 +653,37 @@
        3])
 
 ^{:refer hara.seedgen/seedgen-benchremove :added "4.1"}
-(fact "TODO")
+(fact "removes generated bench namespaces for a selector"
+  (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchremove"
+                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test/sample")
+                   (.mkdirs))
+        path     (.getAbsolutePath (java.io.File. test-dir "remove_test.clj"))
+        bench-path (.getAbsolutePath (java.io.File. root "test/samplebench/python/sample/remove_test.clj"))
+        lookup   {'xt.sample.remove-test path}
+        project  {:root (.getAbsolutePath root)
+                  :test-paths ["test"]}]
+    (try
+      (spit path (str "(ns xt.sample.remove-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [hara.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+                      "(fact \"removable bench\"\n"
+                      "  (!.js (+ 1 2 3))\n"
+                      "  => 6)\n"))
+      (form-bench/seedgen-benchadd 'xt.sample.remove
+                                   {:lang [:python] :write true :rename '{xt [samplebench :lang]}}
+                                   lookup
+                                   project)
+      (let [before-exists (.exists (java.io.File. bench-path))]
+        (seedgen-benchremove 'xt.sample.remove
+                             {:lang [:python] :write true :rename '{xt [samplebench :lang]}}
+                             lookup
+                             project)
+        [before-exists
+         (.exists (java.io.File. bench-path))])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [true false])
