@@ -39,12 +39,21 @@
       (second v)
       v)))
 
-(defn- parse-test-args
+(defn collect-selector
+  "if the first arg is :only, collects following non-keyword args into a
+   vector selector; otherwise returns the single parsed selector"
+  {:added "4.1"}
+  [args]
+  (if (= :only (read-arg (first args)))
+    (let [vals (take-while (complement #(keyword? (read-arg %))) (rest args))]
+      [(vec (map read-arg vals)) (drop (inc (count vals)) args)])
+    [(read-arg (first args)) (rest args)]))
+
+(defn parse-test-args
   "parses args after the 'test' subcommand"
   {:added "4.1"}
   [args]
-  (let [[selector & more] args
-        selector (read-arg selector)
+  (let [[selector more] (collect-selector args)
         [langs more] (cond
                        (and (= ":with" (first more))
                             (second more))
@@ -269,12 +278,11 @@
         (recur (assoc opts k v) args))
       opts)))
 
-(defn- parse-command-args
+(defn parse-command-args
   "parses namespace selector and options for a generic seedgen command"
   {:added "4.1"}
   [args]
-  (let [[selector & more] args
-        selector (read-arg selector)
+  (let [[selector more] (collect-selector args)
         params (parse-command-params more)]
     {:selector selector :params params}))
 
