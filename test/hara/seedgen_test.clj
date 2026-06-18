@@ -285,12 +285,16 @@
 
 ^{:refer hara.seedgen/seedgen-readforms :added "4.1"}
 (fact "returns summary information for public seedgen readforms analysis"
-  (seedgen-readforms '[xt.sample.train-002] {:return :summary})
-  => (contains {:errors 0
-                :warnings 0
-                :items 1
-                :results 1
-                :total number?}))
+  (let [project (assoc (project/project)
+                       :test-paths (vec (distinct (concat (:test-paths (project/project))
+                                                          ["test-data"]))))
+        lookup  (project/file-lookup project)]
+    (seedgen-readforms '[xt.sample.train-002] {:return :summary} lookup project)
+    => (contains {:errors 0
+                  :warnings 0
+                  :items 1
+                  :results 1
+                  :total number?})))
 
 ^{:refer hara.seedgen/seedgen-benchlist :added "4.1"}
 (fact "returns summary information for seedgen benchlist tasks"

@@ -5,20 +5,25 @@
 
 ^{:refer hara.seedgen.common-infile/seedgen-root :added "4.1"}
 (fact "returns an explicit error result when the test file is missing"
-  (project/in-context
-   (seed-infile/seedgen-root 'xt.sample.train-001-test {}))
-  => :xtalk
+  (let [project (assoc (project/project)
+                       :test-paths (vec (distinct (concat (:test-paths (project/project))
+                                                          ["test-data"]))))
+        lookup  (project/file-lookup project)]
+    (seed-infile/seedgen-root 'xt.sample.train-001-test {} lookup project)
+    => :xtalk
 
-  (project/in-context
-   (seed-infile/seedgen-root 'xt.sample.missing-test {}))
-  => (contains {:status :error
-                :data :no-test-file}))
+    (seed-infile/seedgen-root 'xt.sample.missing-test {} lookup project)
+    => (contains {:status :error
+                  :data :no-test-file})))
 
 ^{:refer hara.seedgen.common-infile/seedgen-list :added "4.1"}
 (fact "returns an empty list when a test file only declares the seedgen root"
-  (project/in-context
-   (seed-infile/seedgen-list 'xt.sample.train-001-test {}))
-  => []
+  (let [project (assoc (project/project)
+                       :test-paths (vec (distinct (concat (:test-paths (project/project))
+                                                          ["test-data"]))))
+        lookup  (project/file-lookup project)]
+    (seed-infile/seedgen-list 'xt.sample.train-001-test {} lookup project)
+    => [])
 
   (let [tmp (java.io.File/createTempFile "seedgen-infile" ".clj")
         path (.getAbsolutePath tmp)
@@ -82,8 +87,11 @@
        'xt.lang.spec-base/example.C
        'xt.lang.spec-base/example.D}
 
-  (-> (project/in-context
-       (seed-infile/seedgen-incomplete 'xt.sample.train-004-test {}))
-      keys
-      set)
+  (let [project (assoc (project/project)
+                       :test-paths (vec (distinct (concat (:test-paths (project/project))
+                                                          ["test-data"]))))
+        lookup  (project/file-lookup project)]
+    (-> (seed-infile/seedgen-incomplete 'xt.sample.train-004-test {} lookup project)
+        keys
+        set))
   => #{})
