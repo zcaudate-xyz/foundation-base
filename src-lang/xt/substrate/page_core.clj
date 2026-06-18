@@ -1,4 +1,4 @@
-(ns xt.substrate.base-page
+(ns xt.substrate.page-core
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
@@ -33,23 +33,6 @@
   {:added "4.1"}
   [group]
   (return (xt/x:get-key group "remote")))
-
-(defn.xt async-fn
-  "normalises model stage execution across plain values and xt.promise results"
-  {:added "4.1"}
-  [handler context callbacks]
-  (var success (xt/x:get-key callbacks "success"))
-  (var error (xt/x:get-key callbacks "error"))
-  (try
-    (var output (handler context))
-    (if (promise/x:promise-native? output)
-      (return
-       (promise/x:promise-catch
-        (promise/x:promise-then output success)
-        error))
-      (return (promise/x:promise-run (success output))))
-    (catch err
-      (return (promise/x:promise-run (error err))))))
 
 (defn.xt wrap-space-args
   "puts the model context as first argument"
@@ -241,7 +224,7 @@
   (xt/x:set-key (xt/x:get-key context "acc") "path" path)
   (return
    (promise/x:promise-then
-    (event-model/pipeline-run-remote context save-output -/async-fn nil nil)
+    (event-model/pipeline-run-remote context save-output event-model/async-fn-promise nil nil)
     (fn []
       (return (-/run-tail-call context refresh-deps-fn))))))
 
@@ -260,7 +243,7 @@
   (xt/x:set-key (xt/x:get-key context "acc") "path" path)
   (return
    (promise/x:promise-then
-    (event-model/pipeline-run context disabled -/async-fn nil nil)
+    (event-model/pipeline-run context disabled event-model/async-fn-promise nil nil)
     (fn []
       (return (-/run-tail-call context refresh-deps-fn))))))
 

@@ -11,7 +11,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
-             [xt.substrate.base-page :as base-page]
+             [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-memory :as transport-memory]]})
 
 (fact:global
@@ -19,12 +19,12 @@
   :teardown [(l/rt:stop)]})
 
 ^{:name demo-000-page-model-basic
-  :refer xt.substrate.base-page/add-group}
+  :refer xt.substrate.page-core/add-group}
 (fact "a page model computes its output from args on initial refresh"
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (var group (base-page/add-group node
+    (var group (page-core/add-group node
                                     nil
                                     "page"
                                     {"greet"
@@ -36,19 +36,19 @@
     (-> (. group ["init"])
         (promise/x:promise-then
          (fn [_]
-           (var model-result (base-page/model-ensure node nil "page" "greet"))
+           (var model-result (page-core/model-ensure node nil "page" "greet"))
            (var model (xt/x:get-idx model-result 1))
            (repl/notify (event-model/get-current model nil))))))
   => "hello world")
 
 
 ^{:name demo-001-page-model-update
-  :refer xt.substrate.base-page/model-update}
+  :refer xt.substrate.page-core/model-update}
 (fact "page-model-update refreshes a model with new args"
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (base-page/add-group-attach node
+    (page-core/add-group-attach node
                                 nil
                                 "page"
                                 {"greet"
@@ -60,14 +60,14 @@
     (-> (substrate/page-model-update node nil "page" "greet" {})
         (promise/x:promise-then
          (fn [_]
-           (var model-result (base-page/model-ensure node nil "page" "greet"))
+           (var model-result (page-core/model-ensure node nil "page" "greet"))
            (var model (xt/x:get-idx model-result 1))
            (repl/notify (event-model/get-current model nil))))))
   => "hello world"
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (base-page/add-group-attach node
+    (page-core/add-group-attach node
                                 nil
                                 "page"
                                 {"greet"
@@ -79,19 +79,19 @@
     (-> (substrate/page-model-set-input node nil "page" "greet" {"data" ["substrate"]} {})
         (promise/x:promise-then
          (fn [_]
-           (var model-result (base-page/model-ensure node nil "page" "greet"))
+           (var model-result (page-core/model-ensure node nil "page" "greet"))
            (var model (xt/x:get-idx model-result 1))
            (repl/notify (event-model/get-current model nil))))))
   => "hello substrate")
 
 
 ^{:name demo-002-page-model-dependency
-  :refer xt.substrate.base-page/add-group-attach}
+  :refer xt.substrate.page-core/add-group-attach}
 (fact "refreshing a source model also refreshes its dependents"
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (base-page/add-group-attach node
+    (page-core/add-group-attach node
                                 nil
                                 "page"
                                 {"source"
@@ -102,7 +102,7 @@
                                  {"handler" (fn [context]
                                               (var local-node (. context ["node"]))
                                               (var source-result
-                                                (base-page/model-ensure local-node
+                                                (page-core/model-ensure local-node
                                                                         nil
                                                                         "page"
                                                                         "source"))
@@ -116,14 +116,14 @@
     (-> (substrate/page-model-update node nil "page" "source" {})
         (promise/x:promise-then
          (fn [_]
-           (var derived-result (base-page/model-ensure node nil "page" "derived"))
+           (var derived-result (page-core/model-ensure node nil "page" "derived"))
            (var derived (xt/x:get-idx derived-result 1))
            (repl/notify (event-model/get-current derived nil))))))
   => "derived-beta")
 
 
 ^{:name demo-003-page-model-remote
-  :refer xt.substrate.base-page/add-group-attach}
+  :refer xt.substrate.page-core/add-group-attach}
 (fact "a page model handler can issue a request over a memory transport"
 
   (notify/wait-on :js
@@ -149,7 +149,7 @@
            (transport-memory/text-endpoint (. wire ["right"])))])
         (promise/x:promise-then
          (fn [_]
-           (base-page/add-group-attach client
+           (page-core/add-group-attach client
                                        nil
                                        "page"
                                        {"echo"
@@ -168,19 +168,19 @@
            (return (substrate/page-model-update client nil "page" "echo" {}))))
         (promise/x:promise-then
          (fn [_]
-           (var model-result (base-page/model-ensure client nil "page" "echo"))
+           (var model-result (page-core/model-ensure client nil "page" "echo"))
            (var model (xt/x:get-idx model-result 1))
            (repl/notify (event-model/get-current model nil))))))
   => {"echo" "ping" "server" "server"})
 
 
 ^{:name demo-004-page-model-local-and-remote
-  :refer xt.substrate.base-page/remote-call}
+  :refer xt.substrate.page-core/remote-call}
 (fact "a model can have separate local and remote handlers"
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (base-page/add-group-attach node
+    (page-core/add-group-attach node
                                 nil
                                 "page"
                                 {"both"
@@ -192,17 +192,17 @@
     (-> (substrate/page-model-update node nil "page" "both" {})
         (promise/x:promise-then
          (fn [_]
-           (return (base-page/remote-call node nil "page" "both" [] true))))
+           (return (page-core/remote-call node nil "page" "both" [] true))))
         (promise/x:promise-then
          (fn [_]
-           (var model-result (base-page/model-ensure node nil "page" "both"))
+           (var model-result (page-core/model-ensure node nil "page" "both"))
            (var model (xt/x:get-idx model-result 1))
            (repl/notify (event-model/get-current model nil))))))
   => "remote-value"
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (base-page/add-group-attach node
+    (page-core/add-group-attach node
                                 nil
                                 "page"
                                 {"both"
@@ -214,7 +214,7 @@
     (-> (substrate/page-model-update node nil "page" "both" {})
         (promise/x:promise-then
          (fn [_]
-           (var model-result (base-page/model-ensure node nil "page" "both"))
+           (var model-result (page-core/model-ensure node nil "page" "both"))
            (var model (xt/x:get-idx model-result 1))
            (repl/notify (event-model/get-current model nil))))))
   => "local-value")

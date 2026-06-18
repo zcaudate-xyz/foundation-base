@@ -1,5 +1,5 @@
 ^{:seedgen/skip true}
-(ns xt.substrate.e2e-browser-basic-test
+(ns xt.substrate.browser.e2e-browser-basic-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]

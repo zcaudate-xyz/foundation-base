@@ -1,12 +1,12 @@
 ^{:seedgen/skip true}
-(ns xt.substrate.e2e-page-remote-sharedworker-test
+(ns xt.substrate.browser.e2e-page-remote-sharedworker-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [js.worker.link]
             [xt.lang.common-notify :as notify]
             [xt.substrate.page-remote]
-            [xt.substrate.base-page]
+            [xt.substrate.page-core]
             [xt.event.base-model]
             [xt.substrate.transport-browser]))
 
@@ -21,7 +21,7 @@
                        {"id" "page-remote-shared-server"
                         "spaces" {"room/a" {"state" {}}}}))
             (xt.substrate.page-remote/install node)
-            (xt.substrate.base-page/add-group
+            (xt.substrate.page-core/add-group
              node
              "room/a"
              "demo"
@@ -54,7 +54,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
-             [xt.substrate.base-page :as base-page]
+             [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
              [xt.substrate.page-remote :as page-remote]]})
 

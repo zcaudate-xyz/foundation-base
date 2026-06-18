@@ -8,7 +8,7 @@
              [xt.event.base-listener :as event-common]
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
-             [xt.substrate.base-page :as base-page]
+             [xt.substrate.page-core :as base-page]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-space :as node-space]]})
 
@@ -71,7 +71,7 @@
   "captures a serializable snapshot of all models in a group"
   {:added "4.1"}
   [node space-id group-id]
-  (var group (base-page/group-get node space-id group-id))
+  (var group (page-core/group-get node space-id group-id))
   (when (xt/x:nil? group)
     (return {}))
   (var models (xt/x:get-key group "models"))
@@ -144,7 +144,7 @@
   {:added "4.1"}
   [space args request node]
   (var space-id (xt/x:first args))
-  (var runtime (base-page/ensure-space-page node space-id))
+  (var runtime (page-core/ensure-space-page node space-id))
   (var groups (xt/x:get-key runtime "groups"))
   (var out {})
   (xt/for:object [[group-id group] groups]
@@ -163,7 +163,7 @@
   (var space-id (xt/x:get-key payload "space"))
   (var group-id (xt/x:get-key payload "group"))
   (var transport-id (xtd/get-in request ["meta" "transport_id"]))
-  (var group (base-page/group-get node space-id group-id))
+  (var group (page-core/group-get node space-id group-id))
   (when (xt/x:nil? group)
     (return {"error" "group not found"
              "space" space-id
@@ -208,7 +208,7 @@
   [space args request node]
   (var payload (xt/x:first args))
   (return
-   (-> (base-page/group-update node
+   (-> (page-core/group-update node
                                (xt/x:get-key payload "space")
                                (xt/x:get-key payload "group")
                                (or (xt/x:get-key payload "event") {}))
@@ -222,7 +222,7 @@
   [space args request node]
   (var payload (xt/x:first args))
   (return
-   (-> (base-page/model-update node
+   (-> (page-core/model-update node
                                (xt/x:get-key payload "space")
                                (xt/x:get-key payload "group")
                                (xt/x:get-key payload "model")
@@ -237,7 +237,7 @@
   [space args request node]
   (var payload (xt/x:first args))
   (return
-   (-> (base-page/model-set-input node
+   (-> (page-core/model-set-input node
                                  (xt/x:get-key payload "space")
                                  (xt/x:get-key payload "group")
                                  (xt/x:get-key payload "model")
@@ -252,7 +252,7 @@
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
-  (var out (base-page/trigger-model node
+  (var out (page-core/trigger-model node
                                     (xt/x:get-key payload "space")
                                     (xt/x:get-key payload "group")
                                     (xt/x:get-key payload "model")
@@ -266,7 +266,7 @@
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
-  (var out (base-page/trigger-group node
+  (var out (page-core/trigger-group node
                                     (xt/x:get-key payload "space")
                                     (xt/x:get-key payload "group")
                                     (xt/x:get-key payload "signal")
@@ -349,7 +349,7 @@
      (var emitted (xt/x:obj-assign {} data))
      (xt/x:set-key emitted "meta" meta)
      (return
-      (base-page/trigger-listeners
+      (page-core/trigger-listeners
        node
        space-id
        [group-id model-id]
@@ -362,7 +362,7 @@
   "creates a proxy group on the client from a server snapshot"
   {:added "4.1"}
   [node space-id group-id snapshot remote-spec]
-  (var runtime (base-page/ensure-space-page node space-id))
+  (var runtime (page-core/ensure-space-page node space-id))
   (var groups (xt/x:get-key runtime "groups"))
   (var group-models {})
   (xt/for:object [[model-id model-snapshot] snapshot]
@@ -386,7 +386,7 @@
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
   (var output (xt/x:get-key data "output"))
-  (var group (base-page/group-get node space group-id))
+  (var group (page-core/group-get node space group-id))
   (when (xt/x:nil? group)
     (return nil))
   (var model (xtd/get-in group ["models" model-id]))
@@ -404,7 +404,7 @@
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
   (var input (xt/x:get-key data "input"))
-  (var group (base-page/group-get node space group-id))
+  (var group (page-core/group-get node space group-id))
   (when (xt/x:nil? group)
     (return nil))
   (var model (xtd/get-in group ["models" model-id]))
@@ -429,7 +429,7 @@
   "forwards local page operations to the server owning the remote group"
   {:added "4.1"}
   [op node space-id group-id args]
-  (var group (base-page/group-get node space-id group-id))
+  (var group (page-core/group-get node space-id group-id))
   (var remote-spec (xt/x:get-key group "remote"))
   (var transport-id (xt/x:get-key remote-spec "transport_id"))
   (cond (== op "group-update")
@@ -507,7 +507,7 @@
   [node]
   (-/install-handlers node)
   (-/install-triggers node)
-  (base-page/set-remote-dispatcher -/remote-dispatcher)
+  (page-core/set-remote-dispatcher -/remote-dispatcher)
   (return node))
 
 (defn.xt list-remote-groups
@@ -540,7 +540,7 @@
             (xt/x:err (xt/x:cat "ERR - " error)))
           (var snapshot (xt/x:get-key response "models"))
           (-/create-proxy-group node space-id group-id snapshot opts)
-          (return (base-page/group-get node space-id group-id)))))))
+          (return (page-core/group-get node space-id group-id)))))))
 
 (defn.xt close-remote-group
   "closes a remote page group and removes proxy models"
@@ -556,7 +556,7 @@
                           {"transport_id" transport-id})
        (promise/x:promise-then
         (fn [_]
-          (var runtime (base-page/ensure-space-page node space-id))
+          (var runtime (page-core/ensure-space-page node space-id))
           (var groups (xt/x:get-key runtime "groups"))
           (xt/x:del-key groups group-id)
           (return nil))))))

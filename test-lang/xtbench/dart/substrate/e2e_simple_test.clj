@@ -66,7 +66,7 @@
   
   
   (defn )
-  (base-page/add-group-attach
+  (page-core/add-group-attach
    node
    "space/a"
    "entries"
@@ -87,7 +87,7 @@
            {"db/fn.primary"
             {"fn"   (db-helper/call-db-handler (js-postgres/create {:database "test-scratch"}) "db/primary")
              "meta" {"kind" "request"}}}}))
-    (base-page/add-group-attach node
+    (page-core/add-group-attach node
                                 nil
                                 "page"
                                 {"ping" (db-helper/call-view-request entries/ping

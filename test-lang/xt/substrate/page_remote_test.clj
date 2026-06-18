@@ -12,7 +12,7 @@
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
              [xt.substrate.base-router :as router]
-             [xt.substrate.base-page :as base-page]
+             [xt.substrate.page-core :as base-page]
              [xt.substrate.page-remote :as page-remote]]})
 
 (defn.js make-server-node
@@ -71,7 +71,7 @@
   {:added "4.1"}
   [server]
   (return
-   (base-page/add-group server
+   (page-core/add-group server
                         "room/a"
                         "demo"
                         {"main" {"defaults" {"args" ["hello"]
@@ -220,7 +220,7 @@
                    (var snapshot (xt/x:get-key response "models"))
                    (page-remote/create-proxy-group client "room/a" "demo" snapshot
                                                    {"transport_id" "server-conn"})
-                   (return (base-page/group-get client "room/a" "demo"))))))))
+                   (return (page-core/group-get client "room/a" "demo"))))))))
         (promise/x:promise-then
          (fn [group]
            (var model (xtd/get-in group ["models" "main"]))
@@ -263,7 +263,7 @@
         (promise/x:promise-then
          (fn [_]
            (repl/notify
-            {"group"       (base-page/group-get client
+            {"group"       (page-core/group-get client
                                                 "room/a" "demo")
              "output_subs" (router/list-subscriptions server
                                                       "room/a" page-remote/SIGNAL_OUTPUT)

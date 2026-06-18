@@ -16,7 +16,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.event.base-model :as event-model]
              [xt.substrate :as event-node]
-             [xt.substrate.base-page :as base-page]
+             [xt.substrate.page-core :as base-page]
              [js.net.conn-postgres :as js-postgres]
              [xt.db.substrate :as db-helper]
              [postgres.sample.scratch-v0.route-entries :as entries]]})
@@ -61,7 +61,7 @@
            {"db/fn.primary"
             {"fn"   (db-helper/call-db-handler (fn [] (js-postgres/create {:database "test-scratch"})) "db/primary")
              "meta" {"kind" "request"}}}}))
-    (base-page/add-group-attach node
+    (page-core/add-group-attach node
                                 nil
                                 "page"
                                 {"ping" {"handler" (db-helper/call-view-request entries/ping
@@ -69,7 +69,7 @@
                                                                                 "action/ping.primary"
                                                                                 {})
                                          "defaults" {"args" []}}})
-    (var [_group model] (base-page/model-ensure node nil "page" "ping"))
+    (var [_group model] (page-core/model-ensure node nil "page" "ping"))
     (repl/notify model))
   => (contains-in
       {"output"
@@ -95,7 +95,7 @@
            {"db/fn.primary"
             {"fn"   (db-helper/call-db-handler (fn [] (js-postgres/create {:database "test-scratch"})) "db/primary")
              "meta" {"kind" "request"}}}}))
-    (base-page/add-group-attach node
+    (page-core/add-group-attach node
                                 nil
                                 "page"
                                 {"ping" {"handler" (db-helper/call-view-request entries/ping
@@ -106,7 +106,7 @@
     (-> (event-node/page-model-update node nil "page" "ping" {})
         (promise/x:promise-then
          (fn [out]
-           (var [_group model] (base-page/model-ensure node nil "page" "ping"))
+           (var [_group model] (page-core/model-ensure node nil "page" "ping"))
            (repl/notify {:out out
                          :value (event-model/get-current model nil)})))))
   => {"value" "pong",
@@ -122,7 +122,7 @@
            {"db/fn.primary"
             {"fn"   (db-helper/call-db-handler (fn [] (js-postgres/create {:database "test-scratch"})) "db/primary")
              "meta" {"kind" "request"}}}}))
-    (base-page/add-group-attach node
+    (page-core/add-group-attach node
                                 nil
                                 "page"
                                 {"ping" {"handler" (db-helper/call-view-request entries/ping
@@ -133,7 +133,7 @@
     (-> (event-node/page-model-update node nil "page" "ping" {})
         (promise/x:promise-then
          (fn [_]
-           (repl/notify (base-page/model-ensure node nil "page" "ping"))))))
+           (repl/notify (page-core/model-ensure node nil "page" "ping"))))))
   => (contains-in
       [{"name" "page",
         "models"

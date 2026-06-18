@@ -6,7 +6,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
              [xt.event.base-listener :as event-common]
-             [xt.substrate.base-page :as page]
+             [xt.substrate.page-core :as page]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-space :as node-space]
