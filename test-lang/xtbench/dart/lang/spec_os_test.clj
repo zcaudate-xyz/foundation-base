@@ -85,5 +85,4 @@
   (s/seedgen-benchadd '[xt.lang.spec-os] {:lang [:r] :write true})
   
   (s/seedgen-langadd 'xt.lang.spec-os {:lang [:lua :python] :write true})
-  (s/seedgen-langremove 'xt.lang.spec-os
-{:lang [:lua :python] :write true}))
+  (s/seedgen-langremove 'xt.lang.spec-os {:lang [:lua :python] :write true}))

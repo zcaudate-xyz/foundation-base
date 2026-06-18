@@ -8,12 +8,55 @@
   {:runtime :twostep
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-lib :as xtl]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.spec-link :as spec-link]
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
+
+^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
+(fact "passes rejected promise error to notify-fn"
+
+  (notify/wait-on-call
+   (fn [] (!.dt
+           (repl/notify-with-promise
+            repl/notify-socket
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise (fn [] (xt/x:err "bad")))
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "bad")
+
+^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
+(fact "passes rejected promise error to notify-fn"
+
+  (notify/wait-on-call
+   (fn [] (!.dt
+           (repl/notify-with-promise
+            repl/notify-socket
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise (fn [] (xt/x:err "bad")))
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "bad")
+
+^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
+(fact "passes rejected promise error to notify-fn"
+
+  (notify/wait-on-call
+   (fn [] (!.dt
+           (repl/notify-with-promise
+            repl/notify-socket
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise (fn [] (xt/x:err "bad")))
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "bad")
 
 ^{:refer xt.lang.common-repl/socket-connect :added "4.0"
   :setup [(l/rt:restart)]}
@@ -56,6 +99,19 @@
                             {}))))
   => "hello")
 
+^{:refer xt.lang.common-repl/notify-socket-full :added "4.1"}
+(fact "waits for promises before socket notification"
+
+  (notify/wait-on-call
+   (fn [] (!.dt
+           (repl/notify-socket-full
+            "127.0.0.1" (@! (:socket-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello")
+
 ^{:refer xt.lang.common-repl/notify-socket-http :added "4.0"}
 (fact "using the base socket implementation to notify on http protocol"
 
@@ -81,11 +137,31 @@
                               {}))))
   => "hello")
 
+^{:refer xt.lang.common-repl/notify-http-full :added "4.1"}
+(fact "waits for promises before http notification"
+
+  (notify/wait-on-call
+   (fn [] (!.dt
+           (repl/notify-http-full
+            "127.0.0.1" (@! (:http-port (l/default-notify)))
+            (promise/x:promise-run "hello")
+            (@! notify/*override-id*)
+            nil
+            {}))))
+  => "hello")
+
 ^{:refer xt.lang.common-repl/notify :added "4.0"}
 (fact "sends a message to the notify server"
 
   (notify/wait-on :dart
     (repl/notify 1))
+  => 1)
+
+^{:refer xt.lang.common-repl/>notify :added "4.0"}
+(fact "creates a callback function"
+
+  (notify/wait-on :dart
+    ((repl/>notify) 1))
   => 1)
 
 ^{:refer xt.lang.common-repl/<! :added "4.0"}

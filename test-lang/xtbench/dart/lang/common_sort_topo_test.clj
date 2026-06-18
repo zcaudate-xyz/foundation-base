@@ -24,13 +24,13 @@
 (fact "visits nodes and pushes the sorted ids"
 
   (!.dt
-   (var nodes {"a" {"id" "a", "links" ["b"]}
-               "b" {"id" "b", "links" ["c"]}
-               "c" {"id" "c", "links" []}})
-   (var visited {})
-   (var sorted [])
-   (topo/sort-edges-visit nodes visited sorted "a" nil)
-   [visited sorted])
+    (var nodes {"a" {"id" "a", "links" ["b"]}
+                "b" {"id" "b", "links" ["c"]}
+                "c" {"id" "c", "links" []}})
+    (var visited {})
+    (var sorted [])
+    (topo/sort-edges-visit nodes visited sorted "a" nil)
+    [visited sorted])
   => [{"a" true, "b" true, "c" true}
       ["a" "b" "c"]])
 
@@ -38,14 +38,14 @@
 (fact "sorts edges given a list"
 
   (!.dt
-   (topo/sort-edges [["a" "b"] ["b" "c"] ["c" "d"] ["d" "e"]]))
+    (topo/sort-edges [["a" "b"] ["b" "c"] ["c" "d"] ["d" "e"]]))
   => ["a" "b" "c" "d" "e"])
 
 ^{:refer xt.lang.common-sort-topo/sort-topo :added "4.1"}
 (fact "sorts in topological order"
 
   (!.dt
-   (topo/sort-topo [["a" ["b" "c"]] ["c" ["b"]]]))
+    (topo/sort-topo [["a" ["b" "c"]] ["c" ["b"]]]))
   => ["b" "c" "a"])
 
 (comment

@@ -494,7 +494,7 @@
  
  xyz.zcaudate/postgres
  {:description "postgres language and runtime support"
-  :include [[postgres :complete]]}
+  :include [[postgres :exclude [postgres.sample]]]}
 
  xyz.zcaudate/solidity
  {:description "solidity language and runtime support"

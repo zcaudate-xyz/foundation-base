@@ -6,6 +6,7 @@
   :aliases
   {"test"    ["run" "-m" "code.test"]
    "manage"  ["run" "-m" "code.manage"]
+   "seedgen" ["run" "-m" "hara.seedgen.cli"]
    #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "serve"       ["run" "-m" "code.doc.server" "8080"]

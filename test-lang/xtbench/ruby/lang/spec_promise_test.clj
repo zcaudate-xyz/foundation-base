@@ -14,6 +14,18 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.lang.spec-promise/x:promise :added "4.1"}
+(fact "creates a promise"
+
+  (notify/wait-on :ruby
+    (-> (spec-promise/x:promise
+         (fn []
+           (return "hello")))
+        (spec-promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => "hello")
+
 ^{:refer xt.lang.spec-base/x:async-run :added "4.1"}
 (fact "runs thunks in the host async model"
 

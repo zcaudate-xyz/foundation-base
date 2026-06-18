@@ -1,6 +1,7 @@
 (ns xtbench.dart.lang.common-trace-test
   (:use code.test)
-  (:require [hara.lang             :as l]))
+  (:require [hara.lang             :as l]
+            [xt.lang.common-trace :as trace]))
 
 (l/script- :dart
   {:runtime :twostep

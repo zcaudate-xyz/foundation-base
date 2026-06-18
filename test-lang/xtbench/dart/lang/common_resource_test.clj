@@ -1,4 +1,4 @@
-(ns xtbench.dart.lang.common-space-test
+(ns xtbench.dart.lang.common-resource-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-resource :as rt]))

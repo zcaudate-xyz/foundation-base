@@ -6,7 +6,7 @@
 (l/script- :dart
   {:runtime :twostep
    :require [[xt.lang.parser-xml :as xml]
-             [xt.lang.spec-base :as xt]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

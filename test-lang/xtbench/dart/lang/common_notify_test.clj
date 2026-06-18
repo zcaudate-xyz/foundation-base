@@ -8,7 +8,7 @@
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.lang.spec-base :as xt]
+   :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global

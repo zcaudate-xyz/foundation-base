@@ -224,7 +224,7 @@
     (var err-fn (fn []
                   (xt/x:err "ERR")))
     (err-fn))
-  => (throws))
+  => (fn [out] (re-find #"ERR" (deref out))))
 
 ^{:refer xt.lang.spec-base/x:ex-native? :added "4.1"}
 (fact "check is exception is native"
@@ -270,7 +270,7 @@
   (!.dt
     (var type-fn (fn [obj]
                    (return
-                    (xt/x:type-native obj))))
+                     (xt/x:type-native obj))))
     [(type-fn {})
      (type-fn [])
      (type-fn [1])])
@@ -765,8 +765,9 @@
 (fact "recognises arrays"
 
   (!.dt
-    (xt/x:is-array? [1 2]))
-  => true)
+    [(xt/x:is-array? [])
+     (xt/x:is-array? [1 2])])
+  => [true true])
 
 ^{:refer xt.lang.spec-base/x:print :added "4.1"}
 (fact "expands and emits a lua print form"
@@ -1232,7 +1233,7 @@
   (!.dt
     (do:>
      (x:throw "THROW")))
-  => (throws))
+  => (fn [out] (re-find #"THROW" (deref out))))
 
 ^{:refer xt.lang.spec-base/x:now-ms :added "4.1"}
 (fact "expands and emits a millisecond time expression"
