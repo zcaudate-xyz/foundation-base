@@ -236,9 +236,7 @@
          :token  {:nil       {:as "nothing"}
                   :string    {:quote :double}
                   :symbol    {:global #'julia-symbol-global
-                              :replace (assoc helper/+sym-replace+
-                                              \! "!"
-                                              \: "_")}}
+                              :replace (assoc helper/+sym-replace+ \! "!")}}
          :data   {:map-entry {:start ""  :end ""  :space "" :assign " => " :keyword :string
                               :key-fn #'julia-map-key}
                   :map       {:start "Dict{Any,Any}(" :end ")"}
