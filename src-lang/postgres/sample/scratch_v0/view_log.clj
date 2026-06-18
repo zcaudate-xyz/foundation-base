@@ -2,7 +2,7 @@
   (:require [std.lib :as h]
             [hara.lang :as l]
             [postgres.gen.bind-macro :as bind-pg]
-            [xt.db.gen-bind :as bind]
+            [postgres.gen.gen-bind :as bind]
             [postgres.sample.scratch-v0]))
 
 (l/script :xtalk

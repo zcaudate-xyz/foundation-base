@@ -1,4 +1,4 @@
-(ns xt.db.gen-bind
+(ns postgres.gen.gen-bind
   (:require [hara.lang :as l]
             [postgres.gen.bind-macro :as gen]
             [std.lib.env :as env]

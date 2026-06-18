@@ -1,7 +1,7 @@
 (ns postgres.sample.scratch-v0.route-scratch
   (:require [hara.lang :as l]
             [postgres.sample.scratch-v0.route-entries]
-            [xt.db.gen-bind :as bind]))
+            [postgres.gen.gen-bind :as bind]))
 
 (l/script :xtalk
   {:require [[xt.db.text.base-util :as ut]]})

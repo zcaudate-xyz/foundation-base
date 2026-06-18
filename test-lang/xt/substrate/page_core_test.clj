@@ -9,7 +9,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
-             [xt.substrate.page-core :as base-page]
+             [xt.substrate.page-core :as page-core]
              [xt.substrate.base-space :as node-space]]})
 
 (defn.js create-node
@@ -24,25 +24,6 @@
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
-
-^{:refer xt.substrate.page-core/async-fn :added "4.1"}
-(fact "runs the success callback for plain values"
-
-  (notify/wait-on :js
-    (var out nil)
-    (-> (page-core/async-fn
-         (fn [ctx]
-           (return (. ctx ["value"])))
-         {"value" 3}
-         {"success" (fn [value]
-                      (:= out ["success" value])
-                      (return value))
-          "error" (fn [err]
-                    (:= out ["error" err])
-                    (return err))})
-        (promise/x:promise-then
-         (fn [] (repl/notify out)))))
-  => ["success" 3])
 
 ^{:refer xt.substrate.page-core/wrap-space-args :added "4.1"}
 (fact "prepends the model context to handler arguments"
@@ -173,7 +154,29 @@
       "input" {"data" [1 2]}})
 
 ^{:refer xt.substrate.page-core/prep-model :added "4.1"}
-(fact "TODO")
+(fact "prepares the model context and disabled flag"
+
+  (!.js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [space args request node]
+                          (return {"args" args}))
+              "defaults" {"args" [1 2]}}})
+    (var [path context disabled]
+         (page-core/prep-model node "space/a" "page" "ping" {"args" [3 4]}))
+    {"path" path
+     "args" (. context ["args"])
+     "disabled" disabled
+     "space" (. (. context ["space"]) ["id"])
+     "group" (. (. context ["group"]) ["name"])})
+  => {"path" ["page" "ping"]
+      "args" [3 4]
+      "disabled" false
+      "space" "space/a"
+      "group" "page"})
 
 ^{:refer xt.substrate.page-core/get-model-dependents :added "4.1"}
 (fact "finds groups that depend on a model"

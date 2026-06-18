@@ -1,10 +1,10 @@
-(ns xt.db.gen-bind-test
+(ns postgres.gen.gen-bind-test
   (:require [postgres.sample.scratch-v1 :as scratch]
-            [xt.db.gen-bind :as bind]
+            [postgres.gen.gen-bind :as bind]
             [xt.db.helpers.seed-system-test :as sample-data])
   (:use code.test))
 
-^{:refer xt.db.gen-bind/tmpl-route :added "4.0"}
+^{:refer postgres.gen.gen-bind/tmpl-route :added "4.0"}
 (fact "creates a route template"
 
   (bind/tmpl-route '[addf scratch/addf])
@@ -15,7 +15,7 @@
                     :flags {},
                     :url "/addf"}))
 
-^{:refer xt.db.gen-bind/tmpl-view :added "4.0"}
+^{:refer postgres.gen.gen-bind/tmpl-view :added "4.0"}
 (fact "creates a view template"
 
   (bind/tmpl-view '[currency-all sample-data/currency-all])
@@ -28,16 +28,16 @@
          :view
          {:table "Currency", :type "select", :tag "all", :query nil}}))
 
-^{:refer xt.db.gen-bind/route-map :added "4.0"}
+^{:refer postgres.gen.gen-bind/route-map :added "4.0"}
 (fact "returns a map of routes")
 
-^{:refer xt.db.gen-bind/route-list :added "4.0"}
+^{:refer postgres.gen.gen-bind/route-list :added "4.0"}
 (fact "lists all routes"
 
   (bind/route-list)
   => vector?)
 
-^{:refer xt.db.gen-bind/view-list :added "4.0"}
+^{:refer postgres.gen.gen-bind/view-list :added "4.0"}
 (fact "lists all views"
 
   (bind/view-list)

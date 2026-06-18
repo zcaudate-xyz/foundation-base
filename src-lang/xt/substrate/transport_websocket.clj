@@ -6,7 +6,7 @@
              [xt.substrate.transport-memory :as json-transport]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.net.ws-legacy :as wsrt]]})
+             [xt.net.ws-native :as ws]]})
 
 (defspec.xt event-text
   [:fn [:xt/any] :xt/any])
@@ -131,40 +131,62 @@
 
         :else
         (return socket-source)))
+(defn.xt ensure-websocket-client
+  "wraps a raw socket or ws-native source in a ws-native client"
+  {:added "4.1"}
+  [socket-source]
+  (cond (ws/client? socket-source)
+        (return socket-source)
+
+        (xt/x:is-object? socket-source)
+        (return (ws/RawWebsocketClient (or socket-source {}) socket-source))
+
+        :else
+        (return (ws/RawWebsocketClient {} socket-source))))
+(defn.xt ensure-promise
+  "wraps sync values in a native promise while passing promises through"
+  {:added "4.1"}
+  [value]
+  (if (promise/x:promise-native? value)
+    (return value)
+    (return (promise/x:promise-run value))))
 (defn.xt websocket-source
   "creates a websocket-backed text endpoint source"
   {:added "4.1"}
   [socket-source]
-  (var current-socket nil)
+  (var current-client nil)
+  (var current-raw nil)
   (var current-message-callback nil)
   (var current-open-callback nil)
   (var current-error-callback nil)
   (var current-close-callback nil)
   (var send-fn
        (fn [text]
-         (when (xt/x:nil? current-socket)
+         (when (xt/x:nil? current-client)
            (xt/x:err "websocket endpoint not started"))
-         (return (. current-socket (send text)))))
+         (return (ws/send current-client text))))
   (var start-fn
        (fn [listener]
          (return
           (promise/x:promise-then
-           (wsrt/ensure-promise (-/resolve-socket socket-source))
+           (-/ensure-promise (-/resolve-socket socket-source))
            (fn [socket]
-             (:= current-socket socket)
+             (var client (-/ensure-websocket-client socket))
+             (:= current-client client)
+             (:= current-raw (or (xt/x:get-key client "raw") socket))
              (:= current-message-callback
                  (fn [event]
                    (return (listener event nil))))
-             (-/add-socket-listener socket "message" current-message-callback)
-             (if (-/socket-open? socket)
-               (return socket)
+             (ws/add-listeners client {"message" current-message-callback})
+             (if (-/socket-open? current-raw)
+               (return current-raw)
                (do (var state {"status" "opening"
-                               "socket" socket
+                               "socket" current-raw
                                "error" "websocket failed to open"})
                    (:= current-open-callback
                        (fn [_event]
                          (xt/x:set-key state "status" "open")
-                         (return socket)))
+                         (return current-raw)))
                    (:= current-error-callback
                        (fn [event]
                          (xt/x:set-key state "status" "error")
@@ -179,32 +201,32 @@
                                              "websocket closed before open"
                                              event)))
                          (return event)))
-                   (-/add-socket-listener socket "open" current-open-callback)
-                   (-/add-socket-listener socket "error" current-error-callback)
-                   (-/add-socket-listener socket "close" current-close-callback)
+                   (ws/add-listeners client {"open" current-open-callback
+                                             "error" current-error-callback
+                                             "close" current-close-callback})
                    (return
                     (promise/x:promise-then
                      (-/await-open state)
                      (fn [_]
-                       (return socket)))))))))))
+                       (return current-raw)))))))))))
   (var stop-fn
        (fn [_]
-         (when (and (xt/x:not-nil? current-socket)
+         (when (and (xt/x:not-nil? current-raw)
                     (xt/x:not-nil? current-message-callback))
-           (-/remove-socket-listener current-socket "message" current-message-callback))
-         (when (and (xt/x:not-nil? current-socket)
+           (-/remove-socket-listener current-raw "message" current-message-callback))
+         (when (and (xt/x:not-nil? current-raw)
                     (xt/x:not-nil? current-open-callback))
-           (-/remove-socket-listener current-socket "open" current-open-callback))
-         (when (and (xt/x:not-nil? current-socket)
+           (-/remove-socket-listener current-raw "open" current-open-callback))
+         (when (and (xt/x:not-nil? current-raw)
                     (xt/x:not-nil? current-error-callback))
-           (-/remove-socket-listener current-socket "error" current-error-callback))
-         (when (and (xt/x:not-nil? current-socket)
+           (-/remove-socket-listener current-raw "error" current-error-callback))
+         (when (and (xt/x:not-nil? current-raw)
                     (xt/x:not-nil? current-close-callback))
-           (-/remove-socket-listener current-socket "close" current-close-callback))
-         (when (and (xt/x:not-nil? current-socket)
-                    (xt/x:is-function? (xt/x:get-key current-socket "close")))
-           (. current-socket (close)))
-         (:= current-socket nil)
+           (-/remove-socket-listener current-raw "close" current-close-callback))
+         (when (xt/x:not-nil? current-client)
+           (ws/disconnect current-client))
+         (:= current-client nil)
+         (:= current-raw nil)
          (:= current-message-callback nil)
          (:= current-open-callback nil)
          (:= current-error-callback nil)
