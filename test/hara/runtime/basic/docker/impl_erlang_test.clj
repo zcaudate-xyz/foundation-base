@@ -23,7 +23,7 @@
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
-            (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
+            (System/getenv "HARA_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 

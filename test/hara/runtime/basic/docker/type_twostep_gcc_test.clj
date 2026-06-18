@@ -5,14 +5,16 @@
             [hara.lang :as l]
             [std.lib.env :as env]))
 
-(l/script- :c
-  {:runtime :twostep
-   :process {:force-container true
-             :container {:image "foundation-base/rt-twostep-c:latest"}
-             :exec-fn #'twostep/sh-exec-portable} :test-mode true})
 
-(fact:global {:skip (or (not (env/program-exists? "docker"))
-                        (not (System/getenv "RT_TWOSTEP_DOCKER_TESTS")))
+(l/script- :c
+           {:runtime :twostep
+            :process {:force-container true
+                      :container {:image "foundation-base/rt-twostep-c:latest"}
+                      :exec-fn #'twostep/sh-exec-portable}})
+
+(fact:global
+ {:skip (or (not (env/program-exists? "docker"))
+            (System/getenv "HARA_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
@@ -29,9 +31,9 @@
 (fact "gcc twostep can return values in docker"
   [(!.c
      (+ 1 2 3))
-
+   
    (add-10 6)
-
+   
    (!.c
      (-/add-20 (-/add-10 6)))
 

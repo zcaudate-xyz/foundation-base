@@ -9,10 +9,12 @@
   {:runtime :twostep
    :process {:force-container true
              :container {:image "foundation-base/rt-twostep-rust:latest"}
-             :exec-fn #'twostep/sh-exec-portable} :test-mode true})
+             :exec-fn #'twostep/sh-exec-portable}
+   :test-mode true})
 
-(fact:global {:skip (or (not (env/program-exists? "docker"))
-                        (not (System/getenv "RT_TWOSTEP_DOCKER_TESTS")))
+(fact:global
+ {:skip (or (not (env/program-exists? "docker"))
+            (System/getenv "HARA_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
@@ -29,12 +31,12 @@
 (fact "rust twostep can return values in docker"
   [(!.rs
      (+ 1 2 3))
-
+   
    (add-10 6)
-
+   
    (!.rs
      (-/add-20 (-/add-10 6)))
-
+   
    (!.rs
      (-/add-20 10))]
   => [6 16 36 30])
