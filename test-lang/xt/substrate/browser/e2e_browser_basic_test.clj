@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
 (ns xt.substrate.e2e-browser-basic-test
   (:use code.test)
   (:require [hara.lang :as l]

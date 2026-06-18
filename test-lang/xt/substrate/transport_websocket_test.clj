@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
 (ns xt.substrate.transport-websocket-test
   (:use code.test)
   (:require [hara.lang :as l]

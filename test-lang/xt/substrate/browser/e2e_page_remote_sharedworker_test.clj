@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
 (ns xt.substrate.e2e-page-remote-sharedworker-test
   (:use code.test)
   (:require [hara.lang :as l]

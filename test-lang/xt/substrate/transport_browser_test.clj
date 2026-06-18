@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
 (ns xt.substrate.transport-browser-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify])
