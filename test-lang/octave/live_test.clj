@@ -1,9 +1,7 @@
 (ns octave.live-test
+  (:use code.test)
   (:require [hara.lang :as l]
-            [hara.model.annex.spec-octave]
-            [octave.core :as y]
-            [std.lib.env :as env])
-  (:use code.test))
+            [std.lib.env :as env]))
 
 (fact:global
  {:skip (not (or (env/program-exists? "octave-cli")

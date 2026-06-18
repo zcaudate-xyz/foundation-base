@@ -34,6 +34,24 @@
   (topological-top {:a #{} :b #{:a}})
   => #{:b})
 
+^{:refer std.lib.sort/find-cycle :added "4.0"}
+(fact "finds a cycle path in a directed graph"
+
+  (find-cycle {:a #{:b}, :b #{:a}})
+  => (fn [c] (and (= (count c) 3)
+                  (= (first c) (last c))
+                  (= (set c) #{:a :b})))
+
+  (find-cycle {:a #{:b}, :b #{:c}, :c #{:b}})
+  => (fn [c] (and (= (count c) 3)
+                  (= (first c) (last c))
+                  (= (set c) #{:b :c})
+                  (every? (fn [[a b]] (get-in {:a #{:b} :b #{:c} :c #{:b}} [a b]))
+                          (partition 2 1 c))))
+
+  (find-cycle {:a #{:b}, :b #{}})
+  => nil)
+
 ^{:refer std.lib.sort/topological-sort :added "3.0"}
 (fact "sorts a directed graph into its dependency order"
 
@@ -47,7 +65,14 @@
 
   (topological-sort {:a #{:b},
                      :b #{:a}})
-  => (throws))
+  => (throws)
+
+  (try (topological-sort {:a #{:b}, :b #{:a}})
+       (catch clojure.lang.ExceptionInfo e
+         (:cycle (ex-data e))))
+  => (fn [c] (and (= (count c) 3)
+                  (= (first c) (last c))
+                  (= (set c) #{:a :b}))))
 
 ^{:refer std.lib.sort/topological-sort-order-by-deps :added "4.0"}
 (fact "sorts topological sort by dependency size"

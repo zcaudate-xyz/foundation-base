@@ -29,8 +29,9 @@
               (compile/compile-rt-prep))
               (compile/compile-rt-eval
                +rt+
-               '(do (:= (!:G ethers) (require "ethers"))
-                    "ready"))]
+               '((fn []
+                   (:= (!:G ethers) (require "ethers"))
+                   (return "ready"))))]
   :teardown [(component/stop +rt+)]}
 (fact "deploy abi"
 
@@ -46,8 +47,9 @@
               (compile/compile-rt-prep))
               (compile/compile-rt-eval
                +rt+
-               '(do (:= (!:G ethers) (require "ethers"))
-                    "ready"))]
+               '((fn []
+                   (:= (!:G ethers) (require "ethers"))
+                   (return "ready"))))]
   :teardown [(component/stop +rt+)]}
 (fact "deploys a pointer"
 
@@ -62,8 +64,9 @@
               (compile/compile-rt-prep))
               (compile/compile-rt-eval
                +rt+
-               '(do (:= (!:G ethers) (require "ethers"))
-                    "ready"))]}
+               '((fn []
+                   (:= (!:G ethers) (require "ethers"))
+                   (return "ready"))))]}
 (fact "deploys a namespace on the blockchain"
 
   (deploy/deploy-module +rt+

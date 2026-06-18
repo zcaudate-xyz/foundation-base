@@ -63,6 +63,35 @@
          dependent-nodes (apply set/union (vals g))]
      (set/difference nodes dependent-nodes))))
 
+(defn find-cycle
+  "finds a cycle in a directed graph, returning a closed path [a b c a] or nil
+
+   (find-cycle {:a #{:b}, :b #{:c}, :c #{:b}})
+   => [:b :c :b]
+
+   (find-cycle {:a #{:b}, :b #{:a}})
+   => [:a :b :a]
+
+   (find-cycle {:a #{:a}})
+   => [:a :a]
+
+   (find-cycle {:a #{:b}, :b #{}})
+   => nil"
+  {:added "4.0"}
+  ([g]
+   (letfn [(dfs [node visited path]
+             (cond (visited node)
+                   (let [idx (.indexOf path node)]
+                     (conj (subvec path idx) node))
+
+                   (seq (get g node))
+                   (let [visited (conj visited node)]
+                     (first (keep #(dfs % visited (conj path node))
+                                  (get g node))))
+
+                   :else nil))]
+     (first (keep #(dfs % #{} []) (keys g))))))
+
 (defn topological-sort
   "sorts a directed graph into its dependency order
  
@@ -89,11 +118,14 @@
    (cond (empty? s)
          (if (every? empty? (vals g))
            l
-           (throw (ex-info "Graph Contains Circular Dependency."
-                           {:data (->> g
-                                       (filter (fn [[k v]] (-> v empty? not)))
-                                       (into {}))
-                            :list l})))
+           (let [remaining (->> g
+                                (filter (fn [[k v]] (-> v empty? not)))
+                                (into {}))
+                 cycle     (find-cycle remaining)]
+             (throw (ex-info (str "Graph Contains Circular Dependency: " (pr-str cycle))
+                             {:data remaining
+                              :list l
+                              :cycle cycle}))))
 
          :else
          (let [[n s*] (if-let [item (first s)]
