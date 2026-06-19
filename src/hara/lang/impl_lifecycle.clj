@@ -83,19 +83,10 @@
         native (if (-> emit :native :suppress)
                  []
                  native)
-        native-bundled  (apply merge (map :bundle (vals native)))
-        override (-> emit :override)
-        override-map (when override
-                       (into {}
-                             (map (fn [[k v]]
-                                    [(if (symbol? k) (str k) k) v])
-                                  override)))]
+        native-bundled  (apply merge (map :bundle (vals native)))]
 
     (keep (fn [[name module]]
-            (let [name (if override-map
-                         (or (get override-map (if (symbol? name) (str name) name))
-                             name)
-                         name)]
+            (let [name (deps/native-name-with-override name emit)]
               (if-let [form (deps/module-import-form book name module native-opts)]
                 (impl/emit-direct grammar
                                   form
