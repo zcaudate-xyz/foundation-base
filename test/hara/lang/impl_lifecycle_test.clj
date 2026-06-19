@@ -73,13 +73,30 @@
 ^{:refer hara.lang.impl-lifecycle/emit-module-setup-native-arr :added "4.0"}
 (fact "creates the setup code for native imports"
 
-  (emit-module-setup-native-arr 'js.blessed.ui-core
+  (emit-module-setup-native-arr {:lang :js
+                                 :emit {:compile {:type :graph
+                                                  :base    'js
+                                                  :root-ns 'js.blessed.ui-core}}}
                                 (emit-module-prep 'js.blessed.ui-core
                                                   {:lang :js
                                                    :emit {:compile {:type :graph
                                                                     :base    'js
                                                                     :root-ns 'js.blessed.ui-core}}}))
-  => (contains ["import React from 'react'" "import Blessed from 'blessed'"] :in-any-order))
+  => (contains ["import React from 'react'" "import Blessed from 'blessed'"] :in-any-order)
+
+  (emit-module-setup-native-arr {:lang :js
+                                 :emit {:override {"react" "https://cdn.example.com/react"}
+                                        :compile {:type :graph
+                                                  :base    'js
+                                                  :root-ns 'js.blessed.ui-core}}}
+                                (emit-module-prep 'js.blessed.ui-core
+                                                  {:lang :js
+                                                   :emit {:override {"react" "https://cdn.example.com/react"}
+                                                          :compile {:type :graph
+                                                                    :base    'js
+                                                                    :root-ns 'js.blessed.ui-core}}}))
+  => (contains ["import React from 'https://cdn.example.com/react'"
+                "import Blessed from 'blessed'"] :in-any-order))
 
 ^{:refer hara.lang.impl-lifecycle/emit-module-setup-link-import :added "4.0"}
 (fact "creates a import structure from links"

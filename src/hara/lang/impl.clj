@@ -268,8 +268,7 @@
     (let [imports-opts (update mopts :emit merge (:native emit))]
       
       (mapcat (fn [[name module]]
-                (let [name (deps/native-name-with-override name emit)
-                      {:keys [bundle]} module
+                (let [{:keys [bundle]} module 
                       form-bundled (if (not-empty bundle)
                                      (emit-script-imports bundle emit input))
                       form (deps/module-import-form book name module imports-opts)]

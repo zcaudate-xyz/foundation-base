@@ -86,12 +86,11 @@
         native-bundled  (apply merge (map :bundle (vals native)))]
 
     (keep (fn [[name module]]
-            (let [name (deps/native-name-with-override name emit)]
-              (if-let [form (deps/module-import-form book name module native-opts)]
-                (impl/emit-direct grammar
-                                  form
-                                  namespace
-                                  native-opts))))
+            (if-let [form (deps/module-import-form book name module native-opts)]
+              (impl/emit-direct grammar
+                                form
+                                namespace
+                                native-opts)))
           (merge native native-bundled))))
 
 (defn emit-module-setup-link-import

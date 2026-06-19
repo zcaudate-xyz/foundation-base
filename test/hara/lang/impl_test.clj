@@ -368,7 +368,17 @@
      :library +library-ext+
      :module (lib/get-module +library-ext+ :lua 'L.util)
      :layout :flat}))
-  => '("var__(local=cjson,==require(\"cjson\"));"))
+  => '("var__(local=cjson,==require(\"cjson\"));")
+
+  (emit-script-imports
+   '{"cjson" {:as cjson}}
+   {:override {"cjson" "https://cdn.example.com/cjson"}}
+   (emit-options
+    {:lang :lua
+     :library +library-ext+
+     :module (lib/get-module +library-ext+ :lua 'L.util)
+     :layout :flat}))
+  => '("var__(local=cjson,==require(\"https://cdn.example.com/cjson\"));"))
 
 ^{:refer hara.lang.impl/emit-script-deps :added "4.0"}
 (fact "emits the script deps"
