@@ -10,8 +10,7 @@
 
 (l/script- :solidity
   {:config  {:mode :clean}
-   :require [[hara.runtime.solidity :as sol]]
-   :test-mode true})
+   :require [[hara.runtime.solidity :as sol]]})
 
 (defn.sol ^{:- [:pure :internal]
             :static/returns [:string :memory]}
@@ -127,3 +126,6 @@
   (compile/create-file-entry {}
                              {:name "USDT.sol"
                               :file "resources/assets/rt.solidity/example/USDT.sol"}))
+
+^{:refer hara.runtime.solidity.compile-solc/create-file-entry :added "4.1"}
+(fact "TODO")

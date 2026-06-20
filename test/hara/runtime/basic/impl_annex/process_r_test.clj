@@ -57,3 +57,7 @@
 (fact "R errors are propagated"
   (!.R (throw "boom"))
   => (throws clojure.lang.ExceptionInfo))
+
+
+^{:refer hara.runtime.basic.impl-annex.process-r/default-body-transform :added "4.1"}
+(fact "TODO")

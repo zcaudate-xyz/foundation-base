@@ -4,7 +4,7 @@
             [hara.lang :as l]))
 
 (l/script- :rust
-  {:runtime :twostep :test-mode true})
+  {:runtime :twostep})
 
 (fact:global {:skip (not (env/program-exists? "rustc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 

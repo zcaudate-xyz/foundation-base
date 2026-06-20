@@ -254,7 +254,7 @@
   => "a + 1")
 
 ^{:refer hara.model.spec-dart/dart-fn :added "4.1"}
-(fact "TODO")
+(fact "emits dart functions")
 
 ^{:refer hara.model.spec-dart/dart-var :added "4.1"}
 (fact "transforms var destructuring for dart"
@@ -280,20 +280,20 @@
   => '(var* entry))
 
 ^{:refer hara.model.spec-dart/dart-tf-let-bind :added "4.1"}
-(fact "TODO")
+(fact "transforms dart let bindings")
 
 ^{:refer hara.model.spec-dart/tf-for-object :added "4.1"}
-(fact "TODO")
+(fact "transforms for:object loops")
 
 ^{:refer hara.model.spec-dart/tf-for-array :added "4.1"}
-(fact "TODO")
+(fact "transforms for:array loops")
 
 ^{:refer hara.model.spec-dart/tf-for-iter :added "4.1"}
-(fact "TODO")
+(fact "transforms for:iter loops")
 
 ^{:refer hara.model.spec-dart/dart-tf-ternary :added "4.1"}
-(fact "TODO")
+(fact "transforms dart ternary expressions")
 
 
 ^{:refer hara.model.spec-dart/dart-string :added "4.1"}
-(fact "TODO")
+(fact "emits dart strings")

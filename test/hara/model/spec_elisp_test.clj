@@ -25,67 +25,67 @@
   => "(list (symbol-function (quote eq-nested-obj)) (symbol-function (quote eq-nested-arr)))")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-break :added "4.1"}
-(fact "TODO")
+(fact "transforms break forms")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-bsl :added "4.1"}
-(fact "TODO")
+(fact "left shifts bits")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-bsr :added "4.1"}
-(fact "TODO")
+(fact "right shifts bits")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-bxor :added "4.1"}
-(fact "TODO")
+(fact "computes bitwise XOR")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-band :added "4.1"}
-(fact "TODO")
+(fact "computes bitwise AND")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-bor :added "4.1"}
-(fact "TODO")
+(fact "computes bitwise OR")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-mod :added "4.1"}
-(fact "TODO")
+(fact "computes modulo")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-pow :added "4.1"}
-(fact "TODO")
+(fact "computes power")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-xor :added "4.1"}
-(fact "TODO")
+(fact "computes XOR")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-throw :added "4.1"}
-(fact "TODO")
+(fact "transforms throw forms")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-for-array :added "4.1"}
-(fact "TODO")
+(fact "transforms for:array loops")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-for-object :added "4.1"}
-(fact "TODO")
+(fact "transforms for:object loops")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-for-iter :added "4.1"}
-(fact "TODO")
+(fact "transforms for:iter loops")
 
 ^{:refer hara.model.spec-elisp/elisp-tf-for-index :added "4.1"}
-(fact "TODO")
+(fact "transforms for:index loops")
 
 ^{:refer hara.model.spec-elisp/elisp-expand :added "4.1"}
-(fact "TODO")
+(fact "expands elisp forms")
 
 ^{:refer hara.model.spec-elisp/elisp-invoke :added "4.1"}
-(fact "TODO")
+(fact "emits elisp invocations")
 
 ^{:refer hara.model.spec-elisp/elisp-normalize-funcalls :added "4.1"}
-(fact "TODO")
+(fact "normalizes elisp function calls")
 
 ^{:refer hara.model.spec-elisp/elisp-transform :added "4.1"}
-(fact "TODO")
+(fact "transforms elisp forms")
 
 ^{:refer hara.model.spec-elisp/emit-elisp-coll :added "4.1"}
-(fact "TODO")
+(fact "emits elisp collections")
 
 ^{:refer hara.model.spec-elisp/emit-elisp-map :added "4.1"}
-(fact "TODO")
+(fact "emits elisp maps")
 
 ^{:refer hara.model.spec-elisp/emit-elisp-form :added "4.1"}
-(fact "TODO")
+(fact "emits elisp forms")
 
 ^{:refer hara.model.spec-elisp/emit-elisp :added "4.1"}
 (fact "emits code into emacs lisp schema"

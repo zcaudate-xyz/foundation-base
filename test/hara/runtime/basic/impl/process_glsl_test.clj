@@ -42,3 +42,19 @@
         (and (string? out)
              (boolean (re-find #"^pixel: \d+\.\d+ \d+\.\d+ \d+\.\d+ \d+\.\d+$" out)))))
   => true)
+
+
+^{:refer hara.runtime.basic.impl.process-glsl/transform-form-verify :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.basic.impl.process-glsl/raw-eval-glsl :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.basic.impl.process-glsl/invoke-ptr-glsl :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.basic.impl.process-glsl/rt-glsl:create :added "4.1"}
+(fact "TODO")

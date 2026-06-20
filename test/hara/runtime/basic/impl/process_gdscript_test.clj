@@ -43,3 +43,22 @@
        (:root (first @calls))
        (:args (first @calls))]))
   => ["ok" "/tmp/rt" ["godot" "--headless" "--script" "file.gd"]])
+
+
+^{:refer hara.runtime.basic.impl.process-gdscript/ensure-project! :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.basic.impl.process-gdscript/wrap-godot-eval :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.basic.impl.process-gdscript/transform-form-verify :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.basic.impl.process-gdscript/default-oneshot-in :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.basic.impl.process-gdscript/default-oneshot-out :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.basic.impl.process-gdscript/verify-exec-gdscript :added "4.1"}
+(fact "TODO")

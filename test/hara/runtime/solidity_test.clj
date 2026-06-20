@@ -51,3 +51,6 @@
 (comment
   (s/rt-get-contract-address)
   (s/rt-ge))
+
+^{:refer hara.runtime.solidity/rt:print :added "4.1"}
+(fact "TODO")

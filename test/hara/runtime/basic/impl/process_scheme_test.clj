@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]))
 
 (l/script- :scheme
-  {:runtime :basic :test-mode true})
+  {:runtime :basic})
 
 (fact:global
  {:setup [(l/rt:restart)]

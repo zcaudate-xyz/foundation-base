@@ -9,12 +9,10 @@
 
 (l/script- :ruby
   {:runtime :oneshot
-   :require [[xt.lang.spec-primitive :as primitive]] :test-mode true})
+   :require [[xt.lang.spec-primitive :as primitive]]})
 
 (fact:global
- {:skip (not (env/program-exists? "ruby"))
-  :setup    [(l/annex:start-all)]
-  :teardown [(l/annex:stop-all)]})
+ {:skip (not (env/program-exists? "ruby"))})
 
 ^{:refer hara.runtime.basic.impl.process-ruby/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE ruby code"

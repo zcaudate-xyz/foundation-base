@@ -11,8 +11,7 @@
 
 (l/script- :solidity
   {:config  {:mode :clean}
-   :require [[hara.runtime.solidity :as s]]
-   :test-mode true})
+   :require [[hara.runtime.solidity :as s]]})
 
 (defn.sol ^{:- [:pure :internal]
             :static/returns [:string :memory]}

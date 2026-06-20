@@ -15,13 +15,13 @@
           (return dest-key))))
 
 ^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-expression :added "4.1"}
-(fact "TODO")
+(fact "rewrites r expressions")
 
 ^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-statement :added "4.1"}
-(fact "TODO")
+(fact "rewrites r statements")
 
 ^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-statements :added "4.1"}
-(fact "TODO")
+(fact "rewrites r statement blocks")
 
 ^{:refer hara.model.annex.spec-r.rewrite/r-rewrite-stage :added "4.1"}
 (fact "rewrites defgen into an iterator-building defn"

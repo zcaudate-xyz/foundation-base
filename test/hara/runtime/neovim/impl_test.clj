@@ -79,3 +79,25 @@
       (finally
         (impl/stop-neovim rt))))
   => true)
+
+
+^{:refer hara.runtime.neovim.impl/value->clj :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.neovim.impl/pack-request :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.neovim.impl/stop-neovim :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.neovim.impl/next-msgid :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.neovim.impl/send-request :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.neovim.impl/rt-neovim-string :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.neovim.impl/neovim-shared:create :added "4.1"}
+(fact "TODO")

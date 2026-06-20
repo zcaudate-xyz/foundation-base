@@ -5,7 +5,7 @@
   (:use code.test))
 
 ^{:refer hara.model.spec-python/python-emit-nonlocal :added "4.1"}
-(fact "TODO")
+(fact "emits python nonlocal statements")
 
 ^{:refer hara.model.spec-python/python-defn- :added "4.0"}
 (fact "hidden function without decorators"
@@ -178,13 +178,13 @@
                (return err))))
 
 ^{:refer hara.model.spec-python/python-tf-prototype-create :added "4.1"}
-(fact "TODO")
+(fact "creates python prototypes")
 
 ^{:refer hara.model.spec-python/python-tf-prototype-get :added "4.1"}
-(fact "TODO")
+(fact "gets python prototypes")
 
 ^{:refer hara.model.spec-python/python-tf-prototype-set :added "4.1"}
-(fact "TODO")
+(fact "sets python prototypes")
 
 ^{:refer hara.model.spec-python/python-tf-prototype-method :added "4.1"}
-(fact "TODO")
+(fact "calls python prototype methods")

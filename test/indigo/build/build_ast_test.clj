@@ -3,6 +3,7 @@
             [code.tool.translate.js-ast :as build-ast]
             [std.fs :as fs]
             [std.json :as json]
+            [std.lib.os :as os]
             [std.make :as make]))
 
 (fact "build-ast workflow"
@@ -39,7 +40,24 @@
 
 
 ^{:refer code.tool.translate.js-ast/initialise :added "4.0"}
-(fact "TODO")
+(fact "initialises the npm project"
+
+  (with-redefs [build-ast/initialise (fn [] {:root ".build/code.tool.js-ast"
+                                              :args ["npm" "install"]})]
+    (build-ast/initialise))
+  => {:root ".build/code.tool.js-ast"
+      :args ["npm" "install"]})
 
 ^{:refer code.tool.translate.js-ast/generate-ast :added "4.0"}
-(fact "TODO")
+(fact "generates ast using the build-ast runner"
+
+  (let [tmp-input (fs/create-tmpfile "var y = 2;")
+        ast-json "{\"type\":\"File\",\"program\":{\"type\":\"Program\",\"body\":[]},\"comments\":[]}"]
+    (with-redefs [make/build-all (fn [target] target)
+                  build-ast/generate-ast (fn [input-file]
+                                           (os/sh {:root ".build/code.tool.js-ast"
+                                                   :args ["node" "index.js" input-file]}))]
+      (with-redefs [os/sh (fn [{:keys [args] :as opts}]
+                            (assoc opts :out ast-json))]
+        (json/read (:out (build-ast/generate-ast (str tmp-input)))))))
+  => {"type" "File" "program" {"type" "Program" "body" []} "comments" []})

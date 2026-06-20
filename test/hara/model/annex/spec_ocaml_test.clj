@@ -31,37 +31,37 @@
   => "fun x -> x + 1")
 
 ^{:refer hara.model.annex.spec-ocaml/emit-raw-str :added "4.1"}
-(fact "TODO")
+(fact "emits raw strings")
 
 ^{:refer hara.model.annex.spec-ocaml/emit-indent-body :added "4.1"}
-(fact "TODO")
+(fact "emits indented bodies")
 
 ^{:refer hara.model.annex.spec-ocaml/emit-lines-with :added "4.1"}
-(fact "TODO")
+(fact "emits lines with separators")
 
 ^{:refer hara.model.annex.spec-ocaml/ml-invoke :added "4.1"}
-(fact "TODO")
+(fact "emits ocaml invocations")
 
 ^{:refer hara.model.annex.spec-ocaml/ml-args :added "4.1"}
-(fact "TODO")
+(fact "formats ocaml function arguments")
 
 ^{:refer hara.model.annex.spec-ocaml/parse-match-clauses :added "4.1"}
-(fact "TODO")
+(fact "parses pattern match clauses")
 
 ^{:refer hara.model.annex.spec-ocaml/body-expr :added "4.1"}
-(fact "TODO")
+(fact "extracts body expressions")
 
 ^{:refer hara.model.annex.spec-ocaml/tf-defn :added "4.1"}
-(fact "TODO")
+(fact "transforms function definitions")
 
 ^{:refer hara.model.annex.spec-ocaml/tf-match :added "4.1"}
-(fact "TODO")
+(fact "transforms pattern match expressions")
 
 ^{:refer hara.model.annex.spec-ocaml/tf-if :added "4.1"}
-(fact "TODO")
+(fact "transforms if expressions")
 
 ^{:refer hara.model.annex.spec-ocaml/tf-letrec :added "4.1"}
-(fact "TODO")
+(fact "transforms letrec expressions")
 
 ^{:refer hara.model.annex.spec-ocaml/tf-lambda :added "4.1"}
-(fact "TODO")
+(fact "transforms lambda expressions")

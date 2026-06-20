@@ -77,3 +77,16 @@
 
   (!.js document.title)
   => "Main")
+
+
+^{:refer hara.runtime.chromedriver/current-tab :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.chromedriver/tab-list :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.chromedriver/tab-switch :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.chromedriver/tab-close :added "4.1"}
+(fact "TODO")

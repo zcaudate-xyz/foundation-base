@@ -4,7 +4,7 @@
             [hara.lang :as l]))
 
 (l/script- :c
-  {:runtime :twostep :test-mode true})
+  {:runtime :twostep})
 
 (fact:global {:skip (not (env/program-exists? "gcc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 

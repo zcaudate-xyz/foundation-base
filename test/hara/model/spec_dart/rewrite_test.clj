@@ -186,16 +186,16 @@
 
 
 ^{:refer hara.model.spec-dart.rewrite/dart-rewrite-conditional-expression :added "4.1"}
-(fact "TODO")
+(fact "rewrites dart conditional expressions")
 
 ^{:refer hara.model.spec-dart.rewrite/dart-rewrite-expression :added "4.1"}
-(fact "TODO")
+(fact "rewrites dart expressions")
 
 ^{:refer hara.model.spec-dart.rewrite/dart-rewrite-statement :added "4.1"}
-(fact "TODO")
+(fact "rewrites dart statements")
 
 ^{:refer hara.model.spec-dart.rewrite/dart-rewrite-statements :added "4.1"}
-(fact "TODO")
+(fact "rewrites dart statement blocks")
 
 ^{:refer hara.model.spec-dart.rewrite/dart-rewrite-stage :added "4.1"}
-(fact "TODO")
+(fact "rewrites dart stages")

@@ -5,7 +5,7 @@
   (:use code.test))
 
 (l/script- :c
-  {:runtime :oneshot :test-mode true})
+  {:runtime :oneshot})
 
 (defn.c ^{:- [:int]}
   add

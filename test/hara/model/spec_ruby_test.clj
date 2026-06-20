@@ -255,10 +255,10 @@
   => "respond_to?")
 
 ^{:refer hara.model.spec-ruby/ruby-destructure-key :added "4.1"}
-(fact "TODO")
+(fact "rewrites destructuring keys for ruby")
 
 ^{:refer hara.model.spec-ruby/ruby-method-ref :added "4.1"}
-(fact "TODO")
+(fact "creates ruby method references")
 
 ^{:refer hara.model.spec-ruby/ruby-symbol-global :added "4.1"}
 (fact "emit ruby global symbol"
@@ -302,22 +302,22 @@
   => "{\"ref_links\" => {}, \"first_name\" => \"Root\"}")
 
 ^{:refer hara.model.spec-ruby/ruby-emit-args :added "4.1"}
-(fact "TODO")
+(fact "emits ruby argument lists")
 
 ^{:refer hara.model.spec-ruby/ruby-div :added "4.1"}
-(fact "TODO")
+(fact "emits ruby division")
 
 ^{:refer hara.model.spec-ruby/ruby-invoke :added "4.1"}
-(fact "TODO")
+(fact "emits ruby invocations")
 
 ^{:refer hara.model.spec-ruby/ruby-dot :added "4.1"}
-(fact "TODO")
+(fact "emits ruby dot access")
 
 ^{:refer hara.model.spec-ruby/ruby-emit-range :added "4.1"}
-(fact "TODO")
+(fact "emits ruby ranges")
 
 ^{:refer hara.model.spec-ruby/ruby-defn- :added "4.1"}
-(fact "TODO")
+(fact "emits private ruby functions")
 
 ^{:refer hara.model.spec-ruby/ruby-defn :added "4.1"}
 (fact "emit ruby function definition"
@@ -326,7 +326,7 @@
   => "def add(a,b)\n  return a + b\nend")
 
 ^{:refer hara.model.spec-ruby/ruby-defgen :added "4.1"}
-(fact "TODO")
+(fact "emits ruby generator definitions")
 
 ^{:refer hara.model.spec-ruby/ruby-fn :added "4.1"}
 (fact "basic transform for ruby blocks"
@@ -335,23 +335,23 @@
   => '(:- "->(" "a" ") {\n" "(do (+ a 1))" "\n}"))
 
 ^{:refer hara.model.spec-ruby/tf-for-array :added "4.1"}
-(fact "TODO")
+(fact "transforms for:array loops")
 
 ^{:refer hara.model.spec-ruby/tf-for-object :added "4.1"}
-(fact "TODO")
+(fact "transforms for:object loops")
 
 ^{:refer hara.model.spec-ruby/tf-for-iter :added "4.1"}
-(fact "TODO")
+(fact "transforms for:iter loops")
 
 ^{:refer hara.model.spec-ruby/tf-for-index :added "4.1"}
-(fact "TODO")
+(fact "transforms for:index loops")
 
 
 ^{:refer hara.model.spec-ruby/ruby-string :added "4.1"}
-(fact "TODO")
+(fact "emits ruby strings")
 
 ^{:refer hara.model.spec-ruby/ruby-throw :added "4.1"}
-(fact "TODO")
+(fact "emits ruby exceptions")
 
 ^{:refer hara.model.spec-ruby/ruby-def :added "4.1"}
-(fact "TODO")
+(fact "emits ruby definitions")

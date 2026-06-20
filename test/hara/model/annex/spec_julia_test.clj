@@ -127,16 +127,16 @@
   => "\"abc\"")
 
 ^{:refer hara.model.annex.spec-julia/julia-symbol-global :added "4.1"}
-(fact "TODO")
+(fact "emits julia global symbol access")
 
 ^{:refer hara.model.annex.spec-julia/tf-for-array :added "4.1"}
-(fact "TODO")
+(fact "transforms for:array loops")
 
 ^{:refer hara.model.annex.spec-julia/tf-for-object :added "4.1"}
-(fact "TODO")
+(fact "transforms for:object loops")
 
 ^{:refer hara.model.annex.spec-julia/tf-for-iter :added "4.1"}
-(fact "TODO")
+(fact "transforms for:iter loops")
 
 ^{:refer hara.model.annex.spec-julia/tf-for-index :added "4.0"}
 (fact "for index transform"
@@ -177,3 +177,10 @@
 
   (julia-module-export {:code {'a {:op :defn} 'b {:op :def}}} {})
   => anything #_(contains '(export (a b))))
+
+
+^{:refer hara.model.annex.spec-julia/tf-ternary :added "4.1"}
+(fact "transforms ternary expressions")
+
+^{:refer hara.model.annex.spec-julia/emit-throw :added "4.1"}
+(fact "emits throw statements")

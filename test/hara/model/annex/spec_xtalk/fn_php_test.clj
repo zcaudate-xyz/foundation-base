@@ -289,10 +289,10 @@
   => #"usleep")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-file-slurp :added "4.1"}
-(fact "TODO")
+(fact "reads file contents")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-file-spit :added "4.1"}
-(fact "TODO")
+(fact "writes file contents")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-return-encode :added "4.1"}
 (fact "return encode"

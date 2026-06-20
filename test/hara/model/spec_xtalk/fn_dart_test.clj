@@ -7,19 +7,19 @@
   (l/emit-as :dart [form]))
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-method0 :added "4.1"}
-(fact "TODO")
+(fact "emits dart no-arg methods")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-runtime-type-string :added "4.1"}
-(fact "TODO")
+(fact "gets dart runtime type string")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-is-map :added "4.1"}
-(fact "TODO")
+(fact "checks dart map type")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-map-get :added "4.1"}
-(fact "TODO")
+(fact "gets dart map values")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-xt-exception? :added "4.1"}
-(fact "TODO")
+(fact "checks dart exceptions")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-len :added "4.1"}
 (fact "gets length"
@@ -72,19 +72,19 @@
   => #"eval not supported")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-ex-native? :added "4.1"}
-(fact "TODO")
+(fact "checks native exceptions")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-ex-new :added "4.1"}
-(fact "TODO")
+(fact "creates exceptions")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-ex-message :added "4.1"}
-(fact "TODO")
+(fact "gets exception message")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-ex-data :added "4.1"}
-(fact "TODO")
+(fact "gets exception data")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-has-key? :added "4.1"}
-(fact "TODO")
+(fact "checks object key")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-del-key :added "4.1"}
 (fact "deletes key from map by key"
@@ -154,7 +154,7 @@
   => #"math\.log")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-m-log10 :added "4.1"}
-(fact "TODO")
+(fact "computes base-10 logarithm")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-m-max :added "4.1"}
 (fact "maximum"
@@ -182,13 +182,13 @@
   => #"~/")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-m-cosh :added "4.1"}
-(fact "TODO")
+(fact "computes hyperbolic cosine")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-m-sinh :added "4.1"}
-(fact "TODO")
+(fact "computes hyperbolic sine")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-m-tanh :added "4.1"}
-(fact "TODO")
+(fact "computes hyperbolic tangent")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-to-string :added "4.1"}
 (fact "converts to string"
@@ -201,28 +201,28 @@
   => #"num\.parse")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-is-string? :added "4.1"}
-(fact "TODO")
+(fact "checks string type")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-is-number? :added "4.1"}
-(fact "TODO")
+(fact "checks number type")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-is-integer? :added "4.1"}
-(fact "TODO")
+(fact "checks integer type")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-is-boolean? :added "4.1"}
-(fact "TODO")
+(fact "checks boolean type")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-is-function? :added "4.1"}
-(fact "TODO")
+(fact "checks function type")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-is-object? :added "4.1"}
-(fact "TODO")
+(fact "checks object type")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-is-array? :added "4.1"}
-(fact "TODO")
+(fact "checks array type")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-str-char :added "4.1"}
-(fact "TODO")
+(fact "gets string character")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-str-split :added "4.1"}
 (fact "splits strings"
@@ -305,10 +305,10 @@
   => #"\{\}")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-lu-get :added "4.1"}
-(fact "TODO")
+(fact "gets lookup table value")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-lu-set :added "4.1"}
-(fact "TODO")
+(fact "sets lookup table value")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-lu-del :added "4.1"}
 (fact "deletes lookup values"
@@ -321,7 +321,7 @@
   => #"removeLast")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-arr-slice :added "4.1"}
-(fact "TODO")
+(fact "slices arrays")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-arr-push-first :added "4.1"}
 (fact "pushes array items to the front"
@@ -349,7 +349,7 @@
   => #"sort")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-str-comp :added "4.1"}
-(fact "TODO")
+(fact "compares strings")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-iter-eq :added "4.1"}
 (fact "iter equality stays as a returnable iife in function bodies"
@@ -372,13 +372,13 @@
   => #"iterator")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-iter-from-obj :added "4.1"}
-(fact "TODO")
+(fact "creates iterators from objects")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-iter-has? :added "4.1"}
-(fact "TODO")
+(fact "checks iterator state")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-iter-native? :added "4.1"}
-(fact "TODO")
+(fact "checks native iterators")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-iter-next :added "4.1"}
 (fact "gets iterator values"
@@ -386,10 +386,10 @@
   => #"current")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-iter-null :added "4.1"}
-(fact "TODO")
+(fact "creates null iterators")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-prototype-create :added "4.1"}
-(fact "TODO")
+(fact "creates prototypes")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-prototype-get :added "4.1"}
 (fact "gets runtime prototypes"
@@ -437,40 +437,40 @@
   => #"Future\.sync\(thunk\)")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise-all :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-all")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise-then :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-then")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise-catch :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-catch")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise-finally :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-finally")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise-native? :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-native?")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-socket-connect :added "4.1"}
-(fact "TODO")
+(fact "connects sockets")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-socket-send :added "4.1"}
-(fact "TODO")
+(fact "sends socket data")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-socket-close :added "4.1"}
-(fact "TODO")
+(fact "closes sockets")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-notify-http :added "4.1"}
-(fact "TODO")
+(fact "notifies via HTTP")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-pwd :added "4.1"}
-(fact "TODO")
+(fact "gets working directory")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-file-resolve :added "4.1"}
-(fact "TODO")
+(fact "resolves file paths")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-file-slurp :added "4.1"}
 (fact "file-slurp reads file content"
@@ -498,34 +498,34 @@
   => [true true true true])
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-call :added "4.1"}
-(fact "TODO")
+(fact "emits dart calls")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-string-compare-expr :added "4.1"}
-(fact "TODO")
+(fact "emits dart string comparisons")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-comparison-form :added "4.1"}
-(fact "TODO")
+(fact "emits dart comparison forms")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-lt :added "4.1"}
-(fact "TODO")
+(fact "transforms x:lt")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-lte :added "4.1"}
-(fact "TODO")
+(fact "transforms x:lte")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-gt :added "4.1"}
-(fact "TODO")
+(fact "transforms x:gt")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-gte :added "4.1"}
-(fact "TODO")
+(fact "transforms x:gte")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-json-compact-expr :added "4.1"}
-(fact "TODO")
+(fact "emits dart compact json expressions")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-obj-keys :added "4.1"}
-(fact "TODO")
+(fact "lists object keys")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-obj-vals :added "4.1"}
-(fact "TODO")
+(fact "lists object values")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-obj-pairs :added "4.1"}
-(fact "TODO")
+(fact "lists object pairs")

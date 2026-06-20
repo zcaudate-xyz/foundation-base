@@ -141,7 +141,7 @@
 
 
 ^{:refer hara.model.spec-js/js-tf-prototype-create :added "4.1"}
-(fact "TODO")
+(fact "creates js prototypes")
 
 ^{:refer hara.model.spec-js/js-tf-prototype-method :added "4.1"}
-(fact "TODO")
+(fact "calls js prototype methods")

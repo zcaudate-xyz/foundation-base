@@ -5,7 +5,7 @@
   (:use code.test))
 
 (l/script- :rust
-  {:runtime :twostep :test-mode true})
+  {:runtime :twostep})
 
 (defn.rs ^{:- [:i32]}
   add1

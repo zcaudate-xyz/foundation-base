@@ -6,7 +6,7 @@
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.lang.common-lib :as lib]] :test-mode true})
+   :require [[xt.lang.common-lib :as lib]]})
 
 (fact:global {:skip (not (env/program-exists? "dart")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 

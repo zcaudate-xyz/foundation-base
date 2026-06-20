@@ -56,16 +56,16 @@
   => '(throw (Exception "msg")))
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-ex-native? :added "4.1"}
-(fact "TODO")
+(fact "checks native exceptions")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-ex-new :added "4.1"}
-(fact "TODO")
+(fact "creates exceptions")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-ex-message :added "4.1"}
-(fact "TODO")
+(fact "gets exception message")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-ex-data :added "4.1"}
-(fact "TODO")
+(fact "gets exception data")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-eval :added "4.0"}
 (fact "evals"
@@ -328,7 +328,7 @@
   => #"insert")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-arr-remove :added "4.1"}
-(fact "TODO")
+(fact "removes array elements")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-arr-sort :added "4.0"}
 (fact "arr sort"
@@ -341,10 +341,10 @@
   => #"<")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-arr-every :added "4.1"}
-(fact "TODO")
+(fact "transforms arr-every forms")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-arr-some :added "4.1"}
-(fact "TODO")
+(fact "transforms arr-some forms")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-str-char :added "4.0"}
 (fact "str char"
@@ -367,7 +367,7 @@
   => #"find")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-str-to-fixed :added "4.1"}
-(fact "TODO")
+(fact "formats numbers")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-str-substring :added "4.0"}
 (fact "str substring"
@@ -390,19 +390,19 @@
   => #"replace")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-str-trim :added "4.1"}
-(fact "TODO")
+(fact "trims strings")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-str-trim-left :added "4.1"}
-(fact "TODO")
+(fact "trims left whitespace")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-str-trim-right :added "4.1"}
-(fact "TODO")
+(fact "trims right whitespace")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-str-pad-left :added "4.1"}
-(fact "TODO")
+(fact "pads strings on the left")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-str-pad-right :added "4.1"}
-(fact "TODO")
+(fact "pads strings on the right")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-json-encode :added "4.0"}
 (fact "json encode"
@@ -485,7 +485,7 @@
   => #"hasattr")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-async-run :added "4.1"}
-(fact "TODO")
+(fact "runs asynchronously")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-with-delay :added "4.0"}
 (fact "with delay"
@@ -493,7 +493,7 @@
   => #"sleep")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-pwd :added "4.1"}
-(fact "TODO")
+(fact "gets working directory")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-shell :added "4.0"}
 (fact "shell"
@@ -501,7 +501,7 @@
   => #"subprocess")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-file-resolve :added "4.1"}
-(fact "TODO")
+(fact "resolves file paths")
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-file-slurp :added "4.1"}
 (fact "slurp file"
@@ -514,4 +514,4 @@
             => nil?))
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-del-key :added "4.1"}
-(fact "TODO")
+(fact "deletes object key")

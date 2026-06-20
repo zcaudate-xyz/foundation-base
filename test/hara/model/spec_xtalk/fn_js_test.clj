@@ -53,16 +53,16 @@
             (return t))))
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-ex-native? :added "4.1"}
-(fact "TODO")
+(fact "checks native exceptions")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-ex-new :added "4.1"}
-(fact "TODO")
+(fact "creates exceptions")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-ex-message :added "4.1"}
-(fact "TODO")
+(fact "gets exception message")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-ex-data :added "4.1"}
-(fact "TODO")
+(fact "gets exception data")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-has-key? :added "4.1"}
 (fact "has key"
@@ -320,16 +320,16 @@
   => #"localeCompare")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-str-pad-left :added "4.1"}
-(fact "TODO")
+(fact "pads strings on the left")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-str-pad-right :added "4.1"}
-(fact "TODO")
+(fact "pads strings on the right")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-str-starts-with :added "4.1"}
-(fact "TODO")
+(fact "checks string prefix")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-str-ends-with :added "4.1"}
-(fact "TODO")
+(fact "checks string suffix")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-return-encode :added "4.0"}
 (fact "encodes return"
@@ -413,25 +413,25 @@
   => #"(?s)setTimeout.*new Promise")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise-all :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-all")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise-then :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-then")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise-catch :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-catch")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise-finally :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-finally")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise-native? :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-native?")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-pwd :added "4.1"}
-(fact "TODO")
+(fact "gets working directory")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-shell :added "4.0"}
 (fact "executes shell command"
@@ -442,7 +442,7 @@
   => #"\[\"async\"\]")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-file-resolve :added "4.1"}
-(fact "TODO")
+(fact "resolves file paths")
 
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-file-slurp :added "4.1"}
 (fact "slurp file"

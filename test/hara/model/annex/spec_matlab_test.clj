@@ -7,7 +7,7 @@
 
   (l/emit-as :matlab '[[1 2 3 4]])
   => "[1, 2, 3, 4]"
-
+  
   (l/emit-as :matlab '[(+ 1 2 3)])
   => "1 + 2 + 3"
 
@@ -21,16 +21,16 @@
   => "1 ~= 2")
 
 ^{:refer hara.model.annex.spec-matlab/matlab-token-boolean :added "4.1"}
-(fact "TODO")
+(fact "emits matlab boolean tokens")
 
 ^{:refer hara.model.annex.spec-matlab/matlab-sym-str :added "4.1"}
-(fact "TODO")
+(fact "emits matlab symbol strings")
 
 ^{:refer hara.model.annex.spec-matlab/matlab-module-name :added "4.1"}
-(fact "TODO")
+(fact "emits matlab module names")
 
 ^{:refer hara.model.annex.spec-matlab/matlab-qualified-name :added "4.1"}
-(fact "TODO")
+(fact "emits matlab qualified names")
 
 ^{:refer hara.model.annex.spec-matlab/tf-defn :added "4.1"}
-(fact "TODO")
+(fact "transforms function definitions")

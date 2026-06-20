@@ -3,34 +3,34 @@
   (:require [hara.model.annex.spec-xtalk.fn-julia :refer :all]))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-free-infix :added "4.1"}
-(fact "TODO")
+(fact "extracts julia infix expressions")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-global-key :added "4.1"}
-(fact "TODO")
+(fact "emits julia global key access")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-free-try-catch :added "4.1"}
-(fact "TODO")
+(fact "extracts julia try/catch expressions")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-free-iife :added "4.1"}
-(fact "TODO")
+(fact "extracts julia iife expressions")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-promise-native-check :added "4.1"}
-(fact "TODO")
+(fact "checks native julia promises")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-promise-resolve-form :added "4.1"}
-(fact "TODO")
+(fact "builds julia promise resolution forms")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-promise-reject-form :added "4.1"}
-(fact "TODO")
+(fact "builds julia promise rejection forms")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-promise-wrap-expr :added "4.1"}
-(fact "TODO")
+(fact "wraps julia promise expressions")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-error-value-expr :added "4.1"}
-(fact "TODO")
+(fact "builds julia error value expressions")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-shell-read-expr :added "4.1"}
-(fact "TODO")
+(fact "reads julia shell expressions")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-del :added "4.1"}
 (fact "deletes an element from a collection"
@@ -59,7 +59,7 @@
   => '(... args))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-unpack :added "4.1"}
-(fact "TODO")
+(fact "unpacks values")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-type-native :added "4.1"}
 (fact "returns the native type of an object as a string"
@@ -120,37 +120,37 @@
   => '(isa x AbstractArray))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-is-number? :added "4.1"}
-(fact "TODO")
+(fact "checks number type")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-is-integer? :added "4.1"}
-(fact "TODO")
+(fact "checks integer type")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-is-boolean? :added "4.1"}
-(fact "TODO")
+(fact "checks boolean type")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-is-function? :added "4.1"}
-(fact "TODO")
+(fact "checks function type")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-is-object? :added "4.1"}
-(fact "TODO")
+(fact "checks object type")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-is-array? :added "4.1"}
-(fact "TODO")
+(fact "checks array type")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-lu-get :added "4.1"}
-(fact "TODO")
+(fact "gets lookup table value")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-lu-create :added "4.1"}
-(fact "TODO")
+(fact "creates lookup tables")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-lu-set :added "4.1"}
-(fact "TODO")
+(fact "sets lookup table value")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-lu-del :added "4.1"}
-(fact "TODO")
+(fact "deletes lookup table value")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-lu-eq :added "4.1"}
-(fact "TODO")
+(fact "compares lookup tables")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-obj-keys :added "4.1"}
 (fact "returns object helpers"
@@ -182,13 +182,13 @@
        "\nend)()"))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-obj-vals :added "4.1"}
-(fact "TODO")
+(fact "lists object values")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-obj-pairs :added "4.1"}
-(fact "TODO")
+(fact "lists object pairs")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-obj-assign :added "4.1"}
-(fact "TODO")
+(fact "assigns objects")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-arr-slice :added "4.1"}
 (fact "returns array helpers"
@@ -205,16 +205,16 @@
   => '(:- "sort!(" (% arr) ", by = " (% key-fn) ", lt = " (% compare-fn) ")"))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-arr-insert :added "4.1"}
-(fact "TODO")
+(fact "inserts array elements")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-arr-remove :added "4.1"}
-(fact "TODO")
+(fact "removes array elements")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-arr-sort :added "4.1"}
-(fact "TODO")
+(fact "sorts arrays")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-arr-foldr :added "4.1"}
-(fact "TODO")
+(fact "folds arrays right")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-str-char :added "4.1"}
 (fact "returns string helpers"
@@ -245,67 +245,67 @@
   => '(replace s (=> "-" "/")))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-str-index-of :added "4.1"}
-(fact "TODO")
+(fact "finds substring index")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-str-substring :added "4.1"}
-(fact "TODO")
+(fact "extracts substrings")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-str-join :added "4.1"}
-(fact "TODO")
+(fact "joins strings")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-str-replace :added "4.1"}
-(fact "TODO")
+(fact "replaces substrings")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-str-to-fixed :added "4.1"}
-(fact "TODO")
+(fact "formats numbers")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-has-key? :added "4.1"}
-(fact "TODO")
+(fact "checks object key")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-global-set :added "4.1"}
-(fact "TODO")
+(fact "sets global variables")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-global-del :added "4.1"}
-(fact "TODO")
+(fact "deletes global variables")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-global-has? :added "4.1"}
-(fact "TODO")
+(fact "checks global variables")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-socket-connect :added "4.1"}
-(fact "TODO")
+(fact "connects sockets")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-socket-send :added "4.1"}
-(fact "TODO")
+(fact "sends socket data")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-socket-close :added "4.1"}
-(fact "TODO")
+(fact "closes sockets")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-notify-http :added "4.1"}
-(fact "TODO")
+(fact "notifies via HTTP")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-iter-from-obj :added "4.1"}
-(fact "TODO")
+(fact "creates iterators from objects")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-iter-eq :added "4.1"}
-(fact "TODO")
+(fact "compares iterators")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-iter-has? :added "4.1"}
-(fact "TODO")
+(fact "checks iterator state")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-iter-native? :added "4.1"}
-(fact "TODO")
+(fact "checks native iterators")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-shell :added "4.1"}
-(fact "TODO")
+(fact "runs shell commands")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-file-resolve :added "4.1"}
-(fact "TODO")
+(fact "resolves file paths")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-file-slurp :added "4.1"}
-(fact "TODO")
+(fact "reads file contents")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-file-spit :added "4.1"}
-(fact "TODO")
+(fact "writes file contents")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-return-encode :added "4.1"}
 (fact "encodes a return value with id and key"
@@ -369,3 +369,34 @@
        (wrap-fn
         (fn []
           (return (include_string Main s))))))
+
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-prototype-create :added "4.1"}
+(fact "creates prototypes")
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-prototype-get :added "4.1"}
+(fact "gets prototypes")
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-prototype-set :added "4.1"}
+(fact "sets prototypes")
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-prototype-method :added "4.1"}
+(fact "calls prototype methods")
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-prototype-tostring :added "4.1"}
+(fact "converts prototype to string")
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-ex-native? :added "4.1"}
+(fact "checks native exceptions")
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-ex-new :added "4.1"}
+(fact "creates exceptions")
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-ex-message :added "4.1"}
+(fact "gets exception message")
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-ex-data :added "4.1"}
+(fact "gets exception data")
+
+^{:refer hara.model.annex.spec-xtalk.fn-julia/julia-tf-x-async-run :added "4.1"}
+(fact "runs asynchronously")

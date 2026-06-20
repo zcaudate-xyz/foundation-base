@@ -122,3 +122,10 @@
         (std.lib.component/stop rt1)
         (std.lib.component/stop rt2))))
   => true)
+
+
+^{:refer hara.runtime.blender.impl/stop-blender :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.blender.impl/blender-shared:create :added "4.1"}
+(fact "TODO")

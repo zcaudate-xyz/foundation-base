@@ -114,3 +114,5 @@
 
   (get-options :lua :oneshot :luajit)
   => map?)
+^{:refer hara.runtime.basic.type-common/program-exists? :added "4.1"}
+(fact "TODO")

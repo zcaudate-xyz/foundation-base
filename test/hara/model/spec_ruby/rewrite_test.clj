@@ -3,13 +3,13 @@
   (:use code.test))
 
 ^{:refer hara.model.spec-ruby.rewrite/rewrite-callable-body :added "4.1"}
-(fact "TODO")
+(fact "rewrites callable bodies")
 
 ^{:refer hara.model.spec-ruby.rewrite/rewrite-callable-form :added "4.1"}
-(fact "TODO")
+(fact "rewrites callable forms")
 
 ^{:refer hara.model.spec-ruby.rewrite/rewrite-callable-value :added "4.1"}
-(fact "TODO")
+(fact "rewrites callable values")
 
 ^{:refer hara.model.spec-ruby.rewrite/rewrite-captured-callables :added "4.1"}
 (fact "rewrites only nested callable bodies to use capture aliases"
@@ -37,13 +37,13 @@
          (return value))])
 
 ^{:refer hara.model.spec-ruby.rewrite/ruby-rewrite-generator-body :added "4.1"}
-(fact "TODO")
+(fact "rewrites generator bodies")
 
 ^{:refer hara.model.spec-ruby.rewrite/rewrite-callable-forms :added "4.1"}
-(fact "TODO")
+(fact "rewrites callable forms")
 
 ^{:refer hara.model.spec-ruby.rewrite/mark-inline-defs :added "4.1"}
-(fact "TODO")
+(fact "marks inline definitions")
 
 ^{:refer hara.model.spec-ruby.rewrite/ruby-rewrite-stage :added "4.1"}
 (fact "marks runtime-eval helper defs as inner for Ruby without changing normal staging"

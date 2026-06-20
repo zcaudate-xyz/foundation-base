@@ -25,40 +25,40 @@
   => "fun x => x + 1")
 
 ^{:refer hara.model.annex.spec-lean/emit-raw-str :added "4.1"}
-(fact "TODO")
+(fact "emits raw strings")
 
 ^{:refer hara.model.annex.spec-lean/emit-indent-body :added "4.1"}
-(fact "TODO")
+(fact "emits indented bodies")
 
 ^{:refer hara.model.annex.spec-lean/lean-args :added "4.1"}
-(fact "TODO")
+(fact "formats lean function arguments")
 
 ^{:refer hara.model.annex.spec-lean/lean-invoke :added "4.1"}
-(fact "TODO")
+(fact "emits lean invocations")
 
 ^{:refer hara.model.annex.spec-lean/parse-match-clauses :added "4.1"}
-(fact "TODO")
+(fact "parses pattern match clauses")
 
 ^{:refer hara.model.annex.spec-lean/catch-all-pattern? :added "4.1"}
-(fact "TODO")
+(fact "checks catch-all patterns")
 
 ^{:refer hara.model.annex.spec-lean/guarded-body :added "4.1"}
-(fact "TODO")
+(fact "builds guarded bodies")
 
 ^{:refer hara.model.annex.spec-lean/match-form :added "4.1"}
-(fact "TODO")
+(fact "builds match forms")
 
 ^{:refer hara.model.annex.spec-lean/tf-defn :added "4.1"}
-(fact "TODO")
+(fact "transforms function definitions")
 
 ^{:refer hara.model.annex.spec-lean/tf-match :added "4.1"}
-(fact "TODO")
+(fact "transforms pattern match expressions")
 
 ^{:refer hara.model.annex.spec-lean/tf-if :added "4.1"}
-(fact "TODO")
+(fact "transforms if expressions")
 
 ^{:refer hara.model.annex.spec-lean/tf-letrec :added "4.1"}
-(fact "TODO")
+(fact "transforms letrec expressions")
 
 ^{:refer hara.model.annex.spec-lean/tf-lambda :added "4.1"}
-(fact "TODO")
+(fact "transforms lambda expressions")

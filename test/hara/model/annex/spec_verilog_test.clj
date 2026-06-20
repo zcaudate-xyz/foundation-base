@@ -107,3 +107,7 @@
 (fact "transforms localparam declarations"
   (tf-localparam '(localparam MASK 8))
   => '(:- "localparam" "MASK = 8;"))
+
+
+^{:refer hara.model.annex.spec-verilog/tf-port :added "4.1"}
+(fact "transforms port declarations")

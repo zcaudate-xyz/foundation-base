@@ -25,13 +25,13 @@
   => true)
 
 ^{:refer hara.model.spec-lua.rewrite/lua-rewrite-form :added "4.1"}
-(fact "TODO")
+(fact "rewrites lua forms")
 
 ^{:refer hara.model.spec-lua.rewrite/lua-rewrite-statement :added "4.1"}
-(fact "TODO")
+(fact "rewrites lua statements")
 
 ^{:refer hara.model.spec-lua.rewrite/lua-rewrite-statements :added "4.1"}
-(fact "TODO")
+(fact "rewrites lua statement blocks")
 
 ^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
 (fact "hoists named inline functions for lua"

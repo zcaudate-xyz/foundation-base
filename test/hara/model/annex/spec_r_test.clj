@@ -8,7 +8,7 @@
 
 (fact "Preliminary Checks"
   (l/emit-as :R '[[1 2 3 4]])
-  => "list(1,2,3,4)"
+  => "c(1,2,3,4)"
 
   (l/emit-as :R '[(+ 1 2 3)])
   => "1 + 2 + 3"
@@ -20,7 +20,7 @@
   => "list(a=list(b=3))"
 
   (l/emit-as :R '[(. ["a" "b" "c"] [2])])
-  => "list('a','b','c')[[2]]"
+  => "c('a','b','c')[[2]]"
 )
 
 ^{:refer hara.model.annex.spec-r/tf-defn :added "3.0"}

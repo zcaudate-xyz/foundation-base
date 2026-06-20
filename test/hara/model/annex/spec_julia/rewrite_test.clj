@@ -4,16 +4,16 @@
             [hara.model.annex.spec-julia.rewrite :as rewrite]))
 
 ^{:refer hara.model.annex.spec-julia.rewrite/julia-rewrite-conditional-expression :added "4.1"}
-(fact "TODO")
+(fact "rewrites julia conditional expressions")
 
 ^{:refer hara.model.annex.spec-julia.rewrite/julia-rewrite-expression :added "4.1"}
-(fact "TODO")
+(fact "rewrites julia expressions")
 
 ^{:refer hara.model.annex.spec-julia.rewrite/julia-rewrite-statement :added "4.1"}
-(fact "TODO")
+(fact "rewrites julia statements")
 
 ^{:refer hara.model.annex.spec-julia.rewrite/julia-rewrite-statements :added "4.1"}
-(fact "TODO")
+(fact "rewrites julia statement blocks")
 
 ^{:refer hara.model.annex.spec-julia.rewrite/julia-rewrite-stage :added "4.1"}
 (fact "rewrites unpack invokes for Julia"

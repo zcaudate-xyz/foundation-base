@@ -151,3 +151,40 @@
         (std.lib.component/stop rt2)
         (stop-mock mock))))
   => [true true])
+
+
+^{:refer hara.runtime.unreal.impl/make-node-id :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/send-udp :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/recv-udp :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/discover-node :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/start-command-server :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/start-unreal :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/stop-unreal :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/raw-eval-unreal :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/invoke-ptr-unreal :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/unreal:create :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/unreal :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.unreal.impl/unreal-shared:create :added "4.1"}
+(fact "TODO")

@@ -63,13 +63,13 @@
   => vector?)
 
 ^{:refer hara.model.spec-postgres.common/pg-current-module-link? :added "4.1"}
-(fact "TODO")
+(fact "checks postgres module links")
 
 ^{:refer hara.model.spec-postgres.common/pg-link-symbol :added "4.1"}
-(fact "TODO")
+(fact "resolves postgres link symbols")
 
 ^{:refer hara.model.spec-postgres.common/pg-resolve-entry :added "4.1"}
-(fact "TODO")
+(fact "resolves postgres entries")
 
 ^{:refer hara.model.spec-postgres.common/pg-string :added "4.0"}
 (fact "constructs a pg string"

@@ -5,7 +5,7 @@
   (:use code.test))
 
 ^{:refer hara.model.spec-python.rewrite/python-normalize-form :added "4.1"}
-(fact "TODO")
+(fact "normalizes python forms")
 
 ^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
 (fact "keeps top-level named functions intact"

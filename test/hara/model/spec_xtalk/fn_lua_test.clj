@@ -35,16 +35,16 @@
   => #"error")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-ex-native? :added "4.1"}
-(fact "TODO")
+(fact "checks native exceptions")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-ex-new :added "4.1"}
-(fact "TODO")
+(fact "creates exceptions")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-ex-message :added "4.1"}
-(fact "TODO")
+(fact "gets exception message")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-ex-data :added "4.1"}
-(fact "TODO")
+(fact "gets exception data")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-hash-id :added "4.0"}
 (fact "hash id"
@@ -317,7 +317,7 @@
   => #"type")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-async-run :added "4.1"}
-(fact "TODO")
+(fact "runs asynchronously")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-with-delay :added "4.0"}
 (fact "with delay"
@@ -328,7 +328,7 @@
   => #"ngx.thread.spawn")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-pwd :added "4.1"}
-(fact "TODO")
+(fact "gets working directory")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-shell :added "4.0"}
 (fact "shell"
@@ -336,10 +336,10 @@
   => #"io.popen")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-file-resolve :added "4.1"}
-(fact "TODO")
+(fact "resolves file paths")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-file-slurp :added "4.1"}
-(fact "TODO")
+(fact "reads file contents")
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-file-spit :added "4.1"}
-(fact "TODO")
+(fact "writes file contents")

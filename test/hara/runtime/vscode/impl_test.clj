@@ -81,3 +81,16 @@
       (finally
         (impl/stop-vscode rt))))
   => true)
+
+
+^{:refer hara.runtime.vscode.impl/stop-vscode :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.vscode.impl/next-msgid :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.vscode.impl/send-request :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.vscode.impl/vscode-shared:create :added "4.1"}
+(fact "TODO")

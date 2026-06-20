@@ -57,37 +57,37 @@
   => "add :: Int -> Int -> Int\nadd x y = x + y")
 
 ^{:refer hara.model.annex.spec-haskell/haskell-vector :added "4.1"}
-(fact "TODO")
+(fact "emits haskell vectors")
 
 ^{:refer hara.model.annex.spec-haskell/emit-raw-str :added "4.1"}
-(fact "TODO")
+(fact "emits raw strings")
 
 ^{:refer hara.model.annex.spec-haskell/emit-indent-body :added "4.1"}
-(fact "TODO")
+(fact "emits indented bodies")
 
 ^{:refer hara.model.annex.spec-haskell/haskell-invoke :added "4.1"}
-(fact "TODO")
+(fact "emits haskell invocations")
 
 ^{:refer hara.model.annex.spec-haskell/tf-defn :added "4.1"}
-(fact "TODO")
+(fact "transforms function definitions")
 
 ^{:refer hara.model.annex.spec-haskell/parse-match-clauses :added "4.1"}
-(fact "TODO")
+(fact "parses pattern match clauses")
 
 ^{:refer hara.model.annex.spec-haskell/tf-match :added "4.1"}
-(fact "TODO")
+(fact "transforms pattern match expressions")
 
 ^{:refer hara.model.annex.spec-haskell/tf-if :added "4.1"}
-(fact "TODO")
+(fact "transforms if expressions")
 
 ^{:refer hara.model.annex.spec-haskell/tf-letrec :added "4.1"}
-(fact "TODO")
+(fact "transforms letrec expressions")
 
 ^{:refer hara.model.annex.spec-haskell/tf-lambda :added "4.1"}
-(fact "TODO")
+(fact "transforms lambda expressions")
 
 ^{:refer hara.model.annex.spec-haskell/tf-do :added "4.1"}
-(fact "TODO")
+(fact "transforms do blocks")
 
 ^{:refer hara.model.annex.spec-haskell/haskell-args :added "4.1"}
-(fact "TODO")
+(fact "formats haskell function arguments")

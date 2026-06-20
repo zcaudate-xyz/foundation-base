@@ -59,19 +59,19 @@
          (return true))))
 
 ^{:refer hara.model.spec-lua/lua-tf-incby :added "4.1"}
-(fact "TODO")
+(fact "transforms incby forms")
 
 ^{:refer hara.model.spec-lua/lua-tf-decby :added "4.1"}
-(fact "TODO")
+(fact "transforms decby forms")
 
 ^{:refer hara.model.spec-lua/lua-tf-mulby :added "4.1"}
-(fact "TODO")
+(fact "transforms mulby forms")
 
 ^{:refer hara.model.spec-lua/lua-tf-local :added "4.1"}
-(fact "TODO")
+(fact "transforms local forms")
 
 ^{:refer hara.model.spec-lua/lua-tf-c-ffi :added "4.1"}
-(fact "TODO")
+(fact "transforms c-ffi forms")
 
 ^{:refer hara.model.spec-lua/lua-map-key :added "3.0"}
 (fact "custom lua map key"
@@ -90,37 +90,37 @@
   => "abc")
 
 ^{:refer hara.model.spec-lua/lua-tf-for-object :added "4.1"}
-(fact "TODO")
+(fact "transforms for:object loops")
 
 ^{:refer hara.model.spec-lua/lua-tf-for-array :added "4.1"}
-(fact "TODO")
+(fact "transforms for:array loops")
 
 ^{:refer hara.model.spec-lua/lua-tf-for-iter :added "4.1"}
-(fact "TODO")
+(fact "transforms for:iter loops")
 
 ^{:refer hara.model.spec-lua/lua-tf-for-index :added "4.1"}
-(fact "TODO")
+(fact "transforms for:index loops")
 
 ^{:refer hara.model.spec-lua/lua-tf-for-return :added "4.1"}
-(fact "TODO")
+(fact "transforms for:return loops")
 
 ^{:refer hara.model.spec-lua/lua-tf-for-async :added "4.1"}
-(fact "TODO")
+(fact "transforms for:async loops")
 
 ^{:refer hara.model.spec-lua/lua-tf-yield :added "4.1"}
-(fact "TODO")
+(fact "transforms yield forms")
 
 ^{:refer hara.model.spec-lua/lua-tf-throw :added "4.1"}
-(fact "TODO")
+(fact "transforms throw forms")
 
 ^{:refer hara.model.spec-lua/lua-tf-defgen :added "4.1"}
-(fact "TODO")
+(fact "transforms defgen forms")
 
 ^{:refer hara.model.spec-lua/lua-tf-prototype-create :added "4.1"}
-(fact "TODO")
+(fact "creates prototypes")
 
 ^{:refer hara.model.spec-lua/lua-tf-prototype-method :added "4.1"}
-(fact "TODO")
+(fact "calls prototype methods")
 
 ^{:refer hara.model.spec-lua/lua-module-link :added "4.0"}
 (fact "gets the absolute lua based module"
@@ -139,10 +139,10 @@
   => '(return (tab)))
 
 ^{:refer hara.model.spec-lua/variant-meta :added "4.1"}
-(fact "TODO")
+(fact "provides lua variant metadata")
 
 ^{:refer hara.model.spec-lua/variant-grammar :added "4.1"}
-(fact "TODO")
+(fact "provides lua variant grammar")
 
 ^{:refer hara.model.spec-lua/lua-vector :added "4.1"}
-(fact "TODO")
+(fact "emits lua vectors")

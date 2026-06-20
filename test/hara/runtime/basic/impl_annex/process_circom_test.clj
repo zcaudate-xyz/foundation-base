@@ -22,3 +22,5 @@
   (get-in (common/get-options :circom :twostep :default)
           [:exec-fn])
   => #'hara.runtime.basic.impl-annex.process-circom/sh-exec-circom)
+^{:refer hara.runtime.basic.impl-annex.process-circom/transform-form :added "4.1"}
+(fact "TODO")
