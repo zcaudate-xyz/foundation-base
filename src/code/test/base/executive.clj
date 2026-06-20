@@ -325,17 +325,15 @@
          timeout      (filter #(-> % :form (= :timeout)) forms)
          thrown-forms  (filter #(and (-> % :status (= :exception))
                                      (not= :timeout (:form %))) forms)
-         thrown-checks (filter #(or (and (-> % :data false?)
-                                         (-> % :actual :status (= :exception)))
+         thrown-checks (filter #(or (and (-> % :actual :status (= :exception))
+                                         (not (checker/succeeded? %)))
                                     (-> % :status (= :exception))) checks)
          thrown        (concat thrown-forms thrown-checks)
 
          passed  (filter checker/succeeded? checks)
-         failed  (filter (fn [res]
-                           (if (= :exception (:status res))
-                             true
-                             (and (not (checker/succeeded? res))
-                                  (not= :exception (-> res :actual :status))))) checks)
+         failed  (filter #(and (not (checker/succeeded? %))
+                               (not= :exception (:status %))
+                               (not= :exception (-> % :actual :status))) checks)
 
          facts   (filter (comp not empty? :results) facts)
          files   (->> checks
