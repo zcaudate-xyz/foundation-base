@@ -145,7 +145,16 @@
 
   (let [res (executive/interim [{:results [{:from :verify :status :success :data true :meta {:path "path"}}]}])]
     (:passed res))
-  => (contains [{:from :verify :status :success :data true :meta {:path "path"}}]))
+  => (contains [{:from :verify :status :success :data true :meta {:path "path"}}])
+
+  (let [res (executive/interim [{:results [{:from :verify
+                                            :status :success
+                                            :data nil
+                                            :actual {:status :exception
+                                                     :data (ex-info "boom" {})}
+                                            :meta {:path "path"}}]}])]
+    [(count (:throw res)) (count (:failed res)) (count (:passed res))])
+  => [1 0 0])
 
 ^{:refer code.test.base.executive/retrieve-line :added "3.0"}
 (fact "returns the line of the test"
