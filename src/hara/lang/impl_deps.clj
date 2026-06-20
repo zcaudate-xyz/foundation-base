@@ -22,6 +22,18 @@
   [{:keys [meta] :as book} name module opts]
   (if-let [f (:module-import meta)] (f name module opts)))
 
+(defn native-name-with-override
+  "applies native override to a native import name"
+  {:added "4.0"}
+  [name emit]
+  (if-let [override-map (when-let [override (:override emit)]
+                          (into {} (map (fn [[k v]]
+                                          [(if (symbol? k) (str k) k) v])
+                                        override)))]
+    (or (get override-map (if (symbol? name) (str name) name))
+        name)
+    name))
+
 (defn module-export-form
   "export form"
   {:added "4.0"}

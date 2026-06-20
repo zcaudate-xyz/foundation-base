@@ -79,14 +79,18 @@
                             (. (!:G URL) (revokeObjectURL url))
                             (throw err))))}))
 
-(defn.js make-sharedworker-link
-  "creates a worker-url object backed by a browser SharedWorker"
+(defn.js make-sharedworker-link-opts
+  "creates a worker-url object backed by a browser SharedWorker.
+
+   `opts` is passed as the second argument to the SharedWorker constructor,
+   allowing `{:type \"module\"}` to be used for ES-module worker scripts."
   {:added "4.1"}
-  [script]
+  [script opts]
   (return {:create-fn (fn [listener]
                         (var url (-/make-blob-url (-/resolve-script script)))
+                        (var worker-opts (or opts {}))
                         (try
-                          (var shared (new SharedWorker url))
+                          (var shared (new SharedWorker url worker-opts))
                           (var port (. shared ["port"]))
                           (. port (start))
                           (. port (addEventListener
@@ -94,11 +98,15 @@
                                    (fn [e]
                                      (listener e.data))
                                    false))
-                          (. (!:G URL) (revokeObjectURL url))
                           (return port)
                           (catch err
-                            (. (!:G URL) (revokeObjectURL url))
                             (throw err))))}))
+
+(defn.js make-sharedworker-link
+  "creates a worker-url object backed by a browser SharedWorker"
+  {:added "4.1"}
+  [script]
+  (return (-/make-sharedworker-link-opts script {})))
 
 (defn.js make-sharedworker-link-from-url
   "creates a worker-url object backed by a browser SharedWorker,
