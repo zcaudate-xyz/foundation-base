@@ -1,4 +1,4 @@
-(ns xt.db.poc.browser-sharedworker-test
+(ns xt.db.poc.browser-adaptor-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -35,20 +35,6 @@
              [xt.lang.common-repl :as repl]
              [js.worker.link :as worker-link]]})
 
-(def.js Schema
-  (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
-
-(def.js SchemaLookup
-  (@! (pg/bind-app (pg/app "scratch_v0"))))
-
-(fact:global
- {:setup [(l/rt:restart :js)
-          (l/rt:setup :postgres)
-          (l/rt:scaffold-imports :js)
-          (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
-                             4000)]
-  :teardown [(l/rt:stop)]})
-
 (def +sharedworker-script+
   (l/emit-script
    '(do
@@ -57,6 +43,15 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (. port (postMessage {"type" "worker-connected"}))
+            
+            (var schema {"Log" {"id" {"ident" "id"
+                                       "type" "uuid"
+                                       "primary" true
+                                       "order" 0}
+                                "message" {"ident" "message"
+                                           "type" "text"
+                                           "order" 1}}})
+            (var lookup {"Log" {"position" 0}})
             (var tree ["Log"])
             (. (xt.db.node.adaptor-base/init-db
                 (xt.substrate/node-create {"id" "db-model-server"})
@@ -64,8 +59,8 @@
                             "defaults" (@! local-min/+config-supabase-anon+)}
                  "caching" {"type" "sqlite"
                             "defaults" {}}}
-                xt.db.poc.browser-sharedworker-test/Schema
-                xt.db.poc.browser-sharedworker-test/SchemaLookup)
+                schema
+                lookup)
                (then
                 (fn [node]
                   (. port (postMessage {"type" "primary-connected"}))
@@ -102,6 +97,15 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
+
+
+(fact:global
+ {:setup [(l/rt:restart :js)
+          (l/rt:setup :postgres)
+          (l/rt:scaffold-imports :js)
+          (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
+                             4000)]
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.node.adaptor-base/init-db
   :added "4.1"

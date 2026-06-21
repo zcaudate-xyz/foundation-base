@@ -36,8 +36,8 @@
              [xt.substrate.page-remote :as page-remote]
              [xt.substrate.transport-browser :as browser-transport]
              [xt.db.system.impl-common :as impl-common]
+             [xt.db.system.impl-memory :as impl-memory]
              [xt.db.system.main]
-             [xt.db.poc.db-model-service-worker :as db-model-worker]
              [js.worker.link :as worker-link]]})
 
 (defn- fix-worker-script
@@ -87,27 +87,42 @@
                    (return (xt.db.system.main/create-impl-init caching-impl)))))
              (then
               (fn [_]
+                (var node (xt.substrate/node-create {"id" "db-model-server"}))
+                (xt.substrate/set-service node "db/common" {:schema schema :lookup lookup})
+                (xt.substrate/set-service node "db/primary" primary-impl)
+                (xt.substrate/set-service node "db/caching" caching-impl)
+                (xt.substrate.page-remote/install node)
+                (var primary (xt.substrate/get-service node "db/primary"))
+                (var caching (xt.substrate/get-service node "db/caching"))
+                (. (xt.db.system.impl-common/pull-async primary ["Log"])
+                   (then
+                    (fn [records]
+                      (xt.db.system.impl-common/record-add caching "Log" records)
+                      (. worker-self (postMessage {"signal" "seeded"}))
+                      (return nil))))
+                (xt.substrate.page-core/add-group-attach
+                 node "room/a" "demo"
+                 {"entry" {"handler" (fn [context]
+                                       (var n (. context ["node"]))
+                                       (var args (. context ["args"]))
+                                       (var pull-tree (. args [0]))
+                                       (var c (xt.substrate/get-service n "db/caching"))
+                                       (return (xt.db.system.impl-common/pull c pull-tree)))
+                           "pipeline" {"remote" {"handler" (fn [context]
+                                                             (var n (. context ["node"]))
+                                                             (var args (. context ["args"]))
+                                                             (var pull-tree (. args [0]))
+                                                             (var p (xt.substrate/get-service n "db/primary"))
+                                                             (return (xt.db.system.impl-common/pull-async p pull-tree)))}}
+                           "defaults" {"args" [["Log"]]}
+                           "options" {}}})
                 (return
-                 (xt.db.poc.db-model-service-worker/run-server
-                  worker-self
-                  {"primary" {"impl" primary-impl}
-                   "caching" {"impl" caching-impl}}
-                  schema
-                  lookup
-                  "room/a"
-                  "demo"
-                  {"entry" ["Log"]}
-                  {"signal" "ready"
-                   "worker" "db-model-server"}
-                  (fn [node]
-                    (var primary (xt.substrate/get-service node "db/primary"))
-                    (var caching (xt.substrate/get-service node "db/caching"))
-                    (return
-                     (. (xt.db.system.impl-common/pull-async primary ["Log"])
-                        (then
-                         (fn [records]
-                           (xt.db.system.impl-common/record-add caching "Log" records)
-                           (. worker-self (postMessage {"signal" "seeded"}))))))))))))
+                 (xt.substrate.transport-browser/boot-self
+                  node
+                  {"transport_id" "host"
+                   "target" worker-self
+                   "ready" {"signal" "ready"
+                            "worker" "db-model-server"}})))))
           (then
            (fn [node]
              (return node)))
@@ -129,7 +144,7 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.poc.db-model-service-worker/create-server-node :added "4.1"
+^{:refer xt.db.poc.node-webworker-test/server-node-fact :added "4.1"
   :setup [(scratch-v0/log-append-public "primary")]}
 (fact "server node installs db/primary and db/caching services and exposes page models"
 
@@ -142,17 +157,30 @@
                                    "type" "text"
                                    "order" 1}}})
     (var lookup {"Log" {"position" 0}})
-    (-> (db-model-worker/create-server-node
-         {"primary" {"type" "memory"}
-          "caching" {"type" "memory"}}
-         schema
-         lookup)
+    (var node (substrate/node-create {"id" "db-model-server"}))
+    (substrate/set-service node "db/common" {:schema schema :lookup lookup})
+    (substrate/set-service node "db/primary" (impl-memory/impl-memory schema lookup))
+    (substrate/set-service node "db/caching" (impl-memory/impl-memory schema lookup))
+    (-> (promise/x:promise-run node)
         (promise/x:promise-then
          (fn [node]
            (page-remote/install node)
-           (db-model-worker/install-page-models
+           (page-core/add-group-attach
             node "room/a" "demo"
-            {"entry" (db-model-worker/create-page-model "entry" ["Log"] {})})
+            {"entry" {"handler" (fn [context]
+                                  (var node (. context ["node"]))
+                                  (var args (. context ["args"]))
+                                  (var pull-tree (. args [0]))
+                                  (var caching (substrate/get-service node "db/caching"))
+                                  (return (impl-common/pull caching pull-tree)))
+                      "pipeline" {"remote" {"handler" (fn [context]
+                                                        (var node (. context ["node"]))
+                                                        (var args (. context ["args"]))
+                                                        (var pull-tree (. args [0]))
+                                                        (var primary (substrate/get-service node "db/primary"))
+                                                        (return (impl-common/pull-async primary pull-tree)))}}
+                      "defaults" {"args" [["Log"]]}
+                      "options" {}}})
            (var primary (substrate/get-service node "db/primary"))
            (var caching (substrate/get-service node "db/caching"))
            (impl-common/record-add primary "Log" [{"id" "E-1" "message" "primary"}])
@@ -171,16 +199,20 @@
       "has_group" true
       "model_type" "event.model"})
 
-^{:refer xt.db.poc.db-model-service-worker/boot-worker-server :added "4.1"
+^{:refer xt.db.poc.node-webworker-test/worker-server-fact :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "worker-hosted server exposes db models to a connecting client"
 
   (notify/wait-on [:js 10000]
     (var link (worker-link/make-node-link (@! +server-script+) {}))
-    (var client (db-model-worker/create-client-node))
+    (var client (substrate/node-create {"id" "db-model-client"}))
+    (page-remote/install client)
     (var conn-ref nil)
     (var groups-ref nil)
-    (. (db-model-worker/connect-client client link {})
+    (. (browser-transport/connect-sharedworker
+        client
+        {"transport_id" "worker"
+         "source" link})
        (then
         (fn [conn]
           (:= conn-ref conn)
