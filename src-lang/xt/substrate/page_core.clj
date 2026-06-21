@@ -361,7 +361,6 @@
   (var handler  (xt/x:get-key opts "handler"))
   (var pipeline (xt/x:get-key opts "pipeline"))
   (var defaults (xt/x:get-key opts "defaults"))
-  (var trigger  (xt/x:get-key opts "trigger"))
   (var options  (xt/x:get-key opts "options"))
   (var model
        (event-model/create-model
@@ -375,9 +374,7 @@
         (xt/x:get-key defaults "args")
         (xt/x:get-key defaults "output")
         (xt/x:get-key defaults "process")
-        (xt/x:obj-assign {"trigger" trigger
-                          "init"   (xt/x:get-key defaults "init")}
-                         options)))
+        options))
   (event-model/init-model model)
   (event-model/add-listener
    model
