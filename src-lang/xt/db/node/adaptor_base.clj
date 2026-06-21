@@ -4,11 +4,14 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-data :as xtd]
              [xt.substrate :as substrate]
              [xt.net.http-fetch :as http-fetch]
              [xt.db.text.sql-call :as call]
              [xt.db.system.impl-common :as impl-common]
-             [xt.db.system.main :as impl-main]]})
+             [xt.db.system.main :as impl-main]
+             [xt.substrate.page-core :as page-core]
+             [xt.event.base-model :as event-model]]})
 
 ;;
 ;; The xt.db.node.adaptor-base 
@@ -99,30 +102,49 @@
         (fn [client]
           (return (http-fetch/request-http client fetch-input)))))))
 
-
-
 (defn.xt create-pull-model
   "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
   {:added "4.1"}
-  [tree config options]
+  [service model]
   (var #{local-id
-         remote-id
-         defaults} config)
+         remote-id} service)
+  (var #{pipeline
+         options
+         defaults} model)
   (return
    {"handler"
     (fn [context]
       (var node (. context ["node"]))
-      (var args (. context ["args"]))
+      (var tree (. context ["args"] [0]))
       (var caching (substrate/get-service node local-id))
       (return (impl-common/pull caching tree)))
-    "pipeline" {"remote" {"handler"
-                          (fn [context]
-                            (var node (. context ["node"]))
-                            (var args (. context ["args"]))
-                            (var primary (substrate/get-service node remote-id))
-                            (return (impl-common/pull-async primary tree)))}}
+    "pipeline" (xtd/obj-assign-nested
+                {"remote" {"handler"
+                           (fn [context]
+                             (var node (. context ["node"]))
+                             (var tree (. context ["args"] [0]))
+                             (var primary (substrate/get-service node remote-id))
+                             (return (impl-common/pull-async primary tree)))}}
+                pipeline)
     "defaults" defaults
     "options"  options}))
+
+(defn.xt ^{:substrate/fn true}
+  custom-pull-view
+  "Server-side handler that materialises a custom pull-view page model from client args."
+  {:added "4.1"}
+  [space args request node]
+  (var node-args   (xt/x:first args))
+  (var model-args  (xt/x:second args))
+  (var #{space-id
+         group-id
+         model-id
+         service}   node-args)
+  (return (page-core/add-group-attach
+           node
+           space-id
+           group-id
+           {model-id (-/create-pull-model service model-args)})))
 
 
 ;;
@@ -134,5 +156,15 @@
   [node db-map])
 
 
+(comment
+  (comment
+  {:model {:pipeline ...
+           :defaults ...}
+   :page  {}}
 
+  (var pipeline (xt/x:get-key opts "pipeline"))
+  (var defaults (xt/x:get-key opts "defaults"))
+  (var trigger  (xt/x:get-key opts "trigger"))
+  (var options  (xt/x:get-key opts "options")))
 
+  )
