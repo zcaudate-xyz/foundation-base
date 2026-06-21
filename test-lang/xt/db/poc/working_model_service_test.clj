@@ -1,4 +1,4 @@
-(ns xt.db.poc.db-model-service-test
+(ns xt.db.poc.working-model-service-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
@@ -80,30 +80,34 @@
       "has-remote" true
       "defaults" {"args" [["Log"]]}})
 
-^{:refer xt.db.poc.db-model-service/install-page-models :added "4.1"}
+^{:refer xt.db.poc.db-model-service/install-page-models :added "4.1"
+  :setup [(scratch-v0/log-append-public "cached")]}
 (fact "attaches db-model-service models to a node space"
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "poc-node"}))
     (-> (db-model/init-services
          node
-         {"primary" {"type" "memory"
-                      "defaults" {}}
-          "caching" {"type" "memory"
-                      "defaults" {}}}
+         {"primary" {"type" "supabase"
+                      "defaults" (@! local-min/+config-supabase-anon+)}
+          "caching" {"type" "sqlite"
+                      "defaults" {"filename" ":memory:"}}}
          -/Schema
          -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
            (var primary (substrate/get-service node "db/primary"))
            (var caching (substrate/get-service node "db/caching"))
-           ;; seed both services
-           (impl-common/record-add primary "Log" [{"id" "E-1" "message" "remote"}])
-           (impl-common/record-add caching "Log" [{"id" "E-1" "message" "cached"}])
-           (db-model/install-page-models
-            node nil "page"
-            {"entry" (db-model/create-page-model "entry" ["Log"] {})})
-           (return node)))
+           ;; pull from supabase primary and add to sqlite caching
+           (return
+            (-> (impl-common/pull-async primary ["Log"])
+                (promise/x:promise-then
+                 (fn [records]
+                   (impl-common/record-add caching "Log" records)
+                   (db-model/install-page-models
+                    node nil "page"
+                    {"entry" (db-model/create-page-model "entry" ["Log"] {})})
+                   (return node)))))))
         (promise/x:promise-then
          (fn [node]
            (-> (substrate/page-model-update node nil "page" "entry" {})
@@ -116,29 +120,38 @@
          (fn [err]
            (repl/notify {"error" err
                          "message" (xt/x:ex-message err)})))))
-  => {"id" "E-1" "message" "cached"})
+  => (contains-in
+      [{"id" string?
+        "message" "cached"}]))
 
-^{:refer xt.db.poc.db-model-service/create-page-model :added "4.1"}
+^{:refer xt.db.poc.db-model-service/create-page-model :added "4.1"
+  :setup [(scratch-v0/log-append-public "remote")]}
 (fact "remote handler pulls asynchronously from db/primary"
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "poc-node"}))
     (-> (db-model/init-services
          node
-         {"primary" {"type" "memory"
-                      "defaults" {}}
-          "caching" {"type" "memory"
-                      "defaults" {}}}
+         {"primary" {"type" "supabase"
+                      "defaults" (@! local-min/+config-supabase-anon+)}
+          "caching" {"type" "sqlite"
+                      "defaults" {"filename" ":memory:"}}}
          -/Schema
          -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
            (var primary (substrate/get-service node "db/primary"))
-           (impl-common/record-add primary "Log" [{"id" "E-2" "message" "remote"}])
-           (db-model/install-page-models
-            node nil "page"
-            {"entry" (db-model/create-page-model "entry" ["Log"] {})})
-           (return node)))
+           (var caching (substrate/get-service node "db/caching"))
+           ;; pull from supabase primary and add to sqlite caching
+           (return
+            (-> (impl-common/pull-async primary ["Log"])
+                (promise/x:promise-then
+                 (fn [records]
+                   (impl-common/record-add caching "Log" records)
+                   (db-model/install-page-models
+                    node nil "page"
+                    {"entry" (db-model/create-page-model "entry" ["Log"] {})})
+                   (return node)))))))
         (promise/x:promise-then
          (fn [node]
            (-> (page-core/remote-call node nil "page" "entry" [["Log"]] true)
@@ -151,4 +164,6 @@
          (fn [err]
            (repl/notify {"error" err
                          "message" (xt/x:ex-message err)})))))
-  => {"id" "E-2" "message" "remote"})
+  => (contains-in
+      [{"id" string?
+        "message" "remote"}]))
