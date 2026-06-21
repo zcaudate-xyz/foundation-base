@@ -304,7 +304,8 @@
   (var current-callback nil)
   (var send-fn
        (fn [frame]
-         (return (. worker-self (postMessage frame)))))
+         (. worker-self (postMessage frame))
+         (return (promise/x:promise-run true))))
   (var start-fn
        (fn [listener]
          (:= current-callback
