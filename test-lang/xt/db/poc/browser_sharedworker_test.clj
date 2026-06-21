@@ -4,7 +4,9 @@
             [hara.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
+            [xt.substrate]
             [xt.db.system.main]
+            [xt.db.node.adaptor-base]
             [xt.db.poc.db-model-service-worker-sqlite]))
 
 (do
@@ -25,6 +27,12 @@
   (defrun.pg __init__
     (s/grant-usage #{"scratch_v0"})))
 
+(l/script- :js
+  {:runtime :chromedriver.instance
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-repl :as repl]
+             [js.worker.link :as worker-link]]})
+
 (def +sharedworker-script+
   (l/emit-script
    '(do
@@ -33,39 +41,26 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (. port (postMessage {"type" "worker-connected"}))
-            (var schema {"Log" {"id" {"ident" "id"
-                                       "type" "uuid"
-                                       "primary" true
-                                       "order" 0}
-                                "message" {"ident" "message"
-                                           "type" "text"
-                                           "order" 1}}})
-            (var lookup {"Log" {"position" 0}})
-            (var primary-impl (xt.db.system.main/create-impl
-                               "supabase"
-                               (@! local-min/+config-supabase-anon+)
-                               schema
-                               lookup))
-            (var caching-impl (xt.db.system.main/create-impl
-                               "sqlite"
-                               {}
-                               schema
-                               lookup))
-            (. (. (xt.db.system.main/create-impl-init primary-impl)
-                  (then
-                   (fn [_]
-                     (. port (postMessage {"type" "primary-connected"}))
-                     (return (xt.db.system.main/create-impl-init caching-impl)))))
+            
+            (. (xt.db.node.adaptor-base/init-db
+                (xt.substrate/node-create {"id" "db-model-server-init"})
+                {"primary" {"type" "supabase"
+                            "defaults" (@! local-min/+config-supabase-anon+)}
+                 "caching" {"type" "sqlite"
+                            "defaults" {}}}
+                -/Schema
+                -/SchemaLookup)
                (then
-                (fn [caching-impl]
+                (fn [node]
+                  (. port (postMessage {"type" "primary-connected"}))
                   (. port (postMessage {"type" "sqlite-connected"}))
                   (return
                    (xt.db.poc.db-model-service-worker-sqlite/run-server
                     port
-                    {"primary" {"impl" primary-impl}
-                     "caching" {"impl" caching-impl}}
-                    schema
-                    lookup
+                    {"primary" {"impl" (xt.substrate/get-service node "db/primary")}
+                     "caching" {"impl" (xt.substrate/get-service node "db/caching")}}
+                    -/Schema
+                    -/SchemaLookup
                     "room/a"
                     "demo"
                     {"entry" ["Log"]}
@@ -75,11 +70,11 @@
                       (. port (postMessage {"type" "impl-initialized"}))
                       (return nil))))))
                (catch
-                (fn [err]
-                  (. port (postMessage {"type" "error"
-                                        "stage" "init"
-                                        "message" (. err ["message"])
-                                        "stack" (. err ["stack"])}))))))))
+                   (fn [err]
+                     (. port (postMessage {"type" "error"
+                                           "stage" "init"
+                                           "message" (. err ["message"])
+                                           "stack" (. err ["stack"])}))))))))
    {:lang :js
     :layout :full
     :emit {:override {"@sqlite.org/sqlite-wasm"
@@ -87,11 +82,7 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
-(l/script- :js
-  {:runtime :chromedriver.instance
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [js.worker.link :as worker-link]]})
+
 
 (fact:global
  {:setup [(l/rt:restart :js)
@@ -106,7 +97,7 @@
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "debug SharedWorker sqlite init"
 
-  (notify/wait-on [:js 5000]
+  (notify/wait-on [:js 15000]
     (var messages [])
     (var blob (new Blob [(@! +sharedworker-script+)] {"type" "text/javascript"}))
     (var url (. (!:G URL) (createObjectURL blob)))
@@ -116,17 +107,20 @@
     (. port (addEventListener
               "message"
               (fn [event]
-                (. messages (push {"kind" "message" "data" (. event ["data"])})))
+                (var data (. event ["data"]))
+                (. messages (push {"kind" "message" "data" data}))
+                (var type (xt/x:get-key data "type"))
+                (when (or (== type "impl-initialized")
+                          (== type "error"))
+                  (repl/notify messages)))
               false))
     (. shared (addEventListener
                "error"
                (fn [event]
-                 (. messages (push {"kind" "error" "message" (. event ["message"])})))
+                 (. messages (push {"kind" "error" "message" (. event ["message"])}))
+                 (repl/notify messages))
                false))
     (. (!:G URL) (revokeObjectURL url))
-    ((!:G setTimeout) (fn []
-                        (repl/notify messages))
-     2000)
     (return shared))
   => (contains-in
       [{"kind" "message" "data" {"type" "worker-connected"}}

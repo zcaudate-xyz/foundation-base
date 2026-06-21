@@ -59,6 +59,12 @@
                        schema
                        lookup)))))))
 
+
+;;
+;;
+;;
+
+
 (defn.xt call-primary-handler
   [space args request node]
   (var rpc-spec   (xt/x:first args))
@@ -82,11 +88,6 @@
         (fn [impl]
           (return (impl-common/rpc-call-async impl rpc-spec fn-args)))))))
 
-;;
-;;
-;;
-
-
 (defn.xt call-fetch-handler
   [space args request node]
   (var service-id   (xt/x:first  args))
@@ -97,6 +98,32 @@
        (promise/x:promise-then
         (fn [client]
           (return (http-fetch/request-http client fetch-input)))))))
+
+
+
+(defn.xt create-pull-model
+  "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
+  {:added "4.1"}
+  [tree config options]
+  (var #{local-id
+         remote-id
+         defaults} config)
+  (return
+   {"handler"
+    (fn [context]
+      (var node (. context ["node"]))
+      (var args (. context ["args"]))
+      (var caching (substrate/get-service node local-id))
+      (return (impl-common/pull caching tree)))
+    "pipeline" {"remote" {"handler"
+                          (fn [context]
+                            (var node (. context ["node"]))
+                            (var args (. context ["args"]))
+                            (var primary (substrate/get-service node remote-id))
+                            (return (impl-common/pull-async primary tree)))}}
+    "defaults" defaults
+    "options"  options}))
+
 
 ;;
 ;;
