@@ -5,6 +5,7 @@
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
             [xt.substrate]
+            [xt.substrate.page-remote]
             [xt.db.system.main]
             [xt.db.node.adaptor-base]
             [xt.db.poc.db-model-service-worker-sqlite]))
@@ -42,33 +43,45 @@
             (. port (start))
             (. port (postMessage {"type" "worker-connected"}))
             
+            (var schema {"Log" {"id" {"ident" "id"
+                                       "type" "uuid"
+                                       "primary" true
+                                       "order" 0}
+                                "message" {"ident" "message"
+                                           "type" "text"
+                                           "order" 1}}})
+            (var lookup {"Log" {"position" 0}})
+            (var tree ["Log"])
             (. (xt.db.node.adaptor-base/init-db
-                (xt.substrate/node-create {"id" "db-model-server-init"})
+                (xt.substrate/node-create {"id" "db-model-server"})
                 {"primary" {"type" "supabase"
                             "defaults" (@! local-min/+config-supabase-anon+)}
                  "caching" {"type" "sqlite"
                             "defaults" {}}}
-                -/Schema
-                -/SchemaLookup)
+                schema
+                lookup)
                (then
                 (fn [node]
                   (. port (postMessage {"type" "primary-connected"}))
                   (. port (postMessage {"type" "sqlite-connected"}))
+                  (xt.substrate.page-remote/install node)
+                  (xt.db.poc.db-model-service-worker-sqlite/install-page-models
+                   node
+                   "room/a"
+                   "demo"
+                   {"entry" (xt.db.node.adaptor-base/create-pull-model
+                             tree
+                             {"local_id" "db/caching"
+                              "remote_id" "db/primary"
+                              "defaults" {"args" []}}
+                             {})})
+                  (. port (postMessage {"type" "impl-initialized"}))
                   (return
-                   (xt.db.poc.db-model-service-worker-sqlite/run-server
+                   (xt.db.poc.db-model-service-worker-sqlite/boot-worker-server
+                    node
                     port
-                    {"primary" {"impl" (xt.substrate/get-service node "db/primary")}
-                     "caching" {"impl" (xt.substrate/get-service node "db/caching")}}
-                    -/Schema
-                    -/SchemaLookup
-                    "room/a"
-                    "demo"
-                    {"entry" ["Log"]}
                     {"signal" "ready"
-                     "worker" "db-model-server-sqlite"}
-                    (fn [node]
-                      (. port (postMessage {"type" "impl-initialized"}))
-                      (return nil))))))
+                     "worker" "db-model-server-sqlite"}))))
                (catch
                    (fn [err]
                      (. port (postMessage {"type" "error"
