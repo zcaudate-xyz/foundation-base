@@ -22,6 +22,20 @@
   (defrun.pg __init__
     (s/grant-usage #{"scratch_v0"})))
 
+
+(l/script- :xtalk
+  {:require [[xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
+             [xt.substrate :as substrate]]})
+
+(defn.xt invoke-attached-model
+  "invokes the raw handler of an attached page model"
+  [node space-id group-id model-id args]
+  (var [group model] (substrate/page-model-ensure node space-id group-id model-id))
+  (var handler (xtd/get-in model ["pipeline" "main" "handler"]))
+  (return (handler {"node" node "args" args})))
+
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
@@ -226,8 +240,8 @@
       "has-remote" true
       "defaults" {"args" [["Log"]]}})
 
-^{:refer xt.db.node.adaptor-base/custom-pull-view :added "4.1"}
-(fact "custom-pull-view attaches a pull-view model to the page runtime"
+^{:refer xt.db.node.adaptor-base/attach-pull-model :added "4.1"}
+(fact "attach-pull-model attaches and invokes a pull-view model"
 
   (notify/wait-on :js
     (-> (substrate/node-create {})
@@ -239,30 +253,159 @@
                          -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
-           (return
-            (adaptor/custom-pull-view
-             nil
-             [{"space_id" "room/a"
-               "group_id" "demo"
-               "model_id" "custom-view"
-               "service" {"local_id" "db/caching"
-                          "remote_id" "db/primary"}}
-              {"pipeline" {}
-               "options" {}
-               "defaults" {"args" [["Log"]]}}]
-             nil
-             node))))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))
+           (adaptor/attach-pull-model
+            nil
+            [{"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "custom-view"
+              "service" {"local_id" "db/caching"
+                         "remote_id" "db/primary"}}
+             {"pipeline" {}
+              "options" {}
+              "defaults" {"args" [["Log"]]}}]
+            nil
+            node)
+           (var result (-/invoke-attached-model
+                        node "room/a" "demo" "custom-view"
+                        [["Log"]]))
+           (return (repl/notify result))))
         (promise/x:promise-catch
          (fn [out]
            (repl/notify out)))))
-  => (contains-in
-      {"status" "attached"
-       "space" "room/a"
-       "group" "demo"
-       "model" "custom-view"}))
+  => [])
+
+^{:refer xt.db.node.adaptor-base/create-tree-view-model :added "4.1"}
+(fact "create-tree-view-model builds a page model spec with local and remote handlers"
+
+  (!.js
+   (var spec (adaptor/create-tree-view-model
+              {"local_id" "db/caching"
+               "remote_id" "db/primary"}
+              {"table" "Log"
+               "select_entry" {"input" []
+                               "view" {"table" "Log"
+                                       "type" "select"
+                                       "query" {}}}
+               "return_entry" {"input" []
+                               "view" {"table" "Log"
+                                       "type" "return"
+                                       "query" ["id" "message"]}}
+               "pipeline" {}
+               "options" {}
+               "defaults" {"select_args" []
+                           "return_args" []}}))
+   {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
+    "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
+    "defaults" (. spec ["defaults"])})
+  => {"has-main" true
+      "has-remote" true
+      "defaults" {"select_args" []
+                  "return_args" []}})
+
+^{:refer xt.db.node.adaptor-base/attach-tree-view-model :added "4.1"}
+(fact "attach-tree-view-model attaches and invokes a tree-view model"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-db {"primary" {"type" "postgres"
+                                     "defaults" (@! (local-min/+config+ :db))}
+                          "caching" {"type" "sqlite"
+                                     "defaults" {"filename" ":memory:"}}}
+                         -/Schema
+                         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (adaptor/attach-tree-view-model
+            nil
+            [{"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "tree-view"
+              "service" {"local_id" "db/caching"
+                         "remote_id" "db/primary"}}
+             {"table" "Log"
+              "select_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "select"
+                                      "query" {}}}
+              "return_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "return"
+                                      "query" ["id" "message"]}}
+              "pipeline" {}
+              "options" {}
+              "defaults" {"select_args" []
+                          "return_args" []}}]
+            nil
+            node)
+           (var result (-/invoke-attached-model
+                        node "room/a" "demo" "tree-view"
+                        [[] []]))
+           (return (repl/notify result))))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => [])
+
+^{:refer xt.db.node.adaptor-base/create-rpc-model :added "4.1"}
+(fact "create-rpc-model builds a page model spec with an rpc handler"
+
+  (!.js
+   (var spec (adaptor/create-rpc-model
+              "db/primary"
+              {"rpc_spec" {"input" [{"symbol" "i_message" "type" "text"}]
+                           "return" "jsonb"
+                           "schema" "scratch_v0"
+                           "id" "log_append_public"
+                           "flags" {}}
+               "pipeline" {}
+               "options" {}
+               "defaults" {"fn_args" ["hello"]}}))
+   {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
+    "defaults" (. spec ["defaults"])})
+  => {"has-main" true
+      "defaults" {"fn_args" ["hello"]}})
+
+^{:refer xt.db.node.adaptor-base/attach-rpc-model :added "4.1"}
+(fact "attach-rpc-model attaches and invokes an rpc model"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-db {"primary" {"type" "postgres"
+                                     "defaults" (@! (local-min/+config+ :db))}
+                          "caching" {"type" "sqlite"
+                                     "defaults" {"filename" ":memory:"}}}
+                         -/Schema
+                         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (adaptor/attach-rpc-model
+            nil
+            [{"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "rpc-view"
+              "service" "db/primary"}
+             {"rpc_spec" {"input" [{"symbol" "i_message" "type" "text"}]
+                          "return" "jsonb"
+                          "schema" "scratch_v0"
+                          "id" "log_append_public"
+                          "flags" {}}
+              "pipeline" {}
+              "options" {}
+              "defaults" {"fn_args" ["hello"]}}]
+            nil
+            node)
+           (var result (-/invoke-attached-model
+                        node "room/a" "demo" "rpc-view"
+                        [["hello"]]))
+           (return
+            (-> result
+                (promise/x:promise-then
+                 (fn [out]
+                   (repl/notify out)))))))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => (contains-in {"message" "hello"}))
 
 ^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
 

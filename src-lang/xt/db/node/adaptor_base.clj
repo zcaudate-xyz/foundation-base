@@ -8,6 +8,7 @@
              [xt.substrate :as substrate]
              [xt.net.http-fetch :as http-fetch]
              [xt.db.text.sql-call :as call]
+             [xt.db.text.base-tree :as base-tree]
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.main :as impl-main]
              [xt.substrate.page-core :as page-core]
@@ -149,6 +150,142 @@
    space-id
    group-id
    {model-id (-/create-pull-model service model-args)})
+  (return {"status" "attached"
+           "space" space-id
+           "group" group-id
+           "model" model-id}))
+
+
+;;
+;; TREE VIEW MODEL
+;;
+
+(defn.xt create-tree-view-model
+  "Creates a page model spec that plans a view and pulls from db/caching (sync) and db/primary (async)."
+  {:added "4.1"}
+  [service model]
+  (var #{local-id
+         remote-id} service)
+  (var #{table
+         select-entry
+         return-entry
+         return-omit
+         return-count
+         return-id
+         return-bulk
+         pipeline
+         options
+         defaults} model)
+  (var default-select-args (or (xt/x:get-key defaults "select_args") []))
+  (var default-return-args (or (xt/x:get-key defaults "return_args") []))
+  (var plan-fn
+       (fn [impl select-args return-args]
+         (var schema (xt/x:get-key impl "schema"))
+         (var [ok tree] (base-tree/plan-view
+                         schema
+                         {:table table
+                          :select-entry select-entry
+                          :select-args select-args
+                          :return-entry return-entry
+                          :return-args return-args
+                          :return-omit return-omit
+                          :return-count return-count
+                          :return-id return-id
+                          :return-bulk return-bulk}))
+         (when (not ok)
+           (return [ok tree]))
+         (return [true tree])))
+  (return
+   {"handler"
+    (fn [context]
+      (var node (. context ["node"]))
+      (var args (. context ["args"]))
+      (var select-args (or (xt/x:get-idx args 0) default-select-args))
+      (var return-args (or (xt/x:get-idx args 1) default-return-args))
+      (var caching (substrate/get-service node local-id))
+      (var [ok tree] (plan-fn caching select-args return-args))
+      (when (not ok)
+        (return [ok tree]))
+      (return (impl-common/pull caching tree)))
+    "pipeline" (xtd/obj-assign-nested
+                {"remote" {"handler"
+                           (fn [context]
+                             (var node (. context ["node"]))
+                             (var args (. context ["args"]))
+                             (var select-args (or (xt/x:get-idx args 0) default-select-args))
+                             (var return-args (or (xt/x:get-idx args 1) default-return-args))
+                             (var primary (substrate/get-service node remote-id))
+                             (var [ok tree] (plan-fn primary select-args return-args))
+                             (when (not ok)
+                               (return [ok tree]))
+                             (return (impl-common/pull-async primary tree)))}}
+                pipeline)
+    "defaults" defaults
+    "options"  options}))
+
+(defn.xt ^{:substrate/fn true}
+  attach-tree-view-model
+  "Server-side handler that materialises a tree-view page model from client args."
+  {:added "4.1"}
+  [space args request node]
+  (var node-args   (xt/x:first args))
+  (var model-args  (xt/x:second args))
+  (var #{space-id
+         group-id
+         model-id
+         service}   node-args)
+  (page-core/add-group-attach
+   node
+   space-id
+   group-id
+   {model-id (-/create-tree-view-model service model-args)})
+  (return {"status" "attached"
+           "space" space-id
+           "group" group-id
+           "model" model-id}))
+
+
+;;
+;; RPC MODEL
+;;
+
+(defn.xt create-rpc-model
+  "Creates a page model spec that calls an RPC on a named service."
+  {:added "4.1"}
+  [service-id model]
+  (var #{rpc-spec
+         pipeline
+         options
+         defaults} model)
+  (var default-fn-args (or (xt/x:get-key defaults "fn_args") []))
+  (return
+   {"handler"
+    (fn [context]
+      (var node (. context ["node"]))
+      (var args (. context ["args"]))
+      (var fn-args (or (xt/x:get-idx args 0) default-fn-args))
+      (var impl (substrate/get-service node service-id))
+      (return (impl-common/rpc-call-async impl rpc-spec fn-args)))
+    "pipeline" (xtd/obj-assign-nested {} pipeline)
+    "defaults" defaults
+    "options"  options}))
+
+(defn.xt ^{:substrate/fn true}
+  attach-rpc-model
+  "Server-side handler that materialises an RPC page model from client args."
+  {:added "4.1"}
+  [space args request node]
+  (var node-args   (xt/x:first args))
+  (var model-args  (xt/x:second args))
+  (var #{space-id
+         group-id
+         model-id
+         service}   node-args)
+  (page-core/add-group-attach
+   node
+   space-id
+   group-id
+   {model-id (-/create-rpc-model service model-args)})
   (return {"status" "attached"
            "space" space-id
            "group" group-id
