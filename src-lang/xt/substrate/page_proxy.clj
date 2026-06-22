@@ -1,4 +1,4 @@
-(ns xt.substrate.page-remote
+(ns xt.substrate.page-proxy
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
@@ -19,14 +19,14 @@
 (def$.xt ACTION_MODEL_UPDATE "page.model/update")
 (def$.xt ACTION_MODEL_SET_INPUT "page.model/set-input")
 (def$.xt ACTION_MODEL_TRIGGER "page.model/trigger")
-(def$.xt ACTION_MODEL_REMOTE_CALL "page.model/remote-call")
+(def$.xt ACTION_MODEL_PROXY_CALL "page.model/proxy-call")
 (def$.xt ACTION_GROUP_TRIGGER "page.group/trigger")
 
 (def$.xt SIGNAL_OUTPUT "page.model/output")
 (def$.xt SIGNAL_INPUT  "page.model/input")
 
-(def$.xt LISTENER_OUTPUT "@/page-remote/output")
-(def$.xt LISTENER_INPUT  "@/page-remote/input")
+(def$.xt LISTENER_OUTPUT "@/page-proxy/output")
+(def$.xt LISTENER_INPUT  "@/page-proxy/input")
 
 ;;;
 ;;; SERIALIZATION
@@ -116,7 +116,7 @@
                       {})))
 
 (defn.xt ensure-model-listeners
-  "adds remote-publish listeners to a model if not present"
+  "adds proxy-publish listeners to a model if not present"
   {:added "4.1"}
   [node space-id group-id model-id model]
   (var listeners-map (xt/x:get-key model "listeners"))
@@ -157,7 +157,7 @@
   (return out))
 
 (defn.xt handle-group-open
-  "opens a group to a remote client and returns a snapshot"
+  "opens a group to a proxy client and returns a snapshot"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
@@ -189,7 +189,7 @@
              "models" (-/snapshot-group node space-id group-id)})))
 
 (defn.xt handle-group-close
-  "closes a remote group subscription"
+  "closes a proxy group subscription"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
@@ -204,7 +204,7 @@
            "group"  group-id}))
 
 (defn.xt handle-group-update
-  "handles a remote group update request"
+  "handles a proxy group update request"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
@@ -218,7 +218,7 @@
           (return {"status" "ok"}))))))
 
 (defn.xt handle-model-update
-  "handles a remote model update request"
+  "handles a proxy model update request"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
@@ -233,7 +233,7 @@
           (return {"status" "ok"}))))))
 
 (defn.xt handle-model-set-input
-  "handles a remote model set-input request"
+  "handles a proxy model set-input request"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
@@ -249,7 +249,7 @@
           (return {"status" "ok"}))))))
 
 (defn.xt handle-model-trigger
-  "handles a remote model trigger request"
+  "handles a proxy model trigger request"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
@@ -263,7 +263,7 @@
            "triggered" (xt/x:not-nil? out)}))
 
 (defn.xt handle-group-trigger
-  "handles a remote group trigger request"
+  "handles a proxy group trigger request"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
@@ -275,8 +275,8 @@
   (return {"status" "ok"
            "models" out}))
 
-(defn.xt handle-model-remote-call
-  "handles a remote model remote-call request"
+(defn.xt handle-model-proxy-call
+  "handles a proxy model proxy-call request"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
@@ -301,7 +301,7 @@
                    "data" (xt/x:ex-data err)}))))))
 
 (defn.xt install-handlers
-  "installs remote-page request handlers on a node"
+  "installs page-proxy request handlers on a node"
   {:added "4.1"}
   [node]
   (substrate/register-handler node -/ACTION_GROUP_LIST -/handle-group-list nil)
@@ -311,7 +311,7 @@
   (substrate/register-handler node -/ACTION_MODEL_UPDATE -/handle-model-update nil)
   (substrate/register-handler node -/ACTION_MODEL_SET_INPUT -/handle-model-set-input nil)
   (substrate/register-handler node -/ACTION_MODEL_TRIGGER -/handle-model-trigger nil)
-  (substrate/register-handler node -/ACTION_MODEL_REMOTE_CALL -/handle-model-remote-call nil)
+  (substrate/register-handler node -/ACTION_MODEL_PROXY_CALL -/handle-model-proxy-call nil)
   (substrate/register-handler node -/ACTION_GROUP_TRIGGER -/handle-group-trigger nil)
   (return node))
 
@@ -416,7 +416,7 @@
   (var output (xt/x:get-key data "output"))
   (var group (page-core/group-get node space-id group-id))
   (when (or (xt/x:nil? group)
-            (not (page-core/remote-group? group)))
+            (not (page-core/proxy-group? group)))
     (return nil))
   (var model (xtd/get-in group ["models" model-id]))
   (when (xt/x:nil? model)
@@ -436,7 +436,7 @@
   (var input (xt/x:get-key data "input"))
   (var group (page-core/group-get node space-id group-id))
   (when (or (xt/x:nil? group)
-            (not (page-core/remote-group? group)))
+            (not (page-core/proxy-group? group)))
     (return nil))
   (var model (xtd/get-in group ["models" model-id]))
   (when (xt/x:nil? model)
@@ -445,7 +445,7 @@
   (return (event-model/trigger-listeners model "model.input" (xt/x:get-key model "input"))))
 
 (defn.xt install-triggers
-  "installs client stream triggers for remote page deltas"
+  "installs client stream triggers for proxy page deltas"
   {:added "4.1"}
   [node]
   (substrate/register-trigger node -/SIGNAL_OUTPUT -/apply-model-output nil)
@@ -453,11 +453,11 @@
   (return node))
 
 ;;;
-;;; REMOTE DISPATCHER
+;;; PROXY DISPATCHER
 ;;;
 
-(defn.xt remote-dispatcher
-  "forwards local page operations to the server owning the remote group"
+(defn.xt proxy-dispatcher
+  "forwards local page operations to the server owning the proxy group"
   {:added "4.1"}
   [op node space-id group-id args]
   (var group (page-core/group-get node space-id group-id))
@@ -525,13 +525,13 @@
                                          "event" event}]
                                        {"transport_id" transport-id})))
 
-        (== op "remote-call")
+        (== op "proxy-call")
         (do (var model-id   (xtd/nth args 0))
             (var call-args  (xtd/nth args 1))
             (var save-output (xtd/nth args 2))
             (return (substrate/request node
                                        space-id
-                                       -/ACTION_MODEL_REMOTE_CALL
+                                       -/ACTION_MODEL_PROXY_CALL
                                        [{"space" space-id
                                          "group" group-id
                                          "model" model-id
@@ -547,15 +547,15 @@
 ;;;
 
 (defn.xt install
-  "installs remote-page protocol on a node (both client and server)"
+  "installs page-proxy protocol on a node (both client and server)"
   {:added "4.1"}
   [node]
   (-/install-handlers node)
   (-/install-triggers node)
-  (page-core/set-remote-dispatcher -/remote-dispatcher)
+  (page-core/set-proxy-dispatcher -/proxy-dispatcher)
   (return node))
 
-(defn.xt list-remote-groups
+(defn.xt list-proxy-groups
   "queries a server for available page groups"
   {:added "4.1"}
   [node space-id opts]
@@ -566,8 +566,8 @@
                              [space-id]
                              {"transport_id" transport-id})))
 
-(defn.xt open-remote-group
-  "opens a remote page group on a client and creates proxy models"
+(defn.xt open-proxy-group
+  "opens a proxy page group on a client and creates proxy models"
   {:added "4.1"}
   [node space-id group-id opts]
   (var transport-id (xt/x:get-key opts "transport_id"))
@@ -587,8 +587,8 @@
           (-/create-proxy-group node space-id group-id snapshot opts)
           (return (page-core/group-get node space-id group-id)))))))
 
-(defn.xt close-remote-group
-  "closes a remote page group and removes proxy models"
+(defn.xt close-proxy-group
+  "closes a proxy page group and removes proxy models"
   {:added "4.1"}
   [node space-id group-id opts]
   (var transport-id (xt/x:get-key opts "transport_id"))
@@ -606,8 +606,8 @@
           (xt/x:del-key groups group-id)
           (return nil))))))
 
-(defn.xt remote-call
-  "invokes the remote-call path on a remote page model"
+(defn.xt proxy-call
+  "invokes the proxy-call path on a proxy page model"
   {:added "4.1"}
   [node space-id group-id model-id args save-output opts]
   (var group (page-core/group-get node space-id group-id))
@@ -615,7 +615,7 @@
   (var transport-id (xt/x:get-key remote-spec "transport_id"))
   (return (substrate/request node
                              space-id
-                             -/ACTION_MODEL_REMOTE_CALL
+                             -/ACTION_MODEL_PROXY_CALL
                              [{"space" space-id
                                "group" group-id
                                "model" model-id

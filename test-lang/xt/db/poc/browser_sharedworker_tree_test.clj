@@ -7,7 +7,7 @@
             [postgres.core :as pg]
             [xt.substrate]
             [xt.substrate.transport-browser]
-            [xt.substrate.page-remote]
+            [xt.substrate.page-proxy]
             [xt.substrate.page-core]
             [xt.event.base-model]
             [xt.db.node.adaptor-base]))
@@ -41,7 +41,7 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
-             [xt.substrate.page-remote :as page-remote]]})
+             [xt.substrate.page-proxy :as page-proxy]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -80,7 +80,7 @@
             (xt.substrate/set-service
              node "db/caching"
              (xt.db.system.impl-memory/impl-memory schema lookup))
-            (xt.substrate.page-remote/install node)
+            (xt.substrate.page-proxy/install node)
             (xt.substrate.page-core/add-group-attach
              node
              "room/a"
@@ -123,7 +123,7 @@
 
   (notify/wait-on [:js 20000]
     (var client (substrate/node-create {"id" "db-model-client"}))
-    (page-remote/install client)
+    (page-proxy/install client)
     (promise/x:promise-catch
      (promise/x:promise-then
       (browser-transport/connect-sharedworker
@@ -134,7 +134,7 @@
         (var transport-id (. conn ["transport_id"]))
         (return
          (promise/x:promise-then
-          (page-remote/open-remote-group
+          (page-proxy/open-proxy-group
            client
            "room/a"
            "demo"

@@ -1,4 +1,4 @@
-(ns xt.substrate.page-remote-test
+(ns xt.substrate.page-proxy-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -13,7 +13,7 @@
              [xt.substrate :as substrate]
              [xt.substrate.base-router :as router]
              [xt.substrate.page-core :as base-page]
-             [xt.substrate.page-remote :as page-remote]]})
+             [xt.substrate.page-proxy :as page-proxy]]})
 
 (defn.js make-server-node
   "creates a bare server node"
@@ -116,20 +116,20 @@
   :teardown [(l/rt:stop)]})
 
 
-^{:refer xt.substrate.page-remote/list-remote-groups :added "4.1"}
+^{:refer xt.substrate.page-proxy/list-proxy-groups :added "4.1"}
 (fact "lists remote groups and model ids available on the server"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
-    (page-remote/install server)
+    (page-proxy/install server)
     (-/setup-server-page server)
-    (-> (page-remote/list-remote-groups server "room/a" {})
+    (-> (page-proxy/list-proxy-groups server "room/a" {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
   => {"demo" {"models" ["main"]}})
 
-^{:refer xt.substrate.page-remote/echo-local :added "4.1"}
+^{:refer xt.substrate.page-proxy/echo-local :added "4.1"}
 (fact "handler can be invoked locally on the server"
 
   (notify/wait-on :js
@@ -173,7 +173,7 @@
   => (contains-in
       {"out" [{"reply_to" "r1" "status" "ok" "data" {"pong" "hello"}}]}))
 
-^{:refer xt.substrate.page-remote/echo :added "4.1"}
+^{:refer xt.substrate.page-proxy/echo :added "4.1"}
 (fact "manual transport pair can exchange requests"
 
   (notify/wait-on :js
@@ -199,26 +199,26 @@
                          "message" (xt/x:ex-message err)})))))
   => {"pong" "hello"})
 
-^{:refer xt.substrate.page-remote/open-remote-group :added "4.1"}
+^{:refer xt.substrate.page-proxy/open-proxy-group :added "4.1"}
 (fact "opens a remote group and creates proxy models on the client"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
     (var client (-/make-client-node))
-    (page-remote/install server)
-    (page-remote/install client)
+    (page-proxy/install server)
+    (page-proxy/install client)
     (-/setup-server-page server)
     (-> (-/link-nodes server client)
         (promise/x:promise-then
          (fn [linked]
            (return
             (-> (-/send-and-receive linked server client
-                                    "room/a" page-remote/ACTION_GROUP_OPEN
+                                    "room/a" page-proxy/ACTION_GROUP_OPEN
                                     [{"space" "room/a" "group" "demo"}])
                 (promise/x:promise-then
                  (fn [response]
                    (var snapshot (xt/x:get-key response "models"))
-                   (page-remote/create-proxy-group client "room/a" "demo" snapshot
+                   (page-proxy/create-proxy-group client "room/a" "demo" snapshot
                                                    {"transport_id" "server-conn"})
                    (return (page-core/group-get client "room/a" "demo"))))))))
         (promise/x:promise-then
@@ -233,31 +233,31 @@
        "model_type" "event.model"
        "output" {"current" {"value" "hello"}}}))
 
-^{:refer xt.substrate.page-remote/close-remote-group :added "4.1"}
+^{:refer xt.substrate.page-proxy/close-proxy-group :added "4.1"}
 (fact "closes a remote group and removes router subscriptions"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
     (var client (-/make-client-node))
-    (page-remote/install server)
-    (page-remote/install client)
+    (page-proxy/install server)
+    (page-proxy/install client)
     (-/setup-server-page server)
     (-> (-/link-nodes server client)
         (promise/x:promise-then
          (fn [linked]
            (return
             (-> (-/send-and-receive linked server client
-                                    "room/a" page-remote/ACTION_GROUP_OPEN
+                                    "room/a" page-proxy/ACTION_GROUP_OPEN
                                     [{"space" "room/a" "group" "demo"}])
                 (promise/x:promise-then
                  (fn [response]
                    (var snapshot (xt/x:get-key response "models"))
-                   (page-remote/create-proxy-group client "room/a" "demo" snapshot
+                   (page-proxy/create-proxy-group client "room/a" "demo" snapshot
                                                    {"transport_id" "server-conn"})
                    (return
                     (-/pump-promise
                      linked server client
-                     (page-remote/close-remote-group
+                     (page-proxy/close-proxy-group
                       client "room/a" "demo"
                       {"transport_id" "server-conn"})))))))))
         (promise/x:promise-then
@@ -266,9 +266,9 @@
             {"group"       (page-core/group-get client
                                                 "room/a" "demo")
              "output_subs" (router/list-subscriptions server
-                                                      "room/a" page-remote/SIGNAL_OUTPUT)
+                                                      "room/a" page-proxy/SIGNAL_OUTPUT)
              "input_subs"  (router/list-subscriptions server
-                                                      "room/a" page-remote/SIGNAL_INPUT)})))))
+                                                      "room/a" page-proxy/SIGNAL_INPUT)})))))
   => {"group" nil
       "output_subs" []
       "input_subs" []})

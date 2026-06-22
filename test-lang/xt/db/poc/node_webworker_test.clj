@@ -33,7 +33,7 @@
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
-             [xt.substrate.page-remote :as page-remote]
+             [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-memory :as impl-memory]
@@ -91,7 +91,7 @@
                 (xt.substrate/set-service node "db/common" {:schema schema :lookup lookup})
                 (xt.substrate/set-service node "db/primary" primary-impl)
                 (xt.substrate/set-service node "db/caching" caching-impl)
-                (xt.substrate.page-remote/install node)
+                (xt.substrate.page-proxy/install node)
                 (var primary (xt.substrate/get-service node "db/primary"))
                 (var caching (xt.substrate/get-service node "db/caching"))
                 (. (xt.db.system.impl-common/pull-async primary ["Log"])
@@ -164,7 +164,7 @@
     (-> (promise/x:promise-run node)
         (promise/x:promise-then
          (fn [node]
-           (page-remote/install node)
+           (page-proxy/install node)
            (page-core/add-group-attach
             node "room/a" "demo"
             {"entry" {"handler" (fn [context]
@@ -185,10 +185,10 @@
            (var caching (substrate/get-service node "db/caching"))
            (impl-common/record-add primary "Log" [{"id" "E-1" "message" "primary"}])
            (impl-common/record-add caching "Log" [{"id" "E-1" "message" "cached"}])
-           (-> (page-remote/list-remote-groups node "room/a" {})
+           (-> (page-proxy/list-proxy-groups node "room/a" {})
                (promise/x:promise-then
                 (fn [groups]
-                  (-> (page-remote/open-remote-group node "room/a" "demo" {})
+                  (-> (page-proxy/open-proxy-group node "room/a" "demo" {})
                       (promise/x:promise-then
                        (fn [group]
                          (repl/notify
@@ -206,7 +206,7 @@
   (notify/wait-on [:js 10000]
     (var link (worker-link/make-node-link (@! +server-script+) {}))
     (var client (substrate/node-create {"id" "db-model-client"}))
-    (page-remote/install client)
+    (page-proxy/install client)
     (var conn-ref nil)
     (var groups-ref nil)
     (. (browser-transport/connect-sharedworker
@@ -216,11 +216,11 @@
        (then
         (fn [conn]
           (:= conn-ref conn)
-          (return (page-remote/list-remote-groups client "room/a" {"transport_id" (. conn ["transport_id"])}))))
+          (return (page-proxy/list-proxy-groups client "room/a" {"transport_id" (. conn ["transport_id"])}))))
        (then
         (fn [groups]
           (:= groups-ref groups)
-          (return (page-remote/open-remote-group client "room/a" "demo" {"transport_id" (. conn-ref ["transport_id"])}))))
+          (return (page-proxy/open-proxy-group client "room/a" "demo" {"transport_id" (. conn-ref ["transport_id"])}))))
        (then
         (fn [group]
           (browser-transport/disconnect conn-ref)

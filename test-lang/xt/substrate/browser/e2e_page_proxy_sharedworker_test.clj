@@ -1,11 +1,11 @@
 ^{:seedgen/skip true}
-(ns xt.substrate.browser.e2e-page-remote-sharedworker-test
+(ns xt.substrate.browser.e2e-page-proxy-sharedworker-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [js.worker.link]
             [xt.lang.common-notify :as notify]
-            [xt.substrate.page-remote]
+            [xt.substrate.page-proxy]
             [xt.substrate.page-core]
             [xt.event.base-model]
             [xt.substrate.transport-browser]))
@@ -18,9 +18,9 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (var node (xt.substrate/node-create
-                       {"id" "page-remote-shared-server"
+                       {"id" "page-proxy-shared-server"
                         "spaces" {"room/a" {"state" {}}}}))
-            (xt.substrate.page-remote/install node)
+            (xt.substrate.page-proxy/install node)
             (xt.substrate.page-core/add-group
              node
              "room/a"
@@ -40,7 +40,7 @@
               "target" port
               "ready" {"signal" "ready"
                        "transport" "browser"
-                       "worker" "page-remote-shared"}})
+                       "worker" "page-proxy-shared"}})
             (return node))))
    {:lang :js
     :layout :full}))
@@ -56,7 +56,7 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
-             [xt.substrate.page-remote :as page-remote]]})
+             [xt.substrate.page-proxy :as page-proxy]]})
 
 (fact:global
  {:setup [(l/rt:restart :js)
@@ -65,15 +65,15 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.substrate.page-remote/open-remote-group
+^{:refer xt.substrate.page-proxy/open-proxy-group
   :added "4.1"}
-(fact "page-remote can list, open, and read a remote group over a SharedWorker"
+(fact "page-proxy can list, open, and read a remote group over a SharedWorker"
 
   (notify/wait-on [:js 5000]
     (var client (substrate/node-create
-                 {"id" "page-remote-browser-client"
+                 {"id" "page-proxy-browser-client"
                   "spaces" {"room/a" {"state" {}}}}))
-    (page-remote/install client)
+    (page-proxy/install client)
     (promise/x:promise-catch
      (promise/x:promise-then
       (browser-transport/connect-sharedworker
@@ -84,11 +84,11 @@
         (var transport-id (. conn ["transport_id"]))
         (return
          (promise/x:promise-then
-          (page-remote/list-remote-groups client "room/a" {"transport_id" transport-id})
+          (page-proxy/list-proxy-groups client "room/a" {"transport_id" transport-id})
           (fn [groups]
             (return
              (promise/x:promise-then
-              (page-remote/open-remote-group
+              (page-proxy/open-proxy-group
                client
                "room/a"
                "demo"

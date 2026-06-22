@@ -6,7 +6,7 @@
             [scaffold.supabase.local-min :as local-min]
             [xt.substrate]
             [xt.substrate.page-core]
-            [xt.substrate.page-remote]
+            [xt.substrate.page-proxy]
             [xt.substrate.transport-browser]
             [xt.db.system.main]
             [xt.db.node.adaptor-base]))
@@ -70,7 +70,7 @@
                 (fn [node]
                   (. port (postMessage {"type" "primary-connected"}))
                   (. port (postMessage {"type" "sqlite-connected"}))
-                  (xt.substrate.page-remote/install node)
+                  (xt.substrate.page-proxy/install node)
                   (xt.substrate.page-core/add-group-attach
                    node
                    "room/a"

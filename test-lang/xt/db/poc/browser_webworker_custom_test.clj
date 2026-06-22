@@ -7,7 +7,7 @@
             [postgres.core :as pg]
             [xt.substrate]
             [xt.substrate.transport-browser]
-            [xt.substrate.page-remote]
+            [xt.substrate.page-proxy]
             [xt.substrate.page-core]
             [xt.event.base-model]
             [xt.db.node.adaptor-base]))
@@ -41,7 +41,7 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
-             [xt.substrate.page-remote :as page-remote]
+             [xt.substrate.page-proxy :as page-proxy]
              [xt.db.node.adaptor-base]]})
 
 (def.js Schema
@@ -62,7 +62,7 @@
   (l/emit-script
    '(do
       (var node (xt.substrate/node-create {"id" "db-model-server"}))
-      (xt.substrate.page-remote/install node)
+      (xt.substrate.page-proxy/install node)
       (xt.substrate/register-handler
        node "@/echo"
        (fn [space args request node]
@@ -114,7 +114,7 @@
 
   (notify/wait-on [:js 20000]
                   (var client (substrate/node-create {"id" "db-model-client"}))
-                  (page-remote/install client)
+                  (page-proxy/install client)
                   (promise/x:promise-catch
                    (promise/x:promise-then
                     (browser-transport/connect-worker
@@ -129,11 +129,11 @@
                           (fn [echo]
                               (return
                                (promise/x:promise-then
-                                (page-remote/list-remote-groups client "room/a" {"transport_id" transport-id})
+                                (page-proxy/list-proxy-groups client "room/a" {"transport_id" transport-id})
                                 (fn [groups]
                                     (return
                                      (promise/x:promise-then
-                                      (page-remote/open-remote-group
+                                      (page-proxy/open-proxy-group
                                        client
                                        "room/a"
                                        "demo"
