@@ -102,6 +102,10 @@
         (fn [client]
           (return (http-fetch/request-http client fetch-input)))))))
 
+;;
+;;
+;;
+
 (defn.xt create-pull-model
   "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
   {:added "4.1"}
@@ -130,7 +134,7 @@
     "options"  options}))
 
 (defn.xt ^{:substrate/fn true}
-  custom-pull-view
+  attach-pull-model
   "Server-side handler that materialises a custom pull-view page model from client args."
   {:added "4.1"}
   [space args request node]

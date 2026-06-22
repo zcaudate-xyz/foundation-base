@@ -5,6 +5,7 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as xtt]
+             [xt.db.text.base-check :as check]
              [xt.db.text.sql-graph :as sql-graph]
              [xt.db.text.sql-util :as sql-util]
              [xt.db.text.base-scope :as base-scope]]})
@@ -178,3 +179,97 @@
                                      (xt/x:arr-assign sel-input))
                                  true))
   (return qtree))
+
+
+;;
+;; PLAN VIEW
+;;
+
+(defn.xt plan-view-check
+  "checks query arguments against the entry input"
+  {:added "4.0"}
+  [entry args drop-first]
+  (var targs (xt/x:get-key entry "input"))
+  (when drop-first
+    (:= targs [(xt/x:unpack targs)])
+    (x:arr-pop-first targs))
+  (var [l-ok l-err] (check/check-args-length args targs))
+  (when (not l-ok)
+    (return [l-ok l-err]))
+  (var [t-ok t-err] (check/check-args-type args targs))
+  (when (not t-ok)
+    (return [t-ok t-err]))
+  (return [true nil]))
+
+(defn.xt plan-view
+  "prepares a db query from entries against a system impl"
+  {:added "4.0"}
+  [schema query-spec]
+  (var #{table
+         select-entry
+         select-args
+         return-entry
+         return-args
+         return-omit
+         return-count
+         return-id
+         return-bulk} query-spec)
+  (cond (and (xt/x:not-nil? select-entry)
+             (xt/x:not-nil? return-entry))
+        (do (var [s-ok s-err] (-/plan-view-check select-entry select-args false))
+            (when (not s-ok)
+              (return [s-ok s-err]))
+            (var [r-ok r-err] (-/plan-view-check return-entry return-args true))
+            (when (not r-ok)
+              (return [r-ok r-err]))
+            (return [true (-/plan-combined
+                           schema
+                           select-entry
+                           select-args
+                           return-entry
+                           return-args
+                           return-omit
+                           {}
+                           false)]))
+        
+        (xt/x:not-nil? select-entry)
+        (do (var [s-ok s-err] (-/plan-view-check select-entry select-args false))
+            (when (not s-ok)
+              (return [s-ok s-err]))
+            (return [true (:? return-count
+                              (-/plan-count
+                               schema
+                               select-entry
+                               select-args
+                               {})
+                              (-/plan-select
+                               schema
+                               select-entry
+                               select-args
+                               {}))]))
+
+        (xt/x:not-nil? return-id)
+        (do (var rargs [return-id (xt/x:unpack return-args)])
+            (var [r-ok r-err] (-/plan-view-check return-entry rargs false))
+            (when (not r-ok)
+              (return [r-ok r-err]))
+            (return [true (-/plan-return
+                           schema
+                           return-entry
+                           return-id
+                           return-args
+                           {})]))
+
+        (xt/x:not-nil? return-bulk)
+        (do (var [r-ok r-err] (-/plan-view-check return-entry return-args true))
+            (when (not r-ok)
+              (return [r-ok r-err]))
+            (return [true (-/plan-return-bulk
+                           schema
+                           return-entry
+                           return-bulk
+                           return-args
+                           {})]))
+
+        :else
+        (return [true nil])))

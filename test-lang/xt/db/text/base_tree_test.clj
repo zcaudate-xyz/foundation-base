@@ -6,7 +6,9 @@
   {:runtime :basic
    :require [[xt.db.text.base-tree :as v]
              [xt.db.text.sql-util :as ut]
-             [xt.db.helpers.data-main-test :as sample]]})
+             [xt.db.helpers.data-main-test :as sample]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -331,3 +333,99 @@
        "where" [{"type" "fiat"}],
        "links" [],
        "data" ["id"]}])
+
+^{:refer xt.db.text.base-tree/plan-view-check :added "4.1"}
+(fact "checks query arguments against the entry input"
+
+  (!.js
+   [(v/plan-view-check
+     {"input" [{"symbol" "i_type", "type" "text"}]}
+     ["fiat"]
+     false)
+    (v/plan-view-check
+     {"input" [{"symbol" "i_type", "type" "text"}]}
+     [1]
+     false)])
+  => [[true nil]
+      [false {"status" "error"
+              "tag" "net/arg-typecheck-failed"
+              "data" {"input" 1
+                      "spec" {"symbol" "i_type", "type" "text"}}}]])
+
+^{:refer xt.db.text.base-tree/plan-view :added "4.1"
+  :setup [(def +input-plan-view-select+
+            {:input [{"symbol" "i_type", "type" "text"}]
+             :control {:limit 2}
+             :view {:table "Currency"
+                    :type "select"
+                    :query {"type" "{{i_type}}"}}})
+          (def +input-plan-view-return+
+            {:input [{"symbol" "i_currency_id", "type" "text"}
+                     {"symbol" "i_note", "type" "text"}]
+             :view {:table "Currency"
+                    :type "return"
+                    :query ["id"
+                            {"::" "sql/arg", "name" "{{i_note}}"}]}})]}
+(fact "plans a db query from entries and schema"
+
+  (!.js
+   (var [ok tree] (v/plan-view
+                   sample/Schema
+                   {:table "Currency"
+                    :select-entry (@! +input-plan-view-select+)
+                    :select-args ["fiat"]
+                    :return-entry (@! +input-plan-view-return+)
+                    :return-args ["note"]}))
+   [ok
+    (xt/x:first tree)
+    (xtd/get-in tree [1 "where" 0 "type"])
+    (xtd/get-in tree [1 "data"])])
+  => [true
+      "Currency"
+      "fiat"
+      ["id"]]
+
+  (!.js
+   (var [ok tree] (v/plan-view
+                   sample/Schema
+                   {:table "Currency"
+                    :select-entry (@! +input-plan-view-select+)
+                    :select-args ["fiat"]}))
+   [ok
+    (xt/x:first tree)
+    (xtd/get-in tree [1 "where" 0 "type"])
+    (xtd/get-in tree [1 "data"])])
+  => [true
+      "Currency"
+      "fiat"
+      ["id"]]
+
+  (!.js
+   (var [ok tree] (v/plan-view
+                   sample/Schema
+                   {:table "Currency"
+                    :return-entry (@! +input-plan-return+)
+                    :return-id "STATS"
+                    :return-args ["hello"]}))
+   [ok
+    (xt/x:first tree)
+    (xtd/get-in tree [1 "where" 0 "id"])
+    (xtd/get-in tree [1 "data"])])
+  => [true
+      "Currency"
+      "STATS"
+      ["id" "description"]]
+
+  (!.js
+   (var [ok tree] (v/plan-view
+                   sample/Schema
+                   {:table "Currency"
+                    :return-entry (@! +input-plan-return-bulk+)
+                    :return-bulk ["STATS" "USD"]
+                    :return-args []}))
+   [ok
+    (xt/x:first tree)
+    (xtd/get-in tree [1 "where" 0 "id"])])
+  => [true
+      "Currency"
+      ["in" [["STATS" "USD"]]]])
