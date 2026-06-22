@@ -19,6 +19,7 @@
 (def$.xt ACTION_MODEL_UPDATE "page.model/update")
 (def$.xt ACTION_MODEL_SET_INPUT "page.model/set-input")
 (def$.xt ACTION_MODEL_TRIGGER "page.model/trigger")
+(def$.xt ACTION_MODEL_REMOTE_CALL "page.model/remote-call")
 (def$.xt ACTION_GROUP_TRIGGER "page.group/trigger")
 
 (def$.xt SIGNAL_OUTPUT "page.model/output")
@@ -124,7 +125,7 @@
      model
      -/LISTENER_OUTPUT
      (fn [_id data _t meta]
-       (return (-/publish-model-output node space-id [group-id model-id] data)))
+       (return (-/publish-model-output node space-id [group-id model-id] (xt/x:get-key data "data"))))
      nil
      (fn [event]
        (return (== "model.output" (xt/x:get-key event "type"))))))
@@ -133,7 +134,7 @@
      model
      -/LISTENER_INPUT
      (fn [_id data _t meta]
-       (return (-/publish-model-input node space-id [group-id model-id] data)))
+       (return (-/publish-model-input node space-id [group-id model-id] (xt/x:get-key data "data"))))
      nil
      (fn [event]
        (return (== "model.input" (xt/x:get-key event "type"))))))
@@ -274,6 +275,31 @@
   (return {"status" "ok"
            "models" out}))
 
+(defn.xt handle-model-remote-call
+  "handles a remote model remote-call request"
+  {:added "4.1"}
+  [space args request node]
+  (var payload (xt/x:first args))
+  (var space-id (xt/x:get-key payload "space"))
+  (var group-id (xt/x:get-key payload "group"))
+  (var model-id (xt/x:get-key payload "model"))
+  (return
+   (-> (page-core/remote-call node
+                              space-id
+                              group-id
+                              model-id
+                              (or (xt/x:get-key payload "args") [])
+                              (xt/x:get-key payload "save_output"))
+       (promise/x:promise-then
+        (fn [_]
+          (return {"status" "ok"})))
+       (promise/x:promise-catch
+        (fn [err]
+          (return {"status" "error"
+                   "message" (xt/x:ex-message err)
+                   "stack" (xt/x:get-key err "stack")
+                   "data" (xt/x:ex-data err)}))))))
+
 (defn.xt install-handlers
   "installs remote-page request handlers on a node"
   {:added "4.1"}
@@ -285,6 +311,7 @@
   (substrate/register-handler node -/ACTION_MODEL_UPDATE -/handle-model-update nil)
   (substrate/register-handler node -/ACTION_MODEL_SET_INPUT -/handle-model-set-input nil)
   (substrate/register-handler node -/ACTION_MODEL_TRIGGER -/handle-model-trigger nil)
+  (substrate/register-handler node -/ACTION_MODEL_REMOTE_CALL -/handle-model-remote-call nil)
   (substrate/register-handler node -/ACTION_GROUP_TRIGGER -/handle-group-trigger nil)
   (return node))
 
@@ -380,14 +407,16 @@
 (defn.xt apply-model-output
   "applies an inbound output delta to a proxy model"
   {:added "4.1"}
-  [node space stream]
+  [space stream node]
   (var data (xt/x:get-key stream "data"))
+  (var space-id (xt/x:get-key stream "space"))
   (var path (xt/x:get-key data "path"))
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
   (var output (xt/x:get-key data "output"))
-  (var group (page-core/group-get node space group-id))
-  (when (xt/x:nil? group)
+  (var group (page-core/group-get node space-id group-id))
+  (when (or (xt/x:nil? group)
+            (not (page-core/remote-group? group)))
     (return nil))
   (var model (xtd/get-in group ["models" model-id]))
   (when (xt/x:nil? model)
@@ -398,14 +427,16 @@
 (defn.xt apply-model-input
   "applies an inbound input delta to a proxy model"
   {:added "4.1"}
-  [node space stream]
+  [space stream node]
   (var data (xt/x:get-key stream "data"))
+  (var space-id (xt/x:get-key stream "space"))
   (var path (xt/x:get-key data "path"))
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
   (var input (xt/x:get-key data "input"))
-  (var group (page-core/group-get node space group-id))
-  (when (xt/x:nil? group)
+  (var group (page-core/group-get node space-id group-id))
+  (when (or (xt/x:nil? group)
+            (not (page-core/remote-group? group)))
     (return nil))
   (var model (xtd/get-in group ["models" model-id]))
   (when (xt/x:nil? model)
@@ -494,6 +525,20 @@
                                          "event" event}]
                                        {"transport_id" transport-id})))
 
+        (== op "remote-call")
+        (do (var model-id   (xtd/nth args 0))
+            (var call-args  (xtd/nth args 1))
+            (var save-output (xtd/nth args 2))
+            (return (substrate/request node
+                                       space-id
+                                       -/ACTION_MODEL_REMOTE_CALL
+                                       [{"space" space-id
+                                         "group" group-id
+                                         "model" model-id
+                                         "args" call-args
+                                         "save_output" save-output}]
+                                       {"transport_id" transport-id})))
+
         :else
         (return nil)))
 
@@ -560,3 +605,20 @@
           (var groups (xt/x:get-key runtime "groups"))
           (xt/x:del-key groups group-id)
           (return nil))))))
+
+(defn.xt remote-call
+  "invokes the remote-call path on a remote page model"
+  {:added "4.1"}
+  [node space-id group-id model-id args save-output opts]
+  (var group (page-core/group-get node space-id group-id))
+  (var remote-spec (xt/x:get-key group "remote"))
+  (var transport-id (xt/x:get-key remote-spec "transport_id"))
+  (return (substrate/request node
+                             space-id
+                             -/ACTION_MODEL_REMOTE_CALL
+                             [{"space" space-id
+                               "group" group-id
+                               "model" model-id
+                               "args" args
+                               "save_output" save-output}]
+                             {"transport_id" transport-id})))

@@ -1,4 +1,4 @@
-(ns xt.db.poc.browser-sharedworker-custom-test
+(ns xt.db.poc.browser-sharedworker-tree-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -65,8 +65,8 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (var node (xt.substrate/node-create {"id" "db-model-server"}))
-            (var schema xt.db.poc.browser-sharedworker-custom-test/Schema)
-            (var lookup xt.db.poc.browser-sharedworker-custom-test/SchemaLookup)
+            (var schema xt.db.poc.browser-sharedworker-tree-test/Schema)
+            (var lookup xt.db.poc.browser-sharedworker-tree-test/SchemaLookup)
             (xt.substrate/set-service node "db/common" {:schema schema
                                                         :lookup lookup})
             (xt.substrate/set-service
@@ -85,12 +85,22 @@
              node
              "room/a"
              "demo"
-             {"pull-view" (xt.db.node.adaptor-base/create-pull-model
+             {"tree-view" (xt.db.node.adaptor-base/create-tree-view-model
                            {"local_id" "db/caching"
                             "remote_id" "db/primary"}
-                           {"pipeline" {}
+                           {"table" "Log"
+                            "select_entry" {"input" []
+                                            "view" {"table" "Log"
+                                                    "type" "select"
+                                                    "query" {}}}
+                            "return_entry" {"input" []
+                                            "view" {"table" "Log"
+                                                    "type" "return"
+                                                    "query" ["id" "message"]}}
+                            "pipeline" {}
                             "options" {}
-                            "defaults" {"args" [["Log"]]}})})
+                            "defaults" {"select_args" []
+                                        "return_args" []}})})
             (return
              (xt.substrate.transport-browser/boot-self
               node
@@ -106,10 +116,10 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
-^{:refer xt.db.poc.browser-sharedworker-custom-test/attach-pull-model
+^{:refer xt.db.poc.browser-sharedworker-tree-test/attach-tree-view-model
   :added "4.1"
-  :setup [(scratch-v0/log-append-public "remote")]}
-(fact "client can open a remote pull model and read its output"
+  :setup [(scratch-v0/log-append-public "tree")]}
+(fact "client can open a remote tree-view model and read its output"
 
   (notify/wait-on [:js 20000]
     (var client (substrate/node-create {"id" "db-model-client"}))
@@ -130,10 +140,10 @@
            "demo"
            {"transport_id" transport-id})
           (fn [group]
-            (var model (xtd/get-in group ["models" "pull-view"]))
+            (var model (xtd/get-in group ["models" "tree-view"]))
             (return
              (promise/x:promise-then
-              (base-page/remote-call client "room/a" "demo" "pull-view" [["Log"]] true)
+              (base-page/remote-call client "room/a" "demo" "tree-view" [[] []] true)
               (fn [res]
                 (return
                  (promise/x:with-delay
@@ -145,27 +155,4 @@
        (repl/notify {"error" err
                      "message" (xt/x:ex-message err)}))))
   => (contains-in
-      {"output" [{"message" "remote"}]}))
-
-^{:refer xt.db.poc.browser-sharedworker-custom-test/supabase-reachable
-  :added "4.1"}
-(fact "browser page can reach supabase rest endpoint"
-
-  (notify/wait-on [:js 20000]
-    (var client (js.net.http-fetch/create
-                  (@! local-min/+config-supabase-anon+)
-                  (xt.net.addon-supabase/middleware-supabase)))
-    (-> (js.net.http-fetch/request-http
-         client
-         {"path" "/rest/v1/Log"
-          "method" "GET"
-          "headers" {"Accept-Profile" "scratch_v0"
-                     "apikey" (@! (-> local-min/+config+ :api :anon-key))}})
-        (promise/x:promise-then
-         (fn [res]
-           (repl/notify (. res ["body"]))))
-        (promise/x:promise-catch
-         (fn [err]
-           (repl/notify err)))))
-  => (contains-in
-      [{"id" string?}]))
+      {"output" [{"message" "tree"}]}))

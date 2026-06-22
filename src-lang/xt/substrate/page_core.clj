@@ -232,6 +232,9 @@
   "runs the remote call"
   {:added "4.1"}
   [node space-id group-id model-id args save-output]
+  (var [group model] (-/model-ensure node space-id group-id model-id))
+  (when (and (-/remote-group? group) -/REMOTE_DISPATCHER)
+    (return (-/REMOTE_DISPATCHER "remote-call" node space-id group-id [model-id args save-output])))
   (var [path context disabled]
        (-/prep-model node space-id group-id model-id {"args" args}))
   (return (-/run-remote context save-output path nil)))

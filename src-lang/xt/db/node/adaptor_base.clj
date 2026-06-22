@@ -258,15 +258,18 @@
          options
          defaults} model)
   (var default-fn-args (or (xt/x:get-key defaults "fn_args") []))
+  (var rpc-handler
+       (fn [context]
+         (var node (. context ["node"]))
+         (var args (. context ["args"]))
+         (var fn-args (or (xt/x:get-idx args 0) default-fn-args))
+         (var impl (substrate/get-service node service-id))
+         (return (impl-common/rpc-call-async impl rpc-spec fn-args))))
   (return
-   {"handler"
-    (fn [context]
-      (var node (. context ["node"]))
-      (var args (. context ["args"]))
-      (var fn-args (or (xt/x:get-idx args 0) default-fn-args))
-      (var impl (substrate/get-service node service-id))
-      (return (impl-common/rpc-call-async impl rpc-spec fn-args)))
-    "pipeline" (xtd/obj-assign-nested {} pipeline)
+   {"handler" rpc-handler
+    "pipeline" (xtd/obj-assign-nested
+                {"remote" {"handler" rpc-handler}}
+                pipeline)
     "defaults" defaults
     "options"  options}))
 
