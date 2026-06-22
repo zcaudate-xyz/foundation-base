@@ -71,7 +71,7 @@
   {:added "4.1"}
   [server]
   (return
-   (page-core/add-group server
+   (base-page/add-group server
                         "room/a"
                         "demo"
                         {"main" {"defaults" {"args" ["hello"]
@@ -81,8 +81,7 @@
                                  "handler" (fn [ctx]
                                              (var data (xtd/get-in ctx ["input" "data"]))
                                              (return {"value" (xt/x:first data)}))
-                                 "trigger" true
-                                 "options" {}}})))
+                                 "options" {"trigger" true}}})))
 
 (defn.js send-and-receive
   "sends a request from client to server and pumps captured frames"
@@ -220,7 +219,7 @@
                    (var snapshot (xt/x:get-key response "models"))
                    (page-proxy/create-proxy-group client "room/a" "demo" snapshot
                                                    {"transport_id" "server-conn"})
-                   (return (page-core/group-get client "room/a" "demo"))))))))
+                   (return (base-page/group-get client "room/a" "demo"))))))))
         (promise/x:promise-then
          (fn [group]
            (var model (xtd/get-in group ["models" "main"]))
@@ -263,7 +262,7 @@
         (promise/x:promise-then
          (fn [_]
            (repl/notify
-            {"group"       (page-core/group-get client
+            {"group"       (base-page/group-get client
                                                 "room/a" "demo")
              "output_subs" (router/list-subscriptions server
                                                       "room/a" page-proxy/SIGNAL_OUTPUT)

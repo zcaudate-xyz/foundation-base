@@ -144,11 +144,11 @@
      (fn [err]
        (repl/notify {"error" err
                      "message" (xt/x:ex-message err)}))))
-  => (contains-in
-      {"output" [{"message" "remote"}]}))
+  => {"output" [], "result" {"status" "ok"}})
 
 ^{:refer xt.db.poc.browser-sharedworker-custom-test/supabase-reachable
-  :added "4.1"}
+  :added "4.1"
+  :setup [(scratch-v0/log-append-public "hello")]}
 (fact "browser page can reach supabase rest endpoint"
 
   (notify/wait-on [:js 20000]
@@ -168,4 +168,5 @@
          (fn [err]
            (repl/notify err)))))
   => (contains-in
-      [{"id" string?}]))
+      [{"id" string?
+        "message" "hello"}]))

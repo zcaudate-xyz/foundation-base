@@ -51,8 +51,7 @@
                 "handler" (fn [ctx]
                             (var data (xt.lang.common-data/get-in ctx ["input"]))
                             (return {"value" (xt.lang.spec-base/x:first data)}))
-                "trigger" true
-                "options" {}}})
+                "options" {"trigger" true}}})
       (xt.substrate.transport-browser/boot-self
        node
        {"transport_id" "host"

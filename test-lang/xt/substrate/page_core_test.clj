@@ -677,15 +677,15 @@
      {"always" {"handler" (fn [space args request node]
                             (return {"args" args}))
                 "defaults" {"args" []}
-                "trigger" true}
+                "options" {"trigger" true}}
       "match" {"handler" (fn [space args request node]
                            (return {"args" args}))
                "defaults" {"args" []}
-               "trigger" "go"}
+               "options" {"trigger" "go"}}
       "skip" {"handler" (fn [space args request node]
                           (return {"args" args}))
               "defaults" {"args" []}
-              "trigger" "other"}})
+              "options" {"trigger" "other"}}})
     (var group (page-core/group-ensure node "space/a" "page"))
     (page-core/trigger-group-raw node "space/a" group "go" {"value" 9}))
   => ["always" "match"])
@@ -702,15 +702,15 @@
      {"always" {"handler" (fn [space args request node]
                             (return {"args" args}))
                 "defaults" {"args" []}
-                "trigger" true}
+                "options" {"trigger" true}}
       "match" {"handler" (fn [space args request node]
                            (return {"args" args}))
                "defaults" {"args" []}
-               "trigger" "go"}
+               "options" {"trigger" "go"}}
       "skip" {"handler" (fn [space args request node]
                           (return {"args" args}))
               "defaults" {"args" []}
-              "trigger" "other"}})
+              "options" {"trigger" "other"}}})
     (page-core/trigger-group node "space/a" "page" "go" {"value" 9}))
   => ["always" "match"])
 
@@ -725,7 +725,7 @@
      "page"
      {"ping" {"handler" (fn [ctx] (return {"triggered" true}))
               "defaults" {"args" []}
-              "trigger" "go"}})
+              "options" {"trigger" "go"}}})
     (-> (page-core/trigger-model node "space/a" "page" "ping" "go" {"value" 9})
         (promise/x:promise-then
          (fn [acc]
@@ -744,7 +744,7 @@
      {"ping" {"handler" (fn [space args request node]
                           (return {"args" args}))
               "defaults" {"args" []}
-              "trigger" "go"}})
+              "options" {"trigger" "go"}}})
     (page-core/add-group-attach
      node
      "space/a"
@@ -752,7 +752,7 @@
      {"pong" {"handler" (fn [space args request node]
                           (return {"args" args}))
               "defaults" {"args" []}
-              "trigger" "go"}})
+              "options" {"trigger" "go"}}})
     (page-core/trigger-all node "space/a" "go" {}))
   => {"page" ["ping"]
       "other" ["pong"]})

@@ -365,10 +365,6 @@
   (var pipeline (xt/x:get-key opts "pipeline"))
   (var defaults (xt/x:get-key opts "defaults"))
   (var options  (xt/x:get-key opts "options"))
-  (var trigger  (xt/x:get-key opts "trigger"))
-  (when (xt/x:not-nil? trigger)
-    (:= options (xtd/obj-assign {"trigger" trigger}
-                                (or options {}))))
   (var model
        (event-model/create-model
         nil
