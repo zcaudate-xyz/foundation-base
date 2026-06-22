@@ -76,11 +76,11 @@
                    "room/a"
                    "demo"
                    {"entry" (xt.db.node.adaptor-base/create-pull-model
-                             tree
                              {"local_id" "db/caching"
-                              "remote_id" "db/primary"
-                              "defaults" {"args" []}}
-                             {})})
+                              "remote_id" "db/primary"}
+                             {"pipeline" {}
+                              "options" {}
+                              "defaults" {"args" [tree]}})})
                   (. port (postMessage {"type" "impl-initialized"}))
                   (return
                    (xt.substrate.transport-browser/boot-self

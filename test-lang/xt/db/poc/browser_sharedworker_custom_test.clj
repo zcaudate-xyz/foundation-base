@@ -1,14 +1,12 @@
-(ns xt.db.poc.browser-adaptor-test
+(ns xt.db.poc.browser-sharedworker-custom-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
+            [postgres.core :as pg]
             [xt.substrate]
-            [xt.substrate.page-core]
-            [xt.substrate.page-remote]
             [xt.substrate.transport-browser]
-            [xt.db.system.main]
             [xt.db.node.adaptor-base]))
 
 (do
@@ -33,7 +31,23 @@
   {:runtime :chromedriver.instance
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [js.worker.link :as worker-link]]})
+             [js.worker.link :as worker-link]
+             [xt.substrate :as substrate]
+             [xt.substrate.transport-browser :as browser-transport]]})
+
+(def.js Schema
+  (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
+
+(def.js SchemaLookup
+  (@! (pg/bind-app (pg/app "scratch_v0"))))
+
+(fact:global
+ {:setup [(l/rt:restart :js)
+          (l/rt:setup :postgres)
+          (l/rt:scaffold-imports :js)
+          (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
+                             4000)]
+  :teardown [(l/rt:stop)]})
 
 (def +sharedworker-script+
   (l/emit-script
@@ -43,47 +57,28 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (. port (postMessage {"type" "worker-connected"}))
-            
-            (var schema {"Log" {"id" {"ident" "id"
-                                       "type" "uuid"
-                                       "primary" true
-                                       "order" 0}
-                                "message" {"ident" "message"
-                                           "type" "text"
-                                           "order" 1}}})
-            (var lookup {"Log" {"position" 0}})
-            (var tree ["Log"])
             (. (xt.db.node.adaptor-base/init-db
                 (xt.substrate/node-create {"id" "db-model-server"})
                 {"primary" {"type" "supabase"
                             "defaults" (@! local-min/+config-supabase-anon+)}
                  "caching" {"type" "sqlite"
                             "defaults" {}}}
-                schema
-                lookup)
+                xt.db.poc.browser-sharedworker-custom-test/Schema
+                xt.db.poc.browser-sharedworker-custom-test/SchemaLookup)
                (then
                 (fn [node]
                   (. port (postMessage {"type" "primary-connected"}))
                   (. port (postMessage {"type" "sqlite-connected"}))
-                  (xt.substrate.page-remote/install node)
-                  (xt.substrate.page-core/add-group-attach
+                  (xt.substrate/register-handler
                    node
-                   "room/a"
-                   "demo"
-                   {"entry" (xt.db.node.adaptor-base/create-pull-model
-                             {"local_id" "db/caching"
-                              "remote_id" "db/primary"}
-                             {"pipeline" {}
-                              "options" {}
-                              "defaults" {"args" [tree]}})})
-                  (. port (postMessage {"type" "impl-initialized"}))
+                   "custom-pull-view"
+                   xt.db.node.adaptor-base/custom-pull-view
+                   {})
                   (return
                    (xt.substrate.transport-browser/boot-self
                     node
                     {"transport_id" "host"
-                     "target" port
-                     "ready" {"signal" "ready"
-                              "worker" "db-model-server-sqlite"}}))))
+                     "target" port}))))
                (catch
                    (fn [err]
                      (. port (postMessage {"type" "error"
@@ -97,20 +92,10 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
-
-
-(fact:global
- {:setup [(l/rt:restart :js)
-          (l/rt:setup :postgres)
-          (l/rt:scaffold-imports :js)
-          (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
-                             4000)]
-  :teardown [(l/rt:stop)]})
-
-^{:refer xt.db.node.adaptor-base/init-db
+^{:refer xt.db.poc.browser-sharedworker-custom-test/custom-pull-view
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
-(fact "debug SharedWorker sqlite init"
+(fact "client can configure a custom pull view via a server-side handler"
 
   (notify/wait-on [:js 15000]
     (var messages [])
@@ -123,22 +108,54 @@
               "message"
               (fn [event]
                 (var data (. event ["data"]))
-                (. messages (push {"kind" "message" "data" data}))
+                (. messages (push data))
                 (var type (xt/x:get-key data "type"))
-                (when (or (== type "impl-initialized")
-                          (== type "error"))
-                  (repl/notify messages)))
+                (when (== type "error")
+                  (repl/notify {"messages" messages
+                                "error" data}))
+                (when (== type "sqlite-connected")
+                  (var client (substrate/node-create {"id" "db-model-client"}))
+                  (. (browser-transport/connect-sharedworker
+                      client
+                      {"transport_id" "worker"
+                       "source" shared
+                       "wait_ready" false})
+                     (then
+                      (fn [conn]
+                        (return
+                         (substrate/request
+                          client
+                          "room/a"
+                          "custom-pull-view"
+                          [{"space_id" "room/a"
+                            "group_id" "demo"
+                            "model_id" "custom-view"
+                            "service" {"local_id" "db/caching"
+                                       "remote_id" "db/primary"}}
+                           {"pipeline" {}
+                            "options" {}
+                            "defaults" {"args" [["Log"]]}}]
+                          {"transport_id" "worker"}))))
+                     (then
+                      (fn [result]
+                        (repl/notify result)))
+                     (catch
+                         (fn [err]
+                           (repl/notify {"error" err
+                                         "message" (. err ["message"])}))))))
               false))
     (. shared (addEventListener
                "error"
                (fn [event]
-                 (. messages (push {"kind" "error" "message" (. event ["message"])}))
-                 (repl/notify messages))
+                 (. messages (push {"type" "sharedworker-error"
+                                   "message" (. event ["message"])}))
+                 (repl/notify {"messages" messages
+                               "error" event}))
                false))
     (. (!:G URL) (revokeObjectURL url))
     (return shared))
   => (contains-in
-      [{"kind" "message" "data" {"type" "worker-connected"}}
-       {"kind" "message" "data" {"type" "primary-connected"}}
-       {"kind" "message" "data" {"type" "sqlite-connected"}}
-       {"kind" "message" "data" {"type" "impl-initialized"}}]))
+      {"status" "attached"
+       "space" "room/a"
+       "group" "demo"
+       "model" "custom-view"}))

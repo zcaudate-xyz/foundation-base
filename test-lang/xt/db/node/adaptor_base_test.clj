@@ -31,14 +31,15 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.node.adaptor-base :as adaptor]
              [xt.db.system.impl-common :as impl-common]
-             [xt.substrate :as substrate]]})
+             [xt.substrate :as substrate]
+             [xt.net.http-fetch :as fetch]
+             [js.net.http-fetch :as js-fetch]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
 
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
-
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -143,6 +144,126 @@
            (repl/notify out)))))
   => (contains-in {"message" "hello"}))
 
+^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"}
+(fact "call-rpc-handler routes rpc args through a named service"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-db {"primary" {"type" "postgres"
+                                     "defaults" (@! (local-min/+config+ :db))}
+                          "caching" {"type" "sqlite"
+                                     "defaults" {"filename" ":memory:"}}}
+                         -/Schema
+                         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (return
+            (adaptor/call-rpc-handler
+             nil
+             ["db/primary"
+              {"input" [{"symbol" "i_message" "type" "text"}]
+               "return" "jsonb"
+               "schema" "scratch_v0"
+               "id" "log_append_public"
+               "flags" {}}
+              ["hello"]]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => (contains-in {"message" "hello"}))
+
+^{:refer xt.db.node.adaptor-base/call-fetch-handler :added "4.1"}
+(fact "call-fetch-handler routes fetch args through a named http service"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (promise/x:promise-run)
+        (promise/x:promise-then
+         (fn [node]
+           (substrate/set-service
+            node
+            "http/client"
+            (js-fetch/create
+             {:headers {"apikey" (@! (-> local-min/+config+ :api :anon-key))}
+              :host (@! (-> local-min/+config+ :api :hostname))
+              :port (@! (-> local-min/+config+ :api :port))}))
+           (return node)))
+        (promise/x:promise-then
+         (fn [node]
+           (return
+            (adaptor/call-fetch-handler
+             nil
+             ["http/client" {"path" "/auth/v1/health"}]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify (. out status))))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => 200)
+
+^{:refer xt.db.node.adaptor-base/create-pull-model :added "4.1"}
+(fact "create-pull-model builds a page model spec with local and remote handlers"
+
+  (!.js
+   (var spec (adaptor/create-pull-model
+              {"local_id" "db/caching"
+               "remote_id" "db/primary"}
+              {"pipeline" {}
+               "options" {}
+               "defaults" {"args" [["Log"]]}}))
+   {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
+    "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
+    "defaults" (. spec ["defaults"])})
+  => {"has-main" true
+      "has-remote" true
+      "defaults" {"args" [["Log"]]}})
+
+^{:refer xt.db.node.adaptor-base/custom-pull-view :added "4.1"}
+(fact "custom-pull-view attaches a pull-view model to the page runtime"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-db {"primary" {"type" "postgres"
+                                     "defaults" (@! (local-min/+config+ :db))}
+                          "caching" {"type" "sqlite"
+                                     "defaults" {"filename" ":memory:"}}}
+                         -/Schema
+                         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (return
+            (adaptor/custom-pull-view
+             nil
+             [{"space_id" "room/a"
+               "group_id" "demo"
+               "model_id" "custom-view"
+               "service" {"local_id" "db/caching"
+                          "remote_id" "db/primary"}}
+              {"pipeline" {}
+               "options" {}
+               "defaults" {"args" [["Log"]]}}]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => (contains-in
+      {"status" "attached"
+       "space" "room/a"
+       "group" "demo"
+       "model" "custom-view"}))
+
 ^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
 
 
@@ -156,13 +277,3 @@
                             "services" {}})
     {}))
   => nil)
-
-
-^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.adaptor-base/call-fetch-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.adaptor-base/_ :added "4.1"}
-(fact "TODO")

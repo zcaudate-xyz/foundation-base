@@ -140,11 +140,15 @@
          group-id
          model-id
          service}   node-args)
-  (return (page-core/add-group-attach
-           node
-           space-id
-           group-id
-           {model-id (-/create-pull-model service model-args)})))
+  (page-core/add-group-attach
+   node
+   space-id
+   group-id
+   {model-id (-/create-pull-model service model-args)})
+  (return {"status" "attached"
+           "space" space-id
+           "group" group-id
+           "model" model-id}))
 
 
 ;;
