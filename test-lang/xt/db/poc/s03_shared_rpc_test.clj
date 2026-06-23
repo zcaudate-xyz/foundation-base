@@ -1,16 +1,10 @@
-(ns xt.db.poc.browser-sharedworker-rpc-test
+(ns xt.db.poc.s03-shared-rpc-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
-            [postgres.core :as pg]
-            [xt.substrate]
-            [xt.substrate.transport-browser]
-            [xt.substrate.page-proxy]
-            [xt.substrate.page-core]
-            [xt.event.base-model]
-            [xt.db.node.adaptor-base]))
+            [postgres.core :as pg]))
 
 (do
   (l/script- :postgres
@@ -41,7 +35,8 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
-             [xt.substrate.page-proxy :as page-proxy]]})
+             [xt.substrate.page-proxy :as page-proxy]
+             [xt.db.node.adaptor-base :as adaptor-base]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -52,7 +47,6 @@
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
-          (l/rt:scaffold-imports :js)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
   :teardown [(l/rt:stop)]})
@@ -67,16 +61,27 @@
             (var node (xt.substrate/node-create {"id" "db-model-server"}))
             (var schema xt.db.poc.browser-sharedworker-rpc-test/Schema)
             (var lookup xt.db.poc.browser-sharedworker-rpc-test/SchemaLookup)
-            (xt.substrate/set-service node "db/common" {:schema schema
-                                                        :lookup lookup})
+
+            ;;
+            ;;
+            (xt.db.node.adaptor-base/init-adaptor-handler
+             node
+             {"primary" {"type" "supabase"
+                         "defaults" (@! local-min/+config-supabase-anon+)}
+              "caching" {"type" "sqlite"
+                         "defaults" {"filename" ":memory:"}}
+              schema
+              lookup})
+
+            (xt.net.addon-supabase/middleware-supabase)
+            
             (xt.substrate/set-service
              node "db/primary"
              (xt.db.system.impl-supabase/impl-supabase
               (js.net.http-fetch/create
                (@! local-min/+config-supabase-anon+)
-               (xt.net.addon-supabase/middleware-supabase))
-              schema
-              lookup))
+               )
+              ))
             (xt.substrate/set-service
              node "db/caching"
              (xt.db.system.impl-memory/impl-memory schema lookup))

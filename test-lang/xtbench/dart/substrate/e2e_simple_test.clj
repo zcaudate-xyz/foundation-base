@@ -48,11 +48,11 @@
   (notify/wait-on :js
     (-> (substrate/node-create
          {"handlers"
-          {"fn/init-db"
+          {"@xt.db/init-adaptor"
            {"fn" (fn [space args request node]
                    (substrate/set-service node "db.primary"))}}})
         (substrate/request nil
-                           "fn/init-db"
+                           "@xt.db/init-adaptor"
                            []
                            {})
         (promise/x:promise-then

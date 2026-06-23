@@ -68,38 +68,28 @@
        (fn [space args request node]
          (return {"echo" args}))
        nil)
-      (. (xt.db.node.adaptor-base/init-db
-          node
-          {"primary" {"type" "memory" "defaults" {}}
-           "caching" {"type" "memory" "defaults" {}}}
-          xt.db.poc.browser-webworker-custom-test/Schema
-          xt.db.poc.browser-webworker-custom-test/SchemaLookup)
+      (var group (xt.substrate.page-core/add-group
+                  node
+                  "room/a"
+                  "demo"
+                  {"main" {"defaults" {"args" ["hello"]
+                                       "output" {}
+                                       "process" (fn [x] (return x))}
+                           "handler" (fn [ctx]
+                                       (var data (xt.lang.common-data/get-in ctx ["input" "data"]))
+                                       (return {"value" (xt.lang.spec-base/x:first data)}))
+                           "options" {"trigger" true}}}))
+      (. (xt.lang.spec-base/x:get-key group "init")
          (then
-          (fn [node]
-            (var group (xt.substrate.page-core/add-group
-                        node
-                        "room/a"
-                        "demo"
-                        {"main" {"defaults" ["hello"]
-                                 "handler" (fn [ctx]
-                                             (var data (xt.lang.common-data/get-in ctx ["input" "data"]))
-                                             (return {"value" (xt.lang.spec-base/x:first data)}))
-                                 "options" {}}}))
+          (fn [_]
             (return
-             (. (xt.lang.spec-base/x:get-key group "init")
-                (then
-                 (fn [_]
-                   (return
-                    (xt.substrate.transport-browser/boot-self
-                     node
-                     {"transport_id" "host"
-                      "target" self
-                      "ready" {"signal" "ready"
-                               "transport" "browser"
-                               "worker" "db-model-server"}}))))))))
-         (catch
-             (fn [err]
-               (return err)))))
+             (xt.substrate.transport-browser/boot-self
+              node
+              {"transport_id" "host"
+               "target" self
+               "ready" {"signal" "ready"
+                        "transport" "browser"
+                        "worker" "db-model-server"}}))))))
    {:lang :js
     :layout :full
     :emit {:override {"@sqlite.org/sqlite-wasm"
@@ -145,13 +135,12 @@
                                             {"echo" echo
                                              "groups" groups
                                              "has_group" (xt/x:not-nil? group)
-                                             "model" model
                                              "output" (event-model/get-current model nil)})))))))))))))
                    (fn [err]
                        (repl/notify {"error" err
                                      "message" (xt/x:ex-message err)}))))
   => (contains-in
-      [{"echo" {"echo" [1 2 3]}
-        "groups" {"demo" {"models" ["main"]}}
-        "has_group" true
-        "output" {"value" "hello"}}]))
+      {"echo" {"echo" [[1 2 3]]}
+       "groups" {"demo" {"models" ["main"]}}
+       "has_group" true
+       "output" {"value" "hello"}}))

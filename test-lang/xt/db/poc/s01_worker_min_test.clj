@@ -1,4 +1,4 @@
-(ns xt.db.poc.browser-webworker-min-test
+(ns xt.db.poc.s01-worker-min-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -49,7 +49,7 @@
                             "output" {}
                             "process" (fn [x] (return x))}
                 "handler" (fn [ctx]
-                            (var data (xt.lang.common-data/get-in ctx ["input"]))
+                            (var data (xt.lang.common-data/get-in ctx ["input" "data"]))
                             (return {"value" (xt.lang.spec-base/x:first data)}))
                 "options" {"trigger" true}}})
       (xt.substrate.transport-browser/boot-self
@@ -99,5 +99,5 @@
        (repl/notify {"error" err
                      "message" (xt/x:ex-message err)}))))
   => (contains-in
-      [{"groups" {"demo" {"models" ["main"]}}
-        "output" {"value" "hello"}}]))
+      {"groups" {"demo" {"models" ["main"]}}
+       "output" {"value" "hello"}}))

@@ -60,37 +60,33 @@
 (def +sharedworker-script+
   (l/emit-script
    '(do
+      (var node (xt.substrate/node-create {"id" "db-model-server"}))
+      (var schema xt.db.poc.browser-sharedworker-custom-test/Schema)
+      (var lookup xt.db.poc.browser-sharedworker-custom-test/SchemaLookup)
+      (xt.substrate/set-service
+       node "db/common"
+       {:schema schema
+        :lookup lookup
+        :primary (xt.db.system.impl-supabase/impl-supabase
+                  (js.net.http-fetch/create
+                   (@! local-min/+config-supabase-anon+)
+                   (xt.net.addon-supabase/middleware-supabase))
+                  schema
+                  lookup)
+        :caching (xt.db.system.impl-memory/impl-memory schema lookup)})
+      (xt.substrate/register-handler
+       node "@xt.db/init-adaptor"
+       xt.db.node.adaptor-base/init-adaptor-handler
+       nil)
+      (xt.substrate/register-handler
+       node "@/attach-pull-model"
+       xt.db.node.adaptor-base/attach-pull-model
+       nil)
+      (xt.substrate.page-proxy/install node)
       (:= (. globalThis ["onconnect"])
           (fn [e]
             (var port (. e ["ports"] [0]))
             (. port (start))
-            (var node (xt.substrate/node-create {"id" "db-model-server"}))
-            (var schema xt.db.poc.browser-sharedworker-custom-test/Schema)
-            (var lookup xt.db.poc.browser-sharedworker-custom-test/SchemaLookup)
-            (xt.substrate/set-service node "db/common" {:schema schema
-                                                        :lookup lookup})
-            (xt.substrate/set-service
-             node "db/primary"
-             (xt.db.system.impl-supabase/impl-supabase
-              (js.net.http-fetch/create
-               (@! local-min/+config-supabase-anon+)
-               (xt.net.addon-supabase/middleware-supabase))
-              schema
-              lookup))
-            (xt.substrate/set-service
-             node "db/caching"
-             (xt.db.system.impl-memory/impl-memory schema lookup))
-            (xt.substrate.page-proxy/install node)
-            (xt.substrate.page-core/add-group-attach
-             node
-             "room/a"
-             "demo"
-             {"pull-view" (xt.db.node.adaptor-base/create-pull-model
-                           {"local_id" "db/caching"
-                            "remote_id" "db/primary"}
-                           {"pipeline" {}
-                            "options" {}
-                            "defaults" {"args" [["Log"]]}})})
             (return
              (xt.substrate.transport-browser/boot-self
               node
@@ -124,27 +120,56 @@
         (var transport-id (. conn ["transport_id"]))
         (return
          (promise/x:promise-then
-          (page-proxy/open-proxy-group
-           client
-           "room/a"
-           "demo"
-           {"transport_id" transport-id})
-          (fn [group]
-            (var model (xtd/get-in group ["models" "pull-view"]))
+          (substrate/request client
+                             "room/a"
+                             "@xt.db/init-adaptor"
+                             []
+                             {"transport_id" transport-id})
+          (fn [init-res]
             (return
              (promise/x:promise-then
-              (base-page/remote-call client "room/a" "demo" "pull-view" [["Log"]] true)
-              (fn [res]
+              (substrate/request client
+                                 "room/a"
+                                 "@/attach-pull-model"
+                                 [{"space_id" "room/a"
+                                   "group_id" "demo"
+                                   "model_id" "pull-view"
+                                   "service" {"caching_id" "db/caching"
+                                              "primary_id" "db/primary"}}
+                                  {"pipeline" {}
+                                   "options" {}
+                                   "defaults" {"args" [["Log"]]}}]
+                                 {"transport_id" transport-id})
+              (fn [group-res]
                 (return
-                 (promise/x:with-delay
-                  1000
-                  (fn []
-                    (repl/notify {"result" res
-                                  "output" (event-model/get-current model nil)}))))))))))))
+                 (promise/x:promise-then
+                  (page-proxy/open-proxy-group
+                   client
+                   "room/a"
+                   "demo"
+                   {"transport_id" transport-id})
+                  (fn [group]
+                    (var model (xtd/get-in group ["models" "pull-view"]))
+                    (return
+                     (promise/x:promise-then
+                      (base-page/remote-call client "room/a" "demo" "pull-view" [["Log"]] true)
+                      (fn [res]
+                        (return
+                         (promise/x:with-delay
+                          1000
+                          (fn []
+                            (repl/notify {"init" init-res
+                                          "group" group-res
+                                          "result" res
+                                          "output" (event-model/get-current model nil)}))))))))))))))))))
      (fn [err]
        (repl/notify {"error" err
                      "message" (xt/x:ex-message err)}))))
-  => {"output" [], "result" {"status" "ok"}})
+  => (contains-in
+      {"init" {"status" "ok"}
+       "group" {"status" "attached"}
+       "output" [{"message" "remote"}]
+       "result" {"status" "ok"}}))
 
 ^{:refer xt.db.poc.browser-sharedworker-custom-test/supabase-reachable
   :added "4.1"

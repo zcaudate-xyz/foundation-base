@@ -171,7 +171,7 @@
          {"pred" nil,
           "meta" {"listener/id" "@/page", "listener/type" "model"}}}}]))
 
-^{:refer xt.db.substrate/init-db-services :added "4.1"}
+^{:refer xt.db.substrate/init-adaptor-main-services :added "4.1"}
 (fact "initializes db/primary and db/caching services from node service config"
 
   (notify/wait-on :js
@@ -190,7 +190,7 @@
             "db/caching"
             {"kind" "sqlite"
              "instance" {"filename" ":memory:"}}}}))
-    (db-helper/init-db-services node)
+    (db-helper/init-adaptor-main-services node)
     (repl/notify
      {"primary_type" (xt/x:get-key (event-node/get-service node "db/primary") "::")
       "caching_type" (xt/x:get-key (event-node/get-service node "db/caching") "::")

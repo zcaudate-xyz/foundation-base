@@ -13,7 +13,8 @@
              [xt.substrate :as substrate]
              [xt.substrate.base-router :as router]
              [xt.substrate.page-core :as base-page]
-             [xt.substrate.page-proxy :as page-proxy]]})
+             [xt.substrate.page-proxy :as page-proxy]
+             [xt.db.node.adaptor-base :as adaptor]]})
 
 (defn.js make-server-node
   "creates a bare server node"
@@ -271,3 +272,40 @@
   => {"group" nil
       "output_subs" []
       "input_subs" []})
+
+^{:refer xt.substrate.page-proxy/init-adaptor-main-handler :added "4.1"}
+(fact "client can call @xt.db/init-adaptor-handler on the server through the proxy"
+
+  (notify/wait-on :js
+    (var server (-/make-server-node))
+    (var client (-/make-client-node))
+    (var schema {"Log" {"id" {"ident" "id"
+                               "type" "uuid"
+                               "primary" true
+                               "order" 0}
+                        "message" {"ident" "message"
+                                   "type" "text"
+                                   "order" 1}}})
+    (var lookup {"Log" {"position" 0}})
+    (substrate/set-service server "db/common" {"schema" schema
+                                                "lookup" lookup})
+    (adaptor/init-handlers server {})
+    (page-proxy/install server)
+    (page-proxy/install client)
+    (-> (-/link-nodes server client)
+        (promise/x:promise-then
+         (fn [linked]
+           (return
+            (-/send-and-receive linked server client
+                                "room/a" "@xt.db/init-adaptor"
+                                [{"primary" {"type" "memory" "defaults" {}}
+                                  "caching" {"type" "memory" "defaults" {}}}]))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify {"init" out
+                         "primary" (substrate/get-service server "db/primary")
+                         "caching" (substrate/get-service server "db/caching")})))))
+  => (contains-in
+      {"init" {"status" "ok"}
+       "primary" {"::" "xt.db.system.impl_memory/ImplMemory"}
+       "caching" {"::" "xt.db.system.impl_memory/ImplMemory"}}))

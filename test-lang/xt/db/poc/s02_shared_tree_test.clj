@@ -1,16 +1,10 @@
-(ns xt.db.poc.browser-sharedworker-tree-test
+(ns xt.db.poc.s02-shared-tree-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
-            [postgres.core :as pg]
-            [xt.substrate]
-            [xt.substrate.transport-browser]
-            [xt.substrate.page-proxy]
-            [xt.substrate.page-core]
-            [xt.event.base-model]
-            [xt.db.node.adaptor-base]))
+            [postgres.core :as pg]))
 
 (do
   (l/script- :postgres
@@ -67,6 +61,10 @@
             (var node (xt.substrate/node-create {"id" "db-model-server"}))
             (var schema xt.db.poc.browser-sharedworker-tree-test/Schema)
             (var lookup xt.db.poc.browser-sharedworker-tree-test/SchemaLookup)
+
+            ;;
+            ;; SETUP SERVICES EXPANDED
+            ;;
             (xt.substrate/set-service node "db/common" {:schema schema
                                                         :lookup lookup})
             (xt.substrate/set-service
@@ -81,13 +79,17 @@
              node "db/caching"
              (xt.db.system.impl-memory/impl-memory schema lookup))
             (xt.substrate.page-proxy/install node)
+            
+            ;;
+            ;; SETUP GROUP WITH MODEL
+            ;;
             (xt.substrate.page-core/add-group-attach
              node
              "room/a"
              "demo"
              {"tree-view" (xt.db.node.adaptor-base/create-tree-view-model
-                           {"local_id" "db/caching"
-                            "remote_id" "db/primary"}
+                           {"caching_id         " "db/caching"
+                            "primary_id" "db/primary"}
                            {"table" "Log"
                             "select_entry" {"input" []
                                             "view" {"table" "Log"
@@ -124,35 +126,35 @@
   (notify/wait-on [:js 20000]
     (var client (substrate/node-create {"id" "db-model-client"}))
     (page-proxy/install client)
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      (browser-transport/connect-sharedworker
-       client
-       {"transport_id" "worker"
-        "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
-      (fn [conn]
-        (var transport-id (. conn ["transport_id"]))
-        (return
-         (promise/x:promise-then
-          (page-proxy/open-proxy-group
-           client
-           "room/a"
-           "demo"
-           {"transport_id" transport-id})
-          (fn [group]
-            (var model (xtd/get-in group ["models" "tree-view"]))
-            (return
-             (promise/x:promise-then
-              (base-page/remote-call client "room/a" "demo" "tree-view" [[] []] true)
-              (fn [res]
-                (return
-                 (promise/x:with-delay
-                  1000
-                  (fn []
-                    (repl/notify {"result" res
-                                  "output" (event-model/get-current model nil)}))))))))))))
-     (fn [err]
-       (repl/notify {"error" err
-                     "message" (xt/x:ex-message err)}))))
+    (-> (browser-transport/connect-sharedworker
+         client
+         {"transport_id" "worker"
+          "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
+        (promise/x:promise-then
+         (fn [conn]
+           (var transport-id (. conn ["transport_id"]))
+           (return
+            (page-proxy/open-proxy-group
+             client
+             "room/a"
+             "demo"
+             {"transport_id" transport-id}))))
+        (promise/x:promise-then
+         (fn [group]
+           (var model (xtd/get-in group ["models" "tree-view"]))
+           (return
+            (base-page/remote-call client "room/a" "demo" "tree-view" [[] []] true))))
+        (promise/x:promise-then
+         (fn [res]
+           (return
+            (promise/x:with-delay
+             1000
+             (fn []
+               (repl/notify {"result" res
+                             "output" (event-model/get-current model nil)}))))))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" err
+                         "message" (xt/x:ex-message err)})))))
   => (contains-in
       {"output" [{"message" "tree"}]}))

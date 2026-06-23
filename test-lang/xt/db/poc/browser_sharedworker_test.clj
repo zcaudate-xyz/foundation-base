@@ -58,7 +58,7 @@
             (. port (start))
             (. port (postMessage {"type" "worker-connected"}))
             (var tree ["Log"])
-            (. (xt.db.node.adaptor-base/init-db
+            (. (xt.db.node.adaptor-base/init-adaptor-handler
                 (xt.substrate/node-create {"id" "db-model-server"})
                 {"primary" {"type" "supabase"
                             "defaults" (@! local-min/+config-supabase-anon+)}
@@ -76,8 +76,8 @@
                    "room/a"
                    "demo"
                    {"entry" (xt.db.node.adaptor-base/create-pull-model
-                             {"local_id" "db/caching"
-                              "remote_id" "db/primary"}
+                             {"caching_id" "db/caching"
+                              "primary_id" "db/primary"}
                              {"pipeline" {}
                               "options" {}
                               "defaults" {"args" [tree]}})})
@@ -103,7 +103,7 @@
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
 
-^{:refer xt.db.node.adaptor-base/init-db
+^{:refer xt.db.node.adaptor-base/init-adaptor-handler
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "debug SharedWorker sqlite init"
