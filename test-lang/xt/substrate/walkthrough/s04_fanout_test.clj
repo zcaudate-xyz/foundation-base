@@ -1,4 +1,4 @@
-(ns xt.substrate.walkthrough-s04-fanout-test
+(ns xt.substrate.walkthrough.s04-fanout-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -16,7 +16,7 @@
   {:setup [(l/rt:restart)]
    :teardown [(l/rt:stop)]})
 
-^{:refer xt.substrate.transport-memory/memory-network :added "4.1"}
+^{:refer xt.substrate.walkthrough.s04-fanout-test/demo-001-memory-network}
 (fact "a shared memory network supports stream fanout across multiple transports"
 
   (notify/wait-on :js

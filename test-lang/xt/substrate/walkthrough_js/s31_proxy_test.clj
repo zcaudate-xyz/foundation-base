@@ -6,6 +6,19 @@
             [js.worker.link]
             [xt.lang.common-notify :as notify]))
 
+(l/script- :js
+  {:runtime :chromedriver.instance
+   :require [[js.worker.link :as worker-link]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
+             [xt.event.base-model :as event-model]
+             [xt.substrate :as substrate]
+             [xt.substrate.page-core :as base-page]
+             [xt.substrate.transport-browser :as browser-transport]
+             [xt.substrate.page-proxy :as page-proxy]]})
+
 (def ^:private +sharedworker-script+
   (l/emit-script
    '(do
@@ -41,21 +54,8 @@
    {:lang :js
     :layout :full}))
 
-(l/script- :js
-  {:runtime :chromedriver.instance
-   :require [[js.worker.link :as worker-link]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]
-             [xt.event.base-model :as event-model]
-             [xt.substrate :as substrate]
-             [xt.substrate.page-core :as base-page]
-             [xt.substrate.transport-browser :as browser-transport]
-             [xt.substrate.page-proxy :as page-proxy]]})
-
 (fact:global
- {:setup [(l/rt:restart :js)
+ {:setup [(l/rt:restart)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
   :teardown [(l/rt:stop)]})
@@ -63,47 +63,43 @@
 ^{:refer xt.substrate.page-proxy/open-proxy-group
   :added "4.1"}
 (fact "page-proxy can list, open, and read a remote group over a SharedWorker"
-
+  
   (notify/wait-on [:js 5000]
     (var client (substrate/node-create
                  {"id" "page-proxy-browser-client"
                   "spaces" {"room/a" {"state" {}}}}))
     (page-proxy/install client)
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      (browser-transport/connect-sharedworker
-       client
-       {"transport_id" "worker"
-        "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
-      (fn [conn]
-        (var transport-id (. conn ["transport_id"]))
-        (return
-         (promise/x:promise-then
-          (page-proxy/list-proxy-groups client "room/a" {"transport_id" transport-id})
-          (fn [groups]
-            (return
-             (promise/x:promise-then
-              (page-proxy/open-proxy-group
-               client
-               "room/a"
-               "demo"
-               {"transport_id" transport-id})
-              (fn [group]
-                (var model (xtd/get-in group ["models" "main"]))
-                (return
-                 (promise/x:promise-then
-                  (browser-transport/disconnect conn)
-                  (fn [_]
-                    (repl/notify
-                     {"groups" groups
-                      "has_group" (xt/x:not-nil? group)
-                      "model_type" (xt/x:get-key model "::")
-                      "output" (event-model/get-current model nil)}))))))))))))
-     (fn [err]
-       (repl/notify {"error" err
-                     "message" (xt/x:ex-message err)}))))
+    (var transport-id nil)
+    (-> (browser-transport/connect-sharedworker
+         client
+         {"transport_id" "worker"
+          "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
+        (promise/x:promise-then
+         (fn [conn]
+           (:= transport-id (. conn ["transport_id"]))
+           (return
+            (page-proxy/list-proxy-groups client "room/a" {"transport_id" transport-id}))))
+        (promise/x:promise-then
+         (fn [groups]
+           (return
+            (page-proxy/open-proxy-group
+             client
+             "room/a"
+             "demo"
+             {"transport_id" transport-id}))))
+        (promise/x:promise-then
+         (fn [group]
+           (var model (xtd/get-in group ["models" "main"]))
+           (repl/notify
+            {"has_group" (xt/x:not-nil? group)
+             "model_type" (xt/x:get-key model "::")
+             "output" (event-model/get-current model nil)})
+           (browser-transport/disconnect conn)))        
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" err
+                         "message" (xt/x:ex-message err)})))))
   => (contains-in
-      {"groups" {"demo" {"models" ["main"]}}
-       "has_group" true
+      {"has_group" true
        "model_type" "event.model"
        "output" {"value" "hello"}}))

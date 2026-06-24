@@ -41,9 +41,7 @@
                (repl/notify))))))
   => "hello world")
 
-
-^{:name demo-001-page-model-update
-  :refer xt.substrate.page-core/model-update}
+^{:refer xt.substrate.walkthrough.s06-page-test/demo-001-page-model-update}
 (fact "page-model-update refreshes a model with new args"
 
   (notify/wait-on :js
@@ -85,8 +83,7 @@
   => "hello substrate")
 
 
-^{:name demo-002-page-model-dependency
-  :refer xt.substrate.page-core/add-group-attach}
+^{:refer xt.substrate.walkthrough.s06-page-test/demo-002-page-model-dependency}
 (fact "refreshing a source model also refreshes its dependents"
 
   (notify/wait-on :js
@@ -121,9 +118,7 @@
            (repl/notify (event-model/get-current derived nil))))))
   => "derived-beta")
 
-
-^{:name demo-003-page-model-remote
-  :refer xt.substrate.page-core/add-group-attach}
+^{:refer xt.substrate.walkthrough.s06-page-test/demo-003-page-model-remote}
 (fact "a page model handler can issue a request over a memory transport"
 
   (notify/wait-on :js
@@ -174,8 +169,7 @@
   => {"echo" "ping" "server" "server"})
 
 
-^{:name demo-004-page-model-local-and-remote
-  :refer xt.substrate.page-core/remote-call}
+^{:refer xt.substrate.walkthrough.s06-page-test/demo-004-page-model-local-and-remote}
 (fact "a model can have separate local and remote handlers"
 
   (notify/wait-on :js

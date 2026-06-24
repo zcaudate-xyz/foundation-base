@@ -52,32 +52,45 @@
     (wstest-stop)
     (wstest-start)))
 
-
+^{:seedgen/root {:all true, :langs [:js]}}
 (l/script- :js
-  {:runtime :websocket
+  {:runtime :basic
    :require [[xt.substrate :as event-node]
              [xt.substrate.transport-websocket :as ws-transport]
+             [xt.net.ws-native :as ws-native]
+             [js.net.ws-native :as js-ws]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]]})
+             [xt.lang.spec-promise :as promise]]
+   :import [["ws" :as Websocket]]})
 
 (fact:global
  {:setup [(wstest-restart)
-          (l/rt:restart)]
+          (l/rt:restart)
+          (l/rt:scaffold-imports :js)]
   :teardown [(wstest-stop)
              (l/rt:stop)]})
 
 (fact "a node websocket runtime can attach a live websocket transport and request over it"
   (notify/wait-on [:js 5000]
-    (var ws-module (require "ws"))
-    (var WebSocket (or (. ws-module ["WebSocket"])
-                       ws-module))
+    ;;
+    ;; Create and connect a ws-native HttpWebsocketClient lazily so the raw
+    ;; socket is created just before the transport attaches its listeners.
+    ;; readyState is exposed because transport-websocket uses it to decide
+    ;; whether to wait for the open event before completing attach.
+    ;;
     (var node (event-node/node-create {"id" "node-client"}))
     (-> (event-node/attach-transport
          node
          "server"
          (ws-transport/websocket-endpoint
-          {"url" "ws://127.0.0.1:29632/"
-           "WebSocket" WebSocket}))
+          {"create_fn"
+           (fn []
+             (var client (js-ws/create {}))
+             (js-ws/connect-ws client {"url" "ws://127.0.0.1:29632/"})
+             (xt/x:set-key client "readyState"
+                           (. (xt/x:get-key client "raw") ["readyState"]))
+             (return client))}))
         (promise/x:promise-then
          (fn [_]
            (return
@@ -89,11 +102,7 @@
              {"transport_id" "server"}))))
         (promise/x:promise-then
          (fn [response]
-           (return
-            (promise/x:promise-then
-             (event-node/detach-transport node "server")
-             (fn [_]
-               (repl/notify response))))))
+           (repl/notify response)))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify {"error" err}))))

@@ -17,7 +17,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:name demo-000-stream-frame-basic  :refer xt.substrate.base-frame/stream-frame}
+^{:refer xt.substrate.walkthrough.s03-transport-test/demo-000-stream-frame-basic}
 (fact "frame transport with trigger"
 
   
@@ -67,7 +67,7 @@
   => (contains {"space" "space/a", "id" string?, "signal" "event/ping", "kind" "stream", "meta" {}, "data" {"data" 1}}))
 
 
-^{:name demo-001-stream-frame-trigger :refer xt.substrate.base-frame/stream-frame}
+^{:refer xt.substrate.walkthrough.s03-transport-test/demo-001-stream-frame-trigger}
 (fact "frame transport with trigger"
 
   ;; A stream-frame can trigger state mutation on the receiving node.
@@ -118,7 +118,7 @@
 
 
 
-^{:name demo-002-request-frame-handle  :refer xt.substrate.base-frame/request-frame}
+^{:refer xt.substrate.walkthrough.s03-transport-test/demo-002-request-frame-handle}
 (fact "frame transport with request"
   
   ;; A request-frame carries an action, args, and a reply address.

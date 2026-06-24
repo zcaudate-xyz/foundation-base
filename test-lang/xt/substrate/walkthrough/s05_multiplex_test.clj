@@ -32,7 +32,7 @@
   {:setup [(l/rt:restart)]
    :teardown [(l/rt:stop)]})
 
-^{:refer xt.substrate.transport-memory/memory-network :added "4.1"}
+^{:refer xt.substrate.walkthrough.s05-multiplex-test/demo-001-memory-network}
 (fact "a shared memory network supports multiplexer nodes with multiple upstream transports"
 
   ;;
