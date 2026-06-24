@@ -10,9 +10,8 @@
   (connect [client opts])
   (disconnect [client])
   (send [client input])
-  (add-listeners [client m])
-  (start-heartbeat [client name f interval])
-  (stop-heartbeat [client name]))
+  (add-listeners [client m]))
+
 
 (defn.xt prepare-url
   [client input]

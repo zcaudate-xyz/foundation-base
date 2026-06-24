@@ -148,7 +148,7 @@
   (return (pubsub/publish impl topic message opts)))
 
 (defimpl.xt ImplSupabase
-  [client schema lookup session refresh opts]
+  [client schema lookup state opts]
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
    impl-common/rpc-call-async -/rpc-call-async}
@@ -169,4 +169,9 @@
 (defn.xt impl-supabase
   [client schema lookup session opts]
   (return
-   (-/ImplSupabase client schema lookup session nil (or opts {}))))
+   (-/ImplSupabase client schema lookup
+                   {"session" session
+                    "refresh" nil
+                    "pubsub" {}
+                    "id_counter" 0}
+                   (or opts {}))))

@@ -6,6 +6,7 @@
              [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.net.http-fetch :as http-fetch]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
 
@@ -42,7 +43,7 @@
   (return (or (xt/x:get-key opts "auth_token")
               (xt/x:get-key opts "token")
               (xt/x:get-key opts "access_token")
-              (xt/x:get-key (xt/x:get-key impl "session") "access_token")
+              (xt/x:get-key (xt/x:get-key (xt/x:get-key impl "state") "session") "access_token")
               (xt/x:get-key (or (xt/x:get-key (xt/x:get-key impl "client") "defaults") {}) "token")
               nil)))
 
@@ -288,8 +289,13 @@
                                            {"topic" resolved-topic}))
   (var leave-frame (phoenix/make-frame-leave client
                                              {"topic" resolved-topic}))
+  (var state (xt/x:get-key impl "state"))
+  (var id-counter (xt/x:get-key state "id_counter"))
+  (var id (xt/x:cat "sub-" id-counter))
+  (xt/x:set-key state "id_counter" (+ id-counter 1))
   (var handle {"client" client
                "topic" resolved-topic
+               "id" id
                "callback" callback
                "config" config
                "leave_frame" leave-frame
@@ -318,12 +324,14 @@
                               (phoenix/send-frame client join-frame)
                               (var interval (or (xt/x:get-key opts "heartbeat_interval")
                                                 30000))
-                              (var timer (setInterval
-                                          (fn []
-                                            (phoenix/send-heartbeat client {}))
-                                          interval))
-                              (xt/x:set-key handle "heartbeat" timer)
+                              (http-fetch/start-heartbeat client id
+                                                          (fn [client name]
+                                                            (phoenix/send-heartbeat client {}))
+                                                          interval)
                               (return true))})
+  (var pubsub (or (xt/x:get-key state "pubsub") {}))
+  (xt/x:set-key pubsub id handle)
+  (xt/x:set-key state "pubsub" pubsub)
   (return handle))
 
 (defn.xt unsubscribe
@@ -332,13 +340,16 @@
   [impl handle]
   (var client (xt/x:get-key handle "client"))
   (var leave-frame (xt/x:get-key handle "leave_frame"))
-  (var timer (xt/x:get-key handle "heartbeat"))
-  (when (xt/x:not-nil? timer)
-    (clearInterval timer))
+  (var id (xt/x:get-key handle "id"))
+  (http-fetch/stop-heartbeat client id)
   (when (xt/x:not-nil? leave-frame)
     (phoenix/send-frame client leave-frame))
   (websocket/disconnect client)
   (xt/x:set-key handle "active" false)
+  (var state (xt/x:get-key impl "state"))
+  (var pubsub (or (xt/x:get-key state "pubsub") {}))
+  (xt/x:del-key pubsub id)
+  (xt/x:set-key state "pubsub" pubsub)
   (return true))
 
 (defn.xt publish

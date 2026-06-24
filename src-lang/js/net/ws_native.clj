@@ -6,6 +6,7 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-protocol :as protocol]
+             [xt.net.http-fetch :as http-fetch]
              [xt.net.ws-native :as websocket]]})
 
 (defn.js connect-ws
@@ -86,9 +87,11 @@
   {websocket/connect -/connect-ws
    websocket/disconnect -/disconnect-ws
    websocket/send -/send-ws
-   websocket/add-listeners -/add-listeners-ws
-   websocket/start-heartbeat -/start-heartbeat-ws
-   websocket/stop-heartbeat -/stop-heartbeat-ws})
+   websocket/add-listeners -/add-listeners-ws}
+
+  http-fetch/IHttpHeartbeat
+  {http-fetch/start-heartbeat -/start-heartbeat-ws
+   http-fetch/stop-heartbeat -/stop-heartbeat-ws})
 
 (defn.js create
   "creates a new HttpWebsocketClient"
@@ -160,9 +163,11 @@
   {websocket/connect -/connect-raw
    websocket/disconnect -/disconnect-raw
    websocket/send -/send-raw
-   websocket/add-listeners -/add-listeners-raw
-   websocket/start-heartbeat -/start-heartbeat-raw
-   websocket/stop-heartbeat -/stop-heartbeat-raw})
+   websocket/add-listeners -/add-listeners-raw}
+
+  http-fetch/IHttpHeartbeat
+  {http-fetch/start-heartbeat -/start-heartbeat-raw
+   http-fetch/stop-heartbeat -/stop-heartbeat-raw})
 
 (defn.js wrap
   "wraps an existing raw websocket socket in a ws-native client"

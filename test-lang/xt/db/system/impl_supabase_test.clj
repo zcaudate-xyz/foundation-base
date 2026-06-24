@@ -243,9 +243,9 @@
                         (@! (pg/bind-app (pg/app "scratch_v0")))))
            (impl/set-session! source session)
            (impl/start-auto-refresh source {"interval" 10})
-           (var started (xt/x:not-nil? (. (. source ["refresh"]) ["timer"])))
+           (var started (xt/x:not-nil? (. (. (. source ["state"]) ["refresh"]) ["timer"])))
            (impl/stop-auto-refresh source)
-           (var stopped (xt/x:nil? (. (. source ["refresh"]) ["timer"])))
+           (var stopped (xt/x:nil? (. (. (. source ["state"]) ["refresh"]) ["timer"])))
            (repl/notify [started stopped])))))
   => [true true])
 
@@ -265,4 +265,5 @@
       {"schema" map?, "lookup" map?, "opts" {},
        "::" "xt.db.system.impl_supabase/ImplSupabase",
        "::/protocols" ["xt.db.system.impl_common/ISourceRemote"],
-       "client" map?}))
+       "client" map?
+       "state" {"session" nil?, "refresh" nil?, "pubsub" map?, "id_counter" 0}}))
