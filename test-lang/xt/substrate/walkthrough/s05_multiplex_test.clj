@@ -1,4 +1,4 @@
-(ns xt.substrate.e2e-multiplex-test
+(ns xt.substrate.walkthrough.s05-multiplex-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -35,6 +35,19 @@
 ^{:refer xt.substrate.transport-memory/memory-network :added "4.1"}
 (fact "a shared memory network supports multiplexer nodes with multiple upstream transports"
 
+  ;;
+  ;; Topology:
+  ;;
+  ;;   client ---- mux ---- server-a
+  ;;              |
+  ;;              +--------- server-b
+  ;;
+  ;; The client only knows about the mux. The mux only knows about the
+  ;; client and the two servers. Each server only knows about the mux.
+  ;;
+  ;; The memory-network helper builds the wiring as three independent
+  ;; pairs, where each side of a pair can send to the other side.
+  ;;
   (notify/wait-on :js
     (var network (transport-memory/memory-network
                   {"client" ["mux-client"]
@@ -43,7 +56,18 @@
                    "mux-a" ["server-a"]
                    "server-b" ["mux-b"]
                    "mux-b" ["server-b"]}))
+
+    ;;
+    ;; Client has no handlers; it only sends requests to the mux.
+    ;;
     (var client (event-node/node-create {"id" "client"}))
+
+    ;;
+    ;; The mux exposes a single "demo/proxy" handler. It receives
+    ;; args [target-id payload], then issues a new request to the
+    ;; named target transport. This is the multiplexer: one public
+    ;; action fans out to many backend nodes.
+    ;;
     (var mux (event-node/node-create
               {"id" "mux"
                "handlers"
@@ -57,6 +81,12 @@
                           [(xt/x:get-idx args (xt/x:offset 1))]
                           {"transport_id" (xt/x:get-idx args (xt/x:offset 0))})))
                  "meta" {"kind" "request"}}}}))
+
+    ;;
+    ;; Two identical backend servers. Each only needs to know the
+    ;; "demo/echo" action and returns its own id so the test can
+    ;; verify which server actually handled the request.
+    ;;
     (var server-a (event-node/node-create
                    {"id" "server-a"
                     "handlers"
@@ -71,6 +101,11 @@
                                          (return {"server" (. server-node ["id"])
                                                   "value" (xt/x:get-idx args (xt/x:offset 0))}))
                                   "meta" {"kind" "request"}}}}))
+
+    ;;
+    ;; Attach all six transport endpoints. After this, the mux can
+    ;; reach both servers and the client can reach the mux.
+    ;;
     (-> (promise/x:promise-all
          [(event-node/attach-transport
            client
@@ -96,6 +131,11 @@
            server-b
            "mux"
            (transport-memory/text-endpoint (. network ["server-b"])))])
+
+        ;;
+        ;; Ask the mux to proxy to server-a, then to server-b.
+        ;; The responses prove routing went to the correct backend.
+        ;;
         (promise/x:promise-then
          (fn [_]
            (return

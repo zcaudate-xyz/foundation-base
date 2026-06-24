@@ -1,5 +1,4 @@
-^{:seedgen/skip true}
-(ns xt.substrate.browser.transport-websocket-node-e2e-test
+(ns xt.substrate.walkthrough.s07-wsserver-test
   (:use code.test)
   (:require [std.json :as json]
             [hara.lang :as l]

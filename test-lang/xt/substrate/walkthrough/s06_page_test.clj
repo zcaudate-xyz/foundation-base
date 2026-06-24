@@ -1,4 +1,4 @@
-(ns xt.substrate.e2e-page-test
+(ns xt.substrate.walkthrough.s06-page-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -11,15 +11,14 @@
              [xt.lang.spec-promise :as promise]
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
-             [xt.substrate.page-core :as base-page]
+             [xt.substrate.page-core :as page-core]
              [xt.substrate.transport-memory :as transport-memory]]})
 
 (fact:global
- {:setup [(l/rt:restart)]
+ {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:name demo-000-page-model-basic
-  :refer xt.substrate.page-core/add-group}
+^{:refer xt.substrate.walkthroug.s06-page-test/demo-000-page-model-basic}
 (fact "a page model computes its output from args on initial refresh"
 
   (notify/wait-on :js
@@ -36,9 +35,10 @@
     (-> (. group ["init"])
         (promise/x:promise-then
          (fn [_]
-           (var model-result (page-core/model-ensure node nil "page" "greet"))
-           (var model (xt/x:get-idx model-result 1))
-           (repl/notify (event-model/get-current model nil))))))
+          (-> (page-core/model-ensure node nil "page" "greet")
+               (xt/x:second)
+               (event-model/get-current nil)
+               (repl/notify))))))
   => "hello world")
 
 

@@ -1,12 +1,7 @@
-(ns xt.substrate.e2e-transport-test
+(ns xt.substrate.walkthrough.s03-transport-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
-
-(l/script- :postgres
-  {:runtime :jdbc.client
-   :config {:dbname "test-scratch"}
-   :require [[postgres.sample.scratch-v0 :as v0]]})
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
@@ -16,16 +11,10 @@
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
              [xt.substrate.base-frame :as frame]
-             [xt.substrate.transport-memory :as transport-memory]
-             [js.net.conn-postgres :as js-postgres]
-             [xt.net.conn-sql :as conn-sql]
-             [xt.db.text.sql-call :as call]
-             [xt.db.substrate :as db-helper]
-             [postgres.sample.scratch-v0.route-entries :as entries]]})
+             [xt.substrate.transport-memory :as transport-memory]]})
 
 (fact:global
- {:setup [(l/rt:restart)
-          (l/rt:setup :postgres)]
+ {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:name demo-000-stream-frame-basic  :refer xt.substrate.base-frame/stream-frame}
@@ -193,48 +182,3 @@
 
 
 
-
-^{:name demo-002-request-frame-dataview  :refer xt.substrate.base-frame/request-frame}
-
-
-
-
-
-
-
-
-
-
-
-
-(comment
-  
-  (notify/wait-on :js
-    (-> (substrate/node-create
-         {"services"
-          {"db/primary"
-           {"database" "test-scratch"}}
-          "handlers"
-          {"db/fn.primary"
-           {"fn" (fn [space args request node]
-                   (var opts (xt/x:first args))
-                   (var fn-template (. opts ["template"]))
-                   (var fn-args     (. opts ["args"]))
-                   (return
-                    (-> (conn-sql/connect
-                         (js-postgres/driver)
-                         (substrate/get-service node "db/primary"))
-                        (promise/x:promise-then
-                         (fn [conn]
-                           (return (call/call-raw conn fn-template fn-args)))))))
-            "meta" {"kind" "request"}}}})
-        (substrate/request nil
-                           "db/fn.primary"
-                           [{"template" entries/ping
-                             "args" []}]
-                           {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))))
-
-  )
