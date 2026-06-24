@@ -51,14 +51,26 @@
       (. raw (addEventListener k handler)))
     (return (xt/x:obj-keys m))))
 
+(defn.js default-heartbeat-fn
+  "default heartbeat sends a raw heartbeat string"
+  {:added "4.1.3"}
+  [client name]
+  (return (websocket/send client "heartbeat")))
+
 (defn.js start-heartbeat-ws
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
   [client name f interval]
-  (var #{heartbeats} client)
+  (var #{defaults heartbeats} client)
   (var stop-fn (xt/x:get-key heartbeats name))
   (when (xt/x:is-function? stop-fn)
     (stop-fn))
+  (:= f (or f
+            (xt/x:get-key defaults "heartbeat_fn")
+            -/default-heartbeat-fn))
+  (:= interval (or interval
+                   (xt/x:get-key defaults "heartbeat_interval")
+                   30000))
   (var timer (setInterval
               (fn []
                 (f client name))
