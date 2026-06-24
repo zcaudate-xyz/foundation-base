@@ -81,28 +81,12 @@
   [x & more] (apply list (quote b:xor) x more))
 
 (defmacro.xt ^{:standalone true} 
-  block
-  [x & more] (apply list (quote block) x more))
-
-(defmacro.xt ^{:standalone true} 
   br*
   [x & more] (apply list (quote br*) x more))
 
 (defmacro.xt ^{:standalone true} 
   break
   [x & more] (apply list (quote break) x more))
-
-(defmacro.xt ^{:standalone true} 
-  do:>
-  [x & more] (apply list (quote do:>) x more))
-
-(defmacro.xt ^{:standalone true} 
-  fn.inner
-  [x & more] (apply list (quote fn.inner) x more))
-
-(defmacro.xt ^{:standalone true} 
-  fn:>
-  [x & more] (apply list (quote fn:>) x more))
 
 (defmacro.xt ^{:standalone true} 
   forange
@@ -159,10 +143,6 @@
 (defmacro.xt ^{:standalone true} 
   var
   [x & more] (apply list (quote var) x more))
-
-(defmacro.xt ^{:standalone true} 
-  var.inner
-  [x & more] (apply list (quote var.inner) x more))
 
 (defmacro.xt ^{:standalone true} 
   xor

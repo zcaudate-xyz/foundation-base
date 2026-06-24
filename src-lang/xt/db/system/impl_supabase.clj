@@ -55,6 +55,8 @@
    (-> (http-fetch/request-http client input)
        (promise/x:promise-then -/normalise-body))))
 
+
+
 (defn.xt cmd-rpc-call-async
   [impl rpc-spec args opts]
   (var input-spec (or (xt/x:get-key rpc-spec "input") []))
@@ -85,86 +87,21 @@
    (-> (http-fetch/request-http client input)
        (promise/x:promise-then -/normalise-body))))
 
-;;
-;; SESSION
-;;
-
-(defn.xt set-session!
-  "sets the active session on the supabase impl and syncs the bearer token"
-  {:added "4.1"}
-  [impl session]
-  (return (session/set-session! impl session)))
-
-(defn.xt get-session
-  "returns the current session stored on the supabase impl"
-  {:added "4.1"}
-  [impl]
-  (return (session/get-session impl)))
-
-(defn.xt session-info
-  "returns the current authenticated user information for the active session"
-  {:added "4.1"}
-  [impl]
-  (return (session/session-info impl)))
-
-(defn.xt refresh-session
-  "refreshes the active session token using the stored refresh token"
-  {:added "4.1"}
-  [impl]
-  (return (session/refresh-session impl)))
-
-(defn.xt start-auto-refresh
-  "starts a session refresh timer using the current refresh token"
-  {:added "4.1"}
-  [impl opts]
-  (return (session/start-auto-refresh impl opts)))
-
-(defn.xt stop-auto-refresh
-  "stops the session refresh timer"
-  {:added "4.1"}
-  [impl]
-  (return (session/stop-auto-refresh impl)))
 
 ;;
 ;; PUBSUB
 ;;
-
-(defn.xt subscribe
-  "subscribes the supabase impl to realtime changes on a topic"
-  {:added "4.1"}
-  [impl topic opts callback]
-  (return (pubsub/subscribe impl topic opts callback)))
-
-(defn.xt unsubscribe
-  "unsubscribes a supabase realtime handle"
-  {:added "4.1"}
-  [impl handle]
-  (return (pubsub/unsubscribe impl handle)))
-
-(defn.xt publish
-  "no-op publish for the supabase realtime abstraction"
-  {:added "4.1"}
-  [impl topic message opts]
-  (return (pubsub/publish impl topic message opts)))
 
 (defimpl.xt ImplSupabase
   [client schema lookup state opts]
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
    impl-common/rpc-call-async -/rpc-call-async}
-
-  impl-common/ISession
-  {impl-common/set-session      -/set-session!
-   impl-common/get-session      -/get-session
-   impl-common/session-info     -/session-info
-   impl-common/refresh-session  -/refresh-session
-   impl-common/start-auto-refresh -/start-auto-refresh
-   impl-common/stop-auto-refresh  -/stop-auto-refresh}
-
+  
   impl-common/IPubSub
-  {impl-common/subscribe   -/subscribe
-   impl-common/unsubscribe -/unsubscribe
-   impl-common/publish     -/publish})
+  {impl-common/subscribe   pubsub/subscribe
+   impl-common/unsubscribe pubsub/unsubscribe
+   impl-common/publish     pubsub/publish})
 
 (defn.xt impl-supabase
   [client schema lookup session opts]
