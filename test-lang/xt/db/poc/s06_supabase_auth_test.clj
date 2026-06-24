@@ -1,4 +1,4 @@
-(ns xt.db.poc.browser-supabase-auth-test
+(ns xt.db.poc.s06-supabase-auth-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -119,8 +119,8 @@
                            [{"primary" {"id" "db/primary"
                                         "type" "supabase"
                                         "defaults" (@! local-min/+config-supabase-anon+)}}
-                            xt.db.poc.browser-supabase-auth-test/Schema
-                            xt.db.poc.browser-supabase-auth-test/SchemaLookup]
+                            xt.db.poc.s06-supabase-auth-test/Schema
+                            xt.db.poc.s06-supabase-auth-test/SchemaLookup]
                            {"transport_id" transport-id})
         (fn [_]
           (return (callback client transport-id)))))))))
@@ -130,7 +130,7 @@
   (return
    (substrate/request client "room/a" op args {"transport_id" transport-id})))
 
-^{:refer xt.db.poc.browser-supabase-auth-test/auth-worker-ping
+^{:refer xt.db.poc.s06-supabase-auth-test/auth-worker-ping
   :added "4.1"}
 (fact "client can reach a simple ping handler on the auth shared worker"
 
@@ -144,7 +144,7 @@
            (repl/notify v)))))))
   => {"status" "pong"})
 
-^{:refer xt.db.poc.browser-supabase-auth-test/supabase-signed-in-anon
+^{:refer xt.db.poc.s06-supabase-auth-test/supabase-signed-in-anon
   :added "4.1"}
 (fact "anon service reports not signed in through the auth worker"
 
@@ -158,7 +158,7 @@
            (repl/notify {"signed-in" v})))))))
   => {"signed-in" false})
 
-^{:refer xt.db.poc.browser-supabase-auth-test/supabase-current-session-anon
+^{:refer xt.db.poc.s06-supabase-auth-test/supabase-current-session-anon
   :added "4.1"}
 (fact "anon service returns no session through the auth worker"
 
@@ -172,7 +172,7 @@
            (repl/notify v)))))))
   => nil)
 
-^{:refer xt.db.poc.browser-supabase-auth-test/supabase-sign-up-user-info
+^{:refer xt.db.poc.s06-supabase-auth-test/supabase-sign-up-user-info
   :added "4.1"}
 (fact "client can sign up through the worker and then query user info"
 
@@ -196,7 +196,22 @@
   => (contains-in
       {"user" {"email" string?}}))
 
-^{:refer xt.db.poc.browser-supabase-auth-test/supabase-reachable
+^{:refer xt.db.poc.s06-supabase-auth-test/supabase-health
+  :added "4.1"}
+(fact "client can call the auth health endpoint through the worker"
+
+  (notify/wait-on [:js 20000]
+    (-/with-auth-worker
+     (fn [client transport-id]
+       (return
+        (promise/x:promise-then
+         (-/request-worker client transport-id "@xt.db/supabase-health" ["db/primary"])
+         (fn [v]
+           (repl/notify v)))))))
+  => (contains-in
+      {"name" "GoTrue"}))
+
+^{:refer xt.db.poc.s06-supabase-auth-test/supabase-reachable
   :added "4.1"
   :setup [(scratch-v0/log-append-public "hello")]}
 (fact "browser page can reach supabase rest endpoint"

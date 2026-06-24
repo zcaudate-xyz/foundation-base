@@ -1,4 +1,4 @@
-(ns xt.db.poc.browser-webworker-custom-test
+(ns xt.db.poc.n03-webworker-custom-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -97,7 +97,7 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
-^{:refer xt.db.poc.browser-webworker-custom-test/attach-pull-model
+^{:refer xt.db.poc.n03-webworker-custom-test/attach-pull-model
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "client can open a remote pull-view model and read its output"

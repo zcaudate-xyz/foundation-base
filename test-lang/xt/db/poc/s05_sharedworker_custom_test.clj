@@ -1,4 +1,4 @@
-(ns xt.db.poc.browser-sharedworker-custom-test
+(ns xt.db.poc.s05-sharedworker-custom-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -61,8 +61,8 @@
   (l/emit-script
    '(do
       (var node (xt.substrate/node-create {"id" "db-model-server"}))
-      (var schema xt.db.poc.browser-sharedworker-custom-test/Schema)
-      (var lookup xt.db.poc.browser-sharedworker-custom-test/SchemaLookup)
+      (var schema xt.db.poc.s05-sharedworker-custom-test/Schema)
+      (var lookup xt.db.poc.s05-sharedworker-custom-test/SchemaLookup)
       (xt.substrate/set-service
        node "db/common"
        {:schema schema
@@ -108,7 +108,7 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
-^{:refer xt.db.poc.browser-sharedworker-custom-test/attach-pull-model
+^{:refer xt.db.poc.s05-sharedworker-custom-test/attach-pull-model
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "client can open a remote pull model and read its output"
@@ -177,7 +177,7 @@
        "output" [{"message" "remote"}]
        "result" {"status" "ok"}}))
 
-^{:refer xt.db.poc.browser-sharedworker-custom-test/supabase-reachable
+^{:refer xt.db.poc.s05-sharedworker-custom-test/supabase-reachable
   :added "4.1"
   :setup [(scratch-v0/log-append-public "hello")]}
 (fact "browser page can reach supabase rest endpoint"

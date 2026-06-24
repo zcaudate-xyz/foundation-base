@@ -1,4 +1,4 @@
-(ns xt.db.poc.browser-sharedworker-test
+(ns xt.db.poc.s04-sharedworker-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -64,8 +64,8 @@
                             "defaults" (@! local-min/+config-supabase-anon+)}
                  "caching" {"type" "sqlite"
                             "defaults" {}}}
-                xt.db.poc.browser-sharedworker-test/Schema
-                xt.db.poc.browser-sharedworker-test/SchemaLookup)
+                xt.db.poc.s04-sharedworker-test/Schema
+                xt.db.poc.s04-sharedworker-test/SchemaLookup)
                (then
                 (fn [node]
                   (. port (postMessage {"type" "primary-connected"}))

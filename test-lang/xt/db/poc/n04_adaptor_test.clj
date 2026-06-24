@@ -1,4 +1,4 @@
-(ns xt.db.poc.browser-adaptor-test
+(ns xt.db.poc.n04-adaptor-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
