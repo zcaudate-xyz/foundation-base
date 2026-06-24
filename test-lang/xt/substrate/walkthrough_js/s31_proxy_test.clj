@@ -1,14 +1,10 @@
 ^{:seedgen/skip true}
-(ns xt.substrate.browser.e2e-page-proxy-sharedworker-test
+(ns xt.substrate.walkthrough-js.s31-proxy-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [js.worker.link]
-            [xt.lang.common-notify :as notify]
-            [xt.substrate.page-proxy]
-            [xt.substrate.page-core]
-            [xt.event.base-model]
-            [xt.substrate.transport-browser]))
+            [xt.lang.common-notify :as notify]))
 
 (def ^:private +sharedworker-script+
   (l/emit-script
@@ -60,7 +56,6 @@
 
 (fact:global
  {:setup [(l/rt:restart :js)
-          (l/rt:scaffold-imports :js)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
   :teardown [(l/rt:stop)]})

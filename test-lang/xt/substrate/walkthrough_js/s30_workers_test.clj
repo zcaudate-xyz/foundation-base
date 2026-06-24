@@ -1,5 +1,5 @@
 ^{:seedgen/skip true}
-(ns xt.substrate.browser.e2e-browser-basic-test
+(ns xt.substrate.walkthrough-js.s30-workers-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -15,34 +15,31 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]]})
 
-(def ^:private +webworker-script+
+(def +webworker-script+
   (l/emit-script
    '(do
-      (var node (xt.substrate/node-create {"id" "worker-web"}))
-      (xt.substrate/register-handler
-       node
-       "demo/echo"
-       (fn [space args request worker-node]
+      (var node (xt.substrate/node-create
+                 {"id" "worker-web"
+                  "handlers"
+                  {"demo/echo" {"fn" (fn [space args request worker-node]
          (return {"space" (. space ["id"])
                   "action" (. request ["action"])
                   "args" args
-                  "worker" (. worker-node ["id"])}))
-       nil)
-      (. (xt.substrate.transport-browser/boot-self
-          node
-         {"transport_id" "host"
-          "target" self
-          "ready" {"signal" "ready"
-                   "transport" "browser"
-                   "worker" "worker-web"}})
-        (then
-         (fn [_]
-            (return node))))
-      node)
+                  "worker" (. worker-node ["id"])}))}}}))
+      (-> (xt.substrate.transport-browser/boot-self
+           node
+           {"transport_id" "host"
+            "target" self
+            "ready" {"signal" "ready"
+                     "transport" "browser"
+                     "worker" "worker-web"}})
+          (xt.lang.spec-promise/x:promise-then
+           (fn [_]
+             (return node)))))
    {:lang :js
     :layout :full}))
 
-(def ^:private +sharedworker-script+
+(def +sharedworker-script+
   (l/emit-script
    '(do
       (:= (. globalThis ["onconnect"])
