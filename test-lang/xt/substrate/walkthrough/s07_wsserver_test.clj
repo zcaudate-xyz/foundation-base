@@ -5,52 +5,66 @@
             [org.httpkit.server :as server]
             [xt.lang.common-notify :as notify]))
 
-(def ^:private +ws-port+ 29632)
-(def ^:private +ws-url+ (str "ws://127.0.0.1:" +ws-port+ "/"))
-(defonce ^:private +ws-server+ (atom nil))
+(do 
+  (def ^:private +ws-port+ 29632)
+  (def ^:private +ws-url+ (str "ws://127.0.0.1:" +ws-port+ "/"))
+  (defonce ^:private +ws-server+ (atom nil))
 
-(defn- start-test-ws-server [port runtime]
-  (let [stop-fn
-        (server/run-server
-         (fn [request]
-           (server/with-channel request channel
-             (server/on-receive
-              channel
-              (fn [msg]
-                (let [{:strs [kind id action args space]} (json/read msg)]
-                  (when (= kind "request")
-                    (server/send!
-                     channel
-                     (json/write
-                      {"kind" "response"
-                       "id" (str "res-" id)
-                       "status" "ok"
-                       "reply_to" id
-                       "space" space
-                       "meta" {}
-                       "data" {"transport" "websocket"
-                               "runtime" runtime
-                               "action" action
-                               "args" args}}))))))))
-         {:port port})]
-    {:port port
-     :stop stop-fn}))
+  (defn wstest-start-fn [port runtime]
+    (let [stop-fn
+          (server/run-server
+           (fn [request]
+             (server/with-channel request channel
+               (server/on-receive
+                channel
+                (fn [msg]
+                  (let [{:strs [kind id action args space]} (json/read msg)]
+                    (when (= kind "request")
+                      (server/send!
+                       channel
+                       (json/write
+                        {"kind" "response"
+                         "id" (str "res-" id)
+                         "status" "ok"
+                         "reply_to" id
+                         "space" space
+                         "meta" {}
+                         "data" {"transport" "websocket"
+                                 "runtime" runtime
+                                 "action" action
+                                 "args" args}}))))))))
+           {:port port})]
+      {:port port
+       :stop stop-fn}))
+
+  (defn wstest-start
+    []
+    (reset! +ws-server+ (wstest-start-fn +ws-port+ "node")))
+  
+  (defn wstest-stop
+    []
+    (when-let [stop-fn (:stop @+ws-server+)]
+      (stop-fn))
+    (reset! +ws-server+ nil))
+  
+  (defn wstest-restart
+    []
+    (wstest-stop)
+    (wstest-start)))
+
 
 (l/script- :js
   {:runtime :websocket
-   :config {:bench true}
    :require [[xt.substrate :as event-node]
              [xt.substrate.transport-websocket :as ws-transport]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]]})
 
 (fact:global
-  {:setup [(reset! +ws-server+ (start-test-ws-server +ws-port+ "node"))
-           (l/rt:restart :js)]
-   :teardown [(when-let [stop-fn (:stop @+ws-server+)]
-                (stop-fn))
-              (reset! +ws-server+ nil)
-              (l/rt:stop)]})
+ {:setup [(wstest-restart)
+          (l/rt:restart)]
+  :teardown [(wstest-stop)
+             (l/rt:stop)]})
 
 (fact "a node websocket runtime can attach a live websocket transport and request over it"
   (notify/wait-on [:js 5000]
