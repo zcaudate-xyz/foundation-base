@@ -49,41 +49,40 @@
         (fn [node]
           (return
            (-/init-adaptor-type node
-                                  (or (xt/x:get-key primary "id")
-                                      "db/primary")
-                                  (xt/x:get-key primary "type")
-                                  (xt/x:get-key primary "defaults")
-                           schema
-                           lookup))))
+                                (or (xt/x:get-key primary "id")
+                                    "db/primary")
+                                (xt/x:get-key primary "type")
+                                (xt/x:get-key primary "defaults")
+                                schema
+                                lookup))))
        (promise/x:promise-then
         (fn [node]
           (return
            (-/init-adaptor-type node
-                                  (or (xt/x:get-key caching "id")
-                                      "db/caching")
-                                  (xt/x:get-key caching "type")
-                                  (xt/x:get-key caching "defaults")
-                                  schema
-                           lookup)))))))
+                                (or (xt/x:get-key caching "id")
+                                    "db/caching")
+                                (xt/x:get-key caching "type")
+                                (xt/x:get-key caching "defaults")
+                                schema
+                                lookup)))))))
 
 (defn.xt ^{:substrate/fn "@xt.db/init-adaptor"}
   init-adaptor-handler
-  "Server-side handler that initialises db services from client config.
-   If db/common already contains :primary or :caching impls, those are used
-   directly (useful in sharedworker contexts where impl-main/create-impl cannot
-   be invoked from a handler)."
+  "Server-side handler that calls init-adaptor-main with client args."
   {:added "4.1"}
   [space args request node]
-  (var config (xt/x:first args))
-  (var schema (xt/x:second args))
-  (var lookup (xt/x:get-idx args (xt/x:offset 2)))
+  (var config  (xt/x:first args))
+  (var schema  (xt/x:second args))
+  (var lookup  (xt/x:get-idx args (xt/x:offset 2)))
   (return
-   (-/init-adaptor-main node config schema lookup)))
+   (-> (-/init-adaptor-main node config schema lookup)
+       (promise/x:promise-then
+        (fn [node]
+          (return {"status" "ok"}))))))
 
 ;;
 ;;
 ;;
-
 
 (defn.xt ^{:substrate/fn "@xt.db/call-rpc"}
   call-rpc-handler
@@ -109,6 +108,20 @@
        (promise/x:promise-then
         (fn [client]
           (return (http-fetch/request-http client fetch-input)))))))
+
+(defn.xt
+  call-primary-handler
+  "Routes rpc args through the live db/primary service."
+  {:added "4.1"}
+  [space args request node]
+  (var rpc-spec (xt/x:first args))
+  (var fn-args  (xt/x:second args))
+  (return
+   (-> (promise/x:promise-run
+        (substrate/get-service node "db/primary"))
+       (promise/x:promise-then
+        (fn [impl]
+          (return (impl-common/rpc-call-async impl rpc-spec fn-args)))))))
 
 ;;
 ;;
@@ -296,7 +309,7 @@
    space-id
    group-id
    {model-id (-/create-rpc-model service model-args)})
-  (return {"status" "attached"2;9u
+  (return {"status" "attached"
            "space" space-id
            "group" group-id
            "model" model-id}))
@@ -306,17 +319,20 @@
 ;;
 ;;
 
+(defn.xt init-handlers
+  [node]
+  (substrate/register-handler node "@xt.db/attach-pull-model" -/attach-pull-model nil)
+  (substrate/register-handler node "@xt.db/attach-rpc-model" -/attach-rpc-model nil)
+  (substrate/register-handler node "@xt.db/attach-tree-view-model" -/attach-tree-view-model nil)
+  (substrate/register-handler node "@xt.db/call-fetch" -/call-fetch-handler nil)
+  (substrate/register-handler node "@xt.db/call-rpc" -/call-rpc-handler nil)
+  (substrate/register-handler node "@xt.db/init-adaptor" -/init-adaptor-handler nil)
+  (return node))
 
+(defn list-substrate-fn
+  [ns]
+  (->> (ns-publics (or ns *ns*))
+       (filter (fn [[n v]]
+                 (string? (-> v meta :substrate/fn))))
+       (sort-by (comp name key))))
 
-(comment
-  (comment
-    {:model {:pipeline ...
-             :defaults ...}
-     :page  {}}
-
-    (var pipeline (xt/x:get-key opts "pipeline"))
-    (var defaults (xt/x:get-key opts "defaults"))
-    (var trigger  (xt/x:get-key opts "trigger"))
-    (var options  (xt/x:get-key opts "options")))
-
-  )
