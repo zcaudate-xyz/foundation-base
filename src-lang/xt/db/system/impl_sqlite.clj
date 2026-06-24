@@ -29,11 +29,8 @@
   "runs a tree ir pull with async sqlite semantics"
   {:added "4.1"}
   [impl tree]
-  (var #{client
-         schema
-         opts} impl)
   (return
-   (conn-sql/query-async client (sql-graph/select schema tree opts))))
+   (promise/x:promise-run (-/pull impl tree))))
 
 (defn.xt record-add
   "adds rows directly through stored sqlite context"
@@ -52,23 +49,6 @@
   (return
    (conn-sql/query client input)))
 
-(defn.xt record-add-async
-  "adds rows directly with async sqlite semantics"
-  {:added "4.1"}
-  [impl table-name records]
-  (var #{client
-         schema
-         lookup
-         opts} impl)
-  (var input (sql-table/prepare-add-input {table-name records}
-                                          schema
-                                          lookup
-                                          opts))
-  (when (== "" input)
-    (return (promise/x:promise-run nil)))
-  (return
-   (conn-sql/query-async client input)))
-
 (defn.xt record-delete
   "deletes ids directly through stored sqlite context"
   {:added "4.1"}
@@ -81,20 +61,6 @@
                        (return (raw/raw-delete table-name {"id" id} opts)))))
   (return
    (conn-sql/query client (xt/x:str-join "\n\n" statements))))
-
-(defn.xt record-delete-async
-  "deletes ids directly with async sqlite semantics"
-  {:added "4.1"}
-  [impl table-name ids]
-  (var #{client
-         opts} impl)
-  (var statements
-       (xt/x:arr-map ids
-                     (fn [id]
-                       (return (raw/raw-delete table-name {"id" id} opts)))))
-  (return
-   (conn-sql/query-async client
-                         (xt/x:str-join "\n\n" statements))))
 
 
 
@@ -149,7 +115,7 @@
    impl-common/record-delete        -/record-delete
    impl-common/process-add-event    -/process-add-event
    impl-common/process-remove-event -/process-remove-event}
-
+  
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
    impl-common/rpc-call-async -/rpc-call-async})
