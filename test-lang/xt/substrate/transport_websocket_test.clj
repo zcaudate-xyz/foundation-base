@@ -248,3 +248,34 @@
       "received" ["pong"]
       "removed" ["message"]
       "closed" 1})
+
+
+^{:refer xt.substrate.transport-websocket/websocket-native? :added "4.1"}
+(fact "detects ws-native client sockets by a non-nil :: key"
+  (!.js
+   [(ws-transport/websocket-native? "ws://demo.test/a")
+    (ws-transport/websocket-native? {"url" "ws://demo.test/a"})
+    (ws-transport/websocket-native? {"::" nil})
+    (ws-transport/websocket-native? {"::" "ws-native"})])
+  => [false false false true])
+
+^{:refer xt.substrate.transport-websocket/ensure-promise :added "4.1"}
+(fact "wraps sync values in a native promise and passes native promises through"
+  (notify/wait-on :js
+    (var input-promise (promise/x:promise-run 42))
+    (promise/x:promise-then
+     (ws-transport/ensure-promise "hello")
+     (fn [sync-result]
+       (promise/x:promise-then
+        (ws-transport/ensure-promise input-promise)
+        (fn [promise-result]
+          (repl/notify
+           {"sync" sync-result
+            "promise" promise-result
+            "native" (promise/x:promise-native? (ws-transport/ensure-promise "hello"))
+            "same" (== (ws-transport/ensure-promise input-promise)
+                       input-promise)}))))))
+  => {"sync" "hello"
+      "promise" 42
+      "native" true
+      "same" true})

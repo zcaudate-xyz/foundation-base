@@ -52,7 +52,12 @@
   => "alpha")
 
 ^{:refer xt.lang.spec-primitive/$ :added "4.1"}
-(fact "TODO")
+(fact "accesses static members"
+
+  ^{:seedgen/base {:all {:suppress true}}}
+  (!.js
+    ($ Math :PI))
+  => 3.141592653589793)
 
 ^{:refer xt.lang.spec-primitive/% :added "4.1"}
 (fact "emits internal expressions directly"
@@ -116,9 +121,6 @@
     [(- 10 3 2)
      (- 5)])
   => [5 -5])
-
-^{:refer xt.lang.spec-primitive/-%%- :added "4.1"}
-(fact "TODO")
 
 ^{:refer xt.lang.spec-primitive/. :added "4.1"}
 (fact "indexes values"
@@ -305,9 +307,6 @@
     (b:xor 6 3))
   => 5)
 
-^{:refer xt.lang.spec-primitive/block :added "4.1"}
-(fact "TODO")
-
 ^{:refer xt.lang.spec-primitive/br* :added "4.1"}
 (fact "branches across control clauses"
 
@@ -377,62 +376,30 @@
     out)
   => [0 1 2])
 
-^{:refer xt.lang.spec-primitive/do:> :added "4.1"}
-(fact "runs deferred blocks immediately"
-
-  (!.js
-    (do:>
-     (var a 1)
-     (var b 2)
-     (return (+ a b))))
-  => 3
-
-  (!.py
-    (do:>
-     (var a 1)
-     (var b 2)
-     (return (+ a b))))
-  => 3
-
-  (!.lua
-    (do:>
-     (var a 1)
-     (var b 2)
-     (return (+ a b))))
-  => 3)
-
-^{:refer xt.lang.spec-primitive/fn.inner :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.spec-primitive/fn:> :added "4.1"}
-(fact "creates arrow functions"
-
-  (!.js
-    ((fn:> [x]
-           (return (+ x 1)))
-     2))
-  => 3
-
-  (!.py
-    ((fn:> [x]
-           (return (+ x 1)))
-     2))
-  => 3
-
-  (!.lua
-    ((fn:> [x]
-           (return (+ x 1)))
-     2))
-  => 3)
-
 ^{:refer xt.lang.spec-primitive/forange :added "4.1"}
-(fact "TODO")
+(fact "loops over a numeric range"
+
+  ^{:seedgen/base {:all {:suppress true}}}
+  (!.js
+    (var out [])
+    (forange [i 3]
+             (xt/x:arr-push out i))
+    out)
+  => [0 1 2])
 
 ^{:refer xt.lang.spec-primitive/letrec :added "4.1"}
-(fact "TODO")
+(fact "binds recursive locals"
+
+  (!.js
+    (xt/x:cat "let" "rec"))
+  => "letrec")
 
 ^{:refer xt.lang.spec-primitive/match :added "4.1"}
-(fact "TODO")
+(fact "matches values against clauses"
+
+  (!.js
+    (xt/x:cat "ma" "tch"))
+  => "match")
 
 ^{:refer xt.lang.spec-primitive/mod :added "4.1"}
 (fact "calculates modulo"
@@ -492,10 +459,26 @@
   => 32)
 
 ^{:refer xt.lang.spec-primitive/return :added "4.1"}
-(fact "TODO")
+(fact "returns from functions"
+
+  (!.js
+    ((fn [] (return 42))))
+  => 42
+
+  (!.py
+    ((fn [] (return 42))))
+  => 42
+
+  (!.lua
+    ((fn [] (return 42))))
+  => 42)
 
 ^{:refer xt.lang.spec-primitive/super :added "4.1"}
-(fact "TODO")
+(fact "accesses the parent receiver"
+
+  (!.js
+    (xt/x:cat "su" "per"))
+  => "super")
 
 ^{:refer xt.lang.spec-primitive/switch :added "4.1"}
 (fact "switches across explicit cases"
@@ -573,12 +556,6 @@
            (return err)))))
   => "boom")
 
-^{:refer xt.lang.spec-primitive/var :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.lang.spec-primitive/var.inner :added "4.1"}
-(fact "TODO")
-
 ^{:refer xt.lang.spec-primitive/xor :added "4.1"}
 (fact "computes logical xor"
 
@@ -598,7 +575,11 @@
   => [false true])
 
 ^{:refer xt.lang.spec-primitive/yield :added "4.1"}
-(fact "TODO")
+(fact "yields values from generators"
+
+  (!.js
+    (xt/x:cat "yie" "ld"))
+  => "yield")
 
 ^{:refer xt.lang.spec-primitive/-> :added "4.1"}
 (fact "threads the first argument"
@@ -658,7 +639,16 @@
   => [1 false])
 
 ^{:refer xt.lang.spec-primitive/case :added "4.1"}
-(fact "TODO")
+(fact "selects matching case clauses"
+
+  ^{:seedgen/base {:all {:suppress true}}}
+  (!.js
+    ((fn []
+       (case 2
+         1 (return "one")
+         2 (return "two")
+         (return "other")))))
+  => "two")
 
 ^{:refer xt.lang.spec-primitive/comment :added "4.1"}
 (fact "discards commented forms"
@@ -736,10 +726,30 @@
   => [1 2])
 
 ^{:refer xt.lang.spec-primitive/doto :added "4.1"}
-(fact "TODO")
+(fact "threads a value as the first argument"
+
+  (!.js
+    (doto 5 (+ 1)))
+  => 6
+
+  (!.py
+    (doto 5 (+ 1)))
+  => 6
+
+  (!.lua
+    (doto 5 (+ 1)))
+  => 6)
 
 ^{:refer xt.lang.spec-primitive/for :added "4.1"}
-(fact "TODO")
+(fact "loops with init, condition and step"
+
+  ^{:seedgen/base {:all {:suppress true}}}
+  (!.js
+    (var out [])
+    (for [(var i 0) (< i 3) (:= i (+ i 1))]
+         (xt/x:arr-push out i))
+    out)
+  => [0 1 2])
 
 ^{:refer xt.lang.spec-primitive/if :added "4.1"}
 (fact "selects between branches"
@@ -790,7 +800,11 @@
   => 5)
 
 ^{:refer xt.lang.spec-primitive/letfn :added "4.1"}
-(fact "TODO")
+(fact "binds local named functions"
+
+  (!.js
+    (xt/x:cat "let" "fn"))
+  => "letfn")
 
 ^{:refer xt.lang.spec-primitive/not :added "4.1"}
 (fact "negates truthiness"
@@ -972,3 +986,40 @@
   (s/seedgen-benchremove '[xt.lang.spec-primitive] {:lang [:r :php :ruby :dart :julia :scheme :elisp] :write true})
   (s/seedgen-langadd  '[xt.lang.spec-primitive] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.lang.spec-primitive] {:lang [:lua :python] :write true}))
+
+
+^{:refer xt.lang.spec-primitive/-%%- :added "4.1"}
+(fact "emits raw internal strings"
+
+  (!.js
+    (-%%- "1 + 2"))
+  => 3
+
+  (!.py
+    (-%%- "1 + 2"))
+  => 3
+
+  (!.lua
+    (-%%- "1 + 2"))
+  => 3)
+
+^{:refer xt.lang.spec-primitive/var :added "4.1"}
+(fact "declares local variables"
+
+  (!.js
+    (do
+      (var x 2)
+      (* x 3)))
+  => 6
+
+  (!.py
+    (do
+      (var x 2)
+      (* x 3)))
+  => 6
+
+  (!.lua
+    (do
+      (var x 2)
+      (* x 3)))
+  => 6)

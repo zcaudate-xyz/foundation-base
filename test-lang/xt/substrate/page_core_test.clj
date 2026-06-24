@@ -849,3 +849,36 @@
       "captured" [{"space_id" "space/a"
                    "path" ["page" "ping"]
                    "value" 9}]})
+
+
+^{:refer xt.substrate.page-core/set-proxy-dispatcher :added "4.1"}
+(fact "sets and returns the proxy dispatcher"
+
+  (!.js
+    (var dispatcher (fn [op node space-id group-id args]
+                      (return {"dispatched" op})))
+    (var result (page-core/set-proxy-dispatcher dispatcher))
+    (page-core/set-proxy-dispatcher nil)
+    (== result dispatcher))
+  => true)
+
+^{:refer xt.substrate.page-core/get-proxy-dispatcher :added "4.1"}
+(fact "returns the current proxy dispatcher"
+
+  (!.js
+    (var dispatcher (fn [op node space-id group-id args]
+                      (return {"dispatched" op})))
+    (page-core/set-proxy-dispatcher dispatcher)
+    (var current (page-core/get-proxy-dispatcher))
+    (page-core/set-proxy-dispatcher nil)
+    (== current dispatcher))
+  => true)
+
+^{:refer xt.substrate.page-core/proxy-group? :added "4.1"}
+(fact "checks whether a group is marked as a remote proxy"
+
+  (!.js
+    [(page-core/proxy-group? {"remote" true})
+     (page-core/proxy-group? {"name" "local"})
+     (page-core/proxy-group? {})])
+  => [true nil nil])
