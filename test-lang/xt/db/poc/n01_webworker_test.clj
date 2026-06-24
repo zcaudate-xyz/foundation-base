@@ -1,4 +1,4 @@
-(ns xt.db.poc.node-webworker-test
+(ns xt.db.poc.n01-webworker-test
   (:use code.test)
   (:require [clojure.string]
             [hara.lang :as l]

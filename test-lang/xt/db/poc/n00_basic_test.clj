@@ -1,4 +1,4 @@
-(ns xt.db.poc.node-basic-test
+(ns xt.db.poc.n00-basic-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]

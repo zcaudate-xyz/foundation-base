@@ -1,4 +1,4 @@
-(ns xt.db.poc.compile-worker-test
+(ns xt.db.poc.n02-compile-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
