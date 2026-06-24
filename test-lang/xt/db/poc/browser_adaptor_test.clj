@@ -53,7 +53,7 @@
                                            "order" 1}}})
             (var lookup {"Log" {"position" 0}})
             (var tree ["Log"])
-            (. (xt.db.node.adaptor-base/init-adaptor-handler
+            (. (xt.db.node.adaptor-base/init-adaptor-main
                 (xt.substrate/node-create {"id" "db-model-server"})
                 {"primary" {"type" "supabase"
                             "defaults" (@! local-min/+config-supabase-anon+)}
@@ -107,7 +107,7 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.adaptor-base/init-adaptor-handler
+^{:refer xt.db.node.adaptor-base/init-adaptor-main
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "debug SharedWorker sqlite init"

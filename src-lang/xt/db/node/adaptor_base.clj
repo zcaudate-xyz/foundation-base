@@ -75,10 +75,7 @@
   (var schema  (xt/x:second args))
   (var lookup  (xt/x:get-idx args (xt/x:offset 2)))
   (return
-   (-> (-/init-adaptor-main node config schema lookup)
-       (promise/x:promise-then
-        (fn [node]
-          (return {"status" "ok"}))))))
+   (-/init-adaptor-main node config schema lookup)))
 
 ;;
 ;;

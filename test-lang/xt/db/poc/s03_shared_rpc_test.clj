@@ -47,6 +47,7 @@
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
+          (l/rt:scaffold-imports :js)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
   :teardown [(l/rt:stop)]})
@@ -59,29 +60,19 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (var node (xt.substrate/node-create {"id" "db-model-server"}))
-            (var schema xt.db.poc.browser-sharedworker-rpc-test/Schema)
-            (var lookup xt.db.poc.browser-sharedworker-rpc-test/SchemaLookup)
+            (var schema xt.db.poc.s03-shared-rpc-test/Schema)
+            (var lookup xt.db.poc.s03-shared-rpc-test/SchemaLookup)
 
             ;;
             ;;
-            (xt.db.node.adaptor-base/init-adaptor-handler
-             node
-             {"primary" {"type" "supabase"
-                         "defaults" (@! local-min/+config-supabase-anon+)}
-              "caching" {"type" "sqlite"
-                         "defaults" {"filename" ":memory:"}}
-              schema
-              lookup})
-
-            (xt.net.addon-supabase/middleware-supabase)
-            
             (xt.substrate/set-service
              node "db/primary"
              (xt.db.system.impl-supabase/impl-supabase
               (js.net.http-fetch/create
                (@! local-min/+config-supabase-anon+)
-               )
-              ))
+               (xt.net.addon-supabase/middleware-supabase))
+              schema
+              lookup))
             (xt.substrate/set-service
              node "db/caching"
              (xt.db.system.impl-memory/impl-memory schema lookup))
@@ -115,7 +106,7 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
-^{:refer xt.db.poc.browser-sharedworker-rpc-test/attach-rpc-model
+^{:refer xt.db.poc.s03-shared-rpc-test/attach-rpc-model
   :added "4.1"}
 (fact "client can open a remote rpc model and read the rpc result"
 

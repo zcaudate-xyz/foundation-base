@@ -289,7 +289,7 @@
     (var lookup {"Log" {"position" 0}})
     (substrate/set-service server "db/common" {"schema" schema
                                                 "lookup" lookup})
-    (adaptor/init-handlers server {})
+    (adaptor/init-handlers server)
     (page-proxy/install server)
     (page-proxy/install client)
     (-> (-/link-nodes server client)
@@ -306,6 +306,7 @@
                          "primary" (substrate/get-service server "db/primary")
                          "caching" (substrate/get-service server "db/caching")})))))
   => (contains-in
-      {"init" {"status" "ok"}
+      {"init" {"services" {"db/primary" {"::" "xt.db.system.impl_memory/ImplMemory"}
+                           "db/caching" {"::" "xt.db.system.impl_memory/ImplMemory"}}}
        "primary" {"::" "xt.db.system.impl_memory/ImplMemory"}
        "caching" {"::" "xt.db.system.impl_memory/ImplMemory"}}))

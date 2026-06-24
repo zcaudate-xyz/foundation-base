@@ -60,12 +60,12 @@
           (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.adaptor-base/init-db-type :added "4.1"}
-(fact "init-db-type installs a live impl on the node"
+^{:refer xt.db.node.adaptor-base/init-adaptor-type :added "4.1"}
+(fact "init-adaptor-type installs a live impl on the node"
 
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (adaptor/init-db-type node
+    (-> (adaptor/init-adaptor-type node
                               "db/primary"
                               "postgres"
                               (@! (local-min/+config+ :db))
@@ -85,7 +85,7 @@
   
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (adaptor/init-db-type node
+    (-> (adaptor/init-adaptor-type node
                               "db/caching"
                               "sqlite"
                               {}
@@ -104,12 +104,12 @@
                  "::/protocols" ["xt.net.conn_sql/ISqlClient"]
                  "raw" map?}}))
 
-^{:refer xt.db.node.adaptor-base/init-adaptor-handler :added "4.1"}
-(fact "init-adaptor-handler installs the db/common db/primary and db/caching services"
-  
+^{:refer xt.db.node.adaptor-base/init-adaptor-main :added "4.1"}
+(fact "init-adaptor-main installs the db/common db/primary and db/caching services"
+
   (notify/wait-on :js
     (-> (substrate/node-create {})
-        (adaptor/init-adaptor-handler {"primary" {"type" "postgres"
+        (adaptor/init-adaptor-main {"primary" {"type" "postgres"
                                      "defaults" (@! (local-min/+config+ :db))}
                           "caching" {"type" "sqlite"
                                      "defaults" {"filename" ":memory:"}}}
@@ -124,45 +124,21 @@
        "db/primary" map?,
        "db/common" map?}))
 
-^{:refer xt.db.node.adaptor-base/call-primary-handler :added "4.1"
-  :setup [(l/rt:restart :js)]}
-(fact "call-primary-handler routes rpc args through the live primary impl"
-  
-  (notify/wait-on :js
-    (-> (substrate/node-create {})
-        (adaptor/init-adaptor-handler {"primary" {"type" "postgres"
-                                     "defaults" (@! (local-min/+config+ :db))}
-                          "caching" {"type" "sqlite"
-                                     "defaults" {"filename" ":memory:"}}}
-                         -/Schema
-                         -/SchemaLookup)
-        (promise/x:promise-then
-         (fn [node]
-           (return
-            (adaptor/call-primary-handler
-             nil
-             [{"input" [{"symbol" "i_message" "type" "text"}]
-               "return" "jsonb"
-               "schema" "scratch_v0"
-               "id" "log_append_public"
-               "flags" {}}
-              ["hello"]]
-             nil
-             node))))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))
-        (promise/x:promise-catch
-         (fn [out]
-           (repl/notify out)))))
-  => (contains-in {"message" "hello"}))
+^{:refer xt.db.node.adaptor-base/init-adaptor :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/init-adaptor-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/init-adaptor-shared-handler :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"}
 (fact "call-rpc-handler routes rpc args through a named service"
 
   (notify/wait-on :js
     (-> (substrate/node-create {})
-        (adaptor/init-adaptor-handler {"primary" {"type" "postgres"
+        (adaptor/init-adaptor-main {"primary" {"type" "postgres"
                                      "defaults" (@! (local-min/+config+ :db))}
                           "caching" {"type" "sqlite"
                                      "defaults" {"filename" ":memory:"}}}
@@ -222,6 +198,39 @@
            (repl/notify out)))))
   => 200)
 
+^{:refer xt.db.node.adaptor-base/call-primary-handler :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "call-primary-handler routes rpc args through the live primary impl"
+  
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-adaptor-main {"primary" {"type" "postgres"
+                                     "defaults" (@! (local-min/+config+ :db))}
+                          "caching" {"type" "sqlite"
+                                     "defaults" {"filename" ":memory:"}}}
+                         -/Schema
+                         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (return
+            (adaptor/call-primary-handler
+             nil
+             [{"input" [{"symbol" "i_message" "type" "text"}]
+               "return" "jsonb"
+               "schema" "scratch_v0"
+               "id" "log_append_public"
+               "flags" {}}
+              ["hello"]]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => (contains-in {"message" "hello"}))
+
 ^{:refer xt.db.node.adaptor-base/create-pull-model :added "4.1"}
 (fact "create-pull-model builds a page model spec with local and remote handlers"
 
@@ -244,7 +253,7 @@
 
   (notify/wait-on :js
     (-> (substrate/node-create {})
-        (adaptor/init-adaptor-handler {"primary" {"type" "postgres"
+        (adaptor/init-adaptor-main {"primary" {"type" "postgres"
                                      "defaults" (@! (local-min/+config+ :db))}
                           "caching" {"type" "sqlite"
                                      "defaults" {"filename" ":memory:"}}}
@@ -306,7 +315,7 @@
 
   (notify/wait-on :js
     (-> (substrate/node-create {})
-        (adaptor/init-adaptor-handler {"primary" {"type" "postgres"
+        (adaptor/init-adaptor-main {"primary" {"type" "postgres"
                                      "defaults" (@! (local-min/+config+ :db))}
                           "caching" {"type" "sqlite"
                                      "defaults" {"filename" ":memory:"}}}
@@ -369,7 +378,7 @@
 
   (notify/wait-on :js
     (-> (substrate/node-create {})
-        (adaptor/init-adaptor-handler {"primary" {"type" "postgres"
+        (adaptor/init-adaptor-main {"primary" {"type" "postgres"
                                      "defaults" (@! (local-min/+config+ :db))}
                           "caching" {"type" "sqlite"
                                      "defaults" {"filename" ":memory:"}}}
@@ -406,7 +415,6 @@
            (repl/notify out)))))
   => (contains-in {"message" "hello"}))
 
-
 ^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
 (fact "init-handlers registers the @xt.db/init-adaptor-handler handler"
 
@@ -414,7 +422,7 @@
     (var node (substrate/node-create {"schema" -/Schema
                                       "lookup" -/SchemaLookup
                                       "services" {}}))
-    (adaptor/init-handlers node {})
+    (adaptor/init-handlers node)
     (substrate/set-service node "db/common" {"schema" -/Schema
                                              "lookup" -/SchemaLookup})
     (-> (substrate/request node "room/a" "@xt.db/init-adaptor"
@@ -428,7 +436,8 @@
          (fn [err]
            (repl/notify {"error" err
                          "message" (xt/x:ex-message err)})))))
-  => (contains-in {"status" "ok"}))
+  => (contains-in {"services" {"db/primary" map?
+                              "db/caching" map?}}))
 
-^{:refer xt.db.node.adaptor-base/init-shared-handlers :added "4.1"}
+^{:refer xt.db.node.adaptor-base/list-substrate-fn :added "4.1"}
 (fact "TODO")

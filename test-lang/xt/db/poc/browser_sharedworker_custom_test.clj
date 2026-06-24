@@ -76,7 +76,13 @@
         :caching (xt.db.system.impl-memory/impl-memory schema lookup)})
       (xt.substrate/register-handler
        node "@xt.db/init-adaptor"
-       xt.db.node.adaptor-base/init-adaptor-handler
+       (fn [space args request node]
+         (var common (xt.substrate/get-service node "db/common"))
+         (xt.substrate/set-service node "db/common" {:schema (. common ["schema"])
+                                                     :lookup (. common ["lookup"])})
+         (xt.substrate/set-service node "db/primary" (. common ["primary"]))
+         (xt.substrate/set-service node "db/caching" (. common ["caching"]))
+         (return {"status" "ok"}))
        nil)
       (xt.substrate/register-handler
        node "@/attach-pull-model"

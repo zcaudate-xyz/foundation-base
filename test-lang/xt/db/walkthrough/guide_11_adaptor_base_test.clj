@@ -45,11 +45,11 @@
           (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.adaptor-base/init-db-type :added "4.1"}
+^{:refer xt.db.node.adaptor-base/init-adaptor-type :added "4.1"}
 (fact "walkthrough: install one live backend on a node"
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (adaptor/init-db-type node
+    (-> (adaptor/init-adaptor-type node
                           "db/primary"
                           "postgres"
                           (@! (local-min/+config+ :db))
@@ -66,11 +66,11 @@
       "service_type" "xt.db.system.impl_postgres/ImplPostgres"
       "service_db" "postgres"})
 
-^{:refer xt.db.node.adaptor-base/init-adaptor-handler :added "4.1"}
+^{:refer xt.db.node.adaptor-base/init-adaptor-main :added "4.1"}
 (fact "walkthrough: install common, primary, and caching services"
   (notify/wait-on :js
     (-> (substrate/node-create {})
-        (adaptor/init-adaptor-handler {"primary" {"type" "postgres"
+        (adaptor/init-adaptor-main {"primary" {"type" "postgres"
                                      "defaults" (@! (local-min/+config+ :db))}
                           "caching" {"type" "sqlite"
                                      "defaults" {"filename" ":memory:"}}}
@@ -99,6 +99,5 @@
    (adaptor/init-handlers
     (substrate/node-create {"schema" -/Schema
                             "lookup" -/SchemaLookup
-                            "services" {}})
-    {}))
-  => (contains {"status" "disconnected"}))
+                            "services" {}})))
+  => (contains-in {"schema" map?}))
