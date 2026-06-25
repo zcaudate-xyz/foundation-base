@@ -5,7 +5,6 @@
 (l/script :xtalk
   {:require [[xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-supabase-pubsub :as pubsub]
-             [xt.db.system.impl-supabase-session :as session]
              [xt.db.text.pgrest-graph :as pgrest-graph]
              [xt.db.text.pgrest-tree :as pgrest-tree]
              [xt.lang.common-protocol :as proto]

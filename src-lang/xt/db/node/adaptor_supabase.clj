@@ -7,7 +7,8 @@
              [xt.substrate :as substrate]
              [xt.net.http-fetch :as http-fetch]
              [xt.net.addon-supabase :as addon]
-             [xt.db.system.impl-common :as impl-common]]})
+             [xt.db.system.impl-supabase :as impl-supabase]
+             [xt.db.system.impl-supabase-session :as session]]})
 
 (defn.xt normalise-auth-response
   "extracts the session payload from a supabase auth response"
@@ -45,8 +46,8 @@
                (promise/x:promise-then -/normalise-auth-response)
                (promise/x:promise-then
                 (fn [session]
-                  (impl-common/set-session impl session)
-                  (impl-common/start-auto-refresh impl opts)
+                  (session/set-session impl session)
+                  (session/start-auto-refresh impl opts)
                   (return session))))))))))
 
 (defn.xt supabase-sign-in-handler
@@ -66,8 +67,8 @@
                (promise/x:promise-then -/normalise-auth-response)
                (promise/x:promise-then
                 (fn [session]
-                  (impl-common/set-session impl session)
-                  (impl-common/start-auto-refresh impl opts)
+                  (session/set-session impl session)
+                  (session/start-auto-refresh impl opts)
                   (return session))))))))))
 
 (defn.xt supabase-sign-out-handler
@@ -80,13 +81,13 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (impl-common/stop-auto-refresh impl)
+          (session/stop-auto-refresh impl)
           (var client (xt/x:get-key impl "client"))
           (return
            (-> (http-fetch/request-http client (addon/cmd-logout opts))
                (promise/x:promise-then
                 (fn [_]
-                  (impl-common/set-session impl nil)
+                  (session/set-session impl nil)
                   (return {"status" "ok"}))))))))))
 
 (defn.xt supabase-refresh-handler
@@ -98,7 +99,7 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (return (impl-common/refresh-session impl)))))))
+          (return (session/refresh-session impl)))))))
 
 (defn.xt supabase-current-session-handler
   "returns the current session stored on the requested service"
@@ -106,14 +107,14 @@
   [space args request node]
   (var service-id (xt/x:first args))
   (var impl (substrate/get-service node service-id))
-  (return (impl-common/get-session impl)))
+  (return (session/get-session impl)))
 
 (defn.xt supabase-signed-in-handler
   "returns true if the requested service has an active access token"
   {:added "4.1"}
   [space args request node]
   (var impl (substrate/get-service node (xt/x:first args)))
-  (var session (impl-common/get-session impl))
+  (var session (session/get-session impl))
   (return (and (xt/x:not-nil? session)
                (xt/x:not-nil? (xt/x:get-key session "access_token")))))
 
@@ -126,7 +127,7 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (return (impl-common/session-info impl)))))))
+          (return (session/session-info impl)))))))
 
 (defn.xt supabase-rpc-call-handler
   "calls an rpc entry on the requested service"
