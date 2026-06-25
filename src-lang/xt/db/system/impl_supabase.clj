@@ -13,6 +13,16 @@
              [xt.net.http-fetch :as http-fetch]
              [xt.net.addon-supabase :as addon]]})
 
+(defn.xt normalise-body
+  [response]
+  (var out (xt/x:get-key response "body"))
+  (cond (and (xt/x:is-object? out)
+             (xt/x:not-nil? (xt/x:get-key out "data")))
+        (return (xt/x:get-key out "data"))
+
+        :else
+        (return out)))
+
 (defn.xt cmd-pull-async
   "runs a tree ir pull with async supabase semantics"
   {:added "4.1"}
@@ -34,15 +44,6 @@
                      :method "GET"}
                     {"headers" headers})))
 
-(defn.xt normalise-body
-  [response]
-  (var out (xt/x:get-key response "body"))
-  (cond (and (xt/x:is-object? out)
-             (xt/x:not-nil? (xt/x:get-key out "data")))
-        (return (xt/x:get-key out "data"))
-
-        :else
-        (return out)))
 
 (defn.xt pull-async
   "runs a tree ir pull with async supabase semantics"

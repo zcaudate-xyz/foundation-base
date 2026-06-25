@@ -74,7 +74,7 @@
   => [{"name" "US Dollar"}])
 
 ^{:refer xt.db.node.adapter-events/make-broadcast-callback :added "4.1"}
-(fact "callback applies xt.db event vectors to db/caching"
+(fact "callback applies broadcast payloads to db/caching"
 
   (notify/wait-on :js
     (-> (substrate/node-create {})
@@ -86,9 +86,9 @@
         (promise/x:promise-then
          (fn [node]
            (var callback (events/make-broadcast-callback node))
-           (-> (callback ["add" {"Currency" [{"id" "USD"
-                                              "name" "US Dollar"
-                                              "symbol" "$"}]}])
+           (-> (callback {"db/sync" {"Currency" [{"id" "USD"
+                                                   "name" "US Dollar"
+                                                   "symbol" "$"}]}})
                (promise/x:promise-then
                 (fn [_]
                   (var caching (substrate/get-service node "db/caching"))
@@ -213,7 +213,33 @@
 
 
 ^{:refer xt.db.node.adapter-events/unsubscribe-topic :added "4.1"}
-(fact "TODO")
+(fact "unsubscribes a previously obtained topic handle"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-adaptor-main
+         {"primary" {"type" "memory" "defaults" {}}
+          "caching" {"type" "memory" "defaults" {}}}
+         sample/Schema
+         sample/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (var mock (-/make-mock-pubsub))
+           (substrate/set-service node "db/pubsub" mock)
+           (-> (events/subscribe-topic node "db/pubsub" "User:u-1" {})
+               (promise/x:promise-then
+                (fn [handle]
+                  (-> (events/unsubscribe-topic node handle)
+                      (promise/x:promise-then
+                       (fn [res]
+                         (return (repl/notify res))))))))))))
+  => true)
 
 ^{:refer xt.db.node.adapter-events/init-adaptor-events :added "4.1"}
-(fact "TODO")
+(fact "installs adapter-events handlers on a node"
+
+  (!.js
+   (var node (substrate/node-create {}))
+   (events/init-adaptor-events node {})
+   (xtd/get-in node ["handlers" "@xt.db/apply-broadcast" "id"]))
+  => "@xt.db/apply-broadcast")

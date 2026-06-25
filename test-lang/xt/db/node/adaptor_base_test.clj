@@ -124,14 +124,31 @@
        "db/primary" map?,
        "db/common" map?}))
 
-^{:refer xt.db.node.adaptor-base/init-adaptor :added "4.1"}
-(fact "TODO")
-
 ^{:refer xt.db.node.adaptor-base/init-adaptor-handler :added "4.1"}
-(fact "TODO")
+(fact "init-adaptor-handler initialises services from client args"
 
-^{:refer xt.db.node.adaptor-base/init-adaptor-shared-handler :added "4.1"}
-(fact "TODO")
+  (notify/wait-on :js
+    (-> (adaptor/init-adaptor-handler
+         nil
+         [{"primary" {"type" "postgres"
+                      "defaults" (@! (local-min/+config+ :db))}
+           "caching" {"type" "sqlite"
+                      "defaults" {"filename" ":memory:"}}}
+          -/Schema
+          -/SchemaLookup]
+         nil
+         (substrate/node-create {}))
+        (promise/x:promise-then
+         (fn [node]
+           (repl/notify
+            (substrate/get-services node))))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify out)))))
+  => (contains-in
+      {"db/caching" map?
+       "db/primary" map?
+       "db/common" map?}))
 
 ^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"}
 (fact "call-rpc-handler routes rpc args through a named service"
@@ -440,4 +457,12 @@
                               "db/caching" map?}}))
 
 ^{:refer xt.db.node.adaptor-base/list-substrate-fn :added "4.1"}
-(fact "TODO")
+(fact "list-substrate-fn lists public vars tagged with :substrate/fn"
+
+  (map first (adaptor/list-substrate-fn 'xt.db.node.adaptor-base))
+  => '[attach-pull-model
+       attach-rpc-model
+       attach-tree-view-model
+       call-fetch-handler
+       call-rpc-handler
+       init-adaptor-handler])

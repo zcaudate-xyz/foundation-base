@@ -10,12 +10,6 @@
              [xt.db.system.impl-supabase :as impl-supabase]
              [xt.db.system.impl-supabase-session :as session]]})
 
-(defn.xt normalise-auth-response
-  "extracts the session payload from a supabase auth response"
-  {:added "4.1"}
-  [response]
-  (return (xt/x:get-key response "body")))
-
 (defn.xt supabase-request
   "executes a supabase command against the requested service"
   {:added "4.1"}
@@ -27,7 +21,7 @@
           (var client (xt/x:get-key impl "client"))
           (return
            (-> (http-fetch/request-http client cmd)
-               (promise/x:promise-then -/normalise-auth-response))))))))
+               (promise/x:promise-then impl-supabase/normalise-body))))))))
 
 (defn.xt supabase-sign-up-handler
   "signs up a new user and starts session auto-refresh"
@@ -43,11 +37,11 @@
           (var client (xt/x:get-key impl "client"))
           (return
            (-> (http-fetch/request-http client (addon/cmd-signup credentials opts))
-               (promise/x:promise-then -/normalise-auth-response)
+               (promise/x:promise-then impl-supabase/normalise-body)
                (promise/x:promise-then
                 (fn [session]
                   (session/set-session impl session)
-                  (session/start-auto-refresh impl opts)
+                  (session/auto-refresh-start impl)
                   (return session))))))))))
 
 (defn.xt supabase-sign-in-handler
@@ -64,11 +58,11 @@
           (var client (xt/x:get-key impl "client"))
           (return
            (-> (http-fetch/request-http client (addon/cmd-token-password credentials opts))
-               (promise/x:promise-then -/normalise-auth-response)
+               (promise/x:promise-then impl-supabase/normalise-body)
                (promise/x:promise-then
                 (fn [session]
                   (session/set-session impl session)
-                  (session/start-auto-refresh impl opts)
+                  (session/auto-refresh-start imp)
                   (return session))))))))))
 
 (defn.xt supabase-sign-out-handler
@@ -81,7 +75,7 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (session/stop-auto-refresh impl)
+          (session/auto-refresh-stop impl)
           (var client (xt/x:get-key impl "client"))
           (return
            (-> (http-fetch/request-http client (addon/cmd-logout opts))
@@ -89,6 +83,11 @@
                 (fn [_]
                   (session/set-session impl nil)
                   (return {"status" "ok"}))))))))))
+
+
+;;
+;;
+;;
 
 (defn.xt supabase-refresh-handler
   "refreshes the current session on the requested service"
@@ -108,26 +107,6 @@
   (var service-id (xt/x:first args))
   (var impl (substrate/get-service node service-id))
   (return (session/get-session impl)))
-
-(defn.xt supabase-signed-in-handler
-  "returns true if the requested service has an active access token"
-  {:added "4.1"}
-  [space args request node]
-  (var impl (substrate/get-service node (xt/x:first args)))
-  (var session (session/get-session impl))
-  (return (and (xt/x:not-nil? session)
-               (xt/x:not-nil? (xt/x:get-key session "access_token")))))
-
-(defn.xt supabase-user-info-handler
-  "returns current authenticated user info for the requested service"
-  {:added "4.1"}
-  [space args request node]
-  (var service-id (xt/x:first args))
-  (return
-   (-> (promise/x:promise-run (substrate/get-service node service-id))
-       (promise/x:promise-then
-        (fn [impl]
-          (return (session/session-info impl)))))))
 
 (defn.xt supabase-rpc-call-handler
   "calls an rpc entry on the requested service"
@@ -335,9 +314,7 @@
   (substrate/register-handler node "@xt.db/supabase-sign-out" -/supabase-sign-out-handler nil)
   (substrate/register-handler node "@xt.db/supabase-refresh" -/supabase-refresh-handler nil)
   (substrate/register-handler node "@xt.db/supabase-current-session" -/supabase-current-session-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-signed-in?" -/supabase-signed-in-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-user-info" -/supabase-user-info-handler nil)
-
+  
   (substrate/register-handler node "@xt.db/supabase-rpc-call" -/supabase-rpc-call-handler nil)
   (substrate/register-handler node "@xt.db/supabase-query-table" -/supabase-query-table-handler nil)
   (substrate/register-handler node "@xt.db/supabase-health" -/supabase-health-handler nil)

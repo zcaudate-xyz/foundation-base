@@ -30,6 +30,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.db.system.impl-supabase :as impl]
+             [xt.db.system.impl-supabase-session :as session]
              [xt.net.addon-supabase :as addon]]})
 
 (fact:global
@@ -50,6 +51,7 @@
 
 ^{:refer xt.db.system.impl-supabase/normalise-body :added "4.1"}
 (fact "TODO")
+
 
 ^{:refer xt.db.system.impl-supabase/cmd-pull-async :added "4.1"}
 (fact "TODO")
@@ -156,7 +158,7 @@
        "id" string?
        "message" "hello"}))
 
-^{:refer xt.db.system.impl-supabase/session-info :added "4.1"}
+^{:refer xt.db.system.impl-supabase-session/session-info :added "4.1"}
 (fact "reads the current user for the active session"
   (notify/wait-on :js
     (var email (xt/x:cat "impl-supabase-"
@@ -176,8 +178,8 @@
                         client
                         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
                         (@! (pg/bind-app (pg/app "scratch_v0")))))
-           (impl/set-session! source session)
-           (-> (impl/session-info source)
+           (session/set-session source session)
+           (-> (session/session-info source)
                (promise/x:promise-then
                 (fn [out]
                   (repl/notify [(xt/x:get-key (. out ["user"]) "email")
@@ -188,7 +190,7 @@
   => (contains-in
       [string? string?]))
 
-^{:refer xt.db.system.impl-supabase/refresh-session :added "4.1"}
+^{:refer xt.db.system.impl-supabase-session/refresh-session :added "4.1"}
 (fact "refreshes the active session"
   (notify/wait-on :js
     (var email (xt/x:cat "impl-supabase-"
@@ -208,8 +210,8 @@
                         client
                         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
                         (@! (pg/bind-app (pg/app "scratch_v0")))))
-           (impl/set-session! source session)
-           (-> (impl/refresh-session source)
+           (session/set-session source session)
+           (-> (session/refresh-session source)
                (promise/x:promise-then
                 (fn [out]
                   (repl/notify [(. out ["access_token"])
@@ -221,7 +223,7 @@
   => (contains-in
       [string? string? string?]))
 
-^{:refer xt.db.system.impl-supabase/start-auto-refresh :added "4.1"}
+^{:refer xt.db.system.impl-supabase-session/start-auto-refresh :added "4.1"}
 (fact "starts the auto refresh timer"
   (notify/wait-on :js
     (var email (xt/x:cat "impl-supabase-"
@@ -241,10 +243,10 @@
                         client
                         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
                         (@! (pg/bind-app (pg/app "scratch_v0")))))
-           (impl/set-session! source session)
-           (impl/start-auto-refresh source {"interval" 10})
+           (session/set-session source session)
+           (session/start-auto-refresh source {"interval" 10})
            (var started (xt/x:not-nil? (. (. (. source ["state"]) ["refresh"]) ["timer"])))
-           (impl/stop-auto-refresh source)
+           (session/stop-auto-refresh source)
            (var stopped (xt/x:nil? (. (. (. source ["state"]) ["refresh"]) ["timer"])))
            (repl/notify [started stopped])))))
   => [true true])
