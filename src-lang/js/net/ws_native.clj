@@ -61,7 +61,8 @@
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
   [client name f interval]
-  (var #{defaults heartbeats} client)
+  (var #{defaults state} client)
+  (var heartbeats (or (xt/x:get-key state "heartbeats") {}))
   (var stop-fn (xt/x:get-key heartbeats name))
   (when (xt/x:is-function? stop-fn)
     (stop-fn))
@@ -80,13 +81,15 @@
                   (clearInterval timer)
                   (xt/x:del-key heartbeats name)
                   (return true)))
+  (xt/x:set-key state "heartbeats" heartbeats)
   (return timer))
 
 (defn.js stop-heartbeat-ws
   "dispatches request through the wrapped fetch client"
   {:added "4.1.3"}
   [client name]
-  (var #{heartbeats} client)
+  (var #{state} client)
+  (var heartbeats (or (xt/x:get-key state "heartbeats") {}))
   (var stop-fn (xt/x:get-key heartbeats name))
   (when (xt/x:is-function? stop-fn)
     (stop-fn))
@@ -94,7 +97,7 @@
 
 (defimpl.xt ^{:lang :js}
   WebsocketClient
-  [raw defaults heartbeats]
+  [raw defaults state]
   websocket/IWebsocket
   {websocket/connect -/connect-ws
    websocket/disconnect -/disconnect-ws
@@ -110,4 +113,4 @@
   {:added "4.1.3"}
   [defaults]
   (return
-   (-/WebsocketClient defaults {})))
+   (-/WebsocketClient defaults {"heartbeats" {}})))

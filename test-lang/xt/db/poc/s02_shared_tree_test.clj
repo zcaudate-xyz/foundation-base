@@ -52,55 +52,75 @@
           (fn [e]
             (var port (. e ["ports"] [0]))
             (. port (start))
-            (var node (xt.substrate/node-create {"id" "db-model-server"}))
+            (. port (postMessage {"type" "debug" "stage" "onconnect-fired"}))
+            (try
+              (var node (xt.substrate/node-create {"id" "db-model-server"}))
 
-            ;;
-            ;; SETUP GROUP WITH MODEL
-            ;;
-            (xt.substrate.page-core/add-group-attach
-             node
-             "room/a"
-             "demo"
-             {"tree-view" (xt.db.node.adaptor-base/create-tree-view-model
-                           {"caching_id"    "db/caching"
-                            "primary_id"    "db/primary"}
-                           {"table" "Log"
-                            "select_entry" {"input" []
-                                            "view" {"table" "Log"
-                                                    "type" "select"
-                                                    "query" {}}}
-                            "return_entry" {"input" []
-                                            "view" {"table" "Log"
-                                                    "type" "return"
-                                                    "query" ["id" "message"]}}
-                            "pipeline" {}
-                            "options" {}
-                            "defaults" {"select_args" []
-                                        "return_args" []}})})
-            
-            (xt.substrate.page-proxy/install node)
-            (-> (xt.db.node.adaptor-base/init-adaptor-main
-                 node
-                 {"primary" {"type" "supabase"
-                             "defaults" (@! local-min/+config-supabase-anon+)}
-                  "caching" {"type" "memory" "defaults" {}}}
-                 xt.db.poc.s02-shared-tree-test/Schema
-                 xt.db.poc.s02-shared-tree-test/SchemaLookup)
-                (xt.lang.spec-promise/x:promise-then
-                 (fn []
-                   (return
-                    (xt.substrate.transport-browser/boot-self
-                     node
-                     {"transport_id" "host"
-                      "target" port
-                      "ready" {"signal" "ready"
-                               "transport" "browser"
-                               "worker" "db-model-server"}}))))
-                (xt.lang.spec-promise/x:promise-catch
-                 (fn [err]
-                   (return
-                    {"error" err
-                     "message" (x:ex-message err)})))))))
+              ;;
+              ;; SETUP GROUP WITH MODEL
+              ;;
+              (xt.substrate.page-core/add-group-attach
+               node
+               "room/a"
+               "demo"
+               {"tree-view" (xt.db.node.adaptor-base/create-tree-view-model
+                             {"caching_id"    "db/caching"
+                              "primary_id"    "db/primary"}
+                             {"table" "Log"
+                              "select_entry" {"input" []
+                                              "view" {"table" "Log"
+                                                      "type" "select"
+                                                      "query" {}}}
+                              "return_entry" {"input" []
+                                              "view" {"table" "Log"
+                                                      "type" "return"
+                                                      "query" ["id" "message"]}}
+                              "pipeline" {}
+                              "options" {}
+                              "defaults" {"select_args" []
+                                          "return_args" []}})})
+
+              (xt.substrate.page-proxy/install node)
+              (. port (postMessage {"type" "debug" "stage" "before-init"}))
+              (. (!:G setTimeout)
+                 (call
+                  null
+                  5000
+                  (fn []
+                    (. port (postMessage {"type" "debug" "stage" "init-timeout"})))))
+              (var init-promise (xt.db.node.adaptor-base/init-adaptor-main
+                                 node
+                                 {"primary" {"type" "supabase"
+                                             "defaults" (@! local-min/+config-supabase-anon+)}
+                                  "caching" {"type" "memory" "defaults" {}}}
+                                 xt.db.poc.s02-shared-tree-test/Schema
+                                 xt.db.poc.s02-shared-tree-test/SchemaLookup))
+              (. port (postMessage {"type" "debug" "stage" "init-called" "pending" (. init-promise ["status"])}))
+              (-> init-promise
+                  (xt.lang.spec-promise/x:promise-then
+                   (fn []
+                     (. port (postMessage {"type" "debug" "stage" "init-ok"}))
+                     (return
+                      (xt.substrate.transport-browser/boot-self
+                       node
+                       {"transport_id" "host"
+                        "target" port
+                        "ready" {"signal" "ready"
+                                 "transport" "browser"
+                                 "worker" "db-model-server"}}))))
+                  (xt.lang.spec-promise/x:promise-catch
+                   (fn [err]
+                     (. port (postMessage {"type" "error"
+                                           "message" (. err ["message"])
+                                           "stack" (. err ["stack"])}))
+                     (return
+                      {"error" err
+                       "message" (x:ex-message err)}))))
+              (catch err
+                (. port (postMessage {"type" "error"
+                                      "stage" "onconnect"
+                                      "message" (. err ["message"])
+                                      "stack" (. err ["stack"])})))))))
    {:lang :js
     :layout :full
     :emit {:override {"@sqlite.org/sqlite-wasm"
@@ -116,18 +136,113 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.poc.browser-sharedworker-tree-test/attach-tree-view-model
-  :added "4.1"
-  :setup [(scratch-v0/log-append-public "tree")]}
-(fact "client can open a remote tree-view model and read its output"
+^{:refer xt.db.poc.s02-shared-tree-test/step-1-create-client
+  :added "4.1"}
+(fact "step 1: client can be created"
+  (notify/wait-on [:js 5000]
+    (var client (substrate/node-create {"id" "db-model-client"}))
+    (repl/notify {"client-created" true}))
+  => (contains-in {"client-created" true}))
 
-  (notify/wait-on [:js 2000]
+^{:refer xt.db.poc.s02-shared-tree-test/step-2-install-proxy
+  :added "4.1"}
+(fact "step 2: page proxy can be installed"
+  (notify/wait-on [:js 5000]
+    (var client (substrate/node-create {"id" "db-model-client"}))
+    (page-proxy/install client)
+    (repl/notify {"proxy-installed" true}))
+  => (contains-in {"proxy-installed" true}))
+
+^{:refer xt.db.poc.s02-shared-tree-test/step-3-connect-sharedworker
+  :added "4.1"}
+(fact "step 3: sharedworker can be connected"
+  (notify/wait-on [:js 10000]
     (var client (substrate/node-create {"id" "db-model-client"}))
     (page-proxy/install client)
     (-> (browser-transport/connect-sharedworker
          client
          {"transport_id" "worker"
-          "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
+          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
+        (promise/x:promise-then
+         (fn [conn]
+           (repl/notify {"transport-id" (. conn ["transport_id"])})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" (xt/x:ex-message err)})))))
+  => (contains-in {"transport-id" string?}))
+
+^{:refer xt.db.poc.s02-shared-tree-test/step-4-open-proxy-group
+  :added "4.1"
+  :setup [(scratch-v0/log-append-public "tree")]}
+(fact "step 4: proxy group can be opened"
+  (notify/wait-on [:js 10000]
+    (var client (substrate/node-create {"id" "db-model-client"}))
+    (page-proxy/install client)
+    (-> (browser-transport/connect-sharedworker
+         client
+         {"transport_id" "worker"
+          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
+        (promise/x:promise-then
+         (fn [conn]
+           (var transport-id (. conn ["transport_id"]))
+           (return
+            (page-proxy/open-proxy-group
+             client
+             "room/a"
+             "demo"
+             {"transport_id" transport-id}))))
+        (promise/x:promise-then
+         (fn [group]
+           (repl/notify {"group-opened" true
+                         "models" (xtd/get-in group ["models"])})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" (xt/x:ex-message err)})))))
+  => (contains-in {"group-opened" true}))
+
+^{:refer xt.db.poc.s02-shared-tree-test/step-5-remote-call
+  :added "4.1"
+  :setup [(scratch-v0/log-append-public "tree")]}
+(fact "step 5: remote call returns data"
+  (notify/wait-on [:js 10000]
+    (var client (substrate/node-create {"id" "db-model-client"}))
+    (page-proxy/install client)
+    (-> (browser-transport/connect-sharedworker
+         client
+         {"transport_id" "worker"
+          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
+        (promise/x:promise-then
+         (fn [conn]
+           (var transport-id (. conn ["transport_id"]))
+           (return
+            (page-proxy/open-proxy-group
+             client
+             "room/a"
+             "demo"
+             {"transport_id" transport-id}))))
+        (promise/x:promise-then
+         (fn [group]
+           (return
+            (base-page/remote-call client "room/a" "demo" "tree-view" [[] []] true))))
+        (promise/x:promise-then
+         (fn [res]
+           (repl/notify {"remote-result" res})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" (xt/x:ex-message err)})))))
+  => (contains-in {"remote-result" map?}))
+
+^{:refer xt.db.poc.browser-sharedworker-tree-test/attach-tree-view-model
+  :added "4.1"
+  :setup [(scratch-v0/log-append-public "tree")]}
+(fact "step 6: client can open a remote tree-view model and read its output"
+  (notify/wait-on [:js 15000]
+    (var client (substrate/node-create {"id" "db-model-client"}))
+    (page-proxy/install client)
+    (-> (browser-transport/connect-sharedworker
+         client
+         {"transport_id" "worker"
+          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
         (promise/x:promise-then
          (fn [conn]
            (var transport-id (. conn ["transport_id"]))
@@ -141,18 +256,51 @@
          (fn [group]
            (var model (xtd/get-in group ["models" "tree-view"]))
            (return
-            (base-page/remote-call client "room/a" "demo" "tree-view" [[] []] true))))
-        (promise/x:promise-then
-         (fn [res]
-           (return
-            (promise/x:with-delay
-             1000
-             (fn []
-               (repl/notify {"result" res
-                             "output" (event-model/get-current model nil)}))))))
+            (promise/x:promise-then
+             (base-page/remote-call client "room/a" "demo" "tree-view" [[] []] true)
+             (fn [res]
+               (return
+                (promise/x:with-delay
+                 1000
+                 (fn []
+                   (repl/notify {"result" res
+                                 "output" (event-model/get-current model nil)})))))))))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify {"error" err
                          "message" (xt/x:ex-message err)})))))
   => (contains-in
       {"output" [{"message" "tree"}]}))
+
+^{:refer xt.db.poc.s02-shared-tree-test/debug-minimal-sharedworker
+  :added "4.1"}
+(fact "minimal sharedworker can echo messages"
+  (notify/wait-on [:js 10000]
+    (var messages [])
+    (var notified false)
+    (var script "self.onconnect = function(e) { var port = e.ports[0]; port.start(); port.postMessage({type: 'debug', stage: 'minimal-onconnect'}); };")
+    (var blob (new Blob [script] {"type" "text/javascript"}))
+    (var url (. (!:G URL) (createObjectURL blob)))
+    (var shared (new SharedWorker url))
+    (var port (. shared ["port"]))
+    (. port (start))
+    (. port (addEventListener
+              "message"
+              (fn [event]
+                (var data (. event ["data"]))
+                (. messages (push data))
+                (when (not notified)
+                  (:= notified true)
+                  (repl/notify messages)))
+              false))
+    (. (!:G URL) (revokeObjectURL url))
+    (. (!:G setTimeout)
+       (call
+        null
+        5000
+        (fn []
+          (when (not notified)
+            (:= notified true)
+            (repl/notify messages))))))
+  => (contains-in
+      [{"type" "debug" "stage" "minimal-onconnect"}]))
