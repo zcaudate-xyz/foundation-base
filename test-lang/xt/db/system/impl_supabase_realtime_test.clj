@@ -119,3 +119,34 @@
                                      "payload" {"db/sync" {"User" [{"id" "u-1"}]}}}})
    captured)
   => [])
+
+
+^{:refer xt.db.system.impl-supabase-realtime/prepare-connect-url :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-realtime/resolve-api-key :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-realtime/resolve-auth-token :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-realtime/broadcast-join-payload :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-realtime/client-topics :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-realtime/topic-entry :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-realtime/on-open :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-realtime/unsubscribe :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.system.impl-supabase-realtime/publish :added "4.1"}
+(fact "TODO")

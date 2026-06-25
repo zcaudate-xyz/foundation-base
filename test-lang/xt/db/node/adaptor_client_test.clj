@@ -197,3 +197,10 @@
       {"has_group" true
        "model_type" "event.model"
        "output" nil}))
+
+
+^{:refer xt.db.node.adaptor-client/attach-model-request :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-client/attach-model-and-open :added "4.1"}
+(fact "TODO")

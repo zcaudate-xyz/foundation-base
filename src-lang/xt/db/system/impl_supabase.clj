@@ -81,7 +81,7 @@
 ;;
 
 (defimpl.xt ImplSupabase
-  [client schema lookup state  listeners opts]
+  [client schema lookup state listeners opts]
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
    impl-common/rpc-call-async -/rpc-call-async}

@@ -148,3 +148,7 @@
            (repl/notify
             (conn-sql/query client "SELECT 1;"))))))
   => 1)
+
+
+^{:refer xt.db.system.impl-sqlite/rpc-call-async :added "4.1"}
+(fact "TODO")

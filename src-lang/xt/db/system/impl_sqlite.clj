@@ -108,7 +108,7 @@
   (conn-sql/query client
                   (xt/x:str-join "\n\n"
                                  (manage/table-create-all schema lookup opts)))
-  (return nil))
+  (return impl))
 
 (defn.xt rpc-call-async
   "sqlite impl does not support remote rpc calls"
@@ -145,7 +145,7 @@
 (defn.xt impl-sqlite
   [client schema lookup]
   (return
-   (-/ImplSqlite client schema lookup  listeners (sql-util/sqlite-opts lookup))))
+   (-/ImplSqlite client schema lookup {} (sql-util/sqlite-opts lookup))))
 
 (defn.xt impl-sqlite-init
   [impl]
