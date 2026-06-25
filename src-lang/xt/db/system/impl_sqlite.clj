@@ -123,7 +123,7 @@
 
 
 (defimpl.xt ImplSqlite
-  [client schema lookup listeners opts]
+  [client schema lookup listeners opts metadata]
 
   impl-common/ISourceLocal
   {impl-common/clear-db             -/clear-db
@@ -145,7 +145,7 @@
 (defn.xt impl-sqlite
   [client schema lookup]
   (return
-   (-/ImplSqlite client schema lookup {} (sql-util/sqlite-opts lookup))))
+   (-/ImplSqlite client schema lookup {} (sql-util/sqlite-opts lookup) {})))
 
 (defn.xt impl-sqlite-init
   [impl]

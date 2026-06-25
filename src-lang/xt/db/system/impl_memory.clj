@@ -88,7 +88,7 @@
 ;;
 
 (defimpl.xt ImplMemory
-  [rows schema lookup listeners]
+  [rows schema lookup listeners metadata]
 
   impl-common/ISourceLocal
   {impl-common/clear-db             -/clear-db
@@ -110,4 +110,4 @@
 (defn.xt impl-memory
   [schema lookup]
   (return
-   (-/ImplMemory {} schema lookup {})))
+   (-/ImplMemory {} schema lookup {} {})))

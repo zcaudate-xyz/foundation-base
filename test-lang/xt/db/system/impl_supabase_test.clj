@@ -204,4 +204,4 @@
        "::" "xt.db.system.impl_supabase/ImplSupabase",
        "::/protocols" ["xt.db.system.impl_common/ISourceRemote"],
        "client" map?
-       "state" {"session" nil?, "auto_refresh" nil?, "pubsub" map?, "id_counter" 0}}))
+       "state" {"session" nil?, "auto_refresh" nil?, "realtime" map?}}))
