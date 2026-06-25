@@ -31,7 +31,9 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
              [js.worker.link :as worker-link]
+             [js.net.http-fetch :as http-fetch]
              [xt.event.base-model :as event-model]
+             [xt.db.node.adaptor-base :as adaptor-base]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
@@ -43,14 +45,6 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
-(fact:global
- {:setup [(l/rt:restart :js)
-          (l/rt:setup :postgres)
-          (l/rt:scaffold-imports :js)
-          (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
-                             4000)]
-  :teardown [(l/rt:stop)]})
-
 (def +sharedworker-script+
   (l/emit-script
    '(do
@@ -59,27 +53,7 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (var node (xt.substrate/node-create {"id" "db-model-server"}))
-            (var schema xt.db.poc.browser-sharedworker-tree-test/Schema)
-            (var lookup xt.db.poc.browser-sharedworker-tree-test/SchemaLookup)
 
-            ;;
-            ;; SETUP SERVICES EXPANDED
-            ;;
-            (xt.substrate/set-service node "db/common" {:schema schema
-                                                        :lookup lookup})
-            (xt.substrate/set-service
-             node "db/primary"
-             (xt.db.system.impl-supabase/impl-supabase
-              (js.net.http-fetch/create
-               (@! local-min/+config-supabase-anon+)
-               (xt.net.addon-supabase/middleware-supabase))
-              schema
-              lookup))
-            (xt.substrate/set-service
-             node "db/caching"
-             (xt.db.system.impl-memory/impl-memory schema lookup))
-            (xt.substrate.page-proxy/install node)
-            
             ;;
             ;; SETUP GROUP WITH MODEL
             ;;
@@ -88,8 +62,8 @@
              "room/a"
              "demo"
              {"tree-view" (xt.db.node.adaptor-base/create-tree-view-model
-                           {"caching_id         " "db/caching"
-                            "primary_id" "db/primary"}
+                           {"caching_id"    "db/caching"
+                            "primary_id"    "db/primary"}
                            {"table" "Log"
                             "select_entry" {"input" []
                                             "view" {"table" "Log"
@@ -103,14 +77,27 @@
                             "options" {}
                             "defaults" {"select_args" []
                                         "return_args" []}})})
-            (return
-             (xt.substrate.transport-browser/boot-self
-              node
-              {"transport_id" "host"
-               "target" port
-               "ready" {"signal" "ready"
-                        "transport" "browser"
-                        "worker" "db-model-server"}})))))
+            
+            (xt.substrate.page-proxy/install node)
+            
+            (var schema xt.db.poc.s02-shared-tree-test/Schema)
+            (var lookup xt.db.poc.s02-shared-tree-test/SchemaLookup)
+
+            
+            (-> (xt.db.node.adaptor-base/init-adaptor-main
+                 node
+                 {"primary" {"type" "supabase"
+                             "defaults" (@! local-min/+config-supabase-anon+)}
+                  "caching" {"type" "memory" "defaults" {}}})
+                (. (then (fn []
+                           (return
+                            (xt.substrate.transport-browser/boot-self
+                             node
+                             {"transport_id" "host"
+                              "target" port
+                              "ready" {"signal" "ready"
+                                       "transport" "browser"
+                                       "worker" "db-model-server"}})))))))))
    {:lang :js
     :layout :full
     :emit {:override {"@sqlite.org/sqlite-wasm"
@@ -118,12 +105,20 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
+(fact:global
+ {:setup [(l/rt:restart :js)
+          (l/rt:setup :postgres)
+          (l/rt:scaffold-imports :js)
+          (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
+                             4000)]
+  :teardown [(l/rt:stop)]})
+
 ^{:refer xt.db.poc.browser-sharedworker-tree-test/attach-tree-view-model
   :added "4.1"
   :setup [(scratch-v0/log-append-public "tree")]}
 (fact "client can open a remote tree-view model and read its output"
 
-  (notify/wait-on [:js 20000]
+  (notify/wait-on [:js 2000]
     (var client (substrate/node-create {"id" "db-model-client"}))
     (page-proxy/install client)
     (-> (browser-transport/connect-sharedworker

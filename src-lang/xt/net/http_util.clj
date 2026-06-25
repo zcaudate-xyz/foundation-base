@@ -86,3 +86,13 @@
     (when (xt/x:not-nil? v)
       (xt/x:arr-push out (xt/x:cat k "=" (xt/x:to-string v)))))
   (return (xt/x:str-join "&" out)))
+
+(defn.xt get-body-data
+  [response]
+  (var out (xt/x:get-key response "body"))
+  (cond (and (xt/x:is-object? out)
+             (xt/x:not-nil? (xt/x:get-key out "data")))
+        (return (xt/x:get-key out "data"))
+
+        :else
+        (return out)))

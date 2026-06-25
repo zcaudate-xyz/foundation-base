@@ -7,7 +7,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as xts]
              [xt.net.http-fetch :as http-fetch]
-             [xt.db.system.impl-supabase :as impl-supabase]
+             [xt.net.http-util :as http-util]
              [xt.net.addon-supabase :as addon]]})
 
 (defn.xt get-session
@@ -41,7 +41,7 @@
                                        {}))
              (promise/x:promise-then
               (fn [response]
-                (return (-/set-session impl (impl-supabase/normalise-body response)))))
+                (return (-/set-session impl (http-util/get-body-data response)))))
              (promise/x:promise-catch
               (fn [err]
                 (return err)))))))

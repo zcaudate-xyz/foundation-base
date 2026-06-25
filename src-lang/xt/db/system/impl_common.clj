@@ -17,8 +17,3 @@
   (process-add-event [impl data])
   (process-remove-event [impl data]))
 
-(defprotocol.xt IPubSub
-  (subscribe   [impl topic opts callback])
-  (unsubscribe [impl handle])
-  (publish     [impl topic message opts]))
-

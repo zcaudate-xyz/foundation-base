@@ -4,24 +4,14 @@
 
 (l/script :xtalk
   {:require [[xt.db.system.impl-common :as impl-common]
-             [xt.db.system.impl-supabase-pubsub :as pubsub]
              [xt.db.text.pgrest-graph :as pgrest-graph]
              [xt.db.text.pgrest-tree :as pgrest-tree]
              [xt.lang.common-protocol :as proto]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as http-fetch]
+             [xt.net.http-util :as http-util]
              [xt.net.addon-supabase :as addon]]})
-
-(defn.xt normalise-body
-  [response]
-  (var out (xt/x:get-key response "body"))
-  (cond (and (xt/x:is-object? out)
-             (xt/x:not-nil? (xt/x:get-key out "data")))
-        (return (xt/x:get-key out "data"))
-
-        :else
-        (return out)))
 
 (defn.xt cmd-pull-async
   "runs a tree ir pull with async supabase semantics"
@@ -53,9 +43,7 @@
   (var input (-/cmd-pull-async impl tree))
   (return
    (-> (http-fetch/request-http client input)
-       (promise/x:promise-then -/normalise-body))))
-
-
+       (promise/x:promise-then http-util/get-body-data))))
 
 (defn.xt cmd-rpc-call-async
   [impl rpc-spec args opts]
@@ -85,7 +73,7 @@
   (var input (-/cmd-rpc-call-async impl rpc-spec args opts))
   (return
    (-> (http-fetch/request-http client input)
-       (promise/x:promise-then -/normalise-body))))
+       (promise/x:promise-then http-util/get-body-data))))
 
 
 ;;
@@ -96,12 +84,7 @@
   [client schema lookup state opts]
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
-   impl-common/rpc-call-async -/rpc-call-async}
-  
-  impl-common/IPubSub
-  {impl-common/subscribe   pubsub/subscribe
-   impl-common/unsubscribe pubsub/unsubscribe
-   impl-common/publish     pubsub/publish})
+   impl-common/rpc-call-async -/rpc-call-async})
 
 (defn.xt impl-supabase
   [client schema lookup opts]
