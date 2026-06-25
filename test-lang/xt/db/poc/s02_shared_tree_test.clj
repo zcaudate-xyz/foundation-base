@@ -79,25 +79,28 @@
                                         "return_args" []}})})
             
             (xt.substrate.page-proxy/install node)
-            
-            (var schema xt.db.poc.s02-shared-tree-test/Schema)
-            (var lookup xt.db.poc.s02-shared-tree-test/SchemaLookup)
-
-            
             (-> (xt.db.node.adaptor-base/init-adaptor-main
                  node
                  {"primary" {"type" "supabase"
                              "defaults" (@! local-min/+config-supabase-anon+)}
-                  "caching" {"type" "memory" "defaults" {}}})
-                (. (then (fn []
-                           (return
-                            (xt.substrate.transport-browser/boot-self
-                             node
-                             {"transport_id" "host"
-                              "target" port
-                              "ready" {"signal" "ready"
-                                       "transport" "browser"
-                                       "worker" "db-model-server"}})))))))))
+                  "caching" {"type" "memory" "defaults" {}}}
+                 xt.db.poc.s02-shared-tree-test/Schema
+                 xt.db.poc.s02-shared-tree-test/SchemaLookup)
+                (xt.lang.spec-promise/x:promise-then
+                 (fn []
+                   (return
+                    (xt.substrate.transport-browser/boot-self
+                     node
+                     {"transport_id" "host"
+                      "target" port
+                      "ready" {"signal" "ready"
+                               "transport" "browser"
+                               "worker" "db-model-server"}}))))
+                (xt.lang.spec-promise/x:promise-catch
+                 (fn [err]
+                   (return
+                    {"error" err
+                     "message" (x:ex-message err)})))))))
    {:lang :js
     :layout :full
     :emit {:override {"@sqlite.org/sqlite-wasm"
