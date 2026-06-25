@@ -40,6 +40,13 @@
              [xt.db.system.main]
              [js.worker.link :as worker-link]]})
 
+
+(def.js Schema
+  (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
+
+(def.js SchemaLookup
+  (@! (pg/bind-app (pg/app "scratch_v0"))))
+
 (defn- fix-worker-script
   "Node 24 eval workers parse scripts containing ESM imports as modules, so the
    worker_threads setup must use a static ESM import instead of CommonJS require."
@@ -132,11 +139,7 @@
                                           "message" (. err ["message"])}))
              (return nil)))))
     {:lang :js
-     :layout :full
-     :emit {:override {"@sqlite.org/sqlite-wasm"
-                       "file:///home/hoebat/Development/greenways/gw-v2/ref/foundation/node_modules/@sqlite.org/sqlite-wasm/dist/node.mjs"
-                       "pg"
-                       "data:text/javascript,export default {Client: function() {}}"}}})))
+     :layout :full})))
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -149,14 +152,8 @@
 (fact "server node installs db/primary and db/caching services and exposes page models"
 
   (notify/wait-on :js
-    (var schema {"Log" {"id" {"ident" "id"
-                               "type" "uuid"
-                               "primary" true
-                               "order" 0}
-                        "message" {"ident" "message"
-                                   "type" "text"
-                                   "order" 1}}})
-    (var lookup {"Log" {"position" 0}})
+    (var schema -/Schema)
+    (var lookup -/SchemaLookup)
     (var node (substrate/node-create {"id" "db-model-server"}))
     (substrate/set-service node "db/common" {:schema schema :lookup lookup})
     (substrate/set-service node "db/primary" (impl-memory/impl-memory schema lookup))

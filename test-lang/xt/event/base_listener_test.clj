@@ -155,7 +155,52 @@
        "listener/type" "custom"}])
 
 ^{:refer xt.event.base-listener/listener-entry? :added "4.1"}
-(fact "TODO")
+(fact "checks if value is a plain listener entry"
+
+  (!.js
+    [(event/listener-entry? nil)
+     (event/listener-entry? {})
+     (event/listener-entry?
+      (event/make-listener-entry
+       "a1" "custom"
+       (fn:> [id data t meta] "a1")
+       nil nil))
+     (event/listener-entry?
+      {"a1" (event/make-listener-entry
+             "a1" "custom"
+             (fn:> [id data t meta] "a1")
+             nil nil)})])
+  => [false false true false]
+
+  (!.lua
+    [(event/listener-entry? nil)
+     (event/listener-entry? {})
+     (event/listener-entry?
+      (event/make-listener-entry
+       "a1" "custom"
+       (fn:> [id data t meta] "a1")
+       nil nil))
+     (event/listener-entry?
+      {"a1" (event/make-listener-entry
+             "a1" "custom"
+             (fn:> [id data t meta] "a1")
+             nil nil)})])
+  => [false false true false]
+
+  (!.py
+    [(event/listener-entry? nil)
+     (event/listener-entry? {})
+     (event/listener-entry?
+      (event/make-listener-entry
+       "a1" "custom"
+       (fn:> [id data t meta] "a1")
+       nil nil))
+     (event/listener-entry?
+      {"a1" (event/make-listener-entry
+             "a1" "custom"
+             (fn:> [id data t meta] "a1")
+             nil nil)})])
+  => [false false true false])
 
 ^{:refer xt.event.base-listener/arrayify-path :added "4.1"}
 (fact "normalizes listener paths"
@@ -182,10 +227,58 @@
   => [[] [] ["a"] ["a"]])
 
 ^{:refer xt.event.base-listener/callback-data :added "4.1"}
-(fact "TODO")
+(fact "normalizes event payload by removing meta"
+
+  (!.js
+    [(event/callback-data "hello")
+     (event/callback-data {:ok true :data "hello"})
+     (event/callback-data {:ok true :meta {:base true}})])
+  => ["hello"
+      {"ok" true
+       "data" "hello"}
+      {"ok" true}]
+
+  (!.lua
+    [(event/callback-data "hello")
+     (event/callback-data {:ok true :data "hello"})
+     (event/callback-data {:ok true :meta {:base true}})])
+  => ["hello"
+      {"ok" true
+       "data" "hello"}
+      {"ok" true}]
+
+  (!.py
+    [(event/callback-data "hello")
+     (event/callback-data {:ok true :data "hello"})
+     (event/callback-data {:ok true :meta {:base true}})])
+  => ["hello"
+      {"ok" true
+       "data" "hello"}
+      {"ok" true}])
 
 ^{:refer xt.event.base-listener/callback-time :added "4.1"}
-(fact "TODO")
+(fact "extracts event timestamp"
+
+  (!.js
+    [(event/callback-time "hello")
+     (event/callback-time {:ok true})
+     (event/callback-time {:ok true :time 123})
+     (event/callback-time {:ok true :t 456})])
+  => [nil nil 123 456]
+
+  (!.lua
+    [(event/callback-time "hello")
+     (event/callback-time {:ok true})
+     (event/callback-time {:ok true :time 123})
+     (event/callback-time {:ok true :t 456})])
+  => [nil nil 123 456]
+
+  (!.py
+    [(event/callback-time "hello")
+     (event/callback-time {:ok true})
+     (event/callback-time {:ok true :time 123})
+     (event/callback-time {:ok true :t 456})])
+  => [nil nil 123 456])
 
 ^{:refer xt.event.base-listener/clear-listeners :added "4.1"}
 (fact "clears non-keyed listeners"

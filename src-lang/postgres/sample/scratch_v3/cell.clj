@@ -102,12 +102,7 @@
   [local-db payload]
   (var request (realtime/postgres-change->sync-request payload))
   (when request
-    (var body-sync (xt/x:get-key request "db/sync"))
-    (var body-remove (xt/x:get-key request "db/remove"))
-    (when body-sync
-      (xdb/sync-event local-db ["add" body-sync]))
-    (when body-remove
-      (xdb/sync-event local-db ["remove" body-remove]))
+    (xdb/sync-event local-db request)
     (return [true request]))
   (return [true nil]))
 

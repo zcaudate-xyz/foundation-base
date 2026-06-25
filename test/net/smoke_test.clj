@@ -14,7 +14,6 @@
             [net.resp.wire]
             [xt.net.http-fetch]
             [xt.net.http-util]
-            [xt.net.http-supabase]
             [xt.net.ws-native]
             [xt.net.ws-phoenix]
             [xt.net.ws-legacy]
@@ -54,7 +53,6 @@
 (fact "all xtalk net namespaces load without error"
   (mapv find-ns '[xt.net.http-fetch
                   xt.net.http-util
-                  xt.net.http-supabase
                   xt.net.ws-native
                   xt.net.ws-phoenix
                   xt.net.ws-legacy

@@ -75,18 +75,7 @@
   (when (xt/x:nil? local-db)
     (return [false {:status "error"
                     :tag "db/local-db-not-provided"}]))
-  (var db-sync (xt/x:get-key sync-request "db/sync"))
-  (var db-remove (xt/x:get-key sync-request "db/remove"))
-  (when (and (xt/x:is-object? db-sync)
-             (xtd/not-empty? db-sync))
-    (xdb/sync-event local-db ["add" db-sync]))
-  (when (and (xt/x:is-object? db-remove)
-             (xtd/not-empty? db-remove))
-    (xt/for:object [[table ids] db-remove]
-      (xdb/db-delete-sync local-db
-                          (db-view/get-schema db)
-                          table
-                          ids)))
+  (xdb/sync-event local-db sync-request)
   (return [true sync-request]))
 
 (defn.xt result->update

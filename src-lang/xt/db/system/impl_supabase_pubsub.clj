@@ -3,10 +3,10 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-data :as xtd]
-             [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as http-fetch]
+             [xt.net.http-util :as http-util]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
 
@@ -17,23 +17,6 @@
 ;; multiple Phoenix channel subscriptions. It only handles broadcast events
 ;; with the event name "xt.db/event".
 ;;
-
-(defn.xt client-base-url
-  "derives the http base url from the supabase http client defaults"
-  {:added "4.1"}
-  [client]
-  (var defaults (or (xt/x:get-key client "defaults") {}))
-  (var secured (xt/x:get-key defaults "secured"))
-  (var host (xt/x:get-key defaults "host"))
-  (var port (xt/x:get-key defaults "port"))
-  (when (xt/x:nil? host)
-    (return nil))
-  (return (xt/x:cat (:? secured "https" "http")
-                    "://"
-                    host
-                    (:? (xt/x:not-nil? port)
-                        (xt/x:cat ":" port)
-                        ""))))
 
 (defn.xt resolve-api-key
   "resolves the api key for websocket auth"
@@ -56,15 +39,24 @@
   "prepares the websocket url used to connect to realtime"
   {:added "4.1"}
   [config]
-  (var base-url (or (xt/x:get-key config "websocket_url")
-                    (-/derive-websocket-url (xt/x:get-key config "base_url"))))
-  (when (xt/x:nil? base-url)
-    (xt/x:err "Supabase realtime missing websocket_url/base_url"))
+  (var input {})
+  (var url (or (xt/x:get-key config "websocket_url")
+               (xt/x:get-key config "ws_url")))
+  (when (xt/x:not-nil? url)
+    (xt/x:set-key input "url" url))
+  (var host (xt/x:get-key config "host"))
+  (when (xt/x:nil? host)
+    (xt/x:err "Supabase realtime missing host"))
+  (var defaults {"basepath" "/realtime/v1/websocket"
+                 "host"     host
+                 "port"     (xt/x:get-key config "port")
+                 "secured"  (xt/x:get-key config "secured")})
+  (var base-url (websocket/prepare-url {"defaults" defaults} input))
   (var params (xt/x:obj-assign {"vsn" "2.0.0"}
                                (or (xt/x:get-key config "params") {})))
   (when (xt/x:not-nil? (xt/x:get-key config "api_key"))
     (xt/x:set-key params "apikey" (xt/x:get-key config "api_key")))
-  (var query (-/encode-query-params params))
+  (var query (http-util/encode-query-params params))
   (if (== query "")
     (return base-url)
     (return (xt/x:cat base-url "?" query))))
@@ -74,10 +66,17 @@
   {:added "4.1"}
   [impl opts]
   (var client (xt/x:get-key impl "client"))
+  (var client-defaults (or (xt/x:get-key client "defaults") {}))
   (var config {})
-  (xt/x:set-key config "base_url"
-                (or (xt/x:get-key opts "base_url")
-                    (-/client-base-url client)))
+  (xt/x:set-key config "host"
+                (or (xt/x:get-key opts "host")
+                    (xt/x:get-key client-defaults "host")))
+  (xt/x:set-key config "port"
+                (or (xt/x:get-key opts "port")
+                    (xt/x:get-key client-defaults "port")))
+  (xt/x:set-key config "secured"
+                (or (xt/x:get-key opts "secured")
+                    (xt/x:get-key client-defaults "secured")))
   (xt/x:set-key config "websocket_url"
                 (or (xt/x:get-key opts "websocket_url")
                     (xt/x:get-key opts "ws_url")))
@@ -105,27 +104,6 @@
     (xt/x:set-key payload "access_token" auth-token))
   (return (xt/x:obj-assign payload
                            (or (xt/x:get-key opts "join_payload") {}))))
-
-(defn.xt broadcast->event-vectors
-  "converts a Supabase broadcast payload into xt.db event vectors
-
-   Expected broadcast envelope:
-     {\"event\": \"xt.db/event\",
-      \"payload\": {\"db/sync\": {...}, \"db/remove\": {...}}}"
-  {:added "4.1"}
-  [payload]
-  (var event (xt/x:get-key payload "event"))
-  (when (not= event "xt.db/event")
-    (return nil))
-  (var data (xt/x:get-key payload "payload"))
-  (var out [])
-  (var db-sync (xt/x:get-key data "db/sync"))
-  (var db-remove (xt/x:get-key data "db/remove"))
-  (when (xt/x:not-nil? db-sync)
-    (xt/x:arr-push out ["add" db-sync]))
-  (when (xt/x:not-nil? db-remove)
-    (xt/x:arr-push out ["remove" db-remove]))
-  (return out))
 
 (defn.xt topic-entry
   "gets the subscription entry for a Phoenix topic"
@@ -171,15 +149,16 @@
      "broadcast"
      (fn [frame]
        (var topic (xt/x:get-key frame "topic"))
-       (var payload (xt/x:get-key frame "payload"))
-       (var events (-/broadcast->event-vectors payload))
-       (var entry (-/topic-entry impl topic))
-       (when (and (xt/x:not-nil? events) (xt/x:not-nil? entry))
-         (var callback (xt/x:get-key entry "callback"))
-         (when (xt/x:is-function? callback)
-           (xt/for:array [event events]
-             (callback event))))
-       (return events))})))
+       (var envelope (xt/x:get-key frame "payload"))
+       (var event-name (xt/x:get-key envelope "event"))
+       (when (== event-name "xt.db/event")
+         (var payload (xt/x:get-key envelope "payload"))
+         (var entry (-/topic-entry impl topic))
+         (when (xt/x:not-nil? entry)
+           (var callback (xt/x:get-key entry "callback"))
+           (when (xt/x:is-function? callback)
+             (callback payload))))
+       (return envelope))})))
 
 (defn.xt ensure-websocket-client
   "returns the shared websocket client, creating it if necessary"

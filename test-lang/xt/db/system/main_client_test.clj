@@ -27,7 +27,8 @@
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.net.http-supabase :as http-supabase]
+             [xt.net.http-fetch :as http-fetch]
+             [xt.net.addon-supabase :as addon]
              [xt.net.conn-sql :as conn-sql]
              [xt.db.system.main-client :as main-client]]})
 
@@ -80,7 +81,7 @@
           "secured" false
           "basepath" ""
           "apikey" (@! (-> local-min/+config+ :api :anon-key))})
-        (http-supabase/health {})
+        (http-fetch/request-http (addon/cmd-health {}))
         (promise/x:promise-then
          (fn [out]
            (repl/notify [(xt/x:get-key out "status")

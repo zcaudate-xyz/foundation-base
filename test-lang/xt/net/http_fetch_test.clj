@@ -111,13 +111,78 @@
 
 
 ^{:refer xt.net.http-fetch/prepare-handler :added "4.1"}
-(fact "TODO")
+(fact "prepares a raw handler with input preparation, middleware, and normalisation"
+
+  (notify/wait-on :js
+    (-> ((fetch/prepare-handler
+          {:defaults {}}
+          (fn [client input]
+            (return (promise/x:promise-run
+                     {"status" 200
+                      "headers" {}
+                      "body" "[1,2,3]"
+                      "error" nil}))))
+         {:defaults {}}
+         {:url "http://example.com"})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => {"status" 200
+      "headers" {}
+      "body" [1 2 3]
+      "error" nil})
 
 ^{:refer xt.net.http-fetch/wrap-prepare-input :added "4.1"}
-(fact "TODO")
+(fact "wraps a handler so it receives prepared input"
+
+  (!.js
+    ((fetch/wrap-prepare-input
+      (fn [client input]
+        (return input)))
+     {:defaults {:secured false
+                 :host "127.0.0.1"
+                 :port "55121"
+                 :headers {"apikey" "TOKEN"}
+                 :basepath "/auth/v1"}}
+     {:path "/sign-in"
+      :headers {"Content-Type" "application/json"}}))
+  => {"url" "http://127.0.0.1:55121/auth/v1/sign-in"
+      "method" "GET"
+      "headers" {"apikey" "TOKEN"
+                 "Content-Type" "application/json"}})
 
 ^{:refer xt.net.http-fetch/wrap-normalise :added "4.1"}
-(fact "TODO")
+(fact "wraps a handler so its response promise is normalised"
+
+  (notify/wait-on :js
+    (-> ((fetch/wrap-normalise
+          (fn [client input]
+            (return (promise/x:promise-run
+                     {"status" 201
+                      "headers" {}
+                      "body" "{\"ok\":true}"
+                      "error" nil}))))
+         {} {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => {"status" 201
+      "headers" {}
+      "body" {"ok" true}
+      "error" nil})
 
 ^{:refer xt.net.http-fetch/prepare-middleware :added "4.1"}
-(fact "TODO")
+(fact "composes middleware wrappers around a handler"
+
+  (!.js
+    ((fetch/prepare-middleware
+      {:middleware [(fn [handler]
+                      (return (fn [client input]
+                                (return (xt/x:cat "A:" (handler client input))))))
+                    (fn [handler]
+                      (return (fn [client input]
+                                (return (xt/x:cat "B:" (handler client input))))))]}
+      (fn [client input]
+        (return "X")))
+     {} {}))
+  => "B:A:X")

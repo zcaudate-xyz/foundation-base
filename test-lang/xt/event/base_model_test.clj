@@ -490,10 +490,70 @@
               "listener/type" "model"}})
 
 ^{:refer xt.event.base-model/remove-listener :added "4.1"}
-(fact "TODO")
+(fact "removes a model listener by id"
+
+  (!.js
+    (var v (-/make-basic-model))
+    (model/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
+    (model/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
+    [(model/list-listeners v)
+     (. (model/remove-listener v "b2") ["meta"])
+     (model/list-listeners v)])
+  => (just-in
+      [(just ["a1" "b2"] :in-any-order)
+       {"listener/id" "b2"
+        "listener/type" "model"}
+       ["a1"]])
+
+  (!.lua
+    (var v (-/make-basic-model))
+    (model/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
+    (model/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
+    [(model/list-listeners v)
+     (. (model/remove-listener v "b2") ["meta"])
+     (model/list-listeners v)])
+  => (just-in
+      [(just ["a1" "b2"] :in-any-order)
+       {"listener/id" "b2"
+        "listener/type" "model"}
+       ["a1"]])
+
+  (!.py
+    (var v (-/make-basic-model))
+    (model/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
+    (model/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
+    [(model/list-listeners v)
+     (. (model/remove-listener v "b2") ["meta"])
+     (model/list-listeners v)])
+  => (just-in
+      [(just ["a1" "b2"] :in-any-order)
+       {"listener/id" "b2"
+        "listener/type" "model"}
+       ["a1"]]))
 
 ^{:refer xt.event.base-model/list-listeners :added "4.1"}
-(fact "TODO")
+(fact "lists all registered listener ids"
+
+  (!.js
+    (var v (-/make-basic-model))
+    (model/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
+    (model/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
+    (model/list-listeners v))
+  => (just ["a1" "b2"] :in-any-order)
+
+  (!.lua
+    (var v (-/make-basic-model))
+    (model/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
+    (model/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
+    (model/list-listeners v))
+  => (just ["a1" "b2"] :in-any-order)
+
+  (!.py
+    (var v (-/make-basic-model))
+    (model/add-listener v "a1" (fn:> [id data t meta] nil) nil nil)
+    (model/add-listener v "b2" (fn:> [id data t meta] nil) nil nil)
+    (model/list-listeners v))
+  => (just ["a1" "b2"] :in-any-order))
 
 ^{:refer xt.event.base-model/trigger-listeners :added "4.1"
   :setup [(def +out+
@@ -1355,8 +1415,3 @@
   (s/seedgen-langremove '[xt.event.base-model]  {:lang [:lua :python] :write true}))
 
 
-^{:refer xt.event.base-model/async-fn-basic :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.event.base-model/async-fn-promise :added "4.1"}
-(fact "TODO")

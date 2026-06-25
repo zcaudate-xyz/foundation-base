@@ -122,6 +122,21 @@
      (- 5)])
   => [5 -5])
 
+^{:refer xt.lang.spec-primitive/-%%- :added "4.1"}
+(fact "emits raw internal strings"
+
+  (!.js
+    (-%%- "1 + 2"))
+  => 3
+
+  (!.py
+    (-%%- "1 + 2"))
+  => 3
+
+  (!.lua
+    (-%%- "1 + 2"))
+  => 3)
+
 ^{:refer xt.lang.spec-primitive/. :added "4.1"}
 (fact "indexes values"
 
@@ -556,6 +571,27 @@
            (return err)))))
   => "boom")
 
+^{:refer xt.lang.spec-primitive/var :added "4.1"}
+(fact "declares local variables"
+
+  (!.js
+    (do
+      (var x 2)
+      (* x 3)))
+  => 6
+
+  (!.py
+    (do
+      (var x 2)
+      (* x 3)))
+  => 6
+
+  (!.lua
+    (do
+      (var x 2)
+      (* x 3)))
+  => 6)
+
 ^{:refer xt.lang.spec-primitive/xor :added "4.1"}
 (fact "computes logical xor"
 
@@ -986,40 +1022,3 @@
   (s/seedgen-benchremove '[xt.lang.spec-primitive] {:lang [:r :php :ruby :dart :julia :scheme :elisp] :write true})
   (s/seedgen-langadd  '[xt.lang.spec-primitive] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.lang.spec-primitive] {:lang [:lua :python] :write true}))
-
-
-^{:refer xt.lang.spec-primitive/-%%- :added "4.1"}
-(fact "emits raw internal strings"
-
-  (!.js
-    (-%%- "1 + 2"))
-  => 3
-
-  (!.py
-    (-%%- "1 + 2"))
-  => 3
-
-  (!.lua
-    (-%%- "1 + 2"))
-  => 3)
-
-^{:refer xt.lang.spec-primitive/var :added "4.1"}
-(fact "declares local variables"
-
-  (!.js
-    (do
-      (var x 2)
-      (* x 3)))
-  => 6
-
-  (!.py
-    (do
-      (var x 2)
-      (* x 3)))
-  => 6
-
-  (!.lua
-    (do
-      (var x 2)
-      (* x 3)))
-  => 6)

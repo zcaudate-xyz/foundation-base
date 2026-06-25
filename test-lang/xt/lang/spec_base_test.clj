@@ -686,7 +686,7 @@
   => [true 1])
 
 ^{:refer xt.lang.spec-base/x:ex-message :added "4.1"}
-(fact "TODO"
+(fact "extracts the message from a host-native exception value"
 
   (!.js
     (var e (xt/x:ex "hello" {:a 1}))
@@ -704,7 +704,7 @@
   => "hello")
 
 ^{:refer xt.lang.spec-base/x:ex-data :added "4.1"}
-(fact "TODO"
+(fact "extracts structured data from a host-native exception value"
 
   (!.js
     (var e (xt/x:ex "hello" {:a 1}))

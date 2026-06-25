@@ -144,7 +144,28 @@
   => ["global" ["cache"]])
 
 ^{:refer xt.substrate/get-service :added "4.1"}
-(fact "TODO")
+(fact "gets a registered service by id"
+
+  (!.js
+   (var n (main/node-create {"id" "node-get-service"
+                            "services" {"cache" {"scope" "global"}}}))
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:nil? (main/get-service n "missing"))])
+  => ["global" true]
+
+  (!.lua
+   (var n (main/node-create {"id" "node-get-service"
+                            "services" {"cache" {"scope" "global"}}}))
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:nil? (main/get-service n "missing"))])
+  => ["global" true]
+
+  (!.py
+   (var n (main/node-create {"id" "node-get-service"
+                            "services" {"cache" {"scope" "global"}}}))
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:nil? (main/get-service n "missing"))])
+  => ["global" true])
 
 ^{:refer xt.substrate/set-service :added "4.1"}
 (fact "set-service registers a runtime service on the node"

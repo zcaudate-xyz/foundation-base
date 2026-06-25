@@ -539,7 +539,25 @@
 
 
 ^{:refer xt.net.addon-supabase/cmd-rpc-call :added "4.1"}
-(fact "TODO")
+(fact "builds the rpc call request"
+  (addon/cmd-rpc-call "ping" {} {})
+  => {"body" "{}"
+      "method" "POST"
+      "path" "/rest/v1/rpc/ping"}
+
+  (addon/cmd-rpc-call "ping" {"message" "hello"} {"headers" {"x-trace" "1"}})
+  => {"body" "{\"message\":\"hello\"}"
+      "headers" {"x-trace" "1"}
+      "method" "POST"
+      "path" "/rest/v1/rpc/ping"})
 
 ^{:refer xt.net.addon-supabase/cmd-query-table :added "4.1"}
-(fact "TODO")
+(fact "builds the query table request"
+  (addon/cmd-query-table "scratch_v0.Log" "select=*" {})
+  => {"method" "GET"
+      "path" "/rest/v1/scratch_v0.Log?select=*"}
+
+  (addon/cmd-query-table "scratch_v0.Log" "select=id" {"headers" {"Prefer" "count=exact"}})
+  => {"headers" {"Prefer" "count=exact"}
+      "method" "GET"
+      "path" "/rest/v1/scratch_v0.Log?select=id"})

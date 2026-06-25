@@ -37,38 +37,35 @@
         (return (impl-memory/impl-memory schema lookup))))
 
 (defn.xt sync-event
-  "applies a local sync event to a db implementation"
+  "applies a sync payload {db/sync ..., db/remove ...} to a db implementation"
   {:added "4.1.4"}
-  [db event]
-  (var op (xt/x:first event))
-  (var data (xt/x:get-idx event 1))
+  [db payload]
   (var kind (xt/x:get-key db "::"))
-  (cond (== op "add")
-        (cond (or (== kind "xt.db.system.impl_sqlite/ImplSqlite")
-                  (== kind "db.sql")
-                  (== kind "db.sqlite"))
-              (return (impl-sqlite/process-add-event db data))
+  (var db-sync (xt/x:get-key payload "db/sync"))
+  (var db-remove (xt/x:get-key payload "db/remove"))
+  (when (xt/x:not-nil? db-sync)
+    (cond (or (== kind "xt.db.system.impl_sqlite/ImplSqlite")
+              (== kind "db.sql")
+              (== kind "db.sqlite"))
+          (impl-sqlite/process-add-event db db-sync)
 
-              :else
-              (return (impl-memory/process-add-event db data)))
+          :else
+          (impl-memory/process-add-event db db-sync)))
+  (when (xt/x:not-nil? db-remove)
+    (cond (or (== kind "xt.db.system.impl_sqlite/ImplSqlite")
+              (== kind "db.sql")
+              (== kind "db.sqlite"))
+          (impl-sqlite/process-remove-event db db-remove)
 
-        (== op "remove")
-        (cond (or (== kind "xt.db.system.impl_sqlite/ImplSqlite")
-                  (== kind "db.sql")
-                  (== kind "db.sqlite"))
-              (return (impl-sqlite/process-remove-event db data))
-
-              :else
-              (return (impl-memory/process-remove-event db data)))
-
-        :else
-        (return nil)))
+          :else
+          (impl-memory/process-remove-event db db-remove)))
+  (return true))
 
 (defn.xt db-delete-sync
   "removes ids from a local db implementation"
   {:added "4.1.4"}
   [db schema table ids]
-  (return (sync-event db ["remove" {table ids}])))
+  (return (sync-event db {"db/remove" {table ids}})))
 
 (defn.xt db-pull-sync
   "pulls a tree from a local db implementation"

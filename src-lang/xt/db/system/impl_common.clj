@@ -17,14 +17,6 @@
   (process-add-event [impl data])
   (process-remove-event [impl data]))
 
-(defprotocol.xt ISession
-  (set-session [impl session])
-  (get-session [impl])
-  (session-info [impl])
-  (refresh-session [impl])
-  (start-auto-refresh [impl opts])
-  (stop-auto-refresh [impl]))
-
 (defprotocol.xt IPubSub
   (subscribe   [impl topic opts callback])
   (unsubscribe [impl handle])

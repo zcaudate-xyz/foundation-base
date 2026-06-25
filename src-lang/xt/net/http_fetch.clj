@@ -94,3 +94,12 @@
     (:= handler (wrapper handler)))
   (return handler))
 
+(defn.xt prepare-handler
+  "prepares a raw request handler with input preparation, middleware, and response normalisation"
+  {:added "4.1"}
+  [client handler]
+  (return
+   (-/wrap-normalise
+    (-/prepare-middleware client
+     (-/wrap-prepare-input handler)))))
+

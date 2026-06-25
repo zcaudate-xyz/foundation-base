@@ -278,14 +278,98 @@
                             false)]))
 
 
-^{:refer xt.net.ws-phoenix/make-frame-heartbeat :added "4.1"}
-(fact "TODO")
+^{:refer xt.net.ws-phoenix/make-frame-heartbeat :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "builds a heartbeat frame on the phoenix topic"
 
-^{:refer xt.net.ws-phoenix/encode-frame :added "4.1"}
-(fact "TODO")
+  (!.js
+    (phoenix/make-frame-heartbeat nil {"ref" "hb-1"}))
+  => {"topic" "phoenix"
+      "event" "heartbeat"
+      "payload" {}
+      "ref" "hb-1"
+      "join_ref" "hb-1"})
 
-^{:refer xt.net.ws-phoenix/send-frame :added "4.1"}
-(fact "TODO")
+^{:refer xt.net.ws-phoenix/encode-frame :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "encodes a frame map to the phoenix v2 wire array"
 
-^{:refer xt.net.ws-phoenix/send-heartbeat :added "4.1"}
-(fact "TODO")
+  (!.js
+    (phoenix/encode-frame {"join_ref" "join-1"
+                           "ref" "ref-1"
+                           "topic" "realtime:room:test"
+                           "event" "phx_join"
+                           "payload" {"config" {}}}))
+  => ["join-1" "ref-1" "realtime:room:test" "phx_join" {"config" {}}])
+
+^{:refer xt.net.ws-phoenix/send-frame :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "sends an encoded frame over the websocket and receives a phx_reply"
+
+  (notify/wait-on [:js 2000]
+    (var client
+         (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
+                               :port (@! (-> local-min/+config+ :api :port))}))
+    (var replied false)
+    (-> client
+        (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=2.0.0&apikey="
+                                           (@! (-> local-min/+config+ :api :anon-key)))})
+        (js-websocket/add-listeners-ws
+         {"open"
+          (fn [_]
+            (phoenix/send-frame
+             client
+             {"topic" "realtime:room:send-frame-test"
+              "event" "phx_join"
+              "payload" {"config" {"broadcast" {"ack" false "self" false}}}
+              "ref" "join-1"
+              "join_ref" "join-1"}))
+          "message"
+          (fn [event]
+            (var frame (phoenix/decode-frame event))
+            (when (and (== "phx_reply" (xt/x:get-key frame "event"))
+                       (== "join-1" (xt/x:get-key frame "ref"))
+                       (not replied))
+              (:= replied true)
+              (websocket/disconnect client)
+              (repl/notify frame)))}))
+    true)
+  => {"join_ref" "join-1",
+      "event" "phx_reply",
+      "ref" "join-1",
+      "payload" {"status" "ok",
+                 "response" {"postgres_changes" []}},
+      "topic" "realtime:room:send-frame-test"})
+
+^{:refer xt.net.ws-phoenix/send-heartbeat :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "sends a heartbeat frame over the websocket and receives a phx_reply"
+
+  (notify/wait-on [:js 2000]
+    (var client
+         (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
+                               :port (@! (-> local-min/+config+ :api :port))}))
+    (var replied false)
+    (-> client
+        (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=2.0.0&apikey="
+                                           (@! (-> local-min/+config+ :api :anon-key)))})
+        (js-websocket/add-listeners-ws
+         {"open"
+          (fn [_]
+            (phoenix/send-heartbeat client {"ref" "hb-1"}))
+          "message"
+          (fn [event]
+            (var frame (phoenix/decode-frame event))
+            (when (and (== "phx_reply" (xt/x:get-key frame "event"))
+                       (== "hb-1" (xt/x:get-key frame "ref"))
+                       (not replied))
+              (:= replied true)
+              (websocket/disconnect client)
+              (repl/notify frame)))}))
+    true)
+  => {"join_ref" nil,
+      "event" "phx_reply",
+      "ref" "hb-1",
+      "payload" {"status" "ok",
+                 "response" {}},
+      "topic" "phoenix"})
