@@ -12,6 +12,9 @@
   (send [client input])
   (add-listeners [client m]))
 
+(defprotocol.xt IWebsocketHeartbeat
+  (start-heartbeat [client name f interval])
+  (stop-heartbeat  [client name]))
 
 (defn.xt prepare-url
   [client input]

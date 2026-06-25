@@ -93,35 +93,34 @@
      obs
      (fn:> [v]
            {:style {:opacity (+ 0.2 v)}}))
+    (var paths
+         (base-animate/get-map-paths
+          mock/MOCK
+          {:a (mock/new-observed 1)
+           :b {:c (mock/new-observed 2)}}))
+    (var path-summary {})
+    (xt/for:array [entry paths]
+      (var [path key v] entry)
+      (var path-key (:? (== 0 (xt/x:len path))
+                        key
+                        (xt/x:cat (xt/x:get-idx path (xt/x:offset 0))
+                                  "/"
+                                  key)))
+      (when (== false v)
+        (xt/x:set-key path-summary path-key false))
+      (when (not= false v)
+        (xt/x:set-key path-summary path-key (mock/get-value v))))
     [(mock/get-value
       (base-animate/new-derived
        mock/MOCK
        (fn:> [a b c] (+ a b c))
        [(mock/new-observed 1)
         (mock/new-observed 2)
-         (mock/new-observed 3)]))
+        (mock/new-observed 3)]))
      (get-style ref)
      (mock/set-value obs 0.4)
      (get-style ref)
-     (do
-       (var paths
-            (base-animate/get-map-paths
-             mock/MOCK
-             {:a (mock/new-observed 1)
-              :b {:c (mock/new-observed 2)}}))
-       (var path-summary {})
-       (xt/for:array [entry paths]
-         (var [path key v] entry)
-         (xt/x:set-key path-summary
-                       (:? (== 0 (xt/x:len path))
-                           key
-                           (xt/x:cat (xt/x:get-idx path (xt/x:offset 0))
-                                     "/"
-                                     key))
-                       (:? (== false v)
-                           false
-                           (mock/get-value v))))
-       path-summary)
+     path-summary
      (base-animate/get-map-input
       mock/MOCK
       [[[] "a" {"value" 1

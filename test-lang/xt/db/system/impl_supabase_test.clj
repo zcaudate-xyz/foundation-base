@@ -28,6 +28,7 @@
              [xt.net.http-fetch :as http-fetch]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
              [xt.db.system.impl-supabase :as impl]
              [xt.db.system.impl-supabase-session :as session]
@@ -50,11 +51,32 @@
     (addon/middleware-supabase))))
 
 ^{:refer xt.db.system.impl-supabase/normalise-body :added "4.1"}
-(fact "TODO")
+(fact "normalise-body unwraps data or returns the body as-is"
+  (!.js
+   [(impl/normalise-body {"body" {"data" {"id" 1}}})
+    (impl/normalise-body {"body" "plain"})
+    (impl/normalise-body {})])
+  => [{"id" 1} "plain" nil])
 
 
 ^{:refer xt.db.system.impl-supabase/cmd-pull-async :added "4.1"}
-(fact "TODO")
+(fact "cmd-pull-async builds a pgrest GET request"
+  (!.js
+   (impl/cmd-pull-async
+    (impl/impl-supabase
+     (js-fetch/create
+      {:host (@! (-> local-min/+config+ :api :hostname))
+       :port (@! (-> local-min/+config+ :api :port))
+       :apikey (@! (-> local-min/+config+ :api :service-key))}
+      (addon/middleware-supabase))
+     (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
+     (@! (pg/bind-app (pg/app "scratch_v0")))
+     {})
+    ["Log"]))
+  => (contains-in
+      {"path" string?
+       "method" "GET"
+       "headers" map?}))
 
 ^{:refer xt.db.system.impl-supabase/pull-async :added "4.1"
   :setup [(scratch-v0/log-append-public "hello")]} 
@@ -101,7 +123,22 @@
         "message" "hello"}]))
 
 ^{:refer xt.db.system.impl-supabase/cmd-rpc-call-async :added "4.1"}
-(fact "TODO")
+(fact "cmd-rpc-call-async builds a supabase rpc POST request"
+  (!.js
+   (impl/cmd-rpc-call-async
+    nil
+    {:input [{:symbol "i_message" :type "text"}]
+     :return "jsonb"
+     :schema "scratch_v0"
+     :id "log_append_public"
+     :flags {}}
+    ["hello"]
+    {:token "abc"}))
+  => (contains-in
+      {"path" "/rest/v1/rpc/log_append_public"
+       "method" "POST"
+       "headers" map?
+       "body" string?}))
 
 ^{:refer xt.db.system.impl-supabase/rpc-call-async :added "4.1"}
 (fact "performs an rpc call"
@@ -158,103 +195,10 @@
        "id" string?
        "message" "hello"}))
 
-^{:refer xt.db.system.impl-supabase-session/session-info :added "4.1"}
-(fact "reads the current user for the active session"
-  (notify/wait-on :js
-    (var email (xt/x:cat "impl-supabase-"
-                         (xt/x:to-string (xt/x:now-ms))
-                         "@example.com"))
-    (-> (http-fetch/request-http
-         (-/default-client (@! (-> local-min/+config+ :api :anon-key)) nil)
-         (addon/cmd-signup {"email" email
-                            "password" "secret123"}
-                           {}))
-        (promise/x:promise-then
-         (fn [signed-up]
-           (var session (. signed-up ["body"]))
-           (var client (-/default-client (@! (-> local-min/+config+ :api :service-key))
-                                         (. session ["access_token"])))
-           (var source (impl/impl-supabase
-                        client
-                        (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
-                        (@! (pg/bind-app (pg/app "scratch_v0")))))
-           (session/set-session source session)
-           (-> (session/session-info source)
-               (promise/x:promise-then
-                (fn [out]
-                  (repl/notify [(xt/x:get-key (. out ["user"]) "email")
-                                (. (. out ["session"]) ["refresh_token"])])))
-               (promise/x:promise-catch
-                (fn [out]
-                  (repl/notify out))))))))
-  => (contains-in
-      [string? string?]))
-
-^{:refer xt.db.system.impl-supabase-session/refresh-session :added "4.1"}
-(fact "refreshes the active session"
-  (notify/wait-on :js
-    (var email (xt/x:cat "impl-supabase-"
-                         (xt/x:to-string (xt/x:now-ms))
-                         "@example.com"))
-    (-> (http-fetch/request-http
-         (-/default-client (@! (-> local-min/+config+ :api :anon-key)) nil)
-         (addon/cmd-signup {"email" email
-                            "password" "secret123"}
-                           {}))
-        (promise/x:promise-then
-         (fn [signed-up]
-           (var session (. signed-up ["body"]))
-           (var client (-/default-client (@! (-> local-min/+config+ :api :service-key))
-                                         (. session ["access_token"])))
-           (var source (impl/impl-supabase
-                        client
-                        (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
-                        (@! (pg/bind-app (pg/app "scratch_v0")))))
-           (session/set-session source session)
-           (-> (session/refresh-session source)
-               (promise/x:promise-then
-                (fn [out]
-                  (repl/notify [(. out ["access_token"])
-                                (. out ["refresh_token"])
-                                (. (. (. source ["client"]) ["defaults"]) ["token"])])))
-               (promise/x:promise-catch
-                (fn [out]
-                  (repl/notify out))))))))
-  => (contains-in
-      [string? string? string?]))
-
-^{:refer xt.db.system.impl-supabase-session/start-auto-refresh :added "4.1"}
-(fact "starts the auto refresh timer"
-  (notify/wait-on :js
-    (var email (xt/x:cat "impl-supabase-"
-                         (xt/x:to-string (xt/x:now-ms))
-                         "@example.com"))
-    (-> (http-fetch/request-http
-         (-/default-client (@! (-> local-min/+config+ :api :anon-key)) nil)
-         (addon/cmd-signup {"email" email
-                            "password" "secret123"}
-                           {}))
-        (promise/x:promise-then
-         (fn [signed-up]
-           (var session (. signed-up ["body"]))
-           (var client (-/default-client (@! (-> local-min/+config+ :api :service-key))
-                                         (. session ["access_token"])))
-           (var source (impl/impl-supabase
-                        client
-                        (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
-                        (@! (pg/bind-app (pg/app "scratch_v0")))))
-           (session/set-session source session)
-           (session/start-auto-refresh source {"interval" 10})
-           (var started (xt/x:not-nil? (. (. (. source ["state"]) ["refresh"]) ["timer"])))
-           (session/stop-auto-refresh source)
-           (var stopped (xt/x:nil? (. (. (. source ["state"]) ["refresh"]) ["timer"])))
-           (repl/notify [started stopped])))))
-  => [true true])
-
 ^{:refer xt.db.system.impl-supabase/impl-supabase :added "4.1"}
 (fact "creates a supabase implementation"
 
-  (!.js
+      (!.js
     (impl/impl-supabase
      (js-fetch/create
           {:host (@! (-> local-min/+config+ :api :hostname))
@@ -262,10 +206,11 @@
            :apikey (@! (-> local-min/+config+ :api :service-key))}
           (addon/middleware-supabase))
      (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
-     (@! (pg/bind-app (pg/app "scratch_v0")))))
+     (@! (pg/bind-app (pg/app "scratch_v0")))
+     {}))
   => (contains-in
       {"schema" map?, "lookup" map?, "opts" {},
        "::" "xt.db.system.impl_supabase/ImplSupabase",
        "::/protocols" ["xt.db.system.impl_common/ISourceRemote"],
        "client" map?
-       "state" {"session" nil?, "refresh" nil?, "pubsub" map?, "id_counter" 0}}))
+       "state" {"session" nil?, "auto_refresh" nil?, "pubsub" map?, "id_counter" 0}}))

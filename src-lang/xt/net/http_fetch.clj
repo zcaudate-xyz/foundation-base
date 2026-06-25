@@ -8,10 +8,6 @@
              [xt.lang.common-protocol :as protocol]
              [xt.net.http-util :as util]]})
 
-(defprotocol.xt IHttpHeartbeat
-  (start-heartbeat [client name f interval])
-  (stop-heartbeat [client name]))
-
 (defprotocol.xt IHttpClient
   (request-http [client input]))
 

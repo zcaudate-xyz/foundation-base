@@ -61,20 +61,20 @@
 (defn.xt auto-refresh-fn
   [impl delay refresh-id]
   (var current-id (xtd/get-in impl ["state" "auto_refresh" "current"]))
-  (when (or (xt/x:nil? current-id)
-            (!= current-id refresh-id))
-    (return current-id))
-  (-> (-/refresh-session impl)
-      (promise/x:promise-catch
-       (fn [err]
-         (return err)))
-      (promise/x:promise-then
-       (fn [_]
-         (promise/x:with-delay
-          delay
-           (fn []
-             (return (-/auto-refresh-fn impl (-/auto-refresh-interval impl) refresh-id)))))))
-  (return refresh-id))
+  (cond (== current-id refresh-id)
+        (do (-> (-/refresh-session impl)
+                (promise/x:promise-catch
+                 (fn [err]
+                   (return err)))
+                (promise/x:promise-then
+                 (fn [_]
+                   (return (promise/x:with-delay
+                            delay
+                            (fn []
+                              (return (-/auto-refresh-fn impl (-/auto-refresh-interval impl) refresh-id))))))))
+            (return refresh-id))
+        :else
+        (return current-id)))
 
 (defn.xt auto-refresh-stop
   [impl]
@@ -87,8 +87,9 @@
   (var current-id (xtd/get-in impl ["state" "auto_refresh" "current"]))
   (when (xt/x:not-nil? current-id)
     (return current-id))
-  
-  (return (-/auto-refresh-fn impl (-/auto-refresh-interval impl) (xts/str-rand 8))))
+  (var refresh-id (xts/str-rand 8))
+  (xtd/set-in impl ["state" "auto_refresh" "current"] refresh-id)
+  (return (-/auto-refresh-fn impl (-/auto-refresh-interval impl) refresh-id)))
 
 
 

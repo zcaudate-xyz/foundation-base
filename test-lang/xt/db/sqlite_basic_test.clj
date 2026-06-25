@@ -47,7 +47,7 @@
                ;; 3. Seed data
                (db-system/sync-event
                 db
-                ["add" (@! fixtures/+entry-seed+)])
+                {"db/sync" (@! fixtures/+entry-seed+)})
 
                ;; 4. Verify with db-exec-sync
                (var count (db-system/db-exec-sync

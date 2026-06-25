@@ -46,25 +46,25 @@
 (fact "creates an empty xt structure"
 
   (!.js
-   [(do (rt/xt-purge)
-        (rt/xt-create))
-    (rt/xt-current)])
-  => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
-                   nil])
+   (rt/xt-purge)
+   {:created (rt/xt-create)
+    :current (rt/xt-current)})
+  => (contains-in {"created" {"config" {}, "spaces" {}, "::" "xt"}
+                   "current" nil})
 
   (!.lua
-   [(do (rt/xt-purge)
-        (rt/xt-create))
-    (rt/xt-current)])
-  => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
-                   nil])
+   (rt/xt-purge)
+   {:created (rt/xt-create)
+    :current (rt/xt-current)})
+  => (contains-in {"created" {"config" {}, "spaces" {}, "::" "xt"}
+                   "current" nil})
 
   (!.py
-   [(do (rt/xt-purge)
-        (rt/xt-create))
-    (rt/xt-current)])
-  => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
-                   nil]))
+   (rt/xt-purge)
+   {:created (rt/xt-create)
+    :current (rt/xt-current)})
+  => (contains-in {"created" {"config" {}, "spaces" {}, "::" "xt"}
+                   "current" nil}))
 
 ^{:refer xt.lang.common-resource/xt-ensure :added "4.1"}
 (fact "makes sure the xt state is alive"

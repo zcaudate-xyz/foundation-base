@@ -93,97 +93,21 @@
   (return client))
 
 (defimpl.xt ^{:lang :js}
-  HttpWebsocketClient
-  [defaults heartbeats]
+  WebsocketClient
+  [raw defaults heartbeats]
   websocket/IWebsocket
   {websocket/connect -/connect-ws
    websocket/disconnect -/disconnect-ws
    websocket/send -/send-ws
    websocket/add-listeners -/add-listeners-ws}
 
-  http-fetch/IHttpHeartbeat
-  {http-fetch/start-heartbeat -/start-heartbeat-ws
-   http-fetch/stop-heartbeat -/stop-heartbeat-ws})
+  websocket/IWebsocketHeartbeat
+  {websocket/start-heartbeat -/start-heartbeat-ws
+   websocket/stop-heartbeat -/stop-heartbeat-ws})
 
 (defn.js create
   "creates a new HttpWebsocketClient"
   {:added "4.1.3"}
   [defaults]
   (return
-   (-/HttpWebsocketClient defaults {})))
-
-;;
-;; Raw Websocket Client
-;;
-
-(defn.js connect-raw
-  "connects a raw websocket client, creating the socket if needed"
-  {:added "4.1"}
-  [client opts]
-  (var raw (xt/x:get-key client "raw"))
-  (if (xt/x:not-nil? raw)
-    (return client))
-  (var url (websocket/prepare-url client (or opts {})))
-  (:= raw (new WebSocket url))
-  (xt/x:set-key client "raw" raw)
-  (return client))
-
-(defn.js disconnect-raw
-  "disconnects a raw websocket client"
-  {:added "4.1"}
-  [client]
-  (var raw (xt/x:get-key client "raw"))
-  (when raw
-    (. raw (close 1000 "done")))
-  (return client))
-
-(defn.js send-raw
-  "sends through a raw websocket client"
-  {:added "4.1"}
-  [client input]
-  (var raw (xt/x:get-key client "raw"))
-  (when raw
-    (. raw (send input)))
-  (return client))
-
-(defn.js add-listeners-raw
-  "adds listeners to the underlying raw websocket socket"
-  {:added "4.1"}
-  [client m]
-  (var raw (xt/x:get-key client "raw"))
-  (when raw
-    (xt/for:object [[k handler] m]
-      (. raw (addEventListener k handler)))
-    (return (xt/x:obj-keys m))))
-
-(defn.js start-heartbeat-raw
-  "raw websocket clients do not provide a built-in heartbeat"
-  {:added "4.1"}
-  [client name f interval]
-  (return nil))
-
-(defn.js stop-heartbeat-raw
-  "raw websocket clients do not provide a built-in heartbeat"
-  {:added "4.1"}
-  [client name]
-  (return nil))
-
-(defimpl.xt ^{:lang :js}
-  RawWebsocketClient
-  [defaults raw]
-  websocket/IWebsocket
-  {websocket/connect -/connect-raw
-   websocket/disconnect -/disconnect-raw
-   websocket/send -/send-raw
-   websocket/add-listeners -/add-listeners-raw}
-
-  http-fetch/IHttpHeartbeat
-  {http-fetch/start-heartbeat -/start-heartbeat-raw
-   http-fetch/stop-heartbeat -/stop-heartbeat-raw})
-
-(defn.js wrap
-  "wraps an existing raw websocket socket in a ws-native client"
-  {:added "4.1"}
-  [defaults raw]
-  (return
-   (-/RawWebsocketClient defaults raw)))
+   (-/WebsocketClient defaults {})))

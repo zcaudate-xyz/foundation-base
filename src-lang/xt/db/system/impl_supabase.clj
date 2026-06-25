@@ -104,11 +104,11 @@
    impl-common/publish     pubsub/publish})
 
 (defn.xt impl-supabase
-  [client schema lookup session opts]
+  [client schema lookup opts]
   (return
    (-/ImplSupabase client schema lookup
-                   {"session" session
-                    "refresh" nil
+                   {"session" nil
+                    "auto_refresh" nil
                     "pubsub" {}
                     "id_counter" 0}
                    (or opts {}))))

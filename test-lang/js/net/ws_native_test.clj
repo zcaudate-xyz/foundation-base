@@ -40,41 +40,6 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-(comment
-
-  @(ws/websocket (str "ws://127.0.0.1:55121/realtime/v1/websocket?vsn=2.0.0&apikey=" (-> local-min/+config+ :api :anon-key))
-                {:on-open (fn [& args] (std.lib/prn args))})
-  
-  (notify/wait-on :js
-    (var client
-         (js-ws/create
-          {:host  "127.0.0.1"
-           :port  55121
-           :path  (+ "/realtime/v1/websocket?vsn=2.0.0&apikey=" (@! (-> local-min/+config+ :api :anon-key)))
-           :token (@! (-> local-min/+config+ :api :anon-key))}))
-    (js-ws/connect-ws client)
-    (js-ws/add-listeners-ws client
-                            {"open"
-                             (fn [_]
-                               (phoenix/send-join
-                                client
-                                {"config" {"broadcast" {"ack" false "self" false}}}
-                                {"topic"  "realtime:room:example-1"
-                                 "ref"    "join-1"})
-                               (repl/notify "opened"))}))
-  
-  {"base_url" (xt/x:cat (or (-> local-min/+config+ :api :protocol) "http")
-                           "://"
-                           (or (-> local-min/+config+ :api :hostname) "127.0.0.1")
-                           ":"
-                           (or (-> local-min/+config+ :api :port) 55121))
-      "api_key" (-> local-min/+config+ :api :service-key)
-      "auth_token" (-> local-min/+config+ :api :service-key)
-      "topic" topic}
-  
-  )
-
-
 ^{:refer js.net.ws-native/connect-ws :added "4.1"}
 (comment "SKIPPED: requires Supabase local-min realtime websocket"
   (notify/wait-on [:js 15000]
@@ -144,7 +109,6 @@
       "request_name" "http-websocket"
       "request_tags" ["websocket"]})
 
-
 ^{:refer js.net.ws-native/disconnect-ws :added "4.1"}
 (fact "disconnects a wrapped websocket client"
 
@@ -186,15 +150,51 @@
    (xt/x:obj-keys handlers))
   => ["open" "message"])
 
-^{:refer js.net.ws-native/create :added "4.1"}
-(fact "creates a websocket wrapper"
-  (!.js
-   (xt/x:get-key (xt/x:get-key (js-ws/create {"topic" "room:http-websocket"}) "defaults") "topic"))
-  => "room:http-websocket")
-
+^{:refer js.net.ws-native/default-heartbeat-fn :added "4.1"}
+(fact "TODO")
 
 ^{:refer js.net.ws-native/start-heartbeat-ws :added "4.1"}
 (fact "TODO")
 
 ^{:refer js.net.ws-native/stop-heartbeat-ws :added "4.1"}
 (fact "TODO")
+
+^{:refer js.net.ws-native/create :added "4.1"}
+(fact "creates a websocket wrapper"
+  (!.js
+   (xt/x:get-key (xt/x:get-key (js-ws/create {"topic" "room:http-websocket"}) "defaults") "topic"))
+  => "room:http-websocket")
+
+(comment
+
+  @(ws/websocket (str "ws://127.0.0.1:55121/realtime/v1/websocket?vsn=2.0.0&apikey=" (-> local-min/+config+ :api :anon-key))
+                {:on-open (fn [& args] (std.lib/prn args))})
+  
+  (notify/wait-on :js
+    (var client
+         (js-ws/create
+          {:host  "127.0.0.1"
+           :port  55121
+           :path  (+ "/realtime/v1/websocket?vsn=2.0.0&apikey=" (@! (-> local-min/+config+ :api :anon-key)))
+           :token (@! (-> local-min/+config+ :api :anon-key))}))
+    (js-ws/connect-ws client)
+    (js-ws/add-listeners-ws client
+                            {"open"
+                             (fn [_]
+                               (phoenix/send-join
+                                client
+                                {"config" {"broadcast" {"ack" false "self" false}}}
+                                {"topic"  "realtime:room:example-1"
+                                 "ref"    "join-1"})
+                               (repl/notify "opened"))}))
+  
+  {"base_url" (xt/x:cat (or (-> local-min/+config+ :api :protocol) "http")
+                           "://"
+                           (or (-> local-min/+config+ :api :hostname) "127.0.0.1")
+                           ":"
+                           (or (-> local-min/+config+ :api :port) 55121))
+      "api_key" (-> local-min/+config+ :api :service-key)
+      "auth_token" (-> local-min/+config+ :api :service-key)
+      "topic" topic}
+  
+  )
