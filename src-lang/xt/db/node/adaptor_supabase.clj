@@ -6,6 +6,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
              [xt.net.http-fetch :as http-fetch]
+             [xt.net.http-util :as http-util]
              [xt.net.addon-supabase :as addon]
              [xt.db.system.impl-supabase :as impl-supabase]
              [xt.db.system.impl-supabase-session :as session]]})
@@ -21,7 +22,7 @@
           (var client (xt/x:get-key impl "client"))
           (return
            (-> (http-fetch/request-http client cmd)
-               (promise/x:promise-then impl-supabase/normalise-body))))))))
+               (promise/x:promise-then http-util/get-body-data))))))))
 
 (defn.xt supabase-sign-up-handler
   "signs up a new user and starts session auto-refresh"
@@ -37,7 +38,7 @@
           (var client (xt/x:get-key impl "client"))
           (return
            (-> (http-fetch/request-http client (addon/cmd-signup credentials opts))
-               (promise/x:promise-then impl-supabase/normalise-body)
+               (promise/x:promise-then http-util/get-body-data)
                (promise/x:promise-then
                 (fn [session]
                   (session/set-session impl session)
@@ -58,7 +59,7 @@
           (var client (xt/x:get-key impl "client"))
           (return
            (-> (http-fetch/request-http client (addon/cmd-token-password credentials opts))
-               (promise/x:promise-then impl-supabase/normalise-body)
+               (promise/x:promise-then http-util/get-body-data)
                (promise/x:promise-then
                 (fn [session]
                   (session/set-session impl session)

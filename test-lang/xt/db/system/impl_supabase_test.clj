@@ -50,15 +50,6 @@
      :token token}
     (addon/middleware-supabase))))
 
-^{:refer xt.db.system.impl-supabase/normalise-body :added "4.1"}
-(fact "normalise-body unwraps data or returns the body as-is"
-  (!.js
-   [(impl/normalise-body {"body" {"data" {"id" 1}}})
-    (impl/normalise-body {"body" "plain"})
-    (impl/normalise-body {})])
-  => [{"id" 1} "plain" nil])
-
-
 ^{:refer xt.db.system.impl-supabase/cmd-pull-async :added "4.1"}
 (fact "cmd-pull-async builds a pgrest GET request"
   (!.js
