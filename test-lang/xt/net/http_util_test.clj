@@ -82,3 +82,17 @@
     (util/encode-query-params nil)])
   => ["a=1&c=two"
       ""])
+
+
+^{:refer xt.net.http-util/get-body-data :added "4.1"}
+(fact "extracts the data field from a normalized response body"
+
+  (!.js
+    [(util/get-body-data {"body" {"data" {"id" "ord-1"}}})
+     (util/get-body-data {"body" "plain-text"})
+     (util/get-body-data {"body" nil})
+     (util/get-body-data {})])
+  => [{"id" "ord-1"}
+      "plain-text"
+      nil
+      nil])

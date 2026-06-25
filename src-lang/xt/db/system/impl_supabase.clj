@@ -97,7 +97,7 @@
    (-/ImplSupabase client schema lookup
                    {"session" nil
                     "auto_refresh" nil
-                    "realtime" {}}
+                    "realtimes" {}}
                    {}
                    {}
-                   metadata)))
+                   {})))

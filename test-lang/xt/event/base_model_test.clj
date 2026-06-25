@@ -264,7 +264,6 @@
         (promise/x:promise-then
          (fn [] (repl/notify out)))))
   => {"value" 3})
-=> {:value 3}
 
   (notify/wait-on :lua
     (var out nil)
@@ -1407,11 +1406,40 @@
                  {"id" "C" "name" "b"}
                  {"id" "D" "name" "b"}]})
 
+^{:refer xt.event.base-model/async-fn-basic :added "4.1"}
+(fact "executes a handler and calls the success callback"
+
+  (!.js
+    (var out nil)
+    (model/async-fn-basic (fn:> [ctx] {:value (xt/x:get-key ctx "input")})
+                          {:input "hello"}
+                          {"success" (fn [res] (:= out res))
+                           "error"   (fn [err] (:= out err))})
+    out)
+  => {"value" "hello"})
+
+^{:refer xt.event.base-model/async-fn-promise :added "4.1"}
+(fact "executes a promise-returning handler and resolves the success callback"
+
+  (notify/wait-on :js
+    (var out nil)
+    (-> (model/async-fn-promise
+         (fn [ctx]
+           (return (promise/x:with-delay 5 (fn:> [] {:value (xt/x:get-key ctx "input")}))))
+         {:input "hello"}
+         {"success" (fn [res] (:= out res))
+          "error"   (fn [err] (:= out err))})
+        (promise/x:promise-then
+         (fn [] (repl/notify out)))))
+  => {"value" "hello"})
+
 (comment
   (s/snapto '[xt.event.base-model])
   
   (s/seedgen-benchadd '[xt.event.base-model] {:lang [:ruby :dart] :write true})
   (s/seedgen-langadd '[xt.event.base-model]  {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.event.base-model]  {:lang [:lua :python] :write true}))
+
+
 
 
