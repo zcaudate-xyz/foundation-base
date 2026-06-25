@@ -332,10 +332,36 @@
 
 
 ^{:refer xt.db.system.memory-graph/check-in-clause :added "4.1"}
-(fact "TODO")
+(fact "emulates the sql in clause"
+
+  (!.js
+    [(g/check-in-clause "USD" [["USD" "AUD"]])
+     (g/check-in-clause "EUR" [["USD" "AUD"]])
+     (g/check-in-clause "USD" [[]])
+     (g/check-in-clause 1 [[1 2 3]])])
+  => [true false false true])
 
 ^{:refer xt.db.system.memory-graph/like-char-at :added "4.1"}
-(fact "TODO")
+(fact "gets a single character from a string"
+
+  (!.js
+    [(g/like-char-at "hello" 0)
+     (g/like-char-at "hello" 4)
+     (g/like-char-at "hello" 10)])
+  => ["h" "o" ""])
 
 ^{:refer xt.db.system.memory-graph/check-like-clause :added "4.1"}
-(fact "TODO")
+(fact "emulates the sql like clause"
+
+  (!.js
+    [(g/check-like-clause "hello" "h_llo")
+     (g/check-like-clause "hello" "%ello%")
+     (g/check-like-clause "hello" "world")
+     (g/check-like-clause "hello" "%")
+     (g/check-like-clause "hello" "_____")
+     (g/check-like-clause "hello" "______")
+     (g/check-like-clause "hello" "h\\%")
+     (g/check-like-clause "h%" "h\\%")
+     (g/check-like-clause "HELLO" "%hello%")
+     (g/check-like-clause 1 "%1%")])
+  => [true true false true true false false true false false])

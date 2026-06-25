@@ -151,4 +151,14 @@
 
 
 ^{:refer xt.db.system.impl-sqlite/rpc-call-async :added "4.1"}
-(fact "TODO")
+(fact "sqlite impl does not support remote rpc calls"
+
+  (notify/wait-on :js
+    (-> (-/connect-impl)
+        (promise/x:promise-then
+         (fn [impl]
+           (return (impl/rpc-call-async impl {"id" "demo"} []))))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"has_error" (xt/x:not-nil? err)})))))
+  => (contains-in {"has_error" true}))

@@ -200,7 +200,85 @@
 
 
 ^{:refer xt.db.node.adaptor-client/attach-model-request :added "4.1"}
-(fact "TODO")
+(fact "sends an attach request to the server-side adaptor handler"
+
+  (notify/wait-on :js
+    (var server (-/make-server-node))
+    (var client (-/make-client-node))
+    (page-proxy/install server)
+    (page-proxy/install client)
+    (adaptor-base/init-handlers server)
+    (-> (-/setup-server-db server)
+        (promise/x:promise-then
+         (fn [_]
+           (return (-/link-nodes server client))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (adaptor-client/attach-model-request
+             client
+             "room/a"
+             "demo"
+             "pull"
+             "@xt.db/attach-pull-model"
+             {"caching_id" "db/caching"
+              "primary_id" "db/primary"}
+             {"pipeline" {}
+              "options" {}
+              "defaults" {"args" []
+                          "output" {}}}
+             {"transport_id" "server"}))))
+        (promise/x:promise-then
+         (fn [result]
+           (repl/notify
+            {"has_result" (xt/x:not-nil? result)})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" err
+                         "message" (xt/x:ex-message err)})))))
+  => (contains-in {"has_result" true}))
 
 ^{:refer xt.db.node.adaptor-client/attach-model-and-open :added "4.1"}
-(fact "TODO")
+(fact "wraps an attach request and opens the proxy group on the client"
+
+  (notify/wait-on :js
+    (var server (-/make-server-node))
+    (var client (-/make-client-node))
+    (page-proxy/install server)
+    (page-proxy/install client)
+    (adaptor-base/init-handlers server)
+    (-> (-/setup-server-db server)
+        (promise/x:promise-then
+         (fn [_]
+           (return (-/link-nodes server client))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (adaptor-client/attach-model-and-open
+             client
+             "room/a"
+             "demo"
+             "pull"
+             "@xt.db/attach-pull-model"
+             {"caching_id" "db/caching"
+              "primary_id" "db/primary"}
+             {"pipeline" {}
+              "options" {}
+              "defaults" {"args" []
+                          "output" {}}}
+             {"transport_id" "server"}))))
+        (promise/x:promise-then
+         (fn [group]
+           (var model (xtd/get-in group ["models" "pull"]))
+           (repl/notify
+            {"has_group" (xt/x:not-nil? group)
+             "model_type" (xt/x:get-key model "::")
+             "output" (event-model/get-current model nil)})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" err
+                         "message" (xt/x:ex-message err)})))))
+  => (contains-in
+      {"has_group" true
+       "model_type" "event.model"
+       "output" nil}))
