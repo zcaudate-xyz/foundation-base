@@ -94,6 +94,22 @@
                   (sql-table/prepare-remove-input data schema lookup opts))
   (return (xt/x:arr-map ordered xt/x:first)))
 
+(defn.xt clear-db
+  "clears all tables from the sqlite impl and recreates the schema"
+  {:added "4.1"}
+  [impl]
+  (var #{client
+         schema
+         lookup
+         opts} impl)
+  (conn-sql/query client
+                  (xt/x:str-join "\n\n"
+                                 (manage/table-drop-all schema lookup opts)))
+  (conn-sql/query client
+                  (xt/x:str-join "\n\n"
+                                 (manage/table-create-all schema lookup opts)))
+  (return nil))
+
 (defn.xt rpc-call-async
   "sqlite impl does not support remote rpc calls"
   {:added "4.1"}
@@ -107,10 +123,11 @@
 
 
 (defimpl.xt ImplSqlite
-  [client schema lookup opts]
+  [client schema lookup listeners opts]
 
   impl-common/ISourceLocal
-  {impl-common/pull                 -/pull
+  {impl-common/clear-db             -/clear-db
+   impl-common/pull                 -/pull
    impl-common/record-add           -/record-add
    impl-common/record-delete        -/record-delete
    impl-common/process-add-event    -/process-add-event
@@ -118,12 +135,17 @@
   
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
-   impl-common/rpc-call-async -/rpc-call-async})
+   impl-common/rpc-call-async -/rpc-call-async}
+
+  impl-common/ISourceListener
+  {impl-common/add-db-listener     impl-common/add-db-listener-default
+   impl-common/remove-db-listener  impl-common/remove-db-listener-default
+   impl-common/get-db-listener     impl-common/get-db-listener-default})
 
 (defn.xt impl-sqlite
   [client schema lookup]
   (return
-   (-/ImplSqlite client schema lookup (sql-util/sqlite-opts lookup))))
+   (-/ImplSqlite client schema lookup  listeners (sql-util/sqlite-opts lookup))))
 
 (defn.xt impl-sqlite-init
   [impl]

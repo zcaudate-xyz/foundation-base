@@ -113,4 +113,4 @@
   {:added "4.1.3"}
   [defaults]
   (return
-   (-/WebsocketClient defaults {"heartbeats" {}})))
+   (-/WebsocketClient nil defaults {"heartbeats" {}})))

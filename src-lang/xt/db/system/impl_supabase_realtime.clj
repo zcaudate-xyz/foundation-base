@@ -5,6 +5,7 @@
   {:require [[xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.db.system.main-ws :as main-ws]
              [xt.net.http-util :as http-util]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
@@ -30,45 +31,13 @@
   [impl id]
   (return (xtd/get-in impl ["state" "realtime" id])))
 
-(defn.xt ensure-realtime
-  "returns the realtime client for id, creating the wrapper if necessary"
-  {:added "4.1"}
-  [impl id]
-  (var realtime (-/get-realtime impl id))
-  (when (xt/x:not-nil? realtime)
-    (return realtime))
-  (:= realtime {"::" "xt.db.system.impl_supabase_realtime/RealtimeClient"
-                "id" id
-                "impl" impl
-                "client" nil
-                "id_counter" 0})
-  (xtd/set-in impl ["state" "realtime" id] realtime)
-  (return realtime))
-
-(defn.xt resolve-api-key
-  "resolves the api key for websocket auth"
-  {:added "4.1"}
-  [realtime opts]
-  (var impl (xt/x:get-key realtime "impl"))
-  (return (or (xt/x:get-key opts "apikey")
-              (xtd/get-in impl ["client" "defaults" "apikey"])
-              nil)))
-
-(defn.xt resolve-auth-token
-  "resolves the realtime auth token from the impl session or client defaults"
-  {:added "4.1"}
-  [realtime opts]
-  (var impl (xt/x:get-key realtime "impl"))
-  (return (or (xt/x:get-key opts "token")
-              (xtd/get-in impl ["state" "session" "access_token"])
-              (xtd/get-in impl ["client" "defaults" "token"]))))
-
 (defn.xt prepare-connect-url
   "prepares the websocket url used to connect to realtime"
   {:added "4.1"}
   [config]
   (var input {})
   (var url (or (xt/x:get-key config "websocket_url")
+               (xt/x:get-key config "url")
                (xt/x:get-key config "ws_url")))
   (when (xt/x:not-nil? url)
     (xt/x:set-key input "url" url))
@@ -89,37 +58,23 @@
     (return base-url)
     (return (xt/x:cat base-url "?" query))))
 
-(defn.xt websocket-config
-  "builds the websocket connection config from the realtime wrapper and options"
+(defn.xt resolve-api-key
+  "resolves the api key for websocket auth"
   {:added "4.1"}
   [realtime opts]
   (var impl (xt/x:get-key realtime "impl"))
-  (var client (xt/x:get-key impl "client"))
-  (var client-defaults (or (xt/x:get-key client "defaults") {}))
-  (var config {})
-  (xt/x:set-key config "host"
-                (or (xt/x:get-key opts "host")
-                    (xt/x:get-key client-defaults "host")))
-  (xt/x:set-key config "port"
-                (or (xt/x:get-key opts "port")
-                    (xt/x:get-key client-defaults "port")))
-  (xt/x:set-key config "secured"
-                (or (xt/x:get-key opts "secured")
-                    (xt/x:get-key client-defaults "secured")))
-  (xt/x:set-key config "websocket_url"
-                (or (xt/x:get-key opts "websocket_url")
-                    (xt/x:get-key opts "ws_url")))
-  (xt/x:set-key config "api_key" (-/resolve-api-key realtime opts))
-  (xt/x:set-key config "params"
-                (xt/x:obj-clone (xt/x:get-key opts "params")))
-  (var websocket (or (xt/x:get-key opts "websocket")
-                     (xt/x:get-key opts "transport")
-                     (:? (xt/x:is-function? WebSocket)
-                         WebSocket
-                         nil)))
-  (when (xt/x:not-nil? websocket)
-    (xt/x:set-key config "websocket" websocket))
-  (return config))
+  (return (or (xt/x:get-key opts "apikey")
+              (xtd/get-in impl ["client" "defaults" "apikey"])
+              nil)))
+
+(defn.xt resolve-auth-token
+  "resolves the realtime auth token from the impl session or client defaults"
+  {:added "4.1"}
+  [realtime opts]
+  (var impl (xt/x:get-key realtime "impl"))
+  (return (or (xt/x:get-key opts "token")
+              (xtd/get-in impl ["state" "session" "access_token"])
+              (xtd/get-in impl ["client" "defaults" "token"]))))
 
 (defn.xt broadcast-join-payload
   "builds the Phoenix join payload for a broadcast-only channel"
@@ -162,69 +117,96 @@
                              30000)
   (return true))
 
-(defn.xt shared-message-handler
-  "creates the websocket message listener that routes by Phoenix topic"
+(defn.xt route-frame
+  "routes a decoded Phoenix frame to status handlers or topic callbacks"
   {:added "4.1"}
-  [realtime]
-  (return
-   (phoenix/wrap-phoenix
-    {"phx_reply"
-     (fn [frame]
-       (var client (xt/x:get-key realtime "client"))
-       (var topic (xt/x:get-key frame "topic"))
-       (var entry (-/topic-entry client topic))
-       (when (xt/x:not-nil? entry)
-         (var opts (xt/x:get-key entry "opts"))
-         (var on-status (xt/x:get-key opts "on_status"))
-         (var status (xtd/get-in frame ["payload" "status"]))
-         (when (and (== status "ok") (xt/x:is-function? on-status))
-           (on-status "SUBSCRIBED" frame)))
-       (return frame))
-
-     "broadcast"
-     (fn [frame]
-       (var client (xt/x:get-key realtime "client"))
-       (var topic (xt/x:get-key frame "topic"))
-       (var envelope (xt/x:get-key frame "payload"))
-       (var event-name (xt/x:get-key envelope "event"))
-       (when (== event-name "xt.db/event")
-         (var payload (xt/x:get-key envelope "payload"))
-         (var entry (-/topic-entry client topic))
-         (when (xt/x:not-nil? entry)
-           (var callback (xt/x:get-key entry "callback"))
-           (when (xt/x:is-function? callback)
-             (callback payload))))
-       (return envelope))})))
-
-(defn.xt ensure-websocket-client
-  "returns the shared websocket client, creating it if necessary"
-  {:added "4.1"}
-  [realtime opts]
+  [realtime frame]
   (var client (xt/x:get-key realtime "client"))
-  (when (xt/x:not-nil? client)
-    (return [client false]))
-  (var config (-/websocket-config realtime opts))
+  (var event-name (xt/x:get-key frame "event"))
+  (cond (== event-name "phx_reply")
+        (do (var topic (xt/x:get-key frame "topic"))
+            (var entry (-/topic-entry client topic))
+            (when (xt/x:not-nil? entry)
+              (var opts (xt/x:get-key entry "opts"))
+              (var on-status (xt/x:get-key opts "on_status"))
+              (var status (xtd/get-in frame ["payload" "status"]))
+              (when (and (== status "ok") (xt/x:is-function? on-status))
+                (on-status "SUBSCRIBED" frame))))
+
+        (== event-name "broadcast")
+        (do (var topic (xt/x:get-key frame "topic"))
+            (var envelope (xt/x:get-key frame "payload"))
+            (var broadcast-event (xt/x:get-key envelope "event"))
+            (when (== broadcast-event "xt.db/event")
+              (var payload (xt/x:get-key envelope "payload"))
+              (var entry (-/topic-entry client topic))
+              (when (xt/x:not-nil? entry)
+                (var callback (xt/x:get-key entry "callback"))
+                (when (xt/x:is-function? callback)
+                  (callback payload))))))
+  (return frame))
+
+(defn.xt ensure-realtime
+  "returns the realtime client for id, creating the wrapper and websocket if necessary"
+  {:added "4.1"}
+  [impl id opts]
+  (var realtime (-/get-realtime impl id))
+  (when (xt/x:not-nil? realtime)
+    (return realtime))
+  (var impl-client (xt/x:get-key impl "client"))
+  (var client-defaults (or (xt/x:get-key impl-client "defaults") {}))
+  (var config {})
+  (xt/x:set-key config "host"
+                (or (xt/x:get-key opts "host")
+                    (xt/x:get-key client-defaults "host")))
+  (xt/x:set-key config "port"
+                (or (xt/x:get-key opts "port")
+                    (xt/x:get-key client-defaults "port")))
+  (xt/x:set-key config "secured"
+                (or (xt/x:get-key opts "secured")
+                    (xt/x:get-key client-defaults "secured")))
+  (xt/x:set-key config "websocket_url"
+                (or (xt/x:get-key opts "websocket_url")
+                    (xt/x:get-key opts "ws_url")))
+  (xt/x:set-key config "api_key"
+                (or (xt/x:get-key opts "apikey")
+                    (xt/x:get-key client-defaults "apikey")))
+  (xt/x:set-key config "params"
+                (xt/x:obj-clone (xt/x:get-key opts "params")))
+  (var websocket (or (xt/x:get-key opts "websocket")
+                     (xt/x:get-key opts "transport")
+                     (:? (xt/x:is-function? WebSocket)
+                         WebSocket
+                         nil)))
+  (when (xt/x:not-nil? websocket)
+    (xt/x:set-key config "websocket" websocket))
   (var ws-url (-/prepare-connect-url config))
-  (:= client {"::" "js.net.ws_native/http_websocket_client"
-              "defaults" (xt/x:obj-assign config {"url" ws-url})
-              "state" {"heartbeats" {}
-                       "pubsub" {"topics" {}}}})
+  (:= realtime {"::" "xt.db.system.impl_supabase_realtime/RealtimeClient"
+                "id" id
+                "impl" impl
+                "client" nil
+                "id_counter" 0})
+  (xtd/set-in impl ["state" "realtime" id] realtime)
+  (var client (main-ws/create-ws-client "ws" (xt/x:obj-assign config {"url" ws-url})))
   (websocket/connect client {})
-  (websocket/add-listeners client {"message" (-/shared-message-handler realtime)})
   (websocket/add-listeners client
-                           {"open"
+                           {"message"
+                            (fn [event]
+                              (-/route-frame realtime (phoenix/decode-frame event))
+                              (return event))
+                            "open"
                             (fn [_event]
                               (-/on-open client realtime)
                               (return true))})
   (xt/x:set-key realtime "client" client)
-  (return [client true]))
+  (return realtime))
 
 (defn.xt subscribe
   "subscribes to a broadcast topic on the realtime websocket"
   {:added "4.1"}
   [realtime topic opts callback]
   (:= opts (or opts {}))
-  (var [client is-new] (-/ensure-websocket-client realtime opts))
+  (var client (xt/x:get-key realtime "client"))
   (var join-payload (-/broadcast-join-payload realtime opts))
   (var join-frame (phoenix/make-frame-join client
                                            join-payload
@@ -247,8 +229,7 @@
                  "handle" handle
                  "active" true})
   (xtd/set-in client ["state" "pubsub" "topics"] topics)
-  (when (not is-new)
-    (phoenix/send-frame client join-frame))
+  (phoenix/send-frame client join-frame)
   (return handle))
 
 (defn.xt unsubscribe

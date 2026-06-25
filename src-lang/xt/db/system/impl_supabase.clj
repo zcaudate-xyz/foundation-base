@@ -81,17 +81,23 @@
 ;;
 
 (defimpl.xt ImplSupabase
-  [client schema lookup state opts]
+  [client schema lookup state  listeners opts]
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
-   impl-common/rpc-call-async -/rpc-call-async})
+   impl-common/rpc-call-async -/rpc-call-async}
+
+  impl-common/ISourceListener
+  {impl-common/add-db-listener     impl-common/add-db-listener-default
+   impl-common/remove-db-listener  impl-common/remove-db-listener-default
+   impl-common/get-db-listener     impl-common/get-db-listener-default})
 
 (defn.xt impl-supabase
-  [client schema lookup opts]
+  [client schema lookup listeners opts]
   (return
    (-/ImplSupabase client schema lookup
                    {"session" nil
                     "auto_refresh" nil
                     "pubsub" {}
                     "id_counter" 0}
+                   {}
                    (or opts {}))))

@@ -30,16 +30,21 @@
    (sql-call/call-raw client rpc-spec args)))
 
 (defimpl.xt ImplPostgres
-  [client schema lookup opts]
+  [client schema lookup listeners opts]
 
   impl-common/ISourceRemote
   {impl-common/pull-async     -/pull-async
-   impl-common/rpc-call-async -/rpc-call-async})
+   impl-common/rpc-call-async -/rpc-call-async}
+
+  impl-common/ISourceListener
+  {impl-common/add-db-listener     impl-common/add-db-listener-default
+   impl-common/remove-db-listener  impl-common/remove-db-listener-default
+   impl-common/get-db-listener     impl-common/get-db-listener-default})
 
 (defn.xt impl-postgres
   [client schema lookup]
   (return
-   (-/ImplPostgres client schema lookup (sql-util/postgres-opts lookup))))
+   (-/ImplPostgres client schema lookup {} (sql-util/postgres-opts lookup))))
 
 (defn.xt impl-postgres-init
   "connects the thin postgres impl through a runtime sql driver"

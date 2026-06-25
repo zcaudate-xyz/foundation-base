@@ -68,6 +68,15 @@
     (util/remove-bulk rows schema table-name ids))
   (return (xt/x:arr-map ordered xt/x:first)))
 
+(defn.xt clear-db
+  "clears all rows from the memory impl"
+  {:added "4.1"}
+  [impl]
+  (var #{rows} impl)
+  (xt/for:array [table-key (xt/x:obj-keys rows)]
+    (xt/x:del-key rows table-key))
+  (return nil))
+
 (defn.xt rpc-call-async
   "memory impl does not support remote rpc calls"
   {:added "4.1"}
@@ -79,10 +88,11 @@
 ;;
 
 (defimpl.xt ImplMemory
-  [rows schema lookup]
+  [rows schema lookup listeners]
 
   impl-common/ISourceLocal
-  {impl-common/pull                 -/pull
+  {impl-common/clear-db             -/clear-db
+   impl-common/pull                 -/pull
    impl-common/record-add           -/record-add
    impl-common/record-delete        -/record-delete
    impl-common/process-add-event    -/process-add-event
@@ -90,9 +100,14 @@
 
   impl-common/ISourceRemote
   {impl-common/pull-async      -/pull-async
-   impl-common/rpc-call-async  -/rpc-call-async})
+   impl-common/rpc-call-async  -/rpc-call-async}
+
+  impl-common/ISourceListener
+  {impl-common/add-db-listener     impl-common/add-db-listener-default
+   impl-common/remove-db-listener  impl-common/remove-db-listener-default
+   impl-common/get-db-listener     impl-common/get-db-listener-default})
 
 (defn.xt impl-memory
   [schema lookup]
   (return
-   (-/ImplMemory {} schema lookup)))
+   (-/ImplMemory {} schema lookup {})))

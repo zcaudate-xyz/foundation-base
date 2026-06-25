@@ -83,6 +83,20 @@
 ^{:refer xt.db.system.impl-sqlite/record-delete :added "4.1"}
 (fact "record-delete uses stored sqlite context")
 
+^{:refer xt.db.system.impl-sqlite/clear-db :added "4.1"}
+(fact "clear-db removes all data and keeps schema intact"
+
+  (notify/wait-on :js
+    (-> (-/connect-impl)
+        (promise/x:promise-then
+         (fn [impl]
+           (impl/record-add impl "Currency" [{"id" "USD" "name" "USD"}
+                                               {"id" "AUD" "name" "AUD"}])
+           (impl/clear-db impl)
+           (repl/notify
+            (impl/pull impl ["Currency"]))))))
+  => [])
+
 ^{:refer xt.db.system.impl-sqlite/process-add-event :added "4.1"}
 (fact "process-add-event executes sql upserts through stored sqlite context"
 

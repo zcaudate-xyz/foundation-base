@@ -86,6 +86,22 @@
                       "00000000-0000-0000-0000-000000000000"]))
   => nil)
 
+^{:refer xt.db.system.impl-memory/clear-db :added "4.1"}
+(fact "clear-db removes all rows from the memory impl"
+
+  (!.js
+    (var impl (impl/impl-memory sample/Schema
+                                sample/SchemaLookup))
+    (impl/record-add impl
+                     "UserAccount"
+                     [sample/RootUser])
+    (impl/clear-db impl)
+    [(xtd/get-in impl ["rows"
+                       "UserAccount"
+                       "00000000-0000-0000-0000-000000000000"])
+     (xt/x:len (xt/x:obj-keys (xtd/get-in impl ["rows"])))])
+  => [nil 0])
+
 ^{:refer xt.db.system.impl-memory/process-add-event :added "4.1"}
 (fact "process-add-event merges nested data into client and links"
   
