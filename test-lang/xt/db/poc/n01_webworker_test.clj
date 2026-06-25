@@ -154,6 +154,7 @@
   (notify/wait-on :js
     (var schema -/Schema)
     (var lookup -/SchemaLookup)
+    
     (var node (substrate/node-create {"id" "db-model-server"}))
     (substrate/set-service node "db/common" {:schema schema :lookup lookup})
     (substrate/set-service node "db/primary" (impl-memory/impl-memory schema lookup))

@@ -102,9 +102,9 @@
     (-> (adaptor-base/init-adaptor-main
          node
          {"primary" {"type" "supabase"
-                      "defaults" (@! local-min/+config-supabase-anon+)}
+                     "defaults" (@! local-min/+config-supabase-anon+)}
           "caching" {"type" "sqlite"
-                      "defaults" {"filename" ":memory:"}}}
+                     "defaults" {"filename" ":memory:"}}}
          -/Schema
          -/SchemaLookup)
         (promise/x:promise-then

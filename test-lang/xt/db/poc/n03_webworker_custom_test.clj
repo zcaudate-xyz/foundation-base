@@ -3,14 +3,7 @@
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.local-min :as local-min]
-            [postgres.core :as pg]
-            [xt.substrate]
-            [xt.substrate.transport-browser]
-            [xt.substrate.page-proxy]
-            [xt.substrate.page-core]
-            [xt.event.base-model]
-            [xt.db.node.adaptor-base]))
+            [scaffold.supabase.local-min :as local-min]))
 
 (do
   (l/script- :postgres
