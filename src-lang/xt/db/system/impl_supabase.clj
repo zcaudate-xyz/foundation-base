@@ -7,11 +7,13 @@
              [xt.db.text.pgrest-graph :as pgrest-graph]
              [xt.db.text.pgrest-tree :as pgrest-tree]
              [xt.lang.common-protocol :as proto]
+             [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as http-fetch]
              [xt.net.http-util :as http-util]
-             [xt.net.addon-supabase :as addon]]})
+             [xt.net.addon-supabase :as addon]
+             [xt.db.system.impl-supabase-realtime :as impl-realtime]]})
 
 (defn.xt cmd-pull-async
   "runs a tree ir pull with async supabase semantics"
@@ -75,11 +77,6 @@
    (-> (http-fetch/request-http client input)
        (promise/x:promise-then http-util/get-body-data))))
 
-
-;;
-;; PUBSUB
-;;
-
 (defimpl.xt ImplSupabase
   [client schema lookup state listeners opts metadata]
   impl-common/ISourceRemote
@@ -89,7 +86,11 @@
   impl-common/ISourceListener
   {impl-common/add-db-listener     impl-common/add-db-listener-default
    impl-common/remove-db-listener  impl-common/remove-db-listener-default
-   impl-common/get-db-listener     impl-common/get-db-listener-default})
+   impl-common/get-db-listener     impl-common/get-db-listener-default}
+
+  impl-common/ISourceRealtime
+  {impl-common/subscribe-db   impl-realtime/subscribe
+   impl-common/unsubscribe-db impl-realtime/unsubscribe})
 
 (defn.xt impl-supabase
   [client schema lookup]

@@ -16,6 +16,10 @@
   (pull-async [impl tree])
   (rpc-call-async [impl rpc-spec args]))
 
+(defprotocol.xt ISourceRealtime
+  (subscribe-db [impl conn-id topics])
+  (unsubscribe-db [impl conn-id  topics]))
+
 (defprotocol.xt ISourceLocal
   (clear-db      [impl])
   (pull          [impl tree])
