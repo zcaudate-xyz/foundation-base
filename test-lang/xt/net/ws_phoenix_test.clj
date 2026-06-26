@@ -137,24 +137,25 @@
     (-> client
         (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
                                            (@! (-> local-min/+config+ :api :anon-key)))})
-        (websocket/add-listeners
-         {"open"
-          (fn [_]
-            (phoenix/send-frame
-             client
-             (phoenix/make-frame-join
-              {"config" {"broadcast" {"ack" false "self" false}}}
-              {"topic" "realtime:room:send-join-test"
-               "ref" "join-1"})))
-          "message"
-          (phoenix/wrap-phoenix
-           {"phx_reply"
-            (fn [frame]
-              (when (and (== "ok" (xtd/get-in frame ["payload" "status"]))
-                         (not joined))
-                (:= joined true)
-                (websocket/disconnect client)
-                (repl/notify frame)))})}))
+        (promise/x:promise-then
+         (fn [client]
+           (websocket/add-listeners
+            client
+            {"message"
+             (phoenix/wrap-phoenix
+              {"phx_reply"
+               (fn [frame]
+                 (when (and (== "ok" (xtd/get-in frame ["payload" "status"]))
+                            (not joined))
+                   (:= joined true)
+                   (websocket/disconnect client)
+                   (repl/notify frame)))})})
+           (phoenix/send-frame
+            client
+            (phoenix/make-frame-join
+             {"config" {"broadcast" {"ack" false "self" false}}}
+             {"topic" "realtime:room:send-join-test"
+              "ref" "join-1"})))))
     true)
   => {"event" "phx_reply",
       "ref" "join-1",
@@ -238,6 +239,9 @@
                    "payload"
                    {"hello" "from postgres",
                     "id" string?}},}]))
+
+
+
 
 ^{:refer xt.net.ws-phoenix/make-frame-heartbeat :added "4.1"}
 (fact "builds a heartbeat frame on the phoenix topic"

@@ -10,17 +10,35 @@
              [xt.net.ws-native :as websocket]]})
 
 (defn.js connect-ws
-  "dispatches request through the wrapped fetch client"
-  {:added "4.1.3"}
+  "connects a websocket client, returning a promise that resolves on open"
+  {:added "4.1.4"}
   [client opts]
-  (var url  (websocket/prepare-url client (or opts {})))
-  (var listeners (xt/x:get-key opts "listeners"))
+  (var url (websocket/prepare-url client (or opts {})))
   (var raw (new WebSocket url))
-  (when (xt/x:not-nil? listeners)
-    (xt/for:object [[k handler] listeners]
-      (. raw (addEventListener k handler))))
   (xt/x:set-key client "raw" raw)
-  (return client))
+  (return
+   (new Promise
+        (fn [resolve reject]
+          (var cleanup-fn
+               (fn []
+                 (. raw (removeEventListener "open" on-open))
+                 (. raw (removeEventListener "error" on-error))
+                 (. raw (removeEventListener "close" on-close))))
+          (var on-open
+               (fn [event]
+                 (cleanup-fn)
+                 (resolve client)))
+          (var on-error
+               (fn [event]
+                 (cleanup-fn)
+                 (reject event)))
+          (var on-close
+               (fn [event]
+                 (cleanup-fn)
+                 (reject event)))
+          (. raw (addEventListener "open" on-open))
+          (. raw (addEventListener "error" on-error))
+          (. raw (addEventListener "close" on-close))))))
 
 (defn.js disconnect-ws
   "dispatches request through the wrapped fetch client"

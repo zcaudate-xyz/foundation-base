@@ -45,17 +45,27 @@
 (defn.xt create-realtime-on-message
   [realtime-client]
   (return
-   (fn [message]
-     )))
+   (phoenix/wrap-phoenix
+    {"broadcast"
+     (fn [frame]
+       (var envelope (xt/x:get-key frame "payload"))
+       (when (== "xt.db/event" (xt/x:get-key envelope "event"))
+         (var payload (xt/x:get-key envelope "payload"))
+         (var callbacks (xtd/get-in realtime-client ["state" "callbacks"]))
+         (xt/for:object [[_id callback] callbacks]
+           (callback (xt/x:obj-assign {"topic" (xt/x:get-key envelope "topic")}
+                                      payload)))))})))
 
 (defn.xt create-realtime
   "returns the realtime websocket client for id, creating it if necessary"
   {:added "4.1"}
-  [impl conn-id listeners]
+  [impl conn-id]
   (var realtime-client (common-ws/create-ws-client {"id" conn-id}))
   (var ws-url (-/prepare-connect-url impl {}))
   (websocket/connect realtime-client {"url" ws-url})
-  (websocket/add-listeners realtime-client listeners)
+  (websocket/add-listeners realtime-client
+                           {"message"
+                            (-/create-realtime-on-message realtime-client)})
   (return realtime-client))
 
 (defn.xt get-realtime
