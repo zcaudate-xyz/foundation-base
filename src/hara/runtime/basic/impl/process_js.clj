@@ -3,6 +3,7 @@
             [hara.runtime.basic.type-basic :as basic]
             [hara.runtime.basic.type-common :as common]
             [hara.runtime.basic.type-oneshot :as oneshot]
+            [hara.runtime.basic.type-playground :as playground]
             [hara.runtime.basic.type-verify :as type-verify]
             [hara.runtime.basic.type-websocket :as websocket]
             [hara.lang.impl :as impl]
@@ -239,4 +240,28 @@
     :js :websocket
     {:type :hara/rt.websocket
      :instance {:create #'websocket/rt-websocket:create}
+     :config {:layout :full}})])
+
+;;
+;; PLAYGROUND
+;;
+
+(def +js-playground-config+
+  (common/set-context-options
+   [:js :playground :default]
+   {:bootstrap false
+    :main  {}
+    :emit  {:native {:suppress true}
+            :body  {:transform #'rt/return-transform}
+            :lang/jsx false
+            :lang/format :global}
+    :json :full
+    :encode :json
+    :timeout 2000}))
+
+(def +js-playground+
+  [(rt/install-type!
+    :js :playground
+    {:type :hara/rt.playground
+     :instance {:create #'playground/rt-playground:create}
      :config {:layout :full}})])

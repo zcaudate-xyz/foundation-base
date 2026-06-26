@@ -40,6 +40,7 @@
          [:js     :basic]              'hara.runtime.basic.impl.process-js
          [:js     :interactive]        'hara.runtime.basic.impl.process-js
          [:js     :websocket]          'hara.runtime.basic.impl.process-js
+         [:js     :playground]         'hara.runtime.basic.impl.process-js
          [:js     :javafx]             'hara.runtime.javafx
          [:js     :graal]              'hara.runtime.graal
          [:js     :browser]            'hara.runtime.browser
