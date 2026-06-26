@@ -6,7 +6,7 @@
              [xt.lang.common-string :as xts]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.system.common-ws :as common-ws]
+             [xt.db.system.impl-common-ws :as common-ws]
              [xt.net.http-util :as http-util]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
@@ -30,34 +30,32 @@
   "prepares the websocket url used to connect to realtime"
   {:added "4.1"}
   [impl params]
-  (var defaults (xtd/get-in impl ["client" "defaults"]))
+  (var #{client} impl)
+  (var #{defaults} client)
   (var path (xt/x:cat "/realtime/v1/websocket"
                       "?"
                       (http-util/encode-query-params
                        (xt/x:obj-assign
                         {"vsn"   "1.0.0"
-                         "apikey" (xtd/get-in defaults "apikey")}
+                         "apikey" (xt/x:get-key defaults "apikey")}
                         params))))
   (return
-   (websocket/prepare-url impl {"path" path})))
+   (websocket/prepare-url client {"path" path})))
+
+(defn.xt create-realtime-on-message
+  [realtime-client]
+  (return
+   (fn [message]
+     )))
 
 (defn.xt create-realtime
   "returns the realtime websocket client for id, creating it if necessary"
   {:added "4.1"}
-  [impl conn-id topics]
+  [impl conn-id listeners]
+  (var realtime-client (common-ws/create-ws-client {"id" conn-id}))
   (var ws-url (-/prepare-connect-url impl {}))
-  (var realtime-client (common-ws/create-ws-client {"id"     conn-id
-                                                    "url"    ws-url
-                                                    "topics" topics}))
-  (websocket/connect realtime-client {})
-  (websocket/add-listeners realtime-client
-                           {"message"
-                            (fn [event]
-                              (-/route-frame impl conn-id (phoenix/decode-frame event))
-                              (return event))
-                            "open"
-                            (fn [_event]
-                              (phoenix/start-heartbeat realtime-client))})
+  (websocket/connect realtime-client {"url" ws-url})
+  (websocket/add-listeners realtime-client listeners)
   (return realtime-client))
 
 (defn.xt get-realtime
@@ -66,13 +64,12 @@
   [impl conn-id]
   (return (xtd/get-in impl ["state" "realtimes" conn-id])))
 
-(defn.xt set-websocket
+(defn.xt set-realtime
   "stores the realtime websocket client for the given id in the impl state"
   {:added "4.1"}
   [impl conn-id client]
   (xtd/set-in impl ["state" "realtimes" conn-id] client)
   (return client))
-
 
 (defn.xt get-auth-token
   "resolves the realtime auth token from the impl session or client defaults"
@@ -93,31 +90,45 @@
      "ref" (xt/x:cat "::JOIN/" topic)
      "access_token" auth-token})))
 
-
-
 (defn.xt join-topic
   "builds the Phoenix join payload for a broadcast-only channel"
   {:added "4.1"}
   [impl conn-id topic]
-  
+  (var realtime-client
+       (-/get-realtime impl conn-id))
   (return
-   (phoenix/send-frame client join-frame)))
+   (phoenix/send-frame realtime-client (-/join-topic-payload impl topic))))
 
-(defn.xt join-
-  "sends pending join frames and starts heartbeat when the socket opens"
-  {:added "4.1"}
-  [impl conn-id]
-  (var client (-/get-websocket impl conn-id))
-  (var topics (-/get-websocket-topics impl conn-id))
-  (xt/for:object [[topic entry] topics]
-    (var join-frame (xt/x:get-key entry "join_frame"))
-    (when (xt/x:not-nil? join-frame)
-      (phoenix/send-frame client join-frame)))
-  
-  (return true))
+
+
+
 
 
 (comment
+  {"open"
+   (fn [e]
+     (repl/notify "opened"))})
+
+
+
+
+
+
+
+(comment
+  (defn.xt join-
+    "sends pending join frames and starts heartbeat when the socket opens"
+    {:added "4.1"}
+    [impl conn-id]
+    (var client (-/get-websocket impl conn-id))
+    (var topics (-/get-websocket-topics impl conn-id))
+    (xt/for:object [[topic entry] topics]
+      (var join-frame (xt/x:get-key entry "join_frame"))
+      (when (xt/x:not-nil? join-frame)
+        (phoenix/send-frame client join-frame)))
+  
+    (return true))
+
   {"message"
    (fn [event]
      (-/route-frame impl conn-id (phoenix/decode-frame event))

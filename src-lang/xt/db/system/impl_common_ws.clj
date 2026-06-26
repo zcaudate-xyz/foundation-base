@@ -1,6 +1,5 @@
-(ns xt.db.system.common-ws
+(ns xt.db.system.impl-common-ws
   (:require [hara.lang :as l]))
-
 
 (l/script :xtalk)
 
