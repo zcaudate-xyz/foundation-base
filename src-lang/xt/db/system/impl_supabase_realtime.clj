@@ -54,7 +54,7 @@
   {:added "4.1"}
   [impl]
   (return (or (xtd/get-in impl ["state" "session" "access_token"])
-              (xtd/get-in impl ["client" "defaults" "token"]))))
+              (xtd/get-in impl ["client" "defaults" "apikey"]))))
 
 (defn.xt topic-join-payload
   "builds the Phoenix join payload for a broadcast-only channel"
@@ -63,10 +63,10 @@
   (var auth-token (-/get-auth-token impl))
   (return
    (phoenix/make-frame-join
-    {"config" {"broadcast" {"ack" false "self" false}}}
+    {"config" {"broadcast" {"ack" false "self" false}}
+     "access_token" auth-token}
     {"topic" topic
-     "ref" (xt/x:cat "#/join/" topic)
-     "access_token" auth-token})))
+     "ref" (xt/x:cat "#/join/" topic)})))
 
 (defn.xt topic-leave-payload
   "builds the Phoenix join payload for a broadcast-only channel"
@@ -90,11 +90,25 @@
        (var envelope (xt/x:get-key frame "payload"))
        (when (== "xt.db/event" (xt/x:get-key envelope "event"))
          (var payload (xt/x:get-key envelope "payload"))
+         (var topic (xt/x:get-key frame "topic"))
          (var callbacks (xtd/get-in realtime-client ["state" "callbacks"]))
          (xt/for:object [[_id callback] callbacks]
-           (callback (xt/x:obj-assign {"topic" (xt/x:get-key envelope "topic")}
-                                      payload)))))})))
-
+           (callback (xt/x:obj-assign {"topic" topic}
+                                      payload)))))
+     "phx_reply"
+     (fn [frame]
+       (var join-ref (xt/x:get-key frame "join_ref"))
+       (var topics   (xtd/get-in realtime-client ["state" "topics"]))
+       (when (xt/x:not-nil? join-ref)
+         (xt/for:object [[topic entry] topics]
+           (when (== (xt/x:cat "#/join/" topic) join-ref)
+             (var status (xtd/get-in frame ["payload" "status"]))
+             (var ok  (== status "ok"))
+             (var deferred  (xt/x:get-key entry "deferred"))
+             (var resolve   (xt/x:get-key deferred "resolve"))
+             (when (xt/x:is-function? resolve)
+               (resolve ok))
+             (xtd/set-in realtime-client ["state" "topics" topic "ready"] ok)))))})))
 
 (defn.xt create-realtime
   "returns the realtime websocket client for id, creating it if necessary"
@@ -130,168 +144,108 @@
   "returns the realtime websocket client for id, creating it if necessary"
   {:added "4.1"}
   [impl conn-id]
-  )
+  (var client (-/get-realtime impl conn-id))
+  (when (xt/x:not-nil? client)
+    (return client))
+  (:= client (-/create-realtime impl conn-id))
+  (-/set-realtime impl conn-id client)
+  (return client))
 
 (defn.xt remove-realtime
-  "returns the realtime websocket client for id, creating it if necessary"
+  "disconnects and removes the realtime websocket client for id"
   {:added "4.1"}
   [impl conn-id]
-  
-  )
+  (var client (-/get-realtime impl conn-id))
+  (when (xt/x:not-nil? client)
+    (var topics (xtd/get-in client ["state" "topics"]))
+    (xt/for:object [[topic entry] topics]
+      (var deferred (xt/x:get-key entry "deferred"))
+      (var resolve (xt/x:get-key deferred "resolve"))
+      (when (xt/x:is-function? resolve)
+        (resolve false)))
+    (websocket/disconnect client))
+  (xt/x:del-key (xtd/get-in impl ["state" "realtimes"]) conn-id)
+  (return client))
 
-(defn.xt add-realtime-callback
-  "returns the realtime websocket client for the given id from the impl state"
-  {:added "4.1"}
-  [impl conn-id callback-id handler]
-  )
-
-(defn.xt remove-realtime-callback
-  "returns the realtime websocket client for the given id from the impl state"
+(defn.xt get-realtime-callback
+  "gets a broadcast callback from the realtime client"
   {:added "4.1"}
   [impl conn-id callback-id]
-  )
-
-
-;;
-;;
-;;
-
-(defn.xt join-topic
-  "builds the Phoenix join payload for a broadcast-only channel"
-  {:added "4.1"}
-  [impl conn-id topic]
-  (var realtime-client
-       (-/get-realtime impl conn-id))
   (return
-   (phoenix/send-frame realtime-client (-/join-topic-payload impl topic))))
+   (xtd/get-in (-/get-realtime impl conn-id) ["state" "callbacks" callback-id])))
 
+(defn.xt add-realtime-callback
+  "adds a callback to be invoked on xt.db/event broadcasts for the realtime client"
+  {:added "4.1"}
+  [impl conn-id callback-id handler]
+  (var client (-/ensure-realtime impl conn-id))
+  (var callbacks (xtd/get-in client ["state" "callbacks"]))
+  (xt/x:set-key callbacks callback-id handler)
+  (return handler))
 
+(defn.xt remove-realtime-callback
+  "removes a broadcast callback from the realtime client"
+  {:added "4.1"}
+  [impl conn-id callback-id]
+  (var client (-/get-realtime impl conn-id))
+  (when (xt/x:not-nil? client)
+    (var callbacks (xtd/get-in client ["state" "callbacks"]))
+    (xt/x:del-key callbacks callback-id))
+  (return true))
 
+(defn.xt get-topics
+  "returns the map of subscribed topics for the realtime client"
+  {:added "4.1"}
+  [impl conn-id]
+  (var client (-/get-realtime impl conn-id))
+  (if (xt/x:not-nil? client)
+    (return (xtd/get-in client ["state" "topics"]))
+    (return {})))
 
+(defn.xt subscribe
+  "subscribes to one or more broadcast topics on the realtime websocket"
+  {:added "4.1"}
+  [impl conn-id topics]
+  (var client (-/ensure-realtime impl conn-id))
+  (xt/x:arr-map topics
+                (fn [topic]
+                  (var join-ref (xt/x:cat "#/join/" topic))
+                  (var deferred {"resolve" nil "reject" nil})
+                  (var init (promise/x:promise-new
+                             (fn [resolve reject]
+                               (xt/x:set-key deferred "resolve" resolve)
+                               (xt/x:set-key deferred "reject" reject))))
+                  (xtd/set-in client
+                              ["state" "topics" topic]
+                              {"init" init
+                               "join_ref" join-ref
+                               "deferred" deferred
+                               "ready" false})))
+  (return
+   (promise/x:promise-then
+    (xtd/get-in client ["state" "init"])
+    (fn [_]
+      (xt/x:arr-map topics
+                    (fn [topic]
+                      (phoenix/send-frame client (-/topic-join-payload impl topic))))
+      (return (promise/x:promise-all
+               (xt/x:arr-map topics
+                             (fn [topic]
+                               (xtd/get-in client ["state" "topics" topic "init"])))))))))
 
-
-(comment
-  {"open"
-   (fn [e]
-     (repl/notify "opened"))})
-
-
-
-
-
-
-
-(comment
-  (defn.xt join-
-    "sends pending join frames and starts heartbeat when the socket opens"
-    {:added "4.1"}
-    [impl conn-id]
-    (var client (-/get-websocket impl conn-id))
-    (var topics (-/get-websocket-topics impl conn-id))
-    (xt/for:object [[topic entry] topics]
-      (var join-frame (xt/x:get-key entry "join_frame"))
-      (when (xt/x:not-nil? join-frame)
-        (phoenix/send-frame client join-frame)))
-  
-    (return true))
-
-  {"message"
-   (fn [event]
-     (-/route-frame impl conn-id (phoenix/decode-frame event))
-     (return event))
-   "open"
-   (fn [_event]
-     (-/on-open impl conn-id)
-     (return true))}
-
-  (websocket/start-heartbeat client
-                             "pubsub"
-                             (fn [client name]
-                               (phoenix/send-heartbeat client {}))
-                             30000))
-
-(comment
-
-  (defn.xt topic-entry
-    "gets the subscription entry for a Phoenix topic"
-    {:added "4.1"}
-    [impl conn-id topic]
-    (return (-/get-topic impl conn-id topic)))
-
-
-
-  (defn.xt route-frame
-    "routes a decoded Phoenix frame to status handlers or topic callbacks"
-    {:added "4.1"}
-    [impl conn-id frame]
-    (var event-name (xt/x:get-key frame "event"))
-    (cond (== event-name "phx_reply")
-          (do (var topic (xt/x:get-key frame "topic"))
-              (var entry (-/get-topic impl conn-id topic))
-              (when (xt/x:not-nil? entry)
-                (var opts (xt/x:get-key entry "opts"))
-                (var on-status (xt/x:get-key opts "on_status"))
-                (var status (xtd/get-in frame ["payload" "status"]))
-                (when (and (== status "ok") (xt/x:is-function? on-status))
-                  (on-status "SUBSCRIBED" frame))))
-
-          (== event-name "broadcast")
-          (do (var topic (xt/x:get-key frame "topic"))
-              (var envelope (xt/x:get-key frame "payload"))
-              (var broadcast-event (xt/x:get-key envelope "event"))
-              (when (== broadcast-event "xt.db/event")
-                (var payload (xt/x:get-key envelope "payload"))
-                (var entry (-/get-topic impl conn-id topic))
-                (when (xt/x:not-nil? entry)
-                  (var callback (xt/x:get-key entry "callback"))
-                  (when (xt/x:is-function? callback)
-                    (callback payload))))))
-    (return frame))
-
-
-
-  (defn.xt subscribe
-    "subscribes to a broadcast topic on the realtime websocket"
-    {:added "4.1"}
-    [impl conn-id topic opts callback]
-    (:= opts (or opts {}))
-    (var client (-/get-websocket impl conn-id))
-    (var join-payload (-/broadcast-join-payload impl conn-id opts))
-    (var join-frame (phoenix/make-frame-join client
-                                             join-payload
-                                             {"topic" topic}))
-    (var id (xts/str-rand 8))
-    (var handle {"topic" topic
-                 "id" id
-                 "callback" callback
-                 "active" true})
-    (-/set-topic impl conn-id topic
-                 {"callback" callback
-                  "opts" opts})
-    (phoenix/send-frame client join-frame)
-    (return handle))
-
-  (defn.xt unsubscribe
-    "leaves a topic on the realtime websocket"
-    {:added "4.1"}
-    [impl conn-id handle]
-    (var topic (xt/x:get-key handle "topic"))
-    (var client (-/get-websocket impl conn-id))
-    (var entry (-/get-topic impl conn-id topic))
-    (when (xt/x:not-nil? entry)
-      (var leave-frame (phoenix/make-frame-leave client
-                                                 {"topic" topic}))
+(defn.xt unsubscribe
+  "unsubscribes from one or more broadcast topics on the realtime websocket"
+  {:added "4.1"}
+  [impl conn-id topics]
+  (return
+   (promise/x:promise
+    (fn []
+      (var client (-/get-realtime impl conn-id))
       (when (xt/x:not-nil? client)
-        (phoenix/send-frame client leave-frame))
-      (var topics (-/get-websocket-topics impl conn-id))
-      (xt/x:del-key topics topic)
-      (-/set-websocket-topics impl conn-id topics))
-    (xt/x:set-key handle "active" false)
-    (return true))
-
-  (defn.xt publish
-    "publishing is not supported by the supabase realtime abstraction"
-    {:added "4.1"}
-    [impl conn-id topic message opts]
-    (return (promise/x:promise-run nil)))
-  )
+        (xt/x:arr-map topics
+                      (fn [topic]
+                        (var entry (xtd/get-in client ["state" "topics" topic]))
+                        (when (xt/x:not-nil? entry)
+                          (phoenix/send-frame client (-/topic-leave-payload impl topic))
+                          (xt/x:del-key (xtd/get-in client ["state" "topics"]) topic)))))
+      (return true)))))

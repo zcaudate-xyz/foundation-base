@@ -145,6 +145,23 @@
     (catch err
         (return (-/make-rejected-state err)))))
 
+(defspec.xt promise-new [:fn [[:xt/fn]] :xt/promise])
+
+(defn.xt promise-new
+  "creates a common promise via an executor (fn [resolve reject] ...)"
+  {:added "4.1"}
+  [thunk]
+  (var out (-/make-pending-state nil))
+  (try
+    (xt/x:apply thunk
+                [(fn [value]
+                   (return (-/internal-settle-action out "resolved" value -/internal-drive-action)))
+                 (fn [err]
+                   (return (-/internal-settle-action out "rejected" err -/internal-drive-action)))])
+    (return out)
+    (catch err
+      (return (-/make-rejected-state err)))))
+
 (defspec.xt promise-run [:fn [:xt/any] :xt/promise])
 
 (defn.xt promise-run

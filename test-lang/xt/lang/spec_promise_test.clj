@@ -59,6 +59,36 @@
            (repl/notify out)))))
   => "hello")
 
+^{:refer xt.lang.spec-promise/x:promise-new :added "4.1"}
+(fact "creates a promise via resolve/reject executor"
+
+  (notify/wait-on :js
+    (-> (spec-promise/x:promise-new
+         (fn [resolve reject]
+           (resolve "hello")))
+        (spec-promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => "hello"
+
+  (notify/wait-on :python
+    (-> (spec-promise/x:promise-new
+         (fn [resolve reject]
+           (resolve "hello")))
+        (spec-promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => "hello"
+
+  (notify/wait-on :lua
+    (-> (spec-promise/x:promise-new
+         (fn [resolve reject]
+           (resolve "hello")))
+        (spec-promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => "hello")
+
 ^{:refer xt.lang.spec-base/x:async-run :added "4.1"}
 (fact "runs thunks in the host async model"
 

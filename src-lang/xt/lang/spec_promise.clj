@@ -12,6 +12,14 @@
   {:added "4.1"}
   ([thunk] (list (quote x:promise) thunk)))
 
+(defspec.xt x:promise-new [:fn [[:xt/fn]] :xt/promise])
+
+(defmacro.xt ^{:standalone true}
+  x:promise-new
+  "wraps thunk execution in the native host promise via resolve/reject callbacks"
+  {:added "4.1"}
+  ([thunk] (list (quote x:promise-new) thunk)))
+
 (defspec.xt x:promise-run [:fn [:xt/any] :xt/promise])
 
 (defmacro.xt ^{:standalone true}

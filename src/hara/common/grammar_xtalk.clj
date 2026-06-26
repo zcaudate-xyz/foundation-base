@@ -916,6 +916,10 @@
     :raw 'xt.lang.common-promise/promise
     :op-spec {:arglists '([thunk])
               :type [:fn [[:xt/fn]] :xt/promise]}}
+   {:op :x-promise-new      :symbol #{'x:promise-new}      :emit :hard-link
+    :raw 'xt.lang.common-promise/promise-new
+    :op-spec {:arglists '([thunk])
+              :type [:fn [[:xt/fn]] :xt/promise]}}
    {:op :x-promise-all      :symbol #{'x:promise-all}      :emit :hard-link
     :raw 'xt.lang.common-promise/promise-all
     :op-spec {:arglists '([promises])

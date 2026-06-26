@@ -615,6 +615,7 @@
 (def +julia-promise+
   {:x-async-run        {:macro #'julia-tf-x-async-run        :emit :macro}
    :x-promise          {:emit :hard-link :raw 'xt.lang.common-promise/promise}
+   :x-promise-new      {:emit :hard-link :raw 'xt.lang.common-promise/promise-new}
    :x-promise-all      {:emit :hard-link :raw 'xt.lang.common-promise/promise-all}
    :x-promise-then     {:emit :hard-link :raw 'xt.lang.common-promise/promise-then}
    :x-promise-catch    {:emit :hard-link :raw 'xt.lang.common-promise/promise-catch}

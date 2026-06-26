@@ -595,6 +595,16 @@
   [[_ thunk]]
   (list 'Future.sync thunk))
 
+(defn dart-tf-x-promise-new
+  [[_ thunk]]
+  (let [call (dart-call thunk
+                        (list :- "completer.complete")
+                        (list :- "completer.completeError"))]
+    (template/$
+     (do (var completer (:- "Completer<dynamic>()"))
+         ~call
+         (return (. completer future))))))
+
 (defn dart-tf-x-promise-all
   [[_ promises]]
   (template/$
@@ -644,6 +654,7 @@
 (def +dart-promise+
   {:x-async-run        {:macro #'dart-tf-x-async-run        :emit :macro}
    :x-promise          {:macro #'dart-tf-x-promise          :emit :macro}
+   :x-promise-new      {:macro #'dart-tf-x-promise-new      :emit :macro}
    :x-promise-all      {:macro #'dart-tf-x-promise-all      :emit :macro}
    :x-promise-then     {:macro #'dart-tf-x-promise-then     :emit :macro}
    :x-promise-catch    {:macro #'dart-tf-x-promise-catch    :emit :macro}

@@ -864,6 +864,7 @@
 (def +ruby-promise+
   {:x-async-run        {:macro #'ruby-tf-x-async-run       :emit :macro}
    :x-promise          {:raw 'xt.lang.common-promise/promise         :emit :hard-link}
+   :x-promise-new      {:raw 'xt.lang.common-promise/promise-new     :emit :hard-link}
    :x-promise-all      {:raw 'xt.lang.common-promise/promise-all     :emit :hard-link}
    :x-promise-then     {:raw 'xt.lang.common-promise/promise-then    :emit :hard-link}
    :x-promise-catch    {:raw 'xt.lang.common-promise/promise-catch   :emit :hard-link}

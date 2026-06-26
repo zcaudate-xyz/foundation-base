@@ -995,6 +995,10 @@
   [[_ thunk]]
   (list 'xt-promise thunk))
 
+(defn elisp-tf-x-promise-new
+  [[_ thunk]]
+  (list 'xt-promise-new thunk))
+
 (defn elisp-tf-x-async-run
   [[_ thunk]]
   (template/$
@@ -1027,6 +1031,7 @@
 (def +elisp-promise+
   {:x-async-run        {:macro #'elisp-tf-x-async-run        :emit :macro :value true}
    :x-promise          {:macro #'elisp-tf-x-promise          :emit :macro}
+   :x-promise-new      {:macro #'elisp-tf-x-promise-new      :emit :macro}
    :x-promise-all      {:macro #'elisp-tf-x-promise-all      :emit :macro}
    :x-promise-then     {:macro #'elisp-tf-x-promise-then     :emit :macro}
    :x-promise-catch    {:macro #'elisp-tf-x-promise-catch    :emit :macro}

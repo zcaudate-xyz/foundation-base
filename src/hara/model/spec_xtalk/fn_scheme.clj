@@ -1020,6 +1020,10 @@
   [[_ thunk]]
   (list 'xt-promise thunk))
 
+(defn scheme-tf-x-promise-new
+  [[_ thunk]]
+  (list 'xt-promise-new thunk))
+
 (defn scheme-tf-x-async-run
   [[_ thunk]]
   (template/$
@@ -1052,6 +1056,7 @@
 (def +scheme-promise+
   {:x-async-run       {:macro #'scheme-tf-x-async-run       :emit :macro :value true}
    :x-promise         {:macro #'scheme-tf-x-promise         :emit :macro}
+   :x-promise-new     {:macro #'scheme-tf-x-promise-new     :emit :macro}
    :x-promise-all     {:macro #'scheme-tf-x-promise-all     :emit :macro}
    :x-promise-then    {:macro #'scheme-tf-x-promise-then    :emit :macro}
    :x-promise-catch   {:macro #'scheme-tf-x-promise-catch   :emit :macro}
