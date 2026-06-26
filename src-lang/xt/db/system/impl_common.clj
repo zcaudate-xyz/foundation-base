@@ -58,7 +58,14 @@
   (return (xt/x:obj-keys out)))
 
 (defn.xt sync-notify-listeners
-  "Notifies db listeners whose table guard matches any changed table."
+  "Notifies db listeners whose table guard matches any changed table.
+
+   A listener's \"guard\" may be:
+   - a function (legacy): (fn [table] bool)
+   - a map/object:        {<table> true|false|(fn [table-payload] bool)}
+
+   For map guards the function receives the table's payload object:
+   {\"db/sync\" [...] \"db/remove\" [...]}."
   {:added "4.1"}
   [impl tables event]
   (var #{listeners} impl)
@@ -69,6 +76,16 @@
     (when (xt/x:is-function? guard)
       (xt/for:array [table tables]
         (when (guard table)
+          (:= matched true))))
+    (when (xt/x:is-object? guard)
+      (xt/for:array [table tables]
+        (var table-guard (xt/x:get-key guard table))
+        (when (xt/x:is-function? table-guard)
+          (var table-payload {"db/sync"   (xtd/get-in event ["db/sync" table])
+                              "db/remove" (xtd/get-in event ["db/remove" table])})
+          (when (table-guard table-payload)
+            (:= matched true)))
+        (when (and table-guard (not (xt/x:is-function? table-guard)))
           (:= matched true))))
     (when matched
       (callback event)))

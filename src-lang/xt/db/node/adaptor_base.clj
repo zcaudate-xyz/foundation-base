@@ -81,14 +81,27 @@
 
 (defn.xt ^{:substrate/fn "@xt.db/init-adaptor"}
   init-adaptor-handler
-  "Server-side handler that calls init-adaptor-main with client args."
+  "Server-side handler that calls init-adaptor-main with client args.
+
+   Returns a serializable summary so the result can be sent over a transport."
   {:added "4.1"}
   [space args request node]
   (var config  (xt/x:first args))
   (var schema  (xt/x:second args))
   (var lookup  (xt/x:get-idx args (xt/x:offset 2)))
   (return
-   (-/init-adaptor-main node config schema lookup)))
+   (-> (-/init-adaptor-main node config schema lookup)
+       (promise/x:promise-then
+        (fn [node]
+          (var primary (substrate/get-service node "db/primary"))
+          (var caching (substrate/get-service node "db/caching"))
+          (var common  (substrate/get-service node "db/common"))
+          (return
+           {"status" "ok"
+            "services"
+            {"db/primary" {"metadata" (or (xt/x:get-key primary "metadata") {})}
+             "db/caching" {"metadata" (or (xt/x:get-key caching "metadata") {})}
+             "db/common"  {"metadata" (or (xt/x:get-key common "metadata") {})}}}))))))
 
 ;;
 ;;
@@ -131,6 +144,26 @@
           (return (-/apply-sync-output node
                                        (substrate/get-service node service-id)
                                        result)))))))
+
+(defn.xt ^{:substrate/fn "@xt.db/sync-event"}
+  sync-event-handler
+  "Substrate handler for @xt.db/sync-event.
+
+   Args: [payload]. Applies the db/sync and db/remove payload to the paired
+   caching db and notifies any registered db listeners."
+  {:added "4.1"}
+  [space args request node]
+  (var payload (or (xt/x:first args) {}))
+  (var primary (substrate/get-service node "db/primary"))
+  (var caching-id (xtd/get-in primary ["metadata" "caching_id"]))
+  (var caching (or (and caching-id (substrate/get-service node caching-id))
+                   (substrate/get-service node "db/caching")))
+  (when (xt/x:nil? caching)
+    (return (promise/x:promise-run
+             [false {"status" "error"
+                     "tag" "db/caching-not-found"}])))
+  (return (promise/x:promise-run
+           (impl-common/sync-process-payload caching payload))))
 
 (defn.xt ^{:substrate/fn "@xt.db/call-fetch"}
   call-fetch-handler
@@ -195,7 +228,7 @@
     "defaults" defaults
     "options"  options}))
 
-(defn.xt addon-model-with-refresh
+(defn.xt add-db-model-listener
   "Attaches a page model and registers a db listener if options.refresh is set."
   {:added "4.1"}
   [node space-id group-id model-id service model-spec]
@@ -213,8 +246,7 @@
     (impl-common/add-db-listener
      caching
      listener-id
-     {"guard"    (fn [table]
-                   (return (xt/x:has-key? refresh-map table)))
+     {"guard"    refresh-map
       "callback" (fn [event]
                    (return
                     (page-core/model-update node space-id group-id model-id event)))}))
@@ -235,7 +267,7 @@
          model-id
          service}   node-args)
   (var model-spec (-/create-pull-model service model-args))
-  (return (-/addon-model-with-refresh
+  (return (-/add-db-model-listener
            node space-id group-id model-id service model-spec)))
 
 
@@ -319,7 +351,7 @@
          model-id
          service}   node-args)
   (var model-spec (-/create-tree-view-model service model-args))
-  (return (-/addon-model-with-refresh
+  (return (-/add-db-model-listener
            node space-id group-id model-id service model-spec)))
 
 
@@ -368,7 +400,7 @@
          service}   node-args)
   (var service-impl (substrate/get-service node service))
   (var model-spec (-/create-rpc-model service model-args))
-  (return (-/addon-model-with-refresh
+  (return (-/add-db-model-listener
            node space-id group-id model-id service-impl model-spec)))
 
 
@@ -449,6 +481,7 @@
   (substrate/register-handler node "@xt.db/detach-tree-view-model" -/detach-tree-view-model nil)
   (substrate/register-handler node "@xt.db/call-fetch" -/call-fetch-handler nil)
   (substrate/register-handler node "@xt.db/call-rpc" -/call-rpc-handler nil)
+  (substrate/register-handler node "@xt.db/sync-event" -/sync-event-handler nil)
   (substrate/register-handler node "@xt.db/init-adaptor" -/init-adaptor-handler nil)
   (return node))
 
