@@ -153,52 +153,18 @@
   (return
    (page-proxy/close-proxy-group node space-id group-id {"transport_id" transport-id})))
 
-(defn.xt detach-pull-model
-  "Client proxy for @xt.db/detach-pull-model"
+(defn.xt detach-db-model
+  "Client proxy for @xt.db/detach-db-model"
   {:added "4.1"}
   [node space-id group-id model-id service opts]
   (return
    (-> (substrate/request node
                           space-id
-                          "@xt.db/detach-pull-model"
+                          "@xt.db/detach-db-model"
                           [{"space_id" space-id
                             "group_id" group-id
                             "model_id" model-id
                             "service"  service}]
-                          (-/request-meta node opts))
-       (promise/x:promise-then
-        (fn [_]
-          (return (-/close-proxy-after node space-id group-id opts)))))))
-
-(defn.xt detach-tree-view-model
-  "Client proxy for @xt.db/detach-tree-view-model"
-  {:added "4.1"}
-  [node space-id group-id model-id service opts]
-  (return
-   (-> (substrate/request node
-                          space-id
-                          "@xt.db/detach-tree-view-model"
-                          [{"space_id" space-id
-                            "group_id" group-id
-                            "model_id" model-id
-                            "service"  service}]
-                          (-/request-meta node opts))
-       (promise/x:promise-then
-        (fn [_]
-          (return (-/close-proxy-after node space-id group-id opts)))))))
-
-(defn.xt detach-rpc-model
-  "Client proxy for @xt.db/detach-rpc-model"
-  {:added "4.1"}
-  [node space-id group-id model-id service-id opts]
-  (return
-   (-> (substrate/request node
-                          space-id
-                          "@xt.db/detach-rpc-model"
-                          [{"space_id" space-id
-                            "group_id" group-id
-                            "model_id" model-id
-                            "service"  service-id}]
                           (-/request-meta node opts))
        (promise/x:promise-then
         (fn [_]

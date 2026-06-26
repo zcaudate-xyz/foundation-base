@@ -224,39 +224,6 @@
            (repl/notify out)))))
   => 200)
 
-^{:refer xt.db.node.adaptor-base/call-primary-handler :added "4.1"
-  :setup [(l/rt:restart :js)]}
-(fact "call-primary-handler routes rpc args through the live primary impl"
-  
-  (notify/wait-on :js
-    (-> (substrate/node-create {})
-        (adaptor/init-adaptor-main {"primary" {"type" "postgres"
-                                     "defaults" (@! (local-min/+config+ :db))}
-                          "caching" {"type" "sqlite"
-                                     "defaults" {"filename" ":memory:"}}}
-                         -/Schema
-                         -/SchemaLookup)
-        (promise/x:promise-then
-         (fn [node]
-           (return
-            (adaptor/call-primary-handler
-             nil
-             [{"input" [{"symbol" "i_message" "type" "text"}]
-               "return" "jsonb"
-               "schema" "scratch_v0"
-               "id" "log_append_public"
-               "flags" {}}
-              ["hello"]]
-             nil
-             node))))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))
-        (promise/x:promise-catch
-         (fn [out]
-           (repl/notify out)))))
-  => (contains-in {"message" "hello"}))
-
 ^{:refer xt.db.node.adaptor-base/apply-sync-output :added "4.1"}
 (fact "apply-sync-output routes db/sync payload to the paired caching db"
 
@@ -574,9 +541,7 @@
        attach-tree-view-model
        call-fetch-handler
        call-rpc-handler
-       detach-pull-model
-       detach-rpc-model
-       detach-tree-view-model
+       detach-db-model
        init-adaptor-handler
        sync-event-handler])
 

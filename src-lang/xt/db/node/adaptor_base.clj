@@ -177,25 +177,6 @@
         (fn [client]
           (return (http-fetch/request-http client fetch-input)))))))
 
-(defn.xt
-  call-primary-handler
-  "Routes rpc args through the live db/primary service."
-  {:added "4.1"}
-  [space args request node]
-  (var rpc-spec (xt/x:first args))
-  (var fn-args  (xt/x:second args))
-  (return
-   (-> (promise/x:promise-run
-        (substrate/get-service node "db/primary"))
-       (promise/x:promise-then
-        (fn [impl]
-          (return (impl-common/rpc-call-async impl rpc-spec fn-args))))
-       (promise/x:promise-then
-        (fn [result]
-          (return (-/apply-sync-output node
-                                       (substrate/get-service node "db/primary")
-                                       result)))))))
-
 ;;
 ;;
 ;;
@@ -426,22 +407,12 @@
            "group" group-id
            "model" model-id}))
 
-(defn.xt ^{:substrate/fn "@xt.db/detach-pull-model"}
-  detach-pull-model
-  "Server-side handler that removes a pull-view page model and its listener."
-  {:added "4.1"}
-  [space args request node]
-  (var node-args   (xt/x:first args))
-  (var #{space-id
-         group-id
-         model-id
-         service}   node-args)
-  (return (-/remove-model-with-refresh
-           node space-id group-id model-id service)))
+(defn.xt ^{:substrate/fn "@xt.db/detach-db-model"}
+  detach-db-model
+  "Server-side handler that removes a page model and its caching db listener.
 
-(defn.xt ^{:substrate/fn "@xt.db/detach-tree-view-model"}
-  detach-tree-view-model
-  "Server-side handler that removes a tree-view page model and its listener."
+   Works for pull, tree-view and RPC models. The `service` field may be either a
+   service id string or the service impl map."
   {:added "4.1"}
   [space args request node]
   (var node-args   (xt/x:first args))
@@ -449,20 +420,9 @@
          group-id
          model-id
          service}   node-args)
-  (return (-/remove-model-with-refresh
-           node space-id group-id model-id service)))
-
-(defn.xt ^{:substrate/fn "@xt.db/detach-rpc-model"}
-  detach-rpc-model
-  "Server-side handler that removes an RPC page model and its listener."
-  {:added "4.1"}
-  [space args request node]
-  (var node-args   (xt/x:first args))
-  (var #{space-id
-         group-id
-         model-id
-         service}   node-args)
-  (var service-impl (substrate/get-service node service))
+  (var service-impl service)
+  (when (xt/x:is-string? service)
+    (:= service-impl (substrate/get-service node service)))
   (return (-/remove-model-with-refresh
            node space-id group-id model-id service-impl)))
 
@@ -476,9 +436,7 @@
   (substrate/register-handler node "@xt.db/attach-pull-model" -/attach-pull-model nil)
   (substrate/register-handler node "@xt.db/attach-rpc-model" -/attach-rpc-model nil)
   (substrate/register-handler node "@xt.db/attach-tree-view-model" -/attach-tree-view-model nil)
-  (substrate/register-handler node "@xt.db/detach-pull-model" -/detach-pull-model nil)
-  (substrate/register-handler node "@xt.db/detach-rpc-model" -/detach-rpc-model nil)
-  (substrate/register-handler node "@xt.db/detach-tree-view-model" -/detach-tree-view-model nil)
+  (substrate/register-handler node "@xt.db/detach-db-model" -/detach-db-model nil)
   (substrate/register-handler node "@xt.db/call-fetch" -/call-fetch-handler nil)
   (substrate/register-handler node "@xt.db/call-rpc" -/call-rpc-handler nil)
   (substrate/register-handler node "@xt.db/sync-event" -/sync-event-handler nil)

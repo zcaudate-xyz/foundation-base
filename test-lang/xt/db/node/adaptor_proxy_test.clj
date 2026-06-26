@@ -201,7 +201,7 @@
                          "message" (xt/x:ex-message err)})))))
   => (contains-in {"message" "hello-proxy"}))
 
-^{:refer xt.db.node.adaptor-proxy/detach-pull-model :added "4.1"}
+^{:refer xt.db.node.adaptor-proxy/detach-db-model :added "4.1"}
 (fact "client proxy detaches a model and closes the proxy group"
 
   (notify/wait-on :js
@@ -233,7 +233,7 @@
         (promise/x:promise-then
          (fn [_]
            (return
-            (adaptor-proxy/detach-pull-model
+            (adaptor-proxy/detach-db-model
              client
              "room/a"
              "demo"
