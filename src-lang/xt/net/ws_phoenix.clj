@@ -146,7 +146,7 @@
   [client]
   (return
    (websocket/start-heartbeat client
-                              "phoenix"
+                              "phoenix.default"
                               (fn [client name]
                                 (-/send-frame client
                                               (-/make-frame-heartbeat {})))

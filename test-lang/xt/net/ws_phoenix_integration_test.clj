@@ -48,10 +48,10 @@
   (var client
        (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
                              :port (@! (-> local-min/+config+ :api :port))}))
-  (-> client
-      (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
-                                         (@! (-> local-min/+config+ :api :anon-key)))
-                                "listeners" listeners}))
+  (js-websocket/connect-ws client
+                           {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
+                                     (@! (-> local-min/+config+ :api :anon-key)))
+                            "listeners" listeners})
   (return client))
 
 ^{:refer xt.net.ws-phoenix/send-join :added "4.1"

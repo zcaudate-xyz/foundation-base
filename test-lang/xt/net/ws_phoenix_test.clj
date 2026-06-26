@@ -37,25 +37,26 @@
   (var client
        (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
                              :port (@! (-> local-min/+config+ :api :port))}))
-  (-> client
-      (js-websocket/connect-ws {:path (xt/x:cat "/realtime/v1/websocket?vsn=1.0.0&apikey="
-                                             (@! (-> local-min/+config+ :api :anon-key)))})
-      (js-websocket/add-listeners-ws
-       {"open"
-        (fn [_]
-          (phoenix/send-frame
-           client
-           (phoenix/make-frame-join
-            {"config" {"broadcast" {"ack" false "self" false}}}
-            {"topic" topic
-             "ref" "::INIT"})))
-        "message"
-        (fn [event]
-          (var frame (phoenix/decode-frame event))
-          (when frames
-            (xt/x:arr-push frames frame))
-          (when (== "::INIT" (xt/x:get-key frame "ref"))
-            (callback frame)))}))
+  (js-websocket/connect-ws client
+                           {:path (xt/x:cat "/realtime/v1/websocket?vsn=1.0.0&apikey="
+                                            (@! (-> local-min/+config+ :api :anon-key)))})
+  (js-websocket/add-listeners-ws
+   client
+   {"open"
+    (fn [_]
+      (phoenix/send-frame
+       client
+       (phoenix/make-frame-join
+        {"config" {"broadcast" {"ack" false "self" false}}}
+        {"topic" topic
+         "ref" "::INIT"})))
+    "message"
+    (fn [event]
+      (var frame (phoenix/decode-frame event))
+      (when frames
+        (xt/x:arr-push frames frame))
+      (when (== "::INIT" (xt/x:get-key frame "ref"))
+        (callback frame)))})
   (return client))
 
 (fact:global
@@ -173,36 +174,37 @@
                                :port (@! (-> local-min/+config+ :api :port))}))
     (var joined false)
     (var frames [])
-    (-> client
-        (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
-                                           (@! (-> local-min/+config+ :api :anon-key)))})
-        (websocket/add-listeners
-         {"open"
-          (fn [_]
+    (js-websocket/connect-ws client
+                             {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
+                                       (@! (-> local-min/+config+ :api :anon-key)))})
+    (websocket/add-listeners
+     client
+     {"open"
+      (fn [_]
+        (phoenix/send-frame
+         client
+         (phoenix/make-frame-join
+          {"config" {"broadcast" {"ack" false "self" false}}}
+          {"topic" "realtime:room:send-leave-test"
+           "ref" "join-1"})))
+      "message"
+      (phoenix/wrap-phoenix
+       {"phx_reply"
+        (fn [frame]
+          (when (and (== "ok" (xtd/get-in frame ["payload" "status"]))
+                     (not joined))
+            (:= joined true)
+            (xt/x:arr-push frames frame)
             (phoenix/send-frame
              client
-             (phoenix/make-frame-join
-              {"config" {"broadcast" {"ack" false "self" false}}}
+             (phoenix/make-frame-leave
               {"topic" "realtime:room:send-leave-test"
-               "ref" "join-1"})))
-          "message"
-          (phoenix/wrap-phoenix
-           {"phx_reply"
-            (fn [frame]
-              (when (and (== "ok" (xtd/get-in frame ["payload" "status"]))
-                         (not joined))
-                (:= joined true)
-                (xt/x:arr-push frames frame)
-                (phoenix/send-frame
-                 client
-                 (phoenix/make-frame-leave
-                  {"topic" "realtime:room:send-leave-test"
-                   "ref" "leave-1"}))
-                (repl/notify "left")))
-            "presence_state"
-            (fn [frame]
-              (xt/x:arr-push frames frame)
-              (repl/notify frames))})}))
+               "ref" "leave-1"}))
+            (repl/notify "left")))
+        "presence_state"
+        (fn [frame]
+          (xt/x:arr-push frames frame)
+          (repl/notify frames))})})
     true)
   => "left")
 
@@ -278,28 +280,29 @@
          (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
                                :port (@! (-> local-min/+config+ :api :port))}))
     (var replied false)
-    (-> client
-        (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
-                                           (@! (-> local-min/+config+ :api :anon-key)))})
-        (js-websocket/add-listeners-ws
-         {"open"
-          (fn [_]
-            (phoenix/send-frame
-             client
-             {"topic" "realtime:room:send-frame-test"
-              "event" "phx_join"
-              "payload" {"config" {"broadcast" {"ack" false "self" false}}}
-              "ref" "join-1"
-              "join_ref" "join-1"}))
-          "message"
-          (fn [event]
-            (var frame (phoenix/decode-frame event))
-            (when (and (== "phx_reply" (xt/x:get-key frame "event"))
-                       (== "join-1" (xt/x:get-key frame "ref"))
-                       (not replied))
-              (:= replied true)
-              (websocket/disconnect client)
-              (repl/notify frame)))}))
+    (js-websocket/connect-ws client
+                             {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
+                                       (@! (-> local-min/+config+ :api :anon-key)))})
+    (js-websocket/add-listeners-ws
+     client
+     {"open"
+      (fn [_]
+        (phoenix/send-frame
+         client
+         {"topic" "realtime:room:send-frame-test"
+          "event" "phx_join"
+          "payload" {"config" {"broadcast" {"ack" false "self" false}}}
+          "ref" "join-1"
+          "join_ref" "join-1"}))
+      "message"
+      (fn [event]
+        (var frame (phoenix/decode-frame event))
+        (when (and (== "phx_reply" (xt/x:get-key frame "event"))
+                   (== "join-1" (xt/x:get-key frame "ref"))
+                   (not replied))
+          (:= replied true)
+          (websocket/disconnect client)
+          (repl/notify frame)))})
     true)
   => {"event" "phx_reply",
       "ref" "join-1",
@@ -316,26 +319,34 @@
          (js-websocket/create {:host (@! (-> local-min/+config+ :api :hostname))
                                :port (@! (-> local-min/+config+ :api :port))}))
     (var replied false)
-    (-> client
-        (js-websocket/connect-ws {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
-                                           (@! (-> local-min/+config+ :api :anon-key)))})
-        (js-websocket/add-listeners-ws
-         {"open"
-          (fn [_]
-            (phoenix/send-frame client
-                                (phoenix/make-frame-heartbeat {"ref" "hb-1"})))
-          "message"
-          (fn [event]
-            (var frame (phoenix/decode-frame event))
-            (when (and (== "phx_reply" (xt/x:get-key frame "event"))
-                       (== "hb-1" (xt/x:get-key frame "ref"))
-                       (not replied))
-              (:= replied true)
-              (websocket/disconnect client)
-              (repl/notify frame)))}))
+    (js-websocket/connect-ws client
+                             {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
+                                       (@! (-> local-min/+config+ :api :anon-key)))})
+    (js-websocket/add-listeners-ws
+     client
+     {"open"
+      (fn [_]
+        (phoenix/send-frame client
+                            (phoenix/make-frame-heartbeat {"ref" "hb-1"})))
+      "message"
+      (fn [event]
+        (var frame (phoenix/decode-frame event))
+        (when (and (== "phx_reply" (xt/x:get-key frame "event"))
+                   (== "hb-1" (xt/x:get-key frame "ref"))
+                   (not replied))
+          (:= replied true)
+          (websocket/disconnect client)
+          (repl/notify frame)))})
     true)
   => {"event" "phx_reply",
       "ref" "hb-1",
       "payload" {"status" "ok",
                  "response" {}},
       "topic" "phoenix"})
+
+
+^{:refer xt.net.ws-phoenix/wrap-phoenix :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.net.ws-phoenix/start-heartbeat :added "4.1"}
+(fact "TODO")

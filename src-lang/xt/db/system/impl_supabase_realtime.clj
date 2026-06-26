@@ -11,6 +11,8 @@
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
 
+
+
 ;;
 ;; Supabase Realtime broadcast-only client.
 ;;
@@ -25,6 +27,10 @@
 ;;   client.state.topics = {"<topic>" {...}}
 ;;
 
+
+;;
+;; Util Functions
+;;
 
 (defn.xt prepare-connect-url
   "prepares the websocket url used to connect to realtime"
@@ -42,6 +48,39 @@
   (return
    (websocket/prepare-url client {"path" path})))
 
+
+(defn.xt get-auth-token
+  "resolves the realtime auth token from the impl session or client defaults"
+  {:added "4.1"}
+  [impl]
+  (return (or (xtd/get-in impl ["state" "session" "access_token"])
+              (xtd/get-in impl ["client" "defaults" "token"]))))
+
+(defn.xt topic-join-payload
+  "builds the Phoenix join payload for a broadcast-only channel"
+  {:added "4.1"}
+  [impl topic]
+  (var auth-token (-/get-auth-token impl))
+  (return
+   (phoenix/make-frame-join
+    {"config" {"broadcast" {"ack" false "self" false}}}
+    {"topic" topic
+     "ref" (xt/x:cat "#/join/" topic)
+     "access_token" auth-token})))
+
+(defn.xt topic-leave-payload
+  "builds the Phoenix join payload for a broadcast-only channel"
+  {:added "4.1"}
+  [impl topic]
+  (return
+   (phoenix/make-frame-leave
+    {"topic" topic
+     "ref" (xt/x:cat "#/leave/" topic)})))
+
+;;
+;; Realtime Client Management
+;;
+
 (defn.xt create-realtime-on-message
   [realtime-client]
   (return
@@ -56,15 +95,21 @@
            (callback (xt/x:obj-assign {"topic" (xt/x:get-key envelope "topic")}
                                       payload)))))})))
 
+
 (defn.xt create-realtime
   "returns the realtime websocket client for id, creating it if necessary"
   {:added "4.1"}
   [impl conn-id]
   (var realtime-client (common-ws/create-ws-client {"id" conn-id}))
   (var ws-url (-/prepare-connect-url impl {}))
-  (websocket/connect realtime-client {"url" ws-url})
+  (var init   (websocket/connect realtime-client
+                                 {"url" ws-url}))
+  (xtd/set-in realtime-client ["state" "init"] init)
   (websocket/add-listeners realtime-client
-                           {"message"
+                           {"open"
+                            (fn [raw]
+                              (phoenix/start-heartbeat realtime-client))
+                            "message"
                             (-/create-realtime-on-message realtime-client)})
   (return realtime-client))
 
@@ -81,24 +126,35 @@
   (xtd/set-in impl ["state" "realtimes" conn-id] client)
   (return client))
 
-(defn.xt get-auth-token
-  "resolves the realtime auth token from the impl session or client defaults"
+(defn.xt ensure-realtime
+  "returns the realtime websocket client for id, creating it if necessary"
   {:added "4.1"}
-  [impl]
-  (return (or (xtd/get-in impl ["state" "session" "access_token"])
-              (xtd/get-in impl ["client" "defaults" "token"]))))
+  [impl conn-id]
+  )
 
-(defn.xt join-topic-payload
-  "builds the Phoenix join payload for a broadcast-only channel"
+(defn.xt remove-realtime
+  "returns the realtime websocket client for id, creating it if necessary"
   {:added "4.1"}
-  [impl topic]
-  (var auth-token (-/get-auth-token impl))
-  (return
-   (phoenix/make-frame-join
-    {"config" {"broadcast" {"ack" false "self" false}}}
-    {"topic" topic
-     "ref" (xt/x:cat "::JOIN/" topic)
-     "access_token" auth-token})))
+  [impl conn-id]
+  
+  )
+
+(defn.xt add-realtime-callback
+  "returns the realtime websocket client for the given id from the impl state"
+  {:added "4.1"}
+  [impl conn-id callback-id handler]
+  )
+
+(defn.xt remove-realtime-callback
+  "returns the realtime websocket client for the given id from the impl state"
+  {:added "4.1"}
+  [impl conn-id callback-id]
+  )
+
+
+;;
+;;
+;;
 
 (defn.xt join-topic
   "builds the Phoenix join payload for a broadcast-only channel"
