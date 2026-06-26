@@ -61,6 +61,43 @@
                      -/Schema
                      -/SchemaLookup)))
 
+(defn.js run-phx-reply-test
+  []
+  (var client (common-ws/create-ws-client {"id" "phx-test"}))
+  (var deferred {"resolve" nil "reject" nil})
+  (var init (promise/x:promise-new
+             (fn [resolve reject]
+               (xt/x:set-key deferred "resolve" resolve)
+               (xt/x:set-key deferred "reject" reject))))
+  (xtd/set-in client ["state" "topics" "realtime:room:phx-test"]
+              {"init" init
+               "join_ref" "#/join/realtime:room:phx-test"
+               "deferred" deferred
+               "ready" false})
+  (var handler (realtime/create-realtime-on-message client))
+  (handler {"topic" "realtime:room:phx-test"
+            "event" "phx_reply"
+            "ref" "#/join/realtime:room:phx-test"
+            "join_ref" "#/join/realtime:room:phx-test"
+            "payload" {"status" "ok"
+                       "response" {"postgres_changes" []}}})
+  (return {"resolved" true
+           "ready" (xtd/get-in client ["state" "topics" "realtime:room:phx-test" "ready"])}))
+
+(defn.js run-subscribe-isolated-test
+  []
+  (var impl (-/default-impl))
+  (var client (common-ws/create-ws-client {"id" "subscribe-test"}))
+  (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
+  (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
+  (xtd/set-in impl ["state" "realtimes" "default"] client)
+  (var sub (realtime/subscribe impl "default" ["realtime:room:isolated-test"]))
+  (var deferred (xtd/get-in client ["state" "topics" "realtime:room:isolated-test" "deferred"]))
+  ((xtd/get-in deferred ["resolve"]) true)
+  (xtd/set-in client ["state" "topics" "realtime:room:isolated-test" "ready"] true)
+  (:= (!:G RT_ISOLATED_CLIENT) client)
+  (return sub))
+
 ^{:refer xt.db.system.impl-supabase-realtime/prepare-connect-url :added "4.1"}
 (fact "creates the connect-url"
   
@@ -135,6 +172,16 @@
   => {"topic" "realtime:room:test"
       "data" 1})
 
+^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "phx_reply resolves the topic init promise and marks the topic ready"
+
+  (notify/wait-on :js
+    (repl/notify
+     (-/run-phx-reply-test)))
+  => {"resolved" true
+      "ready" true})
+
 ^{:refer xt.db.system.impl-supabase-realtime/create-realtime :added "4.1"
   :setup [(l/rt:restart :js)]}
 (fact "creates a realtime connection"
@@ -160,7 +207,7 @@
            (repl/notify "opened")))))
   => "opened"
   
-  (notify/wait-on [:js 2000]
+  (notify/wait-on :js
     (var client
          (js-websocket/create (@! local-min/+config-supabase-anon+)))
     (var joined false)
@@ -212,7 +259,7 @@
   :setup [(l/rt:restart :js)]}
 (fact "creates and returns the same realtime client on subsequent calls"
 
-  (notify/wait-on [:js 2000]
+  (notify/wait-on :js
     (var impl (-/default-impl))
     (var client (realtime/ensure-realtime impl "default"))
     (var same-client (realtime/ensure-realtime impl "default"))
@@ -228,7 +275,7 @@
   :setup [(l/rt:restart :js)]}
 (fact "disconnects and removes the realtime client from the impl state"
 
-  (notify/wait-on [:js 2000]
+  (notify/wait-on :js
     (var impl (-/default-impl))
     (var client (realtime/ensure-realtime impl "default"))
     (-> (xtd/get-in client ["state" "init"])
@@ -242,7 +289,7 @@
   :setup [(l/rt:restart :js)]}
 (fact "retrieves a broadcast callback from the realtime client"
 
-  (notify/wait-on [:js 2000]
+  (notify/wait-on :js
     (var impl (-/default-impl))
     (var handler (fn [event] (return event)))
     (realtime/add-realtime-callback impl "default" "cb-1" handler)
@@ -259,7 +306,7 @@
   :setup [(l/rt:restart :js)]}
 (fact "adds a callback to the realtime client state"
 
-  (notify/wait-on [:js 2000]
+  (notify/wait-on :js
     (var impl (-/default-impl))
     (var handler (fn [event] (return event)))
     (realtime/add-realtime-callback impl "default" "cb-1" handler)
@@ -275,7 +322,7 @@
   :setup [(l/rt:restart :js)]}
 (fact "removes a callback from the realtime client state"
 
-  (notify/wait-on [:js 2000]
+  (notify/wait-on :js
     (var impl (-/default-impl))
     (var handler (fn [event] (return event)))
     (realtime/add-realtime-callback impl "default" "cb-1" handler)
@@ -312,19 +359,32 @@
   :setup [(l/rt:restart :js)]}
 (fact "subscribes to topics after the websocket is initialized"
 
-  (l/with:print-all
-    (notify/wait-on [:js 3000]
-      (var impl (-/default-impl))
-      (-> (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
-                                              "realtime:room:sub-test-2"])
-          (promise/x:promise-then
-           (fn [ok]
-             (repl/notify {"ok" ok
-                           "topics" (realtime/get-topics impl "default")}))))))
+  (notify/wait-on [:js 3000]
+    (var impl (-/default-impl))
+    (-> (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
+                                            "realtime:room:sub-test-2"])
+        (promise/x:promise-then
+         (fn [ok]
+           (repl/notify {"ok" ok
+                         "topics" (realtime/get-topics impl "default")})))))
   => (contains-in
       {"ok" [true true]
        "topics" {"realtime:room:sub-test-1" {"ready" true}
                  "realtime:room:sub-test-2" {"ready" true}}}))
+
+^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "subscribe waits for each topic init promise to resolve"
+
+  (notify/wait-on :js
+    (promise/x:promise-then
+     (-/run-subscribe-isolated-test)
+     (fn [ok]
+       (repl/notify {"ok" ok
+                     "ready" (xtd/get-in (!:G RT_ISOLATED_CLIENT)
+                                         ["state" "topics" "realtime:room:isolated-test" "ready"])}))))
+  => {"ok" [true]
+      "ready" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/unsubscribe :added "4.1"
   :setup [(l/rt:restart :js)]}
@@ -369,7 +429,7 @@
         "hello" "from postgres"}]))
 
 (comment
-  
+
 
 
   )

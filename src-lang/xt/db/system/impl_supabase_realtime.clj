@@ -97,18 +97,16 @@
                                       payload)))))
      "phx_reply"
      (fn [frame]
-       (var join-ref (xt/x:get-key frame "join_ref"))
-       (var topics   (xtd/get-in realtime-client ["state" "topics"]))
-       (when (xt/x:not-nil? join-ref)
-         (xt/for:object [[topic entry] topics]
-           (when (== (xt/x:cat "#/join/" topic) join-ref)
-             (var status (xtd/get-in frame ["payload" "status"]))
-             (var ok  (== status "ok"))
-             (var deferred  (xt/x:get-key entry "deferred"))
-             (var resolve   (xt/x:get-key deferred "resolve"))
-             (when (xt/x:is-function? resolve)
-               (resolve ok))
-             (xtd/set-in realtime-client ["state" "topics" topic "ready"] ok)))))})))
+       (var topic (xt/x:get-key frame "topic"))
+       (var entry (xtd/get-in realtime-client ["state" "topics" topic]))
+       (when (xt/x:is-object? entry)
+         (var status (xtd/get-in frame ["payload" "status"]))
+         (var ok  (== status "ok"))
+         (var deferred  (xt/x:get-key entry "deferred"))
+         (var resolve   (xt/x:get-key deferred "resolve"))
+         (when (xt/x:is-function? resolve)
+           (resolve ok))
+         (xtd/set-in realtime-client ["state" "topics" topic "ready"] ok)))})))
 
 (defn.xt create-realtime
   "returns the realtime websocket client for id, creating it if necessary"
