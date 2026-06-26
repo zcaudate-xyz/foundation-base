@@ -37,6 +37,18 @@
        (Thread/sleep 2000))
      true)))
 
+(defn restart-postgrest
+  "Restarts only the supabase_rest_local-min Docker container and waits for the
+   PostgREST API port to become available again."
+  []
+  (os/sh {:args ["docker" "restart" "supabase_rest_local-min"]
+          :output-errors true})
+  (network/wait-for-port
+   (get-in +config+ [:api :hostname])
+   (get-in +config+ [:api :port]))
+  (Thread/sleep 2000)
+  true)
+
 (defn stop-supabase
   [_])
 

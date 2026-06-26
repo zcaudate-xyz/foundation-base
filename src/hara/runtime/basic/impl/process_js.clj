@@ -255,7 +255,7 @@
             :body  {:transform #'rt/return-transform}
             :lang/jsx false
             :lang/format :global}
-    :json :full
+    :json false
     :encode :json
     :timeout 2000}))
 

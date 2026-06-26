@@ -31,6 +31,12 @@
   ;; "chapterhouse"
   => string?)
 
+^{:refer std.lib.network/local-ip-lan :added "4.0"}
+(fact "returns a non-loopback lan ip"
+
+  (local-ip-lan)
+  => (any nil? string?))
+
 ^{:refer std.lib.network/socket :added "3.0"}
 (fact "creates a new socket"
 

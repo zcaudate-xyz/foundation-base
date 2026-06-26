@@ -95,8 +95,7 @@
   (let [{:keys [process] :as entry} (get @*active* port)]
     (when process
       (doto process
-        (os/sh-kill)
-        (os/sh-exit)
+        (os/sh-kill-tree)
         (os/sh-wait)))
     entry))
 

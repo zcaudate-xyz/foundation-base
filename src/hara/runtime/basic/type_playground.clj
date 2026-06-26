@@ -118,7 +118,7 @@
 
 (defn- serve-file
   "serves a file from the playground root"
-  [root path]
+  [^String root ^String path]
   (let [file (java.io.File. root path)]
     (cond (.exists file)
           {:status 200
@@ -180,7 +180,9 @@
     (assoc rt
            :root root
            :port port
-           :host (or host (network/local-ip))
+           :host (or host
+                     (network/local-ip-lan)
+                     (network/local-ip))
            :channel channel
            :return return
            :stop stop-fn)))
@@ -252,7 +254,9 @@
           {:id (or id (f/sid))
            :tag runtime
            :runtime runtime
-           :process (or process {})})))
+           :process (merge {:json false
+                            :timeout 2000}
+                           (or process {}))})))
 
 (defn rt-playground
   "creates and starts a playground runtime"

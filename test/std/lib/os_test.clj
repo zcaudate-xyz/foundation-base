@@ -71,6 +71,26 @@
   (sh-kill (sh {:args ["ls"] :wait false}))
   => (any Process nil?))
 
+^{:refer std.lib.os/sh-kill-tree :added "4.0"}
+(fact "calls `destroyForcibly` on the process and its descendants"
+  (let [tmp (str (java.io.File/createTempFile "sh-kill-tree" ".pid"))
+        parent (sh {:args ["sh" "-c" (str "sleep 60 & echo $! > " tmp "; wait")]
+                    :wait false})]
+    (Thread/sleep 300)
+    (let [child-pid (try (Long/parseLong (clojure.string/trim (slurp tmp)))
+                         (catch Throwable _ nil))
+          _ (sh-kill-tree parent)
+          _ (Thread/sleep 300)
+          child-handle (when child-pid
+                         (try (.orElse (java.lang.ProcessHandle/of child-pid) nil)
+                              (catch Throwable _ nil)))
+          _ (when (.exists (java.io.File. tmp))
+              (.delete (java.io.File. tmp)))]
+      (or (nil? child-pid)
+          (nil? child-handle)
+          (not (.isAlive ^java.lang.ProcessHandle child-handle)))
+      => true)))
+
 ^{:refer std.lib.os/sh :added "3.0"}
 (fact "creates a sh process"
 

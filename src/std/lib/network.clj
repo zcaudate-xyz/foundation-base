@@ -5,11 +5,12 @@
             [std.lib.time :as time]
             [std.protocol.component :as protocol.component]
             [std.string.common :as str])
-  (:import (java.net Socket ServerSocket ConnectException)))
+  (:import (java.net Socket ServerSocket ConnectException
+                     NetworkInterface InetAddress)))
 
 (defn ^java.net.Inet4Address local-host
   "returns the current host
- 
+
    (local-host)
    ;; #object[java.net.Inet4Address 0x4523dee \"chapterhouse.base.local/127.0.0.1\"]
    => java.net.Inet4Address"
@@ -19,7 +20,7 @@
 
 (defn local-ip
   "returns the current ip
- 
+
    (local-ip)
    ;; \"127.0.0.1\"
    => string?"
@@ -29,7 +30,7 @@
 
 (defn local-hostname
   "returns the current host name
- 
+
    (local-hostname)
    ;; \"chapterhouse.base.local\"
    => string?"
@@ -39,19 +40,54 @@
 
 (defn local-shortname
   "returns the current host short name
- 
+
    (local-shortname)
    ;; \"chapterhouse\"
    => string?"
   {:added "3.0"}
   ([]
    (-> (local-hostname)
-       (clojure.string/split #"\.")
+       (clojure.string/split #"\\.")
        first)))
+
+(defn- ip-score
+  "scores an ipv4 address for lan preference. lower is better."
+  [^String ip]
+  (cond (clojure.string/starts-with? ip "192.168.") 0
+        (clojure.string/starts-with? ip "10.")      1
+        (and (clojure.string/starts-with? ip "172.")
+             (let [n (try (Integer/parseInt (second (clojure.string/split ip #"\\.") 0))
+                          (catch Throwable _ 0))]
+               (<= 16 n 31)))                        2
+        :else                                        3))
+
+(defn local-ip-lan
+  "returns a non-loopback lan ipv4 address, preferring 192.168.*, then 10.*, then 172.16-31.*
+
+   (local-ip-lan)
+   ;; => \"192.168.1.42\"
+   => string?"
+  {:added "4.0"}
+  []
+  (->> (NetworkInterface/getNetworkInterfaces)
+       (enumeration-seq)
+       (filter (fn [^NetworkInterface ni]
+                 (and (.isUp ni)
+                      (not (.isLoopback ni))
+                      (not (.isPointToPoint ni)))))
+       (mapcat (fn [^NetworkInterface ni]
+                 (enumeration-seq (.getInetAddresses ni))))
+       (filter (fn [^InetAddress addr]
+                 (and (instance? java.net.Inet4Address addr)
+                      (not (.isLoopbackAddress addr))
+                      (not (.isLinkLocalAddress addr)))))
+       (map #(.getHostAddress ^InetAddress %))
+       (sort-by ip-score)
+       first))
 
 (defn ^Socket socket
   "creates a new socket
- 
+
    (h/suppress
     (with-open [s ^java.net.Socket (socket 51311)] s))"
   {:added "3.0"}
@@ -86,7 +122,7 @@
 
 (defn port:check-available
   "check that port is available
- 
+
    (port:check-available 51311)
    => anything"
   {:added "4.0"}
@@ -100,7 +136,7 @@
 
 (defn port:get-available
   "get first available port from a range
- 
+
    (port:get-available [51312 51313])
    => number?"
   {:added "4.0"}
@@ -111,7 +147,7 @@
 
 (defn wait-for-port
   "waits for a port to be ready
- 
+
    (wait-for-port \"localhost\" 51313 {:timeout 1000})
    => (throws)"
   {:added "3.0"}
@@ -150,4 +186,3 @@
   (-started?      [s] (.isClosed s))
   (-stopped?      [s] (not (.isClosed s)))
   (-remote?       [s] true))
-

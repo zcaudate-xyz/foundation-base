@@ -108,6 +108,25 @@
    (doto process
      (-> (.destroyForcibly)))))
 
+(defn sh-kill-tree
+  "calls `destroyForcibly` on the process and all descendants.
+
+   Uses java.lang.ProcessHandle when available (Java 9+) so that
+   child processes spawned by the root process are also terminated.
+   Falls back to `sh-kill` on Java 8 or if ProcessHandle is unavailable."
+  {:added "4.0"}
+  ([^Process process]
+   (try
+     (let [handle (.toHandle process)]
+       (->> (.descendants handle)
+            (.iterator)
+            iterator-seq
+            (run! #(.destroyForcibly ^java.lang.ProcessHandle %)))
+       (.destroyForcibly handle))
+     (catch Throwable _
+       (sh-kill process)))
+   process))
+
 (defn ^Process sh
   "creates a sh process
  

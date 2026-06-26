@@ -105,7 +105,7 @@
 (defn stop-browser-raw
   "stops the browser"
   {:added "4.0"}
-  ([{:keys [state host port container state bench] :as rt}]
+  ([{:keys [state host port container bench] :as rt}]
    (let  [_ (conn/conn-close @state)
           _ (reset! state nil)
           _ (if (not  (or container
