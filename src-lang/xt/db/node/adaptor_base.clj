@@ -74,6 +74,8 @@
           (xt/x:set-key primary-metadata "common_id"  common-id)
           (xt/x:set-key primary-metadata "primary_id" primary-id)
           (xt/x:set-key primary-metadata "caching_id" caching-id)
+          (xtd/set-in primary-impl ["state" "caching_fn"]
+                      (fn [] (return caching-impl)))
           (xt/x:set-key caching-metadata "common_id"  common-id)
           (xt/x:set-key caching-metadata "primary_id" primary-id)
           (xt/x:set-key caching-metadata "caching_id" caching-id)
@@ -164,6 +166,33 @@
                      "tag" "db/caching-not-found"}])))
   (return (promise/x:promise-run
            (impl-common/sync-process-payload caching payload))))
+
+(defn.xt ^{:substrate/fn "@xt.db/subscribe-db"}
+  subscribe-db-handler
+  "Substrate handler for @xt.db/subscribe-db.
+
+   Args: [conn-id topics]. Subscribes the primary db realtime client to the
+   given broadcast topics, wiring received db/sync and db/remove events to the
+   paired caching db."
+  {:added "4.1"}
+  [space args request node]
+  (var conn-id (xt/x:first args))
+  (var topics  (xt/x:second args))
+  (var primary (substrate/get-service node "db/primary"))
+  (return (impl-common/subscribe-db primary conn-id topics)))
+
+(defn.xt ^{:substrate/fn "@xt.db/unsubscribe-db"}
+  unsubscribe-db-handler
+  "Substrate handler for @xt.db/unsubscribe-db.
+
+   Args: [conn-id topics]. Unsubscribes the primary db realtime client from
+   the given broadcast topics."
+  {:added "4.1"}
+  [space args request node]
+  (var conn-id (xt/x:first args))
+  (var topics  (xt/x:second args))
+  (var primary (substrate/get-service node "db/primary"))
+  (return (impl-common/unsubscribe-db primary conn-id topics)))
 
 (defn.xt ^{:substrate/fn "@xt.db/call-fetch"}
   call-fetch-handler
@@ -440,6 +469,8 @@
   (substrate/register-handler node "@xt.db/call-fetch" -/call-fetch-handler nil)
   (substrate/register-handler node "@xt.db/call-rpc" -/call-rpc-handler nil)
   (substrate/register-handler node "@xt.db/sync-event" -/sync-event-handler nil)
+  (substrate/register-handler node "@xt.db/subscribe-db" -/subscribe-db-handler nil)
+  (substrate/register-handler node "@xt.db/unsubscribe-db" -/unsubscribe-db-handler nil)
   (substrate/register-handler node "@xt.db/init-adaptor" -/init-adaptor-handler nil)
   (return node))
 

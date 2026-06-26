@@ -543,7 +543,9 @@
        call-rpc-handler
        detach-db-model
        init-adaptor-handler
-       sync-event-handler])
+       subscribe-db-handler
+       sync-event-handler
+       unsubscribe-db-handler])
 
 ^{:refer xt.db.node.adaptor-base/init-adaptor-main :added "4.1"}
 (fact "init-adaptor-main sets metadata on primary and caching services"

@@ -203,3 +203,136 @@
                       [payload]
                       (-/request-meta node opts))))
 
+(defn.xt subscribe-db
+  "Client proxy for @xt.db/subscribe-db"
+  {:added "4.1"}
+  [node space-id conn-id topics opts]
+  (return
+   (substrate/request node
+                      space-id
+                      "@xt.db/subscribe-db"
+                      [conn-id topics]
+                      (-/request-meta node opts))))
+
+(defn.xt unsubscribe-db
+  "Client proxy for @xt.db/unsubscribe-db"
+  {:added "4.1"}
+  [node space-id conn-id topics opts]
+  (return
+   (substrate/request node
+                      space-id
+                      "@xt.db/unsubscribe-db"
+                      [conn-id topics]
+                      (-/request-meta node opts))))
+
+;;
+;; Client-side proxy handlers.
+;;
+;; These mirror the server-side handlers in xt.db.node.adaptor-base so that the
+;; same substrate function ids can be invoked on a client node and be forwarded
+;; to the server over the configured transport.
+;;
+
+(defn.xt ^{:substrate/fn "@xt.db/init-adaptor"}
+  init-adaptor-handler
+  [space args request node]
+  (var config (xt/x:first args))
+  (var schema (xt/x:second args))
+  (var lookup (xt/x:get-idx args (xt/x:offset 2)))
+  (return (-/init-adaptor node config schema lookup request)))
+
+(defn.xt ^{:substrate/fn "@xt.db/attach-pull-model"}
+  attach-pull-model-handler
+  [space args request node]
+  (var node-args  (xt/x:first args))
+  (var model-args (xt/x:second args))
+  (var space-id   (xt/x:get-key node-args "space_id"))
+  (var group-id   (xt/x:get-key node-args "group_id"))
+  (var model-id   (xt/x:get-key node-args "model_id"))
+  (var service    (xt/x:get-key node-args "service"))
+  (return (-/attach-pull-model node space-id group-id model-id service model-args request)))
+
+(defn.xt ^{:substrate/fn "@xt.db/attach-tree-view-model"}
+  attach-tree-view-model-handler
+  [space args request node]
+  (var node-args  (xt/x:first args))
+  (var model-args (xt/x:second args))
+  (var space-id   (xt/x:get-key node-args "space_id"))
+  (var group-id   (xt/x:get-key node-args "group_id"))
+  (var model-id   (xt/x:get-key node-args "model_id"))
+  (var service    (xt/x:get-key node-args "service"))
+  (return (-/attach-tree-view-model node space-id group-id model-id service model-args request)))
+
+(defn.xt ^{:substrate/fn "@xt.db/attach-rpc-model"}
+  attach-rpc-model-handler
+  [space args request node]
+  (var node-args  (xt/x:first args))
+  (var model-args (xt/x:second args))
+  (var space-id   (xt/x:get-key node-args "space_id"))
+  (var group-id   (xt/x:get-key node-args "group_id"))
+  (var model-id   (xt/x:get-key node-args "model_id"))
+  (var service    (xt/x:get-key node-args "service"))
+  (return (-/attach-rpc-model node space-id group-id model-id service model-args request)))
+
+(defn.xt ^{:substrate/fn "@xt.db/detach-db-model"}
+  detach-db-model-handler
+  [space args request node]
+  (var node-args (xt/x:first args))
+  (var space-id  (xt/x:get-key node-args "space_id"))
+  (var group-id  (xt/x:get-key node-args "group_id"))
+  (var model-id  (xt/x:get-key node-args "model_id"))
+  (var service   (xt/x:get-key node-args "service"))
+  (return (-/detach-db-model node space-id group-id model-id service request)))
+
+(defn.xt ^{:substrate/fn "@xt.db/call-rpc"}
+  call-rpc-handler
+  [space args request node]
+  (var service-id (xt/x:first args))
+  (var rpc-spec   (xt/x:second args))
+  (var fn-args    (xt/x:get-idx args (xt/x:offset 2)))
+  (return (-/call-rpc node space service-id rpc-spec fn-args request)))
+
+(defn.xt ^{:substrate/fn "@xt.db/call-fetch"}
+  call-fetch-handler
+  [space args request node]
+  (var service-id  (xt/x:first args))
+  (var fetch-input (xt/x:second args))
+  (return (-/call-fetch node space service-id fetch-input request)))
+
+(defn.xt ^{:substrate/fn "@xt.db/sync-event"}
+  sync-event-handler
+  [space args request node]
+  (var payload (or (xt/x:first args) {}))
+  (return (-/sync-event node space payload request)))
+
+(defn.xt ^{:substrate/fn "@xt.db/subscribe-db"}
+  subscribe-db-handler
+  [space args request node]
+  (var conn-id (xt/x:first args))
+  (var topics  (xt/x:second args))
+  (return (-/subscribe-db node space conn-id topics request)))
+
+(defn.xt ^{:substrate/fn "@xt.db/unsubscribe-db"}
+  unsubscribe-db-handler
+  [space args request node]
+  (var conn-id (xt/x:first args))
+  (var topics  (xt/x:second args))
+  (return (-/unsubscribe-db node space conn-id topics request)))
+
+(defn.xt init-proxy-handlers
+  "Registers client-side proxy handlers so that the same substrate function ids
+   used server-side can be invoked on a client node and forwarded to the server."
+  {:added "4.1"}
+  [node]
+  (substrate/register-handler node "@xt.db/init-adaptor" -/init-adaptor-handler nil)
+  (substrate/register-handler node "@xt.db/attach-pull-model" -/attach-pull-model-handler nil)
+  (substrate/register-handler node "@xt.db/attach-rpc-model" -/attach-rpc-model-handler nil)
+  (substrate/register-handler node "@xt.db/attach-tree-view-model" -/attach-tree-view-model-handler nil)
+  (substrate/register-handler node "@xt.db/detach-db-model" -/detach-db-model-handler nil)
+  (substrate/register-handler node "@xt.db/call-fetch" -/call-fetch-handler nil)
+  (substrate/register-handler node "@xt.db/call-rpc" -/call-rpc-handler nil)
+  (substrate/register-handler node "@xt.db/sync-event" -/sync-event-handler nil)
+  (substrate/register-handler node "@xt.db/subscribe-db" -/subscribe-db-handler nil)
+  (substrate/register-handler node "@xt.db/unsubscribe-db" -/unsubscribe-db-handler nil)
+  (return node))
+
