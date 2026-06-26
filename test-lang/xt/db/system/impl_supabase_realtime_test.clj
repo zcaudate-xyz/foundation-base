@@ -124,7 +124,7 @@
   (!.js
     (var client (common-ws/create-ws-client {"id" "test"}))
     (var called nil)
-    (xtd/set-in client ["state" "topics" "realtime:room:test"] {"callback" (fn [payload] (:= called payload))})
+    (xtd/set-in client ["state" "callbacks" "cb-1"] (fn [payload] (:= called payload)))
     (var handler (realtime/create-realtime-on-message client))
     (handler {"topic" "realtime:room:test"
               "event" "broadcast"
@@ -306,24 +306,25 @@
          (fn [_]
            (repl/notify (realtime/get-topics impl "default"))))))
   => (contains-in
-      {"realtime:room:topics-test" {"ready" true}})
+      {"realtime:room:topics-test" {"ready" true}}))
 
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
   :setup [(l/rt:restart :js)]}
 (fact "subscribes to topics after the websocket is initialized"
 
-  (notify/wait-on [:js 3000]
-    (var impl (-/default-impl))
-    (-> (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
-                                            "realtime:room:sub-test-2"])
-        (promise/x:promise-then
-         (fn [ok]
-           (repl/notify {"ok" ok
-                         "topics" (realtime/get-topics impl "default")})))))
+  (l/with:print-all
+    (notify/wait-on [:js 3000]
+      (var impl (-/default-impl))
+      (-> (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
+                                              "realtime:room:sub-test-2"])
+          (promise/x:promise-then
+           (fn [ok]
+             (repl/notify {"ok" ok
+                           "topics" (realtime/get-topics impl "default")}))))))
   => (contains-in
       {"ok" [true true]
        "topics" {"realtime:room:sub-test-1" {"ready" true}
-                 "realtime:room:sub-test-2" {"ready" true}}})
+                 "realtime:room:sub-test-2" {"ready" true}}}))
 
 ^{:refer xt.db.system.impl-supabase-realtime/unsubscribe :added "4.1"
   :setup [(l/rt:restart :js)]}
@@ -356,11 +357,11 @@
         (promise/x:promise-then
          (fn [_]
            (promise/x:with-delay 500
-             (fn [] (repl/notify "ready")))))))
+                                 (fn [] (repl/notify "ready")))))))
   => "ready"
 
   (do (!.pg
-       (s/realtime-send "room:roundtrip" "xt.db/event" {"hello" "from postgres"}))
+        (s/realtime-send "room:roundtrip" "xt.db/event" {"hello" "from postgres"}))
       (!.js
         RT_EVENTS))
   => (contains-in

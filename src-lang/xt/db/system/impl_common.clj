@@ -4,6 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]]})
 
 (defprotocol.xt ISourceListener
@@ -40,3 +41,58 @@
   (var #{listeners} impl)
   (return
    (xt/x:get-key listeners listener-id)))
+
+(defn.xt sync-get-tables
+  "Extracts table names present in db/sync or db/remove."
+  {:added "4.1"}
+  [payload]
+  (var out {})
+  (var db-sync   (xt/x:get-key payload "db/sync"))
+  (var db-remove (xt/x:get-key payload "db/remove"))
+  (when (xt/x:is-object? db-sync)
+    (xt/for:object [[table _] db-sync]
+      (xt/x:set-key out table true)))
+  (when (xt/x:is-object? db-remove)
+    (xt/for:object [[table _] db-remove]
+      (xt/x:set-key out table true)))
+  (return (xt/x:obj-keys out)))
+
+(defn.xt sync-notify-listeners
+  "Notifies db listeners whose table guard matches any changed table."
+  {:added "4.1"}
+  [impl tables event]
+  (var #{listeners} impl)
+  (xt/for:object [[listener-id handle] listeners]
+    (var guard    (xt/x:get-key handle "guard"))
+    (var callback (xt/x:get-key handle "callback"))
+    (var matched false)
+    (when (xt/x:is-function? guard)
+      (xt/for:array [table tables]
+        (when (guard table)
+          (:= matched true))))
+    (when matched
+      (callback event)))
+  (return true))
+
+(defn.xt sync-process-payload
+  "Applies a sync payload to a db implementation and notifies listeners.
+
+   Steps:
+   1. Apply db/sync records via process-add-event.
+   2. Apply db/remove ids via process-remove-event.
+   3. Extract the affected table names with sync-get-tables.
+   4. Notify any db listeners whose guard matches those tables."
+  {:added "4.1.4"}
+  [impl payload]
+  (var db-sync   (xt/x:get-key payload "db/sync"))
+  (var db-remove (xt/x:get-key payload "db/remove"))
+  (when (and (xt/x:is-object? db-sync)
+             (xtd/not-empty? db-sync))
+    (-/process-add-event impl db-sync))
+  (when (and (xt/x:is-object? db-remove)
+             (xtd/not-empty? db-remove))
+    (-/process-remove-event impl db-remove))
+  (var tables (-/sync-get-tables payload))
+  (when (> (xt/x:len tables) 0)
+    (-/sync-notify-listeners impl tables payload))
+  (return true))

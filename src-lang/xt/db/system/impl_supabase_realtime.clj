@@ -157,12 +157,7 @@
   [impl conn-id]
   (var client (-/get-realtime impl conn-id))
   (when (xt/x:not-nil? client)
-    (var topics (xtd/get-in client ["state" "topics"]))
-    (xt/for:object [[topic entry] topics]
-      (var deferred (xt/x:get-key entry "deferred"))
-      (var resolve (xt/x:get-key deferred "resolve"))
-      (when (xt/x:is-function? resolve)
-        (resolve false)))
+    (xtd/set-in client ["state" "topics"] {})
     (websocket/disconnect client))
   (xt/x:del-key (xtd/get-in impl ["state" "realtimes"]) conn-id)
   (return client))
@@ -231,7 +226,7 @@
       (return (promise/x:promise-all
                (xt/x:arr-map topics
                              (fn [topic]
-                               (xtd/get-in client ["state" "topics" topic "init"])))))))))
+                               (return (xtd/get-in client ["state" "topics" topic "init"]))))))))))
 
 (defn.xt unsubscribe
   "unsubscribes from one or more broadcast topics on the realtime websocket"
