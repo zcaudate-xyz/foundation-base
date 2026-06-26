@@ -236,6 +236,7 @@
             [js.react.ext-cell :base]
             [js.react.ext-form :base]
             [js.react.ext-log :base]
+            [js.react.ext-page :base]
             [js.react.ext-route :base]
             [js.react.ext-view :base]]}
   
