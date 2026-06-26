@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
+            [xt.lang.common-protocol :as proto]
             [scaffold.supabase.local-min :as local-min]))
 
 (do 
@@ -40,10 +41,12 @@
    :require [[xt.lang.common-data :as xtd]
              [xt.lang.common-tree :as tree]
              [xt.lang.common-repl :as repl]
+             [xt.lang.common-protocol :as proto]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.db.node.adaptor-base :as adaptor]
              [xt.db.system.impl-common :as impl-common]
+             [xt.db.helpers.data-main-test :as sample]
              [xt.substrate :as substrate]
              [xt.net.http-fetch :as fetch]
              [js.net.http-fetch :as js-fetch]]})
@@ -248,13 +251,82 @@
            (repl/notify out)))))
   => (contains-in {"message" "hello"}))
 
+^{:refer xt.db.node.adaptor-base/apply-sync-output :added "4.1"}
+(fact "apply-sync-output routes db/sync payload to the paired caching db"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-adaptor-main {"primary" {"type" "memory"
+                                     "defaults" {}}
+                          "caching" {"type" "memory"
+                                     "defaults" {}}}
+                         sample/Schema
+                         sample/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (var primary (substrate/get-service node "db/primary"))
+           (-> (adaptor/apply-sync-output
+                node
+                primary
+                {"db/sync" {"Currency" [{"id" "USD"
+                                          "name" "US Dollar"
+                                          "symbol" "$"}]}})
+               (promise/x:promise-then
+                (fn [_]
+                  (var caching (substrate/get-service node "db/caching"))
+                  (return (repl/notify
+                           (impl-common/pull caching
+                                             ["Currency"
+                                              {"id" "USD"}
+                                              ["name"]]))))))))))
+  => [{"name" "US Dollar"}])
+
+^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"}
+(fact "call-rpc-handler applies sync output embedded in rpc results"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-adaptor-main {"primary" {"type" "memory"
+                                     "defaults" {}}
+                          "caching" {"type" "memory"
+                                     "defaults" {}}}
+                         sample/Schema
+                         sample/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (var mock {"::" "xt.db.node.adaptor_base_test/MockRpc"
+                      "metadata" {"caching_id" "db/caching"
+                                  "primary_id" "db/primary"}})
+           (proto/register-protocol-impl
+            (xt/x:get-key impl-common/ISourceRemote "on")
+            "xt.db.node.adaptor_base_test/MockRpc"
+            {"rpc_call_async" (fn [impl rpc-spec args]
+                                (return {"db/sync" {"Currency" [{"id" "EUR"
+                                                                  "name" "Euro"
+                                                                  "symbol" "€"}]}}))})
+           (substrate/set-service node "db/mock" mock)
+           (-> (adaptor/call-rpc-handler
+                nil
+                ["db/mock" {} []]
+                nil
+                node)
+               (promise/x:promise-then
+                (fn [_]
+                  (var caching (substrate/get-service node "db/caching"))
+                  (return (repl/notify
+                           (impl-common/pull caching
+                                             ["Currency"
+                                              {"id" "EUR"}
+                                              ["name"]]))))))))))
+  => [{"name" "Euro"}])
+
 ^{:refer xt.db.node.adaptor-base/create-pull-model :added "4.1"}
 (fact "create-pull-model builds a page model spec with local and remote handlers"
 
   (!.js
    (var spec (adaptor/create-pull-model
-              {"caching_id" "db/caching"
-               "primary_id" "db/primary"}
+              {"metadata" {"caching_id" "db/caching"
+                          "primary_id" "db/primary"}}
               {"pipeline" {}
                "options" {}
                "defaults" {"args" [["Log"]]}}))
@@ -283,8 +355,8 @@
             [{"space_id" "room/a"
               "group_id" "demo"
               "model_id" "custom-view"
-              "service" {"caching_id" "db/caching"
-                         "primary_id" "db/primary"}}
+              "service" {"metadata" {"caching_id" "db/caching"
+                                     "primary_id" "db/primary"}}}
              {"pipeline" {}
               "options" {}
               "defaults" {"args" [["Log"]]}}]
@@ -304,8 +376,8 @@
 
   (!.js
    (var spec (adaptor/create-tree-view-model
-              {"caching_id" "db/caching"
-               "primary_id" "db/primary"}
+              {"metadata" {"caching_id" "db/caching"
+                          "primary_id" "db/primary"}}
               {"table" "Log"
                "select_entry" {"input" []
                                "view" {"table" "Log"
@@ -345,8 +417,8 @@
             [{"space_id" "room/a"
               "group_id" "demo"
               "model_id" "tree-view"
-              "service" {"caching_id" "db/caching"
-                         "primary_id" "db/primary"}}
+              "service" {"metadata" {"caching_id" "db/caching"
+                                     "primary_id" "db/primary"}}}
              {"table" "Log"
               "select_entry" {"input" []
                               "view" {"table" "Log"
@@ -465,4 +537,94 @@
        attach-tree-view-model
        call-fetch-handler
        call-rpc-handler
+       detach-pull-model
+       detach-rpc-model
+       detach-tree-view-model
        init-adaptor-handler])
+
+^{:refer xt.db.node.adaptor-base/init-adaptor-main :added "4.1"}
+(fact "init-adaptor-main sets metadata on primary and caching services"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-adaptor-main {"primary" {"type" "memory" "defaults" {}}
+                          "caching" {"type" "memory" "defaults" {}}}
+                         -/Schema
+                         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (var primary (substrate/get-service node "db/primary"))
+           (var caching (substrate/get-service node "db/caching"))
+           (repl/notify
+            {"primary" (xtd/get-in primary ["metadata"])
+             "caching" (xtd/get-in caching ["metadata"])})))))
+  => {"primary" {"common_id"  "db/common"
+                 "primary_id" "db/primary"
+                 "caching_id" "db/caching"}
+      "caching" {"common_id"  "db/common"
+                 "primary_id" "db/primary"
+                 "caching_id" "db/caching"}})
+
+^{:refer xt.db.node.adaptor-base/addon-model-with-refresh :added "4.1"}
+(fact "addon-model-with-refresh registers a db listener when options.refresh is set"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-adaptor-main {"primary" {"type" "memory" "defaults" {}}
+                          "caching" {"type" "memory" "defaults" {}}}
+                         -/Schema
+                         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (var service (substrate/get-service node "db/primary"))
+           (var spec (adaptor/create-pull-model
+                      service
+                      {"pipeline" {}
+                       "options" {"refresh" {"User" true
+                                             "Log" true}}
+                       "defaults" {"args" [["User"]]}}))
+           (adaptor/addon-model-with-refresh
+            node "room/a" "demo" "refresh-view" service spec)
+           (var caching (substrate/get-service node "db/caching"))
+           (var listener (impl-common/get-db-listener
+                          caching
+                          "room/a/demo/refresh-view"))
+           (repl/notify
+            {"has_listener" (xt/x:not-nil? listener)
+             "has_guard"    (xt/x:is-function? (xtd/get-in listener ["guard"]))
+             "has_callback" (xt/x:is-function? (xtd/get-in listener ["callback"]))})))))
+  => {"has_listener" true
+      "has_guard"    true
+      "has_callback" true})
+
+^{:refer xt.db.node.adaptor-base/remove-model-with-refresh :added "4.1"}
+(fact "remove-model-with-refresh removes the model and its db listener"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-adaptor-main {"primary" {"type" "memory" "defaults" {}}
+                          "caching" {"type" "memory" "defaults" {}}}
+                         -/Schema
+                         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (var service (substrate/get-service node "db/primary"))
+           (var spec (adaptor/create-pull-model
+                      service
+                      {"pipeline" {}
+                       "options" {"refresh" {"User" true
+                                             "Log" true}}
+                       "defaults" {"args" [["User"]]}}))
+           (adaptor/addon-model-with-refresh
+            node "room/a" "demo" "refresh-view" service spec)
+           (var out (adaptor/remove-model-with-refresh
+                     node "room/a" "demo" "refresh-view" service))
+           (var caching (substrate/get-service node "db/caching"))
+           (var listener (impl-common/get-db-listener
+                          caching
+                          "room/a/demo/refresh-view"))
+           (repl/notify
+            {"status" (xt/x:get-key out "status")
+             "listener_removed" (xt/x:nil? listener)})))))
+  => {"status" "removed"
+      "listener_removed" true})

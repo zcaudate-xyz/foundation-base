@@ -85,8 +85,8 @@
              "room/a"
              "demo"
              "pull"
-             {"caching_id" "db/caching"
-              "primary_id" "db/primary"}
+             {"metadata" {"caching_id" "db/caching"
+                          "primary_id" "db/primary"}}
              {"pipeline" {}
               "options" {}
               "defaults" {"args" []
@@ -129,8 +129,8 @@
              "room/a"
              "demo"
              "tree"
-             {"caching_id" "db/caching"
-              "primary_id" "db/primary"}
+             {"metadata" {"caching_id" "db/caching"
+                          "primary_id" "db/primary"}}
              {"table" "Log"
               "select_entry" {}
               "return_entry" {}
@@ -221,8 +221,8 @@
              "demo"
              "pull"
              "@xt.db/attach-pull-model"
-             {"caching_id" "db/caching"
-              "primary_id" "db/primary"}
+             {"metadata" {"caching_id" "db/caching"
+                          "primary_id" "db/primary"}}
              {"pipeline" {}
               "options" {}
               "defaults" {"args" []
@@ -260,8 +260,8 @@
              "demo"
              "pull"
              "@xt.db/attach-pull-model"
-             {"caching_id" "db/caching"
-              "primary_id" "db/primary"}
+             {"metadata" {"caching_id" "db/caching"
+                          "primary_id" "db/primary"}}
              {"pipeline" {}
               "options" {}
               "defaults" {"args" []
