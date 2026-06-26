@@ -6,6 +6,8 @@
              [xt.lang.common-string :as xts]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-protocol :as proto]
+             [xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-common-ws :as common-ws]
              [xt.net.http-util :as http-util]
              [xt.net.ws-native :as websocket]
@@ -242,3 +244,15 @@
                           (phoenix/send-frame client (-/topic-leave-payload impl topic))
                           (xt/x:del-key (xtd/get-in client ["state" "topics"]) topic)))))
       (return true)))))
+
+;;
+;; RealtimeSource protocol registration
+;;
+
+(proto/register-protocol-impl
+ (xt/x:get-key impl-common/IRealtimeSource "on")
+ "xt.db.system.impl_supabase/ImplSupabase"
+ {"subscribe_topics"    -/subscribe
+  "unsubscribe_topics"  -/unsubscribe
+  "add_event_callback"    -/add-realtime-callback
+  "remove_event_callback" -/remove-realtime-callback})

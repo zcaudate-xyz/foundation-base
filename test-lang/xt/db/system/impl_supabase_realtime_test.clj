@@ -346,7 +346,7 @@
     (realtime/get-topics (-/default-impl) "default"))
   => {}
 
-  (notify/wait-on [:js 3000]
+  (notify/wait-on :js
     (var impl (-/default-impl))
     (-> (realtime/subscribe impl "default" ["realtime:room:topics-test"])
         (promise/x:promise-then
@@ -359,7 +359,7 @@
   :setup [(l/rt:restart :js)]}
 (fact "subscribes to topics after the websocket is initialized"
 
-  (notify/wait-on [:js 3000]
+  (notify/wait-on :js
     (var impl (-/default-impl))
     (-> (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
                                             "realtime:room:sub-test-2"])
@@ -390,7 +390,7 @@
   :setup [(l/rt:restart :js)]}
 (fact "unsubscribes from topics and removes them from state"
 
-  (notify/wait-on [:js 3000]
+  (notify/wait-on :js
     (var impl (-/default-impl))
     (-> (realtime/subscribe impl "default" ["realtime:room:unsub-test"])
         (promise/x:promise-then
@@ -403,22 +403,19 @@
   => {"ok" true
       "topics" {}})
 
-^{:refer xt.db.system.impl-supabase-realtime/add-realtime-callback :added "4.1"
+^{:refer xt.db.system.impl-supabase-realtime/subscribe.add-realtime-callback-00 :added "4.1"
   :setup [(l/rt:restart :js)]}
 (fact "receives xt.db/event broadcasts from postgres after subscribing"
 
-  (notify/wait-on [:js 3000]
+  (notify/wait-on :js
     (:= (!:G RT_EVENTS) [])
     (:= (!:G RT_IMPL) (-/default-impl))
     (realtime/add-realtime-callback (!:G RT_IMPL) "roundtrip" "cb-1"
                                     (fn [event]
                                       (xt/x:arr-push (!:G RT_EVENTS) event)))
-    (-> (realtime/subscribe (!:G RT_IMPL) "roundtrip" ["realtime:room:roundtrip"])
-        (promise/x:promise-then
-         (fn [_]
-           (promise/x:with-delay 500
-                                 (fn [] (repl/notify "ready")))))))
-  => "ready"
+    (repl/notify
+     (realtime/subscribe (!:G RT_IMPL) "roundtrip" ["realtime:room:roundtrip"])))
+  => [true]
 
   (do (!.pg
         (s/realtime-send "room:roundtrip" "xt.db/event" {"hello" "from postgres"}))
@@ -428,11 +425,48 @@
       [{"topic" "realtime:room:roundtrip"
         "hello" "from postgres"}]))
 
-(comment
+^{:refer xt.db.system.impl-supabase-realtime/subscribe.add-realtime-callback-01 :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "receives db/sync payloads from postgres"
 
+  (notify/wait-on :js
+    (:= (!:G RT_EVENTS) [])
+    (:= (!:G RT_IMPL) (-/default-impl))
+    (realtime/add-realtime-callback (!:G RT_IMPL) "sync-test" "cb-1"
+                                    (fn [event]
+                                      (xt/x:arr-push (!:G RT_EVENTS) event)))
+    (repl/notify
+     (realtime/subscribe (!:G RT_IMPL) "sync-test" ["realtime:room:sync-test"])))
+  => [true]
 
+  (do (!.pg
+        (s/realtime-send "room:sync-test" "xt.db/event"
+                         {"db/sync" {"User" [{"id" 1 "name" "Alice"}]}}))
+      (!.js
+        RT_EVENTS))
+  => (contains-in
+      [{"topic" "realtime:room:sync-test"
+        "db/sync" {"User" [{"id" 1 "name" "Alice"}]}}]))
 
-  )
+^{:refer xt.db.system.impl-supabase-realtime/add-realtime-callback-02 :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "receives db/remove payloads from postgres"
 
-(comment
-  (common-ws/create-ws-client {}))
+  (notify/wait-on :js
+    (:= (!:G RT_EVENTS) [])
+    (:= (!:G RT_IMPL) (-/default-impl))
+    (realtime/add-realtime-callback (!:G RT_IMPL) "remove-test" "cb-1"
+                                    (fn [event]
+                                      (xt/x:arr-push (!:G RT_EVENTS) event)))
+    (repl/notify
+     (realtime/subscribe (!:G RT_IMPL) "remove-test" ["realtime:room:remove-test"])))
+  => [true]
+
+  (do (!.pg
+        (s/realtime-send "room:remove-test" "xt.db/event"
+                         {"db/remove" {"User" [1 2 3]}}))
+      (!.js
+        RT_EVENTS))
+  => (contains-in
+      [{"topic" "realtime:room:remove-test"
+        "db/remove" {"User" [1 2 3]}}]))
