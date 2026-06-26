@@ -6,6 +6,7 @@
              [xt.lang.common-string :as xts]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-common-ws :as common-ws]
              [xt.net.http-util :as http-util]
              [xt.net.ws-native :as websocket]
@@ -195,11 +196,28 @@
     (return (xtd/get-in client ["state" "topics"]))
     (return {})))
 
+(defn.xt create-sync-callback
+  "creates a callback that applies db/sync and db/remove payloads to the linked caching impl"
+  {:added "4.1"}
+  [impl]
+  (return
+   (fn [event]
+     (var caching-fn (xtd/get-in impl ["state" "caching_fn"]))
+     (when (xt/x:is-function? caching-fn)
+       (var caching-impl (caching-fn))
+       (when (and (xt/x:not-nil? caching-impl)
+                  (or (xt/x:has-key? event "db/sync")
+                      (xt/x:has-key? event "db/remove")))
+         (var payload (xt/x:obj-clone event))
+         (xt/x:del-key payload "topic")
+         (impl-common/sync-process-payload caching-impl payload))))))
+
 (defn.xt subscribe
   "subscribes to one or more broadcast topics on the realtime websocket"
   {:added "4.1"}
   [impl conn-id topics]
   (var client (-/ensure-realtime impl conn-id))
+  (-/add-realtime-callback impl conn-id "db-sync" (-/create-sync-callback impl))
   (xt/x:arr-map topics
                 (fn [topic]
                   (var join-ref (xt/x:cat "#/join/" topic))

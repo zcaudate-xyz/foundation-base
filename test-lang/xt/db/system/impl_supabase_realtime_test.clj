@@ -34,8 +34,11 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.db.system.main :as main]
+             [xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-common-ws :as common-ws]
+             [xt.db.system.impl-memory :as impl-memory]
              [xt.db.system.impl-supabase-realtime :as realtime]
+             [xt.db.helpers.data-main-test :as sample]
              [xt.net.addon-supabase :as addon]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
@@ -97,6 +100,56 @@
   (xtd/set-in client ["state" "topics" "realtime:room:isolated-test" "ready"] true)
   (:= (!:G RT_ISOLATED_CLIENT) client)
   (return sub))
+
+(defn.js run-subscribe-sync-test
+  []
+  (var impl (-/default-impl))
+  (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+  (xtd/set-in impl ["state" "caching_fn"]
+              (fn [] (return caching-impl)))
+  (var client (common-ws/create-ws-client {"id" "sync-test"}))
+  (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
+  (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
+  (xtd/set-in impl ["state" "realtimes" "default"] client)
+  (realtime/subscribe impl "default" ["realtime:room:sync-test"])
+  (var deferred (xtd/get-in client ["state" "topics" "realtime:room:sync-test" "deferred"]))
+  ((xtd/get-in deferred ["resolve"]) true)
+  (xtd/set-in client ["state" "topics" "realtime:room:sync-test" "ready"] true)
+  (var handler (realtime/create-realtime-on-message client))
+  (handler {"topic" "realtime:room:sync-test"
+            "event" "broadcast"
+            "payload" {"event" "xt.db/event"
+                       "topic" "realtime:room:sync-test"
+                       "payload" {"db/sync" {"UserAccount" [sample/RootUser]}}}})
+  (return {"synced" (impl-common/pull caching-impl ["UserAccount" {"id" "00000000-0000-0000-0000-000000000000"} ["nickname"]])
+           "events" (xtd/get-in caching-impl ["rows" "UserAccount" "00000000-0000-0000-0000-000000000000" "record" "data"])}))
+
+(defn.js run-subscribe-sync-remove-test
+  []
+  (var impl (-/default-impl))
+  (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+  (xtd/set-in impl ["state" "caching_fn"]
+              (fn [] (return caching-impl)))
+  (var client (common-ws/create-ws-client {"id" "sync-remove-test"}))
+  (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
+  (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
+  (xtd/set-in impl ["state" "realtimes" "default"] client)
+  (realtime/subscribe impl "default" ["realtime:room:sync-remove-test"])
+  (var deferred (xtd/get-in client ["state" "topics" "realtime:room:sync-remove-test" "deferred"]))
+  ((xtd/get-in deferred ["resolve"]) true)
+  (xtd/set-in client ["state" "topics" "realtime:room:sync-remove-test" "ready"] true)
+  (var handler (realtime/create-realtime-on-message client))
+  (handler {"topic" "realtime:room:sync-remove-test"
+            "event" "broadcast"
+            "payload" {"event" "xt.db/event"
+                       "topic" "realtime:room:sync-remove-test"
+                       "payload" {"db/sync" {"UserAccount" [sample/RootUser]}}}})
+  (handler {"topic" "realtime:room:sync-remove-test"
+            "event" "broadcast"
+            "payload" {"event" "xt.db/event"
+                       "topic" "realtime:room:sync-remove-test"
+                       "payload" {"db/remove" {"UserAccount" ["00000000-0000-0000-0000-000000000000"]}}}})
+  (return {"remaining" (impl-common/pull caching-impl ["UserAccount" {} ["nickname"]])}))
 
 ^{:refer xt.db.system.impl-supabase-realtime/prepare-connect-url :added "4.1"}
 (fact "creates the connect-url"
@@ -385,6 +438,24 @@
                                          ["state" "topics" "realtime:room:isolated-test" "ready"])}))))
   => {"ok" [true]
       "ready" true})
+
+^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "subscribe syncs db/sync events to a linked caching impl"
+
+  (!.js
+    (-/run-subscribe-sync-test))
+  => (contains-in
+      {"synced" [{"nickname" "root"}]}))
+
+^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "subscribe syncs db/remove events to a linked caching impl"
+
+  (!.js
+    (-/run-subscribe-sync-remove-test))
+  => (contains-in
+      {"remaining" []}))
 
 ^{:refer xt.db.system.impl-supabase-realtime/unsubscribe :added "4.1"
   :setup [(l/rt:restart :js)]}
