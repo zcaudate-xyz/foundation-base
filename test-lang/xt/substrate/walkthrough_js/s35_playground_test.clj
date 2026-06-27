@@ -10,10 +10,11 @@
    models through `js.react.ext-page`."
   (:use code.test)
   (:require [hara.lang :as l]
-            [hara.runtime.js-playground :as js-playground]
-            [hara.runtime.chromedriver :as chromedriver]
             [std.lib.component :as component]
             [xt.lang.common-notify :as notify]))
+
+(require '[hara.runtime.js-playground :as js-playground]
+         '[hara.runtime.chromedriver :as chromedriver])
 
 (l/script- :js
   {:runtime :playground
@@ -25,7 +26,9 @@
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
-             [js.react.ext-page :as ext-page]]})
+             [hara.runtime.js-playground.client :as client]
+             [js.react.ext-page :as ext-page]]
+   :emit {:lang/jsx false}})
 
 (defn.js create-node
   "creates the substrate node spec"
@@ -87,7 +90,7 @@
   :added "4.1"}
 (fact "ext-page can read the substrate model in a playground-served browser"
 
-  (notify/wait-on [:js 5000]
+  (notify/wait-on :js
     (var node (-/setup-node))
     (-> (page-core/model-set-input node "space/a" "page" "greet" {"data" ["hello"]} {})
         (promise/x:promise-then
@@ -99,7 +102,7 @@
   :added "4.1"}
 (fact "ext-page follows model updates in a playground-served browser"
 
-  (notify/wait-on [:js 5000]
+  (notify/wait-on :js
     (var node (-/setup-node))
     (-> (page-core/model-set-input node "space/a" "page" "greet" {"data" ["world"]} {})
         (promise/x:promise-then
@@ -109,8 +112,13 @@
 
 
 (comment
+  
+  
   (!.js
     (window.PLAYGROUND.setStage
      [:div "hello world"]))
+  
+  (!.js
+    (+ 1 2 3))
   
   )

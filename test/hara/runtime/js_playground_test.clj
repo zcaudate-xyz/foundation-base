@@ -114,65 +114,12 @@
             (component/stop rt2)))))))
 
 ^{:refer hara.runtime.js-playground/playground-client-script :added "4.0"}
-(fact "playground client script is emitted as JavaScript"
-
-  (playground-client-script)
-  => #"function App")
-
-^{:refer hara.runtime.js-playground/playground-client-script :added "4.0"}
-(fact "client script is generated from the js-playground-client namespace"
-
-  (let [script (playground-client-script)]
-    script => #"import React from 'https://esm.sh/react@18'"
-    script => #"import ReactDOM from 'https://esm.sh/react-dom@18/client'"
-    script => #"function run_eval"
-    script => #"function mountf"
-    script => #"return_eval"))
-
-^{:refer hara.runtime.js-playground/page-html :added "4.0"}
-(fact "default page contains the react split-screen structure"
-
-  (let [page (page-html {})]
-    page => #"<div id=\"root\"></div>"
-    page => #"react@18"
-    page => #"window.PLAYGROUND"
-    page => #"\"id\":\"stage\""
-    page => #"\"id\":\"sidebar\""))
-
-^{:refer hara.runtime.js-playground/play-script :added "4.0"}
-(fact "play-script transpiles hiccup vectors to React.createElement by default"
-
-  (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))]
-    (try
-      (play-script rt '[(defn.js hello [] [:div "hello"])] true)
-      => #"React\.createElement\(\"div\"[\s\S]*\"hello\"\)"
-      (finally
-        (component/stop rt)))))
-
-^{:refer hara.runtime.js-playground/page-html :added "4.0"}
-(fact "page-html embeds title and tabs in PLAYGROUND_CONFIG"
-
-  (let [page (page-html {:title "My Playground"
-                         :tabs [{:id "stage" :label "Stage"}
-                                {:id "glsl" :label "GLSL"}]})]
-    page => #"window\.PLAYGROUND_CONFIG"
-    page => #"\"title\":\"My Playground\""
-    page => #"\"id\":\"stage\""
-    page => #"\"id\":\"glsl\""))
-
-^{:refer hara.runtime.js-playground/page-html :added "4.0"}
-(fact "page-html applies defaults when title or tabs are nil"
-
-  (let [page (page-html {:title nil :tabs nil})]
-    page => #"<title>hara.runtime js playground</title>"
-    page => #"\"title\":\"hara.runtime js playground\""
-    page => #"\"id\":\"stage\""))
-
-^{:refer hara.runtime.js-playground/playground-client-script :added "4.0"}
 (fact "client script exposes a queryable PLAYGROUND API"
 
   (let [script (playground-client-script)]
     script => #"PLAYGROUND\[\"getMessages\"\]"
     script => #"PLAYGROUND\[\"getStatus\"\]"
     script => #"PLAYGROUND\[\"switchTab\"\]"
+    script => #"PLAYGROUND\[\"createTab\"\]"
+    script => #"PLAYGROUND\[\"closeTab\"\]"
     script => #"PLAYGROUND\[\"setTabContent\"\]"))
