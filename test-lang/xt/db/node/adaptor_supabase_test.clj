@@ -28,6 +28,7 @@
   {:runtime :basic
    :require [[js.net.http-fetch :as js-fetch]
              [xt.net.http-fetch :as http-fetch]
+             [xt.net.http-util :as http-util]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
@@ -41,7 +42,7 @@
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:setup :postgres)
-          (wait-for-postgrest)]
+          (local-min/restart-postgrest)]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
@@ -78,10 +79,10 @@
   (return
    (-/default-client (@! (-> local-min/+config+ :api :anon-key)) nil)))
 
-^{:refer xt.db.node.adaptor-supabase/normalise-auth-response :added "4.1"}
+^{:refer xt.net.http-util/get-body-data :added "4.1"}
 (fact "extracts the body payload from a response"
   (!.js
-   (adaptor/normalise-auth-response {"status" 200 "headers" {} "body" {"access_token" "abc"}}))
+   (http-util/get-body-data {"body" {"access_token" "abc"}}))
   => {"access_token" "abc"})
 
 ^{:refer xt.db.node.adaptor-supabase/supabase-request :added "4.1"}
@@ -111,8 +112,8 @@
          (fn [out]
            (var impl (substrate/get-service node "auth/supabase"))
            (var session (session/get-session impl))
-           (var timer (xt/x:not-nil? (xt/x:get-key (xt/x:get-key (xt/x:get-key impl "state") "refresh") "timer")))
-           (session/stop-auto-refresh impl)
+           (var timer (xt/x:not-nil? (xt/x:get-key (xt/x:get-key (xt/x:get-key impl "state") "auto_refresh") "current")))
+           (session/auto-refresh-stop impl)
            (repl/notify [out session timer])))))
   => (contains-in [{"access_token" string? "refresh_token" string? "user" {"email" string?}}
                 {"access_token" string? "refresh_token" string? "user" {"email" string?}}
@@ -137,8 +138,8 @@
                 (fn [out]
                   (var impl (substrate/get-service node "auth/supabase"))
                   (var session (session/get-session impl))
-                  (var timer (xt/x:not-nil? (xt/x:get-key (xt/x:get-key (xt/x:get-key impl "state") "refresh") "timer")))
-                  (session/stop-auto-refresh impl)
+                  (var timer (xt/x:not-nil? (xt/x:get-key (xt/x:get-key (xt/x:get-key impl "state") "auto_refresh") "current")))
+                  (session/auto-refresh-stop impl)
                   (repl/notify [out session timer]))))))))
   => (contains-in [{"access_token" string? "refresh_token" string? "user" {"email" string?}}
                 {"access_token" string? "refresh_token" string? "user" {"email" string?}}
@@ -158,7 +159,7 @@
                                           node)
         (promise/x:promise-then
          (fn [session]
-           (session/stop-auto-refresh (substrate/get-service node "auth/supabase"))
+           (session/auto-refresh-stop (substrate/get-service node "auth/supabase"))
            (var token-client (-/default-client (@! (-> local-min/+config+ :api :anon-key))
                                                (. session ["access_token"])))
            (var token-node (-/node-with-service token-client session))
@@ -168,7 +169,7 @@
                 (fn [out]
                   (var impl (substrate/get-service token-node "auth/supabase"))
                   (var new-session (session/get-session impl))
-                  (var timer (xt/x:get-key (xt/x:get-key (xt/x:get-key impl "state") "refresh") "timer"))
+                  (var timer (xt/x:get-key (xt/x:get-key (xt/x:get-key impl "state") "auto_refresh") "current"))
                   (repl/notify [out new-session timer]))))))))
   => [{"status" "ok"} nil nil])
 
@@ -190,9 +191,9 @@
                 (fn [out]
                   (var impl (substrate/get-service node "auth/supabase"))
                   (var session (session/get-session impl))
-                  (session/stop-auto-refresh impl)
+                  (session/auto-refresh-stop impl)
                   (repl/notify [out session]))))))))
-  => (contains-in [{"access_token" string? "refresh_token" string? "user" {"email" string?}}
+  => (contains-in [nil
                 {"access_token" string? "refresh_token" string? "user" {"email" string?}}]))
 
 ^{:refer xt.db.node.adaptor-supabase/supabase-current-session-handler :added "4.1"}

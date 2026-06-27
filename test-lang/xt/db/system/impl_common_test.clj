@@ -53,7 +53,7 @@
    (impl-common/sync-get-tables {"db/sync" {"User" [{"id" 1}]
                                             "Log"  [{"id" 2}]}
                                  "db/remove" {"Role" [1 2 3]}}))
-  => (contains ["User" "Log" "Role"] :in-any-order :set)
+  => ["User" "Log" "Role"]
 
   (!.js
    (impl-common/sync-get-tables {"db/sync" {"User" [{"id" 1}]}}))
@@ -92,7 +92,7 @@
                      "callback" (fn [event] (xt/x:arr-push called "l2"))}}})
    (impl-common/sync-notify-listeners impl ["User" "Log"] {})
    (return called))
-  => (contains ["l1" "l2"] :in-any-order :set)
+  => ["l1" "l2"]
 
   (!.js
    (var called [])
@@ -113,7 +113,7 @@
                      "callback" (fn [event] (xt/x:arr-push called "l2"))}}})
    (impl-common/sync-notify-listeners impl ["User" "Log"] {})
    (return called))
-  => (contains ["l1" "l2"] :in-any-order :set)
+  => ["l1" "l2"]
 
   (!.js
    (var called [])
@@ -148,7 +148,7 @@
                 (return true))})
    (impl-common/sync-process-payload impl {"db/sync" {"User" [{"id" 1}]}})
    (return applied))
-  => (contains [["add" {"User" [{"id" 1}]}] "notified"] :in-any-order :set)
+  => [["add" {"User" [{"id" 1}]}] "notified"]
 
   (!.js
    (var applied [])
@@ -165,7 +165,7 @@
                 (return true))})
    (impl-common/sync-process-payload impl {"db/remove" {"Log" [1 2]}})
    (return applied))
-  => (contains [["remove" {"Log" [1 2]}] "notified"] :in-any-order :set)
+  => [["remove" {"Log" [1 2]}] "notified"]
 
   (!.js
    (var applied [])
