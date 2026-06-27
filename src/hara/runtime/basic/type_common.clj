@@ -62,7 +62,6 @@
     :interactive
     :basic
     :websocket
-    :playground
     :remote-port
     :remote-ws})
 

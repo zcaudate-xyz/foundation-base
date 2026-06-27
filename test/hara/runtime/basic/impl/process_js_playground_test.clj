@@ -1,7 +1,7 @@
 (ns hara.runtime.basic.impl.process-js-playground-test
   (:require [hara.common.util :as ut]
             [hara.lang :as l]
-            [hara.runtime.basic.type-playground :as playground]
+            [hara.runtime.js-playground :as playground]
             [std.json :as json])
   (:use code.test)
   (:import (java.net URI)
