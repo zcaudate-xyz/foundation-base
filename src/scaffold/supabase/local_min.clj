@@ -33,7 +33,8 @@
      (when (not (= false (:wait-http opts)))
        (network/wait-for-port
         (get-in +config+ [:api :hostname])
-        (get-in +config+ [:api :port]))
+        (get-in +config+ [:api :port])
+        {:timeout 60000})
        (Thread/sleep 2000))
      true)))
 
@@ -45,7 +46,8 @@
           :output-errors true})
   (network/wait-for-port
    (get-in +config+ [:api :hostname])
-   (get-in +config+ [:api :port]))
+   (get-in +config+ [:api :port])
+   {:timeout 60000})
   (Thread/sleep 2000)
   true)
 
