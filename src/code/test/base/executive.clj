@@ -522,19 +522,48 @@
                              (sort-fn))
            skip?       (when-let [skip (rt/get-global ns :skip)]
                          (rt/eval-in-ns test-ns skip))
-           facts       (accumulate (fn []
-                                     (binding [*ns* (the-ns test-ns)]
-                                       (if skip?
-                                         (doall (mapv #(process/skip-check %) tests))
-                                         (let [_       (rt/eval-in-ns test-ns (rt/get-global ns :prelim))
-                                               _       (rt/eval-in-ns test-ns (rt/get-global ns :setup))
-                                               map-fn  (if (:parallel test)
-                                                         pmap
-                                                         map)
-                                               output  (doall (map-fn #(%) tests))
-                                               _       (rt/eval-in-ns test-ns (rt/get-global ns :teardown))]
-                                           output))))
-                                   run-id)
+           ns-timeout  (or (:timeout-ns params) context/*timeout-ns-global*)
+           run-facts   (fn []
+                         (accumulate (fn []
+                                       (binding [*ns* (the-ns test-ns)]
+                                         (if skip?
+                                           (doall (mapv #(process/skip-check %) tests))
+                                           (let [_       (rt/eval-in-ns test-ns (rt/get-global ns :prelim))
+                                                 _       (rt/eval-in-ns test-ns (rt/get-global ns :setup))
+                                                 map-fn  (if (:parallel test)
+                                                           pmap
+                                                           map)
+                                                 output  (doall (map-fn #(%) tests))
+                                                 _       (rt/eval-in-ns test-ns (rt/get-global ns :teardown))]
+                                             output))))
+                                     run-id))
+           facts       (if ns-timeout
+                         (let [p       (promise)
+                               thread  (doto (Thread. #(try
+                                                         (deliver p (run-facts))
+                                                         (catch Throwable t
+                                                           (deliver p t))))
+                                         (.setDaemon true)
+                                         (.setName (str "code.test.namespace/" test-ns))
+                                         (.start))]
+                           (.join thread (long ns-timeout))
+                           (if (.isAlive thread)
+                             (do
+                               (.interrupt thread)
+                               (output/println
+                                (str "NAMESPACE TIMEOUT: " test-ns
+                                     " after " (t/format-ms ns-timeout)))
+                               [{:results [{:from :evaluate
+                                            :form :timeout
+                                            :status :exception
+                                            :actual {:status :timeout
+                                                     :data ns-timeout}
+                                            :meta {:ns test-ns}}]}])
+                             (let [v @p]
+                               (if (instance? Throwable v)
+                                 (throw v)
+                                 v))))
+                         (run-facts))
             _           (rt/get-global ns :teardown)
             results     (-> (interim facts)
                             (assoc :queued (repeat (count tests) true))

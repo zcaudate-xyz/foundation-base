@@ -107,8 +107,8 @@
   "returns the signature of a function"
   {:added "4.0"}
   [obj]
-  (template/$ (. (python.core/pkg "inspect")
-          (signature ~obj))))
+  (template/$ (str (. (python.core/pkg "inspect")
+                  (signature ~obj)))))
 
 (defmacro.py fn:argspec
   "gets the argspect of a function"

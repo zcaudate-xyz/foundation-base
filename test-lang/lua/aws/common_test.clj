@@ -4,11 +4,11 @@
             [std.string.prose :as prose])
   (:use code.test))
 
-(l/script- :lua
+(l/script- :lua.nginx
   {:runtime :basic
    :config {:program :resty}
    :require [[lua.core :as u]
-             [lua.nginx :as n :include [:string]]
+             [lua.nginx :as n]
              [lua.aws.common :as common]
              [xt.lang.spec-base :as xt]]})
 

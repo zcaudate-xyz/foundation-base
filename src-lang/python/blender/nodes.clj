@@ -1,7 +1,9 @@
 (ns python.blender.nodes
   (:require [hara.lang :as l]))
 
-(l/script :python {:runtime :blender})
+(l/script :python
+  {:runtime :blender
+   :require [[python.blender.nodes :as nodes]]})
 
 (defn.py ensure-material-tree
   "Ensures obj-name has a material with use_nodes enabled.
@@ -98,28 +100,28 @@
   [target pipeline]
   (:= ttype (. target ["type"]))
   (cond (== ttype "material")
-        (:= tree (ensure-material-tree (. target ["obj"])
-                                       (. target (get "mat"))))
+        (:= tree (nodes/ensure-material-tree (. target ["obj"])
+                                             (. target (get "mat"))))
 
         (== ttype "geometry")
-        (:= tree (ensure-geometry-tree (. target ["obj"])
-                                       (. target (get "group"))))
+        (:= tree (nodes/ensure-geometry-tree (. target ["obj"])
+                                             (. target (get "group"))))
 
         (== ttype "compositor")
-        (:= tree (ensure-compositor-tree))
+        (:= tree (nodes/ensure-compositor-tree))
 
         :else
         (throw (Exception (+ "Unknown pipeline target type: " ttype))))
   (for [step :in pipeline]
     (:= op (. step [0]))
     (cond (== op "node")
-          (node tree (. step [1]) (. step [2]) (or (. step [3]) {}))
+          (nodes/node tree (. step [1]) (. step [2]) (or (. step [3]) {}))
 
           (== op "link")
-          (link tree (. step [1]) (. step [2]) (. step [3]) (. step [4]))
+          (nodes/link tree (. step [1]) (. step [2]) (. step [3]) (. step [4]))
 
           (== op "clear")
-          (clear-tree tree)))
+          (nodes/clear-tree tree)))
   (return tree))
 
 (comment

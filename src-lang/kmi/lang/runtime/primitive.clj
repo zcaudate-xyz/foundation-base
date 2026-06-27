@@ -15,6 +15,7 @@
 (def.xt MATH (xt/x:get-key !:G "Math"))
 (def.xt CONSOLE (xt/x:get-key !:G "console"))
 (def.xt JSON-GLOBAL (xt/x:get-key !:G "JSON"))
+(def.xt PROCESS (xt/x:get-key !:G "process"))
 
 (defn.xt count-value
   "counts a value, dispatching between host and kmi types"
@@ -190,7 +191,8 @@
    "apply" -/apply-value
    "Math" -/MATH
    "console" -/CONSOLE
-   "JSON" -/JSON-GLOBAL})
+   "JSON" -/JSON-GLOBAL
+   "process" -/PROCESS})
 
 (defn.xt init-runtime
   "seeds a runtime with the primitive library in kmi.core"

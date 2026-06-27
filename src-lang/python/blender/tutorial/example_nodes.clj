@@ -4,7 +4,8 @@
 (l/script :python
   {:runtime :blender
    :require [[python.blender.nodes :as n]
-             [python.blender.tutorial.example-core]]})
+             [python.blender.tutorial.example-core]
+             [python.blender.tutorial.example-nodes :as self]]})
 
 (defn.py make-noise-material
   "Builds a procedural noise -> diffuse material on obj-name using the
@@ -28,7 +29,7 @@
   (python.blender.tutorial.example-core/clear-scene!)
   (python.blender.tutorial.example-core/add-sphere 1 [0 0 0])
   (:= (. bpy.context.view_layer.objects.active name) obj-name)
-  (make-noise-material obj-name)
+  (self/make-noise-material obj-name)
   (python.blender.tutorial.example-core/add-light "SUN" [5 5 5] 5)
   (python.blender.tutorial.example-core/add-camera [3 3 3] [0.7 0 0.9])
   (return (python.blender.tutorial.example-core/render-to out-path)))

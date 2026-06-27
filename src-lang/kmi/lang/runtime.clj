@@ -71,13 +71,13 @@
   (var source (xt/x:first args))
   (var runtime (xt/x:get-key (xt/x:get-key space "state") "runtime"))
   (var out (eval/eval-string runtime source))
-  (when (eval/error? out)
+  (when (eval/errorp out)
     (return {"error" (xt/x:get-key out "error")}))
   (substrate/set-space-state
    node
    (xt/x:get-key space "id")
-   {"runtime" (eval/runtime out)})
-  (return {"value" (eval/value out)}))
+   {"runtime" (eval/get-runtime out)})
+  (return {"value" (eval/get-value out)}))
 
 (defn.xt handler-load
   "substrate handler for @kmi.lang/load"
@@ -86,13 +86,13 @@
   (var source (xt/x:first args))
   (var runtime (xt/x:get-key (xt/x:get-key space "state") "runtime"))
   (var out (eval/eval-string-many runtime source))
-  (when (eval/error? out)
+  (when (eval/errorp out)
     (return {"error" (xt/x:get-key out "error")}))
   (substrate/set-space-state
    node
    (xt/x:get-key space "id")
-   {"runtime" (eval/runtime out)})
-  (return {"value" (eval/value out)}))
+   {"runtime" (eval/get-runtime out)})
+  (return {"value" (eval/get-value out)}))
 
 (defn.xt handler-describe
   "substrate handler for @kmi.lang/describe"

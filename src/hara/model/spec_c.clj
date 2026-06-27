@@ -117,10 +117,26 @@
         
         body-str (emit/emit-main (list \\ \\ (list \| (apply list 'do body))) grammar mopts)]
     
-    (str ret-type " " sym-str " " args-str " "
+    (str ret-type " " sym-str args-str " "
          "{\n"
          body-str
          "\n}")))
+
+(defn emit-fn
+  "custom fn for C; :header true emits a forward declaration"
+  {:added "4.1"}
+  [[_ sym args & body] grammar mopts]
+  (let [header? (-> sym meta :header)
+        ret-type (or (-> sym meta :tag) (-> sym meta :-) "void")
+        ret-type (to-c-type ret-type)
+        module (:module mopts)
+        sym-str (if (and module (symbol? sym) (not (namespace sym)))
+                  (c-sanitize (symbol (name (:id module)) (name sym)))
+                  (c-sanitize sym))
+        args-str (c-fn-args [:c-args args] grammar mopts)]
+    (if header?
+      (str ret-type " " sym-str args-str ";")
+      (emit-defn (list 'defn sym args (apply list 'do body)) grammar mopts))))
 
 (defn tf-arrow
   "transforms arrow ->"
@@ -140,7 +156,8 @@
                                :class
                                :macro-arrow])
       (grammar/build:override
-       {:defn    {:emit #'emit-defn}})
+       {:defn    {:emit #'emit-defn}
+        :fn      {:emit #'emit-fn}})
       (grammar/build:extend
        {:c-args  {:op :c-args :symbol #{:c-args} :emit #'c-fn-args}
         :define  {:op :define  :symbol '#{define}  :macro #'tf-define

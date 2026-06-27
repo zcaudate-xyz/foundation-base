@@ -1,8 +1,11 @@
 (ns lua.aws.s3
   (:require [hara.lang :as l]))
 
-(l/script :lua
-  {:require [[lua.aws.common :as common] [lua.nginx :as n] [xt.lang.spec-base :as xt] [xt.lang.parser-xml :as xml] [xt.lang.spec-base :as xt]]})
+(l/script :lua.nginx
+  {:require [[lua.aws.common :as common] [lua.nginx :as n]
+             [xt.lang.spec-base :as xt] [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.parser-xml :as xml] [xt.lang.spec-base :as xt]]})
 
 (defn.lua policy-public-read-only
   "creates bucket read only policy"
@@ -22,9 +25,9 @@
   [enforced aws opts]
   (return
    (common/make-request
-    (k/obj-assign (k/obj-clone aws) {:service "s3"})
+    (xtd/obj-assign (xtd/obj-clone aws) {:service "s3"})
     (:? opts
-        (k/obj-assign opts enforced)
+        (xtd/obj-assign opts enforced)
         enforced))))
 
 (defn.lua check-bucket
@@ -70,11 +73,11 @@
   [res]
   (var #{status body} res)
   (when (== status 200)
-    (var result (k/get-in body ["ListBucketResult"]))
+    (var result (xtd/get-in body ["ListBucketResult"]))
     (var arr (:? (k/is-array? result)
-                 (k/arr-keep result (k/key-fn "Contents"))
-                 (k/arrayify (k/get-in result ["Contents"]))))
-    (:= (. res body) (xtd/arr-map arr (k/key-fn "Key"))))
+                 (xtd/arr-keep result (fn [e] (xt/x:get-key e "Contents")))
+                 (xtd/arrayify (xtd/get-in result ["Contents"]))))
+    (:= (. res body) (xtd/arr-map arr (fn [e] (xt/x:get-key e "Key")))))
   (return res))
 
 (defn.lua list-objects
@@ -84,7 +87,7 @@
   (var res (-/s3-request {:method "GET"
                           :route bucket}
                          aws opts))
-  (var process (or (k/get-in opts ["process"])
+  (var process (or (xtd/get-in opts ["process"])
                    -/list-objects-process))
   (return (process res)))
 
@@ -132,7 +135,7 @@
   (var node
        {:tag "Delete"
         :children
-        (k/arr-assign
+        (xtd/arr-assign
          [{:tag "Quiet"
            :children [true]}]
          (xtd/arr-map all-keys

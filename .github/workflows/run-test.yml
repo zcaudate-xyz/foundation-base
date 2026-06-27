@@ -40,7 +40,7 @@ jobs:
             command: lein test :with "[std]"
           - name: xt
             target: "[xt.]"
-            command: lein test :with "[xt.]"
+            command: lein test :with "[xt.]" :timeout-ns 300000
           - name: code
             target: "[code]"
             install_js_parser: true

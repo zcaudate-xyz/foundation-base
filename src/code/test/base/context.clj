@@ -28,6 +28,8 @@
 
 (defonce ^:dynamic *timeout-global* 20000)
 
+(defonce ^:dynamic *timeout-ns-global* nil)
+
 (defonce ^:dynamic *timeout* nil)
 
 (defonce ^:dynamic *print* #{:print-throw :print-failed :print-timeout :print-bulk})
@@ -46,6 +48,7 @@
    :errors nil
    :results nil
    :timeout 60000
+   :timeout-ns nil
    :print #{:print-throw :print-failed :print-timeout :print-bulk}})
 
 (defmacro with-new-context
@@ -65,5 +68,6 @@
                *settings*        (:settings ctx#)
                *root*            (:root ctx#)
                *results*         (:results ctx#)
+               *timeout-ns-global* (:timeout-ns ctx#)
                *print*           (:print ctx#)]
        ~@body)))

@@ -65,10 +65,12 @@
   "transforms a c ffi block"
   {:added "4.0"}
   [[_ & forms]]
-  `(\\ "[["
-    ^{:indent 2}
-    (\\ \\ (~'!:lang {:lang :c} (~'do ~@forms)))
-    \\ "]]"))
+  (let [c-str (impl/emit-str (cons 'do forms)
+                             {:lang :c})]
+    `(\\ "[["
+      ^{:indent 2}
+      (\\ \\ ~c-str)
+      \\ "]]))
 
 (defn lua-map-key
   "custom lua map key"
