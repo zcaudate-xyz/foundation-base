@@ -105,7 +105,7 @@
   => (contains {"value" true}))
 
 ^{:refer hara.runtime.js-playground.client/TopMenu :added "4.0" :timeout 60000}
-(fact "TopMenu displays title, status and message controls"
+(fact "TopMenu displays title and compact connected status")
 
   @(chromedriver/evaluate +browser+ "document.querySelector('#topbar').textContent.includes('hara.runtime js playground')")
   => (contains {"value" true})
@@ -113,17 +113,26 @@
   @(chromedriver/evaluate +browser+ "document.querySelector('#topbar').textContent.includes('connected')")
   => (contains {"value" true})
 
-  @(chromedriver/evaluate +browser+ "document.querySelector('#topbar').textContent.includes('Messages')")
-  => (contains {"value" true}))
+  @(chromedriver/evaluate +browser+ "document.querySelector('#topbar button').textContent.includes('connected')")
+  => (contains {"value" true})
+
+  @(chromedriver/evaluate +browser+ "document.querySelector('#topbar').textContent.includes('Hide message log')")
+  => (contains {"value" false}))
 
 ^{:refer hara.runtime.js-playground.client/TabBar :added "4.0" :timeout 60000}
-(fact "TabBar renders configured tabs and switchTab changes the active tab"
+(fact "TabBar renders configured tabs and tab lifecycle functions work"
 
   @(chromedriver/evaluate +browser+ "Array.from(document.querySelectorAll('button')).some(b => b.textContent === 'Stage')")
   => (contains {"value" true})
 
-  (!.js (window.PLAYGROUND.switchTab "stage"))
-  => nil
+  @(chromedriver/evaluate +browser+ "window.PLAYGROUND.createTab('custom', 'Custom').id")
+  => (contains {"value" "custom"})
+
+  @(chromedriver/evaluate +browser+ "Array.from(document.querySelectorAll('button')).some(b => b.textContent === 'Custom')")
+  => (contains {"value" true})
+
+  (!.js (window.PLAYGROUND.closeTab "custom"))
+  => "custom"
 
   @(chromedriver/evaluate +browser+ "window.PLAYGROUND.getActiveTab()")
   => (contains {"value" "stage"}))
@@ -140,8 +149,8 @@
   @(chromedriver/evaluate +browser+ "document.body.textContent.includes('custom-stage-xyz')")
   => (contains {"value" true})
 
-  (!.js (window.PLAYGROUND.switchTab "custom"))
-  => nil
+  (!.js (window.PLAYGROUND.createTab "custom" "Custom"))
+  => {:id "custom", :label "Custom"}
 
   (!.js (window.PLAYGROUND.setTabContent "custom" (React.createElement "div" null "custom-tab-xyz")))
   => nil

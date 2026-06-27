@@ -56,6 +56,27 @@
               (. messagesRef current (pop)))
             (setMessages (. messagesRef current (slice))))))
 
+(defn.js make-tab-id
+  "returns a unique tab id"
+  {:added "4.1"}
+  [label]
+  (var prefix (or label "tab"))
+  (return (+ "tab-" prefix "-" (xt/x:now-ms))))
+
+(defn.js find-tab-index
+  "finds the index of a tab by id"
+  {:added "4.1"}
+  [tabs id]
+  (return (. tabs
+             (findIndex (fn [t]
+                          (return (== (. t ["id"]) id)))))))
+
+(defn.js has-tab?
+  "checks whether a tab exists"
+  {:added "4.1"}
+  [tabs id]
+  (return (>= (-/find-tab-index tabs id) 0)))
+
 (defn.js run-eval
   "handles an incoming eval message as a sent/reply pair"
   {:added "4.0"}
@@ -195,7 +216,7 @@
                   (return [:% -/MessageItem {:key i :m m}])))))]))
 
 (defn.js TopMenu
-  "top menu bar with connection status on the right and a messages dropdown"
+  "top menu bar with a compact connection status dropdown"
   {:added "4.0"}
   [{:# [title
         status
@@ -206,7 +227,6 @@
   (var [dropdownOpen setDropdownOpen] (r/local))
   (var color (:? (== status "connected") "#4caf50"
                  (:? (== status "error") "#f44336" "#ff9800")))
-  (var recent (. messages (slice -5)))
   (return
    [:div
     {:id "topbar"
@@ -226,83 +246,131 @@
     [:div
      {:style {:display "flex"
               :alignItems "center"
-              :gap "12px"}}
+              :gap "8px"}}
      [:div
       {:style {:position "relative"}}
       [:button
-       {:style {:background "#f5f5f5"
+       {:style {:display "flex"
+                :alignItems "center"
+                :gap "8px"
+                :background "#f5f5f5"
                 :border "1px solid #ddd"
-                :borderRadius "4px"
-                :padding "6px 12px"
+                :borderRadius "999px"
+                :padding "6px 10px"
                 :cursor "pointer"
-                :fontSize "12px"}
+                :fontSize "12px"
+                :fontWeight 600}
         :onClick (fn [] (setDropdownOpen (not dropdownOpen)))}
-       "Messages (" (+ (. messages length)) ")"]
+       [:span
+        {:style {:width "10px"
+                 :height "10px"
+                 :borderRadius "50%"
+                 :background color
+                 :display "inline-block"}}]
+       "connected"
+       [:span
+        {:style {:fontSize "10px" :color "#888" :lineHeight 1}}
+        "▾"]]
       (:? dropdownOpen
           [:div
            {:style {:position "absolute"
                     :top "38px"
                     :right "0"
-                    :width "320px"
-                    :maxHeight "400px"
-                    :overflow "auto"
+                    :width "340px"
+                    :overflow "hidden"
                     :background "#fff"
                     :border "1px solid #ddd"
-                    :borderRadius "4px"
+                    :borderRadius "10px"
                     :boxShadow "0 4px 12px rgba(0,0,0,0.15)"
                     :zIndex 100}}
            [:div
-            {:style {:padding "8px 12px"
+            {:style {:padding "10px 12px"
                      :borderBottom "1px solid #eee"
                      :fontWeight 600
                      :fontSize "12px"}}
-            "Recent Messages"]
-           (:? (> (. messages length) 0)
-               (. recent
-                  (map (fn [m i]
-                         (return [:% -/MessageItem {:key i :m m}]))))
-               [:div
-                {:style {:padding "12px" :color "#999" :fontSize "12px"}}
-                "No messages yet."])
+            [:div
+             {:style {:display "flex"
+                      :alignItems "center"
+                      :gap "8px"}}
+             [:span
+              {:style {:width "10px"
+                       :height "10px"
+                       :borderRadius "50%"
+                       :background color
+                       :display "inline-block"}}]
+             [:span nil status]]]
            [:div
-            {:style {:padding "8px 12px"
-                     :borderTop "1px solid #eee"
+            {:style {:padding "10px 12px"
+                     :borderBottom "1px solid #eee"
+                     :color "#666"
+                     :fontSize "12px"}}
+            url]
+           [:div
+            {:style {:padding "10px 12px"
                      :textAlign "center"}}
             [:button
              {:style {:background "transparent"
-                      :border "none"
+                      :border "1px solid #ddd"
+                      :borderRadius "999px"
+                      :padding "6px 12px"
                       :color "#2196f3"
                       :cursor "pointer"
                       :fontSize "12px"}
               :onClick (fn []
                          (do (setShowMessages (not showMessages))
                              (setDropdownOpen false)))}
-             (:? showMessages "Hide message log" "Show message log")]]]
-          nil)]
-     [:div
-      {:style {:display "flex"
-               :alignItems "center"
-               :gap "6px"
-               :padding "4px 10px"
-               :borderRadius "12px"
-               :background "#f5f5f5"}}
-      [:span
-       {:style {:width "10px"
-                :height "10px"
-                :borderRadius "50%"
-                :background color
-                :display "inline-block"}}]
-      "Status: " status]
-     [:div
-      {:style {:color "#666" :fontSize "12px"}}
-      url]]]))
+             (:? showMessages "Hide message log" (+ "Show message log (" (. messages length) ")"))]]]
+          nil)]]]))
 
 (defn.js TabBar
   "renders the configurable tab bar"
   {:added "4.0"}
   [{:# [tabs
         activeTab
-        setActiveTab]}]
+        setActiveTab
+        createTab
+        closeTab]}]
+  (var tab-buttons
+    (. tabs
+       (map (fn [t i]
+              (var id (. t ["id"]))
+              (var label (. t ["label"]))
+              (var is-active (== id activeTab))
+              (return
+               [:div
+                {:key id
+                 :style {:display "flex"
+                         :alignItems "center"
+                         :gap "4px"}}
+                [:button
+                 {:style {:display "flex"
+                          :alignItems "center"
+                          :gap "8px"
+                          :background (:? is-active "#fff" "transparent")
+                          :border "1px solid #ddd"
+                          :borderBottom (:? is-active "1px solid #fff" "1px solid #ddd")
+                          :borderRadius "10px 10px 0 0"
+                          :padding "5px 10px"
+                          :cursor "pointer"
+                          :fontSize "12px"
+                          :fontWeight (:? is-active 700 500)
+                          :marginBottom "-1px"}
+                  :onClick (fn [] (setActiveTab id))}
+                 [:span nil label]]
+                (:? (not= id "stage")
+                    [:button
+                     {:style {:background "transparent"
+                              :border "none"
+                              :padding "0"
+                              :cursor "pointer"
+                              :fontSize "12px"
+                              :lineHeight 1
+                              :color "#999"}
+                      :onClick (fn [e]
+                                 (do (. e (stopPropagation))
+                                     (closeTab id)))}
+                     "×"]
+                    nil)]))))))
   (return
    [:div
     {:style {:display "flex"
@@ -313,32 +381,30 @@
              :background "#f5f5f5"
              :borderBottom "1px solid #ddd"
              :fontSize "13px"}}
-    (. tabs
-       (map (fn [t i]
-              (var id (. t ["id"]))
-              (var label (. t ["label"]))
-              (var is-active (== id activeTab))
-              (return
-               [:button
-                {:key id
-                 :style {:background (:? is-active "#fff" "transparent")
-                         :border "1px solid #ddd"
-                         :borderBottom (:? is-active "1px solid #fff" "1px solid #ddd")
-                         :borderRadius "4px 4px 0 0"
-                         :padding "4px 12px"
-                         :cursor "pointer"
-                         :fontSize "12px"
-                         :fontWeight (:? is-active 600 400)
-                         :marginBottom "-1px"}
-                 :onClick (fn [] (setActiveTab id))}
-                label]))))]))
+    tab-buttons
+    [:button
+     {:style {:background "#fff"
+              :border "1px solid #ddd"
+              :borderBottom "1px solid #fff"
+              :borderRadius "10px 10px 0 0"
+              :padding "5px 10px"
+              :cursor "pointer"
+              :fontSize "12px"
+              :fontWeight 700
+              :marginBottom "-1px"}
+      :onClick (fn [] (createTab nil nil))}
+     "+"]])
 
 (defn.js ActiveTabPanel
   "renders the content area for the active tab"
   {:added "4.0"}
   [{:# [activeTab
+        tabs
         stage
         tabContent]}]
+  (var tab (. tabs
+              (find (fn [t]
+                      (return (== (. t ["id"]) activeTab))))))
   (return
    [:div
     {:style {:flex 1
@@ -369,7 +435,7 @@
               {:style {:color "#999"
                        :marginTop "40px"
                        :textAlign "center"}}
-              [:h2 nil activeTab]
+              [:h2 nil (:? tab (. tab ["label"]) activeTab)]
               [:p nil "Use the REPL to set content for this tab:"]
               [:pre
                {:style {:background "#fff"
@@ -397,8 +463,11 @@
   (var messagesRef (r/ref []))
   (var [title setTitle] (r/local (. config ["title"])))
   (var titleRef (r/ref (. config ["title"])))
-  (var tabs (. config ["tabs"]))
-  (var default-tab (. (or (. tabs [0]) {"id" "stage"}) ["id"]))
+  (var default-tabs (or (. config ["tabs"])
+                        [{"id" "stage" "label" "Stage"}]))
+  (var [tabs setTabs] (r/local default-tabs))
+  (var tabsRef (r/ref default-tabs))
+  (var default-tab (. (or (. default-tabs [0]) {"id" "stage"}) ["id"]))
   (var [activeTab setActiveTab] (r/local default-tab))
   (var activeTabRef (r/ref default-tab))
   (var [showMessages setShowMessages] (r/local true))
@@ -408,7 +477,44 @@
   (var tabContentRef (r/ref {}))
   (var add-message (-/make-add-message messagesRef setMessages))
   (var ws-url (+ "ws://" (. window location host) "/ws"))
-
+  (var setActiveTab* (fn [id]
+                       (var next-id (if (-/has-tab? (. tabsRef current) id)
+                                      id
+                                      (. (or (. tabsRef current [0]) {"id" "stage"}) ["id"])))
+                       (:= (. activeTabRef current) next-id)
+                       (setActiveTab next-id)))
+  (var setTabs* (fn [next-tabs preferred]
+                  (var normalized (or next-tabs []))
+                  (:= (. tabsRef current) normalized)
+                  (setTabs normalized)
+                  (var fallback (. (or (. normalized [0]) {"id" "stage"}) ["id"]))
+                  (var next-active (or preferred (. activeTabRef current) fallback))
+                  (if (-/has-tab? normalized next-active)
+                    (setActiveTab* next-active)
+                    (setActiveTab* fallback))))
+  (var createTab* (fn [id label]
+                    (var next-id (or id (-/make-tab-id label)))
+                    (var tab {"id" next-id
+                              "label" (or label next-id)})
+                    (var next (. (. tabsRef current) (slice)))
+                    (if (not (-/has-tab? next next-id))
+                      (. next (push tab)))
+                    (setTabs* next next-id)
+                    (setActiveTab* next-id)
+                    (return tab)))
+  (var closeTab* (fn [id]
+                   (if (== id "stage")
+                     (return nil))
+                   (var next (. (. tabsRef current) (filter (fn [t]
+                                                             (return (not= (. t ["id"]) id))))))
+                   (var next-content (Object.assign {} (. tabContentRef current)))
+                   (delete (. next-content [id]))
+                   (:= (. tabContentRef current) next-content)
+                   (setTabContent next-content)
+                   (setTabs* next)
+                   (if (== activeTabRef current id)
+                     (setActiveTab* (. (or (. next [0]) {"id" "stage"}) ["id"])))
+                   (return id)))
   (var setStatus* (fn [s]
                     (:= (. statusRef current) s)
                     (setStatus s)))
@@ -416,9 +522,6 @@
                    (:= (. titleRef current) t)
                    (:= (. document title) t)
                    (setTitle t)))
-  (var setActiveTab* (fn [id]
-                       (:= (. activeTabRef current) id)
-                       (setActiveTab id)))
   (var setStage* (fn [el]
                    (:= (. stageRef current) el)
                    (setStage el)
@@ -435,6 +538,8 @@
           (:= (. PLAYGROUND ["setStage"]) setStage*)
           (:= (. PLAYGROUND ["setTabContent"]) setTabContent*)
           (:= (. PLAYGROUND ["switchTab"]) setActiveTab*)
+          (:= (. PLAYGROUND ["createTab"]) createTab*)
+          (:= (. PLAYGROUND ["closeTab"]) closeTab*)
           (:= (. PLAYGROUND ["setTitle"]) setTitle*)
           (:= (. PLAYGROUND ["getMessages"]) (fn [] (return (. messagesRef current))))
           (:= (. PLAYGROUND ["getStatus"]) (fn [] (return (. statusRef current))))
@@ -452,7 +557,7 @@
           (:= (. ws onerror) (fn [] (setStatus* "error")))
           (:= (. ws onmessage)
               (fn [event]
-                (-/run-eval ws add-message messagesRef setMessages (JSON.parse (. event ["data"])))))
+                (-/run-eval ws add-message messagesRef setMessages (JSON.parse (. event ["data"]))))))
           (return (fn [] (. ws (close)))))
 
   (return
@@ -469,12 +574,15 @@
                    :setShowMessages setShowMessages}]
     [:% -/TabBar {:tabs tabs
                   :activeTab activeTab
-                  :setActiveTab setActiveTab*}]
+                  :setActiveTab setActiveTab*
+                  :createTab createTab*
+                  :closeTab closeTab*}]
     [:div
      {:style {:display "flex"
               :flex 1
               :overflow "hidden"}}
      [:% -/ActiveTabPanel {:activeTab activeTab
+                           :tabs tabs
                            :stage stage
                            :tabContent tabContent}]
      (:? showMessages
@@ -485,7 +593,7 @@
                    :flexDirection "column"
                    :background "#fff"}}
           [:% -/MessageList {:messages messages}]]
-         nil)]]))
+         nil)]] )
 
 (defn.js mount!
   "mounts the playground app into #root and exposes global React and PLAYGROUND"
@@ -498,6 +606,8 @@
       {"setStage" (fn [el] el)
        "setTabContent" (fn [id el] [id el])
        "switchTab" (fn [id] id)
+       "createTab" (fn [spec label] spec)
+       "closeTab" (fn [id] id)
        "setTitle" (fn [t] t)
        "getMessages" (fn [] [])
        "getStatus" (fn [] "connecting")
