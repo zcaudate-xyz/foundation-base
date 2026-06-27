@@ -64,7 +64,7 @@
                              "type" "supabase"
                              "defaults" (@! local-min/+config-supabase-anon+)}
                   "caching" {"id" "db/caching"
-                             "type" "memory"
+                             "type" "sqlite"
                              "defaults" {}}}
                  xt.db.poc.s08-adaptor-parity-test/Schema
                  xt.db.poc.s08-adaptor-parity-test/SchemaLookup)
@@ -111,7 +111,7 @@
                              "type" "supabase"
                              "defaults" (@! local-min/+config-supabase-anon+)}
                   "caching" {"id" "db/caching"
-                             "type" "memory"
+                             "type" "sqlite"
                              "defaults" {}}}
                  xt.db.poc.s08-adaptor-parity-test/Schema
                  xt.db.poc.s08-adaptor-parity-test/SchemaLookup)
@@ -230,7 +230,11 @@
     (-/with-server-worker
      (@! +server-worker-with-model-script+)
      (fn [client transport-id]
-       (return (-/read-tree-view-output client transport-id)))))
+       (return
+        (-> (-/read-tree-view-output client transport-id)
+            (promise/x:promise-then
+             (fn [out]
+               (repl/notify out))))))))
   => (contains-in
       {"has_group" true
        "model_type" "event.model"
@@ -258,11 +262,14 @@
             (promise/x:promise-then
              (fn [_]
                (return (-/read-tree-view-output client transport-id))))
+            (promise/x:promise-then
+             (fn [out]
+               (repl/notify out)))
             (promise/x:promise-catch
              (fn [err]
-               (return {"has_group" false
-                        "error" (. err ["message"])
-                        "stack" (. err ["stack"])}))))))))
+               (repl/notify {"has_group" false
+                             "error" (. err ["message"])
+                             "stack" (. err ["stack"])}))))))))
   => (contains-in
       {"has_group" true
        "model_type" "event.model"

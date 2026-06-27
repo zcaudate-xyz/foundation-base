@@ -320,7 +320,7 @@
               {"group" ["k1"]}
               (just ["a1" "b2"] :in-any-order)
               ["k1"]
-              ["a1" "b2" "k1"]
+              (just ["a1" "b2" "k1"] :in-any-order)
               {"listener/id" "a1"
                "listener/type" "custom"
                "label" "one"}

@@ -162,6 +162,7 @@
   {:bootstrap #'default-basic-client
     :main   {}
    :emit   {:body  {:transform #'rt/return-transform}
+            :lang/jsx false
             :lang/format :global}
    :json   :full
    :encode :json ;; default

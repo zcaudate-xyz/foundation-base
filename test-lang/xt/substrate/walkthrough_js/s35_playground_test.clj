@@ -39,7 +39,7 @@
   {:added "4.1"}
   []
   (var node (substrate/node-create (-/create-node)))
-  (page-core/add-group
+  (page-core/add-group-attach
    node
    "space/a"
    "page"
@@ -69,10 +69,11 @@
 
 (fact:global
  {:setup [(l/rt:restart :js)
+          (l/rt:scaffold-imports :js)
           (def +url+ (js-playground/play-url (l/rt :js)))
           (def +browser+ (chromedriver/browser {}))
           (chromedriver/goto +url+ 5000 +browser+)
-          (wait-for-channel  (l/rt :js))]
+          (wait-for-channel (l/rt :js))]
   :teardown [(l/rt:stop)
              (component/stop +browser+)]})
 
@@ -88,19 +89,10 @@
 
   (notify/wait-on [:js 5000]
     (var node (-/setup-node))
-    (var model (ext-page/get-model node "space/a" ["page" "greet"]))
-    (event-model/add-listener
-     model
-     "@/test/watch-output"
-     (fn [_id data _t meta]
-       (when (== "model.output" (xt/x:get-key data "type"))
-         (repl/notify (-/model-output-value node))))
-     nil
-     nil)
     (-> (page-core/model-set-input node "space/a" "page" "greet" {"data" ["hello"]} {})
         (promise/x:promise-then
-         (fn [_] nil)))
-    nil)
+         (fn [_]
+           (repl/notify (-/model-output-value node))))))
   => "hello")
 
 ^{:refer xt.substrate.walkthrough-js.s35-playground-test/ext-page-follows-model-updates
@@ -109,19 +101,10 @@
 
   (notify/wait-on [:js 5000]
     (var node (-/setup-node))
-    (var model (ext-page/get-model node "space/a" ["page" "greet"]))
-    (event-model/add-listener
-     model
-     "@/test/watch-output"
-     (fn [_id data _t meta]
-       (when (== "model.output" (xt/x:get-key data "type"))
-         (repl/notify (-/model-output-value node))))
-     nil
-     nil)
     (-> (page-core/model-set-input node "space/a" "page" "greet" {"data" ["world"]} {})
         (promise/x:promise-then
-         (fn [_] nil)))
-    nil)
+         (fn [_]
+           (repl/notify (-/model-output-value node))))))
   => "world")
 
 

@@ -19,11 +19,17 @@
             [std.lib.network :as network]
             [std.lib.security :as security]
             [std.protocol.context :as protocol.context]
-            [hara.runtime.js-playground-client]))
+            [hara.runtime.js-playground.client]))
 
 (def +pre-arranged+
   "pre-arranged ports for well-known playground instances"
   {:dev/ws-play 29002})
+
+(def ^:private +cache-control+
+  "headers that tell the browser not to cache playground assets"
+  {"Cache-Control" "no-store, no-cache, must-revalidate, max-age=0"
+   "Pragma"        "no-cache"
+   "Expires"       "0"})
 
 (defn- content-type
   "guesses a content type for a static file path"
@@ -38,32 +44,40 @@
 (defn playground-client-script
   "emits the browser-side React playground app as JS via hara.lang.
 
-   The client lives in `hara.runtime.js-playground-client` and is compiled to
+   The client lives in `hara.runtime.js-playground.client` and is compiled to
    a single ES module with `js.react` for the UI and
    `xt.lang.common-lib/return-eval` for safe eval."
   {:added "4.0"}
   []
   (l/emit-script
-   '(hara.runtime.js-playground-client/mount!)
+   '(hara.runtime.js-playground.client/mount!)
    {:lang :js
     :layout :flat
-    :module 'hara.runtime.js-playground-client
+    :module 'hara.runtime.js-playground.client
     :emit {:lang/jsx false
            :override {"react"            "https://esm.sh/react@18"
                       "react-dom/client" "https://esm.sh/react-dom@18/client"
                       "react-nil"        "https://esm.sh/react-nil"}}}))
 
 (defn page-html
-  "renders the js playground page"
+  "renders the js playground page using std.html
+
+   Accepts :title, :head, :body and :tabs. Tabs are maps of {:id ... :label ...}
+   exposed to the client through window.PLAYGROUND_CONFIG."
   {:added "4.0"}
-  [{:keys [title head body]
-    :or {title "hara.runtime js playground"
-         body [:div {:id "root"}]}}]
-  (let [csp (clojure.string/join ";"
+  [{:keys [title head body tabs]}]
+  (let [title (or title "hara.runtime js playground")
+        body (or body [:div {:id "root"}])
+        tabs (or tabs [{:id "stage" :label "Stage"}])
+        csp (clojure.string/join ";"
                                  ["default-src * 'unsafe-eval'"
                                   "connect-src * 'unsafe-eval' ws: wss:"
                                   "script-src  'self' 'unsafe-eval' 'unsafe-inline' https://esm.sh"
                                   "worker-src  blob: data: 'self' 'unsafe-eval' 'unsafe-inline'"])
+        config-script (str "window.PLAYGROUND_CONFIG="
+                           (json/write {:title title
+                                        :tabs (mapv #(select-keys % [:id :label]) tabs)})
+                           ";")
         body (if (string? body)
                body
                (html/html body))
@@ -71,14 +85,19 @@
                    (string? head) head
                    :else (html/html head))]
     (str "<!doctype html>"
-         "<html><head>"
-         "<meta http-equiv=\"Content-Security-Policy\" content=\"" csp "\">"
-         "<title>" title "</title>"
-         head
-         "</head><body>"
-         body
-         "<script type=\"module\">" (playground-client-script) "</script>"
-         "</body></html>")))
+         (html/html
+          [:html
+           [:head
+            [:meta {:http-equiv "Content-Security-Policy" :content csp}]
+            [:meta {:http-equiv "Cache-Control" :content "no-store, no-cache, must-revalidate, max-age=0"}]
+            [:meta {:http-equiv "Pragma" :content "no-cache"}]
+            [:meta {:http-equiv "Expires" :content "0"}]
+            [:title title]
+            head]
+           [:body
+            body
+            [:script config-script]
+            [:script {:type "module"} (playground-client-script)]]]))))
 
 (defn- serve-file
   "serves a file from the playground root"
@@ -86,12 +105,13 @@
   (let [file (java.io.File. root path)]
     (cond (.exists file)
           {:status 200
-           :headers {"Content-Type" (content-type path)}
+           :headers (merge +cache-control+
+                           {"Content-Type" (content-type path)})
            :body file}
 
           :else
           {:status 404
-           :headers {"Content-Type" "text/plain"}
+           :headers +cache-control+
            :body "not found"})))
 
 (defn- websocket-receive
@@ -136,13 +156,14 @@
 (defn start-js-playground
   "starts the js playground server and returns the runtime with state attached"
   {:added "4.0"}
-  [{:keys [id port host] :as rt}]
+  [{:keys [id port host title tabs] :as rt}]
   (let [root (str (fs/create-tmpdir))
-        _    (spit (str root "/index.html") (page-html {}))
-        port (network/port:check-available (or port
-                                               (+pre-arranged+ id)
-                                               0))
-        port (if (boolean? port) 0 port)
+        _    (spit (str root "/index.html") (page-html {:title title
+                                                         :tabs tabs}))
+        requested (let [p (or port (+pre-arranged+ id))]
+                    (when (and p (not= 0 p)) p))
+        port (or requested
+                 (network/port:check-available 0))
         channel (atom nil)
         return  (atom {})
         handler (playground-handler channel return root)

@@ -194,7 +194,8 @@
   [(default/install-type!
     :js :chromedriver.instance
     {:type :hara/rt.chromedriver
-     :config {:layout :full}
+     :config {:layout :full
+           :emit {:lang/jsx false}}
      :instance {:create browser:create}})
    
    (default/install-type!
