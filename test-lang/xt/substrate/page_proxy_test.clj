@@ -306,8 +306,13 @@
                          "primary" (substrate/get-service server "db/primary")
                          "caching" (substrate/get-service server "db/caching")})))))
   => (contains-in
-      {"init" {"services" {"db/primary" {"::" "xt.db.system.impl_memory/ImplMemory"}
-                           "db/caching" {"::" "xt.db.system.impl_memory/ImplMemory"}}}
+      {"init" {"status" "ok"
+               "services" {"db/primary" {"metadata" {"common_id" "db/common"
+                                                      "primary_id" "db/primary"
+                                                      "caching_id" "db/caching"}}
+                           "db/caching" {"metadata" {"common_id" "db/common"
+                                                      "primary_id" "db/primary"
+                                                      "caching_id" "db/caching"}}}}
        "primary" {"::" "xt.db.system.impl_memory/ImplMemory"}
        "caching" {"::" "xt.db.system.impl_memory/ImplMemory"}}))
 
