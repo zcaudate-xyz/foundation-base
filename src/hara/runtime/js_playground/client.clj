@@ -506,4 +506,4 @@
        "send" (fn [data] data)
        "ws" null
        "stage" null})
-  (r/renderDOMRoot "root" (fn [] [:% -/App {:config config}])))
+  (r/renderDOMRoot "root" (fn [] (return [:% -/App {:config config}]))))

@@ -1,8 +1,30 @@
 (ns xt.db.poc.n00-basic-test
   (:use code.test)
   (:require [hara.lang :as l]
+            [net.http :as net.http]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
+
+(defn wait-for-postgrest-ready
+  "Polls the local PostgREST /Log endpoint until it returns a non-5xx
+   response, giving the schema cache time to initialise."
+  []
+  (let [{:keys [host port apikey]} local-min/+config-supabase-anon+
+        url (str "http://" host ":" port "/Log?select=id&limit=1")]
+    (loop [attempts 0]
+      (let [{:keys [status body]}
+            (try (net.http/get url {:headers {"apikey" apikey}
+                                     :timeout 1000})
+                 (catch Throwable t
+                   {:status 0
+                    :body (str t)}))]
+        (if (and (integer? status) (< status 500))
+          true
+          (if (>= attempts 60)
+            (throw (ex-info "PostgREST schema cache not ready"
+                            {:status status :body body}))
+            (do (Thread/sleep 500)
+                (recur (inc attempts)))))))))
 
 (do 
   (l/script- :postgres
@@ -42,7 +64,8 @@
 
 (fact:global
  {:setup [(l/rt:restart)
-          (l/rt:setup :postgres)]
+          (l/rt:setup :postgres)
+          (wait-for-postgrest-ready)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.poc.node-basic-test/init-services :added "4.1"}
@@ -97,7 +120,7 @@
   :setup [(scratch-v0/log-append-public "cached")]}
 (fact "attaches db-model-service models to a node space"
 
-  (notify/wait-on :js
+  (notify/wait-on [:js 10000]
     (var node (substrate/node-create {"id" "poc-node"}))
     (-> (adaptor-base/init-adaptor-main
          node
@@ -154,7 +177,7 @@
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "remote handler pulls asynchronously from db/primary"
 
-  (notify/wait-on :js
+  (notify/wait-on [:js 10000]
     (var node (substrate/node-create {"id" "poc-node"}))
     (-> (adaptor-base/init-adaptor-main
          node

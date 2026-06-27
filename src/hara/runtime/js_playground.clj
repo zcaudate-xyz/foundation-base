@@ -65,11 +65,11 @@
    Accepts :title, :head, :body and :tabs. Tabs are maps of {:id ... :label ...}
    exposed to the client through window.PLAYGROUND_CONFIG."
   {:added "4.0"}
-  [{:keys [title head body tabs]
-    :or {title "hara.runtime js playground"
-         body [:div {:id "root"}]
-         tabs [{:id "stage" :label "Stage"}]}}]
-  (let [csp (clojure.string/join ";"
+  [{:keys [title head body tabs]}]
+  (let [title (or title "hara.runtime js playground")
+        body (or body [:div {:id "root"}])
+        tabs (or tabs [{:id "stage" :label "Stage"}])
+        csp (clojure.string/join ";"
                                  ["default-src * 'unsafe-eval'"
                                   "connect-src * 'unsafe-eval' ws: wss:"
                                   "script-src  'self' 'unsafe-eval' 'unsafe-inline' https://esm.sh"

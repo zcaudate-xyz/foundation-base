@@ -100,6 +100,19 @@
       (finally
         (component/stop rt)))))
 
+^{:refer hara.runtime.js-playground/start-js-playground :added "4.0"}
+(fact "restarting the playground reuses the same port"
+
+  (let [rt (rt-js-playground {:lang :js :port 0})
+        first-port (:port rt)]
+    (try
+      (component/stop rt)
+      (let [rt2 (component/start rt)]
+        (try
+          (:port rt2) => first-port
+          (finally
+            (component/stop rt2)))))))
+
 ^{:refer hara.runtime.js-playground/playground-client-script :added "4.0"}
 (fact "playground client script is emitted as JavaScript"
 
@@ -146,6 +159,14 @@
     page => #"\"title\":\"My Playground\""
     page => #"\"id\":\"stage\""
     page => #"\"id\":\"glsl\""))
+
+^{:refer hara.runtime.js-playground/page-html :added "4.0"}
+(fact "page-html applies defaults when title or tabs are nil"
+
+  (let [page (page-html {:title nil :tabs nil})]
+    page => #"<title>hara.runtime js playground</title>"
+    page => #"\"title\":\"hara.runtime js playground\""
+    page => #"\"id\":\"stage\""))
 
 ^{:refer hara.runtime.js-playground/playground-client-script :added "4.0"}
 (fact "client script exposes a queryable PLAYGROUND API"
