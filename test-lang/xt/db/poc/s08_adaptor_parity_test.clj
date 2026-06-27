@@ -52,10 +52,12 @@
           (fn [e]
             (var port (. e ["ports"] [0]))
             (. port (start))
+            (. port (postMessage {"type" "debug" "stage" "onconnect"}))
             (var node (xt.substrate/node-create {"id" "adaptor-parity-server"
                                                  "spaces" {"room/a" {"state" {}}}}))
             (xt.db.node.adaptor-base/init-handlers node)
             (xt.substrate.page-proxy/install node)
+            (. port (postMessage {"type" "debug" "stage" "before-init"}))
             (-> (xt.db.node.adaptor-base/init-adaptor-main
                  node
                  {"primary" {"id" "db/primary"
@@ -68,6 +70,7 @@
                  xt.db.poc.s08-adaptor-parity-test/SchemaLookup)
                 (xt.lang.spec-promise/x:promise-then
                  (fn [_]
+                   (. port (postMessage {"type" "debug" "stage" "before-boot"}))
                    (return
                     (xt.substrate.transport-browser/boot-self
                      node
@@ -96,10 +99,12 @@
           (fn [e]
             (var port (. e ["ports"] [0]))
             (. port (start))
+            (. port (postMessage {"type" "debug" "stage" "onconnect"}))
             (var node (xt.substrate/node-create {"id" "adaptor-parity-server"
                                                  "spaces" {"room/a" {"state" {}}}}))
             (xt.db.node.adaptor-base/init-handlers node)
             (xt.substrate.page-proxy/install node)
+            (. port (postMessage {"type" "debug" "stage" "before-init"}))
             (-> (xt.db.node.adaptor-base/init-adaptor-main
                  node
                  {"primary" {"id" "db/primary"
@@ -112,6 +117,7 @@
                  xt.db.poc.s08-adaptor-parity-test/SchemaLookup)
                 (xt.lang.spec-promise/x:promise-then
                  (fn [_]
+                   (. port (postMessage {"type" "debug" "stage" "init-ok"}))
                    (xt.substrate.page-core/add-group-attach
                     node
                     "room/a"

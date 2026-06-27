@@ -39,7 +39,7 @@
   {:added "4.1"}
   []
   (var node (substrate/node-create (-/create-node)))
-  (page-core/add-group-attach
+  (page-core/add-group
    node
    "space/a"
    "page"
@@ -69,12 +69,10 @@
 
 (fact:global
  {:setup [(l/rt:restart :js)
-          (let [rt (l/rt :js)
-                url (js-playground/play-url rt)]
-            (def +browser+ (chromedriver/browser {}))
-            (chromedriver/goto url 5000 +browser+)
-            (wait-for-channel rt))
-          (l/rt:scaffold-imports :js)]
+          (def +url+ (js-playground/play-url (l/rt :js)))
+          (def +browser+ (chromedriver/browser {}))
+          (chromedriver/goto +url+ 5000 +browser+)
+          (wait-for-channel  (l/rt :js))]
   :teardown [(l/rt:stop)
              (component/stop +browser+)]})
 
@@ -88,26 +86,48 @@
   :added "4.1"}
 (fact "ext-page can read the substrate model in a playground-served browser"
 
-  (!.js
+  (notify/wait-on [:js 5000]
     (var node (-/setup-node))
+    (var model (ext-page/get-model node "space/a" ["page" "greet"]))
+    (event-model/add-listener
+     model
+     "@/test/watch-output"
+     (fn [_id data _t meta]
+       (when (== "model.output" (xt/x:get-key data "type"))
+         (repl/notify (-/model-output-value node))))
+     nil
+     nil)
     (-> (page-core/model-set-input node "space/a" "page" "greet" {"data" ["hello"]} {})
         (promise/x:promise-then
-         (fn [_]
-           (return (-/model-output-value node))))))
+         (fn [_] nil)))
+    nil)
   => "hello")
 
 ^{:refer xt.substrate.walkthrough-js.s35-playground-test/ext-page-follows-model-updates
   :added "4.1"}
 (fact "ext-page follows model updates in a playground-served browser"
 
-  (!.js
+  (notify/wait-on [:js 5000]
     (var node (-/setup-node))
+    (var model (ext-page/get-model node "space/a" ["page" "greet"]))
+    (event-model/add-listener
+     model
+     "@/test/watch-output"
+     (fn [_id data _t meta]
+       (when (== "model.output" (xt/x:get-key data "type"))
+         (repl/notify (-/model-output-value node))))
+     nil
+     nil)
     (-> (page-core/model-set-input node "space/a" "page" "greet" {"data" ["world"]} {})
         (promise/x:promise-then
-         (fn [_]
-           (return (-/model-output-value node))))))
+         (fn [_] nil)))
+    nil)
   => "world")
 
 
 (comment
+  (!.js
+    (window.PLAYGROUND.setStage
+     [:div "hello world"]))
+  
   )
