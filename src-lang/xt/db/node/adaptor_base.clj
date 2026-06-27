@@ -81,6 +81,30 @@
           (xt/x:set-key caching-metadata "caching_id" caching-id)
           (return node))))))
 
+(defn.xt service-metadata
+  "returns metadata from either a service impl or a raw config map"
+  {:added "4.1"}
+  [service]
+  (var metadata (xt/x:get-key service "metadata"))
+  (cond (xt/x:not-nil? metadata)
+        (return metadata)
+
+        (xt/x:is-object? service)
+        (return service)
+
+        :else
+        (return {})))
+
+(defn.xt service-impl
+  "resolves a string service id to a service impl when needed"
+  {:added "4.1"}
+  [node service]
+  (cond (xt/x:is-string? service)
+        (return (substrate/get-service node service))
+
+        :else
+        (return service)))
+
 (defn.xt ^{:substrate/fn "@xt.db/init-adaptor"}
   init-adaptor-handler
   "Server-side handler that calls init-adaptor-main with client args.
@@ -214,7 +238,7 @@
   "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
   {:added "4.1"}
   [service model]
-  (var service-metadata (xt/x:get-key service "metadata"))
+  (var service-metadata (-/service-metadata service))
   (var caching-id (xt/x:get-key service-metadata "caching_id"))
   (var primary-id (xt/x:get-key service-metadata "primary_id"))
   (var #{pipeline
@@ -249,7 +273,7 @@
    {model-id model-spec})
   (var refresh-map (xt/x:get-key (xt/x:get-key model-spec "options") "refresh"))
   (when (xt/x:is-object? refresh-map)
-    (var service-metadata (xt/x:get-key service "metadata"))
+    (var service-metadata (-/service-metadata service))
     (var caching-id (xt/x:get-key service-metadata "caching_id"))
     (var caching (substrate/get-service node caching-id))
     (var listener-id (xt/x:cat space-id "/" group-id "/" model-id))
@@ -276,9 +300,10 @@
          group-id
          model-id
          service}   node-args)
-  (var model-spec (-/create-pull-model service model-args))
+  (var service-impl (-/service-impl node service))
+  (var model-spec (-/create-pull-model service-impl model-args))
   (return (-/add-db-model-listener
-           node space-id group-id model-id service model-spec)))
+           node space-id group-id model-id service-impl model-spec)))
 
 
 ;;
@@ -289,7 +314,7 @@
   "Creates a page model spec that plans a view and pulls from db/caching (sync) and db/primary (async)."
   {:added "4.1"}
   [service model]
-  (var service-metadata (xt/x:get-key service "metadata"))
+  (var service-metadata (-/service-metadata service))
   (var caching-id (xt/x:get-key service-metadata "caching_id"))
   (var primary-id (xt/x:get-key service-metadata "primary_id"))
   (var #{table
@@ -360,9 +385,10 @@
          group-id
          model-id
          service}   node-args)
-  (var model-spec (-/create-tree-view-model service model-args))
+  (var service-impl (-/service-impl node service))
+  (var model-spec (-/create-tree-view-model service-impl model-args))
   (return (-/add-db-model-listener
-           node space-id group-id model-id service model-spec)))
+           node space-id group-id model-id service-impl model-spec)))
 
 
 ;;
@@ -408,8 +434,8 @@
          group-id
          model-id
          service}   node-args)
-  (var service-impl (substrate/get-service node service))
-  (var model-spec (-/create-rpc-model service model-args))
+  (var service-impl (-/service-impl node service))
+  (var model-spec (-/create-rpc-model service-impl model-args))
   (return (-/add-db-model-listener
            node space-id group-id model-id service-impl model-spec)))
 
@@ -423,7 +449,7 @@
   {:added "4.1"}
   [node space-id group-id model-id service]
   (page-core/remove-model node space-id group-id model-id)
-  (var service-metadata (xt/x:get-key service "metadata"))
+  (var service-metadata (-/service-metadata service))
   (var caching-id (xt/x:get-key service-metadata "caching_id"))
   (when (xt/x:not-nil? caching-id)
     (var caching (substrate/get-service node caching-id))
@@ -449,9 +475,7 @@
          group-id
          model-id
          service}   node-args)
-  (var service-impl service)
-  (when (xt/x:is-string? service)
-    (:= service-impl (substrate/get-service node service)))
+  (var service-impl (-/service-impl node service))
   (return (-/remove-model-with-refresh
            node space-id group-id model-id service-impl)))
 

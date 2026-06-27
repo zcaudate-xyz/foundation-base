@@ -84,8 +84,8 @@
                           schema
                           lookup))
        (var caching-impl (xt.db.system.main/create-impl
-                          "sqlite"
-                          {"filename" ":memory:"}
+                          "memory"
+                          {}
                           schema
                           lookup))
        (. (. (. (xt.db.system.main/create-impl-init primary-impl)
@@ -139,7 +139,11 @@
                                           "message" (. err ["message"])}))
              (return nil)))))
     {:lang :js
-     :layout :full})))
+     :layout :full
+     :emit {:override {"@sqlite.org/sqlite-wasm"
+                       "data:text/javascript,export default {}"
+                       "pg"
+                       "data:text/javascript,export default {Client: function() {}}"}}})))
 
 (fact:global
  {:setup [(l/rt:restart)

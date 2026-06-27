@@ -63,7 +63,7 @@
                (promise/x:promise-then
                 (fn [session]
                   (session/set-session impl session)
-                  (session/auto-refresh-start imp)
+                  (session/auto-refresh-start impl)
                   (return session))))))))))
 
 (defn.xt supabase-sign-out-handler
@@ -100,6 +100,14 @@
        (promise/x:promise-then
         (fn [impl]
           (return (session/refresh-session impl)))))))
+
+(defn.xt supabase-signed-in-handler
+  "returns whether the requested service currently has a session"
+  {:added "4.1"}
+  [space args request node]
+  (var service-id (xt/x:first args))
+  (var impl (substrate/get-service node service-id))
+  (return (xt/x:not-nil? (session/get-session impl))))
 
 (defn.xt supabase-current-session-handler
   "returns the current session stored on the requested service"
@@ -273,8 +281,12 @@
   [space args request node]
   (var service-id (xt/x:first args))
   (var opts       (or (xt/x:second args) {}))
-  (return
-   (-/supabase-request node service-id (addon/cmd-user-get opts))))
+  (var impl (substrate/get-service node service-id))
+  (var session (session/get-session impl))
+  (if (xt/x:not-nil? session)
+    (return {"user" (xt/x:get-key session "user")})
+    (return
+     (-/supabase-request node service-id (addon/cmd-user-get opts)))))
 
 (defn.xt supabase-user-put-handler
   "updates the current authenticated user on the requested service"
@@ -314,6 +326,7 @@
   (substrate/register-handler node "@xt.db/supabase-sign-in" -/supabase-sign-in-handler nil)
   (substrate/register-handler node "@xt.db/supabase-sign-out" -/supabase-sign-out-handler nil)
   (substrate/register-handler node "@xt.db/supabase-refresh" -/supabase-refresh-handler nil)
+  (substrate/register-handler node "@xt.db/supabase-signed-in?" -/supabase-signed-in-handler nil)
   (substrate/register-handler node "@xt.db/supabase-current-session" -/supabase-current-session-handler nil)
   
   (substrate/register-handler node "@xt.db/supabase-rpc-call" -/supabase-rpc-call-handler nil)
@@ -333,6 +346,7 @@
   (substrate/register-handler node "@xt.db/supabase-settings" -/supabase-settings-handler nil)
   (substrate/register-handler node "@xt.db/supabase-token-refresh" -/supabase-token-refresh-handler nil)
   (substrate/register-handler node "@xt.db/supabase-user-get" -/supabase-user-get-handler nil)
+  (substrate/register-handler node "@xt.db/supabase-user-info" -/supabase-user-get-handler nil)
   (substrate/register-handler node "@xt.db/supabase-user-put" -/supabase-user-put-handler nil)
   (substrate/register-handler node "@xt.db/supabase-verify-get" -/supabase-verify-get-handler nil)
   (substrate/register-handler node "@xt.db/supabase-verify-post" -/supabase-verify-post-handler nil)
