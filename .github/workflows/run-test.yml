@@ -165,7 +165,7 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ${{ matrix.image }}
-          lein test :with xtbench.${{ matrix.lang }}
+          lein seedgen test :all :with "[${{ matrix.lang }}]"
 
     services:
       postgres:
