@@ -125,3 +125,13 @@
     page => #"window.PLAYGROUND"
     page => #"\"id\":\"stage\""
     page => #"\"id\":\"sidebar\""))
+
+^{:refer hara.runtime.js-playground/play-script :added "4.0"}
+(fact "play-script transpiles hiccup vectors to React.createElement by default"
+
+  (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))]
+    (try
+      (play-script rt '[(defn.js hello [] [:div "hello"])] true)
+      => #"React\.createElement\(\"div\"[\s\S]*\"hello\"\)"
+      (finally
+        (component/stop rt)))))

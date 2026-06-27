@@ -53,7 +53,7 @@
                         :summary true}
                 :return :summary}
     :arglists '([] [ns] [ns params] [ns params project] [ns params lookup project])
-    :main      {:count 4}
+    :main      {:count 1}  ; run namespaces sequentially so each chromedriver test gets a clean browser
     :item      {:list     (fn [lookup _] (sort (keys lookup)))
                 :pre      project/sym-name
                 :output   executive/summarise

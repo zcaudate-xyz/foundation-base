@@ -121,9 +121,17 @@
         (server/on-receive ch
                            (fn [msg]
                              (websocket-receive msg return ch))))
-      (let [uri (:uri request)
-            path (if (= "/" uri) "index.html" (subs uri 1))]
-        (serve-file root path)))))
+      (let [uri (:uri request)]
+        (cond (= "/favicon.ico" uri)
+              {:status 204
+               :headers {"Content-Type" "image/x-icon"}
+               :body ""}
+
+              (= "/" uri)
+              (serve-file root "index.html")
+
+              :else
+              (serve-file root (subs uri 1)))))))
 
 (defn start-js-playground
   "starts the js playground server and returns the runtime with state attached"
@@ -251,7 +259,8 @@
   {:added "4.0"}
   [rt forms & [as-script layout]]
   (let [script (l/emit-script (cons 'do forms) {:lang :js
-                                                :layout (or layout :flat)})]
+                                                :layout (or layout :flat)
+                                                :emit {:lang/jsx false}})]
     (cond as-script
           script
 

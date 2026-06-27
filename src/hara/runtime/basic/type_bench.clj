@@ -60,7 +60,10 @@
         thread  (-> (future/future {} (os/sh-wait process))
                     (future/on:complete (fn [ret err]
                                      (try (let [out (os/sh-output process)]
-                                            (when (not= 0 (:exit out))
+                                            ;; 137 is the expected SIGKILL from bench teardown;
+                                            ;; only print real failure output.
+                                            (when (and (not= 0 (:exit out))
+                                                       (not= 137 (:exit out)))
                                               (env/prn out)))
                                           (catch Throwable t))
                                      (swap! *active* dissoc port))))]
