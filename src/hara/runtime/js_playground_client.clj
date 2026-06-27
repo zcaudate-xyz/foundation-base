@@ -81,11 +81,25 @@
                     "time" (xt/x:now-ms)}))))
 
 (defn.js MessageItem
-  "renders a single message in the sidebar log"
+  "renders a single expandable message with a print-to-console button"
   {:added "4.0"}
   [{:# [m]}]
+  (var [expanded setExpanded] (r/local))
   (var type (. m ["type"]))
   (var status (. m ["status"]))
+  (var body (-/format-body (. m ["body"])))
+  (var preview-limit 120)
+  (var is-long (> (. body length) preview-limit))
+  (var display-body (:? (and (not expanded) is-long)
+                        (+ (. body (slice 0 preview-limit)) "...")
+                        body))
+  (var button-style {:background "transparent"
+                     :border "1px solid #ccc"
+                     :borderRadius "4px"
+                     :padding "2px 6px"
+                     :cursor "pointer"
+                     :fontSize "10px"
+                     :color "#555"})
   (return
    [:div
     {:style {:marginBottom "10px"
@@ -96,12 +110,28 @@
              :borderLeft (+ "4px solid "
                             (:? (== type "sent") "#2196f3" "#4caf50"))}}
     [:div
-     {:style {:fontWeight 600
-              :marginBottom "4px"
-              :textTransform "uppercase"
-              :fontSize "10px"
-              :color "#555"}}
-     type " " (. (or (. m ["id"]) "") (slice 0 8))]
+     {:style {:display "flex"
+              :justifyContent "space-between"
+              :alignItems "center"
+              :marginBottom "4px"}}
+     [:div
+      {:style {:fontWeight 600
+               :textTransform "uppercase"
+               :fontSize "10px"
+               :color "#555"}}
+      type " " (. (or (. m ["id"]) "") (slice 0 8))]
+     [:div
+      {:style {:display "flex" :gap "6px"}}
+      (:? is-long
+          [:button
+           {:style button-style
+            :onClick (fn [] (setExpanded (not expanded)))}
+           (:? expanded "Collapse" "Expand")]
+          nil)
+      [:button
+       {:style button-style
+        :onClick (fn [] (. console (log m)))}
+       "Print"]]]
     (:? status
         [:div
          {:style {:fontSize "10px"
@@ -113,7 +143,7 @@
               :whiteSpace "pre-wrap"
               :wordBreak "break-all"
               :fontSize "11px"}}
-     (-/format-body (. m ["body"]))]]))
+     display-body]]))
 
 (defn.js MessageList
   "renders the list of sent/received messages"
@@ -311,9 +341,11 @@
          nil)]]))
 
 (defn.js mount!
-  "mounts the playground app into #root and exposes window.PLAYGROUND"
+  "mounts the playground app into #root and exposes global React and PLAYGROUND"
   {:added "4.0"}
   []
+  (:= (!:G React) React)
+  (:= (!:G ReactDOM) ReactDOM)
   (:= (!:G PLAYGROUND)
       {"setStage" (fn [el] el)
        "send" (fn [data] data)
