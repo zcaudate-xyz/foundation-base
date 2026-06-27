@@ -66,7 +66,7 @@
    exposed to the client through window.PLAYGROUND_CONFIG."
   {:added "4.0"}
   [{:keys [title head body tabs]}]
-  (let [title (or title "hara.runtime js playground")
+  (let [title (or title "JS Playground")
         body (or body [:div {:id "root"}])
         tabs (or tabs [{:id "stage" :label "Stage"}])
         csp (clojure.string/join ";"

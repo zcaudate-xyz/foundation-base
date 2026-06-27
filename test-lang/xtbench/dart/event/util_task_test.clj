@@ -97,6 +97,42 @@
      (repl/>notify)))
   => false)
 
+^{:refer xt.event.util-task/unload-tasks-loop :added "4.1" :seedgen/base {:lua {:suppress true}}}
+(fact "unloads completed tasks in order and skips incomplete ones"
+
+  (notify/wait-on :dart
+    (var tasks {"A" (loader/new-task "A" [] []
+                      {:unload-no-check true
+                       :unload-fn (fn [] (return nil))})
+                "B" (loader/new-task "B" [] []
+                      {:unload-no-check true
+                       :unload-fn (fn [] (return nil))})})
+    (var completed {"A" true "B" true})
+    (spec-promise/x:promise-then
+     (loader/unload-tasks-loop tasks completed ["B" "A"] [] nil)
+     (fn [result]
+       (repl/notify {"result" result
+                     "completed" completed}))))
+  => {"result" [["B" true]
+                ["A" true]]
+      "completed" {}}
+
+  (notify/wait-on :dart
+    (var seen [])
+    (var tasks {"A" (loader/new-task "A" [] []
+                      {:unload-no-check true
+                       :unload-fn (fn [] (return nil))})})
+    (var completed {"A" true})
+    (spec-promise/x:promise-then
+     (loader/unload-tasks-loop tasks completed ["A"] []
+                               (fn [id unloaded]
+                                 (x:arr-push seen [id unloaded])))
+     (fn [result]
+       (repl/notify {"result" result
+                     "seen" seen}))))
+  => {"result" [["A" true]]
+      "seen" [["A" true]]})
+
 ^{:refer xt.event.util-task/new-loader-blank :added "4.1" :seedgen/base {:lua {:suppress true}}}
 (fact "creates an empty loader state"
 

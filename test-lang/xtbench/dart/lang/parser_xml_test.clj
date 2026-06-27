@@ -255,13 +255,14 @@
   => +out-bucket+)
 
 ^{:refer xt.lang.parser-xml/to-string-value :added "4.1"}
-(fact "TODO"
+(fact "converts value to xml string"
 
   (!.dt
     [(xml/to-string-value true)
+     (xml/to-string-value false)
      (xml/to-string-value 1)
      (xml/to-string-value "a")])
-  => ["true" "1" "a"])
+  => ["true" "false" "1" "a"])
 
 ^{:refer xt.lang.parser-xml/to-string-params :added "4.0"}
 (fact "to node params"

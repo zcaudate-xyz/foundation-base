@@ -59,8 +59,11 @@
   "returns a unique tab id"
   {:added "4.1"}
   [label]
-  (var prefix (or label "tab"))
-  (return (+ "tab-" prefix "-" (xt/x:now-ms))))
+  (var suffix (xt/x:now-ms))
+  (var prefix (or label "custom"))
+  (return (:? (== prefix "tab")
+              (+ "tab-" suffix)
+              (+ "tab-" prefix "-" suffix))))
 
 (defn.js find-tab-index
   "finds the index of a tab by id"

@@ -60,6 +60,16 @@
     (xt/x:obj-keys (main/get-services n))])
   => ["global" ["cache"]])
 
+^{:refer xt.substrate/get-service :added "4.1"}
+(fact "gets a registered service by id"
+
+  (!.dt
+   (var n (main/node-create {"id" "node-get-service"
+                            "services" {"cache" {"scope" "global"}}}))
+   [(. (main/get-service n "cache") ["scope"])
+    (xt/x:nil? (main/get-service n "missing"))])
+  => ["global" true])
+
 ^{:refer xt.substrate/set-service :added "4.1"}
 (fact "set-service registers a runtime service on the node"
 

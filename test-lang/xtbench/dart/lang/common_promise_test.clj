@@ -160,6 +160,40 @@
      (repl/>notify)))
   => 9)
 
+^{:refer xt.lang.common-promise/promise-new :added "4.1"}
+(fact "creates a promise via resolve/reject executor callbacks"
+
+  (!.dt
+    (common-promise/promise-native?
+     (common-promise/promise-new
+      (fn [resolve reject]
+        (resolve 1)))))
+  => true
+
+  (!.dt
+    (var p (common-promise/promise-new
+            (fn [resolve reject]
+              (resolve 7))))
+    [(xt/x:get-key p "status")
+     (xt/x:get-key p "value")])
+  => ["resolved" 7]
+
+  (!.dt
+    (var p (common-promise/promise-new
+            (fn [resolve reject]
+              (reject "boom"))))
+    [(xt/x:get-key p "status")
+     (xt/x:get-key p "error")])
+  => ["rejected" "boom"]
+
+  (notify/wait-on :dart
+    (common-promise/promise-then
+     (common-promise/promise-new
+      (fn [resolve reject]
+        (resolve 9)))
+     (repl/>notify)))
+  => 9)
+
 ^{:refer xt.lang.common-promise/promise-run :added "4.1"}
 (fact "common promise helpers use the :: xt.promise wrapper"
 

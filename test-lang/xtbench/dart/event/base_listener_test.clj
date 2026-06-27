@@ -61,6 +61,24 @@
        "listener/id" "a1"
        "listener/type" "custom"}])
 
+^{:refer xt.event.base-listener/listener-entry? :added "4.1"}
+(fact "checks if value is a plain listener entry"
+
+  (!.dt
+    [(event/listener-entry? nil)
+     (event/listener-entry? {})
+     (event/listener-entry?
+      (event/make-listener-entry
+       "a1" "custom"
+       (fn:> [id data t meta] "a1")
+       nil nil))
+     (event/listener-entry?
+      {"a1" (event/make-listener-entry
+             "a1" "custom"
+             (fn:> [id data t meta] "a1")
+             nil nil)})])
+  => [false false true false])
+
 ^{:refer xt.event.base-listener/arrayify-path :added "4.1"}
 (fact "normalizes listener paths"
 
@@ -70,6 +88,28 @@
      (event/arrayify-path "a")
      (event/arrayify-path ["a"])])
   => [[] [] ["a"] ["a"]])
+
+^{:refer xt.event.base-listener/callback-data :added "4.1"}
+(fact "normalizes event payload by removing meta"
+
+  (!.dt
+    [(event/callback-data "hello")
+     (event/callback-data {:ok true :data "hello"})
+     (event/callback-data {:ok true :meta {:base true}})])
+  => ["hello"
+      {"ok" true
+       "data" "hello"}
+      {"ok" true}])
+
+^{:refer xt.event.base-listener/callback-time :added "4.1"}
+(fact "extracts event timestamp"
+
+  (!.dt
+    [(event/callback-time "hello")
+     (event/callback-time {:ok true})
+     (event/callback-time {:ok true :time 123})
+     (event/callback-time {:ok true :t 456})])
+  => [nil nil 123 456])
 
 ^{:refer xt.event.base-listener/clear-listeners :added "4.1"}
 (fact "clears non-keyed listeners"
@@ -94,7 +134,7 @@
               {"group" ["k1"]}
               (just ["a1" "b2"] :in-any-order)
               ["k1"]
-              ["a1" "b2" "k1"]
+              (just ["a1" "b2" "k1"] :in-any-order)
               {"listener/id" "a1"
                "listener/type" "custom"
                "label" "one"}

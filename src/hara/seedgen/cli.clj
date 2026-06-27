@@ -216,6 +216,16 @@
     (println "\n[seedgen] failing list saved to" (str path))
     (str path)))
 
+(defn- clear-bench-lang
+  "removes previously generated bench files for a language"
+  {:added "4.1"}
+  [lang project]
+  (doseq [test-root (:test-paths project)]
+    (let [bench-dir (fs/path (:root project) test-root "xtbench" (name lang))]
+      (when (fs/exists? bench-dir)
+        (println "[seedgen] clearing" (str bench-dir))
+        (fs/delete bench-dir {:recursive true})))))
+
 (defn seedgen-test
   "generates and runs xtbench tests for the given selector and languages"
   {:added "4.1"}
@@ -229,6 +239,7 @@
          _      (when (empty? langs)
                   (throw (ex-info "No languages specified" {})))
          generated (reduce (fn [out lang]
+                             (clear-bench-lang lang project)
                              (let [nss (compatible-namespaces lang selector config project)]
                                (if (seq nss)
                                  (do (println "\n[seedgen]" (count nss) "namespaces for" lang)
@@ -449,8 +460,10 @@
   (let [command (first args)]
     (if command
       (try
-        (run-seedgen-command command (rest args))
-        (System/exit 0)
+        (let [result (run-seedgen-command command (rest args))]
+          (System/exit (if (= "test" command)
+                         (:exit result 0)
+                         0)))
         (catch Throwable t
           (println "Error:" (ex-message t))
           (when-let [data (ex-data t)]
