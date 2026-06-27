@@ -70,7 +70,7 @@
     `(\\ "[["
       ^{:indent 2}
       (\\ \\ ~c-str)
-      \\ "]]))
+      \\ "]]")))
 
 (defn lua-map-key
   "custom lua map key"
