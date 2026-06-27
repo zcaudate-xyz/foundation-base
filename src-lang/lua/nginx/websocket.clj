@@ -7,6 +7,7 @@
             ["cjson" :as cjson]
             ["resty.websocket.server" :as ngxwsserver]]
    :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [lua.nginx.common-cache :as cache]
              [lua.nginx :as n]]})
 
@@ -59,7 +60,7 @@
     (do 
       (cache/set g (-/STREAM-ACTIVE-KEY name) 0)
       (cache/meta-assoc "stream" name
-                        (xt/x:obj-assign {:key name}
+                        (xtd/obj-assign {:key name}
                                          metadata))
       (if setup (setup))
       (return true))))
@@ -123,7 +124,7 @@
   
    (cache/set (cache/cache name)
            uid
-           (cjson.encode (xt/x:obj-assign
+           (cjson.encode (xtd/obj-assign
                           {:id uid
                            :group name
                            :started (os.time)}
@@ -223,7 +224,7 @@
   {:added "4.0"}
   [m]
   (local '[ws err] (. ngxwsserver
-                     (new (xt/x:obj-assign
+                     (new (xtd/obj-assign
                             {:timeout 10000
                              :max-payload-len 65535}
                             m))))

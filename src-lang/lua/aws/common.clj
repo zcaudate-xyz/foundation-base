@@ -1,8 +1,9 @@
 (ns lua.aws.common
   (:require [hara.lang :as l]))
 
-(l/script :lua
-  {:require [[lua.nginx.openssl :as ssl] [lua.nginx :as n] [lua.nginx.http-client :as http] [lua.core :as u] [xt.lang.spec-base :as xt] [xt.lang.parser-xml :as xml] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]})
+(l/script :lua.nginx
+  {:require [[lua.nginx.openssl :as ssl] [lua.nginx :as n] [lua.nginx.http-client :as http] [lua.core :as u] [xt.lang.spec-base :as xt] [xt.lang.common-string :as str] [xt.lang.parser-xml :as xml] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]
+   :import [["resty.string" :as ngxstr]]})
 
 (def.lua AWS_ALGO "AWS4-HMAC-SHA256")
 
@@ -102,27 +103,27 @@
   {:added "4.0"}
   [headers]
   (var out [])
-  (k/for:object [[k v] headers]
-    (var nk (k/to-lowercase k))
+  (xt/for:object [[k v] headers]
+    (var nk (str/to-lowercase k))
     (when (not (xt/x:get-key -/AWS_EXCLUDE nk))
-      (var nv (k/replace v "[ ]+" " "))
-      (x:arr-push out [nk nv])))
-  (return (k/arr-sort out xtd/first k/str-lt)))
+      (var nv (str/replace v "[ ]+" " "))
+      (xt/x:arr-push out [nk nv])))
+  (return (xtd/arr-sort out xtd/first xt/x:str-lt)))
 
 (defn.lua get-canonical-route
   "gets the canonical route"
   {:added "4.0"}
   [route]
-  (var arr     (k/split route "?"))
+  (var arr     (str/split route "?"))
   (var path    (xtd/first arr))
   (var search  (xtd/second arr))
   (var params [])
   (when search
-    (xt/for:array [pair (k/split search "&")]
-      (var [k v] (k/split pair "="))
-      (x:arr-push params [k (or v "")])))
+    (xt/for:array [pair (str/split search "&")]
+      (var [k v] (str/split pair "="))
+      (xt/x:arr-push params [k (or v "")])))
   (return {:path path
-           :params (k/arr-sort params xtd/first k/str-lt)}))
+           :params (xtd/arr-sort params xtd/first xt/x:str-lt)}))
 
 (defn.lua get-canonical
   "gets the canonical string"
@@ -130,17 +131,15 @@
   [method route headers hash]
   (var #{path params} route)
   (return
-   (k/arr-join
-    [(k/to-uppercase method)
+   (xt/x:str-join
+    "\n"
+    [(str/to-uppercase method)
      path
-     (k/arr-join (xtd/arr-map params (fn:> [arr] (xt/x:cat (xtd/first arr) "=" (xtd/second arr))))
-                 "&")
-     (k/arr-join (xtd/arr-map headers (fn:> [arr] (xt/x:cat (xtd/first arr) ":" (xtd/second arr))))
-                 "\n")
+     (xt/x:str-join "&" (xtd/arr-map params (fn:> [arr] (xt/x:cat (xtd/first arr) "=" (xtd/second arr)))))
+     (xt/x:str-join "\n" (xtd/arr-map headers (fn:> [arr] (xt/x:cat (xtd/first arr) ":" (xtd/second arr)))))
      ""
-     (k/arr-join (xtd/arr-map headers xtd/first) ";")
-     (or hash "UNSIGNED-PAYLOAD")]
-    "\n")
+     (xt/x:str-join ";" (xtd/arr-map headers xtd/first))
+     (or hash "UNSIGNED-PAYLOAD")])
    headers))
 
 (defn.lua get-signing-input
@@ -148,11 +147,11 @@
   {:added "4.0"}
   [canonical t region service]
   (return
-   (k/arr-join [-/AWS_ALGO
-                (-/get-date-long t)
-                (-/get-aws-scope t region service)
-                (n/to-hex (-/get-sha256 canonical))]
-               "\n")))
+   (xt/x:str-join "\n"
+                  [-/AWS_ALGO
+                   (-/get-date-long t)
+                   (-/get-aws-scope t region service)
+                   (ngxstr/to-hex (-/get-sha256 canonical))])))
 
 (defn.lua header-authorization
   "creates the header authorization"
@@ -169,14 +168,14 @@
   (var signing-input (-/get-signing-input canonical t region service))
   (var credential  (-/get-aws-credential user t region service))
   
-  (var signature   (n/to-hex (ssl/hmac signing-key signing-input "sha256")))
+  (var signature   (ngxstr/to-hex (ssl/hmac signing-key signing-input "sha256")))
   (var out (xt/x:cat -/AWS_ALGO
                   " "
                   "Credential="
                   credential
                   ", "
                   "SignedHeaders="
-                  (k/arr-join (xtd/arr-map canonical-headers xtd/first) ";")
+                  (xt/x:str-join ";" (xtd/arr-map canonical-headers xtd/first))
                   ", "
                   "Signature="
                   signature))
@@ -192,8 +191,8 @@
   [aws method route headers body]
   (:= aws    (-/get-aws-defaults aws))
   (var #{scheme host port} aws)
-  (var hash  (n/to-hex (-/get-sha256 body)))
-  (var headers (k/obj-assign
+  (var hash  (ngxstr/to-hex (-/get-sha256 body)))
+  (var headers (xtd/obj-assign
                 headers
                 {"host" (xt/x:cat host ":" port)
                  "x-amz-content-sha256" hash
@@ -204,7 +203,7 @@
                       (xt/x:cat "/" route)
                       headers
                       hash))
-  (k/set-key headers "authorization" authorization)
+  (xt/x:set-key headers "authorization" authorization)
   (var url (xt/x:cat scheme "://" host ":" port "/" route))
   (return
    {:method method
@@ -219,9 +218,9 @@
   (var out (xtd/obj-pick response -/REQ_KEYS))
   (var body (. out body))
   (if (and (xtd/not-empty? body)
-           (k/starts-with? body "<?xml"))
-    (k/set-key out "body"
-               (xml/to-brief (xml/parse-xml (xtd/second (k/split body "\n"))))))
+           (str/starts-with? body "<?xml"))
+    (xt/x:set-key out "body"
+               (xml/to-brief (xml/parse-xml (xtd/second (str/split body "\n"))))))
   (return out))
 
 (defn.lua make-request-auth
