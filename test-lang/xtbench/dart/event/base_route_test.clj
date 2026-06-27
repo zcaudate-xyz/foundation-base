@@ -271,6 +271,39 @@
       "route/param" "auth"
       "route/path" ["hello"]})
 
+^{:refer xt.event.base-route/remove-listener :added "4.1"}
+(fact "removes a listener by id"
+
+  (!.dt
+   (var r (route/make-route "hello"))
+   (route/add-url-listener
+    r
+    "a1"
+    (fn:> [id data t meta] nil)
+    {:label "hello"})
+   [(. (route/remove-listener r "a1") ["meta"] ["listener/id"])
+    (xt/x:get-key (. r ["listeners"]) "a1")
+    (route/remove-listener r "missing")])
+  => ["a1"
+      nil
+      nil])
+
+^{:refer xt.event.base-route/list-listeners :added "4.1"}
+(fact "lists all listener ids"
+
+  (!.dt
+   (var r (route/make-route "hello"))
+   (route/add-url-listener r "a1" (fn:> [id data t meta] nil) nil)
+   (route/add-path-listener r ["hello"] "a2" (fn:> [id data t meta] nil) nil)
+   (route/add-param-listener r "auth" "a3" (fn:> [id data t meta] nil) nil)
+   (var before (route/list-listeners r))
+   (route/remove-listener r "a2")
+   (var after (route/list-listeners r))
+   [before after])
+  => (just-in
+      [(just ["a1" "a2" "a3"] :in-any-order)
+       (just ["a1" "a3"] :in-any-order)]))
+
 ^{:refer xt.event.base-route/set-url :added "4.1"}
 (fact "updates the full route url and notifies listeners"
 

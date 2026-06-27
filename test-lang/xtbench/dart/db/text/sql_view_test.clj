@@ -80,12 +80,12 @@
               :tag "all_as_admin",
               :query nil}})
                    (def +check-organisation-all-as-admin+
-                   [["Organisation"
-                    {"custom" [],
-                     "where" [],
-                     "links" [],
-                     "data" ["id"]}]
-                   "SELECT id FROM Organisation"])] :adopt true}
+                     [["Organisation"
+                       {"custom" [],
+                        "where" [],
+                        "links" [],
+                        "data" ["id"]}]
+                      "SELECT id FROM Organisation"])] :adopt true}
 (fact "provides a view select query"
 
   (!.dt
@@ -131,14 +131,13 @@
 
 ^{:refer xt.db.text.sql-view/tree-control-array :added "4.0"
   :setup [(def +check-tree-control-array+
-            [{"args"
-              [{"args" [{"::" "sql/column", "name" "name"}],
-                "::" "sql/tuple"}],
-              "::" "sql/keyword",
-              "name" "ORDER BY"}
-             {"args" [{"::" "sql/keyword", "name" 20}],
-              "::" "sql/keyword",
-              "name" "LIMIT"}])]}
+            [{"::" "sql/keyword",
+              "name" "ORDER BY"
+              "args" [{"args" [{"::" "sql/column", "name" "name"}],
+                       "::" "sql/tuple"}]}
+             {"::" "sql/keyword",
+              "name" "LIMIT"
+              "args" [{"::" "sql/keyword", "name" 20}]}])]}
 (fact "creates a control array"
 
   (!.dt
