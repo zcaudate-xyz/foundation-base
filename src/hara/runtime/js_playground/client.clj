@@ -402,9 +402,9 @@
         tabs
         stage
         tabContent]}]
-  (var tab (. tabs
-              (find (fn [t]
-                      (return (== (. t ["id"]) activeTab))))))
+  (var active-tab (. tabs
+                     (find (fn [t]
+                             (return (== (. t ["id"]) activeTab))))))
   (return
    [:div
     {:style {:flex 1
@@ -435,7 +435,7 @@
               {:style {:color "#999"
                        :marginTop "40px"
                        :textAlign "center"}}
-              [:h2 nil (:? tab (. tab ["label"]) activeTab)]
+              [:h2 nil (:? active-tab (. active-tab ["label"]) activeTab)]
               [:p nil "Use the REPL to set content for this tab:"]
               [:pre
                {:style {:background "#fff"
@@ -494,14 +494,14 @@
                     (setActiveTab* fallback))))
   (var createTab* (fn [id label]
                     (var next-id (or id (-/make-tab-id label)))
-                    (var tab {"id" next-id
-                              "label" (or label next-id)})
+                    (var new-tab {"id" next-id
+                                  "label" (or label next-id)})
                     (var next (. (. tabsRef current) (slice)))
                     (if (not (-/has-tab? next next-id))
-                      (. next (push tab)))
+                      (. next (push new-tab)))
                     (setTabs* next next-id)
                     (setActiveTab* next-id)
-                    (return tab)))
+                    (return new-tab)))
   (var closeTab* (fn [id]
                    (if (== id "stage")
                      (return nil))
@@ -512,7 +512,7 @@
                    (:= (. tabContentRef current) next-content)
                    (setTabContent next-content)
                    (setTabs* next)
-                   (if (== activeTabRef current id)
+                   (if (== (. activeTabRef current) id)
                      (setActiveTab* (. (or (. next [0]) {"id" "stage"}) ["id"])))
                    (return id)))
   (var setStatus* (fn [s]

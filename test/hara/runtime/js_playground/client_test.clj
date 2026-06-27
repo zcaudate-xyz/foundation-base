@@ -105,7 +105,7 @@
   => (contains {"value" true}))
 
 ^{:refer hara.runtime.js-playground.client/TopMenu :added "4.0" :timeout 60000}
-(fact "TopMenu displays title and compact connected status")
+(fact "TopMenu displays title and compact connected status"
 
   @(chromedriver/evaluate +browser+ "document.querySelector('#topbar').textContent.includes('hara.runtime js playground')")
   => (contains {"value" true})
