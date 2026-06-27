@@ -29,5 +29,6 @@
     (executive/init-template :foundation.code {:write true} (-> project :publish :sites) project)
     (executive/deploy-template :foundation.code {:write true} (-> project :publish :sites) project)
     (executive/render 'foundation.code/index {:write true} lookup project)
-    (slurp (io/file root "public" "foundation-code" "index.html")))
-  => (contains "Hello from code.doc" "hero" "foundation-code"))
+    (let [html (slurp (io/file root "public" "foundation-code" "index.html"))]
+      (every? #(.contains ^String html %) ["Hello from code.doc" "hero" "foundation-code"])))
+  => true)

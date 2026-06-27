@@ -12,6 +12,10 @@
              [kmi.lang.common-hash :as common-hash]
              [xt.lang.spec-base :as xt]]})
 
+(def.xt MATH (xt/x:get-key !:G "Math"))
+(def.xt CONSOLE (xt/x:get-key !:G "console"))
+(def.xt JSON-GLOBAL (xt/x:get-key !:G "JSON"))
+
 (defn.xt count-value
   "counts a value, dispatching between host and kmi types"
   {:added "4.1"}
@@ -183,7 +187,10 @@
    "keys" hm/hashmap-keys
    "vals" hm/hashmap-vals
    "type" -/type-value
-   "apply" -/apply-value})
+   "apply" -/apply-value
+   "Math" -/MATH
+   "console" -/CONSOLE
+   "JSON" -/JSON-GLOBAL})
 
 (defn.xt init-runtime
   "seeds a runtime with the primitive library in kmi.core"

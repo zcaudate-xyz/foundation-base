@@ -50,8 +50,8 @@
 
 ^{:refer code.tool.java.compile/supers :added "3.0"}
 (fact "finds supers of a class given it's bytecode"
-  (supers (fs/read-all-bytes "target/classes/code/java/compile.class"))
-  => (contains "java.lang.Object"))
+  (supers (fs/read-all-bytes "target/classes/test/Cat.class"))
+  => (contains ["java.lang.Object" "test.Pet"]))
 
 ^{:refer code.tool.java.compile/javac-output :added "3.0"}
 (fact "displays output of compilation"

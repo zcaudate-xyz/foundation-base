@@ -123,7 +123,7 @@
 
     (git/checkout "feature" {:create true :root root})
     (git/branch {:root root})
-    => (contains "feature")
+    => (contains ["feature"])
     (fs/delete root)))
 
 ^{:refer std.lib.git/checkout :added "4.1"}

@@ -174,12 +174,15 @@
   "branch operations
 
    (git/branch) ;; list branches
+   (git/branch {:root \"\"}) ;; list branches in repo
    (git/branch \"feature\") ;; create branch
    (git/branch \"feature\" {:delete true})"
   ([]
    (branch nil {}))
-  ([name]
-   (branch name {}))
+  ([name-or-opts]
+   (if (map? name-or-opts)
+     (branch nil name-or-opts)
+     (branch name-or-opts {})))
   ([name opts]
    (cond
      (nil? name)
