@@ -25,6 +25,12 @@
   "pre-arranged ports for well-known playground instances"
   {:dev/ws-play 29002})
 
+(def ^:private +cache-control+
+  "headers that tell the browser not to cache playground assets"
+  {"Cache-Control" "no-store, no-cache, must-revalidate, max-age=0"
+   "Pragma"        "no-cache"
+   "Expires"       "0"})
+
 (defn- content-type
   "guesses a content type for a static file path"
   [path]
@@ -71,14 +77,18 @@
                    (string? head) head
                    :else (html/html head))]
     (str "<!doctype html>"
-         "<html><head>"
-         "<meta http-equiv=\"Content-Security-Policy\" content=\"" csp "\">"
-         "<title>" title "</title>"
-         head
-         "</head><body>"
-         body
-         "<script type=\"module\">" (playground-client-script) "</script>"
-         "</body></html>")))
+         (html/html
+          [:html
+           [:head
+            [:meta {:http-equiv "Content-Security-Policy" :content csp}]
+            [:meta {:http-equiv "Cache-Control" :content "no-store, no-cache, must-revalidate, max-age=0"}]
+            [:meta {:http-equiv "Pragma" :content "no-cache"}]
+            [:meta {:http-equiv "Expires" :content "0"}]
+            [:title title]
+            head]
+           [:body
+            body
+            [:script {:type "module"} (playground-client-script)]]]))))
 
 (defn- serve-file
   "serves a file from the playground root"
@@ -86,12 +96,13 @@
   (let [file (java.io.File. root path)]
     (cond (.exists file)
           {:status 200
-           :headers {"Content-Type" (content-type path)}
+           :headers (merge +cache-control+
+                           {"Content-Type" (content-type path)})
            :body file}
 
           :else
           {:status 404
-           :headers {"Content-Type" "text/plain"}
+           :headers +cache-control+
            :body "not found"})))
 
 (defn- websocket-receive
@@ -139,10 +150,10 @@
   [{:keys [id port host] :as rt}]
   (let [root (str (fs/create-tmpdir))
         _    (spit (str root "/index.html") (page-html {}))
-        port (network/port:check-available (or port
-                                               (+pre-arranged+ id)
-                                               0))
-        port (if (boolean? port) 0 port)
+        requested (let [p (or port (+pre-arranged+ id))]
+                    (when (and p (not= 0 p)) p))
+        port (or requested
+                 (network/port:check-available 0))
         channel (atom nil)
         return  (atom {})
         handler (playground-handler channel return root)

@@ -20,10 +20,13 @@
   "returns a string representation of a message body for display"
   {:added "4.0"}
   [body]
-  (cond (== null body) ""
-        (== undefined body) ""
-        (== "string" (typeof body)) body
-        :else (JSON.stringify body null 2)))
+  (if (== null body)
+    (return "")
+    (if (== undefined body)
+      (return "")
+      (if (== "string" (typeof body))
+        (return body)
+        (return (or (JSON.stringify body null 2) (String body)))))))
 
 (defn.js send-response
   "sends a response frame back over the websocket"
@@ -44,55 +47,64 @@
            (. result ["value"])]))
 
 (defn.js make-add-message
-  "creates the add-message callback used by the sidebar log"
+  "creates the add-message callback that prepairs pairs so the latest pair is first"
   {:added "4.0"}
   [messagesRef setMessages]
   (return (fn [m]
-            (. messagesRef current (push m))
+            (. messagesRef current (unshift m))
             (if (> (. messagesRef current length) 200)
-              (. messagesRef current (splice 0 (- (. messagesRef current length) 200))))
+              (. messagesRef current (pop)))
             (setMessages (. messagesRef current (slice))))))
 
 (defn.js run-eval
-  "handles an incoming eval message, evaluates it and sends the response"
+  "handles an incoming eval message as a sent/reply pair"
   {:added "4.0"}
-  [ws add-message msg]
+  [ws add-message messagesRef setMessages msg]
   (var id (. msg ["id"]))
   (var body (. msg ["body"]))
-  (add-message {"type" "sent"
-                "id" id
-                "body" body
-                "time" (xt/x:now-ms)})
+  (var entry {"id" id
+              "time" (xt/x:now-ms)
+              "sent" body
+              "reply" nil
+              "status" nil})
+  (add-message entry)
   (try
     (var [status value] (-/eval-body body))
     (-/send-response ws id status value)
-    (add-message {"type" "reply"
-                  "id" id
-                  "status" status
-                  "body" (-/format-body value)
-                  "time" (xt/x:now-ms)})
+    (:= (. entry ["reply"]) (-/format-body value))
+    (:= (. entry ["status"]) status)
     (catch err
       (var text (or (. err ["message"]) (String err)))
       (-/send-response ws id "error" text)
-      (add-message {"type" "reply"
-                    "id" id
-                    "status" "error"
-                    "body" text
-                    "time" (xt/x:now-ms)}))))
+      (:= (. entry ["reply"]) text)
+      (:= (. entry ["status"]) "error")))
+  (setMessages (. messagesRef current (slice))))
 
 (defn.js MessageItem
-  "renders a single expandable message with a print-to-console button"
+  "renders a sent/reply pair with expand/collapse and print button"
   {:added "4.0"}
   [{:# [m]}]
   (var [expanded setExpanded] (r/local))
-  (var type (. m ["type"]))
+  (var id (. m ["id"]))
   (var status (. m ["status"]))
-  (var body (-/format-body (. m ["body"])))
+  (var sent (or (-/format-body (. m ["sent"])) ""))
+  (var reply (or (-/format-body (. m ["reply"])) ""))
+  (var has-reply (not= nil (. m ["reply"])))
   (var preview-limit 120)
-  (var is-long (> (. body length) preview-limit))
-  (var display-body (:? (and (not expanded) is-long)
-                        (+ (. body (slice 0 preview-limit)) "...")
-                        body))
+  (var long-sent (> (. sent length) preview-limit))
+  (var long-reply (and has-reply (> (. reply length) preview-limit)))
+  (var is-long (or long-sent long-reply))
+  (var display-sent (:? (and (not expanded) long-sent)
+                        (+ (. sent (slice 0 preview-limit)) "...")
+                        sent))
+  (var display-reply (:? (and (not expanded) long-reply)
+                         (+ (. reply (slice 0 preview-limit)) "...")
+                         reply))
+  (var status-color (:? (== status "ok") "#4caf50"
+                        (:? (== status "error") "#f44336" "#ff9800")))
+  (var border-color (:? has-reply
+                        status-color
+                        "#ff9800"))
   (var button-style {:background "transparent"
                      :border "1px solid #ccc"
                      :borderRadius "4px"
@@ -100,15 +112,18 @@
                      :cursor "pointer"
                      :fontSize "10px"
                      :color "#555"})
+  (var label-style {:fontSize "10px"
+                    :color "#888"
+                    :marginTop "4px"})
   (return
    [:div
     {:style {:marginBottom "10px"
              :padding "10px"
              :borderRadius "6px"
              :fontSize "12px"
-             :background (:? (== type "sent") "#e3f2fd" "#e8f5e9")
-             :borderLeft (+ "4px solid "
-                            (:? (== type "sent") "#2196f3" "#4caf50"))}}
+             :background "#fff"
+             :border "1px solid #ddd"
+             :borderLeft (+ "4px solid " border-color)}}
     [:div
      {:style {:display "flex"
               :justifyContent "space-between"
@@ -119,7 +134,13 @@
                :textTransform "uppercase"
                :fontSize "10px"
                :color "#555"}}
-      type " " (. (or (. m ["id"]) "") (slice 0 8))]
+      "Eval " (. (or id "") (slice 0 8))
+      (:? status
+          [:span
+           {:style {:marginLeft "8px"
+                    :color status-color}}
+           "[" status "]"]
+          nil)]
      [:div
       {:style {:display "flex" :gap "6px"}}
       (:? is-long
@@ -132,18 +153,29 @@
        {:style button-style
         :onClick (fn [] (. console (log m)))}
        "Print"]]]
-    (:? status
-        [:div
-         {:style {:fontSize "10px"
-                  :color (:? (== status "ok") "#4caf50" "#f44336")}}
-         status]
-        nil)
+    [:div
+     {:style label-style}
+     "Sent"]
     [:pre
-     {:style {:margin "6px 0 0 0"
+     {:style {:margin "2px 0 0 0"
               :whiteSpace "pre-wrap"
               :wordBreak "break-all"
               :fontSize "11px"}}
-     display-body]]))
+     display-sent]
+    (:? has-reply
+        [:div
+         [:div
+          {:style label-style}
+          "Reply"]
+         [:pre
+          {:style {:margin "2px 0 0 0"
+                   :whiteSpace "pre-wrap"
+                   :wordBreak "break-all"
+                   :fontSize "11px"}}
+          display-reply]]
+        [:div
+         {:style {:color "#999" :fontSize "11px" :marginTop "6px"}}
+         "Waiting for reply..."])]))
 
 (defn.js MessageList
   "renders the list of sent/received messages"
@@ -278,7 +310,7 @@
 
   (r/init []
           (var PLAYGROUND (!:G PLAYGROUND))
-          (:= (. PLAYGROUND ["setStage"]) (fn [el] (setStage el)))
+          (:= (. PLAYGROUND ["setStage"]) (fn [el] (setStage el) (return el)))
           (:= (. PLAYGROUND ["send"])
               (fn [data]
                 (var ws (. PLAYGROUND ["ws"]))
@@ -291,7 +323,7 @@
           (:= (. ws onerror) (fn [] (setStatus "error")))
           (:= (. ws onmessage)
               (fn [event]
-                (-/run-eval ws add-message (JSON.parse (. event ["data"])))))
+                (-/run-eval ws add-message messagesRef setMessages (JSON.parse (. event ["data"])))))
           (return (fn [] (. ws (close)))))
 
   (return
