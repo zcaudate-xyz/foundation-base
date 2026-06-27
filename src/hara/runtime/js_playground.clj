@@ -19,7 +19,7 @@
             [std.lib.network :as network]
             [std.lib.security :as security]
             [std.protocol.context :as protocol.context]
-            [hara.runtime.js-playground-client]))
+            [hara.runtime.js-playground.client]))
 
 (def +pre-arranged+
   "pre-arranged ports for well-known playground instances"
@@ -44,32 +44,40 @@
 (defn playground-client-script
   "emits the browser-side React playground app as JS via hara.lang.
 
-   The client lives in `hara.runtime.js-playground-client` and is compiled to
+   The client lives in `hara.runtime.js-playground.client` and is compiled to
    a single ES module with `js.react` for the UI and
    `xt.lang.common-lib/return-eval` for safe eval."
   {:added "4.0"}
   []
   (l/emit-script
-   '(hara.runtime.js-playground-client/mount!)
+   '(hara.runtime.js-playground.client/mount!)
    {:lang :js
     :layout :flat
-    :module 'hara.runtime.js-playground-client
+    :module 'hara.runtime.js-playground.client
     :emit {:lang/jsx false
            :override {"react"            "https://esm.sh/react@18"
                       "react-dom/client" "https://esm.sh/react-dom@18/client"
                       "react-nil"        "https://esm.sh/react-nil"}}}))
 
 (defn page-html
-  "renders the js playground page"
+  "renders the js playground page using std.html
+
+   Accepts :title, :head, :body and :tabs. Tabs are maps of {:id ... :label ...}
+   exposed to the client through window.PLAYGROUND_CONFIG."
   {:added "4.0"}
-  [{:keys [title head body]
+  [{:keys [title head body tabs]
     :or {title "hara.runtime js playground"
-         body [:div {:id "root"}]}}]
+         body [:div {:id "root"}]
+         tabs [{:id "stage" :label "Stage"}]}}]
   (let [csp (clojure.string/join ";"
                                  ["default-src * 'unsafe-eval'"
                                   "connect-src * 'unsafe-eval' ws: wss:"
                                   "script-src  'self' 'unsafe-eval' 'unsafe-inline' https://esm.sh"
                                   "worker-src  blob: data: 'self' 'unsafe-eval' 'unsafe-inline'"])
+        config-script (str "window.PLAYGROUND_CONFIG="
+                           (json/write {:title title
+                                        :tabs (mapv #(select-keys % [:id :label]) tabs)})
+                           ";")
         body (if (string? body)
                body
                (html/html body))
@@ -88,6 +96,7 @@
             head]
            [:body
             body
+            [:script config-script]
             [:script {:type "module"} (playground-client-script)]]]))))
 
 (defn- serve-file
@@ -147,9 +156,10 @@
 (defn start-js-playground
   "starts the js playground server and returns the runtime with state attached"
   {:added "4.0"}
-  [{:keys [id port host] :as rt}]
+  [{:keys [id port host title tabs] :as rt}]
   (let [root (str (fs/create-tmpdir))
-        _    (spit (str root "/index.html") (page-html {}))
+        _    (spit (str root "/index.html") (page-html {:title title
+                                                         :tabs tabs}))
         requested (let [p (or port (+pre-arranged+ id))]
                     (when (and p (not= 0 p)) p))
         port (or requested

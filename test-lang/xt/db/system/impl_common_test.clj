@@ -7,7 +7,8 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
-             [xt.db.system.impl-common :as impl-common]]})
+             [xt.db.system.impl-common :as impl-common]
+             [xt.db.system.impl-memory :as impl-memory]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -134,52 +135,58 @@
 (fact "applies sync payload and notifies matching listeners"
 
   (!.js
-   (var applied [])
-   (var impl {"listeners"
-              {"l1" {"guard"    (fn [table] (return (== table "User")))
-                     "callback" (fn [event] (xt/x:arr-push applied "notified"))}}
-              "process-add-event"
-              (fn [impl data]
-                (xt/x:arr-push applied ["add" data])
-                (return true))
-              "process-remove-event"
-              (fn [impl data]
-                (xt/x:arr-push applied ["remove" data])
-                (return true))})
-   (impl-common/sync-process-payload impl {"db/sync" {"User" [{"id" 1}]}})
-   (return applied))
-  => [["add" {"User" [{"id" 1}]}] "notified"]
+   (var notified [])
+   (var schema {"User" {"id" {"ident" "id" "order" 0 "type" "text"}}
+                "Log"  {"id" {"ident" "id" "order" 0 "type" "text"}}})
+   (var lookup {"User" {"position" 0}
+                "Log"  {"position" 1}})
+   (var impl (impl-memory/impl-memory schema lookup))
+   (impl-common/add-db-listener
+    impl
+    "l1"
+    {"guard"    (fn [table] (return (== table "User")))
+     "callback" (fn [event] (xt/x:arr-push notified event))})
+   (impl-common/sync-process-payload
+    impl
+    {"db/sync" {"User" [{"id" 1}]}})
+   (return {"notified"    notified
+            "has-record"  (xt/x:not-nil? (xtd/get-in impl ["rows" "User" "1"]))}))
+  => {"notified"   [{"db/sync" {"User" [{"id" 1}]}}]
+      "has-record" true}
 
   (!.js
-   (var applied [])
-   (var impl {"listeners"
-              {"l1" {"guard"    (fn [table] (return (== table "Log")))
-                     "callback" (fn [event] (xt/x:arr-push applied "notified"))}}
-              "process-add-event"
-              (fn [impl data]
-                (xt/x:arr-push applied ["add" data])
-                (return true))
-              "process-remove-event"
-              (fn [impl data]
-                (xt/x:arr-push applied ["remove" data])
-                (return true))})
-   (impl-common/sync-process-payload impl {"db/remove" {"Log" [1 2]}})
-   (return applied))
-  => [["remove" {"Log" [1 2]}] "notified"]
+   (var notified [])
+   (var schema {"User" {"id" {"ident" "id" "order" 0 "type" "text"}}
+                "Log"  {"id" {"ident" "id" "order" 0 "type" "text"}}})
+   (var lookup {"User" {"position" 0}
+                "Log"  {"position" 1}})
+   (var impl (impl-memory/impl-memory schema lookup))
+   (impl-common/add-db-listener
+    impl
+    "l1"
+    {"guard"    (fn [table] (return (== table "Log")))
+     "callback" (fn [event] (xt/x:arr-push notified event))})
+   (impl-common/sync-process-payload
+    impl
+    {"db/remove" {"Log" [1 2]}})
+   (return {"notified"    notified
+            "has-records" (xt/x:obj-keys (or (xtd/get-in impl ["rows" "Log"])
+                                             {}))}))
+  => {"notified"    [{"db/remove" {"Log" [1 2]}}]
+      "has-records" []}
 
   (!.js
-   (var applied [])
-   (var impl {"listeners"
-              {"l1" {"guard"    (fn [table] (return (== table "User")))
-                     "callback" (fn [event] (xt/x:arr-push applied "notified"))}}
-              "process-add-event"
-              (fn [impl data]
-                (xt/x:arr-push applied ["add" data])
-                (return true))
-              "process-remove-event"
-              (fn [impl data]
-                (xt/x:arr-push applied ["remove" data])
-                (return true))})
+   (var notified [])
+   (var schema {"User" {"id" {"ident" "id" "order" 0 "type" "text"}}})
+   (var lookup {"User" {"position" 0}})
+   (var impl (impl-memory/impl-memory schema lookup))
+   (impl-common/add-db-listener
+    impl
+    "l1"
+    {"guard"    (fn [table] (return (== table "User")))
+     "callback" (fn [event] (xt/x:arr-push notified event))})
    (impl-common/sync-process-payload impl {})
-   (return applied))
-  => [])
+   (return {"notified"    notified
+            "has-records" (xt/x:obj-keys (or (xtd/get-in impl ["rows" "User"])
+                                             {}))}))
+  => {"notified" [] "has-records" []})

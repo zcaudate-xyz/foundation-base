@@ -1,6 +1,7 @@
 (ns xt.net.ws-native
   (:require [hara.lang :as l]
-            [xt.lang.common-protocol :refer [defprotocol.xt]]))
+            [xt.lang.common-protocol :refer [defprotocol.xt]])
+  (:refer-clojure :exclude [send]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

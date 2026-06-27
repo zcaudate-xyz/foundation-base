@@ -1,5 +1,5 @@
 ^{:no-test true}
-(ns hara.runtime.js-playground-client
+(ns hara.runtime.js-playground.client
   "Browser-side playground client.
 
    Written as a proper `l/script :js` namespace so it can be compiled with
@@ -197,7 +197,8 @@
 (defn.js TopMenu
   "top menu bar with connection status on the right and a messages dropdown"
   {:added "4.0"}
-  [{:# [status
+  [{:# [title
+        status
         url
         messages
         showMessages
@@ -221,7 +222,7 @@
              :fontSize "14px"}}
     [:div
      {:style {:fontWeight 600 :fontSize "16px"}}
-     "JS Playground"]
+     title]
     [:div
      {:style {:display "flex"
               :alignItems "center"
@@ -296,21 +297,149 @@
       {:style {:color "#666" :fontSize "12px"}}
       url]]]))
 
-(defn.js App
-  "top-level playground UI with a menu bar and collapsible message sidebar"
+(defn.js TabBar
+  "renders the configurable tab bar"
+  {:added "4.0"}
+  [{:# [tabs
+        activeTab
+        setActiveTab]}]
+  (return
+   [:div
+    {:style {:display "flex"
+             :alignItems "center"
+             :gap "4px"
+             :padding "0 16px"
+             :height "36px"
+             :background "#f5f5f5"
+             :borderBottom "1px solid #ddd"
+             :fontSize "13px"}}
+    (. tabs
+       (map (fn [t i]
+              (var id (. t ["id"]))
+              (var label (. t ["label"]))
+              (var is-active (== id activeTab))
+              (return
+               [:button
+                {:key id
+                 :style {:background (:? is-active "#fff" "transparent")
+                         :border "1px solid #ddd"
+                         :borderBottom (:? is-active "1px solid #fff" "1px solid #ddd")
+                         :borderRadius "4px 4px 0 0"
+                         :padding "4px 12px"
+                         :cursor "pointer"
+                         :fontSize "12px"
+                         :fontWeight (:? is-active 600 400)
+                         :marginBottom "-1px"}
+                 :onClick (fn [] (setActiveTab id))}
+                label]))))]))
+
+(defn.js ActiveTabPanel
+  "renders the content area for the active tab"
+  {:added "4.0"}
+  [{:# [activeTab
+        stage
+        tabContent]}]
+  (return
+   [:div
+    {:style {:flex 1
+             :padding "20px"
+             :overflow "auto"
+             :background "#fafafa"}}
+    (:? (== activeTab "stage")
+        (:? stage
+            stage
+            [:div
+             {:style {:color "#999"
+                      :marginTop "40px"
+                      :textAlign "center"}}
+             [:h2 nil "Stage"]
+             [:p nil "Push a React element from the REPL:"]
+             [:pre
+              {:style {:background "#fff"
+                       :padding "12px"
+                       :borderRadius "4px"
+                       :display "inline-block"}}
+              "window.PLAYGROUND.setStage(React.createElement(\"div\", null, \"hello\"))"]])
+        [:div
+         {:id (+ "tab-" activeTab)
+          :style {:width "100%" :height "100%"}}
+         (:? (. tabContent [activeTab])
+             (. tabContent [activeTab])
+             [:div
+              {:style {:color "#999"
+                       :marginTop "40px"
+                       :textAlign "center"}}
+              [:h2 nil activeTab]
+              [:p nil "Use the REPL to set content for this tab:"]
+              [:pre
+               {:style {:background "#fff"
+                        :padding "12px"
+                        :borderRadius "4px"
+                        :display "inline-block"}}
+               (+ "window.PLAYGROUND.setTabContent(\"" activeTab "\", element)")]])])]))
+
+(defn.js get-config
+  "reads playground config from window.PLAYGROUND_CONFIG"
   {:added "4.0"}
   []
+  (var config (!:G PLAYGROUND_CONFIG))
+  (return (or config
+              {"title" "JS Playground"
+               "tabs" [{"id" "stage" "label" "Stage"}]})))
+
+(defn.js App
+  "top-level playground UI with a menu bar, tabs and collapsible message sidebar"
+  {:added "4.0"}
+  [#{[config]}]
   (var [status setStatus] (r/local "connecting"))
-  (var messagesRef (r/ref []))
+  (var statusRef (r/ref "connecting"))
   (var [messages setMessages] (r/local []))
-  (var [stage setStage] (r/local nil))
+  (var messagesRef (r/ref []))
+  (var [title setTitle] (r/local (. config ["title"])))
+  (var titleRef (r/ref (. config ["title"])))
+  (var tabs (. config ["tabs"]))
+  (var default-tab (. (or (. tabs [0]) {"id" "stage"}) ["id"]))
+  (var [activeTab setActiveTab] (r/local default-tab))
+  (var activeTabRef (r/ref default-tab))
   (var [showMessages setShowMessages] (r/local true))
+  (var [stage setStage] (r/local nil))
+  (var stageRef (r/ref nil))
+  (var [tabContent setTabContent] (r/local {}))
+  (var tabContentRef (r/ref {}))
   (var add-message (-/make-add-message messagesRef setMessages))
   (var ws-url (+ "ws://" (. window location host) "/ws"))
 
+  (var setStatus* (fn [s]
+                    (:= (. statusRef current) s)
+                    (setStatus s)))
+  (var setTitle* (fn [t]
+                   (:= (. titleRef current) t)
+                   (:= (. document title) t)
+                   (setTitle t)))
+  (var setActiveTab* (fn [id]
+                       (:= (. activeTabRef current) id)
+                       (setActiveTab id)))
+  (var setStage* (fn [el]
+                   (:= (. stageRef current) el)
+                   (setStage el)
+                   (setActiveTab* "stage")))
+  (var setTabContent* (fn [id el]
+                        (var next (Object.assign {} (. tabContentRef current)))
+                        (:= (. next [id]) el)
+                        (:= (. tabContentRef current) next)
+                        (setTabContent next)
+                        (setActiveTab* id)))
+
   (r/init []
           (var PLAYGROUND (!:G PLAYGROUND))
-          (:= (. PLAYGROUND ["setStage"]) (fn [el] (setStage el) (return el)))
+          (:= (. PLAYGROUND ["setStage"]) setStage*)
+          (:= (. PLAYGROUND ["setTabContent"]) setTabContent*)
+          (:= (. PLAYGROUND ["switchTab"]) setActiveTab*)
+          (:= (. PLAYGROUND ["setTitle"]) setTitle*)
+          (:= (. PLAYGROUND ["getMessages"]) (fn [] (return (. messagesRef current))))
+          (:= (. PLAYGROUND ["getStatus"]) (fn [] (return (. statusRef current))))
+          (:= (. PLAYGROUND ["getActiveTab"]) (fn [] (return (. activeTabRef current))))
+          (:= (. PLAYGROUND ["getTitle"]) (fn [] (return (. titleRef current))))
           (:= (. PLAYGROUND ["send"])
               (fn [data]
                 (var ws (. PLAYGROUND ["ws"]))
@@ -318,9 +447,9 @@
                   (. ws (send (JSON.stringify data))))))
           (var ws (new WebSocket ws-url))
           (:= (. PLAYGROUND ["ws"]) ws)
-          (:= (. ws onopen) (fn [] (setStatus "connected")))
-          (:= (. ws onclose) (fn [] (setStatus "disconnected")))
-          (:= (. ws onerror) (fn [] (setStatus "error")))
+          (:= (. ws onopen) (fn [] (setStatus* "connected")))
+          (:= (. ws onclose) (fn [] (setStatus* "disconnected")))
+          (:= (. ws onerror) (fn [] (setStatus* "error")))
           (:= (. ws onmessage)
               (fn [event]
                 (-/run-eval ws add-message messagesRef setMessages (JSON.parse (. event ["data"])))))
@@ -332,36 +461,22 @@
              :flexDirection "column"
              :height "100vh"
              :fontFamily "system-ui, sans-serif"}}
-    [:% -/TopMenu {:status status
+    [:% -/TopMenu {:title title
+                   :status status
                    :url ws-url
                    :messages messages
                    :showMessages showMessages
                    :setShowMessages setShowMessages}]
+    [:% -/TabBar {:tabs tabs
+                  :activeTab activeTab
+                  :setActiveTab setActiveTab*}]
     [:div
      {:style {:display "flex"
               :flex 1
               :overflow "hidden"}}
-     [:div
-      {:id "stage"
-       :style {:flex 1
-               :padding "20px"
-               :overflow "auto"
-               :borderRight "1px solid #ddd"
-               :background "#fafafa"}}
-      (:? stage
-          stage
-          [:div
-           {:style {:color "#999"
-                    :marginTop "40px"
-                    :textAlign "center"}}
-           [:h2 nil "Stage"]
-           [:p nil "Push a React element from the REPL:"]
-           [:pre
-            {:style {:background "#fff"
-                     :padding "12px"
-                     :borderRadius "4px"
-                     :display "inline-block"}}
-            "window.PLAYGROUND.setStage(React.createElement(\"div\", null, \"hello\"))"]])]
+     [:% -/ActiveTabPanel {:activeTab activeTab
+                           :stage stage
+                           :tabContent tabContent}]
      (:? showMessages
          [:div
           {:id "sidebar"
@@ -376,11 +491,19 @@
   "mounts the playground app into #root and exposes global React and PLAYGROUND"
   {:added "4.0"}
   []
+  (var config (-/get-config))
   (:= (!:G React) React)
   (:= (!:G ReactDOM) ReactDOM)
   (:= (!:G PLAYGROUND)
       {"setStage" (fn [el] el)
+       "setTabContent" (fn [id el] [id el])
+       "switchTab" (fn [id] id)
+       "setTitle" (fn [t] t)
+       "getMessages" (fn [] [])
+       "getStatus" (fn [] "connecting")
+       "getActiveTab" (fn [] "stage")
+       "getTitle" (fn [] "")
        "send" (fn [data] data)
        "ws" null
        "stage" null})
-  (r/renderDOMRoot "root" -/App))
+  (r/renderDOMRoot "root" (fn [] [:% -/App {:config config}])))

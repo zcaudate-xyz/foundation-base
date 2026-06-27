@@ -435,7 +435,7 @@
          model-id
          service}   node-args)
   (var service-impl (-/service-impl node service))
-  (var model-spec (-/create-rpc-model service-impl model-args))
+  (var model-spec (-/create-rpc-model service model-args))
   (return (-/add-db-model-listener
            node space-id group-id model-id service-impl model-spec)))
 

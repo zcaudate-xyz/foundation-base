@@ -135,3 +135,23 @@
       => #"React\.createElement\(\"div\"[\s\S]*\"hello\"\)"
       (finally
         (component/stop rt)))))
+
+^{:refer hara.runtime.js-playground/page-html :added "4.0"}
+(fact "page-html embeds title and tabs in PLAYGROUND_CONFIG"
+
+  (let [page (page-html {:title "My Playground"
+                         :tabs [{:id "stage" :label "Stage"}
+                                {:id "glsl" :label "GLSL"}]})]
+    page => #"window\.PLAYGROUND_CONFIG"
+    page => #"\"title\":\"My Playground\""
+    page => #"\"id\":\"stage\""
+    page => #"\"id\":\"glsl\""))
+
+^{:refer hara.runtime.js-playground/playground-client-script :added "4.0"}
+(fact "client script exposes a queryable PLAYGROUND API"
+
+  (let [script (playground-client-script)]
+    script => #"PLAYGROUND\[\"getMessages\"\]"
+    script => #"PLAYGROUND\[\"getStatus\"\]"
+    script => #"PLAYGROUND\[\"switchTab\"\]"
+    script => #"PLAYGROUND\[\"setTabContent\"\]"))
