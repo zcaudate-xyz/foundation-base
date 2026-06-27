@@ -1,4 +1,3 @@
-^{:no-test true}
 (ns hara.runtime.js-playground.client
   "Browser-side playground client.
 
@@ -100,6 +99,20 @@
       (:= (. entry ["reply"]) text)
       (:= (. entry ["status"]) "error")))
   (setMessages (. messagesRef current (slice))))
+
+(defn.js make-websocket
+  "creates a websocket and wires up playground event handlers"
+  {:added "4.0"}
+  [ws-url setStatus* add-message messagesRef setMessages]
+  (var ws (new WebSocket ws-url))
+  (:= (. ws onopen) (fn [] (setStatus* "connected")))
+  (:= (. ws onclose) (fn [] (setStatus* "disconnected")))
+  (:= (. ws onerror) (fn [] (setStatus* "error")))
+  (:= (. ws onmessage)
+      (fn [event]
+        (-/run-eval ws add-message messagesRef setMessages (JSON.parse (. event ["data"])))))
+  (. window (addEventListener "beforeunload" (fn [] (. ws (close)))))
+  (return ws))
 
 (defn.js MessageItem
   "renders a sent/reply pair with expand/collapse and print button"
@@ -330,7 +343,16 @@
         setActiveTab
         createTab
         closeTab]}]
-  (var tab-buttons
+  (return
+   [:div
+    {:style {:display "flex"
+             :alignItems "center"
+             :gap "4px"
+             :padding "0 16px"
+             :height "36px"
+             :background "#f5f5f5"
+             :borderBottom "1px solid #ddd"
+             :fontSize "13px"}}
     (. tabs
        (map (fn [t i]
               (var id (. t ["id"]))
@@ -370,18 +392,7 @@
                                  (do (. e (stopPropagation))
                                      (closeTab id)))}
                      "×"]
-                    nil)]))))))
-  (return
-   [:div
-    {:style {:display "flex"
-             :alignItems "center"
-             :gap "4px"
-             :padding "0 16px"
-             :height "36px"
-             :background "#f5f5f5"
-             :borderBottom "1px solid #ddd"
-             :fontSize "13px"}}
-    tab-buttons
+                    nil)]))))
     [:button
      {:style {:background "#fff"
               :border "1px solid #ddd"
@@ -393,7 +404,7 @@
               :fontWeight 700
               :marginBottom "-1px"}
       :onClick (fn [] (createTab nil nil))}
-     "+"]])
+     "+"]]))
 
 (defn.js ActiveTabPanel
   "renders the content area for the active tab"
@@ -478,9 +489,9 @@
   (var add-message (-/make-add-message messagesRef setMessages))
   (var ws-url (+ "ws://" (. window location host) "/ws"))
   (var setActiveTab* (fn [id]
-                       (var next-id (if (-/has-tab? (. tabsRef current) id)
-                                      id
-                                      (. (or (. tabsRef current [0]) {"id" "stage"}) ["id"])))
+                       (var next-id (:? (-/has-tab? (. tabsRef current) id)
+                                        id
+                                        (. (or (. tabsRef current [0]) {"id" "stage"}) ["id"])))
                        (:= (. activeTabRef current) next-id)
                        (setActiveTab next-id)))
   (var setTabs* (fn [next-tabs preferred]
@@ -550,15 +561,8 @@
                 (var ws (. PLAYGROUND ["ws"]))
                 (if (and ws (== (. ws readyState) 1))
                   (. ws (send (JSON.stringify data))))))
-          (var ws (new WebSocket ws-url))
-          (:= (. PLAYGROUND ["ws"]) ws)
-          (:= (. ws onopen) (fn [] (setStatus* "connected")))
-          (:= (. ws onclose) (fn [] (setStatus* "disconnected")))
-          (:= (. ws onerror) (fn [] (setStatus* "error")))
-          (:= (. ws onmessage)
-              (fn [event]
-                (-/run-eval ws add-message messagesRef setMessages (JSON.parse (. event ["data"]))))))
-          (return (fn [] (. ws (close)))))
+          (var ws (-/make-websocket ws-url setStatus* add-message messagesRef setMessages))
+          (:= (. PLAYGROUND ["ws"]) ws))
 
   (return
    [:div
@@ -593,7 +597,7 @@
                    :flexDirection "column"
                    :background "#fff"}}
           [:% -/MessageList {:messages messages}]]
-         nil)]] )
+         nil)]]))
 
 (defn.js mount!
   "mounts the playground app into #root and exposes global React and PLAYGROUND"
