@@ -18,7 +18,8 @@
             [std.lib.impl :as impl]
             [std.lib.network :as network]
             [std.lib.security :as security]
-            [std.protocol.context :as protocol.context]))
+            [std.protocol.context :as protocol.context]
+            [hara.runtime.js-playground-client]))
 
 (def +pre-arranged+
   "pre-arranged ports for well-known playground instances"
@@ -34,258 +35,41 @@
     ".json" "application/json"
     "application/octet-stream"))
 
-(defn- playground-client-script
+(defn playground-client-script
   "emits the browser-side React playground app as JS via hara.lang.
 
-   Renders a split-screen UI: a stage on the left for components pushed from
-   the REPL, and a sidebar on the right showing connection status, sent eval
-   requests, and received replies. Exposes window.PLAYGROUND.setStage."
+   The client lives in `hara.runtime.js-playground-client` and is compiled to
+   a single ES module with `js.react` for the UI and
+   `xt.lang.common-lib/return-eval` for safe eval."
+  {:added "4.0"}
   []
   (l/emit-script
-   '(do
-      (defn send-response [ws id status body]
-        (. ws (send (. JSON stringify {"id" id "status" status "body" body}))))
-
-      (defn run-eval [ws add-message msg]
-        (var id (. msg ["id"]))
-        (var body (. msg ["body"]))
-        (add-message {"type" "sent"
-                      "id" id
-                      "body" (. body (slice 0 500))
-                      "time" (. Date (now))})
-        (try
-          (var result (eval body))
-          (defn resolve [value]
-            (var safe (:? (== value undefined) null value))
-            (var safe-text (. JSON stringify safe))
-            (send-response ws id "ok" safe)
-            (add-message {"type" "reply"
-                          "id" id
-                          "status" "ok"
-                          "body" (. safe-text (slice 0 500))
-                          "time" (. Date (now))}))
-          (defn reject [err]
-            (var text (or (. err ["message"]) (String err)))
-            (send-response ws id "error" text)
-            (add-message {"type" "reply"
-                          "id" id
-                          "status" "error"
-                          "body" text
-                          "time" (. Date (now))}))
-          (if (and result (== (typeof (. result then)) "function"))
-            (. result (then resolve reject))
-            (resolve result))
-          (catch err
-            (var text (or (. err ["message"]) (String err)))
-            (send-response ws id "error" text)
-            (add-message {"type" "reply"
-                          "id" id
-                          "status" "error"
-                          "body" text
-                          "time" (. Date (now))}))))
-
-      (var -set-stage null)
-      (var -set-status null)
-      (var -add-message null)
-      (var -ws null)
-
-      (:= (!:G PLAYGROUND)
-          {"setStage" (fn [el]
-                        (if -set-stage
-                          (-set-stage el)))
-           "send" (fn [data]
-                    (if (and -ws (== (. -ws readyState) 1))
-                      (. -ws (send (. JSON stringify data)))))
-           "ws" null
-           "stage" null})
-
-      (defn App []
-        (var React (!:G React))
-        (var useState (. React useState))
-        (var useEffect (. React useEffect))
-        (var useRef (. React useRef))
-
-        (var status-state (useState "connecting"))
-        (var status (. status-state ["0"]))
-        (:= -set-status (. status-state ["1"]))
-
-        (var messages-ref (useRef []))
-        (var messages-state (useState []))
-        (var messages (. messages-state ["0"]))
-        (var set-messages (. messages-state ["1"]))
-
-        (defn add-message [m]
-          (. messages-ref current (push m))
-          (if (> (. messages-ref current length) 200)
-            (. messages-ref current (splice 0 (- (. messages-ref current length) 200))))
-          (set-messages (. messages-ref current (slice))))
-
-        (:= -add-message add-message)
-
-        (var stage-state (useState null))
-        (var stage-content (. stage-state ["0"]))
-        (var set-stage-content (. stage-state ["1"]))
-
-        (:= -set-stage (fn [el]
-                         (set-stage-content el)
-                         (:= (. (!:G PLAYGROUND) ["stage"]) el)))
-
-        (useEffect (fn []
-                     (var ws-url (+ "ws://" (. window location host) "/ws"))
-                     (var ws (new WebSocket ws-url))
-                     (:= -ws ws)
-                     (:= (. (!:G PLAYGROUND) ["ws"]) ws)
-                     (:= (. ws onopen) (fn [] (-set-status "connected")))
-                     (:= (. ws onclose) (fn [] (-set-status "disconnected")))
-                     (:= (. ws onerror) (fn [] (-set-status "error")))
-                     (:= (. ws onmessage)
-                         (fn [event]
-                           (run-eval ws add-message (. JSON parse (. event ["data"])))))
-                     (fn [] (. ws (close))))
-                   [])
-
-        (var status-color (:? (== status "connected") "#4caf50"
-                              (:? (== status "error") "#f44336" "#ff9800")))
-
-        (var stage-placeholder
-             (. React (createElement "div"
-                                     {"style" {"color" "#999"
-                                               "marginTop" "40px"
-                                               "textAlign" "center"}}
-                                     (. React (createElement "h2" nil "Stage"))
-                                     (. React (createElement "p" nil "Push a React element from the REPL:"))
-                                     (. React (createElement "pre"
-                                                             {"style" {"background" "#fff"
-                                                                       "padding" "12px"
-                                                                       "borderRadius" "4px"
-                                                                       "display" "inline-block"}}
-                                                             "window.PLAYGROUND.setStage(React.createElement(\"div\", null, \"hello\"))")))))
-
-        (var message-list
-             (:? (== (. messages length) 0)
-                 (. React (createElement "div"
-                                         {"style" {"color" "#999" "fontSize" "12px"}}
-                                         "No messages yet."))
-                 (. messages
-                    (map (fn [m i]
-                           (return (. React (createElement
-                                             "div"
-                                             {"key" i
-                                              "style" {"marginBottom" "10px"
-                                                       "padding" "10px"
-                                                       "borderRadius" "6px"
-                                                       "fontSize" "12px"
-                                                       "background" (:? (== (. m ["type"]) "sent")
-                                                                       "#e3f2fd"
-                                                                       "#e8f5e9")
-                                                       "borderLeft" (+ "4px solid "
-                                                                       (:? (== (. m ["type"]) "sent")
-                                                                           "#2196f3"
-                                                                           "#4caf50"))}}
-                                             (. React (createElement
-                                                       "div"
-                                                       {"style" {"fontWeight" "600"
-                                                                 "marginBottom" "4px"
-                                                                 "textTransform" "uppercase"
-                                                                 "fontSize" "10px"
-                                                                 "color" "#555"}}
-                                                       (. m ["type"])
-                                                       " "
-                                                       (. (or (. m ["id"]) "") (slice 0 8))))
-                                             (:? (. m ["status"])
-                                                 (. React (createElement
-                                                           "div"
-                                                           {"style" {"fontSize" "10px"
-                                                                     "color" (:? (== (. m ["status"]) "ok")
-                                                                                 "#4caf50"
-                                                                                 "#f44336")}}
-                                                           (. m ["status"])))
-                                                 null)
-                                             (. React (createElement
-                                                       "pre"
-                                                       {"style" {"margin" "6px 0 0 0"
-                                                                 "whiteSpace" "pre-wrap"
-                                                                 "wordBreak" "break-all"
-                                                                 "fontSize" "11px"}}
-                                                       (. m ["body"]))))))))))
-
-        (return (. React (createElement
-                          "div"
-                          {"style" {"display" "flex"
-                                    "height" "100vh"
-                                    "fontFamily" "system-ui, sans-serif"}}
-                          (. React (createElement
-                                    "div"
-                                    {"id" "stage"
-                                     "style" {"flex" 1
-                                              "padding" "20px"
-                                              "overflow" "auto"
-                                              "borderRight" "1px solid #ddd"
-                                              "background" "#fafafa"}}
-                                    (or stage-content stage-placeholder)))
-                          (. React (createElement
-                                    "div"
-                                    {"id" "sidebar"
-                                     "style" {"width" "360px"
-                                              "display" "flex"
-                                              "flexDirection" "column"
-                                              "background" "#fff"}}
-                                    (. React (createElement
-                                              "div"
-                                              {"style" {"padding" "12px 16px"
-                                                        "borderBottom" "1px solid #ddd"
-                                                        "fontWeight" "600"
-                                                        "display" "flex"
-                                                        "alignItems" "center"
-                                                        "gap" "8px"}}
-                                              (. React (createElement
-                                                        "span"
-                                                        {"style" {"width" "10px"
-                                                                  "height" "10px"
-                                                                  "borderRadius" "50%"
-                                                                  "background" status-color
-                                                                  "display" "inline-block"}}))
-                                              "Status: "
-                                              status))
-                                    (. React (createElement
-                                              "div"
-                                              {"style" {"padding" "8px 16px"
-                                                        "borderBottom" "1px solid #ddd"
-                                                        "fontSize" "12px"
-                                                        "color" "#666"}}
-                                              (+ "ws://" (. window location host) "/ws")))
-                                    (. React (createElement
-                                              "div"
-                                              {"style" {"flex" 1
-                                                        "overflow" "auto"
-                                                        "padding" "12px"}}
-                                              message-list)))))))
-
-      (var ReactDOM (!:G ReactDOM))
-      (var root (. ReactDOM (createRoot (. document (getElementById "root")))))
-      (. root (render (. React (createElement App)))))
+   '(hara.runtime.js-playground-client/mount!)
    {:lang :js
-    :layout :flat}))
+    :layout :flat
+    :module 'hara.runtime.js-playground-client
+    :emit {:lang/jsx false
+           :override {"react"            "https://esm.sh/react@18"
+                      "react-dom/client" "https://esm.sh/react-dom@18/client"
+                      "react-nil"        "https://esm.sh/react-nil"}}}))
 
-(defn- page-html
+(defn page-html
   "renders the js playground page"
-  [{:keys [title head body scripts]
+  {:added "4.0"}
+  [{:keys [title head body]
     :or {title "hara.runtime js playground"
          body [:div {:id "root"}]}}]
   (let [csp (clojure.string/join ";"
                                  ["default-src * 'unsafe-eval'"
                                   "connect-src * 'unsafe-eval' ws: wss:"
-                                  "script-src  'self' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net"
+                                  "script-src  'self' 'unsafe-eval' 'unsafe-inline' https://esm.sh"
                                   "worker-src  blob: data: 'self' 'unsafe-eval' 'unsafe-inline'"])
         body (if (string? body)
                body
                (html/html body))
         head (cond (nil? head) ""
                    (string? head) head
-                   :else (html/html head))
-        scripts (apply str (map (fn [src]
-                                  (str "<script src=\"" src "\"></script>"))
-                                scripts))]
+                   :else (html/html head))]
     (str "<!doctype html>"
          "<html><head>"
          "<meta http-equiv=\"Content-Security-Policy\" content=\"" csp "\">"
@@ -293,10 +77,7 @@
          head
          "</head><body>"
          body
-         "<script src=\"https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js\" crossorigin></script>"
-         "<script src=\"https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js\" crossorigin></script>"
-         scripts
-         "<script>" (playground-client-script) "</script>"
+         "<script type=\"module\">" (playground-client-script) "</script>"
          "</body></html>")))
 
 (defn- serve-file

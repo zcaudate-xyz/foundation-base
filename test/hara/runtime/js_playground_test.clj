@@ -106,6 +106,16 @@
   (playground-client-script)
   => #"function App")
 
+^{:refer hara.runtime.js-playground/playground-client-script :added "4.0"}
+(fact "client script is generated from the js-playground-client namespace"
+
+  (let [script (playground-client-script)]
+    script => #"import React from 'https://esm.sh/react@18'"
+    script => #"import ReactDOM from 'https://esm.sh/react-dom@18/client'"
+    script => #"function run_eval"
+    script => #"function mountf"
+    script => #"return_eval"))
+
 ^{:refer hara.runtime.js-playground/page-html :added "4.0"}
 (fact "default page contains the react split-screen structure"
 
@@ -113,5 +123,5 @@
     page => #"<div id=\"root\"></div>"
     page => #"react@18"
     page => #"window.PLAYGROUND"
-    page => #"id=\"stage\""
-    page => #"id=\"sidebar\""))
+    page => #"\"id\":\"stage\""
+    page => #"\"id\":\"sidebar\""))
