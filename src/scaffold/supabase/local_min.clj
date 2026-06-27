@@ -28,8 +28,11 @@
    (start-supabase nil))
   ([_opts]
    (let [opts (or _opts {})]
+     (println "[supabase] starting local-min...")
      (os/sh {:args ["supabase" "start" "--workdir" "docker/local-min"]
-             :output-errors true})
+             :inherit true
+             :wait true})
+     (println "[supabase] start command completed")
      (when (not (= false (:wait-http opts)))
        (network/wait-for-port
         (get-in +config+ [:api :hostname])
@@ -56,7 +59,10 @@
 
 (defn shutdown-supabase
   [_]
+  (println "[supabase] stopping local-min...")
   (os/sh {:args ["supabase" "stop" "--workdir" "docker/local-min" "--no-backup"]
-          :output-errors true}))
+          :inherit true
+          :wait true})
+  (println "[supabase] stop command completed"))
 
 
