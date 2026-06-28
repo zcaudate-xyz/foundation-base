@@ -60,7 +60,7 @@
   (var height (or (and opts (. opts ["height"])) 256))
   (var canvas (or (and opts (. opts ["canvas"]))
                   (-/make-canvas width height)))
-  (var gl (. canvas (getContext "webgl")))
+  (var gl (. canvas (getContext "webgl" {"preserveDrawingBuffer" true})))
   (when (== null gl)
     (throw (new Error "WebGL not supported")))
   (var vs "attribute vec2 a_position; void main() { gl_Position = vec4(a_position, 0.0, 1.0); }")

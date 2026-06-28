@@ -18,8 +18,19 @@
    :test-mode true
    :require [[xt.lang.spec-base :as xt]
              [hara.runtime.js-playground.client :as client]
+             [js.react :as r]
              [js.react.ui-webgl :as ui-webgl]]
    :emit {:lang/jsx false}})
+
+(defn.js CanvasWrapper
+  "React wrapper that mounts a raw DOM canvas into its div"
+  {:added "4.1"}
+  [{:# [canvas]}]
+  (return [:div {:ref (fn [el]
+                        (when el
+                          (:= (. el innerHTML) "")
+                          (. el (appendChild canvas))))
+                 :style {:width "100%" :height "100%"}}]))
 
 (defn.js show-effect
   "creates a new playground tab and renders the effect into it"
@@ -32,11 +43,7 @@
   (when (== "undefined" (typeof (!:G __glsl_canvases__)))
     (:= (!:G __glsl_canvases__) {}))
   (:= (. (!:G __glsl_canvases__) [tab-id]) canvas)
-  (window.PLAYGROUND.switchTab tab-id)
-  (var panel (document.getElementById (+ "tab-" tab-id)))
-  (when panel
-    (:= (. panel innerHTML) "")
-    (. panel (appendChild canvas)))
+  (window.PLAYGROUND.setTabContent tab-id [:% -/CanvasWrapper {:canvas canvas}])
   (return tab-id))
 
 (defn.js read-center-pixel
@@ -94,6 +101,12 @@
           (window.PLAYGROUND.switchTab "gradient")
           (window.PLAYGROUND.getActiveTab)))
     => "gradient"
+
+    (!.js
+      (var panel (document.getElementById "tab-gradient"))
+      (var canvas (. (!:G __glsl_canvases__) ["gradient"]))
+      (. panel (contains canvas)))
+    => true
 
     (!.js (-/read-center-pixel "gradient"))
     => (fn [pixels]

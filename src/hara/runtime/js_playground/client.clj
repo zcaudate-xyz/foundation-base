@@ -409,6 +409,18 @@
       :onClick (fn [] (createTab nil nil))}
      "+"]]))
 
+(defn.js DomNode
+  "mounts a raw DOM node inside a React-managed div"
+  {:added "4.1"}
+  [{:# [node]}]
+  (var elRef (r/ref nil))
+  (r/init []
+    (var el (r/curr elRef))
+    (when el
+      (. el (appendChild node))))
+  (return [:div {:ref elRef
+                 :style {:width "100%" :height "100%"}}]))
+
 (defn.js ActiveTabPanel
   "renders the content area for the active tab"
   {:added "4.0"}
@@ -419,6 +431,7 @@
   (var active-tab (. tabs
                      (find (fn [t]
                              (return (== (. t ["id"]) activeTab))))))
+  (var content (. tabContent [activeTab]))
   (return
    [:div
     {:style {:flex 1
@@ -443,8 +456,10 @@
         [:div
          {:id (+ "tab-" activeTab)
           :style {:width "100%" :height "100%"}}
-         (:? (. tabContent [activeTab])
-             (. tabContent [activeTab])
+         (:? content
+             (:? (. content nodeType)
+                 [:% -/DomNode {:node content}]
+                 content)
              [:div
               {:style {:color "#999"
                        :marginTop "40px"
