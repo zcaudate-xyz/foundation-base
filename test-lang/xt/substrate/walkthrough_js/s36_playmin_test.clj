@@ -13,7 +13,8 @@
             [std.lib.component :as component]
             [xt.lang.common-notify :as notify]))
 
-(require '[hara.runtime.js-playground :as js-playground])
+(require '[hara.runtime.js-playground :as js-playground]
+         '[hara.runtime.chromedriver :as chromedriver])
 
 (l/script- :js
   {:runtime :playground
