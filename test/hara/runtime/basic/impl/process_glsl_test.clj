@@ -30,8 +30,19 @@
   (space/space:rt-active (env/ns-sym))
   => (contains [:lang/glsl]))
 
+(defn- egl-available? []
+  (try
+    (let [tmp (java.io.File/createTempFile "egl-check" ".c")]
+      (spit tmp "#include <EGL/egl.h>\nint main(){return 0;}")
+      (let [pb (ProcessBuilder. (into-array String ["gcc" "-x" "c" (.getAbsolutePath tmp) "-o" "/dev/null"]))
+            process (.start pb)]
+        (.waitFor process)
+        (= 0 (.exitValue process))))
+    (catch Throwable _ false)))
+
 (fact:global
- {:skip (not (env/program-exists? "gcc"))})
+ {:skip (not (and (env/program-exists? "gcc")
+                  (egl-available?)))})
 
 ^{:refer hara.runtime.basic.impl.process-glsl/!.gl :added "4.0"}
 (fact "runs a simple fragment shader through the runtime"

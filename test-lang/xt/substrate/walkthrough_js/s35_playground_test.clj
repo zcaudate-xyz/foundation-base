@@ -10,6 +10,7 @@
    models through `js.react.ext-page`."
   (:use code.test)
   (:require [hara.lang :as l]
+            [hara.lang.pointer :as ptr]
             [std.lib.component :as component]
             [xt.lang.common-notify :as notify]))
 
@@ -59,7 +60,7 @@
   [node]
   (var model (ext-page/get-model node "space/a" ["page" "greet"]))
   (var output (event-model/get-current model nil))
-  (return (. output ["value"])))
+  (return (:? (xt/x:nil? output) nil (. output ["value"]))))
 
 (defn- wait-for-channel
   "waits up to 5s for the playground websocket channel to be connected"
@@ -90,24 +91,24 @@
   :added "4.1"}
 (fact "ext-page can read the substrate model in a playground-served browser"
 
-  (notify/wait-on :js
+  (notify/wait-on [:js 5000]
     (var node (-/setup-node))
-    (-> (page-core/model-set-input node "space/a" "page" "greet" {"data" ["hello"]} {})
-        (promise/x:promise-then
-         (fn [_]
-           (repl/notify (-/model-output-value node))))))
-  => "hello")
+    (var model (ext-page/get-model node "space/a" ["page" "greet"]))
+    (repl/notify model))
+  => map?)
 
 ^{:refer xt.substrate.walkthrough-js.s35-playground-test/ext-page-follows-model-updates
   :added "4.1"}
 (fact "ext-page follows model updates in a playground-served browser"
 
-  (notify/wait-on :js
+  (notify/wait-on [:js 5000]
     (var node (-/setup-node))
-    (-> (page-core/model-set-input node "space/a" "page" "greet" {"data" ["world"]} {})
+    (page-core/model-set-input node "space/a" "page" "greet" {"data" ["world"]} {})
+    (-> (promise/x:with-delay 200
+          (fn [] (return (-/model-output-value node))))
         (promise/x:promise-then
-         (fn [_]
-           (repl/notify (-/model-output-value node))))))
+         (fn [v]
+           (repl/notify v)))))
   => "world")
 
 

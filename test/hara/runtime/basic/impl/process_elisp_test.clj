@@ -1,12 +1,15 @@
 (ns hara.runtime.basic.impl.process-elisp-test
   (:use code.test)
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [std.lib.env :as env]))
 
 (l/script- :elisp
-  {:runtime :basic})
+  {:runtime :basic
+   :test-mode true})
 
 (fact:global
- {:setup [(l/rt:restart)]
+ {:skip (not (env/program-exists? "emacs"))
+  :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.basic.impl.process-elisp/+elisp-basic-config+ :added "4.1"}

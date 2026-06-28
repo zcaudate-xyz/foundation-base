@@ -191,7 +191,7 @@
          (fn [i]
            (return
             (spec-promise/x:with-delay
-             (:? (== i 1) 100 300)
+             (:? (== i 1) 200 600)
              (fn []
                (when (== i 1)
                  (repl/notify [(throttle/throttle-active instance)
@@ -211,7 +211,7 @@
          (fn [i]
            (return
             (spec-promise/x:with-delay
-             (:? (== i 1) 100 300)
+             (:? (== i 1) 200 600)
              (fn []
                (when (== i 1)
                  (repl/notify [(throttle/throttle-active instance)

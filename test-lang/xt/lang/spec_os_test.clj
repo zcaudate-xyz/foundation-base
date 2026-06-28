@@ -150,10 +150,10 @@
          (fn [path cb]
            (return
             (spec-os/x:file-slurp path cb))))
-    (spit-fn (xt/x:cat (spec-os/x:pwd) "/" "test-scratch/out.tmp")
+    (spit-fn "/tmp/spec-os-out.tmp"
              "hello world"
              (fn [err out]
-               (slurp-fn (xt/x:cat (spec-os/x:pwd) "/" "test-scratch/out.tmp")
+               (slurp-fn "/tmp/spec-os-out.tmp"
                          (fn [err out]
                            (repl/notify out))))))
   => "hello world"
@@ -167,10 +167,10 @@
          (fn [path cb]
            (return
             (spec-os/x:file-slurp path cb))))
-    (spit-fn (xt/x:cat (spec-os/x:pwd) "/" "test-scratch/out.tmp")
+    (spit-fn "/tmp/spec-os-out.tmp"
              "hello world"
              (fn [err out]
-               (slurp-fn (xt/x:cat (spec-os/x:pwd) "/" "test-scratch/out.tmp")
+               (slurp-fn "/tmp/spec-os-out.tmp"
                          (fn [err out]
                            (repl/notify out))))))
   => "hello world"
@@ -184,10 +184,10 @@
          (fn [path cb]
            (return
             (spec-os/x:file-slurp path cb))))
-    (spit-fn (xt/x:cat (spec-os/x:pwd) "/" "test-scratch/out.tmp")
+    (spit-fn "/tmp/spec-os-out.tmp"
              "hello world"
              (fn [err out]
-               (slurp-fn (xt/x:cat (spec-os/x:pwd) "/" "test-scratch/out.tmp")
+               (slurp-fn "/tmp/spec-os-out.tmp"
                          (fn [err out]
                            (repl/notify out))))))
   => "hello world")

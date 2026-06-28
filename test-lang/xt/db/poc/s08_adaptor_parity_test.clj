@@ -214,7 +214,6 @@
 
 (fact:global
  {
-  :skip (not (std.lib.env/program-exists? "supabase"))
   :setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
           (local-min/restart-postgrest)

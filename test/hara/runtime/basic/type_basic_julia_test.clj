@@ -1,13 +1,18 @@
 (ns hara.runtime.basic.type-basic-julia-test
   (:use code.test)
   (:require [std.lib.env :as env]
+            [hara.lang :as l]
             [hara.lang.script :as script]
             [hara.model.annex.spec-julia :refer :all]))
 
 (script/script- :julia
-  {:runtime :basic})
+  {:runtime :basic
+   :test-mode true})
 
-(fact:global {:skip (not (env/program-exists? "julia"))})
+(fact:global
+ {:skip (not (env/program-exists? "julia"))
+  :setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 (defn.jl add-10 [x]
   (return (+ x 10)))

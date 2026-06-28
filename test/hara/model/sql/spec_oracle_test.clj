@@ -21,17 +21,14 @@
 (fact "emit Oracle enum support as a comment"
 
   (l/emit-as :oracle '[(defenum Status [:pending :done])])
-  => "-- ENUM "Status": 'pending', 'done'")
+  => "-- ENUM \"Status\": 'pending', 'done'")
 
 (fact "emit Oracle table with enum check"
 
   (l/emit-as :oracle '[(deftype Account
                          [:id {:type :uuid :primary true}
                           :status {:type OracleStatus :default :pending}])])
-  => "CREATE TABLE "Account" (
-       "id" VARCHAR2(36) PRIMARY KEY,
-       "status" VARCHAR2(255) DEFAULT 'pending' CHECK ("status" IN ('pending', 'done'))
-     );")
+  => "CREATE TABLE \"Account\" (\n  \"id\" VARCHAR2(36) PRIMARY KEY,\n  \"status\" VARCHAR2(255) DEFAULT 'pending' CHECK (\"status\" IN ('pending', 'done'))\n);")
 
 (fact "emit Oracle function syntax"
 
@@ -39,12 +36,7 @@
                          add-values
                          [:integer lhs :integer rhs]
                          (return (+ lhs rhs)))])
-  => "CREATE OR REPLACE FUNCTION "add_values"("lhs" NUMBER(10), "rhs" NUMBER(10))
-     RETURN NUMBER(10)
-     IS
-     BEGIN
-       RETURN lhs + rhs;
-     END;")
+  => "CREATE OR REPLACE FUNCTION \"add_values\"(\"lhs\" NUMBER(10), \"rhs\" NUMBER(10))\nRETURN NUMBER(10)\nIS\nBEGIN\n  RETURN lhs + rhs;\nEND;")
 
 (fact "registers oracle forms in top-level helpers"
 

@@ -75,17 +75,10 @@
   => "Reduce(f,as.list(arr),init=init)"
 
   (l/emit-as :r [(r-tf-x-obj-pairs '(_ obj))])
-  => "`if`(
-       is.null(obj),
-       list(),
-       unname(Map(list,as.list(names(obj)),unname(as.list(obj))))
-     )"
+  => "`if`(\n  is.null(obj),\n  c(),\n  unname(Map(list,as.list(names(obj)),unname(as.list(obj))))\n)"
 
   (l/emit-as :r [(r-tf-x-iter-from-obj '(_ obj))])
-  => "structure(
-       unname(Map(list,as.list(names(obj)),unname(as.list(obj)))),
-       class='xt_iterator'
-     )")
+  => "structure(\n  unname(Map(list,as.list(names(obj)),unname(as.list(obj)))),\n  class='xt_iterator'\n)")
 
 (fact "supports key R backend runtime helpers"
 
@@ -120,8 +113,7 @@
 
   (!.R
    (xts/pad-lines (xts/join "\n" ["hello" "world"]) 2 " "))
-  => "  hello
-       world"
+  => "  hello\n  world"
 
   (!.R
    (xt/x:json-decode (k/return-encode 1 "id-A" "key-A")))
@@ -171,17 +163,6 @@
   [(r-tf-x-obj-keys '(_ obj))
    (r-tf-x-obj-vals '(_ obj))
    (r-tf-x-obj-pairs '(_ obj))]
-  => [(:? (x:nil? obj)
-          []
-          (as.list (names obj)))
-      (:? (x:nil? obj)
-          []
-          (unname (as.list obj)))
-      (:?
-       (x:nil? obj)
-       []
-       (unname
-        (Map
-         list
-         (as.list (names obj))
-         (unname (as.list obj)))))])
+  => '[(:? (x:nil? obj) [] (as.list (names obj)))
+       (:? (x:nil? obj) [] (unname (as.list obj)))
+       (:? (x:nil? obj) [] (unname (Map list (as.list (names obj)) (unname (as.list obj)))))])

@@ -23,7 +23,6 @@
 
 (fact:global
  {
-  :skip (not (std.lib.env/program-exists? "supabase"))
   :setup [(l/rt:restart)
            (l/rt:teardown :postgres)
            (l/rt:setup :postgres)]

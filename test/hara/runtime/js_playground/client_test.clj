@@ -19,13 +19,21 @@
    :test-mode true
    :emit {:lang/jsx false}})
 
+(defn- chrome-candidates []
+  ["google-chrome-stable"
+   "google-chrome"
+   "chromium"
+   "chromium-browser"
+   "chrome-headless-shell"])
+
+(defn- chrome-exec []
+  (or (System/getenv "CHROME")
+      (some #(when (env/program-exists? %) %) (chrome-candidates))
+      "chromium"))
+
 (defn- chrome-available? []
   (or (System/getenv "CHROME")
-      (env/program-exists? "google-chrome-stable")
-      (env/program-exists? "google-chrome")
-      (env/program-exists? "chromium")
-      (env/program-exists? "chromium-browser")
-      (env/program-exists? "chrome-headless-shell")))
+      (some env/program-exists? (chrome-candidates))))
 
 (defn- start-static-server
   "serves a generated playground page from a temp root"
@@ -70,7 +78,7 @@
           (def +browser+ (chromedriver/browser
                           {:port +browser-port+
                            :bench
-                           {:exec ["chromium-browser"
+                           {:exec [(chrome-exec)
                                    "--no-sandbox"
                                    "--headless=new"
                                    "--disable-extensions"

@@ -63,7 +63,7 @@
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
 (fact:global
- {:skip (not (std.lib.env/program-exists? "supabase"))
+ {
   :setup [(l/rt:restart)
           (l/rt:setup :postgres)
           (local-min/refresh-postgrest-schema "scratch_v0" "Log")

@@ -101,7 +101,6 @@
 
 (fact:global
  {
-  :skip (not (std.lib.env/program-exists? "supabase"))
   :setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
           (l/rt:scaffold-imports :js)

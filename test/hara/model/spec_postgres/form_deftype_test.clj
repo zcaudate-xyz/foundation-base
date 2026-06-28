@@ -229,7 +229,7 @@
 
 ^{:refer hara.model.spec-postgres.form-deftype/pg-deftype-format-raw :added "4.1"}
 (fact "processes the type definition"
-  (pg-deftype-format-raw [:a {:type :int}] {:raw ['rt.postgres.base.grammar.form-deftype-test/+fragment-sample+]})
+  (pg-deftype-format-raw [:a {:type :int}] {:raw ['hara.model.spec-postgres.form-deftype-test/+fragment-sample+]})
   => (contains ['(:a {:type :int} :b {:type :text} :a {:type :int}) map?])
 
   (first (pg-deftype-format-raw [:a {:type :int :priority 100} :b {:type :int :priority 10}] {:raw []}))

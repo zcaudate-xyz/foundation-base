@@ -1,12 +1,15 @@
 (ns hara.runtime.basic.impl.process-scheme-test
   (:use code.test)
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [std.lib.env :as env]))
 
 (l/script- :scheme
-  {:runtime :basic})
+  {:runtime :basic
+   :test-mode true})
 
 (fact:global
- {:setup [(l/rt:restart)]
+ {:skip (not (env/program-exists? "racket"))
+  :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.basic.impl.process-scheme/+scheme-basic-config+ :added "4.1"}

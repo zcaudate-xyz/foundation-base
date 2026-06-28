@@ -56,7 +56,8 @@
                               (:websocket
                                :javafx
                                :browser
-                               :browser.instance) [:http (:http-port app)]
+                               :browser.instance
+                               :playground) [:http (:http-port app)]
                               [:socket (:socket-port app)])
             host (or *override-host*
                      (:host notify)

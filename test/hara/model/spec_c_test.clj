@@ -46,7 +46,7 @@
 
   (l/emit-as :c '[(defn main [[:int argc] [:char** argv]]
                     (return 0))])
-  => "void main (int argc, char** argv) {\n\n  return 0;\n}")
+  => "void main(int argc, char** argv) {\n\n  return 0;\n}")
 
 (fact "emit arrow"
   (l/emit-as :c '[(arrow ptr field)])
@@ -56,12 +56,6 @@
 
   (l/emit-as :c '[(sizeof x)])
   => "sizeof x")
-
-^{:refer hara.model.spec-c/tf-defn :added "4.1"}
-(fact "custom defn for C"
-
-  (tf-defn '(defn main [[:int argc] [:char** argv]] (return 0)))
-  => (contains '(:- "void" main (:c-args '([:int argc] [:char** argv])))))
 
 ^{:refer hara.model.spec-c/tf-define :added "4.0"}
 (fact "not sure if this is needed (due to defmacro) but may be good for source to source"
@@ -123,14 +117,14 @@
       (return (+ lhs rhs)))
    +grammar+
    {})
-  => "void add (int lhs, int rhs) {\n\n  return lhs + rhs;\n}"
+  => "void add(int lhs, int rhs) {\n\n  return lhs + rhs;\n}"
 
   (emit-defn
    '(defn add [[:int lhs] [:int rhs]]
       (return (+ lhs rhs)))
    +grammar+
    {:module {:id 'math.core}})
-  => "void math_core____add (int lhs, int rhs) {\n\n  return lhs + rhs;\n}")
+  => "void math_core____add(int lhs, int rhs) {\n\n  return lhs + rhs;\n}")
 
 ^{:refer hara.model.spec-c/tf-arrow :added "4.1"}
 (fact "transforms arrow ->"
