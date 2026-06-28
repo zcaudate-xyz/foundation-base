@@ -81,6 +81,7 @@ jobs:
           mkdir -p .tmp
           docker run --network host \
             -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS} -Djava.io.tmpdir=$(pwd)/.tmp" \
+            -e "_JAVA_OPTIONS=-Djava.io.tmpdir=$(pwd)/.tmp" \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v /home/runner/.docker/config.json:/root/.docker/config.json:ro \
             -v $(pwd):$(pwd) \
@@ -141,6 +142,7 @@ jobs:
           mkdir -p .tmp
           docker run --network host \
             -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS} -Djava.io.tmpdir=$(pwd)/.tmp" \
+            -e "_JAVA_OPTIONS=-Djava.io.tmpdir=$(pwd)/.tmp" \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v /home/runner/.docker/config.json:/root/.docker/config.json:ro \
             -v $(pwd):$(pwd) \
