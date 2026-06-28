@@ -17,79 +17,26 @@
    :config {:port 0}
    :test-mode true
    :require [[xt.lang.spec-base :as xt]
-             [hara.runtime.js-playground.client :as client]]
+             [hara.runtime.js-playground.client :as client]
+             [js.react.ui-webgl :as ui-webgl]]
    :emit {:lang/jsx false}})
-
-(def +gradient-src+ (json/write (sources/gradient-src)))
-(def +checkerboard-src+ (json/write (sources/checkerboard-src)))
-(def +ripple-src+ (json/write (sources/ripple-src)))
-
-(defn.js compile-shader
-  "compiles a single WebGL shader and throws on failure"
-  {:added "4.1"}
-  [gl type source]
-  (var s (. gl (createShader type)))
-  (. gl (shaderSource s source))
-  (. gl (compileShader s))
-  (when (not (. gl (getShaderParameter s (. gl COMPILE_STATUS))))
-    (throw (new Error (. gl (getShaderInfoLog s)))))
-  (return s))
-
-(defn.js create-effect-canvas
-  "creates a canvas, compiles the supplied fragment shader, and draws once"
-  {:added "4.1"}
-  [frag-src]
-  (var canvas (document.createElement "canvas"))
-  (:= (. canvas width) 256)
-  (:= (. canvas height) 256)
-  (:= (. canvas style width) "100%")
-  (:= (. canvas style height) "100%")
-  (var gl (. canvas (getContext "webgl")))
-  (when (== null gl)
-    (throw (new Error "WebGL not supported")))
-  (var vs "attribute vec2 a_position; void main() { gl_Position = vec4(a_position, 0.0, 1.0); }")
-  (var fs (+ "precision mediump float;\n"
-             (. frag-src (replace (new RegExp "^#version[^\\n]*\\n?" "gm") ""))))
-  (var program (. gl (createProgram)))
-  (. gl (attachShader program (-/compile-shader gl (. gl VERTEX_SHADER) vs)))
-  (. gl (attachShader program (-/compile-shader gl (. gl FRAGMENT_SHADER) fs)))
-  (. gl (linkProgram program))
-  (when (not (. gl (getProgramParameter program (. gl LINK_STATUS))))
-    (throw (new Error (. gl (getProgramInfoLog program)))))
-  (. gl (useProgram program))
-  (var buf (. gl (createBuffer)))
-  (. gl (bindBuffer (. gl ARRAY_BUFFER) buf))
-  (. gl (bufferData (. gl ARRAY_BUFFER)
-                    (new Float32Array [-1 -1 3 -1 -1 3])
-                    (. gl STATIC_DRAW)))
-  (var loc (. gl (getAttribLocation program "a_position")))
-  (. gl (enableVertexAttribArray loc))
-  (. gl (vertexAttribPointer loc 2 (. gl FLOAT) false 0 0))
-  (var u-res (. gl (getUniformLocation program "u_resolution")))
-  (var u-time (. gl (getUniformLocation program "u_time")))
-  (. gl (viewport 0 0 256 256))
-  (. gl (clearColor 0 0 0 1))
-  (. gl (clear (. gl COLOR_BUFFER_BIT)))
-  (when (!= null u-res) (. gl (uniform2f u-res 256 256)))
-  (when (!= null u-time) (. gl (uniform1f u-time 0)))
-  (. gl (drawArrays (. gl TRIANGLES) 0 3))
-  (return {"canvas" canvas
-           "gl" gl
-           "program" program
-           "u-resolution" u-res
-           "u-time" u-time}))
 
 (defn.js show-effect
   "creates a new playground tab and renders the effect into it"
   {:added "4.1"}
-  [tab-id frag-src]
+  [tab-id]
+  (var frag-src (. (!:G __glsl_sources__) [tab-id]))
   (window.PLAYGROUND.createTab tab-id tab-id)
-  (var result (-/create-effect-canvas frag-src))
+  (var result (ui-webgl/render-fragment-shader frag-src {"width" 256 "height" 256 "time" 0}))
   (var canvas (. result ["canvas"]))
-  (when (== undefined (typeof (!:G __glsl_canvases__)))
+  (when (== "undefined" (typeof (!:G __glsl_canvases__)))
     (:= (!:G __glsl_canvases__) {}))
   (:= (. (!:G __glsl_canvases__) [tab-id]) canvas)
-  (window.PLAYGROUND.setTabContent tab-id canvas)
+  (window.PLAYGROUND.switchTab tab-id)
+  (var panel (document.getElementById (+ "tab-" tab-id)))
+  (when panel
+    (:= (. panel innerHTML) "")
+    (. panel (appendChild canvas)))
   (return tab-id))
 
 (defn.js read-center-pixel
@@ -97,13 +44,7 @@
   {:added "4.1"}
   [tab-id]
   (var canvas (. (!:G __glsl_canvases__) [tab-id]))
-  (var gl (. canvas (getContext "webgl")))
-  (var pixels (new Uint8Array 4))
-  (. gl (readPixels 128 128 1 1 (. gl RGBA) (. gl UNSIGNED_BYTE) pixels))
-  (return [(. pixels [0])
-           (. pixels [1])
-           (. pixels [2])
-           (. pixels [3])]))
+  (return (ui-webgl/read-center-pixel canvas)))
 
 (defn- wait-for-channel
   "waits up to 5s for the playground websocket channel to be connected"
@@ -117,7 +58,20 @@
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:scaffold-imports :js)
-          (def +url+ (js-playground/play-url (l/rt :js)))
+          (def +sources+ {:gradient (sources/gradient-src)
+                          :checkerboard (sources/checkerboard-src)
+                          :ripple (sources/ripple-src)})
+          (def +page+ (js-playground/play-page
+                       (l/rt :js)
+                       {:name "glsl-playground"
+                        :title "GLSL Playground"
+                        :tabs [{:id "stage" :label "Stage"}]
+                        :head (str "<script type=\"text/javascript\">"
+                                   "window.__glsl_sources__="
+                                   (json/write +sources+)
+                                   ";</script>")}))
+          (def +url+ (let [{:keys [host port]} (l/rt :js)]
+                       (str "http://" host ":" port "/" +page+)))
           (def +browser+ (chromedriver/browser {}))
           (chromedriver/goto +url+ 5000 +browser+)
           (wait-for-channel (l/rt :js))]
@@ -134,12 +88,12 @@
 (fact "three glsl effects are rendered in separate playground tabs"
 
     (!.js
-      (do (-/show-effect "gradient" (@! +gradient-src+))
-          (-/show-effect "checkerboard" (@! +checkerboard-src+))
-          (-/show-effect "ripple" (@! +ripple-src+))
+      (do (-/show-effect "gradient")
+          (-/show-effect "checkerboard")
+          (-/show-effect "ripple")
           (window.PLAYGROUND.switchTab "gradient")
-          {"active" (window.PLAYGROUND.getActiveTab)}))
-    => (contains {"active" "gradient"})
+          (window.PLAYGROUND.getActiveTab)))
+    => "gradient"
 
     (!.js (-/read-center-pixel "gradient"))
     => (fn [pixels]
