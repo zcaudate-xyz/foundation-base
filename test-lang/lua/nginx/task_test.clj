@@ -1,6 +1,7 @@
 (ns lua.nginx.task-test
   (:require [hara.runtime.nginx.config :as config]
             [std.json :as json]
+            [std.lib.env :as env]
             [hara.lang :as l])
   (:use code.test))
 
@@ -9,13 +10,15 @@
 
 (l/script- :lua.nginx
   {:runtime :basic
-    :config  {:exec ["resty" "--http-conf" +resty-http-conf+ "-e"]}
-    :require [[lua.nginx :as n]
-              [lua.nginx.task :as t]
-              [lua.nginx.common-cache :as cache]]})
+   :test-mode true
+   :config  {:exec ["resty" "--http-conf" +resty-http-conf+ "-e"]}
+   :require [[lua.nginx :as n]
+             [lua.nginx.task :as t]
+             [lua.nginx.common-cache :as cache]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
+ {:skip     (not (env/program-exists? "resty"))
+  :setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer lua.nginx.task/INSTANCE-KEY :added "4.0"}

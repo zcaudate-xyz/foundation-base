@@ -168,7 +168,7 @@
                      :function  {:prefix ""
                                  :raw ""
                                  :args {:sep ", "}}
-                     :invoke    {:reversed true :hint ""}
+                     :invoke    {:reversed true :hint "" :assign ":"}
                      :block     {:start " {" :end "}"}}
           :block   {:for {:parameter {:sep ";"}}}
           :function {:defgen {:body {:start " sync* {" :end "}"}}}

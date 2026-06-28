@@ -3,11 +3,13 @@
             [net.http.websocket :as client]
             [hara.runtime.nginx]
             [std.json :as json]
+            [std.lib.env :as env]
             [hara.lang :as l])
   (:use code.test))
 
 (l/script- :lua.nginx
   {:runtime :nginx.instance
+   :test-mode true
    :require [[lua.nginx :as n]
               [lua.nginx.websocket :as ws]
               [xt.lang.spec-base :as xt]
@@ -16,7 +18,8 @@
               [lua.nginx.common-cache :as cache]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
+ {:skip     (not (env/program-exists? "nginx"))
+  :setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer lua.nginx.websocket/STREAM-FLAG-KEY :added "4.0"}

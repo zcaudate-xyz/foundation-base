@@ -107,6 +107,8 @@
   {:added "4.0"}
   [{:keys [host port]
     :as rt}]
+  (when (not (env/program-exists? "nginx"))
+    (f/error "nginx binary not found on PATH" {:binary "nginx"}))
   (let [[tmp-dir tmp-file] (make-temp rt)
         sh-args  ["nginx" "-p" tmp-dir "-c" tmp-file]
         sh-err   (f/with-thrown
@@ -120,7 +122,7 @@
               #_(throw (or sh-err
                            wait-err))
               [:errored tmp-dir])
-          
+
           :else
           [:started tmp-dir tmp-file])))
 

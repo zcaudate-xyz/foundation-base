@@ -1,16 +1,19 @@
 (ns lua.core-test
   (:require [hara.lang :as l]
-            [hara.model.spec-lua :as lua])
+            [hara.model.spec-lua :as lua]
+            [std.lib.env :as env])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
+   :test-mode true
    :exec    :resty
    :require [[lua.core :as u]
              [xt.lang.common-iter :as it]]})
 
 (fact:global
- {:setup [(l/rt:restart)]
+ {:skip (not (env/program-exists? "resty"))
+  :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer lua.core/render :added "4.0"}

@@ -601,9 +601,11 @@
                         (list :- "completer.complete")
                         (list :- "completer.completeError"))]
     (template/$
-     (do (var completer (:- "Completer<dynamic>()"))
-         ~call
-         (return (. completer future))))))
+     (Future.sync
+      (fn []
+        (var completer (:- "Completer<dynamic>()"))
+        ~call
+        (return (. completer future)))))))
 
 (defn dart-tf-x-promise-all
   [[_ promises]]
@@ -743,9 +745,14 @@
   (let [call-ok  (dart-call cb nil filename)
         call-err (dart-call cb 'err nil)]
     (template/$
-     (. (. (File ~filename) (writeAsString ~s))
+     (. (Directory (. (. (File ~filename) parent) path))
+        (create :recursive true)
         (then (fn [_]
-                (return ~call-ok)))
+                (return (. (. (File ~filename) (writeAsString ~s))
+                           (then (fn [_]
+                                   (return ~call-ok)))
+                           (catchError (fn [err]
+                                         (return ~call-err)))))))
         (catchError (fn [err]
                       (return ~call-err)))))))
 

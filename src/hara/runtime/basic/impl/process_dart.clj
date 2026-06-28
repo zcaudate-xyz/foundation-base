@@ -127,6 +127,8 @@
                             (str/includes? source "File(")
                             (str/includes? source "Process.")
                             (str/includes? source "Platform."))
+        async-needed?   (or (str/includes? source "Future.")
+                            (str/includes? source "Completer"))
         math-needed?    (str/includes? source "math.")
         lines           (str/split-lines source)
         [import-lines body-lines]
@@ -143,6 +145,9 @@
                           (and io-needed?
                                (not-any? #(= "import 'dart:io';" %) import-lines))
                           (conj "import 'dart:io';")
+                          (and async-needed?
+                               (not-any? #(= "import 'dart:async';" %) import-lines))
+                          (conj "import 'dart:async';")
                           (and math-needed?
                                (not-any? #(= "import 'dart:math' as math;" %) import-lines))
                           (conj "import 'dart:math' as math;"))]

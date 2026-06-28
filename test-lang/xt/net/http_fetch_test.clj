@@ -4,6 +4,7 @@
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
 
+^{:seedgen/scaffold true}
 (do 
   (l/script- :postgres
     {:runtime :jdbc.client
@@ -22,10 +23,13 @@
   (defrun.pg __init__
     (s/grant-usage #{"scratch_v0"})))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true
+                 :js   {:extra [[js.net.http-fetch :as js-fetch]]}
+                 :dart {:extra [[dart.net.http-fetch :as dart-fetch]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.net.http-fetch :as fetch]
+             ^{:seedgen/extra true}
              [js.net.http-fetch :as js-fetch]
              [xt.lang.common-protocol :as protocol]
              [xt.lang.common-repl :as repl]
@@ -74,7 +78,8 @@
      {:path "/sign-in"}))
   => {"url" "http://127.0.0.1:55121/auth/v1/sign-in", "method" "GET", "headers" {"apikey" "TOKEN", "Content-Type" "application/json"}})
 
-^{:refer xt.net.http-fetch/request-http :added "4.1"}
+^{:refer xt.net.http-fetch/request-http :added "4.1"
+  :seedgen/base {:dart {:suppress true}}}
 (fact "dispatches request through the wrapped fetch client"
   
   (notify/wait-on :js

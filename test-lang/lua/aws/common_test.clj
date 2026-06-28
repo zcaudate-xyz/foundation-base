@@ -1,11 +1,13 @@
 (ns lua.aws.common-test
   (:require [clojure.string]
             [hara.lang :as l]
+            [std.lib.env :as env]
             [std.string.prose :as prose])
   (:use code.test))
 
 (l/script- :lua.nginx
   {:runtime :basic
+   :test-mode true
    :config {:program :resty}
    :require [[lua.core :as u]
              [lua.nginx :as n]
@@ -13,7 +15,8 @@
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
+ {:skip     (not (env/program-exists? "resty"))
+  :setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer lua.aws.common/get-sha256 :added "4.0"}

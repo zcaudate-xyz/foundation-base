@@ -53,10 +53,12 @@
   (var headers (->  {}
                     (xt/x:obj-assign (xt/x:get-key defaults "headers"))
                     (xt/x:obj-assign (xt/x:get-key input "headers"))))
-  (return {:url     (-/prepare-url client input)
-           :body    body
-           :method  (or method "GET")
-           :headers headers}))
+  (var output {:url     (-/prepare-url client input)
+               :method  (or method "GET")
+               :headers headers})
+  (when (xt/x:not-nil? body)
+    (:= output (xt/x:obj-assign output {"body" body})))
+  (return output))
 
 (defn.xt wrap-prepare-input
   [handler]

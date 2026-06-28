@@ -1,10 +1,12 @@
 (ns lua.aws.s3-test
   (:require [lib.minio :as minio]
-            [hara.lang :as l])
+            [hara.lang :as l]
+            [std.lib.env :as env])
   (:use code.test))
 
 (l/script- :lua.nginx
   {:runtime :basic
+   :test-mode true
    :config {:program :resty}
    :require [[lua.core :as u]
              [lua.nginx :as n]
@@ -13,7 +15,8 @@
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
- {:setup    [(l/rt:restart)
+ {:skip     (not (env/program-exists? "resty"))
+  :setup    [(l/rt:restart)
              (minio/start-minio-array [{:port 4489
                                         :console 4499}])
              (Thread/sleep 1000)]

@@ -1,16 +1,19 @@
 (ns lua.nginx-test
   (:require [hara.runtime.nginx :as nginx]
             [hara.lang :as l]
+            [std.lib.env :as env]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua.nginx
   {:runtime :nginx.instance
+   :test-mode true
    :require [[lua.nginx :as n]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
+ {:skip     (not (env/program-exists? "nginx"))
+  :setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer lua.nginx/req-raw-uri :added "4.0"}
