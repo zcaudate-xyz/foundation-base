@@ -9,9 +9,9 @@
    :require [[postgres.core :as pg]]
    :import [["citext"]
             ["uuid-ossp"]]
-   :static {:application ["scratch-v3"]
-            :seed        ["scratch-v3"]
-            :all {:schema ["scratch-v3"]}}})
+   :static {:application ["scratch_v3"]
+            :seed        ["scratch_v3"]
+            :all {:schema ["scratch_v3"]}}})
 
 (def RecordType
   [:op-created {:type :uuid :scope :-/system}
@@ -134,28 +134,323 @@
                             :track o-op})]
     (return o-out)))
 
-
 ;;
-;; Generate
+;; User / UserProfile / Wallet / Asset
 ;;
 
-(def +app+ (app/app-create "scratch-v3"))
+(deftype.pg ^{:track [-/TrackingMin]
+              :append [-/RecordType]
+              :public true}
+  User
+  "User identity for the scratch-v3 sample."
+  [:id            {:type :uuid :primary true
+                   :sql {:default (pg/uuid-generate-v4)}}
+   :nickname      {:type :citext :required true :unique true
+                   :scope :-/info
+                   :web {:example "user123"}}
+   :email         {:type :citext :required true :unique true
+                   :scope :-/info
+                   :web {:example "user@example.com"}}
+   :is-active     {:type :boolean :required true
+                   :scope :-/info
+                   :sql {:default true}}
+   :is-verified   {:type :boolean :required true
+                   :scope :-/info
+                   :sql {:default false}}])
+
+(deftype.pg ^{:track [-/TrackingMin]
+              :append [-/RecordType]
+              :public true}
+  UserProfile
+  "Public profile attached to a User."
+  [:id            {:type :uuid :primary true
+                   :sql {:default (pg/uuid-generate-v4)}}
+   :account       {:type :ref :required true :unique true
+                   :ref {:ns -/User :rval :profile}
+                   :sql {:cascade true}}
+   :first-name    {:type :text :scope :-/info
+                   :web {:example "John"}}
+   :last-name     {:type :text :scope :-/info
+                   :web {:example "Smith"}}
+   :language      {:type :citext :required true
+                   :scope :-/info
+                   :sql {:default "EN"}}
+   :about         {:type :text
+                   :web {:example "Scratch v3 user"}}])
+
+(deftype.pg ^{:track [-/TrackingMin]
+              :append [-/RecordType]
+              :public true}
+  Wallet
+  "Wallet owned by a User."
+  [:id            {:type :uuid :primary true
+                   :sql {:default (pg/uuid-generate-v4)}}
+   :slug          {:type :citext :required true
+                   :scope :-/info
+                   :sql {:default "default"}}
+   :owner         {:type :ref :required true :unique true
+                   :ref {:ns -/User}
+                   :sql {:cascade true}}])
+
+(deftype.pg ^{:track [-/TrackingMin]
+              :append [-/RecordType]
+              :public true}
+  Asset
+  "Asset balance for a currency inside a Wallet."
+  [:id            {:type :uuid :primary true
+                   :sql {:default (pg/uuid-generate-v4)}}
+   :currency      {:type :ref :required true
+                   :ref {:ns -/Currency}}
+   :wallet        {:type :ref :required true
+                   :ref {:ns -/Wallet :rval :entries}
+                   :sql {:cascade true}}
+   :balance       {:type :numeric :required true
+                   :sql {:default 0}}
+   :count-tx      {:type :bigint :required true
+                   :sql {:default 0}}])
+
+;; -- User helpers
+
+(defsel.pg ^{:- [-/User]
+             :args []
+             :api/view true}
+  user-all
+  {:__deleted__ false})
+
+(defsel.pg ^{:- [-/User]
+             :args [:uuid i-user-id]
+             :api/view true}
+  user-by-id
+  {:id i-user-id
+   :__deleted__ false})
+
+(defsel.pg ^{:- [-/User]
+             :args [:citext i-nickname]
+             :api/view true}
+  user-by-nickname
+  {:nickname i-nickname
+   :__deleted__ false})
+
+(defn.pg
+  insert-user
+  "Creates a user row."
+  {:added "4.1"}
+  [:uuid i-id
+   :citext i-nickname
+   :citext i-email
+   :boolean i-is-active
+   :boolean i-is-verified
+   :jsonb o-op]
+  (let [o-out (pg/g:insert -/User
+                           {:id i-id
+                            :nickname i-nickname
+                            :email i-email
+                            :is-active i-is-active
+                            :is-verified i-is-verified}
+                           {:track o-op})]
+    (return o-out)))
+
+(defn.pg
+  update-user
+  "Updates a user row."
+  {:added "4.1"}
+  [:uuid i-id
+   :jsonb m
+   :jsonb o-op]
+  (let [o-out (pg/t:update -/User
+                           {:where {:id i-id}
+                            :set m
+                            :track o-op})]
+    (return o-out)))
+
+(defn.pg
+  delete-user
+  "Soft-deletes a user row."
+  {:added "4.1"}
+  [:uuid i-id
+   :jsonb o-op]
+  (let [o-out (pg/t:update -/User
+                           {:where {:id i-id}
+                            :set {:__deleted__ true}
+                            :track o-op})]
+    (return o-out)))
+
+(defn.pg
+  create-user
+  "Creates a user row, generating the id."
+  {:added "4.1"}
+  [:citext i-nickname
+   :citext i-email
+   :jsonb o-op]
+  (let [(:uuid i-id) (pg/gen-random-uuid)]
+    (return (-/insert-user i-id i-nickname i-email true false o-op))))
+
+;; -- UserProfile helpers
+
+(defsel.pg ^{:- [-/UserProfile]
+             :args [:uuid i-account-id]
+             :api/view true}
+  user-profile-by-account
+  {:account i-account-id})
+
+(defn.pg
+  insert-user-profile
+  "Creates a profile for a user."
+  {:added "4.1"}
+  [:uuid i-account-id
+   :text i-first-name
+   :text i-last-name
+   :citext i-language
+   :text i-about
+   :jsonb o-op]
+  (let [o-out (pg/g:insert -/UserProfile
+                           {:account i-account-id
+                            :first-name i-first-name
+                            :last-name i-last-name
+                            :language i-language
+                            :about i-about}
+                           {:track o-op})]
+    (return o-out)))
+
+(defn.pg
+  update-user-profile
+  "Updates the profile for a user."
+  {:added "4.1"}
+  [:uuid i-account-id
+   :jsonb m
+   :jsonb o-op]
+  (let [o-out (pg/t:update -/UserProfile
+                           {:where {:account i-account-id}
+                            :set m
+                            :track o-op})]
+    (return o-out)))
+
+;; -- Wallet helpers
+
+(defsel.pg ^{:- [-/Wallet]
+             :args [:uuid i-owner-id]
+             :api/view true}
+  wallet-by-owner
+  {:owner i-owner-id})
+
+(defn.pg
+  insert-wallet
+  "Creates a wallet for a user."
+  {:added "4.1"}
+  [:uuid i-owner-id
+   :citext i-slug
+   :jsonb o-op]
+  (let [o-out (pg/g:insert -/Wallet
+                           {:owner i-owner-id
+                            :slug i-slug}
+                           {:track o-op})]
+    (return o-out)))
+
+(defn.pg
+  ensure-wallet
+  "Creates a default wallet for a user if one does not exist."
+  {:added "4.1"}
+  [:uuid i-owner-id
+   :jsonb o-op]
+  (let [v-wallet (pg/t:get -/Wallet
+                           {:where {:owner i-owner-id}})]
+    (if v-wallet
+      (return v-wallet)
+      (let [o-out (pg/g:insert -/Wallet
+                               {:owner i-owner-id
+                                :slug "default"}
+                               {:track o-op})]
+        (return o-out)))))
+
+;; -- Asset helpers
+
+(defsel.pg ^{:- [-/Asset]
+             :args [:uuid i-wallet-id]
+             :api/view true}
+  asset-by-wallet
+  {:wallet i-wallet-id})
+
+(defsel.pg ^{:- [-/Asset]
+             :args [:uuid i-wallet-id
+                    :citext i-currency-id]
+             :api/view true}
+  asset-by-wallet-currency
+  {:wallet i-wallet-id
+   :currency i-currency-id})
+
+(defn.pg
+  insert-asset
+  "Creates an asset row."
+  {:added "4.1"}
+  [:uuid i-wallet-id
+   :citext i-currency-id
+   :numeric i-balance
+   :jsonb o-op]
+  (let [o-out (pg/g:insert -/Asset
+                           {:wallet i-wallet-id
+                            :currency i-currency-id
+                            :balance i-balance}
+                           {:track o-op})]
+    (return o-out)))
+
+(defn.pg
+  ensure-asset
+  "Creates an asset for a wallet/currency pair if one does not exist."
+  {:added "4.1"}
+  [:uuid i-wallet-id
+   :citext i-currency-id
+   :jsonb o-op]
+  (let [v-asset (pg/t:get -/Asset
+                          {:where {:wallet i-wallet-id
+                                   :currency i-currency-id}})]
+    (if v-asset
+      (return v-asset)
+      (let [o-out (pg/g:insert -/Asset
+                               {:wallet i-wallet-id
+                                :currency i-currency-id
+                                :balance 0}
+                               {:track o-op})]
+        (return o-out)))))
+
+(defn.pg
+  asset-credit
+  "Credits an asset balance."
+  {:added "4.1"}
+  [:uuid i-asset-id
+   :numeric i-amount
+   :jsonb o-op]
+  (let [o-out (pg/t:update -/Asset
+                           {:where {:id i-asset-id}
+                            :set {:balance (+ #{"balance"} i-amount)
+                                  :count-tx (+ #{"count_tx"} 1)}
+                            :track o-op
+                            :single true})]
+    (return o-out)))
+
+(defn.pg
+  asset-deduct
+  "Deducts from an asset balance."
+  {:added "4.1"}
+  [:uuid i-asset-id
+   :numeric i-amount
+   :jsonb o-op]
+  (let [o-out (pg/t:update -/Asset
+                           {:where {:id i-asset-id}
+                            :set {:balance (- #{"balance"} i-amount)
+                                  :count-tx (+ #{"count_tx"} 1)}
+                            :track o-op
+                            :single true})]
+    (return o-out)))
+
+
+
+
+
+(def +app+ (app/app-create "scratch_v3"))
 (def +lookup+ (bind-pg/bind-app +app+ :time-updated))
-(def +schema+
-  {"Currency"
-   {"id" {"ident" "id" "type" "text" "order" 0}
-    "type" {"ident" "type" "type" "text" "order" 1}
-    "symbol" {"ident" "symbol" "type" "text" "order" 2}
-    "native" {"ident" "native" "type" "text" "order" 3}
-    "decimal" {"ident" "decimal" "type" "long" "order" 4}
-    "name" {"ident" "name" "type" "text" "order" 5}
-    "plural" {"ident" "plural" "type" "text" "order" 6}
-    "description" {"ident" "description" "type" "text" "order" 7}
-    "time_created" {"ident" "time_created" "type" "long" "order" 8}
-    "time_updated" {"ident" "time_updated" "type" "long" "order" 9}
-    "op_created" {"ident" "op_created" "type" "text" "order" 10}
-    "op_updated" {"ident" "op_updated" "type" "text" "order" 11}
-    "__deleted__" {"ident" "__deleted__" "type" "boolean" "order" 12}}})
+
+
+
 
 (def +schema+
   (bind-pg/bind-schema (:schema +app+)))
@@ -165,7 +460,7 @@
    :export [MODULE]})
 
 (defn.xt get-schema
-  "returns the generated scratch-v3 schema"
+  "returns the generated scratch_v3 schema"
   {:added "4.1"}
   []
   (return (@! +schema+)))

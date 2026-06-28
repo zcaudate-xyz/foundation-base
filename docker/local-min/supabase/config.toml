@@ -3,8 +3,8 @@ project_id = "local-min"
 [api]
 enabled = true
 port = 55121
-schemas = ["public", "storage", "graphql_public", "scratch", "scratch_v0"]
-extra_search_path = ["public", "extensions", "scratch", "scratch_v0"]
+schemas = ["public", "storage", "graphql_public", "scratch", "scratch_v0", "scratch_v3"]
+extra_search_path = ["public", "extensions", "scratch", "scratch_v0", "scratch_v3"]
 max_rows = 1000
 
 [db]

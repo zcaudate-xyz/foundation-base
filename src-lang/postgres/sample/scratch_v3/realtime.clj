@@ -52,6 +52,7 @@
   (var event-type (xt/x:str-to-upper (or (. payload ["eventType"])
                                          (. payload ["event_type"])
                                          "")))
+  (var table (or (. payload ["table"]) "Currency"))
   (var new-row (or (. payload ["new"]) {}))
   (var old-row (or (. payload ["old"]) {}))
   (var row (:? (== event-type "DELETE") old-row new-row))
@@ -60,11 +61,11 @@
         (return nil)
 
         (== event-type "DELETE")
-        (return {"db/remove" {"Currency" [row-id]}})
+        (return {"db/remove" {table [row-id]}})
 
         :else
         (do (xt/x:obj-assign row {"__deleted__" false})
-            (return {"db/sync" {"Currency" [row]}}))))
+            (return {"db/sync" {table [row]}}))))
 
 (defn.xt postgres-change->update
   "wraps a sync request in the js.cell patch update shape"

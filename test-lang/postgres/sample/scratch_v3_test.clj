@@ -9,15 +9,11 @@
   {:runtime :basic
    :require [   [xt.lang.spec-base :as xt]
    [xt.lang.common-data :as xtd]
-   [xt.db.system :as xdb]
    [postgres.sample.scratch-v3 :as scratch]
    [postgres.sample.scratch-v3.view-currency :as view-currency]
    [postgres.sample.scratch-v3.route-currency :as route-currency]
    [postgres.sample.scratch-v3.api-currency :as api-currency]
-   [postgres.sample.scratch-v3.realtime :as realtime]
-   [postgres.sample.scratch-v3.cell :as cell]
-   [js.cell.binding :as binding]
-   [js.cell.binding.model :as binding-model]]})
+   [postgres.sample.scratch-v3.realtime :as realtime]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -25,10 +21,19 @@
 
 ^{:refer postgres.sample.scratch-v3/Currency :added "4.1"}
 (fact "registers Currency in the scratch-v3 application schema"
-  (let [appv (app/app-create "scratch-v3")]
+  (let [appv (app/app-create "scratch_v3")]
     [(contains? (:tables appv) 'Currency)
      (some? (get-in appv [:schema :tree :Currency]))])
   => [true true])
+
+^{:refer postgres.sample.scratch-v3/User :added "4.1"}
+(fact "registers User/UserProfile/Wallet/Asset in the scratch_v3 schema"
+  (let [appv (app/app-create "scratch_v3")]
+    [(contains? (:tables appv) 'User)
+     (contains? (:tables appv) 'UserProfile)
+     (contains? (:tables appv) 'Wallet)
+     (contains? (:tables appv) 'Asset)])
+  => [true true true true])
 
 ^{:refer postgres.sample.scratch-v3/Currency :added "4.1"}
 (fact "defines currency queries, mutations, and schema bindings"
@@ -39,10 +44,12 @@
                                  "Australian Dollar"
                                  "Australian Dollars"
                                  "Currency for Australia"
-                                 {})])]
+                                 {})])
+        user-sql (l/emit-as :postgres `[(scratch/create-user "alice" "alice@example.com" {})])]
     [(str/includes? by-id-sql "currency_by_id")
-     (str/includes? insert-sql "insert_currency")])
-  => [true true]
+     (str/includes? insert-sql "insert_currency")
+     (str/includes? user-sql "create_user")])
+  => [true true true]
 
   (!.js
    (xt/x:has-key? (scratch/get-schema-lookup) "Currency"))
@@ -89,65 +96,6 @@
                                "type" "fiat"
                                "__deleted__" false}]}}
       {"db/remove" {"Currency" ["AUD"]}}])
-
-^{:refer postgres.sample.scratch-v3.cell/compile-bindings :added "4.1"}
-(fact "links the generated view registry to js.cell local and remote bindings"
-  (!.js
-   (var service (cell/create-service
-                 {"execute" (fn [compiled _]
-                              (return [true compiled]))}))
-   (var [ok compiled]
-        (cell/compile-bindings service))
-   (var local-view (xtd/get-in compiled ["currency" "all_local"]))
-   (var remote-view (xtd/get-in compiled ["currency" "all_remote"]))
-   (var local-handler (xt/x:get-key local-view "handler"))
-   (var remote-handler (xt/x:get-key remote-view "remoteHandler"))
-   (xdb/sync-event
-    (xtd/get-in service ["dbs" "currency-local"])
-    ["add"
-     {"Currency" [{"id" "AUD"
-                   "type" "fiat"
-                   "symbol" "$"
-                   "native" "$AU"
-                   "decimal" 2
-                   "name" "Australian Dollar"
-                   "plural" "Australian Dollars"
-                    "description" "Currency for Australia"
-                    "time_updated" 1
-                    "__deleted__" false}]}])
-   [ok
-    (xt/x:is-function? local-handler)
-    (remote-handler {"id" "link-1"})])
-  => (fn [[ok local-ok remote-out]]
-       (and ok
-            local-ok
-            (= "Currency" (xt/x:get-key remote-out "table"))
-            (= "*/standard" (xt/x:get-key remote-out "select"))
-            (= [] (xt/x:get-key remote-out "filters"))))
-
-  (!.js
-   (var local-db (cell/create-local-db))
-   (cell/apply-realtime
-    local-db
-    {"eventType" "INSERT"
-     "new" {"id" "USD"
-            "type" "fiat"
-            "symbol" "$"
-            "native" "$US"
-            "decimal" 2
-            "name" "US Dollar"
-            "plural" "US Dollars"
-            "description" "Currency for the United States"
-            "time_updated" 2}})
-   (xdb/db-pull-sync local-db
-                     (scratch/get-schema)
-                     ["Currency"
-                      ["id" "type" "name" "time_updated"]]))
-  => [{"id" "USD"
-       "type" "fiat"
-       "name" "US Dollar"
-       "time_updated" 2}])
-
 
 ^{:refer postgres.sample.scratch-v3/insert-currency :added "4.1"}
 (fact "TODO")

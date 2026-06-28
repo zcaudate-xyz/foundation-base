@@ -14,9 +14,9 @@
    :export [MODULE]})
 
 (defn.js make-query
-  [db-id select-method target]
+  [db-id table select-method target]
   (var query {"db" db-id
-              "table" "Currency"
+              "table" table
               "select_method" select-method
               "return_method" "default"})
   (when target
@@ -24,20 +24,22 @@
   (return query))
 
 (defn.js make-binding
-  [db-id select-method default-output target]
-  (return {"query" (-/make-query db-id select-method target)
+  [db-id table select-method default-output target]
+  (return {"query" (-/make-query db-id table select-method target)
            "default_output" default-output}))
 
 (defn.js make-binding-pair
-  [view-id select-method default-output]
+  [db-id-prefix view-id table select-method default-output]
   (var out {})
   (xt/x:set-key out (+ view-id "_local")
-                (-/make-binding "currency-local"
+                (-/make-binding (+ db-id-prefix "-local")
+                                table
                                 select-method
                                 default-output
                                 nil))
   (xt/x:set-key out (+ view-id "_remote")
-                (-/make-binding "currency-remote"
+                (-/make-binding (+ db-id-prefix "-remote")
+                                table
                                 select-method
                                 default-output
                                 "supabase"))
@@ -46,9 +48,21 @@
 (def.js BINDINGS
   {"currency"
    (xtd/obj-assign
-    (-/make-binding-pair "all" "all_active" [])
-    (-/make-binding-pair "by_id" "by_id" nil)
-    (-/make-binding-pair "by_type" "by_type" []))})
+    (-/make-binding-pair "scratch" "all" "Currency" "all_active" [])
+    (-/make-binding-pair "scratch" "by_id" "Currency" "by_id" nil)
+    (-/make-binding-pair "scratch" "by_type" "Currency" "by_type" []))
+   "user"
+   (xtd/obj-assign
+    (-/make-binding-pair "scratch" "all" "User" "all" [])
+    (-/make-binding-pair "scratch" "by_id" "User" "by_id" nil)
+    (-/make-binding-pair "scratch" "by_nickname" "User" "by_nickname" nil))
+   "wallet"
+   (xtd/obj-assign
+    (-/make-binding-pair "scratch" "by_owner" "Wallet" "by_owner" nil))
+   "asset"
+   (xtd/obj-assign
+    (-/make-binding-pair "scratch" "by_wallet" "Asset" "by_wallet" [])
+    (-/make-binding-pair "scratch" "by_wallet_currency" "Asset" "by_wallet_currency" nil))})
 
 (defn.js create-local-db
   "creates the local cache db used by js.cell views"
@@ -73,13 +87,13 @@
            (or opts {}))))
 
 (defn.js create-service
-  "creates the js.cell service registry for currency views"
+  "creates the js.cell service registry for scratch-v3 views"
   {:added "4.1"}
   [remote-opts]
   (return
    (service/create-service
-    {"currency-local" (-/create-local-db)
-     "currency-remote" (-/create-remote-db remote-opts)})))
+    {"scratch-local" (-/create-local-db)
+     "scratch-remote" (-/create-remote-db remote-opts)})))
 
 (defn.js get-bindings
   "returns the declarative js.cell bindings for currency views"
