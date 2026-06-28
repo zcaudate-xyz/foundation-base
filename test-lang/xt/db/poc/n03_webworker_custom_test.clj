@@ -44,7 +44,9 @@
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
 (fact:global
- {:setup [(l/rt:restart :js)
+ {
+  :skip (not (std.lib.env/program-exists? "supabase"))
+  :setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
           (l/rt:scaffold-imports :js)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")

@@ -63,9 +63,11 @@
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
 (fact:global
- {:setup [(l/rt:restart)
+ {:skip (not (std.lib.env/program-exists? "supabase"))
+  :setup [(l/rt:restart)
           (l/rt:setup :postgres)
-          (wait-for-postgrest-ready)]
+          (local-min/refresh-postgrest-schema "scratch_v0" "Log")
+          (local-min/wait-for-postgrest-ready "scratch_v0" "Log")]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.poc.node-basic-test/init-services :added "4.1"}

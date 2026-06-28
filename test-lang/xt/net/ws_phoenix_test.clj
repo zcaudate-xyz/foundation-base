@@ -60,7 +60,9 @@
   (return client))
 
 (fact:global
- {:setup [(l/rt:restart)
+ {
+  :skip (not (std.lib.env/program-exists? "supabase"))
+  :setup [(l/rt:restart)
           (l/rt:setup :postgres)]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})

@@ -40,9 +40,12 @@
              [xt.net.addon-supabase :as addon]]})
 
 (fact:global
- {:setup [(l/rt:restart)
+ {
+  :skip (not (std.lib.env/program-exists? "supabase"))
+  :setup [(l/rt:restart)
           (l/rt:setup :postgres)
-          (local-min/restart-postgrest)]
+          (local-min/restart-postgrest)
+          (local-min/wait-for-postgrest-ready "scratch_v0" "Log")]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 

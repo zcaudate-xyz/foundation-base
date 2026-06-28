@@ -141,7 +141,9 @@ console.log('smoke test passed');")
    :require [[xt.lang.common-repl :as repl]]})
 
 (fact:global
- {:setup [(l/rt:restart :js)
+ {
+  :skip (not (std.lib.env/program-exists? "supabase"))
+  :setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
