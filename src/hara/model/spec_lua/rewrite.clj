@@ -2,6 +2,7 @@
   (:require [hara.lang.rewrite.hoist :as hoist]
             [hara.lang.rewrite.fn :as fnrw]
             [hara.lang.rewrite.walk :as walk]
+            [hara.model.spec-lua.c-ffi :as c-ffi]
             [std.lib.collection :as collection]))
 
 (defn- lua-lambda-compatible?
@@ -12,7 +13,8 @@
 (def ^:private +lua-rewriter+
   (hoist/create-rewriter
    {:symbol-prefix "lua_callback__"
-    :lambda-compatible? lua-lambda-compatible?}))
+    :lambda-compatible? lua-lambda-compatible?
+    :skip-form? c-ffi/c-ffi-form?}))
 
 (def lua-rewrite-expression
   (:rewrite-expression +lua-rewriter+))
@@ -180,6 +182,15 @@
 
     (= 'try (first form))
     (lua-lower-try form)
+
+    ;; Expand C FFI blocks to C declaration strings.  The Lua hoisting
+    ;; stage now leaves these forms untouched, so the nested fn/fn:>
+    ;; declarations are still available here.
+    (c-ffi/c-ffi-form? form)
+    (let [body (cond (= '%.c (first form)) (rest form)
+                     (= '!:lang (first form)) (drop 2 form)
+                     :else (rest form))]
+      (c-ffi/c-ffi-body->string body))
 
     :else
     (with-form-meta form

@@ -1,5 +1,6 @@
 (ns lua.core-test
-  (:require [hara.lang :as l])
+  (:require [hara.lang :as l]
+            [hara.model.spec-lua :as lua])
   (:use code.test))
 
 (l/script- :lua

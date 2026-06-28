@@ -11,6 +11,7 @@
              [hara.lang.impl :as impl]
              [hara.lang.script :as script]
              [hara.common.util :as ut]
+            [hara.model.spec-lua.c-ffi :as c-ffi]
             [hara.model.spec-lua.rewrite :as rewrite]
             [hara.model.spec-xtalk]
             [hara.model.spec-xtalk.fn-lua :as fn]
@@ -62,15 +63,14 @@
             :else (list 'var* :local decl := bound)))))
 
 (defn lua-tf-c-ffi
-  "transforms a c ffi block"
+  "transforms a c ffi block into a C declaration string.
+
+   This runs at macro-expansion time, before Lua's lambda hoisting
+   stage can extract the nested fn forms, so the full C prototypes
+   are preserved for ffi.cdef."
   {:added "4.0"}
   [[_ & forms]]
-  (let [c-str (impl/emit-str (cons 'do forms)
-                             {:lang :c})]
-    `(\\ "[["
-      ^{:indent 2}
-      (\\ \\ ~c-str)
-      \\ "]]")))
+  (c-ffi/c-ffi-body->string forms))
 
 (defn lua-map-key
   "custom lua map key"

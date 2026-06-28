@@ -349,17 +349,17 @@
   []
   '(. ngxsha1 (new)))
 
-(defmacro.lua md5-new
-  "creates a sha1"
+(defn.lua md5-new
+  "creates an md5 hash object"
   {:added "4.0"}
   []
-  '(. ngxmd5 (new)))
+  (return (. ngxmd5 (new))))
 
-(defmacro.lua sha256-new
-  "creates a sha256"
+(defn.lua sha256-new
+  "creates a sha256 hash object"
   {:added "4.0"}
   []
-  '(. ngxsha256 (new)))
+  (return (. ngxsha256 (new))))
 
 (def$.lua uuid ngxuuid)
 
@@ -367,6 +367,10 @@
 
 (def$.lua uuid-check ngxuuid.is-valid)
 
-(def$.lua to-hex ngxstr.to-hex)
+(defn.lua to-hex
+  "converts a binary string to hex"
+  {:added "4.0"}
+  [x]
+  (return (ngxstr.to-hex x)))
 
 (def$.lua atoi ngxstr.atoi)

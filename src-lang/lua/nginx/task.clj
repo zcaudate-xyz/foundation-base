@@ -83,8 +83,7 @@
   
   (cache/meta-assoc "task"
                     gid
-                    (xt/x:get-key meta gid)
-                    instdata)
+                    (xt/x:get-key meta gid))
   (return true))
 
 (defn.lua task-remove-instance
@@ -137,7 +136,7 @@
   "sets a flag so the the task look will stop"
   {:added "4.0"}
   [gid uid]
-  (cache/set (cache/cache :GLOBAL)
+  (cache/set (cache/cache "GLOBAL")
              (-/INSTANCE-KEY gid uid)
              true)
   (return true))
@@ -149,7 +148,7 @@
    uid
    handlers
    instdata]
-  (var g (cache/cache :GLOBAL))
+  (var g (cache/cache "GLOBAL"))
   (-/task-add-instance gid uid instdata)
   
   (var #{setup

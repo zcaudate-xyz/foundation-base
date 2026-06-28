@@ -12,6 +12,7 @@
               [lua.nginx.websocket :as ws]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-data :as xtd]
+              [xt.lang.common-lib :as k]
               [lua.nginx.common-cache :as cache]]})
 
 (fact:global
@@ -31,14 +32,14 @@
   => "__stream__:TICKER:__active__")
 
 ^{:refer lua.nginx.websocket/service-register :added "4.0"
-  :setup [(!.lua (cache/flush (cache/cache :GLOBAL)))]}
+  :setup [(!.lua (cache/flush (cache/cache "GLOBAL")))]}
 (fact "registers a ws service with nginx"
 
   (ws/service-register "TICKER"
                        {:hello "world"})
   => true
 
-  (-> (!.lua (cache/get-all (cache/cache :GLOBAL)))
+  (-> (!.lua (cache/get-all (cache/cache "GLOBAL")))
       (update "__meta__:stream" json/read))
   => {"__stream__:TICKER:__active__" 0,
       "__meta__:stream" {"TICKER" {"hello" "world", "key" "TICKER"}}}
@@ -50,7 +51,7 @@
   (ws/service-unregister "TICKER")
   => true
 
-  (!.lua (cache/get-all (cache/cache :GLOBAL)))
+  (!.lua (cache/get-all (cache/cache "GLOBAL")))
   => {"__meta__:stream" "{}"}
 
   (ws/service-unregister "TICKER")
@@ -60,26 +61,26 @@
 (fact "unregisters a ws service with nginx")
 
 ^{:refer lua.nginx.websocket/service-signal-flag :added "4.0"
-  :setup [(!.lua (cache/flush (cache/cache :GLOBAL)))
+  :setup [(!.lua (cache/flush (cache/cache "GLOBAL")))
           (ws/service-register "TICKER"
                                {:hello "world"})]}
 (fact "sets the flag for the service (killing all connections)"
 
-  (!.lua (cache/get (cache/cache :GLOBAL)
+  (!.lua (cache/get (cache/cache "GLOBAL")
                  (ws/STREAM-FLAG-KEY "TICKER")))
   => nil
 
   (ws/service-signal-flag "TICKER")
   => true
 
-  (!.lua (cache/get (cache/cache :GLOBAL)
+  (!.lua (cache/get (cache/cache "GLOBAL")
                  (ws/STREAM-FLAG-KEY "TICKER")))
   => true
 
   (ws/service-reset-flag "TICKER")
   => true
 
-  (!.lua (cache/get (cache/cache :GLOBAL)
+  (!.lua (cache/get (cache/cache "GLOBAL")
                  (ws/STREAM-FLAG-KEY "TICKER")))
   => nil)
 
@@ -87,7 +88,7 @@
 (fact "clears the flag for the service allowing connections")
 
 ^{:refer lua.nginx.websocket/service-prep :added "4.0"
-  :setup [(!.lua (cache/flush (cache/cache :GLOBAL)))
+  :setup [(!.lua (cache/flush (cache/cache "GLOBAL")))
           (ws/service-register "TICKER"
                        {:hello "world"})]}
 (fact "helper function to check if registeration is valid"
@@ -100,8 +101,8 @@
   => {"TICKER" {"hello" "world", "key" "TICKER"}})
 
 ^{:refer lua.nginx.websocket/service-add-connection :added "4.0"
-  :setup [(!.lua (cache/flush (cache/cache :GLOBAL)))
-          (!.lua (cache/flush (cache/cache :WS_DEBUG)))
+  :setup [(!.lua (cache/flush (cache/cache "GLOBAL")))
+          (!.lua (cache/flush (cache/cache "WS_DEBUG")))
           (ws/service-register "WS_DEBUG"
                        {:hello "world"})]}
 (fact "helper for ws-loop to add itself to registry"
@@ -125,7 +126,7 @@
   (!.lua
    (ws/connection-info-update "WS_DEBUG" "id-0"
                               (fn [info]
-                                (return (k/obj-assign {:hello "world"}
+                                (return (xtd/obj-assign {:hello "world"}
                                                       info)))))
   => (contains {"started" integer?
                 "group" "WS_DEBUG",
@@ -188,19 +189,19 @@
                  (f "WS_DEBUG"
                     {}
                     {:setup (fn [_ uid]
-                              (cache/set (cache/cache :GLOBAL)
+                              (cache/set (cache/cache "GLOBAL")
                                       (cat "__COUNTER__:" uid)
                                       0)
                               (return [uid]))
                      :main (fn [conn uid vars]
                              (local uid (xtd/first vars))
-                             (local num (cache/incr (cache/cache :GLOBAL)
+                             (local num (cache/incr (cache/cache "GLOBAL")
                                                  (cat "__COUNTER__:" uid)
                                                  1))
                              (ws/send-text conn (k/to-string num))
                              (n/sleep 0.1))
                      :teardown (fn []
-                                 (cache/del (cache/cache :GLOBAL)
+                                 (cache/del (cache/cache "GLOBAL")
                                             "__COUNTER__"))}
                     {}
                     {})))
@@ -313,10 +314,10 @@
 (fact "runs as es-test-loop"
 
   (def +events+ (:events (net.http/event-stream
-                          (str "http://localhost:" (:port (l/rt :lua))
+                          (str "http://localhost:" (:port (l/rt:inner :lua.nginx))
                                "/eval/es"))))
 
   ;; EVENT SOURCE
-  (do (Thread/sleep 100)
+  (do (Thread/sleep 1000)
       @+events+)
   => ["TEST-5" "TEST-4" "TEST-3" "TEST-2" "TEST-1"])

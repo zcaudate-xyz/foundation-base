@@ -25,7 +25,7 @@
   => "__task__:ticker:s1334")
 
 ^{:refer lua.nginx.task/task-register :added "4.0"
-  :setup [(!.lua (cache/flush (cache/cache :GLOBAL)))]}
+  :setup [(!.lua (cache/flush (cache/cache "GLOBAL")))]}
 (fact "registers a task group"
 
   (t/task-register "ticker" {:hello "world"})
@@ -35,7 +35,7 @@
   => false)
 
 ^{:refer lua.nginx.task/task-unregister :added "4.0"
-  :setup [(!.lua (cache/flush (cache/cache :GLOBAL)))]}
+  :setup [(!.lua (cache/flush (cache/cache "GLOBAL")))]}
 (fact "unregisters a task ground"
 
   (t/task-unregister "ticker")
@@ -48,7 +48,7 @@
   => true)
 
 ^{:refer lua.nginx.task/task-add-instance :added "4.0"
-  :setup [(!.lua (cache/flush (cache/cache :GLOBAL)))]}
+  :setup [(!.lua (cache/flush (cache/cache "GLOBAL")))]}
 (fact "adds task instance information"
 
   (t/task-register "ticker" {:hello "world"})
@@ -117,7 +117,7 @@
 (fact "sets a flag so the the task look will stop")
 
 ^{:refer lua.nginx.task/task-loop :added "4.0"
-  :setup [(!.lua (cache/flush (cache/cache :GLOBAL)))]}
+  :setup [(!.lua (cache/flush (cache/cache "GLOBAL")))]}
 (fact "constructs a task loop"
 
 
@@ -148,7 +148,7 @@
   (!.lua
 
    (t/task-register "test" {})
-   (cache/set  (cache/cache :GLOBAL)
+   (cache/set  (cache/cache "GLOBAL")
             "COUNTER"
             0)
 
@@ -157,7 +157,7 @@
     {:setup (fn [] (return []))
      :check (fn [] (return true))
      :main  (fn []
-              (cache/incr  (cache/cache :GLOBAL)
+              (cache/incr  (cache/cache "GLOBAL")
                         "COUNTER"
                         1)
               #_(n/sleep 0.1))}
@@ -165,7 +165,7 @@
   => string?
 
   (-> (!.lua
-       (cache/get-all (cache/cache :GLOBAL)))
+       (cache/get-all (cache/cache "GLOBAL")))
       (update "__meta__:task" json/read))
 
   => {"__meta__:task" {"test" {"id" "test", "instances" {}}},
@@ -179,7 +179,7 @@
   (!.lua
 
    (t/task-register "test" {})
-   (cache/set  (cache/cache :GLOBAL)
+   (cache/set  (cache/cache "GLOBAL")
             "COUNTER"
             0)
 
@@ -187,7 +187,7 @@
     "test"
     {:setup (fn [] (return []))
      :main  (fn []
-              (cache/incr (cache/cache :GLOBAL)
+              (cache/incr (cache/cache "GLOBAL")
                           "COUNTER"
                           1)
               (n/sleep 0.1))}
@@ -197,7 +197,7 @@
   (Thread/sleep 1000)
 
   (!.lua
-   (cache/get-all (cache/cache :GLOBAL)))
+   (cache/get-all (cache/cache "GLOBAL")))
   => (contains {"COUNTER" #(<= 5 %)})
 
 
