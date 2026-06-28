@@ -15,9 +15,6 @@ major_version = 15
 [studio]
 enabled = false
 
-[local_smtp]
-enabled = false
-
 [storage]
 enabled = false
 
