@@ -3,7 +3,9 @@
 
 (l/script :lua.nginx
   {:require [[lua.nginx.openssl :as ssl] [lua.nginx :as n] [lua.nginx.http-client :as http] [lua.core :as u] [xt.lang.spec-base :as xt] [xt.lang.common-string :as str] [xt.lang.parser-xml :as xml] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]
-   :import [["resty.string" :as ngxstr]]})
+   :import [["resty.md5" :as ngxmd5]
+            ["resty.sha256" :as ngxsha256]
+            ["resty.string" :as ngxstr]]})
 
 (def.lua AWS_ALGO "AWS4-HMAC-SHA256")
 
@@ -139,8 +141,7 @@
      (xt/x:str-join "\n" (xtd/arr-map headers (fn:> [arr] (xt/x:cat (xtd/first arr) ":" (xtd/second arr)))))
      ""
      (xt/x:str-join ";" (xtd/arr-map headers xtd/first))
-     (or hash "UNSIGNED-PAYLOAD")])
-   headers))
+     (or hash "UNSIGNED-PAYLOAD")])))
 
 (defn.lua get-signing-input
   "gets the signing input"
@@ -151,7 +152,7 @@
                   [-/AWS_ALGO
                    (-/get-date-long t)
                    (-/get-aws-scope t region service)
-                   (ngxstr/to-hex (-/get-sha256 canonical))])))
+                   (n/to-hex (-/get-sha256 canonical))])))
 
 (defn.lua header-authorization
   "creates the header authorization"
@@ -168,7 +169,7 @@
   (var signing-input (-/get-signing-input canonical t region service))
   (var credential  (-/get-aws-credential user t region service))
   
-  (var signature   (ngxstr/to-hex (ssl/hmac signing-key signing-input "sha256")))
+  (var signature   (n/to-hex (ssl/hmac signing-key signing-input "sha256")))
   (var out (xt/x:cat -/AWS_ALGO
                   " "
                   "Credential="
@@ -191,7 +192,7 @@
   [aws method route headers body]
   (:= aws    (-/get-aws-defaults aws))
   (var #{scheme host port} aws)
-  (var hash  (ngxstr/to-hex (-/get-sha256 body)))
+  (var hash  (n/to-hex (-/get-sha256 body)))
   (var headers (xtd/obj-assign
                 headers
                 {"host" (xt/x:cat host ":" port)
@@ -257,3 +258,4 @@
         :else
         (return
          (-/make-request-auth aws method route (or headers {}) (or body "") opts))))
+

@@ -72,7 +72,7 @@
   "gets decoded metadata for a group"
   {:added "4.1"}
   [group]
-  (var raw (-/get (-/cache :GLOBAL) (-/meta-key group)))
+  (var raw (-/get (-/cache "GLOBAL") (-/meta-key group)))
   (if raw
     (return (cjson.decode raw))
     (return {})))
@@ -80,13 +80,11 @@
 (defn.lua meta-assoc
   "associates metadata for a group"
   {:added "4.1"}
-  ([group key value]
-   (var meta (-/meta-get group))
-   (:= (. meta [key]) value)
-   (-/set (-/cache :GLOBAL) (-/meta-key group) (cjson.encode meta))
-   (return meta))
-  ([group key value _]
-   (return (-/meta-assoc group key value))))
+  [group key value]
+  (var meta (-/meta-get group))
+  (:= (. meta [key]) value)
+  (-/set (-/cache "GLOBAL") (-/meta-key group) (cjson.encode meta))
+  (return meta))
 
 (defn.lua meta-dissoc
   "removes metadata for a group"
@@ -94,5 +92,5 @@
   [group key]
   (var meta (-/meta-get group))
   (:= (. meta [key]) nil)
-  (-/set (-/cache :GLOBAL) (-/meta-key group) (cjson.encode meta))
+  (-/set (-/cache "GLOBAL") (-/meta-key group) (cjson.encode meta))
   (return meta))

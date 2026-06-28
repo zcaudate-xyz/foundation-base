@@ -53,7 +53,7 @@
   "registers a ws service with nginx"
   {:added "4.0"}
   [name metadata setup]
-  (local g     (cache/cache :GLOBAL))
+  (local g     (cache/cache "GLOBAL"))
   (local meta  (cache/meta-get "stream"))
   (if (. meta  [name])
     (return false)
@@ -69,7 +69,7 @@
   "unregisters a ws service with nginx"
   {:added "4.0"}
   [name teardown]
-  (local g    (cache/cache :GLOBAL))
+  (local g    (cache/cache "GLOBAL"))
   (local meta (cache/meta-get "stream"))
   (if (not (. meta [name]))
     (return false))
@@ -89,7 +89,7 @@
   "sets the flag for the service (killing all connections)"
   {:added "4.0"}
   [name]
-  (local g   (cache/cache :GLOBAL))
+  (local g   (cache/cache "GLOBAL"))
   (cache/set g
              (-/STREAM-FLAG-KEY name)
              true)
@@ -99,7 +99,7 @@
   "clears the flag for the service allowing connections"
   {:added "4.0"}
   [name]
-  (local g     (cache/cache :GLOBAL))
+  (local g     (cache/cache "GLOBAL"))
   (cache/del g (-/STREAM-FLAG-KEY name))
   (return true))
 
@@ -107,7 +107,7 @@
   "helper function to check if registeration is valid"
   {:added "4.0"}
   [name]
-  (local g     (cache/cache :GLOBAL))
+  (local g     (cache/cache "GLOBAL"))
   (local meta  (cache/meta-get "stream"))
   (if (not (. meta [name]))
     (error "SERVICE NOT REGISTERED"))
@@ -117,7 +117,7 @@
   "helper for ws-loop to add itself to registry"
   {:added "4.0"}
   [name uid conndata]
-  (local g     (cache/cache :GLOBAL))
+  (local g     (cache/cache "GLOBAL"))
   (local meta  (-/service-prep name))
   (if (cache/get (cache/cache name) uid)
     (error "INSTANCE ALREADY ADDED"))
@@ -136,7 +136,7 @@
   "helper for ws-loop to remove itself from registry"
   {:added "4.0"}
   [name uid]
-  (local g     (cache/cache :GLOBAL))
+  (local g     (cache/cache "GLOBAL"))
   (local meta  (-/service-prep name))
   (when (cache/get (cache/cache name) uid)
     (cache/del (cache/cache name) uid)
@@ -148,7 +148,7 @@
   "returns number of connections for the given"
   {:added "4.0"}
   [name]
-  (local g     (cache/cache :GLOBAL))
+  (local g     (cache/cache "GLOBAL"))
   (local meta  (-/service-prep name))
   (return (cache/get g (-/STREAM-ACTIVE-KEY name))))
 
@@ -193,7 +193,7 @@
    ^LOOP
    (local uid    (n/uuid))
    (local state  {})
-   (local g (cache/cache :GLOBAL))
+   (local g (cache/cache "GLOBAL"))
    (when (cache/get g (-/STREAM-FLAG-KEY name))
      (return (n/exit 404)))
    (-/service-add-connection name uid conndata)
@@ -273,7 +273,7 @@
            main
            teardown
            check} handlers)
-  (local g (cache/cache :GLOBAL))
+  (local g (cache/cache "GLOBAL"))
   (local vars (:? setup (setup conn uid state) []))
   
   ^LOOP
@@ -323,7 +323,7 @@
     conndata
     opts]
    ^LOOP
-   (local g      (cache/cache :GLOBAL))
+   (local g      (cache/cache "GLOBAL"))
    (local conn   (-/new-connection opts))
    (local uid    (n/uuid))
    (local state  {})
@@ -369,6 +369,7 @@
              {:main (fn [uid state]
                       (while (> n 0)
                         (n/say "data: " (f n) "\n")
+                        (n/flush)
                         (:= n (- n 1))
                         (n/sleep (/ ms 1000)))
                       (cache/del (cache/cache name)

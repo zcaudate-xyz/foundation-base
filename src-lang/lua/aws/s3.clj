@@ -75,9 +75,9 @@
   (when (== status 200)
     (var result (xtd/get-in body ["ListBucketResult"]))
     (var arr (:? (k/is-array? result)
-                 (xtd/arr-keep result (fn [e] (xt/x:get-key e "Contents")))
+                 (xtd/arr-keep result (fn:> [e] (xt/x:get-key e "Contents")))
                  (xtd/arrayify (xtd/get-in result ["Contents"]))))
-    (:= (. res body) (xtd/arr-map arr (fn [e] (xt/x:get-key e "Key")))))
+    (:= (. res body) (xtd/arr-map arr (fn:> [e] (xt/x:get-key e "Key")))))
   (return res))
 
 (defn.lua list-objects
