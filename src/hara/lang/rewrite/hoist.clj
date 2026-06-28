@@ -4,7 +4,7 @@
             [std.lib.collection :as collection]))
 
 (defn create-rewriter
-  [{:keys [fn-tags symbol-prefix bulk-do*? block-form? lambda-compatible?]
+  [{:keys [fn-tags symbol-prefix bulk-do*? block-form? lambda-compatible? skip-form?]
     :or {fn-tags #{'fn}
          symbol-prefix "lifted_lambda__"
          block-form? (fn [form grammar]
@@ -16,7 +16,8 @@
                                 #(block-form? % grammar)))
          bulk-do*? (fn [form mopts]
                      (and (:bulk (meta form))
-                           (not (get-in mopts [:emit :body :transform]))))}}]
+                           (not (get-in mopts [:emit :body :transform]))))
+         skip-form? (constantly false)}}]
   (letfn [(function-form?
             [form]
             (and (collection/form? form)
@@ -70,8 +71,15 @@
                   [[] form]
 
                    (collection/form? form)
-                   (let [[prefix out] (rewrite-expression-coll form grammar)]
-                     [prefix (common/with-form-meta form (apply list out))])
+                   (cond (skip-form? form)
+                         [[] form]
+
+                         (= 'quote (first form))
+                         [[] form]
+
+                         :else
+                         (let [[prefix out] (rewrite-expression-coll form grammar)]
+                           [prefix (common/with-form-meta form (apply list out))]))
 
                    (vector? form)
                    (let [[prefix out] (rewrite-expression-coll form grammar)]
@@ -175,14 +183,16 @@
                     (rewrite-defn form grammar)
                     (if (function-form? form)
                       (rewrite-fn-body form grammar)
-                      (let [[prefix out] (rewrite-expression form grammar)]
-                        (wrap-prefix form prefix out))))))
+                      (if (skip-form? form)
+                        form
+                        (let [[prefix out] (rewrite-expression form grammar)]
+                          (wrap-prefix form prefix out)))))))
 
           (rewrite-statements
             [forms grammar]
             (map #(rewrite-statement % grammar) forms))
 
-                   (rewrite-stage
+          (rewrite-stage
                      [form {:keys [mopts grammar]}]
                      (cond (collection/form? form)
                            (rewrite-statement form grammar)
