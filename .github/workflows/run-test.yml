@@ -78,7 +78,7 @@ jobs:
       postgres:
         image: ghcr.io/zcaudate-xyz/infra-db:main
         env:
-          POSTGRES_DB: test
+          POSTGRES_DB: test-scratch
           POSTGRES_PASSWORD: postgres
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
@@ -126,7 +126,7 @@ jobs:
       postgres:
         image: ghcr.io/zcaudate-xyz/infra-db:main
         env:
-          POSTGRES_DB: test
+          POSTGRES_DB: test-scratch
           POSTGRES_PASSWORD: postgres
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
@@ -171,7 +171,7 @@ jobs:
       postgres:
         image: ghcr.io/zcaudate-xyz/infra-db:main
         env:
-          POSTGRES_DB: test
+          POSTGRES_DB: test-scratch
           POSTGRES_PASSWORD: postgres
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
