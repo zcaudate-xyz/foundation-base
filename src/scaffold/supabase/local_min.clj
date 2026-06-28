@@ -29,9 +29,16 @@
   ([_opts]
    (let [opts (or _opts {})]
      (println "[supabase] starting local-min...")
-     (os/sh {:args ["supabase" "start" "--workdir" "docker/local-min"]
-             :inherit true
-             :wait true})
+     (let [process (os/sh {:args ["supabase" "start" "--workdir" "docker/local-min"]
+                           :wait true
+                           :output false})
+           {:keys [exit out err]} (os/sh-output process)]
+       (when (not= exit 0)
+         (println "[supabase] start failed (exit" exit ")")
+         (when (seq out) (println out))
+         (when (seq err) (println err))
+         (throw (ex-info "supabase start failed"
+                         {:exit exit :out out :err err}))))
      (println "[supabase] start command completed")
      (when (not (= false (:wait-http opts)))
        (network/wait-for-port
@@ -60,9 +67,14 @@
 (defn shutdown-supabase
   [_]
   (println "[supabase] stopping local-min...")
-  (os/sh {:args ["supabase" "stop" "--workdir" "docker/local-min" "--no-backup"]
-          :inherit true
-          :wait true})
+  (let [process (os/sh {:args ["supabase" "stop" "--workdir" "docker/local-min" "--no-backup"]
+                        :wait true
+                        :output false})
+        {:keys [exit out err]} (os/sh-output process)]
+    (when (not= exit 0)
+      (println "[supabase] stop failed (exit" exit ")")
+      (when (seq out) (println out))
+      (when (seq err) (println err))))
   (println "[supabase] stop command completed"))
 
 
