@@ -77,18 +77,19 @@ jobs:
         run: npm ci
         
       - name: Run Tests - ${{ matrix.name }}
-        run: >
-          docker run --network host
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock
-          -v /home/runner/.docker/config.json:/root/.docker/config.json:ro
-          -v $(pwd):$(pwd)
-          -w $(pwd)
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          bash -lc "set -euxo pipefail &&
-          apt-get update &&
-          apt-get install -y --no-install-recommends lua5.4 python3 python3-pip &&
-          ${{ matrix.command }}"
+        run: |
+          mkdir -p .tmp
+          docker run --network host \
+            -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS} -Djava.io.tmpdir=$(pwd)/.tmp" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v /home/runner/.docker/config.json:/root/.docker/config.json:ro \
+            -v $(pwd):$(pwd) \
+            -w $(pwd) \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            bash -lc "set -euxo pipefail &&
+            apt-get update &&
+            apt-get install -y --no-install-recommends lua5.4 python3 python3-pip &&
+            ${{ matrix.command }}"
         
     services:
       postgres:
@@ -136,15 +137,16 @@ jobs:
         run: npm ci
         
       - name: Run Tests - ${{ matrix.lang }}
-        run: >
-          docker run --network host 
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
-          -v /home/runner/.docker/config.json:/root/.docker/config.json:ro
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          lein test :with "${{ matrix.lang }}"
+        run: |
+          mkdir -p .tmp
+          docker run --network host \
+            -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS} -Djava.io.tmpdir=$(pwd)/.tmp" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v /home/runner/.docker/config.json:/root/.docker/config.json:ro \
+            -v $(pwd):$(pwd) \
+            -w $(pwd) \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            lein test :with "${{ matrix.lang }}"
         
     services:
       postgres:
