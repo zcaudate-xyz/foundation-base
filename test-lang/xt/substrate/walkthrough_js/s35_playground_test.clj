@@ -10,7 +10,6 @@
    models through `js.react.ext-page`."
   (:use code.test)
   (:require [hara.lang :as l]
-            [hara.lang.pointer :as ptr]
             [std.lib.component :as component]
             [xt.lang.common-notify :as notify]))
 
@@ -54,13 +53,23 @@
              "options" {"trigger" true}}})
   (return node))
 
-(defn.js model-output-value
+(defn.js modelOutputValue
   "reads the current output value of the page model via ext-page"
   {:added "4.1"}
   [node]
   (var model (ext-page/get-model node "space/a" ["page" "greet"]))
   (var output (event-model/get-current model nil))
   (return (:? (xt/x:nil? output) nil (. output ["value"]))))
+
+(defn.js runModelCheck
+  "creates a node, sets input, waits for the pipeline, and calls notifyFn with the output"
+  {:added "4.1"}
+  [data notifyFn]
+  (var node (-/setup-node))
+  (page-core/model-set-input node "space/a" "page" "greet" {"data" [data]} {})
+  (var p (promise/x:with-delay 200
+           (fn [] (return (-/modelOutputValue node)))))
+  (return (promise/x:promise-then p notifyFn)))
 
 (defn- wait-for-channel
   "waits up to 5s for the playground websocket channel to be connected"
@@ -92,25 +101,16 @@
 (fact "ext-page can read the substrate model in a playground-served browser"
 
   (notify/wait-on [:js 5000]
-    (var node (-/setup-node))
-    (var model (ext-page/get-model node "space/a" ["page" "greet"]))
-    (repl/notify model))
-  => map?)
+    (-/runModelCheck "hello" (fn [v] (repl/notify v))))
+  => "hello")
 
 ^{:refer xt.substrate.walkthrough-js.s35-playground-test/ext-page-follows-model-updates
   :added "4.1"}
 (fact "ext-page follows model updates in a playground-served browser"
 
   (notify/wait-on [:js 5000]
-    (var node (-/setup-node))
-    (page-core/model-set-input node "space/a" "page" "greet" {"data" ["world"]} {})
-    (-> (promise/x:with-delay 200
-          (fn [] (return (-/model-output-value node))))
-        (promise/x:promise-then
-         (fn [v]
-           (repl/notify v)))))
+    (-/runModelCheck "world" (fn [v] (repl/notify v))))
   => "world")
-
 
 (comment
   

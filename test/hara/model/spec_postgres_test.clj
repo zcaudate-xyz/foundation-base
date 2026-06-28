@@ -3,7 +3,8 @@
   (:require [postgres.core :as pg]
             [hara.model.spec-postgres :refer :all]
             [postgres.sample.scratch-v1 :as scratch]
-            [hara.lang :as l]))
+            [hara.lang :as l]
+            [std.lib.env :as env]))
 
 (l/script- :postgres
   {:runtime :jdbc.client

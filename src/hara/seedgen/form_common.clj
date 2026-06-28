@@ -73,6 +73,9 @@
       (nil? current)
       nil
 
+      (not (block/expression? (nav/block current)))
+      (recur (some-> current nav/right))
+
       (= target-key (nav/value current))
       (nav/right current)
 

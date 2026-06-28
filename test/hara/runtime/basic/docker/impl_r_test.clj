@@ -35,6 +35,7 @@
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
+            (not (env/docker-daemon-available?))
             (System/getenv "HARA_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})

@@ -100,6 +100,16 @@
        (not-empty (clojure.string/trim (slurp (.getInputStream process)))))
      (catch Exception _ nil))))
 
+(defn docker-daemon-available?
+  "checks if the docker daemon is reachable"
+  {:added "4.0"}
+  []
+  (try
+    (let [^Process process (.start (ProcessBuilder. ^"[Ljava.lang.String;" (into-array String ["docker" "info"])))]
+      (.waitFor process)
+      (zero? (.exitValue process)))
+    (catch Throwable _ false)))
+
 (defn version-ints
   "parses a version string into a vector of integers
 
