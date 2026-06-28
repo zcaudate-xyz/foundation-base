@@ -30,6 +30,15 @@
 
 
 
+(defn- wait-for-channel
+  "waits up to 5s for the playground websocket channel to be connected"
+  [rt]
+  (let [channel (:channel rt)]
+    (loop [i 0]
+      (when (and (< i 50) (not @channel))
+        (Thread/sleep 100)
+        (recur (inc i))))))
+
 (fact:global
  {:setup [(l/rt:restart :js)
           (def +url+ (js-playground/play-url (l/rt :js)))
