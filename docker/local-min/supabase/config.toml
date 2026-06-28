@@ -27,3 +27,5 @@ enabled = false
 [auth]
 enabled = true
 jwt_secret = "super-secret-jwt-token-with-at-least-32-characters-long"
+site_url = "http://127.0.0.1:55121/auth/v1/health"
+additional_redirect_urls = ["http://127.0.0.1:55121/*"]
