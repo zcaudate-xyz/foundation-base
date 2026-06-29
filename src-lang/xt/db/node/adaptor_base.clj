@@ -20,6 +20,8 @@
 ;;
 
 (defn.xt init-base-type
+  "init-base-type installs a live impl on the node"
+  {:added "4.1"}
   [node service-id type defaults schema lookup]
   (return
    (-> (impl-main/create-impl type defaults schema lookup)
@@ -30,6 +32,8 @@
           (return node))))))
 
 (defn.xt init-base-main
+  "init-base-main sets metadata on primary and caching services"
+  {:added "4.1"}
   [node config schema lookup]
   (var common  (xt/x:obj-assign {"id" "db/common"}
                                 (xt/x:get-key config "common")))
@@ -78,9 +82,7 @@
 
 (defn.xt ^{:substrate/fn "@xt.db/init-base"}
   init-base-handler
-  "Server-side handler that calls init-base-main with client args.
-
-   Returns a serializable summary so the result can be sent over a transport."
+  "init-base-handler initialises services and returns a summary"
   {:added "4.1"}
   [space args request node]
   (var config  (xt/x:first args))
@@ -90,6 +92,8 @@
    (-/init-base-main node config schema lookup)))
 
 (defn.xt get-primary-impl
+  "gets the primary impl"
+  {:added "4.1"}
   [node service-id]
   (var impl         (substrate/get-service node service-id))
   (var primary-id   (xtd/get-in impl ["metadata" "primary_id"]))
@@ -98,6 +102,8 @@
     (return impl)))
 
 (defn.xt get-caching-impl
+  "gets the caching impl"
+  {:added "4.1"}
   [node service-id]
   (var impl         (substrate/get-service node service-id))
   (var caching-id   (xtd/get-in impl ["metadata" "caching_id"]))
@@ -110,11 +116,7 @@
 
 (defn.xt ^{:substrate/fn "@xt.db/subscribe-db"}
   subscribe-db-handler
-  "Substrate handler for @xt.db/subscribe-db.
-
-   Args: [conn-id topics]. Subscribes the primary db realtime client to the
-   given broadcast topics, wiring received db/sync and db/remove events to the
-   paired caching db."
+  "subscribes to the db handler"
   {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first  args))
@@ -125,10 +127,7 @@
 
 (defn.xt ^{:substrate/fn "@xt.db/unsubscribe-db"}
   unsubscribe-db-handler
-  "Substrate handler for @xt.db/unsubscribe-db.
-
-   Args: [conn-id topics]. Unsubscribes the primary db realtime client from
-   the given broadcast topics."
+  "unsubscribes from the db handler"
   {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first  args))
@@ -137,12 +136,9 @@
   (var primary      (-/get-primary-impl node primary-id))
   (return (impl-common/unsubscribe-db primary conn-id topics)))
 
-(defn.xt ^{:substrate/fn "@xt.db/caching-sync"}
-  caching-sync-handler
-  "Substrate handler for @xt.db/caching-sync.
-
-   Args: [payload]. Applies the db/sync and db/remove payload to the paired
-   caching db and notifies any registered db listeners."
+(defn.xt ^{:substrate/fn "@xt.db/sync-caching"}
+  sync-caching-handler
+  "sync-caching-handler applies db/sync payload to the paired caching db"
   {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first  args))
@@ -156,7 +152,7 @@
 ;;
 
 (defn.xt attach-base-model
-  "Attaches a page model and registers a db listener if options.refresh is set."
+  "attach-base-model registers a db listener when options.refresh is set"
   {:added "4.1"}
   [node primary-id space-id group-id model-id model-spec]
   (page-core/add-group-attach node
@@ -179,11 +175,58 @@
            "group" group-id
            "model" model-id}))
 
+(defn.xt ^{:substrate/fn "@xt.db/attach-model"}
+  attach-model-handler
+  "TODO"
+  {:added "4.1"}
+  [space args request node]
+  (var primary-id   (xt/x:first args))
+  (var page-args    (xt/x:second args))
+  (var #{space-id
+         group-id
+         model-id}   page-args)
+  (var model-spec   (xt/x:get-idx args (xt/x:offset 2)))
+  (return (-/attach-base-model node primary-id space-id group-id model-id model-spec)))
+
+;;
+;; MODEL REMOVAL
+;;
+
+(defn.xt detach-base-model
+  "TODO"
+  {:added "4.1"}
+  [node primary-id space-id group-id model-id]
+  (page-core/remove-model node space-id group-id model-id)
+  (var caching (-/get-caching-impl node primary-id))
+  (when (xt/x:not-nil? caching)
+    (impl-common/remove-db-listener
+     caching
+     (xt/x:cat space-id "/" group-id "/" model-id)))
+  (return {"status" "removed"
+           "space" space-id
+           "group" group-id
+           "model" model-id}))
+
+(defn.xt ^{:substrate/fn "@xt.db/detach-model"}
+  detach-model-handler
+  "TODO"
+  {:added "4.1"}
+  [space args request node]
+  (var primary-id   (xt/x:first args))
+  (var page-args    (xt/x:second args))
+  (var #{space-id
+         group-id
+         model-id}   page-args)
+  (return (-/detach-base-model node primary-id space-id group-id model-id)))
+
+
 ;;
 ;; RPC HANDLERS
 ;;
 
-(defn.xt call-rpc-baseline-fn
+(defn.xt rpc-call-baseline-fn
+  "TODO"
+  {:added "4.1"}
   [node primary-id rpc-spec rpc-args]
   (var primary    (-/get-primary-impl node primary-id))
   (return
@@ -197,16 +240,18 @@
             (impl-common/sync-process-payload caching {type {base result}}))
           (return result))))))
 
-(defn.xt ^{:substrate/fn "@xt.db/call-rpc"}
-  call-rpc-handler
+(defn.xt ^{:substrate/fn "@xt.db/rpc-call"}
+  rpc-call-handler
+  "rpc-call-handler routes rpc args through a named service"
+  {:added "4.1"}
   [space args request node]
   (var service-id   (xt/x:first args))
   (var rpc-spec     (xt/x:second args))
   (var rpc-args     (xt/x:get-idx args (xt/x:offset 2)))
-  (return (-/call-rpc-baseline-fn node service-id rpc-spec rpc-args)))
+  (return (-/rpc-call-baseline-fn node service-id rpc-spec rpc-args)))
 
-(defn.xt create-rpc-model
-  "Creates a page model spec that calls an RPC on a named service."
+(defn.xt rpc-create-model
+  "rpc-create-model builds a page model spec with an rpc handler"
   {:added "4.1"}
   [primary-id rpc-spec model]
   (var #{pipeline
@@ -215,16 +260,16 @@
   (var rpc-handler
        (fn [context]
          (var #{space args node} context)
-         (return (-/call-rpc-baseline-fn node primary-id rpc-spec args))))
+         (return (-/rpc-call-baseline-fn node primary-id rpc-spec args))))
   (return
    {"handler" rpc-handler
     "pipeline" pipeline
     "defaults" defaults
     "options"  options}))
 
-(defn.xt ^{:substrate/fn "@xt.db/attach-rpc-model"}
-  attach-rpc-model
-  "Server-side handler that materialises an RPC page model from client args."
+(defn.xt ^{:substrate/fn "@xt.db/rpc-attach-model"}
+  rpc-attach-model
+  "rpc-attach-model attaches and invokes an rpc model"
   {:added "4.1"}
   [space args request node]
   (var primary-id  (xt/x:first args))
@@ -234,7 +279,7 @@
   (var #{space-id
          group-id
          model-id}   page-args)
-  (var model-spec (-/create-rpc-model primary-id rpc-spec model))
+  (var model-spec (-/rpc-create-model primary-id rpc-spec model))
   (return (-/attach-base-model node primary-id space-id group-id model-id model-spec)))
 
 
@@ -242,7 +287,9 @@
 ;; PULL HANDLERS
 ;;
 
-(defn.xt call-pull-baseline-fn
+(defn.xt pull-call-baseline-fn
+  "TODO"
+  {:added "4.1"}
   [node primary-id tree]
   (var primary (-/get-primary-impl node primary-id))
   (return (-> (impl-common/pull-async primary tree)
@@ -256,15 +303,17 @@
                    (impl-common/sync-process-payload caching payload))
                  (return result))))))
 
-(defn.xt ^{:substrate/fn "@xt.db/call-pull"}
-  call-pull-handler
+(defn.xt ^{:substrate/fn "@xt.db/pull-call"}
+  pull-call-handler
+  "TODO"
+  {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first args))
   (var tree         (xt/x:second args))  
-  (return (-/call-pull-baseline-fn node primary-id tree)))
+  (return (-/pull-call-baseline-fn node primary-id tree)))
 
-(defn.xt create-pull-model
-  "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
+(defn.xt pull-create-model
+  "pull-create-model builds a page model spec with local and remote handlers"
   {:added "4.1"}
   [primary-id tree model]
   (var #{pipeline
@@ -280,14 +329,14 @@
                 {"remote" {"handler"
                            (fn [context]
                              (var node (. context ["node"]))
-                             (return (-/call-pull-baseline-fn node primary-id tree)))}}
+                             (return (-/pull-call-baseline-fn node primary-id tree)))}}
                 pipeline)
     "defaults" defaults
     "options"  options}))
 
-(defn.xt ^{:substrate/fn "@xt.db/attach-pull-model"}
-  attach-pull-model
-  "Server-side handler that materialises a custom pull-view page model from client args."
+(defn.xt ^{:substrate/fn "@xt.db/pull-attach-model"}
+  pull-attach-model
+  "pull-attach-model attaches and invokes a pull-view model"
   {:added "4.1"}
   [space args request node]
   (var primary-id  (xt/x:first args))
@@ -297,14 +346,16 @@
   (var #{space-id
          group-id
          model-id}   page-args)
-  (var model-spec (-/create-pull-model primary-id tree model))
+  (var model-spec (-/pull-create-model primary-id tree model))
   (return (-/attach-base-model node primary-id space-id group-id model-id model-spec)))
 
 ;;
 ;; DATAVIEW MODEL
 ;;
 
-(defn.xt call-dataview-baseline-fn
+(defn.xt dataview-call-baseline-fn
+  "TODO"
+  {:added "4.1"}
   [node primary-id dataview]
   (var impl      (-/get-primary-impl node primary-id))
   (var #{schema} impl)
@@ -329,15 +380,17 @@
                    (impl-common/sync-process-payload caching payload))
                  (return result))))))
 
-(defn.xt ^{:substrate/fn "@xt.db/call-dataview"}
-  call-dataview-handler
+(defn.xt ^{:substrate/fn "@xt.db/dataview-call"}
+  dataview-call-handler
+  "TODO"
+  {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first args))
   (var dataview     (xt/x:second args))  
-  (return (-/call-dataview-baseline-fn node primary-id dataview)))
+  (return (-/dataview-call-baseline-fn node primary-id dataview)))
 
-(defn.xt create-dataview-model
-  "Creates a page model spec that plans a view and pulls from db/caching (sync) and db/primary (async)."
+(defn.xt dataview-create-model
+  "TODO"
   {:added "4.1"}
   [service dataview model]
   (var metadata (xt/x:get-key service "metadata"))
@@ -398,9 +451,9 @@
     "defaults" defaults
     "options"  options}))
 
-(defn.xt ^{:substrate/fn "@xt.db/attach-dataview-model"}
-  attach-dataview-model
-  "Server-side handler that materialises a dataview page model from client args."
+(defn.xt ^{:substrate/fn "@xt.db/dataview-attach-model"}
+  dataview-attach-model
+  "TODO"
   {:added "4.1"}
   [space args request node]
   (var service-id  (xt/x:first args))
@@ -415,50 +468,10 @@
          model-id
          service}   node-args)
   (var service-impl (substrate/get-service node service))
-  (var model-spec (-/create-dataview-model service-impl model-args))
+  (var model-spec (-/dataview-create-model service-impl model-args))
   (return (-/attach-base-model
            node space-id group-id model-id service-impl model-spec)))
 
-
-
-;;
-;; MODEL REMOVAL
-;;
-
-(defn.xt remove-model-with-refresh
-  "Removes a page model and its caching db listener."
-  {:added "4.1"}
-  [node space-id group-id model-id service]
-  (page-core/remove-model node space-id group-id model-id)
-  (var metadata (xt/x:get-key service "metadata"))
-  (var caching-id (xt/x:get-key metadata "caching_id"))
-  (when (xt/x:not-nil? caching-id)
-    (var caching (substrate/get-service node caching-id))
-    (when (xt/x:not-nil? caching)
-      (impl-common/remove-db-listener
-       caching
-       (xt/x:cat space-id "/" group-id "/" model-id))))
-  (return {"status" "removed"
-           "space" space-id
-           "group" group-id
-           "model" model-id}))
-
-(defn.xt ^{:substrate/fn "@xt.db/detach-db-model"}
-  detach-db-model
-  "Server-side handler that removes a page model and its caching db listener.
-
-   Works for pull, dataview and RPC models. The `service` field may be either a
-   service id string or the service impl map."
-  {:added "4.1"}
-  [space args request node]
-  (var node-args   (xt/x:first args))
-  (var #{space-id
-         group-id
-         model-id
-         service}   node-args)
-  (var service-impl (substrate/get-service node service))
-  (return (-/remove-model-with-refresh
-           node space-id group-id model-id service-impl)))
 
 
 ;;
@@ -466,22 +479,25 @@
 ;;
 
 (defn.xt init-handlers
+  "TODO"
+  {:added "4.1"}
   [node]
   (substrate/register-handler node "@xt.db/init-base" -/init-base-handler nil)
   (substrate/register-handler node "@xt.db/subscribe-db" -/subscribe-db-handler nil)
   (substrate/register-handler node "@xt.db/unsubscribe-db" -/unsubscribe-db-handler nil)
-  (substrate/register-handler node "@xt.db/caching-sync" -/caching-sync-handler nil)
+  (substrate/register-handler node "@xt.db/sync-caching" -/sync-caching-handler nil)
+  (substrate/register-handler node "@xt.db/attach-model" -/detach-model-handler nil)
+  (substrate/register-handler node "@xt.db/detach-model" -/detach-model-handler nil)
   
-  (substrate/register-handler node "@xt.db/call-rpc" -/call-rpc-handler nil)
-  (substrate/register-handler node "@xt.db/call-pull" -/call-pull-handler nil)
-  (substrate/register-handler node "@xt.db/call-dataview" -/call-dataview-handler nil)
+  (substrate/register-handler node "@xt.db/rpc-call" -/rpc-call-handler nil)
+  (substrate/register-handler node "@xt.db/rpc-attach-model" -/rpc-attach-model nil)
   
-  
-  (substrate/register-handler node "@xt.db/attach-pull-model" -/attach-pull-model nil)
-  (substrate/register-handler node "@xt.db/attach-rpc-model" -/attach-rpc-model nil)
-  (substrate/register-handler node "@xt.db/attach-dataview-model" -/attach-dataview-model nil)
+  (substrate/register-handler node "@xt.db/pull-call" -/pull-call-handler nil)
+  (substrate/register-handler node "@xt.db/pull-attach-model" -/pull-attach-model nil)
+  (substrate/register-handler node "@xt.db/dataview-call" -/dataview-call-handler nil)
+  (substrate/register-handler node "@xt.db/dataview-attach-model" -/dataview-attach-model nil)
 
-  (substrate/register-handler node "@xt.db/detach-db-model" -/detach-db-model nil)
+  
   
   
   
@@ -490,6 +506,8 @@
   (return node))
 
 (defn list-substrate-fn
+  "TODO"
+  {:added "4.1"}
   [ns]
   (->> (ns-publics (or ns *ns*))
        (filter (fn [[n v]]
