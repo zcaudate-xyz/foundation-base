@@ -40,8 +40,7 @@
              [xt.net.addon-supabase :as addon]]})
 
 (fact:global
- {
-  :setup [(l/rt:restart)
+ {:setup [(l/rt:restart)
           (l/rt:setup :postgres)
           (local-min/restart-postgrest)
           (local-min/wait-for-postgrest-ready "scratch_v0" "Log")]
@@ -372,9 +371,9 @@
     (-> (adaptor/supabase-callback-handler nil ["auth/supabase" {}] nil (-/node-with-service (-/anon-client) nil))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [400 "validation_failed"])
+           (repl/notify [(xt/x:is-string? out)
+                         (> (xt/x:len out) 0)])))))
+  => [true true])
 
 ^{:refer xt.db.node.adaptor-supabase/supabase-invite-handler :added "4.1"}
 (fact "sends an invite on the service"

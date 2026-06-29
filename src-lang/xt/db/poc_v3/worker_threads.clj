@@ -53,38 +53,16 @@
           (var transport-id (. conn ["transport_id"]))
           (return (callback client transport-id)))))))
 
-(defn.js attach-user-profile-request
-  "Asks the worker to attach the `profile` RPC model without opening the
-   proxy group."
-  [client transport-id account-id]
-  (return
-   (adaptor-client/attach-model-request
-    client
-    "room/a"
-    "demo"
-    "profile"
-    "@xt.db/attach-rpc-model"
-    "db/primary"
-    {"rpc_spec" {"input" [{"symbol" "i_account_id" "type" "uuid"}]
-                 "return" "jsonb"
-                 "schema" "scratch_v3"
-                 "id" "user_profile_by_account"
-                 "flags" {}}
-     "pipeline" {}
-     "options" {}
-     "defaults" {"fn_args" [account-id]}}
-    {"transport_id" transport-id})))
-
-(defn.js attach-update-profile-request
-  "Asks the worker to attach the `update-profile` RPC model without opening
-   the proxy group."
+(defn.js attach-profile-request
+  "Asks the worker to attach the `profile` RPC model (backed by
+   `scratch_v3.update_user_profile`) without opening the proxy group."
   [client transport-id]
   (return
    (adaptor-client/attach-model-request
     client
     "room/a"
     "demo"
-    "update-profile"
+    "profile"
     "@xt.db/attach-rpc-model"
     "db/primary"
     {"rpc_spec" {"input" [{"symbol" "i_account_id" "type" "uuid"}
@@ -106,30 +84,6 @@
   (return
    (page-proxy/open-proxy-group client "room/a" "demo"
                                 {"transport_id" transport-id})))
-
-(defn.js get-profile-output
-  "Reads the current value of the attached `profile` view model."
-  [client]
-  (var group (base-page/group-get client "room/a" "demo"))
-  (var model (xtd/get-in group ["models" "profile"]))
-  (return (event-model/get-current model nil)))
-
-(defn.js update-profile
-  "Calls the attached `update-profile` RPC model to change the UserProfile
-   fields for account-id. Returns the RPC result promise."
-  [client account-id fields op]
-  (return
-   (base-page/model-set-input
-    client "room/a" "demo" "update-profile"
-    [[account-id fields (or op {})]]
-    {})))
-
-(defn.js refresh-profile
-  "Re-runs the attached `profile` RPC model so its output reflects the latest
-   primary data. Returns the model update promise."
-  [client]
-  (return
-   (base-page/model-set-input client "room/a" "demo" "profile" [] {})))
 
 (defn.js wait-model-output
   "Returns a promise of the next non-empty output for `model-id` in
@@ -156,37 +110,22 @@
       (return nil)))))
 
 (defn.js with-profile-read
-  "Connects to the worker, attaches the UserProfile RPC for account-id,
-   refreshes it, and returns a promise of the current output."
+  "Connects to the worker, invokes the profile RPC with an empty update map,
+   and returns a promise of the current UserProfile row."
   [script-path account-id]
   (return
    (-/with-session
     script-path
     (fn [client transport-id]
-      (var p1 (-/attach-user-profile-request client transport-id account-id))
+      (var p1 (-/attach-profile-request client transport-id))
       (var p2 (promise/x:promise-then
                p1
-               (fn [res]
-                 (console.log "ATTACH-PROFILE-RES" res)
-                 (return (-/open-demo-group client transport-id)))))
-      (var p2b (promise/x:promise-then
-                p2
-                (fn [group]
-                  (console.log "OPEN-GROUP" group)
-                  (return group))))
-      (var p2c (promise/x:promise-then
-                p2b
-                (fn [_]
-                  (return (substrate/request client "room/a" "page.group/list" ["room/a"] {"transport_id" transport-id})))))
-      (var p2d (promise/x:promise-then
-                p2c
-                (fn [list-res]
-                  (console.log "WORKER-GROUPS" list-res)
-                  (return list-res))))
-      (var p3 (promise/x:promise-then
-               p2d
                (fn [_]
-                 (return (-/refresh-profile client)))))
+                 (return (-/open-demo-group client transport-id)))))
+      (var p3 (promise/x:promise-then
+               p2
+               (fn [_]
+                 (return (page-proxy/proxy-call client "room/a" "demo" "profile" [[account-id {} {}]] true {"transport_id" transport-id})))))
       (var p4 (promise/x:promise-then
                p3
                (fn [_]
@@ -195,31 +134,23 @@
 
 (defn.js with-profile-update
   "Connects to the worker, updates the UserProfile for account-id with fields,
-   refreshes the view, and returns a promise of the new output."
+   and returns a promise of the updated row output."
   [script-path account-id fields]
   (return
    (-/with-session
     script-path
     (fn [client transport-id]
-      (var p1 (-/attach-user-profile-request client transport-id account-id))
+      (var p1 (-/attach-profile-request client transport-id))
       (var p2 (promise/x:promise-then
                p1
                (fn [_]
-                 (return (-/attach-update-profile-request client transport-id)))))
+                 (return (-/open-demo-group client transport-id)))))
       (var p3 (promise/x:promise-then
                p2
                (fn [_]
-                 (return (-/open-demo-group client transport-id)))))
+                 (return (page-proxy/proxy-call client "room/a" "demo" "profile" [[account-id fields {}]] true {"transport_id" transport-id})))))
       (var p4 (promise/x:promise-then
                p3
                (fn [_]
-                 (return (-/update-profile client account-id fields {})))))
-      (var p5 (promise/x:promise-then
-               p4
-               (fn [_]
-                 (return (-/refresh-profile client)))))
-      (var p6 (promise/x:promise-then
-               p5
-               (fn [_]
                  (return (-/wait-model-output client "profile")))))
-      (return p6)))))
+      (return p4)))))

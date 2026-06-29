@@ -52,30 +52,12 @@
 
             (var node (xt.substrate/node-create {"id" "poc-v3-worker-threads-server"
                                                  "spaces" {"room/a" {"state" {}}}}))
-            (:= (. globalThis ["__node"]) node)
-            (console.error "WORKER BUNDLE LOADED")
-            (. process (on "unhandledRejection"
-                           (fn [err]
-                             (var group (xt.substrate.page-core/group-get node "room/a" "demo"))
-                             (console.error "WORKER UNHANDLED" (. err ["message"]) group))))
-            (console.error "REGISTERED HANDLER")
 
             ;; install the db adaptor request handlers
             (xt.db.node.adaptor-base/init-handlers node)
 
             ;; allow remote clients to open proxy groups on this node
             (xt.substrate.page-proxy/install node)
-
-            (var old-set-input (xt.substrate/get-handler node "page.model/set-input"))
-            (xt.substrate/register-handler
-             node
-             "page.model/set-input"
-             (fn [space args request node]
-               (console.error "HANDLE SET-INPUT" space args request)
-               (var group (xt.substrate.page-core/group-get node "room/a" "demo"))
-               (console.error "SERVER GROUP" group)
-               (return ((. old-set-input ["fn"]) space args request node)))
-             nil)
 
             ;; initialise the scratch-v3 adaptor on the worker side
             (var config {"primary" {"id" "db/primary"

@@ -88,7 +88,7 @@
    (-/init-base-main node config schema lookup)))
 
 ;;
-;;
+;; REALIME HELPERS
 ;;
 
 
@@ -121,6 +121,8 @@
   (var service      (substrate/get-service node service-id))
   (return (impl-common/unsubscribe-db service conn-id topics)))
 
+
+
 (defn.xt ^{:substrate/fn "@xt.db/sync-event"}
   sync-event-handler
   "Substrate handler for @xt.db/sync-event.
@@ -137,91 +139,30 @@
 
 
 ;;
-;;
+;; CACHING HELPERS
 ;;
 
-(defn.xt apply-sync-output
+(defn.xt caching-sync-output
   "If `result` contains db/sync or db/remove, applies it to the caching
-   DB paired with `source-impl` and returns `result`."
+   DB paired with `service` and returns `result`."
   {:added "4.1"}
-  [node source-impl result]
+  [node service result]
   (when (and (xt/x:is-object? result)
              (or (xt/x:has-key? result "db/sync")
                  (xt/x:has-key? result "db/remove")))
-    (var metadata   (xt/x:get-key source-impl "metadata"))
+    (var metadata   (xt/x:get-key service "metadata"))
     (var caching-id (xt/x:get-key metadata "caching_id"))
+
     (when (xt/x:not-nil? caching-id)
       (var caching (substrate/get-service node caching-id))
       (when (xt/x:not-nil? caching)
         (impl-common/sync-process-payload caching result))))
   (return (promise/x:promise-run result)))
 
-
-(defn.xt ^{:substrate/fn "@xt.db/call-rpc"}
-  call-rpc-handler
-  [space args request node]
-  (var service-id   (xt/x:first args))
-  (var rpc-spec     (xt/x:second args))
-  (var fn-args      (xt/x:get-idx args (xt/x:offset 2)))
-  (var impl (substrate/get-service node service-id))
-  (return
-   (-> (impl-common/rpc-call-async impl rpc-spec fn-args)
-       (promise/x:promise-then
-        (fn [result]
-          (return (-/apply-sync-output node
-                                       impl
-                                       result)))))))
-
-(defn.xt ^{:substrate/fn "@xt.db/call-fetch"}
-  call-fetch-handler
-  [space args request node]
-  (var service-id   (xt/x:first  args))
-  (var fetch-input  (xt/x:second args))
-  (return
-   (-> (promise/x:promise-run
-        (substrate/get-service node service-id))
-       (promise/x:promise-then
-        (fn [client]
-          (return (http-fetch/request-http client fetch-input)))))))
-
-
-
-;;
-;;
-;;
-
-(defn.xt create-pull-model
-  "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
-  {:added "4.1"}
-  [service model]
-  (var metadata (xt/x:get-key service "metadata"))
-  (var caching-id (xt/x:get-key metadata "caching_id"))
-  (var primary-id (xt/x:get-key metadata "primary_id"))
-  (var #{pipeline
-         options
-         defaults} model)
-  (return
-   {"handler"
-    (fn [context]
-      (var node (. context ["node"]))
-      (var tree (. context ["args"] [0]))
-      (var caching (substrate/get-service node caching-id))
-      (return (impl-common/pull caching tree)))
-    "pipeline" (xtd/obj-assign-nested
-                {"remote" {"handler"
-                           (fn [context]
-                             (var node (. context ["node"]))
-                             (var tree (. context ["args"] [0]))
-                             (var primary (substrate/get-service node primary-id))
-                             (return (impl-common/pull-async primary tree)))}}
-                pipeline)
-    "defaults" defaults
-    "options"  options}))
-
-(defn.xt add-db-model-listener
+(defn.xt attach-base-model
   "Attaches a page model and registers a db listener if options.refresh is set."
   {:added "4.1"}
-  [node space-id group-id model-id service model-spec]
+  [node service space-id group-id model-id model-spec]
   (page-core/add-group-attach
    node
    space-id
@@ -229,8 +170,8 @@
    {model-id model-spec})
   (var refresh-map (xt/x:get-key (xt/x:get-key model-spec "options") "refresh"))
   (when (xt/x:is-object? refresh-map)
-    (var metadata (xt/x:get-key service "metadata"))
-    (var caching-id (xt/x:get-key metadata "caching_id"))
+    (var #{metadata} service)
+    (var #{caching-id}  metadata)
     (var caching (substrate/get-service node caching-id))
     (var listener-id (xt/x:cat space-id "/" group-id "/" model-id))
     (impl-common/add-db-listener
@@ -245,21 +186,120 @@
            "group" group-id
            "model" model-id}))
 
+
+
+
+;;
+;; RPC HELPERS
+;;
+
+
+(defn.xt ^{:substrate/fn "@xt.db/call-rpc"}
+  call-rpc-handler
+  [space args request node]
+  (var service-id   (xt/x:first args))
+  (var rpc-spec     (xt/x:second args))
+  (var fn-args      (xt/x:get-idx args (xt/x:offset 2)))
+  (var impl (substrate/get-service node service-id))
+  (return
+   (-> (impl-common/rpc-call-async impl rpc-spec fn-args)
+       (promise/x:promise-then
+        (fn [result]
+          (return (-/caching-sync-output node
+                                       impl
+                                       result)))))))
+
+(defn.xt create-rpc-model
+  "Creates a page model spec that calls an RPC on a named service."
+  {:added "4.1"}
+  [service-id rpc-spec model]
+  (var #{pipeline
+         options
+         defaults} model)
+  (var default-fn-args (or (xt/x:get-key defaults "args") []))
+  (var rpc-handler
+       (fn [context]
+         (var node (. context ["node"]))
+         (var args (. context ["args"]))
+         (var fn-args (or (xt/x:get-idx args 0) default-fn-args))
+         (var impl  (substrate/get-service node service-id))
+         (return
+          (-> (impl-common/rpc-call-async impl rpc-spec fn-args)
+              (promise/x:promise-then
+               (fn [result]
+                 (return (-/caching-sync-output node impl result))))))))
+  (return
+   {"handler" rpc-handler
+    "pipeline" pipeline
+    "defaults" defaults
+    "options"  options}))
+
+(defn.xt ^{:substrate/fn "@xt.db/attach-rpc-model"}
+  attach-rpc-model
+  "Server-side handler that materialises an RPC page model from client args."
+  {:added "4.1"}
+  [space args request node]
+  (var service-id  (xt/x:first args))
+  (var page-args   (xt/x:second args))
+  (var rpc-spec    (xt/x:get-idx args (xt/x:offset 2)))
+  (var model       (xt/x:get-idx args (xt/x:offset 3)))
+  (var #{space-id
+         group-id
+         model-id}   page-args)
+  (var model-spec (-/create-rpc-model service-id rpc-spec model))
+  (var service (substrate/get-service node service-id))
+  (return (-/attach-base-model node service space-id group-id model-id model-spec)))
+
+;;
+;;
+;;
+
+(defn.xt create-pull-model
+  "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
+  {:added "4.1"}
+  [metadata tree model]
+  (var #{caching-id
+         primary-id} metadata)
+  (var #{pipeline
+         options
+         defaults} model)
+  (return
+   {"handler" (fn [context]
+                (var node (. context ["node"]))
+                (var caching (substrate/get-service node caching-id))
+                (return (impl-common/pull caching tree)))
+    "pipeline" (xtd/obj-assign-nested
+                {"remote" {"handler"
+                           (fn [context]
+                             (var node (. context ["node"]))
+                             (var primary (substrate/get-service node primary-id))
+                             (return (impl-common/pull-async primary tree)))}}
+                pipeline)
+    "defaults" defaults
+    "options"  options}))
+
 (defn.xt ^{:substrate/fn "@xt.db/attach-pull-model"}
   attach-pull-model
   "Server-side handler that materialises a custom pull-view page model from client args."
   {:added "4.1"}
   [space args request node]
-  (var node-args   (xt/x:first args))
-  (var model-args  (xt/x:second args))
+  (var service-id  (xt/x:first args))
+  (var page-args   (xt/x:second args))
+  (var tree        (xt/x:get-idx args (xt/x:offset 2)))
+  (var model       (xt/x:get-idx args (xt/x:offset 3)))
   (var #{space-id
          group-id
-         model-id
-         service}   node-args)
-  (var service-impl (substrate/get-service node service))
-  (var model-spec (-/create-pull-model service-impl model-args))
-  (return (-/add-db-model-listener
-           node space-id group-id model-id service-impl model-spec)))
+         model-id}   page-args)
+  (var service (substrate/get-service node service-id))
+  (var #{metadata} service)
+  (var model-spec (-/create-pull-model metadata tree model))
+  (return (-/attach-base-model node service space-id group-id model-id model-spec)))
+
+
+
+
+
+
 
 
 ;;
@@ -343,57 +383,9 @@
          service}   node-args)
   (var service-impl (substrate/get-service node service))
   (var model-spec (-/create-tree-view-model service-impl model-args))
-  (return (-/add-db-model-listener
+  (return (-/attach-base-model
            node space-id group-id model-id service-impl model-spec)))
 
-
-;;
-;; RPC MODEL
-;;
-
-(defn.xt create-rpc-model
-  "Creates a page model spec that calls an RPC on a named service."
-  {:added "4.1"}
-  [service-id model]
-  (var #{rpc-spec
-         pipeline
-         options
-         defaults} model)
-  (var default-fn-args (or (xt/x:get-key defaults "fn_args") []))
-  (var rpc-handler
-       (fn [context]
-         (var node (. context ["node"]))
-         (var args (. context ["args"]))
-         (var fn-args (or (xt/x:get-idx args 0) default-fn-args))
-         (var impl (substrate/get-service node service-id))
-         (return
-          (-> (impl-common/rpc-call-async impl rpc-spec fn-args)
-              (promise/x:promise-then
-               (fn [result]
-                 (return (-/apply-sync-output node impl result))))))))
-  (return
-   {"handler" rpc-handler
-    "pipeline" (xtd/obj-assign-nested
-                {"remote" {"handler" rpc-handler}}
-                pipeline)
-    "defaults" defaults
-    "options"  options}))
-
-(defn.xt ^{:substrate/fn "@xt.db/attach-rpc-model"}
-  attach-rpc-model
-  "Server-side handler that materialises an RPC page model from client args."
-  {:added "4.1"}
-  [space args request node]
-  (var node-args   (xt/x:first args))
-  (var model-args  (xt/x:second args))
-  (var #{space-id
-         group-id
-         model-id
-         service}   node-args)
-  (var service-impl (substrate/get-service node service))
-  (var model-spec (-/create-rpc-model service model-args))
-  (return (-/add-db-model-listener
-           node space-id group-id model-id service-impl model-spec)))
 
 
 ;;
@@ -446,7 +438,7 @@
   (substrate/register-handler node "@xt.db/attach-rpc-model" -/attach-rpc-model nil)
   (substrate/register-handler node "@xt.db/attach-tree-view-model" -/attach-tree-view-model nil)
   (substrate/register-handler node "@xt.db/detach-db-model" -/detach-db-model nil)
-  (substrate/register-handler node "@xt.db/call-fetch" -/call-fetch-handler nil)
+  
   (substrate/register-handler node "@xt.db/call-rpc" -/call-rpc-handler nil)
   (substrate/register-handler node "@xt.db/sync-event" -/sync-event-handler nil)
   (substrate/register-handler node "@xt.db/subscribe-db" -/subscribe-db-handler nil)
@@ -461,3 +453,19 @@
                  (string? (-> v meta :substrate/fn))))
        (sort-by (comp name key))))
 
+
+
+(comment
+  (substrate/register-handler node "@xt.db/call-fetch" -/call-fetch-handler nil)
+  
+  (defn.xt ^{:substrate/fn "@xt.db/call-fetch"}
+    call-fetch-handler
+    [space args request node]
+    (var service-id   (xt/x:first  args))
+    (var fetch-input  (xt/x:second args))
+    (return
+     (-> (promise/x:promise-run
+          (substrate/get-service node service-id))
+         (promise/x:promise-then
+          (fn [client]
+            (return (http-fetch/request-http client fetch-input))))))))

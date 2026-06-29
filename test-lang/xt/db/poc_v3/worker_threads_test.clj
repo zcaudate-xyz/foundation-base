@@ -62,8 +62,8 @@
          (fn [err]
            (repl/notify {"err" (. err ["message"])
                          "stack" (. err ["stack"])})))))
-  => (contains-in {"out" {"first-name" "Alicia"
-                          "last-name" "Adams"}}))
+  => (contains-in {"out" [{"first_name" "Alicia"
+                           "last_name" "Adams"}]}))
 
 ^{:refer xt.db.poc-v3.worker-threads-test/profile-updates
   :added "4.1"}
@@ -72,9 +72,9 @@
     (var p (wt/with-profile-update
              (@! +worker-script-path+)
              (@! +account-id+)
-             {"first-name" "Maria"}))
+             {"first_name" "Maria"}))
     (promise/x:promise-then p
      (fn [out]
        (repl/notify {"out" out}))))
-  => (contains-in {"out" {"first-name" "Maria"
-                          "last-name" "Adams"}}))
+  => (contains-in {"out" [{"first_name" "Maria"
+                           "last_name" "Adams"}]}))

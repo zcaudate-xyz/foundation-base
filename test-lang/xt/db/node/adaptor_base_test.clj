@@ -44,6 +44,21 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
+(defn.js node-init-supabase
+  []
+  (var node (substrate/node-create {}))
+  (return
+   (adaptor/init-base-handler
+    nil
+    [{"primary" {"type" "supabase"
+                 "defaults" (@! local-min/+config-supabase-anon+)}
+      "caching" {"type" "sqlite"
+                 "defaults" {"filename" ":memory:"}}}
+     -/Schema
+     -/SchemaLookup]
+    nil
+    node)))
+
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:teardown :postgres)
@@ -145,149 +160,160 @@
 ^{:refer xt.db.node.adaptor-base/subscribe-db-handler :added "4.1"
   :setup [(l/rt:restart :js)]}
 (fact "subscribes to the db handler"
-  
+
+  ;;
+  ;; PRECHECK
+  ;;
   (notify/wait-on :js
-    (var node (substrate/node-create {}))
-    (:= (!:G NODE) node)
-    (-> (adaptor/init-base-handler
-         nil
-         [{"primary" {"type" "supabase"
-                      "defaults" (@! local-min/+config-supabase-anon+)}
-           "caching" {"type" "sqlite"
-                      "defaults" {"filename" ":memory:"}}}
-          -/Schema
-          -/SchemaLookup]
-         nil
-         node)
+    (var impl (xt.db.system.main/create-impl "supabase"
+                                             (@! local-min/+config-supabase-anon+)
+                                             -/Schema
+                                             -/SchemaLookup))
+    (repl/notify
+     (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
+                                         "realtime:room:sub-test-2"])))
+
+  => [true true]
+
+  ;;
+  ;; FROM HANDLER
+  ;;
+  (notify/wait-on :js
+    (-> (-/node-init-supabase)
         (promise/x:promise-then
-         (fn []
-           #_(return
-            (realtime/subscribe
-             (substrate/get-service node "db/primary")
-             "default"
-             ["room:user-a" "room:user-b" "room:user-c"]))
+         (fn [node]
            (return
             (adaptor/subscribe-db-handler nil
                                           ["db/primary"
                                            "default"
-                                           ["room:user-a" "room:user-b" "room:user-c"]]
+                                           ["realtime:room:sub-test-1"
+                                            "realtime:room:sub-test-2"]]
                                           nil
                                           node))))
         (repl/notify)))
-  
-  
-  (!.js
-    (substrate/get-service NODE "db/primary"))
-
-  
-
-  (notify/wait-on :js
-    (var impl (xt.db.system.main/create-impl "supabase"
-                                (@! local-min/+config-supabase-anon+)
-                                -/Schema
-                                -/SchemaLookup))
-    (repl/notify
-     (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
-                                         "realtime:room:sub-test-2"])))
-  => [true true]
-
-  (notify/wait-on :js
-    (var impl (substrate/get-service NODE "db/primary"))
-    (repl/notify
-     (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
-                                         "realtime:room:sub-test-2"])))
-  => "Missing protocol implementation xt.net.ws_native/IWebsocket for js.net.ws_native/WebsocketClient"
-  
-  (notify/wait-on :js
-    (var impl (substrate/get-service NODE "db/primary"))
-    (-> (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
-                                            "realtime:room:sub-test-2"])
-        (promise/x:promise-then
-         (fn [ok]
-           (repl/notify {"ok" ok
-                         "topics" (realtime/get-topics impl "default")})))))
-  => [false false]
-  
-  (!.js
-    (xt/x:obj-keys
-     (xtd/get-in (substrate/get-service NODE "db/primary")
-                 ["client"]))))
+  => [true true])
 
 ^{:refer xt.db.node.adaptor-base/unsubscribe-db-handler :added "4.1"}
-(fact "TODO")
+(fact "unsubscribes from the db handler"
 
-^{:refer xt.db.node.adaptor-base/sync-event-handler :added "4.1"}
+  ;;
+  ;; FROM HANDLER
+  ;;
+  (notify/wait-on :js
+    (var node nil)
+    (-> (-/node-init-supabase)
+        (promise/x:promise-then
+         (fn [out]
+           (:= node out)
+           (return
+            (adaptor/subscribe-db-handler nil
+                                          ["db/primary"
+                                           "default"
+                                           ["realtime:room:sub-test-1"
+                                            "realtime:room:sub-test-2"]]
+                                          nil
+                                          node))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (adaptor/unsubscribe-db-handler nil
+                                            ["db/primary"
+                                             "default"
+                                             ["realtime:room:sub-test-1"
+                                              "realtime:room:sub-test-2"]]
+                                            nil
+                                            node))))
+        (repl/notify)))
+  => true)
+
+^{:refer xt.db.node.adaptor-base/sync-event-handler :added "4.1"
+  :setup [(def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+                        "message" "hello"}
+                       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+                        "message" "world"}])]}
 (fact "sync-event-handler applies db/sync payload to the paired caching db"
 
   (notify/wait-on :js
-    (-> (substrate/node-create {})
-        (adaptor/init-base-main
-         {"primary" {"type" "memory"
-                     "defaults" {}}
-          "caching" {"type" "memory"
-                     "defaults" {}}}
-         sample/Schema
-         sample/SchemaLookup)
+    (-> (-/node-init-supabase)
         (promise/x:promise-then
          (fn [node]
-           (adaptor/init-handlers node)
-           (-> (adaptor/sync-event-handler
-                nil
-                [{"db/sync" {"Currency" [{"id" "GBP"
-                                          "name" "British Pound"
-                                          "symbol" "£"}]}}]
-                nil
-                node)
-               (promise/x:promise-then
-                (fn [_]
-                  (var caching (substrate/get-service node "db/caching"))
-                  (return (repl/notify
-                           (impl-common/pull caching
-                                             ["Currency"
-                                              {"id" "GBP"}
-                                              ["name"]]))))))))))
-  => [{"name" "British Pound"}])
+           (return
+            (adaptor/sync-event-handler nil
+                                        ["db/caching"
+                                         {"db/sync" {"Log" (@! +logs+)}}]
+                                        nil
+                                        node))))
+        (repl/notify)))
+  => true
 
-^{:refer xt.db.node.adaptor-base/caching-sync-output :added "4.1"}
+  (notify/wait-on :js
+    (var node nil)
+    (-> (-/node-init-supabase)
+        (promise/x:promise-then
+         (fn [out]
+           (:= node out)
+           (return
+            (adaptor/sync-event-handler nil
+                                        ["db/caching"
+                                         {"db/sync" {"Log" (@! +logs+)}}]
+                                        nil
+                                        node))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (impl-common/pull (substrate/get-service node "db/caching")
+                              ["Log"]))))
+        (repl/notify)))
+  => (contains-in
+      [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+        "message" "hello"}
+       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+        "message" "world"}]))
+
+^{:refer xt.db.node.adaptor-base/caching-sync-output :added "4.1"
+  :setup [(def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+                        "message" "hello"}
+                       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+                        "message" "world"}])]}
 (fact "caching-sync-output routes db/sync payload to the paired caching db"
 
   (notify/wait-on :js
-    (-> (substrate/node-create {})
-        (adaptor/init-base-main
-         {"primary" {"type" "memory"
-                     "defaults" {}}
-          "caching" {"type" "memory"
-                     "defaults" {}}}
-         sample/Schema
-         sample/SchemaLookup)
+    (var node nil)
+    (-> (-/node-init-supabase)
         (promise/x:promise-then
-         (fn [node]
+         (fn [out]
+           (:= node out)
            (var primary (substrate/get-service node "db/primary"))
-           (-> (adaptor/caching-sync-output
-                node
-                primary
-                {"db/sync" {"Currency" [{"id" "USD"
-                                         "name" "US Dollar"
-                                         "symbol" "$"}]}})
-               (promise/x:promise-then
-                (fn [_]
-                  (var caching (substrate/get-service node "db/caching"))
-                  (return (repl/notify
-                           (impl-common/pull caching
-                                             ["Currency"
-                                              {"id" "USD"}
-                                              ["name"]]))))))))))
-  => [{"name" "US Dollar"}])
+           (return
+            
+            (-> (adaptor/caching-sync-output
+                 node
+                 primary
+                 {"db/sync" {"Log" (@! +logs+)}})))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (impl-common/pull (substrate/get-service node "db/caching")
+                              ["Log"]))))
+        (repl/notify)))
+  => (contains-in
+      [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+        "message" "hello"}
+       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+        "message" "world"}]))
 
-^{:refer xt.db.node.adaptor-base/caching-add-model-callback :added "4.1"}
-(fact "caching-add-model-callback registers a db listener when options.refresh is set"
+^{:refer xt.db.node.adaptor-base/base-add-model :added "4.1"}
+(fact "base-add-model registers a db listener when options.refresh is set"
 
+  ;;
+  ;; TODO
+  ;; 
   (notify/wait-on :js
     (-> (substrate/node-create {})
         (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
-                                    "caching" {"type" "memory" "defaults" {}}}
-                                   -/Schema
-                                   -/SchemaLookup)
+                                 "caching" {"type" "memory" "defaults" {}}}
+                                -/Schema
+                                -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
            (var service (substrate/get-service node "db/primary"))
@@ -297,7 +323,7 @@
                        "options" {"refresh" {"User" true
                                              "Log" true}}
                        "defaults" {"args" [["User"]]}}))
-           (adaptor/caching-add-model-callback
+           (adaptor/base-add-model
             node "room/a" "demo" "refresh-view" service spec)
            (var caching (substrate/get-service node "db/caching"))
            (var listener (impl-common/get-db-listener
@@ -341,22 +367,22 @@
              node))))
         (repl/notify)))
   => (contains-in {"message" "hello"})
-
+  
   (notify/wait-on :js
     (var node (-> (substrate/node-create {})
                   (adaptor/init-handlers)))
     (-> (promise/x:promise-run nil)
         (promise/x:promise-then
          (fn []
-           (return(substrate/request node
-                                     nil
-                                     "@xt.db/init-base"
-                                     [{"primary" {"type" "postgres"
-                                                  "defaults" (@! (local-min/+config+ :db))}
-                                       "caching" {"type" "sqlite"
-                                                  "defaults" {"filename" ":memory:"}}}
-                                      -/Schema
-                                      -/SchemaLookup]))))
+           (return (substrate/request node
+                                      nil
+                                      "@xt.db/init-base"
+                                      [{"primary" {"type" "postgres"
+                                                   "defaults" (@! (local-min/+config+ :db))}
+                                        "caching" {"type" "sqlite"
+                                                   "defaults" {"filename" ":memory:"}}}
+                                       -/Schema
+                                       -/SchemaLookup]))))
         (promise/x:promise-then
          (fn []
            (return
@@ -575,7 +601,7 @@
                        "options" {"refresh" {"User" true
                                              "Log" true}}
                        "defaults" {"args" [["User"]]}}))
-           (adaptor/caching-add-model-callback
+           (adaptor/base-add-model
             node "room/a" "demo" "refresh-view" service spec)
            (var out (adaptor/remove-model-with-refresh
                      node "room/a" "demo" "refresh-view" service))

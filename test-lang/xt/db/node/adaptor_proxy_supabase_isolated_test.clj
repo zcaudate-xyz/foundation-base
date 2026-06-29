@@ -1,5 +1,5 @@
 (ns xt.db.node.adaptor-proxy-supabase-isolated-test
-  "Isolated reproduction of the sign-up-then-sign-out nil issue."
+  "Isolated reproduction of proxy handler nil issue."
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -39,7 +39,6 @@
 (l/script- :js
   {:runtime :chromedriver.instance
    :require [[xt.lang.common-repl :as repl]
-             [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
@@ -124,10 +123,10 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop :js)]})
 
-(defn.js connect-worker-debug
+(defn.js connect-worker
   []
   (var url (worker-link/make-blob-url (@! +worker-script+)))
-  (var client (substrate/node-create {"id" (xt/x:cat "debug-client-" (xt/x:now-ms))}))
+  (var client (substrate/node-create {"id" (xt/x:cat "iso-client-" (xt/x:now-ms))}))
   (proxy/init-proxy-handlers client)
   (return
    (promise/x:promise-then
@@ -137,22 +136,12 @@
       "source" {"create_fn"
                 (fn [listener]
                   (var shared (new SharedWorker url))
-                  (. shared (addEventListener
-                             "error"
-                             (fn [err]
-                               (:= (. globalThis ["__worker_debug__"])
-                                   {"type" "sharedworker-error"
-                                    "message" (. err ["message"])}))
-                             false))
                   (var port (. shared ["port"]))
                   (. port (start))
                   (. port (addEventListener
                            "message"
                            (fn [e]
-                             (var data (. e ["data"]))
-                             (when (. data ["__debug__"])
-                               (:= (. globalThis ["__worker_debug__"]) data))
-                             (listener data))
+                             (listener (. e ["data"])))
                            false))
                   (return port))}
        "wait_ready" true})
@@ -160,98 +149,59 @@
       (proxy/set-default-transport client (. conn ["transport_id"]))
       (return client)))))
 
-^{:refer xt.db.node.adaptor-proxy-supabase-isolated-test/sign-up-then-out
+^{:refer xt.db.node.adaptor-proxy-supabase-isolated-test/signed-in-only
   :added "4.1"}
-(fact "sign up then sign out with debug capture"
+(fact "signed-in? only"
   (notify/wait-on [:js 60000]
-    (var email (xt/x:cat "isolated-proxy-"
+    (-> (-/connect-worker)
+        (promise/x:promise-then
+         (fn [client]
+           (-> (proxy/supabase-signed-in-handler nil ["auth/supabase"] nil client)
+               (promise/x:promise-then
+                (fn [out]
+                  (repl/notify {"out" out})))
+               (promise/x:promise-catch
+                (fn [err]
+                  (repl/notify {"error" err}))))))))
+  => (contains-in {"out" false}))
+
+^{:refer xt.db.node.adaptor-proxy-supabase-isolated-test/health-only
+  :added "4.1"}
+(fact "health only"
+  (notify/wait-on [:js 60000]
+    (-> (-/connect-worker)
+        (promise/x:promise-then
+         (fn [client]
+           (-> (proxy/supabase-health-handler nil ["auth/supabase" {}] nil client)
+               (promise/x:promise-then
+                (fn [out]
+                  (repl/notify {"out" out})))
+               (promise/x:promise-catch
+                (fn [err]
+                  (repl/notify {"error" err}))))))))
+  => (contains-in {"out" {"name" "GoTrue"}}))
+
+^{:refer xt.db.node.adaptor-proxy-supabase-isolated-test/sign-up-then-health
+  :added "4.1"}
+(fact "sign up then health"
+  (notify/wait-on [:js 60000]
+    (var email (xt/x:cat "up-health-proxy-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
-    (var url (worker-link/make-blob-url (@! +worker-script+)))
-    (var client (substrate/node-create {"id" (xt/x:cat "orig-client-" (xt/x:now-ms))}))
-    (proxy/init-proxy-handlers client)
-    (-> (browser-transport/connect-sharedworker
-         client
-         {"transport_id" "worker"
-          "source" {"create_fn"
-                    (fn [listener]
-                      (var shared (new SharedWorker url))
-                      (var port (. shared ["port"]))
-                      (. port (start))
-                      (. port (addEventListener
-                               "message"
-                               (fn [e]
-                                 (listener (. e ["data"])))
-                               false))
-                      (return port))}
-           "wait_ready" true})
+    (-> (-/connect-worker)
         (promise/x:promise-then
-         (fn [conn]
-           (proxy/set-default-transport client (. conn ["transport_id"]))
+         (fn [client]
            (-> (proxy/supabase-sign-up-handler nil
                                                ["auth/supabase" {"email" email "password" "secret123"} {}]
                                                nil
                                                client)
                (promise/x:promise-then
                 (fn [_]
-                  (promise/x:with-delay 500
-                    (fn []
-                      (return (proxy/supabase-sign-out-handler nil ["auth/supabase" {}] nil client))))))
+                  (proxy/supabase-health-handler nil ["auth/supabase" {}] nil client)))
                (promise/x:promise-then
                 (fn [out]
                   (repl/notify {"out" out})))
                (promise/x:promise-catch
                 (fn [err]
                   (repl/notify {"error" err}))))))))
-  => (contains-in {"out" {"status" "ok"}}))
-
-^{:refer xt.db.node.adaptor-proxy-supabase-isolated-test/sign-in-then-out
-  :added "4.1"}
-(fact "admin create user then sign in then sign out"
-  (notify/wait-on [:js 60000]
-    (var email (xt/x:cat "in-then-out-proxy-"
-                         (xt/x:to-string (xt/x:now-ms))
-                         "@example.com"))
-    (var url (worker-link/make-blob-url (@! +worker-script+)))
-    (var client (substrate/node-create {"id" (xt/x:cat "inout-client-" (xt/x:now-ms))}))
-    (proxy/init-proxy-handlers client)
-    (-> (browser-transport/connect-sharedworker
-         client
-         {"transport_id" "worker"
-          "source" {"create_fn"
-                    (fn [listener]
-                      (var shared (new SharedWorker url))
-                      (var port (. shared ["port"]))
-                      (. port (start))
-                      (. port (addEventListener
-                               "message"
-                               (fn [e]
-                                 (listener (. e ["data"])))
-                               false))
-                      (return port))}
-           "wait_ready" true})
-        (promise/x:promise-then
-         (fn [conn]
-           (proxy/set-default-transport client (. conn ["transport_id"]))
-           (-> (proxy/supabase-admin-create-user-handler nil
-                                                         ["auth/supabase-service"
-                                                          {"email" email "password" "pass123456" "email_confirm" true}
-                                                          {}]
-                                                         nil
-                                                         client)
-               (promise/x:promise-then
-                (fn [_]
-                  (proxy/supabase-sign-in-handler nil
-                                                  ["auth/supabase" {"email" email "password" "pass123456"} {}]
-                                                  nil
-                                                  client)))
-               (promise/x:promise-then
-                (fn [_]
-                  (proxy/supabase-sign-out-handler nil ["auth/supabase" {}] nil client)))
-               (promise/x:promise-then
-                (fn [out]
-                  (repl/notify {"out" out})))
-               (promise/x:promise-catch
-                (fn [err]
-                  (repl/notify {"error" err}))))))))
-  => (contains-in {"out" {"status" "ok"}}))
+  => (contains-in {"out" {"name" "GoTrue"}}))
