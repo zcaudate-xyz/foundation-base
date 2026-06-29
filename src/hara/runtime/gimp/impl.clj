@@ -142,7 +142,9 @@
            :process proc)))
 
 (defn- start-gimp-container
-  "Starts GIMP inside a Docker container and maps a host port to it."
+  "Starts GIMP inside a Docker container using host networking.
+   Host networking avoids Docker port-mapping races that caused the first
+   eval to read EOF/broken pipe."
   {:added "4.1"}
   [{:keys [id container port] :as rt}]
   (let [image     (or (get-in container [:image])
@@ -157,7 +159,7 @@
                     :group   "hara"
                     :image   image
                     :cmd     (vec (concat exec [bootstrap]))
-                    :expose  [[port port]]
+                    :flags   ["--network=host"]
                     :remove  true})]
     (network/wait-for-port "127.0.0.1" port {:timeout 60000})
     (assoc (connect-gimp-socket rt "127.0.0.1" port)
@@ -295,5 +297,7 @@
     :python :gimp
     {:type :hara/rt.gimp
      :config {:layout :full
-              :container {:image "foundation-base/rt-basic-gimp:latest"}}
+              :container {:image "foundation-base/rt-basic-gimp:latest"
+                          :exec  ["xvfb-run" "-a" "gimp" "-i"
+                                  "--batch-interpreter" "python-fu-eval" "-b"]}}
      :instance {:create gimp:create}})])

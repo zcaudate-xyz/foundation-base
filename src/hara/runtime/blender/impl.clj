@@ -142,7 +142,9 @@
            :process proc)))
 
 (defn- start-blender-container
-  "Starts blender inside a Docker container and maps a host port to it."
+  "Starts blender inside a Docker container using host networking.
+   Host networking avoids Docker port-mapping races that caused the first
+   eval to read EOF/broken pipe."
   {:added "4.1"}
   [{:keys [id container port] :as rt}]
   (let [image     (or (get-in container [:image])
@@ -155,7 +157,7 @@
                     :group   "hara"
                     :image   image
                     :cmd     ["blender" "--background" "--python-expr" bootstrap]
-                    :expose  [[port port]]
+                    :flags   ["--network=host"]
                     :remove  true})]
     (network/wait-for-port "127.0.0.1" port {:timeout 60000})
     (assoc (connect-blender-socket rt "127.0.0.1" port)
@@ -265,6 +267,9 @@
               :method {-raw-eval raw-eval-blender
                        -invoke-ptr invoke-ptr-blender}])
 
+(def +default-blender-container+
+  {:image "foundation-base/rt-basic-blender:latest"})
+
 (defn blender:create
   "Creates a Blender runtime."
   {:added "4.1"}
@@ -274,7 +279,7 @@
                         {:id (or id (f/sid))
                          :tag :blender
                          :exec exec
-                         :container container
+                         :container (or container +default-blender-container+)
                          :lock (Object.)
                          :lifecycle {:main {}
                                     :emit {}

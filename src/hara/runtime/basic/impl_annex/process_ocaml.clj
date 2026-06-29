@@ -34,7 +34,8 @@
 (def +ocaml-twostep-config+
   (common/set-context-options
    [:ocaml :twostep :default]
-   {:container {:image "foundation-base/rt-twostep-ocaml:latest"}
+   {:container {:image "foundation-base/rt-twostep-ocaml:latest"
+                :flags ["--user" "root"]}
     :container-backup true
     :exec-fn #'twostep/sh-exec-portable
     :main {:in identity}

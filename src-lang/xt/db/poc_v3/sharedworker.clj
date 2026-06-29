@@ -156,12 +156,12 @@
 
 (defn.js update-profile
   "Calls the attached `update-profile` RPC model to change the UserProfile
-   first-name for account-id. Returns the RPC result promise."
-  [client account-id first-name]
+   fields for account-id. Returns the RPC result promise."
+  [client account-id fields op]
   (return
    (base-page/model-set-input
     client "room/a" "demo" "update-profile"
-    [[account-id {"first-name" first-name}]]
+    [[account-id fields (or op {})]]
     {})))
 
 (defn.js refresh-profile
