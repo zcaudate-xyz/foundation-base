@@ -403,23 +403,33 @@
   (return model))
 
 (defn.xt add-group-attach
-  "adds group statically"
+  "adds group statically, merging models into an existing group when present"
   {:added "4.1"}
   [node space-id group-id models]
   (var runtime (-/ensure-space-page node space-id))
   (var groups (xt/x:get-key runtime "groups"))
-  (var group-throttle (-/create-throttle node space-id group-id -/refresh-model-dependents))
-  (var group-deps (-/get-group-deps group-id models))
-  (var group-models {})
+  (var group (xt/x:get-key groups group-id))
+  (when (xt/x:nil? group)
+    (:= group {"name" group-id
+               "models" {}
+               "specs" {}
+               "throttle" (-/create-throttle node space-id group-id -/refresh-model-dependents)
+               "deps" {}})
+    (xt/x:set-key groups group-id group))
+  (var group-models (xt/x:get-key group "models"))
+  (var group-specs (xt/x:get-key group "specs"))
+  (when (xt/x:nil? group-models)
+    (:= group-models {})
+    (xt/x:set-key group "models" group-models))
+  (when (xt/x:nil? group-specs)
+    (:= group-specs {})
+    (xt/x:set-key group "specs" group-specs))
+  (xtd/obj-assign group-specs models)
   (xt/for:object [[model-id model] models]
     (xt/x:set-key group-models
                   model-id
                   (-/create-model node space-id group-id model-id model)))
-  (var group {"name" group-id
-              "models" group-models
-              "throttle" group-throttle
-              "deps" group-deps})
-  (xt/x:set-key groups group-id group)
+  (xt/x:set-key group "deps" (-/get-group-deps group-id group-specs))
   (return group))
 
 (defn.xt add-group

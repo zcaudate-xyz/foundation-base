@@ -481,31 +481,39 @@
            (return
             (page-core/refresh-model node "room/a" "demo" "rpc-view" {} nil))))
         (repl/notify)))
-  =# {"path" ["demo" "rpc-view"], "error" true, "post" [false], "::" "model.run", "main" [true "ERR: - {\"status\":\"error\",\"tag\":\"net/args-not-same-length\",\"data\":{\"expected\":1,\"actual\":5,\"input\":\"hello\"}}" true], "pre" [false]}
-  => (contains-in {"message" "hello"}))
+  => (contains-in
+      {"path" ["demo" "rpc-view"], "post" [false], "::" "model.run", "main" [true {"message" "hello", "author_id" nil, "id" string?}], "pre" [false]}))
+
+(comment
+  (pg/t:delete scratch-v0/Log)
+  
+  )
+
 
 ^{:refer xt.db.node.adaptor-base/create-pull-model :added "4.1"}
 (fact "create-pull-model builds a page model spec with local and remote handlers"
 
   (!.js
     (var spec (adaptor/create-pull-model
-               {"metadata" {"caching_id" "db/caching"
-                            "primary_id" "db/primary"}}
+               {"caching_id" "db/caching"
+                "primary_id" "db/primary"}
+               ["Log"]
                {"pipeline" {}
                 "options" {}
-                "defaults" {"args" [["Log"]]}}))
+                "defaults" {}}))
     {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
      "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
      "defaults" (. spec ["defaults"])})
-  => {"has-main" true
-      "has-remote" true
-      "defaults" {"args" [["Log"]]}})
+  => {"has-remote" true, "has-main" true, "defaults" {}})
 
-^{:refer xt.db.node.adaptor-base/attach-pull-model :added "4.1"}
+^{:refer xt.db.node.adaptor-base/attach-pull-model :added "4.1"
+  :setup [(l/rt:restart :js)]}
 (fact "attach-pull-model attaches and invokes a pull-view model"
 
   (notify/wait-on :js
-    (-> (substrate/node-create {})
+    (var node (substrate/node-create {}))
+    (:= (!:G NODE) node)
+    (-> node
         (adaptor/init-base-main {"primary" {"type" "postgres"
                                             "defaults" (@! (local-min/+config+ :db))}
                                  "caching" {"type" "sqlite"
@@ -514,26 +522,53 @@
                                 -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
+
+           ;;
+           ;; ACTIVE
+           ;;
            (adaptor/attach-pull-model
             nil
-            [{"space_id" "room/a"
+            ["db/primary"
+             {"space_id" "room/a"
               "group_id" "demo"
-              "model_id" "custom-view"
-              "service" {"metadata" {"caching_id" "db/caching"
-                                     "primary_id" "db/primary"}}}
+              "model_id" "custom-view"}
+             ["Log"]
              {"pipeline" {}
-              "options" {}
-              "defaults" {"args" [["Log"]]}}]
+              "options"  {"refresh" {"Log" true}}
+              "defaults" {"args" []}}]
             nil
             node)
-           (var result (-/invoke-attached-model
-                        node "room/a" "demo" "custom-view"
-                        [["Log"]]))
-           (return (repl/notify result))))
-        (promise/x:promise-catch
-         (fn [out]
-           (repl/notify out)))))
-  => [])
+
+           
+           ;;
+           ;; PASSIVE
+           ;;
+           (adaptor/attach-pull-model
+            nil
+            ["db/primary"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "custom-view-2"}
+             ["Log"]
+             {"pipeline" {}
+              "options"  {"refresh" {"Log" true}}
+              "defaults" {"args" []}}]
+            nil
+            node)
+           (return
+            ;; REFRESH ACTIVE
+            (page-core/refresh-model-remote node "room/a" "demo" "custom-view" nil))))
+        (repl/notify)))
+  => (contains-in
+      {"path" ["demo" "custom-view"],
+       "remote" [true [{"message" "hello", "author_id" nil, "id" string?}]],
+       "post" [false], "::" "model.run", "pre" [false]})
+
+  (!.js
+    ;; PASSIVE STILL UPDATES
+    (page-core/get-current-output NODE "room/a" "demo" "custom-view-2"))
+  => (contains-in
+      [{"message" "hello", "author_id" nil, "id" string?}]))
 
 (comment
 

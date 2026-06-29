@@ -9,6 +9,7 @@
              [xt.net.http-fetch :as http-fetch]
              [xt.db.text.sql-call :as call]
              [xt.db.text.base-tree :as base-tree]
+             [xt.db.text.base-flatten :as base-flatten]
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.main :as impl-main]
              [xt.substrate.page-core :as page-core]
@@ -222,15 +223,13 @@
   (var #{pipeline
          options
          defaults} model)
-  (var default-fn-args (or (xt/x:get-key defaults "args") []))
   (var rpc-handler
        (fn [context]
          (var node (. context ["node"]))
          (var args (. context ["args"]))
-         (var fn-args (or (xt/x:get-idx args 0) default-fn-args))
          (var impl  (substrate/get-service node service-id))
          (return
-          (-> (impl-common/rpc-call-async impl rpc-spec fn-args)
+          (-> (impl-common/rpc-call-async impl rpc-spec args)
               (promise/x:promise-then
                (fn [result]
                  (return (-/caching-sync-output node impl result))))))))
@@ -269,6 +268,7 @@
   (var #{pipeline
          options
          defaults} model)
+  (var table (xt/x:first tree))
   (return
    {"handler" (fn [context]
                 (var node (. context ["node"]))
@@ -279,7 +279,16 @@
                            (fn [context]
                              (var node (. context ["node"]))
                              (var primary (substrate/get-service node primary-id))
-                             (return (impl-common/pull-async primary tree)))}}
+                             (var caching (substrate/get-service node caching-id))
+                             (return (-> (impl-common/pull-async primary tree)
+                                         (promise/x:promise-then
+                                          (fn [result]
+                                            (var rows (:? (xt/x:is-array? result)
+                                                          result
+                                                          [result]))
+                                            (var payload {"db/sync" {table rows}})
+                                            (impl-common/sync-process-payload caching payload)
+                                            (return result))))))}}
                 pipeline)
     "defaults" defaults
     "options"  options}))

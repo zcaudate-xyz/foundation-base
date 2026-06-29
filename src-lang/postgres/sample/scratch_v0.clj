@@ -46,6 +46,17 @@
   []
   "pong")
 
+(defn.pg ^{:%% :sql
+           :- [:text]
+           :props [:immutable :parallel-safe]
+           :api/flags []
+           :api/meta {:sb/grant :all}}
+  echo
+  "Returns a stable scratch-v0 ping response."
+  {:added "4.1.4"}
+  [:text i-input]
+  i-input)
+
 (defn.pg ^{:props [:security :definer]
            :api/flags []
            :api/meta {:sb/grant :auth}}
@@ -54,7 +65,7 @@
   {:added "4.1.4"}
   [:text i-message]
   (let [o-log (pg/t:insert -/Log
-                           {:message i-message})]
+                {:message i-message})]
     (return o-log)))
 
 (defn.pg ^{:props [:security :definer]
