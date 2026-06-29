@@ -154,7 +154,7 @@
      (fn [client transport-id]
        (return
         (promise/x:promise-then
-         (-/request-worker client transport-id "@xt.db/supabase-signed-in?" ["db/primary"])
+         (-/request-worker client transport-id "@xt.supabase/signed-in?" ["db/primary"])
          (fn [v]
            (repl/notify {"signed-in" v})))))))
   => {"signed-in" false})
@@ -168,7 +168,7 @@
      (fn [client transport-id]
        (return
         (promise/x:promise-then
-         (-/request-worker client transport-id "@xt.db/supabase-current-session" ["db/primary"])
+         (-/request-worker client transport-id "@xt.supabase/current-session" ["db/primary"])
          (fn [v]
            (repl/notify v)))))))
   => nil)
@@ -186,12 +186,12 @@
        (return
         (promise/x:promise-then
          (promise/x:promise-then
-          (-/request-worker client transport-id "@xt.db/supabase-sign-up" ["db/primary"
-                                                                            {"email" email
-                                                                             "password" "pass123456"}])
+          (-/request-worker client transport-id "@xt.supabase/sign-up" ["db/primary"
+                                                                          {"email" email
+                                                                           "password" "pass123456"}])
           (fn [_]
             (return
-             (-/request-worker client transport-id "@xt.db/supabase-user-info" ["db/primary"]))))
+             (-/request-worker client transport-id "@xt.supabase/user-info" ["db/primary"]))))
          (fn [v]
            (repl/notify v)))))))
   => (contains-in
@@ -206,7 +206,7 @@
      (fn [client transport-id]
        (return
         (promise/x:promise-then
-         (-/request-worker client transport-id "@xt.db/supabase-health" ["db/primary"])
+         (-/request-worker client transport-id "@xt.supabase/health" ["db/primary"])
          (fn [v]
            (repl/notify v)))))))
   => (contains-in

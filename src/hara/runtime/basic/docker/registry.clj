@@ -89,7 +89,19 @@
      {:image      "foundation-base/rt-basic-erlang:latest"
       :notes      "project-owned Erlang basic runtime image using OTP 27 alpine with shell bootstrap support"
       :config     {:container {:image "foundation-base/rt-basic-erlang:latest"
-                               :exec  ["sh" "-c"]}}}})
+                               :exec  ["sh" "-c"]}}}
+
+     :blender
+     {:image      "foundation-base/rt-basic-blender:latest"
+      :notes      "project-owned Blender runtime image based on linuxserver/blender"
+      :config     {:container {:image "foundation-base/rt-basic-blender:latest"
+                               :exec  ["blender" "--background" "--python-expr"]}}}
+
+     :gimp
+     {:image      "foundation-base/rt-basic-gimp:latest"
+      :notes      "project-owned GIMP runtime image based on ubuntu:24.04 with xvfb"
+      :config     {:container {:image "foundation-base/rt-basic-gimp:latest"
+                               :exec  ["xvfb-run" "-a" "gimp" "-i" "--batch-interpreter" "python-fu-eval" "-b"]}}}})
 
 (defn registry-dockerfile-path
   "returns the repo-local Dockerfile path for a language"

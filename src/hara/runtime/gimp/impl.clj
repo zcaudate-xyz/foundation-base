@@ -9,6 +9,7 @@
             [hara.runtime.basic.impl.process-python :as process-python]
             [hara.runtime.basic.type-common :as common]
             [std.lib.network :as network]
+            [lib.docker.common :as docker]
             [xt.lang.common-lib :as lib])
   (:import [java.io BufferedReader InputStreamReader]
            [java.net Socket]
@@ -45,8 +46,9 @@
                           out   (return-eval body)]
                       (conn.sendall (. (json.dumps {:id id :status "ok" :body out}) (encode "utf-8")))
                       (conn.sendall (:% b "\n"))))))))
-      (let [server (socket.socket)]
-        (. server (bind '("127.0.0.1" port)))
+      (let [server (socket.socket)
+            host   (or (. opts (get "host")) "127.0.0.1")]
+        (. server (bind '(host port)))
         (. server (listen 1))
         (print "HARA_GIMP_READY")
         (. sys (stdout.flush))
@@ -59,20 +61,22 @@
             (. thd (start))))))])
 
 (defn gimp-bootstrap
-  "Python bootstrap that runs inside GIMP and starts a TCP server on PORT."
+  "Python bootstrap that runs inside GIMP and starts a TCP server on PORT.
+   HOST defaults to 127.0.0.1; use 0.0.0.0 when running inside a container."
   {:added "4.1"}
-  [port]
-  (let [bootstrap (->> [(impl/emit-entry-deps
-                         lib/return-eval
-                         {:lang :python
-                          :layout :flat})
-                        (impl/emit-as
-                         :python +server-gimp+)]
-                       (clojure.string/join "\n\n"))]
-    (str bootstrap
-         "\n\n"
-         (impl/emit-as
-          :python [(list 'server-gimp port {})]))))
+  ([port] (gimp-bootstrap port "127.0.0.1"))
+  ([port host]
+   (let [bootstrap (->> [(impl/emit-entry-deps
+                          lib/return-eval
+                          {:lang :python
+                           :layout :flat})
+                         (impl/emit-as
+                          :python +server-gimp+)]
+                        (clojure.string/join "\n\n"))]
+     (str bootstrap
+          "\n\n"
+          (impl/emit-as
+           :python [(list 'server-gimp port {:host host})])))))
 
 ;;
 ;; PROCESS
@@ -104,10 +108,24 @@
           (do (Thread/sleep 50)
               (recur)))))))
 
-(defn start-gimp
-  "Starts a headless GIMP process with a Python socket server."
+(defn- connect-gimp-socket
+  "Opens a socket to HOST:PORT and returns the runtime with connection state."
   {:added "4.1"}
-  [{:keys [id exec port] :as rt}]
+  [rt host port]
+  (let [socket (Socket. host ^Integer port)
+        in  (BufferedReader. (InputStreamReader. (.getInputStream socket)))
+        out (.getOutputStream socket)]
+    (assoc rt
+           :port port
+           :socket socket
+           :reader in
+           :output out
+           :msgid (AtomicInteger. 0))))
+
+(defn- start-gimp-local
+  "Starts a headless GIMP process on the host."
+  {:added "4.1"}
+  [{:keys [exec port] :as rt}]
   (let [exec (or exec (gimp-exec))
         port (or port (network/port:check-available 0))
         bootstrap (gimp-bootstrap port)
@@ -120,25 +138,66 @@
                                                           bootstrap])))]
     (wait-for-gimp-ready proc 60000)
     (network/wait-for-port "127.0.0.1" port {:timeout 30000})
-    (let [socket (Socket. "127.0.0.1" ^Integer port)
-          in  (BufferedReader. (InputStreamReader. (.getInputStream socket)))
-          out (.getOutputStream socket)]
-      (assoc rt
-             :process proc
-             :socket socket
-             :reader in
-             :output out
-             :msgid (AtomicInteger. 0)))))
+    (assoc (connect-gimp-socket rt "127.0.0.1" port)
+           :process proc)))
+
+(defn- start-gimp-container
+  "Starts GIMP inside a Docker container and maps a host port to it."
+  {:added "4.1"}
+  [{:keys [id container port] :as rt}]
+  (let [image     (or (get-in container [:image])
+                      (f/error "No container image configured for GIMP runtime"))
+        exec      (or (get-in container [:exec])
+                      ["gimp" "-i" "--batch-interpreter" "python-fu-eval" "-b"])
+        port      (or port (network/port:check-available 0))
+        bootstrap (gimp-bootstrap port "0.0.0.0")
+        container-id (str (or id (f/sid)))
+        container (docker/start-container
+                   {:id      container-id
+                    :group   "hara"
+                    :image   image
+                    :cmd     (vec (concat exec [bootstrap]))
+                    :expose  [[port port]]
+                    :remove  true})]
+    (network/wait-for-port "127.0.0.1" port {:timeout 60000})
+    (assoc (connect-gimp-socket rt "127.0.0.1" port)
+           :container container)))
+
+(defn start-gimp
+  "Starts a headless GIMP process with a Python socket server.
+   Falls back to a Docker container when the local binary is missing
+   and a :container image is configured."
+  {:added "4.1"}
+  [{:keys [exec container] :as rt}]
+  (let [exec     (or exec (gimp-exec))
+        exec-str (cond (vector? exec) (first exec)
+                       (string? exec) exec
+                       :else nil)
+        rt       (assoc rt :exec exec)]
+    (cond
+      (and exec-str (common/program-exists? exec-str))
+      (start-gimp-local rt)
+
+      (some? (:image container))
+      (start-gimp-container rt)
+
+      :else
+      (f/error "GIMP executable not found and no container image configured"
+               {:exec exec
+                :container container}))))
 
 (defn stop-gimp
-  "Stops the GIMP process and socket."
+  "Stops the GIMP process/socket or container."
   {:added "4.1"}
-  [{:keys [^Process process ^Socket socket] :as rt}]
+  [{:keys [^Process process ^Socket socket container] :as rt}]
   (when socket
     (try (.close socket)
          (catch Throwable _)))
   (when process
     (try (.destroyForcibly process)
+         (catch Throwable _)))
+  (when container
+    (try (docker/stop-container container)
          (catch Throwable _)))
   rt)
 
@@ -210,12 +269,13 @@
 (defn gimp:create
   "Creates a GIMP runtime."
   {:added "4.1"}
-  [{:keys [id exec]
+  [{:keys [id exec container]
     :as m}]
   (map->RuntimeGimp (merge
                         {:id (or id (f/sid))
                          :tag :gimp
                          :exec exec
+                         :container container
                          :lifecycle {:main {}
                                     :emit {}
                                     :json :full}}
@@ -234,5 +294,6 @@
   [(rt/install-type!
     :python :gimp
     {:type :hara/rt.gimp
-     :config {:layout :full}
+     :config {:layout :full
+              :container {:image "foundation-base/rt-basic-gimp:latest"}}
      :instance {:create gimp:create}})])

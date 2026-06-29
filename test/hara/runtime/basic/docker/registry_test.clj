@@ -12,7 +12,7 @@
 ^{:refer hara.runtime.basic.docker.registry/registry-dockerfile-path :added "4.1"}
 (fact "resolves repo-local Dockerfile paths for each registered language"
   (every? #(str/ends-with? (registry-dockerfile-path %) "/Dockerfile")
-          [:python :js :ruby :php :perl :lua :julia :r :erlang])
+          [:python :js :ruby :php :perl :lua :julia :r :erlang :blender :gimp])
   => true)
 
 ^{:refer hara.runtime.basic.docker.registry/registry-config :added "4.1"}
@@ -30,7 +30,7 @@
 
 ^{:refer hara.runtime.basic.docker.registry/registry-image :added "4.1"}
 (fact "returns canonical repo-owned images for all basic runtimes"
-  (mapv registry-image [:python :js :ruby :php :perl :lua :julia :r :erlang])
+  (mapv registry-image [:python :js :ruby :php :perl :lua :julia :r :erlang :blender :gimp])
   => ["foundation-base/rt-basic-python:latest"
       "foundation-base/rt-basic-js:latest"
       "foundation-base/rt-basic-ruby:latest"
@@ -39,7 +39,9 @@
       "foundation-base/rt-basic-lua:latest"
       "foundation-base/rt-basic-julia:latest"
       "foundation-base/rt-basic-r:latest"
-      "foundation-base/rt-basic-erlang:latest"])
+      "foundation-base/rt-basic-erlang:latest"
+      "foundation-base/rt-basic-blender:latest"
+      "foundation-base/rt-basic-gimp:latest"])
 
 ^{:refer hara.runtime.basic.docker.registry/registry-dockerfile :added "4.1"}
 (fact "returns dockerfile source for each registered language"
@@ -52,5 +54,7 @@
            :lua
            :julia
            :r
-           :erlang])
+           :erlang
+           :blender
+           :gimp])
   => true)

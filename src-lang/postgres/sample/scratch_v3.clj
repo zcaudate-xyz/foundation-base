@@ -6,12 +6,14 @@
 
 (l/script :postgres
   {:config {:dbname "test-scratch"}
-   :require [[postgres.core :as pg]]
+   :require [[postgres.core :as pg]
+             [postgres.core.supabase :as s]]
    :import [["citext"]
             ["uuid-ossp"]]
    :static {:application ["scratch_v3"]
             :seed        ["scratch_v3"]
-            :all {:schema ["scratch_v3"]}}})
+            :all {:schema ["scratch_v3"]}}
+   :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
 (def RecordType
   [:op-created {:type :uuid :scope :-/system}
@@ -59,32 +61,37 @@
 
 (defsel.pg ^{:- [-/Currency]
              :args []
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   currency-all-active
   {:__deleted__ false})
 
 (defsel.pg ^{:- [-/Currency]
              :args [:citext i-currency-id]
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   currency-by-id
   {:id i-currency-id
    :__deleted__ false})
 
 (defsel.pg ^{:- [-/Currency]
              :args [:text i-currency-type]
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   currency-by-type
   {:type i-currency-type
    :__deleted__ false})
 
 (defret.pg ^{:- [-/Currency]
              :args []
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   currency-default
   [:citext i-currency-id]
   #{:*/standard})
 
-(defn.pg ^{:api/flags []}
+(defn.pg ^{:api/flags []
+  :api/meta {:sb/grant :all}}
   insert-currency
   "Creates a currency row."
   {:added "4.1"}
@@ -109,7 +116,8 @@
                            {:track o-op})]
     (return o-out)))
 
-(defn.pg ^{:api/flags []}
+(defn.pg ^{:api/flags []
+  :api/meta {:sb/grant :all}}
   update-currency
   "Updates currency attributes without changing the primary id."
   {:added "4.1"}
@@ -122,7 +130,8 @@
                             :track o-op})]
     (return o-out)))
 
-(defn.pg ^{:api/flags []}
+(defn.pg ^{:api/flags []
+  :api/meta {:sb/grant :all}}
   delete-currency
   "Marks a currency row as deleted so clients can remove it from cache."
   {:added "4.1"}
@@ -160,7 +169,9 @@
 
 (deftype.pg ^{:track [-/TrackingMin]
               :append [-/RecordType]
-              :public true}
+              :public true
+              :api/meta {:sb/access {:anon :all
+                                     :auth :all}}}
   UserProfile
   "Public profile attached to a User."
   [:id            {:type :uuid :primary true
@@ -213,25 +224,29 @@
 
 (defsel.pg ^{:- [-/User]
              :args []
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   user-all
   {:__deleted__ false})
 
 (defsel.pg ^{:- [-/User]
              :args [:uuid i-user-id]
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   user-by-id
   {:id i-user-id
    :__deleted__ false})
 
 (defsel.pg ^{:- [-/User]
              :args [:citext i-nickname]
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   user-by-nickname
   {:nickname i-nickname
    :__deleted__ false})
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   insert-user
   "Creates a user row."
   {:added "4.1"}
@@ -251,6 +266,7 @@
     (return o-out)))
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   update-user
   "Updates a user row."
   {:added "4.1"}
@@ -264,6 +280,7 @@
     (return o-out)))
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   delete-user
   "Soft-deletes a user row."
   {:added "4.1"}
@@ -276,6 +293,7 @@
     (return o-out)))
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   create-user
   "Creates a user row, generating the id."
   {:added "4.1"}
@@ -289,11 +307,13 @@
 
 (defsel.pg ^{:- [-/UserProfile]
              :args [:uuid i-account-id]
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   user-profile-by-account
   {:account i-account-id})
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   insert-user-profile
   "Creates a profile for a user."
   {:added "4.1"}
@@ -313,6 +333,8 @@
     (return o-out)))
 
 (defn.pg
+  ^{:api/flags []
+    :api/meta {:sb/grant :all}}
   update-user-profile
   "Updates the profile for a user."
   {:added "4.1"}
@@ -329,11 +351,13 @@
 
 (defsel.pg ^{:- [-/Wallet]
              :args [:uuid i-owner-id]
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   wallet-by-owner
   {:owner i-owner-id})
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   insert-wallet
   "Creates a wallet for a user."
   {:added "4.1"}
@@ -347,6 +371,7 @@
     (return o-out)))
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   ensure-wallet
   "Creates a default wallet for a user if one does not exist."
   {:added "4.1"}
@@ -366,19 +391,22 @@
 
 (defsel.pg ^{:- [-/Asset]
              :args [:uuid i-wallet-id]
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   asset-by-wallet
   {:wallet i-wallet-id})
 
 (defsel.pg ^{:- [-/Asset]
              :args [:uuid i-wallet-id
                     :citext i-currency-id]
-             :api/view true}
+             :api/view true
+             :api/meta {:sb/grant :all}}
   asset-by-wallet-currency
   {:wallet i-wallet-id
    :currency i-currency-id})
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   insert-asset
   "Creates an asset row."
   {:added "4.1"}
@@ -394,6 +422,7 @@
     (return o-out)))
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   ensure-asset
   "Creates an asset for a wallet/currency pair if one does not exist."
   {:added "4.1"}
@@ -413,6 +442,7 @@
         (return o-out)))))
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   asset-credit
   "Credits an asset balance."
   {:added "4.1"}
@@ -428,6 +458,7 @@
     (return o-out)))
 
 (defn.pg
+  ^{:api/meta {:sb/grant :all}}
   asset-deduct
   "Deducts from an asset balance."
   {:added "4.1"}

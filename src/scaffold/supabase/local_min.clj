@@ -56,6 +56,7 @@
                              {:status status :body body}))
              (do (Thread/sleep 500)
                  (recur)))))))))
+
 (defn wait-for-postgrest-ready
   "Polls PostgREST for a specific schema/table until it returns HTTP 200.
    Defaults to scratch_v0.Log to match the existing poc tests."

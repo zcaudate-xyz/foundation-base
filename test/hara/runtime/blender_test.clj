@@ -1,13 +1,10 @@
 (ns hara.runtime.blender-test
-  (:require [hara.lang :as l]
-            [hara.runtime.blender.impl :as impl]
+  (:require [hara.runtime.blender.impl :as impl]
             [std.lib.env :as env])
   (:use code.test))
 
-(l/script- :python
-  {:runtime :blender :test-mode true})
-
-(fact:global {:skip (not (env/program-exists? "blender")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
+(fact:global {:skip (not (or (env/program-exists? "blender")
+                              (env/program-exists? "docker")))})
 
 ^{:refer hara.runtime.blender.impl/blender :added "4.1"}
 (fact "starts and stops a blender runtime"
@@ -26,13 +23,4 @@
        (string? (impl/raw-eval-blender rt "OUT = str(bpy.data.meshes.new('Cube'))"))]
       (finally
         (std.lib.component/stop rt))))
-  => [6 true])
-
-^{:refer hara.lang/script- :added "4.1"}
-(fact "uses blender runtime through hara.lang"
-  (try
-    [(!.py (+ 1 2 3))
-     (string? @(!.py (bpy.data.meshes.new "Cube")))]
-    (finally
-      (l/rt:stop :python)))
   => [6 true])

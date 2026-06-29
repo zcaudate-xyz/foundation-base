@@ -24,7 +24,8 @@
            (-> (http-fetch/request-http client cmd)
                (promise/x:promise-then http-util/get-body-data))))))))
 
-(defn.xt supabase-sign-up-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/sign-up"}
+  supabase-sign-up-handler
   "signs up a new user and starts session auto-refresh"
   {:added "4.1"}
   [space args request node]
@@ -45,7 +46,8 @@
                   (session/auto-refresh-start impl)
                   (return session))))))))))
 
-(defn.xt supabase-sign-in-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/sign-in"}
+  supabase-sign-in-handler
   "signs in with password and starts session auto-refresh"
   {:added "4.1"}
   [space args request node]
@@ -66,7 +68,8 @@
                   (session/auto-refresh-start impl)
                   (return session))))))))))
 
-(defn.xt supabase-sign-out-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/sign-out"}
+  supabase-sign-out-handler
   "signs out the current user and stops auto-refresh"
   {:added "4.1"}
   [space args request node]
@@ -90,7 +93,8 @@
 ;;
 ;;
 
-(defn.xt supabase-refresh-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/refresh"}
+  supabase-refresh-handler
   "refreshes the current session on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -101,7 +105,8 @@
         (fn [impl]
           (return (session/refresh-session impl)))))))
 
-(defn.xt supabase-signed-in-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/signed-in?"}
+  supabase-signed-in-handler
   "returns whether the requested service currently has a session"
   {:added "4.1"}
   [space args request node]
@@ -109,7 +114,8 @@
   (var impl (substrate/get-service node service-id))
   (return (xt/x:not-nil? (session/get-session impl))))
 
-(defn.xt supabase-current-session-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/current-session"}
+  supabase-current-session-handler
   "returns the current session stored on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -117,7 +123,8 @@
   (var impl (substrate/get-service node service-id))
   (return (session/get-session impl)))
 
-(defn.xt supabase-rpc-call-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/rpc-call"}
+  supabase-rpc-call-handler
   "calls an rpc entry on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -128,7 +135,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-rpc-call rpc-name data opts))))
 
-(defn.xt supabase-query-table-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/query-table"}
+  supabase-query-table-handler
   "queries a table on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -139,7 +147,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-query-table table-name query opts))))
 
-(defn.xt supabase-health-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/health"}
+  supabase-health-handler
   "calls the auth health endpoint on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -148,7 +157,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-health opts))))
 
-(defn.xt supabase-admin-create-user-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/admin-create-user"}
+  supabase-admin-create-user-handler
   "creates a user through the admin endpoint"
   {:added "4.1"}
   [space args request node]
@@ -158,7 +168,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-admin-create-user data opts))))
 
-(defn.xt supabase-admin-delete-user-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/admin-delete-user"}
+  supabase-admin-delete-user-handler
   "deletes a user through the admin endpoint"
   {:added "4.1"}
   [space args request node]
@@ -168,7 +179,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-admin-delete-user user-id opts))))
 
-(defn.xt supabase-admin-generate-link-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/admin-generate-link"}
+  supabase-admin-generate-link-handler
   "generates an admin link on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -178,7 +190,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-admin-generate-link data opts))))
 
-(defn.xt supabase-admin-get-user-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/admin-get-user"}
+  supabase-admin-get-user-handler
   "fetches a user through the admin endpoint"
   {:added "4.1"}
   [space args request node]
@@ -188,7 +201,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-admin-get-user user-id opts))))
 
-(defn.xt supabase-admin-list-users-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/admin-list-users"}
+  supabase-admin-list-users-handler
   "lists users through the admin endpoint"
   {:added "4.1"}
   [space args request node]
@@ -197,7 +211,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-admin-list-users opts))))
 
-(defn.xt supabase-admin-update-user-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/admin-update-user"}
+  supabase-admin-update-user-handler
   "updates a user through the admin endpoint"
   {:added "4.1"}
   [space args request node]
@@ -207,7 +222,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-admin-update-user user-id opts))))
 
-(defn.xt supabase-authorize-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/authorize"}
+  supabase-authorize-handler
   "starts an OAuth authorization request"
   {:added "4.1"}
   [space args request node]
@@ -217,7 +233,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-authorize data opts))))
 
-(defn.xt supabase-callback-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/callback"}
+  supabase-callback-handler
   "handles an OAuth callback request"
   {:added "4.1"}
   [space args request node]
@@ -226,7 +243,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-callback opts))))
 
-(defn.xt supabase-invite-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/invite"}
+  supabase-invite-handler
   "sends an invite on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -236,7 +254,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-invite data opts))))
 
-(defn.xt supabase-otp-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/otp"}
+  supabase-otp-handler
   "requests a passwordless OTP on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -246,7 +265,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-otp data opts))))
 
-(defn.xt supabase-recovery-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/recovery"}
+  supabase-recovery-handler
   "requests a recovery email on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -256,7 +276,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-recovery data opts))))
 
-(defn.xt supabase-settings-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/settings"}
+  supabase-settings-handler
   "reads auth settings on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -265,7 +286,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-settings opts))))
 
-(defn.xt supabase-token-refresh-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/token-refresh"}
+  supabase-token-refresh-handler
   "refreshes a session with a refresh token on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -275,7 +297,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-token-refresh data opts))))
 
-(defn.xt supabase-user-get-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/user-get"}
+  supabase-user-get-handler
   "fetches the current authenticated user on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -288,7 +311,8 @@
     (return
      (-/supabase-request node service-id (addon/cmd-user-get opts)))))
 
-(defn.xt supabase-user-put-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/user-put"}
+  supabase-user-put-handler
   "updates the current authenticated user on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -298,7 +322,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-user-put data opts))))
 
-(defn.xt supabase-verify-get-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/verify-get"}
+  supabase-verify-get-handler
   "verifies a token via GET on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -308,7 +333,8 @@
   (return
    (-/supabase-request node service-id (addon/cmd-verify-get data opts))))
 
-(defn.xt supabase-verify-post-handler
+(defn.xt ^{:substrate/fn "@xt.supabase/verify-post"}
+  supabase-verify-post-handler
   "verifies a token via POST on the requested service"
   {:added "4.1"}
   [space args request node]
@@ -322,32 +348,32 @@
   "installs supabase adaptor handlers on a node"
   {:added "4.1"}
   [node]
-  (substrate/register-handler node "@xt.db/supabase-sign-up" -/supabase-sign-up-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-sign-in" -/supabase-sign-in-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-sign-out" -/supabase-sign-out-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-refresh" -/supabase-refresh-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-signed-in?" -/supabase-signed-in-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-current-session" -/supabase-current-session-handler nil)
+  (substrate/register-handler node "@xt.supabase/sign-up" -/supabase-sign-up-handler nil)
+  (substrate/register-handler node "@xt.supabase/sign-in" -/supabase-sign-in-handler nil)
+  (substrate/register-handler node "@xt.supabase/sign-out" -/supabase-sign-out-handler nil)
+  (substrate/register-handler node "@xt.supabase/refresh" -/supabase-refresh-handler nil)
+  (substrate/register-handler node "@xt.supabase/signed-in?" -/supabase-signed-in-handler nil)
+  (substrate/register-handler node "@xt.supabase/current-session" -/supabase-current-session-handler nil)
   
-  (substrate/register-handler node "@xt.db/supabase-rpc-call" -/supabase-rpc-call-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-query-table" -/supabase-query-table-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-health" -/supabase-health-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-admin-create-user" -/supabase-admin-create-user-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-admin-delete-user" -/supabase-admin-delete-user-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-admin-generate-link" -/supabase-admin-generate-link-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-admin-get-user" -/supabase-admin-get-user-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-admin-list-users" -/supabase-admin-list-users-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-admin-update-user" -/supabase-admin-update-user-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-authorize" -/supabase-authorize-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-callback" -/supabase-callback-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-invite" -/supabase-invite-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-otp" -/supabase-otp-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-recovery" -/supabase-recovery-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-settings" -/supabase-settings-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-token-refresh" -/supabase-token-refresh-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-user-get" -/supabase-user-get-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-user-info" -/supabase-user-get-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-user-put" -/supabase-user-put-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-verify-get" -/supabase-verify-get-handler nil)
-  (substrate/register-handler node "@xt.db/supabase-verify-post" -/supabase-verify-post-handler nil)
+  (substrate/register-handler node "@xt.supabase/rpc-call" -/supabase-rpc-call-handler nil)
+  (substrate/register-handler node "@xt.supabase/query-table" -/supabase-query-table-handler nil)
+  (substrate/register-handler node "@xt.supabase/health" -/supabase-health-handler nil)
+  (substrate/register-handler node "@xt.supabase/admin-create-user" -/supabase-admin-create-user-handler nil)
+  (substrate/register-handler node "@xt.supabase/admin-delete-user" -/supabase-admin-delete-user-handler nil)
+  (substrate/register-handler node "@xt.supabase/admin-generate-link" -/supabase-admin-generate-link-handler nil)
+  (substrate/register-handler node "@xt.supabase/admin-get-user" -/supabase-admin-get-user-handler nil)
+  (substrate/register-handler node "@xt.supabase/admin-list-users" -/supabase-admin-list-users-handler nil)
+  (substrate/register-handler node "@xt.supabase/admin-update-user" -/supabase-admin-update-user-handler nil)
+  (substrate/register-handler node "@xt.supabase/authorize" -/supabase-authorize-handler nil)
+  (substrate/register-handler node "@xt.supabase/callback" -/supabase-callback-handler nil)
+  (substrate/register-handler node "@xt.supabase/invite" -/supabase-invite-handler nil)
+  (substrate/register-handler node "@xt.supabase/otp" -/supabase-otp-handler nil)
+  (substrate/register-handler node "@xt.supabase/recovery" -/supabase-recovery-handler nil)
+  (substrate/register-handler node "@xt.supabase/settings" -/supabase-settings-handler nil)
+  (substrate/register-handler node "@xt.supabase/token-refresh" -/supabase-token-refresh-handler nil)
+  (substrate/register-handler node "@xt.supabase/user-get" -/supabase-user-get-handler nil)
+  (substrate/register-handler node "@xt.supabase/user-info" -/supabase-user-get-handler nil)
+  (substrate/register-handler node "@xt.supabase/user-put" -/supabase-user-put-handler nil)
+  (substrate/register-handler node "@xt.supabase/verify-get" -/supabase-verify-get-handler nil)
+  (substrate/register-handler node "@xt.supabase/verify-post" -/supabase-verify-post-handler nil)
   (return node))

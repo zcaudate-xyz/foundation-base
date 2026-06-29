@@ -11,7 +11,8 @@
    :import [["gi" :as gi]]})
 
 (fact:global
- {:skip (not (env/program-exists? "gimp"))
+ {:skip (not (or (env/program-exists? "gimp")
+                 (env/program-exists? "docker")))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 

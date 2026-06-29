@@ -10,6 +10,7 @@
             [hara.runtime.basic.impl.process-python :as process-python]
             [hara.runtime.basic.type-common :as common]
             [std.lib.network :as network]
+            [lib.docker.common :as docker]
             [xt.lang.common-lib :as lib])
   (:import [java.io BufferedReader InputStreamReader]
            [java.net Socket]
@@ -47,8 +48,9 @@
                           out   (return-eval (+ "import bpy\n" body))]
                       (conn.sendall (. (json.dumps {:id id :status "ok" :body out}) (encode "utf-8")))
                       (conn.sendall (:% b "\n"))))))))
-      (let [server (socket.socket)]
-        (. server (bind '("127.0.0.1" port)))
+      (let [server (socket.socket)
+            host   (or (. opts (get "host")) "127.0.0.1")]
+        (. server (bind '(host port)))
         (. server (listen 1))
         (print "HARA_BLENDER_READY")
         (. sys (stdout.flush))
@@ -61,20 +63,22 @@
             (. thd (start))))))])
 
 (defn blender-bootstrap
-  "Python bootstrap that runs inside Blender and starts a TCP server on PORT."
+  "Python bootstrap that runs inside Blender and starts a TCP server on PORT.
+   HOST defaults to 127.0.0.1; use 0.0.0.0 when running inside a container."
   {:added "4.1"}
-  [port]
-  (let [bootstrap (->> [(impl/emit-entry-deps
-                         lib/return-eval
-                         {:lang :python
-                          :layout :flat})
-                        (impl/emit-as
-                         :python +server-blender+)]
-                       (clojure.string/join "\n\n"))]
-    (str bootstrap
-         "\n\n"
-         (impl/emit-as
-          :python [(list 'server-blender port {})]))))
+  ([port] (blender-bootstrap port "127.0.0.1"))
+  ([port host]
+   (let [bootstrap (->> [(impl/emit-entry-deps
+                          lib/return-eval
+                          {:lang :python
+                           :layout :flat})
+                         (impl/emit-as
+                          :python +server-blender+)]
+                        (clojure.string/join "\n\n"))]
+     (str bootstrap
+          "\n\n"
+          (impl/emit-as
+           :python [(list 'server-blender port {:host host})])))))
 
 ;;
 ;; PROCESS
@@ -106,10 +110,24 @@
           (do (Thread/sleep 50)
               (recur)))))))
 
-(defn start-blender
-  "Starts a headless blender process with a Python socket server."
+(defn- connect-blender-socket
+  "Opens a socket to HOST:PORT and returns the runtime with connection state."
   {:added "4.1"}
-  [{:keys [id exec port] :as rt}]
+  [rt host port]
+  (let [socket (Socket. host ^Integer port)
+        in  (BufferedReader. (InputStreamReader. (.getInputStream socket)))
+        out (.getOutputStream socket)]
+    (assoc rt
+           :port port
+           :socket socket
+           :reader in
+           :output out
+           :msgid (AtomicInteger. 0))))
+
+(defn- start-blender-local
+  "Starts a headless blender process on the host."
+  {:added "4.1"}
+  [{:keys [exec port] :as rt}]
   (let [exec (or exec (blender-exec))
         ^Integer port (or port (network/port:check-available 0))
         bootstrap (blender-bootstrap port)
@@ -120,26 +138,64 @@
                                                           bootstrap])))]
     (wait-for-blender-ready proc 60000)
     (network/wait-for-port "127.0.0.1" port {:timeout 30000})
-    (let [socket (Socket. "127.0.0.1" port)
-          in  (BufferedReader. (InputStreamReader. (.getInputStream socket)))
-          out (.getOutputStream socket)]
-      (assoc rt
-             :process proc
-             :port port
-             :socket socket
-             :reader in
-             :output out
-             :msgid (AtomicInteger. 0)))))
+    (assoc (connect-blender-socket rt "127.0.0.1" port)
+           :process proc)))
+
+(defn- start-blender-container
+  "Starts blender inside a Docker container and maps a host port to it."
+  {:added "4.1"}
+  [{:keys [id container port] :as rt}]
+  (let [image     (or (get-in container [:image])
+                      (f/error "No container image configured for Blender runtime"))
+        port      (or port (network/port:check-available 0))
+        bootstrap (blender-bootstrap port "0.0.0.0")
+        container-id (str (or id (f/sid)))
+        container (docker/start-container
+                   {:id      container-id
+                    :group   "hara"
+                    :image   image
+                    :cmd     ["blender" "--background" "--python-expr" bootstrap]
+                    :expose  [[port port]]
+                    :remove  true})]
+    (network/wait-for-port "127.0.0.1" port {:timeout 60000})
+    (assoc (connect-blender-socket rt "127.0.0.1" port)
+           :container container)))
+
+(defn start-blender
+  "Starts a headless blender process with a Python socket server.
+   Falls back to a Docker container when the local binary is missing
+   and a :container image is configured."
+  {:added "4.1"}
+  [{:keys [exec container] :as rt}]
+  (let [exec     (or exec (blender-exec))
+        exec-str (cond (vector? exec) (first exec)
+                       (string? exec) exec
+                       :else nil)
+        rt       (assoc rt :exec exec)]
+    (cond
+      (and exec-str (common/program-exists? exec-str))
+      (start-blender-local rt)
+
+      (some? (:image container))
+      (start-blender-container rt)
+
+      :else
+      (f/error "Blender executable not found and no container image configured"
+               {:exec exec
+                :container container}))))
 
 (defn stop-blender
-  "Stops the blender process and socket."
+  "Stops the blender process/socket or container."
   {:added "4.1"}
-  [{:keys [^Process process ^Socket socket] :as rt}]
+  [{:keys [^Process process ^Socket socket container] :as rt}]
   (when socket
     (try (.close socket)
          (catch Throwable _)))
   (when process
     (try (.destroyForcibly process)
+         (catch Throwable _)))
+  (when container
+    (try (docker/stop-container container)
          (catch Throwable _)))
   rt)
 
@@ -212,12 +268,13 @@
 (defn blender:create
   "Creates a Blender runtime."
   {:added "4.1"}
-  [{:keys [id exec]
+  [{:keys [id exec container]
     :as m}]
   (map->RuntimeBlender (merge
                         {:id (or id (f/sid))
                          :tag :blender
                          :exec exec
+                         :container container
                          :lock (Object.)
                          :lifecycle {:main {}
                                     :emit {}
@@ -251,10 +308,12 @@
   [(rt/install-type!
     :python :blender.instance
     {:type :hara/rt.blender
-     :config {:layout :full}
+     :config {:layout :full
+              :container {:image "foundation-base/rt-basic-blender:latest"}}
      :instance {:create blender:create}})
    (rt/install-type!
     :python :blender
     {:type :hara/rt.blender.shared
-     :config {:layout :full}
+     :config {:layout :full
+              :container {:image "foundation-base/rt-basic-blender:latest"}}
      :instance {:create blender-shared:create}})])
