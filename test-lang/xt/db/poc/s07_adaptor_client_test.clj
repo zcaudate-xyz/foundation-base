@@ -60,12 +60,12 @@
                                            "spaces" {"room/a" {"state" {}}}}))
       ;; install db adaptor request handlers
       (xt.db.node.adaptor-base/init-handlers node)
-      ;; override init-adaptor to return a clean status map
+      ;; override init-base to return a clean status map
       (xt.substrate/register-handler
-       node "@xt.db/init-adaptor"
+       node "@xt.db/init-base"
        (fn [space args request node]
          (return
-          (. (xt.db.node.adaptor-base/init-adaptor-main
+          (. (xt.db.node.adaptor-base/init-base-main
               node
               (. args [0])
               (. args [1])
@@ -119,7 +119,7 @@
        (promise/x:promise-then
         (substrate/request client
                            "room/a"
-                           "@xt.db/init-adaptor"
+                           "@xt.db/init-base"
                            [{"primary" {"id" "db/primary"
                                         "type" "supabase"
                                         "defaults" (@! local-min/+config-supabase-anon+)}

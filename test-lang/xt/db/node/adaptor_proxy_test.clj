@@ -38,7 +38,7 @@
   {:added "4.1"}
   [server]
   (return
-   (adaptor-base/init-adaptor-main
+   (adaptor-base/init-base-main
     server
     {"primary" {"type" "memory" "defaults" {}}
      "caching" {"type" "memory" "defaults" {}}}
@@ -66,8 +66,8 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.adaptor-proxy/init-adaptor :added "4.1"}
-(fact "client proxy forwards init-adaptor and installs service stubs"
+^{:refer xt.db.node.adaptor-proxy/init-base :added "4.1"}
+(fact "client proxy forwards init-base and installs service stubs"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
@@ -83,7 +83,7 @@
         (promise/x:promise-then
          (fn [_]
            (return
-            (adaptor-proxy/init-adaptor
+            (adaptor-proxy/init-base
              client
              {"primary" {"type" "memory" "defaults" {}}
               "caching" {"type" "memory" "defaults" {}}}

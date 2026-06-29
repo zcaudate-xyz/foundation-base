@@ -58,7 +58,7 @@
             (xt.db.node.adaptor-base/init-handlers node)
             (xt.substrate.page-proxy/install node)
             (. port (postMessage {"type" "debug" "stage" "before-init"}))
-            (-> (xt.db.node.adaptor-base/init-adaptor-main
+            (-> (xt.db.node.adaptor-base/init-base-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"
@@ -105,7 +105,7 @@
             (xt.db.node.adaptor-base/init-handlers node)
             (xt.substrate.page-proxy/install node)
             (. port (postMessage {"type" "debug" "stage" "before-init"}))
-            (-> (xt.db.node.adaptor-base/init-adaptor-main
+            (-> (xt.db.node.adaptor-base/init-base-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"

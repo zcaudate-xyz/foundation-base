@@ -5,10 +5,15 @@
      - worker.mjs   tiny ESM wrapper that captures parentPort
      - bundle.mjs   self-contained xtalk bootstrap
 
-   Keeping the wrapper separate lets the bundle be a plain ESM module while
-   still receiving the worker's MessagePort."
+   The worker bundle is fully self-contained: it embeds the scratch-v3 schema
+   and lookup, initialises the Supabase primary + SQLite cache adaptor, and
+   exposes the node over parentPort. The client only has to connect and attach
+   proxy models."
   (:require [hara.lang :as l]
             [clojure.java.io :as io]
+            [clojure.string :as str]
+            [clojure.data.json :as json]
+            [scaffold.supabase.local-min :as local-min]
             [xt.lang.spec-base]
             [xt.lang.spec-promise]
             [xt.lang.common-data]
@@ -19,67 +24,87 @@
             [xt.substrate.page-proxy]
             [xt.substrate.transport-browser]
             [xt.db.node.adaptor-base]
-            [xt.db.node.adaptor-client]))
+            [xt.db.node.adaptor-client]
+            [xt.db.poc-v3.sharedworker :as sharedworker]))
+
+(l/script :js
+  {:require [[xt.db.poc-v3.sharedworker :as sharedworker]]})
 
 (defn worker-threads-script-str
   "Returns the worker bootstrap as a self-contained JavaScript string.
    Expects `globalThis.__parentPort` to hold the worker's MessagePort."
   []
-  (l/emit-script
-   '(do
-      (var parent-port (. globalThis ["__parentPort"]))
+  (let [config-anon (json/write-str local-min/+config-supabase-anon+)]
+    (-> (l/emit-script
+         '(do
+            (var parent-port (. globalThis ["__parentPort"]))
 
-      ;; adapter object with the MessagePort-like interface expected by
-      ;; transport-browser/self-endpoint
-      (var worker
-           {"postMessage" (fn [data]
-                            (. parent-port (postMessage data)))
-            "addEventListener" (fn [event listener capture]
-                                 (when (== event "message")
-                                   (. parent-port (on "message"
-                                                      (fn [data]
-                                                        (listener {"data" data}))))))})
+            ;; adapter object with the MessagePort-like interface expected by
+            ;; transport-browser/self-endpoint
+            (var worker
+                 {"postMessage" (fn [data]
+                                  (. parent-port (postMessage data)))
+                  "addEventListener" (fn [event listener capture]
+                                       (when (== event "message")
+                                         (. parent-port (on "message"
+                                                            (fn [data]
+                                                              (listener {"data" data}))))))})
 
-      (var node (xt.substrate/node-create {"id" "poc-v3-worker-threads-server"
-                                           "spaces" {"room/a" {"state" {}}}}))
+            (var node (xt.substrate/node-create {"id" "poc-v3-worker-threads-server"
+                                                 "spaces" {"room/a" {"state" {}}}}))
+            (:= (. globalThis ["__node"]) node)
+            (console.error "WORKER BUNDLE LOADED")
+            (. process (on "unhandledRejection"
+                           (fn [err]
+                             (var group (xt.substrate.page-core/group-get node "room/a" "demo"))
+                             (console.error "WORKER UNHANDLED" (. err ["message"]) group))))
+            (console.error "REGISTERED HANDLER")
 
-      ;; install the db adaptor request handlers
-      (xt.db.node.adaptor-base/init-handlers node)
+            ;; install the db adaptor request handlers
+            (xt.db.node.adaptor-base/init-handlers node)
 
-      ;; wrap init-adaptor so errors are serialised back to the client
-      (xt.substrate/register-handler
-       node
-       "@xt.db/init-adaptor"
-       (fn [space args request node]
-         (return
-          (. (xt.db.node.adaptor-base/init-adaptor-main
-              node
-              (. args [0])
-              (. args [1])
-              (. args [2]))
-             (then (fn [_]
-                     (return {"status" "ok"})))
-             (catch (fn [err]
-                      (return {"status" "error"
-                               "message" (. err ["message"])
-                               "stack" (. err ["stack"])}))))))
-       nil)
+            ;; allow remote clients to open proxy groups on this node
+            (xt.substrate.page-proxy/install node)
 
-      ;; allow remote clients to open proxy groups on this node
-      (xt.substrate.page-proxy/install node)
+            (var old-set-input (xt.substrate/get-handler node "page.model/set-input"))
+            (xt.substrate/register-handler
+             node
+             "page.model/set-input"
+             (fn [space args request node]
+               (console.error "HANDLE SET-INPUT" space args request)
+               (var group (xt.substrate.page-core/group-get node "room/a" "demo"))
+               (console.error "SERVER GROUP" group)
+               (return ((. old-set-input ["fn"]) space args request node)))
+             nil)
 
-      ;; expose the node over parentPort
-      (. (xt.substrate.transport-browser/boot-self
-          node
-          {"transport_id" "host"
-           "target" worker
-           "ready" {"signal" "ready"
-                    "transport" "worker_threads"
-                    "worker" "poc-v3-worker-threads-server"}})
-         (then (fn [_]
-                 (return node)))))
-   {:lang :js
-    :layout :full}))
+            ;; initialise the scratch-v3 adaptor on the worker side
+            (var config {"primary" {"id" "db/primary"
+                                    "type" "supabase"
+                                    "defaults" __CONFIG_ANON__}
+                         "caching" {"id" "db/caching"
+                                    "type" "sqlite"
+                                    "defaults" {}}})
+
+            ;; expose the node over parentPort once the adaptor is ready
+            (. (xt.db.node.adaptor-base/init-base-main
+                node
+                config
+                xt.db.poc-v3.sharedworker/Schema
+                xt.db.poc-v3.sharedworker/Lookup)
+               (then (fn [_]
+                       (. (xt.substrate.transport-browser/boot-self
+                           node
+                           {"transport_id" "host"
+                            "target" worker
+                            "ready" {"signal" "ready"
+                                     "transport" "worker_threads"
+                                     "worker" "poc-v3-worker-threads-server"}})
+                          (then (fn [_]
+                                  (return node)))))))
+            node)
+         {:lang :js
+          :layout :full})
+        (str/replace "__CONFIG_ANON__" config-anon))))
 
 (defn write-worker-script!
   "Writes the worker wrapper and bundle under `root`/poc-v3-worker-threads.

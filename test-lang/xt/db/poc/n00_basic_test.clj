@@ -75,7 +75,7 @@
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "poc-node"}))
-    (-> (adaptor-base/init-adaptor-main
+    (-> (adaptor-base/init-base-main
          node
          {"primary" {"type" "supabase"
                       "defaults" (@! local-min/+config-supabase-anon+)}
@@ -124,7 +124,7 @@
 
   (notify/wait-on [:js 10000]
     (var node (substrate/node-create {"id" "poc-node"}))
-    (-> (adaptor-base/init-adaptor-main
+    (-> (adaptor-base/init-base-main
          node
          {"primary" {"type" "supabase"
                      "defaults" (@! local-min/+config-supabase-anon+)}
@@ -181,7 +181,7 @@
 
   (notify/wait-on [:js 10000]
     (var node (substrate/node-create {"id" "poc-node"}))
-    (-> (adaptor-base/init-adaptor-main
+    (-> (adaptor-base/init-base-main
          node
          {"primary" {"type" "supabase"
                       "defaults" (@! local-min/+config-supabase-anon+)}

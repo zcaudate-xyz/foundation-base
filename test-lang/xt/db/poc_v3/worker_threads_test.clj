@@ -1,14 +1,13 @@
 (ns xt.db.poc-v3.worker-threads-test
-  "Minimal debug test."
+  "End-to-end test for the `xt.db.poc-v3.worker-threads` setup."
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
             [postgres.sample.scratch-v3 :as scratch-v3]
             [postgres.core.supabase :as s]
-            [xt.db.poc-v3.worker-threads :as worker-threads]
-            [xt.db.poc-v3.worker-threads-script :as worker-threads-script]
-            [xt.db.poc-v3.sharedworker :as sharedworker]))
+            [xt.db.poc-v3.worker-threads :as wt]
+            [xt.db.poc-v3.worker-threads-script :as worker-threads-script]))
 
 (def +account-id+ "11111111-1111-1111-1111-111111111111")
 
@@ -34,13 +33,13 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.db.poc-v3.worker-threads :as worker-threads]
-             [xt.db.poc-v3.sharedworker :as sharedworker]]})
+             [xt.db.poc-v3.worker-threads :as wt]]
+   :emit {:lang/format :commonjs}})
 
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:setup :postgres)
-          (local-min/wait-for-postgrest-ready "scratch_v3" "UserProfile")
+          (l/rt:scaffold-imports :js)
           (scratch-v3/insert-user +account-id+ "poc-alice" "alice@poc.local" true false {})
           (scratch-v3/insert-user-profile +account-id+ "Alicia" "Adams" "EN" "scratch v3 user" {})
           (def +worker-script-path+
@@ -48,14 +47,34 @@
              (str (System/getProperty "user.dir") "/.tmp")))]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.poc-v3.worker-threads-test/var-then
+^{:refer xt.db.poc-v3.worker-threads-test/profile-reads
   :added "4.1"}
-(fact "promise-then on var"
-  (notify/wait-on [:js 30000]
-    (var p (promise/x:promise (fn [] (return {"x" 1}))))
-    (return
-     (promise/x:promise-then
-      p
-      (fn [v]
-        (return (repl/notify {"v" v}))))))
-  => (contains-in {"v" {"x" 1}}))
+(fact "UserProfile reads through worker-thread RPC"
+  (notify/wait-on [:js 60000]
+    (var p (wt/with-profile-read
+             (@! +worker-script-path+)
+             (@! +account-id+)))
+    (-> p
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify {"out" out})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"err" (. err ["message"])
+                         "stack" (. err ["stack"])})))))
+  => (contains-in {"out" {"first-name" "Alicia"
+                          "last-name" "Adams"}}))
+
+^{:refer xt.db.poc-v3.worker-threads-test/profile-updates
+  :added "4.1"}
+(fact "UserProfile updates through worker-thread RPC"
+  (notify/wait-on [:js 60000]
+    (var p (wt/with-profile-update
+             (@! +worker-script-path+)
+             (@! +account-id+)
+             {"first-name" "Maria"}))
+    (promise/x:promise-then p
+     (fn [out]
+       (repl/notify {"out" out}))))
+  => (contains-in {"out" {"first-name" "Maria"
+                          "last-name" "Adams"}}))

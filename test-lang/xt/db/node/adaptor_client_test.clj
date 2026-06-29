@@ -36,7 +36,7 @@
   {:added "4.1"}
   [server]
   (return
-   (adaptor-base/init-adaptor-main
+   (adaptor-base/init-base-main
     server
     {"primary" {"type" "memory" "defaults" {}}
      "caching" {"type" "memory" "defaults" {}}}

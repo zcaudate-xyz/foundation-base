@@ -76,7 +76,7 @@
                   lookup)
         :caching (xt.db.system.impl-memory/impl-memory schema lookup)})
       (xt.substrate/register-handler
-       node "@xt.db/init-adaptor"
+       node "@xt.db/init-base"
        (fn [space args request node]
          (var common (xt.substrate/get-service node "db/common"))
          (xt.substrate/set-service node "db/common" {:schema (. common ["schema"])
@@ -129,7 +129,7 @@
          (promise/x:promise-then
           (substrate/request client
                              "room/a"
-                             "@xt.db/init-adaptor"
+                             "@xt.db/init-base"
                              []
                              {"transport_id" transport-id})
           (fn [init-res]

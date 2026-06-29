@@ -273,8 +273,8 @@
       "output_subs" []
       "input_subs" []})
 
-^{:refer xt.substrate.page-proxy/init-adaptor-main-handler :added "4.1"}
-(fact "client can call @xt.db/init-adaptor-handler on the server through the proxy"
+^{:refer xt.substrate.page-proxy/init-base-main-handler :added "4.1"}
+(fact "client can call @xt.db/init-base-handler on the server through the proxy"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
@@ -297,7 +297,7 @@
          (fn [linked]
            (return
             (-/send-and-receive linked server client
-                                "room/a" "@xt.db/init-adaptor"
+                                "room/a" "@xt.db/init-base"
                                 [{"primary" {"type" "memory" "defaults" {}}
                                   "caching" {"type" "memory" "defaults" {}}}]))))
         (promise/x:promise-then

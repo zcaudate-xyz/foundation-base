@@ -88,7 +88,7 @@
                   5000
                   (fn []
                     (. port (postMessage {"type" "debug" "stage" "init-timeout"})))))
-              (var init-promise (xt.db.node.adaptor-base/init-adaptor-main
+              (var init-promise (xt.db.node.adaptor-base/init-base-main
                                  node
                                  {"primary" {"type" "supabase"
                                              "defaults" (@! local-min/+config-supabase-anon+)}

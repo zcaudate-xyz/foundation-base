@@ -66,8 +66,8 @@
     (xt/x:set-key target "db/common" common))
   (return node))
 
-(defn.xt init-adaptor
-  "Client proxy for @xt.db/init-adaptor.
+(defn.xt init-base
+  "Client proxy for @xt.db/init-base.
 
    Forwards to the server and installs lightweight service stubs on the client."
   {:added "4.1"}
@@ -75,7 +75,7 @@
   (return
    (-> (substrate/request node
                           nil
-                          "@xt.db/init-adaptor"
+                          "@xt.db/init-base"
                           [config schema lookup]
                           (-/request-meta node opts))
        (promise/x:promise-then
@@ -233,13 +233,13 @@
 ;; to the server over the configured transport.
 ;;
 
-(defn.xt ^{:substrate/fn "@xt.db/init-adaptor"}
-  init-adaptor-handler
+(defn.xt ^{:substrate/fn "@xt.db/init-base"}
+  init-base-handler
   [space args request node]
   (var config (xt/x:first args))
   (var schema (xt/x:second args))
   (var lookup (xt/x:get-idx args (xt/x:offset 2)))
-  (return (-/init-adaptor node config schema lookup request)))
+  (return (-/init-base node config schema lookup request)))
 
 (defn.xt ^{:substrate/fn "@xt.db/attach-pull-model"}
   attach-pull-model-handler
@@ -324,7 +324,7 @@
    used server-side can be invoked on a client node and forwarded to the server."
   {:added "4.1"}
   [node]
-  (substrate/register-handler node "@xt.db/init-adaptor" -/init-adaptor-handler nil)
+  (substrate/register-handler node "@xt.db/init-base" -/init-base-handler nil)
   (substrate/register-handler node "@xt.db/attach-pull-model" -/attach-pull-model-handler nil)
   (substrate/register-handler node "@xt.db/attach-rpc-model" -/attach-rpc-model-handler nil)
   (substrate/register-handler node "@xt.db/attach-tree-view-model" -/attach-tree-view-model-handler nil)

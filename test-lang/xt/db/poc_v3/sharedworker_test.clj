@@ -119,19 +119,19 @@
                                    ((!:G String) err))})))))
   => (contains-in {"ok" true}))
 
-^{:refer xt.db.poc-v3.sharedworker-test/init-adaptor-works
+^{:refer xt.db.poc-v3.sharedworker-test/init-base-works
   :added "4.1"}
-(fact "init-adaptor returns from sharedworker"
+(fact "init-base returns from sharedworker"
   (notify/wait-on [:js 20000]
     (-> (sharedworker/connect-sharedworker "init-client")
         (promise/x:promise-then
          (fn [conn]
            (var client (. conn ["node"]))
            (var transport-id (. conn ["transport_id"]))
-           (return (sharedworker/init-adaptor client transport-id))))
+           (return (sharedworker/init-base client transport-id))))
         (promise/x:promise-then
          (fn [res]
-           (repl/notify {"stage" "init-adaptor-ok" "res" res})))
+           (repl/notify {"stage" "init-base-ok" "res" res})))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify {"stage" "error"
@@ -140,4 +140,4 @@
                                    ((!:G String) err))
                          "data" (xt/x:ex-data err)
                          "stack" (. err ["stack"])})))))
-  => (contains-in {"stage" "init-adaptor-ok"}))
+  => (contains-in {"stage" "init-base-ok"}))

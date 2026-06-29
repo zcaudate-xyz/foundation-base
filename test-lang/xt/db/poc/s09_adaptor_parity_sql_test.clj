@@ -56,7 +56,7 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (return
-             (. (xt.db.node.adaptor-base/init-adaptor-main
+             (. (xt.db.node.adaptor-base/init-base-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"
@@ -121,7 +121,7 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (return
-             (. (xt.db.node.adaptor-base/init-adaptor-main
+             (. (xt.db.node.adaptor-base/init-base-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"

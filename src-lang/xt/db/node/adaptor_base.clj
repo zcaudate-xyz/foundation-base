@@ -19,7 +19,7 @@
 ;; The xt.db.node.adaptor-base 
 ;;
 
-(defn.xt init-adaptor-type
+(defn.xt init-base-type
   [node service-id type defaults schema lookup]
   (return
    (-> (impl-main/create-impl type defaults schema lookup)
@@ -29,85 +29,54 @@
           (substrate/set-service node service-id impl)
           (return node))))))
 
-(defn.xt init-adaptor-main
+(defn.xt init-base-main
   [node config schema lookup]
-  (var primary  (or (xt/x:get-key config "primary") {}))
-  (var caching  (or (xt/x:get-key config "caching") {}))
-  (var common   (or (xt/x:get-key config "common") {}))
-  (var primary-id (or (xt/x:get-key primary "id") "db/primary"))
-  (var caching-id (or (xt/x:get-key caching "id") "db/caching"))
-  (var common-id  (or (xt/x:get-key common "id")  "db/common"))
+  (var common  (xt/x:obj-assign {"id" "db/common"}
+                                (xt/x:get-key config "common")))
+  (var primary  (xt/x:obj-assign {"id" "db/primary"}
+                                 (xt/x:get-key config "primary")))
+  (var caching  (xt/x:obj-assign {"id" "db/caching"}
+                                 (xt/x:get-key config "caching")))
+
+  (var common-id (xt/x:get-key common "id"))
+  (var primary-id (xt/x:get-key primary "id"))
+  (var caching-id (xt/x:get-key caching "id"))
+  (substrate/set-service node
+                         common-id
+                         {:schema schema
+                          :lookup lookup})
   (return
-   (-> (promise/x:promise-run node)
+   (-> (promise/x:promise-all
+        [(-/init-base-type node
+                              primary-id
+                              (xt/x:get-key primary "type")
+                              (xt/x:get-key primary "defaults")
+                              schema
+                              lookup)
+         (-/init-base-type node
+                              caching-id
+                              (xt/x:get-key caching "type")
+                              (xt/x:get-key caching "defaults")
+                              schema
+                              lookup)])
        (promise/x:promise-then
-        (fn [node]
-          (substrate/set-service
-           node
-           common-id
-           {:schema schema
-            :lookup lookup})
-          (return node)))
-       (promise/x:promise-then
-        (fn [node]
-          (return
-           (-/init-adaptor-type node
-                                primary-id
-                                (xt/x:get-key primary "type")
-                                (xt/x:get-key primary "defaults")
-                                schema
-                                lookup))))
-       (promise/x:promise-then
-        (fn [node]
-          (return
-           (-/init-adaptor-type node
-                                caching-id
-                                (xt/x:get-key caching "type")
-                                (xt/x:get-key caching "defaults")
-                                schema
-                                lookup))))
-       (promise/x:promise-then
-        (fn [node]
-          (var primary-impl (substrate/get-service node primary-id))
-          (var caching-impl (substrate/get-service node caching-id))
-          (var primary-metadata (xt/x:get-key primary-impl "metadata"))
-          (var caching-metadata (xt/x:get-key caching-impl "metadata"))
-          (xt/x:set-key primary-metadata "common_id"  common-id)
-          (xt/x:set-key primary-metadata "primary_id" primary-id)
-          (xt/x:set-key primary-metadata "caching_id" caching-id)
-          (xtd/set-in primary-impl ["state" "caching_fn"]
-                      (fn [] (return caching-impl)))
-          (xt/x:set-key caching-metadata "common_id"  common-id)
-          (xt/x:set-key caching-metadata "primary_id" primary-id)
-          (xt/x:set-key caching-metadata "caching_id" caching-id)
+        (fn [init]
+          (var metadata {:common-id common-id
+                         :primary-id primary-id
+                         :caching-id caching-id
+                         :caching-fn (fn [] (return (substrate/get-service node caching-id)))
+                         :primary-fn (fn [] (return (substrate/get-service node primary-id)))})
+          (-> (substrate/get-service node primary-id)
+              (xt/x:get-key "metadata")
+              (xt/x:obj-assign metadata))
+          (-> (substrate/get-service node caching-id)
+              (xt/x:get-key "metadata")
+              (xt/x:obj-assign metadata))
           (return node))))))
 
-(defn.xt service-metadata
-  "returns metadata from either a service impl or a raw config map"
-  {:added "4.1"}
-  [service]
-  (var metadata (xt/x:get-key service "metadata"))
-  (cond (xt/x:not-nil? metadata)
-        (return metadata)
-
-        (xt/x:is-object? service)
-        (return service)
-
-        :else
-        (return {})))
-
-(defn.xt service-impl
-  "resolves a string service id to a service impl when needed"
-  {:added "4.1"}
-  [node service]
-  (cond (xt/x:is-string? service)
-        (return (substrate/get-service node service))
-
-        :else
-        (return service)))
-
-(defn.xt ^{:substrate/fn "@xt.db/init-adaptor"}
-  init-adaptor-handler
-  "Server-side handler that calls init-adaptor-main with client args.
+(defn.xt ^{:substrate/fn "@xt.db/init-base"}
+  init-base-handler
+  "Server-side handler that calls init-base-main with client args.
 
    Returns a serializable summary so the result can be sent over a transport."
   {:added "4.1"}
@@ -116,18 +85,56 @@
   (var schema  (xt/x:second args))
   (var lookup  (xt/x:get-idx args (xt/x:offset 2)))
   (return
-   (-> (-/init-adaptor-main node config schema lookup)
-       (promise/x:promise-then
-        (fn [node]
-          (var primary (substrate/get-service node "db/primary"))
-          (var caching (substrate/get-service node "db/caching"))
-          (var common  (substrate/get-service node "db/common"))
-          (return
-           {"status" "ok"
-            "services"
-            {"db/primary" {"metadata" (or (xt/x:get-key primary "metadata") {})}
-             "db/caching" {"metadata" (or (xt/x:get-key caching "metadata") {})}
-             "db/common"  {"metadata" (or (xt/x:get-key common "metadata") {})}}}))))))
+   (-/init-base-main node config schema lookup)))
+
+;;
+;;
+;;
+
+
+(defn.xt ^{:substrate/fn "@xt.db/subscribe-db"}
+  subscribe-db-handler
+  "Substrate handler for @xt.db/subscribe-db.
+
+   Args: [conn-id topics]. Subscribes the primary db realtime client to the
+   given broadcast topics, wiring received db/sync and db/remove events to the
+   paired caching db."
+  {:added "4.1"}
+  [space args request node]
+  (var service-id   (xt/x:first  args))
+  (var conn-id      (xt/x:second args))
+  (var topics       (xt/x:get-idx args (xt/x:offset 2)))
+  (var service      (substrate/get-service node service-id))
+  (return (impl-common/subscribe-db service conn-id topics)))
+
+(defn.xt ^{:substrate/fn "@xt.db/unsubscribe-db"}
+  unsubscribe-db-handler
+  "Substrate handler for @xt.db/unsubscribe-db.
+
+   Args: [conn-id topics]. Unsubscribes the primary db realtime client from
+   the given broadcast topics."
+  {:added "4.1"}
+  [space args request node]
+  (var service-id   (xt/x:first  args))
+  (var conn-id      (xt/x:second args))
+  (var topics       (xt/x:get-idx args (xt/x:offset 2)))
+  (var service      (substrate/get-service node service-id))
+  (return (impl-common/unsubscribe-db service conn-id topics)))
+
+(defn.xt ^{:substrate/fn "@xt.db/sync-event"}
+  sync-event-handler
+  "Substrate handler for @xt.db/sync-event.
+
+   Args: [payload]. Applies the db/sync and db/remove payload to the paired
+   caching db and notifies any registered db listeners."
+  {:added "4.1"}
+  [space args request node]
+  (var service-id   (xt/x:first  args))
+  (var payload      (xt/x:second args))
+  (var service      (substrate/get-service node service-id))
+  (return (promise/x:promise-run
+           (impl-common/sync-process-payload service payload))))
+
 
 ;;
 ;;
@@ -149,9 +156,6 @@
         (impl-common/sync-process-payload caching result))))
   (return (promise/x:promise-run result)))
 
-;;
-;;
-;;
 
 (defn.xt ^{:substrate/fn "@xt.db/call-rpc"}
   call-rpc-handler
@@ -159,64 +163,14 @@
   (var service-id   (xt/x:first args))
   (var rpc-spec     (xt/x:second args))
   (var fn-args      (xt/x:get-idx args (xt/x:offset 2)))
+  (var impl (substrate/get-service node service-id))
   (return
-   (-> (promise/x:promise-run
-        (substrate/get-service node service-id))
-       (promise/x:promise-then
-        (fn [impl]
-          (return (impl-common/rpc-call-async impl rpc-spec fn-args))))
+   (-> (impl-common/rpc-call-async impl rpc-spec fn-args)
        (promise/x:promise-then
         (fn [result]
           (return (-/apply-sync-output node
-                                       (substrate/get-service node service-id)
+                                       impl
                                        result)))))))
-
-(defn.xt ^{:substrate/fn "@xt.db/sync-event"}
-  sync-event-handler
-  "Substrate handler for @xt.db/sync-event.
-
-   Args: [payload]. Applies the db/sync and db/remove payload to the paired
-   caching db and notifies any registered db listeners."
-  {:added "4.1"}
-  [space args request node]
-  (var payload (or (xt/x:first args) {}))
-  (var primary (substrate/get-service node "db/primary"))
-  (var caching-id (xtd/get-in primary ["metadata" "caching_id"]))
-  (var caching (or (and caching-id (substrate/get-service node caching-id))
-                   (substrate/get-service node "db/caching")))
-  (when (xt/x:nil? caching)
-    (return (promise/x:promise-run
-             [false {"status" "error"
-                     "tag" "db/caching-not-found"}])))
-  (return (promise/x:promise-run
-           (impl-common/sync-process-payload caching payload))))
-
-(defn.xt ^{:substrate/fn "@xt.db/subscribe-db"}
-  subscribe-db-handler
-  "Substrate handler for @xt.db/subscribe-db.
-
-   Args: [conn-id topics]. Subscribes the primary db realtime client to the
-   given broadcast topics, wiring received db/sync and db/remove events to the
-   paired caching db."
-  {:added "4.1"}
-  [space args request node]
-  (var conn-id (xt/x:first args))
-  (var topics  (xt/x:second args))
-  (var primary (substrate/get-service node "db/primary"))
-  (return (impl-common/subscribe-db primary conn-id topics)))
-
-(defn.xt ^{:substrate/fn "@xt.db/unsubscribe-db"}
-  unsubscribe-db-handler
-  "Substrate handler for @xt.db/unsubscribe-db.
-
-   Args: [conn-id topics]. Unsubscribes the primary db realtime client from
-   the given broadcast topics."
-  {:added "4.1"}
-  [space args request node]
-  (var conn-id (xt/x:first args))
-  (var topics  (xt/x:second args))
-  (var primary (substrate/get-service node "db/primary"))
-  (return (impl-common/unsubscribe-db primary conn-id topics)))
 
 (defn.xt ^{:substrate/fn "@xt.db/call-fetch"}
   call-fetch-handler
@@ -230,6 +184,8 @@
         (fn [client]
           (return (http-fetch/request-http client fetch-input)))))))
 
+
+
 ;;
 ;;
 ;;
@@ -238,9 +194,9 @@
   "Creates a page model spec that reads from db/caching (sync) and db/primary (async)."
   {:added "4.1"}
   [service model]
-  (var service-metadata (-/service-metadata service))
-  (var caching-id (xt/x:get-key service-metadata "caching_id"))
-  (var primary-id (xt/x:get-key service-metadata "primary_id"))
+  (var metadata (xt/x:get-key service "metadata"))
+  (var caching-id (xt/x:get-key metadata "caching_id"))
+  (var primary-id (xt/x:get-key metadata "primary_id"))
   (var #{pipeline
          options
          defaults} model)
@@ -273,8 +229,8 @@
    {model-id model-spec})
   (var refresh-map (xt/x:get-key (xt/x:get-key model-spec "options") "refresh"))
   (when (xt/x:is-object? refresh-map)
-    (var service-metadata (-/service-metadata service))
-    (var caching-id (xt/x:get-key service-metadata "caching_id"))
+    (var metadata (xt/x:get-key service "metadata"))
+    (var caching-id (xt/x:get-key metadata "caching_id"))
     (var caching (substrate/get-service node caching-id))
     (var listener-id (xt/x:cat space-id "/" group-id "/" model-id))
     (impl-common/add-db-listener
@@ -300,7 +256,7 @@
          group-id
          model-id
          service}   node-args)
-  (var service-impl (-/service-impl node service))
+  (var service-impl (substrate/get-service node service))
   (var model-spec (-/create-pull-model service-impl model-args))
   (return (-/add-db-model-listener
            node space-id group-id model-id service-impl model-spec)))
@@ -314,9 +270,9 @@
   "Creates a page model spec that plans a view and pulls from db/caching (sync) and db/primary (async)."
   {:added "4.1"}
   [service model]
-  (var service-metadata (-/service-metadata service))
-  (var caching-id (xt/x:get-key service-metadata "caching_id"))
-  (var primary-id (xt/x:get-key service-metadata "primary_id"))
+  (var metadata (xt/x:get-key service "metadata"))
+  (var caching-id (xt/x:get-key metadata "caching_id"))
+  (var primary-id (xt/x:get-key metadata "primary_id"))
   (var #{table
          select-entry
          return-entry
@@ -385,7 +341,7 @@
          group-id
          model-id
          service}   node-args)
-  (var service-impl (-/service-impl node service))
+  (var service-impl (substrate/get-service node service))
   (var model-spec (-/create-tree-view-model service-impl model-args))
   (return (-/add-db-model-listener
            node space-id group-id model-id service-impl model-spec)))
@@ -434,7 +390,7 @@
          group-id
          model-id
          service}   node-args)
-  (var service-impl (-/service-impl node service))
+  (var service-impl (substrate/get-service node service))
   (var model-spec (-/create-rpc-model service model-args))
   (return (-/add-db-model-listener
            node space-id group-id model-id service-impl model-spec)))
@@ -449,8 +405,8 @@
   {:added "4.1"}
   [node space-id group-id model-id service]
   (page-core/remove-model node space-id group-id model-id)
-  (var service-metadata (-/service-metadata service))
-  (var caching-id (xt/x:get-key service-metadata "caching_id"))
+  (var metadata (xt/x:get-key service "metadata"))
+  (var caching-id (xt/x:get-key metadata "caching_id"))
   (when (xt/x:not-nil? caching-id)
     (var caching (substrate/get-service node caching-id))
     (when (xt/x:not-nil? caching)
@@ -475,7 +431,7 @@
          group-id
          model-id
          service}   node-args)
-  (var service-impl (-/service-impl node service))
+  (var service-impl (substrate/get-service node service))
   (return (-/remove-model-with-refresh
            node space-id group-id model-id service-impl)))
 
@@ -495,7 +451,7 @@
   (substrate/register-handler node "@xt.db/sync-event" -/sync-event-handler nil)
   (substrate/register-handler node "@xt.db/subscribe-db" -/subscribe-db-handler nil)
   (substrate/register-handler node "@xt.db/unsubscribe-db" -/unsubscribe-db-handler nil)
-  (substrate/register-handler node "@xt.db/init-adaptor" -/init-adaptor-handler nil)
+  (substrate/register-handler node "@xt.db/init-base" -/init-base-handler nil)
   (return node))
 
 (defn list-substrate-fn

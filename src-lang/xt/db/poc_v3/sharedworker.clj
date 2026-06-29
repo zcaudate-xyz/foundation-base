@@ -86,14 +86,14 @@
      "source" (-/sharedworker-source)
      "wait_ready" true})))
 
-(defn.js init-adaptor
+(defn.js init-base
   "Asks the worker to initialise the scratch-v3 adaptor with a Supabase
    primary and a SQLite cache."
   [client transport-id]
   (return
    (substrate/request client
                       "room/a"
-                      "@xt.db/init-adaptor"
+                      "@xt.db/init-base"
                       [{"primary" {"id" "db/primary"
                                    "type" "supabase"
                                    "defaults" (@! local-min/+config-supabase-anon+)}
@@ -182,7 +182,7 @@
           (var client (. conn ["node"]))
           (var transport-id (. conn ["transport_id"]))
           (return
-           (-> (-/init-adaptor client transport-id)
+           (-> (-/init-base client transport-id)
                (promise/x:promise-then
                 (fn [_]
                   (return (callback client transport-id)))))))))))
@@ -193,7 +193,7 @@
    It creates a single xt.substrate node, installs the xt.db.node adaptor
    request handlers, and exposes the node over the worker's MessagePort via
    `xt.substrate.transport-browser/boot-self`. The client supplies the schema,
-   lookup and adaptor configuration through the `@xt.db/init-adaptor` handler."
+   lookup and adaptor configuration through the `@xt.db/init-base` handler."
   []
   (l/emit-script
    '(do
@@ -203,13 +203,13 @@
       ;; install the db adaptor request handlers
       (xt.db.node.adaptor-base/init-handlers node)
 
-      ;; wrap init-adaptor so that errors are serialised back to the page
+      ;; wrap init-base so that errors are serialised back to the page
       (xt.substrate/register-handler
        node
-       "@xt.db/init-adaptor"
+       "@xt.db/init-base"
        (fn [space args request node]
          (return
-          (. (xt.db.node.adaptor-base/init-adaptor-main node
+          (. (xt.db.node.adaptor-base/init-base-main node
                                                         (. args [0])
                                                         (. args [1])
                                                         (. args [2]))
