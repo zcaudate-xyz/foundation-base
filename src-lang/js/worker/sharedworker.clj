@@ -2,8 +2,6 @@
   "SharedWorker bootstrap and remote xt.db.node helpers."
   (:require [clojure.walk :as walk]
             [hara.lang :as l]
-            [js.lib.client-fetch]
-            [xt.db.node]
             [xt.lang.common-data]
             [xt.lang.spec-base]
             [xt.lang.spec-promise]
@@ -69,8 +67,7 @@
                      :layout layout}))))
 
 (l/script :js
-  {:require [[xt.db.node :as db-node]
-             [xt.lang.common-data :as xtd]
+  {:require [[xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as event-node]
@@ -139,7 +136,7 @@
    (-> (-/request browser-node
                   transport-id
                   shared-space
-                  db-node/ACTION_MODEL_PUT
+                  "@xt.db/model-put"
                   {"model_id" model-id
                    "model_spec" model-spec})
        (promise/x:promise-then
@@ -148,7 +145,7 @@
            (-/request browser-node
                       transport-id
                       shared-space
-                      db-node/ACTION_MODEL_MATERIALIZE
+                      "@xt.db/model-materialize"
                       {"model_id" model-id}))))
        (promise/x:promise-then
         (fn [_]
@@ -156,7 +153,7 @@
            (-/request browser-node
                       transport-id
                       shared-space
-                      db-node/ACTION_MODEL_SYNC
+                      "@xt.db/model-sync"
                       {"model_id" model-id})))))))
 
 (defn.js query-view
@@ -167,7 +164,7 @@
    (-/request (xt/x:get-key session "node")
               (xt/x:get-key session "transport_id")
               space
-              db-node/ACTION_QUERY
+              "@xt.db/query"
               {"view" {"model_id" model-id
                        "view_id" view-id
                        "args" (or args [])}})))
@@ -183,7 +180,7 @@
    (-> (-/request browser-node
                   transport-id
                   tab-space
-                  db-node/ACTION_MODEL_PUT
+                  "@xt.db/model-put"
                   {"model_id" model-id
                    "model_spec" model-spec})
        (promise/x:promise-then
@@ -192,7 +189,7 @@
            (-/request browser-node
                       transport-id
                       tab-space
-                      db-node/ACTION_SOURCE_SHARE
+                      "@xt.db/source-share"
                       {"model_id" model-id
                        "from_space" shared-space
                        "source_ids" ["primary" "caching"]}))))
@@ -202,7 +199,7 @@
            (-/request browser-node
                       transport-id
                       tab-space
-                      db-node/ACTION_MODEL_SYNC
+                      "@xt.db/model-sync"
                       {"model_id" model-id}))))
        (promise/x:promise-then
         (fn [_]
@@ -235,5 +232,5 @@
    (-/request (xt/x:get-key session "node")
               (xt/x:get-key session "transport_id")
               (xt/x:get-key session "shared_space")
-              db-node/ACTION_NODE_SUMMARY
+              "@xt.db/node-summary"
               {})))
