@@ -297,7 +297,7 @@
     :python :gimp
     {:type :hara/rt.gimp
      :config {:layout :full
-              :container {:image "foundation-base/rt-basic-gimp:latest"
+              :container {:image "foundation-base/rt-basic-gimp:debian-buster-py2"
                           :exec  ["xvfb-run" "-a" "gimp" "-i"
                                   "--batch-interpreter" "python-fu-eval" "-b"]}}
      :instance {:create gimp:create}})])
