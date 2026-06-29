@@ -366,12 +366,14 @@
         (repl/notify)))
   => {"path" ["group:a" "echo"], "post" [false], "::" "model.run", "main" [true [1 2 3]], "pre" [false]})
 
-^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"}
+^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
 (fact "call-rpc-handler routes rpc args through a named service"
 
   (notify/wait-on :js
-    (-> (substrate/node-create {})
-        (adaptor/init-base-main
+    (var node (substrate/node-create {}))
+    (-> (adaptor/init-base-main
+         node
          {"primary" {"type" "postgres"
                      "defaults" (@! (local-min/+config+ :db))}
           "caching" {"type" "sqlite"
@@ -388,13 +390,24 @@
                "return" "jsonb"
                "schema" "scratch_v0"
                "id" "log_append_public"
-               "flags" {}}
+               "flags" {}
+               "table" {"base" "Log"
+                        "type" "db/sync"}}
               ["hello"]]
              nil
              node))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (impl-common/pull (substrate/get-service node "db/caching")
+                              ["Log"]))))
         (repl/notify)))
-  => (contains-in {"message" "hello"})
+  => (contains-in [{"message" "hello"}])
+
   
+  ;;
+  ;; WITH TABLE will sync
+  ;; 
   (notify/wait-on :js
     (var node (-> (substrate/node-create {})
                   (adaptor/init-handlers)))
@@ -421,16 +434,70 @@
                                      "return" "jsonb"
                                      "schema" "scratch_v0"
                                      "id" "log_append_public"
+                                     ;; TABLE
+                                     "table" {"base" "Log"
+                                              "type" "db/sync"}
                                      "flags" {}}
                                     ["world"]])))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (substrate/get-service node "db/caching")
+                               ["Log"])])))
         (repl/notify)))
-  => (contains-in {"message" "world"}))
+  => (contains-in [{"message" "world", "author_id" nil, "id" string?}
+                   [{"message" "world", "author_id" nil, "id" string?}]])
+
+
+  ;;
+  ;; WITHOUT TABLE will not sync
+  ;; 
+  (notify/wait-on :js
+    (var node (-> (substrate/node-create {})
+                  (adaptor/init-handlers)))
+    (-> (promise/x:promise-run nil)
+        (promise/x:promise-then
+         (fn []
+           (return (substrate/request node
+                                      nil
+                                      "@xt.db/init-base"
+                                      [{"primary" {"type" "postgres"
+                                                   "defaults" (@! (local-min/+config+ :db))}
+                                        "caching" {"type" "sqlite"
+                                                   "defaults" {"filename" ":memory:"}}}
+                                       -/Schema
+                                       -/SchemaLookup]))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (-> (substrate/request node
+                                   nil
+                                   "@xt.db/call-rpc"
+                                   ["db/primary"
+                                    {"input" [{"symbol" "i_message" "type" "text"}]
+                                     "return" "jsonb"
+                                     "schema" "scratch_v0"
+                                     "id" "log_append_public"
+                                     ;; NO TABLE
+                                     "flags" {}}
+                                    ["world"]])))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (substrate/get-service node "db/caching")
+                               ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [{"message" "world", "author_id" nil, "id" string?}
+       []]))
 
 ^{:refer xt.db.node.adaptor-base/create-rpc-model :added "4.1"}
 (fact "create-rpc-model builds a page model spec with an rpc handler"
 
   (!.js
-    (var spec (adaptor/create-rpc-model
+    (adaptor/create-rpc-model
                "db/primary"
                {"input" [{"symbol" "i_message" "type" "text"}]
                 "return" "jsonb"
@@ -440,17 +507,16 @@
                {"pipeline" {}
                 "options" {}
                 "defaults" {"args" ["hello"]}}))
-    {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
-     "defaults" (. spec ["defaults"])})
-  => {"has-main" true
-      "defaults" {"args" ["hello"]}})
+  => {"pipeline" {}, "options" {}, "defaults" {"args" ["hello"]}})
 
 ^{:refer xt.db.node.adaptor-base/attach-rpc-model :added "4.1"
-  :setup [(l/rt:restart :js)]}
+  :setup [(l/rt:restart :js)
+          (pg/t:delete scratch-v0/Log)]}
 (fact "attach-rpc-model attaches and invokes an rpc model"
 
   (notify/wait-on :js
-    (-> (substrate/node-create {})
+    (var node (substrate/node-create {}))
+    (-> node
         (adaptor/init-base-main {"primary" {"type" "postgres"
                                             "defaults" (@! (local-min/+config+ :db))}
                                  "caching" {"type" "sqlite"
@@ -459,7 +525,6 @@
                                 -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
-           
            (adaptor/attach-rpc-model
             nil
             ["db/primary"
@@ -471,24 +536,26 @@
               "return" "jsonb"
               "schema" "scratch_v0"
               "id" "log_append_public"
+              "table" {"base" "Log"
+                       "type" "db/sync"}
               "flags" {}}
              {"pipeline" {}
               "options" {}
               "defaults" {"args" ["hello"]}}]
             nil
             node)
-           
            (return
             (page-core/refresh-model node "room/a" "demo" "rpc-view" {} nil))))
-        (repl/notify)))
+        
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            [out
+             (impl-common/pull (substrate/get-service node "db/caching")
+                               ["Log"])])))))
   => (contains-in
-      {"path" ["demo" "rpc-view"], "post" [false], "::" "model.run", "main" [true {"message" "hello", "author_id" nil, "id" string?}], "pre" [false]}))
-
-(comment
-  (pg/t:delete scratch-v0/Log)
-  
-  )
-
+      [{"path" ["demo" "rpc-view"], "post" [false], "::" "model.run", "main" [true {"message" "hello", "author_id" nil, "id" string?}], "pre" [false]}
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.adaptor-base/create-pull-model :added "4.1"}
 (fact "create-pull-model builds a page model spec with local and remote handlers"
@@ -531,7 +598,7 @@
             ["db/primary"
              {"space_id" "room/a"
               "group_id" "demo"
-              "model_id" "custom-view"}
+              "model_id" "active-view"}
              ["Log"]
              {"pipeline" {}
               "options"  {"refresh" {"Log" true}}
@@ -548,7 +615,7 @@
             ["db/primary"
              {"space_id" "room/a"
               "group_id" "demo"
-              "model_id" "custom-view-2"}
+              "model_id" "passive-view"}
              ["Log"]
              {"pipeline" {}
               "options"  {"refresh" {"Log" true}}
@@ -557,16 +624,16 @@
             node)
            (return
             ;; REFRESH ACTIVE
-            (page-core/refresh-model-remote node "room/a" "demo" "custom-view" nil))))
+            (page-core/refresh-model-remote node "room/a" "demo" "active-view" nil))))
         (repl/notify)))
   => (contains-in
-      {"path" ["demo" "custom-view"],
+      {"path" ["demo" "active-view"],
        "remote" [true [{"message" "hello", "author_id" nil, "id" string?}]],
        "post" [false], "::" "model.run", "pre" [false]})
 
   (!.js
     ;; PASSIVE STILL UPDATES
-    (page-core/get-current-output NODE "room/a" "demo" "custom-view-2"))
+    (page-core/get-current-output NODE "room/a" "demo" "passive-view"))
   => (contains-in
       [{"message" "hello", "author_id" nil, "id" string?}]))
 

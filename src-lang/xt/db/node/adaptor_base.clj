@@ -196,21 +196,30 @@
 ;; RPC HANDLER
 ;;
 
+(defn.xt call-rpc-baseline-fn
+  [node service-id rpc-spec rpc-args]
+  (var impl         (substrate/get-service node service-id))
+  (var #{metadata} impl)
+  (var #{caching-id} metadata)
+  (var table-spec   (xt/x:get-key rpc-spec "table"))
+  (return
+   (-> (impl-common/rpc-call-async impl rpc-spec rpc-args)
+       (promise/x:promise-then
+        (fn [result]
+          (when (and table-spec
+                     caching-id)
+            (var #{base type} table-spec)
+            (var caching (substrate/get-service node caching-id))
+            (impl-common/sync-process-payload caching {type {base result}}))
+          (return result))))))
+
 (defn.xt ^{:substrate/fn "@xt.db/call-rpc"}
   call-rpc-handler
   [space args request node]
   (var service-id   (xt/x:first args))
   (var rpc-spec     (xt/x:second args))
-  (var fn-args      (xt/x:get-idx args (xt/x:offset 2)))
-  (var impl (substrate/get-service node service-id))
-  (return
-   (-> (impl-common/rpc-call-async impl rpc-spec fn-args)
-       (promise/x:promise-then
-        (fn [result]
-          (return (-/caching-sync-output node
-                                         impl
-                                         result)))))))
-
+  (var rpc-args      (xt/x:get-idx args (xt/x:offset 2)))
+  (return (-/call-rpc-baseline-fn node service-id rpc-spec rpc-args)))
 
 ;;
 ;; RPC MODEL
@@ -225,14 +234,8 @@
          defaults} model)
   (var rpc-handler
        (fn [context]
-         (var node (. context ["node"]))
-         (var args (. context ["args"]))
-         (var impl  (substrate/get-service node service-id))
-         (return
-          (-> (impl-common/rpc-call-async impl rpc-spec args)
-              (promise/x:promise-then
-               (fn [result]
-                 (return (-/caching-sync-output node impl result))))))))
+         (var #{space args node} context)
+         (return (-/call-rpc-baseline-fn node service-id rpc-spec args))))
   (return
    {"handler" rpc-handler
     "pipeline" pipeline
