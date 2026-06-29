@@ -66,6 +66,88 @@
           (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 
+^{:refer xt.db.node.adaptor-base/create-tree-view-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/attach-tree-view-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/sync-event-handler :added "4.1"
+  :setup [(def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+                        "message" "hello"}
+                       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+                        "message" "world"}])]}
+(fact "sync-event-handler applies db/sync payload to the paired caching db"
+
+  (notify/wait-on :js
+    (-> (-/node-init-supabase)
+        (promise/x:promise-then
+         (fn [node]
+           (return
+            (adaptor/sync-event-handler nil
+                                        ["db/caching"
+                                         {"db/sync" {"Log" (@! +logs+)}}]
+                                        nil
+                                        node))))
+        (repl/notify)))
+  => true
+
+  (notify/wait-on :js
+    (var node nil)
+    (-> (-/node-init-supabase)
+        (promise/x:promise-then
+         (fn [out]
+           (:= node out)
+           (return
+            (adaptor/sync-event-handler nil
+                                        ["db/caching"
+                                         {"db/sync" {"Log" (@! +logs+)}}]
+                                        nil
+                                        node))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (impl-common/pull (substrate/get-service node "db/caching")
+                              ["Log"]))))
+        (repl/notify)))
+  => (contains-in
+      [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+        "message" "hello"}
+       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+        "message" "world"}]))
+
+^{:refer xt.db.node.adaptor-base/caching-sync-output :added "4.1"
+  :setup [(def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+                        "message" "hello"}
+                       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+                        "message" "world"}])]}
+(fact "caching-sync-output routes db/sync payload to the paired caching db"
+
+  (notify/wait-on :js
+    (var node nil)
+    (-> (-/node-init-supabase)
+        (promise/x:promise-then
+         (fn [out]
+           (:= node out)
+           (var primary (substrate/get-service node "db/primary"))
+           (return
+            
+            (-> (adaptor/caching-sync-output
+                 node
+                 primary
+                 {"db/sync" {"Log" (@! +logs+)}})))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (impl-common/pull (substrate/get-service node "db/caching")
+                              ["Log"]))))
+        (repl/notify)))
+  => (contains-in
+      [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+        "message" "hello"}
+       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+        "message" "world"}]))
+
 ^{:refer xt.db.node.adaptor-base/init-base-type :added "4.1"}
 (fact "init-base-type installs a live impl on the node"
 
@@ -158,6 +240,12 @@
        "meta" {},
        "router" {"subscriptions" {}, "connections" {}}, "pending" {}, "listeners" {}}))
 
+^{:refer xt.db.node.adaptor-base/get-primary-impl :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/get-caching-impl :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.db.node.adaptor-base/subscribe-db-handler :added "4.1"
   :setup [(l/rt:restart :js)]}
 (fact "subscribes to the db handler"
@@ -227,82 +315,8 @@
         (repl/notify)))
   => true)
 
-^{:refer xt.db.node.adaptor-base/sync-event-handler :added "4.1"
-  :setup [(def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
-                        "message" "hello"}
-                       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
-                        "message" "world"}])]}
-(fact "sync-event-handler applies db/sync payload to the paired caching db"
-
-  (notify/wait-on :js
-    (-> (-/node-init-supabase)
-        (promise/x:promise-then
-         (fn [node]
-           (return
-            (adaptor/sync-event-handler nil
-                                        ["db/caching"
-                                         {"db/sync" {"Log" (@! +logs+)}}]
-                                        nil
-                                        node))))
-        (repl/notify)))
-  => true
-
-  (notify/wait-on :js
-    (var node nil)
-    (-> (-/node-init-supabase)
-        (promise/x:promise-then
-         (fn [out]
-           (:= node out)
-           (return
-            (adaptor/sync-event-handler nil
-                                        ["db/caching"
-                                         {"db/sync" {"Log" (@! +logs+)}}]
-                                        nil
-                                        node))))
-        (promise/x:promise-then
-         (fn [out]
-           (return
-            (impl-common/pull (substrate/get-service node "db/caching")
-                              ["Log"]))))
-        (repl/notify)))
-  => (contains-in
-      [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
-        "message" "hello"}
-       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
-        "message" "world"}]))
-
-
-^{:refer xt.db.node.adaptor-base/caching-sync-output :added "4.1"
-  :setup [(def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
-                        "message" "hello"}
-                       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
-                        "message" "world"}])]}
-(fact "caching-sync-output routes db/sync payload to the paired caching db"
-
-  (notify/wait-on :js
-    (var node nil)
-    (-> (-/node-init-supabase)
-        (promise/x:promise-then
-         (fn [out]
-           (:= node out)
-           (var primary (substrate/get-service node "db/primary"))
-           (return
-            
-            (-> (adaptor/caching-sync-output
-                 node
-                 primary
-                 {"db/sync" {"Log" (@! +logs+)}})))))
-        (promise/x:promise-then
-         (fn [out]
-           (return
-            (impl-common/pull (substrate/get-service node "db/caching")
-                              ["Log"]))))
-        (repl/notify)))
-  => (contains-in
-      [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
-        "message" "hello"}
-       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
-        "message" "world"}]))
+^{:refer xt.db.node.adaptor-base/caching-sync-handler :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.db.node.adaptor-base/attach-base-model :added "4.1"
   :setup [(l/rt:restart :js)]}
@@ -314,7 +328,7 @@
          (fn [node]
            (adaptor/attach-base-model
             node
-            (substrate/get-service node "db/caching")
+            "db/caching"
             "space/a"
             "group:a"
             "echo"
@@ -349,7 +363,7 @@
          (fn [node]
            (adaptor/attach-base-model
             node
-            (substrate/get-service node "db/caching")
+            "db/caching"
             "space/a"
             "group:a"
             "echo"
@@ -365,6 +379,9 @@
                                        {}))))
         (repl/notify)))
   => {"path" ["group:a" "echo"], "post" [false], "::" "model.run", "main" [true [1 2 3]], "pre" [false]})
+
+^{:refer xt.db.node.adaptor-base/call-rpc-baseline-fn :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
@@ -557,6 +574,12 @@
       [{"path" ["demo" "rpc-view"], "post" [false], "::" "model.run", "main" [true {"message" "hello", "author_id" nil, "id" string?}], "pre" [false]}
        [{"message" "hello", "author_id" nil, "id" string?}]]))
 
+^{:refer xt.db.node.adaptor-base/call-pull-baseline-fn :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/call-pull-handler :added "4.1"}
+(fact "TODO")
+
 ^{:refer xt.db.node.adaptor-base/create-pull-model :added "4.1"}
 (fact "create-pull-model builds a page model spec with local and remote handlers"
 
@@ -636,6 +659,30 @@
     (page-core/get-current-output NODE "room/a" "demo" "passive-view"))
   => (contains-in
       [{"message" "hello", "author_id" nil, "id" string?}]))
+
+^{:refer xt.db.node.adaptor-base/call-dataview-baseline-fn :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/call-dataview-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/create-dataview-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/attach-dataview-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/remove-model-with-refresh :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/detach-db-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.adaptor-base/list-substrate-fn :added "4.1"}
+(fact "TODO")
 
 (comment
 
@@ -730,7 +777,7 @@
                                                "Log" true}}
                          "defaults" {"args" [["User"]]}}))
              (adaptor/attach-base-model
-              node "room/a" "demo" "refresh-view" service spec)
+              node "db/primary" "room/a" "demo" "refresh-view" spec)
              (var out (adaptor/remove-model-with-refresh
                        node "room/a" "demo" "refresh-view" service))
              (var caching (substrate/get-service node "db/caching"))
@@ -826,22 +873,3 @@
       => 200)
     )
   )
-
-
-^{:refer xt.db.node.adaptor-base/create-tree-view-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.adaptor-base/attach-tree-view-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.adaptor-base/remove-model-with-refresh :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.adaptor-base/detach-db-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.adaptor-base/list-substrate-fn :added "4.1"}
-(fact "TODO")
