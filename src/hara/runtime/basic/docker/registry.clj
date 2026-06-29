@@ -33,7 +33,7 @@
   "wraps default-basic-client with inline jsonlite install for r-base image"
   {:added "4.0"}
   [port opts]
-  (str "options(repos = c(CRAN = 'https://cran.r-project.org/'))\n"
+  (str "options(repos = c(CRAN = 'https://cran.r-project.org'))\n"
        "if (!requireNamespace('jsonlite', quietly = TRUE)) {\n"
        "  install.packages('jsonlite')\n"
        "}\n\n"
@@ -99,7 +99,7 @@
 
      :gimp
      {:image      "foundation-base/rt-basic-gimp:latest"
-      :notes      "project-owned GIMP runtime image based on ubuntu:24.04 with xvfb"
+      :notes      "project-owned GIMP runtime image based on ubuntu:24.04 with the official GIMP 3.0 AppImage"
       :config     {:container {:image "foundation-base/rt-basic-gimp:latest"
                                :exec  ["xvfb-run" "-a" "gimp" "-i" "--batch-interpreter" "python-fu-eval" "-b"]}}}})
 

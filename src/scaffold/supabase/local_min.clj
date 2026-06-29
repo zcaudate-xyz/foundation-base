@@ -80,6 +80,7 @@
                              {:schema schema :table table :status status :body body}))
              (do (Thread/sleep 500)
                  (recur)))))))))
+
 (defn refresh-postgrest-schema
   "Tells PostgREST to reload its schema cache and waits until the probe
    endpoint returns HTTP 200."
