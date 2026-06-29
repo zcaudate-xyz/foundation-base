@@ -81,6 +81,12 @@
     (xt/x:set-key out model-id (-/serialize-model model)))
   (return out))
 
+(defn.xt get-current-output
+  "returns the current output value of a page model"
+  {:added "4.1"}
+  [node space-id group-id model-id]
+  (return (page-core/get-current-output node space-id group-id model-id)))
+
 ;;;
 ;;; SERVER HANDLERS
 ;;;

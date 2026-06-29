@@ -14,7 +14,6 @@
              [xt.substrate.page-core :as page-core]
              [xt.event.base-model :as event-model]]})
 
-
 ;;
 ;; The xt.db.node.adaptor-base 
 ;;
@@ -159,6 +158,11 @@
         (impl-common/sync-process-payload caching result))))
   (return (promise/x:promise-run result)))
 
+
+;;
+;; BASE MODEL
+;;
+
 (defn.xt attach-base-model
   "Attaches a page model and registers a db listener if options.refresh is set."
   {:added "4.1"}
@@ -168,7 +172,7 @@
    space-id
    group-id
    {model-id model-spec})
-  (var refresh-map (xt/x:get-key (xt/x:get-key model-spec "options") "refresh"))
+  (var refresh-map (xtd/get-in model-spec ["options" "refresh"]))
   (when (xt/x:is-object? refresh-map)
     (var #{metadata} service)
     (var #{caching-id}  metadata)
@@ -187,12 +191,9 @@
            "model" model-id}))
 
 
-
-
 ;;
-;; RPC HELPERS
+;; RPC HANDLER
 ;;
-
 
 (defn.xt ^{:substrate/fn "@xt.db/call-rpc"}
   call-rpc-handler
@@ -206,8 +207,13 @@
        (promise/x:promise-then
         (fn [result]
           (return (-/caching-sync-output node
-                                       impl
-                                       result)))))))
+                                         impl
+                                         result)))))))
+
+
+;;
+;; RPC MODEL
+;;
 
 (defn.xt create-rpc-model
   "Creates a page model spec that calls an RPC on a named service."

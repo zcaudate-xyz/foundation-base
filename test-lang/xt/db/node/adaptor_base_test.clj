@@ -35,6 +35,7 @@
              [xt.db.system.impl-supabase-realtime :as realtime]
              [xt.db.helpers.data-main-test :as sample]
              [xt.substrate :as substrate]
+             [xt.substrate.page-core :as page-core]
              [xt.net.http-fetch :as fetch]
              [js.net.http-fetch :as js-fetch]]})
 
@@ -71,11 +72,11 @@
   (notify/wait-on :js
     (var node (substrate/node-create {}))
     (-> (adaptor/init-base-type node
-                                   "db/primary"
-                                   "postgres"
-                                   (@! (local-min/+config+ :db))
-                                   -/Schema
-                                   -/SchemaLookup)
+                                "db/primary"
+                                "postgres"
+                                (@! (local-min/+config+ :db))
+                                -/Schema
+                                -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
            (repl/notify
@@ -91,11 +92,11 @@
   (notify/wait-on :js
     (var node (substrate/node-create {}))
     (-> (adaptor/init-base-type node
-                                   "db/caching"
-                                   "sqlite"
-                                   {}
-                                   -/Schema
-                                   -/SchemaLookup)
+                                "db/caching"
+                                "sqlite"
+                                {}
+                                -/Schema
+                                -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
            (repl/notify
@@ -115,9 +116,9 @@
   (notify/wait-on :js
     (-> (substrate/node-create {})
         (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
-                                    "caching" {"type" "memory" "defaults" {}}}
-                                   -/Schema
-                                   -/SchemaLookup)
+                                 "caching" {"type" "memory" "defaults" {}}}
+                                -/Schema
+                                -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
            (var primary (substrate/get-service node "db/primary"))
@@ -270,6 +271,7 @@
        {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
         "message" "world"}]))
 
+
 ^{:refer xt.db.node.adaptor-base/caching-sync-output :added "4.1"
   :setup [(def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
                         "message" "hello"}
@@ -302,12 +304,41 @@
        {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
         "message" "world"}]))
 
-^{:refer xt.db.node.adaptor-base/base-add-model :added "4.1"}
-(fact "base-add-model registers a db listener when options.refresh is set"
-
-  ;;
-  ;; TODO
-  ;; 
+^{:refer xt.db.node.adaptor-base/attach-base-model :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "attach-base-model registers a db listener when options.refresh is set"
+  
+  (notify/wait-on :js
+    (-> (-/node-init-supabase)
+        (promise/x:promise-then
+         (fn [node]
+           (adaptor/attach-base-model
+            node
+            (substrate/get-service node "db/caching")
+            "space/a"
+            "group:a"
+            "echo"
+            {"handler" (fn [ctx]
+                         (return ctx.args))
+             "defaults" {"args" [1]}})
+           (return
+            (->  (page-core/refresh-model  node
+                                           "space/a"
+                                           "group:a"
+                                           "echo"
+                                           {}
+                                           nil)
+                 (promise/x:promise-then
+                  (fn []
+                    (repl/notify
+                     (page-core/get-current-output node
+                                                   "space/a"
+                                                   "group:a"
+                                                   "echo"))))))))
+        (promise/x:promise-catch
+         (fn [err] (repl/notify (. err message))))))
+  => [1]
+  
   (notify/wait-on :js
     (-> (substrate/node-create {})
         (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
@@ -316,28 +347,24 @@
                                 -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
-           (var service (substrate/get-service node "db/primary"))
-           (var spec (adaptor/create-pull-model
-                      service
-                      {"pipeline" {}
-                       "options" {"refresh" {"User" true
-                                             "Log" true}}
-                       "defaults" {"args" [["User"]]}}))
-           (adaptor/base-add-model
-            node "room/a" "demo" "refresh-view" service spec)
-           (var caching (substrate/get-service node "db/caching"))
-           (var listener (impl-common/get-db-listener
-                          caching
-                          "room/a/demo/refresh-view"))
-           (repl/notify
-            {"has_listener" (xt/x:not-nil? listener)
-             "has_guard"    (xt/x:is-object? (xtd/get-in listener ["guard"]))
-             "guard_user"   (xtd/get-in listener ["guard" "User"])
-             "has_callback" (xt/x:is-function? (xtd/get-in listener ["callback"]))})))))
-  => {"has_listener" true
-      "has_guard"    true
-      "guard_user"   true
-      "has_callback" true})
+           (adaptor/attach-base-model
+            node
+            (substrate/get-service node "db/caching")
+            "space/a"
+            "group:a"
+            "echo"
+            {"handler" (fn [ctx]
+                         (return (. ctx ["args"])))
+             "defaults" {"args" [1]}})
+           (return
+            (page-core/model-set-input node
+                                       "space/a"
+                                       "group:a"
+                                       "echo"
+                                       {:data [1 2 3]}
+                                       {}))))
+        (repl/notify)))
+  => {"path" ["group:a" "echo"], "post" [false], "::" "model.run", "main" [true [1 2 3]], "pre" [false]})
 
 ^{:refer xt.db.node.adaptor-base/call-rpc-handler :added "4.1"}
 (fact "call-rpc-handler routes rpc args through a named service"
@@ -405,59 +432,56 @@
   (!.js
     (var spec (adaptor/create-rpc-model
                "db/primary"
-               {"rpc_spec" {"input" [{"symbol" "i_message" "type" "text"}]
-                            "return" "jsonb"
-                            "schema" "scratch_v0"
-                            "id" "log_append_public"
-                            "flags" {}}
-                "pipeline" {}
+               {"input" [{"symbol" "i_message" "type" "text"}]
+                "return" "jsonb"
+                "schema" "scratch_v0"
+                "id" "log_append_public"
+                "flags" {}}
+               {"pipeline" {}
                 "options" {}
-                "defaults" {"fn_args" ["hello"]}}))
+                "defaults" {"args" ["hello"]}}))
     {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
      "defaults" (. spec ["defaults"])})
   => {"has-main" true
-      "defaults" {"fn_args" ["hello"]}})
+      "defaults" {"args" ["hello"]}})
 
-^{:refer xt.db.node.adaptor-base/attach-rpc-model :added "4.1"}
+^{:refer xt.db.node.adaptor-base/attach-rpc-model :added "4.1"
+  :setup [(l/rt:restart :js)]}
 (fact "attach-rpc-model attaches and invokes an rpc model"
 
   (notify/wait-on :js
     (-> (substrate/node-create {})
         (adaptor/init-base-main {"primary" {"type" "postgres"
-                                               "defaults" (@! (local-min/+config+ :db))}
-                                    "caching" {"type" "sqlite"
-                                               "defaults" {"filename" ":memory:"}}}
-                                   -/Schema
-                                   -/SchemaLookup)
+                                            "defaults" (@! (local-min/+config+ :db))}
+                                 "caching" {"type" "sqlite"
+                                            "defaults" {"filename" ":memory:"}}}
+                                -/Schema
+                                -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
+           
            (adaptor/attach-rpc-model
             nil
-            [{"space_id" "room/a"
+            ["db/primary"
+             {"space_id" "room/a"
               "group_id" "demo"
               "model_id" "rpc-view"
               "service" "db/primary"}
-             {"rpc_spec" {"input" [{"symbol" "i_message" "type" "text"}]
-                          "return" "jsonb"
-                          "schema" "scratch_v0"
-                          "id" "log_append_public"
-                          "flags" {}}
-              "pipeline" {}
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             {"pipeline" {}
               "options" {}
-              "defaults" {"fn_args" ["hello"]}}]
+              "defaults" {"args" ["hello"]}}]
             nil
             node)
-           (var result (-/invoke-attached-model
-                        node "room/a" "demo" "rpc-view"
-                        [["hello"]]))
+           
            (return
-            (-> result
-                (promise/x:promise-then
-                 (fn [out]
-                   (repl/notify out)))))))
-        (promise/x:promise-catch
-         (fn [out]
-           (repl/notify out)))))
+            (page-core/refresh-model node "room/a" "demo" "rpc-view" {} nil))))
+        (repl/notify)))
+  =# {"path" ["demo" "rpc-view"], "error" true, "post" [false], "::" "model.run", "main" [true "ERR: - {\"status\":\"error\",\"tag\":\"net/args-not-same-length\",\"data\":{\"expected\":1,\"actual\":5,\"input\":\"hello\"}}" true], "pre" [false]}
   => (contains-in {"message" "hello"}))
 
 ^{:refer xt.db.node.adaptor-base/create-pull-model :added "4.1"}
@@ -483,11 +507,11 @@
   (notify/wait-on :js
     (-> (substrate/node-create {})
         (adaptor/init-base-main {"primary" {"type" "postgres"
-                                               "defaults" (@! (local-min/+config+ :db))}
-                                    "caching" {"type" "sqlite"
-                                               "defaults" {"filename" ":memory:"}}}
-                                   -/Schema
-                                   -/SchemaLookup)
+                                            "defaults" (@! (local-min/+config+ :db))}
+                                 "caching" {"type" "sqlite"
+                                            "defaults" {"filename" ":memory:"}}}
+                                -/Schema
+                                -/SchemaLookup)
         (promise/x:promise-then
          (fn [node]
            (adaptor/attach-pull-model
@@ -511,13 +535,56 @@
            (repl/notify out)))))
   => [])
 
-^{:refer xt.db.node.adaptor-base/create-tree-view-model :added "4.1"}
-(fact "create-tree-view-model builds a page model spec with local and remote handlers"
+(comment
 
-  (!.js
-    (var spec (adaptor/create-tree-view-model
-               {"metadata" {"caching_id" "db/caching"
-                            "primary_id" "db/primary"}}
+  ^{:refer xt.db.node.adaptor-base/create-tree-view-model :added "4.1"}
+  (fact "create-tree-view-model builds a page model spec with local and remote handlers"
+
+    (!.js
+      (var spec (adaptor/create-tree-view-model
+                 {"metadata" {"caching_id" "db/caching"
+                              "primary_id" "db/primary"}}
+                 {"table" "Log"
+                  "select_entry" {"input" []
+                                  "view" {"table" "Log"
+                                          "type" "select"
+                                          "query" {}}}
+                  "return_entry" {"input" []
+                                  "view" {"table" "Log"
+                                          "type" "return"
+                                          "query" ["id" "message"]}}
+                  "pipeline" {}
+                  "options" {}
+                  "defaults" {"select_args" []
+                              "return_args" []}}))
+      {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
+       "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
+       "defaults" (. spec ["defaults"])})
+    => {"has-main" true
+        "has-remote" true
+        "defaults" {"select_args" []
+                    "return_args" []}})
+
+  ^{:refer xt.db.node.adaptor-base/attach-tree-view-model :added "4.1"}
+  (fact "attach-tree-view-model attaches and invokes a tree-view model"
+
+    (notify/wait-on :js
+      (-> (substrate/node-create {})
+          (adaptor/init-base-main {"primary" {"type" "postgres"
+                                              "defaults" (@! (local-min/+config+ :db))}
+                                   "caching" {"type" "sqlite"
+                                              "defaults" {"filename" ":memory:"}}}
+                                  -/Schema
+                                  -/SchemaLookup)
+          (promise/x:promise-then
+           (fn [node]
+             (adaptor/attach-tree-view-model
+              nil
+              [{"space_id" "room/a"
+                "group_id" "demo"
+                "model_id" "tree-view"
+                "service" {"metadata" {"caching_id" "db/caching"
+                                       "primary_id" "db/primary"}}}
                {"table" "Log"
                 "select_entry" {"input" []
                                 "view" {"table" "Log"
@@ -530,170 +597,149 @@
                 "pipeline" {}
                 "options" {}
                 "defaults" {"select_args" []
-                            "return_args" []}}))
-    {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
-     "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
-     "defaults" (. spec ["defaults"])})
-  => {"has-main" true
-      "has-remote" true
-      "defaults" {"select_args" []
-                  "return_args" []}})
+                            "return_args" []}}]
+              nil
+              node)
+             (var result (-/invoke-attached-model
+                          node "room/a" "demo" "tree-view"
+                          [[] []]))
+             (return (repl/notify result))))
+          (promise/x:promise-catch
+           (fn [out]
+             (repl/notify out)))))
+    => [])
+
+  ^{:refer xt.db.node.adaptor-base/remove-model-with-refresh :added "4.1"}
+  (fact "remove-model-with-refresh removes the model and its db listener"
+
+    (notify/wait-on :js
+      (-> (substrate/node-create {})
+          (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
+                                   "caching" {"type" "memory" "defaults" {}}}
+                                  -/Schema
+                                  -/SchemaLookup)
+          (promise/x:promise-then
+           (fn [node]
+             (var service (substrate/get-service node "db/primary"))
+             (var spec (adaptor/create-pull-model
+                        service
+                        {"pipeline" {}
+                         "options" {"refresh" {"User" true
+                                               "Log" true}}
+                         "defaults" {"args" [["User"]]}}))
+             (adaptor/attach-base-model
+              node "room/a" "demo" "refresh-view" service spec)
+             (var out (adaptor/remove-model-with-refresh
+                       node "room/a" "demo" "refresh-view" service))
+             (var caching (substrate/get-service node "db/caching"))
+             (var listener (impl-common/get-db-listener
+                            caching
+                            "room/a/demo/refresh-view"))
+             (repl/notify
+              {"status" (xt/x:get-key out "status")
+               "listener_removed" (xt/x:nil? listener)})))))
+    => {"status" "removed"
+        "listener_removed" true})
+
+  ^{:refer xt.db.node.adaptor-base/detach-db-model :added "4.1"}
+  (fact "TODO")
+
+  ^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
+  (fact "init-handlers registers the @xt.db/init-base-handler handler"
+
+    (notify/wait-on :js
+      (var node (substrate/node-create {"schema" -/Schema
+                                        "lookup" -/SchemaLookup
+                                        "services" {}}))
+      (adaptor/init-handlers node)
+      (substrate/set-service node "db/common" {"schema" -/Schema
+                                               "lookup" -/SchemaLookup})
+      (-> (substrate/request node "room/a" "@xt.db/init-base"
+                             [{"primary" {"type" "memory" "defaults" {}}
+                               "caching" {"type" "memory" "defaults" {}}}]
+                             {})
+          (promise/x:promise-then
+           (fn [out]
+             (repl/notify out)))
+          (promise/x:promise-catch
+           (fn [err]
+             (repl/notify {"error" err
+                           "message" (xt/x:ex-message err)})))))
+    => (contains-in {"services" {"db/primary" map?
+                                 "db/caching" map?}}))
+
+  ^{:refer xt.db.node.adaptor-base/list-substrate-fn :added "4.1"}
+  (fact "list-substrate-fn lists public vars tagged with :substrate/fn"
+
+    (map first (adaptor/list-substrate-fn 'xt.db.node.adaptor-base))
+    => '[attach-pull-model
+         attach-rpc-model
+         attach-tree-view-model
+         call-rpc-handler
+         detach-db-model
+         init-base-handler
+         subscribe-db-handler
+         sync-event-handler
+         unsubscribe-db-handler])
+
+  (comment
+    (l/rt:restart :js))
+
+
+
+  (comment
+
+
+    
+    ^{:refer xt.db.node.adaptor-base/call-fetch-handler :added "4.1"}
+    (fact "call-fetch-handler routes fetch args through a named http service"
+
+      (notify/wait-on :js
+        (-> (substrate/node-create {})
+            (promise/x:promise-run)
+            (promise/x:promise-then
+             (fn [node]
+               (substrate/set-service
+                node
+                "http/client"
+                (js-fetch/create
+                 {:headers {"apikey" (@! (-> local-min/+config+ :api :anon-key))}
+                  :host (@! (-> local-min/+config+ :api :hostname))
+                  :port (@! (-> local-min/+config+ :api :port))}))
+               (return node)))
+            (promise/x:promise-then
+             (fn [node]
+               (return
+                (adaptor/call-fetch-handler
+                 nil
+                 ["http/client" {"path" "/auth/v1/health"}]
+                 nil
+                 node))))
+            (promise/x:promise-then
+             (fn [out]
+               (repl/notify (. out status))))
+            (promise/x:promise-catch
+             (fn [out]
+               (repl/notify out)))))
+      => 200)
+    )
+  )
+
+
+^{:refer xt.db.node.adaptor-base/create-tree-view-model :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.db.node.adaptor-base/attach-tree-view-model :added "4.1"}
-(fact "attach-tree-view-model attaches and invokes a tree-view model"
-
-  (notify/wait-on :js
-    (-> (substrate/node-create {})
-        (adaptor/init-base-main {"primary" {"type" "postgres"
-                                               "defaults" (@! (local-min/+config+ :db))}
-                                    "caching" {"type" "sqlite"
-                                               "defaults" {"filename" ":memory:"}}}
-                                   -/Schema
-                                   -/SchemaLookup)
-        (promise/x:promise-then
-         (fn [node]
-           (adaptor/attach-tree-view-model
-            nil
-            [{"space_id" "room/a"
-              "group_id" "demo"
-              "model_id" "tree-view"
-              "service" {"metadata" {"caching_id" "db/caching"
-                                     "primary_id" "db/primary"}}}
-             {"table" "Log"
-              "select_entry" {"input" []
-                              "view" {"table" "Log"
-                                      "type" "select"
-                                      "query" {}}}
-              "return_entry" {"input" []
-                              "view" {"table" "Log"
-                                      "type" "return"
-                                      "query" ["id" "message"]}}
-              "pipeline" {}
-              "options" {}
-              "defaults" {"select_args" []
-                          "return_args" []}}]
-            nil
-            node)
-           (var result (-/invoke-attached-model
-                        node "room/a" "demo" "tree-view"
-                        [[] []]))
-           (return (repl/notify result))))
-        (promise/x:promise-catch
-         (fn [out]
-           (repl/notify out)))))
-  => [])
+(fact "TODO")
 
 ^{:refer xt.db.node.adaptor-base/remove-model-with-refresh :added "4.1"}
-(fact "remove-model-with-refresh removes the model and its db listener"
-
-  (notify/wait-on :js
-    (-> (substrate/node-create {})
-        (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
-                                    "caching" {"type" "memory" "defaults" {}}}
-                                   -/Schema
-                                   -/SchemaLookup)
-        (promise/x:promise-then
-         (fn [node]
-           (var service (substrate/get-service node "db/primary"))
-           (var spec (adaptor/create-pull-model
-                      service
-                      {"pipeline" {}
-                       "options" {"refresh" {"User" true
-                                             "Log" true}}
-                       "defaults" {"args" [["User"]]}}))
-           (adaptor/base-add-model
-            node "room/a" "demo" "refresh-view" service spec)
-           (var out (adaptor/remove-model-with-refresh
-                     node "room/a" "demo" "refresh-view" service))
-           (var caching (substrate/get-service node "db/caching"))
-           (var listener (impl-common/get-db-listener
-                          caching
-                          "room/a/demo/refresh-view"))
-           (repl/notify
-            {"status" (xt/x:get-key out "status")
-             "listener_removed" (xt/x:nil? listener)})))))
-  => {"status" "removed"
-      "listener_removed" true})
+(fact "TODO")
 
 ^{:refer xt.db.node.adaptor-base/detach-db-model :added "4.1"}
 (fact "TODO")
 
 ^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
-(fact "init-handlers registers the @xt.db/init-base-handler handler"
-
-  (notify/wait-on :js
-    (var node (substrate/node-create {"schema" -/Schema
-                                      "lookup" -/SchemaLookup
-                                      "services" {}}))
-    (adaptor/init-handlers node)
-    (substrate/set-service node "db/common" {"schema" -/Schema
-                                             "lookup" -/SchemaLookup})
-    (-> (substrate/request node "room/a" "@xt.db/init-base"
-                           [{"primary" {"type" "memory" "defaults" {}}
-                             "caching" {"type" "memory" "defaults" {}}}]
-                           {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))
-        (promise/x:promise-catch
-         (fn [err]
-           (repl/notify {"error" err
-                         "message" (xt/x:ex-message err)})))))
-  => (contains-in {"services" {"db/primary" map?
-                               "db/caching" map?}}))
+(fact "TODO")
 
 ^{:refer xt.db.node.adaptor-base/list-substrate-fn :added "4.1"}
-(fact "list-substrate-fn lists public vars tagged with :substrate/fn"
-
-  (map first (adaptor/list-substrate-fn 'xt.db.node.adaptor-base))
-  => '[attach-pull-model
-       attach-rpc-model
-       attach-tree-view-model
-       call-rpc-handler
-       detach-db-model
-       init-base-handler
-       subscribe-db-handler
-       sync-event-handler
-       unsubscribe-db-handler])
-
-(comment
-  (l/rt:restart :js))
-
-
-
-(comment
-
-
-  
-^{:refer xt.db.node.adaptor-base/call-fetch-handler :added "4.1"}
-(fact "call-fetch-handler routes fetch args through a named http service"
-
-  (notify/wait-on :js
-    (-> (substrate/node-create {})
-        (promise/x:promise-run)
-        (promise/x:promise-then
-         (fn [node]
-           (substrate/set-service
-            node
-            "http/client"
-            (js-fetch/create
-             {:headers {"apikey" (@! (-> local-min/+config+ :api :anon-key))}
-              :host (@! (-> local-min/+config+ :api :hostname))
-              :port (@! (-> local-min/+config+ :api :port))}))
-           (return node)))
-        (promise/x:promise-then
-         (fn [node]
-           (return
-            (adaptor/call-fetch-handler
-             nil
-             ["http/client" {"path" "/auth/v1/health"}]
-             nil
-             node))))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify (. out status))))
-        (promise/x:promise-catch
-         (fn [out]
-           (repl/notify out)))))
-  => 200)
-)
+(fact "TODO")

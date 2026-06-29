@@ -147,6 +147,13 @@
                         (xt/x:json-encode [group-id model-id]))))
   (return [group model]))
 
+(defn.xt get-current-output
+  "returns the current output value of a page model"
+  {:added "4.1"}
+  [node space-id group-id model-id]
+  (var [_group model] (-/model-ensure node space-id group-id model-id))
+  (return (xtd/get-in model ["output" "current"])))
+
 (defn.xt trigger-listeners
   "triggers keyed listeners on the node for a page path"
   {:added "4.1"}

@@ -665,6 +665,23 @@
            (repl/notify {"main" (. acc ["main"])})))))
   => {"main" [true {"data" [1 2 3]}]})
 
+^{:refer xt.substrate.page-core/get-current-output :added "4.1"}
+(fact "returns the current output value of a model"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/add-group-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx] (return {"updated" true}))
+              "defaults" {"args" []}}})
+    (-> (page-core/refresh-model node "space/a" "page" "ping" {} nil)
+        (promise/x:promise-then
+         (fn [_]
+           (repl/notify (page-core/get-current-output node "space/a" "page" "ping"))))))
+  => {"updated" true})
+
 ^{:refer xt.substrate.page-core/trigger-group-raw :added "4.1"}
 (fact "only triggers matching models"
 
