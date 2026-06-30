@@ -177,7 +177,7 @@
 
 (defn.xt ^{:substrate/fn "@xt.db/attach-model"}
   attach-model-handler
-  "TODO"
+  "attach-model-handler attaches a page model to the node"
   {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first args))
@@ -193,7 +193,7 @@
 ;;
 
 (defn.xt detach-base-model
-  "TODO"
+  "detach-base-model removes the model and its db listener"
   {:added "4.1"}
   [node primary-id space-id group-id model-id]
   (page-core/remove-model node space-id group-id model-id)
@@ -209,7 +209,7 @@
 
 (defn.xt ^{:substrate/fn "@xt.db/detach-model"}
   detach-model-handler
-  "TODO"
+  "detach-model-handler detaches a page model from the node"
   {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first args))
@@ -225,7 +225,7 @@
 ;;
 
 (defn.xt rpc-call-baseline-fn
-  "TODO"
+  "rpc-call-baseline-fn routes rpc args and syncs result to caching"
   {:added "4.1"}
   [node primary-id rpc-spec rpc-args]
   (var primary    (-/get-primary-impl node primary-id))
@@ -288,7 +288,7 @@
 ;;
 
 (defn.xt pull-call-baseline-fn
-  "TODO"
+  "pull-call-baseline-fn pulls data and syncs result to caching"
   {:added "4.1"}
   [node primary-id tree]
   (var primary (-/get-primary-impl node primary-id))
@@ -305,7 +305,7 @@
 
 (defn.xt ^{:substrate/fn "@xt.db/pull-call"}
   pull-call-handler
-  "TODO"
+  "pull-call-handler routes pull args through a named service"
   {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first args))
@@ -354,7 +354,7 @@
 ;;
 
 (defn.xt dataview-call-baseline-fn
-  "TODO"
+  "dataview-call-baseline-fn executes a dataview query and syncs to caching"
   {:added "4.1"}
   [node primary-id dataview]
   (var impl      (-/get-primary-impl node primary-id))
@@ -378,7 +378,7 @@
 
 (defn.xt ^{:substrate/fn "@xt.db/dataview-call"}
   dataview-call-handler
-  "TODO"
+  "dataview-call-handler routes dataview args through a named service"
   {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first args))
@@ -386,14 +386,13 @@
   (return (-/dataview-call-baseline-fn node primary-id dataview)))
 
 (defn.xt dataview-create-model
-  "TODO"
+  "dataview-create-model builds a page model spec with local and remote handlers"
   {:added "4.1"}
   [primary-id dataview model]
   (var #{pipeline
          options
          defaults} model)
   (var #{table} dataview)
-  (var user-args (xtd/get-in defaults ["args" (xt/x:offset 0)]))
   (return
    {"handler"
     (fn [context]
@@ -425,24 +424,18 @@
 
 (defn.xt ^{:substrate/fn "@xt.db/dataview-attach-model"}
   dataview-attach-model
-  "TODO"
+  "dataview-attach-model attaches and invokes a dataview model"
   {:added "4.1"}
   [space args request node]
-  (var service-id  (xt/x:first args))
+  (var primary-id  (xt/x:first args))
   (var page-args   (xt/x:second args))
   (var dataview    (xt/x:get-idx args (xt/x:offset 2)))
   (var model       (xt/x:get-idx args (xt/x:offset 3)))
-  
-  (var node-args   (xt/x:first args))
-  (var model-args  (xt/x:second args))
   (var #{space-id
          group-id
-         model-id
-         service}   node-args)
-  (var service-impl (substrate/get-service node service))
-  (var model-spec (-/dataview-create-model service-impl model-args))
-  (return (-/attach-base-model
-           node space-id group-id model-id service-impl model-spec)))
+         model-id}   page-args)
+  (var model-spec (-/dataview-create-model primary-id dataview model))
+  (return (-/attach-base-model node primary-id space-id group-id model-id model-spec)))
 
 
 
@@ -451,7 +444,7 @@
 ;;
 
 (defn.xt init-handlers
-  "TODO"
+  "init-handlers registers the @xt.db handlers"
   {:added "4.1"}
   [node]
   (substrate/register-handler node "@xt.db/init-base" -/init-base-handler nil)
@@ -478,7 +471,7 @@
   (return node))
 
 (defn list-substrate-fn
-  "TODO"
+  "list-substrate-fn lists public vars tagged with :substrate/fn"
   {:added "4.1"}
   [ns]
   (->> (ns-publics (or ns *ns*))
