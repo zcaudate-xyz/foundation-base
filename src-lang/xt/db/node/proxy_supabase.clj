@@ -43,5 +43,5 @@
   {:added "4.1"}
   [node]
   (xt/for:array [action -/ACTIONS]
-    (substrate/register-handler node action proxy-util/supabase-forward-handler nil))
+    (substrate/register-handler node action proxy-util/request-proxy nil))
   (return node))

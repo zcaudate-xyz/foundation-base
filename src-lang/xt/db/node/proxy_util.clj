@@ -46,7 +46,7 @@
   (var transport-id (-/get-transport-id node request))
   (return {"transport_id" transport-id}))
 
-(defn.xt supabase-forward-handler
+(defn.xt request-proxy
   "generic client proxy for @xt.supabase/* actions"
   {:added "4.1"}
   [space args request node]
@@ -54,5 +54,16 @@
    (substrate/request node
                       nil
                       (xt/x:get-key request "action")
+                      args
+                      (-/request-meta node request))))
+
+(defn.xt request-client
+  "calls a supabase action through substrate/request"
+  {:added "4.1"}
+  [node action args opts]
+  (return
+   (substrate/request node
+                      nil
+                      action
                       args
                       (-/request-meta node request))))
