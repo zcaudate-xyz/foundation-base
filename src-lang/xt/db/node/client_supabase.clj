@@ -18,7 +18,6 @@
 ;;
 
 
-
 (defn.xt sign-up
   "signs up a new user through the node"
   {:added "4.1"}
@@ -231,7 +230,7 @@
   {:added "4.1"}
   [node service-id opts]
   (return
-   (-/user-get node opts)))
+   (-/user-get node service-id opts)))
 
 (defn.xt user-put
   "updates the current authenticated user on the requested service"

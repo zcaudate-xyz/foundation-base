@@ -451,7 +451,7 @@
   (substrate/register-handler node "@xt.db/subscribe-db" -/subscribe-db-handler nil)
   (substrate/register-handler node "@xt.db/unsubscribe-db" -/unsubscribe-db-handler nil)
   (substrate/register-handler node "@xt.db/sync-caching" -/sync-caching-handler nil)
-  (substrate/register-handler node "@xt.db/attach-model" -/detach-model-handler nil)
+  (substrate/register-handler node "@xt.db/attach-model" -/attach-model-handler nil)
   (substrate/register-handler node "@xt.db/detach-model" -/detach-model-handler nil)
   (substrate/register-handler node "@xt.db/rpc-call" -/rpc-call-handler nil)
   (substrate/register-handler node "@xt.db/rpc-attach-model" -/rpc-attach-model nil)

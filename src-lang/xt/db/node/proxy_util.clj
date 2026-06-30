@@ -20,17 +20,17 @@
 ;;
 
 (defn.xt set-default-transport
-  "sets the default server transport id for supabase proxy requests"
+  "sets the default server transport id for proxy requests"
   {:added "4.1"}
   [node transport-id]
-  (xtd/set-in node ["state" "adaptor_proxy_supabase" "default_transport_id"] transport-id)
+  (xtd/set-in node ["state" "adaptor_proxy" "default_transport_id"] transport-id)
   (return transport-id))
 
 (defn.xt get-default-transport
-  "gets the default server transport id for supabase proxy requests"
+  "gets the default server transport id for proxy requests"
   {:added "4.1"}
   [node]
-  (return (xtd/get-in node ["state" "adaptor_proxy_supabase" "default_transport_id"])))
+  (return (xtd/get-in node ["state" "adaptor_proxy" "default_transport_id"])))
 
 (defn.xt get-transport-id
   "resolves the transport id from opts or the node default"
@@ -66,4 +66,4 @@
                       nil
                       action
                       args
-                      (-/request-meta node request))))
+                      (-/request-meta node opts))))
