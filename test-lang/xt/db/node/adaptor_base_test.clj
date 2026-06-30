@@ -358,16 +358,136 @@
   => {"path" ["group:a" "echo"], "post" [false], "::" "model.run", "main" [true [1 2 3]], "pre" [false]})
 
 ^{:refer xt.db.node.adaptor-base/attach-model-handler :added "4.1"}
-(fact "TODO")
+(fact "attach-model-handler attaches a page model to the node"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
+                                 "caching" {"type" "memory" "defaults" {}}}
+                                -/Schema
+                                -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (adaptor/attach-model-handler
+            nil
+            ["db/caching"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "echo"}
+             {"handler" (fn [ctx]
+                          (return (. ctx ["args"])))
+              "defaults" {"args" [1 2 3]}}]
+            nil
+            node)
+           (return
+            (page-core/refresh-model node "room/a" "demo" "echo" {} nil))))
+        (repl/notify)))
+  => {"path" ["demo" "echo"], "post" [false], "::" "model.run", "main" [true [1 2 3]], "pre" [false]})
 
 ^{:refer xt.db.node.adaptor-base/detach-base-model :added "4.1"}
-(fact "TODO")
+(fact "detach-base-model removes the model and its db listener"
+
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
+                                 "caching" {"type" "memory" "defaults" {}}}
+                                -/Schema
+                                -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (adaptor/attach-base-model
+            node
+            "db/primary"
+            "room/a"
+            "demo"
+            "refresh-view"
+            {"handler" (fn [ctx] (return []))
+             "options" {"refresh" {"Log" true}}
+             "defaults" {"args" []}})
+           (var out (adaptor/detach-base-model
+                     node "db/primary" "room/a" "demo" "refresh-view"))
+           (var caching (substrate/get-service node "db/caching"))
+           (var listener (impl-common/get-db-listener
+                          caching
+                          "room/a/demo/refresh-view"))
+           (repl/notify
+            {"status" (xt/x:get-key out "status")
+             "listener_removed" (xt/x:nil? listener)})))))
+  => {"status" "removed"
+      "listener_removed" true})
 
 ^{:refer xt.db.node.adaptor-base/detach-model-handler :added "4.1"}
-(fact "TODO")
+(fact "detach-model-handler detaches a page model from the node"
 
-^{:refer xt.db.node.adaptor-base/rpc-call-baseline-fn :added "4.1"}
-(fact "TODO")
+  (notify/wait-on :js
+    (-> (substrate/node-create {})
+        (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
+                                 "caching" {"type" "memory" "defaults" {}}}
+                                -/Schema
+                                -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (adaptor/attach-base-model
+            node
+            "db/primary"
+            "room/a"
+            "demo"
+            "echo"
+            {"handler" (fn [ctx] (return [1]))
+             "defaults" {"args" []}})
+           (return
+            (adaptor/detach-model-handler
+             nil
+             ["db/primary"
+              {"space_id" "room/a"
+               "group_id" "demo"
+               "model_id" "echo"}]
+             nil
+             node))))
+        (repl/notify)))
+  => {"status" "removed"
+      "space" "room/a"
+      "group" "demo"
+      "model" "echo"})
+
+^{:refer xt.db.node.adaptor-base/rpc-call-baseline-fn :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "rpc-call-baseline-fn routes rpc args and syncs result to caching"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (adaptor/init-base-main
+         node
+         {"primary" {"type" "postgres"
+                     "defaults" (@! (local-min/+config+ :db))}
+          "caching" {"type" "sqlite"
+                     "defaults" {"filename" ":memory:"}}}
+         -/Schema
+         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [node]
+           (return
+            (adaptor/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "table" {"base" "Log"
+                       "type" "db/sync"}
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (substrate/get-service node "db/caching")
+                               ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [{"message" "hello", "author_id" nil, "id" string?}
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.adaptor-base/rpc-call-handler :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
@@ -560,11 +680,93 @@
       [{"path" ["demo" "rpc-view"], "post" [false], "::" "model.run", "main" [true {"message" "hello", "author_id" nil, "id" string?}], "pre" [false]}
        [{"message" "hello", "author_id" nil, "id" string?}]]))
 
-^{:refer xt.db.node.adaptor-base/pull-call-baseline-fn :added "4.1"}
-(fact "TODO")
+^{:refer xt.db.node.adaptor-base/pull-call-baseline-fn :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "pull-call-baseline-fn pulls data and syncs result to caching"
 
-^{:refer xt.db.node.adaptor-base/pull-call-handler :added "4.1"}
-(fact "TODO")
+  (notify/wait-on :js
+    (var node nil)
+    (-> (adaptor/init-base-main
+         (substrate/node-create {})
+         {"primary" {"type" "postgres"
+                     "defaults" (@! (local-min/+config+ :db))}
+          "caching" {"type" "sqlite"
+                     "defaults" {"filename" ":memory:"}}}
+         -/Schema
+         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [out]
+           (:= node out)
+           (return
+            (adaptor/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (adaptor/pull-call-baseline-fn node "db/primary" ["Log"]))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (substrate/get-service node "db/caching")
+                               ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello", "author_id" nil, "id" string?}]
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
+
+^{:refer xt.db.node.adaptor-base/pull-call-handler :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "pull-call-handler routes pull args through a named service"
+
+  (notify/wait-on :js
+    (var node nil)
+    (-> (adaptor/init-base-main
+         (substrate/node-create {})
+         {"primary" {"type" "postgres"
+                     "defaults" (@! (local-min/+config+ :db))}
+          "caching" {"type" "sqlite"
+                     "defaults" {"filename" ":memory:"}}}
+         -/Schema
+         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [out]
+           (:= node out)
+           (return
+            (adaptor/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (adaptor/pull-call-handler
+             nil
+             ["db/primary" ["Log"]]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (substrate/get-service node "db/caching")
+                               ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello", "author_id" nil, "id" string?}]
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.adaptor-base/pull-create-model :added "4.1"}
 (fact "pull-create-model builds a page model spec with local and remote handlers"
@@ -646,11 +848,116 @@
   => (contains-in
       [{"message" "hello", "author_id" nil, "id" string?}]))
 
-^{:refer xt.db.node.adaptor-base/dataview-call-baseline-fn :added "4.1"}
-(fact "TODO")
+^{:refer xt.db.node.adaptor-base/dataview-call-baseline-fn :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)
+          (l/rt:restart :js)]}
+(fact "dataview-call-baseline-fn executes a dataview query and syncs to caching"
 
-^{:refer xt.db.node.adaptor-base/dataview-call-handler :added "4.1"}
-(fact "TODO")
+  (notify/wait-on :js
+    (var node nil)
+    (-> (adaptor/init-base-main
+         (substrate/node-create {})
+         {"primary" {"type" "postgres"
+                     "defaults" (@! (local-min/+config+ :db))}
+          "caching" {"type" "sqlite"
+                     "defaults" {"filename" ":memory:"}}}
+         -/Schema
+         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [out]
+           (:= node out)
+           (return
+            (adaptor/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (adaptor/dataview-call-baseline-fn
+             node
+             "db/primary"
+             {"table" "Log"
+              "select_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "select"
+                                      "query" {}}}
+              "return_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "return"
+                                      "query" ["id" "message"]}}}))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            [out
+             (impl-common/pull (substrate/get-service node "db/caching")
+                               ["Log"])])))))
+  => (contains-in
+      [[{"message" "hello", "author_id" nil, "id" string?}]
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
+
+^{:refer xt.db.node.adaptor-base/dataview-call-handler :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "dataview-call-handler routes dataview args through a named service"
+
+  (notify/wait-on :js
+    (var node nil)
+    (-> (adaptor/init-base-main
+         (substrate/node-create {})
+         {"primary" {"type" "postgres"
+                     "defaults" (@! (local-min/+config+ :db))}
+          "caching" {"type" "sqlite"
+                     "defaults" {"filename" ":memory:"}}}
+         -/Schema
+         -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [out]
+           (:= node out)
+           (return
+            (adaptor/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (adaptor/dataview-call-handler
+             nil
+             ["db/primary"
+              {"table" "Log"
+               "select_entry" {"input" []
+                               "view" {"table" "Log"
+                                       "type" "select"
+                                       "query" {}}}
+               "return_entry" {"input" []
+                               "view" {"table" "Log"
+                                       "type" "return"
+                                       "query" ["id" "message"]}}}]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            [out
+             (impl-common/pull (substrate/get-service node "db/caching")
+                               ["Log"])])))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify (. err message))))
+        #_(repl/notify)))
+  => (contains-in
+      [[{"message" "hello", "author_id" nil, "id" string?}]
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.adaptor-base/dataview-create-model :added "4.1"}
 (fact "TODO")
@@ -659,10 +966,47 @@
 (fact "TODO")
 
 ^{:refer xt.db.node.adaptor-base/init-handlers :added "4.1"}
-(fact "TODO")
+(fact "init-handlers registers the @xt.db handlers"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {"schema" -/Schema
+                                      "lookup" -/SchemaLookup
+                                      "services" {}}))
+    (adaptor/init-handlers node)
+    (substrate/set-service node "db/common" {"schema" -/Schema
+                                             "lookup" -/SchemaLookup})
+    (-> (substrate/request node "room/a" "@xt.db/init-base"
+                           [{"primary" {"type" "memory" "defaults" {}}
+                             "caching" {"type" "memory" "defaults" {}}}
+                            -/Schema
+                            -/SchemaLookup]
+                           {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" err
+                         "message" (xt/x:ex-message err)})))))
+  => (contains-in {"services" {"db/primary" map?
+                               "db/caching" map?}}))
 
 ^{:refer xt.db.node.adaptor-base/list-substrate-fn :added "4.1"}
-(fact "TODO")
+(fact "list-substrate-fn lists public vars tagged with :substrate/fn"
+  
+  (map first (adaptor/list-substrate-fn 'xt.db.node.adaptor-base))
+  => '[attach-model-handler
+       dataview-attach-model
+       dataview-call-handler
+       detach-model-handler
+       init-base-handler
+       pull-attach-model
+       pull-call-handler
+       rpc-attach-model
+       rpc-call-handler
+       subscribe-db-handler
+       sync-caching-handler
+       unsubscribe-db-handler])
 
 (comment
 

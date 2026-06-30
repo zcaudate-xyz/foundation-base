@@ -358,22 +358,18 @@
   {:added "4.1"}
   [node primary-id dataview]
   (var impl      (-/get-primary-impl node primary-id))
-  (var #{schema} impl)
-  (var #{table
-         select-entry
-         select-args
-         return-entry
-         return-args
-         return-omit
-         return-count
-         return-id
-         return-bulk} dataview)
-  (var [ok tree] (base-tree/plan-view schema dataview))
+  (var #{schema} impl)  
+  (var [ok tree] (base-tree/plan-view schema
+                                      (xt/x:obj-assign
+                                       {:select-args []
+                                        :return-args []}
+                                       dataview)))
   (if (not ok)
     (throw (xt/x:ex "Invalid Dataview" dataview)))
   (return (-> (impl-common/pull-async impl tree)
               (promise/x:promise-then
                (fn [result]
+                 (var #{table} dataview)
                  (var caching (-/get-caching-impl node primary-id))
                  (when caching
                    (var payload {"db/sync" {table result}})
@@ -392,61 +388,37 @@
 (defn.xt dataview-create-model
   "TODO"
   {:added "4.1"}
-  [service dataview model]
-  (var metadata (xt/x:get-key service "metadata"))
-  (var caching-id (xt/x:get-key metadata "caching_id"))
-  (var primary-id (xt/x:get-key metadata "primary_id"))
-  (var #{table
-         select-entry
-         return-entry
-         return-omit
-         return-count
-         return-id
-         return-bulk} dataview)
+  [primary-id dataview model]
   (var #{pipeline
          options
          defaults} model)
-  (var default-select-args (or (xt/x:get-key defaults "select_args") []))
-  (var default-return-args (or (xt/x:get-key defaults "return_args") []))
-  (var plan-fn
-       (fn [impl select-args return-args]
-         (var schema (xt/x:get-key impl "schema"))
-         (return
-          (base-tree/plan-view
-           schema
-           {:table table
-            :select-entry select-entry
-            :select-args select-args
-            :return-entry return-entry
-            :return-args return-args
-            :return-omit return-omit
-            :return-count return-count
-            :return-id return-id
-            :return-bulk return-bulk}))))
+  (var #{table} dataview)
+  (var user-args (xtd/get-in defaults ["args" (xt/x:offset 0)]))
   (return
    {"handler"
     (fn [context]
       (var node (. context ["node"]))
       (var args (. context ["args"]))
-      (var select-args (or (xt/x:get-idx args 0) default-select-args))
-      (var return-args (or (xt/x:get-idx args 1) default-return-args))
-      (var caching (substrate/get-service node caching-id))
-      (var [ok tree] (plan-fn caching select-args return-args))
-      (when (not ok)
-        (return [ok tree]))
+      (var caching   (-/get-caching-impl node primary-id))
+      (var #{schema} impl)  
+      (var [ok tree] (base-tree/plan-view schema
+                                          (-> {:select-args []
+                                               :return-args []}
+                                              (xt/x:obj-assign (xt/x:first args))
+                                              (xt/x:obj-assign dataview))))
+      (if (not ok)
+        (throw (xt/x:ex "Invalid Dataview" dataview)))
       (return (impl-common/pull caching tree)))
     "pipeline" (xtd/obj-assign-nested
                 {"remote" {"handler"
                            (fn [context]
                              (var node (. context ["node"]))
                              (var args (. context ["args"]))
-                             (var select-args (or (xt/x:get-idx args 0) default-select-args))
-                             (var return-args (or (xt/x:get-idx args 1) default-return-args))
-                             (var primary   (substrate/get-service node primary-id))
-                             (var [ok tree] (plan-fn primary select-args return-args))
-                             (when (not ok)
-                               (return [ok tree]))
-                             (return (impl-common/pull-async primary tree)))}}
+                             (return
+                              (-/dataview-call-baseline-fn  node primary-id
+                                                            (-> {}
+                                                                (xt/x:obj-assign (xt/x:first args))
+                                                                (xt/x:obj-assign dataview)))))}}
                 pipeline)
     "defaults" defaults
     "options"  options}))
