@@ -284,7 +284,7 @@
 
 
 ;;
-;; PULL HANDLERS
+;; PULL
 ;;
 
 (defn.xt pull-call-baseline-fn
@@ -350,7 +350,7 @@
   (return (-/attach-base-model node primary-id space-id group-id model-id model-spec)))
 
 ;;
-;; DATAVIEW MODEL
+;; DATAVIEW
 ;;
 
 (defn.xt dataview-call-baseline-fn
@@ -399,7 +399,7 @@
       (var node (. context ["node"]))
       (var args (. context ["args"]))
       (var caching   (-/get-caching-impl node primary-id))
-      (var #{schema} impl)  
+      (var #{schema} caching)  
       (var [ok tree] (base-tree/plan-view schema
                                           (-> {:select-args []
                                                :return-args []}
@@ -453,21 +453,12 @@
   (substrate/register-handler node "@xt.db/sync-caching" -/sync-caching-handler nil)
   (substrate/register-handler node "@xt.db/attach-model" -/detach-model-handler nil)
   (substrate/register-handler node "@xt.db/detach-model" -/detach-model-handler nil)
-  
   (substrate/register-handler node "@xt.db/rpc-call" -/rpc-call-handler nil)
   (substrate/register-handler node "@xt.db/rpc-attach-model" -/rpc-attach-model nil)
-  
   (substrate/register-handler node "@xt.db/pull-call" -/pull-call-handler nil)
   (substrate/register-handler node "@xt.db/pull-attach-model" -/pull-attach-model nil)
   (substrate/register-handler node "@xt.db/dataview-call" -/dataview-call-handler nil)
   (substrate/register-handler node "@xt.db/dataview-attach-model" -/dataview-attach-model nil)
-
-  
-  
-  
-  
-  
-  
   (return node))
 
 (defn list-substrate-fn
@@ -480,18 +471,3 @@
        (sort-by (comp name key))))
 
 
-
-(comment
-  (substrate/register-handler node "@xt.db/call-fetch" -/call-fetch-handler nil)
-  
-  (defn.xt ^{:substrate/fn "@xt.db/call-fetch"}
-    call-fetch-handler
-    [space args request node]
-    (var service-id   (xt/x:first  args))
-    (var fetch-input  (xt/x:second args))
-    (return
-     (-> (promise/x:promise-run
-          (substrate/get-service node service-id))
-         (promise/x:promise-then
-          (fn [client]
-            (return (http-fetch/request-http client fetch-input))))))))
