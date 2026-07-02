@@ -7,8 +7,7 @@
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[js.worker.link :as worker-link]
-             [xt.lang.spec-base :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
@@ -64,14 +63,14 @@
 
 (defn.js store-worker-url
   []
-  (var url (worker-link/make-blob-url (@! +sharedworker-script+)))
+  (var url (browser-transport/blob-url (@! +sharedworker-script+)))
   (. (!:G localStorage) (setItem "__s34_worker_url__" url))
   (return url))
 
 (defn.js make-worker-link
   []
   (var url (. (!:G localStorage) (getItem "__s34_worker_url__")))
-  (return (worker-link/make-sharedworker-link-from-url url)))
+  (return (browser-transport/sharedworker-url-source url)))
 
 (defn.js group-output-value
   [group]

@@ -32,8 +32,7 @@
 (l/script- :js
   {:runtime :chromedriver.instance
    :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [js.worker.link :as worker-link]]})
+             [xt.lang.common-repl :as repl]]})
 
 (def +sharedworker-script+
   (l/emit-script

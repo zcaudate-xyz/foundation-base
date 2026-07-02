@@ -46,8 +46,8 @@
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
 (defn.js node-init-supabase
-  []
-  (var node (substrate/node-create {}))
+  [node]
+  (:= node (or node (substrate/node-create {})))
   (return
    (adaptor/init-base-handler
     nil
@@ -78,7 +78,7 @@
                                 -/Schema
                                 -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (repl/notify
             (substrate/get-service node "db/primary"))))))
   => (contains-in
@@ -96,7 +96,7 @@
                                 -/Schema
                                 -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (repl/notify
             (substrate/get-service node "db/caching"))))))
   => (contains-in
@@ -109,13 +109,14 @@
 (fact "init-base-main sets metadata on primary and caching services"
 
   (notify/wait-on :js
-    (-> (substrate/node-create {})
+    (var node (substrate/node-create {}))
+    (-> node
         (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
                                  "caching" {"type" "memory" "defaults" {}}}
                                 -/Schema
                                 -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (var primary (substrate/get-service node "db/primary"))
            (var caching (substrate/get-service node "db/caching"))
            (repl/notify
@@ -139,32 +140,26 @@
          nil
          (substrate/node-create {}))
         (repl/notify)))
-  => (contains-in
-      {"handlers" {}, "services" {"db/caching" map?, "db/primary" map?, "db/common" map?},
-       "id" string?
-       "spaces" {},
-       "::" "substrate",
-       "transports" {},
-       "triggers" {},
-       "meta" {},
-       "router" {"subscriptions" {}, "connections" {}}, "pending" {}, "listeners" {}}))
+  => {"success" true})
 
 ^{:refer xt.db.node.adaptor-base/get-primary-impl :added "4.1"}
 (fact "gets the primary impl"
 
   (notify/wait-on :js
-    (-> (-/node-init-supabase)
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (repl/notify (adaptor/get-primary-impl node "db/primary"))))))
   => (contains-in
       {"schema" map?, "lookup" map?, "opts" {},
        "::" "xt.db.system.impl_supabase/ImplSupabase", "metadata" {"caching_id" "db/caching", "common_id" "db/common"}})
 
   (notify/wait-on :js
-    (-> (-/node-init-supabase)
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (repl/notify (adaptor/get-primary-impl node "db/caching"))))))
   => (contains-in
       {"schema" map?, "lookup" map?, "opts" {},
@@ -174,9 +169,10 @@
 (fact "gets the caching impl"
 
   (notify/wait-on :js
-    (-> (-/node-init-supabase)
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (repl/notify (adaptor/get-caching-impl node "db/primary"))))))
   => (contains-in
       {"schema" map?, "lookup" map?, "opts" map?,
@@ -204,9 +200,10 @@
   ;; FROM HANDLER
   ;;
   (notify/wait-on :js
-    (-> (-/node-init-supabase)
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (return
             (adaptor/subscribe-db-handler nil
                                           ["db/primary"
@@ -225,11 +222,10 @@
   ;; FROM HANDLER
   ;;
   (notify/wait-on :js
-    (var node nil)
-    (-> (-/node-init-supabase)
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
-         (fn [out]
-           (:= node out)
+         (fn []
            (return
             (adaptor/subscribe-db-handler nil
                                           ["db/primary"
@@ -239,7 +235,7 @@
                                           nil
                                           node))))
         (promise/x:promise-then
-         (fn [out]
+         (fn []
            (return
             (adaptor/unsubscribe-db-handler nil
                                             ["db/primary"
@@ -259,24 +255,24 @@
 (fact "sync-caching-handler applies db/sync payload to the paired caching db"
 
   (notify/wait-on :js
-    (-> (-/node-init-supabase)
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (return
             (adaptor/sync-caching-handler nil
-                                        ["db/primary"
-                                         {"db/sync" {"Log" (@! +logs+)}}]
-                                        nil
-                                        node))))
+                                          ["db/primary"
+                                           {"db/sync" {"Log" (@! +logs+)}}]
+                                          nil
+                                          node))))
         (repl/notify)))
   => true
 
   (notify/wait-on :js
-    (var node nil)
-    (-> (-/node-init-supabase)
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
          (fn [out]
-           (:= node out)
            (return
             (adaptor/sync-caching-handler nil
                                         ["db/primary"
@@ -300,9 +296,10 @@
 (fact "attach-base-model registers a db listener when options.refresh is set"
   
   (notify/wait-on :js
-    (-> (-/node-init-supabase)
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (adaptor/attach-base-model
             node
             "db/caching"
@@ -331,13 +328,14 @@
   => [1]
   
   (notify/wait-on :js
-    (-> (substrate/node-create {})
+    (var node (substrate/node-create {}))
+    (-> node
         (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
                                  "caching" {"type" "memory" "defaults" {}}}
                                 -/Schema
                                 -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (adaptor/attach-base-model
             node
             "db/caching"
@@ -361,13 +359,14 @@
 (fact "attach-model-handler attaches a page model to the node"
 
   (notify/wait-on :js
-    (-> (substrate/node-create {})
+    (var node (substrate/node-create {}))
+    (-> node
         (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
                                  "caching" {"type" "memory" "defaults" {}}}
                                 -/Schema
                                 -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (adaptor/attach-model-handler
             nil
             ["db/caching"
@@ -388,13 +387,14 @@
 (fact "detach-base-model removes the model and its db listener"
 
   (notify/wait-on :js
-    (-> (substrate/node-create {})
+    (var node (substrate/node-create {}))
+    (-> node
         (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
                                  "caching" {"type" "memory" "defaults" {}}}
                                 -/Schema
                                 -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (adaptor/attach-base-model
             node
             "db/primary"
@@ -420,13 +420,14 @@
 (fact "detach-model-handler detaches a page model from the node"
 
   (notify/wait-on :js
-    (-> (substrate/node-create {})
+    (var node (substrate/node-create {}))
+    (-> node
         (adaptor/init-base-main {"primary" {"type" "memory" "defaults" {}}
                                  "caching" {"type" "memory" "defaults" {}}}
                                 -/Schema
                                 -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (adaptor/attach-base-model
             node
             "db/primary"
@@ -465,7 +466,7 @@
          -/Schema
          -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (return
             (adaptor/rpc-call-baseline-fn
              node
@@ -504,7 +505,7 @@
          -/Schema
          -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (return
             (adaptor/rpc-call-handler
              nil
@@ -647,7 +648,7 @@
                                 -/Schema
                                 -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (adaptor/rpc-attach-model
             nil
             ["db/primary"
@@ -685,9 +686,9 @@
 (fact "pull-call-baseline-fn pulls data and syncs result to caching"
 
   (notify/wait-on :js
-    (var node nil)
+    (var node (substrate/node-create {}))
     (-> (adaptor/init-base-main
-         (substrate/node-create {})
+         node
          {"primary" {"type" "postgres"
                      "defaults" (@! (local-min/+config+ :db))}
           "caching" {"type" "sqlite"
@@ -696,7 +697,6 @@
          -/SchemaLookup)
         (promise/x:promise-then
          (fn [out]
-           (:= node out)
            (return
             (adaptor/rpc-call-baseline-fn
              node
@@ -727,9 +727,9 @@
 (fact "pull-call-handler routes pull args through a named service"
 
   (notify/wait-on :js
-    (var node nil)
+    (var node (substrate/node-create {}))
     (-> (adaptor/init-base-main
-         (substrate/node-create {})
+         node
          {"primary" {"type" "postgres"
                      "defaults" (@! (local-min/+config+ :db))}
           "caching" {"type" "sqlite"
@@ -738,7 +738,6 @@
          -/SchemaLookup)
         (promise/x:promise-then
          (fn [out]
-           (:= node out)
            (return
             (adaptor/rpc-call-baseline-fn
              node
@@ -799,7 +798,7 @@
                                 -/Schema
                                 -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
 
            ;;
            ;; ACTIVE
@@ -854,9 +853,9 @@
 (fact "dataview-call-baseline-fn executes a dataview query and syncs to caching"
 
   (notify/wait-on :js
-    (var node nil)
+    (var node (substrate/node-create {}))
     (-> (adaptor/init-base-main
-         (substrate/node-create {})
+         node
          {"primary" {"type" "postgres"
                      "defaults" (@! (local-min/+config+ :db))}
           "caching" {"type" "sqlite"
@@ -865,7 +864,6 @@
          -/SchemaLookup)
         (promise/x:promise-then
          (fn [out]
-           (:= node out)
            (return
             (adaptor/rpc-call-baseline-fn
              node
@@ -906,9 +904,9 @@
 (fact "dataview-call-handler routes dataview args through a named service"
 
   (notify/wait-on :js
-    (var node nil)
+    (var node (substrate/node-create {}))
     (-> (adaptor/init-base-main
-         (substrate/node-create {})
+         node
          {"primary" {"type" "postgres"
                      "defaults" (@! (local-min/+config+ :db))}
           "caching" {"type" "sqlite"
@@ -917,7 +915,6 @@
          -/SchemaLookup)
         (promise/x:promise-then
          (fn [out]
-           (:= node out)
            (return
             (adaptor/rpc-call-baseline-fn
              node

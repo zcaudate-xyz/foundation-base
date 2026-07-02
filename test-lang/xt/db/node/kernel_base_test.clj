@@ -2,7 +2,8 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.local-min :as local-min]))
+            [scaffold.supabase.local-min :as local-min]
+            [xt.db.node.kernel-base :as kernel]))
 
 (do 
   (l/script- :postgres
@@ -31,6 +32,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.db.node.kernel-base :as kernel]
+             [xt.db.system.main :as impl-main]
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-supabase-realtime :as realtime]
              [xt.db.helpers.data-main-test :as sample]
@@ -45,6 +47,32 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
+(defn.js node-init-postgres
+  [node]
+  (:= node (or node (substrate/node-create {})))
+  (return
+   (kernel/kernel-setup-main
+    node
+    {"primary" {"type" "postgres"
+                "defaults" (@! (local-min/+config+ :db))}
+     "caching" {"type" "sqlite"
+                "defaults" {"filename" ":memory:"}}}
+    -/Schema
+    -/SchemaLookup)))
+
+(defn.js node-init-supabase
+  [node]
+  (:= node (or node (substrate/node-create {})))
+  (return
+   (kernel/kernel-setup-main
+    node
+    {"primary" {"type" "supabase"
+                "defaults" (@! local-min/+config-supabase-anon+)}
+     "caching" {"type" "sqlite"
+                "defaults" {"filename" ":memory:"}}}
+    -/Schema
+    -/SchemaLookup)))
+
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:teardown :postgres)
@@ -52,292 +80,833 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.node.kernel-base/get-primary-impl :added "4.1"}
-(fact "TODO")
+(fact "gets the primary impl from a service id"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+           (repl/notify (kernel/get-primary-impl node "db/primary"))))))
+  => (contains-in
+      {"schema" map?, "lookup" map?, "opts" map?,
+       "::" "xt.db.system.impl_postgres/ImplPostgres",
+       "metadata" {"caching_id" "db/caching", "common_id" "db/common"}}))
 
 ^{:refer xt.db.node.kernel-base/get-caching-impl :added "4.1"}
-(fact "TODO")
+(fact "gets the caching impl from a primary service id"
 
-^{:refer xt.db.node.kernel-base/kernel-create-config :added "4.1"}
-(fact "creates a normalized config map with default ids"
-
-  (!.js
-    (kernel/kernel-create-config
-     {"common"  {}
-      "primary" {"type" "postgres" "defaults" {"host" "localhost"}}
-      "caching" {"type" "sqlite" "defaults" {"filename" ":memory:"}}}))
-  => {"common"  {"id" "db/common"}
-      "primary" {"id" "db/primary" "type" "postgres" "defaults" {"host" "localhost"}}
-      "caching" {"id" "db/caching" "type" "sqlite" "defaults" {"filename" ":memory:"}}})
-
-^{:refer xt.db.node.kernel-base/kernel-check-exists :added "4.1"}
-(fact "checks whether all base services exist on the node"
-
-  (!.js
+  (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (substrate/set-service node "db/common" {})
-    (substrate/set-service node "db/primary" {})
-    (kernel/kernel-check-exists node
-                                {"common"  {"id" "db/common"}
-                                 "primary" {"id" "db/primary"}
-                                 "caching" {"id" "db/caching"}}))
-  => false
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+           (repl/notify (kernel/get-caching-impl node "db/primary"))))))
+  => (contains-in
+      {"schema" map?, "lookup" map?, "opts" map?,
+       "::" "xt.db.system.impl_sqlite/ImplSqlite",
+       "metadata" {"primary_id" "db/primary", "common_id" "db/common"}}))
 
-  (!.js
+^{:refer xt.db.node.kernel-base/subscribe-db-handler :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "subscribes to the db handler"
+
+  ;;
+  ;; PRECHECK
+  ;;
+  (notify/wait-on :js
+    (var impl (impl-main/create-impl "supabase"
+                                     (@! local-min/+config-supabase-anon+)
+                                     -/Schema
+                                     -/SchemaLookup))
+    (repl/notify
+     (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
+                                         "realtime:room:sub-test-2"])))
+
+  => [true true]
+
+  ;;
+  ;; FROM HANDLER
+  ;;
+  (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (substrate/set-service node "db/common" {})
-    (substrate/set-service node "db/primary" {})
-    (substrate/set-service node "db/caching" {})
-    (kernel/kernel-check-exists node
-                                {"common"  {"id" "db/common"}
-                                 "primary" {"id" "db/primary"}
-                                 "caching" {"id" "db/caching"}}))
+    (-> (-/node-init-supabase node)
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/subscribe-db-handler nil
+                                         ["db/primary"
+                                          "default"
+                                          ["realtime:room:sub-test-1"
+                                           "realtime:room:sub-test-2"]]
+                                         nil
+                                         node))))
+        (repl/notify)))
+  => [true true])
+
+^{:refer xt.db.node.kernel-base/unsubscribe-db-handler :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "unsubscribes from the db handler"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-supabase node)
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/subscribe-db-handler nil
+                                         ["db/primary"
+                                          "default"
+                                          ["realtime:room:sub-test-1"
+                                           "realtime:room:sub-test-2"]]
+                                         nil
+                                         node))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/unsubscribe-db-handler nil
+                                           ["db/primary"
+                                            "default"
+                                            ["realtime:room:sub-test-1"
+                                             "realtime:room:sub-test-2"]]
+                                           nil
+                                           node))))
+        (repl/notify)))
   => true)
 
-^{:refer xt.db.node.kernel-base/kernel-setup-single :added "4.1"
-  :setup [(l/rt:restart :js)]}
-(fact "installs a live impl on the node"
+^{:refer xt.db.node.kernel-base/sync-caching-handler :added "4.1"
+  :setup [(l/rt:restart :js)
+          (def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+                        "message" "hello"}
+                       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+                        "message" "world"}])]}
+(fact "sync-caching-handler applies db/sync payload to the paired caching db"
 
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (kernel/kernel-setup-single node
-                                    "db/primary"
-                                    "memory"
-                                    {}
-                                    -/Schema
-                                    -/SchemaLookup)
-        (promise/x:promise-then
-           (fn []
-             (repl/notify
-              (substrate/get-service node "db/primary"))))))
-  => (contains-in
-      {"schema" map? "lookup" map?
-       "::" "xt.db.system.impl_memory/ImplMemory"}))
-
-^{:refer xt.db.node.kernel-base/kernel-teardown-single :added "4.1"}
-(fact "tears down a single base service"
-
-  (notify/wait-on :js
-    (var node (substrate/node-create {}))
-    (-> (kernel/kernel-setup-single node
-                                    "db/primary"
-                                    "memory"
-                                    {}
-                                    -/Schema
-                                    -/SchemaLookup)
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
          (fn []
-           (kernel/kernel-teardown-single node "db/primary")
-           (repl/notify
-            (substrate/get-service node "db/primary"))))))
-  => nil)
-
-^{:refer xt.db.node.kernel-base/kernel-setup-main :added "4.1"}
-(fact "sets up common, primary and caching services"
+           (return
+            (kernel/sync-caching-handler nil
+                                         ["db/primary"
+                                          {"db/sync" {"Log" (@! +logs+)}}]
+                                         nil
+                                         node))))
+        (repl/notify)))
+  => true
 
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (kernel/kernel-setup-main node
-                                 {"primary" {"type" "memory" "defaults" {}}
-                                  "caching" {"type" "memory" "defaults" {}}}
-                                 -/Schema
-                                 -/SchemaLookup)
+    (-> (-/node-init-supabase node)
         (promise/x:promise-then
-         (fn []
-           (var primary (substrate/get-service node "db/primary"))
-           (var caching (substrate/get-service node "db/caching"))
-           (repl/notify
-            {"primary" (xtd/get-in primary ["metadata"])
-             "caching" (xtd/get-in caching ["metadata"])})))))
-  => {"caching" {"primary_id" "db/primary", "common_id" "db/common"},
-      "primary" {"caching_id" "db/caching", "common_id" "db/common"}})
-
-^{:refer xt.db.node.kernel-base/kernel-setup-handler :added "4.1"}
-(fact "explicitly sets up base services through the handler"
-
-  (notify/wait-on :js
-    (var node (substrate/node-create {}))
-    (-> (kernel/kernel-setup-handler
-         nil
-         [{"primary" {"type" "memory" "defaults" {}}
-           "caching" {"type" "memory" "defaults" {}}}
-          -/Schema
-          -/SchemaLookup]
-         nil
-         node)
+         (fn [out]
+           (return
+            (kernel/sync-caching-handler nil
+                                         ["db/primary"
+                                          {"db/sync" {"Log" (@! +logs+)}}]
+                                         nil
+                                         node))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                              ["Log"]))))
         (repl/notify)))
   => (contains-in
-      {"status" "setup"
-       "data"   {"common"  {"id" "db/common"}
-                 "primary" {"id" "db/primary"}
-                 "caching" {"id" "db/caching"}}}))
+      [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+        "message" "hello"}
+       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+        "message" "world"}]))
 
-^{:refer xt.db.node.kernel-base/kernel-teardown-main :added "4.1"}
-(fact "tears down common, primary and caching services"
+^{:refer xt.db.node.kernel-base/attach-base-model :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "attach-base-model registers a db listener when options.refresh is set"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+           (kernel/attach-base-model
+            node
+            "db/caching"
+            "space/a"
+            "group:a"
+            "echo"
+            {"handler" (fn [ctx]
+                         (return ctx.args))
+             "defaults" {"args" [1]}})
+           (return
+            (-> (page-core/refresh-model  node
+                                          "space/a"
+                                          "group:a"
+                                          "echo"
+                                          {}
+                                          nil)
+                (promise/x:promise-then
+                 (fn []
+                   (repl/notify
+                    (page-core/get-current-output node
+                                                  "space/a"
+                                                  "group:a"
+                                                  "echo"))))))))
+        (promise/x:promise-catch
+         (fn [err] (repl/notify (. err message))))))
+  => [1]
 
   (notify/wait-on :js
     (var node (substrate/node-create {}))
     (-> (kernel/kernel-setup-main node
-                                 {"primary" {"type" "memory" "defaults" {}}
-                                  "caching" {"type" "memory" "defaults" {}}}
-                                 -/Schema
-                                 -/SchemaLookup)
+                                  {"primary" {"type" "memory" "defaults" {}}
+                                   "caching" {"type" "memory" "defaults" {}}}
+                                  -/Schema
+                                  -/SchemaLookup)
         (promise/x:promise-then
          (fn []
-           (kernel/kernel-teardown-main node
-                                        {"common"  {"id" "db/common"}
-                                         "primary" {"id" "db/primary"}
-                                         "caching" {"id" "db/caching"}})
-           (repl/notify 
-            {"common"  (xt/x:is-object? (substrate/get-service node "db/common"))
-             "primary" (xt/x:is-object? (substrate/get-service node "db/primary"))
-             "caching" (xt/x:is-object? (substrate/get-service node "db/caching"))})))
+           (kernel/attach-base-model
+            node
+            "db/caching"
+            "space/a"
+            "group:a"
+            "echo"
+            {"handler" (fn [ctx]
+                         (return (. ctx ["args"])))
+             "defaults" {"args" [1]}})
+           (return
+            (page-core/model-set-input node
+                                       "space/a"
+                                       "group:a"
+                                       "echo"
+                                       {:data [1 2 3]}
+                                       {}))))
+        (repl/notify)))
+  => {"path" ["group:a" "echo"], "post" [false], "::" "model.run", "main" [true [1 2 3]], "pre" [false]})
+
+^{:refer xt.db.node.kernel-base/attach-model-handler :added "4.1"}
+(fact "attach-model-handler attaches a page model to the node"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (kernel/kernel-setup-main node
+                                  {"primary" {"type" "memory" "defaults" {}}
+                                   "caching" {"type" "memory" "defaults" {}}}
+                                  -/Schema
+                                  -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (kernel/attach-model-handler
+            nil
+            ["db/caching"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "echo"}
+             {"handler" (fn [ctx]
+                          (return (. ctx ["args"])))
+              "defaults" {"args" [1 2 3]}}]
+            nil
+            node)
+           (return
+            (page-core/refresh-model node "room/a" "demo" "echo" {} nil))))
+        (repl/notify)))
+  => {"path" ["demo" "echo"], "post" [false], "::" "model.run", "main" [true [1 2 3]], "pre" [false]})
+
+^{:refer xt.db.node.kernel-base/detach-base-model :added "4.1"}
+(fact "detach-base-model removes the model and its db listener"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (kernel/kernel-setup-main node
+                                  {"primary" {"type" "memory" "defaults" {}}
+                                   "caching" {"type" "memory" "defaults" {}}}
+                                  -/Schema
+                                  -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (kernel/attach-base-model
+            node
+            "db/primary"
+            "room/a"
+            "demo"
+            "refresh-view"
+            {"handler" (fn [ctx] (return []))
+             "options" {"refresh" {"Log" true}}
+             "defaults" {"args" []}})
+           (var out (kernel/detach-base-model
+                     node "db/primary" "room/a" "demo" "refresh-view"))
+           (var caching (kernel/get-caching-impl node "db/primary"))
+           (var listener (impl-common/get-db-listener
+                          caching
+                          "room/a/demo/refresh-view"))
+           (repl/notify
+            {"status" (xt/x:get-key out "status")
+             "listener_removed" (xt/x:nil? listener)})))))
+  => {"status" "removed"
+      "listener_removed" true})
+
+^{:refer xt.db.node.kernel-base/detach-model-handler :added "4.1"}
+(fact "detach-model-handler detaches a page model from the node"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (kernel/kernel-setup-main node
+                                  {"primary" {"type" "memory" "defaults" {}}
+                                   "caching" {"type" "memory" "defaults" {}}}
+                                  -/Schema
+                                  -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (kernel/attach-base-model
+            node
+            "db/primary"
+            "room/a"
+            "demo"
+            "echo"
+            {"handler" (fn [ctx] (return [1]))
+             "defaults" {"args" []}})
+           (return
+            (kernel/detach-model-handler
+             nil
+             ["db/primary"
+              {"space_id" "room/a"
+               "group_id" "demo"
+               "model_id" "echo"}]
+             nil
+             node))))
+        (repl/notify)))
+  => {"status" "removed"
+      "space" "room/a"
+      "group" "demo"
+      "model" "echo"})
+
+^{:refer xt.db.node.kernel-base/rpc-call-baseline-fn :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "rpc-call-baseline-fn routes rpc args and syncs result to caching"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "table" {"base" "Log"
+                       "type" "db/sync"}
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                               ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [{"message" "hello", "author_id" nil, "id" string?}
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
+
+^{:refer xt.db.node.kernel-base/rpc-call-handler :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "rpc-call-handler routes rpc args through a named service"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/rpc-call-handler
+             nil
+             ["db/primary"
+              {"input" [{"symbol" "i_message" "type" "text"}]
+               "return" "jsonb"
+               "schema" "scratch_v0"
+               "id" "log_append_public"
+               "flags" {}
+               "table" {"base" "Log"
+                        "type" "db/sync"}}
+              ["hello"]]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                              ["Log"]))))
+        (repl/notify)))
+  => (contains-in [{"message" "hello"}])
+
+  ;;
+  ;; WITHOUT TABLE will not sync
+  ;;
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/rpc-call-handler
+             nil
+             ["db/primary"
+              {"input" [{"symbol" "i_message" "type" "text"}]
+               "return" "jsonb"
+               "schema" "scratch_v0"
+               "id" "log_append_public"
+               ;; NO TABLE
+               "flags" {}}
+              ["world"]]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                               ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [{"message" "world", "author_id" nil, "id" string?}
+       []]))
+
+^{:refer xt.db.node.kernel-base/rpc-create-model :added "4.1"}
+(fact "rpc-create-model builds a page model spec with an rpc handler"
+
+  (!.js
+    (var spec (kernel/rpc-create-model
+               "db/primary"
+               {"input" [{"symbol" "i_message" "type" "text"}]
+                "return" "jsonb"
+                "schema" "scratch_v0"
+                "id" "log_append_public"
+                "flags" {}}
+               {"pipeline" {}
+                "options" {}
+                "defaults" {"args" ["hello"]}}))
+    {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
+     "defaults" (. spec ["defaults"])})
+  => {"has-main" true, "defaults" {"args" ["hello"]}})
+
+^{:refer xt.db.node.kernel-base/rpc-attach-model :added "4.1"
+  :setup [(l/rt:restart :js)
+          (pg/t:delete scratch-v0/Log)]}
+(fact "rpc-attach-model attaches and invokes an rpc model"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+           (kernel/rpc-attach-model
+            nil
+            ["db/primary"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "rpc-view"
+              "service" "db/primary"}
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "table" {"base" "Log"
+                       "type" "db/sync"}
+              "flags" {}}
+             {"pipeline" {}
+              "options" {}
+              "defaults" {"args" ["hello"]}}]
+            nil
+            node)
+           (return
+            (page-core/refresh-model node "room/a" "demo" "rpc-view" {} nil))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            [out
+             (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                               ["Log"])])))))
+  => (contains-in
+      [{"path" ["demo" "rpc-view"], "post" [false], "::" "model.run", "main" [true {"message" "hello", "author_id" nil, "id" string?}], "pre" [false]}
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
+
+^{:refer xt.db.node.kernel-base/pull-call-baseline-fn :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "pull-call-baseline-fn pulls data and syncs result to caching"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (kernel/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (kernel/pull-call-baseline-fn node "db/primary" ["Log"]))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                               ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello", "author_id" nil, "id" string?}]
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
+
+^{:refer xt.db.node.kernel-base/pull-call-handler :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "pull-call-handler routes pull args through a named service"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (kernel/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (kernel/pull-call-handler
+             nil
+             ["db/primary" ["Log"]]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                               ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello", "author_id" nil, "id" string?}]
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
+
+^{:refer xt.db.node.kernel-base/pull-create-model :added "4.1"}
+(fact "pull-create-model builds a page model spec with local and remote handlers"
+
+  (!.js
+    (var spec (kernel/pull-create-model
+               {"caching_id" "db/caching"
+                "primary_id" "db/primary"}
+               ["Log"]
+               {"pipeline" {}
+                "options" {}
+                "defaults" {}}))
+    {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
+     "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
+     "defaults" (. spec ["defaults"])})
+  => {"has-remote" true, "has-main" true, "defaults" {}})
+
+^{:refer xt.db.node.kernel-base/pull-attach-model :added "4.1"
+  :setup [(l/rt:restart :js)
+          (pg/t:delete scratch-v0/Log)]}
+(fact "pull-attach-model attaches and invokes a pull-view model"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (:= (!:G NODE) node)
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+
+           ;;
+           ;; ACTIVE
+           ;;
+           (kernel/pull-attach-model
+            nil
+            ["db/primary"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "active-view"}
+             ["Log"]
+             {"pipeline" {}
+              "options"  {"refresh" {"Log" true}}
+              "defaults" {"args" []}}]
+            nil
+            node)
+
+           ;;
+           ;; PASSIVE
+           ;;
+           (kernel/pull-attach-model
+            nil
+            ["db/primary"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "passive-view"}
+             ["Log"]
+             {"pipeline" {}
+              "options"  {"refresh" {"Log" true}}
+              "defaults" {"args" []}}]
+            nil
+            node)
+
+           ;;
+           ;; SEED DATA
+           ;;
+           (return
+            (kernel/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           ;; REFRESH ACTIVE
+           (return
+            (page-core/refresh-model-remote node "room/a" "demo" "active-view" nil))))
+        (repl/notify)))
+  => (contains-in
+      {"path" ["demo" "active-view"],
+       "remote" [true [{"message" "hello", "author_id" nil, "id" string?}]],
+       "post" [false], "::" "model.run", "pre" [false]})
+
+  (!.js
+    ;; PASSIVE STILL UPDATES
+    (page-core/get-current-output NODE "room/a" "demo" "passive-view"))
+  => (contains-in
+      [{"message" "hello", "author_id" nil, "id" string?}]))
+
+^{:refer xt.db.node.kernel-base/dataview-call-baseline-fn :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)
+          (l/rt:restart :js)]}
+(fact "dataview-call-baseline-fn executes a dataview query and syncs to caching"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (kernel/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (kernel/dataview-call-baseline-fn
+             node
+             "db/primary"
+             {"table" "Log"
+              "select_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "select"
+                                      "query" {}}}
+              "return_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "return"
+                                      "query" ["id" "message"]}}}))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            [out
+             (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                               ["Log"])])))))
+  => (contains-in
+      [[{"message" "hello", "author_id" nil, "id" string?}]
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
+
+^{:refer xt.db.node.kernel-base/dataview-call-handler :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "dataview-call-handler routes dataview args through a named service"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            (kernel/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (kernel/dataview-call-handler
+             nil
+             ["db/primary"
+              {"table" "Log"
+               "select_entry" {"input" []
+                               "view" {"table" "Log"
+                                       "type" "select"
+                                       "query" {}}}
+               "return_entry" {"input" []
+                               "view" {"table" "Log"
+                                       "type" "return"
+                                       "query" ["id" "message"]}}}]
+             nil
+             node))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            [out
+             (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                               ["Log"])])))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify (. err message))))))
-  => {"caching" false, "primary" false, "common" false})
-
-^{:refer xt.db.node.kernel-base/kernel-teardown-handler :added "4.1"
-  :setup [(l/rt:restart :js)]}
-(fact "tears down base services through the handler"
-
-  (notify/wait-on :js
-    (var node (substrate/node-create {}))
-    (-> (kernel/kernel-setup-main node
-                                 {"primary" {"type" "memory" "defaults" {}}
-                                  "caching" {"type" "memory" "defaults" {}}}
-                                 -/Schema
-                                 -/SchemaLookup)
-        (promise/x:promise-then
-         (fn []
-           (kernel/kernel-teardown-handler
-            nil
-            [{"common"  {"id" "db/common"}
-              "primary" {"id" "db/primary"}
-              "caching" {"id" "db/caching"}}]
-            nil
-            node)
-           (repl/notify 
-            {"common"  (xt/x:is-object? (substrate/get-service node "db/common"))
-             "primary" (xt/x:is-object? (substrate/get-service node "db/primary"))
-             "caching" (xt/x:is-object? (substrate/get-service node "db/caching"))})))))
-  => {"caching" false, "primary" false, "common" false})
-
-^{:refer xt.db.node.kernel-base/kernel-init-main :added "4.1"}
-(fact "ensures base services are present"
-
-  (notify/wait-on :js
-    (var node (substrate/node-create {}))
-    (-> (kernel/kernel-init-main node
-                                {"primary" {"type" "memory" "defaults" {}}
-                                 "caching" {"type" "memory" "defaults" {}}}
-                                -/Schema
-                                -/SchemaLookup)
-        (repl/notify)))
   => (contains-in
-      {"status" "setup"
-       "data"   {"common"  {"id" "db/common"}
-                 "primary" {"id" "db/primary" "type" "memory" "defaults" {}}
-                 "caching" {"id" "db/caching" "type" "memory" "defaults" {}}}})
-
-  (notify/wait-on :js
-    (var node (substrate/node-create {}))
-    (-> (kernel/kernel-setup-main node
-                                 {"primary" {"type" "memory" "defaults" {}}
-                                  "caching" {"type" "memory" "defaults" {}}}
-                                 -/Schema
-                                 -/SchemaLookup)
-        (promise/x:promise-then
-         (fn []
-           (kernel/kernel-init-main node
-                                    {"primary" {"type" "memory" "defaults" {}}
-                                     "caching" {"type" "memory" "defaults" {}}}
-                                    -/Schema
-                                    -/SchemaLookup)
-           (repl/notify
-            {"common"  (substrate/get-service node "db/common")
-             "primary" (substrate/get-service node "db/primary")
-             "caching" (substrate/get-service node "db/caching")})))))
-  => (contains-in
-      {"common" map? "primary" map? "caching" map?}))
-
-^{:refer xt.db.node.kernel-base/kernel-init-handler :added "4.1"}
-(fact "initialises base services through the handler"
-
-  (notify/wait-on :js
-    (var node (substrate/node-create {}))
-    (-> (kernel/kernel-init-handler
-         nil
-         [{"primary" {"type" "memory" "defaults" {}}
-           "caching" {"type" "memory" "defaults" {}}}
-          -/Schema
-          -/SchemaLookup]
-         nil
-         node)
-        (repl/notify)))
-  => {"status" "setup"
-      "data"   {"common"  {"id" "db/common"}
-                "primary" {"id" "db/primary" "type" "memory" "defaults" {}}
-                "caching" {"id" "db/caching" "type" "memory" "defaults" {}}}})
-
-^{:refer xt.db.node.kernel-base/subscribe-db-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/unsubscribe-db-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/sync-caching-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/attach-base-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/attach-model-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/detach-base-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/detach-model-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/rpc-call-baseline-fn :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/rpc-call-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/rpc-create-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/rpc-attach-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/pull-call-baseline-fn :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/pull-call-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/pull-create-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/pull-attach-model :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/dataview-call-baseline-fn :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/dataview-call-handler :added "4.1"}
-(fact "TODO")
+      [[{"message" "hello", "author_id" nil, "id" string?}]
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.kernel-base/dataview-create-model :added "4.1"}
-(fact "TODO")
+(fact "dataview-create-model builds a page model spec with local and remote handlers"
 
-^{:refer xt.db.node.kernel-base/dataview-attach-model :added "4.1"}
-(fact "TODO")
+  (!.js
+    (var spec (kernel/dataview-create-model
+               "db/primary"
+               {"table" "Log"
+                "select_entry" {"input" []
+                                "view" {"table" "Log"
+                                        "type" "select"
+                                        "query" {}}}
+                "return_entry" {"input" []
+                                "view" {"table" "Log"
+                                        "type" "return"
+                                        "query" ["id" "message"]}}}
+               {"pipeline" {}
+                "options" {}
+                "defaults" {"args" [[] []]}}))
+    {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
+     "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
+     "defaults" (. spec ["defaults"])})
+  => {"has-main" true
+      "has-remote" true
+      "defaults" {"args" [[] []]}})
+
+^{:refer xt.db.node.kernel-base/dataview-attach-model :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "dataview-attach-model attaches and invokes a dataview model"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (kernel/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (kernel/dataview-attach-model
+            nil
+            ["db/primary"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "dataview-view"}
+             {"table" "Log"
+              "select_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "select"
+                                      "query" {}}}
+              "return_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "return"
+                                      "query" ["id" "message"]}}}
+             {"pipeline" {}
+              "options" {}
+              "defaults" {"args" [[] []]}}]
+            nil
+            node)
+           (return
+            (page-core/refresh-model-remote node "room/a" "demo" "dataview-view" nil))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            [out
+             (impl-common/pull (kernel/get-caching-impl node "db/primary")
+                               ["Log"])])))))
+  => (contains-in
+      [{"path" ["demo" "dataview-view"],
+        "remote" [true [{"message" "hello", "author_id" nil, "id" string?}]],
+        "post" [false], "::" "model.run", "pre" [false]}
+       [{"message" "hello", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.kernel-base/init-handlers :added "4.1"}
-(fact "TODO")
+(fact "init-handlers registers the @xt.db handlers"
+
+  (!.js
+    (var node (substrate/node-create {}))
+    (kernel/init-handlers node)
+    (xt/x:obj-keys (. node ["handlers"])))
+  => (contains ["@xt.db/kernel-init"
+                "@xt.db/kernel-setup"
+                "@xt.db/kernel-teardown"
+                "@xt.db/subscribe-db"
+                "@xt.db/unsubscribe-db"
+                "@xt.db/sync-caching"
+                "@xt.db/attach-model"
+                "@xt.db/detach-model"
+                "@xt.db/rpc-call"
+                "@xt.db/rpc-attach-model"
+                "@xt.db/pull-call"
+                "@xt.db/pull-attach-model"
+                "@xt.db/dataview-call"
+                "@xt.db/dataview-attach-model"]))
 
 ^{:refer xt.db.node.kernel-base/list-substrate-fn :added "4.1"}
-(fact "TODO")
+(fact "list-substrate-fn lists public vars tagged with :substrate/fn"
+
+  (sort (map (comp :substrate/fn meta second)
+             (kernel/list-substrate-fn 'xt.db.node.kernel-base)))
+  => ["@xt.db/attach-model"
+      "@xt.db/dataview-attach-model"
+      "@xt.db/dataview-call"
+      "@xt.db/detach-model"
+      "@xt.db/kernel-init"
+      "@xt.db/kernel-setup"
+      "@xt.db/kernel-teardown"
+      "@xt.db/pull-attach-model"
+      "@xt.db/pull-call"
+      "@xt.db/rpc-attach-model"
+      "@xt.db/rpc-call"
+      "@xt.db/subscribe-db"
+      "@xt.db/sync-caching"
+      "@xt.db/unsubscribe-db"])

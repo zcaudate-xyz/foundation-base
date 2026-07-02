@@ -53,6 +53,21 @@
 (defspec.xt disconnect
   [:fn [NodeTransportConnection] :xt/promise])
 
+(defspec.xt blob-url
+  [:fn [:xt/str] :xt/str])
+
+(defspec.xt webworker-source
+  [:fn [:xt/str] :xt/any])
+
+(defspec.xt sharedworker-source
+  [:fn [:xt/str [:xt/maybe [:xt/dict :xt/str :xt/any]]] :xt/any])
+
+(defspec.xt sharedworker-url-source
+  [:fn [:xt/str] :xt/any])
+
+(defspec.xt node-worker-source
+  [:fn [:xt/str [:xt/maybe [:xt/dict :xt/str :xt/any]]] :xt/any])
+
 (defn.xt ready-event?
   "checks if an inbound event should resolve connection readiness"
   {:added "4.1"}
@@ -426,3 +441,96 @@
    (main/detach-transport
     (xt/x:get-key connection "node")
     (xt/x:get-key connection "transport_id"))))
+
+(defn.xt blob-url
+  "creates a blob URL from a worker script"
+  {:added "4.1"}
+  [script]
+  (var blob (new Blob [script]
+                      {:type "text/javascript"}))
+  (return (. (!:G URL) (createObjectURL blob))))
+
+(defn.xt webworker-source
+  "creates a transport source map backed by a browser WebWorker"
+  {:added "4.1"}
+  [script]
+  (return
+   {"create_fn"
+    (fn [listener]
+      (var url (-/blob-url script))
+      (try
+        (var worker (new Worker url))
+        (. worker (addEventListener
+                   "message"
+                   (fn [e]
+                     (return (listener (. e ["data"]))))
+                   false))
+        (. (!:G URL) (revokeObjectURL url))
+        (return worker)
+        (catch err
+          (. (!:G URL) (revokeObjectURL url))
+          (throw err))))}))
+
+(defn.xt sharedworker-source
+  "creates a transport source map backed by a browser SharedWorker.
+   `opts` is passed as the second argument to the SharedWorker constructor,
+   allowing `{:type \"module\"}` to be used for ES-module worker scripts."
+  {:added "4.1"}
+  [script opts]
+  (var worker-opts (or opts {}))
+  (return
+   {"create_fn"
+    (fn [listener]
+      (var url (-/blob-url script))
+      (try
+        (var shared (new SharedWorker url worker-opts))
+        (var port (. shared ["port"]))
+        (. port (start))
+        (. port (addEventListener
+                 "message"
+                 (fn [e]
+                   (return (listener (. e ["data"]))))
+                 false))
+        (. (!:G URL) (revokeObjectURL url))
+        (return port)
+        (catch err
+          (. (!:G URL) (revokeObjectURL url))
+          (throw err))))}))
+
+(defn.xt sharedworker-url-source
+  "creates a transport source map backed by a browser SharedWorker,
+   reusing an existing URL so multiple tabs connect to the same worker"
+  {:added "4.1"}
+  [url]
+  (return
+   {"create_fn"
+    (fn [listener]
+      (var shared (new SharedWorker url))
+      (var port (. shared ["port"]))
+      (. port (start))
+      (. port (addEventListener
+               "message"
+               (fn [e]
+                 (return (listener (. e ["data"]))))
+               false))
+      (return port))}))
+
+(defn.xt node-worker-source
+  "creates a transport source map backed by a Node.js worker_threads Worker"
+  {:added "4.1"}
+  [script opts]
+  (var config (or opts {}))
+  (var eval-flag (xt/x:get-key config "eval"))
+  (var eval-mode (:? (xt/x:nil? eval-flag) true eval-flag))
+  (var #{Worker} (require "worker_threads"))
+  (return
+   {"create_fn"
+    (fn [listener]
+      (var worker (new Worker script
+                            (:? eval-mode
+                                {:eval true}
+                                {})))
+      (. worker (on "message"
+                    (fn [data]
+                      (return (listener data)))))
+      (return worker))}))

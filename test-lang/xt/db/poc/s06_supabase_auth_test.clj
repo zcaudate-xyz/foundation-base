@@ -28,7 +28,6 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [js.worker.link :as worker-link]
              [xt.substrate :as substrate]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
@@ -109,7 +108,7 @@
     (browser-transport/connect-sharedworker
      client
      {"transport_id" "worker"
-      "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
+      "source" (browser-transport/sharedworker-source (@! +sharedworker-script+) {"type" "module"})})
     (fn [conn]
       (var transport-id (. conn ["transport_id"]))
       (return

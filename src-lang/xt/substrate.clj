@@ -362,9 +362,10 @@
   (return service))
 
 (defn.xt remove-service
-  "sets a shared service on the node"
+  "removes a shared service from the node"
   {:added "4.1"}
   [node service-id]
+  (var service (-/get-service node service-id))
   (xt/x:del-key (xt/x:get-key node "services")
                 service-id)
   (return service))

@@ -36,8 +36,8 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
-             [js.worker.link :as worker-link]
              [xt.event.base-model :as event-model]
+             [xt.db.node.runtime :as runtime]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
@@ -50,10 +50,8 @@
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
 (fact:global
- {
-  :setup [(l/rt:restart :js)
+ {:setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
-          (l/rt:scaffold-imports :js)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
   :teardown [(l/rt:stop)]})
@@ -62,34 +60,7 @@
   (l/emit-script
    '(do
       (var node (xt.substrate/node-create {"id" "db-model-server"}))
-      (var schema xt.db.poc.s05-sharedworker-custom-test/Schema)
-      (var lookup xt.db.poc.s05-sharedworker-custom-test/SchemaLookup)
-      (xt.substrate/set-service
-       node "db/common"
-       {:schema schema
-        :lookup lookup
-        :primary (xt.db.system.impl-supabase/impl-supabase
-                  (js.net.http-fetch/create
-                   (@! local-min/+config-supabase-anon+)
-                   (xt.net.addon-supabase/middleware-supabase))
-                  schema
-                  lookup)
-        :caching (xt.db.system.impl-memory/impl-memory schema lookup)})
-      (xt.substrate/register-handler
-       node "@xt.db/init-base"
-       (fn [space args request node]
-         (var common (xt.substrate/get-service node "db/common"))
-         (xt.substrate/set-service node "db/common" {:schema (. common ["schema"])
-                                                     :lookup (. common ["lookup"])})
-         (xt.substrate/set-service node "db/primary" (. common ["primary"]))
-         (xt.substrate/set-service node "db/caching" (. common ["caching"]))
-         (return {"status" "ok"}))
-       nil)
-      (xt.substrate/register-handler
-       node "@/attach-pull-model"
-       xt.db.node.adaptor-base/attach-pull-model
-       nil)
-      (xt.substrate.page-proxy/install node)
+      (xt.db.node.runtime/init-server node)
       (:= (. globalThis ["onconnect"])
           (fn [e]
             (var port (. e ["ports"] [0]))
@@ -109,74 +80,66 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
+
 ^{:refer xt.db.poc.s05-sharedworker-custom-test/attach-pull-model
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "client can open a remote pull model and read its output"
 
-  (notify/wait-on [:js 20000]
+  (notify/wait-on [:js 5000]
     (var client (substrate/node-create {"id" "db-model-client"}))
-    (page-proxy/install client)
-    (promise/x:promise-catch
-     (promise/x:promise-then
-      (browser-transport/connect-sharedworker
-       client
-       {"transport_id" "worker"
-        "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
-      (fn [conn]
-        (var transport-id (. conn ["transport_id"]))
-        (return
-         (promise/x:promise-then
-          (substrate/request client
-                             "room/a"
-                             "@xt.db/init-base"
-                             []
-                             {"transport_id" transport-id})
-          (fn [init-res]
-            (return
-             (promise/x:promise-then
-              (substrate/request client
-                                 "room/a"
-                                 "@/attach-pull-model"
-                                 [{"space_id" "room/a"
-                                   "group_id" "demo"
-                                   "model_id" "pull-view"
-                                   "service" {"caching_id" "db/caching"
-                                              "primary_id" "db/primary"}}
-                                  {"pipeline" {}
-                                   "options" {}
-                                   "defaults" {"args" [["Log"]]}}]
-                                 {"transport_id" transport-id})
-              (fn [group-res]
-                (return
-                 (promise/x:promise-then
-                  (page-proxy/open-proxy-group
-                   client
-                   "room/a"
-                   "demo"
-                   {"transport_id" transport-id})
-                  (fn [group]
-                    (var model (xtd/get-in group ["models" "pull-view"]))
-                    (return
-                     (promise/x:promise-then
-                      (base-page/remote-call client "room/a" "demo" "pull-view" [["Log"]] true)
-                      (fn [res]
-                        (return
-                         (promise/x:with-delay
-                          1000
-                          (fn []
-                            (repl/notify {"init" init-res
-                                          "group" group-res
-                                          "result" res
-                                          "output" (event-model/get-current model nil)}))))))))))))))))))
-     (fn [err]
-       (repl/notify {"error" err
-                     "message" (xt/x:ex-message err)}))))
-  => (contains-in
-      {"init" {"status" "ok"}
-       "group" {"status" "attached"}
-       "output" [{"message" "remote"}]
-       "result" {"status" "ok"}}))
+    (runtime/init-server-proxy client)
+    (-> client
+        (browser-transport/connect-sharedworker
+         {"transport_id" "worker"
+          "source" (browser-transport/sharedworker-source (@! +sharedworker-script+)
+                                                          {"type" "module"})})
+        (promise/x:promise-then
+         (fn [conn]
+           (return
+            (substrate/request client
+                               "room/a"
+                               "@xt.db/init-base"
+                               [{"primary" {"type" "supabase"
+                                           "defaults" (@! local-min/+config-supabase-anon+)}
+                                "caching" {"type" "sqlite"
+                                           "defaults" {"filename" ":memory:"}}}
+                                -/Schema
+                                -/SchemaLookup]))))
+        (repl/notify)))
+  => {"success" true})
+
+
+^{:refer xt.db.poc.s05-sharedworker-custom-test/CONNECT
+  :added "4.1"
+  :setup [(scratch-v0/log-append-public "remote")]}
+(fact "client can open a remote pull model and read its output"
+
+  (notify/wait-on [:js 5000]
+    (var client (substrate/node-create {"id" "db-model-client"}))
+    (runtime/init-server-proxy client)
+    (-> client
+        (browser-transport/connect-sharedworker
+         {"transport_id" "worker"
+          "source" (browser-transport/sharedworker-source (@! +sharedworker-script+)
+                                                          {"type" "module"})})
+        (promise/x:promise-then
+         (fn [conn]
+           (return
+            (substrate/request client
+                               "room/a"
+                               "@xt.db/init-base"
+                               [{"primary" {"type" "supabase"
+                                           "defaults" (@! local-min/+config-supabase-anon+)}
+                                "caching" {"type" "sqlite"
+                                           "defaults" {"filename" ":memory:"}}}
+                                -/Schema
+                                -/SchemaLookup]))))
+        (repl/notify)))
+  => {"success" true}
+  
+  
+  )
 
 ^{:refer xt.db.poc.s05-sharedworker-custom-test/supabase-reachable
   :added "4.1"

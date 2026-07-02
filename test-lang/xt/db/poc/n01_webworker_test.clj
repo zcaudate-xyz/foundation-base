@@ -3,8 +3,7 @@
   (:require [clojure.string]
             [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.local-min :as local-min]
-            [js.worker.link]))
+            [scaffold.supabase.local-min :as local-min]))
 
 (do
   (l/script- :postgres
@@ -37,8 +36,7 @@
              [xt.substrate.transport-browser :as browser-transport]
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-memory :as impl-memory]
-             [xt.db.system.main]
-             [js.worker.link :as worker-link]]})
+             [xt.db.system.main]]})
 
 
 (def.js Schema
@@ -207,12 +205,12 @@
 (fact "worker-hosted server exposes db models to a connecting client"
 
   (notify/wait-on [:js 10000]
-    (var link (worker-link/make-node-link (@! +server-script+) {}))
+    (var link (browser-transport/node-worker-source (@! +server-script+) {}))
     (var client (substrate/node-create {"id" "db-model-client"}))
     (page-proxy/install client)
     (var conn-ref nil)
     (var groups-ref nil)
-    (. (browser-transport/connect-sharedworker
+    (. (browser-transport/connect-worker
         client
         {"transport_id" "worker"
          "source" link})

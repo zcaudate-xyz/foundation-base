@@ -29,7 +29,6 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
-             [js.worker.link :as worker-link]
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
@@ -112,7 +111,7 @@
     (browser-transport/connect-sharedworker
      client
      {"transport_id" "worker"
-      "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
+      "source" (browser-transport/sharedworker-source (@! +sharedworker-script+) {"type" "module"})})
     (fn [conn]
       (var transport-id (. conn ["transport_id"]))
       (return

@@ -35,8 +35,7 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.page-proxy :as page-proxy]
-             [xt.substrate.transport-browser :as browser-transport]
-             [js.worker.link :as worker-link]]})
+             [xt.substrate.transport-browser :as browser-transport]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -182,7 +181,7 @@
     (browser-transport/connect-sharedworker
      client
      {"transport_id" "worker"
-      "source" (worker-link/make-sharedworker-link-opts script {"type" "module"})})
+      "source" (browser-transport/sharedworker-source script {"type" "module"})})
     (fn [conn]
       (var transport-id (. conn ["transport_id"]))
       (return (callback client transport-id))))))

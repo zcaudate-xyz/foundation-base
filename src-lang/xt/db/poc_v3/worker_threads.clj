@@ -18,8 +18,7 @@
              [xt.substrate.page-core :as base-page]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as transport-browser]
-             [xt.db.node.adaptor-client :as adaptor-client]
-             [js.worker.link :as worker-link]]})
+             [xt.db.node.adaptor-client :as adaptor-client]]})
 
 (defn.js connect-worker-threads
   "Creates a client node, spawns the worker-thread server from `script-path`,
@@ -30,7 +29,7 @@
                                       "spaces" {"room/a" {"state" {}}}}))
   (page-proxy/install client)
 
-  (var link (worker-link/make-node-link script-path {"eval" false}))
+  (var link (transport-browser/node-worker-source script-path {"eval" false}))
 
   (return
    (transport-browser/connect-worker

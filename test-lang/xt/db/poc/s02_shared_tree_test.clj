@@ -30,7 +30,6 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
-             [js.worker.link :as worker-link]
              [js.net.http-fetch :as http-fetch]
              [xt.event.base-model :as event-model]
              [xt.db.node.adaptor-base :as adaptor-base]
@@ -163,7 +162,7 @@
     (-> (browser-transport/connect-sharedworker
          client
          {"transport_id" "worker"
-          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
+          "source" (browser-transport/sharedworker-source (@! +sharedworker-script+) {"type" "module"})})
         (promise/x:promise-then
          (fn [conn]
            (repl/notify {"transport-id" (. conn ["transport_id"])})))
@@ -182,7 +181,7 @@
     (-> (browser-transport/connect-sharedworker
          client
          {"transport_id" "worker"
-          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
+          "source" (browser-transport/sharedworker-source (@! +sharedworker-script+) {"type" "module"})})
         (promise/x:promise-then
          (fn [conn]
            (var transport-id (. conn ["transport_id"]))
@@ -211,7 +210,7 @@
     (-> (browser-transport/connect-sharedworker
          client
          {"transport_id" "worker"
-          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
+          "source" (browser-transport/sharedworker-source (@! +sharedworker-script+) {"type" "module"})})
         (promise/x:promise-then
          (fn [conn]
            (var transport-id (. conn ["transport_id"]))
@@ -243,7 +242,7 @@
     (-> (browser-transport/connect-sharedworker
          client
          {"transport_id" "worker"
-          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+) {"type" "module"})})
+          "source" (browser-transport/sharedworker-source (@! +sharedworker-script+) {"type" "module"})})
         (promise/x:promise-then
          (fn [conn]
            (var transport-id (. conn ["transport_id"]))

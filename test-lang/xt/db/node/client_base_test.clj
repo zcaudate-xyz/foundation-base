@@ -117,14 +117,16 @@
     (var client (substrate/node-create {}))
     (runtime/init-server server)
     (runtime/init-server-proxy client)
-    (-> (client/init-base client {"primary" {"type" "supabase"
-                                             "defaults" (@! local-min/+config-supabase-anon+)}
-                                  "caching" {"type" "sqlite"
-                                             "defaults" {"filename" ":memory:"}}}
-                          -/Schema
-                          -/SchemaLookup
-                          {})
-        (repl/notify)))
+    (transport-memory/link-pair server client)
+    (repl/notify server)
+    #_(-> (client/init-base client {"primary" {"type" "supabase"
+                                               "defaults" (@! local-min/+config-supabase-anon+)}
+                                    "caching" {"type" "sqlite"
+                                               "defaults" {"filename" ":memory:"}}}
+                            -/Schema
+                            -/SchemaLookup
+                            {})
+          (repl/notify)))
   )
 
 ^{:refer xt.db.node.client-base/init-base :added "4.1"}

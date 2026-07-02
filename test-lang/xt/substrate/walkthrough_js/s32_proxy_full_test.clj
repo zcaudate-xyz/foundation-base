@@ -17,13 +17,11 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
-            [js.worker.link]
             [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[js.worker.link :as worker-link]
-             [xt.lang.spec-base :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
@@ -105,7 +103,7 @@
      (browser-transport/connect-sharedworker
       client
       {"transport_id" "worker"
-       "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
+       "source" (browser-transport/sharedworker-source (@! +sharedworker-script+) {})})
      (promise/x:promise-then
       (fn [conn]
         (:= conn-ref conn)
@@ -171,7 +169,7 @@
      (browser-transport/connect-sharedworker
       client
       {"transport_id" "worker"
-       "source" (worker-link/make-sharedworker-link (@! +sharedworker-script+))})
+       "source" (browser-transport/sharedworker-source (@! +sharedworker-script+) {})})
      (promise/x:promise-then
       (fn [conn]
         (:= conn-ref conn)
