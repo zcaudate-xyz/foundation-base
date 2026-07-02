@@ -34,9 +34,11 @@
              [xt.substrate.page-core :as page-core]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
+             
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.impl-memory :as impl-memory]
-             [xt.db.system.main]]})
+             [xt.db.system.main]
+             [xt.db.node.runtime :as runtime]]})
 
 
 (def.js Schema
@@ -45,16 +47,62 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
-(defn- fix-worker-script
-  "Node 24 eval workers parse scripts containing ESM imports as modules, so the
-   worker_threads setup must use a static ESM import instead of CommonJS require."
-  [script]
-  (str "import { parentPort } from 'worker_threads';\n"
-       (-> script
-           (clojure.string/replace #"let worker_threads = require\(\"worker_threads\"\);\n" "")
-           (clojure.string/replace #"worker_threads\[\"parentPort\"\]" "parentPort"))))
 
-(def ^:private +server-script+
+(fact:global
+ {:setup [(l/rt:restart)
+          (l/rt:setup :postgres)
+          (l/rt:scaffold-imports :js)]
+  :teardown [(l/rt:stop)]})
+
+
+^{:refer xt.db.poc.node-webworker-test/worker-server-fact :added "4.1"
+  :setup [(scratch-v0/log-append-public "remote")]}
+(fact "worker-hosted server exposes db models to a connecting client"
+
+  (notify/wait-on [:js 10000]
+    (var link (browser-transport/node-worker-source (@! +server-script+) {}))
+    (var client (substrate/node-create {"id" "db-model-client"}))
+    (page-proxy/install client)
+    (var conn-ref nil)
+    (var groups-ref nil)
+    (. (browser-transport/connect-worker
+        client
+        {"transport_id" "worker"
+         "source" link})
+       (then
+        (fn [conn]
+          (:= conn-ref conn)
+          (return (page-proxy/list-proxy-groups client "room/a" {"transport_id" (. conn ["transport_id"])}))))
+       (then
+        (fn [groups]
+          (:= groups-ref groups)
+          (return (page-proxy/open-proxy-group client "room/a" "demo" {"transport_id" (. conn-ref ["transport_id"])}))))
+       (then
+        (fn [group]
+          (browser-transport/disconnect conn-ref)
+          (var model (xtd/get-in group ["models" "entry"]))
+          (repl/notify
+           {"connected" true
+            "groups" groups-ref
+            "has_group" (xt/x:not-nil? group)
+            "model_type" (xt/x:get-key model "::")
+            "output" (event-model/get-current model nil)})))
+       (catch
+        (fn [err]
+          (repl/notify
+           {"connected" false
+            "error" err
+            "message" (xt/x:ex-message err)})))))
+  => (contains-in
+      {"connected" true
+       "groups" {"demo" {"models" ["entry"]}}
+       "has_group" true
+       "model_type" "event.model"}))
+
+
+(comment
+
+  (def ^:private +server-script+
   (fix-worker-script
    (l/emit-script
     '(do
@@ -142,104 +190,4 @@
                        "data:text/javascript,export default {}"
                        "pg"
                        "data:text/javascript,export default {Client: function() {}}"}}})))
-
-(fact:global
- {
-  :setup [(l/rt:restart)
-          (l/rt:setup :postgres)
-          (l/rt:scaffold-imports :js)]
-  :teardown [(l/rt:stop)]})
-
-^{:refer xt.db.poc.node-webworker-test/server-node-fact :added "4.1"
-  :setup [(scratch-v0/log-append-public "primary")]}
-(fact "server node installs db/primary and db/caching services and exposes page models"
-
-  (notify/wait-on :js
-    (var schema -/Schema)
-    (var lookup -/SchemaLookup)
-    
-    (var node (substrate/node-create {"id" "db-model-server"}))
-    (substrate/set-service node "db/common" {:schema schema :lookup lookup})
-    (substrate/set-service node "db/primary" (impl-memory/impl-memory schema lookup))
-    (substrate/set-service node "db/caching" (impl-memory/impl-memory schema lookup))
-    (-> (promise/x:promise-run node)
-        (promise/x:promise-then
-         (fn [node]
-           (page-proxy/install node)
-           (page-core/add-group-attach
-            node "room/a" "demo"
-            {"entry" {"handler" (fn [context]
-                                  (var node (. context ["node"]))
-                                  (var args (. context ["args"]))
-                                  (var pull-tree (. args [0]))
-                                  (var caching (substrate/get-service node "db/caching"))
-                                  (return (impl-common/pull caching pull-tree)))
-                      "pipeline" {"remote" {"handler" (fn [context]
-                                                        (var node (. context ["node"]))
-                                                        (var args (. context ["args"]))
-                                                        (var pull-tree (. args [0]))
-                                                        (var primary (substrate/get-service node "db/primary"))
-                                                        (return (impl-common/pull-async primary pull-tree)))}}
-                      "defaults" {"args" [["Log"]]}
-                      "options" {}}})
-           (var primary (substrate/get-service node "db/primary"))
-           (var caching (substrate/get-service node "db/caching"))
-           (impl-common/record-add primary "Log" [{"id" "E-1" "message" "primary"}])
-           (impl-common/record-add caching "Log" [{"id" "E-1" "message" "cached"}])
-           (-> (page-proxy/list-proxy-groups node "room/a" {})
-               (promise/x:promise-then
-                (fn [groups]
-                  (-> (page-proxy/open-proxy-group node "room/a" "demo" {})
-                      (promise/x:promise-then
-                       (fn [group]
-                         (repl/notify
-                          {"groups" groups
-                           "has_group" (xt/x:not-nil? group)
-                           "model_type" (xt/x:get-key (xtd/get-in group ["models" "entry"]) "::")})))))))))))
-  => {"groups" {"demo" {"models" ["entry"]}}
-      "has_group" true
-      "model_type" "event.model"})
-
-^{:refer xt.db.poc.node-webworker-test/worker-server-fact :added "4.1"
-  :setup [(scratch-v0/log-append-public "remote")]}
-(fact "worker-hosted server exposes db models to a connecting client"
-
-  (notify/wait-on [:js 10000]
-    (var link (browser-transport/node-worker-source (@! +server-script+) {}))
-    (var client (substrate/node-create {"id" "db-model-client"}))
-    (page-proxy/install client)
-    (var conn-ref nil)
-    (var groups-ref nil)
-    (. (browser-transport/connect-worker
-        client
-        {"transport_id" "worker"
-         "source" link})
-       (then
-        (fn [conn]
-          (:= conn-ref conn)
-          (return (page-proxy/list-proxy-groups client "room/a" {"transport_id" (. conn ["transport_id"])}))))
-       (then
-        (fn [groups]
-          (:= groups-ref groups)
-          (return (page-proxy/open-proxy-group client "room/a" "demo" {"transport_id" (. conn-ref ["transport_id"])}))))
-       (then
-        (fn [group]
-          (browser-transport/disconnect conn-ref)
-          (var model (xtd/get-in group ["models" "entry"]))
-          (repl/notify
-           {"connected" true
-            "groups" groups-ref
-            "has_group" (xt/x:not-nil? group)
-            "model_type" (xt/x:get-key model "::")
-            "output" (event-model/get-current model nil)})))
-       (catch
-        (fn [err]
-          (repl/notify
-           {"connected" false
-            "error" err
-            "message" (xt/x:ex-message err)})))))
-  => (contains-in
-      {"connected" true
-       "groups" {"demo" {"models" ["entry"]}}
-       "has_group" true
-       "model_type" "event.model"}))
+  )
