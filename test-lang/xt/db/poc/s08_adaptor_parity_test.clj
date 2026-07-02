@@ -1,4 +1,4 @@
-(ns xt.db.poc.s08-adaptor-parity-test
+(ns xt.db.poc.s08-kernel-parity-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -31,8 +31,8 @@
              [xt.lang.spec-promise :as promise]
              [js.net.http-fetch :as http-fetch]
              [xt.event.base-model :as event-model]
-             [xt.db.node.adaptor-base :as adaptor-base]
-             [xt.db.node.adaptor-client :as adaptor-client]
+             [xt.db.node.kernel-base :as kernel-base]
+             [xt.db.node.kernel-client :as kernel-client]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
@@ -52,12 +52,12 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (. port (postMessage {"type" "debug" "stage" "onconnect"}))
-            (var node (xt.substrate/node-create {"id" "adaptor-parity-server"
+            (var node (xt.substrate/node-create {"id" "kernel-parity-server"
                                                  "spaces" {"room/a" {"state" {}}}}))
-            (xt.db.node.adaptor-base/init-handlers node)
+            (xt.db.node.kernel-base/init-handlers node)
             (xt.substrate.page-proxy/install node)
             (. port (postMessage {"type" "debug" "stage" "before-init"}))
-            (-> (xt.db.node.adaptor-base/init-base-main
+            (-> (xt.db.node.kernel-base/init-base-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"
@@ -65,8 +65,8 @@
                   "caching" {"id" "db/caching"
                              "type" "sqlite"
                              "defaults" {}}}
-                 xt.db.poc.s08-adaptor-parity-test/Schema
-                 xt.db.poc.s08-adaptor-parity-test/SchemaLookup)
+                 xt.db.poc.s08-kernel-parity-test/Schema
+                 xt.db.poc.s08-kernel-parity-test/SchemaLookup)
                 (xt.lang.spec-promise/x:promise-then
                  (fn [_]
                    (. port (postMessage {"type" "debug" "stage" "before-boot"}))
@@ -77,7 +77,7 @@
                       "target" port
                       "ready" {"signal" "ready"
                                "transport" "browser"
-                               "worker" "adaptor-parity-server"}}))))
+                               "worker" "kernel-parity-server"}}))))
                 (xt.lang.spec-promise/x:promise-catch
                  (fn [err]
                    (. port (postMessage {"type" "error"
@@ -99,12 +99,12 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (. port (postMessage {"type" "debug" "stage" "onconnect"}))
-            (var node (xt.substrate/node-create {"id" "adaptor-parity-server"
+            (var node (xt.substrate/node-create {"id" "kernel-parity-server"
                                                  "spaces" {"room/a" {"state" {}}}}))
-            (xt.db.node.adaptor-base/init-handlers node)
+            (xt.db.node.kernel-base/init-handlers node)
             (xt.substrate.page-proxy/install node)
             (. port (postMessage {"type" "debug" "stage" "before-init"}))
-            (-> (xt.db.node.adaptor-base/init-base-main
+            (-> (xt.db.node.kernel-base/init-base-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"
@@ -112,8 +112,8 @@
                   "caching" {"id" "db/caching"
                              "type" "sqlite"
                              "defaults" {}}}
-                 xt.db.poc.s08-adaptor-parity-test/Schema
-                 xt.db.poc.s08-adaptor-parity-test/SchemaLookup)
+                 xt.db.poc.s08-kernel-parity-test/Schema
+                 xt.db.poc.s08-kernel-parity-test/SchemaLookup)
                 (xt.lang.spec-promise/x:promise-then
                  (fn [_]
                    (. port (postMessage {"type" "debug" "stage" "init-ok"}))
@@ -121,7 +121,7 @@
                     node
                     "room/a"
                     "demo"
-                    {"tree-view" (xt.db.node.adaptor-base/create-tree-view-model
+                    {"tree-view" (xt.db.node.kernel-base/create-tree-view-model
                                   {"caching_id" "db/caching"
                                    "primary_id" "db/primary"}
                                   {"table" "Log"
@@ -144,7 +144,7 @@
                       "target" port
                       "ready" {"signal" "ready"
                                "transport" "browser"
-                               "worker" "adaptor-parity-server"}}))))
+                               "worker" "kernel-parity-server"}}))))
                 (xt.lang.spec-promise/x:promise-catch
                  (fn [err]
                    (. port (postMessage {"type" "error"
@@ -162,7 +162,7 @@
   "connects a client to a shared worker running the given server script"
   {:added "4.1"}
   [script callback]
-  (var client (substrate/node-create {"id" "adaptor-parity-client"
+  (var client (substrate/node-create {"id" "kernel-parity-client"
                                       "spaces" {"room/a" {"state" {}}}}))
   (page-proxy/install client)
   (return
@@ -222,7 +222,7 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.poc.s08-adaptor-parity-test/server-config-tree-view
+^{:refer xt.db.poc.s08-kernel-parity-test/server-config-tree-view
   :added "4.1"
   :setup [(scratch-v0/log-append-public "parity-server")]}
 (fact "server config: model attached directly on server reads postgres data"
@@ -241,17 +241,17 @@
        "model_type" "event.model"
        "output" [{"message" "parity-server"}]}))
 
-^{:refer xt.db.poc.s08-adaptor-parity-test/client-server-config-tree-view
+^{:refer xt.db.poc.s08-kernel-parity-test/client-server-config-tree-view
   :added "4.1"
   :setup [(scratch-v0/log-append-public "parity-client")]}
-(fact "client/server config: model attached remotely via adaptor-client reads postgres data"
+(fact "client/server config: model attached remotely via kernel-client reads postgres data"
 
   (notify/wait-on [:js 20000]
     (-/with-server-worker
      (@! +server-worker-script+)
      (fn [client transport-id]
        (return
-        (-> (adaptor-client/attach-tree-view-model
+        (-> (kernel-client/attach-tree-view-model
              client
              "room/a"
              "demo"

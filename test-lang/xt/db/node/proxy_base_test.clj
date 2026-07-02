@@ -9,7 +9,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.adaptor-base :as adaptor]
+             [xt.db.node.kernel-base :as adaptor]
              [xt.db.node.proxy-base :as proxy-base]
              [xt.db.node.proxy-util :as proxy-util]
              [xt.substrate :as substrate]
@@ -22,7 +22,7 @@
   :teardown [(l/rt:stop)]})
 
 (defn.js server-node
-  "creates a server node with adaptor-base and page-proxy handlers installed"
+  "creates a server node with kernel-base and page-proxy handlers installed"
   {:added "4.1"}
   []
   (var node (substrate/node-create {"id" "proxy-base-server"}))

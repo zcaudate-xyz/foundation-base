@@ -11,7 +11,7 @@
 
 ;;
 ;; Client-side proxy handlers for the server-side base adaptor handlers in
-;; xt.db.node.adaptor-base.
+;; xt.db.node.kernel-base.
 ;;
 ;; These mirror the server substrate handler ids (e.g. @xt.db/init-base)
 ;; so that the same function ids can be invoked on a client node and forwarded
@@ -83,7 +83,7 @@
           (return (page-proxy/close-proxy-group node space-id group-id {"transport_id" transport-id})))))))
 
 (defn.xt init-proxy-handlers
-  "Registers client-side proxy handlers for xt.db.node.adaptor-base methods so
+  "Registers client-side proxy handlers for xt.db.node.kernel-base methods so
    that the same substrate function ids can be invoked on a client node and
    forwarded to the server. Attach actions open a proxy group after the server
    call; detach actions close it."

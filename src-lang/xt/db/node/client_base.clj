@@ -8,7 +8,7 @@
 
 ;;
 ;; Client-side API for the base db actions registered by
-;; xt.db.node.adaptor-base (server-side) and xt.db.node.proxy-base
+;; xt.db.node.kernel-base (server-side) and xt.db.node.proxy-base
 ;; (client-side proxy).
 ;;
 ;; All functions below issue substrate/request calls, so the same code works

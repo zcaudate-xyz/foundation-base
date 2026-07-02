@@ -10,7 +10,7 @@
             [xt.substrate.page-proxy]
             [xt.substrate.page-core]
             [xt.event.base-model]
-            [xt.db.node.adaptor-base]))
+            [xt.db.node.kernel-base]))
 
 (do
   (l/script- :postgres
@@ -36,6 +36,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
+             [js.worker.link :as worker-link]
              [xt.event.base-model :as event-model]
              [xt.db.node.runtime :as runtime]
              [xt.substrate :as substrate]
@@ -92,8 +93,8 @@
     (-> client
         (browser-transport/connect-sharedworker
          {"transport_id" "worker"
-          "source" (browser-transport/sharedworker-source (@! +sharedworker-script+)
-                                                          {"type" "module"})})
+          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+)
+                                                            {"type" "module"})})
         (promise/x:promise-then
          (fn [conn]
            (return
@@ -121,8 +122,8 @@
     (-> client
         (browser-transport/connect-sharedworker
          {"transport_id" "worker"
-          "source" (browser-transport/sharedworker-source (@! +sharedworker-script+)
-                                                          {"type" "module"})})
+          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+)
+                                                            {"type" "module"})})
         (promise/x:promise-then
          (fn [conn]
            (return
@@ -136,10 +137,7 @@
                                 -/Schema
                                 -/SchemaLookup]))))
         (repl/notify)))
-  => {"success" true}
-  
-  
-  )
+  => {"success" true})
 
 ^{:refer xt.db.poc.s05-sharedworker-custom-test/supabase-reachable
   :added "4.1"

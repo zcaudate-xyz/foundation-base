@@ -1,4 +1,4 @@
-(ns xt.db.poc.n04-adaptor-test
+(ns xt.db.poc.n04-kernel-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -9,7 +9,7 @@
             [xt.substrate.page-proxy]
             [xt.substrate.transport-browser]
             [xt.db.system.main]
-            [xt.db.node.adaptor-base]))
+            [xt.db.node.kernel-base]))
 
 (do
   (l/script- :postgres
@@ -52,7 +52,7 @@
                                            "order" 1}}})
             (var lookup {"Log" {"position" 0}})
             (var tree ["Log"])
-            (. (xt.db.node.adaptor-base/init-base-main
+            (. (xt.db.node.kernel-base/init-base-main
                 (xt.substrate/node-create {"id" "db-model-server"})
                 {"primary" {"type" "supabase"
                             "defaults" (@! local-min/+config-supabase-anon+)}
@@ -69,7 +69,7 @@
                    node
                    "room/a"
                    "demo"
-                   {"entry" (xt.db.node.adaptor-base/create-pull-model
+                   {"entry" (xt.db.node.kernel-base/create-pull-model
                              {"caching_id" "db/caching"
                               "primary_id" "db/primary"}
                              {"pipeline" {}
@@ -107,7 +107,7 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.adaptor-base/init-base-main
+^{:refer xt.db.node.kernel-base/init-base-main
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "debug SharedWorker sqlite init"

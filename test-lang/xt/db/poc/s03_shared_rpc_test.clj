@@ -35,7 +35,7 @@
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
              [xt.substrate.page-proxy :as page-proxy]
-             [xt.db.node.adaptor-base :as adaptor-base]]})
+             [xt.db.node.kernel-base :as kernel-base]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -81,7 +81,7 @@
              node
              "room/a"
              "demo"
-             {"rpc-view" (xt.db.node.adaptor-base/create-rpc-model
+             {"rpc-view" (xt.db.node.kernel-base/create-rpc-model
                           "db/primary"
                           {"rpc_spec" {"input" []
                                        "return" "text"

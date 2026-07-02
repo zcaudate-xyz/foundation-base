@@ -6,7 +6,8 @@
             [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j] [xt.lang.spec-base :as xt] [js.cell.kernel.worker-local :as worker-local] [js.cell.kernel.worker-mock :as worker-mock]]})
+  {:require [[js.core :as j]
+             [xt.lang.spec-base :as xt] [js.cell.kernel.worker-local :as worker-local] [js.cell.kernel.worker-mock :as worker-mock]]})
 
 (defn.js make-mock-link
   "creates a kernel worker-url object backed by the mock worker"

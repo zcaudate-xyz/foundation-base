@@ -18,7 +18,7 @@
              [xt.substrate.page-core :as base-page]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as transport-browser]
-             [xt.db.node.adaptor-client :as adaptor-client]]})
+             [xt.db.node.kernel-client :as kernel-client]]})
 
 (defn.js connect-worker-threads
   "Creates a client node, spawns the worker-thread server from `script-path`,
@@ -57,7 +57,7 @@
    `scratch_v3.update_user_profile`) without opening the proxy group."
   [client transport-id]
   (return
-   (adaptor-client/attach-model-request
+   (kernel-client/attach-model-request
     client
     "room/a"
     "demo"

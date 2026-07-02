@@ -39,8 +39,8 @@
              [xt.substrate.page-core :as base-page]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
-             [xt.db.node.adaptor-base :as adaptor-base]
-             [xt.db.node.adaptor-client :as adaptor-client]]})
+             [xt.db.node.kernel-base :as kernel-base]
+             [xt.db.node.kernel-client :as kernel-client]]})
 
 (def.js Schema
   (@! +schema+))
@@ -109,7 +109,7 @@
    via the `scratch_v3.user_profile_by_account` PostgREST function."
   [client transport-id account-id]
   (return
-   (adaptor-client/attach-rpc-model
+   (kernel-client/attach-rpc-model
     client
     "room/a"
     "demo"
@@ -129,7 +129,7 @@
   "Attaches an RPC model that calls `scratch_v3.update_user_profile`."
   [client transport-id]
   (return
-   (adaptor-client/attach-rpc-model
+   (kernel-client/attach-rpc-model
     client
     "room/a"
     "demo"
@@ -201,7 +201,7 @@
                                            "spaces" {"room/a" {"state" {}}}}))
 
       ;; install the db adaptor request handlers
-      (xt.db.node.adaptor-base/init-handlers node)
+      (xt.db.node.kernel-base/init-handlers node)
 
       ;; wrap init-base so that errors are serialised back to the page
       (xt.substrate/register-handler
@@ -209,7 +209,7 @@
        "@xt.db/init-base"
        (fn [space args request node]
          (return
-          (. (xt.db.node.adaptor-base/init-base-main node
+          (. (xt.db.node.kernel-base/init-base-main node
                                                         (. args [0])
                                                         (. args [1])
                                                         (. args [2]))

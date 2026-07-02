@@ -54,7 +54,7 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
              [xt.db.system.impl-common :as impl-common]
-             [xt.db.node.adaptor-base :as adaptor-base]]})
+             [xt.db.node.kernel-base :as kernel-base]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -75,7 +75,7 @@
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "poc-node"}))
-    (-> (adaptor-base/init-base-main
+    (-> (kernel-base/init-base-main
          node
          {"primary" {"type" "supabase"
                       "defaults" (@! local-min/+config-supabase-anon+)}
@@ -124,7 +124,7 @@
 
   (notify/wait-on [:js 10000]
     (var node (substrate/node-create {"id" "poc-node"}))
-    (-> (adaptor-base/init-base-main
+    (-> (kernel-base/init-base-main
          node
          {"primary" {"type" "supabase"
                      "defaults" (@! local-min/+config-supabase-anon+)}
@@ -181,7 +181,7 @@
 
   (notify/wait-on [:js 10000]
     (var node (substrate/node-create {"id" "poc-node"}))
-    (-> (adaptor-base/init-base-main
+    (-> (kernel-base/init-base-main
          node
          {"primary" {"type" "supabase"
                       "defaults" (@! local-min/+config-supabase-anon+)}

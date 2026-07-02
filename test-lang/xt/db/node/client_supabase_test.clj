@@ -31,7 +31,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.adaptor-supabase :as adaptor]
+             [xt.db.node.kernel-supabase :as adaptor]
              [xt.db.node.client-supabase :as client]
              [xt.db.node.proxy-supabase :as proxy-supabase]
              [xt.db.node.proxy-util :as proxy-util]

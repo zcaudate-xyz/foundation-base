@@ -34,7 +34,7 @@
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
              [xt.substrate.page-proxy :as page-proxy]
-             [xt.db.node.adaptor-base]]})
+             [xt.db.node.kernel-base]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))

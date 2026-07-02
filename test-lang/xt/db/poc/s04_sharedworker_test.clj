@@ -9,7 +9,7 @@
             [xt.substrate.page-proxy]
             [xt.substrate.transport-browser]
             [xt.db.system.main]
-            [xt.db.node.adaptor-base]))
+            [xt.db.node.kernel-base]))
 
 (do
   (l/script- :postgres
@@ -58,7 +58,7 @@
             (. port (start))
             (. port (postMessage {"type" "worker-connected"}))
             (var tree ["Log"])
-            (. (xt.db.node.adaptor-base/init-base-main
+            (. (xt.db.node.kernel-base/init-base-main
                 (xt.substrate/node-create {"id" "db-model-server"})
                 {"primary" {"type" "supabase"
                             "defaults" (@! local-min/+config-supabase-anon+)}
@@ -75,7 +75,7 @@
                    node
                    "room/a"
                    "demo"
-                   {"entry" (xt.db.node.adaptor-base/create-pull-model
+                   {"entry" (xt.db.node.kernel-base/create-pull-model
                              {"caching_id" "db/caching"
                               "primary_id" "db/primary"}
                              {"pipeline" {}
@@ -103,7 +103,7 @@
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
 
-^{:refer xt.db.node.adaptor-base/init-base-main
+^{:refer xt.db.node.kernel-base/init-base-main
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "debug SharedWorker sqlite init"

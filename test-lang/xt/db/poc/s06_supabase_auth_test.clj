@@ -31,8 +31,8 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
-             [xt.db.node.adaptor-base :as adaptor-base]
-             [xt.db.node.adaptor-supabase :as adaptor-supabase]
+             [xt.db.node.kernel-base :as kernel-base]
+             [xt.db.node.kernel-supabase :as kernel-supabase]
              [js.net.http-fetch]]})
 
 (def.js Schema
@@ -59,12 +59,12 @@
        (fn [space args request node]
          (return {"status" "pong"}))
        nil)
-      (xt.db.node.adaptor-base/init-handlers node)
+      (xt.db.node.kernel-base/init-handlers node)
       (xt.substrate/register-handler
        node "@xt.db/init-adaptor"
        (fn [space args request node]
          (return
-          (. (xt.db.node.adaptor-base/init-adaptor-main
+          (. (xt.db.node.kernel-base/init-kernel-main
               node
               (. args [0])
               (. args [1])
@@ -78,7 +78,7 @@
                          "message" (. err ["message"])
                          "stack" (. err ["stack"])}))))))
        nil)
-      (xt.db.node.adaptor-supabase/init-handlers node)
+      (xt.db.node.kernel-supabase/init-handlers node)
       (xt.substrate.page-proxy/install node)
       (:= (. globalThis ["onconnect"])
           (fn [e]

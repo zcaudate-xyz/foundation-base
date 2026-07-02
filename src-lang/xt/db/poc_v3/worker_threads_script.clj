@@ -23,8 +23,8 @@
             [xt.substrate.page-core]
             [xt.substrate.page-proxy]
             [xt.substrate.transport-browser]
-            [xt.db.node.adaptor-base]
-            [xt.db.node.adaptor-client]
+            [xt.db.node.kernel-base]
+            [xt.db.node.kernel-client]
             [xt.db.poc-v3.sharedworker :as sharedworker]))
 
 (l/script :js
@@ -54,7 +54,7 @@
                                                  "spaces" {"room/a" {"state" {}}}}))
 
             ;; install the db adaptor request handlers
-            (xt.db.node.adaptor-base/init-handlers node)
+            (xt.db.node.kernel-base/init-handlers node)
 
             ;; allow remote clients to open proxy groups on this node
             (xt.substrate.page-proxy/install node)
@@ -68,7 +68,7 @@
                                     "defaults" {}}})
 
             ;; expose the node over parentPort once the adaptor is ready
-            (. (xt.db.node.adaptor-base/init-base-main
+            (. (xt.db.node.kernel-base/init-base-main
                 node
                 config
                 xt.db.poc-v3.sharedworker/Schema

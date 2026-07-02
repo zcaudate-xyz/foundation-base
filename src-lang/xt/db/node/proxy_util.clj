@@ -8,7 +8,7 @@
 
 ;;
 ;; Client-side proxy handlers for the server-side supabase adaptor handlers in
-;; xt.db.node.adaptor-supabase.
+;; xt.db.node.kernel-supabase.
 ;;
 ;; These mirror the server substrate handler ids (e.g. @xt.supabase/sign-in)
 ;; so that the same function ids can be invoked on a client node and be

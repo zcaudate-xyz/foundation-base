@@ -14,7 +14,7 @@
              [xt.substrate.base-router :as router]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.page-proxy :as page-proxy]
-             [xt.db.node.adaptor-base :as adaptor]]})
+             [xt.db.node.kernel-base :as adaptor]]})
 
 (defn.js make-server-node
   "creates a bare server node"

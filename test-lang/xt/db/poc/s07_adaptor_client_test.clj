@@ -1,4 +1,4 @@
-(ns xt.db.poc.s07-adaptor-client-test
+(ns xt.db.poc.s07-kernel-client-test
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
@@ -34,8 +34,8 @@
              [xt.substrate.page-core :as base-page]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
-             [xt.db.node.adaptor-base :as adaptor-base]
-             [xt.db.node.adaptor-client :as adaptor-client]]})
+             [xt.db.node.kernel-base :as kernel-base]
+             [xt.db.node.kernel-client :as kernel-client]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -55,16 +55,16 @@
 (def +sharedworker-script+
   (l/emit-script
    '(do
-      (var node (xt.substrate/node-create {"id" "db-adaptor-client-server"
+      (var node (xt.substrate/node-create {"id" "db-kernel-client-server"
                                            "spaces" {"room/a" {"state" {}}}}))
       ;; install db adaptor request handlers
-      (xt.db.node.adaptor-base/init-handlers node)
+      (xt.db.node.kernel-base/init-handlers node)
       ;; override init-base to return a clean status map
       (xt.substrate/register-handler
        node "@xt.db/init-base"
        (fn [space args request node]
          (return
-          (. (xt.db.node.adaptor-base/init-base-main
+          (. (xt.db.node.kernel-base/init-base-main
               node
               (. args [0])
               (. args [1])
@@ -91,7 +91,7 @@
                "target" port
                "ready" {"signal" "ready"
                         "transport" "browser"
-                        "worker" "db-adaptor-client-server"}})))))
+                        "worker" "db-kernel-client-server"}})))))
    {:lang :js
     :layout :full
     :emit {:override {"@sqlite.org/sqlite-wasm"
@@ -99,11 +99,11 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
-(defn.js with-adaptor-worker
+(defn.js with-kernel-worker
   "connects to the shared worker, initialises the db adaptor, and invokes callback"
   {:added "4.1"}
   [callback]
-  (var client (substrate/node-create {"id" "db-adaptor-client"
+  (var client (substrate/node-create {"id" "db-kernel-client"
                                       "spaces" {"room/a" {"state" {}}}}))
   (page-proxy/install client)
   (return
@@ -125,22 +125,22 @@
                              "caching" {"id" "db/caching"
                                         "type" "memory"
                                         "defaults" {}}}
-                            xt.db.poc.s07-adaptor-client-test/Schema
-                            xt.db.poc.s07-adaptor-client-test/SchemaLookup]
+                            xt.db.poc.s07-kernel-client-test/Schema
+                            xt.db.poc.s07-kernel-client-test/SchemaLookup]
                            {"transport_id" transport-id})
         (fn [_]
           (return (callback client transport-id)))))))))
 
-^{:refer xt.db.poc.s07-adaptor-client-test/attach-tree-view-model
+^{:refer xt.db.poc.s07-kernel-client-test/attach-tree-view-model
   :added "4.1"
-  :setup [(scratch-v0/log-append-public "adaptor-client-tree")]}
+  :setup [(scratch-v0/log-append-public "kernel-client-tree")]}
 (fact "client can init adaptor, attach a remote tree-view model, and read postgres data"
 
   (notify/wait-on [:js 20000]
-    (-/with-adaptor-worker
+    (-/with-kernel-worker
      (fn [client transport-id]
        (return
-        (-> (adaptor-client/attach-tree-view-model
+        (-> (kernel-client/attach-tree-view-model
              client
              "room/a"
              "demo"
@@ -176,18 +176,18 @@
   => (contains-in
       {"has_group" true
        "model_type" "event.model"
-       "output" [{"message" "adaptor-client-tree"}]}))
+       "output" [{"message" "kernel-client-tree"}]}))
 
-^{:refer xt.db.poc.s07-adaptor-client-test/attach-pull-model
+^{:refer xt.db.poc.s07-kernel-client-test/attach-pull-model
   :added "4.1"
-  :setup [(scratch-v0/log-append-public "adaptor-client-pull")]}
+  :setup [(scratch-v0/log-append-public "kernel-client-pull")]}
 (fact "client can init adaptor, attach a remote pull-view model, and read postgres data"
 
   (notify/wait-on [:js 20000]
-    (-/with-adaptor-worker
+    (-/with-kernel-worker
      (fn [client transport-id]
        (return
-        (-> (adaptor-client/attach-pull-model
+        (-> (kernel-client/attach-pull-model
              client
              "room/a"
              "demo"
@@ -221,5 +221,5 @@
   => (fn [notify]
        (and (get notify "has_group")
             (= "event.model" (get notify "model_type"))
-            (some #(= "adaptor-client-pull" (get % "message"))
+            (some #(= "kernel-client-pull" (get % "message"))
                   (get notify "output")))))

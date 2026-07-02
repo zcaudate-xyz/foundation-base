@@ -112,14 +112,14 @@
        "spaces" {"__NODE__" {"id" "__NODE__", "state" {}, "meta" {}}},
        "::" "substrate"})
 
-  (notify/wait-on :js
+  (!.js
     (var server (substrate/node-create {}))
     (var client (substrate/node-create {}))
     (runtime/init-server server)
     (runtime/init-server-proxy client)
     (transport-memory/link-pair server client)
     (repl/notify server)
-    #_(-> (client/init-base client {"primary" {"type" "supabase"
+    (-> (client/init-base client {"primary" {"type" "supabase"
                                                "defaults" (@! local-min/+config-supabase-anon+)}
                                     "caching" {"type" "sqlite"
                                                "defaults" {"filename" ":memory:"}}}
@@ -127,6 +127,29 @@
                             -/SchemaLookup
                             {})
           (repl/notify)))
+  
+
+  (notify/wait-on :js
+    (var server (substrate/node-create {}))
+    (var client (substrate/node-create {}))
+    (runtime/init-server server)
+    (runtime/init-server-proxy client)
+    (transport-memory/link-pair server client)
+    
+    (-> (client/init-base client {"primary" {"type" "supabase"
+                                               "defaults" (@! local-min/+config-supabase-anon+)}
+                                  "caching" {"type" "sqlite"
+                                             "defaults" {"filename" ":memory:"}}}
+                          -/Schema
+                          -/SchemaLookup
+                          {})
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))
+        (promise/x:promise-catch
+         (fn [out]
+           (repl/notify (. out message))))))
+  
   )
 
 ^{:refer xt.db.node.client-base/init-base :added "4.1"}

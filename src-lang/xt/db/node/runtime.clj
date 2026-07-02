@@ -7,14 +7,14 @@
              [xt.substrate.page-proxy :as page-proxy]
              [xt.db.node.proxy-base :as proxy-base]
              [xt.db.node.proxy-supabase :as proxy-supabase]
-             [xt.db.node.adaptor-base :as adaptor-base]
-             [xt.db.node.adaptor-supabase :as adaptor-supabase]]})
+             [xt.db.node.kernel-base :as kernel-base]
+             [xt.db.node.kernel-supabase :as kernel-supabase]]})
 
 (defn.xt init-server
   [node]
   (page-proxy/install node)
-  (adaptor-base/init-handlers node)
-  (adaptor-supabase/init-handlers node))
+  (kernel-base/init-handlers node)
+  (kernel-supabase/init-handlers node))
 
 (defn.xt init-server-proxy
   [node]

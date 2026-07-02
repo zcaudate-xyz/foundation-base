@@ -1,4 +1,4 @@
-(ns xt.db.node.adaptor-supabase-test
+(ns xt.db.node.kernel-supabase-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
@@ -33,7 +33,7 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.adaptor-supabase :as adaptor]
+             [xt.db.node.kernel-supabase :as adaptor]
              [xt.db.system.main :as main]
              [xt.db.system.impl-supabase-session :as session]
              [xt.substrate :as substrate]
@@ -86,7 +86,7 @@
    (http-util/get-body-data {"body" {"access_token" "abc"}}))
   => {"access_token" "abc"})
 
-^{:refer xt.db.node.adaptor-supabase/supabase-request :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-request :added "4.1"}
 (fact "executes a command through the service client"
 
   (notify/wait-on :js
@@ -98,10 +98,10 @@
            (repl/notify out)))))
   => (contains-in {"name" "GoTrue"}))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-sign-up-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-sign-up-handler :added "4.1"}
 (fact "signs up, stores the session and starts auto-refresh"
   (notify/wait-on :js
-    (var email (xt/x:cat "adaptor-supabase-"
+    (var email (xt/x:cat "kernel-supabase-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (var node (-/node-with-service (-/anon-client) nil))
@@ -120,10 +120,10 @@
                 {"access_token" string? "refresh_token" string? "user" {"email" string?}}
                 true]))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-sign-in-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-sign-in-handler :added "4.1"}
 (fact "signs in, stores the session and starts auto-refresh"
   (notify/wait-on :js
-    (var email (xt/x:cat "adaptor-supabase-"
+    (var email (xt/x:cat "kernel-supabase-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (var client (-/anon-client))
@@ -146,10 +146,10 @@
                 {"access_token" string? "refresh_token" string? "user" {"email" string?}}
                 true]))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-sign-out-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-sign-out-handler :added "4.1"}
 (fact "signs out and clears the stored session"
   (notify/wait-on :js
-    (var email (xt/x:cat "adaptor-supabase-"
+    (var email (xt/x:cat "kernel-supabase-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (var anon (-/anon-client))
@@ -174,10 +174,10 @@
                   (repl/notify [out new-session timer]))))))))
   => [{"status" "ok"} nil nil])
 
-^{:refer xt.db.node.adaptor-supabase/supabase-refresh-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-refresh-handler :added "4.1"}
 (fact "refreshes the stored session"
   (notify/wait-on :js
-    (var email (xt/x:cat "adaptor-supabase-"
+    (var email (xt/x:cat "kernel-supabase-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (var node (-/node-with-service (-/anon-client) nil))
@@ -197,7 +197,7 @@
   => (contains-in [nil
                 {"access_token" string? "refresh_token" string? "user" {"email" string?}}]))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-current-session-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-current-session-handler :added "4.1"}
 (fact "returns the session stored on the service"
   (!.js
    (var node (-/node-with-service (-/anon-client) {"access_token" "abc"}))
@@ -205,7 +205,7 @@
   => {"access_token" "abc"})
 
 
-^{:refer xt.db.node.adaptor-supabase/supabase-rpc-call-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-rpc-call-handler :added "4.1"}
 (fact "calls an rpc entry on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-rpc-call-handler nil
@@ -221,7 +221,7 @@
            (repl/notify out)))))
   => "pong")
 
-^{:refer xt.db.node.adaptor-supabase/supabase-query-table-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-query-table-handler :added "4.1"}
 (fact "queries a table on the service"
   {:setup [(scratch-v0/log-append-public "hello")]}
   (notify/wait-on :js
@@ -237,7 +237,7 @@
            (repl/notify out)))))
   => (contains-in [{"message" "hello", "author_id" nil, "id" string?}]))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-health-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-health-handler :added "4.1"}
 (fact "calls the auth health endpoint on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-health-handler nil ["auth/supabase" {}] nil (-/node-with-service (-/anon-client) nil))
@@ -246,10 +246,10 @@
            (repl/notify out)))))
   => (contains-in {"name" "GoTrue"}))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-admin-create-user-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-admin-create-user-handler :added "4.1"}
 (fact "creates a user through the admin endpoint"
   (notify/wait-on :js
-    (var email (xt/x:cat "adaptor-admin-"
+    (var email (xt/x:cat "kernel-admin-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (-> (adaptor/supabase-admin-create-user-handler nil
@@ -261,10 +261,10 @@
            (repl/notify [(. out ["email"])])))))
   => (contains-in [string?]))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-admin-delete-user-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-admin-delete-user-handler :added "4.1"}
 (fact "deletes a user through the admin endpoint"
   (notify/wait-on :js
-    (var email (xt/x:cat "adaptor-admin-"
+    (var email (xt/x:cat "kernel-admin-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (var node (-/node-with-service (-/service-client) nil))
@@ -282,7 +282,7 @@
                                 (== 0 (xt/x:len (xtd/obj-keys deleted)))]))))))))
   => (contains-in [string? true]))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-admin-generate-link-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-admin-generate-link-handler :added "4.1"}
 (fact "generates an admin link on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-admin-generate-link-handler nil
@@ -294,10 +294,10 @@
            (repl/notify [(. out ["action_link"])])))))
   => (contains-in [string?]))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-admin-get-user-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-admin-get-user-handler :added "4.1"}
 (fact "fetches a user through the admin endpoint"
   (notify/wait-on :js
-    (var email (xt/x:cat "adaptor-admin-"
+    (var email (xt/x:cat "kernel-admin-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (var node (-/node-with-service (-/service-client) nil))
@@ -317,7 +317,7 @@
                          (repl/notify [(. got ["email"])])))))))))))
   => (contains-in [string?]))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-admin-list-users-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-admin-list-users-handler :added "4.1"}
 (fact "lists users through the admin endpoint"
   (notify/wait-on :js
     (-> (adaptor/supabase-admin-list-users-handler nil ["auth/supabase" {}] nil (-/node-with-service (-/service-client) nil))
@@ -326,10 +326,10 @@
            (repl/notify [(. out ["aud"])])))))
   => ["authenticated"])
 
-^{:refer xt.db.node.adaptor-supabase/supabase-admin-update-user-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-admin-update-user-handler :added "4.1"}
 (fact "updates a user through the admin endpoint"
   (notify/wait-on :js
-    (var email (xt/x:cat "adaptor-admin-"
+    (var email (xt/x:cat "kernel-admin-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (var node (-/node-with-service (-/service-client) nil))
@@ -352,7 +352,7 @@
                          (repl/notify [(xt/x:get-key (xt/x:get-key updated "user_metadata") "note")])))))))))))
   => ["updated-by-test"])
 
-^{:refer xt.db.node.adaptor-supabase/supabase-authorize-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-authorize-handler :added "4.1"}
 (fact "starts an OAuth authorization request"
   (notify/wait-on :js
     (-> (adaptor/supabase-authorize-handler nil
@@ -365,7 +365,7 @@
                          (. out ["error_code"])])))))
   => [400 "validation_failed"])
 
-^{:refer xt.db.node.adaptor-supabase/supabase-callback-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-callback-handler :added "4.1"}
 (fact "handles an OAuth callback request"
   (notify/wait-on :js
     (-> (adaptor/supabase-callback-handler nil ["auth/supabase" {}] nil (-/node-with-service (-/anon-client) nil))
@@ -374,7 +374,7 @@
            (repl/notify out)))))
   => (contains-in {"name" "GoTrue"}))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-invite-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-invite-handler :added "4.1"}
 (fact "sends an invite on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-invite-handler nil
@@ -386,11 +386,11 @@
            (repl/notify [(. out ["email"])])))))
   => (contains-in [string?]))
 
-^{:refer xt.db.node.adaptor-supabase/supabase-otp-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-otp-handler :added "4.1"}
 (fact "requests a passwordless OTP on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-otp-handler nil
-                                       ["auth/supabase" {"email" (xt/x:cat "adaptor-otp-"
+                                       ["auth/supabase" {"email" (xt/x:cat "kernel-otp-"
                                                                            (xt/x:to-string (xt/x:now-ms))
                                                                            "@example.com")} {}]
                                        nil
@@ -400,11 +400,11 @@
            (repl/notify out)))))
   => {})
 
-^{:refer xt.db.node.adaptor-supabase/supabase-recovery-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-recovery-handler :added "4.1"}
 (fact "requests a recovery email on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-recovery-handler nil
-                                            ["auth/supabase" {"email" (xt/x:cat "adaptor-recovery-"
+                                            ["auth/supabase" {"email" (xt/x:cat "kernel-recovery-"
                                                                                  (xt/x:to-string (xt/x:now-ms))
                                                                                  "@example.com")} {}]
                                             nil
@@ -414,7 +414,7 @@
            (repl/notify out)))))
   => {})
 
-^{:refer xt.db.node.adaptor-supabase/supabase-settings-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-settings-handler :added "4.1"}
 (fact "reads auth settings on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-settings-handler nil ["auth/supabase" {}] nil (-/node-with-service (-/anon-client) nil))
@@ -423,10 +423,10 @@
            (repl/notify [(. out ["external"] ["email"])])))))
   => [true])
 
-^{:refer xt.db.node.adaptor-supabase/supabase-token-refresh-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-token-refresh-handler :added "4.1"}
 (fact "refreshes a session with a refresh token on the service"
   (notify/wait-on :js
-    (var email (xt/x:cat "adaptor-"
+    (var email (xt/x:cat "kernel-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (var client (-/anon-client))
@@ -445,7 +445,7 @@
                                 (xt/x:not-nil? (xt/x:get-key out "refresh_token"))]))))))))
   => [true true])
 
-^{:refer xt.db.node.adaptor-supabase/supabase-user-get-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-user-get-handler :added "4.1"}
 (fact "fetches the current authenticated user on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-user-get-handler nil ["auth/supabase" {}] nil (-/node-with-service (-/anon-client) nil))
@@ -455,7 +455,7 @@
                          (. out ["error_code"])])))))
   => [401 "no_authorization"])
 
-^{:refer xt.db.node.adaptor-supabase/supabase-user-put-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-user-put-handler :added "4.1"}
 (fact "updates the current authenticated user on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-user-put-handler nil
@@ -468,7 +468,7 @@
                          (. out ["error_code"])])))))
   => [401 "no_authorization"])
 
-^{:refer xt.db.node.adaptor-supabase/supabase-verify-get-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-verify-get-handler :added "4.1"}
 (fact "verifies a token via GET on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-verify-get-handler nil
@@ -481,7 +481,7 @@
                          (. out ["error_code"])])))))
   => [400 "validation_failed"])
 
-^{:refer xt.db.node.adaptor-supabase/supabase-verify-post-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-verify-post-handler :added "4.1"}
 (fact "verifies a token via POST on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-verify-post-handler nil
@@ -494,7 +494,7 @@
                          (. out ["error_code"])])))))
   => [400 "validation_failed"])
 
-^{:refer xt.db.node.adaptor-supabase/init-handlers :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/init-handlers :added "4.1"}
 (fact "registers all supabase adaptor handlers on the node"
   (!.js
    (var node (substrate/node-create {}))

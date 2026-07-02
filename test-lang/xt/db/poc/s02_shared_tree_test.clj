@@ -32,7 +32,7 @@
              [xt.lang.spec-promise :as promise]
              [js.net.http-fetch :as http-fetch]
              [xt.event.base-model :as event-model]
-             [xt.db.node.adaptor-base :as adaptor-base]
+             [xt.db.node.kernel-base :as kernel-base]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
@@ -62,7 +62,7 @@
                node
                "room/a"
                "demo"
-               {"tree-view" (xt.db.node.adaptor-base/create-tree-view-model
+               {"tree-view" (xt.db.node.kernel-base/create-tree-view-model
                              {"caching_id"    "db/caching"
                               "primary_id"    "db/primary"}
                              {"table" "Log"
@@ -87,7 +87,7 @@
                   5000
                   (fn []
                     (. port (postMessage {"type" "debug" "stage" "init-timeout"})))))
-              (var init-promise (xt.db.node.adaptor-base/init-base-main
+              (var init-promise (xt.db.node.kernel-base/init-base-main
                                  node
                                  {"primary" {"type" "supabase"
                                              "defaults" (@! local-min/+config-supabase-anon+)}

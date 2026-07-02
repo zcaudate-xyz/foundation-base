@@ -30,8 +30,8 @@
              [xt.lang.common-protocol :as proto]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.adaptor-base :as adaptor]
-             [xt.db.node.adaptor-supabase :as adaptor-supabase]
+             [xt.db.node.kernel-base :as adaptor]
+             [xt.db.node.kernel-supabase :as kernel-supabase]
              [xt.db.node.proxy-supabase :as proxy-supabase]
              [xt.db.node.proxy-util :as proxy-util]
              [xt.db.system.main :as system-main]
@@ -72,7 +72,7 @@
   {:added "4.1"}
   []
   (var node (substrate/node-create {"id" "proxy-supabase-server"}))
-  (adaptor-supabase/init-handlers node)
+  (kernel-supabase/init-handlers node)
   (var client (js-fetch/create
                {"host" (@! (-> local-min/+config+ :api :hostname))
                 "port" (@! (-> local-min/+config+ :api :port))
