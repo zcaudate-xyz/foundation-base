@@ -102,7 +102,7 @@
   (var caching-id (xtd/get-in config ["caching" "id"]))
   (substrate/set-service node
                          common-id
-                         {:config connfig
+                         {:config config
                           :schema schema
                           :lookup lookup
                           :metadata {:common-id common-id}})
