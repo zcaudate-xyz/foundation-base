@@ -28,6 +28,13 @@
   (process-add-event [impl data])
   (process-remove-event [impl data]))
 
+(defprotocol.xt ISourceLifecycle
+  (stop-db [impl]))
+
+;;
+;; 
+;;
+
 (defn.xt add-db-listener-default
   [impl listener-id handle]
   (var #{listeners} impl)

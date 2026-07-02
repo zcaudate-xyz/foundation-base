@@ -29,6 +29,14 @@
   (return
    (sql-call/call-raw client rpc-spec args)))
 
+(defn.xt stop-db
+  "closes the postgres client"
+  {:added "4.1"}
+  [impl]
+  (var #{client} impl)
+  (conn-sql/disconnect client)
+  (return nil))
+
 (defimpl.xt ImplPostgres
   [client schema lookup listeners opts metadata]
 
@@ -39,7 +47,10 @@
   impl-common/ISourceListener
   {impl-common/add-db-listener     impl-common/add-db-listener-default
    impl-common/remove-db-listener  impl-common/remove-db-listener-default
-   impl-common/get-db-listener     impl-common/get-db-listener-default})
+   impl-common/get-db-listener     impl-common/get-db-listener-default}
+
+  impl-common/ISourceLifecycle
+  {impl-common/stop-db         -/stop-db})
 
 (defn.xt impl-postgres
   [client schema lookup]

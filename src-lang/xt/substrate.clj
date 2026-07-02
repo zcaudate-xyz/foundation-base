@@ -361,6 +361,14 @@
                 service)
   (return service))
 
+(defn.xt remove-service
+  "sets a shared service on the node"
+  {:added "4.1"}
+  [node service-id]
+  (xt/x:del-key (xt/x:get-key node "services")
+                service-id)
+  (return service))
+
 ;; NODE REGISTRY
 (defn.xt register-handler
   "registers a shared request handler"

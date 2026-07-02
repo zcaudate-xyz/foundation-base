@@ -30,6 +30,19 @@
   (return
    (xt/x:has-key? xt.lang.common-protocol/IMPLEMENTATIONS typename)))
 
+(defn.xt protocol-implements
+  "returns true if obj implements the given protocol"
+  {:added "4.1"}
+  [obj protocol]
+  (var type (xt/x:get-key obj "::"))
+  (when (xt/x:nil? type)
+    (return false))
+  (var entry (xt/x:get-key xt.lang.common-protocol/PROTOCOLS protocol))
+  (when (xt/x:nil? entry)
+    (return false))
+  (var impls (xt/x:get-key entry "impls"))
+  (return (xt/x:has-key? impls type)))
+
 (defn.xt protocol-method
   "looks up the registered method by protocol and implementation type"
   {:added "4.1"}
@@ -57,6 +70,16 @@
     (xt/x:err (xt/x:cat "Missing protocol method " on "/" method " for " type)))
 
   (return method-fn))
+
+(defn.xt protocol-has-method
+  "returns true if obj has a concrete method for protocol/method"
+  {:added "4.1"}
+  [obj protocol method]
+  (try
+    (-/protocol-method obj protocol method)
+    (return true)
+    (catch err
+        (return false))))
 
 (defn.xt register-protocol-impl
   "registers protocol implementations in the registry"

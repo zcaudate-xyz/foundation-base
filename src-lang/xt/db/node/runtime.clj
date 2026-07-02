@@ -13,8 +13,8 @@
 (defn.xt init-server
   [node]
   (page-proxy/install node)
-  (adaptor-base/init-handlers)
-  (adaptor-supabase/init-handlers))
+  (adaptor-base/init-handlers node)
+  (adaptor-supabase/init-handlers node))
 
 (defn.xt init-server-proxy
   [node]

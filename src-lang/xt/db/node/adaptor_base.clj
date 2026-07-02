@@ -35,13 +35,13 @@
   "init-base-main sets metadata on primary and caching services"
   {:added "4.1"}
   [node config schema lookup]
-  (var common  (xt/x:obj-assign {"id" "db/common"}
-                                (xt/x:get-key config "common")))
+  (var common   (xt/x:obj-assign {"id" "db/common"}
+                                 (xt/x:get-key config "common")))
   (var primary  (xt/x:obj-assign {"id" "db/primary"}
                                  (xt/x:get-key config "primary")))
   (var caching  (xt/x:obj-assign {"id" "db/caching"}
                                  (xt/x:get-key config "caching")))
-
+  
   (var common-id  (xt/x:get-key common "id"))
   (var primary-id (xt/x:get-key primary "id"))
   (var caching-id (xt/x:get-key caching "id"))
@@ -78,7 +78,7 @@
               (xt/x:obj-assign {:common-id common-id
                                 :primary-id primary-id
                                 :primary-fn (fn [] (return (substrate/get-service node primary-id)))}))
-          (return node))))))
+          (return {:success true}))))))
 
 (defn.xt ^{:substrate/fn "@xt.db/init-base"}
   init-base-handler
