@@ -42,9 +42,76 @@
 
 (defn.xt sharedworker-connect-kernel
   [client source transport-id config schema lookup]
-  (-/init-server-proxy node)
+  (-/init-server-proxy client)
   (return
    (-> (browser-transport/connect-sharedworker
+        client
+        {"transport_id" transport-id
+         "source" source})
+       (promise/x:promise-then
+        (fn [conn]
+          (return
+           (substrate/request client
+                              nil
+                              "@xt.db/kernel-init"
+                              [config schema lookup]
+                              {})))))))
+
+(defn.xt webworker-init-kernel
+  [node transport-id worker-id]
+  (-/init-server node)
+  (return
+   (browser-transport/boot-self
+    node
+    {"transport_id" transport-id
+     "target" globalThis
+     "ready" {"signal" "ready"
+              "transport" "browser"
+              "worker" worker-id}})))
+
+(defn.xt webworker-connect-kernel
+  [client source transport-id config schema lookup]
+  (-/init-server-proxy client)
+  (return
+   (-> (browser-transport/connect-worker
+        client
+        {"transport_id" transport-id
+         "source" source})
+       (promise/x:promise-then
+        (fn [conn]
+          (return
+           (substrate/request client
+                              nil
+                              "@xt.db/kernel-init"
+                              [config schema lookup]
+                              {})))))))
+
+(defn.xt worker-threads-init-kernel
+  [node transport-id worker-id]
+  (-/init-server node)
+  (var #{parentPort} (require "worker_threads"))
+  (var worker
+       {"postMessage" (fn [data]
+                        (. parentPort (postMessage data)))
+        "addEventListener" (fn [event listener capture]
+                             (when (== event "message")
+                               (. parentPort (on "message"
+                                                 (fn [data]
+                                                   (listener {"data" data}))))))})
+  (return
+   (browser-transport/boot-self
+    node
+    {"transport_id" transport-id
+     "target" worker
+     "ready" {"signal" "ready"
+              "transport" "worker_threads"
+              "worker" worker-id}})))
+
+(defn.xt worker-threads-connect-kernel
+  [client source transport-id config schema lookup]
+  (-/init-server-proxy client)
+  (return
+   (-> (browser-transport/connect-worker
         client
         {"transport_id" transport-id
          "source" source})

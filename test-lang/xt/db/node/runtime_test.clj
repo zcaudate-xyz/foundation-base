@@ -13,3 +13,16 @@
 
 ^{:refer xt.db.node.runtime/sharedworker-connect-kernel :added "4.1"}
 (fact "TODO")
+
+
+^{:refer xt.db.node.runtime/webworker-init-kernel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/webworker-connect-kernel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/worker-threads-init-kernel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/worker-threads-connect-kernel :added "4.1"}
+(fact "TODO")

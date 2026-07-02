@@ -5,27 +5,6 @@
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
 
-(defn wait-for-postgrest-ready
-  "Polls the local PostgREST /Log endpoint until it returns a non-5xx
-   response, giving the schema cache time to initialise."
-  []
-  (let [{:keys [host port apikey]} local-min/+config-supabase-anon+
-        url (str "http://" host ":" port "/Log?select=id&limit=1")]
-    (loop [attempts 0]
-      (let [{:keys [status body]}
-            (try (net.http/get url {:headers {"apikey" apikey}
-                                     :timeout 1000})
-                 (catch Throwable t
-                   {:status 0
-                    :body (str t)}))]
-        (if (and (integer? status) (< status 500))
-          true
-          (if (>= attempts 60)
-            (throw (ex-info "PostgREST schema cache not ready"
-                            {:status status :body body}))
-            (do (Thread/sleep 500)
-                (recur (inc attempts)))))))))
-
 (do 
   (l/script- :postgres
     {:runtime :jdbc.client
