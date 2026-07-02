@@ -8,8 +8,9 @@
             [xt.substrate.page-core]
             [xt.substrate.page-proxy]
             [xt.substrate.transport-browser]
-            [xt.db.system.main]
-            [xt.db.node.kernel-base]))
+            [postgres.core :as pg]
+            [xt.db.node.kernel-base]
+            [xt.db.node.runtime]))
 
 (do
   (l/script- :postgres
@@ -32,71 +33,21 @@
 (l/script- :js
   {:runtime :chromedriver.instance
    :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]]})
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-promise :as promise]
+             [xt.event.base-model :as event-model]
+             [xt.db.node.client-base :as client-base]
+             [xt.db.node.runtime :as runtime]
+             [xt.substrate :as substrate]
+             [xt.substrate.page-core :as base-page]
+             [xt.substrate.page-proxy :as page-proxy]]})
 
-(def +sharedworker-script+
-  (l/emit-script
-   '(do
-      (:= (. globalThis ["onconnect"])
-          (fn [e]
-            (var port (. e ["ports"] [0]))
-            (. port (start))
-            (. port (postMessage {"type" "worker-connected"}))
-            
-            (var schema {"Log" {"id" {"ident" "id"
-                                       "type" "uuid"
-                                       "primary" true
-                                       "order" 0}
-                                "message" {"ident" "message"
-                                           "type" "text"
-                                           "order" 1}}})
-            (var lookup {"Log" {"position" 0}})
-            (var tree ["Log"])
-            (. (xt.db.node.kernel-base/kernel-init-main
-                (xt.substrate/node-create {"id" "db-model-server"})
-                {"primary" {"type" "supabase"
-                            "defaults" (@! local-min/+config-supabase-anon+)}
-                 "caching" {"type" "sqlite"
-                            "defaults" {}}}
-                schema
-                lookup)
-               (then
-                (fn [node]
-                  (. port (postMessage {"type" "primary-connected"}))
-                  (. port (postMessage {"type" "sqlite-connected"}))
-                  (xt.substrate.page-proxy/install node)
-                  (xt.substrate.page-core/add-group-attach
-                   node
-                   "room/a"
-                   "demo"
-                   {"entry" (xt.db.node.kernel-base/pull-create-model
-                             "db/primary"
-                             tree
-                             {"pipeline" {}
-                              "options" {}
-                              "defaults" {"args" [tree]}})})
-                  (. port (postMessage {"type" "impl-initialized"}))
-                  (return
-                   (xt.substrate.transport-browser/boot-self
-                    node
-                    {"transport_id" "host"
-                     "target" port
-                     "ready" {"signal" "ready"
-                              "worker" "db-model-server-sqlite"}}))))
-               (catch
-                   (fn [err]
-                     (. port (postMessage {"type" "error"
-                                           "stage" "init"
-                                           "message" (. err ["message"])
-                                           "stack" (. err ["stack"])}))))))))
-   {:lang :js
-    :layout :full
-    :emit {:override {"@sqlite.org/sqlite-wasm"
-                      "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
-                      "pg"
-                      "data:text/javascript,export default {Client: function() {}}"}}}))
+(def.js Schema
+  (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
 
-
+(def.js SchemaLookup
+  (@! (pg/bind-app (pg/app "scratch_v0"))))
 
 (fact:global
  {
@@ -107,38 +58,73 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
+(defn.js connect-kernel-worker
+  "connects to the shared worker and initialises the db adaptor on the client"
+  {:added "4.1"}
+  [client]
+  (return
+   (runtime/sharedworker-connect client
+                                 {"primary" {"type" "supabase"
+                                             "defaults" (@! local-min/+config-supabase-anon+)}
+                                  "caching" {"type" "sqlite"
+                                             "defaults" {}}}
+                                 -/Schema
+                                 -/SchemaLookup)))
+
+(defn.js with-kernel-worker
+  "connects a client to the shared worker and invokes callback"
+  {:added "4.1"}
+  [callback]
+  (var client (substrate/node-create {"id" "db-model-client"}))
+  (return
+   (promise/x:promise-then
+    (-/connect-kernel-worker client)
+    (fn [_]
+      (return (callback client))))))
+
 ^{:refer xt.db.node.kernel-base/kernel-init-main
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
-(fact "debug SharedWorker sqlite init"
+(fact "SharedWorker sqlite init exposes a remote pull model"
 
   (notify/wait-on [:js 15000]
-    (var messages [])
-    (var blob (new Blob [(@! +sharedworker-script+)] {"type" "text/javascript"}))
-    (var url (. (!:G URL) (createObjectURL blob)))
-    (var shared (new SharedWorker url {"type" "module"}))
-    (var port (. shared ["port"]))
-    (. port (start))
-    (. port (addEventListener
-              "message"
-              (fn [event]
-                (var data (. event ["data"]))
-                (. messages (push {"kind" "message" "data" data}))
-                (var type (xt/x:get-key data "type"))
-                (when (or (== type "impl-initialized")
-                          (== type "error"))
-                  (repl/notify messages)))
-              false))
-    (. shared (addEventListener
-               "error"
-               (fn [event]
-                 (. messages (push {"kind" "error" "message" (. event ["message"])}))
-                 (repl/notify messages))
-               false))
-    (. (!:G URL) (revokeObjectURL url))
-    (return shared))
+    (-/with-kernel-worker
+     (fn [client]
+       (return
+        (-> (client-base/pull-attach-model
+             client
+             "db/primary"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "entry"}
+             ["Log"]
+             {"pipeline" {}
+              "options" {}
+              "defaults" {"args" [["Log"]]}}
+             {})
+            (promise/x:promise-then
+             (fn [_]
+               (return
+                (page-proxy/open-proxy-group client "room/a" "demo" {}))))
+            (promise/x:promise-then
+             (fn [_]
+               (return
+                (base-page/remote-call client "room/a" "demo" "entry" [["Log"]] true))))
+            (promise/x:promise-then
+             (fn [_]
+               (var group (base-page/group-get client "room/a" "demo"))
+               (var model (xtd/get-in group ["models" "entry"]))
+               (repl/notify
+                {"has_group" (xt/x:not-nil? group)
+                 "model_type" (xt/x:get-key model "::")
+                 "output" (event-model/get-current model nil)})))
+            (promise/x:promise-catch
+             (fn [err]
+               (repl/notify
+                {"has_group" false
+                 "error" (. err ["message"])
+                 "stack" (. err ["stack"])}))))))))
   => (contains-in
-      [{"kind" "message" "data" {"type" "worker-connected"}}
-       {"kind" "message" "data" {"type" "primary-connected"}}
-       {"kind" "message" "data" {"type" "sqlite-connected"}}
-       {"kind" "message" "data" {"type" "impl-initialized"}}]))
+      {"has_group" true
+       "model_type" "event.model"
+       "output" [{"message" "remote"}]}))

@@ -796,3 +796,6 @@
          (fn [response]
            (repl/notify response)))))
   => {"status" "ok"})
+
+^{:refer xt.substrate.page-proxy/get-current-output :added "4.1"}
+(fact "TODO")

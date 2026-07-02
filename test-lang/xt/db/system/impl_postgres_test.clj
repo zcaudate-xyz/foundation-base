@@ -124,3 +124,7 @@
 
 ^{:refer xt.db.system.impl-postgres/impl-postgres-init :added "4.1"}
 (fact "initialises a postgres connection")
+
+
+^{:refer xt.db.system.impl-postgres/stop-db :added "4.1"}
+(fact "TODO")

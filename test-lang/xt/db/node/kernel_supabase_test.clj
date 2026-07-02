@@ -470,3 +470,13 @@
         (xt/x:not-nil? (xt/x:get-key (xt/x:get-key node "handlers") "@xt.supabase/health"))
         (== 27 (xt/x:len (xtd/obj-keys (xt/x:get-key node "handlers"))))))
   => true)
+
+
+^{:refer xt.db.node.kernel-supabase/supabase-signed-in-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-supabase/supabase-rpc-call-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-supabase/supabase-query-table-handler :added "4.1"}
+(fact "TODO")

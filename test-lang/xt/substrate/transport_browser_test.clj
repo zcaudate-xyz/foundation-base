@@ -424,3 +424,19 @@
             "transport_id" "worker"}))))))
   => {"detached" true
       "transport_id" "worker"})
+
+
+^{:refer xt.substrate.transport-browser/blob-url :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.transport-browser/webworker-source :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.transport-browser/sharedworker-source :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.transport-browser/sharedworker-url-source :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.transport-browser/node-worker-source :added "4.1"}
+(fact "TODO")

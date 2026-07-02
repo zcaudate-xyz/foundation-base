@@ -477,3 +477,6 @@
       "seen" [{"text" "hello"
                "ctx" {"wire" "host"
                       "peer" "peer"}}]})
+
+^{:refer xt.substrate.transport-memory/link-pair :added "4.1"}
+(fact "TODO")

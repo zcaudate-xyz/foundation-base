@@ -342,3 +342,9 @@
       "on" "xt.lang.common_protocol_test/IHelloReg"
       "sigs" {}
       "impls" {}})
+
+^{:refer xt.lang.common-protocol/protocol-implements :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-protocol/protocol-has-method :added "4.1"}
+(fact "TODO")

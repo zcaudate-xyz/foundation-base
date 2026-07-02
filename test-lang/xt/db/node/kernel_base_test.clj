@@ -910,3 +910,34 @@
       "@xt.db/subscribe-db"
       "@xt.db/sync-caching"
       "@xt.db/unsubscribe-db"])
+
+
+^{:refer xt.db.node.kernel-base/kernel-create-config :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/kernel-check-exists :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/kernel-setup-single :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/kernel-teardown-single :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/kernel-setup-main :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/kernel-setup-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/kernel-teardown-main :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/kernel-teardown-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/kernel-init-main :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/kernel-init-handler :added "4.1"}
+(fact "TODO")

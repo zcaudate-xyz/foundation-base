@@ -190,3 +190,25 @@
   => {"transport-attached" true
       "status" "error"
       "kind" "response"})
+
+
+^{:refer xt.db.node.runtime/sharedworket-init-string :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/sharedworker-connect :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/webworker-init-string :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/webworker-connect :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/nodeworker-init-kernel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/nodeworker-init-string :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/nodeworker-connect :added "4.1"}
+(fact "TODO")

@@ -938,3 +938,7 @@
   (s/seedgen-benchadd '[xt.substrate] {:lang :dart :write true})
   (s/seedgen-langremove '[xt.substrate] {:lang [:lua :python] :write true})
   (s/seedgen-langadd '[xt.substrate] {:lang [:lua :python] :write true}))
+
+
+^{:refer xt.substrate/remove-service :added "4.1"}
+(fact "TODO")

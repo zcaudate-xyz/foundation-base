@@ -131,3 +131,43 @@
        "services" {"db/caching" map?, "db/primary" map?, "db/common" map?}}))
 
 
+
+
+^{:refer xt.db.node.client-base/kernel-setup :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/kernel-teardown :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/subscribe-db :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/unsubscribe-db :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/sync-caching :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/attach-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/detach-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/rpc-call :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/rpc-attach-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/pull-call :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/pull-attach-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/dataview-call :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.client-base/dataview-attach-model :added "4.1"}
+(fact "TODO")

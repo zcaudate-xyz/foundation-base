@@ -542,3 +542,7 @@
   => (contains-in
       [{"topic" "realtime:room:remove-test"
         "db/remove" {"User" [1 2 3]}}]))
+
+
+^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback :added "4.1"}
+(fact "TODO")

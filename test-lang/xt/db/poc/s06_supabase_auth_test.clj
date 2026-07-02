@@ -29,10 +29,7 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
-             [xt.substrate.page-proxy :as page-proxy]
-             [xt.substrate.transport-browser :as browser-transport]
-             [xt.db.node.kernel-base :as kernel-base]
-             [xt.db.node.kernel-supabase :as kernel-supabase]
+             [xt.db.node.runtime :as runtime]
              [js.net.http-fetch]]})
 
 (def.js Schema
@@ -50,102 +47,36 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
-(def +sharedworker-script+
-  (l/emit-script
-   '(do
-      (var node (xt.substrate/node-create {"id" "db-auth-server"}))
-      (xt.substrate/register-handler
-       node "@xt.db/ping"
-       (fn [space args request node]
-         (return {"status" "pong"}))
-       nil)
-      (xt.db.node.kernel-base/init-handlers node)
-      (xt.substrate/register-handler
-       node "@xt.db/init-adaptor"
-       (fn [space args request node]
-         (return
-          (. (xt.db.node.kernel-base/kernel-init-main
-              node
-              (. args [0])
-              (. args [1])
-              (. args [2]))
-             (then
-              (fn [_]
-                (return {"status" "ok"})))
-             (catch
-              (fn [err]
-                (return {"status" "error"
-                         "message" (. err ["message"])
-                         "stack" (. err ["stack"])}))))))
-       nil)
-      (xt.db.node.kernel-supabase/init-handlers node)
-      (xt.substrate.page-proxy/install node)
-      (:= (. globalThis ["onconnect"])
-          (fn [e]
-            (var port (. e ["ports"] [0]))
-            (. port (start))
-            (return
-             (xt.substrate.transport-browser/boot-self
-              node
-              {"transport_id" "host"
-               "target" port
-               "ready" {"signal" "ready"
-                        "transport" "browser"
-                        "worker" "db-auth-server"}})))))
-    {:lang :js
-     :layout :full
-     :emit {:override {"@sqlite.org/sqlite-wasm"
-                       "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
-                       "pg"
-                       "data:text/javascript,export default {Client: function() {}}"}}}))
+(defn.js connect-auth-worker
+  "connects to the shared worker and initialises the db adaptor on the client"
+  {:added "4.1"}
+  [client]
+  (return
+   (runtime/sharedworker-connect client
+                                 {"primary" {"id" "db/primary"
+                                             "type" "supabase"
+                                             "defaults" (@! local-min/+config-supabase-anon+)}
+                                  "caching" {"id" "db/caching"
+                                             "type" "memory"
+                                             "defaults" {}}}
+                                 -/Schema
+                                 -/SchemaLookup)))
 
 (defn.js with-auth-worker
+  "connects a client to the shared worker and invokes callback"
+  {:added "4.1"}
   [callback]
   (var client (substrate/node-create {"id" "db-auth-client"}))
-  (page-proxy/install client)
   (return
    (promise/x:promise-then
-    (browser-transport/connect-sharedworker
-     client
-     {"transport_id" "worker"
-      "source" (browser-transport/sharedworker-source (@! +sharedworker-script+) {"type" "module"})})
-    (fn [conn]
-      (var transport-id (. conn ["transport_id"]))
-      (return
-       (promise/x:promise-then
-        (substrate/request client
-                           "room/a"
-                           "@xt.db/init-adaptor"
-                           [{"primary" {"id" "db/primary"
-                                        "type" "supabase"
-                                        "defaults" (@! local-min/+config-supabase-anon+)}
-                             "caching" {"id" "db/caching"
-                                        "type" "memory"
-                                        "defaults" {}}}
-                            xt.db.poc.s06-supabase-auth-test/Schema
-                            xt.db.poc.s06-supabase-auth-test/SchemaLookup]
-                           {"transport_id" transport-id})
-        (fn [_]
-          (return (callback client transport-id)))))))))
+    (-/connect-auth-worker client)
+    (fn [_]
+      (return (callback client))))))
 
 (defn.js request-worker
-  [client transport-id op args]
+  [client op args]
   (return
-   (substrate/request client "room/a" op args {"transport_id" transport-id})))
-
-^{:refer xt.db.poc.s06-supabase-auth-test/auth-worker-ping
-  :added "4.1"}
-(fact "client can reach a simple ping handler on the auth shared worker"
-
-  (notify/wait-on [:js 20000]
-    (-/with-auth-worker
-     (fn [client transport-id]
-       (return
-        (promise/x:promise-then
-         (-/request-worker client transport-id "@xt.db/ping" [])
-         (fn [v]
-           (repl/notify v)))))))
-  => {"status" "pong"})
+   (substrate/request client "room/a" op args {})))
 
 ^{:refer xt.db.poc.s06-supabase-auth-test/supabase-signed-in-anon
   :added "4.1"}
@@ -153,10 +84,10 @@
 
   (notify/wait-on [:js 20000]
     (-/with-auth-worker
-     (fn [client transport-id]
+     (fn [client]
        (return
         (promise/x:promise-then
-         (-/request-worker client transport-id "@xt.supabase/signed-in?" ["db/primary"])
+         (-/request-worker client "@xt.supabase/signed-in?" ["db/primary"])
          (fn [v]
            (repl/notify {"signed-in" v})))))))
   => {"signed-in" false})
@@ -167,10 +98,10 @@
 
   (notify/wait-on [:js 20000]
     (-/with-auth-worker
-     (fn [client transport-id]
+     (fn [client]
        (return
         (promise/x:promise-then
-         (-/request-worker client transport-id "@xt.supabase/current-session" ["db/primary"])
+         (-/request-worker client "@xt.supabase/current-session" ["db/primary"])
          (fn [v]
            (repl/notify v)))))))
   => nil)
@@ -181,19 +112,19 @@
 
   (notify/wait-on [:js 20000]
     (-/with-auth-worker
-     (fn [client transport-id]
+     (fn [client]
        (var email (xt/x:cat "auth-test-"
                             (xt/x:to-string (xt/x:now-ms))
                             "@example.com"))
        (return
         (promise/x:promise-then
          (promise/x:promise-then
-          (-/request-worker client transport-id "@xt.supabase/sign-up" ["db/primary"
-                                                                          {"email" email
-                                                                           "password" "pass123456"}])
+          (-/request-worker client "@xt.supabase/sign-up" ["db/primary"
+                                                           {"email" email
+                                                            "password" "pass123456"}])
           (fn [_]
             (return
-             (-/request-worker client transport-id "@xt.supabase/user-info" ["db/primary"]))))
+             (-/request-worker client "@xt.supabase/user-info" ["db/primary"]))))
          (fn [v]
            (repl/notify v)))))))
   => (contains-in
@@ -205,14 +136,14 @@
 
   (notify/wait-on [:js 20000]
     (-/with-auth-worker
-     (fn [client transport-id]
+     (fn [client]
        (return
         (promise/x:promise-then
-         (-/request-worker client transport-id "@xt.supabase/health" ["db/primary"])
+         (-/request-worker client "@xt.supabase/health" ["db/primary"])
          (fn [v]
            (repl/notify v)))))))
   => (contains-in
-      {"name" "GoTrue"}))
+      {"name" "GoTrue"})
 
 ^{:refer xt.db.poc.s06-supabase-auth-test/supabase-reachable
   :added "4.1"
