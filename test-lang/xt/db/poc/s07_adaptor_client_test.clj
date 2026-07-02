@@ -52,44 +52,26 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
-(def +sharedworker-script+
-  (l/emit-script
-   '(do
-      (var node (xt.substrate/node-create {"id" "db-sharedworker"
-                                           "spaces" {"room/a" {"state" {}}}}))
-      (xt.db.node.runtime/sharedworker-init-kernel node
-                                                   "browser"
-                                                   "db-sharedworker"))
-   {:lang :js
-    :layout :full
-    :emit {:override {"@sqlite.org/sqlite-wasm"
-                      "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
-                      "pg"
-                      "data:text/javascript,export default {Client: function() {}}"}}}))
-
 (defn.js connect-kernel-worker
   "connects to the shared worker, initialises the db adaptor, and invokes callback"
   {:added "4.1"}
   [client]
   (return
-   (runtime/sharedworker-connect-kernel client
-                                        (browser-transport/sharedworker-source (@! +sharedworker-script+) {"type" "module"})
-                                        "transport-browser"
-                                        {"primary" {"type" "supabase"
-                                                    "defaults" (@! local-min/+config-supabase-anon+)}
-                                         "caching" {"type" "sqlite"
-                                                    "defaults" {}}}
-                                        -/Schema
-                                        -/SchemaLookup)))
+   (runtime/sharedworker-connect client
+                                 {"primary" {"type" "supabase"
+                                             "defaults" (@! local-min/+config-supabase-anon+)}
+                                  "caching" {"type" "sqlite"
+                                             "defaults" {}}}
+                                 -/Schema
+                                 -/SchemaLookup)))
 
 ^{:refer xt.db.poc.s07-kernel-client-test/dataview-attach-model
   :added "4.1"
   :setup [(scratch-v0/log-append-public "kernel-client-tree")]}
 (fact "client can init adaptor, attach a remote tree-view model, and read postgres data"
-
+  
   (notify/wait-on [:js 5000]
-    (var client (substrate/node-create {"id" "db-kernel-client"
-                                        "spaces" {"room/a" {"state" {}}}}))
+    (var client (substrate/node-create {}))
     (-> (-/connect-kernel-worker client)
         (promise/x:promise-then
          (fn [_]
@@ -113,11 +95,11 @@
                   "options" {}
                   "defaults" {"select_args" []
                               "return_args" []}}
-                 {"transport_id" "transport-browser"})))))
+                 {})))))
         (promise/x:promise-then
          (fn [_]
            (return
-            (page-proxy/open-proxy-group client "room/a" "demo" {"transport_id" "transport-browser"}))))
+            (page-proxy/open-proxy-group client "room/a" "demo" {}))))
         (promise/x:promise-then
          (fn [_]
            (return
@@ -129,8 +111,8 @@
            (repl/notify
             {"has_group" (xt/x:not-nil? group)
              "model_type" (xt/x:get-key model "::")
-             "output" (event-model/get-current model nil)}))))
-    =>) (contains-in
+             "output" (event-model/get-current model nil)})))))
+  => (contains-in
       {"has_group" true
        "model_type" "event.model"
        "output" [{"message" "kernel-client-tree"}]}))
@@ -142,8 +124,7 @@
 
 
   (notify/wait-on [:js 5000]
-    (var client (substrate/node-create {"id" "db-kernel-client"
-                                        "spaces" {"room/a" {"state" {}}}}))
+    (var client (substrate/node-create {}))
     (-> (-/connect-kernel-worker client)
         (promise/x:promise-then
          (fn [_]
@@ -159,11 +140,11 @@
                   "options" {}
                   "defaults" {"args" []
                               "output" {}}}
-                 {"transport_id" "transport-browser"})))))
+                 {})))))
         (promise/x:promise-then
          (fn [_]
            (return
-            (page-proxy/open-proxy-group client "room/a" "demo" {"transport_id" "transport-browser"}))))
+            (page-proxy/open-proxy-group client "room/a" "demo" {}))))
         (promise/x:promise-then
          (fn [_]
            (return
@@ -182,8 +163,7 @@
             {"has_group" false
              "error" (. err ["message"])
              "stack" (. err ["stack"])})))))
-  => (fn [notify]
-       (and (get notify "has_group")
-            (= "event.model" (get notify "model_type"))
-            (some #(= "kernel-client-pull" (get % "message"))
-                  (get notify "output")))))
+  => (contains-in
+      {"has_group" true,
+       "output" [{"message" "tree", "author_id" nil, "id" string?}],
+       "model_type" "event.model"}))
