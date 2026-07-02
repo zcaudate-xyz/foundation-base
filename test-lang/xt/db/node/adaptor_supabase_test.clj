@@ -371,9 +371,8 @@
     (-> (adaptor/supabase-callback-handler nil ["auth/supabase" {}] nil (-/node-with-service (-/anon-client) nil))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify [(xt/x:is-string? out)
-                         (> (xt/x:len out) 0)])))))
-  => [true true])
+           (repl/notify out)))))
+  => (contains-in {"name" "GoTrue"}))
 
 ^{:refer xt.db.node.adaptor-supabase/supabase-invite-handler :added "4.1"}
 (fact "sends an invite on the service"

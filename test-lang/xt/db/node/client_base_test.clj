@@ -1,75 +1,131 @@
 (ns xt.db.node.client-base-test
   (:use code.test)
   (:require [hara.lang :as l]
-            [xt.lang.common-notify :as notify]))
+            [xt.lang.common-notify :as notify]
+            [scaffold.supabase.local-min :as local-min]))
+
+(do
+  (l/script- :postgres
+    {:runtime :jdbc.client
+     :require [[postgres.sample.scratch-v0 :as scratch-v0]
+               [postgres.core :as pg]
+               [postgres.core.supabase :as s]]
+     :config {:host   (-> local-min/+config+ :db :host)
+              :port   (-> local-min/+config+ :db :port)
+              :user   (-> local-min/+config+ :db :user)
+              :pass   (-> local-min/+config+ :db :password)
+              :dbname (-> local-min/+config+ :db :database)
+              :startup  local-min/start-supabase
+              :shutdown local-min/stop-supabase}
+     :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
+
+  (defrun.pg __init__
+    (s/grant-usage #{"scratch_v0"})))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
+   :require [[js.net.http-fetch :as js-fetch]
+             [xt.net.http-fetch :as http-fetch]
+             [xt.net.http-util :as http-util]
              [xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.db.node.runtime :as runtime]
+             [xt.db.node.client-base :as client]
+             [xt.db.node.proxy-base :as proxy-base]
+             [xt.db.node.proxy-util :as proxy-util]
+             [xt.db.system.main :as main]
              [xt.substrate :as substrate]
              [xt.substrate.transport-memory :as transport-memory]
-             [xt.db.node.proxy-base :as proxy-base]
-             [xt.db.node.client-base :as client]]})
+             [xt.net.addon-supabase :as addon]]})
 
-(defn.js make-node
-  "creates a bare node"
-  {:added "4.1"}
-  [id]
-  (return (substrate/node-create {"id" id
-                                  "spaces" {"room/a" {"state" {}}}})))
 
-(defn.js mock-init-base-handler
-  "mock server-side @xt.db/init-base handler"
-  {:added "4.1"}
-  [space args request node]
-  (return {"status" "ok" "node_id" (xt/x:get-key node "id")}))
+(def.js Schema
+  (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
 
-(defn.js link-nodes
-  "links two nodes with an in-memory transport wire"
-  {:added "4.1"}
-  [server client]
-  (var wire (transport-memory/memory-pair {"left_id" "client"
-                                           "right_id" "server"}))
-  (return
-   (promise/x:promise-all
-    [(substrate/attach-transport
-      client
-      "server"
-      (transport-memory/text-endpoint (. wire ["left"])))
-     (substrate/attach-transport
-      server
-      "client"
-      (transport-memory/text-endpoint (. wire ["right"])))])))
+(def.js SchemaLookup
+  (@! (pg/bind-app (pg/app "scratch_v0"))))
+
 
 (fact:global
- {:setup [(l/rt:restart)]
+ {:setup [(l/rt:restart)
+          (l/rt:setup :postgres)
+          (local-min/restart-postgrest)
+          (local-min/wait-for-postgrest-ready "scratch_v0" "Log")]
+  :teardown [(l/rt:teardown :postgres)
+             (l/rt:stop)]})
+
+(fact:global
+ {:setup [(l/rt:restart)
+          ]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.client-base/request :added "4.1"}
-(fact "calls a base db action through substrate/request"
-
+(comment
   (notify/wait-on :js
-    (var node (-/make-node "local"))
-    (substrate/register-handler node "@xt.db/init-base" -/mock-init-base-handler nil)
-    (-> (client/request node "@xt.db/init-base" [{} {} {}] {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))))
-  => {"status" "ok" "node_id" "local"})
-
-^{:refer xt.db.node.client-base/init-base :added "4.1"}
-(fact "invokes a local base handler"
-
-  (notify/wait-on :js
-    (var node (-/make-node "local"))
-    (substrate/register-handler node "@xt.db/init-base" -/mock-init-base-handler nil)
+    (var node (substrate/node-create {}))
+    (adaptor/init-handlers node)
     (-> (client/init-base node {} {} {} {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {"status" "ok" "node_id" "local"})
+  )
+
+^{:refer xt.db.node.client-base/init-base :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "invokes a local base handler"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (adaptor/init-handlers node)
+    (-> (client/init-base node {"primary" {"type" "supabase"
+                                           "defaults" (@! local-min/+config-supabase-anon+)}
+                                "caching" {"type" "sqlite"
+                                           "defaults" {"filename" ":memory:"}}}
+                          -/Schema
+                          -/SchemaLookup
+                          {})
+        (repl/notify)))
+  => (contains-in
+      {"handlers" {}, "services" {"db/caching" map?, "db/primary" map?, "db/common" map?},
+       "id" "node-LzspZD",
+       "spaces" {"__NODE__" {"id" "__NODE__", "state" {}, "meta" {}}},
+       "::" "substrate"})
+
+  
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (adaptor/init-handlers node)
+    (-> (substrate/request node
+                           nil
+                           "@xt.db/init-base"
+                           [{"primary" {"type" "supabase"
+                                        "defaults" (@! local-min/+config-supabase-anon+)}
+                             "caching" {"type" "sqlite"
+                                        "defaults" {"filename" ":memory:"}}}
+                            -/Schema
+                            -/SchemaLookup])
+        (repl/notify)))
+  => (contains-in
+      {"handlers" {}, "services" {"db/caching" map?, "db/primary" map?, "db/common" map?},
+       "id" "node-LzspZD",
+       "spaces" {"__NODE__" {"id" "__NODE__", "state" {}, "meta" {}}},
+       "::" "substrate"})
+
+  (notify/wait-on :js
+    (var server (substrate/node-create {}))
+    (var client (substrate/node-create {}))
+    (runtime/init-server server)
+    (runtime/init-server-proxy client)
+    (-> (client/init-base client {"primary" {"type" "supabase"
+                                             "defaults" (@! local-min/+config-supabase-anon+)}
+                                  "caching" {"type" "sqlite"
+                                             "defaults" {"filename" ":memory:"}}}
+                          -/Schema
+                          -/SchemaLookup
+                          {})
+        (repl/notify)))
+  )
 
 ^{:refer xt.db.node.client-base/init-base :added "4.1"}
 (fact "forwards a base request through a proxy-base node"
@@ -82,7 +138,7 @@
     (-> (-/link-nodes server client)
         (promise/x:promise-then
          (fn [_]
-           (client/set-default-transport client "server")
+           (proxy-util/set-default-transport client "server")
            (return (client/init-base client {} {} {} {}))))
         (promise/x:promise-then
          (fn [out]

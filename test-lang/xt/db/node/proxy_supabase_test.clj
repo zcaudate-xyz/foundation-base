@@ -115,8 +115,11 @@
 
 (fact:global
  {:setup [(l/rt:restart)
-          (l/rt:setup :postgres)]
-  :teardown [(l/rt:stop)]})
+          (l/rt:setup :postgres)
+          (local-min/restart-postgrest)
+          (local-min/wait-for-postgrest-ready "scratch_v0" "Log")]
+  :teardown [(l/rt:teardown :postgres)
+             (l/rt:stop)]})
 
 ^{:refer xt.db.node.proxy-supabase/init-proxy-handlers :added "4.1"}
 (fact "init-proxy-handlers registers all supabase proxy actions on the node"

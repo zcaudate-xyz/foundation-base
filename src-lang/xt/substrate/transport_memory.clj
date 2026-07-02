@@ -311,3 +311,20 @@
                                           (xt/x:obj-keys (xt/x:get-key network "states"))
                                           {}
                                           0)))
+
+(defn.xt link-pair
+  "links two nodes with an in-memory transport wire"
+  {:added "4.1"}
+  [server client]
+  (var wire (-/memory-pair {"left_id"  "client"
+                            "right_id" "server"}))
+  (return
+   (promise/x:promise-all
+    [(main/attach-transport
+      client
+      "server"
+      (-/text-endpoint (. wire ["left"])))
+     (main/attach-transport
+      server
+      "client"
+      (-/text-endpoint (. wire ["right"])))])))
