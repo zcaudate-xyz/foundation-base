@@ -52,21 +52,6 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
-(defn.js node-init-supabase
-  []
-  (var node (substrate/node-create {}))
-  (return
-   (adaptor/init-base-handler
-    nil
-    [{"primary" {"type" "supabase"
-                 "defaults" (@! local-min/+config-supabase-anon+)}
-      "caching" {"type" "sqlite"
-                 "defaults" {"filename" ":memory:"}}}
-     -/Schema
-     -/SchemaLookup]
-    nil
-    node)))
-
 (defn.js server-node
   "creates a server node with supabase adaptor handlers and a local-min service"
   {:added "4.1"}

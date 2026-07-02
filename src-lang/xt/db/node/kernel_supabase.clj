@@ -1,4 +1,4 @@
-(ns xt.db.node.adaptor-supabase
+(ns xt.db.node.kernel-supabase
   (:require [hara.lang :as l]))
 
 (l/script :xtalk

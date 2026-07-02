@@ -74,7 +74,7 @@
   (return
    (substrate/request server
                       nil
-                      "@xt.db/init-base"
+                      "@xt.db/kernel-init"
                       [{"primary" {"type" "memory" "defaults" {}}
                         "caching" {"type" "memory" "defaults" {}}}
                        {}
@@ -99,11 +99,11 @@
    (var node (-/client-node))
    (var handlers (xt/x:get-key node "handlers"))
    (return {"count"   (xt/x:len (xtd/obj-keys handlers))
-           "call"    (xt/x:get-key handlers "@xt.db/init-base")
+           "call"    (xt/x:get-key handlers "@xt.db/kernel-init")
            "attach"  (xt/x:get-key handlers "@xt.db/attach-model")
            "detach"  (xt/x:get-key handlers "@xt.db/detach-model")}))
-  => {"count"   12
-      "call"    {"id" "@xt.db/init-base" "meta" {}}
+  => {"count"   14
+      "call"    {"id" "@xt.db/kernel-init" "meta" {}}
       "attach"  {"id" "@xt.db/attach-model" "meta" {}}
       "detach"  {"id" "@xt.db/detach-model" "meta" {}}})
 

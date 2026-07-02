@@ -18,7 +18,7 @@
              [xt.substrate.page-core :as base-page]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as transport-browser]
-             [xt.db.node.kernel-client :as kernel-client]]})
+             [xt.db.node.client-base :as client-base]]})
 
 (defn.js connect-worker-threads
   "Creates a client node, spawns the worker-thread server from `script-path`,
@@ -57,21 +57,20 @@
    `scratch_v3.update_user_profile`) without opening the proxy group."
   [client transport-id]
   (return
-   (kernel-client/attach-model-request
+   (client-base/rpc-attach-model
     client
-    "room/a"
-    "demo"
-    "profile"
-    "@xt.db/attach-rpc-model"
     "db/primary"
-    {"rpc_spec" {"input" [{"symbol" "i_account_id" "type" "uuid"}
-                          {"symbol" "m" "type" "jsonb"}
-                          {"symbol" "o_op" "type" "jsonb"}]
-                 "return" "jsonb"
-                 "schema" "scratch_v3"
-                 "id" "update_user_profile"
-                 "flags" {}}
-     "pipeline" {}
+    {"space_id" "room/a"
+     "group_id" "demo"
+     "model_id" "profile"}
+    {"input" [{"symbol" "i_account_id" "type" "uuid"}
+              {"symbol" "m" "type" "jsonb"}
+              {"symbol" "o_op" "type" "jsonb"}]
+     "return" "jsonb"
+     "schema" "scratch_v3"
+     "id" "update_user_profile"
+     "flags" {}}
+    {"pipeline" {}
      "options" {}
      "defaults" {"fn_args" []}}
     {"transport_id" transport-id})))

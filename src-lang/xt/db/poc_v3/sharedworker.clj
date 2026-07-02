@@ -40,7 +40,7 @@
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
              [xt.db.node.kernel-base :as kernel-base]
-             [xt.db.node.kernel-client :as kernel-client]]})
+             [xt.db.node.client-base :as client-base]]})
 
 (def.js Schema
   (@! +schema+))
@@ -93,7 +93,7 @@
   (return
    (substrate/request client
                       "room/a"
-                      "@xt.db/init-base"
+                      "@xt.db/kernel-init"
                       [{"primary" {"id" "db/primary"
                                    "type" "supabase"
                                    "defaults" (@! local-min/+config-supabase-anon+)}
@@ -109,18 +109,18 @@
    via the `scratch_v3.user_profile_by_account` PostgREST function."
   [client transport-id account-id]
   (return
-   (kernel-client/attach-rpc-model
+   (client-base/rpc-attach-model
     client
-    "room/a"
-    "demo"
-    "profile"
     "db/primary"
-    {"rpc_spec" {"input" [{"symbol" "i_account_id" "type" "uuid"}]
-                 "return" "jsonb"
-                 "schema" "scratch_v3"
-                 "id" "user_profile_by_account"
-                 "flags" {}}
-     "pipeline" {}
+    {"space_id" "room/a"
+     "group_id" "demo"
+     "model_id" "profile"}
+    {"input" [{"symbol" "i_account_id" "type" "uuid"}]
+     "return" "jsonb"
+     "schema" "scratch_v3"
+     "id" "user_profile_by_account"
+     "flags" {}}
+    {"pipeline" {}
      "options" {}
      "defaults" {"fn_args" [account-id]}}
     {"transport_id" transport-id})))
@@ -129,20 +129,20 @@
   "Attaches an RPC model that calls `scratch_v3.update_user_profile`."
   [client transport-id]
   (return
-   (kernel-client/attach-rpc-model
+   (client-base/rpc-attach-model
     client
-    "room/a"
-    "demo"
-    "update-profile"
     "db/primary"
-    {"rpc_spec" {"input" [{"symbol" "i_account_id" "type" "uuid"}
-                          {"symbol" "m" "type" "jsonb"}
-                          {"symbol" "o_op" "type" "jsonb"}]
-                 "return" "jsonb"
-                 "schema" "scratch_v3"
-                 "id" "update_user_profile"
-                 "flags" {}}
-     "pipeline" {}
+    {"space_id" "room/a"
+     "group_id" "demo"
+     "model_id" "update-profile"}
+    {"input" [{"symbol" "i_account_id" "type" "uuid"}
+              {"symbol" "m" "type" "jsonb"}
+              {"symbol" "o_op" "type" "jsonb"}]
+     "return" "jsonb"
+     "schema" "scratch_v3"
+     "id" "update_user_profile"
+     "flags" {}}
+    {"pipeline" {}
      "options" {}
      "defaults" {"fn_args" []}}
     {"transport_id" transport-id})))
@@ -193,7 +193,7 @@
    It creates a single xt.substrate node, installs the xt.db.node adaptor
    request handlers, and exposes the node over the worker's MessagePort via
    `xt.substrate.transport-browser/boot-self`. The client supplies the schema,
-   lookup and adaptor configuration through the `@xt.db/init-base` handler."
+   lookup and adaptor configuration through the `@xt.db/kernel-init` handler."
   []
   (l/emit-script
    '(do
@@ -206,13 +206,13 @@
       ;; wrap init-base so that errors are serialised back to the page
       (xt.substrate/register-handler
        node
-       "@xt.db/init-base"
+       "@xt.db/kernel-init"
        (fn [space args request node]
          (return
-          (. (xt.db.node.kernel-base/init-base-main node
-                                                        (. args [0])
-                                                        (. args [1])
-                                                        (. args [2]))
+          (. (xt.db.node.kernel-base/kernel-init-main node
+                                                       (. args [0])
+                                                       (. args [1])
+                                                       (. args [2]))
              (then (fn [_]
                      (return {"status" "ok"})))
              (catch (fn [err]

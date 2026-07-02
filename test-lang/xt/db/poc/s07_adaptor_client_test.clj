@@ -35,7 +35,7 @@
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
              [xt.db.node.kernel-base :as kernel-base]
-             [xt.db.node.kernel-client :as kernel-client]]})
+             [xt.db.node.client-base :as client-base]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -61,10 +61,10 @@
       (xt.db.node.kernel-base/init-handlers node)
       ;; override init-base to return a clean status map
       (xt.substrate/register-handler
-       node "@xt.db/init-base"
+       node "@xt.db/kernel-init"
        (fn [space args request node]
          (return
-          (. (xt.db.node.kernel-base/init-base-main
+          (. (xt.db.node.kernel-base/kernel-init-main
               node
               (. args [0])
               (. args [1])
@@ -118,7 +118,7 @@
        (promise/x:promise-then
         (substrate/request client
                            "room/a"
-                           "@xt.db/init-base"
+                           "@xt.db/kernel-init"
                            [{"primary" {"id" "db/primary"
                                         "type" "supabase"
                                         "defaults" (@! local-min/+config-supabase-anon+)}
@@ -140,13 +140,12 @@
     (-/with-kernel-worker
      (fn [client transport-id]
        (return
-        (-> (kernel-client/attach-tree-view-model
+        (-> (client-base/dataview-attach-model
              client
-             "room/a"
-             "demo"
-             "tree-view"
-             {"caching_id" "db/caching"
-              "primary_id" "db/primary"}
+             "db/primary"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "tree-view"}
              {"table" "Log"
               "select_entry" {"input" []
                               "view" {"table" "Log"
@@ -155,14 +154,18 @@
               "return_entry" {"input" []
                               "view" {"table" "Log"
                                       "type" "return"
-                                      "query" ["id" "message"]}}
-              "pipeline" {}
+                                      "query" ["id" "message"]}}}
+             {"pipeline" {}
               "options" {}
               "defaults" {"select_args" []
                           "return_args" []}}
              {"transport_id" transport-id})
             (promise/x:promise-then
-             (fn [group]
+             (fn [_]
+               (return
+                (page-proxy/open-proxy-group client "room/a" "demo" {"transport_id" transport-id}))))
+            (promise/x:promise-then
+             (fn [_]
                (return
                 (base-page/remote-call client "room/a" "demo" "tree-view" [[] []] true))))
             (promise/x:promise-then
@@ -187,20 +190,24 @@
     (-/with-kernel-worker
      (fn [client transport-id]
        (return
-        (-> (kernel-client/attach-pull-model
+        (-> (client-base/pull-attach-model
              client
-             "room/a"
-             "demo"
-             "pull"
-             {"caching_id" "db/caching"
-              "primary_id" "db/primary"}
+             "db/primary"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "pull"}
+             ["Log"]
              {"pipeline" {}
               "options" {}
               "defaults" {"args" []
                          "output" {}}}
              {"transport_id" transport-id})
             (promise/x:promise-then
-             (fn [group]
+             (fn [_]
+               (return
+                (page-proxy/open-proxy-group client "room/a" "demo" {"transport_id" transport-id}))))
+            (promise/x:promise-then
+             (fn [_]
                (return
                 ;; request all Log rows through the remote pull model
                 (base-page/remote-call client "room/a" "demo" "pull" [["Log"]] true))))

@@ -32,7 +32,7 @@
              [js.net.http-fetch :as http-fetch]
              [xt.event.base-model :as event-model]
              [xt.db.node.kernel-base :as kernel-base]
-             [xt.db.node.kernel-client :as kernel-client]
+             [xt.db.node.client-base :as client-base]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
              [xt.substrate.transport-browser :as browser-transport]
@@ -57,7 +57,7 @@
             (xt.db.node.kernel-base/init-handlers node)
             (xt.substrate.page-proxy/install node)
             (. port (postMessage {"type" "debug" "stage" "before-init"}))
-            (-> (xt.db.node.kernel-base/init-base-main
+            (-> (xt.db.node.kernel-base/kernel-init-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"
@@ -104,7 +104,7 @@
             (xt.db.node.kernel-base/init-handlers node)
             (xt.substrate.page-proxy/install node)
             (. port (postMessage {"type" "debug" "stage" "before-init"}))
-            (-> (xt.db.node.kernel-base/init-base-main
+            (-> (xt.db.node.kernel-base/kernel-init-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"
@@ -121,9 +121,8 @@
                     node
                     "room/a"
                     "demo"
-                    {"tree-view" (xt.db.node.kernel-base/create-tree-view-model
-                                  {"caching_id" "db/caching"
-                                   "primary_id" "db/primary"}
+                    {"tree-view" (xt.db.node.kernel-base/dataview-create-model
+                                  "db/primary"
                                   {"table" "Log"
                                    "select_entry" {"input" []
                                                    "view" {"table" "Log"
@@ -132,8 +131,8 @@
                                    "return_entry" {"input" []
                                                    "view" {"table" "Log"
                                                            "type" "return"
-                                                           "query" ["id" "message"]}}
-                                   "pipeline" {}
+                                                           "query" ["id" "message"]}}}
+                                  {"pipeline" {}
                                    "options" {}
                                    "defaults" {"select_args" []
                                                "return_args" []}})})
@@ -175,7 +174,7 @@
       (var transport-id (. conn ["transport_id"]))
       (return (callback client transport-id))))))
 
-(def.js tree-view-model-args
+(def.js tree-view-model-dataview
   {"table" "Log"
    "select_entry" {"input" []
                    "view" {"table" "Log"
@@ -184,8 +183,10 @@
    "return_entry" {"input" []
                    "view" {"table" "Log"
                            "type" "return"
-                           "query" ["id" "message"]}}
-   "pipeline" {}
+                           "query" ["id" "message"]}}})
+
+(def.js tree-view-model
+  {"pipeline" {}
    "options" {}
    "defaults" {"select_args" []
                "return_args" []}})
@@ -251,14 +252,14 @@
      (@! +server-worker-script+)
      (fn [client transport-id]
        (return
-        (-> (kernel-client/attach-tree-view-model
+        (-> (client-base/dataview-attach-model
              client
-             "room/a"
-             "demo"
-             "tree-view"
-             {"caching_id" "db/caching"
-              "primary_id" "db/primary"}
-             -/tree-view-model-args
+             "db/primary"
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "tree-view"}
+             -/tree-view-model-dataview
+             -/tree-view-model
              {"transport_id" transport-id})
             (promise/x:promise-then
              (fn [_]

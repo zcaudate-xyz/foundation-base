@@ -62,9 +62,8 @@
                node
                "room/a"
                "demo"
-               {"tree-view" (xt.db.node.kernel-base/create-tree-view-model
-                             {"caching_id"    "db/caching"
-                              "primary_id"    "db/primary"}
+               {"tree-view" (xt.db.node.kernel-base/dataview-create-model
+                             "db/primary"
                              {"table" "Log"
                               "select_entry" {"input" []
                                               "view" {"table" "Log"
@@ -73,8 +72,8 @@
                               "return_entry" {"input" []
                                               "view" {"table" "Log"
                                                       "type" "return"
-                                                      "query" ["id" "message"]}}
-                              "pipeline" {}
+                                                      "query" ["id" "message"]}}}
+                             {"pipeline" {}
                               "options" {}
                               "defaults" {"select_args" []
                                           "return_args" []}})})
@@ -87,7 +86,7 @@
                   5000
                   (fn []
                     (. port (postMessage {"type" "debug" "stage" "init-timeout"})))))
-              (var init-promise (xt.db.node.kernel-base/init-base-main
+              (var init-promise (xt.db.node.kernel-base/kernel-init-main
                                  node
                                  {"primary" {"type" "supabase"
                                              "defaults" (@! local-min/+config-supabase-anon+)}

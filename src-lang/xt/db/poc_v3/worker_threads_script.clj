@@ -24,7 +24,6 @@
             [xt.substrate.page-proxy]
             [xt.substrate.transport-browser]
             [xt.db.node.kernel-base]
-            [xt.db.node.kernel-client]
             [xt.db.poc-v3.sharedworker :as sharedworker]))
 
 (l/script :js
@@ -68,7 +67,7 @@
                                     "defaults" {}}})
 
             ;; expose the node over parentPort once the adaptor is ready
-            (. (xt.db.node.kernel-base/init-base-main
+            (. (xt.db.node.kernel-base/kernel-init-main
                 node
                 config
                 xt.db.poc-v3.sharedworker/Schema

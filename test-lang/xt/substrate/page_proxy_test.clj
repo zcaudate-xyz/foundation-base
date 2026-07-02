@@ -273,8 +273,8 @@
       "output_subs" []
       "input_subs" []})
 
-^{:refer xt.substrate.page-proxy/init-base-main-handler :added "4.1"}
-(fact "client can call @xt.db/init-base-handler on the server through the proxy"
+^{:refer xt.substrate.page-proxy/kernel-init-handler :added "4.1"}
+(fact "client can call @xt.db/kernel-init on the server through the proxy"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
@@ -297,22 +297,21 @@
          (fn [linked]
            (return
             (-/send-and-receive linked server client
-                                "room/a" "@xt.db/init-base"
+                                "room/a" "@xt.db/kernel-init"
                                 [{"primary" {"type" "memory" "defaults" {}}
-                                  "caching" {"type" "memory" "defaults" {}}}]))))
+                                  "caching" {"type" "memory" "defaults" {}}
+                                  "common" {}}
+                                 schema
+                                 lookup]))))
         (promise/x:promise-then
          (fn [out]
            (repl/notify {"init" out
                          "primary" (substrate/get-service server "db/primary")
                          "caching" (substrate/get-service server "db/caching")})))))
   => (contains-in
-      {"init" {"status" "ok"
-               "services" {"db/primary" {"metadata" {"common_id" "db/common"
-                                                      "primary_id" "db/primary"
-                                                      "caching_id" "db/caching"}}
-                           "db/caching" {"metadata" {"common_id" "db/common"
-                                                      "primary_id" "db/primary"
-                                                      "caching_id" "db/caching"}}}}
+      {"init" {"::" "substrate"
+               "services" {"db/primary" map?
+                           "db/caching" map?}}
        "primary" {"::" "xt.db.system.impl_memory/ImplMemory"}
        "caching" {"::" "xt.db.system.impl_memory/ImplMemory"}}))
 

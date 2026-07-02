@@ -52,7 +52,7 @@
                                            "order" 1}}})
             (var lookup {"Log" {"position" 0}})
             (var tree ["Log"])
-            (. (xt.db.node.kernel-base/init-base-main
+            (. (xt.db.node.kernel-base/kernel-init-main
                 (xt.substrate/node-create {"id" "db-model-server"})
                 {"primary" {"type" "supabase"
                             "defaults" (@! local-min/+config-supabase-anon+)}
@@ -69,9 +69,9 @@
                    node
                    "room/a"
                    "demo"
-                   {"entry" (xt.db.node.kernel-base/create-pull-model
-                             {"caching_id" "db/caching"
-                              "primary_id" "db/primary"}
+                   {"entry" (xt.db.node.kernel-base/pull-create-model
+                             "db/primary"
+                             tree
                              {"pipeline" {}
                               "options" {}
                               "defaults" {"args" [tree]}})})
@@ -107,7 +107,7 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.db.node.kernel-base/init-base-main
+^{:refer xt.db.node.kernel-base/kernel-init-main
   :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "debug SharedWorker sqlite init"

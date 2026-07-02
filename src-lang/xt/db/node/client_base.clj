@@ -16,12 +16,26 @@
 ;; base proxy handlers installed and forwarding to a remote transport.
 ;;
 
-(defn.xt init-base
+(defn.xt kernel-init
   "initialises base db services on the node"
   {:added "4.1"}
   [node config schema lookup opts]
   (return
-   (proxy-util/request-client node "@xt.db/init-base" [config schema lookup] opts)))
+   (proxy-util/request-client node "@xt.db/kernel-init" [config schema lookup] opts)))
+
+(defn.xt kernel-setup
+  "initialises base db services on the node"
+  {:added "4.1"}
+  [node config schema lookup opts]
+  (return
+   (proxy-util/request-client node "@xt.db/kernel-setup" [config schema lookup] opts)))
+
+(defn.xt kernel-teardown
+  "initialises base db services on the node"
+  {:added "4.1"}
+  [node config opts]
+  (return
+   (proxy-util/request-client node "@xt.db/kernel-teardown" [config] opts)))
 
 (defn.xt subscribe-db
   "subscribes to db topics on the requested service"

@@ -64,7 +64,7 @@
        node "@xt.db/init-adaptor"
        (fn [space args request node]
          (return
-          (. (xt.db.node.kernel-base/init-kernel-main
+          (. (xt.db.node.kernel-base/kernel-init-main
               node
               (. args [0])
               (. args [1])
@@ -118,7 +118,10 @@
                            "@xt.db/init-adaptor"
                            [{"primary" {"id" "db/primary"
                                         "type" "supabase"
-                                        "defaults" (@! local-min/+config-supabase-anon+)}}
+                                        "defaults" (@! local-min/+config-supabase-anon+)}
+                             "caching" {"id" "db/caching"
+                                        "type" "memory"
+                                        "defaults" {}}}
                             xt.db.poc.s06-supabase-auth-test/Schema
                             xt.db.poc.s06-supabase-auth-test/SchemaLookup]
                            {"transport_id" transport-id})

@@ -33,6 +33,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.node.runtime :as runtime]
              [xt.db.node.client-base :as client]
+             [xt.db.node.kernel-base :as kernel-base]
              [xt.db.node.proxy-base :as proxy-base]
              [xt.db.node.proxy-util :as proxy-util]
              [xt.db.system.main :as main]
@@ -56,78 +57,18 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-(fact:global
- {:setup [(l/rt:restart)
-          ]
-  :teardown [(l/rt:stop)]})
 
 (comment
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (adaptor/init-handlers node)
-    (-> (client/init-base node {} {} {} {})
+    (kernel-base/init-handlers node)
+    (-> (client/kernel-init node {} {} {} {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
   )
 
-^{:refer xt.db.node.client-base/init-base :added "4.1"
-  :setup [(l/rt:restart :js)]}
-(fact "invokes a local base handler"
-
-  (notify/wait-on :js
-    (var node (substrate/node-create {}))
-    (adaptor/init-handlers node)
-    (-> (client/init-base node {"primary" {"type" "supabase"
-                                           "defaults" (@! local-min/+config-supabase-anon+)}
-                                "caching" {"type" "sqlite"
-                                           "defaults" {"filename" ":memory:"}}}
-                          -/Schema
-                          -/SchemaLookup
-                          {})
-        (repl/notify)))
-  => (contains-in
-      {"handlers" {}, "services" {"db/caching" map?, "db/primary" map?, "db/common" map?},
-       "id" "node-LzspZD",
-       "spaces" {"__NODE__" {"id" "__NODE__", "state" {}, "meta" {}}},
-       "::" "substrate"})
-
-  
-  (notify/wait-on :js
-    (var node (substrate/node-create {}))
-    (adaptor/init-handlers node)
-    (-> (substrate/request node
-                           nil
-                           "@xt.db/init-base"
-                           [{"primary" {"type" "supabase"
-                                        "defaults" (@! local-min/+config-supabase-anon+)}
-                             "caching" {"type" "sqlite"
-                                        "defaults" {"filename" ":memory:"}}}
-                            -/Schema
-                            -/SchemaLookup])
-        (repl/notify)))
-  => (contains-in
-      {"handlers" {}, "services" {"db/caching" map?, "db/primary" map?, "db/common" map?},
-       "id" "node-LzspZD",
-       "spaces" {"__NODE__" {"id" "__NODE__", "state" {}, "meta" {}}},
-       "::" "substrate"})
-
-  (!.js
-    (var server (substrate/node-create {}))
-    (var client (substrate/node-create {}))
-    (runtime/init-server server)
-    (runtime/init-server-proxy client)
-    (transport-memory/link-pair server client)
-    (repl/notify server)
-    (-> (client/init-base client {"primary" {"type" "supabase"
-                                               "defaults" (@! local-min/+config-supabase-anon+)}
-                                    "caching" {"type" "sqlite"
-                                               "defaults" {"filename" ":memory:"}}}
-                            -/Schema
-                            -/SchemaLookup
-                            {})
-          (repl/notify)))
-  
+(comment
 
   (notify/wait-on :js
     (var server (substrate/node-create {}))
@@ -136,8 +77,8 @@
     (runtime/init-server-proxy client)
     (transport-memory/link-pair server client)
     
-    (-> (client/init-base client {"primary" {"type" "supabase"
-                                               "defaults" (@! local-min/+config-supabase-anon+)}
+    (-> (client/kernel-init client {"primary" {"type" "supabase"
+                                             "defaults" (@! local-min/+config-supabase-anon+)}
                                   "caching" {"type" "sqlite"
                                              "defaults" {"filename" ":memory:"}}}
                           -/Schema
@@ -149,27 +90,44 @@
         (promise/x:promise-catch
          (fn [out]
            (repl/notify (. out message))))))
-  
+
   )
 
-^{:refer xt.db.node.client-base/init-base :added "4.1"}
-(fact "forwards a base request through a proxy-base node"
+^{:refer xt.db.node.client-base/kernel-init :added "4.1"
+  :setup [(l/rt:restart :js)]}
+(fact "invokes a local base handler"
 
   (notify/wait-on :js
-    (var server (-/make-node "server"))
-    (var client (-/make-node "client"))
-    (proxy-base/init-proxy-handlers client)
-    (substrate/register-handler server "@xt.db/init-base" -/mock-init-base-handler nil)
-    (-> (-/link-nodes server client)
-        (promise/x:promise-then
-         (fn [_]
-           (proxy-util/set-default-transport client "server")
-           (return (client/init-base client {} {} {} {}))))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))
-        (promise/x:promise-catch
-         (fn [err]
-           (repl/notify {"error" err
-                         "message" (xt/x:ex-message err)})))))
-  => {"status" "ok" "node_id" "server"})
+    (var node (substrate/node-create {}))
+    (kernel-base/init-handlers node)
+    (-> (client/kernel-init node {"primary" {"type" "supabase"
+                                           "defaults" (@! local-min/+config-supabase-anon+)}
+                                "caching" {"type" "sqlite"
+                                           "defaults" {"filename" ":memory:"}}}
+                          -/Schema
+                          -/SchemaLookup
+                          {})
+        (repl/notify)))
+  => (contains-in
+      {"::" "substrate"
+       "services" {"db/caching" map?, "db/primary" map?, "db/common" map?}})
+
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (kernel-base/init-handlers node)
+    (-> (substrate/request node
+                           nil
+                           "@xt.db/kernel-init"
+                           [{"primary" {"type" "supabase"
+                                        "defaults" (@! local-min/+config-supabase-anon+)}
+                             "caching" {"type" "sqlite"
+                                        "defaults" {"filename" ":memory:"}}}
+                            -/Schema
+                            -/SchemaLookup])
+        (repl/notify)))
+  => (contains-in
+      {"::" "substrate"
+       "services" {"db/caching" map?, "db/primary" map?, "db/common" map?}}))
+
+

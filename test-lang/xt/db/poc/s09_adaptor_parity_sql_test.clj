@@ -30,7 +30,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
              [xt.event.base-model :as event-model]
-             [xt.db.node.kernel-client :as kernel-client]
+             [xt.db.node.client-base :as client-base]
              [xt.db.node.kernel-base :as kernel-base]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
@@ -55,7 +55,7 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (return
-             (. (xt.db.node.kernel-base/init-base-main
+             (. (xt.db.node.kernel-base/kernel-init-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"
@@ -71,9 +71,8 @@
                     node
                     "room/a"
                     "demo"
-                    {"tree-view" (xt.db.node.kernel-base/create-tree-view-model
-                                  {"caching_id" "db/caching"
-                                   "primary_id" "db/primary"}
+                    {"tree-view" (xt.db.node.kernel-base/dataview-create-model
+                                  "db/primary"
                                   {"table" "Log"
                                    "select_entry" {"input" []
                                                    "view" {"table" "Log"
@@ -82,8 +81,8 @@
                                    "return_entry" {"input" []
                                                    "view" {"table" "Log"
                                                            "type" "return"
-                                                           "query" ["id" "message"]}}
-                                   "pipeline" {}
+                                                           "query" ["id" "message"]}}}
+                                  {"pipeline" {}
                                    "options" {}
                                    "defaults" {"select_args" []
                                                "return_args" []}})})
@@ -120,7 +119,7 @@
             (var port (. e ["ports"] [0]))
             (. port (start))
             (return
-             (. (xt.db.node.kernel-base/init-base-main
+             (. (xt.db.node.kernel-base/kernel-init-main
                  node
                  {"primary" {"id" "db/primary"
                              "type" "supabase"
@@ -153,7 +152,7 @@
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
-(defn.js tree-view-model-args
+(defn.js tree-view-model-dataview
   []
   (return {"table" "Log"
            "select_entry" {"input" []
@@ -163,8 +162,11 @@
            "return_entry" {"input" []
                            "view" {"table" "Log"
                                    "type" "return"
-                                   "query" ["id" "message"]}}
-           "pipeline" {}
+                                   "query" ["id" "message"]}}}))
+
+(defn.js tree-view-model
+  []
+  (return {"pipeline" {}
            "options" {}
            "defaults" {"select_args" []
                        "return_args" []}}))
@@ -253,13 +255,14 @@
      (@! +client-server-script+)
      (fn [client transport-id]
        (return
-        (-> (kernel-client/attach-tree-view-model
+        (-> (client-base/dataview-attach-model
              client
-             "room/a"
-             "demo"
-             "tree-view"
              "db/primary"
-             (-/tree-view-model-args)
+             {"space_id" "room/a"
+              "group_id" "demo"
+              "model_id" "tree-view"}
+             (-/tree-view-model-dataview)
+             (-/tree-view-model)
              {"transport_id" transport-id})
             (promise/x:promise-then
              (fn [_]

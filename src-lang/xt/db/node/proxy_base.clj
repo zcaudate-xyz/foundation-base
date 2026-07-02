@@ -23,7 +23,9 @@
 ;;
 
 (def.xt call-actions
-  ["@xt.db/init-base"
+  ["@xt.db/kernel-init"
+   "@xt.db/kernel-setup"
+   "@xt.db/kernel-teardown"
    "@xt.db/subscribe-db"
    "@xt.db/unsubscribe-db"
    "@xt.db/sync-caching"

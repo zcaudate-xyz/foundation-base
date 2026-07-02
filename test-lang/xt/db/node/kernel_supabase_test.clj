@@ -204,39 +204,6 @@
    (adaptor/supabase-current-session-handler nil ["auth/supabase"] nil node))
   => {"access_token" "abc"})
 
-
-^{:refer xt.db.node.kernel-supabase/supabase-rpc-call-handler :added "4.1"}
-(fact "calls an rpc entry on the service"
-  (notify/wait-on :js
-    (-> (adaptor/supabase-rpc-call-handler nil
-                                           ["auth/supabase"
-                                            "ping"
-                                            {}
-                                            {"headers" {"Accept-Profile" "scratch_v0"
-                                                        "Content-Profile" "scratch_v0"}}]
-                                           nil
-                                           (-/node-with-service (-/anon-client) nil))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))))
-  => "pong")
-
-^{:refer xt.db.node.kernel-supabase/supabase-query-table-handler :added "4.1"}
-(fact "queries a table on the service"
-  {:setup [(scratch-v0/log-append-public "hello")]}
-  (notify/wait-on :js
-    (-> (adaptor/supabase-query-table-handler nil
-                                              ["auth/supabase"
-                                               "Log"
-                                               "select=*"
-                                               {"headers" {"Accept-Profile" "scratch_v0"}}]
-                                              nil
-                                              (-/node-with-service (-/service-client) nil))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify out)))))
-  => (contains-in [{"message" "hello", "author_id" nil, "id" string?}]))
-
 ^{:refer xt.db.node.kernel-supabase/supabase-health-handler :added "4.1"}
 (fact "calls the auth health endpoint on the service"
   (notify/wait-on :js

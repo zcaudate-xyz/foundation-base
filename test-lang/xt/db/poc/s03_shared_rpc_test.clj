@@ -81,14 +81,14 @@
              node
              "room/a"
              "demo"
-             {"rpc-view" (xt.db.node.kernel-base/create-rpc-model
+             {"rpc-view" (xt.db.node.kernel-base/rpc-create-model
                           "db/primary"
-                          {"rpc_spec" {"input" []
-                                       "return" "text"
-                                       "schema" "scratch_v0"
-                                       "id" "ping"
-                                       "flags" {}}
-                           "pipeline" {}
+                          {"input" []
+                           "return" "text"
+                           "schema" "scratch_v0"
+                           "id" "ping"
+                           "flags" {}}
+                          {"pipeline" {}
                            "options" {}
                            "defaults" {"fn_args" []}})})
             (return

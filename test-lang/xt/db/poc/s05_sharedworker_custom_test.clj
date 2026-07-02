@@ -36,7 +36,6 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
-             [js.worker.link :as worker-link]
              [xt.event.base-model :as event-model]
              [xt.db.node.runtime :as runtime]
              [xt.substrate :as substrate]
@@ -62,6 +61,22 @@
    '(do
       (var node (xt.substrate/node-create {"id" "db-model-server"}))
       (xt.db.node.runtime/init-server node)
+      ;; override @xt.db/kernel-init so the response serialises cleanly
+      (xt.substrate/register-handler
+       node "@xt.db/kernel-init"
+       (fn [space args request node]
+         (return
+          (. (xt.db.node.kernel-base/kernel-init-main
+              node
+              (. args [0])
+              (. args [1])
+              (. args [2]))
+             (then (fn [_] (return {"status" "ok"})))
+             (catch (fn [err]
+                      (return {"status" "error"
+                               "message" (. err ["message"])
+                               "stack" (. err ["stack"])}))))))
+       nil)
       (:= (. globalThis ["onconnect"])
           (fn [e]
             (var port (. e ["ports"] [0]))
@@ -93,51 +108,22 @@
     (-> client
         (browser-transport/connect-sharedworker
          {"transport_id" "worker"
-          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+)
-                                                            {"type" "module"})})
+          "source" (browser-transport/sharedworker-source (@! +sharedworker-script+)
+                                                          {"type" "module"})})
         (promise/x:promise-then
          (fn [conn]
            (return
             (substrate/request client
                                "room/a"
-                               "@xt.db/init-base"
+                               "@xt.db/kernel-init"
                                [{"primary" {"type" "supabase"
-                                           "defaults" (@! local-min/+config-supabase-anon+)}
-                                "caching" {"type" "sqlite"
-                                           "defaults" {"filename" ":memory:"}}}
+                                            "defaults" (@! local-min/+config-supabase-anon+)}
+                                 "caching" {"type" "sqlite"
+                                            "defaults" {"filename" ":memory:"}}}
                                 -/Schema
                                 -/SchemaLookup]))))
         (repl/notify)))
-  => {"success" true})
-
-
-^{:refer xt.db.poc.s05-sharedworker-custom-test/CONNECT
-  :added "4.1"
-  :setup [(scratch-v0/log-append-public "remote")]}
-(fact "client can open a remote pull model and read its output"
-
-  (notify/wait-on [:js 5000]
-    (var client (substrate/node-create {"id" "db-model-client"}))
-    (runtime/init-server-proxy client)
-    (-> client
-        (browser-transport/connect-sharedworker
-         {"transport_id" "worker"
-          "source" (worker-link/make-sharedworker-link-opts (@! +sharedworker-script+)
-                                                            {"type" "module"})})
-        (promise/x:promise-then
-         (fn [conn]
-           (return
-            (substrate/request client
-                               "room/a"
-                               "@xt.db/init-base"
-                               [{"primary" {"type" "supabase"
-                                           "defaults" (@! local-min/+config-supabase-anon+)}
-                                "caching" {"type" "sqlite"
-                                           "defaults" {"filename" ":memory:"}}}
-                                -/Schema
-                                -/SchemaLookup]))))
-        (repl/notify)))
-  => {"success" true})
+  => {"status" "ok"})
 
 ^{:refer xt.db.poc.s05-sharedworker-custom-test/supabase-reachable
   :added "4.1"
