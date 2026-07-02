@@ -7,10 +7,17 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
+             [xt.db.node.client-base :as client-base]
              [xt.db.node.proxy-base :as proxy-base]
              [xt.db.node.proxy-supabase :as proxy-supabase]
              [xt.db.node.kernel-base :as kernel-base]
              [xt.db.node.kernel-supabase :as kernel-supabase]]})
+
+(def.xt DEFAULT_TRANSPORT
+  "xt.db.default.transport")
+
+(def.xt DEFAULT_WORKER
+  "xt.db.default.worker")
 
 (defn.xt init-server
   [node]
@@ -24,6 +31,11 @@
   (proxy-base/init-proxy-handlers node)
   (proxy-supabase/init-proxy-handlers node))
 
+
+;;
+;; SHAREDWORKER
+;;
+
 (defn.xt sharedworker-init-kernel
   [node transport-id worker-id]
   (-/init-server node)
@@ -34,28 +46,50 @@
         (return
          (browser-transport/boot-self
           node
-          {"transport_id" transport-id
+          {"transport_id" (or transport-id
+                              -/DEFAULT_TRANSPORT)
            "target" port
            "ready" {"signal" "ready"
-                    "transport" "browser"
-                    "worker" worker-id}})))))
+                    "transport" (or transport-id
+                                    -/DEFAULT_TRANSPORT)
+                    "worker" (or transport-id
+                                 -/DEFAULT_WORKER)}})))))
 
-(defn.xt sharedworker-connect-kernel
-  [client source transport-id config schema lookup]
+(defn sharedworket-init-string
+  [& [override]]
+  (l/emit-script
+   '(do
+      (var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
+      (xt.db.node.runtime/sharedworker-init-kernel node))
+   {:lang :js
+    :layout :full
+    :emit {:override (or {"@sqlite.org/sqlite-wasm" "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
+                          "pg" "data:text/javascript,export default {Client: function() {}}"})}}))
+
+
+(def.xt DEFAULT_SHAREDWORKER_SCRIPT
+  (@! (sharedworket-init-string)))
+
+(defn.xt sharedworker-connect
+  [client config schema lookup source transport-id]
   (-/init-server-proxy client)
   (return
    (-> (browser-transport/connect-sharedworker
         client
-        {"transport_id" transport-id
-         "source" source})
+        {"transport_id" (or transport-id
+                            -/DEFAULT_TRANSPORT)
+         "source" (or source
+                      (browser-transport/sharedworker-source -/DEFAULT_SHAREDWORKER_SCRIPT
+                                                             {"type" "module"}))})
        (promise/x:promise-then
         (fn [conn]
           (return
-           (substrate/request client
-                              nil
-                              "@xt.db/kernel-init"
-                              [config schema lookup]
-                              {})))))))
+           (client-base/kernel-init client config schema lookup {})))))))
+
+
+;;
+;; WEBWORKER
+;;
 
 (defn.xt webworker-init-kernel
   [node transport-id worker-id]
@@ -63,30 +97,54 @@
   (return
    (browser-transport/boot-self
     node
-    {"transport_id" transport-id
+    {"transport_id" (or transport-id
+                        -/DEFAULT_TRANSPORT)
      "target" globalThis
      "ready" {"signal" "ready"
-              "transport" "browser"
-              "worker" worker-id}})))
+              "transport" (or transport-id
+                              -/DEFAULT_TRANSPORT)
+              "worker" (or worker-id
+                           -/DEFAULT_WORKER)}})))
 
-(defn.xt webworker-connect-kernel
-  [client source transport-id config schema lookup]
+(defn webworker-init-string
+  [& [override]]
+  (l/emit-script
+   '(do
+      (var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
+      (xt.db.node.runtime/webworker-init-kernel node))
+   {:lang :js
+    :layout :full
+    :emit {:override (or override
+                         {"@sqlite.org/sqlite-wasm" "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
+                          "pg" "data:text/javascript,export default {Client: function() {}}"})}}))
+
+(def.xt DEFAULT_WEBWORKER_SCRIPT
+  (@! (webworker-init-string)))
+
+(defn.xt webworker-connect
+  [client config schema lookup source transport-id]
   (-/init-server-proxy client)
   (return
    (-> (browser-transport/connect-worker
         client
-        {"transport_id" transport-id
-         "source" source})
+        {"transport_id" (or transport-id
+                            -/DEFAULT_TRANSPORT)
+         "source" (or source
+                      (browser-transport/webworker-source -/DEFAULT_WEBWORKER_SCRIPT
+                                                          {"type" "module"}))})
        (promise/x:promise-then
         (fn [conn]
           (return
-           (substrate/request client
-                              nil
-                              "@xt.db/kernel-init"
-                              [config schema lookup]
-                              {})))))))
+           (client-base/kernel-init client config schema lookup {})))))))
 
-(defn.xt worker-threads-init-kernel
+
+
+
+;;
+;; NODEWORKER
+;;
+
+(defn.xt nodeworker-init-kernel
   [node transport-id worker-id]
   (-/init-server node)
   (var #{parentPort} (require "worker_threads"))
@@ -104,22 +162,33 @@
     {"transport_id" transport-id
      "target" worker
      "ready" {"signal" "ready"
-              "transport" "worker_threads"
-              "worker" worker-id}})))
+              "transport" (or transport-id
+                              -/DEFAULT_TRANSPORT)
+              "worker" (or worker-id
+                           -/DEFAULT_WORKER)}})))
 
-(defn.xt worker-threads-connect-kernel
-  [client source transport-id config schema lookup]
+(defn nodeworker-init-string
+  [& [override]]
+  (l/emit-script
+   '(do
+      (var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
+      (xt.db.node.runtime/nodeworker-init-kernel node))
+   {:lang :js
+    :layout :full
+    :emit {:override  override}}))
+
+(defn.xt nodeworker-connect
+  [client config schema lookup source transport-id]
   (-/init-server-proxy client)
   (return
    (-> (browser-transport/connect-worker
         client
-        {"transport_id" transport-id
-         "source" source})
+        {"transport_id" (or transport-id
+                            -/DEFAULT_TRANSPORT)
+         "source" (or source
+                      (browser-transport/webworker-source -/DEFAULT_WEBWORKER_SCRIPT
+                                                          {"type" "module"}))})
        (promise/x:promise-then
         (fn [conn]
           (return
-           (substrate/request client
-                              nil
-                              "@xt.db/kernel-init"
-                              [config schema lookup]
-                              {})))))))
+           (client-base/kernel-init client config schema lookup {})))))))
