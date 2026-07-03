@@ -38,6 +38,7 @@
              [xt.db.system.impl-common :as impl-common]
              [xt.db.node.kernel-base :as kernel-base]
              [xt.db.node.proxy-util :as proxy-util]
+             [xt.db.node.client-base :as client-base]
              [xt.db.node.runtime :as runtime]]})
 
 (def.js Schema
@@ -45,6 +46,13 @@
 
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
+
+(def.js CONFIG
+  {"supabase" {"type" "supabase"
+               "defaults" (@! local-min/+config-supabase-anon+)}
+   "sqlite"   {"type" "sqlite"
+               "defaults" {"filename" ":memory:"}}
+   "memory"   {"type" "memory" "defaults" {}}})
 
 
 (fact:global
@@ -54,6 +62,14 @@
           (local-min/wait-for-postgrest-ready "scratch_v0" "Log" 120000)]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
+
+
+^{:refer xt.db.node.runtime/create-impl-local :added "4.1"}
+(fact "create-impl memory returns an impl"
+  (!.js
+   (var impl (xt.db.system.main/create-impl "memory" {} {} {}))
+   (return {"type" (xt/x:get-key impl "::")}))
+  => {"type" "xt.db.system.impl_memory/ImplMemory"})
 
 
 ^{:refer xt.db.node.runtime/nodeworker-init-kernel :added "4.1"}
@@ -112,3 +128,48 @@
   => {"init" true
       "transport" "xt.db.default.transport"
       "transport-attached" true})
+
+^{:refer xt.db.node.runtime/nodeworker-connect :added "4.1"}
+(fact "connects a client to a Node worker_threads kernel and pulls data from supabase"
+  {:setup [(pg/t:delete scratch-v0/Log)
+           (pg/t:insert scratch-v0/Log {:message "hello-nodeworker"})]}
+
+  (notify/wait-on [:js 20000]
+    (var client (substrate/node-create {"id" "nodeworker-supabase-client"}))
+    (-> (runtime/nodeworker-connect client
+                                    {"primary" (. -/CONFIG ["supabase"])
+                                     "caching" (. -/CONFIG ["sqlite"])}
+                                    -/Schema
+                                    -/SchemaLookup
+                                    nil
+                                    nil)
+        (promise/x:promise-then
+         (fn [init-out]
+           (return
+            (substrate/request client
+                               nil
+                               "@xt.db/rpc-call"
+                               ["db/primary"
+                                {"id" "ping"
+                                 "schema" "scratch_v0"
+                                 "return" "jsonb"
+                                 "input" []
+                                 "flags" {}}
+                                []]
+                               {}))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            {"pulled" (xt/x:not-nil? out)
+             "count" (xt/x:len out)
+             "first-message" (xtd/get-in out [0 "message"])})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify
+            {"error" (xt/x:ex-message err)
+             "status" (xt/x:get-key err "status")
+             "data" (xt/x:get-key err "data")
+             "frame-error" (xt/x:get-key err "error")
+             "raw" err})))))
+  => {"rpc" "pong"})
+

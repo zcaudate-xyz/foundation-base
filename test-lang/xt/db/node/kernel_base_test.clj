@@ -1067,3 +1067,13 @@
        "@xt.db/subscribe-db"
        "@xt.db/sync-cached"
        "@xt.db/unsubscribe-db"))
+
+
+^{:refer xt.db.node.kernel-base/pull-cached-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/dataview-prep-tree :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-base/dataview-cached-handler :added "4.1"}
+(fact "TODO")

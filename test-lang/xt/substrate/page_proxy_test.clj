@@ -802,3 +802,9 @@
 
 ^{:refer xt.substrate.page-proxy/model-get-output :added "4.1"}
 (fact "TODO")
+
+^{:refer xt.substrate.page-proxy/proxy-dispatch-op :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.page-proxy/group-sync-proxy :added "4.1"}
+(fact "TODO")

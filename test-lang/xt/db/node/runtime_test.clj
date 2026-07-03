@@ -235,3 +235,19 @@
   => (fn [res]
        (and (= "shared" (get-in res ["output-a" 0 "message"]))
             (= "shared" (get-in res ["output-b" 0 "message"])))))
+
+
+^{:refer xt.db.node.runtime/sharedworker-init-kernel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/webworker-init-kernel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/nodeworker-init-kernel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/nodeworker-init-string :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.runtime/nodeworker-connect :added "4.1"}
+(fact "TODO")
