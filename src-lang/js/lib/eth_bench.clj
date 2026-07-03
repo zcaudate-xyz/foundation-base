@@ -1,5 +1,5 @@
 (ns js.lib.eth-bench
-  (:require []
+  (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 
 (l/script :js

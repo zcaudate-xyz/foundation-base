@@ -10,7 +10,8 @@
 (do
   (l/script- :postgres
     {:runtime :jdbc.client
-     :require [[postgres.sample.scratch-v3 :as scratch-v3]
+     :require [[postgres.sample.scratch-v0 :as scratch-v0]
+               [postgres.sample.scratch-v3 :as scratch-v3]
                [postgres.core :as pg]
                [postgres.core.supabase :as s]]
      :config {:host   (-> local-min/+config+ :db :host)
@@ -23,7 +24,12 @@
      :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
   (defrun.pg __init__
-    (s/grant-usage #{"scratch_v3"})))
+    (do
+      (pg/t:delete scratch-v0/Log)
+      (s/grant-usage #{"scratch_v0"})
+      (s/grant-usage #{"scratch_v3"})
+      (s/grant-tables #{"scratch_v3"})
+      (s/grant-privileges #{"scratch_v3"}))))
 
 (l/script- :js
   {:runtime :chromedriver.instance
@@ -65,18 +71,17 @@
                           true false {})
   (scratch-v3/insert-user-profile (java.util.UUID/fromString "00000000-0000-0000-0000-000000000001")
                                   "Alice" "Smith" "EN" "About Alice" {})
-  (scratch-v3/insert-wallet (java.util.UUID/fromString "00000000-0000-0000-0000-000000000002")
-                            (java.util.UUID/fromString "00000000-0000-0000-0000-000000000001")
-                            "default" {})
-  (scratch-v3/insert-asset (java.util.UUID/fromString "00000000-0000-0000-0000-000000000002")
-                           "USD" 100 {})
-  (scratch-v3/insert-asset (java.util.UUID/fromString "00000000-0000-0000-0000-000000000002")
-                           "BTC" 0.5 {}))
+  (let [wallet (scratch-v3/insert-wallet (java.util.UUID/fromString "00000000-0000-0000-0000-000000000001")
+                                         "default" {})]
+    (scratch-v3/insert-asset (:id wallet) "USD" 100 {})
+    (scratch-v3/insert-asset (:id wallet) "BTC" 0.5 {})))
 
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
           (seed-scratch-v3!)
+          (local-min/restart-postgrest)
+          (local-min/refresh-postgrest-schema "scratch_v3" "Currency")
           (l/rt:scaffold-imports :js)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
@@ -188,7 +193,8 @@
                                                                 "schema" "scratch_v3"
                                                                 "name" "EnumCurrencyType"}]}
                                                "__deleted__" false}}}
-              "return_entry" {"input" [{"symbol" "i_note" "type" "text"}]
+              "return_entry" {"input" [{"symbol" "i_currency_id" "type" "citext"}
+                                       {"symbol" "i_note" "type" "text"}]
                               "view" {"table" "Currency"
                                       "type" "return"
                                       "query" ["id" "name" "type"
@@ -316,7 +322,7 @@
                               "view" {"table" "Wallet"
                                       "type" "return"
                                       "query" ["id" "slug"
-                                               ["entries" ["balance"
+                                               ["entries" ["id" "balance"
                                                            ["currency" ["id" "name"]]]]]}}}
              {"pipeline" {}
               "options" {}
@@ -331,9 +337,14 @@
          (fn [_]
            (return
             (page-proxy/model-proxy-call client "room/a" "demo" "wallet-by-owner"
-                                         [{"select_args" [(-/USER_ID)]
+                                         [{"select_args" [-/USER_ID]
                                            "return_args" []}]
                                          true {}))))
+        (promise/x:promise-then
+         (fn [_]
+           (return (promise/x:with-delay
+                    500
+                    (fn [] (return true))))))
         (promise/x:promise-then
          (fn [_]
            (var group (page-core/group-get client "room/a" "demo"))
@@ -378,9 +389,10 @@
               "model_id" "user-detail"}
              ["User"
               {"nickname" "alice"}
-              [["profile" ["first_name" "last_name"]]
-               ["wallets" ["slug"
-                           ["entries" ["balance"
+              ["*/data"
+               ["profile" ["id" "first_name" "last_name"]]
+               ["wallets" ["id" "slug"
+                           ["entries" ["id" "balance"
                                        ["currency" ["id" "name"]]]]]]]]
              {"pipeline" {}
               "options" {}
@@ -414,15 +426,16 @@
        "model_type" "event.model"
        "output" [(contains
                   {"nickname" "alice"
-                   "profile" (contains
-                              [(contains {"first_name" "Alice"
-                                          "last_name" "Smith"})])
+                   "profile" (contains {"first_name" "Alice"
+                                        "last_name" "Smith"})
                    "wallets" (contains
-                              [(contains
-                                {"slug" "default"
-                                 "entries" (contains
-                                            [(contains {"balance" 100
-                                                        "currency" {"id" "USD"}})
-                                             (contains {"balance" 0.5
-                                                        "currency" {"id" "BTC"}})]
-                                            :in-any-order)})])})]}))
+                              {"slug" "default"
+                               "entries" (contains
+                                          [(contains {"balance" 100
+                                                      "currency" (contains {"id" "USD"})})
+                                           (contains {"balance" 0.5
+                                                      "currency" (contains {"id" "BTC"})})]
+                                          :in-any-order)})})]}))
+
+
+
