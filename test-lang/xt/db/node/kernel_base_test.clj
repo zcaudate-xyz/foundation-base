@@ -156,7 +156,7 @@
     (var node (substrate/node-create {}))
     (-> (kernel/kernel-setup-single node "db/primary" "memory" {} -/Schema -/SchemaLookup)
         (promise/x:promise-then
-         (fn []
+         (fn [out]
            (repl/notify
             (substrate/get-service node "db/primary"))))))
   => (contains-in
@@ -187,23 +187,8 @@
                                    "caching" {"type" "memory" "defaults" {}}}
                                   -/Schema
                                   -/SchemaLookup)
-        (promise/x:promise-then
-         (fn []
-           (repl/notify
-            {"common" (substrate/get-service node "db/common")
-             "primary" (substrate/get-service node "db/primary")
-             "caching" (substrate/get-service node "db/caching")})))))
-  => (contains-in
-      {"common" {"config" map?, "schema" map?, "lookup" map?
-                 "metadata" {"common_id" "db/common"}}
-       "primary" {"schema" map?, "lookup" map?
-                  "metadata" {"common_id" "db/common"
-                              "caching_id" "db/caching"}
-                  "::" "xt.db.system.impl_memory/ImplMemory"}
-       "caching" {"schema" map?, "lookup" map?
-                  "metadata" {"common_id" "db/common"
-                              "primary_id" "db/primary"}
-                  "::" "xt.db.system.impl_memory/ImplMemory"}}))
+        (repl/notify)))
+  => {"status" "setup", "data" {"caching" {"id" "db/caching", "type" "memory", "defaults" {}}, "primary" {"id" "db/primary", "type" "memory", "defaults" {}}, "common" {"id" "db/common"}}})
 
 ^{:refer xt.db.node.kernel-base/kernel-setup-handler :added "4.1"}
 (fact "explicitly sets up base services from handler args"
@@ -218,15 +203,8 @@
           -/SchemaLookup]
          nil
          node)
-        (promise/x:promise-then
-         (fn []
-           (repl/notify
-            {"common_exists" (xt/x:not-nil? (substrate/get-service node "db/common"))
-             "primary_exists" (xt/x:not-nil? (substrate/get-service node "db/primary"))
-             "caching_exists" (xt/x:not-nil? (substrate/get-service node "db/caching"))})))))
-  => {"common_exists" true
-      "primary_exists" true
-      "caching_exists" true})
+        (repl/notify)))
+  => {"status" "setup", "data" {"caching" {"id" "db/caching", "type" "memory", "defaults" {}}, "primary" {"id" "db/primary", "type" "memory", "defaults" {}}, "common" {"id" "db/common"}}})
 
 ^{:refer xt.db.node.kernel-base/kernel-teardown-main :added "4.1"}
 (fact "tears down common, primary and caching services"
@@ -238,14 +216,10 @@
     (-> (kernel/kernel-setup-main node config -/Schema -/SchemaLookup)
         (promise/x:promise-then
          (fn []
-           (kernel/kernel-teardown-main node config)
-           (repl/notify
-            {"common_removed" (xt/x:nil? (substrate/get-service node "db/common"))
-             "primary_removed" (xt/x:nil? (substrate/get-service node "db/primary"))
-             "caching_removed" (xt/x:nil? (substrate/get-service node "db/caching"))})))))
-  => {"common_removed" true
-      "primary_removed" true
-      "caching_removed" true})
+           (return
+            (kernel/kernel-teardown-main node config))))
+        (repl/notify)))
+  => {"status" "teardown", "data" {"caching" {"id" "db/caching", "type" "memory", "defaults" {}}, "primary" {"id" "db/primary", "type" "memory", "defaults" {}}, "common" {"id" "db/common"}}})
 
 ^{:refer xt.db.node.kernel-base/kernel-teardown-handler :added "4.1"}
 (fact "tears down base services from a handler arg"
@@ -257,14 +231,10 @@
     (-> (kernel/kernel-setup-main node config -/Schema -/SchemaLookup)
         (promise/x:promise-then
          (fn []
-           (kernel/kernel-teardown-handler nil ["db/primary"] nil node)
-           (repl/notify
-            {"common_removed" (xt/x:nil? (substrate/get-service node "db/common"))
-             "primary_removed" (xt/x:nil? (substrate/get-service node "db/primary"))
-             "caching_removed" (xt/x:nil? (substrate/get-service node "db/caching"))})))))
-  => {"common_removed" true
-      "primary_removed" true
-      "caching_removed" true})
+           (return
+            (kernel/kernel-teardown-handler nil ["db/primary"] nil node))))
+        (repl/notify)))
+  => {"status" "teardown", "data" {"caching" {"id" "db/caching", "type" "memory", "defaults" {}}, "primary" {"id" "db/primary", "type" "memory", "defaults" {}}, "common" {"id" "db/common"}}})
 
 ^{:refer xt.db.node.kernel-base/kernel-init-main :added "4.1"}
 (fact "ensures base services are present"
@@ -277,17 +247,8 @@
         (promise/x:promise-then
          (fn []
            (return (kernel/kernel-init-main node config -/Schema -/SchemaLookup))))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify
-            {"is_node" (== out node)
-             "common_exists" (xt/x:not-nil? (substrate/get-service node "db/common"))
-             "primary_exists" (xt/x:not-nil? (substrate/get-service node "db/primary"))
-             "caching_exists" (xt/x:not-nil? (substrate/get-service node "db/caching"))})))))
-  => {"is_node" true
-      "common_exists" true
-      "primary_exists" true
-      "caching_exists" true})
+        (repl/notify)))
+  => {"status" "no_change", "data" {"caching" {"id" "db/caching", "type" "memory", "defaults" {}}, "primary" {"id" "db/primary", "type" "memory", "defaults" {}}, "common" {"id" "db/common"}}})
 
 ^{:refer xt.db.node.kernel-base/kernel-init-handler :added "4.1"}
 (fact "initialises base services from handler args if needed"
@@ -302,15 +263,9 @@
           -/SchemaLookup]
          nil
          node)
-        (promise/x:promise-then
-         (fn []
-           (repl/notify
-            {"common_exists" (xt/x:not-nil? (substrate/get-service node "db/common"))
-             "primary_exists" (xt/x:not-nil? (substrate/get-service node "db/primary"))
-             "caching_exists" (xt/x:not-nil? (substrate/get-service node "db/caching"))})))))
-  => {"common_exists" true
-      "primary_exists" true
-      "caching_exists" true})
+        (repl/notify)))
+  => {"status" "setup", "data" {"caching" {"id" "db/caching", "type" "memory", "defaults" {}}, "primary" {"id" "db/primary", "type" "memory", "defaults" {}}, "common" {"id" "db/common"}}})
+
 
 ^{:refer xt.db.node.kernel-base/subscribe-db-handler :added "4.1"
   :setup [(l/rt:restart :js)]}
@@ -379,13 +334,13 @@
         (repl/notify)))
   => true)
 
-^{:refer xt.db.node.kernel-base/sync-caching-handler :added "4.1"
+^{:refer xt.db.node.kernel-base/sync-cached-handler :added "4.1"
   :setup [(l/rt:restart :js)
           (def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
                         "message" "hello"}
                        {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
                         "message" "world"}])]}
-(fact "sync-caching-handler applies db/sync payload to the paired caching db"
+(fact "sync-cached-handler applies db/sync payload to the paired caching db"
 
   (notify/wait-on :js
     (var node (substrate/node-create {}))
@@ -393,11 +348,11 @@
         (promise/x:promise-then
          (fn []
            (return
-            (kernel/sync-caching-handler nil
-                                         ["db/primary"
-                                          {"db/sync" {"Log" (@! +logs+)}}]
-                                         nil
-                                         node))))
+            (kernel/sync-cached-handler nil
+                                        ["db/primary"
+                                         {"db/sync" {"Log" (@! +logs+)}}]
+                                        nil
+                                        node))))
         (repl/notify)))
   => true
 
@@ -407,11 +362,11 @@
         (promise/x:promise-then
          (fn [out]
            (return
-            (kernel/sync-caching-handler nil
-                                         ["db/primary"
-                                          {"db/sync" {"Log" (@! +logs+)}}]
-                                         nil
-                                         node))))
+            (kernel/sync-cached-handler nil
+                                        ["db/primary"
+                                         {"db/sync" {"Log" (@! +logs+)}}]
+                                        nil
+                                        node))))
         (promise/x:promise-then
          (fn [out]
            (return
@@ -448,16 +403,15 @@
                                           "group:a"
                                           "echo"
                                           {}
-                                          nil)
-                (promise/x:promise-then
-                 (fn []
-                   (repl/notify
-                    (page-core/model-get-output node
-                                                  "space/a"
-                                                  "group:a"
-                                                  "echo"))))))))
-        (promise/x:promise-catch
-         (fn [err] (repl/notify (. err message))))))
+                                          nil)))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (page-core/model-get-output node
+                                        "space/a"
+                                        "group:a"
+                                        "echo"))))
+        (repl/notify)))
   => [1]
 
   (notify/wait-on :js
@@ -537,17 +491,10 @@
             {"handler" (fn [ctx] (return []))
              "options" {"refresh" {"Log" true}}
              "defaults" {"args" []}})
-           (var out (kernel/detach-base-model
-                     node "db/primary" "room/a" "demo" "refresh-view"))
-           (var caching (kernel/get-caching-impl node "db/primary"))
-           (var listener (impl-common/get-db-listener
-                          caching
-                          "room/a/demo/refresh-view"))
            (repl/notify
-            {"status" (xt/x:get-key out "status")
-             "listener_removed" (xt/x:nil? listener)})))))
-  => {"status" "removed"
-      "listener_removed" true})
+            (kernel/detach-base-model
+             node "db/primary" "room/a" "demo" "refresh-view"))))))
+  => {"space" "room/a", "model" "refresh-view", "group" "demo", "status" "removed"})
 
 ^{:refer xt.db.node.kernel-base/detach-model-handler :added "4.1"}
 (fact "detach-model-handler detaches a page model from the node"
@@ -1016,9 +963,7 @@
     {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
      "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
      "defaults" (. spec ["defaults"])})
-  => {"has-main" true
-      "has-remote" true
-      "defaults" {"args" [[] []]}})
+  => {"has-remote" true, "has-main" true, "defaults" {"args" [{"return_args" [], "select_args" []}]}})
 
 ^{:refer xt.db.node.kernel-base/dataview-attach-model :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
@@ -1088,32 +1033,37 @@
                 "@xt.db/kernel-teardown"
                 "@xt.db/subscribe-db"
                 "@xt.db/unsubscribe-db"
-                "@xt.db/sync-caching"
+                "@xt.db/sync-cached"
                 "@xt.db/attach-model"
                 "@xt.db/detach-model"
                 "@xt.db/rpc-call"
                 "@xt.db/rpc-attach-model"
                 "@xt.db/pull-call"
+                "@xt.db/pull-cached"
                 "@xt.db/pull-attach-model"
                 "@xt.db/dataview-call"
-                "@xt.db/dataview-attach-model"]))
+                "@xt.db/dataview-cached"
+                "@xt.db/dataview-attach-model"]
+               :in-any-order))
 
 ^{:refer xt.db.node.kernel-base/list-substrate-fn :added "4.1"}
 (fact "list-substrate-fn lists public vars tagged with :substrate/fn"
-
+  
   (sort (map (comp :substrate/fn meta second)
              (kernel/list-substrate-fn 'xt.db.node.kernel-base)))
-  => ["@xt.db/attach-model"
-      "@xt.db/dataview-attach-model"
-      "@xt.db/dataview-call"
-      "@xt.db/detach-model"
-      "@xt.db/kernel-init"
-      "@xt.db/kernel-setup"
-      "@xt.db/kernel-teardown"
-      "@xt.db/pull-attach-model"
-      "@xt.db/pull-call"
-      "@xt.db/rpc-attach-model"
-      "@xt.db/rpc-call"
-      "@xt.db/subscribe-db"
-      "@xt.db/sync-caching"
-      "@xt.db/unsubscribe-db"])
+  => '("@xt.db/attach-model"
+       "@xt.db/dataview-attach-model"
+       "@xt.db/dataview-call"
+       "@xt.db/detach-model"
+       "@xt.db/kernel-init"
+       "@xt.db/kernel-setup"
+       "@xt.db/kernel-teardown"
+       "@xt.db/pull-attach-model"
+       "@xt.db/pull-cached"
+       "@xt.db/pull-cached"
+       "@xt.db/pull-call"
+       "@xt.db/rpc-attach-model"
+       "@xt.db/rpc-call"
+       "@xt.db/subscribe-db"
+       "@xt.db/sync-cached"
+       "@xt.db/unsubscribe-db"))

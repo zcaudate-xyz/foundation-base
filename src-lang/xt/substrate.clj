@@ -38,7 +38,6 @@
 (def.xt ^{:arglists '([node space-id signal event])} page-space-trigger-all page/space-trigger-all)
 (def.xt ^{:arglists '([node space-id])} page-raw-callback-add page/raw-callback-add)
 (def.xt ^{:arglists '([node space-id])} page-raw-callback-remove page/raw-callback-remove)
-
 (def.xt ^{:arglists '([node])} page-proxy-install page-proxy/install)
 (def.xt ^{:arglists '([node space-id opts])} page-proxy-list page-proxy/group-list-proxy)
 (def.xt ^{:arglists '([node space-id group-id opts])} page-proxy-open page-proxy/group-open-proxy)
@@ -48,26 +47,33 @@
 
 (defspec.xt NodeTriggerHandler
   [:fn [node-space/NodeSpace frame/NodeFrame :xt/any] :xt/any])
+
 (defspec.xt NodeHandlerEntry
   [:xt/record
    ["id" :xt/str]
    ["fn" node-request/RequestHandler]
    ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
 (defspec.xt NodeTriggerEntry
   [:xt/record
    ["id" :xt/str]
    ["fn" NodeTriggerHandler]
    ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
 (defspec.xt NodeTransportListener
   [:fn [frame/NodeFrame
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       :xt/promise])
+   :xt/promise])
+
 (defspec.xt NodeTransportSendFn
   [:fn [frame/NodeFrame] :xt/any])
+
 (defspec.xt NodeTransportStartFn
   [:fn [NodeTransportListener] :xt/any])
+
 (defspec.xt NodeTransportStopFn
   [:fn [:xt/any] :xt/any])
+
 (defspec.xt NodeTransport
   [:xt/record
    ["::" :xt/str]
@@ -77,6 +83,7 @@
    ["send_fn" [:xt/maybe NodeTransportSendFn]]
    ["start_fn" [:xt/maybe NodeTransportStartFn]]
    ["stop_fn" [:xt/maybe NodeTransportStopFn]]])
+
 (defspec.xt EventNode
   [:xt/record
    ["::" :xt/str]
@@ -90,120 +97,150 @@
    ["router" router/RouterState]
    ["transports" [:xt/dict :xt/str NodeTransport]]
    ["meta" [:xt/maybe [:xt/dict :xt/str :xt/any]]]])
+
 (defspec.xt node?
   [:fn [:xt/any] :xt/bool])
+
 (defspec.xt transport?
   [:fn [:xt/any] :xt/bool])
+
 (defspec.xt transport-create
   [:fn [:xt/str
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       NodeTransport])
+   NodeTransport])
+
 (defspec.xt node-configure
   [:fn [EventNode
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       EventNode])
+   EventNode])
+
 (defspec.xt node-create
   [:fn [[:xt/maybe [:xt/dict :xt/str :xt/any]]] EventNode])
+
 (defspec.xt register-handler
   [:fn [EventNode
         :xt/str
         node-request/RequestHandler
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       NodeHandlerEntry])
+   NodeHandlerEntry])
+
 (defspec.xt get-services
   [:fn [EventNode] [:xt/dict :xt/str :xt/any]])
+
 (defspec.xt get-service
   [:fn [EventNode :xt/str] :xt/any])
+
 (defspec.xt set-service
   [:fn [EventNode :xt/str :xt/any] :xt/any])
+
 (defspec.xt unregister-handler
   [:fn [EventNode :xt/str] [:xt/maybe NodeHandlerEntry]])
+
 (defspec.xt get-handler
   [:fn [EventNode :xt/str] [:xt/maybe NodeHandlerEntry]])
+
 (defspec.xt list-handlers
   [:fn [EventNode] [:xt/array :xt/str]])
+
 (defspec.xt register-trigger
   [:fn [EventNode
         :xt/str
         NodeTriggerHandler
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       NodeTriggerEntry])
+   NodeTriggerEntry])
+
 (defspec.xt unregister-trigger
   [:fn [EventNode :xt/str] [:xt/maybe NodeTriggerEntry]])
+
 (defspec.xt get-trigger
   [:fn [EventNode :xt/str] [:xt/maybe NodeTriggerEntry]])
+
 (defspec.xt list-triggers
   [:fn [EventNode] [:xt/array :xt/str]])
+
 (defspec.xt list-subscriptions
   [:fn [EventNode
         [:xt/maybe :xt/str]
         [:xt/maybe :xt/str]]
-       [:or router/RouterSubscriptions
-            router/RouterSpaceSubscriptions
-            [:xt/array :xt/str]]])
+   [:or router/RouterSubscriptions
+    router/RouterSpaceSubscriptions
+    [:xt/array :xt/str]]])
+
 (defspec.xt broadcast-transport
   [:fn [EventNode
         frame/NodeFrame
         [:xt/maybe :xt/str]]
-       :xt/promise])
+   :xt/promise])
+
 (defspec.xt route-stream
   [:fn [EventNode
         frame/NodeFrame
         [:xt/maybe :xt/str]]
-       :xt/promise])
+   :xt/promise])
+
 (defspec.xt attach-transport
   [:fn [EventNode
         :xt/str
         [:or NodeTransport
-             [:xt/dict :xt/str :xt/any]]]
-       :xt/promise])
+         [:xt/dict :xt/str :xt/any]]]
+   :xt/promise])
+
 (defspec.xt detach-transport
   [:fn [EventNode :xt/str] :xt/promise])
+
 (defspec.xt receive-request
   [:fn [EventNode
         frame/NodeFrame
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       :xt/promise])
+   :xt/promise])
+
 (defspec.xt receive-response
   [:fn [EventNode frame/NodeFrame] :xt/promise])
+
 (defspec.xt request
   [:fn [EventNode
         [:xt/maybe :xt/str]
         :xt/str
         [:xt/maybe [:xt/array :xt/any]]
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       :xt/promise])
+   :xt/promise])
+
 (defspec.xt subscribe
   [:fn [EventNode
         [:xt/maybe :xt/str]
         :xt/str
         [:xt/maybe :xt/str]
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       :xt/promise])
+   :xt/promise])
+
 (defspec.xt unsubscribe
   [:fn [EventNode
         [:xt/maybe :xt/str]
         :xt/str
         [:xt/maybe :xt/str]
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       :xt/promise])
+   :xt/promise])
+
 (defspec.xt publish
   [:fn [EventNode
         [:xt/maybe :xt/str]
         :xt/str
         :xt/any
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       :xt/promise])
+   :xt/promise])
+
 (defspec.xt receive-publish
   [:fn [EventNode
         frame/NodeFrame
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       :xt/promise])
+   :xt/promise])
+
 (defspec.xt receive-frame
   [:fn [EventNode
         frame/NodeFrame
         [:xt/maybe [:xt/dict :xt/str :xt/any]]]
-       :xt/promise])
+   :xt/promise])
+
 (defn.xt node?
   "checks if a value is a node runtime"
   {:added "4.1"}
@@ -211,6 +248,7 @@
   (return (and (xt/x:is-object? obj)
                (== "substrate"
                    (xt/x:get-key obj "::")))))
+
 (defn.xt transport?
   "checks if a value is a node transport"
   {:added "4.1"}
@@ -218,6 +256,7 @@
   (return (and (xt/x:is-object? obj)
                (== "substrate.transport"
                    (xt/x:get-key obj "::")))))
+
 (defn.xt transport-create
   "wraps a transport implementation"
   {:added "4.1"}
@@ -228,12 +267,14 @@
      :id transport-id
      :listener nil}
     (or impl {}))))
+
 (defn.xt get-services
   "gets registered node services"
   {:added "4.1"}
   [node]
   (return (or (xt/x:get-key node "services")
               {})))
+
 (defn.xt get-service
   "gets a registered node service"
   {:added "4.1"}
@@ -248,6 +289,7 @@
                 service-id
                 service)
   (return service))
+
 (defn.xt remove-service
   "removes a shared service from the node"
   {:added "4.1"}
@@ -256,26 +298,31 @@
   (xt/x:del-key (xt/x:get-key node "services")
                 service-id)
   (return service))
+
 (defn.xt transport-get
   "gets an attached transport"
   {:added "4.1"}
   [node transport-id]
   (return (base-util/transport-get node transport-id)))
+
 (defn.xt transport-list
   "lists active transport ids"
   {:added "4.1"}
   [node]
   (return (base-util/transport-list node)))
+
 (defn.xt transport-send
   "sends frames through a transport"
   {:added "4.1"}
   [node transport-id frame]
   (return (base-util/transport-send node transport-id frame)))
+
 (defn.xt list-subscriptions
   "lists router subscriptions"
   {:added "4.1"}
   [node space signal]
   (return (router/list-subscriptions node space signal)))
+
 (defn.xt publish
   "publishes a stream frame through node core and subscribed transports"
   {:added "4.1"}
@@ -345,17 +392,19 @@
                                       frame
                                       exclude-id
                                       0)))
+
 (defn.xt route-stream
   "routes a stream to transports subscribed for the matching space and signal"
   {:added "4.1"}
   [node stream exclude-id]
   (return (base-util/stream-route-loop node
-                               (router/target-ids node
-                                                  (xt/x:get-key stream "space")
-                                                  (xt/x:get-key stream "signal"))
-                               stream
-                               exclude-id
-                               0)))
+                                       (router/target-ids node
+                                                          (xt/x:get-key stream "space")
+                                                          (xt/x:get-key stream "signal"))
+                                       stream
+                                       exclude-id
+                                       0)))
+
 (defn.xt receive-request
   "receives and handles an inbound request"
   {:added "4.1"}
@@ -372,13 +421,15 @@
       (fn [err]
         (return (base-util/response-error node request err nil ctx)))))
     (catch err
-      (return (base-util/response-error node request err nil ctx)))))
+        (return (base-util/response-error node request err nil ctx)))))
+
 (defn.xt receive-response
   "receives an inbound response"
   {:added "4.1"}
   [node response]
   (node-request/settle-pending node response)
   (return (promise/x:promise-run response)))
+
 (defn.xt subscribe
   "constructs and optionally sends a subscribe control frame"
   {:added "4.1"}
@@ -393,6 +444,7 @@
       (-/transport-send node target event)
       (fn [_]
         (return event))))))
+
 (defn.xt unsubscribe
   "constructs and optionally sends an unsubscribe control frame"
   {:added "4.1"}
@@ -407,6 +459,7 @@
       (-/transport-send node target event)
       (fn [_]
         (return event))))))
+
 (defn.xt receive-publish
   "receives an inbound stream frame"
   {:added "4.1"}
@@ -419,6 +472,7 @@
       (return (-/route-stream node
                               stream
                               (xt/x:get-key ctx "transport_id")))))))
+
 (defn.xt receive-frame
   "demultiplexes node frames"
   {:added "4.1"}
@@ -441,6 +495,7 @@
 
         :else
         (return (promise/x:promise-run event))))
+
 (defn.xt attach-transport
   "attaches and optionally starts a transport"
   {:added "4.1"}
@@ -469,6 +524,7 @@
     (fn [listener]
       (xt/x:set-key transport "listener" listener)
       (return transport)))))
+
 (defn.xt detach-transport
   "detaches and optionally stops a transport"
   {:added "4.1"}
@@ -488,48 +544,50 @@
      (stop-fn (xt/x:get-key transport "listener")))
     (fn [_]
       (return transport)))))
+
 (defn.xt node-configure
   "applies declarative spaces, handlers, and triggers to a node"
   {:added "4.1"}
   [node opts]
   (:= opts (or opts {}))
   (xt/for:object [[space-id config] (or (xt/x:get-key opts "spaces") {})]
-   (node-space/create-space node
-                            space-id
-                            (base-util/config-normalize-space space-id config)))
+    (node-space/create-space node
+                             space-id
+                             (base-util/config-normalize-space space-id config)))
   (xt/for:object [[action config] (or (xt/x:get-key opts "handlers") {})]
-   (var entry (base-util/config-normalize-handler action config))
-   (-/register-handler node
-                       action
-                       (xt/x:get-key entry "fn")
-                       (xt/x:get-key entry "meta")))
+    (var entry (base-util/config-normalize-handler action config))
+    (-/register-handler node
+                        action
+                        (xt/x:get-key entry "fn")
+                        (xt/x:get-key entry "meta")))
   (xt/for:object [[signal config] (or (xt/x:get-key opts "triggers") {})]
-   (var entry (base-util/config-normalize-trigger signal config))
-   (-/register-trigger node
-                       signal
-                       (xt/x:get-key entry "fn")
-                       (xt/x:get-key entry "meta")))
+    (var entry (base-util/config-normalize-trigger signal config))
+    (-/register-trigger node
+                        signal
+                        (xt/x:get-key entry "fn")
+                        (xt/x:get-key entry "meta")))
   (return node))
+
 (defn.xt node-create
   "creates a transport-agnostic node runtime, optionally from declarative config"
   {:added "4.1"}
   [opts]
   (:= opts (or opts {}))
   (var node
-   (event-common/blank-container
-    "substrate"
-    (xt/x:obj-assign
-     {:id (or (xt/x:get-key opts "id")
-              (frame/rand-id "node-" 6))
-      :spaces {}
-      :services {}
-      :handlers {}
-      :triggers {}
-      :pending {}
-      :router {:connections {}
-               :subscriptions {}}
-      :transports {}
-      :meta (or (xt/x:get-key opts "meta") {})}
-     (base-util/node-base-opts opts))))
+       (event-common/blank-container
+        "substrate"
+        (xt/x:obj-assign
+         {:id (or (xt/x:get-key opts "id")
+                  (frame/rand-id "node-" 6))
+          :spaces {}
+          :services {}
+          :handlers {}
+          :triggers {}
+          :pending {}
+          :router {:connections {}
+                   :subscriptions {}}
+          :transports {}
+          :meta (or (xt/x:get-key opts "meta") {})}
+         (base-util/node-base-opts opts))))
   (-/node-configure node opts)
   (return node))

@@ -24,8 +24,12 @@
             (-/notify-with-promise notify-fn host port out id key opts))))
         (promise/x:promise-catch
          (fn [err]
+           (var out (:? (xt/x:ex-message err)
+                        {:message (xt/x:ex-message err)
+                         :data (xt/x:ex-data err)}
+                        err))
            (return
-            (notify-fn host port err id key opts)))))))
+            (notify-fn host port out id key opts)))))))
 
 ;;
 ;; SOCKET
