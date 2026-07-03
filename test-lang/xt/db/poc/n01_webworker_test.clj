@@ -48,66 +48,32 @@
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
 
-(fact:global
- {:setup [(l/rt:restart)
-          (l/rt:setup :postgres)
-          (l/rt:scaffold-imports :js)]
-  :teardown [(l/rt:stop)]})
+(defn.js node-worker-module-source
+  "creates a Node worker_threads source that evaluates the script as an ES module"
+  [script opts]
+  (var #{Worker} (require "worker_threads"))
+  (return
+   {"create_fn"
+    (fn [listener]
+      (var worker (new Worker script
+                            {:eval true
+                             :type "module"}))
+      (. worker (on "message"
+                    (fn [data]
+                      (return (listener data)))))
+      (return worker))}))
 
 
-(notify/wait-on [:js 1000]
-  (var client (substrate/node-create {"id" "db-model-client"}))
-  (runtime/nodeworker-connect client ))
+(defn- fix-worker-script
+  "Node 24 eval workers parse scripts containing ESM imports as modules, so the
+   worker_threads setup must use a static ESM import instead of CommonJS require."
+  [script]
+  (str "import { parentPort } from 'worker_threads';\n"
+       (-> script
+           (clojure.string/replace #"let worker_threads = require\(\"worker_threads\"\);\n" "")
+           (clojure.string/replace #"worker_threads\[\"parentPort\"\]" "parentPort"))))
 
-
-^{:refer xt.db.poc.node-webworker-test/worker-server-fact :added "4.1"
-  :setup [(scratch-v0/log-append-public "remote")]}
-(fact "worker-hosted server exposes db models to a connecting client"
-
-  (notify/wait-on [:js 10000]
-    (var link (browser-transport/node-worker-source (@! +server-script+) {}))
-    (var client (substrate/node-create {"id" "db-model-client"}))
-    (page-proxy/install client)
-    (var conn-ref nil)
-    (var groups-ref nil)
-    (. (browser-transport/connect-worker
-        client
-        {"transport_id" "worker"
-         "source" link})
-       (then
-        (fn [conn]
-          (:= conn-ref conn)
-          (return (page-proxy/group-list-proxy client "room/a" {"transport_id" (. conn ["transport_id"])}))))
-       (then
-        (fn [groups]
-          (:= groups-ref groups)
-          (return (page-proxy/group-open-proxy client "room/a" "demo" {"transport_id" (. conn-ref ["transport_id"])}))))
-       (then
-        (fn [group]
-          (browser-transport/disconnect conn-ref)
-          (var model (xtd/get-in group ["models" "entry"]))
-          (repl/notify
-           {"connected" true
-            "groups" groups-ref
-            "has_group" (xt/x:not-nil? group)
-            "model_type" (xt/x:get-key model "::")
-            "output" (event-model/get-current model nil)})))
-       (catch
-        (fn [err]
-          (repl/notify
-           {"connected" false
-            "error" err
-            "message" (xt/x:ex-message err)})))))
-  => (contains-in
-      {"connected" true
-       "groups" {"demo" {"models" ["entry"]}}
-       "has_group" true
-       "model_type" "event.model"}))
-
-
-(comment
-
-  (def ^:private +server-script+
+(def ^:private +server-script+
   (fix-worker-script
    (l/emit-script
     '(do
@@ -195,4 +161,55 @@
                        "data:text/javascript,export default {}"
                        "pg"
                        "data:text/javascript,export default {Client: function() {}}"}}})))
-  )
+
+
+(fact:global
+ {:setup [(l/rt:restart)
+          (l/rt:setup :postgres)
+          (l/rt:scaffold-imports :js)]
+  :teardown [(l/rt:stop)]})
+
+
+^{:refer xt.db.poc.node-webworker-test/worker-server-fact :added "4.1"
+  :setup [(scratch-v0/log-append-public "remote")]}
+(fact "worker-hosted server exposes db models to a connecting client"
+
+  (notify/wait-on [:js 10000]
+    (var link (-/node-worker-module-source (@! +server-script+) {}))
+    (var client (substrate/node-create {"id" "db-model-client"}))
+    (page-proxy/install client)
+    (var conn-ref nil)
+    (var groups-ref nil)
+    (. (browser-transport/connect-worker
+        client
+        {"transport_id" "worker"
+         "source" link})
+       (then
+        (fn [conn]
+          (:= conn-ref conn)
+          (return (page-proxy/group-list-proxy client "room/a" {"transport_id" (. conn ["transport_id"])}))))
+       (then
+        (fn [groups]
+          (:= groups-ref groups)
+          (return (page-proxy/group-open-proxy client "room/a" "demo" {"transport_id" (. conn-ref ["transport_id"])}))))
+       (then
+        (fn [group]
+          (browser-transport/disconnect conn-ref)
+          (var model (xtd/get-in group ["models" "entry"]))
+          (repl/notify
+           {"connected" true
+            "groups" groups-ref
+            "has_group" (xt/x:not-nil? group)
+            "model_type" (xt/x:get-key model "::")
+            "output" (event-model/get-current model nil)})))
+       (catch
+        (fn [err]
+          (repl/notify
+           {"connected" false
+            "error" err
+            "message" (xt/x:ex-message err)})))))
+  => (contains-in
+      {"connected" true
+       "groups" {"demo" {"models" ["entry"]}}
+       "has_group" true
+       "model_type" "event.model"}))

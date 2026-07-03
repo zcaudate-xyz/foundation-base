@@ -14,21 +14,6 @@
 (def$.xt STATE_TAG "substrate.page")
 (def$.xt STATE_SLOT "page")
 
-(def.xt PROXY_DISPATCHER nil)
-
-(defn.xt proxy-dispatcher-set
-  "sets the proxy operation dispatcher"
-  {:added "4.1"}
-  [dispatcher]
-  (:= -/PROXY_DISPATCHER dispatcher)
-  (return dispatcher))
-
-(defn.xt proxy-dispatcher-get
-  "gets the proxy operation dispatcher"
-  {:added "4.1"}
-  []
-  (return -/PROXY_DISPATCHER))
-
 (defn.xt proxy-group?
   "checks if a group is a proxy for a remote page group"
   {:added "4.1"}
@@ -177,8 +162,9 @@
   {:added "4.1"}
   [node space-id group-id model-id args save-output]
   (var [group model] (-/model-ensure node space-id group-id model-id))
-  (when (and (-/proxy-group? group) -/PROXY_DISPATCHER)
-    (return (-/PROXY_DISPATCHER "proxy-call" node space-id group-id [model-id args save-output])))
+  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (when dispatch-fn
+    (return (dispatch-fn "proxy-call" node space-id group-id [model-id args save-output])))
   (var [path context disabled]
        (-/model-prep node space-id group-id model-id {"args" args}))
   (return (page-util/run-remote context save-output path nil)))
@@ -187,6 +173,10 @@
   "calls update on the model"
   {:added "4.1"}
   [node space-id group-id model-id event refresh-deps-fn]
+  (var [group model] (-/model-ensure node space-id group-id model-id))
+  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (when dispatch-fn
+    (return (dispatch-fn "model-update" node space-id group-id [model-id (or event {})])))
   (var [path context disabled]
        (-/model-prep node space-id group-id model-id {"event" event}))
   (return (page-util/run-refresh context disabled path refresh-deps-fn)))
@@ -384,8 +374,9 @@
   {:added "4.1"}
   [node space-id group-id event]
   (var group (-/group-ensure node space-id group-id))
-  (when (and (-/proxy-group? group) -/PROXY_DISPATCHER)
-    (return (-/PROXY_DISPATCHER "group-update" node space-id group-id [event])))
+  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (when dispatch-fn
+    (return (dispatch-fn "group-update" node space-id group-id [event])))
   (var throttle (xt/x:get-key group "throttle"))
   (var models (xt/x:get-key group "models"))
   (var out [])
@@ -404,8 +395,9 @@
   {:added "4.1"}
   [node space-id group-id model-id event]
   (var [group model] (-/model-ensure node space-id group-id model-id))
-  (when (and (-/proxy-group? group) -/PROXY_DISPATCHER)
-    (return (-/PROXY_DISPATCHER "model-update" node space-id group-id [model-id event])))
+  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (when dispatch-fn
+    (return (dispatch-fn "model-update" node space-id group-id [model-id event])))
   (var throttle (xt/x:get-key group "throttle"))
   (var entry (th/throttle-run throttle model-id [(or event {})]))
   (return (xt/x:get-key entry "promise")))
@@ -415,8 +407,9 @@
   {:added "4.1"}
   [node space-id group-id model-id current event]
   (var [group model] (-/model-ensure node space-id group-id model-id))
-  (when (and (-/proxy-group? group) -/PROXY_DISPATCHER)
-    (return (-/PROXY_DISPATCHER "model-set-input" node space-id group-id [model-id current event])))
+  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (when dispatch-fn
+    (return (dispatch-fn "model-set-input" node space-id group-id [model-id current event])))
   (event-model/set-input model current)
   (return (-/model-update node space-id group-id model-id (or event {}))))
 
@@ -445,8 +438,9 @@
   {:added "4.1"}
   [node space-id group-id signal event]
   (var group (-/group-ensure node space-id group-id))
-  (when (and (-/proxy-group? group) -/PROXY_DISPATCHER)
-    (return (-/PROXY_DISPATCHER "trigger-group" node space-id group-id [signal event])))
+  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (when dispatch-fn
+    (return (dispatch-fn "trigger-group" node space-id group-id [signal event])))
   (return (-/group-trigger-raw node space-id group signal event)))
 
 (defn.xt model-trigger
@@ -454,8 +448,9 @@
   {:added "4.1"}
   [node space-id group-id model-id signal event]
   (var [group model] (-/model-ensure node space-id group-id model-id))
-  (when (and (-/proxy-group? group) -/PROXY_DISPATCHER)
-    (return (-/PROXY_DISPATCHER "trigger-model" node space-id group-id [model-id signal event])))
+  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (when dispatch-fn
+    (return (dispatch-fn "trigger-model" node space-id group-id [model-id signal event])))
   (var options (xt/x:get-key model "options"))
   (var trigger (xt/x:get-key options "trigger"))
   (when (page-util/check-event trigger signal event {"model" model
@@ -475,10 +470,11 @@
   (var groups (xt/x:get-key (-/space-ensure-page node space-id) "groups"))
   (var out {})
   (xt/for:object [[group-id group] groups]
+    (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
     (xt/x:set-key out
                   group-id
-                  (:? (and (-/proxy-group? group) -/PROXY_DISPATCHER)
-                      (-/PROXY_DISPATCHER "trigger-group" node space-id group-id [signal event])
+                  (:? dispatch-fn
+                      (dispatch-fn "trigger-group" node space-id group-id [signal event])
                       (-/group-trigger-raw node space-id group signal event))))
   (return out))
 

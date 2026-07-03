@@ -60,17 +60,18 @@
   (var transport-id (proxy-util/get-transport-id node (xtd/get-in request ["meta"])))
   (page-proxy/group-create-proxy node space-id group-id {} {"transport_id" transport-id})
   (return
-   (-> (substrate/request node
-                          nil
-                          (xt/x:get-key request "action")
-                          args
-                          {"transport_id" transport-id})
+   (promise/x:promise-then
+    (substrate/request node
+                       nil
+                       (xt/x:get-key request "action")
+                       args
+                       {"transport_id" transport-id})
+    (fn [status]
+      (return
        (promise/x:promise-then
-        (fn [status]
-          (-> (page-proxy/group-open-proxy node space-id group-id {"transport_id" transport-id})
-              (promise/x:promise-then
-               (fn [_]
-                 (return status)))))))))
+        (page-proxy/group-open-proxy node space-id group-id {"transport_id" transport-id})
+        (fn [_]
+          (return status))))))))
 
 (defn.xt detach-forward-handler
   "forwards a detach action to the server and closes the proxy group"

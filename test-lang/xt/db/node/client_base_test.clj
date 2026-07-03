@@ -652,8 +652,7 @@
                                      {}))))
         (promise/x:promise-then
          (fn []
-           (var server (xtd/get-in client ["state" "test-server"]))
-           (return (page-core/model-refresh server "room/a" "demo" "rpc-view" {} nil))))
+           (return (page-core/model-refresh client "room/a" "demo" "rpc-view" {} nil))))
         (promise/x:promise-then
          (fn [out]
            (var server (xtd/get-in client ["state" "test-server"]))

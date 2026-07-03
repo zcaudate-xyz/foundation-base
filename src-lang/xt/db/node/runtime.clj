@@ -176,7 +176,9 @@
       (xt.db.node.runtime/nodeworker-init-kernel node))
    {:lang :js
     :layout :full
-    :emit {:override override}}))
+    :emit {:override (or override
+                         {"@sqlite.org/sqlite-wasm" "data:text/javascript,export default {}"
+                          "pg" "data:text/javascript,export default {Client: function() {}}"})}}))
 
 (def.xt DEFAULT_NODEWORKER_SCRIPT
   (@! (nodeworker-init-string)))

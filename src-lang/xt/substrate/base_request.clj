@@ -51,10 +51,12 @@
   [:fn [:xt/any] :xt/promise])
 
 (defn.xt ensure-promise
-  "wraps sync values in a native host promise"
+  "wraps sync values in a native host promise; leaves thenables/native promises as-is"
   {:added "4.1"}
   [value]
-  (if (promise/x:promise-native? value)
+  (if (or (promise/x:promise-native? value)
+          (and (xt/x:not-nil? value)
+               (xt/x:is-function? (xt/x:get-key value "then"))))
     (return value)
     (return (promise/x:promise-run value))))
 

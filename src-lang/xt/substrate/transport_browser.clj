@@ -528,7 +528,8 @@
     (fn [listener]
       (var worker (new Worker script
                             (:? eval-mode
-                                {:eval true}
+                                {:eval true
+                                 :type "module"}
                                 {})))
       (. worker (on "message"
                     (fn [data]

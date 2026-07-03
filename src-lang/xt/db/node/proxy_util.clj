@@ -64,8 +64,10 @@
   {:added "4.1"}
   [node action args opts]
   (return
-   (substrate/request node
-                      nil
-                      action
-                      args
-                      (-/request-meta node opts))))
+   (:? (substrate/get-handler node action)
+       (substrate/request node nil action args {"local" true})
+       (substrate/request node
+                          nil
+                          action
+                          args
+                          (-/request-meta node opts)))))

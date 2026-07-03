@@ -230,14 +230,11 @@
   [space args request node]
   (var payload (xt/x:first args))
   (return
-   (-> (page-core/model-update node
-                               (xt/x:get-key payload "space")
-                               (xt/x:get-key payload "group")
-                               (xt/x:get-key payload "model")
-                               (or (xt/x:get-key payload "event") {}))
-       (promise/x:promise-then
-        (fn [_]
-          (return {"status" "ok"}))))))
+   (page-core/model-update node
+                           (xt/x:get-key payload "space")
+                           (xt/x:get-key payload "group")
+                           (xt/x:get-key payload "model")
+                           (or (xt/x:get-key payload "event") {}))))
 
 (defn.xt model-handle-set-input
   "handles a proxy model set-input request"
@@ -392,84 +389,15 @@
    nil)
   (return model))
 
-(defn.xt group-create-proxy
-  "creates a proxy group on the client from a server snapshot"
-  {:added "4.1"}
-  [node space-id group-id snapshot remote-spec]
-  (var runtime (page-core/space-ensure-page node space-id))
-  (var groups (xt/x:get-key runtime "groups"))
-  (var group-models {})
-  (xt/for:object [[model-id model-snapshot] snapshot]
-    (xt/x:set-key group-models
-                  model-id
-                  (-/model-create-proxy node space-id group-id model-id model-snapshot)))
-  (var group {"name"    group-id
-              "models"  group-models
-              "remote"  remote-spec
-              "deps"    {}
-              "throttle" nil})
-  (xt/x:set-key groups group-id group)
-  (return group))
-
-(defn.xt model-apply-output
-  "applies an inbound output delta to a proxy model"
-  {:added "4.1"}
-  [space stream node]
-  (var data (xt/x:get-key stream "data"))
-  (var space-id (xt/x:get-key stream "space"))
-  (var path (xt/x:get-key data "path"))
-  (var group-id (xt/x:first path))
-  (var model-id (xt/x:second path))
-  (var output (xt/x:get-key data "output"))
-  (var group (page-core/group-get node space-id group-id))
-  (when (or (xt/x:nil? group)
-            (not (page-core/proxy-group? group)))
-    (return nil))
-  (var model (xtd/get-in group ["models" model-id]))
-  (when (xt/x:nil? model)
-    (return nil))
-  (xt/x:obj-assign (xt/x:get-key model "output") output)
-  (return (event-model/trigger-listeners model "model.output" (xt/x:get-key model "output"))))
-
-(defn.xt model-apply-input
-  "applies an inbound input delta to a proxy model"
-  {:added "4.1"}
-  [space stream node]
-  (var data (xt/x:get-key stream "data"))
-  (var space-id (xt/x:get-key stream "space"))
-  (var path (xt/x:get-key data "path"))
-  (var group-id (xt/x:first path))
-  (var model-id (xt/x:second path))
-  (var input (xt/x:get-key data "input"))
-  (var group (page-core/group-get node space-id group-id))
-  (when (or (xt/x:nil? group)
-            (not (page-core/proxy-group? group)))
-    (return nil))
-  (var model (xtd/get-in group ["models" model-id]))
-  (when (xt/x:nil? model)
-    (return nil))
-  (xt/x:obj-assign (xt/x:get-key model "input") input)
-  (return (event-model/trigger-listeners model "model.input" (xt/x:get-key model "input"))))
-
-(defn.xt install-triggers
-  "installs client stream triggers for proxy page deltas"
-  {:added "4.1"}
-  [node]
-  (base-util/register-trigger node -/SIGNAL_OUTPUT -/model-apply-output nil)
-  (base-util/register-trigger node -/SIGNAL_INPUT -/model-apply-input nil)
-  (return node))
 
 ;;;
 ;;; PROXY DISPATCHER
 ;;;
 
-(defn.xt proxy-dispatcher
-  "forwards local page operations to the server owning the proxy group"
+(defn.xt proxy-dispatch-op
+  "forwards a single proxy page operation to the server over a given transport"
   {:added "4.1"}
-  [op node space-id group-id args]
-  (var group (page-core/group-get node space-id group-id))
-  (var remote-spec (xt/x:get-key group "remote"))
-  (var transport-id (xt/x:get-key remote-spec "transport_id"))
+  [node transport-id op space-id group-id args]
   (cond (== op "group-update")
         (do (var event (xtd/nth args 0))
             (return (base-util/request node
@@ -549,6 +477,85 @@
         :else
         (return nil)))
 
+(defn.xt proxy-dispatcher
+  "forwards local page operations to the server owning the proxy group"
+  {:added "4.1"}
+  [op node space-id group-id args]
+  (var group (page-core/group-get node space-id group-id))
+  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (return (dispatch-fn op node space-id group-id args)))
+
+(defn.xt group-create-proxy
+  "creates a proxy group on the client from a server snapshot"
+  {:added "4.1"}
+  [node space-id group-id snapshot remote-spec]
+  (var runtime (page-core/space-ensure-page node space-id))
+  (var groups (xt/x:get-key runtime "groups"))
+  (var group-models {})
+  (xt/for:object [[model-id model-snapshot] snapshot]
+    (xt/x:set-key group-models
+                  model-id
+                  (-/model-create-proxy node space-id group-id model-id model-snapshot)))
+  (var transport-id (xt/x:get-key remote-spec "transport_id"))
+  (var dispatch-fn (fn [op node space-id group-id args]
+                     (return (-/proxy-dispatch-op node transport-id op space-id group-id args))))
+  (var group {"name"    group-id
+              "models"  group-models
+              "remote"  remote-spec
+              "proxy_dispatch" dispatch-fn
+              "deps"    {}
+              "throttle" nil})
+  (xt/x:set-key groups group-id group)
+  (return group))
+
+(defn.xt model-apply-output
+  "applies an inbound output delta to a proxy model"
+  {:added "4.1"}
+  [space stream node]
+  (var data (xt/x:get-key stream "data"))
+  (var space-id (xt/x:get-key stream "space"))
+  (var path (xt/x:get-key data "path"))
+  (var group-id (xt/x:first path))
+  (var model-id (xt/x:second path))
+  (var output (xt/x:get-key data "output"))
+  (var group (page-core/group-get node space-id group-id))
+  (when (or (xt/x:nil? group)
+            (not (page-core/proxy-group? group)))
+    (return nil))
+  (var model (xtd/get-in group ["models" model-id]))
+  (when (xt/x:nil? model)
+    (return nil))
+  (xt/x:obj-assign (xt/x:get-key model "output") output)
+  (return (event-model/trigger-listeners model "model.output" (xt/x:get-key model "output"))))
+
+(defn.xt model-apply-input
+  "applies an inbound input delta to a proxy model"
+  {:added "4.1"}
+  [space stream node]
+  (var data (xt/x:get-key stream "data"))
+  (var space-id (xt/x:get-key stream "space"))
+  (var path (xt/x:get-key data "path"))
+  (var group-id (xt/x:first path))
+  (var model-id (xt/x:second path))
+  (var input (xt/x:get-key data "input"))
+  (var group (page-core/group-get node space-id group-id))
+  (when (or (xt/x:nil? group)
+            (not (page-core/proxy-group? group)))
+    (return nil))
+  (var model (xtd/get-in group ["models" model-id]))
+  (when (xt/x:nil? model)
+    (return nil))
+  (xt/x:obj-assign (xt/x:get-key model "input") input)
+  (return (event-model/trigger-listeners model "model.input" (xt/x:get-key model "input"))))
+
+(defn.xt install-triggers
+  "installs client stream triggers for proxy page deltas"
+  {:added "4.1"}
+  [node]
+  (base-util/register-trigger node -/SIGNAL_OUTPUT -/model-apply-output nil)
+  (base-util/register-trigger node -/SIGNAL_INPUT -/model-apply-input nil)
+  (return node))
+
 ;;;
 ;;; PUBLIC API
 ;;;
@@ -559,7 +566,6 @@
   [node]
   (-/install-handlers node)
   (-/install-triggers node)
-  (page-core/proxy-dispatcher-set -/proxy-dispatcher)
   (return node))
 
 (defn.xt group-list-proxy
@@ -578,6 +584,9 @@
   {:added "4.1"}
   [node space-id group-id opts]
   (var transport-id (xt/x:get-key opts "transport_id"))
+  (var existing-group (page-core/group-get node space-id group-id))
+  (var remote-spec (or (and existing-group (xt/x:get-key existing-group "remote"))
+                       opts))
   (return
    (-> (base-util/request node
                           space-id
@@ -591,7 +600,7 @@
           (when (xt/x:not-nil? error)
             (xt/x:err (xt/x:cat "ERR - " error)))
           (var snapshot (xt/x:get-key response "models"))
-          (-/group-create-proxy node space-id group-id snapshot opts)
+          (-/group-create-proxy node space-id group-id snapshot remote-spec)
           (return (page-core/group-get node space-id group-id)))))))
 
 (defn.xt group-close-proxy
@@ -618,17 +627,8 @@
   {:added "4.1"}
   [node space-id group-id model-id args save-output opts]
   (var group (page-core/group-get node space-id group-id))
-  (var remote-spec (xt/x:get-key group "remote"))
-  (var transport-id (xt/x:get-key remote-spec "transport_id"))
-  (return (base-util/request node
-                             space-id
-                             -/ACTION_MODEL_PROXY_CALL
-                             [{"space" space-id
-                               "group" group-id
-                               "model" model-id
-                               "args" args
-                               "save_output" save-output}]
-                             {"transport_id" transport-id})))
+  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (return (dispatch-fn "proxy-call" node space-id group-id [model-id args save-output])))
 
 (defn.xt group-sync-proxy
   "opens a proxy group and returns a bidirectional sync control handle"

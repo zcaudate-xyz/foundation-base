@@ -530,7 +530,11 @@
         (promise/x:promise-then
          (fn [response]
            (repl/notify response)))))
-  => {"status" "ok"})
+  => {"path" ["demo" "main"]
+      "post" [false]
+      "::" "model.run"
+      "pre" [false]
+      "main" [true {"value" "hello"}]})
 
 ^{:refer xt.substrate.page-proxy/model-handle-set-input :added "4.1"}
 (fact "sets model input and refreshes the model"
@@ -755,17 +759,15 @@
   => {"status" "ok"})
 
 ^{:refer xt.substrate.page-proxy/install :added "4.1"}
-(fact "installs handlers, triggers and the proxy dispatcher"
+(fact "installs handlers and triggers"
 
   (!.js
     (var node (substrate/node-create {"id" "node"}))
     (page-proxy/install node)
     {"handlers" (xt/x:len (substrate/list-handlers node))
-     "triggers" (xt/x:len (substrate/list-triggers node))
-     "dispatcher" (xt/x:is-function? (base-page/proxy-dispatcher-get))})
+     "triggers" (xt/x:len (substrate/list-triggers node))})
   => {"handlers" 9
-      "triggers" 2
-      "dispatcher" true})
+      "triggers" 2})
 
 ^{:refer xt.substrate.page-proxy/model-proxy-call :added "4.1"}
 (fact "issues a proxy-call request through the proxy group"

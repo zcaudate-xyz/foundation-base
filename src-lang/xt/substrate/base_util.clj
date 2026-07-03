@@ -57,6 +57,8 @@
   "resolves the outbound request target transport"
   {:added "4.1"}
   [node meta]
+  (when (xt/x:get-key meta "local")
+    (return nil))
   (var target (xt/x:get-key meta "transport_id"))
   (when (xt/x:not-nil? target)
     (return target))

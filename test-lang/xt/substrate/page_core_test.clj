@@ -869,29 +869,6 @@
                    "value" 9}]})
 
 
-^{:refer xt.substrate.page-core/proxy-dispatcher-set :added "4.1"}
-(fact "sets and returns the proxy dispatcher"
-
-  (!.js
-    (var dispatcher (fn [op node space-id group-id args]
-                      (return {"dispatched" op})))
-    (var result (page-core/proxy-dispatcher-set dispatcher))
-    (page-core/proxy-dispatcher-set nil)
-    (== result dispatcher))
-  => true)
-
-^{:refer xt.substrate.page-core/proxy-dispatcher-get :added "4.1"}
-(fact "returns the current proxy dispatcher"
-
-  (!.js
-    (var dispatcher (fn [op node space-id group-id args]
-                      (return {"dispatched" op})))
-    (page-core/proxy-dispatcher-set dispatcher)
-    (var current (page-core/proxy-dispatcher-get))
-    (page-core/proxy-dispatcher-set nil)
-    (== current dispatcher))
-  => true)
-
 ^{:refer xt.substrate.page-core/proxy-group? :added "4.1"}
 (fact "checks whether a group is marked as a remote proxy"
 
