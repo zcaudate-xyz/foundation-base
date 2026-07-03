@@ -160,46 +160,126 @@
   => (throws))
 
 ^{:refer kmi.lang.parser-forms/read-delimited :added "4.1"}
-(fact "TODO")
+(fact "handles empty input and EOF before closing delimiter"
+
+  (!.js (forms/read-delimited (rdr/create "]") "]" core/read))
+  => []
+
+  (!.js (forms/read-delimited (rdr/create "1 2") "]" core/read))
+  => (throws))
 
 ^{:refer kmi.lang.parser-forms/read-list :added "4.1"}
-(fact "TODO")
+(fact "handles empty lists and EOF"
+
+  (!.js (list/list-to-array (forms/read-list (rdr/create ")") core/read)))
+  => []
+
+  (!.js (forms/read-list (rdr/create "") core/read))
+  => (throws))
 
 ^{:refer kmi.lang.parser-forms/read-vector :added "4.1"}
-(fact "TODO")
+(fact "handles empty vectors and EOF"
+
+  (!.js (p/to-array (forms/read-vector (rdr/create "]") core/read)))
+  => []
+
+  (!.js (forms/read-vector (rdr/create "") core/read))
+  => (throws))
 
 ^{:refer kmi.lang.parser-forms/read-map :added "4.1"}
-(fact "TODO")
+(fact "handles empty maps and rejects odd number of entries"
+
+  (!.js (var out (forms/read-map (rdr/create "}") core/read))
+        [(. out _size)])
+  => [0]
+
+  (!.js (forms/read-map (rdr/create ":a}") core/read))
+  => (throws))
 
 ^{:refer kmi.lang.parser-forms/read-set :added "4.1"}
-(fact "TODO")
+(fact "handles empty sets"
+
+  (!.js (var out (forms/read-set (rdr/create "}") core/read))
+        [(. out _size)])
+  => [0])
 
 ^{:refer kmi.lang.parser-forms/read-required :added "4.1"}
-(fact "TODO")
+(fact "reads required forms and throws on EOF"
+
+  (!.js (forms/read-required (rdr/create "42") core/read))
+  => 42
+
+  (!.js (forms/read-required (rdr/create "") core/read))
+  => (throws))
 
 ^{:refer kmi.lang.parser-forms/read-quote :added "4.1"}
-(fact "TODO")
+(fact "quotes non-symbol forms"
+
+  (!.js (var out (list/list-to-array (forms/read-quote (rdr/create "42") core/read)))
+        [(. (xt/x:first out) _name)
+         (xt/x:second out)])
+  => ["quote" 42])
 
 ^{:refer kmi.lang.parser-forms/read-syntax-quote :added "4.1"}
-(fact "TODO")
+(fact "syntax-quotes non-symbol forms"
+
+  (!.js (var out (list/list-to-array (forms/read-syntax-quote (rdr/create "42") core/read)))
+        [(. (xt/x:first out) _name)
+         (xt/x:second out)])
+  => ["syntax-quote" 42])
 
 ^{:refer kmi.lang.parser-forms/read-deref :added "4.1"}
-(fact "TODO")
+(fact "derefs non-symbol forms"
+
+  (!.js (var out (list/list-to-array (forms/read-deref (rdr/create "42") core/read)))
+        [(. (xt/x:first out) _name)
+         (xt/x:second out)])
+  => ["deref" 42])
 
 ^{:refer kmi.lang.parser-forms/read-unquote-splicing :added "4.1"}
-(fact "TODO")
+(fact "reads unquote-splicing directly"
+
+  (!.js (var out (list/list-to-array (forms/read-unquote-splicing (rdr/create "42") core/read)))
+        [(. (xt/x:first out) _name)
+         (xt/x:second out)])
+  => ["unquote-splicing" 42])
 
 ^{:refer kmi.lang.parser-forms/read-unquote :added "4.1"}
-(fact "TODO")
+(fact "reads plain unquote without splicing"
+
+  (!.js (var out (list/list-to-array (forms/read-unquote (rdr/create "42") core/read)))
+        [(. (xt/x:first out) _name)
+         (xt/x:second out)])
+  => ["unquote" 42])
 
 ^{:refer kmi.lang.parser-forms/read-meta :added "4.1"}
-(fact "TODO")
+(fact "reads map metadata"
+
+  (!.js (var out (forms/read-meta (rdr/create "{:a 1} hello") core/read))
+        (var meta (syn/get-metadata out))
+        [(ic/is-syntax? out)
+         (hm/hashmap-lookup-key meta (kw/keyword nil "a") false)])
+  => [true 1])
 
 ^{:refer kmi.lang.parser-forms/read-var-quote :added "4.1"}
-(fact "TODO")
+(fact "var-quotes non-symbol forms"
+
+  (!.js (var out (list/list-to-array (forms/read-var-quote (rdr/create "42") core/read)))
+        [(. (xt/x:first out) _name)
+         (xt/x:second out)])
+  => ["var" 42])
 
 ^{:refer kmi.lang.parser-forms/read-discard :added "4.1"}
-(fact "TODO")
+(fact "discards the next form and returns the following one"
+
+  (!.js (forms/read-discard (rdr/create "1 2 3") core/read))
+  => 2)
 
 ^{:refer kmi.lang.parser-forms/read-dispatch :added "4.1"}
-(fact "TODO")
+(fact "rejects unknown and EOF dispatch macros"
+
+  (!.js (forms/read-dispatch (rdr/create "x") core/read))
+  => (throws)
+
+  (!.js (forms/read-dispatch (rdr/create "") core/read))
+  => (throws))

@@ -141,7 +141,15 @@
   => ["@kmi.lang/describe"
       "@kmi.lang/eval"
       "@kmi.lang/load"
-      "@kmi.lang/read"])
+      "@kmi.lang/read"
+      "@xt.substrate/echo"
+      "@xt.substrate/get-service"
+      "@xt.substrate/list-handlers"
+      "@xt.substrate/list-spaces"
+      "@xt.substrate/list-transports"
+      "@xt.substrate/list-triggers"
+      "@xt.substrate/node-info"
+      "@xt.substrate/ping"])
 
 (fact "substrate eval request returns the value"
 
@@ -195,28 +203,144 @@
 
 
 ^{:refer kmi.lang.runtime/read-string :added "4.1"}
-(fact "TODO")
+(fact "reads primitive and managed forms"
+
+  (!.js
+   [(rt/read-string "42")
+    (rt/read-string "\"hello\"")
+    (rt/read-string "true")
+    (rt/read-string "nil")
+    (rev/symbol? (rt/read-string "+"))
+    (rev/keyword? (rt/read-string ":key"))
+    (rev/list? (rt/read-string "(+ 1 2)"))
+    (rev/vector? (rt/read-string "[1 2]"))
+    (xt/x:get-key (rt/read-string ":key") "_name")
+    (xt/x:len (proto/to-array (rt/read-string "(+ 1 2)")))])
+  => [42 "hello" true nil true true true true "key" 3])
+
+(fact "reads only the first form"
+
+  (!.js
+   (rt/read-string "1 2 3"))
+  => 1)
 
 ^{:refer kmi.lang.runtime/read-many :added "4.1"}
-(fact "TODO")
+(fact "reads all forms from a string"
+
+  (!.js
+   (var forms (rt/read-many "1 2 (+ 1 2)"))
+   [(xt/x:len forms)
+    (xt/x:get-idx forms 0)
+    (xt/x:get-idx forms 1)
+    (rev/list? (xt/x:get-idx forms 2))])
+  => [3 1 2 true])
+
+(fact "returns an empty array for an empty string"
+
+  (!.js
+   (rt/read-many ""))
+  => [])
 
 ^{:refer kmi.lang.runtime/eval-form :added "4.1"}
-(fact "TODO")
+(fact "evaluates a self-evaluating form"
+
+  (!.js
+   (var out (rt/eval-form (rt/empty-runtime) 42))
+   [(xt/x:get-key out "value")
+    (xt/x:get-key (xt/x:get-key out "runtime") "ns")])
+  => [42 "user"])
+
+(fact "evaluates a function call form"
+
+  (!.js
+   (var out (rt/eval-form (rt/empty-runtime) (rt/read-string "(+ 1 2)")))
+   (xt/x:get-key out "value"))
+  => 3)
+
+(fact "returns an error for unbound symbols"
+
+  (!.js
+   (var out (rt/eval-form (rt/empty-runtime) (rt/read-string "x")))
+   (xt/x:has-key? out "error"))
+  => true)
 
 ^{:refer kmi.lang.runtime/eval-string-many :added "4.1"}
-(fact "TODO")
+(fact "evaluates multiple forms and returns the last value"
+
+  (!.js
+   (var out (rt/eval-string-many (rt/empty-runtime) "1 2 3"))
+   (xt/x:get-key out "value"))
+  => 3)
+
+(fact "threads runtime state across forms"
+
+  (!.js
+   (var out (rt/eval-string-many (rt/empty-runtime) "(def x 5) (+ x 1)"))
+   [(xt/x:get-key out "value")
+    (xt/x:get-key (xt/x:get-key (xt/x:get-key (xt/x:get-key (xt/x:get-key out "runtime") "namespaces") "user") "vars") "x")])
+  => [6 5])
 
 ^{:refer kmi.lang.runtime/handler-read :added "4.1"}
-(fact "TODO")
+(fact "substrate read request returns the parsed form"
+
+  (notify/wait-on :js
+    (var node (rt/create-node {}))
+    (-> (substrate/request node "kmi.session" "@kmi.lang/read" ["42"] {})
+        (promise/x:promise-then
+         (fn [res]
+           (repl/notify res)))))
+  => {"form" 42})
 
 ^{:refer kmi.lang.runtime/handler-eval :added "4.1"}
-(fact "TODO")
+(fact "substrate eval request returns errors for invalid input"
+
+  (notify/wait-on :js
+    (var node (rt/create-node {}))
+    (-> (substrate/request node "kmi.session" "@kmi.lang/eval" ["x"] {})
+        (promise/x:promise-then
+         (fn [res]
+           (repl/notify {"has-error" (xt/x:is-string? (xt/x:get-key res "error"))})))))
+  => {"has-error" true})
 
 ^{:refer kmi.lang.runtime/handler-load :added "4.1"}
-(fact "TODO")
+(fact "substrate load request evaluates many forms and threads state"
+
+  (notify/wait-on :js
+    (var node (rt/create-node {}))
+    (-> (substrate/request node "kmi.session" "@kmi.lang/load" ["(def z 8) (+ z 2)"] {})
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (substrate/request node "kmi.session" "@kmi.lang/eval" ["z"] {}))))
+        (promise/x:promise-then
+         (fn [res]
+           (repl/notify res)))))
+  => {"value" 8})
 
 ^{:refer kmi.lang.runtime/handler-describe :added "4.1"}
-(fact "TODO")
+(fact "substrate describe request returns metadata for a managed form"
+
+  (notify/wait-on :js
+    (var node (rt/create-node {}))
+    (-> (substrate/request node "kmi.session" "@kmi.lang/describe" ["[1 2 3]"] {})
+        (promise/x:promise-then
+         (fn [res]
+           (repl/notify res)))))
+  => {"tag" "vector" "type" "object" "size" 3 "string" "[1, 2, 3]"})
+
+(fact "substrate describe request returns metadata for primitives"
+
+  (notify/wait-on :js
+    (var node (rt/create-node {}))
+    (-> (substrate/request node "kmi.session" "@kmi.lang/describe" ["42"] {})
+        (promise/x:promise-then
+         (fn [res]
+           (repl/notify res)))))
+  => {"tag" "number" "type" "number" "size" nil "string" "42"})
 
 ^{:refer kmi.lang.runtime/stop :added "4.1"}
-(fact "TODO")
+(fact "placeholder stop returns true"
+
+  (!.js
+   (rt/stop (rt/create-node {})))
+  => true)
