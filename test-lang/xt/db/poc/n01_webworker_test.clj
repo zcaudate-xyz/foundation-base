@@ -77,11 +77,11 @@
        (then
         (fn [conn]
           (:= conn-ref conn)
-          (return (page-proxy/list-proxy-groups client "room/a" {"transport_id" (. conn ["transport_id"])}))))
+          (return (page-proxy/group-list-proxy client "room/a" {"transport_id" (. conn ["transport_id"])}))))
        (then
         (fn [groups]
           (:= groups-ref groups)
-          (return (page-proxy/open-proxy-group client "room/a" "demo" {"transport_id" (. conn-ref ["transport_id"])}))))
+          (return (page-proxy/group-open-proxy client "room/a" "demo" {"transport_id" (. conn-ref ["transport_id"])}))))
        (then
         (fn [group]
           (browser-transport/disconnect conn-ref)
@@ -158,7 +158,7 @@
                       (xt.db.system.impl-common/record-add caching "Log" records)
                       (. worker-self (postMessage {"signal" "seeded"}))
                       (return nil))))
-                (xt.substrate.page-core/add-group-attach
+                (xt.substrate.page-core/group-add-attach
                  node "room/a" "demo"
                  {"entry" {"handler" (fn [context]
                                        (var n (. context ["node"]))

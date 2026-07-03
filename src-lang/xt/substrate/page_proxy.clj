@@ -9,6 +9,7 @@
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
+             [xt.substrate.page-util :as page-util]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-space :as node-space]]})
 
@@ -32,14 +33,14 @@
 ;;; SERIALIZATION
 ;;;
 
-(defn.xt serialize-input
+(defn.xt model-serialize-input
   "serializes the input record for transport"
   {:added "4.1"}
   [input]
   (return {"current" (xt/x:get-key input "current")
            "updated" (xt/x:get-key input "updated")}))
 
-(defn.xt serialize-output
+(defn.xt model-serialize-output
   "serializes an output record for transport"
   {:added "4.1"}
   [output]
@@ -52,7 +53,7 @@
            "errored"   (xt/x:get-key output "errored")
            "tag"       (xt/x:get-key output "tag")}))
 
-(defn.xt serialize-model
+(defn.xt model-serialize
   "captures a serializable snapshot of model state"
   {:added "4.1"}
   [model]
@@ -60,15 +61,15 @@
   (var output (event-model/get-output model nil))
   (var remote (xt/x:get-key model "remote"))
   (var sync   (xt/x:get-key model "sync"))
-  (var out {"input"  (-/serialize-input input)
-            "output" (-/serialize-output output)})
+  (var out {"input"  (-/model-serialize-input input)
+            "output" (-/model-serialize-output output)})
   (when (xt/x:not-nil? remote)
-    (xt/x:set-key out "remote" (-/serialize-output remote)))
+    (xt/x:set-key out "remote" (-/model-serialize-output remote)))
   (when (xt/x:not-nil? sync)
-    (xt/x:set-key out "sync" (-/serialize-output sync)))
+    (xt/x:set-key out "sync" (-/model-serialize-output sync)))
   (return out))
 
-(defn.xt snapshot-group
+(defn.xt group-snapshot
   "captures a serializable snapshot of all models in a group"
   {:added "4.1"}
   [node space-id group-id]
@@ -78,14 +79,14 @@
   (var models (xt/x:get-key group "models"))
   (var out {})
   (xt/for:object [[model-id model] models]
-    (xt/x:set-key out model-id (-/serialize-model model)))
+    (xt/x:set-key out model-id (-/model-serialize model)))
   (return out))
 
-(defn.xt get-current-output
+(defn.xt model-get-output
   "returns the current output value of a page model"
   {:added "4.1"}
   [node space-id group-id model-id]
-  (return (page-core/get-current-output node space-id group-id model-id)))
+  (return (page-core/model-get-output node space-id group-id model-id)))
 
 ;;;
 ;;; SERVER HANDLERS
@@ -103,7 +104,7 @@
                       space-id
                       -/SIGNAL_OUTPUT
                       {"path" path
-                       "output" (-/serialize-output output)}
+                       "output" (-/model-serialize-output output)}
                       {})))
 
 (defn.xt publish-model-input
@@ -118,7 +119,7 @@
                       space-id
                       -/SIGNAL_INPUT
                       {"path" path
-                       "input" (-/serialize-input input)}
+                       "input" (-/model-serialize-input input)}
                       {})))
 
 (defn.xt ensure-model-listeners
@@ -146,12 +147,12 @@
        (return (== "model.input" (xt/x:get-key event "type"))))))
   (return model))
 
-(defn.xt handle-group-list
+(defn.xt group-handle-list
   "lists page groups and model ids available on the server"
   {:added "4.1"}
   [space args request node]
   (var space-id (xt/x:first args))
-  (var runtime (page-core/ensure-space-page node space-id))
+  (var runtime (page-core/space-ensure-page node space-id))
   (var groups (xt/x:get-key runtime "groups"))
   (var out {})
   (xt/for:object [[group-id group] groups]
@@ -162,7 +163,7 @@
     (xt/x:set-key out group-id {"models" model-ids}))
   (return out))
 
-(defn.xt handle-group-open
+(defn.xt group-handle-open
   "opens a group to a proxy client and returns a snapshot"
   {:added "4.1"}
   [space args request node]
@@ -189,12 +190,12 @@
       (fn [_]
         (return {"space"  space-id
                  "group"  group-id
-                 "models" (-/snapshot-group node space-id group-id)}))))
+                 "models" (-/group-snapshot node space-id group-id)}))))
     (return {"space"  space-id
              "group"  group-id
-             "models" (-/snapshot-group node space-id group-id)})))
+             "models" (-/group-snapshot node space-id group-id)})))
 
-(defn.xt handle-group-close
+(defn.xt group-handle-close
   "closes a proxy group subscription"
   {:added "4.1"}
   [space args request node]
@@ -209,7 +210,7 @@
            "space"  space-id
            "group"  group-id}))
 
-(defn.xt handle-group-update
+(defn.xt group-handle-update
   "handles a proxy group update request"
   {:added "4.1"}
   [space args request node]
@@ -223,7 +224,7 @@
         (fn [_]
           (return {"status" "ok"}))))))
 
-(defn.xt handle-model-update
+(defn.xt model-handle-update
   "handles a proxy model update request"
   {:added "4.1"}
   [space args request node]
@@ -238,7 +239,7 @@
         (fn [_]
           (return {"status" "ok"}))))))
 
-(defn.xt handle-model-set-input
+(defn.xt model-handle-set-input
   "handles a proxy model set-input request"
   {:added "4.1"}
   [space args request node]
@@ -254,12 +255,12 @@
         (fn [_]
           (return {"status" "ok"}))))))
 
-(defn.xt handle-model-trigger
+(defn.xt model-handle-trigger
   "handles a proxy model trigger request"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
-  (var out (page-core/trigger-model node
+  (var out (page-core/model-trigger node
                                     (xt/x:get-key payload "space")
                                     (xt/x:get-key payload "group")
                                     (xt/x:get-key payload "model")
@@ -268,12 +269,12 @@
   (return {"status"    "ok"
            "triggered" (xt/x:not-nil? out)}))
 
-(defn.xt handle-group-trigger
+(defn.xt group-handle-trigger
   "handles a proxy group trigger request"
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
-  (var out (page-core/trigger-group node
+  (var out (page-core/group-trigger node
                                     (xt/x:get-key payload "space")
                                     (xt/x:get-key payload "group")
                                     (xt/x:get-key payload "signal")
@@ -281,7 +282,7 @@
   (return {"status" "ok"
            "models" out}))
 
-(defn.xt handle-model-proxy-call
+(defn.xt model-handle-proxy-call
   "handles a proxy model proxy-call request"
   {:added "4.1"}
   [space args request node]
@@ -290,12 +291,12 @@
   (var group-id (xt/x:get-key payload "group"))
   (var model-id (xt/x:get-key payload "model"))
   (return
-   (-> (page-core/remote-call node
-                              space-id
-                              group-id
-                              model-id
-                              (or (xt/x:get-key payload "args") [])
-                              (xt/x:get-key payload "save_output"))
+   (-> (page-core/model-remote-call node
+                                    space-id
+                                    group-id
+                                    model-id
+                                    (or (xt/x:get-key payload "args") [])
+                                    (xt/x:get-key payload "save_output"))
        (promise/x:promise-then
         (fn [_]
           (return {"status" "ok"})))
@@ -310,22 +311,22 @@
   "installs page-proxy request handlers on a node"
   {:added "4.1"}
   [node]
-  (substrate/register-handler node -/ACTION_GROUP_LIST -/handle-group-list nil)
-  (substrate/register-handler node -/ACTION_GROUP_OPEN -/handle-group-open nil)
-  (substrate/register-handler node -/ACTION_GROUP_CLOSE -/handle-group-close nil)
-  (substrate/register-handler node -/ACTION_GROUP_UPDATE -/handle-group-update nil)
-  (substrate/register-handler node -/ACTION_MODEL_UPDATE -/handle-model-update nil)
-  (substrate/register-handler node -/ACTION_MODEL_SET_INPUT -/handle-model-set-input nil)
-  (substrate/register-handler node -/ACTION_MODEL_TRIGGER -/handle-model-trigger nil)
-  (substrate/register-handler node -/ACTION_MODEL_PROXY_CALL -/handle-model-proxy-call nil)
-  (substrate/register-handler node -/ACTION_GROUP_TRIGGER -/handle-group-trigger nil)
+  (substrate/register-handler node -/ACTION_GROUP_LIST -/group-handle-list nil)
+  (substrate/register-handler node -/ACTION_GROUP_OPEN -/group-handle-open nil)
+  (substrate/register-handler node -/ACTION_GROUP_CLOSE -/group-handle-close nil)
+  (substrate/register-handler node -/ACTION_GROUP_UPDATE -/group-handle-update nil)
+  (substrate/register-handler node -/ACTION_MODEL_UPDATE -/model-handle-update nil)
+  (substrate/register-handler node -/ACTION_MODEL_SET_INPUT -/model-handle-set-input nil)
+  (substrate/register-handler node -/ACTION_MODEL_TRIGGER -/model-handle-trigger nil)
+  (substrate/register-handler node -/ACTION_MODEL_PROXY_CALL -/model-handle-proxy-call nil)
+  (substrate/register-handler node -/ACTION_GROUP_TRIGGER -/group-handle-trigger nil)
   (return node))
 
 ;;;
 ;;; CLIENT PROXY MODELS
 ;;;
 
-(defn.xt create-proxy-model
+(defn.xt model-create-proxy
   "creates a lightweight proxy model from a server snapshot"
   {:added "4.1"}
   [node space-id group-id model-id snapshot]
@@ -391,17 +392,17 @@
    nil)
   (return model))
 
-(defn.xt create-proxy-group
+(defn.xt group-create-proxy
   "creates a proxy group on the client from a server snapshot"
   {:added "4.1"}
   [node space-id group-id snapshot remote-spec]
-  (var runtime (page-core/ensure-space-page node space-id))
+  (var runtime (page-core/space-ensure-page node space-id))
   (var groups (xt/x:get-key runtime "groups"))
   (var group-models {})
   (xt/for:object [[model-id model-snapshot] snapshot]
     (xt/x:set-key group-models
                   model-id
-                  (-/create-proxy-model node space-id group-id model-id model-snapshot)))
+                  (-/model-create-proxy node space-id group-id model-id model-snapshot)))
   (var group {"name"    group-id
               "models"  group-models
               "remote"  remote-spec
@@ -410,7 +411,7 @@
   (xt/x:set-key groups group-id group)
   (return group))
 
-(defn.xt apply-model-output
+(defn.xt model-apply-output
   "applies an inbound output delta to a proxy model"
   {:added "4.1"}
   [space stream node]
@@ -430,7 +431,7 @@
   (xt/x:obj-assign (xt/x:get-key model "output") output)
   (return (event-model/trigger-listeners model "model.output" (xt/x:get-key model "output"))))
 
-(defn.xt apply-model-input
+(defn.xt model-apply-input
   "applies an inbound input delta to a proxy model"
   {:added "4.1"}
   [space stream node]
@@ -454,8 +455,8 @@
   "installs client stream triggers for proxy page deltas"
   {:added "4.1"}
   [node]
-  (substrate/register-trigger node -/SIGNAL_OUTPUT -/apply-model-output nil)
-  (substrate/register-trigger node -/SIGNAL_INPUT -/apply-model-input nil)
+  (substrate/register-trigger node -/SIGNAL_OUTPUT -/model-apply-output nil)
+  (substrate/register-trigger node -/SIGNAL_INPUT -/model-apply-input nil)
   (return node))
 
 ;;;
@@ -558,10 +559,10 @@
   [node]
   (-/install-handlers node)
   (-/install-triggers node)
-  (page-core/set-proxy-dispatcher -/proxy-dispatcher)
+  (page-core/proxy-dispatcher-set -/proxy-dispatcher)
   (return node))
 
-(defn.xt list-proxy-groups
+(defn.xt group-list-proxy
   "queries a server for available page groups"
   {:added "4.1"}
   [node space-id opts]
@@ -572,7 +573,7 @@
                              [space-id]
                              {"transport_id" transport-id})))
 
-(defn.xt open-proxy-group
+(defn.xt group-open-proxy
   "opens a proxy page group on a client and creates proxy models"
   {:added "4.1"}
   [node space-id group-id opts]
@@ -590,10 +591,10 @@
           (when (xt/x:not-nil? error)
             (xt/x:err (xt/x:cat "ERR - " error)))
           (var snapshot (xt/x:get-key response "models"))
-          (-/create-proxy-group node space-id group-id snapshot opts)
+          (-/group-create-proxy node space-id group-id snapshot opts)
           (return (page-core/group-get node space-id group-id)))))))
 
-(defn.xt close-proxy-group
+(defn.xt group-close-proxy
   "closes a proxy page group and removes proxy models"
   {:added "4.1"}
   [node space-id group-id opts]
@@ -607,12 +608,12 @@
                           {"transport_id" transport-id})
        (promise/x:promise-then
         (fn [_]
-          (var runtime (page-core/ensure-space-page node space-id))
+          (var runtime (page-core/space-ensure-page node space-id))
           (var groups (xt/x:get-key runtime "groups"))
           (xt/x:del-key groups group-id)
           (return nil))))))
 
-(defn.xt proxy-call
+(defn.xt model-proxy-call
   "invokes the proxy-call path on a proxy page model"
   {:added "4.1"}
   [node space-id group-id model-id args save-output opts]
@@ -628,3 +629,22 @@
                                "args" args
                                "save_output" save-output}]
                              {"transport_id" transport-id})))
+
+(defn.xt group-sync-proxy
+  "opens a proxy group and returns a bidirectional sync control handle"
+  {:added "4.1"}
+  [node space-id group-id opts]
+  (-/install node)
+  (var transport-id (xt/x:get-key opts "transport_id"))
+  (return
+   (-> (-/group-open-proxy node space-id group-id opts)
+       (promise/x:promise-then
+        (fn [group]
+          (return {"space"        space-id
+                   "group"        group-id
+                   "group-obj"    group
+                   "transport_id" transport-id
+                   "close"        (fn []
+                                   (return (-/group-close-proxy
+                                            node space-id group-id opts)))}))))))
+

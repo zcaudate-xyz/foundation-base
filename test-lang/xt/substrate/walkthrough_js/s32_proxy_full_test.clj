@@ -52,7 +52,7 @@
             ;; a single page group with one model:
             ;;   input.data defaults to ["hello"]
             ;;   handler returns {:value (first input.data)}
-            (xt.substrate.page-core/add-group
+            (xt.substrate.page-core/group-add
              node
              "room/a"
              "demo"
@@ -109,7 +109,7 @@
         (:= conn-ref conn)
         ;; 3. open the remote group as a proxy on the client
         (return
-         (page-proxy/open-proxy-group
+         (page-proxy/group-open-proxy
           client
           "room/a"
           "demo"
@@ -175,7 +175,7 @@
         (:= conn-ref conn)
         ;; 3. open the remote group as a proxy on the client
         (return
-         (page-proxy/open-proxy-group
+         (page-proxy/group-open-proxy
           client
           "room/a"
           "demo"

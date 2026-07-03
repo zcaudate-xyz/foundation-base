@@ -72,7 +72,7 @@
   {:added "4.1"}
   [server]
   (return
-   (base-page/add-group server
+   (base-page/group-add server
                         "room/a"
                         "demo"
                         {"main" {"defaults" {"args" ["hello"]
@@ -116,14 +116,14 @@
   :teardown [(l/rt:stop)]})
 
 
-^{:refer xt.substrate.page-proxy/list-proxy-groups :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-list-proxy :added "4.1"}
 (fact "lists remote groups and model ids available on the server"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
     (page-proxy/install server)
     (-/setup-server-page server)
-    (-> (page-proxy/list-proxy-groups server "room/a" {})
+    (-> (page-proxy/group-list-proxy server "room/a" {})
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
@@ -199,7 +199,7 @@
                          "message" (xt/x:ex-message err)})))))
   => {"pong" "hello"})
 
-^{:refer xt.substrate.page-proxy/open-proxy-group :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-open-proxy :added "4.1"}
 (fact "opens a remote group and creates proxy models on the client"
 
   (notify/wait-on :js
@@ -218,7 +218,7 @@
                 (promise/x:promise-then
                  (fn [response]
                    (var snapshot (xt/x:get-key response "models"))
-                   (page-proxy/create-proxy-group client "room/a" "demo" snapshot
+                   (page-proxy/group-create-proxy client "room/a" "demo" snapshot
                                                    {"transport_id" "server-conn"})
                    (return (base-page/group-get client "room/a" "demo"))))))))
         (promise/x:promise-then
@@ -233,7 +233,7 @@
        "model_type" "event.model"
        "output" {"current" {"value" "hello"}}}))
 
-^{:refer xt.substrate.page-proxy/close-proxy-group :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-close-proxy :added "4.1"}
 (fact "closes a remote group and removes router subscriptions"
 
   (notify/wait-on :js
@@ -252,12 +252,12 @@
                 (promise/x:promise-then
                  (fn [response]
                    (var snapshot (xt/x:get-key response "models"))
-                   (page-proxy/create-proxy-group client "room/a" "demo" snapshot
+                   (page-proxy/group-create-proxy client "room/a" "demo" snapshot
                                                    {"transport_id" "server-conn"})
                    (return
                     (-/pump-promise
                      linked server client
-                     (page-proxy/close-proxy-group
+                     (page-proxy/group-close-proxy
                       client "room/a" "demo"
                       {"transport_id" "server-conn"})))))))))
         (promise/x:promise-then
@@ -309,28 +309,29 @@
                          "primary" (substrate/get-service server "db/primary")
                          "caching" (substrate/get-service server "db/caching")})))))
   => (contains-in
-      {"init" {"::" "substrate"
-               "services" {"db/primary" map?
-                           "db/caching" map?}}
+      {"init" {"status" "setup"
+               "data" {"primary" map?
+                       "caching" map?
+                       "common" map?}}
        "primary" {"::" "xt.db.system.impl_memory/ImplMemory"}
        "caching" {"::" "xt.db.system.impl_memory/ImplMemory"}}))
 
 
-^{:refer xt.substrate.page-proxy/serialize-input :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-serialize-input :added "4.1"}
 (fact "extracts current and updated from an input record"
 
   (!.js
-    (page-proxy/serialize-input {"current" {"data" [1]}
+    (page-proxy/model-serialize-input {"current" {"data" [1]}
                                  "updated" 100
                                  "default" nil}))
   => {"current" {"data" [1]}
       "updated" 100})
 
-^{:refer xt.substrate.page-proxy/serialize-output :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-serialize-output :added "4.1"}
 (fact "extracts transportable fields from an output record"
 
   (!.js
-    (page-proxy/serialize-output {"type" "output"
+    (page-proxy/model-serialize-output {"type" "output"
                                   "current" {"value" 1}
                                   "updated" 100
                                   "elapsed" 5
@@ -347,7 +348,7 @@
       "errored" false
       "tag" "main"})
 
-^{:refer xt.substrate.page-proxy/serialize-model :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-serialize :added "4.1"}
 (fact "captures a serializable snapshot of model state"
 
   (!.js
@@ -359,12 +360,12 @@
                  "defaults" {"args" [1 2]
                              "output" {"value" 0}}}))
     (event-model/init-model model)
-    (page-proxy/serialize-model model))
+    (page-proxy/model-serialize model))
   => (contains-in {"input" {"current" {"data" [1 2]}}
                    "output" {"type" "output"
                              "current" nil}}))
 
-^{:refer xt.substrate.page-proxy/snapshot-group :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-snapshot :added "4.1"}
 (fact "captures a serializable snapshot of all models in a group"
 
   (notify/wait-on :js
@@ -374,7 +375,7 @@
     (-> (xt/x:get-key group "init")
         (promise/x:promise-then
          (fn [_]
-           (repl/notify (page-proxy/snapshot-group server "room/a" "demo"))))))
+           (repl/notify (page-proxy/group-snapshot server "room/a" "demo"))))))
   => (contains-in {"main" {"input" {"current" {"data" ["hello"]}}
                            "output" {"current" {"value" "hello"}}}}))
 
@@ -419,17 +420,17 @@
   => {"output" true
       "input" true})
 
-^{:refer xt.substrate.page-proxy/handle-group-list :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-handle-list :added "4.1"}
 (fact "lists available groups and their model ids"
 
   (!.js
     (var server (-/make-server-node))
     (page-proxy/install-handlers server)
     (-/setup-server-page server)
-    (page-proxy/handle-group-list nil ["room/a"] {} server))
+    (page-proxy/group-handle-list nil ["room/a"] {} server))
   => {"demo" {"models" ["main"]}})
 
-^{:refer xt.substrate.page-proxy/handle-group-open :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-handle-open :added "4.1"}
 (fact "returns a model snapshot and subscribes the transport"
 
   (notify/wait-on :js
@@ -440,7 +441,7 @@
                                     {"send_fn" (fn [frame] (return frame))})
         (promise/x:promise-then
          (fn [_]
-           (-> (page-proxy/handle-group-open nil
+           (-> (page-proxy/group-handle-open nil
                                              [{"space" "room/a"
                                                "group" "demo"}]
                                              {"meta" {"transport_id" "conn"}}
@@ -458,7 +459,7 @@
                    "has_models" true
                    "output_subs" ["conn"]}))
 
-^{:refer xt.substrate.page-proxy/handle-group-close :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-handle-close :added "4.1"}
 (fact "removes subscriptions and returns a closed status"
 
   (notify/wait-on :js
@@ -469,14 +470,14 @@
                                     {"send_fn" (fn [frame] (return frame))})
         (promise/x:promise-then
          (fn [_]
-           (-> (page-proxy/handle-group-open nil
+           (-> (page-proxy/group-handle-open nil
                                              [{"space" "room/a"
                                                "group" "demo"}]
                                              {"meta" {"transport_id" "conn"}}
                                              server)
                (promise/x:promise-then
                 (fn [_]
-                  (var closed (page-proxy/handle-group-close
+                  (var closed (page-proxy/group-handle-close
                                nil
                                [{"space" "room/a"
                                  "group" "demo"}]
@@ -494,14 +495,14 @@
                    "output_subs" []
                    "input_subs" []}))
 
-^{:refer xt.substrate.page-proxy/handle-group-update :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-handle-update :added "4.1"}
 (fact "refreshes every model in the group and returns ok"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
     (page-proxy/install-handlers server)
     (-/setup-server-page server)
-    (-> (page-proxy/handle-group-update nil
+    (-> (page-proxy/group-handle-update nil
                                         [{"space" "room/a"
                                           "group" "demo"
                                           "event" {}}]
@@ -512,14 +513,14 @@
            (repl/notify response)))))
   => {"status" "ok"})
 
-^{:refer xt.substrate.page-proxy/handle-model-update :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-handle-update :added "4.1"}
 (fact "refreshes a single model and returns ok"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
     (page-proxy/install-handlers server)
     (-/setup-server-page server)
-    (-> (page-proxy/handle-model-update nil
+    (-> (page-proxy/model-handle-update nil
                                         [{"space" "room/a"
                                           "group" "demo"
                                           "model" "main"
@@ -531,14 +532,14 @@
            (repl/notify response)))))
   => {"status" "ok"})
 
-^{:refer xt.substrate.page-proxy/handle-model-set-input :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-handle-set-input :added "4.1"}
 (fact "sets model input and refreshes the model"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
     (page-proxy/install-handlers server)
     (-/setup-server-page server)
-    (-> (page-proxy/handle-model-set-input nil
+    (-> (page-proxy/model-handle-set-input nil
                                             [{"space" "room/a"
                                               "group" "demo"
                                               "model" "main"
@@ -557,14 +558,14 @@
                    "input" ["world"]
                    "output" {"current" {"value" "world"}}}))
 
-^{:refer xt.substrate.page-proxy/handle-model-trigger :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-handle-trigger :added "4.1"}
 (fact "triggers a matching model and reports triggered"
 
   (!.js
     (var server (-/make-server-node))
     (page-proxy/install-handlers server)
     (-/setup-server-page server)
-    (page-proxy/handle-model-trigger nil
+    (page-proxy/model-handle-trigger nil
                                       [{"space" "room/a"
                                         "group" "demo"
                                         "model" "main"
@@ -574,14 +575,14 @@
   => {"status" "ok"
       "triggered" true})
 
-^{:refer xt.substrate.page-proxy/handle-group-trigger :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-handle-trigger :added "4.1"}
 (fact "triggers matching models in the group"
 
   (!.js
     (var server (-/make-server-node))
     (page-proxy/install-handlers server)
     (-/setup-server-page server)
-    (page-proxy/handle-group-trigger nil
+    (page-proxy/group-handle-trigger nil
                                       [{"space" "room/a"
                                         "group" "demo"
                                         "signal" true}]
@@ -590,14 +591,14 @@
   => {"status" "ok"
       "models" ["main"]})
 
-^{:refer xt.substrate.page-proxy/handle-model-proxy-call :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-handle-proxy-call :added "4.1"}
 (fact "invokes a remote call on the model and returns ok"
 
   (notify/wait-on :js
     (var server (-/make-server-node))
     (page-proxy/install-handlers server)
     (-/setup-server-page server)
-    (-> (page-proxy/handle-model-proxy-call nil
+    (-> (page-proxy/model-handle-proxy-call nil
                                              [{"space" "room/a"
                                                "group" "demo"
                                                "model" "main"
@@ -627,12 +628,12 @@
       "page.model/trigger"
       "page.model/update"])
 
-^{:refer xt.substrate.page-proxy/create-proxy-model :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-create-proxy :added "4.1"}
 (fact "creates a proxy model from a server snapshot"
 
   (!.js
     (var node (-/make-client-node))
-    (var model (page-proxy/create-proxy-model
+    (var model (page-proxy/model-create-proxy
                 node "room/a" "demo" "main"
                 {"input" {"current" {"data" [1]}
                           "updated" 10}
@@ -651,12 +652,12 @@
                    "input" {"data" [1]}
                    "output" {"current" {"value" 1}}}))
 
-^{:refer xt.substrate.page-proxy/create-proxy-group :added "4.1"}
+^{:refer xt.substrate.page-proxy/group-create-proxy :added "4.1"}
 (fact "creates a proxy group and stores the remote spec"
 
   (!.js
     (var node (-/make-client-node))
-    (page-proxy/create-proxy-group
+    (page-proxy/group-create-proxy
      node "room/a" "demo"
      {"main" {"input" {"current" {"data" [1]}}
               "output" {"type" "output"
@@ -668,18 +669,18 @@
   => {"remote" {"transport_id" "server-conn"}
       "model_type" "event.model"})
 
-^{:refer xt.substrate.page-proxy/apply-model-output :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-apply-output :added "4.1"}
 (fact "applies an inbound output delta to a proxy model"
 
   (!.js
     (var node (-/make-client-node))
-    (page-proxy/create-proxy-group
+    (page-proxy/group-create-proxy
      node "room/a" "demo"
      {"main" {"input" {"current" {"data" [1]}}
               "output" {"type" "output"
                         "current" {"value" 1}}}}
      {"transport_id" "server-conn"})
-    (page-proxy/apply-model-output "room/a"
+    (page-proxy/model-apply-output "room/a"
                                    {"space" "room/a"
                                     "data" {"path" ["demo" "main"]
                                             "output" {"current" {"value" 2}}}}
@@ -689,18 +690,18 @@
     (event-model/get-output model nil))
   => (contains-in {"current" {"value" 2}}))
 
-^{:refer xt.substrate.page-proxy/apply-model-input :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-apply-input :added "4.1"}
 (fact "applies an inbound input delta to a proxy model"
 
   (!.js
     (var node (-/make-client-node))
-    (page-proxy/create-proxy-group
+    (page-proxy/group-create-proxy
      node "room/a" "demo"
      {"main" {"input" {"current" {"data" [1]}}
               "output" {"type" "output"
                         "current" {"value" 1}}}}
      {"transport_id" "server-conn"})
-    (page-proxy/apply-model-input "room/a"
+    (page-proxy/model-apply-input "room/a"
                                   {"space" "room/a"
                                    "data" {"path" ["demo" "main"]
                                            "input" {"current" {"data" [2]}}}}
@@ -739,7 +740,7 @@
                 (promise/x:promise-then
                  (fn [response]
                    (var snapshot (xt/x:get-key response "models"))
-                   (page-proxy/create-proxy-group client "room/a" "demo" snapshot
+                   (page-proxy/group-create-proxy client "room/a" "demo" snapshot
                                                    {"transport_id" "server-conn"})
                    (var call-args ["main" [] true])
                    (return
@@ -761,12 +762,12 @@
     (page-proxy/install node)
     {"handlers" (xt/x:len (substrate/list-handlers node))
      "triggers" (xt/x:len (substrate/list-triggers node))
-     "dispatcher" (xt/x:is-function? (base-page/get-proxy-dispatcher))})
+     "dispatcher" (xt/x:is-function? (base-page/proxy-dispatcher-get))})
   => {"handlers" 9
       "triggers" 2
       "dispatcher" true})
 
-^{:refer xt.substrate.page-proxy/proxy-call :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-proxy-call :added "4.1"}
 (fact "issues a proxy-call request through the proxy group"
 
   (notify/wait-on :js
@@ -785,17 +786,17 @@
                 (promise/x:promise-then
                  (fn [response]
                    (var snapshot (xt/x:get-key response "models"))
-                   (page-proxy/create-proxy-group client "room/a" "demo" snapshot
+                   (page-proxy/group-create-proxy client "room/a" "demo" snapshot
                                                    {"transport_id" "server-conn"})
                    (return
                     (-/pump-promise
                      linked server client
-                     (page-proxy/proxy-call client "room/a" "demo" "main"
+                     (page-proxy/model-proxy-call client "room/a" "demo" "main"
                                             [] true {})))))))))
         (promise/x:promise-then
          (fn [response]
            (repl/notify response)))))
   => {"status" "ok"})
 
-^{:refer xt.substrate.page-proxy/get-current-output :added "4.1"}
+^{:refer xt.substrate.page-proxy/model-get-output :added "4.1"}
 (fact "TODO")

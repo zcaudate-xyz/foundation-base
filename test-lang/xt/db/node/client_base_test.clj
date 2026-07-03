@@ -79,6 +79,8 @@
    (-> (transport-memory/link-pair server client)
        (promise/x:promise-then
         (fn []
+          (proxy-util/set-default-transport client "server")
+          (xtd/set-in client ["state" "test-server"] server)
           (return
            (client/kernel-init client {"primary" (. -/CONFIG [primary])
                                        "caching" (. -/CONFIG [caching])}
@@ -377,7 +379,8 @@
                                  {}))))
         (promise/x:promise-then
          (fn []
-           (client/pull-cached node "db/primary" ["Log"])))
+           (return
+            (client/pull-cached client "db/primary" ["Log"]))))
         (repl/notify)))
   => (contains-in
       [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
@@ -409,17 +412,15 @@
         (promise/x:promise-then
          (fn []
            (return
-            ;; set input
-            )))
+            (page-core/model-set-input node "room/a" "demo" "echo"
+                                       {"data" [4 5 6]}
+                                       {}))))
         (promise/x:promise-then
          (fn []
            (return
-            (page-core/get-current-output node "room/a" "demo" "echo"))))
+            (page-core/model-get-output node "room/a" "demo" "echo"))))
         (repl/notify)))
-  => {"status" "attached"
-      "space" "room/a"
-      "group" "demo"
-      "model" "echo"}
+  => [4 5 6]
 
   ;;
   ;; PROXY
@@ -612,7 +613,7 @@
                                      {}))))
         (promise/x:promise-then
          (fn []
-           (return (page-core/refresh-model node "room/a" "demo" "rpc-view" {} nil))))
+           (return (page-core/model-refresh node "room/a" "demo" "rpc-view" {} nil))))
         (promise/x:promise-then
          (fn [out]
            (var caching (kernel-base/get-caching-impl node "db/primary"))
@@ -652,7 +653,7 @@
         (promise/x:promise-then
          (fn []
            (var server (xtd/get-in client ["state" "test-server"]))
-           (return (page-core/refresh-model server "room/a" "demo" "rpc-view" {} nil))))
+           (return (page-core/model-refresh server "room/a" "demo" "rpc-view" {} nil))))
         (promise/x:promise-then
          (fn [out]
            (var server (xtd/get-in client ["state" "test-server"]))
@@ -775,7 +776,7 @@
                              {}))))
         (promise/x:promise-then
          (fn []
-           (return (page-core/refresh-model-remote node "room/a" "demo" "pull-view" nil))))
+           (return (page-core/model-refresh-remote node "room/a" "demo" "pull-view" nil))))
         (repl/notify)))
   => (contains-in
       {"path" ["demo" "pull-view"]
@@ -817,7 +818,7 @@
         (promise/x:promise-then
          (fn []
            (var server (xtd/get-in client ["state" "test-server"]))
-           (return (page-core/refresh-model-remote server "room/a" "demo" "pull-view" nil))))
+           (return (page-core/model-refresh-remote server "room/a" "demo" "pull-view" nil))))
         (repl/notify)))
   => (contains-in
       {"path" ["demo" "pull-view"]
@@ -966,7 +967,7 @@
                                           {}))))
         (promise/x:promise-then
          (fn []
-           (return (page-core/refresh-model-remote node "room/a" "demo" "dataview-view" nil))))
+           (return (page-core/model-refresh-remote node "room/a" "demo" "dataview-view" nil))))
         (promise/x:promise-then
          (fn [out]
            (var caching (kernel-base/get-caching-impl node "db/primary"))
@@ -1023,7 +1024,7 @@
         (promise/x:promise-then
          (fn []
            (var server (xtd/get-in client ["state" "test-server"]))
-           (return (page-core/refresh-model-remote server "room/a" "demo" "dataview-view" nil))))
+           (return (page-core/model-refresh-remote server "room/a" "demo" "dataview-view" nil))))
         (promise/x:promise-then
          (fn [out]
            (var server (xtd/get-in client ["state" "test-server"]))

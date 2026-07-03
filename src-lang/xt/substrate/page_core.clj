@@ -8,21 +8,22 @@
              [xt.event.base-listener :as event-common]
              [xt.event.base-model :as event-model]
              [xt.event.util-throttle :as th]
-             [xt.substrate.base-space :as node-space]]})
+             [xt.substrate.base-space :as node-space]
+             [xt.substrate.page-util :as page-util]]})
 
 (def$.xt STATE_TAG "substrate.page")
 (def$.xt STATE_SLOT "page")
 
 (def.xt PROXY_DISPATCHER nil)
 
-(defn.xt set-proxy-dispatcher
+(defn.xt proxy-dispatcher-set
   "sets the proxy operation dispatcher"
   {:added "4.1"}
   [dispatcher]
   (:= -/PROXY_DISPATCHER dispatcher)
   (return dispatcher))
 
-(defn.xt get-proxy-dispatcher
+(defn.xt proxy-dispatcher-get
   "gets the proxy operation dispatcher"
   {:added "4.1"}
   []
@@ -34,44 +35,6 @@
   [group]
   (return (xt/x:get-key group "remote")))
 
-(defn.xt wrap-space-args
-  "puts the model context as first argument"
-  {:added "4.1"}
-  [handler]
-  (return
-   (fn [context]
-     (var args (or (. context ["args"]) []))
-     (var params [context])
-     (xt/x:arr-assign params args)
-     (return (xt/x:apply handler params)))))
-
-(defn.xt check-event
-  "checks that a trigger matches signal and event"
-  {:added "4.1"}
-  [pred signal event ctx]
-  (var check false)
-  (try
-    (var t (:? (xt/x:nil? pred)
-               true
-
-               (xt/x:is-boolean? pred)
-               pred
-
-               (xt/x:is-function? pred)
-               (pred signal ctx)
-
-               (xt/x:is-object? pred)
-               (xt/x:get-key pred signal)
-
-               :else
-               (== signal pred)))
-    (:= check (or (== true t)
-                  (and (xt/x:is-function? t) (t event ctx))
-                  false))
-    (catch err
-      (:= check false)))
-  (return check))
-
 (defn.xt runtime-page
   "creates the page runtime container"
   {:added "4.1"}
@@ -82,7 +45,7 @@
            "meta" (or (xt/x:get-key opts "meta") {})
            "opts" opts}))
 
-(defn.xt get-space-page
+(defn.xt space-get-page
   "gets the page runtime from a node space"
   {:added "4.1"}
   [node space-id]
@@ -90,7 +53,7 @@
   (when (xt/x:is-object? state)
     (return (xt/x:get-key state -/STATE_SLOT))))
 
-(defn.xt ensure-space-page
+(defn.xt space-ensure-page
   "ensures the node space has a page runtime slot"
   {:added "4.1"}
   [node space-id]
@@ -107,7 +70,7 @@
     (xt/x:set-key state -/STATE_SLOT runtime))
   (return runtime))
 
-(defn.xt set-space-page
+(defn.xt space-set-page
   "replaces the nested page runtime for a node space"
   {:added "4.1"}
   [node space-id runtime]
@@ -124,7 +87,7 @@
   "gets a page model record from a node space"
   {:added "4.1"}
   [node space-id group-id]
-  (return (xtd/get-in (-/ensure-space-page node space-id)
+  (return (xtd/get-in (-/space-ensure-page node space-id)
                       ["groups" group-id])))
 
 (defn.xt group-ensure
@@ -147,7 +110,7 @@
                         (xt/x:json-encode [group-id model-id]))))
   (return [group model]))
 
-(defn.xt get-current-output
+(defn.xt model-get-output
   "returns the current output value of a page model"
   {:added "4.1"}
   [node space-id group-id model-id]
@@ -166,7 +129,7 @@
                       "path" path}
                      event))))
 
-(defn.xt prep-model
+(defn.xt model-prep
   "prepares params of models"
   {:added "4.1"}
   [node space-id group-id model-id opts]
@@ -183,12 +146,12 @@
                          (or opts {}))))
   (return [path context disabled]))
 
-(defn.xt get-model-dependents
+(defn.xt model-get-dependents
   "gets all dependents for a model"
   {:added "4.1"}
   [node space-id group-id model-id]
   (var out {})
-  (var groups (xt/x:get-key (-/ensure-space-page node space-id) "groups"))
+  (var groups (xt/x:get-key (-/space-ensure-page node space-id) "groups"))
   (xt/for:object [[dgroup-id dgroup] groups]
     (var deps (xt/x:get-key dgroup "deps"))
     (var model-lu (xtd/get-in deps [group-id model-id]))
@@ -196,12 +159,12 @@
       (xt/x:set-key out dgroup-id (xt/x:obj-keys model-lu))))
   (return out))
 
-(defn.xt get-group-dependents
+(defn.xt group-get-dependents
   "gets all dependents for a group"
   {:added "4.1"}
   [node space-id group-id]
   (var out {})
-  (var groups (xt/x:get-key (-/ensure-space-page node space-id) "groups"))
+  (var groups (xt/x:get-key (-/space-ensure-page node space-id) "groups"))
   (xt/for:object [[dgroup-id dgroup] groups]
     (var deps (xt/x:get-key dgroup "deps"))
     (var group-lu (xt/x:get-key deps group-id))
@@ -209,33 +172,7 @@
       (xt/x:set-key out dgroup-id true)))
   (return out))
 
-(defn.xt run-tail-call
-  "helper function for tail calls on run commands"
-  {:added "4.1"}
-  [context refresh-deps-fn]
-  (var acc (xt/x:get-key context "acc"))
-  (var path (xt/x:get-key context "path"))
-  (var node (xt/x:get-key context "node"))
-  (var space-id (xt/x:get-key (xt/x:get-key context "space") "id"))
-  (var group-id (xt/x:first path))
-  (var model-id (xt/x:second path))
-  (when (and acc (not (xt/x:get-key acc "error")))
-    (when refresh-deps-fn
-      (refresh-deps-fn node space-id group-id model-id refresh-deps-fn)))
-  (return acc))
-
-(defn.xt run-remote
-  "runs the remote function"
-  {:added "4.1"}
-  [context save-output path refresh-deps-fn]
-  (xt/x:set-key (xt/x:get-key context "acc") "path" path)
-  (return
-   (promise/x:promise-then
-    (event-model/pipeline-run-remote context save-output event-model/async-fn-promise nil nil)
-    (fn []
-      (return (-/run-tail-call context refresh-deps-fn))))))
-
-(defn.xt remote-call
+(defn.xt model-remote-call
   "runs the remote call"
   {:added "4.1"}
   [node space-id group-id model-id args save-output]
@@ -243,57 +180,46 @@
   (when (and (-/proxy-group? group) -/PROXY_DISPATCHER)
     (return (-/PROXY_DISPATCHER "proxy-call" node space-id group-id [model-id args save-output])))
   (var [path context disabled]
-       (-/prep-model node space-id group-id model-id {"args" args}))
-  (return (-/run-remote context save-output path nil)))
+       (-/model-prep node space-id group-id model-id {"args" args}))
+  (return (page-util/run-remote context save-output path nil)))
 
-(defn.xt run-refresh
-  "helper function for refresh"
+(defn.xt model-refresh
+  "calls update on the model"
   {:added "4.1"}
-  [context disabled path refresh-deps-fn]
-  (xt/x:set-key (xt/x:get-key context "acc") "path" path)
-  (return
-   (promise/x:promise-then
-    (event-model/pipeline-run context disabled event-model/async-fn-promise nil nil)
-    (fn []
-      (return (-/run-tail-call context refresh-deps-fn))))))
+  [node space-id group-id model-id event refresh-deps-fn]
+  (var [path context disabled]
+       (-/model-prep node space-id group-id model-id {"event" event}))
+  (return (page-util/run-refresh context disabled path refresh-deps-fn)))
 
-(defn.xt refresh-model-dependents
+(defn.xt model-refresh-remote
+  "calls update on remote function"
+  {:added "4.1"}
+  [node space-id group-id model-id refresh-deps-fn]
+  (var [path context disabled]
+       (-/model-prep node space-id group-id model-id {}))
+  (return (page-util/run-remote context true path refresh-deps-fn)))
+
+(defn.xt model-refresh-dependents
   "refreshes model dependents"
   {:added "4.1"}
   [node space-id group-id model-id]
-  (var dependents (-/get-model-dependents node space-id group-id model-id))
+  (var dependents (-/model-get-dependents node space-id group-id model-id))
   (xt/for:object [[dgroup-id dmodel-ids] dependents]
     (var throttle (xt/x:get-key (-/group-ensure node space-id dgroup-id) "throttle"))
     (xt/for:array [dmodel-id dmodel-ids]
       (th/throttle-run throttle dmodel-id [])))
   (return dependents))
 
-(defn.xt refresh-model
-  "calls update on the model"
-  {:added "4.1"}
-  [node space-id group-id model-id event refresh-deps-fn]
-  (var [path context disabled]
-       (-/prep-model node space-id group-id model-id {"event" event}))
-  (return (-/run-refresh context disabled path refresh-deps-fn)))
-
-(defn.xt refresh-model-remote
-  "calls update on remote function"
-  {:added "4.1"}
-  [node space-id group-id model-id refresh-deps-fn]
-  (var [path context disabled]
-       (-/prep-model node space-id group-id model-id {}))
-  (return (-/run-remote context true path refresh-deps-fn)))
-
-(defn.xt refresh-model-dependents-unthrottled
+(defn.xt model-refresh-dependents-unthrottled
   "refreshes dependents without throttle"
   {:added "4.1"}
   [node space-id group-id model-id refresh-deps-fn]
-  (var dependents (-/get-model-dependents node space-id group-id model-id))
+  (var dependents (-/model-get-dependents node space-id group-id model-id))
   (var out [])
   (xt/for:object [[dgroup-id dmodel-ids] dependents]
     (xt/for:array [dmodel-id dmodel-ids]
       (xt/x:arr-push out
-                     (-/refresh-model node
+                     (-/model-refresh node
                                      space-id
                                      dgroup-id
                                      dmodel-id
@@ -301,7 +227,7 @@
                                      refresh-deps-fn))))
   (return (promise/x:promise-all out)))
 
-(defn.xt refresh-group
+(defn.xt group-refresh
   "refreshes the group"
   {:added "4.1"}
   [node space-id group-id event refresh-deps-fn]
@@ -309,25 +235,9 @@
   (var running [])
   (xt/for:object [[model-id model] (xt/x:get-key group "models")]
     (var [path context disabled]
-         (-/prep-model node space-id group-id model-id {"event" event}))
-    (xt/x:arr-push running (-/run-refresh context disabled path refresh-deps-fn)))
+         (-/model-prep node space-id group-id model-id {"event" event}))
+    (xt/x:arr-push running (page-util/run-refresh context disabled path refresh-deps-fn)))
   (return (promise/x:promise-all running)))
-
-(defn.xt get-group-deps
-  "gets group deps"
-  {:added "4.1"}
-  [group-id models]
-  (var all-deps {})
-  (xt/for:object [[model-id model-entry] models]
-    (var deps (xt/x:get-key model-entry "deps"))
-    (xt/for:array [path (or deps [])]
-      (:= path (:? (xt/x:is-array? path) path [group-id path]))
-      (xtd/set-in all-deps
-                  [(xt/x:first path)
-                   (xt/x:second path)
-                   model-id]
-                  true)))
-  (return all-deps))
 
 (defn.xt get-unknown-deps
   "gets unknown deps"
@@ -358,7 +268,7 @@
     (fn [model-id event]
       (return
        (promise/x:promise-catch
-        (-/refresh-model node space-id group-id model-id event refresh-deps-fn)
+        (-/model-refresh node space-id group-id model-id event refresh-deps-fn)
         (fn [err]
           (return err)))))
     xt/x:now-ms)))
@@ -377,9 +287,9 @@
         nil
         (xtd/obj-assign-nested
          {"main"   {"handler" handler
-                    "wrapper" -/wrap-space-args}
-          "remote" {"wrapper" -/wrap-space-args}
-          "sync"   {"wrapper" -/wrap-space-args}}
+                    "wrapper" page-util/wrap-space-args}
+          "remote" {"wrapper" page-util/wrap-space-args}
+          "sync"   {"wrapper" page-util/wrap-space-args}}
          pipeline)
         (xt/x:get-key defaults "args")
         (xt/x:get-key defaults "output")
@@ -402,18 +312,18 @@
    nil)
   (return model))
 
-(defn.xt add-group-attach
+(defn.xt group-add-attach
   "adds group statically, merging models into an existing group when present"
   {:added "4.1"}
   [node space-id group-id models]
-  (var runtime (-/ensure-space-page node space-id))
+  (var runtime (-/space-ensure-page node space-id))
   (var groups (xt/x:get-key runtime "groups"))
   (var group (xt/x:get-key groups group-id))
   (when (xt/x:nil? group)
     (:= group {"name" group-id
                "models" {}
                "specs" {}
-               "throttle" (-/create-throttle node space-id group-id -/refresh-model-dependents)
+               "throttle" (-/create-throttle node space-id group-id -/model-refresh-dependents)
                "deps" {}})
     (xt/x:set-key groups group-id group))
   (var group-models (xt/x:get-key group "models"))
@@ -429,24 +339,24 @@
     (xt/x:set-key group-models
                   model-id
                   (-/create-model node space-id group-id model-id model)))
-  (xt/x:set-key group "deps" (-/get-group-deps group-id group-specs))
+  (xt/x:set-key group "deps" (page-util/get-group-deps group-id group-specs))
   (return group))
 
-(defn.xt add-group
+(defn.xt group-add
   "adds a group and runs its initial refresh"
   {:added "4.1"}
   [node space-id group-id models]
-  (var group (-/add-group-attach node space-id group-id models))
-  (xt/x:set-key group "init" (-/refresh-group node space-id group-id {} nil))
+  (var group (-/group-add-attach node space-id group-id models))
+  (xt/x:set-key group "init" (-/group-refresh node space-id group-id {} nil))
   (return group))
 
-(defn.xt remove-group
+(defn.xt group-remove
   "removes the group"
   {:added "4.1"}
   [node space-id group-id]
-  (var runtime (-/ensure-space-page node space-id))
+  (var runtime (-/space-ensure-page node space-id))
   (var groups (xt/x:get-key runtime "groups"))
-  (var dependents (-/get-group-dependents node space-id group-id))
+  (var dependents (-/group-get-dependents node space-id group-id))
   (when (> (xt/x:len (xt/x:obj-keys dependents)) 0)
     (xt/x:err (xt/x:cat "ERR - existing group dependents - "
                         (xt/x:json-encode dependents))))
@@ -454,11 +364,11 @@
   (xt/x:del-key groups group-id)
   (return curr))
 
-(defn.xt remove-model
+(defn.xt model-remove
   "removes the model"
   {:added "4.1"}
   [node space-id group-id model-id]
-  (var dependents (-/get-model-dependents node space-id group-id model-id))
+  (var dependents (-/model-get-dependents node space-id group-id model-id))
   (when (> (xt/x:len (xt/x:obj-keys dependents)) 0)
     (xt/x:err (xt/x:cat "ERR - existing model dependents - "
                         (xt/x:json-encode dependents))))
@@ -510,7 +420,7 @@
   (event-model/set-input model current)
   (return (-/model-update node space-id group-id model-id (or event {}))))
 
-(defn.xt trigger-group-raw
+(defn.xt group-trigger-raw
   "triggers a group"
   {:added "4.1"}
   [node space-id group signal event]
@@ -519,10 +429,10 @@
   (xt/for:object [[model-id model] models]
     (var options (xt/x:get-key model "options"))
     (var trigger (xt/x:get-key options "trigger"))
-    (var check (-/check-event trigger signal event {"model" model
-                                                    "group" group
-                                                    "node" node
-                                                    "space_id" space-id}))
+    (var check (page-util/check-event trigger signal event {"model" model
+                                                            "group" group
+                                                            "node" node
+                                                            "space_id" space-id}))
     (when check
       (th/throttle-run (xt/x:get-key group "throttle")
                        model-id
@@ -530,16 +440,16 @@
       (xt/x:arr-push out model-id)))
   (return out))
 
-(defn.xt trigger-group
+(defn.xt group-trigger
   "triggers a group"
   {:added "4.1"}
   [node space-id group-id signal event]
   (var group (-/group-ensure node space-id group-id))
   (when (and (-/proxy-group? group) -/PROXY_DISPATCHER)
     (return (-/PROXY_DISPATCHER "trigger-group" node space-id group-id [signal event])))
-  (return (-/trigger-group-raw node space-id group signal event)))
+  (return (-/group-trigger-raw node space-id group signal event)))
 
-(defn.xt trigger-model
+(defn.xt model-trigger
   "triggers a model"
   {:added "4.1"}
   [node space-id group-id model-id signal event]
@@ -548,75 +458,50 @@
     (return (-/PROXY_DISPATCHER "trigger-model" node space-id group-id [model-id signal event])))
   (var options (xt/x:get-key model "options"))
   (var trigger (xt/x:get-key options "trigger"))
-  (when (-/check-event trigger signal event {"model" model
-                      "group" group
-                                             "node" node
-                                             "space_id" space-id})
+  (when (page-util/check-event trigger signal event {"model" model
+                                                     "group" group
+                                                     "node" node
+                                                     "space_id" space-id})
     (var entry (th/throttle-run (xt/x:get-key group "throttle")
                                 model-id
                                 [event]))
     (return (xt/x:get-key entry "promise")))
   (return nil))
 
-(defn.xt trigger-all
+(defn.xt space-trigger-all
   "triggers all groups in a space"
   {:added "4.1"}
   [node space-id signal event]
-  (var groups (xt/x:get-key (-/ensure-space-page node space-id) "groups"))
+  (var groups (xt/x:get-key (-/space-ensure-page node space-id) "groups"))
   (var out {})
   (xt/for:object [[group-id group] groups]
     (xt/x:set-key out
                   group-id
                   (:? (and (-/proxy-group? group) -/PROXY_DISPATCHER)
                       (-/PROXY_DISPATCHER "trigger-group" node space-id group-id [signal event])
-                      (-/trigger-group-raw node space-id group signal event))))
+                      (-/group-trigger-raw node space-id group signal event))))
   (return out))
 
-(defn.xt raw-callback-id
-  "creates a stable node trigger id for one page space"
-  {:added "4.1"}
-  [space-id]
-  (return (xt/x:cat "@/raw/page/" (or space-id ""))))
-
-(defn.xt register-page-trigger
-  "registers a raw page trigger directly on the node"
-  {:added "4.1"}
-  [node signal trigger-fn meta]
-  (var entry {"id" signal
-             "fn" trigger-fn
-             "meta" (or meta {})})
-  (xt/x:set-key (xt/x:get-key node "triggers")
-               signal
-               entry)
-  (return entry))
-
-(defn.xt unregister-page-trigger
-  "removes a raw page trigger directly from the node"
-  {:added "4.1"}
-  [node signal]
-  (var triggers (xt/x:get-key node "triggers"))
-  (var prev (xt/x:get-key triggers signal))
-  (xt/x:del-key triggers signal)
-  (return prev))
-
-(defn.xt add-raw-callback
+(defn.xt raw-callback-add
   "adds a raw substrate trigger callback for one space"
   {:added "4.1"}
   [node space-id]
-  (var trigger-id (-/raw-callback-id space-id))
+  (var trigger-id (page-util/raw-callback-id space-id))
   (return
-   (-/register-page-trigger
+   (page-util/register-page-trigger
     node
     trigger-id
     (fn [_space frame local-node]
-      (return (-/trigger-all local-node
+      (return (-/space-trigger-all local-node
                              space-id
                              (xt/x:get-key frame "signal")
                              frame)))
     {"space_id" space-id})))
 
-(defn.xt remove-raw-callback
+(defn.xt raw-callback-remove
   "removes the raw substrate trigger callback for one space"
   {:added "4.1"}
   [node space-id]
-  (return (-/unregister-page-trigger node (-/raw-callback-id space-id))))
+  (return (page-util/unregister-page-trigger node (page-util/raw-callback-id space-id))))
+
+

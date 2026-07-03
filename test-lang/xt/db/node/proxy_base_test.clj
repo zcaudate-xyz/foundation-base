@@ -92,21 +92,6 @@
           (fn [_]
             (return (f server client))))))))
 
-^{:refer xt.db.node.proxy-base/init-proxy-handlers :added "4.1"}
-(fact "registers all base proxy actions on the client node"
-
-  (!.js
-   (var node (-/client-node))
-   (var handlers (xt/x:get-key node "handlers"))
-   (return {"count"   (xt/x:len (xtd/obj-keys handlers))
-           "call"    (xt/x:get-key handlers "@xt.db/kernel-init")
-           "attach"  (xt/x:get-key handlers "@xt.db/attach-model")
-           "detach"  (xt/x:get-key handlers "@xt.db/detach-model")}))
-  => {"count"   14
-      "call"    {"id" "@xt.db/kernel-init" "meta" {}}
-      "attach"  {"id" "@xt.db/attach-model" "meta" {}}
-      "detach"  {"id" "@xt.db/detach-model" "meta" {}}})
-
 ^{:refer xt.db.node.proxy-util/request-proxy :added "4.1"}
 (fact "forwards a call action to the server"
 
@@ -140,7 +125,7 @@
         server
         "@xt.db/attach-model"
         (fn [space args request node]
-          (page-core/add-group-attach
+          (page-core/group-add-attach
            node
            "room/a"
            "demo"
@@ -184,7 +169,7 @@
         server
         "@xt.db/attach-model"
         (fn [space args request node]
-          (page-core/add-group-attach
+          (page-core/group-add-attach
            node
            "room/a"
            "demo"
@@ -199,7 +184,7 @@
         server
         "@xt.db/detach-model"
         (fn [space args request node]
-          (page-core/remove-model node "room/a" "demo" "echo")
+          (page-core/model-remove node "room/a" "demo" "echo")
           (return {"status" "removed"
                    "space" "room/a"
                    "group" "demo"
@@ -236,3 +221,18 @@
            {"error" (xt/x:ex-message err)
             "data"  (xt/x:ex-data err)}))))))
   => nil)
+
+^{:refer xt.db.node.proxy-base/init-proxy-handlers :added "4.1"}
+(fact "registers all base proxy actions on the client node"
+
+  (!.js
+   (var node (-/client-node))
+   (var handlers (xt/x:get-key node "handlers"))
+   (return {"count"   (xt/x:len (xtd/obj-keys handlers))
+           "call"    (xt/x:get-key handlers "@xt.db/kernel-init")
+           "attach"  (xt/x:get-key handlers "@xt.db/attach-model")
+           "detach"  (xt/x:get-key handlers "@xt.db/detach-model")}))
+  => {"count"   16
+      "call"    {"id" "@xt.db/kernel-init" "meta" {}}
+      "attach"  {"id" "@xt.db/attach-model" "meta" {}}
+      "detach"  {"id" "@xt.db/detach-model" "meta" {}}})

@@ -103,13 +103,13 @@
              (promise/x:promise-then
               (fn [_]
                 (return
-                 (page-proxy/open-proxy-group client "room/a" "demo" {}))))
+                 (page-proxy/group-open-proxy client "room/a" "demo" {}))))
              (promise/x:promise-then
               (fn [group]
                 (var model (xtd/get-in group ["models" "rpc-view"]))
                 (return
                  (promise/x:promise-then
-                  (base-page/remote-call client "room/a" "demo" "rpc-view" [[]] true)
+                  (base-page/model-remote-call client "room/a" "demo" "rpc-view" [[]] true)
                   (fn [res]
                     (return
                      (promise/x:with-delay

@@ -443,7 +443,7 @@
                          (return ctx.args))
              "defaults" {"args" [1]}})
            (return
-            (-> (page-core/refresh-model  node
+            (-> (page-core/model-refresh  node
                                           "space/a"
                                           "group:a"
                                           "echo"
@@ -452,7 +452,7 @@
                 (promise/x:promise-then
                  (fn []
                    (repl/notify
-                    (page-core/get-current-output node
+                    (page-core/model-get-output node
                                                   "space/a"
                                                   "group:a"
                                                   "echo"))))))))
@@ -512,7 +512,7 @@
             nil
             node)
            (return
-            (page-core/refresh-model node "room/a" "demo" "echo" {} nil))))
+            (page-core/model-refresh node "room/a" "demo" "echo" {} nil))))
         (repl/notify)))
   => {"path" ["demo" "echo"], "post" [false], "::" "model.run", "main" [true [1 2 3]], "pre" [false]})
 
@@ -727,7 +727,7 @@
             nil
             node)
            (return
-            (page-core/refresh-model node "room/a" "demo" "rpc-view" {} nil))))
+            (page-core/model-refresh node "room/a" "demo" "rpc-view" {} nil))))
         (promise/x:promise-then
          (fn [out]
            (repl/notify
@@ -887,7 +887,7 @@
          (fn [_]
            ;; REFRESH ACTIVE
            (return
-            (page-core/refresh-model-remote node "room/a" "demo" "active-view" nil))))
+            (page-core/model-refresh-remote node "room/a" "demo" "active-view" nil))))
         (repl/notify)))
   => (contains-in
       {"path" ["demo" "active-view"],
@@ -896,7 +896,7 @@
 
   (!.js
     ;; PASSIVE STILL UPDATES
-    (page-core/get-current-output NODE "room/a" "demo" "passive-view"))
+    (page-core/model-get-output NODE "room/a" "demo" "passive-view"))
   => (contains-in
       [{"message" "hello", "author_id" nil, "id" string?}]))
 
@@ -1063,7 +1063,7 @@
             nil
             node)
            (return
-            (page-core/refresh-model-remote node "room/a" "demo" "dataview-view" nil))))
+            (page-core/model-refresh-remote node "room/a" "demo" "dataview-view" nil))))
         (promise/x:promise-then
          (fn [out]
            (repl/notify

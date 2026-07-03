@@ -214,7 +214,7 @@
   "refreshes a substrate page model"
   {:added "4.1"}
   [node space-id path event]
-  (return (page-core/refresh-model node
+  (return (page-core/model-refresh node
                                    space-id
                                    (xt/x:first path)
                                    (xt/x:second path)
@@ -225,7 +225,7 @@
   "invokes the remote stage of a page model"
   {:added "4.1"}
   [node space-id path args save-output]
-  (return (page-core/remote-call node
+  (return (page-core/model-remote-call node
                                  space-id
                                  (xt/x:first path)
                                  (xt/x:second path)

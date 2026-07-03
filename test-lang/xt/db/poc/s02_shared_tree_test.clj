@@ -107,11 +107,11 @@
             (promise/x:promise-then
              (fn [_]
                (return
-                (page-proxy/open-proxy-group client "room/a" "demo" {}))))
+                (page-proxy/group-open-proxy client "room/a" "demo" {}))))
             (promise/x:promise-then
              (fn [_]
                (return
-                (base-page/remote-call client "room/a" "demo" "tree-view" [[] []] true))))
+                (base-page/model-remote-call client "room/a" "demo" "tree-view" [[] []] true))))
             (promise/x:promise-then
              (fn [res]
                (var group (base-page/group-get client "room/a" "demo"))

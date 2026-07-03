@@ -23,7 +23,7 @@
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (var group (page-core/add-group node
+    (var group (page-core/group-add node
                                     nil
                                     "page"
                                     {"greet"
@@ -46,7 +46,7 @@
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/add-group-attach node
+    (page-core/group-add-attach node
                                 nil
                                 "page"
                                 {"greet"
@@ -65,7 +65,7 @@
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/add-group-attach node
+    (page-core/group-add-attach node
                                 nil
                                 "page"
                                 {"greet"
@@ -88,7 +88,7 @@
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/add-group-attach node
+    (page-core/group-add-attach node
                                 nil
                                 "page"
                                 {"source"
@@ -144,7 +144,7 @@
            (transport-memory/text-endpoint (. wire ["right"])))])
         (promise/x:promise-then
          (fn [_]
-           (page-core/add-group-attach client
+           (page-core/group-add-attach client
                                        nil
                                        "page"
                                        {"echo"
@@ -174,7 +174,7 @@
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/add-group-attach node
+    (page-core/group-add-attach node
                                 nil
                                 "page"
                                 {"both"
@@ -186,7 +186,7 @@
     (-> (substrate/page-model-update node nil "page" "both" {})
         (promise/x:promise-then
          (fn [_]
-           (return (page-core/remote-call node nil "page" "both" [] true))))
+           (return (page-core/model-remote-call node nil "page" "both" [] true))))
         (promise/x:promise-then
          (fn [_]
            (var model-result (page-core/model-ensure node nil "page" "both"))
@@ -196,7 +196,7 @@
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/add-group-attach node
+    (page-core/group-add-attach node
                                 nil
                                 "page"
                                 {"both"

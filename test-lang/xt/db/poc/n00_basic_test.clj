@@ -121,7 +121,7 @@
                 (promise/x:promise-then
                  (fn [records]
                    (impl-common/record-add caching "Log" records)
-                   (page-core/add-group-attach
+                   (page-core/group-add-attach
                     node nil "page"
                     {"entry" {"handler" (fn [context]
                                            (var node (. context ["node"]))
@@ -178,7 +178,7 @@
                 (promise/x:promise-then
                  (fn [records]
                    (impl-common/record-add caching "Log" records)
-                   (page-core/add-group-attach
+                   (page-core/group-add-attach
                     node nil "page"
                     {"entry" {"handler" (fn [context]
                                            (var node (. context ["node"]))
@@ -197,7 +197,7 @@
                    (return node)))))))
         (promise/x:promise-then
          (fn [node]
-           (-> (page-core/remote-call node nil "page" "entry" [["Log"]] true)
+           (-> (page-core/model-remote-call node nil "page" "entry" [["Log"]] true)
                (promise/x:promise-then
                 (fn [_]
                   (var model-result (page-core/model-ensure node nil "page" "entry"))

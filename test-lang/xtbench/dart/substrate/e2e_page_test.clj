@@ -17,12 +17,12 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.substrate.page-core/add-group :name demo-000-page-model-basic}
+^{:refer xt.substrate.page-core/group-add :name demo-000-page-model-basic}
 (fact "a page model computes its output from args on initial refresh"
 
   (notify/wait-on :dart
     (var node (substrate/node-create {"id" "node"}))
-    (var group (page-core/add-group node
+    (var group (page-core/group-add node
                                     nil
                                     "page"
                                     {"greet"
@@ -44,7 +44,7 @@
 
   (notify/wait-on :dart
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/add-group-attach node
+    (page-core/group-add-attach node
                                 nil
                                 "page"
                                 {"greet"
@@ -63,7 +63,7 @@
 
   (notify/wait-on :dart
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/add-group-attach node
+    (page-core/group-add-attach node
                                 nil
                                 "page"
                                 {"greet"
@@ -80,7 +80,7 @@
            (repl/notify (event-model/get-current model nil))))))
   => "hello substrate")
 
-^{:refer xt.substrate.page-core/add-group-attach :name demo-003-page-model-remote}
+^{:refer xt.substrate.page-core/group-add-attach :name demo-003-page-model-remote}
 (fact "a page model handler can issue a request over a memory transport"
 
   (notify/wait-on :dart
@@ -106,7 +106,7 @@
            (transport-memory/text-endpoint (. wire ["right"])))])
         (promise/x:promise-then
          (fn [_]
-           (page-core/add-group-attach client
+           (page-core/group-add-attach client
                                        nil
                                        "page"
                                        {"echo"
@@ -130,7 +130,7 @@
            (repl/notify (event-model/get-current model nil))))))
   => {"echo" "ping" "server" "server"})
 
-^{:refer xt.substrate.page-core/add-group-attach :name demo-003-page-model-remote}
+^{:refer xt.substrate.page-core/group-add-attach :name demo-003-page-model-remote}
 (fact "a page model handler can issue a request over a memory transport"
 
   (notify/wait-on :dart
@@ -156,7 +156,7 @@
            (transport-memory/text-endpoint (. wire ["right"])))])
         (promise/x:promise-then
          (fn [_]
-           (page-core/add-group-attach client
+           (page-core/group-add-attach client
                                        nil
                                        "page"
                                        {"echo"
@@ -180,12 +180,12 @@
            (repl/notify (event-model/get-current model nil))))))
   => {"echo" "ping" "server" "server"})
 
-^{:refer xt.substrate.page-core/remote-call :name demo-004-page-model-local-and-remote}
+^{:refer xt.substrate.page-core/model-remote-call :name demo-004-page-model-local-and-remote}
 (fact "a model can have separate local and remote handlers"
 
   (notify/wait-on :dart
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/add-group-attach node
+    (page-core/group-add-attach node
                                 nil
                                 "page"
                                 {"both"
@@ -197,7 +197,7 @@
     (-> (substrate/page-model-update node nil "page" "both" {})
         (promise/x:promise-then
          (fn [_]
-           (return (page-core/remote-call node nil "page" "both" [] true))))
+           (return (page-core/model-remote-call node nil "page" "both" [] true))))
         (promise/x:promise-then
          (fn [_]
            (var model-result (page-core/model-ensure node nil "page" "both"))
@@ -207,7 +207,7 @@
 
   (notify/wait-on :dart
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/add-group-attach node
+    (page-core/group-add-attach node
                                 nil
                                 "page"
                                 {"both"

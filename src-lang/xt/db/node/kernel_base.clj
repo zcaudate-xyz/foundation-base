@@ -255,7 +255,7 @@
   "attach-base-model registers a db listener when options.refresh is set"
   {:added "4.1"}
   [node primary-id space-id group-id model-id model-spec]
-  (page-core/add-group-attach node
+  (page-core/group-add-attach node
                               space-id
                               group-id
                               {model-id model-spec})
@@ -296,7 +296,7 @@
   "detach-base-model removes the model and its db listener"
   {:added "4.1"}
   [node primary-id space-id group-id model-id]
-  (page-core/remove-model node space-id group-id model-id)
+  (page-core/model-remove node space-id group-id model-id)
   (var caching (-/get-caching-impl node primary-id))
   (when (xt/x:not-nil? caching)
     (impl-common/remove-db-listener

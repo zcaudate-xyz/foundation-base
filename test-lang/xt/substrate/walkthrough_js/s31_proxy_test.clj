@@ -28,7 +28,7 @@
                        {"id" "page-proxy-shared-server"
                         "spaces" {"room/a" {"state" {}}}}))
             (xt.substrate.page-proxy/install node)
-            (xt.substrate.page-core/add-group
+            (xt.substrate.page-core/group-add
              node
              "room/a"
              "demo"
@@ -58,7 +58,7 @@
                              4000)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.substrate.page-proxy/open-proxy-group
+^{:refer xt.substrate.page-proxy/group-open-proxy
   :added "4.1"}
 (fact "page-proxy can list, open, and read a remote group over a SharedWorker"
   
@@ -76,11 +76,11 @@
          (fn [conn]
            (:= transport-id (. conn ["transport_id"]))
            (return
-            (page-proxy/list-proxy-groups client "room/a" {"transport_id" transport-id}))))
+            (page-proxy/group-list-proxy client "room/a" {"transport_id" transport-id}))))
         (promise/x:promise-then
          (fn [groups]
            (return
-            (page-proxy/open-proxy-group
+            (page-proxy/group-open-proxy
              client
              "room/a"
              "demo"

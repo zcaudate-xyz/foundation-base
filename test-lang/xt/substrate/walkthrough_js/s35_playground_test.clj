@@ -42,7 +42,7 @@
   {:added "4.1"}
   []
   (var node (substrate/node-create (-/create-node)))
-  (page-core/add-group-attach
+  (page-core/group-add-attach
    node
    "space/a"
    "page"

@@ -40,7 +40,7 @@
        (fn [space args request node]
          (return {"echo" args}))
        nil)
-      (xt.substrate.page-core/add-group
+      (xt.substrate.page-core/group-add
        node
        "room/a"
        "demo"
@@ -79,11 +79,11 @@
         (var transport-id (. conn ["transport_id"]))
         (return
          (promise/x:promise-then
-          (page-proxy/list-proxy-groups client "room/a" {"transport_id" transport-id})
+          (page-proxy/group-list-proxy client "room/a" {"transport_id" transport-id})
           (fn [groups]
             (return
              (promise/x:promise-then
-              (page-proxy/open-proxy-group
+              (page-proxy/group-open-proxy
                client
                "room/a"
                "demo"

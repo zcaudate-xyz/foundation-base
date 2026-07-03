@@ -26,7 +26,7 @@
                  {"id" "page-proxy-shared-server"
                   "spaces" {"room/a" {"state" {}}}}))
       (xt.substrate.page-proxy/install node)
-      (xt.substrate.page-core/add-group
+      (xt.substrate.page-core/group-add
        node
        "room/a"
        "demo"
@@ -100,7 +100,7 @@
          "source" (-/make-worker-link)})
        (promise/x:promise-then
         (fn [conn]
-          (return (page-proxy/open-proxy-group
+          (return (page-proxy/group-open-proxy
                    client
                    "room/a"
                    "demo"
