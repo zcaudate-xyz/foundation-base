@@ -102,3 +102,25 @@
          (fn [acc]
            (repl/notify {"main" (. acc ["main"])})))))
   => {"main" [true {"data" [1 2 3]}]})
+
+
+^{:refer js.react.ext-page/throttled-setter :added "4.1"}
+(fact "TODO")
+
+^{:refer js.react.ext-page/initModelBase :added "4.1"}
+(fact "TODO")
+
+^{:refer js.react.ext-page/listenModel :added "4.1"}
+(fact "TODO")
+
+^{:refer js.react.ext-page/listenModelOutput :added "4.1"}
+(fact "TODO")
+
+^{:refer js.react.ext-page/listenModelThrottled :added "4.1"}
+(fact "TODO")
+
+^{:refer js.react.ext-page/useRefreshArgs :added "4.1"}
+(fact "TODO")
+
+^{:refer js.react.ext-page/listenSuccess :added "4.1"}
+(fact "TODO")

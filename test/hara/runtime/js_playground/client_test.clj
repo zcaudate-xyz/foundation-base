@@ -267,3 +267,7 @@
 
   (!.js (typeof (client/make-websocket "ws://localhost/ws" (fn [s]) (fn [m]) {"current" []} (fn [ms]))))
   => "object")
+
+
+^{:refer hara.runtime.js-playground.client/DomNode :added "4.1"}
+(fact "TODO")

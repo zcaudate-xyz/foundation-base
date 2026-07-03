@@ -529,3 +529,7 @@
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-obj-pairs :added "4.1"}
 (fact "lists object pairs")
+
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise-new :added "4.1"}
+(fact "TODO")

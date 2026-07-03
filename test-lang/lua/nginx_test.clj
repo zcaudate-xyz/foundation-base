@@ -165,3 +165,7 @@
 
   (hara.runtime.nginx/nginx-conf)
   (./import))
+
+
+^{:refer lua.nginx/to-hex :added "4.1"}
+(fact "TODO")

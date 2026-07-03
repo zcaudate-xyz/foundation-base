@@ -51,3 +51,7 @@
    :default
    (ut/lang-pointer :lua {:module 'L.core}) [])
   => (throws))
+
+
+^{:refer hara.lang.script-control/script-rt-prep :added "4.1"}
+(fact "TODO")

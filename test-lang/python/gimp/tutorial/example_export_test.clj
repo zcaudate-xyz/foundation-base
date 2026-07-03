@@ -41,3 +41,7 @@
         "/tmp/tutorial-export-source.png"
         "/tmp/tutorial-export-converted.xcf"))))
   => "/tmp/tutorial-export-converted.xcf")
+
+
+^{:refer python.gimp.tutorial.example-export/save-both-formats :added "4.1"}
+(fact "TODO")

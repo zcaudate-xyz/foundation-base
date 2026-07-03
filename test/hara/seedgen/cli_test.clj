@@ -56,3 +56,6 @@
 (fact "is the CLI entry point"
   (var? #'cli/-main) => true
   (:doc (meta #'cli/-main)) => "main entry point for lein seedgen")
+
+^{:refer hara.seedgen.cli/seedgen-todos :added "4.1"}
+(fact "TODO")

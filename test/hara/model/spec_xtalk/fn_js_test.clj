@@ -543,3 +543,7 @@
                 (return tn))))
       (return t)))
   )
+
+
+^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise-new :added "4.1"}
+(fact "TODO")

@@ -192,3 +192,31 @@
              nil))))
         (repl/notify)))
   => {"value" 7})
+
+
+^{:refer kmi.lang.runtime/read-string :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.runtime/read-many :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.runtime/eval-form :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.runtime/eval-string-many :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.runtime/handler-read :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.runtime/handler-eval :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.runtime/handler-load :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.runtime/handler-describe :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.runtime/stop :added "4.1"}
+(fact "TODO")

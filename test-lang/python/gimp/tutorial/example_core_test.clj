@@ -81,3 +81,19 @@
     (var id (core/create-image 8 8))
     (core/delete-image id))
   => integer?)
+
+
+^{:refer python.gimp.tutorial.example-core/ensure-gimp :added "4.1"}
+(fact "TODO")
+
+^{:refer python.gimp.tutorial.example-core/ensure-gegl :added "4.1"}
+(fact "TODO")
+
+^{:refer python.gimp.tutorial.example-core/ensure-gio :added "4.1"}
+(fact "TODO")
+
+^{:refer python.gimp.tutorial.example-core/fill-layer-color :added "4.1"}
+(fact "TODO")
+
+^{:refer python.gimp.tutorial.example-core/flatten-image :added "4.1"}
+(fact "TODO")

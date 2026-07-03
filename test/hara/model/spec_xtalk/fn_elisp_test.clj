@@ -483,3 +483,7 @@
 
 ^{:refer hara.model.spec-xtalk.fn-elisp/elisp-tf-x-file-spit :added "4.1"}
 (fact "writes file contents")
+
+
+^{:refer hara.model.spec-xtalk.fn-elisp/elisp-tf-x-promise-new :added "4.1"}
+(fact "TODO")
