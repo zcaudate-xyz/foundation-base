@@ -28,14 +28,108 @@
                 :code   '{identity {}}})
   => book-module?)
 
+(def +polyfill-book+
+  {:modules
+   {'demo.poly (book-module {:lang :js :id 'demo.poly})
+    'demo.core (book-module {:lang :js :id 'demo.core})}})
+
 ^{:refer hara.lang.book-module/polyfill-default-alias :added "4.1"}
-(fact "TODO")
+(fact "returns the default alias for a derived polyfill module"
+  (polyfill-default-alias 'common-net)  => 'polyfill-net
+  (polyfill-default-alias 'polyfill-net) => 'polyfill-net
+  (polyfill-default-alias 'net)          => 'polyfill-net)
 
 ^{:refer hara.lang.book-module/module-derived-view :added "4.1"}
-(fact "TODO")
+(fact "returns a compilation view with derived polyfill links"
+
+  (-> (module-derived-view
+       +polyfill-book+
+       (book-module {:lang :js
+                     :id 'demo.core
+                     :code '{identity {:deps #{}
+                                       :polyfill-modules #{demo.poly}}}}))
+      (select-keys [:link :internal :alias]))
+  => '{:link {polyfill-demo.poly demo.poly}
+        :internal {demo.poly polyfill-demo.poly}
+        :alias {polyfill-demo.poly demo.poly}}
+
+  (-> (module-derived-view
+       +polyfill-book+
+       (book-module {:lang :js
+                     :id 'demo.core
+                     :code '{identity {:deps #{}
+                                       :polyfill-modules #{demo.core}}}}))
+      (select-keys [:link :internal :alias]))
+  => '{:link {} :internal nil :alias {}}
+
+  (-> (module-derived-view
+       +polyfill-book+
+       (book-module {:lang :js
+                     :id 'demo.core
+                     :internal {'demo.poly 'polyfill-demo.poly}
+                     :code '{identity {:deps #{}
+                                       :polyfill-modules #{demo.poly}}}}))
+      (select-keys [:link :internal :alias]))
+  => '{:link {} :internal {demo.poly polyfill-demo.poly} :alias {}}
+
+  (module-derived-view
+   +polyfill-book+
+   (book-module {:lang :js
+                 :id 'demo.core
+                 :code '{identity {:deps #{}
+                                   :polyfill-modules #{missing.module}}}}))
+  => (throws-info '{:module demo.core
+                    :polyfill missing.module})
+
+  (module-derived-view
+   +polyfill-book+
+   (book-module {:lang :js
+                 :id 'demo.core
+                 :link '{polyfill-demo.poly other.module}
+                 :code '{identity {:deps #{}
+                                   :polyfill-modules #{demo.poly}}}}))
+  => (throws-info '{:module demo.core
+                    :alias polyfill-demo.poly
+                    :current other.module
+                    :polyfill demo.poly})
+
+  (module-derived-view
+   +polyfill-book+
+   (book-module {:lang :js
+                 :id 'demo.core
+                 :alias '{polyfill-demo.poly other.module}
+                 :code '{identity {:deps #{}
+                                   :polyfill-modules #{demo.poly}}}}))
+  => (throws-info '{:module demo.core
+                    :alias polyfill-demo.poly
+                    :current other.module
+                    :polyfill demo.poly}))
 
 ^{:refer hara.lang.book-module/resolve-module-view :added "4.1"}
-(fact "TODO")
+(fact "resolves a module id or module map to the derived compilation view"
+
+  (resolve-module-view nil nil) => nil
+
+  (-> (resolve-module-view
+       +polyfill-book+
+       'demo.core)
+      :id)
+  => 'demo.core
+
+  (-> (resolve-module-view
+       nil
+       (book-module {:lang :js :id 'demo.core}))
+      :id)
+  => 'demo.core
+
+  (-> (resolve-module-view
+       +polyfill-book+
+       (book-module {:lang :js
+                     :id 'demo.core
+                     :code '{identity {:deps #{}
+                                       :polyfill-modules #{demo.poly}}}}))
+      :link)
+  => '{polyfill-demo.poly demo.poly})
 
 ^{:refer hara.lang.book-module/module-deps-code :added "4.0"}
 (fact "gets the code link dependencies"

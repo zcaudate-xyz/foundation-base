@@ -177,7 +177,7 @@
                                      (xt/x:arr-assign sel-args))
                                  (-> (xt/x:arr-clone  ret-input)
                                      (xt/x:arr-assign sel-input))
-                                 true))
+                                 (:? (> (xt/x:len ret-input) 0) true false)))
   (return qtree))
 
 

@@ -61,8 +61,40 @@
   => (contains {"name" "evaluate"}))
 
 
-^{:refer hara.runtime.chromedriver.spec/tmpl-connection :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.chromedriver.spec/tmpl-connection :added "4.0"}
+(fact "creates a connection form given template"
 
-^{:refer hara.runtime.chromedriver.spec/tmpl-browser :added "4.1"}
-(fact "TODO")
+  (spec/tmpl-connection ['page-navigate ["Page" "navigate"]])
+  => '(defn page-navigate
+       [conn url & [{:keys [frame-id referrer referrer-policy transition-type], :as m} timeout opts]]
+       (hara.runtime.chromedriver.connection/send
+        conn
+        "Page.navigate"
+        (merge {"url" url} m)
+        timeout
+        opts))
+
+  (spec/tmpl-connection ['page-capture-screenshot ["Page" "captureScreenshot"]])
+  => '(defn page-capture-screenshot
+       [conn & [{:keys [capture-beyond-viewport clip format from-surface optimize-for-speed quality], :as m} timeout opts]]
+       (hara.runtime.chromedriver.connection/send
+        conn
+        "Page.captureScreenshot"
+        (merge {} m)
+        timeout
+        opts)))
+
+^{:refer hara.runtime.chromedriver.spec/tmpl-browser :added "4.0"}
+(fact "constructs the browser template"
+
+  (spec/tmpl-browser ['browser-eval 'util/runtime-evaluate])
+  => '(def browser-eval
+       (hara.runtime.chromedriver.impl/wrap-browser-state util/runtime-evaluate))
+
+  (-> (spec/tmpl-browser ['browser-eval 'util/runtime-evaluate])
+      second
+      meta
+      :arglists
+      second
+      ffirst)
+  => 'browser)

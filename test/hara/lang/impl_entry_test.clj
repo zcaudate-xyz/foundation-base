@@ -245,7 +245,21 @@
   => '(defn add-fn [a b] (return (+ a (+ a 1)))))
 
 ^{:refer hara.lang.impl-entry/prepare-code-entry :added "4.1"}
-(fact "TODO")
+(fact "prepares a raw code entry for storage without eager hydration"
+
+  (let [entry (entry/prepare-code-entry {})]
+    (and (contains? entry :static/code.cache)
+         (map? @(:static/code.cache entry))))
+  => true
+
+  (let [cache (atom {:cached true})
+        entry (entry/prepare-code-entry {:static/code.cache cache})]
+    (= cache (:static/code.cache entry)))
+  => true
+
+  (binding [entry/*extra* {:probe/value true}]
+    (:probe/value (entry/prepare-code-entry {})))
+  => true)
 
 ^{:refer hara.lang.impl-entry/create-code :added "4.0"}
 (fact "creates the code entry"

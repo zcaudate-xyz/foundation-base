@@ -115,4 +115,9 @@
   (get-options :lua :oneshot :luajit)
   => map?)
 ^{:refer hara.runtime.basic.type-common/program-exists? :added "4.1"}
-(fact "TODO")
+(fact "checks if an executable exists"
+  (program-exists? "ls")
+  => true
+
+  (program-exists? "definitely-not-a-real-command-12345")
+  => false)

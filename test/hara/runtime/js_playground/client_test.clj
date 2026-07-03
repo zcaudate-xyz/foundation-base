@@ -269,5 +269,19 @@
   => "object")
 
 
-^{:refer hara.runtime.js-playground.client/DomNode :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.js-playground.client/DomNode :added "4.1" :timeout 60000}
+(fact "DomNode mounts a raw DOM node inside the React-managed tab panel"
+
+  @(chromedriver/evaluate +browser+
+                         (str "globalThis.PLAYGROUND.createTab('dom', 'Dom');"
+                              "var node = document.createElement('div');"
+                              "node.id = 'dom-node-xyz';"
+                              "node.textContent = 'dom-content-xyz';"
+                              "globalThis.PLAYGROUND.setTabContent('dom', node);"))
+  => (contains {"value" nil})
+
+  @(chromedriver/evaluate +browser+ "document.getElementById('dom-node-xyz') !== null")
+  => (contains {"value" true})
+
+  @(chromedriver/evaluate +browser+ "document.body.textContent.includes('dom-content-xyz')")
+  => (contains {"value" true}))

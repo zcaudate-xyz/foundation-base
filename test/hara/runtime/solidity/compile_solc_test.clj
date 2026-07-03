@@ -5,6 +5,7 @@
             [hara.runtime.solidity.compile-solc :as compile]
             [hara.runtime.solidity.env-hardhat :as env]
             [hara.lang :as l]
+            [std.lib.env]
             [std.make.compile :as make-compile])
   (:use code.test))
 
@@ -18,7 +19,8 @@
   (return "HELLO WORLD"))
 
 (fact:global
- {:setup    [(l/rt:restart)]
+ {:skip     (not (std.lib.env/program-exists? "node"))
+  :setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.solidity.compile-solc/compile-base-emit :added "4.0"}
@@ -121,11 +123,13 @@
   )
 
 ^{:refer hara.runtime.solidity.compile-solc/create-file-entry :added "4.0"}
-(comment "creates a file entry"
-
-  (compile/create-file-entry {}
-                             {:name "USDT.sol"
-                              :file "resources/assets/rt.solidity/example/USDT.sol"}))
-
-^{:refer hara.runtime.solidity.compile-solc/create-file-entry :added "4.1"}
-(fact "TODO")
+(fact "creates a file entry from a solidity source file"
+  (with-redefs [compile/create-base-entry (fn [_rt prep _m _tag _name _refresh]
+                                            {:tag :file
+                                             :name "USDT.sol"
+                                             :code (first (prep {:file "resources/assets/rt.solidity/example/USDT.sol"}))})]
+    (compile/create-file-entry (l/rt :solidity)
+                               {:name "USDT.sol"
+                                :file "resources/assets/rt.solidity/example/USDT.sol"}))
+  => (contains {:tag :file
+                :name "USDT.sol"}))

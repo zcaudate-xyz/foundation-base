@@ -1,6 +1,7 @@
 (ns hara.runtime.basic.impl-annex.process-perl-test
   (:require [hara.runtime.basic.impl-annex.process-perl :refer :all]
             [std.concurrent :as cc]
+            [std.lib.env :as env]
             [hara.lang :as l])
   (:use code.test))
 
@@ -8,7 +9,8 @@
   {:runtime :oneshot})
 
 (fact:global
- {:setup    [(l/annex:start-all)]
+ {:skip (not (env/program-exists? "perl"))
+  :setup    [(l/annex:start-all)]
   :teardown [(l/annex:stop-all)]})
 
 ^{:refer hara.runtime.basic.impl-annex.process-perl/CANARY :adopt true :added "4.0"}
@@ -27,11 +29,24 @@
   (default-body-transform '[1 2 3] {:bulk true})
   => '(do 1 2 3))
 
-^{:refer hara.runtime.basic.impl-annex.process-perl/perl-body-wrap :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.basic.impl-annex.process-perl/perl-body-wrap :added "4.0"}
+(fact "wraps body forms in a flat do block"
+  (perl-body-wrap '[1 2 3])
+  => '(do 1 2 3)
 
-^{:refer hara.runtime.basic.impl-annex.process-perl/default-basic-body-transform :added "4.1"}
-(fact "TODO")
+  (perl-body-wrap '[(+ 1 2)])
+  => '(do (+ 1 2)))
+
+^{:refer hara.runtime.basic.impl-annex.process-perl/default-basic-body-transform :added "4.0"}
+(fact "transforms basic forms for Perl without a function wrapper"
+  (default-basic-body-transform '[1 2 3] {})
+  => '(do [1 2 3])
+
+  (default-basic-body-transform '(do 1 2 3) {})
+  => '(do 1 2 3)
+
+  (default-basic-body-transform '[1 2 3] {:bulk true})
+  => '(do 1 2 3))
 
 ^{:refer hara.runtime.basic.impl-annex.process-perl/default-basic-client :added "4.1"}
 (fact "builds perl basic client source from perl forms"

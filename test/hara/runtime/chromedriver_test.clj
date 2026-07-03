@@ -2,7 +2,8 @@
   (:use code.test)
   (:require [hara.runtime.chromedriver :as chromedriver]
              [hara.lang :as l]
-             [std.lib :as h]))
+             [std.lib :as h]
+             [std.lib.env :as env]))
 
 (l/script :js
   {:runtime :chromedriver.instance
@@ -11,7 +12,12 @@
              [xt.lang.common-resource :as rt]]})
 
 (fact:global
- {:setup [(l/rt:restart :js)
+ {:skip (not (or (env/program-exists? "google-chrome-stable")
+                 (env/program-exists? "google-chrome")
+                 (env/program-exists? "chromium")
+                 (env/program-exists? "chromium-browser")
+                 (env/program-exists? "chrome-headless-shell")))
+  :setup [(l/rt:restart :js)
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
@@ -79,14 +85,49 @@
   => "Main")
 
 
-^{:refer hara.runtime.chromedriver/current-tab :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.chromedriver/current-tab :added "4.0"
+  :setup [(def +browser+ (chromedriver/browser {:port 19224}))
+          (chromedriver/goto "data:text/html,<title>Current Tab</title>" 4000 +browser+)]
+  :teardown [(h/stop +browser+)]}
+(fact "returns the active tab handle"
 
-^{:refer hara.runtime.chromedriver/tab-list :added "4.1"}
-(fact "TODO")
+  (chromedriver/current-tab +browser+)
+  => (contains {:target-id string?
+                :session-id string?}))
 
-^{:refer hara.runtime.chromedriver/tab-switch :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.chromedriver/tab-list :added "4.0"
+  :setup [(def +browser+ (chromedriver/browser {:port 19225}))
+          (chromedriver/goto "data:text/html,<title>Tab List</title>" 4000 +browser+)]
+  :teardown [(h/stop +browser+)]}
+(fact "lists all open tabs"
 
-^{:refer hara.runtime.chromedriver/tab-close :added "4.1"}
-(fact "TODO")
+  (chromedriver/tab-list +browser+)
+  => vector?)
+
+^{:refer hara.runtime.chromedriver/tab-switch :added "4.0"
+  :setup [(def +browser+ (chromedriver/browser {:port 19226}))
+          (chromedriver/goto "data:text/html,<title>One</title>" 4000 +browser+)]
+  :teardown [(h/stop +browser+)]}
+(fact "switches the active tab"
+
+  (def +one+ (chromedriver/current-tab +browser+))
+  (def +two+ (chromedriver/tab-create +browser+ "data:text/html,<title>Two</title>"))
+
+  (chromedriver/tab-switch +browser+ +two+)
+  @(chromedriver/evaluate +browser+ "document.title")
+  => (contains {"value" "Two"})
+
+  (chromedriver/tab-switch +browser+ +one+ {:bootstrap false})
+  @(chromedriver/evaluate +browser+ "document.title")
+  => (contains {"value" "One"}))
+
+^{:refer hara.runtime.chromedriver/tab-close :added "4.0"
+  :setup [(def +browser+ (chromedriver/browser {:port 19227}))
+          (chromedriver/goto "data:text/html,<title>Main</title>" 4000 +browser+)]
+  :teardown [(h/stop +browser+)]}
+(fact "closes the given tab"
+
+  (def +tab+ (chromedriver/tab-create +browser+ "data:text/html,<title>Close Me</title>"))
+
+  (chromedriver/tab-close +browser+ +tab+)
+  => (contains {"success" true}))

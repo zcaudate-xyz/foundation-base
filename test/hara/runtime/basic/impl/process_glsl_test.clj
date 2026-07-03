@@ -3,7 +3,8 @@
             [hara.runtime.basic.impl.process-glsl :as glsl]
             [std.lib.context.space :as space]
             [std.lib.env :as env]
-            [std.string.prose :as prose])
+            [std.string.prose :as prose]
+            [hara.common.util :as ut])
   (:use code.test))
 
 (l/script :glsl
@@ -40,6 +41,29 @@
         (= 0 (.exitValue process))))
     (catch Throwable _ false)))
 
+^{:refer hara.runtime.basic.impl.process-glsl/transform-form-verify :added "4.0"}
+(fact "prepends a #version directive and normalizes the body"
+  (glsl/transform-form-verify '(do (var :uniform :vec3 pos)
+                                   (fn main [] (:= gl_Position (:vec4 pos 1.0))))
+                              {})
+  => '[(:- "#version 460")
+       (do (var :uniform :vec3 pos)
+           (fn main [] (:= gl_Position (:vec4 pos 1.0))))]
+
+  (glsl/transform-form-verify nil {})
+  => '[(:- "#version 460") (do)])
+
+^{:refer hara.runtime.basic.impl.process-glsl/rt-glsl:create :added "4.0"}
+(fact "creates a glsl run runtime with default program and exec"
+  (let [rt (glsl/rt-glsl:create {:lang :glsl :runtime :oneshot})]
+    (and (record? rt)
+         (= #{:id :lang :runtime :program :exec :process} (set (keys rt)))
+         (= :glsl (:lang rt))
+         (= :oneshot (:runtime rt))
+         (= :gcc-egl-frag (:program rt))
+         (= ["gcc"] (:exec rt))))
+  => true)
+
 (fact:global
  {:skip (not (and (env/program-exists? "gcc")
                   (egl-available?)))})
@@ -55,17 +79,32 @@
   => true)
 
 
-^{:refer hara.runtime.basic.impl.process-glsl/transform-form-verify :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.0"}
+(fact "compiles and runs a simple C program"
+  (glsl/glsl-sh-exec ["gcc"]
+                     "#include <stdio.h>\nint main(){printf(\"hello\");return 0;}"
+                     {:extension "c"})
+  => "hello")
 
-^{:refer hara.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.0"}
+(fact "returns stderr output on compile failure when stderr is enabled"
+  (string? (glsl/glsl-sh-exec ["gcc"]
+                              "int main(){ UNKNOWN }"
+                              {:extension "c" :stderr true}))
+  => true)
 
-^{:refer hara.runtime.basic.impl.process-glsl/raw-eval-glsl :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.basic.impl.process-glsl/raw-eval-glsl :added "4.0"}
+(fact "compiles and runs a generated C body through the runtime"
+  (let [rt (glsl/rt-glsl:create {:lang :glsl :runtime :oneshot})]
+    (glsl/raw-eval-glsl rt
+                        "#include <stdio.h>\nint main(){printf(\"raw\");return 0;}"))
+  => "raw")
 
-^{:refer hara.runtime.basic.impl.process-glsl/invoke-ptr-glsl :added "4.1"}
-(fact "TODO")
-
-^{:refer hara.runtime.basic.impl.process-glsl/rt-glsl:create :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.basic.impl.process-glsl/invoke-ptr-glsl :added "4.0"}
+(fact "invokes a glsl pointer through the run harness"
+  (let [rt (glsl/rt-glsl:create {:lang :glsl :runtime :oneshot})
+        ptr (ut/lang-pointer :glsl
+                             {:form '(fn ^{:- [:void]} main []
+                                        (:= gl_FragColor (:vec4 0.0 1.0 0.0 1.0)))})]
+    (glsl/invoke-ptr-glsl rt ptr []))
+  => "pixel: 0.000 1.000 0.000 1.000")

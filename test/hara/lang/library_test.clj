@@ -9,6 +9,7 @@
             [hara.lang.library :as lib]
             [hara.lang.library-snapshot :as snap]
             [hara.lang.library-snapshot-prep-test :as prep]
+            [hara.common.emit-prep-lua-test :as lua-prep]
             [hara.common.util :as ut]
             [hara.model.spec-lua :as lua]
             [std.lib.atom :as atom]
@@ -17,6 +18,32 @@
   (:use code.test))
 
 (def +library+ (lib/library {:snapshot prep/+snap+}))
+
+(def +contract-book+
+  (b/book {:lang :lua
+           :meta (:meta lua-prep/+book-empty+)
+           :grammar (:grammar lua-prep/+book-empty+)
+           :modules {'L.contract (module/book-module {:lang :lua
+                                                      :id 'L.contract
+                                                      :code {'foo (b/book-entry {:lang :lua
+                                                                                 :module 'L.contract
+                                                                                 :section :code
+                                                                                 :id 'foo
+                                                                                 :form-input '(defabstract foo [x])
+                                                                                 :namespace 'L.contract})}})
+                     'L.impl (module/book-module {:lang :lua
+                                                 :id 'L.impl
+                                                 :implements ['L.contract]
+                                                 :code {'foo (b/book-entry {:lang :lua
+                                                                            :module 'L.impl
+                                                                            :section :code
+                                                                            :id 'foo
+                                                                            :form-input '(defn foo [x] x)
+                                                                            :namespace 'L.impl})}})}}))
+
+(def +contract-snapshot+
+  (snap/snapshot {:lua {:id :lua
+                        :book +contract-book+}}))
 
 ^{:refer hara.lang.library/wait-snapshot :added "4.0"}
 (fact "gets the current waiting snapshot"
@@ -61,16 +88,72 @@
   => snap/snapshot?)
 
 ^{:refer hara.lang.library/snapshot-find-module :added "4.1"}
-(fact "TODO")
+(fact "finds a module anywhere in the merged library snapshot"
+
+  (-> (lib/snapshot-find-module prep/+snap+ 'L.core)
+      first)
+  => :lua
+
+  (-> (lib/snapshot-find-module prep/+snap+ 'L.core)
+      second)
+  => module/book-module?
+
+  (-> (lib/snapshot-find-module prep/+snap+ 'x.core)
+      first)
+  => :x
+
+  (lib/snapshot-find-module prep/+snap+ 'missing.module)
+  => nil)
 
 ^{:refer hara.lang.library/entry-arity :added "4.1"}
-(fact "TODO")
+(fact "returns the arity of an entry from its input form"
+
+  (lib/entry-arity {:form-input '(defn add-fn [a b] (+ a b))})
+  => 2
+
+  (lib/entry-arity {:form-input '(defn no-args [] x)})
+  => 0
+
+  (lib/entry-arity {:form-input '(do something)})
+  => nil)
 
 ^{:refer hara.lang.library/entry-abstract? :added "4.1"}
-(fact "TODO")
+(fact "checks if an entry was declared with `defabstract`"
+
+  (lib/entry-abstract? {:form-input '(defabstract foo [x])})
+  => true
+
+  (lib/entry-abstract? {:form-input '(defn foo [x] x)})
+  => false
+
+  (lib/entry-abstract? {:form-input "not a seq"})
+  => false)
 
 ^{:refer hara.lang.library/validate-module-implements :added "4.1"}
-(fact "TODO")
+(fact "checks that a module satisfies all declared abstract contracts"
+
+  (lib/validate-module-implements +contract-snapshot+ :lua 'L.impl)
+  => true
+
+  (lib/validate-module-implements (snap/snapshot
+                                   {:lua {:id :lua
+                                          :book (assoc-in +contract-book+
+                                                          [:modules 'L.impl :code]
+                                                          {})}})
+                                  :lua
+                                  'L.impl)
+  => (throws-info {:missing '[foo]})
+
+  (lib/validate-module-implements (snap/snapshot
+                                   {:lua {:id :lua
+                                          :book (assoc-in +contract-book+
+                                                          [:modules 'L.impl :code 'foo :form-input]
+                                                          '(defn foo [x y] x))}})
+                                  :lua
+                                  'L.impl)
+  => (throws-info {:mismatched '[{:id foo
+                                  :expected 1
+                                  :actual 2}]}))
 
 ^{:refer hara.lang.library/get-book :added "4.0"}
 (fact "gets a book from library"
@@ -239,7 +322,21 @@
   => coll?)
 
 ^{:refer hara.lang.library/install-module-specialized! :added "4.1"}
-(fact "TODO")
+(fact "installs a specialized module clone into the library"
+  :setup [(def +specialized-lib+
+            (lib/library {:snapshot prep/+snap+}))
+          (lib/install-module-specialized! +specialized-lib+
+                                           :lua
+                                           'L.core
+                                           'L.core.specialized
+                                           {})]
+
+  (lib/get-module +specialized-lib+ :lua 'L.core.specialized)
+  => module/book-module?
+
+  (-> (lib/get-module +specialized-lib+ :lua 'L.core.specialized)
+      :id)
+  => 'L.core.specialized)
 
 ^{:refer hara.lang.library/install-book! :added "4.0"
   :setup [(lib/delete-book! +library+ :lua.redis)]}

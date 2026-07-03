@@ -268,21 +268,48 @@
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
     (main/list-handlers n))
-  => ["echo" "sum"]
+  => ["@xt.substrate/echo"
+      "@xt.substrate/get-service"
+      "@xt.substrate/list-handlers"
+      "@xt.substrate/list-spaces"
+      "@xt.substrate/list-transports"
+      "@xt.substrate/list-triggers"
+      "@xt.substrate/node-info"
+      "@xt.substrate/ping"
+      "echo"
+      "sum"]
 
   (!.lua
     (var n (main/node-create {}))
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
     (main/list-handlers n))
-  => ["echo" "sum"]
+  => ["@xt.substrate/echo"
+      "@xt.substrate/get-service"
+      "@xt.substrate/list-handlers"
+      "@xt.substrate/list-spaces"
+      "@xt.substrate/list-transports"
+      "@xt.substrate/list-triggers"
+      "@xt.substrate/node-info"
+      "@xt.substrate/ping"
+      "echo"
+      "sum"]
 
   (!.py
     (var n (main/node-create {}))
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
     (main/list-handlers n))
-  => ["echo" "sum"])
+  => ["@xt.substrate/echo"
+      "@xt.substrate/get-service"
+      "@xt.substrate/list-handlers"
+      "@xt.substrate/list-spaces"
+      "@xt.substrate/list-transports"
+      "@xt.substrate/list-triggers"
+      "@xt.substrate/node-info"
+      "@xt.substrate/ping"
+      "echo"
+      "sum"])
 
 ^{:refer xt.substrate/register-trigger :added "4.1"}
 (fact "registers triggers on the node"
@@ -608,7 +635,17 @@
    [(main/list-spaces n)
     (main/list-handlers n)
     (main/list-triggers n)])
-  => [["room/c"] ["echo"] ["event/tick"]]
+  => [["room/c"]
+      ["@xt.substrate/echo"
+       "@xt.substrate/get-service"
+       "@xt.substrate/list-handlers"
+       "@xt.substrate/list-spaces"
+       "@xt.substrate/list-transports"
+       "@xt.substrate/list-triggers"
+       "@xt.substrate/node-info"
+       "@xt.substrate/ping"
+       "echo"]
+      ["event/tick"]]
 
   (!.lua
    (var n (main/node-create {"id" "node-b"}))
@@ -625,7 +662,17 @@
    [(main/list-spaces n)
     (main/list-handlers n)
     (main/list-triggers n)])
-  => [["room/c"] ["echo"] ["event/tick"]]
+  => [["room/c"]
+      ["@xt.substrate/echo"
+       "@xt.substrate/get-service"
+       "@xt.substrate/list-handlers"
+       "@xt.substrate/list-spaces"
+       "@xt.substrate/list-transports"
+       "@xt.substrate/list-triggers"
+       "@xt.substrate/node-info"
+       "@xt.substrate/ping"
+       "echo"]
+      ["event/tick"]]
 
   (!.py
    (var n (main/node-create {"id" "node-b"}))
@@ -642,7 +689,17 @@
    [(main/list-spaces n)
     (main/list-handlers n)
     (main/list-triggers n)])
-  => [["room/c"] ["echo"] ["event/tick"]])
+  => [["room/c"]
+      ["@xt.substrate/echo"
+       "@xt.substrate/get-service"
+       "@xt.substrate/list-handlers"
+       "@xt.substrate/list-spaces"
+       "@xt.substrate/list-transports"
+       "@xt.substrate/list-triggers"
+       "@xt.substrate/node-info"
+       "@xt.substrate/ping"
+       "echo"]
+      ["event/tick"]])
 
 ^{:refer xt.substrate/node-create :added "4.1"}
 (fact "declarative node config participates in local publish and request flows"
@@ -669,6 +726,68 @@
   => {"space" "room/a"
       "count" 3
       "payload" "hello"})
+
+^{:refer xt.substrate.base-util-handlers/install-util-handlers :added "4.1"}
+(fact "nodes are created with util handlers installed"
+
+  (!.js
+    (main/list-handlers (main/node-create {"id" "util-node"})))
+  => ["@xt.substrate/echo"
+      "@xt.substrate/get-service"
+      "@xt.substrate/list-handlers"
+      "@xt.substrate/list-spaces"
+      "@xt.substrate/list-transports"
+      "@xt.substrate/list-triggers"
+      "@xt.substrate/node-info"
+      "@xt.substrate/ping"])
+
+^{:refer xt.substrate.base-util-handlers/ping :added "4.1"}
+(fact "util ping handler returns pong and node id"
+
+  (notify/wait-on :js
+    (var n (main/node-create {"id" "ping-node"}))
+    (promise/x:promise-then
+     (main/request n nil "@xt.substrate/ping" [] nil)
+     (fn [out]
+       (repl/notify out))))
+  => {"pong" true "node" "ping-node"})
+
+^{:refer xt.substrate.base-util-handlers/echo :added "4.1"}
+(fact "util echo handler returns supplied arguments"
+
+  (notify/wait-on :js
+    (var n (main/node-create {"id" "echo-node"}))
+    (promise/x:promise-then
+     (main/request n nil "@xt.substrate/echo" [1 2 3] nil)
+     (fn [out]
+       (repl/notify out))))
+  => [1 2 3])
+
+^{:refer xt.substrate.base-util-handlers/get-service :added "4.1"}
+(fact "util get-service handler returns the requested service"
+
+  (notify/wait-on :js
+    (var n (main/node-create {"id" "service-node"}))
+    (main/set-service n "cache" {"scope" "local"})
+    (promise/x:promise-then
+     (main/request n nil "@xt.substrate/get-service" "cache" nil)
+     (fn [out]
+       (repl/notify out))))
+  => {"scope" "local"})
+
+^{:refer xt.substrate.base-util-handlers/override :added "4.1"}
+(fact "user handlers can override util handlers"
+
+  (notify/wait-on :js
+    (var n (main/node-create {"id" "override-node"
+                              "handlers" {"@xt.substrate/ping"
+                                          (fn [space args request node]
+                                            (return "user-pong"))}}))
+    (promise/x:promise-then
+     (main/request n nil "@xt.substrate/ping" [] nil)
+     (fn [out]
+       (repl/notify out))))
+  => "user-pong")
 
 (comment
   (s/snapto '[xt.substrate])

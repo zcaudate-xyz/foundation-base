@@ -23,4 +23,16 @@
           [:exec-fn])
   => #'hara.runtime.basic.impl-annex.process-circom/sh-exec-circom)
 ^{:refer hara.runtime.basic.impl-annex.process-circom/transform-form :added "4.1"}
-(fact "TODO")
+(fact "wraps a bare expression as a circom component main template"
+  (transform-form '[(signal x) (signal y)] nil)
+  => '(:- "\ncomponent main = " (signal y) ";"))
+
+^{:refer hara.runtime.basic.impl-annex.process-circom/transform-form :added "4.1"}
+(fact "keeps the program as-is when it already contains main or pragma"
+  (transform-form '[(pragma circom "2.0.0") (main {public [x]})] nil)
+  => '(do (pragma circom "2.0.0") (main {public [x]})))
+
+^{:refer hara.runtime.basic.impl-annex.process-circom/transform-form :added "4.1"}
+(fact "normalizes a single form into a vector before wrapping"
+  (transform-form '(signal x) nil)
+  => '(:- "\ncomponent main = " (signal x) ";"))

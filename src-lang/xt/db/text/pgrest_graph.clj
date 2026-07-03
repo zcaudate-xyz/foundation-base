@@ -16,10 +16,34 @@
                     (return (== (xt/x:get-key entry "::")
                                 "sql/count"))))))
 
+(defn.xt pgrest-resolve-value
+  "resolves sql tag objects into scalar values for PostgREST"
+  {:added "4.1"}
+  [value]
+  (cond (and (xt/x:is-object? value)
+             (xt/x:has-key? value "::"))
+        (do (var tcls (xt/x:get-key value "::"))
+            (cond (== tcls "sql/arg")
+                  (return (xt/x:get-key value "name"))
+
+                  (== tcls "sql/cast")
+                  (return (-/pgrest-resolve-value
+                           (xt/x:first (xt/x:get-key value "args"))))
+
+                  (== tcls "sql/defenum")
+                  (return (xt/x:get-key value "name"))
+
+                  :else
+                  (return value)))
+
+        :else
+        (return value)))
+
 (defn.xt value->query-text
   "formats a value for PostgREST query-string output"
   {:added "4.1"}
   [value]
+  (:= value (-/pgrest-resolve-value value))
   (cond (xt/x:nil? value)
         (return "null")
 
@@ -141,6 +165,42 @@
                           (xt/x:str-join "," fragments)
                           ")"))))
 
+(defn.xt forward-ref-column?
+  "checks whether a key in the given table is a forward reference column"
+  {:added "4.1"}
+  [schema table-name key]
+  (var col (xt/x:get-path schema [table-name key]))
+  (return (and (xt/x:is-object? col)
+               (== "ref" (xt/x:get-key col "type"))
+               (!= "reverse" (xt/x:get-path col ["ref" "type"])))))
+
+(defn.xt flatten-forward-ref-clause
+  "flattens forward reference filters from {ref {id ...}} to {ref_id ...}"
+  {:added "4.1"}
+  [schema table-name clause]
+  (var out {})
+  (xt/for:object [[k v] clause]
+    (cond (and (-/forward-ref-column? schema table-name k)
+               (xt/x:is-object? v)
+               (xt/x:has-key? v "id"))
+          (xt/x:set-key out (xt/x:cat k "_id") (xt/x:get-key v "id"))
+
+          (xt/x:is-object? v)
+          (xt/x:set-key out k (-/flatten-forward-ref-clause schema table-name v))
+
+          :else
+          (xt/x:set-key out k v)))
+  (return out))
+
+(defn.xt flatten-forward-ref-filters
+  "flattens forward reference filters in a where clause list"
+  {:added "4.1"}
+  [schema table-name where]
+  (:= where (:? (xt/x:is-array? where) where (:? (xt/x:is-object? where) [where] [])))
+  (return (xt/x:arr-map where
+                        (fn [clause]
+                          (return (-/flatten-forward-ref-clause schema table-name clause))))))
+
 (defn.xt compile-where-params
   "compiles tree where clauses into PostgREST query params"
   {:added "4.1"}
@@ -173,12 +233,14 @@
              (>= (xt/x:len item) 3)
              (xt/x:is-string? (xt/x:first item)))
         (return (xt/x:cat (xt/x:first item)
+                          ":"
+                          (xt/x:first (xtd/nth item 2))
                           "("
                           (select-params-fn (xtd/second (xtd/nth item 2)))
                           ")"))
 
         :else
-        (return (xt/x:to-string item))))
+        (return (xt/x:to-string (-/pgrest-resolve-value item)))))
 
 (defn.xt compile-tree-select-params
   "compiles tree-ir data/link params into PostgREST select syntax"
@@ -190,7 +252,9 @@
   (when (-/tree-count? custom)
     (return "count"))
   (var out [])
-  (xt/x:arr-assign out (or data []))
+  (xt/x:arr-assign out (xt/x:arr-map (or data [])
+                                     (fn [item]
+                                       (return (-/pgrest-resolve-value item)))))
   (xt/x:arr-assign out (xt/x:arr-map (or links [])
                                      (fn [item]
                                        (return
@@ -266,7 +330,10 @@
   (:= tree (base-graph/select-tree schema tree opts))
   (var table-name (xt/x:first tree))
   (var params (xtd/second tree))
-  (var where (or (xt/x:get-key params "where") []))
+  (var where (-/flatten-forward-ref-filters schema
+                                            table-name
+                                            (or (xt/x:get-key params "where") [])))
+  (xt/x:set-key params "where" where)
   (var custom (or (xt/x:get-key params "custom") []))
   (var select (-/compile-tree-select-params params))
   (var request-params [(xt/x:cat "select=" select)])
@@ -274,6 +341,7 @@
   (:= request-params (xt/x:arr-concat request-params (-/compile-control-params custom)))
   (var path (xt/x:cat "/rest/v1/" table-name))
   (var query (-/compile-query-string request-params))
+  (var url (-/compile-url path request-params))
   (return {"type" "query"
            "table" table-name
            "method" "GET"
@@ -282,7 +350,7 @@
            "filters" where
            "params" request-params
            "query" query
-           "url" (-/compile-url path request-params)
+           "url" url
            "headers" {}}))
 
 (defn.xt select-tree

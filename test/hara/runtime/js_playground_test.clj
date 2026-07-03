@@ -125,22 +125,86 @@
     script => #"PLAYGROUND\[\"setTabContent\"\]"))
 
 ^{:refer hara.runtime.js-playground/page-html :added "4.1"}
-(fact "TODO")
+(fact "page-html renders the playground page with config and scripts"
+
+  (page-html {:title "Custom Playground"
+              :tabs [{:id "stage" :label "Stage"}
+                     {:id "repl" :label "REPL"}]})
+  => #"<!doctype html>"
+
+  (page-html {:title "Custom Playground"})
+  => #"<title>Custom Playground</title>"
+
+  (page-html {:title "Custom Playground"})
+  => #"window\.PLAYGROUND_CONFIG="
+
+  (page-html {:title "Custom Playground"})
+  => #"<script type=\"module\">")
 
 ^{:refer hara.runtime.js-playground/stop-js-playground :added "4.1"}
-(fact "TODO")
+(fact "stop-js-playground stops the server and returns the runtime"
+
+  (let [rt (rt-js-playground {:lang :js :port 0})]
+    (try
+      rt => (contains {:port integer?})
+      (stop-js-playground rt) => rt
+      (finally
+        ;; already stopped
+        ))))
 
 ^{:refer hara.runtime.js-playground/invoke-ptr-js-playground :added "4.1"}
-(fact "TODO")
+(fact "invoke-ptr evaluates through a connected browser"
+
+  (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))
+        {:keys [ws connected]} (connect-mock-browser (:port rt))]
+    (try
+      (deref connected 1000 false)
+      => true
+
+      (invoke-ptr-js-playground rt identity [1])
+      => 6
+
+      (finally
+        (.sendClose ^WebSocket ws WebSocket/NORMAL_CLOSURE "done")
+        (component/stop rt)))))
 
 ^{:refer hara.runtime.js-playground/rt-js-playground-string :added "4.1"}
-(fact "TODO")
+(fact "rt-js-playground-string formats the runtime as a readable tag"
+
+  (rt-js-playground-string {:lang :js
+                            :id "hello"
+                            :host "127.0.0.1"
+                            :port 1234})
+  => "#rt.js-playground[:js \"hello\" \"127.0.0.1\" 1234]")
 
 ^{:refer hara.runtime.js-playground/play-file :added "4.1"}
-(fact "TODO")
+(fact "play-file joins paths under the runtime root"
+
+  (play-file {:root "/tmp/foo"} "bar" "baz.js")
+  => "/tmp/foo/bar/baz.js")
 
 ^{:refer hara.runtime.js-playground/play-script :added "4.1"}
-(fact "TODO")
+(fact "play-script emits js and writes a hashed script into the served root"
+
+  (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))]
+    (try
+      (play-script rt ['(+ 1 2)])
+      => #"\.js$"
+
+      (play-script rt ['(+ 1 2)] true)
+      => #"1 \+ 2"
+      (finally
+        (component/stop rt)))))
 
 ^{:refer hara.runtime.js-playground/play-page :added "4.1"}
-(fact "TODO")
+(fact "play-page writes a hashed html page into the served root"
+
+  (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))]
+    (try
+      (play-page rt {:title "Custom Page"})
+      => #"page-.*\.html"
+
+      (play-page rt {:title "Custom Page"} true)
+      => #"<title>Custom Page</title>"
+      (finally
+        (component/stop rt)))))

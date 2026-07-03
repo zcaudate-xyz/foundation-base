@@ -1,6 +1,7 @@
 (ns hara.runtime.basic.impl.process-scheme-test
   (:use code.test)
   (:require [hara.lang :as l]
+            [hara.runtime.basic.impl.process-scheme :refer [scheme-root]]
             [std.lib.env :as env]))
 
 (l/script- :scheme
@@ -19,4 +20,7 @@
 
 
 ^{:refer hara.runtime.basic.impl.process-scheme/scheme-root :added "4.1"}
-(fact "TODO")
+(fact "returns the project root directory"
+  (scheme-root)
+  => (or (System/getenv "PWD")
+         (System/getProperty "user.dir")))

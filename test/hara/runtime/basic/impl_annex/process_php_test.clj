@@ -53,11 +53,31 @@
 
 
 ^{:refer hara.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"}
-(fact "TODO")
+(fact "creates a single-line php source string for runtime eval"
+  (php-body-source '[1 2 3] {})
+  => #"\(function \(\)\{\s+return \[1,2,3\];\s+\}\)\(\)"
+
+  (php-body-source '[1 2 3] {:bulk true})
+  => #"\(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\)")
 
 ^{:refer hara.runtime.basic.impl-annex.process-php/default-basic-body-transform :added "4.1"}
-(fact "TODO")
+(fact "transforms basic runtime forms into a PHP return statement"
+  (second (default-basic-body-transform '[1 2 3] {}))
+  => #"^return \(function \(\)\{\s+return \[1,2,3\];\s+\}\)\(\);$"
 
+  (second (default-basic-body-transform '[1 2 3] {:bulk true}))
+  => #"^return \(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\);$")
 
 ^{:refer hara.runtime.basic.impl-annex.process-php/php-prefix-params :added "4.1"}
-(fact "TODO")
+(fact "prefixes bare function parameter symbols with $"
+  (php-prefix-params '(fn [x y] (+ x y)))
+  => '(fn [$x $y] (+ $x $y))
+
+  (php-prefix-params '(defn add [x y] (+ x y)))
+  => '(defn add [$x $y] (+ $x $y))
+
+  (php-prefix-params '(fn [x] (fn [y] (+ x y))))
+  => '(fn [$x] (fn [$y] (+ $x $y)))
+
+  (php-prefix-params '(fn [$x] (+ $x 1)))
+  => '(fn [$x] (+ $x 1)))

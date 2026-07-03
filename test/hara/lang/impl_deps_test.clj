@@ -219,4 +219,19 @@
 
 
 ^{:refer hara.lang.impl-deps/native-name-with-override :added "4.1"}
-(fact "TODO")
+(fact "applies native override to a native import name"
+
+  (deps/native-name-with-override 'cjson {})
+  => 'cjson
+
+  (deps/native-name-with-override 'cjson {:override {'json "rapidjson"}})
+  => 'cjson
+
+  (deps/native-name-with-override 'cjson {:override {'cjson "rapidjson"}})
+  => "rapidjson"
+
+  (deps/native-name-with-override "cjson" {:override {"cjson" "rapidjson"}})
+  => "rapidjson"
+
+  (deps/native-name-with-override 'cjson {:override {"cjson" "rapidjson"}})
+  => "rapidjson")

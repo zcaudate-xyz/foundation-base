@@ -12,7 +12,8 @@
              [xt.substrate.base-router :as router]
              [xt.substrate.base-space :as node-space]
              [xt.substrate.base-request :as node-request]
-             [xt.substrate.base-pubsub :as node-pubsub]]})
+             [xt.substrate.base-pubsub :as node-pubsub]
+             [xt.substrate.base-util-handlers :as util-handlers]]})
 
 (def.xt ^{:arglists '([space-id config])} create-space node-space/create-space)
 (def.xt ^{:arglists '([node space-id])} get-space node-space/get-space)
@@ -550,6 +551,7 @@
   {:added "4.1"}
   [node opts]
   (:= opts (or opts {}))
+  (util-handlers/install-util-handlers node)
   (xt/for:object [[space-id config] (or (xt/x:get-key opts "spaces") {})]
     (node-space/create-space node
                              space-id
