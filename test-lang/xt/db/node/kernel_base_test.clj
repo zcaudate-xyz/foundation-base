@@ -107,6 +107,211 @@
        "::" "xt.db.system.impl_sqlite/ImplSqlite",
        "metadata" {"primary_id" "db/primary", "common_id" "db/common"}}))
 
+^{:refer xt.db.node.kernel-base/kernel-create-config :added "4.1"}
+(fact "creates a normalized config with default service ids"
+
+  (!.js
+    (kernel/kernel-create-config
+     {"primary" {"type" "postgres"}
+      "caching" {"type" "sqlite"}
+      "common"  {"custom" true}}))
+  => {"common" {"id" "db/common" "custom" true}
+      "primary" {"id" "db/primary" "type" "postgres"}
+      "caching" {"id" "db/caching" "type" "sqlite"}}
+
+  (!.js
+    (kernel/kernel-create-config
+     {"primary" {"type" "memory"}
+      "caching" {"type" "memory"}}))
+  => {"common" {"id" "db/common"}
+      "primary" {"id" "db/primary" "type" "memory"}
+      "caching" {"id" "db/caching" "type" "memory"}})
+
+^{:refer xt.db.node.kernel-base/kernel-check-exists :added "4.1"}
+(fact "checks whether common, primary and caching services are all present"
+
+  (!.js
+    (var node (substrate/node-create {}))
+    (kernel/kernel-check-exists
+     node
+     {"primary" {"type" "memory"}
+      "caching" {"type" "memory"}}))
+  => false
+
+  (!.js
+    (var node (substrate/node-create {}))
+    (substrate/set-service node "db/common" {})
+    (substrate/set-service node "db/primary" {})
+    (substrate/set-service node "db/caching" {})
+    (kernel/kernel-check-exists
+     node
+     {"primary" {"type" "memory"}
+      "caching" {"type" "memory"}}))
+  => true)
+
+^{:refer xt.db.node.kernel-base/kernel-setup-single :added "4.1"}
+(fact "installs a single live impl on the node"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (kernel/kernel-setup-single node "db/primary" "memory" {} -/Schema -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (repl/notify
+            (substrate/get-service node "db/primary"))))))
+  => (contains-in
+      {"schema" map?, "lookup" map?
+       "::" "xt.db.system.impl_memory/ImplMemory"}))
+
+^{:refer xt.db.node.kernel-base/kernel-teardown-single :added "4.1"}
+(fact "tears down a single base service"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (kernel/kernel-setup-single node "db/primary" "memory" {} -/Schema -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (kernel/kernel-teardown-single node "db/primary")
+           (repl/notify
+            {"service_removed" (xt/x:nil? (substrate/get-service node "db/primary"))
+             "node_returned" (xt/x:not-nil? node)})))))
+  => {"service_removed" true, "node_returned" true})
+
+^{:refer xt.db.node.kernel-base/kernel-setup-main :added "4.1"}
+(fact "sets up common, primary and caching services with metadata"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (kernel/kernel-setup-main node
+                                  {"primary" {"type" "memory" "defaults" {}}
+                                   "caching" {"type" "memory" "defaults" {}}}
+                                  -/Schema
+                                  -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (repl/notify
+            {"common" (substrate/get-service node "db/common")
+             "primary" (substrate/get-service node "db/primary")
+             "caching" (substrate/get-service node "db/caching")})))))
+  => (contains-in
+      {"common" {"config" map?, "schema" map?, "lookup" map?
+                 "metadata" {"common_id" "db/common"}}
+       "primary" {"schema" map?, "lookup" map?
+                  "metadata" {"common_id" "db/common"
+                              "caching_id" "db/caching"}
+                  "::" "xt.db.system.impl_memory/ImplMemory"}
+       "caching" {"schema" map?, "lookup" map?
+                  "metadata" {"common_id" "db/common"
+                              "primary_id" "db/primary"}
+                  "::" "xt.db.system.impl_memory/ImplMemory"}}))
+
+^{:refer xt.db.node.kernel-base/kernel-setup-handler :added "4.1"}
+(fact "explicitly sets up base services from handler args"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (kernel/kernel-setup-handler
+         nil
+         [{"primary" {"type" "memory" "defaults" {}}
+           "caching" {"type" "memory" "defaults" {}}}
+          -/Schema
+          -/SchemaLookup]
+         nil
+         node)
+        (promise/x:promise-then
+         (fn []
+           (repl/notify
+            {"common_exists" (xt/x:not-nil? (substrate/get-service node "db/common"))
+             "primary_exists" (xt/x:not-nil? (substrate/get-service node "db/primary"))
+             "caching_exists" (xt/x:not-nil? (substrate/get-service node "db/caching"))})))))
+  => {"common_exists" true
+      "primary_exists" true
+      "caching_exists" true})
+
+^{:refer xt.db.node.kernel-base/kernel-teardown-main :added "4.1"}
+(fact "tears down common, primary and caching services"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (var config {"primary" {"type" "memory" "defaults" {}}
+                 "caching" {"type" "memory" "defaults" {}}})
+    (-> (kernel/kernel-setup-main node config -/Schema -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (kernel/kernel-teardown-main node config)
+           (repl/notify
+            {"common_removed" (xt/x:nil? (substrate/get-service node "db/common"))
+             "primary_removed" (xt/x:nil? (substrate/get-service node "db/primary"))
+             "caching_removed" (xt/x:nil? (substrate/get-service node "db/caching"))})))))
+  => {"common_removed" true
+      "primary_removed" true
+      "caching_removed" true})
+
+^{:refer xt.db.node.kernel-base/kernel-teardown-handler :added "4.1"}
+(fact "tears down base services from a handler arg"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (var config {"primary" {"type" "memory" "defaults" {}}
+                 "caching" {"type" "memory" "defaults" {}}})
+    (-> (kernel/kernel-setup-main node config -/Schema -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (kernel/kernel-teardown-handler nil ["db/primary"] nil node)
+           (repl/notify
+            {"common_removed" (xt/x:nil? (substrate/get-service node "db/common"))
+             "primary_removed" (xt/x:nil? (substrate/get-service node "db/primary"))
+             "caching_removed" (xt/x:nil? (substrate/get-service node "db/caching"))})))))
+  => {"common_removed" true
+      "primary_removed" true
+      "caching_removed" true})
+
+^{:refer xt.db.node.kernel-base/kernel-init-main :added "4.1"}
+(fact "ensures base services are present"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (var config {"primary" {"type" "memory" "defaults" {}}
+                 "caching" {"type" "memory" "defaults" {}}})
+    (-> (kernel/kernel-init-main node config -/Schema -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (return (kernel/kernel-init-main node config -/Schema -/SchemaLookup))))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            {"is_node" (== out node)
+             "common_exists" (xt/x:not-nil? (substrate/get-service node "db/common"))
+             "primary_exists" (xt/x:not-nil? (substrate/get-service node "db/primary"))
+             "caching_exists" (xt/x:not-nil? (substrate/get-service node "db/caching"))})))))
+  => {"is_node" true
+      "common_exists" true
+      "primary_exists" true
+      "caching_exists" true})
+
+^{:refer xt.db.node.kernel-base/kernel-init-handler :added "4.1"}
+(fact "initialises base services from handler args if needed"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (kernel/kernel-init-handler
+         nil
+         [{"primary" {"type" "memory" "defaults" {}}
+           "caching" {"type" "memory" "defaults" {}}}
+          -/Schema
+          -/SchemaLookup]
+         nil
+         node)
+        (promise/x:promise-then
+         (fn []
+           (repl/notify
+            {"common_exists" (xt/x:not-nil? (substrate/get-service node "db/common"))
+             "primary_exists" (xt/x:not-nil? (substrate/get-service node "db/primary"))
+             "caching_exists" (xt/x:not-nil? (substrate/get-service node "db/caching"))})))))
+  => {"common_exists" true
+      "primary_exists" true
+      "caching_exists" true})
+
 ^{:refer xt.db.node.kernel-base/subscribe-db-handler :added "4.1"
   :setup [(l/rt:restart :js)]}
 (fact "subscribes to the db handler"
@@ -806,7 +1011,8 @@
                                         "query" ["id" "message"]}}}
                {"pipeline" {}
                 "options" {}
-                "defaults" {"args" [[] []]}}))
+                "defaults" {"args" [{"select_args" []
+                                     "return_args" []}]}}))
     {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
      "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
      "defaults" (. spec ["defaults"])})
@@ -852,7 +1058,8 @@
                                       "query" ["id" "message"]}}}
              {"pipeline" {}
               "options" {}
-              "defaults" {"args" [[] []]}}]
+              "defaults" {"args" [{"select_args" []
+                                   "return_args" []}]}}]
             nil
             node)
            (return
@@ -910,34 +1117,3 @@
       "@xt.db/subscribe-db"
       "@xt.db/sync-caching"
       "@xt.db/unsubscribe-db"])
-
-
-^{:refer xt.db.node.kernel-base/kernel-create-config :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/kernel-check-exists :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/kernel-setup-single :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/kernel-teardown-single :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/kernel-setup-main :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/kernel-setup-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/kernel-teardown-main :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/kernel-teardown-handler :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/kernel-init-main :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.kernel-base/kernel-init-handler :added "4.1"}
-(fact "TODO")

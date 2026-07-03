@@ -44,6 +44,17 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
+(def.js LogModelBasic
+  {"table" "Log"
+   "select_entry" {"input" []
+                   "view" {"table" "Log"
+                           "type" "select"
+                           "query" {}}}
+   "return_entry" {"input" []
+                   "view" {"table" "Log"
+                           "type" "return"
+                           "query" ["id" "message"]}}})
+
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
@@ -82,15 +93,7 @@
                  {"space_id" "room/a"
                   "group_id" "demo"
                   "model_id" "tree-view"}
-                 {"table" "Log"
-                  "select_entry" {"input" []
-                                  "view" {"table" "Log"
-                                          "type" "select"
-                                          "query" {}}}
-                  "return_entry" {"input" []
-                                  "view" {"table" "Log"
-                                          "type" "return"
-                                          "query" ["id" "message"]}}}
+                 -/LogModelBasic
                  {"pipeline" {}
                   "options" {}
                   "defaults" {"select_args" []
