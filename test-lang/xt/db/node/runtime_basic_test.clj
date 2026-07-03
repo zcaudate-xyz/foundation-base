@@ -1,8 +1,8 @@
 (ns xt.db.node.runtime-basic-test
   (:use code.test)
-  (:require [clojure.string :as str]
-            [hara.lang :as l]
+  (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
+            [clojure.string :as str]
             [net.http :as net.http]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
@@ -46,74 +46,69 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
-(defn- fix-worker-script
-  "Node 24 eval workers parse scripts as ESM, so the worker_threads setup must
-   use a static ESM import instead of CommonJS require."
-  [script]
-  (str "import { parentPort } from 'worker_threads';\n"
-       (-> script
-           (str/replace #"let \{parentPort\} = require\(\"worker_threads\"\);\n" ""))))
-
-(def +worker-threads-script+
-  (fix-worker-script
-   (l/emit-script
-    '(do
-       (var node (xt.substrate/node-create {"id" "worker-threads-server"}))
-       (xt.db.node.runtime/worker-threads-init-kernel node "host" "worker-threads-server"))
-    {:lang :js
-     :layout :full
-     :emit {:override {"@sqlite.org/sqlite-wasm"
-                       "data:text/javascript,export default {}"
-                       "pg"
-                       "data:text/javascript,export default {Client: function() {}}"}}})))
 
 (fact:global
  {:setup [(l/rt:restart)
           (l/rt:setup :postgres)
           (local-min/restart-postgrest)
-          (local-min/wait-for-postgrest-ready "scratch_v0" "Log" 120000)
-          (l/rt:scaffold-imports :js)]
+          (local-min/wait-for-postgrest-ready "scratch_v0" "Log" 120000)]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-^{:refer xt.db.node.runtime/worker-threads-init-kernel :added "4.1"}
-(fact "boots a worker_threads worker and emits a ready signal"
+
+^{:refer xt.db.node.runtime/nodeworker-init-kernel :added "4.1"}
+(fact "boots a Node worker_threads kernel and emits a ready signal"
 
   (notify/wait-on [:js 10000]
-    (var source (browser-transport/node-worker-source (@! +worker-threads-script+) {:eval true}))
-    ((xt/x:get-key source "create_fn")
-     (fn [data]
-       (repl/notify data))))
-  => {"signal" "ready"
-      "transport" "host"
-      "worker" "worker-threads-server"})
-
-^{:refer xt.db.node.runtime/worker-threads-connect-kernel :added "4.1"}
-(fact "connects a client to a worker_threads kernel and routes kernel-init"
-
-  (notify/wait-on [:js 10000]
-    (var client (substrate/node-create {"id" "worker-threads-client"}))
-    (proxy-util/set-default-transport client "host")
-    (-> (runtime/worker-threads-connect-kernel
-         client
-         (browser-transport/node-worker-source (@! +worker-threads-script+) {:eval true})
-         "host"
-         {"primary" {"type" "memory" "defaults" {}}
-          "caching" {"type" "memory" "defaults" {}}}
-         {}
-         {})
+    (var source (browser-transport/node-worker-source (@! (runtime/nodeworker-init-string)) {}))
+    (-> (browser-transport/connect-worker
+         (substrate/node-create {"id" "nodeworker-test-client"})
+         {"transport_id" "xt.db.default.transport"
+          "source" source})
         (promise/x:promise-then
-         (fn [server]
+         (fn [conn]
+           (repl/notify (. conn ["ready"]))))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" (xt/x:ex-message err)})))))
+  => {"signal" "ready"
+      "transport" "xt.db.default.transport"
+      "worker" "xt.db.default.worker"})
+
+^{:refer xt.db.node.runtime/nodeworker-init-string :added "4.1"}
+(fact "emits a script string for booting a Node worker_threads kernel"
+
+  (let [script (runtime/nodeworker-init-string)]
+    (and (string? script)
+         (> (count script) 0)
+         (str/includes? script "nodeworker")))
+  => true)
+
+^{:refer xt.db.node.runtime/nodeworker-connect :added "4.1"}
+(fact "connects a client to a Node worker_threads kernel and initialises it"
+
+  (notify/wait-on [:js 10000]
+    (var client (substrate/node-create {"id" "nodeworker-connect-client"}))
+    (-> (runtime/nodeworker-connect client
+                                    {"primary" {"type" "memory" "defaults" {}}
+                                     "caching" {"type" "memory" "defaults" {}}}
+                                    {}
+                                    {}
+                                    nil
+                                    nil)
+        (promise/x:promise-then
+         (fn [out]
            (repl/notify
-            {"has-server" (xt/x:not-nil? server)
-             "has-primary" (xt/x:not-nil? (substrate/get-service server "db/primary"))
-             "has-caching" (xt/x:not-nil? (substrate/get-service server "db/caching"))})))
+            {"init" (xt/x:get-key out "init")
+             "transport" (xt/x:get-key out "transport")
+             "transport-attached" (xt/x:get-key out "transport-attached")})))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify
-            {"transport-attached" (xt/x:not-nil? (substrate/get-transport client "host"))
+            {"error" (xt/x:ex-message err)
              "status" (xt/x:get-key err "status")
-             "kind" (xt/x:get-key err "kind")})))))
-  => {"transport-attached" true
-      "status" "error"
-      "kind" "response"})
+             "data" (xt/x:get-key err "data")
+             "frame-error" (xt/x:get-key err "error")})))))
+  => {"init" true
+      "transport" "xt.db.default.transport"
+      "transport-attached" true})

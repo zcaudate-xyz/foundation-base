@@ -2,16 +2,16 @@
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.spec-promise :as promise]
-             [xt.substrate :as substrate]
-             [xt.substrate.page-proxy :as page-proxy]
-             [xt.substrate.transport-browser :as browser-transport]
-             [xt.db.node.client-base :as client-base]
-             [xt.db.node.proxy-base :as proxy-base]
-             [xt.db.node.proxy-supabase :as proxy-supabase]
-             [xt.db.node.kernel-base :as kernel-base]
-             [xt.db.node.kernel-supabase :as kernel-supabase]]})
+          {:require [[xt.lang.spec-base :as xt]
+                     [xt.lang.spec-promise :as promise]
+                     [xt.substrate :as substrate]
+                     [xt.substrate.page-proxy :as page-proxy]
+                     [xt.substrate.transport-browser :as browser-transport]
+                     [xt.db.node.client-base :as client-base]
+                     [xt.db.node.proxy-base :as proxy-base]
+                     [xt.db.node.proxy-supabase :as proxy-supabase]
+                     [xt.db.node.kernel-base :as kernel-base]
+                     [xt.db.node.kernel-supabase :as kernel-supabase]]})
 
 (def.xt DEFAULT_TRANSPORT
   "xt.db.default.transport")
@@ -147,7 +147,6 @@
 (defn.xt nodeworker-init-kernel
   [node transport-id worker-id]
   (-/init-server node)
-  (var #{parentPort} (require "worker_threads"))
   (var worker
        {"postMessage" (fn [data]
                         (. parentPort (postMessage data)))
@@ -159,7 +158,8 @@
   (return
    (browser-transport/boot-self
     node
-    {"transport_id" transport-id
+    {"transport_id" (or transport-id
+                        -/DEFAULT_TRANSPORT)
      "target" worker
      "ready" {"signal" "ready"
               "transport" (or transport-id
@@ -171,11 +171,15 @@
   [& [override]]
   (l/emit-script
    '(do
+      (:- :import #{parentPort} :from "'worker_threads'")
       (var node (xt.substrate/node-create {"id" xt.db.node.runtime/DEFAULT_WORKER}))
       (xt.db.node.runtime/nodeworker-init-kernel node))
    {:lang :js
     :layout :full
-    :emit {:override  override}}))
+    :emit {:override override}}))
+
+(def.xt DEFAULT_NODEWORKER_SCRIPT
+  (@! (nodeworker-init-string)))
 
 (defn.xt nodeworker-connect
   [client config schema lookup source transport-id]
@@ -184,10 +188,10 @@
    (-> (browser-transport/connect-worker
         client
         {"transport_id" (or transport-id
-                            -/DEFAULT_TRANSPORT)
+                                 -/DEFAULT_TRANSPORT)
          "source" (or source
-                      (browser-transport/webworker-source -/DEFAULT_WEBWORKER_SCRIPT
-                                                          {"type" "module"}))})
+                      (browser-transport/node-worker-source -/DEFAULT_NODEWORKER_SCRIPT
+                                                            {}))})
        (promise/x:promise-then
         (fn [conn]
           (return

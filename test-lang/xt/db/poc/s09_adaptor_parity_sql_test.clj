@@ -181,7 +181,7 @@
                (repl/notify
                 {"has_group" false
                  "error" (. err ["message"])
-                 "stack" (. err ["stack"])})))))))
+                 "stack" (. err ["stack"])}))))))))
   => (contains-in
       {"has_group" true
        "model_type" "event.model"
@@ -217,7 +217,7 @@
                (repl/notify
                 {"has_group" false
                  "error" (. err ["message"])
-                 "stack" (. err ["stack"])})))))))
+                 "stack" (. err ["stack"])}))))))))
   => (contains-in
       {"has_group" true
        "model_type" "event.model"

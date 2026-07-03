@@ -4,13 +4,7 @@
             [hara.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
-            [postgres.core :as pg]
-            [xt.substrate]
-            [xt.substrate.transport-browser]
-            [xt.substrate.page-proxy]
-            [xt.substrate.page-core]
-            [xt.event.base-model]
-            [xt.db.node.kernel-base]))
+            [postgres.core :as pg]))
 
 (do
   (l/script- :postgres
@@ -34,14 +28,10 @@
   {:runtime :chromedriver.instance
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
-             [xt.event.base-model :as event-model]
              [xt.db.node.runtime :as runtime]
-             [xt.substrate :as substrate]
-             [xt.substrate.page-core :as base-page]
-             [xt.substrate.transport-browser :as browser-transport]
-             [xt.substrate.page-proxy :as page-proxy]]})
+             [js.net.http-fetch]
+             [xt.substrate :as substrate]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -52,65 +42,29 @@
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
+          (l/rt:scaffold-imports :js)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
   :teardown [(l/rt:stop)]})
 
-(def +sharedworker-script+
-  (l/emit-script
-   '(do
-      (var node (xt.substrate/node-create {"id" "db-model-server"}))
-      (xt.db.node.runtime/sharedworker-init-kernel node "browser" "db-model-server")
-      ;; override @xt.db/kernel-init so the response serialises cleanly
-      (xt.substrate/register-handler
-       node "@xt.db/kernel-init"
-       (fn [space args request node]
-         (return
-          (. (xt.db.node.kernel-base/kernel-init-main
-              node
-              (. args [0])
-              (. args [1])
-              (. args [2]))
-             (then (fn [_] (return {"status" "ok"})))
-             (catch (fn [err]
-                      (return {"status" "error"
-                               "message" (. err ["message"])
-                               "stack" (. err ["stack"])}))))))
-       nil))
-   {:lang :js
-    :layout :full
-    :emit {:override {"@sqlite.org/sqlite-wasm"
-                      "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
-                      "pg"
-                      "data:text/javascript,export default {Client: function() {}}"}}}))
-
-
-(defn.js connect-kernel-worker
-  "connects to the shared worker and initialises the db adaptor"
-  {:added "4.1"}
-  [client]
-  (return
-   (runtime/sharedworker-connect-kernel
-    client
-    (browser-transport/sharedworker-source (@! +sharedworker-script+) {"type" "module"})
-    "transport-browser"
-    {"primary" {"type" "supabase"
-                "defaults" (@! local-min/+config-supabase-anon+)}
-     "caching" {"type" "sqlite"
-                "defaults" {"filename" ":memory:"}}}
-    -/Schema
-    -/SchemaLookup)))
-
-^{:refer xt.db.poc.s05-sharedworker-custom-test/attach-pull-model
-  :added "4.1"
-  :setup [(scratch-v0/log-append-public "remote")]}
-(fact "client can open a remote pull model and read its output"
+^{:refer xt.db.poc.s05-sharedworker-custom-test/sharedworker-connects
+  :added "4.1"}
+(fact "shared worker auto-connect initialises the kernel on the client"
 
   (notify/wait-on [:js 5000]
     (var client (substrate/node-create {"id" "db-model-client"}))
-    (-> (-/connect-kernel-worker client)
-        (repl/notify)))
-  => {"status" "ok"})
+    (-> (runtime/sharedworker-connect client
+                                      {"primary" {"type" "supabase"
+                                                  "defaults" (@! local-min/+config-supabase-anon+)}
+                                       "caching" {"type" "sqlite"
+                                                  "defaults" {"filename" ":memory:"}}}
+                                      -/Schema
+                                      -/SchemaLookup)
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => (contains-in
+      {"status" "setup", "data" {"caching" map?, "primary" map?, "common" map?}}))
 
 ^{:refer xt.db.poc.s05-sharedworker-custom-test/supabase-reachable
   :added "4.1"

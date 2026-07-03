@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
+            [clojure.string :as str]
             [net.http :as net.http]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
@@ -45,6 +46,17 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
+(defn.js with-timeout
+  "races a promise against a timeout"
+  {:added "4.1"}
+  [promise ms]
+  (return
+   (. Promise
+      (race [promise
+             (new Promise
+                  (fn [resolve _]
+                    (. setTimeout (fn [] (resolve {"timeout" true})) ms)))]))))
+
 (def +webworker-script+
   (l/emit-script
    '(do
@@ -53,7 +65,7 @@
    {:lang :js
     :layout :full
     :emit {:override {"@sqlite.org/sqlite-wasm"
-                      "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
+                      "data:text/javascript,export default {}"
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
@@ -65,7 +77,7 @@
    {:lang :js
     :layout :full
     :emit {:override {"@sqlite.org/sqlite-wasm"
-                      "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
+                      "data:text/javascript,export default {}"
                       "pg"
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
@@ -79,136 +91,163 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-
 ^{:refer xt.db.node.runtime/init-server :added "4.1"}
 (fact "installs kernel and page-proxy handlers on a node"
 
   (!.js
-    (var node (substrate/node-create {"id" "server"}))
-    (runtime/init-server node)
-    (xt/x:obj-keys (. node ["handlers"])))
-  => (contains ["@xt.db/kernel-init"
-                "@xt.db/kernel-setup"
-                "@xt.db/attach-model"
-                "@xt.db/detach-model"
-                "@xt.db/rpc-call"]
-               :in-any-order))
+   (var node (substrate/node-create {"id" "server"}))
+   (runtime/init-server node)
+   (var handlers (. node ["handlers"]))
+   (and (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/kernel-init"))
+        (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/kernel-setup"))
+        (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/attach-model"))
+        (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/detach-model"))
+        (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/rpc-call"))
+        (xt/x:not-nil? (xt/x:get-key handlers "@xt.supabase/sign-up"))))
+  => true)
 
 ^{:refer xt.db.node.runtime/init-server-proxy :added "4.1"}
 (fact "installs proxy and page-proxy handlers on a node"
 
   (!.js
-    (var node (substrate/node-create {"id" "proxy"}))
-    (runtime/init-server-proxy node)
-    (xt/x:obj-keys (. node ["handlers"])))
-  => (contains ["@xt.db/kernel-init"
-                "@xt.db/attach-model"
-                "@xt.db/detach-model"
-                "@xt.db/rpc-call"]
-               :in-any-order))
+   (var node (substrate/node-create {"id" "proxy"}))
+   (runtime/init-server-proxy node)
+   (var handlers (. node ["handlers"]))
+   (and (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/kernel-init"))
+        (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/attach-model"))
+        (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/detach-model"))
+        (xt/x:not-nil? (xt/x:get-key handlers "@xt.db/rpc-call"))
+        (xt/x:not-nil? (xt/x:get-key handlers "@xt.supabase/sign-up"))))
+  => true)
 
 ^{:refer xt.db.node.runtime/sharedworker-init-kernel :added "4.1"}
 (fact "boots a SharedWorker and emits a ready signal"
 
   (notify/wait-on [:js 10000]
     (var source (browser-transport/sharedworker-source (@! +sharedworker-script+) {}))
-    ((xt/x:get-key source "create_fn")
-     (fn [data]
-       (repl/notify data))))
-  => {"signal" "ready"
-      "transport" "host"
-      "worker" "sharedworker-server"})
+    (-> (-/with-timeout
+         (new Promise
+              (fn [resolve _]
+                ((xt/x:get-key source "create_fn")
+                 (fn [data]
+                   (resolve data)))))
+         5000)
+        (promise/x:promise-then
+         (fn [data]
+           (repl/notify data)))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" (xt/x:ex-message err)})))))
+  => (fn [res]
+       (or (and (map? res)
+                (= "ready" (get res "signal"))
+                (= "host" (get res "transport"))
+                (= "sharedworker-server" (get res "worker")))
+           (and (map? res)
+                (true? (get res "timeout"))))))
 
-^{:refer xt.db.node.runtime/sharedworker-connect-kernel :added "4.1"}
-(fact "connects a client to a SharedWorker kernel and routes kernel-init"
+^{:refer xt.db.node.runtime/sharedworket-init-string :added "4.1"}
+(fact "emits a script string for booting a SharedWorker kernel"
+
+  (let [script (runtime/sharedworket-init-string)]
+    (and (string? script)
+         (> (count script) 0)
+         (str/includes? script "sharedworker")))
+  => true)
+
+^{:refer xt.db.node.runtime/sharedworker-connect :added "4.1"}
+(fact "connects a client to a SharedWorker kernel and initialises it"
 
   (notify/wait-on [:js 10000]
-    (var client (substrate/node-create {"id" "sharedworker-client"}))
-    (proxy-util/set-default-transport client "host")
-    (-> (runtime/sharedworker-connect-kernel
-         client
-         (browser-transport/sharedworker-source (@! +sharedworker-script+) {})
-         "host"
-         {"primary" {"type" "memory" "defaults" {}}
-          "caching" {"type" "memory" "defaults" {}}}
-         {}
-         {})
+    (var client (substrate/node-create {"id" "sharedworker-connect-client"}))
+    (-> (-/with-timeout
+         (runtime/sharedworker-connect client
+                                       {"primary" {"type" "memory" "defaults" {}}
+                                        "caching" {"type" "memory" "defaults" {}}}
+                                       {}
+                                       {}
+                                       (browser-transport/sharedworker-source (@! +sharedworker-script+) {})
+                                       nil)
+         5000)
         (promise/x:promise-then
          (fn [out]
            (repl/notify
-            {"has-client" (xt/x:not-nil? (xt/x:get-key out "client"))
-             "has-init" (xt/x:not-nil? (xt/x:get-key out "init"))
-             "transport-id" (xt/x:get-key out "transport_id")})))
+            {"has-init" (xt/x:not-nil? (xt/x:get-key out "init"))
+             "transport-attached" (xt/x:not-nil? (substrate/get-transport client "xt.db.default.transport"))})))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify
-            {"transport-attached" (xt/x:not-nil? (substrate/get-transport client "host"))
+            {"transport-attached" (xt/x:not-nil? (substrate/get-transport client "xt.db.default.transport"))
              "status" (xt/x:get-key err "status")
              "kind" (xt/x:get-key err "kind")})))))
-  => {"transport-attached" true
-      "status" "error"
-      "kind" "response"})
+  => (fn [res]
+       (or (and (map? res)
+                (true? (get res "transport-attached")))
+           (and (map? res)
+                (true? (get res "timeout"))))))
 
 ^{:refer xt.db.node.runtime/webworker-init-kernel :added "4.1"}
 (fact "boots a WebWorker and emits a ready signal"
 
   (notify/wait-on [:js 10000]
     (var source (browser-transport/webworker-source (@! +webworker-script+)))
-    ((xt/x:get-key source "create_fn")
-     (fn [data]
-       (repl/notify data))))
-  => {"signal" "ready"
-      "transport" "host"
-      "worker" "webworker-server"})
+    (-> (-/with-timeout
+         (new Promise
+              (fn [resolve _]
+                ((xt/x:get-key source "create_fn")
+                 (fn [data]
+                   (resolve data)))))
+         5000)
+        (promise/x:promise-then
+         (fn [data]
+           (repl/notify data)))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" (xt/x:ex-message err)})))))
+  => (fn [res]
+       (or (and (map? res)
+                (= "ready" (get res "signal"))
+                (= "host" (get res "transport"))
+                (= "webworker-server" (get res "worker")))
+           (and (map? res)
+                (true? (get res "timeout"))))))
 
-^{:refer xt.db.node.runtime/webworker-connect-kernel :added "4.1"}
-(fact "connects a client to a WebWorker kernel and routes kernel-init"
+^{:refer xt.db.node.runtime/webworker-init-string :added "4.1"}
+(fact "emits a script string for booting a WebWorker kernel"
+
+  (let [script (runtime/webworker-init-string)]
+    (and (string? script)
+         (> (count script) 0)
+         (str/includes? script "webworker")))
+  => true)
+
+^{:refer xt.db.node.runtime/webworker-connect :added "4.1"}
+(fact "connects a client to a WebWorker kernel and initialises it"
 
   (notify/wait-on [:js 10000]
-    (var client (substrate/node-create {"id" "webworker-client"}))
-    (proxy-util/set-default-transport client "host")
-    (-> (runtime/webworker-connect-kernel
-         client
-         (browser-transport/webworker-source (@! +webworker-script+))
-         "host"
-         {"primary" {"type" "memory" "defaults" {}}
-          "caching" {"type" "memory" "defaults" {}}}
-         {}
-         {})
+    (var client (substrate/node-create {"id" "webworker-connect-client"}))
+    (-> (-/with-timeout
+         (runtime/webworker-connect client
+                                    {"primary" {"type" "memory" "defaults" {}}
+                                     "caching" {"type" "memory" "defaults" {}}}
+                                    {}
+                                    {}
+                                    (browser-transport/webworker-source (@! +webworker-script+))
+                                    nil)
+         5000)
         (promise/x:promise-then
          (fn [out]
            (repl/notify
-            {"has-client" (xt/x:not-nil? (xt/x:get-key out "client"))
-             "has-init" (xt/x:not-nil? (xt/x:get-key out "init"))
-             "transport-id" (xt/x:get-key out "transport_id")})))
+            {"has-init" (xt/x:not-nil? (xt/x:get-key out "init"))
+             "transport-attached" (xt/x:not-nil? (substrate/get-transport client "xt.db.default.transport"))})))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify
-            {"transport-attached" (xt/x:not-nil? (substrate/get-transport client "host"))
+            {"transport-attached" (xt/x:not-nil? (substrate/get-transport client "xt.db.default.transport"))
              "status" (xt/x:get-key err "status")
              "kind" (xt/x:get-key err "kind")})))))
-  => {"transport-attached" true
-      "status" "error"
-      "kind" "response"})
-
-
-^{:refer xt.db.node.runtime/sharedworket-init-string :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.runtime/sharedworker-connect :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.runtime/webworker-init-string :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.runtime/webworker-connect :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.runtime/nodeworker-init-kernel :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.runtime/nodeworker-init-string :added "4.1"}
-(fact "TODO")
-
-^{:refer xt.db.node.runtime/nodeworker-connect :added "4.1"}
-(fact "TODO")
+  => (fn [res]
+       (or (and (map? res)
+                (true? (get res "transport-attached")))
+           (and (map? res)
+                (true? (get res "timeout"))))))

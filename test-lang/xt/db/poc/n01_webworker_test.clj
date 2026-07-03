@@ -55,6 +55,11 @@
   :teardown [(l/rt:stop)]})
 
 
+(notify/wait-on [:js 1000]
+  (var client (substrate/node-create {"id" "db-model-client"}))
+  (runtime/nodeworker-connect client ))
+
+
 ^{:refer xt.db.poc.node-webworker-test/worker-server-fact :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "worker-hosted server exposes db models to a connecting client"

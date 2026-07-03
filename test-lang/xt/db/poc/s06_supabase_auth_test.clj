@@ -143,7 +143,7 @@
          (fn [v]
            (repl/notify v)))))))
   => (contains-in
-      {"name" "GoTrue"})
+      {"name" "GoTrue"}))
 
 ^{:refer xt.db.poc.s06-supabase-auth-test/supabase-reachable
   :added "4.1"

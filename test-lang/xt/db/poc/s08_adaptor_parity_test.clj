@@ -35,7 +35,8 @@
              [xt.db.node.runtime :as runtime]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as base-page]
-             [xt.substrate.page-proxy :as page-proxy]]})
+             [xt.substrate.page-proxy :as page-proxy]
+             [xt.substrate.transport-browser :as transport-browser]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -69,28 +70,19 @@
       (xt.substrate/register-handler
        node "@xt.db/kernel-init"
        (fn [space args request node]
-         (return
-          (. (xt.db.node.kernel-base/kernel-init-main
-              node
-              (. args [0])
-              (. args [1])
-              (. args [2]))
-             (then
-              (fn [_]
-                (xt.substrate.page-core/add-group-attach
-                 node
-                 "room/a"
-                 "demo"
-                 {"tree-view" (xt.db.node.kernel-base/dataview-create-model
-                               "db/primary"
-                               xt.db.poc.s08-kernel-parity-test/tree-view-model-dataview
-                               xt.db.poc.s08-kernel-parity-test/tree-view-model)})
-                (return {"status" "ok"})))
-             (catch
-              (fn [err]
-                (return {"status" "error"
-                         "message" (. err ["message"])
-                         "stack" (. err ["stack"])}))))))
+         (-> (xt.db.node.kernel-base/kernel-init-main node (. args [0]) (. args [1]) (. args [2]))
+             (then (fn [_]
+                     (xt.substrate.page-core/add-group-attach
+                      node "room/a" "demo"
+                      {"tree-view" (xt.db.node.kernel-base/dataview-create-model
+                                    "db/primary"
+                                    xt.db.poc.s08-kernel-parity-test/tree-view-model-dataview
+                                    xt.db.poc.s08-kernel-parity-test/tree-view-model)})
+                     (return {"status" "ok"})))
+             (catch (fn [err]
+                      (return {"status" "error"
+                               "message" (. err ["message"])
+                               "stack" (. err ["stack"])})))))
        nil))
    {:lang :js
     :layout :full
@@ -100,8 +92,7 @@
                       "data:text/javascript,export default {Client: function() {}}"}}}))
 
 (fact:global
- {
-  :setup [(l/rt:restart :js)
+ {:setup [(l/rt:restart :js)
           (l/rt:setup :postgres)
           (local-min/restart-postgrest)
           (local-min/wait-for-postgrest-ready "scratch_v0" "Log")
@@ -109,6 +100,11 @@
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
   :teardown [(l/rt:stop)]})
+
+(defn.js shared-source
+  "wraps a raw shared worker script string for connect-sharedworker"
+  [script]
+  (return (transport-browser/sharedworker-source script {"type" "module"})))
 
 (defn.js connect-kernel-worker
   "connects a client to the shared worker and initialises the db adaptor on the client"
@@ -133,9 +129,12 @@
   [source callback]
   (var client (substrate/node-create {"id" "kernel-parity-client"
                                       "spaces" {"room/a" {"state" {}}}}))
+  (var src (:? (== "string" (typeof source))
+               (-/shared-source source)
+               source))
   (return
    (promise/x:promise-then
-    (-/connect-kernel-worker client source)
+    (-/connect-kernel-worker client src)
     (fn [_]
       (return (callback client))))))
 
@@ -144,11 +143,7 @@
   {:added "4.1"}
   [client]
   (return
-   (-> (page-proxy/open-proxy-group
-        client
-        "room/a"
-        "demo"
-        {})
+   (-> (page-proxy/open-proxy-group client "room/a" "demo" {})
        (promise/x:promise-then
         (fn [_]
           (return (base-page/remote-call client "room/a" "demo" "tree-view" [[] []] true))))
@@ -160,6 +155,11 @@
                    "model_type" (xt/x:get-key model "::")
                    "output" (event-model/get-current model nil)}))))))
 
+(defn.js notify-output-or-error
+  "notifies test output, or error details on failure"
+  [value]
+  (return value))
+
 ^{:refer xt.db.poc.s08-kernel-parity-test/server-config-tree-view
   :added "4.1"
   :setup [(scratch-v0/log-append-public "parity-server")]}
@@ -169,11 +169,7 @@
     (-/with-server-worker
      (@! +server-worker-with-model-script+)
      (fn [client]
-       (return
-        (-> (-/read-tree-view-output client)
-            (promise/x:promise-then
-             (fn [out]
-               (repl/notify out)))))))
+       (return (-/notify-output-or-error (-/read-tree-view-output client))))))
   => (contains-in
       {"has_group" true
        "model_type" "event.model"
@@ -189,26 +185,19 @@
      nil
      (fn [client]
        (return
-        (-> (client-base/dataview-attach-model
-             client
-             "db/primary"
-             {"space_id" "room/a"
-              "group_id" "demo"
-              "model_id" "tree-view"}
-             -/tree-view-model-dataview
-             -/tree-view-model
-             {})
-            (promise/x:promise-then
-             (fn [_]
-               (return (-/read-tree-view-output client))))
-            (promise/x:promise-then
-             (fn [out]
-               (repl/notify out)))
-            (promise/x:promise-catch
-             (fn [err]
-               (repl/notify {"has_group" false
-                             "error" (. err ["message"])
-                             "stack" (. err ["stack"])})))))))
+        (-/notify-output-or-error
+         (-> (client-base/dataview-attach-model
+              client
+              "db/primary"
+              {"space_id" "room/a"
+               "group_id" "demo"
+               "model_id" "tree-view"}
+              -/tree-view-model-dataview
+              -/tree-view-model
+              {})
+             (promise/x:promise-then
+              (fn [_]
+                (return (-/read-tree-view-output client))))))))))
   => (contains-in
       {"has_group" true
        "model_type" "event.model"
