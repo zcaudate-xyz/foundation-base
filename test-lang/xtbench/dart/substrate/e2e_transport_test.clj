@@ -56,7 +56,7 @@
                    (substrate/receive-frame
                     server frame {"transport_id" "client"})))})
     (var frame (frame/stream-frame "space/a" "event/ping" {"data" 1} {}))                                                                                                                                                                   
-    (substrate/send-transport client "server" frame))
+    (substrate/transport-send client "server" frame))
   => {"id" "space/a", "state" {"pinged" {"data" 1}}, "meta" {}})
 
 ^{:refer xt.substrate.base-frame/stream-frame :name demo-001-stream-frame-trigger}
@@ -93,7 +93,7 @@
                    (substrate/receive-frame
                     server frame {"transport_id" "client"})))})
     (var frame (frame/stream-frame "space/a" "event/ping" {"data" 1} {}))                                                                                                                                                                   
-    (substrate/send-transport client "server" frame))
+    (substrate/transport-send client "server" frame))
   => {"id" "space/a", "state" {"pinged" {"data" 1}}, "meta" {}})
 
 ^{:refer xt.substrate.base-frame/request-frame :name demo-002-request-frame-dataview}

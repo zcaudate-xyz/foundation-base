@@ -105,7 +105,7 @@
   "creates a connection record from an attached transport"
   {:added "4.1"}
   [node transport-id ready]
-  (var transport (main/get-transport node transport-id))
+  (var transport (main/transport-get node transport-id))
   (return
    {"node" node
     "transport_id" transport-id
@@ -427,7 +427,7 @@
        (return (-/connection-record node transport-id nil))
        (return
         (promise/x:promise-then
-         ((xt/x:get-key (main/get-transport node transport-id)
+         ((xt/x:get-key (main/transport-get node transport-id)
                         "send_fn")
           ready)
          (fn [_]

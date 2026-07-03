@@ -420,7 +420,7 @@
           "transport_id" "worker"})
         (fn [_]
           (repl/notify
-           {"detached" (xt/x:nil? (event-node/get-transport node "worker"))
+           {"detached" (xt/x:nil? (event-node/transport-get node "worker"))
             "transport_id" "worker"}))))))
   => {"detached" true
       "transport_id" "worker"})

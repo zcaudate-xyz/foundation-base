@@ -173,11 +173,11 @@
          (fn [out]
            (repl/notify
             {"has-init" (xt/x:not-nil? (xt/x:get-key out "init"))
-             "transport-attached" (xt/x:not-nil? (substrate/get-transport client "xt.db.default.transport"))})))
+             "transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))})))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify
-            {"transport-attached" (xt/x:not-nil? (substrate/get-transport client "xt.db.default.transport"))
+            {"transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))
              "status" (xt/x:get-key err "status")
              "kind" (xt/x:get-key err "kind")})))))
   => (fn [res]
@@ -239,11 +239,11 @@
          (fn [out]
            (repl/notify
             {"has-init" (xt/x:not-nil? (xt/x:get-key out "init"))
-             "transport-attached" (xt/x:not-nil? (substrate/get-transport client "xt.db.default.transport"))})))
+             "transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))})))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify
-            {"transport-attached" (xt/x:not-nil? (substrate/get-transport client "xt.db.default.transport"))
+            {"transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))
              "status" (xt/x:get-key err "status")
              "kind" (xt/x:get-key err "kind")})))))
   => (fn [res]

@@ -145,7 +145,7 @@
            (repl/notify out)))))
   => {"pong" "hello"})
 
-(fact "respond-ok sends response over transport"
+(fact "response-ok sends response over transport"
   (notify/wait-on :js
     (var server (substrate/node-create {"id" "server"
                                         "spaces" {"room/a" {"state" {}}}}))

@@ -62,7 +62,7 @@
                    (substrate/receive-frame
                     server frame {"transport_id" "client"})))})
     (var frame (frame/stream-frame "space/a" "event/ping" {"data" 1} {}))                                                                                                                                                                   
-    (substrate/send-transport client "server" frame))
+    (substrate/transport-send client "server" frame))
   ;; <RETURN>
   => (contains {"space" "space/a", "id" string?, "signal" "event/ping", "kind" "stream", "meta" {}, "data" {"data" 1}}))
 
@@ -112,7 +112,7 @@
                    (substrate/receive-frame
                     server frame {"transport_id" "client"})))})
     (var frame (frame/stream-frame "space/a" "event/ping" {"data" 1} {}))                                                                                                                                                                   
-    (substrate/send-transport client "server" frame))
+    (substrate/transport-send client "server" frame))
   ;; </RETURN>
   => {"id" "space/a", "state" {"pinged" {"data" 1}}, "meta" {}})
 
@@ -131,7 +131,7 @@
   ;; Request/response round-trip over transport.
   ;;
   ;; Unlike streams (fire-and-forget), requests need a return path.
-  ;; respond-ok looks at ctx.transport_id to decide where to send the
+  ;; response-ok looks at ctx.transport_id to decide where to send the
   ;; response frame. Without a return transport, the response is lost
   ;; and the caller's promise never settles.
   ;;
@@ -140,7 +140,7 @@
   ;;   2. Client sends frame via "server" transport
   ;;   3. Server receive-frame → receive-request → invoke-handler
   ;;   4. Handler returns {"pong" true ...}
-  ;;   5. respond-ok sees transport_id="client", sends response via
+  ;;   5. response-ok sees transport_id="client", sends response via
   ;;      server's "client" transport
   ;;   6. Client receive-frame → receive-response → settles pending
   ;;   7. Promise resolves with the handler's return value

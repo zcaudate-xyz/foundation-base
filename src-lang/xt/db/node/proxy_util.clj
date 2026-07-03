@@ -38,7 +38,7 @@
   [node opts]
   (return (or (xtd/get-in opts ["transport_id"])
               (-/get-default-transport node)
-              (xt/x:first (substrate/list-transports node)))))
+              (xt/x:first (substrate/transport-list node)))))
 
 (defn.xt request-meta
   "builds request meta with an explicit transport_id"

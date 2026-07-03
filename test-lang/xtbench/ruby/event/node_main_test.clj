@@ -152,37 +152,37 @@
     (main/list-triggers n))
   => ["event/ping" "event/pong"])
 
-^{:refer xt.substrate/get-transport :added "4.1"}
+^{:refer xt.substrate.base-util/transport-get :added "4.1"}
 (fact "gets transports by id"
 
   (!.rb
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (. (main/get-transport n "peer-a") ["id"]))
+    (. (util/transport-get n "peer-a") ["id"]))
   => "peer-a")
 
-^{:refer xt.substrate/list-transports :added "4.1"}
+^{:refer xt.substrate.base-util/transport-list :added "4.1"}
 (fact "lists active transport ids"
 
   (!.rb
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
     (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
-    (main/list-transports n))
+    (util/transport-list n))
   => ["peer-a" "peer-b"])
 
-^{:refer xt.substrate/send-transport :added "4.1"}
+^{:refer xt.substrate.base-util/transport-send :added "4.1"}
 (fact "sends frames through a transport"
 
   (!.rb
-    (xt/x:is-function? main/send-transport))
+    (xt/x:is-function? util/transport-send))
   => true)
 
-^{:refer xt.substrate/broadcast-transport-loop :added "4.1"}
+^{:refer xt.substrate.base-util/transport-broadcast-loop :added "4.1"}
 (fact "broadcast loop returns a promise"
 
   (!.rb
-    (xt/x:is-function? main/broadcast-transport-loop))
+    (xt/x:is-function? util/transport-broadcast-loop))
   => true)
 
 ^{:refer xt.substrate/broadcast-transport :added "4.1"}
@@ -192,11 +192,11 @@
     (xt/x:is-function? main/broadcast-transport))
   => true)
 
-^{:refer xt.substrate/route-stream-loop :added "4.1"}
-(fact "route-stream-loop returns a promise"
+^{:refer xt.substrate.base-util/stream-route-loop :added "4.1"}
+(fact "stream-route-loop returns a promise"
 
   (!.rb
-    (xt/x:is-function? main/route-stream-loop))
+    (xt/x:is-function? util/stream-route-loop))
   => true)
 
 ^{:refer xt.substrate/route-stream :added "4.1"}
@@ -220,29 +220,29 @@
     (xt/x:is-function? main/detach-transport))
   => true)
 
-^{:refer xt.substrate/request-target :added "4.1"}
+^{:refer xt.substrate.base-util/transport-request-target :added "4.1"}
 (fact "picks a target transport from meta or the first attached transport"
 
   (!.rb
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    [(main/request-target n {"transport_id" "peer-b"})
-     (main/request-target n {})
-     (main/request-target (main/node-create {}) {})])
+    [(util/transport-request-target n {"transport_id" "peer-b"})
+     (util/transport-request-target n {})
+     (util/transport-request-target (main/node-create {}) {})])
   => ["peer-b" "peer-a" nil])
 
-^{:refer xt.substrate/respond-ok :added "4.1"}
-(fact "respond-ok forwards response frames to a transport"
+^{:refer xt.substrate.base-util/response-ok :added "4.1"}
+(fact "response-ok forwards response frames to a transport"
 
   (!.rb
-    (xt/x:is-function? main/respond-ok))
+    (xt/x:is-function? util/response-ok))
   => true)
 
-^{:refer xt.substrate/respond-error :added "4.1"}
-(fact "respond-error forwards error responses"
+^{:refer xt.substrate.base-util/response-error :added "4.1"}
+(fact "response-error forwards error responses"
 
   (!.rb
-    (xt/x:is-function? main/respond-error))
+    (xt/x:is-function? util/response-error))
   => true)
 
 ^{:refer xt.substrate/receive-request :added "4.1"}

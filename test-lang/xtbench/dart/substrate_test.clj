@@ -12,7 +12,8 @@
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as main]
              [xt.substrate.base-router :as router]
-             [xt.substrate.base-request :as req]]})
+             [xt.substrate.base-request :as req]
+             [xt.substrate.base-util :as util]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -158,23 +159,23 @@
     (main/list-triggers n))
   => ["event/ping" "event/pong"])
 
-^{:refer xt.substrate/get-transport :added "4.1"}
+^{:refer xt.substrate.base-util/transport-get :added "4.1"}
 (fact "gets transports by id"
 
   (!.dt
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (. (main/get-transport n "peer-a") ["id"]))
+    (. (util/transport-get n "peer-a") ["id"]))
   => "peer-a")
 
-^{:refer xt.substrate/list-transports :added "4.1"}
+^{:refer xt.substrate.base-util/transport-list :added "4.1"}
 (fact "lists active transport ids"
 
   (!.dt
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
     (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
-    (main/list-transports n))
+    (util/transport-list n))
   => ["peer-a" "peer-b"])
 
 ^{:refer xt.substrate.base-router/list-subscriptions :added "4.1"
@@ -192,18 +193,18 @@
      (router/list-subscriptions n "room/b" "event/ping")])
   => +out+)
 
-^{:refer xt.substrate/send-transport :added "4.1"}
+^{:refer xt.substrate.base-util/transport-send :added "4.1"}
 (fact "sends frames through a transport"
 
   (!.dt
-    (xt/x:is-function? main/send-transport))
+    (xt/x:is-function? util/transport-send))
   => true)
 
-^{:refer xt.substrate/broadcast-transport-loop :added "4.1"}
+^{:refer xt.substrate.base-util/transport-broadcast-loop :added "4.1"}
 (fact "broadcast loop returns a promise"
 
   (!.dt
-    (xt/x:is-function? main/broadcast-transport-loop))
+    (xt/x:is-function? util/transport-broadcast-loop))
   => true)
 
 ^{:refer xt.substrate/broadcast-transport :added "4.1"}
@@ -213,11 +214,11 @@
     (xt/x:is-function? main/broadcast-transport))
   => true)
 
-^{:refer xt.substrate/route-stream-loop :added "4.1"}
-(fact "route-stream-loop returns a promise"
+^{:refer xt.substrate.base-util/stream-route-loop :added "4.1"}
+(fact "stream-route-loop returns a promise"
 
   (!.dt
-    (xt/x:is-function? main/route-stream-loop))
+    (xt/x:is-function? util/stream-route-loop))
   => true)
 
 ^{:refer xt.substrate/route-stream :added "4.1"}
@@ -227,18 +228,18 @@
     (xt/x:is-function? main/route-stream))
   => true)
 
-^{:refer xt.substrate/request-target :added "4.1"}
+^{:refer xt.substrate.base-util/transport-request-target :added "4.1"}
 (fact "picks a target transport from meta or the first attached transport"
 
   (!.dt
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    [(main/request-target n {"transport_id" "peer-b"})
-     (main/request-target n {})
-     (xt/x:nil? (main/request-target (main/node-create {}) {}))])
+    [(util/transport-request-target n {"transport_id" "peer-b"})
+     (util/transport-request-target n {})
+     (xt/x:nil? (util/transport-request-target (main/node-create {}) {}))])
   => ["peer-b" "peer-a" true])
 
-^{:refer xt.substrate/await-pending :added "4.1"}
+^{:refer xt.substrate.base-util/pending-await :added "4.1"}
 (fact "waits for pending states to resolve or reject"
 
   (notify/wait-on :dart
@@ -251,11 +252,11 @@
        (xt/x:set-key state "value" {"ok" true}))
      20)
     (promise/x:promise-then
-     (main/await-pending state)
+     (util/pending-await state)
      (fn [value]
        (return
         (promise/x:promise-catch
-         (main/await-pending {"status" "rejected"
+         (util/pending-await {"status" "rejected"
                               "error" "denied"})
          (fn [err]
            (repl/notify {"value" value
@@ -263,15 +264,15 @@
   => {"value" {"ok" true}
       "error" "denied"})
 
-^{:refer xt.substrate/request-context :added "4.1"}
+^{:refer xt.substrate.base-util/request-context-merge :added "4.1"}
 (fact "merges transport context into request meta"
 
   (!.dt
-   [(main/request-context
+   [(util/request-context-merge
      {"kind" "request"
       "meta" {"trace" "a"}}
      {"transport_id" "peer-a"})
-    (main/request-context
+    (util/request-context-merge
      {"kind" "request"}
      {"transport_id" "peer-b"})])
   => [{"kind" "request"
@@ -280,18 +281,18 @@
       {"kind" "request"
        "meta" {"transport_id" "peer-b"}}])
 
-^{:refer xt.substrate/respond-ok :added "4.1"}
-(fact "respond-ok forwards response frames to a transport"
+^{:refer xt.substrate.base-util/response-ok :added "4.1"}
+(fact "response-ok forwards response frames to a transport"
 
   (!.dt
-    (xt/x:is-function? main/respond-ok))
+    (xt/x:is-function? util/response-ok))
   => true)
 
-^{:refer xt.substrate/respond-error :added "4.1"}
-(fact "respond-error forwards error responses"
+^{:refer xt.substrate.base-util/response-error :added "4.1"}
+(fact "response-error forwards error responses"
 
   (!.dt
-    (xt/x:is-function? main/respond-error))
+    (xt/x:is-function? util/response-error))
   => true)
 
 ^{:refer xt.substrate/receive-request :added "4.1"}
@@ -375,19 +376,19 @@
     (xt/x:is-function? main/detach-transport))
   => true)
 
-^{:refer xt.substrate/config-space-opts :added "4.1"}
+^{:refer xt.substrate.base-util/config-normalize-space :added "4.1"}
 (fact "normalizes declarative space config and rejects mismatched ids"
 
   (!.dt
    (do:>
     (var thrown false)
     (try
-      (main/config-space-opts "room/a" {"id" "room/b"})
+      (util/config-normalize-space "room/a" {"id" "room/b"})
       (catch err
         (:= thrown true)))
     (return
-     [(main/config-space-opts "room/a" nil)
-      (main/config-space-opts "room/a" {"id" "room/a"
+     [(util/config-normalize-space "room/a" nil)
+      (util/config-normalize-space "room/a" {"id" "room/a"
                                         "state" {"count" 1}
                                         "meta" {"role" "alpha"}})
       thrown])))
@@ -396,7 +397,7 @@
        "meta" {"role" "alpha"}}
       true])
 
-^{:refer xt.substrate/config-handler-entry :added "4.1"}
+^{:refer xt.substrate.base-util/config-normalize-handler :added "4.1"}
 (fact "normalizes handler config from fn or declarative entry"
 
   (!.dt
@@ -405,20 +406,20 @@
                      (return args)))
     (var thrown false)
     (try
-     (main/config-handler-entry "ping" {"id" "pong"
+     (util/config-normalize-handler "ping" {"id" "pong"
                                         "fn" handler-fn})
      (catch err
        (:= thrown true)))
     (return
-     [(xt/x:is-function? (:? true (xt/x:get-key (main/config-handler-entry "ping" handler-fn) "fn")))
-     (. (main/config-handler-entry "ping" {"fn" handler-fn
+     [(xt/x:is-function? (:? true (xt/x:get-key (util/config-normalize-handler "ping" handler-fn) "fn")))
+     (. (util/config-normalize-handler "ping" {"fn" handler-fn
                                            "meta" {"kind" "request"}}) ["meta"])
      thrown])))
   => [true
      {"kind" "request"}
      true])
 
-^{:refer xt.substrate/config-trigger-entry :added "4.1"}
+^{:refer xt.substrate.base-util/config-normalize-trigger :added "4.1"}
 (fact "normalizes trigger config from fn or declarative entry"
 
   (!.dt
@@ -427,25 +428,25 @@
                      (return stream)))
     (var thrown false)
     (try
-     (main/config-trigger-entry "event/ping" {"id" "event/pong"
+     (util/config-normalize-trigger "event/ping" {"id" "event/pong"
                                               "fn" trigger-fn})
      (catch err
        (:= thrown true)))
     (return
-     [(xt/x:is-function? (:? true (xt/x:get-key (main/config-trigger-entry "event/ping" trigger-fn) "fn")))
-     (. (main/config-trigger-entry "event/ping" {"fn" trigger-fn
+     [(xt/x:is-function? (:? true (xt/x:get-key (util/config-normalize-trigger "event/ping" trigger-fn) "fn")))
+     (. (util/config-normalize-trigger "event/ping" {"fn" trigger-fn
                                                  "meta" {"kind" "stream"}}) ["meta"])
      thrown])))
   => [true
      {"kind" "stream"}
      true])
 
-^{:refer xt.substrate/configure-node :added "4.1"}
-(fact "configure-node applies declarative config to an existing node"
+^{:refer xt.substrate/node-configure :added "4.1"}
+(fact "node-configure applies declarative config to an existing node"
 
   (!.dt
    (var n (main/node-create {"id" "node-b"}))
-   (main/configure-node
+   (main/node-configure
     n
     {"spaces" {"room/c" {"state" {"count" 4}}}
      "handlers" {"echo" (fn [space args request node]
@@ -460,11 +461,11 @@
     (main/list-triggers n)])
   => [["room/c"] ["echo"] ["event/tick"]])
 
-^{:refer xt.substrate/node-base-opts :added "4.1"}
+^{:refer xt.substrate.base-util/node-base-opts :added "4.1"}
 (fact "strips declarative config keys before node construction"
 
   (!.dt
-   (main/node-base-opts {"id" "node-a"
+   (util/node-base-opts {"id" "node-a"
                          "meta" {"cluster" "local"}
                          "spaces" {"room/a" {}}
                          "handlers" {"ping" true}
