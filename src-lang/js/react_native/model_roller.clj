@@ -9,8 +9,7 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[xt.lang.spec-base :as xt]
-              [xt.lang.common-math :as math]
-              [xt.lang.spec-base :as xt]]})
+             [xt.lang.common-math :as math]]})
 
 ;;
 ;; ROLLER

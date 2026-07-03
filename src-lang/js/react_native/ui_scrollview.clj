@@ -8,7 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-    :require [[[xt.lang.common-data :as xtd]
+    :require [[xt.lang.common-data :as xtd]
              [js.react :as r]
               [js.react-native :as n]
               [js.react-native.animate :as a]

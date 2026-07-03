@@ -1,11 +1,15 @@
 (ns js.lib.react-query
-  (:require [hara.lang :as l]
+  (:require []
             [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["@tanstack/react-query" :as [* ReactQuery]]]
-   :require [[[xt.lang.common-lib :as k]
-             [js.react :as r] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.spec-base :as xt] [xt.lang.common-sort-by :as xtsb]]})
+   :require [[xt.lang.common-lib :as k]
+             [js.react :as r]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-tree :as xtt]
+             [xt.lang.common-sort-by :as xtsb]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactQuery"

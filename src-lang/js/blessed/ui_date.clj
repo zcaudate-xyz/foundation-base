@@ -5,7 +5,6 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
-             [xt.lang.spec-base :as xt]
              [js.react :as r]
              [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]

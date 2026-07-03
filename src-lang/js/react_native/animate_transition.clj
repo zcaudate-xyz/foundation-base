@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-lib :suppress true :as k]
+  {:require [[xt.lang.common-lib :as k]
              [js.react-native.animate :as a]]})
 
 ;;

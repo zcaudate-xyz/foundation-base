@@ -9,8 +9,7 @@
              [js.blessed.ui-style :as ui-style]
              [js.blessed.ui-core :as ui-core]
              [js.blessed.ui-group :as ui-group]
-             [js.blessed.ui-date :as ui-date]
-             [xt.lang.spec-base :as xt]]})
+             [js.blessed.ui-date :as ui-date]]})
 
 (defn.js FormWrapper
   "addes `width`, `offset` and `label`"

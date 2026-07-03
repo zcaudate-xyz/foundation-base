@@ -2,7 +2,9 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.spec-base :as xt] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [js.react :as r]
+             [js.lib.chalk :as chalk]]})
 
 (defn.js Status
   "displays status"

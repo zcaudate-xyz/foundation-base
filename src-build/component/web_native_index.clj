@@ -16,8 +16,7 @@
              [js.react-native :as n :include [:fn]]
              [js.lib.rn-expo :as x :include [:lib]]
              [xt.lang.spec-base :as xt]
-             [xt.lang.debug-client :as client]
-             [xt.old.event-box :as base-box]
+             [xt.event.base-box :as base-box]
              [component.web-native :as web-native]]
    
    :file   "App.js"})
@@ -60,10 +59,7 @@
 
 (defrun.js ^{:rt/init true}
   __main__
-  (base-box/set-data -/Global ["Main"] -/AppMain)
-  (client/debug-client-ws "localhost"
-                    29001
-                    {}))
+  (base-box/set-data -/Global ["Main"] -/AppMain))
 
 (defn.js clearScratch
   []

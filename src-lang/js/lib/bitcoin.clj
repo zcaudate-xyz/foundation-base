@@ -10,11 +10,10 @@
             ["bip39" :as BIP39]
             ["wif" :as WIF]
             ["safe-buffer" :as SafeBuffer]]
-   :require [[[xt.lang.common-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [js.core :as j]
              [xt.lang.spec-base :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.spec-base :as xt]]})
+             [xt.lang.common-data :as xtd]]})
 
 (def +networks+
   {:citycoin ["main" "test"],

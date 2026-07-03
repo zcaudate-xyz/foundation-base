@@ -1,5 +1,5 @@
 (ns js.lib.eth-bench
-  (:require [hara.lang :as l]
+  (:require []
             [xt.lang.common-notify :as notify]))
 
 (l/script :js
@@ -7,7 +7,6 @@
              [js.lib.eth-solc :as eth-solc]
              [xt.lang.spec-base :as xt]
              [js.core :as j]
-             [xt.lang.spec-base :as xt]
              [xt.lang.common-tree :as xtt]
              [xt.lang.common-lib :as k]]})
 

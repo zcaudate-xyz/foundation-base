@@ -8,7 +8,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[[xt.lang.common-lib :as k]
+    :require [[xt.lang.common-lib :as k]
              [js.react :as r]
               [js.react-native :as n]
               [js.react-native.animate :as a]

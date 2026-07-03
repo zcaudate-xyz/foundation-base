@@ -8,7 +8,8 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[[xt.lang.common-data :as xtd]
+   :require [[xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]
              [js.react-native :as n]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
