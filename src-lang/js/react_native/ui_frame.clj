@@ -2,7 +2,8 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.react :as r]
+  {:require [[xt.lang.common-data :as xtd]
+             [js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]]})

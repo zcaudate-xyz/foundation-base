@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require []})
+  {:require [[xt.lang.spec-base :as xt]]})
 
 (def.js FontSize
   {:xxl  {:fontSize 40}

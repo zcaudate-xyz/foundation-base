@@ -2,7 +2,12 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.react :as r] [js.react-native.animate :as a] [js.react-native.model-roller :as model-roller]]})
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [js.react :as r]
+             [js.react-native.animate :as a]
+             [js.react-native.model-roller :as model-roller]]})
 
 (defn.js useRoller
   "roller model for slider and spinner"

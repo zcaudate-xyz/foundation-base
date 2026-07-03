@@ -4,7 +4,8 @@
 
 (l/script :js
   {:import [["@tanstack/react-query" :as [* ReactQuery]]]
-   :require [[js.react :as r] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.spec-base :as xt] [xt.lang.common-sort-by :as xtsb]]})
+   :require [[[xt.lang.common-lib :as k]
+             [js.react :as r] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.lang.spec-base :as xt] [xt.lang.common-sort-by :as xtsb]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactQuery"

@@ -2,7 +2,10 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-color :as c] [xt.lang.spec-base :as xt] [xt.lang.spec-base :as xt]] :runtime :websocket})
+  {:runtime :websocket
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-color :as c]
+             [xt.lang.spec-base :as xt]]})
 
 ;;
 ;; hsl function
