@@ -132,7 +132,8 @@
               (xt/x:obj-assign {:common-id common-id
                                 :primary-id primary-id
                                 :primary-fn (fn [] (return (substrate/get-service node primary-id)))}))
-          (return node))))))
+          (return {:status  "setup"
+                   :data    config}))))))
 
 (defn.xt ^{:substrate/fn "@xt.db/kernel-setup"}
   kernel-setup-handler
@@ -186,7 +187,8 @@
   {:added "4.1"}
   [node config schema lookup]
   (if (-/kernel-check-exists node config)
-    (return node)
+    (return {:status  "no_change"
+             :data    (-/kernel-create-config config)})
     (return (-/kernel-setup-main node config schema lookup))))
 
 (defn.xt ^{:substrate/fn "@xt.db/kernel-init"}
@@ -520,8 +522,8 @@
                              (return
                               (-/dataview-call-baseline-fn  node primary-id
                                                             (-> {}
-                                                                (xt/x:obj-assign (xt/x:first args))
-                                                                (xt/x:obj-assign dataview)))))}}
+                                                                (xt/x:obj-assign dataview)
+                                                                (xt/x:obj-assign (xt/x:first args))))))}}
                 pipeline)
     "defaults" defaults
     "options"  options}))
