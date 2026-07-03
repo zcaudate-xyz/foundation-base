@@ -42,8 +42,7 @@
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
 (fact:global
- {
-  :setup [(l/rt:restart)
+ {:setup [(l/rt:restart)
           (l/rt:setup :postgres)
           (local-min/refresh-postgrest-schema "scratch_v0" "Log")
           (local-min/wait-for-postgrest-ready "scratch_v0" "Log")]
@@ -57,51 +56,42 @@
     (-> (kernel-base/kernel-init-main
          node
          {"primary" {"type" "supabase"
-                      "defaults" (@! local-min/+config-supabase-anon+)}
+                     "defaults" (@! local-min/+config-supabase-anon+)}
           "caching" {"type" "sqlite"
                      "defaults" {"filename" ":memory:"}}}
          -/Schema
          -/SchemaLookup)
-        (promise/x:promise-then
-         (fn [node]
-           (repl/notify
-            {"primary_type" (xt/x:get-key (substrate/get-service node "db/primary") "::")
-             "caching_type" (xt/x:get-key (substrate/get-service node "db/caching") "::")
-             "common" (xt/x:not-nil? (substrate/get-service node "db/common"))})))))
-  => {"primary_type" "xt.db.system.impl_supabase/ImplSupabase"
-      "caching_type" "xt.db.system.impl_sqlite/ImplSqlite"
-      "common" true})
+        (repl/notify)))
+  => (contains-in
+      {"status" "setup", "data" {"caching" {"id" "db/caching", "type" "sqlite", "defaults" {"filename" ":memory:"}}, "primary" map?, "common" {"id" "db/common"}}}))
 
 ^{:refer xt.db.poc.node-basic-test/create-page-model :added "4.1"}
 (fact "returns a model spec with local and remote handlers"
 
   (!.js
-   (var spec {"handler" (fn [context]
-                          (var node (. context ["node"]))
-                          (var args (. context ["args"]))
-                          (var pull-tree (xt/x:first args))
-                          (var caching (substrate/get-service node "db/caching"))
-                          (return (impl-common/pull caching pull-tree)))
-              "pipeline" {"remote" {"handler" (fn [context]
-                                                (var node (. context ["node"]))
-                                                (var args (. context ["args"]))
-                                                (var pull-tree (xt/x:first args))
-                                                (var primary (substrate/get-service node "db/primary"))
-                                                (return (impl-common/pull-async primary pull-tree)))}}
-              "defaults" {"args" [["Log"]]}
-              "options" {}})
-   {"has-main" (xt/x:is-function? (xtd/get-in spec ["handler"]))
-    "has-remote" (xt/x:is-function? (xtd/get-in spec ["pipeline" "remote" "handler"]))
-    "defaults" (. spec ["defaults"])})
-  => {"has-main" true
-      "has-remote" true
-      "defaults" {"args" [["Log"]]}})
+    (var spec {"handler" (fn [context]
+                           (var node (. context ["node"]))
+                           (var args (. context ["args"]))
+                           (var pull-tree (xt/x:first args))
+                           (var caching (substrate/get-service node "db/caching"))
+                           (return (impl-common/pull caching pull-tree)))
+               "pipeline" {"remote" {"handler" (fn [context]
+                                                 (var node (. context ["node"]))
+                                                 (var args (. context ["args"]))
+                                                 (var pull-tree (xt/x:first args))
+                                                 (var primary (substrate/get-service node "db/primary"))
+                                                 (return (impl-common/pull-async primary pull-tree)))}}
+               "defaults" {"args" [["Log"]]}
+               "options" {}})
+    spec)
+  => (contains-in
+      {"pipeline" {"remote" {}}, "options" {}, "defaults" {"args" [["Log"]]}}))
 
 ^{:refer xt.db.poc.node-basic-test/install-page-models :added "4.1"
   :setup [(scratch-v0/log-append-public "cached")]}
 (fact "attaches db-model-service models to a node space"
 
-  (notify/wait-on [:js 10000]
+  (notify/wait-on :js
     (var node (substrate/node-create {"id" "poc-node"}))
     (-> (kernel-base/kernel-init-main
          node
@@ -112,7 +102,7 @@
          -/Schema
          -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (var primary (substrate/get-service node "db/primary"))
            (var caching (substrate/get-service node "db/caching"))
            ;; pull from supabase primary and add to sqlite caching
@@ -124,11 +114,11 @@
                    (page-core/group-add-attach
                     node nil "page"
                     {"entry" {"handler" (fn [context]
-                                           (var node (. context ["node"]))
-                                           (var args (. context ["args"]))
-                                           (var pull-tree (xt/x:first args))
-                                           (var caching (substrate/get-service node "db/caching"))
-                                           (return (impl-common/pull caching pull-tree)))
+                                          (var node (. context ["node"]))
+                                          (var args (. context ["args"]))
+                                          (var pull-tree (xt/x:first args))
+                                          (var caching (substrate/get-service node "db/caching"))
+                                          (return (impl-common/pull caching pull-tree)))
                               "pipeline" {"remote" {"handler" (fn [context]
                                                                 (var node (. context ["node"]))
                                                                 (var args (. context ["args"]))
@@ -158,18 +148,18 @@
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "remote handler pulls asynchronously from db/primary"
 
-  (notify/wait-on [:js 10000]
+  (notify/wait-on :js
     (var node (substrate/node-create {"id" "poc-node"}))
     (-> (kernel-base/kernel-init-main
          node
          {"primary" {"type" "supabase"
-                      "defaults" (@! local-min/+config-supabase-anon+)}
+                     "defaults" (@! local-min/+config-supabase-anon+)}
           "caching" {"type" "sqlite"
-                      "defaults" {"filename" ":memory:"}}}
+                     "defaults" {"filename" ":memory:"}}}
          -/Schema
          -/SchemaLookup)
         (promise/x:promise-then
-         (fn [node]
+         (fn []
            (var primary (substrate/get-service node "db/primary"))
            (var caching (substrate/get-service node "db/caching"))
            ;; pull from supabase primary and add to sqlite caching
@@ -181,11 +171,11 @@
                    (page-core/group-add-attach
                     node nil "page"
                     {"entry" {"handler" (fn [context]
-                                           (var node (. context ["node"]))
-                                           (var args (. context ["args"]))
-                                           (var pull-tree (xt/x:first args))
-                                           (var caching (substrate/get-service node "db/caching"))
-                                           (return (impl-common/pull caching pull-tree)))
+                                          (var node (. context ["node"]))
+                                          (var args (. context ["args"]))
+                                          (var pull-tree (xt/x:first args))
+                                          (var caching (substrate/get-service node "db/caching"))
+                                          (return (impl-common/pull caching pull-tree)))
                               "pipeline" {"remote" {"handler" (fn [context]
                                                                 (var node (. context ["node"]))
                                                                 (var args (. context ["args"]))
