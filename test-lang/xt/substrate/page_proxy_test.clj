@@ -801,10 +801,62 @@
   => {"status" "ok"})
 
 ^{:refer xt.substrate.page-proxy/model-get-output :added "4.1"}
-(fact "TODO")
+(fact "returns the current output value of a page model"
+
+  (notify/wait-on :js
+    (var server (-/make-server-node))
+    (-/setup-server-page server)
+    (-> (base-page/model-refresh server "room/a" "demo" "main" {} nil)
+        (promise/x:promise-then
+         (fn [_]
+           (repl/notify (page-proxy/model-get-output server "room/a" "demo" "main"))))))
+  => {"value" "hello"})
 
 ^{:refer xt.substrate.page-proxy/proxy-dispatch-op :added "4.1"}
-(fact "TODO")
+(fact "routes a proxy operation to the correct server action"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {"id" "client"
+                                      "spaces" {"room/a" {"state" {}}}}))
+    (page-proxy/install-handlers node)
+    (var out [])
+    (-> (substrate/attach-transport node "conn"
+                                    {"send_fn" (fn [frame]
+                                                 (xt/x:arr-push out frame)
+                                                 (return frame))})
+        (promise/x:promise-then
+         (fn [_]
+           (page-proxy/proxy-dispatch-op node "conn" "proxy-call"
+                                         "room/a" "demo" ["main" [] true])
+           (repl/notify
+            {"action" (xt/x:get-key (xt/x:get-idx out 0) "action")})))))
+  => {"action" "page.model/proxy-call"})
 
 ^{:refer xt.substrate.page-proxy/group-sync-proxy :added "4.1"}
-(fact "TODO")
+(fact "opens a proxy group and returns a sync control handle"
+
+  (notify/wait-on :js
+    (var server (-/make-server-node))
+    (var client (-/make-client-node))
+    (page-proxy/install server)
+    (page-proxy/install client)
+    (-/setup-server-page server)
+    (-> (-/link-nodes server client)
+        (promise/x:promise-then
+         (fn [linked]
+           (var p (page-proxy/group-sync-proxy client "room/a" "demo"
+                                               {"transport_id" "server-conn"}))
+           (return (-/pump-promise linked server client p))))
+        (promise/x:promise-then
+         (fn [response]
+           (repl/notify
+            {"space" (. response ["space"])
+             "group" (. response ["group"])
+             "transport_id" (. response ["transport_id"])
+             "has_group_obj" (xt/x:not-nil? (. response ["group-obj"]))
+             "has_close" (xt/x:is-function? (. response ["close"]))})))))
+  => {"space" "room/a"
+      "group" "demo"
+      "transport_id" "server-conn"
+      "has_group_obj" true
+      "has_close" true})

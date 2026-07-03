@@ -127,4 +127,21 @@
 
 
 ^{:refer xt.db.system.impl-postgres/stop-db :added "4.1"}
-(fact "TODO")
+(fact "closes the postgres client and clears raw connection state"
+
+  (notify/wait-on :js
+    (-> (impl/impl-postgres
+         (js-postgres/create {:database "test-scratch"})
+         (@! (pg/bind-schema (:schema (pg/app "scratch_v0"))))
+         (@! (pg/bind-app (pg/app "scratch_v0"))))
+        (impl/impl-postgres-init)
+        (promise/x:promise-then
+         (fn [impl]
+           (var client (xt/x:get-key impl "client"))
+           (var connected (xt/x:not-nil? (xt/x:get-key client "raw")))
+           (impl/stop-db impl)
+           (var raw (xt/x:get-key client "raw"))
+           (repl/notify {"connected" connected
+                         "raw-nil" (xt/x:nil? raw)})))))
+  => {"connected" true
+      "raw-nil" true})

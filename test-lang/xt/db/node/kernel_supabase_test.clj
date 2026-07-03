@@ -204,6 +204,37 @@
    (adaptor/supabase-current-session-handler nil ["auth/supabase"] nil node))
   => {"access_token" "abc"})
 
+^{:refer xt.db.node.kernel-supabase/supabase-signed-in-handler :added "4.1"}
+(fact "returns whether the service has a stored session"
+  (!.js
+   [(adaptor/supabase-signed-in-handler nil ["auth/supabase"] nil (-/node-with-service (-/anon-client) nil))
+    (adaptor/supabase-signed-in-handler nil ["auth/supabase"] nil (-/node-with-service (-/anon-client) {"access_token" "abc"}))])
+  => [false true])
+
+^{:refer xt.db.node.kernel-supabase/supabase-query-table-handler :added "4.1"}
+(fact "queries a table through the service client"
+  (notify/wait-on :js
+    (-> (adaptor/supabase-query-table-handler nil
+                                              ["auth/supabase" "Log" {} {}]
+                                              nil
+                                              (-/node-with-service (-/service-client) nil))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify {"has-data" (xt/x:is-array? out)})))))
+  => {"has-data" true})
+
+^{:refer xt.db.node.kernel-supabase/supabase-rpc-call-handler :added "4.1"}
+(fact "calls an rpc entry on the service"
+  (notify/wait-on :js
+    (-> (adaptor/supabase-rpc-call-handler nil
+                                            ["auth/supabase" "ping" {} {}]
+                                            nil
+                                            (-/node-with-service (-/service-client) nil))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify out)))))
+  => "pong")
+
 ^{:refer xt.db.node.kernel-supabase/supabase-health-handler :added "4.1"}
 (fact "calls the auth health endpoint on the service"
   (notify/wait-on :js
@@ -473,10 +504,50 @@
 
 
 ^{:refer xt.db.node.kernel-supabase/supabase-signed-in-handler :added "4.1"}
-(fact "TODO")
+(fact "returns true after signing up a fresh email user"
+  (notify/wait-on :js
+    (var email (xt/x:cat "kernel-signed-in-"
+                         (xt/x:to-string (xt/x:now-ms))
+                         "@example.com"))
+    (var node (-/node-with-service (-/anon-client) nil))
+    (-> (adaptor/supabase-sign-up-handler nil
+                                          ["auth/supabase" {"email" email "password" "secret123"} {}]
+                                          nil
+                                          node)
+        (promise/x:promise-then
+         (fn [_]
+           (session/auto-refresh-stop (substrate/get-service node "auth/supabase"))
+           (repl/notify (adaptor/supabase-signed-in-handler nil ["auth/supabase"] nil node))))))
+  => true)
 
 ^{:refer xt.db.node.kernel-supabase/supabase-rpc-call-handler :added "4.1"}
-(fact "TODO")
+(fact "calls log_append_public and returns the created Log row"
+  (notify/wait-on :js
+    (-> (adaptor/supabase-rpc-call-handler nil
+                                            ["auth/supabase"
+                                             "log_append_public"
+                                             {"i_message" "kernel-rpc-log"}
+                                             {"headers" {"Content-Profile" "scratch_v0"}}]
+                                            nil
+                                            (-/node-with-service (-/service-client) nil))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify {"message" (. out ["message"])
+                         "has-id" (xt/x:not-nil? (. out ["id"]))})))))
+  => {"message" "kernel-rpc-log"
+      "has-id" true})
 
 ^{:refer xt.db.node.kernel-supabase/supabase-query-table-handler :added "4.1"}
-(fact "TODO")
+(fact "queries the Log table via the kernel handler"
+  (notify/wait-on :js
+    (-> (adaptor/supabase-query-table-handler nil
+                                              ["auth/supabase"
+                                               "Log"
+                                               {}
+                                               {"headers" {"Accept-Profile" "scratch_v0"}}]
+                                              nil
+                                              (-/node-with-service (-/service-client) nil))
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify {"has-data" (xt/x:is-array? out)})))))
+  => {"has-data" true})

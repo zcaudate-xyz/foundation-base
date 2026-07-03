@@ -56,7 +56,7 @@
 (defn frame
   [data]
   (let [inner (or (:hara/provenance data) {})
-        base  (merge inner
+        base  (merge (select-keys inner +field-keys+)
                      (select-keys data +field-keys+))]
     (if (empty? base)
       {}

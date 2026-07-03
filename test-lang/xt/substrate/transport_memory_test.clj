@@ -9,6 +9,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
+             [xt.substrate :as event-node]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-json :as node-json]
              [xt.substrate.transport-memory :as transport-memory]]})
@@ -18,6 +19,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
+             [xt.substrate :as event-node]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-json :as node-json]
              [xt.substrate.transport-memory :as transport-memory]]})
@@ -27,6 +29,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
+             [xt.substrate :as event-node]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-json :as node-json]
              [xt.substrate.transport-memory :as transport-memory]]})
@@ -479,4 +482,19 @@
                       "peer" "peer"}}]})
 
 ^{:refer xt.substrate.transport-memory/link-pair :added "4.1"}
-(fact "TODO")
+(fact "links two nodes with a bidirectional in-memory wire"
+  (notify/wait-on :js
+    (var server (event-node/node-create
+                 {"id" "link-server"
+                  "handlers"
+                  {"demo/echo" {"fn" (fn [space args request server-node]
+                                       (return {"echo" args}))
+                                "meta" {"kind" "request"}}}}))
+    (var client (event-node/node-create {"id" "link-client"}))
+    (-> (transport-memory/link-pair server client)
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (event-node/request client "room/a" "demo/echo" ["ping"] nil))))
+        (repl/notify)))
+  => {"echo" ["ping"]})

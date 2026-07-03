@@ -735,7 +735,78 @@
        [{"message" "hello-pull", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.client-base/pull-cached :added "4.1"}
-(fact "TODO")
+(fact "pulls cached data through the client and syncs result to caching"
+
+  ;;
+  ;; DIRECT
+  ;;
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/init-kernel node "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-call node
+                             "db/primary"
+                             {"input" [{"symbol" "i_message" "type" "text"}]
+                              "return" "jsonb"
+                              "schema" "scratch_v0"
+                              "id" "log_append_public"
+                              "flags" {}}
+                             ["hello-pull-cached"]
+                             {}))))
+        (promise/x:promise-then
+         (fn []
+           (return (client/pull-call node "db/primary" ["Log"] {}))))
+        (promise/x:promise-then
+         (fn []
+           (return (client/pull-cached node "db/primary" ["Log"] {}))))
+        (promise/x:promise-then
+         (fn [out]
+           (var caching (kernel-base/get-caching-impl node "db/primary"))
+           (return
+            [out
+             (impl-common/pull caching ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello-pull-cached", "author_id" nil, "id" string?}]
+       [{"message" "hello-pull-cached", "author_id" nil, "id" string?}]])
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-call client
+                             "db/primary"
+                             {"input" [{"symbol" "i_message" "type" "text"}]
+                              "return" "jsonb"
+                              "schema" "scratch_v0"
+                              "id" "log_append_public"
+                              "flags" {}}
+                             ["hello-pull-cached"]
+                             {}))))
+        (promise/x:promise-then
+         (fn []
+           (return (client/pull-call client "db/primary" ["Log"] {}))))
+        (promise/x:promise-then
+         (fn []
+           (return (client/pull-cached client "db/primary" ["Log"] {}))))
+        (promise/x:promise-then
+         (fn [out]
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (var caching (kernel-base/get-caching-impl server "db/primary"))
+           (return
+            [out
+             (impl-common/pull caching ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello-pull-cached", "author_id" nil, "id" string?}]
+       [{"message" "hello-pull-cached", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.client-base/pull-attach-model :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
@@ -917,8 +988,96 @@
       [[{"message" "hello-dataview", "author_id" nil, "id" string?}]
        [{"message" "hello-dataview", "author_id" nil, "id" string?}]]))
 
-^{:refer xt.db.node.client-base/dataview-cached :added "4.1"}
-(fact "TODO")
+^{:refer xt.db.node.client-base/dataview-cached :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "executes a dataview query through the client and returns the cached result"
+
+  ;;
+  ;; DIRECT
+  ;;
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (var dataview-spec {"table" "Log"
+                        "select_entry" {"input" []
+                                        "view" {"table" "Log"
+                                                "type" "select"
+                                                "query" {}}}
+                        "return_entry" {"input" []
+                                        "view" {"table" "Log"
+                                                "type" "return"
+                                                "query" ["id" "message"]}}})
+    (-> (-/init-kernel node "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-call node
+                             "db/primary"
+                             {"input" [{"symbol" "i_message" "type" "text"}]
+                              "return" "jsonb"
+                              "schema" "scratch_v0"
+                              "id" "log_append_public"
+                              "flags" {}}
+                             ["hello-dataview-cached"]
+                             {}))))
+        (promise/x:promise-then
+         (fn []
+           (return (client/dataview-call node "db/primary" dataview-spec {}))))
+        (promise/x:promise-then
+         (fn []
+           (return (client/dataview-cached node "db/primary" dataview-spec {}))))
+        (promise/x:promise-then
+         (fn [out]
+           (return
+            [out
+             (impl-common/pull (kernel-base/get-caching-impl node "db/primary") ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello-dataview-cached", "author_id" nil, "id" string?}]
+       [{"message" "hello-dataview-cached", "author_id" nil, "id" string?}]])
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (var dataview-spec {"table" "Log"
+                        "select_entry" {"input" []
+                                        "view" {"table" "Log"
+                                                "type" "select"
+                                                "query" {}}}
+                        "return_entry" {"input" []
+                                        "view" {"table" "Log"
+                                                "type" "return"
+                                                "query" ["id" "message"]}}})
+    (-> (-/init-proxy client "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-call client
+                             "db/primary"
+                             {"input" [{"symbol" "i_message" "type" "text"}]
+                              "return" "jsonb"
+                              "schema" "scratch_v0"
+                              "id" "log_append_public"
+                              "flags" {}}
+                             ["hello-dataview-cached"]
+                             {}))))
+        (promise/x:promise-then
+         (fn []
+           (return (client/dataview-call client "db/primary" dataview-spec {}))))
+        (promise/x:promise-then
+         (fn []
+           (return (client/dataview-cached client "db/primary" dataview-spec {}))))
+        (promise/x:promise-then
+         (fn [out]
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (return
+            [out
+             (impl-common/pull (kernel-base/get-caching-impl server "db/primary") ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello-dataview-cached", "author_id" nil, "id" string?}]
+       [{"message" "hello-dataview-cached", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.client-base/dataview-attach-model :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}

@@ -238,16 +238,107 @@
 
 
 ^{:refer xt.db.node.runtime/sharedworker-init-kernel :added "4.1"}
-(fact "TODO")
+(fact "sets up a SharedWorker onconnect handler that boots the transport"
+
+  (notify/wait-on :js
+    (var port-started false)
+    (var listener nil)
+    (var port {"start" (fn [] (:= port-started true))
+               "addEventListener" (fn [event cb] (:= listener cb))
+               "postMessage" (fn [data] nil)})
+    (var shared {"port" port})
+    (var node (substrate/node-create {"id" "shared-kernel"}))
+    (runtime/sharedworker-init-kernel node "transport" "worker")
+    ((. (!:G globalThis) ["onconnect"]) {"ports" [port]})
+    (repl/notify {"started" port-started
+                  "has-listener" (xt/x:is-function? listener)}))
+  => {"started" true, "has-listener" true})
 
 ^{:refer xt.db.node.runtime/webworker-init-kernel :added "4.1"}
-(fact "TODO")
+(fact "boots a WebWorker kernel and posts the ready signal"
+
+  (notify/wait-on :js
+    (var posted [])
+    (var listeners [])
+    (:= (!:G addEventListener) (fn [event listener] (xt/x:arr-push listeners [event listener])))
+    (:= (!:G removeEventListener) (fn [event listener] nil))
+    (:= (!:G postMessage) (fn [data] (xt/x:arr-push posted data)))
+    (var node (substrate/node-create {"id" "web-kernel"}))
+    (promise/x:promise-then
+     (runtime/webworker-init-kernel node "transport" "web")
+     (fn [conn]
+       (repl/notify {"transport-attached" (xt/x:not-nil? (substrate/transport-get node "transport"))
+                     "ready-signal" (xt/x:first posted)}))))
+  => {"transport-attached" true
+      "ready-signal" {"signal" "ready" "transport" "transport" "worker" "web"}})
 
 ^{:refer xt.db.node.runtime/nodeworker-init-kernel :added "4.1"}
-(fact "TODO")
+(fact "boots a Node.js worker kernel using parentPort"
+
+  (notify/wait-on :js
+    (var posted [])
+    (var on-handler nil)
+    (:= (!:G parentPort)
+        {"postMessage" (fn [data] (xt/x:arr-push posted data))
+         "on" (fn [event listener] (:= on-handler listener))})
+    (var node (substrate/node-create {"id" "node-kernel"}))
+    (promise/x:promise-then
+     (runtime/nodeworker-init-kernel node "transport" "worker")
+     (fn [conn]
+       (repl/notify {"transport-attached" (xt/x:not-nil? (substrate/transport-get node "transport"))
+                     "ready-signal" (xt/x:first posted)}))))
+  => {"transport-attached" true
+      "ready-signal" {"signal" "ready" "transport" "transport" "worker" "worker"}})
 
 ^{:refer xt.db.node.runtime/nodeworker-init-string :added "4.1"}
-(fact "TODO")
+(fact "emits a script string for booting a Node.js worker kernel"
+
+  (let [script (runtime/nodeworker-init-string)]
+    (and (string? script)
+         (> (count script) 0)
+         (str/includes? script "nodeworker")))
+  => true)
 
 ^{:refer xt.db.node.runtime/nodeworker-connect :added "4.1"}
-(fact "TODO")
+(fact "connects a client to a worker kernel and initialises it"
+
+  (notify/wait-on [:js 20000]
+    (var client (substrate/node-create {"id" "nodeworker-connect-client"}))
+    (var onmessage nil)
+    (var worker
+         {"postMessage" (fn [data]
+                          (var request-id (. data ["id"]))
+                          (var kind (. data ["kind"]))
+                          (when (== kind "request")
+                            (onmessage {"kind" "response"
+                                        "reply_to" request-id
+                                        "status" "ok"
+                                        "data" {"status" "ok"}})))
+          "terminate" (fn [])})
+    (var source
+         {"create_fn"
+          (fn [listener]
+            (:= onmessage listener)
+            (listener {"signal" "ready"
+                       "transport" "xt.db.default.transport"
+                       "worker" "worker"})
+            (return worker))})
+    ;; Note: source-endpoint passes the raw payload directly, not a {data: ...} event
+    (-> (runtime/nodeworker-connect client
+                                    {"primary" {"type" "memory" "defaults" {}}
+                                     "caching" {"type" "memory" "defaults" {}}}
+                                    {}
+                                    {}
+                                    source
+                                    nil)
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            {"init" (xt/x:get-key out "init")
+             "transport-attached" (xt/x:get-key out "transport-attached")
+             "transport" (xt/x:get-key out "transport")})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify
+            {"error" (xt/x:ex-message err)})))))
+  => {"init" true, "transport-attached" true, "transport" "xt.db.default.transport"})

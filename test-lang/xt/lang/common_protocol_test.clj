@@ -344,7 +344,109 @@
       "impls" {}})
 
 ^{:refer xt.lang.common-protocol/protocol-implements :added "4.1"}
-(fact "TODO")
+(fact "returns true if obj implements the given protocol"
+
+  (!.js
+   (do
+     (xt/x:set-key proto/PROTOCOLS
+                   "xt.lang.common_protocol_test/IHelloImpl"
+                   {"::" "type/protocol"
+                    "impls" {"xt.lang.common_protocol_test/HelloImpl"
+                             {"hello_str" "hello-str-fn"}}})
+     [(proto/protocol-implements {"::" "xt.lang.common_protocol_test/HelloImpl"}
+                                 "xt.lang.common_protocol_test/IHelloImpl")
+      (proto/protocol-implements {"::" "xt.lang.common_protocol_test/OtherImpl"}
+                                 "xt.lang.common_protocol_test/IHelloImpl")
+      (proto/protocol-implements {"::" "xt.lang.common_protocol_test/HelloImpl"}
+                                 "xt.lang.common_protocol_test/IMissing")]))
+  => [true false false]
+
+  (!.lua
+   (do
+     (xt/x:set-key proto/PROTOCOLS
+                   "xt.lang.common_protocol_test/IHelloImpl"
+                   {"::" "type/protocol"
+                    "impls" {"xt.lang.common_protocol_test/HelloImpl"
+                             {"hello_str" "hello-str-fn"}}})
+     [(proto/protocol-implements {"::" "xt.lang.common_protocol_test/HelloImpl"}
+                                 "xt.lang.common_protocol_test/IHelloImpl")
+      (proto/protocol-implements {"::" "xt.lang.common_protocol_test/OtherImpl"}
+                                 "xt.lang.common_protocol_test/IHelloImpl")
+      (proto/protocol-implements {"::" "xt.lang.common_protocol_test/HelloImpl"}
+                                 "xt.lang.common_protocol_test/IMissing")]))
+  => [true false false]
+
+  (!.py
+   (do
+     (xt/x:set-key proto/PROTOCOLS
+                   "xt.lang.common_protocol_test/IHelloImpl"
+                   {"::" "type/protocol"
+                    "impls" {"xt.lang.common_protocol_test/HelloImpl"
+                             {"hello_str" "hello-str-fn"}}})
+     [(proto/protocol-implements {"::" "xt.lang.common_protocol_test/HelloImpl"}
+                                 "xt.lang.common_protocol_test/IHelloImpl")
+      (proto/protocol-implements {"::" "xt.lang.common_protocol_test/OtherImpl"}
+                                 "xt.lang.common_protocol_test/IHelloImpl")
+      (proto/protocol-implements {"::" "xt.lang.common_protocol_test/HelloImpl"}
+                                 "xt.lang.common_protocol_test/IMissing")]))
+  => [true false false])
 
 ^{:refer xt.lang.common-protocol/protocol-has-method :added "4.1"}
-(fact "TODO")
+(fact "returns true if obj has a concrete method for protocol/method"
+
+  (!.js
+   (do
+     (xt/x:set-key proto/PROTOCOLS
+                   "xt.lang.common_protocol_test/IHelloMethod"
+                   {"::" "type/protocol"
+                    "impls" {"xt.lang.common_protocol_test/HelloMethod"
+                             {"hello_str" "hello-str-fn"
+                              "hello_prn" "hello-prn-fn"}}})
+     [(proto/protocol-has-method {"::" "xt.lang.common_protocol_test/HelloMethod"}
+                                 "xt.lang.common_protocol_test/IHelloMethod"
+                                 "hello_str")
+      (proto/protocol-has-method {"::" "xt.lang.common_protocol_test/HelloMethod"}
+                                 "xt.lang.common_protocol_test/IHelloMethod"
+                                 "missing_method")
+      (proto/protocol-has-method {"::" "xt.lang.common_protocol_test/HelloMethod"}
+                                 "xt.lang.common_protocol_test/IMissing"
+                                 "hello_str")]))
+  => [true false false]
+
+  (!.lua
+   (do
+     (xt/x:set-key proto/PROTOCOLS
+                   "xt.lang.common_protocol_test/IHelloMethod"
+                   {"::" "type/protocol"
+                    "impls" {"xt.lang.common_protocol_test/HelloMethod"
+                             {"hello_str" "hello-str-fn"
+                              "hello_prn" "hello-prn-fn"}}})
+     [(proto/protocol-has-method {"::" "xt.lang.common_protocol_test/HelloMethod"}
+                                 "xt.lang.common_protocol_test/IHelloMethod"
+                                 "hello_str")
+      (proto/protocol-has-method {"::" "xt.lang.common_protocol_test/HelloMethod"}
+                                 "xt.lang.common_protocol_test/IHelloMethod"
+                                 "missing_method")
+      (proto/protocol-has-method {"::" "xt.lang.common_protocol_test/HelloMethod"}
+                                 "xt.lang.common_protocol_test/IMissing"
+                                 "hello_str")]))
+  => [true false false]
+
+  (!.py
+   (do
+     (xt/x:set-key proto/PROTOCOLS
+                   "xt.lang.common_protocol_test/IHelloMethod"
+                   {"::" "type/protocol"
+                    "impls" {"xt.lang.common_protocol_test/HelloMethod"
+                             {"hello_str" "hello-str-fn"
+                              "hello_prn" "hello-prn-fn"}}})
+     [(proto/protocol-has-method {"::" "xt.lang.common_protocol_test/HelloMethod"}
+                                 "xt.lang.common_protocol_test/IHelloMethod"
+                                 "hello_str")
+      (proto/protocol-has-method {"::" "xt.lang.common_protocol_test/HelloMethod"}
+                                 "xt.lang.common_protocol_test/IHelloMethod"
+                                 "missing_method")
+      (proto/protocol-has-method {"::" "xt.lang.common_protocol_test/HelloMethod"}
+                                 "xt.lang.common_protocol_test/IMissing"
+                                 "hello_str")]))
+  => [true false false])

@@ -12,9 +12,74 @@
              [xt.substrate :as event-node]
              [xt.substrate.transport-browser :as browser-transport]]})
 
+(defn.js install-worker-polyfill
+  "Installs a Node worker_threads backed Worker polyfill for :basic tests."
+  {:added "4.1"}
+  []
+  (var wt (require "worker_threads"))
+  (:= (!:G Worker)
+      (fn [url opts]
+        (var worker (new wt.Worker
+                         "require('worker_threads').parentPort.on('message', function(d){require('worker_threads').parentPort.postMessage(d);});"
+                         {:eval true}))
+        (var wrapper {"url" url
+                      "postMessage" (fn [msg]
+                                      (. worker (postMessage msg)))
+                      "addEventListener" (fn [event listener capture]
+                                           (when (== event "message")
+                                             (. worker (on "message"
+                                                           (fn [data]
+                                                             (listener {"data" data}))))))
+                      "removeEventListener" (fn [event listener capture]
+                                              nil)
+                      "terminate" (fn []
+                                    (. worker (terminate)))})
+        (return wrapper))))
+
+(defn.js install-sharedworker-polyfill
+  "Installs a Node worker_threads backed SharedWorker polyfill for :basic tests."
+  {:added "4.1"}
+  []
+  (var wt (require "worker_threads"))
+  (var MessageChannel (. wt ["MessageChannel"]))
+  (:= (!:G SharedWorker)
+      (fn [url opts]
+        (var mc (new MessageChannel))
+        (var port (. mc ["port1"]))
+        (var worker (new wt.Worker
+                         "const wt=require('worker_threads'); const port=wt.workerData.port; port.on('message', function(d){port.postMessage(d);});"
+                         {:eval true
+                          :workerData {:port (. mc ["port2"])}
+                          :transferList [(. mc ["port2"])]}))
+        (var port-wrapper {"postMessage" (fn [msg]
+                                           (. port (postMessage msg)))
+                           "start" (fn []
+                                     (xt/x:set-key port-wrapper "started" true)
+                                     (. port (start)))
+                           "addEventListener" (fn [event listener capture]
+                                                (when (== event "message")
+                                                  (. port (on "message"
+                                                              (fn [data]
+                                                                (listener {"data" data}))))))
+                           "removeEventListener" (fn [event listener capture]
+                                                   nil)
+                           "started" false})
+        (return {"port" port-wrapper}))))
+
+(defn.js install-polyfills
+  "Makes browser worker constructors available in the Node :basic runtime."
+  {:added "4.1"}
+  []
+  (when (xt/x:nil? (!:G Worker))
+    (-/install-worker-polyfill))
+  (when (xt/x:nil? (!:G SharedWorker))
+    (-/install-sharedworker-polyfill))
+  (return true))
+
 (fact:global
   {:setup [(l/rt:restart)
-           (l/rt:scaffold-imports :js)]
+           (l/rt:scaffold-imports :js)
+           (!.js (-/install-polyfills))]
    :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.transport-browser/worker-endpoint :added "4.1"}
@@ -427,16 +492,109 @@
 
 
 ^{:refer xt.substrate.transport-browser/blob-url :added "4.1"}
-(fact "TODO")
+(fact "creates a blob URL from a script string"
+  (!.js
+   (var url (browser-transport/blob-url "console.log('hello')"))
+   [(xt/x:is-string? url)
+    (url.startsWith "blob:")
+    (> url.length 5)])
+  => [true true true])
 
 ^{:refer xt.substrate.transport-browser/webworker-source :added "4.1"}
-(fact "TODO")
+(fact "creates a WebWorker source that wires a real Worker"
+  (notify/wait-on :js
+    (var received [])
+    (var source (browser-transport/webworker-source
+                 "self.onmessage = function(e) { self.postMessage(e.data); };"
+                 nil))
+    (var worker ((. source ["create_fn"])
+                 (fn [data]
+                   (xt/x:arr-push received data))))
+    (worker.postMessage {"test" "webworker"})
+    (do (setTimeout
+         (fn []
+           (worker.terminate)
+           (repl/notify
+            {"received" received
+             "hasPostMessage" (xt/x:is-function? worker.postMessage)
+             "hasAddEventListener" (xt/x:is-function? worker.addEventListener)
+             "hasTerminate" (xt/x:is-function? worker.terminate)}))
+         100)
+        nil))
+  => (contains-in {"received" [{"test" "webworker"}]
+                   "hasPostMessage" true
+                   "hasAddEventListener" true
+                   "hasTerminate" true}))
 
 ^{:refer xt.substrate.transport-browser/sharedworker-source :added "4.1"}
-(fact "TODO")
+(fact "creates a SharedWorker source that wires a real SharedWorker port"
+  (notify/wait-on :js
+    (var received [])
+    (var source (browser-transport/sharedworker-source
+                 "self.onconnect = function(e) { var p = e.ports[0]; p.onmessage = function(ev) { p.postMessage(ev.data); }; };"
+                 nil))
+    (var port ((. source ["create_fn"])
+               (fn [data]
+                 (xt/x:arr-push received data))))
+    (port.postMessage {"test" "sharedworker"})
+    (do (setTimeout
+         (fn []
+           (repl/notify
+            {"received" received
+             "started" (. port ["started"])
+             "hasPostMessage" (xt/x:is-function? port.postMessage)
+             "hasAddEventListener" (xt/x:is-function? port.addEventListener)}))
+         100)
+        nil))
+  => (contains-in {"received" [{"test" "sharedworker"}]
+                   "started" true
+                   "hasPostMessage" true
+                   "hasAddEventListener" true}))
 
 ^{:refer xt.substrate.transport-browser/sharedworker-url-source :added "4.1"}
-(fact "TODO")
+(fact "creates a SharedWorker source from an existing URL"
+  (notify/wait-on :js
+    (var received [])
+    (var url (browser-transport/blob-url
+              "self.onconnect = function(e) { var p = e.ports[0]; p.onmessage = function(ev) { p.postMessage(ev.data); }; };"))
+    (var source (browser-transport/sharedworker-url-source url))
+    (var port ((. source ["create_fn"])
+               (fn [data]
+                 (xt/x:arr-push received data))))
+    (port.postMessage {"test" "sharedworker-url"})
+    (do (setTimeout
+         (fn []
+           (repl/notify
+            {"received" received
+             "started" (. port ["started"])
+             "hasPostMessage" (xt/x:is-function? port.postMessage)
+             "hasAddEventListener" (xt/x:is-function? port.addEventListener)}))
+         100)
+        nil))
+  => (contains-in {"received" [{"test" "sharedworker-url"}]
+                   "started" true
+                   "hasPostMessage" true
+                   "hasAddEventListener" true}))
 
 ^{:refer xt.substrate.transport-browser/node-worker-source :added "4.1"}
-(fact "TODO")
+(fact "creates a Node.js worker source backed by worker_threads"
+  (notify/wait-on :js
+    (var received [])
+    (var source (browser-transport/node-worker-source
+                 "require('worker_threads').parentPort.postMessage('hello-node')"
+                 nil))
+    (var worker ((. source ["create_fn"])
+                 (fn [data]
+                   (xt/x:arr-push received data))))
+    (do (setTimeout
+         (fn []
+           (worker.terminate)
+           (repl/notify
+            {"received" received
+             "hasPostMessage" (xt/x:is-function? worker.postMessage)
+             "hasTerminate" (xt/x:is-function? worker.terminate)}))
+         100)
+        nil))
+  => (contains-in {"received" ["hello-node"]
+                   "hasPostMessage" true
+                   "hasTerminate" true}))

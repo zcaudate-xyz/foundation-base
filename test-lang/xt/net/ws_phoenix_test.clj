@@ -347,7 +347,36 @@
 
 
 ^{:refer xt.net.ws-phoenix/wrap-phoenix :added "4.1"}
-(fact "TODO")
+(fact "wraps a handler map and dispatches incoming frames by event name"
+
+  (!.js
+   (do
+     (var calls [])
+     (var handler (phoenix/wrap-phoenix
+                   {"phx_reply" (fn [frame] (xt/x:arr-push calls ["reply" frame]))
+                    "broadcast" (fn [frame] (xt/x:arr-push calls ["broadcast" frame]))}))
+     (handler "{\"event\":\"phx_reply\",\"topic\":\"room:1\",\"payload\":{\"status\":\"ok\"}}")
+     (handler "{\"event\":\"broadcast\",\"topic\":\"room:1\",\"payload\":{\"msg\":\"hi\"}}")
+     (handler "{\"event\":\"unknown\",\"topic\":\"room:1\",\"payload\":{}}")
+     calls))
+  => [["reply" {"event" "phx_reply",
+                "topic" "room:1",
+                "payload" {"status" "ok"}}]
+      ["broadcast" {"event" "broadcast",
+                    "topic" "room:1",
+                    "payload" {"msg" "hi"}}]])
 
 ^{:refer xt.net.ws-phoenix/start-heartbeat :added "4.1"}
-(fact "TODO")
+(fact "sets up a recurring phoenix heartbeat on the websocket"
+
+  (!.js
+   (do
+     (var client (js-websocket/create {}))
+     (var timer (phoenix/start-heartbeat client))
+     (var stop-fn (xtd/get-in client ["state" "heartbeats" "phoenix.default"]))
+     (var result [(xt/x:not-nil? timer)
+                  (xt/x:is-function? stop-fn)])
+     (when (xt/x:is-function? stop-fn)
+       (stop-fn))
+     result))
+  => [true true])

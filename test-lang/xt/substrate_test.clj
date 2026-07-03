@@ -377,51 +377,6 @@
     (main/list-triggers n))
   => ["event/ping" "event/pong"])
 
-^{:refer xt.substrate.base-util/transport-get :added "4.1"}
-(fact "gets transports by id"
-
-  (!.js
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (. (util/transport-get n "peer-a") ["id"]))
-  => "peer-a"
-
-  (!.lua
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (. (util/transport-get n "peer-a") ["id"]))
-  => "peer-a"
-
-  (!.py
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (. (util/transport-get n "peer-a") ["id"]))
-  => "peer-a")
-
-^{:refer xt.substrate.base-util/transport-list :added "4.1"}
-(fact "lists active transport ids"
-
-  (!.js
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
-    (util/transport-list n))
-  => ["peer-a" "peer-b"]
-
-  (!.lua
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
-    (util/transport-list n))
-  => ["peer-a" "peer-b"]
-
-  (!.py
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
-    (util/transport-list n))
-  => ["peer-a" "peer-b"])
-
 ^{:refer xt.substrate.base-router/list-subscriptions :added "4.1"
   :setup [(def +out+
             (just-in
@@ -453,36 +408,6 @@
      (router/list-subscriptions n "room/b" "event/ping")])
   => +out+)
 
-^{:refer xt.substrate.base-util/transport-send :added "4.1"}
-(fact "sends frames through a transport"
-
-  (!.js
-    (xt/x:is-function? util/transport-send))
-  => true
-
-  (!.lua
-    (xt/x:is-function? util/transport-send))
-  => true
-
-  (!.py
-    (xt/x:is-function? util/transport-send))
-  => true)
-
-^{:refer xt.substrate.base-util/transport-broadcast-loop :added "4.1"}
-(fact "broadcast loop returns a promise"
-
-  (!.js
-    (xt/x:is-function? util/transport-broadcast-loop))
-  => true
-
-  (!.lua
-    (xt/x:is-function? util/transport-broadcast-loop))
-  => true
-
-  (!.py
-    (xt/x:is-function? util/transport-broadcast-loop))
-  => true)
-
 ^{:refer xt.substrate/broadcast-transport :added "4.1"}
 (fact "broadcast sends to all transports"
 
@@ -498,21 +423,6 @@
     (xt/x:is-function? main/broadcast-transport))
   => true)
 
-^{:refer xt.substrate.base-util/stream-route-loop :added "4.1"}
-(fact "stream-route-loop returns a promise"
-
-  (!.js
-    (xt/x:is-function? util/stream-route-loop))
-  => true
-
-  (!.lua
-    (xt/x:is-function? util/stream-route-loop))
-  => true
-
-  (!.py
-    (xt/x:is-function? util/stream-route-loop))
-  => true)
-
 ^{:refer xt.substrate/route-stream :added "4.1"}
 (fact "route-stream fans out by router subscription"
 
@@ -526,103 +436,6 @@
 
   (!.py
     (xt/x:is-function? main/route-stream))
-  => true)
-
-^{:refer xt.substrate.base-util/transport-request-target :added "4.1"}
-(fact "picks a target transport from meta or the first attached transport"
-
-  (!.js
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    [(util/transport-request-target n {"transport_id" "peer-b"})
-     (util/transport-request-target n {})
-     (xt/x:nil? (util/transport-request-target (main/node-create {}) {}))])
-  => ["peer-b" "peer-a" true]
-
-  (!.lua
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    [(util/transport-request-target n {"transport_id" "peer-b"})
-     (util/transport-request-target n {})
-     (xt/x:nil? (util/transport-request-target (main/node-create {}) {}))])
-  => ["peer-b" "peer-a" true]
-
-  (!.py
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    [(util/transport-request-target n {"transport_id" "peer-b"})
-     (util/transport-request-target n {})
-     (xt/x:nil? (util/transport-request-target (main/node-create {}) {}))])
-  => ["peer-b" "peer-a" true])
-
-^{:refer xt.substrate.base-util/pending-await :added "4.1"}
-(fact "waits for pending states to resolve or reject"
-  (notify/wait-on :js
-    (var state {"status" "pending"
-                "value" nil
-                "error" nil})
-    (setTimeout
-     (fn []
-       (xt/x:set-key state "status" "resolved")
-       (xt/x:set-key state "value" {"ok" true}))
-     20)
-    (promise/x:promise-then
-     (util/pending-await state)
-     (fn [value]
-       (return
-        (promise/x:promise-catch
-         (util/pending-await {"status" "rejected"
-                              "error" "denied"})
-         (fn [err]
-           (repl/notify {"value" value
-                         "error" err})))))))
-  => {"value" {"ok" true}
-      "error" "denied"})
-
-^{:refer xt.substrate.base-util/request-context-merge :added "4.1"}
-(fact "merges transport context into request meta"
-  (!.js
-   [(util/request-context-merge
-     {"kind" "request"
-      "meta" {"trace" "a"}}
-     {"transport_id" "peer-a"})
-    (util/request-context-merge
-     {"kind" "request"}
-     {"transport_id" "peer-b"})])
-  => [{"kind" "request"
-       "meta" {"trace" "a"
-               "transport_id" "peer-a"}}
-      {"kind" "request"
-       "meta" {"transport_id" "peer-b"}}])
-
-^{:refer xt.substrate.base-util/response-ok :added "4.1"}
-(fact "response-ok forwards response frames to a transport"
-
-  (!.js
-    (xt/x:is-function? util/response-ok))
-  => true
-
-  (!.lua
-    (xt/x:is-function? util/response-ok))
-  => true
-
-  (!.py
-    (xt/x:is-function? util/response-ok))
-  => true)
-
-^{:refer xt.substrate.base-util/response-error :added "4.1"}
-(fact "response-error forwards error responses"
-
-  (!.js
-    (xt/x:is-function? util/response-error))
-  => true
-
-  (!.lua
-    (xt/x:is-function? util/response-error))
-  => true
-
-  (!.py
-    (xt/x:is-function? util/response-error))
   => true)
 
 ^{:refer xt.substrate/receive-request :added "4.1"}
@@ -777,68 +590,6 @@
     (xt/x:is-function? main/detach-transport))
   => true)
 
-^{:refer xt.substrate.base-util/config-normalize-space :added "4.1"}
-(fact "normalizes declarative space config and rejects mismatched ids"
-  (!.js
-   (do:>
-    (var thrown false)
-    (try
-      (util/config-normalize-space "room/a" {"id" "room/b"})
-      (catch err
-        (:= thrown true)))
-    (return
-     [(util/config-normalize-space "room/a" nil)
-      (util/config-normalize-space "room/a" {"id" "room/a"
-                                        "state" {"count" 1}
-                                        "meta" {"role" "alpha"}})
-      thrown])))
-  => [nil
-      {"state" {"count" 1}
-       "meta" {"role" "alpha"}}
-      true])
-
-^{:refer xt.substrate.base-util/config-normalize-handler :added "4.1"}
-(fact "normalizes handler config from fn or declarative entry"
-  (!.js
-   (do:>
-    (var handler-fn (fn [space args request node]
-                     (return args)))
-    (var thrown false)
-    (try
-     (util/config-normalize-handler "ping" {"id" "pong"
-                                        "fn" handler-fn})
-     (catch err
-       (:= thrown true)))
-    (return
-     [(xt/x:is-function? (:? true (xt/x:get-key (util/config-normalize-handler "ping" handler-fn) "fn")))
-     (. (util/config-normalize-handler "ping" {"fn" handler-fn
-                                           "meta" {"kind" "request"}}) ["meta"])
-     thrown])))
-  => [true
-     {"kind" "request"}
-     true])
-
-^{:refer xt.substrate.base-util/config-normalize-trigger :added "4.1"}
-(fact "normalizes trigger config from fn or declarative entry"
-  (!.js
-   (do:>
-    (var trigger-fn (fn [space stream node]
-                     (return stream)))
-    (var thrown false)
-    (try
-     (util/config-normalize-trigger "event/ping" {"id" "event/pong"
-                                              "fn" trigger-fn})
-     (catch err
-       (:= thrown true)))
-    (return
-     [(xt/x:is-function? (:? true (xt/x:get-key (util/config-normalize-trigger "event/ping" trigger-fn) "fn")))
-     (. (util/config-normalize-trigger "event/ping" {"fn" trigger-fn
-                                                 "meta" {"kind" "stream"}}) ["meta"])
-     thrown])))
-  => [true
-     {"kind" "stream"}
-     true])
-
 ^{:refer xt.substrate/node-configure :added "4.1"}
 (fact "node-configure applies declarative config to an existing node"
 
@@ -893,19 +644,6 @@
     (main/list-triggers n)])
   => [["room/c"] ["echo"] ["event/tick"]])
 
-^{:refer xt.substrate.base-util/node-base-opts :added "4.1"}
-(fact "strips declarative config keys before node construction"
-  (!.js
-   (util/node-base-opts {"id" "node-a"
-                         "meta" {"cluster" "local"}
-                         "spaces" {"room/a" {}}
-                         "handlers" {"ping" true}
-                         "triggers" {"event/ping" true}
-                         "custom" 42}))
-  => {"id" "node-a"
-      "meta" {"cluster" "local"}
-      "custom" 42})
-
 ^{:refer xt.substrate/node-create :added "4.1"}
 (fact "declarative node config participates in local publish and request flows"
 
@@ -940,4 +678,28 @@
 
 
 ^{:refer xt.substrate/remove-service :added "4.1"}
-(fact "TODO")
+(fact "removes a shared service from the node"
+
+  (!.js
+    (var n (main/node-create {"id" "node-remove-service"}))
+    (main/set-service n "cache" {"scope" "local"})
+    (main/remove-service n "cache")
+    [(xt/x:nil? (main/get-service n "cache"))
+     (xt/x:obj-keys (main/get-services n))])
+  => [true []]
+
+  (!.lua
+    (var n (main/node-create {"id" "node-remove-service"}))
+    (main/set-service n "cache" {"scope" "local"})
+    (main/remove-service n "cache")
+    [(xt/x:nil? (main/get-service n "cache"))
+     (xt/x:obj-keys (main/get-services n))])
+  => [true []]
+
+  (!.py
+    (var n (main/node-create {"id" "node-remove-service"}))
+    (main/set-service n "cache" {"scope" "local"})
+    (main/remove-service n "cache")
+    [(xt/x:nil? (main/get-service n "cache"))
+     (xt/x:obj-keys (main/get-services n))])
+  => [true []])

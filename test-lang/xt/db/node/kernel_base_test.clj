@@ -1069,11 +1069,101 @@
        "@xt.db/unsubscribe-db"))
 
 
-^{:refer xt.db.node.kernel-base/pull-cached-handler :added "4.1"}
-(fact "TODO")
+^{:refer xt.db.node.kernel-base/pull-cached-handler :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "pull-cached-handler returns data already synced to the caching impl"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/pull-call-baseline-fn node "db/primary" ["Log"]))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/pull-cached-handler nil ["db/primary" ["Log"]] nil node))))
+        (repl/notify)))
+  => (contains-in [{"message" "hello", "author_id" nil, "id" string?}]))
 
 ^{:refer xt.db.node.kernel-base/dataview-prep-tree :added "4.1"}
-(fact "TODO")
+(fact "prepares a query tree from a dataview spec"
 
-^{:refer xt.db.node.kernel-base/dataview-cached-handler :added "4.1"}
-(fact "TODO")
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (-> (kernel/kernel-setup-main node
+                                  {"primary" {"type" "memory" "defaults" {}}
+                                   "caching" {"type" "memory" "defaults" {}}}
+                                  -/Schema
+                                  -/SchemaLookup)
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/dataview-prep-tree
+             (kernel/get-primary-impl node "db/primary")
+             {"table" "Log"
+              "select_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "select"
+                                      "query" {}}}
+              "return_entry" {"input" []
+                              "view" {"table" "Log"
+                                      "type" "return"
+                                      "query" ["id" "message"]}}}))))
+        (repl/notify)))
+  => (fn [out]
+       (and (vector? out)
+            (= "Log" (first out))
+            (map? (second out)))))
+
+^{:refer xt.db.node.kernel-base/dataview-cached-handler :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
+(fact "dataview-cached-handler returns a dataview result from the caching impl"
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {}))
+    (var dataview {"table" "Log"
+                   "select_entry" {"input" []
+                                   "view" {"table" "Log"
+                                           "type" "select"
+                                           "query" {}}}
+                   "return_entry" {"input" []
+                                   "view" {"table" "Log"
+                                           "type" "return"
+                                           "query" ["id" "message"]}}})
+    (-> (-/node-init-postgres node)
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/rpc-call-baseline-fn
+             node
+             "db/primary"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}
+             ["hello"]))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/dataview-call-baseline-fn node "db/primary" dataview))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (kernel/dataview-cached-handler nil ["db/primary" dataview] nil node))))
+        (repl/notify)))
+  => (contains-in [{"message" "hello", "author_id" nil, "id" string?}]))

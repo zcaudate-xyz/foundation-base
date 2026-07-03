@@ -440,6 +440,20 @@
   => {"ok" [true]
       "ready" true})
 
+^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback :added "4.1"}
+(fact "applies db/sync payloads to the linked caching impl"
+
+  (!.js
+    (var impl (-/default-impl))
+    (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+    (xtd/set-in impl ["state" "caching_fn"]
+                (fn [] (return caching-impl)))
+    (var callback (realtime/create-sync-callback impl))
+    (callback {"db/sync" {"UserAccount" [sample/RootUser]}})
+    {"synced" (impl-common/pull caching-impl ["UserAccount" {"id" "00000000-0000-0000-0000-000000000000"} ["nickname"]])})
+  => (contains-in
+      {"synced" [{"nickname" "root"}]}))
+
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
   :setup [(l/rt:restart :js)]}
 (fact "subscribe syncs db/sync events to a linked caching impl"
@@ -545,4 +559,16 @@
 
 
 ^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback :added "4.1"}
-(fact "TODO")
+(fact "applies db/remove payloads to the linked caching impl"
+
+  (!.js
+    (var impl (-/default-impl))
+    (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+    (xtd/set-in impl ["state" "caching_fn"]
+                (fn [] (return caching-impl)))
+    (var callback (realtime/create-sync-callback impl))
+    (callback {"db/sync" {"UserAccount" [sample/RootUser]}})
+    (callback {"db/remove" {"UserAccount" ["00000000-0000-0000-0000-000000000000"]}})
+    {"remaining" (impl-common/pull caching-impl ["UserAccount" {} ["nickname"]])})
+  => (contains-in
+      {"remaining" []}))
