@@ -60,10 +60,11 @@
   "list all site packages"
   {:added "4.0"}
   []
-  (template/$ (-> (map (fn [e] e.project_name)
-                (. (__import__ "pkg_resources")
-                   working_set))
-           (sorted))))
+  (template/$ (-> (. (python.core/pkg "importlib.metadata")
+                     (distributions))
+                  (map (fn [e] (. e metadata ["Name"])))
+                  (filter (fn [e] e))
+                  (sorted))))
 
 (defmacro.py site:builtins
   "list all builtin modules"

@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-math :as math] [xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-math :as math] [xt.lang.spec-base :as xt]]})
 
 
 ;;

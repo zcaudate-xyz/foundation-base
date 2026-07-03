@@ -2,7 +2,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.spec-base :as xt]
+  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]
              [js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
@@ -121,4 +121,3 @@
       (fn [#{offset value}]
         (return
          {:text (format (. items [value]) value)}))}]]))
-

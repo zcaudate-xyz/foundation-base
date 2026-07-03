@@ -3,7 +3,7 @@
             [std.lib.foundation :as f]))
 
 (l/script :js
-  {:import [["@react-native-async-storage/async-storage" :as RNAsyncStorage]] :require [[xt.lang.spec-base :as xt] [xt.lang.spec-base :as xt]]})
+  {:import [["@react-native-async-storage/async-storage" :as RNAsyncStorage]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.spec-base :as xt]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RNAsyncStorage.default"
@@ -46,4 +46,3 @@
   [key data]
   (return
    (-/mergeItem key (xt/x:json-encode data))))
-

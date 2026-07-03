@@ -4,7 +4,7 @@
 (l/script :xtalk
   {:export [MODULE]
    :require [[js.cell.service.db-view :as db-view]
-             [xt.db.system :as xdb]
+             [xt.db.system.impl-common :as impl-common]
              [xt.db.text.base-flatten :as flatten]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
@@ -75,7 +75,7 @@
   (when (xt/x:nil? local-db)
     (return [false {:status "error"
                     :tag "db/local-db-not-provided"}]))
-  (xdb/sync-event local-db sync-request)
+  (impl-common/sync-process-payload local-db sync-request)
   (return [true sync-request]))
 
 (defn.xt result->update
