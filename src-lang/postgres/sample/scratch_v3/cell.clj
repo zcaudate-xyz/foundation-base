@@ -1,3 +1,4 @@
+^{:no-test true}
 (ns postgres.sample.scratch-v3.cell
   (:require [hara.lang :as l]))
 

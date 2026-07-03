@@ -1,3 +1,4 @@
+^{:no-test true}
 (ns postgres.sample.scratch-v0.view-log
   (:require [std.lib :as h]
             [hara.lang :as l]

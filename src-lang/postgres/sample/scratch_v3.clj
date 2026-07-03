@@ -1,8 +1,9 @@
+^{:no-test true}
 (ns postgres.sample.scratch-v3
   (:require [hara.lang :as l]
-             [postgres.core :as pg :refer [defret.pg defsel.pg]]
-             [hara.runtime.postgres.base.application :as app]
-             [postgres.gen.bind-macro :as bind-pg]))
+            [postgres.core :as pg :refer [defret.pg defsel.pg]]
+            [hara.runtime.postgres.base.application :as app]
+            [postgres.gen.bind-macro :as bind-pg]))
 
 (l/script :postgres
   {:config {:dbname "test-scratch"}

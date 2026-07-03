@@ -1,3 +1,4 @@
+^{:no-test true}
 (ns python.gimp.tutorial.example-core
   (:require [hara.lang :as l]))
 

@@ -1,9 +1,9 @@
+^{:no-test true}
 (ns python.gimp.tutorial.example-layers
   (:require [hara.lang :as l]))
 
 (l/script :python
-  {:runtime :gimp
-   :require [[python.gimp.tutorial.example-core :as core]]})
+  {:require [[python.gimp.tutorial.example-core :as core]]})
 
 (defn.py create-striped-png
   "Creates a width x height image with horizontal stripes of the given

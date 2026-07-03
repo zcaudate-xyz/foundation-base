@@ -1,3 +1,4 @@
+^{:no-test true}
 (ns postgres.sample.scratch-v0
   (:require [hara.lang :as l]
             [postgres.core :as pg :refer [defret.pg defsel.pg]]

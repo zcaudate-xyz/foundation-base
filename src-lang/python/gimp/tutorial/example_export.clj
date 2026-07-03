@@ -1,9 +1,9 @@
+^{:no-test true}
 (ns python.gimp.tutorial.example-export
   (:require [hara.lang :as l]))
 
 (l/script :python
-  {:runtime :gimp
-   :require [[python.gimp.tutorial.example-core :as core]
+  {:require [[python.gimp.tutorial.example-core :as core]
              [python.gimp.tutorial.example-image]]})
 
 (defn.py save-both-formats

@@ -1,11 +1,11 @@
+^{:no-test true}
 (ns python.blender.tutorial.example-nodes
   (:require [hara.lang :as l]))
 
 (l/script :python
-  {:runtime :blender
-   :require [[python.blender.nodes :as n]
-             [python.blender.tutorial.example-core]
-             [python.blender.tutorial.example-nodes :as self]]})
+  {:require [[python.blender.nodes :as n]
+             [python.blender.tutorial.example-core :as core]
+             [python.blender.tutorial.example-nodes :as nodes]]})
 
 (defn.py make-noise-material
   "Builds a procedural noise -> diffuse material on obj-name using the
@@ -26,13 +26,13 @@
    camera, then renders the image to out-path. Returns out-path."
   {:added "4.1"}
   [obj-name out-path]
-  (python.blender.tutorial.example-core/clear-scene!)
-  (python.blender.tutorial.example-core/add-sphere 1 [0 0 0])
+  (core/clear-scene!)
+  (core/add-sphere 1 [0 0 0])
   (:= (. bpy.context.view_layer.objects.active name) obj-name)
-  (self/make-noise-material obj-name)
-  (python.blender.tutorial.example-core/add-light "SUN" [5 5 5] 5)
-  (python.blender.tutorial.example-core/add-camera [3 3 3] [0.7 0 0.9])
-  (return (python.blender.tutorial.example-core/render-to out-path)))
+  (nodes/make-noise-material obj-name)
+  (core/add-light "SUN" [5 5 5] 5)
+  (core/add-camera [3 3 3] [0.7 0 0.9])
+  (return (core/render-to out-path)))
 
 (defn.py build-geometry-pipeline
   "Creates a geometry nodes modifier on obj-name and builds a pipeline

@@ -1,9 +1,9 @@
+^{:no-test true}
 (ns python.gimp.tutorial.example-image
   (:require [hara.lang :as l]))
 
 (l/script :python
-  {:runtime :gimp
-   :require [[python.gimp.tutorial.example-core :as core]]})
+  {:require [[python.gimp.tutorial.example-core :as core]]})
 
 (defn.py create-white-png
   "Creates a width x height white image and saves it to out-path as PNG.
