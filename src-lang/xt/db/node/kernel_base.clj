@@ -236,9 +236,9 @@
   (var primary      (-/get-primary-impl node primary-id))
   (return (impl-common/unsubscribe-db primary conn-id topics)))
 
-(defn.xt ^{:substrate/fn "@xt.db/sync-caching"}
-  sync-caching-handler
-  "sync-caching-handler applies db/sync payload to the paired caching db"
+(defn.xt ^{:substrate/fn "@xt.db/sync-cached"}
+  sync-cached-handler
+  "sync-cached-handler applies db/sync payload to the paired caching db"
   {:added "4.1"}
   [space args request node]
   (var primary-id   (xt/x:first  args))
@@ -418,6 +418,16 @@
   (var tree         (xt/x:second args))  
   (return (-/pull-call-baseline-fn node primary-id tree)))
 
+(defn.xt ^{:substrate/fn "@xt.db/pull-cached"}
+  pull-cached-handler
+  "pull-call-handler routes pull args through a named service"
+  {:added "4.1"}
+  [space args request node]
+  (var primary-id   (xt/x:first args))
+  (var tree         (xt/x:second args))
+  (var caching (-/get-caching-impl node primary-id))
+  (return (impl-common/pull caching tree)))
+
 (defn.xt pull-create-model
   "pull-create-model builds a page model spec with local and remote handlers"
   {:added "4.1"}
@@ -459,11 +469,9 @@
 ;; DATAVIEW
 ;;
 
-(defn.xt dataview-call-baseline-fn
-  "dataview-call-baseline-fn executes a dataview query and syncs to caching"
-  {:added "4.1"}
-  [node primary-id dataview]
-  (var impl      (-/get-primary-impl node primary-id))
+
+(defn.xt dataview-prep-tree
+  [impl dataview]
   (var #{schema} impl)  
   (var [ok tree] (base-tree/plan-view schema
                                       (xt/x:obj-assign
@@ -472,6 +480,14 @@
                                        dataview)))
   (if (not ok)
     (throw (xt/x:ex "Invalid Dataview" dataview)))
+  (return tree))
+
+(defn.xt dataview-call-baseline-fn
+  "dataview-call-baseline-fn executes a dataview query and syncs to caching"
+  {:added "4.1"}
+  [node primary-id dataview]
+  (var impl     (-/get-primary-impl node primary-id))
+  (var tree     (-/dataview-prep-tree impl dataview))
   (return (-> (impl-common/pull-async impl tree)
               (promise/x:promise-then
                (fn [result]
@@ -490,6 +506,17 @@
   (var primary-id   (xt/x:first args))
   (var dataview     (xt/x:second args))  
   (return (-/dataview-call-baseline-fn node primary-id dataview)))
+
+(defn.xt ^{:substrate/fn "@xt.db/pull-cached"}
+  dataview-cached-handler
+  "pull-call-handler routes pull args through a named service"
+  {:added "4.1"}
+  [space args request node]
+  (var primary-id   (xt/x:first args))
+  (var dataview     (xt/x:second args))
+  (var caching      (-/get-caching-impl node primary-id))
+  (var tree          (-/dataview-prep-tree caching dataview))
+  (return (impl-common/pull caching tree)))
 
 (defn.xt dataview-create-model
   "dataview-create-model builds a page model spec with local and remote handlers"
@@ -558,14 +585,16 @@
   (substrate/register-handler node "@xt.db/kernel-teardown" -/kernel-teardown-handler)
   (substrate/register-handler node "@xt.db/subscribe-db" -/subscribe-db-handler nil)
   (substrate/register-handler node "@xt.db/unsubscribe-db" -/unsubscribe-db-handler nil)
-  (substrate/register-handler node "@xt.db/sync-caching" -/sync-caching-handler nil)
+  (substrate/register-handler node "@xt.db/sync-cached" -/sync-cached-handler nil)
   (substrate/register-handler node "@xt.db/attach-model" -/attach-model-handler nil)
   (substrate/register-handler node "@xt.db/detach-model" -/detach-model-handler nil)
   (substrate/register-handler node "@xt.db/rpc-call" -/rpc-call-handler nil)
   (substrate/register-handler node "@xt.db/rpc-attach-model" -/rpc-attach-model nil)
   (substrate/register-handler node "@xt.db/pull-call" -/pull-call-handler nil)
+  (substrate/register-handler node "@xt.db/pull-cached" -/pull-cached-handler nil)
   (substrate/register-handler node "@xt.db/pull-attach-model" -/pull-attach-model nil)
   (substrate/register-handler node "@xt.db/dataview-call" -/dataview-call-handler nil)
+  (substrate/register-handler node "@xt.db/dataview-cached" -/dataview-cached-handler nil)
   (substrate/register-handler node "@xt.db/dataview-attach-model" -/dataview-attach-model nil)
   (return node))
 

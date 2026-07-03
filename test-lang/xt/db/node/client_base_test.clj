@@ -40,9 +40,9 @@
              [xt.db.system.impl-common :as impl-common]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
+             [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-memory :as transport-memory]
              [xt.net.addon-supabase :as addon]]})
-
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -75,13 +75,16 @@
   (var server (substrate/node-create {}))
   (runtime/init-server server)
   (runtime/init-server-proxy client)
-  (transport-memory/link-pair server client)    
   (return
-   (client/kernel-init client {"primary" (. -/CONFIG [primary])
-                               "caching" (. -/CONFIG [caching])}
-                          -/Schema
-                          -/SchemaLookup
-                          {})))
+   (-> (transport-memory/link-pair server client)
+       (promise/x:promise-then
+        (fn []
+          (return
+           (client/kernel-init client {"primary" (. -/CONFIG [primary])
+                                       "caching" (. -/CONFIG [caching])}
+                                  -/Schema
+                                  -/SchemaLookup
+                                  {})))))))
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -90,7 +93,6 @@
           (local-min/wait-for-postgrest-ready "scratch_v0" "Log")]
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
-
 
 ^{:refer xt.db.node.client-base/kernel-init.primitive :added "4.1"
   :setup [(l/rt:restart :js)]}
@@ -329,29 +331,53 @@
         (repl/notify)))
   => true)
 
-
-
-^{:refer xt.db.node.client-base/sync-caching :added "4.1"}
+^{:refer xt.db.node.client-base/sync-cached :added "4.1"}
 (fact "applies a db/sync payload to the paired caching db"
   {:setup [(def +logs+ [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
                         "message" "hello"}
                        {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
                         "message" "world"}])]}
 
+  ;;
+  ;; DIRECT
+  ;;
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (-/node-init-supabase node)
+    (-> (-/init-kernel node "supabase" "sqlite")
         (promise/x:promise-then
          (fn []
            (return
-            (client/sync-caching node
+            (client/sync-cached node
                                  "db/primary"
                                  {"db/sync" {"Log" (@! +logs+)}}
                                  {}))))
         (promise/x:promise-then
          (fn []
-           (var caching (kernel-base/get-caching-impl node "db/primary"))
-           (return (impl-common/pull caching ["Log"]))))
+           (return
+            (client/pull-cached node "db/primary" ["Log"]))))
+        (repl/notify)))
+  => (contains-in
+      [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
+        "message" "hello"}
+       {"id" "257553c1-c4f4-44ad-b1b5-092bf825a691"
+        "message" "world"}])
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "supabase" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/sync-cached client
+                                 "db/primary"
+                                 {"db/sync" {"Log" (@! +logs+)}}
+                                 {}))))
+        (promise/x:promise-then
+         (fn []
+           (client/pull-cached node "db/primary" ["Log"])))
         (repl/notify)))
   => (contains-in
       [{"id" "257553c1-c4f4-44ad-b1b5-092bf825a690"
@@ -362,9 +388,12 @@
 ^{:refer xt.db.node.client-base/attach-model :added "4.1"}
 (fact "attaches a page model through the client"
 
+  ;;
+  ;; DIRECT
+  ;;
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (-/node-init-memory node)
+    (-> (-/init-kernel node "memory" "memory")
         (promise/x:promise-then
          (fn []
            (return
@@ -379,16 +408,52 @@
                                  {}))))
         (promise/x:promise-then
          (fn []
-           (return (page-core/refresh-model node "room/a" "demo" "echo" {} nil))))
+           (return
+            ;; set input
+            )))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (page-core/get-current-output node "room/a" "demo" "echo"))))
         (repl/notify)))
-  => {"path" ["demo" "echo"], "post" [false], "::" "model.run", "main" [true [1 2 3]], "pre" [false]})
+  => {"status" "attached"
+      "space" "room/a"
+      "group" "demo"
+      "model" "echo"}
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "memory" "memory")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/attach-model client
+                                 "db/caching"
+                                 {"space_id" "room/a"
+                                  "group_id" "demo"
+                                  "model_id" "echo"}
+                                 {"handler" (fn [ctx]
+                                              (return (. ctx ["args"])))
+                                  "defaults" {"args" [1 2 3]}}
+                                 {}))))
+        (repl/notify)))
+  => {"status" "attached"
+      "space" "room/a"
+      "group" "demo"
+      "model" "echo"})
 
 ^{:refer xt.db.node.client-base/detach-model :added "4.1"}
 (fact "detaches a page model through the client"
 
+  ;;
+  ;; DIRECT
+  ;;
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (-/node-init-memory node)
+    (-> (-/init-kernel node "memory" "memory")
         (promise/x:promise-then
          (fn []
            (return
@@ -414,15 +479,51 @@
   => {"status" "removed"
       "space" "room/a"
       "group" "demo"
+      "model" "echo"}
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "memory" "memory")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/attach-model client
+                                 "db/caching"
+                                 {"space_id" "room/a"
+                                  "group_id" "demo"
+                                  "model_id" "echo"}
+                                 {"handler" (fn [ctx]
+                                              (return [1]))
+                                  "defaults" {"args" []}}
+                                 {}))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/detach-model client
+                                 "db/caching"
+                                 {"space_id" "room/a"
+                                  "group_id" "demo"
+                                  "model_id" "echo"}
+                                 {}))))
+        (repl/notify)))
+  => {"status" "removed"
+      "space" "room/a"
+      "group" "demo"
       "model" "echo"})
 
 ^{:refer xt.db.node.client-base/rpc-call :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
 (fact "calls an rpc entry through the client and syncs result to caching"
 
+  ;;
+  ;; DIRECT
+  ;;
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (-/node-init-postgres node)
+    (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
            (return
@@ -446,15 +547,50 @@
         (repl/notify)))
   => (contains-in
       [{"message" "hello-client", "author_id" nil, "id" string?}
+       [{"message" "hello-client", "author_id" nil, "id" string?}]])
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-call client
+                             "db/primary"
+                             {"input" [{"symbol" "i_message" "type" "text"}]
+                              "return" "jsonb"
+                              "schema" "scratch_v0"
+                              "id" "log_append_public"
+                              "table" {"base" "Log"
+                                       "type" "db/sync"}
+                              "flags" {}}
+                             ["hello-client"]
+                             {}))))
+        (promise/x:promise-then
+         (fn [out]
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (var caching (kernel-base/get-caching-impl server "db/primary"))
+           (return
+            [out
+             (impl-common/pull caching ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [{"message" "hello-client", "author_id" nil, "id" string?}
        [{"message" "hello-client", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.client-base/rpc-attach-model :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
 (fact "attaches and invokes an rpc model through the client"
 
+  ;;
+  ;; DIRECT
+  ;;
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (-/node-init-postgres node)
+    (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
            (return
@@ -486,15 +622,59 @@
         (repl/notify)))
   => (contains-in
       [{"path" ["demo" "rpc-view"], "post" [false], "::" "model.run", "main" [true {"message" "hello-attach", "author_id" nil, "id" string?}], "pre" [false]}
+       [{"message" "hello-attach", "author_id" nil, "id" string?}]])
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-attach-model client
+                                     "db/primary"
+                                     {"space_id" "room/a"
+                                      "group_id" "demo"
+                                      "model_id" "rpc-view"}
+                                     {"input" [{"symbol" "i_message" "type" "text"}]
+                                      "return" "jsonb"
+                                      "schema" "scratch_v0"
+                                      "id" "log_append_public"
+                                      "table" {"base" "Log"
+                                               "type" "db/sync"}
+                                      "flags" {}}
+                                     {"pipeline" {}
+                                      "options" {}
+                                      "defaults" {"args" ["hello-attach"]}}
+                                     {}))))
+        (promise/x:promise-then
+         (fn []
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (return (page-core/refresh-model server "room/a" "demo" "rpc-view" {} nil))))
+        (promise/x:promise-then
+         (fn [out]
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (var caching (kernel-base/get-caching-impl server "db/primary"))
+           (return
+            [out
+             (impl-common/pull caching ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [{"path" ["demo" "rpc-view"], "post" [false], "::" "model.run", "main" [true {"message" "hello-attach", "author_id" nil, "id" string?}], "pre" [false]}
        [{"message" "hello-attach", "author_id" nil, "id" string?}]]))
 
 ^{:refer xt.db.node.client-base/pull-call :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
 (fact "pulls data through the client and syncs result to caching"
 
+  ;;
+  ;; DIRECT
+  ;;
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (-/node-init-postgres node)
+    (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
            (return
@@ -519,15 +699,54 @@
         (repl/notify)))
   => (contains-in
       [[{"message" "hello-pull", "author_id" nil, "id" string?}]
+       [{"message" "hello-pull", "author_id" nil, "id" string?}]])
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-call client
+                             "db/primary"
+                             {"input" [{"symbol" "i_message" "type" "text"}]
+                              "return" "jsonb"
+                              "schema" "scratch_v0"
+                              "id" "log_append_public"
+                              "flags" {}}
+                             ["hello-pull"]
+                             {}))))
+        (promise/x:promise-then
+         (fn []
+           (return (client/pull-call client "db/primary" ["Log"] {}))))
+        (promise/x:promise-then
+         (fn [out]
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (var caching (kernel-base/get-caching-impl server "db/primary"))
+           (return
+            [out
+             (impl-common/pull caching ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello-pull", "author_id" nil, "id" string?}]
        [{"message" "hello-pull", "author_id" nil, "id" string?}]]))
+
+^{:refer xt.db.node.client-base/pull-cached :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.db.node.client-base/pull-attach-model :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
 (fact "attaches and invokes a pull-view model through the client"
 
+  ;;
+  ;; DIRECT
+  ;;
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (-/node-init-postgres node)
+    (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
            (return
@@ -561,15 +780,60 @@
   => (contains-in
       {"path" ["demo" "pull-view"]
        "remote" [true [{"message" "hello-pull-attach", "author_id" nil, "id" string?}]]
+       "post" [false], "::" "model.run", "pre" [false]})
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/pull-attach-model client
+                                      "db/primary"
+                                      {"space_id" "room/a"
+                                       "group_id" "demo"
+                                       "model_id" "pull-view"}
+                                      ["Log"]
+                                      {"pipeline" {}
+                                       "options" {}
+                                       "defaults" {"args" []
+                                                   "output" {}}}
+                                      {}))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-call client
+                             "db/primary"
+                             {"input" [{"symbol" "i_message" "type" "text"}]
+                              "return" "jsonb"
+                              "schema" "scratch_v0"
+                              "id" "log_append_public"
+                              "flags" {}}
+                             ["hello-pull-attach"]
+                             {}))))
+        (promise/x:promise-then
+         (fn []
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (return (page-core/refresh-model-remote server "room/a" "demo" "pull-view" nil))))
+        (repl/notify)))
+  => (contains-in
+      {"path" ["demo" "pull-view"]
+       "remote" [true [{"message" "hello-pull-attach", "author_id" nil, "id" string?}]]
        "post" [false], "::" "model.run", "pre" [false]}))
 
 ^{:refer xt.db.node.client-base/dataview-call :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
 (fact "executes a dataview query through the client and syncs to caching"
 
+  ;;
+  ;; DIRECT
+  ;;
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (-/node-init-postgres node)
+    (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
            (return
@@ -606,15 +870,66 @@
         (repl/notify)))
   => (contains-in
       [[{"message" "hello-dataview", "author_id" nil, "id" string?}]
+       [{"message" "hello-dataview", "author_id" nil, "id" string?}]])
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-call client
+                             "db/primary"
+                             {"input" [{"symbol" "i_message" "type" "text"}]
+                              "return" "jsonb"
+                              "schema" "scratch_v0"
+                              "id" "log_append_public"
+                              "flags" {}}
+                             ["hello-dataview"]
+                             {}))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/dataview-call client
+                                  "db/primary"
+                                  {"table" "Log"
+                                   "select_entry" {"input" []
+                                                   "view" {"table" "Log"
+                                                           "type" "select"
+                                                           "query" {}}}
+                                   "return_entry" {"input" []
+                                                   "view" {"table" "Log"
+                                                           "type" "return"
+                                                           "query" ["id" "message"]}}}
+                                  {}))))
+        (promise/x:promise-then
+         (fn [out]
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (var caching (kernel-base/get-caching-impl server "db/primary"))
+           (return
+            [out
+             (impl-common/pull caching ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [[{"message" "hello-dataview", "author_id" nil, "id" string?}]
        [{"message" "hello-dataview", "author_id" nil, "id" string?}]]))
+
+^{:refer xt.db.node.client-base/dataview-cached :added "4.1"}
+(fact "TODO")
 
 ^{:refer xt.db.node.client-base/dataview-attach-model :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)]}
 (fact "attaches and invokes a dataview model through the client"
 
+  ;;
+  ;; DIRECT
+  ;;
   (notify/wait-on :js
     (var node (substrate/node-create {}))
-    (-> (-/node-init-postgres node)
+    (-> (-/init-kernel node "postgres" "sqlite")
         (promise/x:promise-then
          (fn []
            (return
@@ -655,6 +970,64 @@
         (promise/x:promise-then
          (fn [out]
            (var caching (kernel-base/get-caching-impl node "db/primary"))
+           (return
+            [out
+             (impl-common/pull caching ["Log"])])))
+        (repl/notify)))
+  => (contains-in
+      [{"path" ["demo" "dataview-view"]
+        "remote" [true [{"message" "hello-dataview-attach", "author_id" nil, "id" string?}]]
+        "post" [false], "::" "model.run", "pre" [false]}
+       [{"message" "hello-dataview-attach", "author_id" nil, "id" string?}]])
+
+  ;;
+  ;; PROXY
+  ;;
+  (notify/wait-on :js
+    (var client (substrate/node-create {}))
+    (-> (-/init-proxy client "postgres" "sqlite")
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/rpc-call client
+                             "db/primary"
+                             {"input" [{"symbol" "i_message" "type" "text"}]
+                              "return" "jsonb"
+                              "schema" "scratch_v0"
+                              "id" "log_append_public"
+                              "flags" {}}
+                             ["hello-dataview-attach"]
+                             {}))))
+        (promise/x:promise-then
+         (fn []
+           (return
+            (client/dataview-attach-model client
+                                          "db/primary"
+                                          {"space_id" "room/a"
+                                           "group_id" "demo"
+                                           "model_id" "dataview-view"}
+                                          {"table" "Log"
+                                           "select_entry" {"input" []
+                                                           "view" {"table" "Log"
+                                                                   "type" "select"
+                                                                   "query" {}}}
+                                           "return_entry" {"input" []
+                                                           "view" {"table" "Log"
+                                                                   "type" "return"
+                                                                   "query" ["id" "message"]}}}
+                                          {"pipeline" {}
+                                           "options" {}
+                                           "defaults" {"select_args" []
+                                                       "return_args" []}}
+                                          {}))))
+        (promise/x:promise-then
+         (fn []
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (return (page-core/refresh-model-remote server "room/a" "demo" "dataview-view" nil))))
+        (promise/x:promise-then
+         (fn [out]
+           (var server (xtd/get-in client ["state" "test-server"]))
+           (var caching (kernel-base/get-caching-impl server "db/primary"))
            (return
             [out
              (impl-common/pull caching ["Log"])])))

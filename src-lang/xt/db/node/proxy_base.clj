@@ -28,10 +28,12 @@
    "@xt.db/kernel-teardown"
    "@xt.db/subscribe-db"
    "@xt.db/unsubscribe-db"
-   "@xt.db/sync-caching"
+   "@xt.db/sync-cached"
    "@xt.db/rpc-call"
    "@xt.db/pull-call"
-   "@xt.db/dataview-call"])
+   "@xt.db/pull-cached"
+   "@xt.db/dataview-call"
+   "@xt.db/dataview-cached"])
 
 (def.xt attach-actions
   ["@xt.db/attach-model"

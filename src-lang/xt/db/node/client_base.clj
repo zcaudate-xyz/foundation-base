@@ -51,12 +51,12 @@
   (return
    (proxy-util/request-client node "@xt.db/unsubscribe-db" [primary-id conn-id topics] opts)))
 
-(defn.xt sync-caching
+(defn.xt sync-cached
   "applies a db/sync payload to the paired caching db"
   {:added "4.1"}
   [node primary-id payload opts]
   (return
-   (proxy-util/request-client node "@xt.db/sync-caching" [primary-id payload] opts)))
+   (proxy-util/request-client node "@xt.db/sync-cached" [primary-id payload] opts)))
 
 (defn.xt attach-model
   "attaches a page model to the node"
@@ -93,6 +93,13 @@
   (return
    (proxy-util/request-client node "@xt.db/pull-call" [primary-id tree] opts)))
 
+(defn.xt pull-cached
+  "pulls data and syncs the result to caching"
+  {:added "4.1"}
+  [node primary-id tree opts]
+  (return
+   (proxy-util/request-client node "@xt.db/pull-cached" [primary-id tree] opts)))
+
 (defn.xt pull-attach-model
   "attaches and invokes a pull-view model"
   {:added "4.1"}
@@ -106,6 +113,13 @@
   [node primary-id dataview opts]
   (return
    (proxy-util/request-client node "@xt.db/dataview-call" [primary-id dataview] opts)))
+
+(defn.xt dataview-cached
+  "executes a dataview query and syncs to caching"
+  {:added "4.1"}
+  [node primary-id dataview opts]
+  (return
+   (proxy-util/request-client node "@xt.db/dataview-cached" [primary-id dataview] opts)))
 
 (defn.xt dataview-attach-model
   "attaches and invokes a dataview model"
