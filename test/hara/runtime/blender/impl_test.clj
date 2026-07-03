@@ -125,7 +125,19 @@
 
 
 ^{:refer hara.runtime.blender.impl/stop-blender :added "4.1"}
-(fact "TODO")
+(fact "stops a running blender process"
+  (let [rt (impl/blender {})
+        _ (impl/stop-blender rt)
+        process (:process rt)]
+    (boolean (and process (not (.isAlive ^Process process)))))
+  => true)
 
 ^{:refer hara.runtime.blender.impl/blender-shared:create :added "4.1"}
-(fact "TODO")
+(fact "creates a shared blender runtime client"
+  (let [rt (impl/blender-shared:create {:id :shared-blender-impl-test})]
+    [(= :hara/rt.blender (get-in rt [:client :type]))
+     (= impl/blender:create (get-in rt [:client :constructor]))
+     (= :shared-blender-impl-test (:id rt))
+     (= :shared-blender-impl-test (:rt/id rt))
+     (:temp rt)])
+  => [true true true true true])

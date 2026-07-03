@@ -2,8 +2,10 @@
   (:require [hara.runtime.solidity :as s]
             [hara.runtime.solidity.client :as client]
             [hara.runtime.solidity.compile-common :as compile-common]
+            [hara.runtime.solidity.compile-solc :as compile-solc]
             [hara.runtime.solidity.env-hardhat :as env]
-            [hara.lang :as l])
+            [hara.lang :as l]
+            [std.lib.env :as senv])
   (:use code.test))
 
 (l/script- :solidity
@@ -13,7 +15,8 @@
    :test-mode true})
 
 (fact:global
- {:setup    [(l/rt:restart)]
+ {:skip     (not (senv/program-exists? "node"))
+  :setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer hara.runtime.solidity/exec-rt-web3 :added "4.0"}
@@ -24,9 +27,50 @@
   => :ok)
 
 ^{:refer hara.runtime.solidity/rt:print :added "4.0"}
-(comment "prints out the contract"
-  ;; Prints
-  )
+(fact "prints module contract code with line numbers"
+  (let [calls (atom [])]
+    (with-redefs [compile-solc/compile-module-code (fn [m]
+                                                      (swap! calls conj [:module m])
+                                                      "contract Test {}")
+                  senv/pl-add-lines (fn [body & _]
+                                      (swap! calls conj [:pl body])
+                                      body)]
+      (s/rt:print {:name "Test"})
+      @calls))
+  => [[:module {:name "Test"}] [:pl "contract Test {}"]])
+
+^{:refer hara.runtime.solidity/rt:print :added "4.0"}
+(fact "prints pointer contract code when :module and :id are supplied"
+  (let [calls (atom [])]
+    (with-redefs [compile-solc/compile-ptr-code (fn [m]
+                                                  (swap! calls conj [:ptr m])
+                                                  "contract Ptr {}")
+                  senv/pl-add-lines (fn [body & _]
+                                      (swap! calls conj [:pl body])
+                                      body)]
+      (s/rt:print {:module "Hello" :id "main"})
+      @calls))
+  => [[:ptr {:module "Hello" :id "main"}] [:pl "contract Ptr {}"]])
+
+^{:refer hara.runtime.solidity/rt:print :added "4.0"}
+(fact "suppresses line numbers via second argument"
+  (let [calls (atom [])]
+    (with-redefs [compile-solc/compile-module-code (fn [_] "line1\nline2")
+                  senv/p (fn [& args]
+                           (swap! calls conj args))]
+      (s/rt:print {} true)
+      @calls))
+  => [["line1\nline2"]])
+
+^{:refer hara.runtime.solidity/rt:print :added "4.0"}
+(fact "suppresses line numbers via :no-lines option"
+  (let [calls (atom [])]
+    (with-redefs [compile-solc/compile-module-code (fn [_] "line1\nline2")
+                  senv/p (fn [& args]
+                           (swap! calls conj args))]
+      (s/rt:print {:no-lines true})
+      @calls))
+  => [["line1\nline2"]])
 
 ^{:refer hara.runtime.solidity/rt:deploy-ptr :added "4.0"}
 (fact "deploys a ptr a contract"
@@ -51,6 +95,3 @@
 (comment
   (s/rt-get-contract-address)
   (s/rt-ge))
-
-^{:refer hara.runtime.solidity/rt:print :added "4.1"}
-(fact "TODO")

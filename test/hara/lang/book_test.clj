@@ -117,7 +117,16 @@
   => '#{L.core/identity-fn})
 
 ^{:refer hara.lang.book/get-code-entry-view :added "4.1"}
-(fact "TODO")
+(fact "gets a code entry materialized for the current book language"
+  (b/get-code-entry-view +sample+ 'L.core/identity-fn)
+  => (contains '{:id identity-fn
+                 :module L.core
+                 :lang :lua
+                 :section :code
+                 :deps #{}})
+
+  (b/get-code-entry-view +sample+ 'L.core/missing)
+  => (throws))
 
 ^{:refer hara.lang.book/get-deps :added "4.0"}
 (fact "get dependencies for a given id"
@@ -401,7 +410,21 @@
   => '{L.core {:as u, :id L.core}})
 
 ^{:refer hara.lang.book/module-normalize-implements :added "4.1"}
-(fact "TODO")
+(fact "normalizes module contracts into a vector of symbols"
+  (b/module-normalize-implements nil)
+  => []
+
+  (b/module-normalize-implements 'IProto)
+  => '[IProto]
+
+  (b/module-normalize-implements '[IProto IOther])
+  => '[IProto IOther]
+
+  (b/module-normalize-implements #{'IProto 'IOther})
+  => '[IOther IProto]
+
+  (b/module-normalize-implements "contract")
+  => ["contract"])
 
 ^{:refer hara.lang.book/module-export-requires :added "4.1"}
 (fact "reconstructs module requires from stored link metadata"
@@ -415,19 +438,92 @@
   => '[[L.core :as u :include true]])
 
 ^{:refer hara.lang.book/module-export-imports :added "4.1"}
-(fact "TODO")
+(fact "reconstructs native imports from stored module metadata"
+  (b/module-export-imports
+   (module/book-module
+    '{:id L.util
+      :lang :lua
+      :link {- L.util}
+      :native {cjson {:as cjson}}}))
+  => '[[cjson :as cjson]]
+
+  (b/module-export-imports
+   (module/book-module
+    '{:id L.util
+      :lang :lua
+      :link {- L.util}
+      :native {cjson {:as cjson}
+               json {:as json
+                     :bundle {decoder {:version "1"}}}}}))
+  => '[[cjson :as cjson]
+       [json :as json :bundle [[decoder :version "1"]]]])
 
 ^{:refer hara.lang.book/module-specialize-symbol :added "4.1"}
-(fact "TODO")
+(fact "rewrites self references from one module to another"
+  (b/module-specialize-symbol 'L.core 'L.alt 'L.core/identity-fn)
+  => 'L.alt/identity-fn
+
+  (b/module-specialize-symbol 'L.core 'L.alt 'L.other/identity-fn)
+  => 'L.other/identity-fn
+
+  (b/module-specialize-symbol 'L.core 'L.alt 'plain-sym)
+  => 'plain-sym)
 
 ^{:refer hara.lang.book/module-specialize-form :added "4.1"}
-(fact "TODO")
+(fact "rewrites self references inside an entry form"
+  (b/module-specialize-form 'L.core 'L.alt
+                            '(defn f [x] (L.core/identity-fn x)))
+  => '(defn f [x] (L.alt/identity-fn x))
+
+  (b/module-specialize-form 'L.core 'L.alt
+                            '(defn f [x] (L.other/identity-fn x)))
+  => '(defn f [x] (L.other/identity-fn x)))
 
 ^{:refer hara.lang.book/module-specialize-entry :added "4.1"}
-(fact "TODO")
+(fact "clones an entry into a new module"
+  (let [entry (entry/book-entry {:lang :lua
+                                 :id 'f
+                                 :module 'L.core
+                                 :section :code
+                                 :form '(defn f [x] (L.core/identity-fn x))
+                                 :form-input '(defn f [x] (L.core/identity-fn x))
+                                 :standalone '(fn [x] (L.core/identity-fn x))
+                                 :deps #{'L.core/identity-fn}
+                                 :deps-fragment #{'L.core/identity}
+                                 :namespace 'L.core
+                                 :declared false
+                                 :static/code.cache (atom {})
+                                 :static/template.cache (atom {})})
+        specialized (b/module-specialize-entry 'L.core 'L.alt entry)]
+    [(:module specialized)
+     (:form specialized)
+     (:deps specialized)
+     (:deps-fragment specialized)
+     (:static/code.cache specialized)
+     (:static/template.cache specialized)]
+    => ['L.alt
+        '(defn f [x] (L.alt/identity-fn x))
+        '#{L.alt/identity-fn}
+        '#{L.alt/identity}
+        nil
+        nil]))
 
 ^{:refer hara.lang.book/module-specialize-bindings :added "4.1"}
-(fact "TODO")
+(fact "normalizes specialization bindings keyed by alias or module id"
+  (let [module (module/book-module
+                '{:id L.core
+                  :lang :lua
+                  :link {- L.core
+                         cache L.cache}
+                  :internal {L.core -
+                             L.cache cache}})]
+    [(b/module-specialize-bindings module '{L.cache L.custom-cache})
+     (b/module-specialize-bindings module '{cache L.custom-cache})
+     (b/module-specialize-bindings module '{L.core L.alt other L.x})])
+  => [{'L.cache 'L.custom-cache}
+      {'L.cache 'L.custom-cache}
+      {'L.core 'L.alt
+       'other 'L.x}])
 
 ^{:refer hara.lang.book/module-specialize :added "4.1"}
 (fact "clones a module under a new id with rewritten links"

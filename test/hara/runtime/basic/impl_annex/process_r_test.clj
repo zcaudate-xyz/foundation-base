@@ -1,10 +1,13 @@
 (ns hara.runtime.basic.impl-annex.process-r-test
   (:require [hara.runtime.basic.impl-annex.process-r :refer :all]
-            [hara.lang :as l])
+            [hara.lang :as l]
+            [std.lib.env :as env])
   (:use code.test))
 
-(l/script- :r
-  {:runtime :oneshot})
+(fact:global
+ {:skip (not (env/program-exists? "R"))
+  :setup    [(l/script- :r {:runtime :oneshot})]
+  :teardown []})
 
 ^{:refer hara.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE r code"
@@ -59,5 +62,16 @@
   => (throws clojure.lang.ExceptionInfo))
 
 
-^{:refer hara.runtime.basic.impl-annex.process-r/default-body-transform :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.basic.impl-annex.process-r/default-body-transform :added "4.0"}
+(fact "wraps body forms in an R function with explicit return"
+  (default-body-transform '[1 2 3] {})
+  => '((fn [] (return [1 2 3])))
+
+  (default-body-transform '(do (defn add-10 [x] (+ x 10))
+                               (add-10 5))
+                          {})
+  => '((fn [] (def add-10 (fn [x] (+ x 10)))
+         (return (add-10 5))))
+
+  (default-body-transform '[1] {})
+  => '((fn [] (return [1]))))

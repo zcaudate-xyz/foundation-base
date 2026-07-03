@@ -2,8 +2,13 @@
   (:require [clojure.string :as str]
              [hara.runtime.basic.impl.process-dart :refer :all]
              [hara.lang :as l]
-             [std.lib.os :as os])
+             [std.lib.os :as os]
+             [std.lib.env :as env]
+             [std.fs :as fs])
   (:use code.test))
+
+(fact:global
+ {:skip (not (env/program-exists? "dart"))})
 
 ^{:refer hara.runtime.basic.impl.process-dart/normalize-dart-source :added "4.1"}
 (fact "preserves multiline call continuations when normalizing dart"
@@ -97,13 +102,71 @@
 
 
 ^{:refer hara.runtime.basic.impl.process-dart/dart-package-imports :added "4.1"}
-(fact "TODO")
+(fact "finds package imports referenced by generated Dart source"
+  (dart-package-imports "")
+  => []
+
+  (dart-package-imports "import 'dart:io';")
+  => []
+
+  (dart-package-imports "package:foo/bar.dart")
+  => ["foo"]
+
+  (dart-package-imports "import 'package:foo/bar.dart';\nimport 'package:baz/qux.dart';\nimport 'package:foo/other.dart';")
+  => ["baz" "foo"]
+
+  (dart-package-imports "x package:abc/def x package:ghi/jkl")
+  => ["abc" "ghi"])
 
 ^{:refer hara.runtime.basic.impl.process-dart/dart-package-root :added "4.1"}
-(fact "TODO")
+(fact "returns cached Dart package root for twostep scripts"
+  (dart-package-root "/tmp/root")
+  => "/tmp/root/target/dart-twostep"
+
+  (dart-package-root nil)
+  => (str (java.io.File. (System/getProperty "user.dir") "target/dart-twostep")))
 
 ^{:refer hara.runtime.basic.impl.process-dart/dart-pubspec :added "4.1"}
-(fact "TODO")
+(fact "creates minimal pubspec for generated twostep scripts"
+  (dart-pubspec [])
+  => (str "name: foundation_base_dart_twostep\n"
+          "publish_to: 'none'\n"
+          "environment:\n"
+          "  sdk: '>=3.0.0 <4.0.0'\n")
+
+  (dart-pubspec ["foo" "bar"])
+  => (str "name: foundation_base_dart_twostep\n"
+          "publish_to: 'none'\n"
+          "environment:\n"
+          "  sdk: '>=3.0.0 <4.0.0'\n"
+          "dependencies:\n"
+          "  foo: any\n"
+          "  bar: any\n"))
 
 ^{:refer hara.runtime.basic.impl.process-dart/ensure-dart-package-context :added "4.1"}
-(fact "TODO")
+(fact "creates cached package root and resolves dependencies"
+  (ensure-dart-package-context nil "")
+  => nil
+
+  (let [root (str (fs/create-tmpdir "dart-ctx-test-"))]
+    (try
+      (with-redefs [os/sh (fn [_] {:pid 1})
+                    os/sh-wait (fn [_] nil)
+                    os/sh-output (fn [_] {:exit 0 :out "" :err ""})]
+        (let [source "import 'package:foo/bar.dart';"
+              result (ensure-dart-package-context root source)
+              pubspec (str root "/target/dart-twostep/pubspec.yaml")]
+          [result
+           (.exists (java.io.File. pubspec))
+           (slurp pubspec)]))
+      => [(str root "/target/dart-twostep")
+          true
+          (str "name: foundation_base_dart_twostep\n"
+               "publish_to: 'none'\n"
+               "environment:\n"
+               "  sdk: '>=3.0.0 <4.0.0'\n"
+               "dependencies:\n"
+               "  foo: any\n")]
+      (finally
+        (try (fs/delete root)
+             (catch Throwable _))))))

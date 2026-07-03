@@ -62,13 +62,55 @@
   => "ok")
 
 ^{:refer hara.runtime.basic.type-twostep/local-exec-available? :added "4.1"}
-(fact "TODO")
+(fact "checks if the resolved twostep executable exists locally"
+  (p/local-exec-available? "ls")
+  => true
+
+  (p/local-exec-available? ["ls"])
+  => true
+
+  (p/local-exec-available? "definitely-not-a-real-command-12345")
+  => false
+
+  (p/local-exec-available? nil)
+  => false)
 
 ^{:refer hara.runtime.basic.type-twostep/sh-exec-docker :added "4.1"}
-(fact "TODO")
+(fact "executes compile and run inside a docker container"
+  (with-redefs [os/sh (fn [_] :proc)
+                os/sh-wait (fn [_] nil)
+                os/sh-output (fn [_] {:exit 0 :out "ok\n" :err ""})
+                spit (fn [& _] nil)
+                fs/parent (fn [_] "/tmp")
+                fs/file-name (fn [_] "tmp")
+                fs/delete (fn [& _] nil)]
+    (p/sh-exec-docker ["gcc"] "body" {:extension "c"
+                                        :container {:image "gcc:latest"
+                                                    :exec ["gcc"]}}))
+  => "ok")
 
 ^{:refer hara.runtime.basic.type-twostep/sh-exec-portable :added "4.1"}
-(fact "TODO")
+(fact "chooses local or container execution based on availability"
+  (with-redefs [p/local-exec-available? (fn [_] true)
+                p/sh-exec (fn [_ _ _] "local")
+                p/sh-exec-docker (fn [_ _ _] "docker")]
+    (p/sh-exec-portable ["gcc"] "body" {:extension "c"}))
+  => "local"
+
+  (with-redefs [p/local-exec-available? (fn [_] false)
+                p/sh-exec (fn [_ _ _] "local")
+                p/sh-exec-docker (fn [_ _ _] "docker")]
+    (p/sh-exec-portable ["gcc"] "body" {:extension "c"
+                                          :container {:image "gcc:latest"}}))
+  => "docker"
+
+  (with-redefs [p/local-exec-available? (fn [_] true)
+                p/sh-exec (fn [_ _ _] "local")
+                p/sh-exec-docker (fn [_ _ _] "docker")]
+    (p/sh-exec-portable ["gcc"] "body" {:extension "c"
+                                          :container {:image "gcc:latest"}
+                                          :force-container true}))
+  => "docker")
 
 ^{:refer hara.runtime.basic.type-twostep/raw-eval-twostep :added "4.0"}
 (fact "evaluates the twostep evaluation"

@@ -4,6 +4,7 @@
              [postgres.sample.scratch-v1 :as scratch]
              [std.fs :as fs]
              [hara.lang.compile :refer :all]
+             [hara.lang.book-module :as bm]
              [hara.lang.impl :as impl]
              [hara.lang.library :as lib]
              [hara.lang.library-snapshot :as snap]
@@ -108,8 +109,45 @@
   (compile-module-create-links '[a.b a.c] 'a {})
   => (contains {'a.b (contains {:label "b"}) 'a.c (contains {:label "c"})}))
 
+(def +spec-book+
+  {:modules
+   {'mod.a (bm/book-module {:lang :js :id 'mod.a
+                            :specialize {'src.core {:backend 'default-a
+                                                    :bindings {'ContractA 'backend-a}}}})
+    'mod.b (bm/book-module {:lang :js :id 'mod.b
+                            :specialize {'src.core {:bindings {'ContractA 'backend-b}}}})
+    'mod.c (bm/book-module {:lang :js :id 'mod.c
+                            :specialize {'src.core {:bindings {'ContractA 'backend-a}}}})}})
+
 ^{:refer hara.lang.compile/compile-module-directory-specialization-conflicts :added "4.1"}
-(fact "TODO")
+(fact "detects conflicting specialization contract backends across modules"
+
+  (compile-module-directory-specialization-conflicts
+   +spec-book+ ['mod.a])
+  => '{ContractA {:backend backend-a
+                  :module mod.a
+                  :source src.core}}
+
+  (compile-module-directory-specialization-conflicts
+   +spec-book+ ['mod.a 'mod.c])
+  => '{ContractA {:backend backend-a
+                  :module mod.a
+                  :source src.core}}
+
+  (compile-module-directory-specialization-conflicts
+   +spec-book+ ['mod.a 'mod.b])
+  => (throws-info '{:contract ContractA
+                    :module mod.b
+                    :source src.core
+                    :backend backend-b
+                    :previous-module mod.a
+                    :previous-source src.core
+                    :previous-backend backend-a})
+
+  (compile-module-directory-specialization-conflicts
+   {} ['missing.module])
+  => '{})
+
 
 ^{:refer hara.lang.compile/compile-module-directory-selected :added "4.0"}
 (fact "compiles the directory based on sorted imports"

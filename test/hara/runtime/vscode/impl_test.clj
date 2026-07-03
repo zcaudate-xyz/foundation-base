@@ -84,13 +84,36 @@
 
 
 ^{:refer hara.runtime.vscode.impl/stop-vscode :added "4.1"}
-(fact "TODO")
+(fact "returns the runtime when stopping"
+  (let [rt (impl/vscode:create {})]
+    (identical? (impl/stop-vscode rt) rt))
+  => true)
 
 ^{:refer hara.runtime.vscode.impl/next-msgid :added "4.1"}
-(fact "TODO")
+(fact "increments the message id counter"
+  (let [rt (assoc (impl/vscode:create {}) :msgid (atom 0))]
+    [(impl/next-msgid rt)
+     (impl/next-msgid rt)
+     @(:msgid rt)])
+  => [1 2 2])
 
-^{:refer hara.runtime.vscode.impl/send-request :added "4.1"}
-(fact "TODO")
+^{:refer hara.runtime.vscode.impl/send-request :added "4.1" :timeout 60000}
+(fact "sends a code request and returns a response"
+  (let [rt (impl/vscode {})
+        code (impl/js-eval-wrap "1 + 2 + 3")]
+    (try
+      (let [response (impl/send-request rt code)]
+        [(number? (:id response))
+         (= "ok" (:status response))
+         (= 6 (:value response))])
+      (finally
+        (impl/stop-vscode rt))))
+  => [true true true])
 
 ^{:refer hara.runtime.vscode.impl/vscode-shared:create :added "4.1"}
-(fact "TODO")
+(fact "creates a shared vscode runtime client"
+  (let [shared (impl/vscode-shared:create {})]
+    [(boolean shared)
+     (= :hara/rt.vscode (-> shared :client :type))
+     (:temp shared)])
+  => [true true true])

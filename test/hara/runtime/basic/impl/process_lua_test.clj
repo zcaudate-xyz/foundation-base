@@ -73,4 +73,19 @@
   => #"local function add_10\(x\)")
 
 ^{:refer hara.runtime.basic.impl.process-lua/lua-basic-script-globalize-entry :added "4.1"}
-(fact "TODO")
+(fact "converts local Lua declarations to globals for basic runtime"
+  (lua-basic-script-globalize-entry "local function add_10(x) return x + 10 end"
+                                    {:entry {:op-key :defn}})
+  => "function add_10(x) return x + 10 end"
+
+  (lua-basic-script-globalize-entry "local x = 1"
+                                    {:entry {:op-key :def}})
+  => "x = 1"
+
+  (lua-basic-script-globalize-entry "function add_10(x) return x + 10 end"
+                                    {:entry {:op-key :defn}})
+  => "function add_10(x) return x + 10 end"
+
+  (lua-basic-script-globalize-entry "local x = 1"
+                                    {:entry {:op-key :other}})
+  => "local x = 1")

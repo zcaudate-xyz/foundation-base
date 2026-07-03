@@ -1,6 +1,7 @@
 (ns hara.runtime.basic.impl.process-elisp-test
   (:use code.test)
   (:require [hara.lang :as l]
+            [hara.runtime.basic.impl.process-elisp :refer [elisp-root]]
             [std.lib.env :as env]))
 
 (l/script- :elisp
@@ -19,4 +20,7 @@
 
 
 ^{:refer hara.runtime.basic.impl.process-elisp/elisp-root :added "4.1"}
-(fact "TODO")
+(fact "returns the project root directory"
+  (elisp-root)
+  => (or (System/getenv "PWD")
+         (System/getProperty "user.dir")))

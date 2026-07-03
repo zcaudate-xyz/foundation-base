@@ -82,22 +82,72 @@
 
 
 ^{:refer hara.runtime.neovim.impl/value->clj :added "4.1"}
-(fact "TODO")
+(fact "converts msgpack values to clojure data"
+  (let [msgpack (org.msgpack.MessagePack.)
+        roundtrip (fn [v]
+                    (let [out (java.io.ByteArrayOutputStream.)
+                          packer (.createPacker msgpack out)]
+                      (.write packer v)
+                      (.flush packer)
+                      (let [in (java.io.ByteArrayInputStream. (.toByteArray out))
+                            unpacker (.createUnpacker msgpack in)]
+                        (impl/value->clj (.read unpacker org.msgpack.type.Value)))))]
+    [(roundtrip nil)
+     (roundtrip true)
+     (roundtrip 42)
+     (roundtrip 3.14)
+     (roundtrip "hello")
+     (roundtrip [1 2 3])
+     (roundtrip {"a" 1 "b" 2})])
+  => [nil true 42 3.14 "hello" [1 2 3] {"a" 1, "b" 2}])
 
 ^{:refer hara.runtime.neovim.impl/pack-request :added "4.1"}
-(fact "TODO")
+(fact "packs a msgpack-rpc request"
+  (let [msgpack (org.msgpack.MessagePack.)
+        params (doto (java.util.ArrayList.) (.add 42))
+        bytes (impl/pack-request 1 "test" params)
+        in (java.io.ByteArrayInputStream. bytes)
+        unpacker (.createUnpacker msgpack in)]
+    (impl/value->clj (.read unpacker org.msgpack.type.Value)))
+  => [0 1 "test" [42]])
 
 ^{:refer hara.runtime.neovim.impl/stop-neovim :added "4.1"}
-(fact "TODO")
+(fact "returns the runtime when stopping"
+  (let [rt (impl/neovim:create {})]
+    (identical? (impl/stop-neovim rt) rt))
+  => true)
 
 ^{:refer hara.runtime.neovim.impl/next-msgid :added "4.1"}
-(fact "TODO")
+(fact "increments the message id counter"
+  (let [rt (assoc (impl/neovim:create {}) :msgid (atom 0))]
+    [(impl/next-msgid rt)
+     (impl/next-msgid rt)
+     @(:msgid rt)])
+  => [1 2 2])
 
 ^{:refer hara.runtime.neovim.impl/send-request :added "4.1"}
-(fact "TODO")
+(fact "sends a msgpack-rpc request and returns the raw result"
+  (let [rt (impl/neovim {})
+        params (doto (java.util.ArrayList.)
+                 (.add (impl/lua-eval-wrap "return 1 + 2 + 3"))
+                 (.add (java.util.ArrayList.)))
+        result (try
+                 (impl/send-request rt "nvim_exec_lua" params)
+                 (finally
+                   (impl/stop-neovim rt)))]
+    [(string? result)
+     (boolean (re-find #"\"value\":6" result))])
+  => [true true])
 
 ^{:refer hara.runtime.neovim.impl/rt-neovim-string :added "4.1"}
-(fact "TODO")
+(fact "produces the runtime string representation"
+  (impl/rt-neovim-string {:id :foo})
+  => "#rt.neovim[:foo]")
 
 ^{:refer hara.runtime.neovim.impl/neovim-shared:create :added "4.1"}
-(fact "TODO")
+(fact "creates a shared neovim runtime client"
+  (let [shared (impl/neovim-shared:create {})]
+    [(boolean shared)
+     (= :hara/rt.neovim (-> shared :client :type))
+     (:temp shared)])
+  => [true true true])
