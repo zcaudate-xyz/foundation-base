@@ -636,4 +636,3 @@
                       "cursor" cursor
                       "origin_node" (xt/x:get-key node "id")}
                      (or meta {})))))
-

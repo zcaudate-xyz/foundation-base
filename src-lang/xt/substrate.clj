@@ -7,35 +7,45 @@
              [xt.lang.spec-promise :as promise]
              [xt.event.base-listener :as event-common]
              [xt.substrate.page-core :as page]
+             [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-space :as node-space]
              [xt.substrate.base-request :as node-request]
              [xt.substrate.base-pubsub :as node-pubsub]]})
-(def.xt create-space node-space/create-space)
-(def.xt get-space node-space/get-space)
-(def.xt list-spaces node-space/list-spaces)
-(def.xt get-space-state node-space/get-space-state)
-(def.xt set-space-state node-space/set-space-state)
-(def.xt update-space-state node-space/update-space-state)
-(def.xt page-space-get page/space-get-page)
-(def.xt page-space-ensure page/space-ensure-page)
-(def.xt page-space-set page/space-set-page)
-(def.xt page-group-get page/group-get)
-(def.xt page-group-ensure page/group-ensure)
-(def.xt page-model-ensure page/model-ensure)
-(def.xt page-group-add-attach page/group-add-attach)
-(def.xt page-group-add page/group-add)
-(def.xt page-group-remove page/group-remove)
-(def.xt page-model-remove page/model-remove)
-(def.xt page-group-update page/group-update)
-(def.xt page-model-update page/model-update)
-(def.xt page-model-set-input page/model-set-input)
-(def.xt page-group-trigger page/group-trigger)
-(def.xt page-model-trigger page/model-trigger)
-(def.xt page-space-trigger-all page/space-trigger-all)
-(def.xt page-raw-callback-add page/raw-callback-add)
-(def.xt page-raw-callback-remove page/raw-callback-remove)
+
+(def.xt ^{:arglists '([space-id config])} create-space node-space/create-space)
+(def.xt ^{:arglists '([node space-id])} get-space node-space/get-space)
+(def.xt ^{:arglists '([node])} list-spaces node-space/list-spaces)
+(def.xt ^{:arglists '([node space-id])} get-space-state node-space/get-space-state)
+(def.xt ^{:arglists '([node space-id state])} set-space-state node-space/set-space-state)
+(def.xt ^{:arglists '([node space-id f])} update-space-state node-space/update-space-state)
+(def.xt ^{:arglists '([node space-id])} page-space-get page/space-get-page)
+(def.xt ^{:arglists '([node space-id])} page-space-ensure page/space-ensure-page)
+(def.xt ^{:arglists '([node space-id runtime])} page-space-set page/space-set-page)
+(def.xt ^{:arglists '([node space-id group-id])} page-group-get page/group-get)
+(def.xt ^{:arglists '([node space-id group-id])} page-group-ensure page/group-ensure)
+(def.xt ^{:arglists '([node space-id group-id model-id])} page-model-ensure page/model-ensure)
+(def.xt ^{:arglists '([node space-id group-id models])} page-group-add-attach page/group-add-attach)
+(def.xt ^{:arglists '([node space-id group-id models])} page-group-add page/group-add)
+(def.xt ^{:arglists '([node space-id group-id])} page-group-remove page/group-remove)
+(def.xt ^{:arglists '([node space-id group-id model-id])} page-model-remove page/model-remove)
+(def.xt ^{:arglists '([node space-id group-id event])} page-group-update page/group-update)
+(def.xt ^{:arglists '([node space-id group-id model-id event])} page-model-update page/model-update)
+(def.xt ^{:arglists '([node space-id group-id model-id current event])} page-model-set-input page/model-set-input)
+(def.xt ^{:arglists '([node space-id group-id signal event])} page-group-trigger page/group-trigger)
+(def.xt ^{:arglists '([node space-id group-id model-id signal event])} page-model-trigger page/model-trigger)
+(def.xt ^{:arglists '([node space-id signal event])} page-space-trigger-all page/space-trigger-all)
+(def.xt ^{:arglists '([node space-id])} page-raw-callback-add page/raw-callback-add)
+(def.xt ^{:arglists '([node space-id])} page-raw-callback-remove page/raw-callback-remove)
+
+(def.xt ^{:arglists '([node])} page-proxy-install page-proxy/install)
+(def.xt ^{:arglists '([node space-id opts])} page-proxy-list page-proxy/group-list-proxy)
+(def.xt ^{:arglists '([node space-id group-id opts])} page-proxy-open page-proxy/group-open-proxy)
+(def.xt ^{:arglists '([node space-id group-id opts])} page-proxy-close page-proxy/group-close-proxy)
+(def.xt ^{:arglists '([node space-id group-id model-id args save-output opts])} page-proxy-call page-proxy/model-proxy-call)
+(def.xt ^{:arglists '([node space-id group-id opts])} page-proxy-sync page-proxy/group-sync-proxy)
+
 (defspec.xt NodeTriggerHandler
   [:fn [node-space/NodeSpace frame/NodeFrame :xt/any] :xt/any])
 (defspec.xt NodeHandlerEntry
@@ -246,81 +256,86 @@
   (xt/x:del-key (xt/x:get-key node "services")
                 service-id)
   (return service))
-(defn.xt register-handler
-  "registers a shared request handler"
+(defn.xt transport-get
+  "gets an attached transport"
   {:added "4.1"}
-  [node action handler meta]
-  (var entry {:id action
-              :fn handler
-              :meta (or meta {})})
-  (xt/x:set-key (xt/x:get-key node "handlers")
-                action
-                entry)
-  (return entry))
-(defn.xt unregister-handler
-  "unregisters a shared request handler"
-  {:added "4.1"}
-  [node action]
-  (var handlers (xt/x:get-key node "handlers"))
-  (var prev (xt/x:get-key handlers action))
-  (xt/x:del-key handlers action)
-  (return prev))
-(defn.xt get-handler
-  "gets a shared request handler"
-  {:added "4.1"}
-  [node action]
-  (return (xt/x:get-key (xt/x:get-key node "handlers")
-                        action)))
-(defn.xt list-handlers
-  "lists registered request handlers"
+  [node transport-id]
+  (return (base-util/transport-get node transport-id)))
+(defn.xt transport-list
+  "lists active transport ids"
   {:added "4.1"}
   [node]
-  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "handlers"))
-                        (fn [x] (return x))
-                        xt/x:str-lt)))
-(defn.xt register-trigger
-  "registers a shared stream trigger"
+  (return (base-util/transport-list node)))
+(defn.xt transport-send
+  "sends frames through a transport"
   {:added "4.1"}
-  [node signal trigger-fn meta]
-  (var entry {:id signal
-              :fn trigger-fn
-              :meta (or meta {})})
-  (xt/x:set-key (xt/x:get-key node "triggers")
-                signal
-                entry)
-  (return entry))
-(defn.xt unregister-trigger
-  "unregisters a shared stream trigger"
-  {:added "4.1"}
-  [node signal]
-  (var triggers (xt/x:get-key node "triggers"))
-  (var prev (xt/x:get-key triggers signal))
-  (xt/x:del-key triggers signal)
-  (return prev))
-(defn.xt get-trigger
-  "gets a shared stream trigger"
-  {:added "4.1"}
-  [node signal]
-  (return (xt/x:get-key (xt/x:get-key node "triggers")
-                        signal)))
-(defn.xt list-triggers
-  "lists registered stream triggers"
-  {:added "4.1"}
-  [node]
-  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "triggers"))
-                        (fn [x] (return x))
-                        xt/x:str-lt)))
-(def.xt transport-get base-util/transport-get)
-
-(def.xt transport-list base-util/transport-list)
-
-(def.xt transport-send base-util/transport-send)
-
+  [node transport-id frame]
+  (return (base-util/transport-send node transport-id frame)))
 (defn.xt list-subscriptions
   "lists router subscriptions"
   {:added "4.1"}
   [node space signal]
   (return (router/list-subscriptions node space signal)))
+(defn.xt publish
+  "publishes a stream frame through node core and subscribed transports"
+  {:added "4.1"}
+  [node space signal data meta]
+  (return (base-util/publish node space signal data meta)))
+
+(defn.xt list-triggers
+  "lists registered stream triggers"
+  {:added "4.1"}
+  [node]
+  (return (base-util/list-triggers node)))
+
+(defn.xt register-trigger
+  "registers a shared stream trigger"
+  {:added "4.1"}
+  [node signal trigger-fn meta]
+  (return (base-util/register-trigger node signal trigger-fn meta)))
+
+(defn.xt get-trigger
+  "gets a shared stream trigger"
+  {:added "4.1"}
+  [node signal]
+  (return (base-util/get-trigger node signal)))
+
+(defn.xt unregister-handler
+  "unregisters a shared request handler"
+  {:added "4.1"}
+  [node action]
+  (return (base-util/unregister-handler node action)))
+
+(defn.xt unregister-trigger
+  "unregisters a shared stream trigger"
+  {:added "4.1"}
+  [node signal]
+  (return (base-util/unregister-trigger node signal)))
+
+(defn.xt get-handler
+  "gets a shared request handler"
+  {:added "4.1"}
+  [node action]
+  (return (base-util/get-handler node action)))
+
+(defn.xt list-handlers
+  "lists registered request handlers"
+  {:added "4.1"}
+  [node]
+  (return (base-util/list-handlers node)))
+
+(defn.xt register-handler
+  "registers a shared request handler"
+  {:added "4.1"}
+  [node action handler meta]
+  (return (base-util/register-handler node action handler meta)))
+
+(defn.xt request
+  "issues a request locally or over an attached transport"
+  {:added "4.1"}
+  [node space action args meta]
+  (return (base-util/request node space action args meta)))
+
 (defn.xt broadcast-transport
   "broadcasts a frame across attached transports"
   {:added "4.1"}
@@ -364,49 +379,6 @@
   [node response]
   (node-request/settle-pending node response)
   (return (promise/x:promise-run response)))
-(defn.xt request
-  "issues a request locally or over an attached transport"
-  {:added "4.1"}
-  [node space action args meta]
-  (:= meta (or meta {}))
-  (var request-frame (frame/request-frame space action args meta))
-  (var target (base-util/transport-request-target node meta))
-  (if (xt/x:nil? target)
-    (return
-     (node-request/invoke-handler node request-frame))
-    (try
-      (var pending-state {"status" "pending"
-                          "value" nil
-                          "error" nil})
-      (node-request/add-pending node
-                                request-frame
-                                (fn [value]
-                                  (xt/x:set-key pending-state "status" "resolved")
-                                  (xt/x:set-key pending-state "value" value)
-                                  (return value))
-                                (fn [err]
-                                  (xt/x:set-key pending-state "status" "rejected")
-                                  (xt/x:set-key pending-state "error" err)
-                                  (return err))
-                                {:transport_id target})
-      (return
-       (promise/x:promise-then
-        (promise/x:promise-catch
-         (promise/x:promise-then
-          (-/transport-send node target request-frame)
-          (fn [_]
-            (return nil)))
-         (fn [err]
-           (node-request/remove-pending node
-                                        (xt/x:get-key request-frame "id"))
-           (xt/x:throw err)))
-        (fn [_]
-          (return (base-util/pending-await pending-state)))))
-      (catch err
-        (return
-         (promise/x:promise
-          (fn []
-            (xt/x:throw err))))))))
 (defn.xt subscribe
   "constructs and optionally sends a subscribe control frame"
   {:added "4.1"}
@@ -447,20 +419,6 @@
       (return (-/route-stream node
                               stream
                               (xt/x:get-key ctx "transport_id")))))))
-(defn.xt publish
-  "publishes a stream frame through node core and subscribed transports"
-  {:added "4.1"}
-  [node space signal data meta]
-  (:= meta (or meta {}))
-  (var stream (frame/stream-frame space
-                                  signal
-                                  data
-                                  meta
-                                  (xt/x:get-key meta "cause")))
-  (return
-   (-/receive-publish node
-                      stream
-                      {:transport_id (xt/x:get-key meta "transport_id")})))
 (defn.xt receive-frame
   "demultiplexes node frames"
   {:added "4.1"}

@@ -7,7 +7,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.event.base-listener :as event-common]
              [xt.event.base-model :as event-model]
-             [xt.substrate :as substrate]
+             [xt.substrate.base-util :as base-util]
              [xt.substrate.page-core :as page-core]
              [xt.substrate.page-util :as page-util]
              [xt.substrate.base-router :as router]
@@ -100,7 +100,7 @@
   (when (== 0 (xt/x:len target-ids))
     (return nil))
   (return
-   (substrate/publish node
+   (base-util/publish node
                       space-id
                       -/SIGNAL_OUTPUT
                       {"path" path
@@ -115,7 +115,7 @@
   (when (== 0 (xt/x:len target-ids))
     (return nil))
   (return
-   (substrate/publish node
+   (base-util/publish node
                       space-id
                       -/SIGNAL_INPUT
                       {"path" path
@@ -311,15 +311,15 @@
   "installs page-proxy request handlers on a node"
   {:added "4.1"}
   [node]
-  (substrate/register-handler node -/ACTION_GROUP_LIST -/group-handle-list nil)
-  (substrate/register-handler node -/ACTION_GROUP_OPEN -/group-handle-open nil)
-  (substrate/register-handler node -/ACTION_GROUP_CLOSE -/group-handle-close nil)
-  (substrate/register-handler node -/ACTION_GROUP_UPDATE -/group-handle-update nil)
-  (substrate/register-handler node -/ACTION_MODEL_UPDATE -/model-handle-update nil)
-  (substrate/register-handler node -/ACTION_MODEL_SET_INPUT -/model-handle-set-input nil)
-  (substrate/register-handler node -/ACTION_MODEL_TRIGGER -/model-handle-trigger nil)
-  (substrate/register-handler node -/ACTION_MODEL_PROXY_CALL -/model-handle-proxy-call nil)
-  (substrate/register-handler node -/ACTION_GROUP_TRIGGER -/group-handle-trigger nil)
+  (base-util/register-handler node -/ACTION_GROUP_LIST -/group-handle-list nil)
+  (base-util/register-handler node -/ACTION_GROUP_OPEN -/group-handle-open nil)
+  (base-util/register-handler node -/ACTION_GROUP_CLOSE -/group-handle-close nil)
+  (base-util/register-handler node -/ACTION_GROUP_UPDATE -/group-handle-update nil)
+  (base-util/register-handler node -/ACTION_MODEL_UPDATE -/model-handle-update nil)
+  (base-util/register-handler node -/ACTION_MODEL_SET_INPUT -/model-handle-set-input nil)
+  (base-util/register-handler node -/ACTION_MODEL_TRIGGER -/model-handle-trigger nil)
+  (base-util/register-handler node -/ACTION_MODEL_PROXY_CALL -/model-handle-proxy-call nil)
+  (base-util/register-handler node -/ACTION_GROUP_TRIGGER -/group-handle-trigger nil)
   (return node))
 
 ;;;
@@ -455,8 +455,8 @@
   "installs client stream triggers for proxy page deltas"
   {:added "4.1"}
   [node]
-  (substrate/register-trigger node -/SIGNAL_OUTPUT -/model-apply-output nil)
-  (substrate/register-trigger node -/SIGNAL_INPUT -/model-apply-input nil)
+  (base-util/register-trigger node -/SIGNAL_OUTPUT -/model-apply-output nil)
+  (base-util/register-trigger node -/SIGNAL_INPUT -/model-apply-input nil)
   (return node))
 
 ;;;
@@ -472,7 +472,7 @@
   (var transport-id (xt/x:get-key remote-spec "transport_id"))
   (cond (== op "group-update")
         (do (var event (xtd/nth args 0))
-            (return (substrate/request node
+            (return (base-util/request node
                                        space-id
                                        -/ACTION_GROUP_UPDATE
                                        [{"space" space-id
@@ -483,7 +483,7 @@
         (== op "model-update")
         (do (var model-id (xtd/nth args 0))
             (var event    (xtd/nth args 1))
-            (return (substrate/request node
+            (return (base-util/request node
                                        space-id
                                        -/ACTION_MODEL_UPDATE
                                        [{"space" space-id
@@ -496,7 +496,7 @@
         (do (var model-id (xtd/nth args 0))
             (var current  (xtd/nth args 1))
             (var event    (xtd/nth args 2))
-            (return (substrate/request node
+            (return (base-util/request node
                                        space-id
                                        -/ACTION_MODEL_SET_INPUT
                                        [{"space" space-id
@@ -510,7 +510,7 @@
         (do (var model-id (xtd/nth args 0))
             (var signal   (xtd/nth args 1))
             (var event    (xtd/nth args 2))
-            (return (substrate/request node
+            (return (base-util/request node
                                        space-id
                                        -/ACTION_MODEL_TRIGGER
                                        [{"space" space-id
@@ -523,7 +523,7 @@
         (== op "trigger-group")
         (do (var signal (xtd/nth args 0))
             (var event  (xtd/nth args 1))
-            (return (substrate/request node
+            (return (base-util/request node
                                        space-id
                                        -/ACTION_GROUP_TRIGGER
                                        [{"space" space-id
@@ -536,7 +536,7 @@
         (do (var model-id   (xtd/nth args 0))
             (var call-args  (xtd/nth args 1))
             (var save-output (xtd/nth args 2))
-            (return (substrate/request node
+            (return (base-util/request node
                                        space-id
                                        -/ACTION_MODEL_PROXY_CALL
                                        [{"space" space-id
@@ -567,7 +567,7 @@
   {:added "4.1"}
   [node space-id opts]
   (var transport-id (xt/x:get-key opts "transport_id"))
-  (return (substrate/request node
+  (return (base-util/request node
                              space-id
                              -/ACTION_GROUP_LIST
                              [space-id]
@@ -579,7 +579,7 @@
   [node space-id group-id opts]
   (var transport-id (xt/x:get-key opts "transport_id"))
   (return
-   (-> (substrate/request node
+   (-> (base-util/request node
                           space-id
                           -/ACTION_GROUP_OPEN
                           [{"space" space-id
@@ -600,7 +600,7 @@
   [node space-id group-id opts]
   (var transport-id (xt/x:get-key opts "transport_id"))
   (return
-   (-> (substrate/request node
+   (-> (base-util/request node
                           space-id
                           -/ACTION_GROUP_CLOSE
                           [{"space" space-id
@@ -620,7 +620,7 @@
   (var group (page-core/group-get node space-id group-id))
   (var remote-spec (xt/x:get-key group "remote"))
   (var transport-id (xt/x:get-key remote-spec "transport_id"))
-  (return (substrate/request node
+  (return (base-util/request node
                              space-id
                              -/ACTION_MODEL_PROXY_CALL
                              [{"space" space-id

@@ -9,9 +9,9 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.substrate.base-sync :as model]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as main]
+             [xt.substrate.base-sync :as model]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-request :as req]
              [xt.substrate.base-util :as util]]})
@@ -21,9 +21,9 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.substrate.base-sync :as model]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as main]
+             [xt.substrate.base-sync :as model]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-request :as req]
              [xt.substrate.base-util :as util]]})
@@ -33,9 +33,9 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
-             [xt.substrate.base-sync :as model]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as main]
+             [xt.substrate.base-sync :as model]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-request :as req]
              [xt.substrate.base-util :as util]]})

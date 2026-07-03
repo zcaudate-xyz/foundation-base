@@ -6,7 +6,9 @@
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
              [xt.substrate.base-frame :as frame]
-             [xt.substrate.base-request :as node-request]]})
+             [xt.substrate.base-request :as node-request]
+             [xt.substrate.base-router :as router]
+             [xt.substrate.base-pubsub :as node-pubsub]]})
 
 (defn.xt transport-get
   "gets an attached transport"
@@ -234,3 +236,141 @@
   (xt/x:del-key base "handlers")
   (xt/x:del-key base "triggers")
   (return base))
+
+(defn.xt register-handler
+  "registers a shared request handler"
+  {:added "4.1"}
+  [node action handler meta]
+  (var entry {:id action
+              :fn handler
+              :meta (or meta {})})
+  (xt/x:set-key (xt/x:get-key node "handlers")
+                action
+                entry)
+  (return entry))
+
+(defn.xt unregister-handler
+  "unregisters a shared request handler"
+  {:added "4.1"}
+  [node action]
+  (var handlers (xt/x:get-key node "handlers"))
+  (var prev (xt/x:get-key handlers action))
+  (xt/x:del-key handlers action)
+  (return prev))
+
+(defn.xt get-handler
+  "gets a shared request handler"
+  {:added "4.1"}
+  [node action]
+  (return (xt/x:get-key (xt/x:get-key node "handlers")
+                        action)))
+
+(defn.xt list-handlers
+  "lists registered request handlers"
+  {:added "4.1"}
+  [node]
+  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "handlers"))
+                        (fn [x] (return x))
+                        xt/x:str-lt)))
+
+(defn.xt register-trigger
+  "registers a shared stream trigger"
+  {:added "4.1"}
+  [node signal trigger-fn meta]
+  (var entry {:id signal
+              :fn trigger-fn
+              :meta (or meta {})})
+  (xt/x:set-key (xt/x:get-key node "triggers")
+                signal
+                entry)
+  (return entry))
+
+(defn.xt unregister-trigger
+  "unregisters a shared stream trigger"
+  {:added "4.1"}
+  [node signal]
+  (var triggers (xt/x:get-key node "triggers"))
+  (var prev (xt/x:get-key triggers signal))
+  (xt/x:del-key triggers signal)
+  (return prev))
+
+(defn.xt get-trigger
+  "gets a shared stream trigger"
+  {:added "4.1"}
+  [node signal]
+  (return (xt/x:get-key (xt/x:get-key node "triggers")
+                        signal)))
+
+(defn.xt list-triggers
+  "lists registered stream triggers"
+  {:added "4.1"}
+  [node]
+  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "triggers"))
+                        (fn [x] (return x))
+                        xt/x:str-lt)))
+
+(defn.xt request
+  "issues a request locally or over an attached transport"
+  {:added "4.1"}
+  [node space action args meta]
+  (:= meta (or meta {}))
+  (var request-frame (frame/request-frame space action args meta))
+  (var target (-/transport-request-target node meta))
+  (if (xt/x:nil? target)
+    (return
+     (node-request/invoke-handler node request-frame))
+    (try
+      (var pending-state {"status" "pending"
+                          "value" nil
+                          "error" nil})
+      (node-request/add-pending node
+                                request-frame
+                                (fn [value]
+                                  (xt/x:set-key pending-state "status" "resolved")
+                                  (xt/x:set-key pending-state "value" value)
+                                  (return value))
+                                (fn [err]
+                                  (xt/x:set-key pending-state "status" "rejected")
+                                  (xt/x:set-key pending-state "error" err)
+                                  (return err))
+                                {:transport_id target})
+      (return
+       (promise/x:promise-then
+        (promise/x:promise-catch
+         (promise/x:promise-then
+          (-/transport-send node target request-frame)
+          (fn [_]
+            (return nil)))
+         (fn [err]
+           (node-request/remove-pending node
+                                        (xt/x:get-key request-frame "id"))
+           (xt/x:throw err)))
+        (fn [_]
+          (return (-/pending-await pending-state)))))
+      (catch err
+        (return
+         (promise/x:promise
+          (fn []
+            (xt/x:throw err))))))))
+
+(defn.xt publish
+  "publishes a stream frame through node core and subscribed transports"
+  {:added "4.1"}
+  [node space signal data meta]
+  (:= meta (or meta {}))
+  (var stream (frame/stream-frame space
+                                  signal
+                                  data
+                                  meta
+                                  (xt/x:get-key meta "cause")))
+  (return
+   (promise/x:promise-then
+    (node-pubsub/receive-publish node stream)
+    (fn [_]
+      (return (-/stream-route-loop node
+                                  (router/target-ids node
+                                                     (xt/x:get-key stream "space")
+                                                     (xt/x:get-key stream "signal"))
+                                  stream
+                                  (xt/x:get-key meta "transport_id")
+                                  0))))))
