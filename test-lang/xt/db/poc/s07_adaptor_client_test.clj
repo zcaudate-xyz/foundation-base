@@ -31,7 +31,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
-             [xt.substrate.page-core :as base-page]
+             [xt.substrate.page-core :as page-core]
              [xt.substrate.page-proxy :as page-proxy]
              [xt.substrate.transport-browser :as browser-transport]
              [xt.db.node.kernel-base :as kernel-base]
@@ -78,7 +78,8 @@
 
 ^{:refer xt.db.poc.s07-kernel-client-test/dataview-attach-model
   :added "4.1"
-  :setup [(scratch-v0/log-append-public "kernel-client-tree")]}
+  :setup [(pg/t:delete scratch-v0/Log)
+          (scratch-v0/log-append-public "kernel-client-tree")]}
 (fact "client can init adaptor, attach a remote tree-view model, and read postgres data"
   
   (notify/wait-on [:js 5000]
@@ -106,10 +107,10 @@
         (promise/x:promise-then
          (fn [_]
            (return
-            (base-page/model-remote-call client "room/a" "demo" "tree-view" [[] []] true))))
+            (page-core/model-remote-call client "room/a" "demo" "tree-view" [[] []] true))))
         (promise/x:promise-then
          (fn [_]
-           (var group (base-page/group-get client "room/a" "demo"))
+           (var group (page-core/group-get client "room/a" "demo"))
            (var model (xtd/get-in group ["models" "tree-view"]))
            (repl/notify
             {"has_group" (xt/x:not-nil? group)
@@ -122,7 +123,9 @@
 
 ^{:refer xt.db.poc.s07-kernel-client-test/attach-pull-model
   :added "4.1"
-  :setup [(scratch-v0/log-append-public "kernel-client-pull")]}
+  :setup [(pg/t:delete scratch-v0/Log)
+          (scratch-v0/log-append-public "kernel-client-pull")
+          (Thread/sleep 1000)]}
 (fact "client can init adaptor, attach a remote pull-view model, and read postgres data"
 
 
@@ -151,10 +154,10 @@
         (promise/x:promise-then
          (fn [_]
            (return
-            (base-page/model-remote-call client "room/a" "demo" "pull" [["Log"]] true))))
+            (page-core/model-remote-call client "room/a" "demo" "pull" [["Log"]] true))))
         (promise/x:promise-then
          (fn [_]
-           (var group (base-page/group-get client "room/a" "demo"))
+           (var group (page-core/group-get client "room/a" "demo"))
            (var model (xtd/get-in group ["models" "pull"]))
            (repl/notify
             {"has_group" (xt/x:not-nil? group)
@@ -167,6 +170,6 @@
              "error" (. err ["message"])
              "stack" (. err ["stack"])})))))
   => (contains-in
-      {"has_group" true,
-       "output" [{"message" "tree", "author_id" nil, "id" string?}],
+      {"has_group" true, "output" [{"message" "kernel-client-pull", "author_id" nil,
+                                    "id" string?}],
        "model_type" "event.model"}))
