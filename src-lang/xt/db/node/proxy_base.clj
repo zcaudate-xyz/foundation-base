@@ -58,15 +58,17 @@
   (var space-id (xtd/get-in page-args ["space_id"]))
   (var group-id (xtd/get-in page-args ["group_id"]))
   (var transport-id (proxy-util/get-transport-id node (xtd/get-in request ["meta"])))
+  (page-proxy/create-proxy-group node space-id group-id {} {"transport_id" transport-id})
   (return
-   (-> (substrate/request node
-                          nil
-                          (xt/x:get-key request "action")
-                          args
-                          {"transport_id" transport-id})
+   (-> (page-proxy/open-proxy-group node space-id group-id {"transport_id" transport-id})
        (promise/x:promise-then
-        (fn [_]
-          (return (page-proxy/open-proxy-group node space-id group-id {"transport_id" transport-id})))))))
+        (fn [_out]
+          (return
+           (substrate/request node
+                              nil
+                              (xt/x:get-key request "action")
+                              args
+                              {"transport_id" transport-id})))))))
 
 (defn.xt detach-forward-handler
   "forwards a detach action to the server and closes the proxy group"
@@ -77,14 +79,15 @@
   (var group-id (xtd/get-in page-args ["group_id"]))
   (var transport-id (proxy-util/get-transport-id node (xtd/get-in request ["meta"])))
   (return
-   (-> (substrate/request node
-                          nil
-                          (xt/x:get-key request "action")
-                          args
-                          {"transport_id" transport-id})
+   (-> (page-proxy/close-proxy-group node space-id group-id {"transport_id" transport-id})
        (promise/x:promise-then
-        (fn [_]
-          (return (page-proxy/close-proxy-group node space-id group-id {"transport_id" transport-id})))))))
+        (fn [_out]
+          (return
+           (substrate/request node
+                           nil
+                           (xt/x:get-key request "action")
+                           args
+                           {"transport_id" transport-id})))))))
 
 (defn.xt init-proxy-handlers
   "Registers client-side proxy handlers for xt.db.node.kernel-base methods so

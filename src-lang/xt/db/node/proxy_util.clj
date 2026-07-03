@@ -33,11 +33,12 @@
   (return (xtd/get-in node ["state" "adaptor_proxy" "default_transport_id"])))
 
 (defn.xt get-transport-id
-  "resolves the transport id from opts or the node default"
+  "resolves the transport id from opts, the node default, or the first attached transport"
   {:added "4.1"}
   [node opts]
   (return (or (xtd/get-in opts ["transport_id"])
-              (-/get-default-transport node))))
+              (-/get-default-transport node)
+              (xt/x:first (substrate/list-transports node)))))
 
 (defn.xt request-meta
   "builds request meta with an explicit transport_id"
@@ -58,7 +59,8 @@
                       (-/request-meta node request))))
 
 (defn.xt request-client
-  "calls a supabase action through substrate/request"
+  "calls a db action through a local handler if one is registered, otherwise
+   forwards over the configured transport"
   {:added "4.1"}
   [node action args opts]
   (return
