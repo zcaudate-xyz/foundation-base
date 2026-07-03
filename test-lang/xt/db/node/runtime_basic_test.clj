@@ -138,7 +138,7 @@
     (var client (substrate/node-create {"id" "nodeworker-supabase-client"}))
     (-> (runtime/nodeworker-connect client
                                     {"primary" (. -/CONFIG ["supabase"])
-                                     "caching" (. -/CONFIG ["sqlite"])}
+                                     "caching" (. -/CONFIG ["memory"])}
                                     -/Schema
                                     -/SchemaLookup
                                     nil
@@ -148,14 +148,9 @@
            (return
             (substrate/request client
                                nil
-                               "@xt.db/rpc-call"
+                               "@xt.db/pull-call"
                                ["db/primary"
-                                {"id" "ping"
-                                 "schema" "scratch_v0"
-                                 "return" "jsonb"
-                                 "input" []
-                                 "flags" {}}
-                                []]
+                                ["Log"]]
                                {}))))
         (promise/x:promise-then
          (fn [out]
@@ -165,11 +160,17 @@
              "first-message" (xtd/get-in out [0 "message"])})))
         (promise/x:promise-catch
          (fn [err]
+           (var frame-error (xt/x:get-key err "error"))
            (repl/notify
             {"error" (xt/x:ex-message err)
              "status" (xt/x:get-key err "status")
              "data" (xt/x:get-key err "data")
-             "frame-error" (xt/x:get-key err "error")
+             "frame-error" frame-error
+             "frame-error-message" (xt/x:get-key frame-error "message")
+             "frame-error-stack" (xt/x:get-key frame-error "stack")
+             "frame-error-name" (xt/x:get-key frame-error "name")
              "raw" err})))))
-  => {"rpc" "pong"})
+  => {"pulled" true
+      "count" 1
+      "first-message" "hello-nodeworker"})
 
