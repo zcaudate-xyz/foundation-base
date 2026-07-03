@@ -529,3 +529,14 @@
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-obj-pairs :added "4.1"}
 (fact "lists object pairs")
+
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise-new :added "4.0"}
+(fact "creates a new promise via a Dart completer"
+  (let [out (l/emit-as :dart [(dart-tf-x-promise-new '[_ thunk])])]
+    [(boolean (re-find #"Completer<dynamic>\(\)" out))
+     (boolean (re-find #"Function\.apply\(thunk" out))
+     (boolean (re-find #"completer\.complete" out))
+     (boolean (re-find #"completer\.completeError" out))
+     (boolean (re-find #"completer\.future" out))])
+  => [true true true true true])

@@ -135,3 +135,7 @@
   (space-create )
   (into {} (space))
   (into {} (space 'hello)))
+
+
+^{:refer std.lib.context.space/space-rt-create :added "4.1"}
+(fact "TODO")

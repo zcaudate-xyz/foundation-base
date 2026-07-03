@@ -50,3 +50,13 @@
    [(ic/show out)
     (ic/count out)])
   => ["[\"a\", 1]" 2])
+
+
+^{:refer kmi.lang.type-pair/pair-to-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.type-pair/pair-to-array :added "4.1"}
+(fact "TODO")
+
+^{:refer kmi.lang.type-pair/pair-nth :added "4.1"}
+(fact "TODO")

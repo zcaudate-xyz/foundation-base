@@ -4,6 +4,7 @@
              [hara.lang.book :as book]
              [hara.lang.book-module :as module]
              [hara.lang.impl :as impl]
+             [hara.lang.impl-entry :as entry]
              [hara.lang.library :as lib]
              [hara.lang.library-snapshot-prep-test :as prep]
              [hara.lang.pointer :as ptr]
@@ -459,5 +460,33 @@
 (fact "macro for runtime lang macros")
 
 
-^{:refer hara.lang.script-macro/hydrate-top-level-entry :added "4.1"}
-(fact "TODO")
+^{:refer hara.lang.script-macro/hydrate-top-level-entry :added "4.0"}
+(fact "hydrates a top level entry with grammar and module metadata"
+
+  (let [plib (lib/library {:snapshot prep/+snap+})]
+    (lib/add-book! plib (assoc pg/+book+ :modules {}))
+    (lib/add-module! plib (module/book-module {:lang :postgres
+                                               :id 'postgres.sample.scratch-v1}))
+    (impl/with:library [plib]
+      (let [book     (lib/get-book plib :postgres)
+            reserved ['defn (get-in book [:grammar :reserved 'defn])]
+            [tmeta entry] (entry/create-code-raw
+                           (with-meta
+                             '(defn.pg hydrated-fn
+                                "a hydrated function"
+                                {:added "4.0"}
+                                [:jsonb input]
+                                (return input))
+                             {:module 'postgres.sample.scratch-v1})
+                           (second reserved)
+                           {:module 'postgres.sample.scratch-v1
+                            :lang :postgres})
+            hydrated (macro/hydrate-top-level-entry entry
+                                                    :postgres
+                                                    (second reserved)
+                                                    plib
+                                                    'postgres.sample.scratch-v1)]
+        [(contains? hydrated :static/schema)
+         (contains? hydrated :static/application)
+         (:static/return hydrated)])))
+  => [true true [:jsonb]])

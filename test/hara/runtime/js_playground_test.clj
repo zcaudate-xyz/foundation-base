@@ -123,3 +123,24 @@
     script => #"PLAYGROUND\[\"createTab\"\]"
     script => #"PLAYGROUND\[\"closeTab\"\]"
     script => #"PLAYGROUND\[\"setTabContent\"\]"))
+
+^{:refer hara.runtime.js-playground/page-html :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.js-playground/stop-js-playground :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.js-playground/invoke-ptr-js-playground :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.js-playground/rt-js-playground-string :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.js-playground/play-file :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.js-playground/play-script :added "4.1"}
+(fact "TODO")
+
+^{:refer hara.runtime.js-playground/play-page :added "4.1"}
+(fact "TODO")

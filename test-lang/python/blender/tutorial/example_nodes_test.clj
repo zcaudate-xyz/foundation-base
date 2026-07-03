@@ -94,3 +94,31 @@
            "NoiseSphere"
            "/tmp/tutorial-nodes.png")))
   => "/tmp/tutorial-nodes.png")
+
+
+^{:refer python.blender.tutorial.example-nodes/make-noise-material :added "4.1"}
+(fact "TODO")
+
+^{:refer python.blender.tutorial.example-nodes/build-geometry-pipeline :added "4.1"}
+(fact "TODO")
+
+^{:refer python.blender.tutorial.example-nodes/material-node-count :added "4.1"}
+(fact "TODO")
+
+^{:refer python.blender.tutorial.example-nodes/clear-tree-count :added "4.1"}
+(fact "TODO")
+
+^{:refer python.blender.tutorial.example-nodes/add-node-count :added "4.1"}
+(fact "TODO")
+
+^{:refer python.blender.tutorial.example-nodes/link-count :added "4.1"}
+(fact "TODO")
+
+^{:refer python.blender.tutorial.example-nodes/build-pipeline-count :added "4.1"}
+(fact "TODO")
+
+^{:refer python.blender.tutorial.example-nodes/geometry-tree-name :added "4.1"}
+(fact "TODO")
+
+^{:refer python.blender.tutorial.example-nodes/compositor-tree-name :added "4.1"}
+(fact "TODO")

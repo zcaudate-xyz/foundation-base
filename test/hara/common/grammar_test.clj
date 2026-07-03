@@ -107,7 +107,14 @@
   => map?)
 
 ^{:refer hara.common.grammar/default-lookup :added "4.1"}
-(fact "TODO")
+(fact "removes optional categories from the lookup"
+  (contains? (set (keys (default-lookup +op-all+)))
+             :functional-core)
+  => false
+
+  (contains? (set (keys (default-lookup +op-all+)))
+             :math)
+  => true)
 
 ^{:refer hara.common.grammar/build :added "4.1"}
 (fact "functional core ops are selected explicitly"

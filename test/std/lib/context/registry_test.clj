@@ -62,3 +62,7 @@
 (fact "gets the scratch runtime for a registered context"
   (registry-scratch :null)
   => rt-null?)
+
+
+^{:refer std.lib.context.registry/registry-scratch-set! :added "4.1"}
+(fact "TODO")

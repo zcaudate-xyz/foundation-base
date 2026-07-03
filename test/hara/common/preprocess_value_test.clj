@@ -41,13 +41,53 @@
           (return ["unable to connect"]))))
 
 ^{:refer hara.common.preprocess-value/value-block-entry :added "4.1"}
-(fact "TODO")
+(fact "returns the reserved entry for block-valued macro calls"
+  (let [macro (fn [_] nil)
+        grammar {:reserved {'x:block {:emit :macro
+                                      :macro macro
+                                      :op-spec {:allow-blocks true}}}}]
+    (value-block-entry '(x:block 1 2) grammar)
+    => {:emit :macro :macro macro :op-spec {:allow-blocks true}}
+
+    (value-block-entry '(x:block 1 2)
+                       {:reserved {'x:block {:emit :macro
+                                             :macro macro
+                                             :op-spec {}}}})
+    => nil
+
+    (value-block-entry 'x:block grammar)
+    => nil))
 
 ^{:refer hara.common.preprocess-value/expand-value-block :added "4.1"}
-(fact "TODO")
+(fact "expands block-valued macro calls"
+  (let [macro (fn [[_ & body]] (apply list '+ body))
+        grammar {:reserved {'x:block {:emit :macro
+                                      :macro macro
+                                      :op-spec {:allow-blocks true}}}}]
+    (expand-value-block '(x:block 1 2 3) grammar nil {})
+    => '(+ 1 2 3)
+
+    (expand-value-block '(foo 1 2) {} nil {})
+    => nil))
 
 ^{:refer hara.common.preprocess-value/resolve-block-form :added "4.1"}
-(fact "TODO")
+(fact "resolves block-valued forms and namespaced fragment wrappers"
+  (let [macro (fn [_] nil)
+        grammar {:reserved {'x:block {:emit :macro
+                                      :macro macro
+                                      :op-spec {:allow-blocks true}}}}
+        modules {'U.test {:fragment {'my-op {:template (fn [a b]
+                                                          (list 'x:block a b))}}}}
+        mopts '{:module {:id JS.core
+                         :link {u U.test}}}]
+    (resolve-block-form '(x:block 1) grammar nil {})
+    => '(x:block 1)
+
+    (resolve-block-form '(foo 1) grammar nil {})
+    => nil
+
+    (resolve-block-form '(u/my-op 1 2) grammar modules mopts)
+    => '(x:block 1 2)))
 
 ^{:refer hara.common.preprocess-value/value-template-args :added "4.1"}
 (fact "derives template value args from arglists metadata"

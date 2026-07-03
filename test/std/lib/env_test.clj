@@ -272,3 +272,6 @@
 (fact "removes filters from the debug allowlist"
   (dbg:remove-filters :test)
   => (complement #(contains? % :test)))
+
+^{:refer std.lib.env/docker-daemon-available? :added "4.1"}
+(fact "TODO")

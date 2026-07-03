@@ -51,3 +51,24 @@
    :default
    (ut/lang-pointer :lua {:module 'L.core}) [])
   => (throws))
+
+
+^{:refer hara.lang.script-control/script-rt-prep :added "4.0"}
+(fact "prepares a runtime context without starting it"
+
+  (do (script-rt-stop :lua)
+      (space/space:context-unset (ut/lang-context :lua))
+      (space/space:rt-active))
+  => []
+
+  (let [[sp ctx] (script-rt-prep :lua :default {})]
+    [(space/space? sp) ctx])
+  => [true :lang/lua]
+
+  (space/space:context-list)
+  => (contains '[:lang/lua])
+
+  (do (script-rt-stop :lua)
+      (space/space:context-unset (ut/lang-context :lua))
+      (space/space:rt-active))
+  => [])
