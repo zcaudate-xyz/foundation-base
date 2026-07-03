@@ -11,7 +11,6 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as main]
-             [xt.substrate.base-sync :as model]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-request :as req]
              [xt.substrate.base-util :as util]]})
@@ -23,7 +22,6 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as main]
-             [xt.substrate.base-sync :as model]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-request :as req]
              [xt.substrate.base-util :as util]]})
@@ -35,7 +33,6 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.helpers.test-fixtures :as fixtures]
              [xt.substrate :as main]
-             [xt.substrate.base-sync :as model]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-request :as req]
              [xt.substrate.base-util :as util]]})
@@ -723,7 +720,6 @@
 
   (notify/wait-on :js
     (var n (main/node-create {"id" "node-a"}))
-    (model/install n fixtures/InstallOpts)
     (promise/x:promise-catch
      (promise/x:promise-then
       (main/publish n "room/a" "xt.db/cache.changed" {"tables" {"Order" true}}
