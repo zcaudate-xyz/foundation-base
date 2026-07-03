@@ -451,15 +451,18 @@
   (return (. (!:G URL) (createObjectURL blob))))
 
 (defn.xt webworker-source
-  "creates a transport source map backed by a browser WebWorker"
+  "creates a transport source map backed by a browser WebWorker.
+   `opts` is passed as the second argument to the Worker constructor,
+   allowing `{:type \"module\"}` to be used for ES-module worker scripts."
   {:added "4.1"}
-  [script]
+  [script opts]
+  (var worker-opts (or opts {}))
   (return
    {"create_fn"
     (fn [listener]
       (var url (-/blob-url script))
       (try
-        (var worker (new Worker url))
+        (var worker (new Worker url worker-opts))
         (. worker (addEventListener
                    "message"
                    (fn [e]

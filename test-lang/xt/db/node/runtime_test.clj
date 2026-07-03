@@ -3,11 +3,18 @@
   (:require [hara.lang :as l]
             [hara.runtime.chromedriver :as chromedriver]
             [clojure.string :as str]
-            [net.http :as net.http]
+            [xt.lang.spec-base :as xt]
+            [xt.lang.common-repl :as repl]
+            [xt.lang.spec-promise :as promise]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.local-min :as local-min]))
+            [xt.substrate :as substrate]
+            [xt.substrate.transport-browser :as browser-transport]
+            [scaffold.supabase.local-min :as local-min]
+            [xt.db.node.client-base :as client-base]
+            [xt.db.node.runtime :as runtime]
+            [js.worker.link :as worker-link]))
 
-(do 
+(do
   (l/script- :postgres
     {:runtime :jdbc.client
      :require [[postgres.sample.scratch-v0 :as scratch-v0]
@@ -29,16 +36,12 @@
   {:runtime :chromedriver.instance
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
-             [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
-             [xt.substrate.page-core :as page-core]
              [xt.substrate.transport-browser :as browser-transport]
-             [xt.db.system.impl-common :as impl-common]
-             [xt.db.node.kernel-base :as kernel-base]
-             [xt.db.node.proxy-util :as proxy-util]
-             [xt.db.node.runtime :as runtime]]})
+             [xt.db.node.client-base :as client-base]
+             [xt.db.node.runtime :as runtime]
+             [js.worker.link :as worker-link]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -46,40 +49,15 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
-(defn.js with-timeout
-  "races a promise against a timeout"
-  {:added "4.1"}
-  [promise ms]
-  (return
-   (. Promise
-      (race [promise
-             (new Promise
-                  (fn [resolve _]
-                    (. setTimeout (fn [] (resolve {"timeout" true})) ms)))]))))
+(def +sharedworker-script+
+  (runtime/sharedworket-init-string
+   {"@sqlite.org/sqlite-wasm" "data:text/javascript,export default {}"
+    "pg" "data:text/javascript,export default {Client: function() {}}"}))
 
 (def +webworker-script+
-  (l/emit-script
-   '(do
-      (var node (xt.substrate/node-create {"id" "webworker-server"}))
-      (xt.db.node.runtime/webworker-init-kernel node "host" "webworker-server"))
-   {:lang :js
-    :layout :full
-    :emit {:override {"@sqlite.org/sqlite-wasm"
-                      "data:text/javascript,export default {}"
-                      "pg"
-                      "data:text/javascript,export default {Client: function() {}}"}}}))
-
-(def +sharedworker-script+
-  (l/emit-script
-   '(do
-      (var node (xt.substrate/node-create {"id" "sharedworker-server"}))
-      (xt.db.node.runtime/sharedworker-init-kernel node "host" "sharedworker-server"))
-   {:lang :js
-    :layout :full
-    :emit {:override {"@sqlite.org/sqlite-wasm"
-                      "data:text/javascript,export default {}"
-                      "pg"
-                      "data:text/javascript,export default {Client: function() {}}"}}}))
+  (runtime/webworker-init-string
+   {"@sqlite.org/sqlite-wasm" "data:text/javascript,export default {}"
+    "pg" "data:text/javascript,export default {Client: function() {}}"}))
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -120,32 +98,6 @@
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.supabase/sign-up"))))
   => true)
 
-^{:refer xt.db.node.runtime/sharedworker-init-kernel :added "4.1"}
-(fact "boots a SharedWorker and emits a ready signal"
-
-  (notify/wait-on [:js 10000]
-    (var source (browser-transport/sharedworker-source (@! +sharedworker-script+) {}))
-    (-> (-/with-timeout
-         (new Promise
-              (fn [resolve _]
-                ((xt/x:get-key source "create_fn")
-                 (fn [data]
-                   (resolve data)))))
-         5000)
-        (promise/x:promise-then
-         (fn [data]
-           (repl/notify data)))
-        (promise/x:promise-catch
-         (fn [err]
-           (repl/notify {"error" (xt/x:ex-message err)})))))
-  => (fn [res]
-       (or (and (map? res)
-                (= "ready" (get res "signal"))
-                (= "host" (get res "transport"))
-                (= "sharedworker-server" (get res "worker")))
-           (and (map? res)
-                (true? (get res "timeout"))))))
-
 ^{:refer xt.db.node.runtime/sharedworket-init-string :added "4.1"}
 (fact "emits a script string for booting a SharedWorker kernel"
 
@@ -154,63 +106,6 @@
          (> (count script) 0)
          (str/includes? script "sharedworker")))
   => true)
-
-^{:refer xt.db.node.runtime/sharedworker-connect :added "4.1"}
-(fact "connects a client to a SharedWorker kernel and initialises it"
-
-  (notify/wait-on [:js 10000]
-    (var client (substrate/node-create {"id" "sharedworker-connect-client"}))
-    (-> (-/with-timeout
-         (runtime/sharedworker-connect client
-                                       {"primary" {"type" "memory" "defaults" {}}
-                                        "caching" {"type" "memory" "defaults" {}}}
-                                       {}
-                                       {}
-                                       (browser-transport/sharedworker-source (@! +sharedworker-script+) {})
-                                       nil)
-         5000)
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify
-            {"has-init" (xt/x:not-nil? (xt/x:get-key out "init"))
-             "transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))})))
-        (promise/x:promise-catch
-         (fn [err]
-           (repl/notify
-            {"transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))
-             "status" (xt/x:get-key err "status")
-             "kind" (xt/x:get-key err "kind")})))))
-  => (fn [res]
-       (or (and (map? res)
-                (true? (get res "transport-attached")))
-           (and (map? res)
-                (true? (get res "timeout"))))))
-
-^{:refer xt.db.node.runtime/webworker-init-kernel :added "4.1"}
-(fact "boots a WebWorker and emits a ready signal"
-
-  (notify/wait-on [:js 10000]
-    (var source (browser-transport/webworker-source (@! +webworker-script+)))
-    (-> (-/with-timeout
-         (new Promise
-              (fn [resolve _]
-                ((xt/x:get-key source "create_fn")
-                 (fn [data]
-                   (resolve data)))))
-         5000)
-        (promise/x:promise-then
-         (fn [data]
-           (repl/notify data)))
-        (promise/x:promise-catch
-         (fn [err]
-           (repl/notify {"error" (xt/x:ex-message err)})))))
-  => (fn [res]
-       (or (and (map? res)
-                (= "ready" (get res "signal"))
-                (= "host" (get res "transport"))
-                (= "webworker-server" (get res "worker")))
-           (and (map? res)
-                (true? (get res "timeout"))))))
 
 ^{:refer xt.db.node.runtime/webworker-init-string :added "4.1"}
 (fact "emits a script string for booting a WebWorker kernel"
@@ -221,33 +116,122 @@
          (str/includes? script "webworker")))
   => true)
 
-^{:refer xt.db.node.runtime/webworker-connect :added "4.1"}
-(fact "connects a client to a WebWorker kernel and initialises it"
+^{:refer xt.db.node.runtime/sharedworker-connect :added "4.1"}
+(fact "connects a client to a SharedWorker kernel and initialises it"
 
-  (notify/wait-on [:js 10000]
-    (var client (substrate/node-create {"id" "webworker-connect-client"}))
-    (-> (-/with-timeout
-         (runtime/webworker-connect client
-                                    {"primary" {"type" "memory" "defaults" {}}
-                                     "caching" {"type" "memory" "defaults" {}}}
-                                    {}
-                                    {}
-                                    (browser-transport/webworker-source (@! +webworker-script+))
-                                    nil)
-         5000)
+  (notify/wait-on [:js 20000]
+    (var client (substrate/node-create {"id" "sharedworker-connect-client"}))
+    (-> (runtime/sharedworker-connect client
+                                      {"primary" {"type" "memory" "defaults" {}}
+                                       "caching" {"type" "memory" "defaults" {}}}
+                                      {}
+                                      {}
+                                      (browser-transport/sharedworker-source
+                                       (@! +sharedworker-script+)
+                                       {"type" "module"})
+                                      nil)
         (promise/x:promise-then
          (fn [out]
            (repl/notify
-            {"has-init" (xt/x:not-nil? (xt/x:get-key out "init"))
-             "transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))})))
+            {"transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))})))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify
-            {"transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))
-             "status" (xt/x:get-key err "status")
-             "kind" (xt/x:get-key err "kind")})))))
+            {"error" (xt/x:ex-message err)})))))
+  => {"transport-attached" true})
+
+^{:refer xt.db.node.runtime/webworker-connect :added "4.1"}
+(fact "connects a client to a WebWorker kernel and initialises it"
+
+  (notify/wait-on [:js 20000]
+    (var client (substrate/node-create {"id" "webworker-connect-client"}))
+    (-> (runtime/webworker-connect client
+                                   {"primary" {"type" "memory" "defaults" {}}
+                                    "caching" {"type" "memory" "defaults" {}}}
+                                   {}
+                                   {}
+                                   (browser-transport/webworker-source
+                                    (@! +webworker-script+)
+                                    {"type" "module"})
+                                   nil)
+        (promise/x:promise-then
+         (fn [out]
+           (repl/notify
+            {"transport-attached" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify
+            {"error" (xt/x:ex-message err)})))))
+  => {"transport-attached" true})
+
+(defn.js sharedworker-source-from-url
+  "creates a SharedWorker source that reuses a fixed blob URL"
+  {:added "4.1"}
+  [url opts]
+  (var worker-opts (or opts {}))
+  (return
+   {"create_fn"
+    (fn [listener]
+      (var shared (new SharedWorker url worker-opts))
+      (var port (. shared ["port"]))
+      (. port (start))
+      (. port (addEventListener
+               "message"
+               (fn [e]
+                 (return (listener (. e ["data"]))))
+               false))
+      (return port))}))
+
+^{:refer xt.db.node.runtime/sharedworker-connect
+  :added "4.1"}
+(fact "two clients connect to the same SharedWorker and pull data"
+
+  (notify/wait-on [:js 30000]
+    (var worker-url (worker-link/make-blob-url (@! +sharedworker-script+)))
+    (var source (-/sharedworker-source-from-url worker-url {"type" "module"}))
+    (var client-a (substrate/node-create {"id" "sharedworker-client-a"}))
+    (var client-b (substrate/node-create {"id" "sharedworker-client-b"}))
+    (-> (runtime/sharedworker-connect client-a
+                                      {"primary" {"type" "memory" "defaults" {}}
+                                       "caching" {"type" "memory" "defaults" {}}}
+                                      -/Schema
+                                      -/SchemaLookup
+                                      source
+                                      nil)
+        (promise/x:promise-then
+         (fn [_]
+           (return (client-base/sync-cached
+                    client-a
+                    "db/primary"
+                    {"db/sync" {"Log" [{"id" 1 "message" "shared"}]}}
+                    {}))))
+        (promise/x:promise-then
+         (fn [_]
+           (return (client-base/pull-cached client-a "db/primary" ["Log" {"data" ["message"]}] {}))))
+        (promise/x:promise-then
+         (fn [output-a]
+           (-> (runtime/sharedworker-connect client-b
+                                             {"primary" {"type" "memory" "defaults" {}}
+                                              "caching" {"type" "memory" "defaults" {}}}
+                                             -/Schema
+                                             -/SchemaLookup
+                                             source
+                                             nil)
+               (promise/x:promise-then
+                (fn [_]
+                  (return (client-base/pull-cached client-b "db/primary" ["Log" {"data" ["message"]}] {}))))
+               (promise/x:promise-then
+                (fn [output-b]
+                  (repl/notify
+                   {"output-a" output-a
+                    "output-b" output-b}))))))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify
+            {"error" (xt/x:ex-message err)
+             "string" (xt/x:to-string err)
+             "keys" (xt/x:obj-keys err)
+             "json" (. (!:G JSON) (stringify err))})))))
   => (fn [res]
-       (or (and (map? res)
-                (true? (get res "transport-attached")))
-           (and (map? res)
-                (true? (get res "timeout"))))))
+       (and (= "shared" (get-in res ["output-a" 0 "message"]))
+            (= "shared" (get-in res ["output-b" 0 "message"])))))

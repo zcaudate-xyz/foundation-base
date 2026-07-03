@@ -9,6 +9,7 @@
                      [xt.substrate.transport-browser :as browser-transport]
                      [xt.db.node.client-base :as client-base]
                      [xt.db.node.proxy-base :as proxy-base]
+                     [xt.db.node.proxy-util :as proxy-util]
                      [xt.db.node.proxy-supabase :as proxy-supabase]
                      [xt.db.node.kernel-base :as kernel-base]
                      [xt.db.node.kernel-supabase :as kernel-supabase]]})
@@ -186,15 +187,26 @@
 (defn.xt nodeworker-connect
   [client config schema lookup source transport-id]
   (-/init-server-proxy client)
+  (var actual-transport-id (or transport-id
+                               -/DEFAULT_TRANSPORT))
   (return
    (-> (browser-transport/connect-worker
         client
-        {"transport_id" (or transport-id
-                                 -/DEFAULT_TRANSPORT)
+        {"transport_id" actual-transport-id
          "source" (or source
                       (browser-transport/node-worker-source -/DEFAULT_NODEWORKER_SCRIPT
                                                             {}))})
        (promise/x:promise-then
         (fn [conn]
+          (proxy-util/set-default-transport client actual-transport-id)
           (return
-           (client-base/kernel-init client config schema lookup {})))))))
+           (substrate/request client
+                              nil
+                              "@xt.db/kernel-init"
+                              [config schema lookup]
+                              {}))))
+       (promise/x:promise-then
+        (fn [out]
+          (return {"init" true
+                   "transport" actual-transport-id
+                   "transport-attached" true}))))))
