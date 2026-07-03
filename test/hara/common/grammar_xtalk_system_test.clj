@@ -197,7 +197,30 @@
 
 
 ^{:refer hara.common.grammar-xtalk-system/xtalk-op-polyfill-symbol :added "4.1"}
-(fact "TODO")
+(fact "returns the hard-link helper symbol for an xtalk op"
+  (xtalk-op-polyfill-symbol :x-obj-keys)
+  => 'xt.lang.common-data/obj-keys
+
+  (xtalk-op-polyfill-symbol :x-promise)
+  => 'xt.lang.common-promise/promise
+
+  (xtalk-op-polyfill-symbol :x-add)
+  => nil
+
+  (xtalk-op-polyfill-symbol :x-obj-keys
+                            {:reserved {'x:obj-keys {:emit :macro}}})
+  => nil)
 
 ^{:refer hara.common.grammar-xtalk-system/xtalk-ops-polyfill-modules :added "4.1"}
-(fact "TODO")
+(fact "returns helper module namespaces for a collection of xtalk ops"
+  (xtalk-ops-polyfill-modules #{:x-obj-keys
+                                :x-promise})
+  => '#{xt.lang.common-data
+        xt.lang.common-promise}
+
+  (xtalk-ops-polyfill-modules #{:x-add})
+  => '#{}
+
+  (xtalk-ops-polyfill-modules #{:x-obj-keys :x-promise}
+                              {:reserved {'x:promise {:emit :macro}}})
+  => '#{xt.lang.common-data})

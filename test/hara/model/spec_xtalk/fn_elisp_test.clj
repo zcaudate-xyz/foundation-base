@@ -486,4 +486,6 @@
 
 
 ^{:refer hara.model.spec-xtalk.fn-elisp/elisp-tf-x-promise-new :added "4.1"}
-(fact "TODO")
+(fact "transforms x:promise-new"
+  (elisp-tf-x-promise-new '(x:promise-new thunk))
+  => '(xt-promise-new thunk))

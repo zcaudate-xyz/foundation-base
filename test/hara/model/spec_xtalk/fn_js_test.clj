@@ -545,5 +545,7 @@
   )
 
 
-^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise-new :added "4.1"}
-(fact "TODO")
+^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise-new :added "4.0"}
+(fact "creates a new promise"
+  (l/emit-as :js [(js-tf-x-promise-new '[_ thunk])])
+  => "new Promise(function (resolve,reject){\n  thunk(resolve,reject);\n})")

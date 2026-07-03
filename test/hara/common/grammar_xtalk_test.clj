@@ -24,11 +24,15 @@
         [arr val]
         (x:arr-push [arr val])))
 
-^{:refer hara.common.grammar-xtalk/tf-lt-string :added "4.1"}
-(fact "TODO")
+^{:refer hara.common.grammar-xtalk/tf-str-lt :added "4.1"}
+(fact "checks string ordering ascending"
+  (tf-str-lt '(x:str-lt "a" "b"))
+  => '(x:str-comp "a" "b"))
 
-^{:refer hara.common.grammar-xtalk/tf-gt-string :added "4.1"}
-(fact "TODO")
+^{:refer hara.common.grammar-xtalk/tf-str-gt :added "4.1"}
+(fact "checks string ordering descending"
+  (tf-str-gt '(x:str-gt "a" "b"))
+  => '(x:str-comp "b" "a"))
 
 ^{:refer hara.common.grammar-xtalk/tf-throw :added "4.0"}
 (fact "wrapper for throw transform"

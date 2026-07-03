@@ -81,16 +81,72 @@
   => vector?)
 
 ^{:refer hara.lang.script/script-require-target-id :added "4.1"}
-(fact "TODO")
+(fact "constructs a target module id from module, source, and alias"
+
+  (script/script-require-target-id 'my.module 'source.core nil)
+  => 'my.module.source.core
+
+  (script/script-require-target-id 'my.module 'source.core 'src)
+  => 'my.module.src
+
+  (script/script-require-target-id 'my.module 'source.core '[prefix src])
+  => 'my.module.src)
 
 ^{:refer hara.lang.script/script-specialize-merge-contracts :added "4.1"}
-(fact "TODO")
+(fact "merges specialization bindings into a contract map"
+
+  (script/script-specialize-merge-contracts :demo 'current {}
+                                            {'source.core {:backend 'backend.core
+                                                           :bindings {'contract.core 'backend.core}}})
+  => {'contract.core {:backend 'backend.core
+                      :source 'source.core
+                      :declared-backend 'backend.core}}
+
+  (script/script-specialize-merge-contracts :demo 'current
+                                            {'contract.core {:backend 'backend.core
+                                                             :source 'source.core
+                                                             :declared-backend 'backend.core}}
+                                            {'other.core {:backend 'alt.core
+                                                          :bindings {'contract.core 'alt.core}}})
+  => (throws))
 
 ^{:refer hara.lang.script/script-specialize-require :added "4.1"}
-(fact "TODO")
+(fact "resolves a specialization require spec"
+
+  (let [lib (lib/library:create {})]
+    (lib/install-book! lib xtalk/+book+)
+    (lib/install-book! lib lua/+book+)
+    (lib/install-module! lib :lua 'demo.contract {})
+    (lib/install-module! lib :lua 'demo.source {:require '[[demo.contract :as cache]]})
+    (lib/install-module! lib :lua 'demo.backend {:implements '[demo.contract]})
+    (script/script-specialize-require :lua 'demo.current lib '[demo.source :as src :with demo.backend]))
+  => '{:require-spec [demo.current.src :as src]
+       :specialize {demo.source {:backend demo.backend
+                                 :bindings {demo.contract demo.backend}
+                                 :contracts [demo.contract]
+                                 :source-lang :lua
+                                 :backend-lang :lua
+                                 :target demo.current.src}}})
 
 ^{:refer hara.lang.script/script-specialize-config :added "4.1"}
-(fact "TODO")
+(fact "processes config require specs for specialization"
+
+  (let [lib (lib/library:create {})]
+    (lib/install-book! lib xtalk/+book+)
+    (lib/install-book! lib lua/+book+)
+    (lib/install-module! lib :lua 'demo.contract {})
+    (lib/install-module! lib :lua 'demo.source {:require '[[demo.contract :as cache]]})
+    (lib/install-module! lib :lua 'demo.backend {:implements '[demo.contract]})
+    (script/script-specialize-config :lua 'demo.current
+                                     {:require '[[demo.source :as src :with demo.backend]]}
+                                     lib))
+  => '{:require [[demo.current.src :as src]]
+       :specialize {demo.source {:backend demo.backend
+                                 :bindings {demo.contract demo.backend}
+                                 :contracts [demo.contract]
+                                 :source-lang :lua
+                                 :backend-lang :lua
+                                 :target demo.current.src}}})
 
 ^{:refer hara.lang.script/script-fn-base :added "4.0"}
 (fact "setup for the runtime"

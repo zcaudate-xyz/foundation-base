@@ -58,4 +58,9 @@
   (:doc (meta #'cli/-main)) => "main entry point for lein seedgen")
 
 ^{:refer hara.seedgen.cli/seedgen-todos :added "4.1"}
-(fact "TODO")
+(fact "returns 0 TODO facts for a selector matching no namespaces"
+  (cli/seedgen-todos 'nonexistent.namespace.selector)
+  => 0
+
+  (cli/seedgen-todos 'nonexistent.namespace.selector {:write true})
+  => 0)
