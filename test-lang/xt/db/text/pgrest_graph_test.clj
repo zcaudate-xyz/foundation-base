@@ -172,7 +172,7 @@
          "data" ["nickname"]}]]
       g/compile-tree-select-params)])
   => ["status"
-      "account(nickname)"])
+      "account:Account(nickname)"])
 
 ^{:refer xt.db.text.pgrest-graph/compile-tree-select-params :added "4.1"}
 (fact "compiles tree params into select syntax"
@@ -196,7 +196,7 @@
       {"custom" []
        "data" []
        "links" []})])
-  => ["status,account(nickname)"
+  => ["status,account:Account(nickname)"
       "count"
       "*"])
 
@@ -274,29 +274,29 @@
   (!.js
     (g/select-return
      sample/Schema
-     ["Order"
+     ["WalletAsset"
       {"custom" [],
-       "where" [{"account" {"id" "acct-1"}}],
-       "links" [["account"
+       "where" [{"wallet" {"id" "wallet-1"}}],
+       "links" [["wallet"
                  "forward"
-                 ["Account"
+                 ["Wallet"
                   {"custom" [],
                    "where" [],
                    "links" [],
-                   "data" ["nickname"]}]]],
-       "data" ["status"]}]
+                   "data" ["slug"]}]]],
+       "data" ["id"]}]
      0
      {}))
   => {"type" "query",
-      "table" "Order",
+      "table" "WalletAsset",
       "method" "GET",
-      "path" "/rest/v1/Order",
-      "select" "status,account(nickname)",
-      "filters" [{"account" {"id" "acct-1"}}],
-      "params" ["select=status,account(nickname)"
-                "account.id=eq.acct-1"],
-      "query" "select=status,account(nickname)&account.id=eq.acct-1",
-      "url" "/rest/v1/Order?select=status,account(nickname)&account.id=eq.acct-1",
+      "path" "/rest/v1/WalletAsset",
+      "select" "id,wallet:Wallet(slug)",
+      "filters" [{"wallet_id" "wallet-1"}],
+      "params" ["select=id,wallet:Wallet(slug)"
+                "wallet_id=eq.wallet-1"],
+      "query" "select=id,wallet:Wallet(slug)&wallet_id=eq.wallet-1",
+      "url" "/rest/v1/WalletAsset?select=id,wallet:Wallet(slug)&wallet_id=eq.wallet-1",
       "headers" {}})
 
 ^{:refer xt.db.text.pgrest-graph/select-tree :added "4.1"}

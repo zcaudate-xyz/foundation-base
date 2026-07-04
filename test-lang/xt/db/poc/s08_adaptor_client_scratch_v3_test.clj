@@ -366,9 +366,9 @@
                   {"slug" "default"
                    "entries" (contains
                               [(contains {"balance" 100
-                                          "currency" {"id" "USD" "name" "US Dollar"}})
+                                          "currency" (contains {"id" "USD" "name" "US Dollar"})})
                                (contains {"balance" 0.5
-                                          "currency" {"id" "BTC" "name" "Bitcoin"}})]
+                                          "currency" (contains {"id" "BTC" "name" "Bitcoin"})})]
                               :in-any-order)})]}))
 
 ^{:refer xt.db.poc.s08-adaptor-client-scratch-v3-test/pull-multi-table
