@@ -25,15 +25,16 @@
 (fact "compiles solidity input json"
 
   (!.js
+   (var content (eth-solc/contract-wrap-body
+                 "function test___hello() pure public returns(string memory) { return \"HELLO WORLD\"; }"
+                 "Test"))
    (xtd/obj-keys
-    (eth-solc/compile
-     (xt/x:json-encode
-      {:language "Solidity"
-       :sources {"test.sol"
-                 {:content (eth-solc/contract-wrap-body
-                            "function test___hello() pure public returns(string memory) { return \"HELLO WORLD\"; }"
-                            "Test")}}
-       :settings {:outputSelection {"*" {"*" ["*"]}}}}})))
+    (JSON.parse
+     (eth-solc/compile
+      (+ "{\"language\":\"Solidity\","
+         "\"sources\":{\"test.sol\":{\"content\":"
+         (JSON.stringify content)
+         "}},\"settings\":{\"outputSelection\":{\"*\":{\"*\":[\"*\"]}}}}")))))
   => ["contracts" "sources"])
 
 ^{:refer js.lib.eth-solc/contract-wrap-body :added "4.0" :unchecked true}

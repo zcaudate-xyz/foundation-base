@@ -36,17 +36,17 @@
   (var ethers (-/get-ethers))
   (return (. ethers (formatUnits s units))))
 
-(defn.js ^{:arglists '([s, units])}
+(defn.js ^{:arglists '([s])}
   keccak256
-  [s units]
+  [s]
   (var ethers (-/get-ethers))
-  (return (. ethers (keccak256 s units))))
+  (return (. ethers (keccak256 (. ethers (toUtf8Bytes s))))))
 
-(defn.js ^{:arglists '([s, units])}
+(defn.js ^{:arglists '([s])}
   ripemd160
-  [s units]
+  [s]
   (var ethers (-/get-ethers))
-  (return (. ethers (ripemd160 s units))))
+  (return (. ethers (ripemd160 (. ethers (toUtf8Bytes s))))))
 
 (defn.js ^{:arglists '([s, units])}
   mnemonicToSeed

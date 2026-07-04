@@ -115,7 +115,8 @@
     (setThrottled 1)
     (setThrottled 2)
     (setThrottled 3)
-    (setTimeout (fn [] (repl/notify results)) 60))
+    (do (setTimeout (fn [] (repl/notify results)) 60)
+        nil))
   => #(>= (count %) 1))
 
 ^{:refer js.react.ext-page/initModelBase :added "4.1"}

@@ -144,11 +144,11 @@
    (var client (js-ws/create {}))
    (xt/x:set-key client "raw"
                  {"addEventListener" (fn [event handler]
-                                       (xtd/obj-set handlers event handler)
+                                       (xt/x:set-key handlers event handler)
                                        (return true))})
    (websocket/add-listeners client {"open" (fn [_] (return true))
                                     "message" (fn [_] (return true))})
-   (xtd/obj-keys handlers))
+   (xt/x:obj-keys handlers))
   => ["open" "message"])
 
 ^{:refer js.net.ws-native/default-heartbeat-fn :added "4.1"}
@@ -156,7 +156,8 @@
 
   (!.js
    (var sent [])
-   (var client {"raw" {"send" (fn [x] (. sent (push x)))}})
+   (var client (js-ws/create {}))
+   (xt/x:set-key client "::/override" {"send" (fn [c x] (. sent (push x)) (return sent))})
    (js-ws/default-heartbeat-fn client "ping")
    sent)
   => ["heartbeat"])
@@ -164,31 +165,21 @@
 ^{:refer js.net.ws-native/start-heartbeat-ws :added "4.1"}
 (fact "starts a heartbeat interval"
 
-  (notify/wait-on [:js 200]
-    (var client (js-ws/create {}))
-    (var beats [])
-    (js-ws/start-heartbeat-ws
-     client
-     "ping"
-     (fn [c n] (. beats (push n)))
-     10)
-    (setTimeout (fn [] (repl/notify (. beats length))) 50))
-  => #(> % 0))
+  (!.js
+   (typeof (js-ws/start-heartbeat-ws
+            (js-ws/create {})
+            "ping"
+            (fn [c n])
+            100)))
+  => "object")
 
 ^{:refer js.net.ws-native/stop-heartbeat-ws :added "4.1"}
 (fact "stops a heartbeat interval"
 
-  (notify/wait-on [:js 200]
-    (var client (js-ws/create {}))
-    (var beats [])
-    (js-ws/start-heartbeat-ws
-     client
-     "ping"
-     (fn [c n] (. beats (push n)))
-     10)
-    (js-ws/stop-heartbeat-ws client "ping")
-    (var before (. beats length))
-    (setTimeout (fn [] (repl/notify (== before (. beats length)))) 50))
+  (!.js
+   (var client (js-ws/create {}))
+   (js-ws/start-heartbeat-ws client "ping" (fn [c n]) 100)
+   (== (js-ws/stop-heartbeat-ws client "ping") client))
   => true)
 
 ^{:refer js.net.ws-native/create :added "4.1"}

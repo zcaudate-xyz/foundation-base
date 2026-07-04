@@ -2,12 +2,15 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [js.net.conn-redis :as redis]
-            [xt.lang.common-data :as xtd]))
+            [xt.lang.common-notify :as notify]
+            [xt.lang.common-repl :as repl]
+            [xt.lang.spec-promise :as promise]))
 
 (l/script- :js
   {:runtime :basic
    :require [[js.net.conn-redis :as redis]
-             [xt.lang.common-data :as xtd]]})
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -24,31 +27,36 @@
 ^{:refer js.net.conn-redis/client-connect :added "4.1"}
 (fact "connects the redis client"
 
-  (!.js
-   (var client (redis/create {}))
-   (var raw {"connect" (fn [] (return (Promise.resolve "connected")))})
-   (xtd/obj-assign client {"raw" raw})
-   (redis/client-connect client {}))
-  => "connected")
+  (notify/wait-on :js
+    (-> (redis/client-connect (redis/create {}) {})
+        (promise/x:promise-then
+         (fn [client]
+           (repl/notify (typeof client))))))
+  => "object")
 
 ^{:refer js.net.conn-redis/client-disconnect :added "4.1"}
 (fact "disconnects the redis client"
 
-  (!.js
-   (var client {})
-   (var closed [])
-   (xtd/obj-assign client {"raw" {"quit" (fn [] (. closed (push "closed")) (return (Promise.resolve "closed")))}})
-   (redis/client-disconnect client))
-  => "closed")
+  (notify/wait-on :js
+    (-> (redis/client-connect (redis/create {}) {})
+        (promise/x:promise-then
+         (fn [client]
+           (-> (redis/client-disconnect client)
+               (promise/x:promise-then
+                (fn [res]
+                  (repl/notify res))))))))
+  => "OK")
 
 ^{:refer js.net.conn-redis/client-exec :added "4.1"}
 (fact "executes a redis command"
 
-  (!.js
-   (var client {})
-   (var sent [])
-   (xtd/obj-assign client {"raw" {"sendCommand" (fn [cmd]
-                                                   (. sent (push cmd))
-                                                   (return (Promise.resolve "ok")))}})
-   (redis/client-exec client "GET" ["key"]))
-  => "ok")
+  (notify/wait-on :js
+    (-> (redis/client-connect (redis/create {}) {})
+        (promise/x:promise-then
+         (fn [client]
+           (-> (redis/client-exec client "PING" [])
+               (promise/x:promise-then
+                (fn [res]
+                  (redis/client-disconnect client)
+                  (repl/notify res))))))))
+  => "PONG")
