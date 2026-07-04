@@ -380,21 +380,48 @@
     (util/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (util/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
     (util/list-handlers n))
-  => ["echo" "sum"]
+  => ["@/echo"
+      "@/get-service"
+      "@/list-handlers"
+      "@/list-spaces"
+      "@/list-transports"
+      "@/list-triggers"
+      "@/node-info"
+      "@/ping"
+      "echo"
+      "sum"]
 
   (!.lua
     (var n (main/node-create {}))
     (util/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (util/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
     (util/list-handlers n))
-  => ["echo" "sum"]
+  => ["@/echo"
+      "@/get-service"
+      "@/list-handlers"
+      "@/list-spaces"
+      "@/list-transports"
+      "@/list-triggers"
+      "@/node-info"
+      "@/ping"
+      "echo"
+      "sum"]
 
   (!.py
     (var n (main/node-create {}))
     (util/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (util/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
     (util/list-handlers n))
-  => ["echo" "sum"])
+  => ["@/echo"
+      "@/get-service"
+      "@/list-handlers"
+      "@/list-spaces"
+      "@/list-transports"
+      "@/list-triggers"
+      "@/node-info"
+      "@/ping"
+      "echo"
+      "sum"])
 
 ^{:refer xt.substrate.base-util/register-trigger :added "4.1"}
 (fact "registers a shared stream trigger"

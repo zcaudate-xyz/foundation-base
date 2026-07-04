@@ -113,10 +113,12 @@
           lang        (:lang module)]
       (collection/map-vals
        (fn [entry]
-         (impl-template/materialize-code-entry book
-                                               entry
-                                               {:lang lang
-                                                :module module-view}))
+         (if (impl-template/code-state-computing? entry)
+           entry
+           (impl-template/materialize-code-entry book
+                                                 entry
+                                                 {:lang lang
+                                                  :module module-view})))
        (:code module)))
     (:code module)))
 

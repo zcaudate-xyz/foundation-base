@@ -499,7 +499,7 @@
    (adaptor/init-handlers node)
    (and (xt/x:not-nil? (xt/x:get-key (xt/x:get-key node "handlers") "@xt.supabase/sign-up"))
         (xt/x:not-nil? (xt/x:get-key (xt/x:get-key node "handlers") "@xt.supabase/health"))
-        (== 27 (xt/x:len (xtd/obj-keys (xt/x:get-key node "handlers"))))))
+        (== 35 (xt/x:len (xtd/obj-keys (xt/x:get-key node "handlers"))))))
   => true)
 
 
