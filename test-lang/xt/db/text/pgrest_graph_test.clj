@@ -51,6 +51,17 @@
      (g/tree-count? [])])
   => [true false false])
 
+^{:refer xt.db.text.pgrest-graph/pgrest-resolve-value :added "4.1"}
+(fact "resolves sql tag objects to scalar values"
+
+  (!.js
+    [(g/pgrest-resolve-value {"::" "sql/arg" "name" "balance"})
+     (g/pgrest-resolve-value {"::" "sql/cast" "args" [{"::" "sql/arg" "name" "amount"}]})
+     (g/pgrest-resolve-value {"::" "sql/defenum" "name" "status"})
+     (g/pgrest-resolve-value "plain")
+     (g/pgrest-resolve-value 42)])
+  => ["balance" "amount" "status" "plain" 42])
+
 ^{:refer xt.db.text.pgrest-graph/value->query-text :added "4.1"}
 (fact "formats scalars for query strings"
 
@@ -221,6 +232,41 @@
      (g/compile-url "/rest/v1/Order" [])])
   => ["/rest/v1/Order?select=*&limit=20"
       "/rest/v1/Order"])
+
+^{:refer xt.db.text.pgrest-graph/forward-ref-column? :added "4.1"}
+(fact "detects forward reference columns in a schema"
+
+  (!.js
+    [(g/forward-ref-column? sample/Schema "WalletAsset" "wallet")
+     (g/forward-ref-column? sample/Schema "WalletAsset" "asset")
+     (g/forward-ref-column? sample/Schema "WalletAsset" "id")])
+  => [true true false])
+
+^{:refer xt.db.text.pgrest-graph/flatten-forward-ref-clause :added "4.1"}
+(fact "flattens {ref {id ...}} filters to {ref_id ...}"
+
+  (!.js
+    (g/flatten-forward-ref-clause
+     sample/Schema
+     "WalletAsset"
+     {"wallet" {"id" "wallet-1"}
+      "asset" {"id" "asset-1"}
+      "status" "active"}))
+  => {"wallet_id" "wallet-1"
+      "asset_id" "asset-1"
+      "status" "active"})
+
+^{:refer xt.db.text.pgrest-graph/flatten-forward-ref-filters :added "4.1"}
+(fact "flattens forward reference filters across where branches"
+
+  (!.js
+    (g/flatten-forward-ref-filters
+     sample/Schema
+     "WalletAsset"
+     [{"wallet" {"id" "wallet-1"}}
+      {"asset" {"id" "asset-1"}}]))
+  => [{"wallet_id" "wallet-1"}
+      {"asset_id" "asset-1"}])
 
 ^{:refer xt.db.text.pgrest-graph/select-return :added "4.1"}
 (fact "compiles tree ir into a PostgREST request"

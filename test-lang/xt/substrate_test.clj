@@ -119,6 +119,78 @@
      (xt/x:is-function? (. transport ["stop_fn"]))])
   => ["substrate.transport" "peer-a" "edge" true true true])
 
+^{:refer xt.substrate/transport-get :added "4.1"}
+(fact "gets attached transports by id"
+
+  (!.js
+    (var n (main/node-create {}))
+    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
+    (. (main/transport-get n "peer-a") ["id"]))
+  => "peer-a"
+
+  (!.lua
+    (var n (main/node-create {}))
+    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
+    (. (main/transport-get n "peer-a") ["id"]))
+  => "peer-a"
+
+  (!.py
+    (var n (main/node-create {}))
+    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
+    (. (main/transport-get n "peer-a") ["id"]))
+  => "peer-a")
+
+^{:refer xt.substrate/transport-list :added "4.1"}
+(fact "lists attached transport ids"
+
+  (!.js
+    (var n (main/node-create {}))
+    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
+    (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
+    (main/transport-list n))
+  => ["peer-a" "peer-b"]
+
+  (!.lua
+    (var n (main/node-create {}))
+    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
+    (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
+    (main/transport-list n))
+  => ["peer-a" "peer-b"]
+
+  (!.py
+    (var n (main/node-create {}))
+    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
+    (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
+    (main/transport-list n))
+  => ["peer-a" "peer-b"])
+
+^{:refer xt.substrate/transport-send :added "4.1"}
+(fact "sends frames through an attached transport"
+
+  (notify/wait-on :js
+    (var n (main/node-create {}))
+    (var captured nil)
+    (xt/x:set-key (. n ["transports"]) "peer-a"
+                  (main/transport-create "peer-a"
+                                         {"send_fn" (fn [frame]
+                                                      (:= captured frame)
+                                                      (return frame))}))
+    (promise/x:promise-then
+     (main/transport-send n "peer-a" {"kind" "test"})
+     (fn [out]
+       (repl/notify {"captured" captured
+                     "out" out}))))
+  => {"captured" {"kind" "test"}
+      "out" {"kind" "test"}}
+
+  (!.lua
+    (xt/x:is-function? main/transport-send))
+  => true
+
+  (!.py
+    (xt/x:is-function? main/transport-send))
+  => true)
+
 ^{:refer xt.substrate/get-services :added "4.1"}
 (fact "node-create keeps a first-class services registry"
 

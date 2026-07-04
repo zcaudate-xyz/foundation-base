@@ -172,7 +172,7 @@
   (var col (xt/x:get-path schema [table-name key]))
   (return (and (xt/x:is-object? col)
                (== "ref" (xt/x:get-key col "type"))
-               (!= "reverse" (xt/x:get-path col ["ref" "type"])))))
+               (not (== "reverse" (xt/x:get-path col ["ref" "type"]))))))
 
 (defn.xt flatten-forward-ref-clause
   "flattens forward reference filters from {ref {id ...}} to {ref_id ...}"
