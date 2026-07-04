@@ -1,3 +1,4 @@
+^{:no-test true}
 (ns scaffold.supabase.local-min
   (:require [std.config :as config]
             [std.lib.os :as os]

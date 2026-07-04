@@ -72,6 +72,19 @@
          (catch Exception e))
        boolean)))
 
+(defn- program-check
+  "checks if an executable exists on PATH
+
+   (program-exists? \"ls\")
+   => true"
+  {:added "4.0"}
+  ([args check-fn default]
+   (try
+     (let [^Process process (.start (ProcessBuilder. ^"[Ljava.lang.String;" (into-array String args)))]
+       (.waitFor process)
+       (check-fn (clojure.string/trim (slurp (.getInputStream process)))))
+     (catch Exception _ default))))
+
 (defn program-exists?
   "checks if an executable exists on PATH
 
@@ -79,11 +92,7 @@
    => true"
   {:added "4.0"}
   ([exec]
-   (try
-     (let [^Process process (.start (ProcessBuilder. ^"[Ljava.lang.String;" (into-array String ["which" exec])))]
-       (.waitFor process)
-       (not= "" (clojure.string/trim (slurp (.getInputStream process)))))
-     (catch Exception _ false))))
+   (program-check ["which" exec] #(not= "" %) false)))
 
 (defn program-version
   "returns the version output of a program, or nil if unavailable
@@ -94,11 +103,7 @@
   ([exec]
    (program-version exec ["--version"]))
   ([exec args]
-   (try
-     (let [^Process process (.start (ProcessBuilder. ^"[Ljava.lang.String;" (into-array String (cons exec args))))]
-       (.waitFor process)
-       (not-empty (clojure.string/trim (slurp (.getInputStream process)))))
-     (catch Exception _ nil))))
+   (program-check (cons exec args) not-empty nil)))
 
 (defn docker-daemon-available?
   "checks if the docker daemon is reachable"
