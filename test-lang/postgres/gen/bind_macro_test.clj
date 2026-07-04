@@ -202,16 +202,16 @@
     {}))
   => ["UserAccount"
       {"custom" [],
-       "where" [],
+       "data" ["id" "nickname"],
        "links"
        [["profile"
          "reverse"
          ["UserProfile"
           {"custom" [],
-           "where" [{"id" 1, "account" ["eq" ["UserAccount.id"]]}],
+           "data" ["first_name" "last_name"],
            "links" [],
-           "data" ["first_name" "last_name"]}]]],
-       "data" ["id" "nickname"]}]
+           "where" [{"account" ["eq" ["UserAccount.id"]], "id" 1}]}]]],
+       "where" []}]
 
   (!.py
    (scope/get-tree

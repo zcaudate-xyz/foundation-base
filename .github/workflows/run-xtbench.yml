@@ -17,8 +17,10 @@ jobs:
             image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-dart:ci
           - lang: ruby
             image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-ruby:ci
+          # infra-foundation-xtbench-python has not been published, so fall back
+          # to the clean image, which already bundles python3, lein, and deps.
           - lang: python
-            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-python:ci
+            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
 
     steps:
       - name: Checkout repository

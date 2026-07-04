@@ -5,7 +5,7 @@
 
 ^{:refer postgres.typed.typed-parse/read-forms :added "0.1"}
 (fact "read-forms reads top-level forms from a file"
-  (let [forms (parse/read-forms "src-lang/postgres/sample/scratch_v2.clj")]
+  (let [forms (parse/read-forms "src-lang/postgres/typed/typed_common.clj")]
     (vector? forms) => true))
 
 ^{:refer postgres.typed.typed-parse/deftype? :added "0.1"}
@@ -203,7 +203,7 @@
 
 ^{:refer postgres.typed.typed-parse/analyze-file :added "0.1"}
 (fact "analyze-file returns structure with all type definitions"
-  (let [result (parse/analyze-file "src-lang/postgres/sample/scratch_v2.clj")]
+  (let [result (parse/analyze-file "src-lang/postgres/typed/typed_common.clj")]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))
@@ -222,7 +222,7 @@
 
 ^{:refer postgres.typed.typed-parse/analyze-namespace :added "0.1"}
 (fact "analyze-namespace analyzes a namespace"
-  (let [result (parse/analyze-namespace 'postgres.sample.scratch-v2)]
+  (let [result (parse/analyze-namespace 'rt.postgres.base.typed.typed-common)]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))

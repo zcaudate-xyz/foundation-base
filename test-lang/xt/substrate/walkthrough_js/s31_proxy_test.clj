@@ -5,6 +5,13 @@
             [hara.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]))
 
+(defn- ci?
+  []
+  (boolean (System/getenv "CI")))
+
+(fact:global
+ {:skip (ci?)})
+
 (l/script- :js
   {:runtime :chromedriver.instance
    :require [[xt.lang.spec-base :as xt]

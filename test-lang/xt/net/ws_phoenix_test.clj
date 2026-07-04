@@ -204,8 +204,7 @@
             (repl/notify "left")))
         "presence_state"
         (fn [frame]
-          (xt/x:arr-push frames frame)
-          (repl/notify frames))})})
+          (xt/x:arr-push frames frame))})})
     true)
   => "left")
 
