@@ -68,8 +68,13 @@
   :include [[js.blessed :complete]]}
   
  xyz.zcaudate/js.core
- {:description "js core libraries" 
-  :include [[js.core :complete]
+ {:description "js core submodules, module scaffolding and webpack helpers"
+  :include [[js.core.impl :complete]
+            [js.core.fetch :complete]
+            [js.core.util :complete]
+            [js.core.style :complete]
+            [js.core.dom :complete]
+            [js.module :complete]
             [js.webpack :complete]]}
 
  xyz.zcaudate/js.gh-primer
@@ -229,7 +234,6 @@
  xyz.zcaudate/js.react-ext
  {:description "js core libraries" 
   :include [[js.react.ext-box :base]
-            [js.react.ext-cell :base]
             [js.react.ext-form :base]
             [js.react.ext-log :base]
             [js.react.ext-page :base]

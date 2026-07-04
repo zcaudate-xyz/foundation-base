@@ -20,11 +20,11 @@
 ^{:refer code.manage.unit.scaffold/new-filename :added "4.1"}
 (fact "uses the paired jagged test root when given a source path"
 
-  (new-filename "src-lang/xt/cell/service/util_hello.clj"
-                'xt.cell.service.util-hello-test
+  (new-filename "src-lang/xt/substrate/service/util_hello.clj"
+                'xt.substrate.service.util-hello-test
                 (project/project)
                 false)
-  => (str (fs/path "test-lang/xt/cell/service/util_hello_test.clj")))
+  => (str (fs/path "test-lang/xt/substrate/service/util_hello_test.clj")))
 
 ^{:refer code.manage.unit.scaffold/scaffold-new :added "1.2"}
 (fact "creates a completely new scaffold"

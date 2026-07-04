@@ -5,7 +5,6 @@
 (l/script :js
   {:runtime :basic
    :require  [[js.react :as r :include [:fn]]
-              [js.core :as j :include [:node :util]]
               [js.lib.valtio :as v]
               [js.blessed.layout :as layout]
               [js.blessed.ui-core :as ui-core]

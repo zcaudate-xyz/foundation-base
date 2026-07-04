@@ -4,7 +4,6 @@
 
 (l/script :js
   {:require  [[js.react :as r :include [:fn]]
-              [js.core :as j :include [:node :util]]
               [js.core.style :as css]
               [js.blessed.form :as f]
               [js.react.ext-form :as ext-form]

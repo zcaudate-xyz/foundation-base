@@ -4,7 +4,7 @@
             [std.lib.foundation :as f]
             [std.lib.template :as template]))
 
-(l/script :js js.core)
+(l/script :js js.core.fetch)
 
 ;;
 ;; fetch

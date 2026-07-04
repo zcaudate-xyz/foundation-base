@@ -6,7 +6,6 @@
   {:runtime :basic
    :config   {:emit {:lang/jsx false}}
    :require  [[js.react :as r :include [:fn]]
-              [js.core :as j :include [:node :util]]
               [js.lib.valtio :as v]
               [js.blessed.ui-core :as ui-core]
               [js.blessed.ui-util :as ui-util]

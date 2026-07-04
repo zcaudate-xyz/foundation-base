@@ -10,7 +10,7 @@
             :id :dev/web-main
             :emit {:native {:suppress true}
                    :lang/jsx false}}
-   :require [[js.core :as j]
+   :require [[js.module :as jm]
              [js.react :as r]
              [js.react.ext-box :as ext-box]
              [js.react-native :as n :include [:fn]]
@@ -23,8 +23,8 @@
 
 (defrun.js __import__
   #_#_
-  (j/import-missing)
-  (j/import-set-global))
+  (jm/import-missing)
+  (jm/import-set-global))
 
 (defn.js UserCard
   [#{name address status}]

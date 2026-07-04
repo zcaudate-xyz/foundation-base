@@ -4,7 +4,6 @@
 
 (l/script :js
   {:require  [[js.react :as r :include [:fn]]
-              [js.core :as j :include [:node :util]]
               [js.lib.valtio :as v]
               [js.blessed.frame-sidemenu :as frame-sidemenu]
               [js.blessed.ui-core :as ui-core]

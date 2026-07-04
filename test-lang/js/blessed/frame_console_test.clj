@@ -4,7 +4,6 @@
 
 (l/script :js
   {:require  [[js.react :as r :include [:fn]]
-              [js.core :as j :include [:node :util]]
               [js.blessed.frame-console :as frame-console]
               [js.blessed.ui-core :as ui-core]
               [js.lib.chalk :as chk]]

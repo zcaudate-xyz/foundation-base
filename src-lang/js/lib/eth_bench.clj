@@ -26,9 +26,9 @@
                       (var address (or (xt/x:get-key contract "contractAddress")
                                        (xt/x:get-key contract "target")))
                       {:status true
-                       :size ((. (/ (xt/x:len bytecode) 2 1024)
-   (toFixed 3))
-                        :contractAddress address}))
+                       :size (. (/ (xt/x:len bytecode) 2 1024)
+                                (toFixed 3))
+                       :contractAddress address}))
 
               (catch (fn:> [err]
                         {:status false

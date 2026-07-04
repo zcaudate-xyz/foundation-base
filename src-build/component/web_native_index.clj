@@ -10,7 +10,7 @@
             :id :dev/web-main
             :emit {:native {:suppress true}
                    :lang/jsx false}}
-   :require [[js.core :as j]
+   :require [[js.module :as jm]
              [js.react.ext-box :as ext-box]
              [js.react :as r]
              [js.react-native :as n :include [:fn]]
@@ -22,8 +22,8 @@
    :file   "App.js"})
 
 (defrun.js __import__
-  (j/import-missing)
-  (j/import-set-global))
+  (jm/import-missing)
+  (jm/import-set-global))
 
 (defglobal.js Global
   (base-box/make-box {:l0 "00a-native-text"}))

@@ -693,7 +693,7 @@
   => {"return" "number", "value" 2, "type" "data"})
 
 (comment
-  (s/snapto '[xt.cell])
+  (s/snapto '[xt.substrate])
   
   (s/seedgen-benchadd '[xt.lang.spec] {:lang [:r] :write true})
   (s/seedgen-benchadd '[xt.lang.spec-base] {:lang [:r] :write true})

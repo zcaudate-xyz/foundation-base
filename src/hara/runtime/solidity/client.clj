@@ -142,7 +142,7 @@
     (solc/compile-rt-eval (:node rt)
                           form-call
                           (if to-string?
-                            xt.lang.common-lib/to-string))))
+                            'xt.lang.common-lib/to-string))))
 
 (defn invoke-ptr-web3
   "invokes the runtime, deploying the contract if not available"
