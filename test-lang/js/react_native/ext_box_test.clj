@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r :include [:fn]]
+   :require [[js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [js.react.ext-box :as ext-box]
              [xt.event.base-box :as event-box]]
@@ -45,7 +44,7 @@
          :onPress (fn:> (event-box/set-data
                          box
                          ["other"]
-                         (j/random)))}]
+                         (Math.random)))}]
        [:% n/Text " "]
        [:% n/Button
         {:title "SAME"

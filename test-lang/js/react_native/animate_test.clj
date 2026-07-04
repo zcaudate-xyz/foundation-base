@@ -10,13 +10,14 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-              [js.react :as r :include [:fn]]
+   :require [[js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
               [js.react-native.animate :as a]
               [xt.event.base-animate :as event-animate]
               [xt.lang.spec-base :as xt]
-              [xt.lang.common-lib :as k]]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-math :as math]
+              [xt.lang.common-string :as str]]
    })
 
 ^{:refer js.react-native.animate/val :added "4.0" :unchecked true}
@@ -31,7 +32,7 @@
           textRef   (a/useListenSingle
                      ind
                      (fn [v]
-                       (return {:text (+ "ind: " (j/toFixed v 2))})))]
+                       (return {:text (+ "ind: " (str/to-fixed v 2))})))]
       (return
        (n/EnclosedCode
         {:label "js.react-native.animate/val"}
@@ -95,7 +96,7 @@
           textRef (a/useListenSingle
                    ind
                    (fn [v]
-                     (return {:text (j/toFixed v 3)})))]
+                     (return {:text (str/to-fixed v 3)})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/createTransition"}
@@ -127,8 +128,8 @@
                      [ind ind2]
                      (fn [v v2]
                        (return {:text
-                                (+ (+ " ind: "  (j/toFixed v 2))
-                                   (+ ", ind2: " (j/toFixed v2 2)))})))]
+                                (+ (+ " ind: "  (str/to-fixed v 2))
+                                   (+ ", ind2: " (str/to-fixed v2 2)))})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/val"}
@@ -167,7 +168,7 @@
                      ind
                      (fn [ind]
                        (return
-                        {:text (j/toFixed ind 2)}))))]
+                        {:text (str/to-fixed ind 2)}))))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/listenSingle"}
@@ -197,7 +198,7 @@
                      ind
                      (fn [ind]
                        (return
-                        {:text (j/toFixed ind 2)})))]
+                        {:text (str/to-fixed ind 2)})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/useListenSingle"}
@@ -233,8 +234,8 @@
                      (fn [v v2]
                        (return
                         {:text
-                         (+ "[" (j/toFixed v 2)
-                            ", " (j/toFixed v2 2)
+                         (+ "[" (str/to-fixed v 2)
+                            ", " (str/to-fixed v2 2)
                             "]")}))))]
       (return
        (n/EnclosedCode
@@ -273,8 +274,8 @@
                    (fn [v v2]
                      (return
                       {:text
-                       (+ "[" (j/toFixed v 2)
-                          ", " (j/toFixed v2 2)
+                       (+ "[" (str/to-fixed v 2)
+                          ", " (str/to-fixed v2 2)
                           "]")})))]
       (return
        (n/EnclosedCode
@@ -331,8 +332,8 @@
                      (fn [#{ind ind2}]
                        (return
                         {:text
-                         (+ "[" (j/toFixed ind 2)
-                            ", " (j/toFixed ind2 2)
+                         (+ "[" (str/to-fixed ind 2)
+                            ", " (str/to-fixed ind2 2)
                             "]")}))))]
       (return
        (n/EnclosedCode
@@ -389,8 +390,8 @@
                        (fn [#{ind ind2}]
                          (return
                           {:text
-                           (+ "[" (j/toFixed ind 2)
-                              ", " (j/toFixed ind2 2)
+                           (+ "[" (str/to-fixed ind 2)
+                              ", " (str/to-fixed ind2 2)
                               "]")}))
                        (fn:> {})))]
       (return
@@ -443,11 +444,11 @@
                       (return
                        {:style
                         {:transform
-                         [{:scaleX (* 100 (j/max 0.1 v))}]}})))
+                         [{:scaleX (* 100 (math/max 0.1 v))}]}})))
           textRef    (a/useListenSingle
                       indicator
                       (fn [v]
-                        (return {:text (j/toFixed v 3)})))]
+                        (return {:text (str/to-fixed v 3)})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/runWithCancel"}
@@ -497,11 +498,11 @@
                       (return
                        {:style
                         {:transform
-                         [{:scaleX (* 100 (j/max 0.1 v))}]}})))
+                         [{:scaleX (* 100 (math/max 0.1 v))}]}})))
           textRef    (a/useListenSingle
                       indicator
                       (fn [v]
-                        (return {:text (j/toFixed v 3)})))]
+                        (return {:text (str/to-fixed v 3)})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/runWithOne"}
@@ -557,11 +558,11 @@
                       (return
                        {:style
                         {:transform
-                         [{:scaleX (* 100 (j/max 0.1 v))}]}})))
+                         [{:scaleX (* 100 (math/max 0.1 v))}]}})))
           textRef    (a/useListenSingle
                       indicator
                       (fn [v]
-                        (return {:text (j/toFixed v 3)})))]
+                        (return {:text (str/to-fixed v 3)})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/runWithAll"}
@@ -611,14 +612,14 @@
           textRef (a/useListenArray
                    [ind]
                    (fn [v]
-                     (return {:text (j/toFixed v 3)})))
+                     (return {:text (str/to-fixed v 3)})))
           boxRef  (a/useListenArray
                    [ind]
                    (fn [v]
                      (return
                       {:style
                        {:transform
-                        [{:scaleX (* 100 (j/max 0.1 v))}]}})))]
+                        [{:scaleX (* 100 (math/max 0.1 v))}]}})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/useBinaryIndicator"}
@@ -662,14 +663,14 @@
           textRef (a/useListenArray
                    [ind]
                    (fn [v]
-                     (return {:text (j/toFixed v 3)})))
+                     (return {:text (str/to-fixed v 3)})))
           boxRef  (a/useListenArray
                    [ind]
                    (fn [v]
                      (return
                       {:style
                        {:transform
-                        [{:scaleX (* 100 (j/max 0.1 v))}]}})))]
+                        [{:scaleX (* 100 (math/max 0.1 v))}]}})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/usePressIndicator"}
@@ -721,11 +722,11 @@
                      (return
                       {:style
                        {:transform
-                        [{:scaleX (* 20 (j/max 0.1 v))}]}})))
+                        [{:scaleX (* 20 (math/max 0.1 v))}]}})))
           textRef (a/useListenArray
                    [ind]
                    (fn [v]
-                     (return {:text (j/toFixed v 3)})))]
+                     (return {:text (str/to-fixed v 3)})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/useLinearIndicator"}
@@ -781,11 +782,11 @@
                      (return
                       {:style
                        {:transform
-                        [{:scaleX (* 20 (j/max 0.1 v))}]}})))
+                        [{:scaleX (* 20 (math/max 0.1 v))}]}})))
           textRef (a/useListenArray
                    [ind]
                    (fn [v]
-                     (return {:text (j/toFixed v 3)})))]
+                     (return {:text (str/to-fixed v 3)})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/useIndexIndicator"}
@@ -847,7 +848,7 @@
           textRef (a/useListenArray
                    [ind]
                    (fn [v]
-                     (return {:text (j/toFixed v 3)})))]
+                     (return {:text (str/to-fixed v 3)})))]
       (return
        (n/EnclosedCode
 {:label "js.react-native.animate/useCircularIndicator"}
@@ -932,7 +933,7 @@
     (var textRef (a/useListenSingle
                   position
                   (fn [v]
-                    (return {:text (j/toFixed v 3)}))))
+                    (return {:text (str/to-fixed v 3)}))))
     (return
      (n/EnclosedCode
 {:label "js.react-native.animate/usePosition"}
@@ -991,7 +992,7 @@
     (var textLowerRef (a/useListenSingle
                   positionLower
                   (fn [v]
-                    (return {:text (j/toFixed v 3)}))))
+                    (return {:text (str/to-fixed v 3)}))))
     (var boxUpperRef  (a/useListenSingle
                   positionUpper
                   (fn [v]
@@ -1002,7 +1003,7 @@
     (var textUpperRef (a/useListenSingle
                   positionUpper
                   (fn [v]
-                    (return {:text (j/toFixed v 3)}))))
+                    (return {:text (str/to-fixed v 3)}))))
     (return
      (n/EnclosedCode
 {:label "js.react-native.animate/useRange"}
@@ -1071,11 +1072,11 @@
                     (return
                      {:style
                       {:transform
-                       [{:scaleX (* 100 (j/max 0.1 v))}]}}))))
+                       [{:scaleX (* 100 (math/max 0.1 v))}]}}))))
     (var textRef (a/useListenSingle
                   vindicator
                   (fn [v]
-                    (return {:text (j/toFixed v 3)}))))
+                    (return {:text (str/to-fixed v 3)}))))
     (return
      (n/EnclosedCode
 {:label "js.react-native.animate/useShowing"}

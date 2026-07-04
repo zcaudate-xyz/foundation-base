@@ -5,9 +5,9 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.core :as j]
-             [xt.lang.spec-base :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]
              [js.react-native.helper-color :as c]
              [js.react-native.helper-theme :as helper-theme]
              [js.react-native.helper-theme-default :as helper-theme-default]
@@ -44,7 +44,7 @@
             :margin 10
             :height 100
             :width 100}))
-   (j/map [0 0.2 0.5 0.8 1] f))
+   (xtd/arr-map [0 0.2 0.5 0.8 1] f))
   => vector?)
 
 ^{:refer js.react-native.helper-transition/absoluteAnimateProgress :added "4.0" :unchecked true}
@@ -61,7 +61,7 @@
                :height 100
                :width 100}
               progress))))
-   (j/map [0 0.2 0.5 0.8 1] f))
+   (xtd/arr-map [0 0.2 0.5 0.8 1] f))
   => vector?)
 
 ^{:refer js.react-native.helper-transition/relativeAnimateProgress :added "4.0" :unchecked true}
@@ -75,7 +75,7 @@
                :xOffset 100
                :yOffset 100}
               progress))))
-   (j/map [0 0.2 0.5 0.8 1] f))
+   (xtd/arr-map [0 0.2 0.5 0.8 1] f))
   => [{"style"
        {"transform"
         [{"translateX" 100} {"translateY" 100} {"scale" 0.2}],

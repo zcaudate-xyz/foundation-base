@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-              [js.react :as r :include [:fn]]
+   :require [[js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
               [js.react.ext-log :as ext-log]
               [xt.event.base-log :as event-log]]
@@ -26,7 +25,7 @@
     (var queueEntry (fn:> []
                       (event-log/queue-entry
                        log
-                       {:id (j/randomId 6)}
+                       {:id (. (Math.random) (toString 36) (substr 2 6))}
                        (fn:> [entry t] (. entry id))
                        (fn:> [entry] entry))))
     (r/init []

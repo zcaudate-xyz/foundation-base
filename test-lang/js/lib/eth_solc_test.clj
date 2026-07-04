@@ -10,8 +10,7 @@
      :require [[xt.lang.spec-base :as xt]
                [xt.lang.common-data :as xtd]
                [xt.lang.common-repl :as repl]
-               [js.lib.eth-solc :as eth-solc :include [:fn]]
-               [js.core :as j]]})
+               [js.lib.eth-solc :as eth-solc :include [:fn]]]})
 
 (fact:global
  {:setup    [(s/rt:stop-hardhat-server)

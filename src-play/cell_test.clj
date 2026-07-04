@@ -1,5 +1,7 @@
 (ns xt.cell-test
-  (:require [hara.lang :as l])
+  (:require [hara.lang :as l]
+            [xt.lang.common-notify :as notify]
+            [xt.lang.common-repl :as repl])
   (:use code.test))
 
 ^{:seedgen/root {:all true, :langs [:lua :python :js]}}
@@ -21,7 +23,7 @@
              [xt.cell :as cell]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.inner-mock :as inner-mock]
-             [js.core :as j]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -119,10 +121,11 @@
 ^{:refer xt.cell/setup-service :added "4.1"}
 (fact "sets the worker service registry over a link transport"
 
-  (j/<!
-   (cell/setup-service
-    (-/make-link)
-    {"dbs" {"local" {"kind" "cache"}}}))
+  (notify/wait-on [:js 5000]
+   (repl/notify
+    (cell/setup-service
+     (-/make-link)
+     {"dbs" {"local" {"kind" "cache"}}})))
   => {"dbs" {"local" {"kind" "cache"}}})
 
 ^{:refer xt.cell/get-service :added "4.1"}
@@ -136,10 +139,11 @@
 ^{:refer xt.cell/setup-bindings :added "4.1"}
 (fact "sets the worker bindings registry over a link transport"
 
-  (j/<!
-   (cell/setup-bindings
-    (-/make-link)
-    {"orders" {"list" {}}}))
+  (notify/wait-on [:js 5000]
+   (repl/notify
+    (cell/setup-bindings
+     (-/make-link)
+     {"orders" {"list" {}}})))
   => {"orders" {"list" {}}})
 
 ^{:refer xt.cell/get-bindings :added "4.1"}

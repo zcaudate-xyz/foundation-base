@@ -5,8 +5,8 @@
 (l/script :js
   {:runtime :basic
    :config   {:emit {:lang/jsx false}}
+   :import   [["util" :as NodeUtil]]
    :require  [[js.react :as r :include [:fn]]
-              [js.core :as j :include [:node :util]]
               [js.lib.valtio :as v]
                [js.blessed.ui-group :as ui-group]
                [js.blessed.ui-core :as ui-core]
@@ -15,6 +15,7 @@
                [xt.lang.spec-base :as xt]
                [xt.lang.common-lib :as k]
                [xt.lang.common-data :as xtd]
+               [xt.lang.common-string :as str]
                [xt.lang.common-tree :as xtt]]
     :export  [MODULE]})
 
@@ -206,7 +207,7 @@
         :color "green"
         :initial initial
         :setInitial setInitial
-        :tabsFormat (fn:> [s] (+ " " (j/toUpperCase s) " "))
+        :tabsFormat (fn:> [s] (+ " " (str/to-uppercase s) " "))
         :formatFn k/identity}]
       [:box {:left 25 :shrink true
              :content (+ "" initial)}]])))
@@ -239,7 +240,7 @@
         :color "green"
         :initial initial
         :setInitial setInitial
-        :tabsFormat (fn:> [s] (+ " " (j/toUpperCase s) " "))
+        :tabsFormat (fn:> [s] (+ " " (str/to-uppercase s) " "))
         :formatFn k/identity}]
       [:box {:left 25 :shrink true
              :content (+ "" initial)}]])))
@@ -317,7 +318,7 @@
         :color "green"
         :initial initial
         :setInitial setInitial
-        :tabsFormat (fn:> [s] (+ " " (j/toUpperCase s) " "))
+        :tabsFormat (fn:> [s] (+ " " (str/to-uppercase s) " "))
         :formatFn k/identity}]
       [:box {:left 25 :shrink true
              :content (+ "" initial)}]])))
@@ -345,31 +346,31 @@
                   :setInitial setInitial
                   :width 3
                   :color "yellow"
-                  :listFormat j/toUpperCase
+                  :listFormat str/to-uppercase
                   :formatFn xt/x:json-encode}
                  {:type "tabs"
                   :initial l1
                   :setInitial setL1
                   :width 30
                   :color "red"
-                  :tabsFormat j/toUpperCase
+                  :tabsFormat str/to-uppercase
                   :formatFn xt/x:json-encode}
                  {:type "list"
                   :width 4
                   :initial l2
                   :color "green"
                   :setInitial setL2
-                  :listFormat j/toUpperCase
+                  :listFormat str/to-uppercase
                   :formatFn xt/x:json-encode}
                  {:type "tabs"
                   :color "blue"
                   :width 10
                   :initial l3
                   :setInitial setL3
-                  :tabsFormat j/toUpperCase
+                  :tabsFormat str/to-uppercase
                   :formatFn xt/x:json-encode}]}]
       [:box {:top 10 :shrink true
-             :content (j/inspect #{initial l1 l2 l3})}]])))
+             :content (NodeUtil.inspect #{initial l1 l2 l3})}]])))
 
 ^{:refer js.blessed.ui-group/displayTarget :added "4.0" :unchecked true}
 (fact "helper function for display")

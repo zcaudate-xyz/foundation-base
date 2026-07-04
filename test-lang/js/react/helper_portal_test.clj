@@ -5,8 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.core :as j]
-             [xt.lang.spec-base :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [js.react.helper-portal :as portal]]})
 

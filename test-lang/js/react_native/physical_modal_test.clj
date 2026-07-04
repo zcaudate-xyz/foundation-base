@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
+   :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              ]
    })
@@ -36,11 +35,14 @@
         {:title "RAND"
          :onPress
          (fn []
-           (setWidth (j/floor (* 100 (j/random))))
-           (setHeight (j/floor (* 50 (j/random))))
-           (j/future-delayed [100]
-             (n/measureRef boxRef
-                        setDisplay)))}]
+           (setWidth (Math.floor (* 100 (Math.random))))
+           (setHeight (Math.floor (* 50 (Math.random))))
+           (new Promise (fn [resolve]
+             (setTimeout (fn []
+                           (n/measureRef boxRef
+                                         setDisplay)
+                           (resolve nil))
+                         100))))}]
        [:% n/Text " "]
        [:% n/Button
         {:title "MEASURE"

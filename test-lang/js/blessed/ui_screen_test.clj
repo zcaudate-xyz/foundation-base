@@ -5,8 +5,8 @@
 (l/script :js
   {:runtime :basic
    :config   {:emit {:lang/jsx false}}
+   :import   [["util" :as NodeUtil]]
    :require  [[js.react :as r :include [:fn]]
-              [js.core :as j :include [:node :util]]
               [js.lib.valtio :as v]
                [js.blessed.ui-screen :as ui-screen]
                [js.blessed.ui-core :as ui-core]
@@ -35,7 +35,7 @@
        {:top 2
         :left 0
         :color "yellow"
-        :content (j/inspect mouse)}]])))
+        :content (NodeUtil.inspect mouse)}]])))
 
 ^{:refer js.blessed.ui-screen/ScreenMeasure :added "4.0" :unchecked true}
 (fact "component that measures then screen"
@@ -52,7 +52,7 @@
        {:top 2
         :left 0
         :color "yellow"
-        :content (j/inspect dims)}]])))
+        :content (NodeUtil.inspect dims)}]])))
 
 ^{:refer js.blessed.ui-screen/GridLayout :added "4.0" :unchecked true}
 (fact "component that implements grid layout"
@@ -68,7 +68,7 @@
       [:box {:top 2}]
       [:% ui-screen/GridLayout
        {:top 1
-         :items (j/map (xtd/arr-range 20)
+         :items (xtd/arr-map (xtd/arr-range 20)
                        (fn:> [i]
                         [:box
                          {:top 1
@@ -87,7 +87,7 @@
        {:top 2
         :left 0
         :color "yellow"
-        :content (j/inspect dims)}]]))
+        :content (NodeUtil.inspect dims)}]]))
 
   )
 

@@ -3,8 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require  [[js.core :as j :include [:node :util]]
-              [js.react :as r :include [:fn]]
+  {:require  [[js.react :as r :include [:fn]]
               [js.lib.datetime :as ut]]
    :export  [MODULE]})
 
@@ -16,7 +15,7 @@
 
   (defn.js AgoDemo
     []
-    (let [current (r/const (* (- (j/now) 20000) 1000))
+    (let [current (r/const (* (- (Date.now) 20000) 1000))
           [delay setDelay] (r/useCountdown
                             9 (fn []
                                 (setDelay 9)))]

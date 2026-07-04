@@ -9,12 +9,12 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react-native.helper-color :as c]
+   :require [[js.react-native.helper-color :as c]
              [js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as ui]
+             [xt.lang.common-math :as math]
              ]
    })
 
@@ -250,9 +250,9 @@
                                 hovering}]
                      (return
                       {:style {:opacity   (- 1 (* pressing 0.4))
-                               :borderRadius (j/floor (* pressing 10))
+                               :borderRadius (math/floor (* pressing 10))
                                :transform [{:translateX (* pressing 140)}
-                                           {:scale (+ 1 (* (j/max pressing hovering) 0.4))}]}}))}]
+                                           {:scale (+ 1 (* (math/max pressing hovering) 0.4))}]}}))}]
           :addons [{:component n/TextInput
                     :size 11
                     :editable false
@@ -290,7 +290,7 @@
                         hovering
                         active}]
                    (var transform [{:scale (+ 1
-                                              (* (j/max pressing hovering)
+                                              (* (math/max pressing hovering)
                                                  0.1)
                                               (* pressing
                                                  0.3))}])

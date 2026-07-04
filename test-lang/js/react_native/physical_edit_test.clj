@@ -9,12 +9,13 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
+   :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.physical-edit :as physical-edit]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-math :as math]
              ]
    })
 
@@ -43,7 +44,7 @@
                       :alignItems "center"
                       :height 50
                       :flex 1}]
-             :inner [(j/assign
+             :inner [(xtd/obj-assign
                       {:component n/View
                        :style [(:? (== axis "horizontal")
                                    {:left (- (/ size 2))}
@@ -85,9 +86,9 @@
                                                                :useNativeDriver false})
                                                     (start)))})]
       (r/init []
-        (var interval (j/setInterval
+        (var interval (setInterval
                        (fn []
-                         (when (< 0.1 (j/abs (r/curr speed)))
+                         (when (< 0.1 (math/abs (r/curr speed)))
                            (a/setValue
                             rotation
                             (+ rotation._value
@@ -97,7 +98,7 @@
                        (fn [#{value}]
                          (r/curr:set speed value)))
         (return (fn []
-                  (j/clearInterval interval))))
+                  (clearInterval interval))))
       (return
        (n/EnclosedCode
 {:label "js.react-native.physical-edit/createPanVelocity"}
@@ -117,7 +118,7 @@
                       :alignItems "center"
                       :height 50
                       :flex 1}]
-             :inner [(j/assign
+             :inner [(xtd/obj-assign
                       {:component n/View
                        :style [(:? (== axis "horizontal")
                                    {:left (- (/ size 2))}
@@ -149,7 +150,7 @@
     []
     (var position     (a/val 100))
     (var percentage   (a/derive (fn:> [p]
-                                  (j/max 0 (j/min 100 (j/floor (/  p 2)))))
+                                  (math/max 0 (math/min 100 (math/floor (/  p 2)))))
                                 [position]))
     (var responder    (r/const (physical-edit/createPan
                                 {:pan {:dx position}
@@ -166,7 +167,7 @@
                    :backgroundColor "blue"
                    :width 220}]
           :addons []
-          :inner [(j/assign
+          :inner [(xtd/obj-assign
                    {:component n/View
                     :style [{:cursor "grab"
                              :height 20
@@ -176,7 +177,7 @@
                     {:position
                      (fn [v]
                        (return {:style {:transform
-                                        [{:translateX (j/max 0 (j/min 200 v))}]}}))}}
+                                        [{:translateX (math/max 0 (math/min 200 v))}]}}))}}
 
                    responder.panHandlers)
                   {:component n/View

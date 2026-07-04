@@ -24,8 +24,7 @@
              [xt.cell.kernel.base-impl :as base-impl]
              [xt.cell.kernel.inner-impl :as inner-impl]
              [xt.cell.kernel.inner-mock :as inner-mock]
-             [xt.lang.common-repl :as repl]
-             [js.core :as j]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -93,18 +92,20 @@
 ^{:refer xt.cell.kernel.base-impl/call :added "4.0"}
 (fact "conducts a call against a cell or link"
 
-  (j/<!
-   (base-impl/call (-/make-cell)
-                   {:op "call"
-                    :action "@cell/echo"
-                    :body ["hello"]}))
+  (notify/wait-on :js
+    (. (base-impl/call (-/make-cell)
+                       {:op "call"
+                        :action "@cell/echo"
+                        :body ["hello"]})
+       (then (repl/>notify))))
   => (contains ["hello" integer?])
 
-  (j/<!
-   (base-impl/call (-/make-link)
-                   {:op "call"
-                    :action "@cell/echo"
-                    :body ["hello"]}))
+  (notify/wait-on :js
+    (. (base-impl/call (-/make-link)
+                       {:op "call"
+                        :action "@cell/echo"
+                        :body ["hello"]})
+       (then (repl/>notify))))
   => (contains ["hello" integer?]))
 
 ^{:refer xt.cell.kernel.base-impl/model-get :added "4.0"}

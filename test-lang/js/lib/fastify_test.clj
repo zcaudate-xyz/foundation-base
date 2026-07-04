@@ -1,7 +1,8 @@
 (ns js.lib.fastify-test
   (:require [hara.lang :as l]
             [std.lib.network :as network]
-            [std.lib.os :as os])
+            [std.lib.os :as os]
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
@@ -9,8 +10,7 @@
     :require [[xt.lang.spec-base :as xt]
                [xt.lang.common-lib :as k]
                [xt.lang.common-repl :as repl]
-               [js.lib.fastify :as http]
-               [js.core :as j]]})
+               [js.lib.fastify :as http]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -59,7 +59,10 @@
 (fact "starts a fastify server"
 
   (def -server-
-    (j/<! (http/start-server (@! +port+) k/identity)))
+    (notify/wait-on :js
+      (. (http/start-server (@! +port+) k/identity)
+         (then (fn [result]
+                 (repl/notify result))))))
 
   -server-
   => map?

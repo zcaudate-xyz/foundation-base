@@ -11,8 +11,7 @@
              [xt.lang.common-data :as xtd]
              [xt.cell.kernel.inner-local :as inner-local]
              [xt.cell.kernel.inner-impl :as inner-impl]
-             [xt.lang.common-repl :as repl]
-             [js.core :as j]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -27,8 +26,12 @@
     (inner-impl/worker-handle-async
      worker
      (fn [ms]
-       (return (j/future-delayed [ms]
-                 (return ["pong" 1]))))
+       (return (new Promise
+                    (fn [resolve]
+                      (setTimeout
+                       (fn []
+                         (resolve ["pong" 1]))
+                       ms)))))
      "call"
      "async-1"
      [10]))

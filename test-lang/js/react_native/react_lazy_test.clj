@@ -12,7 +12,6 @@
    :require [[js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [xt.lang.spec-base :as xt]
-             [js.core :as j]
              [js.react-native.ui-button :as ui-button]]
    :static {:import/async #{js.react-native.ui-button}}
    })
@@ -31,17 +30,29 @@
     (var refresh    (r/useRefresh))
     (var getCount   (r/useGetCount))
     (var module
-         (j/module:async
-          (j/future-delayed [100]
-            (return
-             {"__esMODULE" true
-              :default {:lazyView -/LazyView}}))))
-    (var LazyComponent (r/lazy (fn:> (j/future
-                                       (return {"__esMODULE" true
-                                                :default -/LazyView})))))
+         (new Proxy
+              {}
+              {"get"
+               (fn [target prop]
+                 (return
+                  (new Promise
+                       (fn [resolve]
+                         (setTimeout
+                          (fn []
+                            (resolve {"__esMODULE" true
+                                      :default -/LazyView}))
+                          100)))))}))
+    (var LazyComponent (r/lazy (fn:> (new Promise
+                                          (fn [resolve]
+                                            (resolve {"__esMODULE" true
+                                                      :default -/LazyView}))))))
     (r/init []
-      (j/future-delayed [500]
-        (refresh)))
+      (new Promise
+           (fn [resolve]
+             (setTimeout
+              (fn []
+                (resolve (refresh)))
+              500))))
     (return
      (n/EnclosedCode
 {:label "js.react/useLazy"}

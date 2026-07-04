@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react :as r]
+    :require [[js.react :as r]
               [js.react-native :as n :include [:fn]]
               [js.react-native.animate :as a]
               [js.react-native.physical-base :as physical-base]
@@ -35,7 +34,7 @@
      :zIndex (* 10 scale)
      :transform
      [{:translateY translate}
-      #_{:translateX (* 0.5 (j/abs translate))}
+      #_{:translateX (* 0.5 (math/abs translate))}
       #_{:scaleX (math/mix 0.2 1 scale)}
       #_{:scaleY (math/mix 0.2 1 scale)}]}}))
 
@@ -49,7 +48,7 @@
 
 (defn.js get-element
   [offset index divisions values]
-  (var noffset (j/round offset))
+  (var noffset (math/round offset))
   (var center (math/mod-pos noffset divisions))
   (var shifted (- index center))
   (var shifted-mod (math/mod-pos shifted divisions))
@@ -75,7 +74,7 @@
     :transformations
     {indicator
      (fn:> [offset]
-       (j/assign (transformFn offset index modelFn)
+       (xtd/obj-assign (transformFn offset index modelFn)
                  {:text (-/get-element offset index divisions values)}))}}))
 
 ^{:refer js.react-native.model-roller/DigitRollerManual
@@ -120,7 +119,7 @@
         {:style {:height 80
                  :width 80
                  :backgroundColor "black"}}
-        (j/map (xtd/arr-range -/DIVISIONS)
+        (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                (fn:> [index i]
                  [:% physical-base/Text
                   {:key i
@@ -148,7 +147,7 @@
                                :transform
                                [{:scale (* 2 scale)}
                                 {:translateY translate}
-                                {:translateX (* 0.5 (j/abs translate))}]}}))}]))]
+                                {:translateX (* 0.5 (math/abs translate))}]}}))}]))]
        [:% n/View
         [:% n/Button
          {:title "-1"
@@ -187,11 +186,11 @@
     (r/init []
       (a/addListener position
                      (fn [#{value}]
-                       (var normed (j/floor (/ (- position._value) 2)))
+                       (var normed (math/floor (/ (- position._value) 2)))
                        (when (not= position0 normed)
                          (setPosition0 normed)))))
     (r/watch [position0]
-      (setPosition1 (j/floor (/ position0 10))))
+      (setPosition1 (math/floor (/ position0 10))))
     (return
      (n/EnclosedCode
 {:label "js.react-native.model-roller/DigitRollerPan"}
@@ -202,7 +201,7 @@
          :style {:height 80
                  :width 80
                  :backgroundColor "black"}
-         :addons [(:.. (j/map (xtd/arr-range -/DIVISIONS)
+         :addons [(:.. (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset1"
@@ -212,7 +211,7 @@
                                                     :left 18}
                                                    -/DIVISIONS
                                                    HOURS_ARRAY))))
-                  (:.. (j/map (xtd/arr-range -/DIVISIONS)
+                  (:.. (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset0"
@@ -230,7 +229,7 @@
                   :backgroundColor "blue"
                   :width 30}]
          :addons []
-         :inner [(j/assign
+         :inner [(xtd/obj-assign
                   {:component n/View
                    :style [{:cursor "grab"
                             :height 20
@@ -262,9 +261,9 @@
           size 40
           ]
       (r/init []
-        (var interval (j/setInterval
+        (var interval (setInterval
                        (fn []
-                         (when (< 0.1 (j/abs (r/curr speed)))
+                         (when (< 0.1 (math/abs (r/curr speed)))
                            (a/setValue
                             rotation
                             (+ rotation._value
@@ -274,7 +273,7 @@
                        (fn [#{value}]
                          (r/curr:set speed value)))
         (return (fn []
-                  (j/clearInterval interval))))
+                  (clearInterval interval))))
       (return
        (n/EnclosedCode
 {:label "js.react-native.physical-edit/createPanVelocity"}
@@ -294,7 +293,7 @@
                       :alignItems "center"
                       :height 50
                       :flex 1}]
-             :inner [(j/assign
+             :inner [(xtd/obj-assign
                       {:component n/View
                        :style [(:? (== axis "horizontal")
                                    {:left (- (/ size 2))}

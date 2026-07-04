@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react :as r]
+    :require [[js.react :as r]
               [js.react-native :as n :include [:fn]]
               [js.react-native.animate :as a]
               [js.react-native.physical-base :as physical-base]
@@ -57,7 +56,7 @@
                  :height 200
                  :backgroundColor "white"
                  :overflow "hidden"}}
-        (j/map (xtd/arr-range -/DIVISIONS)
+        (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                (fn:> [index i]
                  [:% physical-base/Box
                   {:key i

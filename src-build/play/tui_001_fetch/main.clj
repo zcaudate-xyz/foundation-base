@@ -4,7 +4,6 @@
 
 (l/script :js
   {:require [[js.react :as r]
-             [js.core :as j]
              [js.blessed :as b]]
    :static {:export false}})
 
@@ -41,13 +40,13 @@
             :scrollbar {:style {:bg "gray"
                                 :fg "gray"}
                         :track true}
-            :content (j/inspect val {:colors true :depth 0})}]
+            :content (. util (inspect val {:colors true :depth 0}))}]
      [:% -/Button {:top 21 :left 2
                    :action (fn []
-                             (-> (j/fetch "https://api.github.com/users/zcaudate"
-                                           {:headers {"Accept" "application/vnd.github.v3+json"}
-                                            :as "json"})
-                                 (j/then  (fn [res] (setVal res)))))
+                             (-> (fetch "https://api.github.com/users/zcaudate"
+                                         {:headers {"Accept" "application/vnd.github.v3+json"}
+                                          :as "json"})
+                                 (.then (fn [res] (setVal res)))))
                    :color "gray"
                    :text "GITHUB"}]])))
 
@@ -75,5 +74,5 @@
 
 (defrun.js __init__
   (do (:# (!:uuid)))
-  (:= (!:G fetch)  j/NodeFetch)
+  (:= (!:G fetch)  (require "node-fetch"))
   (b/renderBlessed [:% -/App] (-/Screen)))

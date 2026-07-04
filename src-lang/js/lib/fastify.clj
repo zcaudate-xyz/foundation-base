@@ -3,8 +3,7 @@
             [hara.lang :as l]))
 
 (l/script :js
-   {:require [[js.core :as j]
-              [xt.lang.common-data :as d]
+   {:require [[xt.lang.common-data :as d]
               [xt.lang.spec-base :as x]
               [xt.lang.common-resource :as rt :with [defsingleton.js]]]
     :import  [["fastify" :as Fastify]]})
@@ -42,11 +41,11 @@
   (var app (Fastify {:logger true}))
   (. app (all "*" (-/wrap-handler handler)))
   (return (. app
-             (listen (j/assign {:port port} opts))
+             (listen (d/obj-assign {:port port} opts))
              (then (fn []
                      (-/current-servers-reset
-                      (j/assign (-/current-servers)
-                                {port (j/assign app {:port port})}))
+                      (d/obj-assign (-/current-servers)
+                                {port (d/obj-assign app {:port port})}))
                      (return app))))))
 
 (defn.js stop-server

@@ -11,14 +11,14 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
+   :require [[js.react :as r]
               [js.react.ext-view :as ext-view]
               [js.react-native :as n :include [:fn]]
               [js.react-native.physical-addon :as physical-addon]
               [js.react-native.ui-autocomplete :as ui-autocomplete]
               [js.react-native.ui-input :as ui-input]
-              [xt.lang.spec-base :as xt]]
+              [xt.lang.spec-base :as xt]
+              [xt.lang.common-string :as str]]
    })
 
 ^{:refer js.react-native.ui-autocomplete/AutocompleteModal :added "4.0" :unchecked true}
@@ -66,7 +66,7 @@
     [filt]
     (var output [])
     (xt/for:array [n -/NAMES]
-      (when (j/startsWith n (j/toUpperCase filt))
+      (when (str/starts-with? n (str/to-uppercase filt))
         (xt/x:arr-push output {:name n}))
       (when (< 15 (xt/x:len output))
         (return output)))
@@ -79,8 +79,10 @@
     (var [visible setVisible] (r/local true))
     (var view    (ext-view/makeView
                   {:handler (fn:> [filt]
-                              (j/future-delayed [300]
-                                (return (-/get-names filt))))
+                              (new Promise (fn [resolve]
+                                (setTimeout (fn []
+                                              (resolve (-/get-names filt)))
+                                            300))))
                    :defaultOutput []}))
     (var component (r/const
                     (fn [#{entry}]

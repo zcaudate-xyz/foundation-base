@@ -10,7 +10,6 @@
 
 (l/script :js
   {:require [[js.react :as r]
-             [js.core :as j]
              [js.blessed :as b]]
    :static {:export false}})
 

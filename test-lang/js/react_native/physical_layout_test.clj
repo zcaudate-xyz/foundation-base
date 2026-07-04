@@ -9,11 +9,11 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
+   :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
+             [xt.lang.common-data :as xtd]
              ]
    })
 
@@ -31,7 +31,7 @@
        {:style {:flexDirection "row"
                 :flexWrap "wrap"
                 :align-content "space-between"}}
-       (j/map
+       (xtd/arr-map
         [1 2 3 4 5 6 7 8 9]
         (fn:> [i]
           [:% n/View
@@ -42,7 +42,7 @@
                     :backgroundColor "blue"
                     :minWidth 150
                     :maxWidth 180}}]))
-       (j/map
+       (xtd/arr-map
         [1 2 3 4 5 6]
         (fn:> [i]
           [:% n/View

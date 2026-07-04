@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react-native.helper-color :as c]
+    :require [[js.react-native.helper-color :as c]
               [js.react :as r]
               [js.react-native :as n :include [:fn]]
               [js.react-native.animate :as a]
@@ -36,7 +35,7 @@
             :transformations
             (fn [#{emptying
                    focusing}]
-              (var active (j/max (- 1 emptying)
+              (var active (math/max (- 1 emptying)
                                  focusing))
               (return {:style {:opacity 1
                                :fontSize   (math/mix 20 12 active)
@@ -209,7 +208,7 @@
               :transformations
               (fn [#{emptying
                      focusing}]
-                (var active (j/max (- 1 emptying)
+                (var active (math/max (- 1 emptying)
                                    focusing))
                 (return {:style {:opacity 1
                                  :fontSize   (math/mix 20  12  active)
@@ -378,14 +377,14 @@
     (var submitLogin
          (fn []
            (setWaiting true)
-           (j/setTimeout (fn []
+           (setTimeout (fn []
                            (setWaiting false)
                            (setStep 1))
                          400)))
     (var submitPassword
          (fn []
            (setWaiting true)
-           (j/setTimeout (fn []
+           (setTimeout (fn []
                            (setWaiting false)
                            (setStep 2))
                          400)))
@@ -448,7 +447,7 @@
   (defn.js LoginFormWalkthroughStepperDemo
     []
     (var form (-/useLoginForm))
-    (var [session setSession] (r/local (j/random)))
+    (var [session setSession] (r/local (Math.random)))
     (var #{login setLogin
            password setPassword
            waiting setWaiting
@@ -467,20 +466,20 @@
     (var submitLogin
          (fn []
            (setWaiting true)
-           (j/setTimeout (fn []
+           (setTimeout (fn []
                            (setWaiting false)
                            (setStep 1))
                          400)))
     (var submitPassword
          (fn []
            (setWaiting true)
-           (j/setTimeout (fn []
+           (setTimeout (fn []
                            (setWaiting false)
                            (setStep 2))
                          400)))
     (var submitReset
          (fn []
-           (setSession (j/random))
+           (setSession (Math.random))
            (setLogin "")
            (setPassword "")
            (setStep 0)))

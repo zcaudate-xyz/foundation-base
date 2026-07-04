@@ -8,7 +8,6 @@
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
               [xt.lang.common-repl :as repl]
-              [js.core :as j]
               [js.react.ext-form :as ext-form]]})
 
 (fact:global
@@ -22,14 +21,22 @@
                                                           (< 0 (xt/x:len v))))}]]
    :last     [["is-not-empty" {:message "Must not be empty"
                                 :check (fn:> [v rec]
-                                         (j/future-delayed [100]
-                                           (return (and (xt/x:not-nil? v)
-                                                        (< 0 (xt/x:len v))))))}]]
+                                         (new Promise
+                                              (fn [resolve]
+                                                (setTimeout
+                                                 (fn []
+                                                   (resolve (and (xt/x:not-nil? v)
+                                                                 (< 0 (xt/x:len v)))))
+                                                 100))))}]]
    :email    [["is-not-empty" {:message "Must not be empty"
                                 :check (fn:> [v rec]
-                                         (j/future-delayed [100]
-                                                           (return (and (xt/x:not-nil? v)
-                                                        (< 0 (xt/x:len v))))))}]]})
+                                         (new Promise
+                                              (fn [resolve]
+                                                (setTimeout
+                                                 (fn []
+                                                   (resolve (and (xt/x:not-nil? v)
+                                                                 (< 0 (xt/x:len v)))))
+                                                 100))))}]]})
 
 ^{:refer js.react.ext-form/makeFree :added "4.0" :unchecked true}
 (fact "makes a free form (no validation)")

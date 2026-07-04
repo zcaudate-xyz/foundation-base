@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.react :as r]
+  {:require [[js.react :as r]
              [js.blessed :as b]]
    :static {:export false}})
 
@@ -32,7 +31,7 @@
    (forange [y rows]
      (forange [x cols]
        (:= (. grid [y] [x])
-           (j/round (* 0.8 (j/random))))))))
+           (Math.round (* 0.8 (Math.random))))))))
 
 (defn.js gridCreate
   ([rows cols]
@@ -135,19 +134,19 @@
            :width (+ 2 (* 2 rows))
            :height (+ 2 cols)
            :border "line"}
-     (j/map grid
+     (. grid (map
             (fn [row i]
               (return
-               (j/map row
-                      (fn [col j]
-                        (return
-                         [:box {:top i
-                                :width 2
-                                :left (* 2 j)
-                                :key (+ i "_" j)
-                                :content ""
-                                :style {:bg (:? (== 1 col) ["yellow" "black"])}
-                                :shrink true}]))))))])))
+               (. row (map
+                       (fn [col j]
+                         (return
+                          [:box {:top i
+                                 :width 2
+                                 :left (* 2 j)
+                                 :key (+ i "_" j)
+                                 :content ""
+                                 :style {:bg (:? (== 1 col) ["yellow" "black"])}
+                                 :shrink true}]))))))))])))
 
 (defn.js App
   ([]

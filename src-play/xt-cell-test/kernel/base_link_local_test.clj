@@ -14,8 +14,7 @@
    :require [[xt.lang.common-lib :as k]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.base-link-local :as base-link-local]
-             [xt.lang.common-repl :as repl]
-             [js.core :as j]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -62,15 +61,20 @@
     (var link
          (-/make-link
           (fn [listener input]
-            (j/future-delayed [10]
-              (listener {"op" "stream"
-                         "signal" "hello"
-                         "status" "ok"
-                         "body" "hello"})
-              (listener {"op" "call"
-                         "id" input.id
-                         "status" "ok"
-                         "body" nil})))))
+            (new Promise
+                 (fn [resolve]
+                   (setTimeout
+                    (fn []
+                      (listener {"op" "stream"
+                                 "signal" "hello"
+                                 "status" "ok"
+                                 "body" "hello"})
+                      (listener {"op" "call"
+                                 "id" input.id
+                                 "status" "ok"
+                                 "body" nil})
+                      (resolve nil))
+                    10))))))
     (base-link/add-callback link "test" "hello" (repl/>notify))
     (base-link-local/trigger-async link "stream" "hello" "ok" "hello" 100))
   => {"body" "hello"
@@ -196,11 +200,16 @@
     (var link
          (-/make-link
           (fn [listener input]
-            (j/future-delayed [10]
-              (listener {"op" "call"
-                         "id" input.id
-                         "status" "ok"
-                         "body" ["pong" 1]})))))
+            (new Promise
+                 (fn [resolve]
+                   (setTimeout
+                    (fn []
+                      (listener {"op" "call"
+                                 "id" input.id
+                                 "status" "ok"
+                                 "body" ["pong" 1]})
+                      (resolve nil))
+                    10))))))
     (. (base-link-local/ping-async link 100)
        (then (repl/>notify))))
   => ["pong" 1])
@@ -227,11 +236,16 @@
     (var link
          (-/make-link
           (fn [listener input]
-            (j/future-delayed [10]
-              (listener {"op" "call"
-                         "id" input.id
-                         "status" "ok"
-                         "body" ["hello" 1]})))))
+            (new Promise
+                 (fn [resolve]
+                   (setTimeout
+                    (fn []
+                      (listener {"op" "call"
+                                 "id" input.id
+                                 "status" "ok"
+                                 "body" ["hello" 1]})
+                      (resolve nil))
+                    10))))))
     (. (base-link-local/echo-async link "hello" 100)
        (then (repl/>notify))))
   => ["hello" 1])
@@ -263,12 +277,17 @@
     (var link
          (-/make-link
           (fn [listener input]
-            (j/future-delayed [10]
-              (listener {"op" "call"
-                         "id" input.id
-                         "status" "error"
-                         "body" ["error" 1]
-                         "action" "@cell/error.async"})))))
+            (new Promise
+                 (fn [resolve]
+                   (setTimeout
+                    (fn []
+                      (listener {"op" "call"
+                                 "id" input.id
+                                 "status" "error"
+                                 "body" ["error" 1]
+                                 "action" "@cell/error.async"})
+                      (resolve nil))
+                    10))))))
     (. (base-link-local/error-async link 100)
        (catch (repl/>notify))))
   => (contains-in

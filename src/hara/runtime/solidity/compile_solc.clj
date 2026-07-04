@@ -1,7 +1,6 @@
 (ns hara.runtime.solidity.compile-solc
   (:require [clojure.string]
             [hara.lang.book-module :as book-module]
-            [js.core :as j]
             [js.lib.eth-solc :as eth-solc]
             [hara.runtime.basic :as basic]
             [hara.runtime.solidity.compile-common :as common]

@@ -9,13 +9,14 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
+   :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-tree :as xtt]]})
+             [xt.lang.common-tree :as xtt]
+             [xt.lang.common-math :as math]
+             [xt.lang.common-string :as str]]})
 
 (defn.js nest-tree
   [obj prefix]
@@ -314,7 +315,7 @@
                 :d "4"}
         :initial initial
         :setInitial setInitial
-        :tabsFormat (fn:> [s] (+ " " (j/toUpperCase s) " "))
+        :tabsFormat (fn:> [s] (+ " " (str/to-uppercase s) " "))
         :formatFn k/identity}]
       [:% n/Caption
        {:text (xt/x:json-encode #{initial})
@@ -374,7 +375,7 @@
         :initial initial
         :setInitial setInitial
         :listWidth 30
-        :listFormat j/toUpperCase
+        :listFormat str/to-uppercase
         :formatFn k/identity}]
       [:% n/Caption
        {:text (xt/x:json-encode #{initial})
@@ -444,25 +445,25 @@
                   :initial initial
                   :setInitial setInitial
                   :listWidth 30
-                  :listFormat j/toUpperCase
+                  :listFormat str/to-uppercase
                   :formatFn xt/x:json-encode}
                  {:type "tabs"
                   :initial l1
                   :setInitial setL1
                   :listWidth 30
-                  :tabsFormat j/toUpperCase
+                  :tabsFormat str/to-uppercase
                   :formatFn xt/x:json-encode}
                  {:type "list"
                   :listWidth 30
                   :initial l2
                   :setInitial setL2
-                  :listFormat j/toUpperCase
+                  :listFormat str/to-uppercase
                   :formatFn xt/x:json-encode}
                  {:type "tabs"
                   :listWidth 30
                   :initial l3
                   :setInitial setL3
-                  :tabsFormat j/toUpperCase
+                  :tabsFormat str/to-uppercase
                   :formatFn xt/x:json-encode}]}]
       [:% n/Caption
        {:text (xt/x:json-encode #{initial l1 l2 l3})
@@ -551,14 +552,14 @@
 
   (defn.js PortalView
     []
-    (var [code setCode] (r/local (j/randomId 5)))
+    (var [code setCode] (r/local (. (Math.random) (toString 36) (substr 2 4))))
     (return
      [:% n/View
       {:style {:marginTop 10}}
       [:% n/Row
        [:% n/Button
         {:title "CHANGE"
-         :onPress (fn:> (setCode (j/randomId 5)))}]]
+         :onPress (fn:> (setCode (. (Math.random) (toString 36) (substr 2 4))))}]]
       [:% n/Row
        [:% n/Portal
         {}
@@ -635,8 +636,8 @@
 
   (defn.js UsePortalLayoutsDemo
     []
-    (var [offset setOffset] (r/local (j/floor
-                                      (* 100 (j/random 100)))))
+    (var [offset setOffset] (r/local (math/floor
+                                      (* 100 (Math.random)))))
 
     (var [layouts setLayouts] (r/local {}))
     (return
@@ -659,7 +660,7 @@
            [:% n/Button
             {:title "CHANGE"
              :onPress (fn:>
-                       (setOffset (j/floor (* 100 (j/random)))))}]
+                       (setOffset (math/floor (* 100 (Math.random)))))}]
            [:% -/UsePortalLayoutsView
             #{offset setOffset
               layouts setLayouts}]]]]

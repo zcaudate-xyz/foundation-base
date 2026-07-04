@@ -10,8 +10,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react-native.helper-color :as c]
+    :require [[js.react-native.helper-color :as c]
               [xt.lang.common-math :as math]
               [js.react :as r]
               [js.react-native :as n :include [:fn]]
@@ -88,7 +87,7 @@
                   :transformations
                    (fn [#{emptying
                           focusing}]
-                     (var active (j/min (- 1 emptying)
+                     (var active (math/min (- 1 emptying)
                                         focusing))
                      (return {:style {:opacity active}}))}]}]]
 [:% n/Caption
@@ -141,7 +140,7 @@
                   :transformations
                    (fn [#{emptying
                           focusing}]
-                     (var active (j/max (- 1 emptying)
+                     (var active (math/max (- 1 emptying)
                                         focusing))
                      (return {:style {:opacity 1
                                       :fontSize   (math/mix 20  14 (- 1 emptying))
@@ -211,7 +210,7 @@
                   :transformations
                    (fn [#{emptying
                           focusing}]
-                     (var active (j/min (- 1 emptying)
+                     (var active (math/min (- 1 emptying)
                                         focusing))
                      (return {:style {:opacity active}}))}]}]]
 [:% n/Caption
@@ -223,7 +222,7 @@
   (def +++
     (f/suppress
      (!.js
-      (j/assign test.web-00-rn.main/I09_RAW
+      (xtd/obj-assign test.web-00-rn.main/I09_RAW
                 (component.web-native/raw-controls))))))
 
 
@@ -257,7 +256,7 @@
                   :transformations
                    (fn [#{emptying
                           focusing}]
-                     (var active (j/max (- 1 emptying)
+                     (var active (math/max (- 1 emptying)
                                         focusing))
                      (return {:style {:opacity 1
                                       :fontSize   (math/mix 20  14 (- 1 emptying))

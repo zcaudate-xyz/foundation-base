@@ -81,7 +81,7 @@
    (rt-get-node rt)
    (list `eth-lib/getBlockNumber
          (list `eth-lib/new-rpc-provider))
-   'js.core/toString))
+   'xt.lang.common-lib/to-string))
 
 (defn rt:node-get-balance
   "gets the current balance"
@@ -94,7 +94,7 @@
          (or address (rt-get-address rt))
          #_(compile-common/get-caller-address
           (rt-get-id rt)))
-   'js.core/toString))
+   'xt.lang.common-lib/to-string))
 
 (defn rt:node-ping
   "pings the node"

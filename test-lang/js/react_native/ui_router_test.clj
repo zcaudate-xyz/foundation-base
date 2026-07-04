@@ -11,8 +11,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
-             [js.react-native.ui-router :as ui-router]
-             [js.core :as j]]
+             [js.react-native.ui-router :as ui-router]]
    })
 
 ^{:refer js.react-native.ui-router/useTransition :added "4.0" :unchecked true}
@@ -29,7 +28,7 @@
                 :height 100
                 :width 100
                 :backgroundColor "red"
-                :transform [{"rotateY" (+ j/PI "rad")}]}}] ))))
+                :transform [{"rotateY" (+ Math.PI "rad")}]}}] ))))
 
 ^{:refer js.react-native.ui-router/RouterImpl :added "4.0" :unchecked true}
 (fact "creates the transitioning router")
