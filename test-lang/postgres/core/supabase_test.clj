@@ -389,8 +389,30 @@
   => (throws clojure.lang.ExceptionInfo "Supabase API request failed"))
 
 
+(def ^:private +sample-realtime-payload+
+  {"db/sync" {"Entry" []}})
+
 ^{:refer postgres.core.supabase/resolve-literal :added "4.1"}
-(fact "TODO")
+(fact "resolves literal data carried directly or via a bound var"
+  (s/resolve-literal {:a 1}) => {:a 1}
+  (s/resolve-literal [1 2 3]) => [1 2 3]
+  (s/resolve-literal "hello") => "hello"
+  (s/resolve-literal 42) => 42
+  (s/resolve-literal true) => true
+  (s/resolve-literal nil) => nil
+  (s/resolve-literal :keyword) => :keyword
+  (s/resolve-literal 's/resolve-literal) => s/resolve-literal
+  (s/resolve-literal 'not-a-bound-symbol-12345) => 'not-a-bound-symbol-12345)
 
 ^{:refer postgres.core.supabase/normalize-realtime-payload :added "4.1"}
-(fact "TODO")
+(fact "normalizes literal map payloads into postgres jsonb forms"
+  (s/normalize-realtime-payload {:a 1}) => {:a 1}
+  (meta (s/normalize-realtime-payload {:a 1})) => {:js true}
+  (s/normalize-realtime-payload [1 2]) => [1 2]
+  (s/normalize-realtime-payload "hello") => "hello"
+  (s/normalize-realtime-payload 42) => 42
+  (s/normalize-realtime-payload nil) => nil
+  (s/normalize-realtime-payload '+sample-realtime-payload+) => +sample-realtime-payload+
+  (meta (s/normalize-realtime-payload '+sample-realtime-payload+)) => {:js true}
+  (meta (s/normalize-realtime-payload (with-meta {:a 1} {:tag :data})))
+  => {:tag :data :js true})

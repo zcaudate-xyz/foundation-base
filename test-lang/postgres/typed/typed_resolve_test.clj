@@ -4,7 +4,27 @@
             [postgres.typed.typed-resolve :as typed-resolve]))
 
 ^{:refer postgres.typed.typed-resolve/canonical-fn-sym :added "4.1"}
-(fact "TODO")
+(fact "canonical-fn-sym rewrites rt.postgres namespaces"
+  (typed-resolve/canonical-fn-sym 'rt.postgres.foo/bar)
+  => 'hara.runtime.postgres.foo/bar
+
+  (typed-resolve/canonical-fn-sym 'rt.postgres.util/one)
+  => 'hara.runtime.postgres.util/one
+
+  (typed-resolve/canonical-fn-sym 'rt.postgres/one)
+  => 'rt.postgres/one
+
+  (typed-resolve/canonical-fn-sym 'other.namespace/foo)
+  => 'other.namespace/foo
+
+  (typed-resolve/canonical-fn-sym 'plain)
+  => 'plain
+
+  (typed-resolve/canonical-fn-sym :keyword)
+  => :keyword
+
+  (typed-resolve/canonical-fn-sym nil)
+  => nil)
 
 ^{:refer postgres.typed.typed-resolve/app-name-from-static :added "4.1"}
 (fact "app-name-from-static normalizes static application values"

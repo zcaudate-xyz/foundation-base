@@ -376,22 +376,84 @@
   => [true false false false])
 
 ^{:refer net.openapi.read/resource-path :added "4.1"}
-(fact "TODO")
+(fact "resolves classpath resources and rejects json strings and urls"
+  [(read/resource-path "{\"swagger\":\"2.0\"}")
+   (read/resource-path "  {\"swagger\":\"2.0\"}")
+   (read/resource-path "http://example.com/openapi.json")
+   (read/resource-path "resources/assets/lib.supabase/openapi.json")
+   (read/resource-path "assets/lib.supabase/openapi.json")]
+  => [nil
+      nil
+      nil
+      "assets/lib.supabase/openapi.json"
+      "assets/lib.supabase/openapi.json"])
 
 ^{:refer net.openapi.read/vendor-extension-map :added "4.1"}
-(fact "TODO")
+(fact "extracts x- prefixed keys into a sorted map"
+  [(read/vendor-extension-map {"type" "object" "x-go-name" "Widget"})
+   (read/vendor-extension-map {:type "object" :x-go-name "Widget"})
+   (read/vendor-extension-map {"type" "object"})
+   (read/vendor-extension-map nil)]
+  => [{"x-go-name" "Widget"}
+      {"x-go-name" "Widget"}
+      {}
+      {}])
 
 ^{:refer net.openapi.read/normalize-properties :added "4.1"}
-(fact "TODO")
+(fact "normalizes each property schema and sorts the result"
+  (read/normalize-properties {}
+                             {"name" {"type" "string"}
+                              "count" {"type" "integer"}})
+  => {"count" {:type "integer"}
+      "name" {:type "string"}})
 
 ^{:refer net.openapi.read/select-filter :added "4.1"}
-(fact "TODO")
+(fact "matches ids against functions, strings, regexes, sets, seqs, vectors and numbers"
+  [(read/select-filter #(= "foo" %) "foo")
+   (read/select-filter #(= "foo" %) "bar")
+   (read/select-filter "/widgets" "/widgets/{widget_id}")
+   (read/select-filter :get :get-widgets)
+   (read/select-filter 'get "get-widgets")
+   (read/select-filter #"/widgets" "/widgets/{widget_id}")
+   (read/select-filter #{"/a" "/widgets"} "/widgets")
+   (read/select-filter #{"/a" "/widgets"} "/other")
+   (read/select-filter '("/widgets" "/widgets/{widget_id}") "/widgets/{widget_id}")
+   (read/select-filter ["/a" "/widgets"] "/widgets/{widget_id}")
+   (read/select-filter 42 42)]
+  => [true false true true true true true false true true true])
 
 ^{:refer net.openapi.read/select-operations :added "4.1"}
-(fact "TODO")
+(fact "filters operations by applying the selector to the path"
+  (let [ops (read/operation-map +v3-spec+ :v3)]
+    [(count (read/select-operations ops nil))
+     (count (read/select-operations ops "/widgets/{widget_id}"))
+     (count (read/select-operations ops #"/widgets"))
+     (count (read/select-operations ops "/unknown"))])
+  => [2 2 2 0])
 
 ^{:refer net.openapi.read/remove-empty-options :added "4.1"}
-(fact "TODO")
+(fact "drops empty parameter buckets but preserves non-empty ones"
+  (read/remove-empty-options {:path-params [{:name "widget_id"}]
+                              :query-params []
+                              :header-params []
+                              :cookie-params []
+                              :body {:required true}})
+  => {:path-params [{:name "widget_id"}]
+      :body {:required true}})
 
 ^{:refer net.openapi.read/format-operations :added "4.1"}
-(fact "TODO")
+(fact "optionally removes empty buckets from every operation"
+  (let [ops {"create-widget" {:path-params []
+                               :query-params [{:name "q"}]}}]
+    [(-> (read/format-operations ops {:remove-empty? true})
+         (get "create-widget")
+         keys
+         sort
+         vec)
+     (-> (read/format-operations ops {})
+         (get "create-widget")
+         keys
+         sort
+         vec)])
+  => [[:query-params]
+      [:path-params :query-params]])

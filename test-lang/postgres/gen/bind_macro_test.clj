@@ -4,6 +4,7 @@
             [postgres.gen.bind-macro :as gen]
             [postgres.sample.scratch-v1 :as scratch]
             [hara.lang :as l]
+            [hara.lang.book :as book]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user]))
 
@@ -63,7 +64,56 @@
   (gen/plain-symbol? 123) => false)
 
 ^{:refer postgres.gen.bind-macro/bind-entry :added "4.1"}
-(fact "TODO")
+(fact "gets a materialized postgres code entry when available"
+
+  (select-keys (gen/bind-entry scratch/ping)
+               [:lang :section :module :id :op-key])
+  => {:lang :postgres
+      :section :code
+      :module 'postgres.sample.scratch-v1
+      :id 'ping
+      :op-key :defn}
+
+  (let [entry (book/book-entry {:lang :js
+                                :section :code
+                                :module 'test.ns
+                                :id 'foo
+                                :namespace 'test.ns
+                                :form '(defn foo [])
+                                :declared 1
+                                :line 1})]
+    (select-keys (gen/bind-entry entry)
+                 [:lang :section :module :id]))
+  => {:lang :js
+      :section :code
+      :module 'test.ns
+      :id 'foo}
+
+  (select-keys (gen/bind-entry (book/book-entry {:lang :postgres
+                                                 :section :code
+                                                 :module 'test.ns
+                                                 :namespace 'test.ns
+                                                 :form '(defn foo [])
+                                                 :declared 1
+                                                 :line 1}))
+               [:lang :section :module :id])
+  => {:lang :postgres
+      :section :code
+      :module 'test.ns
+      :id nil}
+
+  (select-keys (gen/bind-entry (book/book-entry {:lang :postgres
+                                                 :section :code
+                                                 :id 'foo
+                                                 :namespace 'test.ns
+                                                 :form '(defn foo [])
+                                                 :declared 1
+                                                 :line 1}))
+               [:lang :section :module :id])
+  => {:lang :postgres
+      :section :code
+      :module nil
+      :id 'foo})
 
 ^{:refer postgres.gen.bind-macro/transform-to-str :added "4.0"}
 (fact "transforms relevant forms to string"
