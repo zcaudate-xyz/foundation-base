@@ -3,7 +3,13 @@
   (:use code.test))
 
 ^{:refer js.tamagui/generate-blocks :added "4.0" :unchecked true}
-(fact "TODO")
+(fact "generates a block layout for tamagui components"
+
+  (some? (generate-blocks))
+  => true)
 
 ^{:refer js.tamagui/init-components :added "4.0" :unchecked true}
-(fact "TODO")
+(fact "registers tamagui components"
+
+  (init-components)
+  => true)

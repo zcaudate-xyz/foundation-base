@@ -105,22 +105,57 @@
 
 
 ^{:refer js.react.ext-page/throttled-setter :added "4.1"}
-(fact "TODO")
+(fact "creates a throttled setter"
+
+  (notify/wait-on :js
+    (var results [])
+    (var [setThrottled throttle] (ext-page/throttled-setter
+                                  (fn [x] (. results (push x)))
+                                  20))
+    (setThrottled 1)
+    (setThrottled 2)
+    (setThrottled 3)
+    (setTimeout (fn [] (repl/notify results)) 60))
+  => #(>= (count %) 1))
 
 ^{:refer js.react.ext-page/initModelBase :added "4.1"}
-(fact "TODO")
+(fact "is a function"
+
+  (!.js
+   (typeof ext-page/initModelBase))
+  => "function")
 
 ^{:refer js.react.ext-page/listenModel :added "4.1"}
-(fact "TODO")
+(fact "is a function"
+
+  (!.js
+   (typeof ext-page/listenModel))
+  => "function")
 
 ^{:refer js.react.ext-page/listenModelOutput :added "4.1"}
-(fact "TODO")
+(fact "is a function"
+
+  (!.js
+   (typeof ext-page/listenModelOutput))
+  => "function")
 
 ^{:refer js.react.ext-page/listenModelThrottled :added "4.1"}
-(fact "TODO")
+(fact "is a function"
+
+  (!.js
+   (typeof ext-page/listenModelThrottled))
+  => "function")
 
 ^{:refer js.react.ext-page/useRefreshArgs :added "4.1"}
-(fact "TODO")
+(fact "is a function"
+
+  (!.js
+   (typeof ext-page/useRefreshArgs))
+  => "function")
 
 ^{:refer js.react.ext-page/listenSuccess :added "4.1"}
-(fact "TODO")
+(fact "is a function"
+
+  (!.js
+   (typeof ext-page/listenSuccess))
+  => "function")

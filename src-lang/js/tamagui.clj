@@ -1,7 +1,9 @@
 (ns js.tamagui
   (:require [js.react.compile :as compile]
             [hara.lang :as l]
-            [std.lib.foundation :as f]))
+            [std.block :as block]
+            [std.lib.foundation :as f]
+            [std.string.case :as case]))
 
 (l/script :js
   {:import [["tamagui" :as [* T]]
@@ -392,3 +394,43 @@
    variableToString
    withStaticProperties
    wrapChildrenInText])
+
+(def +components+
+  (apply hash-map
+         `[:tamagui/button                 {:tag -/Button}
+           :tamagui/card                   {:tag -/Card}
+           :tamagui/checkbox               {:tag -/Checkbox}
+           :tamagui/dialog                 {:tag -/Dialog}
+           :tamagui/dialog-content         {:tag -/DialogContent}
+           :tamagui/dialog-title           {:tag -/DialogTitle}
+           :tamagui/dialog-trigger         {:tag -/DialogTrigger}
+           :tamagui/input                  {:tag -/Input}
+           :tamagui/label                  {:tag -/Label}
+           :tamagui/popover                {:tag -/Popover}
+           :tamagui/radio-group            {:tag -/RadioGroup}
+           :tamagui/select                 {:tag -/Select}
+           :tamagui/switch                 {:tag -/Switch}
+           :tamagui/tabs                   {:tag -/Tabs}
+           :tamagui/text                   {:tag -/Text}
+           :tamagui/textarea               {:tag -/TextArea}
+           :tamagui/theme                  {:tag -/Theme}
+           :tamagui/toast                  {:tag -/Toast}
+           :tamagui/tooltip                {:tag -/Tooltip}
+           :tamagui/x-stack                {:tag -/XStack}
+           :tamagui/y-stack                {:tag -/YStack}]))
+
+(defn init-components
+  []
+  (compile/put-registry :tamagui +components+)
+  true)
+
+(defn generate-blocks
+  []
+  (block/layout
+   (vec (mapcat (fn [[k]]
+                  [(keyword "tamagui" (case/spear-case (str k)))
+                   {:tag (symbol "-" (str k))}])
+                (sort (ns-publics *ns*))))))
+
+(def +init+
+  (init-components))

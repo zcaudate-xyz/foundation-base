@@ -117,7 +117,7 @@
     (var client (js-ws/create {}))
     (xt/x:set-key client "raw"
                   {"close" (fn [code reason]
-                             (xt/x:arr-push closed [code reason])
+                             (. closed (push [code reason]))
                              (return true))})
     (websocket/disconnect client)
     closed)
@@ -130,7 +130,7 @@
    (var client (js-ws/create {}))
    (xt/x:set-key client "raw"
                  {"send" (fn [payload]
-                           (xt/x:arr-push sent payload)
+                           (. sent (push payload))
                            (return true))})
    (websocket/send client "hello")
    sent)
@@ -138,26 +138,58 @@
 
 ^{:refer js.net.ws-native/add-listeners-ws :added "4.1"}
 (fact "adds listeners to the wrapped websocket client"
+
   (!.js
    (var handlers {})
    (var client (js-ws/create {}))
    (xt/x:set-key client "raw"
                  {"addEventListener" (fn [event handler]
-                                       (xt/x:set-key handlers event handler)
+                                       (xtd/obj-set handlers event handler)
                                        (return true))})
    (websocket/add-listeners client {"open" (fn [_] (return true))
                                     "message" (fn [_] (return true))})
-   (xt/x:obj-keys handlers))
+   (xtd/obj-keys handlers))
   => ["open" "message"])
 
 ^{:refer js.net.ws-native/default-heartbeat-fn :added "4.1"}
-(fact "TODO")
+(fact "sends a heartbeat string"
+
+  (!.js
+   (var sent [])
+   (var client {"raw" {"send" (fn [x] (. sent (push x)))}})
+   (js-ws/default-heartbeat-fn client "ping")
+   sent)
+  => ["heartbeat"])
 
 ^{:refer js.net.ws-native/start-heartbeat-ws :added "4.1"}
-(fact "TODO")
+(fact "starts a heartbeat interval"
+
+  (notify/wait-on [:js 200]
+    (var client (js-ws/create {}))
+    (var beats [])
+    (js-ws/start-heartbeat-ws
+     client
+     "ping"
+     (fn [c n] (. beats (push n)))
+     10)
+    (setTimeout (fn [] (repl/notify (. beats length))) 50))
+  => #(> % 0))
 
 ^{:refer js.net.ws-native/stop-heartbeat-ws :added "4.1"}
-(fact "TODO")
+(fact "stops a heartbeat interval"
+
+  (notify/wait-on [:js 200]
+    (var client (js-ws/create {}))
+    (var beats [])
+    (js-ws/start-heartbeat-ws
+     client
+     "ping"
+     (fn [c n] (. beats (push n)))
+     10)
+    (js-ws/stop-heartbeat-ws client "ping")
+    (var before (. beats length))
+    (setTimeout (fn [] (repl/notify (== before (. beats length)))) 50))
+  => true)
 
 ^{:refer js.net.ws-native/create :added "4.1"}
 (fact "creates a websocket wrapper"
@@ -169,7 +201,7 @@
 
   @(ws/websocket (str "ws://127.0.0.1:55121/realtime/v1/websocket?vsn=2.0.0&apikey=" (-> local-min/+config+ :api :anon-key))
                 {:on-open (fn [& args] (std.lib/prn args))})
-  
+
   (notify/wait-on :js
     (var client
          (js-ws/create
@@ -187,7 +219,7 @@
                                 {"topic"  "realtime:room:example-1"
                                  "ref"    "join-1"})
                                (repl/notify "opened"))}))
-  
+
   {"base_url" (xt/x:cat (or (-> local-min/+config+ :api :protocol) "http")
                            "://"
                            (or (-> local-min/+config+ :api :hostname) "127.0.0.1")
@@ -196,5 +228,5 @@
       "api_key" (-> local-min/+config+ :api :service-key)
       "auth_token" (-> local-min/+config+ :api :service-key)
       "topic" topic}
-  
+
   )
