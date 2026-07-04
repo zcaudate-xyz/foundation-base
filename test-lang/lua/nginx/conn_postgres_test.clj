@@ -116,7 +116,6 @@
   (!.lua (var client (pg/create (pg/default-env)))
          (pg/client-connect client {})
          (var p (pg/client-query-async client "SELECT 2 AS n"))
-         (pg/client-disconnect client)
          (type p))
   => "table")
 

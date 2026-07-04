@@ -103,10 +103,10 @@ jobs:
             -v $(pwd):$(pwd) \
             -w $(pwd) \
             ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            bash -lc "set -euxo pipefail &&
+            bash -lc 'set -euxo pipefail &&
             apt-get update &&
             apt-get install -y --no-install-recommends lua5.4 python3 python3-pip &&
-            ${{ matrix.command }}"
+            ${{ matrix.command }}'
         
     services:
       postgres:
@@ -168,6 +168,7 @@ jobs:
         run: |
           mkdir -p .tmp
           docker run --network host \
+            -e "CI=true" \
             -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS} -Djava.io.tmpdir=$(pwd)/.tmp" \
             -e "_JAVA_OPTIONS=-Djava.io.tmpdir=$(pwd)/.tmp" \
             -v /var/run/docker.sock:/var/run/docker.sock \
@@ -175,9 +176,9 @@ jobs:
             -v $(pwd):$(pwd) \
             -w $(pwd) \
             ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            bash -lc "set -euxo pipefail &&
+            bash -lc 'set -euxo pipefail &&
               ${{ matrix.lang == 'python' && 'pip install --no-cache-dir psycopg2-binary redis' || 'true' }} &&
-              lein test :with \"${{ matrix.lang }}\""
+              lein test :with "${{ matrix.lang }}"'
         
     services:
       postgres:

@@ -5,7 +5,7 @@
   (:import [std.lib.foundation Wrapped])
   (:use code.test))
 
-(l/script :python
+(l/script- :python
   {:runtime :gimp
    :require [[python.gimp.tutorial.example-core :as core]]
    :import [["gi" :as gi]]})

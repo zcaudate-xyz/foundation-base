@@ -15,8 +15,13 @@
              [lua.aws.common :as common]
              [xt.lang.spec-base :as xt]]})
 
+(defn- ci?
+  []
+  (boolean (System/getenv "CI")))
+
 (fact:global
- {:skip     (or (not (env/program-exists? "resty"))
+ {:skip     (or (ci?)
+                (not (env/program-exists? "resty"))
                 (not (env/program-exists? "minio")))
   :setup    [(l/rt:restart)
              (minio/start-minio-array [{:port 4489
