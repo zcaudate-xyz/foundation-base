@@ -66,10 +66,13 @@
             :compare f/hash-id}]
   ([ptr]
    (let [form (raw-compile-form ptr)
+         module-id (:module (ptr/get-entry ptr))
          body (impl/emit-script
                form
                {:lang :lua
-                :layout :flat})]
+                :layout :flat
+                :module module-id
+                :namespace module-id})]
      {:body body
       :sha  (security/sha1 body)})))
 
