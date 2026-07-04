@@ -3,12 +3,12 @@
 
 (l/script :js
   {:require [[demo-xtdb-backbone.app.backbone :as backbone]
-             [js.worker.sharedworker :as sharedworker]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.substrate :as event-node]
-             [xt.substrate.page-model :as page-model]]})
+             [xt.substrate :as substrate]
+             [xt.substrate.page-model :as page-model]
+             [xt.substrate.transport-browser :as browser-transport]]})
 
 (defn.js default-session-config
   []
@@ -29,13 +29,13 @@
   [opts]
   (var config (-/merged-session-config opts))
   (return
-   (event-node/node-create
+   (substrate/node-create
     {"id" (or (xt/x:get-key config "browser_node_id")
               "demo-xtdb-backbone-webapp")})))
 
 (defn.js create-page-node
   []
-  (return (event-node/node-create {"id" "demo-xtdb-backbone-page-node"})))
+  (return (substrate/node-create {"id" "demo-xtdb-backbone-page-node"})))
 
 (defn.js install-demo-models
   [node space-id]
@@ -48,35 +48,70 @@
   [shared-worker opts]
   (var config (-/merged-session-config opts))
   (var browser-node (-/create-browser-node config))
+  (var shared-space (xt/x:get-key config "shared_space"))
   (return
-   (sharedworker/connect
-    browser-node
-    (xtd/obj-assign-nested config
-                           {"sharedworker" shared-worker}))))
+   (-> (browser-transport/connect-sharedworker
+        browser-node
+        {"transport_id" "worker"
+         "sharedworker" shared-worker})
+       (promise/x:promise-then
+        (fn [conn]
+          (return {"node" browser-node
+                   "conn" conn
+                   "ready" (. conn ["ready"])
+                   "transport_id" "worker"
+                   "shared_space" shared-space}))))))
 
 (defn.js disconnect-session
   [session]
   (return
-   (sharedworker/disconnect session)))
+   (browser-transport/disconnect
+    (xt/x:get-key session "conn"))))
+
+(defn.js node-summary
+  [session]
+  (return
+   (promise/x:promise-catch
+    (promise/x:promise-then
+     (substrate/request (xt/x:get-key session "node")
+                        (xt/x:get-key session "shared_space")
+                        "@xt.db/node-summary"
+                        []
+                        {"transport_id" (xt/x:get-key session "transport_id")})
+     (fn [response]
+       (var kind (xt/x:get-key response "kind"))
+       (var status (xt/x:get-key response "status"))
+       (cond (not (== kind "response"))
+             (return response)
+
+             (== "ok" status)
+             (return (xt/x:get-key response "data"))
+
+             :else
+             (xt/x:throw (or (xt/x:get-key response "error")
+                             response)))))
+    (fn [err]
+      (xt/x:throw (or (xt/x:get-key err "error")
+                      err))))))
 
 (defn.js bootstrap
   [shared-worker opts]
   (var config (-/merged-session-config opts))
   (return
-   (promise/x:promise-then
-    (-/connect-session shared-worker config)
-    (fn [session]
-      (return
+   (-> (-/connect-session shared-worker config)
        (promise/x:promise-then
-        (sharedworker/node-summary session)
-        (fn [summary]
+        (fn [session]
           (return
-           (promise/x:promise-then
-            (-/disconnect-session session)
-            (fn [_]
-              (return {"shared_space" (xt/x:get-key session "shared_space")
-                       "transport_id" (xt/x:get-key session "transport_id")
-                       "summary" summary})))))))))))
+           (-> (-/node-summary session)
+               (promise/x:promise-then
+                (fn [summary]
+                  (return
+                   (-> (-/disconnect-session session)
+                       (promise/x:promise-then
+                        (fn [_]
+                          (return {"shared_space" (xt/x:get-key session "shared_space")
+                                   "transport_id" (xt/x:get-key session "transport_id")
+                                   "summary" summary}))))))))))))))
 
 (defn.js set-view-input
   [node space-id model-id view-id input]

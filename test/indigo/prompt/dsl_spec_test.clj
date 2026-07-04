@@ -55,14 +55,27 @@
   => string?)
 
 ^{:refer indigo.prompt.dsl-spec/spec-examples :added "4.0"}
-(fact "TODO")
+(fact "returns all spec examples"
+  (with-redefs [clojure.core/slurp (fn [_] "example content")]
+    (keys (spec/spec-examples)))
+  => '(:forms :files))
 
 
 ^{:refer indigo.prompt.dsl-spec/spec-example-files :added "4.0"}
-(fact "TODO")
+(fact "returns a map of example file contents"
+  (with-redefs [clojure.core/slurp (fn [_] "example content")]
+    (spec/spec-example-files))
+  => {:library-browser ["example content" "example content"]})
 
 ^{:refer indigo.prompt.dsl-spec/spec-example-forms :added "4.0"}
-(fact "TODO")
+(fact "returns example forms"
+  (first (spec/spec-example-forms))
+  => :primitives
+
+  (spec/spec-example-forms)
+  => vector?)
 
 ^{:refer indigo.prompt.dsl-spec/create-spec :added "4.0"}
-(fact "TODO")
+(fact "creates the full spec document"
+  (spec/create-spec)
+  => string?)

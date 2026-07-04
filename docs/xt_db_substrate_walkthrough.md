@@ -129,7 +129,7 @@ flowchart TD
     G --> H
 ```
 
-This is the js.cell-style part of the design:
+This is the substrate-style part of the design:
 
 - first define the cells you want
 - then decide where those cells read from

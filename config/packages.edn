@@ -67,10 +67,6 @@
  {:description "js blessed" 
   :include [[js.blessed :complete]]}
   
- xyz.zcaudate/js.cell
- {:description "js blessed" 
-  :include [[js.cell :complete]]}
-  
  xyz.zcaudate/js.core
  {:description "js core libraries" 
   :include [[js.core :complete]

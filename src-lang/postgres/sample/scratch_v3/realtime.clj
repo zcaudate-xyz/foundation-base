@@ -69,7 +69,7 @@
             (return {"db/sync" {table [row]}}))))
 
 (defn.xt postgres-change->update
-  "wraps a sync request in the js.cell patch update shape"
+  "wraps a sync request in the db sync update shape"
   {:added "4.1"}
   [payload]
   (var request (-/postgres-change->sync-request payload))

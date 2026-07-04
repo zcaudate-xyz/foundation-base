@@ -3,4 +3,6 @@
   (:use code.test))
 
 ^{:refer indigo.prompt.translate-figma-make/defrule :added "4.0"}
-(fact "TODO")
+(fact "defrule is a no-op macro returning nil"
+  (defrule :x {:from ["a"] :to (var x 1)})
+  => nil)

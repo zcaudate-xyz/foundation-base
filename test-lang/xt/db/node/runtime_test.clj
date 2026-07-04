@@ -11,8 +11,7 @@
             [xt.substrate.transport-browser :as browser-transport]
             [scaffold.supabase.local-min :as local-min]
             [xt.db.node.client-base :as client-base]
-            [xt.db.node.runtime :as runtime]
-            [js.worker.link :as worker-link]))
+            [xt.db.node.runtime :as runtime]))
 
 (do
   (l/script- :postgres
@@ -40,8 +39,7 @@
              [xt.substrate :as substrate]
              [xt.substrate.transport-browser :as browser-transport]
              [xt.db.node.client-base :as client-base]
-             [xt.db.node.runtime :as runtime]
-             [js.worker.link :as worker-link]]})
+             [xt.db.node.runtime :as runtime]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -187,7 +185,7 @@
 (fact "two clients connect to the same SharedWorker and pull data"
 
   (notify/wait-on [:js 30000]
-    (var worker-url (worker-link/make-blob-url (@! +sharedworker-script+)))
+    (var worker-url (browser-transport/blob-url (@! +sharedworker-script+)))
     (var source (-/sharedworker-source-from-url worker-url {"type" "module"}))
     (var client-a (substrate/node-create {"id" "sharedworker-client-a"}))
     (var client-b (substrate/node-create {"id" "sharedworker-client-b"}))

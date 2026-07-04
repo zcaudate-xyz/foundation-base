@@ -83,7 +83,7 @@
   => ["Currency" true true])
 
 ^{:refer postgres.sample.scratch-v3.realtime/postgres-change->sync-request :added "4.1"}
-(fact "converts realtime postgres_changes payloads into js.cell sync updates"
+(fact "converts realtime postgres_changes payloads into db sync updates"
   (!.js
    [(realtime/postgres-change->sync-request
      {"eventType" "INSERT"

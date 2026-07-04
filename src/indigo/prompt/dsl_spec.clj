@@ -262,6 +262,13 @@
                                             :.. more}] (return a))))
                              {:a 1 :b 2})))]])
 
+(defn spec-examples
+  "returns all spec examples"
+  {:added "4.0"}
+  []
+  {:forms (spec-example-forms)
+   :files (spec-example-files)})
+
 (defn create-spec
   "creates the actual spec"
   {:added "4.0"}

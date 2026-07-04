@@ -10,7 +10,6 @@
              [js.react-native.ext-box-test :as ext-box-test]
              [js.react-native.ext-log-test :as ext-log-test]
              [js.react-native.ext-view-test :as ext-view-test]
-             [js.react-native.ext-cell-test :as ext-cell-test]
              [js.react-native.ext-form-test :as ext-form-test]
              [js.react-native.ext-route-test :as ext-route-test]
              [js.react-native.ui-frame-test :as ui-frame-test]
@@ -157,13 +156,6 @@
   (return
    [:<>
     [:% ext-form-test/RegistrationFormDemo]]))
-
-(defn.js CellExamples
-  []
-  (return
-   [:<>
-    [:% ext-cell-test/SimpleCellDemo]
-    [:% ext-cell-test/SimpleCellViewsDemo]]))
 
 (defn.js AnimateExamples
   []
@@ -406,8 +398,7 @@
         ["00e-native-modal"  -/NativeModalExamples]
         ["00f-ext-view"      -/ViewExamples]
         ["00g-ext-form"      -/FormExamples]
-        ["00h-ext-cell"      -/CellExamples]
-        ["00i-ext-route"     -/RouteExamples]
+        ["00h-ext-route"     -/RouteExamples]
         ["00j-ext-box"       -/BoxExamples]
         ["00k-ext-log"       -/LogExamples]
         

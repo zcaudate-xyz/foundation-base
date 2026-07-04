@@ -37,17 +37,17 @@
 
 (def +wrong-source-file+
   (str "(ns hello\n"
-       " (:require [js.cell.service :as service] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]))\n\n"
+       " (:require [xt.db.node.runtime :as runtime] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]))\n\n"
        "(l/script :xtalk\n"
-       "  {:export [MODULE] :require [[js.cell.service :as service] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})"))
+       "  {:export [MODULE] :require [[xt.db.node.runtime :as runtime] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})"))
 
 (def +right-source-file+
   (str "(ns hello\n"
-       "  (:require [js.cell.service     :as service]\n"
+       "  (:require [xt.db.node.runtime  :as runtime]\n"
        "            [xt.lang.spec-base   :as xt]\n"
        "            [xt.lang.common-data :as xtd]))\n\n"
        "(l/script :xtalk\n"
-       "  {:require [[js.cell.service :as service]\n"
+       "  {:require [[xt.db.node.runtime :as runtime]\n"
        "             [xt.lang.spec-base :as xt]\n"
        "             [xt.lang.common-data :as xtd]]\n"
        "   :export [MODULE]})"))
