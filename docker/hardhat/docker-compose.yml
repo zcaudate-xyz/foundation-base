@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  hardhat:
+    build: .
+    image: foundation/hardhat:latest
+    container_name: foundation-hardhat
+    ports:
+      - "8545:8545"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8545').then(()=>process.exit(0)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - foundation-hardhat-network
+
+networks:
+  foundation-hardhat-network:
+    driver: bridge

@@ -176,13 +176,14 @@
 
   (set
    (notify/wait-on :js
-     (. (xtd/obj-keys
-         (e/new-contract "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA"
-                         (@! (:abi +contract+))
-                         (e/get-signer "http://127.0.0.1:8545"
-                                       (@! (last env-hardhat/+default-private-keys+)))))
-        (then (fn [result]
-                (repl/notify result))))))
+     (xt/x:async-run
+      (fn []
+        (repl/notify
+         (xtd/obj-keys
+          (e/new-contract "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA"
+                          (@! (:abi +contract+))
+                          (e/get-signer "http://127.0.0.1:8545"
+                                        (@! (last env-hardhat/+default-private-keys+))))))))))
   => #{"interface" "filters" "runner" "fallback" "target"})
 
 ^{:refer js.lib.eth-lib/new-contract-factory :added "4.0" :unchecked true
@@ -193,25 +194,27 @@
 (fact "creates a new contract factory"
 
   (notify/wait-on :js
-    (. (xtd/obj-keys
-        (e/new-contract-factory
-         (@! (:abi +contract+))
-         (@! (:bytecode +contract+))
-         (e/get-signer "http://127.0.0.1:8545"
-                       (@! (last env-hardhat/+default-private-keys+)))))
-       (then (fn [result]
-               (repl/notify result)))))
+    (xt/x:async-run
+     (fn []
+       (repl/notify
+        (xtd/obj-keys
+         (e/new-contract-factory
+          (@! (:abi +contract+))
+          (@! (:bytecode +contract+))
+          (e/get-signer "http://127.0.0.1:8545"
+                        (@! (last env-hardhat/+default-private-keys+)))))))))
   => ["interface" "bytecode" "runner"])
 
 ^{:refer js.lib.eth-lib/get-signer :added "4.0" :unchecked true}
 (fact "gets a signer given url and private key"
 
   (notify/wait-on :js
-    (. (xtd/obj-keys
-        (e/get-signer "http://127.0.0.1:8545"
-                      (@! (last env-hardhat/+default-private-keys+))))
-       (then (fn [result]
-               (repl/notify result)))))
+    (xt/x:async-run
+     (fn []
+       (repl/notify
+        (xtd/obj-keys
+         (e/get-signer "http://127.0.0.1:8545"
+                       (@! (last env-hardhat/+default-private-keys+))))))))
   => ["provider" "address"])
 
 ^{:refer js.lib.eth-lib/get-signer-address :added "4.0" :unchecked true}
