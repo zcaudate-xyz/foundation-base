@@ -138,4 +138,14 @@
 
 
 ^{:refer std.lib.context.space/space-rt-create :added "4.1"}
-(fact "TODO")
+(fact "creates a runtime record for the context without starting it"
+  (let [sp (space-create {:namespace 'test.create})]
+    (space-context-set sp :null :default {})
+    (space-rt-create sp :null))
+  => reg/rt-null?
+
+  (let [sp (doto (space-create {:namespace 'test.create})
+             (space-context-set :null :default {}))]
+    (space-rt-create sp :null)
+    (space:rt-get sp :null))
+  => nil)

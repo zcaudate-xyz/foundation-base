@@ -274,4 +274,6 @@
   => (complement #(contains? % :test)))
 
 ^{:refer std.lib.env/docker-daemon-available? :added "4.1"}
-(fact "TODO")
+(fact "checks if the docker daemon is reachable"
+  (docker-daemon-available?)
+  => boolean?)

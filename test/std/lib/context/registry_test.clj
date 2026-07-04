@@ -64,5 +64,12 @@
   => rt-null?)
 
 
-^{:refer std.lib.context.registry/registry-scratch-set! :added "4.1"}
-(fact "TODO")
+^{:refer std.lib.context.registry/registry-scratch-set! :added "4.1"
+  :setup [(registry-install :scratch.test)]
+  :teardown [(registry-uninstall :scratch.test)]}
+(fact "sets the scratch runtime for a registered context"
+  (registry-scratch-set! :scratch.test {:foo 1})
+  => vector?
+
+  (registry-scratch :scratch.test)
+  => {:foo 1})

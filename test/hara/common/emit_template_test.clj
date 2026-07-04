@@ -70,3 +70,20 @@
                   :lang :js}]
     (cached-entry-deps book (assoc +js-entry+ :static/code.cache (atom {}))))
   => #{})
+
+^{:refer hara.common.emit-template/code-state-computing? :added "4.1"}
+(fact "returns true if the entry is currently being staged"
+  (code-state-computing? {:lang :js :module 'M :id 'foo})
+  => false
+
+  (let [reserved {:hydrate (fn [_ _ context]
+                             [nil (code-state-computing? (:entry context))])}]
+    (:form (create-code-state {:op 'test
+                               :form-input '(foo)
+                               :module 'M
+                               :lang :js
+                               :id 'foo}
+                              reserved
+                              js/+grammar+
+                              {})))
+  => true)
