@@ -12,11 +12,6 @@
 ;;
 
 
-(defn- get-gesture-symbols
-  ([]
-   (let [all (json/read (env/sys:resource-content "assets/js.core/react-native-gesture-handler.json"))]
-     (vec (sort (map symbol (keys all)))))))
-
 (def +gesture+
   '[BaseButton BorderlessButton Directions DrawerLayout DrawerLayoutAndroid
     FlatList FlingGestureHandler ForceTouchGestureHandler GestureHandlerRootView

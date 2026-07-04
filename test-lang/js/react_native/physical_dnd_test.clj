@@ -9,12 +9,12 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
+   :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.physical-edit :as physical-edit]
+             [xt.lang.common-data :as xtd]
              ]
    })
 
@@ -66,7 +66,7 @@
                       :height 50
                       :flex 1}]
              :inner [{:component n/View
-                      :inner [(j/assign
+                      :inner [(xtd/obj-assign
                                {:component n/View
                                 :style [(:? (== axis "horizontal")
                                             {:left (- (/ size 2))}
@@ -85,7 +85,7 @@
                                                        ["black" "red"])}}))}
 
                                responder.panHandlers)
-                              (j/assign
+                              (xtd/obj-assign
                                {:component n/View
                                 :style [(:? (== axis "horizontal")
                                             {:left (- (/ size 2))}

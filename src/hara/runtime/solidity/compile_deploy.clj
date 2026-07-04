@@ -1,6 +1,5 @@
 (ns hara.runtime.solidity.compile-deploy
-  (:require [js.core :as j]
-             [js.lib.eth-bench :as eth-bench]
+  (:require [js.lib.eth-bench :as eth-bench]
              [hara.runtime.basic :as basic]
              [hara.runtime.solidity.compile-common :as common]
              [hara.runtime.solidity.compile-solc :as solc]

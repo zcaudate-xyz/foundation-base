@@ -9,7 +9,6 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.event.base-model :as event-model]
-             [js.core :as j]
              [js.react.ext-view :as ext-view]]})
 
 (fact:global
@@ -51,16 +50,21 @@
 ^{:refer js.react.ext-view/refresh-view :added "4.0" :unchecked true}
 (fact "refreshes the view"
 
-  (j/<!
-   (do:>
-    (var v (event-model/create-model
-            (fn:> [x] (j/future-delayed [100]
-                        (return {:value x})))
-            {}
-            [3]
-            {:value 0}))
-    (event-model/init-view v)
-    (return (ext-view/refresh-view v))))
+  (notify/wait-on :js
+    (. (do:>
+        (var v (event-model/create-model
+                (fn:> [x] (new Promise
+                               (fn [resolve]
+                                 (setTimeout
+                                  (fn []
+                                    (resolve {:value x}))
+                                  100))))
+                {}
+                [3]
+                {:value 0}))
+        (event-model/init-view v)
+        (return (ext-view/refresh-view v)))
+       (then (repl/>notify))))
   => {"::" "view.run"
       "post" [false],
       "main" [true {"value" 3}],
@@ -69,16 +73,21 @@
 ^{:refer js.react.ext-view/refresh-args :added "4.0" :unchecked true}
 (fact "refreshes the view view args"
 
-  (j/<!
-   (do:>
-    (var v (event-model/create-model
-            (fn:> [x] (j/future-delayed [100]
-                        (return {:value x})))
-            {}
-            [3]
-            {:value 0}))
-    (event-model/init-view v)
-    (return (ext-view/refresh-args v [10]))))
+  (notify/wait-on :js
+    (. (do:>
+        (var v (event-model/create-model
+                (fn:> [x] (new Promise
+                               (fn [resolve]
+                                 (setTimeout
+                                  (fn []
+                                    (resolve {:value x}))
+                                  100))))
+                {}
+                [3]
+                {:value 0}))
+        (event-model/init-view v)
+        (return (ext-view/refresh-args v [10])))
+       (then (repl/>notify))))
   => {"::" "view.run"
       "post" [false],
       "main" [true {"value" 10}],
@@ -99,13 +108,19 @@
 ^{:refer js.react.ext-view/make-view :added "4.0" :unchecked true}
 (fact "makes and initialises view"
 
-  (j/<! (. (ext-view/make-view
-            (fn:> [x] (j/future-delayed [100]
-                        (return {:value x})))
-            {}
-            [3]
-            {:value 0})
-           ["init"]))
+  (notify/wait-on :js
+    (. (. (ext-view/make-view
+           (fn:> [x] (new Promise
+                          (fn [resolve]
+                            (setTimeout
+                             (fn []
+                               (resolve {:value x}))
+                             100))))
+           {}
+           [3]
+           {:value 0})
+          ["init"])
+       (then (repl/>notify))))
   => {"post" [false],
       "main" [true {"value" 3}],
       "pre" [false],

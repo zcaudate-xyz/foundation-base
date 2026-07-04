@@ -7,8 +7,7 @@
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
-             [xt.lang.common-tree :as xtt]
-             [js.core :as j]]})
+             [xt.lang.common-tree :as xtt]]})
 
 (defn.js get-ethers
   []
@@ -145,7 +144,7 @@
   {:added "4.0"}
   [bn x precision]
   (var b1 (-/parseUnits "1" (or precision 24)))
-  (var bx (-/parseUnits (j/toString x) (or precision 24)))
+  (var bx (-/parseUnits (k/to-string x) (or precision 24)))
   (return (/ (* (-/to-bignum bn) bx)
              b1)))
 
@@ -154,7 +153,7 @@
   {:added "4.0"}
   [bn x precision]
   (var b1 (-/parseUnits "1" (or precision 24)))
-  (var bx (-/parseUnits (j/toString x) (or precision 24)))
+  (var bx (-/parseUnits (k/to-string x) (or precision 24)))
   (return (/ (* (-/to-bignum bn) b1)
              bx)))
 
@@ -246,7 +245,7 @@
                           :from (. resp from)
                           :to (. resp to)
                           :chainId (-/to-number (. resp chainId))
-                          :gasLimit (j/toString (. resp gasLimit))})))))
+                          :gasLimit (k/to-string (. resp gasLimit))})))))
 
 (defn.js contract-deploy
   "deploys the contract"
@@ -277,10 +276,10 @@
                                    (return
                                     (:? (== "bigint"
                                             (k/type-native o))
-                                        (j/toString o)
+                                        (k/to-string o)
                                         (:? (== "BigNumber"
                                                 (k/type-native o))
-                                            (j/toString o)
+                                            (k/to-string o)
                                             o))))
                              k/identity))))
   (var output

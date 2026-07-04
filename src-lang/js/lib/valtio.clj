@@ -4,7 +4,7 @@
   (:refer-clojure :exclude [use val proxy]))
 
 (l/script :js
-  {:import [["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]] ["valtio" :as [* Valtio]] ["valtio" :as [* Valtio]] ["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [js.core :as j]]})
+  {:import [["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]] ["valtio" :as [* Valtio]] ["valtio" :as [* Valtio]] ["valtio/vanilla" :as [* ValtioCore]] ["valtio/utils" :as [* ValtioUtils]]] :require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
 
 ;;
 ;; valtio
@@ -43,8 +43,8 @@
   (var __reset__ (fn []
                    (xt/for:object [[k _] out]
                      (xt/x:del-key out k))
-                    (j/assign out (val-fn))))
-  (j/defineProperty out "__reset__"
+                    (xtd/obj-assign out (val-fn))))
+  (Object.defineProperty out "__reset__"
     {:value __reset__
      :writable false})
   (__reset__ out)
@@ -59,7 +59,7 @@
     (__reset__)
     (xt/for:object [[k _] pobj]
       (xt/x:del-key pobj k)))
-  (return (j/assign pobj m)))
+  (return (xtd/obj-assign pobj m)))
 
 (defn.js useVal
   "uses only the getter"
@@ -106,11 +106,11 @@
                    (return (xtd/obj-omit (-/useSnapshot pobj)
                                         ["__reset__"])))
          setFn   (fn [m]
-                   (return (j/assign pobj m)))
+                   (return (xtd/obj-assign pobj m)))
           resetFn (fn [m]
                     (xt/for:object [[k _] pobj]
                       (xt/x:del-key pobj k))
-                    (j/assign pobj m))]
+                    (xtd/obj-assign pobj m))]
      (return [getFn setFn resetFn pobj]))))
 
 (defn.js getFieldAccessors
@@ -159,7 +159,7 @@
            (:= callbacks [])
            (:.. rprops)]}]
      (let [[value setValue] (-/useProxyField record field)
-           tprops (j/assign {getter value
+           tprops (xtd/obj-assign {getter value
                              setter (fn [out]
                                       (setValue out)
                                       (. callbacks (map (fn:> [f] (f out)))))}

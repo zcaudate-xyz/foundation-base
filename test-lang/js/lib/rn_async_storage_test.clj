@@ -6,8 +6,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.lib.rn-async-storage :as store]
-             [js.core :as j]
-             [xt.lang.common-repl :as repl]]})
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]]})
 
 (fact:global
   {:setup    [(l/rt:restart)
@@ -17,32 +17,50 @@
                 (var LocalStorageCtor
                      (. (require "node-localstorage")
                         LocalStorage))
-                (j/assign (!:G window)
-                          {:localStorage (new LocalStorageCtor
-                                             ".localstorage")})
+                (xtd/obj-assign (!:G window)
+                                {:localStorage (new LocalStorageCtor
+                                                   ".localstorage")})
                 (repl/notify true))]
    :teardown [(l/rt:stop)]})
 
 
 ^{:refer js.lib.rn-async-storage/getJSON :added "4.0" :unchecked true
-  :setup [(j/<! (store/clear))]}
+  :setup [(notify/wait-on :js
+            (. (store/clear)
+               (then (fn [result]
+                       (repl/notify result)))))]}
 (fact "gets the json data structure"
 
-  (j/<! (store/setJSON "hello" {:a 1}))
+  (notify/wait-on :js
+    (. (store/setJSON "hello" {:a 1})
+       (then (fn [result]
+               (repl/notify result)))))
   => nil
 
-  (j/<! (store/getJSON "hello"))
+  (notify/wait-on :js
+    (. (store/getJSON "hello")
+       (then (fn [result]
+               (repl/notify result)))))
   => {"a" 1})
 
 ^{:refer js.lib.rn-async-storage/setJSON :added "4.0" :unchecked true}
 (fact "sets the json structure")
 
 ^{:refer js.lib.rn-async-storage/mergeJSON :added "4.0" :unchecked true
-  :setup [(j/<! (store/setJSON "hello" {:a 1}))]}
+  :setup [(notify/wait-on :js
+            (. (store/setJSON "hello" {:a 1})
+               (then (fn [result]
+                       (repl/notify result)))))]}
 (fact "merges json data on the same key"
 
-  (j/<! (store/mergeJSON "hello" {:b 2}))
+  (notify/wait-on :js
+    (. (store/mergeJSON "hello" {:b 2})
+       (then (fn [result]
+               (repl/notify result)))))
   => nil
 
-  (j/<! (store/getJSON "hello"))
+  (notify/wait-on :js
+    (. (store/getJSON "hello")
+       (then (fn [result]
+               (repl/notify result)))))
   => {"a" 1, "b" 2})

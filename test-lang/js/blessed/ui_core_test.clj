@@ -3,7 +3,16 @@
   (:use code.test))
 
 (l/script :js
-  {:export [MODULE] :require [[js.react :as r :include [:fn]] [js.core :as j :include [:node :util]] [js.lib.valtio :as v] [js.blessed.ui-core :as ui-core] [js.blessed :as b :include [:fn]] [js.lib.chalk :as chk] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str]]})
+  {:export [MODULE]
+   :import [["util" :as NodeUtil]]
+   :require [[js.react :as r :include [:fn]]
+             [js.lib.valtio :as v]
+             [js.blessed.ui-core :as ui-core]
+             [js.blessed :as b :include [:fn]]
+             [js.lib.chalk :as chk]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]]})
 
 (defn.js boolText
   "gets the text for true or false"
@@ -225,7 +234,7 @@
         :setValue setValue
         :color "green"}]
       [:box {:left 25 :shrink true
-             :content (+ "" (j/toFixed value 1))}]])))
+             :content (+ "" (str/to-fixed value 1))}]])))
 
 ^{:refer js.blessed.ui-core/EnumBoxIndexed :added "4.0" :unchecked true}
 (fact "Constructs a EnumBoxIndexed"

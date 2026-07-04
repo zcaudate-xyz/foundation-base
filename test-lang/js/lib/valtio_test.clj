@@ -7,9 +7,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.lib.valtio :as v]
-             [js.core :as j]
              [xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]]})
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -27,8 +27,8 @@
 (fact "resets proxy to original"
 
   (!.js
-   (v/reset (j/assign (v/make (fn:> {:a 1 :b 2}))
-                      {:a 3 :b 4})))
+   (v/reset (xtd/obj-assign (v/make (fn:> {:a 1 :b 2}))
+                           {:a 3 :b 4})))
   => {"a" 1, "b" 2})
 
 ^{:refer js.lib.valtio/useVal :added "4.0" :unchecked true}

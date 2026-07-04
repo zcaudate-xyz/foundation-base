@@ -11,7 +11,6 @@
             ["wif" :as WIF]
             ["safe-buffer" :as SafeBuffer]]
    :require [[xt.lang.common-lib :as k]
-             [js.core :as j]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]]})
 
@@ -279,8 +278,8 @@
   (var est-kbs  (/ (* 55 (+ 1 (* 2 (xt/x:len from-inputs))))
                    1000))
   (var multiple 100000000)
-   (var fee      (j/round (* fee-per-kb est-kbs multiple)))
-    (var to-total (j/round (- (* (xtd/arr-foldl
+   (var fee      (Math.round (* fee-per-kb est-kbs multiple)))
+    (var to-total (Math.round (- (* (xtd/arr-foldl
                                    from-inputs
                                    (fn:> [total input]
                                      (return
@@ -325,10 +324,10 @@
   (var est-kbs  (/ (* 110 (+ 1 (xt/x:len from-inputs)))
                    1000))
   (var multiple 100000000)
-   (var fee       (j/round (* fee-per-kb est-kbs multiple)))
-   (var to-total  (j/round (* amount multiple)))
+   (var fee       (Math.round (* fee-per-kb est-kbs multiple)))
+   (var to-total  (Math.round (* amount multiple)))
    
-    (var to-change (j/round (- (* (xtd/arr-foldl
+    (var to-change (Math.round (- (* (xtd/arr-foldl
                                     from-inputs
                                     (fn:> [total input]
                                       (return

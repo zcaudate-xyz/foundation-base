@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react :as r :include [:fn]]
+    :require [[js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
               [js.react.ext-view :as ext-view]
               [xt.event.base-model :as event-model]
@@ -39,8 +38,12 @@
     []
     (var view (ext-view/makeView
                {:handler (fn:> [x y z]
-                               (j/future-delayed [500]
-                                 (return (+ x y z))))
+                               (new Promise
+                                  (fn [resolve]
+                                    (setTimeout
+                                     (fn []
+                                       (resolve (+ x y z)))
+                                     500))))
                 :defaultArgs [1 2 3]
                 :options {:init false}}))
     (var [type setType] (r/local "success"))
@@ -54,9 +57,9 @@
         {:title "R"
          :onPress (fn:> (ext-view/refresh-args
                          view
-                         [(j/random)
-                          (j/random)
-                          (j/random)]))}]
+                         [(Math.random)
+                          (Math.random)
+                          (Math.random)]))}]
        [:% n/Text " "]
        [:% n/Button
         {:title "D"
@@ -97,8 +100,12 @@
     []
     (var view (ext-view/makeView
                {:handler (fn:> [x y z]
-                               (j/future-delayed [500]
-                                 (return (+ x y z))))
+                               (new Promise
+                                  (fn [resolve]
+                                    (setTimeout
+                                     (fn []
+                                       (resolve (+ x y z)))
+                                     500))))
                 :defaultArgs [1 2 3]
                 :options {:init false}}))
     (var [types setTypes] (r/local ["pending" "disabled"]))
@@ -112,9 +119,9 @@
         {:title "R"
          :onPress (fn:> (ext-view/refresh-args
                          view
-                         [(j/random)
-                          (j/random)
-                          (j/random)]))}]
+                         [(Math.random)
+                          (Math.random)
+                          (Math.random)]))}]
        [:% n/Text " "]
        [:% n/Button
         {:title "D"
@@ -161,14 +168,26 @@
     []
     (var view (ext-view/makeView
                {:handler (fn:> [x y z]
-                               (j/future-delayed [500]
-                                 (return (+ x y z))))
+                               (new Promise
+                                  (fn [resolve]
+                                    (setTimeout
+                                     (fn []
+                                       (resolve (+ x y z)))
+                                     500))))
                 :pipeline {:sync  {:handler (fn:> [x y z]
-                                              (j/future-delayed [500]
-                                                (return (+ x y z))))}
+                                              (new Promise
+                                                   (fn [resolve]
+                                                     (setTimeout
+                                                      (fn []
+                                                        (resolve (+ x y z)))
+                                                      500))))}
                            :remote {:handler (fn:> [x y z]
-                                               (j/future-delayed [500]
-                                                 (return (+ x y z))))}}
+                                               (new Promise
+                                                    (fn [resolve]
+                                                      (setTimeout
+                                                       (fn []
+                                                         (resolve (+ x y z)))
+                                                       500))))}}
                 :defaultArgs [1 2 3]
                 :options {:init false}}))
     (var [types setTypes] (r/local ["pending" "disabled"]))
@@ -182,24 +201,24 @@
         {:title "M"
          :onPress (fn:> (ext-view/refresh-args
                          view
-                         [(j/random)
-                          (j/random)
-                          (j/random)]))}]
+                         [(Math.random)
+                          (Math.random)
+                          (Math.random)]))}]
        [:% n/Button
         {:title "R"
          :onPress (fn:> (ext-view/refresh-args-remote
                          view
-                         [(j/random)
-                          (j/random)
-                          (j/random)]
+                         [(Math.random)
+                          (Math.random)
+                          (Math.random)]
                          true))}]
        [:% n/Button
         {:title "S"
          :onPress (fn:> (ext-view/refresh-args-sync
                          view
-                         [(j/random)
-                          (j/random)
-                          (j/random)]
+                         [(Math.random)
+                          (Math.random)
+                          (Math.random)]
                          true))}]
        [:% n/Text " "]
        [:% n/Button

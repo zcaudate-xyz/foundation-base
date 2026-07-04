@@ -4,8 +4,7 @@
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:require [[js.core :as j]
-              [xt.lang.spec-base :as xt]
+  {:require [[xt.lang.spec-base :as xt]
               [xt.lang.common-string :as str]]})
 
 (defn.js compile

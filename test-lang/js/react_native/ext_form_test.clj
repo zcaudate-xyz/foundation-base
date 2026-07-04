@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react :as r :include [:fn]]
+    :require [[js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
               [js.react.ext-form :as ext-form]
               [xt.lang.spec-base :as xt]
@@ -24,14 +23,22 @@
                                                (< 0 (xt/x:len v))))}]]
    :last-name  [["is-not-empty" {:message "Must not be empty"
                                  :check (fn:> [v rec]
-                                          (j/future-delayed [100]
-                                            (return (and (xt/x:not-nil? v)
-                                                         (< 0 (xt/x:len v))))))}]]
+                                          (new Promise
+                                               (fn [resolve]
+                                                 (setTimeout
+                                                  (fn []
+                                                    (resolve (and (xt/x:not-nil? v)
+                                                                  (< 0 (xt/x:len v)))))
+                                                  100))))}]]
    :email      [["is-not-empty" {:message "Must not be empty"
                                  :check (fn:> [v rec]
-                                          (j/future-delayed [100]
-                                            (return (and (xt/x:not-nil? v)
-                                                         (< 0 (xt/x:len v))))))}]]})
+                                          (new Promise
+                                               (fn [resolve]
+                                                 (setTimeout
+                                                  (fn []
+                                                    (resolve (and (xt/x:not-nil? v)
+                                                                  (< 0 (xt/x:len v)))))
+                                                  100))))}]]})
 
 ^{:refer js.react-native.ext-form-test/RegistrationForm
   :adopt true

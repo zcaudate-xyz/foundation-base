@@ -5,8 +5,7 @@
   {:import [["tamagui" :as [* Tamagui]]]
    :require [[js.tamagui :as tm]
              [js.react :as r]
-             [js.react.helper-data :as data]
-             [js.core :as j]]})
+             [js.react.helper-data :as data]]})
 
 (def.js defaultContextValues
   {:size "$true"
@@ -68,9 +67,9 @@
            :setFocused setFocused}
           (r/createElement
            -/InputGroupFrame
-           (j/assign {:applyFocusStyle focused
-                      :ref fRef}
-                     props))))))))
+           (Object.assign {:applyFocusStyle focused
+                       :ref fRef}
+                      props))))))))
 
 (def.js InputFrame
   (tm/styled tm/Input
@@ -89,7 +88,7 @@
           {:flex 1}
           (r/createElement
            -/InputFrame
-           (j/assign
+           (Object.assign
             {:ref fRef
              :onFocus (fn [] (setFocused true))
              :onBlur (fn [] (setFocused false))
@@ -159,8 +158,8 @@
                                    :color color}))
         (return
          (r/createElement -/InputIconFrame
-                          (j/assignNew props {:ref fRef
-                                              :children nil})
+                          ((Object.assign {} props {:ref fRef
+                                               :children nil}))
                           (getThemedIcon (. props children))))))))
 
 (def.js InputContainerFrame

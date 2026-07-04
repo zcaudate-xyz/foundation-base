@@ -5,8 +5,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.core :as j]
-             [xt.lang.spec-base :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [js.react-native.helper-color :as c]]})
 
@@ -23,19 +22,22 @@
 ^{:refer js.react-native.helper-color/hsl-parse-raw :added "4.0" :unchecked true}
 (fact "converts string to hsl"
 
-  (c/hsl-parse-raw "rgb(255,0,255)"
-                   3
-                   j/parseInt)
+  (!.js
+   (c/hsl-parse-raw "rgb(255,0,255)"
+                    3
+                    Number.parseInt))
   => [255 0 255]
 
-  (c/hsl-parse-raw "rbga(255,0,255)"
-                   4
-                   j/parseInt)
+  (!.js
+   (c/hsl-parse-raw "rbga(255,0,255)"
+                    4
+                    Number.parseInt))
   => [255 0 255]
 
-  (c/hsl-parse-raw "hsl(300, 100%, 0.5%)"
-                   3
-                   j/parseFloat)
+  (!.js
+   (c/hsl-parse-raw "hsl(300, 100%, 0.5%)"
+                    3
+                    Number.parseFloat))
   => [300 100 0.5])
 
 ^{:refer js.react-native.helper-color/hsl-parse :added "4.0" :unchecked true}

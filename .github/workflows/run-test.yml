@@ -73,7 +73,7 @@ jobs:
 
       - name: Install JS parser dependencies
         if: matrix.install_js_parser == true
-        working-directory: src-training/scripts/js_parser
+        working-directory: scripts/js_parser
         run: npm ci
         
       - name: Run Tests - ${{ matrix.name }}
@@ -134,7 +134,7 @@ jobs:
 
       - name: Install JS parser dependencies
         if: matrix.install_js_parser == true
-        working-directory: src-training/scripts/js_parser
+        working-directory: scripts/js_parser
         run: npm ci
         
       - name: Run Tests - ${{ matrix.lang }}

@@ -6,7 +6,6 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.lib.osc :as osc]
-              [js.core :as j]
               [xt.lang.common-data :as xtd]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-repl :as repl]]})

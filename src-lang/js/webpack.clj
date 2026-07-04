@@ -3,8 +3,7 @@
   (:require [hara.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j]]
-   :static  {:lang/no-lint true}})
+  {:static  {:lang/no-lint true}})
 
 (def.js webpack (require "webpack"))
 
@@ -65,7 +64,7 @@
 (defn.js
   node-dev-config
   [#{provide}]
-  (return (j/assign {} -/node-common-config
+  (return (Object.assign {} -/node-common-config
                     {:mode "development"
                      :output {:path (. -/path (join __dirname "dist"))
                               :filename "main.js"}
@@ -76,10 +75,10 @@
                                {:raw true :entryOnly false})
                           (:? provide (new (. -/webpack ProvidePlugin) provide))
                           (new -/RunNodeWebpackPlugin)]
-                         (j/filter (fn:> [x] x)))})))
+                         (.filter (fn:> [x] x)))})))
 
 (def.js node-prod-config
-  (j/assign {} -/node-common-config
+  (Object.assign {} -/node-common-config
             {:mode "production"
              :output {:path (. -/path (join __dirname "dist"))
                       :filename "main.min.js"}

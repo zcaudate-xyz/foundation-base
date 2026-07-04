@@ -3,7 +3,8 @@
             [hara.runtime.solidity.compile-solc :as compile-solc]
             [hara.runtime.solidity.env-hardhat :as env-hardhat]
             [hara.lang :as l]
-            [web3.lib.example-counter :as example-counter])
+            [web3.lib.example-counter :as example-counter]
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
@@ -12,8 +13,7 @@
                 [xt.lang.common-lib :as k]
                 [xt.lang.common-repl :as repl]
                 [js.lib.eth-bench :as e :include [:fn]]
-                [js.lib.eth-solc :as eth-solc :include [:fn]]
-                [js.core :as j]]})
+                [js.lib.eth-solc :as eth-solc :include [:fn]]]})
 
 (fact:global
  {:setup    [(solidity/rt:stop-hardhat-server)
@@ -34,24 +34,28 @@
              example-counter/+default-contract+))]}
 (fact "deploys the contract"
 
-  (j/<!
-   (e/contract-deploy "http://127.0.0.1:8545"
-                      (@! (last env-hardhat/+default-private-keys+))
-                      (@! (:abi +contract+))
-                      (@! (:bytecode +contract+))
-                      []
-                      {}))
+  (notify/wait-on :js
+    (. (e/contract-deploy "http://127.0.0.1:8545"
+                          (@! (last env-hardhat/+default-private-keys+))
+                          (@! (:abi +contract+))
+                          (@! (:bytecode +contract+))
+                          []
+                          {})
+       (then (fn [result]
+               (repl/notify result)))))
   => (contains-in
       {"status" true,
         "contractAddress" string?})
 
-  (j/<!
-   (e/contract-deploy "http://127.0.0.1:8545"
-                      (@! (last env-hardhat/+default-private-keys+))
-                      (@! (:abi +contract+))
-                      (@! (:bytecode +contract+))
-                      [1 2 3]
-                      {}))
+  (notify/wait-on :js
+    (. (e/contract-deploy "http://127.0.0.1:8545"
+                          (@! (last env-hardhat/+default-private-keys+))
+                          (@! (:abi +contract+))
+                          (@! (:bytecode +contract+))
+                          [1 2 3]
+                          {})
+       (then (fn [result]
+               (repl/notify result)))))
   => (contains-in {"status" false,
                    "data" map?}))
 
@@ -61,34 +65,39 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-             (j/<!
-              (e/contract-deploy "http://127.0.0.1:8545"
-                       (@! (last env-hardhat/+default-private-keys+))
-                       (@! (:abi +contract+))
-                       (@! (:bytecode +contract+))
-                       []
-                       {})
-               (fn [m]
-                 (return (xt/x:get-key m "contractAddress")))))]}
+             (notify/wait-on :js
+               (. (e/contract-deploy "http://127.0.0.1:8545"
+                                     (@! (last env-hardhat/+default-private-keys+))
+                                     (@! (:abi +contract+))
+                                     (@! (:bytecode +contract+))
+                                     []
+                                     {})
+                  (then (fn [m]
+                          (repl/notify (xt/x:get-key m "contractAddress")))))))]}
 (fact "runs the contract given address and arguments"
 
-  (j/<! (e/contract-run "http://127.0.0.1:8545"
-                        (@! (last env-hardhat/+default-private-keys+))
-                        (@! +address+)
-                        (@! (:abi +contract+))
-                        "m__inc_both"
-                        []
-                        nil))
+  (notify/wait-on :js
+    (. (e/contract-run "http://127.0.0.1:8545"
+                       (@! (last env-hardhat/+default-private-keys+))
+                       (@! +address+)
+                       (@! (:abi +contract+))
+                       "m__inc_both"
+                       []
+                       nil)
+       (then (fn [result]
+               (repl/notify result)))))
   => map?
 
-  (j/<! (e/contract-run "http://127.0.0.1:8545"
-                        (@! (last env-hardhat/+default-private-keys+))
-                        (@! +address+)
-                        (@! (:abi +contract+))
-                        "g__Counter0"
-                        []
-                        nil)
-        k/to-number)
+  (notify/wait-on :js
+    (. (e/contract-run "http://127.0.0.1:8545"
+                       (@! (last env-hardhat/+default-private-keys+))
+                       (@! +address+)
+                       (@! (:abi +contract+))
+                       "g__Counter0"
+                       []
+                       nil)
+       (then (fn [result]
+               (repl/notify (k/to-number result))))))
   => number?)
 
 ^{:refer js.lib.eth-bench/get-past-events :added "4.0" :unchecked true
@@ -97,27 +106,33 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-             (j/<!
-              (e/contract-deploy "http://127.0.0.1:8545"
-                        (@! (last env-hardhat/+default-private-keys+))
-                        (@! (:abi +contract+))
-                        (@! (:bytecode +contract+))
-                        []
-                        {})
-               (fn [m]
-                 (return (xt/x:get-key m "contractAddress")))))
-          (j/<! (e/contract-run "http://127.0.0.1:8545"
-                        (@! (last env-hardhat/+default-private-keys+))
-                        (@! +address+)
-                        (@! (:abi +contract+))
-                        "m__inc_both"
-                        []
-                        nil))]}
+             (notify/wait-on :js
+               (. (e/contract-deploy "http://127.0.0.1:8545"
+                                     (@! (last env-hardhat/+default-private-keys+))
+                                     (@! (:abi +contract+))
+                                     (@! (:bytecode +contract+))
+                                     []
+                                     {})
+                  (then (fn [m]
+                          (repl/notify (xt/x:get-key m "contractAddress")))))))
+          (notify/wait-on :js
+            (. (e/contract-run "http://127.0.0.1:8545"
+                               (@! (last env-hardhat/+default-private-keys+))
+                               (@! +address+)
+                               (@! (:abi +contract+))
+                               "m__inc_both"
+                               []
+                               nil)
+               (then (fn [result]
+                       (repl/notify result)))))]}
 (fact "gets all past events"
 
-  (j/<! (e/get-past-events "http://127.0.0.1:8545"
-                           (@! +address+)
-                           (@! (:abi +contract+))
-                           "CounterLog"
-                           {}))
+  (notify/wait-on :js
+    (. (e/get-past-events "http://127.0.0.1:8545"
+                          (@! +address+)
+                          (@! (:abi +contract+))
+                          "CounterLog"
+                          {})
+       (then (fn [result]
+               (repl/notify result)))))
   => vector?)

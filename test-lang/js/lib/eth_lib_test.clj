@@ -15,8 +15,7 @@
                 [xt.lang.common-repl :as repl]
                 [js.lib.eth-lib :as e :include [:fn]]
                 [js.lib.eth-solc :as eth-solc :include [:fn]]
-                [web3.lib.example-counter :as example-counter]
-             [js.core :as j]]})
+                [web3.lib.example-counter :as example-counter]]})
 
 (fact:global
   {:setup    [(s/rt:stop-hardhat-server)
@@ -98,9 +97,11 @@
 ^{:refer js.lib.eth-lib/new-rpc-provider :added "4.0" :unchecked true}
 (fact "creates a new rpc provider"
 
-  (j/<!
-   (e/getBlockNumber
-    (e/new-rpc-provider "http://127.0.0.1:8545")))
+  (notify/wait-on :js
+    (. (e/getBlockNumber
+        (e/new-rpc-provider "http://127.0.0.1:8545"))
+       (then (fn [result]
+               (repl/notify result)))))
   => number?)
 
 ^{:refer js.lib.eth-lib/new-web3-provider :added "4.0" :unchecked true}
@@ -109,20 +110,24 @@
 ^{:refer js.lib.eth-lib/new-wallet :added "4.0" :unchecked true}
 (fact "creates a new wallet"
 
-  (j/<!
-   (e/getAddress
-    (e/new-wallet
-     (@! (last env-hardhat/+default-private-keys+))
-     (e/new-rpc-provider "http://127.0.0.1:8545"))))
+  (notify/wait-on :js
+    (. (e/getAddress
+        (e/new-wallet
+         (@! (last env-hardhat/+default-private-keys+))
+         (e/new-rpc-provider "http://127.0.0.1:8545")))
+       (then (fn [result]
+               (repl/notify result)))))
   => "0x001Dc339B1E9B9D443bcd39F9d5114390Bc43aCD")
 
 ^{:refer js.lib.eth-lib/new-wallet-from-mnemonic :added "4.0" :unchecked true}
 (fact "creates new wallet from mnemonic"
 
-  (j/<!
-   (e/getAddress
-    (e/new-wallet-from-mnemonic
-     "taxi dash nation raw first art ticket more useful mosquito include true")))
+  (notify/wait-on :js
+    (. (e/getAddress
+        (e/new-wallet-from-mnemonic
+         "taxi dash nation raw first art ticket more useful mosquito include true"))
+       (then (fn [result]
+               (repl/notify result)))))
   => "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA")
 
 ^{:refer js.lib.eth-lib/new-contract :added "4.0" :unchecked true
@@ -133,12 +138,14 @@
 (fact "creates a new contract"
 
   (set
-   (j/<!
-     (xtd/obj-keys
-      (e/new-contract "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA"
-                      (@! (:abi +contract+))
-                      (e/get-signer "http://127.0.0.1:8545"
-                                    (@! (last env-hardhat/+default-private-keys+)))))))
+   (notify/wait-on :js
+     (. (xtd/obj-keys
+         (e/new-contract "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA"
+                         (@! (:abi +contract+))
+                         (e/get-signer "http://127.0.0.1:8545"
+                                       (@! (last env-hardhat/+default-private-keys+)))))
+        (then (fn [result]
+                (repl/notify result))))))
   => #{"interface" "filters" "runner" "fallback" "target"})
 
 ^{:refer js.lib.eth-lib/new-contract-factory :added "4.0" :unchecked true
@@ -148,40 +155,48 @@
              example-counter/+default-contract+))]}
 (fact "creates a new contract factory"
 
-  (j/<!
-   (xtd/obj-keys
-    (e/new-contract-factory
-     (@! (:abi +contract+))
-     (@! (:bytecode +contract+))
-     (e/get-signer "http://127.0.0.1:8545"
-                   (@! (last env-hardhat/+default-private-keys+))))))
+  (notify/wait-on :js
+    (. (xtd/obj-keys
+        (e/new-contract-factory
+         (@! (:abi +contract+))
+         (@! (:bytecode +contract+))
+         (e/get-signer "http://127.0.0.1:8545"
+                       (@! (last env-hardhat/+default-private-keys+)))))
+       (then (fn [result]
+               (repl/notify result)))))
   => ["interface" "bytecode" "runner"])
 
 ^{:refer js.lib.eth-lib/get-signer :added "4.0" :unchecked true}
 (fact "gets a signer given url and private key"
 
-  (j/<!
-   (xtd/obj-keys
-    (e/get-signer "http://127.0.0.1:8545"
-                  (@! (last env-hardhat/+default-private-keys+)))))
+  (notify/wait-on :js
+    (. (xtd/obj-keys
+        (e/get-signer "http://127.0.0.1:8545"
+                      (@! (last env-hardhat/+default-private-keys+))))
+       (then (fn [result]
+               (repl/notify result)))))
   => ["provider" "address"])
 
 ^{:refer js.lib.eth-lib/get-signer-address :added "4.0" :unchecked true}
 (fact "gets signer address given url and private key"
 
-  (j/<!
-   (e/get-signer-address "http://127.0.0.1:8545"
-                         (@! (last env-hardhat/+default-private-keys+))))
+  (notify/wait-on :js
+    (. (e/get-signer-address "http://127.0.0.1:8545"
+                             (@! (last env-hardhat/+default-private-keys+)))
+       (then (fn [result]
+               (repl/notify result)))))
   => (last env-hardhat/+default-addresses-raw+))
 
 ^{:refer js.lib.eth-lib/send-wei :added "4.0" :unchecked true}
 (fact "gets wei to account"
 
-  (j/<!
-   (e/send-wei (e/get-signer "http://127.0.0.1:8545"
-                             (@! (last env-hardhat/+default-private-keys+)))
-               (@! (first env-hardhat/+default-addresses+))
-               1000000))
+  (notify/wait-on :js
+    (. (e/send-wei (e/get-signer "http://127.0.0.1:8545"
+                                 (@! (last env-hardhat/+default-private-keys+)))
+                   (@! (first env-hardhat/+default-addresses+))
+                   1000000)
+       (then (fn [result]
+               (repl/notify result)))))
   => (contains-in
       {"gasLimit" any
         "chainId" 1337,
@@ -189,17 +204,19 @@
         "to" "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA"})
 
   (bigint
-   (j/<!
-    (e/getBalance (e/new-rpc-provider "http://127.0.0.1:8545")
-                  (@! (first env-hardhat/+default-addresses+)))
-    j/toString))
+   (notify/wait-on :js
+     (. (e/getBalance (e/new-rpc-provider "http://127.0.0.1:8545")
+                      (@! (first env-hardhat/+default-addresses+)))
+        (then (fn [result]
+                (repl/notify (k/to-string result)))))))
   => integer?
 
   (bigint
-   (j/<!
-    (e/getBalance (e/new-rpc-provider "http://127.0.0.1:8545")
-                  (@! (last env-hardhat/+default-addresses+)))
-    j/toString))
+   (notify/wait-on :js
+     (. (e/getBalance (e/new-rpc-provider "http://127.0.0.1:8545")
+                      (@! (last env-hardhat/+default-addresses+)))
+        (then (fn [result]
+                (repl/notify (k/to-string result)))))))
   => integer?)
 
 ^{:refer js.lib.eth-lib/contract-deploy :added "4.0" :unchecked true
@@ -209,15 +226,15 @@
              example-counter/+default-contract+))]}
 (fact "deploys the contract"
 
-   (j/<!
-    (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                     (@! (last env-hardhat/+default-private-keys+)))
-                       (@! (:abi +contract+))
-                       (@! (:bytecode +contract+))
-                       []
-                       {})
-     (fn [m]
-       (return (xt/x:get-key m "target"))))
+   (notify/wait-on :js
+     (. (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
+                                         (@! (last env-hardhat/+default-private-keys+)))
+                           (@! (:abi +contract+))
+                           (@! (:bytecode +contract+))
+                           []
+                           {})
+        (then (fn [m]
+                (repl/notify (xt/x:get-key m "target"))))))
   => string?)
 
 ^{:refer js.lib.eth-lib/contract-run :added "4.0" :unchecked true
@@ -226,33 +243,38 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-             (j/<!
-              (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                               (@! (last env-hardhat/+default-private-keys+)))
-                                 (@! (:abi +contract+))
-                                 (@! (:bytecode +contract+))
-                                 []
-                                 {})
-               (fn [m]
-                 (return (xt/x:get-key m "target")))))]}
+             (notify/wait-on :js
+               (. (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
+                                                   (@! (last env-hardhat/+default-private-keys+)))
+                                     (@! (:abi +contract+))
+                                     (@! (:bytecode +contract+))
+                                     []
+                                     {})
+                  (then (fn [m]
+                          (repl/notify (xt/x:get-key m "target")))))))]}
 (fact "runs the contract"
 
-  (j/<! (e/contract-run (e/get-signer "http://127.0.0.1:8545"
-                                      (@! (last env-hardhat/+default-private-keys+)))
-                        (@! +address+)
-                        (@! (:abi +contract+))
-                        "m__inc_both"
-                        []
-                        nil))
+  (notify/wait-on :js
+    (. (e/contract-run (e/get-signer "http://127.0.0.1:8545"
+                                     (@! (last env-hardhat/+default-private-keys+)))
+                       (@! +address+)
+                       (@! (:abi +contract+))
+                       "m__inc_both"
+                       []
+                       nil)
+       (then (fn [result]
+               (repl/notify result)))))
 
-  (j/<! (e/contract-run (e/get-signer "http://127.0.0.1:8545"
-                                      (@! (last env-hardhat/+default-private-keys+)))
-                        (@! +address+)
-                        (@! (:abi +contract+))
-                        "g__Counter0"
-                        []
-                        nil)
-        k/to-number)
+  (notify/wait-on :js
+    (. (e/contract-run (e/get-signer "http://127.0.0.1:8545"
+                                     (@! (last env-hardhat/+default-private-keys+)))
+                       (@! +address+)
+                       (@! (:abi +contract+))
+                       "g__Counter0"
+                       []
+                       nil)
+       (then (fn [result]
+               (repl/notify (k/to-number result))))))
   => integer?)
 
 ^{:refer js.lib.eth-lib/subscribe-event :added "4.0" :unchecked true
@@ -261,15 +283,15 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-             (j/<!
-              (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                               (@! (last env-hardhat/+default-private-keys+)))
-                                 (@! (:abi +contract+))
-                                 (@! (:bytecode +contract+))
-                                 []
-                                 {})
-               (fn [m]
-                 (return (xt/x:get-key m "target")))))]}
+             (notify/wait-on :js
+               (. (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
+                                                   (@! (last env-hardhat/+default-private-keys+)))
+                                     (@! (:abi +contract+))
+                                     (@! (:bytecode +contract+))
+                                     []
+                                     {})
+                  (then (fn [m]
+                          (repl/notify (xt/x:get-key m "target")))))))]}
 (fact "subscribes to events"
 
   (notify/wait-on [:js 5000]
@@ -304,15 +326,15 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-             (j/<!
-              (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                               (@! (last env-hardhat/+default-private-keys+)))
-                                 (@! (:abi +contract+))
-                                 (@! (:bytecode +contract+))
-                                 []
-                                 {})
-               (fn [m]
-                 (return (xt/x:get-key m "target")))))]}
+             (notify/wait-on :js
+               (. (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
+                                                   (@! (last env-hardhat/+default-private-keys+)))
+                                     (@! (:abi +contract+))
+                                     (@! (:bytecode +contract+))
+                                     []
+                                     {})
+                  (then (fn [m]
+                          (repl/notify (xt/x:get-key m "target")))))))]}
 (fact "subscribes to single event"
 
   (!.js

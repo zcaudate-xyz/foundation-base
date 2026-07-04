@@ -5,7 +5,6 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.react-native.model-context :as  model-context]
-             [js.core :as j]
              [xt.lang.spec-base :as xt]]})
 
 (fact:global

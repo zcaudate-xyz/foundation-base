@@ -5,9 +5,9 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[js.core :as j]
-             [xt.lang.spec-base :as xt]
+   :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
+             [xt.lang.common-math :as math]
              [js.react-native.helper-color :as c]
              [js.react-native.helper-theme :as helper-theme]
              [js.react-native.helper-theme-default :as helper-theme-default]]})
@@ -105,14 +105,14 @@
                                            "pressing"
                                            "disabled"]
                                  :values  {:hovering (fn:> [hovering #{focusing}]
-                                                       (j/max hovering focusing))}}
+                                                       (math/max hovering focusing))}}
                             :bg {:initial "default"
                                  :stages  ["highlighted"
                                            "hovering"
                                            "pressing"
                                            "disabled"]
                                  :values {:hovering (fn:> [hovering #{focusing}]
-                                                      (j/max hovering focusing))}}}
+                                                      (math/max hovering focusing))}}}
             :transformations
             {:bg (fn [#{hovering
                         pressing}]
@@ -163,14 +163,14 @@
                                            "pressing"
                                            "disabled"]
                                  :values  {:hovering (fn:> [hovering #{focusing}]
-                                                       (j/max hovering focusing))}}
+                                                       (math/max hovering focusing))}}
                             :bg {:initial "default"
                                  :stages  ["highlighted"
                                            "hovering"
                                            "pressing"
                                            "disabled"]
                                  :values {:hovering (fn:> [hovering #{focusing}]
-                                                      (j/max hovering focusing))}}}
+                                                      (math/max hovering focusing))}}}
             :transformations
             {:bg (fn [#{hovering
                         pressing}]
@@ -208,14 +208,14 @@
                                            "pressing"
                                            "disabled"]
                                  :values  {:hovering (fn:> [hovering #{focusing}]
-                                                       (j/max hovering focusing))}}
+                                                       (math/max hovering focusing))}}
                             :bg {:initial "default"
                                  :stages  ["highlighted"
                                            "hovering"
                                            "pressing"
                                            "disabled"]
                                  :values {:hovering (fn:> [hovering #{focusing}]
-                                                      (j/max hovering focusing))}}}
+                                                      (math/max hovering focusing))}}}
             :transformations
             {:bg (fn [#{hovering
                         pressing}]
@@ -268,14 +268,14 @@
                                             "pressing"
                                             "disabled"]
                                   :values  {:hovering (fn:> [hovering #{focusing}]
-                                                        (j/max hovering focusing))}}
+                                                        (math/max hovering focusing))}}
                              :bg {:initial "default"
                                   :stages  ["highlighted"
                                             "hovering"
                                             "pressing"
                                             "disabled"]
                                   :values {:hovering (fn:> [hovering #{focusing}]
-                                                       (j/max hovering focusing))}}}
+                                                       (math/max hovering focusing))}}}
              :transformations
              {:bg (fn [#{hovering
                          pressing}]
@@ -335,14 +335,14 @@
                                             "pressing"
                                             "disabled"]
                                   :values  {:hovering (fn:> [hovering #{focusing}]
-                                                        (j/max hovering focusing))}}
+                                                        (math/max hovering focusing))}}
                              :bg {:initial "default"
                                   :stages  ["highlighted"
                                             "hovering"
                                             "pressing"
                                             "disabled"]
                                   :values {:hovering (fn:> [hovering #{focusing}]
-                                                       (j/max hovering focusing))}}}
+                                                       (math/max hovering focusing))}}}
              :transformations
              {:bg (fn [#{hovering
                          pressing}]

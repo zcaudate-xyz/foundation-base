@@ -3,8 +3,7 @@
   (:refer-clojure :exclude [print send]))
 
 (l/script :js
-  {:require [[js.core :as j]]
-   :import  [["javascript-time-ago" :as TimeAgo]
+  {:import  [["javascript-time-ago" :as TimeAgo]
              ["javascript-time-ago/locale/en" :as TimeAgoEn]
              ["dateformat" :as DateFormat]]})
 

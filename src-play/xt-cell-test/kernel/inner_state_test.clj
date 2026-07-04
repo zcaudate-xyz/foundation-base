@@ -1,6 +1,7 @@
 (ns xt.cell.kernel.inner-state-test
   (:require [hara.lang              :as l]
-            [xt.lang.common-notify :as notify])
+            [xt.lang.common-notify :as notify]
+            [xt.lang.common-repl :as repl])
   (:use code.test))
 
 (do (l/script- :xtalk
@@ -620,7 +621,8 @@
 ^{:refer xt.cell.kernel.inner-state/fn-ping-async :added "4.0"}
 (fact "pings after a delay"
 
-  (j/<! (inner-state/fn-ping-async 10))
+  (notify/wait-on [:js 5000]
+                  (repl/notify (inner-state/fn-ping-async 10)))
   => (contains ["pong" integer?]))
 
 ^{:refer xt.cell.kernel.inner-state/fn-echo :added "4.0"}
@@ -641,7 +643,8 @@
 ^{:refer xt.cell.kernel.inner-state/fn-echo-async :added "4.0"}
 (fact "echos after a delay"
 
-  (j/<! (inner-state/fn-echo-async "hello" 10))
+  (notify/wait-on [:js 5000]
+                  (repl/notify (inner-state/fn-echo-async "hello" 10)))
   => (contains ["hello" integer?]))
 
 ^{:refer xt.cell.kernel.inner-state/fn-error :added "4.0"}
@@ -662,8 +665,9 @@
 ^{:refer xt.cell.kernel.inner-state/fn-error-async :added "4.0"}
 (fact "throws an async error"
 
-  (j/<! (. (inner-state/fn-error-async 10)
-           (catch j/identity)))
+  (notify/wait-on [:js 5000]
+                  (repl/notify (. (inner-state/fn-error-async 10)
+                                  (catch (fn [e] e)))))
   => (contains ["error"]))
 
 (comment

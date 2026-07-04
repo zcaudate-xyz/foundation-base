@@ -30,8 +30,7 @@
              [xt.cell.kernel.base-impl :as base-impl]
              [xt.cell.kernel.inner-impl :as inner-impl]
              [xt.cell.kernel.inner-mock :as inner-mock]
-             [xt.lang.common-repl :as repl]
-             [js.core :as j]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup [(do (l/rt:restart)
@@ -67,32 +66,39 @@
                         (then (repl/>notify))))]}
 (fact "puts the cell as first argument"
 
-  (j/<!
-   ((base-model/wrap-cell-args
-     base-link-local/echo)
-    {:cell (-/get-cell)
-     :args ["hello"]}))
+  (notify/wait-on :js
+    (. ((base-model/wrap-cell-args
+         base-link-local/echo)
+        {:cell (-/get-cell)
+         :args ["hello"]})
+       (then (repl/>notify))))
   => (contains ["hello" integer?]))
 
 ^{:refer xt.cell.kernel.base-model/throttle-entry-promise :added "4.1"}
 (fact "normalises legacy and map throttle entries to their promise"
 
-  (j/<! (base-model/throttle-entry-promise
-         [(. Promise (resolve "legacy")) 10]))
+  (notify/wait-on :js
+    (. (base-model/throttle-entry-promise
+        [(. Promise (resolve "legacy")) 10])
+       (then (repl/>notify))))
   => "legacy"
 
-  (j/<! (base-model/throttle-entry-promise
-         {"promise" (. Promise (resolve "mapped"))
-          "started" 20}))
+  (notify/wait-on :js
+    (. (base-model/throttle-entry-promise
+        {"promise" (. Promise (resolve "mapped"))
+         "started" 20})
+       (then (repl/>notify))))
   => "mapped")
 
 ^{:refer xt.cell.kernel.base-model/throttle-entry :added "4.1"}
 (fact "normalises throttle entries to the legacy [promise started] shape"
 
-  (j/<! (xt/x:first
-         (base-model/throttle-entry
-          {"promise" (. Promise (resolve "mapped"))
-           "started" 20})))
+  (notify/wait-on :js
+    (. (xt/x:first
+        (base-model/throttle-entry
+         {"promise" (. Promise (resolve "mapped"))
+          "started" 20}))
+       (then (repl/>notify))))
   => "mapped"
 
   (!.js
@@ -110,11 +116,13 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/ping
-                                                          :defaultArgs []}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/ping
+                                                         :defaultArgs []}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "prepares params of views"
 
   (!.js
@@ -164,19 +172,22 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:echo-async {:handler base-link-local/echo
-                                                                :remoteHandler base-link-local/echo-async
-                                                                :defaultArgs ["hello" 100]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:echo-async {:handler base-link-local/echo
+                                                               :remoteHandler base-link-local/echo-async
+                                                               :defaultArgs ["hello" 100]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "runs the remote function"
 
-  (j/<!
-   (do:>
-    (var [path context disabled]
-         (base-model/prep-view (-/CELL) "hello" "echo_async" {}))
-    (return (base-model/run-remote context true path nil))))
+  (notify/wait-on :js
+    (. (do:>
+        (var [path context disabled]
+             (base-model/prep-view (-/CELL) "hello" "echo_async" {}))
+        (return (base-model/run-remote context true path nil)))
+       (then (repl/>notify))))
   => (contains-in
       {"::" "view.run",
        "path" ["hello" "echo_async"],
@@ -189,16 +200,19 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:echo-async {:handler base-link-local/echo
-                                                                :remoteHandler base-link-local/echo-async
-                                                                :defaultArgs ["hello" 100]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:echo-async {:handler base-link-local/echo
+                                                               :remoteHandler base-link-local/echo-async
+                                                               :defaultArgs ["hello" 100]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "runs the remote call"
 
-  (j/<!
-   (base-model/remote-call (-/CELL) "hello" "echo_async" ["hello" 100] true))
+  (notify/wait-on :js
+    (. (base-model/remote-call (-/CELL) "hello" "echo_async" ["hello" 100] true)
+       (then (repl/>notify))))
   => (contains-in
       {"::" "view.run",
        "path" ["hello" "echo_async"],
@@ -211,18 +225,21 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/ping
-                                                          :defaultArgs []}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/ping
+                                                         :defaultArgs []}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "helper function for refresh"
 
-  (j/<!
-   (do:>
-    (var [path context disabled]
-         (base-model/prep-view (-/CELL) "hello" "ping" {:event {}}))
-    (return (base-model/run-refresh context disabled path nil))))
+  (notify/wait-on :js
+    (. (do:>
+        (var [path context disabled]
+             (base-model/prep-view (-/CELL) "hello" "ping" {:event {}}))
+        (return (base-model/run-refresh context disabled path nil)))
+       (then (repl/>notify))))
   => (contains-in
       {"::" "view.run",
        "path" ["hello" "ping"],
@@ -235,14 +252,16 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/ping
-                                                          :defaultArgs []}
-                                                   :ping1 {:handler base-link-local/ping
-                                                           :defaultArgs []
-                                                           :deps ["ping"]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/ping
+                                                         :defaultArgs []}
+                                                  :ping1 {:handler base-link-local/ping
+                                                          :defaultArgs []
+                                                          :deps ["ping"]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "refreshes view dependents"
 
   (def +res+
@@ -278,15 +297,19 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:echo-async {:handler base-link-local/echo-async
-                                                                :defaultArgs ["hello" 100]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:echo-async {:handler base-link-local/echo-async
+                                                               :defaultArgs ["hello" 100]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "refreshes a view"
 
-  (j/<! (base-model/refresh-view
-         (-/CELL) "hello" "echo_async" {}))
+  (notify/wait-on :js
+    (. (base-model/refresh-view
+        (-/CELL) "hello" "echo_async" {})
+       (then (repl/>notify))))
   => (contains-in
       {"::" "view.run",
        "path" ["hello" "echo_async"],
@@ -299,16 +322,20 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:echo-async {:handler base-link-local/echo
-                                                                :remoteHandler base-link-local/echo-async
-                                                                :defaultArgs ["hello" 100]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:echo-async {:handler base-link-local/echo
+                                                               :remoteHandler base-link-local/echo-async
+                                                               :defaultArgs ["hello" 100]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "refreshes view remotely"
 
-  (j/<! (base-model/refresh-view-remote
-         (-/CELL) "hello" "echo_async" nil))
+  (notify/wait-on :js
+    (. (base-model/refresh-view-remote
+        (-/CELL) "hello" "echo_async" nil)
+       (then (repl/>notify))))
   => (contains-in
       {"::" "view.run",
        "path" ["hello" "echo_async"],
@@ -321,14 +348,16 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/ping
-                                                          :defaultArgs []}
-                                                   :ping1 {:handler base-link-local/ping
-                                                           :defaultArgs []
-                                                           :deps ["ping"]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/ping
+                                                         :defaultArgs []}
+                                                  :ping1 {:handler base-link-local/ping
+                                                          :defaultArgs []
+                                                          :deps ["ping"]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "refreshes view dependents unthrottled"
 
   (def +res3+
@@ -358,22 +387,25 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/ping
-                                                          :defaultArgs []}
-                                                   :ping1 {:handler base-link-local/ping
-                                                           :defaultArgs []
-                                                           :deps ["ping"]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/ping
+                                                         :defaultArgs []}
+                                                  :ping1 {:handler base-link-local/ping
+                                                          :defaultArgs []
+                                                          :deps ["ping"]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "refreshes a model"
 
-  (j/<!
-   (base-model/refresh-model
-    (-/CELL)
-    "hello"
-    {}
-    nil))
+  (notify/wait-on :js
+    (. (base-model/refresh-model
+        (-/CELL)
+        "hello"
+        {}
+        nil)
+       (then (repl/>notify))))
   => (contains-in
       [{"path" ["hello" "ping"],
         "post" [false],
@@ -501,13 +533,14 @@
                         (then (repl/>notify))))]}
 (fact "adds a model"
 
-  (j/<!
-   (. (base-model/add-model
-       (-/CELL)
-       "hello"
-       {:echo-async {:handler base-link-local/echo-async
-                     :defaultArgs ["hello" 100]}})
-      ["init"]))
+  (notify/wait-on :js
+    (. (. (base-model/add-model
+           (-/CELL)
+           "hello"
+           {:echo-async {:handler base-link-local/echo-async
+                         :defaultArgs ["hello" 100]}})
+          ["init"])
+       (then (repl/>notify))))
   => (contains-in
       [{"::" "view.run",
         "path" ["hello" "echo_async"],
@@ -515,13 +548,14 @@
         "main" [true ["hello" integer?]],
         "pre" [false]}])
 
-  (j/<!
-   (. (base-model/add-model
-       (-/CELL)
-       "hello2"
-       {:error-async {:handler base-link-local/error-async
-                      :defaultArgs [100]}})
-      ["init"]))
+  (notify/wait-on :js
+    (. (. (base-model/add-model
+           (-/CELL)
+           "hello2"
+           {:error-async {:handler base-link-local/error-async
+                          :defaultArgs [100]}})
+          ["init"])
+       (then (repl/>notify))))
   => (contains-in
       [{"::" "view.run",
         "path" ["hello2" "error_async"],
@@ -544,12 +578,14 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model
-                             (-/CELL)
-                             "hello"
-                             {:echo-async {:handler base-link-local/echo-async
-                                           :defaultArgs ["hello" 100]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model
+                            (-/CELL)
+                            "hello"
+                            {:echo-async {:handler base-link-local/echo-async
+                                          :defaultArgs ["hello" 100]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "removes a model"
 
   (!.js
@@ -581,12 +617,14 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model
-                             (-/CELL)
-                             "hello"
-                             {:echo-async {:handler base-link-local/echo-async
-                                           :defaultArgs ["hello" 100]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model
+                            (-/CELL)
+                            "hello"
+                            {:echo-async {:handler base-link-local/echo-async
+                                          :defaultArgs ["hello" 100]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "removes a view"
 
   (!.js
@@ -609,21 +647,24 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/ping
-                                                          :defaultArgs []}
-                                                   :ping1 {:handler base-link-local/ping
-                                                           :defaultArgs []
-                                                           :deps ["ping"]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/ping
+                                                         :defaultArgs []}
+                                                  :ping1 {:handler base-link-local/ping
+                                                          :defaultArgs []
+                                                          :deps ["ping"]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "updates a model"
 
-  (j/<!
-   (base-model/model-update
-    (-/CELL)
-    "hello"
-    {}))
+  (notify/wait-on :js
+    (. (base-model/model-update
+        (-/CELL)
+        "hello"
+        {})
+       (then (repl/>notify))))
   => (contains-in
       {"ping"
        {"path" ["hello" "ping"],
@@ -643,19 +684,22 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/ping
-                                                          :defaultArgs []}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/ping
+                                                         :defaultArgs []}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "updates a view"
 
-  (j/<!
-   (xtd/first
-    (base-model/view-update
-     (-/CELL)
-     "hello"
-     "ping")))
+  (notify/wait-on :js
+    (. (xtd/first
+        (base-model/view-update
+         (-/CELL)
+         "hello"
+         "ping"))
+       (then (repl/>notify))))
   => (contains-in
       {"path" ["hello" "ping"],
        "post" [false],
@@ -668,17 +712,20 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/echo
-                                                          :defaultArgs ["foo"]}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/echo
+                                                         :defaultArgs ["foo"]}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "sets view input"
 
-  (j/<!
-   (xtd/first
-    (base-model/view-set-input
-     (-/CELL) "hello" "ping" {:data ["bar"]})))
+  (notify/wait-on :js
+    (. (xtd/first
+        (base-model/view-set-input
+         (-/CELL) "hello" "ping" {:data ["bar"]}))
+       (then (repl/>notify))))
   => (contains-in
       {"path" ["hello" "ping"],
        "post" [false],
@@ -691,12 +738,14 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/echo
-                                                          :defaultArgs ["foo"]
-                                                          :trigger {"hello" true}}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/echo
+                                                         :defaultArgs ["foo"]
+                                                         :trigger {"hello" true}}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "triggers model raw"
 
   (!.js
@@ -713,12 +762,14 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/echo
-                                                          :defaultArgs ["foo"]
-                                                          :trigger {"hello" true}}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/echo
+                                                         :defaultArgs ["foo"]
+                                                         :trigger {"hello" true}}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "triggers a model"
 
   (!.js
@@ -733,12 +784,14 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/echo
-                                                          :defaultArgs ["foo"]
-                                                          :trigger {"hello" true}}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/echo
+                                                         :defaultArgs ["foo"]
+                                                         :trigger {"hello" true}}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "triggers a view"
 
   (notify/wait-on :js
@@ -761,12 +814,14 @@
                    (notify/wait-on :js
                      (. (-/reset-cell) ["init"]
                         (then (repl/>notify))))
-                   (j/<! (. (base-model/add-model (-/CELL)
-                                                  "hello"
-                                                  {:ping {:handler base-link-local/echo
-                                                          :defaultArgs ["foo"]
-                                                          :trigger {"hello" true}}})
-                            ["init"]))]}
+                   (notify/wait-on :js
+                     (. (. (base-model/add-model (-/CELL)
+                                                 "hello"
+                                                 {:ping {:handler base-link-local/echo
+                                                         :defaultArgs ["foo"]
+                                                         :trigger {"hello" true}}})
+                           ["init"])
+                        (then (repl/>notify))))]}
 (fact "triggers all"
 
   (!.js

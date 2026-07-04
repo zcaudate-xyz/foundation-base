@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-    :require [[js.core :as j]
-              [js.react :as r]
+    :require [[js.react :as r]
               [js.react-native :as n :include [:fn]]
               [js.react-native.animate :as a]
               [js.react-native.physical-base :as physical-base]
@@ -30,7 +29,7 @@
 
 (defn.js get-element
   [offset index divisions values]
-  (var noffset (j/round offset))
+  (var noffset (math/round offset))
   (var center (math/mod-pos noffset divisions))
   (var shifted (- index center))
   (var shifted-mod (math/mod-pos shifted divisions))
@@ -55,7 +54,7 @@
      :zIndex (* 10 scale)
      :transform
      [{:translateY (- translate)}
-      {:translateX (* 0.5 (j/abs translate))}
+      {:translateX (* 0.5 (math/abs translate))}
       {:scaleX (math/mix 0.2 1 scale)}
       {:scaleY (math/mix 0.2 1 scale)}]}}))
 
@@ -73,7 +72,7 @@
      :zIndex (* 10 scale)
      :transform
      [{:translateY (- translate)}
-      #_{:translateX (* 0.5 (j/abs translate))}
+      #_{:translateX (* 0.5 (math/abs translate))}
       #_{:scaleX (math/mix 0.2 1 scale)}
       #_{:scaleY (math/mix 0.2 1 scale)}]}}))
 
@@ -110,7 +109,7 @@
     :transformations
     {indicator
      (fn:> [offset]
-       (j/assign (transformFn offset index modelFn)
+       (xtd/obj-assign (transformFn offset index modelFn)
                  {:text (-/get-element offset index divisions values)}))}}))
 
 (defn.js useInterval
@@ -120,10 +119,10 @@
   (r/watch [active]
     (when (and active
                (not (r/curr interval)))
-      (r/curr:set interval (j/setInterval f ms)))
+      (r/curr:set interval (setInterval f ms)))
     (when (and (not active)
                (r/curr interval))
-      (j/clearInterval (r/curr interval))
+      (clearInterval (r/curr interval))
       (r/curr:set interval nil)))
   (return [active setActive]))
 
@@ -145,7 +144,7 @@
        [:% n/View
         {:style {:height 80
                  :width 80}}
-        (j/map -/DATES
+        (xtd/arr-map -/DATES
                (fn [date i]
                  (var #{translate
                         scale
@@ -161,7 +160,7 @@
                                                            (fn:> [v] (* v v v v v v v)))
                                            :transform
                                            [{:translateY translate}
-                                            {:translateX (* 0.15 (j/abs translate))}
+                                            {:translateX (* 0.15 (math/abs translate))}
                                             {:scaleY scale}]}}
                         date]]))))]
        [:% n/Fill]]))))
@@ -198,7 +197,7 @@
          :style {:height 80
                  :width 80
                  :backgroundColor "black"}
-         :addons [(:.. (j/map (xtd/arr-range -/DIVISIONS)
+         :addons [(:.. (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset0"
@@ -232,7 +231,7 @@
 
     (var HOURS_ARRAY (r/const (-/make-values -/HOURS -/DIVISIONS)))
     (r/watch [position0]
-      (setPosition1 (j/floor (/ position0 10))))
+      (setPosition1 (math/floor (/ position0 10))))
     (return
      (n/EnclosedCode
 {:label "js.react-native.physical-play/DigitRollerDouble"}
@@ -243,7 +242,7 @@
          :style {:height 80
                  :width 80
                  :backgroundColor "black"}
-         :addons [(:.. (j/map (xtd/arr-range -/DIVISIONS)
+         :addons [(:.. (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset1"
@@ -253,7 +252,7 @@
                                                     :left 18}
                                                    -/DIVISIONS
                                                    HOURS_ARRAY))))
-                  (:.. (j/map (xtd/arr-range -/DIVISIONS)
+                  (:.. (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset0"
@@ -282,22 +281,22 @@
 
   (defn.js DigitClockDemo
     []
-    (var [seconds0 setSeconds0] (r/local (j/floor (/ (xt/x:now-ms) 1000))))
+    (var [seconds0 setSeconds0] (r/local (math/floor (/ (xt/x:now-ms) 1000))))
     (var iseconds0  (a/useIndexIndicator seconds0
                                         {:default {:duration 100}}))
 
-    (var [seconds1 setSeconds1] (r/local  (j/floor (/ seconds0 10))))
+    (var [seconds1 setSeconds1] (r/local  (math/floor (/ seconds0 10))))
     (var iseconds1   (a/useIndexIndicator seconds1
                                           {:default {:duration 100}}))
-    (var [minutes0 setMinutes0] (r/local (j/floor (/ (xt/x:now-ms) 1000))))
+    (var [minutes0 setMinutes0] (r/local (math/floor (/ (xt/x:now-ms) 1000))))
     (var iminutes0  (a/useIndexIndicator minutes0
                                         {:default {:duration 100}}))
 
-    (var [minutes1 setMinutes1] (r/local  (j/floor (/ minutes0 10))))
+    (var [minutes1 setMinutes1] (r/local  (math/floor (/ minutes0 10))))
     (var iminutes1   (a/useIndexIndicator minutes1
                                           {:default {:duration 100}}))
     (var [active setActive] (-/useInterval (fn []
-                                                (var now (j/floor (/ (xt/x:now-ms) 1000)))
+                                                (var now (math/floor (/ (xt/x:now-ms) 1000)))
                                                (when (not= seconds0 now)
                                                  (setSeconds0 now)))
                                              200))
@@ -307,11 +306,11 @@
 
     (var DIGITS_ARRAY (r/const (-/make-values -/DIGITS -/CLOCK_DIVISIONS)))
     (r/watch [seconds0]
-      (setSeconds1 (j/floor (/ seconds0 10))))
+      (setSeconds1 (math/floor (/ seconds0 10))))
     (r/watch [seconds1]
-      (setMinutes0 (j/floor (/ seconds0 60))))
+      (setMinutes0 (math/floor (/ seconds0 60))))
     (r/watch [minutes0]
-      (setMinutes1 (j/floor (/ seconds0 600))))
+      (setMinutes1 (math/floor (/ seconds0 600))))
     (return
      (n/EnclosedCode
 {:label "js.react-native.physical-play/DigitClock"}
@@ -322,7 +321,7 @@
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
-          :addons [(:.. (j/map (xtd/arr-range 6)
+          :addons [(:.. (xtd/arr-map (xtd/arr-range 6)
                                (fn:> [index]
                                  (-/createComponent index
                                                     "minutes1"
@@ -339,7 +338,7 @@
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
-          :addons [(:.. (j/map (xtd/arr-range -/CLOCK_DIVISIONS)
+          :addons [(:.. (xtd/arr-map (xtd/arr-range -/CLOCK_DIVISIONS)
                                (fn:> [index]
                                  (-/createComponent index
                                                     "minutes0"
@@ -359,7 +358,7 @@
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
-          :addons [(:.. (j/map (xtd/arr-range 6)
+          :addons [(:.. (xtd/arr-map (xtd/arr-range 6)
                                (fn:> [index]
                                  (-/createComponent index
                                                     "seconds1"
@@ -376,7 +375,7 @@
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
-          :addons [(:.. (j/map (xtd/arr-range -/CLOCK_DIVISIONS)
+          :addons [(:.. (xtd/arr-map (xtd/arr-range -/CLOCK_DIVISIONS)
                                (fn:> [index]
                                  (-/createComponent index
                                                     "seconds0"

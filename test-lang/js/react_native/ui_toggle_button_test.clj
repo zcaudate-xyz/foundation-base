@@ -9,11 +9,11 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
+   :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-toggle-button :as ui-toggle-button]
+             [xt.lang.common-math :as math]
              ]
    })
 
@@ -62,7 +62,7 @@
                    :transformations
                    (fn [#{active
                           pressing}]
-                     (return {:style {:width (+ (* 100 (j/abs (- pressing active)))
+                     (return {:style {:width (+ (* 100 (math/abs (- pressing active)))
                                                 "%")}}))}
                   {:component n/View
                    :style {:height 2
