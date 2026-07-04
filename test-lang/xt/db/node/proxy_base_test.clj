@@ -232,7 +232,7 @@
            "call"    (xt/x:get-key handlers "@xt.db/kernel-init")
            "attach"  (xt/x:get-key handlers "@xt.db/attach-model")
            "detach"  (xt/x:get-key handlers "@xt.db/detach-model")}))
-  => {"count"   16
+  => {"count"   24
       "call"    {"id" "@xt.db/kernel-init" "meta" {}}
       "attach"  {"id" "@xt.db/attach-model" "meta" {}}
       "detach"  {"id" "@xt.db/detach-model" "meta" {}}})

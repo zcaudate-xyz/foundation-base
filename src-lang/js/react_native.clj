@@ -563,7 +563,12 @@
   "creates an enclosed code section"
   {:added "4.0"}
   [props & children]
-  (let [code (l/emit-str (apply list 'do children) (l/macro-opts))]
+  (let [mopts (l/macro-opts)
+        ;; Prevent emit-str from materialising all entries in the current
+        ;; module. Materialising entries that also use EnclosedCode would
+        ;; trigger infinite recursion during macro expansion.
+        mopts (update mopts :module dissoc :code)
+        code (l/emit-str (apply list 'do children) mopts)]
     (apply vector
            :% 'js.react-native/EnclosedCodeContainer
            (assoc props :code (list (list 'fn:> code)))

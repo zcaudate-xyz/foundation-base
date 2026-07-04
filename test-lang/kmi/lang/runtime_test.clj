@@ -142,14 +142,14 @@
       "@kmi.lang/eval"
       "@kmi.lang/load"
       "@kmi.lang/read"
-      "@xt.substrate/echo"
-      "@xt.substrate/get-service"
-      "@xt.substrate/list-handlers"
-      "@xt.substrate/list-spaces"
-      "@xt.substrate/list-transports"
-      "@xt.substrate/list-triggers"
-      "@xt.substrate/node-info"
-      "@xt.substrate/ping"])
+      "@/echo"
+      "@/get-service"
+      "@/list-handlers"
+      "@/list-spaces"
+      "@/list-transports"
+      "@/list-triggers"
+      "@/node-info"
+      "@/ping"])
 
 (fact "substrate eval request returns the value"
 

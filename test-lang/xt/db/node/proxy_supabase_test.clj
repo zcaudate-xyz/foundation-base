@@ -116,7 +116,7 @@
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.supabase/sign-in"))
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.supabase/sign-out"))
         (xt/x:not-nil? (xt/x:get-key handlers "@xt.supabase/health"))
-        (== 27 (xt/x:len (xtd/obj-keys handlers)))))
+        (== 35 (xt/x:len (xtd/obj-keys handlers)))))
   => true)
 
 ^{:refer xt.db.node.proxy-supabase-test/server-health-direct :added "4.1"}

@@ -18,44 +18,64 @@
   [grammar entry]
   (get-in grammar [:reserved (:op entry)]))
 
+(def ^:private ^ThreadLocal computing-entries
+  (ThreadLocal.))
+
+(defn code-state-computing?
+  "returns true if the entry is currently being staged on this thread"
+  {:added "4.1"}
+  [entry]
+  (contains? (or (.get computing-entries) #{})
+             [(:lang entry) (:module entry) (:id entry)]))
+
 (defn create-code-state
   "hydrates and stages a code entry for the current grammar"
   {:added "4.1"}
   [entry reserved grammar modules & [mopts]]
-  (let [module (or (:module mopts)
-                   (get modules (:module entry)))
-        module (cond-> module
-                 (map? module) (assoc :display :brief))
-        context (merge {:module module
-                        :entry  (assoc entry :display :brief)}
-                       mopts)
-        [hmeta form-hydrate] (let [{:keys [hydrate]} reserved]
-                               (if hydrate
-                                 (hydrate (:form-input entry) grammar context)
-                                 [nil (:form-input entry)]))
-        [form-staged
-         deps
-         deps-fragment
-         deps-native] (preprocess/to-staging form-hydrate
-                                             grammar
-                                             modules
-                                             context)
-        form-rewrite (rewrite/rewrite-stage :staging
-                                            form-staged
-                                            grammar
-                                            context)
-        {:keys [ops profiles polyfill-modules]}
-        (xtalk-system/scan-xtalk form-rewrite grammar)
-        deps (into (or deps #{})
-                   (xtalk-system/xtalk-ops-polyfill-symbols ops grammar))]
-    {:hmeta hmeta
-      :form form-rewrite
-      :deps deps
-     :deps-fragment deps-fragment
-     :deps-native deps-native
-     :xtalk-ops ops
-     :xtalk-profiles profiles
-     :polyfill-modules polyfill-modules}))
+  (let [key [(:lang entry) (:module entry) (:id entry)]
+        computing (or (.get computing-entries) #{})]
+    (when (contains? computing key)
+      (throw (ex-info (str "Recursive code-state computation for " key)
+                      {:entry key
+                       :stack (vec computing)})))
+    (.set computing-entries (conj computing key))
+    (try
+      (let [module (or (:module mopts)
+                       (get modules (:module entry)))
+            module (cond-> module
+                     (map? module) (assoc :display :brief))
+            context (merge {:module module
+                            :entry  (assoc entry :display :brief)}
+                           mopts)
+            [hmeta form-hydrate] (let [{:keys [hydrate]} reserved]
+                                   (if hydrate
+                                     (hydrate (:form-input entry) grammar context)
+                                     [nil (:form-input entry)]))
+            [form-staged
+             deps
+             deps-fragment
+             deps-native] (preprocess/to-staging form-hydrate
+                                                 grammar
+                                                 modules
+                                                 context)
+            form-rewrite (rewrite/rewrite-stage :staging
+                                                form-staged
+                                                grammar
+                                                context)
+            {:keys [ops profiles polyfill-modules]}
+            (xtalk-system/scan-xtalk form-rewrite grammar)
+            deps (into (or deps #{})
+                       (xtalk-system/xtalk-ops-polyfill-symbols ops grammar))]
+        {:hmeta hmeta
+         :form form-rewrite
+         :deps deps
+         :deps-fragment deps-fragment
+         :deps-native deps-native
+         :xtalk-ops ops
+         :xtalk-profiles profiles
+         :polyfill-modules polyfill-modules})
+      (finally
+        (.set computing-entries computing)))))
 
 (defn cached-code-state
   "restages a code entry for the current language, using the per-entry cache when available"

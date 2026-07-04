@@ -268,14 +268,14 @@
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
     (main/list-handlers n))
-  => ["@xt.substrate/echo"
-      "@xt.substrate/get-service"
-      "@xt.substrate/list-handlers"
-      "@xt.substrate/list-spaces"
-      "@xt.substrate/list-transports"
-      "@xt.substrate/list-triggers"
-      "@xt.substrate/node-info"
-      "@xt.substrate/ping"
+  => ["@/echo"
+      "@/get-service"
+      "@/list-handlers"
+      "@/list-spaces"
+      "@/list-transports"
+      "@/list-triggers"
+      "@/node-info"
+      "@/ping"
       "echo"
       "sum"]
 
@@ -284,14 +284,14 @@
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
     (main/list-handlers n))
-  => ["@xt.substrate/echo"
-      "@xt.substrate/get-service"
-      "@xt.substrate/list-handlers"
-      "@xt.substrate/list-spaces"
-      "@xt.substrate/list-transports"
-      "@xt.substrate/list-triggers"
-      "@xt.substrate/node-info"
-      "@xt.substrate/ping"
+  => ["@/echo"
+      "@/get-service"
+      "@/list-handlers"
+      "@/list-spaces"
+      "@/list-transports"
+      "@/list-triggers"
+      "@/node-info"
+      "@/ping"
       "echo"
       "sum"]
 
@@ -300,14 +300,14 @@
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
     (main/list-handlers n))
-  => ["@xt.substrate/echo"
-      "@xt.substrate/get-service"
-      "@xt.substrate/list-handlers"
-      "@xt.substrate/list-spaces"
-      "@xt.substrate/list-transports"
-      "@xt.substrate/list-triggers"
-      "@xt.substrate/node-info"
-      "@xt.substrate/ping"
+  => ["@/echo"
+      "@/get-service"
+      "@/list-handlers"
+      "@/list-spaces"
+      "@/list-transports"
+      "@/list-triggers"
+      "@/node-info"
+      "@/ping"
       "echo"
       "sum"])
 
@@ -636,14 +636,14 @@
     (main/list-handlers n)
     (main/list-triggers n)])
   => [["room/c"]
-      ["@xt.substrate/echo"
-       "@xt.substrate/get-service"
-       "@xt.substrate/list-handlers"
-       "@xt.substrate/list-spaces"
-       "@xt.substrate/list-transports"
-       "@xt.substrate/list-triggers"
-       "@xt.substrate/node-info"
-       "@xt.substrate/ping"
+      ["@/echo"
+       "@/get-service"
+       "@/list-handlers"
+       "@/list-spaces"
+       "@/list-transports"
+       "@/list-triggers"
+       "@/node-info"
+       "@/ping"
        "echo"]
       ["event/tick"]]
 
@@ -663,14 +663,14 @@
     (main/list-handlers n)
     (main/list-triggers n)])
   => [["room/c"]
-      ["@xt.substrate/echo"
-       "@xt.substrate/get-service"
-       "@xt.substrate/list-handlers"
-       "@xt.substrate/list-spaces"
-       "@xt.substrate/list-transports"
-       "@xt.substrate/list-triggers"
-       "@xt.substrate/node-info"
-       "@xt.substrate/ping"
+      ["@/echo"
+       "@/get-service"
+       "@/list-handlers"
+       "@/list-spaces"
+       "@/list-transports"
+       "@/list-triggers"
+       "@/node-info"
+       "@/ping"
        "echo"]
       ["event/tick"]]
 
@@ -690,14 +690,14 @@
     (main/list-handlers n)
     (main/list-triggers n)])
   => [["room/c"]
-      ["@xt.substrate/echo"
-       "@xt.substrate/get-service"
-       "@xt.substrate/list-handlers"
-       "@xt.substrate/list-spaces"
-       "@xt.substrate/list-transports"
-       "@xt.substrate/list-triggers"
-       "@xt.substrate/node-info"
-       "@xt.substrate/ping"
+      ["@/echo"
+       "@/get-service"
+       "@/list-handlers"
+       "@/list-spaces"
+       "@/list-transports"
+       "@/list-triggers"
+       "@/node-info"
+       "@/ping"
        "echo"]
       ["event/tick"]])
 
@@ -732,14 +732,14 @@
 
   (!.js
     (main/list-handlers (main/node-create {"id" "util-node"})))
-  => ["@xt.substrate/echo"
-      "@xt.substrate/get-service"
-      "@xt.substrate/list-handlers"
-      "@xt.substrate/list-spaces"
-      "@xt.substrate/list-transports"
-      "@xt.substrate/list-triggers"
-      "@xt.substrate/node-info"
-      "@xt.substrate/ping"])
+  => ["@/echo"
+      "@/get-service"
+      "@/list-handlers"
+      "@/list-spaces"
+      "@/list-transports"
+      "@/list-triggers"
+      "@/node-info"
+      "@/ping"])
 
 ^{:refer xt.substrate.base-util-handlers/ping :added "4.1"}
 (fact "util ping handler returns pong and node id"
@@ -747,7 +747,7 @@
   (notify/wait-on :js
     (var n (main/node-create {"id" "ping-node"}))
     (promise/x:promise-then
-     (main/request n nil "@xt.substrate/ping" [] nil)
+     (main/request n nil "@/ping" [] nil)
      (fn [out]
        (repl/notify out))))
   => {"pong" true "node" "ping-node"})
@@ -758,7 +758,7 @@
   (notify/wait-on :js
     (var n (main/node-create {"id" "echo-node"}))
     (promise/x:promise-then
-     (main/request n nil "@xt.substrate/echo" [1 2 3] nil)
+     (main/request n nil "@/echo" [1 2 3] nil)
      (fn [out]
        (repl/notify out))))
   => [1 2 3])
@@ -770,7 +770,7 @@
     (var n (main/node-create {"id" "service-node"}))
     (main/set-service n "cache" {"scope" "local"})
     (promise/x:promise-then
-     (main/request n nil "@xt.substrate/get-service" "cache" nil)
+     (main/request n nil "@/get-service" "cache" nil)
      (fn [out]
        (repl/notify out))))
   => {"scope" "local"})
@@ -780,11 +780,11 @@
 
   (notify/wait-on :js
     (var n (main/node-create {"id" "override-node"
-                              "handlers" {"@xt.substrate/ping"
+                              "handlers" {"@/ping"
                                           (fn [space args request node]
                                             (return "user-pong"))}}))
     (promise/x:promise-then
-     (main/request n nil "@xt.substrate/ping" [] nil)
+     (main/request n nil "@/ping" [] nil)
      (fn [out]
        (repl/notify out))))
   => "user-pong")

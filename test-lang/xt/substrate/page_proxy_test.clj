@@ -622,15 +622,23 @@
     (var node (substrate/node-create {"id" "node"}))
     (page-proxy/install-handlers node)
     (substrate/list-handlers node))
-  => ["page.group/close"
-      "page.group/list"
-      "page.group/open"
-      "page.group/trigger"
-      "page.group/update"
-      "page.model/proxy-call"
-      "page.model/set-input"
-      "page.model/trigger"
-      "page.model/update"])
+  => ["@/echo"
+      "@/get-service"
+      "@/list-handlers"
+      "@/list-spaces"
+      "@/list-transports"
+      "@/list-triggers"
+      "@/node-info"
+      "@/ping"
+      "@page/group-close"
+      "@page/group-list"
+      "@page/group-open"
+      "@page/group-trigger"
+      "@page/group-update"
+      "@page/model-proxy-call"
+      "@page/model-set-input"
+      "@page/model-trigger"
+      "@page/model-update"])
 
 ^{:refer xt.substrate.page-proxy/model-create-proxy :added "4.1"}
 (fact "creates a proxy model from a server snapshot"
@@ -766,7 +774,7 @@
     (page-proxy/install node)
     {"handlers" (xt/x:len (substrate/list-handlers node))
      "triggers" (xt/x:len (substrate/list-triggers node))})
-  => {"handlers" 9
+  => {"handlers" 17
       "triggers" 2})
 
 ^{:refer xt.substrate.page-proxy/model-proxy-call :added "4.1"}
@@ -830,7 +838,7 @@
                                          "room/a" "demo" ["main" [] true])
            (repl/notify
             {"action" (xt/x:get-key (xt/x:get-idx out 0) "action")})))))
-  => {"action" "page.model/proxy-call"})
+  => {"action" "@page/model-proxy-call"})
 
 ^{:refer xt.substrate.page-proxy/group-sync-proxy :added "4.1"}
 (fact "opens a proxy group and returns a sync control handle"
