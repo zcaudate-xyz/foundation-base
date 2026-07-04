@@ -211,4 +211,4 @@
 (fact "emit statement"
   (emit/with:emit
     (g/sol-emit-statement '(:emit (MyEvent 1)) g/+grammar+ {}))
-  => "emit MyEvent(1);")
+  => "emit MyEvent(1)")

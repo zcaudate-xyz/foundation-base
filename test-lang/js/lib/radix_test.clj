@@ -3,7 +3,13 @@
   (:use code.test))
 
 ^{:refer js.lib.radix/generate-blocks :added "4.0" :unchecked true}
-(fact "TODO")
+(fact "generates a block layout for radix components"
+
+  (some? (generate-blocks))
+  => true)
 
 ^{:refer js.lib.radix/init-components :added "4.0" :unchecked true}
-(fact "TODO")
+(fact "registers radix components"
+
+  (init-components)
+  => true)

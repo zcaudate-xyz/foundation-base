@@ -1,5 +1,5 @@
 (ns js.lib.react-query
-  (:require []
+  (:require [hara.lang :as l]
             [std.lib.foundation :as f]))
 
 (l/script :js

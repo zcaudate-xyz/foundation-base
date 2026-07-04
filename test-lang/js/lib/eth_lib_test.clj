@@ -27,28 +27,65 @@
     :teardown [(l/rt:stop)]})
 
 ^{:refer js.lib.eth-lib/get-ethers :added "4.1"}
-(fact "TODO")
+(fact "returns the ethers module"
+
+  (!.js
+   (typeof (. (e/get-ethers) Wallet)))
+  => "function")
 
 ^{:refer js.lib.eth-lib/verifyMessage :added "4.1"}
-(fact "TODO")
+(fact "verifies a message signature"
+
+  (!.js
+   (var wallet (e/new-wallet-from-mnemonic
+                "taxi dash nation raw first art ticket more useful mosquito include true"))
+   (var signature (. wallet (signMessage "hello world")))
+   (e/verifyMessage "hello world" signature))
+  => "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA")
 
 ^{:refer js.lib.eth-lib/parseUnits :added "4.1"}
-(fact "TODO")
+(fact "parses a decimal string into wei"
+
+  (!.js
+   (. (e/parseUnits "1.234" 8)
+      (toString)))
+  => "123400000")
 
 ^{:refer js.lib.eth-lib/formatUnits :added "4.1"}
-(fact "TODO")
+(fact "formats wei into a decimal string"
+
+  (!.js
+   (e/formatUnits "123400000" 8))
+  => "1.234")
 
 ^{:refer js.lib.eth-lib/keccak256 :added "4.1"}
-(fact "TODO")
+(fact "computes the keccak256 digest"
+
+  (!.js
+   (e/keccak256 "hello world"))
+  => "0x47173285a8d7341e5e972fc677286384f802f8ef42a5ec5f03bbfa254cb01fad")
 
 ^{:refer js.lib.eth-lib/ripemd160 :added "4.1"}
-(fact "TODO")
+(fact "computes the ripemd160 digest"
+
+  (!.js
+   (e/ripemd160 "hello world"))
+  => string?)
 
 ^{:refer js.lib.eth-lib/mnemonicToSeed :added "4.1"}
-(fact "TODO")
+(fact "derives a seed from a mnemonic"
+
+  (!.js
+   (typeof (e/mnemonicToSeed
+            "taxi dash nation raw first art ticket more useful mosquito include true")))
+  => "object")
 
 ^{:refer js.lib.eth-lib/to-bignum :added "4.1"}
-(fact "TODO")
+(fact "converts a value to a bigint"
+
+  (!.js
+   (typeof (e/to-bignum "12345")))
+  => "bigint")
 
 ^{:refer js.lib.eth-lib/to-bignum-pow10 :added "4.0" :unchecked true}
 (fact "number with base 10 exponent"

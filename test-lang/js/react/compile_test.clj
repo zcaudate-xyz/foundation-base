@@ -108,7 +108,7 @@
   => [:div {:class ["p-8"]} [:p {:name "hello"} [:a]]])
 
 ^{:refer js.react.compile/compile-full :added "4.0" :unchecked true}
-(fact "TODO"
+(fact "compiles the full react component"
 
   (compile/compile-full
     {:states {:var/html-code   ""
