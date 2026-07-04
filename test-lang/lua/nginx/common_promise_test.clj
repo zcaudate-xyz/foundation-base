@@ -94,7 +94,8 @@
   (!.lua (var r (p/promise-all [(p/promise-resolve 1)
                                 (p/promise-resolve 2)
                                 (p/promise-resolve 3)]))
-         (p/promise-await r))
+         (var settled (p/promise-await r))
+         (. settled ["value"]))
   => [1 2 3])
 
 ^{:refer lua.nginx.common-promise/promise-then :added "4.1"}

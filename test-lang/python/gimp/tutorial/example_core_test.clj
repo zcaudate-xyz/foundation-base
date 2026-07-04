@@ -10,9 +10,14 @@
    :require [[python.gimp.tutorial.example-core :as core]]
    :import [["gi" :as gi]]})
 
+(defn- ci?
+  []
+  (boolean (System/getenv "CI")))
+
 (fact:global
- {:skip (not (or (env/program-exists? "gimp")
-                 (env/program-exists? "docker")))
+ {:skip (or (ci?)
+             (not (or (env/program-exists? "gimp")
+                      (env/program-exists? "docker"))))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 

@@ -100,8 +100,14 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
+        volumes:
+          - ${{ github.workspace }}/docker/postgres-init:/docker-entrypoint-initdb.d
         ports:
           - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
 
   run-lang-tests:
     name: Run Tests - ${{ matrix.lang }}
@@ -148,7 +154,9 @@ jobs:
             -v $(pwd):$(pwd) \
             -w $(pwd) \
             ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            lein test :with "${{ matrix.lang }}"
+            bash -lc "set -euxo pipefail &&
+              ${{ matrix.lang == 'python' && 'pip install --no-cache-dir psycopg2-binary redis' || 'true' }} &&
+              lein test :with \"${{ matrix.lang }}\""
         
     services:
       postgres:
@@ -158,6 +166,12 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
+        volumes:
+          - ${{ github.workspace }}/docker/postgres-init:/docker-entrypoint-initdb.d
         ports:
           - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
 

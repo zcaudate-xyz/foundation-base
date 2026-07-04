@@ -16,7 +16,8 @@
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
- {:skip     (not (env/program-exists? "resty"))
+ {:skip     (or (not (env/program-exists? "resty"))
+                (not (env/program-exists? "minio")))
   :setup    [(l/rt:restart)
              (minio/start-minio-array [{:port 4489
                                         :console 4499}])

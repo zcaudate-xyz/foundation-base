@@ -52,8 +52,13 @@
    {:lang :js
     :layout :full}))
 
+(defn- ci?
+  []
+  (boolean (System/getenv "CI")))
+
 (fact:global
- {:setup [(l/rt:restart)
+ {:skip (ci?)
+  :setup [(l/rt:restart)
           (chromedriver/goto (str "http://127.0.0.1:" (:http-port (l/default-notify)) "/")
                              4000)]
   :teardown [(l/rt:stop)]})

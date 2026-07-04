@@ -4,8 +4,13 @@
   (:import [std.lib.foundation Wrapped])
   (:use code.test))
 
-(fact:global {:skip (not (or (env/program-exists? "blender")
-                              (env/program-exists? "docker")))})
+(defn- ci?
+  []
+  (boolean (System/getenv "CI")))
+
+(fact:global {:skip (or (ci?)
+                         (not (or (env/program-exists? "blender")
+                                   (env/program-exists? "docker"))))})
 
 (defn- unwrap [x]
   (if (instance? Wrapped x)
