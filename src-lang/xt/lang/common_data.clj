@@ -1099,3 +1099,37 @@
   (return (fn [key]
             (return (or (xt/x:get-key cache key)
                         (cache-fn key))))))
+
+(defn.xt id-fn
+  "gets the id for an object"
+  {:added "4.1"}
+  ([x]
+   (return (xt/x:get-key x "id"))))
+
+(defn.xt key-fn
+  "creates a key access function"
+  {:added "4.1"}
+  ([k]
+   (return (fn [x] (return (xt/x:get-key x k))))))
+
+(defn.xt template-entry
+  "gets data from a structure using template"
+  {:added "4.1"}
+  [obj template props]
+  (cond (xt/x:is-function? template)
+        (return (template obj props))
+
+        (xt/x:nil? template)
+        (return obj)
+
+        (xt/x:is-array? template)
+        (return (-/get-in obj template))
+
+        :else
+        (return template)))
+
+(defn.xt template-fn
+  "creates a template entry function"
+  {:added "4.1"}
+  [template]
+  (return (fn [obj props] (return (-/template-entry obj template props)))))
