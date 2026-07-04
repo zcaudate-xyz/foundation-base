@@ -33,7 +33,7 @@ jobs:
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein incomplete
           
   run-group-tests:
-    name: Run Tests - ${{ matrix.name }}
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
@@ -53,9 +53,18 @@ jobs:
             target: "[code]"
             install_js_parser: true
             command: lein test :with "[code]"
-          - name: script, net, math, lib, jvm
+          - name: script/net/math/lib/jvm
             target: "[script net math lib jvm]"
             command: lein test :with "[script net math lib jvm]"
+          - name: solidity web3
+            target: "[solidity web3]"
+            command: lein test :with "[solidity web3]"
+          - name: kmi
+            target: "[kmi]"
+            command: lein test :with "[kmi]"
+          - name: postgres
+            target: "[postgres]"
+            command: lein test :with "[postgres]"
     
     steps:
       - name: Checkout repository
@@ -83,7 +92,7 @@ jobs:
         working-directory: scripts/js_parser
         run: npm ci
         
-      - name: Run Tests - ${{ matrix.name }}
+      - name: run
         run: |
           mkdir -p .tmp
           docker run --network host \

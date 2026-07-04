@@ -17,6 +17,8 @@ jobs:
             image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-dart:ci
           - lang: ruby
             image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-ruby:ci
+          - lang: python
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-python:ci
 
     steps:
       - name: Checkout repository
@@ -29,7 +31,7 @@ jobs:
           username: ${{ secrets.GH_USER }}
           password: ${{ secrets.GH_TOKEN }}
 
-      - name: Run xtbench tests - ${{ matrix.lang }}
+      - name: run
         run: >
           docker run --network host
           -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
