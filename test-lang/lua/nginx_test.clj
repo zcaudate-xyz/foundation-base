@@ -168,4 +168,7 @@
 
 
 ^{:refer lua.nginx/to-hex :added "4.1"}
-(fact "TODO")
+(fact "converts a binary string to hex"
+
+  (!.lua (n/to-hex "hello"))
+  => "68656c6c6f")

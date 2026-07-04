@@ -102,7 +102,9 @@
 (defn.py client-connect
   [client opts]
   (var #{defaults} client)
-  (var env (xtd/obj-assign defaults (or opts {})))
+  (var env (xtd/obj-clone (-/default-env)))
+  (xtd/obj-assign env defaults)
+  (xtd/obj-assign env (or opts {}))
   (var dsn (xt/x:cat "dbname=" (xt/x:get-key env "database")
                      " user=" (xt/x:get-key env "user")
                      " password=" (xt/x:get-key env "password")
