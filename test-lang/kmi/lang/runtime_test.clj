@@ -138,18 +138,18 @@
   (notify/wait-on :js
     (var node (rt/create-node {}))
     (repl/notify (substrate/list-handlers node)))
-  => ["@kmi.lang/describe"
-      "@kmi.lang/eval"
-      "@kmi.lang/load"
-      "@kmi.lang/read"
-      "@/echo"
+  => ["@/echo"
       "@/get-service"
       "@/list-handlers"
       "@/list-spaces"
       "@/list-transports"
       "@/list-triggers"
       "@/node-info"
-      "@/ping"])
+      "@/ping"
+      "@kmi.lang/describe"
+      "@kmi.lang/eval"
+      "@kmi.lang/load"
+      "@kmi.lang/read"])
 
 (fact "substrate eval request returns the value"
 

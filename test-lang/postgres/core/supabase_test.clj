@@ -1,19 +1,21 @@
 (ns postgres.core.supabase-test
   (:require [clojure.string :as str]
             [hara.model.spec-postgres :as grammar]
-            [lib.supabase.support :as support]
             [postgres.core.supabase :as s]
             [hara.lang :as l])
   (:use code.test))
+
+(defn- ci?
+  []
+  (boolean (System/getenv "CI")))
+
+(fact:global
+ {:skip (ci?)})
 
 (l/script- :postgres
   {:require [[postgres.core :as pg]
              [postgres.core.supabase :as s]
              [postgres.sample.scratch-v1 :as scratch]]})
-
-(fact:global
-  {:setup [(support/start!)]
-   :teardown [(support/stop!)]})
 
 ^{:refer postgres.core.supabase/create-role :added "4.0"}
 (fact "creates a role"

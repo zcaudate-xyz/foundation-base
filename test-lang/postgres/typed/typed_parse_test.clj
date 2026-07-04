@@ -5,7 +5,7 @@
 
 ^{:refer postgres.typed.typed-parse/read-forms :added "0.1"}
 (fact "read-forms reads top-level forms from a file"
-  (let [forms (parse/read-forms "src/rt/postgres/base/typed/typed_common.clj")]
+  (let [forms (parse/read-forms "src-lang/postgres/typed/typed_common.clj")]
     (vector? forms) => true))
 
 ^{:refer postgres.typed.typed-parse/deftype? :added "0.1"}
@@ -135,12 +135,12 @@
 
 ^{:refer postgres.typed.typed-parse/parse-fn-inputs :added "0.1"}
 (fact "parse-fn-inputs extracts function arguments"
-  (parse/parse-fn-inputs [:uuid i-id])
+  (parse/parse-fn-inputs [:uuid 'i-id])
   => (contains [(contains {:name 'i-id :type :uuid :role :payload})])
-  (parse/parse-fn-inputs [:uuid i-id :text i-handle])
+  (parse/parse-fn-inputs [:uuid 'i-id :text 'i-handle])
   => (contains [(contains {:name 'i-id :type :uuid :role :payload})
                 (contains {:name 'i-handle :type :text :role :payload})])
-  (parse/parse-fn-inputs [:jsonb o-op])
+  (parse/parse-fn-inputs [:jsonb 'o-op])
   => (contains [(contains {:name 'o-op :type :jsonb :role :payload})]))
 
 ^{:refer postgres.typed.typed-parse/infer-fn-arg-role :added "4.1"}
@@ -203,7 +203,7 @@
 
 ^{:refer postgres.typed.typed-parse/analyze-file :added "0.1"}
 (fact "analyze-file returns structure with all type definitions"
-  (let [result (parse/analyze-file "src/rt/postgres/base/typed/typed_common.clj")]
+  (let [result (parse/analyze-file "src-lang/postgres/typed/typed_common.clj")]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))

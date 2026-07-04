@@ -7,22 +7,22 @@
 
 ^{:refer postgres.typed/analyze-file :added "4.1"}
 (fact "analyze-file returns structure with tables, enums, and functions"
-  (let [result (typed-analysis/analyze-file "src/rt/postgres/base/typed/typed_common.clj")]
+  (let [result (typed-analysis/analyze-file "src-lang/postgres/typed/typed_common.clj")]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))
 
 ^{:refer postgres.typed/analyze-namespace :added "4.1"}
 (fact "analyze-namespace analyzes a namespace and returns type definitions"
-  (let [result (typed-analysis/analyze-namespace 'rt.postgres.base.typed.typed-common)]
+  (let [result (typed-analysis/analyze-namespace 'postgres.typed.typed-common)]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))
 
 ^{:refer postgres.typed/analyze-and-register! :added "4.1"}
 (fact "analyze-and-register! analyzes and registers types from a namespace"
-  (typed/clear-registry!)
-  (let [result (typed-analysis/analyze-and-register! 'rt.postgres.base.typed.typed-common)]
+  (types/clear-registry!)
+  (let [result (typed-analysis/analyze-and-register! 'postgres.typed.typed-common)]
     ;; Result is the analysis map with tables, enums, functions
     (contains? result :tables) => true
     (contains? result :enums) => true
@@ -38,20 +38,20 @@
 
 ^{:refer postgres.typed/get-function-report :added "4.1"}
 (fact "get-function-report lazily retrieves and caches infer reports for registered functions"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [analysis (-> 'postgres.sample.scratch-v2
                      parse/analyze-namespace
                      parse/register-types!)
         fn-def   (some #(when (= "insert-entry" (:name %)) %)
                        (:functions analysis))]
-    (typed/register-type! 'postgres.sample.scratch-v2/insert-entry fn-def)
+    (types/register-type! 'postgres.sample.scratch-v2/insert-entry fn-def)
     (let [report (typed-analysis/get-function-report 'postgres.sample.scratch-v2/insert-entry)]
       (get-in report [:function :name]) => "insert-entry"
       (get-in report [:analysis :mutating]) => true)))
 
 ^{:refer postgres.typed/Type :added "4.1"}
 (fact "Type includes grouped nested operations"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [user-table (types/make-table-def "test" "User"
                                          [(types/make-column-def :id (types/make-type-ref :primitive nil :uuid)
                                                                  {:required true :primary true})
@@ -93,11 +93,11 @@
                                       [:jsonb]
                                       {:raw-body '[(test.core/set-user auth-user-id {:handle handle} auth-op)]}
                                       "test.rpc")]
-    (typed/register-type! 'test/User user-table)
-    (typed/register-type! 'test.core/update-user-raw update-fn)
-    (typed/register-type! 'test.core/create-user create-fn)
-    (typed/register-type! 'test.core/set-user set-user-fn)
-    (typed/register-type! 'test.rpc/user-set-handle wrapper-fn)
+    (types/register-type! 'test/User user-table)
+    (types/register-type! 'test.core/update-user-raw update-fn)
+    (types/register-type! 'test.core/create-user create-fn)
+    (types/register-type! 'test.core/set-user set-user-fn)
+    (types/register-type! 'test.rpc/user-set-handle wrapper-fn)
     (let [report (typed-analysis/Type wrapper-fn)]
       (get-in report [:analysis :mutating]) => true
       (get-in report [:analysis :operations-by-type "update" 0 :table]) => "User"
@@ -135,7 +135,7 @@
 
 ^{:refer postgres.typed/get-function-report-json :added "4.1"}
 (fact "get-function-report-json serializes reports for registered functions"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (-> 'postgres.sample.scratch-v2
       parse/analyze-namespace
       parse/register-types!)
@@ -157,9 +157,9 @@
 
 ^{:refer postgres.typed/get-function-def :added "4.1"}
 (fact "get-function-def returns a registered function definition"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [fn-def (types/make-fn-def "test" "get-user" [] [:jsonb] {} nil)]
-    (typed/register-type! 'test/get-user fn-def)
+    (types/register-type! 'test/get-user fn-def)
     (typed-analysis/get-function-def 'test/get-user) => fn-def))
 
 ^{:refer postgres.typed/fn-ref->fn-sym :added "4.1"}
@@ -168,9 +168,9 @@
 
 ^{:refer postgres.typed/resolve-function-def :added "4.1"}
 (fact "resolve-function-def returns registered function defs"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [fn-def (types/make-fn-def "demo" "inner" [] [:jsonb] {} nil)]
-    (typed/register-type! 'demo/inner fn-def)
+    (types/register-type! 'demo/inner fn-def)
     (typed-analysis/resolve-function-def 'demo/inner) => fn-def))
 
 ^{:refer postgres.typed/get-app-function-def :added "4.1"}
@@ -184,7 +184,7 @@
 
 ^{:refer postgres.typed/with-app-typed-registry :added "4.1"}
 (fact "with-app-typed-registry temporarily merges app types into the registry"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [table (types/make-table-def "demo" "Entry" [] :id)]
     (with-redefs [hara.runtime.postgres.base.application/app-typed
                   (fn [_] {:tables {'demo/Entry table}
@@ -199,7 +199,7 @@
 
 ^{:refer postgres.typed/get-function-input-shape :added "4.1"}
 (fact "get-function-input-shape projects update columns and keeps helper-chain narrowing intact"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [user-columns [(types/make-column-def :id
                                              (types/make-type-ref :primitive nil :uuid)
                                              {:required true :primary true})
@@ -339,7 +339,7 @@
 
 ^{:refer postgres.typed/get-app-function-input-shape :added "4.1"}
 (fact "get-app-function-input-shape infers jsonb input shape from an app typed payload"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [task-columns [(types/make-column-def :id
                                              (types/make-type-ref :primitive nil :uuid)
                                              {:required true :primary true})
@@ -363,7 +363,7 @@
 
 ^{:refer postgres.typed/get-function-input-schema :added "4.1"}
 (fact "get-function-input-schema formats inferred input shapes"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [task-columns [(types/make-column-def :id
                                              (types/make-type-ref :primitive nil :uuid)
                                              {:required true :primary true})
@@ -377,8 +377,8 @@
                 [:jsonb m]
                 (pg/t:insert Task m))
         fn-def (parse/parse-defn form "test.ns" nil)]
-    (typed/register-type! 'test.ns/Task task-table)
-    (typed/register-type! 'test.ns/insert-task-raw fn-def)
+    (types/register-type! 'test.ns/Task task-table)
+    (types/register-type! 'test.ns/insert-task-raw fn-def)
     (get-in (typed-analysis/get-function-input-schema 'test.ns/insert-task-raw 'm :openapi)
             [:properties "id" :format]) => "uuid"
     (get-in (typed-analysis/get-function-input-schema 'test.ns/insert-task-raw 'm :json-schema)
@@ -426,7 +426,7 @@
 
 ^{:refer postgres.typed/get-function-output-shape :added "4.1"}
 (fact "get-function-output-shape preserves nested jsonb refinement from plain child bindings"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [form '(defn.pg
                 prepare-account
                 "prepares an account payload"
@@ -440,7 +440,7 @@
                        {:profile o-profile
                         :password-salt v-password-salt}))))
         fn-def (parse/parse-defn form "test.ns" nil)]
-    (typed/register-type! 'test.ns/prepare-account fn-def)
+    (types/register-type! 'test.ns/prepare-account fn-def)
     (let [shape (typed-analysis/get-function-output-shape 'test.ns/prepare-account)]
       (types/jsonb-shape? shape) => true
       (get-in shape [:fields :security :shape :fields :password-salt :type]) => :text
@@ -475,7 +475,7 @@
 
 ^{:refer postgres.typed/get-function-output-schema :added "4.1"}
 (fact "get-function-output-schema formats inferred output shapes"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (let [form '(defn.pg
                 prepare-topic
                 "prepares a topic payload"
@@ -488,7 +488,7 @@
                        {:code-full v-code
                         :organisation-id v-organisation-id}))))
         fn-def (parse/parse-defn form "test.ns" nil)]
-    (typed/register-type! 'test.ns/prepare-topic fn-def)
+    (types/register-type! 'test.ns/prepare-topic fn-def)
     (get-in (typed-analysis/get-function-output-schema 'test.ns/prepare-topic :openapi)
             [:properties "organisation_id" :format]) => "uuid"
     (get-in (typed-analysis/get-function-output-schema 'test.ns/prepare-topic :json-schema)
@@ -557,14 +557,14 @@
 
 ^{:refer postgres.typed/make-json-schema :added "4.1"}
 (fact "make-json-schema generates JSON Schema definitions"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (typed-analysis/analyze-and-register! 'postgres.sample.scratch-v2)
   (let [schema (typed-analysis/make-json-schema)]
     (map? schema) => true))
 
 ^{:refer postgres.typed/make-typescript :added "4.1"}
 (fact "make-typescript generates TypeScript definitions"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (typed-analysis/analyze-and-register! 'postgres.sample.scratch-v2)
   (let [ts (typed-analysis/make-typescript)]
     (string? ts) => true
