@@ -1,6 +1,5 @@
 (ns js.react-native.ext-route-test
-  (:require [js.cell.playground :as browser]
-            [hara.lang :as l])
+  (:require [hara.lang :as l])
   (:use code.test))
 
 (l/script :js
