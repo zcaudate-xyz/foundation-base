@@ -6,7 +6,7 @@
             [std.lib.env :as env]))
 
 (l/script- :lua
-  {:runtime :neovim
+  {:runtime :neovim.instance
    :test-mode true})
 
 (fact:global {:skip (not (env/program-exists? "nvim"))

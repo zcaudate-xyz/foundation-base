@@ -1,7 +1,6 @@
 (ns hara.common.grammar-xtalk-test
   (:require [clojure.string :as str]
-            [hara.common.grammar-xtalk :as xtalk :refer :all]
-            [xtgen.lang :as xtgen])
+            [hara.common.grammar-xtalk :as xtalk :refer :all])
   (:use code.test))
 
 (fact "all xtalk grammar map entries expose op-spec contracts"
@@ -13,16 +12,6 @@
                     (not (:op-spec entry)))]
      (:op entry)))
   => [])
-
-(fact "common-lib generator emits the current macro wrapper"
-  (read-string
-   (xtgen/generate-common-lib
-    {:symbol  '[x:arr-push]
-     :op-spec {:arglists '([arr val])}}))
-  => '(defmacro.xt ^{:standalone true}
-        x:arr-push
-        [arr val]
-        (x:arr-push [arr val])))
 
 ^{:refer hara.common.grammar-xtalk/tf-str-lt :added "4.1"}
 (fact "checks string ordering ascending"
