@@ -61,6 +61,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Create test database
+        run: |
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U postgres -d test-scratch -c 'CREATE DATABASE test;'
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U postgres -d test-scratch -c 'GRANT ALL PRIVILEGES ON DATABASE test TO postgres;'
+
       - name: Log into GHCR
         uses: docker/login-action@v2
         with:
@@ -100,8 +107,6 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
-        volumes:
-          - ${{ github.workspace }}/docker/postgres-init:/docker-entrypoint-initdb.d
         ports:
           - 5432:5432
       redis:
@@ -126,6 +131,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
+      - name: Create test database
+        run: |
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U postgres -d test-scratch -c 'CREATE DATABASE test;'
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U postgres -d test-scratch -c 'GRANT ALL PRIVILEGES ON DATABASE test TO postgres;'
 
       - name: Log into GHCR
         uses: docker/login-action@v2
@@ -166,8 +178,6 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
-        volumes:
-          - ${{ github.workspace }}/docker/postgres-init:/docker-entrypoint-initdb.d
         ports:
           - 5432:5432
       redis:
