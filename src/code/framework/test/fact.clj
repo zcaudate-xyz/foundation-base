@@ -97,7 +97,7 @@
          out     []]
     (if (nil? current)
       out
-      (let [form     (nav/value current)
+      (let [form     (if (nav/expression? current) (nav/value current))
             fact-nav (when (and (seq? form)
                                 (#{'fact 'comment} (first form)))
                        (if (= :meta (nav/tag current))
