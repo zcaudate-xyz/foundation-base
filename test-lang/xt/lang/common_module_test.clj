@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-module :refer :all]
-            js.core))
+            js.react))
 
 ^{:refer xt.lang.common-module/current-module :added "4.1"}
 (fact "gets a module from the library by id"
@@ -12,20 +12,20 @@
   => (contains {:id 'xt.lang.common-module})
 
   (l/with:macro-opts [(l/rt:macro-opts :js)]
-    (:id (current-module 'js.core)))
-  => 'js.core)
+    (:id (current-module 'js.react)))
+  => 'js.react)
 
 ^{:refer xt.lang.common-module/linked-natives :added "4.1"}
 (fact "collects native imports across module dependencies"
 
-  (sort (keys (linked-natives :js 'js.core)))
-  => ["node-fetch" "util" "uuid"])
+  (sort (keys (linked-natives :js 'js.react)))
+  => ["react" "react-dom/client" "react-nil"])
 
 ^{:refer xt.lang.common-module/current-natives :added "4.1"}
 (fact "gets the native imports of a single module"
 
-  (sort (keys (current-natives :js 'js.core)))
-  => ["node-fetch" "util" "uuid"])
+  (sort (keys (current-natives :js 'js.react)))
+  => ["react" "react-dom/client" "react-nil"])
 
 ^{:refer xt.lang.common-module/expose-module :added "4.1"}
 (fact "returns a module key as stringified data"
