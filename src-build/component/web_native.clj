@@ -9,7 +9,7 @@
              [js.react-native.animate-test :as animate-test]
              [js.react-native.ext-box-test :as ext-box-test]
              [js.react-native.ext-log-test :as ext-log-test]
-             [js.react-native.ext-view-test :as ext-view-test]
+             [js.react-native.ext-model-test :as ext-model-test]
              [js.react-native.ext-form-test :as ext-form-test]
              [js.react-native.ext-route-test :as ext-route-test]
              [js.react-native.ui-frame-test :as ui-frame-test]
@@ -128,9 +128,9 @@
   []
   (return
    [:<>
-    [:% ext-view-test/ListenViewDemo]
-    [:% ext-view-test/ListenViewOutputDemo]
-    [:% ext-view-test/ListenViewOutputMultiDemo]]))
+    [:% ext-model-test/ListenViewDemo]
+    [:% ext-model-test/ListenViewOutputDemo]
+    [:% ext-model-test/ListenViewOutputMultiDemo]]))
 
 (defn.js RouteExamples
   []
@@ -396,7 +396,7 @@
         ["00c-native-tree"   -/TreeExamples]
         ["00d-native-data"   -/DataExamples]
         ["00e-native-modal"  -/NativeModalExamples]
-        ["00f-ext-view"      -/ViewExamples]
+        ["00f-ext-model"      -/ViewExamples]
         ["00g-ext-form"      -/FormExamples]
         ["00h-ext-route"     -/RouteExamples]
         ["00j-ext-box"       -/BoxExamples]

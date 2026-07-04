@@ -238,7 +238,7 @@
             [js.react.ext-log :base]
             [js.react.ext-page :base]
             [js.react.ext-route :base]
-            [js.react.ext-view :base]]}
+            [js.react.ext-model :base]]}
   
  xyz.zcaudate/js.react-native
  {:description "js react native ui libraries" 

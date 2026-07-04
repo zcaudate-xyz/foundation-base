@@ -1,4 +1,4 @@
-(ns js.react.ext-view
+(ns js.react.ext-model
   (:require [hara.lang :as l]))
 
 (l/script :js

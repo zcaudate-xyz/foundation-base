@@ -1,4 +1,4 @@
-(ns js.react-native.ext-view-test
+(ns js.react-native.ext-model-test
   (:require [hara.lang :as l])
   (:use code.test))
 
@@ -11,20 +11,20 @@
             :notify {:host "test.statstrade.io"}}
     :require [[js.react :as r :include [:fn]]
               [js.react-native :as n :include [:fn]]
-              [js.react.ext-view :as ext-view]
+              [js.react.ext-model :as ext-model]
               [xt.event.base-model :as event-model]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-lib :as k]
               [xt.lang.spec-base :as xt]]
    })
 
-^{:refer js.react.ext-view/listenView :adopt true :added "4.0" :unchecked true}
+^{:refer js.react.ext-model/listenView :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
 
   (defn.js ListenViewPane
     [#{view
        type}]
-    (var output (ext-view/listenView view type {}))
+    (var output (ext-model/listenView view type {}))
     (var getCount (r/useGetCount))
     (return
      [:% n/TextDisplay
@@ -36,7 +36,7 @@
   
   (defn.js ListenViewDemo
     []
-    (var view (ext-view/makeView
+    (var view (ext-model/makeView
                {:handler (fn:> [x y z]
                                (new Promise
                                   (fn [resolve]
@@ -48,14 +48,14 @@
                 :options {:init false}}))
     (var [type setType] (r/local "success"))
     (r/init []
-      (ext-view/refresh-view view))
+      (ext-model/refresh-view view))
     (return
      (n/EnclosedCode 
-{:label "js.react.ext-view/listenView"} 
+{:label "js.react.ext-model/listenView"} 
 [:% n/Row
        [:% n/Button
         {:title "R"
-         :onPress (fn:> (ext-view/refresh-args
+         :onPress (fn:> (ext-model/refresh-args
                          view
                          [(Math.random)
                           (Math.random)
@@ -65,7 +65,7 @@
         {:title "D"
          :onPress (fn []
                     (event-model/set-input view {})
-                    (ext-view/refresh-view view))}]
+                    (ext-model/refresh-view view))}]
        [:% n/Tabs
         {:data ["input" "output" "pending" "elapsed" "disabled" "success"]
          :value type
@@ -74,18 +74,18 @@
         {:key type
          :content (n/format-entry
                    {:type type
-                    :result (ext-view/listenView view type {})
+                    :result (ext-model/listenView view type {})
                     :count ((r/useGetCount))
                     :view  (xtd/obj-pick view ["input" "output"])})}]))))
 
 
-^{:refer js.react.ext-view/listenViewOutput :adopt true :added "4.0" :unchecked true}
+^{:refer js.react.ext-model/listenViewOutput :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
 
   (defn.js ListenViewOutputPane
     [#{view
        types}]
-    (var output (ext-view/listenViewOutput
+    (var output (ext-model/listenViewOutput
                  view types {}))
     (var getCount (r/useGetCount))
     (return
@@ -98,7 +98,7 @@
   
   (defn.js ListenViewOutputDemo
     []
-    (var view (ext-view/makeView
+    (var view (ext-model/makeView
                {:handler (fn:> [x y z]
                                (new Promise
                                   (fn [resolve]
@@ -110,14 +110,14 @@
                 :options {:init false}}))
     (var [types setTypes] (r/local ["pending" "disabled"]))
     (r/init []
-      (ext-view/refresh-view view))
+      (ext-model/refresh-view view))
     (return
      (n/EnclosedCode 
-{:label "js.react.ext-view/listenViewOutput"} 
+{:label "js.react.ext-model/listenViewOutput"} 
 [:% n/Row
        [:% n/Button
         {:title "R"
-         :onPress (fn:> (ext-view/refresh-args
+         :onPress (fn:> (ext-model/refresh-args
                          view
                          [(Math.random)
                           (Math.random)
@@ -127,7 +127,7 @@
         {:title "D"
          :onPress (fn []
                     (event-model/set-input view {})
-                    (ext-view/refresh-view view))}]
+                    (ext-model/refresh-view view))}]
        [:% n/TabsMulti
         {:data ["input" "output" "pending" "elapsed" "disabled"]
          :values types
@@ -136,22 +136,22 @@
         {:key types
          :content (n/format-entry
                    {:types types
-                    :result (ext-view/listenViewOutput view types {})
+                    :result (ext-model/listenViewOutput view types {})
                     :count ((r/useGetCount))
                     :view  (xtd/obj-pick view ["input" "output"])})}]))))
 
 
-^{:refer js.react.ext-view/listenViewOutput.MULTI :adopt true :added "4.0" :unchecked true}
+^{:refer js.react.ext-model/listenViewOutput.MULTI :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
 
   (defn.js ListenViewOutputMultiPane
     [#{view
        types}]
-    (var remoteOutput (ext-view/listenViewOutput
+    (var remoteOutput (ext-model/listenViewOutput
                        view types {} "remote"))
-    (var mainOutput (ext-view/listenViewOutput
+    (var mainOutput (ext-model/listenViewOutput
                      view types {}))
-    (var syncOutput (ext-view/listenViewOutput
+    (var syncOutput (ext-model/listenViewOutput
                      view types {} "sync"))
     (var getCount (r/useGetCount))
     (return
@@ -166,7 +166,7 @@
   
   (defn.js ListenViewOutputMultiDemo
     []
-    (var view (ext-view/makeView
+    (var view (ext-model/makeView
                {:handler (fn:> [x y z]
                                (new Promise
                                   (fn [resolve]
@@ -192,21 +192,21 @@
                 :options {:init false}}))
     (var [types setTypes] (r/local ["pending" "disabled"]))
     (r/init []
-      (ext-view/refresh-view view))
+      (ext-model/refresh-view view))
     (return
      (n/EnclosedCode 
-{:label "js.react.ext-view/listenViewOutput.SYNC"} 
+{:label "js.react.ext-model/listenViewOutput.SYNC"} 
 [:% n/Row
        [:% n/Button
         {:title "M"
-         :onPress (fn:> (ext-view/refresh-args
+         :onPress (fn:> (ext-model/refresh-args
                          view
                          [(Math.random)
                           (Math.random)
                           (Math.random)]))}]
        [:% n/Button
         {:title "R"
-         :onPress (fn:> (ext-view/refresh-args-remote
+         :onPress (fn:> (ext-model/refresh-args-remote
                          view
                          [(Math.random)
                           (Math.random)
@@ -214,7 +214,7 @@
                          true))}]
        [:% n/Button
         {:title "S"
-         :onPress (fn:> (ext-view/refresh-args-sync
+         :onPress (fn:> (ext-model/refresh-args-sync
                          view
                          [(Math.random)
                           (Math.random)
@@ -225,7 +225,7 @@
         {:title "D"
          :onPress (fn []
                     (event-model/set-input view {})
-                    (ext-view/refresh-view view))}]
+                    (ext-model/refresh-view view))}]
        [:% n/TabsMulti
         {:data ["input" "output" "pending" "elapsed" "disabled"]
          :values types
@@ -234,9 +234,9 @@
         {:key types
          :content (n/format-entry
                    {:types types
-                    :result {:main   (ext-view/listenViewOutput view types {})
-                             :remote (ext-view/listenViewOutput view types {} "remote")
-                             :sync   (ext-view/listenViewOutput view types {} "sync")}
+                    :result {:main   (ext-model/listenViewOutput view types {})
+                             :remote (ext-model/listenViewOutput view types {} "remote")
+                             :sync   (ext-model/listenViewOutput view types {} "sync")}
                     :count ((r/useGetCount))
                     :view  (xtd/obj-pick view ["input" "output" "sync" "remote"])})}])))
   

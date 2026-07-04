@@ -12,7 +12,7 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r]
-              [js.react.ext-view :as ext-view]
+              [js.react.ext-model :as ext-model]
               [js.react-native :as n :include [:fn]]
               [js.react-native.physical-addon :as physical-addon]
               [js.react-native.ui-autocomplete :as ui-autocomplete]
@@ -77,7 +77,7 @@
     (var inputRef (r/ref))
     (var [value setValue] (r/local ""))
     (var [visible setVisible] (r/local true))
-    (var view    (ext-view/makeView
+    (var view    (ext-model/makeView
                   {:handler (fn:> [filt]
                               (new Promise (fn [resolve]
                                 (setTimeout (fn []
