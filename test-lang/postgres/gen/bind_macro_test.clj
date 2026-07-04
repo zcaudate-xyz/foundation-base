@@ -201,15 +201,15 @@
             #{:first-name :last-name}]}))
     {}))
   => ["UserAccount"
-      {"custom" {},
-       "where" {},
+      {"custom" [],
+       "where" [],
        "links"
        [["profile"
          "reverse"
          ["UserProfile"
-          {"custom" {},
+          {"custom" [],
            "where" [{"id" 1, "account" ["eq" ["UserAccount.id"]]}],
-           "links" {},
+           "links" [],
            "data" ["first_name" "last_name"]}]]],
        "data" ["id" "nickname"]}]
 

@@ -2,19 +2,20 @@
   (:require [postgres.typed.typed-common :as types]
             [postgres.typed.typed-parse :as parse]
             [postgres.sample.scratch-v2 :as scratch]
+            [postgres.typed :as typed]
             [postgres.typed :as typed-analysis])
   (:use code.test))
 
 ^{:refer postgres.typed/analyze-file :added "4.1"}
 (fact "analyze-file returns structure with tables, enums, and functions"
-  (let [result (typed-analysis/analyze-file "src/rt/postgres/base/typed/typed_common.clj")]
+  (let [result (typed-analysis/analyze-file "src-lang/postgres/sample/scratch_v2.clj")]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))
 
 ^{:refer postgres.typed/analyze-namespace :added "4.1"}
 (fact "analyze-namespace analyzes a namespace and returns type definitions"
-  (let [result (typed-analysis/analyze-namespace 'rt.postgres.base.typed.typed-common)]
+  (let [result (typed-analysis/analyze-namespace 'postgres.sample.scratch-v2)]
     (contains? result :tables) => true
     (contains? result :enums) => true
     (contains? result :functions) => true))
@@ -22,7 +23,7 @@
 ^{:refer postgres.typed/analyze-and-register! :added "4.1"}
 (fact "analyze-and-register! analyzes and registers types from a namespace"
   (typed/clear-registry!)
-  (let [result (typed-analysis/analyze-and-register! 'rt.postgres.base.typed.typed-common)]
+  (let [result (typed-analysis/analyze-and-register! 'postgres.sample.scratch-v2)]
     ;; Result is the analysis map with tables, enums, functions
     (contains? result :tables) => true
     (contains? result :enums) => true

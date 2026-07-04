@@ -33,6 +33,18 @@
     parse/analyze-namespace
     parse/register-types!))
 
+(defn clear-registry!
+  "Clears the global type registry."
+  {:added "4.1"}
+  []
+  (types/clear-registry!))
+
+(defn register-type!
+  "Registers a single type definition under a namespaced symbol."
+  {:added "4.1"}
+  [type-sym type-def]
+  (types/register-type! type-sym type-def))
+
 (defn make-function-report
   "Generates a JSON-friendly infer report for one function in a namespace."
   [ns-sym fn-sym]
