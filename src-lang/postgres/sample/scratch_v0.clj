@@ -50,7 +50,6 @@
 (defn.pg ^{:%% :sql
            :- [:text]
            :props [:immutable :parallel-safe]
-           :api/flags []
            :api/meta {:sb/grant :all}}
   echo
   "Returns a stable scratch-v0 ping response."
@@ -59,7 +58,6 @@
   i-input)
 
 (defn.pg ^{:props [:security :definer]
-           :api/flags []
            :api/meta {:sb/grant :auth}}
   log-append-public
   "Appends a log row for the current authenticated user."

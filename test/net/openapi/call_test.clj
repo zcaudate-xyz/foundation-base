@@ -212,4 +212,22 @@
       "default-key"])
 
 ^{:refer net.openapi.call/merge-value :added "4.1"}
-(fact "TODO")
+(fact "merges maps and lets input override scalar defaults"
+  [(call/merge-value {:a 1 :b 2} {:b 3 :c 4})
+   (call/merge-value {:a 1} nil)
+   (call/merge-value nil {:a 1})
+   (call/merge-value nil nil)
+   (call/merge-value "default" "input")
+   (call/merge-value "default" nil)
+   (call/merge-value "default" false)
+   (call/merge-value "default" 0)
+   (call/merge-value "default" "")]
+  => [{:a 1 :b 3 :c 4}
+      {:a 1}
+      {:a 1}
+      nil
+      "input"
+      "default"
+      false
+      0
+      ""])

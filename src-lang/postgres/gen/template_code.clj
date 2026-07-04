@@ -13,7 +13,8 @@
     "   :return ~return"
     "   :schema ~schema"
     "   :id ~id"
-    "   :flags ~flags})"]))
+    "   :flags ~flags"
+    "   :url ~url})"]))
 
 (defn namespace-url-root
   "Creates a default API root from a postgres module namespace."
@@ -30,13 +31,15 @@
   "Creates template input for a generated `def.xt` route entry."
   {:added "4.1"}
   [{:keys [src route-sym root]}]
-  (let [{:keys [input return schema id flags]} (bind/bind-function @(resolve src))]
+  (let [{:keys [input return schema id flags]} (bind/bind-function @(resolve src))
+        url (str root "/" (name route-sym))]
     {'route-sym route-sym
      'input     input
      'return    return
      'schema    schema
      'id        id
-     'flags     flags}))
+     'flags     flags
+     'url       url}))
 
 (def ^:private +route-entry+
   (template/get-template ROUTE_ENTRY_TEMPLATE

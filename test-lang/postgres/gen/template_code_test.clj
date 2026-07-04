@@ -97,4 +97,35 @@
 
 
 ^{:refer postgres.gen.template-code/route-entry-input :added "4.1"}
-(fact "TODO")
+(fact "creates template input for a simple route"
+  (gen/route-entry-input {:src 'postgres.sample.scratch-v0/ping
+                          :route-sym 'ping
+                          :root "api/scratch-v0"})
+  => {'route-sym 'ping
+      'input []
+      'return "text"
+      'schema "scratch_v0"
+      'id "ping"
+      'flags {}
+      'url "api/scratch-v0/ping"})
+
+^{:refer postgres.gen.template-code/route-entry-input :added "4.1"}
+(fact "creates template input using the root to build the url"
+  (gen/route-entry-input {:src 'postgres.sample.scratch-v0/log-append
+                          :route-sym 'log-append
+                          :root "api/scratch-v0"})
+  => {'route-sym 'log-append
+      'input [{:symbol "i_message" :type "text"}]
+      'return "jsonb"
+      'schema "scratch_v0"
+      'id "log_append"
+      'flags {}
+      'url "api/scratch-v0/log-append"})
+
+^{:refer postgres.gen.template-code/route-entry-input :added "4.1"}
+(fact "uses a custom root when provided"
+  (get (gen/route-entry-input {:src 'postgres.sample.scratch-v0/ping
+                               :route-sym 'ping
+                               :root "custom/root"})
+       'url)
+  => "custom/root/ping")
