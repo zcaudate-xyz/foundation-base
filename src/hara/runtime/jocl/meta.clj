@@ -35,7 +35,7 @@
 ;;
 
 (def +init+
-  (CL/setExceptionsEnabled false))
+  (org.jocl.CL/setExceptionsEnabled false))
 
 (defn cl-size
   "helper for cl-types
@@ -235,12 +235,12 @@
 ;;
 
 (def +id-fns+
-  '{:platform-ids    {:fn CL/clGetPlatformIDs
+  '{:platform-ids    {:fn org.jocl.CL/clGetPlatformIDs
                       :unit :array
                       :sizet  :int
                       :arrayt cl_platform_id
                       :return vec}
-    :device-ids      {:fn CL/clGetDeviceIDs
+    :device-ids      {:fn org.jocl.CL/clGetDeviceIDs
                       :unit :array
                       :sizet  :int
                       :arrayt cl_device_id
@@ -248,19 +248,19 @@
 
 (def +info-fns+
   '[[:platform-info   {:arrayt :byte :return h/string
-                       :prefix "CL_PLATFORM" :fn CL/clGetPlatformInfo
+                       :prefix "CL_PLATFORM" :fn org.jocl.CL/clGetPlatformInfo
                        :key :platform :class cl_platform_id}]
-    [:device-info     {:prefix "CL_DEVICE"   :fn CL/clGetDeviceInfo
+    [:device-info     {:prefix "CL_DEVICE"   :fn org.jocl.CL/clGetDeviceInfo
                        :key :device :class cl_device_id}]
-    [:context-info    {:prefix "CL_CONTEXT"  :fn CL/clGetContextInfo
+    [:context-info    {:prefix "CL_CONTEXT"  :fn org.jocl.CL/clGetContextInfo
                        :key :context :class cl_context}]
-    [:mem-info        {:prefix "CL_MEM"      :fn CL/clGetMemObjectInfo
+    [:mem-info        {:prefix "CL_MEM"      :fn org.jocl.CL/clGetMemObjectInfo
                        :key :mem :class cl_mem}]
-    [:queue-info      {:prefix "CL_QUEUE"    :fn CL/clGetCommandQueueInfo
+    [:queue-info      {:prefix "CL_QUEUE"    :fn org.jocl.CL/clGetCommandQueueInfo
                        :key :queue :class cl_command_queue}]
-    [:program-info    {:prefix "CL_PROGRAM"  :fn CL/clGetProgramInfo
+    [:program-info    {:prefix "CL_PROGRAM"  :fn org.jocl.CL/clGetProgramInfo
                        :key :program :class cl_program :exclude [:devices :context]}]
-    [:kernel-info     {:prefix "CL_KERNEL"   :fn CL/clGetKernelInfo
+    [:kernel-info     {:prefix "CL_KERNEL"   :fn org.jocl.CL/clGetKernelInfo
                        :key :kernel :class cl_kernel}]])
 
 (def +fns+
@@ -328,7 +328,7 @@
              ([~(symbol tname)]
               (fn-call ~(keyword (str tname "-info")) ~opts
                        ~(symbol tname)
-                       ~(symbol (str "CL/" prefix "_" (upper-str k)))))))]))
+                       ~(symbol (str "org.jocl.CL/" prefix "_" (upper-str k)))))))]))
 
 (defn info-template:print
   "creates a print template"

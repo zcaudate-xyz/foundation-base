@@ -1,23 +1,42 @@
 (ns hara.runtime.jocl
-  (:require [hara.runtime.jocl.common :as common]
-            [hara.runtime.jocl.exec :as exec]
-            [hara.runtime.jocl.meta :as meta]
-            [hara.runtime.jocl.type :as type]
-            [hara.runtime.jocl.runtime :as rt]
+  (:refer-clojure :exclude [meta to-array])
+  (:require [hara.runtime.jocl.env :as jocl-env]
+            [hara.lang.registry :as reg]
+            [hara.lang.runtime :as default]
             [std.lib.foundation :as h]))
 
-(h/intern-in meta/platform:default
-             meta/platform-info
-             meta/device-info
-             meta/kernel-info
-             meta/queue-info
-             meta/context-info
-             meta/program-info
+(def ^{:added "4.1"}
+  +available?+
+  "True when the OpenCL native library can be loaded and has at least one
+   platform.  The JOCL sub-namespaces are only loaded when this is true so
+   that tests can be skipped gracefully on machines without OpenCL."
+  (boolean (jocl-env/opencl-available?)))
 
-             meta/device:cpu
-             meta/device:gpu
+(defn- import-jocl-ns
+  "Loads `ns-sym` and interns all of its public vars into the current
+   namespace.  This makes the functions/macros re-referrable by test
+   namespaces without importing `org.jocl.CL` directly."
+  {:added "4.1"}
+  [ns-sym]
+  (require ns-sym)
+  (let [ns-obj (find-ns ns-sym)]
+    (doseq [[sym ^clojure.lang.Var var] (ns-publics ns-obj)]
+      (when-not (= sym '+available?+)
+        (h/intern-var *ns* sym var)))))
 
-             exec/exec
-             rt/jocl
-             rt/jocl:create)
+(when +available?+
+  (import-jocl-ns 'hara.runtime.jocl.common)
+  (import-jocl-ns 'hara.runtime.jocl.meta)
+  (import-jocl-ns 'hara.runtime.jocl.exec)
+  (import-jocl-ns 'hara.runtime.jocl.type)
+  (import-jocl-ns 'hara.runtime.jocl.runtime))
 
+(when-not +available?+
+  ;; Install a no-op :c/:jocl runtime type so that `(l/script- :c
+  ;; {:runtime :jocl :test-mode true})` in test namespaces can still
+  ;; compile and set up script macros even when OpenCL is missing.
+  (default/install-type!
+   :c :jocl
+   {:type :hara/lib.jocl.dummy
+    :config {:bootstrap false}
+    :instance {:create (fn [config] config)}}))

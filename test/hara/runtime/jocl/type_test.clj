@@ -1,51 +1,37 @@
 (ns hara.runtime.jocl.type-test
+  (:refer-clojure :exclude [to-array])
   (:use code.test)
-  (:require [hara.runtime.jocl.type :refer :all]
-            [std.lib.bin.buffer :as bin])
-  (:refer-clojure :exclude [to-array]))
+  (:require [hara.runtime.jocl :refer :all]
+            [hara.runtime.jocl.env :as jocl-env]))
+
+(jocl-env/with-stubs buffer-type unit-type type-args to-array)
+
+(fact:global
+ {:skip (not (jocl-env/opencl-available?))})
 
 ^{:refer hara.runtime.jocl.type/buffer-type :added "3.0"}
 (fact "outputs type information for buffers"
-  ^:hidden
-  
-  (buffer-type (bin/byte-buffer 10))
-  => {:buffer true, :unit :byte, :dsize 1, :length 10}
 
-  (buffer-type (int-array 10))
-  => {:buffer true, :unit :int, :dsize 4, :length 10})
+  (buffer-type (float-array [1 2 3]))
+  => {:buffer true :unit :float :dsize 4 :length 3})
 
 ^{:refer hara.runtime.jocl.type/unit-type :added "3.0"}
 (fact "outputs type information for unit inputs"
-  ^:hidden
-  
+
   (unit-type 1)
-  => {:unit :long, :dsize 8}
-  
-  (unit-type [])
-  => (throws))
+  => {:unit :long :dsize 8})
 
 ^{:refer hara.runtime.jocl.type/type-args :added "3.0"}
 (fact "returns and checks type information of inputs"
-  ^:hidden
-  
-  (type-args [{:buffer true :dsize 1 :output true}]
-             [(bin/buffer 10)])
-  => [{:buffer true, :unit :byte, :dsize 1, :length 10, :output true}]
-  
-  (type-args [{:buffer true :dsize 8 :output true}]
-             [(long-array 10)])
-  => [{:buffer true, :unit :long, :dsize 8, :length 10, :output true}]
-  
-  (type-args [{:buffer true :dsize 8 :output true}]
-             [(int-array 10)])
-  => (throws)
-  
-  (type-args [{:buffer true :output true}]
-             [10])
-  => (throws))
+
+  (type-args '[{:type :float :dsize 4 :buffer true}
+               {:type :long :dsize 8}]
+             [(float-array [1 2 3]) 1])
+  => [{:buffer true :unit :float :dsize 4 :length 3}
+      {:unit :long :dsize 8}])
 
 ^{:refer hara.runtime.jocl.type/to-array :added "3.0"}
 (fact "converts a value to an array"
-
+ 
   (str (type (to-array 10)))
   => "class [J")

@@ -1,10 +1,18 @@
 (ns hara.runtime.jocl.runtime-test
+  (:refer-clojure :exclude [to-array])
   (:use code.test)
-  (:require [hara.runtime.jocl.runtime :refer :all]
-            [hara.runtime.jocl.exec :as exec]
-            [hara.lang :as l]
+  (:require [hara.lang :as l]
             [std.lib.component :as component]
-            [std.lib.context.pointer :as cptr]))
+            [std.lib.context.pointer :as cptr]
+            [hara.runtime.jocl :as exec :refer :all]
+            [hara.runtime.jocl.env :as jocl-env]))
+
+(jocl-env/with-stubs exec? exec kernel? init-exec-jocl
+                     init-ptr-jocl invoke-ptr-jocl stop-jocl jocl:create
+                     jocl +exec+ +rt+)
+
+(fact:global
+ {:skip (not (jocl-env/opencl-available?))})
 
 (l/script- :c)
 
@@ -22,9 +30,9 @@
    (-/MUL= c a b i)))
 
 (defonce +exec+
-  (-> (exec/exec {:source sample
-                  :worksize (fn [{:keys [a]}]
-                              [(count a)])})
+  (-> (exec {:source sample
+             :worksize (fn [{:keys [a]}]
+                         [(count a)])})
       (component/start)))
 
 (defonce +rt+

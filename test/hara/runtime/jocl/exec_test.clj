@@ -1,10 +1,19 @@
 (ns hara.runtime.jocl.exec-test
+  (:refer-clojure :exclude [to-array])
   (:use code.test)
-  (:require [hara.runtime.jocl.exec :refer :all]
-            [hara.runtime.jocl.meta :as meta]
-            [hara.runtime.jocl.type :as type]
-            [hara.lang :as l]
-            [std.lib.component :as component]))
+  (:require [hara.lang :as l]
+            [std.lib.component :as component]
+            [hara.runtime.jocl :refer :all]
+            [hara.runtime.jocl.env :as jocl-env]))
+
+(jocl-env/with-stubs exec-source exec-prep exec-start exec-stop
+                     exec-invoke:worksize set-kernel-buffer
+                     set-kernel-value exec-invoke:setup exec-invoke:process
+                     exec-invoke:output exec-invoke exec? exec type-args
+                     platform:default device:gpu +exec+)
+
+(fact:global
+ {:skip (not (jocl-env/opencl-available?))})
 
 (l/script- :c)
 
@@ -20,11 +29,6 @@
     :__global :float :* c]
    (var :int i := -/G0)
    (-/MUL= c a b i)))
-
-
-;;
-;;
-;;
 
 (defonce +exec+
   (-> (exec {:source sample
@@ -46,8 +50,8 @@
 (fact "preps the source for the exec"
   ^:hidden
 
-  (exec-prep (meta/platform:default)
-             (meta/device:gpu)
+  (exec-prep (platform:default)
+             (device:gpu)
              (second (exec-source sample))
              (first (exec-source sample)))
   => map?)
@@ -125,8 +129,8 @@
 (fact "sets up the exec"
   
   (exec-invoke:setup +exec+
-                     (type/type-args (:spec @(:state +exec+))
-                                     +exec-args+)
+                     (type-args (:spec @(:state +exec+))
+                                +exec-args+)
                      +exec-args+)
   => (contains [org.jocl.cl_mem
                 org.jocl.cl_mem

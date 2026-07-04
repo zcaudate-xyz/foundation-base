@@ -1,8 +1,18 @@
 (ns hara.runtime.jocl.meta-test
+  (:refer-clojure :exclude [to-array])
   (:use code.test)
-  (:require [hara.runtime.jocl.meta :refer :all]
-            [std.lib.foundation :as h])
-  (:import (org.jocl CL)))
+  (:require [std.lib.foundation :as h]
+            [hara.runtime.jocl :refer :all]
+            [hara.runtime.jocl.env :as jocl-env]))
+
+(jocl-env/with-stubs cl-size cl-types lookup:fn lookup:flags lookup:build
+                     array-form to-ptr cl-call fn-call info-template:defn
+                     info-template:print info-template:gen info-template
+                     info-gen list-platforms platform:default list-devices
+                     device-info device:cpu device:gpu)
+
+(fact:global
+ {:skip (not (jocl-env/opencl-available?))})
 
 ^{:refer hara.runtime.jocl.meta/cl-size :added "3.0"}
 (fact "helper for cl-types"
@@ -55,18 +65,18 @@
     :return h/string,
     :arrayt :byte,
     :prefix "CL_PLATFORM",
-    :fn CL/clGetPlatformInfo,
+    :fn org.jocl.CL/clGetPlatformInfo,
     :key :platform,
     :class cl_platform_id}
    (platform:default)
-   CL/CL_PLATFORM_NAME)
+   (jocl-env/cl-field "CL_PLATFORM_NAME"))
   => string?)
 
 ^{:refer hara.runtime.jocl.meta/fn-call :added "3.0"}
 (fact "creates a cl call given a lookup key"
   ^:hidden
   
-  (fn-call :platform-info {} (platform:default) CL/CL_PLATFORM_NAME)
+  (fn-call :platform-info {} (platform:default) (jocl-env/cl-field "CL_PLATFORM_NAME"))
   => string?)
 
 ^{:refer hara.runtime.jocl.meta/info-template:defn :added "3.0"}
@@ -76,7 +86,7 @@
   (info-template:defn "platform" "CL_PLATFORM" [:name {}])
   => '[:name (defn platform-info:name
                ([platform]
-                (fn-call :platform-info {} platform CL/CL_PLATFORM_NAME)))])
+                (fn-call :platform-info {} platform org.jocl.CL/CL_PLATFORM_NAME)))])
 
 ^{:refer hara.runtime.jocl.meta/info-template:print :added "3.0"}
 (fact "creates a print template"
