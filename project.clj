@@ -117,6 +117,9 @@
    ;; hara.runtime.libpython
    [clj-python/libpython-clj "2.026"]
 
+   ;; hara.runtime.jocl
+   [org.jocl/jocl "2.0.4"]
+
    ;; std.pretty
    [org.clojure/core.rrb-vector "0.1.2"]
 

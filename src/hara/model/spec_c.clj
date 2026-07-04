@@ -79,9 +79,16 @@
                (second args)
                args)
         args (if (vector? args)
-               (if (vector? (first args))
-                  args
-                  (partition 2 args))
+               (cond (empty? args)
+                     []
+                     (vector? (first args))
+                     args
+                     (some keyword? args)
+                     (->> (helper/emit-typed-args args grammar)
+                          (map (fn [{:keys [modifiers symbol]}]
+                                 [(vec modifiers) symbol])))
+                     :else
+                     (partition 2 args))
                 [args])]
     (str "("
          (clojure.string/join ", "
