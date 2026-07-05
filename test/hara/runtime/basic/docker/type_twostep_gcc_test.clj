@@ -8,7 +8,7 @@
 (l/script- :c
   {:runtime :twostep
    :process {:force-container true
-             :container {:image "foundation-base/rt-twostep-c:latest"}
+             :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-c:latest"}
              :exec-fn #'twostep/sh-exec-portable}
    :test-mode true})
 

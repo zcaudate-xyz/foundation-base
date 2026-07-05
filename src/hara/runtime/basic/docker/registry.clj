@@ -42,65 +42,65 @@
 (def +registry+
   "canonical docker images and bootstrap config for all :basic-capable languages"
    {:python
-     {:image      "foundation-base/rt-basic-python:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-python:latest"
       :notes      "project-owned Python basic runtime image using the CPython slim base image"
-      :config     {:container {:image "foundation-base/rt-basic-python:latest"}}}
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-python:latest"}}}
 
      :js
-     {:image      "foundation-base/rt-basic-js:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-js:latest"
       :notes      "project-owned Node.js basic runtime image using the Node alpine base image"
-      :config     {:container {:image "foundation-base/rt-basic-js:latest"}}}
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-js:latest"}}}
 
      :ruby
-     {:image      "foundation-base/rt-basic-ruby:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-ruby:latest"
       :notes      "project-owned Ruby basic runtime image using the Ruby alpine base image"
-      :config     {:container {:image "foundation-base/rt-basic-ruby:latest"}}}
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-ruby:latest"}}}
 
      :php
-     {:image      "foundation-base/rt-basic-php:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-php:latest"
       :notes      "project-owned PHP basic runtime image using the PHP CLI base image"
-      :config     {:container {:image "foundation-base/rt-basic-php:latest"}}}
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-php:latest"}}}
 
      :perl
-     {:image      "foundation-base/rt-basic-perl:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-perl:latest"
       :notes      "project-owned Perl basic runtime image using the Perl slim base image"
-      :config     {:container {:image "foundation-base/rt-basic-perl:latest"}}}
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-perl:latest"}}}
 
      :lua
-     {:image      "foundation-base/rt-basic-lua:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-lua:latest"
       :notes      "project-owned OpenResty LuaJIT image with Nchan and LuaRocks packages preinstalled"
-      :config     {:container {:image "foundation-base/rt-basic-lua:latest"}
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-lua:latest"}
                    :program :luajit}}
 
     :julia
-     {:image      "foundation-base/rt-basic-julia:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-julia:latest"
       :notes      "project-owned Julia basic runtime image with JSON preinstalled"
-      :config     {:container {:image "foundation-base/rt-basic-julia:latest"}
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-julia:latest"}
                    :process   {:timeout 120000}}}
 
     :r
-     {:image      "foundation-base/rt-basic-r:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-r:latest"
       :notes      "project-owned R basic runtime image based on rocker/r-ver with jsonlite available"
-      :config     {:container {:image     "foundation-base/rt-basic-r:latest"
+      :config     {:container {:image     "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-r:latest"
                                :bootstrap #'r-bootstrap}
                    :process   {:timeout 30000}}}
 
      :erlang
-     {:image      "foundation-base/rt-basic-erlang:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-erlang:latest"
       :notes      "project-owned Erlang basic runtime image using OTP 27 alpine with shell bootstrap support"
-      :config     {:container {:image "foundation-base/rt-basic-erlang:latest"
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-erlang:latest"
                                :exec  ["sh" "-c"]}}}
 
      :blender
-     {:image      "foundation-base/rt-basic-blender:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest"
       :notes      "project-owned Blender runtime image based on linuxserver/blender"
-      :config     {:container {:image "foundation-base/rt-basic-blender:latest"
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest"
                                :exec  ["blender" "--background" "--python-expr"]}}}
 
      :gimp
-     {:image      "foundation-base/rt-basic-gimp:latest"
+     {:image      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-gimp:latest"
       :notes      "project-owned GIMP runtime image based on ubuntu:24.04 with the official GIMP 3.0 AppImage"
-      :config     {:container {:image "foundation-base/rt-basic-gimp:latest"
+      :config     {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-gimp:latest"
                                :exec  ["xvfb-run" "-a" "gimp" "-i" "--batch-interpreter" "python-fu-eval" "-b"]}}}})
 
 (defn registry-dockerfile-path

@@ -268,7 +268,7 @@
                        -invoke-ptr invoke-ptr-blender}])
 
 (def +default-blender-container+
-  {:image "foundation-base/rt-basic-blender:latest"})
+  {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest"})
 
 (defn blender:create
   "Creates a Blender runtime."
@@ -314,11 +314,11 @@
     :python :blender.instance
     {:type :hara/rt.blender
      :config {:layout :full
-              :container {:image "foundation-base/rt-basic-blender:latest"}}
+              :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest"}}
      :instance {:create blender:create}})
    (rt/install-type!
     :python :blender
     {:type :hara/rt.blender.shared
      :config {:layout :full
-              :container {:image "foundation-base/rt-basic-blender:latest"}}
+              :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest"}}
      :instance {:create blender-shared:create}})])

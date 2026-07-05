@@ -13,7 +13,7 @@
 ;; The bootstrap connects back to the JVM socket server via
 ;; host.docker.internal:<port>, running the eval loop with JSON + Sockets.
 ;;
-;; Image: foundation-base/rt-basic-julia:latest
+;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-julia:latest
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-julia-test
 ;;
 

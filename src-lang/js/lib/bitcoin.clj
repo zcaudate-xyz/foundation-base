@@ -225,7 +225,7 @@
   [message wif network options]
   (var pair (-/pair-from-wif wif network))
   (var signature (. BitcoinMessage (sign message
-                                         (. pair privateKey)
+                                         (SafeBuffer.Buffer.from (. pair privateKey))
                                          true
                                          (. network messagePrefix)
                                          options)))

@@ -113,7 +113,7 @@
 (def +c-twostep-config+
   (common/set-context-options
    [:c :twostep :default]
-   {:container {:image "foundation-base/rt-twostep-c:latest"}
+   {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-c:latest"}
     :container-backup true
     :exec-fn #'twostep/sh-exec-portable
     :emit  {:body  {:transform #'transform-form}}

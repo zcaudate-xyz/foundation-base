@@ -14,7 +14,7 @@
 ;;
 ;; No extra packages required — stdlib `socket` + `json` only.
 ;;
-;; Image: foundation-base/rt-basic-python:latest
+;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-python:latest
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-python-test
 ;;
 

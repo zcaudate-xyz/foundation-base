@@ -13,7 +13,7 @@
 ;;
 ;; Bootstrap connects back to the JVM via host.docker.internal:<port>.
 ;;
-;; Image: foundation-base/rt-basic-lua:latest
+;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-lua:latest
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-lua-test
 ;;
 

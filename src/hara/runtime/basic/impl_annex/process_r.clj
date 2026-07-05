@@ -183,7 +183,7 @@
    [:r :basic :default]
    {:bootstrap #'default-basic-client
      :main  {}
-     :container {:image "foundation-base/rt-basic-r:latest"}
+     :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-r:latest"}
      :container-backup true
      :emit  {:body  {:transform #'default-body-transform}}
      :json :full

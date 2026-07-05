@@ -208,7 +208,7 @@
 (def +default-basic-config+
   {:bootstrap #'default-basic-client
    :main   {}
-   :container {:image "foundation-base/rt-basic-php:latest"}
+   :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-php:latest"}
    :container-backup true
    :emit   {:body  {:transform #'default-basic-body-transform}
             :lang/format :global}

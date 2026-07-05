@@ -48,7 +48,7 @@
                 hara.runtime.basic.type-common/get-options (fn [& _] {})
                 hara.runtime.basic.type-oneshot/rt-oneshot-setup (fn [& _]
                                                          [:php
-                                                          {:container {:image "foundation-base/rt-basic-php:latest"}
+                                                          {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-php:latest"}
                                                            :container-backup true}
                                                           ["php" "-r"]])
                 hara.runtime.basic.type-common/program-exists? (fn [_] false)]

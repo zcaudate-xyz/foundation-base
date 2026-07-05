@@ -134,7 +134,7 @@
 (def +default-julia-basic-config+
   {:bootstrap #'default-basic-client
    :main  {}
-   :container {:image "foundation-base/rt-basic-julia:latest"}
+   :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-julia:latest"}
    :container-backup true
    :emit  {:body  {:transform #'default-body-transform}}
    :json :full

@@ -22,8 +22,8 @@
    (-> (registry-config :lua) :program)
    (-> (registry-config :julia) :process :timeout)
    (-> (registry-config :erlang) :container :exec)]
-  => ["foundation-base/rt-basic-python:latest"
-      "foundation-base/rt-basic-lua:latest"
+  => ["ghcr.io/zcaudate-xyz/foundation-base/rt-basic-python:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-lua:latest"
       :luajit
       120000
       ["sh" "-c"]])
@@ -31,17 +31,17 @@
 ^{:refer hara.runtime.basic.docker.registry/registry-image :added "4.1"}
 (fact "returns canonical repo-owned images for all basic runtimes"
   (mapv registry-image [:python :js :ruby :php :perl :lua :julia :r :erlang :blender :gimp])
-  => ["foundation-base/rt-basic-python:latest"
-      "foundation-base/rt-basic-js:latest"
-      "foundation-base/rt-basic-ruby:latest"
-      "foundation-base/rt-basic-php:latest"
-      "foundation-base/rt-basic-perl:latest"
-      "foundation-base/rt-basic-lua:latest"
-      "foundation-base/rt-basic-julia:latest"
-      "foundation-base/rt-basic-r:latest"
-      "foundation-base/rt-basic-erlang:latest"
-      "foundation-base/rt-basic-blender:latest"
-      "foundation-base/rt-basic-gimp:latest"])
+  => ["ghcr.io/zcaudate-xyz/foundation-base/rt-basic-python:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-js:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-ruby:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-php:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-perl:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-lua:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-julia:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-r:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-erlang:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest"
+      "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-gimp:latest"])
 
 ^{:refer hara.runtime.basic.docker.registry/registry-dockerfile :added "4.1"}
 (fact "returns dockerfile source for each registered language"

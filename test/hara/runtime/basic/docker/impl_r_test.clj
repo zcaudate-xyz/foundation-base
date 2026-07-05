@@ -14,7 +14,7 @@
 ;; The canonical registry entry is based on `rocker/r-ver:4.3`,
 ;; which includes jsonlite and can connect back to the JVM host.
 ;;
-;; Image: foundation-base/rt-basic-r:latest
+;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-r:latest
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-r-test
 ;;
 

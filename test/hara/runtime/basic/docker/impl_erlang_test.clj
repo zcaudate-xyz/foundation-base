@@ -12,7 +12,7 @@
 ;; Earlier OTP versions do NOT have the stdlib json module — use erlang:27+.
 ;; Bootstrap connects back to the JVM via host.docker.internal:<port>.
 ;;
-;; Image: foundation-base/rt-basic-erlang:latest
+;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-erlang:latest
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-erlang-test
 ;;
 

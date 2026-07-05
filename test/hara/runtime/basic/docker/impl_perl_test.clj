@@ -11,7 +11,7 @@
 ;; Uses IO::Socket::INET + JSON::PP — both in Perl core (5.14+), no CPAN needed.
 ;; Bootstrap connects back to the JVM via host.docker.internal:<port>.
 ;;
-;; Image: foundation-base/rt-basic-perl:latest
+;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-perl:latest
 ;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-perl-test
 ;;
 

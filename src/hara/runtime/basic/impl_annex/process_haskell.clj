@@ -38,7 +38,7 @@
 (def +haskell-twostep-config+
   (common/set-context-options
    [:haskell :twostep :default]
-   {:container {:image "foundation-base/rt-twostep-haskell:latest"}
+   {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-haskell:latest"}
     :container-backup true
     :exec-fn #'twostep/sh-exec-portable
     :main {:in identity}

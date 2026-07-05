@@ -191,7 +191,7 @@
 (def +lean-twostep-config+
   (common/set-context-options
    [:lean :twostep :default]
-   {:container {:image "foundation-base/rt-twostep-lean:latest"}
+   {:container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-lean:latest"}
     :container-backup true
     :exec-fn #'sh-exec-lean-portable
     :main {:in identity}

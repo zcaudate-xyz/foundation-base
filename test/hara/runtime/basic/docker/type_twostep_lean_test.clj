@@ -7,7 +7,7 @@
 (l/script- :lean
   {:runtime :twostep
    :process {:force-container true
-             :container {:image "foundation-base/rt-twostep-lean:latest"}
+             :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-lean:latest"}
              :exec-fn #'rt.basic.impl-annex.process-lean/sh-exec-lean-portable}
    :test-mode true})
 
