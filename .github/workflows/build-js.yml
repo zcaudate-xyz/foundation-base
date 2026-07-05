@@ -8,7 +8,7 @@ env:
 jobs:
   build-js-web:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 15
     
     steps:
       - name: Write SSH keys
