@@ -6,7 +6,8 @@ env:
   LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
 
 jobs:
-  run-xtbench-tests:
+  run-xtbench-lang-tests:
+    name: xt.lang / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
@@ -20,6 +21,8 @@ jobs:
           # infra-foundation-xtbench-python has not been published, so fall back
           # to the clean image, which already bundles python3, lein, and deps.
           - lang: python
+            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+          - lang: lua
             image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
 
     steps:
@@ -41,7 +44,135 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ${{ matrix.image }}
-          lein seedgen test :all :with "[${{ matrix.lang }}]"
+          lein seedgen test '[xt.lang]' :with "[${{ matrix.lang }}]"
+
+  run-xtbench-event-tests:
+    name: xt.event / ${{ matrix.lang }}
+    needs: run-xtbench-lang-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lang: dart
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-dart:ci
+          - lang: ruby
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-ruby:ci
+          - lang: python
+            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+          - lang: lua
+            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log into GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USER }}
+          password: ${{ secrets.GH_TOKEN }}
+
+      - name: run
+        run: >
+          docker run --network host
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v $(pwd):$(pwd)
+          -w $(pwd)
+          ${{ matrix.image }}
+          lein seedgen test '[xt.event]' :with "[${{ matrix.lang }}]"
+
+  run-xtbench-substrate-tests:
+    name: xt.substrate / ${{ matrix.lang }}
+    needs: run-xtbench-event-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lang: dart
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-dart:ci
+          - lang: ruby
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-ruby:ci
+          - lang: python
+            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+          - lang: lua
+            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log into GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USER }}
+          password: ${{ secrets.GH_TOKEN }}
+
+      - name: run
+        run: >
+          docker run --network host
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v $(pwd):$(pwd)
+          -w $(pwd)
+          ${{ matrix.image }}
+          lein seedgen test '[xt.substrate]' :with "[${{ matrix.lang }}]"
+
+    services:
+      postgres:
+        image: ghcr.io/zcaudate-xyz/infra-db:main
+        env:
+          POSTGRES_DB: test-scratch
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+
+  run-xtbench-db-tests:
+    name: xt.db / ${{ matrix.lang }}
+    needs: run-xtbench-substrate-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lang: dart
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-dart:ci
+          - lang: ruby
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-ruby:ci
+          - lang: python
+            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+          - lang: lua
+            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log into GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USER }}
+          password: ${{ secrets.GH_TOKEN }}
+
+      - name: run
+        run: >
+          docker run --network host
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -v $(pwd):$(pwd)
+          -w $(pwd)
+          ${{ matrix.image }}
+          lein seedgen test '[xt.db]' :with "[${{ matrix.lang }}]"
 
     services:
       postgres:
