@@ -445,6 +445,10 @@
   (stmt/rewrite-return-statement form
                                  #(dart-rewrite-expression % grammar)))
 
+(defn- rewrite-throw-statement
+  [form grammar]
+  (list 'throw (dart-rewrite-expression (second form) grammar)))
+
 (defn- rewrite-if-statement
   [form grammar]
   (stmt/rewrite-if-statement form
@@ -486,6 +490,7 @@
         (rewrite-for-statement form grammar)
         for:async     (rewrite-for-async-form form grammar)
         return        (rewrite-return-statement form grammar)
+        throw         (rewrite-throw-statement form grammar)
         if            (rewrite-if-statement form grammar)
         when          (rewrite-when-statement form grammar)
         while         (rewrite-while-statement form grammar)

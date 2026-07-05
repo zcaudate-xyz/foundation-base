@@ -5,7 +5,13 @@
 (do (l/script- :xtalk
       {:require [[xt.lang.common-protocol :as proto]
                  [xt.lang.spec-base :as xt]
-                 [xt.lang.spec-promise :as promise]]}))
+                 [xt.lang.spec-promise :as promise]]})
+    
+    ;; define the protocol at the top level so seedgen sees the generated
+    ;; defn.xt entries before the fact body resolves -/hello-str.
+    (proto/defprotocol.xt IHello
+      (hello-str [impl])
+      (hello-prn [impl])))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
@@ -139,6 +145,7 @@
             ["hello_str" {"name" "hello_str",
                           "arglist" ["impl"]}])) )
 
+
 ^{:refer xt.lang.common-protocol/defprotocol.xt :added "4.1"}
 (fact "expands to a protocol value and method wrappers"
 
@@ -148,10 +155,6 @@
       (hello-prn [impl])))
   => seq?
 
-  (proto/defprotocol.xt IHello
-    (hello-str [impl])
-    (hello-prn [impl]))
-  
   (!.js
    (xt/x:is-function? -/hello-str))
   => true)
