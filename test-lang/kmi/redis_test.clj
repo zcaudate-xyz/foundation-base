@@ -197,7 +197,10 @@
   => vector?)
 
 ^{:refer kmi.redis/flat-pairs-to-object :added "4.0"}
-(fact "TODO")
+(fact "flat pairs to object"
+
+  (r/flat-pairs-to-object ["a" 1 "b" 2])
+  => {"a" 1, "b" 2})
 
 ^{:refer kmi.redis/flat-pairs-to-array :added "4.0"}
 (fact "flat pairs to array"

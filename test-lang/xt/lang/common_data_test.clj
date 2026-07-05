@@ -1753,3 +1753,70 @@
   (s/seedgen-langremove 'xt.lang.common-data {:lang [:lua :python] :write true})
   
   )
+
+
+^{:refer xt.lang.common-data/id-fn :added "4.1"}
+(fact "gets the id for an object"
+
+  (!.js (xtd/id-fn {"id" 1}))
+  => 1
+
+  (!.lua (xtd/id-fn {"id" 1}))
+  => 1
+
+  (!.py (xtd/id-fn {"id" 1}))
+  => 1)
+
+^{:refer xt.lang.common-data/key-fn :added "4.1"}
+(fact "creates a key access function"
+
+  (!.js ((xtd/key-fn "name") {"name" "alice"}))
+  => "alice"
+
+  (!.lua ((xtd/key-fn "name") {"name" "alice"}))
+  => "alice"
+
+  (!.py ((xtd/key-fn "name") {"name" "alice"}))
+  => "alice")
+
+^{:refer xt.lang.common-data/template-entry :added "4.1"}
+(fact "gets data from a structure using template"
+
+  (!.js [(xtd/template-entry {"a" {"b" 1}} ["a" "b"] nil)
+         (xtd/template-entry {"a" 1} nil nil)
+         (xtd/template-entry {"a" 1} "a" nil)
+         (xtd/template-entry {"id" 1}
+                             (fn [obj props]
+                               (return (+ 1 (xtd/id-fn obj))))
+                             nil)])
+  => [1 {"a" 1} "a" 2]
+
+  (!.lua [(xtd/template-entry {"a" {"b" 1}} ["a" "b"] nil)
+          (xtd/template-entry {"a" 1} nil nil)
+          (xtd/template-entry {"a" 1} "a" nil)
+          (xtd/template-entry {"id" 1}
+                              (fn [obj props]
+                                (return (+ 1 (xtd/id-fn obj))))
+                              nil)])
+  => [1 {"a" 1} "a" 2]
+
+  (!.py [(xtd/template-entry {"a" {"b" 1}} ["a" "b"] nil)
+         (xtd/template-entry {"a" 1} nil nil)
+         (xtd/template-entry {"a" 1} "a" nil)
+         (xtd/template-entry {"id" 1}
+                             (fn [obj props]
+                               (return (+ 1 (xtd/id-fn obj))))
+                             nil)])
+  => [1 {"a" 1} "a" 2])
+
+^{:refer xt.lang.common-data/template-fn :added "4.1"}
+(fact "creates a template entry function"
+
+  (!.js ((xtd/template-fn ["a" "b"]) {"a" {"b" 1}} nil))
+  => 1
+
+  (!.lua ((xtd/template-fn ["a" "b"]) {"a" {"b" 1}} nil))
+  => 1
+
+  (!.py ((xtd/template-fn ["a" "b"]) {"a" {"b" 1}} nil))
+  => 1)

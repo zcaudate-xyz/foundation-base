@@ -677,3 +677,19 @@
                          [:output :shape :fields])
                  :extra)
       => true)))
+
+
+^{:refer postgres.typed/clear-registry! :added "4.1"}
+(fact "clears the global type registry"
+  (types/clear-registry!)
+  (types/register-type! 'demo/Temp {:kind :table :name "Temp"})
+  (contains? @types/*type-registry* 'demo/Temp) => true
+  (typed-analysis/clear-registry!)
+  (contains? @types/*type-registry* 'demo/Temp) => false)
+
+^{:refer postgres.typed/register-type! :added "4.1"}
+(fact "registers a single type definition under a namespaced symbol"
+  (types/clear-registry!)
+  (let [fn-def (types/make-fn-def "demo" "registered" [] [:jsonb] {} nil)]
+    (typed-analysis/register-type! 'demo/registered fn-def)
+    (typed-analysis/get-function-def 'demo/registered) => fn-def))

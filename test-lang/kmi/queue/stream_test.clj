@@ -173,8 +173,12 @@
         [[string? ["id" "1"]]
          [string? ["id" "2"]]]]]))
 
-^{:refer kmi.queue.stream/mq-stream-group-create :added "3.0"}
-(fact "TODO")
+^{:refer kmi.queue.stream/mq-stream-group-create :added "3.0"
+  :setup [(reset-x)]}
+(fact "creates a group"
+
+  (stream/mq-stream-group-create "test:stream:_:p4" "default" "0")
+  => "OK")
 
 ^{:refer kmi.queue.stream/mq-stream-read-init :added "4.0"
   :setup [(reset-x)]}
