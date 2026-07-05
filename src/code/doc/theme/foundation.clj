@@ -12,7 +12,8 @@
               :outline   "render-outline"
               :top-level "render-top-level"
               :page-meta "render-page-meta"
-              :site-links "render-site-links"}
+              :site-links "render-site-links"
+              :volume-links "render-volume-links"}
    :manifest ["article.html"
               "home.html"
               "assets/css/foundation.css"
@@ -56,6 +57,43 @@
                  [:span {:class "site-link-title"} title]
                  [:span {:class "site-link-subtitle"} subtitle]])))
        common/joinl))
+
+(defn- public-relative-path
+  [output]
+  (let [prefix "public/"]
+    (cond
+      (= output "public") ""
+      (.startsWith ^String output prefix) (subs output (count prefix))
+      :else output)))
+
+(defn- page-prefix
+  [output]
+  (let [rel (public-relative-path output)]
+    (if (empty? rel)
+      ""
+      (apply str (repeat (count (remove empty? (common/split rel #"/"))) "../")))))
+
+(defn render-volume-links
+  "renders links between configured documentation volumes"
+  {:added "4.1"}
+  [key _ lookup]
+  (let [{current-ns :ns current-output :output} (lookup key)
+        prefix (page-prefix current-output)]
+    (->> (meta lookup)
+         (filter (fn [[site {:keys [pages]}]]
+                   (and (contains? #{:core :foundation.code :std :hara} site)
+                        (get pages 'index))))
+         (sort-by (comp {:core 0 :foundation.code 1 :std 2 :hara 3} first))
+         (map (fn [[site {:keys [output pages]}]]
+                (let [rel   (public-relative-path output)
+                      href  (str prefix (when-not (empty? rel) (str rel "/")) "index.html")
+                      title (get-in pages ['index :title])]
+                  (html/html
+                   [:a {:class (str "sidebar-link volume-link"
+                                    (when (= current-ns (name site)) " active"))
+                        :href href}
+                    title]))))
+         common/joinl)))
 
 (defn render-page-meta
   "renders metadata chips for the current page"

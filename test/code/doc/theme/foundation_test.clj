@@ -26,6 +26,19 @@
     (render-site-links 'foundation.code/index {} lookup))
   => #"site-link-card")
 
+
+^{:refer code.doc.theme.foundation/render-volume-links :added "4.1"}
+(fact "renders cross-volume links relative to the current output directory"
+  (let [lookup (with-meta (fn [_] {:name "index" :ns "std" :output "public/std"})
+                 {:core {:output "public"
+                         :pages {'index {:title "foundation"}}}
+                  :std {:output "public/std"
+                        :pages {'index {:title "std"}}}
+                  :hara {:output "public/std-lang"
+                         :pages {'index {:title "hara.lang"}}}})]
+    (render-volume-links 'std/index {} lookup))
+  => #"\.\./std-lang/index\.html")
+
 ^{:refer code.doc.theme.foundation/render-page-meta :added "4.1"}
 (fact "renders metadata chips for the current page"
   (let [lookup (constantly {:name "guides" :title "Guides" :subtitle "Patterns"})]

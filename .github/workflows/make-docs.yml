@@ -56,18 +56,19 @@ jobs:
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci 
           lein exec -ep "(require '[code.doc :as doc]
                                   '[code.doc.executive :as exec])
-                          (doc/init-template :hara {:write true})
-                          (doc/deploy-template :hara {:write true})
                           (let [project (doc/make-project)
-                                lookup  (exec/all-pages project)]
-                            (doseq [k (sort (filter #(= \"hara\" (namespace %))
+                                lookup  (exec/all-pages project)
+                                sites   #{\"core\" \"foundation.code\" \"std\" \"hara\"}]
+                            (doseq [site [:core :foundation.code :std :hara]]
+                              (doc/deploy-template site {:write true}))
+                            (doseq [k (sort (filter #(sites (namespace %))
                                                     (keys lookup)))]
                               (exec/render k {:write true} lookup project)))"
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./public/std-lang
+          path: ./public
           
   deploy:
     environment:

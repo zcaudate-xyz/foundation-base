@@ -16,9 +16,8 @@
         <p class="page-subtitle"><@=subtitle></p>
         <@=page-meta>
       </section>
-      <nav class="volume-nav" style="display:flex;gap:1rem;margin-bottom:1.5rem;">
-        <a class="sidebar-link" href="/index.html">Home</a>
-        <a class="sidebar-link" href="/std/index.html">std</a>
+      <nav class="volume-nav">
+        <@=volume-links>
       </nav>
       <section class="home-grid">
         <article class="home-content">
@@ -30,7 +29,30 @@
         </aside>
       </section>
     </main>
+    <button class="theme-toggle" type="button" aria-label="Toggle color theme">Theme</button>
     <script>
+      (function() {
+        var stored = localStorage.getItem('foundation-theme');
+        if (stored === 'light' || stored === 'dark') {
+          document.documentElement.setAttribute('data-theme', stored);
+        }
+        var button = document.querySelector('.theme-toggle');
+        if (!button) return;
+        var sync = function() {
+          var theme = document.documentElement.getAttribute('data-theme') ||
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          button.textContent = theme === 'dark' ? 'Light' : 'Dark';
+        };
+        button.addEventListener('click', function() {
+          var current = document.documentElement.getAttribute('data-theme') ||
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          var next = current === 'dark' ? 'light' : 'dark';
+          document.documentElement.setAttribute('data-theme', next);
+          localStorage.setItem('foundation-theme', next);
+          sync();
+        });
+        sync();
+      })();
       document.querySelectorAll('pre').forEach(function(pre) {
         var code = pre.querySelector('code');
         if (!code) return;

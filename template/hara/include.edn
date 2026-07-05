@@ -1,5 +1,5 @@
 {:theme-base "theme-foundation"
- :site-label "foundation-code"
- :tagline "Static docs for serious Clojure systems"
- :nav-label "Docs"
+ :site-label "foundation"
+ :tagline "Documentation for foundation libraries"
+ :nav-label "Pages"
  :tracking-enabled "false"}
