@@ -80,21 +80,24 @@
   (compile-solc/compile-rt-eval
    (rt-get-node rt)
    (list `eth-lib/getBlockNumber
-         (list `eth-lib/new-rpc-provider))
-   'xt.lang.common-lib/to-string))
+         (list `eth-lib/new-rpc-provider
+               (compile-common/get-url rt)))))
 
 (defn rt:node-get-balance
   "gets the current balance"
   {:added "4.0"}
   [& [address rt]]
-  (compile-solc/compile-rt-eval
-   (rt-get-node rt)
-   (list `eth-lib/getBalance
-         (list `eth-lib/new-rpc-provider )
-         (or address (rt-get-address rt))
-         #_(compile-common/get-caller-address
-          (rt-get-id rt)))
-   'xt.lang.common-lib/to-string))
+  (let [url   (compile-common/get-url rt)
+        addr  (or address (rt-get-address rt))
+        form  (list '.
+                    (list `eth-lib/getBalance
+                          (list `eth-lib/new-rpc-provider url)
+                          addr)
+                    '(then (fn [v]
+                             (return (. v (toString))))))]
+    (compile-solc/compile-rt-eval
+     (rt-get-node rt)
+     form)))
 
 (defn rt:node-ping
   "pings the node"
