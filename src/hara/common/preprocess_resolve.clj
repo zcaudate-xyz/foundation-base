@@ -65,8 +65,7 @@
                 :module (dissoc module :code :fragment)}))
     (if (not (or preprocess-base/*macro-skip-deps*
                  (not deps)
-                 (= 'defglobal op)
-                  (= 'defrun op)))
+                 (= 'defrun op)))
        (vswap! deps conj sym-full))
      sym-full))
 

@@ -531,10 +531,11 @@
                     (= type :self)     (name sym)
                     
                     (= type :link)     (link-symbol sym))]
-     (if (not (and (not= type :unknown)
-                   link-fn))
-       (apply str (replace (:replace opts) sym))
-       sym))))
+     (if (or (= type :global)
+             (and (not= type :unknown)
+                  link-fn))
+       sym
+       (apply str (replace (:replace opts) sym))))))
 
 (defn emit-symbol
   "emits symbol allowing for custom functions"

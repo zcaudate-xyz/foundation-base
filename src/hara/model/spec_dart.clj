@@ -1,5 +1,6 @@
 (ns hara.model.spec-dart
-  (:require [hara.lang.book :as book]
+  (:require [clojure.string]
+            [hara.lang.book :as book]
              [hara.common.emit :as emit]
              [hara.common.emit-common :as common]
              [hara.common.emit-data :as data]
@@ -34,8 +35,25 @@
       (clojure.string/replace "$" "\\$")))
 
 (defn- dart-symbol-global
+  "Emits a global access, lazily initialising the key in `__globals__`.
+
+   Dart does not allow assignment to a `final` top-level variable, so we
+   cannot initialise `__globals__` itself.  Instead, every access to a
+   global key uses null-aware assignment on the map entry, which works
+   because `__globals__` is declared by the runtime before user code runs."
+  {:added "4.1"}
   [key _grammar _mopts]
-  (list '. '__globals__ [(ut/sym-default-str key)]))
+  (list ':- (str "(__globals__[\"" (ut/sym-default-str key) "\"] ??= <dynamic, dynamic>{})")))
+
+(defn- dart-emit-defglobal
+  "Suppresses top-level defglobal initialisation for Dart.
+
+   The key is initialised lazily on first access via `dart-symbol-global`,
+   which avoids emitting top-level assignment statements before the
+   runtime declares `__globals__`."
+  {:added "4.1"}
+  [_form _grammar _mopts]
+  "")
 
 (defn dart-fn
   [[_ & args]]
@@ -152,7 +170,8 @@
            :for-object  {:macro #'tf-for-object :emit :macro}
          :for-array   {:macro #'tf-for-array  :emit :macro}
          :for-iter    {:macro #'tf-for-iter   :emit :macro}
-         :with-global {:value true :raw "__globals__"}})
+         :with-global {:value true :raw "__globals__"}
+         :defglobal    {:emit #'dart-emit-defglobal}})
        (grammar/build:override fn-dart/+dart+)
         (grammar/build:extend
            {:dart-or      {:op :dart-or      :symbol #{'dart:or}      :emit :infix             :raw "??"}
@@ -172,7 +191,8 @@
                      :block     {:start " {" :end "}"}}
           :block   {:for {:parameter {:sep ";"}}}
           :function {:defgen {:body {:start " sync* {" :end "}"}}}
-          :define  {:def {:raw "var"}}
+          :define  {:def {:raw "var"}
+                    :defglobal {:raw ""}}
            :rewrite {:staging [#'rewrite/dart-rewrite-stage]}
            :token   {:symbol {:replace {\- "_"}
                               :global #'dart-symbol-global}

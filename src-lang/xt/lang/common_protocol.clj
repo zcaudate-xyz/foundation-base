@@ -7,9 +7,9 @@
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]]})
 
-(def.xt PROTOCOLS {})
+(defglobal.xt PROTOCOLS {})
 
-(def.xt IMPLEMENTATIONS {})
+(defglobal.xt IMPLEMENTATIONS {})
 
 ;;
 ;; design of protocol and class
