@@ -82,7 +82,7 @@
                 compile-common/get-url (fn [_] "url")
                 compile-common/get-caller-private-key (fn [_] "key")
                 compile-common/get-contract-address (fn [_] "addr")
-                solc/compile-rt-eval (fn [_ _ _] "result")]
+                solc/compile-rt-eval (fn [_ _] "result")]
     (client/invoke-ptr-web3-call {:node {:id "id"}} (atom {:form '(defn f [])}) []))
   => "result")
 

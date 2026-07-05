@@ -35,4 +35,4 @@ jobs:
           -e "GITHUB_TOKEN=${{ secrets.GH_TOKEN }}"  
           -e "GITHUB_USER=${{ secrets.GH_USER }}"
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci 
-          bash -c "cd foundation-base && git config --global --add safe.directory '*' && lein push-native-code"
+          bash -c "cd foundation-base && git config --global --add safe.directory '*' && git config --global user.name 'github-actions' && git config --global user.email 'github-actions@github.com' && lein push-native-code"
