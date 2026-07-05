@@ -25,8 +25,7 @@
         (promise/x:promise-catch
          (fn [err]
            (var out (:? (xt/x:ex-message err)
-                        {:message (xt/x:ex-message err)
-                         :data (xt/x:ex-data err)}
+                        (xt/x:ex-message err)
                         err))
            (return
             (notify-fn host port out id key opts)))))))

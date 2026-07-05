@@ -25,8 +25,8 @@
 (defn lua-tf-x-err
   [[_ s & [data]]]
   (if data
-    (template/$ (error (cjson.encode ~[s data])))
-    (template/$ (error ~s))))
+    (template/$ (error (cjson.encode ~[s data]) 0))
+    (template/$ (error ~s 0))))
 
 (defn lua-tf-x-ex-native?
   [[_ err]]
