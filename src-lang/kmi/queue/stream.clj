@@ -272,9 +272,10 @@
   "creates a group"
   {:added "3.0"}
   ([key group latest]
-   (return (r/call "XGROUP" "CREATE" key group
-                   (or latest "0")
-                   "MKSTREAM"))))
+   (local ret (r/call "XGROUP" "CREATE" key group
+                      (or latest "0")
+                      "MKSTREAM"))
+   (return (or (. ret ["ok"]) ret))))
 
 (defn.lua mq-stream-read-init
   "reads from a stream"

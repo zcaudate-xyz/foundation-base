@@ -63,10 +63,8 @@
   ([{:keys [id env mode host port] :as m}]
    (let [id   (or id (f/sid))
          mode (or mode :eval)
-         m    (merge m
-                     (conn/test:config)
-                     {:host host
-                      :port port})]
+         m    (merge (conn/test:config)
+                     m)]
      (merge m {:id id
                :tag :redis
                :mode mode

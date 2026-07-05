@@ -422,7 +422,10 @@
                (var t (type obj))
                (if (== t "table")
                  (do (var mt (getmetatable obj))
-                     (if (== mt (. cjson ["array_mt"]))
+                     (if (or (and (not= nil mt)
+                                  (not= nil (. cjson ["array_mt"]))
+                                  (== mt (. cjson ["array_mt"])))
+                             (not= nil (. '(obj) [1])))
                        (do (var out {})
                            (var max 0)
                            (for:object [[k v] obj]

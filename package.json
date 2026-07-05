@@ -3,6 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "type": "commonjs",
+  "engines": {
+    "node": ">=24"
+  },
   "dependencies": {
     "@measured/puck": "^0.20.2",
     "@radix-ui/themes": "^3.3.0",

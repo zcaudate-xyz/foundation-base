@@ -65,33 +65,33 @@
                        "\nappendonly no"
                        (if (map? init)
                          (str "\n" (config-to-args init))))))]
-    (-> (if (network/port:check-available port)
-          (swap! *active*
-                 (fn [m]
-                   (let [process (os/sh
-                                  {:args ["redis-server" (str "./" redis-conf)]
-                                   :wait false
-                                   :root root-dir})
-                         thread  (-> (future/future (os/sh-wait process))
-                                     (future/on:complete (fn [_ _]
-                                                      (try (let [out (os/sh-output process)]
-                                                             (when (not= 0 (:exit out))
-                                                               (env/prn out)))
-                                                           (catch Throwable t))
-                                                      (swap! *active* (fn [current]
-                                                                        (if (= (-> current (get port) :process) process)
-                                                                          (dissoc current port)
-                                                                          current))))))]
-                     (network/wait-for-port "localhost" port
-                                      {:timeout 1000})
-                     (assoc m port {:type type
-                                    :port port
-                                    :root root-dir
-                                    :process process
-                                    :thread thread}))))
-          (or (get @*active* port)
-              {:port port}))
-        (get port))))
+    (or (get (if (network/port:check-available port)
+                (swap! *active*
+                       (fn [m]
+                         (let [process (os/sh
+                                        {:args ["redis-server" (str "./" redis-conf)]
+                                         :wait false
+                                         :root root-dir})
+                               thread  (-> (future/future (os/sh-wait process))
+                                           (future/on:complete (fn [_ _]
+                                                            (try (let [out (os/sh-output process)]
+                                                                   (when (not= 0 (:exit out))
+                                                                     (env/prn out)))
+                                                                 (catch Throwable t))
+                                                            (swap! *active* (fn [current]
+                                                                              (if (= (-> current (get port) :process) process)
+                                                                                (dissoc current port)
+                                                                                current))))))]
+                           (network/wait-for-port "localhost" port
+                                            {:timeout 1000})
+                           (assoc m port {:type type
+                                          :port port
+                                          :root root-dir
+                                          :process process
+                                          :thread thread}))))
+                @*active*)
+              port)
+        {:port port})))
 
 (defn stop-redis-server
   "stop the redis server"

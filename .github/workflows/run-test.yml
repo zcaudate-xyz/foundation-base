@@ -179,6 +179,7 @@ jobs:
             -w $(pwd) \
             ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
             bash -lc 'set -euxo pipefail &&
+              ${{ matrix.lang == 'js' && 'apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gnupg && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && apt-get install -y --no-install-recommends nodejs' || 'true' }} &&
               ${{ matrix.lang == 'python' && 'pip install --no-cache-dir psycopg2-binary redis' || 'true' }} &&
               lein test :with "${{ matrix.lang }}"'
         
