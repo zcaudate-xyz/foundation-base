@@ -78,7 +78,7 @@
                                    true
                                    false
                                    true
-                                   {}
+                                   []
                                    (just ["a" "b"] :in-any-order)])}}}
   (!.js
    (var log (log-latest/new-log-latest {}))

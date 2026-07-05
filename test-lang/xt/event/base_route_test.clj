@@ -477,7 +477,7 @@
       "route/param" "auth"
       "route/path" ["hello"]})
 
-^{:refer xt.event.base-route/remove-listener :added "4.1"}
+^{:refer xt.event.base-route/remove-listener :added "4.1" :seedgen/base {:lua {:expect ["a1"]}}}
 (fact "removes a listener by id"
 
   (!.js

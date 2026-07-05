@@ -421,11 +421,45 @@
    #(dart-rewrite-expression % grammar)
    #(dart-truthy-form %1 %2 grammar)))
 
+(defn- dart-global-assign?
+  "Matches direct assignment to a !:G global: (= (!:G key) value)."
+  [form]
+  (and (collection/form? form)
+       (= ':= (first form))
+       (collection/form? (second form))
+       (= '!:G (first (second form)))
+       (= 2 (count (second form)))))
+
+(defn- dart-rewrite-global-assign
+  "Rewrites (= (!:G key) value) to (x:set-key !:G (str key) value),
+   which emits the valid Dart __globals__[\"key\"] = value."
+  [form grammar]
+  (let [[_ [_ key] value] form]
+    (dart-rewrite-statement (list 'x:set-key '!:G (str key) value)
+                            grammar)))
+
+(defn- dart-global-read?
+  "Matches a bare (!:G key) expression."
+  [form]
+  (and (collection/form? form)
+       (= '!:G (first form))
+       (= 2 (count form))))
+
+(defn- dart-rewrite-global-read
+  "Rewrites bare (!:G key) to (x:get-key !:G (str key)),
+   so nil values (including deleted keys) round-trip as nil."
+  [form grammar]
+  (let [[_ key] form]
+    (dart-rewrite-expression (list 'x:get-key '!:G (str key))
+                             grammar)))
+
 (defn dart-rewrite-expression
   [form grammar]
-  (walk/rewrite-form form
-                     #(rewrite-expression-list % grammar)
-                     #(dart-rewrite-expression % grammar)))
+  (or (when (dart-global-read? form)
+        (dart-rewrite-global-read form grammar))
+      (walk/rewrite-form form
+                         #(rewrite-expression-list % grammar)
+                         #(dart-rewrite-expression % grammar))))
 
 (defn- rewrite-do-statement
   [form grammar]
@@ -478,6 +512,9 @@
   (cond
     (not (collection/form? form))
     (dart-rewrite-expression form grammar)
+
+    (dart-global-assign? form)
+    (dart-rewrite-global-assign form grammar)
 
      :else
      (case (first form)

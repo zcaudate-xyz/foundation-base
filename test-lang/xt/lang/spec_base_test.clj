@@ -610,9 +610,6 @@
 ^{:refer xt.lang.spec-base/x:err :added "4.1"}
 (fact "expands and emits a lua error form"
 
-  ^{:seedgen/base {:dart {:expect (fn [out]
-                                    (re-find #"ERR" @out))}}}
-          
   (!.js
     (var err-fn (fn []
                   (xt/x:err "ERR")))
@@ -2948,9 +2945,6 @@
 ^{:refer xt.lang.spec-base/x:throw :added "4.1"}
 (fact "expands to the canonical throw form"
 
-  ^{:seedgen/base {:dart {:expect (fn [out]
-                                    (re-find #"THROW" @out))}}}
-          
   (!.js
     (do:>
      (x:throw "THROW")))
