@@ -11,6 +11,9 @@ on:
       - 'template/**'
   workflow_dispatch:
 
+env:
+  LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
+
 permissions:
   contents: read
   pages: write
@@ -28,6 +31,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Log into GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USER }}
+          password: ${{ secrets.GH_TOKEN }}
         
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -37,6 +47,9 @@ jobs:
       - name: Generate Documentation
         run: >
           docker run --network host 
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v /var/run/docker.sock:/var/run/docker.sock 
+          -v /home/runner/.docker/config.json:/root/.docker/config.json:ro
           -v $(pwd):$(pwd) 
           -w $(pwd) 
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci 
