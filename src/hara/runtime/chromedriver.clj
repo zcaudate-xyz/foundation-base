@@ -49,6 +49,23 @@
   [browser]
   (get @(conn/send @(:state browser) "Target.getTargets") "targetInfos"))
 
+(defn- wait-for-ready
+  "polls document.readyState on a connection until complete or timeout"
+  {:added "4.0"}
+  [conn timeout]
+  (let [end (+ (System/currentTimeMillis) timeout)]
+    (loop []
+      (let [state (get @(util/runtime-evaluate conn "document.readyState")
+                       "value")]
+        (if (= state "complete")
+          state
+          (if (> (System/currentTimeMillis) end)
+            (throw (ex-info "Timeout waiting for document ready"
+                            {:state state
+                             :timeout timeout}))
+            (do (Thread/sleep 50)
+                (recur))))))))
+
 (defn tab-create
   "creates a new tab and returns a tab handle"
   {:added "4.0"}
@@ -57,9 +74,12 @@
         {:strs [targetId]} @(util/target-create conn url opts timeout extra-opts)
         {:strs [sessionId]} @(conn/send conn "Target.attachToTarget"
                                        {:targetId targetId
-                                        :flatten true})]
-    {:target-id targetId
-     :session-id sessionId}))
+                                        :flatten true})
+        tab {:target-id targetId
+             :session-id sessionId}]
+    (wait-for-ready (assoc conn :session-id sessionId)
+                    (or timeout 5000))
+    tab))
 
 (defn tab-switch
   "switches the browser runtime to the given tab handle.
