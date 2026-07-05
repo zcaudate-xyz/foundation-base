@@ -85,6 +85,14 @@ jobs:
           username: ${{ secrets.GH_USER }}
           password: ${{ secrets.GH_TOKEN }}
 
+      - name: Pull runtime images
+        if: matrix.name == 'hara'
+        run: |
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-haskell:latest
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-lean:latest
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-ocaml:latest
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest
+
       - name: Install root JS dependencies
         run: npm ci --legacy-peer-deps
 
