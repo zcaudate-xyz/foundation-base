@@ -122,7 +122,7 @@
         spec     (first (filter #(-> (get % "name")
                                      (= fn-name))
                                 (:abi contract)))
-        to-string?  (invoke-ptr-web3-check contract fn-name args)
+        _  (invoke-ptr-web3-check contract fn-name args)
         node-id (:id (:node rt))
         readonly? (#{"view" "pure"}
                    (or (get spec "stateMutability")
@@ -140,9 +140,7 @@
                           {:gasLimit common/*gas-limit*
                            :value    common/*caller-payment*}))]
     (solc/compile-rt-eval (:node rt)
-                          form-call
-                          (if to-string?
-                            'xt.lang.common-lib/to-string))))
+                          form-call)))
 
 (defn invoke-ptr-web3
   "invokes the runtime, deploying the contract if not available"

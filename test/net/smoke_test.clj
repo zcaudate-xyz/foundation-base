@@ -16,7 +16,6 @@
             [xt.net.http-util]
             [xt.net.ws-native]
             [xt.net.ws-phoenix]
-            [xt.net.ws-legacy]
             [xt.net.conn-redis]
             [xt.net.conn-sql]
             [xt.net.addon-supabase]
@@ -55,7 +54,6 @@
                   xt.net.http-util
                   xt.net.ws-native
                   xt.net.ws-phoenix
-                  xt.net.ws-legacy
                   xt.net.conn-redis
                   xt.net.conn-sql
                   xt.net.addon-supabase])

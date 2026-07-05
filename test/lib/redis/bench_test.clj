@@ -5,6 +5,10 @@
             [std.lib.os :as os])
   (:use code.test))
 
+(fact:global
+ {:setup    [(reset! bench/*active* {})]
+  :teardown [(reset! bench/*active* {})]})
+
 ^{:refer lib.redis.bench/all-redis-ports :added "4.0"}
 (fact "gets all active redis ports"
   (with-redefs [os/sh (constantly "redis-server 1234 *:6379 (LISTEN)")]

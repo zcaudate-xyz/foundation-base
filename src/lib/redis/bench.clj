@@ -65,7 +65,7 @@
                        "\nappendonly no"
                        (if (map? init)
                          (str "\n" (config-to-args init))))))]
-    (-> (if (not (get @*active* port))
+    (-> (if (network/port:check-available port)
           (swap! *active*
                  (fn [m]
                    (let [process (os/sh
@@ -78,7 +78,10 @@
                                                              (when (not= 0 (:exit out))
                                                                (env/prn out)))
                                                            (catch Throwable t))
-                                                      (swap! *active* dissoc port))))]
+                                                      (swap! *active* (fn [current]
+                                                                        (if (= (-> current (get port) :process) process)
+                                                                          (dissoc current port)
+                                                                          current))))))]
                      (network/wait-for-port "localhost" port
                                       {:timeout 1000})
                      (assoc m port {:type type
@@ -86,7 +89,8 @@
                                     :root root-dir
                                     :process process
                                     :thread thread}))))
-          @*active*)
+          (or (get @*active* port)
+              {:port port}))
         (get port))))
 
 (defn stop-redis-server
