@@ -7,7 +7,7 @@ env:
 
 jobs:
   run-xtbench-lang-tests:
-    name: xt.lang / ${{ matrix.lang }}
+    name: 01 - xt.lang / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
@@ -47,8 +47,7 @@ jobs:
           lein seedgen test '[xt.lang]' :with "[${{ matrix.lang }}]"
 
   run-xtbench-event-tests:
-    name: xt.event / ${{ matrix.lang }}
-    needs: run-xtbench-lang-tests
+    name: 02 - xt.event / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
@@ -86,8 +85,7 @@ jobs:
           lein seedgen test '[xt.event]' :with "[${{ matrix.lang }}]"
 
   run-xtbench-substrate-tests:
-    name: xt.substrate / ${{ matrix.lang }}
-    needs: run-xtbench-event-tests
+    name: 03 - xt.substrate / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
@@ -136,8 +134,7 @@ jobs:
           - 5432:5432
 
   run-xtbench-db-tests:
-    name: xt.db / ${{ matrix.lang }}
-    needs: run-xtbench-substrate-tests
+    name: 04 - xt.db / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
