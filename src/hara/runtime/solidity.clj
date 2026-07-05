@@ -16,8 +16,6 @@
 
 (f/intern-in [rt:start-hardhat-server env-hardhat/start-hardhat-server]
              [rt:stop-hardhat-server env-hardhat/stop-hardhat-server]
-             [rt:start-ganache-server env-hardhat/start-ganache-server]
-             [rt:stop-ganache-server env-hardhat/stop-ganache-server]
 
              compile-common/with:caller-address
              compile-common/with:caller-payment

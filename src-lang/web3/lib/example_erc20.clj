@@ -99,7 +99,7 @@
     "}"])
   
   (s/rt:print)
-  (s/rt:start-ganache-server)
+  (s/rt:start-hardhat-server)
   (l/rt:restart))
 
 
