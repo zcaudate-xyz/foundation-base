@@ -2,6 +2,9 @@ name: Notify
 
 on: [push, workflow_dispatch]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   
   notify:
@@ -15,7 +18,7 @@ jobs:
     
     steps:    
       - name: Notify Downstream
-        uses: peter-evans/repository-dispatch@v2
+        uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.GH_TOKEN }}
           repository: ${{ matrix.downstream }}
