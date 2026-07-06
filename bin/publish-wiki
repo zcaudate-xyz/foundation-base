@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SOURCE_DIR="${ROOT_DIR}/wiki"
+WIKI_REMOTE="${WIKI_REMOTE:-git@github.com:zcaudate-xyz/foundation-base.wiki.git}"
+WORK_DIR="$(mktemp -d)"
+WIKI_DIR="${WORK_DIR}/foundation-base.wiki"
+
+cleanup() {
+  rm -rf "${WORK_DIR}"
+}
+trap cleanup EXIT
+
+if [[ ! -d "${SOURCE_DIR}" ]]; then
+  echo "Wiki source directory not found: ${SOURCE_DIR}" >&2
+  exit 1
+fi
+
+if ! git clone "${WIKI_REMOTE}" "${WIKI_DIR}"; then
+  cat >&2 <<'EOF'
+Unable to clone the GitHub Wiki repository.
+
+Before publishing:
+  1. Enable Wikis in the foundation-base repository settings.
+  2. Open the Wiki tab and create the first page.
+  3. Run this command again.
+EOF
+  exit 1
+fi
+
+find "${SOURCE_DIR}" -maxdepth 1 -type f -name '*.md' -print0 |
+  while IFS= read -r -d '' source_file; do
+    cp "${source_file}" "${WIKI_DIR}/$(basename "${source_file}")"
+  done
+
+cd "${WIKI_DIR}"
+git add -- '*.md'
+
+if git diff --cached --quiet; then
+  echo "Wiki is already up to date."
+  exit 0
+fi
+
+git commit -m "docs: sync Foundation Base wiki pages"
+git push origin HEAD
+
+echo "Published Wiki pages from ${SOURCE_DIR}."
