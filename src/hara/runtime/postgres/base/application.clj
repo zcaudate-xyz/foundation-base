@@ -58,7 +58,7 @@
   {:added "4.0"}
   [tables links & [typed-info]]
   (let [ref-fn   (fn [{:keys [ref] :as attrs}]
-                   (let [rkey (symbol (namespace (:key ref)))]
+                   (let [rkey (clojure.core/symbol (clojure.core/namespace (:key ref)))]
                      {:link (select-keys (get links rkey)
                                          [:id :module :lang :section])}))
         schema   (schema/with:ref-fn [ref-fn]
@@ -107,9 +107,11 @@
                                                (if public-only
                                                  (:static/public m)
                                                  true)))))))
-         links    (collection/map-juxt [(comp keyword str :id)
-                               (fn [entry] (select-keys entry [:id :module :section :lang]))]
-                              entries)
+         links    (collection/map-juxt [(fn [entry]
+                                          (clojure.core/symbol (clojure.core/name (:id entry))))
+                                        (fn [entry]
+                                          (select-keys entry [:id :module :section :lang]))]
+                                       entries)
          tentries (mapcat (comp :vec :static/schema-seed) entries)
          tables   (->> tentries
                        (partition 2)
