@@ -8,32 +8,16 @@
             [std.lib.env :as env]
             [std.lib.foundation :as f]))
 
-(defn emit-input-rest
-  "emits a canonical xtalk rest parameter for the active target language"
-  {:added "4.1"}
-  [{:keys [symbol]} grammar mopts]
-  (let [lang (some-> (:lang mopts) name keyword)
-        out  (common/*emit-fn* symbol grammar mopts)
-        php-out (if (.startsWith ^String out "$")
-                  out
-                  (str "$" out))]
-    (case lang
-      (:js :javascript) (str "..." out)
-      :python          (str "*" out)
-      :ruby            (str "*" out)
-      :php             (str "..." php-out)
-      :lua             "..."
-      :dart            (str "[" out " = const []]")
-      (f/error "Rest parameters are not supported for target"
-               {:lang lang
-                :symbol symbol}))))
-
 (defn emit-input-default
   "create input arg strings"
   {:added "3.0"}
   ([{:keys [force modifiers type symbol value rest] :as arg} assign grammar mopts]
    (if rest
-     (emit-input-rest arg grammar mopts)
+     (if-let [emit-rest (get-in grammar [:default :function :args :rest])]
+       (emit-rest arg grammar mopts)
+       (f/error "Rest argument emitter not configured"
+                {:lang (:lang mopts)
+                 :symbol symbol}))
      (let [{:keys [start end]} (helper/get-options grammar [:default :index])
            {:keys [reversed hint]
             :as invoke}  (helper/get-options grammar [:default :invoke])
@@ -173,48 +157,6 @@
                 :else
                 (str start (clojure.string/join (str sep space) iargs) end))))))
 
-(defn- replace-rest-symbol
-  [form from to]
-  (cond (= form from)
-        to
-
-        (and (collection/form? form)
-             (= 'quote (first form)))
-        form
-
-        (collection/form? form)
-        (with-meta (apply list (map #(replace-rest-symbol % from to) form))
-          (meta form))
-
-        (vector? form)
-        (with-meta (mapv #(replace-rest-symbol % from to) form)
-          (meta form))
-
-        (map? form)
-        (with-meta (into (empty form)
-                         (map (fn [[k v]]
-                                [(replace-rest-symbol k from to)
-                                 (replace-rest-symbol v from to)]))
-                         form)
-          (meta form))
-
-        (set? form)
-        (with-meta (set (map #(replace-rest-symbol % from to) form))
-          (meta form))
-
-        :else
-        form))
-
-(defn- prepare-rest-body
-  [args body mopts]
-  (if-let [rest-sym (some helper/rest-arg-symbol args)]
-    (case (some-> (:lang mopts) name keyword)
-      :lua (cons (list 'var rest-sym [(list ':- "...")]) body)
-      :php (let [php-sym (symbol (str "$" (name rest-sym)))]
-             (map #(replace-rest-symbol % rest-sym php-sym) body))
-      body)
-    body))
-
 (defn emit-fn
   "emits a function template"
   {:added "3.0"}
@@ -223,7 +165,6 @@
                        [(first body) (rest body)]
                        [nil body])
          [args & body] body
-         body         (prepare-rest-body args body mopts)
          header-only?  (:header (meta name))
          {:keys [compressed] :as block} (emit-fn-block key grammar)
          {:keys [enabled assign space after]}   (helper/get-options grammar [:default :typehint])
