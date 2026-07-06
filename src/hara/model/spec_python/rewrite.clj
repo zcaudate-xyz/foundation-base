@@ -208,12 +208,6 @@
              (concat (map python-normalize-form body)
                      (map python-rewrite-handler handlers))))))
 
-(defn- python-spread-form?
-  [form]
-  (and (collection/form? form)
-       (= :.. (first form))
-       (= 2 (count form))))
-
 (defn- python-rewrite-list
   [form]
   (cond
@@ -228,10 +222,6 @@
 
     (= 'try (first form))
     (python-rewrite-try form)
-
-    (python-spread-form? form)
-    (with-form-meta form
-      (list :* (python-normalize-form (second form))))
 
     :else
     (with-form-meta form
