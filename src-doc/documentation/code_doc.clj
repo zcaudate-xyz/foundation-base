@@ -2,7 +2,7 @@
 
 [[:hero {:title "code.doc"
          :subtitle "The publish pipeline, the theme layer, and the authoring model."
-         :lead "This page is the compact reference for extending `code.doc` itself: what the pipeline does, where to plug in richer authoring blocks, and how the foundation-code site now uses it."
+         :lead "This page is the compact reference for extending `code.doc` itself: what the pipeline does, where to plug in richer authoring blocks, and how the code site now uses it."
          :badges ["Compiler" "Themes" "Coverage audit"]
          :actions [{:label "Read the architecture" :href "architecture.html" :variant :primary}
                    {:label "Jump to reference" :href "reference.html"}]}]]

@@ -9,7 +9,39 @@
 
 [[:card-grid {:title "Libraries"
               :lead "Each card links to a focused reference page."
-              :items [{:meta "Code"
+              :items [{:meta "Concurrency"
+                       :title "std.concurrent"
+                       :text "Queues, executors, requests, relays, pools, and threads."
+                       :href "std-concurrent.html"}
+                      {:meta "Dispatch"
+                       :title "std.dispatch"
+                       :text "Boards, hubs, queues, debounce, hooks, and dispatch core."
+                       :href "std-dispatch.html"}
+                      {:meta "Filesystem"
+                       :title "std.fs"
+                       :text "Paths, walking, archives, attributes, and watchers."
+                       :href "std-fs.html"}
+                      {:meta "Scheduling"
+                       :title "std.scheduler"
+                       :text "Runners, programs, spawns, and scheduled task lifecycle."
+                       :href "std-scheduler.html"}
+                      {:meta "Text"
+                       :title "std.string"
+                       :text "Case, coercion, paths, pluralization, prose, and wrapping."
+                       :href "std-string.html"}
+                      {:meta "Tasks"
+                       :title "std.task"
+                       :text "Process and bulk task execution."
+                       :href "std-task.html"}
+                      {:meta "Time"
+                       :title "std.time"
+                       :text "Time coercion, durations, zones, formats, and representations."
+                       :href "std-time.html"}
+                      {:meta "Timeseries"
+                       :title "std.timeseries"
+                       :text "Journals, intervals, ranges, computation, and processing."
+                       :href "std-timeseries.html"}
+                      {:meta "Code"
                        :title "std.block"
                        :text "Code representation, traversal, and manipulation."
                        :href "std-block.html"}

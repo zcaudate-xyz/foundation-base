@@ -1,0 +1,5 @@
+{:theme-base "theme-foundation"
+ :site-label "foundation"
+ :tagline "Documentation for foundation libraries"
+ :nav-label "Pages"
+ :tracking-enabled "false"}

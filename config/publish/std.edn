@@ -6,6 +6,46 @@
              :title "std"
              :subtitle "standard libraries for foundation"}
 
+            std-concurrent
+            {:input "src-doc/documentation/std/std_concurrent.clj"
+             :title "std.concurrent"
+             :subtitle "concurrency primitives"}
+
+            std-dispatch
+            {:input "src-doc/documentation/std/std_dispatch.clj"
+             :title "std.dispatch"
+             :subtitle "dispatch boards, hubs, and queues"}
+
+            std-fs
+            {:input "src-doc/documentation/std/std_fs.clj"
+             :title "std.fs"
+             :subtitle "filesystem paths and operations"}
+
+            std-scheduler
+            {:input "src-doc/documentation/std/std_scheduler.clj"
+             :title "std.scheduler"
+             :subtitle "scheduled task runners"}
+
+            std-string
+            {:input "src-doc/documentation/std/std_string.clj"
+             :title "std.string"
+             :subtitle "string utilities"}
+
+            std-task
+            {:input "src-doc/documentation/std/std_task.clj"
+             :title "std.task"
+             :subtitle "task execution"}
+
+            std-time
+            {:input "src-doc/documentation/std/std_time.clj"
+             :title "std.time"
+             :subtitle "time utilities"}
+
+            std-timeseries
+            {:input "src-doc/documentation/std/std_timeseries.clj"
+             :title "std.timeseries"
+             :subtitle "time-series journals"}
+
             std-block
             {:input "src-doc/documentation/std/std_block.clj"
              :title "std.block"

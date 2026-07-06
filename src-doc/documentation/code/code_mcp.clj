@@ -15,8 +15,3 @@
 
 [[:chapter {:title "API" :link "api"}]]
 
-[[:api {:namespace "code.mcp.server"}]]
-[[:api {:namespace "code.mcp.tool.code-manage"}]]
-[[:api {:namespace "code.mcp.tool.code-test"}]]
-[[:api {:namespace "code.mcp.tool.code-doc"}]]
-[[:api {:namespace "code.mcp.tool.hara-lang"}]]

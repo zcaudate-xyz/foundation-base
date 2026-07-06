@@ -1,8 +1,8 @@
-(ns documentation.foundation-code-reference)
+(ns documentation.code-reference)
 
 [[:chapter {:title "Reference"}]]
 
-"These are the namespaces that matter most when extending `code.doc` for foundation-code."
+"These are the namespaces that matter most when extending `code.doc` for code."
 
 [[:chapter {:title "Parsing" :link "code.doc.parse"}]]
 [[:api {:namespace "code.doc.parse"

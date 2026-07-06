@@ -15,7 +15,3 @@
 
 [[:chapter {:title "API" :link "api"}]]
 
-[[:api {:namespace "code.tool.build"}]]
-[[:api {:namespace "code.tool.java"}]]
-[[:api {:namespace "code.tool.maven"}]]
-[[:api {:namespace "code.tool.measure"}]]

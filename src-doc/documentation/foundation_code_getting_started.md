@@ -13,9 +13,9 @@
 ```clojure
 (require '[code.doc :as doc])
 
-(doc/init-template :foundation.code {:write true})
-(doc/deploy-template :foundation.code {:write true})
-(doc/publish '[foundation.code/index] {:write true})
+(doc/init-template :code {:write true})
+(doc/deploy-template :code {:write true})
+(doc/publish '[code/index] {:write true})
 ```
 
 ## Author a page {#author-a-page}

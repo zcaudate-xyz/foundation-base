@@ -1,4 +1,4 @@
-(ns documentation.foundation-code-guides)
+(ns documentation.code-guides)
 
 [[:chapter {:title "Authoring guides"}]]
 
@@ -15,4 +15,4 @@
                        :text "Generated `:api` and `:reference` blocks work best when they support a concept page instead of replacing it."}]}]]
 
 [[:quote {:text "A good docs page should read like a guide, but stay anchored to the source."
-           :source "foundation-code authoring rule"}]]
+           :source "code authoring rule"}]]

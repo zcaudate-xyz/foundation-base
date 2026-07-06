@@ -2,35 +2,42 @@
 
 [[:hero {:title "hara"
          :subtitle "Language tooling, runtime integration, and polyglot system libraries."
-         :lead "`hara` groups the language-oriented parts of foundation into focused subcategories. `hara.lang` is the compiler and emission layer; `hara.model` defines target language models; `hara.runtime` connects generated code to live systems; and supporting namespaces keep shared grammar, type, and utility behavior reusable."
+         :lead "`hara` groups the language-oriented parts of foundation: `hara.lang` for authoring and emission, `hara.model` for target specs, `hara.runtime` for execution, `hara.typed` for typed xtalk, and examples for generated projects."
          :badges ["Language tooling" "Runtimes" "Models" "Polyglot"]
          :actions [{:label "Read the introduction" :href "introduction.html" :variant :primary}
-                   {:label "See the comparison" :href "comparison.html"}]}]]
+                   {:label "Browse examples" :href "examples.html"}]}]]
 
 [[:card-grid {:title "Subcategories"
-              :lead "The Hara namespaces are organized by role, similar to the focused `std.*` library pages."
+              :lead "The Hara section covers the compiler, target models, runtimes, typed analysis, shared emitters, seed generation, and examples."
               :items [{:meta "Compiler"
                        :title "hara.lang"
-                       :text "Book-based authoring, grammar-driven emission, scripts, modules, and language library support."
+                       :text "Book-based authoring, grammar-driven emission, scripts, modules, and language libraries."
                        :href "introduction.html"}
                       {:meta "Language Models"
                        :title "hara.model"
-                       :text "Target language specifications for JavaScript, Lua, Python, SQL, Solidity, xtalk, and annex languages."}
+                       :text "Target specifications for JavaScript, Lua, Python, Go, Dart, SQL, Solidity, xtalk, and annex languages."
+                       :href "hara-model.html"}
                       {:meta "Runtimes"
                        :title "hara.runtime"
-                       :text "Runtime clients and execution adapters for browsers, databases, containers, editors, and native tools."}
-                      {:meta "Shared Emitters"
-                       :title "hara.common"
-                       :text "Shared grammar, emit, preprocess, and utility behavior used by language models."}
+                       :text "Runtime clients and execution adapters for browsers, databases, containers, editors, and native tools."
+                       :href "hara-runtime.html"}
                       {:meta "Typing"
                        :title "hara.typed"
-                       :text "Typed analysis and cross-runtime type support for generated systems."}]}]]
+                       :text "Typed xtalk analysis and target declaration emission."
+                       :href "hara-typed.html"}
+                      {:meta "Shared Emitters"
+                       :title "hara.common"
+                       :text "Shared grammar, emit, preprocess, rewrite, and utility behavior."
+                       :href "hara-common.html"}
+                      {:meta "Generation"
+                       :title "hara.seedgen"
+                       :text "Seed generation and xtalk test scaffolding."
+                       :href "hara-seedgen.html"}
+                      {:meta "Examples"
+                       :title "Generated projects"
+                       :text "Play projects and walkthroughs from src-build."
+                       :href "examples.html"}]}]]
 
 [[:callout {:tone :info
-            :title "Why this site exists"
-            :content "Most tools explain code generation from the perspective of a compiler. This site explains `hara` from the perspective of **systems work**: shared abstractions, target-specific emission, runtime integration, and a single maintenance workflow across languages."}]]
-
-[[:demo {:title "The authoring model in one screen"
-          :content "A `script` establishes the language context, while emission turns a shared form model into target syntax."
-          :lang "clojure"
-          :code "(require '[hara.lang :as l]\n         '[hara.model.spec-js :as js])\n\n(l/emit-as :js '(+ 1 2 3))\n;; => \"1 + 2 + 3\""}]]
+            :title "Relationship to xt"
+            :content "`hara` provides the compiler, type, model, and runtime machinery. `xt` is a portable library/application layer built on top of that machinery."}]]

@@ -14,4 +14,49 @@
           comparison
           {:input "src-doc/documentation/std_lang_comparison.clj"
            :title "Comparison"
-           :subtitle "where hara.lang sits relative to straight transpilers, Haxe, Racket, and language workbenches"}}}
+           :subtitle "where hara.lang sits relative to straight transpilers, Haxe, Racket, and language workbenches"}
+
+          hara-model
+          {:input "src-doc/documentation/hara/hara_model.clj"
+           :title "hara.model"
+           :subtitle "target language specifications and xtalk function libraries"}
+
+          hara-runtime
+          {:input "src-doc/documentation/hara/hara_runtime.clj"
+           :title "hara.runtime"
+           :subtitle "runtime adapters for generated code"}
+
+          hara-typed
+          {:input "src-doc/documentation/hara/hara_typed.clj"
+           :title "hara.typed"
+           :subtitle "typed xtalk analysis and emission"}
+
+          hara-common
+          {:input "src-doc/documentation/hara/hara_common.clj"
+           :title "hara.common"
+           :subtitle "shared grammar, emit, and preprocess layers"}
+
+          hara-seedgen
+          {:input "src-doc/documentation/hara/hara_seedgen.clj"
+           :title "hara.seedgen"
+           :subtitle "seed generation and xtalk test scaffolding"}
+
+          examples
+          {:input "src-doc/documentation/hara/hara_examples.clj"
+           :title "Examples"
+           :subtitle "generated project examples from src-build/play"}
+
+          walkthrough-basic
+          {:input "src-doc/documentation/hara/walkthrough_basic.clj"
+           :title "Walkthrough: basic"
+           :subtitle "basic hara.lang authoring"}
+
+          walkthrough-multi
+          {:input "src-doc/documentation/hara/walkthrough_multi.clj"
+           :title "Walkthrough: multi"
+           :subtitle "multiple language contexts"}
+
+          walkthrough-live
+          {:input "src-doc/documentation/hara/walkthrough_live.clj"
+           :title "Walkthrough: live"
+           :subtitle "live runtime execution"}}}
