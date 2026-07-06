@@ -3,8 +3,8 @@
  :pages    {index      
             {:base  "home.html"
              :input "src-doc/documentation/main_index.clj"
-             :title "foundation"
-             :subtitle "core libs and tools"}
+             :title "Foundation Base"
+             :subtitle "Clojure-first libraries, developer tooling, language generation, and runtime integration"}
              
             code-doc      
             {:input "src-doc/documentation/code_doc.clj"
