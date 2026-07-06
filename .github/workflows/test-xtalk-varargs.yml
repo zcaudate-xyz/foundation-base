@@ -1,11 +1,13 @@
 name: Validate xtalk varargs
 
 on:
-  pull_request:
-    branches: [main]
+  push:
+    branches: [feature/xtalk-varargs]
 
 permissions:
   contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   varargs:
@@ -41,11 +43,38 @@ jobs:
           password: ${{ secrets.GH_TOKEN }}
 
       - name: Run varargs tests
-        run: >
-          docker run --network host
-          -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC"
-          -v /var/run/docker.sock:/var/run/docker.sock
-          -v $(pwd):$(pwd)
-          -w $(pwd)
-          ${{ matrix.image }}
-          lein seedgen test '[xt.lang.varargs-test]' :with "[${{ matrix.lang }}]"
+        id: test
+        shell: bash
+        run: |
+          set +e
+          docker run --network host \
+            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v "$(pwd):$(pwd)" \
+            -w "$(pwd)" \
+            "${{ matrix.image }}" \
+            lein seedgen test '[xt.lang.varargs-test]' :with "[${{ matrix.lang }}]" \
+            2>&1 | tee varargs.log
+          echo "status=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Report result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          {
+            echo "### xtalk varargs / ${{ matrix.lang }}"
+            echo
+            echo "Exit status: ${{ steps.test.outputs.status }}"
+            echo
+            echo '```text'
+            tail -n 120 varargs.log
+            echo '```'
+          } > comment.md
+          gh pr comment 341 --body-file comment.md
+
+      - name: Fail job when tests failed
+        if: steps.test.outputs.status != '0'
+        run: exit 1
