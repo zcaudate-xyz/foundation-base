@@ -2,7 +2,7 @@ name: Publish Documentation
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
     paths:
       - 'src-doc/**'
       - 'src/**'
@@ -26,9 +26,10 @@ concurrency:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -39,21 +40,21 @@ jobs:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
           password: ${{ secrets.GH_TOKEN }}
-        
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
-        
+
       - name: Generate Documentation
         run: >
-          docker run --network host 
+          docker run --network host
           -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
+          -v /var/run/docker.sock:/var/run/docker.sock
           -v /home/runner/.docker/config.json:/root/.docker/config.json:ro
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci 
+          -v $(pwd):$(pwd)
+          -w $(pwd)
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
           lein exec -ep "(require '[code.doc :as doc]
                                   '[code.doc.executive :as exec])
                           (let [project (doc/make-project)
@@ -64,19 +65,20 @@ jobs:
                             (doseq [k (sort (filter #(sites (namespace %))
                                                     (keys lookup)))]
                               (exec/render k {:write true} lookup project)))"
-          
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./public
-          
+
   deploy:
+    if: github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
-    
+
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
