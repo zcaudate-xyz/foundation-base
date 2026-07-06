@@ -1,12 +1,17 @@
 (ns hara.model.annex.spec-php
   (:require [hara.lang.book :as book]
             [hara.common.emit :as emit]
+            [hara.common.emit-common :as common]
             [hara.common.grammar :as grammar]
             [hara.lang.script :as script]
             [hara.model.spec-xtalk]
             [hara.model.annex.spec-xtalk.fn-php :as fn]
             [hara.model.annex.spec-php.rewrite :as rewrite]
             [std.lib.collection :as collection]))
+
+(defn php-emit-input-rest
+  [{:keys [symbol]} grammar mopts]
+  (str "..." (common/*emit-fn* symbol grammar mopts)))
 
 (def +features+
   (let [base        (grammar/build :exclude [:pointer :block :data-range])
@@ -53,7 +58,8 @@
         :default {:common   {:statement ";"}
                   :invoke   {:apply "->"
                              :static "::"}
-                  :function {:raw "function"}}
+                  :function {:raw "function"
+                             :args {:rest #'php-emit-input-rest}}}
         :block {:script {:start "<?php\n"
                          :end   "\n?>"}
                 :try    {:control {:catch {:parameter {:start "("
