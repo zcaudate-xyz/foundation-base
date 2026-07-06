@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
+  LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
