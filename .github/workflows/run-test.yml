@@ -1,17 +1,21 @@
 name: Run Code
 
-on: [push, repository_dispatch, workflow_dispatch]
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+  workflow_dispatch:
 
 env:
   LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  
   run-incomplete:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,18 +26,19 @@ jobs:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
           password: ${{ secrets.GH_TOKEN }}
-        
+
       - name: Run Incomplete
         run: >
-          docker run --network host 
+          docker run --network host
           -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock 
+          -v /var/run/docker.sock:/var/run/docker.sock
           -v /home/runner/.docker/config.json:/root/.docker/config.json:ro
-          -v $(pwd):$(pwd) 
-          -w $(pwd) 
+          -v $(pwd):$(pwd)
+          -w $(pwd)
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein incomplete
-          
+
   run-group-tests:
+    if: github.ref == 'refs/heads/main'
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -66,7 +71,7 @@ jobs:
           - name: postgres
             target: "[postgres]"
             command: lein test :with "[postgres]"
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -100,7 +105,7 @@ jobs:
         if: matrix.install_js_parser == true
         working-directory: scripts/js_parser
         run: npm ci
-        
+
       - name: run
         run: |
           mkdir -p .tmp
@@ -117,7 +122,7 @@ jobs:
             apt-get update &&
             apt-get install -y --no-install-recommends lua5.4 python3 python3-pip redis-server &&
             ${{ matrix.command }}'
-        
+
     services:
       postgres:
         image: ghcr.io/zcaudate-xyz/infra-db:main
@@ -134,6 +139,7 @@ jobs:
           - 6379:6379
 
   run-lang-tests:
+    if: github.ref == 'refs/heads/main'
     name: Run Tests - ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -146,7 +152,7 @@ jobs:
           - lang: lua
           - lang: python
           - lang: dart
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -173,7 +179,7 @@ jobs:
         if: matrix.install_js_parser == true
         working-directory: scripts/js_parser
         run: npm ci
-        
+
       - name: Run Tests - ${{ matrix.lang }}
         run: |
           mkdir -p .tmp
@@ -190,7 +196,7 @@ jobs:
               ${{ matrix.lang == 'js' && 'apt-get update && apt-get install -y --no-install-recommends ca-certificates curl gnupg && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && apt-get install -y --no-install-recommends nodejs' || 'true' }} &&
               ${{ matrix.lang == 'python' && 'pip install --no-cache-dir psycopg2-binary redis' || 'true' }} &&
               lein test :with "${{ matrix.lang }}"'
-        
+
     services:
       postgres:
         image: ghcr.io/zcaudate-xyz/infra-db:main
@@ -205,4 +211,3 @@ jobs:
         image: redis:7-alpine
         ports:
           - 6379:6379
-
