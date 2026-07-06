@@ -234,9 +234,16 @@
 
 (comment
 
-  ;; With the namespace loaded, open +url+ in a browser and evaluate:
+  (local-min/start-supabase)
+  (l/rt:restart :js)
+  (l/rt:scaffold-imports :js)
+  (def +url+ (js-playground/play-url (l/rt :js)))
+
+  ;; Open +url+ in a browser, then evaluate:
   (!.js
    (ui/mount-playground
     (-/local-client-defaults)
     {"space_id" "room/playground"
-     "group_id" "auth"})))
+     "group_id" "auth"}))
+
+  (l/rt:stop))
