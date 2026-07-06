@@ -220,7 +220,7 @@
               (vector? (second props))
               (let [k (first (second props))]
                 (not (and (collection/form? k)
-                          (#{':- :to} (first k))))))))
+                          (#{':- :to} (first k)))))))))
 
 (defn- python-safe-dot
   "rewrites (. obj [k]) to a safe lookup that returns None on missing keys/indices"
