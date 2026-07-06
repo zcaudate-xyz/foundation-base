@@ -123,7 +123,7 @@
     (map (fn [arg]
            (list 'display arg))
          args)
-    ['null])))
+    [false])))
 
 (defn scheme-tf-x-len
   [[_ obj]]
