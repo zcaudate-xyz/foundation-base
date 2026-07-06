@@ -27,6 +27,50 @@
     (list 'if test expr (scheme-if-chain more fallback))
     fallback))
 
+(defn scheme-truthy-check
+  [sym]
+  (list 'or
+        (list 'equal? sym (list 'quote 'null))
+        (list 'equal? sym false)))
+
+(defn scheme-tf-or
+  [[_ & args]]
+  (letfn [(or-expr [args]
+            (cond (empty? args)
+                  'null
+                  (= 1 (count args))
+                  (first args)
+                  :else
+                  (let [sym (gensym "v__")]
+                    (list 'let
+                          (list (list sym (first args)))
+                          (list 'if
+                                (scheme-truthy-check sym)
+                                (or-expr (rest args))
+                                sym)))))]
+    (or-expr args)))
+
+(defn scheme-tf-and
+  [[_ & args]]
+  (letfn [(and-expr [args]
+            (cond (empty? args)
+                  true
+                  (= 1 (count args))
+                  (first args)
+                  :else
+                  (let [sym (gensym "v__")]
+                    (list 'let
+                          (list (list sym (first args)))
+                          (list 'if
+                                (scheme-truthy-check sym)
+                                (and-expr (rest args))
+                                sym)))))]
+    (and-expr args)))
+
+(defn scheme-tf--%%-
+  [[_ value]]
+  (list 'x:eval value))
+
 (defn scheme-promise-native-expr
   [value]
   (list 'and
@@ -995,19 +1039,23 @@
 
 (defn scheme-tf-x-prototype-create
   [[_ m]]
-  (list 'xt-proto-create m))
+  m)
 
 (defn scheme-tf-x-prototype-get
   [[_ obj]]
-  (list 'xt-proto-get obj))
+  (list 'hash-ref obj "_xt_proto" false))
 
 (defn scheme-tf-x-prototype-set
   [[_ obj prototype]]
-  (list 'xt-proto-set obj prototype))
+  (list 'begin
+        (list 'hash-set! obj "_xt_proto" prototype)
+        obj))
 
 (defn scheme-tf-x-prototype-method
   [[_ obj key]]
-  (list 'xt-proto-method obj key))
+  (list 'or
+        (list 'hash-ref obj key false)
+        (list 'hash-ref (list 'hash-ref obj "_xt_proto" false) key false)))
 
 (def +scheme-proto+
   {:prototype-create {:macro #'scheme-tf-x-prototype-create :emit :macro

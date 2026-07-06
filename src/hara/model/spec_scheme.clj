@@ -291,7 +291,7 @@
 
 (defn emit-scheme-form
   [form]
-  (cond (nil? form)      "#f"
+  (cond (nil? form)      "'null"
         (true? form)     "#t"
         (false? form)    "#f"
         (string? form)   (pr-str form)

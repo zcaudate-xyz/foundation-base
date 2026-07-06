@@ -83,7 +83,7 @@
   {:added "4.1"}
   ([] (source-namespaces (project/project)))
   ([project]
-   (->> (project/all-files ["test-lang/xt"] {} project)
+   (->> (project/all-files ["test-lang/xt" "test-lang/kmi"] {} project)
         (remove (fn [[ns path]]
                   (common/seedgen-skip? path)))
         keys
@@ -242,20 +242,28 @@
                              (clear-bench-lang lang project)
                              (let [nss (compatible-namespaces lang selector config project)]
                                (if (seq nss)
-                                 (do (println "\n[seedgen]" (count nss) "namespaces for" lang)
-                                     (let [result (seedgen/seedgen-benchadd nss {:lang [lang]
-                                                                                 :write true})]
-                                       (when (res/result? result)
-                                         (throw (ex-info "Bench generation failed"
-                                                         {:lang lang :result result})))
-                                       (assoc out lang (mapv #(generated-namespace % lang) nss))))
+                                 (do (println "\n[seedgen]" (count nss) "compatible namespaces for" lang)
+                                     (let [generated-nss
+                                           (vec (sort (keep (fn [ns]
+                                                              (let [result (seedgen/seedgen-benchadd [ns] {:lang [lang]
+                                                                                                            :write true})]
+                                                                (if (res/result? result)
+                                                                  (do (println "[seedgen] skipping" ns "for" lang ":" (:data result))
+                                                                      nil)
+                                                                  (generated-namespace ns lang))))
+                                                            nss)))]
+                                       (when (seq generated-nss)
+                                         (println "[seedgen] generated" (count generated-nss) "bench namespaces for" lang))
+                                       (assoc out lang generated-nss)))
                                  (do (println "\n[seedgen] no compatible namespaces for" lang)
                                      (assoc out lang [])))))
                            {}
                            langs)
          all-nss (vec (sort (mapcat val generated)))
          _       (println "\n[seedgen] running" (count all-nss) "generated namespaces")
-         summary (test-task/run all-nss {} project)
+         summary (if (seq all-nss)
+                   (test-task/run all-nss {} project)
+                   {:passed 0 :failed 0 :throw 0 :timeout 0 :errored []})
          failing (failing-functions)
          _       (save-failing-list failing)
          errors  (:errored @executive/+latest+)]
