@@ -321,39 +321,26 @@
   (if (xt/x:nil? target)
     (return
      (node-request/invoke-handler node request-frame))
-    (try
-      (var pending-state {"status" "pending"
-                          "value" nil
-                          "error" nil})
-      (node-request/add-pending node
-                                request-frame
-                                (fn [value]
-                                  (xt/x:set-key pending-state "status" "resolved")
-                                  (xt/x:set-key pending-state "value" value)
-                                  (return value))
-                                (fn [err]
-                                  (xt/x:set-key pending-state "status" "rejected")
-                                  (xt/x:set-key pending-state "error" err)
-                                  (return err))
-                                {:transport_id target})
-      (return
-       (promise/x:promise-then
-        (promise/x:promise-catch
-         (promise/x:promise-then
-          (-/transport-send node target request-frame)
-          (fn [_]
-            (return nil)))
-         (fn [err]
-           (node-request/remove-pending node
-                                        (xt/x:get-key request-frame "id"))
-           (xt/x:throw err)))
-        (fn [_]
-          (return (-/pending-await pending-state)))))
-      (catch err
-        (return
-         (promise/x:promise
-          (fn []
-            (xt/x:throw err))))))))
+    (return
+     (promise/x:promise-new
+      (fn [resolve reject]
+        (node-request/add-pending node
+                                  request-frame
+                                  resolve
+                                  reject
+                                  {:transport_id target})
+        (try
+          (return
+           (promise/x:promise-catch
+            (-/transport-send node target request-frame)
+            (fn [err]
+              (node-request/remove-pending node
+                                           (xt/x:get-key request-frame "id"))
+              (return (reject err)))))
+          (catch err
+            (node-request/remove-pending node
+                                         (xt/x:get-key request-frame "id"))
+            (return (reject err)))))))))
 
 (defn.xt publish
   "publishes a stream frame through node core and subscribed transports"
