@@ -209,7 +209,7 @@
   [args body mopts]
   (if-let [rest-sym (some helper/rest-arg-symbol args)]
     (case (some-> (:lang mopts) name keyword)
-      :lua (cons (list 'var rest-sym (vector '...)) body)
+      :lua (cons (list 'var rest-sym [(list ':- "...")]) body)
       :php (let [php-sym (symbol (str "$" (name rest-sym)))]
              (map #(replace-rest-symbol % rest-sym php-sym) body))
       body)
