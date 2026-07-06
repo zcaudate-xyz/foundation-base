@@ -19,8 +19,8 @@
          {:and {:raw "&&"}
           :or  {:raw "||"}
           :not {:raw "!"}
-          :eq  {:raw "=="}
-          :neq {:raw "!="}
+          :eq  {:raw "==="}
+          :neq {:raw "!=="}
           :gt  {:raw ">"}
           :lt  {:raw "<"}
           :gte {:raw ">="}
@@ -40,7 +40,12 @@
                  :die    {:op :die
                           :symbol #{'die}
                           :raw "die"
-                          :emit :prefix}})))))
+                          :emit :prefix}
+                 :foreach {:op :foreach
+                           :symbol '#{foreach}
+                           :raw "foreach"
+                           :type :block
+                           :block {:main #{:parameter :body}}}})))))
 
 (def +template+
   (->> {:banned #{:keyword}
@@ -53,7 +58,9 @@
                          :end   "\n?>"}
                 :try    {:control {:catch {:parameter {:start "("
                                                      :end   ")"
-                                                     :sep   ""}}}}}
+                                                     :sep   ""}}}}
+                :foreach {:parameter {:start " (" :end ")" :sep " as "}
+                          :body      {:start " {" :end "}"}}}
         :token {:nil     {:as "null"}
                 :boolean {:as (fn [b] (if b "true" "false"))}
                 :string  {:quote :single}}
@@ -64,7 +71,8 @@
                             :space  ""
                             :keyword :string}}
         :define {:def       {:raw ""}
-                 :defglobal {:raw ""}}}
+                 :defglobal {:raw ""}
+                 :shorthand true}}
        (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+

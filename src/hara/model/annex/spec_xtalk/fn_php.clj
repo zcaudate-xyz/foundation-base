@@ -61,6 +61,59 @@
    :x-type-native    {:macro #'php-tf-x-type-native :emit :macro}})
 
 ;;
+;; EXCEPTIONS
+;;
+
+(defn php-tf-x-ex-new
+  "creates a PHP Exception with optional data payload"
+  {:added "4.1"}
+  [[_ message & [data]]]
+  (if (some? data)
+    (template/$
+     (do (var e := (new Exception ~message))
+         (:= e->data ~data)
+         (return e)))
+    (list 'new 'Exception message)))
+
+(defn php-tf-x-ex-message
+  "gets the exception message"
+  {:added "4.1"}
+  [[_ err]]
+  (list '. err 'getMessage))
+
+(defn php-tf-x-ex-data
+  "gets the exception data payload"
+  {:added "4.1"}
+  [[_ err]]
+  (list '. err ["data"]))
+
+(defn php-tf-x-ex-native?
+  "checks whether value is a native PHP exception"
+  {:added "4.1"}
+  [[_ err]]
+  (list 'instanceof err 'Throwable))
+
+(def +php-ex+
+  {:x-ex             {:macro #'php-tf-x-ex-new    :emit :macro}
+   :x-ex-new         {:macro #'php-tf-x-ex-new    :emit :macro}
+   :x-ex-message     {:macro #'php-tf-x-ex-message :emit :macro}
+   :x-ex-data        {:macro #'php-tf-x-ex-data    :emit :macro}
+   :x-ex-native?     {:macro #'php-tf-x-ex-native? :emit :macro}})
+
+;;
+;; ASYNC
+;;
+
+(defn php-tf-x-async-run
+  "PHP is synchronous; run the thunk immediately"
+  {:added "4.1"}
+  [[_ thunk]]
+  (list 'call_user_func_array thunk []))
+
+(def +php-async+
+  {:x-async-run     {:macro #'php-tf-x-async-run :emit :macro}})
+
+;;
 ;; CUSTOM
 ;;
 
@@ -84,6 +137,8 @@
 (defn php-tf-x-m-mod   [[_ num denom]] (list :% num (list :- " % ") denom))
 (defn php-tf-x-m-quot  [[_ num denom]] (list 'floor (list '/ num denom)))
 
+(defn php-tf-x-m-pow [[_ base n]] (list '** base n))
+
 (def +php-math+
   {:x-m-abs           {:emit :alias :raw 'abs  :value true}
    :x-m-acos          {:emit :alias :raw 'acos :value true}
@@ -99,7 +154,7 @@
    :x-m-max           {:macro #'php-tf-x-m-max,      :raw 'max :emit :macro :value true}
    :x-m-min           {:macro #'php-tf-x-m-min,      :raw 'min :emit :macro :value true}
    :x-m-mod           {:macro #'php-tf-x-m-mod,      :emit :macro}
-   :x-m-pow           {:emit :alias :raw 'pow  :value true}
+   :x-m-pow           {:macro #'php-tf-x-m-pow :emit :macro :value true}
    :x-m-quot          {:macro #'php-tf-x-m-quot,     :emit :macro}
    :x-m-sin           {:emit :alias :raw 'sin  :value true}
    :x-m-sinh          {:emit :alias :raw 'sinh :value true}
@@ -129,11 +184,13 @@
 
 (defn php-tf-x-is-object?
   [[_ e]]
-  (list 'is_object e))
+  (list 'and (list 'is_array e)
+        (list 'not (list 'array_is_list e))))
 
 (defn php-tf-x-is-array?
   [[_ e]]
-  (list 'is_array e))
+  (list 'and (list 'is_array e)
+        (list 'array_is_list e)))
 
 (def +php-type+
   {:x-to-string      {:emit :alias :raw '(string)}
@@ -145,6 +202,42 @@
    :x-is-function?   {:emit :alias :raw 'is_callable}
    :x-is-object?     {:macro #'php-tf-x-is-object? :emit :macro}
    :x-is-array?      {:macro #'php-tf-x-is-array? :emit :macro}})
+
+;;
+;; OBJ
+;;
+
+(defn php-tf-x-obj-keys
+  [[_ obj]]
+  (list 'array_keys obj))
+
+(defn php-tf-x-obj-vals
+  [[_ obj]]
+  (list 'array_values obj))
+
+(defn php-tf-x-obj-pairs
+  [[_ obj]]
+  (template/$
+   ((fn []
+      (var $out := [])
+      (for:object [[$k $v] ~obj]
+        (x:arr-push $out [$k $v]))
+      (return $out)))))
+
+(defn php-tf-x-obj-clone
+  [[_ obj]]
+  (list 'array_merge [] obj))
+
+(defn php-tf-x-obj-assign
+  [[_ obj m]]
+  (list 'array_merge obj m))
+
+(def +php-obj+
+  {:x-obj-keys      {:macro #'php-tf-x-obj-keys    :emit :macro}
+   :x-obj-vals      {:macro #'php-tf-x-obj-vals    :emit :macro}
+   :x-obj-pairs     {:macro #'php-tf-x-obj-pairs   :emit :macro}
+   :x-obj-clone     {:macro #'php-tf-x-obj-clone   :emit :macro}
+   :x-obj-assign    {:macro #'php-tf-x-obj-assign  :emit :macro}})
 
 ;;
 ;; LU
@@ -162,10 +255,71 @@
   [[_ lu obj]]
   (list 'unset (list :% lu [(list 'spl_object_id obj)])))
 
+(defn php-tf-x-lu-eq
+  [[_ o1 o2]]
+  (list '=== o1 o2))
+
 (def +php-lu+
-  {:x-lu-get         {:macro #'php-tf-x-lu-get :emit :macro}
+  {:x-lu-create      {:emit :unit :default []}
+   :x-lu-eq          {:macro #'php-tf-x-lu-eq :emit :macro}
+   :x-lu-get         {:macro #'php-tf-x-lu-get :emit :macro}
    :x-lu-set         {:macro #'php-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'php-tf-x-lu-del :emit :macro}})
+
+;;
+;; FOR
+;;
+
+(defn php-tf-for-array
+  "custom for:array code"
+  {:added "4.1"}
+  [[_ [lhs rhs] & body]]
+  (if (vector? lhs)
+    (let [[i v] lhs]
+      (cond
+        (= i '_)
+        (apply list 'foreach [(list 'array_values rhs) v] body)
+
+        (= v '_)
+        (apply list 'foreach [(list 'array_keys rhs) i] body)
+
+        :else
+        (template/$
+         (foreach [(array_keys ~rhs) ~i]
+           (var ~v := (:% ~rhs [~i]))
+           ~@body))))
+    (apply list 'foreach [rhs lhs] body)))
+
+(defn php-tf-for-object
+  "custom for:object code"
+  {:added "4.1"}
+  [[_ [lhs rhs] & body]]
+  (if (vector? lhs)
+    (let [[k v] lhs]
+      (cond
+        (= k '_)
+        (apply list 'foreach [(list 'array_values rhs) v] body)
+
+        (= v '_)
+        (apply list 'foreach [(list 'array_keys rhs) k] body)
+
+        :else
+        (template/$
+         (foreach [(array_keys ~rhs) ~k]
+           (var ~v := (:% ~rhs [~k]))
+           ~@body))))
+    (apply list 'foreach [(list 'array_values rhs) lhs] body)))
+
+(defn php-tf-for-iter
+  "custom for:iter code"
+  {:added "4.1"}
+  [[_ [e it] & body]]
+  (apply list 'foreach [it e] body))
+
+(def +php-for+
+  {:for-array  {:macro #'php-tf-for-array :emit :macro}
+   :for-object {:macro #'php-tf-for-object :emit :macro}
+   :for-iter   {:macro #'php-tf-for-iter :emit :macro}})
 
 ;;
 ;; ARR
@@ -174,6 +328,13 @@
 (defn php-tf-x-arr-push
   [[_ arr item]]
   (list 'array_push arr item))
+
+(defn php-tf-x-arr-assign
+  [[_ arr other]]
+  (template/$
+   (do (for:array [e ~other]
+         (x:arr-push ~arr e))
+       (return ~arr))))
 
 (defn php-tf-x-arr-pop
   [[_ arr]]
@@ -221,6 +382,57 @@
   [[_ a b]]
   (list '< (list 'strcmp a b) 0))
 
+(defn php-tf-x-arr-clone
+  [[_ arr]]
+  (list 'array_merge [] arr))
+
+(defn php-tf-x-arr-each
+  [[_ arr f]]
+  (list 'array_walk arr f))
+
+(defn php-tf-x-arr-every
+  [[_ arr pred]]
+  (template/$
+   ((fn []
+      (for:array [$e ~arr]
+        (if (not (~pred $e))
+          (return false)))
+      (return true)))))
+
+(defn php-tf-x-arr-some
+  [[_ arr pred]]
+  (template/$
+   ((fn []
+      (for:array [$e ~arr]
+        (if (~pred $e)
+          (return true)))
+      (return false)))))
+
+(defn php-tf-x-arr-map
+  [[_ arr f]]
+  (list 'array_values (list 'array_map f arr)))
+
+(defn php-tf-x-arr-filter
+  [[_ arr pred]]
+  (list 'array_values (list 'array_filter arr pred)))
+
+(defn php-tf-x-arr-foldl
+  [[_ arr f init]]
+  (list 'array_reduce arr f init))
+
+(defn php-tf-x-arr-foldr
+  [[_ arr f init]]
+  (list 'array_reduce (list 'array_reverse arr) f init))
+
+(defn php-tf-x-arr-find
+  [[_ arr pred]]
+  (template/$
+   ((fn []
+      (for:array [$i (array_keys ~arr)]
+        (if (~pred (:% ~arr [$i]))
+          (return $i)))
+      (return -1)))))
+
 (def +php-arr+
   {:x-arr-push        {:macro #'php-tf-x-arr-push       :emit :macro}
    :x-arr-pop         {:macro #'php-tf-x-arr-pop        :emit :macro}
@@ -230,6 +442,16 @@
    :x-arr-insert      {:macro #'php-tf-x-arr-insert     :emit :macro}
    :x-arr-remove      {:macro #'php-tf-x-arr-remove     :emit :macro}
    :x-arr-sort        {:macro #'php-tf-x-arr-sort       :emit :macro}
+   :x-arr-assign      {:macro #'php-tf-x-arr-assign     :emit :macro}
+   :x-arr-clone       {:macro #'php-tf-x-arr-clone      :emit :macro}
+   :x-arr-each        {:macro #'php-tf-x-arr-each       :emit :macro}
+   :x-arr-every       {:macro #'php-tf-x-arr-every      :emit :macro}
+   :x-arr-some        {:macro #'php-tf-x-arr-some       :emit :macro}
+   :x-arr-map         {:macro #'php-tf-x-arr-map        :emit :macro}
+   :x-arr-filter      {:macro #'php-tf-x-arr-filter     :emit :macro}
+   :x-arr-foldl       {:macro #'php-tf-x-arr-foldl      :emit :macro}
+   :x-arr-foldr       {:macro #'php-tf-x-arr-foldr      :emit :macro}
+   :x-arr-find        {:macro #'php-tf-x-arr-find       :emit :macro}
    :x-str-comp        {:macro #'php-tf-x-str-comp       :emit :macro}})
 
 ;;
@@ -258,7 +480,9 @@
 
 (defn php-tf-x-str-substring
   ([[_ s start & args]]
-   (list 'substr s start (first args))))
+   (if-let [end (first args)]
+     (list 'substr s start (list '- end start))
+     (list 'substr s start))))
 
 (defn php-tf-x-str-to-upper
   ([[_ s]]
@@ -325,36 +549,41 @@
 
 (defn php-tf-x-iter-from-arr
   [[_ arr]]
-  arr)
+  (list 'new 'ArrayIterator arr))
 
 (defn php-tf-x-iter-from
   [[_ obj]]
-  obj)
+  (list 'new 'ArrayIterator obj))
 
 (defn php-tf-x-iter-eq
   [[_ it0 it1 eq-fn]]
   (template/$
-   (if (!= (count ~it0) (count ~it1))
-     (return false)
-     (do (for [i (range 0 (count ~it0))]
-           (if (not (~eq-fn (:% ~it0 [i])
-                            (:% ~it1 [i])))
-             (return false)))
-         (return true)))))
+   (do (var $i0 := ~it0)
+        (var $i1 := ~it1)
+        (while (and (. $i0 (valid))
+                    (. $i1 (valid)))
+          (if (not (~eq-fn (. $i0 (current))
+                           (. $i1 (current))))
+            (return false))
+          (. $i0 (next))
+          (. $i1 (next)))
+        (return (and (not (. $i0 (valid)))
+                     (not (. $i1 (valid))))))))
 
 (defn php-tf-x-iter-next
   [[_ it]]
-  (list 'array_shift it))
+  (template/$
+   (do (var $res := (. ~it (current)))
+       (. ~it (next))
+       (return $res))))
 
 (defn php-tf-x-iter-has?
   [[_ obj]]
-  (list 'and
-        (list 'is_array obj)
-        (list '> (list 'count obj) 0)))
+  (list 'array_is_list obj))
 
 (defn php-tf-x-iter-native?
   [[_ it]]
-  (list 'is_array it))
+  (list 'instanceof it 'ArrayIterator))
 
 (def +php-iter+
   {:x-iter-from-obj       {:macro #'php-tf-x-iter-from-obj       :emit :macro}
@@ -459,9 +688,13 @@
 (def +php+
   (merge +php-core+
          +php-custom+
+         +php-ex+
+         +php-async+
          +php-math+
          +php-type+
          +php-lu+
+         +php-obj+
+         +php-for+
          +php-arr+
          +php-str+
          +php-json+
