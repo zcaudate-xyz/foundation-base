@@ -237,3 +237,123 @@
      (map? json-schema)
      (str/includes? ts "interface")])
   => [true true true])
+
+
+^{:refer postgres.typed/inferred->shape :added "4.1"}
+(fact "unwraps shaped inference values"
+  (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "Entry")]
+    [(typed/inferred->shape shape)
+     (typed/inferred->shape {:kind :shaped :shape shape})
+     (typed/inferred->shape {:kind :primitive})])
+  => [(types/make-jsonb-shape {:id {:type :uuid}} "Entry")
+      (types/make-jsonb-shape {:id {:type :uuid}} "Entry")
+      nil])
+
+^{:refer postgres.typed/format-shape :added "4.1"}
+(fact "formats jsonb shapes for supported schema targets"
+  (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "Entry")]
+    [(typed/format-shape shape :shape)
+     (get-in (typed/format-shape shape :openapi) [:properties "id" :format])
+     (get-in (typed/format-shape shape :json-schema) [:properties "id" :format])
+     (string? (typed/format-shape shape :typescript))])
+  => [(types/make-jsonb-shape {:id {:type :uuid}} "Entry") "uuid" "uuid" true])
+
+^{:refer postgres.typed/registry->typed :added "4.1"}
+(fact "groups flat registry entries into a typed payload"
+  (let [table (types/make-table-def "demo" "Entry" [] :id)
+        fn-def (types/make-fn-def "demo" "insert-entry" [] [:jsonb] {} nil)
+        typed-payload (typed/registry->typed {'demo/Entry table
+                                              'demo/insert-entry fn-def})]
+    [(contains? (:tables typed-payload) 'demo/Entry)
+     (contains? (:functions typed-payload) 'demo/insert-entry)])
+  => [true true])
+
+^{:refer postgres.typed/typed->registry :added "4.1"}
+(fact "flattens typed payload sections into one registry"
+  (let [table (types/make-table-def "demo" "Entry" [] :id)
+        fn-def (types/make-fn-def "demo" "insert-entry" [] [:jsonb] {} nil)]
+    (set (keys (typed/typed->registry {:tables {'demo/Entry table}
+                                       :enums {}
+                                       :functions {'demo/insert-entry fn-def}}))))
+  => '#{demo/Entry demo/insert-entry})
+
+^{:refer postgres.typed/load-analysis :added "4.1"}
+(fact "creates a context from parsed postgres analysis"
+  (let [analysis (parse/analyze-namespace 'postgres.sample.scratch-v2)
+        ctx (typed/load-analysis analysis)]
+    [(:domain ctx)
+     (= analysis (:analysis ctx))
+     (some? (typed/entry ctx 'postgres.sample.scratch-v2/insert-entry))])
+  => [:postgres true true])
+
+^{:refer postgres.typed/load-registry :added "4.1"}
+(fact "creates a context from an explicit registry"
+  (let [fn-def (types/make-fn-def "demo" "get-entry" [] [:jsonb] {} nil)
+        ctx (typed/load-registry {'demo/get-entry fn-def})]
+    [(:domain ctx)
+     (= fn-def (typed/entry ctx 'demo/get-entry))])
+  => [:postgres true])
+
+^{:refer postgres.typed/with-context-registry :added "4.1"}
+(fact "temporarily installs the context registry for inference internals"
+  (let [fn-def (types/make-fn-def "demo" "get-entry" [] [:jsonb] {} nil)
+        ctx (typed/load-registry {'demo/get-entry fn-def})]
+    [(contains? @types/*type-registry* 'demo/get-entry)
+     (typed/with-context-registry ctx #(contains? @types/*type-registry* 'demo/get-entry))
+     (contains? @types/*type-registry* 'demo/get-entry)])
+  => [false true false])
+
+^{:refer postgres.typed/entries :added "4.1"}
+(fact "returns all declarations from a postgres context"
+  (let [ctx (typed/load-ns 'postgres.sample.scratch-v2)]
+    (pos? (count (typed/entries ctx))))
+  => true)
+
+^{:refer postgres.typed/entry :added "4.1"}
+(fact "resolves namespaced entries from a postgres context"
+  (let [ctx (typed/load-ns 'postgres.sample.scratch-v2)]
+    (:name (typed/entry ctx 'postgres.sample.scratch-v2/insert-entry)))
+  => "insert-entry")
+
+^{:refer postgres.typed/missing-function! :added "4.1"}
+(fact "throws typed missing-function errors"
+  (try
+    (typed/missing-function! 'demo/missing)
+    (catch clojure.lang.ExceptionInfo e
+      (ex-data e)))
+  => {:type :typed/missing-function
+      :fn 'demo/missing})
+
+^{:refer postgres.typed/missing-argument! :added "4.1"}
+(fact "throws typed missing-argument errors"
+  (try
+    (typed/missing-argument! 'demo/get-entry 'm)
+    (catch clojure.lang.ExceptionInfo e
+      (ex-data e)))
+  => {:type :typed/missing-argument
+      :fn 'demo/get-entry
+      :arg 'm})
+
+^{:refer postgres.typed/function-input :added "4.1"}
+(fact "returns all inputs or one named input from a context"
+  (let [ctx (typed/load-ns 'postgres.sample.scratch-v2)]
+    [(mapv :name (typed/function-input ctx 'postgres.sample.scratch-v2/insert-entry))
+     (:name (typed/function-input ctx 'postgres.sample.scratch-v2/insert-entry 'i-tags))])
+  => ['[i-name i-tags o-op] 'i-tags])
+
+^{:refer postgres.typed/function-output :added "4.1"}
+(fact "returns the declared function output from a context"
+  (typed/function-output (typed/load-ns 'postgres.sample.scratch-v2)
+                         'postgres.sample.scratch-v2/insert-entry)
+  => '[:jsonb])
+
+^{:refer postgres.typed/export-json-schema :added "4.1"}
+(fact "exports JSON Schema from a postgres context"
+  (map? (typed/export-json-schema (typed/load-ns 'postgres.sample.scratch-v2)))
+  => true)
+
+^{:refer postgres.typed/export-typescript :added "4.1"}
+(fact "exports TypeScript declarations from a postgres context"
+  (str/includes? (typed/export-typescript (typed/load-ns 'postgres.sample.scratch-v2))
+                 "interface")
+  => true)
