@@ -25,6 +25,7 @@
   std-timeseries {:input "src-doc/documentation/std/std_timeseries.clj" :title "std.timeseries" :subtitle "time-series journals"}
   std-block {:input "src-doc/documentation/std/std_block.clj" :title "std.block" :subtitle "code representation"}
 
+  jvm-index {:input "src-doc/documentation/std/jvm_index.clj" :title "jvm.*" :subtitle "JVM libraries"}
   jvm-artifact {:input "src-doc/documentation/std/jvm_artifact.clj" :title "jvm.artifact" :subtitle "artifact coordinates and paths"}
   jvm-classloader {:input "src-doc/documentation/std/jvm_classloader.clj" :title "jvm.classloader" :subtitle "classpath and classloaders"}
   jvm-deps {:input "src-doc/documentation/std/jvm_deps.clj" :title "jvm.deps" :subtitle "JVM dependency resolution"}
@@ -35,6 +36,7 @@
   jvm-require {:input "src-doc/documentation/std/jvm_require.clj" :title "jvm.require" :subtitle "dependency-aware requiring"}
   jvm-tool {:input "src-doc/documentation/std/jvm_tool.clj" :title "jvm.tool" :subtitle "REPL development tools"}
 
+  lib-index {:input "src-doc/documentation/std/lib_index.clj" :title "lib.*" :subtitle "integration libraries"}
   lib-aether {:input "src-doc/documentation/std/lib_aether.clj" :title "lib.aether" :subtitle "Maven repository integration"}
   lib-docker {:input "src-doc/documentation/std/lib_docker.clj" :title "lib.docker" :subtitle "container lifecycle helpers"}
   lib-jdbc {:input "src-doc/documentation/std/lib_jdbc.clj" :title "lib.jdbc" :subtitle "JDBC database access"}
