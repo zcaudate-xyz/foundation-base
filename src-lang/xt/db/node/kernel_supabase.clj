@@ -4,7 +4,9 @@
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-data :as xtd]
              [xt.substrate :as substrate]
+             [xt.substrate.page-core :as page-core]
              [xt.net.http-fetch :as http-fetch]
              [xt.net.http-util :as http-util]
              [xt.net.addon-supabase :as addon]
@@ -344,6 +346,54 @@
   (return
    (-/supabase-request node service-id (addon/cmd-verify-post data opts))))
 
+;;
+;; PAGE MODEL
+;;
+
+(defn.xt supabase-create-model
+  "builds a page model spec backed by a Supabase command"
+  {:added "4.1"}
+  [service-id supabase-handler model]
+  (var #{pipeline
+         options
+         defaults} model)
+  (var model-handler
+       (fn [context]
+         (var node (. context ["node"]))
+         (var cmd  (if (xt/x:is-function? supabase-handler)
+                     (supabase-handler context)
+                     supabase-handler))
+         (return (-/supabase-request node service-id cmd))))
+  (return
+   {"handler" model-handler
+    "pipeline" (xtd/obj-assign-nested
+                {"remote" {"handler" model-handler}}
+                pipeline)
+    "defaults" defaults
+    "options"  options}))
+
+(defn.xt ^{:substrate/fn "@xt.supabase/attach-model"}
+  supabase-attach-model
+  "attaches a Supabase-backed page model to the node"
+  {:added "4.1"}
+  [space args request node]
+  (var service-id        (xt/x:first args))
+  (var page-args         (xt/x:second args))
+  (var supabase-handler  (xt/x:get-idx args (xt/x:offset 2)))
+  (var model             (xt/x:get-idx args (xt/x:offset 3)))
+  (var #{space-id
+         group-id
+         model-id} page-args)
+  (var model-spec (-/supabase-create-model service-id supabase-handler model))
+  (page-core/group-add-attach node
+                              space-id
+                              group-id
+                              {model-id model-spec})
+  (return {"status" "attached"
+           "space" space-id
+           "group" group-id
+           "model" model-id}))
+
 (defn.xt init-handlers
   "installs supabase adaptor handlers on a node"
   {:added "4.1"}
@@ -376,4 +426,5 @@
   (substrate/register-handler node "@xt.supabase/user-put" -/supabase-user-put-handler nil)
   (substrate/register-handler node "@xt.supabase/verify-get" -/supabase-verify-get-handler nil)
   (substrate/register-handler node "@xt.supabase/verify-post" -/supabase-verify-post-handler nil)
+  (substrate/register-handler node "@xt.supabase/attach-model" -/supabase-attach-model nil)
   (return node))

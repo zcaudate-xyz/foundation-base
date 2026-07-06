@@ -35,6 +35,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.node.kernel-supabase :as adaptor]
              [xt.db.system.main :as main]
+             [xt.substrate.page-core :as page-core]
              [xt.db.system.impl-supabase-session :as session]
              [xt.substrate :as substrate]
              [xt.net.addon-supabase :as addon]]})

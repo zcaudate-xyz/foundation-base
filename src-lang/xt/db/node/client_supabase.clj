@@ -90,6 +90,15 @@
                               [service-id table-name query (or opts {})]
                               opts)))
 
+(defn.xt attach-model
+  "attaches a Supabase-backed page model to the node"
+  {:added "4.1"}
+  [node service-id page-args supabase-handler model opts]
+  (return
+   (proxy-util/request-client node "@xt.supabase/attach-model"
+                              [service-id page-args supabase-handler model]
+                              opts)))
+
 (defn.xt health
   "calls the auth health endpoint on the requested service"
   {:added "4.1"}

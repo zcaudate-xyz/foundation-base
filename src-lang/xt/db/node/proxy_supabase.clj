@@ -3,8 +3,10 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
              [xt.substrate :as substrate]
+             [xt.substrate.page-proxy :as page-proxy]
              [xt.db.node.proxy-util :as proxy-util]]})
 
 (def.xt ACTIONS
@@ -36,6 +38,32 @@
    "@xt.supabase/verify-get"
    "@xt.supabase/verify-post"])
 
+(def.xt ATTACH_ACTIONS
+  ["@xt.supabase/attach-model"])
+
+(defn.xt attach-forward-handler
+  "forwards a Supabase attach action to the server and opens the proxy group"
+  {:added "4.1"}
+  [space args request node]
+  (var page-args (xt/x:second args))
+  (var space-id (xtd/get-in page-args ["space_id"]))
+  (var group-id (xtd/get-in page-args ["group_id"]))
+  (var transport-id (proxy-util/get-transport-id node (xtd/get-in request ["meta"])))
+  (page-proxy/group-create-proxy node space-id group-id {} {"transport_id" transport-id})
+  (return
+   (promise/x:promise-then
+    (substrate/request node
+                       nil
+                       (xt/x:get-key request "action")
+                       args
+                       {"transport_id" transport-id})
+    (fn [status]
+      (return
+       (promise/x:promise-then
+        (page-proxy/group-open-proxy node space-id group-id {"transport_id" transport-id})
+        (fn [_]
+          (return status))))))))
+
 (defn.xt init-proxy-handlers
   "Registers client-side supabase proxy handlers so that the same substrate
    function ids used server-side can be invoked on a client node and forwarded
@@ -44,4 +72,6 @@
   [node]
   (xt/for:array [action -/ACTIONS]
     (substrate/register-handler node action proxy-util/request-proxy nil))
+  (xt/for:array [action -/ATTACH_ACTIONS]
+    (substrate/register-handler node action -/attach-forward-handler nil))
   (return node))
