@@ -1,4 +1,5 @@
 (ns documentation.code-manage
+  (:require [code.manage :as manage])
   (:use code.test))
 
 [[:hero {:title "code.manage"
@@ -22,6 +23,76 @@
 [[:chapter {:title "Internal usage" :link "internal"}]]
 
 "The repository exposes `code.manage` through Leiningen tasks, JVM tool helpers, and MCP tools. It is also the safest way to gather examples for documentation without inventing usage narratives by hand."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Analysing namespaces"}]]
+
+"`code.manage` tasks operate on namespaces, sets of namespaces, or `:all`. `analyse` returns structured metadata about source or test files, and `vars` lists the public vars."
+
+^{:refer code.manage/analyse :added "3.0"}
+(fact "analyse a single namespace"
+  (manage/analyse 'code.manage)
+  => code.framework.common.Entry)
+
+^{:refer code.manage/vars :added "3.0"}
+(fact "list vars in a namespace"
+  (manage/vars 'code.manage)
+  => vector?)
+
+[[:section {:title "Finding code"}]]
+
+"`find-usages` discovers where a var is referenced, while `locate-code` and `grep` search for structural patterns and raw text."
+
+^{:refer code.manage/find-usages :added "3.0"}
+(fact "find usages of a var"
+  (manage/find-usages 'code.manage
+                      {:var 'code.framework/analyse
+                       :print {:result false :summary false}})
+  => map?)
+
+^{:refer code.manage/locate-code :added "3.0"}
+(fact "locate forms matching a structural query"
+  (manage/locate-code 'code.manage
+                      {:query '[ns | {:first :require}]
+                       :print {:result false :summary false}})
+  => seq?)
+
+^{:refer code.manage/grep :added "3.0"}
+(fact "grep for text in files"
+  (manage/grep 'code.manage
+               {:query "analyse"
+                :print {:result false :summary false}})
+  => seq?)
+
+[[:section {:title "Test hygiene"}]]
+
+"`missing`, `orphaned`, and `incomplete` help keep tests in sync with source code. They report source vars without tests, tests without source, and both problems together."
+
+^{:refer code.manage/missing :added "3.0"}
+(fact "find source vars without tests"
+  (manage/missing 'code.manage
+                  {:print {:result false :summary false}})
+  => map?)
+
+^{:refer code.manage/orphaned :added "3.0"}
+(fact "find tests without corresponding source"
+  (manage/orphaned 'code.manage
+                   {:print {:result false :summary false}})
+  => map?)
+
+[[:section {:title "End-to-end: preview a safe refactor"}]]
+
+"`grep-replace` performs text replacement across files. Set `:write false` to preview diffs before committing changes."
+
+^{:refer code.manage/grep-replace :added "3.0"}
+(fact "preview a no-op replacement"
+  (manage/grep-replace 'code.manage
+                       {:query "definvoke"
+                        :replace "definvoke"
+                        :write false
+                        :print {:result false :summary false}})
+  => (contains {:updated false}))
 
 [[:chapter {:title "API" :link "api"}]]
 

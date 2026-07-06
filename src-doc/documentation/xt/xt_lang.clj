@@ -1,5 +1,14 @@
 (ns documentation.xt-lang
+  (:require [hara.lang :as l])
   (:use code.test))
+
+(l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]]})
+
+(fact:global
+ {:setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 [[:hero {:title "xt.lang"
          :subtitle "Portable language primitives and common libraries."
@@ -9,19 +18,27 @@
 
 "Target languages differ in collection APIs, nil handling, string operations, promises, modules, and resource access. `xt.lang` gives generated programs one shared vocabulary for those behaviors."
 
-[[:chapter {:title "How to use it" :link "usage"}]]
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
 
-"A hara script requires the libraries it needs, then emitted xtalk code calls those portable helpers. Application examples in `src-build/play/*xtalk*` and tests under `test-lang/xt/lang` show this pattern."
+(fact "check array type"
+  ^{:refer xt.lang.common-lib/is-array? :added "4.0"}
+  (!.js
+    [(k/is-array? [1 2 3])
+     (k/is-array? {:a 1})])
+  => [true false])
 
-(comment
-  (l/script :xtalk
-    {:require [[xt.lang.spec-base :as xt]
-               [xt.lang.common-data :as data]
-               [xt.lang.common-string :as string]]}))
+(fact "check string type"
+  ^{:refer xt.lang.common-lib/is-string? :added "4.0"}
+  (!.js
+    [(k/is-string? "hello")
+     (k/is-string? 1)])
+  => [true false])
 
-[[:chapter {:title "Internal usage" :link "internal"}]]
-
-"The common libraries are used by xt.db, xt.event, xt.net, xt.substrate, and by generated single-source examples. The `test-lang/xtbench` tests exercise cross-target parity for these helpers."
+(fact "check object type"
+  ^{:refer xt.lang.common-lib/is-object? :added "4.0"}
+  (!.js
+    [(k/is-object? {:a 1})
+     (k/is-object? [1 2 3])])
+  => [true false])
 
 [[:chapter {:title "API" :link "api"}]]
-
