@@ -8,6 +8,7 @@
             [hara.lang.impl :as impl]
             [hara.lang.library :as lib]
             [hara.lang.pointer :as ptr]
+            [hara.model.spec-postgres.common :as pgcommon]
             [hara.common.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.context.pointer]
@@ -142,30 +143,14 @@
   "transforms the let form"
   {:added "4.0"}
   [inner]
-  [:DO :$$
-   :BEGIN
-   \\
-   (list \|
-         (list 'do [:LOOP \\
-                    `(\| (~'do ~inner [:exit]))
-                    \\
-                    :END-LOOP]))
-   \\
-   :END :$$ :LANGUAGE "plpgsql"])
+  (pgcommon/block-do-block
+   (list 'do (pgcommon/block-loop-block nil inner))))
 
 (defn invoke-ptr-pg-transform-try-fn
   "transforms the try form"
   {:added "4.0"}
   [inner]
-  [:DO :$$
-   :DECLARE
-   (list \| '(do [e_code text]
-                 [e_msg text]
-                 [e_detail text]
-                 [e_hint text]
-                 [e_context text]))
-   inner
-   :$$ :LANGUAGE "plpgsql"])
+  (pgcommon/block-do-block inner))
 
 (defn invoke-ptr-pg-transform-prep
   "transforms a form"
@@ -193,19 +178,28 @@
                                                         :let true))
         nform (case type
                 :try (invoke-ptr-pg-transform-try-fn inner)
-                :let (invoke-ptr-pg-transform-let-fn inner))]
-    (cond changed
-          [['[:select (set-config "temp.out" nil false)] false]
-           [nform false]
-           ['[:select (current-setting "temp.out" false)] true]]
-          
-          :else
-          [[nform (if (:hide (meta form)) false true)]])))
+                :let (invoke-ptr-pg-transform-let-fn inner))
+        res (cond changed
+                  [['[:select (set-config "temp.out" nil false)] false]
+                   [nform false]
+                   ['[:select (current-setting "temp.out" false)] true]]
+
+                  :else
+                  [[nform (if (:hide (meta form)) false true)]])]
+    res))
+
+(defn invoke-ptr-pg-form
+  "executes a single transformed form"
+  {:added "4.0"}
+  [pg ptr form]
+  (invoke-ptr-pg-single pg
+                        (assoc ptr :form (ptr/free-form [form]))
+                        []))
 
 (defn invoke-ptr-pg-block
   "invokes a block"
   {:added "4.0"}
-  [{:keys [instance] :as pg} ptr args]
+  [pg ptr args]
   (let [forms   (if (and (:form ptr)
                          (empty? args))
                   (ptr/free-form-body (:form ptr))
@@ -219,11 +213,11 @@
                                      (and (list? form)
                                           (= 'try (first form)))
                                      (invoke-ptr-pg-transform :try form)
-                                     
+
                                      :else
                                      [[form (if (:hide (meta form)) false true)]])))
                      (mapcat (fn [[form show]]
-                               (let [res (invoke-ptr-pg-single pg ptr [form])]
+                               (let [res (invoke-ptr-pg-form pg ptr form)]
                                  (if show [res])))))]
     (cond (= 1 (count results))
           (first results)

@@ -55,7 +55,7 @@
   {:added "4.1"}
   [value]
   (if (or (promise/x:promise-native? value)
-          (and (xt/x:not-nil? value)
+          (and (xt/x:is-object? value)
                (xt/x:is-function? (xt/x:get-key value "then"))))
     (return value)
     (return (promise/x:promise-run value))))
