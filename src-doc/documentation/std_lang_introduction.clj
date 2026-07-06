@@ -1,4 +1,6 @@
-(ns documentation.hara.lang-introduction)
+(ns documentation.hara.lang-introduction
+  (:require [hara.lang :as l])
+  (:use code.test))
 
 [[:hero {:title "Introduction"
          :subtitle "Understanding the book, the grammar, and the runtime model."
@@ -18,6 +20,36 @@
                       {:meta "Script"
                        :title "Namespaces become language modules"
                        :text "Using `l/script` installs a module into the current language book, imports relevant macros, and connects the namespace to a runtime configuration for further evaluation."}]}]]
+
+[[:section {:title "Walkthrough"}]]
+
+"The fastest way to see the book and grammar model is to emit the same small function to two targets. `l/emit-as` takes a language keyword and a quoted hara.lang form, and returns the emitted string."
+
+(fact "emit a function to JavaScript"
+  ^{:refer hara.lang/emit-as :added "4.0"}
+  (l/emit-as :js '[(defn add [a b]
+                     (return (+ a b)))
+                   (add 1 2)])
+  => "function add(a,b){\n  return a + b;\n}\n\nadd(1,2)")
+
+(fact "emit the same function to Lua"
+  ^{:refer hara.lang/emit-as :added "4.0"}
+  (l/emit-as :lua '[(defn add [a b]
+                      (return (+ a b)))
+                    (add 1 2)])
+  => "local function add(a,b)\n  return a + b\nend\n\nadd(1,2)")
+
+"`l/script-` installs a script context into the current namespace. Once installed, `!.js` evaluates expressions in place, and `defn.js` stores functions as book entries that can be called like Clojure functions."
+
+(fact "install a script context and call a generated function"
+  ^{:refer hara.lang/script- :added "4.0"}
+  (do
+    (l/script- :js
+      {:require [[xt.lang.spec-base :as xt]]})
+    (defn.js add [a b]
+      (return (+ a b)))
+    (add 1 2))
+  => "add(1,2)")
 
 [[:chapter {:title "Why not just transpile?"}]]
 

@@ -108,4 +108,4 @@
   => 6)
 
 [[:chapter {:title "Source"}]]
-[[:file {:src "src-build/walkthrough/std_lang_02_live.clj"}]]
+[[:file {:src "src-doc/walkthrough/std_lang_02_live.clj"}]]

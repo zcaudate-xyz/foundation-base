@@ -1,4 +1,6 @@
-(ns documentation.hara.lang-comparison)
+(ns documentation.hara.lang-comparison
+  (:require [hara.lang :as l])
+  (:use code.test))
 
 [[:hero {:title "Comparison"
          :subtitle "How `hara.lang` differs from straight transpilation and adjacent tools."
@@ -32,6 +34,41 @@
                       {:meta "JetBrains MPS / Spoofax"
                        :title "Language workbenches"
                        :text "Those systems are deeper on language engineering, projectional editing, and formal tooling. `hara.lang` is lighter, code-first, and much more comfortable inside a REPL-driven Clojure workflow."}]}]]
+
+[[:section {:title "Walkthrough"}]]
+
+"The difference is easiest to see with a concrete example. The same hara.lang form is emitted through different grammars, and each target keeps its own idioms. This is not source-to-source translation; it is shared authoring with target-specific realization."
+
+(fact "shared form, JS realization"
+  ^{:refer hara.lang/emit-as :added "4.0"}
+  (l/emit-as :js '[(defn square [n]
+                     (return (* n n)))
+                   (square 5)])
+  => "function square(n){\n  return n * n;\n}\n\nsquare(5)")
+
+(fact "shared form, Lua realization"
+  ^{:refer hara.lang/emit-as :added "4.0"}
+  (l/emit-as :lua '[(defn square [n]
+                      (return (* n n)))
+                    (square 5)])
+  => "local function square(n)\n  return n * n\nend\n\nsquare(5)")
+
+"The grammar also controls how macros and operators lower. A conditional in the shared DSL becomes a target-appropriate `if` without the author having to remember each language's syntax."
+
+(fact "shared conditional in JS and Lua"
+  ^{:refer hara.lang/emit-as :added "4.0"}
+  [(l/emit-as :js '[(defn sign [n]
+                     (if (> n 0)
+                       (return 1)
+                       (return -1)))
+                   (sign 5)])
+   (l/emit-as :lua '[(defn sign [n]
+                      (if (> n 0)
+                        (return 1)
+                        (return -1)))
+                    (sign 5)])]
+  => ["function sign(n){\n  if(n > 0){\n    return 1;\n  }\n  else{\n    return -1;\n  }\n}\n\nsign(5)"
+      "local function sign(n)\n  if n > 0 then\n    return 1\n  else\n    return -1\n  end\nend\n\nsign(5)"])
 
 [[:chapter {:title "What is unusual about `hara.lang`?"}]]
 
