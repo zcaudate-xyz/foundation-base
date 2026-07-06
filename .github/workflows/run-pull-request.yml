@@ -1,0 +1,233 @@
+name: Run affected Clojure tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - '**/*.clj'
+      - '.github/workflows/run-pull-request.yml'
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: run-pull-request-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  detect-affected-tests:
+    name: Detect affected Clojure tests
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    outputs:
+      has_tests: ${{ steps.affected.outputs.has_tests }}
+      files: ${{ steps.affected.outputs.files }}
+      needs_hara_images: ${{ steps.affected.outputs.needs_hara_images }}
+      needs_js_parser: ${{ steps.affected.outputs.needs_js_parser }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve changed files to tests
+        id: affected
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          base_sha='${{ github.event.pull_request.base.sha }}'
+          head_sha='${{ github.event.pull_request.head.sha }}'
+
+          git diff --name-only --diff-filter=ACMR \
+            "$base_sha...$head_sha" \
+            -- '*.clj' \
+            | grep -E '^(src|src-lang|src-extra|test|test-lang)/.*\.clj$' \
+            | sort -u \
+            | tee changed-clj-files.txt || true
+
+          : > affected-test-files.txt
+          : > unmapped-source-files.txt
+
+          while IFS= read -r file; do
+            [[ -n "$file" ]] || continue
+
+            case "$file" in
+              test/*.clj|test-lang/*.clj)
+                printf '%s\n' "$file" >> affected-test-files.txt
+                continue
+                ;;
+            esac
+
+            namespace=$(sed -nE \
+              's/^\(ns[[:space:]]+([^[:space:]()]+).*/\1/p' \
+              "$file" | head -n 1)
+
+            if [[ -z "$namespace" ]]; then
+              printf '%s\n' "$file" >> unmapped-source-files.txt
+              continue
+            fi
+
+            candidates=$(mktemp)
+            namespace_path=$(printf '%s' "$namespace" \
+              | tr '.' '/' \
+              | tr '-' '_')
+            escaped_namespace=$(printf '%s' "$namespace" \
+              | sed 's/[][\\.^$*+?(){}|]/\\&/g')
+
+            for test_root in test test-lang; do
+              direct="$test_root/${namespace_path}_test.clj"
+              if [[ -f "$direct" ]]; then
+                printf '%s\n' "$direct" >> "$candidates"
+              fi
+            done
+
+            grep -RIlE --include='*.clj' \
+              ":refer[[:space:]]+$escaped_namespace/" \
+              test test-lang >> "$candidates" || true
+
+            grep -RIlE --include='*.clj' \
+              "\\[$escaped_namespace([[:space:]]|\\])" \
+              test test-lang >> "$candidates" || true
+
+            if [[ -s "$candidates" ]]; then
+              cat "$candidates" >> affected-test-files.txt
+            else
+              printf '%s\n' "$file" >> unmapped-source-files.txt
+            fi
+
+            rm -f "$candidates"
+          done < changed-clj-files.txt
+
+          sort -u -o affected-test-files.txt affected-test-files.txt
+          sort -u -o unmapped-source-files.txt unmapped-source-files.txt
+
+          if [[ -s affected-test-files.txt ]]; then
+            files=$(paste -sd ' ' affected-test-files.txt)
+            echo 'has_tests=true' >> "$GITHUB_OUTPUT"
+            echo "files=$files" >> "$GITHUB_OUTPUT"
+          else
+            echo 'has_tests=false' >> "$GITHUB_OUTPUT"
+            echo 'files=' >> "$GITHUB_OUTPUT"
+          fi
+
+          if grep -q '^test/hara/' affected-test-files.txt; then
+            echo 'needs_hara_images=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'needs_hara_images=false' >> "$GITHUB_OUTPUT"
+          fi
+
+          if grep -q '^test/code/' affected-test-files.txt; then
+            echo 'needs_js_parser=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'needs_js_parser=false' >> "$GITHUB_OUTPUT"
+          fi
+
+          {
+            echo '### Changed Clojure files'
+            if [[ -s changed-clj-files.txt ]]; then
+              sed 's/^/- `/' changed-clj-files.txt | sed 's/$/`/'
+            else
+              echo '- No source or test `.clj` files changed.'
+            fi
+
+            echo
+            echo '### Affected test files'
+            if [[ -s affected-test-files.txt ]]; then
+              sed 's/^/- `/' affected-test-files.txt | sed 's/$/`/'
+            else
+              echo '- None found.'
+            fi
+
+            if [[ -s unmapped-source-files.txt ]]; then
+              echo
+              echo '### Changed source files without a matched test'
+              sed 's/^/- `/' unmapped-source-files.txt | sed 's/$/`/'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  run-affected-tests:
+    name: Run affected Clojure tests
+    needs: detect-affected-tests
+    if: needs.detect-affected-tests.outputs.has_tests == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create test database
+        run: |
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U postgres -d test-scratch -c 'CREATE DATABASE test;'
+          docker exec ${{ job.services.postgres.id }} \
+            psql -U postgres -d test-scratch -c 'GRANT ALL PRIVILEGES ON DATABASE test TO postgres;'
+
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull hara runtime images
+        if: needs.detect-affected-tests.outputs.needs_hara_images == 'true'
+        run: |
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-haskell:latest
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-lean:latest
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-ocaml:latest
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest
+
+      - name: Install root JS dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install JS parser dependencies
+        if: needs.detect-affected-tests.outputs.needs_js_parser == 'true'
+        working-directory: scripts/js_parser
+        run: npm ci
+
+      - name: Run affected tests
+        env:
+          AFFECTED_TEST_FILES: ${{ needs.detect-affected-tests.outputs.files }}
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp
+
+          echo "Running affected test files: ${AFFECTED_TEST_FILES}"
+
+          docker run --network host \
+            -e 'CI=true' \
+            -e "AFFECTED_TEST_FILES=${AFFECTED_TEST_FILES}" \
+            -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS} -Djava.io.tmpdir=$(pwd)/.tmp" \
+            -e "_JAVA_OPTIONS=-Djava.io.tmpdir=$(pwd)/.tmp" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v /home/runner/.docker/config.json:/root/.docker/config.json:ro \
+            -v $(pwd):$(pwd) \
+            -w $(pwd) \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            bash -lc 'set -euxo pipefail &&
+              apt-get update &&
+              apt-get install -y --no-install-recommends lua5.4 python3 python3-pip redis-server &&
+              lein test :files "$AFFECTED_TEST_FILES"'
+
+    services:
+      postgres:
+        image: ghcr.io/zcaudate-xyz/infra-db:main
+        env:
+          POSTGRES_DB: test-scratch
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
