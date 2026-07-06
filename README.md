@@ -10,13 +10,16 @@ The repository is large because it contains several related systems. You do not 
 
 | I want to... | Start here |
 |---|---|
+| Install the project and run a first workflow | [`GETTING_STARTED.md`](GETTING_STARTED.md) |
 | Use the standard Clojure libraries | [`std`](https://zcaudate.xyz/foundation-base/std/index.html) and the guides in [`guides/`](guides/) |
 | Generate JavaScript, Lua, Python, Go, SQL, Solidity, or other code | [Hara introduction](https://zcaudate.xyz/foundation-base/hara/introduction.html) |
+| Browse walkthroughs and generated projects | [`wiki/Examples.md`](wiki/Examples.md) and the [published examples page](https://zcaudate.xyz/foundation-base/examples.html) |
 | Run generated code in external runtimes | [Hara runtimes](https://zcaudate.xyz/foundation-base/hara/hara-runtime.html) |
 | Write tests using the fact-based test framework | [`code.test` guide](guides/code.test.md) |
 | Analyse, query, or refactor Clojure source | [`code.manage`](guides/code.manage.md) and [`code.query`](guides/code.query.md) |
-| Generate project documentation | [`code.doc`](https://zcaudate.xyz/foundation-base/code/code-doc.html) |
+| Generate project documentation | [`code.doc`](https://zcaudate.xyz/foundation-base/code-tools.html) |
 | Explore portable cross-target libraries | [`xt`](https://zcaudate.xyz/foundation-base/xt/index.html) |
+| Browse topic-oriented pages | [`wiki/Home.md`](wiki/Home.md) |
 | Contribute to the repository | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
 ## What is in the repository?
@@ -39,6 +42,7 @@ Supporting directories include:
 | `src-build/` | Walkthroughs, demos, build definitions, and generated project examples |
 | `src-doc/` | Source for the generated documentation site |
 | `guides/` | Task-oriented Markdown guides |
+| `wiki/` | GitHub Wiki-ready topic pages, kept in the main repository for review and versioning |
 | `config/publish/` | Documentation-site configuration |
 
 ## Quick start
@@ -113,9 +117,36 @@ Start with:
 
 - [Hara overview](https://zcaudate.xyz/foundation-base/hara/index.html)
 - [Introduction](https://zcaudate.xyz/foundation-base/hara/introduction.html)
-- [Basic walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-basic.html)
-- [Multiple-language walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-multi.html)
-- [Live runtime walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-live.html)
+- [Basic walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-basic.html) — [source](src-build/walkthrough/std_lang_00_basic.clj)
+- [Multiple-language walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-multi.html) — [source](src-build/walkthrough/std_lang_01_multi.clj)
+- [Live runtime walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-live.html) — [source](src-build/walkthrough/std_lang_02_live.clj)
+
+## Examples
+
+Examples should retain links to the authored source, project-generation definition, tests where available, generated output repository, and reproduction command.
+
+| Example | Generated project | Authored source | Build definition |
+|---|---|---|---|
+| C pthreads hello | [`hoebat/play.c-000-pthreads-hello`](https://github.com/hoebat/play.c-000-pthreads-hello) | [`main.clj`](src-build/play/c_000_pthreads_hello/main.clj) | [`build.clj`](src-build/play/c_000_pthreads_hello/build.clj) |
+| OpenResty hello | [`hoebat/play.ngx-000-hello`](https://github.com/hoebat/play.ngx-000-hello) | [`main.clj`](src-build/play/ngx_000_hello/main.clj) | [`build.clj`](src-build/play/ngx_000_hello/build.clj) |
+| OpenResty live evaluation | [`hoebat/play.ngx-001-eval`](https://github.com/hoebat/play.ngx-001-eval) | [`main.clj`](src-build/play/ngx_001_eval/main.clj) | [`build.clj`](src-build/play/ngx_001_eval/build.clj) |
+| TUI counter | [`hoebat/play.tui-000-counter`](https://github.com/hoebat/play.tui-000-counter) | [`main.clj`](src-build/play/tui_000_counter/main.clj) | [`build.clj`](src-build/play/tui_000_counter/build.clj) |
+| TUI fetch | [`hoebat/play.tui-001-fetch`](https://github.com/hoebat/play.tui-001-fetch) | [`main.clj`](src-build/play/tui_001_fetch/main.clj) | [`build.clj`](src-build/play/tui_001_fetch/build.clj) |
+| TUI Game of Life | [`zcaudate/play.tui-002-game-of-life`](https://github.com/zcaudate/play.tui-002-game-of-life) | [`main.clj`](src-build/play/tui_002_game_of_life/main.clj) | [`build.clj`](src-build/play/tui_002_game_of_life/build.clj) |
+| React Native components | [`zcaudate/foundation.react-native`](https://github.com/zcaudate/foundation.react-native) | [`web_native_index.clj`](src-build/component/web_native_index.clj) | [`build_native_index.clj`](src-build/component/build_native_index.clj) |
+
+Generate or push the existing examples with the project aliases:
+
+```bash
+lein push-c-000-pthreads
+lein push-ngx-000-hello
+lein push-ngx-001-eval
+lein push-tui-000-counter
+lein push-tui-001-fetch
+lein push-tui-002-game-of-life
+```
+
+See [`wiki/Examples.md`](wiki/Examples.md) for the expanded examples index.
 
 ## Write and run tests
 
@@ -145,8 +176,6 @@ The complete suite covers many optional runtimes and external services, so targe
 
 ## Work with the repository
 
-There are several useful ways to interact with Foundation Base:
-
 ### As a library consumer
 
 Install the project locally, depend on the modules you need, and treat documented public namespaces as the supported entry points. Because the repository contains both mature and experimental areas, check the relevant guide and tests before relying on an unfamiliar subsystem.
@@ -158,7 +187,7 @@ Start with one focused workflow:
 1. emit a small JavaScript or Lua form;
 2. run one `code.test` namespace;
 3. inspect one generated project under `src-build/play`;
-4. browse the matching generated documentation page.
+4. browse the matching generated documentation and source links.
 
 ### As a contributor
 
@@ -167,6 +196,28 @@ Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, repository conventions, tes
 ### As a documentation author
 
 The public site is generated from files in `src-doc/documentation/`. The repository homepage and `src-doc/documentation/main_index.clj` intentionally use the same project description and navigation model. When one changes, update the other in the same pull request.
+
+## Wiki pages
+
+GitHub stores a repository Wiki in a separate Git repository named `foundation-base.wiki`. That Wiki has not yet been initialized, so the reviewable source pages currently live under [`wiki/`](wiki/).
+
+The prepared pages include:
+
+- [`Home`](wiki/Home.md)
+- [`Getting Started`](wiki/Getting-Started.md)
+- [`Repository Map`](wiki/Repository-Map.md)
+- [`Hara Language Tooling`](wiki/Hara-Language-Tooling.md)
+- [`Code Tools`](wiki/Code-Tools.md)
+- [`Examples`](wiki/Examples.md)
+- [`Contributing`](wiki/Contributing.md)
+
+After the Wiki is enabled and its first page is created in GitHub, run:
+
+```bash
+bash bin/publish-wiki
+```
+
+This synchronizes the reviewed Markdown pages to the separate Wiki repository.
 
 ## Guides
 
