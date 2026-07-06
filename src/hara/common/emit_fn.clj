@@ -13,11 +13,17 @@
   {:added "3.0"}
   ([{:keys [force modifiers type symbol value rest] :as arg} assign grammar mopts]
    (if rest
-     (if-let [emit-rest (get-in grammar [:default :function :args :rest])]
-       (emit-rest arg grammar mopts)
-       (f/error "Rest argument emitter not configured"
-                {:lang (:lang mopts)
-                 :symbol symbol}))
+     (let [lang      (:lang mopts)
+           emit-rest (or (get-in grammar [:default :function :args :rest])
+                         (when lang
+                           (requiring-resolve
+                            (symbol (str "hara.model.spec-" (name lang) ".rest")
+                                    "emit-input-rest"))))]
+       (if emit-rest
+         (emit-rest arg grammar mopts)
+         (f/error "Rest argument emitter not configured"
+                  {:lang lang
+                   :symbol symbol})))
      (let [{:keys [start end]} (helper/get-options grammar [:default :index])
            {:keys [reversed hint]
             :as invoke}  (helper/get-options grammar [:default :invoke])
