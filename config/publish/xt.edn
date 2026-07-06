@@ -1,0 +1,72 @@
+{:theme  "foundation"
+ :output "public/xt"
+ :pages  {index
+          {:base  "home.html"
+           :input "src-doc/documentation/xt/xt_index.clj"
+           :title "xt"
+           :subtitle "cross-target libraries, substrates, and runtime building blocks"}
+
+          xt-lang
+          {:input "src-doc/documentation/xt/xt_lang.clj"
+           :title "xt.lang"
+           :subtitle "portable language primitives and common libraries"}
+
+          xt-lang-common
+          {:input "src-doc/documentation/xt/xt_lang_common.clj"
+           :title "xt.lang.common"
+           :subtitle "data, iteration, math, string, tree, and utility layers"}
+
+          xt-lang-runtime
+          {:input "src-doc/documentation/xt/xt_lang_runtime.clj"
+           :title "xt.lang.runtime"
+           :subtitle "promise, protocol, resource, notify, and repl layers"}
+
+          xt-db
+          {:input "src-doc/documentation/xt/xt_db.clj"
+           :title "xt.db"
+           :subtitle "database text, system, node, and runtime layers"}
+
+          xt-db-text
+          {:input "src-doc/documentation/xt/xt_db_text.clj"
+           :title "xt.db.text"
+           :subtitle "schema, graph, tree, sql, and pgrest builders"}
+
+          xt-db-system
+          {:input "src-doc/documentation/xt/xt_db_system.clj"
+           :title "xt.db.system"
+           :subtitle "memory, postgres, sqlite, supabase, and websocket systems"}
+
+          xt-db-node
+          {:input "src-doc/documentation/xt/xt_db_node.clj"
+           :title "xt.db.node"
+           :subtitle "client, kernel, proxy, and runtime node layers"}
+
+          xt-db-walkthrough
+          {:input "src-doc/documentation/xt/xt_db_walkthrough.clj"
+           :title "xt.db walkthrough"
+           :subtitle "binding framework and substrate walkthrough"}
+
+          xt-net
+          {:input "src-doc/documentation/xt/xt_net.clj"
+           :title "xt.net"
+           :subtitle "http, websocket, sql, redis, and supabase helpers"}
+
+          xt-event
+          {:input "src-doc/documentation/xt/xt_event.clj"
+           :title "xt.event"
+           :subtitle "event, model, route, form, log, and validation layers"}
+
+          xt-substrate
+          {:input "src-doc/documentation/xt/xt_substrate.clj"
+           :title "xt.substrate"
+           :subtitle "frames, pubsub, requests, routers, spaces, pages, and transports"}
+
+          xt-substrate-walkthrough
+          {:input "src-doc/documentation/xt/xt_substrate_walkthrough.clj"
+           :title "xt.substrate walkthrough"
+           :subtitle "memory, websocket, fanout, multiplex, and page examples"}
+
+          xt-examples
+          {:input "src-doc/documentation/xt/xt_examples.clj"
+           :title "xt examples"
+           :subtitle "pocs, xtbench, and generated project examples"}}}

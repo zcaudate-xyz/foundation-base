@@ -1,5 +1,5 @@
 {:theme  "foundation"
- :output "public/std-lang"
+ :output "public/hara"
  :pages  {index
           {:base  "home.html"
            :input "src-doc/documentation/std_lang_index.clj"

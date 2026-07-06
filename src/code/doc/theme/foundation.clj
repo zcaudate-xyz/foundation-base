@@ -81,9 +81,9 @@
         prefix (page-prefix current-output)]
     (->> (meta lookup)
          (filter (fn [[site {:keys [pages]}]]
-                   (and (contains? #{:core :foundation.code :std :hara} site)
+                   (and (contains? #{:core :std :hara :code :xt} site)
                         (get pages 'index))))
-         (sort-by (comp {:core 0 :foundation.code 1 :std 2 :hara 3} first))
+         (sort-by (comp {:core 0 :std 1 :hara 2 :code 3 :xt 4} first))
          (map (fn [[site {:keys [output pages]}]]
                 (let [rel   (public-relative-path output)
                       href  (str prefix (when-not (empty? rel) (str rel "/")) "index.html")

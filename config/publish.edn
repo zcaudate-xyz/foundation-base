@@ -6,6 +6,7 @@
  :snippets "src-doc/snippets"
  :sites      {:core         [:include "config/publish/foundation.core.edn" {:type :edn}]
               :hara         [:include "config/publish/hara.edn" {:type :edn}]
-              :foundation.code [:include "config/publish/foundation.code.edn" {:type :edn}]
+              :code         [:include "config/publish/code.edn" {:type :edn}]
+              :xt           [:include "config/publish/xt.edn" {:type :edn}]
               :std          [:include "config/publish/std.edn" {:type :edn}]
               :test-site    [:include "config/publish/test.site.edn" {:type :edn}]}}

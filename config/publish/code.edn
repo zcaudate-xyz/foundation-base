@@ -1,0 +1,67 @@
+{:theme  "foundation"
+ :output "public/code"
+ :pages  {index
+          {:base  "home.html"
+           :input "src-doc/documentation/code_index.clj"
+           :title "code"
+           :subtitle "development tooling for foundation"}
+
+          getting-started
+          {:input "src-doc/documentation/foundation_code_getting_started.md"
+           :title "Getting Started"
+           :subtitle "bootstrap a site, a page, and a publish flow"}
+
+          architecture
+          {:input "src-doc/documentation/foundation_code_architecture.clj"
+           :title "Architecture"
+           :subtitle "how parse, collect, link, and render fit together"}
+
+          code-test
+          {:input "src-doc/documentation/code/code_test.clj"
+           :title "code.test"
+           :subtitle "fact-based custom testing"}
+
+          code-manage
+          {:input "src-doc/documentation/code/code_manage.clj"
+           :title "code.manage"
+           :subtitle "analysis, scaffolding, location, and refactoring tasks"}
+
+          code-query
+          {:input "src-doc/documentation/code/code_query.clj"
+           :title "code.query"
+           :subtitle "structural code queries and transformations"}
+
+          code-framework
+          {:input "src-doc/documentation/code/code_framework.clj"
+           :title "code.framework"
+           :subtitle "source and test analysis foundation"}
+
+          code-doc
+          {:input "src-doc/documentation/code_doc.clj"
+           :title "code.doc"
+           :subtitle "compiler, themes, and authoring primitives"}
+
+          code-project
+          {:input "src-doc/documentation/code/code_project.clj"
+           :title "code.project"
+           :subtitle "project metadata and file lookup"}
+
+          code-tool
+          {:input "src-doc/documentation/code/code_tool.clj"
+           :title "code.tool"
+           :subtitle "build, java, maven, and measurement tooling"}
+
+          code-mcp
+          {:input "src-doc/documentation/code/code_mcp.clj"
+           :title "code.mcp"
+           :subtitle "agent-facing MCP tool surface"}
+
+          guides
+          {:input "src-doc/documentation/foundation_code_guides.clj"
+           :title "Guides"
+           :subtitle "authoring patterns for landing pages and references"}
+
+          reference
+          {:input "src-doc/documentation/foundation_code_reference.clj"
+           :title "Reference"
+           :subtitle "the high-value entry points in code.doc"}}}
