@@ -227,7 +227,7 @@
    :equal-form (fn [[x y]]
                  (list 'equal? x y))
    :nil-form (fn [x]
-               (list 'null? x))
+               (list 'not x))
    :assign-symbol-form (fn [sym value]
                          (list 'set! sym value))
    :index-read-form (fn [obj key kind]
@@ -294,7 +294,7 @@
 
 (defn emit-scheme-form
   [form]
-  (cond (nil? form)      "null"
+  (cond (nil? form)      "#f"
         (true? form)     "#t"
         (false? form)    "#f"
         (string? form)   (pr-str form)
