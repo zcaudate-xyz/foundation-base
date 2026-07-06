@@ -6,6 +6,11 @@
              :title "std"
              :subtitle "standard libraries for foundation"}
 
+            std-block
+            {:input "src-doc/documentation/std/std_block.clj"
+             :title "std.block"
+             :subtitle "code representation"}
+
             std-lib-apply
             {:input "src-doc/documentation/std/std_lib_apply.clj"
              :title "std.lib.apply"
@@ -16,10 +21,35 @@
              :title "std.lib.atom"
              :subtitle "enhanced atom operations"}
 
+            std-lib-bin
+            {:input "src-doc/documentation/std/std_lib_bin.clj"
+             :title "std.lib.bin"
+             :subtitle "binary data utilities"}
+
+            std-lib-class
+            {:input "src-doc/documentation/std/std_lib_class.clj"
+             :title "std.lib.class"
+             :subtitle "class and reflection helpers"}
+
             std-lib-collection
             {:input "src-doc/documentation/std/std_lib_collection.clj"
              :title "std.lib.collection"
              :subtitle "collection utilities"}
+
+            std-lib-component
+            {:input "src-doc/documentation/std/std_lib_component.clj"
+             :title "std.lib.component"
+             :subtitle "component lifecycle utilities"}
+
+            std-lib-encode
+            {:input "src-doc/documentation/std/std_lib_encode.clj"
+             :title "std.lib.encode"
+             :subtitle "encoding utilities"}
+
+            std-lib-enum
+            {:input "src-doc/documentation/std/std_lib_enum.clj"
+             :title "std.lib.enum"
+             :subtitle "enum utilities"}
 
             std-lib-env
             {:input "src-doc/documentation/std/std_lib_env.clj"
@@ -31,12 +61,67 @@
              :title "std.lib.foundation"
              :subtitle "basic functionality for foundation"}
 
+            std-lib-future
+            {:input "src-doc/documentation/std/std_lib_future.clj"
+             :title "std.lib.future"
+             :subtitle "future and async helpers"}
+
+            std-lib-io
+            {:input "src-doc/documentation/std/std_lib_io.clj"
+             :title "std.lib.io"
+             :subtitle "I/O utilities"}
+
+            std-lib-network
+            {:input "src-doc/documentation/std/std_lib_network.clj"
+             :title "std.lib.network"
+             :subtitle "network utilities"}
+
+            std-lib-resource
+            {:input "src-doc/documentation/std/std_lib_resource.clj"
+             :title "std.lib.resource"
+             :subtitle "resource loading utilities"}
+
+            std-lib-schema
+            {:input "src-doc/documentation/std/std_lib_schema.clj"
+             :title "std.lib.schema"
+             :subtitle "schema utilities"}
+
+            std-lib-security
+            {:input "src-doc/documentation/std/std_lib_security.clj"
+             :title "std.lib.security"
+             :subtitle "security utilities"}
+
+            std-lib-sort
+            {:input "src-doc/documentation/std/std_lib_sort.clj"
+             :title "std.lib.sort"
+             :subtitle "sorting utilities"}
+
             std-lib-stream
             {:input "src-doc/documentation/std/std_lib_stream.clj"
              :title "std.lib.stream"
              :subtitle "streams and transducers"}
 
-            std-block
-            {:input "src-doc/documentation/std/std_block.clj"
-             :title "std.block"
-             :subtitle "code representation"}}}
+            std-lib-system
+            {:input "src-doc/documentation/std/std_lib_system.clj"
+             :title "std.lib.system"
+             :subtitle "system composition utilities"}
+
+            std-lib-time
+            {:input "src-doc/documentation/std/std_lib_time.clj"
+             :title "std.lib.time"
+             :subtitle "time utilities"}
+
+            std-lib-transform
+            {:input "src-doc/documentation/std/std_lib_transform.clj"
+             :title "std.lib.transform"
+             :subtitle "data transform utilities"}
+
+            std-lib-walk
+            {:input "src-doc/documentation/std/std_lib_walk.clj"
+             :title "std.lib.walk"
+             :subtitle "walk and traversal utilities"}
+
+            std-lib-zip
+            {:input "src-doc/documentation/std/std_lib_zip.clj"
+             :title "std.lib.zip"
+             :subtitle "zipper utilities"}}}

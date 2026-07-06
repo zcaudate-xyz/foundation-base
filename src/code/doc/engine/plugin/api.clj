@@ -66,11 +66,6 @@
           "v&nbsp;" version]
          [:i {:class "error version"} "NONE"])]
       [:div
-       [:input {:class "source-toggle"
-                :type "checkbox"
-                :id (entry-tag (str "pre-" namespace)  var)}]
-       [:label {:class "source-toggle"
-                :for (entry-tag (str "pre-" namespace) var)} ""]
         [:pre {:class "source"}
          [:code {:class "clojure"}
           (-> entry :source :code)]]]])))

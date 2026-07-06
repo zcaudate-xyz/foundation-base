@@ -3,8 +3,8 @@
  :pages  {index
           {:base  "home.html"
            :input "src-doc/documentation/std_lang_index.clj"
-           :title "hara.lang"
-           :subtitle "polyglot templating, grammar-driven emission, and runtime-aware code generation"}
+           :title "hara"
+           :subtitle "language tooling, runtime integration, and polyglot system libraries"}
 
           introduction
           {:input "src-doc/documentation/std_lang_introduction.clj"
