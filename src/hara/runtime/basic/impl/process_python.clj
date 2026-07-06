@@ -15,23 +15,13 @@
             [xt.lang.common-lib :as lib]))
 
 (def ^{:added "4.1"
-       :doc "Helpers that let emitted xtalk objects support attribute-style access
-   for keys (e.g. obj._size) while still behaving as dicts."}
+       :doc "Base dict subclass that lets emitted xtalk objects use attribute-style\n   access for keys (e.g. obj._size) while still behaving as dicts."}
   +python-obj-helper+
   (str "class __XtObject(dict):\n"
        "    def __getattr__(self, key):\n"
        "        return self.get(key)\n"
        "    def __setattr__(self, key, value):\n"
-       "        self[key] = value\n"
-       "\n"
-       "def __xt_obj(d=None):\n"
-       "    return __XtObject(d if d is not None else {})\n"
-       "\n"
-       "def __xt_get(obj, k):\n"
-       "    try:\n"
-       "        return obj[k]\n"
-       "    except (KeyError, IndexError, TypeError):\n"
-       "        return None\n"))
+       "        self[key] = value\n"))
 
 (def +python-init+
   (common/put-program-options

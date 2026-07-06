@@ -133,6 +133,8 @@
                           (cond-> ptr/*print* debug (conj :input)))
             ptr/*output* (cond-> ptr/*output*
                            raw (conj :raw))
+            ptr/*print* (cond-> ptr/*print*
+                           raw (conj :raw-output))
             ptr/*input* (if (= (:tag meta) -)
                           #{:input}
                           (cond-> ptr/*input*

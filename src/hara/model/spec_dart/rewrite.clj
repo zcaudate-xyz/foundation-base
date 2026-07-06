@@ -321,6 +321,12 @@
             then*
             else*))))
 
+(defn- spread-form?
+  [form]
+  (and (collection/form? form)
+       (= :.. (first form))
+       (= 2 (count form))))
+
 (defn- rewrite-invoke-expression
   [form grammar]
   (let [head        (first form)
@@ -328,17 +334,24 @@
                       (dart-rewrite-expression head grammar)
                       head)
         args        (rest form)
-        unpack?     (unpack/any-unpack? args)
+        spread?     (some spread-form? args)
+        unpack?     (or (unpack/any-unpack? args) spread?)
         apply?      (or unpack?
                         (dart-function-var-symbol? head*)
                         (dart-function-var-symbol? head))
         args        (if unpack?
                       args
                       (dart-pad-optional-args head args))
-        args*       (unpack/rewrite-args args
-                                         #(dart-rewrite-expression % grammar)
-                                         identity
-                                         #(list :.. %))]
+        args*       (map #(cond
+                            (spread-form? %)
+                            (list :.. (dart-rewrite-expression (second %) grammar))
+
+                            (unpack/unpack-form? %)
+                            (list :.. (dart-rewrite-expression (second %) grammar))
+
+                            :else
+                            (dart-rewrite-expression % grammar))
+                         args)]
     (with-form-meta
       form
       (if apply?

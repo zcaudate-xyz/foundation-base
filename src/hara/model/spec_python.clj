@@ -207,6 +207,15 @@
   (and (vector? args)
        (some #(= '... %) args)))
 
+(defn- python-vargs-collector-param?
+  "checks if an args vector uses the `[args]` variadic-collector convention"
+  {:added "4.1"}
+  [args]
+  (and (vector? args)
+       (= 1 (count args))
+       (symbol? (first args))
+       (= 'args (first args))))
+
 (declare python-replace-vargs-body)
 
 (defn- python-replace-vargs-body
@@ -245,7 +254,7 @@
   {:added "4.1"}
   [source vargs-sym]
   (let [vargs-name (name vargs-sym)
-        pattern (re-pattern (str vargs-name "(?:=None)?\\):"))]
+        pattern (re-pattern (str vargs-name "\\s*=\\s*None\\):"))]
     (clojure.string/replace source pattern (str "*" vargs-name "):"))))
 
 (defn- python-default-nil
@@ -276,13 +285,23 @@
   [form grammar mopts]
   (let [[tag name args & more] form
         more (python-prepend-nonlocals name args more)
+        collector? (python-vargs-collector-param? args)
         args (-> (python-apply-optional-defaults name args)
                  (python-default-nil))]
-    (if (python-vargs-param? args)
-      (let [vargs-sym (gensym "vargs__")
+    (if (or (python-vargs-param? args)
+            collector?)
+      (let [vargs-sym (if collector?
+                        'args
+                        (gensym "vargs__"))
             form* (python-replace-vargs
                    (list* tag name args more)
                    vargs-sym)
+            form* (if collector?
+                    (let [[tag name args & body] form*]
+                      (apply list tag name args
+                             (cons (list 'var 'args (list 'list 'args))
+                                   body)))
+                    form*)
             output (top/emit-top-level
                     :defn
                     form*
@@ -529,7 +548,7 @@
                                                  :args {:start "" :end ":" :space ""}}}}
                    :branch   {:control {:elseif {:raw "elif"}}}}
         :data     {:map-entry {:key-fn data/default-map-key}
-                   :map       {:start "__xt_obj({" :end "})" :space ""}
+                   :map       {:start "__XtObject({" :end "})" :space ""}
                    :set       {:start "{" :end "}" :space ""}
                    :vector    {:start "[" :end "]" :space ""}
                    :tuple     {:start "(" :end ")" :space ""}
