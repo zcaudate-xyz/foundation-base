@@ -199,7 +199,8 @@
                 :flexWrap "wrap"}}
        [:button
         {:style (-/button-style true)
-         :disabled (xt/x:not-nil? busy)
+         :disabled (or (xt/x:not-nil? busy)
+                       signed-in)
          :onClick (fn []
                     (-/run-action node
                                   space-id
@@ -215,7 +216,8 @@
             "Create account")]
        [:button
         {:style (-/button-style false)
-         :disabled (xt/x:not-nil? busy)
+         :disabled (or (xt/x:not-nil? busy)
+                       signed-in)
          :onClick (fn []
                     (-/run-action node
                                   space-id
