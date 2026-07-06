@@ -1,4 +1,5 @@
-(ns documentation.code-index)
+(ns documentation.code-index
+  (:require [code.project :as project]))
 
 [[:hero {:title "code"
          :subtitle "Development tools for foundation."
@@ -40,6 +41,18 @@
                        :title "code.mcp"
                        :text "MCP server and tool layer for code-manage, code-test, code-doc, and hara-lang actions."
                        :href "code-mcp.html"}]}]]
+
+[[:section {:title "Walkthrough"}]]
+
+"The first step when working with any `code.*` tool is to establish the project context. `code.project/project` loads `project.clj`, and `code.project/file-lookup` maps every namespace to its file. From there you can analyse, query, or render."
+
+^{:refer code.project/project :added "3.0"}
+(fact "load the project and build a namespace lookup"
+  (let [proj (project/project)
+        lookup (project/file-lookup proj)]
+    [(symbol? (:name proj))
+     (contains? lookup 'code.project)])
+  => [true true])
 
 [[:callout {:tone :info
             :title "How this section is organized"
