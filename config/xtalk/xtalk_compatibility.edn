@@ -10,5 +10,6 @@
                     xt.event]
           :exclude [xt.sample]}
  :ruby   {:include [xt.lang
-                    xt.event]
+                    xt.event
+                    xt.substrate]
           :exclude [xt.sample]}}
