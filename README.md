@@ -1,24 +1,63 @@
-# foundation
+# Foundation Base
 
+**A Clojure-first toolkit for building, generating, testing, and operating polyglot systems.**
 
-### Getting Started
+Foundation Base combines reusable Clojure libraries, developer tooling, language generation, and runtime integration in one repository. It is intended for developers who want one REPL-driven environment for working across application code, generated source, tests, documentation, and external runtimes.
 
-For a comprehensive guide on installation, usage, and development setup, please refer to [GETTING_STARTED.md](GETTING_STARTED.md).
+The repository is large because it contains several related systems. You do not need to understand all of them before getting started.
 
-### Guides
+## Choose your path
 
-Detailed usage guides and scenarios for core libraries can be found in the `guides/` directory:
+| I want to... | Start here |
+|---|---|
+| Install the project and run a first workflow | [`GETTING_STARTED.md`](GETTING_STARTED.md) |
+| Use the standard Clojure libraries | [`std`](https://zcaudate.xyz/foundation-base/std/index.html) and the guides in [`guides/`](guides/) |
+| Generate JavaScript, Lua, Python, Go, SQL, Solidity, or other code | [Hara introduction](https://zcaudate.xyz/foundation-base/hara/introduction.html) |
+| Browse walkthroughs and generated projects | [`wiki/Examples.md`](wiki/Examples.md) and the [published examples page](https://zcaudate.xyz/foundation-base/examples.html) |
+| Run generated code in external runtimes | [Hara runtimes](https://zcaudate.xyz/foundation-base/hara/hara-runtime.html) |
+| Write tests using the fact-based test framework | [`code.test` guide](guides/code.test.md) |
+| Analyse, query, or refactor Clojure source | [`code.manage`](guides/code.manage.md) and [`code.query`](guides/code.query.md) |
+| Generate project documentation | [`code.doc`](https://zcaudate.xyz/foundation-base/code-tools.html) |
+| Explore portable cross-target libraries | [`xt`](https://zcaudate.xyz/foundation-base/xt/index.html) |
+| Browse topic-oriented pages | [`wiki/Home.md`](wiki/Home.md) |
+| Contribute to the repository | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
-- [code.test](guides/code.test.md): A robust testing framework replacing `clojure.test`.
-- [code.manage](guides/code.manage.md): Tools for code maintenance, refactoring, and test management.
-- [std.task](guides/std.task.md): Task definition and execution engine.
-- [std.block](guides/std.block.md): Source code block parsing and layout.
-- [code.query](guides/code.query.md): Pattern matching and structural editing for code.
-- [xt.db.node.kernel-base](guides/xt.db.node.adaptor_base.md): Node bootstrap and RPC routing for live database services.
-- [std.timeseries](guides/std.timeseries.md): Time-series data management and aggregation.
-- [std.scheduler](guides/std.scheduler.md): Concurrent task scheduling and scaling.
+## What is in the repository?
 
-#### Quick Install (Users)
+Foundation Base is organised into four primary areas:
+
+| Area | Purpose |
+|---|---|
+| `std.*` | Standard libraries and reusable infrastructure: collections, concurrency, filesystems, strings, time, tasks, scheduling, configuration, data handling, and system utilities |
+| `code.*` | Developer tooling: testing, documentation, source queries, code management, project metadata, build tooling, and analysis |
+| `hara.*` and `rt.*` | Language authoring, grammar-driven code generation, typing, and runtime adapters |
+| `xt.*` | Portable libraries and application layers built on top of the language tooling |
+
+Supporting directories include:
+
+| Path | Purpose |
+|---|---|
+| `src/`, `src-lang/`, `src-extra/` | Main source trees |
+| `test/`, `test-lang/` | Tests, mirroring the source structure |
+| `src-build/` | Walkthroughs, demos, build definitions, and generated project examples |
+| `src-doc/` | Source for the generated documentation site |
+| `guides/` | Task-oriented Markdown guides |
+| `wiki/` | GitHub Wiki-ready topic pages, kept in the main repository for review and versioning |
+| `config/publish/` | Documentation-site configuration |
+
+## Quick start
+
+### Prerequisites
+
+- Java 21
+- Leiningen
+- Git
+
+Some test groups and runtimes also require tools such as Node.js, Python, R, Docker, PostgreSQL, OpenResty, or language-specific compilers. You only need those dependencies for the corresponding subsystem.
+
+### Clone and install locally
+
+Clojars deployment is currently paused, so the simplest installation path is a local Maven install:
 
 ```bash
 git clone git@github.com:zcaudate-xyz/foundation-base.git
@@ -26,99 +65,195 @@ cd foundation-base
 lein install
 ```
 
-#### Quick Setup (Developers)
+Then add the current project version from [`project.clj`](project.clj) to another Leiningen project:
 
-1.  **Prerequisites**: Java 21, Leiningen.
-2.  **Setup**: `git clone ...` then `lein deps`.
-3.  **Run Tests**: `./lein test :only std.lib.collection-test` (Do not run full suite initially).
+```clojure
+[xyz.zcaudate/foundation-base "4.1.5"]
+```
 
-### hara.lang - A Playground for Languages
+### Start a REPL
 
-There are so many languages currently out there is the world. Every single one of them has their own quirks but each are inspired by one another. 
+```bash
+lein repl
+```
 
-`hara.lang` creates an environment where multiple languages and multiple runtimes can be mixed, matched and integrated to get the basic minimum piece of code working. 
+Try a standard-library helper:
 
-When the benefits of repl driven development can be made available
-to any language, programming then becomes about the code itself and not everything around making the code work.
+```clojure
+(require '[std.lib :as h])
 
-An example working with Javascript in emacs:
+(h/time-ms)
+(h/pl "Hello Foundation!")
+```
 
-![captured](https://www.github.com/zcaudate-xyz/foundation-base/assets/1455572/a57f2ad2-23f9-4d39-917b-490bae8bd70b)
+## Generate target-language code
 
-### Template Base Transpile
-The best way to think about `std.lang` is that it is a convertor from lisp to algol. Algol languages syntactically is about 95% as another algol language. C is not that different from Js, is not that different from Python, is not that different from Solidity. There are differences in terms of types and keywords and whitespace/braces, but in general, the conventions are always present. `std.lang` provides a lisp dsl for these conventions as well as a method to write one's own grammer to target any language.
+`hara.lang` is a language-oriented templating and code-generation system. Clojure forms are stored in a reusable intermediate representation and emitted through a target grammar.
 
-Furthermore, robust programs require more than just writing the function. Testing is paramount and there is so much pain when jumping from one language to another due to the fact that one has to relearn all the tooling of a language's eco system to be effective. The advantage of `std.lang` is to provide a common testing/maintainance strategy across all code → from C to bash to solidity. If a new language needs to be targeted, a grammar and a runtime specific to that language would be suffice to integrate that language into the existing clojure toolchain. 
+```clojure
+(require '[hara.lang :as l])
 
-The generated code can be run independently of `std.lang`, using a language's native toolchain. `std.lang` only takes care of transpiling lisp to a target language, it doesn't try to do anything more than that. If a client asked you to do a C project. In the past you would probably say ‘no thanks’. But with `std.lang`, you write in lisp, test the functions in lisp and generate the c files. The client is happy because they get what they want, the lisper is happy because they get to write in lisp, test in lisp and have the same dynamic eval that a lisper expects.
+(l/emit-as :js '(+ 1 2 3))
+;; => "1 + 2 + 3"
+```
 
-### Solidity examples
+The same authoring model can target multiple languages:
 
-A runtime/workflow has been developed for live evaluation of solidity code. The tests are more important than the source files and can be walked through form by form. `nodejs` as well and the `ganache`, `solc`, `ethers` packages will need to be installed. Please see setup for [the testing environment](https://github.com/zcaudate/infra-testing/blob/main/infra/Dockerfile_foundation).
+```clojure
+(l/emit-as :js
+  '[(defn add [a b]
+      (return (+ a b)))
+    (add 1 2)])
 
-- [bookstore](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/web3/lib/example_bookstore.clj) and [test](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/test/web3/lib/example_bookstore_test.clj)
-- [erc20 token](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/web3/lib/example_erc20.clj) and [tests](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/test/web3/lib/example_erc20_test.clj)
-- [basic counter](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/test/web3/lib/example_counter_test.clj) and [tests](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/test/web3/lib/example_counter_test.clj)
+(l/emit-as :lua
+  '[(defn add [a b]
+      (return (+ a b)))
+    (add 1 2)])
+```
 
+Hara goes beyond printing syntax. Language books, grammars, modules, pointers, and runtime adapters make it possible to inspect, test, and execute generated code from the same Clojure workflow.
 
-### Dev prerequisites
+Start with:
 
-There are a number of programs needing to be preinstalled for the java environment to shell out to. Not all of them will be needed on your own projects but they will be necessary for running tests in dev.
+- [Hara overview](https://zcaudate.xyz/foundation-base/hara/index.html)
+- [Introduction](https://zcaudate.xyz/foundation-base/hara/introduction.html)
+- [Basic walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-basic.html) — [source](src-build/walkthrough/std_lang_00_basic.clj)
+- [Multiple-language walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-multi.html) — [source](src-build/walkthrough/std_lang_01_multi.clj)
+- [Live runtime walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-live.html) — [source](src-build/walkthrough/std_lang_02_live.clj)
 
-Please see [GETTING_STARTED.md](GETTING_STARTED.md) for detailed development instructions.
+## Examples
 
-### hara.lang - overview
+Examples should retain links to the authored source, project-generation definition, tests where available, generated output repository, and reproduction command.
 
-[std.lang](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang.clj) started off as an experimental snippet generator to run bits of lua code on openresty. I was looking around for a lightweight alternative to clojure servers and made the decision because of [this epic rant](https://www.github.com/zcaudate-xyz/foundation-base/discussions/4) on Quora. 
+| Example | Generated project | Authored source | Build definition |
+|---|---|---|---|
+| C pthreads hello | [`hoebat/play.c-000-pthreads-hello`](https://github.com/hoebat/play.c-000-pthreads-hello) | [`main.clj`](src-build/play/c_000_pthreads_hello/main.clj) | [`build.clj`](src-build/play/c_000_pthreads_hello/build.clj) |
+| OpenResty hello | [`hoebat/play.ngx-000-hello`](https://github.com/hoebat/play.ngx-000-hello) | [`main.clj`](src-build/play/ngx_000_hello/main.clj) | [`build.clj`](src-build/play/ngx_000_hello/build.clj) |
+| OpenResty live evaluation | [`hoebat/play.ngx-001-eval`](https://github.com/hoebat/play.ngx-001-eval) | [`main.clj`](src-build/play/ngx_001_eval/main.clj) | [`build.clj`](src-build/play/ngx_001_eval/build.clj) |
+| TUI counter | [`hoebat/play.tui-000-counter`](https://github.com/hoebat/play.tui-000-counter) | [`main.clj`](src-build/play/tui_000_counter/main.clj) | [`build.clj`](src-build/play/tui_000_counter/build.clj) |
+| TUI fetch | [`hoebat/play.tui-001-fetch`](https://github.com/hoebat/play.tui-001-fetch) | [`main.clj`](src-build/play/tui_001_fetch/main.clj) | [`build.clj`](src-build/play/tui_001_fetch/build.clj) |
+| TUI Game of Life | [`zcaudate/play.tui-002-game-of-life`](https://github.com/zcaudate/play.tui-002-game-of-life) | [`main.clj`](src-build/play/tui_002_game_of_life/main.clj) | [`build.clj`](src-build/play/tui_002_game_of_life/build.clj) |
+| React Native components | [`zcaudate/foundation.react-native`](https://github.com/zcaudate/foundation.react-native) | [`web_native_index.clj`](src-build/component/web_native_index.clj) | [`build_native_index.clj`](src-build/component/build_native_index.clj) |
 
-As features crept into the library, it slowly evolved into what it is now. More features were added to the project and it has evolved into a tool for exploration into multi-language/multi-runtime environment, allowing unprecedented control in code manipulation and testing:
+Generate or push the existing examples with the project aliases:
 
-- A standard set of [symbols](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang/base/grammar_spec.clj) for transpile
-- grammar spec for transpile to the following target languages:
-  - [lua](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang/model/spec_lua.clj)       (production ready)
-  - [js](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang/model/spec_js.clj)        (production ready)
-  - [python](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang/model/spec_python.clj)    (somewhat production ready)
-  - [r](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang/model/spec_r.clj)         (experimetal)
-  - [c](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang/model/spec_c.clj)         (gpu kernel code)
-  - [solidity](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/rt/solidity/grammar.clj)  (production ready)
-  - [bash](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang/model/spec_bash.clj)      (experimental)
-  - go        (seeking implementations)
-  - ocaml     (seeking implemenations)
-  - haskell   (seeking implementations)
-- Live eval through pluggable runtimes
-  - os      ([js](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/rt/basic/impl/process_js.clj), [python](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/rt/basic/impl/process_python.clj), [R](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/rt/basic/impl/process_r.clj), [lua](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/rt/basic/impl/process_lua.clj), [c](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/rt/basic/impl/process_c.clj))  
-  - [graal](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/rt/graal.clj)   (js, python)
-  - [nginx](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/rt/nginx.clj)   (lua)
-  - [evm](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/rt/solidity/client.clj)     (solidity)
-  - jocl        (c, gpu kernel)  
-  - websockets  (js, lua, python)
-  - browser     (js, through chrome driver)
-  - neovim      (lua, through msgpack-rpc)
-  - blender     (python, through embedded socket server)
-- [xtalk](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src/std/lang/base/grammar_xtalk.clj) (crosstalk), a template language transpiling across dynamic language targets (lua, js, python)
-- various helpers across different environments
-- [js](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src/js), [lua](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src/lua) and [xtalk](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src/xt) utility libaries.
+```bash
+lein push-c-000-pthreads
+lein push-ngx-000-hello
+lein push-ngx-001-eval
+lein push-tui-000-counter
+lein push-tui-001-fetch
+lein push-tui-002-game-of-life
+```
 
-### hara.lang - walkthroughs
+See [`wiki/Examples.md`](wiki/Examples.md) for the expanded examples index.
 
-Guided walkthroughs are provided for 
-- [00 basics](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_00_basic.clj)
-- [01 multi-lang](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_01_multi.clj)
-- [02 live eval](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_02_live.clj)
-- 03 under the hood
-- 04 creating a language
-- 05 creating a runtime
+## Write and run tests
 
-### hara.lang - examples
+Foundation Base uses `code.test`, not `clojure.test`. Tests are written as facts using the `=>` assertion form.
 
-- [react native components](https://github.com/zcaudate/foundation.react-native), generated from [build namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/component/build_native_index.clj) and [index namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/component/web_native_index.clj).
-- [c pthreads](https://github.com/zcaudate/play.c-000-pthreads-hello), generated from [build namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/c_000_pthreads_hello/build.clj) and [main namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/c_000_pthreads_hello/main.clj)
-- [ngx hello](https://github.com/zcaudate/play.ngx-000-hello), generated from [build namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_000_hello/build.clj) and [main namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_000_hello/main.clj)
-- [ngx server](https://github.com/zcaudate/play.ngx-000-hello), generated from [build namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_001_eval/build.clj) and [main namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_001_eval/main.clj)
-- [tui counter](https://github.com/zcaudate/play.tui-000-counter), generated from [build namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_000_counter/build.clj) and [main namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_000_counter/main.clj)
-- [tui fetch](https://github.com/zcaudate/play.tui-001-fetch), generated from [build namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_001_fetch/build.clj) and [main namespace](https://www.github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_001_fetch/main.clj)
-- [tui game of life](https://github.com/zcaudate/play.tui-002-game-of-life), generated from [build namespace](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src-build/play/tui_002_game_of_life/build.clj) and [main namespace](https://www.github.com/zcaudate-xyz/foundation-base/tree/main/src-build/play/tui_002_game_of_life/main.clj)
+```clojure
+(ns example.core-test
+  (:require [code.test :refer [fact =>]]))
+
+(fact "addition works"
+  (+ 1 2) => 3)
+```
+
+Run a targeted namespace while developing:
+
+```bash
+lein test :only std.lib.collection-test
+```
+
+Run tests matching a namespace prefix:
+
+```bash
+lein test :with std.lib
+```
+
+The complete suite covers many optional runtimes and external services, so targeted tests are the recommended starting point.
+
+## Work with the repository
+
+### As a library consumer
+
+Install the project locally, depend on the modules you need, and treat documented public namespaces as the supported entry points. Because the repository contains both mature and experimental areas, check the relevant guide and tests before relying on an unfamiliar subsystem.
+
+### As an explorer
+
+Start with one focused workflow:
+
+1. emit a small JavaScript or Lua form;
+2. run one `code.test` namespace;
+3. inspect one generated project under `src-build/play`;
+4. browse the matching generated documentation and source links.
+
+### As a contributor
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) for setup, repository conventions, testing expectations, documentation generation, and pull-request guidance.
+
+### As a documentation author
+
+The public site is generated from files in `src-doc/documentation/`. The repository homepage and `src-doc/documentation/main_index.clj` intentionally use the same project description and navigation model. When one changes, update the other in the same pull request.
+
+## Wiki pages
+
+GitHub stores a repository Wiki in a separate Git repository named `foundation-base.wiki`. That Wiki has not yet been initialized, so the reviewable source pages currently live under [`wiki/`](wiki/).
+
+The prepared pages include:
+
+- [`Home`](wiki/Home.md)
+- [`Getting Started`](wiki/Getting-Started.md)
+- [`Repository Map`](wiki/Repository-Map.md)
+- [`Hara Language Tooling`](wiki/Hara-Language-Tooling.md)
+- [`Code Tools`](wiki/Code-Tools.md)
+- [`Examples`](wiki/Examples.md)
+- [`Contributing`](wiki/Contributing.md)
+
+After the Wiki is enabled and its first page is created in GitHub, run:
+
+```bash
+bash bin/publish-wiki
+```
+
+This synchronizes the reviewed Markdown pages to the separate Wiki repository.
+
+## Guides
+
+- [`code.test`](guides/code.test.md) — fact-based testing and checkers
+- [`code.manage`](guides/code.manage.md) — source maintenance and test management
+- [`code.query`](guides/code.query.md) — structural source queries and edits
+- [`std.task`](guides/std.task.md) — task definition and execution
+- [`std.block`](guides/std.block.md) — source block parsing and layout
+- [`std.scheduler`](guides/std.scheduler.md) — concurrent scheduling
+- [`std.timeseries`](guides/std.timeseries.md) — time-series data and aggregation
+- [`xt.db.node.kernel-base`](guides/xt.db.node.adaptor_base.md) — database node bootstrap and RPC routing
+
+## Project status
+
+Foundation Base is an active codebase containing production-used libraries, evolving developer tooling, and experimental language/runtime integrations.
+
+Documentation should use these maturity labels where possible:
+
+- **Stable** — relied upon by production systems or other repositories
+- **Usable** — functional and tested, but APIs may still change
+- **Experimental** — research, prototypes, incomplete targets, or environment-specific integrations
+
+The full test suite currently includes runtime-dependent groups and is not guaranteed to pass on a minimal workstation without additional services. See the open issues and [`CONTRIBUTING.md`](CONTRIBUTING.md) for current work.
+
+## Documentation
+
+Published documentation: <https://zcaudate.xyz/foundation-base/>
+
+Documentation source: [`src-doc/documentation/`](src-doc/documentation/)
+
+Generate documentation locally with:
+
+```bash
+lein publish
+```
 
 ## License
 
-Copyright © 2023 Chris Zheng, MIT License
+Copyright © 2023 Chris Zheng. Distributed under the MIT License.

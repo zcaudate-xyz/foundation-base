@@ -1,54 +1,27 @@
-{:theme    "foundation"
- :output   "public"
- :pages    {index      
-            {:base  "home.html"
-             :input "src-doc/documentation/main_index.clj"
-             :title "foundation"
-             :subtitle "core libs and tools"}
-             
-            code-doc      
-            {:input "src-doc/documentation/code_doc.clj"
-             :title "code.doc"
-             :subtitle "tools for documentation"}
-            
-            #_#_
-            std-lib
-            {:input "src-doc/documentation/std_lib.clj"
-             :title "std.lib"
-             :subtitle "more functionality in std.lib"}
-            
-            #_#_
-            std-lib-bin
-            {:input "src-doc/documentation/std_lib_bin.clj"
-             :title "std.lib.bin"
-             :subtitle "basic functionality for buffers"}
+{:theme  "foundation"
+ :output "public"
+ :pages  {index
+          {:base  "home.html"
+           :input "src-doc/documentation/main_index.clj"
+           :title "Foundation Base"
+           :subtitle "Clojure-first libraries, developer tooling, language generation, and runtime integration"}
 
-            #_#_
-            std-lib-generate
-            {:input "src-doc/documentation/std_lib_generate.clj"
-             :title "std.lib.bin"
-             :subtitle "basic functionality for buffers"}
-            
-            #_#_
-            std-lib-link
-            {:input "src-doc/documentation/std_lib_foundation.clj"
-             :title "std.lib.foundation"
-             :subtitle "basic functionality for foundation"}
-            
-            #_#_
-            std-lib-stream
-            {:input "src-doc/documentation/std_lib_stream.clj"
-             :title "std.lib.system"
-             :subtitle "components and subcomponents"}
-            
-            #_#_
-            std-lib-system
-            {:input "src-doc/documentation/std_lib_system.clj"
-             :title "std.lib.system"
-             :subtitle "components and subcomponents"}
-            
-            #_#_
-            std-lib-zip
-            {:input "src-doc/documentation/std_lib_zip.clj"
-             :title "std.lib.system"
-             :subtitle "components and subcomponents"}}}
+          getting-started
+          {:input "src-doc/documentation/main_getting_started.clj"
+           :title "Getting Started"
+           :subtitle "install the project and choose a focused workflow"}
+
+          examples
+          {:input "src-doc/documentation/main_examples.clj"
+           :title "Examples"
+           :subtitle "walkthroughs, generated projects, source, tests, and runnable repositories"}
+
+          code-tools
+          {:input "src-doc/documentation/main_code_tools.clj"
+           :title "Code Tools"
+           :subtitle "testing, documentation, source queries, management, and project tooling"}
+
+          contributing
+          {:input "src-doc/documentation/main_contributing.clj"
+           :title "Contributing"
+           :subtitle "setup, targeted tests, documentation, and pull requests"}}}

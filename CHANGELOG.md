@@ -1,24 +1,35 @@
-# Change Log
-All notable changes to this project will be documented in this file. This change log follows the conventions of [keepachangelog.com](http://keepachangelog.com/).
+# Changelog
+
+Notable user-facing changes to Foundation Base are recorded here.
+
+This repository predates this changelog structure, so earlier releases have not yet been reconstructed from Git history. New entries should describe changes that affect installation, public APIs, generated output, supported runtimes, documentation, or contributor workflows.
+
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions should follow the version declared in `project.clj`.
 
 ## [Unreleased]
-### Changed
-- Add a new arity to `make-widget-async` to provide a different widget shape.
 
-## [0.1.1] - 2022-11-14
+### Added
+
+- A contributor onboarding guide covering setup, targeted tests, documentation generation, language targets, runtimes, and pull-request expectations.
+- Clear repository interaction paths for library consumers, language-tooling users, explorers, contributors, and documentation authors.
+
 ### Changed
-- Documentation on how to make the widgets.
+
+- Reworked the repository README to explain the purpose and scope of Foundation Base before installation details.
+- Mirrored the README identity, navigation, repository map, and quick-start paths in `src-doc/documentation/main_index.clj`.
+- Updated the generated-site title and subtitle to match the repository positioning.
+- Updated the getting-started guide to use the current project version and current onboarding model.
 
 ### Removed
-- `make-widget-sync` - we're all async, all the time.
 
-### Fixed
-- Fixed widget maker to keep working when daylight savings switches over.
+- Placeholder widget-template release notes and example repository links that were unrelated to Foundation Base.
 
-## 0.1.0 - 2022-11-14
-### Added
-- Files from the new template.
-- Widget maker public API - `make-widget-sync`.
+## Release process notes
 
-[Unreleased]: https://github.com/your-name/foundation-base/compare/0.1.1...HEAD
-[0.1.1]: https://github.com/your-name/foundation-base/compare/0.1.0...0.1.1
+When preparing a release:
+
+1. move relevant entries from `Unreleased` into a versioned section;
+2. add the release date in `YYYY-MM-DD` format;
+3. update comparison links when the corresponding tag exists;
+4. verify the dependency coordinate and version against `project.clj`;
+5. include migration notes for public API or generated-output changes.
