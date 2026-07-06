@@ -24,6 +24,23 @@
   => #"function \(\$a, \$b\)\s*\{\n  return \$a \+ \$b;\n\}")
 
 ^{:refer hara.model.annex.spec-php/+grammar+ :added "4.1"}
+(fact "rewrites bare lexical locals for PHP emission"
+  (l/emit-as :php ['(do
+                     (var out [])
+                     (var entries [0 1 2])
+                     (for:array [i entries]
+                       (xt/x:arr-push out i))
+                     out)])
+  => #"\$out = \[\];\n\$entries = \[0, 1, 2\];\nforeach \(\$entries as \$i\)")
+
+^{:refer hara.model.annex.spec-php/+grammar+ :added "4.1"}
+(fact "rewrites bare function params for seedgen-generated PHP forms"
+  (l/emit-as :php ['((fn [x]
+                       (return (+ x 1)))
+                     2)])
+  => #"\(function \(\$x\)\{\s+return \$x \+ 1;\s+\}\)\(2\)")
+
+^{:refer hara.model.annex.spec-php/+grammar+ :added "4.1"}
 (fact "emits method, static, and constructor calls through shared invoke/index emitters"
   [(l/emit-as :php ['(. $obj (method $arg))])
    (l/emit-as :php ['($ MyClass staticMethod $arg)])

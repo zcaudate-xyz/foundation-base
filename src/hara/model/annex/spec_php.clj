@@ -5,6 +5,7 @@
             [hara.lang.script :as script]
             [hara.model.spec-xtalk]
             [hara.model.annex.spec-xtalk.fn-php :as fn]
+            [hara.model.annex.spec-php.rewrite :as rewrite]
             [std.lib.collection :as collection]))
 
 (def +features+
@@ -56,6 +57,7 @@
         :token {:nil     {:as "null"}
                 :boolean {:as (fn [b] (if b "true" "false"))}
                 :string  {:quote :single}}
+        :rewrite {:staging [#'rewrite/php-rewrite-stage]}
         :data  {:vector    {:start "[" :end "]" :space ", "}
                 :map       {:start "[" :end "]" :space ", "}
                 :map-entry {:assign " => "

@@ -81,3 +81,14 @@
 
   (php-prefix-params '(fn [$x] (+ $x 1)))
   => '(fn [$x] (+ $x 1)))
+
+^{:refer hara.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"}
+(fact "runtime source emits seedgen-style bare PHP locals as valid PHP variables"
+  (php-body-source '(do
+                      (var out [])
+                      (var entries [0 1 2])
+                      (for:array [i entries]
+                        (xt/x:arr-push out i))
+                      out)
+                   {:bulk true})
+  => #"\$out = \[\];\s+\$entries = \[0, 1, 2\];\s+foreach \(\$entries as \$i\)")
