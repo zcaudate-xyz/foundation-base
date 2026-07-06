@@ -1,167 +1,71 @@
-{:theme    "foundation"
- :output   "public/std"
- :pages    {index
-            {:base  "home.html"
-             :input "src-doc/documentation/std/std_index.clj"
-             :title "std"
-             :subtitle "standard libraries for foundation"}
+{:theme "foundation"
+ :output "public/std"
+ :pages
+ {index {:base "home.html" :input "src-doc/documentation/std/std_index.clj" :title "std" :subtitle "standard libraries for foundation"}
 
-            std-concurrent
-            {:input "src-doc/documentation/std/std_concurrent.clj"
-             :title "std.concurrent"
-             :subtitle "concurrency primitives"}
+  std-concurrent {:input "src-doc/documentation/std/std_concurrent.clj" :title "std.concurrent" :subtitle "concurrency primitives"}
+  std-concurrent-atom {:input "src-doc/documentation/std/std_concurrent_atom.clj" :title "std.concurrent.atom" :subtitle "batched atom queues"}
+  std-concurrent-bus {:input "src-doc/documentation/std/std_concurrent_bus.clj" :title "std.concurrent.bus" :subtitle "thread message bus"}
+  std-concurrent-executor {:input "src-doc/documentation/std/std_concurrent_executor.clj" :title "std.concurrent.executor" :subtitle "executors and scheduling"}
+  std-concurrent-pool {:input "src-doc/documentation/std/std_concurrent_pool.clj" :title "std.concurrent.pool" :subtitle "reusable resource pools"}
+  std-concurrent-print {:input "src-doc/documentation/std/std_concurrent_print.clj" :title "std.concurrent.print" :subtitle "serialized concurrent output"}
+  std-concurrent-queue {:input "src-doc/documentation/std/std_concurrent_queue.clj" :title "std.concurrent.queue" :subtitle "blocking queues and deques"}
+  std-concurrent-relay {:input "src-doc/documentation/std/std_concurrent_relay.clj" :title "std.concurrent.relay" :subtitle "interactive streams"}
+  std-concurrent-request {:input "src-doc/documentation/std/std_concurrent_request.clj" :title "std.concurrent.request" :subtitle "request orchestration"}
+  std-concurrent-request-apply {:input "src-doc/documentation/std/std_concurrent_request_apply.clj" :title "std.concurrent.request-apply" :subtitle "request applicatives"}
+  std-concurrent-request-command {:input "src-doc/documentation/std/std_concurrent_request_command.clj" :title "std.concurrent.request-command" :subtitle "request command templates"}
+  std-concurrent-thread {:input "src-doc/documentation/std/std_concurrent_thread.clj" :title "std.concurrent.thread" :subtitle "thread utilities"}
 
-            std-dispatch
-            {:input "src-doc/documentation/std/std_dispatch.clj"
-             :title "std.dispatch"
-             :subtitle "dispatch boards, hubs, and queues"}
+  std-dispatch {:input "src-doc/documentation/std/std_dispatch.clj" :title "std.dispatch" :subtitle "dispatch boards, hubs, and queues"}
+  std-fs {:input "src-doc/documentation/std/std_fs.clj" :title "std.fs" :subtitle "filesystem paths and operations"}
+  std-scheduler {:input "src-doc/documentation/std/std_scheduler.clj" :title "std.scheduler" :subtitle "scheduled task runners"}
+  std-string {:input "src-doc/documentation/std/std_string.clj" :title "std.string" :subtitle "string utilities"}
+  std-task {:input "src-doc/documentation/std/std_task.clj" :title "std.task" :subtitle "task execution"}
+  std-time {:input "src-doc/documentation/std/std_time.clj" :title "std.time" :subtitle "time utilities"}
+  std-timeseries {:input "src-doc/documentation/std/std_timeseries.clj" :title "std.timeseries" :subtitle "time-series journals"}
+  std-block {:input "src-doc/documentation/std/std_block.clj" :title "std.block" :subtitle "code representation"}
 
-            std-fs
-            {:input "src-doc/documentation/std/std_fs.clj"
-             :title "std.fs"
-             :subtitle "filesystem paths and operations"}
+  jvm-artifact {:input "src-doc/documentation/std/jvm_artifact.clj" :title "jvm.artifact" :subtitle "artifact coordinates and paths"}
+  jvm-classloader {:input "src-doc/documentation/std/jvm_classloader.clj" :title "jvm.classloader" :subtitle "classpath and classloaders"}
+  jvm-deps {:input "src-doc/documentation/std/jvm_deps.clj" :title "jvm.deps" :subtitle "JVM dependency resolution"}
+  jvm-monitor {:input "src-doc/documentation/std/jvm_monitor.clj" :title "jvm.monitor" :subtitle "JVM metrics"}
+  jvm-namespace {:input "src-doc/documentation/std/jvm_namespace.clj" :title "jvm.namespace" :subtitle "namespace management"}
+  jvm-protocol {:input "src-doc/documentation/std/jvm_protocol.clj" :title "jvm.protocol" :subtitle "JVM extension protocols"}
+  jvm-reflect {:input "src-doc/documentation/std/jvm_reflect.clj" :title "jvm.reflect" :subtitle "Java reflection"}
+  jvm-require {:input "src-doc/documentation/std/jvm_require.clj" :title "jvm.require" :subtitle "dependency-aware requiring"}
+  jvm-tool {:input "src-doc/documentation/std/jvm_tool.clj" :title "jvm.tool" :subtitle "REPL development tools"}
 
-            std-scheduler
-            {:input "src-doc/documentation/std/std_scheduler.clj"
-             :title "std.scheduler"
-             :subtitle "scheduled task runners"}
+  lib-aether {:input "src-doc/documentation/std/lib_aether.clj" :title "lib.aether" :subtitle "Maven repository integration"}
+  lib-docker {:input "src-doc/documentation/std/lib_docker.clj" :title "lib.docker" :subtitle "container lifecycle helpers"}
+  lib-jdbc {:input "src-doc/documentation/std/lib_jdbc.clj" :title "lib.jdbc" :subtitle "JDBC database access"}
+  lib-lucene {:input "src-doc/documentation/std/lib_lucene.clj" :title "lib.lucene" :subtitle "Lucene search engines"}
+  lib-minio {:input "src-doc/documentation/std/lib_minio.clj" :title "lib.minio" :subtitle "local MinIO environments"}
+  lib-openpgp {:input "src-doc/documentation/std/lib_openpgp.clj" :title "lib.openpgp" :subtitle "OpenPGP operations"}
+  lib-oshi {:input "src-doc/documentation/std/lib_oshi.clj" :title "lib.oshi" :subtitle "system information"}
+  lib-postgres {:input "src-doc/documentation/std/lib_postgres.clj" :title "lib.postgres" :subtitle "PostgreSQL lifecycle"}
+  lib-rabbitmq {:input "src-doc/documentation/std/lib_rabbitmq.clj" :title "lib.rabbitmq" :subtitle "RabbitMQ management"}
+  lib-redis {:input "src-doc/documentation/std/lib_redis.clj" :title "lib.redis" :subtitle "Redis client lifecycle"}
 
-            std-string
-            {:input "src-doc/documentation/std/std_string.clj"
-             :title "std.string"
-             :subtitle "string utilities"}
-
-            std-task
-            {:input "src-doc/documentation/std/std_task.clj"
-             :title "std.task"
-             :subtitle "task execution"}
-
-            std-time
-            {:input "src-doc/documentation/std/std_time.clj"
-             :title "std.time"
-             :subtitle "time utilities"}
-
-            std-timeseries
-            {:input "src-doc/documentation/std/std_timeseries.clj"
-             :title "std.timeseries"
-             :subtitle "time-series journals"}
-
-            std-block
-            {:input "src-doc/documentation/std/std_block.clj"
-             :title "std.block"
-             :subtitle "code representation"}
-
-            std-lib-apply
-            {:input "src-doc/documentation/std/std_lib_apply.clj"
-             :title "std.lib.apply"
-             :subtitle "applicative invocation"}
-
-            std-lib-atom
-            {:input "src-doc/documentation/std/std_lib_atom.clj"
-             :title "std.lib.atom"
-             :subtitle "enhanced atom operations"}
-
-            std-lib-bin
-            {:input "src-doc/documentation/std/std_lib_bin.clj"
-             :title "std.lib.bin"
-             :subtitle "binary data utilities"}
-
-            std-lib-class
-            {:input "src-doc/documentation/std/std_lib_class.clj"
-             :title "std.lib.class"
-             :subtitle "class and reflection helpers"}
-
-            std-lib-collection
-            {:input "src-doc/documentation/std/std_lib_collection.clj"
-             :title "std.lib.collection"
-             :subtitle "collection utilities"}
-
-            std-lib-component
-            {:input "src-doc/documentation/std/std_lib_component.clj"
-             :title "std.lib.component"
-             :subtitle "component lifecycle utilities"}
-
-            std-lib-encode
-            {:input "src-doc/documentation/std/std_lib_encode.clj"
-             :title "std.lib.encode"
-             :subtitle "encoding utilities"}
-
-            std-lib-enum
-            {:input "src-doc/documentation/std/std_lib_enum.clj"
-             :title "std.lib.enum"
-             :subtitle "enum utilities"}
-
-            std-lib-env
-            {:input "src-doc/documentation/std/std_lib_env.clj"
-             :title "std.lib.env"
-             :subtitle "environment and system utilities"}
-
-            std-lib-foundation
-            {:input "src-doc/documentation/std/std_lib_foundation.clj"
-             :title "std.lib.foundation"
-             :subtitle "basic functionality for foundation"}
-
-            std-lib-future
-            {:input "src-doc/documentation/std/std_lib_future.clj"
-             :title "std.lib.future"
-             :subtitle "future and async helpers"}
-
-            std-lib-io
-            {:input "src-doc/documentation/std/std_lib_io.clj"
-             :title "std.lib.io"
-             :subtitle "I/O utilities"}
-
-            std-lib-network
-            {:input "src-doc/documentation/std/std_lib_network.clj"
-             :title "std.lib.network"
-             :subtitle "network utilities"}
-
-            std-lib-resource
-            {:input "src-doc/documentation/std/std_lib_resource.clj"
-             :title "std.lib.resource"
-             :subtitle "resource loading utilities"}
-
-            std-lib-schema
-            {:input "src-doc/documentation/std/std_lib_schema.clj"
-             :title "std.lib.schema"
-             :subtitle "schema utilities"}
-
-            std-lib-security
-            {:input "src-doc/documentation/std/std_lib_security.clj"
-             :title "std.lib.security"
-             :subtitle "security utilities"}
-
-            std-lib-sort
-            {:input "src-doc/documentation/std/std_lib_sort.clj"
-             :title "std.lib.sort"
-             :subtitle "sorting utilities"}
-
-            std-lib-stream
-            {:input "src-doc/documentation/std/std_lib_stream.clj"
-             :title "std.lib.stream"
-             :subtitle "streams and transducers"}
-
-            std-lib-system
-            {:input "src-doc/documentation/std/std_lib_system.clj"
-             :title "std.lib.system"
-             :subtitle "system composition utilities"}
-
-            std-lib-time
-            {:input "src-doc/documentation/std/std_lib_time.clj"
-             :title "std.lib.time"
-             :subtitle "time utilities"}
-
-            std-lib-transform
-            {:input "src-doc/documentation/std/std_lib_transform.clj"
-             :title "std.lib.transform"
-             :subtitle "data transform utilities"}
-
-            std-lib-walk
-            {:input "src-doc/documentation/std/std_lib_walk.clj"
-             :title "std.lib.walk"
-             :subtitle "walk and traversal utilities"}
-
-            std-lib-zip
-            {:input "src-doc/documentation/std/std_lib_zip.clj"
-             :title "std.lib.zip"
-             :subtitle "zipper utilities"}}}
+  std-lib-apply {:input "src-doc/documentation/std/std_lib_apply.clj" :title "std.lib.apply" :subtitle "applicative invocation"}
+  std-lib-atom {:input "src-doc/documentation/std/std_lib_atom.clj" :title "std.lib.atom" :subtitle "enhanced atom operations"}
+  std-lib-bin {:input "src-doc/documentation/std/std_lib_bin.clj" :title "std.lib.bin" :subtitle "binary data utilities"}
+  std-lib-class {:input "src-doc/documentation/std/std_lib_class.clj" :title "std.lib.class" :subtitle "class and reflection helpers"}
+  std-lib-collection {:input "src-doc/documentation/std/std_lib_collection.clj" :title "std.lib.collection" :subtitle "collection utilities"}
+  std-lib-component {:input "src-doc/documentation/std/std_lib_component.clj" :title "std.lib.component" :subtitle "component lifecycle utilities"}
+  std-lib-encode {:input "src-doc/documentation/std/std_lib_encode.clj" :title "std.lib.encode" :subtitle "encoding utilities"}
+  std-lib-enum {:input "src-doc/documentation/std/std_lib_enum.clj" :title "std.lib.enum" :subtitle "enum utilities"}
+  std-lib-env {:input "src-doc/documentation/std/std_lib_env.clj" :title "std.lib.env" :subtitle "environment and system utilities"}
+  std-lib-foundation {:input "src-doc/documentation/std/std_lib_foundation.clj" :title "std.lib.foundation" :subtitle "basic functionality for foundation"}
+  std-lib-future {:input "src-doc/documentation/std/std_lib_future.clj" :title "std.lib.future" :subtitle "future and async helpers"}
+  std-lib-io {:input "src-doc/documentation/std/std_lib_io.clj" :title "std.lib.io" :subtitle "I/O utilities"}
+  std-lib-network {:input "src-doc/documentation/std/std_lib_network.clj" :title "std.lib.network" :subtitle "network utilities"}
+  std-lib-resource {:input "src-doc/documentation/std/std_lib_resource.clj" :title "std.lib.resource" :subtitle "resource loading utilities"}
+  std-lib-schema {:input "src-doc/documentation/std/std_lib_schema.clj" :title "std.lib.schema" :subtitle "schema utilities"}
+  std-lib-security {:input "src-doc/documentation/std/std_lib_security.clj" :title "std.lib.security" :subtitle "security utilities"}
+  std-lib-sort {:input "src-doc/documentation/std/std_lib_sort.clj" :title "std.lib.sort" :subtitle "sorting utilities"}
+  std-lib-stream {:input "src-doc/documentation/std/std_lib_stream.clj" :title "std.lib.stream" :subtitle "streams and transducers"}
+  std-lib-system {:input "src-doc/documentation/std/std_lib_system.clj" :title "std.lib.system" :subtitle "system composition utilities"}
+  std-lib-time {:input "src-doc/documentation/std/std_lib_time.clj" :title "std.lib.time" :subtitle "time utilities"}
+  std-lib-transform {:input "src-doc/documentation/std/std_lib_transform.clj" :title "std.lib.transform" :subtitle "data transform utilities"}
+  std-lib-walk {:input "src-doc/documentation/std/std_lib_walk.clj" :title "std.lib.walk" :subtitle "walk and traversal utilities"}
+  std-lib-zip {:input "src-doc/documentation/std/std_lib_zip.clj" :title "std.lib.zip" :subtitle "zipper utilities"}}}
