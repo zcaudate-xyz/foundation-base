@@ -12,4 +12,4 @@
 "Read the source file directly for the executable facts. The docs page should keep high-level explanation here and use selected fact snippets when examples are expanded further."
 
 [[:chapter {:title "Source"}]]
-[[:file {:src "src-build/walkthrough/std_lang_00_basic.clj"}]]
+[[:file {:src "src-doc/walkthrough/std_lang_00_basic.clj"}]]

@@ -95,4 +95,4 @@
       "function (){\n  return 1 + 2 + 3;\n}"])
 
 [[:chapter {:title "Source"}]]
-[[:file {:src "src-build/walkthrough/std_lang_01_multi.clj"}]]
+[[:file {:src "src-doc/walkthrough/std_lang_01_multi.clj"}]]

@@ -41,7 +41,7 @@
   [[_ & args]]
   (letfn [(or-expr [args]
             (cond (empty? args)
-                  'null
+                  false
                   (= 1 (count args))
                   (first args)
                   :else
@@ -263,7 +263,7 @@
 (defn scheme-tf-x-type-native
   [[_ obj]]
   (scheme-if-chain
-   [[(list 'null? obj)      "nil"]
+   [[(list 'not obj)        "nil"]
     [(list 'string? obj)    "string"]
     [(list 'number? obj)    "number"]
     [(list 'boolean? obj)   "boolean"]
