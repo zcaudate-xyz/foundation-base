@@ -1,13 +1,16 @@
 name: Notify
 
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  
   notify:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -15,8 +18,8 @@ jobs:
 #            - 'zcaudate-xyz/foundation-embed'
 #            - 'zcaudate-xyz/foundation-fx'
             - 'zcaudate-xyz/foundation-web'
-    
-    steps:    
+
+    steps:
       - name: Notify Downstream
         uses: peter-evans/repository-dispatch@v3
         with:
