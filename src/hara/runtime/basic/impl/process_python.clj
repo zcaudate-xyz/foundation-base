@@ -14,6 +14,25 @@
             [std.lib.os :as os]
             [xt.lang.common-lib :as lib]))
 
+(def ^{:added "4.1"
+       :doc "Helpers that let emitted xtalk objects support attribute-style access
+   for keys (e.g. obj._size) while still behaving as dicts."}
+  +python-obj-helper+
+  (str "class __XtObject(dict):\n"
+       "    def __getattr__(self, key):\n"
+       "        return self.get(key)\n"
+       "    def __setattr__(self, key, value):\n"
+       "        self[key] = value\n"
+       "\n"
+       "def __xt_obj(d=None):\n"
+       "    return __XtObject(d if d is not None else {})\n"
+       "\n"
+       "def __xt_get(obj, k):\n"
+       "    try:\n"
+       "        return obj[k]\n"
+       "    except (KeyError, IndexError, TypeError):\n"
+       "        return None\n"))
+
 (def +python-init+
   (common/put-program-options
    :python  {:default  {:oneshot     :cpython
@@ -99,7 +118,9 @@
                    {:lang :python
                     :layout :flat})]
     (fn [body]
-      (str bootstrap
+      (str +python-obj-helper+
+           "\n\n"
+           bootstrap
            "\n\n"
            (impl/emit-as
             :python [(list 'print (list 'return-eval body))])))))
@@ -170,7 +191,9 @@
                          :python +client-basic+)]
                        (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
-      (str bootstrap
+      (str +python-obj-helper+
+           "\n\n"
+           bootstrap
            "\n\n"
            (impl/emit-as
             :python [(list 'client-basic
@@ -231,7 +254,9 @@
                          :python +client-ws+)]
                        (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
-      (str bootstrap
+      (str +python-obj-helper+
+           "\n\n"
+           bootstrap
            "\n\n"
            (impl/emit-as
             :python [(list 'client-ws

@@ -129,7 +129,10 @@
 (def +scheme-local-override+
   {:break {:macro #'scheme-tf-break :emit :macro}
    :mod   {:macro #'scheme-tf-mod   :emit :macro}
-   :pow   {:macro #'scheme-tf-pow   :emit :macro}})
+   :pow   {:macro #'scheme-tf-pow   :emit :macro}
+   :or    {:macro #'fn/scheme-tf-or    :emit :macro}
+   :and   {:macro #'fn/scheme-tf-and   :emit :macro}
+   :internal-str {:macro #'fn/scheme-tf--%%- :emit :macro}})
 
 (def +scheme-local-extend+
   {:with-global {:op :with-global :symbol #{'!:G}        :emit :with-global}
@@ -291,7 +294,7 @@
 
 (defn emit-scheme-form
   [form]
-  (cond (nil? form)      "'null"
+  (cond (nil? form)      "null"
         (true? form)     "#t"
         (false? form)    "#f"
         (string? form)   (pr-str form)

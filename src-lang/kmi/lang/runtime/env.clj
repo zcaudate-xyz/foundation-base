@@ -122,9 +122,9 @@
   "looks up a symbol: env -> current ns -> refs -> kmi.core"
   {:added "4.1"}
   [runtime env sym]
-  (var local (-/env-lookup env sym))
-  (when (xt/x:not-nil? local)
-    (return local))
+  (var resolved (-/env-lookup env sym))
+  (when (xt/x:not-nil? resolved)
+    (return resolved))
   (var ns-name (-/sym-ns sym))
   (var name (-/sym-name sym))
   (when (xt/x:not-nil? ns-name)

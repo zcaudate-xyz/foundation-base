@@ -176,7 +176,8 @@
         (grammar/build:extend
            {:dart-or      {:op :dart-or      :symbol #{'dart:or}      :emit :infix             :raw "??"}
             :dart-ternary {:op :dart-ternary :symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}
-            :dart-var     {:op :dart-var     :symbol #{'var}          :macro #'dart-var         :emit :macro}})))
+            :dart-var     {:op :dart-var     :symbol #{'var}          :macro #'dart-var         :emit :macro}
+            :vargs        {:op :vargs        :symbol '#{...}          :raw "vargs"            :value true :emit :throw}})))
 
 (def +template+
   (-> (emit/default-grammar)

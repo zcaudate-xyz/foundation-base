@@ -130,6 +130,10 @@
         async-needed?   (or (str/includes? source "Future.")
                             (str/includes? source "Completer"))
         math-needed?    (str/includes? source "math.")
+        typed-data-needed? (or (str/includes? source "Uint8List")
+                               (str/includes? source "ByteData")
+                               (str/includes? source "Float32List")
+                               (str/includes? source "Int32List"))
         lines           (str/split-lines source)
         [import-lines body-lines]
         (reduce (fn [[imports body] line]
@@ -150,7 +154,10 @@
                           (conj "import 'dart:async';")
                           (and math-needed?
                                (not-any? #(= "import 'dart:math' as math;" %) import-lines))
-                          (conj "import 'dart:math' as math;"))]
+                          (conj "import 'dart:math' as math;")
+                          (and typed-data-needed?
+                               (not-any? #(= "import 'dart:typed_data';" %) import-lines))
+                          (conj "import 'dart:typed_data';"))]
     (str/join "\n"
               (concat imports
                       (when (and (seq imports)

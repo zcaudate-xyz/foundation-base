@@ -208,30 +208,69 @@
              (concat (map python-normalize-form body)
                      (map python-rewrite-handler handlers))))))
 
-(defn- python-rewrite-list
+(declare python-normalize-lhs-form)
+
+(defn- python-safe-dot?
+  "matches a single-index read like (. obj [k]), but not slice syntax"
   [form]
-  (cond
-    (not (collection/form? form))
-    form
+  (and (collection/form? form)
+       (= '. (first form))
+       (let [props (rest form)]
+         (and (= 2 (count props))
+              (vector? (second props))
+              (let [k (first (second props))]
+                (not (and (collection/form? k)
+                          (#{':- :to} (first k))))))))
 
-    (= 'quote (first form))
-    form
-
-    (= 'throw (first form))
-    (python-rewrite-throw form)
-
-    (= 'try (first form))
-    (python-rewrite-try form)
-
-    :else
+(defn- python-safe-dot
+  "rewrites (. obj [k]) to a safe lookup that returns None on missing keys/indices"
+  [form]
+  (let [[_ obj [k]] form]
     (with-form-meta form
-      (apply list (map python-normalize-form form)))))
+      (list '__xt_get obj k))))
+
+(defn- python-rewrite-list-fn
+  [wrap?]
+  (fn [form]
+    (cond
+      (not (collection/form? form))
+      form
+
+      (= 'quote (first form))
+      form
+
+      (= 'throw (first form))
+      (python-rewrite-throw form)
+
+      (= 'try (first form))
+      (python-rewrite-try form)
+
+      (and (collection/form? form)
+           (#{:= :+= :-= :*=} (first form)))
+      (let [[op lhs rhs] form]
+        (with-form-meta form
+          (list op
+                (python-normalize-lhs-form lhs)
+                (python-normalize-form rhs))))
+
+      :else
+      (let [rewritten (if (and wrap? (python-safe-dot? form))
+                        (python-safe-dot form)
+                        form)]
+        (with-form-meta rewritten
+          (apply list (map python-normalize-form rewritten)))))))
 
 (defn python-normalize-form
   [form]
   (walk/rewrite-form form
-                     python-rewrite-list
+                     (python-rewrite-list-fn true)
                      python-normalize-form))
+
+(defn- python-normalize-lhs-form
+  [form]
+  (walk/rewrite-form form
+                     (python-rewrite-list-fn false)
+                     python-normalize-lhs-form))
 
 (defn python-rewrite-stage
   [form opts]

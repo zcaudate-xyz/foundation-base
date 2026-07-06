@@ -29,9 +29,13 @@
 
 (defn scheme-truthy-check
   [sym]
-  (list 'or
-        (list 'equal? sym (list 'quote 'null))
-        (list 'equal? sym false)))
+  (list 'if
+        (list 'null? sym)
+        false
+        (list 'if
+              (list 'equal? sym false)
+              false
+              true)))
 
 (defn scheme-tf-or
   [[_ & args]]
@@ -43,11 +47,11 @@
                   :else
                   (let [sym (gensym "v__")]
                     (list 'let
-                          (list (list sym (first args)))
+                          [sym (first args)]
                           (list 'if
                                 (scheme-truthy-check sym)
-                                (or-expr (rest args))
-                                sym)))))]
+                                sym
+                                (or-expr (rest args)))))))]
     (or-expr args)))
 
 (defn scheme-tf-and
@@ -60,7 +64,7 @@
                   :else
                   (let [sym (gensym "v__")]
                     (list 'let
-                          (list (list sym (first args)))
+                          [sym (first args)]
                           (list 'if
                                 (scheme-truthy-check sym)
                                 (and-expr (rest args))
@@ -119,7 +123,7 @@
     (map (fn [arg]
            (list 'display arg))
          args)
-    [false])))
+    ['null])))
 
 (defn scheme-tf-x-len
   [[_ obj]]
@@ -371,7 +375,7 @@
 
 (defn scheme-tf-x-lu-create
   [_]
-  '(make-hash))
+  '(make-hasheq))
 
 (defn scheme-tf-x-lu-get
   [[_ lu obj]]
@@ -1053,9 +1057,13 @@
 
 (defn scheme-tf-x-prototype-method
   [[_ obj key]]
-  (list 'or
-        (list 'hash-ref obj key false)
-        (list 'hash-ref (list 'hash-ref obj "_xt_proto" false) key false)))
+  (let [direct (gensym "d__")]
+    (list 'let
+          [direct (list 'hash-ref obj key nil)]
+          (list 'if
+                (scheme-truthy-check direct)
+                direct
+                (list 'hash-ref (list 'hash-ref obj "_xt_proto" nil) key nil)))))
 
 (def +scheme-proto+
   {:prototype-create {:macro #'scheme-tf-x-prototype-create :emit :macro
@@ -1114,15 +1122,14 @@
 
 (defn scheme-tf-x-socket-connect
   [[_ host port _opts cb]]
-  (list 'with-handlers
-        (list (list (list 'lambda '(e) true)
-                    (list 'lambda '(e)
-                          (list cb 'e false))))
-        (list 'let-values
-              (list (list (list 'in 'out)
-                          (list 'tcp-connect host port)))
-              (list cb false (list 'vector 'in 'out))))
-  )
+  (let [handler-pair (list (list 'lambda '(e) true)
+                           (list 'lambda '(e)
+                                 (list cb 'e 'null)))
+        bindings (list (list (list 'in 'out)
+                             (list 'tcp-connect host port)))
+        let-body (list cb 'null (list 'vector 'in 'out))
+        with-body (list 'let-values bindings let-body)]
+    (list 'with-handlers (list handler-pair) with-body)))
 
 (defn scheme-tf-x-socket-send
   [[_ conn s]]

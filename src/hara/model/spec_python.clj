@@ -34,6 +34,14 @@
   [v]
   (if v "True" "False"))
 
+(defn python-tf-inif
+  "Python's `cond and then or else` ternary fails when `then` is falsy.
+   Wrap the branches in single-element lists so the truthiness test only
+   sees the list, then extract the chosen value with `[0]."
+  {:added "4.1"}
+  [[_ check then else]]
+  (list '. (list 'or (list 'and check [then]) [else]) [0]))
+
 (defn- python-qualified-symbol
   [sym]
   (let [{:keys [module]} (preprocess/macro-opts)
@@ -192,17 +200,100 @@
   (str "nonlocal "
        (string/join ", " (map #(common/*emit-fn* % grammar mopts) syms))))
 
+(defn- python-vargs-param?
+  "checks if an args vector uses the variadic `...` marker"
+  {:added "4.1"}
+  [args]
+  (and (vector? args)
+       (some #(= '... %) args)))
+
+(declare python-replace-vargs-body)
+
+(defn- python-replace-vargs-body
+  "replaces `...` with vargs-sym in body forms and converts `[...]` to
+   (list vargs-sym)"
+  {:added "4.1"}
+  [form vargs-sym]
+  (cond (seq? form)
+        (with-meta
+          (apply list (map #(python-replace-vargs-body % vargs-sym) form))
+          (meta form))
+
+        (vector? form)
+        (let [items (vec (map #(python-replace-vargs-body % vargs-sym) form))]
+          (if (and (= 1 (count items))
+                   (= vargs-sym (first items)))
+            (list 'list vargs-sym)
+            (with-meta items (meta form))))
+
+        (= '... form)
+        vargs-sym
+
+        :else form))
+
+(defn- python-replace-vargs
+  "replaces `...` with vargs-sym in the args vector and body"
+  {:added "4.1"}
+  [form vargs-sym]
+  (let [[tag name args & more] form]
+    (apply list tag name
+           (vec (map #(if (= '... %) vargs-sym %) args))
+           (map #(python-replace-vargs-body % vargs-sym) more))))
+
+(defn- python-add-vargs-star
+  "post-processes a Python function header so the vargs parameter emits as *vargs"
+  {:added "4.1"}
+  [source vargs-sym]
+  (let [vargs-name (name vargs-sym)
+        pattern (re-pattern (str vargs-name "(?:=None)?\\):"))]
+    (clojure.string/replace source pattern (str "*" vargs-name "):"))))
+
+(defn- python-default-nil
+  "gives every plain parameter a default of nil so that Python matches JS/Lua
+   semantics for omitted trailing arguments. Only applies when every parameter
+   is a simple symbol (or the variadic `...` marker) to avoid Python's
+   'parameter without a default follows parameter with a default' error."
+  {:added "4.1"}
+  [args]
+  (if-not (and (vector? args)
+               (every? symbol? args)
+               (not (some #(#{:= '&} %) args)))
+    args
+    (vec (mapcat (fn [i]
+                   (let [a (nth args i)
+                         n (nth args (inc i) nil)]
+                     (if (and (symbol? a)
+                              (not= '... a)
+                              (not= '& a)
+                              (not= := n))
+                       [a := nil]
+                       [a])))
+                 (range (count args))))))
+
 (defn python-defn-
   "hidden function without decorators"
   {:added "4.0"}
   [form grammar mopts]
   (let [[tag name args & more] form
-        more (python-prepend-nonlocals name args more)]
-    (top/emit-top-level
-     :defn
-      (list* tag name (python-apply-optional-defaults name args) more)
-     grammar
-     mopts)))
+        more (python-prepend-nonlocals name args more)
+        args (-> (python-apply-optional-defaults name args)
+                 (python-default-nil))]
+    (if (python-vargs-param? args)
+      (let [vargs-sym (gensym "vargs__")
+            form* (python-replace-vargs
+                   (list* tag name args more)
+                   vargs-sym)
+            output (top/emit-top-level
+                    :defn
+                    form*
+                    grammar
+                    mopts)]
+        (python-add-vargs-star output vargs-sym))
+      (top/emit-top-level
+       :defn
+       (list* tag name args more)
+       grammar
+       mopts))))
 
 (defn python-defn
   "creates a defn function for python"
@@ -393,6 +484,7 @@
          :for-array   {:macro #'tf-for-array  :emit :macro}
          :for-iter    {:macro #'tf-for-iter   :emit :macro}
          :for-index   {:macro #'tf-for-index  :emit :macro}
+         :inif        {:macro #'python-tf-inif :emit :macro}
          :prototype-get       {:macro #'python-tf-prototype-get     :emit :macro}
          :prototype-set       {:macro #'python-tf-prototype-set     :emit :macro}
          :prototype-create    {:macro #'python-tf-prototype-create  :emit :macro
@@ -408,6 +500,7 @@
         :del       {:op :del     :symbol #{'del}  :raw "del"  :emit :prefix}
         :pass      {:op :pass    :symbol #{'pass} :raw "pass" :emit :return :type :special}
         :nan       {:op :nan     :symbol #{'NaN}  :raw "NaN"  :value true :emit :throw}
+         :vargs     {:op :vargs   :symbol '#{...} :raw "args" :value true :emit :throw}
          :nonlocal  {:op :nonlocal :symbol #{'nonlocal} :emit #'python-emit-nonlocal}
          :with      {:op :with    :symbol #{'with} :type :block
                      :block  {:main #{:parameter :body}}}})))
@@ -425,7 +518,7 @@
                   :function  {:raw "lambda"
                               :args      {:start " " :end ":" :space ""}
                               :body      {:start "" :end "" :append true}}
-                  :infix     {:if  {:check "and" :then "or"}}
+                  :infix     {:if  {:check " if " :then " else "}}
                   :global    {:reference '(globals)}}
         :token   {:nil       {:as "None"}
                   :boolean   {:as #'python-token-boolean}
@@ -436,6 +529,7 @@
                                                  :args {:start "" :end ":" :space ""}}}}
                    :branch   {:control {:elseif {:raw "elif"}}}}
         :data     {:map-entry {:key-fn data/default-map-key}
+                   :map       {:start "__xt_obj({" :end "})" :space ""}
                    :set       {:start "{" :end "}" :space ""}
                    :vector    {:start "[" :end "]" :space ""}
                    :tuple     {:start "(" :end ")" :space ""}

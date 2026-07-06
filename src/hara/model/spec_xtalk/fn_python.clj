@@ -215,7 +215,10 @@
 
 (defn python-tf-x-to-number
   [[_ e]]
-  (list 'float e))
+  (list ':?
+        (list '. e '(isdigit))
+        (list 'int e)
+        (list 'float e)))
 
 (defn python-tf-x-is-string?
   [[_ e]]

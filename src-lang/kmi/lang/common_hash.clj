@@ -60,6 +60,24 @@
             (:- "0xFFFFFF"))))
 
 ;;
+;; DART
+;;
+
+(l/script :dart
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-resource :as rt]]})
+
+(defn.dt hash-float
+  "hashes a floating point"
+  {:added "4.1"}
+  [f]
+  (var bytes (new Uint8List 4))
+  (var bdata (new ByteData.view (. bytes buffer)))
+  (. bdata (setFloat32 0 f))
+  (return (. bdata (getInt32 0))))
+
+;;
 ;; XTALK
 ;;
 
