@@ -2,12 +2,20 @@
   (:require [code.mcp.base.server :as server]
             [code.mcp.tool.basic :as basic]
             [code.test :refer :all])
-  (:import [io.modelcontextprotocol.server.transport StdioServerTransportProvider]))
+  (:import [io.modelcontextprotocol.server.transport StdioServerTransportProvider
+            WebFluxStreamableServerTransportProvider]))
 
 ^{:refer code.mcp.base.server/create-transport-provider :added "4.1"}
 (fact "creates a stdio transport provider"
   (instance? StdioServerTransportProvider
              (server/create-transport-provider {:type :stdio}))
+  => true)
+
+^{:refer code.mcp.base.server/create-transport-provider :added "4.1"}
+(fact "creates a WebFlux streamable HTTP transport provider"
+  (instance? WebFluxStreamableServerTransportProvider
+             (server/create-transport-provider {:type :webflux-streamable
+                                                :message-endpoint "/mcp"}))
   => true)
 
 ^{:refer code.mcp.base.server/create-server :added "4.1"}

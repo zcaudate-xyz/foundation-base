@@ -8,9 +8,14 @@
             [code.mcp.tool.code-test :as code-test]
             [code.mcp.tool.form-heal :as form-heal]
             [code.mcp.tool.jvm-namespace :as jvm-namespace]
-            [code.mcp.tool.hara-lang :as hara.lang]))
+            [code.mcp.tool.hara-lang :as hara.lang])
+  (:import [org.springframework.web.reactive.function.server RouterFunctions]
+           [org.springframework.http.server.reactive ReactorHttpHandlerAdapter]
+           [reactor.netty.http.server HttpServer]
+           [reactor.netty DisposableServer]))
 
-(defonce *server* (atom nil))
+(defonce ^:dynamic *server* (atom nil))
+(defonce ^:dynamic *http-server* (atom nil))
 
 (defn default-instructions
   []
@@ -71,3 +76,53 @@
            (when current
              (base-server/close! current))
            nil)))
+
+(defn create-http-server
+  "Creates a long-lived streamable HTTP MCP server map without installing it globally."
+  ([]
+   (create-http-server {}))
+  ([{:keys [host port endpoint]
+     :or {host "127.0.0.1"
+          port 3339
+          endpoint "/mcp"}
+     :as opts}]
+   (let [mcp-server (create-server
+                     (merge opts
+                            {:transport {:type :webflux-streamable
+                                         :message-endpoint endpoint}}))
+         provider (:provider mcp-server)
+         http-handler (RouterFunctions/toHttpHandler (.getRouterFunction provider))
+         adapter (ReactorHttpHandlerAdapter. http-handler)
+         http-server (-> (HttpServer/create)
+                         (.host host)
+                         (.port (int port))
+                         (.handle adapter)
+                         (.bindNow))]
+     {:host host
+      :port (.port ^DisposableServer http-server)
+      :endpoint endpoint
+      :url (str "http://" host ":" (.port ^DisposableServer http-server) endpoint)
+      :mcp mcp-server
+      :http http-server})))
+
+(defn start-http-server
+  "Starts the MCP server once in the current JVM and exposes it over streamable HTTP."
+  ([]
+   (start-http-server {}))
+  ([opts]
+   (swap! *http-server*
+          (fn [current]
+            (or current
+                (create-http-server opts))))))
+
+(defn stop-http-server
+  "Stops the long-lived HTTP MCP server, if one is running."
+  []
+  (swap! *http-server*
+         (fn [current]
+           (when current
+             (when-let [http (:http current)]
+               (.disposeNow ^DisposableServer http))
+             (base-server/close! (:mcp current)))
+           nil)))
+

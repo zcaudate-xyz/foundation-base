@@ -85,3 +85,38 @@
       (server/stop-server)
       @closed => {:server :mock}
       @server/*server* => nil)))
+
+^{:refer code.mcp.server/create-http-server :added "4.1"}
+(fact "creates a streamable HTTP MCP server on an ephemeral port"
+  (let [instance (server/create-http-server {:port 0})]
+    (try
+      [(pos? (:port instance))
+       (= (:url instance) (str "http://127.0.0.1:" (:port instance) "/mcp"))
+       (contains? instance :mcp)
+       (contains? instance :http)]
+      (finally
+        (.disposeNow ^reactor.netty.DisposableServer (:http instance))
+        (base-server/close! (:mcp instance)))))
+  => [true true true true])
+
+^{:refer code.mcp.server/start-http-server :added "4.1"}
+(fact "starts and memoizes the streamable HTTP MCP server"
+  (server/stop-http-server)
+  (let [first-instance (server/start-http-server {:port 0})
+        second-instance (server/start-http-server {:port 0})]
+    (try
+      [(identical? first-instance second-instance)
+       (pos? (:port first-instance))]
+      (finally
+        (server/stop-http-server))))
+  => [true true])
+
+^{:refer code.mcp.server/stop-http-server :added "4.1"}
+(fact "stops the streamable HTTP MCP server"
+  (server/stop-http-server)
+  (let [instance (server/start-http-server {:port 0})]
+    (server/stop-http-server)
+    [(nil? @server/*http-server*)
+     (.isDisposed ^reactor.netty.DisposableServer (:http instance))])
+  => [true true])
+

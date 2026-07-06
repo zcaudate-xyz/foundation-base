@@ -1,13 +1,32 @@
 (ns code.mcp.base.server
   (:require [code.mcp.base.wrap :as wrap])
-  (:import [io.modelcontextprotocol.server McpServer McpSyncServer]
-           [io.modelcontextprotocol.server.transport StdioServerTransportProvider]))
+  (:import [com.fasterxml.jackson.databind ObjectMapper]
+           [io.modelcontextprotocol.server McpServer McpSyncServer]
+           [io.modelcontextprotocol.server.transport StdioServerTransportProvider
+            WebFluxStreamableServerTransportProvider
+            WebFluxSseServerTransportProvider]))
 
 (defn create-transport-provider
-  [{:keys [provider type]}]
+  [{:keys [provider type message-endpoint sse-endpoint base-path object-mapper]}]
   (or provider
       (case (or type :stdio)
-        :stdio (StdioServerTransportProvider.)
+        :stdio
+        (StdioServerTransportProvider.)
+
+        :webflux-streamable
+        (-> (WebFluxStreamableServerTransportProvider/builder)
+            (.objectMapper (or object-mapper (ObjectMapper.)))
+            (.messageEndpoint (or message-endpoint "/mcp"))
+            (.build))
+
+        :webflux-sse
+        (cond-> (doto (WebFluxSseServerTransportProvider/builder)
+                  (.objectMapper (or object-mapper (ObjectMapper.))))
+          base-path (.basePath base-path)
+          message-endpoint (.messageEndpoint message-endpoint)
+          sse-endpoint (.sseEndpoint sse-endpoint)
+          true (.build))
+
         (throw (ex-info "Unsupported transport type"
                         {:type type})))))
 
