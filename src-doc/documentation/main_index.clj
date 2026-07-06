@@ -4,9 +4,9 @@
           :subtitle "A Clojure-first toolkit for building, generating, testing, and operating polyglot systems."
           :lead "Foundation Base combines reusable Clojure libraries, developer tooling, language generation, and runtime integration in one repository. Start with the area that matches what you want to do; you do not need to understand the entire codebase first."
           :badges ["std" "code" "hara + rt" "xt"]
-          :actions [{:label "Generate code with Hara" :href "hara/introduction.html" :variant :primary}
-                    {:label "Browse standard libraries" :href "std/index.html"}
-                    {:label "Explore developer tools" :href "code/index.html"}]}]]
+          :actions [{:label "Getting started" :href "getting-started.html" :variant :primary}
+                    {:label "Browse examples" :href "examples.html"}
+                    {:label "Contribute" :href "contributing.html"}]}]]
 
 [[:section {:title "Choose your path"}]]
 
@@ -19,37 +19,41 @@
                        :title "Generate code for other languages"
                        :text "Use Hara books and grammars to emit JavaScript, Lua, Python, Go, SQL, Solidity, and other targets from a shared Clojure authoring model."
                        :href "hara/introduction.html"}
-                      {:meta "Runtime integration"
-                       :title "Execute generated code"
-                       :text "Connect generated code to processes, browsers, databases, containers, editors, OpenResty, and other runtime hosts."
-                       :href "hara/hara-runtime.html"}
+                      {:meta "Examples"
+                       :title "Compare source with generated projects"
+                       :text "Follow walkthroughs and open authored Clojure source, build definitions, generated repositories, and reproduction commands."
+                       :href "examples.html"}
                       {:meta "Developer tooling"
                        :title "Test, document, query, and maintain code"
                        :text "Use code.test, code.doc, code.query, code.manage, project metadata, build tools, and analysis utilities."
-                       :href "code/index.html"}
+                       :href "code-tools.html"}
                       {:meta "Cross-target libraries"
                        :title "Build portable application layers"
                        :text "Explore xt.lang, xt.db, xt.net, xt.event, xt.substrate, walkthroughs, and parity examples built on top of the language tooling."
                        :href "xt/index.html"}
                       {:meta "Contributing"
                        :title "Work on Foundation Base"
-                       :text "The repository README and CONTRIBUTING.md cover setup, targeted testing, documentation generation, repository conventions, and pull-request expectations."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/CONTRIBUTING.md"}]}]]
+                       :text "Set up the repository, run targeted tests, update documentation, and prepare focused pull requests."
+                       :href "contributing.html"}]}]]
 
 [[:chapter {:title "Repository map"}]]
 
 [[:card-grid {:items [{:meta "std.*"
                        :title "Standard libraries"
-                       :text "Reusable infrastructure and application-level utilities."}
+                       :text "Reusable infrastructure and application-level utilities."
+                       :href "std/index.html"}
                       {:meta "code.*"
                        :title "Development tools"
-                       :text "Testing, documentation, structural queries, maintenance, project tooling, and analysis."}
+                       :text "Testing, documentation, structural queries, maintenance, project tooling, and analysis."
+                       :href "code-tools.html"}
                       {:meta "hara.* and rt.*"
                        :title "Languages and runtimes"
-                       :text "Grammar-driven code generation, typing, target models, and runtime adapters."}
+                       :text "Grammar-driven code generation, typing, target models, and runtime adapters."
+                       :href "hara/index.html"}
                       {:meta "xt.*"
                        :title "Portable libraries"
-                       :text "Cross-target libraries and application layers built with the language tooling."}]}]]
+                       :text "Cross-target libraries and application layers built with the language tooling."
+                       :href "xt/index.html"}]}]]
 
 [[:chapter {:title "Quick start"}]]
 
@@ -84,13 +88,16 @@
                        :text "Install locally, use documented public namespaces, and check the relevant guide and tests before adopting an unfamiliar subsystem."}
                       {:meta "Explorer"
                        :title "Follow one focused workflow"
-                       :text "Emit a small JS or Lua form, run one code.test namespace, inspect a generated project, and browse the matching documentation page."}
+                       :text "Emit a small JS or Lua form, run one code.test namespace, inspect a generated project, and browse the matching documentation page."
+                       :href "examples.html"}
                       {:meta "Contributor"
                        :title "Make targeted changes"
-                       :text "Use the contributor guide for environment setup, conventions, documentation generation, and pull-request expectations."}
-                      {:meta "Documentation author"
-                       :title "Keep the two homepages aligned"
-                       :text "README.md and src-doc/documentation/main_index.clj intentionally share the same identity, paths, and repository map. Update both in the same pull request."}]}]]
+                       :text "Use the contributor guide for environment setup, conventions, documentation generation, and pull-request expectations."
+                       :href "contributing.html"}
+                      {:meta "Wiki reader"
+                       :title "Browse topic-oriented pages"
+                       :text "Wiki-ready Markdown pages are kept in the repository and can be synchronized to GitHub Wiki after it is initialized."
+                       :href "https://github.com/zcaudate-xyz/foundation-base/tree/main/wiki"}]}]]
 
 [[:chapter {:title "Project status"}]]
 
