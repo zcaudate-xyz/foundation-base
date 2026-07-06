@@ -1,15 +1,60 @@
-{:dart   {:include :all
+{;;
+ ;; FULL
+ ;;
+ 
+ :js     {:include [xt.lang
+                    xt.event
+                    xt.substrate
+                    xt.db
+                    kmi.lang]
           :exclude [xt.sample]}
- :js     {:include :all
+ :lua    {:include [xt.lang
+                    xt.event
+                    xt.substrate
+                    xt.db
+                    kmi.lang]
           :exclude [xt.sample]}
- :lua    {:include :all
+ :python {:include [xt.lang
+                    xt.event
+                    xt.substrate
+                    xt.db
+                    kmi.lang]
           :exclude [xt.sample]}
- :python {:include :all
+ :dart   {:include [xt.lang
+                    xt.event
+                    xt.substrate
+                    xt.db
+                    kmi.lang]
           :exclude [xt.sample]}
- :julia  {:include [xt.lang
-                    xt.event]
-          :exclude [xt.sample]}
+ 
+ ;;
+ ;; FULL HOPEFUL
+ ;;
+
  :ruby   {:include [xt.lang
                     xt.event
-                    xt.substrate]
-          :exclude [xt.sample]}}
+                    xt.substrate
+                    xt.db
+                    kmi.lang]
+          :exclude [xt.sample]}
+ :php    {:include [xt.lang
+                    xt.event
+                    kmi.lang]
+          :exclude [xt.sample]}
+ 
+ :scheme {:include [xt.lang]
+          :exclude [xt.sample]}
+ 
+ :elisp  {:include [xt.lang
+                    xt.event
+                    kmi.lang]
+          :exclude [xt.sample]}
+ ;;
+ ;; PARTIAL
+ ;;
+ :julia  {:include [xt.lang
+                    xt.event
+                    kmi.lang]
+          :exclude [xt.sample]}
+  
+ }
