@@ -5,7 +5,8 @@
   (:use code.test))
 
 (fact "typescript typed fixture loads its specs"
-  (-> (typed/get-spec 'hara.model.typescript-model-fixture/User)
+  (-> (typed/spec-def (typed/load-ns 'hara.model.typescript-model-fixture)
+                       'hara.model.typescript-model-fixture/User)
       :type
       types/type->data
       :kind)

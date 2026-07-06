@@ -7,7 +7,6 @@
             [postgres.core.graph]
             [postgres.core.impl]
             [postgres.core.graph-view :as graph-view]
-            [postgres.typed :as typed]
             [hara.lang :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format
@@ -30,5 +29,4 @@
              app/app-rebuild
              app/app-clear
 
-             entity/E
-             typed/Type)
+             entity/E)

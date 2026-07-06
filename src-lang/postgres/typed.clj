@@ -1,6 +1,6 @@
 (ns postgres.typed
-  (:require [clojure.string :as str]
-            [postgres.typed.export.json-openapi :as compile.json-openapi]
+  (:refer-clojure :exclude [load-file])
+  (:require [postgres.typed.export.json-openapi :as compile.json-openapi]
             [postgres.typed.export.json-schema :as compile.json-schema]
             [postgres.typed.export.ts-schema :as compile.ts-schema]
             [hara.runtime.postgres.base.application :as app]
@@ -8,61 +8,12 @@
             [postgres.typed.typed-common :as types]
             [postgres.typed.typed-infer :as typed-infer]
             [postgres.typed.typed-resolve :as typed-resolve]
-            [postgres.typed.typed-parse :as parse]
-            [postgres.typed.typed-shape :as shape]))
-(declare get-function-def with-app-typed-registry report-json resolve-function-def
-         enrich-function-arg-roles)
+            [postgres.typed.typed-parse :as parse]))
+(declare enrich-function-arg-roles input-shape output-shape)
 ;; ─────────────────────────────────────────────────────────────────────────────
-;; Source Analysis API
+;; Shape Formatting Helpers
 ;; ─────────────────────────────────────────────────────────────────────────────
 
-(defn analyze-file
-  "Analyzes a Clojure source file for type definitions."
-  [file-path]
-  (parse/analyze-file file-path))
-
-(defn analyze-namespace
-  "Analyzes a namespace for type definitions."
-  [ns-sym]
-  (parse/analyze-namespace ns-sym))
-
-(defn analyze-and-register!
-  "Analyzes a namespace and registers all types."
-  [ns-sym]
-  (-> ns-sym
-    parse/analyze-namespace
-    parse/register-types!))
-
-(defn clear-registry!
-  "Clears the global type registry."
-  {:added "4.1"}
-  []
-  (types/clear-registry!))
-
-(defn register-type!
-  "Registers a single type definition under a namespaced symbol."
-  {:added "4.1"}
-  [type-sym type-def]
-  (types/register-type! type-sym type-def))
-
-(defn make-function-report
-  "Generates a JSON-friendly infer report for one function in a namespace."
-  [ns-sym fn-sym]
-  (analyze/reset-cache!)
-  (let [analysis (-> ns-sym
-                     parse/analyze-namespace
-                     parse/register-types!)
-        fn-name (name fn-sym)]
-    (when-let [fn-def (some #(when (= fn-name (:name %)) %)
-                            (:functions analysis))]
-      (analyze/infer-report fn-def))))
-
-(defn get-function-report
-  "Retrieves a cached infer report for a registered function."
-  [fn-ref]
-  (let [fn-def (resolve-function-def fn-ref)]
-    (when fn-def
-      (analyze/infer-report fn-def))))
 
 (defn inferred->shape
   [inferred]
@@ -87,177 +38,6 @@
                     {:format format
                      :available [:shape :openapi :json-schema :typescript]}))))
 
-(defn get-app-function-report
-  "Retrieves a cached infer report from an app typed payload."
-  [app-name fn-sym]
-  (with-app-typed-registry
-    app-name
-    (fn [typed-payload]
-      (some-> (get-in typed-payload [:functions (typed-resolve/canonical-fn-sym fn-sym)])
-              get-function-report))))
-
-(defn get-function-report-json
-  "Serializes a registered function infer report to JSON."
-  ([fn-ref]
-   (some-> (get-function-report fn-ref)
-           report-json))
-  ([fn-ref pretty?]
-   (some-> (get-function-report fn-ref)
-           (report-json pretty?))))
-
-(defn get-app-function-report-json
-  "Serializes an app function infer report to JSON."
-  ([app-name fn-sym]
-   (some-> (get-app-function-report app-name fn-sym)
-           report-json))
-  ([app-name fn-sym pretty?]
-   (some-> (get-app-function-report app-name fn-sym)
-           (report-json pretty?))))
-
-(defn get-function-def
-  "Retrieves a registered function definition by namespaced symbol."
-  [fn-sym]
-  (let [fn-def (types/get-type fn-sym)]
-    (when (types/fn-def? fn-def)
-      fn-def)))
-
-(defn fn-ref->fn-sym
-  "Best-effort conversion of a function reference into a namespaced symbol."
-  [fn-ref]
-  (typed-resolve/fn-ref->fn-sym fn-ref))
-
-(defn resolve-function-def
-  "Resolves a FnDef from either a FnDef, a namespaced symbol, a Var, or a function value.
-   If the global registry doesn't contain the function yet, attempts to analyze and register
-   the owning namespace, then resolves again."
-  [fn-ref]
-  (cond
-    (types/fn-def? fn-ref)
-    (enrich-function-arg-roles fn-ref)
-
-    (types/fn-def? (typed-resolve/resolve-function-def fn-ref))
-    (enrich-function-arg-roles (typed-resolve/resolve-function-def fn-ref))
-
-    :else
-    (when-let [fn-sym (typed-resolve/fn-ref->fn-sym fn-ref)]
-      (or (some-> (typed-resolve/resolve-function-def fn-ref)
-                  enrich-function-arg-roles)
-          (do (analyze-and-register! (symbol (namespace fn-sym)))
-              (some-> (typed-resolve/resolve-function-def fn-ref)
-                      enrich-function-arg-roles))))))
-
-(defn get-app-function-def
-  "Retrieves a function definition from an app typed payload."
-  [app-name fn-sym]
-  (let [fn-def (get-in (app/app-typed app-name)
-                       [:functions (typed-resolve/canonical-fn-sym fn-sym)])]
-    (when (types/fn-def? fn-def)
-      fn-def)))
-
-(defn with-app-typed-registry
-  [app-name f]
-  (let [typed-payload (app/app-typed app-name)
-        current @types/*type-registry*]
-    (try
-      (swap! types/*type-registry*
-             (fn [registry]
-               (-> registry
-                   (merge (:tables typed-payload))
-                   (merge (:enums typed-payload))
-                   (merge (:functions typed-payload)))))
-      (f typed-payload)
-      (finally
-        (reset! types/*type-registry* current)))))
-
-(defn get-function-input-shape
-  "Infers a JsonbShape for a JSONB function input.
-   `fn-ref` may be a FnDef or a namespaced symbol in the registry."
-  [fn-ref arg-sym]
-  (let [fn-def (resolve-function-def fn-ref)]
-    (when (and fn-def arg-sym)
-      (typed-infer/infer-jsonb-arg-shape
-       arg-sym
-       fn-def
-       (some (fn [arg]
-               (when (= arg-sym (:name arg))
-                 (:role arg)))
-             (:inputs fn-def))))))
-
-(defn get-app-function-input-shape
-  "Infers a JsonbShape for a JSONB function input from an app typed payload."
-  [app-name fn-sym arg-sym]
-  (with-app-typed-registry
-    app-name
-    (fn [typed-payload]
-      (when-let [fn-def (get-in typed-payload [:functions fn-sym])]
-        (get-function-input-shape fn-def arg-sym)))))
-
-(defn get-function-input-schema
-  "Formats an inferred JSONB input shape for a function.
-   Formats: `:shape`, `:openapi`, `:json-schema`, `:typescript`."
-  ([fn-ref arg-sym]
-   (get-function-input-schema fn-ref arg-sym :shape))
-  ([fn-ref arg-sym format]
-   (when-let [input-shape (get-function-input-shape fn-ref arg-sym)]
-     (case format
-       :shape input-shape
-       :openapi (compile.json-openapi/shape->openapi input-shape)
-       :json-schema (compile.json-schema/shape->json-schema input-shape)
-       :typescript (compile.ts-schema/shape->ts-interface input-shape)
-       (throw (ex-info "Unknown input schema format"
-                       {:format format
-                        :available [:shape :openapi :json-schema :typescript]}))))))
-
-(defn get-app-function-input-schema
-  "Formats an inferred JSONB input shape from an app typed payload."
-  ([app-name fn-sym arg-sym]
-   (get-app-function-input-schema app-name fn-sym arg-sym :shape))
-  ([app-name fn-sym arg-sym format]
-   (when-let [input-shape (get-app-function-input-shape app-name fn-sym arg-sym)]
-     (case format
-       :shape input-shape
-       :openapi (compile.json-openapi/shape->openapi input-shape)
-       :json-schema (compile.json-schema/shape->json-schema input-shape)
-       :typescript (compile.ts-schema/shape->ts-interface input-shape)
-       (throw (ex-info "Unknown input schema format"
-                       {:format format
-                        :available [:shape :openapi :json-schema :typescript]}))))))
-
-(defn get-function-output-shape
-  "Infers a JsonbShape for a function's JSON/object output."
-  [fn-ref]
-  (let [fn-def (resolve-function-def fn-ref)]
-    (when fn-def
-      (some-> fn-def
-              analyze/cached-infer
-              inferred->shape))))
-
-(defn get-app-function-output-shape
-  "Infers a JsonbShape for a function output from an app typed payload."
-  [app-name fn-sym]
-  (with-app-typed-registry
-    app-name
-    (fn [typed-payload]
-      (some-> (get-in typed-payload [:functions fn-sym])
-              get-function-output-shape))))
-
-(defn get-function-output-schema
-  "Formats an inferred JSON/object output shape for a function.
-   Formats: `:shape`, `:openapi`, `:json-schema`, `:typescript`."
-  ([fn-ref]
-   (get-function-output-schema fn-ref :shape))
-  ([fn-ref format]
-   (when-let [output-shape (get-function-output-shape fn-ref)]
-     (format-shape output-shape format))))
-
-(defn get-app-function-output-schema
-  "Formats an inferred JSON/object output shape from an app typed payload."
-  ([app-name fn-sym]
-   (get-app-function-output-schema app-name fn-sym :shape))
-  ([app-name fn-sym format]
-   (when-let [output-shape (get-app-function-output-shape app-name fn-sym)]
-     (format-shape output-shape format))))
-
 (defn report-json
   "Serializes an infer report to JSON."
   ([report]
@@ -265,52 +45,12 @@
   ([report pretty?]
    (analyze/report-json report pretty?)))
 
-(defn make-function-json
-  "Generates JSON for one function infer report in a namespace."
-  ([ns-sym fn-sym]
-   (when-let [report (make-function-report ns-sym fn-sym)]
-     (report-json report)))
-  ([ns-sym fn-sym pretty?]
-   (when-let [report (make-function-report ns-sym fn-sym)]
-     (report-json report pretty?))))
+;; Contract Helpers
 
 ;; ─────────────────────────────────────────────────────────────────────────────
-;; Schema Generation API
-;; ─────────────────────────────────────────────────────────────────────────────
 
-(defn make-openapi
-  "Generates a complete OpenAPI 3.0 spec for the given namespace.
-   
-   Example:
-   (make-openapi 'gwdb.core.user (constantly true))  ; all functions
-   (make-openapi 'gwdb.core.user #(= :sb/auth (get-in % [:body-meta :expose])))"
-  [root-ns fn-filter]
-  (types/clear-registry!)
-  (analyze/reset-cache!)
-  (-> root-ns parse/analyze-namespace parse/register-types!)
-  (compile.json-openapi/generate-openapi root-ns fn-filter))
 
-(defn make-json-schema
-  "Generates JSON Schema definitions for all tables and enums."
-  []
-  (compile.json-schema/generate-json-schema))
-
-(defn make-typescript
-  "Generates TypeScript interfaces for all tables and enums."
-  []
-  (compile.ts-schema/generate-ts-schema))
-;; Type Function API
-;; ─────────────────────────────────────────────────────────────────────────────
-
-(defn app-name-from-static
-  [app]
-  (typed-resolve/app-name-from-static app))
-
-(defn fn-ref->app-name
-  [fn-ref fn-def]
-  (typed-resolve/fn-ref->app-name fn-ref fn-def))
-
-(defn arg-type
+(defn- arg-type
   [arg]
   (let [t (:type arg)]
     (cond
@@ -318,12 +58,12 @@
       (and (map? t) (keyword? (:name t))) (:name t)
       :else nil)))
 
-(defn arg-type-name
+(defn- arg-type-name
   [arg]
   (when-let [t (arg-type arg)]
     (name t)))
 
-(defn track-arg-role?
+(defn- track-arg-role?
   [fn-def arg-name]
   (let [body (get-in fn-def [:body-meta :raw-body])
         aliases (get-in fn-def [:body-meta :aliases] {})
@@ -381,7 +121,7 @@
               (some #(scan-form % tracked visited) forms))]
       (boolean (and body (scan-form body #{arg-name} #{fn-key}))))))
 
-(defn enrich-function-arg-roles
+(defn- enrich-function-arg-roles
   [fn-def]
   (if (types/fn-def? fn-def)
     (update fn-def :inputs
@@ -394,7 +134,7 @@
                     inputs)))
     fn-def))
 
-(defn jsonb-arg?
+(defn- jsonb-arg?
   [arg]
   (or (= :jsonb (arg-type arg))
       (some #{:jsonb} (:modifiers arg))))
@@ -425,7 +165,7 @@
             :jschema {:type "string"}
             :ts "string")))))
 
-(defn format-primitive
+(defn- format-primitive
   [format t]
   (case format
     :shape {:type t}
@@ -433,8 +173,8 @@
     :json-schema (resolve-type t :jschema)
     :typescript (resolve-type t :ts)))
 
-(defn build-input-schemas
-  [fn-def format]
+(defn- build-input-schemas
+  [ctx fn-def format]
   (into {}
         (keep (fn [arg]
                 (let [arg-name (:name arg)
@@ -447,7 +187,7 @@
                       :schema (format-primitive format :jsonb)}]
 
                     (jsonb-arg? arg)
-                    (when-let [shape (get-function-input-shape fn-def arg-name)]
+                    (when-let [shape (input-shape ctx fn-def arg-name)]
                       [(keyword arg-name)
                        {:shape shape
                         :schema (format-shape shape format)}])
@@ -458,49 +198,217 @@
                       :schema (format-primitive format t)}])))
               (:inputs fn-def))))
 
-(defn build-output-schema
-  [fn-def format]
-  (when-let [output-shape (get-function-output-shape fn-def)]
+(defn- build-output-schema
+  [ctx fn-def format]
+  (when-let [output-shape (output-shape ctx fn-def)]
     {:shape output-shape
      :schema (format-shape output-shape format)}))
 
-(defn Type
-  ([fn-ref]
-   (Type fn-ref {:format :shape}))
-  ([fn-ref opts]
-   (let [format   (get opts :format :shape)
-         debug?   (boolean (get opts :debug))
-         fn-def   (resolve-function-def fn-ref)
-         app-name (fn-ref->app-name fn-ref fn-def)]
-     (when fn-def
-       (let [render (fn []
-                      (let [report (analyze/infer-report fn-def)
-                            input-schemas (build-input-schemas fn-def format)
-                            output-schema (build-output-schema fn-def format)]
-                        (-> report
-                            (assoc :input {:args (mapv (fn [arg]
-                                                         {:name (:name arg)
-                                                          :type (arg-type-name arg)
-                                                          :modifiers (:modifiers arg)
-                                                          :role (:role arg)})
-                                                       (:inputs fn-def))
-                                           :schemas input-schemas})
-                            (assoc :output output-schema))))
-             debug-print (fn [typed-payload]
-                           (when debug?
-                             (println "Type debug app-name:" app-name)
-                             (println "Type debug app-present:" (boolean (app/app app-name)))
-                             (println "Type debug typed tables:" (count (:tables typed-payload)))))
-             run (fn []
-                   (if (and app-name (app/app app-name))
-                     (with-app-typed-registry app-name
-                       (fn [typed-payload]
-                         (debug-print typed-payload)
-                         (render)))
-                     (render)))]
-         (when app-name
-           (when-not (app/app app-name)
-             (try
-               (app/app-rebuild-tables app-name)
-               (catch Throwable _ nil))))
-         (run))))))
+
+;; ─────────────────────────────────────────────────────────────────────────────
+;; Context API
+;; ─────────────────────────────────────────────────────────────────────────────
+
+(defn registry->typed
+  "Builds a typed payload from a flat registry map."
+  [registry]
+  (reduce types/add-typed
+          (types/empty-typed)
+          (vals registry)))
+
+(defn typed->registry
+  "Flattens an app typed payload into the registry shape expected by inference."
+  [typed]
+  (merge (:tables typed)
+         (:enums typed)
+         (:functions typed)))
+
+(defn load-analysis
+  "Creates a postgres typed context from parsed analysis."
+  [analysis]
+  (let [typed (types/analysis->typed analysis)]
+    {:domain :postgres
+     :analysis analysis
+     :typed typed
+     :registry (typed->registry typed)}))
+
+(defn load-file
+  "Creates a postgres typed context from a source file."
+  [file-path]
+  (load-analysis (parse/analyze-file file-path)))
+
+(defn load-ns
+  "Creates a postgres typed context from a namespace."
+  [ns-sym]
+  (load-analysis (parse/analyze-namespace ns-sym)))
+
+(defn load-app
+  "Creates a postgres typed context from an app typed payload."
+  [app-name]
+  (let [typed (app/app-typed app-name)]
+    {:domain :postgres
+     :app-name app-name
+     :typed typed
+     :registry (typed->registry typed)}))
+
+(defn load-registry
+  "Creates a postgres typed context from a registry map, defaulting to the current registry."
+  ([]
+   (load-registry @types/*type-registry*))
+  ([registry]
+   {:domain :postgres
+    :typed (registry->typed registry)
+    :registry registry}))
+
+(defn with-context-registry
+  "Runs `f` with the context registry visible to existing inference internals."
+  [ctx f]
+  (let [current @types/*type-registry*]
+    (try
+      (reset! types/*type-registry* (:registry ctx))
+      (f)
+      (finally
+        (reset! types/*type-registry* current)))))
+
+(defn entries
+  "Returns all typed declarations in a postgres context."
+  [ctx]
+  (vals (:registry ctx)))
+
+(defn entry
+  "Returns a typed declaration from a postgres context."
+  [ctx sym]
+  (let [sym (typed-resolve/canonical-fn-sym sym)]
+    (or (get-in ctx [:registry sym])
+        (get-in ctx [:registry (symbol (name sym))])
+        (get-in ctx [:registry (keyword (name sym))]))))
+
+(defn missing-function!
+  [fn-ref]
+  (throw (ex-info "Typed function not found"
+                  {:type :typed/missing-function
+                   :fn fn-ref})))
+
+(defn missing-argument!
+  [fn-ref arg-sym]
+  (throw (ex-info "Typed function argument not found"
+                  {:type :typed/missing-argument
+                   :fn fn-ref
+                   :arg arg-sym})))
+
+(defn function-def
+  "Resolves and enriches a function definition from a postgres context."
+  [ctx fn-ref]
+  (or (with-context-registry
+        ctx
+        #(some-> (or (when (types/fn-def? fn-ref)
+                       fn-ref)
+                     (typed-resolve/resolve-function-def fn-ref)
+                     (when-let [fn-sym (typed-resolve/fn-ref->fn-sym fn-ref)]
+                       (entry ctx fn-sym)))
+                 enrich-function-arg-roles))
+      (missing-function! fn-ref)))
+
+(defn function-report
+  "Returns the postgres inference report for a function in a context."
+  [ctx fn-ref]
+  (with-context-registry
+    ctx
+    #(analyze/infer-report (function-def ctx fn-ref))))
+
+(defn function-input
+  "Returns all inputs, or a single input by argument symbol."
+  ([ctx fn-ref]
+   (:inputs (function-def ctx fn-ref)))
+  ([ctx fn-ref arg-sym]
+   (or (some (fn [arg]
+               (when (= arg-sym (:name arg))
+                 arg))
+             (:inputs (function-def ctx fn-ref)))
+       (missing-argument! fn-ref arg-sym))))
+
+(defn function-output
+  "Returns the declared postgres function output."
+  [ctx fn-ref]
+  (:output (function-def ctx fn-ref)))
+
+(defn input-shape
+  "Infers a JsonbShape for a postgres function input. Returns nil when not inferable."
+  [ctx fn-ref arg-sym]
+  (let [fn-def (function-def ctx fn-ref)
+        arg (function-input ctx fn-ref arg-sym)]
+    (with-context-registry
+      ctx
+      #(typed-infer/infer-jsonb-arg-shape arg-sym fn-def (:role arg)))))
+
+(defn input-schema
+  "Formats an inferred postgres JSONB input shape."
+  ([ctx fn-ref arg-sym]
+   (input-schema ctx fn-ref arg-sym :shape))
+  ([ctx fn-ref arg-sym format]
+   (some-> (input-shape ctx fn-ref arg-sym)
+           (format-shape format))))
+
+(defn output-shape
+  "Infers a JsonbShape for a postgres function output. Returns nil when not inferable."
+  [ctx fn-ref]
+  (let [fn-def (function-def ctx fn-ref)]
+    (with-context-registry
+      ctx
+      #(some-> fn-def analyze/cached-infer inferred->shape))))
+
+(defn output-schema
+  "Formats an inferred postgres output shape."
+  ([ctx fn-ref]
+   (output-schema ctx fn-ref :shape))
+  ([ctx fn-ref format]
+   (some-> (output-shape ctx fn-ref)
+           (format-shape format))))
+
+(defn function-contract
+  "Returns the function report plus formatted input and output schemas."
+  ([ctx fn-ref]
+   (function-contract ctx fn-ref {:format :shape}))
+  ([ctx fn-ref opts]
+   (let [format (get opts :format :shape)
+         fn-def (function-def ctx fn-ref)]
+     (with-context-registry
+       ctx
+       #(let [report (analyze/infer-report fn-def)
+              input-schemas (build-input-schemas ctx fn-def format)
+              output-schema (build-output-schema ctx fn-def format)]
+          (-> report
+              (assoc :input {:args (mapv (fn [arg]
+                                           {:name (:name arg)
+                                            :type (arg-type-name arg)
+                                            :modifiers (:modifiers arg)
+                                            :role (:role arg)})
+                                         (:inputs fn-def))
+                             :schemas input-schemas})
+              (assoc :output output-schema)))))))
+
+(defn export-openapi
+  "Generates OpenAPI from a postgres typed context."
+  ([ctx]
+   (export-openapi ctx (constantly true)))
+  ([ctx fn-filter]
+   (with-context-registry
+     ctx
+     #(compile.json-openapi/generate-openapi (or (some-> ctx :analysis :ns)
+                                           (:app-name ctx)
+                                           "postgres")
+                                       fn-filter))))
+
+(defn export-json-schema
+  "Generates JSON Schema from a postgres typed context."
+  [ctx]
+  (with-context-registry
+    ctx
+    #(compile.json-schema/generate-json-schema)))
+
+(defn export-typescript
+  "Generates TypeScript definitions from a postgres typed context."
+  [ctx]
+  (with-context-registry
+    ctx
+    #(compile.ts-schema/generate-ts-schema)))

@@ -24,36 +24,39 @@
                 :item {:kind :named :name sample.user/User}}})
 
 (fact "defspec.xt registers a spec declaration"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (eval '(hara.typed/defspec.xt LocalId :xt/str))
-  (-> (typed/get-spec 'hara.model.spec-xtalk-typed-test/LocalId)
+  (-> (typed/spec-def (typed/load-registry) 'hara.model.spec-xtalk-typed-test/LocalId)
       :type
       types/type->data)
   => {:kind :primitive :name :xt/str})
 
 (fact "registry entries expose explicit declaration kinds"
-  (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lang.spec-base)
-  (typed/analyze-and-register! 'xt.db.text.base-scope)
-  [(-> (typed/get-entry 'xt.lang.spec-base/x:add)
-       types/entry-kinds
-       set)
-   (types/declaration-kind (typed/get-macro 'xt.lang.spec-base/x:add))
-   (types/declaration-kind (typed/get-value 'xt.db.text.base-scope/Scopes))
-   (nil? (typed/get-type 'xt.lang.spec-base/x:add))
-   (= :value (-> (typed/get-entry 'xt.db.text.base-scope/Scopes)
-                  types/entry-primary-kind))]
+  (let [ctx (typed/load-analysis
+             {:ns 'combined
+              :specs (:specs (:analysis (typed/load-ns 'xt.lang.spec-base)))
+              :functions (:functions (:analysis (typed/load-ns 'xt.lang.spec-base)))
+              :macros (:macros (:analysis (typed/load-ns 'xt.lang.spec-base)))
+              :values (:values (:analysis (typed/load-ns 'xt.db.text.base-scope)))})]
+    [(-> (typed/entry ctx 'xt.lang.spec-base/x:add)
+         types/entry-kinds
+         set)
+     (types/declaration-kind (typed/macro-def ctx 'xt.lang.spec-base/x:add))
+     (types/declaration-kind (typed/value-def ctx 'xt.db.text.base-scope/Scopes))
+     (nil? (typed/declaration ctx 'xt.lang.spec-base/x:add :value))
+     (= :value (-> (typed/entry ctx 'xt.db.text.base-scope/Scopes)
+                   types/entry-primary-kind))])
   => '[#{:macro :spec}
         :macro
         :value
-        false
+        true
         true])
 
 (fact "defspec.xt resolves aliased type names during registration"
-  (typed/clear-registry!)
+  (types/clear-registry!)
   (eval '(hara.typed/defspec.xt AliasMaybeFixture
            [:xt/maybe types/User]))
-  (-> (typed/get-spec 'hara.model.spec-xtalk-typed-test/AliasMaybeFixture)
+  (-> (typed/spec-def (typed/load-registry) 'hara.model.spec-xtalk-typed-test/AliasMaybeFixture)
       :type
       types/type->data)
   => '{:kind :maybe
@@ -499,15 +502,18 @@
   => '[true true])
 
 (fact "registers macros and values in the typed registry"
-  (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lang.spec-base)
-  (typed/analyze-and-register! 'xt.db.text.base-scope)
-  [(some? (typed/get-macro 'xt.lang.spec-base/x:add))
-   (true? (get-in (typed/get-macro 'xt.lang.spec-base/x:add) [:body-meta :macro]))
-   (some? (typed/get-value 'xt.db.text.base-scope/Scopes))
-   (true? (get-in (typed/get-value 'xt.db.text.base-scope/Scopes) [:body-meta :def]))
-   (some? (typed/get-declaration 'xt.db.text.base-scope/Scopes :value))
-   (pos? (count (typed/list-entries)))]
+  (let [ctx (typed/load-analysis
+             {:ns 'combined
+              :specs (:specs (:analysis (typed/load-ns 'xt.lang.spec-base)))
+              :functions (:functions (:analysis (typed/load-ns 'xt.lang.spec-base)))
+              :macros (:macros (:analysis (typed/load-ns 'xt.lang.spec-base)))
+              :values (:values (:analysis (typed/load-ns 'xt.db.text.base-scope)))})]
+    [(some? (typed/macro-def ctx 'xt.lang.spec-base/x:add))
+     (true? (get-in (typed/macro-def ctx 'xt.lang.spec-base/x:add) [:body-meta :macro]))
+     (some? (typed/value-def ctx 'xt.db.text.base-scope/Scopes))
+     (true? (get-in (typed/value-def ctx 'xt.db.text.base-scope/Scopes) [:body-meta :def]))
+     (some? (typed/declaration ctx 'xt.db.text.base-scope/Scopes :value))
+     (pos? (count (typed/entries ctx)))])
   => '[true true true true true true])
 
 (fact "emits TypeScript declarations from xtalk specs"
@@ -560,59 +566,68 @@
   => '{:kind :primitive :name :xt/str})
 
 (fact "checks valid xtalk functions"
-  (typed/clear-registry!)
-  (typed/analyze-and-register! 'hara.model.spec-xtalk-typed-fixture)
-  (-> (typed/check-function 'hara.model.spec-xtalk-typed-fixture/find-user)
-      (select-keys [:return :errors]))
+  (let [ctx (typed/load-ns 'hara.model.spec-xtalk-typed-fixture)]
+    (-> (typed/function-report ctx 'hara.model.spec-xtalk-typed-fixture/find-user)
+        (select-keys [:return :errors])))
   => '{:return {:kind :maybe
                 :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}
        :errors []})
 
 (fact "reports return and call mismatches"
-  (typed/clear-registry!)
-  (typed/analyze-and-register! 'hara.model.spec-xtalk-typed-fixture)
-  [(-> (typed/check-function 'hara.model.spec-xtalk-typed-fixture/wrong-user-name)
-       :errors
-       first
-       :tag)
-   (-> (typed/check-function 'hara.model.spec-xtalk-typed-fixture/find-user-wrong-key)
-       :errors
-       first
-       :tag)]
+  (let [ctx (typed/load-ns 'hara.model.spec-xtalk-typed-fixture)]
+    [(-> (typed/function-report ctx 'hara.model.spec-xtalk-typed-fixture/wrong-user-name)
+         :errors
+         first
+         :tag)
+     (-> (typed/function-report ctx 'hara.model.spec-xtalk-typed-fixture/find-user-wrong-key)
+         :errors
+         first
+         :tag)])
   => [:return-type-mismatch :call-arg-type-mismatch])
 
 (fact "exposes typed analysis helpers"
-  (typed/clear-registry!)
-  (typed/analyze-and-register! 'hara.model.spec-xtalk-typed-fixture)
-  [(analysis/get-function-input-type 'hara.model.spec-xtalk-typed-fixture/find-user 'id)
-   (analysis/get-function-output-type 'hara.model.spec-xtalk-typed-fixture/find-user)]
+  (let [ctx (typed/load-ns 'hara.model.spec-xtalk-typed-fixture)]
+    (typed/with-context-registry
+      ctx
+      #(vector (analysis/get-function-input-type 'hara.model.spec-xtalk-typed-fixture/find-user 'id)
+               (analysis/get-function-output-type 'hara.model.spec-xtalk-typed-fixture/find-user))))
   => '[{:kind :primitive :name :xt/str}
        {:kind :maybe
         :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}])
 
 (fact "analyzes event-common and event-form namespace specs"
-  (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.event.base-listener)
-  (typed/analyze-and-register! 'xt.event.base-form)
-  [(analysis/get-function-output-type 'xt.event.base-listener/blank-container)
-   (analysis/get-function-output-type 'xt.event.base-listener/add-listener)
-   (analysis/get-function-output-type 'xt.event.base-form/make-form)
-   (analysis/get-function-output-type 'xt.event.base-form/get-result)]
+  (let [ctx (typed/load-analysis
+             {:ns 'combined
+              :specs (into (:specs (:analysis (typed/load-ns 'xt.event.base-listener)))
+                           (:specs (:analysis (typed/load-ns 'xt.event.base-form))))
+              :functions (into (:functions (:analysis (typed/load-ns 'xt.event.base-listener)))
+                               (:functions (:analysis (typed/load-ns 'xt.event.base-form))))})]
+    (typed/with-context-registry
+      ctx
+      #(vector (analysis/get-function-output-type 'xt.event.base-listener/blank-container)
+               (analysis/get-function-output-type 'xt.event.base-listener/add-listener)
+               (analysis/get-function-output-type 'xt.event.base-form/make-form)
+               (analysis/get-function-output-type 'xt.event.base-form/get-result))))
   => '[{:kind :named :name xt.event.base-listener/EventContainer}
        {:kind :named :name xt.event.base-listener/EventListenerEntry}
        {:kind :named :name xt.event.base-form/EventForm}
        {:kind :named :name xt.event.base-form/ValidationResult}])
 
 (fact "analyzes event-route, event-view, and event-box namespace specs"
-  (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.event.base-route)
-  (typed/analyze-and-register! 'xt.event.base-model)
-  (typed/analyze-and-register! 'xt.event.base-box)
-  [(analysis/get-function-output-type 'xt.event.base-route/make-route)
-   (analysis/get-function-output-type 'xt.event.base-route/get-param)
-   (analysis/get-function-output-type 'xt.event.base-model/create-model)
-   (analysis/get-function-output-type 'xt.event.base-model/pipeline-prep)
-   (analysis/get-function-output-type 'xt.event.base-box/make-box)]
+  (let [route (:analysis (typed/load-ns 'xt.event.base-route))
+        model (:analysis (typed/load-ns 'xt.event.base-model))
+        box (:analysis (typed/load-ns 'xt.event.base-box))
+        ctx (typed/load-analysis
+             {:ns 'combined
+              :specs (into (:specs route) (concat (:specs model) (:specs box)))
+              :functions (into (:functions route) (concat (:functions model) (:functions box)))})]
+    (typed/with-context-registry
+      ctx
+      #(vector (analysis/get-function-output-type 'xt.event.base-route/make-route)
+               (analysis/get-function-output-type 'xt.event.base-route/get-param)
+               (analysis/get-function-output-type 'xt.event.base-model/create-model)
+               (analysis/get-function-output-type 'xt.event.base-model/pipeline-prep)
+               (analysis/get-function-output-type 'xt.event.base-box/make-box))))
   => '[{:kind :named :name xt.event.base-route/EventRoute}
        {:kind :maybe
          :item {:kind :primitive :name :xt/str}}
@@ -622,9 +637,8 @@
                 {:kind :primitive :name :xt/bool}]}
        {:kind :named :name xt.event.base-box/EventBox}])
 
-(fact "check-namespace can analyze event-route without crashing"
-  (typed/clear-registry!)
-  (-> (typed/check-namespace 'xt.event.base-route)
+(fact "namespace-report can analyze event-route without crashing"
+  (-> (typed/namespace-report (typed/load-ns 'xt.event.base-route))
       :namespace)
   => 'xt.event.base-route)
 

@@ -2,7 +2,6 @@
   (:require [hara.runtime.postgres.base.client :as client]
             [hara.runtime.postgres.base.client-impl :as client-impl]
             [postgres.gen.bind-macro]
-            [postgres.typed :as typed]
             [postgres.entity :as entity]
             [hara.runtime.postgres.base.application :as app]
             [postgres.core.addon]
@@ -41,8 +40,7 @@
              graph-view/defret.pg
              graph-view/defsel.pg
 
-             entity/E
-             typed/Type)
+             entity/E)
 
 (defn purge-postgres
   "purges the postgres.core library. Used for debugging"
