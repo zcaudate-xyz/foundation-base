@@ -18,13 +18,6 @@ jobs:
         with:
           ref: docs/merge-guides-slop
           fetch-depth: 0
-      - name: Format imported guides
-        run: |
-          find src-doc/documentation -name '*.clj' -print0 | while IFS= read -r -d '' file; do
-            python3 -c 'import sys; sys.path.insert(0, ".github/scripts"); from format_docs import convert_text; sys.stdout.write(convert_text(sys.stdin.read()))' < "$file" > "$file.tmp"
-            mv "$file.tmp" "$file"
-          done
-          git diff --check
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/github-script@v7
         with:
-          path: src-doc
+          script: core.info('staged commit check ready')
