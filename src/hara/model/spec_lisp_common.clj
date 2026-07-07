@@ -164,13 +164,6 @@
        (= 'x:unpack (first form))
        (= 2 (count form))))
 
-(defn- rest-arg-form?
-  [form]
-  (and (collection/form? form)
-       (= 2 (count form))
-       (= :.. (first form))
-       (symbol? (second form))))
-
 (defn transform-form
   {:added "4.1"}
    [{:keys [begin
@@ -308,41 +301,6 @@
                (if (seq bindings)
                  [(let-form bindings body-forms)]
                  body-forms)))
-          (prepare-function [args body]
-            (let [args       (vec args)
-                  rest-args  (filterv rest-arg-form? args)]
-              (cond (empty? rest-args)
-                    [args (transform-body body)]
-
-                    (< 1 (count rest-args))
-                    (throw (ex-info "Only one rest argument is allowed"
-                                    {:args args}))
-
-                    (not= (last args) (first rest-args))
-                    (throw (ex-info "Rest argument must be final"
-                                    {:args args
-                                     :rest (first rest-args)}))
-
-                    :else
-                    (let [rest-sym  (second (first rest-args))
-                          fixed     (butlast args)
-                          body      (transform-body body)]
-                      (cond (= 'begin begin)
-                            [(vec (concat fixed ['. rest-sym]))
-                             (cons (list 'set! rest-sym
-                                         (list 'list->vector rest-sym))
-                                   body)]
-
-                            (= 'progn begin)
-                            [(vec (concat fixed ['&rest rest-sym]))
-                             (cons (list 'setq rest-sym
-                                         (list 'vconcat rest-sym))
-                                   body)]
-
-                            :else
-                            (throw (ex-info "Rest arguments are not supported by this Lisp target"
-                                            {:begin begin
-                                             :args args})))))))
           (branch-form [clauses]
             (letfn [(emit-branch [[clause & more]]
                       (when clause
@@ -391,23 +349,23 @@
                               fn     (let [[_ maybe-name maybe-args & more] form
                                            named? (symbol? maybe-name)
                                            args   (if named? maybe-args maybe-name)
-                                           body   (if named? more (drop 2 form))
-                                           [args body] (prepare-function args body)]
-                                       (lambda-form args body))
+                                           body   (if named? more (drop 2 form))]
+                                       (lambda-form args
+                                                    (transform-body body)))
                               fn:>   (let [[_ maybe-name maybe-args & more] form
                                            named? (symbol? maybe-name)
                                            args   (if named? maybe-args maybe-name)
-                                           body   (if named? more (drop 2 form))
-                                           [args body] (prepare-function args body)]
-                                       (lambda-form args body))
+                                           body   (if named? more (drop 2 form))]
+                                       (lambda-form args
+                                                    (transform-body body)))
                                def    (def-form (second form)
                                                 (transform (nth form 2)))
-                               defn   (let [[args body] (prepare-function (nth form 2)
-                                                                         (drop 3 form))]
-                                        (defn-form (second form) args body))
-                              defgen (let [[args body] (prepare-function (nth form 2)
-                                                                        (drop 3 form))]
-                                       (defn-form (second form) args body))
+                               defn   (defn-form (second form)
+                                                 (nth form 2)
+                                                 (transform-body (drop 3 form)))
+                              defgen (defn-form (second form)
+                                                (nth form 2)
+                                                (transform-body (drop 3 form)))
                               let    (let-form
                                       (->> (partition 2 (second form))
                                            (mapv (fn [[sym value]]
