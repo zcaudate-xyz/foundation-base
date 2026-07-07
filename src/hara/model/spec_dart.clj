@@ -32,7 +32,7 @@
   {:added "4.1"}
   [s]
   (-> (pr-str s)
-      (clojure.string/replace "$" "\$")))
+      (clojure.string/replace "$" "\\$")))
 
 (defn- dart-symbol-global
   "Emits a global access, lazily initialising the key in `__globals__`.
