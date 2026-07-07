@@ -144,5 +144,98 @@
 ;; BEGIN merged documentation: plans/slop/summary/std_lib_transform_summary.md
 ;; sha256: 9742dbe8ac6374c44358b4017bfbe20897a6261475090b91286b3c475999a536
 [[:chapter {:title "std.lib.transform: A Comprehensive Summary" :link "merged-plans-slop-summary-std-lib-transform-summary-md"}]]
-"## std.lib.transform: A Comprehensive Summary\n\nThe `std.lib.transform` module provides a powerful and extensible framework for transforming and normalizing data based on a schema. It's designed to process complex, nested data structures, particularly those used in database modeling or API definitions. The core of the module is the `normalise` function, which orchestrates a pipeline of transformations defined by various sub-namespaces. This module is crucial for ensuring data quality and consistency within the `foundation-base` project.\n\nThe module is organized into several sub-namespaces:\n\n### `std.lib.transform.allow`\n\nThis namespace provides transformation wrappers related to allowing or disallowing certain data based on schema definitions.\n\n*   **`wrap-branch-model-allow [f]`**: A wrapper that filters branches (sub-maps) based on schema rules.\n*   **`wrap-attr-model-allow [f]`**: A wrapper that filters attributes (values) based on schema rules.\n\n### `std.lib.transform.apply`\n\nThis namespace likely contains functions for applying transformations. (No direct `apply.clj` found, but `std.lib.transform.apply` is referenced in `std.lib.transform.clj`).\n\n### `std.lib.transform.base.alias`\n\nThis namespace handles aliasing of keys during transformation.\n\n*   **`wrap-alias [f]`**: A wrapper that applies key aliasing based on schema definitions.\n\n### `std.lib.transform.base.enum`\n\nThis namespace provides transformations related to enum types.\n\n*   **`wrap-single-enum [f]`**: A wrapper that handles single enum values, likely for validation or coercion.\n\n### `std.lib.transform.base.keyword`\n\nThis namespace provides transformations related to keywords.\n\n*   **`wrap-single-keyword [f]`**: A wrapper that handles single keyword values, likely for validation or coercion.\n\n### `std.lib.transform.base.type-check`\n\nThis namespace provides transformations related to type checking.\n\n*   **`wrap-single-type-check [f]`**: A wrapper that performs type checking on single values.\n\n### `std.lib.transform.convert`\n\nThis namespace provides transformations for converting data types.\n\n*   **`wrap-single-model-convert [f]`**: A wrapper that converts single data values based on schema type definitions.\n\n### `std.lib.transform.fill-assoc`\n\nThis namespace provides transformations for associating default values.\n\n*   **`wrap-model-fill-assoc [f]`**: A wrapper that fills in associated default values based on schema definitions.\n\n### `std.lib.transform.fill-empty`\n\nThis namespace provides transformations for filling in empty values.\n\n*   **`wrap-model-fill-empty [f]`**: A wrapper that fills in empty values based on schema definitions.\n\n### `std.lib.transform.ignore`\n\nThis namespace provides transformations for ignoring certain data.\n\n*   **`wrap-nil-model-ignore [f]`**: A wrapper that ignores `nil` values based on schema rules.\n\n### `std.lib.transform.mask`\n\nThis namespace provides transformations for masking data.\n\n*   **`wrap-model-pre-mask [f]`**: A wrapper that applies masking to data before other transformations.\n*   **`wrap-model-post-mask [f]`**: A wrapper that applies masking to data after other transformations.\n\n### `std.lib.transform.require`\n\nThis namespace provides transformations related to required fields.\n\n*   **`wrap-model-pre-require [f]`**: A wrapper that checks for required fields before other transformations.\n*   **`wrap-model-post-require [f]`**: A wrapper that checks for required fields after other transformations.\n\n### `std.lib.transform.validate`\n\nThis namespace provides transformations for validating data.\n\n*   **`wrap-single-model-validate [f]`**: A wrapper that validates single data values based on schema rules.\n\n### `std.lib.transform` (Facade Namespace)\n\nThis namespace acts as a facade, orchestrating the transformation pipeline and providing the main `normalise` function. It also defines common transformation directives and helper functions.\n\n*   **`tree-directives`**: A set of keywords representing the different stages or types of transformations that can be applied (e.g., `:pre-require`, `:fill-assoc`, `:validate`, `:convert`).\n*   **`submaps [m options subk]`**: Extracts sub-maps from a map `m` based on a set of `options` and a `subk` (subkey).\n*   **`wrap-plus [f]`**: A wrapper that handles additional attributes (denoted by `:+`) in the data, allowing for recursive normalization of these attributes.\n*   **`wrap-ref-path [f]`**: A wrapper used for tracing the reference path during normalization, useful for debugging or error reporting.\n*   **`wrap-key-path [f]`**: A wrapper used for tracing the key path during normalization.\n*   **`normalise-loop [tdata tsch nsv interim fns datasource]`**: The core recursive loop for the `normalise` function, iterating through data and applying transformations based on the schema.\n*   **`normalise-nil [subdata _ nsv interim datasource]`**: Handles cases where a sub-schema is not found, typically throwing an error.\n*   **`normalise-attr [subdata [attr] nsv interim fns datasource]`**: Handles the normalization of individual attributes, including collections of attributes.\n*   **`normalise-single [subdata [attr] nsv interim fns datasource]`**: Handles the normalization of single attribute values, including reference resolution.\n*   **`normalise-expression [subdata [attr] nsv interim datasource]`**: Normalizes expressions within the data.\n*   **`normalise-wrap [fns wrappers]`**: Applies a series of wrappers to a set of normalization functions.\n*   **`normalise-wrapper-fns`**: A map linking wrapper keywords (e.g., `:plus`, `:fill-assoc`, `:alias`) to their corresponding wrapper functions.\n*   **`normalise-wrappers [datasource & [additions fns]]`**: Constructs a map of wrapped normalization functions based on the pipeline configuration and available wrappers.\n*   **`normalise-base [tdata datasource wrappers]`**: The base function that applies the wrapped normalization functions to the data.\n*   **`normalise [data datasource & [wrappers]]`**: The main function for transforming and normalizing data. It takes `data`, a `datasource` (containing the schema and pipeline configuration), and optional `wrappers`. It orchestrates the entire transformation pipeline, including pre- and post-processing steps.\n\n**Overall Importance:**\n\nThe `std.lib.transform` module is a critical component for data management and processing within the `foundation-base` project. Its key contributions include:\n\n*   **Schema-Driven Data Transformation:** Provides a declarative and extensible way to transform data based on a defined schema, ensuring data consistency and adherence to rules.\n*   **Robust Data Validation:** Integrates various validation steps (required fields, type checks, custom checks) into the transformation pipeline.\n*   **Automated Data Coercion and Defaulting:** Handles automatic type conversion, filling in default values, and associating related data.\n*   **Flexible Transformation Pipeline:** Allows for a highly customizable sequence of transformations, including pre- and post-processing hooks.\n*   **Error Reporting and Tracing:** Provides mechanisms for reporting errors during transformation, including tracing the path of data and references.\n*   **Modularity and Extensibility:** The use of wrappers and sub-namespaces allows for easy extension with new transformation types and rules.\n\nBy offering these comprehensive data transformation capabilities, `std.lib.transform` significantly enhances the `foundation-base` project's ability to manage and process diverse data models accurately and consistently, which is vital for its multi-language development ecosystem.\n"
+
+"The `std.lib.transform` module provides a powerful and extensible framework for transforming and normalizing data based on a schema. It's designed to process complex, nested data structures, particularly those used in database modeling or API definitions. The core of the module is the `normalise` function, which orchestrates a pipeline of transformations defined by various sub-namespaces. This module is crucial for ensuring data quality and consistency within the `foundation-base` project."
+
+"The module is organized into several sub-namespaces:"
+
+[[:section {:title "std.lib.transform.allow" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-allow"}]]
+
+"This namespace provides transformation wrappers related to allowing or disallowing certain data based on schema definitions."
+
+"*   **`wrap-branch-model-allow [f]`**: A wrapper that filters branches (sub-maps) based on schema rules.\n*   **`wrap-attr-model-allow [f]`**: A wrapper that filters attributes (values) based on schema rules."
+
+[[:section {:title "std.lib.transform.apply" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-apply"}]]
+
+"This namespace likely contains functions for applying transformations. (No direct `apply.clj` found, but `std.lib.transform.apply` is referenced in `std.lib.transform.clj`)."
+
+[[:section {:title "std.lib.transform.base.alias" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-base-alias"}]]
+
+"This namespace handles aliasing of keys during transformation."
+
+"*   **`wrap-alias [f]`**: A wrapper that applies key aliasing based on schema definitions."
+
+[[:section {:title "std.lib.transform.base.enum" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-base-enum"}]]
+
+"This namespace provides transformations related to enum types."
+
+"*   **`wrap-single-enum [f]`**: A wrapper that handles single enum values, likely for validation or coercion."
+
+[[:section {:title "std.lib.transform.base.keyword" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-base-keyword"}]]
+
+"This namespace provides transformations related to keywords."
+
+"*   **`wrap-single-keyword [f]`**: A wrapper that handles single keyword values, likely for validation or coercion."
+
+[[:section {:title "std.lib.transform.base.type-check" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-base-type-check"}]]
+
+"This namespace provides transformations related to type checking."
+
+"*   **`wrap-single-type-check [f]`**: A wrapper that performs type checking on single values."
+
+[[:section {:title "std.lib.transform.convert" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-convert"}]]
+
+"This namespace provides transformations for converting data types."
+
+"*   **`wrap-single-model-convert [f]`**: A wrapper that converts single data values based on schema type definitions."
+
+[[:section {:title "std.lib.transform.fill-assoc" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-fill-assoc"}]]
+
+"This namespace provides transformations for associating default values."
+
+"*   **`wrap-model-fill-assoc [f]`**: A wrapper that fills in associated default values based on schema definitions."
+
+[[:section {:title "std.lib.transform.fill-empty" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-fill-empty"}]]
+
+"This namespace provides transformations for filling in empty values."
+
+"*   **`wrap-model-fill-empty [f]`**: A wrapper that fills in empty values based on schema definitions."
+
+[[:section {:title "std.lib.transform.ignore" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-ignore"}]]
+
+"This namespace provides transformations for ignoring certain data."
+
+"*   **`wrap-nil-model-ignore [f]`**: A wrapper that ignores `nil` values based on schema rules."
+
+[[:section {:title "std.lib.transform.mask" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-mask"}]]
+
+"This namespace provides transformations for masking data."
+
+"*   **`wrap-model-pre-mask [f]`**: A wrapper that applies masking to data before other transformations.\n*   **`wrap-model-post-mask [f]`**: A wrapper that applies masking to data after other transformations."
+
+[[:section {:title "std.lib.transform.require" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-require"}]]
+
+"This namespace provides transformations related to required fields."
+
+"*   **`wrap-model-pre-require [f]`**: A wrapper that checks for required fields before other transformations.\n*   **`wrap-model-post-require [f]`**: A wrapper that checks for required fields after other transformations."
+
+[[:section {:title "std.lib.transform.validate" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-validate"}]]
+
+"This namespace provides transformations for validating data."
+
+"*   **`wrap-single-model-validate [f]`**: A wrapper that validates single data values based on schema rules."
+
+[[:section {:title "std.lib.transform (Facade Namespace)" :link "merged-plans-slop-summary-std-lib-transform-summary-md-std-lib-transform-facade-namespace"}]]
+
+"This namespace acts as a facade, orchestrating the transformation pipeline and providing the main `normalise` function. It also defines common transformation directives and helper functions."
+
+"*   **`tree-directives`**: A set of keywords representing the different stages or types of transformations that can be applied (e.g., `:pre-require`, `:fill-assoc`, `:validate`, `:convert`).\n*   **`submaps [m options subk]`**: Extracts sub-maps from a map `m` based on a set of `options` and a `subk` (subkey).\n*   **`wrap-plus [f]`**: A wrapper that handles additional attributes (denoted by `:+`) in the data, allowing for recursive normalization of these attributes.\n*   **`wrap-ref-path [f]`**: A wrapper used for tracing the reference path during normalization, useful for debugging or error reporting.\n*   **`wrap-key-path [f]`**: A wrapper used for tracing the key path during normalization.\n*   **`normalise-loop [tdata tsch nsv interim fns datasource]`**: The core recursive loop for the `normalise` function, iterating through data and applying transformations based on the schema.\n*   **`normalise-nil [subdata _ nsv interim datasource]`**: Handles cases where a sub-schema is not found, typically throwing an error.\n*   **`normalise-attr [subdata [attr] nsv interim fns datasource]`**: Handles the normalization of individual attributes, including collections of attributes.\n*   **`normalise-single [subdata [attr] nsv interim fns datasource]`**: Handles the normalization of single attribute values, including reference resolution.\n*   **`normalise-expression [subdata [attr] nsv interim datasource]`**: Normalizes expressions within the data.\n*   **`normalise-wrap [fns wrappers]`**: Applies a series of wrappers to a set of normalization functions.\n*   **`normalise-wrapper-fns`**: A map linking wrapper keywords (e.g., `:plus`, `:fill-assoc`, `:alias`) to their corresponding wrapper functions.\n*   **`normalise-wrappers [datasource & [additions fns]]`**: Constructs a map of wrapped normalization functions based on the pipeline configuration and available wrappers.\n*   **`normalise-base [tdata datasource wrappers]`**: The base function that applies the wrapped normalization functions to the data.\n*   **`normalise [data datasource & [wrappers]]`**: The main function for transforming and normalizing data. It takes `data`, a `datasource` (containing the schema and pipeline configuration), and optional `wrappers`. It orchestrates the entire transformation pipeline, including pre- and post-processing steps."
+
+"**Overall Importance:**"
+
+"The `std.lib.transform` module is a critical component for data management and processing within the `foundation-base` project. Its key contributions include:"
+
+"*   **Schema-Driven Data Transformation:** Provides a declarative and extensible way to transform data based on a defined schema, ensuring data consistency and adherence to rules.\n*   **Robust Data Validation:** Integrates various validation steps (required fields, type checks, custom checks) into the transformation pipeline.\n*   **Automated Data Coercion and Defaulting:** Handles automatic type conversion, filling in default values, and associating related data.\n*   **Flexible Transformation Pipeline:** Allows for a highly customizable sequence of transformations, including pre- and post-processing hooks.\n*   **Error Reporting and Tracing:** Provides mechanisms for reporting errors during transformation, including tracing the path of data and references.\n*   **Modularity and Extensibility:** The use of wrappers and sub-namespaces allows for easy extension with new transformation types and rules."
+
+"By offering these comprehensive data transformation capabilities, `std.lib.transform` significantly enhances the `foundation-base` project's ability to manage and process diverse data models accurately and consistently, which is vital for its multi-language development ecosystem."
 ;; END merged documentation: plans/slop/summary/std_lib_transform_summary.md
