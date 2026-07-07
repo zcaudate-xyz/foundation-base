@@ -49,11 +49,35 @@ jobs:
       - name: Check generated fact counts
         run: |
           set -euo pipefail
-          fact_count=$(grep -Rh '^\^{:id merged-plans-slop-summary-.*-example-' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')
-          code_count=$( (grep -Rh '\[\[:code {:lang "clojure"}' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} || true) | wc -l | tr -d ' ' )
-          test "$fact_count" = "277"
-          test "$code_count" = "0"
-          git diff --check
+          python3 - <<'PY'
+          from pathlib import Path
+
+          files = [
+              Path("src-doc/documentation/code/code_query.clj"),
+              Path("src-doc/documentation/std/lib_index.clj"),
+              Path("src-doc/documentation/std/std_block.clj"),
+              Path("src-doc/documentation/std/std_lib_apply.clj"),
+              Path("src-doc/documentation/std/std_lib_bin.clj"),
+              Path("src-doc/documentation/std/std_lib_component.clj"),
+              Path("src-doc/documentation/std_lang_introduction.clj"),
+              Path("src-doc/documentation/xt/xt_lang.clj"),
+          ]
+          text = "\n".join(path.read_text() for path in files)
+          fact_count = sum(
+              1 for line in text.splitlines()
+              if line.startswith("^{:id merged-plans-slop-summary-")
+              and "-example-" in line
+          )
+          code_count = text.count('[[:code {:lang "clojure"}')
+          print({"facts": fact_count, "clojure-code-directives": code_count})
+          if fact_count != 277:
+              raise SystemExit(f"expected 277 generated facts, found {fact_count}")
+          if code_count != 0:
+              raise SystemExit(f"expected no imported Clojure code directives, found {code_count}")
+          PY
+
+      - name: Check patch formatting
+        run: git diff --check
 
       - name: Extract generated facts
         run: |
