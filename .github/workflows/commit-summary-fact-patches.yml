@@ -80,11 +80,12 @@ jobs:
           PY
           git diff --check
 
-      - name: Commit read-dispatch fact patch
+      - name: Commit and rebase read-dispatch patch
         run: |
           set -euo pipefail
           git add src-doc/documentation/std/std_block.clj
           git config user.name github-actions
           git config user.email github-actions@github.com
           git commit -m "Avoid named character in std.block summary fact"
+          git pull --rebase origin docs/summary-fact-examples
           git push origin HEAD:docs/summary-fact-examples
