@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: write
-  issues: write
+  statuses: write
 
 jobs:
   check:
