@@ -6,6 +6,7 @@ from pathlib import Path
 sys.path.insert(0, ".github/scripts")
 from convert_merged_docs_to_dsl import render
 
+# This module is intentionally a pure text transformation used by the staging workflow.
 PATTERN = re.compile(
     r"^;; BEGIN merged documentation: ([^\n]+)\n"
     r";; sha256: ([0-9a-f]+)\n"
