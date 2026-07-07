@@ -5,9 +5,10 @@ on:
     branches: [main]
     paths:
       - .github/workflows/format-docs-pr.yml
+      - .github/scripts/format_summary_docs.py
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   check:
@@ -15,10 +16,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: docs/format-slop-summary
           fetch-depth: 0
-      - name: Export full repository workspace
-        uses: actions/upload-artifact@v4
-        with:
-          name: foundation-workspace-full
-          path: .
-          include-hidden-files: true
+
+      - name: Convert migrated summaries to code.doc
+        run: python3 .github/scripts/format_summary_docs.py
+
+      - name: Validate generated documentation
+        run: |
+          test ! -d plans/slop/summary
+          test "$(grep -Rhc '^;; BEGIN merged documentation: plans/slop/summary/' src-doc/documentation | awk '{sum += $1} END {print sum}')" = "100"
+          test "$(git diff --name-only -- src-doc/documentation | wc -l | tr -d ' ')" = "39"
+          git diff --check
+
+      - name: Commit formatted documentation
+        run: |
+          git checkout origin/main -- .github/workflows/format-docs-pr.yml
+          git rm -f .github/workflows/export-summary-docs.yml
+          git rm -f .github/scripts/format_summary_docs.py
+          git add src-doc/documentation .github/workflows/format-docs-pr.yml
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -m "Format merged slop summaries as code.doc"
+          git push origin HEAD:docs/format-slop-summary
