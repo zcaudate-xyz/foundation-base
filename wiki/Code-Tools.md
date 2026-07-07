@@ -6,9 +6,9 @@ The `code.*` namespaces provide the development and maintenance layer for Founda
 
 | Namespace | Purpose | Guide or page |
 |---|---|---|
-| `code.test` | Fact-based tests, arrow assertions, checkers, skips, and targeted execution | [Guide](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/documentation/code/code_test.clj) |
-| `code.manage` | Source analysis, scaffolding, locating, refactoring, and test management | [Guide](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/documentation/code/code_manage.clj) |
-| `code.query` | Structural matching, traversal, and source transformations | [Guide](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/documentation/code/code_query.clj) |
+| `code.test` | Fact-based tests, arrow assertions, checkers, skips, and targeted execution | [Guide](https://zcaudate.xyz/foundation-base/code/code-test.html) |
+| `code.manage` | Source analysis, scaffolding, locating, refactoring, and test management | [Guide](https://zcaudate.xyz/foundation-base/code/code-manage.html) |
+| `code.query` | Structural matching, traversal, and source transformations | [Guide](https://zcaudate.xyz/foundation-base/code/code-query.html) |
 | `code.framework` | Source and test metadata used by other code tools | [Published page](https://zcaudate.xyz/foundation-base/code/code-framework.html) |
 | `code.doc` | Static documentation parsing, linking, rendering, themes, and publishing | [Published page](https://zcaudate.xyz/foundation-base/code/code-doc.html) |
 | `code.project` | Project metadata and namespace-to-file lookup | [Published page](https://zcaudate.xyz/foundation-base/code/code-project.html) |
