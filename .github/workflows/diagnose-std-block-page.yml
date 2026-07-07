@@ -1,0 +1,73 @@
+name: Diagnose std.block page
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/diagnose-std-block-page.yml
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Repair reader-unsafe expected value
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("src-doc/documentation/std/std_block.clj")
+          text = path.read_text()
+          before = '''  (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+            => #std.block.type.ModifierBlock{:tag :hash-uneval, :string "#_", :command #function[...]}
+          '''
+          after = '''  (select-keys (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+               [:tag :string])
+            => {:tag :hash-uneval, :string "#_"}
+          '''
+          if before not in text:
+              raise SystemExit("modifier-block example was not found")
+          path.write_text(text.replace(before, after, 1))
+          PY
+
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Capture parser output
+        run: |
+          set +e
+          mkdir -p .tmp
+          cat > .tmp/parse_std_block.clj <<'CLJ'
+          (require '[code.doc.parse :as parse])
+          (let [file "src-doc/documentation/std/std_block.clj"
+                elements (parse/parse-file file {})]
+            (println "Parsed" (count elements) "elements"))
+          CLJ
+          docker run --rm \
+            -e 'CI=true' \
+            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            bash -lc 'set -euo pipefail; lein javac; java -cp "$(lein classpath)" clojure.main .tmp/parse_std_block.clj' \
+            > .tmp/std-block-parser.log 2>&1
+          echo "$?" > .tmp/std-block-parser.status
+          set -e
+
+      - name: Upload parser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: std-block-parser-diagnostics
+          path: |
+            .tmp/std-block-parser.log
+            .tmp/std-block-parser.status
