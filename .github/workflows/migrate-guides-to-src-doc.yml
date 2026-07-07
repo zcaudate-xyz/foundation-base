@@ -6,6 +6,11 @@ on:
       - docs/merge-guides-slop
     paths:
       - .github/workflows/migrate-guides-to-src-doc.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/migrate-guides-to-src-doc.yml
 
 permissions:
   contents: write
