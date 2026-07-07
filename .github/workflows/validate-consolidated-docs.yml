@@ -31,4 +31,4 @@ jobs:
           path: src-doc
       - uses: actions/github-script@v7
         with:
-          script: core.info('formatted documentation is ready')
+          script: require('./.github/scripts/create_formatted_commit.js')
