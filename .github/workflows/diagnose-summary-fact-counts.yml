@@ -1,0 +1,62 @@
+name: Diagnose summary fact counts
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/diagnose-summary-fact-counts.yml
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Count generated fact IDs
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          files = [
+              Path("src-doc/documentation/code/code_query.clj"),
+              Path("src-doc/documentation/std/lib_index.clj"),
+              Path("src-doc/documentation/std/std_block.clj"),
+              Path("src-doc/documentation/std/std_lib_apply.clj"),
+              Path("src-doc/documentation/std/std_lib_bin.clj"),
+              Path("src-doc/documentation/std/std_lib_component.clj"),
+              Path("src-doc/documentation/std_lang_introduction.clj"),
+              Path("src-doc/documentation/xt/xt_lang.clj"),
+          ]
+          text = "\n".join(path.read_text() for path in files)
+          count = sum(
+              1 for line in text.splitlines()
+              if line.startswith("^{:id merged-plans-slop-summary-")
+              and "-example-" in line
+          )
+          print("generated-fact-ids", count)
+          if count != 277:
+              raise SystemExit(1)
+          PY
+
+      - name: Count imported Clojure directives
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          files = [
+              Path("src-doc/documentation/code/code_query.clj"),
+              Path("src-doc/documentation/std/lib_index.clj"),
+              Path("src-doc/documentation/std/std_block.clj"),
+              Path("src-doc/documentation/std/std_lib_apply.clj"),
+              Path("src-doc/documentation/std/std_lib_bin.clj"),
+              Path("src-doc/documentation/std/std_lib_component.clj"),
+              Path("src-doc/documentation/std_lang_introduction.clj"),
+              Path("src-doc/documentation/xt/xt_lang.clj"),
+          ]
+          text = "\n".join(path.read_text() for path in files)
+          count = text.count('[[:code {:lang "clojure"}')
+          print("clojure-code-directives", count)
+          if count != 0:
+              raise SystemExit(1)
+          PY
