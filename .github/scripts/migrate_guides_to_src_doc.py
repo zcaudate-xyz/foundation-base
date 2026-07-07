@@ -253,14 +253,14 @@ def main() -> None:
     if unsupported:
         raise RuntimeError(f"Unsupported documentation files: {unsupported}")
 
-    mapping: dict[str, str] = {}
+    mapping = {rel(source): rel(route(source)) for source in sources}
+    replace_stale_references(mapping)
+
     for source in sources:
-        target = route(source)
+        target = ROOT / mapping[rel(source)]
         text = source.read_text(encoding="utf-8")
         append_markdown(target, source, text)
-        mapping[rel(source)] = rel(target)
 
-    replace_stale_references(mapping)
     append_manifest(mapping)
 
     for source_root in SOURCE_ROOTS:
