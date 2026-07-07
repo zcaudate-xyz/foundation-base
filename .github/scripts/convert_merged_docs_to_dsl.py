@@ -116,9 +116,22 @@ def heading_form(kind, heading, link):
 
 def render(source, markdown):
     items = tokenize(markdown)
+    levels = [item[1] for item in items if item[0] == "heading"]
+    base = min(levels) if levels else None
+    prefix = slug(source)
+    seen = {}
     forms = []
+    if base is None:
+        forms.append(heading_form("chapter", source_title(source), "merged-" + prefix))
     for item in items:
-        if item[0] == "paragraph":
+        if item[0] == "heading":
+            names = ("chapter", "section", "subsection", "subsubsection")
+            kind = names[min(3, item[1] - base)]
+            key = f"merged-{prefix}-{slug(item[2])}"
+            seen[key] = seen.get(key, 0) + 1
+            link = key if seen[key] == 1 else f"{key}-{seen[key]}"
+            forms.append(heading_form(kind, item[2], link))
+        elif item[0] == "paragraph":
             forms.append(quote(item[1]))
         elif item[0] == "code":
             forms.append(f'[[:code {{:lang {quote(item[1])}}} {quote(item[2])}]]')
