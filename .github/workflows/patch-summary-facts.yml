@@ -1,0 +1,75 @@
+name: Patch summary facts
+
+on:
+  push:
+    branches: [docs/summary-fact-examples]
+    paths:
+      - .github/workflows/patch-summary-facts.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/summary-fact-examples
+          fetch-depth: 0
+
+      - name: Patch std.block facts
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("src-doc/documentation/std/std_block.clj")
+          text = path.read_text()
+
+          replacements = [
+              (
+                  '''(fact "-parse example"
+                    (base/block-info (-parse (reader/create ":a")))
+                    => {:type :token, :tag :keyword, :string ":a", :height 0, :width 2}
+
+                    (base/block-info (-parse (reader/create "\\\"\\\\n\\\"")))
+                    => {:type :token, :tag :string, :string "\\\"\\\\n\\\"", :height 1, :width 1}
+                  )''',
+                  '''(fact "-parse example"
+                    [(base/block-info (-parse (reader/create ":a")))
+                     (base/block-info (-parse (reader/create "\\\"\\\\n\\\"")))]
+                    => [{:type :token, :tag :keyword, :string ":a", :height 0, :width 2}
+                        {:type :token, :tag :string, :string "\\\"\\\\n\\\"", :height 1, :width 1}]
+                  )'''
+              ),
+              (
+                  '''(fact "modifier-block example"
+                    (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+                    => #std.block.type.ModifierBlock{:tag :hash-uneval, :string "#_", :command #function[...]}
+                  )''',
+                  '''(fact "modifier-block example"
+                    (select-keys (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+                                 [:tag :string])
+                    => {:tag :hash-uneval, :string "#_"}
+                  )'''
+              ),
+          ]
+
+          for before, after in replacements:
+              if before not in text:
+                  raise SystemExit("expected std.block fact was not found")
+              text = text.replace(before, after, 1)
+
+          path.write_text(text)
+          PY
+          git diff --check
+
+      - name: Commit fact patches
+        run: |
+          set -euo pipefail
+          git add src-doc/documentation/std/std_block.clj
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -m "Refine std.block summary facts"
+          git push origin HEAD:docs/summary-fact-examples
