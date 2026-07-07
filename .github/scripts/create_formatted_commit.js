@@ -33,7 +33,12 @@ module.exports = async ({github, context, core, exec}) => {
     tree.push({path, mode: '100644', type: 'blob', sha: null})
   }
 
-  const parentSha = context.sha
+  const branch = await github.rest.git.getRef({
+    owner,
+    repo,
+    ref: 'heads/docs/merge-guides-slop'
+  })
+  const parentSha = branch.data.object.sha
   const parent = await github.rest.git.getCommit({owner, repo, commit_sha: parentSha})
   const createdTree = await github.rest.git.createTree({
     owner,
