@@ -25,3 +25,6 @@ jobs:
             mv "$file.tmp" "$file"
           done
           git diff --check
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: src-doc
