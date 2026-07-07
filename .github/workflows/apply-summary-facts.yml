@@ -26,11 +26,33 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check committed fact counts
+      - name: Repair reader-unsafe expected value
         run: |
           set -euo pipefail
-          test "$(grep -Rh '^\^{:id merged-plans-slop-summary-.*-example-' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')" = "277"
-          test "$(grep -Rh '\[\[:code {:lang "clojure"}' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')" = "0"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("src-doc/documentation/std/std_block.clj")
+          text = path.read_text()
+          before = '''  (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+            => #std.block.type.ModifierBlock{:tag :hash-uneval, :string "#_", :command #function[...]}
+          '''
+          after = '''  (select-keys (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+               [:tag :string])
+            => {:tag :hash-uneval, :string "#_"}
+          '''
+          if before not in text:
+              raise SystemExit("modifier-block example was not found")
+          path.write_text(text.replace(before, after, 1))
+          PY
+
+      - name: Check generated fact counts
+        run: |
+          set -euo pipefail
+          fact_count=$(grep -Rh '^\^{:id merged-plans-slop-summary-.*-example-' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')
+          code_count=$(( (grep -Rh '\[\[:code {:lang "clojure"}' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} || true) | wc -l | tr -d ' ' ))
+          test "$fact_count" = "277"
+          test "$code_count" = "0"
           git diff --check
 
       - name: Extract generated facts
