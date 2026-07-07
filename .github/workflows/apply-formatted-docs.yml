@@ -17,4 +17,4 @@ jobs:
         with:
           ref: docs/merge-guides-slop
           fetch-depth: 0
-      - run: python3 -c 'import sys; sys.path.insert(0, ".github/scripts"); import format_docs'
+      - run: bash .github/scripts/format_all_docs.sh
