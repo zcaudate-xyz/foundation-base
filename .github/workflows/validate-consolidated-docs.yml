@@ -9,7 +9,7 @@ on:
       - .github/scripts/format_docs.py
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   format:
