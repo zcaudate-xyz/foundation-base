@@ -2,7 +2,7 @@ name: Refactor xtalk varargs
 
 on:
   push:
-    branches: [feature/xtalk-varargs]
+    branches: [fix/xtalk-varargs-inline-specs]
 
 permissions:
   contents: write
@@ -29,4 +29,4 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -A
           git commit -m 'Move xtalk rest emission into language specs'
-          git push origin HEAD:feature/xtalk-varargs
+          git push origin HEAD:fix/xtalk-varargs-inline-specs
