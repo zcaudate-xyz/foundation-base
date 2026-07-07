@@ -45,7 +45,6 @@ def tokenize(markdown):
         if not line.strip():
             index += 1
             continue
-
         fence = FENCE.match(line)
         if fence:
             marker = fence.group(1)
@@ -61,13 +60,11 @@ def tokenize(markdown):
                 index += 1
             out.append(("code", language, "\n".join(body).rstrip()))
             continue
-
         heading = HEADING.match(line)
         if heading:
             out.append(("heading", len(heading.group(1)), clean_title(heading.group(2))))
             index += 1
             continue
-
         if line.lstrip().startswith(">"):
             body = []
             while index < len(lines) and (lines[index].lstrip().startswith(">") or not lines[index].strip()):
@@ -80,13 +77,11 @@ def tokenize(markdown):
             else:
                 out.append(("quote", text))
             continue
-
         image = IMAGE.match(line.strip())
         if image:
             out.append(("image", image.group(1) or image.group(3) or "", image.group(2)))
             index += 1
             continue
-
         if index + 1 < len(lines) and "|" in line and TABLE_DIVIDER.match(lines[index + 1]):
             body = [line, lines[index + 1]]
             index += 2
@@ -95,7 +90,6 @@ def tokenize(markdown):
                 index += 1
             out.append(("paragraph", "\n".join(body)))
             continue
-
         if LIST_LINE.match(line):
             body = []
             while index < len(lines) and (LIST_LINE.match(lines[index]) or lines[index].startswith(("  ", "\t")) or not lines[index].strip()):
@@ -103,7 +97,6 @@ def tokenize(markdown):
                 index += 1
             out.append(("paragraph", "\n".join(body).strip()))
             continue
-
         body = [line]
         index += 1
         while index < len(lines) and not special(lines, index):
@@ -115,3 +108,25 @@ def tokenize(markdown):
 
 def source_title(source):
     return Path(source).stem.replace("_", " ").replace(".", " ").title()
+
+
+def heading_form(kind, heading, link):
+    return f'[[:{kind} {{:title {quote(heading)} :link {quote(link)}}}]]'
+
+
+def render(source, markdown):
+    items = tokenize(markdown)
+    forms = []
+    for item in items:
+        if item[0] == "paragraph":
+            forms.append(quote(item[1]))
+        elif item[0] == "code":
+            forms.append(f'[[:code {{:lang {quote(item[1])}}} {quote(item[2])}]]')
+        elif item[0] == "quote":
+            forms.append(f'[[:quote {{:text {quote(item[1])}}}]]')
+        elif item[0] == "callout":
+            tone = "warning" if item[1] in {"warning", "caution"} else "success" if item[1] == "tip" else "info"
+            forms.append(f'[[:callout {{:tone :{tone} :title {quote(item[1].title())} :content {quote(item[2])}}}]]')
+        elif item[0] == "image":
+            forms.append(f'[[:image {{:src {quote(item[2])} :alt {quote(item[1])} :title {quote(item[1])}}}]]')
+    return "\n\n".join(forms)
