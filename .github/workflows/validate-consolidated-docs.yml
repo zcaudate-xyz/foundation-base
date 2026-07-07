@@ -1,0 +1,37 @@
+name: Generate code.doc formatted sources
+
+on:
+  push:
+    branches: [docs/merge-guides-slop]
+    paths:
+      - .github/workflows/validate-consolidated-docs.yml
+      - .github/scripts/convert_merged_docs_to_dsl.py
+      - .github/scripts/format_docs.py
+
+permissions:
+  contents: write
+  statuses: write
+
+jobs:
+  format:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/merge-guides-slop
+      - name: Format imported guides
+        run: |
+          find src-doc/documentation -name '*.clj' -print0 | while IFS= read -r -d '' file; do
+            python3 -c 'import sys; sys.path.insert(0, ".github/scripts"); from format_docs import convert_text; sys.stdout.write(convert_text(sys.stdin.read()))' < "$file" > "$file.tmp"
+            mv "$file.tmp" "$file"
+          done
+          git diff --check
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formatted-src-doc
+          path: src-doc
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const build = require('./.github/scripts/create_formatted_commit.js')
+            return build({github, context, core, exec})

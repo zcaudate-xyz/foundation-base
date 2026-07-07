@@ -9,15 +9,15 @@
 [[:card-grid {:items [{:meta "Testing"
                        :title "code.test"
                        :text "Fact-based tests, arrow assertions, checkers, skips, and targeted runs."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/guides/code.test.md"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/documentation/code/code_test.clj"}
                       {:meta "Management"
                        :title "code.manage"
                        :text "Analysis, scaffolding, location, refactoring, and test-management workflows."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/guides/code.manage.md"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/documentation/code/code_manage.clj"}
                       {:meta "Queries"
                        :title "code.query"
                        :text "Structural matching, traversal, and transformations for Clojure source."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/guides/code.query.md"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/documentation/code/code_query.clj"}
                       {:meta "Documentation"
                        :title "code.doc"
                        :text "Parse, collect, link, render, theme, and publish static documentation."

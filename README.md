@@ -11,12 +11,12 @@ The repository is large because it contains several related systems. You do not 
 | I want to... | Start here |
 |---|---|
 | Install the project and run a first workflow | [`GETTING_STARTED.md`](GETTING_STARTED.md) |
-| Use the standard Clojure libraries | [`std`](https://zcaudate.xyz/foundation-base/std/index.html) and the guides in [`guides/`](guides/) |
+| Use the standard Clojure libraries | [`std`](https://zcaudate.xyz/foundation-base/std/index.html), including the integrated narrative guides |
 | Generate JavaScript, Lua, Python, Go, SQL, Solidity, or other code | [Hara introduction](https://zcaudate.xyz/foundation-base/hara/introduction.html) |
 | Browse walkthroughs and generated projects | [`wiki/Examples.md`](wiki/Examples.md) and the [published examples page](https://zcaudate.xyz/foundation-base/examples.html) |
 | Run generated code in external runtimes | [Hara runtimes](https://zcaudate.xyz/foundation-base/hara/hara-runtime.html) |
-| Write tests using the fact-based test framework | [`code.test` guide](guides/code.test.md) |
-| Analyse, query, or refactor Clojure source | [`code.manage`](guides/code.manage.md) and [`code.query`](guides/code.query.md) |
+| Write tests using the fact-based test framework | [`code.test` guide](https://zcaudate.xyz/foundation-base/code/code-test.html) |
+| Analyse, query, or refactor Clojure source | [`code.manage`](https://zcaudate.xyz/foundation-base/code/code-manage.html) and [`code.query`](https://zcaudate.xyz/foundation-base/code/code-query.html) |
 | Generate project documentation | [`code.doc`](https://zcaudate.xyz/foundation-base/code-tools.html) |
 | Explore portable cross-target libraries | [`xt`](https://zcaudate.xyz/foundation-base/xt/index.html) |
 | Browse topic-oriented pages | [`wiki/Home.md`](wiki/Home.md) |
@@ -40,8 +40,7 @@ Supporting directories include:
 | `src/`, `src-lang/`, `src-extra/` | Main source trees |
 | `test/`, `test-lang/` | Tests, mirroring the source structure |
 | `src-build/` | Walkthroughs, demos, build definitions, and generated project examples |
-| `src-doc/` | Source for the generated documentation site |
-| `guides/` | Task-oriented Markdown guides |
+| `src-doc/` | Authored source for the generated documentation site, including narrative guides and API references |
 | `wiki/` | GitHub Wiki-ready topic pages, kept in the main repository for review and versioning |
 | `config/publish/` | Documentation-site configuration |
 
@@ -219,16 +218,17 @@ bash bin/publish-wiki
 
 This synchronizes the reviewed Markdown pages to the separate Wiki repository.
 
-## Guides
+## Integrated guides
 
-- [`code.test`](guides/code.test.md) — fact-based testing and checkers
-- [`code.manage`](guides/code.manage.md) — source maintenance and test management
-- [`code.query`](guides/code.query.md) — structural source queries and edits
-- [`std.task`](guides/std.task.md) — task definition and execution
-- [`std.block`](guides/std.block.md) — source block parsing and layout
-- [`std.scheduler`](guides/std.scheduler.md) — concurrent scheduling
-- [`std.timeseries`](guides/std.timeseries.md) — time-series data and aggregation
-- [`xt.db.node.kernel-base`](guides/xt.db.node.adaptor_base.md) — database node bootstrap and RPC routing
+The explanatory guides now live beside the generated API sections in `src-doc/documentation/` and are published as part of the corresponding subsystem pages:
+
+- [`code.test`](https://zcaudate.xyz/foundation-base/code/code-test.html) — fact-based testing and checkers
+- [`code.manage`](https://zcaudate.xyz/foundation-base/code/code-manage.html) — source maintenance and test management
+- [`code.query`](https://zcaudate.xyz/foundation-base/code/code-query.html) — structural source queries and edits
+- [`std.task`](https://zcaudate.xyz/foundation-base/std/std-task.html) — task definition and execution
+- [`std.block`](https://zcaudate.xyz/foundation-base/std/std-block.html) — source block parsing and layout
+- [`std.scheduler`](https://zcaudate.xyz/foundation-base/std/std-scheduler.html) — concurrent scheduling
+- [`std.timeseries`](https://zcaudate.xyz/foundation-base/std/std-timeseries.html) — time-series data and aggregation
 
 ## Project status
 
