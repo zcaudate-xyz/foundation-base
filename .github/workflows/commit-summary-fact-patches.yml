@@ -18,7 +18,7 @@ jobs:
           ref: docs/summary-fact-examples
           fetch-depth: 0
 
-      - name: Patch read-dispatch fact by metadata ID
+      - name: Simplify parse fact by metadata ID
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -26,7 +26,7 @@ jobs:
 
           path = Path("src-doc/documentation/std/std_block.clj")
           text = path.read_text()
-          identifier = "merged-plans-slop-summary-std-block-parse-tutorial-md-example-1"
+          identifier = "merged-plans-slop-summary-std-block-parse-tutorial-md-example-2"
           marker = f'^{{:id {identifier} :added "4.0"}}\n'
           marker_start = text.index(marker)
           fact_start = text.index("(fact ", marker_start + len(marker))
@@ -67,14 +67,12 @@ jobs:
                       break
               index += 1
           else:
-              raise ValueError("unterminated read-dispatch fact")
+              raise ValueError("unterminated -parse fact")
 
-          replacement = '''(fact "read-dispatch example"
-            (read-dispatch (char 9))
-            => :void
-
-            (read-dispatch (first "#"))
-            => :hash
+          replacement = '''(fact "-parse example"
+            (select-keys (base/block-info (-parse (reader/create ":a")))
+                         [:type :tag :string])
+            => {:type :token, :tag :keyword, :string ":a"}
           )'''
           path.write_text(text[:fact_start] + replacement + text[index + 1:])
           PY
@@ -105,7 +103,7 @@ jobs:
               const commit = await github.rest.git.createCommit({
                 owner,
                 repo,
-                message: 'Avoid named character in std.block summary fact',
+                message: 'Simplify std.block parse summary fact',
                 tree: tree.data.sha,
                 parents: [parentSha]
               })
