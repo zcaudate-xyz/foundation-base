@@ -1,7 +1,7 @@
 (ns hara.model.spec-python
   (:require [clojure.string :as string]
             [hara.lang.book :as book]
- 	    [hara.common.emit :as emit]
+  	    [hara.common.emit :as emit]
             [hara.common.emit-common :as common]
             [hara.common.emit-data :as data]
             [hara.common.emit-helper :as helper]
@@ -33,6 +33,10 @@
 (defn- python-token-boolean
   [v]
   (if v "True" "False"))
+
+(defn python-emit-input-rest
+  [{:keys [symbol]} grammar mopts]
+  (str "*" (common/*emit-fn* symbol grammar mopts)))
 
 (defn- python-qualified-symbol
   [sym]
@@ -213,15 +217,15 @@
          body  (list* 'defn- name (python-apply-optional-defaults name args) more)]
      (if (empty? decorators)
        body
-       `(\\ ~(apply list
-                    \\ (mapcat (fn [d]
-                                 [\\ (list :%
+       `(\ ~(apply list
+                    \ (mapcat (fn [d]
+                                 [\ (list :%
                                            (list :- "@")
                                            (if (keyword? d)
                                              (list :- (f/strn d))
                                              d))])
                                decorators))
-         \\ ~body)))))
+         \ ~body)))))
 
 (defn python-fn
   "basic transform for python lambdas"
@@ -273,9 +277,9 @@
          name   (symbol (:id module) (name sym))
          supers (list 'quote (remove keyword? inherit))]
      `(:- :class (:% ~name ~supers) \:
-          (\\
-           \\ (\| (do ~@body))
-           \\)))))
+          (\
+           \ (\| (do ~@body))
+           \)))))
 
 (defn python-var
   "var -> fn.inner shorthand"
@@ -423,7 +427,8 @@
                   :invoke    {:reversed true
                               :hint ":"}
                   :function  {:raw "lambda"
-                              :args      {:start " " :end ":" :space ""}
+                              :args      {:start " " :end ":" :space ""
+                                          :rest #'python-emit-input-rest}
                               :body      {:start "" :end "" :append true}}
                   :infix     {:if  {:check "and" :then "or"}}
                   :global    {:reference '(globals)}}
