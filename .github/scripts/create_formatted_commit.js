@@ -40,5 +40,13 @@ module.exports = async ({github, context, core, exec}) => {
     base_tree: parent.data.tree.sha,
     tree
   })
-  core.info(`created tree ${createdTree.data.sha}`)
+  const commit = await github.rest.git.createCommit({
+    owner,
+    repo,
+    message: 'Format consolidated guides with code.doc DSL',
+    tree: createdTree.data.sha,
+    parents: [context.sha]
+  })
+  core.info(`FORMATTED_COMMIT_SHA=${commit.data.sha}`)
+  core.setOutput('commit_sha', commit.data.sha)
 }
