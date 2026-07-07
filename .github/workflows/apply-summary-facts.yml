@@ -7,7 +7,7 @@ on:
       - .github/workflows/apply-summary-facts.yml
 
 permissions:
-  contents: read
+  contents: write
   packages: read
 
 jobs:
@@ -157,17 +157,15 @@ jobs:
             -w "$(pwd)" \
             ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
             bash -lc 'set -euo pipefail; lein javac; java -cp "$(lein classpath)" clojure.main .tmp/validate_summary_facts.clj' \
-            > .tmp/parse.log 2>&1
-          status=$?
-          echo "$status" > .tmp/parse.status
-          cat .tmp/parse.log
-          exit "$status"
+            > .github/summary-facts-validation.log 2>&1
+          echo "$?" > .github/summary-facts-validation.status
+          set -e
 
-      - name: Upload parser diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: summary-fact-validation
-          path: |
-            .tmp/parse.log
-            .tmp/parse.status
+      - name: Publish validation result
+        run: |
+          set -euo pipefail
+          git add .github/summary-facts-validation.log .github/summary-facts-validation.status
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -m "Record summary fact validation"
+          git push origin HEAD:docs/summary-fact-examples
