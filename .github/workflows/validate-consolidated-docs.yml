@@ -1,0 +1,46 @@
+name: Validate consolidated documentation
+
+on:
+  push:
+    branches:
+      - docs/merge-guides-slop
+    paths:
+      - .github/workflows/validate-consolidated-docs.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout documentation branch
+        uses: actions/checkout@v4
+        with:
+          ref: docs/merge-guides-slop
+
+      - name: Verify legacy documentation is gone
+        run: |
+          test ! -e guides
+          test ! -e plans/slop
+          git diff --check origin/main...HEAD
+
+      - name: Read every authored documentation form
+        run: |
+          docker run --rm \
+            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
+            -v "${PWD}:${PWD}" \
+            -w "${PWD}" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            lein exec -ep "(doseq [f (filter #(and (.isFile %) (.endsWith (.getName %) \".clj\")) (file-seq (clojure.java.io/file \"src-doc\")))] (with-open [r (java.io.PushbackReader. (clojure.java.io/reader f))] (loop [] (let [form (read {:eof ::eof} r)] (when-not (= ::eof form) (recur))))))"
+
+      - name: Parse and render every configured documentation page
+        run: |
+          docker run --rm \
+            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
+            -v "${PWD}:${PWD}" \
+            -w "${PWD}" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            lein exec -ep "(require '[code.doc :as doc] '[code.doc.executive :as exec]) (let [project (doc/make-project) lookup (exec/all-pages project)] (doseq [k (sort (keys lookup))] (exec/render k {:write false} lookup project)))"
