@@ -2090,11 +2090,10 @@
 
 ^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-2 :added "4.0"}
 (fact "-parse example"
-  (base/block-info (-parse (reader/create ":a")))
-  => {:type :token, :tag :keyword, :string ":a", :height 0, :width 2}
-
-  (base/block-info (-parse (reader/create "\"\\n\"")))
-  => {:type :token, :tag :string, :string "\"\\n\"", :height 1, :width 1}
+  [(base/block-info (-parse (reader/create ":a")))
+   (base/block-info (-parse (reader/create "\"\\n\"")))]
+  => [{:type :token, :tag :keyword, :string ":a", :height 0, :width 2}
+      {:type :token, :tag :string, :string "\"\\n\"", :height 1, :width 1}]
 )
 
 [[:subsection {:title "parse-void" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-void"}]]
@@ -3086,8 +3085,9 @@
 
 ^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-20 :added "4.0"}
 (fact "modifier-block example"
-  (modifier-block :hash-uneval "#_" (fn [acc _] acc))
-  => #std.block.type.ModifierBlock{:tag :hash-uneval, :string "#_", :command #function[...]}
+  (select-keys (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+               [:tag :string])
+  => {:tag :hash-uneval, :string "#_"}
 )
 ;; END merged documentation: plans/slop/summary/std_block_type_tutorial.md
 
