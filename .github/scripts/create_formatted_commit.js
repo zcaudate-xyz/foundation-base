@@ -33,7 +33,8 @@ module.exports = async ({github, context, core, exec}) => {
     tree.push({path, mode: '100644', type: 'blob', sha: null})
   }
 
-  const parent = await github.rest.git.getCommit({owner, repo, commit_sha: context.sha})
+  const parentSha = context.sha
+  const parent = await github.rest.git.getCommit({owner, repo, commit_sha: parentSha})
   const createdTree = await github.rest.git.createTree({
     owner,
     repo,
@@ -45,7 +46,7 @@ module.exports = async ({github, context, core, exec}) => {
     repo,
     message: 'Format consolidated guides with code.doc DSL',
     tree: createdTree.data.sha,
-    parents: [context.sha]
+    parents: [parentSha]
   })
   core.info(`FORMATTED_COMMIT_SHA=${commit.data.sha}`)
   core.setOutput('commit_sha', commit.data.sha)
