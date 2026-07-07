@@ -8,7 +8,7 @@ on:
       - .github/scripts/format_summary_facts.py
 
 permissions:
-  contents: read
+  contents: write
   packages: read
 
 jobs:
@@ -27,6 +27,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git diff --name-only -- src-doc/documentation | wc -l | tr -d ' ')" = "8"
+          test "$(grep -Rh '^(' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | grep -c '^(fact ')" = "277"
           git diff --check
 
       - name: Log into GHCR
@@ -36,7 +37,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Capture code.doc parser diagnostics
+      - name: Parse changed pages with code.doc
         run: |
           set -euo pipefail
           mkdir -p .tmp
@@ -54,8 +55,6 @@ jobs:
              "src-doc/documentation/xt/xt_lang.clj"])
 
           (doseq [file files]
-            (println "Parsing" file)
-            (flush)
             (let [elements (parse/parse-file file {})]
               (when-not (seq elements)
                 (throw (ex-info "Documentation page produced no elements"
@@ -64,22 +63,21 @@ jobs:
           (println "Parsed" (count files) "documentation pages.")
           CLJ
 
-          set +e
           docker run --rm \
             -e 'CI=true' \
             -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
             -v "$(pwd):$(pwd)" \
             -w "$(pwd)" \
             ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            bash -lc 'set -euo pipefail; java -cp "$(lein classpath)" clojure.main .tmp/validate_summary_facts.clj' \
-            > .tmp/parse.log 2>&1
-          echo "$?" > .tmp/parse.status
-          set -e
+            bash -lc 'set -euo pipefail; lein javac; java -cp "$(lein classpath)" clojure.main .tmp/validate_summary_facts.clj'
 
-      - name: Upload parser diagnostics
-        uses: actions/upload-artifact@v4
-        with:
-          name: summary-fact-parser-diagnostics
-          path: |
-            .tmp/parse.log
-            .tmp/parse.status
+      - name: Commit fact-based documentation
+        run: |
+          set -euo pipefail
+          git checkout origin/main -- .github/workflows/format-docs-pr.yml
+          git rm -f .github/scripts/format_summary_facts.py
+          git add src-doc/documentation .github/workflows/format-docs-pr.yml
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -m "Represent imported Clojure examples as facts"
+          git push origin HEAD:docs/format-slop-summary
