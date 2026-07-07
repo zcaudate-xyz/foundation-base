@@ -71,8 +71,8 @@
                   (apply list 'while
                          (list '< i (list 'x:len arr))
                          (concat [(list 'var v (list '. arr [i]))]
-                                  body
-                                  [(list ':= i (list '+ i 1))])))))
+                                 body
+                                 [(list ':= i (list '+ i 1))])))))
     (let [idx (gensym "idx__")]
       (list 'do
             (list 'var idx 0)
@@ -81,8 +81,8 @@
                   (apply list 'while
                          (list '< idx (list 'x:len arr))
                          (concat [(list 'var e (list '. arr [idx]))]
-                                  body
-                                  [(list ':= idx (list '+ idx 1))])))))))
+                                 body
+                                 [(list ':= idx (list '+ idx 1))])))))))
 
 (defn elisp-tf-for-object
   [[_ [[k v] m] & body]]
@@ -97,8 +97,8 @@
                 (apply list 'while
                        (list '< idx (list 'x:len keys))
                        (concat [(list 'var key (list '. keys [idx]))]
-                                (if (not= v '_)
-                                  [(list 'var v (list '. m [key]))]
+                               (if (not= v '_)
+                                 [(list 'var v (list '. m [key]))]
                                  [])
                                body
                                [(list ':= idx (list '+ idx 1))]))))))
@@ -199,8 +199,8 @@
            grammar
            mopts)
 
-           :else
-           (emit-common/emit-invoke-raw "funcall" (cons sym args) grammar mopts))))
+          :else
+          (emit-common/emit-invoke-raw "funcall" (cons sym args) grammar mopts))))
 
 (defn- elisp-collect-defuns
   [form]
@@ -341,32 +341,32 @@
   [args]
   [])
 
- (def +elisp-transform-config+
-   {:begin 'progn
-     :reserved +reserved+
-     :def-form (fn [sym value]
-                 (list 'progn
-                       (list 'defvar sym nil)
-                       (list 'setq sym value)))
-     :return-form (fn [value]
-                    (list 'throw (list 'quote '__xt_return__) value))
-     :lambda-form (fn [args body]
-                     (list* 'lambda
-                            (apply list args)
-                            (concat (elisp-function-prologue args)
-                                    [(list 'catch (list 'quote '__xt_return__)
-                                           (if (= 1 (count body))
-                                             (first body)
-                                             (cons 'progn body)))])))
-     :defn-form (fn [sym args body]
-                  (list* 'defun
-                         sym
+(def +elisp-transform-config+
+  {:begin 'progn
+   :reserved +reserved+
+   :def-form (fn [sym value]
+               (list 'progn
+                     (list 'defvar sym nil)
+                     (list 'setq sym value)))
+   :return-form (fn [value]
+                  (list 'throw (list 'quote '__xt_return__) value))
+   :lambda-form (fn [args body]
+                  (list* 'lambda
                          (apply list args)
                          (concat (elisp-function-prologue args)
                                  [(list 'catch (list 'quote '__xt_return__)
                                         (if (= 1 (count body))
                                           (first body)
                                           (cons 'progn body)))])))
+   :defn-form (fn [sym args body]
+                (list* 'defun
+                       sym
+                       (apply list args)
+                       (concat (elisp-function-prologue args)
+                               [(list 'catch (list 'quote '__xt_return__)
+                                      (if (= 1 (count body))
+                                        (first body)
+                                        (cons 'progn body)))])))
    :let-form (fn [bindings body]
                (list* 'let* (apply list bindings) body))
    :while-form (fn [test body]
@@ -375,37 +375,37 @@
                (let [body-form (if (= 1 (count body))
                                  (first body)
                                  (cons 'progn body))
-                      caught    (if catch
-                                  (let [raw-sym (gensym "err__")
-                                        bind-sym (or (:sym catch) 'err)
-                                        catch-form (if (= 1 (count (:body catch)))
-                                                     (first (:body catch))
-                                                     (cons 'progn (:body catch)))]
-                                     (list 'condition-case raw-sym
-                                           body-form
-                                           (list 'error
-                                                 (list 'let
-                                                       (list (list bind-sym
-                                                                   (list 'error-message-string raw-sym)))
-                                                       catch-form))))
-                                  body-form)]
+                     caught    (if catch
+                                 (let [raw-sym (gensym "err__")
+                                       bind-sym (or (:sym catch) 'err)
+                                       catch-form (if (= 1 (count (:body catch)))
+                                                    (first (:body catch))
+                                                    (cons 'progn (:body catch)))]
+                                   (list 'condition-case raw-sym
+                                         body-form
+                                         (list 'error
+                                               (list 'let
+                                                     (list (list bind-sym
+                                                                 (list 'error-message-string raw-sym)))
+                                                     catch-form))))
+                                 body-form)]
                  (if (seq finally)
                    (list* 'unwind-protect caught finally)
                    caught)))
-    :not-equal-form (fn [[x y]]
-                      (list 'not (list 'equal x y)))
-    :equal-form (fn [[x y]]
-                  (list 'equal x y))
-    :nil-form (fn [x]
-                (list 'null x))
-    :assign-symbol-form (fn [sym value]
-                          (list 'progn
-                                (list 'setq sym value)
-                                (list 'if
-                                      (list 'functionp sym)
-                                      (list 'fset (list 'intern (name sym)) sym)
-                                      nil)
-                                sym))
+   :not-equal-form (fn [[x y]]
+                     (list 'not (list 'equal x y)))
+   :equal-form (fn [[x y]]
+                 (list 'equal x y))
+   :nil-form (fn [x]
+               (list 'null x))
+   :assign-symbol-form (fn [sym value]
+                         (list 'progn
+                               (list 'setq sym value)
+                               (list 'if
+                                     (list 'functionp sym)
+                                     (list 'fset (list 'intern (name sym)) sym)
+                                     nil)
+                               sym))
    :index-read-form (fn [obj key kind]
                       (case kind
                         :key (list 'gethash key obj)
@@ -414,22 +414,22 @@
                                     (list 'hash-table-p obj)
                                     (list 'gethash key obj)
                                     (list 'aref obj key))))
-    :index-write-form (fn [obj key value kind]
-                        (case kind
-                          :key (list 'progn
-                                     (list 'puthash key value obj)
-                                     obj)
-                          :idx (list 'progn
-                                     (list 'aset obj key value)
-                                     obj)
-                          :auto (list 'if
-                                      (list 'hash-table-p obj)
-                                      (list 'progn
-                                            (list 'puthash key value obj)
-                                            obj)
-                                      (list 'progn
-                                            (list 'aset obj key value)
-                                            obj))))
+   :index-write-form (fn [obj key value kind]
+                       (case kind
+                         :key (list 'progn
+                                    (list 'puthash key value obj)
+                                    obj)
+                         :idx (list 'progn
+                                    (list 'aset obj key value)
+                                    obj)
+                         :auto (list 'if
+                                     (list 'hash-table-p obj)
+                                     (list 'progn
+                                           (list 'puthash key value obj)
+                                           obj)
+                                     (list 'progn
+                                           (list 'aset obj key value)
+                                           obj))))
    :global-symbol '__xt_globals__
    :global-read-form (fn [global key]
                        (list 'gethash key global))
@@ -438,9 +438,67 @@
                               (list 'puthash key value global)
                               global))})
 
+(defn- elisp-rest-arg-form?
+  [form]
+  (and (collection/form? form)
+       (= 2 (count form))
+       (= :.. (first form))
+       (symbol? (second form))))
+
+(defn- elisp-callable-form?
+  [form]
+  (and (collection/form? form)
+       (contains? '#{fn fn:> defn defgen} (first form))))
+
+(defn- elisp-lower-rest-callable
+  [form]
+  (let [[tag head & tail] form
+        [name args body] (if (symbol? head)
+                           [head (first tail) (rest tail)]
+                           [nil head tail])
+        rest-args (filterv elisp-rest-arg-form? args)]
+    (cond
+      (empty? rest-args) form
+      (< 1 (count rest-args))
+      (throw (ex-info "Only one rest argument is allowed" {:form form :args args}))
+      (not= (last args) (first rest-args))
+      (throw (ex-info "Rest argument must be final" {:form form :args args}))
+      :else
+      (let [rest-sym (second (first rest-args))
+            args (vec (concat (butlast args) ['&rest rest-sym]))
+            body (cons (list 'setq rest-sym (list 'vconcat rest-sym)) body)
+            out (if name
+                  (apply list tag name args body)
+                  (apply list tag args body))]
+        (with-meta out (meta form))))))
+
+(defn- elisp-lower-rest-forms
+  [form]
+  (cond
+    (and (collection/form? form) (= 'quote (first form))) form
+    (elisp-callable-form? form)
+    (let [form (elisp-lower-rest-callable form)]
+      (with-meta (apply list (map elisp-lower-rest-forms form)) (meta form)))
+    (collection/form? form)
+    (with-meta (apply list (map elisp-lower-rest-forms form)) (meta form))
+    (vector? form)
+    (with-meta (mapv elisp-lower-rest-forms form) (meta form))
+    (set? form)
+    (with-meta (set (map elisp-lower-rest-forms form)) (meta form))
+    (map? form)
+    (with-meta
+      (into (empty form)
+            (map (fn [[k v]]
+                   [(elisp-lower-rest-forms k)
+                    (elisp-lower-rest-forms v)]))
+            form)
+      (meta form))
+    :else form))
+
 (defn elisp-transform
   [form]
-  (common/transform-form +elisp-transform-config+ form))
+  (common/transform-form +elisp-transform-config+
+                         (elisp-lower-rest-forms form)))
 
 (declare emit-elisp-form)
 
