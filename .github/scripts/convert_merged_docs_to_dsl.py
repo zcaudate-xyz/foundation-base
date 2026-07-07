@@ -114,6 +114,17 @@ def heading_form(kind, heading, link):
     return f'[[:{kind} {{:title {quote(heading)} :link {quote(link)}}}]]'
 
 
+def paragraph_form(text):
+    stripped = text.strip()
+    if stripped.startswith(("{", "[")):
+        try:
+            json.loads(stripped)
+            return f'[[:code {{:lang "json"}} {quote(stripped)}]]'
+        except json.JSONDecodeError:
+            pass
+    return quote(text)
+
+
 def render(source, markdown):
     items = tokenize(markdown)
     levels = [item[1] for item in items if item[0] == "heading"]
@@ -132,7 +143,7 @@ def render(source, markdown):
             link = key if seen[key] == 1 else f"{key}-{seen[key]}"
             forms.append(heading_form(kind, item[2], link))
         elif item[0] == "paragraph":
-            forms.append(quote(item[1]))
+            forms.append(paragraph_form(item[1]))
         elif item[0] == "code":
             forms.append(f'[[:code {{:lang {quote(item[1])}}} {quote(item[2])}]]')
         elif item[0] == "quote":
