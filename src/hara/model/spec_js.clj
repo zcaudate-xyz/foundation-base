@@ -37,6 +37,10 @@
   ([^java.util.regex.Pattern re]
    (str "/" (.pattern re) "/")))
 
+(defn js-emit-input-rest
+  [{:keys [symbol]} grammar mopts]
+  (str "..." (common/*emit-fn* symbol grammar mopts)))
+
 (defn js-map-key
   "emits a map key"
   {:added "4.0"}
@@ -134,9 +138,9 @@
                            (name sym))
          supers (list 'quote (vec (remove keyword? inherit)))]
      `(:- :class ~sym-name :extends ~supers \{
-          (\\
-           \\ (\| (do ~@body))
-           \\)
+          (\
+           \ (\| (do ~@body))
+           \)
           \}))))
 
 (defn js-tf-var-let
@@ -158,7 +162,7 @@
   (let [[binding method] (cond (= k '_) [v  'Object.values]
                                (= v '_) [k  'Object.keys]
                                :else [[k v] 'Object.entries])]
-    (apply list 'for [(list 'var* :let binding) :of (list method m)]
+    (apply list 'for [(list 'var* :let binding) :of (list '% method m)]
            body)))
 
 (defn js-tf-for-array
@@ -209,12 +213,12 @@
                                :block
                                :data-range
                                :functional-core])
-       (grammar/build:override
-        {:var         {:symbol '#{var*}}
-         :pow         {:raw "Math.pow" :emit :invoke}
-         :mul         {:value true}
-         :defn        {:symbol '#{defn defn- defelem}}
-         :with-global {:value true :raw "globalThis"}
+      (grammar/build:override
+       {:var         {:symbol '#{var*}}
+        :pow         {:raw "Math.pow" :emit :invoke}
+        :mul         {:value true}
+        :defn        {:symbol '#{defn defn- defelem}}
+        :with-global {:value true :raw "globalThis"}
         :defclass    {:macro  #'js-defclass    :emit :macro}
         :for-object  {:macro  #'js-tf-for-object  :emit :macro}
         :for-array   {:macro  #'js-tf-for-array   :emit :macro}
@@ -244,7 +248,8 @@
         :allow   {:assign  #{:symbol :vector :set :map}}
         :highlight '#{return break del tab reject}
         :default  {:common    {:namespace-full "$$"}
-                   :function  {:raw "function" :space ""}}
+                   :function  {:raw "function" :space ""
+                               :args {:rest #'js-emit-input-rest}}}
         :token    {:nil       {:as "null"}
                    :regex     {:custom #'js-regex}
                    :string    {}
