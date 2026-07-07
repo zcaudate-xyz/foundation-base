@@ -1,8 +1,8 @@
-name: Format docs branch
+name: Format docs PR
 
 on:
-  push:
-    branches: [docs/merge-guides-slop]
+  pull_request:
+    branches: [main]
     paths:
       - .github/workflows/format-docs-pr.yml
 
