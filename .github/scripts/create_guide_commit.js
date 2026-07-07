@@ -57,6 +57,7 @@ module.exports = async ({github, context, core, exec}) => {
     sha: parentSha,
     state: 'success',
     context: 'guide-docs/staged-commit',
-    description: commit.data.sha
+    description: commit.data.sha,
+    target_url: `https://github.com/${owner}/${repo}/commit/${commit.data.sha}`
   })
 }
