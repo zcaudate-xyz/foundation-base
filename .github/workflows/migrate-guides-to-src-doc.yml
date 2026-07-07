@@ -31,9 +31,24 @@ jobs:
         run: python3 -m py_compile .github/scripts/migrate_guides_to_src_doc.py
 
       - name: Merge prose into src-doc
-        run: python3 .github/scripts/migrate_guides_to_src_doc.py
+        id: migrate
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          python3 .github/scripts/migrate_guides_to_src_doc.py 2>&1 | tee migration-error.log
+
+      - name: Commit migration diagnostics
+        if: steps.migrate.outcome == 'failure'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add migration-error.log
+          git commit -m "Record documentation migration failure"
+          git push origin HEAD:docs/merge-guides-slop
+          exit 1
 
       - name: Verify the migration
+        if: steps.migrate.outcome == 'success'
         run: |
           test ! -e guides
           test ! -e plans/slop
@@ -42,13 +57,16 @@ jobs:
           test "$(git diff --name-only | grep '^src-doc/' | wc -l | tr -d ' ')" -gt 0
 
       - name: Remove one-off migration machinery
+        if: steps.migrate.outcome == 'success'
         run: |
           git checkout origin/main -- .github/workflows/make-docs.yml
           rm .github/scripts/migrate_guides_to_src_doc.py
           rm .github/workflows/migrate-guides-to-src-doc.yml
+          rm -f migration-error.log
           rmdir .github/scripts 2>/dev/null || true
 
       - name: Commit consolidated documentation
+        if: steps.migrate.outcome == 'success'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
