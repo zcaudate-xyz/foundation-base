@@ -31,4 +31,6 @@ jobs:
           path: src-doc
       - uses: actions/github-script@v7
         with:
-          script: require('./.github/scripts/create_formatted_commit.js')
+          script: |
+            const build = require('./.github/scripts/create_formatted_commit.js')
+            return build({github, context, core, exec})
