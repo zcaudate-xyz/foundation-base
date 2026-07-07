@@ -20,8 +20,10 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 30
+    env:
+      LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC
 
     steps:
       - name: Checkout documentation branch
@@ -29,6 +31,11 @@ jobs:
         with:
           ref: docs/merge-guides-slop
           fetch-depth: 0
+
+      - name: Verify toolchain
+        run: |
+          java -version
+          lein version
 
       - name: Verify legacy documentation is gone
         run: |
@@ -38,18 +45,8 @@ jobs:
 
       - name: Read every authored documentation form
         run: |
-          docker run --rm \
-            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
-            -v "${PWD}:${PWD}" \
-            -w "${PWD}" \
-            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            lein exec -ep "(doseq [f (filter #(and (.isFile %) (.endsWith (.getName %) \".clj\")) (file-seq (clojure.java.io/file \"src-doc\")))] (with-open [r (java.io.PushbackReader. (clojure.java.io/reader f))] (loop [] (let [form (read {:eof ::eof} r)] (when-not (= ::eof form) (recur))))))"
+          lein exec -ep "(doseq [f (filter #(and (.isFile %) (.endsWith (.getName %) \".clj\")) (file-seq (clojure.java.io/file \"src-doc\")))] (with-open [r (java.io.PushbackReader. (clojure.java.io/reader f))] (loop [] (let [form (read {:eof ::eof} r)] (when-not (= ::eof form) (recur))))))"
 
       - name: Parse and render every configured documentation page
         run: |
-          docker run --rm \
-            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
-            -v "${PWD}:${PWD}" \
-            -w "${PWD}" \
-            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            lein exec -ep "(require '[code.doc :as doc] '[code.doc.executive :as exec]) (let [project (doc/make-project) lookup (exec/all-pages project)] (doseq [k (sort (keys lookup))] (exec/render k {:write false} lookup project)))"
+          lein exec -ep "(require '[code.doc :as doc] '[code.doc.executive :as exec]) (let [project (doc/make-project) lookup (exec/all-pages project)] (doseq [k (sort (keys lookup))] (exec/render k {:write false} lookup project)))"
