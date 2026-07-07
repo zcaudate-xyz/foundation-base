@@ -55,10 +55,12 @@ module.exports = async ({github, context, core, exec}) => {
   })
   core.info(`FORMATTED_COMMIT_SHA=${commit.data.sha}`)
   core.setOutput('commit_sha', commit.data.sha)
-  await github.rest.issues.createComment({
+  await github.rest.repos.createCommitStatus({
     owner,
     repo,
-    issue_number: 349,
-    body: `Staged formatted documentation commit: \`${commit.data.sha}\``
+    sha: parentSha,
+    state: 'success',
+    context: 'formatted-docs/staged-commit',
+    description: commit.data.sha
   })
 }
