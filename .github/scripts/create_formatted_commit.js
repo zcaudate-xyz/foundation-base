@@ -16,5 +16,29 @@ module.exports = async ({github, context, core, exec}) => {
     })
     tree.push({path: file, mode: '100644', type: 'blob', sha: blob.data.sha})
   }
-  core.info(`created ${tree.length} documentation blobs`)
+
+  const cleanup = [
+    '.github/scripts/convert_merged_docs_to_dsl.py',
+    '.github/scripts/format_docs.py',
+    '.github/scripts/format_all_docs.sh',
+    '.github/scripts/convert_merged_docs_to_dsl.clj',
+    '.github/scripts/render_merged_docs_dsl.py',
+    '.github/scripts/test.txt',
+    '.github/scripts/create_formatted_commit.js',
+    '.github/workflows/apply-formatted-docs.yml',
+    '.github/workflows/format-docs-pr.yml',
+    '.github/workflows/validate-consolidated-docs.yml'
+  ]
+  for (const path of cleanup) {
+    tree.push({path, mode: '100644', type: 'blob', sha: null})
+  }
+
+  const parent = await github.rest.git.getCommit({owner, repo, commit_sha: context.sha})
+  const createdTree = await github.rest.git.createTree({
+    owner,
+    repo,
+    base_tree: parent.data.tree.sha,
+    tree
+  })
+  core.info(`created tree ${createdTree.data.sha}`)
 }
