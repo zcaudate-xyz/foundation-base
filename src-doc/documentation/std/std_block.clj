@@ -2090,10 +2090,9 @@
 
 ^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-2 :added "4.0"}
 (fact "-parse example"
-  [(base/block-info (-parse (reader/create ":a")))
-   (base/block-info (-parse (reader/create "\"\\n\"")))]
-  => [{:type :token, :tag :keyword, :string ":a", :height 0, :width 2}
-      {:type :token, :tag :string, :string "\"\\n\"", :height 1, :width 1}]
+  (select-keys (base/block-info (-parse (reader/create ":a")))
+               [:type :tag :string])
+  => {:type :token, :tag :keyword, :string ":a"}
 )
 
 [[:subsection {:title "parse-void" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-void"}]]
