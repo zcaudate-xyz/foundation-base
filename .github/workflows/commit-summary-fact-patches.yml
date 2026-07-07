@@ -18,7 +18,7 @@ jobs:
           ref: docs/summary-fact-examples
           fetch-depth: 0
 
-      - name: Patch generated facts by metadata ID
+      - name: Patch read-dispatch fact
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -26,78 +26,19 @@ jobs:
 
           path = Path("src-doc/documentation/std/std_block.clj")
           text = path.read_text()
-
-          def replace_fact(text, identifier, replacement):
-              marker = f"^{{:id {identifier} :added \"4.0\"}}\n"
-              marker_start = text.index(marker)
-              fact_start = text.index("(fact ", marker_start + len(marker))
-              depth = 0
-              in_string = False
-              escaped = False
-              comment = False
-              index = fact_start
-              while index < len(text):
-                  char = text[index]
-                  if comment:
-                      if char == "\n":
-                          comment = False
-                      index += 1
-                      continue
-                  if in_string:
-                      if escaped:
-                          escaped = False
-                      elif char == "\\":
-                          escaped = True
-                      elif char == '"':
-                          in_string = False
-                      index += 1
-                      continue
-                  if char == ";":
-                      comment = True
-                  elif char == '"':
-                      in_string = True
-                  elif char == "\\":
-                      index += 2
-                      continue
-                  elif char == "(":
-                      depth += 1
-                  elif char == ")":
-                      depth -= 1
-                      if depth == 0:
-                          return text[:fact_start] + replacement + text[index + 1:]
-                  index += 1
-              raise ValueError(f"unterminated fact for {identifier}")
-
-          text = replace_fact(
-              text,
-              "merged-plans-slop-summary-std-block-parse-tutorial-md-example-2",
-              '''(fact "-parse example"
-            [(base/block-info (-parse (reader/create ":a")))
-             (base/block-info (-parse (reader/create "\\\"\\\\n\\\"")))]
-            => [{:type :token, :tag :keyword, :string ":a", :height 0, :width 2}
-                {:type :token, :tag :string, :string "\\\"\\\\n\\\"", :height 1, :width 1}]
-          )'''
-          )
-
-          text = replace_fact(
-              text,
-              "merged-plans-slop-summary-std-block-type-tutorial-md-example-20",
-              '''(fact "modifier-block example"
-            (select-keys (modifier-block :hash-uneval "#_" (fn [acc _] acc))
-                         [:tag :string])
-            => {:tag :hash-uneval, :string "#_"}
-          )'''
-          )
-
-          path.write_text(text)
+          before = "  (read-dispatch \\tab)\n  => :void"
+          after = "  (read-dispatch (char 9))\n  => :void"
+          if before not in text:
+              raise SystemExit("read-dispatch named character example was not found")
+          path.write_text(text.replace(before, after, 1))
           PY
           git diff --check
 
-      - name: Commit std.block fact patches
+      - name: Commit read-dispatch fact patch
         run: |
           set -euo pipefail
           git add src-doc/documentation/std/std_block.clj
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git commit -m "Refine std.block summary facts"
+          git commit -m "Avoid named character in std.block summary fact"
           git push origin HEAD:docs/summary-fact-examples
