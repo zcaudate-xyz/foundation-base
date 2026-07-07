@@ -1,4 +1,4 @@
-name: Apply summary fact examples
+name: Validate summary fact examples
 
 on:
   push:
@@ -7,10 +7,11 @@ on:
       - .github/workflows/apply-summary-facts.yml
 
 permissions:
-  contents: write
+  contents: read
+  packages: read
 
 jobs:
-  apply:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,35 +19,155 @@ jobs:
           ref: docs/summary-fact-examples
           fetch-depth: 0
 
-      - name: Generate fact examples
+      - name: Check committed fact counts
         run: |
           set -euo pipefail
-          python3 .github/scripts/format_summary_facts.py
-          python3 - <<'PY'
-          from pathlib import Path
-          path = Path("src-doc/documentation/std/std_block.clj")
-          text = path.read_text()
-          before = '''  ;; Throws exception if string is not a valid comment
-            ;; (str (comment "hello"))
-            => ExceptionInfo: "Not a valid comment string."
-          '''
-          after = '''  ;; Throws exception if string is not a valid comment
-            (str (comment "hello"))
-            => (throws clojure.lang.ExceptionInfo "Not a valid comment string.")
-          '''
-          if before not in text:
-              raise SystemExit("exception example was not found")
-          path.write_text(text.replace(before, after, 1))
-          PY
-          test "$(git diff --name-only -- src-doc/documentation | wc -l | tr -d ' ')" = "8"
           test "$(grep -Rh '^\^{:id merged-plans-slop-summary-.*-example-' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')" = "277"
+          test "$(grep -Rh '\[\[:code {:lang "clojure"}' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')" = "0"
           git diff --check
 
-      - name: Commit generated pages
+      - name: Extract generated facts
         run: |
           set -euo pipefail
-          git add src-doc/documentation
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git commit -m "Represent imported Clojure examples as facts"
-          git push origin HEAD:docs/summary-fact-examples
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          files = [
+              Path("src-doc/documentation/code/code_query.clj"),
+              Path("src-doc/documentation/std/lib_index.clj"),
+              Path("src-doc/documentation/std/std_block.clj"),
+              Path("src-doc/documentation/std/std_lib_apply.clj"),
+              Path("src-doc/documentation/std/std_lib_bin.clj"),
+              Path("src-doc/documentation/std/std_lib_component.clj"),
+              Path("src-doc/documentation/std_lang_introduction.clj"),
+              Path("src-doc/documentation/xt/xt_lang.clj"),
+          ]
+          out = Path(".tmp/generated-facts")
+          out.mkdir(parents=True, exist_ok=True)
+          marker = re.compile(r'^\^\{:id (merged-plans-slop-summary-[^ ]+-example-\d+) :added "4\.0"\}\n', re.M)
+
+          def extract_fact(text, start):
+              start = text.index("(fact ", start)
+              depth = 0
+              string = False
+              escape = False
+              comment = False
+              index = start
+              while index < len(text):
+                  char = text[index]
+                  if comment:
+                      if char == "\n":
+                          comment = False
+                      index += 1
+                      continue
+                  if string:
+                      if escape:
+                          escape = False
+                      elif char == "\\":
+                          escape = True
+                      elif char == '"':
+                          string = False
+                      index += 1
+                      continue
+                  if char == ";":
+                      comment = True
+                  elif char == '"':
+                      string = True
+                  elif char == "\\":
+                      index += 2
+                      continue
+                  elif char == "(":
+                      depth += 1
+                  elif char == ")":
+                      depth -= 1
+                      if depth == 0:
+                          return text[start:index + 1]
+                  index += 1
+              raise ValueError("unterminated fact")
+
+          count = 0
+          for path in files:
+              text = path.read_text()
+              for match in marker.finditer(text):
+                  identifier = match.group(1)
+                  (out / f"{identifier}.clj").write_text(
+                      extract_fact(text, match.end()) + "\n"
+                  )
+                  count += 1
+          if count != 277:
+              raise SystemExit(f"expected 277 extracted facts, found {count}")
+          print("Extracted", count, "generated facts.")
+          PY
+
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse every generated fact and page
+        run: |
+          set -euo pipefail
+          cat > .tmp/validate_summary_facts.clj <<'CLJ'
+          (require '[clojure.java.io :as io]
+                   '[code.doc.parse :as parse]
+                   '[std.block.navigate :as nav])
+
+          (def page-files
+            ["src-doc/documentation/code/code_query.clj"
+             "src-doc/documentation/std/lib_index.clj"
+             "src-doc/documentation/std/std_block.clj"
+             "src-doc/documentation/std/std_lib_apply.clj"
+             "src-doc/documentation/std/std_lib_bin.clj"
+             "src-doc/documentation/std/std_lib_component.clj"
+             "src-doc/documentation/std_lang_introduction.clj"
+             "src-doc/documentation/xt/xt_lang.clj"])
+
+          (def failures (atom []))
+
+          (doseq [file (sort-by #(.getName %) (file-seq (io/file ".tmp/generated-facts")))
+                  :when (.isFile file)]
+            (try
+              (nav/parse-string (slurp file))
+              (catch Throwable t
+                (println "FACT-FAIL" (.getName file) "::" (.getMessage t))
+                (swap! failures conj (.getName file)))))
+
+          (when (seq @failures)
+            (throw (ex-info "Generated facts failed parsing"
+                            {:failures @failures})))
+
+          (doseq [file page-files]
+            (println "Parsing page" file)
+            (let [elements (parse/parse-file file {})]
+              (when-not (seq elements)
+                (throw (ex-info "Documentation page produced no elements"
+                                {:file file})))))
+
+          (println "Parsed all generated facts and" (count page-files) "documentation pages.")
+          CLJ
+
+          set +e
+          docker run --rm \
+            -e 'CI=true' \
+            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
+            -v "$(pwd):$(pwd)" \
+            -w "$(pwd)" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            bash -lc 'set -euo pipefail; lein javac; java -cp "$(lein classpath)" clojure.main .tmp/validate_summary_facts.clj' \
+            > .tmp/parse.log 2>&1
+          status=$?
+          echo "$status" > .tmp/parse.status
+          cat .tmp/parse.log
+          exit "$status"
+
+      - name: Upload parser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summary-fact-validation
+          path: |
+            .tmp/parse.log
+            .tmp/parse.status
