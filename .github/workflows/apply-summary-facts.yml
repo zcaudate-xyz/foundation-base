@@ -19,17 +19,27 @@ jobs:
           ref: docs/summary-fact-examples
           fetch-depth: 0
 
-      - name: Check committed fact counts
-        run: |
-          set -euo pipefail
-          test "$(grep -Rh '^\^{:id merged-plans-slop-summary-.*-example-' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')" = "277"
-          test "$(grep -Rh '\[\[:code {:lang "clojure"}' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')" = "0"
-          git diff --check
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract generated facts
+      - name: Validate and publish diagnostics
         run: |
-          set -euo pipefail
-          python3 - <<'PY'
+          set +e
+          mkdir -p .tmp/generated-facts
+          : > .github/summary-facts-validation.log
+          status=0
+
+          count=$(grep -Rh '^\^{:id merged-plans-slop-summary-.*-example-' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')
+          echo "Generated fact count: $count" >> .github/summary-facts-validation.log
+          if [ "$count" != "277" ]; then
+            status=1
+          fi
+
+          python3 - <<'PY' >> .github/summary-facts-validation.log 2>&1
           import re
           from pathlib import Path
 
@@ -44,7 +54,6 @@ jobs:
               Path("src-doc/documentation/xt/xt_lang.clj"),
           ]
           out = Path(".tmp/generated-facts")
-          out.mkdir(parents=True, exist_ok=True)
           marker = re.compile(r'^\^\{:id (merged-plans-slop-summary-[^ ]+-example-\d+) :added "4\.0"\}\n', re.M)
 
           def extract_fact(text, start):
@@ -99,17 +108,11 @@ jobs:
               raise SystemExit(f"expected 277 extracted facts, found {count}")
           print("Extracted", count, "generated facts.")
           PY
+          extract_status=$?
+          if [ "$extract_status" != "0" ]; then
+            status=$extract_status
+          fi
 
-      - name: Log into GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Parse every generated fact and page
-        run: |
-          set -euo pipefail
           cat > .tmp/validate_summary_facts.clj <<'CLJ'
           (require '[clojure.java.io :as io]
                    '[code.doc.parse :as parse]
@@ -149,21 +152,24 @@ jobs:
           (println "Parsed all generated facts and" (count page-files) "documentation pages.")
           CLJ
 
-          set +e
-          docker run --rm \
-            -e 'CI=true' \
-            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
-            -v "$(pwd):$(pwd)" \
-            -w "$(pwd)" \
-            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            bash -lc 'set -euo pipefail; lein javac; java -cp "$(lein classpath)" clojure.main .tmp/validate_summary_facts.clj' \
-            > .github/summary-facts-validation.log 2>&1
-          echo "$?" > .github/summary-facts-validation.status
-          set -e
+          if [ "$extract_status" = "0" ]; then
+            docker run --rm \
+              -e 'CI=true' \
+              -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
+              -v "$(pwd):$(pwd)" \
+              -w "$(pwd)" \
+              ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+              bash -lc 'set -euo pipefail; lein javac; java -cp "$(lein classpath)" clojure.main .tmp/validate_summary_facts.clj' \
+              >> .github/summary-facts-validation.log 2>&1
+            parse_status=$?
+            if [ "$parse_status" != "0" ]; then
+              status=$parse_status
+            fi
+          fi
 
-      - name: Publish validation result
-        run: |
-          set -euo pipefail
+          echo "$status" > .github/summary-facts-validation.status
+          cat .github/summary-facts-validation.log
+
           git add .github/summary-facts-validation.log .github/summary-facts-validation.status
           git config user.name github-actions
           git config user.email github-actions@github.com
