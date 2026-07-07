@@ -5,6 +5,7 @@
   {:import [["https://esm.sh/react@18.3.1" :as React]
             ["https://esm.sh/react-dom@18.3.1/client" :as ReactDOM]]
    :require [[play.js-002-substrate-scratch-v3.main :as demo]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-data :as data]]
    :static {:export false}})
 
