@@ -7,3 +7,5 @@ find src-doc/documentation -name '*.clj' -print0 |
       < "$file" > "$file.tmp"
     mv "$file.tmp" "$file"
   done
+
+git diff --check
