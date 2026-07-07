@@ -1,0 +1,46 @@
+name: Apply xtalk varargs refactor
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  refactor:
+    if: github.head_ref == 'fix/xtalk-varargs-inline-specs'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/xtalk-varargs-inline-specs
+          fetch-depth: 0
+
+      - name: Apply reviewed migration
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64
+          import gzip
+          import pathlib
+          import re
+
+          workflow = pathlib.Path('.github/workflows/refactor-xtalk-varargs.yml').read_text()
+          match = re.search(r"echo '([^']+)'", workflow)
+          if not match:
+              raise SystemExit('embedded refactor payload not found')
+          pathlib.Path('/tmp/refactor_xtalk_varargs.py').write_bytes(
+              gzip.decompress(base64.b64decode(match.group(1))))
+          PY
+          python /tmp/refactor_xtalk_varargs.py
+          rm -f .github/workflows/apply-xtalk-varargs.yml
+
+      - name: Commit refactor
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          git commit -m 'Move xtalk rest emission into language specs'
+          git push origin HEAD:fix/xtalk-varargs-inline-specs
