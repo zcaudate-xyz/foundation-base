@@ -1,7 +1,7 @@
 (ns hara.model.spec-python
   (:require [clojure.string :as string]
             [hara.lang.book :as book]
-  	    [hara.common.emit :as emit]
+ 	    [hara.common.emit :as emit]
             [hara.common.emit-common :as common]
             [hara.common.emit-data :as data]
             [hara.common.emit-helper :as helper]
@@ -217,15 +217,15 @@
          body  (list* 'defn- name (python-apply-optional-defaults name args) more)]
      (if (empty? decorators)
        body
-       `(\ ~(apply list
-                    \ (mapcat (fn [d]
-                                 [\ (list :%
+       `(\\ ~(apply list
+                    \\ (mapcat (fn [d]
+                                 [\\ (list :%
                                            (list :- "@")
                                            (if (keyword? d)
                                              (list :- (f/strn d))
                                              d))])
                                decorators))
-         \ ~body)))))
+         \\ ~body)))))
 
 (defn python-fn
   "basic transform for python lambdas"
@@ -277,9 +277,9 @@
          name   (symbol (:id module) (name sym))
          supers (list 'quote (remove keyword? inherit))]
      `(:- :class (:% ~name ~supers) \:
-          (\
-           \ (\| (do ~@body))
-           \)))))
+          (\\
+           \\ (\| (do ~@body))
+           \\)))))
 
 (defn python-var
   "var -> fn.inner shorthand"
