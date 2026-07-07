@@ -1,52 +1,25 @@
-name: Validate consolidated documentation
+name: Generate code.doc formatted sources
 
 on:
   push:
-    branches:
-      - docs/merge-guides-slop
+    branches: [docs/merge-guides-slop]
     paths:
       - .github/workflows/validate-consolidated-docs.yml
-  pull_request:
-    branches:
-      - main
-    paths:
-      - README.md
-      - wiki/Code-Tools.md
-      - src-doc/**
-      - .github/workflows/validate-consolidated-docs.yml
+      - .github/scripts/convert_merged_docs_to_dsl.py
 
 permissions:
   contents: read
 
 jobs:
-  validate:
-    runs-on: macos-latest
-    timeout-minutes: 30
-    env:
-      LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC
-
+  format:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout documentation branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: docs/merge-guides-slop
-          fetch-depth: 0
-
-      - name: Verify toolchain
-        run: |
-          java -version
-          lein version
-
-      - name: Verify legacy documentation is gone
-        run: |
-          test ! -e guides
-          test ! -e plans/slop
-          git diff --check origin/main...HEAD
-
-      - name: Read every authored documentation form
-        run: |
-          lein exec -ep "(doseq [f (filter #(and (.isFile %) (.endsWith (.getName %) \".clj\")) (file-seq (clojure.java.io/file \"src-doc\")))] (with-open [r (java.io.PushbackReader. (clojure.java.io/reader f))] (loop [] (let [form (read {:eof ::eof} r)] (when-not (= ::eof form) (recur))))))"
-
-      - name: Parse and render every configured documentation page
-        run: |
-          lein exec -ep "(require '[code.doc :as doc] '[code.doc.executive :as exec]) (let [project (doc/make-project) lookup (exec/all-pages project)] (doseq [k (sort (keys lookup))] (exec/render k {:write false} lookup project)))"
+      - name: Format imported guides
+        run: python3 .github/scripts/format_docs.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formatted-src-doc
+          path: src-doc
