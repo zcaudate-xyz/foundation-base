@@ -1,0 +1,20 @@
+name: Apply formatted docs
+
+on:
+  push:
+    branches: [docs/merge-guides-slop]
+    paths:
+      - .github/workflows/apply-formatted-docs.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/merge-guides-slop
+          fetch-depth: 0
+      - run: echo ready
