@@ -138,9 +138,9 @@
                            (name sym))
          supers (list 'quote (vec (remove keyword? inherit)))]
      `(:- :class ~sym-name :extends ~supers \{
-          (\
-           \ (\| (do ~@body))
-           \)
+          (\\
+           \\ (\| (do ~@body))
+           \\)
           \}))))
 
 (defn js-tf-var-let
@@ -162,7 +162,7 @@
   (let [[binding method] (cond (= k '_) [v  'Object.values]
                                (= v '_) [k  'Object.keys]
                                :else [[k v] 'Object.entries])]
-    (apply list 'for [(list 'var* :let binding) :of (list '% method m)]
+    (apply list 'for [(list 'var* :let binding) :of (list method m)]
            body)))
 
 (defn js-tf-for-array
@@ -213,16 +213,16 @@
                                :block
                                :data-range
                                :functional-core])
-      (grammar/build:override
-       {:var         {:symbol '#{var*}}
-        :pow         {:raw "Math.pow" :emit :invoke}
-        :mul         {:value true}
-        :defn        {:symbol '#{defn defn- defelem}}
-        :with-global {:value true :raw "globalThis"}
+       (grammar/build:override
+        {:var         {:symbol '#{var*}}
+         :pow         {:raw "Math.pow" :emit :invoke}
+         :mul         {:value true}
+         :defn        {:symbol '#{defn defn- defelem}}
+         :with-global {:value true :raw "globalThis"}
         :defclass    {:macro  #'js-defclass    :emit :macro}
         :for-object  {:macro  #'js-tf-for-object  :emit :macro}
         :for-array   {:macro  #'js-tf-for-array   :emit :macro}
-        :for-iter    {:macro  #'js-tf-for-iter    :emit :macro}
+        :for-iter    {:macro  #'js-tf-for-iter   :emit :macro}
         :prototype-get       {:emit :alias :raw 'Object.getPrototypeOf}
         :prototype-set       {:emit :alias :raw 'Object.setPrototypeOf}
         :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro
