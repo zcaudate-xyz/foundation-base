@@ -50,7 +50,7 @@ jobs:
         run: |
           set -euo pipefail
           fact_count=$(grep -Rh '^\^{:id merged-plans-slop-summary-.*-example-' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')
-          code_count=$(( (grep -Rh '\[\[:code {:lang "clojure"}' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} || true) | wc -l | tr -d ' ' ))
+          code_count=$( (grep -Rh '\[\[:code {:lang "clojure"}' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} || true) | wc -l | tr -d ' ' )
           test "$fact_count" = "277"
           test "$code_count" = "0"
           git diff --check
