@@ -23,6 +23,12 @@ This allows page additions and edits to go through normal branches and pull requ
 After merging Wiki page changes and initializing the GitHub Wiki, run:
 
 ```bash
+lein wiki
+```
+
+or call the script directly:
+
+```bash
 bash bin/publish-wiki
 ```
 

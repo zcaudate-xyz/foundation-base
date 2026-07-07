@@ -9,6 +9,7 @@
    "seedgen" ["run" "-m" "hara.seedgen.cli"]
    #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
+   "wiki"        ["exec" "-ep" "(let [p (-> (ProcessBuilder. [\"bash\" \"bin/publish-wiki\"]) (.inheritIO) (.start))] (System/exit (.waitFor p)))"]
    "serve"       ["run" "-m" "code.doc.server" "8080"]
    "incomplete"  ["exec" "-ep" "(use 'code.manage)  (incomplete :all) (System/exit 0)"]
    "install"     ["exec" "-ep" "(use 'code.tool.maven)   (install :all {:tag :all}) (System/exit 0)"]
