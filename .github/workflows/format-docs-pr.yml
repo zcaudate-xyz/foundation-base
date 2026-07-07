@@ -7,7 +7,8 @@ on:
       - .github/workflows/format-docs-pr.yml
 
 permissions:
-  contents: read
+  contents: write
+  issues: write
 
 jobs:
   check:
