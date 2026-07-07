@@ -1,0 +1,211 @@
+name: Validate summary fact examples
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/apply-summary-facts.yml
+      - src-doc/documentation/code/code_query.clj
+      - src-doc/documentation/std/lib_index.clj
+      - src-doc/documentation/std/std_block.clj
+      - src-doc/documentation/std/std_lib_apply.clj
+      - src-doc/documentation/std/std_lib_bin.clj
+      - src-doc/documentation/std/std_lib_component.clj
+      - src-doc/documentation/std_lang_introduction.clj
+      - src-doc/documentation/xt/xt_lang.clj
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Repair reader-unsafe expected value
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("src-doc/documentation/std/std_block.clj")
+          text = path.read_text()
+          before = '''  (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+            => #std.block.type.ModifierBlock{:tag :hash-uneval, :string "#_", :command #function[...]}
+          '''
+          after = '''  (select-keys (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+               [:tag :string])
+            => {:tag :hash-uneval, :string "#_"}
+          '''
+          if before not in text:
+              raise SystemExit("modifier-block example was not found")
+          path.write_text(text.replace(before, after, 1))
+          PY
+
+      - name: Check generated fact counts
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          files = [
+              Path("src-doc/documentation/code/code_query.clj"),
+              Path("src-doc/documentation/std/lib_index.clj"),
+              Path("src-doc/documentation/std/std_block.clj"),
+              Path("src-doc/documentation/std/std_lib_apply.clj"),
+              Path("src-doc/documentation/std/std_lib_bin.clj"),
+              Path("src-doc/documentation/std/std_lib_component.clj"),
+              Path("src-doc/documentation/std_lang_introduction.clj"),
+              Path("src-doc/documentation/xt/xt_lang.clj"),
+          ]
+          text = "\n".join(path.read_text() for path in files)
+          fact_count = sum(
+              1 for line in text.splitlines()
+              if line.startswith("^{:id merged-plans-slop-summary-")
+              and "-example-" in line
+          )
+          code_count = text.count('[[:code {:lang "clojure"}')
+          print({"facts": fact_count, "clojure-code-directives": code_count})
+          if fact_count != 277:
+              raise SystemExit(f"expected 277 generated facts, found {fact_count}")
+          if code_count != 0:
+              raise SystemExit(f"expected no imported Clojure code directives, found {code_count}")
+          PY
+
+      - name: Check patch formatting
+        run: git diff --check
+
+      - name: Extract generated facts
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/generated-facts
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          files = [
+              Path("src-doc/documentation/code/code_query.clj"),
+              Path("src-doc/documentation/std/lib_index.clj"),
+              Path("src-doc/documentation/std/std_block.clj"),
+              Path("src-doc/documentation/std/std_lib_apply.clj"),
+              Path("src-doc/documentation/std/std_lib_bin.clj"),
+              Path("src-doc/documentation/std/std_lib_component.clj"),
+              Path("src-doc/documentation/std_lang_introduction.clj"),
+              Path("src-doc/documentation/xt/xt_lang.clj"),
+          ]
+          out = Path(".tmp/generated-facts")
+          marker = re.compile(r'^\^\{:id (merged-plans-slop-summary-[^ ]+-example-\d+) :added "4\.0"\}\n', re.M)
+
+          def extract_fact(text, start):
+              start = text.index("(fact ", start)
+              depth = 0
+              string = False
+              escape = False
+              comment = False
+              index = start
+              while index < len(text):
+                  char = text[index]
+                  if comment:
+                      if char == "\n":
+                          comment = False
+                      index += 1
+                      continue
+                  if string:
+                      if escape:
+                          escape = False
+                      elif char == "\\":
+                          escape = True
+                      elif char == '"':
+                          string = False
+                      index += 1
+                      continue
+                  if char == ";":
+                      comment = True
+                  elif char == '"':
+                      string = True
+                  elif char == "\\":
+                      index += 2
+                      continue
+                  elif char == "(":
+                      depth += 1
+                  elif char == ")":
+                      depth -= 1
+                      if depth == 0:
+                          return text[start:index + 1]
+                  index += 1
+              raise ValueError("unterminated fact")
+
+          count = 0
+          for path in files:
+              text = path.read_text()
+              for match in marker.finditer(text):
+                  identifier = match.group(1)
+                  (out / f"{identifier}.clj").write_text(
+                      extract_fact(text, match.end()) + "\n"
+                  )
+                  count += 1
+          if count != 277:
+              raise SystemExit(f"expected 277 extracted facts, found {count}")
+          print("Extracted", count, "generated facts.")
+          PY
+
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse every generated fact and page
+        run: |
+          set -euo pipefail
+          cat > .tmp/validate_summary_facts.clj <<'CLJ'
+          (require '[clojure.java.io :as io]
+                   '[code.doc.parse :as parse]
+                   '[std.block.navigate :as nav])
+
+          (def page-files
+            ["src-doc/documentation/code/code_query.clj"
+             "src-doc/documentation/std/lib_index.clj"
+             "src-doc/documentation/std/std_block.clj"
+             "src-doc/documentation/std/std_lib_apply.clj"
+             "src-doc/documentation/std/std_lib_bin.clj"
+             "src-doc/documentation/std/std_lib_component.clj"
+             "src-doc/documentation/std_lang_introduction.clj"
+             "src-doc/documentation/xt/xt_lang.clj"])
+
+          (def failures (atom []))
+
+          (doseq [file (sort-by #(.getName %) (file-seq (io/file ".tmp/generated-facts")))
+                  :when (.isFile file)]
+            (try
+              (nav/parse-string (slurp file))
+              (catch Throwable t
+                (println "FACT-FAIL" (.getName file) "::" (.getMessage t))
+                (swap! failures conj (.getName file)))))
+
+          (when (seq @failures)
+            (throw (ex-info "Generated facts failed parsing"
+                            {:failures @failures})))
+
+          (doseq [file page-files]
+            (println "Parsing page" file)
+            (let [elements (parse/parse-file file {})]
+              (when-not (seq elements)
+                (throw (ex-info "Documentation page produced no elements"
+                                {:file file})))))
+
+          (println "Parsed all generated facts and" (count page-files) "documentation pages.")
+          CLJ
+
+          docker run --rm \
+            -e 'CI=true' \
+            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
+            -v "$(pwd):$(pwd)" \
+            -w "$(pwd)" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            bash -lc 'set -euo pipefail; lein javac; java -cp "$(lein classpath)" clojure.main .tmp/validate_summary_facts.clj'

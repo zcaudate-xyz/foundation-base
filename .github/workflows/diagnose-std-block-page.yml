@@ -1,0 +1,56 @@
+name: Diagnose std.block page
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/diagnose-std-block-page.yml
+      - src-doc/documentation/std/std_block.clj
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Capture parser output
+        run: |
+          set +e
+          mkdir -p .tmp
+          cat > .tmp/parse_std_block.clj <<'CLJ'
+          (require '[code.doc.parse :as parse])
+          (let [file "src-doc/documentation/std/std_block.clj"
+                elements (parse/parse-file file {})]
+            (println "Parsed" (count elements) "elements"))
+          CLJ
+          docker run --rm \
+            -e 'CI=true' \
+            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            bash -lc 'set -euo pipefail; lein javac; java -cp "$(lein classpath)" clojure.main .tmp/parse_std_block.clj' \
+            > .tmp/std-block-parser.log 2>&1
+          echo "$?" > .tmp/std-block-parser.status
+          set -e
+
+      - name: Upload parser diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: std-block-parser-diagnostics-current
+          path: |
+            .tmp/std-block-parser.log
+            .tmp/std-block-parser.status

@@ -149,7 +149,28 @@
 
 "**Example: Using `xtalk`**"
 
-[[:code {:lang "clojure"} ";; In a Clojure file\n(ns my-clojure-ns\n  (:require [xt.lang :as l]))\n\n(l/script :xtalk\n  {:require [[xt.lang.base-lib :as k]]})\n\n(l/defn.xt my-clj-fn [s]\n  (k/to-uppercase s))\n\n;; In a JavaScript file\n(ns my-js-ns\n  (:require [xt.lang :as l]))\n\n(l/script :js\n  {:require [[my-clojure-ns :as clj]]})\n\n(l/defn.js my-js-fn []\n  (console.log (clj/my-clj-fn \"hello\")))"]]
+^{:id merged-plans-slop-summary-xt-lang-summary-md-example-1 :added "4.0"}
+(fact "xt.lang and xtalk Summary example"
+  ;; In a Clojure file
+  (ns my-clojure-ns
+    (:require [xt.lang :as l]))
+
+  (l/script :xtalk
+    {:require [[xt.lang.base-lib :as k]]})
+
+  (l/defn.xt my-clj-fn [s]
+    (k/to-uppercase s))
+
+  ;; In a JavaScript file
+  (ns my-js-ns
+    (:require [xt.lang :as l]))
+
+  (l/script :js
+    {:require [[my-clojure-ns :as clj]]})
+
+  (l/defn.js my-js-fn []
+    (console.log (clj/my-clj-fn "hello")))
+)
 
 "In this example, the `my-js-fn` function in JavaScript calls the `my-clj-fn` function in Clojure. The `xtalk` system automatically handles the conversion of the string argument and the return value between JavaScript and Clojure."
 

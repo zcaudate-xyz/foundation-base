@@ -1,0 +1,44 @@
+name: Patch summary facts
+
+on:
+  push:
+    branches: [docs/summary-fact-examples]
+    paths:
+      - .github/workflows/patch-summary-facts.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/summary-fact-examples
+          fetch-depth: 0
+
+      - name: Patch read-dispatch fact
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("src-doc/documentation/std/std_block.clj")
+          text = path.read_text()
+          before = "  (read-dispatch \\tab)\n  => :void"
+          after = "  (read-dispatch (char 9))\n  => :void"
+          if before not in text:
+              raise SystemExit("read-dispatch named character example was not found")
+          path.write_text(text.replace(before, after, 1))
+          PY
+          git diff --check
+
+      - name: Commit read-dispatch fact patch
+        run: |
+          set -euo pipefail
+          git add src-doc/documentation/std/std_block.clj
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -m "Avoid named character in std.block summary fact"
+          git push origin HEAD:docs/summary-fact-examples

@@ -49,5 +49,32 @@
 
 "The `std.lib.component.track` submodule enhances this by providing a centralized, dynamic view of all active components, enabling powerful runtime introspection and control, which is particularly valuable in long-running or complex systems."
 
-[[:code {:lang "clojure"} ";; Example of a component\n(defrecord Database []\n  std.protocol.track/ITrack\n  (-track-path [db] [:my-app :database])\n\n  std.protocol.component/IComponent\n  (-start [db] (assoc db :status \"started\"))\n  (-stop [db] (dissoc db :status))\n  (-health [db] {:status :ok}))\n\n;; Usage\n(require '[std.lib.component :as comp])\n(require '[std.lib.component.track :as track])\n\n(def db-instance (-> (Database.) comp/start))\n;; db-instance is now tracked and started\n\n(comp/health db-instance)\n;; => {:status :ok}\n\n(track/tracked [:my-app :database] comp/info)\n;; => {:my-app {:database {<uuid> {:info true, :status \"started\"}}}}\n\n(comp/stop db-instance)\n;; db-instance is now stopped and untracked"]]
+^{:id merged-plans-slop-summary-std-lib-component-summary-md-example-1 :added "4.0"}
+(fact "Usage Pattern: example"
+  ;; Example of a component
+  (defrecord Database []
+    std.protocol.track/ITrack
+    (-track-path [db] [:my-app :database])
+
+    std.protocol.component/IComponent
+    (-start [db] (assoc db :status "started"))
+    (-stop [db] (dissoc db :status))
+    (-health [db] {:status :ok}))
+
+  ;; Usage
+  (require '[std.lib.component :as comp])
+  (require '[std.lib.component.track :as track])
+
+  (def db-instance (-> (Database.) comp/start))
+  ;; db-instance is now tracked and started
+
+  (comp/health db-instance)
+  => {:status :ok}
+
+  (track/tracked [:my-app :database] comp/info)
+  => {:my-app {:database {<uuid> {:info true, :status "started"}}}}
+
+  (comp/stop db-instance)
+  ;; db-instance is now stopped and untracked
+)
 ;; END merged documentation: plans/slop/summary/std_lib_component_summary.md

@@ -47,7 +47,27 @@ Common uses include:
 
 [[:section {:title "Example:" :link "merged-plans-slop-summary-std-lib-apply-summary-md-example"}]]
 
-[[:code {:lang "clojure"} ";; Define a host applicative to add numbers\n(def adder (host-applicative {:form '+}))\n\n;; Apply it with arguments\n(apply-in adder nil [1 2 3])\n;; => 6\n\n;; Apply it, letting it resolve its own context (which is none for host-applicative)\n(apply-as adder [10 20])\n;; => 30\n\n;; Invoke it directly\n(invoke-as adder 1 2 3 4 5)\n;; => 15\n\n;; Asynchronous execution\n@(invoke-as (host-applicative {:form '+ :async true}) 1 2 3)\n;; => 6"]]
+^{:id merged-plans-slop-summary-std-lib-apply-summary-md-example-1 :added "4.0"}
+(fact "Example: example"
+  ;; Define a host applicative to add numbers
+  (def adder (host-applicative {:form '+}))
+
+  ;; Apply it with arguments
+  (apply-in adder nil [1 2 3])
+  => 6
+
+  ;; Apply it, letting it resolve its own context (which is none for host-applicative)
+  (apply-as adder [10 20])
+  => 30
+
+  ;; Invoke it directly
+  (invoke-as adder 1 2 3 4 5)
+  => 15
+
+  ;; Asynchronous execution
+  @(invoke-as (host-applicative {:form '+ :async true}) 1 2 3)
+  => 6
+)
 
 "This module lays the groundwork for a flexible function application system, crucial for a multi-language and multi-runtime ecosystem like `foundation-base`."
 ;; END merged documentation: plans/slop/summary/std_lib_apply_summary.md

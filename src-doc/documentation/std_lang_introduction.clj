@@ -103,7 +103,36 @@
 
 "**Example: Creating and Using a Library**"
 
-[[:code {:lang "clojure"} "(require '[hara.lang.base.library :as lib])\n(require '[hara.lang.base.book :as book])\n(require '[hara.lang.base.book-module :as module])\n(require '[hara.lang.base.book-entry :as entry])\n\n;; 1. Define a code entry\n(def my-entry\n  (entry/book-entry\n   {:lang :my-lang, :id 'my-fn, :module 'my-module, :section :code,\n    :form '(defn my-fn [x] (+ x 1))}))\n\n;; 2. Define a module\n(def my-module\n  (module/book-module\n   {:lang :my-lang, :id 'my-module, :code {'my-fn my-entry}}))\n\n;; 3. Define a book\n(def my-book\n  (book/book\n   {:lang :my-lang, :grammar my-grammar, :modules {'my-module my-module}}))\n\n;; 4. Create a library and add the book\n(def my-library (lib/library {}))\n(lib/add-book! my-library my-book)\n\n;; 5. Emit code using the library\n(impl/emit-str '(my-module/my-fn 1) {:lang :my-lang :library my-library})"]]
+^{:id merged-plans-slop-summary-std-lang-base-book-summary-md-example-1 :added "4.0"}
+(fact "hara.lang.base.book and hara.lang.base.library Summary example"
+  (require '[hara.lang.base.library :as lib])
+  (require '[hara.lang.base.book :as book])
+  (require '[hara.lang.base.book-module :as module])
+  (require '[hara.lang.base.book-entry :as entry])
+
+  ;; 1. Define a code entry
+  (def my-entry
+    (entry/book-entry
+     {:lang :my-lang, :id 'my-fn, :module 'my-module, :section :code,
+      :form '(defn my-fn [x] (+ x 1))}))
+
+  ;; 2. Define a module
+  (def my-module
+    (module/book-module
+     {:lang :my-lang, :id 'my-module, :code {'my-fn my-entry}}))
+
+  ;; 3. Define a book
+  (def my-book
+    (book/book
+     {:lang :my-lang, :grammar my-grammar, :modules {'my-module my-module}}))
+
+  ;; 4. Create a library and add the book
+  (def my-library (lib/library {}))
+  (lib/add-book! my-library my-book)
+
+  ;; 5. Emit code using the library
+  (impl/emit-str '(my-module/my-fn 1) {:lang :my-lang :library my-library})
+)
 
 "This example shows how to create a library, add a book to it, and then use the library to emit code. The library provides the necessary context (grammar and modules) for the emit pipeline to do its work."
 
@@ -134,7 +163,16 @@
 
 "To customize the `+` operator to emit `add` instead, you would modify the grammar like this:"
 
-[[:code {:lang "clojure"} "(def +my-grammar+\n  (h/merge-nested\n   helper/+default+\n   {:reserved {\\+ {:emit :infix :raw \"add\"}}}))\n\n(emit/emit '(+ 1 2) +my-grammar+ 'my.ns {})\n;; => \"1 add 2\""]]
+^{:id merged-plans-slop-summary-std-lang-base-emit-summary-md-example-1 :added "4.0"}
+(fact "hara.lang.base.emit Summary example"
+  (def +my-grammar+
+    (h/merge-nested
+     helper/+default+
+     {:reserved {\+ {:emit :infix :raw "add"}}}))
+
+  (emit/emit '(+ 1 2) +my-grammar+ 'my.ns {})
+  => "1 add 2"
+)
 
 "This detailed control over the emission process makes the `foundation-base` transpiler a flexible and powerful tool for code generation."
 ;; END merged documentation: plans/slop/summary/std_lang_base_emit_summary.md
@@ -194,7 +232,21 @@
 
 "A new runtime is typically defined using the `defimpl` macro. This macro takes a name, a list of fields, and a set of protocol implementations."
 
-[[:code {:lang "clojure"} "(defimpl MyRuntime [field1 field2]\n  :protocols [std.protocol.context/IContext\n              :body {-raw-eval (fn [this string]\n                                 ;; implementation for evaluating a raw string\n                                 )}\n              std.protocol.component/IComponent\n              :body {-start (fn [this]\n                              ;; implementation for starting the runtime\n                              this)\n                     -stop (fn [this]\n                             ;; implementation for stopping the runtime\n                             this)}])"]]
+^{:id merged-plans-slop-summary-std-lang-base-runtime-summary-md-example-1 :added "4.0"}
+(fact "hara.lang.base.runtime Summary example"
+  (defimpl MyRuntime [field1 field2]
+    :protocols [std.protocol.context/IContext
+                :body {-raw-eval (fn [this string]
+                                   ;; implementation for evaluating a raw string
+                                   )}
+                std.protocol.component/IComponent
+                :body {-start (fn [this]
+                                ;; implementation for starting the runtime
+                                this)
+                       -stop (fn [this]
+                               ;; implementation for stopping the runtime
+                               this)}])
+)
 
 "*   **`IContext` Protocol:** This protocol defines the core interface for interacting with a runtime. Key functions include:\n    *   `-raw-eval`: Evaluates a raw string of code in the runtime's context.\n    *   `-invoke-ptr`: Invokes a function pointer with specified arguments.\n    *   `-deref-ptr`: Dereferences a pointer to get its value.\n    *   `-init-ptr`: Initializes a pointer in the runtime.\n\n*   **`IComponent` Protocol:** This protocol defines the component lifecycle for the runtime. Key functions include:\n    *   `-start`: Starts the runtime, preparing it for execution.\n    *   `-stop`: Stops the runtime, releasing any resources."
 
@@ -212,7 +264,15 @@
 
 "The following example from `rt.basic.type-basic` shows how a basic runtime is defined using `defimpl`:"
 
-[[:code {:lang "clojure"} "(defimpl RuntimeBasic [id lang]\n  :protocols [protocol.context/IContext\n              :body {-raw-eval eval-string}\n              protocol.component/IComponent\n              :body {-start start-basic\n                     -stop stop-basic}])"]]
+^{:id merged-plans-slop-summary-std-lang-base-runtime-summary-md-example-2 :added "4.0"}
+(fact "hara.lang.base.runtime Summary example"
+  (defimpl RuntimeBasic [id lang]
+    :protocols [protocol.context/IContext
+                :body {-raw-eval eval-string}
+                protocol.component/IComponent
+                :body {-start start-basic
+                       -stop stop-basic}])
+)
 
 "This defines a `RuntimeBasic` record that implements the `IContext` and `IComponent` protocols. The `-raw-eval` function is implemented by `eval-string`, and the `-start` and `-stop` functions are implemented by `start-basic` and `stop-basic`, respectively."
 
@@ -239,7 +299,19 @@
 
 "The `!` macro provides a convenient way to switch between different language runtimes within the same namespace. This is especially useful for testing and for writing polyglot scripts."
 
-[[:code {:lang "clojure"} "(require '[hara.lang.base.script :as script])\n\n(script/script :lua my-lua-module)\n(script/script+ [:py :python] {})\n\n(!:lua (+ 1 2))\n;; => 3\n\n(!:py (+ 1 2))\n;; => 3"]]
+^{:id merged-plans-slop-summary-std-lang-base-script-summary-md-example-1 :added "4.0"}
+(fact "hara.lang.base.script Summary example"
+  (require '[hara.lang.base.script :as script])
+
+  (script/script :lua my-lua-module)
+  (script/script+ [:py :python] {})
+
+  (!:lua (+ 1 2))
+  => 3
+
+  (!:py (+ 1 2))
+  => 3
+)
 
 "In this example, the `script` macro is used to set up the `:lua` runtime, and the `script+` macro is used to set up the `:python` runtime as an annex. The `!` macro is then used to execute code in each of these runtimes."
 

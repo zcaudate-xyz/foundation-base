@@ -1,0 +1,195 @@
+name: Validate imported summary facts
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/diagnose-summary-fact-counts.yml
+      - src-doc/documentation/code/code_query.clj
+      - src-doc/documentation/std/lib_index.clj
+      - src-doc/documentation/std/std_block.clj
+      - src-doc/documentation/std/std_lib_apply.clj
+      - src-doc/documentation/std/std_lib_bin.clj
+      - src-doc/documentation/std/std_lib_component.clj
+      - src-doc/documentation/std_lang_introduction.clj
+      - src-doc/documentation/xt/xt_lang.clj
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare and inspect generated facts
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/generated-facts
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          files = [
+              Path("src-doc/documentation/code/code_query.clj"),
+              Path("src-doc/documentation/std/lib_index.clj"),
+              Path("src-doc/documentation/std/std_block.clj"),
+              Path("src-doc/documentation/std/std_lib_apply.clj"),
+              Path("src-doc/documentation/std/std_lib_bin.clj"),
+              Path("src-doc/documentation/std/std_lib_component.clj"),
+              Path("src-doc/documentation/std_lang_introduction.clj"),
+              Path("src-doc/documentation/xt/xt_lang.clj"),
+          ]
+
+          block_pattern = re.compile(
+              r";; BEGIN merged documentation: plans/slop/summary/.*?"
+              r";; END merged documentation: plans/slop/summary/[^\n]+",
+              re.DOTALL,
+          )
+          marker = re.compile(
+              r'^\^\{:id (merged-plans-slop-summary-[^ ]+-example-\d+) '
+              r':added "4\.0"\}\n',
+              re.MULTILINE,
+          )
+
+          block_file = Path("src-doc/documentation/std/std_block.clj")
+          block_text = block_file.read_text()
+          before = '''  (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+            => #std.block.type.ModifierBlock{:tag :hash-uneval, :string "#_", :command #function[...]}
+          '''
+          after = '''  (select-keys (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+               [:tag :string])
+            => {:tag :hash-uneval, :string "#_"}
+          '''
+          if before not in block_text:
+              raise SystemExit("modifier-block example was not found")
+          block_file.write_text(block_text.replace(before, after, 1))
+
+          def extract_fact(text, start):
+              start = text.index("(fact ", start)
+              depth = 0
+              string = False
+              escape = False
+              comment = False
+              index = start
+              while index < len(text):
+                  char = text[index]
+                  if comment:
+                      if char == "\n":
+                          comment = False
+                      index += 1
+                      continue
+                  if string:
+                      if escape:
+                          escape = False
+                      elif char == "\\":
+                          escape = True
+                      elif char == '"':
+                          string = False
+                      index += 1
+                      continue
+                  if char == ";":
+                      comment = True
+                  elif char == '"':
+                      string = True
+                  elif char == "\\":
+                      index += 2
+                      continue
+                  elif char == "(":
+                      depth += 1
+                  elif char == ")":
+                      depth -= 1
+                      if depth == 0:
+                          return text[start:index + 1]
+                  index += 1
+              raise ValueError("unterminated fact")
+
+          fact_count = 0
+          directive_count = 0
+          out = Path(".tmp/generated-facts")
+          for path in files:
+              text = path.read_text()
+              summary_text = "\n".join(
+                  match.group(0) for match in block_pattern.finditer(text)
+              )
+              directive_count += summary_text.count('[[:code {:lang "clojure"}')
+              for match in marker.finditer(summary_text):
+                  identifier = match.group(1)
+                  (out / f"{identifier}.clj").write_text(
+                      extract_fact(summary_text, match.end()) + "\n"
+                  )
+                  fact_count += 1
+
+          print({"generated-facts": fact_count,
+                 "remaining-imported-clojure-directives": directive_count})
+          if fact_count != 277:
+              raise SystemExit(f"expected 277 generated facts, found {fact_count}")
+          if directive_count != 0:
+              raise SystemExit(
+                  f"expected no Clojure directives in imported blocks, found {directive_count}"
+              )
+          PY
+
+      - name: Check patch formatting
+        run: git diff --check
+
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse every generated fact and page
+        run: |
+          set -euo pipefail
+          cat > .tmp/validate_summary_facts.clj <<'CLJ'
+          (require '[clojure.java.io :as io]
+                   '[code.doc.parse :as parse]
+                   '[std.block.navigate :as nav])
+
+          (def page-files
+            ["src-doc/documentation/code/code_query.clj"
+             "src-doc/documentation/std/lib_index.clj"
+             "src-doc/documentation/std/std_block.clj"
+             "src-doc/documentation/std/std_lib_apply.clj"
+             "src-doc/documentation/std/std_lib_bin.clj"
+             "src-doc/documentation/std/std_lib_component.clj"
+             "src-doc/documentation/std_lang_introduction.clj"
+             "src-doc/documentation/xt/xt_lang.clj"])
+
+          (def failures (atom []))
+
+          (doseq [file (sort-by #(.getName %) (file-seq (io/file ".tmp/generated-facts")))
+                  :when (.isFile file)]
+            (try
+              (nav/parse-string (slurp file))
+              (catch Throwable t
+                (println "FACT-FAIL" (.getName file) "::" (.getMessage t))
+                (swap! failures conj (.getName file)))))
+
+          (when (seq @failures)
+            (throw (ex-info "Generated facts failed parsing"
+                            {:failures @failures})))
+
+          (doseq [file page-files]
+            (println "Parsing page" file)
+            (let [elements (parse/parse-file file {})]
+              (when-not (seq elements)
+                (throw (ex-info "Documentation page produced no elements"
+                                {:file file})))))
+
+          (println "Parsed all generated facts and" (count page-files) "documentation pages.")
+          CLJ
+
+          docker run --rm \
+            -e 'CI=true' \
+            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -XX:+UseG1GC" \
+            -v "$(pwd):$(pwd)" \
+            -w "$(pwd)" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            bash -lc 'set -euo pipefail; lein javac; java -cp "$(lein classpath)" clojure.main .tmp/validate_summary_facts.clj'
