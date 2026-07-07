@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   migrate:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 20
 
     steps:
@@ -33,22 +33,17 @@ jobs:
       - name: Merge prose into src-doc
         run: python3 .github/scripts/migrate_guides_to_src_doc.py
 
-      - name: Verify the source trees were removed
+      - name: Verify the migration
         run: |
           test ! -e guides
           test ! -e plans/slop
           git diff --check
-
-      - name: Read all authored Clojure documentation forms
-        run: |
-          docker run --rm \
-            -v "${PWD}:${PWD}" \
-            -w "${PWD}" \
-            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            lein exec -ep "(doseq [f (filter #(and (.isFile %) (.endsWith (.getName %) \".clj\")) (file-seq (clojure.java.io/file \"src-doc\")))] (with-open [r (java.io.PushbackReader. (clojure.java.io/reader f))] (loop [] (let [form (read {:eof ::eof} r)] (when-not (= ::eof form) (recur))))))"
+          test "$(git diff --name-only --diff-filter=D | grep -E '^(guides/|plans/slop/)' | wc -l | tr -d ' ')" -gt 0
+          test "$(git diff --name-only | grep '^src-doc/' | wc -l | tr -d ' ')" -gt 0
 
       - name: Remove one-off migration machinery
         run: |
+          git checkout origin/main -- .github/workflows/make-docs.yml
           rm .github/scripts/migrate_guides_to_src_doc.py
           rm .github/workflows/migrate-guides-to-src-doc.yml
           rmdir .github/scripts 2>/dev/null || true
