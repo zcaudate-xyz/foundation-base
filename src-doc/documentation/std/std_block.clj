@@ -21,7 +21,7 @@
 "Most Clojure readers discard formatting when they turn source into data. `read-string` gives you values, but it loses comments, extra spaces, and reader macros. `std.block` keeps those details as first-class nodes so code can be analyzed, transformed, and printed back out without destroying the programmer's formatting."
 
 (fact "read-string loses whitespace; std.block keeps it"
-  
+
   (-> (parse/parse-string "[1   2]")
       str)
   => "[1   2]")
@@ -1040,7 +1040,14 @@
 
 "Checks whether an object is an `IBlock` instance."
 
-[[:code {:lang "clojure"} "(block? (construct/void nil))\n;; => true\n\n(block? (construct/token \"hello\"))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-1 :added "4.0"}
+(fact "block? example"
+  (block? (construct/void nil))
+  => true
+
+  (block? (construct/token "hello"))
+  => true
+)
 
 [[:subsection {:title "block-type" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-type"}]]
 
@@ -1048,7 +1055,14 @@
 
 "Returns the block's type as a keyword (e.g., `:void`, `:token`, `:container`)."
 
-[[:code {:lang "clojure"} "(block-type (construct/void nil))\n;; => :void\n\n(block-type (construct/token \"hello\"))\n;; => :token"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-2 :added "4.0"}
+(fact "block-type example"
+  (block-type (construct/void nil))
+  => :void
+
+  (block-type (construct/token "hello"))
+  => :token
+)
 
 [[:subsection {:title "block-tag" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-tag"}]]
 
@@ -1056,7 +1070,14 @@
 
 "Returns the block's specific tag as a keyword (e.g., `:eof`, `:linespace`, `:symbol`)."
 
-[[:code {:lang "clojure"} "(block-tag (construct/void nil))\n;; => :eof\n\n(block-tag (construct/void \\space))\n;; => :linespace"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-3 :added "4.0"}
+(fact "block-tag example"
+  (block-tag (construct/void nil))
+  => :eof
+
+  (block-tag (construct/void \space))
+  => :linespace
+)
 
 [[:subsection {:title "block-string" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-string"}]]
 
@@ -1064,7 +1085,14 @@
 
 "Returns the raw string representation of the block as it would appear in the source file."
 
-[[:code {:lang "clojure"} "(block-string (construct/token 3/4))\n;; => \"3/4\"\n\n(block-string (construct/void \\space))\n;; => \" \""]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-4 :added "4.0"}
+(fact "block-string example"
+  (block-string (construct/token 3/4))
+  => "3/4"
+
+  (block-string (construct/void \space))
+  => " "
+)
 
 [[:subsection {:title "block-length" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-length"}]]
 
@@ -1072,7 +1100,15 @@
 
 "Returns the total character length of the block's string representation."
 
-[[:code {:lang "clojure"} "(block-length (construct/void))\n;; => 1\n\n(block-length (construct/block [1 2 3 4]))\n;; => 9\n;; (e.g., \"[1 2 3 4]\")"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-5 :added "4.0"}
+(fact "block-length example"
+  (block-length (construct/void))
+  => 1
+
+  (block-length (construct/block [1 2 3 4]))
+  => 9
+  ;; (e.g., "[1 2 3 4]")
+)
 
 [[:subsection {:title "block-width" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-width"}]]
 
@@ -1080,7 +1116,11 @@
 
 "Returns the visual width of the block (number of characters on a single line)."
 
-[[:code {:lang "clojure"} "(block-width (construct/token 'hello))\n;; => 5"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-6 :added "4.0"}
+(fact "block-width example"
+  (block-width (construct/token 'hello))
+  => 5
+)
 
 [[:subsection {:title "block-height" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-height"}]]
 
@@ -1088,7 +1128,13 @@
 
 "Returns the height of the block (number of lines it spans)."
 
-[[:code {:lang "clojure"} "(block-height (construct/block\n               ^:list [(construct/newline)\n                       (construct/newline)]))\n;; => 2"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-7 :added "4.0"}
+(fact "block-height example"
+  (block-height (construct/block
+                 ^:list [(construct/newline)
+                         (construct/newline)]))
+  => 2
+)
 
 [[:subsection {:title "block-prefixed" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-prefixed"}]]
 
@@ -1096,7 +1142,12 @@
 
 "Returns the length of any starting characters (e.g., `(` for a list, `[` for a vector)."
 
-[[:code {:lang "clojure"} "(block-prefixed (construct/block #{}))\n;; => 2\n;; (e.g., for a set like #{})"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-8 :added "4.0"}
+(fact "block-prefixed example"
+  (block-prefixed (construct/block #{}))
+  => 2
+  ;; (e.g., for a set like #{})
+)
 
 [[:subsection {:title "block-suffixed" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-suffixed"}]]
 
@@ -1104,7 +1155,12 @@
 
 "Returns the length of any ending characters (e.g., `)` for a list, `]` for a vector)."
 
-[[:code {:lang "clojure"} "(block-suffixed (construct/block #{}))\n;; => 1\n;; (e.g., for a set like #{})"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-9 :added "4.0"}
+(fact "block-suffixed example"
+  (block-suffixed (construct/block #{}))
+  => 1
+  ;; (e.g., for a set like #{})
+)
 
 [[:subsection {:title "block-verify" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-verify"}]]
 
@@ -1112,7 +1168,13 @@
 
 "Checks that the block has correct internal data and structure."
 
-[[:code {:lang "clojure"} ";; Example from test code, but no direct assertion provided.\n;; This function likely returns true for valid blocks.\n;; (block-verify (construct/token \"valid\"))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-10 :added "4.0"}
+(fact "block-verify example"
+  Example from test code, but no direct assertion provided.
+  This function likely returns true for valid blocks.
+  (block-verify (construct/token "valid"))
+  => true
+)
 
 [[:subsection {:title "expression?" :link "merged-plans-slop-summary-std-block-base-tutorial-md-expression"}]]
 
@@ -1120,7 +1182,11 @@
 
 "Checks if the block has a Clojure value associated with it (i.e., implements `IBlockExpression`)."
 
-[[:code {:lang "clojure"} "(expression? (construct/token 1.2))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-11 :added "4.0"}
+(fact "expression? example"
+  (expression? (construct/token 1.2))
+  => true
+)
 
 [[:subsection {:title "block-value" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-value"}]]
 
@@ -1128,7 +1194,11 @@
 
 "Returns the actual Clojure value represented by an expression block."
 
-[[:code {:lang "clojure"} "(block-value (construct/token 1.2))\n;; => 1.2"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-12 :added "4.0"}
+(fact "block-value example"
+  (block-value (construct/token 1.2))
+  => 1.2
+)
 
 [[:subsection {:title "block-value-string" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-value-string"}]]
 
@@ -1136,7 +1206,11 @@
 
 "Returns the string representation from which the block's value was generated. This can differ from `block-string` for special forms."
 
-[[:code {:lang "clojure"} "(block-value-string (parse/parse-string \"#(+ 1 ::2)\"))\n;; => \"#(+ 1 (keyword \":2\"))\""]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-13 :added "4.0"}
+(fact "block-value-string example"
+  (block-value-string (parse/parse-string "#(+ 1 ::2)"))
+  => "#(+ 1 (keyword ":2"))"
+)
 
 [[:subsection {:title "modifier?" :link "merged-plans-slop-summary-std-block-base-tutorial-md-modifier"}]]
 
@@ -1144,7 +1218,11 @@
 
 "Checks if the block is of type `IBlockModifier`."
 
-[[:code {:lang "clojure"} "(modifier? (construct/uneval))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-14 :added "4.0"}
+(fact "modifier? example"
+  (modifier? (construct/uneval))
+  => true
+)
 
 [[:subsection {:title "block-modify" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-modify"}]]
 
@@ -1152,7 +1230,11 @@
 
 "Allows a modifier block to modify an accumulator. Used in parsing and transformation."
 
-[[:code {:lang "clojure"} "(block-modify (construct/uneval) [1 2] 'ANYTHING)\n;; => [1 2]"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-15 :added "4.0"}
+(fact "block-modify example"
+  (block-modify (construct/uneval) [1 2] 'ANYTHING)
+  => [1 2]
+)
 
 [[:subsection {:title "container?" :link "merged-plans-slop-summary-std-block-base-tutorial-md-container"}]]
 
@@ -1160,7 +1242,14 @@
 
 "Determines whether a block has children (i.e., implements `IBlockContainer`)."
 
-[[:code {:lang "clojure"} "(container? (parse/parse-string \"[1 2 3]\"))\n;; => true\n\n(container? (parse/parse-string \" \"))\n;; => false"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-16 :added "4.0"}
+(fact "container? example"
+  (container? (parse/parse-string "[1 2 3]"))
+  => true
+
+  (container? (parse/parse-string " "))
+  => false
+)
 
 [[:subsection {:title "block-children" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-children"}]]
 
@@ -1168,7 +1257,12 @@
 
 "Returns a sequence of child blocks within a container block."
 
-[[:code {:lang "clojure"} "(->> (block-children (parse/parse-string \"[1   2]\"))\n     (map block-string))\n;; => (\"1\" \"   \" \"2\")"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-17 :added "4.0"}
+(fact "block-children example"
+  (->> (block-children (parse/parse-string "[1   2]"))
+       (map block-string))
+  => ("1" "   " "2")
+)
 
 [[:subsection {:title "replace-children" :link "merged-plans-slop-summary-std-block-base-tutorial-md-replace-children"}]]
 
@@ -1176,7 +1270,15 @@
 
 "Replaces the children of a container block with a new sequence of children."
 
-[[:code {:lang "clojure"} "(->> (replace-children (construct/block [])\n                       (conj (vec (block-children (construct/block [1 2]))) \n                             (construct/void \\space)\n                             (construct/block [3 4])))\n     str)\n;; => \"[1 2 [3 4]]\""]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-18 :added "4.0"}
+(fact "replace-children example"
+  (->> (replace-children (construct/block [])
+                         (conj (vec (block-children (construct/block [1 2])))
+                               (construct/void \space)
+                               (construct/block [3 4])))
+       str)
+  => "[1 2 [3 4]]"
+)
 
 [[:subsection {:title "block-info" :link "merged-plans-slop-summary-std-block-base-tutorial-md-block-info"}]]
 
@@ -1184,7 +1286,14 @@
 
 "Returns a map containing basic information about the block, including its type, tag, string, height, and width."
 
-[[:code {:lang "clojure"} "(block-info (construct/token true))\n;; => {:type :token, :tag :boolean, :string \"true\", :height 0, :width 4}\n\n(block-info (construct/void \\tab))\n;; => {:type :void, :tag :linetab, :string \"\\t\", :height 0, :width 4}"]]
+^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-19 :added "4.0"}
+(fact "block-info example"
+  (block-info (construct/token true))
+  => {:type :token, :tag :boolean, :string "true", :height 0, :width 4}
+
+  (block-info (construct/void \tab))
+  => {:type :void, :tag :linetab, :string "\t", :height 0, :width 4}
+)
 ;; END merged documentation: plans/slop/summary/std_block_base_tutorial.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_block_check_tutorial.md
@@ -1207,7 +1316,14 @@
 
 "Returns `true` if a character is considered a boundary character in Clojure syntax."
 
-[[:code {:lang "clojure"} "(boundary? (first \"[\"))\n;; => true\n\n(boundary? (first \"\"\"))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-1 :added "4.0"}
+(fact "boundary? example"
+  (boundary? (first "["))
+  => true
+
+  (boundary? (first "\""))
+  => true
+)
 
 [[:subsection {:title "whitespace?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-whitespace"}]]
 
@@ -1215,7 +1331,11 @@
 
 "Returns `true` if a character is a whitespace character (including spaces, tabs, newlines)."
 
-[[:code {:lang "clojure"} "(whitespace? \\space)\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-2 :added "4.0"}
+(fact "whitespace? example"
+  (whitespace? \space)
+  => true
+)
 
 [[:subsection {:title "comma?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-comma"}]]
 
@@ -1223,7 +1343,11 @@
 
 "Returns `true` if a character is a comma."
 
-[[:code {:lang "clojure"} "(comma? (first \",\"))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-3 :added "4.0"}
+(fact "comma? example"
+  (comma? (first ","))
+  => true
+)
 
 [[:subsection {:title "linebreak?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-linebreak"}]]
 
@@ -1231,7 +1355,11 @@
 
 "Returns `true` if a character is a linebreak character."
 
-[[:code {:lang "clojure"} "(linebreak? \\newline)\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-4 :added "4.0"}
+(fact "linebreak? example"
+  (linebreak? \newline)
+  => true
+)
 
 [[:subsection {:title "delimiter?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-delimiter"}]]
 
@@ -1239,7 +1367,11 @@
 
 "Returns `true` if a character is a collection delimiter (e.g., `(`, `)`, `[`, `]`, `{`, `}`)."
 
-[[:code {:lang "clojure"} "(delimiter? (first \")\"))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-5 :added "4.0"}
+(fact "delimiter? example"
+  (delimiter? (first ")"))
+  => true
+)
 
 [[:subsection {:title "voidspace?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-voidspace"}]]
 
@@ -1247,7 +1379,11 @@
 
 "Determines if an input character represents a \"void space\" (whitespace or comma)."
 
-[[:code {:lang "clojure"} "(voidspace? \\newline)\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-6 :added "4.0"}
+(fact "voidspace? example"
+  (voidspace? \newline)
+  => true
+)
 
 [[:subsection {:title "linetab?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-linetab"}]]
 
@@ -1255,7 +1391,11 @@
 
 "Checks if a character is a tab character."
 
-[[:code {:lang "clojure"} "(linetab? (first \"\\t\"))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-7 :added "4.0"}
+(fact "linetab? example"
+  (linetab? (first "\t"))
+  => true
+)
 
 [[:subsection {:title "linespace?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-linespace"}]]
 
@@ -1263,7 +1403,11 @@
 
 "Returns `true` if a character is a whitespace character that is *not* a linebreak or a tab."
 
-[[:code {:lang "clojure"} "(linespace? \\space)\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-8 :added "4.0"}
+(fact "linespace? example"
+  (linespace? \space)
+  => true
+)
 
 [[:subsection {:title "voidspace-or-boundary?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-voidspace-or-boundary"}]]
 
@@ -1271,7 +1415,13 @@
 
 "Checks if a character is either a void space or a boundary character."
 
-[[:code {:lang "clojure"} "(->> (map voidspace-or-boundary? (concat *boundaries*\n                                         *linebreaks*))\n     (every? true?))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-9 :added "4.0"}
+(fact "voidspace-or-boundary? example"
+  (->> (map voidspace-or-boundary? (concat *boundaries*
+                                           *linebreaks*))
+       (every? true?))
+  => true
+)
 
 [[:subsection {:title "tag" :link "merged-plans-slop-summary-std-block-check-tutorial-md-tag"}]]
 
@@ -1279,7 +1429,14 @@
 
 "Takes a map of checks (predicate functions) and an input, returning the tag (key) of the first predicate that returns `true`."
 
-[[:code {:lang "clojure"} "(tag *void-checks* \\space)\n;; => :linespace\n\n(tag *collection-checks* [])\n;; => :vector"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-10 :added "4.0"}
+(fact "tag example"
+  (tag *void-checks* \space)
+  => :linespace
+
+  (tag *collection-checks* [])
+  => :vector
+)
 
 [[:subsection {:title "void-tag" :link "merged-plans-slop-summary-std-block-check-tutorial-md-void-tag"}]]
 
@@ -1287,7 +1444,11 @@
 
 "Returns the void tag associated with a character (e.g., `:linebreak` for `\\newline`)."
 
-[[:code {:lang "clojure"} "(void-tag \\newline)\n;; => :linebreak"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-11 :added "4.0"}
+(fact "void-tag example"
+  (void-tag \newline)
+  => :linebreak
+)
 
 [[:subsection {:title "void?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-void"}]]
 
@@ -1295,7 +1456,11 @@
 
 "Determines if a character corresponds to a void block type."
 
-[[:code {:lang "clojure"} "(void? \\newline)\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-12 :added "4.0"}
+(fact "void? example"
+  (void? \newline)
+  => true
+)
 
 [[:subsection {:title "token-tag" :link "merged-plans-slop-summary-std-block-check-tutorial-md-token-tag"}]]
 
@@ -1303,7 +1468,11 @@
 
 "Returns the token tag associated with a Clojure form (e.g., `:symbol` for a symbol, `:boolean` for `true`)."
 
-[[:code {:lang "clojure"} "(token-tag 'hello)\n;; => :symbol"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-13 :added "4.0"}
+(fact "token-tag example"
+  (token-tag 'hello)
+  => :symbol
+)
 
 [[:subsection {:title "token?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-token"}]]
 
@@ -1311,7 +1480,11 @@
 
 "Determines if a Clojure form is a token type."
 
-[[:code {:lang "clojure"} "(token? 3/4)\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-14 :added "4.0"}
+(fact "token? example"
+  (token? 3/4)
+  => true
+)
 
 [[:subsection {:title "collection-tag" :link "merged-plans-slop-summary-std-block-check-tutorial-md-collection-tag"}]]
 
@@ -1319,7 +1492,11 @@
 
 "Returns the collection tag associated with a Clojure form (e.g., `:vector` for `[]`, `:map` for `{}`)."
 
-[[:code {:lang "clojure"} "(collection-tag [])\n;; => :vector"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-15 :added "4.0"}
+(fact "collection-tag example"
+  (collection-tag [])
+  => :vector
+)
 
 [[:subsection {:title "collection?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-collection"}]]
 
@@ -1327,7 +1504,11 @@
 
 "Determines if a Clojure form is a collection type."
 
-[[:code {:lang "clojure"} "(collection? {})\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-16 :added "4.0"}
+(fact "collection? example"
+  (collection? {})
+  => true
+)
 
 [[:subsection {:title "comment?" :link "merged-plans-slop-summary-std-block-check-tutorial-md-comment"}]]
 
@@ -1335,7 +1516,14 @@
 
 "Determines if a string is a comment (starts with `;`)."
 
-[[:code {:lang "clojure"} "(comment? \"hello\")\n;; => false\n\n(comment? \";hello\")\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-17 :added "4.0"}
+(fact "comment? example"
+  (comment? "hello")
+  => false
+
+  (comment? ";hello")
+  => true
+)
 ;; END merged documentation: plans/slop/summary/std_block_check_tutorial.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_block_construct_tutorial.md
@@ -1358,7 +1546,14 @@
 
 "Creates a void block. Void blocks represent non-code elements like spaces, newlines, or comments."
 
-[[:code {:lang "clojure"} "(str (void))\n;; => \"␣\"\n\n(str (void \\newline))\n;; => \"\\n\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-1 :added "4.0"}
+(fact "void example"
+  (str (void))
+  => "␣"
+
+  (str (void \newline))
+  => "\n"
+)
 
 [[:subsection {:title "space" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-space"}]]
 
@@ -1366,7 +1561,11 @@
 
 "Creates a single space block."
 
-[[:code {:lang "clojure"} "(str (space))\n;; => \"␣\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-2 :added "4.0"}
+(fact "space example"
+  (str (space))
+  => "␣"
+)
 
 [[:subsection {:title "spaces" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-spaces"}]]
 
@@ -1374,7 +1573,11 @@
 
 "Creates a sequence of `n` space blocks."
 
-[[:code {:lang "clojure"} "(apply str (spaces 5))\n;; => \"␣␣␣␣␣\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-3 :added "4.0"}
+(fact "spaces example"
+  (apply str (spaces 5))
+  => "␣␣␣␣␣"
+)
 
 [[:subsection {:title "tab" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-tab"}]]
 
@@ -1382,7 +1585,11 @@
 
 "Creates a single tab block."
 
-[[:code {:lang "clojure"} "(str (tab))\n;; => \"\\t\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-4 :added "4.0"}
+(fact "tab example"
+  (str (tab))
+  => "\t"
+)
 
 [[:subsection {:title "tabs" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-tabs"}]]
 
@@ -1390,7 +1597,11 @@
 
 "Creates a sequence of `n` tab blocks."
 
-[[:code {:lang "clojure"} "(apply str (tabs 5))\n;; => \"\\t\\t\\t\\t\\t\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-5 :added "4.0"}
+(fact "tabs example"
+  (apply str (tabs 5))
+  => "\t\t\t\t\t"
+)
 
 [[:subsection {:title "newline" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-newline"}]]
 
@@ -1398,7 +1609,11 @@
 
 "Creates a single newline block."
 
-[[:code {:lang "clojure"} "(str (newline))\n;; => \"\\n\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-6 :added "4.0"}
+(fact "newline example"
+  (str (newline))
+  => "\n"
+)
 
 [[:subsection {:title "newlines" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-newlines"}]]
 
@@ -1406,7 +1621,11 @@
 
 "Creates a sequence of `n` newline blocks."
 
-[[:code {:lang "clojure"} "(apply str (newlines 5))\n;; => \"\\n\\n\\n\\n\\n\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-7 :added "4.0"}
+(fact "newlines example"
+  (apply str (newlines 5))
+  => "\n\n\n\n\n"
+)
 
 [[:subsection {:title "comment" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-comment"}]]
 
@@ -1414,7 +1633,15 @@
 
 "Creates a comment block from a string. The string must start with `;`."
 
-[[:code {:lang "clojure"} "(str (comment \";hello\"))\n;; => \";hello\"\n\n;; Throws exception if string is not a valid comment\n;; (str (comment \"hello\"))\n;; => ExceptionInfo: \"Not a valid comment string.\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-8 :added "4.0"}
+(fact "comment example"
+  (str (comment ";hello"))
+  => ";hello"
+
+  ;; Throws exception if string is not a valid comment
+  (str (comment "hello"))
+  => (throws clojure.lang.ExceptionInfo "Not a valid comment string.")
+)
 
 [[:subsection {:title "token-dimensions" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-token-dimensions"}]]
 
@@ -1422,7 +1649,14 @@
 
 "Returns the `[width height]` of a token based on its tag and string representation."
 
-[[:code {:lang "clojure"} "(token-dimensions :regexp \"#\\\"hello\\nworld\\\"\")\n;; => [6 1]\n\n(token-dimensions :regexp \"#\\\"hello\\nworld\\n\\\"\")\n;; => [15 0]"]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-9 :added "4.0"}
+(fact "token-dimensions example"
+  (token-dimensions :regexp "#\"hello\nworld\"")
+  => [6 1]
+
+  (token-dimensions :regexp "#\"hello\nworld\n\"")
+  => [15 0]
+)
 
 [[:subsection {:title "string-token" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-string-token"}]]
 
@@ -1430,7 +1664,14 @@
 
 "Constructs a token block specifically for Clojure string literals, including quotes and handling newlines within the string."
 
-[[:code {:lang "clojure"} "(str (string-token \"hello\"))\n;; => \"\\\"hello\\\"\"\n\n(str (string-token \"hello\\nworld\"))\n;; => \"\\\"hello\\\\nworld\\\"\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-10 :added "4.0"}
+(fact "string-token example"
+  (str (string-token "hello"))
+  => "\"hello\""
+
+  (str (string-token "hello\nworld"))
+  => "\"hello\\nworld\""
+)
 
 [[:subsection {:title "token" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-token"}]]
 
@@ -1438,7 +1679,14 @@
 
 "Creates a token block from a Clojure form (symbol, number, keyword, etc.). It automatically determines the correct tag and string representation."
 
-[[:code {:lang "clojure"} "(str (token 'abc))\n;; => \"abc\"\n\n(str (token 123))\n;; => \"123\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-11 :added "4.0"}
+(fact "token example"
+  (str (token 'abc))
+  => "abc"
+
+  (str (token 123))
+  => "123"
+)
 
 [[:subsection {:title "token-from-string" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-token-from-string"}]]
 
@@ -1446,7 +1694,14 @@
 
 "Creates a token block by reading a string input. This is useful for creating tokens from raw text."
 
-[[:code {:lang "clojure"} "(str (token-from-string \"abc\"))\n;; => \"abc\"\n\n(str (token-from-string \"123\"))\n;; => \"123\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-12 :added "4.0"}
+(fact "token-from-string example"
+  (str (token-from-string "abc"))
+  => "abc"
+
+  (str (token-from-string "123"))
+  => "123"
+)
 
 [[:subsection {:title "container-checks" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-container-checks"}]]
 
@@ -1454,7 +1709,12 @@
 
 "Performs validation checks for a container block based on its tag, children, and properties. This is an internal helper."
 
-[[:code {:lang "clojure"} ";; No direct test example, but it ensures validity of container construction.\n;; (container-checks :list [(token 1)] {:cons 1})\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-13 :added "4.0"}
+(fact "container-checks example"
+  ;; No direct test example, but it ensures validity of container construction.
+  (container-checks :list [(token 1)] {:cons 1})
+  => true
+)
 
 [[:subsection {:title "container" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-container"}]]
 
@@ -1462,7 +1722,14 @@
 
 "Creates a container block (e.g., list, vector, map, set). It takes a tag and a sequence of child blocks."
 
-[[:code {:lang "clojure"} "(str (container :list [(void) (void)]))\n;; => \"(  )\"\n\n(str (container :vector [(token 1) (space) (token 2)]))\n;; => \"[1 2]\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-14 :added "4.0"}
+(fact "container example"
+  (str (container :list [(void) (void)]))
+  => "(  )"
+
+  (str (container :vector [(token 1) (space) (token 2)]))
+  => "[1 2]"
+)
 
 [[:subsection {:title "uneval" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-uneval"}]]
 
@@ -1470,7 +1737,11 @@
 
 "Creates a hash-uneval block (`#_`), which is a modifier block used to comment out the next form."
 
-[[:code {:lang "clojure"} "(str (uneval))\n;; => \"#_\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-15 :added "4.0"}
+(fact "uneval example"
+  (str (uneval))
+  => "#_"
+)
 
 [[:subsection {:title "cursor" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-cursor"}]]
 
@@ -1478,7 +1749,11 @@
 
 "Creates a cursor block (`|`), used for navigation or indicating a position."
 
-[[:code {:lang "clojure"} "(str (cursor))\n;; => \"|\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-16 :added "4.0"}
+(fact "cursor example"
+  (str (cursor))
+  => "|"
+)
 
 [[:subsection {:title "construct-collection" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-construct-collection"}]]
 
@@ -1486,7 +1761,14 @@
 
 "A multimethod for constructing collection blocks (`:list`, `:vector`, `:set`, `:map`) from Clojure data."
 
-[[:code {:lang "clojure"} "(str (construct-collection [1 2 (void) (void) 3]))\n;; => \"[1 2  3]\"\n\n(str (construct-collection '(1 2 3)))\n;; => \"(1 2 3)\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-17 :added "4.0"}
+(fact "construct-collection example"
+  (str (construct-collection [1 2 (void) (void) 3]))
+  => "[1 2  3]"
+
+  (str (construct-collection '(1 2 3)))
+  => "(1 2 3)"
+)
 
 [[:subsection {:title "construct-children" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-construct-children"}]]
 
@@ -1494,7 +1776,11 @@
 
 "Constructs a sequence of child blocks from a raw Clojure data structure, automatically inserting spaces and handling different element types."
 
-[[:code {:lang "clojure"} "(mapv str (construct-children [1 (newline) (void) 2]))\n;; => [\"1\" \"\\n\" \"␣\" \"2\"]"]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-18 :added "4.0"}
+(fact "construct-children example"
+  (mapv str (construct-children [1 (newline) (void) 2]))
+  => ["1" "\n" "␣" "2"]
+)
 
 [[:subsection {:title "block" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-block"}]]
 
@@ -1502,7 +1788,14 @@
 
 "The primary entry point for creating any type of `std.block` from a Clojure data element. It dispatches to `token`, `construct-collection`, or returns the element if it's already a block."
 
-[[:code {:lang "clojure"} "(base/block-info (block 1))\n;; => {:type :token, :tag :long, :string \"1\", :height 0, :width 1}\n\n(str (block [1 (newline) (void) 2]))\n;; => \"[1\\n 2]\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-19 :added "4.0"}
+(fact "block example"
+  (base/block-info (block 1))
+  => {:type :token, :tag :long, :string "1", :height 0, :width 1}
+
+  (str (block [1 (newline) (void) 2]))
+  => "[1\n 2]"
+)
 
 [[:subsection {:title "add-child" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-add-child"}]]
 
@@ -1510,7 +1803,14 @@
 
 "Adds a child element to an existing container block."
 
-[[:code {:lang "clojure"} "(-> (block [])\n    (add-child 1)\n    (add-child 2)\n    (str))\n;; => \"[1 2]\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-20 :added "4.0"}
+(fact "add-child example"
+  (-> (block [])
+      (add-child 1)
+      (add-child 2)
+      (str))
+  => "[1 2]"
+)
 
 [[:subsection {:title "empty" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-empty"}]]
 
@@ -1518,7 +1818,11 @@
 
 "Constructs an empty list block `()`."
 
-[[:code {:lang "clojure"} "(str (empty))\n;; => \"()\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-21 :added "4.0"}
+(fact "empty example"
+  (str (empty))
+  => "()"
+)
 
 [[:subsection {:title "root" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-root"}]]
 
@@ -1526,7 +1830,11 @@
 
 "Constructs a root block, which is a special container that typically represents the top-level of a parsed file."
 
-[[:code {:lang "clojure"} "(str (root '[a b]))\n;; => \"a b\""]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-22 :added "4.0"}
+(fact "root example"
+  (str (root '[a b]))
+  => "a b"
+)
 
 [[:subsection {:title "contents" :link "merged-plans-slop-summary-std-block-construct-tutorial-md-contents"}]]
 
@@ -1534,7 +1842,11 @@
 
 "Reads out the contents of a container block, returning a Clojure data structure."
 
-[[:code {:lang "clojure"} "(contents (block [1 (space) 2 (space) 3]))\n;; => '[1 ␣ 2 ␣ 3]"]]
+^{:id merged-plans-slop-summary-std-block-construct-tutorial-md-example-23 :added "4.0"}
+(fact "contents example"
+  (contents (block [1 (space) 2 (space) 3]))
+  => '[1 ␣ 2 ␣ 3]
+)
 ;; END merged documentation: plans/slop/summary/std_block_construct_tutorial.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_block_grid_tutorial.md
@@ -1557,7 +1869,14 @@
 
 "Removes leading whitespace nodes from a sequence of blocks."
 
-[[:code {:lang "clojure"} "(->> (trim-left [(construct/space)\n                 :a\n                 (construct/space)])\n     (mapv str))\n;; => [\":a\" \"␣\"]"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-1 :added "4.0"}
+(fact "trim-left example"
+  (->> (trim-left [(construct/space)
+                   :a
+                   (construct/space)])
+       (mapv str))
+  => [":a" "␣"]
+)
 
 [[:subsection {:title "trim-right" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-trim-right"}]]
 
@@ -1565,7 +1884,14 @@
 
 "Removes trailing whitespace nodes from a sequence of blocks."
 
-[[:code {:lang "clojure"} "(->> (trim-right [(construct/space)\n                  :a\n                  (construct/space)])\n     (mapv str))\n;; => [\"␣\" \":a\"]"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-2 :added "4.0"}
+(fact "trim-right example"
+  (->> (trim-right [(construct/space)
+                    :a
+                    (construct/space)])
+       (mapv str))
+  => ["␣" ":a"]
+)
 
 [[:subsection {:title "split-lines" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-split-lines"}]]
 
@@ -1573,7 +1899,12 @@
 
 "Splits a sequence of blocks into sub-sequences, where each sub-sequence represents a line, retaining linebreak nodes."
 
-[[:code {:lang "clojure"} "(split-lines [:a :b (construct/newline) :c :d])\n;; => [[:a :b]\n;;     [(construct/newline) :c :d]]"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-3 :added "4.0"}
+(fact "split-lines example"
+  (split-lines [:a :b (construct/newline) :c :d])
+  => [[:a :b]
+         [(construct/newline) :c :d]]
+)
 
 [[:subsection {:title "remove-starting-spaces" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-remove-starting-spaces"}]]
 
@@ -1581,7 +1912,15 @@
 
 "Removes redundant spaces at the beginning of lines, especially after linebreaks."
 
-[[:code {:lang "clojure"} "(remove-starting-spaces [[(construct/newline)\n                          (construct/space)\n                          (construct/space) :a :b]\n                           [(construct/newline) (construct/space) :c :d]])\n;; => [[(construct/newline) :a :b]\n;;     [(construct/newline) :c :d]]"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-4 :added "4.0"}
+(fact "remove-starting-spaces example"
+  (remove-starting-spaces [[(construct/newline)
+                            (construct/space)
+                            (construct/space) :a :b]
+                             [(construct/newline) (construct/space) :c :d]])
+  => [[(construct/newline) :a :b]
+         [(construct/newline) :c :d]]
+)
 
 [[:subsection {:title "adjust-comments" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-adjust-comments"}]]
 
@@ -1589,7 +1928,12 @@
 
 "Adds additional newlines after comments to ensure proper formatting and readability."
 
-[[:code {:lang "clojure"} "(->> (adjust-comments [(construct/comment \";hello\") :a])\n     (mapv str))\n;; => [\";hello\" \"\\n\" \":a\"]"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-5 :added "4.0"}
+(fact "adjust-comments example"
+  (->> (adjust-comments [(construct/comment ";hello") :a])
+       (mapv str))
+  => [";hello" "\n" ":a"]
+)
 
 [[:subsection {:title "remove-extra-linebreaks" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-remove-extra-linebreaks"}]]
 
@@ -1597,7 +1941,17 @@
 
 "Removes redundant or excessive linebreak nodes from a sequence of lines."
 
-[[:code {:lang "clojure"} "(remove-extra-linebreaks [[:a]\n                            [(construct/newline)]\n                            [(construct/newline)]\n                            [(construct/newline)]\n                            [:b]])\n;; => [[:a]\n;;     [(construct/newline)]\n;;     [:b]]"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-6 :added "4.0"}
+(fact "remove-extra-linebreaks example"
+  (remove-extra-linebreaks [[:a]
+                              [(construct/newline)]
+                              [(construct/newline)]
+                              [(construct/newline)]
+                              [:b]])
+  => [[:a]
+         [(construct/newline)]
+         [:b]]
+)
 
 [[:subsection {:title "grid-scope" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-grid-scope"}]]
 
@@ -1605,7 +1959,11 @@
 
 "Calculates the grid scope for child nodes based on the parent scope. This is an internal helper for indentation logic."
 
-[[:code {:lang "clojure"} "(grid-scope [{0 1} 1])\n;; => [{0 1} 0]"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-7 :added "4.0"}
+(fact "grid-scope example"
+  (grid-scope [{0 1} 1])
+  => [{0 1} 0]
+)
 
 [[:subsection {:title "grid-rules" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-grid-rules"}]]
 
@@ -1613,7 +1971,20 @@
 
 "Creates indentation rules for the current block based on its tag, symbol, parent scope, and a global rules map."
 
-[[:code {:lang "clojure"} "(grid-rules :list nil nil nil)\n;; => {:indent 0, :bind 0, :scope []}\n\n(grid-rules :vector nil nil nil)\n;; => {:indent 0, :bind 0, :scope [0]}\n\n(grid-rules :list 'add [1] nil)\n;; => {:indent 1, :bind 0, :scope [0]}\n\n(grid-rules :list 'if nil '{if {:indent 1}})\n;; => {:indent 1, :bind 0, :scope []}"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-8 :added "4.0"}
+(fact "grid-rules example"
+  (grid-rules :list nil nil nil)
+  => {:indent 0, :bind 0, :scope []}
+
+  (grid-rules :vector nil nil nil)
+  => {:indent 0, :bind 0, :scope [0]}
+
+  (grid-rules :list 'add [1] nil)
+  => {:indent 1, :bind 0, :scope [0]}
+
+  (grid-rules :list 'if nil '{if {:indent 1}})
+  => {:indent 1, :bind 0, :scope []}
+)
 
 [[:subsection {:title "indent-bind" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-indent-bind"}]]
 
@@ -1621,7 +1992,22 @@
 
 "Returns the number of lines to indent for binding forms within a block, based on the `bind` rule."
 
-[[:code {:lang "clojure"} "(indent-bind [[(construct/token 'if-let)]\n              [(construct/newline)]\n              [(construct/newline) (construct/block '[i (pos? 0)])]\n              [(construct/newline) (construct/block '(+ i 1))]]\n             1)\n;; => 2\n\n(indent-bind [[(construct/token 'if-let)]\n              [(construct/newline)]\n              [(construct/newline) (construct/block '[i (pos? 0)])]\n              [(construct/newline) (construct/block '(+ i 1))]]\n             0)\n;; => 0"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-9 :added "4.0"}
+(fact "indent-bind example"
+  (indent-bind [[(construct/token 'if-let)]
+                [(construct/newline)]
+                [(construct/newline) (construct/block '[i (pos? 0)])]
+                [(construct/newline) (construct/block '(+ i 1))]]
+               1)
+  => 2
+
+  (indent-bind [[(construct/token 'if-let)]
+                [(construct/newline)]
+                [(construct/newline) (construct/block '[i (pos? 0)])]
+                [(construct/newline) (construct/block '(+ i 1))]]
+               0)
+  => 0
+)
 
 [[:subsection {:title "indent-lines" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-indent-lines"}]]
 
@@ -1629,7 +2015,21 @@
 
 "Indents a sequence of lines based on a given anchor and indentation rule."
 
-[[:code {:lang "clojure"} "(-> (indent-lines [[(construct/token 'if-let)]\n                   [(construct/newline)]\n                   [(construct/newline) (construct/block '[i (pos? 0)])]\n                   [(construct/newline) (construct/block '(+ i 1))]]\n                  1\n                  {:indent 1\n                   :bind 1})\n    (construct/contents))\n;; => '([if-let]\n;;      (\\n ␣ ␣ ␣ ␣)\n;;      (\\n ␣ ␣ ␣ ␣ [i (pos? 0)])\n;;      (\\n ␣ ␣ (+ i 1)))"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-10 :added "4.0"}
+(fact "indent-lines example"
+  (-> (indent-lines [[(construct/token 'if-let)]
+                     [(construct/newline)]
+                     [(construct/newline) (construct/block '[i (pos? 0)])]
+                     [(construct/newline) (construct/block '(+ i 1))]]
+                    1
+                    {:indent 1
+                     :bind 1})
+      (construct/contents))
+  => '([if-let]
+          (\n ␣ ␣ ␣ ␣)
+          (\n ␣ ␣ ␣ ␣ [i (pos? 0)])
+          (\n ␣ ␣ (+ i 1)))
+)
 
 [[:subsection {:title "grid" :link "merged-plans-slop-summary-std-block-grid-tutorial-md-grid"}]]
 
@@ -1637,7 +2037,20 @@
 
 "The main function for formatting a container block. It applies indentation rules and scope to produce a well-formatted block structure."
 
-[[:code {:lang "clojure"} "(-> (construct/block ^:list ['if-let\n                             (construct/newline)\n                             (construct/newline) (construct/block '[i (pos? 0)])\n                             (construct/newline) (construct/block '(+ i 1))])\n    (grid 1 {:rules {'if-let {:indent 1\n                              :bind 1}}})\n    (construct/contents))\n;; => '(if-let\n;;      \\n ␣ ␣ ␣ ␣ ␣\n;;      \\n ␣ ␣ ␣ ␣ ␣ [i (pos? 0)]\n;;      \\n ␣ ␣ (+ i 1)))"]]
+^{:id merged-plans-slop-summary-std-block-grid-tutorial-md-example-11 :added "4.0"}
+(fact "grid example"
+  (-> (construct/block ^:list ['if-let
+                               (construct/newline)
+                               (construct/newline) (construct/block '[i (pos? 0)])
+                               (construct/newline) (construct/block '(+ i 1))])
+      (grid 1 {:rules {'if-let {:indent 1
+                                :bind 1}}})
+      (construct/contents))
+  => '(if-let
+          \n ␣ ␣ ␣ ␣ ␣
+          \n ␣ ␣ ␣ ␣ ␣ [i (pos? 0)]
+          \n ␣ ␣ (+ i 1)))
+)
 ;; END merged documentation: plans/slop/summary/std_block_grid_tutorial.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_block_parse_tutorial.md
@@ -1660,7 +2073,14 @@
 
 "Dispatches parsing logic based on the first character of a form. It returns a keyword indicating the type of form to be parsed."
 
-[[:code {:lang "clojure"} "(read-dispatch \\tab)\n;; => :void\n\n(read-dispatch (first \"#\"))\n;; => :hash"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-1 :added "4.0"}
+(fact "read-dispatch example"
+  (read-dispatch \tab)
+  => :void
+
+  (read-dispatch (first "#"))
+  => :hash
+)
 
 [[:subsection {:title "-parse" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse"}]]
 
@@ -1668,7 +2088,14 @@
 
 "The extendable parsing multimethod. It takes a `reader` and returns a `std.block` AST node. This function is the core of the parsing process."
 
-[[:code {:lang "clojure"} "(base/block-info (-parse (reader/create \":a\")))\n;; => {:type :token, :tag :keyword, :string \":a\", :height 0, :width 2}\n\n(base/block-info (-parse (reader/create \"\\\"\\\\n\\\"\")))\n;; => {:type :token, :tag :string, :string \"\\\"\\\\n\\\"\", :height 1, :width 1}"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-2 :added "4.0"}
+(fact "-parse example"
+  (base/block-info (-parse (reader/create ":a")))
+  => {:type :token, :tag :keyword, :string ":a", :height 0, :width 2}
+
+  (base/block-info (-parse (reader/create "\"\\n\"")))
+  => {:type :token, :tag :string, :string "\"\\n\"", :height 1, :width 1}
+)
 
 [[:subsection {:title "parse-void" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-void"}]]
 
@@ -1676,7 +2103,15 @@
 
 "Reads a void block (e.g., space, newline, tab) from the reader."
 
-[[:code {:lang "clojure"} "(->> (reader/read-repeatedly (reader/create \" \\t\\n\\f\")\n                             parse-void\n                             eof-block?)\n     (take 5)\n     (map str))\n;; => [\"\\u202F\" \"\\t\" \"\\n\" \"\\f\"]"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-3 :added "4.0"}
+(fact "parse-void example"
+  (->> (reader/read-repeatedly (reader/create " \t\n\f")
+                               parse-void
+                               eof-block?)
+       (take 5)
+       (map str))
+  => ["\u202F" "\t" "\n" "\f"]
+)
 
 [[:subsection {:title "parse-comment" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-comment"}]]
 
@@ -1684,7 +2119,13 @@
 
 "Reads a comment block from the reader."
 
-[[:code {:lang "clojure"} "(-> (reader/create \";this is a comment\")\n    parse-comment\n    (base/block-info))\n;; => {:type :comment, :tag :comment, :string \";this is a comment\", :height 0, :width 18}"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-4 :added "4.0"}
+(fact "parse-comment example"
+  (-> (reader/create ";this is a comment")
+      parse-comment
+      (base/block-info))
+  => {:type :comment, :tag :comment, :string ";this is a comment", :height 0, :width 18}
+)
 
 [[:subsection {:title "parse-token" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-token"}]]
 
@@ -1692,7 +2133,18 @@
 
 "Reads a token block (e.g., symbol, number, string) from the reader."
 
-[[:code {:lang "clojure"} "(-> (reader/create \"abc\")\n    (parse-token)\n    (base/block-value))\n;; => 'abc\n\n(-> (reader/create \"3/5\")\n    (parse-token)\n    (base/block-value))\n;; => 3/5"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-5 :added "4.0"}
+(fact "parse-token example"
+  (-> (reader/create "abc")
+      (parse-token)
+      (base/block-value))
+  => 'abc
+
+  (-> (reader/create "3/5")
+      (parse-token)
+      (base/block-value))
+  => 3/5
+)
 
 [[:subsection {:title "parse-keyword" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-keyword"}]]
 
@@ -1700,7 +2152,18 @@
 
 "Reads a keyword block from the reader, handling both simple and namespaced keywords."
 
-[[:code {:lang "clojure"} "(-> (reader/create \":a/b\")\n    (parse-keyword)\n    (base/block-value))\n;; => :a/b\n\n(-> (reader/create \"::hello\")\n    (parse-keyword)\n    (base/block-value))\n;; => (keyword \":hello\")"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-6 :added "4.0"}
+(fact "parse-keyword example"
+  (-> (reader/create ":a/b")
+      (parse-keyword)
+      (base/block-value))
+  => :a/b
+
+  (-> (reader/create "::hello")
+      (parse-keyword)
+      (base/block-value))
+  => (keyword ":hello")
+)
 
 [[:subsection {:title "parse-reader" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-reader"}]]
 
@@ -1708,7 +2171,13 @@
 
 "Reads a character literal (e.g., `\\c`) from the reader."
 
-[[:code {:lang "clojure"} "(-> (reader/create \"\\\\c\")\n    (parse-reader)\n    (base/block-info))\n;; => (contains {:type :token, :tag :char, :string \"\\\\c\"})"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-7 :added "4.0"}
+(fact "parse-reader example"
+  (-> (reader/create "\\c")
+      (parse-reader)
+      (base/block-info))
+  => (contains {:type :token, :tag :char, :string "\\c"})
+)
 
 [[:subsection {:title "read-string-data" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-read-string-data"}]]
 
@@ -1716,7 +2185,11 @@
 
 "Reads the content of a string literal from the reader, handling escape sequences and newlines."
 
-[[:code {:lang "clojure"} "(read-string-data (reader/create \"\\\"hello\\\"\"))\n;; => \"hello\""]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-8 :added "4.0"}
+(fact "read-string-data example"
+  (read-string-data (reader/create "\"hello\""))
+  => "hello"
+)
 
 [[:subsection {:title "eof-block?" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-eof-block"}]]
 
@@ -1724,7 +2197,11 @@
 
 "Checks if a block represents the end-of-file."
 
-[[:code {:lang "clojure"} "(eof-block? (-parse (reader/create \"\")))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-9 :added "4.0"}
+(fact "eof-block? example"
+  (eof-block? (-parse (reader/create "")))
+  => true
+)
 
 [[:subsection {:title "delimiter-block?" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-delimiter-block"}]]
 
@@ -1732,7 +2209,13 @@
 
 "Checks if a block represents a closing delimiter."
 
-[[:code {:lang "clojure"} "(delimiter-block?\n (binding [*end-delimiter* (first \")\")]\n   (-parse (reader/create \")\"))))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-10 :added "4.0"}
+(fact "delimiter-block? example"
+  (delimiter-block?
+   (binding [*end-delimiter* (first ")")]
+     (-parse (reader/create ")"))))
+  => true
+)
 
 [[:subsection {:title "read-whitespace" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-read-whitespace"}]]
 
@@ -1740,7 +2223,11 @@
 
 "Reads a sequence of whitespace characters from the reader and returns them as a vector of void blocks."
 
-[[:code {:lang "clojure"} "(count (read-whitespace (reader/create \"   \")))\n;; => 3"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-11 :added "4.0"}
+(fact "read-whitespace example"
+  (count (read-whitespace (reader/create "   ")))
+  => 3
+)
 
 [[:subsection {:title "parse-non-expressions" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-non-expressions"}]]
 
@@ -1748,7 +2235,11 @@
 
 "Parses whitespace and non-expression blocks until the next expression block is found."
 
-[[:code {:lang "clojure"} "(str (parse-non-expressions (reader/create \" \\na\")))\n;; => \"[(\\u202F \\n) a]\""]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-12 :added "4.0"}
+(fact "parse-non-expressions example"
+  (str (parse-non-expressions (reader/create " \na")))
+  => "[(\u202F \n) a]"
+)
 
 [[:subsection {:title "read-start" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-read-start"}]]
 
@@ -1756,7 +2247,11 @@
 
 "Helper function to consume and verify starting characters of a form (e.g., `(` for a list, `~@` for unquote-splicing)."
 
-[[:code {:lang "clojure"} "(read-start (reader/create \"~@\") \"~#\")\n;; => (throws)"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-13 :added "4.0"}
+(fact "read-start example"
+  (read-start (reader/create "~@") "~#")
+  => (throws)
+)
 
 [[:subsection {:title "read-collection" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-read-collection"}]]
 
@@ -1764,7 +2259,12 @@
 
 "Reads all child blocks within a collection, respecting the start and end delimiters."
 
-[[:code {:lang "clojure"} "(->> (read-collection (reader/create \"(1 2 3 4 5)\") \"(\" (first \")\"))\n     (apply str))\n;; => \"1\\u202F2\\u202F3\\u202F4\\u202F5\""]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-14 :added "4.0"}
+(fact "read-collection example"
+  (->> (read-collection (reader/create "(1 2 3 4 5)") "(" (first ")"))
+       (apply str))
+  => "1\u202F2\u202F3\u202F4\u202F5"
+)
 
 [[:subsection {:title "read-cons" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-read-cons"}]]
 
@@ -1772,7 +2272,16 @@
 
 "Helper method for reading \"cons\" forms (e.g., `@x`, `'x`, `^x`)."
 
-[[:code {:lang "clojure"} "(->> (read-cons (reader/create \"@hello\") \"@\")\n     (map base/block-string))\n;; => '(\"hello\")\n\n(->> (read-cons (reader/create \"^hello {}\") \"^\" 2)\n     (map base/block-string))\n;; => '(\"hello\" \" \" \"{}\")"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-15 :added "4.0"}
+(fact "read-cons example"
+  (->> (read-cons (reader/create "@hello") "@")
+       (map base/block-string))
+  => '("hello")
+
+  (->> (read-cons (reader/create "^hello {}") "^" 2)
+       (map base/block-string))
+  => '("hello" " " "{}")
+)
 
 [[:subsection {:title "parse-collection" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-collection"}]]
 
@@ -1780,7 +2289,28 @@
 
 "Parses a collection block (list, vector, map, set, fn, root) from the reader."
 
-[[:code {:lang "clojure"} "(-> (parse-collection (reader/create \"#(+ 1 2 3 4)\") :fn)\n    (base/block-value))\n;; => '(fn* [] (+ 1 2 3 4))\n\n(-> (parse-collection (reader/create \"(1 2 3 4)\") :list)\n    (base/block-value))\n;; => '(1 2 3 4)\n\n(-> (parse-collection (reader/create \"[1 2 3 4]\") :vector)\n    (base/block-value))\n;; => [1 2 3 4]\n\n(-> (parse-collection (reader/create \"{1 2 3 4}\") :map)\n    (base/block-value))\n;; => {1 2, 3 4}\n\n(-> (parse-collection (reader/create \"#{1 2 3 4}\") :set)\n    (base/block-value))\n;; => #{1 4 3 2}"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-16 :added "4.0"}
+(fact "parse-collection example"
+  (-> (parse-collection (reader/create "#(+ 1 2 3 4)") :fn)
+      (base/block-value))
+  => '(fn* [] (+ 1 2 3 4))
+
+  (-> (parse-collection (reader/create "(1 2 3 4)") :list)
+      (base/block-value))
+  => '(1 2 3 4)
+
+  (-> (parse-collection (reader/create "[1 2 3 4]") :vector)
+      (base/block-value))
+  => [1 2 3 4]
+
+  (-> (parse-collection (reader/create "{1 2 3 4}") :map)
+      (base/block-value))
+  => {1 2, 3 4}
+
+  (-> (parse-collection (reader/create "#{1 2 3 4}") :set)
+      (base/block-value))
+  => #{1 4 3 2}
+)
 
 [[:subsection {:title "parse-cons" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-cons"}]]
 
@@ -1788,7 +2318,29 @@
 
 "Parses a \"cons\" block (deref, meta, quote, syntax, unquote, unquote-splice, select, select-splice, var, hash-keyword, hash-meta, hash-eval)."
 
-[[:code {:lang "clojure"} "(-> (parse-cons (reader/create \"~hello\") :unquote)\n    (base/block-value))\n;; => '(unquote hello)\n\n(-> (parse-cons (reader/create \"~@hello\") :unquote-splice)\n    (base/block-value))\n;; => '(unquote-splicing hello)\n\n(-> (parse-cons (reader/create \"^tag {:a 1}\") :meta)\n    (base/block-value)\n    ((juxt meta identity)))\n;; => [{:tag 'tag} {:a 1}]\n\n(-> (parse-cons (reader/create \"@hello\") :deref)\n    (base/block-value))\n;; => '(deref hello)\n\n(-> (parse-cons (reader/create \"`hello\") :syntax)\n    (base/block-value))\n;; => '(quote std.block.parse-test/hello)"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-17 :added "4.0"}
+(fact "parse-cons example"
+  (-> (parse-cons (reader/create "~hello") :unquote)
+      (base/block-value))
+  => '(unquote hello)
+
+  (-> (parse-cons (reader/create "~@hello") :unquote-splice)
+      (base/block-value))
+  => '(unquote-splicing hello)
+
+  (-> (parse-cons (reader/create "^tag {:a 1}") :meta)
+      (base/block-value)
+      ((juxt meta identity)))
+  => [{:tag 'tag} {:a 1}]
+
+  (-> (parse-cons (reader/create "@hello") :deref)
+      (base/block-value))
+  => '(deref hello)
+
+  (-> (parse-cons (reader/create "`hello") :syntax)
+      (base/block-value))
+  => '(quote std.block.parse-test/hello)
+)
 
 [[:subsection {:title "parse-unquote" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-unquote"}]]
 
@@ -1796,7 +2348,16 @@
 
 "Parses a block starting with `~` (unquote or unquote-splice)."
 
-[[:code {:lang "clojure"} "(-> (parse-unquote (reader/create \"~hello\"))\n    (base/block-value))\n;; => '(unquote hello)\n\n(-> (parse-unquote (reader/create \"~@hello\"))\n    (base/block-value))\n;; => '(unquote-splicing hello)"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-18 :added "4.0"}
+(fact "parse-unquote example"
+  (-> (parse-unquote (reader/create "~hello"))
+      (base/block-value))
+  => '(unquote hello)
+
+  (-> (parse-unquote (reader/create "~@hello"))
+      (base/block-value))
+  => '(unquote-splicing hello)
+)
 
 [[:subsection {:title "parse-select" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-select"}]]
 
@@ -1804,7 +2365,16 @@
 
 "Parses a block starting with `#?` (reader conditional or reader conditional splicing)."
 
-[[:code {:lang "clojure"} "(-> (parse-select (reader/create \"#?(:cljs a)\"))\n    (base/block-value))\n;; => '(? {:cljs a})\n\n(-> (parse-select (reader/create \"#?@(:cljs a)\"))\n    (base/block-value))\n;; => '(?-splicing {:cljs a})"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-19 :added "4.0"}
+(fact "parse-select example"
+  (-> (parse-select (reader/create "#?(:cljs a)"))
+      (base/block-value))
+  => '(? {:cljs a})
+
+  (-> (parse-select (reader/create "#?@(:cljs a)"))
+      (base/block-value))
+  => '(?-splicing {:cljs a})
+)
 
 [[:subsection {:title "parse-hash-uneval" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-hash-uneval"}]]
 
@@ -1812,7 +2382,11 @@
 
 "Parses a hash-uneval block (`#_`)."
 
-[[:code {:lang "clojure"} "(str (parse-hash-uneval (reader/create \"#_\")))\n;; => \"#_\""]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-20 :added "4.0"}
+(fact "parse-hash-uneval example"
+  (str (parse-hash-uneval (reader/create "#_")))
+  => "#_"
+)
 
 [[:subsection {:title "parse-hash-cursor" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-hash-cursor"}]]
 
@@ -1820,7 +2394,11 @@
 
 "Parses a hash-cursor block (`#|`)."
 
-[[:code {:lang "clojure"} "(str (parse-hash-cursor (reader/create \"#|\")))\n;; => \"|\""]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-21 :added "4.0"}
+(fact "parse-hash-cursor example"
+  (str (parse-hash-cursor (reader/create "#|")))
+  => "|"
+)
 
 [[:subsection {:title "parse-hash" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-hash"}]]
 
@@ -1828,7 +2406,48 @@
 
 "Parses a block starting with `#` (hash forms like sets, fn literals, regex, metadata, etc.)."
 
-[[:code {:lang "clojure"} "(-> (parse-hash (reader/create \"#{1 2 3}\"))\n    (base/block-value))\n;; => #{1 2 3}\n\n(-> (parse-hash (reader/create \"#(+ 1 2)\"))\n    (base/block-value))\n;; => '(fn* [] (+ 1 2))\n\n(-> (parse-hash (reader/create \"#\\\"hello\\\"\"))\n    (base/block-value))\n;; => #\"hello\"\n\n(-> (parse-hash (reader/create \"#^hello {}\"))\n    (base/block-value))\n;; => (with-meta {} {:tag 'hello})\n\n(-> (parse-hash (reader/create \"#\\'hello\"))\n    (base/block-value))\n;; => '(var hello)\n\n(-> (parse-hash (reader/create \"#=(list 1 2 3)\"))\n    (base/block-value))\n;; => '(1 2 3)\n\n(-> (parse-hash (reader/create \"#?(:clj true)\"))\n    (base/block-value))\n;; => '(? {:clj true})\n\n(-> (parse-hash (reader/create \"#?@(:clj [1 2 3])\"))\n    (base/block-value))\n;; => '(?-splicing {:clj [1 2 3]})\n\n(-> (parse-hash (reader/create \"#:hello {:a 1 :b 2}\"))\n    (base/block-value))\n;; => #:hello{:b 2, :a 1}\n\n(-> (parse-hash (reader/create \"#inst \\\"2018-08-06T06:01:40.682-00:00\\\"\"))\n    (base/block-value))\n;; => #inst \"2018-08-06T06:01:40.682-00:00\""]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-22 :added "4.0"}
+(fact "parse-hash example"
+  (-> (parse-hash (reader/create "#{1 2 3}"))
+      (base/block-value))
+  => #{1 2 3}
+
+  (-> (parse-hash (reader/create "#(+ 1 2)"))
+      (base/block-value))
+  => '(fn* [] (+ 1 2))
+
+  (-> (parse-hash (reader/create "#\"hello\""))
+      (base/block-value))
+  => #"hello"
+
+  (-> (parse-hash (reader/create "#^hello {}"))
+      (base/block-value))
+  => (with-meta {} {:tag 'hello})
+
+  (-> (parse-hash (reader/create "#\'hello"))
+      (base/block-value))
+  => '(var hello)
+
+  (-> (parse-hash (reader/create "#=(list 1 2 3)"))
+      (base/block-value))
+  => '(1 2 3)
+
+  (-> (parse-hash (reader/create "#?(:clj true)"))
+      (base/block-value))
+  => '(? {:clj true})
+
+  (-> (parse-hash (reader/create "#?@(:clj [1 2 3])"))
+      (base/block-value))
+  => '(?-splicing {:clj [1 2 3]})
+
+  (-> (parse-hash (reader/create "#:hello {:a 1 :b 2}"))
+      (base/block-value))
+  => #:hello{:b 2, :a 1}
+
+  (-> (parse-hash (reader/create "#inst \"2018-08-06T06:01:40.682-00:00\""))
+      (base/block-value))
+  => #inst "2018-08-06T06:01:40.682-00:00"
+)
 
 [[:subsection {:title "parse-string" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-string"}]]
 
@@ -1836,7 +2455,12 @@
 
 "Parses a single block from a string input. This is a convenient entry point for parsing."
 
-[[:code {:lang "clojure"} "(-> (parse-string \"#(:b {:b 1})\")\n    (base/block-value))\n;; => '(fn* [] ((keyword \"b\") {(keyword \"b\") 1}))"]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-23 :added "4.0"}
+(fact "parse-string example"
+  (-> (parse-string "#(:b {:b 1})")
+      (base/block-value))
+  => '(fn* [] ((keyword "b") {(keyword "b") 1}))
+)
 
 [[:subsection {:title "parse-root" :link "merged-plans-slop-summary-std-block-parse-tutorial-md-parse-root"}]]
 
@@ -1844,7 +2468,11 @@
 
 "Parses a string into a root block, which can contain multiple top-level forms."
 
-[[:code {:lang "clojure"} "(str (parse-root \"a b c\"))\n;; => \"a b c\""]]
+^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-24 :added "4.0"}
+(fact "parse-root example"
+  (str (parse-root "a b c"))
+  => "a b c"
+)
 ;; END merged documentation: plans/slop/summary/std_block_parse_tutorial.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_block_reader_tutorial.md
@@ -1867,7 +2495,11 @@
 
 "Creates an `IndexingPushbackReader` from a string, suitable for character-by-character reading."
 
-[[:code {:lang "clojure"} "(type (create \"hello world\"))\n;; => clojure.tools.reader.reader_types.IndexingPushbackReader"]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-1 :added "4.0"}
+(fact "create example"
+  (type (create "hello world"))
+  => clojure.tools.reader.reader_types.IndexingPushbackReader
+)
 
 [[:subsection {:title "reader-position" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-reader-position"}]]
 
@@ -1875,7 +2507,14 @@
 
 "Returns the current `[line column]` position of the reader."
 
-[[:code {:lang "clojure"} "(-> (create \"abc\")\n    step-char\n    step-char\n    reader-position)\n;; => [1 3]"]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-2 :added "4.0"}
+(fact "reader-position example"
+  (-> (create "abc")
+      step-char
+      step-char
+      reader-position)
+  => [1 3]
+)
 
 [[:subsection {:title "throw-reader" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-throw-reader"}]]
 
@@ -1883,7 +2522,13 @@
 
 "Throws an `ExceptionInfo` with a message and the current reader position, useful for reporting parsing errors."
 
-[[:code {:lang "clojure"} "(throw-reader (create \"abc\")\n              \"Message\"\n              {:data true})\n;; => (throws)"]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-3 :added "4.0"}
+(fact "throw-reader example"
+  (throw-reader (create "abc")
+                "Message"
+                {:data true})
+  => (throws)
+)
 
 [[:subsection {:title "step-char" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-step-char"}]]
 
@@ -1891,7 +2536,14 @@
 
 "Moves the reader one character forward and returns the reader itself."
 
-[[:code {:lang "clojure"} "(-> (create \"abc\")\n    step-char\n    read-char\n    str)\n;; => \"b\""]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-4 :added "4.0"}
+(fact "step-char example"
+  (-> (create "abc")
+      step-char
+      read-char
+      str)
+  => "b"
+)
 
 [[:subsection {:title "read-char" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-read-char"}]]
 
@@ -1899,7 +2551,14 @@
 
 "Reads a single character from the reader and advances its position."
 
-[[:code {:lang "clojure"} "(->> read-char\n     (read-repeatedly (create \"abc\"))\n     (take 3)\n     (apply str))\n;; => \"abc\""]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-5 :added "4.0"}
+(fact "read-char example"
+  (->> read-char
+       (read-repeatedly (create "abc"))
+       (take 3)
+       (apply str))
+  => "abc"
+)
 
 [[:subsection {:title "ignore-char" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-ignore-char"}]]
 
@@ -1907,7 +2566,14 @@
 
 "Reads a single character, ignores it (returns `nil`), and advances the reader's position."
 
-[[:code {:lang "clojure"} "(->> ignore-char\n     (read-repeatedly (create \"abc\"))\n     (take 3)\n     (apply str))\n;; => \"\""]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-6 :added "4.0"}
+(fact "ignore-char example"
+  (->> ignore-char
+       (read-repeatedly (create "abc"))
+       (take 3)
+       (apply str))
+  => ""
+)
 
 [[:subsection {:title "unread-char" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-unread-char"}]]
 
@@ -1915,7 +2581,14 @@
 
 "Pushes a character back onto the reader, effectively moving the reader's position backward."
 
-[[:code {:lang "clojure"} "(-> (create \"abc\")\n    (step-char)\n    (unread-char \\A)\n    (reader/slurp))\n;; => \"Abc\""]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-7 :added "4.0"}
+(fact "unread-char example"
+  (-> (create "abc")
+      (step-char)
+      (unread-char \A)
+      (reader/slurp))
+  => "Abc"
+)
 
 [[:subsection {:title "peek-char" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-peek-char"}]]
 
@@ -1923,7 +2596,14 @@
 
 "Returns the next character in the stream without advancing the reader's position."
 
-[[:code {:lang "clojure"} "(->> (read-times (create \"abc\")\n                 peek-char\n                 3)\n     (apply str))\n;; => \"aaa\""]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-8 :added "4.0"}
+(fact "peek-char example"
+  (->> (read-times (create "abc")
+                   peek-char
+                   3)
+       (apply str))
+  => "aaa"
+)
 
 [[:subsection {:title "read-while" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-read-while"}]]
 
@@ -1931,7 +2611,13 @@
 
 "Reads characters from the reader as long as a given predicate remains `true`."
 
-[[:code {:lang "clojure"} "(read-while (create \"abcde\")\n            (fn [ch]\n              (not= (str ch) \"d\")))\n;; => \"abc\""]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-9 :added "4.0"}
+(fact "read-while example"
+  (read-while (create "abcde")
+              (fn [ch]
+                (not= (str ch) "d")))
+  => "abc"
+)
 
 [[:subsection {:title "read-until" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-read-until"}]]
 
@@ -1939,7 +2625,13 @@
 
 "Reads characters from the reader until a given predicate becomes `true`."
 
-[[:code {:lang "clojure"} "(read-until (create \"abcde\")\n            (fn [ch]\n              (= (str ch) \"d\")))\n;; => \"abc\""]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-10 :added "4.0"}
+(fact "read-until example"
+  (read-until (create "abcde")
+              (fn [ch]
+                (= (str ch) "d")))
+  => "abc"
+)
 
 [[:subsection {:title "read-times" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-read-times"}]]
 
@@ -1947,7 +2639,13 @@
 
 "Reads input a specified number of times using a provided reading function."
 
-[[:code {:lang "clojure"} "(->> (read-times (create \"abcdefg\")\n                 #(str (read-char %) (read-char %))\n                 2))\n;; => [\"ab\" \"cd\"]"]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-11 :added "4.0"}
+(fact "read-times example"
+  (->> (read-times (create "abcdefg")
+                   #(str (read-char %) (read-char %))
+                   2))
+  => ["ab" "cd"]
+)
 
 [[:subsection {:title "read-repeatedly" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-read-repeatedly"}]]
 
@@ -1955,7 +2653,14 @@
 
 "Reads input repeatedly until a stop predicate is met."
 
-[[:code {:lang "clojure"} "(->> (read-repeatedly (create \"abcdefg\")\n                      #(str (read-char %) (read-char %))\n                      empty?)\n     (take 5))\n;; => [\"ab\" \"cd\" \"ef\" \"g\"]"]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-12 :added "4.0"}
+(fact "read-repeatedly example"
+  (->> (read-repeatedly (create "abcdefg")
+                        #(str (read-char %) (read-char %))
+                        empty?)
+       (take 5))
+  => ["ab" "cd" "ef" "g"]
+)
 
 [[:subsection {:title "read-include" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-read-include"}]]
 
@@ -1963,7 +2668,12 @@
 
 "Reads characters, including those that satisfy a predicate, and returns them along with the first character that *doesn't* satisfy the predicate."
 
-[[:code {:lang "clojure"} "(read-include (create \"  a\")\n              read-char (complement check/voidspace?))\n;; => [[\" \" \" \"] \"a\"]"]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-13 :added "4.0"}
+(fact "read-include example"
+  (read-include (create "  a")
+                read-char (complement check/voidspace?))
+  => [[" " " "] "a"]
+)
 
 [[:subsection {:title "slurp" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-slurp"}]]
 
@@ -1971,7 +2681,11 @@
 
 "Reads the rest of the input from the reader until EOF."
 
-[[:code {:lang "clojure"} "(reader/slurp (reader/step-char (create \"abc efg\")))\n;; => \"bc efg\""]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-14 :added "4.0"}
+(fact "slurp example"
+  (reader/slurp (reader/step-char (create "abc efg")))
+  => "bc efg"
+)
 
 [[:subsection {:title "read-to-boundary" :link "merged-plans-slop-summary-std-block-reader-tutorial-md-read-to-boundary"}]]
 
@@ -1979,7 +2693,11 @@
 
 "Reads characters until a boundary character or a character not allowed by `allowed` is encountered."
 
-[[:code {:lang "clojure"} "(read-to-boundary (create \"abc efg\"))\n;; => \"abc\""]]
+^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-15 :added "4.0"}
+(fact "read-to-boundary example"
+  (read-to-boundary (create "abc efg"))
+  => "abc"
+)
 ;; END merged documentation: plans/slop/summary/std_block_reader_tutorial.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_block_summary.md
@@ -2121,7 +2839,12 @@
 
 "Compares two blocks for equality based on their tag and string representation. Returns 0 if equal, a negative number if the first is \"less\" than the second, and a positive number otherwise. This is used for `Comparable` implementation."
 
-[[:code {:lang "clojure"} "(block-compare (construct/void \\space)\n                 (construct/void \\space))\n;; => 0"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-1 :added "4.0"}
+(fact "block-compare example"
+  (block-compare (construct/void \space)
+                   (construct/void \space))
+  => 0
+)
 
 [[:subsection {:title "void-block?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-void-block"}]]
 
@@ -2129,7 +2852,11 @@
 
 "Checks if a block is a `VoidBlock` instance."
 
-[[:code {:lang "clojure"} "(void-block? (construct/void))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-2 :added "4.0"}
+(fact "void-block? example"
+  (void-block? (construct/void))
+  => true
+)
 
 [[:subsection {:title "void-block" :link "merged-plans-slop-summary-std-block-type-tutorial-md-void-block-2"}]]
 
@@ -2137,7 +2864,12 @@
 
 "Constructs a new `VoidBlock` instance directly."
 
-[[:code {:lang "clojure"} "(-> (void-block :linespace \\tab 1 0)\n    (base/block-info))\n;; => {:type :void, :tag :linespace, :string \"\\t\", :height 0, :width 1}"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-3 :added "4.0"}
+(fact "void-block example"
+  (-> (void-block :linespace \tab 1 0)
+      (base/block-info))
+  => {:type :void, :tag :linespace, :string "\t", :height 0, :width 1}
+)
 
 [[:subsection {:title "space-block?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-space-block"}]]
 
@@ -2145,7 +2877,11 @@
 
 "Checks if a block represents a space character."
 
-[[:code {:lang "clojure"} "(space-block? (construct/space))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-4 :added "4.0"}
+(fact "space-block? example"
+  (space-block? (construct/space))
+  => true
+)
 
 [[:subsection {:title "linebreak-block?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-linebreak-block"}]]
 
@@ -2153,7 +2889,11 @@
 
 "Checks if a block represents a linebreak character."
 
-[[:code {:lang "clojure"} "(linebreak-block? (construct/newline))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-5 :added "4.0"}
+(fact "linebreak-block? example"
+  (linebreak-block? (construct/newline))
+  => true
+)
 
 [[:subsection {:title "linespace-block?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-linespace-block"}]]
 
@@ -2161,7 +2901,11 @@
 
 "Checks if a block represents a non-linebreak whitespace character (e.g., `\\space`, `\\tab`)."
 
-[[:code {:lang "clojure"} "(linespace-block? (construct/space))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-6 :added "4.0"}
+(fact "linespace-block? example"
+  (linespace-block? (construct/space))
+  => true
+)
 
 [[:subsection {:title "eof-block?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-eof-block"}]]
 
@@ -2169,7 +2913,11 @@
 
 "Checks if a block represents the end-of-file signal."
 
-[[:code {:lang "clojure"} "(eof-block? (construct/void nil))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-7 :added "4.0"}
+(fact "eof-block? example"
+  (eof-block? (construct/void nil))
+  => true
+)
 
 [[:subsection {:title "nil-void?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-nil-void"}]]
 
@@ -2177,7 +2925,17 @@
 
 "Checks if a block is `nil` or a `VoidBlock`."
 
-[[:code {:lang "clojure"} "(nil-void? nil)\n;; => true\n\n(nil-void? (construct/block nil))\n;; => false\n\n(nil-void? (construct/space))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-8 :added "4.0"}
+(fact "nil-void? example"
+  (nil-void? nil)
+  => true
+
+  (nil-void? (construct/block nil))
+  => false
+
+  (nil-void? (construct/space))
+  => true
+)
 
 [[:subsection {:title "comment-block?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-comment-block"}]]
 
@@ -2185,7 +2943,11 @@
 
 "Checks if a block is a `CommentBlock` instance."
 
-[[:code {:lang "clojure"} "(comment-block? (construct/comment \";;hello\"))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-9 :added "4.0"}
+(fact "comment-block? example"
+  (comment-block? (construct/comment ";;hello"))
+  => true
+)
 
 [[:subsection {:title "comment-block" :link "merged-plans-slop-summary-std-block-type-tutorial-md-comment-block-2"}]]
 
@@ -2193,7 +2955,12 @@
 
 "Constructs a new `CommentBlock` instance directly."
 
-[[:code {:lang "clojure"} "(-> (comment-block \";hello\")\n    (base/block-info))\n;; => {:type :comment, :tag :comment, :string \";hello\", :height 0, :width 6}"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-10 :added "4.0"}
+(fact "comment-block example"
+  (-> (comment-block ";hello")
+      (base/block-info))
+  => {:type :comment, :tag :comment, :string ";hello", :height 0, :width 6}
+)
 
 [[:subsection {:title "token-block?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-token-block"}]]
 
@@ -2201,7 +2968,11 @@
 
 "Checks if a block is a `TokenBlock` instance."
 
-[[:code {:lang "clojure"} "(token-block? (construct/token \"hello\"))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-11 :added "4.0"}
+(fact "token-block? example"
+  (token-block? (construct/token "hello"))
+  => true
+)
 
 [[:subsection {:title "token-block" :link "merged-plans-slop-summary-std-block-type-tutorial-md-token-block-2"}]]
 
@@ -2209,7 +2980,11 @@
 
 "Constructs a new `TokenBlock` instance directly."
 
-[[:code {:lang "clojure"} "(base/block-info (token-block :symbol \"abc\" 'abc \"abc\" 3 0))\n;; => {:type :token, :tag :symbol, :string \"abc\", :height 0, :width 3}"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-12 :added "4.0"}
+(fact "token-block example"
+  (base/block-info (token-block :symbol "abc" 'abc "abc" 3 0))
+  => {:type :token, :tag :symbol, :string "abc", :height 0, :width 3}
+)
 
 [[:subsection {:title "container-width" :link "merged-plans-slop-summary-std-block-type-tutorial-md-container-width"}]]
 
@@ -2217,7 +2992,11 @@
 
 "Calculates the visual width of a container block, considering its children and delimiters."
 
-[[:code {:lang "clojure"} "(container-width (construct/block [1 2 3 4]))\n;; => 9"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-13 :added "4.0"}
+(fact "container-width example"
+  (container-width (construct/block [1 2 3 4]))
+  => 9
+)
 
 [[:subsection {:title "container-height" :link "merged-plans-slop-summary-std-block-type-tutorial-md-container-height"}]]
 
@@ -2225,7 +3004,12 @@
 
 "Calculates the height (number of lines) of a container block."
 
-[[:code {:lang "clojure"} "(container-height (construct/block [(construct/newline)\n                                      (construct/newline)]))\n;; => 2"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-14 :added "4.0"}
+(fact "container-height example"
+  (container-height (construct/block [(construct/newline)
+                                        (construct/newline)]))
+  => 2
+)
 
 [[:subsection {:title "container-string" :link "merged-plans-slop-summary-std-block-type-tutorial-md-container-string"}]]
 
@@ -2233,7 +3017,11 @@
 
 "Returns the string representation of a container block, including its delimiters and children's string representations. This is a multimethod extending `base/block-tag`."
 
-[[:code {:lang "clojure"} "(container-string (construct/block [1 2 3]))\n;; => \"[1 2 3]\""]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-15 :added "4.0"}
+(fact "container-string example"
+  (container-string (construct/block [1 2 3]))
+  => "[1 2 3]"
+)
 
 [[:subsection {:title "container-value-string" :link "merged-plans-slop-summary-std-block-type-tutorial-md-container-value-string"}]]
 
@@ -2241,7 +3029,14 @@
 
 "Returns the string representation used to generate the *value* of a container block, often used for debugging or internal representation."
 
-[[:code {:lang "clojure"} "(container-value-string (construct/block [::a :b :c]))\n;; => \"[:std.block.type-test/a :b :c]\"\n\n(container-value-string (parse/parse-string \"[::a :b :c]\"))\n;; => \"[(keyword \":a\") (keyword \"b\") (keyword \"c\")]\""]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-16 :added "4.0"}
+(fact "container-value-string example"
+  (container-value-string (construct/block [::a :b :c]))
+  => "[:std.block.type-test/a :b :c]"
+
+  (container-value-string (parse/parse-string "[::a :b :c]"))
+  => "[(keyword ":a") (keyword "b") (keyword "c")]"
+)
 
 [[:subsection {:title "container-block?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-container-block"}]]
 
@@ -2249,7 +3044,11 @@
 
 "Checks if a block is a `ContainerBlock` instance."
 
-[[:code {:lang "clojure"} "(container-block? (construct/block []))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-17 :added "4.0"}
+(fact "container-block? example"
+  (container-block? (construct/block []))
+  => true
+)
 
 [[:subsection {:title "container-block" :link "merged-plans-slop-summary-std-block-type-tutorial-md-container-block-2"}]]
 
@@ -2257,7 +3056,15 @@
 
 "Constructs a new `ContainerBlock` instance directly."
 
-[[:code {:lang "clojure"} "(-> (container-block :fn [(construct/token '+)\n                            (construct/void)\n                            (construct/token '1)]\n                       (construct/*container-props* :fn))\n    (base/block-value))\n;; => '(fn* [] (+ 1))"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-18 :added "4.0"}
+(fact "container-block example"
+  (-> (container-block :fn [(construct/token '+)
+                              (construct/void)
+                              (construct/token '1)]
+                         (construct/*container-props* :fn))
+      (base/block-value))
+  => '(fn* [] (+ 1))
+)
 
 [[:subsection {:title "modifier-block?" :link "merged-plans-slop-summary-std-block-type-tutorial-md-modifier-block"}]]
 
@@ -2265,7 +3072,11 @@
 
 "Checks if a block is a `ModifierBlock` instance."
 
-[[:code {:lang "clojure"} "(modifier-block? (construct/uneval))\n;; => true"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-19 :added "4.0"}
+(fact "modifier-block? example"
+  (modifier-block? (construct/uneval))
+  => true
+)
 
 [[:subsection {:title "modifier-block" :link "merged-plans-slop-summary-std-block-type-tutorial-md-modifier-block-2"}]]
 
@@ -2273,7 +3084,11 @@
 
 "Constructs a new `ModifierBlock` instance directly."
 
-[[:code {:lang "clojure"} "(modifier-block :hash-uneval \"#_\" (fn [acc _] acc))\n;; => #std.block.type.ModifierBlock{:tag :hash-uneval, :string \"#_\", :command #function[...]}"]]
+^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-20 :added "4.0"}
+(fact "modifier-block example"
+  (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+  => #std.block.type.ModifierBlock{:tag :hash-uneval, :string "#_", :command #function[...]}
+)
 ;; END merged documentation: plans/slop/summary/std_block_type_tutorial.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_block_value_tutorial.md
@@ -2296,7 +3111,13 @@
 
 "Applies modifier blocks within a sequence of blocks to an accumulator. For example, `#_` modifiers will remove the subsequent block from the sequence."
 
-[[:code {:lang "clojure"} "(apply-modifiers [(construct/uneval)\n                  (construct/uneval)\n                  1 2 3])\n;; => [3]"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-1 :added "4.0"}
+(fact "apply-modifiers example"
+  (apply-modifiers [(construct/uneval)
+                    (construct/uneval)
+                    1 2 3])
+  => [3]
+)
 
 [[:subsection {:title "child-values" :link "merged-plans-slop-summary-std-block-value-tutorial-md-child-values"}]]
 
@@ -2304,7 +3125,11 @@
 
 "Returns the Clojure values of the children within a container block, applying any modifiers present."
 
-[[:code {:lang "clojure"} "(child-values (parse/parse-string \"[1 #_2 3]\"))\n;; => [1 3]"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-2 :added "4.0"}
+(fact "child-values example"
+  (child-values (parse/parse-string "[1 #_2 3]"))
+  => [1 3]
+)
 
 [[:subsection {:title "root-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-root-value"}]]
 
@@ -2312,7 +3137,11 @@
 
 "Returns the Clojure value of a `:root` block, typically as a `(do ...)` form if it contains multiple top-level expressions."
 
-[[:code {:lang "clojure"} "(root-value (parse/parse-string \"#[1 2 3]\"))\n;; => '(do 1 2 3)"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-3 :added "4.0"}
+(fact "root-value example"
+  (root-value (parse/parse-string "#[1 2 3]"))
+  => '(do 1 2 3)
+)
 
 [[:subsection {:title "from-value-string" :link "merged-plans-slop-summary-std-block-value-tutorial-md-from-value-string"}]]
 
@@ -2320,7 +3149,11 @@
 
 "Reads a Clojure value from the `block-value-string` of a block. This is useful for blocks where the string representation for value generation differs from the raw string."
 
-[[:code {:lang "clojure"} "(from-value-string (parse/parse-string \"(+ 1 1)\"))\n;; => '(+ 1 1)"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-4 :added "4.0"}
+(fact "from-value-string example"
+  (from-value-string (parse/parse-string "(+ 1 1)"))
+  => '(+ 1 1)
+)
 
 [[:subsection {:title "list-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-list-value"}]]
 
@@ -2328,7 +3161,11 @@
 
 "Returns the Clojure `list` value of an `:list` block."
 
-[[:code {:lang "clojure"} "(list-value (parse/parse-string \"(+ 1 1)\"))\n;; => '(+ 1 1)"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-5 :added "4.0"}
+(fact "list-value example"
+  (list-value (parse/parse-string "(+ 1 1)"))
+  => '(+ 1 1)
+)
 
 [[:subsection {:title "map-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-map-value"}]]
 
@@ -2336,7 +3173,14 @@
 
 "Returns the Clojure `map` value of an `:map` block."
 
-[[:code {:lang "clojure"} "(map-value (parse/parse-string \"{1 2 3 4}\"))\n;; => {1 2, 3 4}\n\n(map-value (parse/parse-string \"{1 2 3}\"))\n;; => (throws)"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-6 :added "4.0"}
+(fact "map-value example"
+  (map-value (parse/parse-string "{1 2 3 4}"))
+  => {1 2, 3 4}
+
+  (map-value (parse/parse-string "{1 2 3}"))
+  => (throws)
+)
 
 [[:subsection {:title "set-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-set-value"}]]
 
@@ -2344,7 +3188,11 @@
 
 "Returns the Clojure `set` value of an `:set` block."
 
-[[:code {:lang "clojure"} "(set-value (parse/parse-string \"#{1 2 3 4}\"))\n;; => #{1 4 3 2}"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-7 :added "4.0"}
+(fact "set-value example"
+  (set-value (parse/parse-string "#{1 2 3 4}"))
+  => #{1 4 3 2}
+)
 
 [[:subsection {:title "vector-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-vector-value"}]]
 
@@ -2352,7 +3200,11 @@
 
 "Returns the Clojure `vector` value of an `:vector` block."
 
-[[:code {:lang "clojure"} "(vector-value (parse/parse-string \"[1 2 3 4]\"))\n;; => [1 2 3 4]"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-8 :added "4.0"}
+(fact "vector-value example"
+  (vector-value (parse/parse-string "[1 2 3 4]"))
+  => [1 2 3 4]
+)
 
 [[:subsection {:title "deref-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-deref-value"}]]
 
@@ -2360,7 +3212,11 @@
 
 "Returns the Clojure value of a `:deref` block (e.g., `@atom`)."
 
-[[:code {:lang "clojure"} "(deref-value (parse/parse-string \"@hello\"))\n;; => '(deref hello)"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-9 :added "4.0"}
+(fact "deref-value example"
+  (deref-value (parse/parse-string "@hello"))
+  => '(deref hello)
+)
 
 [[:subsection {:title "meta-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-meta-value"}]]
 
@@ -2368,7 +3224,16 @@
 
 "Returns the Clojure value of a `:meta` block (e.g., `^:dynamic x`)."
 
-[[:code {:lang "clojure"} "((juxt meta identity)\n (meta-value (parse/parse-string \"^:dynamic {:a 1}\")))\n;; => [{:dynamic true} {:a 1}]\n\n((juxt meta identity)\n (meta-value (parse/parse-string \"^String {:a 1}\")))\n;; => [{:tag 'String} {:a 1}]"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-10 :added "4.0"}
+(fact "meta-value example"
+  ((juxt meta identity)
+   (meta-value (parse/parse-string "^:dynamic {:a 1}")))
+  => [{:dynamic true} {:a 1}]
+
+  ((juxt meta identity)
+   (meta-value (parse/parse-string "^String {:a 1}")))
+  => [{:tag 'String} {:a 1}]
+)
 
 [[:subsection {:title "quote-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-quote-value"}]]
 
@@ -2376,7 +3241,11 @@
 
 "Returns the Clojure value of a `:quote` block (e.g., `'symbol`)."
 
-[[:code {:lang "clojure"} "(quote-value (parse/parse-string \"'hello\"))\n;; => '(quote hello)"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-11 :added "4.0"}
+(fact "quote-value example"
+  (quote-value (parse/parse-string "'hello"))
+  => '(quote hello)
+)
 
 [[:subsection {:title "var-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-var-value"}]]
 
@@ -2384,7 +3253,11 @@
 
 "Returns the Clojure value of a `:var` block (e.g., `#'symbol`)."
 
-[[:code {:lang "clojure"} "(var-value (parse/parse-string \"#'hello\"))\n;; => '(var hello)"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-12 :added "4.0"}
+(fact "var-value example"
+  (var-value (parse/parse-string "#'hello"))
+  => '(var hello)
+)
 
 [[:subsection {:title "hash-keyword-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-hash-keyword-value"}]]
 
@@ -2392,7 +3265,11 @@
 
 "Returns the Clojure value of a `:hash-keyword` block (e.g., `#:prefix{:key value}`)."
 
-[[:code {:lang "clojure"} "(hash-keyword-value (parse/parse-string \"#:hello{:a 1 :b 2}\"))\n;; => #:hello{:b 2, :a 1}"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-13 :added "4.0"}
+(fact "hash-keyword-value example"
+  (hash-keyword-value (parse/parse-string "#:hello{:a 1 :b 2}"))
+  => #:hello{:b 2, :a 1}
+)
 
 [[:subsection {:title "select-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-select-value"}]]
 
@@ -2400,7 +3277,11 @@
 
 "Returns the Clojure value of a `:select` block (reader conditional, e.g., `#?(:clj x)`)."
 
-[[:code {:lang "clojure"} "(select-value (parse/parse-string \"#?(:clj hello)\"))\n;; => '(? {:clj hello})"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-14 :added "4.0"}
+(fact "select-value example"
+  (select-value (parse/parse-string "#?(:clj hello)"))
+  => '(? {:clj hello})
+)
 
 [[:subsection {:title "select-splice-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-select-splice-value"}]]
 
@@ -2408,7 +3289,11 @@
 
 "Returns the Clojure value of a `:select-splice` block (reader conditional splicing, e.g., `#?@(:clj x)`)."
 
-[[:code {:lang "clojure"} "(select-splice-value (parse/parse-string \"#?@(:clj hello)\"))\n;; => '(?-splicing {:clj hello})"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-15 :added "4.0"}
+(fact "select-splice-value example"
+  (select-splice-value (parse/parse-string "#?@(:clj hello)"))
+  => '(?-splicing {:clj hello})
+)
 
 [[:subsection {:title "unquote-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-unquote-value"}]]
 
@@ -2416,7 +3301,11 @@
 
 "Returns the Clojure value of an `:unquote` block (e.g., `~x`)."
 
-[[:code {:lang "clojure"} "(unquote-value (parse/parse-string \"~hello\"))\n;; => '(unquote hello)"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-16 :added "4.0"}
+(fact "unquote-value example"
+  (unquote-value (parse/parse-string "~hello"))
+  => '(unquote hello)
+)
 
 [[:subsection {:title "unquote-splice-value" :link "merged-plans-slop-summary-std-block-value-tutorial-md-unquote-splice-value"}]]
 
@@ -2424,5 +3313,9 @@
 
 "Returns the Clojure value of an `:unquote-splice` block (e.g., `~@x`)."
 
-[[:code {:lang "clojure"} "(unquote-splice-value (parse/parse-string \"~@hello\"))\n;; => '(unquote-splicing hello)"]]
+^{:id merged-plans-slop-summary-std-block-value-tutorial-md-example-17 :added "4.0"}
+(fact "unquote-splice-value example"
+  (unquote-splice-value (parse/parse-string "~@hello"))
+  => '(unquote-splicing hello)
+)
 ;; END merged documentation: plans/slop/summary/std_block_value_tutorial.md

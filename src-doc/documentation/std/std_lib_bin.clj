@@ -53,5 +53,19 @@
 
 "This module is essential for any application requiring low-level binary data handling, network communication, file I/O, or cryptographic operations where precise control over data representation and efficient processing are critical. It abstracts away much of the boilerplate Java interop for NIO buffers and binary conversions, providing a more idiomatic Clojure interface."
 
-[[:code {:lang "clojure"} ";; Example: Creating and writing to a ByteBuffer\n(require '[std.lib.bin :as bin])\n\n(def my-buffer (bin/int-buffer 4)) ; Creates an IntBuffer with capacity 4\n(bin/buffer-write my-buffer (int-array [10 20 30 40]))\n\n;; Example: Converting a number to a bit sequence and then to bytes\n(require '[std.lib.bin.type :as btype])\n\n(def num-val 49)\n(def bit-seq (btype/bitseq num-val)) ; => [1 0 0 0 1 1]\n(def byte-arr (btype/bytes num-val)) ; => byte-array with [49]"]]
+^{:id merged-plans-slop-summary-std-lib-bin-summary-md-example-1 :added "4.0"}
+(fact "Usage Pattern: example"
+  ;; Example: Creating and writing to a ByteBuffer
+  (require '[std.lib.bin :as bin])
+
+  (def my-buffer (bin/int-buffer 4)) ; Creates an IntBuffer with capacity 4
+  (bin/buffer-write my-buffer (int-array [10 20 30 40]))
+
+  ;; Example: Converting a number to a bit sequence and then to bytes
+  (require '[std.lib.bin.type :as btype])
+
+  (def num-val 49)
+  (def bit-seq (btype/bitseq num-val)) ; => [1 0 0 0 1 1]
+  (def byte-arr (btype/bytes num-val)) ; => byte-array with [49]
+)
 ;; END merged documentation: plans/slop/summary/std_lib_bin_summary.md

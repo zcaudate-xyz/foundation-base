@@ -1,4 +1,5 @@
-(ns documentation.lib-index)
+(ns documentation.lib-index
+  (:use code.test))
 
 [[:hero {:title "lib.*"
          :subtitle "Integration library documentation"
@@ -39,7 +40,24 @@
 
 "*   **Referencing Remote Entities:** A pointer can represent a function or variable that exists in a different language runtime (e.g., a Lua function from Clojure).\n*   **Unified Invocation:** Once a pointer is created, it can be invoked using standard Clojure function call syntax, with the `IApplicable` protocol handling the dispatch to the correct runtime.\n*   **Dynamic Resolution:** The `IDeref` interface allows for dynamic retrieval of the entity's value from its runtime.\n*   **Abstraction:** Pointers abstract away the complexities of inter-runtime communication, allowing developers to work with foreign entities as if they were local Clojure objects."
 
-[[:code {:lang "clojure"} ";; Example (conceptual, assuming a 'lua' context is set up)\n(require '[std.lib.context.pointer :as p])\n(require '[std.lib.context.space :as space])\n\n;; Assume a Lua runtime is active in the current space\n(space/space:rt-current :lua) ; => <LuaRuntimeInstance>\n\n;; Create a pointer to a Lua function named 'my-lua-add'\n(def lua-add (p/pointer {:context :lua :id 'my-lua-add}))\n\n;; Invoke the Lua function through the pointer\n(lua-add 10 20) ; This would internally call -invoke-ptr on the Lua runtime\n\n;; Dereference the pointer (if it refers to a value)\n;; @lua-add ; This would internally call -deref-ptr on the Lua runtime"]]
+^{:id merged-plans-slop-summary-std-lib-context-pointer-summary-md-example-1 :added "4.0"}
+(fact "Usage Pattern: example"
+  ;; Example (conceptual, assuming a 'lua' context is set up)
+  (require '[std.lib.context.pointer :as p])
+  (require '[std.lib.context.space :as space])
+
+  ;; Assume a Lua runtime is active in the current space
+  (space/space:rt-current :lua) ; => <LuaRuntimeInstance>
+
+  ;; Create a pointer to a Lua function named 'my-lua-add'
+  (def lua-add (p/pointer {:context :lua :id 'my-lua-add}))
+
+  ;; Invoke the Lua function through the pointer
+  (lua-add 10 20) ; This would internally call -invoke-ptr on the Lua runtime
+
+  ;; Dereference the pointer (if it refers to a value)
+  ;; @lua-add ; This would internally call -deref-ptr on the Lua runtime
+)
 
 "By providing a flexible and protocol-driven mechanism for referencing and interacting with entities across different execution contexts, `std.lib.context.pointer` is a cornerstone of the `foundation-base` project's multi-language capabilities."
 ;; END merged documentation: plans/slop/summary/std_lib_context_pointer_summary.md
