@@ -2075,7 +2075,7 @@
 
 ^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-1 :added "4.0"}
 (fact "read-dispatch example"
-  (read-dispatch \tab)
+  (read-dispatch (char 9))
   => :void
 
   (read-dispatch (first "#"))
