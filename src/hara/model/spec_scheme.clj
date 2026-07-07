@@ -264,9 +264,67 @@
                               (list 'hash-set! global key value)
                               global))})
 
+(defn- scheme-rest-arg-form?
+  [form]
+  (and (collection/form? form)
+       (= 2 (count form))
+       (= :.. (first form))
+       (symbol? (second form))))
+
+(defn- scheme-callable-form?
+  [form]
+  (and (collection/form? form)
+       (contains? '#{fn fn:> defn defgen} (first form))))
+
+(defn- scheme-lower-rest-callable
+  [form]
+  (let [[tag head & tail] form
+        [name args body] (if (symbol? head)
+                           [head (first tail) (rest tail)]
+                           [nil head tail])
+        rest-args (filterv scheme-rest-arg-form? args)]
+    (cond
+      (empty? rest-args) form
+      (< 1 (count rest-args))
+      (throw (ex-info "Only one rest argument is allowed" {:form form :args args}))
+      (not= (last args) (first rest-args))
+      (throw (ex-info "Rest argument must be final" {:form form :args args}))
+      :else
+      (let [rest-sym (second (first rest-args))
+            args (vec (concat (butlast args) ['. rest-sym]))
+            body (cons (list 'set! rest-sym (list 'list->vector rest-sym)) body)
+            out (if name
+                  (apply list tag name args body)
+                  (apply list tag args body))]
+        (with-meta out (meta form))))))
+
+(defn- scheme-lower-rest-forms
+  [form]
+  (cond
+    (and (collection/form? form) (= 'quote (first form))) form
+    (scheme-callable-form? form)
+    (let [form (scheme-lower-rest-callable form)]
+      (with-meta (apply list (map scheme-lower-rest-forms form)) (meta form)))
+    (collection/form? form)
+    (with-meta (apply list (map scheme-lower-rest-forms form)) (meta form))
+    (vector? form)
+    (with-meta (mapv scheme-lower-rest-forms form) (meta form))
+    (set? form)
+    (with-meta (set (map scheme-lower-rest-forms form)) (meta form))
+    (map? form)
+    (with-meta
+      (into (empty form)
+            (map (fn [[k v]]
+                   [(scheme-lower-rest-forms k)
+                    (scheme-lower-rest-forms v)]))
+            form)
+      (meta form))
+    :else form))
+
 (defn scheme-transform
   [form]
-  (common/transform-form +scheme-transform-config+ form))
+  (common/transform-form +scheme-transform-config+
+                         (scheme-lower-rest-forms form)))
 
 (declare emit-scheme-form)
 

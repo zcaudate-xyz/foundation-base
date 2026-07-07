@@ -195,6 +195,10 @@
                        (list 'x:get-key (list 'proto:get obj) key nil))]
     value))
 
+(defn lua-emit-input-rest
+  [_ _ _]
+  "...")
+
 (def +features+
   (-> (grammar/build :include [:builtin
                                :builtin-global
@@ -272,6 +276,7 @@
                   :block     {:parameter {:start " " :end " "}
                               :body      {:start "" :end ""}}
                   :function  {:raw "function"
+                              :args      {:rest #'lua-emit-input-rest}
                               :body      {:start "" :end "end"}}
                   :infix     {:if  {:check "and" :then "or"}}
                   :global    {:reference nil}}

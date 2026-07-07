@@ -37,6 +37,10 @@
   ([^java.util.regex.Pattern re]
    (str "/" (.pattern re) "/")))
 
+(defn js-emit-input-rest
+  [{:keys [symbol]} grammar mopts]
+  (str "..." (common/*emit-fn* symbol grammar mopts)))
+
 (defn js-map-key
   "emits a map key"
   {:added "4.0"}
@@ -218,7 +222,7 @@
         :defclass    {:macro  #'js-defclass    :emit :macro}
         :for-object  {:macro  #'js-tf-for-object  :emit :macro}
         :for-array   {:macro  #'js-tf-for-array   :emit :macro}
-        :for-iter    {:macro  #'js-tf-for-iter    :emit :macro}
+        :for-iter    {:macro  #'js-tf-for-iter   :emit :macro}
         :prototype-get       {:emit :alias :raw 'Object.getPrototypeOf}
         :prototype-set       {:emit :alias :raw 'Object.setPrototypeOf}
         :prototype-create    {:macro #'js-tf-prototype-create  :emit :macro
@@ -244,7 +248,8 @@
         :allow   {:assign  #{:symbol :vector :set :map}}
         :highlight '#{return break del tab reject}
         :default  {:common    {:namespace-full "$$"}
-                   :function  {:raw "function" :space ""}}
+                   :function  {:raw "function" :space ""
+                               :args {:rest #'js-emit-input-rest}}}
         :token    {:nil       {:as "null"}
                    :regex     {:custom #'js-regex}
                    :string    {}

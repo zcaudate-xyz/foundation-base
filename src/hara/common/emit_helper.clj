@@ -151,6 +151,22 @@
 ;; DEFINE
 ;;
 
+(defn rest-arg-form?
+  "checks for the canonical xtalk rest argument form `(:.. args)`"
+  {:added "4.1"}
+  [form]
+  (and (collection/form? form)
+       (= 2 (count form))
+       (= :.. (first form))
+       (symbol? (second form))))
+
+(defn rest-arg-symbol
+  "returns the symbol bound by a canonical xtalk rest argument form"
+  {:added "4.1"}
+  [form]
+  (when (rest-arg-form? form)
+    (second form)))
+
 (defn emit-typed-allowed-args
   "allowed declared args other than symbols"
   {:added "4.0"}
@@ -195,6 +211,23 @@
                   {:modifiers []}
                   more)
 
+           (rest-arg-form? sym)
+           (let [all (if (:symbol curr)
+                       (conj all curr)
+                       all)]
+             (when (or (not-empty more)
+                       (and (not (:symbol curr))
+                            (not-empty (:modifiers curr))))
+               (f/error "Rest argument must be the final declared argument"
+                        {:input sym
+                         :args args
+                         :curr curr}))
+             (recur all
+                    {:modifiers []
+                     :symbol (rest-arg-symbol sym)
+                     :rest true}
+                    more))
+
            (and (not (:symbol curr))
                 (list? sym)
                 (not (neg? (collection/index-at #{:=} sym))))
@@ -234,32 +267,32 @@
              (recur (conj all curr) {:modifiers [] :symbol sym} more)
              (recur all (assoc curr :symbol sym) more))
 
-            (and (collection/form? sym)
-                 (keyword? (first sym)))
-            (if (:symbol curr)
-              (recur (conj all curr) {:type   (butlast sym)
-                                      :symbol (last sym)}
-                     more)
-              (recur all (assoc curr
-                                :symbol sym
-                                :type   (butlast sym)
-                                :symbol (last sym))
-                     more))
+           (and (collection/form? sym)
+                (keyword? (first sym)))
+           (if (:symbol curr)
+             (recur (conj all curr) {:type   (butlast sym)
+                                     :symbol (last sym)}
+                    more)
+             (recur all (assoc curr
+                               :symbol sym
+                               :type   (butlast sym)
+                               :symbol (last sym))
+                    more))
 
-            (and shorthand
-                 (:symbol curr)
-                 (empty? more)
-                 (or (vector? sym)
-                     (map? sym)
-                     (set? sym)))
-            (recur (conj all (assoc curr :value sym))
-                   {:modifiers []}
-                   more)
+           (and shorthand
+                (:symbol curr)
+                (empty? more)
+                (or (vector? sym)
+                    (map? sym)
+                    (set? sym)))
+           (recur (conj all (assoc curr :value sym))
+                  {:modifiers []}
+                  more)
 
-            (or (keyword? sym) (vector? sym))
-            (if (:symbol curr)
-              (recur (conj all curr) {:modifiers [sym]} more)
-              (recur all (update curr :modifiers conj sym) more))
+           (or (keyword? sym) (vector? sym))
+           (if (:symbol curr)
+             (recur (conj all curr) {:modifiers [sym]} more)
+             (recur all (update curr :modifiers conj sym) more))
 
            (:symbol curr)
            (recur (conj all (assoc curr :value sym)) {:modifiers []} more)
@@ -282,7 +315,7 @@
                         (name sym))
                    (name sym))]
     (cond->> (. sym-str (replaceAll "\\." (or (:namespace-sep dopts)
-                                              "_")))
+                                               "_")))
       :then   (replace (merge (:replace sopts)
                               (:replace topts)))
       :then   (apply str))))

@@ -34,6 +34,10 @@
   [v]
   (if v "True" "False"))
 
+(defn python-emit-input-rest
+  [{:keys [symbol]} grammar mopts]
+  (str "*" (common/*emit-fn* symbol grammar mopts)))
+
 (defn- python-qualified-symbol
   [sym]
   (let [{:keys [module]} (preprocess/macro-opts)
@@ -423,7 +427,8 @@
                   :invoke    {:reversed true
                               :hint ":"}
                   :function  {:raw "lambda"
-                              :args      {:start " " :end ":" :space ""}
+                              :args      {:start " " :end ":" :space ""
+                                          :rest #'python-emit-input-rest}
                               :body      {:start "" :end "" :append true}}
                   :infix     {:if  {:check "and" :then "or"}}
                   :global    {:reference '(globals)}}

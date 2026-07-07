@@ -43,6 +43,33 @@
     :else
     #{}))
 
+(defn- rest-arg-form?
+  [form]
+  (and (collection/form? form)
+       (= 2 (count form))
+       (= :.. (first form))
+       (symbol? (second form))))
+
+(defn- param-local-symbols
+  [param]
+  (cond
+    (php-local-symbol? param)
+    #{param}
+
+    (rest-arg-form? param)
+    #{(second param)}
+
+    :else
+    #{}))
+
+(defn- rewrite-param
+  [param]
+  (if (rest-arg-form? param)
+    (common/with-form-meta
+      param
+      (list :.. (php-prefix-local (second param))))
+    (php-prefix-local param)))
+
 (declare php-rewrite-form*)
 (declare php-rewrite-statements*)
 
@@ -74,9 +101,9 @@
         [name params body] (if (symbol? head)
                              [head (first tail) (rest tail)]
                              [nil head tail])
-        param-locals      (set (filter php-local-symbol? params))
+        param-locals      (into #{} (mapcat param-local-symbols) params)
         scope*            (into scope param-locals)
-        params*           (mapv php-prefix-local params)
+        params*           (mapv rewrite-param params)
         body*             (php-rewrite-statements* body scope*)]
     (common/with-form-meta
       form
@@ -87,12 +114,12 @@
 (defn- rewrite-defn*
   [form scope]
   (let [[tag name params & body] form
-        param-locals (set (filter php-local-symbol? params))
+        param-locals (into #{} (mapcat param-local-symbols) params)
         scope*       (into scope param-locals)]
     (common/with-form-meta
       form
       (apply list tag name
-             (mapv php-prefix-local params)
+             (mapv rewrite-param params)
              (php-rewrite-statements* body scope*)))))
 
 (defn- rewrite-let*

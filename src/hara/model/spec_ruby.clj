@@ -172,14 +172,18 @@
                                               grammar mopts)
                             " => "
                             (common/*emit-fn* v grammar mopts)))
-                      m)]
-     (str "{" (clojure.string/join ", " entries) "}")))
+                     m)]
+    (str "{" (clojure.string/join ", " entries) "}")))
 
 (defn ruby-string
   [s]
   (pr-str (if (= "__NODE__" s)
             "$node"
             s)))
+
+(defn ruby-emit-input-rest
+  [{:keys [symbol]} grammar mopts]
+  (str "*" (common/*emit-fn* symbol grammar mopts)))
 
 (defn ruby-emit-args
   [args grammar mopts]
@@ -408,19 +412,19 @@
       (let [[i v] e]
         (template/$
          (do (var ~arr* ~arr)
-              (var ~i 0)
-              (while (< ~i (. ~arr* length))
-                (var ~v (. ~arr* [~i]))
-                ~@body
-                (:= ~i (+ ~i 1))))))
+             (var ~i 0)
+             (while (< ~i (. ~arr* length))
+               (var ~v (. ~arr* [~i]))
+               ~@body
+               (:= ~i (+ ~i 1))))))
       (let [idx (gensym "idx__")]
         (template/$
          (do (var ~arr* ~arr)
-              (var ~idx 0)
-              (while (< ~idx (. ~arr* length))
-                (var ~e (. ~arr* [~idx]))
-                ~@body
-                (:= ~idx (+ ~idx 1)))))))))
+             (var ~idx 0)
+             (while (< ~idx (. ~arr* length))
+               (var ~e (. ~arr* [~idx]))
+               ~@body
+               (:= ~idx (+ ~idx 1)))))))))
 
 (defn tf-for-object
   "transform for `for:object`"
@@ -525,6 +529,7 @@
                   :block     {:parameter {:start " " :end ""}
                               :body      {:start "" :end "end" :append false}}
                   :function  {:raw "def"
+                              :args      {:rest #'ruby-emit-input-rest}
                               :body      {:start "" :end "end"}}}
         :block   {:while     {:body {:start "" :end "end"}}
                   :branch    {:wrap {:start "" :end "end"}

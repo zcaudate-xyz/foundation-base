@@ -58,6 +58,52 @@
        (every? #(compat/compatible-type? types/+nil-type+ % ctx)
                (drop provided-count input-types))))
 
+(defn rest-input-type?
+  [type]
+  (true? (:rest type)))
+
+(defn split-call-inputs
+  [input-types]
+  (let [rest-type (when (rest-input-type? (last input-types))
+                    (last input-types))]
+    {:fixed (if rest-type
+              (vec (butlast input-types))
+              (vec input-types))
+     :rest rest-type}))
+
+(defn call-arity?
+  [input-types provided-count ctx]
+  (let [{:keys [fixed rest]} (split-call-inputs input-types)]
+    (if rest
+      (or (> provided-count (count fixed))
+          (optional-arity? fixed provided-count ctx))
+      (optional-arity? fixed provided-count ctx))))
+
+(defn expected-call-inputs
+  [input-types provided-count]
+  (let [{:keys [fixed rest]} (split-call-inputs input-types)
+        fixed-count (min provided-count (count fixed))
+        extra-count (max 0 (- provided-count (count fixed)))]
+    (vec (concat (take fixed-count fixed)
+                 (when rest
+                   (repeat extra-count (:item rest)))))))
+
+(defn expected-call-arity
+  [input-types ctx]
+  (let [{:keys [fixed rest]} (split-call-inputs input-types)
+        required (loop [n (count fixed)]
+                   (if (and (pos? n)
+                            (compat/compatible-type? types/+nil-type+
+                                                     (nth fixed (dec n))
+                                                     ctx))
+                     (recur (dec n))
+                     n))]
+    (if rest
+      {:min required
+       :fixed (count fixed)
+       :variadic true}
+      (count fixed))))
+
 (defn infer-function-call
   [[callee & args :as form] ctx]
   (let [callee-type (cond
@@ -72,20 +118,23 @@
         callable-types (callable-types callee-type ctx)
         wildcard? (wildcard-callable? callee-type ctx)]
     (if (seq callable-types)
-      (let [arity-types (filterv #(optional-arity? (:inputs %) (count args) ctx)
+      (let [arity-types (filterv #(call-arity? (:inputs %) (count args) ctx)
                                  callable-types)]
         (if (seq arity-types)
           (let [passing-types (filterv (fn [fn-type]
-                                         (every? true?
-                                                 (map #(compat/compatible-type? (:type %1) %2 ctx)
-                                                      arg-results
-                                                      (take (count args) (:inputs fn-type)))))
+                                         (let [expected (expected-call-inputs (:inputs fn-type)
+                                                                              (count args))]
+                                           (every? true?
+                                                   (map #(compat/compatible-type? (:type %1) %2 ctx)
+                                                        arg-results
+                                                        expected))))
                                        arity-types)
                 chosen-types (if (seq passing-types) passing-types arity-types)
                 arg-errors (if (seq passing-types)
                              []
                              (call-arg-errors arg-results
-                                              (take (count args) (:inputs (first arity-types)))
+                                              (expected-call-inputs (:inputs (first arity-types))
+                                                                    (count args))
                                               args
                                               ctx))]
             (compat/result (types/union-type (map :output chosen-types))
@@ -96,7 +145,8 @@
                            (concat errors
                                    [{:tag :call-arity-mismatch
                                      :form form
-                                     :expected (mapv #(count (:inputs %)) callable-types)
+                                     :expected (mapv #(expected-call-arity (:inputs %) ctx)
+                                                     callable-types)
                                      :actual (count args)}])))))
       (if wildcard?
         (compat/result types/+unknown-type+ errors)
@@ -131,7 +181,7 @@
    'x:iter-has? (form/infer-fixed-output types/+bool-type+)
    'x:iter-native? (form/infer-fixed-output types/+bool-type+)
    'x:obj-keys (form/infer-fixed-output {:kind :array
-                                          :item types/+str-type+})
+                                         :item types/+str-type+})
    'x:obj-vals form/infer-obj-vals
    'x:obj-pairs form/infer-obj-pairs
    'x:obj-clone form/infer-obj-clone
@@ -147,20 +197,23 @@
     (when (seq fn-types)
       (let [arg-results arg-results
             errors (vec (mapcat :errors arg-results))
-            arity-types (filterv #(optional-arity? (:inputs %) (count args) ctx)
+            arity-types (filterv #(call-arity? (:inputs %) (count args) ctx)
                                  fn-types)]
         (if (seq arity-types)
           (let [passing-types (filterv (fn [fn-type]
-                                         (every? true?
-                                                 (map #(compat/compatible-type? (:type %1) %2 ctx)
-                                                      arg-results
-                                                      (take (count args) (:inputs fn-type)))))
+                                         (let [expected (expected-call-inputs (:inputs fn-type)
+                                                                              (count args))]
+                                           (every? true?
+                                                   (map #(compat/compatible-type? (:type %1) %2 ctx)
+                                                        arg-results
+                                                        expected))))
                                        arity-types)
                 chosen-types (if (seq passing-types) passing-types arity-types)
                 arg-errors (if (seq passing-types)
                              []
                              (call-arg-errors arg-results
-                                              (take (count args) (:inputs (first arity-types)))
+                                              (expected-call-inputs (:inputs (first arity-types))
+                                                                    (count args))
                                               args
                                               ctx))]
             (compat/result (types/union-type (map :output chosen-types))
@@ -170,7 +223,8 @@
                                  [{:tag :call-arity-mismatch
                                    :form form
                                    :expected (or (ops/op-arglists builtin-entry)
-                                                 (mapv #(count (:inputs %)) fn-types))
+                                                 (mapv #(expected-call-arity (:inputs %) ctx)
+                                                       fn-types))
                                    :actual (count args)}])))))))
 
 (defn infer-builtin-form

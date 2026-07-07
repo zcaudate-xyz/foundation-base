@@ -55,6 +55,10 @@
   [_form _grammar _mopts]
   "")
 
+(defn dart-emit-input-rest
+  [{:keys [symbol]} grammar mopts]
+  (str "[" (common/*emit-fn* symbol grammar mopts) " = const []]"))
+
 (defn dart-fn
   [[_ & args]]
   (if (symbol? (first args))
@@ -187,7 +191,8 @@
            :default {:common    {:statement ";"}
                      :function  {:prefix ""
                                  :raw ""
-                                 :args {:sep ", "}}
+                                 :args {:sep ", "
+                                        :rest #'dart-emit-input-rest}}
                      :invoke    {:reversed true :hint "" :assign ":"}
                      :block     {:start " {" :end "}"}}
           :block   {:for {:parameter {:sep ";"}}}

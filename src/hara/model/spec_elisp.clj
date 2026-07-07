@@ -71,8 +71,8 @@
                   (apply list 'while
                          (list '< i (list 'x:len arr))
                          (concat [(list 'var v (list '. arr [i]))]
-                                  body
-                                  [(list ':= i (list '+ i 1))])))))
+                                 body
+                                 [(list ':= i (list '+ i 1))])))))
     (let [idx (gensym "idx__")]
       (list 'do
             (list 'var idx 0)
@@ -81,8 +81,8 @@
                   (apply list 'while
                          (list '< idx (list 'x:len arr))
                          (concat [(list 'var e (list '. arr [idx]))]
-                                  body
-                                  [(list ':= idx (list '+ idx 1))])))))))
+                                 body
+                                 [(list ':= idx (list '+ idx 1))])))))))
 
 (defn elisp-tf-for-object
   [[_ [[k v] m] & body]]
@@ -97,8 +97,8 @@
                 (apply list 'while
                        (list '< idx (list 'x:len keys))
                        (concat [(list 'var key (list '. keys [idx]))]
-                                (if (not= v '_)
-                                  [(list 'var v (list '. m [key]))]
+                               (if (not= v '_)
+                                 [(list 'var v (list '. m [key]))]
                                  [])
                                body
                                [(list ':= idx (list '+ idx 1))]))))))
@@ -438,9 +438,67 @@
                               (list 'puthash key value global)
                               global))})
 
+(defn- elisp-rest-arg-form?
+  [form]
+  (and (collection/form? form)
+       (= 2 (count form))
+       (= :.. (first form))
+       (symbol? (second form))))
+
+(defn- elisp-callable-form?
+  [form]
+  (and (collection/form? form)
+       (contains? '#{fn fn:> defn defgen} (first form))))
+
+(defn- elisp-lower-rest-callable
+  [form]
+  (let [[tag head & tail] form
+        [name args body] (if (symbol? head)
+                           [head (first tail) (rest tail)]
+                           [nil head tail])
+        rest-args (filterv elisp-rest-arg-form? args)]
+    (cond
+      (empty? rest-args) form
+      (< 1 (count rest-args))
+      (throw (ex-info "Only one rest argument is allowed" {:form form :args args}))
+      (not= (last args) (first rest-args))
+      (throw (ex-info "Rest argument must be final" {:form form :args args}))
+      :else
+      (let [rest-sym (second (first rest-args))
+            args (vec (concat (butlast args) ['&rest rest-sym]))
+            body (cons (list 'setq rest-sym (list 'vconcat rest-sym)) body)
+            out (if name
+                  (apply list tag name args body)
+                  (apply list tag args body))]
+        (with-meta out (meta form))))))
+
+(defn- elisp-lower-rest-forms
+  [form]
+  (cond
+    (and (collection/form? form) (= 'quote (first form))) form
+    (elisp-callable-form? form)
+    (let [form (elisp-lower-rest-callable form)]
+      (with-meta (apply list (map elisp-lower-rest-forms form)) (meta form)))
+    (collection/form? form)
+    (with-meta (apply list (map elisp-lower-rest-forms form)) (meta form))
+    (vector? form)
+    (with-meta (mapv elisp-lower-rest-forms form) (meta form))
+    (set? form)
+    (with-meta (set (map elisp-lower-rest-forms form)) (meta form))
+    (map? form)
+    (with-meta
+      (into (empty form)
+            (map (fn [[k v]]
+                   [(elisp-lower-rest-forms k)
+                    (elisp-lower-rest-forms v)]))
+            form)
+      (meta form))
+    :else form))
+
 (defn elisp-transform
   [form]
-  (common/transform-form +elisp-transform-config+ form))
+  (common/transform-form +elisp-transform-config+
+                         (elisp-lower-rest-forms form)))
 
 (declare emit-elisp-form)
 

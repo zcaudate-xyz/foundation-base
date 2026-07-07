@@ -107,9 +107,23 @@
        (mapcat :require)
        extract-aliases))
 
+(defn rest-arg-form?
+  [form]
+  (and (seq? form)
+       (= 2 (count form))
+       (= :.. (first form))
+       (symbol? (second form))))
+
+(defn rest-arg-type
+  []
+  {:kind :array
+   :item types/+unknown-type+
+   :rest true})
+
 (defn arg-from-inline-form
   [form ctx]
-  (when (and (seq? form)
+  (when (and (not (rest-arg-form? form))
+             (seq? form)
              (= 2 (count form))
              (symbol? (second form)))
     (let [[type-form sym] form]
@@ -168,6 +182,18 @@
                          {:pending pending
                           :item item
                           :args args-form})))
+
+      (rest-arg-form? item)
+      (if (seq more)
+        (throw (ex-info "Rest argument must be final"
+                        {:item item
+                         :args args-form}))
+        (recur (conj out
+                     (types/make-arg (second item)
+                                     (rest-arg-type)
+                                     [:rest]))
+               nil
+               nil))
 
        (= '& item)
        (let [rest-target (first more)

@@ -11,68 +11,74 @@
 (defn emit-input-default
   "create input arg strings"
   {:added "3.0"}
-  ([{:keys [force modifiers type symbol value] :as arg} assign grammar mopts]
-   (let [{:keys [start end]} (helper/get-options grammar [:default :index])
-         {:keys [reversed hint]
-          :as invoke}  (helper/get-options grammar [:default :invoke])
-         {vmod true kmod false} (if (:vector-last (helper/get-options grammar [:default :modifier]))
-                                  (group-by vector? modifiers)
-                                  {false modifiers})
-         {:keys [uppercase]} (:type invoke)
-         arr-fn (fn [mod]
-                  (if (keyword? mod)
-                    (cond-> (name mod)
-                      uppercase (clojure.string/upper-case))
-                    (common/*emit-fn* mod grammar mopts)))
-         tmod   (if type
-                  (vec type)
-                  [])
-         
-         tmodarr (mapv arr-fn tmod)
-         kmodarr (mapv arr-fn kmod)
-         mod-rev?    (and (or (empty tmodarr)
-                              (not-empty kmodarr))
-                          reversed)
-         mod-has?    (or (not-empty tmodarr)
-                         (not-empty kmodarr))
-         mod-sym     (str (if symbol
-                            (common/*emit-fn* symbol grammar mopts))
-                          (if (and mod-rev?
-                                   mod-has?)
-                            hint))
-         mixarr    (concat (if (not mod-rev?)
-                             (concat kmodarr tmodarr)
-                             (if (not= kmodarr mod-has?)
-                               kmodarr))
-                           (filter not-empty [mod-sym])
-                           (if mod-rev? mod-has?))
-         
-         #_#_
-         _         (env/prn {:mod-rev? mod-rev?
-                           :tmodarr tmodarr
-                           :kmodarr kmodarr
-                           :mod-sym mod-sym
-                           :modifiers modifiers
-                           :mixarr  mixarr
-                           :mod-has? mod-has?})
+  ([{:keys [force modifiers type symbol value rest] :as arg} assign grammar mopts]
+   (if rest
+     (if-let [emit-rest (get-in grammar [:default :function :args :rest])]
+       (emit-rest arg grammar mopts)
+       (f/error "Rest argument emitter not configured"
+                {:lang (:lang mopts)
+                 :symbol symbol}))
+     (let [{:keys [start end]} (helper/get-options grammar [:default :index])
+           {:keys [reversed hint]
+            :as invoke}  (helper/get-options grammar [:default :invoke])
+           {vmod true kmod false} (if (:vector-last (helper/get-options grammar [:default :modifier]))
+                                    (group-by vector? modifiers)
+                                    {false modifiers})
+           {:keys [uppercase]} (:type invoke)
+           arr-fn (fn [mod]
+                    (if (keyword? mod)
+                      (cond-> (name mod)
+                        uppercase (clojure.string/upper-case))
+                      (common/*emit-fn* mod grammar mopts)))
+           tmod   (if type
+                    (vec type)
+                    [])
+           
+           tmodarr (mapv arr-fn tmod)
+           kmodarr (mapv arr-fn kmod)
+           mod-rev?    (and (or (empty tmodarr)
+                                (not-empty kmodarr))
+                            reversed)
+           mod-has?    (or (not-empty tmodarr)
+                           (not-empty kmodarr))
+           mod-sym     (str (if symbol
+                              (common/*emit-fn* symbol grammar mopts))
+                            (if (and mod-rev?
+                                     mod-has?)
+                              hint))
+           mixarr    (concat (if (not mod-rev?)
+                               (concat kmodarr tmodarr)
+                               (if (not= kmodarr mod-has?)
+                                 kmodarr))
+                             (filter not-empty [mod-sym])
+                             (if mod-rev? mod-has?))
+           
+           #_#_
+           _         (env/prn {:mod-rev? mod-rev?
+                             :tmodarr tmodarr
+                             :kmodarr kmodarr
+                             :mod-sym mod-sym
+                             :modifiers modifiers
+                             :mixarr  mixarr
+                             :mod-has? mod-has?})
 
-         mixstr (clojure.string/join " "
-                          (filter (fn [x]
-                                    (if (seq x)
-                                      (not-empty x)
-                                      x))
-                                  mixarr))]
-     (str mixstr
-          (if (not-empty vmod)
-            (clojure.string/join
-             (map (fn [arr]
-                    (str start
-                         (if-let [n (first arr)]
-                           (common/*emit-fn* n grammar mopts))
-                         end))
-                  vmod)))
-          (if (or force value)
-            (str " " assign " " (common/*emit-fn* value grammar mopts)))))))
+           mixstr (clojure.string/join " "
+                            (filter (fn [x]
+                                      (if (seq x)
+                                        (not-empty x)
+                                        x))
+                                    mixarr))]
+       (str mixstr
+            (if (not-empty vmod)
+              (clojure.string/join
+               (map (fn [arr]
+                      (str start
+                           (if-let [n (first arr)]
+                             (common/*emit-fn* n grammar mopts))
+                           end))
+                    vmod)))
+            (if (or force value)
+              (str " " assign " " (common/*emit-fn* value grammar mopts))))))))
 
 (defn emit-hint-type
   "emits the return type"
