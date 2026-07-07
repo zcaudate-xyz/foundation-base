@@ -24,7 +24,7 @@
                       {:meta "code.test"
                        :title "Run one test namespace"
                        :text "Use a targeted run rather than configuring every optional runtime."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/guides/code.test.md"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/documentation/code/code_test.clj"}
                       {:meta "examples"
                        :title "Inspect generated projects"
                        :text "Compare authored Clojure source with generated repositories."

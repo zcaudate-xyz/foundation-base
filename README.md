@@ -15,8 +15,8 @@ The repository is large because it contains several related systems. You do not 
 | Generate JavaScript, Lua, Python, Go, SQL, Solidity, or other code | [Hara introduction](https://zcaudate.xyz/foundation-base/hara/introduction.html) |
 | Browse walkthroughs and generated projects | [`wiki/Examples.md`](wiki/Examples.md) and the [published examples page](https://zcaudate.xyz/foundation-base/examples.html) |
 | Run generated code in external runtimes | [Hara runtimes](https://zcaudate.xyz/foundation-base/hara/hara-runtime.html) |
-| Write tests using the fact-based test framework | [`code.test` guide](guides/code.test.md) |
-| Analyse, query, or refactor Clojure source | [`code.manage`](guides/code.manage.md) and [`code.query`](guides/code.query.md) |
+| Write tests using the fact-based test framework | [`code.test` guide](src-doc/documentation/code/code_test.clj) |
+| Analyse, query, or refactor Clojure source | [`code.manage`](src-doc/documentation/code/code_manage.clj) and [`code.query`](src-doc/documentation/code/code_query.clj) |
 | Generate project documentation | [`code.doc`](https://zcaudate.xyz/foundation-base/code-tools.html) |
 | Explore portable cross-target libraries | [`xt`](https://zcaudate.xyz/foundation-base/xt/index.html) |
 | Browse topic-oriented pages | [`wiki/Home.md`](wiki/Home.md) |
@@ -221,13 +221,13 @@ This synchronizes the reviewed Markdown pages to the separate Wiki repository.
 
 ## Guides
 
-- [`code.test`](guides/code.test.md) — fact-based testing and checkers
-- [`code.manage`](guides/code.manage.md) — source maintenance and test management
-- [`code.query`](guides/code.query.md) — structural source queries and edits
-- [`std.task`](guides/std.task.md) — task definition and execution
-- [`std.block`](guides/std.block.md) — source block parsing and layout
-- [`std.scheduler`](guides/std.scheduler.md) — concurrent scheduling
-- [`std.timeseries`](guides/std.timeseries.md) — time-series data and aggregation
+- [`code.test`](src-doc/documentation/code/code_test.clj) — fact-based testing and checkers
+- [`code.manage`](src-doc/documentation/code/code_manage.clj) — source maintenance and test management
+- [`code.query`](src-doc/documentation/code/code_query.clj) — structural source queries and edits
+- [`std.task`](src-doc/documentation/std/std_task.clj) — task definition and execution
+- [`std.block`](src-doc/documentation/std/std_block.clj) — source block parsing and layout
+- [`std.scheduler`](src-doc/documentation/std/std_scheduler.clj) — concurrent scheduling
+- [`std.timeseries`](src-doc/documentation/std/std_timeseries.clj) — time-series data and aggregation
 - [`xt.db.node.kernel-base`](guides/xt.db.node.adaptor_base.md) — database node bootstrap and RPC routing
 
 ## Project status
