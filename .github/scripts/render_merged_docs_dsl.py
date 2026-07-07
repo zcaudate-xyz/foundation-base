@@ -6,4 +6,5 @@ def heading_form(kind, title, link):
 
 
 def render(source, markdown):
-    return []
+    items = tokenize(markdown)
+    return items
