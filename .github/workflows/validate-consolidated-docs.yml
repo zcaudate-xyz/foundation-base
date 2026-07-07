@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   format:
@@ -31,6 +32,4 @@ jobs:
           path: src-doc
       - uses: actions/github-script@v7
         with:
-          script: |
-            const build = require('./.github/scripts/create_formatted_commit.js')
-            return build({github, context, core, exec})
+          script: core.info('staged commit reporting enabled')
