@@ -29,7 +29,52 @@
 ;; BEGIN merged documentation: guides/std.task.md
 ;; sha256: 6356388ac4e8ecef9548c0d84fde20b4fd80948fd8780e96af3bc8a45f960444
 [[:chapter {:title "std.task Guide" :link "merged-guides-std-task-md"}]]
-"# `std.task` Guide\n\n`std.task` defines a protocol and structure for executing operations, managing their inputs/outputs, and formatting their results. It is the engine behind `code.manage` commands.\n\n## Core Concepts\n\n- **Task**: An invokable object with a defined lifecycle.\n- **Template**: A set of defaults for a class of tasks (e.g., `:namespace`, `:file`).\n- **Process**: The underlying execution logic (handling parallel/serial execution, argument parsing).\n\n## Usage\n\n### Defining a Task\n\n```clojure\n(require '[std.task :as task])\n\n;; Simple task\n(task/deftask my-task\n  {:template :default\n   :main {:fn +}\n   :doc \"Adds numbers\"})\n\n(my-task 1 2) ;; => 3\n```\n\n### Scenarios\n\n#### 1. Defining a Custom Task Template\n\nIf you have a set of tasks that share common behavior (e.g., they all operate on database records), you can define a template.\n\n```clojure\n;; Define defaults for :db-task\n(defmethod task/task-defaults :db-task\n  [_]\n  {:main {:arglists '([id] [id options])}\n   :result {:columns [{:key :id :align :left}\n                      {:key :status :align :center}]}})\n\n;; Create a task using this template\n(task/deftask get-user\n  {:template :db-task\n   :main {:fn (fn [id] {:id id :status :active})}\n   :doc \"Fetches a user\"})\n```\n\n#### 2. Parallel Processing\n\nTasks can be configured to run in parallel, which is useful for operations over many items (like files or namespaces).\n\n```clojure\n(task/deftask process-files\n  {:template :default\n   :params {:parallel true\n            :title \"PROCESSING FILES\"}\n   :main {:fn (fn [file] (slurp file))} ;; Simplified example\n   })\n```\n\nWhen invoked with a collection, the task runner (via `std.task.process`) will utilize threads if `:parallel` is set.\n\n#### 3. Customizing Output/Result\n\nYou can control how the result is displayed, which is crucial for CLI tools.\n\n```clojure\n(task/deftask analyze-data\n  {:template :default\n   :main {:fn (fn [x] {:score (rand-int 100) :name x})}\n\n   ;; Define output columns\n   :result {:keys {:count count} ;; Summary key\n            :columns [{:key :name :length 20 :align :left}\n                      {:key :score :length 10 :align :right :color #{:bold}}]}})\n\n;; Invocation might look like:\n;; (analyze-data [\"A\" \"B\"])\n;; => Prints table with Name and Score\n```\n\n#### 4. Item Processing Configuration\n\nThe `:item` key allows transformation of individual inputs or outputs.\n\n```clojure\n(task/deftask list-sorted\n  {:template :default\n   :main {:fn identity}\n   :item {:post (comp vec sort)} ;; Sort the output of the main function\n   })\n```\n\n#### 5. Handling Command Line Arguments\n\nIf you are building a CLI entry point (like `code.manage/-main`), `process-ns-args` helps parse arguments.\n\n```clojure\n(defn -main [& args]\n  (let [opts (task/process-ns-args args)]\n    ;; opts will look like {:only \"my.ns\" :verbose true}\n    ;; if called as: ... :only \"my.ns\" :verbose\n    ...))\n```\n"
+
+"`std.task` defines a protocol and structure for executing operations, managing their inputs/outputs, and formatting their results. It is the engine behind `code.manage` commands."
+
+[[:section {:title "Core Concepts" :link "merged-guides-std-task-md-core-concepts"}]]
+
+"- **Task**: An invokable object with a defined lifecycle.\n- **Template**: A set of defaults for a class of tasks (e.g., `:namespace`, `:file`).\n- **Process**: The underlying execution logic (handling parallel/serial execution, argument parsing)."
+
+[[:section {:title "Usage" :link "merged-guides-std-task-md-usage"}]]
+
+[[:subsection {:title "Defining a Task" :link "merged-guides-std-task-md-defining-a-task"}]]
+
+[[:code {:lang "clojure"} "(require '[std.task :as task])\n\n;; Simple task\n(task/deftask my-task\n  {:template :default\n   :main {:fn +}\n   :doc \"Adds numbers\"})\n\n(my-task 1 2) ;; => 3"]]
+
+[[:subsection {:title "Scenarios" :link "merged-guides-std-task-md-scenarios"}]]
+
+[[:subsubsection {:title "1. Defining a Custom Task Template" :link "merged-guides-std-task-md-1-defining-a-custom-task-template"}]]
+
+"If you have a set of tasks that share common behavior (e.g., they all operate on database records), you can define a template."
+
+[[:code {:lang "clojure"} ";; Define defaults for :db-task\n(defmethod task/task-defaults :db-task\n  [_]\n  {:main {:arglists '([id] [id options])}\n   :result {:columns [{:key :id :align :left}\n                      {:key :status :align :center}]}})\n\n;; Create a task using this template\n(task/deftask get-user\n  {:template :db-task\n   :main {:fn (fn [id] {:id id :status :active})}\n   :doc \"Fetches a user\"})"]]
+
+[[:subsubsection {:title "2. Parallel Processing" :link "merged-guides-std-task-md-2-parallel-processing"}]]
+
+"Tasks can be configured to run in parallel, which is useful for operations over many items (like files or namespaces)."
+
+[[:code {:lang "clojure"} "(task/deftask process-files\n  {:template :default\n   :params {:parallel true\n            :title \"PROCESSING FILES\"}\n   :main {:fn (fn [file] (slurp file))} ;; Simplified example\n   })"]]
+
+"When invoked with a collection, the task runner (via `std.task.process`) will utilize threads if `:parallel` is set."
+
+[[:subsubsection {:title "3. Customizing Output/Result" :link "merged-guides-std-task-md-3-customizing-output-result"}]]
+
+"You can control how the result is displayed, which is crucial for CLI tools."
+
+[[:code {:lang "clojure"} "(task/deftask analyze-data\n  {:template :default\n   :main {:fn (fn [x] {:score (rand-int 100) :name x})}\n\n   ;; Define output columns\n   :result {:keys {:count count} ;; Summary key\n            :columns [{:key :name :length 20 :align :left}\n                      {:key :score :length 10 :align :right :color #{:bold}}]}})\n\n;; Invocation might look like:\n;; (analyze-data [\"A\" \"B\"])\n;; => Prints table with Name and Score"]]
+
+[[:subsubsection {:title "4. Item Processing Configuration" :link "merged-guides-std-task-md-4-item-processing-configuration"}]]
+
+"The `:item` key allows transformation of individual inputs or outputs."
+
+[[:code {:lang "clojure"} "(task/deftask list-sorted\n  {:template :default\n   :main {:fn identity}\n   :item {:post (comp vec sort)} ;; Sort the output of the main function\n   })"]]
+
+[[:subsubsection {:title "5. Handling Command Line Arguments" :link "merged-guides-std-task-md-5-handling-command-line-arguments"}]]
+
+"If you are building a CLI entry point (like `code.manage/-main`), `process-ns-args` helps parse arguments."
+
+[[:code {:lang "clojure"} "(defn -main [& args]\n  (let [opts (task/process-ns-args args)]\n    ;; opts will look like {:only \"my.ns\" :verbose true}\n    ;; if called as: ... :only \"my.ns\" :verbose\n    ...))"]]
 ;; END merged documentation: guides/std.task.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_task_summary.md

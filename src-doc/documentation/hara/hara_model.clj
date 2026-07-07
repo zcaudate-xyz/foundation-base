@@ -13,7 +13,196 @@
 ;; BEGIN merged documentation: guides/MANAGE_XTALK.md
 ;; sha256: 5d3bf37e18ce83b1dabca7c89e88b976714977d3c3d01f16cbabcd21c9a4ac1d
 [[:chapter {:title "Xtalk Management Guide" :link "merged-guides-manage-xtalk-md"}]]
-"# Xtalk Management Guide\n\n`xtalk` (cross-talk) is a polymorphic template language that transpiles lisp to multiple runtime targets (JavaScript, Lua, Python, R, Ruby, Dart, Go, and others). The xtalk management system provides auditing, scaffolding, and maintenance tools for tracking language support, test coverage, and runtime compatibility across the codebase.\n\n## Core Concepts\n\n### Xtalk Model Layers\n\nThe xtalk system is organized into distinct layers:\n\n| Layer | Purpose | Location |\n|-------|---------|----------|\n| **Grammar** | Core syntax and operators for xtalk transpilation | `src/std/lang/base/grammar_xtalk.clj` |\n| **Model** | Language-specific transpilation rules (fn_*, com_*) | `src/std/lang/model/spec_xtalk/` |\n| **Typed** | Type analysis and declaration generation | `src/std/lang/typed/xtalk_*.clj` |\n| **Runtime** | Language runtime implementations and live eval | `src/rt/` |\n| **Tests** | Grammar tests and runtime integration tests | `test/std/lang/model/spec_xtalk/` |\n\n### Key Concepts\n\n- **Function Model** (`fn_<lang>.clj`): Defines how xtalk functions transpile to a specific language\n- **Component Model** (`com_<lang>.clj`): Defines xtalk data structure transpilation (records, dicts, etc.)\n- **Support Matrix**: A semantic grid tracking which xtalk features (operators, constructs) are implemented vs. abstract vs. missing for each language\n- **Inventory**: Cataloging of model definitions, test coverage, and runtime availability\n\n## Common Tasks\n\n### 1. Status and Inventory\n\n**Get overall xtalk status**\n\n```bash\nlein manage status :with xtalk\n```\n\nFrom REPL:\n```clojure\n(require '[code.manage.xtalk :as manage])\n\n;; Get model file inventory by language\n(manage/xtalk-model-inventory)\n;; => {:js {:model-files [...], :model-forms #{:fn :com}, :model-count 2}\n;;     :lua {:model-files [...], ...}\n;;     :python {...}}\n\n;; Get test coverage by language\n(manage/xtalk-test-inventory)\n;; => {:js {:test-files [...], :test-forms #{:fn :com}, :test-count 2}\n;;     ...}\n\n;; Get runtime installation and spec support\n(manage/xtalk-runtime-inventory)\n;; => {:js {:runtime-installed? true, :runtime-executable? true, \n;;          :spec-implemented 42, :spec-abstract 3, :spec-missing 0}\n;;     :lua {:runtime-installed? false, ...}\n;;     :python {...}}\n\n;; Get spec implementation status\n(manage/xtalk-spec-inventory)\n;; => {:js {:spec-tracked? true, :spec-feature-count 15,\n;;          :spec-implemented 12, :spec-abstract 2, :spec-missing 1}\n;;     ...}\n\n;; Unified language status (model + runtime + spec + test)\n(manage/xtalk-language-status)\n;; => {:js {:model-count 2, :test-count 2, :coverage 1.0,\n;;          :runtime-installed? true, :spec-implemented 42, ...}\n;;     ...}\n```\n\n### 2. Spec and Feature Auditing\n\n**Audit xtalk feature support across languages**\n\n```bash\n# Full audit of all supported languages\nlein manage audit-languages\n\n# View feature status matrix\nlein manage support-matrix\n```\n\nFrom REPL:\n```clojure\n;; Get list of xtalk categories (feature groups)\n(manage/xtalk-categories)\n;; => [:xtalk-conditional :xtalk-loop :xtalk-error ...]\n\n;; Get all xtalk operations\n(manage/xtalk-op-map)\n;; => {:x:if {...}, :x:do {...}, :x:try {...}, ...}\n\n;; Get all x:* symbols (xtalk operators)\n(manage/xtalk-symbols)\n;; => [:x:if :x:do :x:try :x:throw :x:let ...]\n\n;; Check feature implementation for specific language\n(manage/feature-status :js :x:if)\n;; => :implemented\n\n(manage/feature-status :lua :x:async)\n;; => :missing\n\n;; Get full support matrix (all languages + features)\n(manage/support-matrix)\n;; => {:languages [:js :lua :python :r :ruby]\n;;     :features [:x:if :x:do :x:try ...]\n;;     :status {:js {...}, :lua {...}, ...}\n;;     :summary {:js {:implemented 40, :abstract 2, :missing 1}, ...}}\n\n;; Get support matrix for specific languages\n(manage/support-matrix [:js :python])\n\n;; Get support matrix for specific features\n(manage/support-matrix nil [:x:if :x:do :x:let])\n\n;; Audit installed language runtimes\n(manage/installed-languages)\n;; => [:js :lua :python :r]\n\n;; Find what's missing for each language\n(manage/missing-by-language)\n;; => {:lua [...], :python [...], :r [...]}\n\n;; Find which languages are missing specific features\n(manage/missing-by-feature)\n;; => {:x:async [:lua :r], :x:spread [:python], ...}\n```\n\n### 3. Xtalk Operations Inventory\n\n**Manage and document xtalk operator definitions**\n\n```clojure\n;; Generate operation inventory (reads grammar-xtalk)\n(manage/generate-xtalk-ops)\n;; Generates config/xtalk/xtalk_ops.edn with all operator details\n\n;; The result includes:\n;; {:op :x:if\n;;  :category :xtalk-conditional\n;;  :canonical-symbol hara.lang.base.grammar-xtalk/x:if\n;;  :symbols [x:if]\n;;  :macro hara.lang.base.grammar-xtalk/x:if\n;;  :doc \"Conditional expression\"\n;;  :cases [...]}\n```\n\n### 4. Test Scaffolding and Generation\n\n**Generate missing tests for grammar operations**\n\n```bash\n# Scaffold grammar tests from operations inventory\nlein manage scaffold-xtalk-grammar-tests\n```\n\nFrom REPL:\n```clojure\n;; Scaffold grammar operation tests\n(manage/scaffold-xtalk-grammar-tests {:write true})\n;; Generates test/std/lang/base/grammar_xtalk_ops_test.clj\n\n;; Split grammar tests by runtime language\n(manage/separate-runtime-tests {:lang :js :write true})\n;; Generates: test/std/lang/base/grammar_xtalk_js_test.clj\n```\n\n### 5. Language Support and Diagnostics\n\n**Check which language runtimes are installed and available**\n\n```clojure\n;; Get installed language runtimes\n(manage/installed-languages)\n;; => [:js :lua :python]\n\n;; Get languages that use xtalk as parent grammar\n(manage/audit-languages)\n;; => [:js :lua :python :r :rb :dart]\n\n;; Filter to only installed languages with xtalk parent\n(manage/audit-languages [:js :python :go])\n;; => [:js :python]  (go removed if not installed)\n\n;; Visualize support matrix\n(manage/visualize-support)\n;; Formatted ASCII table showing language vs. feature support\n```\n\n### 6. Code Generation and Operations\n\n**Generate xtalk operator implementations**\n\n```clojure\n;; Generate default implementations for missing operators\n(manage/generate-xtalk-ops {:write true})\n;; Creates/updates operator configuration\n\n;; List all management operations\n(manage/xtalk-op-map)\n;; => All available management commands and their details\n```\n\n## Workflow Examples\n\n### Workflow 1: Add Support for a New Language\n\nSteps to add a new target language (e.g., Go):\n\n1. **Create grammar specification**\n   - Add `:go` to runtime languages in `src/std/lang/manage/xtalk_scaffold.clj`\n   - Define `+runtime-lang-config+` entry for Go\n\n2. **Create function model**\n   - Create `src/std/lang/model/spec_xtalk/fn_go.clj`\n   - Define how xtalk functions transpile to Go\n\n3. **Create component model**\n   - Create `src/std/lang/model/spec_xtalk/com_go.clj`\n   - Define how xtalk data structures transpile to Go\n\n4. **Create tests**\n   - Create `test/std/lang/model/spec_xtalk/fn_go_test.clj`\n   - Create `test/std/lang/model/spec_xtalk/com_go_test.clj`\n\n5. **Audit coverage**\n   ```clojure\n   (manage/xtalk-language-status {:langs [:go]})\n   ;; Check model-count, test-count, spec coverage\n   ```\n\n6. **Generate operator tests**\n   ```clojure\n   (manage/scaffold-xtalk-grammar-tests {:write true})\n   ;; Generates grammar tests for Go\n   ```\n\n### Workflow 2: Improve Language Coverage\n\nWhen you have missing features (`:spec-missing > 0`):\n\n1. **Identify missing features**\n   ```clojure\n   (manage/missing-by-language)\n   ;; Shows which operators are not yet implemented\n   ```\n\n2. **Update language model**\n   - Edit `src/std/lang/model/spec_xtalk/fn_<lang>.clj`\n   - Add implementation for missing operator (change from `:abstract` to `:emit`)\n\n3. **Verify coverage**\n   ```clojure\n   (manage/support-matrix [:your-lang])\n   ;; Check that missing count decreased\n   ```\n\n4. **Add tests**\n   - Create appropriate test cases in language-specific test file\n   - Run: `lein test :only hara.lang.model.spec-xtalk.<lang>-test`\n\n### Workflow 3: Audit Test Coverage\n\nEnsure every model definition has corresponding tests:\n\n```clojure\n;; Get model and test inventory\n(let [model (manage/xtalk-model-inventory)\n      tests (manage/xtalk-test-inventory)]\n  (doseq [[lang model-entry] model]\n    (let [test-entry (get tests lang)\n          model-count (:model-count model-entry)\n          test-count (:test-count test-entry)\n          coverage (if (pos? model-count) \n                     (double (/ test-count model-count)) \n                     0.0)]\n      (println (format \"%s: %d models, %d tests (%.1f%%)\"\n                       lang model-count test-count (* 100 coverage))))))\n```\n\n## Command Reference\n\n### CLI Commands\n\nAll commands are invoked via `lein manage` with the pattern:\n\n```bash\nlein manage <task> [selectors] [options]\n```\n\n**Xtalk-specific tasks:**\n\n| Task | Description | Example |\n|------|-------------|---------|\n| `status :with xtalk` | Show overall xtalk status | `lein manage status :with xtalk` |\n| `audit-languages` | Check installed language runtimes | `lein manage audit-languages` |\n| `support-matrix` | Display feature support matrix | `lein manage support-matrix` |\n| `missing-by-language` | Show missing operators per language | `lein manage missing-by-language` |\n| `missing-by-feature` | Show which languages lack features | `lein manage missing-by-feature` |\n| `generate-xtalk-ops` | Generate operation inventory | `lein manage generate-xtalk-ops` |\n| `scaffold-xtalk-grammar-tests` | Create test skeletons for operators | `lein manage scaffold-xtalk-grammar-tests` |\n| `separate-runtime-tests` | Split grammar tests by language | `lein manage separate-runtime-tests :lang js` |\n\n### API Reference\n\n**From `code.manage.xtalk` namespace:**\n\n#### Inventory Functions\n\n```clojure\n(xtalk-model-inventory)        ; => {:js {...}, :lua {...}, ...}\n(xtalk-test-inventory)         ; => {:js {...}, :lua {...}, ...}\n(xtalk-runtime-inventory)      ; => {:js {...}, :lua {...}, ...}\n(xtalk-spec-inventory)         ; => {:js {...}, :lua {...}, ...}\n(xtalk-language-status)        ; => {:js {...}, :lua {...}, ...}\n```\n\n#### Audit Functions\n\n```clojure\n(installed-languages)          ; => [:js :lua :python :r]\n(audit-languages)              ; => [:js :lua :python]\n(audit-languages [:js :go])    ; => [:js] (filtered to installed)\n(support-matrix)               ; => {:languages [...] :features [...] :status {...}}\n(support-matrix [:js :lua])    ; => Support matrix for specific languages\n(support-matrix nil [:x:if])   ; => Support matrix for specific features\n(missing-by-language)          ; => {:lua [...] :go [...] :r [...]}\n(missing-by-feature)           ; => {:x:async [:lua] :x:spread [...] ...}\n```\n\n#### Metadata Functions\n\n```clojure\n(xtalk-categories)             ; => [:xtalk-conditional :xtalk-loop ...]\n(xtalk-op-map)                 ; => {:x:if {...} :x:do {...} ...}\n(xtalk-symbols)                ; => [:x:if :x:do :x:try ...]\n```\n\n#### Generation Functions\n\n```clojure\n(generate-xtalk-ops)           ; Generate/update operator inventory\n(scaffold-xtalk-grammar-tests) ; Generate grammar test skeleton\n(separate-runtime-tests)       ; Split tests by runtime language\n(visualize-support)            ; Display formatted support matrix\n```\n\n## File Structure\n\n### Source Organization\n\n```\nsrc/std/lang/\n├── manage/\n│   ├── xtalk_audit.clj        # Audit and feature tracking\n│   ├── xtalk_ops.clj          # Operation inventory management\n│   ├── xtalk_scaffold.clj     # Test generation and scaffolding\n│   └── manage.clj             # Main coordination\n├── model/\n│   └── spec_xtalk/\n│       ├── fn_js.clj          # JavaScript function transpilation\n│       ├── fn_lua.clj         # Lua function transpilation\n│       ├── fn_python.clj      # Python function transpilation\n│       ├── com_js.clj         # JavaScript component transpilation\n│       └── ...\n├── typed/\n│   ├── xtalk.clj              # Core typed system\n│   ├── xtalk_analysis.clj     # Type analysis\n│   ├── xtalk_check.clj        # Type checking\n│   ├── xtalk_parse.clj        # Parsing typed definitions\n│   └── xtalk_ops.clj          # Typed operations\n└── base/\n    └── grammar_xtalk.clj      # Core xtalk grammar definitions\n```\n\n### Configuration\n\n```\nconfig/xtalk/\n└── xtalk_ops.edn             # Operation inventory (managed)\n```\n\n### Tests\n\n```\ntest/std/lang/\n└── model/\n    └── spec_xtalk/\n        ├── fn_js_test.clj     # JavaScript function tests\n        ├── fn_lua_test.clj    # Lua function tests\n        ├── com_js_test.clj    # JavaScript component tests\n        └── ...\n```\n\n## Common Issues and Solutions\n\n### Issue 1: Missing Runtime for Language\n\n**Problem:** `(manage/xtalk-runtime-inventory)` shows `:runtime-installed? false` for a language you need.\n\n**Solution:**\n- Install the runtime: `apt-get install nodejs` (for JavaScript), etc.\n- Or, if it's already installed, ensure it's on your PATH: `which node`\n- Verify with `(manage/installed-languages)`\n\n### Issue 2: Features Showing as Missing\n\n**Problem:** Language has `:spec-missing > 0` when adding a new language.\n\n**Solution:**\n1. Check which features are missing:\n   ```clojure\n   (manage/missing-by-language)\n   ```\n2. For each missing feature, update the grammar in the language's model files:\n   - Edit `src/std/lang/model/spec_xtalk/fn_<lang>.clj`\n   - Change operator status from `:abstract` to `:emit` with implementation\n3. Optionally provide a partial implementation with `:abstract :emit` to indicate \n   work-in-progress\n\n### Issue 3: Test Coverage is Low\n\n**Problem:** A language has models but few tests (`:coverage < 1.0`).\n\n**Solution:**\n1. Identify uncovered models:\n   ```clojure\n   (let [model (manage/xtalk-model-inventory)\n         tests (manage/xtalk-test-inventory)]\n     (doseq [[lang entry] model]\n       (when (> (:model-count entry) (get-in tests [lang :test-count] 0))\n         (println \"Coverage gap for\" lang))))\n   ```\n2. Create corresponding test files in `test/std/lang/model/spec_xtalk/`\n3. Run: `lein test :only hara.lang.model.spec_xtalk.<lang>-test`\n\n### Issue 4: Support Matrix Shows Incomplete Data\n\n**Problem:** Some languages or features aren't appearing in `(manage/support-matrix)`.\n\n**Solution:**\n- Ensure the language has been required/loaded: `(manage/audit-languages)`\n- Check that grammar definitions are properly tagged with `x:` prefix\n- Verify the language grammar is properly registered in \n  `src/std/lang/base/registry.clj`\n\n### Issue 5: Operator Inventory is Stale\n\n**Problem:** New operators aren't appearing in `(manage/xtalk-op-map)`.\n\n**Solution:**\n1. Regenerate the inventory:\n   ```clojure\n   (manage/generate-xtalk-ops {:write true})\n   ```\n2. This reads the latest grammar definitions and updates `config/xtalk/xtalk_ops.edn`\n3. Verify with: `(keys (manage/xtalk-op-map))`\n\n## Advanced Tasks\n\n### Analyzing Operator Metadata\n\n```clojure\n;; Get details for a specific operator\n(get (manage/xtalk-op-map) :x:if)\n;; => {:op :x:if\n;;     :category :xtalk-conditional\n;;     :canonical-symbol ...\n;;     :symbols [x:if]\n;;     :class :infix\n;;     :requires [...]\n;;     :emit :code\n;;     :macro ...\n;;     :doc \"...\"\n;;     :cases [...]}\n```\n\n### Tracking Language Feature Gaps\n\n```clojure\n;; For each language, see which features block full implementation\n(let [matrix (manage/support-matrix)]\n  (doseq [[lang summary] (:summary matrix)]\n    (let [missing (:missing summary)]\n      (when (pos? missing)\n        (println (format \"%s needs %d features\" lang missing))))))\n```\n\n### Custom Coverage Analysis\n\n```clojure\n;; Calculate detailed metrics\n(defn coverage-report []\n  (let [langs (manage/audit-languages)\n        model (manage/xtalk-model-inventory)\n        tests (manage/xtalk-test-inventory)\n        specs (manage/xtalk-spec-inventory)]\n    (doseq [lang langs\n            :let [m (get model lang) t (get tests lang) s (get specs lang)]]\n      (when m\n        (printf \"%-8s | Models: %3d | Tests: %3d | Cov: %5.1f%% | \"\n                lang (:model-count m) (:test-count t)\n                (* 100.0 (/ (:test-count t 0) (:model-count m 1))))\n        (printf \"Features: %2d impl, %2d missing\\n\"\n                (:spec-implemented s 0) (:spec-missing s 0))))))\n\n(coverage-report)\n```\n\n## Related Guides\n\n- [code.manage](code.manage.md) - General code management and maintenance tasks\n- [code.test](code.test.md) - Testing framework used for xtalk tests\n- [std.task](std.task.md) - Task execution engine underlying management operations\n- [README.md](../README.md) - Overview of `hara.lang` and xtalk system\n"
+
+"`xtalk` (cross-talk) is a polymorphic template language that transpiles lisp to multiple runtime targets (JavaScript, Lua, Python, R, Ruby, Dart, Go, and others). The xtalk management system provides auditing, scaffolding, and maintenance tools for tracking language support, test coverage, and runtime compatibility across the codebase."
+
+[[:section {:title "Core Concepts" :link "merged-guides-manage-xtalk-md-core-concepts"}]]
+
+[[:subsection {:title "Xtalk Model Layers" :link "merged-guides-manage-xtalk-md-xtalk-model-layers"}]]
+
+"The xtalk system is organized into distinct layers:"
+
+"| Layer | Purpose | Location |\n|-------|---------|----------|\n| **Grammar** | Core syntax and operators for xtalk transpilation | `src/std/lang/base/grammar_xtalk.clj` |\n| **Model** | Language-specific transpilation rules (fn_*, com_*) | `src/std/lang/model/spec_xtalk/` |\n| **Typed** | Type analysis and declaration generation | `src/std/lang/typed/xtalk_*.clj` |\n| **Runtime** | Language runtime implementations and live eval | `src/rt/` |\n| **Tests** | Grammar tests and runtime integration tests | `test/std/lang/model/spec_xtalk/` |"
+
+[[:subsection {:title "Key Concepts" :link "merged-guides-manage-xtalk-md-key-concepts"}]]
+
+"- **Function Model** (`fn_<lang>.clj`): Defines how xtalk functions transpile to a specific language\n- **Component Model** (`com_<lang>.clj`): Defines xtalk data structure transpilation (records, dicts, etc.)\n- **Support Matrix**: A semantic grid tracking which xtalk features (operators, constructs) are implemented vs. abstract vs. missing for each language\n- **Inventory**: Cataloging of model definitions, test coverage, and runtime availability"
+
+[[:section {:title "Common Tasks" :link "merged-guides-manage-xtalk-md-common-tasks"}]]
+
+[[:subsection {:title "1. Status and Inventory" :link "merged-guides-manage-xtalk-md-1-status-and-inventory"}]]
+
+"**Get overall xtalk status**"
+
+[[:code {:lang "bash"} "lein manage status :with xtalk"]]
+
+"From REPL:"
+
+[[:code {:lang "clojure"} "(require '[code.manage.xtalk :as manage])\n\n;; Get model file inventory by language\n(manage/xtalk-model-inventory)\n;; => {:js {:model-files [...], :model-forms #{:fn :com}, :model-count 2}\n;;     :lua {:model-files [...], ...}\n;;     :python {...}}\n\n;; Get test coverage by language\n(manage/xtalk-test-inventory)\n;; => {:js {:test-files [...], :test-forms #{:fn :com}, :test-count 2}\n;;     ...}\n\n;; Get runtime installation and spec support\n(manage/xtalk-runtime-inventory)\n;; => {:js {:runtime-installed? true, :runtime-executable? true, \n;;          :spec-implemented 42, :spec-abstract 3, :spec-missing 0}\n;;     :lua {:runtime-installed? false, ...}\n;;     :python {...}}\n\n;; Get spec implementation status\n(manage/xtalk-spec-inventory)\n;; => {:js {:spec-tracked? true, :spec-feature-count 15,\n;;          :spec-implemented 12, :spec-abstract 2, :spec-missing 1}\n;;     ...}\n\n;; Unified language status (model + runtime + spec + test)\n(manage/xtalk-language-status)\n;; => {:js {:model-count 2, :test-count 2, :coverage 1.0,\n;;          :runtime-installed? true, :spec-implemented 42, ...}\n;;     ...}"]]
+
+[[:subsection {:title "2. Spec and Feature Auditing" :link "merged-guides-manage-xtalk-md-2-spec-and-feature-auditing"}]]
+
+"**Audit xtalk feature support across languages**"
+
+[[:code {:lang "bash"} "# Full audit of all supported languages\nlein manage audit-languages\n\n# View feature status matrix\nlein manage support-matrix"]]
+
+"From REPL:"
+
+[[:code {:lang "clojure"} ";; Get list of xtalk categories (feature groups)\n(manage/xtalk-categories)\n;; => [:xtalk-conditional :xtalk-loop :xtalk-error ...]\n\n;; Get all xtalk operations\n(manage/xtalk-op-map)\n;; => {:x:if {...}, :x:do {...}, :x:try {...}, ...}\n\n;; Get all x:* symbols (xtalk operators)\n(manage/xtalk-symbols)\n;; => [:x:if :x:do :x:try :x:throw :x:let ...]\n\n;; Check feature implementation for specific language\n(manage/feature-status :js :x:if)\n;; => :implemented\n\n(manage/feature-status :lua :x:async)\n;; => :missing\n\n;; Get full support matrix (all languages + features)\n(manage/support-matrix)\n;; => {:languages [:js :lua :python :r :ruby]\n;;     :features [:x:if :x:do :x:try ...]\n;;     :status {:js {...}, :lua {...}, ...}\n;;     :summary {:js {:implemented 40, :abstract 2, :missing 1}, ...}}\n\n;; Get support matrix for specific languages\n(manage/support-matrix [:js :python])\n\n;; Get support matrix for specific features\n(manage/support-matrix nil [:x:if :x:do :x:let])\n\n;; Audit installed language runtimes\n(manage/installed-languages)\n;; => [:js :lua :python :r]\n\n;; Find what's missing for each language\n(manage/missing-by-language)\n;; => {:lua [...], :python [...], :r [...]}\n\n;; Find which languages are missing specific features\n(manage/missing-by-feature)\n;; => {:x:async [:lua :r], :x:spread [:python], ...}"]]
+
+[[:subsection {:title "3. Xtalk Operations Inventory" :link "merged-guides-manage-xtalk-md-3-xtalk-operations-inventory"}]]
+
+"**Manage and document xtalk operator definitions**"
+
+[[:code {:lang "clojure"} ";; Generate operation inventory (reads grammar-xtalk)\n(manage/generate-xtalk-ops)\n;; Generates config/xtalk/xtalk_ops.edn with all operator details\n\n;; The result includes:\n;; {:op :x:if\n;;  :category :xtalk-conditional\n;;  :canonical-symbol hara.lang.base.grammar-xtalk/x:if\n;;  :symbols [x:if]\n;;  :macro hara.lang.base.grammar-xtalk/x:if\n;;  :doc \"Conditional expression\"\n;;  :cases [...]}"]]
+
+[[:subsection {:title "4. Test Scaffolding and Generation" :link "merged-guides-manage-xtalk-md-4-test-scaffolding-and-generation"}]]
+
+"**Generate missing tests for grammar operations**"
+
+[[:code {:lang "bash"} "# Scaffold grammar tests from operations inventory\nlein manage scaffold-xtalk-grammar-tests"]]
+
+"From REPL:"
+
+[[:code {:lang "clojure"} ";; Scaffold grammar operation tests\n(manage/scaffold-xtalk-grammar-tests {:write true})\n;; Generates test/std/lang/base/grammar_xtalk_ops_test.clj\n\n;; Split grammar tests by runtime language\n(manage/separate-runtime-tests {:lang :js :write true})\n;; Generates: test/std/lang/base/grammar_xtalk_js_test.clj"]]
+
+[[:subsection {:title "5. Language Support and Diagnostics" :link "merged-guides-manage-xtalk-md-5-language-support-and-diagnostics"}]]
+
+"**Check which language runtimes are installed and available**"
+
+[[:code {:lang "clojure"} ";; Get installed language runtimes\n(manage/installed-languages)\n;; => [:js :lua :python]\n\n;; Get languages that use xtalk as parent grammar\n(manage/audit-languages)\n;; => [:js :lua :python :r :rb :dart]\n\n;; Filter to only installed languages with xtalk parent\n(manage/audit-languages [:js :python :go])\n;; => [:js :python]  (go removed if not installed)\n\n;; Visualize support matrix\n(manage/visualize-support)\n;; Formatted ASCII table showing language vs. feature support"]]
+
+[[:subsection {:title "6. Code Generation and Operations" :link "merged-guides-manage-xtalk-md-6-code-generation-and-operations"}]]
+
+"**Generate xtalk operator implementations**"
+
+[[:code {:lang "clojure"} ";; Generate default implementations for missing operators\n(manage/generate-xtalk-ops {:write true})\n;; Creates/updates operator configuration\n\n;; List all management operations\n(manage/xtalk-op-map)\n;; => All available management commands and their details"]]
+
+[[:section {:title "Workflow Examples" :link "merged-guides-manage-xtalk-md-workflow-examples"}]]
+
+[[:subsection {:title "Workflow 1: Add Support for a New Language" :link "merged-guides-manage-xtalk-md-workflow-1-add-support-for-a-new-language"}]]
+
+"Steps to add a new target language (e.g., Go):"
+
+"1. **Create grammar specification**\n   - Add `:go` to runtime languages in `src/std/lang/manage/xtalk_scaffold.clj`\n   - Define `+runtime-lang-config+` entry for Go\n\n2. **Create function model**\n   - Create `src/std/lang/model/spec_xtalk/fn_go.clj`\n   - Define how xtalk functions transpile to Go\n\n3. **Create component model**\n   - Create `src/std/lang/model/spec_xtalk/com_go.clj`\n   - Define how xtalk data structures transpile to Go\n\n4. **Create tests**\n   - Create `test/std/lang/model/spec_xtalk/fn_go_test.clj`\n   - Create `test/std/lang/model/spec_xtalk/com_go_test.clj`\n\n5. **Audit coverage**\n   ```clojure\n   (manage/xtalk-language-status {:langs [:go]})\n   ;; Check model-count, test-count, spec coverage\n   ```\n\n6. **Generate operator tests**\n   ```clojure\n   (manage/scaffold-xtalk-grammar-tests {:write true})\n   ;; Generates grammar tests for Go\n   ```"
+
+[[:subsection {:title "Workflow 2: Improve Language Coverage" :link "merged-guides-manage-xtalk-md-workflow-2-improve-language-coverage"}]]
+
+"When you have missing features (`:spec-missing > 0`):"
+
+"1. **Identify missing features**\n   ```clojure\n   (manage/missing-by-language)\n   ;; Shows which operators are not yet implemented\n   ```\n\n2. **Update language model**\n   - Edit `src/std/lang/model/spec_xtalk/fn_<lang>.clj`\n   - Add implementation for missing operator (change from `:abstract` to `:emit`)\n\n3. **Verify coverage**\n   ```clojure\n   (manage/support-matrix [:your-lang])\n   ;; Check that missing count decreased\n   ```\n\n4. **Add tests**\n   - Create appropriate test cases in language-specific test file\n   - Run: `lein test :only hara.lang.model.spec-xtalk.<lang>-test`"
+
+[[:subsection {:title "Workflow 3: Audit Test Coverage" :link "merged-guides-manage-xtalk-md-workflow-3-audit-test-coverage"}]]
+
+"Ensure every model definition has corresponding tests:"
+
+[[:code {:lang "clojure"} ";; Get model and test inventory\n(let [model (manage/xtalk-model-inventory)\n      tests (manage/xtalk-test-inventory)]\n  (doseq [[lang model-entry] model]\n    (let [test-entry (get tests lang)\n          model-count (:model-count model-entry)\n          test-count (:test-count test-entry)\n          coverage (if (pos? model-count) \n                     (double (/ test-count model-count)) \n                     0.0)]\n      (println (format \"%s: %d models, %d tests (%.1f%%)\"\n                       lang model-count test-count (* 100 coverage))))))"]]
+
+[[:section {:title "Command Reference" :link "merged-guides-manage-xtalk-md-command-reference"}]]
+
+[[:subsection {:title "CLI Commands" :link "merged-guides-manage-xtalk-md-cli-commands"}]]
+
+"All commands are invoked via `lein manage` with the pattern:"
+
+[[:code {:lang "bash"} "lein manage <task> [selectors] [options]"]]
+
+"**Xtalk-specific tasks:**"
+
+"| Task | Description | Example |\n|------|-------------|---------|\n| `status :with xtalk` | Show overall xtalk status | `lein manage status :with xtalk` |\n| `audit-languages` | Check installed language runtimes | `lein manage audit-languages` |\n| `support-matrix` | Display feature support matrix | `lein manage support-matrix` |\n| `missing-by-language` | Show missing operators per language | `lein manage missing-by-language` |\n| `missing-by-feature` | Show which languages lack features | `lein manage missing-by-feature` |\n| `generate-xtalk-ops` | Generate operation inventory | `lein manage generate-xtalk-ops` |\n| `scaffold-xtalk-grammar-tests` | Create test skeletons for operators | `lein manage scaffold-xtalk-grammar-tests` |\n| `separate-runtime-tests` | Split grammar tests by language | `lein manage separate-runtime-tests :lang js` |"
+
+[[:subsection {:title "API Reference" :link "merged-guides-manage-xtalk-md-api-reference"}]]
+
+"**From `code.manage.xtalk` namespace:**"
+
+[[:subsubsection {:title "Inventory Functions" :link "merged-guides-manage-xtalk-md-inventory-functions"}]]
+
+[[:code {:lang "clojure"} "(xtalk-model-inventory)        ; => {:js {...}, :lua {...}, ...}\n(xtalk-test-inventory)         ; => {:js {...}, :lua {...}, ...}\n(xtalk-runtime-inventory)      ; => {:js {...}, :lua {...}, ...}\n(xtalk-spec-inventory)         ; => {:js {...}, :lua {...}, ...}\n(xtalk-language-status)        ; => {:js {...}, :lua {...}, ...}"]]
+
+[[:subsubsection {:title "Audit Functions" :link "merged-guides-manage-xtalk-md-audit-functions"}]]
+
+[[:code {:lang "clojure"} "(installed-languages)          ; => [:js :lua :python :r]\n(audit-languages)              ; => [:js :lua :python]\n(audit-languages [:js :go])    ; => [:js] (filtered to installed)\n(support-matrix)               ; => {:languages [...] :features [...] :status {...}}\n(support-matrix [:js :lua])    ; => Support matrix for specific languages\n(support-matrix nil [:x:if])   ; => Support matrix for specific features\n(missing-by-language)          ; => {:lua [...] :go [...] :r [...]}\n(missing-by-feature)           ; => {:x:async [:lua] :x:spread [...] ...}"]]
+
+[[:subsubsection {:title "Metadata Functions" :link "merged-guides-manage-xtalk-md-metadata-functions"}]]
+
+[[:code {:lang "clojure"} "(xtalk-categories)             ; => [:xtalk-conditional :xtalk-loop ...]\n(xtalk-op-map)                 ; => {:x:if {...} :x:do {...} ...}\n(xtalk-symbols)                ; => [:x:if :x:do :x:try ...]"]]
+
+[[:subsubsection {:title "Generation Functions" :link "merged-guides-manage-xtalk-md-generation-functions"}]]
+
+[[:code {:lang "clojure"} "(generate-xtalk-ops)           ; Generate/update operator inventory\n(scaffold-xtalk-grammar-tests) ; Generate grammar test skeleton\n(separate-runtime-tests)       ; Split tests by runtime language\n(visualize-support)            ; Display formatted support matrix"]]
+
+[[:section {:title "File Structure" :link "merged-guides-manage-xtalk-md-file-structure"}]]
+
+[[:subsection {:title "Source Organization" :link "merged-guides-manage-xtalk-md-source-organization"}]]
+
+[[:code {:lang "text"} "src/std/lang/\n├── manage/\n│   ├── xtalk_audit.clj        # Audit and feature tracking\n│   ├── xtalk_ops.clj          # Operation inventory management\n│   ├── xtalk_scaffold.clj     # Test generation and scaffolding\n│   └── manage.clj             # Main coordination\n├── model/\n│   └── spec_xtalk/\n│       ├── fn_js.clj          # JavaScript function transpilation\n│       ├── fn_lua.clj         # Lua function transpilation\n│       ├── fn_python.clj      # Python function transpilation\n│       ├── com_js.clj         # JavaScript component transpilation\n│       └── ...\n├── typed/\n│   ├── xtalk.clj              # Core typed system\n│   ├── xtalk_analysis.clj     # Type analysis\n│   ├── xtalk_check.clj        # Type checking\n│   ├── xtalk_parse.clj        # Parsing typed definitions\n│   └── xtalk_ops.clj          # Typed operations\n└── base/\n    └── grammar_xtalk.clj      # Core xtalk grammar definitions"]]
+
+[[:subsection {:title "Configuration" :link "merged-guides-manage-xtalk-md-configuration"}]]
+
+[[:code {:lang "text"} "config/xtalk/\n└── xtalk_ops.edn             # Operation inventory (managed)"]]
+
+[[:subsection {:title "Tests" :link "merged-guides-manage-xtalk-md-tests"}]]
+
+[[:code {:lang "text"} "test/std/lang/\n└── model/\n    └── spec_xtalk/\n        ├── fn_js_test.clj     # JavaScript function tests\n        ├── fn_lua_test.clj    # Lua function tests\n        ├── com_js_test.clj    # JavaScript component tests\n        └── ..."]]
+
+[[:section {:title "Common Issues and Solutions" :link "merged-guides-manage-xtalk-md-common-issues-and-solutions"}]]
+
+[[:subsection {:title "Issue 1: Missing Runtime for Language" :link "merged-guides-manage-xtalk-md-issue-1-missing-runtime-for-language"}]]
+
+"**Problem:** `(manage/xtalk-runtime-inventory)` shows `:runtime-installed? false` for a language you need."
+
+"**Solution:**"
+
+"- Install the runtime: `apt-get install nodejs` (for JavaScript), etc.\n- Or, if it's already installed, ensure it's on your PATH: `which node`\n- Verify with `(manage/installed-languages)`"
+
+[[:subsection {:title "Issue 2: Features Showing as Missing" :link "merged-guides-manage-xtalk-md-issue-2-features-showing-as-missing"}]]
+
+"**Problem:** Language has `:spec-missing > 0` when adding a new language."
+
+"**Solution:**"
+
+"1. Check which features are missing:\n   ```clojure\n   (manage/missing-by-language)\n   ```\n2. For each missing feature, update the grammar in the language's model files:\n   - Edit `src/std/lang/model/spec_xtalk/fn_<lang>.clj`\n   - Change operator status from `:abstract` to `:emit` with implementation\n3. Optionally provide a partial implementation with `:abstract :emit` to indicate \n   work-in-progress"
+
+[[:subsection {:title "Issue 3: Test Coverage is Low" :link "merged-guides-manage-xtalk-md-issue-3-test-coverage-is-low"}]]
+
+"**Problem:** A language has models but few tests (`:coverage < 1.0`)."
+
+"**Solution:**"
+
+"1. Identify uncovered models:\n   ```clojure\n   (let [model (manage/xtalk-model-inventory)\n         tests (manage/xtalk-test-inventory)]\n     (doseq [[lang entry] model]\n       (when (> (:model-count entry) (get-in tests [lang :test-count] 0))\n         (println \"Coverage gap for\" lang))))\n   ```\n2. Create corresponding test files in `test/std/lang/model/spec_xtalk/`\n3. Run: `lein test :only hara.lang.model.spec_xtalk.<lang>-test`"
+
+[[:subsection {:title "Issue 4: Support Matrix Shows Incomplete Data" :link "merged-guides-manage-xtalk-md-issue-4-support-matrix-shows-incomplete-data"}]]
+
+"**Problem:** Some languages or features aren't appearing in `(manage/support-matrix)`."
+
+"**Solution:**"
+
+"- Ensure the language has been required/loaded: `(manage/audit-languages)`\n- Check that grammar definitions are properly tagged with `x:` prefix\n- Verify the language grammar is properly registered in \n  `src/std/lang/base/registry.clj`"
+
+[[:subsection {:title "Issue 5: Operator Inventory is Stale" :link "merged-guides-manage-xtalk-md-issue-5-operator-inventory-is-stale"}]]
+
+"**Problem:** New operators aren't appearing in `(manage/xtalk-op-map)`."
+
+"**Solution:**"
+
+"1. Regenerate the inventory:\n   ```clojure\n   (manage/generate-xtalk-ops {:write true})\n   ```\n2. This reads the latest grammar definitions and updates `config/xtalk/xtalk_ops.edn`\n3. Verify with: `(keys (manage/xtalk-op-map))`"
+
+[[:section {:title "Advanced Tasks" :link "merged-guides-manage-xtalk-md-advanced-tasks"}]]
+
+[[:subsection {:title "Analyzing Operator Metadata" :link "merged-guides-manage-xtalk-md-analyzing-operator-metadata"}]]
+
+[[:code {:lang "clojure"} ";; Get details for a specific operator\n(get (manage/xtalk-op-map) :x:if)\n;; => {:op :x:if\n;;     :category :xtalk-conditional\n;;     :canonical-symbol ...\n;;     :symbols [x:if]\n;;     :class :infix\n;;     :requires [...]\n;;     :emit :code\n;;     :macro ...\n;;     :doc \"...\"\n;;     :cases [...]}"]]
+
+[[:subsection {:title "Tracking Language Feature Gaps" :link "merged-guides-manage-xtalk-md-tracking-language-feature-gaps"}]]
+
+[[:code {:lang "clojure"} ";; For each language, see which features block full implementation\n(let [matrix (manage/support-matrix)]\n  (doseq [[lang summary] (:summary matrix)]\n    (let [missing (:missing summary)]\n      (when (pos? missing)\n        (println (format \"%s needs %d features\" lang missing))))))"]]
+
+[[:subsection {:title "Custom Coverage Analysis" :link "merged-guides-manage-xtalk-md-custom-coverage-analysis"}]]
+
+[[:code {:lang "clojure"} ";; Calculate detailed metrics\n(defn coverage-report []\n  (let [langs (manage/audit-languages)\n        model (manage/xtalk-model-inventory)\n        tests (manage/xtalk-test-inventory)\n        specs (manage/xtalk-spec-inventory)]\n    (doseq [lang langs\n            :let [m (get model lang) t (get tests lang) s (get specs lang)]]\n      (when m\n        (printf \"%-8s | Models: %3d | Tests: %3d | Cov: %5.1f%% | \"\n                lang (:model-count m) (:test-count t)\n                (* 100.0 (/ (:test-count t 0) (:model-count m 1))))\n        (printf \"Features: %2d impl, %2d missing\\n\"\n                (:spec-implemented s 0) (:spec-missing s 0))))))\n\n(coverage-report)"]]
+
+[[:section {:title "Related Guides" :link "merged-guides-manage-xtalk-md-related-guides"}]]
+
+"- [code.manage](code.manage.md) - General code management and maintenance tasks\n- [code.test](code.test.md) - Testing framework used for xtalk tests\n- [std.task](std.task.md) - Task execution engine underlying management operations\n- [README.md](../README.md) - Overview of `hara.lang` and xtalk system"
 ;; END merged documentation: guides/MANAGE_XTALK.md
 
 ;; BEGIN merged documentation: plans/slop/deftype_pg_usage.md

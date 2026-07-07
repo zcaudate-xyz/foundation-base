@@ -31,7 +31,64 @@
 ;; BEGIN merged documentation: guides/std.timeseries.md
 ;; sha256: 9aa3c020e7da282c7b391e4fe689b5f95466a0a22daf0a6a1a1ed25aacdbc57f
 [[:chapter {:title "std.timeseries Guide" :link "merged-guides-std-timeseries-md"}]]
-"# `std.timeseries` Guide\n\n`std.timeseries` is a library for handling time-series data using a \"Journal\" abstraction. It supports ingestion, storage, retrieval, downsampling, and aggregation of time-ordered records.\n\n## Core Concepts\n\n- **Journal**: The primary data structure. It manages a sorted list of entries and associated metadata.\n- **Entry**: A map representing a data point. Must have a time key (default `:s/time`).\n- **Processing**: The engine for selecting, aggregating, and transforming data ranges.\n\n## Usage\n\n### Scenarios\n\n#### 1. Real-time Metric Collection\n\n**Scenario: Ingesting sensor data.**\n\nCreate a journal configured for high-frequency data (e.g., milliseconds).\n\n```clojure\n(require '[std.timeseries :as ts])\n\n(def sensor-journal\n  (ts/journal {:meta {:time {:unit :ms :key :timestamp}\n                      :entry {:flatten true} ;; Save space by flattening nested maps\n                      }}))\n\n(defn on-sensor-read [data]\n  ;; data: {:temp 20.5 :humidity 50 :timestamp 1600000000000}\n  (alter-var-root #'sensor-journal ts/add-entry data))\n```\n\n#### 2. Downsampling for Visualization\n\n**Scenario: Fetching a 24-hour chart with 100 data points.**\n\nYou have raw data every second, but you only want 100 points for a graph.\n\n```clojure\n(ts/select sensor-journal\n           {:range [:24h :now] ;; Or specific timestamps\n            :sample 100        ;; Target count\n            :transform {:default {:aggregate :mean} ;; Average values in each bucket\n                        :temp {:aggregate :max}}    ;; But show max temp\n            })\n```\n\n#### 3. Merging Disparate Sources\n\n**Scenario: Combining logs from two servers.**\n\nYou have two journals with potentially overlapping or interleaved time periods.\n\n```clojure\n(def combined-journal (ts/merge journal-a journal-b))\n\n;; The merge respects time ordering.\n;; Pre-requisite: Journals must share the same metadata structure.\n```\n\n#### 4. Handling Irregular Intervals\n\n**Scenario: Data arrives sporadically, but you need a regular 1-second interval output.**\n\nUse `derive` to create a normalized view.\n\n```clojure\n(ts/derive raw-journal\n           {:range :all\n            :transform {:interval :1s  ;; Force 1s buckets\n                        :default {:aggregate :last ;; Use last known value\n                                  :fill :previous} ;; Fill gaps with previous value\n                        }})\n```\n\n#### 5. Complex Window Analysis\n\n**Scenario: Moving average.**\n\nWhile `std.timeseries` focuses on storage and retrieval, you can compute derived series during selection.\n\n```clojure\n(ts/select my-journal\n           {:range :1h\n            :compute {:moving-avg (fn [entries] ...)} ;; Custom computation\n            })\n```\n\n#### 6. Efficient Storage with Templates\n\n**Scenario: Storing repetitive map structures.**\n\nIf every entry looks like `{:a 1 :b {:c 2}}`, the journal can learn a \"template\" to store them as flat vectors internally, saving memory.\n\n```clojure\n(def j (ts/journal {:meta {:entry {:flatten true}}}))\n;; The first entry added determines the template structure.\n(ts/add-entry j {:a 1 :b 2})\n;; Internally stored as something like [1 2] + template reference.\n```\n"
+
+"`std.timeseries` is a library for handling time-series data using a \"Journal\" abstraction. It supports ingestion, storage, retrieval, downsampling, and aggregation of time-ordered records."
+
+[[:section {:title "Core Concepts" :link "merged-guides-std-timeseries-md-core-concepts"}]]
+
+"- **Journal**: The primary data structure. It manages a sorted list of entries and associated metadata.\n- **Entry**: A map representing a data point. Must have a time key (default `:s/time`).\n- **Processing**: The engine for selecting, aggregating, and transforming data ranges."
+
+[[:section {:title "Usage" :link "merged-guides-std-timeseries-md-usage"}]]
+
+[[:subsection {:title "Scenarios" :link "merged-guides-std-timeseries-md-scenarios"}]]
+
+[[:subsubsection {:title "1. Real-time Metric Collection" :link "merged-guides-std-timeseries-md-1-real-time-metric-collection"}]]
+
+"**Scenario: Ingesting sensor data.**"
+
+"Create a journal configured for high-frequency data (e.g., milliseconds)."
+
+[[:code {:lang "clojure"} "(require '[std.timeseries :as ts])\n\n(def sensor-journal\n  (ts/journal {:meta {:time {:unit :ms :key :timestamp}\n                      :entry {:flatten true} ;; Save space by flattening nested maps\n                      }}))\n\n(defn on-sensor-read [data]\n  ;; data: {:temp 20.5 :humidity 50 :timestamp 1600000000000}\n  (alter-var-root #'sensor-journal ts/add-entry data))"]]
+
+[[:subsubsection {:title "2. Downsampling for Visualization" :link "merged-guides-std-timeseries-md-2-downsampling-for-visualization"}]]
+
+"**Scenario: Fetching a 24-hour chart with 100 data points.**"
+
+"You have raw data every second, but you only want 100 points for a graph."
+
+[[:code {:lang "clojure"} "(ts/select sensor-journal\n           {:range [:24h :now] ;; Or specific timestamps\n            :sample 100        ;; Target count\n            :transform {:default {:aggregate :mean} ;; Average values in each bucket\n                        :temp {:aggregate :max}}    ;; But show max temp\n            })"]]
+
+[[:subsubsection {:title "3. Merging Disparate Sources" :link "merged-guides-std-timeseries-md-3-merging-disparate-sources"}]]
+
+"**Scenario: Combining logs from two servers.**"
+
+"You have two journals with potentially overlapping or interleaved time periods."
+
+[[:code {:lang "clojure"} "(def combined-journal (ts/merge journal-a journal-b))\n\n;; The merge respects time ordering.\n;; Pre-requisite: Journals must share the same metadata structure."]]
+
+[[:subsubsection {:title "4. Handling Irregular Intervals" :link "merged-guides-std-timeseries-md-4-handling-irregular-intervals"}]]
+
+"**Scenario: Data arrives sporadically, but you need a regular 1-second interval output.**"
+
+"Use `derive` to create a normalized view."
+
+[[:code {:lang "clojure"} "(ts/derive raw-journal\n           {:range :all\n            :transform {:interval :1s  ;; Force 1s buckets\n                        :default {:aggregate :last ;; Use last known value\n                                  :fill :previous} ;; Fill gaps with previous value\n                        }})"]]
+
+[[:subsubsection {:title "5. Complex Window Analysis" :link "merged-guides-std-timeseries-md-5-complex-window-analysis"}]]
+
+"**Scenario: Moving average.**"
+
+"While `std.timeseries` focuses on storage and retrieval, you can compute derived series during selection."
+
+[[:code {:lang "clojure"} "(ts/select my-journal\n           {:range :1h\n            :compute {:moving-avg (fn [entries] ...)} ;; Custom computation\n            })"]]
+
+[[:subsubsection {:title "6. Efficient Storage with Templates" :link "merged-guides-std-timeseries-md-6-efficient-storage-with-templates"}]]
+
+"**Scenario: Storing repetitive map structures.**"
+
+"If every entry looks like `{:a 1 :b {:c 2}}`, the journal can learn a \"template\" to store them as flat vectors internally, saving memory."
+
+[[:code {:lang "clojure"} "(def j (ts/journal {:meta {:entry {:flatten true}}}))\n;; The first entry added determines the template structure.\n(ts/add-entry j {:a 1 :b 2})\n;; Internally stored as something like [1 2] + template reference."]]
 ;; END merged documentation: guides/std.timeseries.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_timeseries_summary.md

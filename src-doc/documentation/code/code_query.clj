@@ -105,7 +105,58 @@
 ;; BEGIN merged documentation: guides/code.query.md
 ;; sha256: 1b3f76ccfee7dab5138c26d1b1da5a286093daf5f1b8e7704a0fd4aff8c4c314
 [[:chapter {:title "code.query Guide" :link "merged-guides-code-query-md"}]]
-"# `code.query` Guide\n\n`code.query` enables advanced searching and modification of Clojure source code using a pattern-matching DSL over zippers. It allows you to find code structures that match a specific shape and transform them.\n\n## Core Concepts\n\n- **ZLoc**: A zipper location representing a node in the syntax tree.\n- **Selector**: A vector or list pattern describing the structure to match.\n- **Directives**: Special symbols (e.g., `^:%`, `|`, `^:?`) in patterns that control matching behavior (capturing, optionality, cursor placement).\n\n## Usage\n\n### The `$` Macro\n\nThe `$` macro is the main interface. It takes a context (string, file, zipper), a selector path, and optional arguments (transformation function, options).\n\n```clojure\n(require '[code.query :as query])\n```\n\n### Scenarios\n\n#### 1. Finding Specific Forms\n\n**Scenario: Find all `defn` names in a string.**\n\nWe match `(defn name ...)` and capture the name.\n\n```clojure\n(def code \"(defn foo [x] x) (defn bar [y] y)\")\n\n(query/$ code\n         ;; Pattern: List starting with defn, capture the second element (symbol)\n         '[(defn ^:% symbol? & _)])\n;; => (foo bar)\n```\n\n**Scenario: Find all maps containing a specific key.**\n\n```clojure\n(def code \"{:a 1 :b 2} {:a 3}\")\n\n(query/$ code\n         ;; Pattern: Map containing key :a\n         '[{:a _}])\n;; => ({:a 1 :b 2} {:a 3})\n```\n\n#### 2. Structural Editing\n\n**Scenario: Add a docstring to a function if it's missing.**\n\nWe need to match `defn` forms that *don't* have a string as the third element.\n\n```clojure\n(def code \"(defn my-fn [x] x)\")\n\n(query/$ code\n         ;; Match defn where 3rd element is a vector (args), not a string\n         '[(defn symbol? ^:% vector? & _)]\n\n         ;; Transformation function: insert docstring before args\n         (fn [zloc]\n           (std.block.navigate/insert-left zloc \"Added docstring\")))\n;; => \"(defn my-fn \\\"Added docstring\\\" [x] x)\"\n```\n\n#### 3. Context-Aware Modification\n\n**Scenario: Rename a variable only within a specific binding scope.**\n\nThis often requires a multi-step approach or using `|` to position the cursor exactly where the modification should happen.\n\n```clojure\n(def code \"(let [x 1] (+ x 1))\")\n\n(query/$ code\n         ;; Match `let` block, then find `x` inside the vector, position cursor (|) on it\n         '[(let [| x _] & _)]\n         (fn [zloc]\n           (std.block.navigate/set-value zloc 'y)))\n;; => \"(let [y 1] (+ x 1))\"\n;; Note: This only changed the binding name. A full refactor would need to traverse the body too.\n```\n\n#### 4. Advanced Pattern Matching Directives\n\n- `^:%` **Capture**: Returns the matched element.\n- `^:?` **Optional**: The element may or may not exist.\n- `^:+` **One or more**: Repeat match.\n- `^:*` **Zero or more**: Repeat match.\n- `|` **Cursor**: Sets the \"focus\" of the match. The transformation function applies to *this* node, not the whole pattern root.\n- `& _` **Rest**: Matches the rest of the collection (like `& args` in functions).\n\n**Scenario: Extracting dependencies from `ns` form.**\n\n```clojure\n(def ns-form \"(ns my.ns (:require [a.b :as ab] [c.d :refer [x]]))\")\n\n(query/$ ns-form\n         ;; Find :require, then inside it, match vectors\n         '[(ns _ (:require ^:%+ vector?))])\n;; => ([a.b :as ab] [c.d :refer [x]])\n```\n"
+
+"`code.query` enables advanced searching and modification of Clojure source code using a pattern-matching DSL over zippers. It allows you to find code structures that match a specific shape and transform them."
+
+[[:section {:title "Core Concepts" :link "merged-guides-code-query-md-core-concepts"}]]
+
+"- **ZLoc**: A zipper location representing a node in the syntax tree.\n- **Selector**: A vector or list pattern describing the structure to match.\n- **Directives**: Special symbols (e.g., `^:%`, `|`, `^:?`) in patterns that control matching behavior (capturing, optionality, cursor placement)."
+
+[[:section {:title "Usage" :link "merged-guides-code-query-md-usage"}]]
+
+[[:subsection {:title "The $ Macro" :link "merged-guides-code-query-md-the-macro"}]]
+
+"The `$` macro is the main interface. It takes a context (string, file, zipper), a selector path, and optional arguments (transformation function, options)."
+
+[[:code {:lang "clojure"} "(require '[code.query :as query])"]]
+
+[[:subsection {:title "Scenarios" :link "merged-guides-code-query-md-scenarios"}]]
+
+[[:subsubsection {:title "1. Finding Specific Forms" :link "merged-guides-code-query-md-1-finding-specific-forms"}]]
+
+"**Scenario: Find all `defn` names in a string.**"
+
+"We match `(defn name ...)` and capture the name."
+
+[[:code {:lang "clojure"} "(def code \"(defn foo [x] x) (defn bar [y] y)\")\n\n(query/$ code\n         ;; Pattern: List starting with defn, capture the second element (symbol)\n         '[(defn ^:% symbol? & _)])\n;; => (foo bar)"]]
+
+"**Scenario: Find all maps containing a specific key.**"
+
+[[:code {:lang "clojure"} "(def code \"{:a 1 :b 2} {:a 3}\")\n\n(query/$ code\n         ;; Pattern: Map containing key :a\n         '[{:a _}])\n;; => ({:a 1 :b 2} {:a 3})"]]
+
+[[:subsubsection {:title "2. Structural Editing" :link "merged-guides-code-query-md-2-structural-editing"}]]
+
+"**Scenario: Add a docstring to a function if it's missing.**"
+
+"We need to match `defn` forms that *don't* have a string as the third element."
+
+[[:code {:lang "clojure"} "(def code \"(defn my-fn [x] x)\")\n\n(query/$ code\n         ;; Match defn where 3rd element is a vector (args), not a string\n         '[(defn symbol? ^:% vector? & _)]\n\n         ;; Transformation function: insert docstring before args\n         (fn [zloc]\n           (std.block.navigate/insert-left zloc \"Added docstring\")))\n;; => \"(defn my-fn \\\"Added docstring\\\" [x] x)\""]]
+
+[[:subsubsection {:title "3. Context-Aware Modification" :link "merged-guides-code-query-md-3-context-aware-modification"}]]
+
+"**Scenario: Rename a variable only within a specific binding scope.**"
+
+"This often requires a multi-step approach or using `|` to position the cursor exactly where the modification should happen."
+
+[[:code {:lang "clojure"} "(def code \"(let [x 1] (+ x 1))\")\n\n(query/$ code\n         ;; Match `let` block, then find `x` inside the vector, position cursor (|) on it\n         '[(let [| x _] & _)]\n         (fn [zloc]\n           (std.block.navigate/set-value zloc 'y)))\n;; => \"(let [y 1] (+ x 1))\"\n;; Note: This only changed the binding name. A full refactor would need to traverse the body too."]]
+
+[[:subsubsection {:title "4. Advanced Pattern Matching Directives" :link "merged-guides-code-query-md-4-advanced-pattern-matching-directives"}]]
+
+"- `^:%` **Capture**: Returns the matched element.\n- `^:?` **Optional**: The element may or may not exist.\n- `^:+` **One or more**: Repeat match.\n- `^:*` **Zero or more**: Repeat match.\n- `|` **Cursor**: Sets the \"focus\" of the match. The transformation function applies to *this* node, not the whole pattern root.\n- `& _` **Rest**: Matches the rest of the collection (like `& args` in functions)."
+
+"**Scenario: Extracting dependencies from `ns` form.**"
+
+[[:code {:lang "clojure"} "(def ns-form \"(ns my.ns (:require [a.b :as ab] [c.d :refer [x]]))\")\n\n(query/$ ns-form\n         ;; Find :require, then inside it, match vectors\n         '[(ns _ (:require ^:%+ vector?))])\n;; => ([a.b :as ab] [c.d :refer [x]])"]]
 ;; END merged documentation: guides/code.query.md
 
 ;; BEGIN merged documentation: plans/slop/summary/code_query_block_tutorial.md

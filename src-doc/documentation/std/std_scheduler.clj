@@ -25,7 +25,56 @@
 ;; BEGIN merged documentation: guides/std.scheduler.md
 ;; sha256: 4c24ec2509cfbf582a8509baf65f23d07ad0c4c502011fde81ebb275b71f203d
 [[:chapter {:title "std.scheduler Guide" :link "merged-guides-std-scheduler-md"}]]
-"# `std.scheduler` Guide\n\n`std.scheduler` is a system for managing concurrent, scheduled tasks (programs) using a `runner` abstraction. It handles lifecycle, spawning, and scaling of these tasks.\n\n## Core Concepts\n\n- **Runner**: The container for all scheduling logic. It has its own thread pools.\n- **Program**: A definition of a task, including its logic (`main-fn`), state (`create-fn`), and frequency (`interval`).\n- **Spawn**: An executing instance of a program. A single program (like \"send-email\") might have multiple spawns (workers).\n\n## Usage\n\n### Scenarios\n\n#### 1. Periodic \"Cron\" Job\n\n**Scenario: Run a cleanup task every minute.**\n\n```clojure\n(require '[std.scheduler :as scheduler]\n         '[std.lib :as h])\n\n(def runner (scheduler/runner {:id \"system-runner\"}))\n\n(def cleanup-job\n  {:id :cleanup\n   :interval 60000 ;; 60s\n   :create-fn (constantly {:deleted 0}) ;; Initial state\n   :main-fn (fn [args timestamp]\n              ;; Perform cleanup logic\n              (println \"Cleaning up at\" timestamp)\n              {:count 1}) ;; Return value updates state if merge-fn is defined\n   })\n\n(scheduler/install runner cleanup-job)\n(scheduler/spawn runner :cleanup) ;; Start one instance\n```\n\n#### 2. Worker Pool Pattern\n\n**Scenario: A job queue that needs multiple workers processing in parallel.**\n\nYou can define a program and then spawn it multiple times.\n\n```clojure\n(def worker-job\n  {:id :worker\n   :interval 100 ;; Check queue every 100ms\n   :main-fn (fn [_ _]\n              (when-let [job (pop-queue!)]\n                (process job)))\n   ;; Optional: Define limits\n   :min 1\n   :max 5})\n\n(scheduler/install runner worker-job)\n\n;; Scale up\n(dotimes [_ 3]\n  (scheduler/spawn runner :worker))\n```\n\n#### 3. Dynamic Scaling\n\n**Scenario: Increase workers during high load.**\n\nYou can programmatically spawn or unspawn instances based on metrics.\n\n```clojure\n(defn check-load [runner]\n  (let [q-size (get-queue-size)]\n    (cond\n      (> q-size 100) (scheduler/spawn runner :worker)\n      (< q-size 10)  (scheduler/unspawn runner :worker))))\n```\n\n`unspawn` removes one instance, respecting the policy (e.g., kill the `:last` created one).\n\n#### 4. Manual Triggering\n\n**Scenario: Force execution immediately (e.g., via Admin UI).**\n\nYou don't need to wait for the interval.\n\n```clojure\n(scheduler/trigger runner :cleanup)\n```\n\n#### 5. Managing State\n\n**Scenario: Accumulating results.**\n\nThe `merge-fn` allows a program to update its `:state` atom based on the return value of `main-fn`.\n\n```clojure\n(def stats-job\n  {:id :stats\n   :interval 1000\n   :create-fn (constantly 0)\n   :main-fn (fn [_ _] (rand-int 10))\n   :merge-fn (fn [old-state new-val]\n               (+ old-state new-val))})\n\n;; Access state\n(scheduler/get-state runner :stats)\n```\n"
+
+"`std.scheduler` is a system for managing concurrent, scheduled tasks (programs) using a `runner` abstraction. It handles lifecycle, spawning, and scaling of these tasks."
+
+[[:section {:title "Core Concepts" :link "merged-guides-std-scheduler-md-core-concepts"}]]
+
+"- **Runner**: The container for all scheduling logic. It has its own thread pools.\n- **Program**: A definition of a task, including its logic (`main-fn`), state (`create-fn`), and frequency (`interval`).\n- **Spawn**: An executing instance of a program. A single program (like \"send-email\") might have multiple spawns (workers)."
+
+[[:section {:title "Usage" :link "merged-guides-std-scheduler-md-usage"}]]
+
+[[:subsection {:title "Scenarios" :link "merged-guides-std-scheduler-md-scenarios"}]]
+
+[[:subsubsection {:title "1. Periodic \"Cron\" Job" :link "merged-guides-std-scheduler-md-1-periodic-cron-job"}]]
+
+"**Scenario: Run a cleanup task every minute.**"
+
+[[:code {:lang "clojure"} "(require '[std.scheduler :as scheduler]\n         '[std.lib :as h])\n\n(def runner (scheduler/runner {:id \"system-runner\"}))\n\n(def cleanup-job\n  {:id :cleanup\n   :interval 60000 ;; 60s\n   :create-fn (constantly {:deleted 0}) ;; Initial state\n   :main-fn (fn [args timestamp]\n              ;; Perform cleanup logic\n              (println \"Cleaning up at\" timestamp)\n              {:count 1}) ;; Return value updates state if merge-fn is defined\n   })\n\n(scheduler/install runner cleanup-job)\n(scheduler/spawn runner :cleanup) ;; Start one instance"]]
+
+[[:subsubsection {:title "2. Worker Pool Pattern" :link "merged-guides-std-scheduler-md-2-worker-pool-pattern"}]]
+
+"**Scenario: A job queue that needs multiple workers processing in parallel.**"
+
+"You can define a program and then spawn it multiple times."
+
+[[:code {:lang "clojure"} "(def worker-job\n  {:id :worker\n   :interval 100 ;; Check queue every 100ms\n   :main-fn (fn [_ _]\n              (when-let [job (pop-queue!)]\n                (process job)))\n   ;; Optional: Define limits\n   :min 1\n   :max 5})\n\n(scheduler/install runner worker-job)\n\n;; Scale up\n(dotimes [_ 3]\n  (scheduler/spawn runner :worker))"]]
+
+[[:subsubsection {:title "3. Dynamic Scaling" :link "merged-guides-std-scheduler-md-3-dynamic-scaling"}]]
+
+"**Scenario: Increase workers during high load.**"
+
+"You can programmatically spawn or unspawn instances based on metrics."
+
+[[:code {:lang "clojure"} "(defn check-load [runner]\n  (let [q-size (get-queue-size)]\n    (cond\n      (> q-size 100) (scheduler/spawn runner :worker)\n      (< q-size 10)  (scheduler/unspawn runner :worker))))"]]
+
+"`unspawn` removes one instance, respecting the policy (e.g., kill the `:last` created one)."
+
+[[:subsubsection {:title "4. Manual Triggering" :link "merged-guides-std-scheduler-md-4-manual-triggering"}]]
+
+"**Scenario: Force execution immediately (e.g., via Admin UI).**"
+
+"You don't need to wait for the interval."
+
+[[:code {:lang "clojure"} "(scheduler/trigger runner :cleanup)"]]
+
+[[:subsubsection {:title "5. Managing State" :link "merged-guides-std-scheduler-md-5-managing-state"}]]
+
+"**Scenario: Accumulating results.**"
+
+"The `merge-fn` allows a program to update its `:state` atom based on the return value of `main-fn`."
+
+[[:code {:lang "clojure"} "(def stats-job\n  {:id :stats\n   :interval 1000\n   :create-fn (constantly 0)\n   :main-fn (fn [_ _] (rand-int 10))\n   :merge-fn (fn [old-state new-val]\n               (+ old-state new-val))})\n\n;; Access state\n(scheduler/get-state runner :stats)"]]
 ;; END merged documentation: guides/std.scheduler.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_scheduler_summary.md
