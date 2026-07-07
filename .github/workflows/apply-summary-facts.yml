@@ -1,0 +1,52 @@
+name: Apply summary fact examples
+
+on:
+  push:
+    branches: [docs/summary-fact-examples]
+    paths:
+      - .github/workflows/apply-summary-facts.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/summary-fact-examples
+          fetch-depth: 0
+
+      - name: Generate fact examples
+        run: |
+          set -euo pipefail
+          python3 .github/scripts/format_summary_facts.py
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("src-doc/documentation/std/std_block.clj")
+          text = path.read_text()
+          before = '''  ;; Throws exception if string is not a valid comment
+            ;; (str (comment "hello"))
+            => ExceptionInfo: "Not a valid comment string."
+          '''
+          after = '''  ;; Throws exception if string is not a valid comment
+            (str (comment "hello"))
+            => (throws clojure.lang.ExceptionInfo "Not a valid comment string.")
+          '''
+          if before not in text:
+              raise SystemExit("exception example was not found")
+          path.write_text(text.replace(before, after, 1))
+          PY
+          test "$(git diff --name-only -- src-doc/documentation | wc -l | tr -d ' ')" = "8"
+          test "$(grep -Rh '^\^{:id merged-plans-slop-summary-.*-example-' src-doc/documentation/{code/code_query.clj,std/lib_index.clj,std/std_block.clj,std/std_lib_apply.clj,std/std_lib_bin.clj,std/std_lib_component.clj,std_lang_introduction.clj,xt/xt_lang.clj} | wc -l | tr -d ' ')" = "277"
+          git diff --check
+
+      - name: Commit generated pages
+        run: |
+          set -euo pipefail
+          git add src-doc/documentation
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -m "Represent imported Clojure examples as facts"
+          git push origin HEAD:docs/summary-fact-examples
