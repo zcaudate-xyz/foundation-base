@@ -1,0 +1,59 @@
+name: Consolidate documentation sources
+
+on:
+  push:
+    branches:
+      - docs/merge-guides-slop
+    paths:
+      - .github/workflows/migrate-guides-to-src-doc.yml
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout migration branch
+        uses: actions/checkout@v4
+        with:
+          ref: docs/merge-guides-slop
+          fetch-depth: 0
+
+      - name: Validate migration script
+        run: python3 -m py_compile .github/scripts/migrate_guides_to_src_doc.py
+
+      - name: Merge prose into src-doc
+        run: python3 .github/scripts/migrate_guides_to_src_doc.py
+
+      - name: Verify the source trees were removed
+        run: |
+          test ! -e guides
+          test ! -e plans/slop
+          git diff --check
+
+      - name: Read all authored Clojure documentation forms
+        run: |
+          docker run --rm \
+            -v "${PWD}:${PWD}" \
+            -w "${PWD}" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            lein exec -ep "(doseq [f (filter #(and (.isFile %) (.endsWith (.getName %) \".clj\")) (file-seq (clojure.java.io/file \"src-doc\")))] (with-open [r (java.io.PushbackReader. (clojure.java.io/reader f))] (loop [] (let [form (read {:eof ::eof} r)] (when-not (= ::eof form) (recur))))))"
+
+      - name: Remove one-off migration machinery
+        run: |
+          rm .github/scripts/migrate_guides_to_src_doc.py
+          rm .github/workflows/migrate-guides-to-src-doc.yml
+          rmdir .github/scripts 2>/dev/null || true
+
+      - name: Commit consolidated documentation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          git diff --cached --check
+          git commit -m "Merge guides and slop documentation into src-doc"
+          git push origin HEAD:docs/merge-guides-slop
