@@ -32,7 +32,7 @@
   {:added "4.1"}
   [s]
   (-> (pr-str s)
-      (clojure.string/replace "$" "\\$")))
+      (clojure.string/replace "$" "\$")))
 
 (defn- dart-symbol-global
   "Emits a global access, lazily initialising the key in `__globals__`.
@@ -54,6 +54,10 @@
   {:added "4.1"}
   [_form _grammar _mopts]
   "")
+
+(defn dart-emit-input-rest
+  [{:keys [symbol]} grammar mopts]
+  (str "[" (common/*emit-fn* symbol grammar mopts) " = const []]"))
 
 (defn dart-fn
   [[_ & args]]
@@ -187,7 +191,8 @@
            :default {:common    {:statement ";"}
                      :function  {:prefix ""
                                  :raw ""
-                                 :args {:sep ", "}}
+                                 :args {:sep ", "
+                                        :rest #'dart-emit-input-rest}}
                      :invoke    {:reversed true :hint "" :assign ":"}
                      :block     {:start " {" :end "}"}}
           :block   {:for {:parameter {:sep ";"}}}
