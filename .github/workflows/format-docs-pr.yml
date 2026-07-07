@@ -5,37 +5,21 @@ on:
     branches: [main]
     paths:
       - .github/workflows/format-docs-pr.yml
-      - .github/scripts/format_summary_docs.py
 
 permissions:
   contents: write
+  statuses: write
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: docs/format-slop-summary
+          ref: docs/merge-guides-slop
           fetch-depth: 0
-
-      - name: Convert migrated summaries to code.doc
-        run: python3 .github/scripts/format_summary_docs.py
-
-      - name: Validate generated documentation
-        run: |
-          test ! -d plans/slop/summary
-          test "$(grep -Rhc '^;; BEGIN merged documentation: plans/slop/summary/' src-doc/documentation | awk '{sum += $1} END {print sum}')" = "100"
-          test "$(git diff --name-only -- src-doc/documentation | wc -l | tr -d ' ')" = "39"
-          git diff --check
-
-      - name: Commit formatted documentation
-        run: |
-          git checkout origin/main -- .github/workflows/format-docs-pr.yml
-          git rm -f .github/workflows/export-summary-docs.yml
-          git rm -f .github/scripts/format_summary_docs.py
-          git add src-doc/documentation .github/workflows/format-docs-pr.yml
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git commit -m "Format merged slop summaries as code.doc"
-          git push origin HEAD:docs/format-slop-summary
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const build = require('./.github/scripts/create_formatted_commit.js')
+            return build({github, context, core, exec})
