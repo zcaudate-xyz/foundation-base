@@ -208,10 +208,68 @@
   [forms]
   (map lua-rewrite-statement forms))
 
+(defn- lua-rest-arg-form?
+  [form]
+  (and (collection/form? form)
+       (= 2 (count form))
+       (= :.. (first form))
+       (symbol? (second form))))
+
+(defn- lua-callable-form?
+  [form]
+  (and (collection/form? form)
+       (contains? '#{fn fn.inner defn defn- defgen} (first form))))
+
+(defn- lua-lower-rest-callable
+  [form]
+  (let [[tag head & tail] form
+        [name args body] (if (symbol? head)
+                           [head (first tail) (rest tail)]
+                           [nil head tail])
+        rest-args (filterv lua-rest-arg-form? args)]
+    (cond
+      (empty? rest-args) form
+      (< 1 (count rest-args))
+      (throw (ex-info "Only one rest argument is allowed" {:form form :args args}))
+      (not= (last args) (first rest-args))
+      (throw (ex-info "Rest argument must be final" {:form form :args args}))
+      :else
+      (let [rest-sym (second (first rest-args))
+            body (cons (list 'var rest-sym [(list ':- "...")]) body)
+            out (if name
+                  (apply list tag name args body)
+                  (apply list tag args body))]
+        (with-form-meta form out)))))
+
+(defn- lua-lower-rest-forms
+  [form]
+  (cond
+    (and (collection/form? form) (= 'quote (first form))) form
+    (lua-callable-form? form)
+    (let [form (lua-lower-rest-callable form)]
+      (with-form-meta form
+        (apply list (map lua-lower-rest-forms form))))
+    (collection/form? form)
+    (with-form-meta form (apply list (map lua-lower-rest-forms form)))
+    (vector? form)
+    (with-form-meta form (mapv lua-lower-rest-forms form))
+    (set? form)
+    (with-form-meta form (set (map lua-lower-rest-forms form)))
+    (map? form)
+    (with-form-meta form
+      (into (empty form)
+            (map (fn [[k v]]
+                   [(lua-lower-rest-forms k)
+                    (lua-lower-rest-forms v)]))
+            form))
+    :else form))
+
 (defn lua-rewrite-stage
   [form {:keys [grammar] :as opts}]
   (binding [*lua-grammar* grammar]
-    (let [form (lua-rewrite-form ((:rewrite-stage +lua-rewriter+) form opts))]
+    (let [form ((:rewrite-stage +lua-rewriter+) form opts)
+          form (lua-lower-rest-forms form)
+          form (lua-rewrite-form form)]
       (if (runtime-eval? opts)
         (lua-mark-runtime-defs form)
         form))))
