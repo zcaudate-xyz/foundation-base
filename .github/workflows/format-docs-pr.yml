@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - .github/workflows/format-docs-pr.yml
+      - .github/scripts/format_docs.py
+      - .github/scripts/convert_merged_docs_to_dsl.py
 
 permissions:
   contents: read
@@ -14,4 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo ready
+        with:
+          ref: docs/merge-guides-slop
+      - name: Format imported guides
+        run: |
+          find src-doc/documentation -name '*.clj' -print0 | while IFS= read -r -d '' file; do
+            python3 -c 'import sys; sys.path.insert(0, ".github/scripts"); from format_docs import convert_text; sys.stdout.write(convert_text(sys.stdin.read()))' < "$file" > "$file.tmp"
+            mv "$file.tmp" "$file"
+          done
+          git diff --check
