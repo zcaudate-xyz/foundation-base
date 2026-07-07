@@ -26,3 +26,7 @@ def replace_block(match):
         render(source, markdown),
         f";; END merged documentation: {source}",
     ))
+
+
+def convert_text(text):
+    return PATTERN.sub(replace_block, text)
