@@ -14,3 +14,15 @@ PATTERN = re.compile(
     r";; END merged documentation: [^\n]+$",
     re.MULTILINE,
 )
+
+
+def replace_block(match):
+    source = match.group(1)
+    checksum = match.group(2)
+    markdown = json.loads(match.group(3))
+    return "\n".join((
+        f";; BEGIN merged documentation: {source}",
+        f";; sha256: {checksum}",
+        render(source, markdown),
+        f";; END merged documentation: {source}",
+    ))
