@@ -1,0 +1,25 @@
+name: Export summary documentation workspace
+
+on:
+  push:
+    branches: [docs/format-slop-summary]
+    paths:
+      - .github/workflows/export-summary-docs.yml
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: summary-docs-workspace
+          path: |
+            src-doc
+            .github/scripts/convert_merged_docs_to_dsl.py
+            .github/scripts/format_docs.py
+            project.clj
+          include-hidden-files: true
