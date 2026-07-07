@@ -103,5 +103,82 @@
 ;; BEGIN merged documentation: guides/code.manage.md
 ;; sha256: 6c73b0c9dd63628555fa78d92d8920c11594459bc929d65c9c3d045516d4ff56
 [[:chapter {:title "code.manage Guide" :link "merged-guides-code-manage-md"}]]
-"# `code.manage` Guide\n\n`code.manage` provides a suite of tasks for maintaining code quality, managing tests, and refactoring. It is typically invoked via `lein manage` or from the REPL.\n\n## Core Concepts\n\n- **Tasks**: Operations that run over a set of namespaces (e.g., `analyse`, `grep`).\n- **Templates**: Preset configurations for tasks (e.g., `:code.transform`, `:code.locate`).\n- **Selectors**: Arguments to target specific namespaces (e.g., vector of symbols `['my.ns]`).\n\n## Usage\n\n### Invocation\n\n```bash\n# From CLI\nlein manage <task> <namespaces> <options>\n\n# Example\nlein manage analyse \"['code.manage]\" \"{:print {:summary true}}\"\n```\n\n```clojure\n;; From REPL\n(require '[code.manage :as manage])\n(manage/analyse ['code.manage] {:print {:summary true}})\n```\n\n### Scenarios\n\n#### 1. Codebase Cleanup Workflow\n\nA typical cleanup session might involve identifying messy code and then standardizing it.\n\n**Step A: Identify \"Unclean\" Code**\nFind files with top-level comment blocks (often used for debugging/scratch) that shouldn't be committed.\n\n```clojure\n(manage/unclean ['my.project] {:print {:item true}})\n```\n\n**Step B: Remove Docstrings from Source**\nIf you prefer keeping docstrings in tests or external docs, you can purge them.\n\n```clojure\n(manage/purge ['my.project] {:write true})\n```\n\n**Step C: Standardize Namespace Declarations**\nEnsure `ns` forms are formatted consistently (requires sorting, indentation).\n\n```clojure\n(manage/ns-format ['my.project] {:write true})\n```\n\n#### 2. Test Coverage & Management\n\n`code.manage` integrates tightly with `code.test` to ensure coverage.\n\n**Step A: Find Missing Tests**\nList functions that have no corresponding `fact`.\n\n```clojure\n(manage/missing ['my.project])\n```\n\n**Step B: Scaffold New Tests**\nGenerate test files and stubs for the missing functions.\n\n```clojure\n(manage/scaffold ['my.project] {:write true})\n```\n\n**Step C: Identify \"Orphaned\" Tests**\nFind tests that refer to non-existent functions (e.g., after a rename/delete).\n\n```clojure\n(manage/orphaned ['my.project])\n```\n\n#### 3. Large Scale Refactoring\n\nUse `refactor-code` or `grep-replace` for bulk changes.\n\n**Scenario: Renaming a function across the codebase**\n\nIf simple grep isn't enough (e.g., context sensitive), you can write a custom transform script. However, for simple string replacement:\n\n```clojure\n(manage/grep-replace ['my.project]\n                     {:query \"old-fn-name\"\n                      :replace \"new-fn-name\"\n                      :write true})\n```\n\n**Scenario: Custom AST Modification**\n\nYou can use `refactor-code` with a custom edit function that operates on the zipper.\n\n```clojure\n(require '[code.query :as query]\n         '[std.block.navigate :as edit])\n\n(manage/refactor-code ['my.project]\n  {:edits [(fn [zloc]\n             ;; Use code.query to find/modify\n             (query/modify zloc\n                           '[defn old-name]\n                           (fn [node]\n                             (edit/set-value node 'new-name))))]\n   :write true})\n```\n\n#### 4. Search and Analysis\n\n**Scenario: Find all usages of a specific var**\n\nUseful when checking impact before a change.\n\n```clojure\n(manage/find-usages ['my.project]\n                    {:var 'my.project.core/my-func})\n```\n\n**Scenario: Grep with highlighting**\n\nQuickly scan for a pattern.\n\n```clojure\n(manage/grep ['my.project]\n             {:query \"TODO\"\n              :highlight true})\n```\n"
+
+"`code.manage` provides a suite of tasks for maintaining code quality, managing tests, and refactoring. It is typically invoked via `lein manage` or from the REPL."
+
+[[:section {:title "Core Concepts" :link "merged-guides-code-manage-md-core-concepts"}]]
+
+"- **Tasks**: Operations that run over a set of namespaces (e.g., `analyse`, `grep`).\n- **Templates**: Preset configurations for tasks (e.g., `:code.transform`, `:code.locate`).\n- **Selectors**: Arguments to target specific namespaces (e.g., vector of symbols `['my.ns]`)."
+
+[[:section {:title "Usage" :link "merged-guides-code-manage-md-usage"}]]
+
+[[:subsection {:title "Invocation" :link "merged-guides-code-manage-md-invocation"}]]
+
+[[:code {:lang "bash"} "# From CLI\nlein manage <task> <namespaces> <options>\n\n# Example\nlein manage analyse \"['code.manage]\" \"{:print {:summary true}}\""]]
+
+[[:code {:lang "clojure"} ";; From REPL\n(require '[code.manage :as manage])\n(manage/analyse ['code.manage] {:print {:summary true}})"]]
+
+[[:subsection {:title "Scenarios" :link "merged-guides-code-manage-md-scenarios"}]]
+
+[[:subsubsection {:title "1. Codebase Cleanup Workflow" :link "merged-guides-code-manage-md-1-codebase-cleanup-workflow"}]]
+
+"A typical cleanup session might involve identifying messy code and then standardizing it."
+
+"**Step A: Identify \"Unclean\" Code**\nFind files with top-level comment blocks (often used for debugging/scratch) that shouldn't be committed."
+
+[[:code {:lang "clojure"} "(manage/unclean ['my.project] {:print {:item true}})"]]
+
+"**Step B: Remove Docstrings from Source**\nIf you prefer keeping docstrings in tests or external docs, you can purge them."
+
+[[:code {:lang "clojure"} "(manage/purge ['my.project] {:write true})"]]
+
+"**Step C: Standardize Namespace Declarations**\nEnsure `ns` forms are formatted consistently (requires sorting, indentation)."
+
+[[:code {:lang "clojure"} "(manage/ns-format ['my.project] {:write true})"]]
+
+[[:subsubsection {:title "2. Test Coverage & Management" :link "merged-guides-code-manage-md-2-test-coverage-management"}]]
+
+"`code.manage` integrates tightly with `code.test` to ensure coverage."
+
+"**Step A: Find Missing Tests**\nList functions that have no corresponding `fact`."
+
+[[:code {:lang "clojure"} "(manage/missing ['my.project])"]]
+
+"**Step B: Scaffold New Tests**\nGenerate test files and stubs for the missing functions."
+
+[[:code {:lang "clojure"} "(manage/scaffold ['my.project] {:write true})"]]
+
+"**Step C: Identify \"Orphaned\" Tests**\nFind tests that refer to non-existent functions (e.g., after a rename/delete)."
+
+[[:code {:lang "clojure"} "(manage/orphaned ['my.project])"]]
+
+[[:subsubsection {:title "3. Large Scale Refactoring" :link "merged-guides-code-manage-md-3-large-scale-refactoring"}]]
+
+"Use `refactor-code` or `grep-replace` for bulk changes."
+
+"**Scenario: Renaming a function across the codebase**"
+
+"If simple grep isn't enough (e.g., context sensitive), you can write a custom transform script. However, for simple string replacement:"
+
+[[:code {:lang "clojure"} "(manage/grep-replace ['my.project]\n                     {:query \"old-fn-name\"\n                      :replace \"new-fn-name\"\n                      :write true})"]]
+
+"**Scenario: Custom AST Modification**"
+
+"You can use `refactor-code` with a custom edit function that operates on the zipper."
+
+[[:code {:lang "clojure"} "(require '[code.query :as query]\n         '[std.block.navigate :as edit])\n\n(manage/refactor-code ['my.project]\n  {:edits [(fn [zloc]\n             ;; Use code.query to find/modify\n             (query/modify zloc\n                           '[defn old-name]\n                           (fn [node]\n                             (edit/set-value node 'new-name))))]\n   :write true})"]]
+
+[[:subsubsection {:title "4. Search and Analysis" :link "merged-guides-code-manage-md-4-search-and-analysis"}]]
+
+"**Scenario: Find all usages of a specific var**"
+
+"Useful when checking impact before a change."
+
+[[:code {:lang "clojure"} "(manage/find-usages ['my.project]\n                    {:var 'my.project.core/my-func})"]]
+
+"**Scenario: Grep with highlighting**"
+
+"Quickly scan for a pattern."
+
+[[:code {:lang "clojure"} "(manage/grep ['my.project]\n             {:query \"TODO\"\n              :highlight true})"]]
 ;; END merged documentation: guides/code.manage.md

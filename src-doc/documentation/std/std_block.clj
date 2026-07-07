@@ -1017,7 +1017,48 @@
 ;; BEGIN merged documentation: guides/std.block.md
 ;; sha256: 22c920588555fc7bde66da12f2a239bb31df7a66d5bb4b3bd2c16edde8822e2b
 [[:chapter {:title "std.block Guide" :link "merged-guides-std-block-md"}]]
-"# `std.block` Guide\n\n`std.block` allows you to treat source code as data structure (\"blocks\") that preserves formatting, whitespace, and comments. This is essential for building formatters, linters, and refactoring tools.\n\n## Core Concepts\n\n- **Block**: The atom of the system. Can be a token (symbol, keyword), a container (list, vector), or void (whitespace, comment).\n- **Construct**: Functions to build blocks programmatically.\n- **Layout**: Engine to render blocks back to string with specific formatting rules.\n\n## Usage\n\n### Scenarios\n\n#### 1. Programmatic Code Generation\n\nInstead of building code with lists and then pretty-printing (which loses control over exact formatting), you can build blocks.\n\n```clojure\n(require '[std.block :as block])\n\n;; Create a `(+ 1 2)` block\n(def b (block/container :list\n         [(block/token '+)\n          (block/space)\n          (block/token 1)\n          (block/space)\n          (block/token 2)]))\n\n(block/string b) ;; => \"(+ 1 2)\"\n```\n\n#### 2. Layout Customization\n\nYou can control how a block is printed by setting its layout spec.\n\n```clojure\n;; Create a vector that MUST be on one line\n(def v (block/container :vector\n         [(block/token 1) (block/space) (block/token 2)]))\n\n;; Layout usually decides based on width, but we can force it?\n;; Note: Layout logic is internal, but you can inspect the result of `layout`.\n\n(block/string (block/layout v))\n```\n\nTo implement custom formatting rules (like `cond` or `let` binding alignment), you would typically extend the `std.block.layout` multimethods or manipulate the block structure before layout.\n\n#### 3. Parsing and Analysis\n\nDistinguishing between code and \"void\" (whitespace/comments) is key for analysis tools.\n\n```clojure\n(def root (block/parse-string \"(+ 1 1) ;; comment\"))\n\n(def children (block/children root))\n\n;; Filter only meaningful code\n(filter block/code? children)\n;; => (#blk{:string \"(+ 1 1)\" ...})\n\n;; Find comments\n(filter block/comment? children)\n;; => (#blk{:string \";; comment\" ...})\n```\n\n#### 4. Manipulating the Block Tree\n\nYou can traverse and modify the block tree manually, although `code.query` provides a higher-level API for this.\n\n```clojure\n;; Replace all occurrences of 1 with 2 in a block\n(defn replace-one [blk]\n  (if (and (block/token? blk) (= (block/value blk) 1))\n    (block/token 2)\n    (if (block/container? blk)\n      (update blk :children #(mapv replace-one %))\n      blk)))\n```\n\n#### 5. Handling Uneval forms\n\n`#_` (uneval) forms are tricky in standard Clojure readers as they disappear. `std.block` preserves them.\n\n```clojure\n(def b (block/parse-string \"#_(+ 1 2)\"))\n(block/type b) ;; => :uneval (or similar modifier type)\n```\n"
+
+"`std.block` allows you to treat source code as data structure (\"blocks\") that preserves formatting, whitespace, and comments. This is essential for building formatters, linters, and refactoring tools."
+
+[[:section {:title "Core Concepts" :link "merged-guides-std-block-md-core-concepts"}]]
+
+"- **Block**: The atom of the system. Can be a token (symbol, keyword), a container (list, vector), or void (whitespace, comment).\n- **Construct**: Functions to build blocks programmatically.\n- **Layout**: Engine to render blocks back to string with specific formatting rules."
+
+[[:section {:title "Usage" :link "merged-guides-std-block-md-usage"}]]
+
+[[:subsection {:title "Scenarios" :link "merged-guides-std-block-md-scenarios"}]]
+
+[[:subsubsection {:title "1. Programmatic Code Generation" :link "merged-guides-std-block-md-1-programmatic-code-generation"}]]
+
+"Instead of building code with lists and then pretty-printing (which loses control over exact formatting), you can build blocks."
+
+[[:code {:lang "clojure"} "(require '[std.block :as block])\n\n;; Create a `(+ 1 2)` block\n(def b (block/container :list\n         [(block/token '+)\n          (block/space)\n          (block/token 1)\n          (block/space)\n          (block/token 2)]))\n\n(block/string b) ;; => \"(+ 1 2)\""]]
+
+[[:subsubsection {:title "2. Layout Customization" :link "merged-guides-std-block-md-2-layout-customization"}]]
+
+"You can control how a block is printed by setting its layout spec."
+
+[[:code {:lang "clojure"} ";; Create a vector that MUST be on one line\n(def v (block/container :vector\n         [(block/token 1) (block/space) (block/token 2)]))\n\n;; Layout usually decides based on width, but we can force it?\n;; Note: Layout logic is internal, but you can inspect the result of `layout`.\n\n(block/string (block/layout v))"]]
+
+"To implement custom formatting rules (like `cond` or `let` binding alignment), you would typically extend the `std.block.layout` multimethods or manipulate the block structure before layout."
+
+[[:subsubsection {:title "3. Parsing and Analysis" :link "merged-guides-std-block-md-3-parsing-and-analysis"}]]
+
+"Distinguishing between code and \"void\" (whitespace/comments) is key for analysis tools."
+
+[[:code {:lang "clojure"} "(def root (block/parse-string \"(+ 1 1) ;; comment\"))\n\n(def children (block/children root))\n\n;; Filter only meaningful code\n(filter block/code? children)\n;; => (#blk{:string \"(+ 1 1)\" ...})\n\n;; Find comments\n(filter block/comment? children)\n;; => (#blk{:string \";; comment\" ...})"]]
+
+[[:subsubsection {:title "4. Manipulating the Block Tree" :link "merged-guides-std-block-md-4-manipulating-the-block-tree"}]]
+
+"You can traverse and modify the block tree manually, although `code.query` provides a higher-level API for this."
+
+[[:code {:lang "clojure"} ";; Replace all occurrences of 1 with 2 in a block\n(defn replace-one [blk]\n  (if (and (block/token? blk) (= (block/value blk) 1))\n    (block/token 2)\n    (if (block/container? blk)\n      (update blk :children #(mapv replace-one %))\n      blk)))"]]
+
+[[:subsubsection {:title "5. Handling Uneval forms" :link "merged-guides-std-block-md-5-handling-uneval-forms"}]]
+
+"`#_` (uneval) forms are tricky in standard Clojure readers as they disappear. `std.block` preserves them."
+
+[[:code {:lang "clojure"} "(def b (block/parse-string \"#_(+ 1 2)\"))\n(block/type b) ;; => :uneval (or similar modifier type)"]]
 ;; END merged documentation: guides/std.block.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_block_base_tutorial.md
