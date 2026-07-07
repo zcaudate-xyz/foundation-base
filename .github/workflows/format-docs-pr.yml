@@ -7,19 +7,20 @@ on:
       - .github/workflows/format-docs-pr.yml
 
 permissions:
-  contents: write
-  statuses: write
+  contents: read
 
 jobs:
   check:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Export documentation workspace
+        uses: actions/upload-artifact@v4
         with:
-          ref: docs/merge-guides-slop
-          fetch-depth: 0
-      - uses: actions/github-script@v7
-        with:
-          script: |
-            const build = require('./.github/scripts/create_formatted_commit.js')
-            return build({github, context, core, exec})
+          name: summary-docs-workspace
+          path: |
+            src-doc
+            .github/scripts/convert_merged_docs_to_dsl.py
+            .github/scripts/format_docs.py
+            project.clj
+          include-hidden-files: true
