@@ -171,49 +171,49 @@
   [form]
   (common/expand-form +reserved+ form))
 
- (def +scheme-transform-config+
-   {:begin 'begin
-     :reserved +reserved+
-    :def-form (fn [sym value]
-                (list 'define sym value))
-    :lambda-form (fn [args body]
-                    (let [body (if (seq body)
-                                 body
-                                 ['(void)])]
-                      (list* 'lambda
-                             (apply list args)
-                             body)))
-     :defn-form (fn [sym args body]
-                  (list* 'define
-                         (list* sym args)
-                        body))
-    :let-form (fn [bindings body]
-                (list* 'let* (apply list bindings) body))
+(def +scheme-transform-config+
+  {:begin 'begin
+   :reserved +reserved+
+   :def-form (fn [sym value]
+               (list 'define sym value))
+   :lambda-form (fn [args body]
+                  (let [body (if (seq body)
+                               body
+                               ['(void)])]
+                    (list* 'lambda
+                           (apply list args)
+                           body)))
+   :defn-form (fn [sym args body]
+                (list* 'define
+                       (list* sym args)
+                       body))
+   :let-form (fn [bindings body]
+               (list* 'let* (apply list bindings) body))
    :while-form (fn [test body]
                  (list* 'while test body))
-    :try-form (fn [body catch finally]
-                (let [body-form (if (= 1 (count body))
-                                  (first body)
-                                  (cons 'begin body))
-                      caught    (if catch
-                                  (let [raw-sym (gensym "err__")
-                                        bind-sym (or (:sym catch) 'err)
-                                        catch-form (if (= 1 (count (:body catch)))
-                                                     (first (:body catch))
-                                                     (cons 'begin (:body catch)))]
-                                    (list 'with-handlers
-                                          (list (list (list 'lambda (list raw-sym) true)
-                                                       (list 'lambda
-                                                             (list raw-sym)
-                                                             (list 'let
-                                                                   (list (list bind-sym
-                                                                               (list 'if
-                                                                                     (list 'exn:fail? raw-sym)
-                                                                                     (list 'exn-message raw-sym)
-                                                                                     raw-sym)))
-                                                                   catch-form))))
-                                           body-form))
-                                  body-form)]
+   :try-form (fn [body catch finally]
+               (let [body-form (if (= 1 (count body))
+                                 (first body)
+                                 (cons 'begin body))
+                     caught    (if catch
+                                 (let [raw-sym (gensym "err__")
+                                       bind-sym (or (:sym catch) 'err)
+                                       catch-form (if (= 1 (count (:body catch)))
+                                                    (first (:body catch))
+                                                    (cons 'begin (:body catch)))]
+                                   (list 'with-handlers
+                                         (list (list (list 'lambda (list raw-sym) true)
+                                                      (list 'lambda
+                                                            (list raw-sym)
+                                                            (list 'let
+                                                                  (list (list bind-sym
+                                                                              (list 'if
+                                                                                    (list 'exn:fail? raw-sym)
+                                                                                    (list 'exn-message raw-sym)
+                                                                                    raw-sym)))
+                                                                  catch-form))))
+                                         body-form))
+                                 body-form)]
                  (if (seq finally)
                    (list 'dynamic-wind
                          (list 'lambda '() (list 'void))
@@ -238,35 +238,93 @@
                                     (list 'hash? obj)
                                     (list 'hash-ref obj key nil)
                                     (list 'vector-ref obj key))))
-    :index-write-form (fn [obj key value kind]
-                        (case kind
-                          :key (list 'begin
-                                     (list 'hash-set! obj key value)
-                                     obj)
-                          :idx (list 'begin
-                                     (list 'vector-set! obj key value)
-                                     obj)
-                          :auto (list 'if
-                                      (list 'hash? obj)
-                                      (list 'begin
-                                            (list 'hash-set! obj key value)
-                                            obj)
-                                      (list 'begin
-                                            (list 'vector-set! obj key value)
-                                            obj))))
-    :global-symbol '__xt_globals__
-    :global-read-form (fn [global key]
-                        (list 'hash-ref global
-                              (if (symbol? key) (name key) key)
-                              nil))
+   :index-write-form (fn [obj key value kind]
+                       (case kind
+                         :key (list 'begin
+                                    (list 'hash-set! obj key value)
+                                    obj)
+                         :idx (list 'begin
+                                    (list 'vector-set! obj key value)
+                                    obj)
+                         :auto (list 'if
+                                     (list 'hash? obj)
+                                     (list 'begin
+                                           (list 'hash-set! obj key value)
+                                           obj)
+                                     (list 'begin
+                                           (list 'vector-set! obj key value)
+                                           obj))))
+   :global-symbol '__xt_globals__
+   :global-read-form (fn [global key]
+                       (list 'hash-ref global
+                             (if (symbol? key) (name key) key)
+                             nil))
    :global-write-form (fn [global key value]
                         (list 'begin
                               (list 'hash-set! global key value)
                               global))})
 
+(defn- scheme-rest-arg-form?
+  [form]
+  (and (collection/form? form)
+       (= 2 (count form))
+       (= :.. (first form))
+       (symbol? (second form))))
+
+(defn- scheme-callable-form?
+  [form]
+  (and (collection/form? form)
+       (contains? '#{fn fn:> defn defgen} (first form))))
+
+(defn- scheme-lower-rest-callable
+  [form]
+  (let [[tag head & tail] form
+        [name args body] (if (symbol? head)
+                           [head (first tail) (rest tail)]
+                           [nil head tail])
+        rest-args (filterv scheme-rest-arg-form? args)]
+    (cond
+      (empty? rest-args) form
+      (< 1 (count rest-args))
+      (throw (ex-info "Only one rest argument is allowed" {:form form :args args}))
+      (not= (last args) (first rest-args))
+      (throw (ex-info "Rest argument must be final" {:form form :args args}))
+      :else
+      (let [rest-sym (second (first rest-args))
+            args (vec (concat (butlast args) ['. rest-sym]))
+            body (cons (list 'set! rest-sym (list 'list->vector rest-sym)) body)
+            out (if name
+                  (apply list tag name args body)
+                  (apply list tag args body))]
+        (with-meta out (meta form))))))
+
+(defn- scheme-lower-rest-forms
+  [form]
+  (cond
+    (and (collection/form? form) (= 'quote (first form))) form
+    (scheme-callable-form? form)
+    (let [form (scheme-lower-rest-callable form)]
+      (with-meta (apply list (map scheme-lower-rest-forms form)) (meta form)))
+    (collection/form? form)
+    (with-meta (apply list (map scheme-lower-rest-forms form)) (meta form))
+    (vector? form)
+    (with-meta (mapv scheme-lower-rest-forms form) (meta form))
+    (set? form)
+    (with-meta (set (map scheme-lower-rest-forms form)) (meta form))
+    (map? form)
+    (with-meta
+      (into (empty form)
+            (map (fn [[k v]]
+                   [(scheme-lower-rest-forms k)
+                    (scheme-lower-rest-forms v)]))
+            form)
+      (meta form))
+    :else form))
+
 (defn scheme-transform
   [form]
-  (common/transform-form +scheme-transform-config+ form))
+  (common/transform-form +scheme-transform-config+
+                         (scheme-lower-rest-forms form)))
 
 (declare emit-scheme-form)
 
