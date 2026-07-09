@@ -59,8 +59,8 @@ jobs:
                                   '[code.doc.executive :as exec])
                           (let [project (doc/make-project)
                                 lookup  (exec/all-pages project)
-                                sites   #{\"core\" \"foundation.code\" \"std\" \"hara\"}]
-                            (doseq [site [:core :foundation.code :std :hara]]
+                                sites   #{"core" "code" "xt" "std" "hara"}]
+                            (doseq [site [:core :code :xt :std :hara]]
                               (doc/deploy-template site {:write true}))
                             (doseq [k (sort (filter #(sites (namespace %))
                                                     (keys lookup)))]
