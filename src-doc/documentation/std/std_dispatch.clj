@@ -1,4 +1,6 @@
 (ns documentation.std-dispatch
+  (:require [std.dispatch :refer :all]
+            [std.lib.component :as component])
   (:use code.test))
 
 [[:hero {:title "std.dispatch"
@@ -13,8 +15,21 @@
 
 "Require the top-level namespace for common workflows, then move to subnamespaces when you need a lower-level primitive. Existing tests under `test/std/dispatch` and `test/std/dispatch_test.clj` are the best executable examples for edge cases."
 
-(comment
-  (require '[std.dispatch :as lib]))
+(fact "create and use a core dispatcher"
+  (let [d (dispatch {:type :core
+                     :options {:pool {:size 1}}
+                     :handler (fn [_ _])})]
+    (try
+      (submit d :entry)
+      => anything
+      (finally
+        (component/stop d)))))
+
+(fact "create a dispatcher without starting it"
+  (create {:type :core
+           :options {:pool {:size 1}}
+           :handler (fn [_ _])})
+  => dispatch?)
 
 [[:chapter {:title "Internal usage" :link "internal"}]]
 

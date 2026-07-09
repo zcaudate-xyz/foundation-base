@@ -33,7 +33,7 @@ Foundation Base contains several related systems in one repository.
 - Developer tools: [`src/code`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src/code)
 - Language tooling: [Hara docs](https://zcaudate.xyz/foundation-base/hara/index.html)
 - Generated examples: [`src-build/play`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-build/play)
-- Walkthroughs: [`src-build/walkthrough`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-build/walkthrough)
+- Walkthroughs: [`src-doc/walkthrough`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-doc/walkthrough)
 - Documentation sources: [`src-doc/documentation`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-doc/documentation)
 
 ## Maturity labels

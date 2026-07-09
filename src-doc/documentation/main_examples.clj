@@ -13,15 +13,15 @@
 [[:card-grid {:items [{:meta "00"
                        :title "Basic authoring"
                        :text "Install language contexts, emit forms, and work with generated pointers."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_00_basic.clj"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_00_basic.clj"}
                       {:meta "01"
                        :title "Multiple languages"
                        :text "Use the shared authoring model across more than one target grammar."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_01_multi.clj"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_01_multi.clj"}
                       {:meta "02"
                        :title "Live evaluation"
                        :text "Connect emitted code to runtime adapters for interactive execution."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_02_live.clj"}]}]]
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_02_live.clj"}]}]]
 
 [[:chapter {:title "Generated project examples"}]]
 

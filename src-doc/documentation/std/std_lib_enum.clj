@@ -1,11 +1,55 @@
 (ns documentation.std-lib-enum
-  (:use code.test))
+  (:require [std.lib.enum :refer :all])
+  (:use code.test)
+  (:import java.lang.annotation.ElementType))
 
 [[:chapter {:title "Introduction"}]]
 
 [[:section {:title "Overview"}]]
 
 "`std.lib.enum` is part of the standard foundation library set. This page collects the public API reference for the namespace."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Inspecting Java enums"}]]
+
+"`std.lib.enum` makes it easy to work with Java enums from Clojure. Check if a class is an enum, list its values, and convert between strings, keywords, and enum instances."
+
+(fact "check and list enum values"
+  ^{:refer std.lib.enum/enum? :added "3.0"}
+  (enum? java.lang.annotation.ElementType)
+  => true
+
+  ^{:refer std.lib.enum/enum-values :added "3.0"}
+  (->> (enum-values ElementType)
+       (map str)
+       (set))
+  => (contains #{"TYPE" "FIELD" "METHOD" "PARAMETER" "CONSTRUCTOR"}))
+
+(fact "convert to and from enum instances"
+  ^{:refer std.lib.enum/create-enum :added "3.0"}
+  (create-enum "TYPE" ElementType)
+  => ElementType/TYPE
+
+  ^{:refer std.lib.enum/to-enum :added "3.0"}
+  (to-enum :field ElementType)
+  => ElementType/FIELD
+
+  ^{:refer std.lib.enum/enum-map :added "3.0"}
+  (enum-map ElementType)
+  => (satisfies [:annotation-type
+                 :constructor
+                 :field
+                 :local-variable
+                 :method
+                 :module
+                 :package
+                 :parameter
+                 :record-component
+                 :type
+                 :type-parameter
+                 :type-use]
+                (comp vec sort keys)))
 
 [[:chapter {:title "API" :link "std.lib.enum"}]]
 

@@ -1,4 +1,5 @@
 (ns documentation.std-lib-class
+  (:require [std.lib.class :refer :all])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -6,6 +7,64 @@
 [[:section {:title "Overview"}]]
 
 "`std.lib.class` is part of the standard foundation library set. This page collects the public API reference for the namespace."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Class predicates"}]]
+
+"`std.lib.class` provides predicates and accessors for Java class metadata: arrays, primitives, interfaces, abstract classes, and ancestors."
+
+(fact "inspect class flags"
+  ^{:refer std.lib.class/class:array? :added "3.0"}
+  (class:array? (type (int-array 0)))
+  => true
+
+  ^{:refer std.lib.class/primitive? :added "3.0"}
+  (primitive? Integer/TYPE)
+  => true
+
+  ^{:refer std.lib.class/class:interface? :added "3.0"}
+  (class:interface? java.util.Map)
+  => true
+
+  ^{:refer std.lib.class/class:abstract? :added "3.0"}
+  (class:abstract? java.util.AbstractMap)
+  => true)
+
+[[:section {:title "Primitive conversions"}]]
+
+"`primitive` converts between the many representations of a Java primitive: keyword, symbol, raw JVM descriptor, class, and boxed container."
+
+(fact "convert primitive representations"
+  ^{:refer std.lib.class/primitive :added "3.0"}
+  (primitive Boolean/TYPE :symbol)
+  => 'boolean
+
+  ^{:refer std.lib.class/primitive :added "3.0"}
+  (primitive "Z" :symbol)
+  => 'boolean
+
+  ^{:refer std.lib.class/primitive :added "3.0"}
+  (primitive 'long :container)
+  => Long)
+
+[[:section {:title "Hierarchy traversal"}]]
+
+"`ancestor:list`, `ancestor:tree`, and `class:interfaces` walk the type hierarchy of a class."
+
+(fact "walk class hierarchies"
+  ^{:refer std.lib.class/ancestor:list :added "3.0"}
+  (ancestor:list clojure.lang.PersistentHashMap)
+  => [clojure.lang.PersistentHashMap
+      clojure.lang.APersistentMap
+      clojure.lang.AFn
+      java.lang.Object]
+
+  ^{:refer std.lib.class/class:interfaces :added "3.0"}
+  (class:interfaces clojure.lang.AFn)
+  => #{java.lang.Runnable
+       java.util.concurrent.Callable
+       clojure.lang.IFn})
 
 [[:chapter {:title "API" :link "std.lib.class"}]]
 

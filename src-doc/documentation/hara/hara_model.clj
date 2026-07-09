@@ -1,4 +1,7 @@
 (ns documentation.hara-model
+  (:require [hara.lang :as l]
+            [hara.model.spec-js :as js]
+            [hara.model.spec-lua :as lua])
   (:use code.test))
 
 [[:hero {:title "hara.model"
@@ -9,6 +12,78 @@
 "A language model owns target syntax, helper functions, type declarations, and runtime-specific emission rules. Generated projects in `src-build/play` use these models when producing Go, TypeScript, Lua, C, and JS artifacts."
 
 [[:chapter {:title "API"}]]
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Emitting code to a target"}]]
+
+"`hara.lang/emit-as` is the main entry point for turning a hara form into target source code. The same expression can be rendered for different language models just by changing the target keyword."
+
+(fact "arithmetic emits to multiple targets"
+  (l/emit-as :js '[(+ 1 2)])
+  => "1 + 2"
+
+  (l/emit-as :lua '[(+ 1 2)])
+  => "1 + 2"
+
+  (l/emit-as :python '[(+ 1 2)])
+  => "1 + 2")
+
+[[:section {:title "Data literals"}]]
+
+"Maps and vectors are lowered into each target's native data syntax. The JS model uses JSON-like object notation, Lua uses table syntax, and Python uses dict/list literals."
+
+(fact "maps and vectors render in target syntax"
+  (l/emit-as :js '[{:a 1 :b 2}])
+  => "{\"a\":1,\"b\":2}"
+
+  (l/emit-as :lua '[{:a 1 :b 2}])
+  => "{a=1,b=2}"
+
+  (l/emit-as :js '[[1 2 3]])
+  => "[1,2,3]"
+
+  (l/emit-as :lua '[[1 2 3]])
+  => "setmetatable({1,2,3}, cjson.array_mt)")
+
+[[:section {:title "Functions and control flow"}]]
+
+"Function definitions and conditionals are expanded into the target language's statements. The body is emitted with the target's block and return conventions."
+
+(fact "define functions in JS and Lua"
+  (l/emit-as :js '[(defn add [a b] (return (+ a b)))])
+  => "function add(a,b){\n  return a + b;\n}"
+
+  (l/emit-as :lua '[(defn add [a b] (return (+ a b)))])
+  => "local function add(a,b)\n  return a + b\nend")
+
+(fact "if/else becomes target conditionals"
+  (l/emit-as :js '[(if (> x 0) (return x) (return 0))])
+  => "if(x > 0){\n  return x;\n}\nelse{\n  return 0;\n}"
+
+  (l/emit-as :lua '[(if (> x 0) (return x) (return 0))])
+  => "if x > 0 then\n  return x\nelse\n  return 0\nend")
+
+[[:section {:title "Target-specific helpers"}]]
+
+"Each model exposes small helper functions for target-specific edge cases. The JS model has `js-regex` and `js-map-key`; the Lua model has `lua-map-key`."
+
+(fact "JS helpers"
+  (js/js-regex #"abc")
+  => "/abc/"
+
+  (js/js-map-key :hello js/+grammar+ {})
+  => "\"hello\""
+
+  (js/js-map-key 'x js/+grammar+ {})
+  => "[x]")
+
+(fact "Lua helpers"
+  (lua/lua-map-key :abc lua/+grammar+ {})
+  => "abc"
+
+  (lua/lua-map-key 123 lua/+grammar+ {})
+  => "[123]")
 
 ;; BEGIN merged documentation: guides/MANAGE_XTALK.md
 ;; sha256: 5d3bf37e18ce83b1dabca7c89e88b976714977d3c3d01f16cbabcd21c9a4ac1d

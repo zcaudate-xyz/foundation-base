@@ -1,4 +1,5 @@
 (ns documentation.std-lib-encode
+  (:require [std.lib.encode :refer :all])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -6,6 +7,40 @@
 [[:section {:title "Overview"}]]
 
 "`std.lib.encode` is part of the standard foundation library set. This page collects the public API reference for the namespace."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Hexadecimal encoding"}]]
+
+"`std.lib.encode` converts byte arrays to hex strings and back. Use `to-hex` for the full string, `to-hex-chars` for a char array, and `hex-chars` for a single byte."
+
+(fact "encode and decode hex"
+  ^{:refer std.lib.encode/to-hex :added "3.0"}
+  (to-hex (.getBytes "hello"))
+  => "68656c6c6f"
+
+  ^{:refer std.lib.encode/from-hex :added "3.0"}
+  (String. (from-hex "68656c6c6f"))
+  => "hello"
+
+  ^{:refer std.lib.encode/hex-chars :added "3.0"}
+  (hex-chars 255)
+  => [\f \f])
+
+[[:section {:title "Base64 encoding"}]]
+
+"Base64 encoding works the same way: byte array in, ASCII string out."
+
+(fact "encode and decode base64"
+  ^{:refer std.lib.encode/to-base64 :added "3.0"}
+  (-> (.getBytes "hello")
+      (to-base64))
+  => "aGVsbG8="
+
+  ^{:refer std.lib.encode/from-base64 :added "3.0"}
+  (-> (from-base64 "aGVsbG8=")
+      (String.))
+  => "hello")
 
 [[:chapter {:title "API" :link "std.lib.encode"}]]
 

@@ -1,5 +1,8 @@
 (ns documentation.std-string
-  (:use code.test))
+  (:require [std.string :refer :all]
+            [std.string.prose :as prose])
+  (:use code.test)
+  (:refer-clojure :exclude [reverse replace]))
 
 [[:hero {:title "std.string"
          :subtitle "case, coercion, path, plural, prose, and wrapping helpers"
@@ -13,8 +16,29 @@
 
 "Require the top-level namespace for common workflows, then move to subnamespaces when you need a lower-level primitive. Existing tests under `test/std/string` and `test/std/string_test.clj` are the best executable examples for edge cases."
 
-(comment
-  (require '[std.string :as lib]))
+(fact "case conversions"
+  (camel-case "hello-world")
+  => "helloWorld"
+
+  (snake-case "hello-world")
+  => "hello_world"
+
+  (spear-case "hello_world")
+  => "hello-world")
+
+(fact "wrapped operations preserve input type"
+  ((wrap split) :a-b #"-")
+  => [:a :b]
+
+  ((wrap subs) :hello-world 3 8)
+  => :lo-wo)
+
+(fact "prose helpers"
+  (prose/| "abc" "def")
+  => "abc\ndef"
+
+  (prose/single-line "a\nb")
+  => "a b")
 
 [[:chapter {:title "Internal usage" :link "internal"}]]
 

@@ -12,9 +12,9 @@ Examples are a primary entry point into Foundation Base. Each example should kee
 
 | Walkthrough | Published page | Source |
 |---|---|---|
-| Basic authoring | [Walkthrough: basic](https://zcaudate.xyz/foundation-base/hara/walkthrough-basic.html) | [`std_lang_00_basic.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_00_basic.clj) |
-| Multiple languages | [Walkthrough: multi](https://zcaudate.xyz/foundation-base/hara/walkthrough-multi.html) | [`std_lang_01_multi.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_01_multi.clj) |
-| Live evaluation | [Walkthrough: live](https://zcaudate.xyz/foundation-base/hara/walkthrough-live.html) | [`std_lang_02_live.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_02_live.clj) |
+| Basic authoring | [Walkthrough: basic](https://zcaudate.xyz/foundation-base/hara/walkthrough-basic.html) | [`std_lang_00_basic.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_00_basic.clj) |
+| Multiple languages | [Walkthrough: multi](https://zcaudate.xyz/foundation-base/hara/walkthrough-multi.html) | [`std_lang_01_multi.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_01_multi.clj) |
+| Live evaluation | [Walkthrough: live](https://zcaudate.xyz/foundation-base/hara/walkthrough-live.html) | [`std_lang_02_live.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_02_live.clj) |
 
 ## Generated project examples
 

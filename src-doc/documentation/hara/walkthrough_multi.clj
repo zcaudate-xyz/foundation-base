@@ -5,8 +5,8 @@
   (:use code.test))
 
 [[:hero {:title "Walkthrough: multi"
-         :subtitle "Source walkthrough from src-build/walkthrough/std_lang_01_multi.clj"
-         :lead "This page promotes the existing walkthrough source into the public Hara docs. The implementation source remains in `src-build/walkthrough/std_lang_01_multi.clj`; this page explains the intent and links it to the surrounding Hara layers."}]]
+         :subtitle "Source walkthrough from src-doc/walkthrough/std_lang_01_multi.clj"
+         :lead "This page promotes the existing walkthrough source into the public Hara docs. The implementation source remains in `src-doc/walkthrough/std_lang_01_multi.clj`; this page explains the intent and links it to the surrounding Hara layers."}]]
 
 [[:chapter {:title "Motivation"}]]
 "The walkthrough shows how hara.lang scripts define target contexts, how forms are emitted or executed, and how generated pointers connect Clojure authoring to target language code."

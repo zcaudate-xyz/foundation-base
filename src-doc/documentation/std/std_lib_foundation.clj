@@ -1,4 +1,5 @@
 (ns documentation.std-lib-foundation
+  (:require [std.lib.foundation :refer :all])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -6,6 +7,64 @@
 [[:section {:title "Overview"}]]
 
 "`std.lib.foundation` provides basic predicates, constructors, and helpers used across the foundation libraries."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Constants and combinators"}]]
+
+"`T`, `F`, and `NIL` are constant functions. `U` and `Z` are classic fixed-point combinators, useful for anonymous recursion."
+
+(fact "constant functions and combinators"
+  ^{:refer std.lib.foundation/T :added "3.0"}
+  (T 1 2 3)
+  => true
+
+  ^{:refer std.lib.foundation/F :added "3.0"}
+  (F 1 2 3)
+  => false
+
+  ^{:refer std.lib.foundation/Z :added "3.0"}
+  (let [factorial (fn [f]
+                    (fn [n]
+                      (if (zero? n)
+                        1
+                        (* n (f (dec n))))))]
+    ((Z factorial) 5))
+  => 120)
+
+[[:section {:title "Identifiers and time"}]]
+
+"Generate short IDs, UUIDs, and timestamps."
+
+(fact "create identifiers and instants"
+  ^{:refer std.lib.foundation/sid :added "3.0"}
+  (sid)
+  => string?
+
+  ^{:refer std.lib.foundation/uuid :added "3.0"}
+  (uuid)
+  => #(instance? java.util.UUID %)
+
+  ^{:refer std.lib.foundation/instant :added "3.0"}
+  (instant 0)
+  => #inst "1970-01-01T00:00:00.000-00:00")
+
+[[:section {:title "Coercion helpers"}]]
+
+"`strn`, `keyword`, and `string` coerce values to common types."
+
+(fact "coerce values"
+  ^{:refer std.lib.foundation/strn :added "3.0"}
+  (strn :hello)
+  => "hello"
+
+  ^{:refer std.lib.foundation/keyword :added "3.0"}
+  (keyword "hello")
+  => :hello
+
+  ^{:refer std.lib.foundation/string :added "3.0"}
+  (string (.getBytes "Hello"))
+  => "Hello")
 
 [[:chapter {:title "Constants and Combinators" :link "std.lib.foundation"}]]
 

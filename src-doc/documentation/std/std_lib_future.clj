@@ -1,4 +1,5 @@
 (ns documentation.std-lib-future
+  (:require [std.lib.future :as f :refer :all])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -6,6 +7,59 @@
 [[:section {:title "Overview"}]]
 
 "`std.lib.future` is part of the standard foundation library set. This page collects the public API reference for the namespace."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Creating futures"}]]
+
+"`std.lib.future` wraps `CompletableFuture` with a Clojure-friendly API. `future:call` runs a function asynchronously, `completed` creates an already-done future, and `incomplete` creates a promise-like future."
+
+(fact "create and complete futures"
+  ^{:refer std.lib.future/completed :added "3.0"}
+  @(completed 1)
+  => 1
+
+  ^{:refer std.lib.future/future:call :added "3.0"}
+  @(f/future:call (fn [] 1))
+  => 1
+
+  ^{:refer std.lib.future/incomplete :added "3.0"}
+  (f/future:incomplete? (incomplete))
+  => true)
+
+[[:section {:title "Timeouts and values"}]]
+
+"`future:timeout` adds a timeout with an optional default. `future:value` blocks for the result, and `future:now` returns a default if not yet complete."
+
+(fact "control future completion"
+  ^{:refer std.lib.future/future:timeout :added "3.0"}
+  @(-> (f/future:call (fn [] (Thread/sleep 100)))
+       (f/future:timeout 10 :ok))
+  => :ok
+
+  ^{:refer std.lib.future/future:value :added "3.0"}
+  (-> (f/future:run (fn [] 1))
+      (f/future:value))
+  => 1
+
+  ^{:refer std.lib.future/future:now :added "3.0"}
+  (-> (f/future:run (fn [] (Thread/sleep 100)))
+      (f/future:now :invalid))
+  => :invalid)
+
+[[:section {:title "Exception handling"}]]
+
+"Query and force completion states with `future:exception`, `future:complete?`, and `future:force`."
+
+(fact "handle exceptional completion"
+  ^{:refer std.lib.future/future:exception :added "3.0"}
+  (-> (f/future:run (fn [] (throw (ex-info "ERROR" {}))))
+      (f/future:exception))
+  => Throwable
+
+  ^{:refer std.lib.future/future:complete? :added "3.0"}
+  (f/future:complete? (completed 1))
+  => true)
 
 [[:chapter {:title "API" :link "std.lib.future"}]]
 

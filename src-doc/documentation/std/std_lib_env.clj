@@ -1,4 +1,5 @@
 (ns documentation.std-lib-env
+  (:require [std.lib.env :refer :all])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -13,6 +14,55 @@
 - Pretty printing utilities
 - Debug facilities
 "
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Namespace and resource introspection"}]]
+
+"`std.lib.env` provides helpers for inspecting the current namespace and locating classpath resources."
+
+(fact "inspect the current namespace and resources"
+  ^{:refer std.lib.env/ns-sym :added "3.0"}
+  (ns-sym)
+  => 'documentation.std-lib-env
+
+  ^{:refer std.lib.env/sys:resource :added "3.0"}
+  (sys:resource "std/lib.clj")
+  => java.net.URL
+
+  ^{:refer std.lib.env/sys:ns-url :added "4.0"}
+  (sys:ns-url 'std.lib.env)
+  => java.net.URL)
+
+[[:section {:title "Local function overrides"}]]
+
+"`local:set` and `local` allow you to override functions like `println` within a scope. `p` is a shortcut for the local println."
+
+(fact "override and call a local function"
+  ^{:refer std.lib.env/local:set :added "3.0"}
+  (local:set :test (fn [] :hello))
+  => map?
+
+  ^{:refer std.lib.env/local :added "3.0"}
+  (local :test)
+  => :hello
+
+  ^{:refer std.lib.env/p :added "3.0"}
+  (with-out-str (p "hello"))
+  => "hello\n")
+
+[[:section {:title "Pretty printing"}]]
+
+"`pp-str` returns a pretty-printed string, and `pp` writes it to the local pprint output."
+
+(fact "pretty print values"
+  ^{:refer std.lib.env/pp-str :added "4.0"}
+  (pp-str {:a 1})
+  => "{:a 1}"
+
+  ^{:refer std.lib.env/pp :added "3.0"}
+  (with-out-str (pp {:a 1}))
+  => string?)
 
 [[:chapter {:title "Namespace Utilities" :link "std.lib.env"}]]
 

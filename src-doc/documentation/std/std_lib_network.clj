@@ -1,4 +1,5 @@
 (ns documentation.std-lib-network
+  (:require [std.lib.network :refer :all])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -6,6 +7,38 @@
 [[:section {:title "Overview"}]]
 
 "`std.lib.network` is part of the standard foundation library set. This page collects the public API reference for the namespace."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Local host information"}]]
+
+"`std.lib.network` returns information about the local machine: host address, IP, and hostname."
+
+(fact "query local host details"
+  ^{:refer std.lib.network/local-host :added "3.0"}
+  (local-host)
+  => java.net.Inet4Address
+
+  ^{:refer std.lib.network/local-ip :added "3.0"}
+  (local-ip)
+  => string?
+
+  ^{:refer std.lib.network/local-hostname :added "3.0"}
+  (local-hostname)
+  => string?)
+
+[[:section {:title "Port availability"}]]
+
+"`port:check-available`, `port:get-available`, and `wait-for-port` help allocate and synchronise ports."
+
+(fact "check and find available ports"
+  ^{:refer std.lib.network/port:check-available :added "4.0"}
+  (port:check-available 51311)
+  => anything
+
+  ^{:refer std.lib.network/port:get-available :added "4.0"}
+  (port:get-available [51312 51313])
+  => number?)
 
 [[:chapter {:title "API" :link "std.lib.network"}]]
 

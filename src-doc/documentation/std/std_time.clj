@@ -1,4 +1,5 @@
 (ns documentation.std-time
+  (:require [std.time :as time])
   (:use code.test))
 
 [[:hero {:title "std.time"
@@ -13,8 +14,20 @@
 
 "Require the top-level namespace for common workflows, then move to subnamespaces when you need a lower-level primitive. Existing tests under `test/std/time` and `test/std/time_test.clj` are the best executable examples for edge cases."
 
-(comment
-  (require '[std.time :as lib]))
+(fact "coerce instants between representations"
+  (time/coerce-instant 0 {:type java.util.Date})
+  => #inst "1970-01-01T00:00:00.000-00:00")
+
+(fact "format and parse timestamps"
+  (time/format (java.util.Date. 0) "yyyy-MM-dd")
+  => "1970-01-01"
+
+  (time/parse "1970-01-01" "yyyy-MM-dd")
+  => #(instance? java.util.Date %))
+
+(fact "duration calculations"
+  (time/to-ms 1 :s)
+  => 1000)
 
 [[:chapter {:title "Internal usage" :link "internal"}]]
 

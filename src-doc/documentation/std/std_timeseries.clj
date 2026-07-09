@@ -1,4 +1,5 @@
 (ns documentation.std-timeseries
+  (:require [std.timeseries :as ts])
   (:use code.test))
 
 [[:hero {:title "std.timeseries"
@@ -13,8 +14,23 @@
 
 "Require the top-level namespace for common workflows, then move to subnamespaces when you need a lower-level primitive. Existing tests under `test/std/timeseries` and `test/std/timeseries_test.clj` are the best executable examples for edge cases."
 
-(comment
-  (require '[std.timeseries :as lib]))
+(fact "create a journal and add entries"
+  (def sensor-journal
+    (ts/journal {:meta {:time {:unit :ms :key :timestamp}
+                        :entry {:flatten true}}}))
+
+  (-> sensor-journal
+      (ts/add-entry {:temp 20.5 :humidity 50 :timestamp 1600000000000})
+      (count))
+  => 1)
+
+(fact "select entries from a journal"
+  (let [j (-> (ts/journal {:meta {:time {:unit :ms :key :timestamp}}})                       (ts/add-entry {:value 1 :timestamp 0})
+              (ts/add-entry {:value 2 :timestamp 1000})
+              (ts/add-entry {:value 3 :timestamp 2000}))]
+    (->> (ts/select j {:range [0 2000]})
+         (map :value)))
+  => [1 2 3])
 
 [[:chapter {:title "Internal usage" :link "internal"}]]
 

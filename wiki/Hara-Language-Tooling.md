@@ -24,9 +24,9 @@
 
 ## Walkthroughs
 
-- [Basic authoring source](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_00_basic.clj)
-- [Multiple-language source](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_01_multi.clj)
-- [Live evaluation source](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/walkthrough/std_lang_02_live.clj)
+- [Basic authoring source](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_00_basic.clj)
+- [Multiple-language source](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_01_multi.clj)
+- [Live evaluation source](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_02_live.clj)
 - [Published Hara introduction](https://zcaudate.xyz/foundation-base/hara/introduction.html)
 - [Published Hara comparison](https://zcaudate.xyz/foundation-base/hara/comparison.html)
 

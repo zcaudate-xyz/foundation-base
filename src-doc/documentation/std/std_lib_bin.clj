@@ -1,4 +1,6 @@
 (ns documentation.std-lib-bin
+  (:require [std.lib.bin :as bin]
+            [std.lib.bin.type :as btype])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -6,6 +8,58 @@
 [[:section {:title "Overview"}]]
 
 "`std.lib.bin` is part of the standard foundation library set. This page collects the public API reference for the namespace."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "NIO buffers"}]]
+
+"`std.lib.bin.buffer` creates typed NIO buffers. `buffer` is the general constructor; convenience functions like `int-buffer` and `double-buffer` are also available."
+
+(fact "create and write to a buffer"
+  ^{:refer std.lib.bin.buffer/buffer :added "3.0"}
+  (buffer 16)
+  => java.nio.ByteBuffer
+
+  ^{:refer std.lib.bin.buffer/int-buffer :added "3.0"}
+  (int-buffer 4 {:direct true :endian :little})
+  => java.nio.IntBuffer
+
+  ^{:refer std.lib.bin.buffer/buffer-write :added "3.0"}
+  (let [^java.nio.ByteBuffer b (buffer 16)]
+    (buffer-write b (int-array [1 2 3 4]))
+    [(.get b 3) (.get b 7) (.get b 11) (.get b 15)])
+  => [1 2 3 4])
+
+(fact "read from a buffer"
+  ^{:refer std.lib.bin.buffer/buffer-read :added "3.0"}
+  (let [buf (buffer 4)
+        out (int-array 1)]
+    (.put ^java.nio.ByteBuffer buf 3 (byte 1))
+    (buffer-read buf out)
+    (first out))
+  => 1)
+
+[[:section {:title "Binary conversions"}]]
+
+"`std.lib.bin.type` converts values between bit strings, bit sequences, bit sets, byte arrays, and numbers."
+
+(fact "convert between binary representations"
+  ^{:refer std.lib.bin.type/bitseq :added "3.0"}
+  (btype/bitseq (byte-array [49]))
+  => [1 0 0 0 1 1]
+
+  ^{:refer std.lib.bin.type/bitstr :added "3.0"}
+  (btype/bitstr (byte-array [49]))
+  => "100011"
+
+  ^{:refer std.lib.bin.type/number :added "3.0"}
+  (btype/number "100011")
+  => 49
+
+  ^{:refer std.lib.bin.type/bytes :added "3.0"}
+  (-> (btype/bytes "100011")
+      seq)
+  => [49])
 
 [[:chapter {:title "API" :link "std.lib.bin"}]]
 

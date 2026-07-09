@@ -1,4 +1,5 @@
 (ns documentation.std-lib-io
+  (:require [std.lib.io :refer :all])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -6,6 +7,38 @@
 [[:section {:title "Overview"}]]
 
 "`std.lib.io` is part of the standard foundation library set. This page collects the public API reference for the namespace."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Charsets"}]]
+
+"`std.lib.io` provides helpers for working with character sets and checking I/O object types."
+
+(fact "get the default charset"
+  ^{:refer std.lib.io/charset:default :added "3.0"}
+  (charset:default)
+  => "UTF-8")
+
+[[:section {:title "I/O type predicates"}]]
+
+"The predicates distinguish the four main I/O object types."
+
+(fact "check I/O object types"
+  ^{:refer std.lib.io/input-stream? :added "3.0"}
+  (input-stream? (java.io.ByteArrayInputStream. (.getBytes "a")))
+  => true
+
+  ^{:refer std.lib.io/output-stream? :added "3.0"}
+  (output-stream? (java.io.ByteArrayOutputStream.))
+  => true
+
+  ^{:refer std.lib.io/reader? :added "3.0"}
+  (reader? (java.io.StringReader. "a"))
+  => true
+
+  ^{:refer std.lib.io/writer? :added "3.0"}
+  (writer? (java.io.StringWriter.))
+  => true)
 
 [[:chapter {:title "API" :link "std.lib.io"}]]
 

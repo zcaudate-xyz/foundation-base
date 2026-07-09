@@ -1,4 +1,5 @@
 (ns documentation.std-concurrent
+  (:require [std.concurrent :as concurrent])
   (:use code.test))
 
 [[:hero {:title "std.concurrent"
@@ -27,16 +28,23 @@
 
 "The layers are designed to compose. A blocking queue provides back-pressure, an executor runs anonymous tasks, a bus owns addressed handler loops, and a pool manages reusable resources. Request and relay abstractions build higher-level workflows on those primitives."
 
-(comment
-  (require '[std.concurrent :as concurrent])
+(fact "submit work to a pooled executor"
+  (let [work (concurrent/queue:fixed 32)
+        executor (concurrent/executor:pool 2 4 1000 work)]
+    (try
+      @(concurrent/submit executor
+                          (fn [] {:status :complete}))
+      => {:status :complete}
+      (finally
+        (concurrent/exec:shutdown executor)))))
 
-  (def work (concurrent/queue:fixed 32))
-  (def executor (concurrent/executor:pool 2 4 1000 work))
-
-  @(concurrent/submit executor
-                      (fn [] {:status :complete}))
-
-  (concurrent/exec:shutdown executor))
+(fact "use a blocking queue"
+  (let [q (concurrent/queue:fixed 4)]
+    (concurrent/put q 1)
+    (concurrent/put q 2)
+    [(concurrent/take q)
+     (concurrent/take q)])
+  => [1 2])
 
 [[:chapter {:title "Facade API" :link "api"}]]
 

@@ -1,4 +1,5 @@
 (ns documentation.std-lib-apply
+  (:require [std.lib.apply :refer :all])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -12,6 +13,37 @@ Common uses include:
 - Invoking a form with a default runtime
 - Applying arguments within an explicit context
 - Building host applicatives that wrap plain functions"
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Host applicatives"}]]
+
+"A host applicative wraps a plain Clojure function or form so it can be invoked through the applicative interface. `apply-in` runs it in an explicit context, `apply-as` lets it pick its own context, and `invoke-as` accepts variadic arguments."
+
+(fact "create and apply a host applicative"
+  ^{:refer std.lib.apply/host-applicative :added "3.0"}
+  (def adder (host-applicative {:form '+}))
+
+  ^{:refer std.lib.apply/apply-in :added "3.0"}
+  (apply-in adder nil [1 2 3 4 5])
+  => 15
+
+  ^{:refer std.lib.apply/apply-as :added "3.0"}
+  (apply-as adder [10 20 30])
+  => 60
+
+  ^{:refer std.lib.apply/invoke-as :added "3.0"}
+  (invoke-as adder 1 2 3)
+  => 6)
+
+[[:section {:title "Async execution"}]]
+
+"Adding `:async true` causes the applicative to return a future. Dereference it to get the result."
+
+(fact "run an applicative asynchronously"
+  ^{:refer std.lib.apply/host-applicative :added "3.0"}
+  @((host-applicative {:form '+ :async true}) 1 2 3 4 5)
+  => 15)
 
 [[:chapter {:title "Apply within a context" :link "std.lib.apply"}]]
 

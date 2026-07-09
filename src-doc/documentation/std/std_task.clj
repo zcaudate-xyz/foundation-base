@@ -1,4 +1,5 @@
 (ns documentation.std-task
+  (:require [std.task :refer :all])
   (:use code.test))
 
 [[:hero {:title "std.task"
@@ -13,8 +14,31 @@
 
 "Require the top-level namespace for common workflows, then move to subnamespaces when you need a lower-level primitive. Existing tests under `test/std/task` and `test/std/task_test.clj` are the best executable examples for edge cases."
 
-(comment
-  (require '[std.task :as lib]))
+(fact "create a task"
+  (task? (task :namespace "list-interns" ns-interns))
+  => true)
+
+(fact "define a task with deftask"
+  (macroexpand-1
+   '(deftask -list-aliases-
+      {:template :namespace
+       :main clojure.core/ns-aliases
+       :item {:post (comp vec sort keys)}
+       :doc "returns all aliases"}))
+  => '(def -list-aliases-
+        (std.task/task
+         :namespace "-list-aliases-"
+         {:template :namespace,
+          :main clojure.core/ns-aliases,
+          :item {:post (comp vec sort keys)},
+          :doc "returns all aliases"})))
+
+(fact "parse CLI args"
+  (process-ns-args [":only" "foo"])
+  => {:ns 'foo}
+
+  (process-ns-args [":verbose" ":timeout" "100"])
+  => {:verbose true :timeout 100})
 
 [[:chapter {:title "Internal usage" :link "internal"}]]
 

@@ -116,9 +116,9 @@ Start with:
 
 - [Hara overview](https://zcaudate.xyz/foundation-base/hara/index.html)
 - [Introduction](https://zcaudate.xyz/foundation-base/hara/introduction.html)
-- [Basic walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-basic.html) — [source](src-build/walkthrough/std_lang_00_basic.clj)
-- [Multiple-language walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-multi.html) — [source](src-build/walkthrough/std_lang_01_multi.clj)
-- [Live runtime walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-live.html) — [source](src-build/walkthrough/std_lang_02_live.clj)
+- [Basic walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-basic.html) — [source](src-doc/walkthrough/std_lang_00_basic.clj)
+- [Multiple-language walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-multi.html) — [source](src-doc/walkthrough/std_lang_01_multi.clj)
+- [Live runtime walkthrough](https://zcaudate.xyz/foundation-base/hara/walkthrough-live.html) — [source](src-doc/walkthrough/std_lang_02_live.clj)
 
 ## Examples
 

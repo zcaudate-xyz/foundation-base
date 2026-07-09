@@ -1,4 +1,5 @@
 (ns documentation.std-lib-atom
+  (:require [std.lib.atom :refer :all])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -13,6 +14,79 @@
 - Change tracking
 - Derived atoms
 "
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Nested reads and writes"}]]
+
+"`std.lib.atom` extends `clojure.core/atom` with path-aware access. `atom:get`, `atom:mget`, and `atom:keys` read nested values; `atom:put`, `atom:set`, and `atom:set-keys` write them."
+
+(fact "read nested values"
+  ^{:refer std.lib.atom/atom:get :added "3.0"}
+  (atom:get (atom {:a {:b 1 :c 2}})
+            [:a :c])
+  => 2
+
+  ^{:refer std.lib.atom/atom:mget :added "3.0"}
+  (atom:mget (atom {:a {:b 1 :c 2}})
+             [[:a :b] [:a :c]])
+  => [1 2]
+
+  ^{:refer std.lib.atom/atom:keys :added "3.0"}
+  (atom:keys (atom {:a {:b 1 :c 2}})
+             [:a])
+  => [:b :c])
+
+(fact "write nested values"
+  ^{:refer std.lib.atom/atom:put :added "3.0"}
+  (atom:put (atom {:a {:b 1 :c 2}})
+            []
+            {:a {:d 3}})
+  => [{:a {:b 1 :c 2}}
+      {:a {:b 1 :c 2 :d 3}}]
+
+  ^{:refer std.lib.atom/atom:set :added "3.0"}
+  (atom:set (atom {:a {:b 1 :c 2}})
+            [:a :b] 3
+            [:a :d] 5)
+  => '([[:a :b] 1 3]
+       [[:a :d] nil 5]))
+
+[[:section {:title "Change tracking"}]]
+
+"Every write returns a change log. `atom:set-changed` and `atom:put-changed` turn that log into a concise `:changed` summary."
+
+(fact "summarise what changed"
+  ^{:refer std.lib.atom/atom:set-changed :added "3.0"}
+  (->> (atom:set (atom {:a {:b 1 :c 2}})
+                 [:a] {:b 3 :d 4})
+       (atom:set-changed))
+  => [:changed {:a {:b 3 :d 4}}]
+
+  ^{:refer std.lib.atom/atom:put-changed :added "3.0"}
+  (->> (atom:put (atom {:a {:b 1 :c 2}})
+                 []
+                 {:a {:d 3}})
+       (atom:put-changed))
+  => [:changed {:a {:d 3}}])
+
+[[:section {:title "Batch updates"}]]
+
+"`atom:batch` applies many operations in one go: `:set`, `:swap`, `:put`, and `:delete`. It returns the full change log and updates the atom."
+
+(fact "apply several operations at once"
+  ^{:refer std.lib.atom/atom:batch :added "3.0"}
+  (def -atm- (atom {:a {:b 1 :c 2}}))
+
+  (atom:batch -atm-
+              [[:set  [:a :b] 3]
+               [:swap [:a :c] + 10]
+               [:put  [:a :d] {:x 8 :y 9}]
+               [:delete [:a :d :x]]])
+  => '([[:a :b] 1 3]
+       [[:a :c] 2 12]
+       [[:a :d] nil {:x 8 :y 9}]
+       [[:a :d :x] 8 nil]))
 
 [[:chapter {:title "Basic Operations" :link "std.lib.atom"}]]
 

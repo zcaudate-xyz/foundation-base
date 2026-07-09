@@ -1,5 +1,7 @@
 (ns documentation.std-fs
-  (:use code.test))
+  (:require [std.fs :refer :all])
+  (:use code.test)
+  (:refer-clojure :exclude [list resolve]))
 
 [[:hero {:title "std.fs"
          :subtitle "filesystem paths, archives, attributes, walking, and watching"
@@ -13,8 +15,23 @@
 
 "Require the top-level namespace for common workflows, then move to subnamespaces when you need a lower-level primitive. Existing tests under `test/std/fs` and `test/std/fs_test.clj` are the best executable examples for edge cases."
 
-(comment
-  (require '[std.fs :as lib]))
+(fact "convert between namespace and file paths"
+  (ns->file 'std.fs-test)
+  => "std/fs_test"
+
+  (file->ns "std/fs_test")
+  => "std.fs-test")
+
+(fact "read a file's namespace"
+  (file-namespace "src/std/fs.clj")
+  => 'std.fs)
+
+(fact "create and query a path"
+  (exists? (path "project.clj"))
+  => true
+
+  (file-name (path "project.clj"))
+  => "project.clj")
 
 [[:chapter {:title "Internal usage" :link "internal"}]]
 

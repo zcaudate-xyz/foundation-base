@@ -1,4 +1,6 @@
 (ns documentation.std-scheduler
+  (:require [std.lib.component :as component]
+            [std.scheduler :refer :all])
   (:use code.test))
 
 [[:hero {:title "std.scheduler"
@@ -13,8 +15,23 @@
 
 "Require the top-level namespace for common workflows, then move to subnamespaces when you need a lower-level primitive. Existing tests under `test/std/scheduler` and `test/std/scheduler_test.clj` are the best executable examples for edge cases."
 
-(comment
-  (require '[std.scheduler :as lib]))
+(fact "create and inspect a runner"
+  (component/with [runner (runner:create)]
+    (runner:info runner))
+  => {:executors {:core {:threads 0 :active 0 :queued 0 :terminated false}
+                  :scheduler {:threads 0 :active 0 :queued 0 :terminated false}}
+      :programs {}})
+
+(fact "install and trigger a program"
+  (component/with [runner (runner:create)]
+    (let [q (java.util.concurrent.LinkedBlockingQueue.)]
+      (install runner {:id :hello
+                       :type :basic
+                       :interval 100
+                       :main-fn (fn [_ t] (.put q t))})
+      (trigger runner :hello)
+      (boolean (.poll q 1000 java.util.concurrent.TimeUnit/MILLISECONDS))))
+  => true)
 
 [[:chapter {:title "Internal usage" :link "internal"}]]
 

@@ -1,4 +1,8 @@
 (ns documentation.std-lib-component
+  (:require [std.lib.component :refer :all]
+            [std.lib.component.track :as track]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.track :as protocol.track])
   (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
@@ -6,6 +10,56 @@
 [[:section {:title "Overview"}]]
 
 "`std.lib.component` is part of the standard foundation library set. This page collects the public API reference for the namespace."
+
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+[[:section {:title "Defining and running a component"}]]
+
+"A component is any value that implements `std.protocol.component/IComponent`. Records are the most common choice. `start` and `stop` run the lifecycle, and `with` ensures cleanup."
+
+(fact "start, query, and stop a component"
+  ^{:refer std.lib.component/start :added "3.0"}
+  (defrecord Database []
+    protocol.track/ITrack
+    (-track-path [db] [:my-app :database])
+
+    protocol.component/IComponent
+    (-start [db] (assoc db :status "started"))
+    (-stop [db] (dissoc db :status))
+    (-health [db] {:status :ok}))
+
+  (start (Database.))
+  => {:status "started"}
+
+  ^{:refer std.lib.component/health :added "3.0"}
+  (health (Database.))
+  => {:status :ok}
+
+  ^{:refer std.lib.component/stop :added "3.0"}
+  (stop (start (Database.)))
+  => {})
+
+(fact "use with to manage component lifecycle"
+  ^{:refer std.lib.component/with :added "3.0"}
+  (with [db (Database.)]
+        (started? db))
+  => true)
+
+[[:section {:title "Tracking components"}]]
+
+"`std.lib.component.track` keeps a global registry of live components. Tracked components can be listed, queried, and acted upon in groups."
+
+(fact "track and query a component"
+  ^{:refer std.lib.component.track/track :added "3.0"}
+  (def db (-> (Database.) start))
+
+  ^{:refer std.lib.component.track/tracked? :added "3.0"}
+  (tracked? db)
+  => true
+
+  ^{:refer std.lib.component.track/tracked :added "3.0"}
+  (track/tracked [:my-app :database] info)
+  => map?)
 
 [[:chapter {:title "API" :link "std.lib.component"}]]
 

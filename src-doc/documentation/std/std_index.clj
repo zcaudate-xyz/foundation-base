@@ -51,6 +51,23 @@
     {:meta "Traversal" :title "std.lib.walk" :text "Walking and traversal helpers." :href "std-lib-walk.html"}
     {:meta "Zippers" :title "std.lib.zip" :text "Zipper navigation and editing helpers." :href "std-lib-zip.html"}]}]]
 
+[[:chapter {:title "Walkthrough" :link "walkthrough"}]]
+
+"The `std` section is organized into library families. Most workflows start by requiring the top-level namespace, then drilling into sub-namespaces for specialised behaviour."
+
+(fact "a cross-library snippet: string case, collection transform, and time coercion"
+  (require '[std.string :as str]
+           '[std.lib.collection :as coll]
+           '[std.time :as time])
+
+  (->> {"hello-world" 1 "hello-there" 2}
+       (coll/map-keys str/camel-case)
+       (coll/map-vals inc))
+  => {"helloWorld" 2 "helloThere" 3}
+
+  (time/to-ms 1 :m)
+  => 60000)
+
 ;; BEGIN merged documentation: plans/slop/summary/std_config_summary.md
 ;; sha256: ca25d22f80b6db9298681a3cedbfff169f431fa4606bf585792dfaf2158e0608
 [[:chapter {:title "std.config: A Comprehensive Summary (including submodules)" :link "merged-plans-slop-summary-std-config-summary-md"}]]
