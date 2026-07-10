@@ -1,0 +1,112 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{foundation-backbone}[2026/07/10 Foundation application backbone style]
+
+\RequirePackage{fontspec}
+\RequirePackage[a4paper,margin=22mm]{geometry}
+\RequirePackage{xcolor}
+\RequirePackage{microtype}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs}
+\RequirePackage{tabularx}
+\RequirePackage{array}
+\RequirePackage{enumitem}
+\RequirePackage{titlesec}
+\RequirePackage{fancyhdr}
+\RequirePackage{hyperref}
+\RequirePackage{tikz}
+\RequirePackage{listings}
+\RequirePackage{fontawesome5}
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds,calc,shapes.geometric,shapes.multipart}
+
+\definecolor{FoundationInk}{HTML}{172033}
+\definecolor{FoundationBlue}{HTML}{2867B2}
+\definecolor{FoundationTeal}{HTML}{168C88}
+\definecolor{FoundationGold}{HTML}{B47A16}
+\definecolor{FoundationRed}{HTML}{A94545}
+\definecolor{FoundationLight}{HTML}{F3F6FA}
+\definecolor{FoundationMid}{HTML}{D9E2EE}
+\definecolor{FoundationGrey}{HTML}{5D6878}
+
+\IfFontExistsTF{Inter}{\setmainfont{Inter}}{\setmainfont{TeX Gyre Heros}}
+\IfFontExistsTF{Roboto Mono}{\setmonofont{Roboto Mono}}{\setmonofont{Latin Modern Mono}}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=FoundationBlue,
+  urlcolor=FoundationTeal,
+  citecolor=FoundationBlue,
+  pdftitle={Foundation Application Backbone}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.65em}
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.25em,topsep=0.25em}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=0.25em,topsep=0.25em}
+\renewcommand{\arraystretch}{1.25}
+
+\titleformat{\section}{\LARGE\bfseries\color{FoundationInk}}{}{0pt}{}
+\titleformat{\subsection}{\Large\bfseries\color{FoundationBlue}}{}{0pt}{}
+\titleformat{\subsubsection}{\large\bfseries\color{FoundationInk}}{}{0pt}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textbf{Foundation Base}}
+\fancyhead[R]{\small Application Backbone}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+\newcommand{\product}[1]{\texttt{#1}}
+\newcommand{\term}[1]{\textbf{#1}}
+\newcommand{\callout}[2]{%
+  \begin{center}
+  \begin{minipage}{0.94\linewidth}
+  \colorbox{FoundationLight}{\parbox{0.94\linewidth}{\textbf{#1}\par #2}}
+  \end{minipage}
+  \end{center}
+}
+
+\newcommand{\foundationtitle}[3]{%
+  \begin{titlepage}
+  \color{FoundationInk}
+  \vspace*{18mm}
+  {\Huge\bfseries #1\par}
+  \vspace{4mm}
+  {\LARGE #2\par}
+  \vspace{12mm}
+  \begin{tikzpicture}
+    \node[draw=FoundationBlue,fill=FoundationLight,rounded corners=3pt,minimum width=\textwidth,minimum height=22mm,align=left,text width=0.91\textwidth] {
+      \Large\textbf{Model once. Test the movement of data. Generate many application surfaces.}
+    };
+  \end{tikzpicture}
+  \vfill
+  {\large #3\par}
+  \vspace{3mm}
+  {\small Foundation Base --- July 2026\par}
+  \end{titlepage}
+}
+
+\tikzset{
+  fbbox/.style={draw=FoundationBlue,fill=FoundationLight,rounded corners=3pt,minimum height=10mm,align=center,text width=30mm},
+  fbwide/.style={fbbox,text width=43mm},
+  fbstorage/.style={cylinder,shape border rotate=90,aspect=0.25,draw=FoundationTeal,fill=FoundationLight,minimum height=14mm,minimum width=23mm,align=center},
+  fbedge/.style={-{Latex[length=2.5mm]},thick,draw=FoundationGrey},
+  fbdashed/.style={fbedge,dashed},
+  fbgroup/.style={draw=FoundationMid,rounded corners=5pt,inner sep=7pt}
+}
+
+\lstdefinestyle{foundation}{
+  basicstyle=\small\ttfamily,
+  backgroundcolor=\color{FoundationLight},
+  frame=single,
+  rulecolor=\color{FoundationMid},
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  xleftmargin=0.5em,
+  framexleftmargin=0.5em
+}
+\lstset{style=foundation}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
