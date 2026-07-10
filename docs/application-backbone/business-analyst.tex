@@ -1,0 +1,201 @@
+\documentclass[11pt]{article}
+\usepackage{foundation-backbone}
+
+\begin{document}
+\foundationtitle{Building Applications Around a Tested Data Backbone}{A business analyst's guide to \product{xt.substrate}, \product{xt.db.node}, \product{postgres.core} and AI-assisted delivery}{Audience: business analysts, product owners, delivery leads and solution stakeholders}
+
+\tableofcontents
+\newpage
+
+\section{Executive summary}
+
+Most application programmes repeatedly implement the same business behaviour in a database, API, web client, mobile client, integration service and edge worker. The result is familiar: requirements drift between teams, sync defects appear late, security rules are duplicated, and interface work becomes blocked by unstable services.
+
+Foundation Base takes a different approach. It establishes a tested application backbone before the final user interface is built:
+
+\begin{itemize}
+  \item \product{postgres.core} expresses and generates database-facing behaviour and RPC operations close to PostgreSQL;
+  \item \product{xt.substrate} provides the spaces, request transport and runtime context through which application parts communicate;
+  \item \product{xt.db.node} models live views, local projections, refresh, invalidation and remote execution;
+  \item automated tests exercise data movement through the same topology that the application will use;
+  \item AI and conventional UI teams then build web, mobile and edge experiences against a stable, executable contract.
+\end{itemize}
+
+\callout{The central proposition}{Do not ask each interface team to rediscover the application. Build and test the movement of data once, then project it into many user experiences.}
+
+\section{The delivery model}
+
+\begin{center}
+\begin{tikzpicture}[node distance=11mm and 15mm]
+  \node[fbwide] (req) {Business outcomes\\rules and permissions};
+  \node[fbwide,right=of req] (model) {Application model\\views, RPCs, events};
+  \node[fbwide,right=of model] (test) {Backbone tests\\sync and failure cases};
+  \node[fbwide,below=of model] (contract) {Verified application contract};
+  \node[fbbox,below left=of contract] (web) {Web};
+  \node[fbbox,below=of contract] (mobile) {Mobile};
+  \node[fbbox,below right=of contract] (edge) {Edge / automation};
+  \draw[fbedge] (req) -- (model);
+  \draw[fbedge] (model) -- (test);
+  \draw[fbedge] (test) -- (contract);
+  \draw[fbedge] (model) -- (contract);
+  \draw[fbedge] (contract) -- (web);
+  \draw[fbedge] (contract) -- (mobile);
+  \draw[fbedge] (contract) -- (edge);
+\end{tikzpicture}
+\end{center}
+
+This changes the order of delivery. Instead of treating the API as a late integration point, the team first agrees on the observable behaviour of the system: what data is authoritative, what can be cached locally, which operations may be invoked, how permissions apply, and what should happen during refresh, reconnect and failure.
+
+\section{What the three components contribute}
+
+\subsection{\product{xt.substrate}: application spaces and transport}
+
+A space is an application context, such as a local client space or an authoritative server space. The substrate moves requests and responses between those spaces while keeping the application model independent of the particular network or storage mechanism.
+
+For a business analyst, the useful distinction is not ``frontend versus backend''. It is:
+
+\begin{itemize}
+  \item where a decision is made;
+  \item where authoritative data lives;
+  \item which projection the user sees;
+  \item how a result moves from one context to another.
+\end{itemize}
+
+\subsection{\product{xt.db.node}: live views and synchronisation behaviour}
+
+A view is a named live query cell with input, status, value and dependencies. A screen can therefore be described as a set of views rather than a collection of ad hoc HTTP calls. Tests can prove that a list refreshes, a selected record remains coherent, stale data is invalidated, and a local projection is updated after a remote operation.
+
+\subsection{\product{postgres.core}: operations close to the data}
+
+\product{postgres.core} supports PostgreSQL-oriented definitions and generated behaviour, including functions used as RPC operations. Important rules can execute near the source of truth, reducing the number of partial implementations spread across services. Generated SQL remains reviewable and can be validated independently from the UI.
+
+\section{The concrete local--remote topology}
+
+Foundation Base already exercises a topology in which a local application space can use SQLite while a remote space uses PostgreSQL.
+
+\begin{center}
+\begin{tikzpicture}[node distance=12mm and 23mm]
+  \node[fbwide] (ui) {Web or mobile UI};
+  \node[fbwide,below=of ui] (local) {Local space\\live views};
+  \node[fbstorage,left=of local] (sqlite) {SQLite\\projection};
+  \node[fbwide,right=of local] (substrate) {\product{xt.substrate}\\request transport};
+  \node[fbwide,right=of substrate] (server) {Server space\\models and RPC};
+  \node[fbstorage,right=of server] (pg) {Postgres\\authority};
+  \draw[fbedge] (ui) -- node[right,scale=.8]{read state / refresh} (local);
+  \draw[fbedge] (local) -- (substrate);
+  \draw[fbedge] (substrate) -- (server);
+  \draw[fbedge] (server) -- (pg);
+  \draw[fbedge] (local) -- (sqlite);
+  \draw[fbdashed,bend right=25] (server.south) to node[below,scale=.8]{result projected locally} (local.south);
+\end{tikzpicture}
+\end{center}
+
+This is useful beyond offline applications. The same pattern supports fast local reads, explicit caching, deterministic refresh and a clearer separation between authoritative records and user-facing projections.
+
+\section{What gets tested before the UI}
+
+\begin{center}
+\begin{tikzpicture}[node distance=8mm]
+  \node[fbwide] (a) {Create test state};
+  \node[fbwide,below=of a] (b) {Invoke RPC or refresh};
+  \node[fbwide,below=of b] (c) {Observe remote result};
+  \node[fbwide,below=of c] (d) {Observe local projection};
+  \node[fbwide,below=of d] (e) {Assert permission, status and value};
+  \draw[fbedge] (a) -- (b);
+  \draw[fbedge] (b) -- (c);
+  \draw[fbedge] (c) -- (d);
+  \draw[fbedge] (d) -- (e);
+\end{tikzpicture}
+\end{center}
+
+Typical acceptance scenarios include:
+
+\begin{itemize}
+  \item authorised and unauthorised RPC calls;
+  \item remote updates followed by local refresh;
+  \item list/detail coherence after a mutation;
+  \item stale view invalidation;
+  \item reconnect or replay behaviour;
+  \item the same business operation viewed from web, mobile and edge contexts.
+\end{itemize}
+
+These tests become durable evidence for requirements. They reduce reliance on screenshots and manual end-to-end scripts as the only proof that a rule was implemented.
+
+\section{How AI fits into the workflow}
+
+AI is most effective when it receives a constrained, executable contract. Once entities, view inputs, RPCs, validation, permissions and result shapes are known, AI can concentrate on presentation and interaction.
+
+\begin{center}
+\begin{tikzpicture}[node distance=10mm and 18mm]
+  \node[fbwide] (contract) {Verified contract};
+  \node[fbwide,below left=of contract] (prompt) {UI brief and design system};
+  \node[fbwide,below right=of contract] (examples) {Reference flows and test data};
+  \node[fbwide,below=18mm of contract] (ai) {AI-assisted implementation};
+  \node[fbbox,below left=of ai] (react) {React / Next.js};
+  \node[fbbox,below=of ai] (rn) {React Native};
+  \node[fbbox,below right=of ai] (worker) {Bun / edge worker};
+  \draw[fbedge] (contract) -- (ai);
+  \draw[fbedge] (prompt) -- (ai);
+  \draw[fbedge] (examples) -- (ai);
+  \draw[fbedge] (ai) -- (react);
+  \draw[fbedge] (ai) -- (rn);
+  \draw[fbedge] (ai) -- (worker);
+\end{tikzpicture}
+\end{center}
+
+AI does not replace product analysis. It shortens the distance between an agreed workflow and a usable interface, while the backbone limits the scope for invented business logic.
+
+\section{Comparison with common delivery methods}
+
+\begin{tabularx}{\textwidth}{P{30mm}YYYY}
+\toprule
+\textbf{Method} & \textbf{Primary contract} & \textbf{Sync testing} & \textbf{Cross-platform reuse} & \textbf{Typical risk} \\
+\midrule
+UI-first CRUD & Screens and endpoint calls & Usually late, through E2E tests & Low to moderate & Behaviour is inferred separately by each client \\
+REST/OpenAPI & HTTP schema & Good request/response validation; limited local-state semantics & Moderate & Contract describes calls, not complete view lifecycle \\
+GraphQL & Graph and resolver schema & Strong query composition; client cache behaviour remains framework-specific & Moderate to high & Resolver, cache and mutation conventions can diverge \\
+Backend-as-a-Service & Vendor schema, policies and SDK & Fast integration; deeper sync behaviour depends on platform & High within supported clients & Vendor semantics become the architecture \\
+Event sourcing/CQRS & Events, commands and projections & Excellent history and projection testing & High & Operational and conceptual overhead can exceed the problem \\
+Foundation backbone & Spaces, live views, RPC and tested projections & First-class local/remote pipeline tests & High across generated targets & Requires learning the model and maintaining emitter/runtime agreement \\
+\bottomrule
+\end{tabularx}
+
+Foundation is not automatically preferable in every project. A small, connected CRUD site may be delivered faster with a conventional framework. Its advantage grows when the same rules and data flows must work across several runtimes, when local projections matter, or when generated code and AI-assisted clients must remain aligned.
+
+\section{Comparison with a Bun/Rust rewrite}
+
+A Bun/Rust rewrite is a different optimisation strategy. Bun can provide a fast JavaScript/TypeScript server and tooling environment; Rust can provide predictable native performance, memory safety and compact services. That combination is attractive when runtime throughput, startup time, deployment size or low-level control is the dominant concern.
+
+\begin{tabularx}{\textwidth}{P{34mm}YY}
+\toprule
+ & \textbf{Foundation backbone} & \textbf{Bun/Rust rewrite} \\
+\midrule
+Main goal & Preserve one executable application model across target ecosystems & Reimplement services using high-performance target runtimes \\
+Reuse mechanism & Language definitions, emitters, runtimes and portable \product{xt.*} modules & Shared protocols, generated clients, schemas and manually shared domain crates/packages \\
+Testing emphasis & Generated syntax, runtime behaviour, RPC and local/remote data movement & Unit/integration tests per service plus protocol and end-to-end tests \\
+Performance path & Move operations to PostgreSQL or emit to an appropriate target & Optimise hot services directly in Rust; use Bun for JS/TS workloads \\
+Team accessibility & Higher initial Lisp/Foundation learning curve & Familiar TypeScript plus a substantial Rust learning curve \\
+Change propagation & One model can affect several generated targets & Changes often span Rust services, TS services and client SDKs \\
+Best fit & Cross-cutting applications where consistency and generation dominate & Performance-sensitive systems where direct ownership of each runtime dominates \\
+\bottomrule
+\end{tabularx}
+
+The two approaches can be combined. Rust can implement a specialised service behind a stable RPC boundary, while Bun can host an edge or web-facing adapter. Foundation can remain the source for the application contract and sync tests. The decision is therefore not necessarily a repository-wide rewrite; it can be a measured placement of specialised runtimes at proven bottlenecks.
+
+\section{Recommended programme controls}
+
+\begin{enumerate}
+  \item Define a small vertical slice: one entity, one list/detail workflow and one mutation.
+  \item Write acceptance scenarios around authority, permissions and local projection.
+  \item Generate and inspect PostgreSQL output separately from runtime execution.
+  \item Exercise the same flow through \product{xt.db.node} before designing every screen.
+  \item Give AI tools only the verified contract, design system and acceptance examples.
+  \item Measure delivery time, escaped sync defects and cross-client inconsistency against a conventional slice.
+  \item Introduce Bun or Rust only where measurements show that their runtime characteristics solve a material problem.
+\end{enumerate}
+
+\section{Outcome}
+
+The Foundation approach reframes application delivery as the creation of a tested data backbone with multiple presentation surfaces. Business requirements become observable operations and data movements. UI delivery becomes faster and safer because web, mobile and edge applications are projections of behaviour already exercised in tests.
+
+\end{document}
