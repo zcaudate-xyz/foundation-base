@@ -1,0 +1,184 @@
+\documentclass[10pt]{article}
+\usepackage{foundation-backbone}
+
+\begin{document}
+\foundationtitle{Foundation as an Executable Application Backbone}{A five-page technical guide for senior developers across PostgreSQL, JavaScript, mobile, edge and native ecosystems}{Audience: senior developers and architects who may be new to Clojure, Lisp and Foundation}
+
+\section{1. Architectural model}
+
+Foundation Base is not primarily a web framework. It is a language and runtime toolkit for describing behaviour, transforming source forms, emitting target-language code, executing that code in target runtimes and testing agreement across those stages.
+
+For application work, three areas form the backbone:
+
+\begin{itemize}
+  \item \product{postgres.core}: PostgreSQL-oriented definitions and database-side RPC operations;
+  \item \product{xt.substrate}: nodes, spaces, request transport, eventing and runtime context;
+  \item \product{xt.db.node}: models, named views, local stores, invalidation and remote refresh.
+\end{itemize}
+
+For developers unfamiliar with Lisp, a form is both executable code and inspectable data. That permits Foundation to transform the same logical definition into supported target syntax.
+
+\begin{center}
+\begin{tikzpicture}[node distance=9mm and 12mm,scale=.86,transform shape]
+  \node[fbwide] (form) {Source form\\data structure};
+  \node[fbwide,right=of form] (prep) {Preprocessing\\and macros};
+  \node[fbwide,right=of prep] (grammar) {Target grammar\\supported forms};
+  \node[fbwide,below=of prep] (emit) {Emitter output};
+  \node[fbwide,left=of emit] (runtime) {Target runtime};
+  \node[fbwide,right=of emit] (tests) {Emitter and\\runtime tests};
+  \draw[fbedge] (form) -- (prep);
+  \draw[fbedge] (prep) -- (grammar);
+  \draw[fbedge] (grammar) -- (emit);
+  \draw[fbedge] (emit) -- (runtime);
+  \draw[fbedge] (emit) -- (tests);
+  \draw[fbedge] (runtime) -- (tests);
+\end{tikzpicture}
+\end{center}
+
+A portable module is therefore more than a shared library. Its source form, preprocessing, grammar representation, emitted syntax and runtime result all belong to the implementation contract.
+
+\callout{Technical proposition}{Treat the application model and its data movement as executable infrastructure. Generate thin target adapters only after RPC, refresh and projection behaviour are proven.}
+
+\newpage
+\section{2. Spaces, views and PostgreSQL}
+
+A substrate node owns application spaces. A space represents an execution context such as \texttt{room/local} or \texttt{room/server}. \product{xt.db.node} installs models into spaces. A model groups named views; a view holds query input, status, value, dependencies and a query key.
+
+The repository walkthroughs exercise an explicit local SQLite and remote PostgreSQL pipeline:
+
+\begin{center}
+\begin{tikzpicture}[node distance=9mm and 14mm,scale=.83,transform shape]
+  \node[fbwide] (ui) {UI adapter};
+  \node[fbwide,right=of ui] (local) {local live view};
+  \node[fbstorage,below=of local] (sqlite) {SQLite};
+  \node[fbwide,right=of local] (transport) {substrate transport};
+  \node[fbwide,right=of transport] (server) {server model / RPC};
+  \node[fbstorage,below=of server] (pg) {Postgres};
+  \draw[fbedge] (ui) -- node[above,scale=.75]{refresh/read} (local);
+  \draw[fbedge] (local) -- (transport);
+  \draw[fbedge] (transport) -- (server);
+  \draw[fbedge] (server) -- (pg);
+  \draw[fbedge] (local) -- (sqlite);
+  \draw[fbdashed,bend right=27] (server.south) to node[below,scale=.75]{project result} (local.south);
+\end{tikzpicture}
+\end{center}
+
+The application-facing model is defined before storage. A view may begin in an in-memory cache, move to SQLite or delegate to a remote Postgres-backed space without changing the conceptual screen contract.
+
+\subsection{Role of \product{postgres.core}}
+
+\product{postgres.core} is part of the target-language system rather than an ORM over SQL. PostgreSQL functions and supporting definitions can be represented in Foundation forms, emitted as SQL/PLpgSQL and executed against PostgreSQL.
+
+\begin{center}
+\begin{tikzpicture}[node distance=7mm,scale=.86,transform shape]
+  \node[fbwide] (src) {Foundation Postgres form};
+  \node[fbwide,below=of src] (sql) {Emitted SQL / PLpgSQL};
+  \node[fbwide,below=of sql] (db) {Database execution};
+  \node[fbwide,below=of db] (rpc) {RPC invocation};
+  \node[fbwide,below=of rpc] (projection) {Local view projection};
+  \draw[fbedge] (src) -- (sql);
+  \draw[fbedge] (sql) -- (db);
+  \draw[fbedge] (db) -- (rpc);
+  \draw[fbedge] (rpc) -- (projection);
+\end{tikzpicture}
+\end{center}
+
+Validation should separately prove emitted syntax, database execution, RPC behaviour and the resulting local projection. A passing emitter test alone does not establish runtime correctness.
+
+\newpage
+\section{3. Testing and AI-generated adapters}
+
+The highest-value tests prove agreement across layers rather than only isolated CRUD functions.
+
+\begin{center}
+\begin{tikzpicture}
+  \filldraw[fill=FoundationLight,draw=FoundationBlue] (0,0) -- (12,0) -- (10.8,1.25) -- (1.2,1.25) -- cycle;
+  \node at (6,.62) {grammar, transformation and emitter facts};
+  \filldraw[fill=FoundationLight,draw=FoundationTeal] (1.2,1.45) -- (10.8,1.45) -- (9.5,2.7) -- (2.5,2.7) -- cycle;
+  \node at (6,2.07) {target runtime and database execution};
+  \filldraw[fill=FoundationLight,draw=FoundationGold] (2.5,2.9) -- (9.5,2.9) -- (8.2,4.15) -- (3.8,4.15) -- cycle;
+  \node at (6,3.52) {RPC, sync and projection flows};
+  \filldraw[fill=FoundationLight,draw=FoundationRed] (3.8,4.35) -- (8.2,4.35) -- (7.1,5.6) -- (4.9,5.6) -- cycle;
+  \node[align=center] at (6,4.97) {thin UI acceptance};
+\end{tikzpicture}
+\end{center}
+
+A representative flow test should:
+
+\begin{enumerate}
+  \item create controlled server and local state;
+  \item invoke an RPC or remote view refresh;
+  \item assert the authoritative PostgreSQL result;
+  \item assert local SQLite projection, status and invalidation;
+  \item repeat for permission and failure paths.
+\end{enumerate}
+
+Once that backbone is executable, AI-generated UI becomes adapter generation rather than domain invention.
+
+\begin{center}
+\begin{tikzpicture}[node distance=9mm and 14mm,scale=.87,transform shape]
+  \node[fbwide] (backbone) {Executable backbone};
+  \node[fbwide,below=of backbone] (adapter) {Generated adapter boundary};
+  \node[fbbox,below left=of adapter] (next) {Next.js};
+  \node[fbbox,below=of adapter] (expo) {Expo / RN};
+  \node[fbbox,below right=of adapter] (edge) {Bun / edge};
+  \draw[fbedge] (backbone) -- (adapter);
+  \draw[fbedge] (adapter) -- (next);
+  \draw[fbedge] (adapter) -- (expo);
+  \draw[fbedge] (adapter) -- (edge);
+\end{tikzpicture}
+\end{center}
+
+The AI should receive view definitions, statuses, result shapes, RPC arguments, permission outcomes, fixtures, passing flow tests and target-framework constraints. The generated client renders state and invokes operations; it should not reproduce database rules.
+
+This arrangement keeps UI acceptance tests thin. They verify interaction, accessibility and target integration while emitter, runtime, RPC and sync tests carry most correctness.
+
+\newpage
+\section{4. Ecosystem comparison and rewrite strategy}
+
+\begin{tabularx}{\textwidth}{P{27mm}YYY}
+\toprule
+\textbf{Approach} & \textbf{Contract} & \textbf{Local state} & \textbf{Main trade-off} \\
+\midrule
+REST/OpenAPI & HTTP operations and schemas & Client responsibility & Strong stubs; weak view lifecycle model \\
+GraphQL & Type graph and resolvers & Framework-specific cache & Flexible queries; distributed mutation semantics \\
+gRPC/Protobuf & Binary service schema & Application responsibility & Excellent stubs; RPC-centric \\
+ORM/Prisma & Database model and client & Application responsibility & Strong DB access; domain and sync remain elsewhere \\
+Supabase/Firebase & Vendor schema, auth and SDK & Platform-dependent & Rapid delivery; vendor semantics dominate \\
+CQRS/event sourcing & Commands, events, projections & Explicit & Strong history; high operational complexity \\
+Foundation & Forms, grammars, spaces, views and RPC & Explicit local projection & Cross-stage discipline and learning curve \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Foundation versus a Bun/Rust rewrite}
+
+A Bun/Rust rewrite is a runtime-first optimisation. Foundation is a semantics-first optimisation.
+
+\begin{tabularx}{\textwidth}{P{31mm}YY}
+\toprule
+\textbf{Dimension} & \textbf{Foundation} & \textbf{Bun/Rust rewrite} \\
+\midrule
+Source of truth & Portable forms plus emitter/runtime tests & Protocol schemas plus Rust/TS implementations \\
+Primary benefit & Cross-target consistency and generation & Native performance and direct runtime control \\
+Local/remote sync & Modelled through spaces, views and projections & Requires a selected sync layer or custom protocol \\
+Debugging & Trace source form through emitted target & Target-native debugging per service \\
+Change surface & One model may regenerate several targets & Contract changes span services and SDKs \\
+Best fit & Cross-cutting, sync-heavy applications & Measured CPU, memory, latency or startup constraints \\
+\bottomrule
+\end{tabularx}
+
+A hybrid is often stronger than a repository-wide rewrite: retain Foundation for contract generation and projection tests; use Bun as a TypeScript-native web or edge adapter; use Rust for a narrow, profiled service boundary.
+
+\subsection{Implementation decision rules}
+
+\begin{itemize}
+  \item Prefer Foundation when the same behaviour must remain aligned across PostgreSQL, web, mobile and edge targets.
+  \item Prefer direct Bun/Rust when profiling proves that runtime characteristics materially constrain the product.
+  \item Keep native services behind stable RPC boundaries with conformance tests.
+  \item Verify emitted SQL separately from execution and execution separately from sync.
+  \item Follow adjacent Foundation source, grammars and \product{code.test} facts before introducing abstractions.
+\end{itemize}
+
+\callout{Practical rule}{Optimise semantic duplication first. Optimise runtime hotspots second. Preserve an executable contract across both.}
+
+\end{document}
