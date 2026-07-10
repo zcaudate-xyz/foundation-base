@@ -1,0 +1,322 @@
+\documentclass[11pt]{article}
+\usepackage{foundation-backbone}
+
+\begin{document}
+\foundationtitle{Foundation as an Executable Application Backbone}{A technical guide for senior developers working across PostgreSQL, JavaScript, mobile, edge and native ecosystems}{Audience: senior developers and architects who may be new to Clojure, Lisp and Foundation}
+
+\tableofcontents
+\newpage
+
+\section{Architectural intent}
+
+Foundation Base is not primarily a web framework. It is a language and runtime toolkit for describing behaviour, emitting target-language code, running that code in target runtimes, and testing the agreement between those stages.
+
+For application work, three areas form a useful backbone:
+
+\begin{itemize}
+  \item \product{postgres.core}: PostgreSQL definitions and generated database-side operations;
+  \item \product{xt.substrate}: spaces, request/response transport, eventing and runtime context;
+  \item \product{xt.db.node}: models, named views, local caches, SQL attachments, invalidation and remote refresh.
+\end{itemize}
+
+The intended outcome is a stable application contract that is executable before a production UI exists.
+
+\section{Mental model for non-Lisp developers}
+
+Lisp syntax makes code structure explicit with lists. A form such as:
+
+\begin{lstlisting}[language=Lisp]
+(model/view-refresh node "room/local" "orders" "list")
+\end{lstlisting}
+
+is equivalent in intent to a conventional function call. The additional value in Foundation is that forms can be inspected and transformed as data before they are emitted to JavaScript, SQL, Python or another target.
+
+\begin{center}
+\begin{tikzpicture}[node distance=11mm and 16mm]
+  \node[fbwide] (form) {Source form\\data structure};
+  \node[fbwide,right=of form] (prep) {Preprocessing\\macro expansion};
+  \node[fbwide,right=of prep] (grammar) {Target grammar\\validated constructs};
+  \node[fbwide,below=of prep] (emit) {Emitter output};
+  \node[fbwide,left=of emit] (runtime) {Target runtime};
+  \node[fbwide,right=of emit] (tests) {Emission and runtime tests};
+  \draw[fbedge] (form) -- (prep);
+  \draw[fbedge] (prep) -- (grammar);
+  \draw[fbedge] (grammar) -- (emit);
+  \draw[fbedge] (emit) -- (runtime);
+  \draw[fbedge] (emit) -- (tests);
+  \draw[fbedge] (runtime) -- (tests);
+\end{tikzpicture}
+\end{center}
+
+This pipeline is why a portable module is more than a shared package. Its source form, transformations, target grammar, emitted syntax and runtime result are all part of the implementation.
+
+\section{Backbone topology}
+
+\subsection{Spaces and live views}
+
+A substrate node owns application spaces. A space can represent a local client context, a remote server context, a test peer or another logical boundary. \product{xt.db.node} installs models into spaces. A model groups named views; each view has query input, status, value, dependencies and a query key.
+
+\begin{center}
+\begin{tikzpicture}[node distance=10mm and 18mm]
+  \node[fbwide] (node) {substrate node};
+  \node[fbwide,below left=of node] (local) {space: room/local};
+  \node[fbwide,below right=of node] (server) {space: room/server};
+  \node[fbbox,below left=of local] (list) {view: list};
+  \node[fbbox,below right=of local] (detail) {view: detail};
+  \node[fbwide,below=of server] (model) {server model};
+  \draw[fbedge] (node) -- (local);
+  \draw[fbedge] (node) -- (server);
+  \draw[fbedge] (local) -- (list);
+  \draw[fbedge] (local) -- (detail);
+  \draw[fbedge] (server) -- (model);
+\end{tikzpicture}
+\end{center}
+
+The application-facing shape is defined before storage. A view can begin in memory, then be backed by SQLite or delegated to a remote Postgres-backed space without changing the screen-level model.
+
+\subsection{Local SQLite and remote PostgreSQL}
+
+The repository walkthroughs exercise this topology directly:
+
+\begin{center}
+\begin{tikzpicture}[node distance=11mm and 20mm]
+  \node[fbwide] (ui) {UI adapter};
+  \node[fbwide,right=of ui] (lv) {local live view};
+  \node[fbstorage,below=of lv] (sqlite) {SQLite};
+  \node[fbwide,right=of lv] (transport) {substrate transport};
+  \node[fbwide,right=of transport] (sv) {server view / RPC};
+  \node[fbstorage,below=of sv] (pg) {Postgres};
+  \draw[fbedge] (ui) -- node[above,scale=.8]{refresh / read} (lv);
+  \draw[fbedge] (lv) -- (transport);
+  \draw[fbedge] (transport) -- (sv);
+  \draw[fbedge] (sv) -- (pg);
+  \draw[fbedge] (lv) -- (sqlite);
+  \draw[fbdashed,bend right=28] (sv.south) to node[below,scale=.8]{project result} (lv.south);
+\end{tikzpicture}
+\end{center}
+
+This makes the local store an explicit materialised projection rather than an incidental framework cache.
+
+\section{Role of \product{postgres.core}}
+
+\product{postgres.core} is part of the target-language system rather than an ORM abstraction over SQL. PostgreSQL functions, graph operations and supporting definitions can be expressed in Foundation forms, emitted as SQL/PLpgSQL and executed in a PostgreSQL runtime.
+
+A robust workflow treats database generation as a separate validation stage:
+
+\begin{enumerate}
+  \item inspect the source form and nearby grammar definitions;
+  \item emit SQL and review the exact generated text;
+  \item validate syntax and quoting against PostgreSQL;
+  \item execute against a disposable database where the environment permits;
+  \item invoke the operation through the same RPC path used by the application;
+  \item verify the resulting local projection through \product{xt.db.node}.
+\end{enumerate}
+
+\begin{center}
+\begin{tikzpicture}[node distance=9mm]
+  \node[fbwide] (src) {Foundation Postgres form};
+  \node[fbwide,below=of src] (sql) {Emitted SQL / PLpgSQL};
+  \node[fbwide,below=of sql] (db) {Database execution};
+  \node[fbwide,below=of db] (rpc) {RPC invocation};
+  \node[fbwide,below=of rpc] (projection) {Local view projection};
+  \draw[fbedge] (src) -- (sql);
+  \draw[fbedge] (sql) -- (db);
+  \draw[fbedge] (db) -- (rpc);
+  \draw[fbedge] (rpc) -- (projection);
+\end{tikzpicture}
+\end{center}
+
+\section{Testing strategy}
+
+The highest-value tests are not isolated CRUD facts. They prove agreement across layers.
+
+\subsection{Test pyramid for generated applications}
+
+\begin{center}
+\begin{tikzpicture}
+  \filldraw[fill=FoundationLight,draw=FoundationBlue] (0,0) -- (12,0) -- (10.8,1.4) -- (1.2,1.4) -- cycle;
+  \node at (6,.7) {grammar, transformation and emitter facts};
+  \filldraw[fill=FoundationLight,draw=FoundationTeal] (1.2,1.6) -- (10.8,1.6) -- (9.5,3) -- (2.5,3) -- cycle;
+  \node at (6,2.3) {target runtime and database execution};
+  \filldraw[fill=FoundationLight,draw=FoundationGold] (2.5,3.2) -- (9.5,3.2) -- (8.2,4.6) -- (3.8,4.6) -- cycle;
+  \node at (6,3.9) {RPC, sync and projection flows};
+  \filldraw[fill=FoundationLight,draw=FoundationRed] (3.8,4.8) -- (8.2,4.8) -- (7.1,6.2) -- (4.9,6.2) -- cycle;
+  \node[align=center] at (6,5.5) {thin UI\\acceptance};
+\end{tikzpicture}
+\end{center}
+
+This ordering pushes correctness below the UI. UI tests then verify interaction and accessibility rather than re-proving every database rule.
+
+\subsection{Representative flow test}
+
+\begin{center}
+\begin{tikzpicture}[node distance=12mm and 16mm]
+  \node[fbbox] (test) {code.test fact};
+  \node[fbwide,right=of test] (local) {local view refresh};
+  \node[fbwide,right=of local] (remote) {remote dispatch};
+  \node[fbstorage,below=of remote] (pg) {Postgres};
+  \node[fbstorage,below=of local] (sqlite) {SQLite};
+  \node[fbwide,left=of sqlite] (assert) {assert status, value, invalidation};
+  \draw[fbedge] (test) -- (local);
+  \draw[fbedge] (local) -- (remote);
+  \draw[fbedge] (remote) -- (pg);
+  \draw[fbedge] (remote) -- (local);
+  \draw[fbedge] (local) -- (sqlite);
+  \draw[fbedge] (sqlite) -- (assert);
+\end{tikzpicture}
+\end{center}
+
+\section{AI-generated UI as an adapter}
+
+Once the backbone is executable, UI generation can be treated as adapter generation. The AI receives:
+
+\begin{itemize}
+  \item model and view definitions;
+  \item view inputs, statuses and result shapes;
+  \item RPC names, arguments, errors and permissions;
+  \item fixture data and passing flow tests;
+  \item the design system and target framework constraints.
+\end{itemize}
+
+The generated client should not reproduce domain rules. It invokes operations, renders view state and adapts interaction to the target ecosystem.
+
+\begin{center}
+\begin{tikzpicture}[node distance=11mm and 15mm]
+  \node[fbwide] (backbone) {Executable backbone};
+  \node[fbwide,below=of backbone] (adapter) {Generated adapter boundary};
+  \node[fbbox,below left=of adapter] (next) {Next.js};
+  \node[fbbox,below=of adapter] (expo) {Expo / RN};
+  \node[fbbox,below right=of adapter] (edge) {Bun / edge};
+  \draw[fbedge] (backbone) -- (adapter);
+  \draw[fbedge] (adapter) -- (next);
+  \draw[fbedge] (adapter) -- (expo);
+  \draw[fbedge] (adapter) -- (edge);
+\end{tikzpicture}
+\end{center}
+
+\section{Comparison with established approaches}
+
+\begin{tabularx}{\textwidth}{P{27mm}YYYY}
+\toprule
+\textbf{Approach} & \textbf{Contract} & \textbf{Local state} & \textbf{Generation} & \textbf{Main trade-off} \\
+\midrule
+REST + OpenAPI & HTTP operations and schemas & Client-framework responsibility & Excellent clients and server stubs & Weak model of view lifecycle and sync \\
+GraphQL & Type graph and resolver operations & Normalised client cache, framework-specific & Strong schema tooling & Resolver/cache semantics are distributed \\
+gRPC / Protobuf & Binary service contracts & Application responsibility & Excellent multi-language stubs & RPC-centric, not projection-centric \\
+Prisma / ORM & Database model and generated client & Application responsibility & Strong DB client generation & Domain and sync behaviour remain elsewhere \\
+Supabase/Firebase & Hosted schema, auth, realtime and SDK & Platform-managed or client SDK cache & Fast client delivery & Vendor-specific semantics and boundaries \\
+CQRS/event sourcing & Commands, events and projections & Explicit projections & Often custom generators & Operational cost and eventual consistency complexity \\
+Local-first frameworks & Replicated local model & First-class & Varies & Conflict semantics and backend integration can dominate \\
+Foundation & Forms, grammars, spaces, views, RPC and runtime tests & Explicit local projection attached to a space & Multi-target emitters and portable modules & Requires Foundation literacy and cross-stage discipline \\
+\bottomrule
+\end{tabularx}
+
+Foundation's differentiator is not that it alone can generate code or support local state. It is the ability to keep source forms, emitted target code, target runtimes and local/remote projection tests in one repository and one implementation workflow.
+
+\section{Comparison with a Bun/Rust rewrite}
+
+A Bun/Rust rewrite should be evaluated as an alternative decomposition, not as an automatic successor architecture.
+
+\subsection{Typical Bun/Rust topology}
+
+\begin{center}
+\begin{tikzpicture}[node distance=11mm and 18mm]
+  \node[fbwide] (client) {TypeScript clients};
+  \node[fbwide,right=of client] (bun) {Bun API / edge layer};
+  \node[fbwide,right=of bun] (rust) {Rust domain services};
+  \node[fbstorage,right=of rust] (pg) {Postgres};
+  \node[fbwide,below=of bun] (schema) {OpenAPI / Protobuf / shared schemas};
+  \draw[fbedge] (client) -- (bun);
+  \draw[fbedge] (bun) -- (rust);
+  \draw[fbedge] (rust) -- (pg);
+  \draw[fbdashed] (schema) -- (client);
+  \draw[fbdashed] (schema) -- (bun);
+  \draw[fbdashed] (schema) -- (rust);
+\end{tikzpicture}
+\end{center}
+
+This architecture can be excellent when the system needs highly tuned native services, predictable memory use, low startup overhead or a TypeScript-native web/edge layer. It also makes the target implementation direct: Rust developers read Rust and Bun developers read TypeScript.
+
+\subsection{Trade-off matrix}
+
+\begin{tabularx}{\textwidth}{P{34mm}YY}
+\toprule
+\textbf{Dimension} & \textbf{Foundation} & \textbf{Bun/Rust rewrite} \\
+\midrule
+Primary abstraction & Portable source forms and target grammars & Services and packages in their implementation languages \\
+Source of truth & Foundation module plus emitter/runtime tests & Protocol schemas plus Rust/TypeScript implementations \\
+Runtime efficiency & Depends on emitted target and placement of work, especially PostgreSQL & Direct control; Rust is strong for CPU, memory and concurrency hot paths \\
+Developer onboarding & Lisp syntax and Foundation concepts are unfamiliar to many & Bun/TypeScript is accessible; production Rust has a steep ownership/type learning curve \\
+Cross-target consistency & High when portable modules and tests remain supported across targets & Must be enforced through schemas, generated clients and conformance suites \\
+Debugging & Requires tracing source form through emitted code and runtime & Familiar target-native debugging in each service \\
+Change surface & A model change may regenerate several targets & A contract change may require multiple service and client updates \\
+Local/remote sync & Modelled directly through spaces, views and projections & Requires a chosen sync/local-first library or custom protocol \\
+Best optimisation & Reduce semantic duplication and improve generation & Maximise target-native performance and operational isolation \\
+Failure mode & Unsupported grammar constructs or emitter/runtime disagreement & Protocol drift, duplicated domain rules and service integration complexity \\
+\bottomrule
+\end{tabularx}
+
+\subsection{Hybrid placement}
+
+The strongest design may be hybrid:
+
+\begin{center}
+\begin{tikzpicture}[node distance=10mm and 17mm]
+  \node[fbwide] (model) {Foundation contract and sync tests};
+  \node[fbwide,below left=of model] (pg) {Generated Postgres RPC};
+  \node[fbwide,below=of model] (bun) {Bun web / edge adapter};
+  \node[fbwide,below right=of model] (rust) {Rust specialised service};
+  \node[fbwide,below=20mm of model] (clients) {Web and mobile clients};
+  \draw[fbedge] (model) -- (pg);
+  \draw[fbedge] (model) -- (bun);
+  \draw[fbedge] (model) -- (rust);
+  \draw[fbedge] (pg) -- (clients);
+  \draw[fbedge] (bun) -- (clients);
+  \draw[fbedge] (rust) -- (clients);
+\end{tikzpicture}
+\end{center}
+
+Use Rust for a measured hotspot or systems boundary, Bun for a TypeScript-native adapter, and Foundation for contract generation and end-to-end projection tests. This preserves the rewrite's performance benefits without discarding the tested backbone.
+
+\section{Decision framework}
+
+Prefer Foundation when:
+
+\begin{itemize}
+  \item the same domain behaviour must be projected across several target ecosystems;
+  \item generated SQL and portable modules already express substantial business value;
+  \item local SQLite/remote PostgreSQL behaviour is important;
+  \item consistency and testable code generation are more valuable than target-native familiarity.
+\end{itemize}
+
+Prefer a direct Bun/Rust implementation when:
+
+\begin{itemize}
+  \item profiling demonstrates CPU, memory, latency or startup constraints that target-native code materially improves;
+  \item the service boundary is narrow and stable;
+  \item the organisation can sustain Rust and TypeScript implementations plus protocol conformance tests;
+  \item local projection and cross-target generation are not central requirements.
+\end{itemize}
+
+Prefer a hybrid when a small number of native services provide clear value but the broader application still benefits from one tested contract.
+
+\section{Implementation workflow}
+
+\begin{enumerate}
+  \item Read the relevant \product{xt.substrate}, \product{xt.db.node} and \product{postgres.core} source and matching \product{code.test} facts.
+  \item Reproduce one vertical flow using the narrowest test namespace.
+  \item Define the server model and RPC operation.
+  \item Define local views and their remote space mapping.
+  \item Attach Postgres to the server space and SQLite or cache storage to the local space.
+  \item Assert emitted SQL separately from database execution.
+  \item Assert refresh, invalidation and projection behaviour through the node runtime.
+  \item Generate a thin UI adapter and verify it against fixtures and the live backbone.
+  \item Profile before assigning work to Bun or Rust.
+  \item Add contract/conformance tests for every specialised runtime boundary.
+\end{enumerate}
+
+\section{Conclusion}
+
+Foundation offers a semantics-first route to cross-cutting applications. It is strongest where code generation, database-side RPC, portable modules and local/remote state must evolve together. Bun and Rust offer a runtime-first route with excellent target-native characteristics. A disciplined architecture chooses between them per boundary, based on measured constraints, while retaining executable contracts and end-to-end data movement tests as the common quality mechanism.
+
+\end{document}
