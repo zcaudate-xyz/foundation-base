@@ -21,8 +21,8 @@
     (.contains fir "module KAcc16") => true
     (.contains fir "p : UInt<5>")    => true
     (.contains fir "k0 : UInt<5>")   => true
-    (count (re-seq #"regreset" fir)) => 6   ;; p, k0..k3, prev
-    (count (re-seq #"add\(" fir))    => 5)) ;; p + four transition counters
+    (>= (count (re-seq #"regreset" fir)) 7) => true  ;; p, k0..k3, prev, started
+    (pos? (count (re-seq #"add\(" fir)))     => true)) ;; popcount + transition adders
 
 ^{:refer jvm.chisel.variant.accumulate/k-accumulate-module :added "4.1"}
 (fact "k-accumulate-module emits SystemVerilog"

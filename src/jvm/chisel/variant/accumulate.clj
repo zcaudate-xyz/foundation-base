@@ -62,14 +62,20 @@
              k2R (ch/reg-init (ch/u 0 kw))
              k3R (ch/reg-init (ch/u 0 kw))
              prev (ch/reg-init (ch/u 0 1))
+             started (ch/reg-init (ch/b false))
              {:keys [k00 k01 k10 k11]} (v/pair-bools prev bit)]
          (ch/when valid
+           ;; p always accumulates (pR is 0 on the first valid cycle).
            (ch/connect! pR  (v/truncate (ch/add pR  bit) pw))
-           (ch/connect! k0R (v/truncate (ch/add k0R k00) kw))
-           (ch/connect! k1R (v/truncate (ch/add k1R k01) kw))
-           (ch/connect! k2R (v/truncate (ch/add k2R k10) kw))
-           (ch/connect! k3R (v/truncate (ch/add k3R k11) kw))
-           (ch/connect! prev bit))
+           ;; transition counters start only once a predecessor bit exists,
+           ;; matching `k-accumulate` (pairs counted from the second bit).
+           (ch/when started
+             (ch/connect! k0R (v/truncate (ch/add k0R k00) kw))
+             (ch/connect! k1R (v/truncate (ch/add k1R k01) kw))
+             (ch/connect! k2R (v/truncate (ch/add k2R k10) kw))
+             (ch/connect! k3R (v/truncate (ch/add k3R k11) kw)))
+           (ch/connect! prev bit)
+           (ch/connect! started (ch/b true)))
          (ch/connect! (ch/field io :p)  pR)
          (ch/connect! (ch/field io :k0) k0R)
          (ch/connect! (ch/field io :k1) k1R)

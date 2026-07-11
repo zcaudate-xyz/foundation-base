@@ -25,6 +25,13 @@
     :sum   (+ width (db/log2 lanes))
     width))
 
+(defn- widen-to
+  "Zero-extend a `width`-bit UInt `x` to `w` bits (MSBs zero). No-op when w<=width.
+   `ch/add` maps to Chisel's width-preserving `+`, so the :sum tree must widen
+   leaves to the full output width or the carries truncate."
+  [x width w]
+  (if (<= w width) x (ch/cat (ch/u 0 (- w width)) x)))
+
 (defn reduce-module
   "Build a reduce module. opts: {:lanes n :width w :op :sum|:count|:min|:max :name \"Reduce\"}."
   [{:keys [lanes width op name] :or {name "Reduce"}}]
@@ -40,8 +47,9 @@
              vals (ch/field io :values)
              res  (case op
                     :count (db/popcount mask lanes)
-                    :sum   (db/tree-reduce ch/add (ch/u 0 width)
-                                           (db/gated vals mask lanes (ch/u 0 width)))
+                    :sum   (db/tree-reduce ch/add (ch/u 0 ow)
+                                           (mapv #(widen-to % width ow)
+                                                 (db/gated vals mask lanes (ch/u 0 width))))
                     :min   (db/tree-reduce (fn [a b] (ch/mux (ch/lt a b) a b)) maxv
                                            (db/gated vals mask lanes maxv))
                     :max   (db/tree-reduce (fn [a b] (ch/mux (ch/gt a b) a b)) (ch/u 0 width)

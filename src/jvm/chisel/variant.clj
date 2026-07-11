@@ -15,6 +15,8 @@
   (:require [jvm.chisel :as ch]
             [jvm.chisel.db :as db]))
 
+(declare truncate)
+
 (defn sum-width
   "Width of the adder tree that sums `m` one-bit values. Chisel `+` widens by
    one bit per tree level, so summing `m` 1-bit operands yields
@@ -45,18 +47,26 @@
      :k10 (ch/and prev nc)
      :k11 (ch/and prev cur)}))
 
+(defn- widen
+  "Zero-extend a 1-bit value to `w` bits (see `jvm.chisel.db/popcount`)."
+  [b w]
+  (if (<= w 1) b (ch/cat (ch/u 0 (dec w)) b)))
+
 (defn transition-counts
   "Given `bits` : UInt(n) (lsb-first), return `[k0 k1 k2 k3]` — the adder-tree
    sums of the four `pair-bools` over the `n-1` adjacent pairs. For `n < 2`
-   there are no pairs and all counts are zero."
+   there are no pairs and all counts are zero. Indicators are zero-extended to
+   the counter width before summing (see `jvm.chisel.db/popcount`)."
   [bits n]
   (if (< n 2)
     (let [z (ch/u 0 1)] [z z z z])
-    (let [pairs (map (fn [i]
+    (let [w     (kw n)
+          pairs (map (fn [i]
                        (pair-bools (ch/index bits i) (ch/index bits (inc i))))
                      (range (dec n)))
-          sum   (fn [k] (db/tree-reduce ch/add (ch/u 0 1)
-                                        (mapv #(get % k) pairs)))]
+          sum   (fn [k] (truncate (db/tree-reduce ch/add (ch/u 0 w)
+                                                  (mapv #(widen (get % k) w) pairs))
+                                  w))]
       [(sum :k00) (sum :k01) (sum :k10) (sum :k11)])))
 
 (defn popcount

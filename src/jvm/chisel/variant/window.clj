@@ -73,22 +73,39 @@
              k1R (ch/reg-init (ch/u 0 kw))
              k2R (ch/reg-init (ch/u 0 kw))
              k3R (ch/reg-init (ch/u 0 kw))
+             prev (ch/reg-init (ch/u 0 1))
+             fill (ch/reg-init (ch/u 0 pw))        ;; 0..length
              head  (ch/index srR (dec length))
              nhead (ch/index srR (- length 2))
              tail  (ch/index srR 0)
              ntail bit
              leave (v/pair-bools head nhead)
              enter (v/pair-bools tail ntail)
+             acc   (v/pair-bools prev bit)         ;; pair used while the window fills
              bump  (fn [reg l e w]
                      (v/truncate (ch/add (ch/sub reg l) e) w))
-             sr-next (ch/cat (ch/bits-at srR (dec length) 1) ntail)]
+             sr-next (ch/cat (ch/bits-at srR (- length 2) 0) ntail)
+             filling (ch/lt fill (ch/u length pw))]
          (ch/when valid
-           (ch/connect! pR  (v/truncate (ch/add (ch/sub pR head) ntail) pw))
-           (ch/connect! k0R (bump k0R (:k00 leave) (:k00 enter) kw))
-           (ch/connect! k1R (bump k1R (:k01 leave) (:k01 enter) kw))
-           (ch/connect! k2R (bump k2R (:k10 leave) (:k10 enter) kw))
-           (ch/connect! k3R (bump k3R (:k11 leave) (:k11 enter) kw))
-           (ch/connect! srR sr-next))
+           (ch/connect! srR sr-next)               ;; shift every valid cycle
+           (ch/when-else filling
+             ;; warm-up: accumulate like `k-accumulate` until the register is full
+             (do
+               (ch/connect! pR (v/truncate (ch/add pR bit) pw))
+               (ch/when (ch/gt fill (ch/u 0 pw))
+                 (ch/connect! k0R (v/truncate (ch/add k0R (:k00 acc)) kw))
+                 (ch/connect! k1R (v/truncate (ch/add k1R (:k01 acc)) kw))
+                 (ch/connect! k2R (v/truncate (ch/add k2R (:k10 acc)) kw))
+                 (ch/connect! k3R (v/truncate (ch/add k3R (:k11 acc)) kw)))
+               (ch/connect! prev bit)
+               (ch/connect! fill (v/truncate (ch/add fill (ch/u 1 pw)) pw)))
+             ;; steady state: drop the leaving left-edge pair, add the entering one
+             (do
+               (ch/connect! pR  (v/truncate (ch/add (ch/sub pR head) ntail) pw))
+               (ch/connect! k0R (bump k0R (:k00 leave) (:k00 enter) kw))
+               (ch/connect! k1R (bump k1R (:k01 leave) (:k01 enter) kw))
+               (ch/connect! k2R (bump k2R (:k10 leave) (:k10 enter) kw))
+               (ch/connect! k3R (bump k3R (:k11 leave) (:k11 enter) kw)))))
          (ch/connect! (ch/field io :p)  pR)
          (ch/connect! (ch/field io :k0) k0R)
          (ch/connect! (ch/field io :k1) k1R)

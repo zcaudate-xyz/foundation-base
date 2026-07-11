@@ -31,11 +31,34 @@
       :else    (combine (tree-reduce combine zero (subvec v 0 (quot n 2)))
                         (tree-reduce combine zero (subvec v (quot n 2)))))))
 
+(declare log2)
+
+(defn- sum-width
+  "Width of an adder tree summing `m` widened leaves (see `popcount`)."
+  [m]
+  (if (<= m 1) 1 (inc (log2 m))))
+
+(defn- widen
+  "Zero-extend a 1-bit value `b` to `w` bits (MSBs zero). Works around a
+   Verilator/Chisel 6 quirk where `UInt<1> + UInt<1>` drops the carry; widening
+   the leaves before the adder tree keeps every addition at least 2 bits wide."
+  [b w]
+  (if (<= w 1) b (ch/cat (ch/u 0 (dec w)) b)))
+
+(defn- trunc
+  "Low `w` bits of `x`."
+  [x w]
+  (ch/bits-at x (dec w) 0))
+
 (defn popcount
-  "Sum of the set bits of a bitmask `mask` of width `n` (adder tree)."
+  "Sum of the set bits of a bitmask `mask` of width `n` (adder tree). Leaves are
+   zero-extended to the result width before summing so the tree never adds two
+   1-bit values (see `widen`)."
   [mask n]
-  (tree-reduce ch/add (ch/u 0 1)
-               (mapv #(ch/index mask %) (range n))))
+  (let [w (sum-width n)]
+    (trunc (tree-reduce ch/add (ch/u 0 w)
+                        (mapv #(widen (ch/index mask %) w) (range n)))
+           w)))
 
 (defn gated
   "Gate each lane of `values` (Vec n UInt(w)) by a bitmask: lane i becomes
