@@ -9,6 +9,7 @@
             [jvm.chisel.db.schedule :as sched]
             [jvm.chisel.db.cluster :as cl]
             [jvm.chisel.db.estimate :as est]
+            [jvm.chisel.db.observe :as observe]
             [jvm.chisel.db.pipeline :as pipe]))
 
 ;; a logical plan: scan/filter -> hash (group key) -> sum
@@ -81,3 +82,21 @@
   ;; same seam on the admission control plane
   (:admission (cl/admit (cl/cluster inventory) :q1 group-sum-plan
                         {:cost-fn est/estimate-cost})))
+
+;; the feedback loop: run, observe, correct, price the next query
+(comment
+  (def data {:values [10 20 30 40 50 60 70 80] :validMask 2r11111111})
+
+  ;; estimate said 2.33 rows out of the scan; 7 actually passed (ratio ~3x)
+  (observe/calibration group-sum-plan data)
+
+  ;; fold the run into per-kind factors (plain data — persist it between queries)
+  (def factors (observe/correction-factors group-sum-plan data))
+  ;; => {:scan 2.9997907512031805}   (hash/reduce earn nothing: pass-through/exact)
+
+  ;; the next query of this shape is priced from observed reality:
+  ;;   default lanes*nodes = 24, raw estimate = 14, corrected = 22
+  (def learned-cost (observe/make-cost-fn factors))
+  (sched/schedule group-sum-plan inventory {:cost-fn learned-cost})
+  (:admission (cl/admit (cl/cluster inventory) :q2 group-sum-plan
+                        {:cost-fn learned-cost})))

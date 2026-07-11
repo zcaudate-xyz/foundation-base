@@ -84,6 +84,15 @@
   (est/estimate-cost join-plan) => 33
   (< (est/estimate-cost join-plan) (sched/estimate-cost join-plan)) => true)
 
+^{:refer jvm.chisel.db.estimate/estimate-cost :added "4.1"}
+(fact "correction factors scale a node's output before it feeds downstream"
+  (est/estimate-cost plan-a {}) => 9
+  ;; scan out 0.03125 * 128 = 4.0 rows into the reduce -> 8 + 4
+  (est/estimate-cost plan-a {:scan 128.0}) => 12
+  (est/estimate-cost full-sel-plan {:scan 0.5}) => 12
+  ;; a factor on the terminal node scales its own out, nothing downstream
+  (est/estimate-cost plan-a {:aggregate 5.0}) => 9)
+
 ^{:refer jvm.chisel.db.schedule/schedule :added "4.1"}
 (fact "the estimator drops into schedule's :cost-fn seam unchanged"
   (sched/schedule plan-a {:scan 1 :aggregate 1} {:cost-fn est/estimate-cost})

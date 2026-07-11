@@ -48,28 +48,32 @@
 
 (defn- node-flows
   "One topological walk of the plan; returns {node-id {:in c :out c}}.
-   Sources are taken at `:lanes` rows."
-  [plan]
-  (let [width (:width plan)
-        lanes (double (:lanes plan))
-        dom   (Math/pow 2.0 width)]
-    (reduce
-     (fn [env node]
-       (let [card-of (fn [ref] (if (src? ref) lanes (:out (env ref))))
-             ins     (:inputs node)
-             in0     (card-of (first ins))
-             out     (case (:op node)
-                       :scan        (* in0 (reduce (fn [s p]
-                                                     (* s (pred-selectivity width p)))
-                                                   1.0 (:preds node)))
-                       :bloom-probe (* in0 (bloom-sel (:bits-count node) (:ks node) in0))
-                       :hash        in0
-                       :join-build  in0
-                       :join-probe  (* in0 (min 1.0 (/ (card-of (second ins)) dom)))
-                       :reduce      1.0
-                       in0)]
-         (assoc env (:id node) {:in in0 :out out})))
-     {} (sched/plan->nodes plan))))
+   Sources are taken at `:lanes` rows. `factors` (per resource kind) scales
+   each node's raw output estimate before it feeds downstream — `{}` is the
+   uncorrected model, and the seam `observe/correction-factors` fills."
+  ([plan] (node-flows plan {}))
+  ([plan factors]
+   (let [width (:width plan)
+         lanes (double (:lanes plan))
+         dom   (Math/pow 2.0 width)]
+     (reduce
+      (fn [env node]
+        (let [card-of (fn [ref] (if (src? ref) lanes (:out (env ref))))
+              ins     (:inputs node)
+              in0     (card-of (first ins))
+              raw     (case (:op node)
+                        :scan        (* in0 (reduce (fn [s p]
+                                                      (* s (pred-selectivity width p)))
+                                                    1.0 (:preds node)))
+                        :bloom-probe (* in0 (bloom-sel (:bits-count node) (:ks node) in0))
+                        :hash        in0
+                        :join-build  in0
+                        :join-probe  (* in0 (min 1.0 (/ (card-of (second ins)) dom)))
+                        :reduce      1.0
+                        in0)
+              out     (* raw (double (get factors (sched/op->kind (:op node)) 1.0)))]
+          (assoc env (:id node) {:in in0 :out out})))
+      {} (sched/plan->nodes plan)))))
 
 (defn cardinalities
   "Estimated output cardinality per node id — the inspectable intermediate a
@@ -79,7 +83,10 @@
 
 (defn estimate-cost
   "Drop-in `:cost-fn`: row-cycles = Σ ceil(input cardinality) over all nodes.
-   Full-selectivity linear plans reproduce `schedule/estimate-cost`."
-  [plan]
-  (long (reduce (fn [acc flow] (+ acc (Math/ceil (:in flow))))
-                0.0 (vals (node-flows plan)))))
+   Full-selectivity linear plans reproduce `schedule/estimate-cost`.
+   The 2-arity applies per-kind correction `factors` (see `node-flows`) —
+   `observe/make-cost-fn` is the intended caller."
+  ([plan] (estimate-cost plan {}))
+  ([plan factors]
+   (long (reduce (fn [acc flow] (+ acc (Math/ceil (:in flow))))
+                 0.0 (vals (node-flows plan factors))))))
