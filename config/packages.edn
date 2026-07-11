@@ -61,8 +61,13 @@
 
  xyz.zcaudate/jvm
  {:description "jvm library"
-  :include [[jvm :complete]]}
-  
+  :include [[jvm :exclude [jvm.chisel]]]}
+
+ xyz.zcaudate/jvm.chisel
+ {:description "thin Clojure mapping of Chisel hardware primitives (JVM interop)"
+  :include [[jvm.chisel :complete]]
+  :dependencies [org.chipsalliance/chisel_2.13]}
+
  xyz.zcaudate/js.blessed
  {:description "js blessed" 
   :include [[js.blessed :complete]]}
