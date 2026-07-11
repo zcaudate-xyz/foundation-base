@@ -1,0 +1,50 @@
+(ns jvm.chisel.db-join-test
+  (:use code.test)
+  (:require [jvm.chisel.db.join :as j]
+            [jvm.chisel.db.hash :as h]))
+
+(def ^:private width 8)
+(def ^:private buckets 16)
+(def ^:private k 0x9E)
+(defn- bkt [x] (h/hash-ref x width k 4))
+
+^{:refer jvm.chisel.db.join/join-build-ref :added "4.1"}
+(fact "build-ref: table length and valid-bitmask reflect occupied buckets"
+  (let [keys [3 7 11 42 99 200]
+        t    (j/join-build-ref keys 2r11111111 width buckets k)]
+    (count (:keys t))            => buckets
+    (Long/bitCount (:valid t))   => (count (set (map bkt keys)))))
+
+^{:refer jvm.chisel.db.join/join-probe-ref :added "4.1"}
+(fact "probe hits exactly when the key is the last writer in its bucket"
+  (let [keys (vec (range 0 256 17))                 ;; 16 widely-spread keys
+        mask (dec (bit-shift-left 1 (count keys)))
+        t    (j/join-build-ref keys mask width buckets k)]
+    (every? (fn [k]
+              (= (j/join-probe-ref k t width buckets k)
+                 (= k (nth (:keys t) (bkt k)))))
+            keys)
+    => true))
+
+^{:refer jvm.chisel.db.join/join-build-ref :added "4.1"}
+(fact "last-writer-wins on collision: probing the overwritten key misses"
+  ;; keys 0 and 1 both hash to bucket 0 with k=0x9E, width 8
+  (bkt 0) => (bkt 1)
+  (let [t (j/join-build-ref [0 1] 2r11 width buckets k)]
+    (nth (:keys t) (bkt 0))                 => 1     ;; lane 1 survives
+    (j/join-probe-ref 1 t width buckets k)  => true  ;; survivor hits
+    (j/join-probe-ref 0 t width buckets k)  => false ;; overwritten misses
+    (Long/bitCount (:valid t))              => 1))   ;; single occupied bucket
+
+^{:refer jvm.chisel.db.join/join-probe-ref :added "4.1"}
+(fact "probe into an empty bucket misses"
+  (let [t (j/join-build-ref [0 1] 2r11 width buckets k)]   ;; only bucket 0 occupied
+    (bkt 60)                               => 2       ;; key 60 maps to bucket 2
+    (j/join-probe-ref 60 t width buckets k) => false))  ;; bucket 2 empty -> miss
+
+^{:refer jvm.chisel.db.join/join-build-ref :added "4.1"}
+(fact "valid-mask gates which lanes are inserted"
+  (let [t (j/join-build-ref [0 1] 2r01 width buckets k)]   ;; only lane 0 inserted
+    (nth (:keys t) (bkt 0))                 => 0
+    (j/join-probe-ref 0 t width buckets k)  => true
+    (j/join-probe-ref 1 t width buckets k)  => false))  ;; lane 1 was masked out

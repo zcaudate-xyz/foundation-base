@@ -105,3 +105,23 @@
            (step)
            (expect (port "hit") (long (b01 want))))))))
   => nil)
+
+^{:refer jvm.chisel.db.bloom/bloom-insert-ref :added "4.1"}
+(fact "bloom probe hits every ref-inserted key (insert -> probe round trip)"
+  (let [width 8 bits-count 16 ks [0x9E 0x5D]
+        insert-keys [3 7 11 42 99 200]
+        bits (reduce (fn [b k] (bloom/bloom-insert-ref k b width bits-count ks))
+                     0 insert-keys)]
+    (ct/simulate
+     (bloom/bloom-probe-module {:width width :bits-count bits-count :ks ks
+                                :name "BloomRoundTripCo"})
+     (fn [ctx]
+       (let [{:keys [port poke expect step]} ctx]
+         (poke (port "bits") (long bits))
+         (doseq [k insert-keys]
+           (assert (bloom/bloom-probe-ref k bits width bits-count ks)
+                   "reference must consider inserted keys present")
+           (poke (port "key") (long k))
+           (step)
+           (expect (port "hit") (long 1)))))))
+  => nil)

@@ -116,6 +116,10 @@
   "pack a seq of Bool/Bits into a UInt (VecInit(...).asUInt), lsb first"
   [coll] (in/vec-as-uint coll))
 
+(defn vec-init
+  "build a chisel Vec from a seq of Data (VecInit), dynamically indexable"
+  [coll] (in/vec-init coll))
+
 ;; wiring --------------------------------------------------------------------
 
 (defn connect!

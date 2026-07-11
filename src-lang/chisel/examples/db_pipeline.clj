@@ -7,6 +7,8 @@
    costed); the chip only sees the operator graph and the resource inventory."
   (:require [jvm.chisel :as ch]
             [jvm.chisel.db.schedule :as sched]
+            [jvm.chisel.db.cluster :as cl]
+            [jvm.chisel.db.estimate :as est]
             [jvm.chisel.db.pipeline :as pipe]))
 
 ;; a logical plan: scan/filter -> hash (group key) -> sum
@@ -39,3 +41,43 @@
             (pipe/pipeline-module (assoc group-sum-plan :name "GroupSum8"))))
   (println (ch/emit-system-verilog
             (pipe/pipeline-module (assoc group-sum-plan :name "GroupSum8")))))
+
+;; multi-query admission: allocate cores, don't synthesise hardware
+(comment
+  (def chip (cl/cluster {:scan 2 :hash 2 :aggregate 1}))
+
+  ;; q1 (scan -> hash -> sum) pins scan-0, hash-0, aggregate-0
+  (def r1 (cl/admit chip :q1 group-sum-plan))
+  (:placement (:admission r1))
+
+  ;; q2 cannot reuse q1's units; it draws scan-1 + hash-1
+  (def probe-plan {:width 8 :lanes 8
+                   :stages [{:op :scan :preds [[:gte 1]]}
+                            {:op :hash :buckets 16}]})
+  (def r2 (cl/admit (:cluster r1) :q2 probe-plan))
+  (cl/free-counts (:cluster r2))  ;; => {:scan 0, :hash 0, :aggregate 0}
+  (cl/utilization (:cluster r2))  ;; => {:scan 1.0, :hash 1.0, :aggregate 1.0}
+
+  ;; q3 is refused until something finishes — nothing is allocated
+  (cl/admit (:cluster r2) :q3 probe-plan)
+  ;; => {:ok? false :reason "insufficient free resources: ..."}
+
+  ;; q1 finishes; its blocks return to the pool; q3 now fits and reuses them
+  (def chip2 (cl/release (:cluster r2) :q1))
+  (cl/free-counts chip2)          ;; => {:scan 1, :hash 1, :aggregate 1}
+  (:admission (cl/admit chip2 :q3 probe-plan)))
+
+;; cardinality-driven costing: the non-ML precursor of the learned model,
+;; plugged into the :cost-fn seam both control planes already expose
+(comment
+  ;; where does the plan actually narrow?
+  (est/cardinalities group-sum-plan)
+  ;; => {0 <rows after gte20/lte80>, 1 <same>, 2 1.0}
+
+  ;; selective plans bid the default lanes*nodes estimate down
+  (sched/schedule group-sum-plan inventory {:cost-fn est/estimate-cost})
+  (sched/estimate-cost group-sum-plan)   ;; default: 24 (8 lanes x 3 nodes)
+
+  ;; same seam on the admission control plane
+  (:admission (cl/admit (cl/cluster inventory) :q1 group-sum-plan
+                        {:cost-fn est/estimate-cost})))

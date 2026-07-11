@@ -55,6 +55,15 @@
     (doseq [[i x] (map-indexed vector vals)]
       (poke (vec-el v i) (long x)))))
 
+(defn expect-vec!
+  "Expect each lane of the Vec *output* port named `pname` to equal the
+   corresponding value in `vals` (lane 0 = first element)."
+  [ctx pname vals]
+  (let [{:keys [port expect]} ctx
+        v (port pname)]
+    (doseq [[i x] (map-indexed vector vals)]
+      (expect (vec-el v i) (long x)))))
+
 (defn simulate
   "Elaborate and simulate `builder` (a `jvm.chisel/module` thunk), running
    `(f ctx)` inside the simulation context. `ctx` is a map:

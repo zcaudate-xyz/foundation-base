@@ -150,6 +150,11 @@
   (let [v (.do_apply ^chisel3.VecInit$ chisel3.VecInit$/MODULE$ (->seq coll) si)]
     (.do_asUInt ^Bits v si)))
 
+(defn vec-init
+  "VecInit(coll) — a chisel Vec from a seq of Data (supports dynamic indexing)."
+  [coll]
+  (.do_apply ^chisel3.VecInit$ chisel3.VecInit$/MODULE$ (->seq coll) si))
+
 ;; ---------------------------------------------------------------------------
 ;; construction: wire / reg
 ;; ---------------------------------------------------------------------------
