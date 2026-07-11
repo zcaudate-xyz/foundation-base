@@ -121,6 +121,9 @@
    ;; hara.runtime.jocl
    [org.jocl/jocl "2.0.4"]
 
+   ;; jvm.chisel (runtime link against precompiled Chisel; no Scala compiler plugin needed)
+   [org.chipsalliance/chisel_2.13 "6.7.0"]
+
    ;; std.pretty
    [org.clojure/core.rrb-vector "0.1.2"]
 

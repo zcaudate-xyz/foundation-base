@@ -55,16 +55,10 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          lein exec -ep "(require '[code.doc :as doc]
-                                  '[code.doc.executive :as exec])
-                          (let [project (doc/make-project)
-                                lookup  (exec/all-pages project)
-                                sites   #{"core" "code" "xt" "std" "hara"}]
-                            (doseq [site [:core :code :xt :std :hara]]
-                              (doc/deploy-template site {:write true}))
-                            (doseq [k (sort (filter #(sites (namespace %))
-                                                    (keys lookup)))]
-                              (exec/render k {:write true} lookup project)))"
+          lein exec -ep "(require '[code.doc :as doc])
+                          (doseq [site [:core :code :xt :std :hara]]
+                            (doc/deploy-template site {:write true})
+                            (doc/publish [(symbol (name site))] {:write true :parallel false}))"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
