@@ -13,6 +13,52 @@
              [xt.db.system.impl-supabase :as impl-supabase]
              [xt.db.system.impl-supabase-session :as session]]})
 
+(defn.xt supabase-rpc-error-detail
+  "returns decoded structured gw rpc error details when available"
+  {:added "4.1"}
+  [body]
+  (var detail (or (xt/x:get-key body "details")
+                  (xt/x:get-key body "detail")))
+  (cond (xt/x:is-string? detail)
+        (try
+          (return (xt/x:json-decode detail))
+          (catch err
+            (return detail)))
+
+        :else
+        (return detail)))
+
+(defn.xt supabase-error-data
+  "normalizes a failed supabase response into exception data"
+  {:added "4.1"}
+  [response]
+  (var status (xt/x:get-key response "status"))
+  (var body   (xt/x:get-key response "body"))
+  (var detail (-/supabase-rpc-error-detail body))
+  (var data body)
+  (when (and (xt/x:is-object? detail)
+             (== "gw.rpc.error" (xt/x:get-key detail "type")))
+    (:= data detail))
+  (when (xt/x:is-object? data)
+    (xt/x:set-key data "status" status)
+    (when (xt/x:nil? (xt/x:get-key data "http_status"))
+      (xt/x:set-key data "http_status" status)))
+  (return data))
+
+(defn.xt supabase-response-data
+  "extracts supabase response data and rejects failed responses"
+  {:added "4.1"}
+  [response]
+  (var status (xt/x:get-key response "status"))
+  (var data (-/supabase-error-data response))
+  (var body (xt/x:get-key response "body"))
+  (when (and status (>= status 400))
+    (throw (xt/x:ex (or (xt/x:get-key data "message")
+                        (xt/x:get-key body "message")
+                        "Supabase request failed")
+                    data)))
+  (return (http-util/get-body-data response)))
+
 (defn.xt supabase-request
   "executes a supabase command against the requested service"
   {:added "4.1"}
@@ -24,7 +70,7 @@
           (var client (xt/x:get-key impl "client"))
           (return
            (-> (http-fetch/request-http client cmd)
-               (promise/x:promise-then http-util/get-body-data))))))))
+               (promise/x:promise-then -/supabase-response-data))))))))
 
 (defn.xt ^{:substrate/fn "@xt.supabase/sign-up"}
   supabase-sign-up-handler
