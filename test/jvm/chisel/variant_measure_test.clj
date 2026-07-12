@@ -18,7 +18,7 @@
   (m/c-measure-ref [0 0 0 0])     => [0 0]
   (m/c-measure-ref [1 1 1 1])     => [4 0])
 
-^{:refer jvm.chisel.variant.measure/k-measure-module :added "4.1"}
+^{:refer jvm.chisel.variant.measure/k-measure-module :added "4.1" :id test-k-measure-module-1}
 (fact "k-measure-module builds popcount + four transition adder trees"
   (let [fir (ch/emit-firrtl (m/k-measure-module {:n 8 :name "KMeasure8"}))]
     (.contains fir "module KMeasure8") => true
@@ -34,7 +34,7 @@
     (.contains fir "p : UInt<4>")      => true
     (.contains fir "c : UInt<4>")      => true))
 
-^{:refer jvm.chisel.variant.measure/k-measure-module :added "4.1"}
+^{:refer jvm.chisel.variant.measure/k-measure-module :added "4.1" :id test-k-measure-module-2}
 (fact "k-measure-module emits SystemVerilog"
   (let [sv (ch/emit-system-verilog (m/k-measure-module {:n 8 :name "KMeasure8SV"}))]
     (.contains sv "module KMeasure8SV") => true))

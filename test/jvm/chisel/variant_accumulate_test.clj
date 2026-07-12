@@ -15,7 +15,7 @@
                       (subvec (vec bits) 0 (inc i))))
              (range (count bits)))))
 
-^{:refer jvm.chisel.variant.accumulate/k-accumulate-module :added "4.1"}
+^{:refer jvm.chisel.variant.accumulate/k-accumulate-module :added "4.1" :id test-k-accumulate-module-1}
 (fact "k-accumulate-module is sequential with six regs and right widths"
   (let [fir (ch/emit-firrtl (acc/k-accumulate-module {:n-max 16 :name "KAcc16"}))]
     (.contains fir "module KAcc16") => true
@@ -24,7 +24,7 @@
     (>= (count (re-seq #"regreset" fir)) 7) => true  ;; p, k0..k3, prev, started
     (pos? (count (re-seq #"add\(" fir)))     => true)) ;; popcount + transition adders
 
-^{:refer jvm.chisel.variant.accumulate/k-accumulate-module :added "4.1"}
+^{:refer jvm.chisel.variant.accumulate/k-accumulate-module :added "4.1" :id test-k-accumulate-module-2}
 (fact "k-accumulate-module emits SystemVerilog"
   (let [sv (ch/emit-system-verilog (acc/k-accumulate-module {:n-max 16 :name "KAcc16SV"}))]
     (.contains sv "module KAcc16SV") => true))

@@ -28,7 +28,7 @@
     (emit/spit-system-verilog b path)
     (:exit (emit/lint! path "EmitReduceSum")) => 0))
 
-^{:refer jvm.chisel.emit/lint! :added "4.1"}
+^{:refer jvm.chisel.emit/lint! :added "4.1" :id test-lint!-1}
 (fact "sequential k-accumulate emits lint-clean SystemVerilog"
   (let [b    (acc/k-accumulate-module {:n-max 16 :name "EmitKAcc"})
         path (str outdir "/EmitKAcc.sv")]
@@ -36,7 +36,7 @@
     (emit/spit-system-verilog b path)
     (:exit (emit/lint! path "EmitKAcc")) => 0))
 
-^{:refer jvm.chisel.emit/lint! :added "4.1"}
+^{:refer jvm.chisel.emit/lint! :added "4.1" :id test-lint!-2}
 (fact "full composed pipeline emits lint-clean SystemVerilog"
   (let [b    (pipe/pipeline-module
               {:width 8 :lanes 8 :name "EmitPipeFull"

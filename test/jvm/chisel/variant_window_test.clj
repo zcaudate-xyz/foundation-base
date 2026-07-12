@@ -19,7 +19,7 @@
     => (mapv (fn [i] (m/k-measure-ref (subvec (vec bits) i (+ i 3))))
              (range (- (count bits) 3 -1)))))
 
-^{:refer jvm.chisel.variant.window/k-window-module :added "4.1"}
+^{:refer jvm.chisel.variant.window/k-window-module :added "4.1" :id test-k-window-module-1}
 (fact "k-window-module is sequential: shift reg + five counters, sub/add bumps"
   (let [fir (ch/emit-firrtl (win/k-window-module {:length 4 :name "KWin4"}))]
     (.contains fir "module KWin4")  => true
@@ -29,7 +29,7 @@
     (pos? (count (re-seq #"add\(" fir)))    => true
     (pos? (count (re-seq #"sub\(" fir)))    => true))
 
-^{:refer jvm.chisel.variant.window/k-window-module :added "4.1"}
+^{:refer jvm.chisel.variant.window/k-window-module :added "4.1" :id test-k-window-module-2}
 (fact "k-window-module emits SystemVerilog"
   (let [sv (ch/emit-system-verilog (win/k-window-module {:length 4 :name "KWin4SV"}))]
     (.contains sv "module KWin4SV") => true))

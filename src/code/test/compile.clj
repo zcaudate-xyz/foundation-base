@@ -169,11 +169,25 @@
      fpkg)))
 
 (defn install-fact
-  "installs the current fact"
+  "installs the current fact.
+   Warns loudly when a *different* fact with the same id is already installed
+   in the namespace — the usual cause is two facts sharing one `:refer` (the
+   id is derived from it), which silently overwrites the earlier fact so that
+   it never runs while the suite stays green. Give one fact a unique `:id` in
+   its metadata to disambiguate. Re-installing the same fact (same id and
+   description, e.g. a REPL re-eval) replaces silently."
   {:added "3.0"}
   ([meta body]
-   (let [{:keys [ns id] :as fpkg} (create-fact meta body)
-         _ (rt/set-fact ns id fpkg)]
+   (let [{:keys [ns id desc] :as fpkg} (create-fact meta body)
+         existing (rt/get-fact ns id)]
+     (when (and existing (not= (:desc existing) desc))
+       (println
+        (format (str "WARNING code.test: fact `%s` in `%s` (line %s) overwrites an"
+                     " earlier fact (line %s) with the same id - the earlier fact"
+                     " will NOT run. Add a unique :id to one fact's metadata"
+                     " (duplicate :refer?).")
+                id ns (:line fpkg) (:line existing))))
+     (rt/set-fact ns id fpkg)
      fpkg)))
 
 (defn fact:compile

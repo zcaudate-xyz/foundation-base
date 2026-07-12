@@ -5,6 +5,10 @@
             [code.test.base.runtime :as rt]
             [code.test.compile :as compile :refer :all :exclude [=> *last*]]))
 
+;; facts below install into 'my.ns, which must exist even when this
+;; namespace is tested in isolation (lein test :only code.test.compile-test)
+(create-ns 'my.ns)
+
 ^{:refer code.test.compile/arrow? :added "3.0"}
 (fact "checks if form is an arrow"
   (arrow? '=>) => true
@@ -147,3 +151,19 @@
 ^{:refer code.test.compile/fact:symbol :added "3.0"
   :style/indent 1}
 (fact "gets the current fact symbol")
+
+^{:refer code.test.compile/install-fact :added "4.1"
+  :id test-install-fact-duplicate-warning}
+(fact "warns when a different fact with the same id is already installed"
+  (let [m1 {:id 'test-dup-probe :ns 'code.test.compile-test
+            :desc "first" :line 1000 :path "x.clj"}
+        m2 {:id 'test-dup-probe :ns 'code.test.compile-test
+            :desc "second" :line 1001 :path "x.clj"}]
+    (install-fact m1 '(+ 1 1))
+    (let [warning (with-out-str (install-fact m2 '(+ 2 2)))]
+      ;; re-installing the same fact (same desc) stays silent
+      (install-fact m1 '(+ 1 1))
+      (rt/remove-fact 'code.test.compile-test 'test-dup-probe)
+      [(boolean (re-find #"overwrites an earlier fact" warning))
+       (boolean (re-find #"test-dup-probe" warning))]))
+  => [true true])

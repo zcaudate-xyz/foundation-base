@@ -11,7 +11,7 @@
   (sq/k-squash-ref [0 0 0 0 1 1 1 1] 4)   => [0 1]
   (sq/k-squash-ref [1 1 1 1 1 1] 3)       => [1 1])
 
-^{:refer jvm.chisel.variant.squash/k-squash-module :added "4.1"}
+^{:refer jvm.chisel.variant.squash/k-squash-module :added "4.1" :id test-k-squash-module-1}
 (fact "k-squash-module is combinational, one popcount-threshold per block"
   (let [fir (ch/emit-firrtl (sq/k-squash-module {:blocks 2 :resolution 3 :name "KSq2x3"}))]
     (.contains fir "module KSq2x3")   => true
@@ -20,7 +20,7 @@
     (count (re-seq #"regreset" fir))  => 0
     (count (re-seq #"add\(" fir))     => 4)) ;; 2 blocks x sum(3 bits)=2 adds
 
-^{:refer jvm.chisel.variant.squash/k-squash-module :added "4.1"}
+^{:refer jvm.chisel.variant.squash/k-squash-module :added "4.1" :id test-k-squash-module-2}
 (fact "k-squash-module emits SystemVerilog"
   (let [sv (ch/emit-system-verilog (sq/k-squash-module {:blocks 2 :resolution 3 :name "KSq2x3SV"}))]
     (.contains sv "module KSq2x3SV") => true))
