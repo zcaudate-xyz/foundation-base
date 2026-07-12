@@ -100,7 +100,8 @@
 
 (defn pack
   "Pack a seq of 0/1 bits into an integer, element 0 at the least-significant
-   bit (matches the lsb-first convention of `jvm.chisel.variant`)."
+   bit (matches the lsb-first convention of `jvm.chisel.variant`, whose
+   kernels now live in foundation-embed)."
   [bits]
   (reduce (fn [m i] (bit-or m (bit-shift-left (long (nth bits i)) i)))
           0 (range (count bits))))

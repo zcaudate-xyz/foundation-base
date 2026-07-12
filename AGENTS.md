@@ -38,6 +38,23 @@ Tests use the `fact` macro and `=>` arrow assertions:
   => expected-result)
 ```
 
+### Fact IDs: one `:refer` per namespace, or use `:id`
+
+A fact's id is derived from its `:refer` metadata (`fact-id` in
+`code.test.base.runtime`). **Two facts in the same namespace with the same
+`:refer` collide: the later one overwrites the earlier one in the registry,
+and the earlier fact never runs** — the suite still reports green, just with
+fewer checks. `install-fact` now prints a `WARNING code.test: fact ... will
+NOT run` line at load time when this happens; never let those warnings stand
+in a namespace you own (many pre-existing ones remain elsewhere in the tree).
+
+- Keep to one fact per `:refer` per namespace (the existing convention), or
+- give every fact a unique explicit id: `^{:refer my.ns/fn :id test-my-fn-2}`.
+
+To prove a test file's assertions actually execute, temporarily break one
+expectation and confirm the run fails (the summary line shows
+`FAILED L:<line>`), then revert. Don't trust the passed-check count alone.
+
 ### Conditional Namespace Skipping
 
 Use `fact:global` with `:skip` to skip every fact in a namespace when a runtime condition is not met (for example, an external OS program is missing). Skipped facts are reported as skipped and their bodies are not executed.

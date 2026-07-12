@@ -77,3 +77,4 @@ node_modules/
 /src-training/python/__pycache__/
 /src-training/python/models/
 /src-training/python/venv/
+/src-lang/python/ml/.venv

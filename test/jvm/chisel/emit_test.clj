@@ -7,8 +7,7 @@
             [std.lib.env :as env]
             [jvm.chisel.emit :as emit]
             [jvm.chisel.db.reduce :as red]
-            [jvm.chisel.db.pipeline :as pipe]
-            [jvm.chisel.variant.accumulate :as acc]))
+            [jvm.chisel.db.pipeline :as pipe]))
 
 (fact:global
  {:skip (not (env/program-exists? "verilator"))})
@@ -27,14 +26,6 @@
     (str/includes? sv "{3'h0,")               => true
     (emit/spit-system-verilog b path)
     (:exit (emit/lint! path "EmitReduceSum")) => 0))
-
-^{:refer jvm.chisel.emit/lint! :added "4.1" :id test-lint!-1}
-(fact "sequential k-accumulate emits lint-clean SystemVerilog"
-  (let [b    (acc/k-accumulate-module {:n-max 16 :name "EmitKAcc"})
-        path (str outdir "/EmitKAcc.sv")]
-    (str/includes? (emit/system-verilog b) "module EmitKAcc") => true
-    (emit/spit-system-verilog b path)
-    (:exit (emit/lint! path "EmitKAcc")) => 0))
 
 ^{:refer jvm.chisel.emit/lint! :added "4.1" :id test-lint!-2}
 (fact "full composed pipeline emits lint-clean SystemVerilog"
