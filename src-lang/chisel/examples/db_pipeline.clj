@@ -10,6 +10,7 @@
             [jvm.chisel.db.cluster :as cl]
             [jvm.chisel.db.estimate :as est]
             [jvm.chisel.db.observe :as observe]
+            [jvm.chisel.db.pg :as pg]
             [jvm.chisel.db.pipeline :as pipe]))
 
 ;; a logical plan: scan/filter -> hash (group key) -> sum
@@ -100,3 +101,17 @@
   (sched/schedule group-sum-plan inventory {:cost-fn learned-cost})
   (:admission (cl/admit (cl/cluster inventory) :q2 group-sum-plan
                         {:cost-fn learned-cost})))
+
+;; postgres seam: EXPLAIN (FORMAT JSON) plan trees translate straight in
+(comment
+  (pg/plan->chip-plan
+   {"Node Type" "Aggregate" "Strategy" "Plain" "Output" ["count(*)"]
+    "Plans" [{"Node Type" "Seq Scan" "Relation Name" "orders"
+              "Filter" "(amount >= 100)"}]})
+  ;; => {:ok? true
+  ;;     :plan {:width 32 :lanes 8 :sources 1
+  ;;            :nodes [{:id :n0 :op :scan :inputs [[:src 0]] :preds [[:gte 100]]}
+  ;;                    {:id :n1 :op :reduce :inputs [:n0] :reduce-op :count}]}}
+  ;; unsupported nodes (Index Scan, Sort, grouped agg, outer joins) refuse the
+  ;; plan with a reason; what translates flows through schedule/admit/run-plan.
+  )

@@ -15,7 +15,7 @@
   (reduce/reduce-ref [1 2 3 4 5 6 7 8] 2r10101010 :min 8)   => 2
   (reduce/reduce-ref [1 2 3 4 5 6 7 8] 2r10101010 :max 8)   => 8)
 
-^{:refer jvm.chisel.db.reduce/reduce-module :added "4.1"}
+^{:refer jvm.chisel.db.reduce/reduce-module :added "4.1" :id test-reduce-module-1}
 (fact "reduce :sum builds an adder tree of the right width"
   (let [fir (ch/emit-firrtl
              (reduce/reduce-module {:lanes 8 :width 8 :op :sum :name "Sum8"}))]
@@ -23,7 +23,7 @@
     (.contains fir "result : UInt<11>") => true
     (count (re-seq #"add\(" fir)) => 7))
 
-^{:refer jvm.chisel.db.reduce/reduce-module :added "4.1"}
+^{:refer jvm.chisel.db.reduce/reduce-module :added "4.1" :id test-reduce-module-2}
 (fact "reduce :count/:min/:max elaborate"
   (let [count-fir (ch/emit-firrtl (reduce/reduce-module {:lanes 8 :width 8 :op :count :name "Count8"}))
         min-fir   (ch/emit-firrtl (reduce/reduce-module {:lanes 8 :width 8 :op :min   :name "Min8"}))
@@ -33,7 +33,7 @@
     (.contains min-fir "module Min8") => true
     (.contains max-fir "module Max8") => true))
 
-^{:refer jvm.chisel.db.reduce/reduce-module :added "4.1"}
+^{:refer jvm.chisel.db.reduce/reduce-module :added "4.1" :id test-reduce-module-3}
 (fact "reduce emits SystemVerilog"
   (let [sv (ch/emit-system-verilog
             (reduce/reduce-module {:lanes 8 :width 8 :op :sum :name "Sum8SV"}))]

@@ -10,7 +10,7 @@
   (scan/scan-ref [10 20 30 40 50 60 70 80] 2r00001111 [[:gte 50]])  => 2r00000000
   (scan/scan-ref [10 20 30 40 50 60 70 80] 2r11111111 [[:gte 20] [:lte 50]]) => 2r00011110)
 
-^{:refer jvm.chisel.db.scan/scan-module :added "4.1"}
+^{:refer jvm.chisel.db.scan/scan-module :added "4.1" :id test-scan-module-1}
 (fact "scan-module elaborates a multi-predicate scan to FIRRTL"
   (let [fir (ch/emit-firrtl
              (scan/scan-module {:lanes 8 :width 8 :preds [[:eq 0] [:gte 1]] :name "Scan8"}))]
@@ -21,7 +21,7 @@
     (.contains fir "geq(") => true
     (.contains fir "connect io.matchMask") => true))
 
-^{:refer jvm.chisel.db.scan/scan-module :added "4.1"}
+^{:refer jvm.chisel.db.scan/scan-module :added "4.1" :id test-scan-module-2}
 (fact "scan-module emits SystemVerilog"
   (let [sv (ch/emit-system-verilog
             (scan/scan-module {:lanes 8 :width 8 :preds [[:eq 0]] :name "Scan8SV"}))]

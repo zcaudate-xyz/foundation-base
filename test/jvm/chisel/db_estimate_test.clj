@@ -46,14 +46,14 @@
   (est/pred-selectivity 8 [:gte 300]) => 0.0
   (est/pred-selectivity 8 [:bogus 1]) => 1.0)
 
-^{:refer jvm.chisel.db.estimate/cardinalities :added "4.1"}
+^{:refer jvm.chisel.db.estimate/cardinalities :added "4.1" :id test-cardinalities-1}
 (fact "cardinalities track how each node narrows the stream"
   (est/cardinalities plan-a) => {0 0.03125 1 1.0}
   (est/cardinalities full-sel-plan) => {0 8.0 1 1.0}
   ;; [:gte 128] (0.5) * [:lt 192] (0.75) = 0.375 of 8 rows
   (est/cardinalities two-pred-plan) => {0 3.0 1 1.0})
 
-^{:refer jvm.chisel.db.estimate/estimate-cost :added "4.1"}
+^{:refer jvm.chisel.db.estimate/estimate-cost :added "4.1" :id test-estimate-cost-1}
 (fact "cost sums ceiled input cardinalities; selective plans bid down"
   (est/estimate-cost plan-a) => 9        ;; 8 + ceil(0.03125)
   (est/estimate-cost two-pred-plan) => 11 ;; 8 + 3
@@ -63,7 +63,7 @@
   ;; an empty plan costs nothing
   (est/estimate-cost {:width 8 :lanes 8 :stages []}) => 0)
 
-^{:refer jvm.chisel.db.estimate/cardinalities :added "4.1"}
+^{:refer jvm.chisel.db.estimate/cardinalities :added "4.1" :id test-cardinalities-2}
 (fact "bloom-probe keeps the false-positive fraction of its input"
   (let [cards (est/cardinalities bloom-plan)]
     ;; 1 - (15/16)^(2*8) of 8 rows ~= 5.15
@@ -73,7 +73,7 @@
   (est/estimate-cost bloom-plan) => 22
   (< (est/estimate-cost bloom-plan) (sched/estimate-cost bloom-plan)) => true)
 
-^{:refer jvm.chisel.db.estimate/estimate-cost :added "4.1"}
+^{:refer jvm.chisel.db.estimate/estimate-cost :added "4.1" :id test-estimate-cost-2}
 (fact "join-probe is costed from the build table's domain coverage"
   (let [cards (est/cardinalities join-plan)]
     (cards :b0) => 7.96875              ;; 8 * 255/256
@@ -84,7 +84,7 @@
   (est/estimate-cost join-plan) => 33
   (< (est/estimate-cost join-plan) (sched/estimate-cost join-plan)) => true)
 
-^{:refer jvm.chisel.db.estimate/estimate-cost :added "4.1"}
+^{:refer jvm.chisel.db.estimate/estimate-cost :added "4.1" :id test-estimate-cost-3}
 (fact "correction factors scale a node's output before it feeds downstream"
   (est/estimate-cost plan-a {}) => 9
   ;; scan out 0.03125 * 128 = 4.0 rows into the reduce -> 8 + 4

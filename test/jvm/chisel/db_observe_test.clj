@@ -58,7 +58,7 @@
                               skewed)
   => {})
 
-^{:refer jvm.chisel.db.observe/make-cost-fn :added "4.1"}
+^{:refer jvm.chisel.db.observe/make-cost-fn :added "4.1" :id test-make-cost-fn-1}
 (fact "corrected cost drops into schedule's :cost-fn seam"
   (let [raw       (observe/make-cost-fn {})
         corrected (observe/make-cost-fn {:scan 128.0})]
@@ -67,7 +67,7 @@
     (:cost (sched/schedule plan-a {:scan 1 :aggregate 1} {:cost-fn corrected}))
     => 12))
 
-^{:refer jvm.chisel.db.observe/make-cost-fn :added "4.1"}
+^{:refer jvm.chisel.db.observe/make-cost-fn :added "4.1" :id test-make-cost-fn-2}
 (fact "the same corrected cost prices cluster admissions"
   (let [corrected (observe/make-cost-fn (observe/correction-factors plan-a skewed))
         r (cl/admit (cl/cluster {:scan 1 :aggregate 1}) :q1 plan-a

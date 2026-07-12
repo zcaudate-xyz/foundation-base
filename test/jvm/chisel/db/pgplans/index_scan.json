@@ -1,0 +1,19 @@
+[
+  {
+    "Plan": {
+      "Node Type": "Index Scan",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Scan Direction": "Forward",
+      "Index Name": "orders_amount_idx",
+      "Relation Name": "orders",
+      "Alias": "orders",
+      "Startup Cost": 0.29,
+      "Total Cost": 8.30,
+      "Plan Rows": 3,
+      "Plan Width": 4,
+      "Output": ["amount"],
+      "Index Cond": "(amount >= 100)"
+    }
+  }
+]

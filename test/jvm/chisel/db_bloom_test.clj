@@ -17,7 +17,7 @@
     (bloom/bloom-probe-ref 123 bits 8 64 ks) => true
     (count (filter #(pos? (bit-and bits (bit-shift-left 1 %))) (range 64))) => 3))
 
-^{:refer jvm.chisel.db.bloom/bloom-probe-module :added "4.1"}
+^{:refer jvm.chisel.db.bloom/bloom-probe-module :added "4.1" :id test-bloom-probe-module-1}
 (fact "bloom probe elaborates one multiply per hash and a per-bit neq"
   (let [fir (ch/emit-firrtl
              (bloom/bloom-probe-module {:width 8 :bits-count 64 :ks ks :name "BloomProbe8"}))]
@@ -26,7 +26,7 @@
     (count (re-seq #"mul\(" fir)) => 3
     (.contains fir "neq(") => true))
 
-^{:refer jvm.chisel.db.bloom/bloom-probe-module :added "4.1"}
+^{:refer jvm.chisel.db.bloom/bloom-probe-module :added "4.1" :id test-bloom-probe-module-2}
 (fact "bloom probe emits SystemVerilog"
   (let [sv (ch/emit-system-verilog
             (bloom/bloom-probe-module {:width 8 :bits-count 64 :ks ks :name "BloomProbe8SV"}))]

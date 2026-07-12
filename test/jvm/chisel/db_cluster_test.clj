@@ -30,7 +30,7 @@
   (cl/utilization (cl/cluster inv))
   => {:scan 0.0 :hash 0.0 :join 0.0 :aggregate 0.0})
 
-^{:refer jvm.chisel.db.cluster/admit :added "4.1"}
+^{:refer jvm.chisel.db.cluster/admit :added "4.1" :id test-admit-1}
 (fact "admitting two queries packs them onto disjoint units"
   (let [r1 (cl/admit (cl/cluster inv) :q1 plan-a)]
     (:ok? r1) => true
@@ -48,7 +48,7 @@
       (cl/free-counts (:cluster r2))
       => {:scan 0 :hash 0 :join 1 :aggregate 0})))
 
-^{:refer jvm.chisel.db.cluster/admit :added "4.1"}
+^{:refer jvm.chisel.db.cluster/admit :added "4.1" :id test-admit-2}
 (fact "a contended query is refused and nothing leaks"
   (let [r1 (cl/admit (cl/cluster {:scan 1 :aggregate 1}) :q1 plan-a)
         r2 (cl/admit (:cluster r1) :q2 plan-a)]
@@ -70,7 +70,7 @@
     ;; release of an unknown id is a no-op
     (cl/release cl2 :nope) => cl2))
 
-^{:refer jvm.chisel.db.cluster/admit :added "4.1"}
+^{:refer jvm.chisel.db.cluster/admit :added "4.1" :id test-admit-3}
 (fact "duplicate ids and unsupported operators are refused"
   (let [cl1 (:cluster (cl/admit (cl/cluster inv) :q1 plan-a))]
     (cl/admit cl1 :q1 plan-a)
@@ -78,7 +78,7 @@
     (cl/admit cl1 :q2 {:width 8 :lanes 8 :stages [{:op :fft}]})
     => {:ok? false :reason "unsupported operator in plan"}))
 
-^{:refer jvm.chisel.db.cluster/admit :added "4.1"}
+^{:refer jvm.chisel.db.cluster/admit :added "4.1" :id test-admit-4}
 (fact "a DAG join plan packs scan/join/aggregate units in node order"
   (let [r (cl/admit (cl/cluster {:scan 2 :join 2 :aggregate 1}) :q1 join-plan)]
     (:ok? r) => true
@@ -95,7 +95,7 @@
   (let [r (cl/admit (cl/cluster {:scan 2 :aggregate 2}) :q1 plan-a)]
     (cl/utilization (:cluster r)) => {:scan 0.5 :aggregate 0.5}))
 
-^{:refer jvm.chisel.db.cluster/admit :added "4.1"}
+^{:refer jvm.chisel.db.cluster/admit :added "4.1" :id test-admit-5}
 (fact "a custom :cost-fn replaces the default estimate at admission"
   (let [r (cl/admit (cl/cluster inv) :q1 plan-a {:cost-fn (constantly 3)})]
     (:cost (:admission r)) => 3
