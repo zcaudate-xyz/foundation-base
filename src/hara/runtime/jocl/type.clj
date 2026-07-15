@@ -35,6 +35,30 @@
      {:unit unit
       :dsize (quot (class/primitive unit :size) 8)})))
 
+(defn unit-coerce
+  "coerces a scalar value to the kernel's declared primitive `unit`.
+
+   Kernel scalars must be passed to `clSetKernelArg` with exactly the
+   declared size — a Clojure long (8 bytes) for an `:int` parameter is
+   rejected with `CL_INVALID_KERNEL_ARGS` by strict drivers (e.g. NVIDIA
+   OpenCL 3.0 / CUDA 13)."
+  {:added "4.1"}
+  ([unit arg]
+   (case unit
+     :int     (int arg)
+     :uint    (int arg)
+     :long    (long arg)
+     :ulong   (long arg)
+     :short   (short arg)
+     :ushort  (short arg)
+     :char    (unchecked-byte arg)
+     :uchar   (unchecked-byte arg)
+     :bool    (unchecked-byte arg)
+     :float   (float arg)
+     :double  (double arg)
+     :half    (short arg)
+     (h/error "Cannot coerce to unit" {:unit unit :arg arg}))))
+
 (defn type-args
   "returns and checks type information of inputs"
   {:added "3.0"}

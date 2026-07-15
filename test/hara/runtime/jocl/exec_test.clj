@@ -71,13 +71,13 @@
        ""
        "#define G0 get_global_id(0)"
        ""
-       "__kernel void hara_runtime_jocl_exec_test____sample(__global const float * a, __global const float * b, __global float * c) {"
+       "__kernel void sample(__global const float * a, __global const float * b, __global float * c) {"
        ""
        "  int i = G0;"
        "  MUL_eq(c,a,b,i);"
        "}")
 
-      "hara_runtime_jocl_exec_test____sample"])
+      "sample"])
 
 ^{:refer hara.runtime.jocl.exec/exec-start :added "3.0"}
 (fact "starts the exec"
@@ -124,6 +124,30 @@
   [(float-array (range 10))
    (float-array (range 10))
    (float-array 10)])
+
+(defn.c ^{:- [:__kernel :void]
+          :rt/kernel {:worksize (fn [{:keys [a]}] [(count a)])}}
+  scale-by
+  ([:__global :const :float :* a
+    :__global :float :* c
+    :int n]
+   (var :int i := -/G0)
+   (:= (. c [i]) (* (. a [i]) n))))
+
+^{:refer hara.runtime.jocl.exec/set-kernel-value :added "4.1" :id test-scalar-kernel-arg-coercion}
+(fact "scalar args are coerced to the kernel's declared type"
+  ;; Clojure literals are longs (8 bytes); the kernel declares `int n`
+  ;; (4 bytes). Strict drivers (NVIDIA OpenCL 3.0 / CUDA 13) reject the
+  ;; mismatch with CL_INVALID_KERNEL_ARGS and the output stays zero.
+  (let [e (component/start
+           (exec {:source scale-by
+                  :worksize (fn [{:keys [a]}] [(count a)])}))
+        out (float-array 10)]
+    (try
+      (seq (exec-invoke e (float-array (range 10)) out 3))
+      (finally
+        (component/stop e))))
+  => '(0.0 3.0 6.0 9.0 12.0 15.0 18.0 21.0 24.0 27.0))
 
 ^{:refer hara.runtime.jocl.exec/exec-invoke:setup :added "3.0"}
 (fact "sets up the exec"

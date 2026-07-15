@@ -53,9 +53,9 @@
                              :layout :flat
                              :namespace (or namespace (env/ns-sym))
                              :emit {:body {:suppress true}}}))
-        name      (-> (symbol (name (:module source-ptr))
-                              (name (:id source-ptr)))
-                      (c/c-sanitize))]
+        ;; :flat layout emits declarations unmangled, so the kernel name is
+        ;; just the entry id (see hara.model.spec-c/emit-defn).
+        name      (c/c-sanitize (:id source-ptr))]
     [code name]))
 
 (defn exec-start
@@ -171,7 +171,11 @@
          buffs  (mapv (fn [i {:keys [buffer] :as entry} targ arg]
                         (if buffer
                           (set-kernel-buffer context kernel i entry targ arg)
-                          (set-kernel-value  kernel i targ arg)))
+                          ;; scalars must match the kernel's declared type
+                          ;; exactly (strict drivers reject size mismatches
+                          ;; with CL_INVALID_KERNEL_ARGS)
+                          (set-kernel-value  kernel i entry
+                                             (type/unit-coerce (:type entry) arg))))
                       (range) spec targs args)]
      buffs)))
 

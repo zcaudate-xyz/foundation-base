@@ -116,7 +116,12 @@
         ret-type (to-c-type ret-type)
         
         module (:module mopts)
-        sym-str (if (and module (symbol? sym) (not (namespace sym)))
+        ;; Under :flat layout all symbols emit unmangled (see
+        ;; emit-common/link-symbol), so declarations must stay unmangled
+        ;; too — otherwise same-module calls (`-/helper`) reference names
+        ;; that no declaration provides (unresolved extern at link time).
+        sym-str (if (and module (symbol? sym) (not (namespace sym))
+                         (not= :flat (:layout mopts)))
                   (c-sanitize (symbol (name (:id module)) (name sym)))
                   (c-sanitize sym))
         

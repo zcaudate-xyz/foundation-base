@@ -93,8 +93,10 @@
         step  (fn [] (.step (.testableClock sim (.clock ^chisel3.Module @raw)) 1))
         reset! (fn [] (let [r (.reset ^chisel3.Module @raw)]
                         (poke r true) (step) (poke r false)))
-        ctx {:port pdata :poke poke :expect expect :peek peekv :step step :reset! reset!}]
-    (.simulate sim thunk (fn1 (fn [_] (f ctx))))))
+        ctx {:port pdata :poke poke :expect expect :peek peekv :step step :reset! reset!}
+        ret (atom nil)]
+    (.simulate sim thunk (fn1 (fn [_] (reset! ret (f ctx)))))
+    @ret))
 
 ;; bit-vector helpers --------------------------------------------------------
 
