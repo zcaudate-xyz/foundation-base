@@ -1,5 +1,11 @@
 {
   "mcpServers": {
+    "chatgpt": {
+      "command": "/home/hoebat/Development/greenways/foundation-base/.kimi/mcp-chatgpt/.venv/bin/python3",
+      "args": [
+        "/home/hoebat/Development/greenways/foundation-base/.kimi/mcp-chatgpt/server.py"
+      ]
+    },
     "clojure-light": {
       "command": "/home/hoebat/Development/greenways/gw-v2/ref/foundation/.kimi/mcp-clojure-light/.venv/bin/python3",
       "args": [
