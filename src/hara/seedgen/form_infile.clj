@@ -426,6 +426,27 @@
       :else
       (replace-runtime-lang-content-string expr-str expr-form lang))))
 
+(defn- replace-top-level-helper-lang-string
+  [expr-str root-lang lang]
+  (let [expr-str  (strip-seedgen-control-meta-string expr-str)
+        root      (nav/parse-root expr-str)
+        expr-nav  (nav/down root)
+        form-nav  (some-> expr-nav form-common/nav-body)
+        head-nav  (some-> form-nav nav/down)
+        head      (some-> head-nav nav/value)
+        source-tag (name (common/seedgen-dispatch-tag root-lang))
+        target-tag (name (common/seedgen-dispatch-tag lang))
+        suffix    (str "." source-tag)
+        head-name (when (symbol? head) (name head))
+        prefix    (when (and head-name (str/ends-with? head-name suffix))
+                    (subs head-name 0 (- (count head-name) (count suffix))))]
+    (if (and head-nav
+             (contains? #{"def" "defn" "defn-" "defmacro"} prefix))
+      (-> head-nav
+          (nav/replace (symbol (str prefix "." target-tag)))
+          nav/root-string)
+      expr-str)))
+
 (defn- indent-lines
   [prefix s]
   (str prefix
@@ -1210,11 +1231,15 @@
 
 (defn- render-global-top-target
   [output lang]
-  (let [all-items (form-common/item-classify-langs (get-in output [:globals :global-top]))
+  (let [root-lang (get-in output [:globals :lang :root])
+        all-items (form-common/item-classify-langs (get-in output [:globals :global-top]))
         keep-map  (->> (keep-target-items (get-in output [:globals :global-top]) lang)
                        (map (fn [item]
                               [(line-key (item-line item))
-                               (render-item-string item)]))
+                               (replace-top-level-helper-lang-string
+                                (render-item-string item)
+                                root-lang
+                                lang)]))
                        (into {}))]
     {:all-lines (->> all-items
                      (map item-line)
@@ -1306,7 +1331,7 @@
                       (get keep-map line)
 
                       :else
-                      current)))
+                      (replace-top-level-helper-lang-string current root-lang lang))))
                 top-navs))
          "\n")))
 

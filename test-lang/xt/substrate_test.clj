@@ -781,7 +781,7 @@
                               "handlers" {"ping" (fn [space args request node]
                                                    (return {"space" (. space ["id"])
                                                             "count" (. (. space ["state"]) ["count"])
-                                                            "payload" (xt/x:get-idx args 0)}))}
+                                                            "payload" (xt/x:get-idx args (xt/x:offset 0))}))}
                               "triggers" {"event/updated" (fn [space stream node]
                                                             (main/set-space-state node
                                                                                   (. space ["id"])

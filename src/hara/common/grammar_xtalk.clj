@@ -756,7 +756,10 @@
               :arglists '([value])}}
    {:op :x-apply          :symbol #{'x:apply}           :emit :abstract
     :op-spec {:type [:fn [:xt/fn [:xt/array :xt/any]] :xt/any]
-              :arglists '([f args])}}])
+              :arglists '([f args])}}
+   {:op :x-construct     :symbol #{'x:construct}     :emit :abstract
+    :op-spec {:type [:fn [:xt/fn [:xt/array :xt/any]] :xt/any]
+              :arglists '([ctor args])}}])
 
 (def +xt-functional-return+
   [{:op :x-return-encode   :symbol #{'x:return-encode}   :emit :abstract

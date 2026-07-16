@@ -18,6 +18,10 @@
   [[_ f args]]
   (list '. f (list 'apply nil args)))
 
+(defn js-tf-x-construct
+  [[_ ctor args]]
+  (list '. 'Reflect (list 'construct ctor args)))
+
 (defn js-tf-x-random
   [_]
   '(Math.random))
@@ -79,6 +83,7 @@
    :x-err            {:emit :alias :raw 'throw}
    :x-eval           {:emit :alias :raw 'eval}
    :x-apply          {:macro #'js-tf-x-apply   :emit :macro}
+   :x-construct      {:macro #'js-tf-x-construct :emit :macro}
    :x-unpack         {:emit :alias :raw :..}
    :x-print          {:emit :alias :raw 'console.log :value true}
    :x-random         {:emit :alias :raw 'Math.random :value true}

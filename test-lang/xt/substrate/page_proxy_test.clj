@@ -3,6 +3,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -837,7 +838,7 @@
            (page-proxy/proxy-dispatch-op node "conn" "proxy-call"
                                          "room/a" "demo" ["main" [] true])
            (repl/notify
-            {"action" (xt/x:get-key (xt/x:get-idx out 0) "action")})))))
+            {"action" (xt/x:get-key (xt/x:get-idx out (xt/x:offset 0)) "action")})))))
   => {"action" "@page/model-proxy-call"})
 
 ^{:refer xt.substrate.page-proxy/group-sync-proxy :added "4.1"}

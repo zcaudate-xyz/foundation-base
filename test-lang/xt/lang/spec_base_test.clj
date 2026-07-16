@@ -2409,6 +2409,27 @@
                 [1 2 3]))
   => 6)
 
+^{:refer xt.lang.spec-base/x:construct :added "4.1"}
+(fact "constructs values with array arguments"
+
+  (!.js
+    (xt/x:construct (fn [value]
+                      (return {"value" value}))
+                    [3]))
+  => {"value" 3}
+
+  (!.py
+    (xt/x:construct (fn [value]
+                      (return {"value" value}))
+                    [3]))
+  => {"value" 3}
+
+  (!.lua
+    (xt/x:construct (fn [value]
+                      (return {"value" value}))
+                    [3]))
+  => {"value" 3})
+
 ^{:refer xt.lang.spec-base/x:iter-from-obj :added "4.1"}
 (fact "creates iterators over object pairs"
 

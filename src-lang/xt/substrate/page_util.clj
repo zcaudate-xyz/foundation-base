@@ -55,10 +55,16 @@
   (var space-id (xt/x:get-key (xt/x:get-key context "space") "id"))
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
-  (when (and acc (not (xt/x:get-key acc "error")))
-    (when refresh-deps-fn
-      (refresh-deps-fn node space-id group-id model-id refresh-deps-fn)))
-  (return acc))
+  (if (and acc
+           (not (xt/x:get-key acc "error"))
+           refresh-deps-fn)
+    (return
+     (promise/x:promise-then
+      (promise/x:promise-run
+       (refresh-deps-fn node space-id group-id model-id refresh-deps-fn))
+      (fn [_]
+        (return acc))))
+    (return acc)))
 
 (defn.xt run-remote
   "runs the remote function"

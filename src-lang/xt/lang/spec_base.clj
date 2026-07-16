@@ -1116,6 +1116,14 @@
   {:added "4.1"}
   ([f args] (list (quote x:apply) f args)))
 
+(defspec.xt x:construct [:fn [:xt/fn [:xt/array :xt/any]] :xt/any])
+
+(defmacro.xt ^{:standalone true}
+  x:construct
+  "constructs a value with array arguments"
+  {:added "4.1"}
+  ([ctor args] (list (quote x:construct) ctor args)))
+
 (defspec.xt x:iter-from-obj nil)
 
 (defmacro.xt ^{:standalone true} 

@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -30,7 +30,7 @@
                                      {"handler" (fn [context _]
                                                   (var args (. context ["args"]))
                                                   (return (xt/x:cat "hello "
-                                                                    (xt/x:get-idx args 0))))
+                                                                    (xt/x:get-idx args (xt/x:offset 0)))))
                                       "defaults" {"args" ["world"]}}}))
     (-> (. group ["init"])
         (promise/x:promise-then
@@ -53,13 +53,13 @@
                                  {"handler" (fn [context _]
                                               (var args (. context ["args"]))
                                               (return (xt/x:cat "hello "
-                                                                (xt/x:get-idx args 0))))
+                                                                (xt/x:get-idx args (xt/x:offset 0)))))
                                   "defaults" {"args" ["world"]}}})
     (-> (substrate/page-model-update node nil "page" "greet" {})
         (promise/x:promise-then
          (fn [_]
            (var model-result (page-core/model-ensure node nil "page" "greet"))
-           (var model (xt/x:get-idx model-result 1))
+           (var model (xt/x:get-idx model-result (xt/x:offset 1)))
            (repl/notify (event-model/get-current model nil))))))
   => "hello world"
 
@@ -72,13 +72,13 @@
                                  {"handler" (fn [context _]
                                               (var args (. context ["args"]))
                                               (return (xt/x:cat "hello "
-                                                                (xt/x:get-idx args 0))))
+                                                                (xt/x:get-idx args (xt/x:offset 0)))))
                                   "defaults" {"args" ["world"]}}})
     (-> (substrate/page-model-set-input node nil "page" "greet" {"data" ["substrate"]} {})
         (promise/x:promise-then
          (fn [_]
            (var model-result (page-core/model-ensure node nil "page" "greet"))
-           (var model (xt/x:get-idx model-result 1))
+           (var model (xt/x:get-idx model-result (xt/x:offset 1)))
            (repl/notify (event-model/get-current model nil))))))
   => "hello substrate")
 
@@ -105,7 +105,7 @@
                                                                         "source"))
                                               (var source-val
                                                 (event-model/get-current
-                                                 (xt/x:get-idx source-result 1)
+                                                 (xt/x:get-idx source-result (xt/x:offset 1))
                                                  nil))
                                               (return (xt/x:cat "derived-" source-val)))
                                   "defaults" {"args" []}
@@ -114,7 +114,7 @@
         (promise/x:promise-then
          (fn [_]
            (var derived-result (page-core/model-ensure node nil "page" "derived"))
-           (var derived (xt/x:get-idx derived-result 1))
+           (var derived (xt/x:get-idx derived-result (xt/x:offset 1)))
            (repl/notify (event-model/get-current derived nil))))))
   => "derived-beta")
 
@@ -129,7 +129,7 @@
                   "handlers"
                   {"demo/echo"
                    {"fn" (fn [space args request node]
-                           (return {"echo" (xt/x:get-idx args 0)
+                           (return {"echo" (xt/x:get-idx args (xt/x:offset 0))
                                     "server" (. node ["id"])}))
                     "meta" {"kind" "request"}}}}))
     (var client (substrate/node-create {"id" "client"}))
@@ -164,7 +164,7 @@
         (promise/x:promise-then
          (fn [_]
            (var model-result (page-core/model-ensure client nil "page" "echo"))
-           (var model (xt/x:get-idx model-result 1))
+           (var model (xt/x:get-idx model-result (xt/x:offset 1)))
            (repl/notify (event-model/get-current model nil))))))
   => {"echo" "ping" "server" "server"})
 
@@ -190,7 +190,7 @@
         (promise/x:promise-then
          (fn [_]
            (var model-result (page-core/model-ensure node nil "page" "both"))
-           (var model (xt/x:get-idx model-result 1))
+           (var model (xt/x:get-idx model-result (xt/x:offset 1)))
            (repl/notify (event-model/get-current model nil))))))
   => "remote-value"
 
@@ -209,6 +209,6 @@
         (promise/x:promise-then
          (fn [_]
            (var model-result (page-core/model-ensure node nil "page" "both"))
-           (var model (xt/x:get-idx model-result 1))
+           (var model (xt/x:get-idx model-result (xt/x:offset 1)))
            (repl/notify (event-model/get-current model nil))))))
   => "local-value")

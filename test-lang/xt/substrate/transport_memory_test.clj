@@ -9,6 +9,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-data :as xtd]
              [xt.substrate :as event-node]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-json :as node-json]
@@ -19,6 +20,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-data :as xtd]
              [xt.substrate :as event-node]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-json :as node-json]
@@ -29,6 +31,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-data :as xtd]
              [xt.substrate :as event-node]
              [xt.substrate.base-frame :as frame]
              [xt.substrate.base-json :as node-json]
@@ -364,7 +367,9 @@
   (!.js
    (var network {"states" {}})
    (transport-memory/ensure-network-targets-loop network ["peer-a" "peer-b"] 0)
-   (xt/x:obj-keys (. network ["states"])))
+   (xtd/arr-sort (xt/x:obj-keys (. network ["states"]))
+                  (fn [x] (return x))
+                  xt/x:str-lt))
   => ["peer-a" "peer-b"])
 
 ^{:refer xt.substrate.transport-memory/configure-network-links-loop :added "4.1"}
@@ -376,7 +381,9 @@
     {"hub" ["peer-a" "peer-b"]}
     ["hub"]
     0)
-   {"keys" (xt/x:obj-keys (. network ["states"]))
+   {"keys" (xtd/arr-sort (xt/x:obj-keys (. network ["states"]))
+                          (fn [x] (return x))
+                          xt/x:str-lt)
     "hub-peers" (. (. (. network ["states"]) ["hub"]) ["peers"])})
   => {"keys" ["hub" "peer-a" "peer-b"]
       "hub-peers" ["peer-a" "peer-b"]})
@@ -395,7 +402,9 @@
              ["hub" "peer-a"]
              {}
              0))
-   [(xt/x:obj-keys out)
+   [(xtd/arr-sort (xt/x:obj-keys out)
+                   (fn [x] (return x))
+                   xt/x:str-lt)
     (. (. out ["hub"]) ["meta"] ["kind"])
     (. (. out ["peer-a"]) ["meta"] ["id"])])
   => [["hub" "peer-a"] "wire.memory" "peer-a"])
@@ -448,16 +457,16 @@
                 "listener" nil
                 "peer" peer})
     (var endpoint (transport-memory/memory-endpoint state))
-    ((. endpoint ["start_fn"]) (fn [event ctx] event))
+    ((. endpoint ["start_fn"]) (fn [event ctx] (return event)))
     ((. endpoint ["write_fn"]) "pong")
     ((. endpoint ["stop_fn"]) nil)
     (repl/notify
      {"seen" seen
-      "listener" (. state ["listener"])}))
+      "listener_nil" (xt/x:nil? (. state ["listener"]))}))
   => {"seen" [{"text" "pong"
                "ctx" {"wire" "host"
                       "peer" "peer"}}]
-      "listener" nil})
+      "listener_nil" true})
 
 ^{:refer xt.substrate.transport-memory/memory-pair :added "4.1"}
 (fact "creates a bidirectional in-memory pair with configured ids"

@@ -72,6 +72,10 @@
   [[_ f args]]
   (list f (list :* args)))
 
+(defn python-tf-x-construct
+  [[_ ctor args]]
+  (list ctor (list :* args)))
+
 (defn python-tf-x-random
   [_]
   '(. (__import__ "random")
@@ -117,6 +121,7 @@
     :x-ex-data       {:macro #'python-tf-x-ex-data    :emit :macro}
     :x-eval           {:macro #'python-tf-x-eval    :emit :macro}
     :x-apply          {:macro #'python-tf-x-apply   :emit :macro}
+    :x-construct      {:macro #'python-tf-x-construct :emit :macro}
     :x-unpack         {:raw :*  :emit :alias}
     :x-random         {:macro #'python-tf-x-random  :emit :macro}
    :x-print          {:macro #'python-tf-x-print         :emit :macro}

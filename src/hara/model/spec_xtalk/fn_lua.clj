@@ -22,6 +22,10 @@
   [[_ f args]]
   (list f (list 'unpack args)))
 
+(defn lua-tf-x-construct
+  [[_ ctor args]]
+  (list ctor (list 'unpack args)))
+
 (defn lua-tf-x-err
   [[_ s & [data]]]
   (if data
@@ -87,6 +91,7 @@
     :x-ex-data        {:macro #'lua-tf-x-ex-data    :emit :macro}
     :x-eval           {:macro #'lua-tf-x-eval   :emit :macro}
     :x-apply          {:macro #'lua-tf-x-apply  :emit :macro}
+    :x-construct      {:macro #'lua-tf-x-construct :emit :macro}
     :x-unpack         {:emit :alias :raw 'unpack}
     :x-print          {:emit :alias :raw 'print}
    

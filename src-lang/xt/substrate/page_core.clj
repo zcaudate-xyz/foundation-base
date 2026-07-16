@@ -18,7 +18,7 @@
   "checks if a group is a proxy for a remote page group"
   {:added "4.1"}
   [group]
-  (return (xt/x:get-key group "remote")))
+  (return (== true (xt/x:get-key group "remote"))))
 
 (defn.xt runtime-page
   "creates the page runtime container"
@@ -247,7 +247,10 @@
                           (xt/x:nil? (xt/x:get-key (xt/x:get-key linked-group "models")
                                                    linked-model-id)))
                   (xt/x:arr-push out [linked-group-id linked-model-id]))))))
-  (return out))
+  (return (xtd/arr-sort out
+                         (fn [pair]
+                           (return (xt/x:json-encode pair)))
+                         xt/x:str-lt)))
 
 (defn.xt create-throttle
   "creates the throttle"
@@ -313,7 +316,7 @@
     (:= group {"name" group-id
                "models" {}
                "specs" {}
-               "throttle" (-/create-throttle node space-id group-id -/model-refresh-dependents)
+               "throttle" (-/create-throttle node space-id group-id -/model-refresh-dependents-unthrottled)
                "deps" {}})
     (xt/x:set-key groups group-id group))
   (var group-models (xt/x:get-key group "models"))
@@ -431,7 +434,10 @@
                        model-id
                        [event])
       (xt/x:arr-push out model-id)))
-  (return out))
+  (return (xtd/arr-sort out
+                         (fn [model-id]
+                           (return model-id))
+                         xt/x:str-lt)))
 
 (defn.xt group-trigger
   "triggers a group"

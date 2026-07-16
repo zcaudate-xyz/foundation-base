@@ -7,6 +7,13 @@
              [xt.net.ws-native :as websocket]]
    :import [["dart:io" :as io]]})
 
+
+(defn.dt dispatch-ws [client event payload]
+  (var handler (xt/x:get-key (xt/x:get-key client "callbacks") event))
+  (when (xt/x:not-nil? handler)
+    (when (xt/x:is-function? handler)
+      (handler payload)))
+  (return payload))
 (defn.dt connect-ws
   [client opts]
   (var url (websocket/prepare-url client (or opts {})))
@@ -15,12 +22,11 @@
       (then
        (fn [raw]
          (xt/x:set-key client "raw" raw)
-         (. raw
-            (listen
-             (fn [message]
-               (var handler (xt/x:get-key (xt/x:get-key client "callbacks") "message"))
-               (when (xt/x:is-function? handler)
-                 (handler {"data" message})))))
+         (when (xt/x:get-key (xt/x:get-key client "defaults") "background")
+           (. raw
+              (listen
+               (fn [message]
+                 (-/dispatch-ws client "message" {"data" message})))))
          (return client))))))
 
 (defn.dt disconnect-ws
@@ -34,9 +40,29 @@
 (defn.dt send-ws
   [client input]
   (var raw (xt/x:get-key client "raw"))
-  (when (xt/x:not-nil? raw)
-    (. raw (add input)))
-  (return client))
+  (when (xt/x:nil? raw)
+    (return client))
+  (when (xt/x:nil? (xt/x:get-key (xt/x:get-key client "callbacks") "message"))
+    (xt/x:err "dart websocket missing message listener"))
+  (var defaults (xt/x:get-key client "defaults"))
+  (when (xt/x:get-key defaults "background")
+    (. raw (add input))
+    (return client))
+  (var response-future (. raw first))
+  (. raw (add input))
+  (return
+   (. response-future
+      (then
+       (fn [message]
+         (-/dispatch-ws client "message" {"data" message})
+         (when (xt/x:get-key defaults "close_after_message")
+           (xt/x:set-key client "raw" nil)
+           (return
+            (. (. raw (close))
+               (then
+                (fn [_]
+                  (return client))))))
+         (return client))))))
 
 (defn.dt add-listeners-ws
   [client m]
@@ -65,4 +91,12 @@
 
 (defn.dt create
   [defaults]
-  (return (-/DartWebsocketClient nil (or defaults {}) {} {})))
+  (var client (-/DartWebsocketClient nil (or defaults {}) {} {}))
+  (xt/x:set-key client "::/override"
+                {"connect" -/connect-ws
+                 "disconnect" -/disconnect-ws
+                 "send" -/send-ws
+                 "add_listeners" -/add-listeners-ws
+                 "start_heartbeat" -/start-heartbeat-ws
+                 "stop_heartbeat" -/stop-heartbeat-ws})
+  (return client))

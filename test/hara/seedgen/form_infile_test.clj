@@ -20,6 +20,8 @@
                       "  (:require [hara.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true :langs [:js :lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
+                      "(defn.js helper [] (return 1))\n\n"
+                      "(defn.js helper [] (return 1))\n\n"
                       "^{:refer sample/hello :added \"4.1\"}\n"
                       "(fact \"TODO\")\n"))
       (let [output (form-parse/seedgen-readforms 'sample.metatest {} lookup project)]
@@ -43,6 +45,7 @@
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true :langs [:js :lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
+                      "(defn.js helper [] (return 1))\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"target\"\n"
                       "  (!.js (+ 1 2 3))\n"
@@ -53,13 +56,15 @@
         [(string? rendered)
          (str/includes? rendered "(ns samplebench.lua.target-test")
          (str/includes? rendered "(l/script- :lua")
+         (str/includes? rendered "(defn.lua helper")
+         (not (str/includes? rendered "(defn.js helper"))
          (str/includes? rendered "(!.lua (+ 1 2 3))")])
       (finally
         (fs/delete root {:recursive true})))))
 
 ^{:refer hara.seedgen.form-infile/render-top-level-target :added "4.1"}
 (fact "renders a file for a single target language"
-  (run-render-target) => [true true true true])
+  (run-render-target) => [true true true true true true])
 
 ^{:refer hara.seedgen.form-infile/seedgen-langadd :added "4.1" :timeout 300000}
 (fact "adds seedgen runtimes back from the seedgen root form"

@@ -71,6 +71,10 @@
   [[_ f args]]
   (list 'Function.apply f args))
 
+(defn dart-tf-x-construct
+  [[_ ctor args]]
+  (list 'Function.apply ctor args))
+
 (defn dart-tf-x-now-ms
   [_]
   (list '. (list 'DateTime.now) 'millisecondsSinceEpoch))
@@ -182,6 +186,7 @@
    :x-len      {:macro #'dart-tf-x-len      :emit :macro :value true}
    :x-cat      {:macro #'dart-tf-x-cat      :emit :macro :value true}
    :x-apply    {:macro #'dart-tf-x-apply    :emit :macro}
+   :x-construct {:macro #'dart-tf-x-construct :emit :macro}
     :x-err      {:emit :alias :raw 'throw}
     :x-ex-native? {:macro #'dart-tf-x-ex-native? :emit :macro}
     :x-ex-new   {:macro #'dart-tf-x-ex-new   :emit :macro}

@@ -78,6 +78,27 @@
   (if (xt/x:is-string? source)
     (return source)
     (return (xt/x:get-key source "url"))))
+(defn.xt mark-open
+  [state socket _event]
+  (xt/x:set-key state "status" "open")
+  (return socket))
+
+(defn.xt mark-error
+  [state event]
+  (xt/x:set-key state "status" "error")
+  (xt/x:set-key state "error" event)
+  (return event))
+
+(defn.xt mark-close
+  [state event]
+  (when (not (== (xt/x:get-key state "status") "open"))
+    (xt/x:set-key state "status" "error")
+    (xt/x:set-key state "error"
+                  (:? (xt/x:nil? event)
+                      "websocket closed before open"
+                      event)))
+  (return event))
+
 (defn.xt await-open
   [state]
   (var status (xt/x:get-key state "status"))
@@ -110,7 +131,7 @@
           (xt/x:err "websocket source missing connect implementation"))
         (when (xt/x:nil? (-/websocket-url socket-source))
           (xt/x:err "websocket source missing url"))
-        (return (new ctor (-/websocket-url socket-source))))))
+        (return (xt/x:construct ctor [(-/websocket-url socket-source)])))))
 (defn.xt resolve-socket
   [socket-source]
   (cond (xt/x:is-string? socket-source)
@@ -183,22 +204,13 @@
                                      "error" "websocket failed to open"})
                          (:= current-open-callback
                              (fn [_event]
-                               (xt/x:set-key state "status" "open")
-                               (return current-socket)))
+                               (return (-/mark-open state current-socket _event))))
                          (:= current-error-callback
                              (fn [event]
-                               (xt/x:set-key state "status" "error")
-                               (xt/x:set-key state "error" event)
-                               (return event)))
+                               (return (-/mark-error state event))))
                          (:= current-close-callback
                              (fn [event]
-                               (when (not (== (xt/x:get-key state "status") "open"))
-                                 (xt/x:set-key state "status" "error")
-                                 (xt/x:set-key state "error"
-                                               (:? (xt/x:nil? event)
-                                                   "websocket closed before open"
-                                                   event)))
-                               (return event)))
+                               (return (-/mark-close state event))))
                          (ws/add-listeners current-native {"open" current-open-callback
                                                            "error" current-error-callback
                                                            "close" current-close-callback})
@@ -215,22 +227,13 @@
                                      "error" "websocket failed to open"})
                          (:= current-open-callback
                              (fn [_event]
-                               (xt/x:set-key state "status" "open")
-                               (return current-socket)))
+                               (return (-/mark-open state current-socket _event))))
                          (:= current-error-callback
                              (fn [event]
-                               (xt/x:set-key state "status" "error")
-                               (xt/x:set-key state "error" event)
-                               (return event)))
+                               (return (-/mark-error state event))))
                          (:= current-close-callback
                              (fn [event]
-                               (when (not (== (xt/x:get-key state "status") "open"))
-                                 (xt/x:set-key state "status" "error")
-                                 (xt/x:set-key state "error"
-                                               (:? (xt/x:nil? event)
-                                                   "websocket closed before open"
-                                                   event)))
-                               (return event)))
+                               (return (-/mark-close state event))))
                          (-/add-socket-listener current-socket "open" current-open-callback)
                          (-/add-socket-listener current-socket "error" current-error-callback)
                          (-/add-socket-listener current-socket "close" current-close-callback)

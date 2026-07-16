@@ -2,6 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
+^{:seedgen/root {:all true, :langs [:js :lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-notify :as notify]
@@ -304,7 +305,9 @@
         (promise/x:promise-then
          (fn [arr]
            (repl/notify {"count" (xt/x:len arr)
-                         "first" (. (. (xt/x:get-idx arr 0) ["main"]) [1])})))))
+                         "first" (xt/x:get-idx
+                                  (. (xt/x:get-idx arr (xt/x:offset 0)) ["main"])
+                                  (xt/x:offset 1))})))))
   => {"count" 1
       "first" {"consumer" true}})
 
@@ -532,8 +535,10 @@
     (-> (page-core/group-update node "space/a" "page" {})
         (promise/x:promise-then
          (fn [result]
-           (repl/notify {"ping" (. (. (. result ["ping"]) ["main"]) [1])
-                         "pong" (. (. (. result ["pong"]) ["main"]) [1])})))))
+           (repl/notify {"ping" (xt/x:get-idx (. (. result ["ping"]) ["main"])
+                                               (xt/x:offset 1))
+                         "pong" (xt/x:get-idx (. (. result ["pong"]) ["main"])
+                                               (xt/x:offset 1))})))))
   => {"ping" {"ping" true}
       "pong" {"pong" true}})
 
@@ -563,7 +568,7 @@
      node
      "space/a"
      "page"
-     {"ping" {"handler" (fn [ctx]
+     {"ping" {"handler" (fn [ctx _a _b _c]
                            (return {"data" (. (. ctx ["input"]) ["data"])}))
               "defaults" {"args" []}}})
     (-> (page-core/model-set-input node "space/a" "page" "ping" {"data" [1 2 3]} {})
@@ -738,4 +743,4 @@
     [(page-core/proxy-group? {"remote" true})
      (page-core/proxy-group? {"name" "local"})
      (page-core/proxy-group? {})])
-  => [true nil nil])
+  => [true false false])
