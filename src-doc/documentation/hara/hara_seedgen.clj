@@ -125,3 +125,15 @@
   => '[sample/foo])
 
 [[:chapter {:title "API"}]]
+
+[[:chapter {:title "xtbench authoring"}]]
+
+"The `test-lang/xt` suite is single-source coverage: a canonical JavaScript seed is generated into target-language xtbench files. Keep the seed and its facts intact so every target exercises the same behavior."
+
+[[:section {:title "Target adapters without separate facts"}]]
+
+"When a capability needs a runtime-native adapter, keep the JS root and inject the target implementation through `:seedgen/root` `:extra`. Mark the JS adapter require with `:seedgen/extra true`, then use form-level `:seedgen/base` `:transform` metadata to replace only the adapter symbol. This preserves the fact, assertion, and control flow across languages."
+
+[[:section {:title "Suppression is exceptional"}]]
+
+"Do not edit generated `test-lang/xtbench` files, remove the canonical `:js` seed, or add separate target-only facts merely to make a bench pass. Use `:suppress` only when the capability is genuinely unavailable on a target; record the reason and retain all portable coverage. Regenerate the affected bench and run both the seed and generated target test after every change."
