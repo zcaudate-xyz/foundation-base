@@ -182,7 +182,7 @@
                                 sample/Schema
                                 sample/SchemaLookup
                                 (ut/sqlite-opts sample/SchemaLookup)))
-  => "DELETE FROM \"Currency\" WHERE \"id\" = 'USD';\n\nDELETE FROM \"Currency\" WHERE \"id\" = 'AUD';"
+  => "DELETE FROM \"Currency\" WHERE \"id\" = 'AUD';\n\nDELETE FROM \"Currency\" WHERE \"id\" = 'USD';"
 
   (!.js
     (table/prepare-remove-input {"Currency" [{"id" "USD"}
@@ -190,7 +190,7 @@
                                 sample/Schema
                                 sample/SchemaLookup
                                 (ut/postgres-opts sample/SchemaLookup)))
-  => "DELETE FROM \"scratch-sample-db\".\"Currency\" WHERE \"id\" = 'USD';\n\nDELETE FROM \"scratch-sample-db\".\"Currency\" WHERE \"id\" = 'AUD';")
+  => "DELETE FROM \"scratch-sample-db\".\"Currency\" WHERE \"id\" = 'AUD';\n\nDELETE FROM \"scratch-sample-db\".\"Currency\" WHERE \"id\" = 'USD';")
 
 (comment
   (s/pedantic ['xt.db.text.sql-table])

@@ -23,10 +23,33 @@
              ^{:seedgen/extra true}
              [js.net.conn-sqlite :as js-sqlite]]})
 
+(l/script- :lua.nginx
+  {:runtime :nginx.instance
+   :config {:program :resty}
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.spec-promise :as promise]
+             [xt.db.system.impl-sqlite :as impl]
+             [xt.db.text.sql-util :as ut]
+             [xt.db.text.sql-table :as sql-table]
+             [xt.db.text.base-flatten :as f]
+             [xt.db.helpers.data-main-test :as sample]
+             [xt.net.conn-sql :as conn-sql]
+             [lua.nginx.conn-sqlite :as lua-sqlite]]})
+
+^{:seedgen/base
+  {:lua {:transform '{js-sqlite/create lua-sqlite/create}}
+   :python {:transform '{js-sqlite/create py-sqlite/create}}
+   :dart {:transform '{js-sqlite/create dart-sqlite/create}}}}
+(defn.js sqlite-create
+  []
+  (return (js-sqlite/create {"filename" ":memory:"})))
+
 (defn.js connect-impl
   []
   (return
-   (-> (impl/impl-sqlite (js-sqlite/create {"filename" ":memory:"})
+   (-> (impl/impl-sqlite (-/sqlite-create)
                          sample/Schema
                          sample/SchemaLookup)
        (impl/impl-sqlite-init))))
@@ -95,7 +118,7 @@
            (impl/clear-db impl)
            (repl/notify
             (impl/pull impl ["Currency"]))))))
-  => [])
+  => empty?)
 
 ^{:refer xt.db.system.impl-sqlite/process-add-event :added "4.1"}
 (fact "process-add-event executes sql upserts through stored sqlite context"
@@ -129,7 +152,7 @@
 (fact "creates the sqlite impl config before connection init"
 
   (!.js
-    (impl/impl-sqlite (js-sqlite/create {"filename" ":memory:"})
+    (impl/impl-sqlite (-/sqlite-create)
                       sample/Schema
                       sample/SchemaLookup))
   => map?)
@@ -138,7 +161,7 @@
 (fact "impl-sqlite-init wires up js.net.conn-sqlite and stores the connection"
   
   (notify/wait-on [:js 5000]
-    (-> (impl/impl-sqlite (js-sqlite/create {"filename" ":memory:"})
+    (-> (impl/impl-sqlite (-/sqlite-create)
                           sample/Schema
                           sample/SchemaLookup)
         (impl/impl-sqlite-init)

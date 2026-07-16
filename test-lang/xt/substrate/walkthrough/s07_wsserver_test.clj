@@ -120,7 +120,7 @@
      :python {:transform '{:js :python js-ws/create py-ws/create js-ws/connect-ws py-ws/connect-ws}}
      :dart {:transform '{:js :dart js-ws/create dart-ws/create js-ws/connect-ws dart-ws/connect-ws}
             :input
-            (!.dt
+            '(!.dt
               (-/websocket-roundtrip-run
                (fn []
                  (var client (dart-ws/create {"close_after_message" true}))

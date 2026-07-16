@@ -7,6 +7,7 @@
   {:import [["lsqlite3" :as ngxsqlite]]
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-promise :as common-promise]
              [xt.lang.common-data :as xtd]
              [xt.net.conn-sql :as conn-sql]]})
 
@@ -87,9 +88,14 @@
                        :else
                        (table.insert out (xtd/arr-map values -/coerce-number)))
                 (return 0))))
-  (if (< 2 (len out))
-    (return out)
-   (return (xtd/first out))))
+  (cond (== 0 (len out))
+        (return [])
+
+        (< 1 (len out))
+        (return out)
+
+        :else
+        (return (xtd/first out))))
 
 (defn.lua normalize-connect-opts
   "defaults to an in-memory database when no sqlite target is provided"
@@ -104,7 +110,7 @@
 (defn.lua client-connect
   [client opts]
   (var #{defaults} client)
-  (var env (-/normalize-connect-opts (xtd/obj-assign defaults opts)))
+  (var env (-/normalize-connect-opts (xtd/obj-assign defaults (or opts {}))))
   (var #{filename memory} env)
   (var instance (:? (or memory
                          (xt/x:nil? filename))
@@ -125,7 +131,7 @@
 
 (defn.lua client-query-async
   [client input]
-  (return (promise/x:promise-run
+  (return (common-promise/promise-run
            (-/client-query client input))))
 
 (defimpl.xt ^{:lang :lua}
@@ -139,5 +145,10 @@
 
 (defn.lua create
   [defaults]
-  (return
-   (-/LuaNginxSqliteClient (or defaults {}) nil)))
+  (var client (-/LuaNginxSqliteClient (or defaults {}) nil))
+  (xt/x:set-key client "::/override"
+                {"connect" -/client-connect
+                 "disconnect" -/client-disconnect
+                 "query" -/client-query
+                 "query_async" -/client-query-async})
+  (return client))

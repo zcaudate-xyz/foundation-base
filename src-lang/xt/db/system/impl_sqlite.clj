@@ -5,11 +5,13 @@
 (l/script :xtalk
   {:require [[xt.db.system.impl-common :as impl-common]
              [xt.db.text.base-flatten :as f]
+             [xt.db.text.base-schema :as base-schema]
              [xt.db.text.sql-graph :as sql-graph]
              [xt.db.text.sql-table :as sql-table]
              [xt.db.text.sql-util :as sql-util]
              [xt.db.text.sql-manage :as manage]
              [xt.db.text.sql-raw :as raw]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-protocol :as proto]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
@@ -79,7 +81,12 @@
   (var flat (f/flatten-bulk schema data))
   (conn-sql/query client
                   (sql-table/prepare-add-input data schema lookup opts))
-  (return (xt/x:obj-keys flat)))
+  (return
+   (xtd/arr-keep (base-schema/table-order lookup)
+                  (fn [table-name]
+                    (return (:? (xt/x:has-key? flat table-name)
+                                table-name
+                                nil))))))
 
 (defn.xt process-remove-event
   "processes nested removals into sqlite delete statements"
@@ -154,7 +161,7 @@
          lookup
          opts} impl)
   (return
-   (-> (conn-sql/connect client)
+   (-> (conn-sql/connect client {})
        (promise/x:promise-then
         (fn [client]
           (conn-sql/query client (xt/x:str-join

@@ -109,7 +109,7 @@
                      " user=" (xt/x:get-key env "user")
                      " password=" (xt/x:get-key env "password")
                      " host=" (xt/x:get-key env "host")
-                     " port=" (xt/x:get-key env "port")))
+                     " port=" (xt/x:to-string (xt/x:get-key env "port"))))
   (var pg (-/load-module))
   (var raw (. pg (connect dsn)))
   (:= (. raw autocommit) true)

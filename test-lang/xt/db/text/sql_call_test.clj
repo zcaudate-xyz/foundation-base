@@ -26,6 +26,16 @@
              ^{:seedgen/extra true}
              [js.net.conn-postgres :as js-postgres]]})
 
+(l/script- :lua.nginx
+  {:runtime :nginx.instance
+   :config {:program :resty}
+   :require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as spec-promise]
+             [xt.lang.common-repl :as repl]
+             [xt.db.text.sql-call :as call]
+             [xt.net.conn-sql :as conn-sql]
+             [lua.nginx.conn-postgres :as lua-postgres]]})
+
 (fact:global
  {
   :setup    [(l/rt:restart)
@@ -74,10 +84,11 @@
 
   ^{:seedgen/base {:lua.nginx    {:transform '{js-postgres/create lua-postgres/create}}
                    :python       {:transform '{js-postgres/create py-postgres/create}}
-                   :dart         {:transform '{js-postgres/create dart-postgres/create}}}}      
+                   :dart         {:transform '{js-postgres/create dart-postgres/create
+                                               (. err message) (xt/x:to-string err)}}}}      
   (notify/wait-on :js
-    (-> (js-postgres/create {:database "test-scratch"})
-        (conn-sql/connect {:host "127.0.0.1",
+    (var client (js-postgres/create {:database "test-scratch"}))
+    (-> (conn-sql/connect client {:host "127.0.0.1",
                            :port 5432
                            :user "postgres",
                            :password "postgres"})
@@ -94,6 +105,7 @@
                            [10 20]))))
         (spec-promise/x:promise-then
          (fn [x]
+           (conn-sql/disconnect client)
            (repl/notify x)))
         (spec-promise/x:promise-catch
          (fn [err]
@@ -106,10 +118,11 @@
 
   ^{:seedgen/base {:lua.nginx    {:transform '{js-postgres/create lua-postgres/create}}
                    :python       {:transform '{js-postgres/create py-postgres/create}}
-                   :dart         {:transform '{js-postgres/create dart-postgres/create}}}}
+                   :dart         {:transform '{js-postgres/create dart-postgres/create
+                                               (. err message) (xt/x:to-string err)}}}}
   (notify/wait-on :js
-    (-> (js-postgres/create {:database "test-scratch"})
-        (conn-sql/connect)
+    (var client (js-postgres/create {:database "test-scratch"}))
+    (-> (conn-sql/connect client {})
         (spec-promise/x:promise-then
          (fn [client]
            (return
@@ -123,6 +136,7 @@
                            [10 20]))))
         (spec-promise/x:promise-then
          (fn [x]
+           (conn-sql/disconnect client)
            (repl/notify (xt/x:json-decode x))))
         (spec-promise/x:promise-catch
          (fn [err]

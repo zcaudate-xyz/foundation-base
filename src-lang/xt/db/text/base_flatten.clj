@@ -155,6 +155,10 @@
    (xtd/arr-keep (sch/table-order lookup)
                  (fn [table-name]
                    (return (:? (xt/x:has-key? flat table-name)
-                               [table-name (xt/x:obj-keys (xt/x:get-key flat table-name))]
+                               [table-name
+                                (xtd/arr-sort
+                                 (xt/x:obj-keys (xt/x:get-key flat table-name))
+                                 (fn [id] (return id))
+                                 xt/x:lt)]
                                nil))))))
 

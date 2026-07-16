@@ -136,26 +136,30 @@
 (fact "column creation function"
 
   (!.js
+   (var sqlite-opts (ut/sqlite-opts nil))
+   (var postgres-opts (ut/postgres-opts sample/SchemaLookup))
    [(manage/table-create-column sample/Schema
                                 (xtd/get-in sample/Schema
                                           ["Currency" "id"])
-                                (ut/sqlite-opts nil))
+                                 sqlite-opts)
     (manage/table-create-column sample/Schema
                                 (xtd/get-in sample/Schema
                                           ["Currency" "id"])
-                                (ut/postgres-opts sample/SchemaLookup))])
+                                postgres-opts)])
   => ["\"id\" text PRIMARY KEY"
       "\"id\" citext PRIMARY KEY"]
 
   (!.js
+   (var sqlite-opts (ut/sqlite-opts nil))
+   (var postgres-opts (ut/postgres-opts sample/SchemaLookup))
    [(manage/table-create-column sample/Schema
                                 (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
-                                (ut/sqlite-opts nil))
+                                 sqlite-opts)
     (manage/table-create-column sample/Schema
                                 (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
-                                (ut/postgres-opts sample/SchemaLookup))])
+                                postgres-opts)])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
       "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""])
 
@@ -189,12 +193,13 @@
 (fact "emits a table create string"
 
   (!.js
+   (var sqlite-opts (ut/sqlite-opts nil))
    [(manage/table-create sample/Schema
                          "Currency"
-                         (ut/sqlite-opts nil))
+                          sqlite-opts)
     (manage/table-create sample/Schema
                          "UserProfile"
-                         (ut/sqlite-opts nil))])
+                         sqlite-opts)])
   => [+currency-table+
       +profile-table+])
 

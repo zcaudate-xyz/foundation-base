@@ -7,6 +7,7 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.spec-promise :as promise]
+             [xt.lang.common-promise :as common-promise]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-resource :as rt]
              [xt.net.conn-sql :as conn-sql]]})
@@ -134,14 +135,18 @@
   (local '[ret err] (. conn (query query)))
   (. conn (keepalive -/KEEPALIVE 10))
   
+  ;; pgmoon returns the number of executed statements as its second value.
+  ;; A single-statement query therefore succeeds with `err` equal to 1.
   (when (not= 1 err)
-    (return false err))
+    (xt/x:err err))
   (return (-/normalise-query-output ret)))
 
 (defn.lua client-connect
   [client opts]
   (var #{defaults} client)
-  (var env (xtd/obj-assign (xtd/obj-clone defaults) opts))
+  (var env (xtd/obj-clone (-/default-env)))
+  (xtd/obj-assign env defaults)
+  (xtd/obj-assign env (or opts {}))
   (var conn (ngxpg.new env))
   (var query-opts {})
   (:= (. conn
@@ -174,7 +179,7 @@
 
 (defn.lua client-query-async
   [client input]
-  (return (promise/x:promise-run (-/client-query client input))))
+  (return (common-promise/promise-run (-/client-query client input))))
 
 (defimpl.xt ^{:lang :lua}
   LuaNginxPostgresClient
@@ -187,8 +192,13 @@
 
 (defn.lua create
   [defaults]
-  (return
-   (-/LuaNginxPostgresClient (or defaults {}) nil)))
+  (var client (-/LuaNginxPostgresClient (or defaults {}) nil))
+  (xt/x:set-key client "::/override"
+                {"connect" -/client-connect
+                 "disconnect" -/client-disconnect
+                 "query" -/client-query
+                 "query_async" -/client-query-async})
+  (return client))
 
 (comment
   (./create-tests))

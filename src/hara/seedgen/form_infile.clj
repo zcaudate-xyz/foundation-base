@@ -765,7 +765,8 @@
 
 (defn- render-generated-item-string
   [entry root-item lang]
-  (let [input-override (item-base-override entry root-item lang :input)
+  (let [input-override (some-> (item-base-override entry root-item lang :input)
+                               transform-literal)
          generated-str  (if input-override
                           (let [base-str  (replace-runtime-lang-string
                                            (render-item-string root-item)
@@ -1237,7 +1238,8 @@
                        (map (fn [item]
                               [(line-key (item-line item))
                                (replace-top-level-helper-lang-string
-                                (render-item-string item)
+                                (apply-item-transform-string
+                                 (render-item-string item) nil item lang)
                                 root-lang
                                 lang)]))
                        (into {}))]
