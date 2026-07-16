@@ -5,7 +5,7 @@
             [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/scaffold true}
-(do 
+(do
   (l/script- :postgres
     {:runtime :jdbc.client
      :config {:dbname "test-scratch"}
@@ -85,7 +85,7 @@
   ^{:seedgen/base {:lua.nginx    {:transform '{js-postgres/create lua-postgres/create}}
                    :python       {:transform '{js-postgres/create py-postgres/create}}
                    :dart         {:transform '{js-postgres/create dart-postgres/create
-                                               (. err message) (xt/x:to-string err)}}}}      
+                                               (. err message) (xt/x:to-string err)}}}}
   (notify/wait-on :js
     (var client (js-postgres/create {:database "test-scratch"}))
     (-> (conn-sql/connect client {:host "127.0.0.1",

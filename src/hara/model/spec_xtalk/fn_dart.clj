@@ -369,9 +369,9 @@
 (defn dart-tf-x-obj-keys
   [[_ obj]]
   (template/$
-   (:- "List<String>.from(("
+   (:- "List<dynamic>.from(("
        ~obj
-       ").keys.map((key) => key.toString()))")))
+       ").keys)")))
 
 (defn dart-tf-x-obj-vals
   [[_ obj]]

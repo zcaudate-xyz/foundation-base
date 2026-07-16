@@ -5,6 +5,7 @@
             [xt.db.helpers.data-main-test :as sample]
             [xt.db.text.sql-util :as ut]))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -92,6 +93,10 @@
 ^{:refer xt.db.text.base-graph/base-query-inputs :added "4.1"}
 (fact "formats query input into table clause and return"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [["Currency" {} nil]
+                                                    ["Currency" {} ["id" "name"]]
+                                                    ["Currency" {"id" "USD"} nil]
+                                                    ["Currency" {"id" "USD"} ["id" "name"]]])}}}
   (!.js
     [(base-graph/base-query-inputs ["Currency"])
      (base-graph/base-query-inputs ["Currency" ["id" "name"]])

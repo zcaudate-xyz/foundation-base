@@ -109,10 +109,10 @@
   (var out (xtt/tree-walk tree
                           (fn [x] (return x))
                           (fn [x]
-                            (return (:? (and (xt/x:is-string? x)
-                                             (xt/x:has-key? arg-map x))
-                                        (xt/x:get-key arg-map x)
-                                        x)))))
+                            (when (and (xt/x:is-string? x)
+                                       (xt/x:has-key? arg-map x))
+                              (return (xt/x:get-key arg-map x)))
+                            (return x))))
   (return out))
 
 

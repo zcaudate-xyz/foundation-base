@@ -119,7 +119,8 @@
     (-/process-add-event impl db-sync))
   (when (and (xt/x:is-object? db-remove)
              (xtd/not-empty? db-remove))
-    (-/process-remove-event impl db-remove))
+    (xt/for:object [[table-name ids] db-remove]
+      (-/record-delete impl table-name ids)))
   (var tables (-/sync-get-tables payload))
   (when (> (xt/x:len tables) 0)
     (-/sync-notify-listeners impl tables payload))

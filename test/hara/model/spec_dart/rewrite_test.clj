@@ -185,6 +185,15 @@
   => [true true true true true true true])
 
 
+(fact "emits XT vector literals as dynamic Dart lists"
+  (let [out (l/emit-as :dart ['(defn sample []
+                                  (var out [{"::" "sql/count"}])
+                                  (x:arr-push out "id")
+                                  (return out))])]
+    [(str/includes? out "var out = <dynamic>[")
+     (str/includes? out "out.add(\"id\")")])
+  => [true true])
+
 ^{:refer hara.model.spec-dart.rewrite/dart-rewrite-conditional-expression :added "4.1"}
 (fact "rewrites dart conditional expressions")
 

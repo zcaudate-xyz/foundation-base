@@ -204,7 +204,7 @@
                               :global #'dart-symbol-global}
                      :string {:custom #'dart-string}
                      :nil {:as "null"}}
-            :data    {:vector {:start "[" :end "]" :space ""}
+            :data    {:vector {:start "<dynamic>[" :end "]" :space ""}
                       :map    {:start "<dynamic, dynamic>{" :end "}" :space ""}
                     :map-entry {:key-fn #'dart-map-key}}})))
 

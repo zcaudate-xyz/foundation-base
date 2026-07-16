@@ -4,6 +4,7 @@
             [postgres.gen.bind-macro :as gen]
             [xt.db.helpers.seed-system-test :as data]))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]
@@ -251,8 +252,8 @@
                    (@! (gen/bind-view data/currency-all-crypto))
                    []
                    {}))
-  => [{"id" "XLM"}
-      {"id" "XLM.T"}])
+  => (contains [{"id" "XLM"}
+                {"id" "XLM.T"}] :in-any-order))
 
 ^{:refer xt.db.system.memory-graph/view-count :added "4.1"}
 (fact "plans and pulles a count query"
@@ -303,10 +304,11 @@
                         ["STATS" "USD"]
                         []
                         {}))
-  => [{"id" "STATS"
-       "description" "Default Currency for Statstrade"}
-      {"id" "USD"
-       "description" "Default Current for the United States of America"}])
+  => (contains [{"id" "STATS"
+                 "description" "Default Currency for Statstrade"}
+                {"id" "USD"
+                 "description" "Default Current for the United States of America"}]
+               :in-any-order))
 
 ^{:refer xt.db.system.memory-graph/view-combined :added "4.1"}
 (fact "plans and pulles a combined query"
@@ -325,10 +327,11 @@
                      []
                      nil
                      {}))
-  => [{"id" "XLM"
-       "description" "Default Currency for the Stellar Blockchain"}
-      {"id" "XLM.T"
-       "description" "Default Currency for the Stellar TestNet Blockchain"}])
+  => (contains [{"id" "XLM"
+                 "description" "Default Currency for the Stellar Blockchain"}
+                {"id" "XLM.T"
+                 "description" "Default Currency for the Stellar TestNet Blockchain"}]
+               :in-any-order))
 
 
 ^{:refer xt.db.system.memory-graph/check-in-clause :added "4.1"}

@@ -3,6 +3,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -139,6 +140,7 @@
 ^{:refer xt.db.system.impl-memory/process-remove-event :added "4.1"}
 (fact "process-remove-event removes nested data in lookup order"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [["UserAccount" "UserProfile"] nil nil])}}}
   (!.js
     (var impl (impl/impl-memory sample/Schema
                                 sample/SchemaLookup))
@@ -165,10 +167,8 @@
 (fact "creates the thin memory impl record with stored schema context"
   
   (!.js
-    (impl/impl-memory {}
-                      sample/Schema
-                      sample/SchemaLookup
-                      {}))
+    (impl/impl-memory sample/Schema
+                      sample/SchemaLookup))
   => (contains-in
       {"::" "xt.db.system.impl_memory/ImplMemory"
        "rows" {}

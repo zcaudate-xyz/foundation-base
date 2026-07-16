@@ -2,6 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.text.base-tree :as v]
@@ -337,6 +338,11 @@
 ^{:refer xt.db.text.base-tree/plan-view-check :added "4.1"}
 (fact "checks query arguments against the entry input"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [[true nil]
+                                                    [false {"status" "error"
+                                                            "tag" "net/arg-typecheck-failed"
+                                                            "data" {"input" 1
+                                                                    "spec" {"symbol" "i_type", "type" "text"}}}]])}}}
   (!.js
    [(v/plan-view-check
      {"input" [{"symbol" "i_type", "type" "text"}]}

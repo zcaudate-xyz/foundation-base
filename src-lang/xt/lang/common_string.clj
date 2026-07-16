@@ -115,6 +115,8 @@
   "check for starts with"
   {:added "4.1"}
   [s match]
+  (when (> (xt/x:str-len match) (xt/x:str-len s))
+    (return false))
   (return (== (xt/x:str-substring s
                                   (xt/x:offset)
                                   (xt/x:str-len match))
@@ -124,6 +126,8 @@
   "check for ends with"
   {:added "4.1"}
   [s match]
+  (when (> (xt/x:str-len match) (xt/x:str-len s))
+    (return false))
   (return (== match
               (xt/x:str-substring
                s

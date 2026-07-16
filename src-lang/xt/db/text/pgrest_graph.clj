@@ -169,7 +169,8 @@
   "checks whether a key in the given table is a forward reference column"
   {:added "4.1"}
   [schema table-name key]
-  (var col (xt/x:get-path schema [table-name key]))
+  (var table (xt/x:get-key schema table-name))
+  (var col (and table (xt/x:get-key table key)))
   (return (and (xt/x:is-object? col)
                (== "ref" (xt/x:get-key col "type"))
                (not (== "reverse" (xt/x:get-path col ["ref" "type"]))))))

@@ -2,6 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.text.pgrest-graph :as g]
@@ -161,7 +162,7 @@
 (fact "compiles string and link select items"
 
   (!.js
-    [(g/compile-tree-select-item "status")
+    [(g/compile-tree-select-item "status" nil)
      (g/compile-tree-select-item
       ["account"
        "forward"
@@ -170,7 +171,8 @@
          "where" []
          "links" []
          "data" ["nickname"]}]]
-      g/compile-tree-select-params)])
+      (fn [params]
+        (return (g/compile-tree-select-params params))))])
   => ["status"
       "account:Account(nickname)"])
 
@@ -315,9 +317,9 @@
       {"custom" []
        "where" [{"type" "fiat"}]
        "links" []
-       "data" ["id"]}])
+       "data" ["id"]}]
 
-(!.js
+  (!.js
   (g/select-tree
    sample/Schema
    ["Currency"
@@ -328,7 +330,7 @@
     {"custom" []
      "where" [{"id" "USD"}]
      "links" []
-     "data" ["id"]}]
+     "data" ["id"]}])
 
 ^{:refer xt.db.text.pgrest-graph/select :added "4.1"}
 (fact "wraps select-return at the top level and accepts query forms"

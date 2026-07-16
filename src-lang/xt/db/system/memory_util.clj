@@ -42,8 +42,8 @@
   (when (not (xt/x:is-object? entry))
     (:= entry {:record {:id id
                         :data {}
-                        :ref-links {}
-                        :rev-links {}}}))
+                        :ref_links {}
+                        :rev_links {}}}))
   (var record (xt/x:get-key entry "record"))
   (var data (or (xt/x:get-key incoming-record "data")
                 {}))
@@ -294,7 +294,6 @@
       (xt/for:array [field (xt/x:obj-keys ref-links)]
         (var links (xt/x:get-key ref-links field))
         (xt/for:array [link-id (xt/x:obj-keys links)]
-          (-/add-single-link rows schema table-key row-id field link-id)
           (xt/x:arr-push out {:table table-key
                               :id row-id
                               :field field
@@ -302,11 +301,17 @@
       (xt/for:array [field (xt/x:obj-keys rev-links)]
         (var links (xt/x:get-key rev-links field))
         (xt/for:array [link-id (xt/x:obj-keys links)]
-          (-/add-single-link rows schema table-key row-id field link-id)
           (xt/x:arr-push out {:table table-key
                               :id row-id
                               :field field
                               :link-id link-id})))))
+  (xt/for:array [link-spec out]
+    (-/add-single-link rows
+                        schema
+                        (xt/x:get-key link-spec "table")
+                        (xt/x:get-key link-spec "id")
+                        (xt/x:get-key link-spec "field")
+                        (xt/x:get-key link-spec "link_id")))
   (return out))
 
 (defn.xt add-bulk

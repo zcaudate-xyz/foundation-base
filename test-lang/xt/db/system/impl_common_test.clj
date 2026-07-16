@@ -3,6 +3,7 @@
   (:require [hara.lang :as l]
             [xt.db.system.impl-common :as impl-common]))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -27,6 +28,7 @@
 ^{:refer xt.db.system.impl-common/get-db-listener-default :added "4.1"}
 (fact "retrieves a listener handle from the impl listener map"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua [true true nil])}}}
   (!.js
     (var handle (fn [event] (return event)))
     (var impl {:listeners {"l-1" handle
@@ -39,6 +41,7 @@
 ^{:refer xt.db.system.impl-common/remove-db-listener-default :added "4.1"}
 (fact "removes a listener handle from the impl listener map"
 
+  ^{:seedgen/base {:lua {:expect (l/as-lua ["l-1" nil])}}}
   (!.js
     (var handle (fn [event] (return event)))
     (var impl {:listeners {"l-1" handle}})
@@ -54,7 +57,7 @@
    (impl-common/sync-get-tables {"db/sync" {"User" [{"id" 1}]
                                             "Log"  [{"id" 2}]}
                                  "db/remove" {"Role" [1 2 3]}}))
-  => ["User" "Log" "Role"]
+  => (contains ["User" "Log" "Role"] :in-any-order)
 
   (!.js
    (impl-common/sync-get-tables {"db/sync" {"User" [{"id" 1}]}}))
@@ -93,7 +96,7 @@
                      "callback" (fn [event] (xt/x:arr-push called "l2"))}}})
    (impl-common/sync-notify-listeners impl ["User" "Log"] {})
    (return called))
-  => ["l1" "l2"]
+  => (contains ["l1" "l2"] :in-any-order)
 
   (!.js
    (var called [])
@@ -114,7 +117,7 @@
                      "callback" (fn [event] (xt/x:arr-push called "l2"))}}})
    (impl-common/sync-notify-listeners impl ["User" "Log"] {})
    (return called))
-  => ["l1" "l2"]
+  => (contains ["l1" "l2"] :in-any-order)
 
   (!.js
    (var called [])
@@ -150,7 +153,7 @@
     impl
     {"db/sync" {"User" [{"id" 1}]}})
    (return {"notified"    notified
-            "has-record"  (xt/x:not-nil? (xtd/get-in impl ["rows" "User" "1"]))}))
+            "has-record"  (== 1 (xt/x:len (xt/x:obj-keys (or (xtd/get-in impl ["rows" "User"]) {}))))}))
   => {"notified"   [{"db/sync" {"User" [{"id" 1}]}}]
       "has-record" true}
 

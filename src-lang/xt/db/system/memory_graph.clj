@@ -19,6 +19,9 @@
   "gets a single character from a string"
   {:added "4.1"}
   [s i]
+  (when (or (< i 0)
+            (>= i (xt/x:str-len s)))
+    (return ""))
   (return (xt/x:str-substring s
                               (xt/x:offset i)
                               (+ i 1))))
@@ -161,7 +164,7 @@
   {:added "4.1"}
   [record key clause]
   (cond (xt/x:str-ends-with key "_id")
-        (do (var base-key (xt/x:str-substring key 0 (- (xt/x:str-len key) 3)))
+        (do (var base-key (xt/x:str-substring key (xt/x:offset 0) (- (xt/x:str-len key) 3)))
             (return (== clause
                         (xt/x:first (xt/x:obj-keys
                                      (or (xtd/get-in record ["ref_links" base-key])
@@ -270,7 +273,7 @@
   {:added "4.1"}
   [record key]
   (cond (xt/x:str-ends-with key "_id")
-        (do (var base-key (xt/x:str-substring key 0 (- (xt/x:str-len key) 3)))
+        (do (var base-key (xt/x:str-substring key (xt/x:offset 0) (- (xt/x:str-len key) 3)))
             (return (xt/x:first (xt/x:obj-keys
                                  (or (xtd/get-in record ["ref_links" base-key])
                                      {})))))
@@ -403,5 +406,5 @@
   "plans and pulles a combined query"
   {:added "4.1"}
   [rows schema sel-entry sel-args ret-entry ret-args ret-omit opts]
-  (var tree (base-tree/plan-combined schema sel-entry sel-args ret-entry ret-args ret-omit opts))
+  (var tree (base-tree/plan-combined schema sel-entry sel-args ret-entry ret-args ret-omit opts false))
   (return (-/pull rows schema tree opts)))

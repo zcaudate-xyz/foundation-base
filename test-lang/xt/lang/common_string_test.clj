@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [std.string.prose :as prose]))
 
-^{:seedgen/root {:all true, :langs [:python :lua]}}
+^{:seedgen/root {:all true, :langs [:python :lua :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-string :as xts]
@@ -254,14 +254,17 @@
 ^{:refer xt.lang.common-string/ends-with? :added "4.1"}
 (fact "checks for ends with"
 
-  (!.js (xts/ends-with? "Foo Bar" "Bar"))
-  => true
+  (!.js [(xts/ends-with? "Foo Bar" "Bar")
+          (xts/ends-with? "id" "_id")])
+  => [true false]
 
-  (!.py (xts/ends-with? "Foo Bar" "Bar"))
-  => true
+  (!.py [(xts/ends-with? "Foo Bar" "Bar")
+          (xts/ends-with? "id" "_id")])
+  => [true false]
 
-  (!.lua (xts/ends-with? "Foo Bar" "Bar"))
-  => true)
+  (!.lua [(xts/ends-with? "Foo Bar" "Bar")
+           (xts/ends-with? "id" "_id")])
+  => [true false])
 
 ^{:refer xt.lang.common-string/capitalize :added "4.1"}
 (fact "uppercases the first letter"

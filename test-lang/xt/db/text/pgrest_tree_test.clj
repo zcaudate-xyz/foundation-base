@@ -4,6 +4,7 @@
             [xt.db.helpers.seed-system-test :as data])
   (:use code.test))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.text.pgrest-tree :as v]

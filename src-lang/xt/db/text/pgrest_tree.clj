@@ -37,5 +37,5 @@
   "provides a view combine query"
   {:added "4.0"}
   [schema sel-entry sel-args ret-entry ret-args ret-omit opts]
-  (var qtree (base-tree/plan-combined schema sel-entry sel-args ret-entry ret-args ret-omit opts))
+  (var qtree (base-tree/plan-combined schema sel-entry sel-args ret-entry ret-args ret-omit opts false))
   (return (pgrest-graph/select-return schema qtree 0 opts)))

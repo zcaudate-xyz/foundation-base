@@ -30,17 +30,17 @@
   => "(() {\n  print(\"hello\");\n  return null;\n})()"
 
   (l/emit-as :dart ['(x:len [1 2 3])])
-  => "[1,2,3].length"
+  => "<dynamic>[1,2,3].length"
 
   (l/emit-as :dart ['(x:len [1 2 3])])
-  => "[1,2,3].length"
+  => "<dynamic>[1,2,3].length"
 
   (l/emit-as :dart ['(x:arr-push items 1)])
   => "items.add(1)"
 
   (let [out (l/emit-as :dart ['(x:obj-keys records)])]
-    [(boolean (re-find #"List<String>\.from" out))
-     (boolean (re-find #"\.keys\.map" out))])
+    [(boolean (re-find #"List<dynamic>\.from" out))
+     (boolean (re-find #"\.keys\)" out))])
   => [true true]
 
   (let [out (l/emit-as :dart ['(x:json-encode {:query {:table "Order"
