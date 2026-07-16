@@ -93,9 +93,9 @@
 
         (== status "rejected")
         (return
-         (promise/x:promise
-          (fn []
-            (xt/x:throw (xt/x:get-key state "error")))))
+         (promise/x:promise-new
+          (fn [_ reject]
+            (reject (xt/x:get-key state "error")))))
 
         :else
         (return

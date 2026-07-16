@@ -27,7 +27,7 @@
                                     nil
                                     "page"
                                     {"greet"
-                                     {"handler" (fn [context]
+                                     {"handler" (fn [context _]
                                                   (var args (. context ["args"]))
                                                   (return (xt/x:cat "hello "
                                                                     (xt/x:get-idx args 0))))
@@ -50,7 +50,7 @@
                                 nil
                                 "page"
                                 {"greet"
-                                 {"handler" (fn [context]
+                                 {"handler" (fn [context _]
                                               (var args (. context ["args"]))
                                               (return (xt/x:cat "hello "
                                                                 (xt/x:get-idx args 0))))
@@ -69,7 +69,7 @@
                                 nil
                                 "page"
                                 {"greet"
-                                 {"handler" (fn [context]
+                                 {"handler" (fn [context _]
                                               (var args (. context ["args"]))
                                               (return (xt/x:cat "hello "
                                                                 (xt/x:get-idx args 0))))
@@ -148,7 +148,7 @@
                                        nil
                                        "page"
                                        {"echo"
-                                        {"handler" (fn [context]
+                                        {"handler" (fn [context _]
                                                      (var local-node (. context ["node"]))
                                                      (var space    (. context ["space"]))
                                                      (var args     (. context ["args"]))

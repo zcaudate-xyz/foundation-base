@@ -3,7 +3,9 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
-            [xt.db.node.kernel-base :as kernel]))
+            [xt.db.node.kernel-base :as kernel]
+            [postgres.core :as pg]
+            [postgres.core.supabase :as s]))
 
 (do 
   (l/script- :postgres

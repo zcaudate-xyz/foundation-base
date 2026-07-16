@@ -105,27 +105,33 @@
   ([]
    (start-supabase nil))
   ([_opts]
-   (let [opts (or _opts {})]
-     (println "[supabase] starting local-min...")
-     (let [process (os/sh {:args ["supabase" "start" "--workdir" "docker/local-min"]
-                           :wait true
-                           :output false})
-           {:keys [exit out err]} (os/sh-output process)]
-       (when (not= exit 0)
-         (println "[supabase] start failed (exit" exit ")")
-         (when (seq out) (println out))
-         (when (seq err) (println err))
-         (throw (ex-info "supabase start failed"
-                         {:exit exit :out out :err err}))))
+   (let [opts (or _opts {})
+         _ (println "[supabase] starting local-min...")
+         process (os/sh {:args ["supabase" "start" "--workdir" "docker/local-min"]
+                         :wait true
+                         :output false})
+         {:keys [exit out err] :as start} (os/sh-output process)
+         api {:host (get-in +config+ [:api :hostname])
+              :port (get-in +config+ [:api :port])}]
+     (when (not= exit 0)
+       (println "[supabase] start failed (exit" exit ")")
+       (when (seq out) (println out))
+       (when (seq err) (println err))
+       (throw (ex-info "supabase start failed"
+                       {:exit exit :out out :err err})))
      (println "[supabase] start command completed")
      (when (not (= false (:wait-http opts)))
-       (network/wait-for-port
-        (get-in +config+ [:api :hostname])
-        (get-in +config+ [:api :port])
-        {:timeout 60000})
-       (println "[supabase] waiting for auth service...")
-       (wait-for-auth-ready)
-       (println "[supabase] kong/api ready"))
+       (try
+         (network/wait-for-port (:host api) (:port api) {:timeout 60000})
+         (println "[supabase] waiting for auth service...")
+         (wait-for-auth-ready)
+         (println "[supabase] kong/api ready")
+         (catch Throwable t
+           (throw (ex-info "Supabase local-min API did not become ready"
+                           {:api api
+                            :start start
+                            :hint "Run `supabase status --workdir docker/local-min`; Kong/API must listen on the configured port."}
+                           t)))))
      true)))
 
 (defn restart-postgrest

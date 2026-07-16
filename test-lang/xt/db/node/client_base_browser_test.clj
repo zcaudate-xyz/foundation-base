@@ -4,7 +4,8 @@
             [hara.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
-            [postgres.core :as pg]))
+            [postgres.core :as pg]
+            [postgres.core.supabase :as s]))
 
 ;;
 ;; POSTGRES RUNTIME

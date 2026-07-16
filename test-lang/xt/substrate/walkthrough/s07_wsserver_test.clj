@@ -52,26 +52,32 @@
     (wstest-stop)
     (wstest-start)))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true
+                 :js   {:extra [[js.net.ws-native :as js-ws]]}
+                 :dart {:extra [[dart.net.ws-native :as dart-ws]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.substrate :as event-node]
              [xt.substrate.transport-websocket :as ws-transport]
              [xt.net.ws-native :as ws-native]
+             ^{:seedgen/extra true}
              [js.net.ws-native :as js-ws]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]]
-   :import [["ws" :as Websocket]]})
+             [xt.lang.spec-promise :as promise]]})
 
 (fact:global
  {:setup [(wstest-restart)
-          (l/rt:restart)
-          (l/rt:scaffold-imports :js)]
+          (l/rt:restart)]
   :teardown [(wstest-stop)
              (l/rt:stop)]})
 
+^{:refer xt.substrate.walkthrough.s07-wsserver-test/websocket-roundtrip
+  :added "4.1"}
 (fact "a node websocket runtime can attach a live websocket transport and request over it"
+  ^{:seedgen/base {:dart {:transform '{:js              :dart
+                                       js-ws/create     dart-ws/create
+                                       js-ws/connect-ws dart-ws/connect-ws}}}}
   (notify/wait-on [:js 5000]
     ;;
     ;; Create and connect a ws-native HttpWebsocketClient lazily so the raw
@@ -87,10 +93,7 @@
           {"create_fn"
            (fn []
              (var client (js-ws/create {}))
-             (js-ws/connect-ws client {"url" "ws://127.0.0.1:29632/"})
-             (xt/x:set-key client "readyState"
-                           (. (xt/x:get-key client "raw") ["readyState"]))
-             (return client))}))
+             (return (js-ws/connect-ws client {"url" "ws://127.0.0.1:29632/"})))}))
         (promise/x:promise-then
          (fn [_]
            (return

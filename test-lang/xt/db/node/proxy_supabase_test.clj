@@ -2,7 +2,9 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.local-min :as local-min]))
+            [scaffold.supabase.local-min :as local-min]
+            [postgres.core :as pg]
+            [postgres.core.supabase :as s]))
 
 (do 
   (l/script- :postgres

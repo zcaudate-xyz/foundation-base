@@ -4,7 +4,9 @@
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]
             [clojure.java.shell :as sh]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [postgres.core :as pg]
+            [postgres.core.supabase :as s]))
 
 (do 
   (l/script- :postgres
