@@ -68,7 +68,7 @@
   (return
    (promise/x:promise-then
     (event-model/pipeline-run-remote context save-output event-model/async-fn-promise nil nil)
-    (fn []
+    (fn [_]
       (return (-/run-tail-call context refresh-deps-fn))))))
 
 (defn.xt run-refresh
@@ -79,7 +79,7 @@
   (return
    (promise/x:promise-then
     (event-model/pipeline-run context disabled event-model/async-fn-promise nil nil)
-    (fn []
+    (fn [_]
       (return (-/run-tail-call context refresh-deps-fn))))))
 
 (defn.xt get-group-deps
