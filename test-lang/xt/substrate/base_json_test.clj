@@ -11,8 +11,7 @@
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
-  {:setup [(l/rt:restart)
-           (l/rt:scaffold-imports :js)]
+  {:setup [(l/rt:restart)]
    :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.base-json/frame-kind? :added "4.1"}

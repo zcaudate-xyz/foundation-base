@@ -100,9 +100,8 @@
         :else
         (return
          (promise/x:promise-then
-          (xt/x:async-run
-           (fn []
-             (return nil)))
+          (promise/x:with-delay 1
+           (fn [] (return nil)))
           (fn [_]
             (return (-/pending-await state)))))))
 

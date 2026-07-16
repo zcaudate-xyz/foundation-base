@@ -164,11 +164,11 @@
     (var state {"status" "pending"
                 "value" nil
                 "error" nil})
-    (setTimeout
+    (promise/x:with-delay
+     20
      (fn []
        (xt/x:set-key state "status" "resolved")
-       (xt/x:set-key state "value" {"ok" true}))
-     20)
+       (xt/x:set-key state "value" {"ok" true})))
     (promise/x:promise-then
      (util/pending-await state)
      (fn [value]

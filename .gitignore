@@ -46,6 +46,7 @@ pom.xml.asc
 /src-app/**/.build
 /src-infra/*/live
 /temp
+/test-lang/xtbench
 /prompt/aaa
 *_temp
 *.~undo-tree~
