@@ -3,6 +3,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-data :as xtd]

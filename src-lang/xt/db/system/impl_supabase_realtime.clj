@@ -7,7 +7,7 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.db.system.impl-common :as impl-common]
-             [xt.db.system.impl-common-ws :as common-ws]
+             [xt.db.system.impl-supabase-ws :as supabase-ws]
              [xt.net.http-util :as http-util]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
@@ -113,7 +113,7 @@
   "returns the realtime websocket client for id, creating it if necessary"
   {:added "4.1"}
   [impl conn-id]
-  (var realtime-client (common-ws/create-ws-client {"id" conn-id}))
+  (var realtime-client (supabase-ws/create-ws-client impl {"id" conn-id}))
   (var ws-url (-/prepare-connect-url impl {}))
   (var init   (websocket/connect realtime-client
                                  {"url" ws-url}))

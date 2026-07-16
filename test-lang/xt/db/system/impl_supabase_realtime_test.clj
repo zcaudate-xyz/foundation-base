@@ -35,7 +35,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.system.main :as main]
              [xt.db.system.impl-common :as impl-common]
-             [xt.db.system.impl-common-ws :as common-ws]
+             [xt.db.system.impl-supabase-ws :as supabase-ws]
              [xt.db.system.impl-memory :as impl-memory]
              [xt.db.system.impl-supabase-realtime :as realtime]
              [xt.db.helpers.data-main-test :as sample]
@@ -67,7 +67,7 @@
 
 (defn.js run-phx-reply-test
   []
-  (var client (common-ws/create-ws-client {"id" "phx-test"}))
+  (var client (js-websocket/create {"id" "phx-test"}))
   (var deferred {"resolve" nil "reject" nil})
   (var init (promise/x:promise-new
              (fn [resolve reject]
@@ -91,7 +91,7 @@
 (defn.js run-subscribe-isolated-test
   []
   (var impl (-/default-impl))
-  (var client (common-ws/create-ws-client {"id" "subscribe-test"}))
+  (var client (js-websocket/create {"id" "subscribe-test"}))
   (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
   (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
   (xtd/set-in impl ["state" "realtimes" "default"] client)
@@ -108,7 +108,7 @@
   (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
   (xtd/set-in impl ["state" "caching_fn"]
               (fn [] (return caching-impl)))
-  (var client (common-ws/create-ws-client {"id" "sync-test"}))
+  (var client (js-websocket/create {"id" "sync-test"}))
   (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
   (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
   (xtd/set-in impl ["state" "realtimes" "default"] client)
@@ -131,7 +131,7 @@
   (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
   (xtd/set-in impl ["state" "caching_fn"]
               (fn [] (return caching-impl)))
-  (var client (common-ws/create-ws-client {"id" "sync-remove-test"}))
+  (var client (js-websocket/create {"id" "sync-remove-test"}))
   (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
   (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
   (xtd/set-in impl ["state" "realtimes" "default"] client)
@@ -213,7 +213,7 @@
 (fact "dispatches xt.db/event broadcasts to topic callbacks"
 
   (!.js
-    (var client (common-ws/create-ws-client {"id" "test"}))
+    (var client (js-websocket/create {"id" "test"}))
     (var called nil)
     (xtd/set-in client ["state" "callbacks" "cb-1"] (fn [payload] (:= called payload)))
     (var handler (realtime/create-realtime-on-message client))

@@ -4,6 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.db.system.impl-common :as impl-common]
+             [xt.db.system.impl-supabase-ws :as supabase-ws]
              [xt.db.text.pgrest-graph :as pgrest-graph]
              [xt.db.text.pgrest-tree :as pgrest-tree]
              [xt.lang.common-protocol :as proto]
@@ -77,6 +78,13 @@
    (-> (http-fetch/request-http client input)
        (promise/x:promise-then http-util/get-body-data))))
 
+(defn.xt create-ws-client
+  [impl defaults]
+  (var create-fn (xtd/get-in impl ["client" "create_ws_client"]))
+  (when (xt/x:nil? create-fn)
+    (xt/x:err "Supabase websocket client factory is not configured"))
+  (return (create-fn defaults)))
+
 (defimpl.xt ImplSupabase
   [client schema lookup state listeners opts metadata]
   impl-common/ISourceRemote
@@ -90,7 +98,10 @@
 
   impl-common/ISourceRealtime
   {impl-common/subscribe-db   impl-realtime/subscribe
-   impl-common/unsubscribe-db impl-realtime/unsubscribe})
+   impl-common/unsubscribe-db impl-realtime/unsubscribe}
+
+  supabase-ws/ISupabaseWebsocketFactory
+  {supabase-ws/create-ws-client -/create-ws-client})
 
 (defn.xt impl-supabase
   [client schema lookup]
