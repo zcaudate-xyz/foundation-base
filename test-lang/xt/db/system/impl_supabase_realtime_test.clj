@@ -24,9 +24,15 @@
   (defrun.pg __init__
     (s/grant-usage #{"scratch_v0"})))
 
+^{:seedgen/root {:all true
+                 :langs [:js :lua.nginx :python :dart]
+                 :js {:extra [[js.net.ws-native :as js-websocket]]}
+                 :lua.nginx {:extra [[lua.net.ws-native :as lua-websocket]]}
+                 :python {:extra [[python.net.ws-native :as py-websocket]]}
+                 :dart {:extra [[dart.net.ws-native :as dart-websocket]]}}}
 (l/script- :js
   {:runtime :basic
-   :require [[js.net.http-fetch :as js-fetch]
+   :require [^{:seedgen/extra true}
              [js.net.ws-native :as js-websocket]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
@@ -35,13 +41,28 @@
              [xt.lang.spec-promise :as promise]
              [xt.db.system.main :as main]
              [xt.db.system.impl-common :as impl-common]
-             [xt.db.system.impl-supabase-ws :as supabase-ws]
              [xt.db.system.impl-memory :as impl-memory]
              [xt.db.system.impl-supabase-realtime :as realtime]
              [xt.db.helpers.data-main-test :as sample]
-             [xt.net.addon-supabase :as addon]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
+
+(l/script- :lua.nginx
+  {:runtime :nginx.instance
+   :config {:program :resty}
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as xts]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [xt.db.system.main :as main]
+             [xt.db.system.impl-common :as impl-common]
+             [xt.db.system.impl-memory :as impl-memory]
+             [xt.db.system.impl-supabase-realtime :as realtime]
+             [xt.db.helpers.data-main-test :as sample]
+             [xt.net.ws-native :as websocket]
+             [xt.net.ws-phoenix :as phoenix]
+             [lua.net.ws-native :as lua-websocket]]})
 
 (def.js Schema
   (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
@@ -56,108 +77,15 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-(defn.js default-impl
-  [opts]
-  (return
-   (main/create-impl "supabase"
-                     (xt/x:obj-assign (@! local-min/+config-supabase-anon+)
-                                      opts)
-                     -/Schema
-                     -/SchemaLookup)))
-
-(defn.js run-phx-reply-test
-  []
-  (var client (js-websocket/create {"id" "phx-test"}))
-  (var deferred {"resolve" nil "reject" nil})
-  (var init (promise/x:promise-new
-             (fn [resolve reject]
-               (xt/x:set-key deferred "resolve" resolve)
-               (xt/x:set-key deferred "reject" reject))))
-  (xtd/set-in client ["state" "topics" "realtime:room:phx-test"]
-              {"init" init
-               "join_ref" "#/join/realtime:room:phx-test"
-               "deferred" deferred
-               "ready" false})
-  (var handler (realtime/create-realtime-on-message client))
-  (handler {"topic" "realtime:room:phx-test"
-            "event" "phx_reply"
-            "ref" "#/join/realtime:room:phx-test"
-            "join_ref" "#/join/realtime:room:phx-test"
-            "payload" {"status" "ok"
-                       "response" {"postgres_changes" []}}})
-  (return {"resolved" true
-           "ready" (xtd/get-in client ["state" "topics" "realtime:room:phx-test" "ready"])}))
-
-(defn.js run-subscribe-isolated-test
-  []
-  (var impl (-/default-impl))
-  (var client (js-websocket/create {"id" "subscribe-test"}))
-  (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
-  (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
-  (xtd/set-in impl ["state" "realtimes" "default"] client)
-  (var sub (realtime/subscribe impl "default" ["realtime:room:isolated-test"]))
-  (var deferred (xtd/get-in client ["state" "topics" "realtime:room:isolated-test" "deferred"]))
-  ((xtd/get-in deferred ["resolve"]) true)
-  (xtd/set-in client ["state" "topics" "realtime:room:isolated-test" "ready"] true)
-  (:= (!:G RT_ISOLATED_CLIENT) client)
-  (return sub))
-
-(defn.js run-subscribe-sync-test
-  []
-  (var impl (-/default-impl))
-  (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
-  (xtd/set-in impl ["state" "caching_fn"]
-              (fn [] (return caching-impl)))
-  (var client (js-websocket/create {"id" "sync-test"}))
-  (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
-  (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
-  (xtd/set-in impl ["state" "realtimes" "default"] client)
-  (realtime/subscribe impl "default" ["realtime:room:sync-test"])
-  (var deferred (xtd/get-in client ["state" "topics" "realtime:room:sync-test" "deferred"]))
-  ((xtd/get-in deferred ["resolve"]) true)
-  (xtd/set-in client ["state" "topics" "realtime:room:sync-test" "ready"] true)
-  (var handler (realtime/create-realtime-on-message client))
-  (handler {"topic" "realtime:room:sync-test"
-            "event" "broadcast"
-            "payload" {"event" "xt.db/event"
-                       "topic" "realtime:room:sync-test"
-                       "payload" {"db/sync" {"UserAccount" [sample/RootUser]}}}})
-  (return {"synced" (impl-common/pull caching-impl ["UserAccount" {"id" "00000000-0000-0000-0000-000000000000"} ["nickname"]])
-           "events" (xtd/get-in caching-impl ["rows" "UserAccount" "00000000-0000-0000-0000-000000000000" "record" "data"])}))
-
-(defn.js run-subscribe-sync-remove-test
-  []
-  (var impl (-/default-impl))
-  (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
-  (xtd/set-in impl ["state" "caching_fn"]
-              (fn [] (return caching-impl)))
-  (var client (js-websocket/create {"id" "sync-remove-test"}))
-  (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
-  (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
-  (xtd/set-in impl ["state" "realtimes" "default"] client)
-  (realtime/subscribe impl "default" ["realtime:room:sync-remove-test"])
-  (var deferred (xtd/get-in client ["state" "topics" "realtime:room:sync-remove-test" "deferred"]))
-  ((xtd/get-in deferred ["resolve"]) true)
-  (xtd/set-in client ["state" "topics" "realtime:room:sync-remove-test" "ready"] true)
-  (var handler (realtime/create-realtime-on-message client))
-  (handler {"topic" "realtime:room:sync-remove-test"
-            "event" "broadcast"
-            "payload" {"event" "xt.db/event"
-                       "topic" "realtime:room:sync-remove-test"
-                       "payload" {"db/sync" {"UserAccount" [sample/RootUser]}}}})
-  (handler {"topic" "realtime:room:sync-remove-test"
-            "event" "broadcast"
-            "payload" {"event" "xt.db/event"
-                       "topic" "realtime:room:sync-remove-test"
-                       "payload" {"db/remove" {"UserAccount" ["00000000-0000-0000-0000-000000000000"]}}}})
-  (return {"remaining" (impl-common/pull caching-impl ["UserAccount" {} ["nickname"]])}))
-
 ^{:refer xt.db.system.impl-supabase-realtime/prepare-connect-url :added "4.1"}
 (fact "creates the connect-url"
   
   (!.js
     (realtime/prepare-connect-url
-     (-/default-impl)
+     (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup)
      {}))
   => #"ws://127.0.0.1:55121/realtime/v1/websocket")
 
@@ -165,14 +93,20 @@
 (fact "resolves the auth token from client defaults when no session exists"
 
   (!.js
-    (realtime/get-auth-token (-/default-impl)))
+    (realtime/get-auth-token (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup)))
   => (-> local-min/+config+ :api :anon-key))
 
 ^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload :added "4.1"}
 (fact "builds a Phoenix join frame for a broadcast topic"
 
   (!.js
-    (realtime/topic-join-payload (-/default-impl) "realtime:room:test"))
+    (realtime/topic-join-payload (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup) "realtime:room:test"))
   => {"topic" "realtime:room:test"
       "event" "phx_join"
       "ref" "#/join/realtime:room:test"
@@ -180,7 +114,7 @@
       "payload" {"config" {"broadcast" {"ack" false "self" false}}
                  "access_token" (-> local-min/+config+ :api :anon-key)}})
 
-^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload.no-token :added "4.1"}
 (fact "join payload omits access_token when token is nil"
 
   (!.js
@@ -201,7 +135,10 @@
 (fact "builds a Phoenix leave frame for a broadcast topic"
 
   (!.js
-    (realtime/topic-leave-payload (-/default-impl) "realtime:room:test"))
+    (realtime/topic-leave-payload (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup) "realtime:room:test"))
   => {"topic" "realtime:room:test"
       "event" "phx_leave"
       "ref" "#/leave/realtime:room:test"
@@ -209,7 +146,10 @@
       "payload" {}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message :added "4.1"
-  :setup [(l/rt:restart :js)]}
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "dispatches xt.db/event broadcasts to topic callbacks"
 
   (!.js
@@ -226,25 +166,53 @@
   => {"topic" "realtime:room:test"
       "data" 1})
 
-^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message :added "4.1"
-  :setup [(l/rt:restart :js)]}
+^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message.phx-reply :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "phx_reply resolves the topic init promise and marks the topic ready"
 
   (notify/wait-on :js
+    (var client (js-websocket/create {"id" "phx-test"}))
+    (var deferred {"resolve" nil "reject" nil})
+    (var init (promise/x:promise-new
+               (fn [resolve reject]
+                 (xt/x:set-key deferred "resolve" resolve)
+                 (xt/x:set-key deferred "reject" reject))))
+    (xtd/set-in client ["state" "topics" "realtime:room:phx-test"]
+                {"init" init
+                 "join_ref" "#/join/realtime:room:phx-test"
+                 "deferred" deferred
+                 "ready" false})
+    (var handler (realtime/create-realtime-on-message client))
+    (handler {"topic" "realtime:room:phx-test"
+              "event" "phx_reply"
+              "ref" "#/join/realtime:room:phx-test"
+              "join_ref" "#/join/realtime:room:phx-test"
+              "payload" {"status" "ok"
+                         "response" {"postgres_changes" []}}})
     (repl/notify
-     (-/run-phx-reply-test)))
+     {"resolved" true
+      "ready" (xtd/get-in client ["state" "topics" "realtime:room:phx-test" "ready"])}))
   => {"resolved" true
       "ready" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/create-realtime :added "4.1"
-  :setup [(l/rt:restart :js)]}
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "creates a realtime connection"
 
   (let [p (promise)]
     (ws/websocket
      (!.js
        (realtime/prepare-connect-url
-        (-/default-impl)
+        (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup)
         {}))
      {:on-open (fn [& args]
                  (deliver p "opened"))})
@@ -253,7 +221,10 @@
 
   (notify/wait-on :js
     (var client (realtime/create-realtime
-                 (-/default-impl)
+                 (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup)
                  (xts/str-rand 8)))
     (-> (xtd/get-in client ["state" "init"])
         (promise/x:promise-then
@@ -295,7 +266,10 @@
 
   (!.js
     (realtime/get-realtime
-     (-/default-impl)
+     (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup)
      "hello"))
   => nil)
 
@@ -303,18 +277,24 @@
 (fact "stores the realtime websocket client in the impl state"
 
   (!.js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (var client {"id" "test"})
     (realtime/set-realtime impl "test" client)
     (realtime/get-realtime impl "test"))
   => {"id" "test"})
 
 ^{:refer xt.db.system.impl-supabase-realtime/ensure-realtime :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "creates and returns the same realtime client on subsequent calls"
 
   (notify/wait-on :js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (var client (realtime/ensure-realtime impl "default"))
     (var same-client (realtime/ensure-realtime impl "default"))
     (-> (xtd/get-in client ["state" "init"])
@@ -326,11 +306,14 @@
       "same_client" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/remove-realtime :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "disconnects and removes the realtime client from the impl state"
 
   (notify/wait-on :js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (var client (realtime/ensure-realtime impl "default"))
     (-> (xtd/get-in client ["state" "init"])
         (promise/x:promise-then
@@ -340,11 +323,14 @@
   => {"removed" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/get-realtime-callback :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "retrieves a broadcast callback from the realtime client"
 
   (notify/wait-on :js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (var handler (fn [event] (return event)))
     (realtime/add-realtime-callback impl "default" "cb-1" handler)
     (var client (realtime/get-realtime impl "default"))
@@ -357,11 +343,14 @@
       "missing" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/add-realtime-callback :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "adds a callback to the realtime client state"
 
   (notify/wait-on :js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (var handler (fn [event] (return event)))
     (realtime/add-realtime-callback impl "default" "cb-1" handler)
     (var client (realtime/get-realtime impl "default"))
@@ -373,11 +362,14 @@
   => {"has_callback" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/remove-realtime-callback :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "removes a callback from the realtime client state"
 
   (notify/wait-on :js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (var handler (fn [event] (return event)))
     (realtime/add-realtime-callback impl "default" "cb-1" handler)
     (var client (realtime/get-realtime impl "default"))
@@ -397,11 +389,17 @@
 (fact "returns subscribed topics for the realtime client"
 
   (!.js
-    (realtime/get-topics (-/default-impl) "default"))
+    (realtime/get-topics (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup) "default"))
   => {}
 
   (notify/wait-on :js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (-> (realtime/subscribe impl "default" ["realtime:room:topics-test"])
         (promise/x:promise-then
          (fn [_]
@@ -410,11 +408,14 @@
       {"realtime:room:topics-test" {"ready" true}}))
 
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "subscribes to topics after the websocket is initialized"
 
   (notify/wait-on :js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (-> (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
                                             "realtime:room:sub-test-2"])
         (promise/x:promise-then
@@ -426,13 +427,30 @@
        "topics" {"realtime:room:sub-test-1" {"ready" true}
                  "realtime:room:sub-test-2" {"ready" true}}}))
 
-^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
-  :setup [(l/rt:restart :js)]}
+^{:refer xt.db.system.impl-supabase-realtime/subscribe.await-topic-init :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "subscribe waits for each topic init promise to resolve"
 
   (notify/wait-on :js
     (promise/x:promise-then
-     (-/run-subscribe-isolated-test)
+     (do
+       (var impl (main/create-impl "supabase"
+                                  (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                                  -/Schema
+                                  -/SchemaLookup))
+       (var client (js-websocket/create {"id" "subscribe-test"}))
+       (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
+       (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
+       (xtd/set-in impl ["state" "realtimes" "default"] client)
+       (var sub (realtime/subscribe impl "default" ["realtime:room:isolated-test"]))
+       (var deferred (xtd/get-in client ["state" "topics" "realtime:room:isolated-test" "deferred"]))
+       ((xtd/get-in deferred ["resolve"]) true)
+       (xtd/set-in client ["state" "topics" "realtime:room:isolated-test" "ready"] true)
+       (:= (!:G RT_ISOLATED_CLIENT) client)
+       sub)
      (fn [ok]
        (repl/notify {"ok" ok
                      "ready" (xtd/get-in (!:G RT_ISOLATED_CLIENT)
@@ -444,7 +462,10 @@
 (fact "applies db/sync payloads to the linked caching impl"
 
   (!.js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
     (xtd/set-in impl ["state" "caching_fn"]
                 (fn [] (return caching-impl)))
@@ -454,30 +475,85 @@
   => (contains-in
       {"synced" [{"nickname" "root"}]}))
 
-^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
-  :setup [(l/rt:restart :js)]}
+^{:refer xt.db.system.impl-supabase-realtime/subscribe.sync :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "subscribe syncs db/sync events to a linked caching impl"
 
   (!.js
-    (-/run-subscribe-sync-test))
+    (var impl (main/create-impl "supabase"
+                               (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                               -/Schema
+                               -/SchemaLookup))
+    (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+    (xtd/set-in impl ["state" "caching_fn"] (fn [] (return caching-impl)))
+    (var client (js-websocket/create {"id" "sync-test"}))
+    (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
+    (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
+    (xtd/set-in impl ["state" "realtimes" "default"] client)
+    (realtime/subscribe impl "default" ["realtime:room:sync-test"])
+    (var deferred (xtd/get-in client ["state" "topics" "realtime:room:sync-test" "deferred"]))
+    ((xtd/get-in deferred ["resolve"]) true)
+    (xtd/set-in client ["state" "topics" "realtime:room:sync-test" "ready"] true)
+    (var handler (realtime/create-realtime-on-message client))
+    (handler {"topic" "realtime:room:sync-test"
+              "event" "broadcast"
+              "payload" {"event" "xt.db/event"
+                         "topic" "realtime:room:sync-test"
+                         "payload" {"db/sync" {"UserAccount" [sample/RootUser]}}}})
+    {"synced" (impl-common/pull caching-impl ["UserAccount" {"id" "00000000-0000-0000-0000-000000000000"} ["nickname"]])
+     "events" (xtd/get-in caching-impl ["rows" "UserAccount" "00000000-0000-0000-0000-000000000000" "record" "data"])})
   => (contains-in
       {"synced" [{"nickname" "root"}]}))
 
-^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
-  :setup [(l/rt:restart :js)]}
+^{:refer xt.db.system.impl-supabase-realtime/subscribe.remove :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "subscribe syncs db/remove events to a linked caching impl"
 
   (!.js
-    (-/run-subscribe-sync-remove-test))
+    (var impl (main/create-impl "supabase"
+                               (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                               -/Schema
+                               -/SchemaLookup))
+    (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+    (xtd/set-in impl ["state" "caching_fn"] (fn [] (return caching-impl)))
+    (var client (js-websocket/create {"id" "sync-remove-test"}))
+    (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
+    (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
+    (xtd/set-in impl ["state" "realtimes" "default"] client)
+    (realtime/subscribe impl "default" ["realtime:room:sync-remove-test"])
+    (var deferred (xtd/get-in client ["state" "topics" "realtime:room:sync-remove-test" "deferred"]))
+    ((xtd/get-in deferred ["resolve"]) true)
+    (xtd/set-in client ["state" "topics" "realtime:room:sync-remove-test" "ready"] true)
+    (var handler (realtime/create-realtime-on-message client))
+    (handler {"topic" "realtime:room:sync-remove-test"
+              "event" "broadcast"
+              "payload" {"event" "xt.db/event"
+                         "topic" "realtime:room:sync-remove-test"
+                         "payload" {"db/sync" {"UserAccount" [sample/RootUser]}}}})
+    (handler {"topic" "realtime:room:sync-remove-test"
+              "event" "broadcast"
+              "payload" {"event" "xt.db/event"
+                         "topic" "realtime:room:sync-remove-test"
+                         "payload" {"db/remove" {"UserAccount" ["00000000-0000-0000-0000-000000000000"]}}}})
+    {"remaining" (impl-common/pull caching-impl ["UserAccount" {} ["nickname"]])})
   => (contains-in
       {"remaining" []}))
 
 ^{:refer xt.db.system.impl-supabase-realtime/unsubscribe :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "unsubscribes from topics and removes them from state"
 
   (notify/wait-on :js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (-> (realtime/subscribe impl "default" ["realtime:room:unsub-test"])
         (promise/x:promise-then
          (fn [_]
@@ -490,12 +566,15 @@
       "topics" {}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe.add-realtime-callback-00 :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "receives xt.db/event broadcasts from postgres after subscribing"
 
   (notify/wait-on :js
     (:= (!:G RT_EVENTS) [])
-    (:= (!:G RT_IMPL) (-/default-impl))
+    (:= (!:G RT_IMPL) (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (realtime/add-realtime-callback (!:G RT_IMPL) "roundtrip" "cb-1"
                                     (fn [event]
                                       (xt/x:arr-push (!:G RT_EVENTS) event)))
@@ -512,12 +591,15 @@
         "hello" "from postgres"}]))
 
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe.add-realtime-callback-01 :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "receives db/sync payloads from postgres"
 
   (notify/wait-on :js
     (:= (!:G RT_EVENTS) [])
-    (:= (!:G RT_IMPL) (-/default-impl))
+    (:= (!:G RT_IMPL) (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (realtime/add-realtime-callback (!:G RT_IMPL) "sync-test" "cb-1"
                                     (fn [event]
                                       (xt/x:arr-push (!:G RT_EVENTS) event)))
@@ -535,12 +617,15 @@
         "db/sync" {"User" [{"id" 1 "name" "Alice"}]}}]))
 
 ^{:refer xt.db.system.impl-supabase-realtime/add-realtime-callback-02 :added "4.1"
-  :setup [(l/rt:restart :js)]}
+}
 (fact "receives db/remove payloads from postgres"
 
   (notify/wait-on :js
     (:= (!:G RT_EVENTS) [])
-    (:= (!:G RT_IMPL) (-/default-impl))
+    (:= (!:G RT_IMPL) (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (realtime/add-realtime-callback (!:G RT_IMPL) "remove-test" "cb-1"
                                     (fn [event]
                                       (xt/x:arr-push (!:G RT_EVENTS) event)))
@@ -558,11 +643,14 @@
         "db/remove" {"User" [1 2 3]}}]))
 
 
-^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback.remove :added "4.1"}
 (fact "applies db/remove payloads to the linked caching impl"
 
   (!.js
-    (var impl (-/default-impl))
+    (var impl (main/create-impl "supabase"
+                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
+                       -/Schema
+                       -/SchemaLookup))
     (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
     (xtd/set-in impl ["state" "caching_fn"]
                 (fn [] (return caching-impl)))
