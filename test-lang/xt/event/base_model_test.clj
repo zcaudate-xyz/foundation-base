@@ -51,9 +51,9 @@
       [3]
       nil
       nil
-      nil)))
+      nil))))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python :ruby]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
@@ -263,7 +263,7 @@
           "error"   (fn [err] (:= out err))})
         (promise/x:promise-then
          (fn [] (repl/notify out)))))
-  => {"value" 3})
+  => {"value" 3}
 
   (notify/wait-on :lua
     (var out nil)
@@ -1406,7 +1406,7 @@
                  {"id" "C" "name" "b"}
                  {"id" "D" "name" "b"}]})
 
-^{:refer xt.event.base-model/async-fn-basic :added "4.1"}
+^{:refer xt.event.base-model/async-fn-basic :added "4.1" :id test-xt-event-base-model-async-fn-basic-input}
 (fact "executes a handler and calls the success callback"
 
   (!.js
@@ -1418,7 +1418,7 @@
     out)
   => {"value" "hello"})
 
-^{:refer xt.event.base-model/async-fn-promise :added "4.1"}
+^{:refer xt.event.base-model/async-fn-promise :added "4.1" :id test-xt-event-base-model-async-fn-promise-input}
 (fact "executes a promise-returning handler and resolves the success callback"
 
   (notify/wait-on :js

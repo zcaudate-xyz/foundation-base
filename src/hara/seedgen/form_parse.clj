@@ -164,9 +164,11 @@
 
 (defn entry-enrich
   [root-lang script-heads fact-nav entry]
-  (merge entry
-         (fact-classify-meta root-lang script-heads fact-nav)
-         {:checks (check-classify root-lang script-heads fact-nav)}))
+  (let [explicit-id (some-> fact-nav form-common/nav-meta nav/value :id)]
+    (cond-> (merge entry
+                   (fact-classify-meta root-lang script-heads fact-nav)
+                   {:checks (check-classify root-lang script-heads fact-nav)})
+      explicit-id (assoc-in [:meta :id] explicit-id))))
 
 (defn seedgen-readforms
   "returns parsed seedgen metadata and analyse output under :entries"

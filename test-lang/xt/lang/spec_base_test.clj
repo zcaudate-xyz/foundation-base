@@ -5,7 +5,7 @@
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise]))
 
-^{:seedgen/root {:all true, :langs [:python :lua]
+^{:seedgen/root {:all true, :langs [:python :lua :ruby]
                  :lua     {:extra  [[xt.lang.common-promise :as lua-promise]]}
                  :python  {:extra  [[xt.lang.common-promise :as py-promise]]}}}
 (l/script- :js

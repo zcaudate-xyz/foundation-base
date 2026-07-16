@@ -136,7 +136,14 @@
     (seed-readforms/entry-enrich :js #{'hara.lang/script-} fact-nav entry)
     => (contains {:checks map?
                   :fact-setup map?
-                  :fact-teardown map?})))
+                  :fact-teardown map?}))
+
+  (let [text "^{:refer sample/hello :id test-sample-hello-custom}\n(fact \"hello\"\n  (!.js 1)\n  => 1)"
+        root (nav/parse-root text)
+        fact-nav (nav/down root)
+        entry {}]
+    (seed-readforms/entry-enrich :js #{'hara.lang/script-} fact-nav entry)
+    => (contains {:meta {:id 'test-sample-hello-custom}})))
 
 ^{:refer hara.seedgen.form-parse/seedgen-readforms :added "4.1"}
 (fact "returns globals and analyse entries in the train-002 seedgen shape"

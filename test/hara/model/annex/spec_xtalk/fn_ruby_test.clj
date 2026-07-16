@@ -109,7 +109,14 @@
 (fact "deletes values")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-apply :added "4.1"}
-(fact "applies arguments")
+(fact "applies arguments"
+  (ruby-tf-x-apply '(:x-apply f args))
+  => '(. f (call (:.. args))))
+
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-construct :added "4.1"}
+(fact "constructs values with array arguments"
+  (ruby-tf-x-construct '(:x-construct ctor args))
+  => '(. ctor (call (:.. args))))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-type-native :added "4.1"}
 (fact "detects native type")

@@ -4,7 +4,7 @@
             [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:python :lua]}}
+^{:seedgen/root {:all true, :langs [:python :lua :ruby]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-os :as spec-os]

@@ -389,6 +389,9 @@
          body     (rewrite/rewrite-callable-body args body)
          grammar  preprocess-base/*macro-grammar*
          mopts    preprocess-base/*macro-opts*
+         args     (if (empty? args)
+                    [(list ':* '__args)]
+                    args)
          args-str (clojure.string/join ", "
                                        (common/emit-array args grammar mopts))
          body-str (common/*emit-fn* (cons 'do body) grammar mopts)]

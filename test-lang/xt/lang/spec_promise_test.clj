@@ -4,7 +4,7 @@
             [xt.lang.spec-base :as xt])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :python :lua]}}
+^{:seedgen/root {:all true, :langs [:js :python :lua :ruby]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-promise :as spec-promise]

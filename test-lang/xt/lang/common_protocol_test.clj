@@ -13,7 +13,7 @@
       (hello-str [impl])
       (hello-prn [impl])))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python :ruby]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-protocol :as proto]

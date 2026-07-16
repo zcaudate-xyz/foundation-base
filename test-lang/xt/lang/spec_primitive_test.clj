@@ -4,7 +4,7 @@
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-primitive :as primitive]))
 
-^{:seedgen/root {:all true, :langs [:python :lua]}}
+^{:seedgen/root {:all true, :langs [:python :lua :ruby]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-repl :as repl]
@@ -137,7 +137,7 @@
     (-%%- "1 + 2"))
   => 3)
 
-^{:refer xt.lang.spec-primitive/. :added "4.1"}
+^{:refer xt.lang.spec-primitive/. :added "4.1" :id test-xt-lang-spec-primitive-dot}
 (fact "indexes values"
 
   ^{:seedgen/base {:lua {:suppress true}}}

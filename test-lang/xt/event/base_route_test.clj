@@ -2,7 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :python]}}
+^{:seedgen/root {:all true, :langs [:js :python :ruby]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]

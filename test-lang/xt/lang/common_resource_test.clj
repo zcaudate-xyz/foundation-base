@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-resource :as rt]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python :ruby]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-resource :as rt]]})

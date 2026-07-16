@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [std.string.prose :as prose]))
 
-^{:seedgen/root {:all true, :langs [:python :lua :dart]}}
+^{:seedgen/root {:all true, :langs [:python :lua :dart :ruby]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-string :as xts]
