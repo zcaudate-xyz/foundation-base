@@ -114,23 +114,6 @@
                    (return [(. e ["ident"]) cols]))))
   => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
 
-^{:refer xt.db.text.base-scope/get-link-standard.more :added "4.0" :adopt true}
-(fact "classifies the link"
-
-  (!.js
-    (xtd/arr-map (scope/get-link-columns sample/Schema
-                                         "UserAccount"
-                                         [["profile"
-                                           {:id "1"}
-                                           {:id "2"}
-                                           {:id "3"}
-                                           ["first_name"
-                                            "last_name"]]])
-                 (fn [out]
-                   (var [e cols] out)
-                   (return [(. e ["ident"]) cols]))))
-  => [["profile" [{"id" "1"} {"id" "2"} {"id" "3"} ["first_name" "last_name"]]]])
-
 ^{:refer xt.db.text.base-scope/merge-queries :added "4.0"}
 (fact "merges query with clause"
 

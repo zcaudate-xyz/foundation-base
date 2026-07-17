@@ -614,7 +614,8 @@
         (promise/x:promise-then
          (fn [response]
            (repl/notify response)))))
-  => {"status" "ok"})
+  => (contains-in {"status" "ok"
+                   "output" {"current" {"value" "hello"}}}))
 
 ^{:refer xt.substrate.page-proxy/install-handlers :added "4.1"}
 (fact "registers all page-proxy action handlers"
@@ -765,7 +766,8 @@
         (promise/x:promise-then
          (fn [response]
            (repl/notify response)))))
-  => {"status" "ok"})
+  => (contains-in {"status" "ok"
+                   "output" {"current" {"value" "hello"}}}))
 
 ^{:refer xt.substrate.page-proxy/install :added "4.1"}
 (fact "installs handlers and triggers"
@@ -806,8 +808,13 @@
                                             [] true {})))))))))
         (promise/x:promise-then
          (fn [response]
-           (repl/notify response)))))
-  => {"status" "ok"})
+           (repl/notify
+            {"response" response
+             "model_output" (page-proxy/model-get-output
+                             client "room/a" "demo" "main")})))))
+  => (contains-in {"response" {"status" "ok"
+                                "output" {"current" {"value" "hello"}}}
+                   "model_output" {"value" "hello"}}))
 
 ^{:refer xt.substrate.page-proxy/model-get-output :added "4.1"}
 (fact "returns the current output value of a page model"

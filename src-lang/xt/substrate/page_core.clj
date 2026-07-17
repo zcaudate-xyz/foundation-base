@@ -18,7 +18,9 @@
   "checks if a group is a proxy for a remote page group"
   {:added "4.1"}
   [group]
-  (return (== true (xt/x:get-key group "remote"))))
+  (var remote (xt/x:get-key group "remote"))
+  (return (and (xt/x:not-nil? remote)
+               (not= false remote))))
 
 (defn.xt runtime-page
   "creates the page runtime container"

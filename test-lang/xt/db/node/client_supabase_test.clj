@@ -219,7 +219,7 @@
            (repl/notify out)))))
   => true)
 
-^{:refer xt.db.node.client-supabase/signed-in? :added "4.1"}
+^{:refer xt.db.node.client-supabase/signed-in?.no-session :added "4.1"}
 (fact "returns false when the service has no session"
 
   (notify/wait-on :js
@@ -315,9 +315,8 @@
            (-> (client/admin-delete-user node "auth/supabase" user-id {})
                (promise/x:promise-then
                 (fn [deleted]
-                  (repl/notify [(. created ["email"])
-                                (== 0 (xt/x:len (xtd/obj-keys deleted)))]))))))))
-  => (contains-in [string? true]))
+                  (repl/notify deleted))))))))
+  => {"status" 200 "http_status" 200})
 
 ^{:refer xt.db.node.client-supabase/admin-generate-link :added "4.1"}
 (fact "generates an admin link on the service"
@@ -399,11 +398,12 @@
                           "auth/supabase"
                           {"redirect_to" "http://localhost/callback"}
                           {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [400 "validation_failed"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 400 "validation_failed"])
 
 ^{:refer xt.db.node.client-supabase/callback :added "4.1"}
 (fact "handles an OAuth callback request"
@@ -444,7 +444,7 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {})
+  => {"status" 200 "http_status" 200})
 
 ^{:refer xt.db.node.client-supabase/recovery :added "4.1"}
 (fact "requests a recovery email on the service"
@@ -459,7 +459,7 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {})
+  => {"status" 200 "http_status" 200})
 
 ^{:refer xt.db.node.client-supabase/settings :added "4.1"}
 (fact "reads auth settings on the service"
@@ -499,22 +499,24 @@
 
   (notify/wait-on :js
     (-> (client/user-get (-/node-with-service (-/anon-client) nil) "auth/supabase" {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [401 "no_authorization"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 401 "no_authorization"])
 
 ^{:refer xt.db.node.client-supabase/user-info :added "4.1"}
 (fact "user-info is an alias for user-get"
 
   (notify/wait-on :js
     (-> (client/user-info (-/node-with-service (-/anon-client) nil) "auth/supabase" {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [401 "no_authorization"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 401 "no_authorization"])
 
 ^{:refer xt.db.node.client-supabase/user-put :added "4.1"}
 (fact "updates the current authenticated user on the service"
@@ -524,11 +526,12 @@
                          "auth/supabase"
                          {"data" {"note" "updated"}}
                          {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [401 "no_authorization"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 401 "no_authorization"])
 
 ^{:refer xt.db.node.client-supabase/verify-get :added "4.1"}
 (fact "verifies a token via GET on the service"
@@ -538,11 +541,12 @@
                            "auth/supabase"
                            {"type" "email"}
                            {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [400 "validation_failed"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 400 "validation_failed"])
 
 ^{:refer xt.db.node.client-supabase/verify-post :added "4.1"}
 (fact "verifies a token via POST on the service"
@@ -552,13 +556,14 @@
                             "auth/supabase"
                             {"type" "email" "token" "abc123"}
                             {})
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [400 "validation_failed"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 400 "validation_failed"])
 
-^{:refer xt.db.node.client-supabase/sign-up :added "4.1"}
+^{:refer xt.db.node.client-supabase/sign-up.proxy :added "4.1"}
 (fact "forwards sign-up through a proxy-supabase node"
 
   (notify/wait-on :js

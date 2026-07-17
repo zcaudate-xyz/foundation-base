@@ -296,7 +296,11 @@
                                     (xt/x:get-key payload "save_output"))
        (promise/x:promise-then
         (fn [_]
-          (return {"status" "ok"})))
+          (var [_group model]
+               (page-core/model-ensure node space-id group-id model-id))
+          (return {"status" "ok"
+                   "output" (-/model-serialize-output
+                             (xt/x:get-key model "output"))})))
        (promise/x:promise-catch
         (fn [err]
           (return {"status" "error"
@@ -628,7 +632,19 @@
   [node space-id group-id model-id args save-output opts]
   (var group (page-core/group-get node space-id group-id))
   (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
-  (return (dispatch-fn "proxy-call" node space-id group-id [model-id args save-output])))
+  (return
+   (-> (dispatch-fn "proxy-call" node space-id group-id [model-id args save-output])
+       (promise/x:promise-then
+        (fn [response]
+          (var output (xt/x:get-key response "output"))
+          (when (xt/x:not-nil? output)
+            (-/model-apply-output
+             space-id
+             {"space" space-id
+              "data" {"path" [group-id model-id]
+                      "output" output}}
+             node))
+          (return response))))))
 
 (defn.xt group-sync-proxy
   "opens a proxy group and returns a bidirectional sync control handle"

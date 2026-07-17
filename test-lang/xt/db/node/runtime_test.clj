@@ -180,7 +180,7 @@
                false))
       (return port))}))
 
-^{:refer xt.db.node.runtime/sharedworker-connect
+^{:refer xt.db.node.runtime/sharedworker-connect.multi-client
   :added "4.1"}
 (fact "two clients connect to the same SharedWorker and pull data"
 

@@ -55,6 +55,27 @@ To prove a test file's assertions actually execute, temporarily break one
 expectation and confirm the run fails (the summary line shows
 `FAILED L:<line>`), then revert. Don't trust the passed-check count alone.
 
+### Assert the intended result
+
+Tests must prove the function's semantic contract, not merely that execution
+did not throw or that a delivery mechanism returned a success status.
+
+- Test a transport or handler delivery mechanism once. Tests for functions
+  reached through it should then assert each function's actual return value or
+  resulting state.
+- Preserve stable domain expectations exactly. For example, if an RPC is
+  expected to return `"pong"`, assert `"pong"`; do not substitute a different
+  RPC or weaken the expectation to a status, type, or non-nil check.
+- Use `promise-catch` as the asserted path only for intentional negative tests.
+  Include an explicit rejection marker and assert the relevant error fields so
+  that an accidentally resolved promise cannot satisfy the test.
+- A catch may help diagnose a positive flow, but catching an exception must
+  never turn that positive test into a pass.
+- A status-only assertion is appropriate only when the function's documented
+  domain result genuinely is status-only; say so in the fact description.
+- Seedgen transforms must preserve these semantic assertions across target
+  languages. Prefer a language transform over suppressing or weakening a fact.
+
 ### Conditional Namespace Skipping
 
 Use `fact:global` with `:skip` to skip every fact in a namespace when a runtime condition is not met (for example, an external OS program is missing). Skipped facts are reported as skipped and their bodies are not executed.

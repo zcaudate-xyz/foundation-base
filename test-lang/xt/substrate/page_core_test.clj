@@ -452,7 +452,7 @@
   => {"removed-name" "page"
       "remaining" nil})
 
-^{:refer xt.substrate.page-core/group-remove :added "4.1"}
+^{:refer xt.substrate.page-core/group-remove.dependents :added "4.1"}
 (fact "throws when dependents exist"
 
   (!.js
@@ -492,11 +492,11 @@
               "defaults" {"args" []}}})
     (var removed (page-core/model-remove node "space/a" "page" "ping"))
     {"removed-type" (. removed ["::"])
-     "remaining" (xt/x:obj-keys (. (. (page-core/group-get node "space/a" "page") ["models"])))})
+     "remaining" (xt/x:obj-keys (xt/x:get-key (page-core/group-get node "space/a" "page") "models"))})
   => {"removed-type" "event.model"
       "remaining" ["pong"]})
 
-^{:refer xt.substrate.page-core/model-remove :added "4.1"}
+^{:refer xt.substrate.page-core/model-remove.dependents :added "4.1"}
 (fact "throws when model dependents exist"
 
   (!.js
@@ -741,6 +741,7 @@
 
   (!.js
     [(page-core/proxy-group? {"remote" true})
-     (page-core/proxy-group? {"name" "local"})
+     (page-core/proxy-group? {"remote" {"transport_id" "server"}})
+     (page-core/proxy-group? {"remote" false})
      (page-core/proxy-group? {})])
-  => [true false false])
+  => [true true false false])

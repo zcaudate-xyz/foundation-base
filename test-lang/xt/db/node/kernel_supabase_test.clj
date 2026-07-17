@@ -218,7 +218,8 @@
 (fact "queries a table through the service client"
   (notify/wait-on :js
     (-> (adaptor/supabase-query-table-handler nil
-                                              ["auth/supabase" "Log" {} {}]
+                                              ["auth/supabase" "Log" {}
+                                               {"headers" {"Accept-Profile" "scratch_v0"}}]
                                               nil
                                               (-/node-with-service (-/service-client) nil))
         (promise/x:promise-then
@@ -230,7 +231,11 @@
 (fact "calls an rpc entry on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-rpc-call-handler nil
-                                            ["auth/supabase" "ping" {} {}]
+                                            ["auth/supabase"
+                                             "ping"
+                                             {}
+                                             {"headers" {"Accept-Profile" "scratch_v0"
+                                                         "Content-Profile" "scratch_v0"}}]
                                             nil
                                             (-/node-with-service (-/service-client) nil))
         (promise/x:promise-then
@@ -279,9 +284,8 @@
            (-> (adaptor/supabase-admin-delete-user-handler nil ["auth/supabase" user-id {}] nil node)
                (promise/x:promise-then
                 (fn [deleted]
-                  (repl/notify [(. created ["email"])
-                                (== 0 (xt/x:len (xtd/obj-keys deleted)))]))))))))
-  => (contains-in [string? true]))
+                  (repl/notify deleted))))))))
+  => {"status" 200 "http_status" 200})
 
 ^{:refer xt.db.node.kernel-supabase/supabase-admin-generate-link-handler :added "4.1"}
 (fact "generates an admin link on the service"
@@ -360,11 +364,12 @@
                                             ["auth/supabase" {"redirect_to" "http://localhost/callback"} {}]
                                             nil
                                             (-/node-with-service (-/anon-client) nil))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [400 "validation_failed"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 400 "validation_failed"])
 
 ^{:refer xt.db.node.kernel-supabase/supabase-callback-handler :added "4.1"}
 (fact "handles an OAuth callback request"
@@ -399,7 +404,7 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {})
+  => {"status" 200 "http_status" 200})
 
 ^{:refer xt.db.node.kernel-supabase/supabase-recovery-handler :added "4.1"}
 (fact "requests a recovery email on the service"
@@ -413,7 +418,7 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {})
+  => {"status" 200 "http_status" 200})
 
 ^{:refer xt.db.node.kernel-supabase/supabase-settings-handler :added "4.1"}
 (fact "reads auth settings on the service"
@@ -450,11 +455,12 @@
 (fact "fetches the current authenticated user on the service"
   (notify/wait-on :js
     (-> (adaptor/supabase-user-get-handler nil ["auth/supabase" {}] nil (-/node-with-service (-/anon-client) nil))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [401 "no_authorization"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 401 "no_authorization"])
 
 ^{:refer xt.db.node.kernel-supabase/supabase-user-put-handler :added "4.1"}
 (fact "updates the current authenticated user on the service"
@@ -463,11 +469,12 @@
                                             ["auth/supabase" {"data" {"note" "updated"}} {}]
                                             nil
                                             (-/node-with-service (-/anon-client) nil))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [401 "no_authorization"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 401 "no_authorization"])
 
 ^{:refer xt.db.node.kernel-supabase/supabase-verify-get-handler :added "4.1"}
 (fact "verifies a token via GET on the service"
@@ -476,11 +483,12 @@
                                               ["auth/supabase" {"type" "email"} {}]
                                               nil
                                               (-/node-with-service (-/anon-client) nil))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [400 "validation_failed"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 400 "validation_failed"])
 
 ^{:refer xt.db.node.kernel-supabase/supabase-verify-post-handler :added "4.1"}
 (fact "verifies a token via POST on the service"
@@ -489,11 +497,12 @@
                                                ["auth/supabase" {"type" "email" "token" "abc123"} {}]
                                                nil
                                                (-/node-with-service (-/anon-client) nil))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify [(. out ["code"])
-                         (. out ["error_code"])])))))
-  => [400 "validation_failed"])
+        (promise/x:promise-catch
+         (fn [err]
+           (var data (xt/x:ex-data err))
+           (repl/notify ["rejected" (xt/x:get-key data "status")
+                         (xt/x:get-key data "error_code")])))))
+  => ["rejected" 400 "validation_failed"])
 
 ^{:refer xt.db.node.kernel-supabase/init-handlers :added "4.1"}
 (fact "registers all supabase adaptor handlers on the node"
@@ -506,7 +515,7 @@
   => true)
 
 
-^{:refer xt.db.node.kernel-supabase/supabase-signed-in-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-signed-in-handler.live :added "4.1"}
 (fact "returns true after signing up a fresh email user"
   (notify/wait-on :js
     (var email (xt/x:cat "kernel-signed-in-"
@@ -523,7 +532,7 @@
            (repl/notify (adaptor/supabase-signed-in-handler nil ["auth/supabase"] nil node))))))
   => true)
 
-^{:refer xt.db.node.kernel-supabase/supabase-rpc-call-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-rpc-call-handler.live :added "4.1"}
 (fact "calls log_append_public and returns the created Log row"
   (notify/wait-on :js
     (-> (adaptor/supabase-rpc-call-handler nil
@@ -540,7 +549,7 @@
   => {"message" "kernel-rpc-log"
       "has-id" true})
 
-^{:refer xt.db.node.kernel-supabase/supabase-query-table-handler :added "4.1"}
+^{:refer xt.db.node.kernel-supabase/supabase-query-table-handler.live :added "4.1"}
 (fact "queries the Log table via the kernel handler"
   (notify/wait-on :js
     (-> (adaptor/supabase-query-table-handler nil

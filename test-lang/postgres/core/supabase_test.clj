@@ -125,7 +125,7 @@
                           "db/sync"
                           {"db/sync" {"Entry" []}}
                           false)])]
-    [(str/includes? sql "realtime.send(")
+    [(str/starts-with? sql "SELECT realtime.send(")
      (str/includes? sql "'db/sync'")
      (str/includes? sql "'room:test'")
      (str/includes? sql "jsonb_build_object")])
@@ -139,7 +139,7 @@
                           "room:test"
                           {"db/sync" {"Entry" []}}
                           false)])]
-    [(str/includes? sql "realtime.send(")
+    [(str/starts-with? sql "SELECT realtime.send(")
      (str/includes? sql "'db/sync'")
      (str/includes? sql "'room:test'")
      (str/includes? sql "jsonb_build_object")])

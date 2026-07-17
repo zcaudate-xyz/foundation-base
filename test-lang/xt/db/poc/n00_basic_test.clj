@@ -144,7 +144,7 @@
       [{"id" string?
         "message" "cached"}]))
 
-^{:refer xt.db.poc.node-basic-test/create-page-model :added "4.1"
+^{:refer xt.db.poc.node-basic-test/create-page-model.remote :added "4.1"
   :setup [(scratch-v0/log-append-public "remote")]}
 (fact "remote handler pulls asynchronously from db/primary"
 

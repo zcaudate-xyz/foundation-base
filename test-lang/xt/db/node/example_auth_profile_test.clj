@@ -22,7 +22,8 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
              [hara.runtime.js-playground.client :as client]]
-   :emit {:lang/jsx false}})
+   :emit {:native {:suppress true}
+          :lang/jsx false}})
 
 (defn.js local-client-defaults
   "returns browser client defaults for scaffold/supabase local-min"
@@ -57,7 +58,6 @@
 (fact:global
  {:setup [(local-min/start-supabase)
           (l/rt:restart :js)
-          (l/rt:scaffold-imports :js)
           (def +url+ (js-playground/play-url (l/rt :js)))
           (def +browser+ (chromedriver/browser {}))
           (chromedriver/goto +url+ 5000 +browser+)
@@ -236,7 +236,6 @@
 
   (local-min/start-supabase)
   (l/rt:restart :js)
-  (l/rt:scaffold-imports :js)
   (def +url+ (js-playground/play-url (l/rt :js)))
 
   ;; Open +url+ in a browser, then evaluate:

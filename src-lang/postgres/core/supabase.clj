@@ -205,11 +205,12 @@
   ([topic event payload]
    `(s/realtime-send ~topic ~event ~payload false))
   ([topic event payload private?]
-   (list 'realtime.send
-         (normalize-realtime-payload payload)
-         event
-         topic
-         private?)))
+   [:select
+    (list 'realtime.send
+          (normalize-realtime-payload payload)
+          event
+          topic
+          private?)]))
 
 (defmacro.pg
   realtime-send-request
@@ -223,11 +224,12 @@
      (when-not event
        (f/error "Unsupported xt.db realtime request"
                 {:request request}))
-     (list 'realtime.send
-           (normalize-realtime-payload request)
-           event
-           topic
-           private?))))
+     [:select
+      (list 'realtime.send
+            (normalize-realtime-payload request)
+            event
+            topic
+            private?)])))
 
 (defn process-return
   "processes the return value"
