@@ -2,6 +2,7 @@
   (:require [clojure.set :as set]
              [clojure.string :as string]
              [clojure.walk :as walk]
+             [hara.common.preprocess-base :as preprocess-base]
              [hara.common.util :as ut]
              [hara.lang.rewrite.common :as common]
              [hara.lang.rewrite.destructure :as destruct]))
@@ -541,7 +542,20 @@
   (if (and (symbol? form)
            (namespace form)
            (not (ruby-constant-symbol? form)))
-    (list 'ruby-method-ref form)
+    (let [mopts      preprocess-base/*macro-opts*
+          module     (:module mopts)
+          modules    (or (:modules mopts)
+                         (:modules (:book mopts))
+                         (get-in mopts [:snapshot :ruby :book :modules]))
+          [sym-ns sym-id] (ut/sym-pair form)
+          sym-module (or (get (:link module) sym-ns)
+                         (when (= '- sym-ns) (:id module))
+                         sym-ns)
+          op         (get-in modules [sym-module :code sym-id :op])]
+      (if (= 'def op)
+        ;; def.xt value defs emit memoized zero-arg methods; invoke, don't ref
+        (ut/sym-full sym-module sym-id)
+        (list 'ruby-method-ref form)))
     (rewrite-callable-form form callables)))
 
 (defn- iterator-symbol

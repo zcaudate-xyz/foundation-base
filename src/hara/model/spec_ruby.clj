@@ -41,7 +41,7 @@
           (and (symbol? sym)
                (= "SPACE_NODE" sym-name)
                (some? (namespace sym)))
-          "\"$node\""
+          "\"__NODE__\""
 
           (and (symbol? sym)
                (nil? (namespace sym))
@@ -110,11 +110,23 @@
 (defn ruby-method-ref
   [[_ sym]]
   (let [grammar preprocess-base/*macro-grammar*
-        mopts   preprocess-base/*macro-opts*]
-    (list ':-
-          (str "method(:"
-               (common/emit-symbol sym grammar mopts)
-               ")"))))
+        mopts   preprocess-base/*macro-opts*
+        module  (:module mopts)
+        modules (or (:modules mopts)
+                    (:modules (:book mopts))
+                    (get-in mopts [:snapshot :ruby :book :modules]))
+        [sym-ns sym-id] (ut/sym-pair sym)
+        sym-module (or (get (:link module) sym-ns)
+                       (when (= '- sym-ns) (:id module))
+                       sym-ns)
+        op      (get-in modules [sym-module :code sym-id :op])]
+    (if (= 'def op)
+      ;; def.xt value defs are memoized zero-arg methods; invoke rather than ref
+      (list sym)
+      (list ':-
+            (str "method(:"
+                 (common/emit-symbol sym grammar mopts)
+                 ")")))))
 
 (defn ruby-symbol-global
   [key _grammar _mopts]
@@ -177,9 +189,7 @@
 
 (defn ruby-string
   [s]
-  (pr-str (if (= "__NODE__" s)
-            "$node"
-            s)))
+  (pr-str s))
 
 (defn ruby-emit-input-rest
   [{:keys [symbol]} grammar mopts]
@@ -250,14 +260,6 @@
 (defn ruby-def
   [[tag sym body :as form]]
   (cond
-    (and (symbol? sym)
-         (= "SPACE_NODE" (name sym))
-         (= "__NODE__" body))
-    (list ':- (top/emit-top-level :def
-                                  (list tag sym "$node")
-                                  preprocess-base/*macro-grammar*
-                                  preprocess-base/*macro-opts*))
-
     (seq (ruby-def-arglists sym))
     (let [arglists (ruby-def-arglists sym)
           args (first arglists)]
@@ -269,7 +271,22 @@
     (ruby-def-alias-wrapper sym body)
 
     :else
-    (list ':- (top/emit-top-level :def form preprocess-base/*macro-grammar* preprocess-base/*macro-opts*))))
+    ;; memoized zero-arg method + eager invocation at the def site.
+    ;; pairs with `:defglobal {:assign "||="}`: registries persist across
+    ;; script evals, so value defs must also be created once and stay stable
+    ;; (e.g. protocol descriptors keep their registered impls). the mangled
+    ;; name matches references emitted under :full/:host layouts, and a
+    ;; method (not a local) stays visible inside other method bodies.
+    (let [grammar   preprocess-base/*macro-grammar*
+          mopts     preprocess-base/*macro-opts*
+          module    (:module mopts)
+          module-id (if (map? module) (:id module) module)
+          munge-fn  (fn [x] (clojure.string/replace (str x) #"[\.\-]" "_"))
+          name      (if module-id
+                      (str (munge-fn module-id) "____" (munge-fn sym))
+                      (munge-fn sym))
+          body-str  (common/*emit-fn* body grammar mopts)]
+      (list ':- (str "def " name "\n @" name " ||= " body-str "\n end\n" name)))))
 
 (defn- ruby-callable-form?
   [form]
@@ -389,11 +406,20 @@
          body     (rewrite/rewrite-callable-body args body)
          grammar  preprocess-base/*macro-grammar*
          mopts    preprocess-base/*macro-opts*
-         args     (if (empty? args)
-                    [(list ':* '__args)]
-                    args)
+         rest?    (and (seq args)
+                       (collection/form? (last args))
+                       (= :.. (first (last args))))
+         [args rest-arg] (cond (empty? args)
+                               [nil '__args]
+
+                               rest?
+                               [(vec (butlast args)) (second (last args))]
+
+                               :else
+                               [args '__])
          args-str (clojure.string/join ", "
-                                       (common/emit-array args grammar mopts))
+                                       (concat (common/emit-array (vec args) grammar mopts)
+                                               [(str "*" rest-arg)]))
          body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
      (list ':- "->(" args-str ") {\n" body-str "\n}"))))
 
@@ -561,7 +587,7 @@
         :function {:defn      {:raw "def"
                                :body      {:start "" :end "end"}}}
         :define   {:def       {:raw "def"}
-                   :defglobal {:raw ""}}}
+                   :defglobal {:raw "" :assign "||="}}}
        (collection/merge-nested (emit/default-grammar))))
 
 

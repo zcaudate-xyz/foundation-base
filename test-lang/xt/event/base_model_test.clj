@@ -163,9 +163,14 @@
                             (fn [x] (return x)))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify context.acc)))))
+           (repl/notify (xt/x:get-key context "acc"))))))
   => {"post" [false], "::" "model.run", "main" [true {"value" 3}], "pre" [false]}
 
+  ^{:seedgen/base {:ruby {:expect (just-in {"error" true
+                                            "remote" [true string? true]
+                                            "post" [false]
+                                            "::" "model.run"
+                                            "pre" [false]})}}}
   (notify/wait-on :js
     (var v (model/create-model
             nil
@@ -188,7 +193,7 @@
          (fn [x] (return x)))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify context.acc)))))
+           (repl/notify (xt/x:get-key context "acc"))))))
   => {"error" true, "remote" [true {} true], "post" [false], "::" "model.run", "pre" [false]})
 
 
@@ -217,7 +222,7 @@
                                    (fn [x] (return x)))
         (promise/x:promise-then
          (fn [out]
-           (repl/notify context.acc)))))
+           (repl/notify (xt/x:get-key context "acc"))))))
   => {"error" true, "remote" [true "ERRORED" true], "post" [false], "::" "model.run", "pre" [false]})
 
 ^{:refer xt.event.base-model/async-fn-basic :added "4.1"}

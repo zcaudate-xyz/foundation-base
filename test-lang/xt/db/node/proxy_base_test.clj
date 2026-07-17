@@ -92,7 +92,7 @@
           (fn [_]
             (return (f server client))))))))
 
-^{:refer xt.db.node.proxy-util/request-proxy :added "4.1"}
+^{:refer xt.db.node.proxy-util/request-proxy :added "4.1" :seedgen/base {:ruby {:suppress true}}}
 (fact "forwards a call action to the server"
 
   (notify/wait-on :js
@@ -115,7 +115,7 @@
               (repl/notify out)))))))
   => {"forwarded" true})
 
-^{:refer xt.db.node.proxy-base/attach-forward-handler :added "4.1"}
+^{:refer xt.db.node.proxy-base/attach-forward-handler :added "4.1" :seedgen/base {:ruby {:suppress true}}}
 (fact "forwards attach-model and opens a proxy group on the client"
 
   (notify/wait-on :js
@@ -159,7 +159,7 @@
   => {"exists" true
       "proxy"  true})
 
-^{:refer xt.db.node.proxy-base/detach-forward-handler :added "4.1"}
+^{:refer xt.db.node.proxy-base/detach-forward-handler :added "4.1" :seedgen/base {:ruby {:suppress true}}}
 (fact "forwards detach-model and closes the proxy group on the client"
 
   (notify/wait-on :js

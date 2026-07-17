@@ -332,7 +332,7 @@
 (fact "basic transform for ruby blocks"
 
   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
-  => '(:- "->(" "a" ") {\n" "(do (+ a 1))" "\n}"))
+  => '(:- "->(" "a, *__" ") {\n" "(do (+ a 1))" "\n}"))
 
 ^{:refer hara.model.spec-ruby/tf-for-array :added "4.1"}
 (fact "transforms for:array loops")

@@ -58,7 +58,7 @@
      (not (boolean (re-find #"lambda link_id : removed = link_id" out)))])
   => [true true true true])
 
-^{:refer hara.model.spec-python/python-fn :added "4.1"}
+^{:refer hara.model.spec-python/python-fn :added "4.1" :id test-hara-model-spec-python-python-fn-invoke}
 (fact "lifts callbacks passed directly as invoke arguments"
   (let [out (l/emit-as
              :python '[(var removed nil)

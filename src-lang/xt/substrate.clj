@@ -15,7 +15,7 @@
              [xt.substrate.base-pubsub :as node-pubsub]
              [xt.substrate.base-util-handlers :as util-handlers]]})
 
-(def.xt ^{:arglists '([space-id config])} create-space node-space/create-space)
+(def.xt ^{:arglists '([node space-id opts])} create-space node-space/create-space)
 (def.xt ^{:arglists '([node space-id])} get-space node-space/get-space)
 (def.xt ^{:arglists '([node])} list-spaces node-space/list-spaces)
 (def.xt ^{:arglists '([node space-id])} get-space-state node-space/get-space-state)

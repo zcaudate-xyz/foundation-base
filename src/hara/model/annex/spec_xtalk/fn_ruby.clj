@@ -834,13 +834,7 @@
 
 (defn ruby-tf-x-async-run
   [[_ thunk]]
-  (let [grammar   preprocess-base/*macro-grammar*
-        mopts     preprocess-base/*macro-opts*
-        thunk-str (common/emit-wrapping thunk grammar mopts)]
-    (list ':-
-          (str "Thread.new do\n  "
-               thunk-str
-               ".call\nend"))))
+  (list '. thunk (list 'call)))
 
 (defn ruby-tf-x-promise
   [[_ thunk]]
@@ -992,7 +986,10 @@
         http-sym ruby-net-http-sym
         path     (gensym "path__")
         payload  (gensym "payload__")
-        path-val (gensym "path_value__")]
+        path-val (gensym "path_value__")
+        http-inst (gensym "http__")
+        timeout-forms [(list ':- (str (name http-inst) ".open_timeout = 2"))
+                       (list ':- (str (name http-inst) ".read_timeout = 5"))]]
     (template/$
      (do (require "json")
          (require "net/http")
@@ -1015,7 +1012,9 @@
                                             :type "raw"
                                             :return "raw"
                                             :value (. e to_s)}))))
-           (. (. ~http-sym (new ~host ~port)) (post ~path ~payload))
+           (var ~http-inst (. ~http-sym (new ~host ~port)))
+           ~@timeout-forms
+           (. ~http-inst (post ~path ~payload))
            (return ["async"])
            (catch e
              (return ["unable to connect" (. e to_s)])))))))
@@ -1032,11 +1031,48 @@
   ([[_ out id key]]
    (let [out-type (ruby-tf-x-type-native `[_ ~out])
          payload  (gensym "payload__")
-         error    (gensym "error__")]
+         error    (gensym "error__")
+         acc      (gensym "acc__")
+         ks       (gensym "ks__")
+         i        (gensym "i__")
+         k        (gensym "k__")
+         v        (gensym "v__")]
      (template/$ (do (require "json")
+                     (var json-filter
+                          (fn [obj]
+                            (cond (. obj (is_a? Hash))
+                                  (do (var ~acc {})
+                                      (var ~ks (. obj (keys)))
+                                      (var ~i 0)
+                                      (while (< ~i (. ~ks length))
+                                        (var ~k (. ~ks [~i]))
+                                        (var ~v (. obj [~k]))
+                                        (when (not (or (. ~v (is_a? Proc))
+                                                       (. ~v (is_a? Method))))
+                                          (:= (. ~acc [~k]) (json-filter ~v)))
+                                        (:= ~i (+ ~i 1)))
+                                      (return ~acc))
+
+                                  (. obj (is_a? Array))
+                                  (do (var ~acc [])
+                                      (var ~i 0)
+                                      (while (< ~i (. obj length))
+                                        (var ~v (. obj [~i]))
+                                        (when (not (or (. ~v (is_a? Proc))
+                                                       (. ~v (is_a? Method))))
+                                          (. ~acc (push (json-filter ~v))))
+                                        (:= ~i (+ ~i 1)))
+                                      (return ~acc))
+
+                                  (or (. obj (is_a? Proc))
+                                      (. obj (is_a? Method)))
+                                  (return nil)
+
+                                  :else
+                                  (return obj))))
                      (var ~payload {:type "data"
                                     :return ~out-type
-                                    :value ~out})
+                                    :value (json-filter ~out)})
                      (if (not (. ~id nil?))
                        (:= (. ~payload ["id"]) ~id))
                      (if (not (. ~key nil?))

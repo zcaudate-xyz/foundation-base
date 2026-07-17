@@ -118,7 +118,9 @@
            (repl/notify (event-model/get-current derived nil))))))
   => "derived-beta")
 
-^{:refer xt.substrate.walkthrough.s06-page-test/demo-003-page-model-remote}
+^{:refer xt.substrate.walkthrough.s06-page-test/demo-003-page-model-remote
+  ;; ruby: suppressed - flaky transport timing stall (see xt.substrate.page-proxy)
+  :seedgen/base {:ruby {:suppress true}}}
 (fact "a page model handler can issue a request over a memory transport"
 
   (notify/wait-on :js

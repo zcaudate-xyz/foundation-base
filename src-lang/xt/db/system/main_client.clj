@@ -7,6 +7,12 @@
 (defabstract.xt create-client
   [type defaults])
 
+(defn.xt create-client
+  "fallback client factory - returns nil for types without a runtime adapter"
+  {:added "4.1"}
+  [type defaults]
+  (return nil))
+
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]

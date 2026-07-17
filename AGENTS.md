@@ -259,6 +259,35 @@ lein seedgen compatible '[xt.lang]'
 lein seedgen incomplete '[xt.lang]'
 ```
 
+### Ruby target status
+
+Ruby is a first-class xtbench target (dispatch tag `:rb`, book
+`hara.model.spec-ruby`, runtime `hara.runtime.basic.impl.process-ruby`).
+Generate with `:lang ruby` and gate with
+`lein seedgen test '[<family>]' :with [ruby]`.
+
+Runtime notes:
+
+- The `:basic` runtime spawns local `ruby -e` (needs ruby on PATH); a docker
+  fallback via `:container-backup` is configured (image `rt-basic-ruby`).
+- Promise jobs run on a single-threaded job queue drained on the client main
+  thread (js microtask semantics) — do not reintroduce `Thread.new` in
+  `x:async-run`.
+- `x:return-encode` recursively strips `Proc` values from payloads (mirrors
+  JSON.stringify dropping functions).
+- 0-arity lambdas emit variadic `->(*__args)`; other arities get a trailing
+  `, *__` splat so extra args are ignored (JS semantics).
+- Native adapters live in `src-lang/ruby/net/` (`ws_native`, and db clients),
+  injected via `:seedgen/root :ruby {:extra ...}` like other languages.
+- `xt.db.system.main-client/create-client` has an xtalk fallback returning
+  nil for adapter-less types (mirrors the js cond fallthrough for "memory").
+
+Known gaps: a small set of transport/proxy facts in
+`test-lang/xt/substrate/page_proxy_test.clj` and `s06_page_test.clj` are
+`:suppress`ed for ruby (flaky promise-chain stalls under full-suite load);
+`xt.db.system.impl-supabase-realtime-test` is suppressed (needs local
+supabase infra + ruby http-fetch adapter). kmi.lang seeds are js-only for now.
+
 ### `:seedgen/*` metadata reference
 
 #### `:seedgen/root` — declare a seed and its targets

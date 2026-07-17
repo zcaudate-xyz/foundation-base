@@ -239,7 +239,7 @@
          :else
          (let [[args body] args]
            (let [args (if (empty? args)
-                        [(list ':* '__args)]
+                        [(list :.. '__args)]
                         args)]
            (apply list :- :lambda
                   (concat (if (not-empty args)
@@ -381,6 +381,7 @@
                                :block])
        (grammar/build:override
         {:pow         {:raw "**"}
+         :spread      {:raw "*" :emit :pre}
          :and         {:raw "and"}
          :or          {:raw "or"}
          :not         {:raw "not" :emit :prefix}

@@ -15,7 +15,8 @@
                  :js           {:extra [[js.net.conn-postgres :as js-postgres]]}
                  :lua.nginx    {:extra [[lua.nginx.conn-postgres :as lua-postgres]]}
                  :python       {:extra [[python.net.conn-postgres :as py-postgres]]}
-                 :dart         {:extra [[dart.net.conn-postgres :as dart-postgres]]}}}
+                 :dart         {:extra [[dart.net.conn-postgres :as dart-postgres]]}
+                 :ruby         {:extra [[ruby.net.conn-postgres :as ruby-postgres]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -85,7 +86,8 @@
   ^{:seedgen/base {:lua.nginx    {:transform '{js-postgres/create lua-postgres/create}}
                    :python       {:transform '{js-postgres/create py-postgres/create}}
                    :dart         {:transform '{js-postgres/create dart-postgres/create
-                                               (. err message) (xt/x:to-string err)}}}}
+                                               (. err message) (xt/x:to-string err)}}
+                   :ruby         {:transform '{js-postgres/create ruby-postgres/create}}}}
   (notify/wait-on :js
     (var client (js-postgres/create {:database "test-scratch"}))
     (-> (conn-sql/connect client {:host "127.0.0.1",
@@ -119,7 +121,8 @@
   ^{:seedgen/base {:lua.nginx    {:transform '{js-postgres/create lua-postgres/create}}
                    :python       {:transform '{js-postgres/create py-postgres/create}}
                    :dart         {:transform '{js-postgres/create dart-postgres/create
-                                               (. err message) (xt/x:to-string err)}}}}
+                                               (. err message) (xt/x:to-string err)}}
+                   :ruby         {:transform '{js-postgres/create ruby-postgres/create}}}}
   (notify/wait-on :js
     (var client (js-postgres/create {:database "test-scratch"}))
     (-> (conn-sql/connect client {})

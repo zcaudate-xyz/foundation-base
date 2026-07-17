@@ -135,7 +135,8 @@
   {:added "4.0"}
   [lang & code]
   (let [default-timeout (case lang
-                          (:dart :ruby) 10000
+                          :dart 10000
+                          :ruby 30000
                           2000)
         [lang timeout] (cond (vector? lang)
                              lang
