@@ -272,6 +272,7 @@
       "payload" {"config" {}}})
 
 ^{:refer xt.net.ws-phoenix/send-frame :added "4.1"
+  :id test-xt_net_ws_phoenix__send_frame_phx_reply
   :setup [(l/rt:restart :js)]}
 (fact "sends an encoded frame over the websocket and receives a phx_reply"
 

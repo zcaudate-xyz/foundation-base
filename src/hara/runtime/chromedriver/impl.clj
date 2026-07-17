@@ -65,6 +65,7 @@
                  [*chrome*
                   "--no-sandbox"
                   "--headless"
+                  "--disable-web-security"
                   (str "--remote-debugging-port=" port)
                   "--remote-debugging-address=0.0.0.0"])]
     (-> (if (not (get @bench/*active* port))

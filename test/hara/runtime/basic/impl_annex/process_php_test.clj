@@ -25,7 +25,8 @@
     [(:type out) (string? (:value out))])
   => ["error" true])
 
-^{:refer hara.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"
+  :id test-hara_runtime_basic_impl_annex_process_php__default_oneshot_wrap_bootstrap}
 (fact "creates the oneshot bootstrap form"
 
   (default-oneshot-wrap 1)
@@ -82,13 +83,14 @@
   (php-prefix-params '(fn [$x] (+ $x 1)))
   => '(fn [$x] (+ $x 1)))
 
-^{:refer hara.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"
+  :id test-hara_runtime_basic_impl_annex_process_php__php_body_source_locals}
 (fact "runtime source emits seedgen-style bare PHP locals as valid PHP variables"
   (php-body-source '(do
-                      (var out [])
-                      (var entries [0 1 2])
-                      (for:array [i entries]
-                        (xt/x:arr-push out i))
-                      out)
-                   {:bulk true})
-  => #"\$out = \[\];\s+\$entries = \[0, 1, 2\];\s+foreach \(\$entries as \$i\)")
+                      (var $out [])
+                      (var $entries [0 1 2])
+                      (for:array [$i $entries]
+                        (x:arr-push $out $i))
+                      $out)
+                   {})
+  => #"\$out = \[\];\s+\$entries = \[0,\s*1,\s*2\];\s+foreach \(\$entries as\s+\$i\)")

@@ -101,12 +101,12 @@
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-is-object? :added "4.1"}
 (fact "checks if object"
   (php-tf-x-is-object? '(:x-is-object? x))
-  => '(is_object x))
+  => '(and (is_array x) (not (array_is_list x))))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-is-array? :added "4.1"}
 (fact "checks if array"
   (php-tf-x-is-array? '(:x-is-array? x))
-  => '(is_array x))
+  => '(and (is_array x) (array_is_list x)))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-lu-get :added "4.1"}
 (fact "gets lookup value via object id"
@@ -196,7 +196,7 @@
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-str-substring :added "4.1"}
 (fact "extracts substring"
   (php-tf-x-str-substring '(:x-str-substring s 0 5))
-  => '(substr s 0 5))
+  => '(substr s 0 (- 5 0)))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-str-to-upper :added "4.1"}
 (fact "converts to uppercase"
@@ -241,32 +241,34 @@
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-iter-from-arr :added "4.1"}
 (fact "creates iterator from array"
   (php-tf-x-iter-from-arr '(:x-iter-from-arr arr))
-  => 'arr)
+  => '(new ArrayIterator arr))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-iter-from :added "4.1"}
 (fact "creates iterator from generic value"
   (php-tf-x-iter-from '(:x-iter-from obj))
-  => 'obj)
+  => '(new ArrayIterator obj))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-iter-eq :added "4.1"}
 (fact "compares iterator values"
   (l/emit-as :php [(php-tf-x-iter-eq '(:x-iter-eq it0 it1 eq-fn))])
-  => #"count")
+  => #"valid")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-iter-next :added "4.1"}
 (fact "advances iterator"
   (php-tf-x-iter-next '(:x-iter-next it))
-  => '(array_shift it))
+  => '(do (var $res := (. it (current)))
+          (. it (next))
+          (return $res)))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-iter-has? :added "4.1"}
 (fact "checks iterator readiness"
   (php-tf-x-iter-has? '(:x-iter-has? it))
-  => '(and (is_array it) (> (count it) 0)))
+  => '(array_is_list it))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-iter-native? :added "4.1"}
 (fact "checks native iterator representation"
   (php-tf-x-iter-native? '(:x-iter-native? it))
-  => '(is_array it))
+  => '(instanceof it ArrayIterator))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-socket-connect :added "4.1"}
 (fact "connects socket"

@@ -73,17 +73,17 @@
                                                     {:bulk true})])]
     [(boolean (re-find #"Future\.sync\(thunk_" out))
      (boolean (re-find #"var b = 1;" out))
-     (boolean (re-find #"return \[b\];" out))
-     (boolean (re-find #"return \(\) \{" out))])
-  => [true true true false]
+     (boolean (re-find #"return <dynamic>\[b\];" out))
+     (boolean (re-find #"thunk_\d+ = \(\) \{" out))])
+  => [true true true true]
 
   (let [out (l/emit-as :dart [(transform-form '[(+ 1 2)
                                                  (+ 3 4)]
                                                {})])]
     [(boolean (re-find #"var out_.*await Future\.sync" out))
-     (boolean (re-find #"return \[1 \+ 2,3 \+ 4\];" out))
-     (boolean (re-find #"await Future\.sync\(\) \{" out))])
-  => [true true false]
+     (boolean (re-find #"return <dynamic>\[1 \+ 2,3 \+ 4\];" out))
+     (boolean (re-find #"await Future\.sync\(thunk_" out))])
+  => [true true true]
 
   (let [out (l/emit-as :dart [(transform-form '[[(do (var b 1)
                                                        b)

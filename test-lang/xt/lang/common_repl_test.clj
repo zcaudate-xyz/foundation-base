@@ -33,7 +33,8 @@
  {:setup [(l/rt:restart)]
  :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
+^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"
+  :id test-xt_lang_common_repl__notify_with_promise_plain}
 (fact "calls notify-fn directly for plain values"
 
   (notify/wait-on-call
@@ -69,7 +70,8 @@
             {}))))
   => "hello")
 
-^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
+^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"
+  :id test-xt_lang_common_repl__notify_with_promise_wait}
 (fact "waits for resolved promise before calling notify-fn"
 
   (notify/wait-on-call
@@ -83,7 +85,8 @@
             {}))))
   => "hello")
 
-^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"}
+^{:refer xt.lang.common-repl/notify-with-promise :added "4.1"
+  :id test-xt_lang_common_repl__notify_with_promise_rejected}
 (fact "passes rejected promise error to notify-fn"
 
   (notify/wait-on-call

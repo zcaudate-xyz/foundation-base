@@ -128,13 +128,12 @@
   {:added "4.0"}
   [{:keys [input raw debug clip] :as meta}
    thunk]
-  (binding [ptr/*print* (if (= (:tag meta) *)
-                          #{:input-form :raw-input :raw-output}
-                          (cond-> ptr/*print* debug (conj :input)))
+  (binding [ptr/*print* (cond-> (if (= (:tag meta) *)
+                                   #{:input-form :raw-input :raw-output}
+                                   (cond-> ptr/*print* debug (conj :input)))
+                          raw (conj :raw-output))
             ptr/*output* (cond-> ptr/*output*
                            raw (conj :raw))
-            ptr/*print* (cond-> ptr/*print*
-                           raw (conj :raw-output))
             ptr/*input* (if (= (:tag meta) -)
                           #{:input}
                           (cond-> ptr/*input*

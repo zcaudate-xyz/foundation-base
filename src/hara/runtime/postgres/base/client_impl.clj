@@ -63,7 +63,7 @@
   [[f :as form] book]
   (or (keyword? f)
       (if-let [reserved (get-in book [:grammar :reserved f])]
-        (or (not (#{:block :special} (:type reserved))))
+        (not (#{:block :special} (:type reserved)))
         (and (symbol? f)
              (let [entry (if-let [var (resolve f)]
                            (and (std.lib.context.pointer/pointer? @var)
@@ -74,7 +74,10 @@
                                   (or (get-in book [:modules sym-module :code sym-id])
                                       (get-in book [:modules sym-module :fragment sym-id])))))]
                (and entry
-                    (not= [:block] (:static/return entry))))))))
+                    (not= [:block] (:static/return entry))))))
+      (when (and (collection/form? form)
+                 (not (symbol? f)))
+        true)))
 
 (defn prepend-select-check
   "checks if values needs a `SELECT` prepended"
@@ -93,7 +96,19 @@
                         (number? x)
                         (map? x)
                         (and (collection/form? x)
-                             (prepend-select-check-form x book)))))))))
+                             (prepend-select-check-form x book))))))
+        (when (and (not (:id ptr))
+                   (empty? args)
+                   (:form ptr))
+          (let [forms (ptr/free-form-body (:form ptr))]
+            (and (= 1 (count forms))
+                 (let [x (first forms)]
+                   (and (not (vector? x))
+                        (or (string? x)
+                            (number? x)
+                            (map? x)
+                            (and (collection/form? x)
+                                 (prepend-select-check-form x book)))))))))))
 
 (defn invoke-ptr-pg-single
   "invokes single"

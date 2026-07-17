@@ -82,7 +82,9 @@
 (fact "makes the app graph schema"
 
   (with-redefs [app-modules (fn [_] [{:id 'test.module
-                                      :code {:entry {:op 'deftype
+                                      :code {:entry {:id 'test/entry
+                                                     :module 'test.module
+                                                     :op 'deftype
                                                      :static/schema-seed []}}}])]
     (with-redefs-fn {#'hara.runtime.postgres.base.application/app-create-typed
                      (fn [_ _] {:tables {'User :table}

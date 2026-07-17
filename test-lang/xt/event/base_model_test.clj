@@ -1406,7 +1406,8 @@
                  {"id" "C" "name" "b"}
                  {"id" "D" "name" "b"}]})
 
-^{:refer xt.event.base-model/async-fn-basic :added "4.1"}
+^{:refer xt.event.base-model/async-fn-basic :added "4.1"
+  :id test-xt_event_base_model__async_fn_basic_input}
 (fact "executes a handler and calls the success callback"
 
   (!.js
@@ -1418,7 +1419,8 @@
     out)
   => {"value" "hello"})
 
-^{:refer xt.event.base-model/async-fn-promise :added "4.1"}
+^{:refer xt.event.base-model/async-fn-promise :added "4.1"
+  :id test-xt_event_base_model__async_fn_promise_input}
 (fact "executes a promise-returning handler and resolves the success callback"
 
   (notify/wait-on :js

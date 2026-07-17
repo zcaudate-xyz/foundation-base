@@ -48,7 +48,7 @@
 
   (client-impl/prepend-select-check addon/b:insert
                              [])
-  => false
+  => nil
 
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              [1])
@@ -68,15 +68,15 @@
 
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              ['(if a 1 2)])
-  => false
+  => nil
 
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              ['(do:block 1 2 3)])
-  => false
+  => nil
 
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              ['(do:assert 1 2 3)])
-  => false
+  => nil
 
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              ['(do:run 1 2 3)])
@@ -84,7 +84,7 @@
 
   (client-impl/prepend-select-check (ut/lang-pointer :postgres)
                              [[:anything]])
-  => false)
+  => nil)
 
 ^{:refer hara.runtime.postgres.base.client-impl/prepend-select-check :added "4.0"}
 (fact "checks if values needs a `SELECT` prepended"
@@ -107,14 +107,14 @@
 
   (client-impl/invoke-ptr-pg-transform-let-fn
    'form)
-  => '[:DO :$$ :BEGIN \\ (\| (do [:LOOP \\ (\| (do form [:exit])) \\ :END-LOOP])) \\ :END :$$ :LANGUAGE "plpgsql"])
+  => '[:do :$$ \\ :begin \\ (\| (do [:loop \\ (\| (do form)) \\ :end-loop])) \\ :end \; \\ :$$ :language "plpgsql" \;])
 
 ^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-transform-try-fn :added "4.0"}
 (fact "transforms the try form"
 
   (client-impl/invoke-ptr-pg-transform-try-fn
    'form)
-  => [:DO :$$ :DECLARE '(\| (do [e_code text] [e_msg text] [e_detail text] [e_hint text] [e_context text])) 'form :$$ :LANGUAGE "plpgsql"])
+  => '[:do :$$ \\ :begin \\ (\| form) \\ :end \; \\ :$$ :language "plpgsql" \;])
 
 ^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-transform-prep :added "4.0"}
 (fact "transforms a form"
@@ -137,20 +137,27 @@
       (catch others
           (return 1))))
   => '[[[:select (set-config "temp.out" nil false)] false]
-       [[:DO
-         :$$
-         :DECLARE
-         (\| (do [e_code text] [e_msg text] [e_detail text] [e_hint text] [e_context text]))
+      [[:do
+        :$$
+        \\
+        :begin
+        \\
+        (\|
          (try
-           (do [:perform (set_config "temp.out" (:text (+ a b c)) false)])
-           (catch
-               others
-               (do [:perform (set_config "temp.out" (:text 1) false)])))
-         :$$
-         :LANGUAGE
-         "plpgsql"]
-        false]
-       [[:select (current-setting "temp.out" false)] true]]
+          (do [:perform (set_config "temp.out" (:text (+ a b c)) false)])
+          (catch
+           others
+           (do [:perform (set_config "temp.out" (:text 1) false)]))))
+        \\
+        :end
+        \;
+        \\
+        :$$
+        :language
+        "plpgsql"
+        \;]
+       false]
+      [[:select (current-setting "temp.out" false)] true]]
 
   (client-impl/invoke-ptr-pg-transform
    :let
@@ -158,31 +165,34 @@
           (:integer b) 2]
       (return (+ a b))))
   => '[[[:select (set-config "temp.out" nil false)] false]
-       [[:DO
-         :$$
-         :BEGIN
-         \\
-         (\|
-          (do
-            [:LOOP
-             \\
-             (\|
-              (do
-                (let
-                    [(:integer a) 1 (:integer b) 2]
-                  (do
-                    [:perform (set_config "temp.out" (:text (+ a b)) false)]
-                    [:exit]))
-                [:exit]))
-             \\
-             :END-LOOP]))
-         \\
-         :END
-         :$$
-         :LANGUAGE
-         "plpgsql"]
-        false]
-       [[:select (current-setting "temp.out" false)] true]])
+      [[:do
+        :$$
+        \\
+        :begin
+        \\
+        (\|
+         (do
+           [:loop
+            \\
+            (\|
+             (do
+               (let
+                   [(:integer a) 1 (:integer b) 2]
+                 (do
+                   [:perform (set_config "temp.out" (:text (+ a b)) false)]
+                   [:exit]))))
+            \\
+            :end-loop]))
+        \\
+        :end
+        \;
+        \\
+        :$$
+        :language
+        "plpgsql"
+        \;]
+       false]
+      [[:select (current-setting "temp.out" false)] true]])
 
 ^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-block :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]

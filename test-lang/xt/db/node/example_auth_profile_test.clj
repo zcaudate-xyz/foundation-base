@@ -3,6 +3,7 @@
   (:require [hara.lang :as l]
             [scaffold.supabase.local-min :as local-min]
             [std.lib.component :as component]
+            [std.lib.env :as env]
             [xt.lang.common-notify :as notify]))
 
 (require '[hara.runtime.js-playground :as js-playground]
@@ -21,6 +22,7 @@
              [xt.db.system.impl-supabase-session :as session]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
+             [xt.db.node.client-supabase :as supabase-client]
              [hara.runtime.js-playground.client :as client]]
    :emit {:native {:suppress true}
           :lang/jsx false}})
@@ -58,7 +60,8 @@
 (fact:global
  {:setup [(local-min/start-supabase)
           (l/rt:restart :js)
-          (def +url+ (js-playground/play-url (l/rt :js)))
+          (l/rt:scaffold-imports :js)
+          (def +url+ (str "http://127.0.0.1:" (:port (l/rt :js)) "/index.html"))
           (def +browser+ (chromedriver/browser {}))
           (chromedriver/goto +url+ 5000 +browser+)
           (wait-for-channel (l/rt :js))]
@@ -92,6 +95,47 @@
                     "@xt.supabase/sign-up"))
     (xt/x:not-nil? profile-model)])
   => [true true true])
+
+^{:refer xt.db.node.example-auth-profile-test/notify-canary :added "4.1"}
+(fact "notify works in playground"
+
+  (notify/wait-on [:js 5000]
+    (promise/x:with-delay 100
+      (fn [] (repl/notify "ok"))))
+  => "ok")
+
+^{:refer xt.db.node.example-auth-profile-test/typeof-fetch :added "4.1"}
+(fact "fetch is defined in playground"
+
+  (!.js (typeof fetch))
+  => "function")
+
+^{:refer xt.db.node.example-auth-profile-test/raw-fetch-health :added "4.1"}
+(fact "raw fetch to supabase health in playground"
+
+  (notify/wait-on [:js 15000]
+    (-> (fetch "http://127.0.0.1:55121/auth/v1/health"
+               {"headers" {"apikey" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"}})
+        (.then (fn [res]
+                 (return (. res (text)))))
+        (.then (fn [body]
+                 (repl/notify ["ok" body])))
+        (.catch (fn [err]
+                  (repl/notify ["err" (String err)])))))
+  => vector?)
+
+^{:refer xt.db.node.example-auth-profile-test/raw-fetch-notify :added "4.1"}
+(fact "raw fetch to notify server in playground"
+
+  (notify/wait-on [:js 15000]
+    (-> (fetch (str "http://127.0.0.1:" (@! (-> (std.lib.resource/res :hara/lang.notify) :http-port)) "/"))
+        (.then (fn [res]
+                 (return (. res (text)))))
+        (.then (fn [body]
+                 (repl/notify ["ok" body])))
+        (.catch (fn [err]
+                  (repl/notify ["err" (String err)])))))
+  => vector?)
 
 ^{:refer xt.db.node.example-auth-profile/attach-auth-profile-models :added "4.1"}
 (fact "signs up, signs back in, updates auth metadata and logs out through local-min"

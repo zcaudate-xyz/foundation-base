@@ -137,7 +137,8 @@
     (-%%- "1 + 2"))
   => 3)
 
-^{:refer xt.lang.spec-primitive/. :added "4.1"}
+^{:refer xt.lang.spec-primitive/. :added "4.1"
+  :id test-xt_lang_spec_primitive__dot_index}
 (fact "indexes values"
 
   ^{:seedgen/base {:lua {:suppress true}}}
