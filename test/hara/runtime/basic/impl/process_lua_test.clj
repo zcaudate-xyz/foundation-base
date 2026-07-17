@@ -24,7 +24,8 @@
   (default-basic-client 19000)
   => string?)
 
-^{:refer hara.runtime.basic.impl.process-lua/default-basic-client :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-lua/default-basic-client :added "4.1"
+  :id test-default-basic-client-error-propagation}
 (fact "constructs shared bootstrap without swallowing client loop errors"
   (let [out (default-basic-client 19000)]
     [(boolean (re-find #"cjson = require" out))

@@ -41,7 +41,8 @@
         (impl/stop-neovim rt))))
   => [6 true])
 
-^{:refer hara.runtime.neovim.impl/raw-eval-neovim :added "4.1"}
+^{:refer hara.runtime.neovim.impl/raw-eval-neovim :added "4.1"
+  :id test-raw-eval-neovim-errors}
 (fact "propagates lua errors"
   (let [rt (impl/neovim {})]
     (try

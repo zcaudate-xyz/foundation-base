@@ -16,7 +16,8 @@
                                           ($display "hello")
                                           ($finish))))))
 
-^{:refer hara.runtime.basic.impl.process-verilog/transform-form :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-verilog/transform-form :added "4.1"
+  :id test-transform-form-verilog-modules}
 (fact "leaves pure module definitions at the top level"
   (transform-form '[(defn counter [clk]
                       (reg out)
@@ -28,7 +29,8 @@
          (always [posedge clk]
                  (<= out clk)))))
 
-^{:refer hara.runtime.basic.impl.process-verilog/transform-form :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-verilog/transform-form :added "4.1"
+  :id test-transform-form-verilog-mixed-program}
 (fact "separates module definitions from executable statements"
   (transform-form '[(defn counter [clk]
                       (reg out)
@@ -43,7 +45,8 @@
        (defn __hara_tb__ [] (initial (do ($display "done")
                                          ($finish))))))
 
-^{:refer hara.runtime.basic.impl.process-verilog/transform-form :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-verilog/transform-form :added "4.1"
+  :id test-transform-form-verilog-existing-blocks}
 (fact "does not wrap existing initial/always blocks in an additional initial"
   (transform-form '[(initial
                       ($display "hello")
@@ -82,7 +85,8 @@
    "hello verilog")
   => true)
 
-^{:refer hara.runtime.basic.impl.process-verilog-test/CANARY-IVERILOG :adopt true :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-verilog-test/CANARY-IVERILOG :adopt true :added "4.1"
+  :id test-canary-iverilog-multi-statement}
 (fact "evaluates a multi-statement testbench"
   (let [out (!.verilog
              (do ($display "line one")

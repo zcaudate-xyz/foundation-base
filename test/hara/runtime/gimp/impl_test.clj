@@ -46,7 +46,8 @@
    (string? (impl/raw-eval-gimp +rt+ "OUT = str(Gimp.version())"))]
   => [6 true])
 
-^{:refer hara.runtime.gimp.impl/raw-eval-gimp :added "4.1"}
+^{:refer hara.runtime.gimp.impl/raw-eval-gimp :added "4.1"
+  :id test-raw-eval-gimp-errors}
 (fact "propagates python errors"
   (try
     (impl/raw-eval-gimp +rt+ "OUT = 1 / 0")

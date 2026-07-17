@@ -43,7 +43,8 @@
         (impl/stop-vscode rt))))
   => [6 "function"])
 
-^{:refer hara.runtime.vscode.impl/raw-eval-vscode :added "4.1" :timeout 60000}
+^{:refer hara.runtime.vscode.impl/raw-eval-vscode :added "4.1" :timeout 60000
+  :id test-raw-eval-vscode-errors}
 (fact "propagates js errors"
   (let [rt (impl/vscode {})]
     (try

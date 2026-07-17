@@ -38,7 +38,8 @@
      (local-exec-available? nil)])
   => [true true false false])
 
-^{:refer hara.runtime.basic.type-basic/start-basic :added "4.1"}
+^{:refer hara.runtime.basic.type-basic/start-basic :added "4.1"
+  :id test-start-basic-container-fallback}
 (fact "start-basic falls back to container when local exec is unavailable and backup is enabled"
 
   (with-redefs [server/start-server (fn [& _] {:port 1234})
@@ -58,7 +59,8 @@
          count))
   => 4)
 
-^{:refer hara.runtime.basic.type-basic/start-basic :added "4.1"}
+^{:refer hara.runtime.basic.type-basic/start-basic :added "4.1"
+  :id test-start-basic-explicit-container-exec}
 (fact "start-basic preserves explicit container exec over runtime exec"
 
   (with-redefs [server/start-server (fn [& _] {:port 1234})
@@ -82,7 +84,8 @@
   => {:exec ["sh" "-c"]
       :image "erlang:27-alpine"})
 
-^{:refer hara.runtime.basic.type-basic/start-basic :added "4.1"}
+^{:refer hara.runtime.basic.type-basic/start-basic :added "4.1"
+  :id test-start-basic-process-bench-defaults}
 (fact "start-basic merges process bench defaults into the bench runtime"
 
   (let [captured (atom nil)]

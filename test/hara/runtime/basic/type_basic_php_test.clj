@@ -58,7 +58,8 @@
         (component/stop rt))))
   => nil?)
 
-^{:refer hara.runtime.basic.type-basic/invoke-ptr-basic :added "4.1"}
+^{:refer hara.runtime.basic.type-basic/invoke-ptr-basic :added "4.1"
+  :id test-invoke-ptr-basic-php-error-recovery}
 (fact "php basic survives eval errors and continues serving requests"
 
   (let [rt (p/rt-basic {:lang :php

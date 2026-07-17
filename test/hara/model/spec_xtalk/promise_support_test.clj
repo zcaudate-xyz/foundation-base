@@ -31,7 +31,8 @@
    (boolean (find-var 'xt.lang.spec-base/x:ex-data))]
   => [true true true true])
 
-^{:refer xt.lang.spec-base/x:ex :added "4.1"}
+^{:refer xt.lang.spec-base/x:ex :added "4.1"
+  :id test-x-ex-structured-exceptions}
 (fact "xtalk exception helpers emit catchable structured exceptions"
   (let [js-out (l/emit-as :js ['(try
                                  (throw (x:ex "boom" {:a 1}))

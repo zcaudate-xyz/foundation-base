@@ -39,7 +39,8 @@
   (default-oneshot-trim "{\"type\":\"data\",\"return\":\"number\",\"value\":1}")
   => "{\"type\":\"data\",\"return\":\"number\",\"value\":1}")
 
-^{:refer hara.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.1"
+  :id test-r-canary-grammar-additions}
 (fact "R grammar additions"
   (!.R (df {:a [1 2] :b [3 4]}))
   => [{:a 1, :b 3} {:a 2, :b 4}]
@@ -56,7 +57,8 @@
   (!.R [NA NaN Inf])
   => [nil NaN Inf])
 
-^{:refer hara.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.1"}
+^{:refer hara.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.1"
+  :id test-r-canary-errors}
 (fact "R errors are propagated"
   (!.R (throw "boom"))
   => (throws clojure.lang.ExceptionInfo))

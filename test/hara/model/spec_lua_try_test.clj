@@ -27,7 +27,8 @@
      (boolean (re-find #"print" out))])
   => [true true true true true true true])
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
+^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"
+  :id test-lua-rewrite-stage-sync-catch}
 (fact "lua sync catch preserves plain thrown payloads through pcall"
   (let [out (l/emit-as :lua
                        '[(try
@@ -39,7 +40,8 @@
      (boolean (re-find #"error\(lua_try_value__" out))])
   => [true true true])
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
+^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"
+  :id test-lua-rewrite-stage-try-finally}
 (fact "lua try/finally preserves outer return flow after the pcall rewrite"
   (let [out (l/emit-as :lua
                        '[(defn demo []

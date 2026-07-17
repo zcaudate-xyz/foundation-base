@@ -86,7 +86,8 @@
                      {:extension "c"})
   => "hello")
 
-^{:refer hara.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.0"}
+^{:refer hara.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.0"
+  :id test-glsl-sh-exec-compile-failure}
 (fact "returns stderr output on compile failure when stderr is enabled"
   (string? (glsl/glsl-sh-exec ["gcc"]
                               "int main(){ UNKNOWN }"

@@ -45,7 +45,8 @@
         (impl/stop-blender rt))))
   => [6 true])
 
-^{:refer hara.runtime.blender.impl/raw-eval-blender :added "4.1"}
+^{:refer hara.runtime.blender.impl/raw-eval-blender :added "4.1"
+  :id test-raw-eval-blender-errors}
 (fact "propagates python errors"
   (let [rt (impl/blender {})]
     (try

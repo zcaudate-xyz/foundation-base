@@ -48,7 +48,8 @@
   (xtalk-op-profiles :x-add)
   => #{:xtalk-common})
 
-^{:refer hara.common.grammar-xtalk-system/xtalk-op-profiles :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-op-profiles :added "4.1"
+  :id test-xtalk-op-profiles-promise}
 (fact "includes promise ops in the runtime-specific profile"
   (xtalk-op-profiles :x-promise)
   => #{:xtalk-runtime-specific}
@@ -75,7 +76,8 @@
   => '{:op :x-add
         :emit :macro})
 
-^{:refer hara.common.grammar-xtalk-system/xtalk-symbol-entry :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-symbol-entry :added "4.1"
+  :id test-xtalk-symbol-entry-promise}
 (fact "maps promise symbols back to xtalk entries"
   (-> (xtalk-symbol-entry 'x:promise)
       (select-keys [:op :emit :raw]))
@@ -141,7 +143,8 @@
   => '#{xt.lang.common-data/obj-keys
         xt.lang.common-promise/promise})
 
-^{:refer hara.common.grammar-xtalk-system/xtalk-ops-polyfill-symbols :added "4.1"}
+^{:refer hara.common.grammar-xtalk-system/xtalk-ops-polyfill-symbols :added "4.1"
+  :id test-xtalk-ops-polyfill-symbols-overrides}
 (fact "respects grammar overrides when finding polyfill symbols"
   (let [js-grammar {:reserved {'x:promise       {:emit :macro}
                                'x:promise-then  {:emit :macro}

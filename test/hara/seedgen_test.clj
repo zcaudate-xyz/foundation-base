@@ -356,7 +356,8 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.seedgen/seedgen-langadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-langadd :added "4.1"
+  :id test-seedgen-langadd-extra-requires}
 (fact "langadd applies root-script extra requires for generated languages"
   (let [{:keys [root path lookup project]} (seedgen-extra-context "seedgen-langadd-extra")]
     (try
@@ -372,7 +373,8 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.seedgen/seedgen-langadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-langadd :added "4.1"
+  :id test-seedgen-langadd-drop-inline-extras}
 (fact "langadd drops inline script extras from non-target runtimes"
   (let [{:keys [root path lookup project]} (seedgen-script-extra-context "seedgen-langadd-script-extra")]
     (try
@@ -388,7 +390,8 @@
          (fs/delete root {:recursive true}))))
   => [1 1 1])
 
-^{:refer hara.seedgen/seedgen-langadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-langadd :added "4.1"
+  :id test-seedgen-langadd-bulk-selector}
 (fact "bulk seedgen tasks only return test namespaces"
   (let [{:keys [root lookup project]} (seedgen-selector-context "seedgen-task-selector")]
     (try
@@ -483,7 +486,8 @@
   => ['[example.A]
       '[samplebench.python.sample.summary-test]])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+  :id test-seedgen-benchadd-spacing}
 (fact "benchadd preserves multiline setup and teardown indentation"
   (let [{:keys [root bench-path lookup project]} (seedgen-spacing-context "seedgen-benchadd-spacing")]
     (try
@@ -499,7 +503,8 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+  :id test-seedgen-benchadd-extra-requires}
 (fact "benchadd applies root-script extra requires for generated bench namespaces"
   (let [{:keys [root bench-path lookup project]} (seedgen-extra-context "seedgen-benchadd-extra")]
     (try
@@ -515,7 +520,8 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+  :id test-seedgen-benchadd-ref-transform}
 (fact "benchadd recognizes `:ref` metadata and applies target transforms"
   (let [root      (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-ref"
                                                                     (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -556,7 +562,8 @@
         (fs/delete root {:recursive true}))))
   => [true true false])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+  :id test-seedgen-benchadd-drop-inline-extras}
 (fact "benchadd drops inline script extras from non-target runtimes"
   (let [{:keys [root bench-path lookup project]} (seedgen-script-extra-context "seedgen-benchadd-script-extra")]
     (try
@@ -572,7 +579,8 @@
          (fs/delete root {:recursive true}))))
   => [1 1 0])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+  :id test-seedgen-benchadd-suppressed-setup}
 (fact "benchadd skips suppressed setup items when generating bench files"
   (let [{:keys [root bench-path lookup project]} (seedgen-suppress-context "seedgen-benchadd-suppress")]
     (try
@@ -588,7 +596,8 @@
         (fs/delete root {:recursive true}))))
   => [false true true])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+  :id test-seedgen-benchadd-shorthand-metadata}
 (fact "benchadd preserves shorthand metadata on generated runtime checks"
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-meta"
                                                                    (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -618,7 +627,8 @@
    '(l/as-lua +out+))
   => "(fact \"single-pass\"\n  (!.js\n    (l/as-lua +out+))\n  => (l/as-lua +out+))")
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+  :id test-seedgen-benchadd-self-transform}
 (fact "benchadd applies self-referential transforms once"
   (let [{:keys [root bench-path lookup project]} (seedgen-transform-context "seedgen-benchadd-transform")]
     (try
@@ -634,7 +644,8 @@
         (fs/delete root {:recursive true}))))
   => [true true false])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+  :id test-seedgen-benchadd-sql-call-facts}
 (fact "benchadd keeps all xt.db.text.sql-call call facts"
   (let [proj   (project/project)
         lookup (project/file-lookup proj)

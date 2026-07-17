@@ -74,7 +74,8 @@
   (prep-form :staging '(+ @1 2 3) nil nil {})
   => '[(+ (!:eval 1) 2 3) #{} #{} {}])
 
-^{:refer hara.common.emit/prep-form :added "4.1"}
+^{:refer hara.common.emit/prep-form :added "4.1"
+  :id test-prep-form-staging-rewrites}
 (fact "runs staging rewrites after to-staging"
   (with-redefs [preprocess/to-input
                 (fn [_]

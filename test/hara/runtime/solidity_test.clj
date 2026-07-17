@@ -39,7 +39,8 @@
       @calls))
   => [[:module {:name "Test"}] [:pl "contract Test {}"]])
 
-^{:refer hara.runtime.solidity/rt:print :added "4.0"}
+^{:refer hara.runtime.solidity/rt:print :added "4.0"
+  :id test-rt-print-pointer-contract}
 (fact "prints pointer contract code when :module and :id are supplied"
   (let [calls (atom [])]
     (with-redefs [compile-solc/compile-ptr-code (fn [m]
@@ -52,7 +53,8 @@
       @calls))
   => [[:ptr {:module "Hello" :id "main"}] [:pl "contract Ptr {}"]])
 
-^{:refer hara.runtime.solidity/rt:print :added "4.0"}
+^{:refer hara.runtime.solidity/rt:print :added "4.0"
+  :id test-rt-print-no-lines-argument}
 (fact "suppresses line numbers via second argument"
   (let [calls (atom [])]
     (with-redefs [compile-solc/compile-module-code (fn [_] "line1\nline2")
@@ -62,7 +64,8 @@
       @calls))
   => [["line1\nline2"]])
 
-^{:refer hara.runtime.solidity/rt:print :added "4.0"}
+^{:refer hara.runtime.solidity/rt:print :added "4.0"
+  :id test-rt-print-no-lines-option}
 (fact "suppresses line numbers via :no-lines option"
   (let [calls (atom [])]
     (with-redefs [compile-solc/compile-module-code (fn [_] "line1\nline2")

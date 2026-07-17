@@ -10,7 +10,8 @@
   (meta (with-form-meta (with-meta [1 2 3] {:hello true}) [4 5 6]))
   => {:hello true})
 
-^{:refer hara.lang.rewrite.common/with-form-meta :added "4.1"}
+^{:refer hara.lang.rewrite.common/with-form-meta :added "4.1"
+  :id test-with-form-meta-non-iobj}
 (fact "returns out unchanged when out is not an IObj"
   (with-form-meta (with-meta [] {:hello true}) "world")
   => "world"

@@ -109,7 +109,8 @@
       (finally
         (when (.exists tmp) (.delete tmp))))))
 
-^{:refer hara.runtime.basic.impl.process-gdscript/default-oneshot-out :added "4.1"}
+^{:refer hara.runtime.basic.impl.process-gdscript/default-oneshot-out :added "4.1"
+  :id test-default-oneshot-out-stdout-fallback}
 (fact "falls back to the last non-blank stdout line"
   (with-redefs-fn {(var gd/+current-output-file+) (atom (java.io.File. "/nonexistent/path"))}
     #(gd/default-oneshot-out "Godot Engine header\n\n  \nfinal line\n"))

@@ -35,7 +35,8 @@
     (+ 1 2 3))
    => 6)
 
-^{:refer hara.runtime.basic.impl-annex.process-rust-test/CANARY-RUSTC :adopt true :added "4.0"}
+^{:refer hara.runtime.basic.impl-annex.process-rust-test/CANARY-RUSTC :adopt true :added "4.0"
+  :id test-canary-rustc-direct-pointer-calls}
 (fact "twostep evaluates direct pointer calls in the script environment"
 
   [(-/add1 10)

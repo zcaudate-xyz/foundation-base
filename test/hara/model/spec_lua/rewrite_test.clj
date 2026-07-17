@@ -71,7 +71,8 @@
      (nil? (re-find #"hello\(function \(x\)" out))])
   => [true true])
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
+^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"
+  :id test-lua-rewrite-stage-runtime-eval-helper}
 (fact "marks runtime-eval helper defs as inner for lua without affecting normal staging"
   (let [plain (rewrite/lua-rewrite-stage
                '(do

@@ -74,7 +74,8 @@
       (finally
         (component/stop rt)))))
 
-^{:refer hara.runtime.js-playground/raw-eval-js-playground :added "4.0"}
+^{:refer hara.runtime.js-playground/raw-eval-js-playground :added "4.0"
+  :id test-raw-eval-js-playground-connected}
 (fact "raw-eval evaluates through a connected browser"
 
   (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))
@@ -100,7 +101,8 @@
       (finally
         (component/stop rt)))))
 
-^{:refer hara.runtime.js-playground/start-js-playground :added "4.0"}
+^{:refer hara.runtime.js-playground/start-js-playground :added "4.0"
+  :id test-start-js-playground-restart}
 (fact "restarting the playground reuses the same port"
 
   (let [rt (rt-js-playground {:lang :js :port 0})
