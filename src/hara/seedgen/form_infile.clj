@@ -547,7 +547,7 @@
 
 (defn- render-meta-string
   [m vector-values]
-  (let [preferred-order [:refer :ref :added :setup :teardown]
+  (let [preferred-order [:refer :ref :added :id :setup :teardown]
         ordered-keys    (concat (filter #(contains? m %) preferred-order)
                                 (remove (set preferred-order) (keys m)))
         entries         (reduce (fn [out k]

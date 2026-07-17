@@ -440,7 +440,7 @@
                       "  (:require [hara.lang :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
-                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
+                      "^{:refer xt.lang.spec-base/example.A :added \"4.1\" :id test-example-a}\n"
                       "(fact \"metadata branches\"\n\n"
                       "  ^{:seedgen/base {:lua {:expect 6}}}\n"
                       "  (!.js\n"
@@ -450,7 +450,7 @@
       (slurp path)
       (finally
         (.delete tmp))))
-  => "(ns sample.add-test\n  (:use code.test)\n  (:require [hara.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  (!.lua\n    (+ 1 2 3))\n  => 6\n\n  (!.py\n    (+ 1 2 3))\n  => 6)\n"
+  => "(ns sample.add-test\n  (:use code.test)\n  (:require [hara.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\" :id test-example-a}\n(fact \"metadata branches\"\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  (!.lua\n    (+ 1 2 3))\n  => 6\n\n  (!.py\n    (+ 1 2 3))\n  => 6)\n"
 
   (let [tmp (java.io.File/createTempFile "seedgen-langadd-train004-f-expect" ".clj")
         path (.getAbsolutePath tmp)

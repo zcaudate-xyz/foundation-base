@@ -166,7 +166,9 @@
   [root-lang script-heads fact-nav entry]
   (merge entry
          (fact-classify-meta root-lang script-heads fact-nav)
-         {:checks (check-classify root-lang script-heads fact-nav)}))
+         {:meta (merge (:meta entry)
+                       (meta (nav/value fact-nav)))
+          :checks (check-classify root-lang script-heads fact-nav)}))
 
 (defn seedgen-readforms
   "returns parsed seedgen metadata and analyse output under :entries"

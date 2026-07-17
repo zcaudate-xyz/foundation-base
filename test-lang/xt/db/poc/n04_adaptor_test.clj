@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
 (ns xt.db.poc.n04-kernel-test
   (:use code.test)
   (:require [hara.lang :as l]
