@@ -250,10 +250,14 @@
     :arg (arg-form name)))
 
 (defn realtime-send-form
-  "Builds the canonical private realtime-send-request wrapper form."
+  "Builds the canonical private realtime-send-request wrapper form.
+
+   Supabase stores and authorizes the logical topic (Brand:<id>) while its
+   Phoenix channel adds the realtime: wire prefix. Client descriptors keep
+   exposing that wire topic as realtime:Brand:<id>."
   [plan {:keys [auth-form result-sym arg-form] :as forms}]
   (let [id-form (topic-id-form (:topic-id plan) forms)]
     (list 's/realtime-send-request
-          (list '|| (str "realtime:" (:aggregate plan) ":") id-form)
+          (list '|| (str (:aggregate plan) ":") id-form)
           (notification-payload plan result-sym)
           true)))

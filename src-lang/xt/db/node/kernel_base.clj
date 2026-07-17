@@ -234,7 +234,10 @@
   (var conn-id      (xt/x:second args))
   (var topics       (xt/x:get-idx args (xt/x:offset 2)))
   (var primary      (-/get-primary-impl node primary-id))
-  (return (impl-common/unsubscribe-db primary conn-id topics)))
+  ;; Supabase topic refcount mutation is synchronous. Acknowledge it directly
+  ;; so a SharedWorker proxy does not wait on an implementation-local promise.
+  (impl-common/unsubscribe-db primary conn-id topics)
+  (return true))
 
 (defn.xt ^{:substrate/fn "@xt.db/sync-cached"}
   sync-cached-handler

@@ -20,7 +20,17 @@
      :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
   (defrun.pg __init__
-    (s/grant-usage #{"scratch_v0"})))
+    (s/grant-usage #{"scratch_v0"}))
+
+  (defn.pg ^{:- [:boolean]}
+    send-realtime-roundtrip
+    []
+    (let [_ [:perform
+             (s/realtime-send
+              "room:roundtrip"
+              "xt.db/event"
+              {"hello" "from postgres"})]]
+      (return true))))
 
 ^{:seedgen/root {:all true
                  :langs [:js :lua.nginx :python :dart]
@@ -91,7 +101,13 @@
       {"create_ws_client"
        (fn [_impl defaults]
          (return (js-websocket/create defaults)))}}))
-  => (-> local-min/+config+ :api :anon-key))
+  => (-> local-min/+config+ :api :anon-key)
+
+  (!.js
+   (realtime/get-auth-token
+    {"client" {"defaults" {"apikey" "anon" "token" "session-jwt"}}
+     "state" {"realtimes" {}}}))
+  => "session-jwt")
 
 ^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
@@ -112,7 +128,18 @@
       "ref" "#/join/realtime:room:test"
       "join_ref" "#/join/realtime:room:test"
       "payload" {"config" {"broadcast" {"ack" false "self" false}}
-                 "access_token" (-> local-min/+config+ :api :anon-key)}})
+                 "access_token" (-> local-min/+config+ :api :anon-key)}}
+
+  (!.js
+    (realtime/topic-join-payload
+     {"client" {"defaults" {"apikey" "anon" "token" "session-jwt"}}
+      "state" {"realtimes" {}}}
+     "realtime:User:00000000-0000-0000-0000-000000000001"))
+  => (contains-in
+      {"topic" "realtime:User:00000000-0000-0000-0000-000000000001"
+       "payload" {"access_token" "session-jwt"
+                  "config" {"private" true
+                            "broadcast" {"ack" false "self" false}}}}))
 
 ^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload.no-token :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
@@ -500,7 +527,7 @@
              (xt/x:set-key target "remove"
                            {"table" table-name "ids" ids})
              (return true))}})
-    (xtd/set-in impl ["state" "caching_fn"]
+    (xtd/set-in impl ["metadata" "caching_fn"]
                 (fn [] (return caching-impl)))
     (var callback (realtime/create-sync-callback impl))
     (callback {"db/sync" {"UserAccount" [{"id" 1 "name" "root"}]}})
@@ -623,6 +650,29 @@
            (repl/notify {"ok" ok
                          "topics" (realtime/get-topics impl "default")})))))
   => {"ok" true
+      "topics" {}}
+
+  (notify/wait-on :js
+    (var sent [])
+    (var impl {"state" {"realtimes" {}}})
+    (var client
+         {"state" {"topics" {"realtime:User:1" {"ready" true
+                                                   "refs" 2}}}
+          "::/override"
+          {"send" (fn [_client input]
+                    (xt/x:arr-push sent input)
+                    (return input))}})
+    (realtime/set-realtime impl "default" client)
+    (-> (realtime/unsubscribe impl "default" ["realtime:User:1"])
+        (promise/x:promise-then
+         (fn [_]
+           (return
+            (realtime/unsubscribe impl "default" ["realtime:User:1"]))))
+        (promise/x:promise-then
+         (fn [_]
+           (repl/notify {"sent" (xt/x:len sent)
+                         "topics" (realtime/get-topics impl "default")})))))
+  => {"sent" 1
       "topics" {}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe.add-realtime-callback-00 :added "4.1"
@@ -650,8 +700,7 @@
      (realtime/subscribe (!:G RT_IMPL) "roundtrip" ["realtime:room:roundtrip"])))
   => [true]
 
-  (do (!.pg
-        (s/realtime-send "room:roundtrip" "xt.db/event" {"hello" "from postgres"}))
+  (do (send-realtime-roundtrip)
       (!.js
         RT_EVENTS))
   => (contains-in

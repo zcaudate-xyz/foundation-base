@@ -55,15 +55,28 @@
   {:added "4.1"}
   [impl]
   (return (or (xtd/get-in impl ["state" "session" "access_token"])
+              (xtd/get-in impl ["client" "defaults" "token"])
               (xtd/get-in impl ["client" "defaults" "apikey"]))))
+
+(defn.xt private-entity-topic?
+  "returns true for canonical private entity wire topics"
+  {:added "4.1.5"}
+  [topic]
+  (return
+   (or (xts/starts-with? topic "realtime:User:")
+       (xts/starts-with? topic "realtime:Brand:")
+       (xts/starts-with? topic "realtime:Campaign:")
+       (xts/starts-with? topic "realtime:Topic:"))))
 
 (defn.xt topic-join-payload
   "builds the Phoenix join payload for a broadcast-only channel"
   {:added "4.1"}
   [impl topic]
   (var auth-token (-/get-auth-token impl))
-  (var payload
-       {"config" {"broadcast" {"ack" false "self" false}}})
+  (var config {"broadcast" {"ack" false "self" false}})
+  (when (-/private-entity-topic? topic)
+    (xt/x:set-key config "private" true))
+  (var payload {"config" config})
   (when (xt/x:not-nil? auth-token)
     (xt/x:set-key payload "access_token" auth-token))
   (return
@@ -213,7 +226,9 @@
   [impl]
   (return
    (fn [event]
-     (var caching-fn (xtd/get-in impl ["state" "caching_fn"]))
+     (var caching-fn
+          (or (xtd/get-in impl ["metadata" "caching_fn"])
+              (xtd/get-in impl ["state" "caching_fn"])))
      (when (xt/x:is-function? caching-fn)
        (var caching-impl (caching-fn))
        (when (and (xt/x:not-nil? caching-impl)
@@ -229,24 +244,31 @@
   [impl conn-id topics]
   (var client (-/ensure-realtime impl conn-id))
   (-/add-realtime-callback impl conn-id "db-sync" (-/create-sync-callback impl))
+  (var new-topics [])
   (xt/for:array [topic topics]
-    (var join-ref (xt/x:cat "#/join/" topic))
-    (var deferred {"resolve" nil "reject" nil})
-    (var init (promise/x:promise-new
-               (fn [resolve reject]
-                 (xt/x:set-key deferred "resolve" resolve)
-                 (xt/x:set-key deferred "reject" reject))))
-    (xtd/set-in client
-                ["state" "topics" topic]
-                {"init" init
-                 "join_ref" join-ref
-                 "deferred" deferred
-                 "ready" false}))
+    (var entry (xtd/get-in client ["state" "topics" topic]))
+    (if (xt/x:not-nil? entry)
+      (xt/x:set-key entry "refs" (xt/x:inc (or (xt/x:get-key entry "refs") 1)))
+      (do
+        (var join-ref (xt/x:cat "#/join/" topic))
+        (var deferred {"resolve" nil "reject" nil})
+        (var init (promise/x:promise-new
+                   (fn [resolve reject]
+                     (xt/x:set-key deferred "resolve" resolve)
+                     (xt/x:set-key deferred "reject" reject))))
+        (xtd/set-in client
+                    ["state" "topics" topic]
+                    {"init" init
+                     "join_ref" join-ref
+                     "deferred" deferred
+                     "ready" false
+                     "refs" 1})
+        (xt/x:arr-push new-topics topic))))
   (return
    (promise/x:promise-then
     (xtd/get-in client ["state" "init"])
     (fn [_]
-      (xt/for:array [topic topics]
+      (xt/for:array [topic new-topics]
         (phoenix/send-frame client (-/topic-join-payload impl topic)))
       (return (promise/x:promise-all
                (xt/x:arr-map topics
@@ -257,15 +279,15 @@
   "unsubscribes from one or more broadcast topics on the realtime websocket"
   {:added "4.1"}
   [impl conn-id topics]
-  (return
-   (promise/x:promise
-    (fn []
-      (var client (-/get-realtime impl conn-id))
-      (when (xt/x:not-nil? client)
-        (xt/for:array [topic topics]
-          (var entry (xtd/get-in client ["state" "topics" topic]))
-          (when (xt/x:not-nil? entry)
+  (var client (-/get-realtime impl conn-id))
+  (when (xt/x:not-nil? client)
+    (xt/for:array [topic topics]
+      (var entry (xtd/get-in client ["state" "topics" topic]))
+      (when (xt/x:not-nil? entry)
+        (var refs (xt/x:dec (or (xt/x:get-key entry "refs") 1)))
+        (if (> refs 0)
+          (xt/x:set-key entry "refs" refs)
+          (do
             (phoenix/send-frame client (-/topic-leave-payload impl topic))
-            (xt/x:del-key (xtd/get-in client ["state" "topics"]) topic))))
-      (return true)))))
-
+            (xt/x:del-key (xtd/get-in client ["state" "topics"]) topic))))))
+  (return (promise/x:promise-run true)))
