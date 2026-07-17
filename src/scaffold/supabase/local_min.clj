@@ -101,24 +101,50 @@
                          {:exit exit :out out :err err}))))
      (wait-for-postgrest-ready schema table))))
 
+(defn- run-supabase-command
+  [args]
+  (-> (os/sh {:args (into ["supabase"] args)
+              :wait true
+              :output false})
+      (os/sh-output)))
+
+(defn- partial-api-stack?
+  [{:keys [out err]}]
+  (let [output (str out "\n" err)]
+    (and (re-find #"supabase start is already running" output)
+         (re-find #"Stopped services: \[[^\]]*supabase_kong_[^\]]*\]" output))))
+
+(defn- assert-command-success
+  [{:keys [exit out err] :as result} message]
+  (when (not= exit 0)
+    (println "[supabase]" message "(exit" exit ")")
+    (when (seq out) (println out))
+    (when (seq err) (println err))
+    (throw (ex-info (str "supabase " message)
+                    result)))
+  result)
+
 (defn start-supabase
   ([]
    (start-supabase nil))
   ([_opts]
    (let [opts (or _opts {})
          _ (println "[supabase] starting local-min...")
-         process (os/sh {:args ["supabase" "start" "--workdir" "docker/local-min"]
-                         :wait true
-                         :output false})
-         {:keys [exit out err] :as start} (os/sh-output process)
+         initial-start (-> (run-supabase-command
+                            ["start" "--workdir" "docker/local-min"])
+                           (assert-command-success "start failed"))
+         recovery (when (partial-api-stack? initial-start)
+                    (println "[supabase] partial local-min stack detected; restarting...")
+                    (let [stop (-> (run-supabase-command
+                                    ["stop" "--workdir" "docker/local-min"])
+                                   (assert-command-success "recovery stop failed"))
+                          restart (-> (run-supabase-command
+                                       ["start" "--workdir" "docker/local-min"])
+                                      (assert-command-success "recovery start failed"))]
+                      {:stop stop :start restart}))
+         start (or (:start recovery) initial-start)
          api {:host (get-in +config+ [:api :hostname])
               :port (get-in +config+ [:api :port])}]
-     (when (not= exit 0)
-       (println "[supabase] start failed (exit" exit ")")
-       (when (seq out) (println out))
-       (when (seq err) (println err))
-       (throw (ex-info "supabase start failed"
-                       {:exit exit :out out :err err})))
      (println "[supabase] start command completed")
      (when (not (= false (:wait-http opts)))
        (try
@@ -130,6 +156,8 @@
            (throw (ex-info "Supabase local-min API did not become ready"
                            {:api api
                             :start start
+                            :initial-start initial-start
+                            :recovery recovery
                             :hint "Run `supabase status --workdir docker/local-min`; Kong/API must listen on the configured port."}
                            t)))))
      true)))

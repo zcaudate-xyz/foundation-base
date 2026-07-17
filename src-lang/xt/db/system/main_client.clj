@@ -19,6 +19,7 @@
              [xt.net.addon-supabase :as addon]
              [xt.net.conn-sql :as conn-sql]
              [js.net.http-fetch :as js-fetch]
+             [js.net.ws-native :as js-ws]
              [js.net.conn-sqlite :as js-sqlite]
              [js.net.conn-postgres :as js-postgres]]})
 
@@ -33,5 +34,7 @@
          (js-postgres/create defaults))
 
         (== type "supabase")
-        (return
-         (js-fetch/create defaults (addon/middleware-supabase)))))
+        (do
+          (var client (js-fetch/create defaults (addon/middleware-supabase)))
+          (xt/x:set-key client "create_ws_client" js-ws/create)
+          (return client))))

@@ -4,6 +4,7 @@
             [xt.lang.common-notify :as notify]
             [xt.db.node.proxy-util :as proxy-util]))
 
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
