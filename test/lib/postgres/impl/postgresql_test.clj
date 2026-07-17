@@ -31,7 +31,8 @@
           java.sql.SQLException
           org.postgresql.util.PSQLException))
 
-^{:refer lib.postgres.impl.postgresql/execute-statement :added "4.1"}
+^{:refer lib.postgres.impl.postgresql/execute-statement :added "4.1"
+  :id execute-statement-with-jdbc-connection}
 (fact "execute-statement runs execute fn with a connection from pool"
 
   (let [results [{:col 42}]

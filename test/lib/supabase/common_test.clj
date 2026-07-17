@@ -237,7 +237,8 @@
     (map? response) => true
     (:status response) => integer?))
 
-^{:refer lib.supabase.common/token-password :added "4.1"}
+^{:refer lib.supabase.common/token-password :added "4.1"
+  :id token-password-rejects-wrong-password}
 (fact "rejects login with wrong password"
   (let [email (unique-email "token-password-wrong")
         _ (common/signup {:email email :password "password123"} (anon-client))
@@ -246,18 +247,21 @@
                                         (anon-client))]
     (:status response) => (fn [s] (>= s 400))))
 
-^{:refer lib.supabase.common/user-get :added "4.1"}
+^{:refer lib.supabase.common/user-get :added "4.1"
+  :id user-get-rejects-invalid-token}
 (fact "rejects user-get with invalid token"
   (let [response (common/user-get (user-client "invalid-token"))]
     (:status response) => (fn [s] (>= s 400))))
 
-^{:refer lib.supabase.common/admin-get-user :added "4.1"}
+^{:refer lib.supabase.common/admin-get-user :added "4.1"
+  :id admin-get-user-not-found}
 (fact "returns error for non-existent user id"
   (let [response (common/admin-get-user {:user-id "00000000-0000-0000-0000-000000000000"}
                                         (service-client))]
     (:status response) => (fn [s] (>= s 400))))
 
-^{:refer lib.supabase.common/admin-create-user :added "4.1"}
+^{:refer lib.supabase.common/admin-create-user :added "4.1"
+  :id admin-user-lifecycle}
 (fact "admin user lifecycle: create, get, update, delete"
   (let [email (unique-email "admin-lifecycle")
         app-meta {:tenant "test-tenant"}
@@ -293,7 +297,8 @@
     (let [after-delete (common/admin-get-user {:user-id user-id} (service-client))]
       (:status after-delete) => (fn [s] (>= s 400)))))
 
-^{:refer lib.supabase.common/signup :added "4.1"}
+^{:refer lib.supabase.common/signup :added "4.1"
+  :id signup-with-metadata}
 (fact "signup includes user metadata and refresh token"
   (let [email (unique-email "signup-metadata")
         response (common/signup {:email email
@@ -309,7 +314,8 @@
     (-> body :user :user_metadata :source) => "integration-test"
     (-> body :user :user_metadata :role) => "tester"))
 
-^{:refer lib.supabase.common/user-put :added "4.1"}
+^{:refer lib.supabase.common/user-put :added "4.1"
+  :id user-put-updates-metadata}
 (fact "updates current user metadata"
   (let [[_email token] (signup-and-token)
         response (common/user-put {:data {:display-name "Updated Name"}}
@@ -319,7 +325,8 @@
     (when (= 200 (:status response))
       (-> body :user_metadata :display-name) => "Updated Name")))
 
-^{:refer lib.supabase.common/token-refresh :added "4.1"}
+^{:refer lib.supabase.common/token-refresh :added "4.1"
+  :id token-refresh-rotates-token}
 (fact "refreshes access token using refresh token"
   (let [[_email token] (signup-and-token)
         response (common/token-refresh {:refresh-token token}
@@ -332,7 +339,8 @@
       (:refresh_token body) => string?
       (not= token (:refresh_token body)) => true)))
 
-^{:refer lib.supabase.common/logout :added "4.1"}
+^{:refer lib.supabase.common/logout :added "4.1"
+  :id logout-invalidates-session}
 (fact "logout invalidates the session token"
   (let [[_email token] (signup-and-token)
         logout-response (common/logout (user-client token))]
@@ -340,7 +348,8 @@
     (let [after-logout (common/user-get (user-client token))]
       (:status after-logout) => (fn [s] (>= s 400)))))
 
-^{:refer lib.supabase.common/admin-list-users :added "4.1"}
+^{:refer lib.supabase.common/admin-list-users :added "4.1"
+  :id admin-list-users-includes-created-user}
 (fact "admin list users contains recently created user"
   (let [email (unique-email "admin-list")
         _ (common/admin-create-user {:email email :password "password123"}
@@ -352,7 +361,8 @@
     (:users body) => vector?
     (contains? emails email) => true))
 
-^{:refer lib.supabase.common/authorize :added "4.1"}
+^{:refer lib.supabase.common/authorize :added "4.1"
+  :id authorize-oauth-response}
 (fact "authorize returns an OAuth response"
   (let [response (common/authorize {:redirect-to "http://localhost:3000/callback"}
                                    (anon-client))]
@@ -362,7 +372,8 @@
       (or (get-in response [:headers "location"])
           (get-in response [:headers "Location"])) => string?)))
 
-^{:refer lib.supabase.common/admin-delete-user :added "4.1"}
+^{:refer lib.supabase.common/admin-delete-user :added "4.1"
+  :id admin-delete-user-twice}
 (fact "deleting same user twice returns an error"
   (let [email (unique-email "admin-delete-twice")
         user-id (-> (common/admin-create-user {:email email :password "password123"}
@@ -372,7 +383,8 @@
     (:status (common/admin-delete-user {:user-id user-id} (service-client))) => 200
     (:status (common/admin-delete-user {:user-id user-id} (service-client))) => (fn [s] (>= s 400))))
 
-^{:refer lib.supabase.common/admin-generate-link :added "4.1"}
+^{:refer lib.supabase.common/admin-generate-link :added "4.1"
+  :id admin-generate-link-action-types}
 (fact "generate-link supports multiple action types"
   (let [response-recovery (common/admin-generate-link {:email (unique-email "generate-link-recovery")
                                                        :type "recovery"}
@@ -385,14 +397,16 @@
     (:status response-recovery) => (fn [s] (#{200 400 404} s))
     (:status response-signup) => (fn [s] (#{200 400 404} s))))
 
-^{:refer lib.supabase.common/otp :added "4.1"}
+^{:refer lib.supabase.common/otp :added "4.1"
+  :id otp-creates-user}
 (fact "otp creates a new user when create-user is true"
   (let [email (unique-email "otp-create")
         response (common/otp {:email email :create-user true} (anon-client))]
     (map? response) => true
     (:status response) => integer?))
 
-^{:refer lib.supabase.common/verify-post :added "4.1"}
+^{:refer lib.supabase.common/verify-post :added "4.1"
+  :id verify-post-structured-error}
 (fact "verify-post rejects invalid token with structured error"
   (let [response (common/verify-post {:type "signup"
                                       :email (unique-email "verify-post-error")
@@ -403,7 +417,8 @@
     (:status response) => (fn [s] (>= s 400))
     (or (:error body) (:message body) (:code body)) => some?))
 
-^{:refer lib.supabase.common/settings :added "4.1"}
+^{:refer lib.supabase.common/settings :added "4.1"
+  :id settings-auth-configuration}
 (fact "settings expose disable-signup and external providers configuration"
   (let [response (common/settings (anon-client))
         body (response-body response)]
