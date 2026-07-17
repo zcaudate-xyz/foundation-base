@@ -254,6 +254,6 @@
   [plan {:keys [auth-form result-sym arg-form] :as forms}]
   (let [id-form (topic-id-form (:topic-id plan) forms)]
     (list 's/realtime-send-request
-          (list '|| (str "realtime:" (:aggregate plan) ":") id-form)
+          (list '|| (str (:aggregate plan) ":") id-form)
           (notification-payload plan result-sym)
           true)))

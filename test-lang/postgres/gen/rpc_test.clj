@@ -44,7 +44,7 @@
     :result-sym 'o-result
     :arg-form #(symbol (subs % 2))})
   => '(s/realtime-send-request
-       (|| "realtime:Campaign:" campaign-id)
+       (|| "Campaign:" campaign-id)
        {"db/sync"
         {"AccessRequest" [(:-> o-result "request")]
          "AccessRole" [(:-> o-result "role")]}}
@@ -197,6 +197,6 @@
     :result-sym 'o-result
     :arg-form #(symbol (subs % 2))})
   => '(s/realtime-send-request
-       (|| "realtime:Brand:" brand-id)
+       (|| "Brand:" brand-id)
        {"db/sync" {"Brand" [o-result]}}
        true))

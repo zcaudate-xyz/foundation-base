@@ -1,15 +1,15 @@
 (ns js.ui.figma
   "React renderer for portable xt.ui nodes using @xtalk/figma-ui."
   (:require [hara.lang :as l]
-            [xt.ui.page :as page-source]))
+            [xt.ui.state.core :as page-source]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.ui.core :as ui]
-             [xt.ui.catalog :as catalog]
-             [xt.ui.model :as ui-model]
-             [xt.ui.page :as ui-page]
+             [xt.ui.widgets.core :as catalog]
+             [xt.ui.state.model :as ui-model]
+             [xt.ui.state.core :as ui-page]
              [js.react :as r]
              [js.lib.figma :as figma]]})
 
@@ -73,6 +73,11 @@
   (ui/registry-register-renderer platform "ui/button" figma/Button)
   (ui/registry-register-renderer platform "ui/alert" figma/Alert)
   (ui/registry-register-renderer platform "ui/spinner" figma/Skeleton)
+  (ui/registry-register-renderer platform "ui/table" "table")
+  (ui/registry-register-renderer platform "ui/table-header" "thead")
+  (ui/registry-register-renderer platform "ui/table-body" "tbody")
+  (ui/registry-register-renderer platform "ui/table-row" "tr")
+  (ui/registry-register-renderer platform "ui/table-cell" "td")
   (return (ui/registry-compose [(catalog/registry) platform])))
 
 (defn.js render-node
