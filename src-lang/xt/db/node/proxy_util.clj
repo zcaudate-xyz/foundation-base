@@ -63,9 +63,11 @@
    forwards over the configured transport"
   {:added "4.1"}
   [node action args opts]
+  (var local-meta {})
+  (xt/x:set-key local-meta "local" true)
   (return
    (:? (substrate/get-handler node action)
-       (substrate/request node nil action args {"local" true})
+       (substrate/request node nil action args local-meta)
        (substrate/request node
                           nil
                           action

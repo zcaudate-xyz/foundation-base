@@ -10,7 +10,6 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.node.kernel-base :as adaptor]
              [xt.db.node.proxy-base :as proxy-base]
              [xt.db.node.proxy-util :as proxy-util]
              [xt.substrate :as substrate]
@@ -23,11 +22,10 @@
   :teardown [(l/rt:stop)]})
 
 (defn.js server-node
-  "creates a server node with kernel-base and page-proxy handlers installed"
+  "creates a server node with page-proxy handlers installed"
   {:added "4.1"}
   []
   (var node (substrate/node-create {"id" "proxy-base-server"}))
-  (adaptor/init-handlers node)
   (page-proxy/install-handlers node)
   (return node))
 
@@ -68,32 +66,8 @@
          (proxy-util/set-default-transport client "server")
          (return (f server client))))))
 
-(defn.js init-server-base
-  "initialises memory primary/caching services on the server"
-  {:added "4.1"}
-  [server]
-  (return
-   (substrate/request server
-                      nil
-                      "@xt.db/kernel-init"
-                      [{"primary" {"type" "memory" "defaults" {}}
-                        "caching" {"type" "memory" "defaults" {}}}
-                       {}
-                       {}]
-                      {})))
 
-(defn.js with-linked-base
-  "creates a linked pair and initialises server base services"
-  {:added "4.1"}
-  [f]
-  (-/with-linked
-   (fn [server client]
-     (-> (-/init-server-base server)
-         (promise/x:promise-then
-          (fn [_]
-            (return (f server client))))))))
-
-^{:refer xt.db.node.proxy-util/request-proxy :added "4.1"}
+^{:refer xt.db.node.proxy-base/request-proxy :added "4.1"}
 (fact "forwards a call action to the server"
 
   (notify/wait-on :js
@@ -105,7 +79,7 @@
         (fn [space args request node]
           (return {"forwarded" true}))
         nil)
-       (-> (proxy-util/request-proxy
+       (-> (proxy-base/request-proxy
             nil
             ["db/primary" {} []]
             {"action" "@xt.db/rpc-call"
@@ -137,7 +111,6 @@
                    "group" "demo"
                    "model" "echo"}))
         nil)
-       (promise/x:promise-catch
         (-> (proxy-base/attach-forward-handler
              nil
              ["db/primary"
@@ -152,11 +125,7 @@
                (var group (page-core/group-get client "room/a" "demo"))
                (repl/notify
                 {"exists" (xt/x:not-nil? group)
-                 "proxy"  (xt/x:not-nil? (page-core/proxy-group? group))}))))
-        (fn [err]
-          (repl/notify
-           {"error" (xt/x:ex-message err)
-            "data"  (xt/x:ex-data err)}))))))
+                 "proxy"  (xt/x:not-nil? (page-core/proxy-group? group))})))))))
   => {"exists" true
       "proxy"  true})
 
@@ -191,7 +160,6 @@
                    "group" "demo"
                    "model" "echo"}))
         nil)
-       (promise/x:promise-catch
         (-> (proxy-base/attach-forward-handler
              nil
              ["db/primary"
@@ -216,11 +184,7 @@
             (promise/x:promise-then
              (fn [_]
                (repl/notify
-                (page-core/group-get client "room/a" "demo")))))
-        (fn [err]
-          (repl/notify
-           {"error" (xt/x:ex-message err)
-            "data"  (xt/x:ex-data err)}))))))
+                (page-core/group-get client "room/a" "demo"))))))))
   => nil)
 
 ^{:refer xt.db.node.proxy-base/init-proxy-handlers :added "4.1"}

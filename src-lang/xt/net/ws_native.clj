@@ -32,6 +32,6 @@
   (return (xt/x:cat "ws" (:? secured "s" "")
                     "://" host
                     ":"
-                    (or port "80")
+                    (xt/x:to-string (or port 80))
                     (or basepath "")
                     (or path ""))))

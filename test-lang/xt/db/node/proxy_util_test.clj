@@ -117,7 +117,7 @@
         nil)
        (-> (proxy-util/request-proxy
             nil
-            ["db/primary" {} []]
+            ["db/primary" {} ["arg"]]
             {"action" "@xt.db/rpc-call"
              "meta" {}}
             client)
@@ -141,10 +141,10 @@
         nil)
        (-> (proxy-util/request-client client
                                       "@xt.db/rpc-call"
-                                      ["db/primary" {} []]
+                                      ["db/primary" {} ["arg"]]
                                       {})
            (promise/x:promise-then
             (fn [res]
               (repl/notify res)))))))
-  => (contains-in {"received" ["db/primary" {} []]
+  => (contains-in {"received" ["db/primary" {} ["arg"]]
                    "transport" "client"}))

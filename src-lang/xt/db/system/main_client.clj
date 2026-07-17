@@ -75,7 +75,11 @@
 
         (== type "supabase")
         (do (var client (dart-fetch/create defaults (addon/middleware-supabase)))
-            (xt/x:set-key client "create_ws_client" dart-ws/create)
+            (xt/x:set-key client "create_ws_client"
+                          (fn [ws-defaults]
+                            (return
+                             (dart-ws/create
+                              (xt/x:obj-assign ws-defaults {"background" true})))))
             (return client))
 
         :else

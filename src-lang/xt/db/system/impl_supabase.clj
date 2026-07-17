@@ -105,11 +105,14 @@
 
 (defn.xt impl-supabase
   [client schema lookup]
-  (return
-   (-/ImplSupabase client schema lookup
-                   {"session" nil
-                    "auto_refresh" nil
-                    "realtimes" {}}
-                   {}
-                   {}
-                   {})))
+  (var impl
+       (-/ImplSupabase client schema lookup
+                        {"session" nil
+                         "auto_refresh" nil
+                         "realtimes" {}}
+                        {}
+                        {}
+                        {}))
+  (xt/x:set-key impl "::/override"
+                {"create_ws_client" -/create-ws-client})
+  (return impl))

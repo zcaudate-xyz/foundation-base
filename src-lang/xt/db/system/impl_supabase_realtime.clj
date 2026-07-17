@@ -62,10 +62,13 @@
   {:added "4.1"}
   [impl topic]
   (var auth-token (-/get-auth-token impl))
+  (var payload
+       {"config" {"broadcast" {"ack" false "self" false}}})
+  (when (xt/x:not-nil? auth-token)
+    (xt/x:set-key payload "access_token" auth-token))
   (return
    (phoenix/make-frame-join
-    {"config" {"broadcast" {"ack" false "self" false}}
-     "access_token" auth-token}
+    payload
     {"topic" topic
      "ref" (xt/x:cat "#/join/" topic)})))
 
@@ -105,15 +108,17 @@
          (var ok  (== status "ok"))
          (var deferred  (xt/x:get-key entry "deferred"))
          (var resolve   (xt/x:get-key deferred "resolve"))
+         (xtd/set-in realtime-client ["state" "topics" topic "ready"] ok)
          (when (xt/x:is-function? resolve)
-           (resolve ok))
-         (xtd/set-in realtime-client ["state" "topics" topic "ready"] ok)))})))
+           (resolve ok))))})))
 
 (defn.xt create-realtime
   "returns the realtime websocket client for id, creating it if necessary"
   {:added "4.1"}
   [impl conn-id]
   (var realtime-client (supabase-ws/create-ws-client impl {"id" conn-id}))
+  (xtd/set-in realtime-client ["state" "callbacks"] {})
+  (xtd/set-in realtime-client ["state" "topics"] {})
   (var ws-url (-/prepare-connect-url impl {}))
   (var init   (websocket/connect realtime-client
                                  {"url" ws-url}))
@@ -174,6 +179,9 @@
   [impl conn-id callback-id handler]
   (var client (-/ensure-realtime impl conn-id))
   (var callbacks (xtd/get-in client ["state" "callbacks"]))
+  (when (xt/x:nil? callbacks)
+    (:= callbacks {})
+    (xtd/set-in client ["state" "callbacks"] callbacks))
   (xt/x:set-key callbacks callback-id handler)
   (return handler))
 
@@ -218,27 +226,25 @@
   [impl conn-id topics]
   (var client (-/ensure-realtime impl conn-id))
   (-/add-realtime-callback impl conn-id "db-sync" (-/create-sync-callback impl))
-  (xt/x:arr-map topics
-                (fn [topic]
-                  (var join-ref (xt/x:cat "#/join/" topic))
-                  (var deferred {"resolve" nil "reject" nil})
-                  (var init (promise/x:promise-new
-                             (fn [resolve reject]
-                               (xt/x:set-key deferred "resolve" resolve)
-                               (xt/x:set-key deferred "reject" reject))))
-                  (xtd/set-in client
-                              ["state" "topics" topic]
-                              {"init" init
-                               "join_ref" join-ref
-                               "deferred" deferred
-                               "ready" false})))
+  (xt/for:array [topic topics]
+    (var join-ref (xt/x:cat "#/join/" topic))
+    (var deferred {"resolve" nil "reject" nil})
+    (var init (promise/x:promise-new
+               (fn [resolve reject]
+                 (xt/x:set-key deferred "resolve" resolve)
+                 (xt/x:set-key deferred "reject" reject))))
+    (xtd/set-in client
+                ["state" "topics" topic]
+                {"init" init
+                 "join_ref" join-ref
+                 "deferred" deferred
+                 "ready" false}))
   (return
    (promise/x:promise-then
     (xtd/get-in client ["state" "init"])
     (fn [_]
-      (xt/x:arr-map topics
-                    (fn [topic]
-                      (phoenix/send-frame client (-/topic-join-payload impl topic))))
+      (xt/for:array [topic topics]
+        (phoenix/send-frame client (-/topic-join-payload impl topic)))
       (return (promise/x:promise-all
                (xt/x:arr-map topics
                              (fn [topic]
@@ -253,12 +259,11 @@
     (fn []
       (var client (-/get-realtime impl conn-id))
       (when (xt/x:not-nil? client)
-        (xt/x:arr-map topics
-                      (fn [topic]
-                        (var entry (xtd/get-in client ["state" "topics" topic]))
-                        (when (xt/x:not-nil? entry)
-                          (phoenix/send-frame client (-/topic-leave-payload impl topic))
-                          (xt/x:del-key (xtd/get-in client ["state" "topics"]) topic)))))
+        (xt/for:array [topic topics]
+          (var entry (xtd/get-in client ["state" "topics" topic]))
+          (when (xt/x:not-nil? entry)
+            (phoenix/send-frame client (-/topic-leave-payload impl topic))
+            (xt/x:del-key (xtd/get-in client ["state" "topics"]) topic))))
       (return true)))))
 
 

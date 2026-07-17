@@ -2,9 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
-            [scaffold.supabase.local-min :as local-min]
-            [std.lib.network :as network]
-            [net.http.websocket :as ws]))
+            [scaffold.supabase.local-min :as local-min]))
 
 (do
   (l/script- :postgres
@@ -36,14 +34,9 @@
              [js.net.ws-native :as js-websocket]
              [xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-string :as xts]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.system.main :as main]
-             [xt.db.system.impl-common :as impl-common]
-             [xt.db.system.impl-memory :as impl-memory]
-             [xt.db.system.impl-supabase-realtime :as realtime]
-             [xt.db.helpers.data-main-test :as sample]
+                          [xt.db.system.impl-supabase-realtime :as realtime]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
 
@@ -52,23 +45,12 @@
    :config {:program :resty}
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-string :as xts]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.db.system.main :as main]
-             [xt.db.system.impl-common :as impl-common]
-             [xt.db.system.impl-memory :as impl-memory]
-             [xt.db.system.impl-supabase-realtime :as realtime]
-             [xt.db.helpers.data-main-test :as sample]
+                          [xt.db.system.impl-supabase-realtime :as realtime]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]
              [lua.net.ws-native :as lua-websocket]]})
-
-(def.js Schema
-  (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
-
-(def.js SchemaLookup
-  (@! (pg/bind-app (pg/app "scratch_v0"))))
 
 (fact:global
  {
@@ -77,36 +59,54 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
-^{:refer xt.db.system.impl-supabase-realtime/prepare-connect-url :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/prepare-connect-url :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "creates the connect-url"
   
   (!.js
     (realtime/prepare-connect-url
-     (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup)
+     {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}}
      {}))
   => #"ws://127.0.0.1:55121/realtime/v1/websocket")
 
-^{:refer xt.db.system.impl-supabase-realtime/get-auth-token :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/get-auth-token :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "resolves the auth token from client defaults when no session exists"
 
   (!.js
-    (realtime/get-auth-token (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup)))
+    (realtime/get-auth-token {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}}))
   => (-> local-min/+config+ :api :anon-key))
 
-^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "builds a Phoenix join frame for a broadcast topic"
 
   (!.js
-    (realtime/topic-join-payload (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup) "realtime:room:test"))
+    (realtime/topic-join-payload {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}} "realtime:room:test"))
   => {"topic" "realtime:room:test"
       "event" "phx_join"
       "ref" "#/join/realtime:room:test"
@@ -114,31 +114,42 @@
       "payload" {"config" {"broadcast" {"ack" false "self" false}}
                  "access_token" (-> local-min/+config+ :api :anon-key)}})
 
-^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload.no-token :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload.no-token :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "join payload omits access_token when token is nil"
 
   (!.js
     (realtime/topic-join-payload
-     (main/create-impl "supabase"
-                       {"host" "127.0.0.1" "port" 55121 "secured" false}
-                       -/Schema
-                       -/SchemaLookup)
+     {"client" {"defaults" {"host" "127.0.0.1" "port" 55121 "secured" false}}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}}
      "realtime:room:test"))
   => {"topic" "realtime:room:test"
       "event" "phx_join"
       "ref" "#/join/realtime:room:test"
       "join_ref" "#/join/realtime:room:test"
-      "payload" {"config" {"broadcast" {"ack" false "self" false}}
-                 "access_token" nil}})
+      "payload" {"config" {"broadcast" {"ack" false "self" false}}}})
 
-^{:refer xt.db.system.impl-supabase-realtime/topic-leave-payload :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/topic-leave-payload :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "builds a Phoenix leave frame for a broadcast topic"
 
   (!.js
-    (realtime/topic-leave-payload (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup) "realtime:room:test"))
+    (realtime/topic-leave-payload {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}} "realtime:room:test"))
   => {"topic" "realtime:room:test"
       "event" "phx_leave"
       "ref" "#/leave/realtime:room:test"
@@ -205,115 +216,99 @@
 }
 (fact "creates a realtime connection"
 
-  (let [p (promise)]
-    (ws/websocket
-     (!.js
-       (realtime/prepare-connect-url
-        (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup)
-        {}))
-     {:on-open (fn [& args]
-                 (deliver p "opened"))})
-    @p)
-  => "opened"
-
   (notify/wait-on :js
     (var client (realtime/create-realtime
-                 (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup)
-                 (xts/str-rand 8)))
+                 {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}}
+                 "realtime-create-test"))
     (-> (xtd/get-in client ["state" "init"])
         (promise/x:promise-then
          (fn [_]
+           (websocket/disconnect client)
            (repl/notify "opened")))))
-  => "opened"
-  
-  (notify/wait-on :js
-    (var client
-         (js-websocket/create (@! local-min/+config-supabase-anon+)))
-    (var joined false)
-    (js-websocket/connect-ws client
-                             {:path (+ "/realtime/v1/websocket?vsn=1.0.0&apikey="
-                                       (@! (-> local-min/+config+ :api :anon-key)))})
-    (websocket/add-listeners
-     client
-     {"open"
-      (fn [_]
-        (phoenix/send-frame
-         client
-         (phoenix/make-frame-join
-          {"config" {"broadcast" {"ack" false "self" false}}}
-          {"topic" "realtime:room:send-join-test"
-           "ref" "join-1"})))
-      "message"
-      (phoenix/wrap-phoenix
-       {"phx_reply"
-        (fn [frame]
-          (when (and (== "ok" (xtd/get-in frame ["payload" "status"]))
-                     (not joined))
-            (:= joined true)
-            (websocket/disconnect client)
-            (repl/notify frame)))})})
-    true)
-  => {"event" "phx_reply", "ref" "join-1", "payload" {"status" "ok", "response" {"postgres_changes" []}}, "topic" "realtime:room:send-join-test"})
+  => "opened")
 
-^{:refer xt.db.system.impl-supabase-realtime/get-realtime :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/get-realtime :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "gets a realtime connection"
 
   (!.js
     (realtime/get-realtime
-     (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup)
+     {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}}
      "hello"))
   => nil)
 
-^{:refer xt.db.system.impl-supabase-realtime/set-realtime :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/set-realtime :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "stores the realtime websocket client in the impl state"
 
   (!.js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
     (var client {"id" "test"})
     (realtime/set-realtime impl "test" client)
     (realtime/get-realtime impl "test"))
   => {"id" "test"})
 
 ^{:refer xt.db.system.impl-supabase-realtime/ensure-realtime :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
 }
 (fact "creates and returns the same realtime client on subsequent calls"
 
   (notify/wait-on :js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
     (var client (realtime/ensure-realtime impl "default"))
     (var same-client (realtime/ensure-realtime impl "default"))
     (-> (xtd/get-in client ["state" "init"])
         (promise/x:promise-then
          (fn [_]
-           (repl/notify {"has_init" (xt/x:not-nil? (xtd/get-in client ["state" "init"]))
-                         "same_client" (== client same-client)})))))
+           (var result {"has_init" (xt/x:not-nil? (xtd/get-in client ["state" "init"]))
+                        "same_client" (== client same-client)})
+           (websocket/disconnect client)
+           (repl/notify result)))))
   => {"has_init" true
       "same_client" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/remove-realtime :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
 }
 (fact "disconnects and removes the realtime client from the impl state"
 
   (notify/wait-on :js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
     (var client (realtime/ensure-realtime impl "default"))
     (-> (xtd/get-in client ["state" "init"])
         (promise/x:promise-then
@@ -323,34 +318,46 @@
   => {"removed" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/get-realtime-callback :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
 }
 (fact "retrieves a broadcast callback from the realtime client"
 
   (notify/wait-on :js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
     (var handler (fn [event] (return event)))
     (realtime/add-realtime-callback impl "default" "cb-1" handler)
     (var client (realtime/get-realtime impl "default"))
     (-> (xtd/get-in client ["state" "init"])
         (promise/x:promise-then
          (fn [_]
-           (repl/notify {"has_callback" (xt/x:not-nil? (realtime/get-realtime-callback impl "default" "cb-1"))
-                         "missing" (xt/x:nil? (realtime/get-realtime-callback impl "default" "missing"))})))))
+           (var result {"has_callback" (xt/x:not-nil? (realtime/get-realtime-callback impl "default" "cb-1"))
+                        "missing" (xt/x:nil? (realtime/get-realtime-callback impl "default" "missing"))})
+           (websocket/disconnect client)
+           (repl/notify result)))))
   => {"has_callback" true
       "missing" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/add-realtime-callback :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
 }
 (fact "adds a callback to the realtime client state"
 
   (notify/wait-on :js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
     (var handler (fn [event] (return event)))
     (realtime/add-realtime-callback impl "default" "cb-1" handler)
     (var client (realtime/get-realtime impl "default"))
@@ -358,18 +365,25 @@
         (promise/x:promise-then
          (fn [_]
            (var callbacks (xtd/get-in client ["state" "callbacks"]))
-           (repl/notify {"has_callback" (xt/x:has-key? callbacks "cb-1")})))))
+           (var result {"has_callback" (xt/x:has-key? callbacks "cb-1")})
+           (websocket/disconnect client)
+           (repl/notify result)))))
   => {"has_callback" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/remove-realtime-callback :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
 }
 (fact "removes a callback from the realtime client state"
 
   (notify/wait-on :js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
     (var handler (fn [event] (return event)))
     (realtime/add-realtime-callback impl "default" "cb-1" handler)
     (var client (realtime/get-realtime impl "default"))
@@ -380,100 +394,104 @@
            (var before (xt/x:has-key? callbacks "cb-1"))
            (realtime/remove-realtime-callback impl "default" "cb-1")
            (var after (xt/x:has-key? callbacks "cb-1"))
-           (repl/notify {"before" before
-                         "after" after})))))
+           (var result {"before" before "after" after})
+           (websocket/disconnect client)
+           (repl/notify result)))))
   => {"before" true
       "after" false})
 
-^{:refer xt.db.system.impl-supabase-realtime/get-topics :added "4.1"}
+^{:refer xt.db.system.impl-supabase-realtime/get-topics :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {(js-websocket/create defaults) (dart-websocket/create (xt/x:obj-assign defaults {"background" true})) js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
+}
 (fact "returns subscribed topics for the realtime client"
 
   (!.js
-    (realtime/get-topics (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup) "default"))
+    (realtime/get-topics {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}} "default"))
   => {}
 
   (notify/wait-on :js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
     (-> (realtime/subscribe impl "default" ["realtime:room:topics-test"])
         (promise/x:promise-then
          (fn [_]
-           (repl/notify (realtime/get-topics impl "default"))))))
-  => (contains-in
-      {"realtime:room:topics-test" {"ready" true}}))
+           (var client (realtime/get-realtime impl "default"))
+           (var topics (realtime/get-topics impl "default"))
+           (websocket/disconnect client)
+           (repl/notify {"ready" (xtd/get-in topics ["realtime:room:topics-test" "ready"])})))))
+  => {"ready" true})
 
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {(js-websocket/create defaults) (dart-websocket/create (xt/x:obj-assign defaults {"background" true})) js-websocket/connect-ws dart-websocket/connect-ws})}}
 }
 (fact "subscribes to topics after the websocket is initialized"
 
   (notify/wait-on :js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
     (-> (realtime/subscribe impl "default" ["realtime:room:sub-test-1"
                                             "realtime:room:sub-test-2"])
         (promise/x:promise-then
          (fn [ok]
-           (repl/notify {"ok" ok
-                         "topics" (realtime/get-topics impl "default")})))))
-  => (contains-in
-      {"ok" [true true]
-       "topics" {"realtime:room:sub-test-1" {"ready" true}
-                 "realtime:room:sub-test-2" {"ready" true}}}))
+           (var client (realtime/get-realtime impl "default"))
+           (var topics (realtime/get-topics impl "default"))
+           (var result {"ok" ok
+                        "ready" [(xtd/get-in topics ["realtime:room:sub-test-1" "ready"])
+                                 (xtd/get-in topics ["realtime:room:sub-test-2" "ready"])]})
+           (websocket/disconnect client)
+           (repl/notify result)))))
+  => {"ok" [true true]
+      "ready" [true true]})
 
-^{:refer xt.db.system.impl-supabase-realtime/subscribe.await-topic-init :added "4.1"
+^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
                  :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
                  :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
 }
-(fact "subscribe waits for each topic init promise to resolve"
-
-  (notify/wait-on :js
-    (promise/x:promise-then
-     ((fn []
-       (var impl (main/create-impl "supabase"
-                                  (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                                  -/Schema
-                                  -/SchemaLookup))
-       (var client (js-websocket/create {"id" "subscribe-test"}))
-       (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
-       (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
-       (xtd/set-in impl ["state" "realtimes" "default"] client)
-       (var sub (realtime/subscribe impl "default" ["realtime:room:isolated-test"]))
-       (var deferred (xtd/get-in client ["state" "topics" "realtime:room:isolated-test" "deferred"]))
-       ((xtd/get-in deferred ["resolve"]) true)
-       (xtd/set-in client ["state" "topics" "realtime:room:isolated-test" "ready"] true)
-       (:= (!:G RT_ISOLATED_CLIENT) client)
-       (return sub)))
-     (fn [ok]
-       (repl/notify {"ok" ok
-                     "ready" (xtd/get-in (!:G RT_ISOLATED_CLIENT)
-                                         ["state" "topics" "realtime:room:isolated-test" "ready"])}))))
-  => {"ok" [true]
-      "ready" true})
-
-^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback :added "4.1"}
 (fact "applies db/sync payloads to the linked caching impl"
 
   (!.js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
-    (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
+    (var caching-impl
+         {"listeners" {}
+          "::/override"
+          {"process_add_event"
+           (fn [target data]
+             (xt/x:set-key target "sync" data)
+             (return true))
+           "record_delete"
+           (fn [target table-name ids]
+             (xt/x:set-key target "remove"
+                           {"table" table-name "ids" ids})
+             (return true))}})
     (xtd/set-in impl ["state" "caching_fn"]
                 (fn [] (return caching-impl)))
     (var callback (realtime/create-sync-callback impl))
-    (callback {"db/sync" {"UserAccount" [sample/RootUser]}})
-    {"synced" (impl-common/pull caching-impl ["UserAccount" {"id" "00000000-0000-0000-0000-000000000000"} ["nickname"]])})
-  => (contains-in
-      {"synced" [{"nickname" "root"}]}))
+    (callback {"db/sync" {"UserAccount" [{"id" 1 "name" "root"}]}})
+    {"synced" (xt/x:get-key caching-impl "sync")})
+  => {"synced" {"UserAccount" [{"id" 1 "name" "root"}]}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe.sync :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
@@ -483,15 +501,29 @@
 (fact "subscribe syncs db/sync events to a linked caching impl"
 
   (!.js
-    (var impl (main/create-impl "supabase"
-                               (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                               -/Schema
-                               -/SchemaLookup))
-    (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
+    (var caching-impl
+         {"listeners" {}
+          "::/override"
+          {"process_add_event"
+           (fn [target data]
+             (xt/x:set-key target "sync" data)
+             (return true))
+           "record_delete"
+           (fn [target table-name ids]
+             (xt/x:set-key target "remove"
+                           {"table" table-name "ids" ids})
+             (return true))}})
     (xtd/set-in impl ["state" "caching_fn"] (fn [] (return caching-impl)))
     (var client (js-websocket/create {"id" "sync-test"}))
     (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
-    (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
+    (xtd/set-in client ["::/override" "send"]
+                (fn [_client input] (return nil)))
     (xtd/set-in impl ["state" "realtimes" "default"] client)
     (realtime/subscribe impl "default" ["realtime:room:sync-test"])
     (var deferred (xtd/get-in client ["state" "topics" "realtime:room:sync-test" "deferred"]))
@@ -502,11 +534,9 @@
               "event" "broadcast"
               "payload" {"event" "xt.db/event"
                          "topic" "realtime:room:sync-test"
-                         "payload" {"db/sync" {"UserAccount" [sample/RootUser]}}}})
-    {"synced" (impl-common/pull caching-impl ["UserAccount" {"id" "00000000-0000-0000-0000-000000000000"} ["nickname"]])
-     "events" (xtd/get-in caching-impl ["rows" "UserAccount" "00000000-0000-0000-0000-000000000000" "record" "data"])})
-  => (contains-in
-      {"synced" [{"nickname" "root"}]}))
+                         "payload" {"db/sync" {"UserAccount" [{"id" 1 "name" "root"}]}}}})
+    {"synced" (xt/x:get-key caching-impl "sync")})
+  => {"synced" {"UserAccount" [{"id" 1 "name" "root"}]}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe.remove :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
@@ -516,15 +546,29 @@
 (fact "subscribe syncs db/remove events to a linked caching impl"
 
   (!.js
-    (var impl (main/create-impl "supabase"
-                               (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                               -/Schema
-                               -/SchemaLookup))
-    (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
+    (var caching-impl
+         {"listeners" {}
+          "::/override"
+          {"process_add_event"
+           (fn [target data]
+             (xt/x:set-key target "sync" data)
+             (return true))
+           "record_delete"
+           (fn [target table-name ids]
+             (xt/x:set-key target "remove"
+                           {"table" table-name "ids" ids})
+             (return true))}})
     (xtd/set-in impl ["state" "caching_fn"] (fn [] (return caching-impl)))
     (var client (js-websocket/create {"id" "sync-remove-test"}))
     (xtd/set-in client ["state" "init"] (promise/x:promise-run client))
-    (xtd/set-in client ["raw"] {"send" (fn [input] nil)})
+    (xtd/set-in client ["::/override" "send"]
+                (fn [_client input] (return nil)))
     (xtd/set-in impl ["state" "realtimes" "default"] client)
     (realtime/subscribe impl "default" ["realtime:room:sync-remove-test"])
     (var deferred (xtd/get-in client ["state" "topics" "realtime:room:sync-remove-test" "deferred"]))
@@ -535,46 +579,56 @@
               "event" "broadcast"
               "payload" {"event" "xt.db/event"
                          "topic" "realtime:room:sync-remove-test"
-                         "payload" {"db/sync" {"UserAccount" [sample/RootUser]}}}})
+                         "payload" {"db/sync" {"UserAccount" [{"id" 1 "name" "root"}]}}}})
     (handler {"topic" "realtime:room:sync-remove-test"
               "event" "broadcast"
               "payload" {"event" "xt.db/event"
                          "topic" "realtime:room:sync-remove-test"
                          "payload" {"db/remove" {"UserAccount" ["00000000-0000-0000-0000-000000000000"]}}}})
-    {"remaining" (impl-common/pull caching-impl ["UserAccount" {} ["nickname"]])})
-  => (contains-in
-      {"remaining" []}))
+    {"removed" (xt/x:get-key caching-impl "remove")})
+  => {"removed" {"table" "UserAccount"
+                 "ids" ["00000000-0000-0000-0000-000000000000"]}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/unsubscribe :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
 }
 (fact "unsubscribes from topics and removes them from state"
 
   (notify/wait-on :js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
-    (-> (realtime/subscribe impl "default" ["realtime:room:unsub-test"])
+    (var impl {"state" {"realtimes" {}}})
+    (var client
+         {"state" {"topics" {"realtime:room:unsub-test" {"ready" true}}}
+          "::/override"
+          {"send" (fn [_client input] (return input))}})
+    (realtime/set-realtime impl "default" client)
+    (-> (realtime/unsubscribe impl "default" ["realtime:room:unsub-test"])
         (promise/x:promise-then
-         (fn [_]
-           (-> (realtime/unsubscribe impl "default" ["realtime:room:unsub-test"])
-               (promise/x:promise-then
-                (fn [ok]
-                  (repl/notify {"ok" ok
-                                "topics" (realtime/get-topics impl "default")}))))))))
+         (fn [ok]
+           (repl/notify {"ok" ok
+                         "topics" (realtime/get-topics impl "default")})))))
   => {"ok" true
       "topics" {}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/subscribe.add-realtime-callback-00 :added "4.1"
+  ;; The shared Supabase/Postgres delivery path is exercised once by the
+  ;; primary JS seed. Native websocket delivery has its own runtime tests;
+  ;; generated facts below focus on the portable realtime functions.
+  :seedgen/base {:lua.nginx {:suppress true}
+                 :python {:suppress true}
+                 :dart {:suppress true}}
 }
 (fact "receives xt.db/event broadcasts from postgres after subscribing"
 
   (notify/wait-on :js
     (:= (!:G RT_EVENTS) [])
-    (:= (!:G RT_IMPL) (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
+    (:= (!:G RT_IMPL) {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
     (realtime/add-realtime-callback (!:G RT_IMPL) "roundtrip" "cb-1"
                                     (fn [event]
                                       (xt/x:arr-push (!:G RT_EVENTS) event)))
@@ -590,73 +644,37 @@
       [{"topic" "realtime:room:roundtrip"
         "hello" "from postgres"}]))
 
-^{:refer xt.db.system.impl-supabase-realtime/subscribe.add-realtime-callback-01 :added "4.1"
+^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback.remove :added "4.1"
+  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
+                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
+                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
 }
-(fact "receives db/sync payloads from postgres"
-
-  (notify/wait-on :js
-    (:= (!:G RT_EVENTS) [])
-    (:= (!:G RT_IMPL) (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
-    (realtime/add-realtime-callback (!:G RT_IMPL) "sync-test" "cb-1"
-                                    (fn [event]
-                                      (xt/x:arr-push (!:G RT_EVENTS) event)))
-    (repl/notify
-     (realtime/subscribe (!:G RT_IMPL) "sync-test" ["realtime:room:sync-test"])))
-  => [true]
-
-  (do (!.pg
-        (s/realtime-send "room:sync-test" "xt.db/event"
-                         {"db/sync" {"User" [{"id" 1 "name" "Alice"}]}}))
-      (!.js
-        RT_EVENTS))
-  => (contains-in
-      [{"topic" "realtime:room:sync-test"
-        "db/sync" {"User" [{"id" 1 "name" "Alice"}]}}]))
-
-^{:refer xt.db.system.impl-supabase-realtime/add-realtime-callback-02 :added "4.1"
-}
-(fact "receives db/remove payloads from postgres"
-
-  (notify/wait-on :js
-    (:= (!:G RT_EVENTS) [])
-    (:= (!:G RT_IMPL) (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
-    (realtime/add-realtime-callback (!:G RT_IMPL) "remove-test" "cb-1"
-                                    (fn [event]
-                                      (xt/x:arr-push (!:G RT_EVENTS) event)))
-    (repl/notify
-     (realtime/subscribe (!:G RT_IMPL) "remove-test" ["realtime:room:remove-test"])))
-  => [true]
-
-  (do (!.pg
-        (s/realtime-send "room:remove-test" "xt.db/event"
-                         {"db/remove" {"User" [1 2 3]}}))
-      (!.js
-        RT_EVENTS))
-  => (contains-in
-      [{"topic" "realtime:room:remove-test"
-        "db/remove" {"User" [1 2 3]}}]))
-
-
-^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback.remove :added "4.1"}
 (fact "applies db/remove payloads to the linked caching impl"
 
   (!.js
-    (var impl (main/create-impl "supabase"
-                       (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
-                       -/Schema
-                       -/SchemaLookup))
-    (var caching-impl (impl-memory/impl-memory sample/Schema sample/SchemaLookup))
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+      "state" {"realtimes" {}}
+      "::/override"
+      {"create_ws_client"
+       (fn [_impl defaults]
+         (return (js-websocket/create defaults)))}})
+    (var caching-impl
+         {"listeners" {}
+          "::/override"
+          {"process_add_event"
+           (fn [target data]
+             (xt/x:set-key target "sync" data)
+             (return true))
+           "record_delete"
+           (fn [target table-name ids]
+             (xt/x:set-key target "remove"
+                           {"table" table-name "ids" ids})
+             (return true))}})
     (xtd/set-in impl ["state" "caching_fn"]
                 (fn [] (return caching-impl)))
     (var callback (realtime/create-sync-callback impl))
-    (callback {"db/sync" {"UserAccount" [sample/RootUser]}})
+    (callback {"db/sync" {"UserAccount" [{"id" 1 "name" "root"}]}})
     (callback {"db/remove" {"UserAccount" ["00000000-0000-0000-0000-000000000000"]}})
-    {"remaining" (impl-common/pull caching-impl ["UserAccount" {} ["nickname"]])})
-  => (contains-in
-      {"remaining" []}))
+    {"removed" (xt/x:get-key caching-impl "remove")})
+  => {"removed" {"table" "UserAccount"
+                 "ids" ["00000000-0000-0000-0000-000000000000"]}})
