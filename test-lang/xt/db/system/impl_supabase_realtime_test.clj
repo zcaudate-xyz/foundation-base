@@ -436,7 +436,7 @@
 
   (notify/wait-on :js
     (promise/x:promise-then
-     (do
+     ((fn []
        (var impl (main/create-impl "supabase"
                                   (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})
                                   -/Schema
@@ -450,7 +450,7 @@
        ((xtd/get-in deferred ["resolve"]) true)
        (xtd/set-in client ["state" "topics" "realtime:room:isolated-test" "ready"] true)
        (:= (!:G RT_ISOLATED_CLIENT) client)
-       sub)
+       (return sub)))
      (fn [ok]
        (repl/notify {"ok" ok
                      "ready" (xtd/get-in (!:G RT_ISOLATED_CLIENT)

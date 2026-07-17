@@ -406,9 +406,9 @@
   (var model-handler
        (fn [context]
          (var node (. context ["node"]))
-         (var cmd  (if (xt/x:is-function? supabase-handler)
-                     (supabase-handler context)
-                     supabase-handler))
+         (var cmd  (:? (xt/x:is-function? supabase-handler)
+                       (supabase-handler context)
+                       supabase-handler))
          (return (-/supabase-request node service-id cmd))))
   (return
    {"handler" model-handler
