@@ -175,7 +175,21 @@
                          "payload" {"data" 1}}})
     called)
   => {"topic" "realtime:room:test"
-      "data" 1})
+      "data" 1}
+
+  (!.js
+    (var client (js-websocket/create {"id" "test"}))
+    (var called nil)
+    (xtd/set-in client ["state" "callbacks" "cb-1"] (fn [payload] (:= called payload)))
+    (var handler (realtime/create-realtime-on-message client))
+    (handler {"topic" "realtime:User:1"
+              "event" "broadcast"
+              "payload" {"event" "db/sync"
+                         "topic" "realtime:User:1"
+                         "payload" {"db/sync" {"User" [{"id" 1}]}}}})
+    called)
+  => {"topic" "realtime:User:1"
+      "db/sync" {"User" [{"id" 1}]}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message.phx-reply :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}

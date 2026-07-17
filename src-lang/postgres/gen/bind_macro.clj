@@ -196,19 +196,21 @@
   [ptr]
   (let [entry  (bind-entry ptr)
         events (select-keys entry [:api/mq.event
-                                   :api/ui.event])]
-    (-> (select-keys entry
-                     [:static/input
-                      :static/return
-                      :static/schema
-                      :id
-                      :api/flags])
-        (collection/unqualify-keys)
-        (update-in [:flags] to-lookup)
-        (update-in [:flags] merge (collection/unqualify-keys events))
-        (update-in [:id] l/sym-default-str)
-        (update-in [:return] (comp name first))
-        (update-in [:input]  (fn [input] (mapv l/emit-type-record input))))))
+                                   :api/ui.event])
+        notify (get-in entry [:api/meta :notify])]
+    (cond-> (-> (select-keys entry
+                             [:static/input
+                              :static/return
+                              :static/schema
+                              :id
+                              :api/flags])
+                (collection/unqualify-keys)
+                (update-in [:flags] to-lookup)
+                (update-in [:flags] merge (collection/unqualify-keys events))
+                (update-in [:id] l/sym-default-str)
+                (update-in [:return] (comp name first))
+                (update-in [:input]  (fn [input] (mapv l/emit-type-record input))))
+      notify (assoc :notify (walk/postwalk transform-to-str notify)))))
 
 (defn bind-view-guards
   "gets more guards"

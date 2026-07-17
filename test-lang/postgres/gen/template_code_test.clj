@@ -129,3 +129,18 @@
                                :root "custom/root"})
        'url)
   => "custom/root/ping")
+
+^{:refer postgres.gen.template-code/render-module :added "4.1"}
+(fact "renders descriptor data as a templated XTalk entry"
+  (gen/render-module
+   'sample.generated
+   :view
+   [['sample/source
+     {:id "sample_source"
+      :table "Sample"
+      :return-entry {:input [] :view {:type "return"}}
+      :select-args []
+      :return-args []}]])
+  => #(and (str/includes? % "(def.xt ^{:api/type :view} source")
+           (str/includes? % ":return-entry {:input []")
+           (not (str/includes? % "\"{:id"))))

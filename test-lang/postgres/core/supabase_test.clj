@@ -145,6 +145,11 @@
      (str/includes? sql "jsonb_build_object")])
   => [true true true true])
 
+^{:refer postgres.core.supabase/realtime-topic :added "4.1.4"}
+(fact "emits the Supabase private-topic authorization helper"
+  (l/emit-as :postgres `[(s/realtime-topic)])
+  => "realtime.topic()")
+
 ^{:refer postgres.core.supabase/process-return :added "4.0"}
 (fact "processes the return value"
 

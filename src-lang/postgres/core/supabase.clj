@@ -213,6 +213,13 @@
           private?)]))
 
 (defmacro.pg
+  realtime-topic
+  "returns the topic being authorized by a realtime.messages RLS policy"
+  {:added "4.1.4"}
+  []
+  (list 'realtime.topic))
+
+(defmacro.pg
   realtime-send-request
   "broadcasts a native xt.db request through Supabase realtime.send"
   {:added "4.1.4"}
@@ -495,4 +502,3 @@
     :defn    (transform-entry-defn body env)
     :deftype (transform-entry-deftype body env)
     body))
-

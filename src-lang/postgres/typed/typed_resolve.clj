@@ -102,9 +102,10 @@
   [op aliases]
   (let [op-name (name op)
         op-str (str op)
-        resolved-op (if (str/includes? op-str "/")
-                      (let [[alias-part fn-part] (str/split op-str #"/")
-                             alias-sym (symbol alias-part)]
+        resolved-op (if (namespace op)
+                      (let [alias-part (namespace op)
+                            fn-part (name op)
+                            alias-sym (symbol alias-part)]
                          (if-let [full-ns (get aliases alias-sym)]
                            (symbol (str full-ns "/" fn-part))
                            op))

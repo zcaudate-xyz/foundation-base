@@ -45,6 +45,14 @@
   (template/get-template ROUTE_ENTRY_TEMPLATE
                          route-entry-input))
 
+(def ^:private MODULE_ENTRY_TEMPLATE
+  (prose/join-lines
+   ["(def.xt ^{:api/type ~api-type} ~entry-sym"
+    "~descriptor)"]))
+
+(def ^:private +module-entry+
+  (template/get-template MODULE_ENTRY_TEMPLATE identity))
+
 (defn emit-route-entry
   "Emits a single `def.xt` route entry for a postgres function symbol."
   {:added "4.1"}
@@ -72,6 +80,97 @@
      (->> (bind/list-api ns)
           (map (comp #(emit-route-entry % root) second))
           (str/join "\n\n")))))
+
+(defn- descriptor-id
+  [descriptor]
+  (or (:id descriptor)
+      (throw (ex-info "Generated descriptor has no :id"
+                      {:descriptor descriptor}))))
+
+(defn- assert-unique-ids!
+  [kind entries]
+  (let [duplicates (->> entries
+                        (group-by (comp descriptor-id second))
+                        (keep (fn [[id matches]]
+                                (when (< 1 (count matches))
+                                  {:id id
+                                   :sources (mapv (comp str first) matches)})))
+                        seq)]
+    (when duplicates
+      (throw (ex-info (str "Duplicate generated " (name kind) " ids")
+                      {:kind kind
+                       :duplicates duplicates})))
+    entries))
+
+(defn route-entries
+  "Binds functions from one or more generated RPC namespaces. The predicate
+   receives a std.lang entry and defaults to all functions. Results are
+   deterministic and duplicate route ids fail generation."
+  {:added "4.1"}
+  ([source-namespaces]
+   (route-entries source-namespaces #(= :defn (:op-key %))))
+  ([source-namespaces pred]
+   (->> source-namespaces
+        (mapcat (fn [ns-sym]
+                  (require ns-sym)
+                  (map (fn [[_ sym]]
+                         [sym (bind/bind-function @(resolve sym))])
+                       (bind/list-api ns-sym pred))))
+        (sort-by (juxt (comp descriptor-id second)
+                       (comp str first)))
+        vec
+        (assert-unique-ids! :route))))
+
+(defn view-entries
+  "Binds defsel.pg/defret.pg entries from one or more namespaces into the
+   standard xt.db.node dataview descriptors. Results are deterministic and
+   duplicate view ids fail generation."
+  {:added "4.1"}
+  [source-namespaces]
+  (->> source-namespaces
+       (mapcat (fn [ns-sym]
+                 (require ns-sym)
+                 (map (fn [[_ sym]]
+                        (let [{:keys [id input view]}
+                              (bind/bind-view @(resolve sym))
+                              entry {:input input
+                                     :view view}
+                              entry-key (if (= "select" (:type view))
+                                          :select-entry
+                                          :return-entry)]
+                          [sym {:id id
+                                :table (:table view)
+                                entry-key entry
+                                :select-args []
+                                :return-args []}]))
+                      (concat (bind/list-view ns-sym :select)
+                              (bind/list-view ns-sym :return)))))
+       distinct
+       (sort-by (juxt (comp descriptor-id second)
+                      (comp str first)))
+       vec
+       (assert-unique-ids! :view)))
+
+(defn emit-module-entry
+  "Emits one templated def.xt entry from a descriptor map."
+  {:added "4.1"}
+  [api-type [sym descriptor]]
+  (template/fill-template
+   +module-entry+
+   {'api-type api-type
+    'entry-sym (symbol (name sym))
+    'descriptor descriptor}))
+
+(defn render-module
+  "Renders a monolithic XTalk module from descriptor entries."
+  {:added "4.1"}
+  [target-ns api-type entries & [{:keys [header]}]]
+  (str (or header "")
+       "(ns " target-ns "\n"
+       "  (:require [hara.lang :as l]))\n\n"
+       "(l/script :xtalk)\n\n"
+       (str/join "\n\n" (map #(emit-module-entry api-type %) entries))
+       (when (seq entries) "\n")))
 
 (defn target-path
   "Resolves the output path for a generated namespace using the source namespace root."

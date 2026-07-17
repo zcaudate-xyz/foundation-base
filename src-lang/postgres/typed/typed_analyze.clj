@@ -20,8 +20,8 @@
    'pg/t:get {:op :get :returns :table-instance}
    'pg/t:get-field {:op :get-field :returns :field}
    'pg/t:select {:op :select :returns :array}
-   'pg/t:update {:op :update :returns :table-instance}
-   'pg/t:delete {:op :delete :returns :table-instance}
+   'pg/t:update {:op :update :returns :array}
+   'pg/t:delete {:op :delete :returns :array}
    'pg/t:upsert {:op :upsert :returns :table-instance}
    'pg/t:id {:op :id :returns :uuid}
    'pg/t:exists {:op :exists :returns :boolean}
@@ -31,8 +31,8 @@
    'pg/g:insert {:op :insert :returns :table-instance :linked? true}
    'pg/g:get {:op :get :returns :table-instance :linked? true}
    'pg/g:select {:op :select :returns :array :linked? true}
-   'pg/g:update {:op :update :returns :table-instance :linked? true}
-   'pg/g:delete {:op :delete :returns :table-instance :linked? true}
+   'pg/g:update {:op :update :returns :array :linked? true}
+   'pg/g:delete {:op :delete :returns :array :linked? true}
    'pg/g:id {:op :id :returns :uuid}
    'pg/g:exists {:op :exists :returns :boolean}
    'pg/g:count {:op :count :returns :integer}})
@@ -246,10 +246,16 @@
 (defn analyze-table-op [op-sym args ctx]
   (let [op-info (get +pg-operations+ op-sym)
         table-expr (first args)
+        params (second args)
         table-def (resolve-table table-expr)]
     (if (and op-info table-def)
-      (let [shape (shape/shape-for-table-op (:op op-info) table-def {})]
-        (case (:returns op-info)
+      (let [shape (shape/shape-for-table-op (:op op-info) table-def {})
+            returns (if (and (= :array (:returns op-info))
+                             (map? params)
+                             (true? (:single params)))
+                      :table-instance
+                      (:returns op-info))]
+        (case returns
           :table-instance {:kind :shaped :shape shape :table (:name table-def)}
           :array (if (types/jsonb-array? shape)
                    {:kind :array :element-type (:element-type shape) :table (:name table-def)}

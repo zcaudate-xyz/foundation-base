@@ -92,7 +92,10 @@
     {"broadcast"
      (fn [frame]
        (var envelope (xt/x:get-key frame "payload"))
-       (when (== "xt.db/event" (xt/x:get-key envelope "event"))
+       (var event (xt/x:get-key envelope "event"))
+       (when (or (== "xt.db/event" event)
+                 (== "db/sync" event)
+                 (== "db/remove" event))
          (var payload (xt/x:get-key envelope "payload"))
          (var topic (xt/x:get-key frame "topic"))
          (var callbacks (xtd/get-in realtime-client ["state" "callbacks"]))
@@ -265,5 +268,4 @@
             (phoenix/send-frame client (-/topic-leave-payload impl topic))
             (xt/x:del-key (xtd/get-in client ["state" "topics"]) topic))))
       (return true)))))
-
 
