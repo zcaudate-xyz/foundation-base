@@ -1,4 +1,4 @@
-(ns jvm.chisel.db-bloom-test
+(ns jvm.chisel.db.bloom-test
   (:use code.test)
   (:require [jvm.chisel :as ch]
             [jvm.chisel.db.bloom :as bloom]))
@@ -31,3 +31,30 @@
   (let [sv (ch/emit-system-verilog
             (bloom/bloom-probe-module {:width 8 :bits-count 64 :ks ks :name "BloomProbe8SV"}))]
     (.contains sv "module BloomProbe8SV") => true))
+
+
+(defn- bloom-fragment-module []
+  (ch/module {:name "BloomFragments"}
+    (fn []
+      (let [io (ch/io (ch/bundle [[:key (ch/input (ch/uint 8))]
+                                  [:bits (ch/input (ch/uint 16))]
+                                  [:inserted (ch/output (ch/uint 16))]
+                                  [:hit (ch/output (ch/bool))]]))]
+        (ch/connect! (ch/field io :inserted)
+                     (bloom/insert-data (ch/field io :key) (ch/field io :bits)
+                                        8 16 [0x9E 0x5D]))
+        (ch/connect! (ch/field io :hit)
+                     (bloom/probe-data (ch/field io :key) (ch/field io :bits)
+                                       8 16 [0x9E 0x5D]))))))
+
+(def ^:private fragment-fir (delay (ch/emit-firrtl (bloom-fragment-module))))
+
+^{:refer jvm.chisel.db.bloom/probe-data :added "4.1"}
+(fact "probe-data combines every hashed membership test"
+  (count (re-seq #"neq\(" @fragment-fir)) => 2
+  (.contains @fragment-fir "connect io.hit") => true)
+
+^{:refer jvm.chisel.db.bloom/insert-data :added "4.1"}
+(fact "insert-data sets every hashed position while preserving existing bits"
+  (count (re-seq #"dshl\(" @fragment-fir)) => 4
+  (.contains @fragment-fir "connect io.inserted") => true)

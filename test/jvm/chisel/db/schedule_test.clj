@@ -1,4 +1,4 @@
-(ns jvm.chisel.db-schedule-test
+(ns jvm.chisel.db.schedule-test
   (:use code.test)
   (:require [jvm.chisel.db.schedule :as sched]
             [jvm.chisel.db.scan :as scan]
@@ -75,3 +75,23 @@
                              :stages [{:op :hash :buckets 16 :k 0x9E}]}
                             {:values values :validMask 2r11111111}))
   => (mapv #(jvm.chisel.db.hash/hash-ref % 8 0x9E 4) values))
+
+
+^{:refer jvm.chisel.db.schedule/plan->nodes :added "4.1"}
+(fact "plan->nodes normalizes a linear plan and preserves an explicit DAG"
+  (sched/plan->nodes {:stages [{:op :scan} {:op :reduce}]})
+  => [{:op :scan :id 0 :inputs [[:src 0]]}
+      {:op :reduce :id 1 :inputs [0]}]
+  (sched/plan->nodes {:nodes [{:id :x :op :scan :inputs [[:src 0]]}]})
+  => [{:id :x :op :scan :inputs [[:src 0]]}])
+
+^{:refer jvm.chisel.db.schedule/plan->sources :added "4.1"}
+(fact "plan->sources accepts default, count, and source descriptors"
+  (sched/plan->sources {}) => 1
+  (sched/plan->sources {:sources 2}) => 2
+  (sched/plan->sources {:sources [:left :right :third]}) => 3)
+
+^{:refer jvm.chisel.db.schedule/estimate-cost :added "4.1"}
+(fact "estimate-cost charges one lane pass per normalized node"
+  (sched/estimate-cost {:lanes 8 :stages [{:op :scan} {:op :reduce}]}) => 16
+  (sched/estimate-cost {:lanes 8 :stages []}) => 0)
