@@ -1,4 +1,3 @@
-^{:seedgen/skip true}
 (ns xt.db.node.client-base-test
   (:use code.test)
   (:require [hara.lang :as l]

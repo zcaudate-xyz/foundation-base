@@ -1,4 +1,3 @@
-^{:seedgen/skip true}
 (ns xt.db.system.impl-postgres-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify])

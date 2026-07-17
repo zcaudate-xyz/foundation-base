@@ -1,4 +1,3 @@
-^{:seedgen/skip true}
 (ns xt.db.system.impl-supabase-ws-test
   (:use code.test)
   (:require [hara.lang :as l]))

@@ -1,4 +1,3 @@
-^{:seedgen/skip true}
 (ns xt.db.helpers.seed-system-test
   (:require [postgres.core :as pg
                :refer [defsel.pg defret.pg]]
