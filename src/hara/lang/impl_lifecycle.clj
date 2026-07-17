@@ -105,7 +105,8 @@
      :as link-opts}
     root-ns]
    (let [link-as (get (:internal module) link-ns)]
-     (case type
+     (when link-as
+       (case type
        :graph
        (let [entry (get links link-ns)
              {:keys [rel label suffix]} (if (and (:rel entry) (:label entry))
@@ -134,7 +135,7 @@
                    (filter (fn [s] (and s (not= s ""))))
                    (clojure.string/join path-separator))
           :suffix suffix
-          :as link-as})))))
+          :as link-as}))))))
 
 (defn emit-module-setup-link-arr
   "creates the setup code for internal links"
@@ -148,23 +149,24 @@
         {:keys [links type root-ns]} (:compile emit)
         {:keys [module]} mopts]
     (keep (fn [ns]
-            (let [import  (emit-module-setup-link-import
-                           type
-                           (:id module)
-                           ns
-                           links
-                           module
-                           (:link (:code emit))
-                           root-ns)
-                  form (deps/module-import-form book
-                                                (:ns import)
-                                                import
-                                                (assoc-in mopts [:emit :import] :link))]
-              (if form
-                (impl/emit-direct grammar
-                                  form
-                                  namespace
-                                  mopts))))
+            (when-let [import (emit-module-setup-link-import
+                              type
+                              (:id module)
+                              ns
+                              links
+                              module
+                              (:link (:code emit))
+                              root-ns)]
+              (let [form (deps/module-import-form
+                          book
+                          (:ns import)
+                          import
+                          (assoc-in mopts [:emit :import] :link))]
+                (if form
+                  (impl/emit-direct grammar
+                                    form
+                                    namespace
+                                    mopts)))))
           direct)))
 
 (defn emit-module-setup-export-body

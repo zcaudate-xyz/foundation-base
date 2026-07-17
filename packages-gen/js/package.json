@@ -1,0 +1,5 @@
+{
+  "name" : "@xtalk/workspace",
+  "private" : true,
+  "workspaces" : [ "*" ]
+}

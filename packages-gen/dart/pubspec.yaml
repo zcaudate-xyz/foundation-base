@@ -1,0 +1,11 @@
+name: xtalk_packages
+publish_to: none
+environment:
+  sdk: '>=3.6.0 <4.0.0'
+workspace:
+  - lang
+  - event
+  - substrate
+  - net
+  - db
+  - ui

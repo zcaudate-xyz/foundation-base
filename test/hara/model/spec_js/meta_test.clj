@@ -29,6 +29,14 @@
                              :refer [hello world]} {:emit {:lang/format :global}})
   => '(Object.defineProperty !:G "React" {:value (require "react")}))
 
+^{:refer hara.model.spec-js.meta/js-module-import :added "4.1" :id scoped-package-import}
+(fact "keeps scoped npm links as bare package specifiers"
+  (js-module-import
+   "@xtalk/lang/common-data"
+   '{:as xtd :suffix ".js"}
+   {:emit {:import :link :lang/format :commonjs}})
+  => '(const xtd := (require "@xtalk/lang/common-data.js")))
+
 ^{:refer hara.model.spec-js.meta/js-module-export :added "4.0"}
 (fact "outputs the js module export form"
 

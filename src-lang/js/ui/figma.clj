@@ -1,6 +1,7 @@
 (ns js.ui.figma
   "React renderer for portable xt.ui nodes using @xtalk/figma-ui."
-  (:require [hara.lang :as l]))
+  (:require [hara.lang :as l]
+            [xt.ui.page :as page-source]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
@@ -8,6 +9,7 @@
              [xt.ui.core :as ui]
              [xt.ui.catalog :as catalog]
              [xt.ui.model :as ui-model]
+             [xt.ui.page :as ui-page]
              [js.react :as r]
              [js.lib.figma :as figma]]})
 
@@ -124,3 +126,27 @@
   (-/use-model-store (xt/x:get-key runtime "store")
                      (or subscription-id "xt.ui/react-view"))
   (return (-/render-node runtime (view-fn runtime))))
+
+(defn.js use-page-controller
+  "binds React rendering to a UI-independent page controller"
+  [controller subscription-id]
+  (r/useSyncExternalStore
+   (fn [notify]
+     (ui-page/subscribe!
+      controller subscription-id
+      (fn [_state _revision] (notify)))
+     (return
+      (fn []
+        (ui-page/unsubscribe! controller subscription-id))))
+   (fn [] (return (ui-page/revision controller)))
+   (fn [] (return (ui-page/revision controller))))
+  (return (ui-page/snapshot controller)))
+
+(defn.js PortableControllerView
+  "renders a pure (state, actions) view while the controller owns effects"
+  [#{runtime controller actions view-fn subscription-id}]
+  (var state
+       (-/use-page-controller
+        controller
+        (or subscription-id "xt.ui/react-controller-view")))
+  (return (-/render-node runtime (view-fn state (or actions {})))))

@@ -34,6 +34,7 @@
            name (if (= :link (:import emit))
                   (str (if (or (clojure.string/starts-with? name ".")
                                (clojure.string/starts-with? name "/")
+                               (re-find #"^@[A-Za-z0-9_.~-]+/" name)
                                (.contains name "://"))
                          ""
                          "./")

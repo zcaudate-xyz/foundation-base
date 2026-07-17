@@ -216,11 +216,13 @@
 (def +meta+
   (book/book-meta
    {:module-current   (fn [])
-    :module-import    (fn [name {:keys [as]} _]
+    :module-import    (fn [name {:keys [as suffix]} _]
                         (list :-
-                              (str "import '" name "'"
+                              (str "import '" name (or suffix "") "'"
                                    (when as
-                                     (str " as " as))
+                                     (str " as "
+                                          (clojure.string/replace
+                                           (str as) "-" "_")))
                                    ";")))}))
 
 (def +book+

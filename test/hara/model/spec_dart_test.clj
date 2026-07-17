@@ -297,3 +297,12 @@
 
 ^{:refer hara.model.spec-dart/dart-string :added "4.1"}
 (fact "emits dart strings")
+
+^{:refer hara.model.spec-dart/+meta+ :added "4.1"}
+(fact "appends generated suffixes to Dart package imports"
+  ((:module-import spec-dart/+meta+)
+   "package:xtalk_ui/page"
+   {:as 'event-listener
+    :suffix ".dart"}
+   {})
+  => '(:- "import 'package:xtalk_ui/page.dart' as event_listener;"))

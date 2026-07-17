@@ -121,6 +121,20 @@
       :root-prefix "@"}))
   => '{:ns "../react", :suffix "", :as r})
 
+
+^{:refer hara.lang.impl-lifecycle/emit-module-setup-link-import
+  :added "4.1"
+  :id compile-time-only-import}
+(fact "omits compile-time-only namespace references from runtime imports"
+  (emit-module-setup-link-import
+   :directory
+   'js.net.conn-sqlite
+   'xt.lang.common-protocol
+   {}
+   {:internal {'xt.lang.common-protocol nil}}
+   {:path-separator "/"
+    :root-prefix {'xt.lang "@xtalk/lang"}})
+  => nil)
 ^{:refer hara.lang.impl-lifecycle/emit-module-setup-link-arr :added "4.0"}
 (fact "creates the setup code for internal links"
 
