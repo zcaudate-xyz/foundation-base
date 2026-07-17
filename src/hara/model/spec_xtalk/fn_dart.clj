@@ -777,7 +777,7 @@
                      (== "" ~root))
                  ~s
                  (+ "cd " ~root " && " ~s)))
-       (return (. (Process.run "sh" (:- "<String>[\"-lc\",shell_command]"))
+       (return (. (Process.run "sh" ["-lc" shell_command])
                   (then (fn [result]
                           (if (not= 0 (. result exitCode))
                             (return (~cb {:code (. result exitCode)

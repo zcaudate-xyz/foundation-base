@@ -1,4 +1,3 @@
-^{:seedgen/skip true}
 (ns xt.db.helpers.data-main-test
   (:require [postgres.core :as pg]
             [hara.lang :as l]

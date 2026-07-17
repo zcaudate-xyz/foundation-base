@@ -1,4 +1,3 @@
-^{:seedgen/skip true}
 (ns xt.db.poc.s03-shared-rpc-test
   (:use code.test)
   (:require [hara.lang :as l]
