@@ -145,6 +145,7 @@
     => '[PONG]))
 
 ^{:refer std.concurrent.request/request-bulk :added "3.0"
+   :id request-bulk-constructs-request
    :adopt true}
 (fact "constructs a bulk request"
 

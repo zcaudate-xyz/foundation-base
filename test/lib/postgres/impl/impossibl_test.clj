@@ -45,7 +45,8 @@
   => (any com.impossibl.postgres.jdbc.PGPooledConnection
           java.sql.SQLException))
 
-^{:refer lib.postgres.impl.impossibl/execute-statement :added "4.1"}
+^{:refer lib.postgres.impl.impossibl/execute-statement :added "4.1"
+  :id execute-statement-with-jdbc-connection}
 (fact "execute-statement runs the execute fn with a connection from pool"
 
   (let [results [{:id 1}]
@@ -56,13 +57,15 @@
     (execute-statement mock-pool "select 1" (constantly results)))
   => [{:id 1}])
 
-^{:refer lib.postgres.impl.impossibl/notify-listener :added "4.1"}
+^{:refer lib.postgres.impl.impossibl/notify-listener :added "4.1"
+  :id notify-listener-proxy}
 (fact "notify-listener returns a PGNotificationListener proxy"
 
   (notify-listener {})
   => (partial instance? com.impossibl.postgres.api.jdbc.PGNotificationListener))
 
-^{:refer lib.postgres.impl.impossibl/create-notify :added "4.1"}
+^{:refer lib.postgres.impl.impossibl/create-notify :added "4.1"
+  :id create-notify-direct-connection}
 (fact "create-notify attempts to create a direct notify connection"
 
   (try (create-notify {:dbname "test"} {:channel "ch"})
