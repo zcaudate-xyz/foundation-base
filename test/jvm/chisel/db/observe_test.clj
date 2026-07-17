@@ -1,4 +1,4 @@
-(ns jvm.chisel.db-observe-test
+(ns jvm.chisel.db.observe-test
   (:use code.test)
   (:require [jvm.chisel.db.observe :as observe]
             [jvm.chisel.db.schedule :as sched]

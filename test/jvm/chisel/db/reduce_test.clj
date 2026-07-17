@@ -1,4 +1,4 @@
-(ns jvm.chisel.db-reduce-test
+(ns jvm.chisel.db.reduce-test
   (:use code.test)
   (:require [jvm.chisel :as ch]
             [jvm.chisel.db.reduce :as reduce]))

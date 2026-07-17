@@ -1,4 +1,4 @@
-(ns jvm.chisel.db-pg-test
+(ns jvm.chisel.db.pg-test
   (:use code.test)
   (:require [jvm.chisel.db.pg :as pg]
             [jvm.chisel.db.schedule :as sched]
@@ -106,3 +106,12 @@
                     (:reason (pg/plan->chip-plan
                               {"Node Type" "Seq Scan" "Filter" "(region = 'EU'::text)"}))))
   => true)
+
+
+^{:refer jvm.chisel.db.pg/explain-file->chip-plan :added "4.1"}
+(fact "explain-file->chip-plan reads a JSON fixture and applies options"
+  (let [r (pg/explain-file->chip-plan
+           "test/jvm/chisel/db/pgplans/seq_scan_filter.json" {:width 8 :lanes 4})]
+    (:ok? r) => true
+    (select-keys (:plan r) [:width :lanes :sources])
+    => {:width 8 :lanes 4 :sources 1}))

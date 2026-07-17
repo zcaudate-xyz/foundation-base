@@ -1,4 +1,4 @@
-(ns jvm.chisel.db-cluster-test
+(ns jvm.chisel.db.cluster-test
   (:use code.test)
   (:require [jvm.chisel.db.cluster :as cl]
             [jvm.chisel.db.schedule :as sched]))
@@ -100,3 +100,14 @@
   (let [r (cl/admit (cl/cluster inv) :q1 plan-a {:cost-fn (constantly 3)})]
     (:cost (:admission r)) => 3
     (:cost (:admission (cl/admit (cl/cluster inv) :q1 plan-a))) => 16))
+
+
+^{:refer jvm.chisel.db.cluster/used-units :added "4.1"}
+(fact "used-units returns exactly the units pinned by admissions"
+  (let [r (cl/admit (cl/cluster inv) :q1 plan-a)]
+    (cl/used-units (:cluster r)) => #{:scan-0 :aggregate-0}))
+
+^{:refer jvm.chisel.db.cluster/free-counts :added "4.1"}
+(fact "free-counts subtracts held units by resource kind"
+  (let [r (cl/admit (cl/cluster inv) :q1 plan-a)]
+    (cl/free-counts (:cluster r)) => {:scan 1 :hash 1 :join 1 :aggregate 0}))

@@ -1,4 +1,4 @@
-(ns jvm.chisel.db-estimate-test
+(ns jvm.chisel.db.estimate-test
   (:use code.test)
   (:require [jvm.chisel.db.estimate :as est]
             [jvm.chisel.db.schedule :as sched]

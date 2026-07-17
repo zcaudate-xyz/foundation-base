@@ -1,4 +1,4 @@
-(ns jvm.chisel.db-hash-test
+(ns jvm.chisel.db.hash-test
   (:use code.test)
   (:require [jvm.chisel :as ch]
             [jvm.chisel.db.hash :as hash]))

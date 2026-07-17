@@ -1,4 +1,4 @@
-(ns jvm.chisel.db-pipeline-test
+(ns jvm.chisel.db.pipeline-test
   (:use code.test)
   (:require [jvm.chisel :as ch]
             [jvm.chisel.db.pipeline :as pipe]

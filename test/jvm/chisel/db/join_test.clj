@@ -1,6 +1,7 @@
-(ns jvm.chisel.db-join-test
+(ns jvm.chisel.db.join-test
   (:use code.test)
-  (:require [jvm.chisel.db.join :as j]
+  (:require [jvm.chisel :as ch]
+            [jvm.chisel.db.join :as j]
             [jvm.chisel.db.hash :as h]))
 
 (def ^:private width 8)
@@ -48,3 +49,34 @@
     (nth (:keys t) (bkt 0))                 => 0
     (j/join-probe-ref 0 t width buckets k)  => true
     (j/join-probe-ref 1 t width buckets k)  => false))  ;; lane 1 was masked out
+
+
+(def ^:private build-fir
+  (delay (ch/emit-firrtl
+          (j/join-build-module {:lanes 4 :width width :buckets 4 :k k
+                                :name "JoinBuildUnit"}))))
+(def ^:private probe-fir
+  (delay (ch/emit-firrtl
+          (j/join-probe-module {:width width :buckets 4 :k k
+                                :name "JoinProbeUnit"}))))
+
+^{:refer jvm.chisel.db.join/build-table-data :added "4.1"}
+(fact "build-table-data emits one key and valid bit per bucket"
+  (.contains @build-fir "tableValid : UInt<4>") => true
+  (.contains @build-fir "tableKeys : UInt<8>[4]") => true
+  (count (re-seq #"mux\(" @build-fir)) => 16)
+
+^{:refer jvm.chisel.db.join/join-probe-data :added "4.1"}
+(fact "join-probe-data dynamically selects and validates a bucket"
+  (.contains @probe-fir "tableKeys[io.tableValid") => false
+  (.contains @probe-fir "connect io.match") => true
+  (.contains @probe-fir "eq(") => true)
+
+^{:refer jvm.chisel.db.join/join-build-module :added "4.1"}
+(fact "join-build-module elaborates its direct-mapped table interface"
+  (.contains @build-fir "module JoinBuildUnit") => true)
+
+^{:refer jvm.chisel.db.join/join-probe-module :added "4.1"}
+(fact "join-probe-module elaborates its lookup interface"
+  (.contains @probe-fir "module JoinProbeUnit") => true
+  (.contains @probe-fir "match : UInt<1>") => true)
