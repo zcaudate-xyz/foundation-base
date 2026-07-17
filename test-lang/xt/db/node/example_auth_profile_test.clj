@@ -1,4 +1,3 @@
-^{:seedgen/skip true}
 (ns xt.db.node.example-auth-profile-test
   (:use code.test)
   (:require [hara.lang :as l]
@@ -59,8 +58,7 @@
         (recur (inc i))))))
 
 (fact:global
- {:skip (boolean (System/getenv "CI"))
-  :setup [(local-min/start-supabase)
+ {:setup [(local-min/start-supabase)
           (l/rt:restart :js)
           (l/rt:scaffold-imports :js)
           (def +url+ (str "http://127.0.0.1:" (:port (l/rt :js)) "/index.html"))

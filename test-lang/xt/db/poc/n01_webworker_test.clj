@@ -1,4 +1,3 @@
-^{:seedgen/skip true}
 (ns xt.db.poc.n01-webworker-test
   (:use code.test)
   (:require [clojure.string]
