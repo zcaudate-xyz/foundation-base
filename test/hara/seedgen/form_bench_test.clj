@@ -263,7 +263,8 @@
                       "^{:seedgen/root {:all true, :langs [:dart]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(fact:global\n"
-                      " {:setup [(!.js (setup-js))]\n"
+                      " {:skip (not (env/program-exists? \"supabase\"))\n"
+                      "  :setup [(!.js (setup-js))]\n"
                       "  :teardown [(!.js (teardown-js))]})\n\n"
                       "^{:refer xt.lang.spec-base/example-h :added \"4.1\"}\n"
                       "(fact \"global bench outcomes\"\n\n"
@@ -279,6 +280,7 @@
         [(-> output :outputs first (select-keys [:lang :ns :updated]))
          (let [content (slurp bench-path)]
            [(boolean (re-find #"\(fact:global" content))
+            (boolean (re-find #":skip \(not \(env/program-exists\? \"supabase\"\)\)" content))
             (boolean (re-find #"\(!\.dt \(setup-js\)\)" content))
             (boolean (re-find #"\(!\.dt \(teardown-js\)\)" content))])])
       (finally
@@ -286,7 +288,7 @@
   => [{:lang :dart
        :ns 'samplebench.dart.sample.global-test
        :updated true}
-      [true true true]])
+      [true true true true]])
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-runtime-variant}

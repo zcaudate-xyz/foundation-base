@@ -48,15 +48,19 @@
    (let [{:keys [host port apikey]} +config-supabase-anon+
          url (str "http://" host ":" port "/auth/v1/health")
          deadline (+ (System/currentTimeMillis) timeout-ms)]
-     (loop []
+     (loop [consecutive-ready 0]
        (let [{:keys [status body]} (http-get url {"apikey" apikey})]
          (if (== status 200)
-           true
+           (let [next-ready (inc consecutive-ready)]
+             (if (>= next-ready 5)
+               true
+               (do (Thread/sleep 500)
+                   (recur next-ready))))
            (if (>= (System/currentTimeMillis) deadline)
              (throw (ex-info "Auth service not ready"
                              {:status status :body body}))
              (do (Thread/sleep 500)
-                 (recur)))))))))
+                 (recur 0)))))))))
 
 (defn wait-for-postgrest-ready
   "Polls PostgREST for a specific schema/table until it returns HTTP 200.

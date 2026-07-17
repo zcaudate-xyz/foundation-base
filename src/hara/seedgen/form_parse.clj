@@ -139,6 +139,8 @@
                               vec)
         global-facts     (reduce (fn [out zloc]
                                    (let [mnav (fact-config-nav zloc)
+                                         config (dissoc (nav/value mnav)
+                                                        :setup :teardown)
                                          setup (class-navs root-lang
                                                            script-heads
                                                            (form-common/nav-vector-items
@@ -148,9 +150,11 @@
                                                               (form-common/nav-vector-items
                                                                (some-> mnav (form-common/nav-map-value :teardown))))]
                                      (-> out
+                                         (update :global-fact-config merge config)
                                          (update :global-fact-setup class-merge setup)
                                          (update :global-fact-teardown class-merge teardown))))
                                  {:global-fact-setup (class-empty)
+                                  :global-fact-config {}
                                   :global-fact-teardown (class-empty)}
                                  global-fact-navs)]
     {:lang {:root root-lang
@@ -158,6 +162,7 @@
                            derived-script-navs)}
      :global-script {:root (some-> root-script-nav form-common/nav-entry)
                      :derived (mapv form-common/nav-entry derived-script-navs)}
+     :global-fact-config (:global-fact-config global-facts)
      :global-fact-setup (:global-fact-setup global-facts)
      :global-fact-teardown (:global-fact-teardown global-facts)
      :global-top (class-navs root-lang script-heads global-top-navs)}))

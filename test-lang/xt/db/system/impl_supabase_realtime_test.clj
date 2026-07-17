@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]
+            [std.lib.env :as env]
             [scaffold.supabase.local-min :as local-min]))
 
 (do
@@ -14,9 +15,7 @@
               :port   (-> local-min/+config+ :db :port)
               :user   (-> local-min/+config+ :db :user)
               :pass   (-> local-min/+config+ :db :password)
-              :dbname (-> local-min/+config+ :db :database)
-              :startup  local-min/start-supabase
-              :shutdown local-min/stop-supabase}
+              :dbname (-> local-min/+config+ :db :database)}
      :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
   (defrun.pg __init__
@@ -53,11 +52,13 @@
              [lua.net.ws-native :as lua-websocket]]})
 
 (fact:global
- {
-  :setup [(l/rt:restart)
+ {:skip (not (env/program-exists? "supabase"))
+  :setup [(local-min/start-supabase)
+          (l/rt:restart)
           (l/rt:setup :postgres)]
   :teardown [(l/rt:teardown :postgres)
-             (l/rt:stop)]})
+             (l/rt:stop)
+             (local-min/stop-supabase nil)]})
 
 ^{:refer xt.db.system.impl-supabase-realtime/prepare-connect-url :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}

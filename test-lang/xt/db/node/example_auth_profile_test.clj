@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [hara.lang :as l]
             [scaffold.supabase.local-min :as local-min]
+            [std.lib.env :as env]
             [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/root {:all true
@@ -55,7 +56,8 @@
      "group_id" "auth"})))
 
 (fact:global
- {:setup [(local-min/start-supabase)
+ {:skip (not (env/program-exists? "supabase"))
+  :setup [(local-min/start-supabase)
           (l/rt:restart)]
   :teardown [(l/rt:stop)
              (local-min/stop-supabase nil)]})

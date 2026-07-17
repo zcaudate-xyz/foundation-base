@@ -157,7 +157,13 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ${{ matrix.image }}
-          lein seedgen test '[xt.substrate]' :with "[${{ matrix.lang }}]"
+          sh -lc '
+            if [ "${{ matrix.lang }}" = "python" ]; then
+              python -m pip uninstall -y websocket || true;
+              python -m pip install --no-cache-dir --force-reinstall websocket-client;
+            fi;
+            exec lein seedgen test "[xt.substrate]" :with "[${{ matrix.lang }}]"
+          '
 
     services:
       postgres:
@@ -205,7 +211,13 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ${{ matrix.image }}
-          lein seedgen test '[xt.db]' :with "[${{ matrix.lang }}]"
+          sh -lc '
+            if [ "${{ matrix.lang }}" = "python" ]; then
+              python -m pip uninstall -y websocket || true;
+              python -m pip install --no-cache-dir --force-reinstall websocket-client psycopg2-binary;
+            fi;
+            exec lein seedgen test "[xt.db]" :with "[${{ matrix.lang }}]"
+          '
 
     services:
       postgres:

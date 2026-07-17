@@ -584,7 +584,9 @@
 
 (defn- render-map-string
   [vector-values]
-  (let [ordered-keys [:setup :teardown]
+  (let [preferred-order [:skip :setup :teardown]
+        ordered-keys (concat preferred-order
+                             (remove (set preferred-order) (keys vector-values)))
         entries      (keep (fn [k]
                              (when-let [rendered (get vector-values k)]
                                [k rendered]))
@@ -963,11 +965,15 @@
                             classify-lang-items
                             (remove #(contains? target-set (item-lang %)))
                             vec)
+        config-render  (update-vals
+                        (get-in output [:globals :global-fact-config])
+                        pr-str)
         setup-render   (render-vector-string :setup (mapv render-item-string keep-setup))
         teardown-render (render-vector-string :teardown (mapv render-item-string keep-teardown))]
     (str "(fact:global\n "
-         (render-map-string {:setup setup-render
-                              :teardown teardown-render})
+         (render-map-string (merge config-render
+                                   {:setup setup-render
+                                    :teardown teardown-render}))
          ")")))
 
 (defn- update-root-script-string
@@ -1219,15 +1225,19 @@
                                                      (get-in output [:globals :global-fact-teardown])
                                                      root-lang
                                                      [lang])
+        config-render   (update-vals
+                         (get-in output [:globals :global-fact-config])
+                         pr-str)
         setup-render    (when (seq setup-items)
                           (render-vector-string :setup setup-items))
         teardown-render (when (seq teardown-items)
                           (render-vector-string :teardown teardown-items))]
-    (when (or setup-render teardown-render)
+    (when (or (seq config-render) setup-render teardown-render)
       (str "(fact:global\n"
            (indent-lines " "
-                         (render-map-string {:setup setup-render
-                                             :teardown teardown-render}))
+                         (render-map-string (merge config-render
+                                                   {:setup setup-render
+                                                    :teardown teardown-render})))
            ")"))))
 
 (defn- render-global-top-target

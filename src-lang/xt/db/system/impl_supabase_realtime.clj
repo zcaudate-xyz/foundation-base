@@ -246,12 +246,24 @@
    (promise/x:promise-then
     (xtd/get-in client ["state" "init"])
     (fn [_]
+      (var out [])
+      (var chain (promise/x:promise-run nil))
       (xt/for:array [topic topics]
-        (phoenix/send-frame client (-/topic-join-payload impl topic)))
-      (return (promise/x:promise-all
-               (xt/x:arr-map topics
-                             (fn [topic]
-                               (return (xtd/get-in client ["state" "topics" topic "init"]))))))))))
+        (:= chain
+            (promise/x:promise-then
+             chain
+             (fn [_]
+               (phoenix/send-frame client (-/topic-join-payload impl topic))
+               (return
+                (promise/x:promise-then
+                 (xtd/get-in client ["state" "topics" topic "init"])
+                 (fn [ready]
+                   (xt/x:arr-push out ready)
+                   (return nil))))))))
+      (return
+       (promise/x:promise-then chain
+                               (fn [_]
+                                 (return out))))))))
 
 (defn.xt unsubscribe
   "unsubscribes from one or more broadcast topics on the realtime websocket"
