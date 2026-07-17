@@ -4,6 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.ui.core :as ui]]})
 
 (defn.xt register
@@ -54,7 +55,7 @@
    (ui/node "ui/column" {"class" "gap-2"}
             [(ui/node "ui/label" {"value" label "for" id} [])
              (ui/node component
-                      (xt/x:obj-assign
+                      (xtd/obj-assign
                        {"id" id "value" (or value "") "on_change" on-change}
                        (or props {}))
                       [])])))

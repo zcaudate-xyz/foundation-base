@@ -1,5 +1,7 @@
 import 'package:xtalk_ui/core.dart' as ui;
 
+import 'package:xtalk_lang/common-data.dart' as xtd;
+
 register(registry, component_id, props, events, slots) {
   return ui.registry_register_contract(
     registry,
@@ -8,7 +10,7 @@ register(registry, component_id, props, events, slots) {
 }
 
 semantic_registry() {
-  var registry = ui.registry_create("xt.ui/semantic");
+  var registry = ui.registry_create("xt.ui/widgets");
   register(
     registry,
     "ui/card",
@@ -94,9 +96,66 @@ semantic_registry() {
     <dynamic>[],
     <dynamic>[]
   );
+  register(
+    registry,
+    "ui/table",
+    <dynamic>["class","hidden","key"],
+    <dynamic>[],
+    <dynamic>["header","body"]
+  );
+  register(
+    registry,
+    "ui/table-header",
+    <dynamic>["class","hidden","key"],
+    <dynamic>[],
+    <dynamic>[]
+  );
+  register(
+    registry,
+    "ui/table-body",
+    <dynamic>["class","hidden","key"],
+    <dynamic>[],
+    <dynamic>[]
+  );
+  register(
+    registry,
+    "ui/table-row",
+    <dynamic>["class","hidden","key","selected"],
+    <dynamic>["on_press"],
+    <dynamic>[]
+  );
+  register(
+    registry,
+    "ui/table-cell",
+    <dynamic>["class","hidden","key","value"],
+    <dynamic>[],
+    <dynamic>[]
+  );
   return registry;
 }
 
 registry() {
   return ui.registry_compose(<dynamic>[ui.base_registry(),semantic_registry()]);
+}
+
+widget(component, props, children) {
+  return ui.node(
+    component,
+    props ?? <dynamic, dynamic>{},
+    children ?? <dynamic>[]
+  );
+}
+
+field(component, id, label, value, props, on_change) {
+  return ui.node("ui/column",<dynamic, dynamic>{"class":"gap-2"},<dynamic>[
+    ui.node(
+      "ui/label",
+      <dynamic, dynamic>{"value":label,"for":id},
+      <dynamic>[]
+    ),
+    ui.node(component,xtd.obj_assign(
+      <dynamic, dynamic>{"id":id,"value":value ?? "","on_change":on_change},
+      props ?? <dynamic, dynamic>{}
+    ),<dynamic>[])
+  ]);
 }

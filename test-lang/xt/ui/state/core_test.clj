@@ -1,4 +1,4 @@
-(ns xt.ui.page-test
+(ns xt.ui.state.core-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -9,9 +9,9 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-repl :as repl]
-             [xt.ui.page :as page]]})
+             [xt.ui.state.core :as page]]})
 
-^{:refer xt.ui.page/controller-create :added "4.1"}
+^{:refer xt.ui.state.core/controller-create :added "4.1"}
 (fact "runs state transitions without a UI runtime"
   (notify/wait-on :js
    (var controller
@@ -40,7 +40,7 @@
           (repl/notify [(page/snapshot controller) seen])))))
   => [{"status" "ready" "data" {"count" 2}} [[2 1]]])
 
-^{:refer xt.ui.page/open! :added "4.1"}
+^{:refer xt.ui.state.core/open! :added "4.1"}
 (fact "owns lifecycle separately from view rendering"
   (notify/wait-on :js
     (var events [])
@@ -59,32 +59,32 @@
   => ["open" "close"])
 
 
-^{:refer xt.ui.page/snapshot :added "4.1"}
+^{:refer xt.ui.state.core/snapshot :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.page/revision :added "4.1"}
+^{:refer xt.ui.state.core/revision :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.page/notify! :added "4.1"}
+^{:refer xt.ui.state.core/notify! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.page/set-state! :added "4.1"}
+^{:refer xt.ui.state.core/set-state! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.page/update-state! :added "4.1"}
+^{:refer xt.ui.state.core/update-state! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.page/subscribe! :added "4.1"}
+^{:refer xt.ui.state.core/subscribe! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.page/unsubscribe! :added "4.1"}
+^{:refer xt.ui.state.core/unsubscribe! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.page/dispatch! :added "4.1"}
+^{:refer xt.ui.state.core/dispatch! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.page/actions-create :added "4.1"}
+^{:refer xt.ui.state.core/actions-create :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.page/close! :added "4.1"}
+^{:refer xt.ui.state.core/close! :added "4.1"}
 (fact "TODO")

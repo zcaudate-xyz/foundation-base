@@ -24,8 +24,7 @@
   (return state))
 
 (defn.xt set-query! [state path value]
-  (var query (xt/x:json-decode
-              (xt/x:json-encode (or (xt/x:get-key state "query") {}))))
+  (var query (xtd/clone-nested (or (xt/x:get-key state "query") {})))
   (xtd/set-in query path value)
   (xt/x:set-key state "query" query)
   (xt/x:set-key state "page" 0)

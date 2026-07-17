@@ -12,6 +12,11 @@
 
 (defspec.xt UiModelStore :xt/any)
 
+(defn.xt listener-key
+  "matches page-core's JSON key for controlled space/group/model identifiers"
+  [space-id group-id model-id]
+  (return (xt/x:cat "[\"" space-id "\",[\"" group-id "\",\"" model-id "\"]]")))
+
 (defn.xt store-create [node space-id group-id mode opts]
   (return {"node" node
            "space_id" space-id
@@ -97,7 +102,7 @@
                          (not (xt/x:is-array? initial-data)))
                     initial-data
                     {})))
-  (var next (xt/x:json-decode (xt/x:json-encode (or current {}))))
+  (var next (xtd/clone-nested (or current {})))
   (xtd/set-in next path value)
   (return (-/set-input! store model-id next event)))
 
@@ -121,7 +126,7 @@
   (var group-id (xt/x:get-key store "group_id"))
   (var group (page-core/group-ensure node space-id group-id))
   (xt/for:object [[model-id _] (xt/x:get-key group "models")]
-    (var key (xt/x:json-encode [space-id [group-id model-id]]))
+    (var key (-/listener-key space-id group-id model-id))
     (event-listener/add-keyed-listener
      node key (xt/x:cat subscription-id "/" model-id) "ui.model"
      (fn [listener-id data t meta]
@@ -137,7 +142,7 @@
   (var group-id (xt/x:get-key store "group_id"))
   (var group (page-core/group-ensure node space-id group-id))
   (xt/for:object [[model-id _] (xt/x:get-key group "models")]
-    (var key (xt/x:json-encode [space-id [group-id model-id]]))
+    (var key (-/listener-key space-id group-id model-id))
     (event-listener/remove-keyed-listener
      node key (xt/x:cat subscription-id "/" model-id)))
   (xt/x:del-key (xt/x:get-key store "listeners") subscription-id)

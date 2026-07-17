@@ -6,11 +6,11 @@ const ui = require("@xtalk/ui/core.js")
 
 const xtd = require("@xtalk/lang/common-data.js")
 
-const ui_page = require("@xtalk/ui/page.js")
+const ui_model = require("@xtalk/ui/state/model.js")
 
-const catalog = require("@xtalk/ui/catalog.js")
+const catalog = require("@xtalk/ui/widgets/core.js")
 
-const ui_model = require("@xtalk/ui/model.js")
+const ui_page = require("@xtalk/ui/state/core.js")
 
 function normalize_props(props){
   let out = Object.assign({},props || {});
@@ -73,6 +73,11 @@ function web_registry(){
   ui.registry_register_renderer(platform,"ui/button",FigmaUi.Button);
   ui.registry_register_renderer(platform,"ui/alert",FigmaUi.Alert);
   ui.registry_register_renderer(platform,"ui/spinner",FigmaUi.Skeleton);
+  ui.registry_register_renderer(platform,"ui/table","table");
+  ui.registry_register_renderer(platform,"ui/table-header","thead");
+  ui.registry_register_renderer(platform,"ui/table-body","tbody");
+  ui.registry_register_renderer(platform,"ui/table-row","tr");
+  ui.registry_register_renderer(platform,"ui/table-cell","td");
   return ui.registry_compose([catalog.registry(),platform]);
 }
 

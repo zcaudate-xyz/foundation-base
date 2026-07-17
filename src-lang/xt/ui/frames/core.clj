@@ -16,7 +16,7 @@
   (return (or (xt/x:get-path frame ["regions" region-id]) fallback)))
 
 (defn.xt override [frame overrides]
-  (var next (xt/x:json-decode (xt/x:json-encode frame)))
+  (var next (xtd/clone-nested frame))
   (xt/for:object [[region-id value] (or overrides {})]
     (xtd/set-in next ["regions" region-id] value))
   (return next))

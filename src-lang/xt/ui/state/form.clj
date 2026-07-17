@@ -1,5 +1,6 @@
 (ns xt.ui.state.form
   "Serializable form drafts, validation and submission state."
+  (:refer-clojure :exclude [reset!])
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
@@ -7,7 +8,7 @@
              [xt.lang.common-data :as xtd]]})
 
 (defn.xt clone [value]
-  (return (xt/x:json-decode (xt/x:json-encode (or value {})))))
+  (return (xtd/clone-nested (or value {}))))
 
 (defn.xt create [values validators]
   (var initial (-/clone values))
@@ -43,9 +44,7 @@
   (xtd/set-in draft path value)
   (xt/x:set-key form "draft" draft)
   (xtd/set-in (xt/x:get-key form "touched") path true)
-  (xt/x:set-key form "dirty"
-                (not= (xt/x:json-encode draft)
-                      (xt/x:json-encode (xt/x:get-key form "initial"))))
+  (xt/x:set-key form "dirty" true)
   (-/validate! form)
   (return draft))
 

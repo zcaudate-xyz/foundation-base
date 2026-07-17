@@ -2,7 +2,7 @@ const ui = require("@xtalk/ui/core.js")
 
 const xtd = require("@xtalk/lang/common-data.js")
 
-const catalog = require("@xtalk/ui/catalog.js")
+const catalog = require("@xtalk/ui/widgets/core.js")
 
 function flutter_registry(){
   let platform = ui.registry_create("xt.ui/flutter-wind");

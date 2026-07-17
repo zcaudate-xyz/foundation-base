@@ -1,5 +1,7 @@
 const ui = require("@xtalk/ui/core.js")
 
+const xtd = require("@xtalk/lang/common-data.js")
+
 function register(registry,component_id,props,events,slots){
   return ui.registry_register_contract(
     registry,
@@ -8,7 +10,7 @@ function register(registry,component_id,props,events,slots){
 }
 
 function semantic_registry(){
-  let registry = ui.registry_create("xt.ui/semantic");
+  let registry = ui.registry_create("xt.ui/widgets");
   register(
     registry,
     "ui/card",
@@ -64,6 +66,23 @@ function semantic_registry(){
   );
   register(registry,"ui/alert",["tone","class","hidden","key"],[],[]);
   register(registry,"ui/spinner",["class","label","hidden","key"],[],[]);
+  register(
+    registry,
+    "ui/table",
+    ["class","hidden","key"],
+    [],
+    ["header","body"]
+  );
+  register(registry,"ui/table-header",["class","hidden","key"],[],[]);
+  register(registry,"ui/table-body",["class","hidden","key"],[],[]);
+  register(
+    registry,
+    "ui/table-row",
+    ["class","hidden","key","selected"],
+    ["on_press"],
+    []
+  );
+  register(registry,"ui/table-cell",["class","hidden","key","value"],[],[]);
   return registry;
 }
 
@@ -71,8 +90,24 @@ function registry(){
   return ui.registry_compose([ui.base_registry(),semantic_registry()]);
 }
 
+function widget(component,props,children){
+  return ui.node(component,props || {},children || []);
+}
+
+function field(component,id,label,value,props,on_change){
+  return ui.node("ui/column",{"class":"gap-2"},[
+    ui.node("ui/label",{"value":label,"for":id},[]),
+    ui.node(component,xtd.obj_assign(
+      {"id":id,"value":value || "","on_change":on_change},
+      props || {}
+    ),[])
+  ]);
+}
+
 module.exports = {
   ["register"]:register,
   ["semantic_registry"]:semantic_registry,
-  ["registry"]:registry
+  ["registry"]:registry,
+  ["widget"]:widget,
+  ["field"]:field
 }

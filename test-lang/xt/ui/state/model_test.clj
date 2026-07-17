@@ -1,4 +1,4 @@
-(ns xt.ui.model-test
+(ns xt.ui.state.model-test
   (:use code.test)
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -11,7 +11,7 @@
              [xt.lang.common-repl :as repl]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
-             [xt.ui.model :as ui-model]]})
+             [xt.ui.state.model :as ui-model]]})
 
 (defn.js create-store
   []
@@ -31,7 +31,7 @@
             "defaults" {"args" [] "output" {}}}})
   (return (ui-model/store-create node "app/account" "account/settings" "local" {})))
 
-^{:refer xt.ui.model/patch-input! :added "4.1"}
+^{:refer xt.ui.state.model/patch-input! :added "4.1"}
 (fact "patches drafts and reads standardized model slots"
   (notify/wait-on :js
     (var store (-/create-store))
@@ -43,7 +43,7 @@
                      (ui-model/model-error store "draft")]))))
   => ["Ada" false nil])
 
-^{:refer xt.ui.model/subscribe! :added "4.1"}
+^{:refer xt.ui.state.model/subscribe! :added "4.1"}
 (fact "subscribes to page model changes and removes listeners on close"
   (notify/wait-on :js
     (var store (-/create-store))
@@ -67,53 +67,53 @@
                    "listeners" []}))
 
 
-^{:refer xt.ui.model/store-create :added "4.1"}
+^{:refer xt.ui.state.model/store-create :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/store-version :added "4.1"}
+^{:refer xt.ui.state.model/store-version :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/store-open :added "4.1"}
+^{:refer xt.ui.state.model/store-open :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/model :added "4.1"}
+^{:refer xt.ui.state.model/model :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/model-slot :added "4.1"}
+^{:refer xt.ui.state.model/model-slot :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/model-input :added "4.1"}
+^{:refer xt.ui.state.model/model-input :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/model-output :added "4.1"}
+^{:refer xt.ui.state.model/model-output :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/model-pending? :added "4.1"}
+^{:refer xt.ui.state.model/model-pending? :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/model-disabled? :added "4.1"}
+^{:refer xt.ui.state.model/model-disabled? :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/model-error :added "4.1"}
+^{:refer xt.ui.state.model/model-error :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/model-remote :added "4.1"}
+^{:refer xt.ui.state.model/model-remote :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/model-sync :added "4.1"}
+^{:refer xt.ui.state.model/model-sync :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/set-input! :added "4.1"}
+^{:refer xt.ui.state.model/set-input! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/invoke! :added "4.1"}
+^{:refer xt.ui.state.model/invoke! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/refresh! :added "4.1"}
+^{:refer xt.ui.state.model/refresh! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/unsubscribe! :added "4.1"}
+^{:refer xt.ui.state.model/unsubscribe! :added "4.1"}
 (fact "TODO")
 
-^{:refer xt.ui.model/store-close :added "4.1"}
+^{:refer xt.ui.state.model/store-close :added "4.1"}
 (fact "TODO")

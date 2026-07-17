@@ -6,6 +6,10 @@ import 'package:xtalk_substrate/page-proxy.dart' as page_proxy;
 
 import 'package:xtalk_substrate/page-core.dart' as page_core;
 
+listener_key(space_id, group_id, model_id) {
+  return "[\"" + space_id + "\",[\"" + group_id + "\",\"" + model_id + "\"]]";
+}
+
 store_create(node, space_id, group_id, mode, opts) {
   return <dynamic, dynamic>{
     "node":node,
@@ -42,9 +46,9 @@ store_open(store) {
 }
 
 model(store, model_id) {
-  var value_43150 = page_core.model_ensure(store["node"],store["space_id"],store["group_id"],model_id);
-  var _group = value_43150[0];
-  var current = value_43150[1];
+  var value_50428 = page_core.model_ensure(store["node"],store["space_id"],store["group_id"],model_id);
+  var _group = value_50428[0];
+  var current = value_50428[1];
   return current;
 }
 
@@ -105,7 +109,7 @@ patch_inputf(store, model_id, path, value, event) {
     var initial_data = current["data"];
     current = (((("Map" == (initial_data.runtimeType).toString()) || (initial_data.runtimeType).toString().startsWith("_Map") || (initial_data.runtimeType).toString().startsWith("LinkedMap")) && !((initial_data.runtimeType).toString().startsWith("List") || (initial_data.runtimeType).toString().startsWith("_GrowableList"))) ? initial_data : <dynamic, dynamic>{});
   }
-  var next = jsonDecode(jsonEncode(current ?? <dynamic, dynamic>{}));
+  var next = xtd.clone_nested(current ?? <dynamic, dynamic>{});
   xtd.set_in(next,path,value);
   return set_inputf(store,model_id,next,event);
 }
@@ -138,7 +142,7 @@ subscribef(store, subscription_id, callback) {
   var group_id = store["group_id"];
   var group = page_core.group_ensure(node,space_id,group_id);
   for(var model_id in group["models"].keys){
-    var key = jsonEncode(<dynamic>[space_id,<dynamic>[group_id,model_id]]);
+    var key = listener_key(space_id,group_id,model_id);
     event_listener.add_keyed_listener(node,key,subscription_id + "/" + model_id,"ui.model",(listener_id, data, t, meta) {
       store["revision"] = (1 + store["revision"]);
       return callback(listener_id,data,t,meta);
@@ -154,7 +158,7 @@ unsubscribef(store, subscription_id) {
   var group_id = store["group_id"];
   var group = page_core.group_ensure(node,space_id,group_id);
   for(var model_id in group["models"].keys){
-    var key = jsonEncode(<dynamic>[space_id,<dynamic>[group_id,model_id]]);
+    var key = listener_key(space_id,group_id,model_id);
     event_listener.remove_keyed_listener(node,key,subscription_id + "/" + model_id);
   };
   store["listeners"].remove(subscription_id);
@@ -163,9 +167,9 @@ unsubscribef(store, subscription_id) {
 
 store_close(store) {
   var listener_ids = List<dynamic>.from(( store["listeners"] ).keys);
-  var arr_43157 = listener_ids;
-  for(var i43158 = 0; i43158 < arr_43157.length; ++i43158){
-    var listener_id = arr_43157[i43158];
+  var arr_50435 = listener_ids;
+  for(var i50436 = 0; i50436 < arr_50435.length; ++i50436){
+    var listener_id = arr_50435[i50436];
     unsubscribef(store,listener_id);
   };
   var control = store["control"];

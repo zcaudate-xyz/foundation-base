@@ -6,6 +6,10 @@ const page_proxy = require("@xtalk/substrate/page-proxy.js")
 
 const page_core = require("@xtalk/substrate/page-core.js")
 
+function listener_key(space_id,group_id,model_id){
+  return "[\"" + space_id + "\",[\"" + group_id + "\",\"" + model_id + "\"]]";
+}
+
 function store_create(node,space_id,group_id,mode,opts){
   return {
     "node":node,
@@ -103,7 +107,7 @@ function patch_inputf(store,model_id,path,value,event){
     let initial_data = current["data"];
     current = ((((null != initial_data) && ("object" == (typeof initial_data)) && !Array.isArray(initial_data)) && !Array.isArray(initial_data)) ? initial_data : {});
   }
-  let next = JSON.parse(JSON.stringify(current || {}));
+  let next = xtd.clone_nested(current || {});
   xtd.set_in(next,path,value);
   return set_inputf(store,model_id,next,event);
 }
@@ -136,7 +140,7 @@ function subscribef(store,subscription_id,callback){
   let group_id = store["group_id"];
   let group = page_core.group_ensure(node,space_id,group_id);
   for(let model_id of Object.keys(group["models"])){
-    let key = JSON.stringify([space_id,[group_id,model_id]]);
+    let key = listener_key(space_id,group_id,model_id);
     event_listener.add_keyed_listener(node,key,subscription_id + "/" + model_id,"ui.model",function (listener_id,data,t,meta){
       store["revision"] = (1 + store["revision"]);
       return callback(listener_id,data,t,meta);
@@ -152,7 +156,7 @@ function unsubscribef(store,subscription_id){
   let group_id = store["group_id"];
   let group = page_core.group_ensure(node,space_id,group_id);
   for(let model_id of Object.keys(group["models"])){
-    let key = JSON.stringify([space_id,[group_id,model_id]]);
+    let key = listener_key(space_id,group_id,model_id);
     event_listener.remove_keyed_listener(node,key,subscription_id + "/" + model_id);
   };
   delete(store["listeners"][subscription_id]);
@@ -174,6 +178,7 @@ function store_close(store){
 }
 
 module.exports = {
+  ["listener_key"]:listener_key,
   ["store_create"]:store_create,
   ["store_version"]:store_version,
   ["store_open"]:store_open,

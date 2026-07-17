@@ -66,9 +66,9 @@ dispatchf(controller, action_id, payload) {
 
 actions_create(controller, action_ids) {
   var actions = <dynamic, dynamic>{};
-  var arr_43179 = action_ids ?? <dynamic>[];
-  for(var i43180 = 0; i43180 < arr_43179.length; ++i43180){
-    var action_id = arr_43179[i43180];
+  var arr_50457 = action_ids ?? <dynamic>[];
+  for(var i50458 = 0; i50458 < arr_50457.length; ++i50458){
+    var action_id = arr_50457[i50458];
     actions[action_id] = ((payload) {
       return dispatchf(controller,action_id,payload);
     });

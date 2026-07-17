@@ -2,11 +2,11 @@ import 'package:xtalk_ui/core.dart' as ui;
 
 import 'package:xtalk_lang/common-data.dart' as xtd;
 
-import 'package:xtalk_ui/catalog.dart' as catalog;
+import 'package:xtalk_ui/widgets/core.dart' as catalog;
 
 flutter_registry() {
   var platform = ui.registry_create("xt.ui/flutter-wind");
-  var arr_43201 = <dynamic>[
+  var arr_50479 = <dynamic>[
     <dynamic>["ui/fragment","WDiv"],
     <dynamic>["ui/row","WDiv"],
     <dynamic>["ui/column","WDiv"],
@@ -25,8 +25,8 @@ flutter_registry() {
     <dynamic>["ui/alert","WDiv"],
     <dynamic>["ui/spinner","WDiv"]
   ];
-  for(var i43202 = 0; i43202 < arr_43201.length; ++i43202){
-    var entry = arr_43201[i43202];
+  for(var i50480 = 0; i50480 < arr_50479.length; ++i50480){
+    var entry = arr_50479[i50480];
     ui.registry_register_renderer(platform,entry[0],entry[1]);
   };
   return ui.registry_compose(<dynamic>[catalog.registry(),platform]);
@@ -43,9 +43,9 @@ action_addf(state, event_id, callback, value_event) {
 
 normalize_props(component_id, props, state) {
   var out = <dynamic, dynamic>{};
-  for(var entry_43223 in (props ?? <dynamic, dynamic>{}).entries){
-    var key = entry_43223.key;
-    var value = entry_43223.value;
+  for(var entry_50501 in (props ?? <dynamic, dynamic>{}).entries){
+    var key = entry_50501.key;
+    var value = entry_50501.value;
     if(key == "class"){
       out["className"] = value;
     }
