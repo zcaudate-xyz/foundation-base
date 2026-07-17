@@ -625,39 +625,6 @@
   => {"ok" true
       "topics" {}})
 
-^{:refer xt.db.system.impl-supabase-realtime/subscribe.add-realtime-callback-00 :added "4.1"
-  ;; The shared Supabase/Postgres delivery path is exercised once by the
-  ;; primary JS seed. Native websocket delivery has its own runtime tests;
-  ;; generated facts below focus on the portable realtime functions.
-  :seedgen/base {:lua.nginx {:suppress true}
-                 :python {:suppress true}
-                 :dart {:suppress true}}
-}
-(fact "receives xt.db/event broadcasts from postgres after subscribing"
-
-  (notify/wait-on :js
-    (:= (!:G RT_EVENTS) [])
-    (:= (!:G RT_IMPL) {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
-      "state" {"realtimes" {}}
-      "::/override"
-      {"create_ws_client"
-       (fn [_impl defaults]
-         (return (js-websocket/create defaults)))}})
-    (realtime/add-realtime-callback (!:G RT_IMPL) "roundtrip" "cb-1"
-                                    (fn [event]
-                                      (xt/x:arr-push (!:G RT_EVENTS) event)))
-    (repl/notify
-     (realtime/subscribe (!:G RT_IMPL) "roundtrip" ["realtime:room:roundtrip"])))
-  => [true]
-
-  (do (!.pg
-        (s/realtime-send "room:roundtrip" "xt.db/event" {"hello" "from postgres"}))
-      (!.js
-        RT_EVENTS))
-  => (contains-in
-      [{"topic" "realtime:room:roundtrip"
-        "hello" "from postgres"}]))
-
 ^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback.remove :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
                  :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}

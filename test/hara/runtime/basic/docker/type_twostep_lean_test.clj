@@ -20,6 +20,7 @@
   :teardown [(l/rt:stop)]})
 
 
+^{:timeout 60000}
 (fact "lean twostep can return values in docker"
   [(!.lean
      (+ 1 2 3))

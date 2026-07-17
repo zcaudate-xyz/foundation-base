@@ -65,3 +65,55 @@
                          "listeners" (xt/x:obj-keys (xt/x:get-key store "listeners"))})))))))
   => (contains-in {"captured" vector?
                    "listeners" []}))
+
+
+^{:refer xt.ui.model/store-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/store-version :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/store-open :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/model-slot :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/model-input :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/model-output :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/model-pending? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/model-disabled? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/model-error :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/model-remote :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/model-sync :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/set-input! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/invoke! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/refresh! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/unsubscribe! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.model/store-close :added "4.1"}
+(fact "TODO")

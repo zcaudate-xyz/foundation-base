@@ -28,3 +28,22 @@
     seen
     (xt/x:has-key? props "on_change")])
   => ["p-4" "Name" true "name" "destructive" "Ada" false])
+
+
+^{:refer js.ui.figma/web-registry :added "4.1"}
+(fact "TODO")
+
+^{:refer js.ui.figma/render-node :added "4.1"}
+(fact "TODO")
+
+^{:refer js.ui.figma/use-model-store :added "4.1"}
+(fact "TODO")
+
+^{:refer js.ui.figma/PortableView :added "4.1"}
+(fact "TODO")
+
+^{:refer js.ui.figma/use-page-controller :added "4.1"}
+(fact "TODO")
+
+^{:refer js.ui.figma/PortableControllerView :added "4.1"}
+(fact "TODO")

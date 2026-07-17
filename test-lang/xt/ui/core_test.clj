@@ -65,3 +65,49 @@
       [{"component" "ui/text"
         "props" {"value" "Camera"}
         "children" []}]] )
+
+
+^{:refer xt.ui.core/node :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/text :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/slot :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/extension :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/component-contract :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/registry-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/registry-register-contract :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/registry-register-renderer :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/registry-contract :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/registry-renderer :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/validate-props :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/runtime-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/capability? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/service :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.core/base-registry :added "4.1"}
+(fact "TODO")

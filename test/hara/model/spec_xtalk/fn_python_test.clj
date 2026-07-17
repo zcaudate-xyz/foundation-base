@@ -515,3 +515,9 @@
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-del-key :added "4.1"}
 (fact "deletes object key")
+
+
+^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-construct :added "4.1"}
+(fact "constructs with splatted arguments"
+  (python-tf-x-construct '(_ Widget args))
+  => '(Widget (:* args)))

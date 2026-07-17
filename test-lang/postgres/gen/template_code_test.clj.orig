@@ -152,7 +152,7 @@
 (fact "binds every API function in deterministic descriptor-id order"
   (let [entries (gen/route-entries ['postgres.sample.scratch-v0])]
     (mapv first entries)
-    => '[postgres.sample.scratch-v0/echo
+    => '[negative/control
          postgres.sample.scratch-v0/log-all
          postgres.sample.scratch-v0/log-append
          postgres.sample.scratch-v0/log-append-public

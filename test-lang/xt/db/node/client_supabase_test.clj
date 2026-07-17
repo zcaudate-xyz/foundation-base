@@ -593,3 +593,7 @@
            (repl/notify {"error" err
                          "message" (xt/x:ex-message err)})))))
   => (contains-in [string? string? true]))
+
+
+^{:refer xt.db.node.client-supabase/attach-model :added "4.1"}
+(fact "TODO")

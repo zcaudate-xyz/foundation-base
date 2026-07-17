@@ -1,8 +1,7 @@
 (ns xt.db.helpers.test-fixtures
   (:require [hara.lang :as l]
             [postgres.core :as pg]
-            [postgres.sample.scratch-v1 :as scratch])
-  (:use code.test))
+            [postgres.sample.scratch-v1 :as scratch]))
 
 (def +scratch-env+
   {"host" "127.0.0.1"
@@ -196,11 +195,3 @@
     {"id" "00000000-0000-0000-0000-0000000000a2"
     "status" "closed"
     "name" "beta-task"}]})
-
-(fact "exposes shared node and postgres fixtures"
-  [(keys +schema+)
-   (keys +lookup+)
-   (keys +task-tree+)]
-  => [["Entry"]
-     ["Entry"]
-     ["Task"]])

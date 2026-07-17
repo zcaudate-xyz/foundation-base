@@ -283,7 +283,8 @@
    (default/default-invoke-script
     rt ptr args raw-eval-nginx
     {:main {}
-     :emit {:body {:transform lua/default-body-transform}}
+     :emit {:body {:transform lua/default-body-transform}
+            :code (:code lua/+lua-basic-script-emit+)}
      :json :full})))
 
 (defn- rt-nginx-string [{:keys [host port eval-path]}]
@@ -313,7 +314,8 @@
                        :eval-path "eval"
                        :no-server false
                        :lifecycle {:main {}
-                                   :emit {:body {:transform lua/default-body-transform}}
+                                   :emit {:body {:transform lua/default-body-transform}
+                                          :code (:code lua/+lua-basic-script-emit+)}
                                    :json :full}}
                       m)))
 

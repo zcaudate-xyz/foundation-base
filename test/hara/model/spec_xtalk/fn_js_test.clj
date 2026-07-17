@@ -549,3 +549,8 @@
 (fact "creates a new promise"
   (l/emit-as :js [(js-tf-x-promise-new '[_ thunk])])
   => "new Promise(function (resolve,reject){\n  thunk(resolve,reject);\n})")
+
+^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-construct :added "4.1"}
+(fact "constructs dynamically through Reflect.construct"
+  (js-tf-x-construct '(_ Widget args))
+  => '(. Reflect (construct Widget args)))

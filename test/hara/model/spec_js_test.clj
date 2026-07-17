@@ -145,3 +145,11 @@
 
 ^{:refer hara.model.spec-js/js-tf-prototype-method :added "4.1"}
 (fact "calls js prototype methods")
+
+
+^{:refer hara.model.spec-js/js-emit-input-rest :added "4.1"}
+(fact "emits a JavaScript variadic parameter"
+  (with-redefs [hara.common.emit-common/*emit-fn*
+                (fn [symbol _ _] (name symbol))]
+    (js-emit-input-rest {:symbol 'args} nil nil))
+  => "...args")

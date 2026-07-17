@@ -219,8 +219,17 @@
 (defn dart-tf-x-m-exp [[_ x]] (list 'math.exp x))
 (defn dart-tf-x-m-loge [[_ x]] (list 'math.log x))
 (defn dart-tf-x-m-log10 [[_ x]] (list '/ (list 'math.log x) 'math.ln10))
-(defn dart-tf-x-m-max [[_ & args]] (reduce (fn [acc arg] (list 'math.max acc arg)) args))
-(defn dart-tf-x-m-min [[_ & args]] (reduce (fn [acc arg] (list 'math.min acc arg)) args))
+(defn dart-tf-x-m-max
+  [[_ & args]]
+  (reduce (fn [acc arg]
+            (list ':? (list '> acc arg) acc arg))
+          args))
+
+(defn dart-tf-x-m-min
+  [[_ & args]]
+  (reduce (fn [acc arg]
+            (list ':? (list '< acc arg) acc arg))
+          args))
 (defn dart-tf-x-m-mod [[_ a b]] (list :% a (list :- " % ") b))
 (defn dart-tf-x-m-pow [[_ a b]] (list 'math.pow a b))
 (defn dart-tf-x-m-quot [[_ a b]] (list :% a (list :- " ~/ ") b))

@@ -146,3 +146,8 @@
 
 ^{:refer hara.model.spec-lua/lua-vector :added "4.1"}
 (fact "emits lua vectors")
+
+
+^{:refer hara.model.spec-lua/lua-emit-input-rest :added "4.1"}
+(fact "emits Lua's anonymous varargs marker"
+  (lua-emit-input-rest {:symbol 'args} nil nil) => "...")

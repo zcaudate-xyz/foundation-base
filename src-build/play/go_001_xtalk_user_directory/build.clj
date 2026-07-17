@@ -1,7 +1,7 @@
 (ns play.go-001-xtalk-user-directory.build
   (:use [code.test :exclude [-main]])
   (:require [hara.model.spec-go.typed :as go-typed]
-            [hara.typed :as xtalk]
+            [hara.typed.xtalk-analysis :as xtalk-analysis]
             [std.make :as make :refer [def.make]]
             [play.go-001-xtalk-user-directory.main :as main]))
 
@@ -32,7 +32,7 @@
 (defn go-source
   [_]
   (-> +main-file+
-      xtalk/analyze-file
+      xtalk-analysis/analyze-file
       go-typed/emit-analysis-declarations))
 
 (def.make PROJECT

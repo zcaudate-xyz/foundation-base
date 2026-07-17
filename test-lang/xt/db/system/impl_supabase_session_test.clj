@@ -86,6 +86,7 @@
    (session/set-session source {"expires_in" 120})
    (var source-opts (main/create-impl "supabase" {} nil nil))
    (xtd/set-in source-opts ["opts" "auto_refresh_interval"] 10000)
+   (session/set-session source-opts {"expires_in" 120})
    [(session/auto-refresh-interval source)
     (session/auto-refresh-interval source-opts)])
   => [60000 10000])

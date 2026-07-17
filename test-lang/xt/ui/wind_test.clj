@@ -30,3 +30,16 @@
     (xt/x:get-key input "type")
     changed])
   => ["WDiv" "flex flex-col gap-4" "WInput" "Grace"])
+
+
+^{:refer xt.ui.wind/flutter-registry :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.wind/action-add! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.wind/normalize-props :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.wind/prepare-node :added "4.1"}
+(fact "TODO")

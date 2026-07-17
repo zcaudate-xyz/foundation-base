@@ -218,8 +218,7 @@
    ;;
    ;; GC FLAGS
    ;;
-   "-XX:+UseAdaptiveSizePolicy"
-   "-XX:+AggressiveHeap"
+   "-XX:+UseG1GC"
    "-XX:+ExplicitGCInvokesConcurrent"
    ;;"-XX:+UseCMSInitiatingOccupancyOnly"
    ;;"-XX:+CMSClassUnloadingEnabled"
@@ -228,11 +227,8 @@
    ;;
    ;; GC TUNING
    ;;   
-   "-XX:MaxNewSize=256m"
-   "-XX:NewSize=256m"
    ;;"-XX:CMSInitiatingOccupancyFraction=60"
    "-XX:MaxTenuringThreshold=8"
-   "-XX:SurvivorRatio=4"
 
    ;;
    ;; Truffle

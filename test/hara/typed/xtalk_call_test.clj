@@ -84,3 +84,46 @@
   => '[{:kind :primitive :name :xt/str}
         {:kind :primitive :name :xt/num}
         :call-arity-mismatch])
+
+
+^{:refer hara.typed.xtalk-call/rest-input-type? :added "4.1"}
+(fact "recognizes only explicitly variadic input types"
+  [(rest-input-type? {:kind :array :item types/+str-type+ :rest true})
+   (rest-input-type? {:kind :array :item types/+str-type+})
+   (rest-input-type? nil)]
+  => [true false false])
+
+^{:refer hara.typed.xtalk-call/split-call-inputs :added "4.1"}
+(fact "separates the final variadic input from fixed inputs"
+  (let [rest-type {:kind :array :item types/+str-type+ :rest true}]
+    (split-call-inputs [types/+int-type+ rest-type]))
+  => {:fixed [types/+int-type+]
+      :rest {:kind :array :item types/+str-type+ :rest true}}
+  (split-call-inputs [types/+int-type+ types/+str-type+])
+  => {:fixed [types/+int-type+ types/+str-type+] :rest nil})
+
+^{:refer hara.typed.xtalk-call/call-arity? :added "4.1"}
+(fact "accepts required, optional, and variadic call arities"
+  (let [optional {:kind :maybe :item types/+str-type+}
+        rest-type {:kind :array :item types/+str-type+ :rest true}]
+    [(call-arity? [types/+int-type+ optional] 1 +ctx+)
+     (call-arity? [types/+int-type+ optional] 0 +ctx+)
+     (call-arity? [types/+int-type+ rest-type] 3 +ctx+)
+     (call-arity? [types/+int-type+] 2 +ctx+)])
+  => [true false true false])
+
+^{:refer hara.typed.xtalk-call/expected-call-inputs :added "4.1"}
+(fact "expands a variadic item type for every extra argument"
+  (let [rest-type {:kind :array :item types/+str-type+ :rest true}]
+    (expected-call-inputs [types/+int-type+ rest-type] 4))
+  => [types/+int-type+ types/+str-type+ types/+str-type+ types/+str-type+]
+  (expected-call-inputs [types/+int-type+ types/+str-type+] 1)
+  => [types/+int-type+])
+
+^{:refer hara.typed.xtalk-call/expected-call-arity :added "4.1"}
+(fact "reports fixed arity numerically and variadic arity structurally"
+  (let [optional {:kind :maybe :item types/+str-type+}
+        rest-type {:kind :array :item types/+str-type+ :rest true}]
+    [(expected-call-arity [types/+int-type+ optional] +ctx+)
+     (expected-call-arity [types/+int-type+ optional rest-type] +ctx+)])
+  => [2 {:min 1 :fixed 2 :variadic true}])

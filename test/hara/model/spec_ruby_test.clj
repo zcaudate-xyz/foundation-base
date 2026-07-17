@@ -355,3 +355,11 @@
 
 ^{:refer hara.model.spec-ruby/ruby-def :added "4.1"}
 (fact "emits ruby definitions")
+
+
+^{:refer hara.model.spec-ruby/ruby-emit-input-rest :added "4.1"}
+(fact "emits a Ruby splat parameter"
+  (with-redefs [hara.common.emit-common/*emit-fn*
+                (fn [symbol _ _] (name symbol))]
+    (spec-ruby/ruby-emit-input-rest {:symbol 'args} nil nil))
+  => "*args")

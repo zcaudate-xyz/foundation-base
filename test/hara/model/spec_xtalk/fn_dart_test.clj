@@ -158,13 +158,13 @@
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-m-max :added "4.1"}
 (fact "maximum"
-  (l/emit-as :dart [(dart-tf-x-m-max '[_ a b])])
-  => #"math\.max")
+  (emit-dart (dart-tf-x-m-max '[_ a b]))
+  => "(a > b) ? a : b")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-m-min :added "4.1"}
 (fact "minimum"
   (emit-dart (dart-tf-x-m-min '[_ a b]))
-  => #"math\.min")
+  => "(a < b) ? a : b")
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-m-mod :added "4.1"}
 (fact "modulo"
@@ -541,3 +541,9 @@
      (boolean (re-find #"completer\.completeError" out))
      (boolean (re-find #"completer\.future" out))])
   => [true true true true true])
+
+^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-construct :added "4.1"}
+(fact "constructs dynamically through Function.apply"
+  (dart-tf-x-construct '(_ Widget args))
+  => '(Function.apply Widget args))
+

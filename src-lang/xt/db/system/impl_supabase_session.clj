@@ -48,15 +48,18 @@
 
 (defn.xt auto-refresh-interval
   [impl]
+  (var configured (xtd/get-in impl ["opts" "auto_refresh_interval"]))
   (var expires-in (xtd/get-in impl ["state" "session" "expires_in"]))
-  (cond (xt/x:not-nil? expires-in)
+  (cond (xt/x:not-nil? configured)
+        (return configured)
+
+        (xt/x:not-nil? expires-in)
         (return (:? (>= (* expires-in 1000) 60000)
                     (- (* expires-in 1000) 60000)
                     1000))
 
         :else
-        (return (or (xtd/get-in impl ["opts" "auto_refresh_interval"])
-                    300000))))
+        (return 300000)))
 
 (defn.xt auto-refresh-fn
   [impl delay refresh-id]
@@ -90,7 +93,6 @@
   (var refresh-id (xts/str-rand 8))
   (xtd/set-in impl ["state" "auto_refresh" "current"] refresh-id)
   (return (-/auto-refresh-fn impl (-/auto-refresh-interval impl) refresh-id)))
-
 
 
 

@@ -2,7 +2,7 @@
   (:use [code.test :exclude [-main]])
   (:require [std.make :as make :refer [def.make]]
              [hara.model.spec-js.ts :as ts]
-             [hara.typed :as xtalk]
+             [hara.typed.xtalk-analysis :as xtalk-analysis]
              [play.ts-001-single-source-user-directory.main :as main]))
 
 (def +gitignore+
@@ -39,7 +39,7 @@
   [{:keys [runtime-output]}]
   {:output (ts/declaration-output-path runtime-output)
    :body   (-> +main-file+
-               xtalk/analyze-file
+               xtalk-analysis/analyze-file
                ts/emit-analysis-declarations)})
 
 (def.make PROJECT

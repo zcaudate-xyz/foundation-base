@@ -310,3 +310,148 @@
 (fact "return eval"
   (l/emit-as :php [(php-tf-x-return-eval '[_ s wrap-fn])])
   => #"eval")
+
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-ex-new :added "4.1"}
+(fact "creates plain exceptions or attaches an explicit data payload"
+  (php-tf-x-ex-new '(_ "boom")) => '(new Exception "boom")
+  (php-tf-x-ex-new '(_ "boom" data))
+  => '(do (var e := (new Exception "boom"))
+          (:= e->data data)
+          (return e)))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-ex-message :added "4.1"}
+(fact "reads a native exception message"
+  (php-tf-x-ex-message '(_ err)) => '(. err getMessage))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-ex-data :added "4.1"}
+(fact "reads an exception's attached data"
+  (php-tf-x-ex-data '(_ err)) => '(. err ["data"]))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-ex-native? :added "4.1"}
+(fact "checks PHP's Throwable contract"
+  (php-tf-x-ex-native? '(_ err)) => '(instanceof err Throwable))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-async-run :added "4.1"}
+(fact "runs asynchronous thunks synchronously on PHP"
+  (php-tf-x-async-run '(_ thunk)) => '(call_user_func_array thunk []))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-m-pow :added "4.1"}
+(fact "lowers exponentiation to PHP's power operator"
+  (php-tf-x-m-pow '(_ base exponent)) => '(** base exponent))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-obj-keys :added "4.1"}
+(fact "returns associative-array keys"
+  (php-tf-x-obj-keys '(_ obj)) => '(array_keys obj))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-obj-vals :added "4.1"}
+(fact "returns associative-array values"
+  (php-tf-x-obj-vals '(_ obj)) => '(array_values obj))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-obj-pairs :added "4.1"}
+(fact "builds key/value pairs in source iteration order"
+  (php-tf-x-obj-pairs '(_ obj))
+  => '((fn []
+         (var $out := [])
+         (for:object [[$k $v] obj]
+           (x:arr-push $out [$k $v]))
+         (return $out))))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-obj-clone :added "4.1"}
+(fact "clones an associative array without retaining identity"
+  (php-tf-x-obj-clone '(_ obj)) => '(array_merge [] obj))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-obj-assign :added "4.1"}
+(fact "merges object fields with right-hand precedence"
+  (php-tf-x-obj-assign '(_ obj fields)) => '(array_merge obj fields))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-lu-eq :added "4.1"}
+(fact "uses strict identity for lookup equality"
+  (php-tf-x-lu-eq '(_ left right)) => '(=== left right))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-for-array :added "4.1"}
+(fact "lowers value, index, and index/value array iteration"
+  (php-tf-for-array '(for:array [value arr] (use value)))
+  => '(foreach [arr value] (use value))
+  (php-tf-for-array '(for:array [[_ value] arr] (use value)))
+  => '(foreach [(array_values arr) value] (use value))
+  (php-tf-for-array '(for:array [[index _] arr] (use index)))
+  => '(foreach [(array_keys arr) index] (use index))
+  (php-tf-for-array '(for:array [[index value] arr] (use index value)))
+  => '(foreach [(array_keys arr) index]
+       (var value := (:% arr [index]))
+       (use index value)))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-for-object :added "4.1"}
+(fact "lowers object iteration through keys or values as requested"
+  (php-tf-for-object '(for:object [value obj] (use value)))
+  => '(foreach [(array_values obj) value] (use value))
+  (php-tf-for-object '(for:object [[key value] obj] (use key value)))
+  => '(foreach [(array_keys obj) key]
+       (var value := (:% obj [key]))
+       (use key value)))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-for-iter :added "4.1"}
+(fact "lowers generic iteration directly to foreach"
+  (php-tf-for-iter '(for:iter [item iterable] (use item)))
+  => '(foreach [iterable item] (use item)))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-assign :added "4.1"}
+(fact "appends every source item and returns the destination"
+  (php-tf-x-arr-assign '(_ target source))
+  => '(do (for:array [e source]
+            (x:arr-push target e))
+          (return target)))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-clone :added "4.1"}
+(fact "clones a PHP array"
+  (php-tf-x-arr-clone '(_ arr)) => '(array_merge [] arr))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-each :added "4.1"}
+(fact "walks each array item with the supplied function"
+  (php-tf-x-arr-each '(_ arr f)) => '(array_walk arr f))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-every :added "4.1"}
+(fact "short-circuits false and otherwise returns true"
+  (php-tf-x-arr-every '(_ arr pred))
+  => '((fn []
+         (for:array [$e arr]
+           (if (not (pred $e))
+             (return false)))
+         (return true))))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-some :added "4.1"}
+(fact "short-circuits true and otherwise returns false"
+  (php-tf-x-arr-some '(_ arr pred))
+  => '((fn []
+         (for:array [$e arr]
+           (if (pred $e)
+             (return true)))
+         (return false))))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-map :added "4.1"}
+(fact "maps and normalizes numeric keys"
+  (php-tf-x-arr-map '(_ arr f)) => '(array_values (array_map f arr)))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-filter :added "4.1"}
+(fact "filters and normalizes numeric keys"
+  (php-tf-x-arr-filter '(_ arr pred))
+  => '(array_values (array_filter arr pred)))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-foldl :added "4.1"}
+(fact "reduces arrays from the left"
+  (php-tf-x-arr-foldl '(_ arr f init)) => '(array_reduce arr f init))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-foldr :added "4.1"}
+(fact "reverses before reducing from the right"
+  (php-tf-x-arr-foldr '(_ arr f init))
+  => '(array_reduce (array_reverse arr) f init))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-arr-find :added "4.1"}
+(fact "returns the first matching index or minus one"
+  (php-tf-x-arr-find '(_ arr pred))
+  => '((fn []
+         (for:array [$i (array_keys arr)]
+           (if (pred (:% arr [$i]))
+             (return $i)))
+         (return -1))))

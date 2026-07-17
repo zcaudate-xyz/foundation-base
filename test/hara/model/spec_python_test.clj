@@ -44,7 +44,8 @@
      (not (boolean (re-find #"lambda elem,props : elem\[\"props\"\] = props" out)))])
   => [true true true true])
 
-^{:refer hara.model.spec-python/python-fn :added "4.1"}
+^{:refer hara.model.spec-python/python-fn :added "4.1"
+  :id test-python-fn-direct-assignment}
 (fact "lifts callbacks that use direct assignment"
 
   (let [out (l/emit-as
@@ -58,7 +59,8 @@
      (not (boolean (re-find #"lambda link_id : removed = link_id" out)))])
   => [true true true true])
 
-^{:refer hara.model.spec-python/python-fn :added "4.1"}
+^{:refer hara.model.spec-python/python-fn :added "4.1"
+  :id test-python-fn-invoke-argument}
 (fact "lifts callbacks passed directly as invoke arguments"
   (let [out (l/emit-as
              :python '[(var removed nil)
@@ -188,3 +190,11 @@
 
 ^{:refer hara.model.spec-python/python-tf-prototype-method :added "4.1"}
 (fact "calls python prototype methods")
+
+
+^{:refer hara.model.spec-python/python-emit-input-rest :added "4.1"}
+(fact "emits a Python variadic parameter"
+  (with-redefs [hara.common.emit-common/*emit-fn*
+                (fn [symbol _ _] (name symbol))]
+    (py/python-emit-input-rest {:symbol 'args} nil nil))
+  => "*args")

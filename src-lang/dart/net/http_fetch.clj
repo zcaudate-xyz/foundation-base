@@ -22,29 +22,38 @@
         (return (util/response-normalize output)))
     (do (var http-client (io.HttpClient))
         (var uri (. Uri (parse (xt/x:get-key request "url"))))
+        (var output-future
+             (. (. http-client (openUrl (xt/x:get-key request "method") uri))
+                (then
+                 (fn [req]
+                   (xt/for:object [[k v] (xt/x:get-key request "headers")]
+                     (. (. req headers) (set k v)))
+                   (when (xt/x:not-nil? (xt/x:get-key request "body"))
+                     (var body-bytes
+                          (. (. convert utf8)
+                             (encode (xt/x:get-key request "body"))))
+                     (:= (. req contentLength) (. body-bytes length))
+                     (. req (add body-bytes)))
+                   (var response-future (. req (close)))
+                   (return
+                    (. response-future
+                       (then
+                        (fn [res]
+                          (var body-future
+                               (. (. res (transform (. (. convert utf8) decoder)))
+                                  (join)))
+                          (return
+                           (. body-future
+                              (then
+                               (fn [body]
+                                 (return {"status" (. res statusCode)
+                                          "headers" {}
+                                          "body" (util/decode-body body)})))))))))))))
         (return
-         (. (. http-client (openUrl (xt/x:get-key request "method") uri))
-            (then
-             (fn [req]
-              (xt/for:object [[k v] (xt/x:get-key request "headers")]
-                (. (. req headers) (set k v)))
-              (when (xt/x:not-nil? (xt/x:get-key request "body"))
-                (. req (write (xt/x:get-key request "body"))))
-              (var response-future (. req (close)))
-              (return
-               (. response-future
-                  (then
-                   (fn [res]
-                     (var body-future
-                          (. (. res (transform (. (. convert utf8) decoder)))
-                             (join)))
-                     (return
-                      (. body-future
-                         (then
-                          (fn [body]
-                            (return {"status" (. res statusCode)
-                                     "headers" {}
-                                     "body" (util/decode-body body)}))))))))))))))))
+         (. output-future
+            (whenComplete
+             (fn []
+               (. http-client (close)))))))))
 
 (defn.dt request-http
   [client input]

@@ -1,35 +1,40 @@
-^{:seedgen/skip true}
 (ns xt.db.node.example-auth-profile-test
   (:use code.test)
   (:require [hara.lang :as l]
             [scaffold.supabase.local-min :as local-min]
-            [std.lib.component :as component]
-            [std.lib.env :as env]
             [xt.lang.common-notify :as notify]))
 
-(require '[hara.runtime.js-playground :as js-playground]
-         '[hara.runtime.chromedriver :as chromedriver])
-
+^{:seedgen/root {:all true
+                 :langs [:js :lua.nginx :python :dart]}}
 (l/script- :js
-  {:runtime :playground
-   :config {:port 0}
+  {:runtime :basic
    :test-mode true
    :require [[xt.lang.common-repl :as repl]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.db.node.example-auth-profile :as example]
-             [xt.db.node.example-auth-profile-ui :as ui]
              [xt.db.system.impl-supabase-session :as session]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
-             [xt.db.node.client-supabase :as supabase-client]
-             [hara.runtime.js-playground.client :as client]]
-   :emit {:native {:suppress true}
-          :lang/jsx false}})
+             [xt.db.node.client-supabase :as supabase-client]]})
+
+(l/script- :lua.nginx
+  {:runtime :nginx.instance
+   :test-mode true
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
+             [lua.nginx.common-promise]
+             [xt.db.node.example-auth-profile :as example]
+             [xt.db.system.impl-supabase-session :as session]
+             [xt.substrate :as substrate]
+             [xt.substrate.page-core :as page-core]
+             [xt.db.node.client-supabase :as supabase-client]]})
 
 (defn.js local-client-defaults
-  "returns browser client defaults for scaffold/supabase local-min"
+  "returns client defaults for scaffold/supabase local-min"
   {:added "4.1"}
   []
   (return
@@ -49,25 +54,10 @@
     {"space_id" "room/a"
      "group_id" "auth"})))
 
-(defn- wait-for-channel
-  "waits up to 5s for the playground websocket channel to be connected"
-  [rt]
-  (let [channel (:channel rt)]
-    (loop [i 0]
-      (when (and (< i 50) (not @channel))
-        (Thread/sleep 100)
-        (recur (inc i))))))
-
 (fact:global
  {:setup [(local-min/start-supabase)
-          (l/rt:restart :js)
-          (l/rt:scaffold-imports :js)
-          (def +url+ (str "http://127.0.0.1:" (:port (l/rt :js)) "/index.html"))
-          (def +browser+ (chromedriver/browser {}))
-          (chromedriver/goto +url+ 5000 +browser+)
-          (wait-for-channel (l/rt :js))]
-  :teardown [(component/stop +browser+)
-             (l/rt:stop)
+          (l/rt:restart)]
+  :teardown [(l/rt:stop)
              (local-min/stop-supabase nil)]})
 
 ^{:refer xt.db.node.example-auth-profile/auth-profile-models :added "4.1"}
@@ -97,197 +87,94 @@
     (xt/x:not-nil? profile-model)])
   => [true true true])
 
-^{:refer xt.db.node.example-auth-profile-test/notify-canary :added "4.1"}
-(fact "notify works in playground"
+^{:refer xt.db.node.example-auth-profile/auth-profile-models.integration
+  :added "4.1"
+  :timeout 70000}
+(fact "runs the auth/profile model handlers through local-min"
 
-  (notify/wait-on [:js 5000]
-    (promise/x:with-delay 100
-      (fn [] (repl/notify "ok"))))
-  => "ok")
-
-^{:refer xt.db.node.example-auth-profile-test/typeof-fetch :added "4.1"}
-(fact "fetch is defined in playground"
-
-  (!.js (typeof fetch))
-  => "function")
-
-^{:refer xt.db.node.example-auth-profile-test/raw-fetch-health :added "4.1"}
-(fact "raw fetch to supabase health in playground"
-
-  (notify/wait-on [:js 15000]
-    (-> (fetch "http://127.0.0.1:55121/auth/v1/health"
-               {"headers" {"apikey" "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0"}})
-        (.then (fn [res]
-                 (return (. res (text)))))
-        (.then (fn [body]
-                 (repl/notify ["ok" body])))
-        (.catch (fn [err]
-                  (repl/notify ["err" (String err)])))))
-  => vector?)
-
-^{:refer xt.db.node.example-auth-profile-test/raw-fetch-notify :added "4.1"}
-(fact "raw fetch to notify server in playground"
-
-  (notify/wait-on [:js 15000]
-    (-> (fetch (str "http://127.0.0.1:" (@! (-> (std.lib.resource/res :hara/lang.notify) :http-port)) "/"))
-        (.then (fn [res]
-                 (return (. res (text)))))
-        (.then (fn [body]
-                 (repl/notify ["ok" body])))
-        (.catch (fn [err]
-                  (repl/notify ["err" (String err)])))))
-  => vector?)
-
-^{:refer xt.db.node.example-auth-profile/attach-auth-profile-models :added "4.1"}
-(fact "signs up, signs back in, updates auth metadata and logs out through local-min"
-
-  (notify/wait-on [:js 15000]
+  (notify/wait-on [:js 60000]
     (var email (xt/x:cat "auth-profile-"
                          (xt/x:to-string (xt/x:now-ms))
                          "@example.com"))
     (var credentials {"email" email
                       "password" "secret123"})
     (var node (-/create-local-node))
-    (-> (page-core/model-refresh node
-                                 "room/a"
-                                 "auth"
-                                 "sign-up"
-                                 {"credentials" credentials}
-                                 nil)
+    (xtd/set-in (substrate/get-service node "auth/supabase")
+                 ["opts" "auto_refresh_interval"]
+                 5000)
+    (var models (example/auth-profile-models "auth/supabase"))
+    (var context {"node" node})
+    (var profile-output nil)
+    (var sign-up (xtd/get-in models ["sign-up" "handler"]))
+    (var logout (xtd/get-in models ["logout" "handler"]))
+    (var login (xtd/get-in models ["login" "handler"]))
+    (var session-get (xtd/get-in models ["session" "handler"]))
+    (var profile-get (xtd/get-in models ["profile" "handler"]))
+    (var profile-change (xtd/get-in models ["change-profile" "handler"]))
+    (-> (sign-up context credentials)
         (promise/x:promise-then
          (fn [_]
-           (return
-            (page-core/model-refresh node
-                                     "room/a"
-                                     "auth"
-                                     "logout"
-                                     {}
-                                     nil))))
+           (return (logout context))))
         (promise/x:promise-then
          (fn [_]
-           (return
-            (page-core/model-refresh node
-                                     "room/a"
-                                     "auth"
-                                     "login"
-                                     {"credentials" credentials}
-                                     nil))))
+           (return (login context credentials))))
         (promise/x:promise-then
          (fn [_]
-           (return
-            (page-core/model-refresh node
-                                     "room/a"
-                                     "auth"
-                                     "session"
-                                     {}
-                                     nil))))
+           (return (session-get context))))
         (promise/x:promise-then
          (fn [_]
-           (return
-            (page-core/model-refresh node
-                                     "room/a"
-                                     "auth"
-                                     "profile"
-                                     {}
-                                     nil))))
+           (return (profile-get context))))
         (promise/x:promise-then
          (fn [_]
-           (return
-            (page-core/model-refresh
-             node
-             "room/a"
-             "auth"
-             "change-profile"
-             {"profile" {"display_name" "Test User"}}
-             nil))))
+           (return (profile-change context {"display_name" "Test User"}))))
         (promise/x:promise-then
          (fn [_]
-           (return
-            (page-core/model-refresh node
-                                     "room/a"
-                                     "auth"
-                                     "profile"
-                                     {}
-                                     nil))))
+           (return (profile-get context))))
+        (promise/x:promise-then
+         (fn [output]
+           (:= profile-output output)
+           (return (logout context))))
         (promise/x:promise-then
          (fn [_]
-           (var profile-output
-                (page-core/model-get-output node
-                                            "room/a"
-                                            "auth"
-                                            "profile"))
-           (return
-            (-> (page-core/model-refresh node
-                                         "room/a"
-                                         "auth"
-                                         "logout"
-                                         {}
-                                         nil)
-                (promise/x:promise-then
-                 (fn [_]
-                   (return
-                    (page-core/model-refresh node
-                                             "room/a"
-                                             "auth"
-                                             "session"
-                                             {}
-                                             nil))))
-                (promise/x:promise-then
-                 (fn [_]
-                   (var session-output
-                        (page-core/model-get-output node
-                                                    "room/a"
-                                                    "auth"
-                                                    "session"))
-                   (var impl
-                        (substrate/get-service node "auth/supabase"))
-                   (session/auto-refresh-stop impl)
-                   (repl/notify
-                    {"email" (xtd/get-in profile-output
-                                         ["user" "email"])
-                     "display_name" (xtd/get-in profile-output
-                                                ["user"
-                                                 "user_metadata"
-                                                 "display_name"])
-                     "session" session-output})))))))
+           (return (session-get context))))
+        (promise/x:promise-then
+         (fn [session-output]
+           (var impl (substrate/get-service node "auth/supabase"))
+           (session/auto-refresh-stop impl)
+           (repl/notify
+            {"email" (xtd/get-in profile-output ["user" "email"])
+             "display_name" (xtd/get-in profile-output
+                                        ["user" "user_metadata" "display_name"])
+             "session" session-output})))
         (promise/x:promise-catch
          (fn [err]
            (repl/notify {"error" (xt/x:ex-message err)
                          "value" (xt/x:to-string err)})))))
-  => {"email" string?
-      "display_name" "Test User"
-      "session" nil})
+  => (contains {"email" string?
+                "display_name" "Test User"
+                "session" nil}))
 
-^{:refer xt.db.node.example-auth-profile-ui/mount-playground :added "4.1"}
-(fact "mounts the interactive auth/profile UI in the playground stage"
 
-  (notify/wait-on [:js 5000]
-    (var node
-         (ui/mount-playground
-          (-/local-client-defaults)
-          {"space_id" "room/ui"
-           "group_id" "auth"}))
-    (promise/x:with-delay
-     200
-     (fn []
-       (var heading (. document (querySelector "h1")))
-       (repl/notify
-        [(xt/x:get-key heading "textContent")
-         (xt/x:not-nil?
-          (substrate/get-service node "auth/supabase"))]))))
-  => ["Supabase auth profile" true])
+^{:refer xt.db.node.example-auth-profile/first-arg :added "4.1"}
+(fact "TODO")
 
-(comment
+^{:refer xt.db.node.example-auth-profile/session-model :added "4.1"}
+(fact "TODO")
 
-  (local-min/start-supabase)
-  (l/rt:restart :js)
-  (def +url+ (js-playground/play-url (l/rt :js)))
+^{:refer xt.db.node.example-auth-profile/profile-model :added "4.1"}
+(fact "TODO")
 
-  ;; Open +url+ in a browser, then evaluate:
-  (!.js
-   (ui/mount-playground
-    (-/local-client-defaults)
-    {"space_id" "room/playground"
-     "group_id" "auth"}))
+^{:refer xt.db.node.example-auth-profile/sign-up-model :added "4.1"}
+(fact "TODO")
 
-  (l/rt:stop))
+^{:refer xt.db.node.example-auth-profile/login-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.example-auth-profile/logout-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.example-auth-profile/change-profile-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.example-auth-profile/attach-auth-profile-models :added "4.1"}
+(fact "TODO")

@@ -504,3 +504,34 @@
 (fact "transforms x:promise-new"
   (scheme-tf-x-promise-new '(x:promise-new thunk))
   => '(xt-promise-new thunk))
+
+^{:refer hara.model.spec-xtalk.fn-scheme/scheme-truthy-check :added "4.1"}
+(fact "treats null and false as falsey"
+  (scheme-truthy-check 'value)
+  => '(if (null? value) false (if (equal? value false) false true)))
+
+^{:refer hara.model.spec-xtalk.fn-scheme/scheme-tf-or :added "4.1"}
+(fact "short-circuits and returns the first truthy value"
+  (with-redefs [clojure.core/gensym (constantly 'v)]
+    (scheme-tf-or '(or a b c)))
+  => '(let [v a]
+        (if (if (null? v) false (if (equal? v false) false true))
+          v
+          (let [v b]
+            (if (if (null? v) false (if (equal? v false) false true))
+              v c)))))
+
+^{:refer hara.model.spec-xtalk.fn-scheme/scheme-tf-and :added "4.1"}
+(fact "short-circuits and returns the first falsey value"
+  (with-redefs [clojure.core/gensym (constantly 'v)]
+    (scheme-tf-and '(and a b c)))
+  => '(let [v a]
+        (if (if (null? v) false (if (equal? v false) false true))
+          (let [v b]
+            (if (if (null? v) false (if (equal? v false) false true))
+              c v))
+          v)))
+
+^{:refer hara.model.spec-xtalk.fn-scheme/scheme-tf--%%- :added "4.1"}
+(fact "lowers the raw-eval marker to x:eval"
+  (scheme-tf--%%- '(-%%- source)) => '(x:eval source))

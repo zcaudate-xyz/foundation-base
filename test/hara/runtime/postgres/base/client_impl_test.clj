@@ -232,3 +232,12 @@
                                               {:form '(+ 1 2 3)})
                              [])
   => 6)
+
+
+^{:refer hara.runtime.postgres.base.client-impl/invoke-ptr-pg-form :added "4.1"}
+(fact "wraps one form in a free pointer form and invokes it without arguments"
+  (with-redefs [client-impl/invoke-ptr-pg-single vector]
+    (client-impl/invoke-ptr-pg-form :pg
+                                    {:id :query}
+                                    '(+ 1 2)))
+  => '[:pg {:id :query :form (+ 1 2)} []])

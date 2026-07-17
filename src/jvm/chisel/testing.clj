@@ -95,7 +95,7 @@
                         (poke r true) (step) (poke r false)))
         ctx {:port pdata :poke poke :expect expect :peek peekv :step step :reset! reset!}
         ret (atom nil)]
-    (.simulate sim thunk (fn1 (fn [_] (reset! ret (f ctx)))))
+    (.simulate sim thunk (fn1 (fn [_] (clojure.core/reset! ret (f ctx)))))
     @ret))
 
 ;; bit-vector helpers --------------------------------------------------------

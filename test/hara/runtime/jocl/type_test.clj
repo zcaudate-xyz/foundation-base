@@ -35,3 +35,16 @@
  
   (str (type (to-array 10)))
   => "class [J")
+
+
+^{:refer hara.runtime.jocl.type/unit-coerce :added "4.1"}
+(fact "coerces scalars to the exact primitive width declared by a kernel"
+  [(class (unit-coerce :int 7))
+   (class (unit-coerce :long 7))
+   (class (unit-coerce :short 7))
+   (class (unit-coerce :char 7))
+   (class (unit-coerce :float 7))
+   (class (unit-coerce :double 7))]
+  => [Integer Long Short Byte Float Double]
+  (unit-coerce :unsupported 1)
+  => (throws-info {:unit :unsupported :arg 1}))

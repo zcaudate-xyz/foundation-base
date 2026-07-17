@@ -563,3 +563,18 @@
          (fn [out]
            (repl/notify {"has-data" (xt/x:is-array? out)})))))
   => {"has-data" true})
+
+^{:refer xt.db.node.kernel-supabase/supabase-rpc-error-detail :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-supabase/supabase-error-data :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-supabase/supabase-response-data :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-supabase/supabase-create-model :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.node.kernel-supabase/supabase-attach-model :added "4.1"}
+(fact "TODO")

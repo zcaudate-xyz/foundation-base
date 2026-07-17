@@ -294,3 +294,7 @@
            (repl/notify {"error" err
                          "message" (xt/x:ex-message err)})))))
   => (contains-in [{"message" "hello-proxy", "author_id" nil, "id" string?}]))
+
+
+^{:refer xt.db.node.proxy-supabase/attach-forward-handler :added "4.1"}
+(fact "TODO")

@@ -57,3 +57,34 @@
         (promise/x:promise-then (fn [_] (return (page/close! controller))))
         (promise/x:promise-then (fn [_] (repl/notify events)))))
   => ["open" "close"])
+
+
+^{:refer xt.ui.page/snapshot :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.page/revision :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.page/notify! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.page/set-state! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.page/update-state! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.page/subscribe! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.page/unsubscribe! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.page/dispatch! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.page/actions-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.ui.page/close! :added "4.1"}
+(fact "TODO")

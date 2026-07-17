@@ -125,11 +125,13 @@
                           "db/sync"
                           {"db/sync" {"Entry" []}}
                           false)])]
-    [(str/starts-with? sql "SELECT realtime.send(")
+    [(str/starts-with? sql "realtime.send(")
+     (not (str/starts-with? sql "SELECT"))
+     (not (str/includes? sql "SELECT SELECT"))
      (str/includes? sql "'db/sync'")
      (str/includes? sql "'room:test'")
      (str/includes? sql "jsonb_build_object")])
-  => [true true true true])
+  => [true true true true true true])
 
 ^{:refer postgres.core.supabase/realtime-send-request :added "4.1.4"}
 (fact "emits an xt.db request as a supabase realtime send"
@@ -139,11 +141,13 @@
                           "room:test"
                           {"db/sync" {"Entry" []}}
                           false)])]
-    [(str/starts-with? sql "SELECT realtime.send(")
+    [(str/starts-with? sql "realtime.send(")
+     (not (str/starts-with? sql "SELECT"))
+     (not (str/includes? sql "SELECT SELECT"))
      (str/includes? sql "'db/sync'")
      (str/includes? sql "'room:test'")
      (str/includes? sql "jsonb_build_object")])
-  => [true true true true])
+  => [true true true true true true])
 
 ^{:refer postgres.core.supabase/realtime-topic :added "4.1.4"}
 (fact "emits the Supabase private-topic authorization helper"

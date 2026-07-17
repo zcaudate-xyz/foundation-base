@@ -2091,7 +2091,6 @@
           \n ␣ ␣ ␣ ␣ ␣
           \n ␣ ␣ ␣ ␣ ␣ [i (pos? 0)]
           \n ␣ ␣ (+ i 1)))
-)
 ;; END merged documentation: plans/slop/summary/std_block_grid_tutorial.md
 
 ;; BEGIN merged documentation: plans/slop/summary/std_block_parse_tutorial.md

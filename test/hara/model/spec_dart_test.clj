@@ -306,3 +306,11 @@
     :suffix ".dart"}
    {})
   => '(:- "import 'package:xtalk_ui/page.dart' as event_listener;"))
+
+
+^{:refer hara.model.spec-dart/dart-emit-input-rest :added "4.1"}
+(fact "emits Dart's optional list-backed rest parameter"
+  (with-redefs [hara.common.emit-common/*emit-fn*
+                (fn [symbol _ _] (name symbol))]
+    (spec-dart/dart-emit-input-rest {:symbol 'args} nil nil))
+  => "[args = const []]")

@@ -279,3 +279,12 @@
       "promise" 42
       "native" true
       "same" true})
+
+^{:refer xt.substrate.transport-websocket/mark-open :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.transport-websocket/mark-error :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.substrate.transport-websocket/mark-close :added "4.1"}
+(fact "TODO")

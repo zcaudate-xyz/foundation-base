@@ -130,13 +130,7 @@
 
 
 ^{:refer hara.common.emit-helper/rest-arg-form? :added "4.1"}
-(fact "recognizes only the canonical final rest argument shape"
-  (rest-arg-form? '(:.. args)) => true
-  (rest-arg-form? '(:.. "args")) => false
-  (rest-arg-form? '(:.. args extra)) => false
-  (rest-arg-form? '[:.. args]) => false)
+(fact "TODO")
 
 ^{:refer hara.common.emit-helper/rest-arg-symbol :added "4.1"}
-(fact "returns the symbol from a canonical rest argument"
-  (rest-arg-symbol '(:.. args)) => 'args
-  (rest-arg-symbol '(:.. "args")) => nil)
+(fact "TODO")

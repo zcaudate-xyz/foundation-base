@@ -343,3 +343,9 @@
 
 ^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-file-spit :added "4.1"}
 (fact "writes file contents")
+
+
+^{:refer hara.model.spec-xtalk.fn-lua/lua-tf-x-construct :added "4.1"}
+(fact "constructs with unpacked arguments"
+  (lua-tf-x-construct '(_ Widget args))
+  => '(Widget (unpack args)))

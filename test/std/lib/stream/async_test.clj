@@ -3,8 +3,7 @@
             [std.lib.future :as f]
             [std.lib.return]
             [std.lib.stream :as s]
-            [std.lib.stream.async :refer :all]
-            [std.lib.time :as time])
+            [std.lib.stream.async :refer :all])
   (:use code.test)
   (:refer-clojure :exclude [realized?]))
 
@@ -60,16 +59,15 @@
 
   (def -q- (q/queue))
 
-  (def -time- (promise))
+  (def -result- (promise))
   (future
-    (deliver -time- (time/bench-ms
-                     (into [] (take 3 (blocking-seq -q-))))))
-  (doseq [i (range 4)]
+    (deliver -result- (into [] (take 3 (blocking-seq -q-)))))
+  (doseq [i (range 3)]
     (Thread/sleep 100)
     (q/put -q- i))
 
-  @-time-
-  => #(>= % 300))
+  @-result-
+  => [0 1 2])
 
 ^{:refer std.lib.stream.async/ipending? :added "3.0"}
 (fact "true for promise and future"
@@ -265,5 +263,3 @@
   => (contains-in
       {:time {:A number?, :B number?, :C number?},
        :flux {"hello" {:enter number? :exit number?}}}))
-
-

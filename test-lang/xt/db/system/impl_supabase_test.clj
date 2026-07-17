@@ -206,3 +206,7 @@
        "::/protocols" ["xt.db.system.impl_common/ISourceRemote"],
        "client" map?
        "state" {"session" nil?, "auto_refresh" nil?, "realtimes" map?}}))
+
+
+^{:refer xt.db.system.impl-supabase/create-ws-client :added "4.1"}
+(fact "TODO")

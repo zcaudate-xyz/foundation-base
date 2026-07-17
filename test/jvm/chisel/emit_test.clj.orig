@@ -21,7 +21,7 @@
     (try
       (with-redefs [emit/system-verilog (fn [_] "module Fixture; endmodule\n")]
         (emit/spit-system-verilog :builder path) => path
-        (slurp path) => "module Fixture; endmodule\n")
+        (slurp path) => "NEGATIVE CONTROL")
       (finally (fs/delete tmpdir)))))
 
 ^{:refer jvm.chisel.emit/lint! :added "4.1"}

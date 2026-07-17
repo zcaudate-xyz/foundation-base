@@ -259,3 +259,18 @@
 (fact "resolves a file path via candidates"
   (resolve-file-path "test/hara.lang/model/spec_xtalk_typed_fixture.clj")
   => "test/hara/model/spec_xtalk_typed_fixture.clj")
+
+^{:refer hara.typed.xtalk-parse/rest-arg-form? :added "4.1"}
+(fact "recognizes canonical list rest arguments only"
+  [(rest-arg-form? '(:.. args))
+   (rest-arg-form? '[:.. args])
+   (rest-arg-form? '(:.. "args"))
+   (rest-arg-form? '(:.. args extra))]
+  => [true false false false])
+
+^{:refer hara.typed.xtalk-parse/rest-arg-type :added "4.1"}
+(fact "creates an unknown-item variadic array type"
+  (rest-arg-type)
+  => {:kind :array
+      :item {:kind :primitive :name :xt/unknown}
+      :rest true})
