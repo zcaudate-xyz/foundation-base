@@ -2,7 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true, :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-notify :as notify]
@@ -448,9 +448,9 @@
               "defaults" {"args" []}}})
     (var removed (page-core/group-remove node "space/a" "page"))
     {"removed-name" (. removed ["name"])
-     "remaining" (page-core/group-get node "space/a" "page")})
+     "group_missing" (== nil (page-core/group-get node "space/a" "page"))})
   => {"removed-name" "page"
-      "remaining" nil})
+      "group_missing" true})
 
 ^{:refer xt.substrate.page-core/group-remove.dependents :added "4.1"}
 (fact "throws when dependents exist"

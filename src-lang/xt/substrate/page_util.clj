@@ -24,23 +24,26 @@
   [pred signal event ctx]
   (var check false)
   (try
-    (var t (:? (xt/x:nil? pred)
-               true
+    (var t nil)
+    (cond (xt/x:nil? pred)
+          (:= t true)
 
-               (xt/x:is-boolean? pred)
-               pred
+          (xt/x:is-boolean? pred)
+          (:= t pred)
 
-               (xt/x:is-function? pred)
-               (pred signal ctx)
+          (xt/x:is-function? pred)
+          (:= t (pred signal ctx))
 
-               (xt/x:is-object? pred)
-               (xt/x:get-key pred signal)
+          (xt/x:is-object? pred)
+          (:= t (xt/x:get-key pred signal))
 
-               :else
-               (== signal pred)))
-    (:= check (or (== true t)
-                  (and (xt/x:is-function? t) (t event ctx))
-                  false))
+          :else
+          (:= t (== signal pred)))
+    (cond (== true t)
+          (:= check true)
+
+          (xt/x:is-function? t)
+          (:= check (xt/x:apply t [event ctx])))
     (catch err
       (:= check false)))
   (return check))

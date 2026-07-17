@@ -199,7 +199,7 @@
   (xt/for:object [[dgroup-id dmodel-ids] dependents]
     (var throttle (xt/x:get-key (-/group-ensure node space-id dgroup-id) "throttle"))
     (xt/for:array [dmodel-id dmodel-ids]
-      (th/throttle-run throttle dmodel-id [])))
+      (th/throttle-run throttle dmodel-id [{}])))
   (return dependents))
 
 (defn.xt model-refresh-dependents-unthrottled

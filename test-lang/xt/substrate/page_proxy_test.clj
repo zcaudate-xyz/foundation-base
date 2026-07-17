@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true, :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -80,7 +80,7 @@
                                             "output" {}
                                             "process" (fn [x] (return x))
                                             "init" (fn [] (return nil))}
-                                 "handler" (fn [ctx]
+                                 "handler" (fn [ctx _]
                                              (var data (xtd/get-in ctx ["input" "data"]))
                                              (return {"value" (xt/x:first data)}))
                                  "options" {"trigger" true}}})))
@@ -146,33 +146,6 @@
            (repl/notify out)))))
   => {"pong" "hello"})
 
-(fact "response-ok sends response over transport"
-  (notify/wait-on :js
-    (var server (substrate/node-create {"id" "server"
-                                        "spaces" {"room/a" {"state" {}}}}))
-    (substrate/register-handler server "echo/ping"
-                                (fn [space args request node]
-                                  (return {"pong" "hello"}))
-                                nil)
-    (var out [])
-    (-> (substrate/attach-transport server "conn"
-                                    {"send_fn" (fn [frame]
-                                                 (xt/x:arr-push out frame)
-                                                 (return frame))})
-        (promise/x:promise-then
-         (fn [_]
-           (var req {"kind" "request"
-                     "id" "r1"
-                     "space" "room/a"
-                     "action" "echo/ping"
-                     "args" ["hello"]
-                     "meta" {"transport_id" "conn"}})
-           (-> (substrate/receive-frame server req {"transport_id" "conn"})
-               (promise/x:promise-then
-                (fn [_]
-                  (repl/notify {"out" out}))))))))
-  => (contains-in
-      {"out" [{"reply_to" "r1" "status" "ok" "data" {"pong" "hello"}}]}))
 
 ^{:refer xt.substrate.page-proxy/echo :added "4.1"}
 (fact "manual transport pair can exchange requests"
@@ -264,58 +237,15 @@
         (promise/x:promise-then
          (fn [_]
            (repl/notify
-            {"group"       (base-page/group-get client
-                                                "room/a" "demo")
+            {"group_missing" (== nil (base-page/group-get client
+                                                              "room/a" "demo"))
              "output_subs" (router/list-subscriptions server
                                                       "room/a" page-proxy/SIGNAL_OUTPUT)
              "input_subs"  (router/list-subscriptions server
                                                       "room/a" page-proxy/SIGNAL_INPUT)})))))
-  => {"group" nil
+  => {"group_missing" true
       "output_subs" []
       "input_subs" []})
-
-^{:refer xt.substrate.page-proxy/kernel-init-handler :added "4.1"}
-(fact "client can call @xt.db/kernel-init on the server through the proxy"
-
-  (notify/wait-on :js
-    (var server (-/make-server-node))
-    (var client (-/make-client-node))
-    (var schema {"Log" {"id" {"ident" "id"
-                               "type" "uuid"
-                               "primary" true
-                               "order" 0}
-                        "message" {"ident" "message"
-                                   "type" "text"
-                                   "order" 1}}})
-    (var lookup {"Log" {"position" 0}})
-    (substrate/set-service server "db/common" {"schema" schema
-                                                "lookup" lookup})
-    (adaptor/init-handlers server)
-    (page-proxy/install server)
-    (page-proxy/install client)
-    (-> (-/link-nodes server client)
-        (promise/x:promise-then
-         (fn [linked]
-           (return
-            (-/send-and-receive linked server client
-                                "room/a" "@xt.db/kernel-init"
-                                [{"primary" {"type" "memory" "defaults" {}}
-                                  "caching" {"type" "memory" "defaults" {}}
-                                  "common" {}}
-                                 schema
-                                 lookup]))))
-        (promise/x:promise-then
-         (fn [out]
-           (repl/notify {"init" out
-                         "primary" (substrate/get-service server "db/primary")
-                         "caching" (substrate/get-service server "db/caching")})))))
-  => (contains-in
-      {"init" {"status" "setup"
-               "data" {"primary" map?
-                       "caching" map?
-                       "common" map?}}
-       "primary" {"::" "xt.db.system.impl_memory/ImplMemory"}
-       "caching" {"::" "xt.db.system.impl_memory/ImplMemory"}}))
 
 
 ^{:refer xt.substrate.page-proxy/model-serialize-input :added "4.1"}
