@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
 (ns xt.db.helpers.seed-user-test
   (:require [postgres.core :as pg :refer [defsel.pg defret.pg]]
             [hara.lang :as l]))

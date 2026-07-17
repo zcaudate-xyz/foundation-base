@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
 (ns xt.db.poc.s08-adaptor-client-scratch-v3-test
   (:use code.test)
   (:require [hara.lang :as l]

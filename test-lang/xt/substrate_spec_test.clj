@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
  (ns xt.substrate-spec-test
    (:use code.test)
    (:require [hara.typed.xtalk-analysis :as xtalk-analysis]

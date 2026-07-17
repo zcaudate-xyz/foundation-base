@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
 (ns xt.db.poc.s01-worker-min-test
   (:use code.test)
   (:require [hara.lang :as l]

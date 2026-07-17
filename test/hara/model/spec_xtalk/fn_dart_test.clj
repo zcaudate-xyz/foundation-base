@@ -492,10 +492,11 @@
 (fact "shell uses Process.run"
   (let [out (l/emit-as :dart [(dart-tf-x-shell '[_ s root cb])])]
     [(boolean (re-find #"Process\.run" out))
+     (boolean (re-find #"<String>\[\"-lc\",shell_command\]" out))
      (boolean (re-find #"cd " out))
      (boolean (re-find #"stdout" out))
      (boolean (re-find #"catchError" out))])
-  => [true true true true])
+  => [true true true true true])
 
 ^{:refer hara.model.spec-xtalk.fn-dart/dart-call :added "4.1"}
 (fact "emits dart calls")
