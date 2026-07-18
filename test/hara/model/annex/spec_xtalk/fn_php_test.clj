@@ -338,7 +338,7 @@
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-m-pow :added "4.1"}
 (fact "lowers exponentiation to PHP's power operator"
-  (php-tf-x-m-pow '(_ base exponent)) => '(** base exponent))
+  (php-tf-x-m-pow '(_ base exponent)) => '(call_user_func_array "pow" [base exponent]))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-x-obj-keys :added "4.1"}
 (fact "returns associative-array keys"
@@ -372,7 +372,7 @@
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-for-array :added "4.1"}
 (fact "lowers value, index, and index/value array iteration"
   (php-tf-for-array '(for:array [value arr] (use value)))
-  => '(foreach [arr value] (use value))
+  => '(foreach [(array_values arr) value] (use value))
   (php-tf-for-array '(for:array [[_ value] arr] (use value)))
   => '(foreach [(array_values arr) value] (use value))
   (php-tf-for-array '(for:array [[index _] arr] (use index)))
@@ -381,6 +381,11 @@
   => '(foreach [(array_keys arr) index]
        (var value := (:% arr [index]))
        (use index value)))
+
+^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-for-index :added "4.1"}
+(fact "lowers exclusive numeric ranges through PHP range"
+  (php-tf-for-index '(for:index [i [0 4 2]] (use i)))
+  => '(foreach [(range 0 (- 4 2) 2) i] (use i)))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-php/php-tf-for-object :added "4.1"}
 (fact "lowers object iteration through keys or values as requested"
