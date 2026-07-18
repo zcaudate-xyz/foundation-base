@@ -1,8 +1,8 @@
-name: XTBench Annex
+name: XTBench TBD
 
 on:
   push:
-    branches: [main, 'lang/php', 'lang/r']
+    branches: ['lang/scheme', 'lang/elisp', 'lang/julia']
   repository_dispatch:
   workflow_dispatch:
 
@@ -15,26 +15,27 @@ jobs:
     name: 01 - xt.lang / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
         include:
-          - lang: php
-            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-php:ci
-          - lang: r
-            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-r:ci
+          - lang: scheme
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-scheme:ci
+          - lang: elisp
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-elisp:ci
+          - lang: julia
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-julia:ci
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Log into GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
           password: ${{ secrets.GH_TOKEN }}
-
       - name: Run xt.lang
         run: >
           docker run --network host
@@ -46,21 +47,28 @@ jobs:
           lein seedgen test '[xt.lang]' :with "[${{ matrix.lang }}]"
 
   run-xtbench-event-tests:
-    name: 02 - xt.event / php
+    name: 02 - xt.event / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lang: elisp
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-elisp:ci
+          - lang: julia
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-julia:ci
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Log into GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
           password: ${{ secrets.GH_TOKEN }}
-
       - name: Run xt.event
         run: >
           docker run --network host
@@ -68,25 +76,32 @@ jobs:
           -v /var/run/docker.sock:/var/run/docker.sock
           -v $(pwd):$(pwd)
           -w $(pwd)
-          ghcr.io/zcaudate-xyz/infra-foundation-xtbench-php:ci
-          lein seedgen test '[xt.event]' :with '[php]'
+          ${{ matrix.image }}
+          lein seedgen test '[xt.event]' :with "[${{ matrix.lang }}]"
 
   run-xtbench-kmi-tests:
-    name: 10 - kmi.lang / php
+    name: 10 - kmi.lang / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - lang: elisp
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-elisp:ci
+          - lang: julia
+            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-julia:ci
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Log into GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
           password: ${{ secrets.GH_TOKEN }}
-
       - name: Run kmi.lang
         run: >
           docker run --network host
@@ -94,5 +109,5 @@ jobs:
           -v /var/run/docker.sock:/var/run/docker.sock
           -v $(pwd):$(pwd)
           -w $(pwd)
-          ghcr.io/zcaudate-xyz/infra-foundation-xtbench-php:ci
-          lein seedgen test '[kmi.lang]' :with '[php]'
+          ${{ matrix.image }}
+          lein seedgen test '[kmi.lang]' :with "[${{ matrix.lang }}]"
