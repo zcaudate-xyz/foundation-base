@@ -1,6 +1,45 @@
 {
-  "schema-version": 1,
-  "kind": "xtbench-index",
-  "updated-at": null,
-  "workflows": {}
+  "updated-at" : "2026-07-18T17:33:50.888698432Z",
+  "schema-version" : 1,
+  "workflows" : {
+    "annex" : {
+      "latest" : {
+        "path" : "runs/annex/0-1.json",
+        "run" : null,
+        "workflow-key" : "annex",
+        "tests" : {
+          "passed" : 0,
+          "failed" : 0,
+          "throw" : 0,
+          "timeout" : 0,
+          "skipped" : 0,
+          "errored" : 0
+        },
+        "git" : null,
+        "jobs" : [ ],
+        "recorded-at" : "2026-07-18T17:33:50.871938984Z",
+        "workflow-name" : "annex",
+        "status" : "failure"
+      },
+      "runs" : [ {
+        "path" : "runs/annex/0-1.json",
+        "run" : null,
+        "workflow-key" : "annex",
+        "tests" : {
+          "passed" : 0,
+          "failed" : 0,
+          "throw" : 0,
+          "timeout" : 0,
+          "skipped" : 0,
+          "errored" : 0
+        },
+        "git" : null,
+        "jobs" : [ ],
+        "recorded-at" : "2026-07-18T17:33:50.871938984Z",
+        "workflow-name" : "annex",
+        "status" : "failure"
+      } ]
+    }
+  },
+  "kind" : "xtbench-index"
 }
