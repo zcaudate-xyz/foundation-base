@@ -3,7 +3,7 @@
   (:require [hara.lang :as l]
             [xt.net.ws-native :refer :all]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python :ruby]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.net.ws-native :as ws-native]]})

@@ -111,6 +111,11 @@
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-apply :added "4.1"}
 (fact "applies arguments")
 
+^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-construct :added "4.1"}
+(fact "constructs callable values with splatted arguments"
+  (ruby-tf-x-construct '[_ ctor args])
+  => '(. ctor (call (:.. args))))
+
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-type-native :added "4.1"}
 (fact "detects native type")
 
@@ -369,7 +374,9 @@
   => [true true true true true])
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-async-run :added "4.1"}
-(fact "runs asynchronously")
+(fact "runs the thunk asynchronously in a Ruby thread"
+  (l/emit-as :ruby [(ruby-tf-x-async-run '[_ thunk])])
+  => "Thread.new do\n  thunk.call\nend")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-promise :added "4.1"}
 (fact "transforms x:promise")

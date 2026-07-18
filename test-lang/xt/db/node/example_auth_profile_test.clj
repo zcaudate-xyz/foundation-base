@@ -6,7 +6,7 @@
             [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/root {:all true
-                 :langs [:js :lua.nginx :python :dart]}}
+                 :langs [:js :lua.nginx :python :dart :ruby]}}
 (l/script- :js
   {:runtime :basic
    :test-mode true

@@ -7,7 +7,8 @@
                  :js           {:extra [[js.net.conn-sqlite :as js-sqlite]]}
                  :lua.nginx    {:extra [[lua.nginx.conn-sqlite :as lua-sqlite]]}
                  :python       {:extra [[python.net.conn-sqlite :as py-sqlite]]}
-                 :dart         {:extra [[dart.net.conn-sqlite :as dart-sqlite]]}}}
+                 :dart         {:extra [[dart.net.conn-sqlite :as dart-sqlite]]}
+                 :ruby         {:extra [[ruby.net.conn-sqlite :as ruby-sqlite]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -41,7 +42,8 @@
 ^{:seedgen/base
   {:lua {:transform '{js-sqlite/create lua-sqlite/create}}
    :python {:transform '{js-sqlite/create py-sqlite/create}}
-   :dart {:transform '{js-sqlite/create dart-sqlite/create}}}}
+   :dart {:transform '{js-sqlite/create dart-sqlite/create}}
+   :ruby {:transform '{js-sqlite/create ruby-sqlite/create}}}}
 (defn.js sqlite-create
   []
   (return (js-sqlite/create {"filename" ":memory:"})))

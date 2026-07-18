@@ -101,6 +101,10 @@
   [[_ f args]]
   (list '. f (list 'call (list :.. args))))
 
+(defn ruby-tf-x-construct
+  [[_ f args]]
+  (list '. f (list 'call (list :.. args))))
+
 (defn ruby-tf-x-type-native
   [[_ obj]]
   (let [current (gensym "__obj__")]
@@ -143,6 +147,7 @@
    :x-now-ms         {:macro #'ruby-tf-x-now-ms :emit :macro}
    :x-del            {:macro #'ruby-tf-x-del   :emit :macro}
    :x-apply          {:macro #'ruby-tf-x-apply :emit :macro}
+   :x-construct      {:macro #'ruby-tf-x-construct :emit :macro}
    :x-type-native    {:macro #'ruby-tf-x-type-native :emit :macro}
    :x-unpack         {:macro #'ruby-tf-x-unpack :emit :macro}})
 

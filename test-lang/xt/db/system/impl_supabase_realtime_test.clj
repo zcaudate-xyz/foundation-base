@@ -22,11 +22,12 @@
     (s/grant-usage #{"scratch_v0"})))
 
 ^{:seedgen/root {:all true
-                 :langs [:js :lua.nginx :python :dart]
+                 :langs [:js :lua.nginx :python :dart :ruby]
                  :js {:extra [[js.net.ws-native :as js-websocket]]}
                  :lua.nginx {:extra [[lua.net.ws-native :as lua-websocket]]}
                  :python {:extra [[python.net.ws-native :as py-websocket]]}
-                 :dart {:extra [[dart.net.ws-native :as dart-websocket]]}}}
+                 :dart {:extra [[dart.net.ws-native :as dart-websocket]]}
+                 :ruby {:extra [[ruby.net.ws-native :as js-websocket]]}}}
 (l/script- :js
   {:runtime :basic
    :require [^{:seedgen/extra true}

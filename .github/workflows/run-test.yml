@@ -2,7 +2,7 @@ name: Run Code
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'lang/**']
   repository_dispatch:
   workflow_dispatch:
 
@@ -12,7 +12,7 @@ env:
 
 jobs:
   run-incomplete:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -38,7 +38,7 @@ jobs:
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein incomplete
 
   run-group-tests:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -139,7 +139,7 @@ jobs:
           - 6379:6379
 
   run-lang-tests:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
     name: Run Tests - ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40

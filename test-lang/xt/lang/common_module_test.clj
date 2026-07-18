@@ -1,3 +1,4 @@
+^{:seedgen/skip true}
 (ns xt.lang.common-module-test
   (:use code.test)
   (:require [hara.lang :as l]

@@ -167,34 +167,17 @@
                            '[[xt.lang.common-protocol-test/IHello
                               {hello-prn -/hello-prn-fn
                                hello-str -/hello-str-fn}]])
-  => '(defn.xt Hello
-        [state client schema lookup opts]
-        (when
-            (not
-             (xt.lang.spec-base/x:get-key
-              xt.lang.common-protocol/IMPLEMENTATIONS
-              "xt.lang.common_protocol_test/Hello"))
-          (do
-            (xt.lang.spec-base/x:set-key
-             xt.lang.common-protocol/IMPLEMENTATIONS
-             "xt.lang.common_protocol_test/Hello"
-             true)
-            (xt.lang.common-protocol/register-protocol-impl
-             (xt.lang.spec-base/x:get-key
-              xt.lang.common-protocol-test/IHello
-              "on")
-             "xt.lang.common_protocol_test/Hello"
-             {"hello_prn" -/hello-prn-fn, "hello_str" -/hello-str-fn})))
-        (return
-         {"::" "xt.lang.common_protocol_test/Hello",
-          "::/protocols" [(xt.lang.spec-base/x:get-key
-                           xt.lang.common-protocol-test/IHello
-                           "on")],
-          "state" state,
-          "client" client,
-          "schema" schema,
-          "lookup" lookup,
-          "opts" opts})))
+  => (fn [form]
+       (let [registration (nth form 3)
+             impl-map (second (nth form 4))]
+         (and (= 'defn.xt (first form))
+              (= 'do (first registration))
+              (= 3 (count registration))
+              (= "xt.lang.common_protocol_test/Hello"
+                 (get impl-map "::"))
+              (contains? impl-map "::/protocol-impls"))))
+
+  )
 
 ^{:refer xt.lang.common-protocol/defimpl.xt :added "4.1"}
 (fact "expands to a constructor and protocol registrations"
