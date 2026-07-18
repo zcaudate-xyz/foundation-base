@@ -1,0 +1,19 @@
+{
+  "run" : null,
+  "workflow-key" : "core",
+  "tests" : {
+    "passed" : 0,
+    "failed" : 0,
+    "throw" : 0,
+    "timeout" : 0,
+    "skipped" : 0,
+    "errored" : 0
+  },
+  "git" : null,
+  "schema-version" : 1,
+  "jobs" : [ ],
+  "recorded-at" : "2026-07-18T17:49:27.332241233Z",
+  "workflow-name" : "core",
+  "status" : "failure",
+  "kind" : "xtbench-run"
+}
