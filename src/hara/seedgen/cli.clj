@@ -79,7 +79,7 @@
   (edn/read-string (slurp +compatibility-path+)))
 
 (defn- source-namespaces
-  "returns all xt.* source test namespaces that are not marked as seedgen/skip"
+  "returns all XT/KMI source tests that are not marked as seedgen/skip"
   {:added "4.1"}
   ([] (source-namespaces (project/project)))
   ([project]
@@ -118,7 +118,7 @@
   (let [all (source-namespaces project)
         {:keys [include exclude]} (language-rules lang config)
         selector-prefs (cond
-                         (= :all selector) ["xt."]
+                         (= :all selector) ["xt." "kmi."]
                          (symbol? selector) [(str selector)]
                          (sequential? selector) (mapv str selector)
                          (keyword? selector) [(name selector)]
@@ -134,7 +134,7 @@
   {:added "4.1"}
   [selector]
   (cond
-    (= :all selector) ["xt."]
+    (= :all selector) ["xt." "kmi."]
     (symbol? selector) [(str selector)]
     (sequential? selector) (mapv str selector)
     (keyword? selector) [(name selector)]
@@ -158,11 +158,19 @@
           (into (sorted-map))))))
 
 (defn- generated-namespace
-  "computes the xtbench.<lang>.* namespace for a source namespace"
+  "computes the xtbench.<lang>.* namespace for an XT or KMI seed"
   {:added "4.1"}
   [source-ns lang]
   (let [s (str source-ns)]
-    (symbol (str/replace s #"^xt\." (str "xtbench." (name lang) ".")))))
+    (symbol
+     (cond (str/starts-with? s "xt.")
+           (str/replace s #"^xt\." (str "xtbench." (name lang) "."))
+
+           (str/starts-with? s "kmi.")
+           (str "xtbench." (name lang) ".kmi."
+                (subs s (count "kmi.")))
+
+           :else s))))
 
 (defn- extract-lang
   "extracts the language keyword from an xtbench.<lang>.* namespace"

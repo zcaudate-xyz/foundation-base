@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true, :langs [:js :lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]

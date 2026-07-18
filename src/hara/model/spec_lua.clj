@@ -84,12 +84,12 @@
                              
                              :else
                              (ut/sym-default-str key))
-               key-str (cond (and (not (#{"function"
-                                          "return"
-                                          "end"
-                                          "for"
-                                          "in"
-                                          "var"} key-str))
+               key-str (cond (and (not (#{"and" "break" "do" "else"
+                                          "elseif" "end" "false" "for"
+                                          "function" "goto" "if" "in"
+                                          "local" "nil" "not" "or"
+                                          "repeat" "return" "then" "true"
+                                          "until" "while"} key-str))
                                   (re-find #"^[A-Za-z][\w\d]*$" key-str))
                              key-str
                              

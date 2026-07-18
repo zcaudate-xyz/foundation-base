@@ -177,6 +177,8 @@
          :with-global {:value true :raw "__globals__"}
          :defglobal    {:emit #'dart-emit-defglobal}})
        (grammar/build:override fn-dart/+dart+)
+       (grammar/build:override
+        {:yield {:emit :prefix :raw "yield"}})
         (grammar/build:extend
            {:dart-or      {:op :dart-or      :symbol #{'dart:or}      :emit :infix             :raw "??"}
             :dart-ternary {:op :dart-ternary :symbol #{'dart:ternary} :macro #'dart-tf-ternary :emit :macro}

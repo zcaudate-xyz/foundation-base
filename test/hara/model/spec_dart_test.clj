@@ -12,6 +12,9 @@
   (l/emit-as :dart ['(defn hello [name] (return (x:cat "hi " name)))])
   => "hello(name) {\n  return \"hi \" + name;\n}"
 
+  (l/emit-as :dart ['(defgen values [] (yield 1))])
+  => "values()  sync* {\n  yield 1;\n}"
+
   (l/emit-as :dart ['(new Person name)])
   => "new Person(name)"
 

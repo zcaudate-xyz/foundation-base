@@ -12,9 +12,9 @@
   "wraps a function to use syntax"
   {:added "4.0"}
   [f]
-  (return (fn [syntax ...]
-            (var value (. syntax _value))
-            (return (f value ...)))))
+  (return (fn [syntax (:.. args)]
+            (var value (xt/x:get-key syntax "_value"))
+            (return (f value (xt/x:unpack args))))))
 
 (proto/defimpl.xt ^{:rt/tag "syntax"} Syntax
   [_value _metadata]
@@ -70,7 +70,7 @@
   {:added "4.0"}
   [x]
   (return (:? (util/is-syntax? x)
-              (. x _metadata)
+              (xt/x:get-key x "_metadata")
               nil)))
 
 (defn.xt syntax
@@ -78,7 +78,7 @@
   {:added "4.0"}
   [x metadata]
   (var v (:? (util/is-syntax? x)
-             (. x _value)
+             (xt/x:get-key x "_value")
              x))
   (return (:? (xt/x:nil? metadata)
               v

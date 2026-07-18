@@ -12,25 +12,25 @@
   "TODO"
   {:added "4.0"}
   [coll]
-  (return (. coll _start_string)))
+  (return (xt/x:get-key coll "_start_string")))
 
 (defn.xt end-string
   "TODO"
   {:added "4.0"}
   [coll]
-  (return (. coll _end_string)))
+  (return (xt/x:get-key coll "_end_string")))
 
 (defn.xt sep-string
   "TODO"
   {:added "4.0"}
   [coll]
-  (return (. coll _sep_string)))
+  (return (xt/x:get-key coll "_sep_string")))
 
 (defn.xt is-ordered?
   "TODO"
   {:added "4.0"}
   [coll]
-  (return (. coll _is_ordered)))
+  (return (xt/x:get-key coll "_is_ordered")))
 
 (defn.xt coll-reduce
   [coll f init]

@@ -39,33 +39,42 @@
   "gets the name of a symbol, keyword or var"
   {:added "4.0"}
   [x]
-  (return (. x _name)))
+  (return (xt/x:get-key x "_name")))
 
 (defn.xt get-namespace
   "gets the namespace of a symbol, keyword or var"
   {:added "4.0"}
   [x]
-  (return (. x _ns)))
+  (return (xt/x:get-key x "_ns")))
 
 (defn.xt hash-with-cache
   "gets a memoized cache id"
   {:added "4.0"}
   [obj hash-fn]
-  (var hash-id (. obj _hash))
+  (var hash-id (xt/x:get-key obj "_hash"))
   (when (xt/x:nil? hash-id)
     (:= hash-id (hash-fn obj))
     (xt/x:set-key obj "_hash" hash-id))
   (return hash-id))
 
-(defn.xt wrap-with-cache
-  "wraps hash-fn call with caching"
+(defn.xt wrap-with-cache-array
+  "wraps hash-fn call with caching using fixed array options"
   {:added "4.0"}
-  [hash-fn is-editable]
+  [hash-fn options]
+  (var is-editable (:? (> (xt/x:len options) 0)
+                       (xt/x:get-idx options (xt/x:offset 0))
+                       nil))
   (return (fn [obj]
             (if (and is-editable
                      (is-editable obj))
               (return (hash-fn obj))
               (return (-/hash-with-cache obj hash-fn))))))
+
+(defn.xt wrap-with-cache
+  "wraps hash-fn call with caching"
+  {:added "4.0"}
+  [hash-fn (:.. options)]
+  (return (-/wrap-with-cache-array hash-fn options)))
 
 (defn.xt show
   "show interface"
@@ -89,11 +98,11 @@
   {:added "4.0"}
   [o1 o2]
   (cond (-/is-syntax? o1)
-        (return (-/eq (. o1 _value)
+        (return (-/eq (xt/x:get-key o1 "_value")
                       o2))
         
         (-/is-syntax? o2)
-        (return (-/eq (. o2 _value)
+        (return (-/eq (xt/x:get-key o2 "_value")
                       o1))
 
         (-/is-managed? o1)

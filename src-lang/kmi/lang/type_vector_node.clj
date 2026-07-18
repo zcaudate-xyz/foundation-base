@@ -161,7 +161,8 @@
                         edit-id
                         size
                         (- level -/BITS)
-                        (xt/x:get-idx children (xt/x:offset sidx))))
+                        (xt/x:get-idx children (xt/x:offset sidx))
+                        editable))
             (cond (and (== nnode nil)
                        (== 0 sidx))
                   (return nil)

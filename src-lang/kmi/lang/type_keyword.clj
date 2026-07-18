@@ -42,15 +42,15 @@
   [sym o]
   (var oclass (common-hash/native-class o))
   (return (and (== "keyword" oclass)
-               (== (. sym _ns)   (. o _ns))
-               (== (. sym _name) (. o _name)))))
+               (== (xt/x:get-key sym "_ns")   (xt/x:get-key o "_ns"))
+               (== (xt/x:get-key sym "_name") (xt/x:get-key o "_name")))))
 
 (proto/defimpl.xt ^{:rt/tag "keyword"} Keyword
   [_ns _name]
   p/IEq
   {eq -/keyword-eq}
   p/IHash
-  {hash (util/wrap-with-cache -/keyword-hash)}
+  {hash (util/wrap-with-cache-array -/keyword-hash [])}
   p/INamespaced
   {name      util/get-name
    namespace util/get-namespace}

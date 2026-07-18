@@ -33,6 +33,13 @@
       => '[samplebench.python.multi-test
            samplebench.js.multi-test]
 
+      (form-bench/seedgen-benchlist 'kmi.lang.runtime-test
+                                    {:lang [:python :dart]}
+                                    (assoc lookup 'kmi.lang.runtime-test path)
+                                    nil)
+      => '[xtbench.python.kmi.lang.runtime-test
+           xtbench.dart.kmi.lang.runtime-test]
+
       (form-bench/seedgen-benchlist 'sample.missing-test
                                     {}
                                     lookup

@@ -71,6 +71,7 @@
      for:iter
      br*
      throw
+     yield
      x:throw
      x:err
      break

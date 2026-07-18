@@ -24,14 +24,6 @@
     (var out (xt/x:get-idx arr (xt/x:offset (node/impl-mask idx))))
     (return (util/impl-denormalise out))))
 
-(defgen.xt vector-to-iter
-  "converts vector to iterator"
-  {:added "4.0"}
-  [vector]
-  (var #{_size} vector)
-  (xt/for:index [idx [0 (xt/x:offset-rlen _size)]]
-    (yield (-/vector-get-idx vector idx))))
-
 (defn.xt vector-to-array
   "converts vector to array"
   {:added "4.0"}
@@ -41,6 +33,12 @@
   (xt/for:index [idx [0 (xt/x:offset-rlen _size)]]
     (xt/x:arr-push out (-/vector-get-idx vector idx)))
   (return out))
+
+(defn.xt vector-to-iter
+  "converts vector to iterator"
+  {:added "4.0"}
+  [vector]
+  (return (xt/x:iter-from-arr (-/vector-to-array vector))))
 
 (defn.xt vector-new
   "creates a new vector"
@@ -112,7 +110,7 @@
   (when (== _size 0)
     (return vector))
   (when (== _size 1)
-    (return (-/vector-empty)))
+    (return (-/vector-empty vector)))
   (when (> (- _size (node/impl-offset _size))
            1)
     (var n_tail (xt/x:arr-slice _tail 0 (- (xt/x:len _tail) 1)))
@@ -289,9 +287,9 @@
   p/IEq
   {:eq coll/coll-eq}
   p/IHash
-  {:hash (util/wrap-with-cache
+  {:hash (util/wrap-with-cache-array
           coll/coll-hash-ordered
-          -/vector-is-editable)}
+          [-/vector-is-editable])}
   p/IFind
   {:find -/vector-find-idx}
   p/IPush
@@ -334,11 +332,10 @@
                            node/BITS
                            [])))
 
-(defn.xt vector
-  "creates a vector"
-  {:added "4.0"}
-  [...]
-  (var input [...])
+(defn.xt vector-from-array
+  "creates a vector from an argument array"
+  {:added "4.1"}
+  [input]
   (cond (xtd/is-empty? input)
         (return -/EMPTY_VECTOR)
 
@@ -348,6 +345,12 @@
           (coll/coll-into-array
            (-/vector-empty-mutable)
            input)))))
+
+(defn.xt vector
+  "creates a vector"
+  {:added "4.0"}
+  [(:.. args)]
+  (return (-/vector-from-array args)))
 
 ;;
 ;; 

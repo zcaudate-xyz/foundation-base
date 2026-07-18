@@ -1,9 +1,9 @@
+^{:seedgen/skip true}
 (ns kmi.lang.runtime-test
   (:require [hara.lang :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -12,6 +12,7 @@
              [xt.substrate :as substrate]
              [xt.substrate.transport-memory :as transport-memory]
              [kmi.lang.runtime :as rt]
+             [kmi.node :as node]
              [kmi.lang.runtime.eval :as rev]
              [kmi.lang.protocol-base :as proto]
              [kmi.lang.type-keyword :as kw]
@@ -42,6 +43,7 @@
     (== nil (xt/x:get-key (rt/eval-string (rt/empty-runtime) "nil") "error"))])
   => [42 "hello" true nil true])
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-arithmetic}
 (fact "evaluates arithmetic and comparison"
 
   (!.js
@@ -53,6 +55,7 @@
     (xt/x:get-key (rt/eval-string (rt/empty-runtime) "(== 1 1)") "value")])
   => [3 7 20 5 true true])
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-quote}
 (fact "quote returns the form unevaluated"
 
   (!.js
@@ -62,6 +65,7 @@
     (rev/symbol? (xt/x:first (proto/to-array value)))])
   => [true true])
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-if}
 (fact "if branches on truthiness"
 
   (!.js
@@ -70,24 +74,28 @@
     (xt/x:get-key (rt/eval-string (rt/empty-runtime) "(if nil 1 2)") "value")])
   => [1 2 2])
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-do}
 (fact "do evaluates in sequence"
 
   (!.js
    (xt/x:get-key (rt/eval-string (rt/empty-runtime) "(do 1 2 3)") "value"))
   => 3)
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-let}
 (fact "let binds values in a local scope"
 
   (!.js
    (xt/x:get-key (rt/eval-string (rt/empty-runtime) "(let [x 10 y 20] (+ x y))") "value"))
   => 30)
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-fn}
 (fact "fn creates applicable closures"
 
   (!.js
    (xt/x:get-key (rt/eval-string (rt/empty-runtime) "((fn [x] (+ x 1)) 5)") "value"))
   => 6)
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-closure}
 (fact "closures capture lexical bindings"
 
   (!.js
@@ -96,6 +104,7 @@
                  "value"))
   => 15)
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-def}
 (fact "def stores vars across evaluations"
 
   (!.js
@@ -106,6 +115,7 @@
     (xt/x:get-key out2 "value")])
   => [7 7])
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-recursion}
 (fact "recursion via def computes factorial"
 
   (!.js
@@ -115,6 +125,7 @@
    (xt/x:get-key out "value"))
   => 120)
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-collections}
 (fact "collection literals evaluate their elements"
 
   (!.js
@@ -124,6 +135,7 @@
     (proto/to-array value)])
   => [true [1 2 3]])
 
+^{:refer kmi.lang.runtime/eval-string :id runtime-errors}
 (fact "errors are returned without throwing"
 
   (!.js
@@ -132,11 +144,11 @@
     (xt/x:is-string? (xt/x:get-key out "error"))])
   => [true true])
 
-^{:refer kmi.lang.runtime/create-node :added "4.1"}
+^{:refer kmi.node/create-node :added "4.1"}
 (fact "creates a substrate node with runtime handlers"
 
   (notify/wait-on :js
-    (var node (rt/create-node {}))
+    (var node (node/create-node {}))
     (repl/notify (substrate/list-handlers node)))
   => ["@/echo"
       "@/get-service"
@@ -151,20 +163,22 @@
       "@kmi.lang/load"
       "@kmi.lang/read"])
 
+^{:refer kmi.node/handler-eval :id node-eval-value}
 (fact "substrate eval request returns the value"
 
   (notify/wait-on :js
-    (var node (rt/create-node {}))
+    (var node (node/create-node {}))
     (-> (substrate/request node "kmi.session" "@kmi.lang/eval" ["(+ 1 2)"] {})
         (promise/x:promise-then
          (fn [res]
            (repl/notify res)))))
   => {"value" 3})
 
+^{:refer kmi.node/handler-eval :id node-eval-session-state}
 (fact "substrate eval threads runtime state through session space"
 
   (notify/wait-on :js
-    (var node (rt/create-node {}))
+    (var node (node/create-node {}))
     (-> (substrate/request node "kmi.session" "@kmi.lang/eval" ["(def x 42)"] {})
         (promise/x:promise-then
          (fn [_]
@@ -173,11 +187,12 @@
         (repl/notify)))
   => {"value" 42})
 
+^{:refer kmi.node/create-node :id node-memory-transport}
 (fact "two nodes talk over a memory transport"
 
   (notify/wait-on :js
-    (var server (rt/create-node {"id" "server"}))
-    (var client (rt/create-node {"id" "client"}))
+    (var server (node/create-node {"id" "server"}))
+    (var client (node/create-node {"id" "client"}))
     (var wire (transport-memory/memory-pair {"left_id" "client"
                                              "right_id" "server"}))
     (-> (promise/x:promise-all
@@ -218,6 +233,7 @@
     (xt/x:len (proto/to-array (rt/read-string "(+ 1 2)")))])
   => [42 "hello" true nil true true true true "key" 3])
 
+^{:refer kmi.lang.runtime/read-string :id runtime-read-first}
 (fact "reads only the first form"
 
   (!.js
@@ -229,12 +245,13 @@
 
   (!.js
    (var forms (rt/read-many "1 2 (+ 1 2)"))
-   [(xt/x:len forms)
-    (xt/x:get-idx forms 0)
-    (xt/x:get-idx forms 1)
-    (rev/list? (xt/x:get-idx forms 2))])
+    [(xt/x:len forms)
+     (xt/x:get-idx forms (xt/x:offset 0))
+     (xt/x:get-idx forms (xt/x:offset 1))
+     (rev/list? (xt/x:get-idx forms (xt/x:offset 2)))])
   => [3 1 2 true])
 
+^{:refer kmi.lang.runtime/read-many :id runtime-read-empty}
 (fact "returns an empty array for an empty string"
 
   (!.js
@@ -250,6 +267,7 @@
     (xt/x:get-key (xt/x:get-key out "runtime") "ns")])
   => [42 "user"])
 
+^{:refer kmi.lang.runtime/eval-form :id runtime-eval-call}
 (fact "evaluates a function call form"
 
   (!.js
@@ -257,6 +275,7 @@
    (xt/x:get-key out "value"))
   => 3)
 
+^{:refer kmi.lang.runtime/eval-form :id runtime-eval-unbound}
 (fact "returns an error for unbound symbols"
 
   (!.js
@@ -272,6 +291,7 @@
    (xt/x:get-key out "value"))
   => 3)
 
+^{:refer kmi.lang.runtime/eval-string-many :id runtime-many-state}
 (fact "threads runtime state across forms"
 
   (!.js
@@ -280,33 +300,33 @@
     (xt/x:get-key (xt/x:get-key (xt/x:get-key (xt/x:get-key (xt/x:get-key out "runtime") "namespaces") "user") "vars") "x")])
   => [6 5])
 
-^{:refer kmi.lang.runtime/handler-read :added "4.1"}
+^{:refer kmi.node/handler-read :added "4.1"}
 (fact "substrate read request returns the parsed form"
 
   (notify/wait-on :js
-    (var node (rt/create-node {}))
+    (var node (node/create-node {}))
     (-> (substrate/request node "kmi.session" "@kmi.lang/read" ["42"] {})
         (promise/x:promise-then
          (fn [res]
            (repl/notify res)))))
   => {"form" 42})
 
-^{:refer kmi.lang.runtime/handler-eval :added "4.1"}
+^{:refer kmi.node/handler-eval :added "4.1"}
 (fact "substrate eval request returns errors for invalid input"
 
   (notify/wait-on :js
-    (var node (rt/create-node {}))
+    (var node (node/create-node {}))
     (-> (substrate/request node "kmi.session" "@kmi.lang/eval" ["x"] {})
         (promise/x:promise-then
          (fn [res]
            (repl/notify {"has-error" (xt/x:is-string? (xt/x:get-key res "error"))})))))
   => {"has-error" true})
 
-^{:refer kmi.lang.runtime/handler-load :added "4.1"}
+^{:refer kmi.node/handler-load :added "4.1"}
 (fact "substrate load request evaluates many forms and threads state"
 
   (notify/wait-on :js
-    (var node (rt/create-node {}))
+    (var node (node/create-node {}))
     (-> (substrate/request node "kmi.session" "@kmi.lang/load" ["(def z 8) (+ z 2)"] {})
         (promise/x:promise-then
          (fn [_]
@@ -317,30 +337,31 @@
            (repl/notify res)))))
   => {"value" 8})
 
-^{:refer kmi.lang.runtime/handler-describe :added "4.1"}
+^{:refer kmi.node/handler-describe :added "4.1"}
 (fact "substrate describe request returns metadata for a managed form"
 
   (notify/wait-on :js
-    (var node (rt/create-node {}))
+    (var node (node/create-node {}))
     (-> (substrate/request node "kmi.session" "@kmi.lang/describe" ["[1 2 3]"] {})
         (promise/x:promise-then
          (fn [res]
            (repl/notify res)))))
   => {"tag" "vector" "type" "object" "size" 3 "string" "[1, 2, 3]"})
 
+^{:refer kmi.node/handler-describe :id node-describe-primitive}
 (fact "substrate describe request returns metadata for primitives"
 
   (notify/wait-on :js
-    (var node (rt/create-node {}))
+    (var node (node/create-node {}))
     (-> (substrate/request node "kmi.session" "@kmi.lang/describe" ["42"] {})
         (promise/x:promise-then
          (fn [res]
            (repl/notify res)))))
   => {"tag" "number" "type" "number" "size" nil "string" "42"})
 
-^{:refer kmi.lang.runtime/stop :added "4.1"}
+^{:refer kmi.node/stop :added "4.1"}
 (fact "placeholder stop returns true"
 
   (!.js
-   (rt/stop (rt/create-node {})))
+   (node/stop (node/create-node {})))
   => true)
