@@ -24,8 +24,10 @@
     (s/grant-usage #{"scratch_v0"})))
 
 ^{:seedgen/root {:all true
+                 :langs [:js :dart :ruby]
                  :js   {:extra [[js.net.http-fetch :as js-fetch]]}
-                 :dart {:extra [[dart.net.http-fetch :as dart-fetch]]}}}
+                 :dart {:extra [[dart.net.http-fetch :as dart-fetch]]}
+                 :ruby {:extra [[ruby.net.http-fetch :as ruby-fetch]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.net.http-fetch :as fetch]
@@ -79,7 +81,8 @@
   => {"url" "http://127.0.0.1:55121/auth/v1/sign-in", "method" "GET", "headers" {"apikey" "TOKEN", "Content-Type" "application/json"}})
 
 ^{:refer xt.net.http-fetch/request-http :added "4.1"
-  :seedgen/base {:dart {:suppress true}}}
+  :seedgen/base {:dart {:suppress true}
+                 :ruby {:transform '{js-fetch/create ruby-fetch/create}}}}
 (fact "dispatches request through the wrapped fetch client"
   
   (notify/wait-on :js

@@ -41,6 +41,9 @@
                     xt.event
                     kmi.lang]
           :exclude [xt.sample]}
+
+ :r      {:include [xt.lang]
+          :exclude [xt.sample]}
  
  :scheme {:include [xt.lang]
           :exclude [xt.sample]}

@@ -22,7 +22,7 @@
 ;; explicitly from the request meta.
 ;;
 
-(def.xt call-actions
+(def.xt CALL_ACTIONS
   ["@xt.db/kernel-init"
    "@xt.db/kernel-setup"
    "@xt.db/kernel-teardown"
@@ -35,13 +35,13 @@
    "@xt.db/dataview-call"
    "@xt.db/dataview-cached"])
 
-(def.xt attach-actions
+(def.xt ATTACH_ACTIONS
   ["@xt.db/attach-model"
    "@xt.db/rpc-attach-model"
    "@xt.db/pull-attach-model"
    "@xt.db/dataview-attach-model"])
 
-(def.xt detach-actions
+(def.xt DETACH_ACTIONS
   ["@xt.db/detach-model"])
 
 (defn.xt request-proxy
@@ -99,10 +99,10 @@
    call; detach actions close it."
   {:added "4.1"}
   [node]
-  (xt/for:array [action -/call-actions]
+  (xt/for:array [action -/CALL_ACTIONS]
     (substrate/register-handler node action -/request-proxy nil))
-  (xt/for:array [action -/attach-actions]
+  (xt/for:array [action -/ATTACH_ACTIONS]
     (substrate/register-handler node action -/attach-forward-handler nil))
-  (xt/for:array [action -/detach-actions]
+  (xt/for:array [action -/DETACH_ACTIONS]
     (substrate/register-handler node action -/detach-forward-handler nil))
   (return node))

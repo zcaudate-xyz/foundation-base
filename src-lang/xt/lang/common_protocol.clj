@@ -54,12 +54,17 @@
     (when (not (xt/x:nil? override-fn))
       (return override-fn)))
   
+  (var local-impls (xt/x:get-key obj "::/protocol-impls"))
+  (var local-impl-map (and local-impls (xt/x:get-key local-impls on)))
   (var protocol (xt/x:get-key xt.lang.common-protocol/PROTOCOLS on))
-  (when (xt/x:nil? protocol)
+  (when (and (xt/x:nil? protocol)
+             (xt/x:nil? local-impl-map))
     (xt/x:err (xt/x:cat "Missing protocol entry " on)))
   
-  (var protocol-impls (xt/x:get-key protocol "impls"))
-  (var protocol-impl-map (xt/x:get-key protocol-impls type))
+  (var protocol-impls (and protocol (xt/x:get-key protocol "impls")))
+  (var protocol-impl-map
+       (or (and protocol-impls (xt/x:get-key protocol-impls type))
+           local-impl-map))
 
   (when (xt/x:nil? protocol-impl-map)
     (xt/x:err (xt/x:cat "Missing protocol implementation " on " for " type)))
@@ -191,7 +196,13 @@
         ctor-map    (into {"::" typename
                            "::/protocols" (mapv (fn [[proto-sym impl-map]]
                                                   (list `xt/x:get-key proto-sym "on"))
-                                                protocols)}
+                                                protocols)
+                           "::/protocol-impls"
+                           (cons 'tab
+                                 (mapv (fn [[proto-sym impl-map]]
+                                         [(list `xt/x:get-key proto-sym "on")
+                                          (normalize-protocol-impl-map impl-map)])
+                                       protocols))}
                           (map (fn [x] [(name x) x]) impl-fields))
 
         proto-forms  (mapv (fn [[proto-sym impl-map]]
@@ -203,9 +214,8 @@
     
     (list (format-defimpl-xt-symbol type-sym "defn")
           type-sym impl-fields
-          (list 'when (list 'not (list `xt/x:get-key `xt.lang.common-protocol/IMPLEMENTATIONS typename))
-                (concat ['do (list `xt/x:set-key `xt.lang.common-protocol/IMPLEMENTATIONS typename true)]
-                        proto-forms))
+          (concat ['do (list `xt/x:set-key `xt.lang.common-protocol/IMPLEMENTATIONS typename true)]
+                  proto-forms)
           (list 'return ctor-map))))
 
 (defmacro defimpl.xt

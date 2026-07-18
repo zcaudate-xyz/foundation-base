@@ -56,7 +56,8 @@
                  :js   {:extra [[js.net.ws-native :as js-ws]]}
                  :lua  {:extra [[lua.net.ws-native :as lua-ws]]}
                  :python {:extra [[python.net.ws-native :as py-ws]]}
-                 :dart {:extra [[dart.net.ws-native :as dart-ws]]}}}
+                 :dart {:extra [[dart.net.ws-native :as dart-ws]]}
+                 :ruby {:extra [[ruby.net.ws-native :as ruby-ws]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.substrate :as event-node]
@@ -117,6 +118,7 @@
 (fact "a node websocket runtime can attach a live websocket transport and request over it"
   ^{:seedgen/base
     {:lua {:transform '{:js :lua js-ws/create lua-ws/create js-ws/connect-ws lua-ws/connect-ws}}
+     :ruby {:transform '{:js :ruby js-ws/create ruby-ws/create js-ws/connect-ws ruby-ws/connect-ws}}
      :python {:transform '{:js :python js-ws/create py-ws/create js-ws/connect-ws py-ws/connect-ws}}
      :dart {:transform '{:js :dart js-ws/create dart-ws/create js-ws/connect-ws dart-ws/connect-ws}
             :input

@@ -50,9 +50,9 @@
   {:added "4.1"}
   [response]
   (var status (xt/x:get-key response "status"))
-  (var data (-/supabase-error-data response))
   (var body (xt/x:get-key response "body"))
   (when (and status (>= status 400))
+    (var data (-/supabase-error-data response))
     (throw (xt/x:ex (or (xt/x:get-key data "message")
                         (xt/x:get-key body "message")
                         "Supabase request failed")

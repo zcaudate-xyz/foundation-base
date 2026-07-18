@@ -77,11 +77,12 @@
                 :args (xt/x:get-key aentry "args")})
     (xt/x:set-key queued key qentry)
     (return qentry))
-  (var promise (-/throttle-run-async throttle id args))
-  (:= aentry {:promise promise
+  (:= aentry {:promise nil
               :started (now-fn)
               :args args})
   (xt/x:set-key active key aentry)
+  (var promise (-/throttle-run-async throttle id args))
+  (xt/x:set-key aentry "promise" promise)
   (return aentry))
 
 (defn.xt throttle-waiting

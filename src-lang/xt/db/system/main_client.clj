@@ -57,6 +57,30 @@
         :else
         (return nil)))
 
+(l/script :ruby
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.net.addon-supabase :as addon]
+             [ruby.net.http-fetch :as ruby-fetch]
+             [ruby.net.ws-native :as ruby-ws]
+             [ruby.net.conn-sqlite :as ruby-sqlite]
+             [ruby.net.conn-postgres :as ruby-postgres]]})
+
+(defn.rb create-client
+  [type defaults]
+  (cond (== type "sqlite")
+        (return (ruby-sqlite/create defaults))
+
+        (== type "postgres")
+        (return (ruby-postgres/create defaults))
+
+        (== type "supabase")
+        (do (var client (ruby-fetch/create defaults (addon/middleware-supabase)))
+            (xt/x:set-key client "create_ws_client" ruby-ws/create)
+            (return client))
+
+        :else
+        (return nil)))
+
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]
              [xt.net.addon-supabase :as addon]

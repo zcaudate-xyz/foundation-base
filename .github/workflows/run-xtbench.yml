@@ -1,8 +1,8 @@
-name: Run xtbench Tests
+name: XTBench Core
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'lang/dart', 'lang/python', 'lang/lua']
   repository_dispatch:
   workflow_dispatch:
 
@@ -12,7 +12,6 @@ env:
 
 jobs:
   run-xtbench-lang-tests:
-    if: github.ref == 'refs/heads/main'
     name: 01 - xt.lang / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -49,7 +48,6 @@ jobs:
           lein seedgen test '[xt.lang]' :with "[${{ matrix.lang }}]"
 
   run-xtbench-event-tests:
-    if: github.ref == 'refs/heads/main'
     name: 02 - xt.event / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -86,7 +84,6 @@ jobs:
           lein seedgen test '[xt.event]' :with "[${{ matrix.lang }}]"
 
   run-xtbench-net-tests:
-    if: github.ref == 'refs/heads/main'
     name: 02 - xt.net / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -123,7 +120,6 @@ jobs:
           lein seedgen test '[xt.net]' :with "[${{ matrix.lang }}]"
 
   run-xtbench-substrate-tests:
-    if: github.ref == 'refs/heads/main'
     name: 03 - xt.substrate / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -177,7 +173,6 @@ jobs:
           - 5432:5432
 
   run-xtbench-db-tests:
-    if: github.ref == 'refs/heads/main'
     name: 05 - xt.db / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -229,40 +224,3 @@ jobs:
           POSTGRES_USER: postgres
         ports:
           - 5432:5432
-
-  run-xtbench-kmi-tests:
-    if: github.ref == 'refs/heads/main'
-    name: 10 - kmi.lang / ${{ matrix.lang }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - lang: dart
-            image: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-dart:ci
-          - lang: python
-            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          - lang: lua
-            image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Log into GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.GH_USER }}
-          password: ${{ secrets.GH_TOKEN }}
-
-      - name: run
-        run: >
-          docker run --network host
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock
-          -v $(pwd):$(pwd)
-          -w $(pwd)
-          ${{ matrix.image }}
-          lein seedgen test '[kmi.lang]' :with "[${{ matrix.lang }}]"
