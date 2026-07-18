@@ -31,4 +31,8 @@
                       {:meta "Examples"
                        :title "xt examples"
                        :text "POCs, substrate walkthroughs, xtbench coverage, and generated xtalk projects."
-                       :href "xt-examples.html"}]}]]
+                       :href "xt-examples.html"}
+                      {:meta "Metrics"
+                       :title "xtbench metrics"
+                       :text "Cross-runtime parity results and xtalk specification coverage published by the XTBench workflows."
+                       :href "xtbench-metrics.html"}]}]]
