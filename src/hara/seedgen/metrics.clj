@@ -123,12 +123,13 @@
                           (merge-with + out (:tests record)))
                         {:passed 0 :failed 0 :throw 0 :timeout 0 :skipped 0 :errored 0}
                         records)
-        failed? (some #(not= "success" (:status %)) records)
+        failed? (or (empty? records)
+                    (some #(not= "success" (:status %)) records))
         sample  (first records)]
     {:schema-version +schema-version+
      :kind "xtbench-run"
      :workflow-key workflow
-     :workflow-name (:workflow-name sample)
+     :workflow-name (or (:workflow-name sample) workflow)
      :status (if failed? "failure" "success")
      :tests totals
      :jobs records
@@ -187,8 +188,6 @@
         updated (update-index index rel record)
         retained (set (map :path (get-in updated [:workflows workflow :runs])))
         expired  (remove retained (map :path (get-in index [:workflows workflow :runs])))]
-    (when (empty? jobs)
-      (throw (ex-info "No XTBench metrics artifacts found" {:input input-dir})))
     (write-json! (str output-dir "/" rel) record)
     (write-json! (str output-dir "/latest/" workflow ".json") record)
     (doseq [path expired

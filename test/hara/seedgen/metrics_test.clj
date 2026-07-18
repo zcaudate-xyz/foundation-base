@@ -17,7 +17,15 @@
     (select-keys record [:workflow-key :status :tests]))
   => {:workflow-key "core"
       :status "failure"
-      :tests {:passed 8 :failed 1 :throw 0 :timeout 0 :skipped 1 :errored 0}})
+      :tests {:passed 8 :failed 1 :throw 0 :timeout 0 :skipped 1 :errored 0}}
+
+  (select-keys (aggregate-records "core" [])
+               [:workflow-key :workflow-name :status :tests :jobs])
+  => {:workflow-key "core"
+      :workflow-name "core"
+      :status "failure"
+      :tests {:passed 0 :failed 0 :throw 0 :timeout 0 :skipped 0 :errored 0}
+      :jobs []})
 
 ^{:refer hara.seedgen.metrics/update-index :added "4.1"}
 (fact "keeps rerun attempts distinct and applies retention"
