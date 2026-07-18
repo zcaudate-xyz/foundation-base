@@ -9,6 +9,7 @@ on:
       - 'config/publish.edn'
       - 'config/publish/**'
       - 'template/**'
+      - 'resources/assets/code.doc/**'
   workflow_dispatch:
 
 env:

@@ -13,7 +13,21 @@
   => [:div [:span {:id "chk"}] [:h2 [:b "1 &nbsp;&nbsp; Introduction"]]]
 
   (page-element {:type :hero :title "foundation-code"})
-  => (contains [:section {:class "hero"}]))
+  => (contains [:section {:class "hero"}])
+
+  (let [element (page-element {:type :widget/js
+                               :src "js/widgets/sample.js"
+                               :class "sample"
+                               :props {:value "</script>"}})]
+    [(first element)
+     (second element)
+     (-> element (nth 2) (nth 2) (clojure.string/includes? "\\u003c/script\\u003e"))])
+  => [:div
+      [:div {:class "widget-js sample"
+             :data-widget-state "pending"
+             :aria-live "polite"}
+       "Loading widget…"]
+      true])
 
 ^{:refer code.doc.engine.winterfell/render-chapter :added "3.0"}
 (fact "seed function for rendering a chapter element"

@@ -23,17 +23,26 @@
   (cli/parse-test-args [":only" "xt.foo" "xt.bar" ":with" "[dart ruby]"])
   => {:selector '[xt.foo xt.bar]
       :langs    '[dart ruby]
-      :extra    []}
+      :extra    []
+      :params   {}}
 
   (cli/parse-test-args ["'xt.foo" ":with" "[dart]"])
   => {:selector 'xt.foo
       :langs    '[dart]
-      :extra    []}
+      :extra    []
+      :params   {}}
 
   (cli/parse-test-args ["':all"])
   => {:selector :all
       :langs    nil
-      :extra    []})
+      :extra    []
+      :params   {}}
+
+  (cli/parse-test-args ["'xt.foo" ":with" "[dart]" ":metrics" "target/out.json"])
+  => {:selector 'xt.foo
+      :langs '[dart]
+      :extra [":metrics" "target/out.json"]
+      :params {:metrics 'target/out.json}})
 
 ^{:refer hara.seedgen.cli/parse-command-args :added "4.1"}
 (fact "parses seedgen command args, including multi-namespace :only"

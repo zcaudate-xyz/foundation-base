@@ -11,6 +11,9 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   RUBY_IMAGE: ghcr.io/zcaudate-xyz/infra-foundation-xtbench-ruby:ci
 
+permissions:
+  contents: write
+
 jobs:
   run-xtbench-lang-tests:
     name: 01 - xt.lang / ruby
@@ -33,7 +36,14 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ${RUBY_IMAGE}
-          lein seedgen test '[xt.lang]' :with '[ruby]'
+          lein seedgen test '[xt.lang]' :with '[ruby]' :metrics target/xtbench-metrics/result.json
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xtbench-lang-ruby
+          path: target/xtbench-metrics/result.json
+          if-no-files-found: warn
 
   run-xtbench-event-tests:
     name: 02 - xt.event / ruby
@@ -56,7 +66,14 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ${RUBY_IMAGE}
-          lein seedgen test '[xt.event]' :with '[ruby]'
+          lein seedgen test '[xt.event]' :with '[ruby]' :metrics target/xtbench-metrics/result.json
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xtbench-event-ruby
+          path: target/xtbench-metrics/result.json
+          if-no-files-found: warn
 
   run-xtbench-substrate-tests:
     name: 03 - xt.substrate / ruby
@@ -80,7 +97,14 @@ jobs:
           -w $(pwd)
           ${RUBY_IMAGE}
           sh -lc 'gem install websocket-client-simple --no-document;
-          lein seedgen test "[xt.substrate]" :with "[ruby]"'
+          lein seedgen test "[xt.substrate]" :with "[ruby]" :metrics target/xtbench-metrics/result.json'
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xtbench-substrate-ruby
+          path: target/xtbench-metrics/result.json
+          if-no-files-found: warn
     services:
       postgres:
         image: ghcr.io/zcaudate-xyz/infra-db:main
@@ -114,7 +138,14 @@ jobs:
           -w $(pwd)
           ${RUBY_IMAGE}
           sh -lc 'gem install pg sqlite3 websocket-client-simple --no-document;
-          lein seedgen test "[xt.db]" :with "[ruby]"'
+          lein seedgen test "[xt.db]" :with "[ruby]" :metrics target/xtbench-metrics/result.json'
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xtbench-db-ruby
+          path: target/xtbench-metrics/result.json
+          if-no-files-found: warn
     services:
       postgres:
         image: ghcr.io/zcaudate-xyz/infra-db:main
@@ -147,4 +178,25 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ${RUBY_IMAGE}
-          lein seedgen test '[kmi.lang]' :with '[ruby]'
+          lein seedgen test '[kmi.lang]' :with '[ruby]' :metrics target/xtbench-metrics/result.json
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xtbench-kmi-ruby
+          path: target/xtbench-metrics/result.json
+          if-no-files-found: warn
+
+  publish-metrics:
+    name: Publish metrics
+    if: always() && github.ref == 'refs/heads/main'
+    needs: [run-xtbench-lang-tests, run-xtbench-event-tests, run-xtbench-substrate-tests, run-xtbench-db-tests, run-xtbench-kmi-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: xtbench-*
+          path: target/xtbench-artifacts
+      - name: Publish metrics branch
+        run: bash bin/publish-xtbench-metrics active "$GITHUB_WORKSPACE/target/xtbench-artifacts" "$RUNNER_TEMP/xtbench-branch"

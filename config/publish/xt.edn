@@ -69,4 +69,9 @@
           xt-examples
           {:input "src-doc/documentation/xt/xt_examples.clj"
            :title "xt examples"
-           :subtitle "pocs, xtbench, and generated project examples"}}}
+           :subtitle "pocs, xtbench, and generated project examples"}
+
+          xtbench-metrics
+          {:input "src-doc/documentation/xt/xtbench_metrics.clj"
+           :title "xtbench metrics"
+           :subtitle "cross-runtime parity and xtalk specification history"}}}

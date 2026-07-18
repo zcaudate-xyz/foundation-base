@@ -27,6 +27,7 @@
             [code.test.base.executive :as executive]
             [code.test.task :as test-task]
             [hara.seedgen :as seedgen]
+            [hara.seedgen.metrics :as metrics]
             [hara.seedgen.common-util :as common]
             [std.fs :as fs]
             [std.lib.result :as res]))
@@ -53,6 +54,8 @@
       [(vec (map read-arg vals)) (drop (inc (count vals)) args)])
     [(read-arg (first args)) (rest args)]))
 
+(declare parse-command-params)
+
 (defn parse-test-args
   "parses args after the 'test' subcommand"
   {:added "4.1"}
@@ -70,7 +73,8 @@
                        [nil more])]
     {:selector selector
      :langs    (if (keyword? langs) [langs] langs)
-     :extra    more}))
+     :extra    more
+     :params   (parse-command-params more)}))
 
 (defn- load-compatibility
   "loads the xtalk compatibility config"
@@ -272,6 +276,7 @@
      {:generated generated
       :summary   summary
       :failing   failing
+      :errored   errors
       :exit      (failing-summary summary errors)})))
 
 (def ^{:added "4.1"} ^:private commands
@@ -432,8 +437,19 @@
   [command args]
   (case command
     "test"
-    (let [{:keys [selector langs]} (parse-test-args args)]
-      (seedgen-test selector langs))
+    (let [{:keys [selector langs params]} (parse-test-args args)
+          result (seedgen-test selector langs)]
+      (when-let [path (:metrics params)]
+        (metrics/write-test-record! (str path) selector langs result))
+      result)
+
+    "metrics-merge"
+    (let [params (parse-command-params args)
+          {:keys [input output workflow]} params]
+      (when-not (and input output workflow)
+        (throw (ex-info "metrics-merge requires :input, :output, and :workflow"
+                        {:params params})))
+      (metrics/merge-directory! (str input) (str output) (name workflow)))
 
     "compatible"
     (let [selector (if (seq args)
@@ -459,7 +475,7 @@
                           {:command command :params params})))
         (fn selector params))
       (throw (ex-info "Unknown seedgen command"
-                      {:command command :available (conj (sort (keys commands)) "compatible" "test" "todos")})))))
+                      {:command command :available (conj (sort (keys commands)) "compatible" "metrics-merge" "test" "todos")})))))
 
 (defn -main
   "main entry point for lein seedgen"
@@ -473,10 +489,16 @@
                          (:exit result 0)
                          0)))
         (catch Throwable t
+          (when (= "test" command)
+            (let [{:keys [selector langs params]} (parse-test-args (rest args))]
+              (when-let [path (:metrics params)]
+                (try (metrics/write-error-record! (str path) selector langs t)
+                     (catch Throwable metrics-error
+                       (println "Unable to write metrics:" (ex-message metrics-error)))))))
           (println "Error:" (ex-message t))
           (when-let [data (ex-data t)]
             (pprint/pprint data))
           (System/exit 1)))
       (do (println "Usage: lein seedgen <command> <selector> [options]")
-          (println "Commands:" (str/join ", " (conj (sort (keys commands)) "compatible" "test" "todos")))
+          (println "Commands:" (str/join ", " (conj (sort (keys commands)) "compatible" "metrics-merge" "test" "todos")))
           (System/exit 1)))))

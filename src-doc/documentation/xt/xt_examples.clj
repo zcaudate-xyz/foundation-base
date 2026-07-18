@@ -22,6 +22,8 @@
 
 "The `test-lang/xtbench` tests exercise portable common libraries across target languages. Use them when documenting which common library behavior is expected to remain identical between emitted runtimes."
 
+"The live [xtbench metrics dashboard](xtbench-metrics.html) tracks suite and language results together with xtalk specification coverage."
+
 [[:chapter {:title "Walkthrough" :link "walkthrough"}]]
 
 [[:section {:title "Inspecting generated xtalk source"}]]

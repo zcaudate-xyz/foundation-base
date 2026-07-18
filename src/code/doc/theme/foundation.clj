@@ -18,7 +18,9 @@
               "home.html"
               "assets/css/foundation.css"
               "assets/css/foundation-highlight.css"
+              "assets/css/widgets/xtbench.css"
               "assets/js/highlight.min.js"
+              "assets/js/widgets/xtbench.js"
               "deploy.edn"
               "include.edn"]})
 

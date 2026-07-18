@@ -10,6 +10,9 @@ env:
   LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: write
+
 jobs:
   run-xtbench-lang-tests:
     name: 01 - xt.lang / ${{ matrix.lang }}
@@ -43,7 +46,14 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ${{ matrix.image }}
-          lein seedgen test '[xt.lang]' :with "[${{ matrix.lang }}]"
+          lein seedgen test '[xt.lang]' :with "[${{ matrix.lang }}]" :metrics target/xtbench-metrics/result.json
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xtbench-lang-${{ matrix.lang }}
+          path: target/xtbench-metrics/result.json
+          if-no-files-found: warn
 
   run-xtbench-event-tests:
     name: 02 - xt.event / php
@@ -69,7 +79,14 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ghcr.io/zcaudate-xyz/infra-foundation-xtbench-php:ci
-          lein seedgen test '[xt.event]' :with '[php]'
+          lein seedgen test '[xt.event]' :with '[php]' :metrics target/xtbench-metrics/result.json
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xtbench-event-php
+          path: target/xtbench-metrics/result.json
+          if-no-files-found: warn
 
   run-xtbench-kmi-tests:
     name: 10 - kmi.lang / php
@@ -95,4 +112,25 @@ jobs:
           -v $(pwd):$(pwd)
           -w $(pwd)
           ghcr.io/zcaudate-xyz/infra-foundation-xtbench-php:ci
-          lein seedgen test '[kmi.lang]' :with '[php]'
+          lein seedgen test '[kmi.lang]' :with '[php]' :metrics target/xtbench-metrics/result.json
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xtbench-kmi-php
+          path: target/xtbench-metrics/result.json
+          if-no-files-found: warn
+
+  publish-metrics:
+    name: Publish metrics
+    if: always() && github.ref == 'refs/heads/main'
+    needs: [run-xtbench-lang-tests, run-xtbench-event-tests, run-xtbench-kmi-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: xtbench-*
+          path: target/xtbench-artifacts
+      - name: Publish metrics branch
+        run: bash bin/publish-xtbench-metrics annex "$GITHUB_WORKSPACE/target/xtbench-artifacts" "$RUNNER_TEMP/xtbench-branch"

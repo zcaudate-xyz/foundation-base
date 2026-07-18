@@ -1,7 +1,8 @@
 (ns code.doc.engine.winterfell
   (:require [clojure.string]
             [code.doc.engine.plugin.api :as api]
-            [code.doc.render.util :as util]))
+            [code.doc.render.util :as util]
+            [std.json :as json]))
 
 (defmulti page-element
   "seed function for rendering a page element"
@@ -225,6 +226,37 @@
         (-> code
             util/basic-html-escape
             clojure.string/trim)]])]))
+
+(defn widget-js-loader
+  "returns a loader for a JavaScript widget mount function"
+  {:added "4.1"}
+  [src props]
+  (let [src-json   (json/write src)
+        props-json (-> (json/write (or props {}))
+                       (clojure.string/replace "<" "\\u003c")
+                       (clojure.string/replace ">" "\\u003e")
+                       (clojure.string/replace "&" "\\u0026"))]
+    (str "(function(root){"
+         "root.dataset.widgetState='loading';"
+         "import(" src-json ").then(function(module){"
+         "if(typeof module.mount!=='function'){throw new Error('Widget module must export mount(element, props)');}"
+         "return module.mount(root," props-json ");"
+         "}).then(function(){root.dataset.widgetState='ready';})"
+         ".catch(function(error){root.dataset.widgetState='error';"
+         "root.textContent='Widget failed to load: '+error.message;console.error(error);});"
+         "})(document.currentScript.previousElementSibling);")))
+
+(defmethod page-element :widget/js
+  ([{:keys [src props class fallback]}]
+   (when-not (seq src)
+     (throw (ex-info ":widget/js requires a non-empty :src" {:src src})))
+   [:div
+    [:div {:class (str "widget-js" (when (seq class) (str " " class)))
+           :data-widget-state "pending"
+           :aria-live "polite"}
+     (or fallback "Loading widget…")]
+    [:script {:type "text/javascript"}
+     (widget-js-loader src props)]]))
 
 (defmethod page-element :image
   ([{:keys [tag number title] :as elem}]

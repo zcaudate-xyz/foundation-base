@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+workflow="$1"
+artifacts_dir="$2"
+metrics_dir="$3"
+branch="xtbench-metrics"
+
+git fetch origin "$branch" || true
+if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
+  git worktree add --detach "$metrics_dir" "origin/$branch"
+  git -C "$metrics_dir" switch -C "$branch" "origin/$branch"
+else
+  git worktree add --detach "$metrics_dir"
+  git -C "$metrics_dir" switch --orphan "$branch"
+  git -C "$metrics_dir" rm -rf .
+fi
+
+publish_attempt=1
+while [ "$publish_attempt" -le 5 ]; do
+  lein seedgen metrics-merge :input "$artifacts_dir" :output "$metrics_dir" :workflow "$workflow"
+  git -C "$metrics_dir" add index.json latest runs
+  if git -C "$metrics_dir" diff --cached --quiet; then
+    exit 0
+  fi
+  git -C "$metrics_dir" config user.name "github-actions[bot]"
+  git -C "$metrics_dir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  git -C "$metrics_dir" commit -m "xtbench $workflow run ${GITHUB_RUN_NUMBER:-0} attempt ${GITHUB_RUN_ATTEMPT:-1}"
+  if git -C "$metrics_dir" push origin "HEAD:$branch"; then
+    exit 0
+  fi
+  publish_attempt=$((publish_attempt + 1))
+  git fetch origin "$branch"
+  git -C "$metrics_dir" reset --hard "origin/$branch"
+done
+
+echo "Unable to publish XTBench metrics after 5 attempts" >&2
+exit 1
