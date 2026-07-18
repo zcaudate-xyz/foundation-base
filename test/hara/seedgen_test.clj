@@ -62,7 +62,7 @@
        "  => 6)\n"))
 
 (def ^:private +seedgen-extra-require-format+
-  #"(?ms):require \[\[xt\.lang\.spec-base :as xt\]\n\s+\[xt\.lang\.common-repl :as repl\]\n\s+\[python\.core\.common-promise :as p\]\]")
+  #"(?ms):require \[\[xt\.lang\.spec-base :as xt\]\n\s+\[xt\.lang\.common-repl :as repl\]\n\s+\[xt\.lang\.common-promise :as p\]\]")
 
 (def ^:private +seedgen-script-extra-source+
   (str "(ns xt.sample.script-extra-test\n"
@@ -384,11 +384,11 @@
                                    project)
       (let [content (slurp path)]
         [(count (re-seq #"\(l/script- :python" content))
-         (count (re-seq #"\[python\.lib\.driver-sqlite :as py-sqlite\]" content))
-         (count (re-seq #"\[js\.lib\.driver-sqlite :as js-sqlite\]" content))])
+         (count (re-seq #"\[python\.net\.conn-sqlite :as py-sqlite\]" content))
+         (count (re-seq #"\[js\.net\.conn-sqlite :as js-sqlite\]" content))])
       (finally
          (fs/delete root {:recursive true}))))
-  => [1 1 1])
+  => [1 2 1])
 
 ^{:refer hara.seedgen/seedgen-langadd :added "4.1"
   :id test-seedgen-langadd-bulk-selector}
@@ -573,8 +573,8 @@
                                    project)
       (let [content (slurp bench-path)]
         [(count (re-seq #"\(l/script- :python" content))
-         (count (re-seq #"\[python\.lib\.driver-sqlite :as py-sqlite\]" content))
-         (count (re-seq #"\[js\.lib\.driver-sqlite :as js-sqlite\]" content))])
+         (count (re-seq #"\[python\.net\.conn-sqlite :as py-sqlite\]" content))
+         (count (re-seq #"\[js\.net\.conn-sqlite :as js-sqlite\]" content))])
       (finally
          (fs/delete root {:recursive true}))))
   => [1 1 0])

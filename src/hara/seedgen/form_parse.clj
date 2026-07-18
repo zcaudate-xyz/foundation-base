@@ -2,6 +2,7 @@
   (:require [code.framework :as base]
              [code.framework.common :as framework.common]
              [code.project :as project]
+             [std.block.base :as block]
              [std.block.navigate :as nav]
              [hara.seedgen.common-util :as common]
              [hara.seedgen.form-common :as form-common]
@@ -20,7 +21,10 @@
     (cond
       (:seedgen/root m) :root
       (:seedgen/derived m) :derived
-      (:seedgen/scaffold m) :scaffold)))
+      (:seedgen/scaffold m) :scaffold
+      ;; A per-language override makes an otherwise portable form part of the
+      ;; canonical seed rather than Clojure-only harness scaffolding.
+      (:seedgen/base m) :root)))
 
 (defn form-script?
   [script-heads form]
@@ -200,8 +204,11 @@
                    fact-navs (->> top-navs
                                   (keep (fn [zloc]
                                           (let [form (nav/value zloc)
+                                                parsed-meta (some-> zloc nav/block block/block-string read-string meta)
                                                 refer (or (:refer (meta form))
-                                                          (:ref (meta form)))]
+                                                          (:ref (meta form))
+                                                          (:refer parsed-meta)
+                                                          (:ref parsed-meta))]
                                             (when (and refer
                                                        (= 'fact (first (nav/value (form-common/nav-body zloc)))))
                                               [refer zloc]))))

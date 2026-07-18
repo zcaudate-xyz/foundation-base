@@ -376,8 +376,10 @@
          (:dart content-by-lang)])
       (finally
         (fs/delete root {:recursive true}))))
-  => [#"(?s)\(l/script- :(lua|lua\.nginx) .*?\[lua\.nginx\.driver-sqlite :as lua-sqlite\].*"
-      #"(?s)\(l/script- :dart .*?\[dart\.lib\.driver-sqlite :as dart-sqlite\].*"])
+  => #(and (re-find #"(?s)\(l/script- :(lua|lua\.nginx)\s+.*?\[lua\.nginx\.conn-sqlite :as lua-sqlite\].*"
+                    (first %))
+           (re-find #"(?s)\(l/script- :dart\s+.*?\[dart\.net\.conn-sqlite :as dart-sqlite\].*"
+                    (second %))))
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-remove-extra-requires}
@@ -412,8 +414,8 @@
         (slurp (str (fs/path root path))))
       (finally
         (fs/delete root {:recursive true}))))
-  => #(and (re-find #"\[lua\.nginx\.driver-sqlite :as lua-sqlite\]" %)
-           (not (re-find #"\[js\.lib\.driver-sqlite :as js-sqlite\]" %))))
+  => #(and (re-find #"\[lua\.nginx\.conn-sqlite :as lua-sqlite\]" %)
+           (not (re-find #"\[js\.net\.conn-sqlite :as js-sqlite\]" %))))
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-drop-extra-requires}

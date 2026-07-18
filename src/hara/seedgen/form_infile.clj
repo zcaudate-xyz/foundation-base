@@ -207,12 +207,14 @@
   [script-str target-lang]
   (let [root       (nav/parse-root script-str)
         script-nav (nav/down root)
-        script-form (some-> script-nav nav/value)
+        ;; rewrite-clj values do not retain metadata attached to nested require
+        ;; vectors. Read the form directly so :seedgen/extra remains visible.
+        script-form (read-string script-str)
         script-lang (some-> script-form second common/seedgen-normalize-runtime-lang)
         config-nav  (some-> script-nav nav/down nav/right nav/right)
-        config      (when (and config-nav
-                               (map? (nav/value config-nav)))
-                      (nav/value config-nav))
+        config      (when (and (seq? script-form)
+                               (map? (nth script-form 2 nil)))
+                      (nth script-form 2))
         requires    (some-> config :require normalize-script-requires)]
     (if (and config (seq requires))
       (let [target-lang  (common/seedgen-normalize-runtime-lang target-lang)
@@ -231,6 +233,28 @@
               nav/root-string)
           script-str))
       script-str)))
+
+(defn- fact-entry-map
+  [output]
+  (reduce-kv (fn [out nsp entries]
+               (reduce-kv (fn [out var entry]
+                            (reduce (fn [out refer]
+                                      (if refer (assoc out refer entry) out))
+                                    out
+                                    [(symbol (str nsp) (str var))
+                                     (:refer entry)
+                                     (:ref entry)]))
+                          out
+                          entries))
+             {}
+             (get output :entries)))
+
+(defn- top-level-refer
+  [form current]
+  (or (:refer (meta form))
+      (:ref (meta form))
+      (let [m (some-> current read-string meta)]
+        (or (:refer m) (:ref m)))))
 
 (defn- merge-script-requires
   [current-requires extra-requires]
@@ -315,9 +339,18 @@
         extra-requires  (root-script-extra-requires output lang)
         drop-targets    (when (not= (common/seedgen-normalize-runtime-lang lang)
                                     root-lang)
-                          (->> (root-script-extra-requires output root-lang)
-                               (map require-target)
-                               set))]
+                          (let [root-str (some-> output
+                                                (get-in [:globals :global-script :root])
+                                                item-string
+                                                unwrap-meta-string)
+                                root-requires (some-> root-str read-string (nth 2 nil) :require)
+                                tagged-targets (->> (normalize-script-requires root-requires)
+                                                    (filter #(-> % meta :seedgen/extra))
+                                                    (map require-target))]
+                            (->> (concat (map require-target
+                                              (root-script-extra-requires output root-lang))
+                                         tagged-targets)
+                                 set)))]
     (if (and (empty? extra-requires)
              (empty? drop-targets))
       script-str
@@ -1034,13 +1067,7 @@
          current-langs    (set (get-in output [:globals :lang :derived]))
          target-set       (set (or target-lang stored-langs []))
          existing-scripts (script-string-map output)
-        fact-entries     (->> (get output :entries)
-                              vals
-                              (mapcat vals))
-        fact-by-refer    (into {}
-                               (map (fn [entry]
-                                      [(symbol (str (:ns entry)) (str (:var entry))) entry]))
-                               fact-entries)
+        fact-by-refer    (fact-entry-map output)
         root-script-line (some-> root-entry item-line line-key)
         derived-lines    (->> (get-in output [:globals :global-script :derived])
                               (map item-line)
@@ -1066,8 +1093,7 @@
                     (let [line     (line-key (nav/line-info zloc))
                           current  (block/block-string (nav/block zloc))
                           form     (nav/value zloc)
-                          refer    (or (:refer (meta form))
-                                       (:ref (meta form)))]
+                          refer    (top-level-refer form current)]
                        (cond
                          (= line root-script-line)
                          (into [(update-root-script-string output ordered-scripts)]
@@ -1100,13 +1126,7 @@
                            purge-langs
                            target-lang)
         target-set       (set target-lang)
-        fact-entries     (->> (get output :entries)
-                              vals
-                              (mapcat vals))
-        fact-by-refer    (into {}
-                               (map (fn [entry]
-                                      [(symbol (str (:ns entry)) (str (:var entry))) entry]))
-                               fact-entries)
+        fact-by-refer    (fact-entry-map output)
         root-script-line (some-> root-entry item-line line-key)
          derived-line->lang
          (->> (get-in output [:globals :global-script :derived])
@@ -1127,8 +1147,7 @@
                           current (block/block-string (nav/block zloc))
                           body    (form-common/nav-body zloc)
                           form    (nav/value zloc)
-                          refer   (or (:refer (meta form))
-                                      (:ref (meta form)))
+                          refer   (top-level-refer form current)
                           head    (when (seq? (nav/value body))
                                     (first (nav/value body)))]
                         (cond
@@ -1298,13 +1317,7 @@
                               (map item-line)
                               (map line-key)
                               set)
-        fact-entries     (->> (get output :entries)
-                              vals
-                              (mapcat vals))
-        fact-by-refer    (into {}
-                               (map (fn [entry]
-                                      [(symbol (str (:ns entry)) (str (:var entry))) entry]))
-                               fact-entries)
+        fact-by-refer    (fact-entry-map output)
         {:keys [all-lines keep-map]} (render-global-top-target output lang)
         script-string    (render-target-script-string output lang)]
     (str (str/join
@@ -1316,8 +1329,7 @@
                         form    (nav/value zloc)
                         head    (when (seq? (nav/value body))
                                   (first (nav/value body)))
-                        refer   (or (:refer (meta form))
-                                    (:ref (meta form)))]
+                        refer   (top-level-refer form current)]
                     (cond
                       (and (seq? form)
                            (= 'ns (first form)))
