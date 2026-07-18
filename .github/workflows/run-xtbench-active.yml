@@ -198,5 +198,9 @@ jobs:
         with:
           pattern: xtbench-*
           path: target/xtbench-artifacts
+      - name: Setup Leiningen
+        uses: DeLaGuardo/setup-clojure@v13
+        with:
+          lein: latest
       - name: Publish metrics branch
         run: bash bin/publish-xtbench-metrics active "$GITHUB_WORKSPACE/target/xtbench-artifacts" "$RUNNER_TEMP/xtbench-branch"
