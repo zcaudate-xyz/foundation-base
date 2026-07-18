@@ -285,7 +285,7 @@
                (promise/x:promise-then
                 (fn [deleted]
                   (repl/notify deleted))))))))
-  => {"status" 200 "http_status" 200})
+  => {})
 
 ^{:refer xt.db.node.kernel-supabase/supabase-admin-generate-link-handler :added "4.1"}
 (fact "generates an admin link on the service"
@@ -404,7 +404,7 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {"status" 200 "http_status" 200})
+  => {})
 
 ^{:refer xt.db.node.kernel-supabase/supabase-recovery-handler :added "4.1"}
 (fact "requests a recovery email on the service"
@@ -418,7 +418,7 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {"status" 200 "http_status" 200})
+  => {})
 
 ^{:refer xt.db.node.kernel-supabase/supabase-settings-handler :added "4.1"}
 (fact "reads auth settings on the service"
@@ -571,7 +571,14 @@
 (fact "TODO")
 
 ^{:refer xt.db.node.kernel-supabase/supabase-response-data :added "4.1"}
-(fact "TODO")
+(fact "returns successful domain data without overwriting its status field"
+  (!.js
+   (adaptor/supabase-response-data
+    {"status" 200
+     "body" {"status" "new"
+             "message" "stored"}}))
+  => {"status" "new"
+      "message" "stored"})
 
 ^{:refer xt.db.node.kernel-supabase/supabase-create-model :added "4.1"}
 (fact "TODO")
