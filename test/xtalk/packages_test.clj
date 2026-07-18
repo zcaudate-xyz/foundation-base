@@ -35,3 +35,23 @@
 
   (get (js-package :ui) "version")
   => VERSION)
+
+^{:refer xtalk.packages/dart-project :added "4.1"}
+(fact "adds application members without changing package workspace entries"
+  (let [project (dart-project ".build/example" ["wind_demo"])
+        pubspec (->> project :sections :setup
+                     (filter #(= "pubspec.yaml" (:file %)))
+                     first
+                     :main)]
+    [(:build project)
+     (last pubspec)
+     (count (:default project))])
+  => [".build/example" "  - wind_demo" (count (module-entries :dart))])
+
+^{:refer xtalk.packages/normalize-dart-module :added "4.1"}
+(fact "adds Dart SDK imports required by emitted raw symbols"
+  (let [source "encode(value) { return jsonEncode(value); }\nrandom() { return math.Random(); }"
+        output (normalize-dart-module source nil)]
+    [(boolean (re-find #"import 'dart:convert';" output))
+     (boolean (re-find #"import 'dart:math' as math;" output))])
+  => [true true])

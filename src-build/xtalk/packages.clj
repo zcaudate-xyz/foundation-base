@@ -2,7 +2,8 @@
   "Source-owned JavaScript and Dart package generation for top-level xt segments."
   (:require [clojure.string :as str]
             [std.make :as make :refer [def.make]]
-            [hara.lang.compile]))
+            [hara.lang.compile]
+            [hara.runtime.basic.impl.process-dart :as dart-runtime]))
 
 (def VERSION "0.1.0")
 (def SEGMENTS [:lang :event :substrate :net :db :ui])
@@ -24,6 +25,20 @@
 (def SINGLE-MODULES
   {:js {:ui ['js.react 'js.lib.figma]}
    :dart {}})
+
+(defn normalize-dart-module
+  "adds Dart SDK imports required by emitted raw symbols"
+  [source _static]
+  (dart-runtime/ensure-dart-imports source))
+
+(declare root-prefix)
+
+(defn module-code-options
+  [platform segment options]
+  (cond-> (assoc options
+                 :link {:path-suffix (if (= platform :dart) ".dart" ".js")
+                        :root-prefix (root-prefix platform segment)})
+    (= platform :dart) (assoc :transforms {:full [normalize-dart-module]})))
 
 (defn package-name
   [platform segment]
@@ -55,9 +70,7 @@
    :target (if (= platform :dart)
              (str (name segment) "/lib")
              (name segment))
-   :emit {:code {:extra-namespaces false
-                 :link {:path-suffix (if (= platform :dart) ".dart" ".js")
-                        :root-prefix (root-prefix platform segment)}}
+   :emit {:code (module-code-options platform segment {:extra-namespaces false})
           :lang/format (if (= platform :js) :commonjs :full)}})
 
 (defn single-entry
@@ -74,8 +87,7 @@
                   (when (= platform :dart) "/lib")
                   (when (seq subdir) (str "/" (str/join "/" subdir))))
      :file file
-     :emit {:code {:link {:path-suffix (if (= platform :dart) ".dart" ".js")
-                          :root-prefix (root-prefix platform segment)}}
+     :emit {:code (module-code-options platform segment {})
             :lang/format (if (= platform :js) :commonjs :full)}}))
 
 (defn module-entries
@@ -196,17 +208,36 @@
          :main (generated-readme platform segment)}])
      SEGMENTS))))
 
-(def +js-project+
+(defn js-project
+  "constructs the generated JavaScript package workspace project"
+  [build]
   {:tag "xtalk-packages-js"
-   :build "packages-gen/js"
+   :build build
    :sections {:setup (manifest-sections :js)}
    :default (vec (module-entries :js))})
 
+(defn dart-project
+  "constructs a Dart package workspace with optional additional members"
+  ([build]
+   (dart-project build []))
+  ([build extra-workspace-members]
+   (let [sections (mapv (fn [section]
+                          (if (and (= "pubspec.yaml" (:file section))
+                                   (= "" (:target section)))
+                            (update section :main into
+                                    (map #(str "  - " %) extra-workspace-members))
+                            section))
+                        (manifest-sections :dart))]
+     {:tag "xtalk-packages-dart"
+      :build build
+      :sections {:setup sections}
+      :default (vec (module-entries :dart))})))
+
+(def +js-project+
+  (js-project "packages-gen/js"))
+
 (def +dart-project+
-  {:tag "xtalk-packages-dart"
-   :build "packages-gen/dart"
-   :sections {:setup (manifest-sections :dart)}
-   :default (vec (module-entries :dart))})
+  (dart-project "packages-gen/dart"))
 
 (def.make XTALK-JS +js-project+)
 (def.make XTALK-DART +dart-project+)

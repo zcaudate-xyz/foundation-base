@@ -39,7 +39,7 @@
 
 (defn.xt action-add!
   [state event-id callback value-event]
-  (var action-id (xt/x:cat "xt_ui_" (xt/x:get-key state "next")))
+  (var action-id (xt/x:cat "xt_ui_" (xt/x:to-string (xt/x:get-key state "next"))))
   (xt/x:set-key state "next" (+ 1 (xt/x:get-key state "next")))
   (xt/x:set-key
    (xt/x:get-key state "actions") action-id
