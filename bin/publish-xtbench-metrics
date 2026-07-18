@@ -30,7 +30,7 @@ fi
 
 publish_attempt=1
 while [ "$publish_attempt" -le 5 ]; do
-  if ! merge_output=$(lein seedgen metrics-merge :input "$artifacts_dir" :output "$metrics_dir" :workflow "$workflow" 2>&1); then
+  if ! merge_output=$(lein seedgen metrics-merge :input "\"$artifacts_dir\"" :output "\"$metrics_dir\"" :workflow "$workflow" 2>&1); then
     printf '%s\n' "$merge_output" >&2
     merge_error=$(printf '%s\n' "$merge_output" | tail -n 12)
     merge_error=${merge_error//'%'/'%25'}
