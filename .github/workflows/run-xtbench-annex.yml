@@ -2,7 +2,7 @@ name: Run xtbench annext Tests
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'lang/**']
   repository_dispatch:
   workflow_dispatch:
 
@@ -12,7 +12,7 @@ env:
 
 jobs:
   run-xtbench-lang-tests:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
     name: 01 - xt.lang / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -51,7 +51,7 @@ jobs:
           lein seedgen test '[xt.lang]' :with "[${{ matrix.lang }}]"
 
   run-xtbench-event-tests:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
     name: 02 - xt.event / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -91,7 +91,7 @@ jobs:
           lein seedgen test '[xt.event]' :with "[${{ matrix.lang }}]"
 
   run-xtbench-substrate-tests:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
     name: 03 - xt.substrate / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -141,7 +141,7 @@ jobs:
           - 5432:5432
 
   run-xtbench-db-tests:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
     name: 05 - xt.db / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -191,7 +191,7 @@ jobs:
           - 5432:5432
 
   run-xtbench-kmi-tests:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
     name: 10 - kmi.lang / ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
