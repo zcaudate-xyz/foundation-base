@@ -30,7 +30,16 @@ fi
 
 publish_attempt=1
 while [ "$publish_attempt" -le 5 ]; do
-  lein seedgen metrics-merge :input "$artifacts_dir" :output "$metrics_dir" :workflow "$workflow"
+  if ! merge_output=$(lein seedgen metrics-merge :input "$artifacts_dir" :output "$metrics_dir" :workflow "$workflow" 2>&1); then
+    printf '%s\n' "$merge_output" >&2
+    merge_error=$(printf '%s\n' "$merge_output" | tail -n 12)
+    merge_error=${merge_error//'%'/'%25'}
+    merge_error=${merge_error//$'\r'/'%0D'}
+    merge_error=${merge_error//$'\n'/'%0A'}
+    echo "::error title=XTBench metrics merge::${merge_error}"
+    exit 1
+  fi
+  printf '%s\n' "$merge_output"
   git -C "$metrics_dir" add index.json latest runs
   if git -C "$metrics_dir" diff --cached --quiet; then
     exit 0
