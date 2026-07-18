@@ -17,6 +17,10 @@
 (defn php-tf-x-apply
   [[_ f args]]
   (list 'call_user_func_array f args))
+(defn php-tf-x-construct
+  [[_ f args]]
+  (list 'call_user_func_array f args))
+
 
 (defn php-tf-x-shell
   ([[_ s opts]]
@@ -52,6 +56,7 @@
    :x-len            {:macro #'php-tf-x-len  :emit :macro}
    :x-err            {:macro #'php-tf-x-err  :emit :macro}
    :x-eval           {:macro #'php-tf-x-eval :emit :macro}
+   :x-construct      {:macro #'php-tf-x-construct :emit :macro}
    :x-apply          {:macro #'php-tf-x-apply :emit :macro}
    :x-unpack         {:emit :alias :raw :...}
    :x-print          {:macro #'php-tf-x-print :emit :macro :value true}
@@ -137,7 +142,7 @@
 (defn php-tf-x-m-mod   [[_ num denom]] (list :% num (list :- " % ") denom))
 (defn php-tf-x-m-quot  [[_ num denom]] (list 'floor (list '/ num denom)))
 
-(defn php-tf-x-m-pow [[_ base n]] (list '** base n))
+(defn php-tf-x-m-pow [[_ base n]] (list 'call_user_func_array "pow" [base n]))
 
 (def +php-math+
   {:x-m-abs           {:emit :alias :raw 'abs  :value true}
@@ -193,8 +198,8 @@
         (list 'array_is_list e)))
 
 (def +php-type+
-  {:x-to-string      {:emit :alias :raw '(string)}
-   :x-to-number      {:emit :alias :raw '(float)}
+  {:x-to-string      {:emit :alias :raw 'strval}
+   :x-to-number      {:emit :alias :raw 'floatval}
    :x-is-string?     {:macro #'php-tf-x-is-string? :emit :macro}
    :x-is-number?     {:macro #'php-tf-x-is-number? :emit :macro}
    :x-is-integer?    {:macro #'php-tf-x-is-integer? :emit :macro}
@@ -288,7 +293,19 @@
          (foreach [(array_keys ~rhs) ~i]
            (var ~v := (:% ~rhs [~i]))
            ~@body))))
-    (apply list 'foreach [rhs lhs] body)))
+    ;; A collection literal cannot be placed directly in the grammar's
+    ;; foreach parameter slot: it is interpreted as additional parameters.
+    ;; array_values also gives for:array the intended dense value iteration.
+    (apply list 'foreach [(list 'array_values rhs) lhs] body)))
+
+(defn php-tf-for-index
+  "lowers an exclusive numeric range to PHP's inclusive range helper"
+  {:added "4.1"}
+  [[_ [i [start end step]] & body]]
+  (let [step (or step 1)]
+    (apply list 'foreach
+           [(list 'range start (list '- end step) step) i]
+           body)))
 
 (defn php-tf-for-object
   "custom for:object code"
@@ -317,7 +334,8 @@
   (apply list 'foreach [it e] body))
 
 (def +php-for+
-  {:for-array  {:macro #'php-tf-for-array :emit :macro}
+  {:for-index  {:macro #'php-tf-for-index :emit :macro}
+   :for-array  {:macro #'php-tf-for-array :emit :macro}
    :for-object {:macro #'php-tf-for-object :emit :macro}
    :for-iter   {:macro #'php-tf-for-iter :emit :macro}})
 
@@ -512,8 +530,34 @@
   ([[_ s]]
    (list 'rtrim s)))
 
+(defn php-tf-x-str-len
+  [[_ s]]
+  (list 'strlen s))
+
+(defn php-tf-x-str-pad-left
+  [[_ s n pad]]
+  (list 'str_pad s n pad 'STR_PAD_LEFT))
+
+(defn php-tf-x-str-pad-right
+  [[_ s n pad]]
+  (list 'str_pad s n pad 'STR_PAD_RIGHT))
+
+(defn php-tf-x-str-starts-with
+  [[_ s prefix]]
+  (list 'str_starts_with s prefix))
+
+(defn php-tf-x-str-ends-with
+  [[_ s suffix]]
+  (list 'str_ends_with s suffix))
+
+
 (def +php-str+
-  {:x-str-char        {:macro #'php-tf-x-str-char       :emit :macro}
+  {:x-str-len         {:macro #'php-tf-x-str-len         :emit :macro}
+   :x-str-pad-left    {:macro #'php-tf-x-str-pad-left    :emit :macro}
+   :x-str-pad-right   {:macro #'php-tf-x-str-pad-right   :emit :macro}
+   :x-str-starts-with {:macro #'php-tf-x-str-starts-with :emit :macro}
+   :x-str-ends-with   {:macro #'php-tf-x-str-ends-with   :emit :macro}
+   :x-str-char        {:macro #'php-tf-x-str-char       :emit :macro}
    :x-str-format      {:macro #'php-tf-x-str-format     :emit :macro}
    :x-str-split       {:macro #'php-tf-x-str-split      :emit :macro}
    :x-str-join        {:macro #'php-tf-x-str-join       :emit :macro}

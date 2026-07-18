@@ -34,7 +34,17 @@
                      (for:array [i entries]
                        (array_push out i))
                      out)])
-  => #"\$out = \[\];\n\$entries = \[0,1,2\];\nforeach \(\$entries as  \$i\)")
+  => #"\$out = \[\];\n\$entries = \[0,1,2\];\nforeach \(array_values\(\$entries\) as  \$i\)")
+
+^{:refer hara.model.annex.spec-php/+grammar+ :added "4.1"
+  :id test-php-grammar-literal-foreach}
+(fact "keeps array literals intact when lowering for:array"
+  (l/emit-as :php ['(do
+                     (var out [])
+                     (for:array [i [0 1 2]]
+                       (array_push out i))
+                     out)])
+  => #"foreach \(array_values\(\[0,1,2\]\) as  \$i\)")
 
 ^{:refer hara.model.annex.spec-php/+grammar+ :added "4.1"
   :id test-php-grammar-function-params}
