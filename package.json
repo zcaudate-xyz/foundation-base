@@ -6,6 +6,11 @@
   "engines": {
     "node": ">=24"
   },
+  "scripts": {
+    "code-manage:poll": "node scripts/code_manage_poller/poller.mjs",
+    "code-manage:serve": "node scripts/code_manage_poller/poller.mjs --serve",
+    "test:code-manage-poller": "node --test scripts/code_manage_poller/test/*.test.mjs"
+  },
   "dependencies": {
     "@measured/puck": "^0.20.2",
     "@radix-ui/themes": "^3.3.0",

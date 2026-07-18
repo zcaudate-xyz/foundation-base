@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.greenways.code-manage-poller</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/node</string>
+    <string>/Users/zcaudate/Development/greenways/foundation-base/scripts/code_manage_poller/poller.mjs</string>
+    <string>--serve</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/zcaudate/Development/greenways/foundation-base</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <key>CODE_MANAGE_REPOSITORY</key>
+    <string>/Users/zcaudate/Development/greenways/foundation-base</string>
+    <key>CODE_MANAGE_GITHUB_REPOSITORY</key>
+    <string>zcaudate-xyz/foundation-base</string>
+    <key>CODE_MANAGE_STATE</key>
+    <string>/Users/zcaudate/Development/greenways/foundation-base/target/code-manage-poller.sqlite</string>
+    <key>CODE_MANAGE_POLL_SECONDS</key>
+    <string>300</string>
+    <key>CODE_MANAGE_PORT</key>
+    <string>8787</string>
+    <key>CODE_MANAGE_WEBHOOK_SECRET</key>
+    <string>replace-with-a-long-random-secret</string>
+    <key>CODEX_BIN</key>
+    <string>/opt/homebrew/bin/codex</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>30</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/zcaudate/Library/Logs/code-manage-poller.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/zcaudate/Library/Logs/code-manage-poller.error.log</string>
+</dict>
+</plist>

@@ -3,6 +3,8 @@ name: Run Code
 on:
   push:
     branches: [main, 'lang/**']
+  pull_request:
+    branches: [main]
   repository_dispatch:
   workflow_dispatch:
 
@@ -12,9 +14,14 @@ env:
 
 jobs:
   run-incomplete:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
+    name: Incomplete - ${{ matrix.section }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        section: [hara, std, xt, code, foundation, web3, kmi, postgres]
 
     steps:
       - name: Checkout repository
@@ -28,14 +35,57 @@ jobs:
           password: ${{ secrets.GH_TOKEN }}
 
       - name: Run Incomplete
-        run: >
-          docker run --network host
-          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
-          -v /var/run/docker.sock:/var/run/docker.sock
-          -v /home/runner/.docker/config.json:/root/.docker/config.json:ro
-          -v $(pwd):$(pwd)
-          -w $(pwd)
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein incomplete
+        run: |
+          mkdir -p target/manage-findings
+          docker run --network host \
+            -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}" \
+            -e "GITHUB_REPOSITORY=${GITHUB_REPOSITORY}" \
+            -e "GITHUB_SHA=${GITHUB_SHA}" \
+            -e "GITHUB_REF=${GITHUB_REF}" \
+            -e "GITHUB_RUN_ID=${GITHUB_RUN_ID}" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v /home/runner/.docker/config.json:/root/.docker/config.json:ro \
+            -v $(pwd):$(pwd) \
+            -w $(pwd) \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            lein run -m code.manage.automation \
+            ${{ matrix.section }} target/manage-findings/${{ matrix.section }}.json
+
+      - name: Upload incomplete report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-manage-incomplete-${{ matrix.section }}
+          path: target/manage-findings/${{ matrix.section }}.json
+          if-no-files-found: warn
+
+  notify-incomplete:
+    if: always() && github.ref == 'refs/heads/main'
+    needs: [run-incomplete]
+    name: Notify code.manage repair service
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CODE_MANAGE_WEBHOOK_URL: ${{ secrets.CODE_MANAGE_WEBHOOK_URL }}
+      CODE_MANAGE_WEBHOOK_SECRET: ${{ secrets.CODE_MANAGE_WEBHOOK_SECRET }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download incomplete reports
+        uses: actions/download-artifact@v4
+        with:
+          pattern: code-manage-incomplete-*
+          path: target/manage-findings
+
+      - name: Send signed findings
+        if: env.CODE_MANAGE_WEBHOOK_URL != '' && env.CODE_MANAGE_WEBHOOK_SECRET != ''
+        run: node scripts/code_manage_poller/notify.mjs target/manage-findings
+
+      - name: Explain disabled notification
+        if: env.CODE_MANAGE_WEBHOOK_URL == '' || env.CODE_MANAGE_WEBHOOK_SECRET == ''
+        run: echo "code.manage webhook is disabled until its URL and secret are configured"
 
   run-group-tests:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')

@@ -1,0 +1,22 @@
+{:schema-version 1
+ :policy :observe
+ :baseline "config/manage/incomplete-baseline.edn"
+ :sections
+ {:hara {:selector [hara]
+         :test-command "lein test :with [hara]"}
+  :std {:selector [std]
+        :test-command "lein test :with [std]"}
+  :xt {:selector [xt.]
+       :test-command "lein test :with [xt.] :timeout-ns 300000"}
+  :code {:selector [code]
+         :test-command "lein test :with [code]"}
+  :foundation {:selector [script net math lib jvm]
+               :label "script/net/math/lib/jvm"
+               :test-command "lein test :with [script net math lib jvm]"}
+  :web3 {:selector [solidity web3]
+         :label "solidity/web3"
+         :test-command "lein test :with [solidity web3]"}
+  :kmi {:selector [kmi]
+        :test-command "lein test :with [kmi]"}
+  :postgres {:selector [postgres]
+             :test-command "lein test :with [postgres]"}}}

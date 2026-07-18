@@ -1,5 +1,6 @@
 (ns code.manage-test
   (:require [code.manage :refer :all]
+            [code.manage.automation :as automation]
             [code.project :as project]
             [std.lib.env :as env]
             [std.task :as task])
@@ -13,6 +14,13 @@
    (task/task? (-> +tasks+ :factcheck-remove))
    (task/task? (-> +tasks+ :factcheck-generate))]
   => [true true true true])
+
+^{:refer code.manage/incomplete-report :added "4.1"}
+(fact "delegates machine-readable reporting through the code.manage task surface"
+  (with-redefs [automation/incomplete-report
+                (fn [target opts] {:target target :section (:section opts)})]
+    (incomplete-report :all {:section :code}))
+  => {:target :all :section :code})
 
 ^{:refer code.manage/analyse :added "3.0"}
 (fact "analyse either a source or test file"

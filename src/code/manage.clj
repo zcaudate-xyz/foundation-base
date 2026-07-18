@@ -1,5 +1,6 @@
 (ns code.manage
   (:require [code.framework :as base]
+            [code.manage.automation :as automation]
             [code.manage.fn-format :as fn-format]
             [code.manage.ns-format :as ns-format]
             [code.manage.ns-rename :as ns-rename]
@@ -665,6 +666,12 @@
 
 (comment (find-usages '[code.manage] {:print {:item true} :var 'code.framework/analyse}))
 
+(defn incomplete-report
+  "writes a versioned incomplete-test report for one configured CI section"
+  {:added "4.1"}
+  [target opts]
+  (automation/incomplete-report target opts))
+
 (invoke/definvoke require-file
   "requires the file and returns public vars
 
@@ -689,6 +696,7 @@
    :missing       missing
    :todos         todos
    :incomplete    incomplete
+   :incomplete-report incomplete-report
    :orphaned      orphaned
    :scaffold      scaffold
    :create-tests  create-tests
@@ -728,13 +736,14 @@
       
       (let [opts (task/process-ns-args (task/collapse-only args))
             func (ns-resolve (find-ns 'code.manage) (symbol cmd))
-            args (mapv (fn [x] (try (read-string x) (catch Throwable _ x))) args)]
-        (if func
-          (func (or (:ns opts) :all) (merge {:print {:function true
-                                                     :summary true
-                                                     :result true
-                                                     :item true}}
-                                            (dissoc opts :ns)))
-          (print-fn))
+            args (mapv (fn [x] (try (read-string x) (catch Throwable _ x))) args)
+            result (if func
+                     (func (or (:ns opts) :all)
+                           (merge {:print {:function true
+                                           :summary true
+                                           :result true
+                                           :item true}}
+                                  (dissoc opts :ns)))
+                     (print-fn))]
         (if-not (get opts :no-exit)
-          (System/exit 0))))))
+          (System/exit (int (or (when (map? result) (:exit result)) 0))))))))
