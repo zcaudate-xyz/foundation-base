@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+report_failure() {
+  local status="$?"
+  echo "::error title=XTBench metrics publisher::failed at line ${BASH_LINENO[0]} with exit ${status}"
+  exit "$status"
+}
+
+trap report_failure ERR
+
 workflow="$1"
 artifacts_dir="$2"
 metrics_dir="$3"
@@ -38,5 +46,5 @@ while [ "$publish_attempt" -le 5 ]; do
   git -C "$metrics_dir" reset --hard "origin/$branch"
 done
 
-echo "Unable to publish XTBench metrics after 5 attempts" >&2
+echo "::error title=XTBench metrics publisher::unable to push metrics after 5 attempts"
 exit 1
