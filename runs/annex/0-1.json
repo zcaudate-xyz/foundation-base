@@ -12,7 +12,7 @@
   "git" : null,
   "schema-version" : 1,
   "jobs" : [ ],
-  "recorded-at" : "2026-07-18T17:33:50.871938984Z",
+  "recorded-at" : "2026-07-18T22:00:06.347811922Z",
   "workflow-name" : "annex",
   "status" : "failure",
   "kind" : "xtbench-run"
