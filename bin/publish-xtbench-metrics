@@ -13,7 +13,6 @@ if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
 else
   git worktree add --detach "$metrics_dir"
   git -C "$metrics_dir" switch --orphan "$branch"
-  git -C "$metrics_dir" rm -rf .
 fi
 
 publish_attempt=1
