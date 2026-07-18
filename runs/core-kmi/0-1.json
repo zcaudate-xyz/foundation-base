@@ -1,0 +1,19 @@
+{
+  "run" : null,
+  "workflow-key" : "core-kmi",
+  "tests" : {
+    "passed" : 0,
+    "failed" : 0,
+    "throw" : 0,
+    "timeout" : 0,
+    "skipped" : 0,
+    "errored" : 0
+  },
+  "git" : null,
+  "schema-version" : 1,
+  "jobs" : [ ],
+  "recorded-at" : "2026-07-18T17:34:07.849906944Z",
+  "workflow-name" : "core-kmi",
+  "status" : "failure",
+  "kind" : "xtbench-run"
+}
