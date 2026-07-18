@@ -137,4 +137,6 @@ jobs:
         with:
           lein: latest
       - name: Publish metrics branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: bash bin/publish-xtbench-metrics annex "$GITHUB_WORKSPACE/target/xtbench-artifacts" "$RUNNER_TEMP/xtbench-branch"

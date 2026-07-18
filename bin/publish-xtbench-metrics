@@ -5,6 +5,11 @@ workflow="$1"
 artifacts_dir="$2"
 metrics_dir="$3"
 branch="xtbench-metrics"
+push_remote="origin"
+
+if [ -n "${GITHUB_TOKEN:-}" ] && [ -n "${GITHUB_REPOSITORY:-}" ]; then
+  push_remote="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+fi
 
 git fetch origin "$branch" || true
 if git show-ref --verify --quiet "refs/remotes/origin/$branch"; then
@@ -25,7 +30,7 @@ while [ "$publish_attempt" -le 5 ]; do
   git -C "$metrics_dir" config user.name "github-actions[bot]"
   git -C "$metrics_dir" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
   git -C "$metrics_dir" commit -m "xtbench $workflow run ${GITHUB_RUN_NUMBER:-0} attempt ${GITHUB_RUN_ATTEMPT:-1}"
-  if git -C "$metrics_dir" push origin "HEAD:$branch"; then
+  if git -C "$metrics_dir" push "$push_remote" "HEAD:$branch"; then
     exit 0
   fi
   publish_attempt=$((publish_attempt + 1))
