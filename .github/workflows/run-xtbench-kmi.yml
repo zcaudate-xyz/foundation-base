@@ -70,7 +70,7 @@ jobs:
           pattern: xtbench-*
           path: target/xtbench-artifacts
       - name: Setup Leiningen
-        uses: DeLaGuardo/setup-clojure@v13
+        uses: DeLaGuardo/setup-clojure@13.4
         with:
           lein: latest
       - name: Publish metrics branch
