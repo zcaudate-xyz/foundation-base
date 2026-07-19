@@ -964,7 +964,7 @@
                container root contents
                void space spaces newline newlines tab tabs
                comment uneval cursor
-               add-child replace-children
+               add-child
                max-width line-width indent-body]}]]
 
 [[:section {:title "Parsing"}]]

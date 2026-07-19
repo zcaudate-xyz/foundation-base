@@ -106,9 +106,23 @@
                    :line line
                    :path common/*path*}}])))
 
+(defn analyse-source-entry
+  "helper function for `analyse-source-code`, returning `[id entry]` pairs.
+   `defimpl` forms also produce constructor entries (`map->` and `->`)"
+  {:added "4.1"}
+  ([nsp nav]
+   (let [[id entry :as pair] (analyse-source-function nsp nav)
+         head (-> nav nav/up nav/down nav/value)]
+     (if (and (symbol? head)
+              (= "defimpl" (name head)))
+       [pair
+        [(symbol (str "map->" id)) (assoc entry :var (symbol (str "map->" id)))]
+        [(symbol (str "->" id)) (assoc entry :var (symbol (str "->" id)))]]
+       [pair]))))
+
 (defn analyse-source-code
   "analyses a source file for namespace and function definitions
- 
+
    (-> (analyse-source-code (slurp \"test-data/code.manage/src/example/core.clj\"))
        (get-in '[example.core -foo-]))
    => '{:ns example.core,
@@ -123,7 +137,7 @@
          nsp  (->  (query/$ nav [(ns | _ & _)] {:walk :top})
                    first)
          fns  (->> (query/$* nav (toplevel-selector) {:return :zipper :walk :top})
-                   (map (partial analyse-source-function nsp))
+                   (mapcat (partial analyse-source-entry nsp))
                    (into {}))]
      (common/entry {nsp fns}))))
 

@@ -4,16 +4,48 @@
   (:use code.test))
 
 ^{:refer code.doc.link.api/external-vars :added "3.0"}
-(fact "grabs external vars from the `module/include` form"
+(fact "grabs external vars from aggregate forms (`module/include`, `intern-in`, `intern-all`)"
 
-  ;; THIS NEEDS FIXING to use h/intern-all as well as module/include
-  (external-vars (project/file-lookup (project/project))
-                 'code.test)
-  => {}
-  #_'{code.test.checker.common [throws exactly approx satisfies stores anything]
-      code.test.checker.collection [contains just contains-in just-in throws-info]
-      code.test.checker.logic [any all is-not]
-      code.test.compile [fact facts =>]})
+  (-> (external-vars (project/file-lookup (project/project))
+                     'code.test)
+      (get 'code.test.checker.common))
+  => '[throws exactly approx satisfies stores anything capture]
+
+  (-> (external-vars (project/file-lookup (project/project))
+                     'code.test)
+      (get 'code.test.checker.collection))
+  => '[contains just contains-in just-in throws-info]
+
+  (-> (external-vars (project/file-lookup (project/project))
+                     'std.lib)
+      (get 'std.lib.collection))
+  => :all)
+
+^{:refer code.doc.link.api/external-vars :id external-vars-aliased :added "4.1"}
+(fact "resolves `[dst src]` alias entries in `intern-in` forms"
+
+  (-> (external-vars (project/file-lookup (project/project))
+                     'std.block)
+      (get 'std.block.base)
+      (->> (filter vector?)))
+  => '[[type block-type]
+       [tag block-tag]
+       [string block-string]
+       [length block-length]
+       [width block-width]
+       [height block-height]
+       [prefixed block-prefixed]
+       [suffixed block-suffixed]
+       [verify block-verify]
+       [value block-value]
+       [value-string block-value-string]
+       [children block-children]
+       [info block-info]]
+
+  (-> (external-vars (project/file-lookup (project/project))
+                     'std.block.heal)
+      (get 'std.block.heal.core))
+  => '[[heal heal-content]])
 
 ^{:refer code.doc.link.api/create-api-table :added "3.0"}
 (fact "creates a api table for publishing"

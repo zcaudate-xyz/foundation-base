@@ -191,7 +191,7 @@
                (when meta [:span {:class "card-meta"} meta])
                [:h4 title]
                [:div {:class "card-text"}
-                (util/basic-html-unescape (util/markup text))]
+                (util/basic-html-unescape (util/markup (or text "")))]
                (when href
                  [:a {:href href} "Learn more"])])
             items))]))))

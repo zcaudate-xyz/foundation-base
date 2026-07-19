@@ -6,7 +6,7 @@
              [std.lib.foundation :as f])
   (:use code.test))
 
-^{:refer lib.docker.common/CANARY :guard true :adopt true :added "4.0"}
+^{:refer lib.docker.common/raw-exec :guard true :adopt true :added "4.0"}
 (fact "executes a shell command"
 
   (common/raw-exec (concat ["docker" "ps"]

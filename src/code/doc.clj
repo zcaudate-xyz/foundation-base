@@ -207,7 +207,8 @@
    (check '[core] {:eval true})"
   {:added "4.1"}
   [:task {:template :code.doc.check
-          :params {:title "CHECKING CODE.DOC PAGES"}
+          :params {:title "CHECKING CODE.DOC PAGES"
+                   :parallel false}
           :main {:fn #'check/check-page}}])
 
 (comment

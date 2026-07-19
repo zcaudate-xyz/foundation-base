@@ -1,5 +1,6 @@
 (ns code.doc.link.test
-  (:require [code.test.base.executive :as executive]
+  (:require [clojure.string]
+            [code.test.base.executive :as executive]
             [std.fs :as fs]
             [std.lib.collection :as collection]))
 
@@ -43,7 +44,9 @@
   "creates a link to all the passed tests in the project"
   {:added "3.0"}
   ([{:keys [project input] :as interim} name]
-   (if *run-tests*
+   (if (and *run-tests*
+            (or (nil? input)
+                (clojure.string/ends-with? input ".clj")))
      (let [path   (or (when input
                         (str (fs/path (:root project) input)))
                       (str (:root project) "/" (get-in project [:publish :files name :input]))

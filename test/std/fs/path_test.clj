@@ -7,7 +7,7 @@
   (:refer-clojure :exclude [resolve])
   (:import (java.io InputStream OutputStream File)))
 
-^{:refer std.fs.path/path.functionality :added "3.0" :adopt true}
+^{:refer std.fs.path/path :id path-functionality :added "3.0" :adopt true}
 (fact "returns a java.nio.file.Path object"
 
   (str (path "~"))

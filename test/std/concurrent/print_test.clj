@@ -44,7 +44,7 @@
   (print/pprint {:a 1})
   => nil?)
 
-^{:refer std.concurrent.print/with-system :added "3.0"}
+^{:refer std.lib.env/with-system :added "3.0"}
 (fact "with system print instead of local"
   (env/with-system
     (print/print "hello"))

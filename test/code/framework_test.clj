@@ -40,6 +40,23 @@
                           :line {:row 3, :col 1, :end-row 6, :end-col 31},
                           :path nil}}))
 
+^{:refer code.framework/analyse-source-entry :added "4.1"}
+(fact "expands `defimpl` forms with constructor entries"
+
+  (->> (std.block.navigate/parse-string "(impl/defimpl Task [x] (toString [obj] \"task\"))")
+       (std.block.navigate/down)
+       (std.block.navigate/right)
+       (analyse-source-entry 'foo)
+       (map first))
+  => '(Task map->Task ->Task)
+
+  (->> (std.block.navigate/parse-string "(defn foo [] 1)")
+       (std.block.navigate/down)
+       (std.block.navigate/right)
+       (analyse-source-entry 'foo)
+       (map first))
+  => '(foo))
+
 ^{:refer code.framework/find-test-frameworks :added "3.0"}
 (fact "find test frameworks given a namespace form"
   (find-test-frameworks '(ns ...
@@ -106,6 +123,7 @@
   => (contains '[analyse
                  analyse-file
                  analyse-source-code
+                 analyse-source-entry
                  analyse-source-function]))
 
 ^{:refer code.framework/read-ns-form :added "4.0"}
