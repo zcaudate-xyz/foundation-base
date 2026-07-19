@@ -12,7 +12,7 @@
   "git" : null,
   "schema-version" : 1,
   "jobs" : [ ],
-  "recorded-at" : "2026-07-18T23:33:42.230743318Z",
+  "recorded-at" : "2026-07-19T02:44:56.806980746Z",
   "workflow-name" : "core-kmi",
   "status" : "failure",
   "kind" : "xtbench-run"

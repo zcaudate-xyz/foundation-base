@@ -1,5 +1,5 @@
 {
-  "updated-at" : "2026-07-18T23:46:17.983296639Z",
+  "updated-at" : "2026-07-19T02:44:56.835552907Z",
   "schema-version" : 1,
   "workflows" : {
     "annex" : {
@@ -93,7 +93,7 @@
         },
         "git" : null,
         "jobs" : [ ],
-        "recorded-at" : "2026-07-18T22:09:02.246808319Z",
+        "recorded-at" : "2026-07-18T23:46:17.960749767Z",
         "workflow-name" : "core",
         "status" : "failure"
       },
@@ -111,7 +111,7 @@
         },
         "git" : null,
         "jobs" : [ ],
-        "recorded-at" : "2026-07-18T22:09:02.246808319Z",
+        "recorded-at" : "2026-07-18T23:46:17.960749767Z",
         "workflow-name" : "core",
         "status" : "failure"
       } ]
@@ -154,11 +154,11 @@
         "status" : "failure"
       } ]
     },
-    "core" : {
+    "core-kmi" : {
       "latest" : {
-        "path" : "runs/core/0-1.json",
+        "path" : "runs/core-kmi/0-1.json",
         "run" : null,
-        "workflow-key" : "core",
+        "workflow-key" : "core-kmi",
         "tests" : {
           "passed" : 0,
           "failed" : 0,
@@ -169,14 +169,14 @@
         },
         "git" : null,
         "jobs" : [ ],
-        "recorded-at" : "2026-07-18T23:46:17.960749767Z",
-        "workflow-name" : "core",
+        "recorded-at" : "2026-07-19T02:44:56.806980746Z",
+        "workflow-name" : "core-kmi",
         "status" : "failure"
       },
       "runs" : [ {
-        "path" : "runs/core/0-1.json",
+        "path" : "runs/core-kmi/0-1.json",
         "run" : null,
-        "workflow-key" : "core",
+        "workflow-key" : "core-kmi",
         "tests" : {
           "passed" : 0,
           "failed" : 0,
@@ -187,8 +187,8 @@
         },
         "git" : null,
         "jobs" : [ ],
-        "recorded-at" : "2026-07-18T23:46:17.960749767Z",
-        "workflow-name" : "core",
+        "recorded-at" : "2026-07-19T02:44:56.806980746Z",
+        "workflow-name" : "core-kmi",
         "status" : "failure"
       } ]
     }
