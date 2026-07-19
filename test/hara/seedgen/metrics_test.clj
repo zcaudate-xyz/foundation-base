@@ -49,7 +49,20 @@
       :tests {:passed 0 :failed 0 :throw 0 :timeout 0 :skipped 0 :errored 0}
       :jobs []
       :error {:type "missing-metrics-artifacts"
-              :message "No XTBench job metrics artifacts were published."}})
+              :message "No XTBench job metrics artifacts were published."}}
+
+  (let [context {:workflow-name "XTBench Core"
+                 :git {:sha "abc123" :ref "refs/heads/main" :event "push"}
+                 :run {:id 12345 :number 77 :attempt 2 :url "https://example.test/run/12345"}}
+        docker-job {:workflow-name "local" :status "success"
+                    :tests {:passed 5}
+                    :git {:sha nil :ref nil :event nil}
+                    :run {:id nil :number nil :attempt 1 :url nil}}]
+    (select-keys (aggregate-records "core" [docker-job] context)
+                 [:workflow-name :git :run]))
+  => {:workflow-name "XTBench Core"
+      :git {:sha "abc123" :ref "refs/heads/main" :event "push"}
+      :run {:id 12345 :number 77 :attempt 2 :url "https://example.test/run/12345"}})
 
 ^{:refer hara.seedgen.metrics/update-index :added "4.1"}
 (fact "keeps rerun attempts distinct and applies retention"

@@ -121,7 +121,9 @@
 (defn aggregate-records
   "combines per-job records into a workflow run record"
   {:added "4.1"}
-  [workflow records]
+  ([workflow records]
+   (aggregate-records workflow records (github-context)))
+  ([workflow records context]
   (let [records (vec (sort-by (juxt :suite :language) records))
         totals  (reduce (fn [out record]
                           (merge-with + out (:tests record)))
@@ -130,13 +132,16 @@
         failed? (or (empty? records)
                     (some #(not= "success" (:status %)) records))
         sample  (first records)
-        context (github-context)
-        missing? (empty? records)]
+        missing? (empty? records)
+        meaningful (fn [m]
+                     (into {} (remove (comp nil? val)) m))
+        sample-workflow (:workflow-name sample)]
     {:schema-version +schema-version+
      :kind "xtbench-run"
      :metrics-status (if missing? "missing-artifacts" "complete")
      :workflow-key workflow
-     :workflow-name (or (:workflow-name sample)
+     :workflow-name (or (when-not (= "local" sample-workflow)
+                          sample-workflow)
                         (:workflow-name context)
                         workflow)
      :status (if failed? "failure" "success")
@@ -145,9 +150,13 @@
      :error (when missing?
               {:type "missing-metrics-artifacts"
                :message "No XTBench job metrics artifacts were published."})
-     :git (or (:git sample) (:git context))
-     :run (or (:run sample) (:run context))
-     :recorded-at (utc-now)}))
+     :git (if (get-in sample [:git :sha])
+            (merge (:git context) (meaningful (:git sample)))
+            (:git context))
+     :run (if (get-in sample [:run :id])
+            (merge (:run context) (meaningful (:run sample)))
+            (:run context))
+     :recorded-at (utc-now)})))
 
 (defn history-entry
   "returns the compact entry stored in index.json"
