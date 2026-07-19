@@ -3,39 +3,27 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.type-pair :as pair]
-             [kmi.lang.common-util :as ic]
-             [xt.lang.common-iter :as it]
-             [xt.lang.common-repl :as repl]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[kmi.lang.type-pair :as pair]
+             [xt.lang.spec-base :as xt]
              [kmi.lang.common-util :as ic]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer kmi.lang.type-pair/pair-new :added "4.0"}
 (fact "creates a pair new"
 
   (!.js
    (var out (pair/pair-new "a" 1 nil))
-   [(. out ["::"])
-    (. out _key)
-    (. out _val)])
-  => ["pair" "a" 1]
-
-  (!.lua
-   (var out (pair/pair-new "a" 1 nil))
-   [(. out ["::"])
-    (. out _key)
-    (. out _val)])
+   [(xt/x:get-key out "::")
+    (xt/x:get-key out "_key")
+    (xt/x:get-key out "_val")])
   => ["pair" "a" 1])
 
 ^{:refer kmi.lang.type-pair/pair :added "4.0"}
@@ -45,23 +33,12 @@
    (var out (pair/pair "a" 1))
    [(ic/show out)
     (ic/count out)])
-  => ["[\"a\", 1]" 2]
-
-  (!.lua
-   (var out (pair/pair "a" 1))
-   [(ic/show out)
-    (ic/count out)])
   => ["[\"a\", 1]" 2])
-
 
 ^{:refer kmi.lang.type-pair/pair-to-iter :added "4.1"}
 (fact "converts pair to iterator"
 
   (!.js
-   (it/arr< (pair/pair-to-iter (pair/pair "a" 1))))
-  => ["a" 1]
-
-  (!.lua
    (it/arr< (pair/pair-to-iter (pair/pair "a" 1))))
   => ["a" 1])
 
@@ -69,10 +46,6 @@
 (fact "converts pair to array"
 
   (!.js
-   (pair/pair-to-array (pair/pair "a" 1)))
-  => ["a" 1]
-
-  (!.lua
    (pair/pair-to-array (pair/pair "a" 1)))
   => ["a" 1])
 
@@ -92,21 +65,5 @@
   => nil
 
   (!.js
-   (pair/pair-nth (pair/pair "a" 1) -1))
-  => nil
-
-  (!.lua
-   (pair/pair-nth (pair/pair "a" 1) 0))
-  => "a"
-
-  (!.lua
-   (pair/pair-nth (pair/pair "a" 1) 1))
-  => 1
-
-  (!.lua
-   (pair/pair-nth (pair/pair "a" 1) 2))
-  => nil
-
-  (!.lua
    (pair/pair-nth (pair/pair "a" 1) -1))
   => nil)

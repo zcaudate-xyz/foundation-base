@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -16,6 +16,7 @@
 
 ^{:refer kmi.lang.runtime/eval-string :added "4.1"}
 (fact "loop returns final value without recur"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -25,6 +26,7 @@
 
 ^{:refer kmi.lang.runtime/read-string :added "4.1"}
 (fact "recur restarts a loop"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -34,6 +36,7 @@
 
 ^{:refer kmi.lang.runtime/read-many :added "4.1"}
 (fact "loop bindings shadow outer names"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -43,6 +46,7 @@
 
 ^{:refer kmi.lang.runtime/eval-form :added "4.1"}
 (fact "recur arity mismatch errors"
+
   (!.js
    (xt/x:not-nil?
     (xt/x:get-key
@@ -53,6 +57,7 @@
 
 ^{:refer kmi.lang.runtime/empty-runtime :added "4.1"}
 (fact "recur outside loop errors"
+
   (!.js
    (xt/x:not-nil?
     (xt/x:get-key
@@ -63,6 +68,7 @@
 
 ^{:refer kmi.lang.runtime/handler-read :added "4.1"}
 (fact "apply calls a function with collected args"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -72,6 +78,7 @@
 
 ^{:refer kmi.lang.runtime/handler-eval :added "4.1"}
 (fact "apply works with fixed leading args"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -81,6 +88,7 @@
 
 ^{:refer kmi.lang.runtime/handler-load :added "4.1"}
 (fact "variadic function collects rest args"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -90,6 +98,7 @@
 
 ^{:refer kmi.lang.runtime/handler-describe :added "4.1"}
 (fact "variadic function with no rest args works"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)

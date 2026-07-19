@@ -102,12 +102,13 @@
   "checks if a value evaluates to itself"
   {:added "4.1"}
   [x]
-  (return (or (xt/x:nil? x)
-              (xt/x:is-string? x)
-              (xt/x:is-number? x)
-              (xt/x:is-boolean? x)
-              (-/keyword? x)
-              (-/hashset? x))))
+  (when (xt/x:nil? x) (return true))
+  (when (xt/x:is-string? x) (return true))
+  (when (xt/x:is-number? x) (return true))
+  (when (xt/x:is-boolean? x) (return true))
+  (when (-/keyword? x) (return true))
+  (when (-/hashset? x) (return true))
+  (return false))
 
 (defn.xt tagged-list?
   "checks if a value is a list whose first element is a symbol with the given name"
@@ -172,7 +173,9 @@
   [eval-fn runtime env parts]
   (var cond-form (xt/x:get-idx parts 1))
   (var then-form (xt/x:get-idx parts 2))
-  (var else-form (xt/x:get-idx parts 3 nil))
+  (var else-form nil)
+  (when (< 3 (xt/x:len parts))
+    (:= else-form (xt/x:get-idx parts 3)))
   (var out (eval-fn runtime env cond-form))
   (when (-/errorp out)
     (return out))
@@ -187,13 +190,13 @@
   "binds a destructuring pattern to a value in an environment"
   {:added "4.1"}
   [eval-fn runtime env pattern value]
-  (cond (-/symbol? pattern)
+  (if (-/symbol? pattern)
         (do (xt/x:set-key (xt/x:get-key env "bindings")
                           (rt-env/sym-name pattern)
                           value)
             (return (-/make-result runtime env)))
 
-        (or (-/vector? pattern) (-/list? pattern))
+      (if (or (-/vector? pattern) (-/list? pattern))
         (do (var arr (p/to-array pattern))
             (var val-arr (p/to-array value))
             (var i 0)
@@ -203,7 +206,7 @@
                        (== "&" (rt-env/sym-name p))
                        (< (+ i 1) (xt/x:len arr)))
                 (do (var rest-pattern (xt/x:get-idx arr (+ i 1)))
-                    (var rest-val (list/list (xt/x:unpack (xt/x:arr-slice val-arr i (xt/x:len val-arr)))))
+                    (var rest-val (list/list [ (xt/x:unpack (xt/x:arr-slice val-arr i (xt/x:len val-arr)))]))
                     (var out (-/bind-pattern eval-fn runtime env rest-pattern rest-val))
                     (when (-/errorp out)
                       (return out))
@@ -215,10 +218,10 @@
                       (return out))
                     (:= runtime (-/get-runtime out))
                     (:= env (-/get-value out))
-                    (:= i (+ i 1))))))
+                    (:= i (+ i 1)))))
             (return (-/make-result runtime env)))
 
-        (-/hashmap? pattern)
+        (if (-/hashmap? pattern)
         (do (var keys-vec nil)
             (var or-map nil)
             (var as-sym nil)
@@ -244,9 +247,9 @@
               (xt/for:array [k-sym (p/to-array keys-vec)]
                 (var key-name (rt-env/sym-name k-sym))
                 (var key-kw (kw/keyword nil key-name))
-                (var val (hm/hashmap-lookup-key value key-kw))
+                (var val (hm/hashmap-lookup-key value key-kw nil))
                 (when (and (xt/x:nil? val) (xt/x:not-nil? or-map))
-                  (var default-form (hm/hashmap-lookup-key or-map k-sym))
+                  (var default-form (hm/hashmap-lookup-key or-map k-sym nil))
                   (when (xt/x:not-nil? default-form)
                     (var default-out (eval-fn runtime env default-form))
                     (when (-/errorp default-out)
@@ -260,10 +263,9 @@
                 (:= env (-/get-value out))))
             (return (-/make-result runtime env)))
 
-        true
-        (return (-/make-error runtime
-                         (xt/x:cat "unsupported binding pattern: "
-                                   (util/show pattern)))))
+          (return (-/make-error runtime
+                                (xt/x:cat "unsupported binding pattern: "
+                                          (util/show pattern))))))))
 
 (defn.xt eval-let
   "evaluates a let form"
@@ -359,7 +361,7 @@
                           (return item-out))
                         (:= runtime (-/get-runtime item-out))
                         (xt/x:arr-push out (-/get-value item-out)))))
-            (return (-/make-result runtime (list/list (xt/x:unpack out)))))
+            (return (-/make-result runtime (list/list [ (xt/x:unpack out)]))))
 
         (-/vector? form)
         (do (var out [])
@@ -379,7 +381,7 @@
                           (return item-out))
                         (:= runtime (-/get-runtime item-out))
                         (xt/x:arr-push out (-/get-value item-out)))))
-            (return (-/make-result runtime (vec/vector (xt/x:unpack out)))))
+            (return (-/make-result runtime (vec/vector [ (xt/x:unpack out)]))))
 
         (-/hashmap? form)
         (do (var out [])
@@ -396,7 +398,7 @@
               (:= runtime (-/get-runtime v-out))
               (xt/x:arr-push out (-/get-value k-out))
               (xt/x:arr-push out (-/get-value v-out)))
-            (return (-/make-result runtime (hm/hashmap (xt/x:unpack out)))))
+            (return (-/make-result runtime (hm/hashmap [ (xt/x:unpack out)]))))
 
         (-/hashset? form)
         (do (var out [])
@@ -406,7 +408,7 @@
                 (return item-out))
               (:= runtime (-/get-runtime item-out))
               (xt/x:arr-push out (-/get-value item-out)))
-            (return (-/make-result runtime (hs/hashset (xt/x:unpack out)))))
+            (return (-/make-result runtime (hs/hashset [ (xt/x:unpack out)]))))
 
         true
         (return (-/make-result runtime form))))
@@ -525,17 +527,17 @@
   (var specs-data (-/get-value form-out))
   (var specs nil)
   (cond (-/symbol? specs-data)
-        (:= specs (vec/vector specs-data))
+        (:= specs (vec/vector [ specs-data]))
 
         (-/vector? specs-data)
         (do (var arr (p/to-array specs-data))
             (var first (xt/x:get-idx arr 0))
             (if (-/symbol? first)
-              (:= specs (vec/vector specs-data))
+              (:= specs (vec/vector [ specs-data]))
               (:= specs specs-data)))
 
         (-/list? specs-data)
-        (:= specs (vec/vector (xt/x:unpack (p/to-array specs-data))))
+        (:= specs (vec/vector [ (xt/x:unpack (p/to-array specs-data))]))
 
         true
         (return (-/make-error runtime "invalid require form")))
@@ -591,7 +593,9 @@
     (:= runtime (-/get-runtime out))
     (xt/x:arr-push args (-/get-value out)))
   (var f (xt/x:get-key target member-name))
-  (return (-/make-result runtime (xt/x:apply f args))))
+  (if (prim/variadic-fn? f)
+    (return (-/make-result runtime (f args)))
+    (return (-/make-result runtime (xt/x:apply f args)))))
 
 (defn.xt eval-throw
   "evaluates a throw form, returning an error result"
@@ -684,7 +688,9 @@
   {:added "4.1"}
   [eval-fn runtime f args]
   (cond (xt/x:is-function? f)
-        (return (-/make-result runtime (xt/x:apply f args)))
+        (if (prim/variadic-fn? f)
+          (return (-/make-result runtime (f args)))
+          (return (-/make-result runtime (xt/x:apply f args))))
 
         (and (xt/x:is-object? f)
              (== "kmi.fn" (xt/x:get-key f "type")))
@@ -716,7 +722,7 @@
               (:= call-env (-/get-value bind-out)))
             (when (xt/x:not-nil? rparam)
               (var tail (xt/x:arr-slice args req-count arg-count))
-              (var bind-out (-/bind-pattern eval-fn runtime call-env rparam (list/list (xt/x:unpack tail))))
+              (var bind-out (-/bind-pattern eval-fn runtime call-env rparam (list/list [ (xt/x:unpack tail)])))
               (when (-/errorp bind-out)
                 (return bind-out))
               (:= runtime (-/get-runtime bind-out))
@@ -858,7 +864,7 @@
       (return res))
     (:= runtime (-/get-runtime res))
     (xt/x:arr-push out (-/get-value res)))
-  (return (-/make-result runtime (vec/vector (xt/x:unpack out)))))
+  (return (-/make-result runtime (vec/vector [ (xt/x:unpack out)]))))
 
 (defn.xt eval-hashmap
   "evaluates a hash-map literal"
@@ -882,7 +888,7 @@
     (xt/x:arr-push items (-/get-value k-out))
     (xt/x:arr-push items (-/get-value v-out))
     (:= i (+ i 1)))
-  (return (-/make-result runtime (hm/hashmap (xt/x:unpack items)))))
+  (return (-/make-result runtime (hm/hashmap [ (xt/x:unpack items)]))))
 
 (defn.xt eval-set
   "evaluates a set literal"
@@ -895,7 +901,7 @@
       (return res))
     (:= runtime (-/get-runtime res))
     (xt/x:arr-push out (-/get-value res)))
-  (return (-/make-result runtime (hs/hashset (xt/x:unpack out)))))
+  (return (-/make-result runtime (hs/hashset [ (xt/x:unpack out)]))))
 
 ;;
 ;; MAIN EVALUATOR

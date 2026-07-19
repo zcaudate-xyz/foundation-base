@@ -21,7 +21,7 @@
   {:added "4.1"}
   [x]
   (return (and (xt/x:is-object? x)
-               (== "reader" (. x ["::"])))))
+               (== "reader" (xt/x:get-key x "::")))))
 
 (defn.xt create
   "creates a string-backed runtime reader"
@@ -39,7 +39,7 @@
   "returns the current [line column] position"
   {:added "4.1"}
   [reader]
-  (return [(. reader line) (. reader col)]))
+  (return [(xt/x:get-key reader "line") (xt/x:get-key reader "col")]))
 
 (defn.xt throw-reader
   "throws a reader error with position context"
@@ -60,61 +60,61 @@
   "returns the current char without advancing"
   {:added "4.1"}
   [reader]
-  (var pushback (. reader pushback))
+  (var pushback (xt/x:get-key reader "pushback"))
   (if (< 0 (xt/x:len pushback))
     (return (xt/x:last pushback))
-    (return (-/impl-char-at (. reader input)
-                            (. reader idx)))))
+    (return (-/impl-char-at (xt/x:get-key reader "input")
+                            (xt/x:get-key reader "idx")))))
 
 (defn.xt read-char
   "reads a single char and advances the reader"
   {:added "4.1"}
   [reader]
-  (var pushback (. reader pushback))
+  (var pushback (xt/x:get-key reader "pushback"))
   (if (< 0 (xt/x:len pushback))
     (do (var ch (xt/x:arr-pop pushback))
-        (xt/x:arr-push (. reader history)
-                       {"idx" (. reader idx)
-                        "line" (. reader line)
-                        "col" (. reader col)
+        (xt/x:arr-push (xt/x:get-key reader "history")
+                       {"idx" (xt/x:get-key reader "idx")
+                        "line" (xt/x:get-key reader "line")
+                        "col" (xt/x:get-key reader "col")
                         "ch" ch
                         "advance" false})
         (if (== "\n" ch)
-          (do (xt/x:set-key reader "line" (+ (. reader line) 1))
+          (do (xt/x:set-key reader "line" (+ (xt/x:get-key reader "line") 1))
               (xt/x:set-key reader "col" 1))
-          (xt/x:set-key reader "col" (+ (. reader col) 1)))
+          (xt/x:set-key reader "col" (+ (xt/x:get-key reader "col") 1)))
         (return ch))
-    (do (var ch (-/impl-char-at (. reader input)
-                                (. reader idx)))
+    (do (var ch (-/impl-char-at (xt/x:get-key reader "input")
+                                (xt/x:get-key reader "idx")))
         (if (xt/x:nil? ch)
           (return nil)
-          (do (xt/x:arr-push (. reader history)
-                             {"idx" (. reader idx)
-                              "line" (. reader line)
-                              "col" (. reader col)
+          (do (xt/x:arr-push (xt/x:get-key reader "history")
+                             {"idx" (xt/x:get-key reader "idx")
+                              "line" (xt/x:get-key reader "line")
+                              "col" (xt/x:get-key reader "col")
                               "ch" ch
                               "advance" true})
-              (xt/x:set-key reader "idx" (+ (. reader idx) 1))
+              (xt/x:set-key reader "idx" (+ (xt/x:get-key reader "idx") 1))
               (if (== "\n" ch)
-                (do (xt/x:set-key reader "line" (+ (. reader line) 1))
+                (do (xt/x:set-key reader "line" (+ (xt/x:get-key reader "line") 1))
                     (xt/x:set-key reader "col" 1))
-                (xt/x:set-key reader "col" (+ (. reader col) 1)))
+                (xt/x:set-key reader "col" (+ (xt/x:get-key reader "col") 1)))
               (return ch))))))
 
 (defn.xt unread-char
   "pushes a char back onto the reader"
   {:added "4.1"}
   [reader ch]
-  (var history (. reader history))
+  (var history (xt/x:get-key reader "history"))
   (when (== 0 (xt/x:len history))
     (xt/x:err "Cannot unread before reading"))
   (var entry (xt/x:arr-pop history))
-  (xt/x:set-key reader "idx" (. entry idx))
-  (xt/x:set-key reader "line" (. entry line))
-  (xt/x:set-key reader "col" (. entry col))
-  (when (or (not (. entry advance))
-            (not= ch (. entry ch)))
-    (xt/x:arr-push (. reader pushback) ch))
+  (xt/x:set-key reader "idx" (xt/x:get-key entry "idx"))
+  (xt/x:set-key reader "line" (xt/x:get-key entry "line"))
+  (xt/x:set-key reader "col" (xt/x:get-key entry "col"))
+  (when (or (not (xt/x:get-key entry "advance"))
+            (not= ch (xt/x:get-key entry "ch")))
+    (xt/x:arr-push (xt/x:get-key reader "pushback") ch))
   (return reader))
 
 (defn.xt step-char

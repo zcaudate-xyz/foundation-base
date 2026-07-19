@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -16,6 +16,7 @@
 
 ^{:refer kmi.lang.runtime/eval-string :added "4.1"}
 (fact "defmacro expands and evaluates"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -25,6 +26,7 @@
 
 ^{:refer kmi.lang.runtime/read-string :added "4.1"}
 (fact "syntax-quote and unquote construct forms"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -34,6 +36,7 @@
 
 ^{:refer kmi.lang.runtime/read-many :added "4.1"}
 (fact "unquote-splicing splices collections"
+
   (!.js
    (var out (rt/eval-string (rt/empty-runtime)
                             "(do (defmacro splice-list [xs] `(list ~@xs))\n                                (splice-list [1 2 3]))"))
@@ -44,6 +47,7 @@
 
 ^{:refer kmi.lang.runtime/eval-form :added "4.1"}
 (fact "var and deref access vars"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -53,6 +57,7 @@
 
 ^{:refer kmi.lang.runtime/empty-runtime :added "4.1"}
 (fact "unquote outside syntax-quote errors"
+
   (!.js
    (xt/x:not-nil? (xt/x:get-key (rt/eval-string (rt/empty-runtime) "(~ 1)") "error")))
   => true)

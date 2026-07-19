@@ -14,33 +14,35 @@
 (def.xt EMPTY_MARKER
   {})
 
-(defgen.xt list-to-iter
+(defn.xt list-to-iter
   "list to iterator"
   {:added "4.0"}
   [list]
-  (while (not= (. list _head) -/EMPTY_MARKER)
-    (yield (. list _head))
-    (:= list (. list _rest))))
+  (var out [])
+  (while (not= (xt/x:get-key list "_head") -/EMPTY_MARKER)
+    (xt/x:arr-push out (xt/x:get-key list "_head"))
+    (:= list (xt/x:get-key list "_rest")))
+  (return (it/iter out)))
 
 (defn.xt list-to-array
   "list to array"
   {:added "4.0"}
   [list]
   (var out [])
-  (while (not= (. list _head) -/EMPTY_MARKER)
-    (xt/x:arr-push out (. list _head))
-    (:= list (. list _rest)))
+  (while (not= (xt/x:get-key list "_head") -/EMPTY_MARKER)
+    (xt/x:arr-push out (xt/x:get-key list "_head"))
+    (:= list (xt/x:get-key list "_rest")))
   (return out))
 
 (defn.xt list-size
   "gets the list size"
   {:added "4.0"}
   [list]
-  (cond (== (. list _head)
+  (cond (== (xt/x:get-key list "_head")
             -/EMPTY_MARKER)
         (return 0)
 
-        :else (return (+ 1 (util/count (. list _rest))))))  
+        :else (return (+ 1 (util/count (xt/x:get-key list "_rest"))))))
 
 (defn.xt list-new
   "creates a new list"
@@ -63,8 +65,8 @@
 (defn.xt list-pop
   "pops an element from front of list"
   {:added "4.0"}
-  [list x]
-  (return  (. list _rest)))
+  [list]
+  (return  (xt/x:get-key list "_rest")))
 
 (defn.xt list-empty
   "gets the empty list"
@@ -91,7 +93,7 @@
   p/IEq
   {:eq coll/coll-eq}
   p/IHash
-  {:hash (util/wrap-with-cache coll/coll-hash-unordered)}
+  {:hash (util/wrap-with-cache coll/coll-hash-unordered [nil])}
   p/IPush
   {:push -/list-push}
   p/IPushMutable
@@ -117,9 +119,13 @@
 (defn.xt list
   "creates a list given arguments"
   {:added "4.0"}
-  [...]
+  [(:.. args)]
+  (var input args)
+  (when (and (== 1 (xt/x:len input))
+             (xt/x:is-array? (xt/x:first input)))
+    (:= input (xt/x:first input)))
   (return
-   (xt/x:arr-foldr [...]
+   (xt/x:arr-foldr input
                 -/list-push
                 -/EMPTY_LIST)))
 

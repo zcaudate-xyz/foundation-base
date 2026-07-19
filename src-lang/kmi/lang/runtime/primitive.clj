@@ -12,10 +12,17 @@
              [kmi.lang.common-hash :as common-hash]
              [xt.lang.spec-base :as xt]]})
 
-(def.xt MATH (xt/x:get-key !:G "Math"))
-(def.xt CONSOLE (xt/x:get-key !:G "console"))
-(def.xt JSON-GLOBAL (xt/x:get-key !:G "JSON"))
-(def.xt PROCESS (xt/x:get-key !:G "process"))
+(def.xt MATH
+  {"PI" 3.141592653589793
+   "pow" (fn [x y] (return (xt/x:m-pow x y)))})
+
+(def.xt CONSOLE {})
+
+(def.xt JSON-GLOBAL
+  {"parse" (fn [s] (return (xt/x:json-decode s)))
+   "stringify" (fn [x] (return (xt/x:json-encode x)))})
+
+(def.xt PROCESS {})
 
 (defn.xt count-value
   "counts a value, dispatching between host and kmi types"
@@ -36,14 +43,16 @@
   {:added "4.1"}
   [x]
   (var arr (p/to-array x))
-  (return (xt/x:first arr)))
+  (if (== 0 (xt/x:len arr))
+    (return nil)
+    (return (xt/x:first arr))))
 
 (defn.xt rest-value
   "returns the remaining elements of a collection as a vector"
   {:added "4.1"}
   [x]
   (var arr (p/to-array x))
-  (return (vec/vector (xt/x:unpack (xt/x:arr-slice arr 1 (xt/x:len arr))))))
+  (return (vec/vector [ (xt/x:unpack (xt/x:arr-slice arr 1 (xt/x:len arr)))])))
 
 (defn.xt nth-value
   "returns the nth element of a collection"
@@ -54,8 +63,10 @@
 (defn.xt str-value
   "concatenates values into a string"
   {:added "4.1"}
-  [...]
-  (var args [...])
+  [(:.. args)]
+  (when (and (== 1 (xt/x:len args))
+             (xt/x:is-array? (xt/x:first args)))
+    (:= args (xt/x:first args)))
   (var out "")
   (xt/for:array [a args]
     (:= out (xt/x:cat out (util/show a))))
@@ -64,11 +75,15 @@
 (defn.xt plus
   "adds numbers"
   {:added "4.1"}
-  [...]
-  (var args [...])
-  (var out 0)
-  (xt/for:array [a args]
-    (:= out (+ out a)))
+  [(:.. args)]
+  (when (and (== 1 (xt/x:len args))
+             (xt/x:is-array? (xt/x:first args)))
+    (:= args (xt/x:first args)))
+  (when (== 0 (xt/x:len args))
+    (return 0))
+  (var out (xt/x:first args))
+  (xt/for:index [i [(xt/x:offset 1) (xt/x:len args)]]
+    (:= out (+ out (xt/x:get-idx args i))))
   (return out))
 
 (defn.xt minus
@@ -80,11 +95,15 @@
 (defn.xt multiply
   "multiplies numbers"
   {:added "4.1"}
-  [...]
-  (var args [...])
-  (var out 1)
-  (xt/for:array [a args]
-    (:= out (* out a)))
+  [(:.. args)]
+  (when (and (== 1 (xt/x:len args))
+             (xt/x:is-array? (xt/x:first args)))
+    (:= args (xt/x:first args)))
+  (when (== 0 (xt/x:len args))
+    (return 1))
+  (var out (xt/x:first args))
+  (xt/for:index [i [(xt/x:offset 1) (xt/x:len args)]]
+    (:= out (* out (xt/x:get-idx args i))))
   (return out))
 
 (defn.xt divide
@@ -126,7 +145,8 @@
 (defn.xt not-value
   {:added "4.1"}
   [x]
-  (return (not x)))
+  (return (or (xt/x:nil? x)
+              (== false x))))
 
 (defn.xt type-value
   "returns the kmi/native class tag"
@@ -136,29 +156,61 @@
 
 (defn.xt list-value
   {:added "4.1"}
-  [...]
-  (return (list/list (xt/x:unpack [...]))))
+  [(:.. args)]
+  (when (and (== 1 (xt/x:len args))
+             (xt/x:is-array? (xt/x:first args)))
+    (:= args (xt/x:first args)))
+  (return (list/list args)))
 
 (defn.xt vector-value
   {:added "4.1"}
-  [...]
-  (return (vec/vector (xt/x:unpack [...]))))
+  [(:.. args)]
+  (when (and (== 1 (xt/x:len args))
+             (xt/x:is-array? (xt/x:first args)))
+    (:= args (xt/x:first args)))
+  (return (vec/vector args)))
 
 (defn.xt hash-map-value
   {:added "4.1"}
-  [...]
-  (return (hm/hashmap (xt/x:unpack [...]))))
+  [(:.. args)]
+  (when (and (== 1 (xt/x:len args))
+             (xt/x:is-array? (xt/x:first args)))
+    (:= args (xt/x:first args)))
+  (return (hm/hashmap args)))
 
 (defn.xt hash-set-value
   {:added "4.1"}
-  [...]
-  (return (hs/hashset (xt/x:unpack [...]))))
+  [(:.. args)]
+  (when (and (== 1 (xt/x:len args))
+             (xt/x:is-array? (xt/x:first args)))
+    (:= args (xt/x:first args)))
+  (return (hs/hashset args)))
+
+(defn.xt variadic-fn?
+  "checks for primitives that receive their arguments as one array on Dart"
+  {:added "4.1"}
+  [f]
+  (return (or (== f -/str-value)
+              (== f -/plus)
+              (== f -/multiply)
+              (== f -/list-value)
+              (== f -/vector-value)
+              (== f -/hash-map-value)
+              (== f -/hash-set-value))))
 
 (defn.xt apply-value
   "applies a function to an array of args"
   {:added "4.1"}
   [f args]
-  (return (xt/x:apply f args)))
+  (if (-/variadic-fn? f)
+    (return (f args))
+    (return (xt/x:apply f args))))
+
+(defn.xt get-value
+  "looks up a hashmap key with a nil default"
+  {:added "4.1"}
+  [m k]
+  (return (hm/hashmap-lookup-key m k nil)))
 
 (def.xt PRIMITIVES
   {"+" -/plus
@@ -182,7 +234,7 @@
    "vector" -/vector-value
    "hash-map" -/hash-map-value
    "hash-set" -/hash-set-value
-   "get" hm/hashmap-lookup-key
+   "get" -/get-value
    "assoc" hm/hashmap-assoc
    "dissoc" hm/hashmap-dissoc
    "keys" hm/hashmap-keys

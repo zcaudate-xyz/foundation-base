@@ -14,7 +14,7 @@
   [x]
   (return
    (and (xt/x:is-object? x)
-        (xt/x:not-nil? (. x ["::"])))))
+        (xt/x:not-nil? (xt/x:get-key x "::")))))
 
 (defn.xt is-syntax?
   "checks if object is of type syntax"
@@ -22,7 +22,7 @@
   [x]
   (return
    (and (xt/x:is-object? x)
-        (== "syntax" (. x ["::"])))))
+        (== "syntax" (xt/x:get-key x "::")))))
 
 (defn.xt hash
   "gets the hash of an object"
@@ -39,19 +39,19 @@
   "gets the name of a symbol, keyword or var"
   {:added "4.0"}
   [x]
-  (return (. x _name)))
+  (return (xt/x:get-key x "_name")))
 
 (defn.xt get-namespace
   "gets the namespace of a symbol, keyword or var"
   {:added "4.0"}
   [x]
-  (return (. x _ns)))
+  (return (xt/x:get-key x "_ns")))
 
 (defn.xt hash-with-cache
   "gets a memoized cache id"
   {:added "4.0"}
   [obj hash-fn]
-  (var hash-id (. obj _hash))
+  (var hash-id (xt/x:get-key obj "_hash"))
   (when (xt/x:nil? hash-id)
     (:= hash-id (hash-fn obj))
     (xt/x:set-key obj "_hash" hash-id))
@@ -60,7 +60,15 @@
 (defn.xt wrap-with-cache
   "wraps hash-fn call with caching"
   {:added "4.0"}
-  [hash-fn is-editable]
+  [hash-fn (:.. opts)]
+  (when (and (xt/x:not-nil? opts)
+             (== 1 (xt/x:len opts))
+             (xt/x:is-array? (xt/x:first opts)))
+    (:= opts (xt/x:first opts)))
+  (var is-editable nil)
+  (when (and (xt/x:not-nil? opts)
+             (< 0 (xt/x:len opts)))
+    (:= is-editable (xt/x:first opts)))
   (return (fn [obj]
             (if (and is-editable
                      (is-editable obj))
@@ -77,6 +85,9 @@
         
         (== t "string")
         (return (xt/x:cat "\"" x "\""))
+
+        (== t "boolean")
+        (return (:? x "true" "false"))
         
         (-/is-managed? x)
         (return (p/show x))
@@ -89,11 +100,11 @@
   {:added "4.0"}
   [o1 o2]
   (cond (-/is-syntax? o1)
-        (return (-/eq (. o1 _value)
+        (return (-/eq (xt/x:get-key o1 "_value")
                       o2))
         
         (-/is-syntax? o2)
-        (return (-/eq (. o2 _value)
+        (return (-/eq (xt/x:get-key o2 "_value")
                       o1))
 
         (-/is-managed? o1)

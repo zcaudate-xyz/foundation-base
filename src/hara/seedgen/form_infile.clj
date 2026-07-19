@@ -362,7 +362,8 @@
   [ns-str new-ns]
   (let [root     (nav/parse-root ns-str)
         ns-nav   (some-> root nav/down)
-        name-nav (some-> ns-nav nav/down nav/right)]
+        body-nav (some-> ns-nav form-common/nav-body)
+        name-nav (some-> body-nav nav/down nav/right)]
     (if name-nav
       (-> name-nav
           (nav/replace new-ns)
@@ -1037,9 +1038,11 @@
         fact-entries     (->> (get output :entries)
                               vals
                               (mapcat vals))
-        fact-by-refer    (into {}
+        fact-by-key      (into {}
                                (map (fn [entry]
-                                      [(symbol (str (:ns entry)) (str (:var entry))) entry]))
+                                      [(or (:id entry)
+                                           (symbol (str (:ns entry)) (str (:var entry))))
+                                       entry]))
                                fact-entries)
         root-script-line (some-> root-entry item-line line-key)
         derived-lines    (->> (get-in output [:globals :global-script :derived])
@@ -1067,7 +1070,8 @@
                           current  (block/block-string (nav/block zloc))
                           form     (nav/value zloc)
                           refer    (or (:refer (meta form))
-                                       (:ref (meta form)))]
+                                       (:ref (meta form)))
+                          fact-key (or (:id (meta form)) refer)]
                        (cond
                          (= line root-script-line)
                          (into [(update-root-script-string output ordered-scripts)]
@@ -1079,8 +1083,8 @@
                         (and (seq? form)
                              (= 'fact (first (nav/value (form-common/nav-body zloc))))
                              refer
-                             (contains? fact-by-refer refer))
-                        [(render-fact-string-add (get fact-by-refer refer)
+                             (contains? fact-by-key fact-key))
+                        [(render-fact-string-add (get fact-by-key fact-key)
                                                  root-lang
                                                  ordered-scripts
                                                  target-set
@@ -1103,9 +1107,11 @@
         fact-entries     (->> (get output :entries)
                               vals
                               (mapcat vals))
-        fact-by-refer    (into {}
+        fact-by-key      (into {}
                                (map (fn [entry]
-                                      [(symbol (str (:ns entry)) (str (:var entry))) entry]))
+                                      [(or (:id entry)
+                                           (symbol (str (:ns entry)) (str (:var entry))))
+                                       entry]))
                                fact-entries)
         root-script-line (some-> root-entry item-line line-key)
          derived-line->lang
@@ -1129,6 +1135,7 @@
                           form    (nav/value zloc)
                           refer   (or (:refer (meta form))
                                       (:ref (meta form)))
+                          fact-key (or (:id (meta form)) refer)
                           head    (when (seq? (nav/value body))
                                     (first (nav/value body)))]
                         (cond
@@ -1145,8 +1152,8 @@
 
                         (and (= 'fact head)
                              refer
-                             (contains? fact-by-refer refer))
-                        [(render-fact-string-remove (get fact-by-refer refer)
+                             (contains? fact-by-key fact-key))
+                        [(render-fact-string-remove (get fact-by-key fact-key)
                                                     target-set
                                                     current)]
 
@@ -1301,9 +1308,11 @@
         fact-entries     (->> (get output :entries)
                               vals
                               (mapcat vals))
-        fact-by-refer    (into {}
+        fact-by-key      (into {}
                                (map (fn [entry]
-                                      [(symbol (str (:ns entry)) (str (:var entry))) entry]))
+                                      [(or (:id entry)
+                                           (symbol (str (:ns entry)) (str (:var entry))))
+                                       entry]))
                                fact-entries)
         {:keys [all-lines keep-map]} (render-global-top-target output lang)
         script-string    (render-target-script-string output lang)]
@@ -1317,10 +1326,10 @@
                         head    (when (seq? (nav/value body))
                                   (first (nav/value body)))
                         refer   (or (:refer (meta form))
-                                    (:ref (meta form)))]
+                                    (:ref (meta form)))
+                        fact-key (or (:id (meta form)) refer)]
                     (cond
-                      (and (seq? form)
-                           (= 'ns (first form)))
+                      (= 'ns head)
                       (replace-ns-name-string current target-ns)
 
                       (= line root-script-line)
@@ -1334,8 +1343,8 @@
 
                       (and (= 'fact head)
                            refer
-                           (contains? fact-by-refer refer))
-                      (render-fact-string-target (get fact-by-refer refer)
+                           (contains? fact-by-key fact-key))
+                      (render-fact-string-target (get fact-by-key fact-key)
                                                  root-lang
                                                  lang)
 

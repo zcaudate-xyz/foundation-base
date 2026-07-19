@@ -18,14 +18,13 @@
   "converts hashset to an array"
   {:added "4.1"}
   [hashset]
-  (return (hashmap/hashmap-keys (. hashset _map))))
+  (return (hashmap/hashmap-keys (xt/x:get-key hashset "_map"))))
 
-(defgen.xt hashset-to-iter
+(defn.xt hashset-to-iter
   "converts hashset to an iterator"
   {:added "4.1"}
   [hashset]
-  (xt/for:array [entry (-/hashset-to-array hashset)]
-    (yield entry)))
+  (return (it/iter (-/hashset-to-array hashset))))
 
 (defn.xt hashset-new
   "creates a new hashset"
@@ -33,7 +32,7 @@
   [m]
   (return {"::" "hashset"
            "_map" m
-           "_size" (. m _size)}))
+           "_size" (xt/x:get-key m "_size")}))
 
 (defn.xt hashset-empty
   "creates an empty hashset from current"
@@ -45,7 +44,7 @@
   "checks if hashset is editable"
   {:added "4.1"}
   [hashset]
-  (return (hashmap/hashmap-is-editable (. hashset _map))))
+  (return (hashmap/hashmap-is-editable (xt/x:get-key hashset "_map"))))
 
 (defn.xt hashset-to-mutable!
   "creates a mutable hashset"
@@ -53,21 +52,21 @@
   [hashset]
   (if (-/hashset-is-editable hashset)
     (return hashset)
-    (return (-/hashset-new (hashmap/hashmap-to-mutable! (. hashset _map))))))
+    (return (-/hashset-new (hashmap/hashmap-to-mutable! (xt/x:get-key hashset "_map"))))))
 
 (defn.xt hashset-to-persistent!
   "creates a persistent hashset"
   {:added "4.1"}
   [hashset]
   (if (-/hashset-is-editable hashset)
-    (return (-/hashset-new (hashmap/hashmap-to-persistent! (. hashset _map))))
+    (return (-/hashset-new (hashmap/hashmap-to-persistent! (xt/x:get-key hashset "_map"))))
     (return hashset)))
 
 (defn.xt hashset-find
   "finds a value in the hashset"
   {:added "4.1"}
   [hashset value]
-  (var out (hashmap/hashmap-lookup-key (. hashset _map) value -/NOT_FOUND))
+  (var out (hashmap/hashmap-lookup-key (xt/x:get-key hashset "_map") value -/NOT_FOUND))
   (if (== out -/NOT_FOUND)
     (return nil)
     (return value)))
@@ -77,7 +76,7 @@
   {:added "4.1"}
   [hashset value]
   (return (not (== -/NOT_FOUND
-                   (hashmap/hashmap-lookup-key (. hashset _map)
+                   (hashmap/hashmap-lookup-key (xt/x:get-key hashset "_map")
                                                value
                                                -/NOT_FOUND)))))
 
@@ -85,7 +84,7 @@
   "adds a value to the persistent hashset"
   {:added "4.1"}
   [hashset value]
-  (return (-/hashset-new (hashmap/hashmap-assoc (. hashset _map) value true))))
+  (return (-/hashset-new (hashmap/hashmap-assoc (xt/x:get-key hashset "_map") value true))))
 
 (defn.xt hashset-push!
   "adds a value to the mutable hashset"
@@ -93,15 +92,15 @@
   [hashset value]
   (when (not (-/hashset-is-editable hashset))
     (xt/x:err "Not Editable"))
-  (hashmap/hashmap-assoc! (. hashset _map) value true)
-  (xt/x:set-key hashset "_size" (. (. hashset _map) _size))
+  (hashmap/hashmap-assoc! (xt/x:get-key hashset "_map") value true)
+  (xt/x:set-key hashset "_size" (xt/x:get-key (xt/x:get-key hashset "_map") "_size"))
   (return hashset))
 
 (defn.xt hashset-dissoc
   "removes a value from the persistent hashset"
   {:added "4.1"}
   [hashset value]
-  (return (-/hashset-new (hashmap/hashmap-dissoc (. hashset _map) value))))
+  (return (-/hashset-new (hashmap/hashmap-dissoc (xt/x:get-key hashset "_map") value))))
 
 (defn.xt hashset-dissoc!
   "removes a value from the mutable hashset"
@@ -109,8 +108,8 @@
   [hashset value]
   (when (not (-/hashset-is-editable hashset))
     (xt/x:err "Not Editable"))
-  (hashmap/hashmap-dissoc! (. hashset _map) value)
-  (xt/x:set-key hashset "_size" (. (. hashset _map) _size))
+  (hashmap/hashmap-dissoc! (xt/x:get-key hashset "_map") value)
+  (xt/x:set-key hashset "_size" (xt/x:get-key (xt/x:get-key hashset "_map") "_size"))
   (return hashset))
 
 (defn.xt hashset-hash
@@ -123,7 +122,7 @@
   "checks hashset equality independent of insertion order"
   {:added "4.1"}
   [s1 s2]
-  (when (not= (. s1 _size) (. s2 _size))
+  (when (not= (xt/x:get-key s1 "_size") (xt/x:get-key s2 "_size"))
     (return false))
   (xt/for:iter [entry (-/hashset-to-iter s1)]
     (when (not (-/hashset-has? s2 entry))
@@ -166,7 +165,7 @@
   p/IHash
   {:hash (util/wrap-with-cache
           -/hashset-hash
-          -/hashset-is-editable)}
+          [-/hashset-is-editable])}
   p/IFind
   {:find -/hashset-find}
   p/IPush
@@ -186,7 +185,7 @@
   "creates a hashset"
   {:added "4.1"}
   [m]
-  (return (-/Hashset m (. m _size))))
+  (return (-/Hashset m (xt/x:get-key m "_size"))))
 
 (def.xt EMPTY_HASHSET
   (-/hashset-create hashmap/EMPTY_HASHMAP))
@@ -200,9 +199,12 @@
 (defn.xt hashset
   "creates a hashset from values"
   {:added "4.1"}
-  [...]
-  (var input [...])
-  (if (xtd/is-empty? input)
+  [(:.. args)]
+  (var input args)
+  (when (and (== 1 (xt/x:len input))
+             (xt/x:is-array? (xt/x:first input)))
+    (:= input (xt/x:first input)))
+  (if (== 0 (xt/x:len input))
     (return -/EMPTY_HASHSET)
     (do (var out (-/hashset-empty-mutable))
         (xt/for:array [entry input]

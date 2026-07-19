@@ -9,29 +9,29 @@
              [kmi.lang.common-util :as util]
              [kmi.lang.common-coll :as coll]]})
 
-(defgen.xt pair-to-iter
+(defn.xt pair-to-iter
   "pair to iterator"
   {:added "4.0"}
   [pair]
-  (yield (. pair _key))
-  (yield (. pair _val)))
+  (return (it/iter [(xt/x:get-key pair "_key")
+                    (xt/x:get-key pair "_val")])))
 
 (defn.xt pair-to-array
   "pair to array"
   {:added "4.0"}
   [pair]
-  (return [(. pair _key)
-           (. pair _val)]))
+  (return [(xt/x:get-key pair "_key")
+           (xt/x:get-key pair "_val")]))
 
 (defn.xt pair-nth
   "pair nth"
   {:added "4.0"}
   [pair i]
-  (return (:? (== i 0)
-              (. pair _key)
-              (== i 1)
-              (. pair _val)
-              :else nil)))
+  (if (== i 0)
+    (return (xt/x:get-key pair "_key"))
+    (if (== i 1)
+      (return (xt/x:get-key pair "_val"))
+      (return nil))))
 
 (proto/defimpl.xt ^{:rt/tag "pair"} Pair
   [_key _val _start_string _end_string _sep_string _is_ordered]
@@ -42,7 +42,8 @@
   {eq coll/coll-eq}
   p/IHash
   {hash (util/wrap-with-cache
-         coll/coll-hash-ordered)}
+         coll/coll-hash-ordered
+         [nil])}
   p/INth
   {nth -/pair-nth}
   p/ISize

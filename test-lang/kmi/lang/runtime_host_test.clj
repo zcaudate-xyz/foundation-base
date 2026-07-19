@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -16,6 +16,7 @@
 
 ^{:refer kmi.lang.runtime/eval-string :added "4.1"}
 (fact "host interop reads a property"
+
   (!.js
    (xt/x:is-number?
     (xt/x:get-key
@@ -26,6 +27,7 @@
 
 ^{:refer kmi.lang.runtime/read-string :added "4.1"}
 (fact "host interop calls a method"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -35,6 +37,7 @@
 
 ^{:refer kmi.lang.runtime/read-many :added "4.1"}
 (fact "throw returns an error result"
+
   (!.js
    (xt/x:not-nil?
     (xt/x:get-key
@@ -45,6 +48,7 @@
 
 ^{:refer kmi.lang.runtime/eval-form :added "4.1"}
 (fact "throw message is preserved"
+
   (!.js
    (== "boom"
        (xt/x:get-key
@@ -55,6 +59,7 @@
 
 ^{:refer kmi.lang.runtime/empty-runtime :added "4.1"}
 (fact "host global JSON is available"
+
   (!.js
    (xt/x:is-object?
     (xt/x:get-key

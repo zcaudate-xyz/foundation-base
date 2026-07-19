@@ -3,19 +3,11 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.type-vector :as v]
-             [kmi.lang.type-vector-node :as node]
-             [kmi.lang.common-util :as ic]
-             [kmi.lang.common-coll :as coll]
-             [xt.lang.common-data :as k]
-             [xt.lang.common-iter :as it]
-             [xt.lang.common-repl :as repl]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[kmi.lang.type-vector :as v]
+             [xt.lang.spec-base :as xt]
              [kmi.lang.type-vector-node :as node]
              [kmi.lang.common-util :as ic]
              [kmi.lang.common-coll :as coll]
@@ -24,8 +16,8 @@
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer kmi.lang.type-vector/vector-get-idx :added "4.0"}
 (fact "gets the index in the persistent vector"
@@ -37,15 +29,6 @@
       v/vector-push-last
       v/EMPTY_VECTOR)
      2047))
-  => 2047
-
-  (!.lua
-   (v/vector-get-idx
-    (k/arr-foldl
-     (k/arr-range [0 2048])
-     v/vector-push-last
-     v/EMPTY_VECTOR)
-    2047))
   => 2047)
 
 ^{:refer kmi.lang.type-vector/vector-to-iter :added "4.0"}
@@ -54,7 +37,7 @@
   (!.js
    (it/arr<
     (v/vector-to-iter
-     (v/vector 1 2 3 4))))
+     (v/vector [ 1 2 3 4]))))
   => [1 2 3 4])
 
 ^{:refer kmi.lang.type-vector/vector-to-array :added "4.0"}
@@ -62,12 +45,7 @@
 
   (!.js
    (v/vector-to-array
-    (v/vector 1 2 3 4)))
-  => [1 2 3 4]
-
-  (!.lua
-   (v/vector-to-array
-    (v/vector 1 2 3 4)))
+    (v/vector [ 1 2 3 4])))
   => [1 2 3 4])
 
 ^{:refer kmi.lang.type-vector/vector-new :added "4.0"}
@@ -78,20 +56,9 @@
                           2
                           node/BITS
                           [1 2]))
-   [(. out ["::"])
-    (. out _size)
-    (. out _shift)
-    (v/vector-to-array out)])
-  => ["vector" 2 5 [1 2]]
-
-  (!.lua
-   (var out (v/vector-new (node/node-create nil [])
-                          2
-                          node/BITS
-                          [1 2]))
-   [(. out ["::"])
-    (. out _size)
-    (. out _shift)
+   [(xt/x:get-key out "::")
+    (xt/x:get-key out "_size")
+    (xt/x:get-key out "_shift")
     (v/vector-to-array out)])
   => ["vector" 2 5 [1 2]])
 
@@ -108,12 +75,7 @@
 (fact "checks that vector is editable"
 
   (!.js
-   [(v/vector-is-editable (v/vector 1 2 3))
-    (v/vector-is-editable (v/vector-empty-mutable))])
-  => [false true]
-
-  (!.lua
-   [(v/vector-is-editable (v/vector 1 2 3))
+   [(v/vector-is-editable (v/vector [ 1 2 3]))
     (v/vector-is-editable (v/vector-empty-mutable))])
   => [false true])
 
@@ -121,12 +83,6 @@
 (fact "push-lastoins an element to the vector"
 
   (!.js
-   (v/vector-to-array
-    (v/vector-push-last v/EMPTY_VECTOR
-                        1)))
-  => [1]
-
-  (!.lua
    (v/vector-to-array
     (v/vector-push-last v/EMPTY_VECTOR
                         1)))
@@ -139,18 +95,7 @@
    (v/vector-to-array
     (k/arr-foldl
      (k/arr-range [0 5])
-     v/vector-pop-last
-     (k/arr-foldl
-      (k/arr-range [0 10])
-      v/vector-push-last
-      v/EMPTY_VECTOR))))
-  => [0 1 2 3 4]
-
-  (!.lua
-   (v/vector-to-array
-    (k/arr-foldl
-     (k/arr-range [0 5])
-     v/vector-pop-last
+     (fn [acc _] (return (v/vector-pop-last acc)))
      (k/arr-foldl
       (k/arr-range [0 10])
       v/vector-push-last
@@ -161,16 +106,7 @@
 (fact "pops the last element"
 
   (!.js
-   (-> (v/vector 1 2 3 4 5 6)
-       (v/vector-to-mutable!)
-       (v/vector-pop-last!)
-       (v/vector-pop-last!)
-       (v/vector-pop-last!)
-       (v/vector-to-array)))
-  => [1 2 3]
-
-  (!.lua
-   (-> (v/vector 1 2 3 4 5 6)
+   (-> (v/vector [ 1 2 3 4 5 6])
        (v/vector-to-mutable!)
        (v/vector-pop-last!)
        (v/vector-pop-last!)
@@ -188,28 +124,13 @@
     v/vector-push-last!
     V0)
    V0)
-  => (contains {"_tail" [0 1 2 3 4 5 6 7 8 9]})
-
-  (!.lua
-   (var V0 (v/vector-empty-mutable))
-   (k/arr-foldl
-    (k/arr-range [0 10])
-    v/vector-push-last!
-    V0)
-   V0)
   => (contains {"_tail" [0 1 2 3 4 5 6 7 8 9]}))
 
 ^{:refer kmi.lang.type-vector/vector-to-mutable! :added "4.0"}
 (fact "mutates the vector"
 
   (!.js
-   (var out (v/vector-to-mutable! (v/vector 1 2 3)))
-   [(v/vector-is-editable out)
-    (v/vector-to-array out)])
-  => [true [1 2 3]]
-
-  (!.lua
-   (var out (v/vector-to-mutable! (v/vector 1 2 3)))
+   (var out (v/vector-to-mutable! (v/vector [ 1 2 3])))
    [(v/vector-is-editable out)
     (v/vector-to-array out)])
   => [true [1 2 3]])
@@ -218,16 +139,7 @@
 (fact "creates persistent vector"
 
   (!.js
-   (var out (-> (v/vector 1 2 3)
-                (v/vector-to-mutable!)
-                (v/vector-push-last! 4)
-                (v/vector-to-persistent!)))
-   [(v/vector-is-editable out)
-    (v/vector-to-array out)])
-  => [false [1 2 3 4]]
-
-  (!.lua
-   (var out (-> (v/vector 1 2 3)
+   (var out (-> (v/vector [ 1 2 3])
                 (v/vector-to-mutable!)
                 (v/vector-push-last! 4)
                 (v/vector-to-persistent!)))
@@ -239,30 +151,18 @@
 (fact "finds the pair entry"
 
   (!.js
-   (var entry (v/vector-find-idx (v/vector 1 2 3) 1))
-   [(. entry _key)
-    (. entry _val)
-    (== nil (v/vector-find-idx (v/vector 1 2 3) 8))])
-  => [1 2 true]
-
-  (!.lua
-   (var entry (v/vector-find-idx (v/vector 1 2 3) 1))
-   [(. entry _key)
-    (. entry _val)
-    (== nil (v/vector-find-idx (v/vector 1 2 3) 8))])
+   (var entry (v/vector-find-idx (v/vector [ 1 2 3]) 1))
+   [(xt/x:get-key entry "_key")
+    (xt/x:get-key entry "_val")
+    (== nil (v/vector-find-idx (v/vector [ 1 2 3]) 8))])
   => [1 2 true])
 
 ^{:refer kmi.lang.type-vector/vector-lookup-idx :added "4.0"}
 (fact "finds the value"
 
   (!.js
-   [(v/vector-lookup-idx (v/vector 1 2 3) 1 "missing")
-    (v/vector-lookup-idx (v/vector 1 2 3) 8 "missing")])
-  => [2 "missing"]
-
-  (!.lua
-   [(v/vector-lookup-idx (v/vector 1 2 3) 1 "missing")
-    (v/vector-lookup-idx (v/vector 1 2 3) 8 "missing")])
+   [(v/vector-lookup-idx (v/vector [ 1 2 3]) 1 "missing")
+    (v/vector-lookup-idx (v/vector [ 1 2 3]) 8 "missing")])
   => [2 "missing"])
 
 ^{:refer kmi.lang.type-vector/vector-create :added "4.0"}
@@ -277,28 +177,12 @@
                 "_size" 0
                 "_root" {"children" [], "::" "vector.node"}
                 "_shift" 5
-                "_tail" []})
-
-  (!.lua
-   (v/vector-create (node/node-create nil [])
-                    0
-                    node/BITS
-                    []))
-  => (contains {"::" "vector"
-                "_size" 0
-                "_root" {"children" [], "::" "vector.node"}
-                "_shift" 5
-                "_tail" []})
-)
+                "_tail" []}))
 
 ^{:refer kmi.lang.type-vector/vector-empty-mutable :added "4.0"}
 (fact "creates an empty mutable vector"
 
   (!.js
-   (v/vector-empty-mutable))
-  => map?
-
-  (!.lua
    (v/vector-empty-mutable))
   => map?)
 
@@ -307,10 +191,5 @@
 
   (!.js
    (v/vector-to-array
-    (v/vector 1 2 3 4)))
-  => [1 2 3 4]
-
-  (!.lua
-   (v/vector-to-array
-    (v/vector 1 2 3 4)))
+    (v/vector [ 1 2 3 4])))
   => [1 2 3 4])

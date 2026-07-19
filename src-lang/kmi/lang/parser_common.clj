@@ -13,32 +13,17 @@
   "checks if a char should be treated as reader whitespace"
   {:added "4.1"}
   [ch]
-  (return (or (== ch " ")
-              (== ch "\n")
-              (== ch "\r")
-              (== ch "\t")
-              (== ch ","))))
+  (return (and (xt/x:not-nil? ch)
+               (< (xt/x:offset -1)
+                  (xt/x:str-index-of " \n\r\t," ch)))))
 
 (defn.xt token-boundary?
   "checks if a char terminates a token"
   {:added "4.1"}
   [ch]
   (return (or (xt/x:nil? ch)
-              (-/whitespace? ch)
-              (== ch "(")
-              (== ch ")")
-              (== ch "[")
-              (== ch "]")
-              (== ch "{")
-              (== ch "}")
-              (== ch "\"")
-              (== ch ";")
-              (== ch "'")
-              (== ch "`")
-              (== ch "^")
-              (== ch "#")
-              (== ch "@")
-              (== ch "~"))))
+              (< (xt/x:offset -1)
+                 (xt/x:str-index-of " \n\r\t,()[]{}\";'`^#@~" ch)))))
 
 (defn.xt read-comment
   "reads a line comment"
@@ -74,22 +59,11 @@
   "checks if a char is numeric"
   {:added "4.1"}
   [ch]
-  (return (and (not= ch nil)
-               (<= "0" ch)
-               (<= ch "9"))))
-
-(defn.xt numeric-leading?
-  "checks if a token looks numeric from the first char"
-  {:added "4.1"}
-  [token]
-  (var first (rdr/impl-char-at token 0))
-  (var second (rdr/impl-char-at token 1))
-  (return (or (-/digit? first)
-              (and (or (== first "+")
-                       (== first "-"))
-                   (or (-/digit? second)
-                       (== second ".")))
-              (== first "."))))
+  (when (xt/x:nil? ch)
+    (return false))
+  (var code (xt/x:str-char ch (xt/x:offset 0)))
+  (return (and (<= 48 code)
+               (<= code 57))))
 
 (defn.xt match-number
   "matches simple integer and decimal number tokens"
@@ -122,8 +96,22 @@
     (do (var out (xt/x:to-number token))
         (if (and (not= out nil)
                  (== out out))
-          (return out)
+          (return (:? dot? out (xt/x:m-floor out)))
           (return nil)))))
+
+(defn.xt numeric-leading?
+  "checks if a token looks numeric from the first char"
+  {:added "4.1"}
+  [token]
+  (var n (xt/x:len token))
+  (var first (rdr/impl-char-at token 0))
+  (return (or (-/digit? first)
+              (== first ".")
+              (and (> n 1)
+                   (or (== first "+")
+                       (== first "-"))
+                   (or (-/digit? (rdr/impl-char-at token 1))
+                       (== (rdr/impl-char-at token 1) "."))))))
 
 (defn.xt read-token
   "reads a token that starts with the given character"
@@ -174,15 +162,15 @@
   {:added "4.1"}
   [meta]
   (cond (xt/x:is-string? meta)
-        (return (hm/hashmap (kw/keyword nil "tag") meta))
+        (return (hm/hashmap [(kw/keyword nil "tag") meta]))
 
         (and (xt/x:is-object? meta)
-             (== "symbol" (. meta ["::"])))
-        (return (hm/hashmap (kw/keyword nil "tag") meta))
+             (== "symbol" (xt/x:get-key meta "::")))
+        (return (hm/hashmap [(kw/keyword nil "tag") meta]))
 
         (and (xt/x:is-object? meta)
-             (== "keyword" (. meta ["::"])))
-        (return (hm/hashmap meta true))
+             (== "keyword" (xt/x:get-key meta "::")))
+        (return (hm/hashmap [meta true]))
 
         :else
         (return meta)))

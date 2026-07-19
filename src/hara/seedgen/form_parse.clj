@@ -200,19 +200,21 @@
                    fact-navs (->> top-navs
                                   (keep (fn [zloc]
                                           (let [form (nav/value zloc)
-                                                refer (or (:refer (meta form))
-                                                          (:ref (meta form)))]
+                                                fact-meta (meta form)
+                                                refer (or (:refer fact-meta)
+                                                          (:ref fact-meta))]
                                             (when (and refer
                                                        (= 'fact (first (nav/value (form-common/nav-body zloc)))))
-                                              [refer zloc]))))
+                                              [(or (:id fact-meta) refer) zloc]))))
                                   (into {}))
                   entries   (framework.common/entry
                             (reduce-kv (fn [out nsp vars]
                                          (assoc out
                                                 nsp
                                                 (reduce-kv (fn [m v entry]
-                                                              (let [fact-nav (get fact-navs
-                                                                                  (symbol (str nsp) (str v)))]
+                                                              (let [fact-key (or (:id entry)
+                                                                                 (symbol (str nsp) (str (:var entry))))
+                                                                    fact-nav (get fact-navs fact-key)]
                                                                 (assoc m
                                                                        v
                                                                        (if fact-nav

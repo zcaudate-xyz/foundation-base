@@ -16,29 +16,28 @@
 
 (defn.xt hashmap-collect-pairs
   [node out]
-  (xt/for:array [child (. node children)]
+  (xt/for:array [child (xt/x:get-key node "children")]
     (var tag (xt/x:get-key child "::"))
     (cond (== tag "hashmap.leaf")
           (xt/x:arr-push out
-                         (type-pair/pair (. child _key)
-                                         (util/impl-denormalise (. child _val))))
+                         (type-pair/pair (xt/x:get-key child "_key")
+                                         (util/impl-denormalise (xt/x:get-key child "_val"))))
 
           (== tag "hashmap.collision")
-          (xt/for:array [leaf (. child children)]
+          (xt/for:array [leaf (xt/x:get-key child "children")]
             (xt/x:arr-push out
-                           (type-pair/pair (. leaf _key)
-                                           (util/impl-denormalise (. leaf _val)))))
+                           (type-pair/pair (xt/x:get-key leaf "_key")
+                                           (util/impl-denormalise (xt/x:get-key leaf "_val")))))
 
           :else
           (-/hashmap-collect-pairs child out)))
   (return out))
 
-(defgen.xt hashmap-to-iter
+(defn.xt hashmap-to-iter
   "converts hashmap to iterator"
   {:added "4.1"}
   [hashmap]
-  (xt/for:array [entry (-/hashmap-collect-pairs (. hashmap _root) [])]
-    (yield entry)))
+  (return (it/iter (-/hashmap-collect-pairs (xt/x:get-key hashmap "_root") []))))
 
 (defn.xt hashmap-to-array
   "converts hashmap to an array of entry arrays"
@@ -46,8 +45,8 @@
   [hashmap]
   (var out [])
   (xt/for:iter [entry (-/hashmap-to-iter hashmap)]
-    (xt/x:arr-push out [(. entry _key)
-                        (. entry _val)]))
+    (xt/x:arr-push out [(xt/x:get-key entry "_key")
+                        (xt/x:get-key entry "_val")]))
   (return out))
 
 (defn.xt hashmap-new
@@ -69,7 +68,7 @@
   "checks if hashmap is editable"
   {:added "4.1"}
   [hashmap]
-  (return (xt/x:not-nil? (xt/x:get-key (. hashmap _root) "edit_id"))))
+  (return (xt/x:not-nil? (xt/x:get-key (xt/x:get-key hashmap "_root") "edit_id"))))
 
 (defn.xt hashmap-to-mutable!
   "creates a mutable hashmap"
@@ -77,35 +76,35 @@
   [hashmap]
   (if (-/hashmap-is-editable hashmap)
     (return hashmap)
-    (return (-/hashmap-new (node/node-editable-root (. hashmap _root))
-                           (. hashmap _size)))))
+    (return (-/hashmap-new (node/node-editable-root (xt/x:get-key hashmap "_root"))
+                           (xt/x:get-key hashmap "_size")))))
 
 (defn.xt hashmap-to-persistent!
   "creates a persistent hashmap"
   {:added "4.1"}
   [hashmap]
   (if (-/hashmap-is-editable hashmap)
-    (return (-/hashmap-new (node/ensure-persistent (. hashmap _root))
-                           (. hashmap _size)))
+    (return (-/hashmap-new (node/ensure-persistent (xt/x:get-key hashmap "_root"))
+                           (xt/x:get-key hashmap "_size")))
     (return hashmap)))
 
 (defn.xt hashmap-find-key
   "finds the entry for a key"
   {:added "4.1"}
   [hashmap key]
-  (var leaf (node/node-find-leaf (. hashmap _root)
+  (var leaf (node/node-find-leaf (xt/x:get-key hashmap "_root")
                                  0
                                  (util/hash key)
                                  key))
   (when leaf
-    (return (type-pair/pair (. leaf _key)
-                            (util/impl-denormalise (. leaf _val))))))
+    (return (type-pair/pair (xt/x:get-key leaf "_key")
+                            (util/impl-denormalise (xt/x:get-key leaf "_val"))))))
 
 (defn.xt hashmap-lookup-key
   "looks up a key in the hashmap"
   {:added "4.1"}
   [hashmap key default-val]
-  (return (node/node-lookup (. hashmap _root)
+  (return (node/node-lookup (xt/x:get-key hashmap "_root")
                             0
                             (util/hash key)
                             key
@@ -117,7 +116,7 @@
   [hashmap]
   (var out [])
   (xt/for:iter [entry (-/hashmap-to-iter hashmap)]
-    (xt/x:arr-push out (. entry _key)))
+    (xt/x:arr-push out (xt/x:get-key entry "_key")))
   (return out))
 
 (defn.xt hashmap-vals
@@ -126,22 +125,22 @@
   [hashmap]
   (var out [])
   (xt/for:iter [entry (-/hashmap-to-iter hashmap)]
-    (xt/x:arr-push out (. entry _val)))
+    (xt/x:arr-push out (xt/x:get-key entry "_val")))
   (return out))
 
 (defn.xt hashmap-assoc
   "associates a key/value pair into a persistent hashmap"
   {:added "4.1"}
   [hashmap key val]
-  (var result (node/node-assoc (. hashmap _root)
+  (var result (node/node-assoc (xt/x:get-key hashmap "_root")
                                nil
                                0
                                (util/hash key)
                                key
                                val))
-  (return (-/hashmap-new (. result node)
-                         (+ (. hashmap _size)
-                            (:? (. result added) 1 0)))))
+  (return (-/hashmap-new (xt/x:get-key result "node")
+                         (+ (xt/x:get-key hashmap "_size")
+                            (:? (xt/x:get-key result "added") 1 0)))))
 
 (defn.xt hashmap-assoc!
   "associates a key/value pair into a mutable hashmap"
@@ -149,7 +148,7 @@
   [hashmap key val]
   (when (not (-/hashmap-is-editable hashmap))
     (xt/x:err "Not Editable"))
-  (var root (. hashmap _root))
+  (var root (xt/x:get-key hashmap "_root"))
   (var edit-id (xt/x:get-key root "edit_id"))
   (var result (node/node-assoc root
                                edit-id
@@ -157,24 +156,24 @@
                                (util/hash key)
                                key
                                val))
-  (xt/x:set-key hashmap "_root" (. result node))
-  (when (. result added)
-    (xt/x:set-key hashmap "_size" (+ (. hashmap _size) 1)))
+  (xt/x:set-key hashmap "_root" (xt/x:get-key result "node"))
+  (when (xt/x:get-key result "added")
+    (xt/x:set-key hashmap "_size" (+ (xt/x:get-key hashmap "_size") 1)))
   (return hashmap))
 
 (defn.xt hashmap-dissoc
   "dissociates a key from a persistent hashmap"
   {:added "4.1"}
   [hashmap key]
-  (var result (node/node-dissoc (. hashmap _root)
+  (var result (node/node-dissoc (xt/x:get-key hashmap "_root")
                                 nil
                                 0
                                 (util/hash key)
                                 key))
-  (return (-/hashmap-new (or (. result node)
+  (return (-/hashmap-new (or (xt/x:get-key result "node")
                              node/EMPTY_HASHMAP_NODE)
-                         (+ (. hashmap _size)
-                            (:? (. result removed) -1 0)))))
+                         (+ (xt/x:get-key hashmap "_size")
+                            (:? (xt/x:get-key result "removed") -1 0)))))
 
 (defn.xt hashmap-dissoc!
   "dissociates a key from a mutable hashmap"
@@ -182,17 +181,17 @@
   [hashmap key]
   (when (not (-/hashmap-is-editable hashmap))
     (xt/x:err "Not Editable"))
-  (var root (. hashmap _root))
+  (var root (xt/x:get-key hashmap "_root"))
   (var edit-id (xt/x:get-key root "edit_id"))
   (var result (node/node-dissoc root
                                 edit-id
                                 0
                                 (util/hash key)
                                 key))
-  (xt/x:set-key hashmap "_root" (or (. result node)
+  (xt/x:set-key hashmap "_root" (or (xt/x:get-key result "node")
                                     (node/node-create edit-id 0 [])))
-  (when (. result removed)
-    (xt/x:set-key hashmap "_size" (- (. hashmap _size) 1)))
+  (when (xt/x:get-key result "removed")
+    (xt/x:set-key hashmap "_size" (- (xt/x:get-key hashmap "_size") 1)))
   (return hashmap))
 
 (defn.xt hashmap-hash
@@ -206,12 +205,12 @@
   "checks hashmap equality independent of insertion order"
   {:added "4.1"}
   [m1 m2]
-  (when (not= (. m1 _size) (. m2 _size))
+  (when (not= (xt/x:get-key m1 "_size") (xt/x:get-key m2 "_size"))
     (return false))
   (xt/for:iter [entry (-/hashmap-to-iter m1)]
-    (var actual (-/hashmap-lookup-key m2 (. entry _key) -/NOT_FOUND))
+    (var actual (-/hashmap-lookup-key m2 (xt/x:get-key entry "_key") -/NOT_FOUND))
     (when (or (== actual -/NOT_FOUND)
-              (not (util/eq actual (. entry _val))))
+              (not (util/eq actual (xt/x:get-key entry "_val"))))
       (return false)))
   (return true))
 
@@ -253,7 +252,7 @@
   p/IHash
   {:hash (util/wrap-with-cache
           -/hashmap-hash
-          -/hashmap-is-editable)}
+          [-/hashmap-is-editable])}
   p/IAssoc
   {:assoc -/hashmap-assoc}
   p/IAssocMutable
@@ -292,11 +291,14 @@
 (defn.xt hashmap
   "creates a hashmap from alternating key/value arguments"
   {:added "4.1"}
-  [...]
-  (var input [...])
+  [(:.. args)]
+  (var input args)
+  (when (and (== 1 (xt/x:len input))
+             (xt/x:is-array? (xt/x:first input)))
+    (:= input (xt/x:first input)))
   (when (not= 0 (xt/x:m-mod (xt/x:len input) 2))
     (xt/x:err "hashmap requires an even number of arguments"))
-  (if (xtd/is-empty? input)
+  (if (== 0 (xt/x:len input))
     (return -/EMPTY_HASHMAP)
     (do (var out (-/hashmap-empty-mutable))
         (var idx 0)

@@ -2,6 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.runtime.env :as env]
@@ -10,8 +11,8 @@
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer kmi.lang.runtime.env/sym-name :added "4.1"}
 (fact "returns the name string of a symbol"

@@ -4,6 +4,7 @@
 (l/script :xtalk
   {:require [[kmi.lang.protocol-base :as p]
              [xt.lang.spec-base :as xt]
+             [xt.lang.common-iter :as it]
              [xt.lang.common-protocol :as proto]
              [kmi.lang.common-util :as util]
              [kmi.lang.common-hash :as common-hash]]})
@@ -12,9 +13,15 @@
   "wraps a function to use syntax"
   {:added "4.0"}
   [f]
-  (return (fn [syntax ...]
-            (var value (. syntax _value))
-            (return (f value ...)))))
+  (return (fn [syntax (:.. args)]
+            (var value (xt/x:get-key syntax "_value"))
+            (return (f value (xt/x:unpack args))))))
+
+(defn.xt syntax-to-iter
+  "iterates over the wrapped syntax value"
+  {:added "4.1"}
+  [syntax]
+  (return (it/iter (p/to-iter (xt/x:get-key syntax "_value")))))
 
 (proto/defimpl.xt ^{:rt/tag "syntax"} Syntax
   [_value _metadata]
@@ -23,7 +30,7 @@
   p/IAssocMutable
   {:assoc-mutable (-/syntax-wrap p/assoc-mutable)}
   p/IColl
-  {:to-iter  (-/syntax-wrap p/to-iter)
+  {:to-iter  -/syntax-to-iter
    :to-array (-/syntax-wrap p/to-array)}
   p/IDissoc
   {:dissoc (-/syntax-wrap p/dissoc)}
@@ -70,7 +77,7 @@
   {:added "4.0"}
   [x]
   (return (:? (util/is-syntax? x)
-              (. x _metadata)
+              (xt/x:get-key x "_metadata")
               nil)))
 
 (defn.xt syntax
@@ -78,7 +85,7 @@
   {:added "4.0"}
   [x metadata]
   (var v (:? (util/is-syntax? x)
-             (. x _value)
+             (xt/x:get-key x "_value")
              x))
   (return (:? (xt/x:nil? metadata)
               v

@@ -12,7 +12,8 @@
              [std.task :as task]))
 
 (def ^:private +seedgen-bench-default-rename+
-  '{xt [xtbench :lang]})
+  '{xt  [xtbench :lang]
+    kmi [xtbench :lang kmi]})
 
 (defn- bench-rename-part->segments
   [part lang]

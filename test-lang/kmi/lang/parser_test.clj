@@ -3,6 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -20,37 +21,14 @@
              [kmi.lang.type-vector :as vec]
              [xt.lang.common-repl :as repl]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [kmi.lang.common-util :as ic]
-             [kmi.lang.protocol-base :as proto]
-             [kmi.lang.parser-common :as pc]
-             [kmi.lang.parser :as p]
-             [kmi.lang.reader :as rdr]
-             [kmi.lang.type-hashmap :as hm]
-             [kmi.lang.type-hashset :as hs]
-             [kmi.lang.type-keyword :as kw]
-             [kmi.lang.type-list :as list]
-             [kmi.lang.type-symbol :as sym]
-             [kmi.lang.type-syntax :as syn]
-             [kmi.lang.type-vector :as vec]
-             [xt.lang.common-repl :as repl]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer kmi.lang.parser-common/whitespace? :added "4.1"}
 (fact "detects reader whitespace"
 
   (!.js
-   [(pc/whitespace? " ")
-    (pc/whitespace? ",")
-    (pc/whitespace? "a")])
-  => [true true false]
-
-  (!.lua
    [(pc/whitespace? " ")
     (pc/whitespace? ",")
     (pc/whitespace? "a")])
@@ -63,24 +41,12 @@
    [(pc/token-boundary? " ")
     (pc/token-boundary? "(")
     (pc/token-boundary? "a")])
-  => [true true false]
-
-  (!.lua
-   [(pc/token-boundary? " ")
-    (pc/token-boundary? "(")
-    (pc/token-boundary? "a")])
   => [true true false])
 
 ^{:refer kmi.lang.parser-common/read-comment :added "4.1"}
 (fact "consumes line comments"
 
   (!.js
-   (var reader (rdr/create "note\nx"))
-   (pc/read-comment reader)
-   (rdr/read-char reader))
-  => "x"
-
-  (!.lua
    (var reader (rdr/create "note\nx"))
    (pc/read-comment reader)
    (rdr/read-char reader))
@@ -93,12 +59,6 @@
    (var reader (rdr/create " \n; note\nabc"))
    [(pc/skip-whitespace reader)
     (rdr/read-char reader)])
-  => ["a" "a"]
-
-  (!.lua
-   (var reader (rdr/create " \n; note\nabc"))
-   [(pc/skip-whitespace reader)
-    (rdr/read-char reader)])
   => ["a" "a"])
 
 ^{:refer kmi.lang.parser-common/digit? :added "4.1"}
@@ -107,23 +67,12 @@
   (!.js
    [(pc/digit? "1")
     (pc/digit? "a")])
-  => [true false]
-
-  (!.lua
-   [(pc/digit? "1")
-    (pc/digit? "a")])
   => [true false])
 
 ^{:refer kmi.lang.parser-common/numeric-leading? :added "4.1"}
 (fact "detects numeric-looking tokens"
 
   (!.js
-   [(pc/numeric-leading? "12")
-    (pc/numeric-leading? "-3")
-    (pc/numeric-leading? "abc")])
-  => [true true false]
-
-  (!.lua
    [(pc/numeric-leading? "12")
     (pc/numeric-leading? "-3")
     (pc/numeric-leading? "abc")])
@@ -136,23 +85,12 @@
    [(pc/match-number "12")
     (pc/match-number "-3.5")
     (== nil (pc/match-number "abc"))])
-  => [12 -3.5 true]
-
-  (!.lua
-   [(pc/match-number "12")
-    (pc/match-number "-3.5")
-    (== nil (pc/match-number "abc"))])
   => [12 -3.5 true])
 
 ^{:refer kmi.lang.parser-common/read-token :added "4.1"}
 (fact "reads tokens until the next boundary"
 
   (!.js
-   (var reader (rdr/create "bc]"))
-   (pc/read-token reader "a"))
-  => "abc"
-
-  (!.lua
    (var reader (rdr/create "bc]"))
    (pc/read-token reader "a"))
   => "abc")
@@ -167,28 +105,14 @@
    [(== nil (pc/interpret-token reader "nil"))
     (pc/interpret-token reader "true")
     (pc/interpret-token reader "-2")
-    [(. s ["::"]) (. s _ns) (. s _name)]
-    [(. k ["::"]) (. k _ns) (. k _name)]])
-  => [true true -2 ["symbol" "hello" "world"] ["keyword" "user" "id"]]
-
-  (!.lua
-   (var reader (rdr/create ""))
-   (var s (pc/interpret-token reader "hello/world"))
-   (var k (pc/interpret-token reader ":user/id"))
-   [(== nil (pc/interpret-token reader "nil"))
-    (pc/interpret-token reader "true")
-    (pc/interpret-token reader "-2")
-    [(. s ["::"]) (. s _ns) (. s _name)]
-    [(. k ["::"]) (. k _ns) (. k _name)]])
+    [(xt/x:get-key s "::") (xt/x:get-key s "_ns") (xt/x:get-key s "_name")]
+    [(xt/x:get-key k "::") (xt/x:get-key k "_ns") (xt/x:get-key k "_name")]])
   => [true true -2 ["symbol" "hello" "world"] ["keyword" "user" "id"]])
 
+^{:refer kmi.lang.parser/match-number :id kmi-extra-1}
 (fact "rejects invalid numeric tokens"
 
   (!.js
-   (pc/interpret-token (rdr/create "") "12a"))
-  => (throws)
-
-  (!.lua
    (pc/interpret-token (rdr/create "") "12a"))
   => (throws))
 
@@ -196,13 +120,6 @@
 (fact "normalises metadata shorthand"
 
   (!.js
-   (var from-string (pc/normalise-meta "tagged"))
-   (var from-keyword (pc/normalise-meta (kw/keyword nil "dynamic")))
-   [(hm/hashmap-lookup-key from-string (kw/keyword nil "tag") nil)
-    (hm/hashmap-lookup-key from-keyword (kw/keyword nil "dynamic") false)])
-  => ["tagged" true]
-
-  (!.lua
    (var from-string (pc/normalise-meta "tagged"))
    (var from-keyword (pc/normalise-meta (kw/keyword nil "dynamic")))
    [(hm/hashmap-lookup-key from-string (kw/keyword nil "tag") nil)
@@ -215,43 +132,34 @@
   (!.js
    (var reader (rdr/create "a\\n\\\"b\""))
    (pc/read-string-body reader))
-  => "a\n\"b"
-
-  (!.lua
-   (var reader (rdr/create "a\\n\\\"b\""))
-   (pc/read-string-body reader))
   => "a\n\"b")
 
+^{:refer kmi.lang.parser/read-map :id kmi-extra-2}
 (fact "rejects odd map forms"
 
   (!.js
    (p/read-map (rdr/create ":a 1 :b}")))
-  => (throws)
-
-  (!.lua
-   (p/read-map (rdr/create ":a 1 :b}")))
   => (throws))
 
+^{:refer kmi.lang.parser/read-dispatch :id kmi-extra-3}
 (fact "reads var-quote and discard dispatch forms"
 
   (!.js
    (var quoted (list/list-to-array (p/read-dispatch (rdr/create "'hello"))))
    (var out (p/read-dispatch (rdr/create "_hello world")))
-   [[(. (xt/x:first quoted) _name)
-     (. (xt/x:second quoted) _name)]
-     (. out _name)])
+   [[(xt/x:get-key (xt/x:first quoted) "_name")
+     (xt/x:get-key (xt/x:second quoted) "_name")]
+     (xt/x:get-key out "_name")])
   => [["var" "hello"] "world"])
 
+^{:refer kmi.lang.parser/read-dispatch :id kmi-extra-4}
 (fact "rejects unsupported dispatch macros"
 
   (!.js
    (p/read-dispatch (rdr/create "?x")))
-  => (throws)
-
-  (!.lua
-   (p/read-dispatch (rdr/create "?x")))
   => (throws))
 
+^{:refer kmi.lang.parser/read :id kmi-extra-5}
 (fact "rejects EOF for prefix reader syntax"
 
   (!.js
@@ -282,6 +190,7 @@
    (p/read (rdr/create "#_skip")))
   => (throws))
 
+^{:refer kmi.lang.parser/read :id kmi-extra-6}
 (fact "reads deref, unquote, syntax-quote, and dispatch reader syntax"
 
   (!.js
@@ -291,17 +200,17 @@
    (var splice-out (list/list-to-array (p/read (rdr/create "~@hello"))))
    (var var-out (list/list-to-array (p/read (rdr/create "#'hello"))))
    (var discard-out (p/read (rdr/create "#_hello world")))
-   [[(. (xt/x:first syntax-out) _name)
-      (. (xt/x:second syntax-out) _name)]
-     [(. (xt/x:first deref-out) _name)
-       (. (xt/x:second deref-out) _name)]
-    [(. (xt/x:first unquote-out) _name)
-     (. (xt/x:second unquote-out) _name)]
-     [(. (xt/x:first splice-out) _name)
-      (. (xt/x:second splice-out) _name)]
-     [(. (xt/x:first var-out) _name)
-      (. (xt/x:second var-out) _name)]
-     (. discard-out _name)])
+   [[(xt/x:get-key (xt/x:first syntax-out) "_name")
+      (xt/x:get-key (xt/x:second syntax-out) "_name")]
+     [(xt/x:get-key (xt/x:first deref-out) "_name")
+       (xt/x:get-key (xt/x:second deref-out) "_name")]
+    [(xt/x:get-key (xt/x:first unquote-out) "_name")
+     (xt/x:get-key (xt/x:second unquote-out) "_name")]
+     [(xt/x:get-key (xt/x:first splice-out) "_name")
+      (xt/x:get-key (xt/x:second splice-out) "_name")]
+     [(xt/x:get-key (xt/x:first var-out) "_name")
+      (xt/x:get-key (xt/x:second var-out) "_name")]
+     (xt/x:get-key discard-out "_name")])
   => [["syntax-quote" "hello"]
       ["deref" "hello"]
       ["unquote" "hello"]
@@ -309,16 +218,14 @@
       ["var" "hello"]
       "world"])
 
+^{:refer kmi.lang.parser/read :id kmi-extra-7}
 (fact "rejects unmatched delimiters"
 
   (!.js
    (p/read (rdr/create ")")))
-  => (throws)
-
-  (!.lua
-   (p/read (rdr/create ")")))
   => (throws))
 
+^{:refer kmi.lang.parser/read-string :id kmi-extra-8}
 (fact "returns nil for empty or comment-only strings"
 
   (!.js
@@ -363,7 +270,7 @@
 
   (!.js
    (var out (p/read-map (rdr/create ":a 1 :b 2}")))
-   [(. out _size)
+   [(xt/x:get-key out "_size")
     (hm/hashmap-lookup-key out (kw/keyword nil "a") "missing")
     (hm/hashmap-lookup-key out (kw/keyword nil "b") "missing")])
   => [2 1 2])
@@ -373,7 +280,7 @@
 
   (!.js
    (var out (p/read-set (rdr/create ":a :b :a}")))
-   [(. out _size)
+   [(xt/x:get-key out "_size")
     (hs/hashset-has? out (kw/keyword nil "a"))
     (hs/hashset-has? out (kw/keyword nil "b"))])
   => [2 true true])
@@ -383,8 +290,8 @@
 
   (!.js
    (var out (list/list-to-array (p/read-quote (rdr/create "hello"))))
-    [(. (xt/x:first out) _name)
-     (. (xt/x:second out) _name)])
+    [(xt/x:get-key (xt/x:first out) "_name")
+     (xt/x:get-key (xt/x:second out) "_name")])
   => ["quote" "hello"])
 
 ^{:refer kmi.lang.parser/read-syntax-quote :added "4.1"}
@@ -392,8 +299,8 @@
 
   (!.js
    (var out (list/list-to-array (p/read-syntax-quote (rdr/create "hello"))))
-   [(. (xt/x:first out) _name)
-    (. (xt/x:second out) _name)])
+   [(xt/x:get-key (xt/x:first out) "_name")
+    (xt/x:get-key (xt/x:second out) "_name")])
   => ["syntax-quote" "hello"])
 
 ^{:refer kmi.lang.parser/read-deref :added "4.1"}
@@ -401,8 +308,8 @@
 
   (!.js
    (var out (list/list-to-array (p/read-deref (rdr/create "hello"))))
-   [(. (xt/x:first out) _name)
-    (. (xt/x:second out) _name)])
+   [(xt/x:get-key (xt/x:first out) "_name")
+    (xt/x:get-key (xt/x:second out) "_name")])
   => ["deref" "hello"])
 
 ^{:refer kmi.lang.parser/read-unquote :added "4.1"}
@@ -410,8 +317,8 @@
 
   (!.js
    (var out (list/list-to-array (p/read-unquote (rdr/create "hello"))))
-    [(. (xt/x:first out) _name)
-     (. (xt/x:second out) _name)])
+    [(xt/x:get-key (xt/x:first out) "_name")
+     (xt/x:get-key (xt/x:second out) "_name")])
   => ["unquote" "hello"])
 
 ^{:refer kmi.lang.parser/read-unquote-splicing :added "4.1"}
@@ -419,8 +326,8 @@
 
   (!.js
    (var out (list/list-to-array (p/read-unquote-splicing (rdr/create "hello"))))
-   [(. (xt/x:first out) _name)
-    (. (xt/x:second out) _name)])
+   [(xt/x:get-key (xt/x:first out) "_name")
+    (xt/x:get-key (xt/x:second out) "_name")])
   => ["unquote-splicing" "hello"])
 
 ^{:refer kmi.lang.parser/read-meta :added "4.1"}
@@ -432,7 +339,7 @@
    (var inner (syn/syntax out nil))
    [(ic/is-syntax? out)
     (hm/hashmap-lookup-key meta (kw/keyword nil "dynamic") false)
-    (. inner _name)])
+    (xt/x:get-key inner "_name")])
   => [true true "hello"])
 
 ^{:refer kmi.lang.parser/read-var-quote :added "4.1"}
@@ -440,8 +347,8 @@
 
   (!.js
    (var out (list/list-to-array (p/read-var-quote (rdr/create "hello"))))
-    [(. (xt/x:first out) _name)
-     (. (xt/x:second out) _name)])
+    [(xt/x:get-key (xt/x:first out) "_name")
+     (xt/x:get-key (xt/x:second out) "_name")])
   => ["var" "hello"])
 
 ^{:refer kmi.lang.parser/read-discard :added "4.1"}
@@ -449,7 +356,7 @@
 
   (!.js
    (var out (p/read-discard (rdr/create "hello world")))
-   (. out _name))
+   (xt/x:get-key out "_name"))
   => "world")
 
 ^{:refer kmi.lang.parser/read-dispatch :added "4.1"}
@@ -457,7 +364,7 @@
 
   (!.js
    (var out (p/read-dispatch (rdr/create "{:a :b}")))
-   [(. out _size)
+   [(xt/x:get-key out "_size")
     (hs/hashset-has? out (kw/keyword nil "a"))
     (hs/hashset-has? out (kw/keyword nil "b"))])
   => [2 true true])
@@ -469,5 +376,5 @@
    (var out (p/read-string "  ; ignore\n^{:tag true} [1 2]"))
    (var meta (syn/get-metadata out))
    [(proto/to-array (syn/syntax out nil))
-    (. meta _size)])
+    (xt/x:get-key meta "_size")])
   => [[1 2] 1])

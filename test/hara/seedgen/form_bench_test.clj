@@ -8,6 +8,7 @@
   (let [tmp (java.io.File/createTempFile "seedgen-benchlist" ".clj")
         path (.getAbsolutePath tmp)
         lookup {'xt.sample.multi-test path
+                'kmi.lang.multi-test path
                 'sample.multi-test path}]
     (try
       (spit path (str "(ns xt.sample.multi-test\n"
@@ -24,6 +25,13 @@
       => '[xtbench.js.sample.multi-test
            xtbench.lua.sample.multi-test
            xtbench.python.sample.multi-test]
+
+      (form-bench/seedgen-benchlist 'kmi.lang.multi-test
+                                    {:lang [:python :dart]}
+                                    lookup
+                                    nil)
+      => '[xtbench.python.kmi.lang.multi-test
+           xtbench.dart.kmi.lang.multi-test]
 
       (form-bench/seedgen-benchlist 'sample.multi-test
                                     {:rename '{sample [samplebench :lang]}
@@ -53,6 +61,56 @@
                     :data :no-seedgen-root})
       (finally
         (.delete tmp)))))
+
+^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+  :id test-seedgen-benchadd-kmi-path}
+(fact "writes KMI benches beneath xtbench without touching the canonical seed"
+  (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-kmi"
+                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
+        test-dir (doto (java.io.File. root "test-lang/kmi/lang")
+                   (.mkdirs))
+        path     (.getAbsolutePath (java.io.File. test-dir "sample_test.clj"))
+        source   (str "^{:no-test true}\n"
+                      "(ns kmi.lang.sample-test\n"
+                      "  (:use code.test)\n"
+                      "  (:require [hara.lang :as l]))\n\n"
+                      "^{:seedgen/root {:all true :langs [:python]}}\n"
+                      "(l/script- :js {:runtime :basic})\n\n"
+                      "^{:refer kmi.lang.sample/value :id kmi-value-1 :added \"4.1\"}\n"
+                      "(fact \"value one\" (!.js (+ 1 2)) => 3)\n\n"
+                      "^{:refer kmi.lang.sample/value :id kmi-value-2 :added \"4.1\"}\n"
+                      "(fact \"value two\" (!.js (+ 2 3)) => 5)\n")
+        lookup   {'kmi.lang.sample-test path}
+        project  {:root (.getAbsolutePath root)
+                  :test-paths ["test-lang"]}]
+    (try
+      (spit path source)
+      (let [output     (form-bench/seedgen-benchadd 'kmi.lang.sample-test
+                                                    {:lang [:python]
+                                                     :write true}
+                                                    lookup
+                                                    project)
+            bench-path (str (fs/path root "test-lang/xtbench/python/kmi/lang/sample_test.clj"))
+            bench-text (slurp bench-path)]
+        [(-> output :outputs first (select-keys [:lang :ns :path :updated]))
+         (= source (slurp path))
+         (fs/exists? bench-path)
+         (str/includes? bench-text "^{:no-test true}")
+         (str/includes? bench-text "(ns xtbench.python.kmi.lang.sample-test")
+         (= 2 (count (re-seq #"!\\.python" bench-text)))
+         (not (str/includes? bench-text "!.js"))])
+      (finally
+        (fs/delete root {:recursive true}))))
+  => [{:lang :python
+       :ns 'xtbench.python.kmi.lang.sample-test
+       :path "test-lang/xtbench/python/kmi/lang/sample_test.clj"
+       :updated true}
+      true
+      true
+      true
+      true
+      true
+      true])
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
 (fact "creates bench files for the requested runtimes"

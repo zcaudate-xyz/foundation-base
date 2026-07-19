@@ -3,7 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js]}}
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -16,6 +16,7 @@
 
 ^{:refer kmi.lang.runtime/eval-string :added "4.1"}
 (fact "vector destructuring in let"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -25,6 +26,7 @@
 
 ^{:refer kmi.lang.runtime/read-string :added "4.1"}
 (fact "rest destructuring in let"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -34,6 +36,7 @@
 
 ^{:refer kmi.lang.runtime/read-many :added "4.1"}
 (fact "nested destructuring in let"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -43,6 +46,7 @@
 
 ^{:refer kmi.lang.runtime/eval-form :added "4.1"}
 (fact "map destructuring with keys and or"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -52,6 +56,7 @@
 
 ^{:refer kmi.lang.runtime/empty-runtime :added "4.1"}
 (fact "map destructuring with as"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -61,6 +66,7 @@
 
 ^{:refer kmi.lang.runtime/handler-read :added "4.1"}
 (fact "destructuring works in fn parameters"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -70,6 +76,7 @@
 
 ^{:refer kmi.lang.runtime/handler-eval :added "4.1"}
 (fact "in-ns switches current namespace"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -79,6 +86,7 @@
 
 ^{:refer kmi.lang.runtime/handler-load :added "4.1"}
 (fact "require with refer imports selected vars"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -88,6 +96,7 @@
 
 ^{:refer kmi.lang.runtime/handler-describe :added "4.1"}
 (fact "use refers all vars from a namespace"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)
@@ -97,6 +106,7 @@
 
 ^{:refer kmi.lang.runtime/create-node :added "4.1"}
 (fact "require with as creates an alias"
+
   (!.js
    (xt/x:get-key
     (rt/eval-string (rt/empty-runtime)

@@ -56,7 +56,7 @@
   (EvalClient. (atom {:inputs [] :transact false})))
 
 
-^{:refer std.concurrent.request/req.more :added "3.0" :adopt true
+^{:refer std.concurrent.request/req-fn :id req.more :added "3.0" :adopt true
   :setup [(def |client| (eval-client))]}
 (fact "execute command on single, bulk and transact calls"
 
@@ -94,7 +94,7 @@
        (map deref))
   => [4])
 
-^{:refer std.concurrent.request/req.time :added "3.0" :adopt true
+^{:refer std.concurrent.request/req-fn :id req.time :added "3.0" :adopt true
   :setup [(def |client| (eval-client))]}
 (fact "execute command on single, bulk and transact calls"
 
@@ -126,7 +126,7 @@
                 :end number?
                 :output 1}))
 
-^{:refer std.concurrent.request/req.fn :added "3.0" :adopt true}
+^{:refer std.concurrent.request/req :id req.fn :added "3.0" :adopt true}
 (fact "functions"
 
   (req + [1 2 3 4])
@@ -135,7 +135,7 @@
   @(req + [1 2 3 4] {:async true})
   => 10)
 
-^{:refer std.concurrent.request/req:bulk.debug :added "3.0" :adopt true
+^{:refer std.concurrent.request/req:bulk :id req:bulk.debug :added "3.0" :adopt true
   :style/indent 1}
 (fact "creates a bulk request"
 

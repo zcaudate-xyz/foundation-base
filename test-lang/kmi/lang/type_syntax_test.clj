@@ -3,6 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.type-syntax :as syn]
@@ -11,27 +12,14 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[kmi.lang.type-syntax :as syn]
-             [kmi.lang.common-util :as tc]
-             [xt.lang.common-lib :as k]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer kmi.lang.type-syntax/syntax-wrap :added "4.0"}
 (fact "wraps a function to use syntax"
 
   (!.js
-   ((syn/syntax-wrap k/identity)
-    {:_value 1}))
-  => 1
-
-  (!.lua
    ((syn/syntax-wrap k/identity)
     {:_value 1}))
   => 1)
@@ -44,23 +32,10 @@
    [(tc/is-syntax? out)
     (tc/count out)
     (syn/get-metadata out)])
-  => [true 3 "hello"]
-
-  (!.lua
-   (var out (syn/syntax-create [1 2 3] "hello"))
-   [(tc/is-syntax? out)
-    (tc/count out)
-    (syn/get-metadata out)])
   => [true 3 "hello"])
 
 ^{:refer kmi.lang.type-syntax/get-metadata :added "4.0"}
 (fact "gets metadata"
-
-  (!.lua
-   [(syn/get-metadata nil)
-    (syn/get-metadata
-     (syn/syntax-create 1 "hello"))])
-  => [nil "hello"]
 
   (!.js
    [(syn/get-metadata nil)
@@ -73,13 +48,6 @@
 (fact "creates or unwraps syntax values"
 
   (!.js
-   (var wrapped (syn/syntax 1 "hello"))
-   [(syn/syntax 1 nil)
-    (syn/get-metadata wrapped)
-    (syn/syntax wrapped nil)])
-  => [1 "hello" 1]
-
-  (!.lua
    (var wrapped (syn/syntax 1 "hello"))
    [(syn/syntax 1 nil)
     (syn/get-metadata wrapped)

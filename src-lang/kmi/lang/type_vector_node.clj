@@ -7,8 +7,8 @@
              [kmi.lang.common-util :as util]]})
 
 (def.xt BITS 5)
-(def.xt WIDTH (xt/x:m-pow 2 -/BITS))
-(def.xt MASK (- -/WIDTH 1))
+(def.xt WIDTH 32)
+(def.xt MASK 31)
 
 (defmacro.xt impl-mask
   "masks an integer value"
@@ -161,7 +161,8 @@
                         edit-id
                         size
                         (- level -/BITS)
-                        (xt/x:get-idx children (xt/x:offset sidx))))
+                        (xt/x:get-idx children (xt/x:offset sidx))
+                        editable))
             (cond (and (== nnode nil)
                        (== 0 sidx))
                   (return nil)

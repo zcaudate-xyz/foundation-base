@@ -34,13 +34,13 @@
   "reads a list form"
   {:added "4.1"}
   [reader read-fn]
-  (return (list/list (xt/x:unpack (-/read-delimited reader ")" read-fn)))))
+  (return (list/list [ (xt/x:unpack (-/read-delimited reader ")" read-fn))])))
 
 (defn.xt read-vector
   "reads a vector form"
   {:added "4.1"}
   [reader read-fn]
-  (return (vec/vector (xt/x:unpack (-/read-delimited reader "]" read-fn)))))
+  (return (vec/vector [ (xt/x:unpack (-/read-delimited reader "]" read-fn))])))
 
 (defn.xt read-map
   "reads a map form"
@@ -49,13 +49,13 @@
   (var items (-/read-delimited reader "}" read-fn))
   (when (not= 0 (xt/x:m-mod (xt/x:len items) 2))
     (rdr/throw-reader reader "Map literal must contain an even number of forms"))
-  (return (hm/hashmap (xt/x:unpack items))))
+  (return (hm/hashmap [ (xt/x:unpack items)])))
 
 (defn.xt read-set
   "reads a set form"
   {:added "4.1"}
   [reader read-fn]
-  (return (hs/hashset (xt/x:unpack (-/read-delimited reader "}" read-fn)))))
+  (return (hs/hashset [ (xt/x:unpack (-/read-delimited reader "}" read-fn))])))
 
 (defn.xt read-required
   "reads the next form or throws on EOF"
@@ -70,29 +70,29 @@
   "reads a quoted form"
   {:added "4.1"}
   [reader read-fn]
-  (return (list/list (sym/symbol nil "quote")
-                     (-/read-required reader read-fn))))
+  (return (list/list [ (sym/symbol nil "quote")
+                     (-/read-required reader read-fn)])))
 
 (defn.xt read-syntax-quote
   "reads a syntax-quote form"
   {:added "4.1"}
   [reader read-fn]
-  (return (list/list (sym/symbol nil "syntax-quote")
-                     (-/read-required reader read-fn))))
+  (return (list/list [ (sym/symbol nil "syntax-quote")
+                     (-/read-required reader read-fn)])))
 
 (defn.xt read-deref
   "reads a deref form"
   {:added "4.1"}
   [reader read-fn]
-  (return (list/list (sym/symbol nil "deref")
-                     (-/read-required reader read-fn))))
+  (return (list/list [ (sym/symbol nil "deref")
+                     (-/read-required reader read-fn)])))
 
 (defn.xt read-unquote-splicing
   "reads an unquote-splicing form"
   {:added "4.1"}
   [reader read-fn]
-  (return (list/list (sym/symbol nil "unquote-splicing")
-                     (-/read-required reader read-fn))))
+  (return (list/list [ (sym/symbol nil "unquote-splicing")
+                     (-/read-required reader read-fn)])))
 
 (defn.xt read-unquote
   "reads an unquote form"
@@ -101,8 +101,8 @@
   (if (== "@" (rdr/peek-char reader))
     (do (rdr/read-char reader)
         (return (-/read-unquote-splicing reader read-fn)))
-    (return (list/list (sym/symbol nil "unquote")
-                       (-/read-required reader read-fn)))))
+    (return (list/list [ (sym/symbol nil "unquote")
+                       (-/read-required reader read-fn)]))))
 
 (defn.xt read-meta
   "reads metadata and wraps the following form"
@@ -116,8 +116,8 @@
   "reads a var-quote form"
   {:added "4.1"}
   [reader read-fn]
-  (return (list/list (sym/symbol nil "var")
-                     (-/read-required reader read-fn))))
+  (return (list/list [ (sym/symbol nil "var")
+                     (-/read-required reader read-fn)])))
 
 (defn.xt read-discard
   "reads and discards the next form"

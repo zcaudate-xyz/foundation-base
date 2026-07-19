@@ -2,6 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.runtime.eval :as eval]
@@ -20,7 +21,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer kmi.lang.runtime.eval/make-result :added "4.1"}
 (fact "creates a successful result map"
@@ -87,10 +88,10 @@
   (!.js
    [(eval/class-of (sym/symbol nil "x"))
     (eval/class-of (kw/keyword nil "x"))
-    (eval/class-of (list/list 1 2))
-    (eval/class-of (vec/vector 1 2))
-    (eval/class-of (hm/hashmap (kw/keyword nil "a") 1))
-    (eval/class-of (hs/hashset 1 2))
+    (eval/class-of (list/list [ 1 2]))
+    (eval/class-of (vec/vector [ 1 2]))
+    (eval/class-of (hm/hashmap [ (kw/keyword nil "a") 1]))
+    (eval/class-of (hs/hashset [ 1 2]))
     (eval/class-of (syn/syntax [1] {}))
     (eval/class-of "hello")
     (eval/class-of 42)
@@ -120,8 +121,8 @@
 (fact "checks if a value is a kmi list"
 
   (!.js
-   [(eval/list? (list/list 1 2))
-    (eval/list? (vec/vector 1 2))
+   [(eval/list? (list/list [ 1 2]))
+    (eval/list? (vec/vector [ 1 2]))
     (eval/list? [1 2])])
   => [true false false])
 
@@ -129,8 +130,8 @@
 (fact "checks if a value is a kmi vector"
 
   (!.js
-   [(eval/vector? (vec/vector 1 2))
-    (eval/vector? (list/list 1 2))
+   [(eval/vector? (vec/vector [ 1 2]))
+    (eval/vector? (list/list [ 1 2]))
     (eval/vector? [1 2])])
   => [true false false])
 
@@ -138,8 +139,8 @@
 (fact "checks if a value is a kmi hashmap"
 
   (!.js
-   [(eval/hashmap? (hm/hashmap (kw/keyword nil "a") 1))
-    (eval/hashmap? (hs/hashset 1))
+   [(eval/hashmap? (hm/hashmap [ (kw/keyword nil "a") 1]))
+    (eval/hashmap? (hs/hashset [ 1]))
     (eval/hashmap? {})])
   => [true false false])
 
@@ -147,8 +148,8 @@
 (fact "checks if a value is a kmi hashset"
 
   (!.js
-   [(eval/hashset? (hs/hashset 1 2))
-    (eval/hashset? (hm/hashmap (kw/keyword nil "a") 1))
+   [(eval/hashset? (hs/hashset [ 1 2]))
+    (eval/hashset? (hm/hashmap [ (kw/keyword nil "a") 1]))
     (eval/hashset? [1 2])])
   => [true false false])
 
@@ -158,7 +159,7 @@
   (!.js
    [(eval/syntax? (syn/syntax [1] {}))
     (eval/syntax? [1])
-    (eval/syntax? (list/list 1 2))])
+    (eval/syntax? (list/list [ 1 2]))])
   => [true false false])
 
 ^{:refer kmi.lang.runtime.eval/self-evaluating? :added "4.1"}
@@ -170,9 +171,9 @@
     (eval/self-evaluating? 42)
     (eval/self-evaluating? true)
     (eval/self-evaluating? (kw/keyword nil "k"))
-    (eval/self-evaluating? (hs/hashset 1))
+    (eval/self-evaluating? (hs/hashset [ 1]))
     (eval/self-evaluating? (sym/symbol nil "x"))
-    (eval/self-evaluating? (list/list 1))])
+    (eval/self-evaluating? (list/list [ 1]))])
   => [true true true true true true false false])
 
 ^{:refer kmi.lang.runtime.eval/tagged-list? :added "4.1"}
@@ -181,7 +182,7 @@
   (!.js
    [(eval/tagged-list? (parser/read-string "(if true 1)") "if")
     (eval/tagged-list? (parser/read-string "(when true 1)") "if")
-    (eval/tagged-list? (vec/vector 1 2) "if")
+    (eval/tagged-list? (vec/vector [ 1 2]) "if")
     (eval/tagged-list? (parser/read-string "(1 2 3)") "if")])
   => [true false false false])
 
@@ -233,10 +234,10 @@
    (var out-sym (eval/bind-pattern eval/eval-form runtime (env/empty-env) (sym/symbol nil "x") 42))
    (var env-sym (eval/get-value out-sym))
 
-   (var out-vec (eval/bind-pattern eval/eval-form runtime (env/empty-env) (parser/read-string "[a b]") (vec/vector 1 2)))
+   (var out-vec (eval/bind-pattern eval/eval-form runtime (env/empty-env) (parser/read-string "[a b]") (vec/vector [ 1 2])))
    (var env-vec (eval/get-value out-vec))
 
-   (var out-map (eval/bind-pattern eval/eval-form runtime (env/empty-env) (parser/read-string "{:keys [a b] :or {b 99}}") (hm/hashmap (kw/keyword nil "a") 1)))
+   (var out-map (eval/bind-pattern eval/eval-form runtime (env/empty-env) (parser/read-string "{:keys [a b] :or {b 99}}") (hm/hashmap [ (kw/keyword nil "a") 1])))
    (var env-map (eval/get-value out-map))
 
    [(env/env-lookup env-sym (sym/symbol nil "x"))
@@ -322,7 +323,7 @@
    (var rt-with-x (env/ns-assoc runtime (sym/symbol nil "x") 42))
    (var x-var (eval/get-value (eval/eval-var rt-with-x env (p/to-array (parser/read-string "(var x)")))))
    (var rt-with-v (env/ns-assoc rt-with-x (sym/symbol nil "v") x-var))
-   (var deref-form (p/to-array (list/list (sym/symbol nil "deref") (sym/symbol nil "v"))))
+   (var deref-form (p/to-array (list/list [ (sym/symbol nil "deref") (sym/symbol nil "v")])))
    (eval/get-value (eval/eval-deref eval/eval-form rt-with-v env deref-form)))
   => 42)
 
@@ -400,8 +401,8 @@
    (var env (env/empty-env))
    (var plus (eval/get-value (eval/eval-symbol runtime env (sym/symbol nil "+"))))
    (var target {"add" plus "name" "world"})
-   (var call-form (p/to-array (list/list (sym/symbol nil "host") target "add" 1 2)))
-   (var prop-form (p/to-array (list/list (sym/symbol nil "host") target "name")))
+   (var call-form (p/to-array (list/list [ (sym/symbol nil "host") target "add" 1 2])))
+   (var prop-form (p/to-array (list/list [ (sym/symbol nil "host") target "name"])))
    [(eval/get-value (eval/eval-host-interop eval/eval-form runtime env call-form))
     (eval/get-value (eval/eval-host-interop eval/eval-form runtime env prop-form))])
   => [3 "world"])
@@ -412,7 +413,7 @@
   (!.js
    (var runtime (rt/empty-runtime))
    (var env (env/empty-env))
-   (var form (p/to-array (list/list (sym/symbol nil "throw") "boom")))
+   (var form (p/to-array (list/list [ (sym/symbol nil "throw") "boom"])))
    (var out (eval/eval-throw eval/eval-form runtime env form))
    [(eval/errorp out) (xt/x:get-key out "error")])
   => [true "boom"])
@@ -445,7 +446,7 @@
    (var env (env/empty-env))
    (var loop-env (env/env-create env))
    (xt/x:set-key loop-env "loop-bindings" [])
-   (var form (p/to-array (list/list (sym/symbol nil "recur") 1 2)))
+   (var form (p/to-array (list/list [ (sym/symbol nil "recur") 1 2])))
    (var out (eval/eval-recur eval/eval-form runtime loop-env form))
    [(eval/recur? (eval/get-value out))
     (eval/recur-values (eval/get-value out))
@@ -540,8 +541,8 @@
    (var out (eval/eval-hashmap eval/eval-form runtime env form))
    (var value (eval/get-value out))
    [(eval/hashmap? value)
-    (hm/hashmap-lookup-key value (kw/keyword nil "a"))
-    (hm/hashmap-lookup-key value (kw/keyword nil "b"))])
+    (hm/hashmap-lookup-key value (kw/keyword nil "a") nil)
+    (hm/hashmap-lookup-key value (kw/keyword nil "b") nil)])
   => [true 1 2])
 
 ^{:refer kmi.lang.runtime.eval/eval-set :added "4.1"}

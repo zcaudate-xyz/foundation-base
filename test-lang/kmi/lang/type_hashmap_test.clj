@@ -3,6 +3,7 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
+^{:seedgen/root {:all true :langs [:lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
    :require [[kmi.lang.type-hashmap :as hm]
@@ -13,32 +14,15 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[kmi.lang.type-hashmap :as hm]
-             [kmi.lang.type-hashmap-node :as node]
-             [kmi.lang.common-util :as ic]
-             [kmi.lang.protocol-base :as p]
-             [xt.lang.common-iter :as it]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer kmi.lang.type-hashmap/hashmap-collect-pairs :added "4.1"}
 (fact "collects pair objects from the trie root"
 
   (!.js
-   (var entries (hm/hashmap-collect-pairs (. (hm/hashmap "a" 1 "b" 2) _root) []))
-   [(ic/count entries)
-    (ic/show (xt/x:get-idx entries (xt/x:offset 0)))
-    (ic/show (xt/x:get-idx entries (xt/x:offset 1)))])
-  => [2 "[\"b\", 2]" "[\"a\", 1]"]
-
-  (!.lua
-   (var entries (hm/hashmap-collect-pairs (. (hm/hashmap "a" 1 "b" 2) _root) []))
+   (var entries (hm/hashmap-collect-pairs (xt/x:get-key (hm/hashmap [ "a" 1 "b" 2]) "_root") []))
    [(ic/count entries)
     (ic/show (xt/x:get-idx entries (xt/x:offset 0)))
     (ic/show (xt/x:get-idx entries (xt/x:offset 1)))])
@@ -48,14 +32,7 @@
 (fact "iterates over hashmap entries as pairs"
 
   (!.js
-   (var entries (it/arr< (hm/hashmap-to-iter (hm/hashmap "a" 1 "b" 2))))
-   [(ic/count entries)
-    (ic/show (xt/x:get-idx entries (xt/x:offset 0)))
-    (ic/show (xt/x:get-idx entries (xt/x:offset 1)))])
-  => [2 "[\"b\", 2]" "[\"a\", 1]"]
-
-  (!.lua
-   (var entries (it/arr< (hm/hashmap-to-iter (hm/hashmap "a" 1 "b" 2))))
+   (var entries (it/arr< (hm/hashmap-to-iter (hm/hashmap [ "a" 1 "b" 2]))))
    [(ic/count entries)
     (ic/show (xt/x:get-idx entries (xt/x:offset 0)))
     (ic/show (xt/x:get-idx entries (xt/x:offset 1)))])
@@ -66,43 +43,25 @@
 
   (!.js
    (hm/hashmap-to-array
-    (hm/hashmap "a" 1 "b" 2)))
-  => [["b" 2] ["a" 1]]
-
-  (!.lua
-   (hm/hashmap-to-array
-    (hm/hashmap "a" 1 "b" 2)))
+    (hm/hashmap [ "a" 1 "b" 2])))
   => [["b" 2] ["a" 1]])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-new :added "4.1"}
 (fact "creates a bare hashmap object with the provided root and size"
 
   (!.js
-   (var out (hm/hashmap-new node/EMPTY_HASHMAP_NODE 3 nil))
-   [(. out ["::"])
-    (. out _size)
-    (xt/x:get-key (. out _root) "::")])
-  => ["hashmap" 3 "hashmap.node"]
-
-  (!.lua
-   (var out (hm/hashmap-new node/EMPTY_HASHMAP_NODE 3 nil))
-   [(. out ["::"])
-    (. out _size)
-    (xt/x:get-key (. out _root) "::")])
+   (var out (hm/hashmap-new node/EMPTY_HASHMAP_NODE 3))
+   [(xt/x:get-key out "::")
+    (xt/x:get-key out "_size")
+    (xt/x:get-key (xt/x:get-key out "_root") "::")])
   => ["hashmap" 3 "hashmap.node"])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-empty :added "4.1"}
 (fact "creates an empty hashmap from an existing hashmap"
 
   (!.js
-   (var out (hm/hashmap-empty (hm/hashmap "a" 1)))
-   [(. out _size)
-    (hm/hashmap-show out)])
-  => [0 "{}"]
-
-  (!.lua
-   (var out (hm/hashmap-empty (hm/hashmap "a" 1)))
-   [(. out _size)
+   (var out (hm/hashmap-empty (hm/hashmap [ "a" 1])))
+   [(xt/x:get-key out "_size")
     (hm/hashmap-show out)])
   => [0 "{}"])
 
@@ -110,12 +69,7 @@
 (fact "detects mutable vs persistent hashmaps"
 
   (!.js
-   [(hm/hashmap-is-editable (hm/hashmap "a" 1))
-    (hm/hashmap-is-editable (hm/hashmap-empty-mutable))])
-  => [false true]
-
-  (!.lua
-   [(hm/hashmap-is-editable (hm/hashmap "a" 1))
+   [(hm/hashmap-is-editable (hm/hashmap [ "a" 1]))
     (hm/hashmap-is-editable (hm/hashmap-empty-mutable))])
   => [false true])
 
@@ -123,7 +77,7 @@
 (fact "supports mutable edits and roundtrips back to persistent"
 
   (!.js
-   (var out (-> (hm/hashmap "a" 1)
+   (var out (-> (hm/hashmap [ "a" 1])
                 (hm/hashmap-to-mutable!)
                 (hm/hashmap-assoc! "b" 2)
                 (hm/hashmap-dissoc! "a")
@@ -131,35 +85,14 @@
    [(p/is-persistent out)
     (hm/hashmap-lookup-key out "a" "missing")
     (hm/hashmap-lookup-key out "b" "missing")
-    (. out _size)])
-  => [true "missing" 2 1]
-
-  (!.lua
-   (var out (-> (hm/hashmap "a" 1)
-                (hm/hashmap-to-mutable!)
-                (hm/hashmap-assoc! "b" 2)
-                (hm/hashmap-dissoc! "a")
-                (hm/hashmap-to-persistent!)))
-   [(p/is-persistent out)
-    (hm/hashmap-lookup-key out "a" "missing")
-    (hm/hashmap-lookup-key out "b" "missing")
-    (. out _size)])
+    (xt/x:get-key out "_size")])
   => [true "missing" 2 1])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-to-persistent! :added "4.1"}
 (fact "converts a mutable hashmap back into a persistent hashmap"
 
   (!.js
-   (var out (-> (hm/hashmap "a" 1)
-                (hm/hashmap-to-mutable!)
-                (hm/hashmap-assoc! "b" 2)
-                (hm/hashmap-to-persistent!)))
-   [(hm/hashmap-is-editable out)
-    (hm/hashmap-lookup-key out "b" "missing")])
-  => [false 2]
-
-  (!.lua
-   (var out (-> (hm/hashmap "a" 1)
+   (var out (-> (hm/hashmap [ "a" 1])
                 (hm/hashmap-to-mutable!)
                 (hm/hashmap-assoc! "b" 2)
                 (hm/hashmap-to-persistent!)))
@@ -173,16 +106,8 @@
   (!.js
    (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
    (var entry (hm/hashmap-find-key out "a"))
-   [(. entry _key)
-    (. entry _val)
-    (hm/hashmap-lookup-key out "missing" "fallback")])
-  => ["a" nil "fallback"]
-
-  (!.lua
-   (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
-   (var entry (hm/hashmap-find-key out "a"))
-   [(. entry _key)
-    (. entry _val)
+   [(xt/x:get-key entry "_key")
+    (xt/x:get-key entry "_val")
     (hm/hashmap-lookup-key out "missing" "fallback")])
   => ["a" nil "fallback"])
 
@@ -193,12 +118,6 @@
    (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
    [(hm/hashmap-lookup-key out "a" "missing")
     (hm/hashmap-lookup-key out "b" "missing")])
-  => [nil "missing"]
-
-  (!.lua
-   (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
-   [(hm/hashmap-lookup-key out "a" "missing")
-    (hm/hashmap-lookup-key out "b" "missing")])
   => [nil "missing"])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-keys :added "4.1"}
@@ -206,12 +125,7 @@
 
   (!.js
    (hm/hashmap-keys
-    (hm/hashmap "a" 1 "b" 2)))
-  => ["b" "a"]
-
-  (!.lua
-   (hm/hashmap-keys
-    (hm/hashmap "a" 1 "b" 2)))
+    (hm/hashmap [ "a" 1 "b" 2])))
   => ["b" "a"])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-vals :added "4.1"}
@@ -219,31 +133,18 @@
 
   (!.js
    (hm/hashmap-vals
-    (hm/hashmap "a" 1 "b" 2)))
-  => [2 1]
-
-  (!.lua
-   (hm/hashmap-vals
-    (hm/hashmap "a" 1 "b" 2)))
+    (hm/hashmap [ "a" 1 "b" 2])))
   => [2 1])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-assoc :added "4.1"}
 (fact "keeps persistent updates immutable"
 
   (!.js
-   (var h0 (hm/hashmap "a" 1))
+   (var h0 (hm/hashmap [ "a" 1]))
    (var h1 (hm/hashmap-assoc h0 "b" 2))
    [(hm/hashmap-lookup-key h0 "b" "missing")
     (hm/hashmap-lookup-key h1 "b" "missing")
-    (. h1 _size)])
-  => ["missing" 2 2]
-
-  (!.lua
-   (var h0 (hm/hashmap "a" 1))
-   (var h1 (hm/hashmap-assoc h0 "b" 2))
-   [(hm/hashmap-lookup-key h0 "b" "missing")
-    (hm/hashmap-lookup-key h1 "b" "missing")
-    (. h1 _size)])
+    (xt/x:get-key h1 "_size")])
   => ["missing" 2 2])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-assoc! :added "4.1"}
@@ -256,76 +157,39 @@
    (hm/hashmap-assoc! out "b" 3)
    [(hm/hashmap-lookup-key out "a" "missing")
     (hm/hashmap-lookup-key out "b" "missing")
-    (. out _size)])
-  => [1 3 2]
-
-  (!.lua
-   (var out (hm/hashmap-empty-mutable))
-   (hm/hashmap-assoc! out "a" 1)
-   (hm/hashmap-assoc! out "b" 2)
-   (hm/hashmap-assoc! out "b" 3)
-   [(hm/hashmap-lookup-key out "a" "missing")
-    (hm/hashmap-lookup-key out "b" "missing")
-    (. out _size)])
+    (xt/x:get-key out "_size")])
   => [1 3 2])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-dissoc :added "4.1"}
 (fact "keeps persistent dissoc immutable"
 
   (!.js
-   (var h0 (hm/hashmap "a" 1 "b" 2))
+   (var h0 (hm/hashmap [ "a" 1 "b" 2]))
    (var h1 (hm/hashmap-dissoc h0 "a"))
    [(hm/hashmap-lookup-key h0 "a" "missing")
     (hm/hashmap-lookup-key h1 "a" "missing")
-    (. h1 _size)])
-  => [1 "missing" 1]
-
-  (!.lua
-   (var h0 (hm/hashmap "a" 1 "b" 2))
-   (var h1 (hm/hashmap-dissoc h0 "a"))
-   [(hm/hashmap-lookup-key h0 "a" "missing")
-    (hm/hashmap-lookup-key h1 "a" "missing")
-    (. h1 _size)])
+    (xt/x:get-key h1 "_size")])
   => [1 "missing" 1])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-dissoc! :added "4.1"}
 (fact "mutably dissociates keys and keeps the remaining entries"
 
   (!.js
-   (var out (-> (hm/hashmap "a" 1 "b" 2)
+   (var out (-> (hm/hashmap [ "a" 1 "b" 2])
                 (hm/hashmap-to-mutable!)))
    (hm/hashmap-dissoc! out "a")
    (hm/hashmap-dissoc! out "missing")
    [(hm/hashmap-lookup-key out "a" "missing")
     (hm/hashmap-lookup-key out "b" "missing")
-    (. out _size)])
-  => ["missing" 2 1]
-
-  (!.lua
-   (var out (-> (hm/hashmap "a" 1 "b" 2)
-                (hm/hashmap-to-mutable!)))
-   (hm/hashmap-dissoc! out "a")
-   (hm/hashmap-dissoc! out "missing")
-   [(hm/hashmap-lookup-key out "a" "missing")
-    (hm/hashmap-lookup-key out "b" "missing")
-    (. out _size)])
+    (xt/x:get-key out "_size")])
   => ["missing" 2 1])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-hash :added "4.1"}
 (fact "computes the same unordered hash as the protocol hash function"
 
   (!.js
-   (var h1 (hm/hashmap "a" 1 "b" 2))
-   (var h2 (hm/hashmap "b" 2 "a" 1))
-   [(hm/hashmap-hash h1)
-    (p/hash h1)
-    (== (hm/hashmap-hash h1)
-        (hm/hashmap-hash h2))])
-  => [1875325 1875325 true]
-
-  (!.lua
-   (var h1 (hm/hashmap "a" 1 "b" 2))
-   (var h2 (hm/hashmap "b" 2 "a" 1))
+   (var h1 (hm/hashmap [ "a" 1 "b" 2]))
+   (var h2 (hm/hashmap [ "b" 2 "a" 1]))
    [(hm/hashmap-hash h1)
     (p/hash h1)
     (== (hm/hashmap-hash h1)
@@ -336,16 +200,8 @@
 (fact "compares and hashes maps independent of insertion order"
 
   (!.js
-   (var h1 (hm/hashmap "a" 1 "b" 2))
-   (var h2 (hm/hashmap "b" 2 "a" 1))
-   [(hm/hashmap-eq h1 h2)
-    (== (p/hash h1)
-        (p/hash h2))])
-  => [true true]
-
-  (!.lua
-   (var h1 (hm/hashmap "a" 1 "b" 2))
-   (var h2 (hm/hashmap "b" 2 "a" 1))
+   (var h1 (hm/hashmap [ "a" 1 "b" 2]))
+   (var h2 (hm/hashmap [ "b" 2 "a" 1]))
    [(hm/hashmap-eq h1 h2)
     (== (p/hash h1)
         (p/hash h2))])
@@ -356,12 +212,7 @@
 
   (!.js
    (hm/hashmap-show
-    (hm/hashmap "a" 1 "b" 2)))
-  => #"\{(?:\"a\" 1, \"b\" 2|\"b\" 2, \"a\" 1)\}"
-
-  (!.lua
-   (hm/hashmap-show
-    (hm/hashmap "a" 1 "b" 2)))
+    (hm/hashmap [ "a" 1 "b" 2])))
   => #"\{(?:\"a\" 1, \"b\" 2|\"b\" 2, \"a\" 1)\}")
 
 ^{:refer kmi.lang.type-hashmap/hashmap-create :added "4.1"}
@@ -369,15 +220,8 @@
 
   (!.js
    (var out (hm/hashmap-create node/EMPTY_HASHMAP_NODE 0))
-   [(. out ["::"])
-    (. out _size)
-    (hm/hashmap-show out)])
-  => ["hashmap" 0 "{}"]
-
-  (!.lua
-   (var out (hm/hashmap-create node/EMPTY_HASHMAP_NODE 0))
-   [(. out ["::"])
-    (. out _size)
+   [(xt/x:get-key out "::")
+    (xt/x:get-key out "_size")
     (hm/hashmap-show out)])
   => ["hashmap" 0 "{}"])
 
@@ -387,14 +231,7 @@
   (!.js
    (var out (hm/hashmap-empty-mutable))
    [(hm/hashmap-is-editable out)
-    (. out _size)
-    (hm/hashmap-show out)])
-  => [true 0 "{}"]
-
-  (!.lua
-   (var out (hm/hashmap-empty-mutable))
-   [(hm/hashmap-is-editable out)
-    (. out _size)
+    (xt/x:get-key out "_size")
     (hm/hashmap-show out)])
   => [true 0 "{}"])
 
@@ -402,15 +239,8 @@
 (fact "creates a hashmap from alternating key/value arguments"
 
   (!.js
-   (var out (hm/hashmap "a" 1 "b" 2))
-   [(. out _size)
-    (hm/hashmap-lookup-key out "a" "missing")
-    (hm/hashmap-lookup-key out "b" "missing")])
-  => [2 1 2]
-
-  (!.lua
-   (var out (hm/hashmap "a" 1 "b" 2))
-   [(. out _size)
+   (var out (hm/hashmap [ "a" 1 "b" 2]))
+   [(xt/x:get-key out "_size")
     (hm/hashmap-lookup-key out "a" "missing")
     (hm/hashmap-lookup-key out "b" "missing")])
   => [2 1 2])

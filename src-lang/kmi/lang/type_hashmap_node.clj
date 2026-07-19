@@ -73,7 +73,7 @@
 
 (defn.xt leaf-value
   [leaf]
-  (return (util/impl-denormalise (. leaf _val))))
+  (return (util/impl-denormalise (xt/x:get-key leaf "_val"))))
 
 (defn.xt node-clone
   "clones a node/collision"
@@ -82,13 +82,13 @@
   (var tag (xt/x:get-key node "::"))
   (cond (== tag "hashmap.node")
         (return (-/node-create (xt/x:get-key node "edit_id")
-                               (. node bitmap)
-                               (xt/x:arr-clone (. node children))))
+                               (xt/x:get-key node "bitmap")
+                               (xt/x:arr-clone (xt/x:get-key node "children"))))
 
         (== tag "hashmap.collision")
         (return (-/collision-create (xt/x:get-key node "edit_id")
-                                    (. node _hash)
-                                    (xt/x:arr-clone (. node children))))
+                                    (xt/x:get-key node "_hash")
+                                    (xt/x:arr-clone (xt/x:get-key node "children"))))
 
         :else
         (return node)))
@@ -100,10 +100,10 @@
   (var tag (xt/x:get-key node "::"))
   (cond (== tag "hashmap.node")
         (do (var out (-/node-create edit-id
-                                    (. node bitmap)
+                                    (xt/x:get-key node "bitmap")
                                     []))
-            (xt/for:array [child (. node children)]
-              (xt/x:arr-push (. out children)
+            (xt/for:array [child (xt/x:get-key node "children")]
+              (xt/x:arr-push (xt/x:get-key out "children")
                              (:? (xt/x:is-object? child)
                                  (-/node-editable child edit-id)
                                  child)))
@@ -111,10 +111,10 @@
 
         (== tag "hashmap.collision")
         (do (var out (-/collision-create edit-id
-                                         (. node _hash)
+                                         (xt/x:get-key node "_hash")
                                          []))
-            (xt/for:array [child (. node children)]
-              (xt/x:arr-push (. out children) child))
+            (xt/for:array [child (xt/x:get-key node "children")]
+              (xt/x:arr-push (xt/x:get-key out "children") child))
             (return out))
 
         :else
@@ -141,10 +141,10 @@
   (var tag (xt/x:get-key node "::"))
   (cond (== tag "hashmap.node")
         (do (var out (-/node-create nil
-                                    (. node bitmap)
+                                    (xt/x:get-key node "bitmap")
                                     []))
-            (xt/for:array [child (. node children)]
-              (xt/x:arr-push (. out children)
+            (xt/for:array [child (xt/x:get-key node "children")]
+              (xt/x:arr-push (xt/x:get-key out "children")
                              (:? (xt/x:is-object? child)
                                  (-/ensure-persistent child)
                                  child)))
@@ -152,10 +152,10 @@
 
         (== tag "hashmap.collision")
         (do (var out (-/collision-create nil
-                                         (. node _hash)
+                                         (xt/x:get-key node "_hash")
                                          []))
-            (xt/for:array [child (. node children)]
-              (xt/x:arr-push (. out children) child))
+            (xt/for:array [child (xt/x:get-key node "children")]
+              (xt/x:arr-push (xt/x:get-key out "children") child))
             (return out))
 
         :else
@@ -163,25 +163,25 @@
 
 (defn.xt collision-find-leaf
   [collision key]
-  (xt/for:array [leaf (. collision children)]
-    (when (util/eq (. leaf _key) key)
+  (xt/for:array [leaf (xt/x:get-key collision "children")]
+    (when (util/eq (xt/x:get-key leaf "_key") key)
       (return leaf)))
   (return nil))
 
 (defn.xt collision-assoc
   [collision edit-id leaf]
-  (var children (. collision children))
+  (var children (xt/x:get-key collision "children"))
   (var nchildren [])
   (var replaced false)
   (xt/for:array [child children]
-    (if (util/eq (. child _key) (. leaf _key))
+    (if (util/eq (xt/x:get-key child "_key") (xt/x:get-key leaf "_key"))
       (do (xt/x:arr-push nchildren leaf)
           (:= replaced true))
       (xt/x:arr-push nchildren child)))
   (when (not replaced)
     (xt/x:arr-push nchildren leaf))
   (return {:node (-/collision-create edit-id
-                                     (. collision _hash)
+                                     (xt/x:get-key collision "_hash")
                                      nchildren)
            :added (not replaced)}))
 
@@ -189,8 +189,8 @@
   [collision edit-id key]
   (var nchildren [])
   (var removed false)
-  (xt/for:array [child (. collision children)]
-    (if (util/eq (. child _key) key)
+  (xt/for:array [child (xt/x:get-key collision "children")]
+    (if (util/eq (xt/x:get-key child "_key") key)
       (:= removed true)
       (xt/x:arr-push nchildren child)))
   (cond (not removed)
@@ -204,14 +204,14 @@
 
         :else
         (return {:node (-/collision-create edit-id
-                                           (. collision _hash)
+                                           (xt/x:get-key collision "_hash")
                                            nchildren)
                  :removed true})))
 
 (defn.xt branch-create
   [edit-id shift leaf-a leaf-b]
-  (var hash-a (. leaf-a _hash))
-  (var hash-b (. leaf-b _hash))
+  (var hash-a (xt/x:get-key leaf-a "_hash"))
+  (var hash-b (xt/x:get-key leaf-b "_hash"))
   (if (or (== hash-a hash-b)
           (>= shift 30))
     (return (-/collision-create edit-id hash-a [leaf-a leaf-b]))
@@ -235,13 +235,13 @@
   {:added "4.1"}
   [node shift hash key default-val]
   (var bitpos (-/impl-bitpos hash shift))
-  (when (== 0 (xt/x:bit-and (. node bitmap) bitpos))
+  (when (== 0 (xt/x:bit-and (xt/x:get-key node "bitmap") bitpos))
     (return default-val))
-  (var idx (-/impl-index (. node bitmap) bitpos))
-  (var child (xt/x:get-idx (. node children) (xt/x:offset idx)))
+  (var idx (-/impl-index (xt/x:get-key node "bitmap") bitpos))
+  (var child (xt/x:get-idx (xt/x:get-key node "children") (xt/x:offset idx)))
   (var tag (xt/x:get-key child "::"))
   (cond (== tag "hashmap.leaf")
-        (if (util/eq (. child _key) key)
+        (if (util/eq (xt/x:get-key child "_key") key)
           (return (-/leaf-value child))
           (return default-val))
 
@@ -261,13 +261,13 @@
 (defn.xt node-find-leaf
   [node shift hash key]
   (var bitpos (-/impl-bitpos hash shift))
-  (when (== 0 (xt/x:bit-and (. node bitmap) bitpos))
+  (when (== 0 (xt/x:bit-and (xt/x:get-key node "bitmap") bitpos))
     (return nil))
-  (var idx (-/impl-index (. node bitmap) bitpos))
-  (var child (xt/x:get-idx (. node children) (xt/x:offset idx)))
+  (var idx (-/impl-index (xt/x:get-key node "bitmap") bitpos))
+  (var child (xt/x:get-idx (xt/x:get-key node "children") (xt/x:offset idx)))
   (var tag (xt/x:get-key child "::"))
   (cond (== tag "hashmap.leaf")
-        (if (util/eq (. child _key) key)
+        (if (util/eq (xt/x:get-key child "_key") key)
           (return child)
           (return nil))
 
@@ -285,22 +285,22 @@
   {:added "4.1"}
   [node edit-id shift hash key val]
   (var bitpos (-/impl-bitpos hash shift))
-  (var bitmap (. node bitmap))
+  (var bitmap (xt/x:get-key node "bitmap"))
   (var leaf (-/leaf-create hash key val))
   (when (== 0 (xt/x:bit-and bitmap bitpos))
     (var idx (-/impl-index bitmap bitpos))
-    (var nchildren (xt/x:arr-clone (. node children)))
+    (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
     (xt/x:arr-insert nchildren (xt/x:offset idx) leaf)
     (return {:node (-/node-create edit-id
                                   (xt/x:bit-or bitmap bitpos)
                                   nchildren)
              :added true}))
   (var idx (-/impl-index bitmap bitpos))
-  (var child (xt/x:get-idx (. node children) (xt/x:offset idx)))
+  (var child (xt/x:get-idx (xt/x:get-key node "children") (xt/x:offset idx)))
   (var tag (xt/x:get-key child "::"))
   (cond (== tag "hashmap.leaf")
-        (if (util/eq (. child _key) key)
-          (do (var nchildren (xt/x:arr-clone (. node children)))
+        (if (util/eq (xt/x:get-key child "_key") key)
+          (do (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
               (xt/x:set-idx nchildren (xt/x:offset idx) leaf)
               (return {:node (-/node-create edit-id bitmap nchildren)
                        :added false}))
@@ -308,17 +308,17 @@
                                            (+ shift -/BITS)
                                            child
                                            leaf))
-              (var nchildren (xt/x:arr-clone (. node children)))
+              (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
               (xt/x:set-idx nchildren (xt/x:offset idx) nchild)
               (return {:node (-/node-create edit-id bitmap nchildren)
                        :added true})))
 
         (== tag "hashmap.collision")
         (do (var result (-/collision-assoc child edit-id leaf))
-            (var nchildren (xt/x:arr-clone (. node children)))
-            (xt/x:set-idx nchildren (xt/x:offset idx) (. result node))
+            (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
+            (xt/x:set-idx nchildren (xt/x:offset idx) (xt/x:get-key result "node"))
             (return {:node (-/node-create edit-id bitmap nchildren)
-                     :added (. result added)}))
+                     :added (xt/x:get-key result "added")}))
 
         :else
         (do (var result (-/node-assoc child
@@ -327,27 +327,27 @@
                                       hash
                                       key
                                       val))
-            (var nchildren (xt/x:arr-clone (. node children)))
-            (xt/x:set-idx nchildren (xt/x:offset idx) (. result node))
+            (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
+            (xt/x:set-idx nchildren (xt/x:offset idx) (xt/x:get-key result "node"))
             (return {:node (-/node-create edit-id bitmap nchildren)
-                     :added (. result added)}))))
+                     :added (xt/x:get-key result "added")}))))
 
 (defn.xt node-dissoc
   "dissociates a key from a node"
   {:added "4.1"}
   [node edit-id shift hash key]
   (var bitpos (-/impl-bitpos hash shift))
-  (var bitmap (. node bitmap))
+  (var bitmap (xt/x:get-key node "bitmap"))
   (when (== 0 (xt/x:bit-and bitmap bitpos))
     (return {:node node :removed false}))
   (var idx (-/impl-index bitmap bitpos))
-  (var child (xt/x:get-idx (. node children) (xt/x:offset idx)))
+  (var child (xt/x:get-idx (xt/x:get-key node "children") (xt/x:offset idx)))
   (var tag (xt/x:get-key child "::"))
   (cond (== tag "hashmap.leaf")
-        (if (util/eq (. child _key) key)
+        (if (util/eq (xt/x:get-key child "_key") key)
           (do (var nbitmap (xt/x:bit-and bitmap
                                          (xt/x:bit-xor -1 bitpos)))
-              (var nchildren (xt/x:arr-clone (. node children)))
+              (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
               (xt/x:arr-remove nchildren idx)
               (return {:node (:? (== 0 nbitmap)
                                  nil
@@ -357,19 +357,19 @@
 
         (== tag "hashmap.collision")
         (do (var result (-/collision-dissoc child edit-id key))
-            (if (not (. result removed))
+            (if (not (xt/x:get-key result "removed"))
               (return {:node node :removed false})
-              (if (xt/x:nil? (. result node))
+              (if (xt/x:nil? (xt/x:get-key result "node"))
                 (do (var nbitmap (xt/x:bit-and bitmap
                                                (xt/x:bit-xor -1 bitpos)))
-                    (var nchildren (xt/x:arr-clone (. node children)))
+                    (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
                     (xt/x:arr-remove nchildren idx)
                     (return {:node (:? (== 0 nbitmap)
                                        nil
                                        (-/node-create edit-id nbitmap nchildren))
                              :removed true}))
-                (do (var nchildren (xt/x:arr-clone (. node children)))
-                    (xt/x:set-idx nchildren (xt/x:offset idx) (. result node))
+                (do (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
+                    (xt/x:set-idx nchildren (xt/x:offset idx) (xt/x:get-key result "node"))
                     (return {:node (-/node-create edit-id bitmap nchildren)
                              :removed true})))))
 
@@ -379,19 +379,19 @@
                                        (+ shift -/BITS)
                                        hash
                                        key))
-            (if (not (. result removed))
+            (if (not (xt/x:get-key result "removed"))
               (return {:node node :removed false})
-              (if (xt/x:nil? (. result node))
+              (if (xt/x:nil? (xt/x:get-key result "node"))
                 (do (var nbitmap (xt/x:bit-and bitmap
                                                (xt/x:bit-xor -1 bitpos)))
-                    (var nchildren (xt/x:arr-clone (. node children)))
+                    (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
                     (xt/x:arr-remove nchildren idx)
                     (return {:node (:? (== 0 nbitmap)
                                        nil
                                        (-/node-create edit-id nbitmap nchildren))
                              :removed true}))
-                (do (var nchildren (xt/x:arr-clone (. node children)))
-                    (xt/x:set-idx nchildren (xt/x:offset idx) (. result node))
+                (do (var nchildren (xt/x:arr-clone (xt/x:get-key node "children")))
+                    (xt/x:set-idx nchildren (xt/x:offset idx) (xt/x:get-key result "node"))
                     (return {:node (-/node-create edit-id bitmap nchildren)
                              :removed true})))))))
 

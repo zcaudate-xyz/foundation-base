@@ -71,14 +71,27 @@
                        :function 'xt.lang.sample/emit
                        :path "test-lang/xtbench/lua/lang/sample_test.clj"
                        :line 51}}
+        kmi-failed {:meta {:ns 'xtbench.python.kmi.lang.runtime-test
+                           :refer 'kmi.lang.runtime/eval-string
+                           :path "test-lang/xtbench/python/kmi/lang/runtime_test.clj"
+                           :line 17}}
         summary (with-meta {:passed 3 :failed 2 :throw 1 :timeout 0}
-                  {:data {:failed [failed failed]
+                  {:data {:failed [failed failed kmi-failed]
                           :throw [thrown]
                           :timeout []}})]
     (cli/failure-tree summary
                       ['xtbench.lua.lang.load-error-test]
                       {:root "/repo"}))
-  => [{:namespace "lang.load-error-test"
+  => [{:namespace "kmi.lang.runtime-test"
+       :runtime-namespace "xtbench.python.kmi.lang.runtime-test"
+       :counts {:failed 1}
+       :functions [{:function "kmi.lang.runtime/eval-string"
+                    :counts {:failed 1}
+                    :locations [{:type :failed :count 1
+                                 :path "test-lang/xtbench/python/kmi/lang/runtime_test.clj"
+                                 :line 17}]}]
+       :namespace-errors []}
+      {:namespace "lang.load-error-test"
        :runtime-namespace "xtbench.lua.lang.load-error-test"
        :counts {:errored 1}
        :functions []

@@ -168,7 +168,15 @@
   {:added "4.1"}
   [source-ns lang]
   (let [s (str source-ns)]
-    (symbol (str/replace s #"^xt\." (str "xtbench." (name lang) ".")))))
+    (symbol
+     (cond (str/starts-with? s "xt.")
+           (str/replace s #"^xt\." (str "xtbench." (name lang) "."))
+
+           (str/starts-with? s "kmi.")
+           (str "xtbench." (name lang) "." s)
+
+           :else
+           s))))
 
 (defn- extract-lang
   "extracts the language keyword from an xtbench.<lang>.* namespace"

@@ -41,15 +41,15 @@
   [sym o]
   (var oclass (common-hash/native-class o))
   (return (and (== "symbol" oclass)
-               (== (. sym _ns) (. o _ns))
-               (== (. sym _name) (. o _name)))))
+               (== (xt/x:get-key sym "_ns") (xt/x:get-key o "_ns"))
+               (== (xt/x:get-key sym "_name") (xt/x:get-key o "_name")))))
 
 (proto/defimpl.xt ^{:rt/tag "symbol"} Symbol
   [_ns _name]
   p/IEq
   {eq -/symbol-eq}
   p/IHash
-  {hash (util/wrap-with-cache -/symbol-hash)}
+  {hash (util/wrap-with-cache -/symbol-hash [nil])}
   p/INamespaced
   {name      util/get-name
    namespace util/get-namespace}
