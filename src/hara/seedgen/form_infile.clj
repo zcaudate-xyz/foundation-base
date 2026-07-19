@@ -267,6 +267,18 @@
         :extra
         normalize-script-requires)))
 
+(defn- root-script-tagged-extra-requires
+  [output]
+  (let [root-form (-> output
+                      (get-in [:globals :global-script :root])
+                      item-value)
+        config    (when (map? (nth root-form 2 nil))
+                    (nth root-form 2))]
+    (->> (:require config)
+         normalize-script-requires
+         (filter #(-> % meta :seedgen/extra))
+         vec)))
+
 (defn- render-script-require-string
   [requires]
   (let [items (mapv pr-str (normalize-script-requires requires))]
@@ -315,7 +327,8 @@
         extra-requires  (root-script-extra-requires output lang)
         drop-targets    (when (not= (common/seedgen-normalize-runtime-lang lang)
                                     root-lang)
-                          (->> (root-script-extra-requires output root-lang)
+                          (->> (concat (root-script-extra-requires output root-lang)
+                                       (root-script-tagged-extra-requires output))
                                (map require-target)
                                set))]
     (if (and (empty? extra-requires)

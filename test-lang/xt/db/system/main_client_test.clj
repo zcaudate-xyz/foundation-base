@@ -51,6 +51,7 @@
   (!.js
     (main-client/create-client "sqlite" {"filename" ":memory:"}))
   => {"::" "js.net.conn_sqlite/SqliteClient",
+      "::/protocol-impls" {"xt.net.conn_sql/ISqlClient" {}},
       "::/protocols" ["xt.net.conn_sql/ISqlClient"],
       "raw" nil,
       "defaults" {"filename" ":memory:"}})

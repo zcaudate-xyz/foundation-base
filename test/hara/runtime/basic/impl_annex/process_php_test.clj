@@ -93,4 +93,4 @@
                         (x:arr-push $out $i))
                       $out)
                    {})
-  => #"\$out = \[\];\s+\$entries = \[0,\s*1,\s*2\];\s+foreach \(\$entries as\s+\$i\)")
+  => #"\$out = \[\];\s+\$entries = \[0,\s*1,\s*2\];\s+foreach \(array_values\(\$entries\) as\s+\$i\)")

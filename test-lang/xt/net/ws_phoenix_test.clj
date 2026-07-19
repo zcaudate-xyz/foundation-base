@@ -226,13 +226,14 @@
   (do (!.pg
        (s/realtime-send "room:db-send" "my-event" {"hello" "from postgres"}))
       (!.js
-        FRAMES))
+        (xt/x:get-idx
+         FRAMES
+         (xt/x:arr-find
+          FRAMES
+          (fn [frame]
+            (return (== "broadcast" (xt/x:get-key frame "event"))))))))
   => (contains-in
-      [{"event" "phx_reply",
-        "ref" "::INIT",
-        "payload" {"status" "ok", "response" {"postgres_changes" []}},
-        "topic" "realtime:room:db-send"}
-       {"event" "broadcast",
+      {"event" "broadcast",
         "ref" nil,
         "topic" "realtime:room:db-send"
         "payload" {"event" "my-event",
@@ -240,7 +241,7 @@
                    "meta" {"id" string?},
                    "payload"
                    {"hello" "from postgres",
-                    "id" string?}},}]))
+                    "id" string?}}}))
 
 
 

@@ -7,8 +7,9 @@
 
 (defn do-expression?
   [form]
-  (and (collection/form? form)
-       (#{'do 'do*} (first form))))
+  (boolean
+   (and (collection/form? form)
+        (#{'do 'do*} (first form)))))
 
 (declare rewrite-inline-do)
 

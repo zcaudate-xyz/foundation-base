@@ -62,7 +62,7 @@
        "  => 6)\n"))
 
 (def ^:private +seedgen-extra-require-format+
-  #"(?ms):require \[\[xt\.lang\.spec-base :as xt\]\n\s+\[xt\.lang\.common-repl :as repl\]\n\s+\[python\.core\.common-promise :as p\]\]")
+  #"(?ms):require \[\[xt\.lang\.spec-base :as xt\]\n\s+\[xt\.lang\.common-repl :as repl\]\n\s+\[xt\.lang\.common-promise :as p\]\]")
 
 (def ^:private +seedgen-script-extra-source+
   (str "(ns xt.sample.script-extra-test\n"
@@ -384,11 +384,13 @@
                                    project)
       (let [content (slurp path)]
         [(count (re-seq #"\(l/script- :python" content))
-         (count (re-seq #"\[python\.lib\.driver-sqlite :as py-sqlite\]" content))
-         (count (re-seq #"\[js\.lib\.driver-sqlite :as js-sqlite\]" content))])
+         (count (re-seq #"\[python\.net\.conn-sqlite :as py-sqlite\]" content))
+         (count (re-seq #"\[js\.net\.conn-sqlite :as js-sqlite\]" content))])
       (finally
          (fs/delete root {:recursive true}))))
-  => [1 1 1])
+  ;; The target require appears once in root metadata and once in the
+  ;; generated Python script. The root-only JS adapter remains only in JS.
+  => [1 2 1])
 
 ^{:refer hara.seedgen/seedgen-langadd :added "4.1"
   :id test-seedgen-langadd-bulk-selector}
@@ -548,7 +550,7 @@
                       "^{:ref xt.sample.ref/driver :added \"4.1\"}\n"
                       "(fact \"applies transforms for :ref metadata\"\n"
                       "  ^{:seedgen/base {:python {:transform '{(js-sqlite/driver) (py-sqlite/driver)}}}}\n"
-                      "  (dbsql/connect (js-sqlite/driver) {})\n"
+                      "  (!.js (dbsql/connect (js-sqlite/driver) {}))\n"
                       "  => nil)\n"))
       (form-bench/seedgen-benchadd 'xt.sample.ref
                                    {:lang [:python] :write true}
@@ -556,7 +558,7 @@
                                    project)
       (let [content (slurp bench-path)]
         [(boolean (re-find #"\^\{:ref xt\.sample\.ref/driver :added \"4\.1\"\}" content))
-         (boolean (re-find #"\(dbsql/connect \(py-sqlite/driver\) \{\}\)" content))
+         (boolean (re-find #"\(!\.py \(dbsql/connect \(py-sqlite/driver\) \{\}\)\)" content))
          (boolean (re-find #"\(js-sqlite/driver\)" content))])
       (finally
         (fs/delete root {:recursive true}))))
@@ -573,8 +575,8 @@
                                    project)
       (let [content (slurp bench-path)]
         [(count (re-seq #"\(l/script- :python" content))
-         (count (re-seq #"\[python\.lib\.driver-sqlite :as py-sqlite\]" content))
-         (count (re-seq #"\[js\.lib\.driver-sqlite :as js-sqlite\]" content))])
+         (count (re-seq #"\[python\.net\.conn-sqlite :as py-sqlite\]" content))
+         (count (re-seq #"\[js\.net\.conn-sqlite :as js-sqlite\]" content))])
       (finally
          (fs/delete root {:recursive true}))))
   => [1 1 0])

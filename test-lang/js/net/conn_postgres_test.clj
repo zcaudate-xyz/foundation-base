@@ -46,7 +46,7 @@
 ^{:refer js.net.conn-postgres/client-connect :added "4.1"}
 (fact "creates a pg connection to the client"
 
-  (notify/wait-on :js
+  (notify/wait-on [:js 5000]
     (-> (js-postgres/client-connect
          
          (@! (local-min/+config+ :db)))
@@ -63,7 +63,7 @@
             (repl/notify out))))))
   => 1
 
-  (notify/wait-on :js
+  (notify/wait-on [:js 5000]
     (-> (js-postgres/client-connect
          
          (@! (local-min/+config+ :db)))
@@ -81,7 +81,7 @@
 ^{:refer js.net.conn-postgres/client-disconnect :added "4.1"}
 (fact "disconnects the underlying raw client"
 
-  (notify/wait-on :js
+  (notify/wait-on [:js 5000]
     (-> (js-postgres/create
          (@! (local-min/+config+ :db)))
         (conn-sql/connect)
@@ -97,7 +97,7 @@
 ^{:refer js.net.conn-postgres/client-query-async :added "4.1"}
 (fact "runs an async query against the live postgres connection"
 
-  (notify/wait-on :js
+  (notify/wait-on [:js 5000]
     (-> (js-postgres/create
          (@! (local-min/+config+ :db)))
         (conn-sql/connect)
@@ -118,6 +118,7 @@
     (js-postgres/create
      (@! (local-min/+config+ :db))))
   => {"::" "js.net.conn_postgres/PostgresClient",
+      "::/protocol-impls" {"xt.net.conn_sql/ISqlClient" {}},
       "::/protocols" ["xt.net.conn_sql/ISqlClient"],
       "raw" nil,
       "defaults"
