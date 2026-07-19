@@ -349,7 +349,12 @@
 
 "**Key Features and Concepts:**"
 
-"1.  **`render [template data]`**:\n    *   **Purpose**: Renders a Mustache `template` string using the provided `data`.\n    *   **Mechanism**:\n        *   It first preprocesses the `template` using `Mustache/preprocess`.\n        *   The `data` map is flattened into a dot-separated key-value map using `std.lib.collection/tree-flatten`. This allows Mustache to access nested data using dot notation (e.g., `user.name`).\n        *   A `hara.lib.mustache.Context` is created with the flattened data.\n        *   Finally, `Mustache/render` is called to produce the output string.\n    *   **Mustache Features Supported**: The underlying `hara.lib.mustache` library supports standard Mustache features, including:\n        *   **Variables**: `{{key}}`\n        *   **Sections (truthy/falsy iteration)**: `{{#section}}...{{/section}}`\n        *   **Inverted Sections (falsy)**: `{{^section}}...{{/section}}`\n        *   **Conditional Sections (custom extension)**: `{{?section}}...{{/section}}` (as shown in tests)\n        *   **Unescaped HTML**: `{{{key}}}` or `{{&key}}` (implied by standard Mustache)."
+"1.  **`render [template data]`**:\n    *   **Purpose**: Renders a Mustache `template` string using the provided `data`.\n    *   **Mechanism**:\n        *   It first preprocesses the `template` using `Mustache/preprocess`.\n        *   The `data` map is flattened into a dot-separated key-value map using `std.lib.collection/tree-flatten`. This allows Mustache to access nested data using dot notation (e.g., `user.name`).\n        *   A `hara.lib.mustache.Context` is created with the flattened data.\n        *   Finally, `Mustache/render` is called to produce the output string."
+
+"The underlying `hara.lib.mustache` library supports standard Mustache features, including:"
+
+[[:code {:lang "text"}
+  "Variables:                        {{key}}\nSections (truthy/falsy iteration): {{#section}}...{{/section}}\nInverted Sections (falsy):         {{^section}}...{{/section}}\nConditional Sections (extension):  {{?section}}...{{/section}}\nUnescaped HTML:                    {{{key}}} or {{&key}}"]]
 
 "**Usage and Importance:**"
 

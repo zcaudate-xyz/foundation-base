@@ -187,6 +187,25 @@ lein exec -ep "(use 'code.doc) (publish '[std.lib])"
 Note: The page key uses the format `[site-key/page-key]` where page-key matches
 the key defined in the site config (with hyphens instead of underscores).
 
+### Checking Documentation
+
+`code.doc/check` validates pages before publishing: missing `:api` namespaces,
+unresolved `:reference` targets, api entries with no source or example
+(rendered as "source not found" / "example not found"), typo'd `:only` vars,
+unknown `[[:related]]`/`[[:links]]` data groups, and page load/parse errors.
+With `:eval true` it also executes page facts and reports failing sections.
+
+```bash
+# Check all sites
+lein exec -ep "(use 'code.doc) (check :all)"
+
+# Check one site, evaluating page facts
+lein exec -ep "(use 'code.doc) (check '[core] {:eval true})"
+
+# CI-friendly: exits non-zero when any issue is found
+lein doc-check
+```
+
 ### Available Elements
 
 | Element | Purpose |
@@ -199,6 +218,43 @@ the key defined in the site config (with hyphens instead of underscores).
 | `[[:image {:src "..." :title "..."}]]` | Embed image |
 | `[[:file {:src "..."}]]` | Include another file |
 | `[[:code {:lang "python"} "..."]]` | Code in other languages |
+| `[[:related {:group "..."}]]` | Related-libraries table from shared data |
+| `[[:links {:group "..."}]]` | Link chips from shared data |
+
+### Data-driven related and links sections
+
+`config/publish/related.edn` (path set by the top-level `:data` key in
+`config/publish.edn`) holds shared entries: `:libraries` (name, href,
+description, comparison, group), `:links` (label, href, group), and
+`:namespaces` (curated extra entries per documented namespace).
+
+- `[[:related {...}]]` renders a comparison table from `:libraries`;
+  `[[:links {...}]]` renders link chips from `:links`. Both honour `:group`,
+  `:only` and `:exclude` filters.
+- Pages **without** an explicit `[[:related]]` element get one appended
+  automatically: sibling pages documenting namespaces in the same group
+  (e.g. other `jvm.*` pages on `std/jvm-monitor.html`) plus curated
+  `:namespaces` entries. Home pages (`home.html` base) and pages with no
+  documented namespaces are skipped.
+
+### Codox API reference
+
+The project is codox-compatible. A `:codox` lein profile carries the codox
+dependency so the normal build is untouched; the `codox` alias runs
+`code.doc.codox/-main`, which exits the JVM explicitly (the plugin task hangs
+on non-daemon threads after generation):
+
+```bash
+# Generate codox API docs into public/api
+lein codox
+```
+
+The `Publish Documentation` workflow runs this after code.doc publishing, so
+`public/api` ships with the GitHub Pages artifact. Known limitation: codox
+only analyses core `def`/`defn` forms — vars defined via custom forms
+(`defn.js`, `invoke/definvoke`, `deftask`, ...) and aggregate namespaces built
+with `f/intern-all` (`std.lib`, `hara.lang`, `code.test`) do not appear in
+codox output; use code.doc for those.
 
 ### Page Key Mapping
 
@@ -228,6 +284,12 @@ lein manage
 
 # Publish documentation (code.doc)
 lein publish
+
+# Check documentation pages (missing namespaces/refs, failing sections)
+lein doc-check
+
+# Generate codox API reference into public/api
+lein codox
 
 # Install to local maven repo
 lein install

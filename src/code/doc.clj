@@ -1,5 +1,6 @@
 (ns code.doc
-  (:require [code.doc.executive :as executive]
+  (:require [code.doc.check :as check]
+            [code.doc.executive :as executive]
             [code.doc.manage :as manage]
             [code.project :as project]
             [std.config :as config]
@@ -158,6 +159,56 @@
   [:task {:template :code.doc.audit
           :params {:title "MISSING CODE.DOC NAMESPACES"}
           :main {:fn #'manage/missing-namespaces}}])
+
+(defmethod task/task-defaults :code.doc.check
+  ([_]
+   {:construct {:input    (fn [_] :list)
+                :lookup   (fn [_ project]
+                            (executive/all-pages project))
+                :env      make-project}
+    :params    {:print {:item true
+                        :result true
+                        :summary true}
+                :return :summary}
+    :arglists '([] [key] [key params] [key params project] [key params lookup project])
+    :main      {:count 4}
+    :item      {:list    (fn [lookup _] (sort (keys lookup)))
+                :display (fn [issues]
+                           (if (empty? issues)
+                             (res/result {:status :info
+                                          :data :ok})
+                             (->> (group-by :type issues)
+                                  (map (fn [[k v]] (str (name k) "=" (count v))))
+                                  (clojure.string/join " "))))}
+    :result    {:ignore empty?
+                :keys {:count count
+                       :data  (fn [issues]
+                                (->> (group-by :type issues)
+                                     (map (fn [[k v]] (str (name k) "=" (count v))))
+                                     (clojure.string/join " ")))}
+                :columns [{:key    :key
+                           :align  :left}
+                          {:key    :count
+                           :format "(%s)"
+                           :length 8
+                           :align  :center
+                           :color  #{:bold}}
+                          {:key    :data
+                           :align  :left
+                           :length 80
+                           :color  #{:yellow}}]}
+    :summary   {:aggregate {:total [:count + 0]}}}))
+
+(invoke/definvoke check
+  "checks documentation pages for missing namespaces, references and failing sections
+
+   (check :all)
+
+   (check '[core] {:eval true})"
+  {:added "4.1"}
+  [:task {:template :code.doc.check
+          :params {:title "CHECKING CODE.DOC PAGES"}
+          :main {:fn #'check/check-page}}])
 
 (comment
   ;; Currently have to change `config/publish.edn` manually

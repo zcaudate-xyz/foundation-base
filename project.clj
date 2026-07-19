@@ -12,6 +12,8 @@
    "wiki"        ["exec" "-ep" "(let [p (-> (ProcessBuilder. [\"bash\" \"bin/publish-wiki\"]) (.inheritIO) (.start))] (System/exit (.waitFor p)))"]
    "serve"       ["run" "-m" "code.doc.server" "8080"]
    "incomplete"  ["exec" "-ep" "(use 'code.manage)  (incomplete :all) (System/exit 0)"]
+   "doc-check"   ["exec" "-ep" "(require '[code.doc.check :as doc-check]) (System/exit (min 1 (doc-check/check-failures :all)))"]
+   "codox"       ["with-profile" "+codox" "run" "-m" "code.doc.codox"]
    "install"     ["exec" "-ep" "(use 'code.tool.maven)   (install :all {:tag :all}) (System/exit 0)"]
    "deploy"      ["exec" "-ep" "(use 'code.tool.maven)   (deploy :all {:tag :all}) (System/exit 0)"]
    "deploy-lein" ["exec" "-ep" "(use 'code.tool.maven)   (deploy-lein :all {:tag :all}) (System/exit 0)"]
@@ -200,7 +202,15 @@
                              [lein-dotenv "RELEASE"]]}
              :repl {:injections [(try (require 'jvm.tool)
                                       (require '[std.lib :as h])
-                                      (catch Throwable t (.printStackTrace t)))]}}
+                                      (catch Throwable t (.printStackTrace t)))]}
+             :codox {:dependencies [[codox "0.10.8"]]}}
+  :codox {:source-paths ["src"]
+          :output-path "public/api"
+          :namespaces [#"^std\..*" #"^code\..*" #"^hara\..*" #"^jvm\..*"
+                       #"^lib\..*" #"^net\..*" #"^math\..*" #"^xtalk\..*"
+                       #"^scaffold\..*"]
+          :metadata {:doc/format :markdown}
+          :source-uri "https://github.com/zcaudate-xyz/foundation-base/blob/main/{filepath}#L{line}"}
   #_#_:repositories [["atlassian" "https://maven.artifacts.atlassian.com/"]]
   :source-paths      ["src" "src-lang" "src-extra" "src-extra/mcp-clj"]
   :test-paths        ["test" "test-lang"]

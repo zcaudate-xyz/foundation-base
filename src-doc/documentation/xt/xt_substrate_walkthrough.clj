@@ -33,6 +33,11 @@ lein test :only xt.substrate.walkthrough.s07-wsserver-test
 
 "The counter example introduces spaces as named state containers. Three requests to `counter/inc` share the same `default::space` state and produce counts 1, 2, and 3. This is the smallest useful substrate program: an action name, arguments, and state scoped by a space id."
 
+[[:code {:lang "clojure"}
+  "(var node (substrate/node-create\n           {\"spaces\"\n            {\"default::space\" {\"state\" {\"count\" 0}}}\n            \"handlers\"\n            {\"counter/inc\"\n             {\"fn\" (fn [space args request node]\n                     (return\n                      (substrate/update-space-state\n                       node (. space [\"id\"])\n                       (fn [state space node]\n                         (return {\"count\" (+ (or (. state [\"count\"]) 0)\n                                             1)})))))}}}))\n(-> (promise/x:promise-all\n     [(substrate/request node \"default::space\" \"counter/inc\" [] {})\n      (substrate/request node \"default::space\" \"counter/inc\" [] {})\n      (substrate/request node \"default::space\" \"counter/inc\" [] {})])\n    (repl/notify))\n;; => [{\"count\" 1} {\"count\" 2} {\"count\" 3}]"]]
+
+"The handler receives the resolved `space` map, and `update-space-state` swaps the stored state. Because all three requests name the same space id, each sees the previous request's count."
+
 [[:section {:title "2. A memory request round-trip"}]]
 
 "`s02_transport_memory_test.clj` creates a server, a client, and a `memory-pair`. Each endpoint is wrapped by `text-endpoint` and attached under the id of the remote peer. The client request is encoded, delivered to the server, handled there, returned over the reverse endpoint, and resolved on the client."
@@ -43,6 +48,11 @@ client <-- response -- server
 ```"
 
 "The transport ids are local names, not node ids discovered from the wire. Keeping them aligned (`server` on the client and `client` on the server) makes explicit `transport_id` routing easy to understand. `link-pair` is the shorter helper when a test does not need to inspect the endpoints."
+
+[[:code {:lang "clojure"}
+  "(var wire (transport-memory/memory-pair {\"left_id\" \"client\"\n                                       \"right_id\" \"server\"}))\n(-> (promise/x:promise-all\n     [(event-node/attach-transport\n       client \"server\"\n       (transport-memory/text-endpoint (. wire [\"left\"])))\n      (event-node/attach-transport\n       server \"client\"\n       (transport-memory/text-endpoint (. wire [\"right\"])))])\n    (promise/x:promise-then\n     (fn [_]\n       (return\n        (event-node/request client \"room/a\" \"demo/echo\" [\"ping\"] nil))))\n    (repl/notify))\n;; => {\"space\" \"room/a\" \"action\" \"demo/echo\"\n;;     \"args\" [\"ping\"] \"server\" \"server\"}"]]
+
+"The client attaches the wire's `left` endpoint under the id `server`; the server attaches `right` under `client`. A single `request` call then traverses both endpoints and resolves with the handler's return value."
 
 [[:section {:title "3. Frames and direct delivery"}]]
 

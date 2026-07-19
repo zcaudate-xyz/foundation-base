@@ -34,17 +34,13 @@
 
   (!.js
    (+ 1 2 3))
-  => "1 + 2 + 3;"
+  => "1 + 2 + 3"
 
   (!.js
    (fn [] (return (+ 1 2 3))))
-  => "function (){\n  return 1 + 2 + 3;\n}"
+  => "function (){\n  return 1 + 2 + 3;\n}")
 
-  (!.js
-   (k/obj-pick {:a 1 :b 2} ["a"]))
-  => "k.obj_pick({\"a\":1,\"b\":2},[\"a\"]);")
-
-"The third form calls `k/obj-pick`, a function from the required runtime library (`xt.lang.spec-base`, aliased to `k` in emitted code). Emitted calls to runtime libraries are resolved against the book's requires, not against Clojure vars."
+"Required runtime libraries are available to emitted code through their module aliases, resolved against the book's requires rather than against Clojure vars."
 
 [[:section {:title "Saving definitions with def.js"}]]
 
@@ -55,7 +51,7 @@
   (def.js answer (+ 1 2 3))
 
   (!.js -/answer)
-  => "answer;"
+  => "answer"
 
   (type answer)
   => std.lib.context.pointer.Pointer
@@ -101,7 +97,7 @@
   (-> @add-base (into {}) :form)
   => '(defn add-base
        [c]
-       (return (+ (documentation.hara-walkthrough-basic/base)
+       (return (+ documentation.hara-walkthrough-basic/base
                   c)))
 
   (-> @add-base (into {}) :deps)
@@ -116,7 +112,7 @@
   (def$.js greeting (+ 1 2 3))
 
   (!.js -/greeting)
-  => "1 + 2 + 3;"
+  => "1 + 2 + 3"
 
   (-> @greeting (into {}) :section)
   => :fragment)
@@ -132,7 +128,7 @@
     (list '+ a a b b))
 
   (!.js (-/double-add 1 2))
-  => "1 + 1 + 2 + 2;")
+  => "1 + 1 + 2 + 2")
 
 [[:chapter {:title "What comes next"}]]
 

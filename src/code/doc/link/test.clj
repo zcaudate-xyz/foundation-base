@@ -42,13 +42,15 @@
 (defn link-tests
   "creates a link to all the passed tests in the project"
   {:added "3.0"}
-  ([{:keys [project] :as interim} name]
+  ([{:keys [project input] :as interim} name]
    (if *run-tests*
-     (let [path   (or (str (:root project) "/" (get-in project [:publish :files name :input]))
+     (let [path   (or (when input
+                        (str (fs/path (:root project) input)))
+                      (str (:root project) "/" (get-in project [:publish :files name :input]))
                       ((:lookup project) (symbol name)))
            rel    (str (fs/relativize (:root project) path))
-           fails  (->> (fn [id sink] (load-file path))
-                       executive/accumulate
+           fails  (->> (executive/accumulate (fn [] (load-file path))
+                                             (str "code.doc:" name))
                        failed-tests
                        (collection/map-juxt [:line identity]))]
        (update-in interim [:articles name :elements]

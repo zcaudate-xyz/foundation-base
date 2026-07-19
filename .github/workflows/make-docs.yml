@@ -61,6 +61,15 @@ jobs:
                             (doc/deploy-template site {:write true})
                             (doc/publish [(symbol (name site))] {:write true :parallel false}))"
 
+      - name: Generate codox API reference
+        run: >
+          docker run --network host
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
+          -v $(pwd):$(pwd)
+          -w $(pwd)
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
+          lein codox
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
