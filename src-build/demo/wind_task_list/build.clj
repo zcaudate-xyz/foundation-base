@@ -192,10 +192,11 @@
   []
   (fs/create-directory +build-root+)
   (when (or (not (fs/exists? (str +app-root+ "/linux")))
+            (not (fs/exists? (str +app-root+ "/macos")))
             (not (fs/exists? (str +app-root+ "/web"))))
     (run-command! +build-root+
                   ["flutter" "create"
-                   "--platforms=linux,web"
+                   "--platforms=linux,macos,web"
                    "--project-name" "wind_demo"
                    "--org" "dev.xtalk"
                    "--no-pub"
@@ -228,16 +229,24 @@
   (build!)
   (run-command! +app-root+ ["flutter" "run" "-d" device]))
 
+(defn build-macos!
+  []
+  (build!)
+  (run-command! +app-root+ ["flutter" "build" "macos"]))
+
 (defn -main
   [& [command]]
   (try
     (case (or command "build")
       "build" (build!)
+      "build-macos" (build-macos!)
       "test" (test!)
       "run-linux" (run-demo! "linux")
+      "run-macos" (run-demo! "macos")
       "run-web" (run-demo! "chrome")
       (throw (ex-info "Unknown Wind demo command"
                       {:command command
-                       :supported ["build" "test" "run-linux" "run-web"]})))
+                       :supported ["build" "build-macos" "test"
+                                   "run-linux" "run-macos" "run-web"]})))
     (finally
       (shutdown-agents))))
