@@ -43,15 +43,15 @@
 
   (!.js (var reader (rdr/create "; comment text\nrest"))
         (rdr/read-char reader)
-        [(pc/read-comment reader)
+        [(== nil (pc/read-comment reader))
          (rdr/read-char reader)])
-  => [nil "r"]
+  => [true "r"]
 
   (!.js (var reader (rdr/create "; trailing"))
         (rdr/read-char reader)
-        [(pc/read-comment reader)
-         (rdr/read-char reader)])
-  => [nil nil])
+        [(== nil (pc/read-comment reader))
+         (== nil (rdr/read-char reader))])
+  => [true true])
 
 ^{:refer kmi.lang.parser-common/skip-whitespace :added "4.1"}
 (fact "advances the reader past whitespace and comments"
@@ -132,15 +132,17 @@
 ^{:refer kmi.lang.parser-common/interpret-token :added "4.1"}
 (fact "interprets tokens into runtime values"
 
-  (!.js [(pc/interpret-token (rdr/create "") "nil")
+  (!.js [(== nil (pc/interpret-token (rdr/create "") "nil"))
          (pc/interpret-token (rdr/create "") "true")
          (pc/interpret-token (rdr/create "") "false")
          (pc/interpret-token (rdr/create "") "123")
+         (== (pc/interpret-token (rdr/create "") "/")
+             (sym/symbol nil "/"))
          (== (pc/interpret-token (rdr/create "") ":hello")
              (kw/keyword nil "hello"))
          (== (pc/interpret-token (rdr/create "") "my-ns/my-name")
              (sym/symbol "my-ns" "my-name"))])
-  => [nil true false 123 true true]
+  => [true true false 123 true true true]
 
   (!.js (pc/interpret-token (rdr/create "") "1.2.3"))
   => (throws)

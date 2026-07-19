@@ -1,6 +1,7 @@
 (ns hara.seedgen.form-bench-test
   (:use code.test)
-  (:require [std.fs :as fs]
+  (:require [clojure.string :as str]
+            [std.fs :as fs]
             [hara.seedgen.form-bench :as form-bench]))
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchlist :added "4.1"}
@@ -97,7 +98,7 @@
          (fs/exists? bench-path)
          (str/includes? bench-text "^{:no-test true}")
          (str/includes? bench-text "(ns xtbench.python.kmi.lang.sample-test")
-         (= 2 (count (re-seq #"!\\.python" bench-text)))
+         (= 2 (count (re-seq #"!\.py" bench-text)))
          (not (str/includes? bench-text "!.js"))])
       (finally
         (fs/delete root {:recursive true}))))
@@ -430,12 +431,13 @@
                  (map (fn [{:keys [lang path]}]
                         [lang (slurp (str (fs/path root path)))]))
                  (into {}))]
-        [(:lua content-by-lang)
-         (:dart content-by-lang)])
+        [(and (str/includes? (:lua content-by-lang) "(l/script- :lua.nginx")
+              (str/includes? (:lua content-by-lang) "[lua.nginx.conn-sqlite :as lua-sqlite]"))
+         (and (str/includes? (:dart content-by-lang) "(l/script- :dart")
+              (str/includes? (:dart content-by-lang) "[dart.net.conn-sqlite :as dart-sqlite]"))])
       (finally
         (fs/delete root {:recursive true}))))
-  => [#"(?s)\(l/script- :(lua|lua\.nginx) .*?\[lua\.nginx\.driver-sqlite :as lua-sqlite\].*"
-      #"(?s)\(l/script- :dart .*?\[dart\.lib\.driver-sqlite :as dart-sqlite\].*"])
+  => [true true])
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-remove-extra-requires}
@@ -470,8 +472,8 @@
         (slurp (str (fs/path root path))))
       (finally
         (fs/delete root {:recursive true}))))
-  => #(and (re-find #"\[lua\.nginx\.driver-sqlite :as lua-sqlite\]" %)
-           (not (re-find #"\[js\.lib\.driver-sqlite :as js-sqlite\]" %))))
+  => #(and (re-find #"\[lua\.nginx\.conn-sqlite :as lua-sqlite\]" %)
+           (not (re-find #"\[js\.net\.conn-sqlite :as js-sqlite\]" %))))
 
 ^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-drop-extra-requires}

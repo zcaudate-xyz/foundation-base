@@ -73,11 +73,11 @@
 (fact "gets the namespace of a symbol or keyword"
 
   (!.js
-   [(util/get-namespace (sym/symbol nil "hello"))
+   [(== nil (util/get-namespace (sym/symbol nil "hello")))
     (util/get-namespace (sym/symbol "ns" "hello"))
-    (util/get-namespace (kw/keyword nil "hello"))
+    (== nil (util/get-namespace (kw/keyword nil "hello")))
     (util/get-namespace (kw/keyword "ns" "hello"))])
-  => [nil "ns" nil "ns"])
+  => [true "ns" true "ns"])
 
 ^{:refer kmi.lang.common-util/hash-with-cache :added "4.1"}
 (fact "gets a memoized hash id"
@@ -171,13 +171,13 @@
 (fact "gets the count of a value"
 
   (!.js
-   [(util/count nil)
+   [(== nil (util/count nil))
     (util/count "abc")
     (util/count [1 2 3])
     (util/count (pair/pair "a" 1))
     (util/count (vec/vector [ 1 2 3]))
     (util/count (vec/vector))])
-  => [nil 3 3 2 3 0])
+  => [true 3 3 2 3 0])
 
 ^{:refer kmi.lang.common-util/impl-normalise :added "4.1"}
 (fact "normalises nil to the sentinel nil value"
@@ -193,7 +193,7 @@
 
   (!.js
    [(util/impl-denormalise 1)
-    (util/impl-denormalise util/NIL)
+    (== nil (util/impl-denormalise util/NIL))
     (== (util/impl-denormalise nil) nil)
     (util/impl-denormalise "hello")])
-  => [1 nil true "hello"])
+  => [1 true true "hello"])

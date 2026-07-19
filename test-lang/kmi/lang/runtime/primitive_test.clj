@@ -39,8 +39,8 @@
   (!.js
    [(prim/first-value (vec/vector [1 2 3]))
     (prim/first-value (list/list [1 2 3]))
-    (prim/first-value (vec/vector))])
-  => [1 1 nil])
+    (== nil (prim/first-value (vec/vector)))])
+  => [1 1 true])
 
 ^{:refer kmi.lang.runtime.primitive/rest-value :added "4.1"}
 (fact "returns the rest as a vector"
@@ -57,8 +57,8 @@
   (!.js
    [(prim/nth-value (vec/vector ["a" "b" "c"]) 0)
     (prim/nth-value (vec/vector ["a" "b" "c"]) 2)
-    (prim/nth-value (vec/vector ["a" "b" "c"]) 5)])
-  => ["a" "c" nil])
+    (== nil (prim/nth-value (vec/vector ["a" "b" "c"]) 5))])
+  => ["a" "c" true])
 
 ^{:refer kmi.lang.runtime.primitive/str-value :added "4.1"}
 (fact "concatenates values into a string"

@@ -107,18 +107,18 @@
    (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
    (var entry (hm/hashmap-find-key out "a"))
    [(xt/x:get-key entry "_key")
-    (xt/x:get-key entry "_val")
+    (== nil (xt/x:get-key entry "_val"))
     (hm/hashmap-lookup-key out "missing" "fallback")])
-  => ["a" nil "fallback"])
+  => ["a" true "fallback"])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-lookup-key :added "4.1"}
 (fact "looks up keys with support for nil values and defaults"
 
   (!.js
    (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
-   [(hm/hashmap-lookup-key out "a" "missing")
+   [(== nil (hm/hashmap-lookup-key out "a" "missing"))
     (hm/hashmap-lookup-key out "b" "missing")])
-  => [nil "missing"])
+  => [true "missing"])
 
 ^{:refer kmi.lang.type-hashmap/hashmap-keys :added "4.1"}
 (fact "returns the hashmap keys"

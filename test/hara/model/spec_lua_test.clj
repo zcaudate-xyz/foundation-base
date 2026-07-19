@@ -86,6 +86,9 @@
   (lua-map-key "abc" +grammar+ {})
   => "abc"
 
+  (lua-map-key "not" +grammar+ {})
+  => "['not']"
+
   (lua-map-key :abc +grammar+ {})
   => "abc")
 

@@ -191,7 +191,7 @@
 
   (!.js
    [(xt/x:len (eval/read-many "1 2 3"))
-    (xt/x:get-idx (eval/read-many "(+ 1 2)") 0)])
+    (xt/x:get-idx (eval/read-many "(+ 1 2)") (xt/x:offset 0))])
   => [3 (parser/read-string "(+ 1 2)")])
 
 ^{:refer kmi.lang.runtime.eval/eval-symbol :added "4.1"}
@@ -211,8 +211,8 @@
    (var runtime (rt/empty-runtime))
    (var env (env/empty-env))
    [(eval/get-value (eval/eval-do-array eval/eval-form runtime env [1 2 3]))
-    (eval/get-value (eval/eval-do-array eval/eval-form runtime env []))])
-  => [3 nil])
+    (== nil (eval/get-value (eval/eval-do-array eval/eval-form runtime env [])))])
+  => [3 true])
 
 ^{:refer kmi.lang.runtime.eval/eval-if :added "4.1"}
 (fact "branches on the condition value"
@@ -222,8 +222,8 @@
    (var env (env/empty-env))
    [(eval/get-value (eval/eval-if eval/eval-form runtime env (p/to-array (parser/read-string "(if true 1 2)"))))
     (eval/get-value (eval/eval-if eval/eval-form runtime env (p/to-array (parser/read-string "(if false 1 2)"))))
-    (eval/get-value (eval/eval-if eval/eval-form runtime env (p/to-array (parser/read-string "(if nil 1)"))))])
-  => [1 2 nil])
+    (== nil (eval/get-value (eval/eval-if eval/eval-form runtime env (p/to-array (parser/read-string "(if nil 1)")))))])
+  => [1 2 true])
 
 ^{:refer kmi.lang.runtime.eval/bind-pattern :added "4.1"}
 (fact "binds symbols, vectors and hashmaps to values"
@@ -263,7 +263,7 @@
    (var params (p/to-array (parser/read-string "[a b & rest]")))
    (var out (eval/parse-params params))
    [(xt/x:len (xt/x:get-key out "req"))
-    (env/sym-name (xt/x:get-idx (xt/x:get-key out "req") 0))
+    (env/sym-name (xt/x:get-idx (xt/x:get-key out "req") (xt/x:offset 0)))
     (env/sym-name (xt/x:get-key out "rest"))])
   => [2 "a" "rest"])
 
@@ -294,7 +294,7 @@
    (var runtime (rt/empty-runtime))
    (var env (env/empty-env))
    (var sq-form (parser/read-string "`(1 ~(+ 1 2) ~@[4 5])"))
-   (var inner (xt/x:get-idx (p/to-array sq-form) 1))
+   (var inner (xt/x:get-idx (p/to-array sq-form) (xt/x:offset 1)))
    (var out (eval/eval-syntax-quote eval/eval-form runtime env inner))
    (var value (eval/get-value out))
    [(eval/list? value)
@@ -353,8 +353,8 @@
    [(eval/spec-ns-name (sym/symbol nil "foo"))
     (eval/spec-ns-name (parser/read-string "[foo :as f]"))
     (eval/spec-ns-name (parser/read-string "(foo :as f)"))
-    (eval/spec-ns-name 42)])
-  => ["foo" "foo" "foo" nil])
+    (== nil (eval/spec-ns-name 42))])
+  => ["foo" "foo" "foo" true])
 
 ^{:refer kmi.lang.runtime.eval/eval-require-spec :added "4.1"}
 (fact "processes a single require spec"
@@ -424,9 +424,9 @@
   (!.js
    (var loop-env (env/env-create (env/empty-env)))
    (xt/x:set-key loop-env "loop-bindings" [])
-   [(eval/env-loop-find (env/empty-env))
+   [(== nil (eval/env-loop-find (env/empty-env)))
     (xt/x:has-key? (eval/env-loop-find loop-env) "loop-bindings")])
-  => [nil true])
+  => [true true])
 
 ^{:refer kmi.lang.runtime.eval/eval-loop :added "4.1"}
 (fact "evaluates a loop form with tail recursion"

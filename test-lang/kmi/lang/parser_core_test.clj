@@ -150,8 +150,8 @@
   (!.js
    (var arr (list/list-to-array (core/read-string "(+ 1 2)")))
    [(xt/x:get-key (xt/x:first arr) "_name")
-    (xt/x:get-idx arr 1)
-    (xt/x:get-idx arr 2)])
+    (xt/x:get-idx arr (xt/x:offset 1))
+    (xt/x:get-idx arr (xt/x:offset 2))])
   => ["+" 1 2]
 
   (!.js

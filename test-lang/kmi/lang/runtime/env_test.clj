@@ -26,9 +26,9 @@
 (fact "returns the namespace string of a symbol"
 
   (!.js
-   [(env/sym-ns (sym/symbol nil "foo"))
+   [(== nil (env/sym-ns (sym/symbol nil "foo")))
     (env/sym-ns (sym/symbol "ns" "foo"))])
-  => [nil "ns"])
+  => [true "ns"])
 
 ^{:refer kmi.lang.runtime.env/env-create :added "4.1"}
 (fact "creates a lexical frame with an optional parent"
@@ -57,8 +57,8 @@
    [(env/env-lookup parent (sym/symbol nil "a"))
     (env/env-lookup child (sym/symbol nil "b"))
     (env/env-lookup child (sym/symbol nil "a"))
-    (env/env-lookup child (sym/symbol nil "c"))])
-  => [1 2 1 nil])
+    (== nil (env/env-lookup child (sym/symbol nil "c")))])
+  => [1 2 1 true])
 
 ^{:refer kmi.lang.runtime.env/env-has? :added "4.1"}
 (fact "checks if a symbol is bound in the lexical environment chain"
@@ -116,9 +116,9 @@
 
   (!.js
    (var rt (env/runtime-create))
-   [(env/ns-lookup rt (sym/symbol nil "missing"))
+   [(== nil (env/ns-lookup rt (sym/symbol nil "missing")))
     (env/ns-lookup (env/ns-assoc rt (sym/symbol nil "x") 42) (sym/symbol nil "x"))])
-  => [nil 42])
+  => [true 42])
 
 ^{:refer kmi.lang.runtime.env/ns-lookup-in :added "4.1"}
 (fact "looks up a symbol in a specific namespace"
@@ -129,17 +129,17 @@
    (var rt2 (env/runtime-set-ns rt1 "other"))
    (var rt3 (env/ns-assoc rt2 (sym/symbol nil "y") 99))
    [(env/ns-lookup-in rt3 "other" (sym/symbol nil "y"))
-    (env/ns-lookup-in rt3 "user" (sym/symbol nil "y"))])
-  => [99 nil])
+    (== nil (env/ns-lookup-in rt3 "user" (sym/symbol nil "y")))])
+  => [99 true])
 
 ^{:refer kmi.lang.runtime.env/ns-alias :added "4.1"}
 (fact "returns the namespace name for an alias in the current namespace"
 
   (!.js
    (var rt (env/runtime-create))
-   [(env/ns-alias rt "c")
+   [(== nil (env/ns-alias rt "c"))
     (env/ns-alias (env/ns-set-alias rt "c" "kmi.core") "c")])
-  => [nil "kmi.core"])
+  => [true "kmi.core"])
 
 ^{:refer kmi.lang.runtime.env/var-lookup :added "4.1"}
 (fact "looks up a symbol through env, current ns, refs and kmi.core"
@@ -156,8 +156,8 @@
    [(env/var-lookup rt6 lex (sym/symbol nil "local"))
     (env/var-lookup rt6 lex (sym/symbol nil "v"))
     (env/var-lookup rt6 lex (sym/symbol nil "w"))
-    (env/var-lookup rt6 lex (sym/symbol nil "missing"))])
-  => [7 11 22 nil])
+    (== nil (env/var-lookup rt6 lex (sym/symbol nil "missing")))])
+  => [7 11 22 true])
 
 ^{:refer kmi.lang.runtime.env/ns-assoc :added "4.1"}
 (fact "binds a symbol to a value in the current namespace"
@@ -181,8 +181,8 @@
   (!.js
    (var rt (env/ns-assoc-macro (env/runtime-create) (sym/symbol nil "m") "macro-fn"))
    [(env/macro-lookup rt (sym/symbol nil "m"))
-    (env/macro-lookup (env/runtime-create) (sym/symbol nil "m"))])
-  => ["macro-fn" nil])
+    (== nil (env/macro-lookup (env/runtime-create) (sym/symbol nil "m")))])
+  => ["macro-fn" true])
 
 ^{:refer kmi.lang.runtime.env/macro? :added "4.1"}
 (fact "checks whether a symbol names a macro"
@@ -233,8 +233,8 @@
    (var rt4 (env/runtime-set-ns rt3 "user"))
    (var rt5 (env/ns-refer rt4 "other" (sym/symbol nil "z")))
    [(env/var-lookup rt5 (env/empty-env) (sym/symbol nil "z"))
-    (env/ns-lookup rt5 (sym/symbol nil "z"))])
-  => [55 nil])
+    (== nil (env/ns-lookup rt5 (sym/symbol nil "z")))])
+  => [55 true])
 
 ^{:refer kmi.lang.runtime.env/ns-refer-all :added "4.1"}
 (fact "refers all vars from a namespace into the current one"
@@ -249,5 +249,5 @@
    (var rt6 (env/ns-refer-all rt5 "other"))
    [(env/var-lookup rt6 (env/empty-env) (sym/symbol nil "a"))
     (env/var-lookup rt6 (env/empty-env) (sym/symbol nil "b"))
-    (env/ns-lookup rt6 (sym/symbol nil "a"))])
-  => [1 2 nil])
+    (== nil (env/ns-lookup rt6 (sym/symbol nil "a")))])
+  => [1 2 true])

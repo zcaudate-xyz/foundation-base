@@ -13,17 +13,31 @@
   "checks if a char should be treated as reader whitespace"
   {:added "4.1"}
   [ch]
-  (return (and (xt/x:not-nil? ch)
-               (< (xt/x:offset -1)
-                  (xt/x:str-index-of " \n\r\t," ch)))))
+  (when (xt/x:nil? ch)
+    (return false))
+  (var code (xt/x:str-char ch (xt/x:offset 0)))
+  (return (or (== code 32)
+              (== code 10)
+              (== code 13)
+              (== code 9)
+              (== code 44))))
 
 (defn.xt token-boundary?
   "checks if a char terminates a token"
   {:added "4.1"}
   [ch]
-  (return (or (xt/x:nil? ch)
-              (< (xt/x:offset -1)
-                 (xt/x:str-index-of " \n\r\t,()[]{}\";'`^#@~" ch)))))
+  (when (xt/x:nil? ch)
+    (return true))
+  (when (-/whitespace? ch)
+    (return true))
+  (var code (xt/x:str-char ch (xt/x:offset 0)))
+  (return (or (== code 40) (== code 41)
+              (== code 91) (== code 93)
+              (== code 123) (== code 125)
+              (== code 34) (== code 59)
+              (== code 39) (== code 96)
+              (== code 94) (== code 35)
+              (== code 64) (== code 126))))
 
 (defn.xt read-comment
   "reads a line comment"
@@ -75,16 +89,16 @@
   (var idx 0)
   (var dot? false)
   (var digits 0)
-  (var first (rdr/impl-char-at token 0))
-  (when (or (== first "+")
-            (== first "-"))
+  (var first (xt/x:str-char token (xt/x:offset 0)))
+  (when (or (== first 43)
+            (== first 45))
     (:= idx 1))
   (while (< idx n)
-    (var ch (rdr/impl-char-at token idx))
-    (cond (-/digit? ch)
+    (var code (xt/x:str-char token (xt/x:offset idx)))
+    (cond (and (<= 48 code) (<= code 57))
           (:= digits (+ digits 1))
 
-          (and (== ch ".")
+          (and (== code 46)
                (not dot?))
           (:= dot? true)
 
@@ -104,14 +118,19 @@
   {:added "4.1"}
   [token]
   (var n (xt/x:len token))
-  (var first (rdr/impl-char-at token 0))
-  (return (or (-/digit? first)
-              (== first ".")
-              (and (> n 1)
-                   (or (== first "+")
-                       (== first "-"))
-                   (or (-/digit? (rdr/impl-char-at token 1))
-                       (== (rdr/impl-char-at token 1) "."))))))
+  (when (== n 0)
+    (return false))
+  (var first (xt/x:str-char token (xt/x:offset 0)))
+  (when (or (and (<= 48 first) (<= first 57))
+            (== first 46))
+    (return true))
+  (when (and (> n 1)
+             (or (== first 43)
+                 (== first 45)))
+    (var second (xt/x:str-char token (xt/x:offset 1)))
+    (return (or (and (<= 48 second) (<= second 57))
+                (== second 46))))
+  (return false))
 
 (defn.xt read-token
   "reads a token that starts with the given character"
@@ -136,6 +155,9 @@
 
         (== token "false")
         (return false)
+
+        (== token "/")
+        (return (sym/symbol nil "/"))
 
         :else
         (do (var number (-/match-number token))

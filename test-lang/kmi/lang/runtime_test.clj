@@ -38,9 +38,9 @@
    [(xt/x:get-key (rt/eval-string (rt/empty-runtime) "42") "value")
     (xt/x:get-key (rt/eval-string (rt/empty-runtime) "\"hello\"") "value")
     (xt/x:get-key (rt/eval-string (rt/empty-runtime) "true") "value")
-    (xt/x:get-key (rt/eval-string (rt/empty-runtime) "nil") "value")
+    (== nil (xt/x:get-key (rt/eval-string (rt/empty-runtime) "nil") "value"))
     (== nil (xt/x:get-key (rt/eval-string (rt/empty-runtime) "nil") "error"))])
-  => [42 "hello" true nil true])
+  => [42 "hello" true true true])
 
 ^{:refer kmi.lang.runtime/eval-string :id kmi-extra-1}
 (fact "evaluates arithmetic and comparison"
@@ -222,14 +222,14 @@
    [(rt/read-string "42")
     (rt/read-string "\"hello\"")
     (rt/read-string "true")
-    (rt/read-string "nil")
+    (== nil (rt/read-string "nil"))
     (rev/symbol? (rt/read-string "+"))
     (rev/keyword? (rt/read-string ":key"))
     (rev/list? (rt/read-string "(+ 1 2)"))
     (rev/vector? (rt/read-string "[1 2]"))
     (xt/x:get-key (rt/read-string ":key") "_name")
     (xt/x:len (proto/to-array (rt/read-string "(+ 1 2)")))])
-  => [42 "hello" true nil true true true true "key" 3])
+  => [42 "hello" true true true true true true "key" 3])
 
 ^{:refer kmi.lang.runtime/read-string :id kmi-extra-15}
 (fact "reads only the first form"
@@ -244,9 +244,9 @@
   (!.js
    (var forms (rt/read-many "1 2 (+ 1 2)"))
    [(xt/x:len forms)
-    (xt/x:get-idx forms 0)
-    (xt/x:get-idx forms 1)
-    (rev/list? (xt/x:get-idx forms 2))])
+    (xt/x:get-idx forms (xt/x:offset 0))
+    (xt/x:get-idx forms (xt/x:offset 1))
+    (rev/list? (xt/x:get-idx forms (xt/x:offset 2)))])
   => [3 1 2 true])
 
 ^{:refer kmi.lang.runtime/read-many :id kmi-extra-16}
@@ -354,8 +354,11 @@
     (-> (substrate/request node "kmi.session" "@kmi.lang/describe" ["42"] {})
         (promise/x:promise-then
          (fn [res]
-           (repl/notify res)))))
-  => {"tag" "number" "type" "number" "size" nil "string" "42"})
+           (repl/notify [(xt/x:get-key res "tag")
+                         (xt/x:get-key res "type")
+                         (== nil (xt/x:get-key res "size"))
+                         (xt/x:get-key res "string")])))))
+  => ["number" "number" true "42"])
 
 ^{:refer kmi.lang.runtime/stop :added "4.1"}
 (fact "placeholder stop returns true"

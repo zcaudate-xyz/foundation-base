@@ -255,14 +255,16 @@
 (fact "reads list forms"
 
   (!.js
-   (list/list-to-array (p/read-list (rdr/create "1 2 3)"))))
+   (var reader (rdr/create "1 2 3)"))
+   (list/list-to-array (p/read-list reader)))
   => [1 2 3])
 
 ^{:refer kmi.lang.parser/read-vector :added "4.1"}
 (fact "reads vector forms"
 
   (!.js
-   (proto/to-array (p/read-vector (rdr/create "1 2 3]"))))
+   (var reader (rdr/create "1 2 3]"))
+   (proto/to-array (p/read-vector reader)))
   => [1 2 3])
 
 ^{:refer kmi.lang.parser/read-map :added "4.1"}

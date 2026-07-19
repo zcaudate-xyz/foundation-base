@@ -116,7 +116,7 @@
   [x name]
   (when (-/list? x)
     (var arr (p/to-array x))
-    (var first (xt/x:get-idx arr 0))
+    (var first (xt/x:get-idx arr (xt/x:offset 0)))
     (return (and (-/symbol? first)
                  (== name (rt-env/sym-name first)))))
   (return false))
@@ -171,11 +171,11 @@
   "evaluates an if form"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var cond-form (xt/x:get-idx parts 1))
-  (var then-form (xt/x:get-idx parts 2))
+  (var cond-form (xt/x:get-idx parts (xt/x:offset 1)))
+  (var then-form (xt/x:get-idx parts (xt/x:offset 2)))
   (var else-form nil)
   (when (< 3 (xt/x:len parts))
-    (:= else-form (xt/x:get-idx parts 3)))
+    (:= else-form (xt/x:get-idx parts (xt/x:offset 3))))
   (var out (eval-fn runtime env cond-form))
   (when (-/errorp out)
     (return out))
@@ -201,11 +201,11 @@
             (var val-arr (p/to-array value))
             (var i 0)
             (while (< i (xt/x:len arr))
-              (var p (xt/x:get-idx arr i))
+              (var p (xt/x:get-idx arr (xt/x:offset i)))
               (if (and (-/symbol? p)
                        (== "&" (rt-env/sym-name p))
                        (< (+ i 1) (xt/x:len arr)))
-                (do (var rest-pattern (xt/x:get-idx arr (+ i 1)))
+                (do (var rest-pattern (xt/x:get-idx arr (xt/x:offset (+ i 1))))
                     (var rest-val (list/list [ (xt/x:unpack (xt/x:arr-slice val-arr i (xt/x:len val-arr)))]))
                     (var out (-/bind-pattern eval-fn runtime env rest-pattern rest-val))
                     (when (-/errorp out)
@@ -213,7 +213,7 @@
                     (:= runtime (-/get-runtime out))
                     (:= env (-/get-value out))
                     (:= i (xt/x:len arr)))
-                (do (var out (-/bind-pattern eval-fn runtime env p (xt/x:get-idx val-arr i)))
+                (do (var out (-/bind-pattern eval-fn runtime env p (xt/x:get-idx val-arr (xt/x:offset i))))
                     (when (-/errorp out)
                       (return out))
                     (:= runtime (-/get-runtime out))
@@ -228,14 +228,13 @@
             (var entries (p/to-array pattern))
             (var i 0)
             (while (< i (xt/x:len entries))
-              (var entry (xt/x:get-idx entries i))
-              (var k (xt/x:get-idx entry 0))
-              (var v (xt/x:get-idx entry 1))
+              (var entry (xt/x:get-idx entries (xt/x:offset i)))
+              (var k (xt/x:get-idx entry (xt/x:offset 0)))
+              (var v (xt/x:get-idx entry (xt/x:offset 1)))
               (when (-/keyword? k)
                 (cond (== k (kw/keyword nil "keys")) (:= keys-vec v)
                       (== k (kw/keyword nil "or"))  (:= or-map v)
-                      (== k (kw/keyword nil "as"))  (:= as-sym v)
-                      true nil))
+                      (== k (kw/keyword nil "as"))  (:= as-sym v)))
               (:= i (+ i 1)))
             (when (xt/x:not-nil? as-sym)
               (var out (-/bind-pattern eval-fn runtime env as-sym value))
@@ -271,14 +270,14 @@
   "evaluates a let form"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var bindings-form (xt/x:get-idx parts 1))
+  (var bindings-form (xt/x:get-idx parts (xt/x:offset 1)))
   (var body (xt/x:arr-slice parts 2 (xt/x:len parts)))
   (var pairs (p/to-array bindings-form))
   (var let-env (rt-env/env-create env))
   (var i 0)
   (while (< i (xt/x:len pairs))
-    (var pattern (xt/x:get-idx pairs i))
-    (var val-form (xt/x:get-idx pairs (+ i 1)))
+    (var pattern (xt/x:get-idx pairs (xt/x:offset i)))
+    (var val-form (xt/x:get-idx pairs (xt/x:offset (+ i 1))))
     (var out (eval-fn runtime env val-form))
     (when (-/errorp out)
       (return out))
@@ -299,9 +298,9 @@
   (var rparam nil)
   (var i 0)
   (while (< i (xt/x:len params))
-    (var p (xt/x:get-idx params i))
+    (var p (xt/x:get-idx params (xt/x:offset i)))
     (if (== "&" (rt-env/sym-name p))
-      (do (:= rparam (xt/x:get-idx params (+ i 1)))
+      (do (:= rparam (xt/x:get-idx params (xt/x:offset (+ i 1))))
           (:= i (+ i 2)))
       (do (xt/x:arr-push req p)
           (:= i (+ i 1)))))
@@ -312,7 +311,7 @@
   "creates a closure from a fn form"
   {:added "4.1"}
   [env parts]
-  (var params-form (xt/x:get-idx parts 1))
+  (var params-form (xt/x:get-idx parts (xt/x:offset 1)))
   (var params (p/to-array params-form))
   (var parsed (-/parse-params params))
   (var body (xt/x:arr-slice parts 2 (xt/x:len parts)))
@@ -328,8 +327,8 @@
   "evaluates a def form"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var sym (xt/x:get-idx parts 1))
-  (var val-form (xt/x:get-idx parts 2))
+  (var sym (xt/x:get-idx parts (xt/x:offset 1)))
+  (var val-form (xt/x:get-idx parts (xt/x:offset 2)))
   (var out (eval-fn runtime env val-form))
   (when (-/errorp out)
     (return out))
@@ -341,13 +340,13 @@
   {:added "4.1"}
   [eval-fn runtime env form]
   (cond (-/tagged-list? form "unquote")
-        (return (eval-fn runtime env (xt/x:get-idx (p/to-array form) 1)))
+        (return (eval-fn runtime env (xt/x:get-idx (p/to-array form) (xt/x:offset 1))))
 
         (-/list? form)
         (do (var out [])
             (xt/for:array [item (p/to-array form)]
               (cond (-/tagged-list? item "unquote-splicing")
-                    (do (var splice-form (xt/x:get-idx (p/to-array item) 1))
+                    (do (var splice-form (xt/x:get-idx (p/to-array item) (xt/x:offset 1)))
                         (var splice-out (eval-fn runtime env splice-form))
                         (when (-/errorp splice-out)
                           (return splice-out))
@@ -367,7 +366,7 @@
         (do (var out [])
             (xt/for:array [item (p/to-array form)]
               (cond (-/tagged-list? item "unquote-splicing")
-                    (do (var splice-form (xt/x:get-idx (p/to-array item) 1))
+                    (do (var splice-form (xt/x:get-idx (p/to-array item) (xt/x:offset 1)))
                         (var splice-out (eval-fn runtime env splice-form))
                         (when (-/errorp splice-out)
                           (return splice-out))
@@ -386,8 +385,8 @@
         (-/hashmap? form)
         (do (var out [])
             (xt/for:array [entry (p/to-array form)]
-              (var k (xt/x:get-idx entry 0))
-              (var v (xt/x:get-idx entry 1))
+              (var k (xt/x:get-idx entry (xt/x:offset 0)))
+              (var v (xt/x:get-idx entry (xt/x:offset 1)))
               (var k-out (-/eval-syntax-quote eval-fn runtime env k))
               (when (-/errorp k-out)
                 (return k-out))
@@ -417,8 +416,8 @@
   "evaluates a defmacro form, binding a macro transformer"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var sym (xt/x:get-idx parts 1))
-  (var params-form (xt/x:get-idx parts 2))
+  (var sym (xt/x:get-idx parts (xt/x:offset 1)))
+  (var params-form (xt/x:get-idx parts (xt/x:offset 2)))
   (var params (p/to-array params-form))
   (var parsed (-/parse-params params))
   (var body (xt/x:arr-slice parts 3 (xt/x:len parts)))
@@ -435,7 +434,7 @@
   "evaluates a deref form on a var object"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var form (xt/x:get-idx parts 1))
+  (var form (xt/x:get-idx parts (xt/x:offset 1)))
   (var out (eval-fn runtime env form))
   (when (-/errorp out)
     (return out))
@@ -451,7 +450,7 @@
   "evaluates a var-quote form, returning a var descriptor"
   {:added "4.1"}
   [runtime env parts]
-  (var sym (xt/x:get-idx parts 1))
+  (var sym (xt/x:get-idx parts (xt/x:offset 1)))
   (var ns-name (rt-env/sym-ns sym))
   (when (xt/x:nil? ns-name)
     (:= ns-name (rt-env/current-ns-name runtime)))
@@ -463,7 +462,7 @@
   "evaluates an in-ns form, switching the current namespace"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var form (xt/x:get-idx parts 1))
+  (var form (xt/x:get-idx parts (xt/x:offset 1)))
   (var out (eval-fn runtime env form))
   (when (-/errorp out)
     (return out))
@@ -480,7 +479,7 @@
         (return (rt-env/sym-name spec))
 
         (or (-/vector? spec) (-/list? spec))
-        (return (rt-env/sym-name (xt/x:get-idx (p/to-array spec) 0)))
+        (return (rt-env/sym-name (xt/x:get-idx (p/to-array spec) (xt/x:offset 0))))
 
         true
         (return nil)))
@@ -492,13 +491,13 @@
   (when (-/symbol? spec)
     (return (-/make-result (rt-env/ns-ensure runtime (rt-env/sym-name spec)) nil)))
   (var spec-arr (p/to-array spec))
-  (var ns-sym (xt/x:get-idx spec-arr 0))
+  (var ns-sym (xt/x:get-idx spec-arr (xt/x:offset 0)))
   (var ns-name (rt-env/sym-name ns-sym))
   (var rt (rt-env/ns-ensure runtime ns-name))
   (var i 1)
   (while (< i (xt/x:len spec-arr))
-    (var k (xt/x:get-idx spec-arr i))
-    (var v (xt/x:get-idx spec-arr (+ i 1)))
+    (var k (xt/x:get-idx spec-arr (xt/x:offset i)))
+    (var v (xt/x:get-idx spec-arr (xt/x:offset (+ i 1))))
     (when (-/keyword? k)
       (var k-name (rt-env/sym-name k))
       (cond (== k-name "as")
@@ -519,7 +518,7 @@
   "evaluates a require form"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var specs-form (xt/x:get-idx parts 1))
+  (var specs-form (xt/x:get-idx parts (xt/x:offset 1)))
   (var form-out (eval-fn runtime env specs-form))
   (when (-/errorp form-out)
     (return form-out))
@@ -531,7 +530,7 @@
 
         (-/vector? specs-data)
         (do (var arr (p/to-array specs-data))
-            (var first (xt/x:get-idx arr 0))
+            (var first (xt/x:get-idx arr (xt/x:offset 0)))
             (if (-/symbol? first)
               (:= specs (vec/vector [ specs-data]))
               (:= specs specs-data)))
@@ -553,7 +552,7 @@
   "evaluates a use form, referring all vars from a namespace"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var form (xt/x:get-idx parts 1))
+  (var form (xt/x:get-idx parts (xt/x:offset 1)))
   (var out (eval-fn runtime env form))
   (when (-/errorp out)
     (return out))
@@ -566,13 +565,13 @@
   "evaluates a host interop form: (. target member args*)"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var target-form (xt/x:get-idx parts 1))
+  (var target-form (xt/x:get-idx parts (xt/x:offset 1)))
   (var target-out (eval-fn runtime env target-form))
   (when (-/errorp target-out)
     (return target-out))
   (:= runtime (-/get-runtime target-out))
   (var target (-/get-value target-out))
-  (var member-form (xt/x:get-idx parts 2))
+  (var member-form (xt/x:get-idx parts (xt/x:offset 2)))
   (var member-name nil)
   (cond (-/symbol? member-form)
         (:= member-name (rt-env/sym-name member-form))
@@ -594,14 +593,14 @@
     (xt/x:arr-push args (-/get-value out)))
   (var f (xt/x:get-key target member-name))
   (if (prim/variadic-fn? f)
-    (return (-/make-result runtime (f args)))
+    (return (-/make-result runtime (prim/invoke-variadic f args)))
     (return (-/make-result runtime (xt/x:apply f args)))))
 
 (defn.xt eval-throw
   "evaluates a throw form, returning an error result"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var form (xt/x:get-idx parts 1))
+  (var form (xt/x:get-idx parts (xt/x:offset 1)))
   (var out (eval-fn runtime env form))
   (when (-/errorp out)
     (return out))
@@ -621,15 +620,15 @@
   "evaluates a loop form with tail recursion"
   {:added "4.1"}
   [eval-fn runtime env parts]
-  (var bindings-form (xt/x:get-idx parts 1))
+  (var bindings-form (xt/x:get-idx parts (xt/x:offset 1)))
   (var body (xt/x:arr-slice parts 2 (xt/x:len parts)))
   (var pairs (p/to-array bindings-form))
   (var loop-env (rt-env/env-create env))
   (var loop-bindings [])
   (var i 0)
   (while (< i (xt/x:len pairs))
-    (var pattern (xt/x:get-idx pairs i))
-    (var val-form (xt/x:get-idx pairs (+ i 1)))
+    (var pattern (xt/x:get-idx pairs (xt/x:offset i)))
+    (var val-form (xt/x:get-idx pairs (xt/x:offset (+ i 1))))
     (var out (eval-fn runtime env val-form))
     (when (-/errorp out)
       (return out))
@@ -656,10 +655,10 @@
                                        (xt/x:to-string (xt/x:len loop-bindings))
                                        ", got "
                                        (xt/x:to-string (xt/x:len values))))))
-          (xt/for:index [idx [0 (xt/x:len loop-bindings)]]
+          (xt/for:index [idx [0 (xt/x:offset-rlen (xt/x:len loop-bindings))]]
             (var bind-out (-/bind-pattern eval-fn runtime loop-env
-                                          (xt/x:get-idx loop-bindings idx)
-                                          (xt/x:get-idx values idx)))
+                                          (xt/x:get-idx loop-bindings (xt/x:offset idx))
+                                          (xt/x:get-idx values (xt/x:offset idx))))
             (when (-/errorp bind-out)
               (return bind-out))
             (:= runtime (-/get-runtime bind-out))
@@ -689,7 +688,7 @@
   [eval-fn runtime f args]
   (cond (xt/x:is-function? f)
         (if (prim/variadic-fn? f)
-          (return (-/make-result runtime (f args)))
+          (return (-/make-result runtime (prim/invoke-variadic f args)))
           (return (-/make-result runtime (xt/x:apply f args))))
 
         (and (xt/x:is-object? f)
@@ -713,9 +712,9 @@
                                              ", got "
                                              (xt/x:to-string arg-count)))))
             (var call-env (rt-env/env-create (xt/x:get-key f "env")))
-            (xt/for:index [i [0 req-count]]
-              (var pattern (xt/x:get-idx req i))
-              (var bind-out (-/bind-pattern eval-fn runtime call-env pattern (xt/x:get-idx args i)))
+            (xt/for:index [i [0 (xt/x:offset-rlen req-count)]]
+              (var pattern (xt/x:get-idx req (xt/x:offset i)))
+              (var bind-out (-/bind-pattern eval-fn runtime call-env pattern (xt/x:get-idx args (xt/x:offset i))))
               (when (-/errorp bind-out)
                 (return bind-out))
               (:= runtime (-/get-runtime bind-out))
@@ -742,7 +741,7 @@
   (var arg-forms (xt/x:arr-slice parts 1 (xt/x:len parts)))
   (when (< (xt/x:len arg-forms) 2)
     (return (-/make-error runtime "apply requires a function and argument collection")))
-  (var f-out (eval-fn runtime env (xt/x:get-idx arg-forms 0)))
+  (var f-out (eval-fn runtime env (xt/x:get-idx arg-forms (xt/x:offset 0))))
   (when (-/errorp f-out)
     (return f-out))
   (:= runtime (-/get-runtime f-out))
@@ -750,13 +749,13 @@
   (var args [])
   (var i 1)
   (while (< i (- (xt/x:len arg-forms) 1))
-    (var out (eval-fn runtime env (xt/x:get-idx arg-forms i)))
+    (var out (eval-fn runtime env (xt/x:get-idx arg-forms (xt/x:offset i))))
     (when (-/errorp out)
       (return out))
     (:= runtime (-/get-runtime out))
     (xt/x:arr-push args (-/get-value out))
     (:= i (+ i 1)))
-  (var last-form (xt/x:get-idx arg-forms (- (xt/x:len arg-forms) 1)))
+  (var last-form (xt/x:get-idx arg-forms (xt/x:offset (- (xt/x:len arg-forms) 1))))
   (var last-out (eval-fn runtime env last-form))
   (when (-/errorp last-out)
     (return last-out))
@@ -777,7 +776,7 @@
   (when (not (-/list? form))
     (return form))
   (var parts (p/to-array form))
-  (var op (xt/x:get-idx parts 0))
+  (var op (xt/x:get-idx parts (xt/x:offset 0)))
   (when (not (-/symbol? op))
     (return form))
   (var macro-fn (rt-env/macro-lookup runtime op))
@@ -830,7 +829,7 @@
   (var op (xt/x:first parts))
   (when (-/symbol? op)
     (var op-name (rt-env/sym-name op))
-    (cond (== op-name "quote")   (return (-/make-result runtime (xt/x:get-idx parts 1)))
+    (cond (== op-name "quote")   (return (-/make-result runtime (xt/x:get-idx parts (xt/x:offset 1))))
           (== op-name "if")     (return (-/eval-if eval-fn runtime env parts))
           (== op-name "do")     (return (-/eval-do-array eval-fn runtime env (xt/x:arr-slice parts 1 (xt/x:len parts))))
           (== op-name "let")    (return (-/eval-let eval-fn runtime env parts))
@@ -839,7 +838,7 @@
           (== op-name "fn")     (return (-/make-result runtime (-/make-closure env parts)))
           (== op-name "def")    (return (-/eval-def eval-fn runtime env parts))
           (== op-name "defmacro") (return (-/eval-defmacro eval-fn runtime env parts))
-          (== op-name "syntax-quote") (return (-/eval-syntax-quote eval-fn runtime env (xt/x:get-idx parts 1)))
+          (== op-name "syntax-quote") (return (-/eval-syntax-quote eval-fn runtime env (xt/x:get-idx parts (xt/x:offset 1))))
           (== op-name "unquote") (return (-/make-error runtime "unquote outside syntax-quote"))
           (== op-name "unquote-splicing") (return (-/make-error runtime "unquote-splicing outside syntax-quote"))
           (== op-name "deref")  (return (-/eval-deref eval-fn runtime env parts))
@@ -874,9 +873,9 @@
   (var entries (p/to-array form))
   (var i 0)
   (while (< i (xt/x:len entries))
-    (var entry (xt/x:get-idx entries i))
-    (var k (xt/x:get-idx entry 0))
-    (var v (xt/x:get-idx entry 1))
+    (var entry (xt/x:get-idx entries (xt/x:offset i)))
+    (var k (xt/x:get-idx entry (xt/x:offset 0)))
+    (var v (xt/x:get-idx entry (xt/x:offset 1)))
     (var k-out (eval-fn runtime env k))
     (when (-/errorp k-out)
       (return k-out))

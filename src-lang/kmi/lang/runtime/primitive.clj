@@ -198,12 +198,25 @@
               (== f -/hash-map-value)
               (== f -/hash-set-value))))
 
+(defn.xt invoke-variadic
+  "invokes an array-backed variadic primitive portably"
+  {:added "4.1"}
+  [f args]
+  (cond (== f -/str-value)      (return (-/str-value args))
+        (== f -/plus)           (return (-/plus args))
+        (== f -/multiply)       (return (-/multiply args))
+        (== f -/list-value)     (return (-/list-value args))
+        (== f -/vector-value)   (return (-/vector-value args))
+        (== f -/hash-map-value) (return (-/hash-map-value args))
+        (== f -/hash-set-value) (return (-/hash-set-value args))
+        :else                   (return nil)))
+
 (defn.xt apply-value
   "applies a function to an array of args"
   {:added "4.1"}
   [f args]
   (if (-/variadic-fn? f)
-    (return (f args))
+    (return (-/invoke-variadic f args))
     (return (xt/x:apply f args))))
 
 (defn.xt get-value

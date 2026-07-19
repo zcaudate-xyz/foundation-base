@@ -38,11 +38,11 @@
 (fact "gets metadata"
 
   (!.js
-   [(syn/get-metadata nil)
+   [(== nil (syn/get-metadata nil))
     (syn/get-metadata
      (syn/syntax-create 1
                         "hello"))])
-  => [nil "hello"])
+  => [true "hello"])
 
 ^{:refer kmi.lang.type-syntax/syntax :added "4.0"}
 (fact "creates or unwraps syntax values"
