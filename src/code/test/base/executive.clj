@@ -406,7 +406,7 @@
         (:run-path))))
 
 (def ^:private +bulk-report-keys+
-  [:failed :throw :timeout])
+  [:passed :failed :throw :timeout])
 
 (defn- bulk-report-data
   "extracts detailed bulk report collections from an item result"

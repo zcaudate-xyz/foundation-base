@@ -1,7 +1,6 @@
 (ns hara.seedgen.metrics
   "Stable JSON records used by XTBench CI and the documentation dashboard."
   (:require [clojure.string :as str]
-            [hara.seedgen.common-xtalk :as xtalk]
             [std.fs :as fs]
             [std.json :as json]))
 
@@ -40,20 +39,33 @@
     "failure"
     "success"))
 
+(defn- github-context
+  []
+  (let [workflow   (or (env "XTBENCH_WORKFLOW") (env "GITHUB_WORKFLOW") "local")
+        repository (or (env "GITHUB_REPOSITORY") "zcaudate-xyz/foundation-base")
+        run-id     (env "GITHUB_RUN_ID")]
+    {:workflow-key workflow
+     :workflow-name (or (env "GITHUB_WORKFLOW") workflow)
+     :git {:sha (env "GITHUB_SHA")
+           :ref (env "GITHUB_REF")
+           :event (env "GITHUB_EVENT_NAME")}
+     :run {:id (parse-long-safe run-id)
+           :number (parse-long-safe (env "GITHUB_RUN_NUMBER"))
+           :attempt (or (parse-long-safe (env "GITHUB_RUN_ATTEMPT")) 1)
+           :url (when run-id
+                  (str "https://github.com/" repository "/actions/runs/" run-id))}}))
+
 (defn test-record
   "creates a JSON-safe XTBench result record"
   {:added "4.1"}
-  [selector langs {:keys [generated summary failing errored]}]
+  [selector langs {:keys [generated summary failing errored spec]}]
   (let [lang       (first langs)
         errored    (vec (or errored (:errored summary) []))
-        spec       (when lang (get (xtalk/language-status {:langs [lang]}) lang))
-        workflow   (or (env "XTBENCH_WORKFLOW") (env "GITHUB_WORKFLOW") "local")
-        repository (or (env "GITHUB_REPOSITORY") "zcaudate-xyz/foundation-base")
-        run-id     (env "GITHUB_RUN_ID")]
-    {:schema-version +schema-version+
+        context    (github-context)]
+    (merge context
+     {:schema-version +schema-version+
      :kind "xtbench-job"
-     :workflow-key workflow
-     :workflow-name (or (env "GITHUB_WORKFLOW") workflow)
+     :metrics-status "complete"
      :suite (selector-name selector)
      :language (some-> lang name)
      :status (conclusion summary errored)
@@ -71,15 +83,7 @@
              (select-keys spec [:model-count :test-count :coverage
                                 :spec-feature-count :spec-implemented
                                 :spec-abstract :spec-missing]))
-     :git {:sha (env "GITHUB_SHA")
-           :ref (env "GITHUB_REF")
-           :event (env "GITHUB_EVENT_NAME")}
-     :run {:id (parse-long-safe run-id)
-           :number (parse-long-safe (env "GITHUB_RUN_NUMBER"))
-           :attempt (or (parse-long-safe (env "GITHUB_RUN_ATTEMPT")) 1)
-           :url (when run-id
-                  (str "https://github.com/" repository "/actions/runs/" run-id))}
-     :recorded-at (utc-now)}))
+     :recorded-at (utc-now)})))
 
 (defn write-json!
   "writes pretty JSON, creating its parent directory"
@@ -125,16 +129,24 @@
                         records)
         failed? (or (empty? records)
                     (some #(not= "success" (:status %)) records))
-        sample  (first records)]
+        sample  (first records)
+        context (github-context)
+        missing? (empty? records)]
     {:schema-version +schema-version+
      :kind "xtbench-run"
+     :metrics-status (if missing? "missing-artifacts" "complete")
      :workflow-key workflow
-     :workflow-name (or (:workflow-name sample) workflow)
+     :workflow-name (or (:workflow-name sample)
+                        (:workflow-name context)
+                        workflow)
      :status (if failed? "failure" "success")
      :tests totals
      :jobs records
-     :git (:git sample)
-     :run (:run sample)
+     :error (when missing?
+              {:type "missing-metrics-artifacts"
+               :message "No XTBench job metrics artifacts were published."})
+     :git (or (:git sample) (:git context))
+     :run (or (:run sample) (:run context))
      :recorded-at (utc-now)}))
 
 (defn history-entry
@@ -142,7 +154,8 @@
   {:added "4.1"}
   [path record]
   (select-keys (assoc record :path path) [:path :workflow-key :workflow-name
-                                          :status :tests :jobs :git :run :recorded-at]))
+                                          :status :metrics-status :tests :jobs
+                                          :error :git :run :recorded-at]))
 
 (defn update-index
   "adds a workflow record to an index and retains the newest entries"
@@ -159,8 +172,9 @@
                                              (get-in item [:run :attempt])] item))
                                {})
                        vals
-                       (sort-by (juxt #(get-in % [:run :number])
-                                      #(get-in % [:run :attempt])) #(compare %2 %1))
+                       (sort-by (juxt #(or (get-in % [:run :number]) -1)
+                                      #(or (get-in % [:run :attempt]) -1))
+                                #(compare %2 %1))
                        (take limit)
                        vec)]
      (-> (or index {})

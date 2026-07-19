@@ -1,6 +1,9 @@
 const esc = (value) => String(value == null ? "" : value).replace(/[&<>"']/g, (ch) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const count = (run, key) => Number(run?.tests?.[key] || 0);
 const runNumber = (run) => run?.run?.number ?? "–";
+const missingArtifacts = (run) => run?.["metrics-status"] === "missing-artifacts";
+const countLabel = (run, key) => missingArtifacts(run) ? "–" : count(run, key);
+const failureLabel = (run) => missingArtifacts(run) ? "–" : count(run,"failed")+count(run,"throw")+count(run,"timeout")+count(run,"errored");
 
 function stylesheet() {
   const href = new URL("../../css/widgets/xtbench.css", import.meta.url).href;
@@ -27,9 +30,10 @@ function render(root, data, props) {
     root.querySelector(".xtbench-cards").innerHTML = workflows.map(w => {
       const wr = filtered.filter(r => r.workflow === w); const latest = wr[0];
       const spec = (latest?.jobs || []).filter(j => !lang || j.language === lang).map(j => j.spec).find(Boolean);
-      return `<section class="xtbench-card"><h3>${esc(w)}</h3><div class="xtbench-status xtbench-status-${esc(latest?.status || "unknown")}">${esc(latest?.status || "no data")}</div><div>Run ${esc(runNumber(latest))} · ${count(latest,"passed")} passed</div>${spec?`<div class="xtbench-spec">Spec ${Number(spec["spec-implemented"]||0)} implemented · ${Number(spec["spec-missing"]||0)} missing</div>`:""}<div class="xtbench-trend" aria-label="Recent run history">${wr.slice(0,30).reverse().map(r=>`<span class="${r.status === "success" ? "" : "failure"}" title="Run ${esc(runNumber(r))}: ${esc(r.status)}"></span>`).join("")}</div></section>`;
+      const result = missingArtifacts(latest) ? "No job metrics" : `${count(latest,"passed")} passed`;
+      return `<section class="xtbench-card"><h3>${esc(w)}</h3><div class="xtbench-status xtbench-status-${esc(latest?.status || "unknown")}">${esc(missingArtifacts(latest) ? "infrastructure failure" : latest?.status || "no data")}</div><div>Run ${esc(runNumber(latest))} · ${esc(result)}</div>${spec?`<div class="xtbench-spec">Spec ${Number(spec["spec-implemented"]||0)} implemented · ${Number(spec["spec-missing"]||0)} missing</div>`:""}<div class="xtbench-trend" aria-label="Recent run history">${wr.slice(0,30).reverse().map(r=>`<span class="${r.status === "success" ? "" : "failure"}" title="Run ${esc(runNumber(r))}: ${esc(missingArtifacts(r) ? "infrastructure failure" : r.status)}"></span>`).join("")}</div></section>`;
     }).join("");
-    root.querySelector("tbody").innerHTML = filtered.slice(0, Number(props.limit || 100)).map(r => `<tr><td>${r.run?.url?`<a href="${esc(r.run.url)}">#${esc(runNumber(r))}</a>`:`#${esc(runNumber(r))}`}</td><td>${esc(r.workflow)}</td><td><span class="xtbench-status xtbench-status-${esc(r.status)}">${esc(r.status)}</span></td><td>${count(r,"passed")}</td><td>${count(r,"failed")+count(r,"throw")+count(r,"timeout")+count(r,"errored")}</td><td>${esc(r["recorded-at"] || "")}</td></tr>`).join("") || `<tr><td colspan="6">No matching runs.</td></tr>`;
+    root.querySelector("tbody").innerHTML = filtered.slice(0, Number(props.limit || 100)).map(r => `<tr><td>${r.run?.url?`<a href="${esc(r.run.url)}">#${esc(runNumber(r))}</a>`:`#${esc(runNumber(r))}`}</td><td>${esc(r.workflow)}</td><td><span class="xtbench-status xtbench-status-${esc(r.status)}">${esc(missingArtifacts(r) ? "infrastructure failure" : r.status)}</span></td><td>${countLabel(r,"passed")}</td><td>${failureLabel(r)}</td><td>${esc(r["recorded-at"] || "")}</td></tr>`).join("") || `<tr><td colspan="6">No matching runs.</td></tr>`;
   };
   root.querySelectorAll("select").forEach(el => el.addEventListener("change", redraw)); redraw();
 }

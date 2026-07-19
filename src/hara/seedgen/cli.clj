@@ -28,6 +28,7 @@
             [code.test.task :as test-task]
             [hara.seedgen :as seedgen]
             [hara.seedgen.metrics :as metrics]
+            [hara.seedgen.common-xtalk :as xtalk]
             [hara.seedgen.common-util :as common]
             [std.fs :as fs]
             [std.lib.result :as res]))
@@ -438,7 +439,18 @@
   (case command
     "test"
     (let [{:keys [selector langs params]} (parse-test-args args)
-          result (seedgen-test selector langs)]
+          ;; Generated namespaces can mutate the loaded runtime/library state.
+          ;; Capture optional audit data before running them, and only when a
+          ;; metrics record was requested.
+          spec   (when (:metrics params)
+                   (try
+                     (get (xtalk/language-status {:langs langs}) (first langs))
+                     (catch Throwable t
+                       (println "[seedgen] unable to collect optional spec metrics:"
+                                (ex-message t))
+                       nil)))
+          result (cond-> (seedgen-test selector langs)
+                   spec (assoc :spec spec))]
       (when-let [path (:metrics params)]
         (metrics/write-test-record! (str path) selector langs result))
       result)

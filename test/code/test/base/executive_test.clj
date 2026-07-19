@@ -208,7 +208,7 @@
          (get-in entry [:actual :data 1 :message])])))
   => [true "#<Wrapped@1: \"oops\">" :throwable "bad"])
 
-^{:refer code.test.base.executive/summarise-bulk :added "4.1"}
+^{:refer code.test.base.executive/summarise-bulk :id summarise-bulk-details :added "4.1"}
 (fact "aggregates detailed failures from wrapped namespace summaries"
   (let [captured (atom nil)
         summary-a (with-meta {:passed 2 :failed 1 :throw 0 :timeout 0}
@@ -230,13 +230,14 @@
                                    'demo.beta-test  {:data summary-b}}
                                   nil)
         @captured)))
-  => [{:failed [{:meta {:line 10 :ns 'demo.alpha-test}}]
+  => [{:passed [:ok-a :ok-b :ok-c]
+       :failed [{:meta {:line 10 :ns 'demo.alpha-test}}]
        :throw [{:meta {:line 20 :ns 'demo.beta-test}}]
        :timeout []}
       ['demo.alpha-test 'demo.beta-test]
       {:save-run false}])
 
-^{:refer code.test.base.executive/summarise-bulk :added "4.1"}
+^{:refer code.test.base.executive/summarise-bulk :id summarise-bulk-skipped :added "4.1"}
 (fact "prints and counts skipped namespaces"
   (let [output   (atom [])
         summary-a (with-meta {:passed 2 :failed 0 :throw 0 :timeout 0 :skipped-ns true}
@@ -278,7 +279,7 @@
     (executive/load-namespace 'my.ns nil (fn [_] "path") nil))
   => 'my.ns)
 
-^{:refer code.test.base.executive/test-namespace :added "3.0"}
+^{:refer code.test.base.executive/test-namespace :id test-namespace-loaded :added "3.0"}
 (fact "runs a loaded namespace"
 
   (with-redefs [rt/all-facts (fn [_] {})
@@ -288,7 +289,7 @@
     (executive/test-namespace 'my.ns {} (fn [_] "path") {:root "."}))
   => '{:queued ()})
 
-^{:refer code.test.base.executive/test-namespace :added "4.1"}
+^{:refer code.test.base.executive/test-namespace :id test-namespace-global-skip :added "4.1"}
 (fact "skips all facts when :skip form evaluates to true"
 
   (let [executed (atom false)
@@ -305,7 +306,7 @@
        @executed]))
   => [{:facts [:skipped] :queued '(true) :skipped-ns true} false])
 
-^{:refer code.test.base.executive/test-namespace :added "4.1"}
+^{:refer code.test.base.executive/test-namespace :id test-namespace-global-run :added "4.1"}
 (fact "runs facts normally when :skip form evaluates to false"
 
   (let [executed (atom false)
