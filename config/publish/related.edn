@@ -1,0 +1,77 @@
+{:libraries
+ [;; foundation volumes — hrefs are relative to the site root (public/)
+  {:name "std.lib"
+   :href "std/index.html"
+   :group :foundation
+   :description "standard utility library — collections, strings, fs, concurrency, testing primitives"
+   :comparison "closest external overlap: medley plus `clojure.java.io` and `core.async` basics, packaged together with no external dependencies"}
+  {:name "hara"
+   :href "hara/index.html"
+   :group :foundation
+   :description "multi-language code generation and runtime emission for JavaScript, Lua, Python, R and SQL targets"
+   :comparison "closest external overlap: template-based code generators; hara emits from live Clojure forms instead of templates"}
+  {:name "code.test"
+   :href "code/code-test.html"
+   :group :foundation
+   :description "fact-based test framework where every check links back to a source var"
+   :comparison "closest external overlap: clojure.test and Midje; facts here double as documentation examples for code.doc"}
+  {:name "code.manage"
+   :href "code/code-manage.html"
+   :group :foundation
+   :description "namespace and test management — incomplete, orphaned, commented and pedantic audits over the project"
+   :comparison "closest external overlap: lint tooling such as Eastwood or clj-kondo, driven by static project analysis"}
+  {:name "code.doc"
+   :href "code/code-doc.html"
+   :group :foundation
+   :description "documentation generator producing the sites you are reading"
+   :comparison "closest external overlap: codox and cljdoc, with executable examples, themes and multi-site publishing"}
+  {:name "xt"
+   :href "xt/index.html"
+   :group :foundation
+   :description "cross-language spec and runtime layer with seed-generated parity tests per target"
+   :comparison "closest external overlap: Haxe or a transpiled standard library — one API surface, many target languages"}
+
+  ;; external projects for comparison
+  {:name "medley"
+   :href "https://github.com/weavejester/medley"
+   :group :external
+   :description "small, pure functions for map and collection manipulation"
+   :comparison "overlaps with `std.lib.collection`; std.lib bundles a wider set of everyday utilities"}
+  {:name "cljdoc / codox"
+   :href "https://cljdoc.org"
+   :group :external
+   :description "hosted API documentation for Clojure libraries, generated from source"
+   :comparison "foundation publishes themed multi-volume sites via code.doc; codox output is also generated for API reference"}
+  {:name "Haxe"
+   :href "https://haxe.org"
+   :group :external
+   :description "cross-platform language and toolkit targeting many runtimes"
+   :comparison "similar 'write once, target many' goal as xt/hara, via a dedicated language rather than Clojure forms"}]
+
+ :namespaces
+ {jvm.monitor
+  [{:name "VisualVM / JMC"
+    :href "https://visualvm.github.io"
+    :group :external
+    :description "standalone JVM monitoring and diagnostic tools shipped with the JDK ecosystem"
+    :comparison "jvm.monitor exposes the same MXBean data from Clojure; VisualVM is a GUI over the same JMX sources"}]}
+
+ :links
+ [{:label "GitHub"
+   :href "https://github.com/zcaudate-xyz/foundation-base"
+   :group :project}
+  {:label "Full setup guide"
+   :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/GETTING_STARTED.md"
+   :group :project}
+  {:label "Examples"
+   :href "examples.html"
+   :group :project}
+  {:label "Contributing"
+   :href "contributing.html"
+   :group :project}
+  {:label "Issue tracker"
+   :href "https://github.com/zcaudate-xyz/foundation-base/issues"
+   :group :project}
+  {:label "API reference (codox)"
+   :href "api/index.html"
+   :group :project}]}

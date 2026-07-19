@@ -12,6 +12,12 @@
 [[:chapter {:title "How to use it"}]]
 "Read the source file directly for the executable facts. The docs page keeps high-level explanation here and uses selected fact snippets below."
 
+[[:callout {:tone :warning
+              :title "Runtime requirements"
+              :content "Every fact on this page executes generated code in a real process. The JavaScript sections need Node.js, and the Lua and Python sections need their respective interpreters on `PATH`. Skip this page's facts when the programs are unavailable."}]]
+
+"What each section demonstrates: the first shows `!.js` returning *values* instead of code strings; the second makes the emission visible with `l/with:print-all`; the third shows the identical hara.lang body running under Lua and Python; the last mixes live results from all three runtimes in one Clojure expression."
+
 [[:chapter {:title "Walkthrough" :link "walkthrough"}]]
 
 [[:section {:title "Live JS execution"}]]

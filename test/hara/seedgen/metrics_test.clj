@@ -9,17 +9,22 @@
                             {:generated {:python ['xtbench.python.lang-test]}
                              :summary {:passed 7 :failed 0 :throw 0 :timeout 0 :skipped 1}
                              :failing {}
+                             :failures [{:namespace "lang.sample-test"
+                                         :counts {:failed 1}}]
                              :spec {:model-count 3 :test-count 2 :coverage 0.5
                                     :spec-feature-count 4 :spec-implemented 3
                                     :spec-abstract 0 :spec-missing 1}})]
     (write-json! path record)
     (select-keys (read-json path)
-                 [:language :status :metrics-status :generated-count :tests :spec]))
+                 [:language :status :metrics-status :generated-count
+                  :tests :failure-counts :failures :spec]))
   => {:language "python"
       :status "success"
       :metrics-status "complete"
       :generated-count 1
       :tests {:passed 7 :failed 0 :throw 0 :timeout 0 :skipped 1 :errored 0}
+      :failure-counts {:failed 0 :throw 0 :timeout 0 :errored 0}
+      :failures [{:namespace "lang.sample-test" :counts {:failed 1}}]
       :spec {:model-count 3 :test-count 2 :coverage 0.5
              :spec-feature-count 4 :spec-implemented 3
              :spec-abstract 0 :spec-missing 1}})
@@ -89,4 +94,16 @@
     (mapv (juxt :path :metrics-status #(get-in % [:error :type]))
           (get-in updated [:workflows "core" :runs])))
   => [["runs/core/9-1.json" "missing-artifacts" "missing-metrics-artifacts"]
-      ["runs/core/0-1.json" nil nil]])
+      ["runs/core/0-1.json" nil nil]]
+
+  (let [record {:workflow-key "core" :status "failure" :tests {}
+                :failure-counts {:failed 1}
+                :jobs [{:language "lua"
+                        :failures [{:namespace "lang.sample-test"}]}]
+                :run {:number 10 :attempt 1}}
+        entry (get-in (update-index {} "runs/core/10-1.json" record)
+                      [:workflows "core" :latest])]
+    [(get-in entry [:jobs 0 :language])
+     (contains? (get-in entry [:jobs 0]) :failures)
+     (:failure-counts entry)])
+  => ["lua" false {:failed 1}])

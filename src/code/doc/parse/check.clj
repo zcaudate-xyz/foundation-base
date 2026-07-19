@@ -12,6 +12,7 @@
     :html :api :manage
     :hero :callout :card-grid
     :quote :demo :badge
+    :related :links
     :shader})
 
 (defn wrap-meta

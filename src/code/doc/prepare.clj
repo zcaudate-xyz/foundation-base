@@ -5,6 +5,7 @@
             [code.doc.link.anchor :as link.anchor]
             [code.doc.link.api :as link.api]
             [code.doc.link.chapter :as link.chapter]
+            [code.doc.link.data :as link.data]
             [code.doc.link.manage :as link.manage]
             [code.doc.link.namespace :as link.namespace]
             [code.doc.link.number :as link.number]
@@ -40,6 +41,7 @@
          (link.api/link-apis name)
          (link.chapter/link-chapters name)
          (link.test/link-tests name)
+         (link.data/link-data name)
          (link.number/link-numbers name)
          (link.tag/link-tags name)
          (link.manage/link-manage name)

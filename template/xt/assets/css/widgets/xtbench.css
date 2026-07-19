@@ -5,6 +5,9 @@
 .xtbench-cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(12rem,1fr)); gap: .75rem; }
 .xtbench-card { padding: .9rem; border: 1px solid var(--border); border-radius: 14px; background: var(--panel); }
 .xtbench-card h3 { margin: 0 0 .45rem; font-size: 1rem; }
+.xtbench-counts { display: inline-flex; flex-wrap: wrap; gap: .3rem; margin: .4rem 0; }
+.xtbench-count { padding: .12rem .35rem; border-radius: 999px; background: color-mix(in srgb,var(--border) 55%,transparent); color: var(--muted); font-size: .72rem; }
+.xtbench-count-failed,.xtbench-count-throw,.xtbench-count-timeout,.xtbench-count-errored { color: #d95151; }
 .xtbench-status { font-weight: 700; text-transform: uppercase; font-size: .75rem; }
 .xtbench-status-success { color: #32a866; } .xtbench-status-failure { color: #d95151; }
 .xtbench-trend { display: flex; gap: 3px; height: 2rem; align-items: end; }
@@ -14,5 +17,16 @@
 .xtbench-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
 .xtbench-table th,.xtbench-table td { padding: .6rem; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
 .xtbench-table th { color: var(--muted); }
+.xtbench-run-toggle { padding: 0 .2rem; border: 0; background: transparent; color: var(--text); cursor: pointer; font: inherit; }
+.xtbench-detail-row td { padding: 0; white-space: normal; background: color-mix(in srgb,var(--panel) 80%,transparent); }
+.xtbench-detail-note { padding: 1rem; color: var(--muted); }
+.xtbench-detail-error { color: #d95151; }
+.xtbench-failure-tree { display: grid; gap: .45rem; padding: .8rem 1rem 1rem; }
+.xtbench-failure-tree details { border-left: 2px solid var(--border); padding-left: .65rem; }
+.xtbench-failure-tree summary { cursor: pointer; }
+.xtbench-tree-level { display: grid; gap: .35rem; margin: .4rem 0 .4rem .55rem; }
+.xtbench-failure-tree ul { margin: .35rem 0 .5rem 1.2rem; padding: 0; }
+.xtbench-failure-type { font-weight: 700; color: #d95151; }
+.xtbench-namespace-errors { margin: .4rem 0; }
 .xtbench-spec { color: var(--muted); font-size: .8rem; }
 .widget-js[data-widget-state="error"] { padding: 1rem; border: 1px solid #d95151; border-radius: 12px; }

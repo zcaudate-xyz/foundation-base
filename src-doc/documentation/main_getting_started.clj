@@ -38,3 +38,17 @@
 [[:callout {:tone :warning
               :title "Optional environments"
               :content "Some test groups require Node.js, Python, R, Docker, PostgreSQL, OpenResty, native compilers, browser drivers, or other external programs. Install only what your selected subsystem needs."}]]
+
+[[:chapter {:title "Related libraries"}]]
+
+"The foundation volumes referenced above, each with the closest external alternative for comparison."
+
+[[:related {:group :foundation}]]
+
+"External projects that overlap with foundation volumes."
+
+[[:related {:group :external}]]
+
+[[:chapter {:title "Links"}]]
+
+[[:links {:group :project}]]

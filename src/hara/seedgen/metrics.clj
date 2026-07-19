@@ -58,7 +58,7 @@
 (defn test-record
   "creates a JSON-safe XTBench result record"
   {:added "4.1"}
-  [selector langs {:keys [generated summary failing errored spec]}]
+  [selector langs {:keys [generated summary failures errored spec]}]
   (let [lang       (first langs)
         errored    (vec (or errored (:errored summary) []))
         context    (github-context)]
@@ -76,9 +76,15 @@
              :timeout (or (:timeout summary) 0)
              :skipped (or (:skipped summary) 0)
              :errored (count errored)}
-     :failing-count (reduce + 0 (for [[_ groups] failing
-                                      [_ entries] groups]
-                                  (count entries)))
+     :failing-count (+ (or (:failed summary) 0)
+                       (or (:throw summary) 0)
+                       (or (:timeout summary) 0)
+                       (count errored))
+     :failure-counts {:failed (or (:failed summary) 0)
+                      :throw (or (:throw summary) 0)
+                      :timeout (or (:timeout summary) 0)
+                      :errored (count errored)}
+     :failures (vec (or failures []))
      :spec (when spec
              (select-keys spec [:model-count :test-count :coverage
                                 :spec-feature-count :spec-implemented
@@ -129,6 +135,10 @@
                           (merge-with + out (:tests record)))
                         {:passed 0 :failed 0 :throw 0 :timeout 0 :skipped 0 :errored 0}
                         records)
+        failure-counts (reduce (fn [out record]
+                                 (merge-with + out (:failure-counts record)))
+                               {:failed 0 :throw 0 :timeout 0 :errored 0}
+                               records)
         failed? (or (empty? records)
                     (some #(not= "success" (:status %)) records))
         sample  (first records)
@@ -146,6 +156,7 @@
                         workflow)
      :status (if failed? "failure" "success")
      :tests totals
+     :failure-counts failure-counts
      :jobs records
      :error (when missing?
               {:type "missing-metrics-artifacts"
@@ -162,9 +173,10 @@
   "returns the compact entry stored in index.json"
   {:added "4.1"}
   [path record]
-  (select-keys (assoc record :path path) [:path :workflow-key :workflow-name
-                                          :status :metrics-status :tests :jobs
-                                          :error :git :run :recorded-at]))
+  (let [compact-jobs (mapv #(dissoc % :failures) (:jobs record))]
+    (select-keys (assoc record :path path :jobs compact-jobs)
+                 [:path :workflow-key :workflow-name :status :metrics-status
+                  :tests :failure-counts :jobs :error :git :run :recorded-at])))
 
 (defn update-index
   "adds a workflow record to an index and retains the newest entries"

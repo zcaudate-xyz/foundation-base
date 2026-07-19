@@ -25,6 +25,7 @@
             [code.framework :as framework]
             [code.project :as project]
             [code.test.base.executive :as executive]
+            [code.test.base.listener :as listener]
             [code.test.task :as test-task]
             [hara.seedgen :as seedgen]
             [hara.seedgen.metrics :as metrics]
@@ -201,6 +202,78 @@
                              (sorted-map)
                              data)]))))
 
+(defn- canonical-bench-namespace
+  [ns]
+  (str/replace (str ns) #"^xtbench\.[^.]+\." ""))
+
+(defn- relative-test-path
+  [root path]
+  (when path
+    (let [root (str (fs/path root))
+          path (str path)
+          prefix (str root java.io.File/separator)]
+      (if (str/starts-with? path prefix)
+        (subs path (count prefix))
+        path))))
+
+(defn failure-tree
+  "builds a JSON-safe namespace/function tree from the latest test details"
+  {:added "4.1"}
+  [summary errored project]
+  (let [root (:root project)
+        details (:data (meta summary))
+        result-occurrences
+        (for [type [:failed :throw :timeout]
+              result (get details type)
+              :let [meta (:meta result)
+                    runtime-ns (or (:ns meta) 'unknown)]]
+          {:type type
+           :runtime-namespace (str runtime-ns)
+           :namespace (canonical-bench-namespace runtime-ns)
+           :function (some-> (listener/result-function result) str)
+           :path (relative-test-path root (:path meta))
+           :line (:line meta)})
+        error-occurrences
+        (for [entry errored
+              :let [runtime-ns (or (if (map? entry) (:ns entry) entry)
+                                   'unknown)]]
+          {:type :errored
+           :runtime-namespace (str runtime-ns)
+           :namespace (canonical-bench-namespace runtime-ns)
+           :function nil
+           :path (when (map? entry) (relative-test-path root (:path entry)))
+           :line (when (map? entry) (:line entry))})
+        occurrences (concat result-occurrences error-occurrences)
+        counts (fn [items] (frequencies (map :type items)))
+        locations (fn [items]
+                    (->> items
+                         (group-by (juxt :type :path :line))
+                         (map (fn [[[type path line] entries]]
+                                (cond-> {:type type :count (count entries)}
+                                  path (assoc :path path)
+                                  line (assoc :line line))))
+                         (sort-by (juxt (comp str :type)
+                                        #(or (:path %) "")
+                                        #(or (:line %) -1)))
+                         vec))]
+    (->> occurrences
+         (group-by (juxt :namespace :runtime-namespace))
+         (map (fn [[[ns runtime-ns] entries]]
+                (let [by-function (group-by :function entries)]
+                  {:namespace ns
+                   :runtime-namespace runtime-ns
+                   :counts (counts entries)
+                   :functions (->> (dissoc by-function nil)
+                                   (map (fn [[function items]]
+                                          {:function function
+                                           :counts (counts items)
+                                           :locations (locations items)}))
+                                   (sort-by :function)
+                                   vec)
+                   :namespace-errors (locations (get by-function nil))})))
+         (sort-by :namespace)
+         vec)))
+
 (defn- failing-summary
   "computes a total failure count from the test summary"
   {:added "4.1"}
@@ -277,6 +350,7 @@
      {:generated generated
       :summary   summary
       :failing   failing
+      :failures  (failure-tree summary errors project)
       :errored   errors
       :exit      (failing-summary summary errors)})))
 

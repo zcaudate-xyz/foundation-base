@@ -196,6 +196,40 @@
                  [:a {:href href} "Learn more"])])
             items))]))))
 
+(defmethod page-element :related
+  ([{:keys [title items error]}]
+   (if error
+     [:pre {:class "error"} error]
+     [:section {:class "related-shell"}
+      (when title
+        [:div {:class "related-heading"} [:h3 title]])
+      (into
+       [:div {:class "related-table"}]
+       (map (fn [{:keys [name href description comparison group]}]
+              [:div {:class "related-row"}
+               [:div {:class "related-name"}
+                (if href
+                  [:a {:href href} name]
+                  name)
+                (when group
+                  [:span {:class "related-family"} (clojure.core/name group)])]
+               [:div {:class "related-description"}
+                (util/basic-html-unescape (util/markup (or description "")))]
+               (when comparison
+                 [:div {:class "related-comparison"}
+                  (util/basic-html-unescape (util/markup comparison))])])
+            items))])))
+
+(defmethod page-element :links
+  ([{:keys [items error]}]
+   (if error
+     [:pre {:class "error"} error]
+     (into
+      [:div {:class "links-list"}]
+      (map (fn [{:keys [label href]}]
+             [:a {:href href} label])
+           items)))))
+
 (defmethod page-element :quote
   ([{:keys [text author source]}]
    [:blockquote {:class "doc-quote"}

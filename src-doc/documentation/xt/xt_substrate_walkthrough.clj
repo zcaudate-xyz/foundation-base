@@ -21,6 +21,10 @@ lein test :only xt.substrate.walkthrough.s07-wsserver-test
 
 "Some historical namespace names contain `walkthroug` in fact metadata, but the `:only` values above come from each file's actual `ns` declaration."
 
+[[:callout {:tone :warning
+              :title "Runtime requirements"
+              :content "Stages `s01` through `s06` run the `:basic` JavaScript runtime and need Node.js on `PATH`. `s07` additionally needs a free local port and the websocket import. The `walkthrough_js` browser stages need Chromedriver and a browser. The excerpts below are trimmed for reading; the linked test files are the executable source of truth."}]]
+
 [[:chapter {:title "Core sequence" :link "core-sequence"}]]
 
 [[:section {:title "1. Local handlers and spaces"}]]

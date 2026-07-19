@@ -61,6 +61,43 @@
   (var? #'cli/seedgen-test) => true
   (:doc (meta #'cli/seedgen-test)) => "generates and runs xtbench tests for the given selector and languages")
 
+^{:refer hara.seedgen.cli/failure-tree :added "4.1"}
+(fact "groups test failures by canonical namespace and function"
+  (let [failed {:meta {:ns 'xtbench.lua.lang.sample-test
+                       :refer 'xt.lang.sample/parse
+                       :path "/repo/test-lang/xtbench/lua/lang/sample_test.clj"
+                       :line 42}}
+        thrown {:meta {:ns 'xtbench.lua.lang.sample-test
+                       :function 'xt.lang.sample/emit
+                       :path "test-lang/xtbench/lua/lang/sample_test.clj"
+                       :line 51}}
+        summary (with-meta {:passed 3 :failed 2 :throw 1 :timeout 0}
+                  {:data {:failed [failed failed]
+                          :throw [thrown]
+                          :timeout []}})]
+    (cli/failure-tree summary
+                      ['xtbench.lua.lang.load-error-test]
+                      {:root "/repo"}))
+  => [{:namespace "lang.load-error-test"
+       :runtime-namespace "xtbench.lua.lang.load-error-test"
+       :counts {:errored 1}
+       :functions []
+       :namespace-errors [{:type :errored :count 1}]}
+      {:namespace "lang.sample-test"
+       :runtime-namespace "xtbench.lua.lang.sample-test"
+       :counts {:failed 2 :throw 1}
+       :functions [{:function "xt.lang.sample/emit"
+                    :counts {:throw 1}
+                    :locations [{:type :throw :count 1
+                                 :path "test-lang/xtbench/lua/lang/sample_test.clj"
+                                 :line 51}]}
+                   {:function "xt.lang.sample/parse"
+                    :counts {:failed 2}
+                    :locations [{:type :failed :count 2
+                                 :path "test-lang/xtbench/lua/lang/sample_test.clj"
+                                 :line 42}]}]
+       :namespace-errors []}])
+
 ^{:refer hara.seedgen.cli/-main :added "4.1"}
 (fact "is the CLI entry point"
   (var? #'cli/-main) => true
