@@ -4,7 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-data]]})
+             [xt.lang.common-data :as xtd]]})
 
 ;;
 ;; SORT BY
