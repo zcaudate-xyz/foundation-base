@@ -1,12 +1,18 @@
 (ns xtalk.packages-test
   (:use code.test)
-  (:require [xtalk.packages :refer :all]))
+  (:require [std.make :as make]
+            [xtalk.packages :refer :all]))
 
 ^{:refer xtalk.packages/package-name :added "4.1"}
 (fact "uses platform-native names for one package per xt segment"
   [(package-name :js :substrate)
    (package-name :dart :substrate)]
   => ["@xtalk/substrate" "xtalk_substrate"])
+
+^{:refer xtalk.packages/package-directory :added "4.1"}
+(fact "uses stable xt-prefixed directories across language workspaces"
+  (mapv package-directory SEGMENTS)
+  => ["xt-lang" "xt-event" "xt-substrate" "xt-net" "xt-db" "xt-ui"])
 
 ^{:refer xtalk.packages/root-prefix :added "4.1"}
 (fact "links portable segments and merged adapters through package prefixes"
@@ -25,13 +31,22 @@
     [(every? js-mains ['xt.lang 'xt.event 'xt.substrate 'xt.net 'xt.db 'xt.ui
                        'js.net 'js.ui 'js.react 'js.lib.figma])
      (every? dart-mains ['xt.lang 'xt.event 'xt.substrate 'xt.net 'xt.db 'xt.ui
-                         'dart.net 'dart.ui])])
-  => [true true])
+                         'dart.net 'dart.ui])
+     (set (map :target (module-entries :js)))
+     (set (map :target (module-entries :dart)))])
+  => [true true
+      #{"xt-lang" "xt-event" "xt-substrate" "xt-net" "xt-db" "xt-ui"
+        "xt-ui/lib"}
+      #{"xt-lang/lib" "xt-event/lib" "xt-substrate/lib" "xt-net/lib"
+        "xt-db/lib" "xt-ui/lib"}])
 
 ^{:refer xtalk.packages/js-package :added "4.1"}
 (fact "keeps internal JavaScript package versions in lockstep"
   (get-in (js-package :db) ["dependencies" "@xtalk/substrate"])
   => VERSION
+
+  (get-in (js-package :db) ["exports" "./*.js"])
+  => "./*.js"
 
   (get (js-package :ui) "version")
   => VERSION)
@@ -47,6 +62,34 @@
      (last pubspec)
      (count (:default project))])
   => [".build/example" "  - wind_demo" (count (module-entries :dart))])
+
+(fact "package projects accept an external source root"
+  [(-> (js-project ".build/js" "../foundation/src-lang")
+       :default first :search first)
+   (-> (dart-project ".build/dart" [] "../foundation/src-lang")
+       :default first :search first)]
+  => ["../foundation/src-lang/xt/lang"
+      "../foundation/src-lang/xt/lang"])
+
+(fact "caller-owned output directories retain the aggregate workspace projects"
+  (let [js (make/make-config (js-project "/tmp/statstrade/js"))
+        dart (make/make-config (dart-project "/tmp/statstrade/dart"))]
+    [(-> js :instance deref :build)
+     (-> dart :instance deref :build)])
+  => ["/tmp/statstrade/js" "/tmp/statstrade/dart"])
+
+(fact "generated manifests address the same xt-prefixed package directories"
+  (let [js (manifest-sections :js)
+        dart (manifest-sections :dart)
+        dart-root (->> dart
+                       (filter #(and (= "" (:target %))
+                                     (= "pubspec.yaml" (:file %))))
+                       first
+                       :main)]
+    [(->> js (map :target) (filter seq) set)
+     (last dart-root)])
+  => [#{"xt-lang" "xt-event" "xt-substrate" "xt-net" "xt-db" "xt-ui"}
+      "  - xt-ui"])
 
 ^{:refer xtalk.packages/normalize-dart-module :added "4.1"}
 (fact "adds Dart SDK imports required by emitted raw symbols"

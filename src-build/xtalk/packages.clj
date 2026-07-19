@@ -46,6 +46,11 @@
     :js (str "@xtalk/" (name segment))
     :dart (str "xtalk_" (name segment))))
 
+(defn package-directory
+  "returns the language-neutral workspace directory for an xt segment"
+  [segment]
+  (str "xt-" (name segment)))
+
 (defn root-prefix
   "Maps every cross-segment import to its package and keeps platform adapters local."
   [platform segment]
@@ -62,16 +67,18 @@
       (= platform :dart) (assoc 'dart (package-name :dart segment)))))
 
 (defn module-entry
-  [platform segment main]
-  {:type :module.directory
-   :lang platform
-   :search [(str "src-lang/" (str/replace (str main) "." "/"))]
-   :main main
-   :target (if (= platform :dart)
-             (str (name segment) "/lib")
-             (name segment))
-   :emit {:code (module-code-options platform segment {:extra-namespaces false})
-          :lang/format (if (= platform :js) :commonjs :full)}})
+  ([platform segment main]
+   (module-entry platform segment main "src-lang"))
+  ([platform segment main source-root]
+   {:type :module.directory
+    :lang platform
+    :search [(str source-root "/" (str/replace (str main) "." "/"))]
+    :main main
+    :target (if (= platform :dart)
+              (str (package-directory segment) "/lib")
+              (package-directory segment))
+    :emit {:code (module-code-options platform segment {:extra-namespaces false})
+           :lang/format (if (= platform :js) :commonjs :full)}}))
 
 (defn single-entry
   [platform segment main]
@@ -83,7 +90,7 @@
     {:type :module.single
      :lang platform
      :main main
-     :target (str (name segment)
+     :target (str (package-directory segment)
                   (when (= platform :dart) "/lib")
                   (when (seq subdir) (str "/" (str/join "/" subdir))))
      :file file
@@ -91,18 +98,20 @@
             :lang/format (if (= platform :js) :commonjs :full)}}))
 
 (defn module-entries
-  [platform]
-  (mapcat
-   (fn [segment]
-     (let [xt-main (symbol (str "xt." (name segment)))
-           directories (cons xt-main
-                             (get-in PLATFORM-DIRECTORIES [platform segment]))
-           singles (concat (when (= segment :substrate) [xt-main])
-                           (get-in SINGLE-MODULES [platform segment]))]
-       (concat
-        (map (partial module-entry platform segment) directories)
-        (map (partial single-entry platform segment) singles))))
-   SEGMENTS))
+  ([platform]
+   (module-entries platform "src-lang"))
+  ([platform source-root]
+   (mapcat
+    (fn [segment]
+      (let [xt-main (symbol (str "xt." (name segment)))
+            directories (cons xt-main
+                              (get-in PLATFORM-DIRECTORIES [platform segment]))
+            singles (concat (when (= segment :substrate) [xt-main])
+                            (get-in SINGLE-MODULES [platform segment]))]
+        (concat
+         (map #(module-entry platform segment % source-root) directories)
+         (map (partial single-entry platform segment) singles))))
+    SEGMENTS)))
 
 (defn js-dependencies
   [segment]
@@ -119,7 +128,8 @@
     "description" (str "Generated XTalk " (name segment) " runtime")
     "license" "MIT"
     "files" ["*.js" "**/*.js"]
-    "exports" {"./*" "./*.js"}
+    "exports" {"./*.js" "./*.js"
+               "./*" "./*.js"}
     "dependencies" (js-dependencies segment)}
     (= segment :net)
     (assoc "optionalDependencies"
@@ -178,7 +188,7 @@
         :target ""
         :main {"name" "@xtalk/workspace"
                "private" true
-               "workspaces" ["*"]}}])
+               "workspaces" ["xt-*"]}}])
     (when (= platform :dart)
       [{:type :gitignore
         :target ""
@@ -192,35 +202,39 @@
                         "environment:"
                         "  sdk: '>=3.6.0 <4.0.0'"
                         "workspace:"]
-                       (map #(str "  - " (name %)) SEGMENTS)))}])
+                       (map #(str "  - " (package-directory %)) SEGMENTS)))}])
     (mapcat
      (fn [segment]
        [(if (= platform :js)
           {:type :package.json
-           :target (name segment)
+           :target (package-directory segment)
            :main (js-package segment)}
           {:type :raw
-           :target (name segment)
+           :target (package-directory segment)
            :file "pubspec.yaml"
            :main (dart-pubspec segment)})
         {:type :readme.md
-         :target (name segment)
+         :target (package-directory segment)
          :main (generated-readme platform segment)}])
      SEGMENTS))))
 
 (defn js-project
   "constructs the generated JavaScript package workspace project"
-  [build]
-  {:tag "xtalk-packages-js"
-   :build build
-   :sections {:setup (manifest-sections :js)}
-   :default (vec (module-entries :js))})
+  ([build]
+   (js-project build "src-lang"))
+  ([build source-root]
+   {:tag "xtalk-packages-js"
+    :build build
+    :sections {:setup (manifest-sections :js)}
+    :default (vec (module-entries :js source-root))}))
 
 (defn dart-project
   "constructs a Dart package workspace with optional additional members"
   ([build]
    (dart-project build []))
   ([build extra-workspace-members]
+   (dart-project build extra-workspace-members "src-lang"))
+  ([build extra-workspace-members source-root]
    (let [sections (mapv (fn [section]
                           (if (and (= "pubspec.yaml" (:file section))
                                    (= "" (:target section)))
@@ -231,7 +245,7 @@
      {:tag "xtalk-packages-dart"
       :build build
       :sections {:setup sections}
-      :default (vec (module-entries :dart))})))
+      :default (vec (module-entries :dart source-root))})))
 
 (def +js-project+
   (js-project "packages-gen/js"))
@@ -247,6 +261,16 @@
   (make/build-all XTALK-JS)
   (make/build-all XTALK-DART))
 
+(defn generate-at!
+  "generates both package workspaces at caller-owned output directories"
+  [js-build dart-build]
+  (make/build-all (make/make-config (js-project js-build)))
+  (make/build-all (make/make-config (dart-project dart-build))))
+
 (defn -main
-  [& _args]
-  (generate!))
+  [& args]
+  (case (count args)
+    0 (generate!)
+    2 (apply generate-at! args)
+    (throw (ex-info "Expected no arguments or JavaScript and Dart output directories."
+                    {:args args}))))

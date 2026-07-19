@@ -2,7 +2,8 @@
   (:require [hara.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.spec-base :as xt]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 
 ;;
@@ -39,7 +40,7 @@
       (xt/x:set-key visited id true)
       (var input (. node ["links"]))
       (xt/for:array [link input]
-        (-/sort-edges-visit nodes visited sorted link (xt/x:arr-clone ancestors))))
+        (-/sort-edges-visit nodes visited sorted link (xtd/arr-clone ancestors))))
   (xt/x:arr-push-first sorted id))
 
 (defn.xt sort-edges
