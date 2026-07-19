@@ -2,6 +2,7 @@
   "Source-owned JavaScript and Dart package generation for top-level xt segments."
   (:require [clojure.string :as str]
             [std.make :as make :refer [def.make]]
+            [std.json :as json]
             [hara.lang.compile]
             [hara.runtime.basic.impl.process-dart :as dart-runtime]))
 
@@ -115,36 +116,74 @@
 
 (defn js-dependencies
   [segment]
-  (into {}
+  (into (array-map)
         (map (fn [dependency]
                [(package-name :js dependency) VERSION])
-             (get DEPENDENCIES segment))))
+             (sort-by #(package-name :js %)
+                      (get DEPENDENCIES segment)))))
+
+(defn json-pretty
+  "renders deterministic two-space JSON compatible with JavaScript workspace tooling"
+  ([value]
+   (str (json-pretty value 0) "\n"))
+  ([value level]
+   (let [padding #(apply str (repeat (* 2 %) " "))]
+     (cond
+       (map? value)
+       (if (empty? value)
+         "{}"
+         (str "{\n"
+              (str/join
+               ",\n"
+               (map (fn [[k v]]
+                      (str (padding (inc level))
+                           (json/write (str k)) ": "
+                           (json-pretty v (inc level))))
+                    value))
+              "\n" (padding level) "}"))
+
+       (sequential? value)
+       (if (empty? value)
+         "[]"
+         (str "[\n"
+              (str/join
+               ",\n"
+               (map #(str (padding (inc level))
+                          (json-pretty % (inc level)))
+                    value))
+              "\n" (padding level) "]"))
+
+       :else
+       (json/write value)))))
 
 (defn js-package
   [segment]
-  (cond->
-   {"name" (package-name :js segment)
-    "version" VERSION
-    "description" (str "Generated XTalk " (name segment) " runtime")
-    "license" "MIT"
-    "files" ["*.js" "**/*.js"]
-    "exports" {"./*.js" "./*.js"
-               "./*" "./*.js"}
-    "dependencies" (js-dependencies segment)}
+  (let [dependencies (js-dependencies segment)]
+    (cond->
+     (array-map
+      "name" (package-name :js segment)
+      "version" VERSION
+      "description" (str "Generated XTalk " (name segment) " runtime")
+      "license" "MIT"
+      "files" ["*.js" "**/*.js"]
+      "exports" (array-map "./*.js" "./*.js"
+                           "./*" "./*.js"))
+    (seq dependencies)
+    (assoc "dependencies" dependencies)
     (= segment :net)
     (assoc "optionalDependencies"
-           {"@sqlite.org/sqlite-wasm" "^3.46.1-build1"
-            "pg" "^8.13.1"
-            "redis" "^4.7.0"})
+           (array-map "@sqlite.org/sqlite-wasm" "^3.46.1-build1"
+                      "pg" "^8.13.1"
+                      "redis" "^4.7.0"))
     (= segment :ui)
     (assoc "peerDependencies"
-           {"@xtalk/figma-ui" "^0.1.3"
-            "react" ">=18"
-            "react-dom" ">=18"}
+           (array-map "@xtalk/figma-ui" "^0.1.3"
+                      "react" ">=18"
+                      "react-dom" ">=18")
            "dependencies"
            (assoc (js-dependencies segment)
                   "react-nil" "^2.0.0"
-                  "sonner" "^2.0.0"))))
+                  "sonner" "^2.0.0")))))
 
 (defn dart-dependency-lines
   [segment]
@@ -200,9 +239,11 @@
     (mapcat
      (fn [segment]
        [(if (= platform :js)
-          {:type :package.json
+          {:type :raw
            :target (package-directory segment)
-           :main (js-package segment)}
+           :file "package.json"
+           :main (fn []
+                   (str/split (json-pretty (js-package segment)) #"\n" -1))}
           {:type :raw
            :target (package-directory segment)
            :file "pubspec.yaml"

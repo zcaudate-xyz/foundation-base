@@ -50,7 +50,21 @@
   => "./*.js"
 
   (get (js-package :ui) "version")
-  => VERSION)
+  => VERSION
+
+  (contains? (js-package :lang) "dependencies")
+  => false)
+
+(fact "renders JavaScript manifests in deterministic workspace format"
+  (json-pretty (array-map "name" "@xtalk/lang"
+                          "files" ["*.js" "**/*.js"]))
+  => (str "{\n"
+          "  \"name\": \"@xtalk/lang\",\n"
+          "  \"files\": [\n"
+          "    \"*.js\",\n"
+          "    \"**/*.js\"\n"
+          "  ]\n"
+          "}\n"))
 
 ^{:refer xtalk.packages/dart-project :added "4.1"}
 (fact "adds application members without changing package workspace entries"
