@@ -49,7 +49,7 @@
 (defn package-directory
   "returns the language-neutral workspace directory for an xt segment"
   [segment]
-  (str "xt-" (name segment)))
+  (str "libs/xt-" (name segment)))
 
 (defn root-prefix
   "Maps every cross-segment import to its package and keeps platform adapters local."
@@ -183,12 +183,6 @@
   [platform]
   (vec
    (concat
-    (when (= platform :js)
-      [{:type :package.json
-        :target ""
-        :main {"name" "@xtalk/workspace"
-               "private" true
-               "workspaces" ["xt-*"]}}])
     (when (= platform :dart)
       [{:type :gitignore
         :target ""

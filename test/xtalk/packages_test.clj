@@ -12,7 +12,8 @@
 ^{:refer xtalk.packages/package-directory :added "4.1"}
 (fact "uses stable xt-prefixed directories across language workspaces"
   (mapv package-directory SEGMENTS)
-  => ["xt-lang" "xt-event" "xt-substrate" "xt-net" "xt-db" "xt-ui"])
+  => ["libs/xt-lang" "libs/xt-event" "libs/xt-substrate"
+      "libs/xt-net" "libs/xt-db" "libs/xt-ui"])
 
 ^{:refer xtalk.packages/root-prefix :added "4.1"}
 (fact "links portable segments and merged adapters through package prefixes"
@@ -35,10 +36,10 @@
      (set (map :target (module-entries :js)))
      (set (map :target (module-entries :dart)))])
   => [true true
-      #{"xt-lang" "xt-event" "xt-substrate" "xt-net" "xt-db" "xt-ui"
-        "xt-ui/lib"}
-      #{"xt-lang/lib" "xt-event/lib" "xt-substrate/lib" "xt-net/lib"
-        "xt-db/lib" "xt-ui/lib"}])
+      #{"libs/xt-lang" "libs/xt-event" "libs/xt-substrate" "libs/xt-net"
+        "libs/xt-db" "libs/xt-ui" "libs/xt-ui/lib"}
+      #{"libs/xt-lang/lib" "libs/xt-event/lib" "libs/xt-substrate/lib"
+        "libs/xt-net/lib" "libs/xt-db/lib" "libs/xt-ui/lib"}])
 
 ^{:refer xtalk.packages/js-package :added "4.1"}
 (fact "keeps internal JavaScript package versions in lockstep"
@@ -88,8 +89,9 @@
                        :main)]
     [(->> js (map :target) (filter seq) set)
      (last dart-root)])
-  => [#{"xt-lang" "xt-event" "xt-substrate" "xt-net" "xt-db" "xt-ui"}
-      "  - xt-ui"])
+  => [#{"libs/xt-lang" "libs/xt-event" "libs/xt-substrate"
+        "libs/xt-net" "libs/xt-db" "libs/xt-ui"}
+      "  - libs/xt-ui"])
 
 ^{:refer xtalk.packages/normalize-dart-module :added "4.1"}
 (fact "adds Dart SDK imports required by emitted raw symbols"
