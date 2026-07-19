@@ -60,19 +60,23 @@
                                                    [ns src]
                                                    (or (resolve-import references @nested src)
                                                        [ns src]))
-                                      resolved (get-in references [rns rsrc])
+                                      resolved   (get-in references [rns rsrc])
+                                      live       (get live-vars dst)
+                                      generated? (and (nil? (get-in resolved [:source :code]))
+                                                      (some? live))
                                       entry (-> resolved
                                                 (assoc :test
                                                        (if (get-in resolved [:test :code])
                                                          (:test resolved)
                                                          (get-in references [ns src :test])))
+                                                (cond-> generated?
+                                                  (-> (assoc-in [:source :generated] true)
+                                                      (assoc :intro (-> live meta :doc))))
                                                 (update-in [:test :code] docstring/->refstring)
                                                 (update-in [:test :path] relative-to-root)
                                                 (update-in [:source :path] relative-to-root)
                                                 (assoc :origin (symbol (str rns "/" rsrc))
-                                                       :arglists (-> (get live-vars dst)
-                                                                     meta
-                                                                     :arglists)))]
+                                                       :arglists (-> live meta :arglists)))]
                                   (assoc out dst entry))))
                             table
                             vals)))

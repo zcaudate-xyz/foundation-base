@@ -31,7 +31,8 @@
       :always
       (into (mapcat (fn [[var entry]]
                       (cond-> []
-                        (nil? (get-in entry [:source :code]))
+                        (and (nil? (get-in entry [:source :code]))
+                             (not (get-in entry [:source :generated])))
                         (conj {:type :missing-source :namespace ns-sym :var var})
 
                         (nil? (get-in entry [:test :code]))

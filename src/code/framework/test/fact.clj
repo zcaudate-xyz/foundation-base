@@ -113,12 +113,13 @@
   ([type nav]
    (let [fns  (top-level-fact-navs nav)]
      (->> (keep gather-fact fns)
-          (reduce (fn [m {:keys [ns var class sexp test intro line form] :as meta}]
+          (reduce (fn [m {:keys [ns var id class sexp test intro line form] :as meta}]
                     (-> m
-                        (update-in [ns var]
+                        (update-in [ns (or id var)]
                                    assoc
                                    :ns ns
                                    :var var
+                                   :id id
                                    :class class
                                    :test  {:path common/*path*
                                            :sexp sexp

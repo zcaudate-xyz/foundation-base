@@ -52,23 +52,33 @@
   "helper function to convert a source entry into a html tree form"
   {:added "3.0"}
   ([entry project var namespace]
-   (if (nil? entry)
-     [:pre {:class "error"} [:h6 "source not found"] [:code ""]]
-     [:div {:class "entry-option"}
-      [:h6
-       (if-let [version (-> entry :meta :added)]
-         [:a {:href (format "%s/blob/master/%s#L%d-L%d"
-                            (:url project)
-                            (-> entry :source :path)
-                            (-> entry :source :line :row)
-                            (-> entry :source :line :end-row))
-              :target "_blank"}
-          "v&nbsp;" version]
-         [:i {:class "error version"} "NONE"])]
-      [:div
-        [:pre {:class "source"}
-         [:code {:class "clojure"}
-          (-> entry :source :code)]]]])))
+   (cond (nil? entry)
+         [:pre {:class "error"} [:h6 "source not found"] [:code ""]]
+
+         (-> entry :source :generated)
+         [:div {:class "entry-option"}
+          [:h6 [:i "generated"]]
+          [:div
+           [:pre {:class "source"}
+            [:code {:class "clojure"}
+             ";; generated at runtime, no single source form"]]]]
+
+         :else
+         [:div {:class "entry-option"}
+          [:h6
+           (if-let [version (-> entry :meta :added)]
+             [:a {:href (format "%s/blob/master/%s#L%d-L%d"
+                                (:url project)
+                                (-> entry :source :path)
+                                (-> entry :source :line :row)
+                                (-> entry :source :line :end-row))
+                  :target "_blank"}
+              "v&nbsp;" version]
+             [:i {:class "error version"} "NONE"])]
+          [:div
+            [:pre {:class "source"}
+             [:code {:class "clojure"}
+              (-> entry :source :code)]]]])))
 
 (defn entry-arglists
   "formats arglists for api display"
@@ -85,6 +95,9 @@
   [entry]
   (let [meta (:meta entry)]
     (cond-> []
+      (-> entry :source :generated)
+      (conj [:span {:class "entry-badge entry-badge-experimental"} "Generated"])
+
       (:deprecated meta)
       (conj [:span {:class "entry-badge entry-badge-deprecated"} "Deprecated"])
 

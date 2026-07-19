@@ -58,6 +58,18 @@
                     'code.doc.link.api)
   => {})
 
+^{:refer code.doc.link.api/create-api-table :id create-api-table-generated :added "4.1"}
+(fact "marks runtime-generated vars with live metadata"
+
+  (let [table (create-api-table {}
+                                {:lookup (project/file-lookup (project/project))
+                                 :root "."}
+                                'std.lib.bin)
+        entry (get table 'double-buffer)]
+    [(-> entry :source :generated)
+     (boolean (seq (:arglists entry)))])
+  => [true true])
+
 ^{:refer code.doc.link.api/link-apis :added "3.0"}
 (fact "links all the api source and test files to the elements"
 

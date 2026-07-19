@@ -24,6 +24,16 @@
       {:type :missing-source :namespace 'std.lib.collection :var 'map-vals}
       {:type :missing-only-var :namespace 'std.lib.collection :var 'map-indexed}])
 
+^{:refer code.doc.check/check-api-element :id check-api-generated :added "4.1"}
+(fact "does not flag runtime-generated vars"
+
+  (check/check-api-element
+   {:lookup {'std.lib.bin "src/std/lib/bin.clj"}}
+   {:type :api :namespace "std.lib.bin"
+    :table {'double-buffer {:source {:generated true}
+                            :test {:code "(fact ...)"}}}})
+  => [])
+
 ^{:refer code.doc.check/check-reference-element :added "4.1"}
 (fact "flags the missing reference placeholder"
 
