@@ -25,7 +25,7 @@
           :ui ['dart.ui]}})
 
 (def SINGLE-MODULES
-  {:js {:ui ['js.react 'js.lib.figma]}
+  {:js {:ui ['js.react 'js.lib.figma 'js.react.view]}
    :dart {}})
 
 (defn normalize-dart-module

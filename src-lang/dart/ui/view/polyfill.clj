@@ -7,7 +7,8 @@
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]
-             [xt.substrate.view :as view]]})
+             [xt.substrate.view :as view]
+             [xt.substrate.view-catalog :as catalog]]})
 
 (defn.dt lower-to
   "lowers a node to another component id, keeping props and children"
@@ -17,6 +18,24 @@
          (return (view/node component-id
                             (xt/x:get-key node "props")
                             (xt/x:get-key node "children")))))
+  (return lowering))
+
+(defn.dt lower-variant
+  "lowers a variant-bearing node to another id, folding the variant's
+   shared class bundle into the node's class"
+  [source-id target-id]
+  (var lowering
+       (fn [node]
+         (var props (xt/x:obj-clone (or (xt/x:get-key node "props") {})))
+         (var classes (catalog/variant-classes source-id
+                                               (xt/x:get-key props "variant")))
+         (when (xt/x:not-nil? classes)
+           (var class-name (or (xt/x:get-key props "class") ""))
+           (when (< 0 (xt/x:str-len class-name))
+             (:= class-name (xt/x:cat class-name " ")))
+           (xt/x:set-key props "class" (xt/x:cat class-name classes)))
+         (xt/x:del-key props "variant")
+         (return (view/node target-id props (xt/x:get-key node "children")))))
   (return lowering))
 
 (defn.dt registry
@@ -29,7 +48,7 @@
     "ui/card-description" (-/lower-to "ui/text")
     "ui/card-footer"      (-/lower-to "ui/column")
     "ui/separator"        (-/lower-to "ui/row")
-    "ui/badge"            (-/lower-to "ui/text")
+    "ui/badge"            (-/lower-variant "ui/badge" "ui/text")
     "ui/table"            (-/lower-to "ui/column")
     "ui/table-header"     (-/lower-to "ui/column")
     "ui/table-body"       (-/lower-to "ui/column")
