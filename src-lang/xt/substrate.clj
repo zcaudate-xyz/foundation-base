@@ -13,6 +13,7 @@
              [xt.substrate.base-space :as node-space]
              [xt.substrate.base-request :as node-request]
              [xt.substrate.base-pubsub :as node-pubsub]
+             [xt.substrate.view :as view]
              [xt.substrate.base-util-handlers :as util-handlers]]})
 
 (def.xt ^{:arglists '([node space-id config])} create-space node-space/create-space)
@@ -37,6 +38,17 @@
 (def.xt ^{:arglists '([node space-id group-id signal event])} page-group-trigger page/group-trigger)
 (def.xt ^{:arglists '([node space-id group-id model-id signal event])} page-model-trigger page/model-trigger)
 (def.xt ^{:arglists '([node space-id signal event])} page-space-trigger-all page/space-trigger-all)
+(def.xt ^{:arglists '([view-id bindings root])} view-spec view/view-spec)
+(def.xt ^{:arglists '([component props children])} view-node view/node)
+(def.xt ^{:arglists '([action-id payload])} view-action view/action)
+(def.xt ^{:arglists '([path])} view-event-value view/event-value)
+(def.xt ^{:arglists '([spec])} view-validate view/validate)
+(def.xt ^{:arglists '([node space-id view-id path default-value])} view-state-get view/state-get)
+(def.xt ^{:arglists '([node space-id view-id path value])} view-state-set view/state-set)
+(def.xt ^{:arglists '([node spec])} view-snapshot view/snapshot)
+(def.xt ^{:arglists '([node spec listener-id callback])} view-subscribe view/subscribe)
+(def.xt ^{:arglists '([subscription])} view-unsubscribe view/unsubscribe)
+(def.xt ^{:arglists '([node space-id action-desc event meta])} view-dispatch view/dispatch)
 (def.xt ^{:arglists '([node space-id])} page-raw-callback-add page/raw-callback-add)
 (def.xt ^{:arglists '([node space-id])} page-raw-callback-remove page/raw-callback-remove)
 (def.xt ^{:arglists '([node])} page-proxy-install page-proxy/install)

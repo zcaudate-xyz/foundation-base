@@ -7,6 +7,8 @@
              [xt.lang.spec-promise :as promise]
              [xt.substrate.page-core :as page-core]
              [xt.db.node.example-auth-profile :as example]
+             [xt.db.node.example-auth-profile-view :as shared-view]
+             [js.react.view.runtime :as view-runtime]
              [js.react :as r]]})
 
 (defn.js error-message
@@ -339,6 +341,23 @@
      :space-id space-id
      :group-id group-id
      :initial-email (xt/x:get-key opts "email")}])
+  (return node))
+
+(defn.js render-substrate-view-playground
+  "renders the shared substrate view through the independent React adapter"
+  {:added "4.1"}
+  [node opts]
+  (:= opts (or opts {}))
+  (var spec (shared-view/install node opts))
+  (var space-id (or (xt/x:get-key opts "space_id")
+                    example/DEFAULT_SPACE_ID))
+  (window.PLAYGROUND.setTitle "Substrate auth profile")
+  (window.PLAYGROUND.setStage
+   [:% view-runtime/View
+    {:node node
+     :spec spec
+     :render-fn shared-view/render
+     :options {"space_id" space-id}}])
   (return node))
 
 (defn.js mount-playground

@@ -23,7 +23,7 @@
   (let [js-mains (set (map :main (module-entries :js)))
         dart-mains (set (map :main (module-entries :dart)))]
     [(every? js-mains ['xt.lang 'xt.event 'xt.substrate 'xt.net 'xt.db 'xt.ui
-                       'js.net 'js.ui 'js.react 'js.lib.figma])
+                       'js.net 'js.ui 'js.react.view 'js.react 'js.lib.figma])
      (every? dart-mains ['xt.lang 'xt.event 'xt.substrate 'xt.net 'xt.db 'xt.ui
                          'dart.net 'dart.ui])])
   => [true true])

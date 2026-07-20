@@ -18,7 +18,7 @@
 
 (def PLATFORM-DIRECTORIES
   {:js {:net ['js.net]
-        :ui ['js.ui]}
+        :ui ['js.ui 'js.react.view]}
    :dart {:net ['dart.net]
           :ui ['dart.ui]}})
 
