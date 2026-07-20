@@ -13,7 +13,7 @@
 (fact "uses stable xt-prefixed directories across language workspaces"
   (mapv package-directory SEGMENTS)
   => ["libs/xt-lang" "libs/xt-event" "libs/xt-substrate"
-      "libs/xt-net" "libs/xt-db" "libs/xt-ui"])
+      "libs/xt-mcp" "libs/xt-net" "libs/xt-db" "libs/xt-ui"])
 
 ^{:refer xtalk.packages/root-prefix :added "4.1"}
 (fact "links portable segments and merged adapters through package prefixes"
@@ -29,21 +29,24 @@
 (fact "merges js.net/dart.net and js.ui/dart.ui without merging package ownership"
   (let [js-mains (set (map :main (module-entries :js)))
         dart-mains (set (map :main (module-entries :dart)))]
-    [(every? js-mains ['xt.lang 'xt.event 'xt.substrate 'xt.net 'xt.db 'xt.ui
+    [(every? js-mains ['xt.lang 'xt.event 'xt.substrate 'xt.mcp 'xt.net 'xt.db 'xt.ui
                        'js.net 'js.ui 'js.react 'js.lib.figma])
-     (every? dart-mains ['xt.lang 'xt.event 'xt.substrate 'xt.net 'xt.db 'xt.ui
+     (every? dart-mains ['xt.lang 'xt.event 'xt.substrate 'xt.mcp 'xt.net 'xt.db 'xt.ui
                          'dart.net 'dart.ui])
      (set (map :target (module-entries :js)))
      (set (map :target (module-entries :dart)))])
   => [true true
       #{"libs/xt-lang" "libs/xt-event" "libs/xt-substrate" "libs/xt-net"
-        "libs/xt-db" "libs/xt-ui" "libs/xt-ui/lib"}
+        "libs/xt-mcp" "libs/xt-db" "libs/xt-ui" "libs/xt-ui/lib"}
       #{"libs/xt-lang/lib" "libs/xt-event/lib" "libs/xt-substrate/lib"
-        "libs/xt-net/lib" "libs/xt-db/lib" "libs/xt-ui/lib"}])
+        "libs/xt-mcp/lib" "libs/xt-net/lib" "libs/xt-db/lib" "libs/xt-ui/lib"}])
 
 ^{:refer xtalk.packages/js-package :added "4.1"}
 (fact "keeps internal JavaScript package versions in lockstep"
   (get-in (js-package :db) ["dependencies" "@xtalk/substrate"])
+  => VERSION
+
+  (get-in (js-package :mcp) ["dependencies" "@xtalk/substrate"])
   => VERSION
 
   (get-in (js-package :db) ["exports" "./*.js"])
@@ -104,7 +107,7 @@
     [(->> js (map :target) (filter seq) set)
      (last dart-root)])
   => [#{"libs/xt-lang" "libs/xt-event" "libs/xt-substrate"
-        "libs/xt-net" "libs/xt-db" "libs/xt-ui"}
+        "libs/xt-mcp" "libs/xt-net" "libs/xt-db" "libs/xt-ui"}
       "  - libs/xt-ui"])
 
 ^{:refer xtalk.packages/normalize-dart-module :added "4.1"}

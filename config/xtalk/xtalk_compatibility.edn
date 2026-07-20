@@ -5,24 +5,28 @@
  :js     {:include [xt.lang
                     xt.event
                     xt.substrate
+                    xt.mcp
                     xt.db
                     kmi.lang]
           :exclude [xt.sample]}
  :lua    {:include [xt.lang
                     xt.event
                     xt.substrate
+                    xt.mcp
                     xt.db
                     kmi.lang]
           :exclude [xt.sample]}
  :python {:include [xt.lang
                     xt.event
                     xt.substrate
+                    xt.mcp
                     xt.db
                     kmi.lang]
           :exclude [xt.sample]}
  :dart   {:include [xt.lang
                     xt.event
                     xt.substrate
+                    xt.mcp
                     xt.db
                     kmi.lang]
           :exclude [xt.sample]}

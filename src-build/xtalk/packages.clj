@@ -7,13 +7,14 @@
             [hara.runtime.basic.impl.process-dart :as dart-runtime]))
 
 (def VERSION "0.1.0")
-(def SEGMENTS [:lang :event :substrate :net :db :ui])
+(def SEGMENTS [:lang :event :substrate :mcp :net :db :ui])
 
 (def DEPENDENCIES
   {:lang []
    :event [:lang]
    :net [:lang]
    :substrate [:lang :event :net]
+   :mcp [:lang :substrate]
    :db [:lang :event :substrate :net]
    :ui [:lang :event :substrate]})
 
