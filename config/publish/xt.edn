@@ -46,6 +46,11 @@
            :title "xt.db walkthrough"
            :subtitle "binding framework and substrate walkthrough"}
 
+          xt-mcp
+          {:input "src-doc/documentation/xt/xt_mcp.clj"
+           :title "xt.mcp"
+           :subtitle "generic MCP descriptors, handlers, clients, and proxies"}
+
           xt-net
           {:input "src-doc/documentation/xt/xt_net.clj"
            :title "xt.net"

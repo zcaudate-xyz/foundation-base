@@ -58,7 +58,10 @@
   i-input)
 
 (defn.pg ^{:props [:security :definer]
-           :api/meta {:sb/grant :auth}}
+           :api/meta {:sb/grant :auth
+                      :mcp {:name "log_append_public"
+                            :title "Append public log"
+                            :description "Appends a log row for the current authenticated user."}}}
   log-append-public
   "Appends a log row for the current authenticated user."
   {:added "4.1.4"}

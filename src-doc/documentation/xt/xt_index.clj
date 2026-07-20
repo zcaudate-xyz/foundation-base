@@ -16,6 +16,10 @@
                        :title "xt.db"
                        :text "Text builders, system implementations, node clients/kernels/proxies, and walkthroughs."
                        :href "xt-db.html"}
+                      {:meta "MCP"
+                       :title "xt.mcp"
+                       :text "Generic MCP descriptors plus optional substrate node kernels, clients, and proxies."
+                       :href "xt-mcp.html"}
                       {:meta "Network"
                        :title "xt.net"
                        :text "HTTP fetch, SQL and Redis connections, websocket helpers, and Supabase integration."
