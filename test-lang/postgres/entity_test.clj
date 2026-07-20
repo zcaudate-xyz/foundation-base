@@ -1,16 +1,21 @@
 (ns postgres.entity-test
   (:use code.test)
   (:require [postgres.entity :as et :refer :all]
+            [hara.lang :as l]
             [hara.model.spec-postgres.entity-util :as ut]
             [hara.common.grammar-spec :as grammar-spec]
             [std.lib.env :as env]))
 
 (def +reduced-target+
-  (atom {:api/input {:class :1d/base
+  (atom {:id 'Social
+         :api/input {:class :1d/base
+                     :symname "Social"
                      :basis #{:table :id}}}))
 
 (def +full-target+
-  (atom {:api/input {:class :2d/base
+  (atom {:id 'Rev
+         :api/input {:class :2d/base
+                     :symname "Rev"
                      :basis #{:table :context :id}}}))
 
 (defn test-resolve
@@ -135,7 +140,8 @@
     (et/target-info 'Rev)
     => {:class :2d/base
         :tuple [2 :base]
-        :basis #{:table :context :id}}))
+        :basis #{:table :context :id}
+        :symname "Rev"}))
 
 ^{:refer postgres.entity/E-check-input :added "4.1"}
 (fact "checks entity-v2 input"
@@ -422,6 +428,59 @@
     (E-main-spec {:spec/addon {:key :k :priority 10}})
     => [:k {:type :ref :required true :priority nil :ref {:ns 'ns/Sym}} 10]))
 
+^{:refer postgres.entity/E-class-types :added "4.1"}
+(fact "infers linkage class types and allows complete manual replacement"
+  (with-test-entity-v2
+    (E-class-types {:class :0d/entry
+                    :symname "Brand"
+                    :basis #{:table :context}
+                    :addons [:social]})
+    => #{"Brand" "Global" "Social"}
+
+    (E-class-types {:class :1d/entry
+                    :symname "TaskRecord"
+                    :basis #{:table}
+                    :link {:for 'Social}})
+    => #{"TaskRecord" "Social"}
+
+    (E-class-types {:class :2d/entry
+                    :symname "AccessRole"
+                    :basis #{:table :context}
+                    :link {:for 'Social}})
+    => #{"Social"}
+
+    (E-class-types {:class :0d/entry
+                    :symname "Brand"
+                    :basis #{:table :context}
+                    :addons [:social]
+                    :class-types #{"Manual"}})
+    => #{"Manual"}
+
+    (E-class-types {:class :0d/entry
+                    :symname "Brand"
+                    :basis #{:table :context}
+                    :addons [:social]
+                    :class-types false})
+    => #{}
+
+    (E-class-types {:class :0d/entry
+                    :symname "Brand"
+                    :basis #{:table :context}
+                    :class-types ["Valid" 1]})
+    => (throws)))
+
+^{:refer postgres.entity/class-types :added "4.1"}
+(fact "collects stable class types from the active application"
+  (with-redefs [l/runtime-library (constantly :library)
+                l/get-book (fn [_ _]
+                             {:modules
+                              {'a {:static {:application ["app"]}
+                                   :code {'A {:api/class-types #{"Beta" "Alpha"}}}}
+                               'b {:static {:application ["other"]}
+                                   :code {'B {:api/class-types #{"Ignored"}}}}}})]
+    (class-types "app" ["Legacy" "Alpha"])
+    => ["Alpha" "Beta" "Legacy"]))
+
 ^{:refer postgres.entity/E :added "4.1"}
 (fact "upgrades to expanded contextual projections when needed"
   (with-test-entity-v2
@@ -429,7 +488,12 @@
                                           :addons [:rev]})))
           zero-cols  (map first (:raw (E {:class :0d/entry
                                           :addons [:rev]})))
-          two-cols   (map first (:raw (E {:class :2d/base})))]
+          two-cols   (map first (:raw (E {:class :2d/base})))
+          class-types (:api/class-types
+                       (E {:class :0d/entry
+                           :symname "Brand"
+                           :addons [:social]}))]
       entry-cols => (contains [:class-table :class-link :class-context :rev])
       zero-cols => (contains [:class-table :class-context :rev])
-      two-cols => (contains [:class-table :class-context :class-ref]))))
+      two-cols => (contains [:class-table :class-context :class-ref])
+      class-types => #{"Brand" "Global" "Social"})))

@@ -210,6 +210,24 @@
        \\ (\| (do [:create-type (. #{"schema"} #{"hello"}) :as-enum (quote ("a" "b" "c"))]))
        \\ :exception :when-others-then
        \\ :end \;
+       \\ :$$ :language "plpgsql" \;]
+
+  (common/pg-defenum
+   '(defenum ^{:static/schema "schema"}
+      hello
+      (!:eval (postgres.entity/class-types "app"))))
+  => '[:do :$$
+       \\ :begin
+       \\ (\| (do [:create-type (. #{"schema"} #{"hello"})
+                    :as-enum
+                    (!:eval
+                     (list
+                      (quote quote)
+                      (clojure.core/map
+                       std.lib.foundation/strn
+                       (postgres.entity/class-types "app"))))]))
+       \\ :exception :when-others-then
+       \\ :end \;
        \\ :$$ :language "plpgsql" \;])
 
 ^{:refer hara.model.spec-postgres.common/pg-defindex :added "4.0"}

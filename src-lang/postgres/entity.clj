@@ -32,7 +32,8 @@
              :access/auth
              :access/system
              :access/hidden
-             :none}})
+             :none}
+   :class-types #{nil? false? string? symbol? keyword? coll?}})
 
 (def ^:private +structural-columns+
   #{:class-table :class-link :class-context :class-ref})
@@ -177,10 +178,14 @@
   [ref]
   (let [resolved (resolve ref)]
     (when resolved
-      (let [input (:api/input @@resolved)]
-        {:class (:class input)
-         :tuple (parse-class (:class input))
-         :basis (public-input->basis input)}))))
+      (let [entry @@resolved
+            input (:api/input entry)
+            symname (or (:symname input)
+                        (some-> (:id entry) name))]
+        (cond-> {:class (:class input)
+                 :tuple (parse-class (:class input))
+                 :basis (public-input->basis input)}
+          symname (assoc :symname symname))))))
 
 (defn E-check-input
   [m]
@@ -570,6 +575,94 @@
                                  (name grammar-spec/*symbol*))
                     priority))))
 
+(defn normalise-class-types
+  [class-types]
+  (cond (or (nil? class-types)
+            (false? class-types))
+        #{}
+
+        (or (string? class-types)
+            (symbol? class-types)
+            (keyword? class-types))
+        #{(f/strn class-types)}
+
+        (coll? class-types)
+        (if (every? #(or (string? %)
+                         (symbol? %)
+                         (keyword? %))
+                    class-types)
+          (into #{} (map f/strn) class-types)
+          (f/error "Invalid class types" {:class-types class-types}))
+
+        :else
+        (f/error "Invalid class types" {:class-types class-types})))
+
+(defn E-relation-ref
+  [relation]
+  (let [for (:for relation)]
+    (if (vector? for)
+      (second for)
+      for)))
+
+(defn E-reference-addons
+  [addons]
+  (->> addons
+       (map E-addon-columns-single)
+       (filter #(= :ref (-> % :field :type)))))
+
+(defn E-auto-class-types
+  [{:keys [class symname basis entity link addons]
+    :as m}]
+  (let [[depth] (parse-class class)
+        reference-addons (E-reference-addons addons)
+        relations (concat (keep identity [(E-relation-ref entity)
+                                          (E-relation-ref link)])
+                          (keep #(-> % :field :ref :ns)
+                                reference-addons))
+        linkage? (or entity link (seq reference-addons))
+        own-type (when (and linkage?
+                            (contains? #{0 1} depth))
+                   symname)
+        context-type (when (and linkage?
+                                (contains? basis :context)
+                                (contains? #{[0 :entry] [1 :entry]}
+                                           (parse-class class)))
+                       (or (get-in m [:entity :context]) "Global"))
+        target-types (keep (fn [ref]
+                             (let [{:keys [tuple symname]} (target-info ref)]
+                               (when (and (contains? #{0 1} (first tuple))
+                                          symname)
+                                 symname)))
+                           relations)]
+    (normalise-class-types
+     (concat (keep identity [own-type context-type])
+             target-types))))
+
+(defn E-class-types
+  [m]
+  (if (contains? m :class-types)
+    (normalise-class-types (:class-types m))
+    (E-auto-class-types m)))
+
+(defn class-types
+  ([]
+   (class-types (ut/default-application (env/ns-sym)) []))
+  ([application]
+   (class-types application []))
+  ([application defaults]
+   (let [book (l/get-book (l/runtime-library) :postgres)]
+     (->> (:modules book)
+          vals
+          (filter (fn [module]
+                    (some #{application}
+                          (get-in module [:static :application]))))
+          (mapcat (comp vals :code))
+          (mapcat :api/class-types)
+          (concat defaults)
+          normalise-class-types
+          sort
+          vec))))
+
 (defn E
   [{:keys [application]
     :as m}]
@@ -595,6 +688,7 @@
                             :entity (normalise-fn (:entity m)))
         _            (E-check-input m)
         m            (assoc m :basis (E-resolve-basis m))
-        out          (E-main m)
+        out          (assoc (E-main m)
+                            :api/class-types (E-class-types m))
         _            (E-main-spec m)]
     out))

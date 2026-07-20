@@ -434,7 +434,15 @@
   [[_ sym array]]
   (let [{:static/keys [schema]} (meta sym)
         ttok  (pg-full-token sym schema)
-        vals  (list 'quote (map f/strn array))]
+        vals  (if (and (seq? array)
+                       (= '!:eval (first array)))
+                (list '!:eval
+                      (list 'list
+                            (list 'quote 'quote)
+                            (list 'clojure.core/map
+                                  'std.lib.foundation/strn
+                                  (second array))))
+                (list 'quote (map f/strn array)))]
     `[:do :$$
       \\ :begin
       \\ (\| (~'do [:create-type ~ttok :as-enum ~vals]))
