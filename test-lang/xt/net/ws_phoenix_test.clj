@@ -238,7 +238,8 @@
         "topic" "realtime:room:db-send"
         "payload" {"event" "my-event",
                    "type" "broadcast",
-                   "meta" {"id" string?},
+                   ;; Realtime versions differ on whether a separate metadata
+                   ;; object is present; the stable message id lives here.
                    "payload"
                    {"hello" "from postgres",
                     "id" string?}}}))
