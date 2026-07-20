@@ -30,8 +30,8 @@
             url (playground/play-url rt)]
         (println "xt.ui React Playground URL:" url)
         script => #"xt.ui React Playground"
-        script => #"render-ui-node"
-        script => #"react-registry"
+        script => #"render_ui_node"
+        script => #"react_registry"
         script => #"setStage"
         (url-reachable? url 3000) => true)
       (finally

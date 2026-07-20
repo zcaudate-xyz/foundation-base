@@ -11,14 +11,6 @@
              [xt.ui.state.core :as state]
              [js.react :as r]]})
 
-(defn.js render-children
-  "renders a UiNode children array to React children"
-  [registry children]
-  (when (xt/x:nil? children)
-    (return nil))
-  (return (. children (map (fn [child]
-                             (return (-/render-ui-node registry child)))))))
-
 (defn.js render-ui-node
   "recursively turns a UiNode descriptor into a React element"
   [registry node]
@@ -37,7 +29,13 @@
   (var renderer (xt/x:get-key registry component-id))
   (when (xt/x:nil? renderer)
     (return null))
-  (return (renderer props (-/render-children registry children))))
+  (return
+   (renderer props
+             (if (xt/x:nil? children)
+               nil
+               (. children
+                  (map (fn [child]
+                         (return (-/render-ui-node registry child)))))))))
 
 (defn.js react-registry
   "minimal registry mapping portable xt.ui components to React elements"
@@ -147,7 +145,7 @@
                   (return (xt/x:obj-assign
                            s
                            {"items" (. items (filter (fn [item i]
-                                                       (return (not= i idx)))))})))))))}
+                                                       (return (not= i idx)))))}))))))}
     {}
     {})))
 

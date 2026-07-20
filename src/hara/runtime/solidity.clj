@@ -85,7 +85,7 @@
                (compile-solc/compile-module-code m))]
     (if (or no-lines (:no-lines m))
       (env/p  code)
-      (env/pl code))))
+      (env/p (env/pl-add-lines code)))))
 
 (defn rt:deploy-ptr
   "deploys a ptr a contract"

@@ -316,7 +316,8 @@
                (promise/x:promise-then
                 (fn [deleted]
                   (repl/notify deleted))))))))
-  => {"status" 200 "http_status" 200})
+  ;; GoTrue returns a successful empty JSON body for this endpoint.
+  => {})
 
 ^{:refer xt.db.node.client-supabase/admin-generate-link :added "4.1"}
 (fact "generates an admin link on the service"
@@ -444,7 +445,8 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {"status" 200 "http_status" 200})
+  ;; GoTrue returns a successful empty JSON body for this endpoint.
+  => {})
 
 ^{:refer xt.db.node.client-supabase/recovery :added "4.1"}
 (fact "requests a recovery email on the service"
@@ -459,7 +461,8 @@
         (promise/x:promise-then
          (fn [out]
            (repl/notify out)))))
-  => {"status" 200 "http_status" 200})
+  ;; GoTrue returns a successful empty JSON body for this endpoint.
+  => {})
 
 ^{:refer xt.db.node.client-supabase/settings :added "4.1"}
 (fact "reads auth settings on the service"

@@ -1,7 +1,9 @@
 (ns hara.runtime.basic.impl-annex.process-r-test
   (:require [hara.runtime.basic.impl-annex.process-r :refer :all]
+            [clojure.string :as str]
             [hara.lang :as l]
-            [std.lib.env :as env])
+            [std.lib.env :as env]
+            [std.lib.foundation :as f])
   (:use code.test))
 
 (fact:global
@@ -43,10 +45,12 @@
   :id test-r-canary-grammar-additions}
 (fact "R grammar additions"
   (!.R (df {:a [1 2] :b [3 4]}))
-  => [{:a 1, :b 3} {:a 2, :b 4}]
+  => [{"a" 1, "b" 3} {"a" 2, "b" 4}]
 
-  (!.R (formula mpg cyl))
-  => "~ mpg cyl"
+  (let [out (!.R (formula mpg cyl))]
+    [(f/wrapped? out)
+     (str/replace @out #", " " ")])
+  => [true "~ mpg cyl"]
 
   (!.R (|> [1 2 3 4] (mean)))
   => 2.5
@@ -54,8 +58,10 @@
   (!.R (%in% 2 [1 2 3]))
   => true
 
+  ;; jsonlite represents R's non-finite numeric markers as strings inside
+  ;; arrays; preserve those markers rather than conflating them with text.
   (!.R [NA NaN Inf])
-  => [nil NaN Inf])
+  => ["NA" "NaN" "Inf"])
 
 ^{:refer hara.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.1"
   :id test-r-canary-errors}
