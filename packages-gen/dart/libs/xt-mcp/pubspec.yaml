@@ -1,0 +1,10 @@
+name: xtalk_mcp
+version: 0.1.0
+description: Generated XTalk mcp runtime
+publish_to: none
+resolution: workspace
+environment:
+  sdk: '>=3.6.0 <4.0.0'
+dependencies:
+  xtalk_lang: 0.1.0
+  xtalk_substrate: 0.1.0

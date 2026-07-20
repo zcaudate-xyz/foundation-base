@@ -3,9 +3,10 @@ publish_to: none
 environment:
   sdk: '>=3.6.0 <4.0.0'
 workspace:
-  - lang
-  - event
-  - substrate
-  - net
-  - db
-  - ui
+  - libs/xt-lang
+  - libs/xt-event
+  - libs/xt-substrate
+  - libs/xt-mcp
+  - libs/xt-net
+  - libs/xt-db
+  - libs/xt-ui

@@ -1,0 +1,9 @@
+name: xtalk_event
+version: 0.1.0
+description: Generated XTalk event runtime
+publish_to: none
+resolution: workspace
+environment:
+  sdk: '>=3.6.0 <4.0.0'
+dependencies:
+  xtalk_lang: 0.1.0

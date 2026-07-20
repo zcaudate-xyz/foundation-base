@@ -1,0 +1,19 @@
+{
+  "name": "@xtalk/substrate",
+  "version": "0.1.0",
+  "description": "Generated XTalk substrate runtime",
+  "license": "MIT",
+  "files": [
+    "*.js",
+    "**/*.js"
+  ],
+  "exports": {
+    "./*.js": "./*.js",
+    "./*": "./*.js"
+  },
+  "dependencies": {
+    "@xtalk/event": "0.1.0",
+    "@xtalk/lang": "0.1.0",
+    "@xtalk/net": "0.1.0"
+  }
+}

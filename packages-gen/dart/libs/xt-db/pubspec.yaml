@@ -1,0 +1,12 @@
+name: xtalk_db
+version: 0.1.0
+description: Generated XTalk db runtime
+publish_to: none
+resolution: workspace
+environment:
+  sdk: '>=3.6.0 <4.0.0'
+dependencies:
+  xtalk_lang: 0.1.0
+  xtalk_event: 0.1.0
+  xtalk_substrate: 0.1.0
+  xtalk_net: 0.1.0

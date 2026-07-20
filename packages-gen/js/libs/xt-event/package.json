@@ -1,0 +1,17 @@
+{
+  "name": "@xtalk/event",
+  "version": "0.1.0",
+  "description": "Generated XTalk event runtime",
+  "license": "MIT",
+  "files": [
+    "*.js",
+    "**/*.js"
+  ],
+  "exports": {
+    "./*.js": "./*.js",
+    "./*": "./*.js"
+  },
+  "dependencies": {
+    "@xtalk/lang": "0.1.0"
+  }
+}
