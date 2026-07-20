@@ -45,8 +45,8 @@
 (defn.xt input
   [id label value action-id disabled]
   (return
-   (view/node "ui/column" {"gap" 6}
-              [(view/node "ui/label" {"value" label} [])
+   (view/node "ui/column" {"class" "flex flex-col gap-1.5"}
+              [(view/node "ui/label" {"value" label "for" id} [])
                (view/node "ui/input"
                           {"id" id
                            "value" (or value "")
@@ -81,13 +81,13 @@
   (var error (xt/x:get-key snapshot "error"))
   (var auth-card
        (view/node
-        "ui/card" {"gap" 14 "padding" 20}
+        "ui/card" {"class" "flex flex-col gap-3.5 p-5"}
         [(-/input "email" "Email" (xt/x:get-key snapshot "email")
                    (-/action-id "set-email") signed-in)
          (-/input "password" "Password" (xt/x:get-key snapshot "password")
                    (-/action-id "set-password") signed-in)
          (view/node
-          "ui/row" {"gap" 10}
+          "ui/row" {"class" "flex flex-row gap-2.5"}
           [(-/button "Create account" (-/action-id "sign-up")
                       (or signed-in (xt/x:not-nil? pending)) (== pending "sign-up"))
            (-/button "Sign in" (-/action-id "login")
@@ -95,11 +95,11 @@
            (-/button "Sign out" (-/action-id "logout")
                       (or (not signed-in) (xt/x:not-nil? pending)) (== pending "logout"))])
          (:? error
-             (view/node "ui/alert" {"tone" "danger"} [error])
+             (view/node "ui/alert" {"variant" "destructive"} [error])
              nil)]))
   (var profile-card
        (view/node
-        "ui/card" {"gap" 14 "padding" 20}
+        "ui/card" {"class" "flex flex-col gap-3.5 p-5"}
         [(view/node "ui/title" {"value" "Current session"} [])
          (view/node "ui/text"
                     {"value" (:? signed-in
@@ -115,7 +115,7 @@
                     (== pending "change-profile"))]))
   (return
    (view/node
-    "ui/column" {"gap" 18 "padding" 24 "class" "auth-profile"}
+    "ui/column" {"class" "auth-profile flex flex-col gap-4 p-6"}
     [(view/node "ui/title" {"value" "Supabase auth profile"} [])
      (view/node "ui/description"
                 {"value" "Authentication and profile state are owned by xt.substrate."}

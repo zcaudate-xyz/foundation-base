@@ -69,6 +69,74 @@
    [missing cyclic])
   => [true true])
 
+^{:refer dart.ui.view.backend/props :added "4.1"}
+(fact "maps classes and variants into the Wind className"
+  (!.dt
+   (var node (substrate/node-create {}))
+   (var spec (view/view-spec "sample" {} nil))
+   (var rt (runtime/runtime-create
+            node spec
+            (fn [_]
+              (return
+               (view/node "ui/column" {"class" "gap-4 p-5"}
+                          [(view/node "ui/button" {"variant" "destructive"}
+                                      ["Delete"])])))
+            {"space_id" "app"}))
+   (var bundle (runtime/prepare rt))
+   (var json (xt/x:get-key bundle "json"))
+   (var button (xt/x:first (xt/x:get-key json "children")))
+   [(xt/x:get-key (xt/x:get-key json "props") "className")
+    (xt/x:get-key (xt/x:get-key button "props") "className")])
+  => ["flex flex-col gap-4 p-5" "bg-red-600 text-white"])
+
+^{:refer dart.ui.view.backend/native-entry :added "4.1"}
+(fact "rejects fg/ platform ids on the Wind backend"
+  (!.dt
+   (var node (substrate/node-create {}))
+   (var spec (view/view-spec "sample" {} nil))
+   (var rt (runtime/runtime-create node spec (fn [_] nil) {"space_id" "app"}))
+   (var rejected false)
+   (try
+     (runtime/resolve-node rt (view/node "fg/button" {} []) {})
+     (catch err (:= rejected true)))
+   rejected)
+  => true)
+
+^{:refer dart.ui.view.polyfill/registry :added "4.1"}
+(fact "lowers the table family to layout and text primitives"
+  (!.dt
+   (var node (substrate/node-create {}))
+   (var spec (view/view-spec "sample" {} nil))
+   (var rt (runtime/runtime-create
+            node spec
+            (fn [_]
+              (return
+               (view/node "ui/table" {}
+                          [(view/node "ui/table-row" {}
+                                      [(view/node "ui/table-cell" {"value" "a"} [])])])))
+            {"space_id" "app"}))
+   (var json (xt/x:get-key (runtime/prepare rt) "json"))
+   (var row (xt/x:first (xt/x:get-key json "children")))
+   (var cell (xt/x:first (xt/x:get-key row "children")))
+   [(xt/x:get-key json "type")
+    (xt/x:get-key (xt/x:get-key row "props") "className")
+    (xt/x:get-key cell "type")
+    (xt/x:get-key (xt/x:get-key cell "props") "text")])
+  => ["WDiv" "flex flex-row " "WText" "a"])
+
+^{:refer dart.ui.view.runtime/prepare-node :added "4.1"}
+(fact "prepares hidden nodes as empty text"
+  (!.dt
+   (var node (substrate/node-create {}))
+   (var spec (view/view-spec "sample" {} nil))
+   (var rt (runtime/runtime-create
+            node spec
+            (fn [_] (return (view/node "ui/text" {"value" "x" "hidden" true} [])))
+            {"space_id" "app"}))
+   (var bundle (runtime/prepare rt))
+   (xt/x:get-key (xt/x:get-key (xt/x:get-key bundle "json") "props") "text"))
+  => "")
+
 ^{:refer dart.ui.view.runtime/local-set :added "4.1"}
 (fact "keeps explicitly local bindings inside the Wind adapter"
   (!.dt

@@ -66,7 +66,7 @@
   (var component-id (xt/x:get-key node "component"))
   (var registry (xt/x:get-key runtime "registry"))
   (var override (xt/x:get-key (xt/x:get-key registry "overrides") component-id))
-  (var native (xt/x:get-key (xt/x:get-key registry "native") component-id))
+  (var native (backend/native-entry registry component-id))
   (when (or override native)
     (return node))
   (when (xt/x:has-key? seen component-id)
@@ -85,6 +85,8 @@
   (when (xt/x:is-array? node)
     (return (. node (map (fn [child]
                            (return (-/render-node runtime child)))))))
+  (when (== true (xt/x:get-key (or (xt/x:get-key node "props") {}) "hidden"))
+    (return nil))
   (:= node (-/resolve-node runtime node {}))
   (var component-id (xt/x:get-key node "component"))
   (var registry (xt/x:get-key runtime "registry"))
@@ -93,7 +95,7 @@
   (var override (xt/x:get-key (xt/x:get-key registry "overrides") component-id))
   (when (xt/x:is-function? override)
     (return (override runtime props children)))
-  (var entry (xt/x:get-key (xt/x:get-key registry "native") component-id))
+  (var entry (backend/native-entry registry component-id))
   (return (backend/render-native runtime entry props children)))
 
 (defn.js render

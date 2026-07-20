@@ -13,7 +13,8 @@
              [xt.event.base-model :as event-model]
              [xt.substrate.base-space :as node-space]
              [xt.substrate.base-util :as base-util]
-             [xt.substrate.page-core :as page-core]]})
+             [xt.substrate.page-core :as page-core]
+             [xt.substrate.view-catalog :as catalog]]})
 
 (def$.xt VERSION 1)
 (def$.xt STATE_SLOT "view")
@@ -89,7 +90,7 @@
   (return true))
 
 (defn.xt validate-node
-  [value]
+  [value opts]
   (when (xt/x:nil? value)
     (return true))
   (when (or (xt/x:is-string? value)
@@ -97,22 +98,33 @@
     (return true))
   (when (xt/x:is-array? value)
     (xt/for:array [child value]
-      (-/validate-node child))
+      (-/validate-node child opts))
     (return true))
   (when (not (xt/x:is-object? value))
     (xt/x:err "invalid view node"))
-  (when (not (xt/x:is-string? (xt/x:get-key value "component")))
+  (var component-id (xt/x:get-key value "component"))
+  (when (not (xt/x:is-string? component-id))
     (xt/x:err "view node requires component"))
+  (cond (catalog/has-component? component-id)
+        (catalog/validate-props component-id (xt/x:get-key value "props"))
+
+        (catalog/platform-id? component-id)
+        (when (xt/x:get-key (or opts {}) "portable")
+          (xt/x:err (xt/x:cat "platform view component not portable - "
+                              component-id)))
+
+        :else
+        (xt/x:err (xt/x:cat "unknown view component - " component-id)))
   (when (not (-/json-safe? (xt/x:get-key value "props")))
     (xt/x:err (xt/x:cat "view props are not serializable - "
-                        (xt/x:get-key value "component"))))
+                        component-id)))
   (xt/for:array [child (or (xt/x:get-key value "children") [])]
-    (-/validate-node child))
+    (-/validate-node child opts))
   (return true))
 
-(defn.xt validate
+(defn.xt validate-with
   "validates a view specification and its current concrete root"
-  [spec]
+  [spec opts]
   (when (not (xt/x:is-object? spec))
     (xt/x:err "view spec must be an object"))
   (when (not= -/VERSION (xt/x:get-key spec "version"))
@@ -122,8 +134,18 @@
     (xt/x:err "view spec requires id"))
   (xt/for:object [[binding-id binding] (or (xt/x:get-key spec "bindings") {})]
     (-/validate-binding binding-id binding))
-  (-/validate-node (xt/x:get-key spec "root"))
+  (-/validate-node (xt/x:get-key spec "root") opts)
   (return true))
+
+(defn.xt validate
+  "validates a view specification, allowing platform (`fg/`) components"
+  [spec]
+  (return (-/validate-with spec nil)))
+
+(defn.xt validate-portable
+  "validates a view specification, rejecting platform (`fg/`) components"
+  [spec]
+  (return (-/validate-with spec {"portable" true})))
 
 (defn.xt state-container
   "ensures substrate-owned state for one view in a node space"
