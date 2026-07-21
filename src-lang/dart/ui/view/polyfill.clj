@@ -7,6 +7,7 @@
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.substrate.view :as view]
              [xt.substrate.view-catalog :as catalog]]})
 
@@ -26,7 +27,7 @@
   [source-id target-id]
   (var lowering
        (fn [node]
-         (var props (xt/x:obj-clone (or (xt/x:get-key node "props") {})))
+         (var props (xtd/obj-clone (or (xt/x:get-key node "props") {})))
          (var classes (catalog/variant-classes source-id
                                                (xt/x:get-key props "variant")))
          (when (xt/x:not-nil? classes)
@@ -57,7 +58,7 @@
     "ui/table-cell"       (-/lower-to "ui/text")
     "ui/textarea"
     (fn [node]
-      (var props (xt/x:obj-clone (xt/x:get-key node "props")))
+      (var props (xtd/obj-clone (xt/x:get-key node "props")))
       (xt/x:set-key props "maxLines" (or (xt/x:get-key props "rows") 4))
       (xt/x:del-key props "rows")
       (return (view/node "ui/input" props [])))}))

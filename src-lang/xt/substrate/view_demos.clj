@@ -12,6 +12,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.substrate.view :as view]]})
 
 (defn.xt sink-section
@@ -161,7 +162,7 @@
                                  (view/node "ui/table-head" {"value" "Price"} [])
                                  (view/node "ui/table-head" {"value" "Size"} [])])])
          (view/node "ui/table-body" {}
-                    (xt/x:arr-map
+                    (xtd/arr-map
                      fills
                      (fn [fill]
                        (return

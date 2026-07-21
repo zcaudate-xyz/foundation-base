@@ -89,8 +89,14 @@
              "props" {"text" (xt/x:to-string node)}
              "children" []}))
   (when (xt/x:is-array? node)
-    (return (xtd/arr-map node (fn [child]
-                                (return (-/prepare-node runtime child state))))))
+    (var out [])
+    (xt/for:array [child node]
+      (var prepared (-/prepare-node runtime child state))
+      (if (xt/x:is-array? prepared)
+        (xt/for:array [c prepared]
+          (xt/x:arr-push out c))
+        (xt/x:arr-push out prepared)))
+    (return out))
   (when (== true (xt/x:get-key (or (xt/x:get-key node "props") {}) "hidden"))
     (return {"type" "WText"
              "props" {"text" ""}
@@ -112,8 +118,8 @@
 (defn.dt prepare
   "returns the WDynamic json/action bundle for the current substrate snapshot"
   [runtime]
-  (var snapshot (-/snapshot runtime))
-  (var concrete ((xt/x:get-key runtime "render_fn") snapshot))
+  (var snap (-/snapshot runtime))
+  (var concrete ((xt/x:get-key runtime "render_fn") snap))
   (view/validate (view/view-spec (xt/x:get-key (xt/x:get-key runtime "spec") "id")
                                 (xt/x:get-key (xt/x:get-key runtime "spec") "bindings")
                                 concrete))

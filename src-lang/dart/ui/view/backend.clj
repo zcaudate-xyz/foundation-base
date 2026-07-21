@@ -8,6 +8,7 @@
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as xts]
              [xt.substrate.view-catalog :as catalog]]})
 
@@ -72,9 +73,9 @@
           (== key "hidden") nil
           (== key "variant") nil
           (== key "on_press")
-          (xt/x:obj-assign out (-/action-add runtime state "onTap" value false))
+          (xtd/obj-assign out (-/action-add runtime state "onTap" value false))
           (== key "on_change")
-          (xt/x:obj-assign out (-/action-add runtime state "onChange" value true))
+          (xtd/obj-assign out (-/action-add runtime state "onChange" value true))
           :else (xt/x:set-key out key value)))
   (var variant (xt/x:get-key input "variant"))
   (when (xt/x:not-nil? variant)
@@ -96,7 +97,7 @@
   (return out))
 
 (defn.dt prepare-native
-  [runtime component-id entry props children state]
+  [runtime component-id entry input children state]
   (return {"type" (xt/x:get-key entry "type")
-           "props" (-/props runtime component-id props state entry)
+           "props" (-/props runtime component-id input state entry)
            "children" children}))

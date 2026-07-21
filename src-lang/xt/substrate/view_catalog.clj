@@ -123,10 +123,10 @@
   [component-id]
   (when (-/platform-id? component-id)
     (return "platform"))
-  (var entry (-/entry component-id))
-  (when (xt/x:nil? entry)
+  (var e (-/entry component-id))
+  (when (xt/x:nil? e)
     (return nil))
-  (return (xt/x:get-key entry "band")))
+  (return (xt/x:get-key e "band")))
 
 (defn.xt portable?
   "checks whether a component id is portable across platforms"
@@ -138,10 +138,10 @@
 (defn.xt variant-classes
   "returns the shared Tailwind class bundle for a component variant"
   [component-id variant]
-  (var entry (-/entry component-id))
-  (when (xt/x:nil? entry)
+  (var e (-/entry component-id))
+  (when (xt/x:nil? e)
     (return nil))
-  (var variants (xt/x:get-key entry "variants"))
+  (var variants (xt/x:get-key e "variants"))
   (when (xt/x:nil? variants)
     (return nil))
   (return (xt/x:get-key variants variant)))
@@ -188,9 +188,9 @@
 (defn.xt validate-props
   "validates the props of a portable component node against the catalog"
   [component-id props]
-  (var entry (-/entry component-id))
-  (var eprops (xt/x:get-key entry "props"))
-  (var events (xt/x:get-key entry "events"))
+  (var e (-/entry component-id))
+  (var eprops (xt/x:get-key e "props"))
+  (var events (xt/x:get-key e "events"))
   (xt/for:object [[prop value] (or props {})]
     (cond (xt/x:has-key? (or events {}) prop)
           (-/validate-action component-id prop value)
@@ -203,7 +203,7 @@
           (do (-/validate-prop-type component-id prop
                                     (xt/x:get-key eprops prop) value)
               (when (== prop "variant")
-                (var variants (xt/x:get-key entry "variants"))
+                (var variants (xt/x:get-key e "variants"))
                 (when (and (xt/x:not-nil? variants)
                            (not (xt/x:has-key? variants value)))
                   (xt/x:err (xt/x:cat "unknown view variant - "

@@ -4,9 +4,13 @@
    VIEW-KITCHEN-SINK-JS emits the browser app (module.graph -> src/, esbuild
    bundle -> public/app.js, static index.html + Tailwind CDN). VIEW-KITCHEN-SINK-DART
    emits a self-contained Dart console package that prepares the same demo maps
-   through dart.ui.view and prints the bundle summary."
+   through dart.ui.view and prints the bundle summary. VIEW-KITCHEN-SINK-FLUTTER
+   emits a Flutter package that renders the same demo through fluttersdk_wind's
+   WDynamic widget (flutter create scaffold + lib/main.dart host)."
   (:use code.test)
   (:require [clojure.string :as str]
+            [std.fs :as fs]
+            [std.lib.os :as os]
             [std.make :as make :refer [def.make]]
             [xtalk.packages :as packages]
             [play.view-001-kitchen-sink.app]))
@@ -94,22 +98,22 @@
 
 (defn dart-root-prefix
   "maps cross-namespace imports onto the single view_demos package"
-  []
+  [package-name]
   (into (array-map)
         (map (fn [[main target]]
-               [main (str "package:view_demos/"
+               [main (str "package:" package-name "/"
                           (str/replace target "lib/" ""))])
              +dart-directories+)))
 
 (defn dart-code-options
-  []
+  [package-name]
   {:extra-namespaces false
    :link {:path-suffix ".dart"
-          :root-prefix (dart-root-prefix)}
+          :root-prefix (dart-root-prefix package-name)}
    :transforms {:full [packages/normalize-dart-module]}})
 
 (defn dart-entries
-  []
+  [package-name]
   (vec
    (concat
     (map (fn [[main target]]
@@ -118,7 +122,7 @@
             :search [(str "src-lang/" (str/replace (str main) "." "/"))]
             :main main
             :target target
-            :emit {:code (dart-code-options)
+            :emit {:code (dart-code-options package-name)
                    :lang/format :full}})
          +dart-directories+)
     [{:type :module.single
@@ -126,7 +130,7 @@
       :main 'xt.substrate
       :target "lib/xt_substrate"
       :file "substrate.dart"
-      :emit {:code (dart-code-options)
+      :emit {:code (dart-code-options package-name)
              :lang/format :full}}])))
 
 (def +dart-pubspec+
@@ -144,7 +148,7 @@
    ""
    "import 'package:view_demos/xt_substrate/substrate.dart' as substrate;"
    "import 'package:view_demos/xt_substrate/view.dart' as view;"
-   "import 'package:view_demos/xt_substrate/view_demos.dart' as demos;"
+   "import 'package:view_demos/xt_substrate/view-demos.dart' as demos;"
    "import 'package:view_demos/xt_ui/view/runtime.dart' as runtime;"
    ""
    "int countNodes(dynamic value) {"
@@ -164,24 +168,24 @@
    "}"
    ""
    "void main() {"
-   "  final node = substrate.xt_substrate____node_create(<dynamic, dynamic>{});"
-   "  final spec = view.xt_substrate_view____view_spec('demo', <dynamic, dynamic>{}, null);"
-   "  final rt = runtime.dart_ui_view_runtime____runtime_create("
-   "      node, spec, demos.xt_substrate_view_demos____kitchen_sink_render, <dynamic, dynamic>{'space_id': 'app'});"
-   "  final bundle = runtime.dart_ui_view_runtime____prepare(rt);"
+   "  final node = substrate.node_create(<dynamic, dynamic>{});"
+   "  final spec = view.view_spec('demo', <dynamic, dynamic>{}, null);"
+   "  final rt = runtime.runtime_create("
+   "      node, spec, demos.kitchen_sink_render, <dynamic, dynamic>{'space_id': 'app'});"
+   "  final bundle = runtime.prepare(rt);"
    "  final json = bundle['json'] as Map;"
    "  final actions = bundle['actions'] as Map;"
-   "  print('root type      : \\${json['type']}');"
-   "  print('node count     : \\${countNodes(json)}');"
-   "  print('action count   : \\${actions.keys.length}');"
-   "  print('portable valid : \\${view.xt_substrate_view____validate_portable(demos.xt_substrate_view_demos____kitchen_sink_spec())}');"
+   "  print('root type      : ${json['type']}');"
+   "  print('node count     : ${countNodes(json)}');"
+   "  print('action count   : ${actions.keys.length}');"
+   "  print('portable valid : ${view.validate_portable(demos.kitchen_sink_spec())}');"
    "  var escapeRejected = false;"
    "  try {"
-   "    view.xt_substrate_view____validate_portable(demos.xt_substrate_view_demos____web_escape_spec());"
+   "    view.validate_portable(demos.web_escape_spec());"
    "  } catch (_) {"
    "    escapeRejected = true;"
    "  }"
-   "  print('escape rejected: \\$escapeRejected');"
+   "  print('escape rejected: $escapeRejected');"
    "  if (!escapeRejected) {"
    "    throw StateError('web-escape spec should be rejected by validate-portable');"
    "  }"
@@ -211,19 +215,218 @@
                        :main +dart-main+}
                       {:type :makefile
                        :main +dart-makefile+}]}
-   :default (dart-entries)})
+   :default (dart-entries "view_demos")})
+
+;;
+;; Flutter
+;;
+
+(def +flutter-build-root+ ".build/view-kitchen-sink-flutter")
+
+(def +flutter-pubspec+
+  ["name: view_kitchen_sink"
+   "version: 0.1.0"
+   "description: Flutter host rendering the xt.substrate.view kitchen sink through fluttersdk_wind"
+   "publish_to: none"
+   "environment:"
+   "  sdk: '>=3.6.0 <4.0.0'"
+   "dependencies:"
+   "  flutter:"
+   "    sdk: flutter"
+   "  fluttersdk_wind: ^1.2.0"
+   "dev_dependencies:"
+   "  flutter_test:"
+   "    sdk: flutter"
+   "flutter:"
+   "  uses-material-design: true"])
+
+(def +flutter-main-dart+
+  ["// Flutter host for the xt.substrate.view kitchen-sink demo."
+   "// Prepares the Wind json/actions bundle through dart.ui.view and renders"
+   "// it with fluttersdk_wind's WDynamic widget."
+   "import 'package:flutter/material.dart';"
+   "import 'package:fluttersdk_wind/fluttersdk_wind.dart';"
+   ""
+   "import 'package:view_kitchen_sink/xt_substrate/substrate.dart' as substrate;"
+   "import 'package:view_kitchen_sink/xt_substrate/view.dart' as view;"
+   "import 'package:view_kitchen_sink/xt_substrate/view-demos.dart' as demos;"
+   "import 'package:view_kitchen_sink/xt_ui/view/runtime.dart' as runtime;"
+   ""
+   "void main() {"
+   "  runApp(const KitchenSinkApp());"
+   "}"
+   ""
+   "class KitchenSinkApp extends StatelessWidget {"
+   "  const KitchenSinkApp({super.key});"
+   ""
+   "  @override"
+   "  Widget build(BuildContext context) {"
+   "    return WindTheme("
+   "      data: WindThemeData(),"
+   "      builder: (context, controller) => MaterialApp("
+   "        debugShowCheckedModeBanner: false,"
+   "        title: 'xt.substrate.view kitchen sink',"
+   "        theme: controller.toThemeData(),"
+   "        home: const KitchenSinkScreen(),"
+   "      ),"
+   "    );"
+   "  }"
+   "}"
+   ""
+   "class KitchenSinkScreen extends StatefulWidget {"
+   "  const KitchenSinkScreen({super.key});"
+   ""
+   "  @override"
+   "  State<KitchenSinkScreen> createState() => _KitchenSinkScreenState();"
+   "}"
+   ""
+   "class _KitchenSinkScreenState extends State<KitchenSinkScreen> {"
+   "  late final dynamic rt;"
+   ""
+   "  @override"
+   "  void initState() {"
+   "    super.initState();"
+   "    final node = substrate.node_create(<dynamic, dynamic>{});"
+   "    final spec = view.view_spec('demo', <dynamic, dynamic>{}, null);"
+   "    rt = runtime.runtime_create("
+   "        node, spec, demos.kitchen_sink_render, <dynamic, dynamic>{'space_id': 'app'});"
+   "    rt['invalidate'] = (dynamic snapshot, dynamic revision, dynamic event) {"
+   "      if (mounted) setState(() {});"
+   "    };"
+   "  }"
+   ""
+   "  @override"
+   "  Widget build(BuildContext context) {"
+   "    final bundle = runtime.prepare(rt);"
+   "    return Scaffold("
+   "      body: SafeArea("
+   "        child: SingleChildScrollView("
+   "          child: WDynamic("
+   "            json: Map<String, dynamic>.from(bundle['json'] as Map),"
+   "            actions: Map<String, Function>.from(bundle['actions'] as Map),"
+   "            onError: (type, error) => Center("
+   "              child: Text('Unable to render $type: $error'),"
+   "            ),"
+   "            onUnknownWidget: (type, props) => Center("
+   "              child: Text('Unsupported Wind widget: $type'),"
+   "            ),"
+   "          ),"
+   "        ),"
+   "      ),"
+   "    );"
+   "  }"
+   "}"])
+
+(def +flutter-widget-test+
+  ["import 'package:flutter_test/flutter_test.dart';"
+   "import 'package:fluttersdk_wind/fluttersdk_wind.dart';"
+   ""
+   "import 'package:view_kitchen_sink/main.dart';"
+   ""
+   "void main() {"
+   "  testWidgets('kitchen sink mounts through WDynamic', (tester) async {"
+   "    await tester.pumpWidget(const KitchenSinkApp());"
+   "    await tester.pump();"
+   ""
+   "    expect(find.byType(WDynamic), findsOneWidget);"
+   "  });"
+   "}"])
+
+(def +flutter-makefile+
+  [[:.PHONY {:- ["get" "run-macos" "run-web" "test"]}]
+   [:get ["flutter pub get"]]
+   [:run-macos ["flutter run -d macos"]]
+   [:run-web ["flutter run -d chrome"]]
+   [:test ["flutter test"]]])
+
+(def +flutter-gitignore+
+  {:type :gitignore
+   :main [".dart_tool/"
+          "pubspec.lock"
+          "build/"
+          ".flutter-plugins"
+          ".flutter-plugins-dependencies"]})
+
+(def.make VIEW-KITCHEN-SINK-FLUTTER
+  {:tag "view-kitchen-sink-flutter"
+   :build +flutter-build-root+
+   :sections {:setup [+flutter-gitignore+
+                      {:type :raw
+                       :file "pubspec.yaml"
+                       :main +flutter-pubspec+}
+                      {:type :raw
+                       :target "lib"
+                       :file "main.dart"
+                       :main +flutter-main-dart+}
+                      {:type :raw
+                       :target "test"
+                       :file "widget_test.dart"
+                       :main +flutter-widget-test+}
+                      {:type :makefile
+                       :main +flutter-makefile+}]}
+   :default (dart-entries "view_kitchen_sink")})
+
+(defn- run-command!
+  [root args]
+  (let [^Process process (os/sh {:root root
+                                 :args args
+                                 :inherit true
+                                 :wait true})
+        exit (.exitValue process)]
+    (when (not= 0 exit)
+      (throw (ex-info "Command failed" {:root root :args args :exit exit})))
+    process))
+
+(defn ensure-flutter-scaffold!
+  []
+  (fs/create-directory +flutter-build-root+)
+  (when (or (not (fs/exists? (str +flutter-build-root+ "/macos")))
+            (not (fs/exists? (str +flutter-build-root+ "/web"))))
+    (run-command! +flutter-build-root+
+                  ["flutter" "create"
+                   "--platforms=macos,web"
+                   "--project-name" "view_kitchen_sink"
+                   "--org" "dev.xtalk"
+                   "--no-pub"
+                   "."])))
+
+(defn flutter-build!
+  []
+  (ensure-flutter-scaffold!)
+  (make/build-all VIEW-KITCHEN-SINK-FLUTTER)
+  (run-command! +flutter-build-root+ ["flutter" "pub" "get"])
+  +flutter-build-root+)
+
+(defn flutter-test!
+  []
+  (flutter-build!)
+  (run-command! +flutter-build-root+ ["flutter" "analyze" "--no-fatal-infos"])
+  (run-command! +flutter-build-root+ ["flutter" "test"]))
+
+(defn flutter-run!
+  [device]
+  (flutter-build!)
+  (run-command! +flutter-build-root+ ["flutter" "run" "-d" device]))
 
 (defn -main
-  []
-  (make/build-all VIEW-KITCHEN-SINK-JS)
-  (make/build-all VIEW-KITCHEN-SINK-DART))
+  [& [command]]
+  (case (or command "build")
+    "build" (do (make/build-all VIEW-KITCHEN-SINK-JS)
+                (make/build-all VIEW-KITCHEN-SINK-DART)
+                (flutter-build!))
+    "test" (flutter-test!)
+    "run-macos" (flutter-run! "macos")
+    "run-web" (flutter-run! "chrome")
+    (throw (ex-info "Unknown kitchen-sink build command"
+                    {:command command
+                     :supported ["build" "test" "run-macos" "run-web"]}))))
 
 ^{:eval false}
-(fact "build the kitchen-sink demo for js and dart"
-  (make/build-all VIEW-KITCHEN-SINK-JS)
-  (make/build-all VIEW-KITCHEN-SINK-DART)
+(fact "build the kitchen-sink demo for js, dart and flutter"
+  (-main "build")
 
   ;; js: cd .build/view-kitchen-sink-js && make install && make bundle && make start
   ;;     open http://localhost:8080
   ;; dart: cd .build/view-kitchen-sink-dart && make get && make run
+  ;; flutter: cd .build/view-kitchen-sink-flutter && make get && make run-macos
   )
