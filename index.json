@@ -1,5 +1,5 @@
 {
-  "updated-at" : "2026-07-22T21:50:53.225681908Z",
+  "updated-at" : "2026-07-22T21:51:58.781278658Z",
   "schema-version" : 1,
   "workflows" : {
     "annex" : {
@@ -1968,7 +1968,7 @@
     },
     "core-kmi" : {
       "latest" : {
-        "path" : "runs/core-kmi/41-1.json",
+        "path" : "runs/core-kmi/42-1.json",
         "failure-counts" : {
           "errored" : 0,
           "throw" : 190,
@@ -1976,9 +1976,9 @@
           "failed" : 0
         },
         "run" : {
-          "number" : 41,
-          "id" : 29937276933,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29937276933",
+          "number" : 42,
+          "id" : 29959476768,
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959476768",
           "attempt" : 1
         },
         "workflow-key" : "core-kmi",
@@ -1993,7 +1993,7 @@
         "git" : {
           "ref" : "refs/heads/main",
           "event" : "push",
-          "sha" : "1bac98c2ea7894b22bb498b68185a01d6e1d86b2"
+          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318"
         },
         "jobs" : [ {
           "failure-counts" : {
@@ -2024,7 +2024,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:36:41.148752575Z",
+          "recorded-at" : "2026-07-22T21:46:56.674447278Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2062,7 +2062,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:26:29.398736348Z",
+          "recorded-at" : "2026-07-22T21:35:14.373283715Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2100,7 +2100,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:26:37.890670479Z",
+          "recorded-at" : "2026-07-22T21:38:18.623596875Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2110,14 +2110,14 @@
           "suite" : "kmi.lang",
           "failing-count" : 190
         } ],
-        "recorded-at" : "2026-07-22T16:37:48.618074019Z",
+        "recorded-at" : "2026-07-22T21:50:53.210720768Z",
         "workflow-name" : "XTBench Core KMI",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
       },
       "runs" : [ {
-        "path" : "runs/core-kmi/41-1.json",
+        "path" : "runs/core-kmi/42-1.json",
         "failure-counts" : {
           "errored" : 0,
           "throw" : 190,
@@ -2125,9 +2125,9 @@
           "failed" : 0
         },
         "run" : {
-          "number" : 41,
-          "id" : 29937276933,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29937276933",
+          "number" : 42,
+          "id" : 29959476768,
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959476768",
           "attempt" : 1
         },
         "workflow-key" : "core-kmi",
@@ -2142,7 +2142,7 @@
         "git" : {
           "ref" : "refs/heads/main",
           "event" : "push",
-          "sha" : "1bac98c2ea7894b22bb498b68185a01d6e1d86b2"
+          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318"
         },
         "jobs" : [ {
           "failure-counts" : {
@@ -2173,7 +2173,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:36:41.148752575Z",
+          "recorded-at" : "2026-07-22T21:46:56.674447278Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2211,7 +2211,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:26:29.398736348Z",
+          "recorded-at" : "2026-07-22T21:35:14.373283715Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2249,7 +2249,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:26:37.890670479Z",
+          "recorded-at" : "2026-07-22T21:38:18.623596875Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2259,7 +2259,7 @@
           "suite" : "kmi.lang",
           "failing-count" : 190
         } ],
-        "recorded-at" : "2026-07-22T16:37:48.618074019Z",
+        "recorded-at" : "2026-07-22T21:50:53.210720768Z",
         "workflow-name" : "XTBench Core KMI",
         "status" : "failure",
         "metrics-status" : "complete",
@@ -2268,7 +2268,7 @@
     },
     "core-kmi" : {
       "latest" : {
-        "path" : "runs/core-kmi/42-1.json",
+        "path" : "runs/core-kmi/43-1.json",
         "failure-counts" : {
           "failed" : 0,
           "throw" : 190,
@@ -2276,10 +2276,10 @@
           "errored" : 0
         },
         "run" : {
-          "id" : 29959476768,
-          "number" : 42,
+          "id" : 29959617326,
+          "number" : 43,
           "attempt" : 1,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959476768"
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959617326"
         },
         "workflow-key" : "core-kmi",
         "tests" : {
@@ -2291,7 +2291,7 @@
           "errored" : 0
         },
         "git" : {
-          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318",
+          "sha" : "d78e5f873b7c69a261b6c8d10e063a4ef0d8734d",
           "ref" : "refs/heads/main",
           "event" : "push"
         },
@@ -2324,7 +2324,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:46:56.674447278Z",
+          "recorded-at" : "2026-07-22T21:49:57.333540710Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2362,7 +2362,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:35:14.373283715Z",
+          "recorded-at" : "2026-07-22T21:40:08.772705367Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2400,7 +2400,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:38:18.623596875Z",
+          "recorded-at" : "2026-07-22T21:41:31.059002140Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2410,14 +2410,14 @@
           "suite" : "kmi.lang",
           "failing-count" : 190
         } ],
-        "recorded-at" : "2026-07-22T21:50:53.210720768Z",
+        "recorded-at" : "2026-07-22T21:51:58.768522121Z",
         "workflow-name" : "XTBench Core KMI",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
       },
       "runs" : [ {
-        "path" : "runs/core-kmi/42-1.json",
+        "path" : "runs/core-kmi/43-1.json",
         "failure-counts" : {
           "failed" : 0,
           "throw" : 190,
@@ -2425,10 +2425,10 @@
           "errored" : 0
         },
         "run" : {
-          "id" : 29959476768,
-          "number" : 42,
+          "id" : 29959617326,
+          "number" : 43,
           "attempt" : 1,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959476768"
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959617326"
         },
         "workflow-key" : "core-kmi",
         "tests" : {
@@ -2440,7 +2440,7 @@
           "errored" : 0
         },
         "git" : {
-          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318",
+          "sha" : "d78e5f873b7c69a261b6c8d10e063a4ef0d8734d",
           "ref" : "refs/heads/main",
           "event" : "push"
         },
@@ -2473,7 +2473,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:46:56.674447278Z",
+          "recorded-at" : "2026-07-22T21:49:57.333540710Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2511,7 +2511,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:35:14.373283715Z",
+          "recorded-at" : "2026-07-22T21:40:08.772705367Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2549,7 +2549,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:38:18.623596875Z",
+          "recorded-at" : "2026-07-22T21:41:31.059002140Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2559,7 +2559,7 @@
           "suite" : "kmi.lang",
           "failing-count" : 190
         } ],
-        "recorded-at" : "2026-07-22T21:50:53.210720768Z",
+        "recorded-at" : "2026-07-22T21:51:58.768522121Z",
         "workflow-name" : "XTBench Core KMI",
         "status" : "failure",
         "metrics-status" : "complete",
