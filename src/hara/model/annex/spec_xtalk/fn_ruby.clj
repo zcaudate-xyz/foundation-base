@@ -524,19 +524,29 @@
 (defn ruby-tv-x-get-key
   [form]
   (let [[_ obj key & [default]] form
-        fallback (if (> (count form) 3) default nil)
-        value    (list '. obj [key])]
+        fallback  (if (> (count form) 3) default nil)
+        obj-sym   (gensym "ruby_get_key_obj__")
+        value-sym (gensym "ruby_get_key_value__")
+        value     (list '. obj-sym [key])]
     (template/$
-     (:?
-      (== nil ~obj)
-      ~fallback
-      (:?
-       (. ~obj (is_a? Array))
-       (:?
-        (. ~key (is_a? Integer))
-        (:? (== nil ~value) ~fallback ~value)
-        ~fallback)
-       (:? (== nil ~value) ~fallback ~value))))))
+     (. (fn []
+          (var ~obj-sym ~obj)
+          (if (== nil ~obj-sym)
+            (return ~fallback)
+            (if (. ~obj-sym (is_a? Array))
+              (if (. ~key (is_a? Integer))
+                (do
+                  (var ~value-sym ~value)
+                  (if (== nil ~value-sym)
+                    (return ~fallback)
+                    (return ~value-sym)))
+                (return ~fallback))
+              (do
+                (var ~value-sym ~value)
+                (if (== nil ~value-sym)
+                  (return ~fallback)
+                  (return ~value-sym))))))
+        (call)))))
 
 (defn ruby-tf-x-set-key
   [[_ obj key value]]

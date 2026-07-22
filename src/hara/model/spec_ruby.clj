@@ -15,8 +15,43 @@
             [hara.model.spec-ruby.rewrite :as rewrite]
             [hara.model.annex.spec-xtalk.fn-ruby :as fn]
             [std.lib.collection :as collection]
-            [std.lib.foundation :as f]
             [std.lib.template :as template]))
+
+(def ^:private +ruby-native-constants+
+  #{"Array" "BasicObject" "Class" "Exception" "FalseClass" "File"
+    "Float" "Hash" "Integer" "IO" "JSON" "Math" "Module" "NilClass"
+    "Numeric" "Object" "Proc" "Range" "Regexp" "RuntimeError" "String"
+    "Symbol" "Time" "TrueClass"})
+
+(defn- ruby-constant-symbol?
+  "checks whether a symbol names an XTalk module constant"
+  [sym {:keys [module book]}]
+  (let [id    (symbol (name sym))
+        ns    (or (namespace sym)
+                  (some-> module :id name symbol))
+        entry (or (get-in module [:code id])
+                  (when ns
+                    (get-in book [:modules (symbol ns) :code id])))]
+    (and (symbol? sym)
+         (re-matches #"[A-Z][A-Za-z0-9_]*" (name sym))
+         (not (contains? +ruby-native-constants+ (name sym)))
+         (= :def (:op-key entry)))))
+
+(defn- ruby-global-constant
+  "emits a Ruby global slot for an XTalk module constant"
+  [sym grammar {:keys [module]}]
+  (let [ns  (or (namespace sym)
+                (some-> module :id name symbol))
+        key (helper/emit-symbol-full (symbol (name sym)) ns grammar)]
+    (str "($__globals__ ||= {})[" (pr-str key) "]")))
+
+(defn- ruby-global-key
+  [key grammar]
+  (if (namespace key)
+    (helper/emit-symbol-full (symbol (name key))
+                             (symbol (namespace key))
+                             grammar)
+    (ut/sym-default-str key)))
 
 (defn ruby-symbol
   "emit ruby symbol
@@ -38,16 +73,8 @@
     (cond (keyword? sym)
           (str ":" (name sym))
 
-          (and (symbol? sym)
-               (= "SPACE_NODE" sym-name)
-               (some? (namespace sym)))
-          "\"$node\""
-
-          (and (symbol? sym)
-               (nil? (namespace sym))
-               (re-matches #"[A-Z][A-Z0-9_]*" sym-name)
-               (clojure.string/includes? sym-name "_"))
-          (str "\"" sym-name "\"")
+    (ruby-constant-symbol? sym mopts)
+          (ruby-global-constant sym grammar mopts)
 
           (and (symbol? sym)
                (nil? (namespace sym)))
@@ -121,7 +148,7 @@
   (let [globals (list ':- "($__globals__ ||= {})")]
     (if (= key '!:G)
       globals
-      (list '. globals [(ut/sym-default-str key)]))))
+      (list '. globals [(ruby-global-key key _grammar)]))))
 
 (defn- ruby-vector-destructure-bindings
   [target temp]
@@ -139,22 +166,18 @@
   (let [bound (last args)]
     (cond
       (destruct/destructure-target? sym)
-      (let [temp (gensym "ruby_var__")]
-        (apply list 'do*
-               (cons (list ':= temp bound)
-                     (map (fn [[target value]]
-                            (list ':= target value))
-                          (destruct/destructure-bindings sym temp ruby-destructure-key)))))
+      (apply list 'do*
+             (map (fn [[target value]]
+                    (list ':= target value))
+                  (destruct/destructure-bindings sym bound ruby-destructure-key)))
 
       (and (vector? sym)
            (seq sym)
            (every? symbol? sym))
-      (let [temp (gensym "ruby_var__")]
-        (apply list 'do*
-               (cons (list ':= temp bound)
-                     (map (fn [[target value]]
-                            (list ':= target value))
-                          (ruby-vector-destructure-bindings sym temp)))))
+      (apply list 'do*
+             (map (fn [[target value]]
+                    (list ':= target value))
+                  (ruby-vector-destructure-bindings sym bound)))
 
       :else
       (list ':= sym bound))))
@@ -177,9 +200,7 @@
 
 (defn ruby-string
   [s]
-  (pr-str (if (= "__NODE__" s)
-            "$node"
-            s)))
+  (pr-str s))
 
 (defn ruby-emit-input-rest
   [{:keys [symbol]} grammar mopts]
@@ -248,16 +269,8 @@
            (not (vector? (nth form 2 nil))))))
 
 (defn ruby-def
-  [[tag sym body :as form]]
+  [[_tag sym body :as form]]
   (cond
-    (and (symbol? sym)
-         (= "SPACE_NODE" (name sym))
-         (= "__NODE__" body))
-    (list ':- (top/emit-top-level :def
-                                  (list tag sym "$node")
-                                  preprocess-base/*macro-grammar*
-                                  preprocess-base/*macro-opts*))
-
     (seq (ruby-def-arglists sym))
     (let [arglists (ruby-def-arglists sym)
           args (first arglists)]
@@ -267,6 +280,14 @@
 
     (ruby-def-alias-target? body)
     (ruby-def-alias-wrapper sym body)
+
+    (ruby-constant-symbol? sym preprocess-base/*macro-opts*)
+    (list ':-
+          (top/emit-top-level
+           :defglobal
+           (list 'defglobal sym body)
+           preprocess-base/*macro-grammar*
+           preprocess-base/*macro-opts*))
 
     :else
     (list ':- (top/emit-top-level :def form preprocess-base/*macro-grammar* preprocess-base/*macro-opts*))))
@@ -394,6 +415,7 @@
          body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
      (list ':- "->(" args-str ") {\n" body-str "\n}"))))
 
+#_{:clj-kondo/ignore [:invalid-arity :unquote-not-syntax-quoted]}
 (defn tf-for-array
   "transform for `for:array`"
   {:added "4.1"}
@@ -426,6 +448,7 @@
                ~@body
                (:= ~idx (+ ~idx 1)))))))))
 
+#_{:clj-kondo/ignore [:invalid-arity :unquote-not-syntax-quoted]}
 (defn tf-for-object
   "transform for `for:object`"
   {:added "4.1"}
@@ -458,6 +481,7 @@
            (or (not-empty body)
                [nil]))))
 
+#_{:clj-kondo/ignore [:invalid-arity :unquote-not-syntax-quoted]}
 (defn tf-for-index
   "transform for `for:index`"
   {:added "4.1"}

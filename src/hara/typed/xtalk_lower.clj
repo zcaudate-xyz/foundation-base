@@ -71,7 +71,9 @@
                         (first part)
                         part))
                     path-parts)]
-     (if (some seq? path-parts)
+     (if (:assignment-target ctx)
+       (list* '. obj path-parts)
+       (if (some seq? path-parts)
        (list* '. obj path-parts)
        (if (= 1 (count path))
          (case (receiver-access-kind obj ctx)
@@ -82,7 +84,7 @@
              (list 'x:get-key obj (first path))))
          (if (:preserve-unknown ctx)
            (list* '. obj path-parts)
-           (list 'x:get-path obj path nil)))))))
+           (list 'x:get-path obj path nil))))))))
 
 (defn lower-fn-shorthand
   [[_ & args]]
@@ -128,7 +130,12 @@
                            (ops/canonical-entry op'))
          canonical-op (or (:canonical-symbol canonical-entry)
                           op')
-         args' (map #(lower-form % ctx) args)
+         args' (if (= op' :=)
+                 (cons (with-meta
+                         (lower-form (first args) (assoc ctx :assignment-target true))
+                         (assoc (meta (first args)) :hara/xtalk-assignment true))
+                       (map #(lower-form % ctx) (rest args)))
+                 (map #(lower-form % ctx) args))
          lowered (cons canonical-op args')]
     (cond
       (= op' '.)

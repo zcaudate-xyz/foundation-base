@@ -1,6 +1,8 @@
 {:ns-groups
  [{:pattern "^xt\\.lang\\."
    :name clj-kondo.hooks.hara-xtalk}
+  {:pattern "^xt\\.substrate\\."
+   :name clj-kondo.hooks.hara-xtalk}
   {:pattern ".+"
    :name clj-kondo.hooks.hara-postgres}]
 
@@ -12,6 +14,14 @@
    hara.lang/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
    hara.typed/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
    defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
+   def$.xt clj-kondo.hooks.hara-xtalk/defvar-xt
+   defn.xt clj-kondo.hooks.hara-xtalk/defn-xt
+   defn/xt clj-kondo.hooks.hara-xtalk/defn-xt
+   def.xt clj-kondo.hooks.hara-xtalk/def-xt
+   defmacro.xt clj-kondo.hooks.hara-xtalk/defmacro-xt
+   defgen.xt clj-kondo.hooks.hara-xtalk/defgen-xt
+   defvar.xt clj-kondo.hooks.hara-xtalk/defvar-xt
+   defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
    defn.js hooks.defn-pg/defn-js
    defvar.js hooks.defn-pg/defn-js
    clj-kondo.hooks.hara-xtalk/defn.xt clj-kondo.hooks.hara-xtalk/defn-xt
@@ -20,6 +30,7 @@
    clj-kondo.hooks.hara-xtalk/defgen.xt clj-kondo.hooks.hara-xtalk/defgen-xt
    clj-kondo.hooks.hara-xtalk/defvar.xt clj-kondo.hooks.hara-xtalk/defvar-xt
    clj-kondo.hooks.hara-xtalk/defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
+   clj-kondo.hooks.hara-xtalk/def$.xt clj-kondo.hooks.hara-xtalk/defvar-xt
    fact clj-kondo.hooks.hara-xtalk/fact-xt
    fact:global clj-kondo.hooks.hara-xtalk/fact-global-xt
    code.test/fact clj-kondo.hooks.hara-xtalk/fact-xt
@@ -45,7 +56,11 @@
                              code.test/fact code.test/fact:global
                              code.test/=> code.test/contains]}
   :duplicate-require {:level :off}
-  :unresolved-symbol {:exclude [fact fact:global defn.pg defrun.pg deftype.pg]}
+  :unresolved-symbol {:exclude [fact fact:global defn.pg defrun.pg deftype.pg
+                                canonical-conditional redundant-access
+                                defaulted-access fn-arrow-canonical fn-arrow-fact
+                                destructuring-collision destructuring-source
+                                loop-context]}
   :hara.postgres/one-let {:level :warning}
   :hara.postgres/nested-let {:level :warning}
    :hara.postgres/input-prefix {:level :warning}
@@ -54,5 +69,18 @@
   :hara.xtalk/block-in-value {:level :error}
   :hara.xtalk/redundant-get-key {:level :warning}
   :hara.xtalk/redundant-fn-arrow {:level :warning}
+  :hara.xtalk/complex-destructuring-source {:level :warning}
   :hara.xtalk/field-collision {:level :error}
-  :hara.xtalk/invalid-destructuring {:level :error}}}
+  :hara.xtalk/invalid-destructuring {:level :error}}
+ :config-in-ns
+ {hara.model.spec-python
+  {:linters {:syntax {:level :off}
+             :invalid-arity {:level :off}
+             :unsupported-binding {:level :off}
+             :unresolved-symbol {:level :off}
+             :unresolved-var {:level :off}
+             :unresolved-namespace {:level :off}}}}
+ :lint-as {defn.xt clojure.core/defn
+           defgen.xt clojure.core/defn
+           def.xt clojure.core/def
+           defvar.xt clojure.core/def}}

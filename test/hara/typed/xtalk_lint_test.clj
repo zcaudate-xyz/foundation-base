@@ -78,6 +78,29 @@
      (:field (first errors))])
   => '[[:XT004] "arr_name"])
 
+^{:refer hara.typed.xtalk-lint/simple-destructuring-source? :added "4.1"}
+(fact "only permits repeatable sources for direct destructuring"
+  [(simple-destructuring-source? 'containers)
+   (simple-destructuring-source? '(. containers ["listeners"]))
+   (simple-destructuring-source? '(get-containers))
+   (simple-destructuring-source? '(. (get-containers) ["listeners"]))]
+  => '[true true false false])
+
+^{:refer hara.typed.xtalk-lint/lint-form :added "4.1" :id destructuring-source}
+(fact "makes destructuring source restrictions explicit"
+  (let [set-diagnostics (lint-form '(var #{listeners} (get-containers)) :statement {})
+        vec-diagnostics (lint-form '(var [a b] (get-values)) :statement {})]
+    [(mapv :code set-diagnostics)
+     (mapv :code vec-diagnostics)
+     (:message (first set-diagnostics))
+     (lint-form '(var #{listeners} containers) :statement {})
+     (lint-form '(var [a b] (. values ["items"])) :statement {})])
+  => '[[:XT006]
+       [:XT006]
+       "destructuring var sources must be a symbol or a simple dot access (. symbol [key]); bind complex expressions to a symbol first"
+       []
+       []])
+
 ^{:refer hara.typed.xtalk-lint/lint-form :added "4.1" :id loop-context}
 (fact "treats namespaced loop macros as statement contexts"
   (lint-form '(xt/for:array [e arr]
@@ -92,7 +115,7 @@
     [(count diagnostics)
      (set (map :code diagnostics))
      (set (map :file (map :loc diagnostics)))])
-  => [10 #{:XT002} #{"src-lang/xt/lang/common_data.clj"}])
+  => [0 #{} #{}])
 
 ^{:refer hara.typed.xtalk-lint/summarize :added "4.1"}
 (fact "summarizes diagnostics by severity and code"

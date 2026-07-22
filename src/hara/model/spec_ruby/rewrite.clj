@@ -440,15 +440,13 @@
 (defn- expand-destructuring-var
   [form bound]
   (let [[tag target & args] form
-        leading (butlast args)
-        temp    (gensym "ruby_destructure__")]
+        leading (butlast args)]
     (common/with-form-meta
       form
       (apply list 'do*
-             (concat [(apply list tag temp (concat leading [bound]))]
-                     (map (fn [[sym value]]
-                            (apply list tag sym (concat leading [value])))
-                          (destructure-bindings target temp)))))))
+             (map (fn [[sym value]]
+                    (apply list tag sym (concat leading [value])))
+                  (destructure-bindings target bound))))))
 
 (defn- ruby-global-const-access?
   [form]

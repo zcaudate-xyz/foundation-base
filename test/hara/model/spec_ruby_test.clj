@@ -95,11 +95,10 @@
   (let [out (rewrite/rewrite-callable-form
              '(var #{order-by} opts)
              #{})]
-    [(= 'do* (first out))
-     (boolean (re-matches #"ruby_destructure__.*"
-                          (str (nth (second out) 1))))
-      (nth (nth (nth out 2) 2) 2)])
-  => [true true "order_by"]
+    [(first out)
+     (mapv #(nth % 1) (rest out))
+     (mapv #(nth (nth % 2) 2) (rest out))])
+  => '[do* [order-by] ["order_by"]]
 
   (l/emit-as :ruby
    '[(var #{check-disabled id-fn} pipeline)])
@@ -122,6 +121,13 @@
             (re-find #"obj__.* = obj" s)
             (re-find #"if nil == obj__" s)
             (re-find #"obj = \{\}" s))))
+
+(fact "Ruby x:get-key evaluates side-effecting receivers once"
+  (l/emit-as :ruby
+   ['(x:get-key (remove-listener container "a1") "meta" nil)])
+  => (fn [s]
+       (and (string? s)
+            (= 1 (count (re-seq #"remove_listener" s))))))
 
 (fact "Ruby key helpers treat arrays differently from hashes"
   (l/emit-as :ruby
@@ -252,7 +258,15 @@
   (spec-ruby/ruby-symbol 'a spec-ruby/+grammar+ {})
   => "a"
   (spec-ruby/ruby-symbol 'respond_to? spec-ruby/+grammar+ {})
-  => "respond_to?")
+  => "respond_to?"
+  (spec-ruby/ruby-symbol 'HEX spec-ruby/+grammar+
+                         {:module {:id 'xt.lang.common-color
+                                   :code {'HEX {:op-key :def}}}})
+  => "($__globals__ ||= {})[\"xt_lang_common_color____HEX\"]"
+  (spec-ruby/ruby-symbol 'xt.lang.common-color/HEX spec-ruby/+grammar+
+                         {:module {:id 'xt.lang.common-color
+                                   :code {'HEX {:op-key :def}}}})
+  => "($__globals__ ||= {})[\"xt_lang_common_color____HEX\"]")
 
 ^{:refer hara.model.spec-ruby/ruby-destructure-key :added "4.1"}
 (fact "rewrites destructuring keys for ruby")
@@ -267,7 +281,9 @@
   => '(:- "($__globals__ ||= {})")
 
   (spec-ruby/ruby-symbol-global 'XT spec-ruby/+grammar+ {})
-  => '(. (:- "($__globals__ ||= {})") ["XT"]))
+  => '(. (:- "($__globals__ ||= {})") ["XT"])
+  (spec-ruby/ruby-symbol-global 'xt.lang.common-color/HEX spec-ruby/+grammar+ {})
+  => '(. (:- "($__globals__ ||= {})") ["xt_lang_common_color____HEX"]))
 
 ^{:refer hara.model.spec-ruby/ruby-var :added "4.1"}
 (fact "emit ruby variable"
@@ -277,12 +293,13 @@
 
   (let [out (spec-ruby/ruby-var '(var #{a-var b-var} opts))]
     [(first out)
-     (symbol? (nth (second out) 1))
-     (nth (nth out 2) 1)
-     (nth (nth (nth out 2) 2) 2)
-     (nth (nth out 3) 1)
-     (nth (nth (nth out 3) 2) 2)])
-  => '[do* true a-var "a_var" b-var "b_var"]
+     (mapv #(nth % 1) (rest out))
+     (mapv #(nth (nth % 2) 2) (rest out))])
+  => '[do* [a-var b-var] ["a_var" "b_var"]]
+
+  (spec-ruby/ruby-var '(var [a b] values))
+  => '(do* (:= a (x:get-idx values (x:offset 0) nil))
+           (:= b (x:get-idx values (x:offset 1) nil)))
 
   (l/emit-as :ruby ['(var #{a-var b-var} opts)])
   => (fn [s]

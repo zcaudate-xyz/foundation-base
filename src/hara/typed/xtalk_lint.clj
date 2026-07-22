@@ -40,8 +40,48 @@
           :message message
           :context context
           :form form
-          :loc (source-location form opts)}
+         :loc (source-location form opts)}
          extra))
+
+(defn simple-destructuring-source?
+  "Returns true when a destructuring var source can be safely read directly.
+
+   Direct destructuring repeats the source once per bound field, so the source
+   must be a symbol or a one-level dot access on a symbol."
+  [form]
+  (or (symbol? form)
+      (and (seq? form)
+           (= '. (canonical-head (first form)))
+           (= 3 (count form))
+           (symbol? (second form))
+           (vector? (nth form 2))
+           (= 1 (count (nth form 2))))))
+
+(defn- valid-destructuring-target?
+  [target]
+  (or (and (set? target)
+           (seq target)
+           (every? symbol? target))
+      (and (vector? target)
+           (seq target)
+           (every? symbol? target))))
+
+(defn var-source-diagnostics
+  [form context opts]
+  (let [target (second form)
+        source (last form)]
+    (if (and (valid-destructuring-target? target)
+             (not (simple-destructuring-source? source)))
+      [(diagnostic
+        :XT006
+        :warning
+        "destructuring var sources must be a symbol or a simple dot access (. symbol [key]); bind complex expressions to a symbol first"
+        form
+        context
+        opts
+        {:target target
+         :source source})]
+      [])))
 
 (defn var-target-diagnostics
   [form context opts]
@@ -233,7 +273,8 @@
                 (and (= h 'x:get-key)
                      (or (= 3 (count form))
                          (and (= 4 (count form))
-                              (nil? (nth form 3)))))
+                              (nil? (nth form 3))))
+                     (string? (nth form 2)))
                 (let [[_ obj key] form]
                   [(diagnostic
                     :XT002
@@ -251,7 +292,8 @@
                 :else
                 [])
           own (if (= h 'var)
-                (into own (var-target-diagnostics form context opts))
+                (into own (concat (var-target-diagnostics form context opts)
+                                  (var-source-diagnostics form context opts)))
                 own)]
       (into own (lint-pairs (form-pairs h form block?) opts)))
 

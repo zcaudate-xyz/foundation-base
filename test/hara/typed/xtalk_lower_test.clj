@@ -50,6 +50,11 @@
   (lower-dot '(. arr (filter pred)))
   => '(. arr (filter pred)))
 
+^{:refer hara.typed.xtalk-lower/lower-form :id lower-assignment-target :added "4.1"}
+(fact "preserves structural access on assignment targets"
+  (lower-form '(:= (. prev ["current"]) value) {})
+  => '(:= (. prev ["current"]) value))
+
 ^{:refer hara.typed.xtalk-lower/lower-fn-shorthand :added "4.1"}
 (fact "lowers fn:> shorthands"
   [(lower-fn-shorthand '(fn:>))
