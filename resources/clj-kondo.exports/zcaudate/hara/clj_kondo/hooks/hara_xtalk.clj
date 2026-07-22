@@ -181,20 +181,12 @@
              %)
           (take-while #(not (identical? % args-node)) tail))))
 
-(defn- definition-stub [node op]
+(defn- definition-stub [node _op]
   (let [name-node (definition-name-node node)
-        args-node (function-args-node node)]
+        _args-node (function-args-node node)]
     (cond
       (= '. (api/sexpr name-node))
       (api/list-node [(api/token-node 'do)])
-
-      (and (= op 'defn) name-node args-node)
-      (api/list-node [(api/token-node 'clojure.core/defn)
-                      name-node args-node (api/coerce nil)])
-
-      (and (= op 'defmacro) name-node args-node)
-      (api/list-node [(api/token-node 'clojure.core/defmacro)
-                      name-node args-node (api/coerce nil)])
 
       name-node
       (api/list-node [(api/token-node 'clojure.core/def)
@@ -222,7 +214,25 @@
   {:node (definition-stub node 'def)})
 
 (defn defspec-xt [{:keys [node]}]
-  {:node (definition-stub node 'def)})
+  (if-let [name-node (definition-name-node node)]
+    {:node (api/list-node [(api/token-node 'clojure.core/declare)
+                           name-node])}
+    {:node (api/list-node [(api/token-node 'do)])}))
 
 (defn defglobal-xt [{:keys [node]}]
   {:node (definition-stub node 'def)})
+
+(defn fact-xt
+  "Keep code.test facts opaque to Clojure analysis.
+
+   Their assertion bodies contain target-language forms such as !.js, fn:>,
+   return, and target-specific symbols. The XTalk hooks lint source definitions
+   directly; a fact hook prevents the custom test macro body from being
+   mistaken for ordinary Clojure."
+  [_]
+  {:node (api/list-node [(api/token-node 'do)])})
+
+(defn fact-global-xt
+  "Keep fact:global setup/teardown forms opaque to Clojure analysis."
+  [_]
+  {:node (api/list-node [(api/token-node 'do)])})

@@ -22,6 +22,8 @@
    clj-kondo.hooks.hara-xtalk/defvar.xt clj-kondo.hooks.hara-xtalk/defvar-xt
    clj-kondo.hooks.hara-xtalk/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
    clj-kondo.hooks.hara-xtalk/defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
+   fact clj-kondo.hooks.hara-xtalk/fact-xt
+   fact:global clj-kondo.hooks.hara-xtalk/fact-global-xt
    clj-kondo.hooks.hara-postgres/defn.pg clj-kondo.hooks.hara-postgres/defn-pg
    clj-kondo.hooks.hara-postgres/defrun.pg clj-kondo.hooks.hara-postgres/defn-pg}}
 

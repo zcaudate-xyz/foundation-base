@@ -28,10 +28,13 @@
                   (api/token-node sym)
                   (api/token-node 'clojure.core/identity)]))
 (defn- require-node [libspec]
-  (let [ns-sym (if (vector? libspec) (first libspec) libspec)]
+  (let [ns-sym (if (vector? libspec) (first libspec) libspec)
+        spec-node (if (vector? libspec)
+                    (api/coerce libspec)
+                    (api/token-node ns-sym))]
     (api/list-node [(api/token-node 'clojure.core/require)
                     (api/list-node [(api/token-node 'quote)
-                                    (api/token-node ns-sym)])])))
+                                    spec-node])])))
 (defn- script-lang [node]
   (let [lang-form (some-> (nth (:children node) 1 nil) api/sexpr)]
     (if (vector? lang-form) (second lang-form) lang-form)))
