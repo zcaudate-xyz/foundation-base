@@ -157,7 +157,7 @@
    '[(for:object [[k v] obj]
         (puts k)
         (puts v))])
-  => #"obj__.* = \(obj \|\| \{\}\)\nkeys__.* = obj__.*\.keys")
+  => "for k, v in  obj || {}\n  puts k\n  puts v\nend\nnil")
 
 (fact "Ruby for:array captures nested callable values without wrapping the loop body"
   (l/emit-as :ruby
@@ -170,10 +170,11 @@
              (return value)))))])
   => (fn [s]
        (and (string? s)
-            (re-find #"value = arr__.*\[idx__.*\]" s)
+            (re-find #"for value in values" s)
             (re-find #"return value__capture__" s)
             (re-find #"\.call\(value\)" s)
             (re-find #"return value" s)
+            (not (re-find #"arr__|idx__" s))
             (not (re-find #"->\(value\)\s*\{" s)))))
 
 (fact "Ruby promise overrides hard-link spec-promise forms to common-promise"
@@ -343,7 +344,21 @@
   => "def add(a,b)\n  return a + b\nend")
 
 ^{:refer hara.model.spec-ruby/ruby-defgen :added "4.1"}
-(fact "emits ruby generator definitions")
+(fact "emits ruby generator definitions with deterministic iterator bindings"
+  (spec-ruby/ruby-defgen '(defgen items [xs] (yield xs)))
+  => '(defn- items [xs]
+        (return
+         (x:iter-generator
+          (fn [items__iter__]
+            (. items__iter__ (<< xs))))))
+
+  (spec-ruby/ruby-defgen
+   '(defgen items [items__iter__] (yield items__iter__)))
+  => '(defn- items [items__iter__]
+        (return
+         (x:iter-generator
+          (fn [items__iter____2]
+            (. items__iter____2 (<< items__iter__)))))))
 
 ^{:refer hara.model.spec-ruby/ruby-fn :added "4.1"}
 (fact "basic transform for ruby blocks"
@@ -352,16 +367,58 @@
   => '(:- "->(" "a" ") {\n" "(do (+ a 1))" "\n}"))
 
 ^{:refer hara.model.spec-ruby/tf-for-array :added "4.1"}
-(fact "transforms for:array loops")
+(fact "transforms for:array loops using native Ruby iteration"
+  (spec-ruby/tf-for-array
+   '(for:array [value values]
+      (puts value)))
+  => '(do
+        (for [value :in values]
+          (puts value))
+        nil)
+
+  (spec-ruby/tf-for-array
+   '(for:array [[i value] values]
+      (puts i)
+      (puts value)))
+  => '(do
+        (for [[value i] :in (. values (each_with_index))]
+          (puts i)
+          (puts value))
+        nil))
 
 ^{:refer hara.model.spec-ruby/tf-for-object :added "4.1"}
-(fact "transforms for:object loops")
+(fact "transforms for:object loops using native Ruby iteration"
+  (spec-ruby/tf-for-object
+   '(for:object [[k v] obj]
+      (puts k)
+      (puts v)))
+  => '(do
+        (for [[k v] :in (or obj {})]
+          (puts k)
+          (puts v))
+        nil)
+
+  (spec-ruby/tf-for-object
+   '(for:object [[_ v] obj]
+      (puts v)))
+  => '(do
+        (for [v :in (. (or obj {}) (values))]
+          (puts v))
+        nil))
 
 ^{:refer hara.model.spec-ruby/tf-for-iter :added "4.1"}
 (fact "transforms for:iter loops")
 
 ^{:refer hara.model.spec-ruby/tf-for-index :added "4.1"}
-(fact "transforms for:index loops")
+(fact "transforms for:index loops without generated temporaries"
+  (spec-ruby/tf-for-index
+   '(for:index [i [0 3 1]]
+      (puts i)))
+  => '(do
+        (var i 0)
+        (while (< i 3)
+          (puts i)
+          (:= i (+ i 1)))))
 
 
 ^{:refer hara.model.spec-ruby/ruby-string :added "4.1"}

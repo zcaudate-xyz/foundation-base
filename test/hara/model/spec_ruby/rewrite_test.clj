@@ -36,6 +36,19 @@
   => '[(fn [value]
          (return value))])
 
+^{:refer hara.model.spec-ruby.rewrite/capture-aliases :added "4.1"}
+(fact "creates deterministic capture aliases without colliding with source symbols"
+  (rewrite/capture-aliases
+   '[(fn [] (return value))]
+   '[value])
+  => '{value value__capture__}
+
+  (rewrite/capture-aliases
+   '[(fn [] (return value))
+     value__capture__]
+   '[value])
+  => '{value value__capture____2})
+
 ^{:refer hara.model.spec-ruby.rewrite/ruby-rewrite-generator-body :added "4.1"}
 (fact "rewrites generator bodies")
 

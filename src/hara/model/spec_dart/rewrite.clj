@@ -1,5 +1,6 @@
 (ns hara.model.spec-dart.rewrite
   (:require [hara.lang.rewrite.conditional :as condrw]
+              [hara.lang.rewrite.common :as rewrite-common]
               [hara.lang.rewrite.hoist :as hoist]
               [hara.lang.rewrite.fn :as fnrw]
               [hara.lang.rewrite.statement :as stmt]
@@ -12,6 +13,7 @@
 (def ^:private +dart-rewriter+
   (hoist/create-rewriter
    {:symbol-prefix "dart_callback__"
+    :symbol-fn #(rewrite-common/stable-symbol "dart_callback__" %)
     :lambda-compatible? (fn [_ _] true)}))
 
 (def ^:private +dart-boolish-ops+
@@ -165,7 +167,7 @@
   [source form grammar]
   (if (simple-truthy-source? form)
     (truthy/wrap-truthy-check source form)
-    (let [value (gensym "dart_truthy__")]
+    (let [value (rewrite-common/stable-symbol "dart_truthy__" form)]
       (with-form-meta
         source
         (list (rewrite-fn
@@ -272,7 +274,7 @@
             (dart-truthy-form source lhs grammar)
             rhs
             lhs))
-    (let [value (gensym "dart_and__")]
+    (let [value (rewrite-common/stable-symbol "dart_and__" [source lhs rhs])]
       (with-form-meta
         source
         (list (rewrite-fn

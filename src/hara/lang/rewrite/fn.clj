@@ -81,9 +81,12 @@
 (defn lift-named-lambda
   ([form rewrite-statements]
    (lift-named-lambda form rewrite-statements {}))
-  ([form rewrite-statements {:keys [symbol-prefix]
+  ([form rewrite-statements {:keys [symbol-prefix symbol-fn]
                              :or {symbol-prefix "lifted_lambda__"}}]
    (let [[name _ _] (fn-parts form)
-         sym        (or name (gensym symbol-prefix))
+         sym        (or name
+                        (if symbol-fn
+                          (symbol-fn form)
+                          (gensym symbol-prefix)))
          binding    (list 'var sym (normalize-fn form rewrite-statements))]
      [[binding] sym])))

@@ -3,6 +3,7 @@
              [hara.common.emit-template :as impl-template]
              [hara.common.emit :as emit]
              [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
+             [hara.common.emit-rewrite :as rewrite]
              [hara.common.grammar-xtalk-system :as xtalk-system]
              [hara.common.provenance :as provenance]
              [hara.common.util :as ut]
@@ -272,6 +273,12 @@
           {:keys [form]}  entry
           form (if (:transform emit)
                  ((:transform emit) form mopts)
+                 form)
+          form (if (= :python lang)
+                 (rewrite/rewrite-stage :staging
+                                        form
+                                        grammar
+                                        (assoc mopts :entry entry))
                  form)
           mopts (-> mopts
                     (assoc :entry (assoc entry :display :brief))

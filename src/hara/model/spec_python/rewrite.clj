@@ -1,6 +1,7 @@
 (ns hara.model.spec-python.rewrite
   (:require [hara.lang.rewrite.hoist :as hoist]
   	    [hara.lang.rewrite.inline-do :as inline]
+            [hara.lang.rewrite.common :as rewrite-common]
             [hara.lang.rewrite.walk :as walk]
             [std.lib.collection :as collection]))
 
@@ -114,6 +115,7 @@
   (hoist/create-rewriter
    {:fn-tags #{'fn 'fn.inner}
      :symbol-prefix "py_callback__"
+     :symbol-fn #(rewrite-common/stable-symbol "py_callback__" %)
      :lambda-compatible? python-lambda-compatible?}))
 
 (def ^:private with-form-meta
@@ -156,8 +158,8 @@
   [form]
   (let [[_ value] form
         value (python-normalize-form value)
-        value-sym (gensym "py_throw_value__")
-        err-sym (gensym "py_throw_err__")
+        value-sym (rewrite-common/stable-symbol "py_throw_value__" form)
+        err-sym (rewrite-common/stable-symbol "py_throw_err__" form)
         native? (list 'isinstance value-sym 'BaseException)]
     (with-form-meta form
       (list 'do
@@ -177,7 +179,7 @@
     catch
     (let [[_ binding & body] form]
       (if (python-value-catch-binding? binding)
-        (let [err-sym (gensym "py_catch_err__")]
+        (let [err-sym (rewrite-common/stable-symbol "py_catch_err__" form)]
           (with-form-meta form
             (apply list 'catch
                    (python-catch-binding binding err-sym)

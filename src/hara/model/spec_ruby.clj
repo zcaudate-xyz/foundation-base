@@ -14,8 +14,7 @@
             [hara.model.spec-xtalk]
             [hara.model.spec-ruby.rewrite :as rewrite]
             [hara.model.annex.spec-xtalk.fn-ruby :as fn]
-            [std.lib.collection :as collection]
-            [std.lib.template :as template]))
+            [std.lib.collection :as collection]))
 
 (def ^:private +ruby-native-constants+
   #{"Array" "BasicObject" "Class" "Exception" "FalseClass" "File"
@@ -390,13 +389,10 @@
   (list* 'defn- sym args (rewrite/rewrite-callable-body args body)))
 
 (defn ruby-defgen
-  [[_ sym args & body]]
-  (let [iterator (gensym "__iter__")]
-    (list 'defn- sym args
-          (list 'return
-                (list 'x:iter-generator
-                      (apply list 'fn [iterator]
-                             (rewrite/ruby-rewrite-generator-body args body iterator)))))))
+  [form]
+  (let [rewritten (rewrite/ruby-rewrite-defgen form)]
+    (with-meta (cons 'defn- (rest rewritten))
+      (meta rewritten))))
 
 (defn ruby-fn
   "basic transform for ruby blocks
@@ -415,61 +411,49 @@
          body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
      (list ':- "->(" args-str ") {\n" body-str "\n}"))))
 
-#_{:clj-kondo/ignore [:invalid-arity :unquote-not-syntax-quoted]}
 (defn tf-for-array
   "transform for `for:array`"
   {:added "4.1"}
   [[_ [e arr] & body]]
-  (let [arr*  (gensym "arr__")
-        bound (if (vector? e) e [e])
+  (let [bound (if (vector? e) e [e])
         bound (vec (remove #{'_} bound))
-        captures (into (array-map)
-                       (map (fn [sym]
-                              [sym (gensym (str (name sym) "__capture__"))]))
-                       bound)
+        captures (rewrite/capture-aliases body bound)
         body  (rewrite/rewrite-callable-body
                bound
-               (rewrite/rewrite-captured-callables body captures))]
-    (if (vector? e)
-      (let [[i v] e]
-        (template/$
-         (do (var ~arr* ~arr)
-             (var ~i 0)
-             (while (< ~i (. ~arr* length))
-               (var ~v (. ~arr* [~i]))
-               ~@body
-               (:= ~i (+ ~i 1))))))
-      (let [idx (gensym "idx__")]
-        (template/$
-         (do (var ~arr* ~arr)
-             (var ~idx 0)
-             (while (< ~idx (. ~arr* length))
-               (var ~e (. ~arr* [~idx]))
-               ~@body
-               (:= ~idx (+ ~idx 1)))))))))
+               (rewrite/rewrite-captured-callables body captures))
+        binding (if (vector? e)
+                  (let [[i v] e]
+                    [[v i] :in (list '. arr '(each_with_index))])
+                  [e :in arr])]
+    (list 'do
+          (apply list 'for binding
+                 (or (not-empty body)
+                     [nil]))
+          nil)))
 
-#_{:clj-kondo/ignore [:invalid-arity :unquote-not-syntax-quoted]}
 (defn tf-for-object
   "transform for `for:object`"
   {:added "4.1"}
   [[_ [[k v] m] & body]]
-  (let [obj  (gensym "obj__")
-        keys (gensym "keys__")
-        idx  (gensym "idx__")
-        key  (if (= k '_) (gensym "key__") k)
-        bound (vec (remove #{'_} [key v]))
-        body  (rewrite/rewrite-callable-body bound body)]
-    (template/$
-     (do (var ~obj (or ~m {}))
-         (var ~keys (. ~obj keys))
-         (var ~idx 0)
-         (while (< ~idx (. ~keys length))
-           (var ~key (. ~keys [~idx]))
-           ~@(if (not= v '_)
-               [(list 'var v (list '. obj [key]))]
-               [])
-           ~@body
-           (:= ~idx (+ ~idx 1)))))))
+  (let [bound (vec (remove #{'_} [k v]))
+        captures (rewrite/capture-aliases body bound)
+        body (rewrite/rewrite-callable-body
+              bound
+              (rewrite/rewrite-captured-callables body captures))
+        [binding source] (cond
+                           (= k '_)
+                           [v (list '. (list 'or m {}) '(values))]
+
+                           (= v '_)
+                           [k (list '. (list 'or m {}) '(keys))]
+
+                           :else
+                           [[k v] (list 'or m {})])]
+    (list 'do
+          (apply list 'for [binding :in source]
+                 (or (not-empty body)
+                     [nil]))
+          nil)))
 
 (defn tf-for-iter
   "transform for `for:iter`"
@@ -481,7 +465,6 @@
            (or (not-empty body)
                [nil]))))
 
-#_{:clj-kondo/ignore [:invalid-arity :unquote-not-syntax-quoted]}
 (defn tf-for-index
   "transform for `for:index`"
   {:added "4.1"}
@@ -491,11 +474,11 @@
                       (neg? step))
                '>
                '<)]
-    (template/$
-     (do (var ~i ~start)
-         (while (~sign ~i ~stop)
-           ~@body
-           (:= ~i (+ ~i ~step)))))))
+    (list 'do
+          (list 'var i start)
+          (apply list 'while (list sign i stop)
+                 (concat body
+                         [(list ':= i (list '+ i step))])))))
 
 (def +features+
   (-> (grammar/build :exclude [:pointer :block :data-range])

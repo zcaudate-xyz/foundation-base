@@ -232,6 +232,50 @@
     :else
     #{}))
 
+(defn- form-symbols
+  [form]
+  (cond
+    (symbol? form)
+    #{form}
+
+    (seq? form)
+    (reduce set/union #{} (map form-symbols form))
+
+    (vector? form)
+    (reduce set/union #{} (map form-symbols form))
+
+    (map? form)
+    (reduce set/union #{} (map form-symbols (mapcat identity form)))
+
+    (set? form)
+    (reduce set/union #{} (map form-symbols form))
+
+    :else
+    #{}))
+
+(defn- fresh-local-symbol
+  [preferred used]
+  (loop [index 1]
+    (let [candidate (if (= 1 index)
+                      preferred
+                      (symbol (str (name preferred) "__" index)))]
+      (if (contains? used candidate)
+        (recur (inc index))
+        candidate))))
+
+(defn capture-aliases
+  "creates deterministic, collision-safe aliases for loop bindings"
+  [forms syms]
+  (first
+   (reduce (fn [[aliases used] sym]
+             (let [alias (fresh-local-symbol
+                          (symbol (str (name sym) "__capture__"))
+                          used)]
+               [(assoc aliases sym alias)
+                (conj used alias)]))
+           [(array-map) (into (form-symbols forms) syms)]
+           syms)))
+
 (defn- drop-aliases
   [aliases syms]
   (apply dissoc aliases (remove nil? syms)))
@@ -543,9 +587,10 @@
     (rewrite-callable-form form callables)))
 
 (defn- iterator-symbol
-  [sym]
-  (gensym (str (name (or sym 'ruby_generator))
-               "__iter__")))
+  [sym args body]
+  (fresh-local-symbol
+   (symbol (str (name (or sym 'ruby_generator)) "__iter__"))
+   (form-symbols (into [args] body))))
 
 (declare rewrite-generator-form)
 
@@ -635,10 +680,10 @@
     (list 'ruby-method-ref form)
     (rewrite-generator-form form iterator callables)))
 
-(defn- rewrite-defgen
+(defn ruby-rewrite-defgen
   [form]
   (let [[_ sym args & body] form
-        iterator (iterator-symbol sym)]
+        iterator (iterator-symbol sym args body)]
     (common/with-form-meta
       form
       (list 'defn sym args
@@ -651,7 +696,7 @@
   [form callables]
   (if (and (seq? form)
            (= 'defgen (first form)))
-    (rewrite-defgen form)
+    (ruby-rewrite-defgen form)
     (rewrite-callable-form form callables)))
 
 (defn rewrite-callable-forms

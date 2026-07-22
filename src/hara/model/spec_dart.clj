@@ -5,6 +5,7 @@
              [hara.common.emit-common :as common]
              [hara.common.emit-data :as data]
             [hara.common.grammar :as grammar]
+            [hara.lang.rewrite.common :as rewrite-common]
              [hara.lang.script :as script]
              [hara.common.util :as ut]
              [hara.model.spec-xtalk]
@@ -70,13 +71,13 @@
    This keeps collection literals and complex expressions from being misread as
    modifiers by the generic def-assign emitter."
   {:added "4.1"}
-  [[_ decl & args]]
+  [[_ decl & args :as form]]
   (if (empty? args)
     (list 'var* decl)
     (let [bound (last args)]
       (cond
         (vector? decl)
-        (let [tmp (gensym "value_")]
+        (let [tmp (rewrite-common/stable-symbol "value_" form)]
           (apply list 'do*
                  (cons (list 'var* tmp := bound)
                        (map-indexed (fn [i sym]
@@ -107,7 +108,7 @@
 (defn tf-for-object
   "for object transform"
   {:added "4.0"}
-  [[_ [[k v] m] & body]]
+  [[_ [[k v] m] & body :as form]]
   (cond (= k '_)
         (apply list 'for [(list 'var* v) :in (list '. m 'values)]
                body)
@@ -117,7 +118,7 @@
                body)
 
         :else
-        (let [entry (gensym "entry_")]
+        (let [entry (rewrite-common/stable-symbol "entry_" form)]
           (apply list 'for [(list 'var* entry) :in (list '. m 'entries)]
                  (concat [(list 'var* k := (list '. entry 'key))
                           (list 'var* v := (list '. entry 'value))]
@@ -126,15 +127,17 @@
 (defn tf-for-array
   "for array transform"
   {:added "4.0"}
-  [[_ [e arr] & body]]
-  (let [arr-sym (gensym "arr_")]
+  [[_ [e arr] & body :as form]]
+  (let [arr-sym (rewrite-common/stable-symbol "arr_" form)]
     (if (vector? e)
       (let [[i v] e]
+        #_{:clj-kondo/ignore [:unresolved-symbol :invalid-arity :unsupported-binding :syntax]}
         (template/$ (do (var* ~arr-sym := ~arr)
                         (for [(var* ~i := 0) (< ~i (. ~arr-sym length)) (:++ ~i)]
                           (var* ~v := (. ~arr-sym [~i]))
                           ~@body))))
-      (let [i (gensym "i")]
+      (let [i (rewrite-common/stable-symbol "i_" form)]
+        #_{:clj-kondo/ignore [:unresolved-symbol :invalid-arity :unsupported-binding :syntax]}
         (template/$ (do (var* ~arr-sym := ~arr)
                         (for [(var* ~i := 0) (< ~i (. ~arr-sym length)) (:++ ~i)]
                           (var* ~e := (. ~arr-sym [~i]))
@@ -143,8 +146,8 @@
 (defn tf-for-iter
   "for iter transform"
   {:added "4.0"}
-  [[_ [e it] & body]]
-  (let [it-sym (gensym "iter_")]
+  [[_ [e it] & body :as form]]
+  (let [it-sym (rewrite-common/stable-symbol "iter_" form)]
     (template/$ (do (var* ~it-sym := ~it)
                     (while (. ~it-sym (moveNext))
                       (var* ~e := (. ~it-sym current))

@@ -4,7 +4,7 @@
             [std.lib.collection :as collection]))
 
 (defn create-rewriter
-  [{:keys [fn-tags symbol-prefix bulk-do*? block-form? lambda-compatible? skip-form?]
+  [{:keys [fn-tags symbol-prefix symbol-fn bulk-do*? block-form? lambda-compatible? skip-form?]
     :or {fn-tags #{'fn}
          symbol-prefix "lifted_lambda__"
          block-form? (fn [form grammar]
@@ -64,7 +64,8 @@
                       [[] form]
                       (fnrw/lift-named-lambda form
                                               #(rewrite-statements % grammar)
-                                              {:symbol-prefix symbol-prefix}))
+                                              {:symbol-prefix symbol-prefix
+                                               :symbol-fn symbol-fn}))
 
                   (and (collection/form? form)
                        (= 'quote (first form)))
