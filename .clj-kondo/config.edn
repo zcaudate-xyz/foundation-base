@@ -46,7 +46,8 @@
    f/intern-all hooks.std-lib/intern-all-hook}}
 
  :linters
-  {:unused-namespace {:exclude [std.lib xt.lang.spec-base]}
+  {:namespace-name-mismatch {:level :off}
+   :unused-namespace {:exclude [std.lib xt.lang.spec-base]}
   :use {:level :off}
   :unused-referred-var {:level :off}
   :unused-excluded-var {:level :off}
@@ -59,7 +60,7 @@
   :unresolved-symbol {:exclude [fact fact:global defn.pg defrun.pg deftype.pg
                                 canonical-conditional redundant-access
                                 defaulted-access fn-arrow-canonical fn-arrow-fact
-                                destructuring-collision destructuring-source
+                                nested-dot-access nested-dot-fact destructuring-collision destructuring-source
                                 loop-context]}
   :hara.postgres/one-let {:level :warning}
   :hara.postgres/nested-let {:level :warning}
@@ -69,6 +70,7 @@
   :hara.xtalk/block-in-value {:level :error}
   :hara.xtalk/redundant-get-key {:level :warning}
   :hara.xtalk/redundant-fn-arrow {:level :warning}
+  :hara.xtalk/nested-dot-access {:level :warning}
   :hara.xtalk/complex-destructuring-source {:level :warning}
   :hara.xtalk/field-collision {:level :error}
   :hara.xtalk/invalid-destructuring {:level :error}}

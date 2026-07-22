@@ -15,6 +15,19 @@
     (symbol (name head))
     head))
 
+(defn- nested-dot-access? [form]
+  (and (seq? form)
+       (= '. (canonical-head (first form)))
+       (seq? (second form))
+       (= '. (canonical-head (first (second form))))))
+
+(defn- flatten-dot-access [form]
+  (if (nested-dot-access? form)
+    (let [[_ object & tail] form
+          [_ base & segments] (flatten-dot-access object)]
+      (list* '. base (concat segments tail)))
+    form))
+
 (defn- report! [node rule level message]
   (api/reg-finding!
    (merge (meta node)
@@ -32,17 +45,28 @@
                (nil? body))
       (list 'fn args (list 'return body)))))
 
-(defn- lint-fn-arrows! [node]
-  (when node
-    (let [form (api/sexpr node)]
-      (when (and (api/list-node? node)
-                 (= 'fn:> (canonical-head (first form))))
-        (when-let [suggestion (fn-arrow-suggestion form)]
-          (report! node :hara.xtalk/redundant-fn-arrow :warning
-                   (str "fn:> with an explicit argument vector and nil body can use canonical fn with an explicit return: "
-                        suggestion))))
-      (doseq [child-node (:children node)]
-        (lint-fn-arrows! child-node)))))
+(defn- lint-fn-arrows!
+  ([node]
+   (lint-fn-arrows! node false))
+  ([node dot-object?]
+   (when node
+     (let [form (api/sexpr node)
+           head (when (seq? form) (canonical-head (first form)))]
+       (when (and (not dot-object?)
+                  (nested-dot-access? form))
+         (report! node :hara.xtalk/nested-dot-access :warning
+                  (str "nested dot access can be flattened into a single dot form: "
+                       (flatten-dot-access form))))
+       (when (and (api/list-node? node)
+                  (= 'fn:> head))
+         (when-let [suggestion (fn-arrow-suggestion form)]
+           (report! node :hara.xtalk/redundant-fn-arrow :warning
+                    (str "fn:> with an explicit argument vector and nil body can use canonical fn with an explicit return: "
+                         suggestion))))
+       (doseq [[idx child-node] (map-indexed vector (:children node))]
+         (lint-fn-arrows! child-node
+                          (and (= head '.)
+                               (= 1 idx))))))))
 
 (defn- binding-value-nodes [bindings-node]
   (when (api/vector-node? bindings-node)
@@ -118,7 +142,9 @@
         (doseq [[field bindings] fields]
           (when (> (count bindings) 1)
             (report! target-node :hara.xtalk/field-collision :error
-                     (str "destructuring fields collide after normalization: " field)))))
+                     (str "destructuring fields collide after snake_case emission: " field
+                          "; prefer spear-case binding "
+                          (symbol (str/replace (name field) "_" "-")))))))
 
       (vector? target)
       (when-not (every? symbol? target)
@@ -135,6 +161,11 @@
             (report! node :hara.xtalk/block-in-value :error
                      (str "block form " head
                           " is not valid in value position; use :? for value conditionals")))
+          (when (and (= head '.)
+                     (nested-dot-access? form))
+            (report! node :hara.xtalk/nested-dot-access :warning
+                     (str "nested dot access can be flattened into a single dot form: "
+                          (flatten-dot-access form))))
           (when (and (= head 'var)
                      (>= (count form) 2))
             (lint-var-target! node))

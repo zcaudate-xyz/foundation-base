@@ -39,6 +39,15 @@
   => '[[:XT002]
        (. m ["name"])])
 
+^{:refer hara.typed.xtalk-lint/lint-form :added "4.1" :id nested-dot-access}
+(fact "flattens nested dot access chains"
+  (let [form '(. (. (. a ["name"]) ["hello"]) (run 1 2 3))
+        diagnostics (lint-form form :statement {})]
+    [(mapv :code diagnostics)
+     (:suggestion (first diagnostics))])
+  => '[[:XT007]
+       (. a ["name"] ["hello"] (run 1 2 3))])
+
 ^{:refer hara.typed.xtalk-lint/lint-form :added "4.1" :id defaulted-access}
 (fact "keeps explicit x-get-key defaults"
   (lint-form '(return (xt/x:get-key m "name" "unknown")) :statement {})
@@ -71,12 +80,24 @@
   => '[[:XT003]
        (fn [id data t meta] (return nil))])
 
+^{:refer hara.typed.xtalk-lint/lint-top-form :added "4.1" :id nested-dot-fact}
+(fact "finds nested dot access inside facts"
+  (let [diagnostics (lint-top-form
+                     '(fact "nested access"
+                        (. (. (. a ["name"]) ["hello"]) (run 1 2 3)))
+                     {})]
+    [(mapv :code diagnostics)
+     (:suggestion (first diagnostics))])
+  => '[[:XT007]
+       (. a ["name"] ["hello"] (run 1 2 3))])
+
 ^{:refer hara.typed.xtalk-lint/lint-form :added "4.1" :id destructuring-collision}
 (fact "detects destructuring field collisions after snake-case normalization"
   (let [errors (lint-form '(var #{arr-name arr_name} m) :statement {})]
     [(mapv :code errors)
-     (:field (first errors))])
-  => '[[:XT004] "arr_name"])
+     (:field (first errors))
+     (:canonical (first errors))])
+  => '[[:XT004] "arr_name" arr-name])
 
 ^{:refer hara.typed.xtalk-lint/simple-destructuring-source? :added "4.1"}
 (fact "only permits repeatable sources for direct destructuring"

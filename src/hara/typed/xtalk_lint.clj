@@ -1,7 +1,8 @@
 (ns hara.typed.xtalk-lint
   (:require [hara.common.grammar :as grammar]
             [hara.typed.xtalk-common :as types]
-            [hara.typed.xtalk-parse :as parse]))
+            [hara.typed.xtalk-parse :as parse]
+            [std.string.case :as string-case]))
 
 (def +extra-block-heads+
   '#{for:array for:object for:index for:iter for:async})
@@ -22,6 +23,26 @@
 (defn block-head?
   [head]
   (contains? +block-heads+ (canonical-head head)))
+
+(defn nested-dot-access?
+  [form]
+  (and (seq? form)
+       (= '. (canonical-head (first form)))
+       (seq? (second form))
+       (= '. (canonical-head (first (second form))))))
+
+(defn flatten-dot-access
+  "Flattens nested dot object access into one canonical dot form.
+
+   The trailing forms are retained as method arguments, so
+   `(. (. a [\"name\"]) [\"hello\"] (run 1 2 3))` becomes
+   `(. a [\"name\"] [\"hello\"] (run 1 2 3))`."
+  [form]
+  (if (nested-dot-access? form)
+    (let [[_ object & tail] form
+          [_ base & segments] (flatten-dot-access object)]
+      (list* '. base (concat segments tail)))
+    form))
 
 (defn source-location
   [form opts]
@@ -109,15 +130,18 @@
               {:target target
                :invalid (vec invalid)})])
           (map (fn [[field pairs]]
-                 (diagnostic
-                  :XT004
-                  :error
-                  (str "destructuring fields collide after normalization: " field)
-                  form
-                  context
-                  opts
-                  {:field field
-                   :bindings (mapv second pairs)}))
+                 (let [canonical (symbol (string-case/spear-case field))]
+                   (diagnostic
+                    :XT004
+                    :error
+                    (str "destructuring fields collide after snake_case emission: " field
+                         "; prefer spear-case binding " canonical)
+                    form
+                    context
+                    opts
+                    {:field field
+                     :canonical canonical
+                     :bindings (mapv second pairs)})))
                collisions))))
 
       (vector? target)
@@ -162,6 +186,10 @@
 (defn form-pairs
   [h form block?]
   (cond
+    (= h '.)
+    (concat [[(second form) :dot-object]]
+            (map (fn [arg] [arg :value]) (drop 2 form)))
+
     (= h 'if)
     (concat [[(second form) :value]
              [(nth form 2 nil) :statement]
@@ -231,26 +259,50 @@
      opts
      {:suggestion suggestion})))
 
+(defn- value-context?
+  [context]
+  (contains? #{:value :dot-object} context))
+
 (defn- lint-fn-arrows
-  [form opts]
-  (cond
-    (seq? form)
-    (into (if-let [own (fn-arrow-diagnostic form :value opts)]
-            [own]
-            [])
-          (mapcat #(lint-fn-arrows % opts) (rest form)))
+  ([form opts]
+   (lint-fn-arrows form opts false))
+  ([form opts dot-object?]
+   (cond
+     (seq? form)
+     (let [h (canonical-head (first form))
+           own (cond-> []
+                 (and (nested-dot-access? form)
+                      (not dot-object?))
+                 (conj (diagnostic
+                        :XT007
+                        :warning
+                        "nested dot access can be flattened into a single dot form"
+                        form
+                        :statement
+                        opts
+                        {:suggestion (flatten-dot-access form)}))
 
-    (or (vector? form) (set? form))
-    (vec (mapcat #(lint-fn-arrows % opts) form))
+                 (fn-arrow-diagnostic form :value opts)
+                 (conj (fn-arrow-diagnostic form :value opts)))]
+       (into own
+             (mapcat (fn [[idx entry]]
+                       (lint-fn-arrows entry
+                                       opts
+                                       (and (= h '.)
+                                            (zero? idx))))
+                     (map-indexed vector (rest form)))))
 
-    (map? form)
-    (vec (mapcat (fn [[key value]]
-                   (concat (lint-fn-arrows key opts)
-                           (lint-fn-arrows value opts)))
-                 form))
+     (or (vector? form) (set? form))
+     (vec (mapcat #(lint-fn-arrows % opts) form))
 
-    :else
-    []))
+     (map? form)
+     (vec (mapcat (fn [[key value]]
+                    (concat (lint-fn-arrows key opts)
+                            (lint-fn-arrows value opts)))
+                  form))
+
+     :else
+     [])))
 
 (defn lint-form
   [form context opts]
@@ -259,7 +311,7 @@
     (let [h (canonical-head (first form))
           block? (block-head? h)
           own (cond
-                (and (= :value context) block?)
+                (and (value-context? context) block?)
                 [(diagnostic
                   :XT001
                   :error
@@ -284,6 +336,18 @@
                     context
                     opts
                     {:suggestion (list '. obj [key])})])
+
+                (and (= h '.)
+                     (nested-dot-access? form)
+                     (not= :dot-object context))
+                [(diagnostic
+                  :XT007
+                  :warning
+                  "nested dot access can be flattened into a single dot form"
+                  form
+                  context
+                  opts
+                  {:suggestion (flatten-dot-access form)})]
 
                 (and (= h 'fn:>)
                      (fn-arrow-suggestion form))
