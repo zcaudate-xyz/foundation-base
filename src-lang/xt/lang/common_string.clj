@@ -230,7 +230,8 @@
   "gets the string description for a given tag"
   {:added "4.0"}
   [tag]
-  (var [ns name] (-/sym-pair tag))
+  (var pair (-/sym-pair tag))
+  (var [ns name] pair)
   (var parts (xt/x:str-split (:? (xt/x:nil? ns) "" ns) "."))
   (var part-count (xt/x:len parts))
   (var desc (:? (xt/x:not-nil? ns)

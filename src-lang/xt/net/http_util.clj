@@ -39,9 +39,10 @@
   "normalises the standard fetch request envelope"
   {:added "4.1.3"}
   [input]
+  (var source (or input {}))
   (var #{method
          headers
-         body} (or input {}))
+         body} source)
   (return {"method"  (or method "GET")
            "headers" headers
            "body"    (or body "")}))

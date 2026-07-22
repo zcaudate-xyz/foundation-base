@@ -69,7 +69,7 @@
   (var i 0)
   (xt/for:array [spec targs]
     (var arg (xt/x:get-idx args (xt/x:offset i)))
-    (if (not (-/check-arg-type (xt/x:get-key spec "type") arg))
+    (if (not (-/check-arg-type (. spec ["type"]) arg))
       (return [false {:status "error"
                       :tag "net/arg-typecheck-failed"
                       :data {:input arg

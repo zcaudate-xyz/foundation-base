@@ -139,7 +139,7 @@
                               {"id" "b" "keep" false}
                               {"id" "c" "keep" true}]})
     (fn [entry]
-      (return (. entry ["keep"]))))
+      (return (. entry ["keep"])))))
   => [{"id" "a" "keep" true}
       {"id" "c" "keep" true}]
 
@@ -149,7 +149,7 @@
                               {"id" "b" "keep" false}
                               {"id" "c" "keep" true}]})
     (fn [entry]
-      (return (. entry ["keep"]))))
+      (return (. entry ["keep"])))))
   => [{"id" "a" "keep" true}
       {"id" "c" "keep" true}]
 
@@ -159,7 +159,7 @@
                               {"id" "b" "keep" false}
                               {"id" "c" "keep" true}]})
     (fn [entry]
-      (return (. entry ["keep"]))))
+      (return (. entry ["keep"])))))
   => [{"id" "a" "keep" true}
       {"id" "c" "keep" true}])
 

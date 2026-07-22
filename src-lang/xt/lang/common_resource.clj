@@ -212,7 +212,8 @@
   (when (or (xt/x:is-function? obj)
             (xt/x:is-object? obj)
             (xt/x:is-array? obj))
-    (var #{hash} (-/xt-ensure))
+    (var current (-/xt-ensure))
+    (var #{hash} current)
     (var #{lookup counter} hash)
     (var hash-id (xt/x:lu-get lookup obj))
     (when (xt/x:nil? hash-id)
@@ -378,7 +379,8 @@
   "gets the var entry"
   {:added "4.0"}
   [sym]
-  (var [module key] (xts/sym-pair sym))
+  (var pair (xts/sym-pair sym))
+  (var [module key] pair)
   (var space (-/xt-space module))
   (return (. space [key])))
 
@@ -389,14 +391,16 @@
     (rt/xt-var \"-/hello\"))"
   {:added "4.0"}
   [sym]
-  (var [module key] (xts/sym-pair sym))
+  (var pair (xts/sym-pair sym))
+  (var [module key] pair)
   (return (-/xt-item module key)))
 
 (defn.xt xt-var-set
   "sets the var"
   {:added "4.0"}
   [sym value]
-  (var [module key] (xts/sym-pair sym))
+  (var pair (xts/sym-pair sym))
+  (var [module key] pair)
   (if (xt/x:nil? value)
     (return (-/xt-item-del module key))
     (return (-/xt-item-set module key value))))
@@ -405,7 +409,8 @@
   "triggers the var"
   {:added "4.0"}
   [sym]
-  (var [module key] (xts/sym-pair sym))
+  (var pair (xts/sym-pair sym))
+  (var [module key] pair)
   (return (-/xt-item-trigger module key)))
 
 (defn.xt xt-add-watch
