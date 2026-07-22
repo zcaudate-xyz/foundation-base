@@ -1,5 +1,5 @@
 {
-  "updated-at" : "2026-07-22T21:54:27.286996286Z",
+  "updated-at" : "2026-07-22T22:04:54.427967974Z",
   "schema-version" : 1,
   "workflows" : {
     "annex" : {
@@ -756,7 +756,7 @@
     },
     "core" : {
       "latest" : {
-        "path" : "runs/core/368-1.json",
+        "path" : "runs/core/369-1.json",
         "failure-counts" : {
           "errored" : 1,
           "throw" : 255,
@@ -764,14 +764,14 @@
           "failed" : 27
         },
         "run" : {
-          "number" : 368,
-          "id" : 29937279089,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29937279089",
+          "number" : 369,
+          "id" : 29959476784,
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959476784",
           "attempt" : 1
         },
         "workflow-key" : "core",
         "tests" : {
-          "passed" : 3549,
+          "passed" : 3582,
           "skipped" : 1,
           "errored" : 1,
           "throw" : 255,
@@ -781,7 +781,7 @@
         "git" : {
           "ref" : "refs/heads/main",
           "event" : "push",
-          "sha" : "1bac98c2ea7894b22bb498b68185a01d6e1d86b2"
+          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318"
         },
         "jobs" : [ {
           "failure-counts" : {
@@ -812,7 +812,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:38:24.384771188Z",
+          "recorded-at" : "2026-07-22T21:40:54.088497028Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -850,7 +850,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:28:56.370384862Z",
+          "recorded-at" : "2026-07-22T21:38:19.042809040Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -888,7 +888,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:32:55.878591766Z",
+          "recorded-at" : "2026-07-22T21:37:08.937062311Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -912,7 +912,7 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 147,
+            "passed" : 158,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 0,
@@ -926,7 +926,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:33:49.214369895Z",
+          "recorded-at" : "2026-07-22T21:35:53.631482733Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -950,7 +950,7 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 117,
+            "passed" : 128,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 0,
@@ -964,7 +964,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:30:08.129066954Z",
+          "recorded-at" : "2026-07-22T21:33:57.148213314Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -988,7 +988,7 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 127,
+            "passed" : 138,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 19,
@@ -1002,7 +1002,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:23:31.465731594Z",
+          "recorded-at" : "2026-07-22T21:34:06.149080670Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1040,7 +1040,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:34:24.234236498Z",
+          "recorded-at" : "2026-07-22T21:45:12.842830083Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1078,7 +1078,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:27:15.517853446Z",
+          "recorded-at" : "2026-07-22T21:36:12.723923534Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1116,7 +1116,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:32:15.759502385Z",
+          "recorded-at" : "2026-07-22T21:35:38.384994270Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1154,7 +1154,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:28:30.641626740Z",
+          "recorded-at" : "2026-07-22T21:31:48.175413004Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1192,7 +1192,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:31:53.962905714Z",
+          "recorded-at" : "2026-07-22T21:33:15.956203591Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1230,7 +1230,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:29:20.800418382Z",
+          "recorded-at" : "2026-07-22T21:33:15.483803165Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1268,7 +1268,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:38:00.933056777Z",
+          "recorded-at" : "2026-07-22T21:39:14.805489751Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1306,7 +1306,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:33:05.939214442Z",
+          "recorded-at" : "2026-07-22T21:34:52.148704706Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1344,7 +1344,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:31:54.845834583Z",
+          "recorded-at" : "2026-07-22T21:36:01.790068394Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1354,14 +1354,14 @@
           "suite" : "xt.substrate",
           "failing-count" : 74
         } ],
-        "recorded-at" : "2026-07-22T16:39:42.027689598Z",
+        "recorded-at" : "2026-07-22T21:54:27.276727943Z",
         "workflow-name" : "XTBench Core",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
       },
       "runs" : [ {
-        "path" : "runs/core/368-1.json",
+        "path" : "runs/core/369-1.json",
         "failure-counts" : {
           "errored" : 1,
           "throw" : 255,
@@ -1369,14 +1369,14 @@
           "failed" : 27
         },
         "run" : {
-          "number" : 368,
-          "id" : 29937279089,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29937279089",
+          "number" : 369,
+          "id" : 29959476784,
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959476784",
           "attempt" : 1
         },
         "workflow-key" : "core",
         "tests" : {
-          "passed" : 3549,
+          "passed" : 3582,
           "skipped" : 1,
           "errored" : 1,
           "throw" : 255,
@@ -1386,7 +1386,7 @@
         "git" : {
           "ref" : "refs/heads/main",
           "event" : "push",
-          "sha" : "1bac98c2ea7894b22bb498b68185a01d6e1d86b2"
+          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318"
         },
         "jobs" : [ {
           "failure-counts" : {
@@ -1417,7 +1417,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:38:24.384771188Z",
+          "recorded-at" : "2026-07-22T21:40:54.088497028Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1455,7 +1455,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:28:56.370384862Z",
+          "recorded-at" : "2026-07-22T21:38:19.042809040Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1493,7 +1493,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:32:55.878591766Z",
+          "recorded-at" : "2026-07-22T21:37:08.937062311Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1517,7 +1517,7 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 147,
+            "passed" : 158,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 0,
@@ -1531,7 +1531,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:33:49.214369895Z",
+          "recorded-at" : "2026-07-22T21:35:53.631482733Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1555,7 +1555,7 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 117,
+            "passed" : 128,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 0,
@@ -1569,7 +1569,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:30:08.129066954Z",
+          "recorded-at" : "2026-07-22T21:33:57.148213314Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1593,7 +1593,7 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 127,
+            "passed" : 138,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 19,
@@ -1607,7 +1607,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:23:31.465731594Z",
+          "recorded-at" : "2026-07-22T21:34:06.149080670Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1645,7 +1645,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:34:24.234236498Z",
+          "recorded-at" : "2026-07-22T21:45:12.842830083Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1683,7 +1683,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:27:15.517853446Z",
+          "recorded-at" : "2026-07-22T21:36:12.723923534Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1721,7 +1721,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:32:15.759502385Z",
+          "recorded-at" : "2026-07-22T21:35:38.384994270Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1759,7 +1759,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:28:30.641626740Z",
+          "recorded-at" : "2026-07-22T21:31:48.175413004Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1797,7 +1797,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:31:53.962905714Z",
+          "recorded-at" : "2026-07-22T21:33:15.956203591Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1835,7 +1835,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:29:20.800418382Z",
+          "recorded-at" : "2026-07-22T21:33:15.483803165Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1873,7 +1873,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:38:00.933056777Z",
+          "recorded-at" : "2026-07-22T21:39:14.805489751Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -1911,7 +1911,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:33:05.939214442Z",
+          "recorded-at" : "2026-07-22T21:34:52.148704706Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1949,7 +1949,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:31:54.845834583Z",
+          "recorded-at" : "2026-07-22T21:36:01.790068394Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -1959,7 +1959,7 @@
           "suite" : "xt.substrate",
           "failing-count" : 74
         } ],
-        "recorded-at" : "2026-07-22T16:39:42.027689598Z",
+        "recorded-at" : "2026-07-22T21:54:27.276727943Z",
         "workflow-name" : "XTBench Core",
         "status" : "failure",
         "metrics-status" : "complete",
@@ -2268,30 +2268,30 @@
     },
     "core" : {
       "latest" : {
-        "path" : "runs/core/369-1.json",
+        "path" : "runs/core/370-1.json",
         "failure-counts" : {
-          "failed" : 27,
+          "failed" : 26,
           "throw" : 255,
           "timeout" : 0,
           "errored" : 1
         },
         "run" : {
-          "id" : 29959476784,
-          "number" : 369,
+          "id" : 29959617374,
+          "number" : 370,
           "attempt" : 1,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959476784"
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959617374"
         },
         "workflow-key" : "core",
         "tests" : {
-          "passed" : 3582,
-          "failed" : 27,
+          "passed" : 3583,
+          "failed" : 26,
           "throw" : 255,
           "timeout" : 0,
           "skipped" : 1,
           "errored" : 1
         },
         "git" : {
-          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318",
+          "sha" : "d78e5f873b7c69a261b6c8d10e063a4ef0d8734d",
           "ref" : "refs/heads/main",
           "event" : "push"
         },
@@ -2324,7 +2324,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:40:54.088497028Z",
+          "recorded-at" : "2026-07-22T22:03:00.396439951Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2362,7 +2362,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:38:19.042809040Z",
+          "recorded-at" : "2026-07-22T21:50:50.619487133Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2400,7 +2400,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:37:08.937062311Z",
+          "recorded-at" : "2026-07-22T21:50:47.738258478Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2438,7 +2438,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:35:53.631482733Z",
+          "recorded-at" : "2026-07-22T21:55:05.866745576Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2476,7 +2476,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:33:57.148213314Z",
+          "recorded-at" : "2026-07-22T21:40:19.151560283Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2514,7 +2514,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:34:06.149080670Z",
+          "recorded-at" : "2026-07-22T21:41:31.670642500Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2552,7 +2552,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:45:12.842830083Z",
+          "recorded-at" : "2026-07-22T22:00:50.535320227Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2566,7 +2566,7 @@
             "errored" : 0,
             "throw" : 3,
             "timeout" : 0,
-            "failed" : 5
+            "failed" : 4
           },
           "run" : {
             "number" : null,
@@ -2576,12 +2576,12 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 558,
+            "passed" : 559,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 3,
             "timeout" : 0,
-            "failed" : 5
+            "failed" : 4
           },
           "generated-count" : 21,
           "git" : {
@@ -2590,7 +2590,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:36:12.723923534Z",
+          "recorded-at" : "2026-07-22T21:55:14.635781547Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2598,7 +2598,7 @@
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
           "suite" : "xt.lang",
-          "failing-count" : 8
+          "failing-count" : 7
         }, {
           "failure-counts" : {
             "errored" : 0,
@@ -2628,7 +2628,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:35:38.384994270Z",
+          "recorded-at" : "2026-07-22T21:51:03.305175738Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2666,7 +2666,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:31:48.175413004Z",
+          "recorded-at" : "2026-07-22T21:39:22.974143435Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2704,7 +2704,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:33:15.956203591Z",
+          "recorded-at" : "2026-07-22T21:54:41.094267755Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2742,7 +2742,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:33:15.483803165Z",
+          "recorded-at" : "2026-07-22T21:46:31.281937233Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2780,7 +2780,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:39:14.805489751Z",
+          "recorded-at" : "2026-07-22T21:53:14.878342172Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2818,7 +2818,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:34:52.148704706Z",
+          "recorded-at" : "2026-07-22T21:48:38.351257327Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2856,7 +2856,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:36:01.790068394Z",
+          "recorded-at" : "2026-07-22T21:57:00.140830011Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2866,37 +2866,37 @@
           "suite" : "xt.substrate",
           "failing-count" : 74
         } ],
-        "recorded-at" : "2026-07-22T21:54:27.276727943Z",
+        "recorded-at" : "2026-07-22T22:04:54.416284297Z",
         "workflow-name" : "XTBench Core",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
       },
       "runs" : [ {
-        "path" : "runs/core/369-1.json",
+        "path" : "runs/core/370-1.json",
         "failure-counts" : {
-          "failed" : 27,
+          "failed" : 26,
           "throw" : 255,
           "timeout" : 0,
           "errored" : 1
         },
         "run" : {
-          "id" : 29959476784,
-          "number" : 369,
+          "id" : 29959617374,
+          "number" : 370,
           "attempt" : 1,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959476784"
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959617374"
         },
         "workflow-key" : "core",
         "tests" : {
-          "passed" : 3582,
-          "failed" : 27,
+          "passed" : 3583,
+          "failed" : 26,
           "throw" : 255,
           "timeout" : 0,
           "skipped" : 1,
           "errored" : 1
         },
         "git" : {
-          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318",
+          "sha" : "d78e5f873b7c69a261b6c8d10e063a4ef0d8734d",
           "ref" : "refs/heads/main",
           "event" : "push"
         },
@@ -2929,7 +2929,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:40:54.088497028Z",
+          "recorded-at" : "2026-07-22T22:03:00.396439951Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2967,7 +2967,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:38:19.042809040Z",
+          "recorded-at" : "2026-07-22T21:50:50.619487133Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -3005,7 +3005,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:37:08.937062311Z",
+          "recorded-at" : "2026-07-22T21:50:47.738258478Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -3043,7 +3043,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:35:53.631482733Z",
+          "recorded-at" : "2026-07-22T21:55:05.866745576Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -3081,7 +3081,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:33:57.148213314Z",
+          "recorded-at" : "2026-07-22T21:40:19.151560283Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -3119,7 +3119,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:34:06.149080670Z",
+          "recorded-at" : "2026-07-22T21:41:31.670642500Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -3157,7 +3157,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:45:12.842830083Z",
+          "recorded-at" : "2026-07-22T22:00:50.535320227Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -3171,7 +3171,7 @@
             "errored" : 0,
             "throw" : 3,
             "timeout" : 0,
-            "failed" : 5
+            "failed" : 4
           },
           "run" : {
             "number" : null,
@@ -3181,12 +3181,12 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 558,
+            "passed" : 559,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 3,
             "timeout" : 0,
-            "failed" : 5
+            "failed" : 4
           },
           "generated-count" : 21,
           "git" : {
@@ -3195,7 +3195,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:36:12.723923534Z",
+          "recorded-at" : "2026-07-22T21:55:14.635781547Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -3203,7 +3203,7 @@
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
           "suite" : "xt.lang",
-          "failing-count" : 8
+          "failing-count" : 7
         }, {
           "failure-counts" : {
             "errored" : 0,
@@ -3233,7 +3233,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:35:38.384994270Z",
+          "recorded-at" : "2026-07-22T21:51:03.305175738Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -3271,7 +3271,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:31:48.175413004Z",
+          "recorded-at" : "2026-07-22T21:39:22.974143435Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -3309,7 +3309,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:33:15.956203591Z",
+          "recorded-at" : "2026-07-22T21:54:41.094267755Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -3347,7 +3347,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:33:15.483803165Z",
+          "recorded-at" : "2026-07-22T21:46:31.281937233Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -3385,7 +3385,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:39:14.805489751Z",
+          "recorded-at" : "2026-07-22T21:53:14.878342172Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -3423,7 +3423,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:34:52.148704706Z",
+          "recorded-at" : "2026-07-22T21:48:38.351257327Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -3461,7 +3461,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:36:01.790068394Z",
+          "recorded-at" : "2026-07-22T21:57:00.140830011Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -3471,7 +3471,7 @@
           "suite" : "xt.substrate",
           "failing-count" : 74
         } ],
-        "recorded-at" : "2026-07-22T21:54:27.276727943Z",
+        "recorded-at" : "2026-07-22T22:04:54.416284297Z",
         "workflow-name" : "XTBench Core",
         "status" : "failure",
         "metrics-status" : "complete",
