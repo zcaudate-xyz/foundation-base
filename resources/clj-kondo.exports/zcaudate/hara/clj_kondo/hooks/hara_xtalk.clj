@@ -94,16 +94,16 @@
                         (filter symbol?)
                         (group-by #(symbol (str/replace (name %) "-" "_"))))]
         (when (seq invalid)
-          (report! target-node :xtalk/invalid-destructuring :error
+          (report! target-node :hara.xtalk/invalid-destructuring :error
                    "set destructuring targets must contain only symbols"))
         (doseq [[field bindings] fields]
           (when (> (count bindings) 1)
-            (report! target-node :xtalk/field-collision :error
+            (report! target-node :hara.xtalk/field-collision :error
                      (str "destructuring fields collide after normalization: " field)))))
 
       (vector? target)
       (when-not (every? symbol? target)
-        (report! target-node :xtalk/invalid-destructuring :error
+        (report! target-node :hara.xtalk/invalid-destructuring :error
                  "vector destructuring targets must contain only symbols")))))
 
 (defn- lint-node! [node context]
@@ -113,7 +113,7 @@
         (api/list-node? node)
         (let [head (canonical-head (first form))]
           (when (and (= :value context) (block-head? head))
-            (report! node :xtalk/block-in-value :error
+            (report! node :hara.xtalk/block-in-value :error
                      (str "block form " head
                           " is not valid in value position; use :? for value conditionals")))
           (when (and (= head 'var)
@@ -123,7 +123,7 @@
                      (or (= 3 (count form))
                          (and (= 4 (count form))
                               (nil? (nth form 3)))))
-            (report! node :xtalk/redundant-get-key :warning
+            (report! node :hara.xtalk/redundant-get-key :warning
                      "simple x:get-key can use canonical dot access (. obj [key])"))
           (doseq [[child-node child-context] (node-pairs head node)]
             (lint-node! child-node child-context)))

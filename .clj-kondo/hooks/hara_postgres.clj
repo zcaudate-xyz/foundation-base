@@ -167,21 +167,21 @@
                                           (.startsWith (str (first %)) "pg/t:"))
                                     body))))
                (not= 1 top-let-count))
-      (report! name-node :gwpg/one-let
+      (report! name-node :hara.postgres/one-let
                (str name " should contain exactly one top-level let")))
     (when (> (count lets) 1)
-      (report! name-node :gwpg/nested-let
+      (report! name-node :hara.postgres/nested-let
                (str name " contains nested or repeated let forms")))
     (doseq [input input-names]
       (when-not (allowed-input-name? input)
-        (report! name-node :gwpg/input-prefix
+        (report! name-node :hara.postgres/input-prefix
                  (str "input binding " input " should use i-* or m"))))
     (doseq [local local-names]
       (when-not (allowed-local-name? local)
-        (report! name-node :gwpg/local-prefix
+        (report! name-node :hara.postgres/local-prefix
                  (str "local binding " local " should use v-* or o-*"))))
     (when (seq direct-returns)
-      (report! name-node :gwpg/return-bound
+      (report! name-node :hara.postgres/return-bound
                (str name " returns an expression directly; bind it before return")))))
 
 (defn defn-pg

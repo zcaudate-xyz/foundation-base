@@ -26,12 +26,12 @@
    clj-kondo.hooks.hara-postgres/defrun.pg clj-kondo.hooks.hara-postgres/defn-pg}}
 
  :linters
- {:gwpg/one-let {:level :warning}
-  :gwpg/nested-let {:level :warning}
-  :gwpg/input-prefix {:level :warning}
-  :gwpg/local-prefix {:level :warning}
-  :gwpg/return-bound {:level :warning}
-  :xtalk/block-in-value {:level :error}
-  :xtalk/field-collision {:level :error}
-  :xtalk/invalid-destructuring {:level :error}
-  :xtalk/redundant-get-key {:level :warning}}}
+ {:hara.postgres/one-let {:level :warning}
+  :hara.postgres/nested-let {:level :warning}
+  :hara.postgres/input-prefix {:level :warning}
+  :hara.postgres/local-prefix {:level :warning}
+  :hara.postgres/return-bound {:level :warning}
+  :hara.xtalk/block-in-value {:level :error}
+  :hara.xtalk/field-collision {:level :error}
+  :hara.xtalk/invalid-destructuring {:level :error}
+  :hara.xtalk/redundant-get-key {:level :warning}}}

@@ -20,7 +20,7 @@
        (fn [e key]
          (if (xt/x:is-function? key)
            (return (key e))
-           (return (xt/x:get-key e key)))))
+           (return (. e [key])))))
   (var key-fn
        (fn [e]
          (return (xt/x:arr-map keys (fn [key] (return (get-fn e key)))))))
