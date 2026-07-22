@@ -286,6 +286,10 @@
 ;; CALLBACK
 ;;
 
+(defspec.xt wrap-callback
+  [:fn [[:xt/dict :xt/str :xt/any] :xt/str]
+        [:fn [:xt/any] :xt/any]])
+
 (defn.xt wrap-callback
   "returns a wrapped callback given map"
   {:added "4.0"}
@@ -294,7 +298,7 @@
     (:= callbacks {}))
   (var result-fn
        (fn [result]
-         (var f (xt/x:get-key callbacks key))
+         (var f (. callbacks [key]))
          (if (xt/x:not-nil? f)
            (return (xt/x:apply f [result]))
            (return result))))
@@ -324,4 +328,3 @@
   [s]
   (return
    (xt/x:return-eval s -/return-wrap)))
-

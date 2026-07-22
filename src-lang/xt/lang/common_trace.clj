@@ -82,7 +82,7 @@
   "filters out traced entries"
   {:added "4.0"}
   [tag]
-  (return (xt/x:arr-filter (-/trace-log) (fn [e] (return (== tag (xt/x:get-key e "tag")))))))
+  (return (xt/x:arr-filter (-/trace-log) (fn [e] (return (== tag (. e ["tag"])))))))
 
 (defn.xt trace-last-entry
   "gets the last entry"
@@ -99,14 +99,14 @@
   {:added "4.0"}
   [tag]
   (return (xt/x:arr-map (-/trace-log)
-                        (fn [e] (return (xt/x:get-key e "data"))))))
+                        (fn [e] (return (. e ["data"]))))))
 
 (defn.xt trace-last
   "gets the last value"
   {:added "4.0"}
   [tag]
-  (return (xt/x:get-key (-/trace-last-entry tag)
-                        "data")))
+  (return (. (-/trace-last-entry tag)
+             ["data"])))
 
 (defmacro.xt TRACE!
   "performs a trace call"

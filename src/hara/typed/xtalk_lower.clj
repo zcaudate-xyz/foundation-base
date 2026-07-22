@@ -1,5 +1,7 @@
 (ns hara.typed.xtalk-lower
   (:require [hara.typed.xtalk-intrinsic :as intrinsic]
+            [hara.typed.xtalk-compat :as compat]
+            [hara.typed.xtalk-common :as types]
             [hara.typed.xtalk-ops :as ops]))
 
 (defn intrinsic-sym
@@ -23,16 +25,56 @@
     :else
     op))
 
+(defn access-kind
+  "returns the canonical access kind for a receiver type"
+  {:added "4.1"}
+  [type ctx]
+  (let [type (if (and (map? type)
+                      (contains? type :kind))
+               type
+               (types/normalize-type type ctx))
+        type (compat/resolve-type type ctx)]
+    (case (:kind type)
+      (:array :tuple) :idx
+      (:record :dict) :key
+      :maybe (access-kind (:item type) ctx)
+      :union (let [kinds (->> (:types type)
+                              (map #(access-kind % ctx))
+                              distinct)]
+               (when (= 1 (count kinds))
+                 (first kinds)))
+      nil)))
+
+(defn- receiver-access-kind
+  [obj ctx]
+  (or (when-let [infer (:infer ctx)]
+        (access-kind (:type (infer obj ctx)) ctx))
+      (when (symbol? obj)
+        (when-let [declared (or (get (meta obj) :-)
+                                (get (meta obj) :hara/type))]
+          (access-kind declared ctx)))))
+
 (defn lower-dot
-  [[_ obj & path-parts]]
-  (let [path (mapv (fn [part]
-                     (if (and (vector? part) (= 1 (count part)))
-                       (first part)
-                       part))
-                   path-parts)]
-    (if (= 1 (count path))
-      (list 'x:get-key obj (first path))
-      (list 'x:get-path obj path nil))))
+  "lowers dot access using the receiver's XTalk type when available"
+  {:added "4.1"}
+  ([form]
+   (lower-dot form nil))
+  ([[_ obj & path-parts] ctx]
+   (let [path (mapv (fn [part]
+                      (if (and (vector? part) (= 1 (count part)))
+                        (first part)
+                        part))
+                    path-parts)]
+     (if (= 1 (count path))
+       (case (receiver-access-kind obj ctx)
+         :idx (list 'x:get-idx obj (first path))
+         :key (list 'x:get-key obj (first path))
+         (if (:preserve-unknown ctx)
+           (list* '. obj path-parts)
+           (list 'x:get-key obj (first path))))
+       (if (:preserve-unknown ctx)
+         (list* '. obj path-parts)
+         (list 'x:get-path obj path nil))))))
 
 (defn lower-fn-shorthand
   [[_ & args]]
@@ -80,7 +122,8 @@
   [form ctx]
   (let [[op & args] form
          op' (resolve-op op ctx)
-         canonical-entry (when (symbol? op')
+         canonical-entry (when (and (symbol? op')
+                                    (namespace op'))
                            (ops/canonical-entry op'))
          canonical-op (or (:canonical-symbol canonical-entry)
                           op')
@@ -88,10 +131,7 @@
          lowered (cons canonical-op args')]
     (cond
       (= op' '.)
-      (lower-dot (cons op' args'))
-
-      (= op' :?)
-      (list 'if (first args') (second args') (nth args' 2 nil))
+      (lower-dot (cons op' args') ctx)
 
       (= op' 'fn:>)
       (lower-fn-shorthand (cons op' args'))

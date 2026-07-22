@@ -29,7 +29,7 @@
   "walks over the list of edges"
   {:added "4.0"}
   [nodes visited sorted id ancestors]
-  (if (== true (xt/x:get-key visited id))
+  (if (== true (. visited [id]))
     (return))
   (var node (. nodes [id]))
   (if (xt/x:nil? node)

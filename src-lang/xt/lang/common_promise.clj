@@ -12,7 +12,7 @@
   {:added "4.1"}
   [value]
   (return (and (xt/x:is-object? value)
-               (== "xt.promise" (xt/x:get-key value "::")))))
+               (== "xt.promise" (. value ["::"])))))
 
 (defn.xt make-resolve-state
   "creates a resolved common promise wrapper"
@@ -43,14 +43,14 @@
   "settles a common promise wrapper and dispatches any children"
   {:added "4.1"}
   [p status payload drive-fn]
-  (when (== "pending" (xt/x:get-key p "status"))
+  (when (== "pending" (. p ["status"]))
     (xt/x:set-key p "status" status)
     (if (== "rejected" status)
       (do (xt/x:set-key p "error" payload)
           (xt/x:set-key p "value" nil))
       (do (xt/x:set-key p "value" payload)
            (xt/x:set-key p "error" nil)))
-    (var children (xt/x:get-key p "children"))
+    (var children (. p ["children"]))
     (xt/x:set-key p "children" [])
     (xt/for:array [entry children]
       (xt/x:apply drive-fn [p entry drive-fn])))
@@ -60,10 +60,10 @@
   "subscribes a child promise to a parent promise"
   {:added "4.1"}
   [promise child on-resolve on-reject drive-fn]
-  (var status (xt/x:get-key promise "status"))
+  (var status (. promise ["status"]))
   (if (== "pending" status)
     (do (xt/x:arr-push
-         (xt/x:get-key promise "children")
+         (. promise ["children"])
          {"child" child
            "resolve" on-resolve
            "reject" on-reject})
@@ -81,7 +81,7 @@
   {:added "4.1"}
   [target value drive-fn]
   (if (-/promise-native? value)
-    (do (var status (xt/x:get-key value "status"))
+    (do (var status (. value ["status"]))
         (cond (== "pending" status)
               (return (-/internal-link-action value target nil nil drive-fn))
 
@@ -89,14 +89,14 @@
               (return (-/internal-settle-action
                        target
                        "rejected"
-                       (xt/x:get-key value "error")
+                       (. value ["error"])
                        drive-fn))
 
               :else
               (return (-/internal-settle-action
                        target
                        "resolved"
-                       (xt/x:get-key value "value")
+                       (. value ["value"])
                        drive-fn))))
     (return (-/internal-settle-action target "resolved" value drive-fn))))
 
@@ -104,11 +104,11 @@
   "dispatches a settled parent promise to a subscribed child"
   {:added "4.1"}
   [promise entry drive-fn]
-  (var status (xt/x:get-key promise "status"))
-  (var child (xt/x:get-key entry "child"))
+  (var status (. promise ["status"]))
+  (var child (. entry ["child"]))
   (var rejected? (== "rejected" status))
-  (var thunk (xt/x:get-key entry (:? rejected? "reject" "resolve")))
-  (var payload (xt/x:get-key promise (:? rejected? "error" "value")))
+  (var thunk (. entry [(:? rejected? "reject" "resolve")]))
+  (var payload (. promise [(:? rejected? "error" "value")]))
   (if (xt/x:nil? thunk)
     (return (-/internal-settle-action
              child

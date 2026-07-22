@@ -453,7 +453,7 @@
      (:= obj {}))
    (when (xt/x:not-nil? m)
      (xt/for:object [[k mv] m]
-       (var v (xt/x:get-key obj k))
+       (var v (. obj [k]))
        (cond (and (xt/x:is-object? mv)
                   (xt/x:is-object? v))
              (xt/x:set-key obj k (-/obj-assign-nested v mv))
@@ -473,7 +473,7 @@
     (xt/for:object [[k mv] input]
       (var merged mv)
       (when (xt/x:has-key? obj k)
-        (:= merged (f (xt/x:get-key obj k)
+        (:= merged (f (. obj [k])
                       mv)))
       (xt/x:set-key obj k merged)))
   (return obj))
@@ -514,7 +514,7 @@
   (when (xt/x:nil? obj)
     (return out))
   (xt/for:array [k ks]
-    (var v (xt/x:get-key obj k))
+    (var v (. obj [k]))
     (if (xt/x:not-nil? v)
       (xt/x:set-key out k v)))
   (return out))
@@ -578,7 +578,7 @@
                               nil))
 
                   (xt/x:is-object? obj)
-                  (return (xt/x:get-key obj k))
+                  (return (. obj [k]))
 
                   :else
                   (return nil))))
@@ -596,7 +596,7 @@
             (return nil))
 
           (xt/x:is-object? curr)
-          (:= curr (xt/x:get-key curr k))
+          (:= curr (. curr [k]))
 
           :else
           (return nil))
@@ -629,7 +629,7 @@
   
   (var k (xt/x:first arr))
   (var narr (-/arr-slice arr 1 nil))
-  (var child (xt/x:get-key obj k))
+  (var child (. obj [k]))
   (if (== 0 (xt/x:len narr))
     (xt/x:set-key obj k v)
     (xt/x:set-key obj k (-/set-in child narr v)))
@@ -688,7 +688,7 @@
   {:added "4.0"}
   ([obj k f args]
    (var inputs (xt/x:arr-clone args))
-   (xt/x:arr-push-first inputs (xt/x:get-key obj k))
+   (xt/x:arr-push-first inputs (. obj [k]))
    (xt/x:set-key obj k (xt/x:apply f inputs))
    (return obj)))
 
@@ -1097,20 +1097,20 @@
   (var cache-fn (fn [key]
                   (return (-/memoize-key-step f key cache))))
   (return (fn [key]
-            (return (or (xt/x:get-key cache key)
+            (return (or (. cache [key])
                         (cache-fn key))))))
 
 (defn.xt id-fn
   "gets the id for an object"
   {:added "4.1"}
   ([x]
-   (return (xt/x:get-key x "id"))))
+   (return (. x ["id"]))))
 
 (defn.xt key-fn
   "creates a key access function"
   {:added "4.1"}
   ([k]
-   (return (fn [x] (return (xt/x:get-key x k))))))
+   (return (fn [x] (return (. x [k]))))))
 
 (defn.xt template-entry
   "gets data from a structure using template"

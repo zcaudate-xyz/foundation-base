@@ -197,15 +197,15 @@
   "named color to rgb"
   {:added "4.0"}
   [s]
-  (return (:? (xt/x:nil? (xt/x:get-key -/NAMED s))
+  (return (:? (xt/x:nil? (. -/NAMED [s]))
               [0 0 0]
-              (xt/x:get-key -/NAMED s))))
+              (. -/NAMED [s]))))
 
 (defn.xt hex->n
   "hex to rgb val"
   {:added "4.0"}
   [s]
-  (var out (xt/x:get-key -/HEX (xts/to-uppercase s)))
+  (var out (. -/HEX [(xts/to-uppercase s)]))
   (when (xt/x:nil? out)
     (:= out 0))
   (return out))
@@ -216,8 +216,8 @@
   [n]
   (var v1 (xtm/quot n 16))
   (var v0 (xtm/mod-pos n 16))
-  (return (xt/x:cat (:? (xt/x:nil? (xt/x:get-key -/LU v1)) "0" (xt/x:get-key -/LU v1))
-                    (:? (xt/x:nil? (xt/x:get-key -/LU v0)) "0" (xt/x:get-key -/LU v0)))))
+  (return (xt/x:cat (:? (xt/x:nil? (. -/LU [v1])) "0" (. -/LU [v1]))
+                    (:? (xt/x:nil? (. -/LU [v0])) "0" (. -/LU [v0])))))
 
 (defn.xt hex->rgb
   "converts a hex value to rgb array"

@@ -34,42 +34,42 @@
   "returns true if obj implements the given protocol"
   {:added "4.1"}
   [obj protocol]
-  (var type (xt/x:get-key obj "::"))
+  (var type (. obj ["::"]))
   (when (xt/x:nil? type)
     (return false))
-  (var entry (xt/x:get-key xt.lang.common-protocol/PROTOCOLS protocol))
+  (var entry (. xt.lang.common-protocol/PROTOCOLS [protocol]))
   (when (xt/x:nil? entry)
     (return false))
-  (var impls (xt/x:get-key entry "impls"))
+  (var impls (. entry ["impls"]))
   (return (xt/x:has-key? impls type)))
 
 (defn.xt protocol-method
   "looks up the registered method by protocol and implementation type"
   {:added "4.1"}
   [obj on method]
-  (var type           (xt/x:get-key obj "::"))  
-  (var override-map   (xt/x:get-key obj "::/override"))
+  (var type           (. obj ["::"]))
+  (var override-map   (. obj ["::/override"]))
   (when (not (xt/x:nil? override-map))
-    (var override-fn    (xt/x:get-key override-map method))
+    (var override-fn    (. override-map [method]))
     (when (not (xt/x:nil? override-fn))
       (return override-fn)))
   
-  (var local-impls (xt/x:get-key obj "::/protocol-impls"))
-  (var local-impl-map (and local-impls (xt/x:get-key local-impls on)))
-  (var protocol (xt/x:get-key xt.lang.common-protocol/PROTOCOLS on))
+  (var local-impls (. obj ["::/protocol-impls"]))
+  (var local-impl-map (and local-impls (. local-impls [on])))
+  (var protocol (. xt.lang.common-protocol/PROTOCOLS [on]))
   (when (and (xt/x:nil? protocol)
              (xt/x:nil? local-impl-map))
     (xt/x:err (xt/x:cat "Missing protocol entry " on)))
   
-  (var protocol-impls (and protocol (xt/x:get-key protocol "impls")))
+  (var protocol-impls (and protocol (. protocol ["impls"])))
   (var protocol-impl-map
-       (or (and protocol-impls (xt/x:get-key protocol-impls type))
+       (or (and protocol-impls (. protocol-impls [type]))
            local-impl-map))
 
   (when (xt/x:nil? protocol-impl-map)
     (xt/x:err (xt/x:cat "Missing protocol implementation " on " for " type)))
   
-  (var method-fn (xt/x:get-key protocol-impl-map method))
+  (var method-fn (. protocol-impl-map [method]))
   
   (when (xt/x:nil? method-fn)
     (xt/x:err (xt/x:cat "Missing protocol method " on "/" method " for " type)))
@@ -90,10 +90,10 @@
   "registers protocol implementations in the registry"
   {:added "4.1"}
   [protocolname typename impl-map]
-  (var protocol (xt/x:get-key xt.lang.common-protocol/PROTOCOLS protocolname))
+  (var protocol (. xt.lang.common-protocol/PROTOCOLS [protocolname]))
   (when (xt/x:nil? protocol)
     (xt/x:err (xt/x:cat "Missing protocol " protocolname)))
-  (var impls (xt/x:get-key protocol "impls"))
+  (var impls (. protocol ["impls"]))
   (xt/x:set-key impls typename impl-map)
   (return impl-map))
 
@@ -102,7 +102,7 @@
   {:added "4.1"}
   [protocol]
   (xt/x:set-key xt.lang.common-protocol/PROTOCOLS
-                (xt/x:get-key protocol "on")
+                (. protocol ["on"])
                 protocol)
   (return protocol))
 

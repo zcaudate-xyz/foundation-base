@@ -20,7 +20,7 @@
 (defn python-tf-x-get-key
   [[_ obj key default]]
   (let [val (list '. obj (list 'get key))]
-    (if default
+    (if (some? default)
       (list 'or val default)
       val)))
 

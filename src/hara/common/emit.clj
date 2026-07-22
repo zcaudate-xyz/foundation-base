@@ -19,7 +19,9 @@
    => map?"
   {:added "4.0"}
   [& [m]]
-  (collection/merge-nested helper/+default+ m))
+  (collection/merge-nested helper/+default+
+                           {:rewrite {:canonical [#'rewrite/canonical-stage]}}
+                           m))
 
 (def +option-keys+
   [:lang
@@ -29,6 +31,7 @@
    :snapshot
    :layout
    :emit
+   :hara/xtalk-context
    :hara/provenance])
 
 (defn emit-main-loop

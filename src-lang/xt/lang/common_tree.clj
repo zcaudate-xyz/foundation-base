@@ -58,8 +58,8 @@
             (xt/x:len ks-dst))
     (return false))
   (xt/for:array [k ks-src]
-    (if (not (-/eq-nested-loop (xt/x:get-key src k)
-                               (xt/x:get-key dst k)
+    (if (not (-/eq-nested-loop (. src [k])
+                               (. dst [k])
                                eq-obj
                                eq-arr
                                cache))
@@ -178,8 +178,8 @@
   (if (xt/x:nil? obj) (return m))
   (var out {})
   (xt/for:object [[k v] m]
-    (if (not (-/eq-nested (xt/x:get-key obj k)
-                          (xt/x:get-key m k)))
+    (if (not (-/eq-nested (. obj [k])
+                          (. m [k])))
       (xt/x:set-key out k v)))
   (return out))
 
@@ -193,8 +193,8 @@
   (var out {})
   (var ks (xt/x:obj-keys m))
   (xt/for:array [k ks]
-    (var v   (xt/x:get-key obj k))
-    (var mv  (xt/x:get-key m k))
+    (var v   (. obj [k]))
+    (var mv  (. m [k]))
     (cond (and (xt/x:is-object? v) (xt/x:is-object? mv))
           (do (var dv (-/tree-diff-nested v mv))
               (if (not (xtd/obj-empty? dv))
@@ -202,4 +202,3 @@
           (not (-/eq-nested v mv))
           (xt/x:set-key out k mv)))
   (return out))
-

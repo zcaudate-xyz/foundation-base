@@ -110,7 +110,7 @@
                                 (fn [v]
                                   (return
                                    (:? (and (xt/x:is-object? v)
-                                            (== "xml" (xt/x:get-key v "::/__type__")))
+                                            (== "xml" (. v ["::/__type__"])))
                                        (-/to-node-normalise v)
                                        v))))))
   (return out))
@@ -124,30 +124,30 @@
   (var levels [top])
   (var current top)
   (xt/for:array [e stack]
-    (var etext (xt/x:get-key e "text"))
-    (var etag (xt/x:get-key e "tag"))
-    (var eparams (xt/x:get-key e "params"))
+    (var etext (. e ["text"]))
+    (var etag (. e ["tag"]))
+    (var eparams (. e ["params"]))
     (when (xt/x:not-nil? etext)
-      (xt/x:arr-push (xt/x:get-key current "children") etext))
-    (cond (== true (xt/x:get-key e "empty"))
+      (xt/x:arr-push (. current ["children"]) etext))
+    (cond (== true (. e ["empty"]))
           (do (var enode {:tag etag})
               (when (and (xt/x:not-nil? eparams)
                          (xtd/obj-not-empty? eparams))
                 (xt/x:set-key enode "params" eparams))
-              (xt/x:arr-push (xt/x:get-key current "children") enode))
+              (xt/x:arr-push (. current ["children"]) enode))
           
-          (not= true (xt/x:get-key e "close"))
+          (not= true (. e ["close"]))
           (do (var ncurrent {"::/__type__" "xml"
                              :parent current
                              :tag etag
                              :params eparams
                              :children []})
-              (xt/x:arr-push (xt/x:get-key current "children") ncurrent)
+              (xt/x:arr-push (. current ["children"]) ncurrent)
               (:= current ncurrent))
           
           :else
-          (:= current (xt/x:get-key current "parent"))))
-  (return (-/to-node-normalise (xt/x:first (xt/x:get-key top "children")))))
+          (:= current (. current ["parent"]))))
+  (return (-/to-node-normalise (xt/x:first (. top ["children"])))))
 
 (defn.xt parse-xml
   "parses xml"
@@ -215,7 +215,7 @@
             (var unique {})
             (xt/for:array [e children]
               (when (xt/x:is-object? e)
-                (xt/x:set-key unique (xt/x:get-key e "tag") true)))
+                (xt/x:set-key unique (. e ["tag"]) true)))
             (if (or has-string
                     (not= (xt/x:len (xt/x:obj-keys unique))
                           (xt/x:len children)))

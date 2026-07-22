@@ -94,11 +94,11 @@
    (xt/x:cat "POST "
              (:? (xt/x:nil? (:? (xt/x:nil? opts)
                                 nil
-                                (xt/x:get-key opts "path" nil)))
+                                (. opts ["path"])))
                  "/"
                  (:? (xt/x:nil? opts)
                      nil
-                     (xt/x:get-key opts "path" nil)))
+                     (. opts ["path"])))
              " HTTP/1.0\r\n"
              "Host: " host ":"  (xt/x:to-string port) "\r\n"
              "Content-Length: " (xt/x:to-string (xt/x:str-len output)) "\r\n"
