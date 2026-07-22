@@ -411,8 +411,8 @@
 
   (!.js
    (var l (log/new-log {}))
-   (log/add-listener l "a1" (fn:> [id data t meta] nil) nil)
-   (log/add-listener l "b2" (fn:> [id data t meta] nil) nil)
+   (log/add-listener l "a1" (fn [id data t meta] (return nil)) nil)
+   (log/add-listener l "b2" (fn [id data t meta] (return nil)) nil)
    [(log/list-listeners l)
     (. (log/remove-listener l "b2") ["meta"])
     (log/list-listeners l)])
@@ -424,8 +424,8 @@
 
   (!.lua
    (var l (log/new-log {}))
-   (log/add-listener l "a1" (fn:> [id data t meta] nil) nil)
-   (log/add-listener l "b2" (fn:> [id data t meta] nil) nil)
+   (log/add-listener l "a1" (fn [id data t meta] (return nil)) nil)
+   (log/add-listener l "b2" (fn [id data t meta] (return nil)) nil)
    [(log/list-listeners l)
     (. (log/remove-listener l "b2") ["meta"])
     (log/list-listeners l)])
@@ -437,8 +437,8 @@
 
   (!.py
    (var l (log/new-log {}))
-   (log/add-listener l "a1" (fn:> [id data t meta] nil) nil)
-   (log/add-listener l "b2" (fn:> [id data t meta] nil) nil)
+   (log/add-listener l "a1" (fn [id data t meta] (return nil)) nil)
+   (log/add-listener l "b2" (fn [id data t meta] (return nil)) nil)
    [(log/list-listeners l)
     (. (log/remove-listener l "b2") ["meta"])
     (log/list-listeners l)])
