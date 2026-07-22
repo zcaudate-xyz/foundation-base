@@ -10,7 +10,15 @@
   => (contains ['defproject 'my "LATEST"
                 :dependencies (contains [['org.clojure/clojure "1.12.0"]
                                          ['a "1.0"]])
-                :profiles map?]))
+                :profiles map?])
+
+  (let [form (project-form {} 'my.main {:version "1.2.3"
+                                         :uberjar-name "my.jar"
+                                         :jar-exclusions []})
+        opts (apply hash-map (drop 3 form))]
+    [(:uberjar-name opts)
+     (get-in opts [:profiles :uberjar :jar-exclusions])])
+  => ["my.jar" []])
 
 ^{:refer code.tool.build/build-deps :added "4.0"}
 (fact "gets dependencies for a given file"

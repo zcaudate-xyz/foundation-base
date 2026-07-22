@@ -7,12 +7,18 @@
    as one serializable view tree that renders through both platform
    frameworks (js.react.view and dart.ui.view). `web-escape-render` holds
    the `fg/` platform band: figma-kit components with no Wind counterpart,
-   which portable validation rejects by design."
+   which portable validation rejects by design.
+
+   The form section is interactive: `kitchen-sink-bindings` reads
+   substrate state and `install-handlers` registers the `demo/*` request
+   handlers, so dispatch -> state-set -> notify drives live rebuilds on
+   every host."
   (:require [hara.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
+             [xt.substrate.base-util :as base-util]
              [xt.substrate.view :as view]]})
 
 (defn.xt sink-section
@@ -52,10 +58,78 @@
       (:= found true)))
   (return found))
 
+;;
+;; interactive form - substrate state bindings and request handlers
+;;
+
+(def$.xt VIEW-ID "demo/kitchen-sink")
+
+(defn.xt kitchen-sink-bindings
+  "substrate state bindings read by the kitchen-sink form"
+  []
+  (return {"name"    {"source" "state"
+                      "space_id" "app"
+                      "path" ["form" "name"]
+                      "default" ""}
+           "about"   {"source" "state"
+                      "space_id" "app"
+                      "path" ["form" "about"]
+                      "default" ""}
+           "orgs"    {"source" "state"
+                      "space_id" "app"
+                      "path" ["orgs"]
+                      "default" []}
+           "pending" {"source" "state"
+                      "space_id" "app"
+                      "path" ["pending"]
+                      "default" false}}))
+
+(defn.xt install-handlers
+  "registers the kitchen-sink demo request handlers on a substrate node"
+  [node]
+  (base-util/register-handler
+   node "demo/set-name"
+   (fn [space args request node]
+     (return (view/state-set node (xt/x:get-key request "space") -/VIEW-ID
+                             ["form" "name"] (xt/x:get-idx args 0))))
+   nil)
+  (base-util/register-handler
+   node "demo/set-about"
+   (fn [space args request node]
+     (return (view/state-set node (xt/x:get-key request "space") -/VIEW-ID
+                             ["form" "about"] (xt/x:get-idx args 0))))
+   nil)
+  (base-util/register-handler
+   node "demo/reset-form"
+   (fn [space args request node]
+     (var space-id (xt/x:get-key request "space"))
+     (view/state-set node space-id -/VIEW-ID ["form" "name"] "")
+     (view/state-set node space-id -/VIEW-ID ["form" "about"] "")
+     (return true))
+   nil)
+  (base-util/register-handler
+   node "demo/create-org"
+   (fn [space args request node]
+     (var space-id (xt/x:get-key request "space"))
+     (var name (view/state-get node space-id -/VIEW-ID ["form" "name"] ""))
+     (var about (view/state-get node space-id -/VIEW-ID ["form" "about"] ""))
+     (when (< 0 (xt/x:str-len name))
+       (var orgs (view/state-get node space-id -/VIEW-ID ["orgs"] []))
+       (view/state-set node space-id -/VIEW-ID ["orgs"]
+                       (xtd/arr-concat orgs [{"name" name "about" about}]))
+       (view/state-set node space-id -/VIEW-ID ["form" "name"] "")
+       (view/state-set node space-id -/VIEW-ID ["form" "about"] ""))
+     (return true))
+   nil)
+  (return true))
+
 (defn.xt kitchen-sink-render
   "renders every portable catalog component on one screen"
   [snapshot]
   (var pending (== true (xt/x:get-key snapshot "pending")))
+  (var name (or (xt/x:get-key snapshot "name") ""))
+  (var about (or (xt/x:get-key snapshot "about") ""))
+  (var orgs (or (xt/x:get-key snapshot "orgs") []))
   (var fills (or (xt/x:get-key snapshot "fills")
                  [["10:02" "BUY" "12.50" "4"]
                   ["10:05" "SELL" "12.55" "2"]
@@ -129,21 +203,41 @@
                                 [])])
          (view/node "ui/card-content" {"class" "flex flex-col gap-4 p-0"}
                     [(view/node "ui/input" {"id" "sink-name"
-                                            "value" (or (xt/x:get-key snapshot "name") "")
+                                            "value" name
                                             "placeholder" "Acme Trading"
                                             "on_change" (view/action "demo/set-name"
                                                                      (view/event-value ["value"]))}
                                 [])
                      (view/node "ui/textarea" {"placeholder" "What does this organisation trade?"
                                                "rows" 3
+                                               "value" about
                                                "on_change" (view/action "demo/set-about"
                                                                         (view/event-value ["value"]))}
+                                [])
+                     (view/node "ui/description"
+                                {"value" (:? (< 0 (xt/x:str-len name))
+                                             (xt/x:cat "Hello, " name
+                                                       "! state-set roundtrip via xt.substrate.")
+                                             "Type a name to see the live substrate roundtrip.")}
                                 [])])
          (view/node "ui/card-footer" {"class" "flex flex-row justify-end gap-2 p-0"}
-                    [(view/node "ui/button" {"variant" "ghost"} ["Cancel"])
+                    [(view/node "ui/button" {"variant" "ghost"
+                                             "on_press" (view/action "demo/reset-form" nil)}
+                                ["Cancel"])
                      (view/node "ui/button" {"pending" pending
                                              "on_press" (view/action "demo/create-org" nil)}
-                                ["Create"])])])])
+                                ["Create"])])])
+       (view/node "ui/column" {"class" "flex flex-col gap-2"}
+                  (xtd/arr-map
+                   orgs
+                   (fn [org]
+                     (return
+                      (view/node "ui/alert" {"variant" "default"}
+                                 [(view/node "ui/text"
+                                             {"value" (xt/x:cat (xt/x:get-key org "name")
+                                                                " - "
+                                                                (xt/x:get-key org "about"))}
+                                             [])])))))])
 
      ;; image
      (-/sink-section
@@ -192,7 +286,7 @@
 
 (defn.xt kitchen-sink-spec
   []
-  (return (view/view-spec "demo/kitchen-sink" {} (-/kitchen-sink-render {}))))
+  (return (view/view-spec -/VIEW-ID (-/kitchen-sink-bindings) (-/kitchen-sink-render {}))))
 
 ;;
 ;; web-escape - fg/ platform band (web-only; rejected by validate-portable)

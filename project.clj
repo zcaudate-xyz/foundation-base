@@ -7,6 +7,7 @@
   {"test"    ["run" "-m" "code.test"]
    "manage"  ["run" "-m" "code.manage"]
    "seedgen" ["run" "-m" "hara.seedgen.cli"]
+   "hara-uberjar" ["run" "-m" "hara.uberjar.build"]
    #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "wiki"        ["exec" "-ep" "(let [p (-> (ProcessBuilder. [\"bash\" \"bin/publish-wiki\"]) (.inheritIO) (.start))] (System/exit (.waitFor p)))"]

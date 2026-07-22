@@ -1,5 +1,7 @@
 {:ns-groups
- [{:pattern ".+"
+ [{:pattern "^xt\\.lang\\."
+   :name clj-kondo.hooks.hara-xtalk}
+  {:pattern ".+"
    :name clj-kondo.hooks.hara-postgres}]
 
  :hooks
@@ -7,8 +9,19 @@
   {hara.lang/script clj-kondo.hooks.hara-postgres/script
    hara.lang/script- clj-kondo.hooks.hara-postgres/script
    hara.lang/script+ clj-kondo.hooks.hara-postgres/script
+   hara.lang/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
+   hara.typed/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
+   defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
+   defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
    defn.pg clj-kondo.hooks.hara-postgres/defn-pg
    defrun.pg clj-kondo.hooks.hara-postgres/defn-pg
+   clj-kondo.hooks.hara-xtalk/defn.xt clj-kondo.hooks.hara-xtalk/defn-xt
+   clj-kondo.hooks.hara-xtalk/def.xt clj-kondo.hooks.hara-xtalk/def-xt
+   clj-kondo.hooks.hara-xtalk/defmacro.xt clj-kondo.hooks.hara-xtalk/defmacro-xt
+   clj-kondo.hooks.hara-xtalk/defgen.xt clj-kondo.hooks.hara-xtalk/defgen-xt
+   clj-kondo.hooks.hara-xtalk/defvar.xt clj-kondo.hooks.hara-xtalk/defvar-xt
+   clj-kondo.hooks.hara-xtalk/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
+   clj-kondo.hooks.hara-xtalk/defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
    clj-kondo.hooks.hara-postgres/defn.pg clj-kondo.hooks.hara-postgres/defn-pg
    clj-kondo.hooks.hara-postgres/defrun.pg clj-kondo.hooks.hara-postgres/defn-pg}}
 
@@ -17,4 +30,8 @@
   :gwpg/nested-let {:level :warning}
   :gwpg/input-prefix {:level :warning}
   :gwpg/local-prefix {:level :warning}
-  :gwpg/return-bound {:level :warning}}}
+  :gwpg/return-bound {:level :warning}
+  :xtalk/block-in-value {:level :error}
+  :xtalk/field-collision {:level :error}
+  :xtalk/invalid-destructuring {:level :error}
+  :xtalk/redundant-get-key {:level :warning}}}

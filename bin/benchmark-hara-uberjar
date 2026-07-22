@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+TRIALS="${TRIALS:-3}"
+SKIP_BUILD="${SKIP_BUILD:-0}"
+EXPECTED="1 + 2 + 3"
+INPUT="[(+ 1 2 3)]"
+
+if ! [[ "$TRIALS" =~ ^[1-9][0-9]*$ ]]; then
+  echo "TRIALS must be a positive integer" >&2
+  exit 2
+fi
+
+tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/hara-uberjar-bench.XXXXXX")"
+trap 'rm -rf "$tmp_dir"' EXIT
+
+cd "$PROJECT_ROOT"
+
+if [[ "$SKIP_BUILD" == "1" ]]; then
+  echo "Reusing the existing Hara standalone uberjar"
+else
+  echo "Building the Hara standalone uberjar"
+  ./lein hara-uberjar
+fi
+
+jars=(.build/hara-uberjar/target/hara-*-standalone.jar)
+if [[ ${#jars[@]} -ne 1 || ! -f "${jars[0]}" ]]; then
+  echo "Expected exactly one Hara standalone jar, found: ${jars[*]}" >&2
+  exit 1
+fi
+
+jar_path="$(cd "$(dirname "${jars[0]}")" && pwd)/$(basename "${jars[0]}")"
+classpath="$(./lein classpath)"
+
+benchmark() {
+  local label="$1"
+  shift
+  local trial output timing real
+
+  : > "$tmp_dir/$label.tsv"
+  for ((trial = 1; trial <= TRIALS; trial++)); do
+    output="$tmp_dir/$label-$trial.out"
+    timing="$tmp_dir/$label-$trial.time"
+    { /usr/bin/time -p "$@" > "$output"; } 2> "$timing"
+    if [[ "$(tr -d '\r\n' < "$output")" != "$EXPECTED" ]]; then
+      echo "$label trial $trial returned unexpected output:" >&2
+      sed -n '1,20p' "$output" >&2
+      exit 1
+    fi
+    real="$(awk '$1 == "real" {print $2}' "$timing")"
+    printf '%s\n' "$real" >> "$tmp_dir/$label.tsv"
+    printf '%-8s trial %d: %ss\n' "$label" "$trial" "$real"
+  done
+}
+
+echo "Benchmarking fresh JVM startup (${TRIALS} trials per mode)"
+benchmark source env -u CLASSPATH java -cp "$classpath" \
+  clojure.main -m hara.uberjar.main emit js "$INPUT"
+benchmark uberjar env -u CLASSPATH java -jar "$jar_path" emit js "$INPUT"
+
+source_avg="$(awk '{sum += $1} END {printf "%.3f", sum / NR}' "$tmp_dir/source.tsv")"
+jar_avg="$(awk '{sum += $1} END {printf "%.3f", sum / NR}' "$tmp_dir/uberjar.tsv")"
+
+awk -v source="$source_avg" -v jar="$jar_avg" 'BEGIN {
+  printf "source average:  %0.3fs\n", source
+  printf "uberjar average: %0.3fs\n", jar
+  printf "speedup:         %0.3fx\n", source / jar
+  printf "reduction:       %0.1f%%\n", (1 - jar / source) * 100
+}'
+
+echo "artifact: $jar_path"

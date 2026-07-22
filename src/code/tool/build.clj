@@ -16,6 +16,11 @@
   "constructs the `project.clj` form"
   {:added "4.0"}
   ([manifest main]
+   (project-form manifest main {}))
+  ([manifest main {:keys [aot jar-exclusions uberjar-name version]
+                   :or {aot [main]
+                        jar-exclusions [#"\.*\.clj"]
+                        version "LATEST"}}]
    (let [deps (apply vector
                      ['org.clojure/clojure
                       (jvm.deps/current-version
@@ -25,12 +30,15 @@
                     (clojure.string/split #"\.")
                     (butlast)
                     (clojure.string/join "." %)
-                    symbol)]
-     (template/$ (defproject ~proj "LATEST"
-            :dependencies ~deps
-            :profiles {:uberjar {:aot [~main]
-                                 :main ~main
-                                 :jar-exclusions [#"\.*\.clj"]}})))))
+                    symbol)
+         form (template/$ (defproject ~proj ~version
+                            :dependencies ~deps
+                            :profiles {:uberjar {:aot ~aot
+                                                 :main ~main
+                                                 :jar-exclusions ~jar-exclusions}}))]
+     (if uberjar-name
+       (apply list (concat form [:uberjar-name uberjar-name]))
+       form))))
 
 (defn build-deps
   "gets dependencies for a given file"
@@ -49,12 +57,14 @@
    => vector?"
   {:added "4.0"}
   ([ns]
+   (build-prep ns {}))
+  ([ns opts]
    (let [proj      (assoc (link/make-project)
                           :tag :all)
          links     (link/all-linkages proj)
          deps      (build-deps links ns)
          manifest  (link/select-manifest links deps)
-         project   (project-form manifest ns)]
+         project   (project-form manifest (or (:main opts) ns) opts)]
      [manifest project deps])))
 
 (defn build-copy
@@ -77,7 +87,6 @@
                         (fs/path src-dir %))
          _    (fs/copy-single src-path dst-path {:options #{:replace-existing}})
          ;; Copy Deps
-         src-ns (env/sys:ns-dir)
          _   (doseq [[k m] manifest]
                (doseq [[from to] (:files m)]
                  (fs/copy-single from (fs/path src-dir to)
@@ -94,7 +103,7 @@
           :as conf} (if (symbol? ns-or-m)
                       @@(resolve ns-or-m)
                       ns-or-m)
-         prep (build-prep ns)
+         prep (build-prep ns conf)
          _    (build-copy prep conf)]
      (fs/list (str root "/" build)))))
 

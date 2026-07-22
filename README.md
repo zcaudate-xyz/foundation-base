@@ -92,7 +92,7 @@ Try a standard-library helper:
 ```clojure
 (require '[hara.lang :as l])
 
-(l/emit-as :js '(+ 1 2 3))
+(l/emit-as :js '[(+ 1 2 3)])
 ;; => "1 + 2 + 3"
 ```
 
@@ -111,6 +111,31 @@ The same authoring model can target multiple languages:
 ```
 
 Hara goes beyond printing syntax. Language books, grammars, modules, pointers, and runtime adapters make it possible to inspect, test, and execute generated code from the same Clojure workflow.
+
+### Build the standalone Hara CLI
+
+Build an AOT-compiled uberjar from the Hara sources in the current checkout:
+
+```bash
+lein hara-uberjar
+```
+
+The artifact is written to
+`.build/hara-uberjar/target/hara-4.1.5-standalone.jar`. It does not require
+Leiningen or a Foundation Base checkout at runtime:
+
+```bash
+java -jar .build/hara-uberjar/target/hara-4.1.5-standalone.jar languages
+java -jar .build/hara-uberjar/target/hara-4.1.5-standalone.jar \
+  emit js '[(+ 1 2 3)]'
+printf '[(* 6 7)]\n' | java -jar \
+  .build/hara-uberjar/target/hara-4.1.5-standalone.jar emit lua -
+```
+
+Input is EDN and must be an outer sequential collection of forms. The CLI
+supports `xtalk`, Bash, C, Dart, GLSL, JavaScript, Lua, Emacs Lisp, Scheme,
+Python, SQL, and Oracle. Language specs remain lazy at runtime; the build
+discovers and AOT-compiles their shared namespace closure for faster startup.
 
 Start with:
 

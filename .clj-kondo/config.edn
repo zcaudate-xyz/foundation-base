@@ -1,5 +1,7 @@
 {:ns-groups
- [{:pattern ".+"
+ [{:pattern "^xt\\.lang\\."
+   :name hooks.xtalk}
+  {:pattern ".+"
    :name hooks.hara-postgres}]
 
  :hooks
@@ -7,8 +9,19 @@
   {hara.lang/script hooks.hara-postgres/script
    hara.lang/script- hooks.hara-postgres/script
    hara.lang/script+ hooks.hara-postgres/script
+   hara.lang/defspec.xt hooks.xtalk/defspec-xt
+   hara.typed/defspec.xt hooks.xtalk/defspec-xt
+   defspec.xt hooks.xtalk/defspec-xt
+   defglobal.xt hooks.xtalk/defglobal-xt
    defn.js hooks.defn-pg/defn-js
    defvar.js hooks.defn-pg/defn-js
+   hooks.xtalk/defn.xt hooks.xtalk/defn-xt
+   hooks.xtalk/def.xt hooks.xtalk/def-xt
+   hooks.xtalk/defmacro.xt hooks.xtalk/defmacro-xt
+   hooks.xtalk/defgen.xt hooks.xtalk/defgen-xt
+   hooks.xtalk/defvar.xt hooks.xtalk/defvar-xt
+   hooks.xtalk/defspec.xt hooks.xtalk/defspec-xt
+   hooks.xtalk/defglobal.xt hooks.xtalk/defglobal-xt
    defn.pg hooks.hara-postgres/defn-pg
    defrun.pg hooks.hara-postgres/defn-pg
    hooks.hara-postgres/defn.pg hooks.hara-postgres/defn-pg
@@ -23,6 +36,10 @@
   :unresolved-symbol {:exclude [defn.pg defrun.pg deftype.pg]}
   :gwpg/one-let {:level :warning}
   :gwpg/nested-let {:level :warning}
-  :gwpg/input-prefix {:level :warning}
-  :gwpg/local-prefix {:level :warning}
-  :gwpg/return-bound {:level :warning}}}
+   :gwpg/input-prefix {:level :warning}
+   :gwpg/local-prefix {:level :warning}
+  :gwpg/return-bound {:level :warning}
+  :xtalk/block-in-value {:level :error}
+  :xtalk/redundant-get-key {:level :warning}
+  :xtalk/field-collision {:level :error}
+  :xtalk/invalid-destructuring {:level :error}}}
