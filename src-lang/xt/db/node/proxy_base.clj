@@ -63,7 +63,7 @@
    (promise/x:promise-then
     (substrate/request node
                        nil
-                       (xt/x:get-key request "action")
+                       (. request ["action"])
                        args
                        {"transport_id" transport-id})
     (fn [status]
@@ -88,7 +88,7 @@
           (return
            (substrate/request node
                               nil
-                              (xt/x:get-key request "action")
+                              (. request ["action"])
                               args
                               {"transport_id" transport-id})))))))
 

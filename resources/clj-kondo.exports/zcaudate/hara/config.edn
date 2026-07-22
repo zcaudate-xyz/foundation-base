@@ -1,5 +1,7 @@
 {:ns-groups
- [{:pattern "^xt\\.lang\\."
+ [{:pattern "^xt\\."
+   :name clj-kondo.hooks.hara-xtalk}
+  {:pattern "^hara\\.model\\.spec-xtalk\\."
    :name clj-kondo.hooks.hara-xtalk}
   {:pattern ".+"
    :name clj-kondo.hooks.hara-postgres}]
@@ -12,6 +14,10 @@
    hara.lang/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
    hara.typed/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
    defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
+   defn.js clj-kondo.hooks.hara-xtalk/defn-xt
+   hara.lang/defn.js clj-kondo.hooks.hara-xtalk/defn-xt
+   defvar.js clj-kondo.hooks.hara-xtalk/defvar-xt
+   hara.lang/defvar.js clj-kondo.hooks.hara-xtalk/defvar-xt
    defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
    defn.pg clj-kondo.hooks.hara-postgres/defn-pg
    defrun.pg clj-kondo.hooks.hara-postgres/defn-pg
@@ -20,8 +26,14 @@
    clj-kondo.hooks.hara-xtalk/defmacro.xt clj-kondo.hooks.hara-xtalk/defmacro-xt
    clj-kondo.hooks.hara-xtalk/defgen.xt clj-kondo.hooks.hara-xtalk/defgen-xt
    clj-kondo.hooks.hara-xtalk/defvar.xt clj-kondo.hooks.hara-xtalk/defvar-xt
+   defprotocol.xt clj-kondo.hooks.hara-xtalk/defprotocol-xt
+   xt.lang.common-protocol/defprotocol.xt clj-kondo.hooks.hara-xtalk/defprotocol-xt
+   proto/defprotocol.xt clj-kondo.hooks.hara-xtalk/defprotocol-xt
    clj-kondo.hooks.hara-xtalk/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
    clj-kondo.hooks.hara-xtalk/defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
+   defimpl.xt clj-kondo.hooks.hara-xtalk/defimpl-xt
+   xt.lang.common-protocol/defimpl.xt clj-kondo.hooks.hara-xtalk/defimpl-xt
+   proto/defimpl.xt clj-kondo.hooks.hara-xtalk/defimpl-xt
    fact clj-kondo.hooks.hara-xtalk/fact-xt
    fact:global clj-kondo.hooks.hara-xtalk/fact-global-xt
    clj-kondo.hooks.hara-postgres/defn.pg clj-kondo.hooks.hara-postgres/defn-pg

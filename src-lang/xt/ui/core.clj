@@ -68,8 +68,8 @@
 (defn.xt registry-register-contract
   "registers a contract and rejects incompatible duplicate definitions"
   [registry contract]
-  (var component-id (xt/x:get-key contract "id"))
-  (var contracts (xt/x:get-key registry "contracts"))
+  (var component-id (. contract ["id"]))
+  (var contracts (. registry ["contracts"]))
   (var existing (xt/x:get-key contracts component-id))
   (when (and existing
              (not= (xt/x:json-encode existing)
@@ -81,7 +81,7 @@
 (defn.xt registry-register-renderer
   "registers the renderer for a component in this layer"
   [registry component-id renderer]
-  (xt/x:set-key (xt/x:get-key registry "renderers") component-id renderer)
+  (xt/x:set-key (. registry ["renderers"]) component-id renderer)
   (return registry))
 
 (defn.xt registry-compose
@@ -90,25 +90,25 @@
   (var out (-/registry-create "composed"))
   (xt/for:array [layer (or layers [])]
     (xt/for:object [[component-id contract]
-                    (or (xt/x:get-key layer "contracts") {})]
+                    (or (. layer ["contracts"]) {})]
       (-/registry-register-contract out contract))
     (xt/for:object [[component-id renderer]
-                    (or (xt/x:get-key layer "renderers") {})]
-      (xt/x:set-key (xt/x:get-key out "renderers") component-id renderer)))
+                    (or (. layer ["renderers"]) {})]
+      (xt/x:set-key (. out ["renderers"]) component-id renderer)))
   (return out))
 
 (defn.xt registry-contract
   [registry component-id]
-  (return (xt/x:get-key (xt/x:get-key registry "contracts") component-id)))
+  (return (xt/x:get-key (. registry ["contracts"]) component-id)))
 
 (defn.xt registry-renderer
   [registry component-id]
-  (return (xt/x:get-key (xt/x:get-key registry "renderers") component-id)))
+  (return (xt/x:get-key (. registry ["renderers"]) component-id)))
 
 (defn.xt validate-props
   [contract props]
-  (var allowed (or (xt/x:get-key contract "props") []))
-  (var events (or (xt/x:get-key contract "events") []))
+  (var allowed (or (. contract ["props"]) []))
+  (var events (or (. contract ["events"]) []))
   (xt/for:object [[prop-id _] (or props {})]
     (when (and (not (xtd/arr-some allowed
                                   (fn [allowed-id]
@@ -117,7 +117,7 @@
                                   (fn [event-id]
                                     (return (== event-id prop-id))))))
       (xt/x:err (xt/x:cat "ERR - unsupported UI prop - "
-                          (xt/x:get-key contract "id") "." prop-id))))
+                          (. contract ["id"]) "." prop-id))))
   (return true))
 
 (defn.xt validate-node
@@ -132,13 +132,13 @@
     (xt/for:array [child ui-node]
       (-/validate-node registry child))
     (return true))
-  (var component-id (xt/x:get-key ui-node "component"))
-  (var contracts (xt/x:get-key registry "contracts"))
+  (var component-id (. ui-node ["component"]))
+  (var contracts (. registry ["contracts"]))
   (when (not (xt/x:has-key? contracts component-id))
     (xt/x:err (xt/x:cat "ERR - unregistered UI component - " component-id)))
   (var contract (xt/x:get-key contracts component-id))
-  (-/validate-props contract (xt/x:get-key ui-node "props"))
-  (xt/for:array [child (or (xt/x:get-key ui-node "children") [])]
+  (-/validate-props contract (. ui-node ["props"]))
+  (xt/for:array [child (or (. ui-node ["children"]) [])]
     (-/validate-node registry child))
   (return true))
 
@@ -154,12 +154,12 @@
 (defn.xt capability?
   [runtime capability-id]
   (return (== true
-              (xt/x:get-key (xt/x:get-key runtime "capabilities")
+              (xt/x:get-key (. runtime ["capabilities"])
                             capability-id))))
 
 (defn.xt service
   [runtime service-id]
-  (return (xt/x:get-key (xt/x:get-key runtime "services") service-id)))
+  (return (xt/x:get-key (. runtime ["services"]) service-id)))
 
 (defn.xt effect!
   "invokes a typed native service and normalizes unavailable services"
@@ -182,10 +182,10 @@
   "returns a supplied slot value or the node's portable fallback"
   [runtime slot-node]
   (var slot-id (xtd/get-in slot-node ["props" "slot_id"]))
-  (var supplied (xt/x:get-key (xt/x:get-key runtime "slots") slot-id))
+  (var supplied (xt/x:get-key (. runtime ["slots"]) slot-id))
   (return (:? supplied
               supplied
-              (xt/x:get-key slot-node "children"))))
+              (. slot-node ["children"]))))
 
 (defn.xt base-registry
   "portable structural component contracts"

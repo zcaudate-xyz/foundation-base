@@ -91,8 +91,8 @@
         (return (xt/x:get-key -/OPERATORS op))
 
         (and (xt/x:is-object? opts)
-             (xt/x:is-object? (xt/x:get-key opts "operators"))
-             (xt/x:has-key? (xt/x:get-key opts "operators") op))
+             (xt/x:is-object? (. opts ["operators"]))
+             (xt/x:has-key? (. opts ["operators"]) op))
         (return (xtd/get-in opts ["operators" op]))
 
         :else
@@ -159,7 +159,7 @@
   {:added "4.0"}
   [v column-fn opts loop-fn]
   (var #{schema name} v)
-  (if (xt/x:get-key opts "strict")
+  (if (. opts ["strict"])
     (return (xt/x:cat (column-fn schema)
                    "."
                    (column-fn name)))
@@ -169,8 +169,8 @@
   "encodes an sql cast"
   {:added "4.0"}
   [v column-fn opts loop-fn]
-  (var [out cast] (xt/x:get-key v "args"))
-  (if (xt/x:get-key opts "strict")
+  (var [out cast] (. v ["args"]))
+  (if (. opts ["strict"])
     (return (xt/x:cat (loop-fn out column-fn opts loop-fn)
                    "::"
                    (-/encode-sql-table cast column-fn opts loop-fn)))
@@ -206,16 +206,16 @@
             (cond (xt/x:nil? fspec)
                   (return (xt/x:cat  name "(" (xt/x:str-join ", " fargs) ")"))
                   
-                  (== "alias" (xt/x:get-key fspec "type"))
-                   (return (xt/x:cat (xt/x:get-key fspec "name")
+                  (== "alias" (. fspec ["type"]))
+                   (return (xt/x:cat (. fspec ["name"])
                                   "("
                                   (xt/x:str-join ", " fargs) ")"))
 
-                   (== "macro" (xt/x:get-key fspec "type"))
-                   (return (xt/x:apply (xt/x:get-key fspec "fn") fargs))
+                   (== "macro" (. fspec ["type"]))
+                   (return (xt/x:apply (. fspec ["fn"]) fargs))
 
                   :else
-                  (xt/x:err (xt/x:cat "Invalid Spec Type - " (xt/x:get-key fspec "type")))))))
+                  (xt/x:err (xt/x:cat "Invalid Spec Type - " (. fspec ["type"])))))))
 
 (defn.xt encode-sql-select
   "encodes an sql select statement"
@@ -248,7 +248,7 @@
   "encodes an sql value"
   {:added "4.0"}
   [v column-fn opts loop-fn]
-  (var tcls   (xt/x:get-key v "::"))
+  (var tcls   (. v ["::"]))
   (var arg-fn (fn [arg]
                 (return (loop-fn arg column-fn opts loop-fn))))
   (var f (xt/x:get-key -/ENCODE_SQL tcls))
@@ -413,9 +413,9 @@
   (cond (xt/x:is-object? input)
         (if (xt/x:has-key? input "::")
           (return (-/encode-sql input column-fn opts -/encode-loop-fn))
-          (return (xt/x:cat (xt/x:get-key input "expr")
+          (return (xt/x:cat (. input ["expr"])
                             (:? (xt/x:has-key? input "as")
-                                (xt/x:cat " AS " (xt/x:get-key input "as"))
+                                (xt/x:cat " AS " (. input ["as"]))
                                 ""))))
         
         (xt/x:is-array? input)
@@ -470,8 +470,8 @@
   {:added "4.0"}
   [input nest-fn column-fn opts]
   (cond (xt/x:is-object? input)
-        (return (xt/x:cat "'" (xt/x:get-key input "as") "'"
-                       ", " (xt/x:get-key input "expr")))
+        (return (xt/x:cat "'" (. input ["as"]) "'"
+                       ", " (. input ["expr"])))
         
         (xt/x:is-array? input)
         (return (nest-fn input))
@@ -524,9 +524,9 @@
                         (cond (xt.lang.spec-base/x:is-object? input)
                               (return (xt.lang.spec-base/x:cat
                                        "'"
-                                       (xt.lang.spec-base/x:get-key input "as")
+                                       (. input ["as"])
                                        "', "
-                                       (xt.lang.spec-base/x:get-key input "expr")))
+                                       (. input ["expr"])))
 
                               (xt.lang.spec-base/x:is-array? input)
                               (return (nest-fn input))

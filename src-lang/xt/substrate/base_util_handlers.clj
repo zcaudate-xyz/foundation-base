@@ -12,7 +12,7 @@
   "util handler: heartbeat"
   [space args request node]
   (return {"pong" true
-           "node" (xt/x:get-key node "id")}))
+           "node" (. node ["id"])}))
 
 (defn.xt ^{:substrate/fn "@/echo"}
   echo
@@ -48,14 +48,14 @@
   node-info
   "util handler: returns node id and metadata"
   [space args request node]
-  (return {"id" (xt/x:get-key node "id")
-           "meta" (xt/x:get-key node "meta")}))
+  (return {"id" (. node ["id"])
+           "meta" (. node ["meta"])}))
 
 (defn.xt ^{:substrate/fn "@/get-service"}
   handle-get-service
   "util handler: returns a service entry by id"
   [space args request node]
-  (return (xt/x:get-key (or (xt/x:get-key node "services") {}) args)))
+  (return (xt/x:get-key (or (. node ["services"]) {}) args)))
 
 (defn.xt install-util-handlers
   "installs the @/* util handlers on a node"

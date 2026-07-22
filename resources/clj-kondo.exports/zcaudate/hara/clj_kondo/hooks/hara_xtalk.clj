@@ -277,6 +277,27 @@
 (defn defglobal-xt [{:keys [node]}]
   {:node (definition-stub node 'def)})
 
+(defn defprotocol-xt [{:keys [node]}]
+  (let [name-node (definition-name-node node)
+        method-nodes (->> (rest (:children node))
+                          (filter api/list-node?)
+                          (keep #(first (:children %))))]
+    {:node
+     (api/list-node
+      (cons (api/token-node 'do)
+            (concat (when name-node
+                      [(api/list-node [(api/token-node 'def)
+                                       name-node
+                                       (api/token-node nil)])])
+                    (map (fn [method-node]
+                           (api/list-node [(api/token-node 'def)
+                                           method-node
+                                           (api/token-node nil)]))
+                         method-nodes))))}))
+
+(defn defimpl-xt [{:keys [node]}]
+  {:node (definition-stub node 'def)})
+
 (defn fact-xt
   "Keep code.test facts opaque to Clojure analysis.
 

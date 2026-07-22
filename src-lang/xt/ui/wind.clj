@@ -39,13 +39,13 @@
 
 (defn.xt action-add!
   [state event-id callback value-event]
-  (var action-id (xt/x:cat "xt_ui_" (xt/x:to-string (xt/x:get-key state "next"))))
-  (xt/x:set-key state "next" (+ 1 (xt/x:get-key state "next")))
+  (var action-id (xt/x:cat "xt_ui_" (xt/x:to-string (. state ["next"]))))
+  (xt/x:set-key state "next" (+ 1 (. state ["next"])))
   (xt/x:set-key
-   (xt/x:get-key state "actions") action-id
+   (. state ["actions"]) action-id
    (fn [args]
      (return (:? value-event
-                 (callback (xt/x:get-key args "_value"))
+                 (callback (. args ["_value"]))
                  (callback args)))))
   (return {event-id {"action" action-id}}))
 
@@ -68,15 +68,15 @@
               (== key "tone")) nil
           :else (xt/x:set-key out key value)))
   (when (== component-id "ui/textarea")
-    (xt/x:set-key out "maxLines" (or (xt/x:get-key props "rows") 4))
+    (xt/x:set-key out "maxLines" (or (. props ["rows"]) 4))
     (xt/x:del-key out "rows"))
   (when (== component-id "ui/row")
     (xt/x:set-key out "className"
-                  (xt/x:cat "flex flex-row " (or (xt/x:get-key out "className") ""))))
+                  (xt/x:cat "flex flex-row " (or (. out ["className"]) ""))))
   (when (or (== component-id "ui/column")
             (== component-id "ui/fragment"))
     (xt/x:set-key out "className"
-                  (xt/x:cat "flex flex-col " (or (xt/x:get-key out "className") ""))))
+                  (xt/x:cat "flex flex-col " (or (. out ["className"]) ""))))
   (return out))
 
 (defn.xt prepare-node
@@ -89,29 +89,29 @@
     (return (xtd/arr-map value
                          (fn [child]
                            (return (-/prepare-node runtime child state))))))
-  (var component-id (xt/x:get-key value "component"))
+  (var component-id (. value ["component"]))
   (when (== component-id "ui/slot")
     (return (-/prepare-node runtime (ui/resolve-slot runtime value) state)))
-  (var props (xt/x:get-key value "props"))
-  (when (== true (xt/x:get-key props "hidden"))
+  (var props (. value ["props"]))
+  (when (== true (. props ["hidden"]))
     (return nil))
-  (var renderer (ui/registry-renderer (xt/x:get-key runtime "registry") component-id))
+  (var renderer (ui/registry-renderer (. runtime ["registry"]) component-id))
   (when (not renderer)
     (return {"type" "WDiv"
              "props" {"className" "flex flex-col"}
-             "children" (-/prepare-node runtime (xt/x:get-key value "children") state)}))
+             "children" (-/prepare-node runtime (. value ["children"]) state)}))
   (var out-props (-/normalize-props component-id props state))
   (when (or (== renderer "WText") (== component-id "ui/label"))
-    (xt/x:set-key out-props "text" (or (xt/x:get-key props "value") ""))
+    (xt/x:set-key out-props "text" (or (. props ["value"]) ""))
     (xt/x:del-key out-props "value")
     (xt/x:del-key out-props "for"))
   (return {"type" renderer
            "props" out-props
-           "children" (-/prepare-node runtime (xt/x:get-key value "children") state)}))
+           "children" (-/prepare-node runtime (. value ["children"]) state)}))
 
 (defn.xt prepare
   "returns the json/actions pair passed directly to Wind WDynamic"
   [runtime value]
   (var state {"next" 0 "actions" {}})
   (var json (-/prepare-node runtime value state))
-  (return {"json" json "actions" (xt/x:get-key state "actions")}))
+  (return {"json" json "actions" (. state ["actions"])}))

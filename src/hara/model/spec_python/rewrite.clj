@@ -225,6 +225,17 @@
     (= 'try (first form))
     (python-rewrite-try form)
 
+    (and (= ':= (first form))
+         (collection/form? (second form))
+         (= '. (first (second form)))
+         (vector? (nth (second form) 2 nil))
+         (= 1 (count (nth (second form) 2))))
+    (let [[_ [_ obj props] value] form]
+      (with-form-meta form
+        (list ':=
+              (list '. obj (list 'setitem (first props)))
+              value)))
+
     :else
     (with-form-meta form
       (apply list (map python-normalize-form form)))))

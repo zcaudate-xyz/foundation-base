@@ -11,10 +11,10 @@
   {:added "4.0"}
   [schema entry opts]
   (var #{strict types column-fn table-fn} opts)
-  (var ident     (xt/x:get-key entry "ident"))
-  (var itype     (xt/x:get-key entry "type"))
-  (var iprimary  (xt/x:get-key entry "primary"))
-  (var irequired (xt/x:get-key entry "required"))
+  (var ident     (. entry ["ident"]))
+  (var itype     (. entry ["type"]))
+  (var iprimary  (. entry ["primary"]))
+  (var irequired (. entry ["required"]))
   (var stype (:? (xt/x:has-key? types itype)
                  (xt/x:get-key types itype)
                  itype))

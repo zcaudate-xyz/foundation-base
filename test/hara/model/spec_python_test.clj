@@ -1,5 +1,6 @@
 (ns hara.model.spec-python-test
-  (:require [hara.lang :as l]
+  (:require [clojure.string :as string]
+            [hara.lang :as l]
             [hara.model.spec-python :as py]
             [hara.typed.xtalk-infer :as infer]
             [std.string.prose :as prose])
@@ -40,7 +41,7 @@
                             {:set_props (fn [elem props]
                                           (x:set-key elem "props" props))})])]
     [(boolean (re-find #"def py_callback__.*\(elem,props\):" out))
-     (boolean (re-find #"elem\[\"props\"\] = props" out))
+     (string/includes? out "elem[\"props\"] = props")
      (boolean (re-find #"data = \{\"set_props\":py_callback__" out))
      (not (boolean (re-find #"lambda elem,props : elem\[\"props\"\] = props" out)))])
   => [true true true true])
@@ -76,9 +77,11 @@
 
 ^{:refer hara.model.spec-python/python-dot :added "4.1"}
 (fact "rewrites JS-style array length lookups to len"
-  (l/emit-as
-   :python '[(. xs ["length"])])
-  => "len(xs)")
+  [(l/emit-as
+    :python '[(. xs ["length"])])
+   (l/emit-as
+    :python '[(. obj ["key"])])]
+  => ["len(xs)" "obj.get(\"key\")"])
 
 ^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-get-key :added "4.1"}
 (fact "preserves falsey defaults for canonical key reads"

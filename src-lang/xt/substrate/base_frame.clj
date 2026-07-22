@@ -114,7 +114,7 @@
   (:= meta (or meta {}))
   (return
     (-/frame -/KIND_REQUEST
-             (or (xt/x:get-key meta "id")
+             (or (. meta ["id"])
                  (-/rand-id "req-" 6))
             space
             meta
@@ -128,7 +128,7 @@
   (:= meta (or meta {}))
   (return
     (-/frame -/KIND_RESPONSE
-             (or (xt/x:get-key meta "id")
+             (or (. meta ["id"])
                  (-/rand-id "res-" 6))
             space
             meta
@@ -156,7 +156,7 @@
   (:= meta (or meta {}))
   (return
     (-/frame -/KIND_STREAM
-             (or (xt/x:get-key meta "id")
+             (or (. meta ["id"])
                  (-/rand-id "evt-" 6))
             space
             meta
@@ -169,18 +169,18 @@
   {:added "4.1"}
   [frame]
   (return (== -/KIND_REQUEST
-              (xt/x:get-key frame "kind"))))
+              (. frame ["kind"]))))
 
 (defn.xt response-frame?
   "checks if a frame is a response"
   {:added "4.1"}
   [frame]
   (return (== -/KIND_RESPONSE
-              (xt/x:get-key frame "kind"))))
+              (. frame ["kind"]))))
 
 (defn.xt stream-frame?
   "checks if a frame is a stream"
   {:added "4.1"}
   [frame]
   (return (== -/KIND_STREAM
-              (xt/x:get-key frame "kind"))))
+              (. frame ["kind"]))))

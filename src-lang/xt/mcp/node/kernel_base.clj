@@ -19,13 +19,13 @@
   (:= opts (or opts {}))
   (return {"::" "mcp.service"
            "protocol_version" base/PROTOCOL_VERSION
-           "server_info" (or (xt/x:get-key opts "server_info")
+           "server_info" (or (. opts ["server_info"])
                              {"name" "xt.mcp" "version" "0.1.0"})
-           "instructions" (xt/x:get-key opts "instructions")
-           "authorize_fn" (xt/x:get-key opts "authorize_fn")
+           "instructions" (. opts ["instructions"])
+           "authorize_fn" (. opts ["authorize_fn"])
            "tools" {}
            "sessions" {}
-           "meta" (or (xt/x:get-key opts "meta") {})}))
+           "meta" (or (. opts ["meta"]) {})}))
 
 (defn.xt install-service
   "installs a named MCP service on a substrate node"
@@ -61,8 +61,8 @@
   (when (not (xt/x:is-function? handler))
     (xt/x:err "MCP tool handler must be a function"))
   (var service (-/ensure-service node service-id nil))
-  (var tools (xt/x:get-key service "tools"))
-  (var name (xt/x:get-key tool "name"))
+  (var tools (. service ["tools"]))
+  (var name (. tool ["name"]))
   (when (xt/x:not-nil? (xt/x:get-key tools name))
     (xt/x:err (xt/x:cat "duplicate MCP tool - " name)))
   (var entry {:tool tool :handler handler :meta (or meta {})})
@@ -74,7 +74,7 @@
   {:added "4.1"}
   [node service-id tool-name]
   (var service (-/ensure-service node service-id nil))
-  (var tools (xt/x:get-key service "tools"))
+  (var tools (. service ["tools"]))
   (var entry (xt/x:get-key tools tool-name))
   (xt/x:del-key tools tool-name)
   (return entry))
@@ -84,14 +84,14 @@
   {:added "4.1"}
   [node service-id tool-name]
   (var service (-/ensure-service node service-id nil))
-  (return (xt/x:get-key (xt/x:get-key service "tools") tool-name)))
+  (return (xt/x:get-key (. service ["tools"]) tool-name)))
 
 (defn.xt list-tools
   "lists registered tools in deterministic name order"
   {:added "4.1"}
   [node service-id]
   (var service (-/ensure-service node service-id nil))
-  (var names (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key service "tools"))
+  (var names (xtd/arr-sort (xt/x:obj-keys (. service ["tools"]))
                            (fn [x] (return x))
                            xt/x:str-lt))
   (return
@@ -99,9 +99,7 @@
                  (fn [name]
                    (return
                     (base/tool-wire
-                     (xt/x:get-key
-                      (xt/x:get-key (xt/x:get-key service "tools") name)
-                      "tool")))))))
+                     (. (xt/x:get-key (. service ["tools"]) name) ["tool"])))))))
 
 (defn.xt session-id
   "resolves the logical MCP session id from call context"
@@ -111,7 +109,7 @@
 
 (defn.xt session-get
   [service context]
-  (return (xt/x:get-key (xt/x:get-key service "sessions")
+  (return (xt/x:get-key (. service ["sessions"])
                         (-/session-id context))))
 
 (defn.xt session-initialized?
@@ -125,7 +123,7 @@
   (xt/x:set-key session "initialized" true)
   (when (xt/x:not-nil? client-info)
     (xt/x:set-key session "client_info" client-info))
-  (xt/x:set-key (xt/x:get-key service "sessions")
+  (xt/x:set-key (. service ["sessions"])
                 (-/session-id context)
                 session)
   (return session))
@@ -133,9 +131,9 @@
 (defn.xt session-start
   [service context params]
   (var session {"initialized" false
-                "client_info" (xt/x:get-key params "clientInfo")
-                "protocol_version" (xt/x:get-key params "protocolVersion")})
-  (xt/x:set-key (xt/x:get-key service "sessions")
+                "client_info" (. params ["clientInfo"])
+                "protocol_version" (. params ["protocolVersion"])})
+  (xt/x:set-key (. service ["sessions"])
                 (-/session-id context)
                 session)
   (return session))
@@ -148,10 +146,10 @@
   (var entry (-/get-tool node service-id tool-name))
   (when (xt/x:nil? entry)
     (xt/x:err (xt/x:cat "Unknown tool: " tool-name)))
-  (var tool (xt/x:get-key entry "tool"))
+  (var tool (. entry ["tool"]))
   (:= tool-args (or tool-args {}))
   (var validation-error
-       (base/schema-error (xt/x:get-key tool "input_schema") tool-args "$"))
+       (base/schema-error (. tool ["input_schema"]) tool-args "$"))
   (when (xt/x:not-nil? validation-error)
     (return (promise/x:promise-run
              (base/tool-error-result validation-error))))
@@ -160,11 +158,11 @@
         "service_id" (or service-id -/DEFAULT_SERVICE)
         "tool" tool
         "request" request
-        "request_id" (xt/x:get-key request "id")
+        "request_id" (. request ["id"])
         "session_id" (-/session-id context)
-        "application" (xt/x:get-key context "application")
-        "meta" (or (xt/x:get-key entry "meta") {})})
-  (var authorize-fn (xt/x:get-key service "authorize_fn"))
+        "application" (. context ["application"])
+        "meta" (or (. entry ["meta"]) {})})
+  (var authorize-fn (. service ["authorize_fn"]))
   (try
     (return
      (-> (node-request/ensure-promise
@@ -177,7 +175,7 @@
               (xt/x:err "MCP tool call was not authorized"))
             (return
              (node-request/ensure-promise
-              ((xt/x:get-key entry "handler") tool-args call-context)))))
+              ((. entry ["handler"]) tool-args call-context)))))
          (promise/x:promise-then base/tool-result)
          (promise/x:promise-catch
           (fn [error]
@@ -189,11 +187,11 @@
 (defn.xt initialize-result
   [service]
   (var result
-       {"protocolVersion" (xt/x:get-key service "protocol_version")
+       {"protocolVersion" (. service ["protocol_version"])
         "capabilities" {"tools" {"listChanged" false}}
-        "serverInfo" (xt/x:get-key service "server_info")})
-  (when (xt/x:not-nil? (xt/x:get-key service "instructions"))
-    (xt/x:set-key result "instructions" (xt/x:get-key service "instructions")))
+        "serverInfo" (. service ["server_info"])})
+  (when (xt/x:not-nil? (. service ["instructions"]))
+    (xt/x:set-key result "instructions" (. service ["instructions"])))
   (return result))
 
 (defn.xt handle-message
@@ -201,12 +199,12 @@
   {:added "4.1"}
   [node service-id message context]
   (:= context (or context {}))
-  (var id (xt/x:get-key message "id"))
-  (var method (xt/x:get-key message "method"))
-  (var params (or (xt/x:get-key message "params") {}))
+  (var id (. message ["id"]))
+  (var method (. message ["method"]))
+  (var params (or (. message ["params"]) {}))
   (var service (-/ensure-service node service-id nil))
   (var tool-name nil)
-  (when (not (== "2.0" (xt/x:get-key message "jsonrpc")))
+  (when (not (== "2.0" (. message ["jsonrpc"])))
     (return (promise/x:promise-run
              (base/error-response id -32600 "Invalid Request" nil))))
   (cond (== method "initialize")
@@ -233,7 +231,7 @@
           (base/response id {"tools" (-/list-tools node service-id)})))
 
         (== method "tools/call")
-        (:= tool-name (xt/x:get-key params "name"))
+        (:= tool-name (. params ["name"]))
 
         :else
         (return
@@ -250,7 +248,7 @@
     (-/call-tool node
                  service-id
                  tool-name
-                 (xt/x:get-key params "arguments")
+                 (. params ["arguments"])
                  message
                  context)
     (fn [result]

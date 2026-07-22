@@ -44,12 +44,12 @@
                         :data {}
                         :ref_links {}
                         :rev_links {}}}))
-  (var record (xt/x:get-key entry "record"))
-  (var data (or (xt/x:get-key incoming-record "data")
+  (var record (. entry ["record"]))
+  (var data (or (. incoming-record ["data"])
                 {}))
-  (var ref-links (or (xt/x:get-key incoming-record "ref_links")
+  (var ref-links (or (. incoming-record ["ref_links"])
                      {}))
-  (var rev-links (or (xt/x:get-key incoming-record "rev_links")
+  (var rev-links (or (. incoming-record ["rev_links"])
                      {}))
   (xtd/swap-key record "data" xt/x:obj-assign [data])
   (xtd/swap-key record "ref_links" xtd/obj-assign-with [ref-links xt/x:obj-assign])
@@ -92,7 +92,7 @@
                                               (< 0 (xt/x:len (xt/x:obj-keys e)))))))))
     (return (xtd/obj-map (xt/x:get-key rows table-key)
                          (fn [e]
-                           (return (xt/x:get-key e "record")))))))
+                           (return (. e ["record"])))))))
 
 (defn.xt get-changed-single
   "gets changed record"
@@ -103,7 +103,7 @@
         (return record)
 
         :else
-        (return (xtt/tree-diff-nested (xt/x:get-key curr "record")
+        (return (xtt/tree-diff-nested (. curr ["record"])
                                       record))))
 
 (defn.xt has-changed-single
@@ -120,13 +120,14 @@
   (var attr (xtd/get-in schema [table-key field "ref"]))
   (when (xt/x:nil? attr)
     (xt/x:err (xt/x:cat "Not a valid link type: " (xt/x:json-encode [table-key field]))))
-  (var link-ns (xt/x:get-key attr "ns"))
-  (var rval (xt/x:get-key attr "rval"))
-  (var link-type (xt/x:get-key attr "type"))
-  (var [table-link
-        inverse-link] (xt/x:get-key {:reverse ["rev_links" "ref_links"]
+  (var link-ns (. attr ["ns"]))
+  (var rval (. attr ["rval"]))
+  (var link-type (. attr ["type"]))
+  (var table-link-value (xt/x:get-key {:reverse ["rev_links" "ref_links"]
                                      :forward ["ref_links" "rev_links"]}
                                     link-type))
+  (var [table-link
+        inverse-link] table-link-value)
   (return {:table-key     table-key
            :table-link    table-link
            :table-field   field
@@ -183,7 +184,7 @@
   [rows schema table-key id]
   (var entry (-/get-entry rows table-key id))
   (when (xt/x:not-nil? entry)
-    (var rec (xt/x:get-key entry "record"))
+    (var rec (. entry ["record"]))
     (var #{ref-links rev-links} rec)
     (var links (xt/x:arr-assign (xt/x:obj-pairs ref-links)
                                 (xt/x:obj-pairs rev-links)))
@@ -308,10 +309,10 @@
   (xt/for:array [link-spec out]
     (-/add-single-link rows
                         schema
-                        (xt/x:get-key link-spec "table")
-                        (xt/x:get-key link-spec "id")
-                        (xt/x:get-key link-spec "field")
-                        (xt/x:get-key link-spec "link_id")))
+                        (. link-spec ["table"])
+                        (. link-spec ["id"])
+                        (. link-spec ["field"])
+                        (. link-spec ["link_id"])))
   (return out))
 
 (defn.xt add-bulk

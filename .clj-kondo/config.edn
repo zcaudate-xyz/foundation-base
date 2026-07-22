@@ -1,7 +1,7 @@
 {:ns-groups
- [{:pattern "^xt\\.lang\\."
+ [{:pattern "^xt\\."
    :name clj-kondo.hooks.hara-xtalk}
-  {:pattern "^xt\\.substrate\\."
+  {:pattern "^hara\\.model\\.spec-xtalk\\."
    :name clj-kondo.hooks.hara-xtalk}
   {:pattern ".+"
    :name clj-kondo.hooks.hara-postgres}]
@@ -21,9 +21,17 @@
    defmacro.xt clj-kondo.hooks.hara-xtalk/defmacro-xt
    defgen.xt clj-kondo.hooks.hara-xtalk/defgen-xt
    defvar.xt clj-kondo.hooks.hara-xtalk/defvar-xt
+   defprotocol.xt clj-kondo.hooks.hara-xtalk/defprotocol-xt
+   xt.lang.common-protocol/defprotocol.xt clj-kondo.hooks.hara-xtalk/defprotocol-xt
+   proto/defprotocol.xt clj-kondo.hooks.hara-xtalk/defprotocol-xt
    defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
-   defn.js hooks.defn-pg/defn-js
-   defvar.js hooks.defn-pg/defn-js
+   defimpl.xt clj-kondo.hooks.hara-xtalk/defimpl-xt
+   xt.lang.common-protocol/defimpl.xt clj-kondo.hooks.hara-xtalk/defimpl-xt
+   proto/defimpl.xt clj-kondo.hooks.hara-xtalk/defimpl-xt
+   defn.js clj-kondo.hooks.hara-xtalk/defn-xt
+   hara.lang/defn.js clj-kondo.hooks.hara-xtalk/defn-xt
+   defvar.js clj-kondo.hooks.hara-xtalk/defvar-xt
+   hara.lang/defvar.js clj-kondo.hooks.hara-xtalk/defvar-xt
    clj-kondo.hooks.hara-xtalk/defn.xt clj-kondo.hooks.hara-xtalk/defn-xt
    clj-kondo.hooks.hara-xtalk/def.xt clj-kondo.hooks.hara-xtalk/def-xt
    clj-kondo.hooks.hara-xtalk/defmacro.xt clj-kondo.hooks.hara-xtalk/defmacro-xt
@@ -54,13 +62,19 @@
   :unresolved-var {:exclude [l/script l/script- l/script+
                              hara.lang/script hara.lang/script- hara.lang/script+
                              hara.lang/defspec.xt
+                             hara.model.spec-xtalk.fn-python
+                             hara.lang.impl
                              code.test/fact code.test/fact:global
                              code.test/=> code.test/contains]}
   :duplicate-require {:level :off}
   :unresolved-symbol {:exclude [fact fact:global defn.pg defrun.pg deftype.pg
                                 canonical-conditional redundant-access
                                 defaulted-access fn-arrow-canonical fn-arrow-fact
-                                nested-dot-access nested-dot-fact destructuring-collision destructuring-source
+                                nested-dot-access nested-dot-fact
+                                test-python-fn-direct-assignment
+                                test-python-fn-invoke-argument
+                                test-python-typed-canonical-access
+                                destructuring-collision destructuring-source
                                 loop-context]}
   :hara.postgres/one-let {:level :warning}
   :hara.postgres/nested-let {:level :warning}

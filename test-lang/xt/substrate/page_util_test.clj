@@ -15,6 +15,7 @@
              [xt.substrate.page-util :as page-util]
              [xt.substrate.base-space :as node-space]]})
 
+^{:clj-kondo/ignore [:unresolved-symbol]}
 (defn.js create-node
   []
   (return
@@ -144,7 +145,7 @@
                 {"kind" "test"}))
     {"id" (. entry ["id"])
      "meta" (. entry ["meta"])
-     "stored" (. (. node ["triggers"]) ["signal/a"] ["id"])} )
+     "stored" (. node ["triggers"] ["signal/a"] ["id"])} )
   => {"id" "signal/a"
       "meta" {"kind" "test"}
       "stored" "signal/a"})

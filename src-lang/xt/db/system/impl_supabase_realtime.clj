@@ -44,7 +44,7 @@
                       (http-util/encode-query-params
                        (xt/x:obj-assign
                         {"vsn"   "1.0.0"
-                         "apikey" (xt/x:get-key defaults "apikey")}
+                         "apikey" (. defaults ["apikey"])}
                         params))))
   (return
    (websocket/prepare-url client {"path" path})))
@@ -91,26 +91,26 @@
    (phoenix/wrap-phoenix
     {"broadcast"
      (fn [frame]
-       (var envelope (xt/x:get-key frame "payload"))
-       (var event (xt/x:get-key envelope "event"))
+       (var envelope (. frame ["payload"]))
+       (var event (. envelope ["event"]))
        (when (or (== "xt.db/event" event)
                  (== "db/sync" event)
                  (== "db/remove" event))
-         (var payload (xt/x:get-key envelope "payload"))
-         (var topic (xt/x:get-key frame "topic"))
+         (var payload (. envelope ["payload"]))
+         (var topic (. frame ["topic"]))
          (var callbacks (xtd/get-in realtime-client ["state" "callbacks"]))
          (xt/for:object [[_id callback] callbacks]
            (callback (xt/x:obj-assign {"topic" topic}
                                       payload)))))
      "phx_reply"
      (fn [frame]
-       (var topic (xt/x:get-key frame "topic"))
+       (var topic (. frame ["topic"]))
        (var entry (xtd/get-in realtime-client ["state" "topics" topic]))
        (when (xt/x:is-object? entry)
          (var status (xtd/get-in frame ["payload" "status"]))
          (var ok  (== status "ok"))
-         (var deferred  (xt/x:get-key entry "deferred"))
-         (var resolve   (xt/x:get-key deferred "resolve"))
+         (var deferred  (. entry ["deferred"]))
+         (var resolve   (. deferred ["resolve"]))
          (xtd/set-in realtime-client ["state" "topics" topic "ready"] ok)
          (when (xt/x:is-function? resolve)
            (resolve ok))))})))
@@ -280,4 +280,3 @@
             (phoenix/send-frame client (-/topic-leave-payload impl topic))
             (xt/x:del-key (xtd/get-in client ["state" "topics"]) topic))))
       (return true)))))
-

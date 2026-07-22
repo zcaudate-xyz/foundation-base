@@ -56,15 +56,15 @@
   "predicate for flat entry"
   {:added "4.0"}
   [entry]
-  (return (not (and (== 0 (xt/x:len (xt/x:obj-keys (xt/x:get-key entry "ref_links"))))
-                    (== 1 (xt/x:len (xt/x:obj-keys (xt/x:get-key entry "data"))))))))
+  (return (not (and (== 0 (xt/x:len (xt/x:obj-keys (. entry ["ref_links"]))))
+                    (== 1 (xt/x:len (xt/x:obj-keys (. entry ["data"]))))))))
 
 (defn.xt table-get-data
   "gets data flat entry"
   {:added "4.0"}
   [entry]
-  (var out  (xt/x:obj-clone (xt/x:get-key entry "data")))
-  (xt/for:object [[link m] (xt/x:get-key entry "ref_links")]
+  (var out  (xt/x:obj-clone (. entry ["data"])))
+  (xt/for:object [[link m] (. entry ["ref_links"])]
     (xt/x:set-key out (xt/x:cat link "_id") (xtd/obj-first-key m)))
   (return out))
 
@@ -97,7 +97,8 @@
                                   -/table-filter-id
                                   -/table-get-data))
          (var sout (xt/x:arr-map out (fn:> [v] (xt/x:obj-assign (xt/x:obj-clone defaults) v))))
-         (var #{schema-update} (xt/x:get-key lookup table-name))
+         (var schema-update-value (xt/x:get-key lookup table-name))
+         (var #{schema-update} schema-update-value)
          (var #{update-key} opts)
          (var sopts)
          (if (and schema-update
@@ -161,6 +162,4 @@
                                                    (fn [id]
                                                      (return (raw/raw-delete table-name {"id" id} opts))))))))
   (return (xt/x:str-join "\n\n" statements)))
-
-
 

@@ -54,7 +54,7 @@
   (return
    (substrate/request node
                       nil
-                      (xt/x:get-key request "action")
+                      (. request ["action"])
                       args
                       (-/request-meta node request))))
 

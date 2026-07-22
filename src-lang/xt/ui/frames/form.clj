@@ -13,23 +13,23 @@
   (return nil))
 
 (defn.xt view [frame state actions]
-  (var form (or (xt/x:get-key state "form") state))
-  (var draft (or (xt/x:get-key form "draft") {}))
-  (var errors (or (xt/x:get-key form "errors") {}))
-  (var fields (or (xt/x:get-key (xt/x:get-key frame "opts") "fields") []))
+  (var form (or (. state ["form"]) state))
+  (var draft (or (. form ["draft"]) {}))
+  (var errors (or (. form ["errors"]) {}))
+  (var fields (or (. frame ["opts"] ["fields"]) []))
   (var children [])
   (xt/for:array [field fields]
-    (var id (xt/x:get-key field "id"))
-    (var component (or (xt/x:get-key field "component") "ui/input"))
+    (var id (. field ["id"]))
+    (var component (or (. field ["component"]) "ui/input"))
     (xt/x:arr-push
      children
      (ui/node "ui/column" {"class" "gap-2" "key" id}
-              [(ui/node "ui/label" {"value" (or (xt/x:get-key field "label") id)
+              [(ui/node "ui/label" {"value" (or (. field ["label"]) id)
                                      "for" id} [])
                (ui/node component
                         {"id" id
                          "value" (or (xt/x:get-key draft id) "")
-                         "disabled" (== true (xt/x:get-key form "pending"))
+                         "disabled" (== true (. form ["pending"]))
                          "on_change" (fn [value]
                                        (return (-/invoke actions "set_field"
                                                           {"field" id "value" value})))} [])
@@ -39,9 +39,9 @@
   (xt/x:arr-push
    children
    (ui/node "ui/button"
-            {"pending" (== true (xt/x:get-key form "pending"))
-             "disabled" (or (not= true (xt/x:get-key form "valid"))
-                            (== true (xt/x:get-key form "pending")))
+            {"pending" (== true (. form ["pending"]))
+             "disabled" (or (not= true (. form ["valid"]))
+                            (== true (. form ["pending"])))
              "on_press" (fn [_] (return (-/invoke actions "submit" draft)))}
             [(ui/text "Save" {})]))
   (return (ui/node "ui/column" {"class" "gap-4"} children)))

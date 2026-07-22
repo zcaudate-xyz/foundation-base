@@ -17,7 +17,7 @@
            (return [e true])
            (if (xt/x:nil? e)
              (xt/x:err (xt/x:cat "Invalid link - " (xt/x:json-encode obj)))
-             (return [(xt/x:get-key e "id") true])))))
+             (return [(. e ["id"]) true])))))
   (return
    (xtd/obj-keep obj
                (fn:> [v]
@@ -81,11 +81,12 @@
   (var link-fn
        (fn [e]
          (var ref (xtd/get-in schema [table-name e "ref"]))
-         (return [(xt/x:get-key ref "ns")
-                  (xt/x:get-key ref "rval")])))
+         (return [(. ref ["ns"])
+                  (. ref ["rval"])])))
   (xt/for:object [[e v] link-obj]
     (when (xt/x:is-array? v)
-      (var [link-key link-path] (link-fn e))
+      (var link-key-value (link-fn e))
+      (var [link-key link-path] link-key-value)
       (xt/for:array [e (xt/x:arr-filter v xt/x:is-object?)]
         (flatten-fn schema link-key
                     e 
@@ -102,7 +103,7 @@
          data-obj
          ref-obj
          rev-obj} flattened)
-  (var link-id (xt/x:get-key data-obj "id"))
+  (var link-id (. data-obj ["id"]))
   (-/flatten-linked schema table-name rev-obj link-id acc -/flatten-obj)
   (-/flatten-linked schema table-name ref-obj link-id acc -/flatten-obj)
   (return acc))
@@ -161,4 +162,3 @@
                                  (fn [id] (return id))
                                  xt/x:lt)]
                                nil))))))
-

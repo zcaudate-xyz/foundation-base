@@ -126,12 +126,12 @@
                                      (or (and (xt/x:has-key? e "scope")
                                               (== true
                                                   (xt/x:get-key scopes
-                                                                (xt/x:cat "-/" (xt/x:get-key e "scope")))))
+                                                                (xt/x:cat "-/" (. e ["scope"])))))
                                          (xt/x:has-key? plains
-                                                        (xt/x:get-key e "ident"))))))
+                                                        (. e ["ident"]))))))
   (return
    (xtd/arr-sort scoped
-                 (fn:> [e] (xt/x:get-key e "order"))
+                 (fn:> [e] (. e ["order"]))
                  (fn:> [a b] (< a b)))))
 
 (defn.xt get-link-standard
@@ -166,7 +166,7 @@
     (xt/x:set-key acc table-key true)
     (xt/for:object [[k v] query]
       (var e (xt/x:get-key table k))
-      (when (==  "ref" (xt/x:get-key e "type"))
+      (when (==  "ref" (. e ["type"]))
         (var link-key (xt/x:get-path e ["ref" "ns"]))
         (cond (xt/x:is-object? v)
               (-/get-query-tables schema link-key v acc)
@@ -185,8 +185,8 @@
   (var cols   (xt/x:get-key schema table-key))
   (return
     (xtd/arr-keepf (xt/x:obj-vals cols)
-                   (fn:> [col] (xt/x:has-key? linked (xt/x:get-key col "ident")))
-                   (fn:> [col] [col (xt/x:get-key linked (xt/x:get-key col "ident"))]))))
+                   (fn:> [col] (xt/x:has-key? linked (. col ["ident"])))
+                   (fn:> [col] [col (xt/x:get-key linked (. col ["ident"]))]))))
 
 (defn.xt get-linked-tables-loop
   "calculated linked tables given query"
@@ -236,8 +236,8 @@
   (:= returning (:? (xt/x:is-array? returning)
                     returning
                     ["*/data"]))
-  (var where-pred  (fn:> [e] (and (xt/x:is-object? e) (xt/x:nil? (xt/x:get-key  e "::")))))
-  (var custom-pred (fn:> [e] (and (xt/x:is-object? e) (xt/x:is-string? (xt/x:get-key  e "::")))))
+  (var where-pred  (fn:> [e] (and (xt/x:is-object? e) (xt/x:nil? (. e ["::"])))))
+  (var custom-pred (fn:> [e] (and (xt/x:is-object? e) (xt/x:is-string? (. e ["::"])))))
   (var custom (xt/x:arr-filter returning custom-pred))
   (var data   (-/get-data-columns schema table-name returning))
   (var links  (-/get-link-columns schema table-name returning))
@@ -264,7 +264,7 @@
                                           "."
                                           (column-fn (xt/x:cat (xt/x:get-path attr ["ref" "key"])
                                                                "_id")))]]))
-         (return [(xt/x:get-key attr "ident")
+         (return [(. attr ["ident"])
                   link-type
                   (-/get-tree schema
                               link-table
@@ -273,8 +273,8 @@
                               opts)])))
   (return [table-name 
            {:where where
-            :data  (xt/x:arr-map data (fn:> [e] (:? (== "ref" (xt/x:get-key e "type"))
-                                                    (xt/x:cat (xt/x:get-key e "ident") "_id")
-                                                    (xt/x:get-key e "ident"))))
+            :data  (xt/x:arr-map data (fn:> [e] (:? (== "ref" (. e ["type"]))
+                                                    (xt/x:cat (. e ["ident"]) "_id")
+                                                    (. e ["ident"]))))
             :links (xt/x:arr-map links get-child-tree)
             :custom custom}]))

@@ -52,14 +52,14 @@
   "helper function for tail calls on run commands"
   {:added "4.1"}
   [context refresh-deps-fn]
-  (var acc (xt/x:get-key context "acc"))
-  (var path (xt/x:get-key context "path"))
-  (var node (xt/x:get-key context "node"))
-  (var space-id (xt/x:get-key (xt/x:get-key context "space") "id"))
+  (var acc (. context ["acc"]))
+  (var path (. context ["path"]))
+  (var node (. context ["node"]))
+  (var space-id (. context ["space"] ["id"]))
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
   (if (and acc
-           (not (xt/x:get-key acc "error"))
+           (not (. acc ["error"]))
            refresh-deps-fn)
     (return
      (promise/x:promise-then
@@ -73,7 +73,7 @@
   "runs the remote function"
   {:added "4.1"}
   [context save-output path refresh-deps-fn]
-  (xt/x:set-key (xt/x:get-key context "acc") "path" path)
+  (xt/x:set-key (. context ["acc"]) "path" path)
   (return
    (promise/x:promise-then
     (event-model/pipeline-run-remote context save-output event-model/async-fn-promise nil nil)
@@ -84,7 +84,7 @@
   "helper function for refresh"
   {:added "4.1"}
   [context disabled path refresh-deps-fn]
-  (xt/x:set-key (xt/x:get-key context "acc") "path" path)
+  (xt/x:set-key (. context ["acc"]) "path" path)
   (return
    (promise/x:promise-then
     (event-model/pipeline-run context disabled event-model/async-fn-promise nil nil)
@@ -97,7 +97,7 @@
   [group-id models]
   (var all-deps {})
   (xt/for:object [[model-id model-entry] models]
-    (var deps (xt/x:get-key model-entry "deps"))
+    (var deps (. model-entry ["deps"]))
     (xt/for:array [path (or deps [])]
       (:= path (:? (xt/x:is-array? path) path [group-id path]))
       (xtd/set-in all-deps
@@ -120,7 +120,7 @@
   (var entry {"id" signal
              "fn" trigger-fn
              "meta" (or meta {})})
-  (xt/x:set-key (xt/x:get-key node "triggers")
+  (xt/x:set-key (. node ["triggers"])
                signal
                entry)
   (return entry))
@@ -129,7 +129,7 @@
   "removes a raw page trigger directly from the node"
   {:added "4.1"}
   [node signal]
-  (var triggers (xt/x:get-key node "triggers"))
+  (var triggers (. node ["triggers"]))
   (var prev (xt/x:get-key triggers signal))
   (xt/x:del-key triggers signal)
   (return prev))

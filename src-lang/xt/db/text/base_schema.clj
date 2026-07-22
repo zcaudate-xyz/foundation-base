@@ -10,18 +10,18 @@
 (def.xt CACHED_LOOKUP (xt/x:lu-create))
 
 (def.xt ^{:arglists '([e])}
-  get-order (fn:> [e] (xt/x:get-key e "order")))
+  get-order (fn:> [e] (. e ["order"])))
 
 (def.xt ^{:arglists '([e])}
-  get-ident (fn:> [e] (xt/x:get-key e "ident")))
+  get-ident (fn:> [e] (. e ["ident"])))
 
 (defn.xt get-ident-id
   "gets the ident id for a schema entry"
   {:added "4.0"}
   [e]
-  (return (:? (== "ref" (xt/x:get-key e "type"))
-              (xt/x:cat (xt/x:get-key e "ident") "_id")
-              (xt/x:get-key e "ident"))))
+  (return (:? (== "ref" (. e ["type"]))
+              (xt/x:cat (. e ["ident"]) "_id")
+              (. e ["ident"]))))
 
 (defn.xt list-tables
   "list tables"
@@ -49,8 +49,8 @@
    (return (-> (xt/x:obj-vals table-def)
                (xt/x:arr-filter (fn [e]
                                   (return
-                                   (and (xt/x:is-number? (xt/x:get-key e "order"))
-                                        (not= (xt/x:get-key e "type") "ref")))))
+                                   (and (xt/x:is-number? (. e ["order"]))
+                                        (not= (. e ["type"]) "ref")))))
                (xt/x:arr-sort    -/get-order xt/x:lt)
                (xt/x:arr-map    -/get-ident)))))
 
@@ -60,8 +60,8 @@
   ([schema table-name]
    (var table-def := (xt/x:get-key schema table-name))
    (return (-> (xt/x:obj-vals table-def)
-               (xt/x:arr-filter (fn:> [e] (and (xt/x:is-number? (xt/x:get-key e "order"))
-                                               (== (xt/x:get-key e "type") "ref"))))
+               (xt/x:arr-filter (fn:> [e] (and (xt/x:is-number? (. e ["order"]))
+                                               (== (. e ["type"]) "ref"))))
                (xt/x:arr-sort   -/get-order xt/x:lt)
                (xt/x:arr-map    -/get-ident)))))
 
@@ -72,7 +72,7 @@
    (var table-def := (xt/x:get-key schema table-name))
    (return (-> (xt/x:obj-vals table-def)
                (xt/x:arr-filter (fn:> [e] (not (xt/x:is-number?
-                                                (xt/x:get-key e "order")))))
+                                                (. e ["order"])))))
                (xt/x:arr-map    -/get-ident)))))
 
 (defn.xt create-table-entries
@@ -82,7 +82,7 @@
   (var table-def := (xt/x:get-key schema table-name))
   (return (-> (xt/x:obj-vals table-def)
               (xt/x:arr-filter (fn [e]
-                                 (return (xt/x:is-number? (xt/x:get-key e "order")))))
+                                 (return (xt/x:is-number? (. e ["order"])))))
               (xtd/arr-sort    -/get-order xt/x:lt))))
 
 (defn.xt create-defaults
@@ -92,8 +92,8 @@
   (var table-def := (xt/x:get-key schema table-name))
   (return (xtd/obj-keepf table-def
                          (fn:> [m]
-                               (and (xt/x:is-object? (xt/x:get-key m "sql"))
-                                    (xt/x:has-key? (xt/x:get-key m "sql") "default")))
+                               (and (xt/x:is-object? (. m ["sql"]))
+                                    (xt/x:has-key? (. m ["sql"]) "default")))
                          (fn [m]
                            (return (xt/x:get-path m ["sql" "default"]))))))
 
@@ -171,7 +171,7 @@
   [lookup]
   (return (-> (xtd/arr-sort (xt/x:obj-pairs lookup)
                             (fn [pair]
-                              (return (xt/x:get-key (xt/x:second pair) "position")))
+                              (return (. (xt/x:second pair) ["position"])))
                             xt/x:lt)
               (xt/x:arr-map xt/x:first))))
 
@@ -199,15 +199,15 @@
     (cond (xt/x:nil? rec)
           (xt/x:set-key out key v)
 
-          (== "ref" (xt/x:get-key rec "type"))
+          (== "ref" (. rec ["type"]))
           (do (var ntable (xt/x:get-path rec ["ref" "ns"]))
               (xt/x:set-key out key (xt/x:arr-map v (fn:> [vdata] (ref-fn ntable vdata)))))
           
           :else
-          (do (var f (xt/x:get-key ctypes (xt/x:get-key rec "type")))
+          (do (var f (xt/x:get-key ctypes (. rec ["type"])))
               (var val (:? (xt/x:nil? f)
                            v
                            (f v)))
-              #_(xt/x:LOG! [table key (xt/x:get-key rec "type") v val])
+              #_(xt/x:LOG! [table key (. rec ["type"]) v val])
               (xt/x:set-key out key val))))
   (return out))

@@ -28,31 +28,31 @@
            "listeners" {}}))
 
 (defn.xt store-version [store]
-  (return (xt/x:get-key store "revision")))
+  (return (. store ["revision"])))
 
 (defn.xt store-open [store]
-  (when (not= "proxy" (xt/x:get-key store "mode"))
-    (page-core/group-ensure (xt/x:get-key store "node")
-                            (xt/x:get-key store "space_id")
-                            (xt/x:get-key store "group_id"))
+  (when (not= "proxy" (. store ["mode"]))
+    (page-core/group-ensure (. store ["node"])
+                            (. store ["space_id"])
+                            (. store ["group_id"]))
     (return (promise/x:promise-run store)))
   (return
    (promise/x:promise-then
     (page-proxy/group-sync-proxy
-     (xt/x:get-key store "node")
-     (xt/x:get-key store "space_id")
-     (xt/x:get-key store "group_id")
-     (xt/x:get-key store "opts"))
+     (. store ["node"])
+     (. store ["space_id"])
+     (. store ["group_id"])
+     (. store ["opts"]))
     (fn [control]
       (xt/x:set-key store "control" control)
       (return store)))))
 
 (defn.xt model [store model-id]
-  (var [_group current]
-       (page-core/model-ensure (xt/x:get-key store "node")
-                               (xt/x:get-key store "space_id")
-                               (xt/x:get-key store "group_id")
+  (var current-value (page-core/model-ensure (. store ["node"])
+                               (. store ["space_id"])
+                               (. store ["group_id"])
                                model-id))
+  (var [_group current] current-value)
   (return current))
 
 (defn.xt model-slot [store model-id slot path fallback]
@@ -87,9 +87,9 @@
 
 (defn.xt set-input! [store model-id value event]
   (return (page-core/model-set-input
-           (xt/x:get-key store "node")
-           (xt/x:get-key store "space_id")
-           (xt/x:get-key store "group_id")
+           (. store ["node"])
+           (. store ["space_id"])
+           (. store ["group_id"])
            model-id value (or event {}))))
 
 (defn.xt patch-input! [store model-id path value event]
@@ -97,7 +97,7 @@
   (when (and (xt/x:is-object? current)
              (xt/x:has-key? current "data")
              (== 1 (xt/x:len (xt/x:obj-keys current))))
-    (var initial-data (xt/x:get-key current "data"))
+    (var initial-data (. current ["data"]))
     (:= current (:? (and (xt/x:is-object? initial-data)
                          (not (xt/x:is-array? initial-data)))
                     initial-data
@@ -108,52 +108,52 @@
 
 (defn.xt invoke! [store model-id args]
   (return (page-core/model-remote-call
-           (xt/x:get-key store "node")
-           (xt/x:get-key store "space_id")
-           (xt/x:get-key store "group_id")
+           (. store ["node"])
+           (. store ["space_id"])
+           (. store ["group_id"])
            model-id (or args []) true)))
 
 (defn.xt refresh! [store model-id event]
   (return (page-core/model-refresh
-           (xt/x:get-key store "node")
-           (xt/x:get-key store "space_id")
-           (xt/x:get-key store "group_id")
+           (. store ["node"])
+           (. store ["space_id"])
+           (. store ["group_id"])
            model-id (or event {}) nil)))
 
 (defn.xt subscribe! [store subscription-id callback]
-  (var node (xt/x:get-key store "node"))
-  (var space-id (xt/x:get-key store "space_id"))
-  (var group-id (xt/x:get-key store "group_id"))
+  (var node (. store ["node"]))
+  (var space-id (. store ["space_id"]))
+  (var group-id (. store ["group_id"]))
   (var group (page-core/group-ensure node space-id group-id))
-  (xt/for:object [[model-id _] (xt/x:get-key group "models")]
+  (xt/for:object [[model-id _] (. group ["models"])]
     (var key (-/listener-key space-id group-id model-id))
     (event-listener/add-keyed-listener
      node key (xt/x:cat subscription-id "/" model-id) "ui.model"
      (fn [listener-id data t meta]
-       (xt/x:set-key store "revision" (+ 1 (xt/x:get-key store "revision")))
+       (xt/x:set-key store "revision" (+ 1 (. store ["revision"])))
        (return (callback listener-id data t meta)))
      {"model_id" model-id} nil))
-  (xt/x:set-key (xt/x:get-key store "listeners") subscription-id true)
+  (xt/x:set-key (. store ["listeners"]) subscription-id true)
   (return subscription-id))
 
 (defn.xt unsubscribe! [store subscription-id]
-  (var node (xt/x:get-key store "node"))
-  (var space-id (xt/x:get-key store "space_id"))
-  (var group-id (xt/x:get-key store "group_id"))
+  (var node (. store ["node"]))
+  (var space-id (. store ["space_id"]))
+  (var group-id (. store ["group_id"]))
   (var group (page-core/group-ensure node space-id group-id))
-  (xt/for:object [[model-id _] (xt/x:get-key group "models")]
+  (xt/for:object [[model-id _] (. group ["models"])]
     (var key (-/listener-key space-id group-id model-id))
     (event-listener/remove-keyed-listener
      node key (xt/x:cat subscription-id "/" model-id)))
-  (xt/x:del-key (xt/x:get-key store "listeners") subscription-id)
+  (xt/x:del-key (. store ["listeners"]) subscription-id)
   (return true))
 
 (defn.xt store-close [store]
-  (var listener-ids (xt/x:obj-keys (xt/x:get-key store "listeners")))
+  (var listener-ids (xt/x:obj-keys (. store ["listeners"])))
   (xt/for:array [listener-id listener-ids]
     (-/unsubscribe! store listener-id))
-  (var control (xt/x:get-key store "control"))
+  (var control (. store ["control"]))
   (when (and (xt/x:not-nil? control)
-             (xt/x:is-function? (xt/x:get-key control "close")))
-    (return ((xt/x:get-key control "close"))))
+             (xt/x:is-function? (. control ["close"])))
+    (return ((. control ["close"]))))
   (return (promise/x:promise-run true)))

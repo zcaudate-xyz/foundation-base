@@ -15,7 +15,7 @@
   [x]
   (return (and (xt/x:is-object? x)
                (== "observed"
-                   (xt/x:get-key x "::")))))
+                   (. x ["::"])))))
 
 (defn.xt add-listener
   [obs f]

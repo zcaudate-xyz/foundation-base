@@ -69,8 +69,8 @@
   (:= opts (or opts {}))
   (return
    {:id space-id
-    :state (or (xt/x:get-key opts "state") {})
-    :meta (or (xt/x:get-key opts "meta") {})}))
+    :state (or (. opts ["state"]) {})
+    :meta (or (. opts ["meta"]) {})}))
 
 (defn.xt get-space
   "gets a node space by id"
@@ -78,7 +78,7 @@
   [node space-id]
   (return
    (xt/x:get-key
-    (xt/x:get-key node "spaces")
+    (. node ["spaces"])
     (or space-id frame/SPACE_NODE))))
 
 (defn.xt create-space
@@ -86,8 +86,8 @@
   {:added "4.1"}
   [node space-id opts]
   (var entry (-/space (or space-id frame/SPACE_NODE) opts))
-  (xt/x:set-key (xt/x:get-key node "spaces")
-                (xt/x:get-key entry "id")
+  (xt/x:set-key (. node ["spaces"])
+                (. entry ["id"])
                 entry)
   (return entry))
 
@@ -106,7 +106,7 @@
   {:added "4.1"}
   [node space-id]
   (var sid (or space-id frame/SPACE_NODE))
-  (var spaces (xt/x:get-key node "spaces"))
+  (var spaces (. node ["spaces"]))
   (var entry (xt/x:get-key spaces sid))
   (xt/x:del-key spaces sid)
   (return entry))
@@ -115,7 +115,7 @@
   "lists all current node spaces"
   {:added "4.1"}
   [node]
-  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "spaces"))
+  (return (xtd/arr-sort (xt/x:obj-keys (. node ["spaces"]))
                         (fn [x] (return x))
                         xt/x:str-lt)))
 
@@ -124,7 +124,7 @@
   {:added "4.1"}
   [node space-id]
   (var entry (-/ensure-space node space-id nil))
-  (return (xt/x:get-key entry "state")))
+  (return (. entry ["state"])))
 
 (defn.xt set-space-state
   "sets state for a node space"
@@ -139,7 +139,7 @@
   {:added "4.1"}
   [node space-id updater]
   (var entry (-/ensure-space node space-id nil))
-  (var curr (xt/x:get-key entry "state"))
+  (var curr (. entry ["state"]))
   (var next (updater curr entry node))
   (xt/x:set-key entry "state" next)
   (return next))

@@ -260,7 +260,7 @@
   [obj]
   (return (and (xt/x:is-object? obj)
                (== "substrate"
-                   (xt/x:get-key obj "::")))))
+                   (. obj ["::"])))))
 
 (defn.xt transport?
   "checks if a value is a node transport"
@@ -268,7 +268,7 @@
   [obj]
   (return (and (xt/x:is-object? obj)
                (== "substrate.transport"
-                   (xt/x:get-key obj "::")))))
+                   (. obj ["::"])))))
 
 (defn.xt transport-create
   "wraps a transport implementation"
@@ -285,7 +285,7 @@
   "gets registered node services"
   {:added "4.1"}
   [node]
-  (return (or (xt/x:get-key node "services")
+  (return (or (. node ["services"])
               {})))
 
 (defn.xt get-service
@@ -298,7 +298,7 @@
   "sets a shared service on the node"
   {:added "4.1"}
   [node service-id service]
-  (xt/x:set-key (xt/x:get-key node "services")
+  (xt/x:set-key (. node ["services"])
                 service-id
                 service)
   (return service))
@@ -308,7 +308,7 @@
   {:added "4.1"}
   [node service-id]
   (var service (-/get-service node service-id))
-  (xt/x:del-key (xt/x:get-key node "services")
+  (xt/x:del-key (. node ["services"])
                 service-id)
   (return service))
 
@@ -412,8 +412,8 @@
   [node stream exclude-id]
   (return (base-util/stream-route-loop node
                                        (router/target-ids node
-                                                          (xt/x:get-key stream "space")
-                                                          (xt/x:get-key stream "signal"))
+                                                          (. stream ["space"])
+                                                          (. stream ["signal"]))
                                        stream
                                        exclude-id
                                        0)))
@@ -484,13 +484,13 @@
     (fn [_]
       (return (-/route-stream node
                               stream
-                              (xt/x:get-key ctx "transport_id")))))))
+                              (. ctx ["transport_id"])))))))
 
 (defn.xt receive-frame
   "demultiplexes node frames"
   {:added "4.1"}
   [node event ctx]
-  (var kind (xt/x:get-key event "kind"))
+  (var kind (. event ["kind"]))
   (cond (== kind frame/KIND_REQUEST)
         (return (-/receive-request node event ctx))
 
@@ -516,13 +516,13 @@
   (:= transport (:? (-/transport? transport)
                     transport
                     (-/transport-create transport-id transport)))
-  (xt/x:set-key (xt/x:get-key node "transports")
+  (xt/x:set-key (. node ["transports"])
                 transport-id
                 transport)
   (router/register-connection node
                               transport-id
-                              {:meta (xt/x:get-key transport "meta")})
-  (var start-fn (xt/x:get-key transport "start_fn"))
+                              {:meta (. transport ["meta"])})
+  (var start-fn (. transport ["start_fn"]))
   (when (xt/x:nil? start-fn)
     (return (promise/x:promise-run transport)))
   (return
@@ -531,7 +531,7 @@
      (start-fn
       (fn [event ctx]
         (:= ctx (or ctx {}))
-        (when (xt/x:nil? (xt/x:get-key ctx "transport_id"))
+        (when (xt/x:nil? (. ctx ["transport_id"]))
           (xt/x:set-key ctx "transport_id" transport-id))
         (return (-/receive-frame node event ctx)))))
     (fn [listener]
@@ -542,19 +542,19 @@
   "detaches and optionally stops a transport"
   {:added "4.1"}
   [node transport-id]
-  (var transports (xt/x:get-key node "transports"))
+  (var transports (. node ["transports"]))
   (var transport (xt/x:get-key transports transport-id))
   (when (xt/x:nil? transport)
     (return (promise/x:promise-run nil)))
   (xt/x:del-key transports transport-id)
   (router/unregister-connection node transport-id)
-  (var stop-fn (xt/x:get-key transport "stop_fn"))
+  (var stop-fn (. transport ["stop_fn"]))
   (when (xt/x:nil? stop-fn)
     (return (promise/x:promise-run transport)))
   (return
    (promise/x:promise-then
     (node-request/ensure-promise
-     (stop-fn (xt/x:get-key transport "listener")))
+     (stop-fn (. transport ["listener"])))
     (fn [_]
       (return transport)))))
 
@@ -564,22 +564,22 @@
   [node opts]
   (:= opts (or opts {}))
   (util-handlers/install-util-handlers node)
-  (xt/for:object [[space-id config] (or (xt/x:get-key opts "spaces") {})]
+  (xt/for:object [[space-id config] (or (. opts ["spaces"]) {})]
     (node-space/create-space node
                              space-id
                              (base-util/config-normalize-space space-id config)))
-  (xt/for:object [[action config] (or (xt/x:get-key opts "handlers") {})]
+  (xt/for:object [[action config] (or (. opts ["handlers"]) {})]
     (var entry (base-util/config-normalize-handler action config))
     (-/register-handler node
                         action
-                        (xt/x:get-key entry "fn")
-                        (xt/x:get-key entry "meta")))
-  (xt/for:object [[signal config] (or (xt/x:get-key opts "triggers") {})]
+                        (. entry ["fn"])
+                        (. entry ["meta"])))
+  (xt/for:object [[signal config] (or (. opts ["triggers"]) {})]
     (var entry (base-util/config-normalize-trigger signal config))
     (-/register-trigger node
                         signal
-                        (xt/x:get-key entry "fn")
-                        (xt/x:get-key entry "meta")))
+                        (. entry ["fn"])
+                        (. entry ["meta"])))
   (return node))
 
 (defn.xt node-create
@@ -591,7 +591,7 @@
        (event-common/blank-container
         "substrate"
         (xt/x:obj-assign
-         {:id (or (xt/x:get-key opts "id")
+         {:id (or (. opts ["id"])
                   (frame/rand-id "node-" 6))
           :spaces {}
           :services {}
@@ -601,7 +601,7 @@
           :router {:connections {}
                    :subscriptions {}}
           :transports {}
-          :meta (or (xt/x:get-key opts "meta") {})}
+          :meta (or (. opts ["meta"]) {})}
          (base-util/node-base-opts opts))))
   (-/node-configure node opts)
   (return node))

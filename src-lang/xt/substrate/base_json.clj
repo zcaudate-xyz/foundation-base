@@ -40,10 +40,10 @@
   [value]
   (when (not (xt/x:is-object? value))
     (return false))
-  (var kind (xt/x:get-key value "kind"))
-  (var id (xt/x:get-key value "id"))
-  (var space (xt/x:get-key value "space"))
-  (var meta (xt/x:get-key value "meta"))
+  (var kind (. value ["kind"]))
+  (var id (. value ["id"]))
+  (var space (. value ["space"]))
+  (var meta (. value ["meta"]))
   (when (or (not (-/frame-kind? kind))
             (not (xt/x:is-string? id))
             (not (xt/x:is-string? space))
@@ -51,16 +51,16 @@
                  (not (xt/x:is-object? meta))))
     (return false))
   (cond (== kind frame/KIND_REQUEST)
-        (return (and (xt/x:is-string? (xt/x:get-key value "action"))
-                     (or (xt/x:nil? (xt/x:get-key value "args"))
-                         (xt/x:is-array? (xt/x:get-key value "args")))))
+        (return (and (xt/x:is-string? (. value ["action"]))
+                     (or (xt/x:nil? (. value ["args"]))
+                         (xt/x:is-array? (. value ["args"])))))
 
         (== kind frame/KIND_RESPONSE)
-        (return (and (xt/x:is-string? (xt/x:get-key value "reply_to"))
-                     (xt/x:is-string? (xt/x:get-key value "status"))))
+        (return (and (xt/x:is-string? (. value ["reply_to"]))
+                     (xt/x:is-string? (. value ["status"]))))
 
         :else
-        (return (xt/x:is-string? (xt/x:get-key value "signal")))))
+        (return (xt/x:is-string? (. value ["signal"])))))
 
 (defn.xt normalize-error
   "normalizes wire errors into plain JSON-safe objects"
@@ -77,12 +77,12 @@
           (var out (xt/x:obj-clone err))
           (when (and (not (xt/x:has-key? out "message"))
                      (xt/x:has-key? out "error")
-                     (xt/x:is-string? (xt/x:get-key out "error")))
-            (xt/x:set-key out "message" (xt/x:get-key out "error")))
+                     (xt/x:is-string? (. out ["error"])))
+            (xt/x:set-key out "message" (. out ["error"])))
           (when (and (not (xt/x:has-key? out "message"))
                      (xt/x:has-key? out "status")
-                     (xt/x:is-string? (xt/x:get-key out "status")))
-            (xt/x:set-key out "message" (xt/x:get-key out "status")))
+                     (xt/x:is-string? (. out ["status"])))
+            (xt/x:set-key out "message" (. out ["status"])))
           (when (not (xt/x:has-key? out "message"))
             (xt/x:set-key out "message" (xt/x:to-string err)))
           (return out))
@@ -97,12 +97,12 @@
   (when (not (xt/x:is-object? frame))
     (return frame))
   (var out (xt/x:obj-clone frame))
-  (when (and (== frame/KIND_RESPONSE (xt/x:get-key out "kind"))
-             (== frame/STATUS_ERROR (xt/x:get-key out "status"))
-             (xt/x:not-nil? (xt/x:get-key out "error")))
+  (when (and (== frame/KIND_RESPONSE (. out ["kind"]))
+             (== frame/STATUS_ERROR (. out ["status"]))
+             (xt/x:not-nil? (. out ["error"])))
     (xt/x:set-key out
                   "error"
-                  (-/normalize-error (xt/x:get-key out "error"))))
+                  (-/normalize-error (. out ["error"]))))
   (return out))
 
 (defn.xt encode-frame

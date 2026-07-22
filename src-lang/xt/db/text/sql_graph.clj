@@ -19,9 +19,9 @@
   {:added "4.0"}
   [input nest-fn column-fn]
   (cond (xt/x:is-object? input)
-        (return (xt/x:cat (xt/x:get-key input "expr")
+        (return (xt/x:cat (. input ["expr"])
                        (:? (xt/x:has-key? input "as")
-                           (xt/x:cat " AS " (xt/x:get-key input "as"))
+                           (xt/x:cat " AS " (. input ["as"]))
                            "")))
 
         (xt/x:is-array? input)
@@ -75,7 +75,7 @@
                         (xt/x:str-pad-left "" (- indent 2) " ")
                         ")"))))
   
-  (cond (==  "ref" (xt/x:get-key attr "type"))
+  (cond (==  "ref" (. attr ["type"]))
         (cond (==  "forward" (xt/x:get-path attr ["ref" "type"]))
                    (cond (xt/x:is-object? clause)
                          (return (forward-fn clause))
@@ -180,14 +180,14 @@
        (fn [v]
          (return (return-format-fn v nest-fn column-fn opts))))
   
-  (var data-params   (xt/x:get-key params "data"))
-  (var link-params   (xt/x:get-key params "links"))
-  (var custom-params (xt/x:get-key params "custom"))
+  (var data-params   (. params ["data"]))
+  (var link-params   (. params ["links"]))
+  (var custom-params (. params ["custom"]))
   (var sort-keys     (xt/x:get-key opts "sort_keys" true))
 
   (when (and (== 1 (xt/x:len custom-params))
              (== "sql/count"
-                 (xt/x:get-key (xt/x:first custom-params) "::")))
+                 (. (xt/x:first custom-params) ["::"])))
     (return (return-count-fn)))  
   
   (var return-data   (xt/x:arr-map data-params format-fn))
@@ -209,12 +209,12 @@
   (var format-fn   (fn:> [input] (ut/encode-sql input column-fn opts ut/encode-loop-fn)))
   (var table-name := (xt/x:first tree))
   (var params := (xtd/second tree))
-  (var where-params  (xt/x:get-key params "where"))
-  (var custom-input (xt/x:get-key params "custom"))
+  (var where-params  (. params ["where"]))
+  (var custom-input (. params ["custom"]))
   (var custom-params (xt/x:arr-filter (:? (xt/x:is-array? custom-input)
                                           custom-input
                                           [])
-                                     (fn:> [e] (== (xt/x:get-key e "::")
+                                     (fn:> [e] (== (. e ["::"])
                                                    "sql/keyword"))))
   (var return-str   (-/select-return-str schema
                                          params

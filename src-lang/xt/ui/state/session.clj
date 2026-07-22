@@ -6,8 +6,8 @@
   {:require [[xt.lang.spec-base :as xt]]})
 
 (defn.xt project [session profile capabilities]
-  (return {"authenticated" (== true (xt/x:get-key (or session {}) "authenticated"))
-           "user_id" (xt/x:get-key (or session {}) "user_id")
+  (return {"authenticated" (== true (. (or session {}) ["authenticated"]))
+           "user_id" (. (or session {}) ["user_id"])
            "profile" (or profile {})
            "capabilities" (or capabilities {})}))
 

@@ -62,10 +62,10 @@
   [event]
   (return (:? (and (xt/x:is-object? event)
                    (xt/x:has-key? event "data"))
-               (xt/x:get-key event "data")
+               (. event ["data"])
                (:? (and (xt/x:is-object? event)
                         (xt/x:has-key? event "text"))
-                   (xt/x:get-key event "text")
+                   (. event ["text"])
                    event))))
 
 (defn.xt network-targets
@@ -85,7 +85,7 @@
   "ensures shared network state exists for an endpoint id"
   {:added "4.1"}
   [network endpoint-id]
-  (var states (xt/x:get-key network "states"))
+  (var states (. network ["states"]))
   (var state (xt/x:get-key states endpoint-id))
   (when (xt/x:nil? state)
     (:= state {"id" endpoint-id
@@ -129,17 +129,17 @@
   (when (>= index (xt/x:len peer-ids))
     (return (promise/x:promise-run true)))
   (var peer-id (xt/x:get-idx peer-ids (xt/x:offset index)))
-  (var peer (xt/x:get-key (xt/x:get-key network "states")
+  (var peer (xt/x:get-key (. network ["states"])
                           peer-id))
   (when (xt/x:nil? peer)
     (xt/x:err (xt/x:cat "wire peer not found - " peer-id)))
-  (var listener (xt/x:get-key peer "listener"))
+  (var listener (. peer ["listener"]))
   (when (xt/x:nil? listener)
     (xt/x:err (xt/x:cat "wire peer not started - " peer-id)))
   (var output
        (listener
         {"text" text}
-        {"wire" (xt/x:get-key state "id")
+        {"wire" (. state ["id"])
          "peer" peer-id}))
   (return
    (promise/x:promise-then
@@ -158,8 +158,8 @@
   [state]
   (var write-fn
        (fn [text]
-         (var network (xt/x:get-key state "network"))
-         (var peer-ids (xt/x:get-key state "peers"))
+         (var network (. state ["network"]))
+         (var peer-ids (. state ["peers"]))
          (when (xt/x:not-nil? network)
           (when (== 0 (xt/x:len peer-ids))
             (xt/x:err "wire endpoint missing peers"))
@@ -168,17 +168,17 @@
                                           peer-ids
                                           text
                                           0)))
-         (var peer (xt/x:get-key state "peer"))
+         (var peer (. state ["peer"]))
          (when (xt/x:nil? peer)
            (xt/x:err "wire endpoint missing peer"))
-         (var listener (xt/x:get-key peer "listener"))
+         (var listener (. peer ["listener"]))
          (when (xt/x:nil? listener)
            (xt/x:err "wire peer not started"))
          (return
           (listener
            {"text" text}
-           {"wire" (xt/x:get-key state "id")
-            "peer" (xt/x:get-key peer "id")}))))
+           {"wire" (. state ["id"])
+            "peer" (. peer ["id"])}))))
   (var start-fn
        (fn [listener]
          (xt/x:set-key state "listener" listener)
@@ -189,7 +189,7 @@
          (return true)))
   (return
    {"meta" {"kind" "wire.memory"
-            "id" (xt/x:get-key state "id")}
+            "id" (. state ["id"])}
     "write_fn" write-fn
     "start_fn" start-fn
     "stop_fn" stop-fn}))
@@ -216,7 +216,7 @@
   (var current-endpoint nil)
   (var current-listener nil)
   (var current-callback nil)
-  (var source-create-fn (xt/x:get-key endpoint-source "create_fn"))
+  (var source-create-fn (. endpoint-source ["create_fn"]))
   (var send-fn
        (fn [frame]
          (var endpoint current-endpoint)
@@ -225,7 +225,7 @@
             (:= endpoint endpoint-source)))
          (when (xt/x:nil? endpoint)
            (xt/x:err "json endpoint not started"))
-         (var raw-write-fn (xt/x:get-key endpoint "write_fn"))
+         (var raw-write-fn (. endpoint ["write_fn"]))
          (when (not (xt/x:is-function? raw-write-fn))
            (xt/x:err "json endpoint missing write implementation"))
          (return (raw-write-fn (node-json/encode-frame frame)))))
@@ -245,7 +245,7 @@
               (:= current-listener current-endpoint)
               (return current-endpoint))
            (do (:= current-endpoint endpoint-source)
-              (var raw-start-fn (xt/x:get-key current-endpoint "start_fn"))
+              (var raw-start-fn (. current-endpoint ["start_fn"]))
               (when (xt/x:nil? raw-start-fn)
                 (:= current-listener current-endpoint)
                 (return current-endpoint))
@@ -260,7 +260,7 @@
           (:= endpoint endpoint-source))
          (var raw-stop-fn nil)
          (when (xt/x:is-object? endpoint)
-          (:= raw-stop-fn (xt/x:get-key endpoint "stop_fn")))
+          (:= raw-stop-fn (. endpoint ["stop_fn"])))
          (when (xt/x:is-function? raw-stop-fn)
           (raw-stop-fn current-listener))
          (:= current-endpoint nil)
@@ -280,11 +280,11 @@
   {:added "4.1"}
   [opts]
   (var config (or opts {}))
-  (var left-state {"id" (or (xt/x:get-key config "left_id")
+  (var left-state {"id" (or (. config ["left_id"])
                             "left")
                    "listener" nil
                    "peer" nil})
-  (var right-state {"id" (or (xt/x:get-key config "right_id")
+  (var right-state {"id" (or (. config ["right_id"])
                              "right")
                     "listener" nil
                     "peer" nil})
@@ -300,7 +300,7 @@
   [opts]
   (var config (or opts {}))
   (var links (:? (xt/x:has-key? config "links")
-                (xt/x:get-key config "links")
+                (. config ["links"])
                 config))
   (var network {"states" {}})
   (-/configure-network-links-loop network
@@ -308,7 +308,7 @@
                                  (xt/x:obj-keys links)
                                  0)
   (return (-/create-network-endpoints-loop network
-                                          (xt/x:obj-keys (xt/x:get-key network "states"))
+                                          (xt/x:obj-keys (. network ["states"]))
                                           {}
                                           0)))
 

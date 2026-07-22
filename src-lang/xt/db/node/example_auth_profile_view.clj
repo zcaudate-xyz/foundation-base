@@ -67,24 +67,24 @@
 (defn.xt render
   "projects one substrate snapshot into serializable semantic view IR"
   [snapshot]
-  (var session (xt/x:get-key snapshot "session"))
-  (var profile-output (xt/x:get-key snapshot "profile"))
+  (var session (. snapshot ["session"]))
+  (var profile-output (. snapshot ["profile"]))
   (var profile (:? (xt/x:not-nil? profile-output)
-                   (or (xt/x:get-key profile-output "user") profile-output)
+                   (or (. profile-output ["user"]) profile-output)
                    nil))
   (var current-user (or profile
                         (:? (xt/x:not-nil? session)
-                            (xt/x:get-key session "user")
+                            (. session ["user"])
                             nil)))
   (var signed-in (xt/x:not-nil? session))
-  (var pending (xt/x:get-key snapshot "pending"))
-  (var error (xt/x:get-key snapshot "error"))
+  (var pending (. snapshot ["pending"]))
+  (var error (. snapshot ["error"]))
   (var auth-card
        (view/node
         "ui/card" {"class" "flex flex-col gap-3.5 p-5"}
-        [(-/input "email" "Email" (xt/x:get-key snapshot "email")
+        [(-/input "email" "Email" (. snapshot ["email"])
                    (-/action-id "set-email") signed-in)
-         (-/input "password" "Password" (xt/x:get-key snapshot "password")
+         (-/input "password" "Password" (. snapshot ["password"])
                    (-/action-id "set-password") signed-in)
          (view/node
           "ui/row" {"class" "flex flex-row gap-2.5"}
@@ -103,12 +103,12 @@
         [(view/node "ui/title" {"value" "Current session"} [])
          (view/node "ui/text"
                     {"value" (:? signed-in
-                                  (or (xt/x:get-key current-user "email")
+                                  (or (. current-user ["email"])
                                       "Authenticated user")
                                   "Not signed in")}
                     [])
          (-/input "display-name" "Display name"
-                   (xt/x:get-key snapshot "display_name")
+                   (. snapshot ["display_name"])
                    (-/action-id "set-display-name") (not signed-in))
          (-/button "Save profile" (-/action-id "change-profile")
                     (or (not signed-in) (xt/x:not-nil? pending))
@@ -170,8 +170,8 @@
   "installs substrate state and handler functionality required by the view"
   [node opts]
   (:= opts (or opts {}))
-  (var space-id (or (xt/x:get-key opts "space_id") example/DEFAULT_SPACE_ID))
-  (var group-id (or (xt/x:get-key opts "group_id") example/DEFAULT_GROUP_ID))
+  (var space-id (or (. opts ["space_id"]) example/DEFAULT_SPACE_ID))
+  (var group-id (or (. opts ["group_id"]) example/DEFAULT_GROUP_ID))
   (-/register-state-handler node (-/action-id "set-email") space-id ["email"])
   (-/register-state-handler node (-/action-id "set-password") space-id ["password"])
   (-/register-state-handler node (-/action-id "set-display-name") space-id ["display_name"])
@@ -207,9 +207,9 @@
                           {"profile" {"display_name" display-name}})))
    {"view_id" -/VIEW_ID})
   (view/state-set node space-id -/VIEW_ID ["email"]
-                  (or (xt/x:get-key opts "email") ""))
+                  (or (. opts ["email"]) ""))
   (view/state-set node space-id -/VIEW_ID ["password"]
-                  (or (xt/x:get-key opts "password") "secret123"))
+                  (or (. opts ["password"]) "secret123"))
   (view/state-set node space-id -/VIEW_ID ["display_name"]
-                  (or (xt/x:get-key opts "display_name") "Playground User"))
+                  (or (. opts ["display_name"]) "Playground User"))
   (return (-/spec space-id group-id)))

@@ -14,34 +14,34 @@
 
 (defn.xt connection-disconnect
   [client]
-  (var impl (xt/x:get-key client "impl"))
-  (var raw  (xt/x:get-key client "raw"))
-  (var disconnect-fn (xt/x:get-key impl "disconnect"))
+  (var impl (. client ["impl"]))
+  (var raw  (. client ["raw"]))
+  (var disconnect-fn (. impl ["disconnect"]))
   (return (disconnect-fn raw)))
 
 (defn.xt connection-query
   [client input]
-  (var impl (xt/x:get-key client "impl"))
-  (var raw  (xt/x:get-key client "raw"))
-  (var query-fn (or (xt/x:get-key impl "query")
-                    (xt/x:get-key impl "query_sync")))
+  (var impl (. client ["impl"]))
+  (var raw  (. client ["raw"]))
+  (var query-fn (or (. impl ["query"])
+                    (. impl ["query_sync"])))
   (return (query-fn raw input)))
 
 (defn.xt connection-query-async
   [client input]
-  (var impl (xt/x:get-key client "impl"))
-  (var raw  (xt/x:get-key client "raw"))
-  (var query-async-fn (or (xt/x:get-key impl "query_async")
-                          (xt/x:get-key impl "query")))
+  (var impl (. client ["impl"]))
+  (var raw  (. client ["raw"]))
+  (var query-async-fn (or (. impl ["query_async"])
+                          (. impl ["query"])))
   (return (query-async-fn raw input)))
 
 (defn.xt connection-connect
   [client opts]
-  (var impl (xt/x:get-key client "impl"))
-  (var connect-fn (xt/x:get-key impl "connect"))
+  (var impl (. client ["impl"]))
+  (var connect-fn (. impl ["connect"]))
   (if (xt/x:nil? connect-fn)
     (return client)
-    (return (connect-fn (xt/x:get-key client "raw") opts))))
+    (return (connect-fn (. client ["raw"]) opts))))
 
 (defimpl.xt SqlConnection
   [raw impl]

@@ -37,21 +37,21 @@
   "serializes the input record for transport"
   {:added "4.1"}
   [input]
-  (return {"current" (xt/x:get-key input "current")
-           "updated" (xt/x:get-key input "updated")}))
+  (return {"current" (. input ["current"])
+           "updated" (. input ["updated"])}))
 
 (defn.xt model-serialize-output
   "serializes an output record for transport"
   {:added "4.1"}
   [output]
-  (return {"type"      (xt/x:get-key output "type")
-           "current"   (xt/x:get-key output "current")
-           "updated"   (xt/x:get-key output "updated")
-           "elapsed"   (xt/x:get-key output "elapsed")
-           "pending"   (xt/x:get-key output "pending")
-           "disabled"  (xt/x:get-key output "disabled")
-           "errored"   (xt/x:get-key output "errored")
-           "tag"       (xt/x:get-key output "tag")}))
+  (return {"type"      (. output ["type"])
+           "current"   (. output ["current"])
+           "updated"   (. output ["updated"])
+           "elapsed"   (. output ["elapsed"])
+           "pending"   (. output ["pending"])
+           "disabled"  (. output ["disabled"])
+           "errored"   (. output ["errored"])
+           "tag"       (. output ["tag"])}))
 
 (defn.xt model-serialize
   "captures a serializable snapshot of model state"
@@ -59,8 +59,8 @@
   [model]
   (var input  (event-model/get-input model))
   (var output (event-model/get-output model nil))
-  (var remote (xt/x:get-key model "remote"))
-  (var sync   (xt/x:get-key model "sync"))
+  (var remote (. model ["remote"]))
+  (var sync   (. model ["sync"]))
   (var out {"input"  (-/model-serialize-input input)
             "output" (-/model-serialize-output output)})
   (when (xt/x:not-nil? remote)
@@ -76,7 +76,7 @@
   (var group (page-core/group-get node space-id group-id))
   (when (xt/x:nil? group)
     (return {}))
-  (var models (xt/x:get-key group "models"))
+  (var models (. group ["models"]))
   (var out {})
   (xt/for:object [[model-id model] models]
     (xt/x:set-key out model-id (-/model-serialize model)))
@@ -126,25 +126,25 @@
   "adds proxy-publish listeners to a model if not present"
   {:added "4.1"}
   [node space-id group-id model-id model]
-  (var listeners-map (xt/x:get-key model "listeners"))
+  (var listeners-map (. model ["listeners"]))
   (when (xt/x:nil? (xt/x:get-key listeners-map -/LISTENER_OUTPUT))
     (event-model/add-listener
      model
      -/LISTENER_OUTPUT
      (fn [_id data _t meta]
-       (return (-/publish-model-output node space-id [group-id model-id] (xt/x:get-key data "data"))))
+       (return (-/publish-model-output node space-id [group-id model-id] (. data ["data"]))))
      nil
      (fn [event]
-       (return (== "model.output" (xt/x:get-key event "type"))))))
+       (return (== "model.output" (. event ["type"]))))))
   (when (xt/x:nil? (xt/x:get-key listeners-map -/LISTENER_INPUT))
     (event-model/add-listener
      model
      -/LISTENER_INPUT
      (fn [_id data _t meta]
-       (return (-/publish-model-input node space-id [group-id model-id] (xt/x:get-key data "data"))))
+       (return (-/publish-model-input node space-id [group-id model-id] (. data ["data"]))))
      nil
      (fn [event]
-       (return (== "model.input" (xt/x:get-key event "type"))))))
+       (return (== "model.input" (. event ["type"]))))))
   (return model))
 
 (defn.xt group-handle-list
@@ -153,10 +153,10 @@
   [space args request node]
   (var space-id (xt/x:first args))
   (var runtime (page-core/space-ensure-page node space-id))
-  (var groups (xt/x:get-key runtime "groups"))
+  (var groups (. runtime ["groups"]))
   (var out {})
   (xt/for:object [[group-id group] groups]
-    (var models (xt/x:get-key group "models"))
+    (var models (. group ["models"]))
     (var model-ids [])
     (xt/for:object [[model-id _] models]
       (xt/x:arr-push model-ids model-id))
@@ -168,21 +168,21 @@
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
-  (var space-id (xt/x:get-key payload "space"))
-  (var group-id (xt/x:get-key payload "group"))
+  (var space-id (. payload ["space"]))
+  (var group-id (. payload ["group"]))
   (var transport-id (xtd/get-in request ["meta" "transport_id"]))
   (var group (page-core/group-get node space-id group-id))
   (when (xt/x:nil? group)
     (return {"error" "group not found"
              "space" space-id
              "group" group-id}))
-  (var models (xt/x:get-key group "models"))
+  (var models (. group ["models"]))
   (xt/for:object [[model-id model] models]
     (-/ensure-model-listeners node space-id group-id model-id model))
   (when (xt/x:not-nil? transport-id)
     (router/add-subscription node transport-id space-id -/SIGNAL_OUTPUT nil {})
     (router/add-subscription node transport-id space-id -/SIGNAL_INPUT nil {}))
-  (var init (xt/x:get-key group "init"))
+  (var init (. group ["init"]))
   (if (xt/x:not-nil? init)
     (return
      (promise/x:promise-then
@@ -200,8 +200,8 @@
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
-  (var space-id (xt/x:get-key payload "space"))
-  (var group-id (xt/x:get-key payload "group"))
+  (var space-id (. payload ["space"]))
+  (var group-id (. payload ["group"]))
   (var transport-id (xtd/get-in request ["meta" "transport_id"]))
   (when (xt/x:not-nil? transport-id)
     (router/remove-subscription node transport-id space-id -/SIGNAL_OUTPUT)
@@ -217,9 +217,9 @@
   (var payload (xt/x:first args))
   (return
    (-> (page-core/group-update node
-                               (xt/x:get-key payload "space")
-                               (xt/x:get-key payload "group")
-                               (or (xt/x:get-key payload "event") {}))
+                               (. payload ["space"])
+                               (. payload ["group"])
+                               (or (. payload ["event"]) {}))
        (promise/x:promise-then
         (fn [_]
           (return {"status" "ok"}))))))
@@ -231,10 +231,10 @@
   (var payload (xt/x:first args))
   (return
    (page-core/model-update node
-                           (xt/x:get-key payload "space")
-                           (xt/x:get-key payload "group")
-                           (xt/x:get-key payload "model")
-                           (or (xt/x:get-key payload "event") {}))))
+                           (. payload ["space"])
+                           (. payload ["group"])
+                           (. payload ["model"])
+                           (or (. payload ["event"]) {}))))
 
 (defn.xt model-handle-set-input
   "handles a proxy model set-input request"
@@ -243,11 +243,11 @@
   (var payload (xt/x:first args))
   (return
    (-> (page-core/model-set-input node
-                                 (xt/x:get-key payload "space")
-                                 (xt/x:get-key payload "group")
-                                 (xt/x:get-key payload "model")
-                                 (xt/x:get-key payload "current")
-                                 (or (xt/x:get-key payload "event") {}))
+                                 (. payload ["space"])
+                                 (. payload ["group"])
+                                 (. payload ["model"])
+                                 (. payload ["current"])
+                                 (or (. payload ["event"]) {}))
        (promise/x:promise-then
         (fn [_]
           (return {"status" "ok"}))))))
@@ -258,11 +258,11 @@
   [space args request node]
   (var payload (xt/x:first args))
   (var out (page-core/model-trigger node
-                                    (xt/x:get-key payload "space")
-                                    (xt/x:get-key payload "group")
-                                    (xt/x:get-key payload "model")
-                                    (xt/x:get-key payload "signal")
-                                    (or (xt/x:get-key payload "event") {})))
+                                    (. payload ["space"])
+                                    (. payload ["group"])
+                                    (. payload ["model"])
+                                    (. payload ["signal"])
+                                    (or (. payload ["event"]) {})))
   (return {"status"    "ok"
            "triggered" (xt/x:not-nil? out)}))
 
@@ -272,10 +272,10 @@
   [space args request node]
   (var payload (xt/x:first args))
   (var out (page-core/group-trigger node
-                                    (xt/x:get-key payload "space")
-                                    (xt/x:get-key payload "group")
-                                    (xt/x:get-key payload "signal")
-                                    (or (xt/x:get-key payload "event") {})))
+                                    (. payload ["space"])
+                                    (. payload ["group"])
+                                    (. payload ["signal"])
+                                    (or (. payload ["event"]) {})))
   (return {"status" "ok"
            "models" out}))
 
@@ -284,28 +284,28 @@
   {:added "4.1"}
   [space args request node]
   (var payload (xt/x:first args))
-  (var space-id (xt/x:get-key payload "space"))
-  (var group-id (xt/x:get-key payload "group"))
-  (var model-id (xt/x:get-key payload "model"))
+  (var space-id (. payload ["space"]))
+  (var group-id (. payload ["group"]))
+  (var model-id (. payload ["model"]))
   (return
    (-> (page-core/model-remote-call node
                                     space-id
                                     group-id
                                     model-id
-                                    (or (xt/x:get-key payload "args") [])
-                                    (xt/x:get-key payload "save_output"))
+                                    (or (. payload ["args"]) [])
+                                    (. payload ["save_output"]))
        (promise/x:promise-then
         (fn [_]
-          (var [_group model]
-               (page-core/model-ensure node space-id group-id model-id))
+          (var model-value (page-core/model-ensure node space-id group-id model-id))
+          (var [_group model] model-value)
           (return {"status" "ok"
                    "output" (-/model-serialize-output
-                             (xt/x:get-key model "output"))})))
+                             (. model ["output"]))})))
        (promise/x:promise-catch
         (fn [err]
           (return {"status" "error"
                    "message" (xt/x:ex-message err)
-                   "stack" (xt/x:get-key err "stack")
+                   "stack" (. err ["stack"])
                    "data" (xt/x:ex-data err)}))))))
 
 (defn.xt install-handlers
@@ -333,48 +333,48 @@
   [node space-id group-id model-id snapshot]
   (var identity-fn (fn [x] (return x)))
   (var nil-fn      (fn [] (return nil)))
-  (var input-snapshot  (xt/x:get-key snapshot "input"))
-  (var output-snapshot (xt/x:get-key snapshot "output"))
+  (var input-snapshot  (. snapshot ["input"]))
+  (var output-snapshot (. snapshot ["output"]))
   (var model
        (event-common/blank-container
         "event.model"
         {"pipeline" {}
          "options"  {}
-         "input"    {"current" (xt/x:get-key input-snapshot "current")
-                     "updated" (xt/x:get-key input-snapshot "updated")
+         "input"    {"current" (. input-snapshot ["current"])
+                     "updated" (. input-snapshot ["updated"])
                      "default" nil-fn}
-         "output"   {"type"      (xt/x:get-key output-snapshot "type")
-                     "current"   (xt/x:get-key output-snapshot "current")
-                     "updated"   (xt/x:get-key output-snapshot "updated")
-                     "elapsed"   (xt/x:get-key output-snapshot "elapsed")
-                     "pending"   (xt/x:get-key output-snapshot "pending")
-                     "disabled"  (xt/x:get-key output-snapshot "disabled")
-                     "errored"   (xt/x:get-key output-snapshot "errored")
-                     "tag"       (xt/x:get-key output-snapshot "tag")
+         "output"   {"type"      (. output-snapshot ["type"])
+                     "current"   (. output-snapshot ["current"])
+                     "updated"   (. output-snapshot ["updated"])
+                     "elapsed"   (. output-snapshot ["elapsed"])
+                     "pending"   (. output-snapshot ["pending"])
+                     "disabled"  (. output-snapshot ["disabled"])
+                     "errored"   (. output-snapshot ["errored"])
+                     "tag"       (. output-snapshot ["tag"])
                      "process"   identity-fn
                      "default"   nil-fn}}))
-  (var remote-snapshot (xt/x:get-key snapshot "remote"))
+  (var remote-snapshot (. snapshot ["remote"]))
   (when (xt/x:not-nil? remote-snapshot)
-    (xt/x:set-key model "remote" {"type"      (xt/x:get-key remote-snapshot "type")
-                                  "current"   (xt/x:get-key remote-snapshot "current")
-                                  "updated"   (xt/x:get-key remote-snapshot "updated")
-                                  "elapsed"   (xt/x:get-key remote-snapshot "elapsed")
-                                  "pending"   (xt/x:get-key remote-snapshot "pending")
-                                  "disabled"  (xt/x:get-key remote-snapshot "disabled")
-                                  "errored"   (xt/x:get-key remote-snapshot "errored")
-                                  "tag"       (xt/x:get-key remote-snapshot "tag")
+    (xt/x:set-key model "remote" {"type"      (. remote-snapshot ["type"])
+                                  "current"   (. remote-snapshot ["current"])
+                                  "updated"   (. remote-snapshot ["updated"])
+                                  "elapsed"   (. remote-snapshot ["elapsed"])
+                                  "pending"   (. remote-snapshot ["pending"])
+                                  "disabled"  (. remote-snapshot ["disabled"])
+                                  "errored"   (. remote-snapshot ["errored"])
+                                  "tag"       (. remote-snapshot ["tag"])
                                   "process"   identity-fn
                                   "default"   nil-fn}))
-  (var sync-snapshot (xt/x:get-key snapshot "sync"))
+  (var sync-snapshot (. snapshot ["sync"]))
   (when (xt/x:not-nil? sync-snapshot)
-    (xt/x:set-key model "sync" {"type"      (xt/x:get-key sync-snapshot "type")
-                                "current"   (xt/x:get-key sync-snapshot "current")
-                                "updated"   (xt/x:get-key sync-snapshot "updated")
-                                "elapsed"   (xt/x:get-key sync-snapshot "elapsed")
-                                "pending"   (xt/x:get-key sync-snapshot "pending")
-                                "disabled"  (xt/x:get-key sync-snapshot "disabled")
-                                "errored"   (xt/x:get-key sync-snapshot "errored")
-                                "tag"       (xt/x:get-key sync-snapshot "tag")
+    (xt/x:set-key model "sync" {"type"      (. sync-snapshot ["type"])
+                                "current"   (. sync-snapshot ["current"])
+                                "updated"   (. sync-snapshot ["updated"])
+                                "elapsed"   (. sync-snapshot ["elapsed"])
+                                "pending"   (. sync-snapshot ["pending"])
+                                "disabled"  (. sync-snapshot ["disabled"])
+                                "errored"   (. sync-snapshot ["errored"])
+                                "tag"       (. sync-snapshot ["tag"])
                                 "process"   identity-fn
                                 "default"   nil-fn}))
   (event-model/add-listener
@@ -486,7 +486,7 @@
   {:added "4.1"}
   [op node space-id group-id args]
   (var group (page-core/group-get node space-id group-id))
-  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (var dispatch-fn (. group ["proxy_dispatch"]))
   (return (dispatch-fn op node space-id group-id args)))
 
 (defn.xt group-create-proxy
@@ -494,13 +494,13 @@
   {:added "4.1"}
   [node space-id group-id snapshot remote-spec]
   (var runtime (page-core/space-ensure-page node space-id))
-  (var groups (xt/x:get-key runtime "groups"))
+  (var groups (. runtime ["groups"]))
   (var group-models {})
   (xt/for:object [[model-id model-snapshot] snapshot]
     (xt/x:set-key group-models
                   model-id
                   (-/model-create-proxy node space-id group-id model-id model-snapshot)))
-  (var transport-id (xt/x:get-key remote-spec "transport_id"))
+  (var transport-id (. remote-spec ["transport_id"]))
   (var dispatch-fn (fn [op node space-id group-id args]
                      (return (-/proxy-dispatch-op node transport-id op space-id group-id args))))
   (var group {"name"    group-id
@@ -516,12 +516,12 @@
   "applies an inbound output delta to a proxy model"
   {:added "4.1"}
   [space stream node]
-  (var data (xt/x:get-key stream "data"))
-  (var space-id (xt/x:get-key stream "space"))
-  (var path (xt/x:get-key data "path"))
+  (var data (. stream ["data"]))
+  (var space-id (. stream ["space"]))
+  (var path (. data ["path"]))
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
-  (var output (xt/x:get-key data "output"))
+  (var output (. data ["output"]))
   (var group (page-core/group-get node space-id group-id))
   (when (or (xt/x:nil? group)
             (not (page-core/proxy-group? group)))
@@ -529,19 +529,19 @@
   (var model (xtd/get-in group ["models" model-id]))
   (when (xt/x:nil? model)
     (return nil))
-  (xt/x:obj-assign (xt/x:get-key model "output") output)
-  (return (event-model/trigger-listeners model "model.output" (xt/x:get-key model "output"))))
+  (xt/x:obj-assign (. model ["output"]) output)
+  (return (event-model/trigger-listeners model "model.output" (. model ["output"]))))
 
 (defn.xt model-apply-input
   "applies an inbound input delta to a proxy model"
   {:added "4.1"}
   [space stream node]
-  (var data (xt/x:get-key stream "data"))
-  (var space-id (xt/x:get-key stream "space"))
-  (var path (xt/x:get-key data "path"))
+  (var data (. stream ["data"]))
+  (var space-id (. stream ["space"]))
+  (var path (. data ["path"]))
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
-  (var input (xt/x:get-key data "input"))
+  (var input (. data ["input"]))
   (var group (page-core/group-get node space-id group-id))
   (when (or (xt/x:nil? group)
             (not (page-core/proxy-group? group)))
@@ -549,8 +549,8 @@
   (var model (xtd/get-in group ["models" model-id]))
   (when (xt/x:nil? model)
     (return nil))
-  (xt/x:obj-assign (xt/x:get-key model "input") input)
-  (return (event-model/trigger-listeners model "model.input" (xt/x:get-key model "input"))))
+  (xt/x:obj-assign (. model ["input"]) input)
+  (return (event-model/trigger-listeners model "model.input" (. model ["input"]))))
 
 (defn.xt install-triggers
   "installs client stream triggers for proxy page deltas"
@@ -576,7 +576,7 @@
   "queries a server for available page groups"
   {:added "4.1"}
   [node space-id opts]
-  (var transport-id (xt/x:get-key opts "transport_id"))
+  (var transport-id (. opts ["transport_id"]))
   (return (base-util/request node
                              space-id
                              -/ACTION_GROUP_LIST
@@ -587,9 +587,9 @@
   "opens a proxy page group on a client and creates proxy models"
   {:added "4.1"}
   [node space-id group-id opts]
-  (var transport-id (xt/x:get-key opts "transport_id"))
+  (var transport-id (. opts ["transport_id"]))
   (var existing-group (page-core/group-get node space-id group-id))
-  (var remote-spec (or (and existing-group (xt/x:get-key existing-group "remote"))
+  (var remote-spec (or (and existing-group (. existing-group ["remote"]))
                        opts))
   (return
    (-> (base-util/request node
@@ -600,10 +600,10 @@
                           {"transport_id" transport-id})
        (promise/x:promise-then
         (fn [response]
-          (var error (xt/x:get-key response "error"))
+          (var error (. response ["error"]))
           (when (xt/x:not-nil? error)
             (xt/x:err (xt/x:cat "ERR - " error)))
-          (var snapshot (xt/x:get-key response "models"))
+          (var snapshot (. response ["models"]))
           (-/group-create-proxy node space-id group-id snapshot remote-spec)
           (return (page-core/group-get node space-id group-id)))))))
 
@@ -611,7 +611,7 @@
   "closes a proxy page group and removes proxy models"
   {:added "4.1"}
   [node space-id group-id opts]
-  (var transport-id (xt/x:get-key opts "transport_id"))
+  (var transport-id (. opts ["transport_id"]))
   (return
    (-> (base-util/request node
                           space-id
@@ -622,7 +622,7 @@
        (promise/x:promise-then
         (fn [_]
           (var runtime (page-core/space-ensure-page node space-id))
-          (var groups (xt/x:get-key runtime "groups"))
+          (var groups (. runtime ["groups"]))
           (xt/x:del-key groups group-id)
           (return nil))))))
 
@@ -631,12 +631,12 @@
   {:added "4.1"}
   [node space-id group-id model-id args save-output opts]
   (var group (page-core/group-get node space-id group-id))
-  (var dispatch-fn (xt/x:get-key group "proxy_dispatch"))
+  (var dispatch-fn (. group ["proxy_dispatch"]))
   (return
    (-> (dispatch-fn "proxy-call" node space-id group-id [model-id args save-output])
        (promise/x:promise-then
         (fn [response]
-          (var output (xt/x:get-key response "output"))
+          (var output (. response ["output"]))
           (when (xt/x:not-nil? output)
             (-/model-apply-output
              space-id
@@ -651,7 +651,7 @@
   {:added "4.1"}
   [node space-id group-id opts]
   (-/install node)
-  (var transport-id (xt/x:get-key opts "transport_id"))
+  (var transport-id (. opts ["transport_id"]))
   (return
    (-> (-/group-open-proxy node space-id group-id opts)
        (promise/x:promise-then
@@ -663,4 +663,3 @@
                    "close"        (fn []
                                    (return (-/group-close-proxy
                                             node space-id group-id opts)))}))))))
-

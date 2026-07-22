@@ -25,11 +25,11 @@
   (cond (xt/x:is-string? message)
         (return message)
 
-        (xt/x:not-nil? (xt/x:get-key message "data"))
-        (return (xt/x:get-key message "data"))
+        (xt/x:not-nil? (. message ["data"]))
+        (return (. message ["data"]))
 
-        (xt/x:not-nil? (xt/x:get-key message "body"))
-        (return (xt/x:get-key message "body"))
+        (xt/x:not-nil? (. message ["body"]))
+        (return (. message ["body"]))
 
         :else
         (return message)))
@@ -55,8 +55,8 @@
   {:added "4.1.4"}
   [opts]
   (return (xt/x:to-string
-           (or (xt/x:get-key opts "ref")
-               (xt/x:get-key opts "join_ref")
+           (or (. opts ["ref"])
+               (. opts ["join_ref"])
                (xt/x:now-ms)))))
 
 (defn.xt make-frame
@@ -64,7 +64,7 @@
   {:added "4.1.4"}
   [topic event payload opts]
   (var ref      (-/get-frame-ref opts))
-  (var join-ref (or (xt/x:get-key opts "join_ref")
+  (var join-ref (or (. opts ["join_ref"])
                     ref))
   (return {"topic" topic
            "event" event
@@ -76,7 +76,7 @@
   "creates a phoenix join frame"
   {:added "4.1.4"}
   [payload opts]
-  (var topic (xt/x:get-key opts "topic"))
+  (var topic (. opts ["topic"]))
   (when (xt/x:nil? topic)
     (xt/x:err "Phoenix channel missing topic"))
   (return (-/make-frame topic
@@ -88,7 +88,7 @@
   "creates a phoenix leave frame"
   {:added "4.1.4"}
   [opts]
-  (var topic (xt/x:get-key opts "topic"))
+  (var topic (. opts ["topic"]))
   (when (xt/x:nil? topic)
     (xt/x:err "Phoenix channel missing topic"))
   (return (-/make-frame topic "phx_leave" {} (or opts {}))))
@@ -109,12 +109,12 @@
    {join_ref, ref, topic, event, payload}"
   {:added "4.1.4"}
   [frame]
-  (return {"join_ref" (or (xt/x:get-key frame "join_ref")
-                          (xt/x:get-key frame "ref"))
-           "ref"      (xt/x:get-key frame "ref")
-           "topic"    (xt/x:get-key frame "topic")
-           "event"    (xt/x:get-key frame "event")
-           "payload"  (or (xt/x:get-key frame "payload") {})}))
+  (return {"join_ref" (or (. frame ["join_ref"])
+                          (. frame ["ref"]))
+           "ref"      (. frame ["ref"])
+           "topic"    (. frame ["topic"])
+           "event"    (. frame ["event"])
+           "payload"  (or (. frame ["payload"]) {})}))
 
 ;;
 ;;
@@ -135,7 +135,7 @@
   [handlers]
   (return (fn [event]
             (var frame (-/decode-frame event))
-            (var handler (xt/x:get-key handlers (xt/x:get-key frame "event")))
+            (var handler (xt/x:get-key handlers (. frame ["event"])))
             (when (xt/x:is-function? handler)
               (handler frame)))))
 
@@ -151,4 +151,3 @@
                                 (-/send-frame client
                                               (-/make-frame-heartbeat {})))
                               30000)))
-

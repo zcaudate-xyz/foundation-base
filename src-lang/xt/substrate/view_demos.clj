@@ -43,8 +43,8 @@
           (-/collect-ids item out))
 
         (xt/x:is-object? value)
-        (do (xt/x:arr-push out (xt/x:get-key value "component"))
-            (-/collect-ids (or (xt/x:get-key value "children") []) out))
+        (do (xt/x:arr-push out (. value ["component"]))
+            (-/collect-ids (or (. value ["children"]) []) out))
 
         :else nil)
   (return out))
@@ -90,19 +90,19 @@
   (base-util/register-handler
    node "demo/set-name"
    (fn [space args request node]
-     (return (view/state-set node (xt/x:get-key request "space") -/VIEW-ID
+     (return (view/state-set node (. request ["space"]) -/VIEW-ID
                              ["form" "name"] (xt/x:get-idx args 0))))
    nil)
   (base-util/register-handler
    node "demo/set-about"
    (fn [space args request node]
-     (return (view/state-set node (xt/x:get-key request "space") -/VIEW-ID
+     (return (view/state-set node (. request ["space"]) -/VIEW-ID
                              ["form" "about"] (xt/x:get-idx args 0))))
    nil)
   (base-util/register-handler
    node "demo/reset-form"
    (fn [space args request node]
-     (var space-id (xt/x:get-key request "space"))
+     (var space-id (. request ["space"]))
      (view/state-set node space-id -/VIEW-ID ["form" "name"] "")
      (view/state-set node space-id -/VIEW-ID ["form" "about"] "")
      (return true))
@@ -110,7 +110,7 @@
   (base-util/register-handler
    node "demo/create-org"
    (fn [space args request node]
-     (var space-id (xt/x:get-key request "space"))
+     (var space-id (. request ["space"]))
      (var name (view/state-get node space-id -/VIEW-ID ["form" "name"] ""))
      (var about (view/state-get node space-id -/VIEW-ID ["form" "about"] ""))
      (when (< 0 (xt/x:str-len name))
@@ -126,11 +126,11 @@
 (defn.xt kitchen-sink-render
   "renders every portable catalog component on one screen"
   [snapshot]
-  (var pending (== true (xt/x:get-key snapshot "pending")))
-  (var name (or (xt/x:get-key snapshot "name") ""))
-  (var about (or (xt/x:get-key snapshot "about") ""))
-  (var orgs (or (xt/x:get-key snapshot "orgs") []))
-  (var fills (or (xt/x:get-key snapshot "fills")
+  (var pending (== true (. snapshot ["pending"])))
+  (var name (or (. snapshot ["name"]) ""))
+  (var about (or (. snapshot ["about"]) ""))
+  (var orgs (or (. snapshot ["orgs"]) []))
+  (var fills (or (. snapshot ["fills"])
                  [["10:02" "BUY" "12.50" "4"]
                   ["10:05" "SELL" "12.55" "2"]
                   ["10:11" "BUY" "12.45" "6"]]))
@@ -234,9 +234,9 @@
                      (return
                       (view/node "ui/alert" {"variant" "default"}
                                  [(view/node "ui/text"
-                                             {"value" (xt/x:cat (xt/x:get-key org "name")
+                                             {"value" (xt/x:cat (. org ["name"])
                                                                 " - "
-                                                                (xt/x:get-key org "about"))}
+                                                                (. org ["about"]))}
                                              [])])))))])
 
      ;; image

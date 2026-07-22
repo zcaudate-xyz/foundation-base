@@ -14,14 +14,14 @@
   "gets an attached transport"
   {:added "4.1"}
   [node transport-id]
-  (return (xt/x:get-key (xt/x:get-key node "transports")
+  (return (xt/x:get-key (. node ["transports"])
                         transport-id)))
 
 (defn.xt transport-list
   "lists active transport ids"
   {:added "4.1"}
   [node]
-  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "transports"))
+  (return (xtd/arr-sort (xt/x:obj-keys (. node ["transports"]))
                         (fn [x] (return x))
                         xt/x:str-lt)))
 
@@ -32,7 +32,7 @@
   (var transport (-/transport-get node transport-id))
   (when (xt/x:nil? transport)
     (xt/x:err (xt/x:cat "transport not found - " transport-id)))
-  (var send-fn (xt/x:get-key transport "send_fn"))
+  (var send-fn (. transport ["send_fn"]))
   (when (xt/x:nil? send-fn)
     (xt/x:err (xt/x:cat "transport missing send_fn - " transport-id)))
   (return (node-request/ensure-promise
@@ -57,9 +57,9 @@
   "resolves the outbound request target transport"
   {:added "4.1"}
   [node meta]
-  (when (xt/x:get-key meta "local")
+  (when (. meta ["local"])
     (return nil))
-  (var target (xt/x:get-key meta "transport_id"))
+  (var target (. meta ["transport_id"]))
   (when (xt/x:not-nil? target)
     (return target))
   (var transports (-/transport-list node))
@@ -86,16 +86,16 @@
   "waits for a pending request state to settle"
   {:added "4.1"}
   [state]
-  (var status (xt/x:get-key state "status"))
+  (var status (. state ["status"]))
   (cond (== status "resolved")
         (return (promise/x:promise-run
-                 (xt/x:get-key state "value")))
+                 (. state ["value"])))
 
         (== status "rejected")
         (return
          (promise/x:promise-new
           (fn [_ reject]
-            (reject (xt/x:get-key state "error")))))
+            (reject (. state ["error"])))))
 
         :else
         (return
@@ -110,14 +110,14 @@
   {:added "4.1"}
   [request ctx]
   (:= ctx (or ctx {}))
-  (var meta (xt/x:get-key request "meta"))
+  (var meta (. request ["meta"]))
   (when (xt/x:nil? meta)
     (:= meta {})
     (xt/x:set-key request "meta" meta))
-  (when (xt/x:not-nil? (xt/x:get-key ctx "transport_id"))
+  (when (xt/x:not-nil? (. ctx ["transport_id"]))
     (xt/x:set-key meta
                  "transport_id"
-                 (xt/x:get-key ctx "transport_id")))
+                 (. ctx ["transport_id"])))
   (return request))
 
 (defn.xt response-ok
@@ -125,15 +125,15 @@
   {:added "4.1"}
   [node request data meta ctx]
   (var response (frame/response-ok-frame
-                 (xt/x:get-key request "id")
-                 (xt/x:get-key request "space")
+                 (. request ["id"])
+                 (. request ["space"])
                  data
                  meta))
-  (var transport-id (xt/x:get-key ctx "transport_id"))
+  (var transport-id (. ctx ["transport_id"]))
   (when (xt/x:nil? transport-id)
-    (var request-meta (xt/x:get-key request "meta"))
+    (var request-meta (. request ["meta"]))
     (when (xt/x:not-nil? request-meta)
-      (:= transport-id (xt/x:get-key request-meta "transport_id"))))
+      (:= transport-id (. request-meta ["transport_id"]))))
   (if (xt/x:nil? transport-id)
     (return (promise/x:promise-run response))
     (return
@@ -147,15 +147,15 @@
   {:added "4.1"}
   [node request error meta ctx]
   (var response (frame/response-error-frame
-                 (xt/x:get-key request "id")
-                 (xt/x:get-key request "space")
+                 (. request ["id"])
+                 (. request ["space"])
                  error
                  meta))
-  (var transport-id (xt/x:get-key ctx "transport_id"))
+  (var transport-id (. ctx ["transport_id"]))
   (when (xt/x:nil? transport-id)
-    (var request-meta (xt/x:get-key request "meta"))
+    (var request-meta (. request ["meta"]))
     (when (xt/x:not-nil? request-meta)
-      (:= transport-id (xt/x:get-key request-meta "transport_id"))))
+      (:= transport-id (. request-meta ["transport_id"]))))
   (if (xt/x:nil? transport-id)
     (return (promise/x:promise-run response))
     (return
@@ -177,11 +177,11 @@
                 (xt/x:has-key? config "meta")))
        (do
          (when (and (xt/x:has-key? config "id")
-                    (not (== (xt/x:get-key config "id")
+                    (not (== (. config ["id"])
                              space-id)))
            (xt/x:err (xt/x:cat "space id mismatch - " space-id)))
-         (return {:state (xt/x:get-key config "state")
-                  :meta (or (xt/x:get-key config "meta") {})}))
+         (return {:state (. config ["state"])
+                  :meta (or (. config ["meta"]) {})}))
 
        :else
        (xt/x:err (xt/x:cat "invalid space config - " space-id))))
@@ -195,14 +195,14 @@
                 :meta {}})
 
        (and (xt/x:is-object? config)
-            (xt/x:is-function? (xt/x:get-key config "fn")))
+            (xt/x:is-function? (. config ["fn"])))
        (do
          (when (and (xt/x:has-key? config "id")
-                    (not (== (xt/x:get-key config "id")
+                    (not (== (. config ["id"])
                              action)))
            (xt/x:err (xt/x:cat "handler id mismatch - " action)))
-         (return {:fn (xt/x:get-key config "fn")
-                  :meta (or (xt/x:get-key config "meta") {})}))
+         (return {:fn (. config ["fn"])
+                  :meta (or (. config ["meta"]) {})}))
 
        :else
        (xt/x:err (xt/x:cat "invalid handler config - " action))))
@@ -216,14 +216,14 @@
                 :meta {}})
 
        (and (xt/x:is-object? config)
-            (xt/x:is-function? (xt/x:get-key config "fn")))
+            (xt/x:is-function? (. config ["fn"])))
        (do
          (when (and (xt/x:has-key? config "id")
-                    (not (== (xt/x:get-key config "id")
+                    (not (== (. config ["id"])
                              signal)))
            (xt/x:err (xt/x:cat "trigger id mismatch - " signal)))
-         (return {:fn (xt/x:get-key config "fn")
-                  :meta (or (xt/x:get-key config "meta") {})}))
+         (return {:fn (. config ["fn"])
+                  :meta (or (. config ["meta"]) {})}))
 
        :else
        (xt/x:err (xt/x:cat "invalid trigger config - " signal))))
@@ -245,7 +245,7 @@
   (var entry {:id action
               :fn handler
               :meta (or meta {})})
-  (xt/x:set-key (xt/x:get-key node "handlers")
+  (xt/x:set-key (. node ["handlers"])
                 action
                 entry)
   (return entry))
@@ -254,7 +254,7 @@
   "unregisters a shared request handler"
   {:added "4.1"}
   [node action]
-  (var handlers (xt/x:get-key node "handlers"))
+  (var handlers (. node ["handlers"]))
   (var prev (xt/x:get-key handlers action))
   (xt/x:del-key handlers action)
   (return prev))
@@ -263,14 +263,14 @@
   "gets a shared request handler"
   {:added "4.1"}
   [node action]
-  (return (xt/x:get-key (xt/x:get-key node "handlers")
+  (return (xt/x:get-key (. node ["handlers"])
                         action)))
 
 (defn.xt list-handlers
   "lists registered request handlers"
   {:added "4.1"}
   [node]
-  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "handlers"))
+  (return (xtd/arr-sort (xt/x:obj-keys (. node ["handlers"]))
                         (fn [x] (return x))
                         xt/x:str-lt)))
 
@@ -281,7 +281,7 @@
   (var entry {:id signal
               :fn trigger-fn
               :meta (or meta {})})
-  (xt/x:set-key (xt/x:get-key node "triggers")
+  (xt/x:set-key (. node ["triggers"])
                 signal
                 entry)
   (return entry))
@@ -290,7 +290,7 @@
   "unregisters a shared stream trigger"
   {:added "4.1"}
   [node signal]
-  (var triggers (xt/x:get-key node "triggers"))
+  (var triggers (. node ["triggers"]))
   (var prev (xt/x:get-key triggers signal))
   (xt/x:del-key triggers signal)
   (return prev))
@@ -299,14 +299,14 @@
   "gets a shared stream trigger"
   {:added "4.1"}
   [node signal]
-  (return (xt/x:get-key (xt/x:get-key node "triggers")
+  (return (xt/x:get-key (. node ["triggers"])
                         signal)))
 
 (defn.xt list-triggers
   "lists registered stream triggers"
   {:added "4.1"}
   [node]
-  (return (xtd/arr-sort (xt/x:obj-keys (xt/x:get-key node "triggers"))
+  (return (xtd/arr-sort (xt/x:obj-keys (. node ["triggers"]))
                         (fn [x] (return x))
                         xt/x:str-lt)))
 
@@ -334,11 +334,11 @@
             (-/transport-send node target request-frame)
             (fn [err]
               (node-request/remove-pending node
-                                           (xt/x:get-key request-frame "id"))
+                                           (. request-frame ["id"]))
               (return (reject err)))))
           (catch err
             (node-request/remove-pending node
-                                         (xt/x:get-key request-frame "id"))
+                                         (. request-frame ["id"]))
             (return (reject err)))))))))
 
 (defn.xt publish
@@ -350,15 +350,15 @@
                                   signal
                                   data
                                   meta
-                                  (xt/x:get-key meta "cause")))
+                                  (. meta ["cause"])))
   (return
    (promise/x:promise-then
     (node-pubsub/receive-publish node stream)
     (fn [_]
       (return (-/stream-route-loop node
                                   (router/target-ids node
-                                                     (xt/x:get-key stream "space")
-                                                     (xt/x:get-key stream "signal"))
+                                                     (. stream ["space"])
+                                                     (. stream ["signal"]))
                                   stream
-                                  (xt/x:get-key meta "transport_id")
+                                  (. meta ["transport_id"])
                                   0))))))

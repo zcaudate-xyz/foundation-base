@@ -61,10 +61,10 @@
   [tool]
   (return
    (and (xt/x:is-object? tool)
-        (xt/x:is-string? (xt/x:get-key tool "name"))
-        (< 0 (xt/x:len (xt/x:get-key tool "name")))
-        (xt/x:is-string? (xt/x:get-key tool "description"))
-        (xt/x:is-object? (xt/x:get-key tool "input_schema")))))
+        (xt/x:is-string? (. tool ["name"]))
+        (< 0 (xt/x:len (. tool ["name"])))
+        (xt/x:is-string? (. tool ["description"]))
+        (xt/x:is-object? (. tool ["input_schema"])))))
 
 (defn.xt tool-wire
   "projects a portable MCP tool descriptor onto the MCP wire shape"
@@ -72,17 +72,17 @@
   [tool]
   (when (not (-/tool-valid? tool))
     (xt/x:err "invalid MCP tool descriptor"))
-  (var out {:name (xt/x:get-key tool "name")
-            :description (xt/x:get-key tool "description")
-            :inputSchema (-/schema-wire (xt/x:get-key tool "input_schema"))})
-  (when (xt/x:not-nil? (xt/x:get-key tool "title"))
-    (xt/x:set-key out "title" (xt/x:get-key tool "title")))
-  (when (xt/x:not-nil? (xt/x:get-key tool "output_schema"))
+  (var out {:name (. tool ["name"])
+            :description (. tool ["description"])
+            :inputSchema (-/schema-wire (. tool ["input_schema"]))})
+  (when (xt/x:not-nil? (. tool ["title"]))
+    (xt/x:set-key out "title" (. tool ["title"])))
+  (when (xt/x:not-nil? (. tool ["output_schema"]))
     (xt/x:set-key out "outputSchema"
-                  (-/schema-wire (xt/x:get-key tool "output_schema"))))
-  (when (xt/x:not-nil? (xt/x:get-key tool "annotations"))
+                  (-/schema-wire (. tool ["output_schema"]))))
+  (when (xt/x:not-nil? (. tool ["annotations"]))
     (xt/x:set-key out "annotations"
-                  (-/annotations-wire (xt/x:get-key tool "annotations"))))
+                  (-/annotations-wire (. tool ["annotations"]))))
   (return out))
 
 (defn.xt schema-type-valid?
@@ -104,18 +104,18 @@
   {:added "4.1"}
   [schema value path]
   (:= path (or path "$"))
-  (when (not (-/schema-type-valid? (xt/x:get-key schema "type") value))
-    (return (xt/x:cat path " must be " (xt/x:get-key schema "type"))))
-  (var enum-values (xt/x:get-key schema "enum"))
+  (when (not (-/schema-type-valid? (. schema ["type"]) value))
+    (return (xt/x:cat path " must be " (. schema ["type"]))))
+  (var enum-values (. schema ["enum"]))
   (when (and (xt/x:is-array? enum-values)
              (not (xtd/arr-some enum-values
                                 (fn [candidate]
                                   (return (== candidate value))))))
     (return (xt/x:cat path " must be one of the declared enum values")))
-  (when (and (== "object" (xt/x:get-key schema "type"))
+  (when (and (== "object" (. schema ["type"]))
              (xt/x:is-object? value))
-    (var properties (or (xt/x:get-key schema "properties") {}))
-    (var required (or (xt/x:get-key schema "required") []))
+    (var properties (or (. schema ["properties"]) {}))
+    (var required (or (. schema ["required"]) []))
     (var required-error nil)
     (xt/for:array [required-key required]
       (when (and (xt/x:nil? required-error)
@@ -133,20 +133,20 @@
                                   property-value
                                   (xt/x:cat path "." property-name)))
 
-              (== false (xt/x:get-key schema "additional_properties"))
+              (== false (. schema ["additional_properties"]))
               (:= property-error
                   (xt/x:cat path "." property-name " is not allowed")))))
     (when (xt/x:not-nil? property-error)
       (return property-error)))
-  (when (and (== "array" (xt/x:get-key schema "type"))
+  (when (and (== "array" (. schema ["type"]))
              (xt/x:is-array? value)
-             (xt/x:not-nil? (xt/x:get-key schema "items")))
+             (xt/x:not-nil? (. schema ["items"])))
     (var item-error nil)
     (var index 0)
     (xt/for:array [item value]
       (when (xt/x:nil? item-error)
         (:= item-error
-            (-/schema-error (xt/x:get-key schema "items")
+            (-/schema-error (. schema ["items"])
                             item
                             (xt/x:cat path "[" index "]"))))
       (:= index (+ index 1)))

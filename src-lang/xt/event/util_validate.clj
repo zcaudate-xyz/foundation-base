@@ -105,7 +105,7 @@
   "walks fields through a single validation promise chain"
   {:added "4.1"}
   [form validators result fields index hook-fn complete-fn]
-  (when (== "errored" (xt/x:get-key result "status"))
+  (when (== "errored" (. result ["status"]))
     (when (xt/x:not-nil? complete-fn)
       (complete-fn false result))
     (return (spec-promise/x:promise-run result)))

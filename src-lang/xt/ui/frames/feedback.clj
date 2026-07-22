@@ -7,9 +7,9 @@
              [xt.ui.core :as ui]]})
 
 (defn.xt view [state fallback]
-  (when (== true (xt/x:get-key state "pending"))
+  (when (== true (. state ["pending"]))
     (return (ui/node "ui/spinner" {"label" "Loading"} [])))
-  (when (xt/x:not-nil? (xt/x:get-key state "error"))
+  (when (xt/x:not-nil? (. state ["error"]))
     (return (ui/node "ui/alert" {"tone" "error"}
-                     [(ui/text (xt/x:to-string (xt/x:get-key state "error")) {})])))
+                     [(ui/text (xt/x:to-string (. state ["error"])) {})])))
   (return fallback))

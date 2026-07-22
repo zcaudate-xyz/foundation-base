@@ -131,20 +131,20 @@
   "adds tasks to a loader"
   {:added "4.1"}
   [loader tasks]
-  (var prev (xt/x:get-key loader "tasks"))
+  (var prev (. loader ["tasks"]))
   (var all (xt/x:arr-assign (xt/x:obj-vals prev)
                             tasks))
   (var deps (xt/x:arr-map all
                           (fn [e]
                             (return
-                             [(xt/x:get-key e "id")
-                              (xt/x:get-key e "deps")]))))
+                             [(. e ["id"])
+                              (. e ["deps"])]))))
   (return (xt/x:obj-assign
            loader
            {:order (xtst/sort-topo deps)
             :tasks (xtd/arr-juxt all
                                  (fn [e]
-                                   (return (xt/x:get-key e "id")))
+                                   (return (. e ["id"])))
                                  xtd/clone-nested)})))
 
 (defn.xt new-loader
@@ -158,13 +158,13 @@
   "lists loading ids"
   {:added "4.1"}
   [loader]
-  (return (xt/x:obj-keys (xt/x:get-key loader "loading"))))
+  (return (xt/x:obj-keys (. loader ["loading"]))))
 
 (defn.xt list-completed
   "lists completed ids"
   {:added "4.1"}
   [loader]
-  (return (xt/x:obj-keys (xt/x:get-key loader "completed"))))
+  (return (xt/x:obj-keys (. loader ["completed"]))))
 
 (defn.xt list-incomplete
   "lists incomplete ids"
@@ -189,7 +189,7 @@
     (when (and (xt/x:not-nil? task)
                (not= true (xt/x:get-key loading id))
                (not= true (xt/x:get-key completed id))
-               (xt/x:arr-every (xt/x:get-key task "deps")
+               (xt/x:arr-every (. task ["deps"])
                                 (fn [dep-id]
                                   (return (== true (xt/x:get-key completed dep-id))))))
       (xt/x:arr-push out id)))

@@ -32,13 +32,13 @@
   {:added "4.1"}
   [params]
   (var out (xt/x:obj-clone (or params {})))
-  (when (xt/x:nil? (xt/x:get-key out "where"))
+  (when (xt/x:nil? (. out ["where"]))
     (xt/x:set-key out "where" []))
-  (when (xt/x:nil? (xt/x:get-key out "data"))
+  (when (xt/x:nil? (. out ["data"]))
     (xt/x:set-key out "data" []))
-  (when (xt/x:nil? (xt/x:get-key out "links"))
+  (when (xt/x:nil? (. out ["links"]))
     (xt/x:set-key out "links" []))
-  (when (xt/x:nil? (xt/x:get-key out "custom"))
+  (when (xt/x:nil? (. out ["custom"]))
     (xt/x:set-key out "custom" []))
   (return out))
 

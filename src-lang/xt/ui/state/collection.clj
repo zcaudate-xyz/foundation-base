@@ -7,11 +7,11 @@
              [xt.lang.common-data :as xtd]]})
 
 (defn.xt create [opts]
-  (return {"items" (or (xt/x:get-key opts "items") [])
-           "query" (or (xt/x:get-key opts "query") {})
-           "page" (or (xt/x:get-key opts "page") 0)
-           "page_size" (or (xt/x:get-key opts "page_size") 25)
-           "total" (or (xt/x:get-key opts "total") 0)
+  (return {"items" (or (. opts ["items"]) [])
+           "query" (or (. opts ["query"]) {})
+           "page" (or (. opts ["page"]) 0)
+           "page_size" (or (. opts ["page_size"]) 25)
+           "total" (or (. opts ["total"]) 0)
            "selected" {}
            "pending" false
            "error" nil}))
@@ -24,7 +24,7 @@
   (return state))
 
 (defn.xt set-query! [state path value]
-  (var query (xtd/clone-nested (or (xt/x:get-key state "query") {})))
+  (var query (xtd/clone-nested (or (. state ["query"]) {})))
   (xtd/set-in query path value)
   (xt/x:set-key state "query" query)
   (xt/x:set-key state "page" 0)
@@ -36,9 +36,9 @@
 
 (defn.xt select! [state id selected]
   (if (== true selected)
-    (xt/x:set-key (xt/x:get-key state "selected") id true)
-    (xt/x:del-key (xt/x:get-key state "selected") id))
+    (xt/x:set-key (. state ["selected"]) id true)
+    (xt/x:del-key (. state ["selected"]) id))
   (return state))
 
 (defn.xt selected-ids [state]
-  (return (xt/x:obj-keys (xt/x:get-key state "selected"))))
+  (return (xt/x:obj-keys (. state ["selected"]))))

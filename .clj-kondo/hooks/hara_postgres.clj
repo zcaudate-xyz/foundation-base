@@ -4,7 +4,8 @@
    l/script- interns grammar macros at runtime. clj-kondo cannot execute that
    setup, so this hook emits placeholders for generated symbols. defsel.pg and
    defret.pg are intentionally absent: postgres.core owns those forms."
-    (:require [clj-kondo.hooks-api :as api]))
+    (:require [clj-kondo.hooks-api :as api]
+              [clojure.string :as str]))
 
 (def ^:private +postgres-ops+
      '[defrun defn defn- defglobal defgen deftemp defclass defabstract def
@@ -12,7 +13,7 @@
        defsubscription deftrigger defpartition])
 
 (def ^:private +common-ops+
-     '[defrun defn defn- defglobal defgen deftemp defclass defabstract def])
+     '[defrun defn defn- defglobal defgen defimpl defprotocol defspec deftemp defclass defabstract def])
 
 (def ^:private +language-highlights+
      {:postgres '[return break do:assert]})
@@ -49,10 +50,18 @@
                  distinct)))
 
 (defn- placeholder-node [sym]
-       (api/list-node
-        [(api/token-node 'clojure.core/def)
-         (api/token-node sym)
-         (api/token-node 'clojure.core/identity)]))
+       (if (and (symbol? sym)
+                (re-find #"^def(?:n|impl|protocol|spec)\\." (name sym)))
+         (api/list-node
+          [(api/token-node 'clojure.core/defmacro)
+           (api/token-node sym)
+           (api/vector-node [(api/token-node '&)
+                             (api/token-node '_)])
+           (api/token-node nil)])
+         (api/list-node
+          [(api/token-node 'clojure.core/def)
+           (api/token-node sym)
+           (api/token-node 'clojure.core/identity)])))
 
 (defn- require-node [libspec]
        (let [ns-sym (if (vector? libspec) (first libspec) libspec)
@@ -101,14 +110,14 @@
 (defn allowed-input-name? [name]
       (or (= name "m")
           (= name "_")
-          (.startsWith name "i-")
-          (.startsWith name "o-")))
+          (str/starts-with? name "i-")
+          (str/starts-with? name "o-")))
 
 (defn allowed-local-name? [name]
       (or (= name "m")
           (= name "_")
-          (.startsWith name "v-")
-          (.startsWith name "o-")))
+          (str/starts-with? name "v-")
+          (str/starts-with? name "o-")))
 
 (defn let-bindings [let-form]
       (let [bindings (second let-form)]

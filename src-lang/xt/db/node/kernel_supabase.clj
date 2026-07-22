@@ -17,8 +17,8 @@
   "returns decoded structured gw rpc error details when available"
   {:added "4.1"}
   [body]
-  (var detail (or (xt/x:get-key body "details")
-                  (xt/x:get-key body "detail")))
+  (var detail (or (. body ["details"])
+                  (. body ["detail"])))
   (cond (xt/x:is-string? detail)
         (try
           (return (xt/x:json-decode detail))
@@ -32,16 +32,16 @@
   "normalizes a failed supabase response into exception data"
   {:added "4.1"}
   [response]
-  (var status (xt/x:get-key response "status"))
-  (var body   (xt/x:get-key response "body"))
+  (var status (. response ["status"]))
+  (var body   (. response ["body"]))
   (var detail (-/supabase-rpc-error-detail body))
   (var data body)
   (when (and (xt/x:is-object? detail)
-             (== "gw.rpc.error" (xt/x:get-key detail "type")))
+             (== "gw.rpc.error" (. detail ["type"])))
     (:= data detail))
   (when (xt/x:is-object? data)
     (xt/x:set-key data "status" status)
-    (when (xt/x:nil? (xt/x:get-key data "http_status"))
+    (when (xt/x:nil? (. data ["http_status"]))
       (xt/x:set-key data "http_status" status)))
   (return data))
 
@@ -49,12 +49,12 @@
   "extracts supabase response data and rejects failed responses"
   {:added "4.1"}
   [response]
-  (var status (xt/x:get-key response "status"))
-  (var body (xt/x:get-key response "body"))
+  (var status (. response ["status"]))
+  (var body (. response ["body"]))
   (when (and status (>= status 400))
     (var data (-/supabase-error-data response))
-    (throw (xt/x:ex (or (xt/x:get-key data "message")
-                        (xt/x:get-key body "message")
+    (throw (xt/x:ex (or (. data ["message"])
+                        (. body ["message"])
                         "Supabase request failed")
                     data)))
   (return (http-util/get-body-data response)))
@@ -67,7 +67,7 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (var client (xt/x:get-key impl "client"))
+          (var client (. impl ["client"]))
           (return
            (-> (http-fetch/request-http client cmd)
                (promise/x:promise-then -/supabase-response-data))))))))
@@ -84,7 +84,7 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (var client (xt/x:get-key impl "client"))
+          (var client (. impl ["client"]))
           (return
            (-> (http-fetch/request-http client (addon/cmd-signup credentials opts))
                (promise/x:promise-then http-util/get-body-data)
@@ -106,7 +106,7 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (var client (xt/x:get-key impl "client"))
+          (var client (. impl ["client"]))
           (return
            (-> (http-fetch/request-http client (addon/cmd-token-password credentials opts))
                (promise/x:promise-then http-util/get-body-data)
@@ -128,7 +128,7 @@
        (promise/x:promise-then
         (fn [impl]
           (session/auto-refresh-stop impl)
-          (var client (xt/x:get-key impl "client"))
+          (var client (. impl ["client"]))
           (return
            (-> (http-fetch/request-http client (addon/cmd-logout opts))
                (promise/x:promise-then
@@ -355,7 +355,7 @@
   (var impl (substrate/get-service node service-id))
   (var session (session/get-session impl))
   (if (xt/x:not-nil? session)
-    (return {"user" (xt/x:get-key session "user")})
+    (return {"user" (. session ["user"])})
     (return
      (-/supabase-request node service-id (addon/cmd-user-get opts)))))
 

@@ -7,13 +7,13 @@
              [xt.ui.core :as ui]]})
 
 (defn.xt view [frame record]
-  (var fields (or (xt/x:get-key (xt/x:get-key frame "opts") "fields") []))
+  (var fields (or (. frame ["opts"] ["fields"]) []))
   (var children [])
   (xt/for:array [field fields]
-    (var id (xt/x:get-key field "id"))
+    (var id (. field ["id"]))
     (xt/x:arr-push
      children
      (ui/node "ui/row" {"class" "justify-between gap-4" "key" id}
-              [(ui/node "ui/label" {"value" (or (xt/x:get-key field "label") id)} [])
+              [(ui/node "ui/label" {"value" (or (. field ["label"]) id)} [])
                (ui/text (or (xt/x:get-key record id) "") {})])))
   (return (ui/node "ui/card-content" {"class" "flex flex-col gap-3"} children)))

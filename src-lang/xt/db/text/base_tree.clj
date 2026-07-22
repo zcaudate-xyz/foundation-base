@@ -104,7 +104,7 @@
     (return tree))
   (xt/for:array [[i e] input-spec]
     (xt/x:set-key arg-map
-                  (xt/x:cat "{{" (xt/x:get-key e "symbol") "}}")
+                  (xt/x:cat "{{" (. e ["symbol"]) "}}")
                   (xt/x:get-idx args i)))
   (var out (xtt/tree-walk tree
                           (fn [x] (return x))
@@ -164,8 +164,8 @@
   "provides a view combine query"
   {:added "4.0"}
   [schema sel-entry sel-args ret-entry ret-args ret-omit opts as-tree]
-  (var sel-input  (xt/x:get-key sel-entry "input"))
-  (var ret-input  (xt/x:get-key ret-entry "input"))
+  (var sel-input  (. sel-entry ["input"]))
+  (var ret-input  (. ret-entry ["input"]))
   (var itree   (-/tree-combined schema
                                 sel-entry
                                 ret-entry
@@ -189,14 +189,16 @@
   "checks query arguments against the entry input"
   {:added "4.0"}
   [entry args drop-first]
-  (var targs (xt/x:get-key entry "input"))
+  (var targs (. entry ["input"]))
   (when drop-first
     (:= targs [(xt/x:unpack targs)])
     (x:arr-pop-first targs))
-  (var [l-ok l-err] (check/check-args-length args targs))
+  (var l-ok-value (check/check-args-length args targs))
+  (var [l-ok l-err] l-ok-value)
   (when (not l-ok)
     (return [l-ok l-err]))
-  (var [t-ok t-err] (check/check-args-type args targs))
+  (var t-ok-value (check/check-args-type args targs))
+  (var [t-ok t-err] t-ok-value)
   (when (not t-ok)
     (return [t-ok t-err]))
   (return [true nil]))
@@ -216,10 +218,12 @@
          return-bulk} query-spec)
   (cond (and (xt/x:not-nil? select-entry)
              (xt/x:not-nil? return-entry))
-        (do (var [s-ok s-err] (-/plan-view-check select-entry select-args false))
+        (do (var s-ok-value (-/plan-view-check select-entry select-args false))
+        (var [s-ok s-err] s-ok-value)
             (when (not s-ok)
               (return [s-ok s-err]))
-            (var [r-ok r-err] (-/plan-view-check return-entry return-args true))
+            (var r-ok-value (-/plan-view-check return-entry return-args true))
+            (var [r-ok r-err] r-ok-value)
             (when (not r-ok)
               (return [r-ok r-err]))
             (return [true (-/plan-combined
@@ -233,7 +237,8 @@
                            false)]))
         
         (xt/x:not-nil? select-entry)
-        (do (var [s-ok s-err] (-/plan-view-check select-entry select-args false))
+        (do (var s-ok-value (-/plan-view-check select-entry select-args false))
+        (var [s-ok s-err] s-ok-value)
             (when (not s-ok)
               (return [s-ok s-err]))
             (return [true (:? return-count
@@ -250,7 +255,8 @@
 
         (xt/x:not-nil? return-id)
         (do (var rargs [return-id (xt/x:unpack return-args)])
-            (var [r-ok r-err] (-/plan-view-check return-entry rargs false))
+            (var r-ok-value (-/plan-view-check return-entry rargs false))
+            (var [r-ok r-err] r-ok-value)
             (when (not r-ok)
               (return [r-ok r-err]))
             (return [true (-/plan-return
@@ -261,7 +267,8 @@
                            {})]))
 
         (xt/x:not-nil? return-bulk)
-        (do (var [r-ok r-err] (-/plan-view-check return-entry return-args true))
+        (do (var r-ok-value (-/plan-view-check return-entry return-args true))
+        (var [r-ok r-err] r-ok-value)
             (when (not r-ok)
               (return [r-ok r-err]))
             (return [true (-/plan-return-bulk

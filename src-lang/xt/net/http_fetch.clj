@@ -51,8 +51,8 @@
   (var #{body
          method} input)
   (var headers (->  {}
-                    (xt/x:obj-assign (xt/x:get-key defaults "headers"))
-                    (xt/x:obj-assign (xt/x:get-key input "headers"))))
+                    (xt/x:obj-assign (. defaults ["headers"]))
+                    (xt/x:obj-assign (. input ["headers"]))))
   (var output {:url     (-/prepare-url client input)
                :method  (or method "GET")
                :headers headers})
@@ -100,4 +100,3 @@
    (-/wrap-normalise
     (-/prepare-middleware client
      (-/wrap-prepare-input handler)))))
-

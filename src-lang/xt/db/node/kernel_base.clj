@@ -45,11 +45,11 @@
 (defn.xt kernel-create-config
   [config]
   (var common   (xt/x:obj-assign {"id" "db/common"}
-                                 (xt/x:get-key config "common")))
+                                 (. config ["common"])))
   (var primary  (xt/x:obj-assign {"id" "db/primary"}
-                                 (xt/x:get-key config "primary")))
+                                 (. config ["primary"])))
   (var caching  (xt/x:obj-assign {"id" "db/caching"}
-                                 (xt/x:get-key config "caching")))
+                                 (. config ["caching"])))
   (return {:common common
            :primary primary
            :caching caching}))
@@ -473,11 +473,12 @@
 (defn.xt dataview-prep-tree
   [impl dataview]
   (var #{schema} impl)  
-  (var [ok tree] (base-tree/plan-view schema
+  (var ok-value (base-tree/plan-view schema
                                       (xt/x:obj-assign
                                        {:select-args []
                                         :return-args []}
                                        dataview)))
+  (var [ok tree] ok-value)
   (if (not ok)
     (throw (xt/x:ex "Invalid Dataview" dataview)))
   (return tree))
@@ -533,11 +534,12 @@
       (var args (. context ["args"]))
       (var caching   (-/get-caching-impl node primary-id))
       (var #{schema} caching)  
-      (var [ok tree] (base-tree/plan-view schema
+      (var ok-value (base-tree/plan-view schema
                                           (-> {:select-args []
                                                :return-args []}
                                               (xt/x:obj-assign (xt/x:first args))
                                               (xt/x:obj-assign dataview))))
+      (var [ok tree] ok-value)
       (if (not ok)
         (throw (xt/x:ex "Invalid Dataview" dataview)))
       (return (impl-common/pull caching tree)))

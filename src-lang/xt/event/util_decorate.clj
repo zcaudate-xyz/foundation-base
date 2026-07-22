@@ -29,7 +29,7 @@
   (var state {:value -1})
   (var next-id-fn
        (fn []
-         (var i (+ 1 (xt/x:get-key state "value")))
+         (var i (+ 1 (. state ["value"])))
          (xt/x:set-key state "value" i)
          (return (xt/x:cat "id-" (xt/x:to-string i)))))
   (return next-id-fn))
@@ -44,9 +44,9 @@
          (xt/x:set-key result "output" {:start (xt/x:now-ms)})))
   (var on-teardown
        (fn []
-         (var output (xt/x:get-key result "output"))
+         (var output (. result ["output"]))
          (var t-end (xt/x:now-ms))
-         (var t-elapsed (- t-end (xt/x:get-key output "start")))
+         (var t-elapsed (- t-end (. output ["start"])))
          (xt/x:set-key output "end" t-end)
          (xt/x:set-key output "elapsed" t-elapsed)))
   (var on-reset
@@ -68,12 +68,12 @@
        (fn [ret]
          (var #{output} result)
          (xt/x:set-key output "success"
-                       (+ 1 (xt/x:get-key output "success")))))
+                       (+ 1 (. output ["success"])))))
   (var on-error
        (fn [ret]
          (var #{output} result)
          (xt/x:set-key output "error"
-                       (+ 1 (xt/x:get-key output "error")))))
+                       (+ 1 (. output ["error"])))))
   (var on-reset
        (fn []
          (xt/x:set-key result "output" {:success 0
@@ -90,9 +90,9 @@
   [cb]
   (when (xt/x:nil? cb)
     (:= cb {}))
-  (return {:on-success (xt/x:get-key cb "success" nil)
-           :on-error (xt/x:get-key cb "error" nil)
-           :on-teardown (xt/x:get-key cb "finally" nil)}))
+  (return {:on-success (. cb ["success"])
+           :on-error (. cb ["error"])
+           :on-teardown (. cb ["finally"])}))
 
 (defn.xt new-handle
   "creates a new handle"
@@ -140,9 +140,9 @@
   (var teardown-fn
        (fn []
          (xt/for:array [cb tcbs]
-           (var on-teardown (xt/x:get-key cb "on_teardown"))
-           (var name (xt/x:get-key cb "name"))
-           (var output (xt/x:get-key cb "output"))
+           (var on-teardown (. cb ["on_teardown"]))
+           (var name (. cb ["name"]))
+           (var output (. cb ["output"]))
            (when (xt/x:not-nil? on-teardown)
              (on-teardown))
            (when (and (xt/x:not-nil? name)
@@ -152,7 +152,7 @@
   (var run-fn
        (fn []
          (xt/for:array [cb tcbs]
-           (var on-setup (xt/x:get-key cb "on_setup"))
+           (var on-setup (. cb ["on_setup"]))
            (when (xt/x:not-nil? on-setup)
              (on-setup args)))
          (var base-thunk
@@ -169,7 +169,7 @@
              base-promise
              (fn [ret]
                (xt/for:array [cb tcbs]
-                 (var on-success (xt/x:get-key cb "on_success"))
+                 (var on-success (. cb ["on_success"]))
                  (when (xt/x:not-nil? on-success)
                    (on-success ret)))
                (xt/x:set-key receipt "status" "success")
@@ -177,7 +177,7 @@
                (return receipt)))
              (fn [err]
                (xt/for:array [cb tcbs]
-                 (var on-error (xt/x:get-key cb "on_error"))
+                 (var on-error (. cb ["on_error"]))
                  (when (xt/x:not-nil? on-error)
                    (on-error err)))
                (xt/x:set-key receipt "status" "error")

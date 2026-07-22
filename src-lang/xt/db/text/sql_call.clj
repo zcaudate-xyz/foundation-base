@@ -23,12 +23,12 @@
   "formats the inputs"
   {:added "4.0"}
   [spec args]
-  (var targs  (xt/x:get-key spec "input"))
+  (var targs  (. spec ["input"]))
   (var out [])
   (xt/for:array [[i arg] args]
     (var input (xt/x:get-idx targs i))
     (var dbarg nil)
-    (cond (== (xt/x:get-key input "type")
+    (cond (== (. input ["type"])
               "jsonb")
           (if (xt/x:is-string? arg)
             (:= dbarg arg)
@@ -52,17 +52,19 @@
   "calls a database function"
   {:added "4.0"}
   [client spec args]
-  (var targs (xt/x:get-key spec "input"))
-  (var [l-ok l-err] (check/check-args-length args targs))
+  (var targs (. spec ["input"]))
+  (var l-ok-value (check/check-args-length args targs))
+  (var [l-ok l-err] l-ok-value)
   (when (not l-ok)
     (xt/x:err (xt/x:cat "ERR: - " (xt/x:json-encode l-err))))
-  (var [t-ok t-err] (check/check-args-type args targs))
+  (var t-ok-value (check/check-args-type args targs))
+  (var [t-ok t-err] t-ok-value)
   (when (not t-ok)
     (xt/x:err (xt/x:cat "ERR: - " (xt/x:json-encode t-err))))
   (var q  (-/call-format-query spec args))
   (var success-fn
        (fn [val]
-         (cond (== "jsonb" (xt/x:get-key spec "return"))
+         (cond (== "jsonb" (. spec ["return"]))
                (if (or (xt/x:nil? val)
                        (== val ""))
                  (return nil)
@@ -83,13 +85,15 @@
   "results an api style result"
   {:added "4.0"}
   [client spec args]
-  (var targs (xt/x:get-key spec "input"))
-  (var [l-ok l-err] (check/check-args-length args targs))
+  (var targs (. spec ["input"]))
+  (var l-ok-value (check/check-args-length args targs))
+  (var [l-ok l-err] l-ok-value)
   (when (not l-ok)
     (return (xt/x:json-encode {:status "error"
                           :data l-err})))
   
-  (var [t-ok t-err] (check/check-args-type args targs))
+  (var t-ok-value (check/check-args-type args targs))
+  (var [t-ok t-err] t-ok-value)
   (when (not t-ok)
     (return (xt/x:json-encode {:status "error"
                            :data t-err})))
@@ -98,14 +102,14 @@
   (var success-fn (fn [val]
                     (return
                      (xt/x:cat "{\"status\": \"ok\", \"data\":"
-                               (:? (== "jsonb" (xt/x:get-key spec "return"))
+                               (:? (== "jsonb" (. spec ["return"]))
                                    (:? (xt/x:is-string? val)
                                        val
                                        (xt/x:json-encode val))
                                    (xt/x:json-encode val))
                                "}"))))
   (var error-fn (fn [err]
-                  (if (xt/x:get-key err "status")
+                  (if (. err ["status"])
                      (return (xt/x:json-encode err))
                      (return (xt/x:json-encode {:status "error"
                                                 :data err})))))

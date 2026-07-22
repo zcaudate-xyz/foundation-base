@@ -11,7 +11,7 @@
   [routes type]
   (return
    (xtd/arr-juxt routes
-                 (fn [e] (return (xt/x:get-key e "url")))
+                 (fn [e] (return (. e ["url"])))
                  (fn [e] (return (xt/x:obj-assign {:type type}
                                                   e))))))
 
@@ -43,10 +43,10 @@
   [views acc]
   (var merge-fn
        (fn [e view-entry]
-         (xt/x:obj-assign (or (xt/x:get-key e "select") {})
-                       (xt/x:get-key view-entry "select"))
-         (xt/x:obj-assign (or (xt/x:get-key e "return") {})
-                       (xt/x:get-key view-entry "return"))
+         (xt/x:obj-assign (or (. e ["select"]) {})
+                       (. view-entry ["select"]))
+         (xt/x:obj-assign (or (. e ["return"]) {})
+                       (. view-entry ["return"]))
          (return e)))
   (return (xt/x:arr-foldl views
                        (fn [out view]
@@ -94,5 +94,4 @@
   "constructs a nested lu map of ids"
   {:added "4.0"}
   [arr]
-  (return (-/lu-nested arr (fn [v] (return (xt/x:get-key v "id"))))))
-
+  (return (-/lu-nested arr (fn [v] (return (. v ["id"]))))))

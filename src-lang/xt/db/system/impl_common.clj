@@ -58,8 +58,8 @@
   {:added "4.1"}
   [payload]
   (var out {})
-  (var db-sync   (xt/x:get-key payload "db/sync"))
-  (var db-remove (xt/x:get-key payload "db/remove"))
+  (var db-sync   (. payload ["db/sync"]))
+  (var db-remove (. payload ["db/remove"]))
   (when (xt/x:is-object? db-sync)
     (xt/for:object [[table _] db-sync]
       (xt/x:set-key out table true)))
@@ -81,8 +81,8 @@
   [impl tables event]
   (var #{listeners} impl)
   (xt/for:object [[listener-id handle] listeners]
-    (var guard    (xt/x:get-key handle "guard"))
-    (var callback (xt/x:get-key handle "callback"))
+    (var guard    (. handle ["guard"]))
+    (var callback (. handle ["callback"]))
     (var matched false)
     (when (xt/x:is-function? guard)
       (xt/for:array [table tables]
@@ -112,8 +112,8 @@
    4. Notify any db listeners whose guard matches those tables."
   {:added "4.1.4"}
   [impl payload]
-  (var db-sync   (xt/x:get-key payload "db/sync"))
-  (var db-remove (xt/x:get-key payload "db/remove"))
+  (var db-sync   (. payload ["db/sync"]))
+  (var db-remove (. payload ["db/remove"]))
   (when (and (xt/x:is-object? db-sync)
              (xtd/not-empty? db-sync))
     (-/process-add-event impl db-sync))

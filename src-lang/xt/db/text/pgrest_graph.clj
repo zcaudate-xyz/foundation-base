@@ -13,7 +13,7 @@
   (return
    (xt/x:arr-some (or custom [])
                   (fn [entry]
-                    (return (== (xt/x:get-key entry "::")
+                    (return (== (. entry ["::"])
                                 "sql/count"))))))
 
 (defn.xt pgrest-resolve-value
@@ -22,16 +22,16 @@
   [value]
   (cond (and (xt/x:is-object? value)
              (xt/x:has-key? value "::"))
-        (do (var tcls (xt/x:get-key value "::"))
+        (do (var tcls (. value ["::"]))
             (cond (== tcls "sql/arg")
-                  (return (xt/x:get-key value "name"))
+                  (return (. value ["name"]))
 
                   (== tcls "sql/cast")
                   (return (-/pgrest-resolve-value
-                           (xt/x:first (xt/x:get-key value "args"))))
+                           (xt/x:first (. value ["args"]))))
 
                   (== tcls "sql/defenum")
-                  (return (xt/x:get-key value "name"))
+                  (return (. value ["name"]))
 
                   :else
                   (return value)))
@@ -110,10 +110,10 @@
   "compiles a filter descriptor into a PostgREST filter fragment"
   {:added "4.1"}
   [filter]
-  (return (xt/x:cat (xt/x:get-key filter "path")
+  (return (xt/x:cat (. filter ["path"])
                     "."
-                    (-/compile-filter-value (xt/x:get-key filter "op")
-                                            (xt/x:get-key filter "value")))))
+                    (-/compile-filter-value (. filter ["op"])
+                                            (. filter ["value"])))))
 
 (defn.xt compile-clause-into
   "compiles nested tree where clauses into filter descriptors"
@@ -128,7 +128,7 @@
                   key))
     (cond (and (xt/x:is-object? value)
                (not (xt/x:is-array? value))
-               (xt/x:nil? (xt/x:get-key value "::")))
+               (xt/x:nil? (. value ["::"])))
           (-/compile-clause-into path value out)
 
           (and (xt/x:is-array? value)
@@ -172,7 +172,7 @@
   (var table (xt/x:get-key schema table-name))
   (var col (and table (xt/x:get-key table key)))
   (return (and (xt/x:is-object? col)
-               (== "ref" (xt/x:get-key col "type"))
+               (== "ref" (. col ["type"]))
                (not (== "reverse" (xt/x:get-path col ["ref" "type"]))))))
 
 (defn.xt flatten-forward-ref-clause
@@ -184,7 +184,7 @@
     (cond (and (-/forward-ref-column? schema table-name k)
                (xt/x:is-object? v)
                (xt/x:has-key? v "id"))
-          (xt/x:set-key out (xt/x:cat k "_id") (xt/x:get-key v "id"))
+          (xt/x:set-key out (xt/x:cat k "_id") (. v ["id"]))
 
           (xt/x:is-object? v)
           (xt/x:set-key out k (-/flatten-forward-ref-clause schema table-name v))
@@ -213,10 +213,10 @@
     (return
      (xt/x:arr-map (-/compile-clause-into "" (xt/x:first where) [])
                    (fn [filter]
-                     (return (xt/x:cat (xt/x:get-key filter "path")
+                     (return (xt/x:cat (. filter ["path"])
                                        "="
-                                       (-/compile-filter-value (xt/x:get-key filter "op")
-                                                               (xt/x:get-key filter "value"))))))))
+                                       (-/compile-filter-value (. filter ["op"])
+                                                               (. filter ["value"]))))))))
   (var clauses (xt/x:arr-filter (xt/x:arr-map where -/compile-or-clause)
                                 xtd/not-empty?))
   (return [(xt/x:cat "or=("
@@ -247,9 +247,9 @@
   "compiles tree-ir data/link params into PostgREST select syntax"
   {:added "4.1"}
   [params]
-  (var custom (xt/x:get-key params "custom"))
-  (var data (xt/x:get-key params "data"))
-  (var links (xt/x:get-key params "links"))
+  (var custom (. params ["custom"]))
+  (var data (. params ["data"]))
+  (var links (. params ["links"]))
   (when (-/tree-count? custom)
     (return "count"))
   (var out [])
@@ -273,26 +273,24 @@
   (var limit nil)
   (var offset nil)
   (xt/for:array [entry (or custom [])]
-    (when (== (xt/x:get-key entry "::") "sql/keyword")
-      (var name (xt/x:get-key entry "name"))
+    (when (== (. entry ["::"]) "sql/keyword")
+      (var name (. entry ["name"]))
       (cond (== name "ORDER BY")
-            (do (var tuple (xt/x:first (or (xt/x:get-key entry "args") [])))
+            (do (var tuple (xt/x:first (or (. entry ["args"]) [])))
                 (:= order-cols
-                    (xt/x:arr-map (or (xt/x:get-key tuple "args") [])
+                    (xt/x:arr-map (or (. tuple ["args"]) [])
                                   (fn [arg]
-                                    (return (xt/x:get-key arg "name"))))))
+                                    (return (. arg ["name"]))))))
 
             (or (== name "ASC")
                 (== name "DESC"))
             (:= order-sort (xt/x:str-to-lower name))
 
             (== name "LIMIT")
-            (:= limit (xt/x:get-key (xt/x:first (or (xt/x:get-key entry "args") []))
-                                    "name"))
+            (:= limit (. (xt/x:first (or (. entry ["args"]) [])) ["name"]))
 
             (== name "OFFSET")
-            (:= offset (xt/x:get-key (xt/x:first (or (xt/x:get-key entry "args") []))
-                                     "name")))))
+            (:= offset (. (xt/x:first (or (. entry ["args"]) [])) ["name"])))))
   (var out [])
   (when (xt/x:is-array? order-cols)
     (xt/x:arr-push out
@@ -333,9 +331,9 @@
   (var params (xtd/second tree))
   (var where (-/flatten-forward-ref-filters schema
                                             table-name
-                                            (or (xt/x:get-key params "where") [])))
+                                            (or (. params ["where"]) [])))
   (xt/x:set-key params "where" where)
-  (var custom (or (xt/x:get-key params "custom") []))
+  (var custom (or (. params ["custom"]) []))
   (var select (-/compile-tree-select-params params))
   (var request-params [(xt/x:cat "select=" select)])
   (:= request-params (xt/x:arr-concat request-params (-/compile-where-params where)))

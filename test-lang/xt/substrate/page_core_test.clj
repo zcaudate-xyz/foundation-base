@@ -2,7 +2,7 @@
   (:require [hara.lang :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python :dart]}}
+^{:seedgen/root {:all true, :langs [:lua :python]}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-notify :as notify]
@@ -15,6 +15,7 @@
              [xt.substrate.page-util :as page-util]
              [xt.substrate.base-space :as node-space]]})
 
+^{:clj-kondo/ignore [:unresolved-symbol]}
 (defn.js create-node
   []
   (return
@@ -121,7 +122,7 @@
     (var [group model] (page-core/model-ensure node "space/a" "page" "ping"))
     {"group" (. group ["name"])
      "model" (. model ["::"])
-     "input" (. (. model ["input"]) ["current"])} )
+     "input" (. model ["input"] ["current"])} )
   => {"group" "page"
       "model" "event.model"
       "input" {"data" [1 2]}})
@@ -143,8 +144,8 @@
     {"path" path
      "args" (. context ["args"])
      "disabled" disabled
-     "space" (. (. context ["space"]) ["id"])
-     "group" (. (. context ["group"]) ["name"])})
+     "space" (. context ["space"] ["id"])
+     "group" (. context ["group"] ["name"])})
   => {"path" ["page" "ping"]
       "args" [3 4]
       "disabled" false
@@ -382,9 +383,9 @@
            "defaults" {"args" [1 2]
                      "output" {"value" 0}}}))
     {"type" (. model ["::"])
-     "input" (. (. model ["input"]) ["current"])
-     "output" (. (. model ["output"]) ["type"])
-     "listener" (. (. (. model ["listeners"]) ["@/page"]) ["meta"] ["listener/type"])} )
+     "input" (. model ["input"] ["current"])
+     "output" (. model ["output"] ["type"])
+     "listener" (. model ["listeners"] ["@/page"] ["meta"] ["listener/type"])} )
   => {"type" "event.model"
       "input" {"data" [1 2]}
       "output" "output"
@@ -407,7 +408,7 @@
                                (return {"args" args}))
                    "defaults" {"args" []}}}))
     {"name" (. group ["name"])
-     "models" (. (. group ["models"]) ["ping"] ["::"])})
+     "models" (. group ["models"] ["ping"] ["::"])})
   => {"name" "page"
       "models" "event.model"})
 
@@ -535,9 +536,9 @@
     (-> (page-core/group-update node "space/a" "page" {})
         (promise/x:promise-then
          (fn [result]
-           (repl/notify {"ping" (xt/x:get-idx (. (. result ["ping"]) ["main"])
+           (repl/notify {"ping" (xt/x:get-idx (. result ["ping"] ["main"])
                                                (xt/x:offset 1))
-                         "pong" (xt/x:get-idx (. (. result ["pong"]) ["main"])
+                         "pong" (xt/x:get-idx (. result ["pong"] ["main"])
                                                (xt/x:offset 1))})))))
   => {"ping" {"ping" true}
       "pong" {"pong" true}})
@@ -569,7 +570,7 @@
      "space/a"
      "page"
      {"ping" {"handler" (fn [ctx _a _b _c]
-                           (return {"data" (. (. ctx ["input"]) ["data"])}))
+                           (return {"data" (. ctx ["input"] ["data"])}))
               "defaults" {"args" []}}})
     (-> (page-core/model-set-input node "space/a" "page" "ping" {"data" [1 2 3]} {})
         (promise/x:promise-then

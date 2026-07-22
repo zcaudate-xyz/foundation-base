@@ -28,17 +28,17 @@
 
 (defn.xt socket-open?
   [socket]
-  (var ready-state (xt/x:get-key socket "readyState"))
+  (var ready-state (. socket ["readyState"]))
   (if (xt/x:nil? ready-state)
     (return true)
     (return (== ready-state 1))))
 
 (defn.xt add-socket-listener
   [socket event handler]
-  (cond (xt/x:is-function? (xt/x:get-key socket "addEventListener"))
+  (cond (xt/x:is-function? (. socket ["addEventListener"]))
         (return (. socket (addEventListener event handler false)))
 
-        (xt/x:is-function? (xt/x:get-key socket "on"))
+        (xt/x:is-function? (. socket ["on"]))
         (return (. socket (on event handler)))
 
         :else
@@ -47,13 +47,13 @@
 
 (defn.xt remove-socket-listener
   [socket event handler]
-  (cond (xt/x:is-function? (xt/x:get-key socket "removeEventListener"))
+  (cond (xt/x:is-function? (. socket ["removeEventListener"]))
         (return (. socket (removeEventListener event handler false)))
 
-        (xt/x:is-function? (xt/x:get-key socket "off"))
+        (xt/x:is-function? (. socket ["off"]))
         (return (. socket (off event handler)))
 
-        (xt/x:is-function? (xt/x:get-key socket "removeListener"))
+        (xt/x:is-function? (. socket ["removeListener"]))
         (return (. socket (removeListener event handler)))
 
         :else
@@ -66,10 +66,10 @@
   [event]
   (return (:? (and (xt/x:is-object? event)
                    (xt/x:has-key? event "data"))
-              (xt/x:get-key event "data")
+              (. event ["data"])
               (:? (and (xt/x:is-object? event)
                        (xt/x:has-key? event "text"))
-                  (xt/x:get-key event "text")
+                  (. event ["text"])
                   event))))
 (defn.xt websocket-url
   "gets the websocket url for a source"
@@ -77,7 +77,7 @@
   [source]
   (if (xt/x:is-string? source)
     (return source)
-    (return (xt/x:get-key source "url"))))
+    (return (. source ["url"]))))
 (defn.xt mark-open
   [state socket _event]
   (xt/x:set-key state "status" "open")
@@ -91,7 +91,7 @@
 
 (defn.xt mark-close
   [state event]
-  (when (not (== (xt/x:get-key state "status") "open"))
+  (when (not (== (. state ["status"]) "open"))
     (xt/x:set-key state "status" "error")
     (xt/x:set-key state "error"
                   (:? (xt/x:nil? event)
@@ -101,16 +101,16 @@
 
 (defn.xt await-open
   [state]
-  (var status (xt/x:get-key state "status"))
+  (var status (. state ["status"]))
   (cond (== status "open")
         (return (promise/x:promise-run
-                 (xt/x:get-key state "socket")))
+                 (. state ["socket"])))
 
         (== status "error")
         (return
          (promise/x:promise
           (fn []
-            (xt/x:throw (xt/x:get-key state "error")))))
+            (xt/x:throw (. state ["error"])))))
 
         :else
         (return
@@ -122,10 +122,10 @@
             (return (-/await-open state)))))))
 (defn.xt connect-socket
   [socket-source]
-  (var connect-fn (xt/x:get-key socket-source "connect_fn"))
+  (var connect-fn (. socket-source ["connect_fn"]))
   (if (xt/x:is-function? connect-fn)
     (return (connect-fn (-/websocket-url socket-source)))
-    (do (var ctor (or (xt/x:get-key socket-source "WebSocket")
+    (do (var ctor (or (. socket-source ["WebSocket"])
                       WebSocket))
         (when (not (xt/x:is-function? ctor))
           (xt/x:err "websocket source missing connect implementation"))
@@ -138,7 +138,7 @@
         (return (-/connect-socket {"url" socket-source}))
 
         (xt/x:is-object? socket-source)
-        (do (var create-fn (xt/x:get-key socket-source "create_fn"))
+        (do (var create-fn (. socket-source ["create_fn"]))
             (cond (xt/x:is-function? create-fn)
                   (return (create-fn))
 
@@ -157,7 +157,7 @@
   {:added "4.1"}
   [socket]
   (return (and (xt/x:is-object? socket)
-               (xt/x:not-nil? (xt/x:get-key socket "::")))))
+               (xt/x:not-nil? (. socket ["::"])))))
 (defn.xt ensure-promise
   "wraps sync values in a native promise while passing promises through"
   {:added "4.1"}
@@ -267,7 +267,7 @@
          (if (xt/x:not-nil? current-native)
            (ws/disconnect current-native)
            (when (and (xt/x:not-nil? current-socket)
-                      (xt/x:is-function? (xt/x:get-key current-socket "close")))
+                      (xt/x:is-function? (. current-socket ["close"])))
              (. current-socket (close))))
          (:= current-socket nil)
          (:= current-native nil)

@@ -435,12 +435,12 @@
   [route url terminate]
   (var #{tree listeners} route)
   (var ninterim (-/interim-from-url url))
-  (var ninterim-params (xt/x:get-key ninterim "params"))
-  (var all-params (xt/x:get-key tree "params"))
+  (var ninterim-params (. ninterim ["params"]))
+  (var all-params (. tree ["params"]))
   
   ^CHANGES
   (var ppath   (-/path-from-tree tree))
-  (var npath   (xt/x:get-key ninterim "path"))
+  (var npath   (. ninterim ["path"]))
   (var pkey    (xt/x:json-encode npath))
   
   (var pparams (xt/x:get-key all-params pkey))
@@ -474,7 +474,7 @@
   {:added "4.0"}
   [route path params]
   (var #{tree} route)
-  (var all-params (xt/x:get-key tree "params"))
+  (var all-params (. tree ["params"]))
 
   ^CHANGES
   (var ppath    (-/path-from-tree tree))
@@ -540,7 +540,7 @@
     (:= path (-/path-from-tree tree)))
   (:= path (xtd/arrayify path))
   (var pkey (xt/x:json-encode path))
-  (var all-params (xt/x:get-key tree "params"))
+  (var all-params (. tree ["params"]))
   (var pparams (xt/x:get-key all-params pkey))
   (when (xt/x:nil? pparams)
     (:= pparams {}))

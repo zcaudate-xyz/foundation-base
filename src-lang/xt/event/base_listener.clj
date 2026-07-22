@@ -143,7 +143,7 @@
   {:added "4.1"}
   [entry]
   (return (and (xt/x:not-nil? entry)
-               (xt/x:is-function? (xt/x:get-key entry "callback")))))
+               (xt/x:is-function? (. entry ["callback"])))))
 
 (defn.xt arrayify-path
   "normalizes event path-like inputs, treating empty objects as empty arrays"
@@ -175,9 +175,9 @@
   (when (not (xt/x:is-object? event))
     (return nil))
   (when (xt/x:has-key? event "time")
-    (return (xt/x:get-key event "time")))
+    (return (. event ["time"])))
   (when (xt/x:has-key? event "t")
-    (return (xt/x:get-key event "t")))
+    (return (. event ["t"])))
   (return nil))
 
 (defn.xt clear-listeners
@@ -234,7 +234,7 @@
   (xt/for:object [[id listener-entry] listeners]
     (when (-/listener-entry? listener-entry)
       (var #{meta} listener-entry)
-      (var t   (xt/x:get-key meta "listener/type"))
+      (var t   (. meta ["listener/type"]))
       (var arr (xt/x:get-key out t))
       (when (xt/x:nil? arr)
         (:= arr [])
@@ -249,10 +249,10 @@
   (var #{callback meta pred} entry)
   (when (or (xt/x:nil? pred)
             (pred event))
-    (var nmeta (xt/x:obj-assign (or (xt/x:get-key event "meta")
+    (var nmeta (xt/x:obj-assign (or (. event ["meta"])
                                     {})
                                 meta))
-    (var listener-id (xt/x:get-key meta "listener/id"))
+    (var listener-id (. meta ["listener/id"]))
     (return
      (callback
       listener-id

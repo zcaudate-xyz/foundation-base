@@ -15,13 +15,13 @@
   (return
    (fn [client input]
      (var #{defaults} client)
-     (var apikey  (or (xt/x:get-key input "apikey")
-                      (xt/x:get-key defaults "apikey")))
-     (var token   (or (xt/x:get-key input "token")
-                      (xt/x:get-key defaults "token")))
+     (var apikey  (or (. input ["apikey"])
+                      (. defaults ["apikey"])))
+     (var token   (or (. input ["token"])
+                      (. defaults ["token"])))
      (var headers (-> {"Content-Type" "application/json"
                        "Accept" "application/json"}
-                      (xt/x:obj-assign (xt/x:get-key input "headers"))
+                      (xt/x:obj-assign (. input ["headers"]))
                       (xt/x:obj-assign (:? token  {"Authorization" (xt/x:cat "Bearer " token)}))
                       (xt/x:obj-assign (:? apikey {"apikey" apikey} ))))
      (return

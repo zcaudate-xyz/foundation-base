@@ -51,15 +51,15 @@
   "invokes a registered trigger for a stream"
   {:added "4.1"}
   [node stream]
-  (var signal (xt/x:get-key stream "signal"))
-  (var entry (xt/x:get-key (xt/x:get-key node "triggers")
+  (var signal (. stream ["signal"]))
+  (var entry (xt/x:get-key (. node ["triggers"])
                            signal))
   (when (xt/x:nil? entry)
     (return (promise/x:promise-run nil)))
   (var current-space (space/ensure-space node
-                                         (xt/x:get-key stream "space")
+                                         (. stream ["space"])
                                          nil))
-  (var trigger-fn (xt/x:get-key entry "fn"))
+  (var trigger-fn (. entry ["fn"]))
   (var output (trigger-fn current-space stream node))
   (if (promise/x:promise-native? output)
     (return output)
@@ -70,7 +70,7 @@
   {:added "4.1"}
   [node stream]
   (space/ensure-space node
-                      (xt/x:get-key stream "space")
+                      (. stream ["space"])
                       nil)
   (return
    (promise/x:promise-then

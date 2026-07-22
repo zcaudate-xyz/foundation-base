@@ -107,7 +107,7 @@
     (return tree))
   (xt/for:array [[i e] input-spec]
     (xt/x:set-key arg-map
-                  (xt/x:cat "{{" (xt/x:get-key e "symbol") "}}")
+                  (xt/x:cat "{{" (. e ["symbol"]) "}}")
                   (xt/x:get-idx args i)))
   (var out (xtt/tree-walk tree
                    (fn [x] (return x))
@@ -171,8 +171,8 @@
   "provides a view combine query"
   {:added "4.0"}
   [schema sel-entry sel-args ret-entry ret-args ret-omit opts as-tree]
-  (var sel-input  (xt/x:get-key sel-entry "input"))
-  (var ret-input  (xt/x:get-key ret-entry "input"))
+  (var sel-input  (. sel-entry ["input"]))
+  (var ret-input  (. ret-entry ["input"]))
   (var itree   (-/tree-combined schema
                                 sel-entry
                                 ret-entry

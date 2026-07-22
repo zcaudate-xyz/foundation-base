@@ -169,8 +169,8 @@
 
 (defn.xt async-fn-basic
   [handler context callbacks]
-  (var success (xt/x:get-key callbacks "success"))
-  (var error (xt/x:get-key callbacks "error"))
+  (var success (. callbacks ["success"]))
+  (var error (. callbacks ["error"]))
   (try
     (var output (handler context))
     (return
@@ -179,8 +179,8 @@
 
 (defn.xt async-fn-promise
   [handler context callbacks]
-  (var success (xt/x:get-key callbacks "success"))
-  (var error (xt/x:get-key callbacks "error"))
+  (var success (. callbacks ["success"]))
+  (var error (. callbacks ["error"]))
   (try
     (var output (handler context))
     (if (promise/x:promise-native? output)
@@ -216,9 +216,9 @@
   (var #{input} context)
   (when (xt/x:nil? input)
     (return true))
-  (when (xt/x:nil? (xt/x:get-key input "data"))
+  (when (xt/x:nil? (. input ["data"]))
     (return true))
-  (when (== true (xt/x:get-key input "disabled"))
+  (when (== true (. input ["disabled"]))
     (return true))
   (return false))
 
@@ -227,7 +227,7 @@
   {:added "4.0"}
   [context]
   (var #{input} context)
-  (return (xt/x:get-key input "data")))
+  (return (. input ["data"])))
 
 (defn.xt create-model
   "creates a model"
@@ -305,7 +305,7 @@
   (var context  (xt/x:obj-assign
                  {:model  model
                   :input (. input ["current"])}
-                 (xt/x:get-key options "context")))
+                 (. options ["context"])))
   (return context))
 
 (defn.xt add-listener
@@ -429,11 +429,11 @@
     (:= dest-key "output"))
   (var output (xt/x:get-key model dest-key))
   (var #{process} output)
-  (if (== true (xt/x:get-key output "errored"))
-    (return (process ((xt/x:get-key output "default"))))
-    (do (var current (xt/x:get-key output "current"))
+  (if (== true (. output ["errored"]))
+    (return (process ((. output ["default"]))))
+    (do (var current (. output ["current"]))
         (when (xt/x:nil? current)
-          (:= current (process ((xt/x:get-key output "default")))))
+          (:= current (process ((. output ["default"])))))
         (return current))))
 
 (defn.xt set-input
@@ -466,7 +466,7 @@
   (xt/x:set-key output "tag" tag)
   
   (cond accumulate
-        (do (var prev (xtd/arrayify (xt/x:get-key output "current")))
+        (do (var prev (xtd/arrayify (. output ["current"])))
             (var next (xt/x:arr-assign
                        (xt/x:arr-clone prev)
                        (xtd/arrayify current)))
@@ -526,7 +526,7 @@
   [model]
   (var #{input options} model)
   (var #{init} options)
-  (var data ((xt/x:get-key input "default")))
+  (var data ((. input ["default"])))
   (return (-/set-input model (xt/x:obj-assign {:data data}
                                              init))))
 
@@ -543,7 +543,7 @@
   (var context  (xt/x:obj-assign (-/model-context model)
                                  opts))
   (var disabled (check-disabled context))
-  (var args (xt/x:get-key context "args"))
+  (var args (. context ["args"]))
   (when (xt/x:nil? args)
     (when (not disabled)
       (:= args (check-args context))))
@@ -586,7 +586,7 @@
                   errored
                   tag
                   dest-key
-                  (xt/x:get-key context "meta")))
+                  (. context ["meta"])))
   (return acc))
 
 (defn.xt pipeline-call
@@ -699,7 +699,7 @@
                      (complete-fn acc))
                    (-/set-elapsed model (- (xt/x:now-ms) started) dest-key)
                    (-/set-pending model false dest-key)))
-            (when (xt/x:get-key output "disabled")
+            (when (. output ["disabled"])
               (-/set-output-disabled model false dest-key))
             (-/set-pending model true dest-key)
             (return
@@ -775,7 +775,7 @@
   (when (xt/x:nil? key-fn)
     (:= key-fn
         (fn [e]
-          (return (xt/x:get-key e "id")))))
+          (return (. e ["id"])))))
   (when (xt/x:nil? val-fn)
     (:= val-fn
         (fn [x]

@@ -28,12 +28,12 @@
   (var table-name (xt/x:first tree))
   (var schema-name (xt/x:get-path lookup [table-name "schema"]))
   (var headers (-> {}
-                   (xt/x:obj-assign (xt/x:get-key request "headers"))
+                   (xt/x:obj-assign (. request ["headers"]))
                    (xt/x:obj-assign (:? schema-name
                                         {"Accept-Profile" schema-name
                                          "Content-Profile" schema-name}))))
   (return
-   (xt/x:obj-assign {:path (xt/x:get-key request "url")
+   (xt/x:obj-assign {:path (. request ["url"])
                      :method "GET"}
                     {"headers" headers})))
 
@@ -50,22 +50,22 @@
 
 (defn.xt cmd-rpc-call-async
   [impl rpc-spec args opts]
-  (var input-spec (or (xt/x:get-key rpc-spec "input") []))
+  (var input-spec (or (. rpc-spec ["input"]) []))
   (var body {})
   (:= opts (or opts {}))
   (xt/for:array [[i input] input-spec]
-    (var key (or (xt/x:get-key input "symbol")
-                 (xt/x:get-key input "name")
+    (var key (or (. input ["symbol"])
+                 (. input ["name"])
                  nil))
     (when (xt/x:not-nil? key)
       (xt/x:set-key body key (xt/x:get-idx args i))))
-  (var schema  (xt/x:get-key rpc-spec "schema"))
-  (var headers (xt/x:obj-clone (xt/x:get-key opts "headers")))
+  (var schema  (. rpc-spec ["schema"]))
+  (var headers (xt/x:obj-clone (. opts ["headers"])))
   (when (xt/x:not-nil? schema)
     (xt/x:set-key headers "Content-Profile" schema)
     (xt/x:set-key headers "Accept-Profile" schema))
   (return
-   (addon/cmd-rpc-call (xt/x:get-key rpc-spec "id")
+   (addon/cmd-rpc-call (. rpc-spec ["id"])
                        body
                        (-> (xt/x:obj-clone opts)
                            (xt/x:obj-assign {"headers" headers})))))

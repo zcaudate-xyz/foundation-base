@@ -161,7 +161,7 @@
   "ensures router state is present on a node"
   {:added "4.1"}
   [node]
-  (var router (xt/x:get-key node "router"))
+  (var router (. node ["router"]))
   (when (xt/x:nil? router)
     (:= router {:connections {}
                 :subscriptions {}})
@@ -172,15 +172,13 @@
   "gets registered router connections"
   {:added "4.1"}
   [node]
-  (return (xt/x:get-key (-/ensure-router node)
-                        "connections")))
+  (return (. (-/ensure-router node) ["connections"])))
 
 (defn.xt get-subscriptions
   "gets router subscriptions"
   {:added "4.1"}
   [node]
-  (return (xt/x:get-key (-/ensure-router node)
-                        "subscriptions")))
+  (return (. (-/ensure-router node) ["subscriptions"])))
 
 (defn.xt register-connection
   "registers a connection with the router"
@@ -325,24 +323,24 @@
   "processes an inbound subscribe control frame"
   {:added "4.1"}
   [node event ctx]
-  (var transport-id (xt/x:get-key ctx "transport_id"))
+  (var transport-id (. ctx ["transport_id"]))
   (when (xt/x:not-nil? transport-id)
     (-/add-subscription node
                         transport-id
-                        (xt/x:get-key event "space")
-                        (xt/x:get-key event "signal")
-                        (xt/x:get-key event "id")
-                        (xt/x:get-key event "meta")))
+                        (. event ["space"])
+                        (. event ["signal"])
+                        (. event ["id"])
+                        (. event ["meta"])))
   (return (promise/x:promise-run event)))
 
 (defn.xt receive-unsubscribe
   "processes an inbound unsubscribe control frame"
   {:added "4.1"}
   [node event ctx]
-  (var transport-id (xt/x:get-key ctx "transport_id"))
+  (var transport-id (. ctx ["transport_id"]))
   (when (xt/x:not-nil? transport-id)
     (-/remove-subscription node
                            transport-id
-                           (xt/x:get-key event "space")
-                           (xt/x:get-key event "signal")))
+                           (. event ["space"])
+                           (. event ["signal"])))
   (return (promise/x:promise-run event)))

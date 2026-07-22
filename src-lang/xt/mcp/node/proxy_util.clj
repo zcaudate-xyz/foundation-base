@@ -40,9 +40,9 @@
   (return
    (substrate/request node
                       nil
-                      (xt/x:get-key request "action")
+                      (. request ["action"])
                       args
-                      (-/request-meta node (xt/x:get-key request "meta")))))
+                      (-/request-meta node (. request ["meta"])))))
 
 (defn.xt request-client
   "calls a local MCP handler when installed, otherwise uses a transport"
@@ -52,4 +52,3 @@
    (:? (substrate/get-handler node action)
        (substrate/request node nil action args {"local" true})
        (substrate/request node nil action args (-/request-meta node opts)))))
-

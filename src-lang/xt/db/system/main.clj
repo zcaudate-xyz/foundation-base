@@ -37,7 +37,7 @@
   {:added "4.1"}
   [impl]
   (var #{schema lookup} impl)
-  (var type (xt/x:get-key impl "::"))
+  (var type (. impl ["::"]))
   (cond (== type "xt.db.system.impl_sqlite/ImplSqlite")
         (return
          (impl-sqlite/impl-sqlite-init impl))

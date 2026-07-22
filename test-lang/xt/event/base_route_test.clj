@@ -368,7 +368,7 @@
    (. (route/add-url-listener
        (route/make-route "hello")
        "a1"
-       (fn:> [id data t meta] nil)
+       (fn:> [id data t meta] (return nil))
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -379,7 +379,7 @@
    (. (route/add-url-listener
        (route/make-route "hello")
        "a1"
-       (fn:> [id data t meta] nil)
+       (fn:> [id data t meta] (return nil))
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -394,7 +394,7 @@
        (route/make-route "hello")
        ["hello"]
        "a1"
-       (fn:> [id data t meta] nil)
+       (fn:> [id data t meta] (return nil))
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -407,7 +407,7 @@
        (route/make-route "hello")
        ["hello"]
        "a1"
-       (fn:> [id data t meta] nil)
+       (fn:> [id data t meta] (return nil))
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -423,7 +423,7 @@
        (route/make-route "hello")
        "auth"
        "a1"
-       (fn:> [id data t meta] nil)
+       (fn:> [id data t meta] (return nil))
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -436,7 +436,7 @@
        (route/make-route "hello")
        "auth"
        "a1"
-       (fn:> [id data t meta] nil)
+       (fn:> [id data t meta] (return nil))
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -453,7 +453,7 @@
        ["hello"]
        "auth"
        "a1"
-       (fn:> [id data t meta] nil)
+       (fn:> [id data t meta] (return nil))
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -468,7 +468,7 @@
        ["hello"]
        "auth"
        "a1"
-       (fn:> [id data t meta] nil)
+       (fn:> [id data t meta] (return nil))
        {:label "hello"})
       ["meta"]))
   => {"label" "hello"
@@ -485,10 +485,10 @@
    (route/add-url-listener
     r
     "a1"
-    (fn:> [id data t meta] nil)
+    (fn:> [id data t meta] (return nil))
     {:label "hello"})
    [(. (route/remove-listener r "a1") ["meta"] ["listener/id"])
-    (. (. r ["listeners"]) ["a1"])
+    (. r ["listeners"] ["a1"])
     (route/remove-listener r "missing")])
   => ["a1"
       nil
@@ -499,10 +499,10 @@
    (route/add-url-listener
     r
     "a1"
-    (fn:> [id data t meta] nil)
+    (fn:> [id data t meta] (return nil))
     {:label "hello"})
    [(. (route/remove-listener r "a1") ["meta"] ["listener/id"])
-    (. (. r ["listeners"]) ["a1"])
+    (. r ["listeners"] ["a1"])
     (route/remove-listener r "missing")])
   => ["a1"
       nil
@@ -513,9 +513,9 @@
 
   (!.js
    (var r (route/make-route "hello"))
-   (route/add-url-listener r "a1" (fn:> [id data t meta] nil) nil)
-   (route/add-path-listener r ["hello"] "a2" (fn:> [id data t meta] nil) nil)
-   (route/add-param-listener r "auth" "a3" (fn:> [id data t meta] nil) nil)
+   (route/add-url-listener r "a1" (fn:> [id data t meta] (return nil)) nil)
+   (route/add-path-listener r ["hello"] "a2" (fn:> [id data t meta] (return nil)) nil)
+   (route/add-param-listener r "auth" "a3" (fn:> [id data t meta] (return nil)) nil)
    (var before (route/list-listeners r))
    (route/remove-listener r "a2")
    (var after (route/list-listeners r))
@@ -526,9 +526,9 @@
 
   (!.py
    (var r (route/make-route "hello"))
-   (route/add-url-listener r "a1" (fn:> [id data t meta] nil) nil)
-   (route/add-path-listener r ["hello"] "a2" (fn:> [id data t meta] nil) nil)
-   (route/add-param-listener r "auth" "a3" (fn:> [id data t meta] nil) nil)
+   (route/add-url-listener r "a1" (fn:> [id data t meta] (return nil)) nil)
+   (route/add-path-listener r ["hello"] "a2" (fn:> [id data t meta] (return nil)) nil)
+   (route/add-param-listener r "auth" "a3" (fn:> [id data t meta] (return nil)) nil)
    (var before (route/list-listeners r))
    (route/remove-listener r "a2")
    (var after (route/list-listeners r))

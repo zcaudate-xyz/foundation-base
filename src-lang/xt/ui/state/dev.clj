@@ -13,7 +13,7 @@
            "panels" {}}))
 
 (defn.xt available? [state capability-id]
-  (return (and (== true (xt/x:get-key state "enabled"))
+  (return (and (== true (. state ["enabled"]))
                (== true (xt/x:get-path state ["capabilities" capability-id])))))
 
 (defn.xt set-summary! [state summary]

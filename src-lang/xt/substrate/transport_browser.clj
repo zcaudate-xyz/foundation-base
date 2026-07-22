@@ -72,25 +72,25 @@
   "checks if an inbound event should resolve connection readiness"
   {:added "4.1"}
   [event opts]
-  (var ready-pred (xt/x:get-key opts "ready_pred"))
+  (var ready-pred (. opts ["ready_pred"]))
   (cond (xt/x:is-function? ready-pred)
         (return (ready-pred event))
 
         :else
         (do (var ready-signal (:? (xt/x:has-key? opts "ready_signal")
-                                  (xt/x:get-key opts "ready_signal")
+                                  (. opts ["ready_signal"])
                                   "ready"))
             (if (xt/x:nil? ready-signal)
               (return false)
               (return (and (xt/x:is-object? event)
-                           (== (xt/x:get-key event "signal")
+                           (== (. event ["signal"])
                                ready-signal)))))))
 
 (defn.xt await-ready
   "waits until a connection state records its ready event"
   {:added "4.1"}
   [state]
-  (var ready (xt/x:get-key state "ready"))
+  (var ready (. state ["ready"]))
   (if (xt/x:not-nil? ready)
     (return (promise/x:promise-run ready))
     (return
@@ -112,7 +112,7 @@
     "transport" transport
     "target" (:? (xt/x:nil? transport)
                  nil
-                 (xt/x:get-key transport "listener"))
+                 (. transport ["listener"]))
     "ready" ready
     "disconnect_fn" (fn []
                       (return
@@ -123,12 +123,12 @@
   {:added "4.1"}
   [endpoint state opts]
   (var wait-ready (:? (xt/x:has-key? opts "wait_ready")
-                      (xt/x:get-key opts "wait_ready")
+                      (. opts ["wait_ready"])
                       true))
   (if (not wait-ready)
     (return endpoint)
     (do
-      (var start-fn (xt/x:get-key endpoint "start_fn"))
+      (var start-fn (. endpoint ["start_fn"]))
       (if (xt/x:nil? start-fn)
         (return endpoint)
         (return
@@ -158,16 +158,16 @@
   (var start-fn
        (fn [listener]
          (:= current-target
-             ((xt/x:get-key source "create_fn")
+             ((. source ["create_fn"])
               listener))
          (return current-target)))
   (var stop-fn
        (fn [_]
          (when (and (xt/x:not-nil? current-target)
-                    (xt/x:is-function? (xt/x:get-key current-target "close")))
+                    (xt/x:is-function? (. current-target ["close"])))
            (. current-target (close)))
          (when (and (xt/x:not-nil? current-target)
-                    (xt/x:is-function? (xt/x:get-key current-target "terminate")))
+                    (xt/x:is-function? (. current-target ["terminate"])))
            (. current-target (terminate)))
          (:= current-target nil)
          (return true)))
@@ -184,7 +184,7 @@
   (var config (or opts {}))
   (var state {"ready" nil})
   (var wait-ready (:? (xt/x:has-key? config "wait_ready")
-                      (xt/x:get-key config "wait_ready")
+                      (. config ["wait_ready"])
                       true))
   (return
    (promise/x:promise-then
@@ -207,7 +207,7 @@
   [event]
   (return (:? (and (xt/x:is-object? event)
                    (xt/x:has-key? event "data"))
-              (xt/x:get-key event "data")
+              (. event ["data"])
               event)))
 
 (defn.xt messageport-endpoint
@@ -223,7 +223,7 @@
          (:= current-callback
              (fn [event]
                (return (listener (-/event-data event) nil))))
-         (when (xt/x:is-function? (xt/x:get-key port "start"))
+         (when (xt/x:is-function? (. port ["start"]))
            (. port (start)))
          (. port (addEventListener
                   "message"
@@ -233,12 +233,12 @@
   (var stop-fn
        (fn [_]
          (when (and (xt/x:not-nil? current-callback)
-                    (xt/x:is-function? (xt/x:get-key port "removeEventListener")))
+                    (xt/x:is-function? (. port ["removeEventListener"])))
            (. port (removeEventListener
                     "message"
                     current-callback
                     false)))
-         (when (xt/x:is-function? (xt/x:get-key port "close"))
+         (when (xt/x:is-function? (. port ["close"]))
            (. port (close)))
          (:= current-callback nil)
          (return true)))
@@ -253,7 +253,7 @@
   {:added "4.1"}
   [shared-or-port]
   (var port (:? (xt/x:has-key? shared-or-port "port")
-                (xt/x:get-key shared-or-port "port")
+                (. shared-or-port ["port"])
                 shared-or-port))
   (return (-/messageport-endpoint port)))
 
@@ -271,7 +271,7 @@
                              worker-source)))
          (when (xt/x:nil? worker)
            (xt/x:err "worker endpoint not started"))
-         (var post-request (xt/x:get-key worker "postRequest"))
+         (var post-request (. worker ["postRequest"]))
          (if (xt/x:is-function? post-request)
            (return (post-request frame))
            (return (. worker (postMessage frame))))))
@@ -279,7 +279,7 @@
        (fn [listener]
          (if (xt/x:has-key? worker-source "create_fn")
            (do (:= current-worker
-                   ((xt/x:get-key worker-source "create_fn")
+                   ((. worker-source ["create_fn"])
                     listener))
                (return current-worker))
            (do (:= current-worker worker-source)
@@ -295,13 +295,13 @@
        (fn [_]
          (when (and (xt/x:not-nil? current-worker)
                     (xt/x:not-nil? current-callback)
-                    (xt/x:is-function? (xt/x:get-key current-worker "removeEventListener")))
+                    (xt/x:is-function? (. current-worker ["removeEventListener"])))
            (. current-worker (removeEventListener
                               "message"
                               current-callback
                               false)))
          (when (and (xt/x:not-nil? current-worker)
-                    (xt/x:is-function? (xt/x:get-key current-worker "terminate")))
+                    (xt/x:is-function? (. current-worker ["terminate"])))
            (. current-worker (terminate)))
          (:= current-worker nil)
          (:= current-callback nil)
@@ -334,7 +334,7 @@
   (var stop-fn
        (fn [_]
          (when (and (xt/x:not-nil? current-callback)
-                    (xt/x:is-function? (xt/x:get-key worker-self "removeEventListener")))
+                    (xt/x:is-function? (. worker-self ["removeEventListener"])))
            (. worker-self (removeEventListener
                            "message"
                            current-callback
@@ -352,9 +352,9 @@
   {:added "4.1"}
   [node opts]
   (var config (or opts {}))
-  (var port (or (xt/x:get-key config "port")
-               (xt/x:get-key config "source")))
-  (var transport-id (or (xt/x:get-key config "transport_id")
+  (var port (or (. config ["port"])
+               (. config ["source"])))
+  (var transport-id (or (. config ["transport_id"])
                        "port"))
   (when (xt/x:nil? port)
     (xt/x:err "connect-port requires `port` or `source`"))
@@ -370,9 +370,9 @@
   {:added "4.1"}
   [node opts]
   (var config (or opts {}))
-  (var source (or (xt/x:get-key config "source")
-                 (xt/x:get-key config "sharedworker")))
-  (var transport-id (or (xt/x:get-key config "transport_id")
+  (var source (or (. config ["source"])
+                 (. config ["sharedworker"])))
+  (var transport-id (or (. config ["transport_id"])
                        "worker"))
   (when (xt/x:nil? source)
     (xt/x:err "connect-sharedworker requires `source` or `sharedworker`"))
@@ -390,9 +390,9 @@
   {:added "4.1"}
   [node opts]
   (var config (or opts {}))
-  (var source (or (xt/x:get-key config "source")
-                 (xt/x:get-key config "worker")))
-  (var transport-id (or (xt/x:get-key config "transport_id")
+  (var source (or (. config ["source"])
+                 (. config ["worker"])))
+  (var transport-id (or (. config ["transport_id"])
                        "worker"))
   (when (xt/x:nil? source)
     (xt/x:err "connect-worker requires `source` or `worker`"))
@@ -410,10 +410,10 @@
   {:added "4.1"}
   [node opts]
   (var config (or opts {}))
-  (var target (xt/x:get-key config "target"))
-  (var transport-id (or (xt/x:get-key config "transport_id")
+  (var target (. config ["target"]))
+  (var transport-id (or (. config ["transport_id"])
                        "host"))
-  (var ready (xt/x:get-key config "ready"))
+  (var ready (. config ["ready"]))
   (when (xt/x:nil? target)
     (xt/x:err "boot-self requires `target`"))
   (return
@@ -427,8 +427,7 @@
        (return (-/connection-record node transport-id nil))
        (return
         (promise/x:promise-then
-         ((xt/x:get-key (main/transport-get node transport-id)
-                        "send_fn")
+         ((. (main/transport-get node transport-id) ["send_fn"])
           ready)
          (fn [_]
            (return (-/connection-record node transport-id ready))))))))))
@@ -439,8 +438,8 @@
   [connection]
   (return
    (main/detach-transport
-    (xt/x:get-key connection "node")
-    (xt/x:get-key connection "transport_id"))))
+    (. connection ["node"])
+    (. connection ["transport_id"]))))
 
 (defn.xt blob-url
   "creates a blob URL from a worker script"
@@ -523,9 +522,10 @@
   {:added "4.1"}
   [script opts]
   (var config (or opts {}))
-  (var eval-flag (xt/x:get-key config "eval"))
+  (var eval-flag (. config ["eval"]))
   (var eval-mode (:? (xt/x:nil? eval-flag) true eval-flag))
-  (var #{Worker} (require "worker_threads"))
+  (var Worker-value (require "worker_threads"))
+  (var #{Worker} Worker-value)
   (return
    {"create_fn"
     (fn [listener]

@@ -24,7 +24,7 @@
   [ctx arg event-key]
   (var value (or arg
                  (xtd/get-in ctx ["event" event-key])
-                 (xt/x:first (xt/x:get-key ctx "args"))
+                 (xt/x:first (. ctx ["args"]))
                  (xt/x:first (xtd/get-in ctx ["input" "data"]))
                  (xt/x:first (xtd/get-in ctx ["event" "data"]))))
   (when (and (xt/x:is-array? value)
@@ -92,7 +92,7 @@
                         (return
                          (supabase/sign-out node
                                             service-id
-                                            {"token" (xt/x:get-key curr-session "access_token")})))))))
+                                            {"token" (. curr-session ["access_token"])})))))))
     "defaults" {"args" []}
     "options" {}}))
 
@@ -112,11 +112,11 @@
                          (supabase/user-put node
                                             service-id
                                             {"data" profile-data}
-                                            {"token" (xt/x:get-key curr-session "access_token")}))))
+                                            {"token" (. curr-session ["access_token"])}))))
                      (promise/x:promise-then
                       (fn [updated]
                         (var updated-user
-                             (or (xt/x:get-key updated "user")
+                             (or (. updated ["user"])
                                  updated))
                         (var impl (substrate/get-service node service-id))
                         (var curr-session (session/get-session impl))
@@ -147,9 +147,9 @@
   {:added "4.1"}
   [node service-id page-args]
   (:= page-args (or page-args {}))
-  (var space-id (or (xt/x:get-key page-args "space_id")
+  (var space-id (or (. page-args ["space_id"])
                     -/DEFAULT_SPACE_ID))
-  (var group-id (or (xt/x:get-key page-args "group_id")
+  (var group-id (or (. page-args ["group_id"])
                     -/DEFAULT_GROUP_ID))
   (page-core/group-add-attach node
                               space-id

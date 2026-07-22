@@ -253,20 +253,46 @@
        (= 1 (count prop))
        (= "length" (first prop))))
 
+(defn- python-dot-string-key?
+  [prop]
+  (and (vector? prop)
+       (= 1 (count prop))
+       (string? (first prop))))
+
+(defn- python-dot-setitem?
+  [prop]
+  (and (collection/form? prop)
+       (= 'setitem (first prop))
+       (= 2 (count prop))))
+
 (defn python-dot
   [[_ obj & props]]
   (let [grammar preprocess-base/*macro-grammar*
-        mopts   preprocess-base/*macro-opts*]
-    (if (and (= 1 (count props))
-             (python-dot-length? (first props)))
+        mopts   preprocess-base/*macro-opts*
+        target  (let [emitted (common/*emit-fn* obj grammar mopts)]
+                  (if (collection/form? obj)
+                    (str "(" emitted ")")
+                    emitted))]
+    (cond
+      (and (= 1 (count props))
+           (python-dot-length? (first props)))
       (list 'len obj)
-      (let [target (let [emitted (common/*emit-fn* obj grammar mopts)]
-                     (if (collection/form? obj)
-                       (str "(" emitted ")")
-                       emitted))]
-        (list ':- (str target
-                       (apply str (map #(common/emit-index-entry % grammar mopts)
-                                       props))))))))
+
+      (and (= 1 (count props))
+           (python-dot-setitem? (first props)))
+      (list ':- (str target
+                     "["
+                     (common/*emit-fn* (second (first props)) grammar mopts)
+                     "]"))
+
+      (and (= 1 (count props))
+           (python-dot-string-key? (first props)))
+      (list '. obj (list 'get (first (first props))))
+
+      :else
+      (list ':- (str target
+                     (apply str (map #(common/emit-index-entry % grammar mopts)
+                                     props)))))))
 
 (defn python-defclass
   "emits a defclass template for python"

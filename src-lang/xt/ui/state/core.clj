@@ -22,13 +22,13 @@
            "opened" false}))
 
 (defn.xt snapshot [controller]
-  (return (xt/x:get-key controller "state")))
+  (return (. controller ["state"])))
 
 (defn.xt revision [controller]
-  (return (xt/x:get-key controller "revision")))
+  (return (. controller ["revision"])))
 
 (defn.xt notify! [controller]
-  (xt/for:object [[_ listener] (xt/x:get-key controller "listeners")]
+  (xt/for:object [[_ listener] (. controller ["listeners"])]
     (listener (-/snapshot controller) (-/revision controller)))
   (return controller))
 
@@ -42,23 +42,23 @@
   (return (-/set-state! controller (update-fn (-/snapshot controller)))))
 
 (defn.xt subscribe! [controller listener-id listener]
-  (xt/x:set-key (xt/x:get-key controller "listeners") listener-id listener)
+  (xt/x:set-key (. controller ["listeners"]) listener-id listener)
   (return listener-id))
 
 (defn.xt unsubscribe! [controller listener-id]
-  (xt/x:del-key (xt/x:get-key controller "listeners") listener-id)
+  (xt/x:del-key (. controller ["listeners"]) listener-id)
   (return true))
 
 (defn.xt dispatch!
   "dispatches an intent; handlers receive controller, payload and dependencies"
   [controller action-id payload]
-  (var handler (xt/x:get-key (xt/x:get-key controller "handlers") action-id))
+  (var handler (xt/x:get-key (. controller ["handlers"]) action-id))
   (when (not (xt/x:is-function? handler))
     (return (promise/x:promise-run
              {"status" "unavailable" "action" action-id})))
   (return
    (promise/x:promise-run
-    (handler controller payload (xt/x:get-key controller "deps")))))
+    (handler controller payload (. controller ["deps"])))))
 
 (defn.xt actions-create [controller action-ids]
   (var actions {})
@@ -69,23 +69,23 @@
   (return actions))
 
 (defn.xt open! [controller]
-  (when (== true (xt/x:get-key controller "opened"))
+  (when (== true (. controller ["opened"]))
     (return (promise/x:promise-run controller)))
   (xt/x:set-key controller "opened" true)
-  (var handler (xt/x:get-key (xt/x:get-key controller "lifecycle") "open"))
+  (var handler (. controller ["lifecycle"] ["open"]))
   (when (not (xt/x:is-function? handler))
     (return (promise/x:promise-run controller)))
   (return
    (promise/x:promise-then
     (promise/x:promise-run
-     (handler controller (xt/x:get-key controller "deps")))
+     (handler controller (. controller ["deps"])))
     (fn [_] (return controller)))))
 
 (defn.xt close! [controller]
-  (when (not= true (xt/x:get-key controller "opened"))
+  (when (not= true (. controller ["opened"]))
     (return (promise/x:promise-run true)))
   (xt/x:set-key controller "opened" false)
-  (var handler (xt/x:get-key (xt/x:get-key controller "lifecycle") "close"))
+  (var handler (. controller ["lifecycle"] ["close"]))
   (var finish (fn [_]
                 (xt/x:set-key controller "listeners" {})
                 (return true)))
@@ -94,5 +94,5 @@
   (return
    (promise/x:promise-then
     (promise/x:promise-run
-     (handler controller (xt/x:get-key controller "deps")))
+     (handler controller (. controller ["deps"])))
     finish)))

@@ -63,10 +63,10 @@
         (do (var out (xt/x:obj-clone response))
             (xt/x:set-key out
                           "headers"
-                          (xt/x:obj-assign {} (xt/x:get-key out "headers")))
+                          (xt/x:obj-assign {} (. out ["headers"])))
             (xt/x:set-key out
                           "body"
-                          (-/decode-body (xt/x:get-key out "body")))
+                          (-/decode-body (. out ["body"])))
             (return out))
 
         (xt/x:is-object? response)
@@ -90,10 +90,10 @@
 
 (defn.xt get-body-data
   [response]
-  (var out (xt/x:get-key response "body"))
+  (var out (. response ["body"]))
   (cond (and (xt/x:is-object? out)
-             (xt/x:not-nil? (xt/x:get-key out "data")))
-        (return (xt/x:get-key out "data"))
+             (xt/x:not-nil? (. out ["data"])))
+        (return (. out ["data"]))
 
         :else
         (return out)))

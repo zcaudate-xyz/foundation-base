@@ -30,26 +30,26 @@
 
 (defn.xt validate! [form]
   (var errors {})
-  (var draft (xt/x:get-key form "draft"))
-  (xt/for:object [[field validators] (xt/x:get-key form "validators")]
+  (var draft (. form ["draft"]))
+  (xt/for:object [[field validators] (. form ["validators"])]
     (var message (-/validate-value validators (xt/x:get-key draft field) draft))
     (when (xt/x:not-nil? message)
       (xt/x:set-key errors field message)))
   (xt/x:set-key form "errors" errors)
   (xt/x:set-key form "valid" (== 0 (xt/x:len (xt/x:obj-keys errors))))
-  (return (xt/x:get-key form "valid")))
+  (return (. form ["valid"])))
 
 (defn.xt set-field! [form path value]
-  (var draft (-/clone (xt/x:get-key form "draft")))
+  (var draft (-/clone (. form ["draft"])))
   (xtd/set-in draft path value)
   (xt/x:set-key form "draft" draft)
-  (xtd/set-in (xt/x:get-key form "touched") path true)
+  (xtd/set-in (. form ["touched"]) path true)
   (xt/x:set-key form "dirty" true)
   (-/validate! form)
   (return draft))
 
 (defn.xt reset! [form]
-  (xt/x:set-key form "draft" (-/clone (xt/x:get-key form "initial")))
+  (xt/x:set-key form "draft" (-/clone (. form ["initial"])))
   (xt/x:set-key form "errors" {})
   (xt/x:set-key form "touched" {})
   (xt/x:set-key form "dirty" false)

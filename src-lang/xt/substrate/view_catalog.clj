@@ -126,7 +126,7 @@
   (var e (-/entry component-id))
   (when (xt/x:nil? e)
     (return nil))
-  (return (xt/x:get-key e "band")))
+  (return (. e ["band"])))
 
 (defn.xt portable?
   "checks whether a component id is portable across platforms"
@@ -141,7 +141,7 @@
   (var e (-/entry component-id))
   (when (xt/x:nil? e)
     (return nil))
-  (var variants (xt/x:get-key e "variants"))
+  (var variants (. e ["variants"]))
   (when (xt/x:nil? variants)
     (return nil))
   (return (xt/x:get-key variants variant)))
@@ -152,23 +152,23 @@
   (when (not (xt/x:is-object? value))
     (xt/x:err (xt/x:cat "view event requires an action descriptor - "
                         component-id " - " prop)))
-  (when (not (xt/x:is-string? (xt/x:get-key value "action")))
+  (when (not (xt/x:is-string? (. value ["action"])))
     (xt/x:err (xt/x:cat "view event requires an action id - "
                         component-id " - " prop)))
-  (var payload (xt/x:get-key value "payload"))
+  (var payload (. value ["payload"]))
   (when (and (xt/x:is-object? payload)
              (xt/x:has-key? payload "$"))
-    (when (not= "event" (xt/x:get-key payload "$"))
+    (when (not= "event" (. payload ["$"]))
       (xt/x:err (xt/x:cat "invalid view event projection - "
                           component-id " - " prop)))
-    (when (not (xt/x:is-array? (xt/x:get-key payload "path")))
+    (when (not (xt/x:is-array? (. payload ["path"])))
       (xt/x:err (xt/x:cat "view event projection requires a path - "
                           component-id " - " prop))))
   (return true))
 
 (defn.xt validate-prop-type
   [component-id prop spec value]
-  (var type (xt/x:get-key spec "type"))
+  (var type (. spec ["type"]))
   (var ok true)
   (cond (== type "string")
         (:= ok (xt/x:is-string? value))
@@ -189,8 +189,8 @@
   "validates the props of a portable component node against the catalog"
   [component-id props]
   (var e (-/entry component-id))
-  (var eprops (xt/x:get-key e "props"))
-  (var events (xt/x:get-key e "events"))
+  (var eprops (. e ["props"]))
+  (var events (. e ["events"]))
   (xt/for:object [[prop value] (or props {})]
     (cond (xt/x:has-key? (or events {}) prop)
           (-/validate-action component-id prop value)
@@ -203,7 +203,7 @@
           (do (-/validate-prop-type component-id prop
                                     (xt/x:get-key eprops prop) value)
               (when (== prop "variant")
-                (var variants (xt/x:get-key e "variants"))
+                (var variants (. e ["variants"]))
                 (when (and (xt/x:not-nil? variants)
                            (not (xt/x:has-key? variants value)))
                   (xt/x:err (xt/x:cat "unknown view variant - "
@@ -212,7 +212,7 @@
           :else (xt/x:err (xt/x:cat "unknown view prop - "
                                     component-id " - " prop))))
   (xt/for:object [[prop spec] (or eprops {})]
-    (when (and (== true (xt/x:get-key spec "required"))
+    (when (and (== true (. spec ["required"]))
                (not (xt/x:has-key? (or props {}) prop)))
       (xt/x:err (xt/x:cat "missing required view prop - "
                           component-id " - " prop))))

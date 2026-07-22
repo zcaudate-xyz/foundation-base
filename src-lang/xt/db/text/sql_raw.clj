@@ -54,7 +54,7 @@
   ([table-name id-column columns values opts]
    (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
    (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
-   (var upsert-clause  (xt/x:get-key opts "upsert_clause"))
+   (var upsert-clause  (. opts ["upsert_clause"]))
    (var out-arr (-/raw-insert-array table-name columns values opts))
    (var col-arr (-> columns
                     (xt/x:arr-filter (fn [col]

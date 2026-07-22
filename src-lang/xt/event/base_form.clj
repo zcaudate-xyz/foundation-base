@@ -213,7 +213,7 @@
   "gets the validation result"
   {:added "4.0"}
   [form]
-  (return (xt/x:get-key form "result")))
+  (return (. form ["result"])))
 
 (defn.xt get-field-result
   "gets the validation status"
@@ -227,7 +227,7 @@
   "gets the data"
   {:added "4.0"}
   [form]
-  (return (xt/x:get-key form "data")))
+  (return (. form ["data"])))
 
 (defn.xt set-data
   "sets the data directly"
@@ -273,7 +273,7 @@
     (fn [res]
       (-/trigger-all form "form.validation")
       (when complete-fn
-        (complete-fn (== "ok" (xt/x:get-key res "status"))
+        (complete-fn (== "ok" (. res ["status"]))
                      res))
       (return res)))))
 
@@ -348,7 +348,7 @@
   (var #{result} form)
   (var #{fields} result)
   (xt/for:object [[_ v] fields]
-    (when (not= "ok" (xt/x:get-key v "status"))
+    (when (not= "ok" (. v ["status"]))
       (return false)))
   (return true))
 
@@ -359,6 +359,6 @@
   (var #{result} form)
   (var #{fields} result)
   (xt/for:object [[_ v] fields]
-    (when (== "errored" (xt/x:get-key v "status"))
+    (when (== "errored" (. v ["status"]))
       (return true)))
   (return false))

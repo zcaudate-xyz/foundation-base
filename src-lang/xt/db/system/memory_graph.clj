@@ -129,18 +129,18 @@
             "limit" nil
             "offset" nil})
   (xt/for:array [entry (or custom [])]
-    (cond (== (xt/x:get-key entry "::") "sql/count")
+    (cond (== (. entry ["::"]) "sql/count")
           (xt/x:set-key out "count" true)
 
-          (== (xt/x:get-key entry "::") "sql/keyword")
-          (do (var name (xt/x:get-key entry "name"))
+          (== (. entry ["::"]) "sql/keyword")
+          (do (var name (. entry ["name"]))
               (cond (== name "ORDER BY")
-                    (do (var tuple (xt/x:first (or (xt/x:get-key entry "args") [])))
+                    (do (var tuple (xt/x:first (or (. entry ["args"]) [])))
                         (xt/x:set-key out
                                       "order_by"
-                                      (xt/x:arr-map (or (xt/x:get-key tuple "args") [])
+                                      (xt/x:arr-map (or (. tuple ["args"]) [])
                                                     (fn [arg]
-                                                      (return (xt/x:get-key arg "name"))))))
+                                                      (return (. arg ["name"]))))))
 
                     (or (== name "ASC")
                         (== name "DESC"))
@@ -149,14 +149,12 @@
                     (== name "LIMIT")
                     (xt/x:set-key out
                                   "limit"
-                                  (xt/x:get-key (xt/x:first (or (xt/x:get-key entry "args") []))
-                                                "name"))
+                                  (. (xt/x:first (or (. entry ["args"]) [])) ["name"]))
 
                     (== name "OFFSET")
                     (xt/x:set-key out
                                   "offset"
-                                  (xt/x:get-key (xt/x:first (or (xt/x:get-key entry "args") []))
-                                                "name"))))))
+                                  (. (xt/x:first (or (. entry ["args"]) [])) ["name"]))))))
   (return out))
 
 (defn.xt check-clause-value
@@ -185,7 +183,7 @@
                       (xt/x:unpack exprs)))
 
         (== link-type "forward")
-        (cond (== pred (xt/x:get-key -/PULL_CHECK "is_null"))
+        (cond (== pred (. -/PULL_CHECK ["is_null"]))
               (return (pred (xtd/get-in record ["ref_links" key])))
 
               :else
@@ -224,8 +222,8 @@
 
         (xt/x:is-object? clause)
         (let [ref (xtd/get-in schema [table-name key "ref"])
-              link-table (xt/x:get-key ref "ns")
-              link-map-key (xt/x:get-key -/LINK_LOOKUP (xt/x:get-key ref "type"))
+              link-table (. ref ["ns"])
+              link-map-key (xt/x:get-key -/LINK_LOOKUP (. ref ["type"]))
               ids (xt/x:obj-keys (or (xtd/get-in record [link-map-key key])
                                      {}))
               entries (-> (or (xt/x:get-key rows link-table)
@@ -238,7 +236,7 @@
                                                          schema
                                                          link-table
                                                          clause
-                                                         (xt/x:get-key entry "record")))))]
+                                                         (. entry ["record"])))))]
           (return (< 0 (xt/x:len found))))
 
         :else
@@ -286,8 +284,8 @@
   {:added "4.1"}
   [rows schema tree record opts pull-entries-fn]
   (var params (xtd/second tree))
-  (var data (or (xt/x:get-key params "data") []))
-  (var links (or (xt/x:get-key params "links") []))
+  (var data (or (. params ["data"]) []))
+  (var links (or (. params ["links"]) []))
   (var out {})
   (xt/for:array [key data]
     (xt/x:set-key out key (-/data-field record key)))
@@ -314,16 +312,16 @@
   "applies control nodes to projected output"
   {:added "4.1"}
   [out custom]
-  (when (xt/x:not-nil? (xt/x:get-key custom "order_by"))
+  (when (xt/x:not-nil? (. custom ["order_by"]))
     (:= out (xtsb/sort-by out
-                          (xt/x:get-key custom "order_by"))))
-  (when (== (xt/x:get-key custom "order_sort") "desc")
+                          (. custom ["order_by"]))))
+  (when (== (. custom ["order_sort"]) "desc")
     (:= out (xt/x:arr-reverse out)))
-  (when (or (xt/x:not-nil? (xt/x:get-key custom "offset"))
-            (xt/x:not-nil? (xt/x:get-key custom "limit")))
-    (var sidx (or (xt/x:get-key custom "offset") 0))
+  (when (or (xt/x:not-nil? (. custom ["offset"]))
+            (xt/x:not-nil? (. custom ["limit"])))
+    (var sidx (or (. custom ["offset"]) 0))
     (var total (xt/x:len out))
-    (var eidx (+ sidx (or (xt/x:get-key custom "limit")
+    (var eidx (+ sidx (or (. custom ["limit"])
                           (- total sidx))))
     (:= eidx (xt/x:m-min eidx total))
     (:= out (xt/x:arr-slice out sidx eidx)))
@@ -335,23 +333,23 @@
   [rows schema tree entries opts]
   (var table-name (xt/x:first tree))
   (var params (xtd/second tree))
-  (var where-clause (xt/x:get-key params "where"))
-  (var custom (-/custom-params (xt/x:get-key params "custom")))
+  (var where-clause (. params ["where"]))
+  (var custom (-/custom-params (. params ["custom"])))
   (var matched (xt/x:arr-filter (or entries [])
                                 (fn [entry]
                                   (return (-/where rows
                                                    schema
                                                    table-name
                                                    where-clause
-                                                   (xt/x:get-key entry "record"))))))
-  (when (xt/x:get-key custom "count")
+                                                   (. entry ["record"]))))))
+  (when (. custom ["count"])
     (return (xt/x:len matched)))
   (var out (xt/x:arr-map matched
                          (fn [entry]
                            (return (-/project-record rows
                                                      schema
                                                      tree
-                                                     (xt/x:get-key entry "record")
+                                                     (. entry ["record"])
                                                      opts
                                                      -/pull-entries)))))
   (return (-/apply-custom out custom)))

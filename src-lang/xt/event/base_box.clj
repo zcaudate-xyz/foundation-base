@@ -88,7 +88,7 @@
   "checks that event matches path predicate"
   {:added "4.1"}
   [event path]
-  (var evpath (xt/x:get-key event "path"))
+  (var evpath (. event ["path"]))
   (when (> (xt/x:len path) (xt/x:len evpath))
     (return false))
   (xt/for:array [[i v] path]
@@ -110,11 +110,11 @@
     (fn [event]
       (return (-/check-event event path))))))
 
-(def.xt ^{:arglists ([box listener-id])}
+(def.xt ^{:arglists '([box listener-id])}
   remove-listener
   event-common/remove-listener)
 
-(def.xt ^{:arglists ([box])}
+(def.xt ^{:arglists '([box])}
   list-listeners
   event-common/list-listeners)
 

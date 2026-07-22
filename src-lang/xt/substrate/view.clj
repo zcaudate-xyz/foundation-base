@@ -76,7 +76,7 @@
   [binding-id binding]
   (when (not (xt/x:is-object? binding))
     (xt/x:err (xt/x:cat "invalid view binding - " binding-id)))
-  (var source (or (xt/x:get-key binding "source") "state"))
+  (var source (or (. binding ["source"]) "state"))
   (when (not (or (== source "state")
                  (== source "model-output")
                  (== source "model-input")
@@ -84,8 +84,8 @@
     (xt/x:err (xt/x:cat "invalid view binding source - " source)))
   (when (and (or (== source "model-output")
                  (== source "model-input"))
-             (or (not (xt/x:is-string? (xt/x:get-key binding "group_id")))
-                 (not (xt/x:is-string? (xt/x:get-key binding "model_id")))))
+             (or (not (xt/x:is-string? (. binding ["group_id"])))
+                 (not (xt/x:is-string? (. binding ["model_id"])))))
     (xt/x:err (xt/x:cat "model binding requires group_id/model_id - " binding-id)))
   (return true))
 
@@ -102,23 +102,23 @@
     (return true))
   (when (not (xt/x:is-object? value))
     (xt/x:err "invalid view node"))
-  (var component-id (xt/x:get-key value "component"))
+  (var component-id (. value ["component"]))
   (when (not (xt/x:is-string? component-id))
     (xt/x:err "view node requires component"))
   (cond (catalog/has-component? component-id)
-        (catalog/validate-props component-id (xt/x:get-key value "props"))
+        (catalog/validate-props component-id (. value ["props"]))
 
         (catalog/platform-id? component-id)
-        (when (xt/x:get-key (or opts {}) "portable")
+        (when (. (or opts {}) ["portable"])
           (xt/x:err (xt/x:cat "platform view component not portable - "
                               component-id)))
 
         :else
         (xt/x:err (xt/x:cat "unknown view component - " component-id)))
-  (when (not (-/json-safe? (xt/x:get-key value "props")))
+  (when (not (-/json-safe? (. value ["props"])))
     (xt/x:err (xt/x:cat "view props are not serializable - "
                         component-id)))
-  (xt/for:array [child (or (xt/x:get-key value "children") [])]
+  (xt/for:array [child (or (. value ["children"]) [])]
     (-/validate-node child opts))
   (return true))
 
@@ -127,14 +127,14 @@
   [spec opts]
   (when (not (xt/x:is-object? spec))
     (xt/x:err "view spec must be an object"))
-  (when (not= -/VERSION (xt/x:get-key spec "version"))
+  (when (not= -/VERSION (. spec ["version"]))
     (xt/x:err (xt/x:cat "unsupported view spec version - "
-                        (xt/x:to-string (xt/x:get-key spec "version")))))
-  (when (not (xt/x:is-string? (xt/x:get-key spec "id")))
+                        (xt/x:to-string (. spec ["version"])))))
+  (when (not (xt/x:is-string? (. spec ["id"])))
     (xt/x:err "view spec requires id"))
-  (xt/for:object [[binding-id binding] (or (xt/x:get-key spec "bindings") {})]
+  (xt/for:object [[binding-id binding] (or (. spec ["bindings"]) {})]
     (-/validate-binding binding-id binding))
-  (-/validate-node (xt/x:get-key spec "root") opts)
+  (-/validate-node (. spec ["root"]) opts)
   (return true))
 
 (defn.xt validate
@@ -151,7 +151,7 @@
   "ensures substrate-owned state for one view in a node space"
   [node space-id view-id]
   (var space (node-space/ensure-space node space-id nil))
-  (var state (xt/x:get-key space "state"))
+  (var state (. space ["state"]))
   (when (or (xt/x:nil? state)
             (not (xt/x:is-object? state)))
     (:= state {})
@@ -176,7 +176,7 @@
 
 (defn.xt state-get
   [node space-id view-id path default-value]
-  (var values (xt/x:get-key (-/state-container node space-id view-id) "values"))
+  (var values (. (-/state-container node space-id view-id) ["values"]))
   (var value (xtd/get-in values (or path [])))
   (return (:? (xt/x:nil? value) default-value value)))
 
@@ -184,13 +184,13 @@
   "sets substrate-owned view state and notifies view subscribers"
   [node space-id view-id path value]
   (var container (-/state-container node space-id view-id))
-  (var values (xt/x:get-key container "values"))
+  (var values (. container ["values"]))
   (when (== 0 (xt/x:len (or path [])))
     (:= values value)
     (xt/x:set-key container "values" values))
   (when (> (xt/x:len (or path [])) 0)
     (xtd/set-in values path value))
-  (var revision (+ 1 (or (xt/x:get-key container "revision") 0)))
+  (var revision (+ 1 (or (. container ["revision"]) 0)))
   (xt/x:set-key container "revision" revision)
   (event-common/trigger-keyed-listeners
    node
@@ -204,29 +204,29 @@
 
 (defn.xt binding-read
   [node view-id binding]
-  (var source (or (xt/x:get-key binding "source") "state"))
-  (var space-id (xt/x:get-key binding "space_id"))
-  (var path (or (xt/x:get-key binding "path") []))
+  (var source (or (. binding ["source"]) "state"))
+  (var space-id (. binding ["space_id"]))
+  (var path (or (. binding ["path"]) []))
   (cond (== source "local")
-        (return (xt/x:get-key binding "initial"))
+        (return (. binding ["initial"]))
 
         (== source "state")
         (return (-/state-get node space-id view-id path
-                            (xt/x:get-key binding "default")))
+                            (. binding ["default"])))
 
         (== source "model-output")
         (return (xtd/get-in
                  (page-core/model-get-output node space-id
-                                             (xt/x:get-key binding "group_id")
-                                             (xt/x:get-key binding "model_id"))
+                                             (. binding ["group_id"])
+                                             (. binding ["model_id"]))
                  path))
 
         (== source "model-input")
-        (do (var [_group model]
-                 (page-core/model-ensure node space-id
-                                         (xt/x:get-key binding "group_id")
-                                         (xt/x:get-key binding "model_id")))
-            (return (xtd/get-in (xt/x:get-key (event-model/get-input model) "current")
+        (do (var model-value (page-core/model-ensure node space-id
+                                         (. binding ["group_id"])
+                                         (. binding ["model_id"])))
+        (var [_group model] model-value)
+            (return (xtd/get-in (. (event-model/get-input model) ["current"])
                                 path)))
 
         :else (xt/x:err (xt/x:cat "unsupported binding source - " source))))
@@ -235,19 +235,19 @@
   "reads every declared binding from substrate"
   [node spec]
   (var out {})
-  (var view-id (xt/x:get-key spec "id"))
-  (xt/for:object [[binding-id binding] (or (xt/x:get-key spec "bindings") {})]
+  (var view-id (. spec ["id"]))
+  (xt/for:object [[binding-id binding] (or (. spec ["bindings"]) {})]
     (xt/x:set-key out binding-id (-/binding-read node view-id binding)))
   (return out))
 
 (defn.xt subscription-notify
   [subscription event]
-  (var revision (+ 1 (xt/x:get-key subscription "revision")))
+  (var revision (+ 1 (. subscription ["revision"])))
   (xt/x:set-key subscription "revision" revision)
-  (var next (-/snapshot (xt/x:get-key subscription "node")
-                        (xt/x:get-key subscription "spec")))
+  (var next (-/snapshot (. subscription ["node"])
+                        (. subscription ["spec"])))
   (xt/x:set-key subscription "snapshot" next)
-  ((xt/x:get-key subscription "callback") next revision event)
+  ((. subscription ["callback"]) next revision event)
   (return next))
 
 (defn.xt subscribe
@@ -262,19 +262,19 @@
                      "snapshot" (-/snapshot node spec)
                      "keys" []})
   (var seen {})
-  (var view-id (xt/x:get-key spec "id"))
-  (xt/for:object [[_ binding] (or (xt/x:get-key spec "bindings") {})]
-    (var source (or (xt/x:get-key binding "source") "state"))
+  (var view-id (. spec ["id"]))
+  (xt/for:object [[_ binding] (or (. spec ["bindings"]) {})]
+    (var source (or (. binding ["source"]) "state"))
     (when (not= source "local")
-      (var space-id (xt/x:get-key binding "space_id"))
+      (var space-id (. binding ["space_id"]))
       (var key (:? (== source "state")
                    (-/state-listener-key space-id view-id)
                    (-/model-listener-key space-id
-                                          (xt/x:get-key binding "group_id")
-                                          (xt/x:get-key binding "model_id"))))
+                                          (. binding ["group_id"])
+                                          (. binding ["model_id"]))))
       (when (not (xt/x:has-key? seen key))
         (xt/x:set-key seen key true)
-        (xt/x:arr-push (xt/x:get-key subscription "keys") key)
+        (xt/x:arr-push (. subscription ["keys"]) key)
         (event-common/add-keyed-listener
          node key listener-id "view"
          (fn [_id event _time _meta]
@@ -285,9 +285,9 @@
 
 (defn.xt unsubscribe
   [subscription]
-  (var node (xt/x:get-key subscription "node"))
-  (var listener-id (xt/x:get-key subscription "id"))
-  (xt/for:array [key (xt/x:get-key subscription "keys")]
+  (var node (. subscription ["node"]))
+  (var listener-id (. subscription ["id"]))
+  (xt/for:array [key (. subscription ["keys"])]
     (event-common/remove-keyed-listener node key listener-id))
   (xt/x:set-key subscription "keys" [])
   (return true))
@@ -295,11 +295,11 @@
 (defn.xt dispatch
   "dispatches a view action through the existing substrate handler surface"
   [node space-id action-desc event meta]
-  (var action-id (xt/x:get-key action-desc "action"))
+  (var action-id (. action-desc ["action"]))
   (when (not (xt/x:is-string? action-id))
     (xt/x:err "view action requires a substrate handler id"))
-  (var payload (xt/x:get-key action-desc "payload"))
+  (var payload (. action-desc ["payload"]))
   (when (and (xt/x:is-object? payload)
-             (== "event" (xt/x:get-key payload "$")))
-    (:= payload (xtd/get-in event (or (xt/x:get-key payload "path") []))))
+             (== "event" (. payload ["$"])))
+    (:= payload (xtd/get-in event (or (. payload ["path"]) []))))
   (return (base-util/request node space-id action-id [payload] (or meta {}))))

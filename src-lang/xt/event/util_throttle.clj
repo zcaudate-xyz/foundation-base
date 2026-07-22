@@ -58,7 +58,7 @@
         (xt/x:del-key queued key)
         (-/throttle-run-async throttle
                               id
-                              (xt/x:get-key qentry "args")))))))
+                              (. qentry ["args"])))))))
 
 (defn.xt throttle-run
   "returns the current throttle entry, queueing at most one rerun"
@@ -72,9 +72,9 @@
     (return qentry))
   (var aentry (xt/x:get-key active key))
   (when (xt/x:not-nil? aentry)
-    (:= qentry {:promise (xt/x:get-key aentry "promise")
+    (:= qentry {:promise (. aentry ["promise"])
                 :started (now-fn)
-                :args (xt/x:get-key aentry "args")})
+                :args (. aentry ["args"])})
     (xt/x:set-key queued key qentry)
     (return qentry))
   (:= aentry {:promise nil
