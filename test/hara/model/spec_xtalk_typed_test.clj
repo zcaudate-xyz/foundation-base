@@ -127,7 +127,7 @@
        (x:get-path route ["tree" "leaf"] "fallback")
        (x:get-idx items (x:offset))
        (x:get-idx items (x:offset 1))
-       (hara.typed.xtalk-intrinsic/arrayify items)])
+       (xt.lang.common-lib/arrayify items)])
 
 (fact "infers open object types for dynamic map keys"
   (-> (infer/infer-type '{:type "route.path" pkey true}
@@ -641,7 +641,6 @@
   (-> (typed/namespace-report (typed/load-ns 'xt.event.base-route))
       :namespace)
   => 'xt.event.base-route)
-
 
 
 

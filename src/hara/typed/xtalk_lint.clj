@@ -170,6 +170,48 @@
     :else
     (map (fn [arg] [arg :value]) (rest form))))
 
+(defn- fn-arrow-suggestion
+  [form]
+  (let [[_ args body] form]
+    (when (and (vector? args)
+               (= 3 (count form))
+               (nil? body))
+      (list 'fn args (list 'return body)))))
+
+(defn- fn-arrow-diagnostic
+  [form context opts]
+  (when-let [suggestion (and (= 'fn:> (canonical-head (first form)))
+                             (fn-arrow-suggestion form))]
+    (diagnostic
+     :XT003
+     :warning
+     "fn:> with an explicit argument vector and nil body can use canonical fn with an explicit return"
+     form
+     context
+     opts
+     {:suggestion suggestion})))
+
+(defn- lint-fn-arrows
+  [form opts]
+  (cond
+    (seq? form)
+    (into (if-let [own (fn-arrow-diagnostic form :value opts)]
+            [own]
+            [])
+          (mapcat #(lint-fn-arrows % opts) (rest form)))
+
+    (or (vector? form) (set? form))
+    (vec (mapcat #(lint-fn-arrows % opts) form))
+
+    (map? form)
+    (vec (mapcat (fn [[key value]]
+                   (concat (lint-fn-arrows key opts)
+                           (lint-fn-arrows value opts)))
+                 form))
+
+    :else
+    []))
+
 (defn lint-form
   [form context opts]
   (cond
@@ -202,6 +244,10 @@
                     opts
                     {:suggestion (list '. obj [key])})])
 
+                (and (= h 'fn:>)
+                     (fn-arrow-suggestion form))
+                [(fn-arrow-diagnostic form context opts)]
+
                 :else
                 [])
           own (if (= h 'var)
@@ -233,6 +279,9 @@
 
       (= h 'def.xt)
       (lint-form (last form) :value opts)
+
+      (#{'fact 'fact:global} h)
+      (lint-fn-arrows form opts)
 
       :else
       [])))

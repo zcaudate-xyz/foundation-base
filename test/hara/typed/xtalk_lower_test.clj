@@ -45,6 +45,11 @@
        (x:get-idx arr i)
        (x:get-path route ["tree" "leaf"] nil)])
 
+^{:refer hara.typed.xtalk-lower/lower-dot :id lower-dot-method-call :added "4.1"}
+(fact "preserves list-shaped native method calls"
+  (lower-dot '(. arr (filter pred)))
+  => '(. arr (filter pred)))
+
 ^{:refer hara.typed.xtalk-lower/lower-fn-shorthand :added "4.1"}
 (fact "lowers fn:> shorthands"
   [(lower-fn-shorthand '(fn:>))
@@ -77,7 +82,16 @@
        (x:get-key route "leaf" nil)
        (x:get-idx items (x:offset))
        (x:get-idx items (x:offset 1))
-       (hara.typed.xtalk-intrinsic/not-empty? items)])
+       (xt.lang.common-lib/not-empty? items)])
+
+^{:refer hara.typed.xtalk-lower/lower-list :id preserve-runtime-helpers :added "4.1"}
+(fact "preserves runtime helpers for target resolution"
+  [(lower-list '(xt.lang.common-lib/arrayify items) +ctx+)
+   (lower-list '(xt.event.base-listener/make-container initializer "route" {}) +ctx+)
+   (lower-list '(xt.event.base-listener/blank-container "route" {}) +ctx+)]
+  => '[(xt.lang.common-lib/arrayify items)
+       (xt.event.base-listener/make-container initializer "route" {})
+       (xt.event.base-listener/blank-container "route" {})])
 
 ^{:refer hara.typed.xtalk-lower/lower-form :id preserve-structural-forms :added "4.1"}
 (fact "does not rewrite structural forms as XTalk operations"

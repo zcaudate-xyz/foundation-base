@@ -54,9 +54,19 @@
    (if (and (= :named (:kind type))
             (symbol? (:name type))
             (not (contains? seen (:name type))))
-     (if-let [spec (types/get-spec (:name type))]
-       (recur (:type spec) ctx (conj seen (:name type)))
-       type)
+     (let [name (:name type)
+           spec (or (types/get-spec name)
+                    (when (namespace name)
+                      (try
+                        (when-let [register! (requiring-resolve
+                                              'hara.typed.xtalk-analysis/analyze-and-register!)]
+                          (register! (symbol (namespace name))))
+                        (types/get-spec name)
+                        (catch Throwable _
+                          nil))))]
+       (if spec
+         (recur (:type spec) ctx (conj seen name))
+         type))
      type)))
 
 (defn type-eq?

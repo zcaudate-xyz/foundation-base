@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [hara.common.emit :as emit]
             [hara.common.emit-rewrite :refer :all]
+            [hara.typed.xtalk-analysis :as analysis]
             [hara.typed.xtalk-infer :as infer]))
 
 ^{:refer hara.common.emit-rewrite/stage-transforms :added "4.1"}
@@ -25,6 +26,20 @@
    (canonical-stage '(. arr [i]) {:mopts {}})]
   => ['(x:get-idx arr i)
       '(. arr [i])])
+
+^{:refer hara.common.emit-rewrite/canonical-stage :id canonical-stage-module-context :added "4.1"}
+(fact "infers local bindings before lowering module forms"
+  (analysis/analyze-and-register! 'xt.event.base-route)
+  (canonical-stage
+   '(do
+      (var r (route/make-route))
+      (. (. r ["listeners"]) ["a1"]))
+   {:mopts {:lang :python
+            :module {:id 'xt.event.base-route-test
+                     :alias {'route 'xt.event.base-route}}}})
+  => '(do
+       (var r (xt.event.base-route/make-route))
+       (x:get-key (x:get-key r "listeners") "a1")))
 
 ^{:refer hara.common.emit-rewrite/canonical-stage :id canonical-stage-xtalk-entry :added "4.1"}
 (fact "runs canonical lowering for XTalk entries"

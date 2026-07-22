@@ -53,5 +53,6 @@
   :hara.postgres/return-bound {:level :warning}
   :hara.xtalk/block-in-value {:level :error}
   :hara.xtalk/redundant-get-key {:level :warning}
+  :hara.xtalk/redundant-fn-arrow {:level :warning}
   :hara.xtalk/field-collision {:level :error}
   :hara.xtalk/invalid-destructuring {:level :error}}}

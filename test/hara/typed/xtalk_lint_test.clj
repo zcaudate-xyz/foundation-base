@@ -44,6 +44,33 @@
   (lint-form '(return (xt/x:get-key m "name" "unknown")) :statement {})
   => [])
 
+^{:refer hara.typed.xtalk-lint/lint-form :added "4.1" :id fn-arrow-canonical}
+(fact "suggests canonical fn for nil fn:> callbacks"
+  (let [diagnostics (lint-form
+                     (fixture '(fn:> [id data t meta] nil))
+                     :value
+                     {})
+        canonical (lint-form
+                   '(fn [id data t meta] (return nil))
+                   :value
+                   {})]
+    [(mapv :code diagnostics)
+     (:suggestion (first diagnostics))
+     canonical])
+  => '[[:XT003]
+       (fn [id data t meta] (return nil))
+       []])
+
+^{:refer hara.typed.xtalk-lint/lint-top-form :added "4.1" :id fn-arrow-fact}
+(fact "finds nil fn:> callbacks inside facts"
+  (let [diagnostics (lint-top-form
+                     '(fact "callback" (!.js (fn:> [id data t meta] nil)))
+                     {:file "fixture.clj"})]
+    [(mapv :code diagnostics)
+     (:suggestion (first diagnostics))])
+  => '[[:XT003]
+       (fn [id data t meta] (return nil))])
+
 ^{:refer hara.typed.xtalk-lint/lint-form :added "4.1" :id destructuring-collision}
 (fact "detects destructuring field collisions after snake-case normalization"
   (let [errors (lint-form '(var #{arr-name arr_name} m) :statement {})]

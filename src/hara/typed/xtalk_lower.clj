@@ -57,6 +57,8 @@
 (defn lower-dot
   "lowers dot access using the receiver's XTalk type when available
 
+   List-shaped path parts are native method calls and are preserved for the
+   target emitter. Vector-shaped path parts are structural key/index access.
    Single-segment access becomes x:get-key or x:get-idx. Multi-segment access
    becomes x:get-path, which is direct chained path access; it is not the
    guarded traversal provided by xt.lang.common-data/get-in."
@@ -69,16 +71,18 @@
                         (first part)
                         part))
                     path-parts)]
-     (if (= 1 (count path))
-       (case (receiver-access-kind obj ctx)
-         :idx (list 'x:get-idx obj (first path))
-         :key (list 'x:get-key obj (first path))
+     (if (some seq? path-parts)
+       (list* '. obj path-parts)
+       (if (= 1 (count path))
+         (case (receiver-access-kind obj ctx)
+           :idx (list 'x:get-idx obj (first path))
+           :key (list 'x:get-key obj (first path))
+           (if (:preserve-unknown ctx)
+             (list* '. obj path-parts)
+             (list 'x:get-key obj (first path))))
          (if (:preserve-unknown ctx)
            (list* '. obj path-parts)
-           (list 'x:get-key obj (first path))))
-       (if (:preserve-unknown ctx)
-         (list* '. obj path-parts)
-         (list 'x:get-path obj path nil))))))
+           (list 'x:get-path obj path nil)))))))
 
 (defn lower-fn-shorthand
   [[_ & args]]
@@ -104,13 +108,6 @@
     'xt.lang.common-lib/fn? 'x:is-function?
     'xt.lang.common-lib/arr? 'x:is-array?
     'xt.lang.common-lib/obj? 'x:is-object?})
-
-(def +intrinsic-targets+
-  {'xt.lang.common-lib/arrayify "arrayify"
-   'xt.lang.common-lib/not-empty? "not-empty?"
-   'xt.lang.common-lib/is-empty? "is-empty?"
-   'xt.event.base-listener/make-container "make-container"
-   'xt.event.base-listener/blank-container "blank-container"})
 
 (defn lower-defaulted-target
   [target args]
@@ -160,9 +157,6 @@
 
       (contains? +wrapper-targets+ op')
       (cons (get +wrapper-targets+ op') args')
-
-      (contains? +intrinsic-targets+ op')
-      (cons (intrinsic-sym (get +intrinsic-targets+ op')) args')
 
       :else
       lowered)))

@@ -25,6 +25,25 @@
 (defn- block-head? [head]
   (contains? +block-heads+ (canonical-head head)))
 
+(defn- fn-arrow-suggestion [form]
+  (let [[_ args body] form]
+    (when (and (vector? args)
+               (= 3 (count form))
+               (nil? body))
+      (list 'fn args (list 'return body)))))
+
+(defn- lint-fn-arrows! [node]
+  (when node
+    (let [form (api/sexpr node)]
+      (when (and (api/list-node? node)
+                 (= 'fn:> (canonical-head (first form))))
+        (when-let [suggestion (fn-arrow-suggestion form)]
+          (report! node :hara.xtalk/redundant-fn-arrow :warning
+                   (str "fn:> with an explicit argument vector and nil body can use canonical fn with an explicit return: "
+                        suggestion))))
+      (doseq [child-node (:children node)]
+        (lint-fn-arrows! child-node)))))
+
 (defn- binding-value-nodes [bindings-node]
   (when (api/vector-node? bindings-node)
     (->> (:children bindings-node)
@@ -125,6 +144,11 @@
                               (nil? (nth form 3)))))
             (report! node :hara.xtalk/redundant-get-key :warning
                      "simple x:get-key can use canonical dot access (. obj [key])"))
+          (when-let [suggestion (when (= head 'fn:>)
+                                  (fn-arrow-suggestion form))]
+            (report! node :hara.xtalk/redundant-fn-arrow :warning
+                     (str "fn:> with an explicit argument vector and nil body can use canonical fn with an explicit return: "
+                          suggestion)))
           (doseq [[child-node child-context] (node-pairs head node)]
             (lint-node! child-node child-context)))
 
@@ -229,10 +253,12 @@
    return, and target-specific symbols. The XTalk hooks lint source definitions
    directly; a fact hook prevents the custom test macro body from being
    mistaken for ordinary Clojure."
-  [_]
+  [{:keys [node]}]
+  (lint-fn-arrows! node)
   {:node (api/list-node [(api/token-node 'do)])})
 
 (defn fact-global-xt
   "Keep fact:global setup/teardown forms opaque to Clojure analysis."
-  [_]
+  [{:keys [node]}]
+  (lint-fn-arrows! node)
   {:node (api/list-node [(api/token-node 'do)])})
