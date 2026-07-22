@@ -55,7 +55,11 @@
           (access-kind declared ctx)))))
 
 (defn lower-dot
-  "lowers dot access using the receiver's XTalk type when available"
+  "lowers dot access using the receiver's XTalk type when available
+
+   Single-segment access becomes x:get-key or x:get-idx. Multi-segment access
+   becomes x:get-path, which is direct chained path access; it is not the
+   guarded traversal provided by xt.lang.common-data/get-in."
   {:added "4.1"}
   ([form]
    (lower-dot form nil))

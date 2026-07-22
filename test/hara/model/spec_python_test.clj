@@ -1,6 +1,7 @@
 (ns hara.model.spec-python-test
   (:require [hara.lang :as l]
             [hara.model.spec-python :as py]
+            [hara.typed.xtalk-infer :as infer]
             [std.string.prose :as prose])
   (:use code.test))
 
@@ -78,6 +79,31 @@
   (l/emit-as
    :python '[(. xs ["length"])])
   => "len(xs)")
+
+^{:refer hara.model.spec-xtalk.fn-python/python-tf-x-get-key :added "4.1"}
+(fact "preserves falsey defaults for canonical key reads"
+  (let [out (l/emit-as
+              :python '[(x:get-key obj "key" false)])]
+    out)
+  => "obj.get(\"key\") or False")
+
+^{:refer hara.lang.impl/emit-as :added "4.1"
+  :id test-python-typed-canonical-access}
+(fact "emits typed canonical object and array access"
+  [(l/emit-as :python
+              '[(. obj [key])]
+              {:hara/xtalk-context
+               {:infer infer/infer-type
+                :env '{obj {:kind :record :fields []}
+                       key {:kind :primitive :name :xt/str}}}})
+   (l/emit-as :python
+              '[(. arr [i])]
+              {:hara/xtalk-context
+               {:infer infer/infer-type
+                :env '{arr {:kind :array
+                            :item {:kind :primitive :name :xt/int}}
+                       i {:kind :primitive :name :xt/int}}}})]
+  => ["obj.get(key)" "arr[i]"])
 
 ^{:refer hara.model.spec-python/python-defclass :added "4.0"}
 (fact "emits a defclass template for python"

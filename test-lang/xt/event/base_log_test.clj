@@ -139,7 +139,7 @@
                               {"id" "b" "keep" false}
                               {"id" "c" "keep" true}]})
     (fn [entry]
-      (return (xt/x:get-key entry "keep")))))
+      (return (. entry ["keep"]))))
   => [{"id" "a" "keep" true}
       {"id" "c" "keep" true}]
 
@@ -149,7 +149,7 @@
                               {"id" "b" "keep" false}
                               {"id" "c" "keep" true}]})
     (fn [entry]
-      (return (xt/x:get-key entry "keep")))))
+      (return (. entry ["keep"]))))
   => [{"id" "a" "keep" true}
       {"id" "c" "keep" true}]
 
@@ -159,7 +159,7 @@
                               {"id" "b" "keep" false}
                               {"id" "c" "keep" true}]})
     (fn [entry]
-      (return (xt/x:get-key entry "keep")))))
+      (return (. entry ["keep"]))))
   => [{"id" "a" "keep" true}
       {"id" "c" "keep" true}])
 
@@ -299,17 +299,17 @@
    (var l (log/new-log {}))
    (log/queue-entry l {:id "id-0"}
                     (fn [x _]
-                      (return (xt/x:get-key x "id")))
+                      (return (. x ["id"])))
                     k/identity
                     1)
    (log/queue-entry l {:id "id-1"}
                     (fn [x _]
-                      (return (xt/x:get-key x "id")))
+                      (return (. x ["id"])))
                     k/identity
                     1)
    (log/queue-entry l {:id "id-2"}
                     (fn [x _]
-                      (return (xt/x:get-key x "id")))
+                      (return (. x ["id"])))
                     k/identity
                     1)
    [(log/get-count l)
@@ -336,17 +336,17 @@
    (var l (log/new-log {}))
    (log/queue-entry l {:id "id-0"}
                     (fn [x _]
-                      (return (xt/x:get-key x "id")))
+                    (return (. x ["id"])))
                     k/identity
                     1)
    (log/queue-entry l {:id "id-1"}
                     (fn [x _]
-                      (return (xt/x:get-key x "id")))
+                    (return (. x ["id"])))
                     k/identity
                     1)
    (log/queue-entry l {:id "id-2"}
                     (fn [x _]
-                      (return (xt/x:get-key x "id")))
+                    (return (. x ["id"])))
                     k/identity
                     1)
    [(log/get-count l)
@@ -373,17 +373,17 @@
    (var l (log/new-log {}))
    (log/queue-entry l {:id "id-0"}
                     (fn [x _]
-                      (return (xt/x:get-key x "id")))
+                    (return (. x ["id"])))
                     k/identity
                     1)
    (log/queue-entry l {:id "id-1"}
                     (fn [x _]
-                      (return (xt/x:get-key x "id")))
+                    (return (. x ["id"])))
                     k/identity
                     1)
    (log/queue-entry l {:id "id-2"}
                     (fn [x _]
-                      (return (xt/x:get-key x "id")))
+                    (return (. x ["id"])))
                     k/identity
                     1)
    [(log/get-count l)

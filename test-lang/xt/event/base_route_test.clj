@@ -297,7 +297,7 @@
            r
            "a1"
            (fn [id data t meta]
-             (xt/x:arr-push calls (xt/x:get-key data "type")))
+             (xt/x:arr-push calls (. data ["type"])))
            nil))
     (route/set-url r "hello/world?auth=sign_out" nil)
     (:= removed (route/remove-listener r "a1"))
@@ -334,7 +334,7 @@
           r
           "a1"
           (fn [id data t meta]
-            (xt/x:arr-push calls (xt/x:get-key data "type")))
+            (xt/x:arr-push calls (. data ["type"])))
           nil))
    (route/set-url r "hello/world?auth=sign_out" nil)
    (:= removed (route/remove-listener r "a1"))
@@ -488,7 +488,7 @@
     (fn:> [id data t meta] nil)
     {:label "hello"})
    [(. (route/remove-listener r "a1") ["meta"] ["listener/id"])
-    (xt/x:get-key (. r ["listeners"]) "a1")
+    (. (. r ["listeners"]) ["a1"])
     (route/remove-listener r "missing")])
   => ["a1"
       nil
@@ -502,7 +502,7 @@
     (fn:> [id data t meta] nil)
     {:label "hello"})
    [(. (route/remove-listener r "a1") ["meta"] ["listener/id"])
-    (xt/x:get-key (. r ["listeners"]) "a1")
+    (. (. r ["listeners"]) ["a1"])
     (route/remove-listener r "missing")])
   => ["a1"
       nil

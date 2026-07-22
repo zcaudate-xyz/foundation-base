@@ -1,6 +1,8 @@
 (ns hara.common.emit-rewrite-test
   (:use code.test)
-  (:require [hara.common.emit-rewrite :refer :all]))
+  (:require [hara.common.emit :as emit]
+            [hara.common.emit-rewrite :refer :all]
+            [hara.typed.xtalk-infer :as infer]))
 
 ^{:refer hara.common.emit-rewrite/stage-transforms :added "4.1"}
 (fact "returns the transforms registered for a stage"
@@ -12,6 +14,23 @@
   (stage-transforms {:rewrite {:emit [dec]}}
                      :staging)
   => [])
+
+^{:refer hara.common.emit-rewrite/canonical-stage :added "4.1"}
+(fact "only applies typed canonical lowering when requested"
+  [(canonical-stage '(. arr [i])
+                    {:mopts {:hara/xtalk-context
+                             {:infer infer/infer-type
+                              :env '{arr {:kind :array
+                                          :item {:kind :primitive :name :xt/int}}}}}})
+   (canonical-stage '(. arr [i]) {:mopts {}})]
+  => ['(x:get-idx arr i)
+      '(. arr [i])])
+
+^{:refer hara.common.emit-rewrite/canonical-stage :id canonical-stage-xtalk-entry :added "4.1"}
+(fact "runs canonical lowering for XTalk entries"
+  (canonical-stage '(. value [key])
+                   {:mopts {:entry {:lang :xtalk}}})
+  => '(. value [key]))
 
 ^{:refer hara.common.emit-rewrite/rewrite-stage :added "4.1"}
 (fact "applies each transform for a stage to the form"
@@ -27,4 +46,8 @@
                  {:rewrite {:emit [(fn [form _] (* form 2))
                                    (fn [form _] (+ form 1))]}}
                  {})
-  => 11)
+  => 11
+
+  (contains? (set (stage-transforms (emit/default-grammar) :canonical))
+             #'canonical-stage)
+  => true)

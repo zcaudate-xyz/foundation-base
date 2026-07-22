@@ -106,7 +106,7 @@
             (return data))
           {:label "hello"}
           (fn [e]
-            (return (xt/x:get-key e "ok")))))
+            (return (. e ["ok"])))))
     [(xt/x:is-function? (. entry ["callback"]))
      (xt/x:is-function? (. entry ["pred"]))
      (. entry ["meta"])])
@@ -125,7 +125,7 @@
             (return data))
           {:label "hello"}
           (fn [e]
-            (return (xt/x:get-key e "ok")))))
+            (return (. e ["ok"])))))
     [(xt/x:is-function? (. entry ["callback"]))
      (xt/x:is-function? (. entry ["pred"]))
      (. entry ["meta"])])
@@ -144,7 +144,7 @@
             (return data))
           {:label "hello"}
           (fn [e]
-            (return (xt/x:get-key e "ok")))))
+            (return (. e ["ok"])))))
     [(xt/x:is-function? (. entry ["callback"]))
      (xt/x:is-function? (. entry ["pred"]))
      (. entry ["meta"])])
@@ -351,7 +351,7 @@
                           (xt/x:arr-push calls "b2"))
                         nil
                         (fn [e]
-                          (return (xt/x:get-key e "ok"))))
+                          (return (. e ["ok"]))))
     (event/add-keyed-listener c
                               "group"
                               "k1"
@@ -395,7 +395,7 @@
                           (xt/x:arr-push calls "b2"))
                         nil
                         (fn [e]
-                          (return (xt/x:get-key e "ok"))))
+                          (return (. e ["ok"]))))
     (event/add-keyed-listener c
                               "group"
                               "k1"
@@ -439,7 +439,7 @@
                           (xt/x:arr-push calls "b2"))
                         nil
                         (fn [e]
-                          (return (xt/x:get-key e "ok"))))
+                          (return (. e ["ok"]))))
     (event/add-keyed-listener c
                               "group"
                               "k1"
@@ -633,7 +633,7 @@
        (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
-       (return (xt/x:get-key e "ok"))))
+       (return (. e ["ok"]))))
     [(event/trigger-listeners c {:ok true})
      calls])
   => (just-in [(just ["a1" "b2"] :in-any-order)
@@ -654,7 +654,7 @@
        (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
-        (return (xt/x:get-key e "ok"))))
+        (return (. e ["ok"]))))
     [(event/trigger-listeners c {:ok true})
      calls])
   => (just-in [(just ["a1" "b2"] :in-any-order)
@@ -675,7 +675,7 @@
        (xt/x:arr-push calls "b2"))
      nil
      (fn [e]
-        (return (xt/x:get-key e "ok"))))
+        (return (. e ["ok"]))))
     [(event/trigger-listeners c {:ok true})
      calls])
   => (just-in [(just ["a1" "b2"] :in-any-order)

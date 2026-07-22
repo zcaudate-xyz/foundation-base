@@ -1563,7 +1563,7 @@
   => "fallback")
 
 ^{:refer xt.lang.spec-base/x:get-path :added "4.1"}
-(fact "gets a nested value by path"
+(fact "gets a value by direct path indexing"
 
   (!.js
     (xt/x:get-path {:nested {:b 2}} ["nested" "b"]))

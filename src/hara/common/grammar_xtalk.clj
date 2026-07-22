@@ -140,7 +140,11 @@
       val)))
 
 (defn tf-get-path
-  "get-in transform"
+  "lowers x:get-path to direct chained path access
+
+   This is structural access: each path component is applied to the previous
+   value and intermediate nil or missing values are not guarded. Use
+   `xt.lang.common-data/get-in` for guarded path traversal."
   {:added "4.0"}
   [[_ obj ks default]]
   (let [val (if (symbol? obj)

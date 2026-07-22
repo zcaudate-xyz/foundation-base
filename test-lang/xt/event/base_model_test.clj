@@ -1412,7 +1412,7 @@
 
   (!.js
     (var out nil)
-    (model/async-fn-basic (fn:> [ctx] {:value (xt/x:get-key ctx "input")})
+    (model/async-fn-basic (fn:> [ctx] {:value (. ctx ["input"])})
                           {:input "hello"}
                           {"success" (fn [res] (:= out res))
                            "error"   (fn [err] (:= out err))})
@@ -1427,7 +1427,7 @@
     (var out nil)
     (-> (model/async-fn-promise
          (fn [ctx]
-           (return (promise/x:with-delay 5 (fn:> [] {:value (xt/x:get-key ctx "input")}))))
+           (return (promise/x:with-delay 5 (fn:> [] {:value (. ctx ["input"])}))))
          {:input "hello"}
          {"success" (fn [res] (:= out res))
           "error"   (fn [err] (:= out err))})
@@ -1441,7 +1441,6 @@
   (s/seedgen-benchadd '[xt.event.base-model] {:lang [:ruby :dart] :write true})
   (s/seedgen-langadd '[xt.event.base-model]  {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.event.base-model]  {:lang [:lua :python] :write true}))
-
 
 
 

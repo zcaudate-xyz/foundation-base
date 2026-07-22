@@ -1,6 +1,8 @@
 (ns hara.typed.xtalk-lower-test
   (:use code.test)
-  (:require [hara.typed.xtalk-lower :refer :all]))
+  (:require [hara.typed.xtalk-common :as types]
+            [hara.typed.xtalk-infer :as infer]
+            [hara.typed.xtalk-lower :refer :all]))
 
 (def +ctx+ {:ns 'sample.route :aliases '{k xt.lang.common-lib}})
 
@@ -15,11 +17,32 @@
    (resolve-op '-/route +ctx+)]
   => '[xt.lang.common-lib/get-key sample.route/route])
 
+^{:refer hara.typed.xtalk-lower/access-kind :added "4.1"}
+(fact "classifies object and array receiver types"
+  [(access-kind {:kind :record :fields []} {})
+   (access-kind {:kind :dict :key types/+str-type+ :value types/+unknown-type+} {})
+   (access-kind {:kind :array :item types/+unknown-type+} {})
+   (access-kind {:kind :tuple :types [types/+str-type+]} {})]
+  => [:key :key :idx :idx])
+
+^{:refer hara.typed.xtalk-lower/lower-dot :id lower-dot-annotated :added "4.1"}
+(fact "classifies annotated receivers without a full inference context"
+  (lower-dot (list '.
+                   (with-meta 'callbacks
+                     {:- [:xt/dict :xt/str :xt/any]})
+                   '[key])
+             {:preserve-unknown true})
+  => '(x:get-key callbacks key))
+
 ^{:refer hara.typed.xtalk-lower/lower-dot :added "4.1"}
-(fact "lowers dot access to key and path helpers"
+(fact "lowers dot access to typed key, index, and path helpers"
   [(lower-dot '(. route ["tree"]))
+   (lower-dot '(. arr [i]) {:infer infer/infer-type
+                            :env '{arr {:kind :array
+                                        :item {:kind :primitive :name :xt/int}}}})
    (lower-dot '(. route "tree" "leaf"))]
   => '[(x:get-key route "tree")
+       (x:get-idx arr i)
        (x:get-path route ["tree" "leaf"] nil)])
 
 ^{:refer hara.typed.xtalk-lower/lower-fn-shorthand :added "4.1"}
@@ -55,6 +78,16 @@
        (x:get-idx items (x:offset))
        (x:get-idx items (x:offset 1))
        (hara.typed.xtalk-intrinsic/not-empty? items)])
+
+^{:refer hara.typed.xtalk-lower/lower-form :id preserve-structural-forms :added "4.1"}
+(fact "does not rewrite structural forms as XTalk operations"
+  (lower-form '(defn sample [x] (return x)) {:preserve-unknown true})
+  => '(defn sample [x] (return x)))
+
+^{:refer hara.typed.xtalk-lower/lower-list :id preserve-value-conditionals :added "4.1"}
+(fact "leaves value conditionals for target-language staging"
+  (lower-list '(:? test 1 2) {:preserve-unknown true})
+  => '(:? test 1 2))
 
 ^{:refer hara.typed.xtalk-lower/lower-form :added "4.1"}
 (fact "recursively lowers nested forms"

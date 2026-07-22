@@ -558,7 +558,11 @@
     (:= idx (- idx 1))))
 
 (defn.xt get-in
-  "gets item in object"
+  "gets a value through a guarded path traversal
+
+   A nil or empty path returns the object. A nil object, missing or nil
+   intermediate branch, non-object branch, or non-numeric array key returns
+   nil."
   {:added "4.1"}
   [obj arr]
   (cond (xt/x:nil? obj)

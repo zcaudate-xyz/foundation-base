@@ -134,7 +134,7 @@
   => '(not= (x:get-key obj "a") nil))
 
 ^{:refer hara.common.grammar-xtalk/tf-get-path :added "4.0"}
-(fact "get-in transform"
+(fact "lowers direct path access to chained indexing"
 
   (tf-get-path '(x:get-path obj ["a" "b" "c"]))
   => '(. obj ["a"] ["b"] ["c"]))

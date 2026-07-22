@@ -701,7 +701,11 @@
 
 (defmacro.xt ^{:standalone true} 
   x:get-path
-  "gets a nested value by path"
+  "gets a value by direct path indexing
+
+   Path components are applied from left to right as direct target-language
+   indexing. Missing or nil intermediate values are not guarded. Use
+   xt.lang.common-data/get-in when guarded traversal is required."
   {:added "4.1"}
   ([obj path] (list (quote x:get-path) obj path)) 
   ([obj path default] (list (quote x:get-path) obj path default)))
