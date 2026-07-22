@@ -1,0 +1,20 @@
+{:ns-groups
+ [{:pattern ".+"
+   :name clj-kondo.hooks.hara-postgres}]
+
+ :hooks
+ {:analyze-call
+  {hara.lang/script clj-kondo.hooks.hara-postgres/script
+   hara.lang/script- clj-kondo.hooks.hara-postgres/script
+   hara.lang/script+ clj-kondo.hooks.hara-postgres/script
+   defn.pg clj-kondo.hooks.hara-postgres/defn-pg
+   defrun.pg clj-kondo.hooks.hara-postgres/defn-pg
+   clj-kondo.hooks.hara-postgres/defn.pg clj-kondo.hooks.hara-postgres/defn-pg
+   clj-kondo.hooks.hara-postgres/defrun.pg clj-kondo.hooks.hara-postgres/defn-pg}}
+
+ :linters
+ {:gwpg/one-let {:level :warning}
+  :gwpg/nested-let {:level :warning}
+  :gwpg/input-prefix {:level :warning}
+  :gwpg/local-prefix {:level :warning}
+  :gwpg/return-bound {:level :warning}}}
