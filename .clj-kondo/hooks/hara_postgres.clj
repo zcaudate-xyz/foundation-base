@@ -1,4 +1,4 @@
-(ns hooks.greenways-postgres
+(ns hooks.hara-postgres
   "clj-kondo hooks for Hara's generated language macros and PostgreSQL DSL.
 
    l/script- interns grammar macros at runtime. clj-kondo cannot execute that

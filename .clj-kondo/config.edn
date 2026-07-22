@@ -1,18 +1,18 @@
 {:ns-groups
  [{:pattern ".+"
-   :name hooks.greenways-postgres}]
+   :name hooks.hara-postgres}]
 
  :hooks
  {:analyze-call
-  {hara.lang/script hooks.greenways-postgres/script
-   hara.lang/script- hooks.greenways-postgres/script
-   hara.lang/script+ hooks.greenways-postgres/script
+  {hara.lang/script hooks.hara-postgres/script
+   hara.lang/script- hooks.hara-postgres/script
+   hara.lang/script+ hooks.hara-postgres/script
    defn.js hooks.defn-pg/defn-js
    defvar.js hooks.defn-pg/defn-js
-   defn.pg hooks.greenways-postgres/defn-pg
-   defrun.pg hooks.greenways-postgres/defn-pg
-   hooks.greenways-postgres/defn.pg hooks.greenways-postgres/defn-pg
-   hooks.greenways-postgres/defrun.pg hooks.greenways-postgres/defn-pg
+   defn.pg hooks.hara-postgres/defn-pg
+   defrun.pg hooks.hara-postgres/defn-pg
+   hooks.hara-postgres/defn.pg hooks.hara-postgres/defn-pg
+   hooks.hara-postgres/defrun.pg hooks.hara-postgres/defn-pg
    deftype.pg hooks.deftype-pg/deftype-pg
    std.lib/intern-in hooks.std-lib/intern-in-hook
    std.lib/intern-all hooks.std-lib/intern-all-hook}}
