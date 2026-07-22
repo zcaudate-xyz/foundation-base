@@ -1,5 +1,5 @@
 {
-  "updated-at" : "2026-07-22T22:16:38.384197192Z",
+  "updated-at" : "2026-07-22T22:21:28.856054667Z",
   "schema-version" : 1,
   "workflows" : {
     "annex" : {
@@ -380,32 +380,32 @@
     },
     "active" : {
       "latest" : {
-        "path" : "runs/active/41-1.json",
+        "path" : "runs/active/42-1.json",
         "failure-counts" : {
           "errored" : 1,
-          "throw" : 13,
+          "throw" : 14,
           "timeout" : 0,
           "failed" : 34
         },
         "run" : {
-          "number" : 41,
-          "id" : 29937276506,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29937276506",
+          "number" : 42,
+          "id" : 29959477304,
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959477304",
           "attempt" : 1
         },
         "workflow-key" : "active",
         "tests" : {
-          "passed" : 1223,
+          "passed" : 1233,
           "skipped" : 1,
           "errored" : 1,
-          "throw" : 13,
+          "throw" : 14,
           "timeout" : 0,
           "failed" : 34
         },
         "git" : {
           "ref" : "refs/heads/main",
           "event" : "push",
-          "sha" : "1bac98c2ea7894b22bb498b68185a01d6e1d86b2"
+          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318"
         },
         "jobs" : [ {
           "failure-counts" : {
@@ -436,7 +436,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:33:08.873552129Z",
+          "recorded-at" : "2026-07-22T21:52:38.994928408Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -460,7 +460,7 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 147,
+            "passed" : 158,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 0,
@@ -474,7 +474,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:19:07.614388739Z",
+          "recorded-at" : "2026-07-22T21:38:02.635012474Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -512,7 +512,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:21:14.369333392Z",
+          "recorded-at" : "2026-07-22T21:37:58.836757825Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -524,7 +524,7 @@
         }, {
           "failure-counts" : {
             "errored" : 0,
-            "throw" : 6,
+            "throw" : 7,
             "timeout" : 0,
             "failed" : 21
           },
@@ -536,10 +536,10 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 233,
+            "passed" : 232,
             "skipped" : 0,
             "errored" : 0,
-            "throw" : 6,
+            "throw" : 7,
             "timeout" : 0,
             "failed" : 21
           },
@@ -550,7 +550,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:33:11.427468559Z",
+          "recorded-at" : "2026-07-22T21:53:37.283791879Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -558,41 +558,41 @@
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
           "suite" : "xt.substrate",
-          "failing-count" : 27
+          "failing-count" : 28
         } ],
-        "recorded-at" : "2026-07-22T16:58:01.183559731Z",
+        "recorded-at" : "2026-07-22T22:16:38.365053680Z",
         "workflow-name" : "XTBench Active",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
       },
       "runs" : [ {
-        "path" : "runs/active/41-1.json",
+        "path" : "runs/active/42-1.json",
         "failure-counts" : {
           "errored" : 1,
-          "throw" : 13,
+          "throw" : 14,
           "timeout" : 0,
           "failed" : 34
         },
         "run" : {
-          "number" : 41,
-          "id" : 29937276506,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29937276506",
+          "number" : 42,
+          "id" : 29959477304,
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959477304",
           "attempt" : 1
         },
         "workflow-key" : "active",
         "tests" : {
-          "passed" : 1223,
+          "passed" : 1233,
           "skipped" : 1,
           "errored" : 1,
-          "throw" : 13,
+          "throw" : 14,
           "timeout" : 0,
           "failed" : 34
         },
         "git" : {
           "ref" : "refs/heads/main",
           "event" : "push",
-          "sha" : "1bac98c2ea7894b22bb498b68185a01d6e1d86b2"
+          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318"
         },
         "jobs" : [ {
           "failure-counts" : {
@@ -623,7 +623,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:33:08.873552129Z",
+          "recorded-at" : "2026-07-22T21:52:38.994928408Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -647,7 +647,7 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 147,
+            "passed" : 158,
             "skipped" : 0,
             "errored" : 0,
             "throw" : 0,
@@ -661,7 +661,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:19:07.614388739Z",
+          "recorded-at" : "2026-07-22T21:38:02.635012474Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -699,7 +699,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:21:14.369333392Z",
+          "recorded-at" : "2026-07-22T21:37:58.836757825Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -711,7 +711,7 @@
         }, {
           "failure-counts" : {
             "errored" : 0,
-            "throw" : 6,
+            "throw" : 7,
             "timeout" : 0,
             "failed" : 21
           },
@@ -723,10 +723,10 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 233,
+            "passed" : 232,
             "skipped" : 0,
             "errored" : 0,
-            "throw" : 6,
+            "throw" : 7,
             "timeout" : 0,
             "failed" : 21
           },
@@ -737,7 +737,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T16:33:11.427468559Z",
+          "recorded-at" : "2026-07-22T21:53:37.283791879Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -745,9 +745,9 @@
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
           "suite" : "xt.substrate",
-          "failing-count" : 27
+          "failing-count" : 28
         } ],
-        "recorded-at" : "2026-07-22T16:58:01.183559731Z",
+        "recorded-at" : "2026-07-22T22:16:38.365053680Z",
         "workflow-name" : "XTBench Active",
         "status" : "failure",
         "metrics-status" : "complete",
@@ -2268,39 +2268,39 @@
     },
     "active" : {
       "latest" : {
-        "path" : "runs/active/42-1.json",
+        "path" : "runs/active/43-1.json",
         "failure-counts" : {
-          "failed" : 34,
-          "throw" : 14,
+          "failed" : 32,
+          "throw" : 12,
           "timeout" : 0,
           "errored" : 1
         },
         "run" : {
-          "id" : 29959477304,
-          "number" : 42,
+          "id" : 29959617305,
+          "number" : 43,
           "attempt" : 1,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959477304"
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959617305"
         },
         "workflow-key" : "active",
         "tests" : {
-          "passed" : 1233,
-          "failed" : 34,
-          "throw" : 14,
+          "passed" : 1237,
+          "failed" : 32,
+          "throw" : 12,
           "timeout" : 0,
           "skipped" : 1,
           "errored" : 1
         },
         "git" : {
-          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318",
+          "sha" : "d78e5f873b7c69a261b6c8d10e063a4ef0d8734d",
           "ref" : "refs/heads/main",
           "event" : "push"
         },
         "jobs" : [ {
           "failure-counts" : {
             "errored" : 1,
-            "throw" : 2,
+            "throw" : 1,
             "timeout" : 0,
-            "failed" : 8
+            "failed" : 6
           },
           "run" : {
             "number" : null,
@@ -2310,12 +2310,12 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 286,
+            "passed" : 289,
             "skipped" : 1,
             "errored" : 1,
-            "throw" : 2,
+            "throw" : 1,
             "timeout" : 0,
-            "failed" : 8
+            "failed" : 6
           },
           "generated-count" : 44,
           "git" : {
@@ -2324,7 +2324,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:52:38.994928408Z",
+          "recorded-at" : "2026-07-22T21:54:38.052897444Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2332,7 +2332,7 @@
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
           "suite" : "xt.db",
-          "failing-count" : 11
+          "failing-count" : 8
         }, {
           "failure-counts" : {
             "errored" : 0,
@@ -2362,7 +2362,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:38:02.635012474Z",
+          "recorded-at" : "2026-07-22T21:44:14.182171356Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2400,7 +2400,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:37:58.836757825Z",
+          "recorded-at" : "2026-07-22T21:43:01.379546443Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2412,7 +2412,7 @@
         }, {
           "failure-counts" : {
             "errored" : 0,
-            "throw" : 7,
+            "throw" : 6,
             "timeout" : 0,
             "failed" : 21
           },
@@ -2424,10 +2424,10 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 232,
+            "passed" : 233,
             "skipped" : 0,
             "errored" : 0,
-            "throw" : 7,
+            "throw" : 6,
             "timeout" : 0,
             "failed" : 21
           },
@@ -2438,7 +2438,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:53:37.283791879Z",
+          "recorded-at" : "2026-07-22T21:58:01.615069806Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2446,48 +2446,48 @@
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
           "suite" : "xt.substrate",
-          "failing-count" : 28
+          "failing-count" : 27
         } ],
-        "recorded-at" : "2026-07-22T22:16:38.365053680Z",
+        "recorded-at" : "2026-07-22T22:21:28.839819981Z",
         "workflow-name" : "XTBench Active",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
       },
       "runs" : [ {
-        "path" : "runs/active/42-1.json",
+        "path" : "runs/active/43-1.json",
         "failure-counts" : {
-          "failed" : 34,
-          "throw" : 14,
+          "failed" : 32,
+          "throw" : 12,
           "timeout" : 0,
           "errored" : 1
         },
         "run" : {
-          "id" : 29959477304,
-          "number" : 42,
+          "id" : 29959617305,
+          "number" : 43,
           "attempt" : 1,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959477304"
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/29959617305"
         },
         "workflow-key" : "active",
         "tests" : {
-          "passed" : 1233,
-          "failed" : 34,
-          "throw" : 14,
+          "passed" : 1237,
+          "failed" : 32,
+          "throw" : 12,
           "timeout" : 0,
           "skipped" : 1,
           "errored" : 1
         },
         "git" : {
-          "sha" : "29f01b4d857e36c9736403095eb6d49706e6c318",
+          "sha" : "d78e5f873b7c69a261b6c8d10e063a4ef0d8734d",
           "ref" : "refs/heads/main",
           "event" : "push"
         },
         "jobs" : [ {
           "failure-counts" : {
             "errored" : 1,
-            "throw" : 2,
+            "throw" : 1,
             "timeout" : 0,
-            "failed" : 8
+            "failed" : 6
           },
           "run" : {
             "number" : null,
@@ -2497,12 +2497,12 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 286,
+            "passed" : 289,
             "skipped" : 1,
             "errored" : 1,
-            "throw" : 2,
+            "throw" : 1,
             "timeout" : 0,
-            "failed" : 8
+            "failed" : 6
           },
           "generated-count" : 44,
           "git" : {
@@ -2511,7 +2511,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:52:38.994928408Z",
+          "recorded-at" : "2026-07-22T21:54:38.052897444Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2519,7 +2519,7 @@
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
           "suite" : "xt.db",
-          "failing-count" : 11
+          "failing-count" : 8
         }, {
           "failure-counts" : {
             "errored" : 0,
@@ -2549,7 +2549,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:38:02.635012474Z",
+          "recorded-at" : "2026-07-22T21:44:14.182171356Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2587,7 +2587,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:37:58.836757825Z",
+          "recorded-at" : "2026-07-22T21:43:01.379546443Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2599,7 +2599,7 @@
         }, {
           "failure-counts" : {
             "errored" : 0,
-            "throw" : 7,
+            "throw" : 6,
             "timeout" : 0,
             "failed" : 21
           },
@@ -2611,10 +2611,10 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 232,
+            "passed" : 233,
             "skipped" : 0,
             "errored" : 0,
-            "throw" : 7,
+            "throw" : 6,
             "timeout" : 0,
             "failed" : 21
           },
@@ -2625,7 +2625,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-07-22T21:53:37.283791879Z",
+          "recorded-at" : "2026-07-22T21:58:01.615069806Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2633,9 +2633,9 @@
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
           "suite" : "xt.substrate",
-          "failing-count" : 28
+          "failing-count" : 27
         } ],
-        "recorded-at" : "2026-07-22T22:16:38.365053680Z",
+        "recorded-at" : "2026-07-22T22:21:28.839819981Z",
         "workflow-name" : "XTBench Active",
         "status" : "failure",
         "metrics-status" : "complete",
