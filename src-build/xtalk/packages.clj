@@ -4,7 +4,11 @@
             [std.make :as make :refer [def.make]]
             [std.json :as json]
             [hara.lang.compile]
-            [hara.runtime.basic.impl.process-dart :as dart-runtime]))
+            [hara.runtime.basic.impl.process-dart :as dart-runtime]
+            ;; single-module entries must be registered in the book at build
+            ;; time; module.single emits an empty module for unregistered
+            ;; namespaces, so entry namespaces are required here explicitly
+            [js.react.view]))
 
 (def VERSION "0.1.0")
 (def SEGMENTS [:lang :event :substrate :mcp :net :db :ui])

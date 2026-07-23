@@ -1,6 +1,7 @@
 (ns xtalk.packages-test
   (:use code.test)
-  (:require [xtalk.packages :refer :all]))
+  (:require [std.make :as make]
+            [xtalk.packages :refer :all]))
 
 ^{:refer xtalk.packages/package-name :added "4.1"}
 (fact "uses platform-native names for one package per xt segment"
@@ -47,6 +48,20 @@
      (last pubspec)
      (count (:default project))])
   => [".build/example" "  - wind_demo" (count (module-entries :dart))])
+
+^{:refer xtalk.packages/single-entry :added "4.1"}
+(fact "emits the js.react.view entry with its public aliases"
+  (let [project {:tag "packages-single-test"
+                 :build ".build/packages-single-test"
+                 :sections {}
+                 :default [(single-entry :js :ui 'js.react.view)]}
+        _ (make/build-all (make/make-config project))
+        content (slurp ".build/packages-single-test/libs/xt-ui/react/view.js")]
+    [(boolean (re-find #"react/view/runtime\.js" content))
+     (boolean (re-find #"runtime_create" content))
+     (boolean (re-find #"native_registry" content))
+     (boolean (re-find #"polyfill_registry" content))])
+  => [true true true true])
 
 ^{:refer xtalk.packages/normalize-dart-module :added "4.1"}
 (fact "adds Dart SDK imports required by emitted raw symbols"

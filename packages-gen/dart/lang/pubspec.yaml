@@ -1,9 +1,0 @@
-name: xtalk_lang
-version: 0.1.0
-description: Generated XTalk lang runtime
-publish_to: none
-resolution: workspace
-environment:
-  sdk: '>=3.6.0 <4.0.0'
-dependencies:
-  meta: ^1.15.0
