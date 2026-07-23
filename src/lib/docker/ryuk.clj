@@ -18,6 +18,7 @@
    :id      "reaper"
    :image   "testcontainers/ryuk:0.3.1"
    :ports   [8080]
+   :expose  ["127.0.0.1::8080"]
    :labels  {"reaped" true}
    :volumes {"/var/run/docker.sock" "/var/run/docker.sock"}})
 
@@ -26,16 +27,18 @@
   {:added "4.0"}
   []
   (if-not (common/has-container? +ryuk+)
-    (let [m (common/start-container +ryuk+)
-          _ (network/wait-for-port (:container-ip m)
-                             (first (:ports m))
-                             {:timeout common/*timeout*})
-          s (network/socket (:container-ip m) (first (:ports m)))
-          r (cc/relay {:type :socket
-                       :attached s})
-          _ (cc/send  r "label=reaped=true")]
+    (let [m    (common/start-container +ryuk+)
+          port (common/get-published-port (:container-id m)
+                                          (first (:ports m)))
+          _    (network/wait-for-port "127.0.0.1" port
+                                      {:timeout common/*timeout*})
+          s    (network/socket "127.0.0.1" port)
+          r    (cc/relay {:type :socket
+                          :attached s})
+          _    (cc/send  r "label=reaped=true")]
       (alter-var-root #'*ryuk* (fn [_]
-                                 (assoc m :socket s :relay r))))
+                                 (assoc m :socket s :relay r
+                                        :host "127.0.0.1" :host-port port))))
     *ryuk*))
 
 (defn stop-ryuk

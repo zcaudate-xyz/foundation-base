@@ -46,6 +46,21 @@
                       {:format false
                        :json false})))
 
+(defn get-published-port
+  "gets the host port published for a container port
+
+   (get-published-port cid 8080)
+   => 56108"
+  {:added "4.1"}
+  [container-id port]
+  (some-> (raw-command ["port" container-id (str port)]
+                       {:format false
+                        :json false})
+          (first)
+          (clojure.string/split #":")
+          (last)
+          (Long/parseLong)))
+
 (defn list-containers
   "gets all local containers
  
