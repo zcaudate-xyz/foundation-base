@@ -23,6 +23,8 @@
              :1d/base :1d/entry :1d/log
              :2d/base :2d/entry :2d/log}
    :addons #{keyword? vector? map?}
+   :owner #{symbol? vector?}
+   :provides #{map?}
    :track  #{:track/none
              :track/data
              :track/log
@@ -115,11 +117,11 @@
     [:entity 2 :entry :minimal] [:class-table :class-context]
     [:entity 2 :log   :minimal] [:class-table :class-context]
 
-    [:link 1 :entry :minimal] [:class-table]
-    [:link 1 :entry :expanded] [:class-table]
-    [:link 1 :log   :minimal] [:class-table]
-    [:link 2 :entry :minimal] [:class-table :class-context]
-    [:link 2 :log   :minimal] [:class-table :class-context]
+    [:owner 1 :entry :minimal] [:class-table]
+    [:owner 1 :entry :expanded] [:class-table]
+    [:owner 1 :log   :minimal] [:class-table]
+    [:owner 2 :entry :minimal] [:class-table :class-context]
+    [:owner 2 :log   :minimal] [:class-table :class-context]
 
     []))
 
@@ -187,9 +189,30 @@
                  :basis (public-input->basis input)}
           symname (assoc :symname symname))))))
 
+(defn E-owner-pair
+  [owner]
+  (let [[ref key] (if (vector? owner)
+                    owner
+                    [owner nil])
+        ref       (ut/normalise-ref ref)]
+    (when-not (and ref
+                   (or (nil? key)
+                       (keyword? key)))
+      (f/error "Invalid :owner"
+               {:owner owner
+                :expected ":owner target or :owner [target :local-key]"}))
+    [(or key
+         (keyword (case/spear-case (name ref))))
+     ref]))
+
 (defn E-check-input
   [m]
-  (let [valid? (fn [allowed v]
+  (let [retired (select-keys m [:link :spec/addon])
+        _       (when (seq retired)
+                  (throw (ex-info "Retired inputs for E"
+                                  {:retired (keys retired)
+                                   :input m})))
+        valid? (fn [allowed v]
                  (let [preds (filter fn? allowed)
                        lits  (set (remove fn? allowed))]
                    (or (contains? lits v)
@@ -206,6 +229,25 @@
                                     (if (seq bad)
                                       (assoc acc k {:invalid bad :allowed allowed})
                                       acc))
+
+                                  (= k :owner)
+                                  (try
+                                    (when (some? v)
+                                      (E-owner-pair v))
+                                    acc
+                                    (catch Throwable _
+                                      (assoc acc k {:value v
+                                                    :expected ":owner target or :owner [target :local-key]"})))
+
+                                  (= k :provides)
+                                  (if (and (map? v)
+                                           (keyword? (:key v))
+                                           (or (not (contains? v :priority))
+                                               (number? (:priority v))))
+                                    acc
+                                    (assoc acc k {:value v
+                                                  :expected {:key :keyword
+                                                             :priority :optional-number}}))
 
                                   :else
                                   (if (valid? allowed v)
@@ -335,29 +377,21 @@
      {key (cond-> ref-field-base
             (= (:class m) :2d/log) (assoc :primary "default"))})))
 
-(defn plan-link-relation
+(defn plan-owner-relation
   [m]
   (let [source-tuple (parse-class (:class m))
         basis-kind   (basis-kind-for m)
-        {:keys [link]} m]
-    (if (not link)
+        {:keys [owner]} m]
+    (if (not owner)
       {}
-      (let [{:keys [for as-key unique]} link
-            _    (when-not for
-                   (f/error "Need a :for keyword" {:input m}))
-            [key ref] (if (vector? for)
-                        for
-                        [(or as-key (keyword (case/spear-case (name (ut/normalise-ref for)))))
-                         for])
-            ref        (ut/normalise-ref ref)
+      (let [[key ref]  (E-owner-pair owner)
             target     (target-info ref)
-            projection (project-support-columns :link
+            projection (project-support-columns :owner
                                                 source-tuple
                                                 basis-kind
                                                 (:tuple target))
-            unique     (or unique
-                           (if (= (:class m) :1d/entry)
-                             [(case/snake-case (name key))]))
+            unique     (if (= (:class m) :1d/entry)
+                         [(case/snake-case (name key))])
             table-base (merge
                         (into {}
                               (map (fn [[local remote]]
@@ -426,7 +460,7 @@
     (collection/merge-nested basis-map generated-map)))
 
 (defn E-basis-compatible?
-  [{:keys [entity addons link]
+  [{:keys [entity addons owner]
     :as m}
    basis]
   (let [m (assoc m :basis basis)]
@@ -434,8 +468,8 @@
      (or (not entity)
          (do (plan-entity-relation m)
              true))
-     (or (not link)
-         (do (plan-link-relation m)
+     (or (not owner)
+         (do (plan-owner-relation m)
              true))
      (every? (fn [addon]
                (if (not= :ref (-> addon :field :type))
@@ -551,7 +585,7 @@
                                          track-cols
                                          (collection/merge-nested class-cols
                                                                   addon-class-cols
-                                                                  (plan-link-relation m))
+                                                                  (plan-owner-relation m))
                                          addon-cols)]
     {:api/meta  access-val
      :api/input (dissoc m :ns-str :application)
@@ -566,9 +600,9 @@
                      vec)}))
 
 (defn E-main-spec
-  [{:spec/keys [addon]}]
-  (if (and addon grammar-spec/*symbol*)
-    (let [{:keys [key priority]} addon]
+  [{:keys [provides]}]
+  (if (and provides grammar-spec/*symbol*)
+    (let [{:keys [key priority]} provides]
       (ut/add-addon key
                     (ut/type-ref (or (namespace grammar-spec/*symbol*)
                                      (name (env/ns-sym)))
@@ -611,15 +645,15 @@
        (filter #(= :ref (-> % :field :type)))))
 
 (defn E-auto-class-types
-  [{:keys [class symname basis entity link addons]
+  [{:keys [class symname basis entity owner addons]
     :as m}]
   (let [[depth] (parse-class class)
         reference-addons (E-reference-addons addons)
         relations (concat (keep identity [(E-relation-ref entity)
-                                          (E-relation-ref link)])
+                                          (some-> owner E-owner-pair second)])
                           (keep #(-> % :field :ref :ns)
                                 reference-addons))
-        linkage? (or entity link (seq reference-addons))
+        linkage? (or entity owner (seq reference-addons))
         own-type (when (and linkage?
                             (contains? #{0 1} depth))
                    symname)
@@ -684,7 +718,7 @@
         m            (E-addon-bool-shorthand m)
         m            (assoc m
                             :addons (normalise-fn (:addons m))
-                            :link   (normalise-fn (:link m))
+                            :owner  (normalise-fn (:owner m))
                             :entity (normalise-fn (:entity m)))
         _            (E-check-input m)
         m            (assoc m :basis (E-resolve-basis m))

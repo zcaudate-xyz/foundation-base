@@ -37,7 +37,9 @@
    fact clj-kondo.hooks.hara-xtalk/fact-xt
    fact:global clj-kondo.hooks.hara-xtalk/fact-global-xt
    clj-kondo.hooks.hara-postgres/defn.pg clj-kondo.hooks.hara-postgres/defn-pg
-   clj-kondo.hooks.hara-postgres/defrun.pg clj-kondo.hooks.hara-postgres/defn-pg}}
+   clj-kondo.hooks.hara-postgres/defrun.pg clj-kondo.hooks.hara-postgres/defn-pg
+   deftype.pg clj-kondo.hooks.hara-postgres/deftype-pg
+   clj-kondo.hooks.hara-postgres/deftype.pg clj-kondo.hooks.hara-postgres/deftype-pg}}
 
  :linters
  {:namespace-name-mismatch {:level :off}
@@ -46,6 +48,9 @@
   :hara.postgres/input-prefix {:level :warning}
   :hara.postgres/local-prefix {:level :warning}
   :hara.postgres/return-bound {:level :warning}
+  :hara.postgres/retired-entity-option {:level :error}
+  :hara.postgres/invalid-owner {:level :error}
+  :hara.postgres/invalid-provides {:level :error}
   :hara.xtalk/block-in-value {:level :error}
   :hara.xtalk/field-collision {:level :error}
   :hara.xtalk/invalid-destructuring {:level :error}
