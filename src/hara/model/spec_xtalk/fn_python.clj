@@ -30,6 +30,13 @@
     (list '== check (list 'x:get-key obj key nil))
     (list 'not= nil (list '. obj (list 'get key)))))
 
+(defn python-tf-x-set-key
+  "sets a key on an object, emitting subscript assignment so that
+   literal string keys do not lower to `obj.get(key) = value`"
+  {:added "4.1"}
+  [[_ obj key value]]
+  (list := (list '. obj (list 'setitem key)) value))
+
 (defn python-tf-x-err
   [[_ msg]]
   (list 'throw (list 'Exception msg)))
@@ -143,6 +150,7 @@
 
 (def +python-custom+
   {:x-get-key        {:macro #'python-tf-x-get-key}
+   :x-set-key        {:macro #'python-tf-x-set-key :emit :macro}
    :x-has-key?       {:macro #'python-tf-x-has-key? :emit :macro}})
 
 ;;

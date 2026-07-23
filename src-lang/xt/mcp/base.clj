@@ -88,15 +88,15 @@
 (defn.xt schema-type-valid?
   "checks a value against the portable JSON Schema type subset"
   {:added "4.1"}
-  [type value]
-  (cond (xt/x:nil? type) (return true)
-        (== type "object") (return (xt/x:is-object? value))
-        (== type "array") (return (xt/x:is-array? value))
-        (== type "string") (return (xt/x:is-string? value))
-        (== type "number") (return (xt/x:is-number? value))
-        (== type "integer") (return (xt/x:is-integer? value))
-        (== type "boolean") (return (xt/x:is-boolean? value))
-        (== type "null") (return (xt/x:nil? value))
+  [schema-type value]
+  (cond (xt/x:nil? schema-type) (return true)
+        (== schema-type "object") (return (xt/x:is-object? value))
+        (== schema-type "array") (return (xt/x:is-array? value))
+        (== schema-type "string") (return (xt/x:is-string? value))
+        (== schema-type "number") (return (xt/x:is-number? value))
+        (== schema-type "integer") (return (xt/x:is-integer? value))
+        (== schema-type "boolean") (return (xt/x:is-boolean? value))
+        (== schema-type "null") (return (xt/x:nil? value))
         :else (return false)))
 
 (defn.xt schema-error

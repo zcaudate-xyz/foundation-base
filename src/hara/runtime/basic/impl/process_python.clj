@@ -80,7 +80,7 @@
                  ['(catch Exception
                       (:= err (. traceback (format-exc))))])
                 '(throw (Exception err)))
-          '(:= (. (globals) ["OUT"])
+          '(:= (. (globals) (setitem "OUT"))
                (OUT-FN)))))
 
 (defn default-body-transform

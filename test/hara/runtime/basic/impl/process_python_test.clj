@@ -52,7 +52,7 @@
               (return (+ 1 2 3))
               (catch Exception (:= err (. traceback (format-exc)))))
             (throw (Exception err)))
-           (:= (. (globals) ["OUT"]) (OUT-FN))))
+           (:= (. (globals) (setitem "OUT")) (OUT-FN))))
 
 (fact "preserves utf-8 output across the basic runtime bridge"
 
@@ -72,7 +72,7 @@
               (return [1 2 3])
               (catch Exception (:= err (. traceback (format-exc)))))
             (throw (Exception err)))
-          (:= (. (globals) ["OUT"]) (OUT-FN)))
+          (:= (. (globals) (setitem "OUT")) (OUT-FN)))
 
   (default-body-transform '[1 2 3] {:bulk true})
   => '(do (defn OUT-FN
@@ -85,7 +85,7 @@
               (return 3)
               (catch Exception (:= err (. traceback (format-exc)))))
             (throw (Exception err)))
-          (:= (. (globals) ["OUT"]) (OUT-FN)))
+          (:= (. (globals) (setitem "OUT")) (OUT-FN)))
 
   (default-body-transform '(do 1 2 3) {})
   => '(do (defn OUT-FN
@@ -98,4 +98,4 @@
               (return 3)
               (catch Exception (:= err (. traceback (format-exc)))))
             (throw (Exception err)))
-          (:= (. (globals) ["OUT"]) (OUT-FN))))
+          (:= (. (globals) (setitem "OUT")) (OUT-FN))))

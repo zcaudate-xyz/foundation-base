@@ -168,6 +168,53 @@
       {} "$" )])
   => [nil "$.snake_case is required"])
 
+^{:refer xt.mcp.base/schema-type-valid? :added "4.1"}
+(fact "checks values against the portable JSON Schema type subset"
+
+  (!.js
+    [(base/schema-type-valid? "object" {"a" 1})
+     (base/schema-type-valid? "array" [1 2])
+     (base/schema-type-valid? "string" "s")
+     (base/schema-type-valid? "number" 1.5)
+     (base/schema-type-valid? "integer" 2)
+     (base/schema-type-valid? "boolean" true)
+     (base/schema-type-valid? "null" nil)
+     (base/schema-type-valid? "string" 1)])
+  => [true true true true true true true false]
+
+  (!.lua
+    [(base/schema-type-valid? "object" {"a" 1})
+     (base/schema-type-valid? "array" [1 2])
+     (base/schema-type-valid? "string" "s")
+     (base/schema-type-valid? "number" 1.5)
+     (base/schema-type-valid? "integer" 2)
+     (base/schema-type-valid? "boolean" true)
+     (base/schema-type-valid? "null" nil)
+     (base/schema-type-valid? "string" 1)])
+  => [true true true true true true true false]
+
+  (!.py
+    [(base/schema-type-valid? "object" {"a" 1})
+     (base/schema-type-valid? "array" [1 2])
+     (base/schema-type-valid? "string" "s")
+     (base/schema-type-valid? "number" 1.5)
+     (base/schema-type-valid? "integer" 2)
+     (base/schema-type-valid? "boolean" true)
+     (base/schema-type-valid? "null" nil)
+     (base/schema-type-valid? "string" 1)])
+  => [true true true true true true true false]
+
+  (!.dt
+    [(base/schema-type-valid? "object" {"a" 1})
+     (base/schema-type-valid? "array" [1 2])
+     (base/schema-type-valid? "string" "s")
+     (base/schema-type-valid? "number" 1.5)
+     (base/schema-type-valid? "integer" 2)
+     (base/schema-type-valid? "boolean" true)
+     (base/schema-type-valid? "null" nil)
+     (base/schema-type-valid? "string" 1)])
+  => [true true true true true true true false])
+
 ^{:refer xt.mcp.base/tool-result :added "4.1"}
 (fact "normalizes generic handler output into an MCP tool result"
 
