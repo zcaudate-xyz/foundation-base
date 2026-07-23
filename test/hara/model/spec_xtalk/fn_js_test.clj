@@ -444,21 +444,21 @@
 ^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-file-resolve :added "4.1"}
 (fact "resolves file paths")
 
-^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-file-slurp :added "4.1"}
-(fact "slurp file"
-  (l/emit-as :js [(js-tf-x-file-slurp '[_ filename opts cb])])
+^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-file-read :added "4.1"}
+(fact "read file"
+  (l/emit-as :js [(js-tf-x-file-read '[_ filename])])
   => #"readFile"
 
-  (l/emit-as :js [(js-tf-x-file-slurp '[_ filename opts cb])])
-  => #"\[\"async\"\]")
+  (l/emit-as :js [(js-tf-x-file-read '[_ filename])])
+  => #"promises")
 
-^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-file-spit :added "4.1"}
-(fact "spit file"
-  (l/emit-as :js [(js-tf-x-file-spit '[_ filename s opts cb])])
+^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-file-write :added "4.1"}
+(fact "write file"
+  (l/emit-as :js [(js-tf-x-file-write '[_ filename content])])
   => #"writeFile"
 
-  (l/emit-as :js [(js-tf-x-file-spit '[_ filename s opts cb])])
-  => #"\[\"async\"\]")
+  (l/emit-as :js [(js-tf-x-file-write '[_ filename content])])
+  => #"promises")
 
 (comment
 
