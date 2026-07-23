@@ -92,25 +92,25 @@
     {"broadcast"
      (fn [frame]
        (var envelope (. frame ["payload"]))
-       (var event (. envelope ["event"]))
+       (var #{event} envelope)
        (when (or (== "xt.db/event" event)
                  (== "db/sync" event)
                  (== "db/remove" event))
-         (var payload (. envelope ["payload"]))
-         (var topic (. frame ["topic"]))
+         (var #{payload} envelope)
+         (var #{topic} frame)
          (var callbacks (xtd/get-in realtime-client ["state" "callbacks"]))
          (xt/for:object [[_id callback] callbacks]
            (callback (xt/x:obj-assign {"topic" topic}
                                       payload)))))
      "phx_reply"
      (fn [frame]
-       (var topic (. frame ["topic"]))
+       (var #{topic} frame)
        (var entry (xtd/get-in realtime-client ["state" "topics" topic]))
        (when (xt/x:is-object? entry)
          (var status (xtd/get-in frame ["payload" "status"]))
          (var ok  (== status "ok"))
-         (var deferred  (. entry ["deferred"]))
-         (var resolve   (. deferred ["resolve"]))
+         (var #{deferred} entry)
+         (var #{resolve} deferred)
          (xtd/set-in realtime-client ["state" "topics" topic "ready"] ok)
          (when (xt/x:is-function? resolve)
            (resolve ok))))})))

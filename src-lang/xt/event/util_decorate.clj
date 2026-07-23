@@ -44,7 +44,7 @@
          (xt/x:set-key result "output" {:start (xt/x:now-ms)})))
   (var on-teardown
        (fn []
-         (var output (. result ["output"]))
+         (var #{output} result)
          (var t-end (xt/x:now-ms))
          (var t-elapsed (- t-end (. output ["start"])))
          (xt/x:set-key output "end" t-end)
@@ -140,9 +140,7 @@
   (var teardown-fn
        (fn []
          (xt/for:array [cb tcbs]
-           (var on-teardown (. cb ["on_teardown"]))
-           (var name (. cb ["name"]))
-           (var output (. cb ["output"]))
+           (var #{on-teardown name output} cb)
            (when (xt/x:not-nil? on-teardown)
              (on-teardown))
            (when (and (xt/x:not-nil? name)
@@ -152,7 +150,7 @@
   (var run-fn
        (fn []
          (xt/for:array [cb tcbs]
-           (var on-setup (. cb ["on_setup"]))
+           (var #{on-setup} cb)
            (when (xt/x:not-nil? on-setup)
              (on-setup args)))
          (var base-thunk
@@ -169,7 +167,7 @@
              base-promise
              (fn [ret]
                (xt/for:array [cb tcbs]
-                 (var on-success (. cb ["on_success"]))
+                 (var #{on-success} cb)
                  (when (xt/x:not-nil? on-success)
                    (on-success ret)))
                (xt/x:set-key receipt "status" "success")
@@ -177,7 +175,7 @@
                (return receipt)))
              (fn [err]
                (xt/for:array [cb tcbs]
-                 (var on-error (. cb ["on_error"]))
+                 (var #{on-error} cb)
                  (when (xt/x:not-nil? on-error)
                    (on-error err)))
                (xt/x:set-key receipt "status" "error")

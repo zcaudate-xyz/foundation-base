@@ -11,7 +11,7 @@
   {:added "4.0"}
   [schema entry opts]
   (var #{strict types column-fn table-fn} opts)
-  (var ident     (. entry ["ident"]))
+  (var #{ident} entry)
   (var itype     (. entry ["type"]))
   (var iprimary  (. entry ["primary"]))
   (var irequired (. entry ["required"]))

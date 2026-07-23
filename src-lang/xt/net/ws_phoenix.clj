@@ -76,7 +76,7 @@
   "creates a phoenix join frame"
   {:added "4.1.4"}
   [payload opts]
-  (var topic (. opts ["topic"]))
+  (var #{topic} opts)
   (when (xt/x:nil? topic)
     (xt/x:err "Phoenix channel missing topic"))
   (return (-/make-frame topic
@@ -88,7 +88,7 @@
   "creates a phoenix leave frame"
   {:added "4.1.4"}
   [opts]
-  (var topic (. opts ["topic"]))
+  (var #{topic} opts)
   (when (xt/x:nil? topic)
     (xt/x:err "Phoenix channel missing topic"))
   (return (-/make-frame topic "phx_leave" {} (or opts {}))))

@@ -52,9 +52,7 @@
   "helper function for tail calls on run commands"
   {:added "4.1"}
   [context refresh-deps-fn]
-  (var acc (. context ["acc"]))
-  (var path (. context ["path"]))
-  (var node (. context ["node"]))
+  (var #{acc path node} context)
   (var space-id (. context ["space"] ["id"]))
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
@@ -97,7 +95,7 @@
   [group-id models]
   (var all-deps {})
   (xt/for:object [[model-id model-entry] models]
-    (var deps (. model-entry ["deps"]))
+    (var #{deps} model-entry)
     (xt/for:array [path (or deps [])]
       (:= path (:? (xt/x:is-array? path) path [group-id path]))
       (xtd/set-in all-deps
@@ -129,7 +127,7 @@
   "removes a raw page trigger directly from the node"
   {:added "4.1"}
   [node signal]
-  (var triggers (. node ["triggers"]))
+  (var #{triggers} node)
   (var prev (xt/x:get-key triggers signal))
   (xt/x:del-key triggers signal)
   (return prev))

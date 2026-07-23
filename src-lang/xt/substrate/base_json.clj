@@ -40,10 +40,7 @@
   [value]
   (when (not (xt/x:is-object? value))
     (return false))
-  (var kind (. value ["kind"]))
-  (var id (. value ["id"]))
-  (var space (. value ["space"]))
-  (var meta (. value ["meta"]))
+  (var #{kind id space meta} value)
   (when (or (not (-/frame-kind? kind))
             (not (xt/x:is-string? id))
             (not (xt/x:is-string? space))

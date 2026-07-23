@@ -59,8 +59,7 @@
   [model]
   (var input  (event-model/get-input model))
   (var output (event-model/get-output model nil))
-  (var remote (. model ["remote"]))
-  (var sync   (. model ["sync"]))
+  (var #{remote sync} model)
   (var out {"input"  (-/model-serialize-input input)
             "output" (-/model-serialize-output output)})
   (when (xt/x:not-nil? remote)
@@ -76,7 +75,7 @@
   (var group (page-core/group-get node space-id group-id))
   (when (xt/x:nil? group)
     (return {}))
-  (var models (. group ["models"]))
+  (var #{models} group)
   (var out {})
   (xt/for:object [[model-id model] models]
     (xt/x:set-key out model-id (-/model-serialize model)))
@@ -153,10 +152,10 @@
   [space args request node]
   (var space-id (xt/x:first args))
   (var runtime (page-core/space-ensure-page node space-id))
-  (var groups (. runtime ["groups"]))
+  (var #{groups} runtime)
   (var out {})
   (xt/for:object [[group-id group] groups]
-    (var models (. group ["models"]))
+    (var #{models} group)
     (var model-ids [])
     (xt/for:object [[model-id _] models]
       (xt/x:arr-push model-ids model-id))
@@ -176,13 +175,13 @@
     (return {"error" "group not found"
              "space" space-id
              "group" group-id}))
-  (var models (. group ["models"]))
+  (var #{models} group)
   (xt/for:object [[model-id model] models]
     (-/ensure-model-listeners node space-id group-id model-id model))
   (when (xt/x:not-nil? transport-id)
     (router/add-subscription node transport-id space-id -/SIGNAL_OUTPUT nil {})
     (router/add-subscription node transport-id space-id -/SIGNAL_INPUT nil {}))
-  (var init (. group ["init"]))
+  (var #{init} group)
   (if (xt/x:not-nil? init)
     (return
      (promise/x:promise-then
@@ -494,13 +493,13 @@
   {:added "4.1"}
   [node space-id group-id snapshot remote-spec]
   (var runtime (page-core/space-ensure-page node space-id))
-  (var groups (. runtime ["groups"]))
+  (var #{groups} runtime)
   (var group-models {})
   (xt/for:object [[model-id model-snapshot] snapshot]
     (xt/x:set-key group-models
                   model-id
                   (-/model-create-proxy node space-id group-id model-id model-snapshot)))
-  (var transport-id (. remote-spec ["transport_id"]))
+  (var #{transport-id} remote-spec)
   (var dispatch-fn (fn [op node space-id group-id args]
                      (return (-/proxy-dispatch-op node transport-id op space-id group-id args))))
   (var group {"name"    group-id
@@ -516,12 +515,12 @@
   "applies an inbound output delta to a proxy model"
   {:added "4.1"}
   [space stream node]
-  (var data (. stream ["data"]))
+  (var #{data} stream)
   (var space-id (. stream ["space"]))
-  (var path (. data ["path"]))
+  (var #{path} data)
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
-  (var output (. data ["output"]))
+  (var #{output} data)
   (var group (page-core/group-get node space-id group-id))
   (when (or (xt/x:nil? group)
             (not (page-core/proxy-group? group)))
@@ -536,12 +535,12 @@
   "applies an inbound input delta to a proxy model"
   {:added "4.1"}
   [space stream node]
-  (var data (. stream ["data"]))
+  (var #{data} stream)
   (var space-id (. stream ["space"]))
-  (var path (. data ["path"]))
+  (var #{path} data)
   (var group-id (xt/x:first path))
   (var model-id (xt/x:second path))
-  (var input (. data ["input"]))
+  (var #{input} data)
   (var group (page-core/group-get node space-id group-id))
   (when (or (xt/x:nil? group)
             (not (page-core/proxy-group? group)))
@@ -576,7 +575,7 @@
   "queries a server for available page groups"
   {:added "4.1"}
   [node space-id opts]
-  (var transport-id (. opts ["transport_id"]))
+  (var #{transport-id} opts)
   (return (base-util/request node
                              space-id
                              -/ACTION_GROUP_LIST
@@ -587,7 +586,7 @@
   "opens a proxy page group on a client and creates proxy models"
   {:added "4.1"}
   [node space-id group-id opts]
-  (var transport-id (. opts ["transport_id"]))
+  (var #{transport-id} opts)
   (var existing-group (page-core/group-get node space-id group-id))
   (var remote-spec (or (and existing-group (. existing-group ["remote"]))
                        opts))
@@ -600,7 +599,7 @@
                           {"transport_id" transport-id})
        (promise/x:promise-then
         (fn [response]
-          (var error (. response ["error"]))
+          (var #{error} response)
           (when (xt/x:not-nil? error)
             (xt/x:err (xt/x:cat "ERR - " error)))
           (var snapshot (. response ["models"]))
@@ -611,7 +610,7 @@
   "closes a proxy page group and removes proxy models"
   {:added "4.1"}
   [node space-id group-id opts]
-  (var transport-id (. opts ["transport_id"]))
+  (var #{transport-id} opts)
   (return
    (-> (base-util/request node
                           space-id
@@ -622,7 +621,7 @@
        (promise/x:promise-then
         (fn [_]
           (var runtime (page-core/space-ensure-page node space-id))
-          (var groups (. runtime ["groups"]))
+          (var #{groups} runtime)
           (xt/x:del-key groups group-id)
           (return nil))))))
 
@@ -636,7 +635,7 @@
    (-> (dispatch-fn "proxy-call" node space-id group-id [model-id args save-output])
        (promise/x:promise-then
         (fn [response]
-          (var output (. response ["output"]))
+          (var #{output} response)
           (when (xt/x:not-nil? output)
             (-/model-apply-output
              space-id
@@ -651,7 +650,7 @@
   {:added "4.1"}
   [node space-id group-id opts]
   (-/install node)
-  (var transport-id (. opts ["transport_id"]))
+  (var #{transport-id} opts)
   (return
    (-> (-/group-open-proxy node space-id group-id opts)
        (promise/x:promise-then

@@ -44,7 +44,7 @@
                         :data {}
                         :ref_links {}
                         :rev_links {}}}))
-  (var record (. entry ["record"]))
+  (var #{record} entry)
   (var data (or (. incoming-record ["data"])
                 {}))
   (var ref-links (or (. incoming-record ["ref_links"])
@@ -121,7 +121,7 @@
   (when (xt/x:nil? attr)
     (xt/x:err (xt/x:cat "Not a valid link type: " (xt/x:json-encode [table-key field]))))
   (var link-ns (. attr ["ns"]))
-  (var rval (. attr ["rval"]))
+  (var #{rval} attr)
   (var link-type (. attr ["type"]))
   (var table-link-value (xt/x:get-key {:reverse ["rev_links" "ref_links"]
                                      :forward ["ref_links" "rev_links"]}

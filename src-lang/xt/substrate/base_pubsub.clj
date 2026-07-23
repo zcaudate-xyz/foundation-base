@@ -51,7 +51,7 @@
   "invokes a registered trigger for a stream"
   {:added "4.1"}
   [node stream]
-  (var signal (. stream ["signal"]))
+  (var #{signal} stream)
   (var entry (xt/x:get-key (. node ["triggers"])
                            signal))
   (when (xt/x:nil? entry)

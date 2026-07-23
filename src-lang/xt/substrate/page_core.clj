@@ -18,7 +18,7 @@
   "checks if a group is a proxy for a remote page group"
   {:added "4.1"}
   [group]
-  (var remote (. group ["remote"]))
+  (var #{remote} group)
   (return (and (xt/x:not-nil? remote)
                (not= false remote))))
 
@@ -45,7 +45,7 @@
   {:added "4.1"}
   [node space-id]
   (var space (node-space/ensure-space node space-id nil))
-  (var state (. space ["state"]))
+  (var #{state} space)
   (when (or (xt/x:nil? state)
             (not (xt/x:is-object? state)))
     (:= state {})
@@ -62,7 +62,7 @@
   {:added "4.1"}
   [node space-id runtime]
   (var space (node-space/ensure-space node space-id nil))
-  (var state (. space ["state"]))
+  (var #{state} space)
   (when (or (xt/x:nil? state)
             (not (xt/x:is-object? state)))
     (:= state {})
@@ -142,7 +142,7 @@
   (var out {})
   (var groups (. (-/space-ensure-page node space-id) ["groups"]))
   (xt/for:object [[dgroup-id dgroup] groups]
-    (var deps (. dgroup ["deps"]))
+    (var #{deps} dgroup)
     (var model-lu (xtd/get-in deps [group-id model-id]))
     (when (xt/x:not-nil? model-lu)
       (xt/x:set-key out dgroup-id (xt/x:obj-keys model-lu))))
@@ -155,7 +155,7 @@
   (var out {})
   (var groups (. (-/space-ensure-page node space-id) ["groups"]))
   (xt/for:object [[dgroup-id dgroup] groups]
-    (var deps (. dgroup ["deps"]))
+    (var #{deps} dgroup)
     (var group-lu (xt/x:get-key deps group-id))
     (when (xt/x:not-nil? group-lu)
       (xt/x:set-key out dgroup-id true)))
@@ -277,10 +277,7 @@
   {:added "4.1"}
   [node space-id group-id model-id
    opts]
-  (var handler  (. opts ["handler"]))
-  (var pipeline (. opts ["pipeline"]))
-  (var defaults (. opts ["defaults"]))
-  (var options  (. opts ["options"]))
+  (var #{handler pipeline defaults options} opts)
   (var model
        (event-model/create-model
         nil
@@ -316,7 +313,7 @@
   {:added "4.1"}
   [node space-id group-id models]
   (var runtime (-/space-ensure-page node space-id))
-  (var groups (. runtime ["groups"]))
+  (var #{groups} runtime)
   (var group (xt/x:get-key groups group-id))
   (when (xt/x:nil? group)
     (:= group {"name" group-id
@@ -354,7 +351,7 @@
   {:added "4.1"}
   [node space-id group-id]
   (var runtime (-/space-ensure-page node space-id))
-  (var groups (. runtime ["groups"]))
+  (var #{groups} runtime)
   (var dependents (-/group-get-dependents node space-id group-id))
   (when (> (xt/x:len (xt/x:obj-keys dependents)) 0)
     (xt/x:err (xt/x:cat "ERR - existing group dependents - "
@@ -373,7 +370,7 @@
                         (xt/x:json-encode dependents))))
   (var group (-/group-get node space-id group-id))
   (when group
-    (var models (. group ["models"]))
+    (var #{models} group)
     (var curr (xt/x:get-key models model-id))
     (xt/x:del-key models model-id)
     (return curr)))
@@ -386,8 +383,7 @@
   (var dispatch-fn (. group ["proxy_dispatch"]))
   (when dispatch-fn
     (return (dispatch-fn "group-update" node space-id group-id [event])))
-  (var throttle (. group ["throttle"]))
-  (var models (. group ["models"]))
+  (var #{throttle models} group)
   (var out [])
   (xt/for:object [[model-id _] models]
     (var entry (th/throttle-run throttle model-id [(or event {})]))
@@ -408,7 +404,7 @@
   (var dispatch-fn (. group ["proxy_dispatch"]))
   (when dispatch-fn
     (return (dispatch-fn "model-update" node space-id group-id [model-id event])))
-  (var throttle (. group ["throttle"]))
+  (var #{throttle} group)
   (var entry (th/throttle-run throttle model-id [(or event {})]))
   (return (. entry ["promise"])))
 
@@ -428,11 +424,11 @@
   "triggers a group"
   {:added "4.1"}
   [node space-id group signal event]
-  (var models (. group ["models"]))
+  (var #{models} group)
   (var out [])
   (xt/for:object [[model-id model] models]
-    (var options (. model ["options"]))
-    (var trigger (. options ["trigger"]))
+    (var #{options} model)
+    (var #{trigger} options)
     (var check (page-util/check-event trigger signal event {"model" model
                                                             "group" group
                                                             "node" node
@@ -466,8 +462,8 @@
   (var dispatch-fn (. group ["proxy_dispatch"]))
   (when dispatch-fn
     (return (dispatch-fn "trigger-model" node space-id group-id [model-id signal event])))
-  (var options (. model ["options"]))
-  (var trigger (. options ["trigger"]))
+  (var #{options} model)
+  (var #{trigger} options)
   (when (page-util/check-event trigger signal event {"model" model
                                                      "group" group
                                                      "node" node

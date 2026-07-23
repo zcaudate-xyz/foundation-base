@@ -7,7 +7,7 @@
              [xt.ui.core :as ui]]})
 
 (defn.xt view [frame content]
-  (var opts (. frame ["opts"]))
+  (var #{opts} frame)
   (return
    (ui/node "ui/column" {"class" (or (. opts ["class"])
                                       "mx-auto w-full gap-6 p-4 md:p-8")}

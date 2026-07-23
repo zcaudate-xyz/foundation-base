@@ -67,7 +67,7 @@
 (defn.xt render
   "projects one substrate snapshot into serializable semantic view IR"
   [snapshot]
-  (var session (. snapshot ["session"]))
+  (var #{session} snapshot)
   (var profile-output (. snapshot ["profile"]))
   (var profile (:? (xt/x:not-nil? profile-output)
                    (or (. profile-output ["user"]) profile-output)
@@ -77,8 +77,7 @@
                             (. session ["user"])
                             nil)))
   (var signed-in (xt/x:not-nil? session))
-  (var pending (. snapshot ["pending"]))
-  (var error (. snapshot ["error"]))
+  (var #{pending error} snapshot)
   (var auth-card
        (view/node
         "ui/card" {"class" "flex flex-col gap-3.5 p-5"}

@@ -81,8 +81,7 @@
   [impl tables event]
   (var #{listeners} impl)
   (xt/for:object [[listener-id handle] listeners]
-    (var guard    (. handle ["guard"]))
-    (var callback (. handle ["callback"]))
+    (var #{guard callback} handle)
     (var matched false)
     (when (xt/x:is-function? guard)
       (xt/for:array [table tables]

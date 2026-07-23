@@ -101,7 +101,7 @@
 
 (defn.xt await-open
   [state]
-  (var status (. state ["status"]))
+  (var #{status} state)
   (cond (== status "open")
         (return (promise/x:promise-run
                  (. state ["socket"])))
@@ -122,7 +122,7 @@
             (return (-/await-open state)))))))
 (defn.xt connect-socket
   [socket-source]
-  (var connect-fn (. socket-source ["connect_fn"]))
+  (var #{connect-fn} socket-source)
   (if (xt/x:is-function? connect-fn)
     (return (connect-fn (-/websocket-url socket-source)))
     (do (var ctor (or (. socket-source ["WebSocket"])
@@ -138,7 +138,7 @@
         (return (-/connect-socket {"url" socket-source}))
 
         (xt/x:is-object? socket-source)
-        (do (var create-fn (. socket-source ["create_fn"]))
+        (do (var #{create-fn} socket-source)
             (cond (xt/x:is-function? create-fn)
                   (return (create-fn))
 

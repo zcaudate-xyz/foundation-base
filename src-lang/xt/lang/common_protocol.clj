@@ -40,7 +40,7 @@
   (var entry (. xt.lang.common-protocol/PROTOCOLS [protocol]))
   (when (xt/x:nil? entry)
     (return false))
-  (var impls (. entry ["impls"]))
+  (var #{impls} entry)
   (return (xt/x:has-key? impls type)))
 
 (defn.xt protocol-method
@@ -93,7 +93,7 @@
   (var protocol (. xt.lang.common-protocol/PROTOCOLS [protocolname]))
   (when (xt/x:nil? protocol)
     (xt/x:err (xt/x:cat "Missing protocol " protocolname)))
-  (var impls (. protocol ["impls"]))
+  (var #{impls} protocol)
   (xt/x:set-key impls typename impl-map)
   (return impl-map))
 

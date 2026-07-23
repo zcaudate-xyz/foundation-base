@@ -366,8 +366,8 @@
     "pipeline" (xtd/obj-assign-nested
                 {"remote" {"handler"
                            (fn [context]
-                             (var node (. context ["node"]))
-                             (var args (. context ["args"]))
+                             (var #{node} context)
+                             (var #{args} context)
                              (return (-/rpc-call-baseline-fn node primary-id rpc-spec args)))}}
                 pipeline)
     "defaults" defaults
@@ -438,13 +438,13 @@
   (var table (xt/x:first tree))
   (return
    {"handler" (fn [context]
-                (var node (. context ["node"]))
+                (var #{node} context)
                 (var caching (-/get-caching-impl node primary-id))
                 (return (impl-common/pull caching tree)))
     "pipeline" (xtd/obj-assign-nested
                 {"remote" {"handler"
                            (fn [context]
-                             (var node (. context ["node"]))
+                             (var #{node} context)
                              (return (-/pull-call-baseline-fn node primary-id tree)))}}
                 pipeline)
     "defaults" defaults
@@ -530,8 +530,8 @@
   (return
    {"handler"
     (fn [context]
-      (var node (. context ["node"]))
-      (var args (. context ["args"]))
+      (var #{node} context)
+      (var #{args} context)
       (var caching   (-/get-caching-impl node primary-id))
       (var #{schema} caching)  
       (var ok-value (base-tree/plan-view schema
@@ -546,8 +546,8 @@
     "pipeline" (xtd/obj-assign-nested
                 {"remote" {"handler"
                            (fn [context]
-                             (var node (. context ["node"]))
-                             (var args (. context ["args"]))
+                             (var #{node} context)
+                             (var #{args} context)
                              (return
                               (-/dataview-call-baseline-fn  node primary-id
                                                             (-> {}

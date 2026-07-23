@@ -61,8 +61,8 @@
   (when (not (xt/x:is-function? handler))
     (xt/x:err "MCP tool handler must be a function"))
   (var service (-/ensure-service node service-id nil))
-  (var tools (. service ["tools"]))
-  (var name (. tool ["name"]))
+  (var #{tools} service)
+  (var #{name} tool)
   (when (xt/x:not-nil? (xt/x:get-key tools name))
     (xt/x:err (xt/x:cat "duplicate MCP tool - " name)))
   (var entry {:tool tool :handler handler :meta (or meta {})})
@@ -74,7 +74,7 @@
   {:added "4.1"}
   [node service-id tool-name]
   (var service (-/ensure-service node service-id nil))
-  (var tools (. service ["tools"]))
+  (var #{tools} service)
   (var entry (xt/x:get-key tools tool-name))
   (xt/x:del-key tools tool-name)
   (return entry))
@@ -146,7 +146,7 @@
   (var entry (-/get-tool node service-id tool-name))
   (when (xt/x:nil? entry)
     (xt/x:err (xt/x:cat "Unknown tool: " tool-name)))
-  (var tool (. entry ["tool"]))
+  (var #{tool} entry)
   (:= tool-args (or tool-args {}))
   (var validation-error
        (base/schema-error (. tool ["input_schema"]) tool-args "$"))
@@ -162,7 +162,7 @@
         "session_id" (-/session-id context)
         "application" (. context ["application"])
         "meta" (or (. entry ["meta"]) {})})
-  (var authorize-fn (. service ["authorize_fn"]))
+  (var #{authorize-fn} service)
   (try
     (return
      (-> (node-request/ensure-promise
@@ -199,8 +199,7 @@
   {:added "4.1"}
   [node service-id message context]
   (:= context (or context {}))
-  (var id (. message ["id"]))
-  (var method (. message ["method"]))
+  (var #{id method} message)
   (var params (or (. message ["params"]) {}))
   (var service (-/ensure-service node service-id nil))
   (var tool-name nil)

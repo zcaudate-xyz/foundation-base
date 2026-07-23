@@ -50,7 +50,7 @@
           (xt/x:set-key p "value" nil))
       (do (xt/x:set-key p "value" payload)
            (xt/x:set-key p "error" nil)))
-    (var children (. p ["children"]))
+    (var #{children} p)
     (xt/x:set-key p "children" [])
     (xt/for:array [entry children]
       (xt/x:apply drive-fn [p entry drive-fn])))
@@ -60,7 +60,7 @@
   "subscribes a child promise to a parent promise"
   {:added "4.1"}
   [promise child on-resolve on-reject drive-fn]
-  (var status (. promise ["status"]))
+  (var #{status} promise)
   (if (== "pending" status)
     (do (xt/x:arr-push
          (. promise ["children"])
@@ -81,7 +81,7 @@
   {:added "4.1"}
   [target value drive-fn]
   (if (-/promise-native? value)
-    (do (var status (. value ["status"]))
+    (do (var #{status} value)
         (cond (== "pending" status)
               (return (-/internal-link-action value target nil nil drive-fn))
 
@@ -104,8 +104,8 @@
   "dispatches a settled parent promise to a subscribed child"
   {:added "4.1"}
   [promise entry drive-fn]
-  (var status (. promise ["status"]))
-  (var child (. entry ["child"]))
+  (var #{status} promise)
+  (var #{child} entry)
   (var rejected? (== "rejected" status))
   (var thunk (. entry [(:? rejected? "reject" "resolve")]))
   (var payload (. promise [(:? rejected? "error" "value")]))

@@ -32,8 +32,7 @@
   "normalizes a failed supabase response into exception data"
   {:added "4.1"}
   [response]
-  (var status (. response ["status"]))
-  (var body   (. response ["body"]))
+  (var #{status body} response)
   (var detail (-/supabase-rpc-error-detail body))
   (var data body)
   (when (and (xt/x:is-object? detail)
@@ -49,8 +48,7 @@
   "extracts supabase response data and rejects failed responses"
   {:added "4.1"}
   [response]
-  (var status (. response ["status"]))
-  (var body (. response ["body"]))
+  (var #{status body} response)
   (when (and status (>= status 400))
     (var data (-/supabase-error-data response))
     (throw (xt/x:ex (or (. data ["message"])
@@ -67,7 +65,7 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (var client (. impl ["client"]))
+          (var #{client} impl)
           (return
            (-> (http-fetch/request-http client cmd)
                (promise/x:promise-then -/supabase-response-data))))))))
@@ -84,7 +82,7 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (var client (. impl ["client"]))
+          (var #{client} impl)
           (return
            (-> (http-fetch/request-http client (addon/cmd-signup credentials opts))
                (promise/x:promise-then http-util/get-body-data)
@@ -106,7 +104,7 @@
    (-> (promise/x:promise-run (substrate/get-service node service-id))
        (promise/x:promise-then
         (fn [impl]
-          (var client (. impl ["client"]))
+          (var #{client} impl)
           (return
            (-> (http-fetch/request-http client (addon/cmd-token-password credentials opts))
                (promise/x:promise-then http-util/get-body-data)
@@ -128,7 +126,7 @@
        (promise/x:promise-then
         (fn [impl]
           (session/auto-refresh-stop impl)
-          (var client (. impl ["client"]))
+          (var #{client} impl)
           (return
            (-> (http-fetch/request-http client (addon/cmd-logout opts))
                (promise/x:promise-then
@@ -405,7 +403,7 @@
          defaults} model)
   (var model-handler
        (fn [context]
-         (var node (. context ["node"]))
+         (var #{node} context)
          (var cmd  (:? (xt/x:is-function? supabase-handler)
                        (supabase-handler context)
                        supabase-handler))

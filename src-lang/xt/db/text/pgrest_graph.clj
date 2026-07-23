@@ -247,9 +247,7 @@
   "compiles tree-ir data/link params into PostgREST select syntax"
   {:added "4.1"}
   [params]
-  (var custom (. params ["custom"]))
-  (var data (. params ["data"]))
-  (var links (. params ["links"]))
+  (var #{custom data links} params)
   (when (-/tree-count? custom)
     (return "count"))
   (var out [])
@@ -274,7 +272,7 @@
   (var offset nil)
   (xt/for:array [entry (or custom [])]
     (when (== (. entry ["::"]) "sql/keyword")
-      (var name (. entry ["name"]))
+      (var #{name} entry)
       (cond (== name "ORDER BY")
             (do (var tuple (xt/x:first (or (. entry ["args"]) [])))
                 (:= order-cols

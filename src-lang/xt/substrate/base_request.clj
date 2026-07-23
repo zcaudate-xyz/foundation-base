@@ -64,8 +64,8 @@
   "adds a pending request entry to a node"
   {:added "4.1"}
   [node request resolve reject meta]
-  (var pending (. node ["pending"]))
-  (var id (. request ["id"]))
+  (var #{pending} node)
+  (var #{id} request)
   (var entry {:resolve resolve
               :reject reject
               :request request
@@ -77,7 +77,7 @@
   "removes a pending request entry"
   {:added "4.1"}
   [node request-id]
-  (var pending (. node ["pending"]))
+  (var #{pending} node)
   (var entry (xt/x:get-key pending request-id))
   (xt/x:del-key pending request-id)
   (return entry))
@@ -86,12 +86,11 @@
   "settles a pending request using a response frame"
   {:added "4.1"}
   [node response]
-  (var reply-to (. response ["reply_to"]))
+  (var #{reply-to} response)
   (var entry (-/remove-pending node reply-to))
   (when (xt/x:nil? entry)
     (return nil))
-  (var resolve (. entry ["resolve"]))
-  (var reject (. entry ["reject"]))
+  (var #{resolve reject} entry)
   (if (== (. response ["status"]) frame/STATUS_OK)
     (resolve (. response ["data"]))
     (reject response))
@@ -101,7 +100,7 @@
   "invokes a node handler for a request"
   {:added "4.1"}
   [node request]
-  (var action (. request ["action"]))
+  (var #{action} request)
   (var entry (xt/x:get-key (. node ["handlers"])
                            action))
   (when (xt/x:nil? entry)

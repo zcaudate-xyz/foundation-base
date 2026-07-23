@@ -72,7 +72,7 @@
   "checks if an inbound event should resolve connection readiness"
   {:added "4.1"}
   [event opts]
-  (var ready-pred (. opts ["ready_pred"]))
+  (var #{ready-pred} opts)
   (cond (xt/x:is-function? ready-pred)
         (return (ready-pred event))
 
@@ -90,7 +90,7 @@
   "waits until a connection state records its ready event"
   {:added "4.1"}
   [state]
-  (var ready (. state ["ready"]))
+  (var #{ready} state)
   (if (xt/x:not-nil? ready)
     (return (promise/x:promise-run ready))
     (return
@@ -128,7 +128,7 @@
   (if (not wait-ready)
     (return endpoint)
     (do
-      (var start-fn (. endpoint ["start_fn"]))
+      (var #{start-fn} endpoint)
       (if (xt/x:nil? start-fn)
         (return endpoint)
         (return
@@ -410,10 +410,10 @@
   {:added "4.1"}
   [node opts]
   (var config (or opts {}))
-  (var target (. config ["target"]))
+  (var #{target} config)
   (var transport-id (or (. config ["transport_id"])
                        "host"))
-  (var ready (. config ["ready"]))
+  (var #{ready} config)
   (when (xt/x:nil? target)
     (xt/x:err "boot-self requires `target`"))
   (return
@@ -486,7 +486,7 @@
       (var url (-/blob-url script))
       (try
         (var shared (new SharedWorker url worker-opts))
-        (var port (. shared ["port"]))
+        (var #{port} shared)
         (. port (start))
         (. port (addEventListener
                  "message"
@@ -508,7 +508,7 @@
    {"create_fn"
     (fn [listener]
       (var shared (new SharedWorker url))
-      (var port (. shared ["port"]))
+      (var #{port} shared)
       (. port (start))
       (. port (addEventListener
                "message"

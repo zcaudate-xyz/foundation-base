@@ -85,7 +85,7 @@
   "ensures shared network state exists for an endpoint id"
   {:added "4.1"}
   [network endpoint-id]
-  (var states (. network ["states"]))
+  (var #{states} network)
   (var state (xt/x:get-key states endpoint-id))
   (when (xt/x:nil? state)
     (:= state {"id" endpoint-id
@@ -133,7 +133,7 @@
                           peer-id))
   (when (xt/x:nil? peer)
     (xt/x:err (xt/x:cat "wire peer not found - " peer-id)))
-  (var listener (. peer ["listener"]))
+  (var #{listener} peer)
   (when (xt/x:nil? listener)
     (xt/x:err (xt/x:cat "wire peer not started - " peer-id)))
   (var output
@@ -158,7 +158,7 @@
   [state]
   (var write-fn
        (fn [text]
-         (var network (. state ["network"]))
+         (var #{network} state)
          (var peer-ids (. state ["peers"]))
          (when (xt/x:not-nil? network)
           (when (== 0 (xt/x:len peer-ids))
@@ -168,10 +168,10 @@
                                           peer-ids
                                           text
                                           0)))
-         (var peer (. state ["peer"]))
+         (var #{peer} state)
          (when (xt/x:nil? peer)
            (xt/x:err "wire endpoint missing peer"))
-         (var listener (. peer ["listener"]))
+         (var #{listener} peer)
          (when (xt/x:nil? listener)
            (xt/x:err "wire peer not started"))
          (return

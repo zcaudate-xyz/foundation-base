@@ -30,7 +30,7 @@
 
 (defn.xt validate! [form]
   (var errors {})
-  (var draft (. form ["draft"]))
+  (var #{draft} form)
   (xt/for:object [[field validators] (. form ["validators"])]
     (var message (-/validate-value validators (xt/x:get-key draft field) draft))
     (when (xt/x:not-nil? message)

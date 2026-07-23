@@ -133,7 +133,7 @@
           (xt/x:set-key out "count" true)
 
           (== (. entry ["::"]) "sql/keyword")
-          (do (var name (. entry ["name"]))
+          (do (var #{name} entry)
               (cond (== name "ORDER BY")
                     (do (var tuple (xt/x:first (or (. entry ["args"]) [])))
                         (xt/x:set-key out

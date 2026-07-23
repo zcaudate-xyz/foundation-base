@@ -490,7 +490,7 @@
   "demultiplexes node frames"
   {:added "4.1"}
   [node event ctx]
-  (var kind (. event ["kind"]))
+  (var #{kind} event)
   (cond (== kind frame/KIND_REQUEST)
         (return (-/receive-request node event ctx))
 
@@ -522,7 +522,7 @@
   (router/register-connection node
                               transport-id
                               {:meta (. transport ["meta"])})
-  (var start-fn (. transport ["start_fn"]))
+  (var #{start-fn} transport)
   (when (xt/x:nil? start-fn)
     (return (promise/x:promise-run transport)))
   (return
@@ -542,13 +542,13 @@
   "detaches and optionally stops a transport"
   {:added "4.1"}
   [node transport-id]
-  (var transports (. node ["transports"]))
+  (var #{transports} node)
   (var transport (xt/x:get-key transports transport-id))
   (when (xt/x:nil? transport)
     (return (promise/x:promise-run nil)))
   (xt/x:del-key transports transport-id)
   (router/unregister-connection node transport-id)
-  (var stop-fn (. transport ["stop_fn"]))
+  (var #{stop-fn} transport)
   (when (xt/x:nil? stop-fn)
     (return (promise/x:promise-run transport)))
   (return

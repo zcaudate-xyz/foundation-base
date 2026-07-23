@@ -169,8 +169,7 @@
 
 (defn.xt async-fn-basic
   [handler context callbacks]
-  (var success (. callbacks ["success"]))
-  (var error (. callbacks ["error"]))
+  (var #{success error} callbacks)
   (try
     (var output (handler context))
     (return
@@ -179,8 +178,7 @@
 
 (defn.xt async-fn-promise
   [handler context callbacks]
-  (var success (. callbacks ["success"]))
-  (var error (. callbacks ["error"]))
+  (var #{success error} callbacks)
   (try
     (var output (handler context))
     (if (promise/x:promise-native? output)
@@ -203,7 +201,7 @@
   [handler]
   (var wrapped-fn
        (fn [context]
-         (var args (. context ["args"]))
+         (var #{args} context)
          (when (xt/x:nil? args)
            (:= args []))
          (return (xt/x:apply handler args))))
@@ -431,7 +429,7 @@
   (var #{process} output)
   (if (== true (. output ["errored"]))
     (return (process ((. output ["default"]))))
-    (do (var current (. output ["current"]))
+    (do (var #{current} output)
         (when (xt/x:nil? current)
           (:= current (process ((. output ["default"])))))
         (return current))))
@@ -543,7 +541,7 @@
   (var context  (xt/x:obj-assign (-/model-context model)
                                  opts))
   (var disabled (check-disabled context))
-  (var args (. context ["args"]))
+  (var #{args} context)
   (when (xt/x:nil? args)
     (when (not disabled)
       (:= args (check-args context))))

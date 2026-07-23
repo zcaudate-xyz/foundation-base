@@ -19,7 +19,7 @@
   (var fields (or (. frame ["opts"] ["fields"]) []))
   (var children [])
   (xt/for:array [field fields]
-    (var id (. field ["id"]))
+    (var #{id} field)
     (var component (or (. field ["component"]) "ui/input"))
     (xt/x:arr-push
      children

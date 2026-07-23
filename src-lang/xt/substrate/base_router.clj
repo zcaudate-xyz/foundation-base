@@ -161,7 +161,7 @@
   "ensures router state is present on a node"
   {:added "4.1"}
   [node]
-  (var router (. node ["router"]))
+  (var #{router} node)
   (when (xt/x:nil? router)
     (:= router {:connections {}
                 :subscriptions {}})
@@ -323,7 +323,7 @@
   "processes an inbound subscribe control frame"
   {:added "4.1"}
   [node event ctx]
-  (var transport-id (. ctx ["transport_id"]))
+  (var #{transport-id} ctx)
   (when (xt/x:not-nil? transport-id)
     (-/add-subscription node
                         transport-id
@@ -337,7 +337,7 @@
   "processes an inbound unsubscribe control frame"
   {:added "4.1"}
   [node event ctx]
-  (var transport-id (. ctx ["transport_id"]))
+  (var #{transport-id} ctx)
   (when (xt/x:not-nil? transport-id)
     (-/remove-subscription node
                            transport-id

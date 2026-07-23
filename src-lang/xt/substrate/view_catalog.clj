@@ -141,7 +141,7 @@
   (var e (-/entry component-id))
   (when (xt/x:nil? e)
     (return nil))
-  (var variants (. e ["variants"]))
+  (var #{variants} e)
   (when (xt/x:nil? variants)
     (return nil))
   (return (xt/x:get-key variants variant)))
@@ -155,7 +155,7 @@
   (when (not (xt/x:is-string? (. value ["action"])))
     (xt/x:err (xt/x:cat "view event requires an action id - "
                         component-id " - " prop)))
-  (var payload (. value ["payload"]))
+  (var #{payload} value)
   (when (and (xt/x:is-object? payload)
              (xt/x:has-key? payload "$"))
     (when (not= "event" (. payload ["$"]))
@@ -168,7 +168,7 @@
 
 (defn.xt validate-prop-type
   [component-id prop spec value]
-  (var type (. spec ["type"]))
+  (var #{type} spec)
   (var ok true)
   (cond (== type "string")
         (:= ok (xt/x:is-string? value))
@@ -190,7 +190,7 @@
   [component-id props]
   (var e (-/entry component-id))
   (var eprops (. e ["props"]))
-  (var events (. e ["events"]))
+  (var #{events} e)
   (xt/for:object [[prop value] (or props {})]
     (cond (xt/x:has-key? (or events {}) prop)
           (-/validate-action component-id prop value)
@@ -203,7 +203,7 @@
           (do (-/validate-prop-type component-id prop
                                     (xt/x:get-key eprops prop) value)
               (when (== prop "variant")
-                (var variants (. e ["variants"]))
+                (var #{variants} e)
                 (when (and (xt/x:not-nil? variants)
                            (not (xt/x:has-key? variants value)))
                   (xt/x:err (xt/x:cat "unknown view variant - "

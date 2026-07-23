@@ -69,7 +69,7 @@
   "registers a contract and rejects incompatible duplicate definitions"
   [registry contract]
   (var component-id (. contract ["id"]))
-  (var contracts (. registry ["contracts"]))
+  (var #{contracts} registry)
   (var existing (xt/x:get-key contracts component-id))
   (when (and existing
              (not= (xt/x:json-encode existing)
@@ -133,7 +133,7 @@
       (-/validate-node registry child))
     (return true))
   (var component-id (. ui-node ["component"]))
-  (var contracts (. registry ["contracts"]))
+  (var #{contracts} registry)
   (when (not (xt/x:has-key? contracts component-id))
     (xt/x:err (xt/x:cat "ERR - unregistered UI component - " component-id)))
   (var contract (xt/x:get-key contracts component-id))

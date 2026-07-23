@@ -59,7 +59,7 @@
                  nil))
     (when (xt/x:not-nil? key)
       (xt/x:set-key body key (xt/x:get-idx args i))))
-  (var schema  (. rpc-spec ["schema"]))
+  (var #{schema} rpc-spec)
   (var headers (xt/x:obj-clone (. opts ["headers"])))
   (when (xt/x:not-nil? schema)
     (xt/x:set-key headers "Content-Profile" schema)

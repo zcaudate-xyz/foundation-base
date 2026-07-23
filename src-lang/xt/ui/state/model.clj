@@ -121,9 +121,7 @@
            model-id (or event {}) nil)))
 
 (defn.xt subscribe! [store subscription-id callback]
-  (var node (. store ["node"]))
-  (var space-id (. store ["space_id"]))
-  (var group-id (. store ["group_id"]))
+  (var #{node space-id group-id} store)
   (var group (page-core/group-ensure node space-id group-id))
   (xt/for:object [[model-id _] (. group ["models"])]
     (var key (-/listener-key space-id group-id model-id))
@@ -137,9 +135,7 @@
   (return subscription-id))
 
 (defn.xt unsubscribe! [store subscription-id]
-  (var node (. store ["node"]))
-  (var space-id (. store ["space_id"]))
-  (var group-id (. store ["group_id"]))
+  (var #{node space-id group-id} store)
   (var group (page-core/group-ensure node space-id group-id))
   (xt/for:object [[model-id _] (. group ["models"])]
     (var key (-/listener-key space-id group-id model-id))
@@ -152,7 +148,7 @@
   (var listener-ids (xt/x:obj-keys (. store ["listeners"])))
   (xt/for:array [listener-id listener-ids]
     (-/unsubscribe! store listener-id))
-  (var control (. store ["control"]))
+  (var #{control} store)
   (when (and (xt/x:not-nil? control)
              (xt/x:is-function? (. control ["close"])))
     (return ((. control ["close"]))))

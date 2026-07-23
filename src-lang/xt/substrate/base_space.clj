@@ -106,7 +106,7 @@
   {:added "4.1"}
   [node space-id]
   (var sid (or space-id frame/SPACE_NODE))
-  (var spaces (. node ["spaces"]))
+  (var #{spaces} node)
   (var entry (xt/x:get-key spaces sid))
   (xt/x:del-key spaces sid)
   (return entry))

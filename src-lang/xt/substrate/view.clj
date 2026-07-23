@@ -151,7 +151,7 @@
   "ensures substrate-owned state for one view in a node space"
   [node space-id view-id]
   (var space (node-space/ensure-space node space-id nil))
-  (var state (. space ["state"]))
+  (var #{state} space)
   (when (or (xt/x:nil? state)
             (not (xt/x:is-object? state)))
     (:= state {})
@@ -184,7 +184,7 @@
   "sets substrate-owned view state and notifies view subscribers"
   [node space-id view-id path value]
   (var container (-/state-container node space-id view-id))
-  (var values (. container ["values"]))
+  (var #{values} container)
   (when (== 0 (xt/x:len (or path [])))
     (:= values value)
     (xt/x:set-key container "values" values))
@@ -205,7 +205,7 @@
 (defn.xt binding-read
   [node view-id binding]
   (var source (or (. binding ["source"]) "state"))
-  (var space-id (. binding ["space_id"]))
+  (var #{space-id} binding)
   (var path (or (. binding ["path"]) []))
   (cond (== source "local")
         (return (. binding ["initial"]))
@@ -266,7 +266,7 @@
   (xt/for:object [[_ binding] (or (. spec ["bindings"]) {})]
     (var source (or (. binding ["source"]) "state"))
     (when (not= source "local")
-      (var space-id (. binding ["space_id"]))
+      (var #{space-id} binding)
       (var key (:? (== source "state")
                    (-/state-listener-key space-id view-id)
                    (-/model-listener-key space-id
@@ -285,7 +285,7 @@
 
 (defn.xt unsubscribe
   [subscription]
-  (var node (. subscription ["node"]))
+  (var #{node} subscription)
   (var listener-id (. subscription ["id"]))
   (xt/for:array [key (. subscription ["keys"])]
     (event-common/remove-keyed-listener node key listener-id))
@@ -298,7 +298,7 @@
   (var action-id (. action-desc ["action"]))
   (when (not (xt/x:is-string? action-id))
     (xt/x:err "view action requires a substrate handler id"))
-  (var payload (. action-desc ["payload"]))
+  (var #{payload} action-desc)
   (when (and (xt/x:is-object? payload)
              (== "event" (. payload ["$"])))
     (:= payload (xtd/get-in event (or (. payload ["path"]) []))))

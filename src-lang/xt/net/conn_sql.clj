@@ -14,30 +14,27 @@
 
 (defn.xt connection-disconnect
   [client]
-  (var impl (. client ["impl"]))
-  (var raw  (. client ["raw"]))
+  (var #{impl raw} client)
   (var disconnect-fn (. impl ["disconnect"]))
   (return (disconnect-fn raw)))
 
 (defn.xt connection-query
   [client input]
-  (var impl (. client ["impl"]))
-  (var raw  (. client ["raw"]))
+  (var #{impl raw} client)
   (var query-fn (or (. impl ["query"])
                     (. impl ["query_sync"])))
   (return (query-fn raw input)))
 
 (defn.xt connection-query-async
   [client input]
-  (var impl (. client ["impl"]))
-  (var raw  (. client ["raw"]))
+  (var #{impl raw} client)
   (var query-async-fn (or (. impl ["query_async"])
                           (. impl ["query"])))
   (return (query-async-fn raw input)))
 
 (defn.xt connection-connect
   [client opts]
-  (var impl (. client ["impl"]))
+  (var #{impl} client)
   (var connect-fn (. impl ["connect"]))
   (if (xt/x:nil? connect-fn)
     (return client)

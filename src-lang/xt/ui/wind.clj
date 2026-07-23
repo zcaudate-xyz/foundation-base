@@ -92,7 +92,7 @@
   (var component-id (. value ["component"]))
   (when (== component-id "ui/slot")
     (return (-/prepare-node runtime (ui/resolve-slot runtime value) state)))
-  (var props (. value ["props"]))
+  (var #{props} value)
   (when (== true (. props ["hidden"]))
     (return nil))
   (var renderer (ui/registry-renderer (. runtime ["registry"]) component-id))

@@ -32,7 +32,7 @@
   (var transport (-/transport-get node transport-id))
   (when (xt/x:nil? transport)
     (xt/x:err (xt/x:cat "transport not found - " transport-id)))
-  (var send-fn (. transport ["send_fn"]))
+  (var #{send-fn} transport)
   (when (xt/x:nil? send-fn)
     (xt/x:err (xt/x:cat "transport missing send_fn - " transport-id)))
   (return (node-request/ensure-promise
@@ -86,7 +86,7 @@
   "waits for a pending request state to settle"
   {:added "4.1"}
   [state]
-  (var status (. state ["status"]))
+  (var #{status} state)
   (cond (== status "resolved")
         (return (promise/x:promise-run
                  (. state ["value"])))
@@ -110,7 +110,7 @@
   {:added "4.1"}
   [request ctx]
   (:= ctx (or ctx {}))
-  (var meta (. request ["meta"]))
+  (var #{meta} request)
   (when (xt/x:nil? meta)
     (:= meta {})
     (xt/x:set-key request "meta" meta))
@@ -129,7 +129,7 @@
                  (. request ["space"])
                  data
                  meta))
-  (var transport-id (. ctx ["transport_id"]))
+  (var #{transport-id} ctx)
   (when (xt/x:nil? transport-id)
     (var request-meta (. request ["meta"]))
     (when (xt/x:not-nil? request-meta)
@@ -151,7 +151,7 @@
                  (. request ["space"])
                  error
                  meta))
-  (var transport-id (. ctx ["transport_id"]))
+  (var #{transport-id} ctx)
   (when (xt/x:nil? transport-id)
     (var request-meta (. request ["meta"]))
     (when (xt/x:not-nil? request-meta)
@@ -254,7 +254,7 @@
   "unregisters a shared request handler"
   {:added "4.1"}
   [node action]
-  (var handlers (. node ["handlers"]))
+  (var #{handlers} node)
   (var prev (xt/x:get-key handlers action))
   (xt/x:del-key handlers action)
   (return prev))
@@ -290,7 +290,7 @@
   "unregisters a shared stream trigger"
   {:added "4.1"}
   [node signal]
-  (var triggers (. node ["triggers"]))
+  (var #{triggers} node)
   (var prev (xt/x:get-key triggers signal))
   (xt/x:del-key triggers signal)
   (return prev))

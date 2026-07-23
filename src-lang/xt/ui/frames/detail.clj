@@ -10,7 +10,7 @@
   (var fields (or (. frame ["opts"] ["fields"]) []))
   (var children [])
   (xt/for:array [field fields]
-    (var id (. field ["id"]))
+    (var #{id} field)
     (xt/x:arr-push
      children
      (ui/node "ui/row" {"class" "justify-between gap-4" "key" id}
