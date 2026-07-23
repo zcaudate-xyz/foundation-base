@@ -1,6 +1,7 @@
 (ns postgres.entity-test
   (:use code.test)
-  (:require [postgres.entity :as et :refer :all]
+  (:require [clj-kondo.core :as kondo]
+            [postgres.entity :as et :refer :all]
             [hara.lang :as l]
             [hara.model.spec-postgres.entity-util :as ut]
             [hara.common.grammar-spec :as grammar-spec]
@@ -45,6 +46,35 @@
                  resolve test-resolve]
      ~@body))
 
+(defn lint-entity-source
+  [source]
+  (->> (binding [*in* (java.io.StringReader. source)]
+         (kondo/run! {:lint ["-"]
+                      :config-dir ".clj-kondo"
+                      :cache false}))
+       :findings
+       (filter #(contains? #{:hara.postgres/retired-entity-option
+                             :hara.postgres/invalid-owner
+                             :hara.postgres/invalid-provides}
+                           (:type %)))
+       (mapv :type)))
+
+^{:refer postgres.entity/E :added "4.1" :id kondo-entity-options}
+(fact "clj-kondo enforces the public entity option shapes"
+  (lint-entity-source
+   "(deftype.pg ^{:! (et/E {:owner demo/Task :provides {:key :tasks :priority 64}})} Good [])")
+  => []
+
+  (lint-entity-source
+   "(deftype.pg ^{:! (et/E {:link {:for demo/Task} :spec/addon {:key :tasks}})} Retired [])")
+  => [:hara.postgres/retired-entity-option
+      :hara.postgres/retired-entity-option]
+
+  (lint-entity-source
+   "(deftype.pg ^{:! (et/E {:owner [:task demo/Task] :provides {:key \"tasks\"}})} Invalid [])")
+  => [:hara.postgres/invalid-owner
+      :hara.postgres/invalid-provides])
+
 (fact "resolves minimal and expanded bases from relation requirements"
   (with-test-entity-v2
     (#'et/E-resolve-basis {:class :1d/base})
@@ -55,7 +85,7 @@
     => #{:table :context :id}
 
     (#'et/E-resolve-basis {:class :1d/entry
-                           :link {:for 'Social}})
+                           :owner 'Social})
     => #{:table}
 
     (#'et/E-resolve-basis {:class :1d/entry
@@ -107,7 +137,7 @@
 (fact "project-support-columns zips local and remote support columns"
   (et/project-support-columns :entity [1 :entry] :expanded [1 :base])
   => {:class-table :class-table}
-  (et/project-support-columns :link [1 :entry] :minimal [1 :base])
+  (et/project-support-columns :owner [1 :entry] :minimal [1 :base])
   => {:class-table :class-table})
 
 ^{:refer postgres.entity/column->coord :added "4.1"}
@@ -155,7 +185,31 @@
   => (throws)
 
   (E-check-input {:class :0d/data})
+  => (throws)
+
+  (E-check-input {:owner 'Social})
+  => {:owner 'Social}
+
+  (E-check-input {:owner ['Social :social]})
+  => {:owner ['Social :social]}
+
+  (E-check-input {:owner [:social 'Social]})
+  => (throws)
+
+  (E-check-input {:provides {:key :social :priority 63}})
+  => {:provides {:key :social :priority 63}}
+
+  (E-check-input {:link {:for 'Social}})
+  => (throws)
+
+  (E-check-input {:spec/addon {:key :social}})
   => (throws))
+
+^{:refer postgres.entity/E-owner-pair :added "4.1"}
+(fact "normalizes shorthand and explicit owners"
+  (E-owner-pair 'Social) => [:social 'Social]
+  (E-owner-pair ['Social :target]) => [:target 'Social]
+  (E-owner-pair [:target 'Social]) => (throws))
 
 ^{:refer postgres.entity/E-known-addon-keys :added "4.1"}
 (fact "E-known-addon-keys reads the registered application addon set"
@@ -236,12 +290,12 @@
                  :sql {:cascade true
                        :unique ["social"]}}}))
 
-^{:refer postgres.entity/plan-link-relation :added "4.1"}
-(fact "plan-link-relation builds the link relation map"
+^{:refer postgres.entity/plan-owner-relation :added "4.1"}
+(fact "plan-owner-relation builds the owner relation map"
   (with-test-entity-v2
-    (et/plan-link-relation {:class :1d/entry
-                            :basis #{:table}
-                            :link {:for 'Social}})
+    (et/plan-owner-relation {:class :1d/entry
+                             :basis #{:table}
+                             :owner 'Social})
     => {:class-table {:foreign {:social {:ns 'Social
                                           :column :class-table}}}
         :social {:type :ref
@@ -391,7 +445,7 @@
                        :ns-str "schema"
                        :access :access/hidden
                        :addons [:detail]
-                       :link {:for 'Social}
+                       :owner 'Social
                        :columns {:note {:type :text}}})
           raw-cols (map first (:raw out))]
       (:track out)
@@ -407,7 +461,7 @@
       => (contains {:class :1d/entry
                     :basis #{:table}
                     :addons [:detail]
-                    :link {:for 'Social}})
+                    :owner 'Social})
 
       (set raw-cols)
       => #{:id
@@ -425,7 +479,7 @@
   (with-redefs [grammar-spec/*symbol* 'Sym
                 env/ns-sym (constantly 'ns)
                 ut/add-addon (fn [k ref p] [k ref p])]
-    (E-main-spec {:spec/addon {:key :k :priority 10}})
+    (E-main-spec {:provides {:key :k :priority 10}})
     => [:k {:type :ref :required true :priority nil :ref {:ns 'ns/Sym}} 10]))
 
 ^{:refer postgres.entity/E-class-types :added "4.1"}
@@ -440,13 +494,13 @@
     (E-class-types {:class :1d/entry
                     :symname "TaskRecord"
                     :basis #{:table}
-                    :link {:for 'Social}})
+                    :owner 'Social})
     => #{"TaskRecord" "Social"}
 
     (E-class-types {:class :2d/entry
                     :symname "AccessRole"
                     :basis #{:table :context}
-                    :link {:for 'Social}})
+                    :owner 'Social})
     => #{"Social"}
 
     (E-class-types {:class :0d/entry

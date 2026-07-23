@@ -43,11 +43,12 @@
    fact:global clj-kondo.hooks.hara-xtalk/fact-global-xt
    code.test/fact clj-kondo.hooks.hara-xtalk/fact-xt
    code.test/fact:global clj-kondo.hooks.hara-xtalk/fact-global-xt
-   defn.pg clj-kondo.hooks.hara-postgres/defn-pg
-   defrun.pg clj-kondo.hooks.hara-postgres/defn-pg
-   clj-kondo.hooks.hara-postgres/defn.pg clj-kondo.hooks.hara-postgres/defn-pg
-   clj-kondo.hooks.hara-postgres/defrun.pg clj-kondo.hooks.hara-postgres/defn-pg
-   deftype.pg hooks.deftype-pg/deftype-pg
+   defn.pg hooks.hara-postgres/defn-pg
+   defrun.pg hooks.hara-postgres/defn-pg
+   clj-kondo.hooks.hara-postgres/defn.pg hooks.hara-postgres/defn-pg
+   clj-kondo.hooks.hara-postgres/defrun.pg hooks.hara-postgres/defn-pg
+   deftype.pg hooks.hara-postgres/deftype-pg
+   clj-kondo.hooks.hara-postgres/deftype.pg hooks.hara-postgres/deftype-pg
    std.lib/intern-in hooks.std-lib/intern-in-hook
    std.lib/intern-all hooks.std-lib/intern-all-hook
    f/intern-in hooks.std-lib/intern-in-hook
@@ -82,6 +83,9 @@
    :hara.postgres/input-prefix {:level :warning}
    :hara.postgres/local-prefix {:level :warning}
   :hara.postgres/return-bound {:level :warning}
+  :hara.postgres/retired-entity-option {:level :error}
+  :hara.postgres/invalid-owner {:level :error}
+  :hara.postgres/invalid-provides {:level :error}
   :hara.xtalk/block-in-value {:level :error}
   :hara.xtalk/redundant-get-key {:level :warning}
   :hara.xtalk/redundant-fn-arrow {:level :warning}

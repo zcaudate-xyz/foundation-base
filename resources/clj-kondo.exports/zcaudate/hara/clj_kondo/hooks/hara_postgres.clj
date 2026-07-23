@@ -70,6 +70,43 @@
     (when (vector? bindings) (map first (partition 2 bindings)))))
 (defn report! [node rule message]
   (api/reg-finding! (merge (meta node) {:type rule :level :warning :message message})))
+(defn report-error! [node rule message]
+  (api/reg-finding! (merge (meta node) {:type rule :level :error :message message})))
+(defn owner-valid? [value]
+  (or (symbol? value)
+      (and (vector? value)
+           (= 2 (count value))
+           (symbol? (first value))
+           (keyword? (second value)))))
+(defn provides-valid? [value]
+  (and (map? value)
+       (keyword? (:key value))
+       (or (not (contains? value :priority))
+           (number? (:priority value)))))
+(defn- entity-input [name-node metadata]
+  (let [name-meta (meta name-node)
+        symbol-meta (meta (api/sexpr name-node))
+        entity-form (or (:! metadata) (:! name-meta) (:! symbol-meta))]
+    (when (and (seq? entity-form)
+               (= "E" (some-> entity-form first name)))
+      (second entity-form))))
+(defn lint-entity! [name-node metadata]
+  (when-let [input (entity-input name-node metadata)]
+    (when (map? input)
+      (when (contains? input :link)
+        (report-error! name-node :hara.postgres/retired-entity-option
+                       "et/E :link has been removed; use :owner target or :owner [target local-key]"))
+      (when (contains? input :spec/addon)
+        (report-error! name-node :hara.postgres/retired-entity-option
+                       "et/E :spec/addon has been removed; use :provides"))
+      (when (and (contains? input :owner)
+                 (not (owner-valid? (:owner input))))
+        (report-error! name-node :hara.postgres/invalid-owner
+                       "et/E :owner must be a target symbol or [target-symbol local-keyword]"))
+      (when (and (contains? input :provides)
+                 (not (provides-valid? (:provides input))))
+        (report-error! name-node :hara.postgres/invalid-provides
+                       "et/E :provides must contain a keyword :key and an optional numeric :priority")))))
 (defn function-shape [node]
   (let [children (rest (:children node))
         metadata (some-> (first children) api/sexpr)
@@ -124,3 +161,17 @@
                  (api/list-node [(api/token-node 'clojure.core/identity)
                                  (normalized-args-node args-node)])])})
     {:node (api/list-node [(api/token-node 'do)])}))
+(defn deftype-pg [{:keys [node]}]
+  (let [children (rest (:children node))
+        meta-node (when (or (api/map-node? (first children))
+                            (api/keyword-node? (first children)))
+                    (first children))
+        children (if meta-node (rest children) children)
+        metadata (some-> meta-node api/sexpr)
+        name-node (first children)]
+    (if name-node
+      (do (lint-entity! name-node metadata)
+          {:node (api/list-node [(api/token-node 'clojure.core/def)
+                                 name-node
+                                 (api/token-node nil)])})
+      {:node (api/list-node [(api/token-node 'do)])})))
