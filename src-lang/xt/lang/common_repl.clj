@@ -64,7 +64,7 @@
   "helper function for `notify-socket`"
   {:added "4.0"}
   [conn out]
-  (xt-link/x:socket-send conn (xt/x:cat out"\n"))
+  (xt-link/x:socket-send conn (xt/x:str-encode (xt/x:cat out"\n")))
   (return
    (xt-link/x:socket-close conn)))
 
@@ -91,19 +91,20 @@
   [conn host port opts output]
   (xt-link/x:socket-send
    conn
-   (xt/x:cat "POST "
-             (:? (xt/x:nil? (:? (xt/x:nil? opts)
-                                nil
-                                (. opts ["path"])))
-                 "/"
-                 (:? (xt/x:nil? opts)
-                     nil
-                     (. opts ["path"])))
-             " HTTP/1.0\r\n"
-             "Host: " host ":"  (xt/x:to-string port) "\r\n"
-             "Content-Length: " (xt/x:to-string (xt/x:str-len output)) "\r\n"
-             "\r\n"
-             output))
+   (xt/x:str-encode
+    (xt/x:cat "POST "
+              (:? (xt/x:nil? (:? (xt/x:nil? opts)
+                                 nil
+                                 (. opts ["path"])))
+                  "/"
+                  (:? (xt/x:nil? opts)
+                      nil
+                      (. opts ["path"])))
+              " HTTP/1.0\r\n"
+              "Host: " host ":"  (xt/x:to-string port) "\r\n"
+              "Content-Length: " (xt/x:to-string (xt/x:str-len output)) "\r\n"
+              "\r\n"
+              output)))
   (return
    (xt-link/x:socket-close conn)))
 

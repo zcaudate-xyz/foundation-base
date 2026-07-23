@@ -684,11 +684,7 @@
            (list 'return ["async"])))))
 
 (def +julia-file+
-  {:x-file-resolve   {:macro #'julia-tf-x-file-resolve :emit :macro}
-   :x-file-slurp     {:macro #'julia-tf-x-file-slurp   :emit :macro
-                      :op-spec {:allow-blocks true}}
-   :x-file-spit      {:macro #'julia-tf-x-file-spit    :emit :macro
-                      :op-spec {:allow-blocks true}}})
+  {:x-file-resolve   {:macro #'julia-tf-x-file-resolve :emit :macro}})
 
 (def +julia-bit+
   {:x-bit-and    {:raw "&" :emit :bi}

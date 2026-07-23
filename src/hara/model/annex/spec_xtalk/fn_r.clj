@@ -987,11 +987,7 @@
              (~cb err nil)))))
 
 (def +r-file+
-  {:x-file-resolve   {:macro #'r-tf-x-file-resolve  :emit :macro}
-   :x-file-slurp     {:macro #'r-tf-x-file-slurp    :emit :macro
-                      :op-spec {:allow-blocks true}}
-   :x-file-spit      {:macro #'r-tf-x-file-spit     :emit :macro
-                      :op-spec {:allow-blocks true}}})
+  {:x-file-resolve   {:macro #'r-tf-x-file-resolve  :emit :macro}})
 
 (defn r-tf-x-socket-connect
   ([[_ host port opts cb]]

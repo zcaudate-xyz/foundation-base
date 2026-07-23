@@ -27,19 +27,18 @@
   {:added "4.1"}
   ([root path] (list (quote x:file-resolve) root path)))
 
-(defspec.xt x:file-slurp [:fn [:xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]])
+(defspec.xt x:file-read [:fn [:xt/str] :xt/promise])
 
 (defmacro.xt ^{:standalone true}
-  x:file-slurp
-  "reads file content through a callback-based runtime contract"
+  x:file-read
+  "reads bytes and returns a native promise"
   {:added "4.1"}
-  ([path cb] (list (quote x:file-slurp) path cb)))
+  ([path] (list (quote x:file-read) path)))
 
-
-(defspec.xt x:file-spit [:fn [:xt/str :xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]])
+(defspec.xt x:file-write [:fn [:xt/str :xt/any] :xt/promise])
 
 (defmacro.xt ^{:standalone true}
-  x:file-spit
-  "writes file content through a callback-based runtime contract"
+  x:file-write
+  "writes bytes and returns a native promise"
   {:added "4.1"}
-  ([path content cb] (list (quote x:file-spit) path content cb)))
+  ([path bytes] (list (quote x:file-write) path bytes)))

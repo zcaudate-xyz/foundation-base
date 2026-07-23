@@ -771,11 +771,7 @@
                       (return ~call-err)))))))
 
 (def +dart-file+
-  {:x-file-resolve   {:macro #'dart-tf-x-file-resolve    :emit :macro}
-   :x-file-slurp     {:macro #'dart-tf-x-file-slurp      :emit :macro
-                      :op-spec {:allow-blocks true}}
-   :x-file-spit      {:macro #'dart-tf-x-file-spit       :emit :macro
-                      :op-spec {:allow-blocks true}}})
+  {:x-file-resolve   {:macro #'dart-tf-x-file-resolve    :emit :macro}})
 
 
 (defn dart-tf-x-shell

@@ -10,12 +10,12 @@
   {:added "4.1"}
   ([host port opts cb] (list (quote x:socket-connect) host port opts cb)))
 
-(defspec.xt x:socket-send [:fn [:xt/any :xt/str] :xt/any])
+(defspec.xt x:socket-send [:fn [:xt/any :xt/any] :xt/int])
 
 (defmacro.xt ^{:standalone true}
   x:socket-send
   {:added "4.1"}
-  ([conn message] (list (quote x:socket-send) conn message)))
+  ([conn bytes] (list (quote x:socket-send) conn bytes)))
 
 (defspec.xt x:socket-close [:fn [:xt/any] :xt/any])
 

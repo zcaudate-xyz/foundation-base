@@ -508,6 +508,48 @@
    :x-str-pad-left   {:macro #'python-tf-x-str-pad-left   :emit :macro}
    :x-str-pad-right  {:macro #'python-tf-x-str-pad-right  :emit :macro}})
 
+(defn python-tf-x-bytes-new [[_ values]]
+  (list 'bytearray values))
+
+(defn python-tf-x-bytes-set [[_ value idx byte]]
+  (list 'x:get-idx
+        [(list '. (list '__import__ "operator")
+               (list 'setitem value idx byte))
+         value]
+        1))
+
+(defn python-tf-x-bytes-copy [[_ value]]
+  (list 'bytearray value))
+
+(defn python-tf-x-bytes-slice [[_ value start & [end]]]
+  (list '. value [(list :to start (or end \0))]))
+
+(defn python-tf-x-bytes-u8 [[_ value]]
+  (list 'b:& value 255))
+
+(defn python-tf-x-bytes-s8 [[_ value]]
+  (list ':? (list '> value 127) (list '- value 256) value))
+
+(defn python-tf-x-str-encode [[_ value]]
+  (list 'bytearray (list '. value (list 'encode "utf-8"))))
+
+(defn python-tf-x-str-decode [[_ value]]
+  (list '. (list 'bytes value) (list 'decode "utf-8")))
+
+(defn python-tf-x-bit-not [[_ value]]
+  (list 'b:xor value -1))
+
+(def +python-bytes+
+  {:x-bytes-new   {:macro #'python-tf-x-bytes-new :emit :macro}
+   :x-bytes-set   {:macro #'python-tf-x-bytes-set :emit :macro}
+   :x-bytes-copy  {:macro #'python-tf-x-bytes-copy :emit :macro}
+   :x-bytes-slice {:macro #'python-tf-x-bytes-slice :emit :macro}
+   :x-bytes-u8    {:macro #'python-tf-x-bytes-u8 :emit :macro}
+   :x-bytes-s8    {:macro #'python-tf-x-bytes-s8 :emit :macro}
+   :x-str-encode  {:macro #'python-tf-x-str-encode :emit :macro}
+   :x-str-decode  {:macro #'python-tf-x-str-decode :emit :macro}
+   :x-bit-not     {:macro #'python-tf-x-bit-not :emit :macro}})
+
 ;;
 ;; JSON
 ;;
@@ -631,8 +673,11 @@
         (return (~cb nil conn))))))
 
 (defn python-tf-x-socket-send
-  ([[_ conn s]]
-   (template/$ (. ~conn (sendall (. ~s (encode)))))))
+  ([[_ conn bytes]]
+   (template/$
+    (x:get-idx [(. ~conn (sendall (bytes ~bytes)))
+                (len ~bytes)]
+               1))))
 
 (defn python-tf-x-socket-close
   ([[_ conn]]
@@ -770,34 +815,32 @@
                    path
                    (join ~root ~relpath)))))))
 
-(defn python-tf-x-file-slurp
-  ([[_ filename cb]]
+(defn python-tf-x-file-read
+  ([[_ filename]]
    (template/$
-    (do (try
-          (var f (open ~filename "r"))
-          (var res (. f (read)))
-          (. f (close))
-          (return (~cb nil res))
-          (catch [Exception :as e]
-              (return (~cb e nil))))))))
+    (x:promise
+     (fn []
+       (return
+        (bytearray
+         (. (. (__import__ "pathlib") (Path ~filename))
+            (read_bytes)))))))))
 
-(defn python-tf-x-file-spit
-  ([[_ filename content cb]]
+(defn python-tf-x-file-write
+  ([[_ filename content]]
    (template/$
-    (do (try
-          (var f (open ~filename "w"))
-          (. f (write ~content))
-          (. f (close))
-          (return (~cb nil ~filename))
-          (catch [Exception :as e]
-              (return (~cb e nil))))))))
+    (x:promise
+     (fn []
+       (return
+        (x:get-idx
+         [(. (. (__import__ "pathlib") (Path ~filename))
+             (write_bytes (bytes ~content)))
+          nil]
+         1)))))))
 
 (def +python-file+
   {:x-file-resolve   {:macro #'python-tf-x-file-resolve  :emit :macro}
-   :x-file-slurp     {:macro #'python-tf-x-file-slurp    :emit :macro
-                      :op-spec {:allow-blocks true}}
-   :x-file-spit      {:macro #'python-tf-x-file-spit     :emit :macro
-                      :op-spec {:allow-blocks true}}})
+   :x-file-read      {:macro #'python-tf-x-file-read     :emit :macro}
+   :x-file-write     {:macro #'python-tf-x-file-write    :emit :macro}})
 
 (def +python+
   (merge +python-core+
@@ -809,6 +852,7 @@
          +python-obj+
          +python-arr+
          +python-str+
+         +python-bytes+
          +python-js+
          +python-return+
          +python-socket+

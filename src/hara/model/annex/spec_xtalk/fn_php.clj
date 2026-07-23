@@ -690,8 +690,7 @@
         (list 'call_user_func_array cb [nil path])))
 
 (def +php-file+
-  {:x-file-slurp     {:macro #'php-tf-x-file-slurp       :emit :macro}
-   :x-file-spit      {:macro #'php-tf-x-file-spit        :emit :macro}})
+  {})
 
 ;;
 ;; RETURN

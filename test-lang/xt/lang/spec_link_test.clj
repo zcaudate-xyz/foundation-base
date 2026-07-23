@@ -70,7 +70,37 @@
   => "OK")
 
 ^{:refer xt.lang.spec-link/x:socket-send :added "4.1"}
-(fact "sends socket messages through write")
+(fact "sends bytes and returns the byte count"
+
+  (notify/wait-on :js
+    (var send-fn
+         (fn [host port cb]
+           (return (spec-link/x:socket-connect host port {} cb))))
+    (send-fn "127.0.0.1" (@! (:socket-port (l/default-notify)))
+     (fn [err conn]
+       (repl/notify (spec-link/x:socket-send conn (xt/x:str-encode "abc")))
+       (spec-link/x:socket-close conn))))
+  => 3
+
+  (notify/wait-on :lua
+    (var send-fn
+         (fn [host port cb]
+           (return (spec-link/x:socket-connect host port {} cb))))
+    (send-fn "127.0.0.1" (@! (:socket-port (l/default-notify)))
+     (fn [err conn]
+       (repl/notify (spec-link/x:socket-send conn (xt/x:str-encode "abc")))
+       (spec-link/x:socket-close conn))))
+  => 3
+
+  (notify/wait-on :python
+    (var send-fn
+         (fn [host port cb]
+           (return (spec-link/x:socket-connect host port {} cb))))
+    (send-fn "127.0.0.1" (@! (:socket-port (l/default-notify)))
+     (fn [err conn]
+       (repl/notify (spec-link/x:socket-send conn (xt/x:str-encode "abc")))
+       (spec-link/x:socket-close conn))))
+  => 3)
 
 ^{:refer xt.lang.spec-link/x:socket-close :added "4.1"}
 (fact "closes sockets through end")

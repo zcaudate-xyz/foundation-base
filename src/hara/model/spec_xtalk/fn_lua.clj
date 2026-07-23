@@ -398,6 +398,56 @@
    :x-str-trim-left  {:macro #'lua-tf-x-str-trim-left  :emit :macro}
    :x-str-trim-right {:macro #'lua-tf-x-str-trim-right :emit :macro}})
 
+(defn lua-tf-x-bytes-new [[_ values]]
+  [(list 'unpack values)])
+
+(defn lua-tf-x-bytes-get [[_ value idx]]
+  (list 'x:get-idx value (list 'x:offset idx)))
+
+(defn lua-tf-x-bytes-set [[_ value idx byte]]
+  (list 'rawset value (list 'x:offset idx) byte))
+
+(defn lua-tf-x-bytes-copy [[_ value]]
+  [(list 'unpack value)])
+
+(defn lua-tf-x-bytes-slice [[_ value start & [end]]]
+  [(if end
+     (list 'unpack value (list 'x:offset start) end)
+     (list 'unpack value (list 'x:offset start)))])
+
+(defn lua-tf-x-bytes-u8 [[_ value]]
+  (list 'bit.band value 255))
+
+(defn lua-tf-x-bytes-s8 [[_ value]]
+  (list ':? (list '> value 127) (list '- value 256) value))
+
+(defn lua-tf-x-str-encode [[_ value]]
+  (template/$ ('((fn [s]
+                   (var out := {})
+                   (string.gsub s "."
+                                (fn [c]
+                                  (table.insert out (string.byte c))))
+                   (return out)))
+                ~value)))
+
+(defn lua-tf-x-str-decode [[_ value]]
+  (list 'string.char (list 'x:unpack value)))
+
+(defn lua-tf-x-bit-not [[_ value]]
+  (list 'bit.bnot value))
+
+(def +lua-bytes+
+  {:x-bytes-new   {:macro #'lua-tf-x-bytes-new :emit :macro :type :template}
+   :x-bytes-get   {:macro #'lua-tf-x-bytes-get :emit :macro}
+   :x-bytes-set   {:macro #'lua-tf-x-bytes-set :emit :macro}
+   :x-bytes-copy  {:macro #'lua-tf-x-bytes-copy :emit :macro :type :template}
+   :x-bytes-slice {:macro #'lua-tf-x-bytes-slice :emit :macro :type :template}
+   :x-bytes-u8    {:macro #'lua-tf-x-bytes-u8 :emit :macro}
+   :x-bytes-s8    {:macro #'lua-tf-x-bytes-s8 :emit :macro}
+   :x-str-encode  {:macro #'lua-tf-x-str-encode :emit :macro}
+   :x-str-decode  {:macro #'lua-tf-x-str-decode :emit :macro}
+   :x-bit-not     {:macro #'lua-tf-x-bit-not :emit :macro}})
+
 ;;
 ;; JSON
 ;;
@@ -526,8 +576,8 @@
            (return (~cb nil conn)))))))
 
 (defn lua-tf-x-socket-send
-  ([[_ conn s]]
-   (template/$ (. ~conn (send ~s)))))
+  ([[_ conn bytes]]
+   (template/$ (. ~conn (send (x:str-decode ~bytes))))))
 
 (defn lua-tf-x-socket-close
   ([[_ conn]]
@@ -655,36 +705,36 @@
         ~path
         (cat ~root "/" ~path)))))
 
-(defn lua-tf-x-file-slurp
-  ([[_ filename cb]]
+(defn lua-tf-x-file-read
+  ([[_ filename]]
    (template/$
-    (do* (var '[handle err] (io.open ~filename "r"))
-         (if err
-           (return (~cb err nil))
-           (do* (var '[res read-err] (handle:read "*a"))
-                (handle:close)
-                (if read-err
-                  (return (~cb read-err nil))
-                  (return (~cb nil res)))))))))
+    (x:promise
+     (fn []
+       (var '[handle err] (io.open ~filename "rb"))
+       (when err
+         (x:err err))
+       (var out (handle:read "*a"))
+       (handle:close)
+       (return (x:str-encode out)))))))
 
-(defn lua-tf-x-file-spit
-  ([[_ filename content cb]]
+(defn lua-tf-x-file-write
+  ([[_ filename content]]
    (template/$
-    (do* (var '[handle err] (io.open ~filename "w"))
-         (if err
-           (return (~cb err nil))
-           (do* (var '[out write-err] (handle:write ~content))
-                (handle:close)
-                (if write-err
-                  (return (~cb write-err nil))
-                  (return (~cb nil ~filename)))))))))
+    (x:promise
+     (fn []
+       (var '[handle err] (io.open ~filename "wb"))
+       (when err
+         (x:err err))
+       (var '[out write-err] (handle:write (x:str-decode ~content)))
+       (handle:close)
+       (when write-err
+         (x:err write-err))
+       (return nil))))))
 
 (def +lua-file+
   {:x-file-resolve   {:macro #'lua-tf-x-file-resolve  :emit :macro}
-   :x-file-slurp     {:macro #'lua-tf-x-file-slurp    :emit :macro
-                      :op-spec {:allow-blocks true}}
-   :x-file-spit      {:macro #'lua-tf-x-file-spit     :emit :macro
-                      :op-spec {:allow-blocks true}}})
+   :x-file-read      {:macro #'lua-tf-x-file-read     :emit :macro}
+   :x-file-write     {:macro #'lua-tf-x-file-write    :emit :macro}})
 
 (def +lua+
   (merge +lua-core+
@@ -697,6 +747,7 @@
          +lua-obj+
          +lua-arr+
          +lua-str+
+         +lua-bytes+
          +lua-js+
          +lua-return+
          +lua-socket+

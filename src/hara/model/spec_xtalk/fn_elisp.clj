@@ -1206,11 +1206,7 @@
                 (list 'funcall cb 'err nil)))))
 
 (def +elisp-file+
-  {:x-file-resolve {:macro #'elisp-tf-x-file-resolve :emit :macro}
-   :x-file-slurp   {:macro #'elisp-tf-x-file-slurp   :emit :macro
-                    :op-spec {:allow-blocks true}}
-   :x-file-spit    {:macro #'elisp-tf-x-file-spit    :emit :macro
-                    :op-spec {:allow-blocks true}}})
+  {:x-file-resolve {:macro #'elisp-tf-x-file-resolve :emit :macro}})
 
 (def +elisp+
   (merge +elisp-core+

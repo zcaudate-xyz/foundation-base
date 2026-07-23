@@ -1197,11 +1197,7 @@
   (list 'xt-file-spit path content cb))
 
 (def +scheme-file+
-  {:x-file-resolve {:macro #'scheme-tf-x-file-resolve :emit :macro :value true}
-   :x-file-slurp   {:macro #'scheme-tf-x-file-slurp   :emit :macro
-                    :op-spec {:allow-blocks true}}
-   :x-file-spit    {:macro #'scheme-tf-x-file-spit    :emit :macro
-                    :op-spec {:allow-blocks true}}})
+  {:x-file-resolve {:macro #'scheme-tf-x-file-resolve :emit :macro :value true}})
 
 (def +scheme+
   (merge +scheme-core+
