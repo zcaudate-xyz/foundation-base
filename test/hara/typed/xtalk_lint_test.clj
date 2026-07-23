@@ -53,6 +53,35 @@
   (lint-form '(return (xt/x:get-key m "name" "unknown")) :statement {})
   => [])
 
+^{:refer hara.typed.xtalk-lint/lint-form :added "4.1" :id redundant-dot-binding}
+(fact "suggests same-name dot bindings use object destructuring"
+  (let [direct (lint-form '(var time (. a ["time"])) :statement {})
+        spear  (lint-form '(var user-id (. a ["user_id"])) :statement {})
+        other  (lint-form '(var name (. a ["display_name"])) :statement {})]
+    [(mapv :code direct)
+     (:suggestion (first direct))
+     (:suggestion (first spear))
+     other])
+  => '[[:XT008]
+       (var #{time} a)
+       (var #{user-id} a)
+       []])
+
+^{:refer hara.typed.xtalk-lint/var-merge-diagnostics :added "4.1"}
+(fact "merges adjacent same-object dot bindings"
+  (let [forms '[(var name (. a ["name"]))
+                (var age (. a ["age"]))]
+        diagnostics (var-merge-diagnostics forms {})
+        form-diagnostics (lint-form (cons 'do forms) :statement {})]
+    [(mapv :code diagnostics)
+     (:bindings (first diagnostics))
+     (:suggestion (first diagnostics))
+     (count (filter #(= :XT009 (:code %)) form-diagnostics))])
+  => '[[:XT009]
+       [name age]
+       (var #{name age} a)
+       1])
+
 ^{:refer hara.typed.xtalk-lint/lint-form :added "4.1" :id fn-arrow-canonical}
 (fact "suggests canonical fn for nil fn:> callbacks"
   (let [diagnostics (lint-form

@@ -51,4 +51,6 @@
   :hara.xtalk/invalid-destructuring {:level :error}
   :hara.xtalk/redundant-get-key {:level :warning}
   :hara.xtalk/redundant-fn-arrow {:level :warning}
-  :hara.xtalk/nested-dot-access {:level :warning}}}
+  :hara.xtalk/nested-dot-access {:level :warning}
+  :hara.xtalk/redundant-dot-destructure {:level :warning}
+  :hara.xtalk/merge-dot-destructure {:level :warning}}}

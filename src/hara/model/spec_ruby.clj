@@ -605,3 +605,6 @@
 
 (def +init+
   (script/install +book+))
+
+;; The adapter installs a Ruby module and therefore must load after +book+.
+(require 'ruby.lang.concurrent-promise)

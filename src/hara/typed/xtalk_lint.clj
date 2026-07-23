@@ -78,6 +78,91 @@
            (vector? (nth form 2))
            (= 1 (count (nth form 2))))))
 
+(defn- var-dot-binding
+  "Returns a same-name field binding when a var can become destructuring.
+
+   The field comparison uses the emitted field key, so spear-case symbols such
+   as `user-id` match their snake_case runtime keys such as `user_id`."
+  [form]
+  (when (and (seq? form)
+             (= 'var (canonical-head (first form)))
+             (= 3 (count form)))
+    (let [[_ target source] form
+          key (when (and (seq? source)
+                         (= '. (canonical-head (first source)))
+                         (= 3 (count source))
+                         (symbol? (second source))
+                         (vector? (nth source 2))
+                         (= 1 (count (nth source 2)))
+                         (string? (first (nth source 2))))
+                (first (nth source 2)))]
+      (when (and (symbol? target)
+                 key
+                 (= (types/field-key target)
+                    (types/field-key key)))
+        {:target target
+         :object (second source)
+         :key key}))))
+
+(defn- var-dot-diagnostic
+  [form context opts]
+  (when-let [{:keys [target object key]} (var-dot-binding form)]
+    (diagnostic
+     :XT008
+     :warning
+     (str "same-name dot binding for \"" key
+          "\" can use object destructuring")
+     form
+     context
+     opts
+     {:target target
+      :object object
+      :key key
+      :suggestion (list 'var #{target} object)})))
+
+(defn var-merge-diagnostics
+  "Suggests merging adjacent same-object dot bindings into one destructuring var."
+  [forms opts]
+  (loop [remaining (seq forms)
+         diagnostics []]
+    (if-let [form (first remaining)]
+      (if-let [binding (var-dot-binding form)]
+        (let [run (vec (take-while (fn [entry]
+                                     (when-let [candidate (var-dot-binding entry)]
+                                       (= (:object binding) (:object candidate))))
+                                   remaining))
+              targets (mapv (comp :target var-dot-binding) run)]
+          (recur (drop (max 1 (count run)) remaining)
+                 (if (> (count run) 1)
+                   (conj diagnostics
+                         (diagnostic
+                          :XT009
+                          :warning
+                          "adjacent same-object dot bindings can be merged into one destructuring var"
+                          form
+                          :statement
+                          opts
+                          {:object (:object binding)
+                           :bindings targets
+                           :forms run
+                           :suggestion (list 'var (set targets) (:object binding))}))
+                   diagnostics)))
+        (recur (next remaining) diagnostics))
+      diagnostics)))
+
+(defn- statement-sequence-forms
+  [h form]
+  (cond
+    (#{'do 'do* 'doto} h)
+    (if (= h 'doto) (drop 2 form) (rest form))
+
+    (#{'when 'while 'for 'forange 'for:array 'for:object
+       'for:index 'for:iter 'for:async} h)
+    (drop 2 form)
+
+    :else
+    nil))
+
 (defn- valid-destructuring-target?
   [target]
   (or (and (set? target)
@@ -166,6 +251,17 @@
                  (when (some? form)
                    (lint-form form context opts)))
                pairs)))
+
+(defn- lint-statement-sequence
+  [forms opts]
+  (let [merge-diagnostics (var-merge-diagnostics forms opts)
+        merged-forms (set (mapcat :forms merge-diagnostics))
+        diagnostics (lint-pairs (map (fn [form] [form :statement]) forms) opts)]
+    (vec (concat merge-diagnostics
+                 (remove (fn [entry]
+                           (and (= :XT008 (:code entry))
+                                (contains? merged-forms (:form entry))))
+                         diagnostics)))))
 
 (defn binding-pairs
   [bindings]
@@ -357,9 +453,14 @@
                 [])
           own (if (= h 'var)
                 (into own (concat (var-target-diagnostics form context opts)
-                                  (var-source-diagnostics form context opts)))
-                own)]
-      (into own (lint-pairs (form-pairs h form block?) opts)))
+                                  (var-source-diagnostics form context opts)
+                                  (when-let [d (var-dot-diagnostic form context opts)]
+                                    [d])))
+                own)
+          child-diagnostics (if-let [forms (statement-sequence-forms h form)]
+                              (lint-statement-sequence forms opts)
+                              (lint-pairs (form-pairs h form block?) opts))]
+      (into own child-diagnostics))
 
     (vector? form)
     (lint-pairs (map (fn [entry] [entry :value]) form) opts)
@@ -380,8 +481,8 @@
             (canonical-head (first form)))]
     (cond
       (#{'defn.xt 'defgen.xt} h)
-      (vec (mapcat #(lint-pairs (map (fn [entry] [entry :statement]) %) opts)
-                   (mapcat function-body-forms [form])))
+      (let [body-sequences (vec (mapcat function-body-forms [form]))]
+        (vec (mapcat #(lint-statement-sequence % opts) body-sequences)))
 
       (= h 'def.xt)
       (lint-form (last form) :value opts)

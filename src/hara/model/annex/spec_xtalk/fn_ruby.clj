@@ -6,20 +6,8 @@
 (declare ruby-tf-x-return-encode)
 (declare ruby-tv-x-get-key)
 
-(def ^:private ruby-concurrent-promise-sym
-  (symbol "Concurrent::Promise"))
-
-(def ^:private ruby-concurrent-promise-new-sym
-  (symbol "Concurrent::Promise.new"))
-
 (def ^:private ruby-net-http-sym
   (symbol "Net::HTTP"))
-
-(defn ruby-concurrent-promise-run
-  [thunk]
-  (list '. (list '. (list ruby-concurrent-promise-new-sym thunk)
-                 (list 'execute))
-        (list 'wait)))
 
 ;;
 ;; CORE
@@ -842,50 +830,16 @@
    :x-shell           {:macro #'ruby-tf-x-shell          :emit :macro
                        :op-spec {:allow-blocks true}}})
 
-(defn ruby-tf-x-async-run
-  [[_ thunk]]
-  (let [grammar   preprocess-base/*macro-grammar*
-        mopts     preprocess-base/*macro-opts*
-        thunk-str (common/emit-wrapping thunk grammar mopts)]
-    (list ':-
-          (str "Thread.new do\n  "
-               thunk-str
-               ".call\nend"))))
-
-(defn ruby-tf-x-promise
-  [[_ thunk]]
-  (list 'xt.lang.common-promise/promise thunk))
-
-(defn ruby-tf-x-promise-all
-  [[_ promises]]
-  (list 'xt.lang.common-promise/promise-all promises))
-
-(defn ruby-tf-x-promise-then
-  [[_ promise thunk]]
-  (list 'xt.lang.common-promise/promise-then promise thunk))
-
-(defn ruby-tf-x-promise-catch
-  [[_ promise thunk]]
-  (list 'xt.lang.common-promise/promise-catch promise thunk))
-
-(defn ruby-tf-x-promise-finally
-  [[_ promise thunk]]
-  (list 'xt.lang.common-promise/promise-finally promise thunk))
-
-(defn ruby-tf-x-promise-native?
-  [[_ value]]
-  (list 'xt.lang.common-promise/promise-native? value))
-
 (def +ruby-promise+
-  {:x-async-run        {:macro #'ruby-tf-x-async-run       :emit :macro}
-   :x-promise          {:raw 'xt.lang.common-promise/promise         :emit :hard-link}
-   :x-promise-new      {:raw 'xt.lang.common-promise/promise-new     :emit :hard-link}
-   :x-promise-all      {:raw 'xt.lang.common-promise/promise-all     :emit :hard-link}
-   :x-promise-then     {:raw 'xt.lang.common-promise/promise-then    :emit :hard-link}
-   :x-promise-catch    {:raw 'xt.lang.common-promise/promise-catch   :emit :hard-link}
-   :x-promise-finally  {:raw 'xt.lang.common-promise/promise-finally :emit :hard-link}
-   :x-promise-native?  {:raw 'xt.lang.common-promise/promise-native? :emit :hard-link}
-   :x-with-delay       {:raw 'xt.lang.common-promise/with-delay      :emit :hard-link}})
+  {:x-async-run        {:raw 'ruby.lang.concurrent-promise/async-run       :emit :hard-link}
+   :x-promise          {:raw 'ruby.lang.concurrent-promise/promise         :emit :hard-link}
+   :x-promise-new      {:raw 'ruby.lang.concurrent-promise/promise-new     :emit :hard-link}
+   :x-promise-all      {:raw 'ruby.lang.concurrent-promise/promise-all     :emit :hard-link}
+   :x-promise-then     {:raw 'ruby.lang.concurrent-promise/promise-then    :emit :hard-link}
+   :x-promise-catch    {:raw 'ruby.lang.concurrent-promise/promise-catch   :emit :hard-link}
+   :x-promise-finally  {:raw 'ruby.lang.concurrent-promise/promise-finally :emit :hard-link}
+   :x-promise-native?  {:raw 'ruby.lang.concurrent-promise/promise-native? :emit :hard-link}
+   :x-with-delay       {:raw 'ruby.lang.concurrent-promise/with-delay      :emit :hard-link}})
 
 
 ;; ITER

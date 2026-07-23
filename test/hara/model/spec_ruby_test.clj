@@ -177,7 +177,7 @@
             (not (re-find #"arr__|idx__" s))
             (not (re-find #"->\(value\)\s*\{" s)))))
 
-(fact "Ruby promise overrides hard-link spec-promise forms to common-promise"
+(fact "Ruby promise overrides hard-link spec-promise forms to concurrent-ruby"
   (select-keys fn-ruby/+ruby-promise+
                [:x-async-run
                 :x-promise
@@ -187,21 +187,21 @@
                 :x-promise-finally
                 :x-promise-native?
                 :x-with-delay])
-  => {:x-async-run       {:macro #'hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-async-run
-                          :emit :macro}
-      :x-promise         {:raw 'xt.lang.common-promise/promise
+  => {:x-async-run       {:raw 'ruby.lang.concurrent-promise/async-run
                           :emit :hard-link}
-      :x-promise-all     {:raw 'xt.lang.common-promise/promise-all
+      :x-promise         {:raw 'ruby.lang.concurrent-promise/promise
                           :emit :hard-link}
-      :x-promise-then    {:raw 'xt.lang.common-promise/promise-then
+      :x-promise-all     {:raw 'ruby.lang.concurrent-promise/promise-all
                           :emit :hard-link}
-      :x-promise-catch   {:raw 'xt.lang.common-promise/promise-catch
+      :x-promise-then    {:raw 'ruby.lang.concurrent-promise/promise-then
                           :emit :hard-link}
-      :x-promise-finally {:raw 'xt.lang.common-promise/promise-finally
+      :x-promise-catch   {:raw 'ruby.lang.concurrent-promise/promise-catch
                           :emit :hard-link}
-       :x-promise-native? {:raw 'xt.lang.common-promise/promise-native?
+      :x-promise-finally {:raw 'ruby.lang.concurrent-promise/promise-finally
+                          :emit :hard-link}
+       :x-promise-native? {:raw 'ruby.lang.concurrent-promise/promise-native?
                            :emit :hard-link}
-       :x-with-delay      {:raw 'xt.lang.common-promise/with-delay
+       :x-with-delay      {:raw 'ruby.lang.concurrent-promise/with-delay
                            :emit :hard-link}})
 
 (fact "Ruby def forms with arglists emit wrapper methods for direct aliases"

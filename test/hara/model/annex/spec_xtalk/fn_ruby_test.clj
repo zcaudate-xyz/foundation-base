@@ -5,7 +5,7 @@
             [hara.model.annex.spec-xtalk.fn-ruby :refer :all]))
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/+ruby-promise+ :added "4.1"}
-(fact "promise helpers hard-link through the shared xt promise module"
+(fact "promise helpers hard-link through the native concurrent-ruby adapter"
   [(get-in +ruby-promise+ [:x-promise :emit])
    (get-in +ruby-promise+ [:x-promise :raw])
    (get-in +ruby-promise+ [:x-promise-then :raw])
@@ -14,12 +14,12 @@
    (get-in +ruby-promise+ [:x-promise-native? :raw])
    (get-in +ruby-promise+ [:x-with-delay :raw])]
   => [:hard-link
-      'xt.lang.common-promise/promise
-      'xt.lang.common-promise/promise-then
-      'xt.lang.common-promise/promise-catch
-      'xt.lang.common-promise/promise-finally
-      'xt.lang.common-promise/promise-native?
-      'xt.lang.common-promise/with-delay])
+      'ruby.lang.concurrent-promise/promise
+      'ruby.lang.concurrent-promise/promise-then
+      'ruby.lang.concurrent-promise/promise-catch
+      'ruby.lang.concurrent-promise/promise-finally
+      'ruby.lang.concurrent-promise/promise-native?
+      'ruby.lang.concurrent-promise/with-delay])
 
 (fact "simple helper rewrites stay structural and avoid the old raw helper"
   (ruby-tf-x-is-function? '(:x-is-function? e))
@@ -372,23 +372,6 @@
      (boolean (re-find #"TCPSocket\.new" socket-out))
      (boolean (re-find #"Net::HTTP\.new" notify-out))])
   => [true true true true true])
-
-^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-async-run :added "4.1"}
-(fact "runs the thunk asynchronously in a Ruby thread"
-  (l/emit-as :ruby [(ruby-tf-x-async-run '[_ thunk])])
-  => "Thread.new do\n  thunk.call\nend")
-
-^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-promise :added "4.1"}
-(fact "transforms x:promise")
-
-^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-promise-all :added "4.1"}
-(fact "transforms x:promise-all")
-
-^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-promise-then :added "4.1"}
-(fact "transforms x:promise-then")
-
-^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-promise-catch :added "4.1"}
-(fact "transforms x:promise-catch")
 
 ^{:refer hara.model.annex.spec-xtalk.fn-ruby/ruby-tf-x-promise-finally :added "4.1"}
 (fact "transforms x:promise-finally")

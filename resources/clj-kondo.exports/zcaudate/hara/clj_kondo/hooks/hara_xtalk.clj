@@ -28,12 +28,70 @@
       (list* '. base (concat segments tail)))
     form))
 
+(defn- field-key [field]
+  (str/replace (if (symbol? field) (name field) field) "-" "_"))
+
+(defn- var-dot-binding [form]
+  (when (and (seq? form)
+             (= 'var (canonical-head (first form)))
+             (= 3 (count form)))
+    (let [[_ target source] form
+          key (when (and (seq? source)
+                         (= '. (canonical-head (first source)))
+                         (= 3 (count source))
+                         (symbol? (second source))
+                         (vector? (nth source 2))
+                         (= 1 (count (nth source 2)))
+                         (string? (first (nth source 2))))
+                (first (nth source 2)))]
+      (when (and (symbol? target)
+                 key
+                 (= (field-key target) (field-key key)))
+        {:target target
+         :object (second source)
+         :key key}))))
+
+(defn- statement-sequence-nodes [head node]
+  (let [children (vec (rest (:children node)))]
+    (cond
+      (#{'do 'do*} head)
+      children
+
+      (= head 'doto)
+      (drop 1 children)
+
+      (#{'when 'while 'for 'forange 'for:array 'for:object
+         'for:index 'for:iter 'for:async} head)
+      (drop 1 children)
+
+      :else
+      nil)))
+
 (defn- report! [node rule level message]
   (api/reg-finding!
    (merge (meta node)
           {:type rule
            :level level
            :message message})))
+
+(defn- lint-var-sequence! [nodes]
+  (loop [remaining (seq nodes)]
+    (when-let [node (first remaining)]
+      (let [form (api/sexpr node)]
+        (if-let [binding (var-dot-binding form)]
+          (let [run (vec (take-while (fn [entry]
+                                       (when-let [candidate (var-dot-binding
+                                                             (api/sexpr entry))]
+                                         (= (:object binding)
+                                            (:object candidate))))
+                                     remaining))]
+            (when (> (count run) 1)
+              (let [targets (mapv (comp :target var-dot-binding api/sexpr) run)]
+                (report! node :hara.xtalk/merge-dot-destructure :warning
+                         (str "adjacent same-object dot bindings can be merged into one destructuring var: "
+                              (list 'var (set targets) (:object binding))))))
+            (recur (drop (max 1 (count run)) remaining)))
+          (recur (next remaining)))))))
 
 (defn- block-head? [head]
   (contains? +block-heads+ (canonical-head head)))
@@ -169,6 +227,14 @@
           (when (and (= head 'var)
                      (>= (count form) 2))
             (lint-var-target! node))
+          (when-let [nodes (statement-sequence-nodes head node)]
+            (lint-var-sequence! nodes))
+          (when-let [{:keys [target object key]} (when (= head 'var)
+                                                   (var-dot-binding form))]
+            (report! node :hara.xtalk/redundant-dot-destructure :warning
+                     (str "same-name dot binding for \"" key
+                          "\" can use object destructuring: "
+                          (list 'var #{target} object))))
           (when (and (= head 'x:get-key)
                      (or (= 3 (count form))
                          (and (= 4 (count form))
