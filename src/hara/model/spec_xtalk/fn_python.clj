@@ -2,8 +2,25 @@
   (:require [std.lib.template :as template]))
 
 (defn python-tf-x-del
+  "deletes a binding, emitting subscript deletion for literal key
+   access so that `(. obj [key])` does not lower to `del obj.get(key)`"
+  {:added "4.1"}
   [[_ obj]]
-  (list 'del obj))
+  (cond (and (seq? obj)
+             (= '. (first obj))
+             (= 3 (count obj))
+             (vector? (nth obj 2))
+             (= 1 (count (nth obj 2))))
+        (list 'del (list '. (second obj) (list 'setitem (first (nth obj 2)))))
+
+        (and (seq? obj)
+             (symbol? (first obj))
+             (= "x:get-key" (name (first obj)))
+             (<= 3 (count obj) 4))
+        (list 'del (list '. (second obj) (list 'setitem (nth obj 2))))
+
+        :else
+        (list 'del obj)))
 
 (defn python-tf-x-del-key
   [[_ obj key]]
