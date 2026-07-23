@@ -221,7 +221,7 @@
             lets (vec (mapcat #(forms-headed % "let") body))
             top-level-lets (filter #(some #{%} body) lets)
             top-let-count (count top-level-lets)
-            input-names (keep #(when (symbol? %) (name %)) (symbol-nodes args))
+            input-names (keep #(when (symbol? %) (clojure.core/name %)) (symbol-nodes args))
             local-bindings (mapcat let-bindings top-level-lets)
             local-names (keep binding-name local-bindings)
             direct-returns (filter (fn [form]
@@ -231,7 +231,7 @@
            (when (and (not (or sql?
                                (and (zero? top-let-count)
                                     (some #(and (seq? %)
-                                                (.startsWith (str (first %)) "pg/t:"))
+                                                (str/starts-with? (str (first %)) "pg/t:"))
                                           body))))
                       (not= 1 top-let-count))
                  (report! name-node :hara.postgres/one-let
