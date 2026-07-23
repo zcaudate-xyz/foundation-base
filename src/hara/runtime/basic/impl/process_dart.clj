@@ -390,8 +390,8 @@
                                              "socket-connect"
                                              "x:notify-http"
                                              "x:shell"
-                                             "x:file-slurp"
-                                             "x:file-spit"
+                                             "x:file-read"
+                                             "x:file-write"
                                              "x:with-delay"}
                                             (name head))))
         statement-op? '#{:- := var return break throw

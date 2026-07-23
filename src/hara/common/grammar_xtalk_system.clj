@@ -22,6 +22,7 @@
                    xtalk/+xt-common-array+
                    xtalk/+xt-common-print+
                    xtalk/+xt-common-string+
+                   xtalk/+xt-common-bytes+
                    xtalk/+xt-common-math+]
    :xtalk-fn      [xtalk/+xt-functional-base+
                    xtalk/+xt-functional-invoke+

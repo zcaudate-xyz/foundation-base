@@ -819,11 +819,7 @@
                (return ["async"]))))))))
 
 (def +ruby-file+
-  {:x-file-resolve    {:macro #'ruby-tf-x-file-resolve   :emit :macro}
-   :x-file-slurp      {:macro #'ruby-tf-x-file-slurp     :emit :macro
-                       :op-spec {:allow-blocks true}}
-   :x-file-spit       {:macro #'ruby-tf-x-file-spit      :emit :macro
-                       :op-spec {:allow-blocks true}}})
+  {:x-file-resolve    {:macro #'ruby-tf-x-file-resolve   :emit :macro}})
 
 (def +ruby-shell+
   {:x-pwd             {:macro #'ruby-tf-x-pwd            :emit :macro}

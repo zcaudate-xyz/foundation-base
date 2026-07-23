@@ -435,6 +435,47 @@
    :x-str-starts-with {:macro #'js-tf-x-str-starts-with :emit :macro}
    :x-str-ends-with   {:macro #'js-tf-x-str-ends-with   :emit :macro}})
 
+(defn js-tf-x-bytes-new [[_ values]]
+  (list '. 'Uint8Array (list 'from values)))
+
+(defn js-tf-x-bytes-set [[_ value idx byte]]
+  (template/$ ('((fn []
+                   (x:set-idx ~value ~idx ~byte)
+                   (return ~value))))))
+
+(defn js-tf-x-bytes-copy [[_ value]]
+  (list '. 'Uint8Array (list 'from value)))
+
+(defn js-tf-x-bytes-slice [[_ value start & [end]]]
+  (list '. value (if end (list 'slice start end) (list 'slice start))))
+
+(defn js-tf-x-bytes-u8 [[_ value]]
+  (list 'b:& value 255))
+
+(defn js-tf-x-bytes-s8 [[_ value]]
+  (list ':? (list '> value 127) (list '- value 256) value))
+
+(defn js-tf-x-str-encode [[_ value]]
+  (template/$ (. (new TextEncoder) (encode ~value))))
+
+(defn js-tf-x-str-decode [[_ value]]
+  (template/$ (. (new TextDecoder) (decode ~value))))
+
+(defn js-tf-x-bit-not [[_ value]]
+  (list 'b:xor value -1))
+
+(def +js-bytes+
+  {:x-bytes-new   {:macro #'js-tf-x-bytes-new :emit :macro}
+   :x-bytes-set   {:macro #'js-tf-x-bytes-set :emit :macro
+                   :op-spec {:allow-blocks true}}
+   :x-bytes-copy  {:macro #'js-tf-x-bytes-copy :emit :macro}
+   :x-bytes-slice {:macro #'js-tf-x-bytes-slice :emit :macro}
+   :x-bytes-u8    {:macro #'js-tf-x-bytes-u8 :emit :macro}
+   :x-bytes-s8    {:macro #'js-tf-x-bytes-s8 :emit :macro}
+   :x-str-encode  {:macro #'js-tf-x-str-encode :emit :macro}
+   :x-str-decode  {:macro #'js-tf-x-str-decode :emit :macro}
+   :x-bit-not     {:macro #'js-tf-x-bit-not :emit :macro}})
+
 ;;
 ;; JSON
 ;;
@@ -532,8 +573,11 @@
                                            (~cb nil conn))))))))
 
 (defn js-tf-x-socket-send
-  ([[_ conn s]]
-   (template/$ (. ~conn (write ~s)))))
+  ([[_ conn bytes]]
+   (template/$
+    (x:get-idx [(. ~conn (write ~bytes))
+                (. ~bytes ["length"])]
+               1))))
 
 (defn js-tf-x-socket-close
   ([[_ conn]]
@@ -723,31 +767,22 @@
    (. (require "path")
       (resolve ~root ~path))))
 
-(defn js-tf-x-file-slurp
-  [[_ filename cb]]
+(defn js-tf-x-file-read
+  [[_ filename]]
   (template/$
-   (do (. (require "fs")
-          (readFile ~filename
-                    "utf-8"
-                    ~cb))
-       (return ["async"]))))
+   (. (. (require "fs") ["promises"])
+      (readFile ~filename))))
 
-(defn js-tf-x-file-spit
-  [[_ filename content cb]]
+(defn js-tf-x-file-write
+  [[_ filename content]]
   (template/$
-   (do (. (require "fs")
-          (writeFile  ~filename
-                      ~content
-                      "utf-8"
-                      ~cb))
-       (return ["async"]))))
+   (. (. (require "fs") ["promises"])
+      (writeFile ~filename ~content))))
 
 (def +js-file+
   {:x-file-resolve   {:macro #'js-tf-x-file-resolve  :emit :macro}
-   :x-file-slurp     {:macro #'js-tf-x-file-slurp    :emit :macro
-                      :op-spec {:allow-blocks true}}
-   :x-file-spit      {:macro #'js-tf-x-file-spit     :emit :macro
-                      :op-spec {:allow-blocks true}}})
+   :x-file-read      {:macro #'js-tf-x-file-read     :emit :macro}
+   :x-file-write     {:macro #'js-tf-x-file-write    :emit :macro}})
 
 
 
@@ -762,6 +797,7 @@
          +js-arr+
          +js-arr-functional+
          +js-str+
+         +js-bytes+
          +js-js+
          +js-return+
          +js-socket+

@@ -3,6 +3,51 @@
 
 (l/script :xtalk)
 
+(defspec.xt x:bytes-new nil)
+(defmacro.xt ^{:standalone true} x:bytes-new {:added "4.1"}
+  ([values] (list 'x:bytes-new values)))
+
+(defspec.xt x:bytes-count nil)
+(defmacro.xt ^{:standalone true} x:bytes-count {:added "4.1"}
+  ([value] (list 'x:bytes-count value)))
+
+(defspec.xt x:bytes-get nil)
+(defmacro.xt ^{:standalone true} x:bytes-get {:added "4.1"}
+  ([value idx] (list 'x:bytes-get value idx)))
+
+(defspec.xt x:bytes-set nil)
+(defmacro.xt ^{:standalone true} x:bytes-set {:added "4.1"}
+  ([value idx byte] (list 'x:bytes-set value idx byte)))
+
+(defspec.xt x:bytes-copy nil)
+(defmacro.xt ^{:standalone true} x:bytes-copy {:added "4.1"}
+  ([value] (list 'x:bytes-copy value)))
+
+(defspec.xt x:bytes-slice nil)
+(defmacro.xt ^{:standalone true} x:bytes-slice {:added "4.1"}
+  ([value start] (list 'x:bytes-slice value start))
+  ([value start end] (list 'x:bytes-slice value start end)))
+
+(defspec.xt x:bytes-u8 nil)
+(defmacro.xt ^{:standalone true} x:bytes-u8 {:added "4.1"}
+  ([value] (list 'x:bytes-u8 value)))
+
+(defspec.xt x:bytes-s8 nil)
+(defmacro.xt ^{:standalone true} x:bytes-s8 {:added "4.1"}
+  ([value] (list 'x:bytes-s8 value)))
+
+(defspec.xt x:str-encode nil)
+(defmacro.xt ^{:standalone true} x:str-encode {:added "4.1"}
+  ([value] (list 'x:str-encode value)))
+
+(defspec.xt x:str-decode nil)
+(defmacro.xt ^{:standalone true} x:str-decode {:added "4.1"}
+  ([value] (list 'x:str-decode value)))
+
+(defspec.xt x:bit-not nil)
+(defmacro.xt ^{:standalone true} x:bit-not {:added "4.1"}
+  ([value] (list 'x:bit-not value)))
+
 (defmacro.xt ^{:style/indent 1}
   for:array
   "iterates arrays in order"

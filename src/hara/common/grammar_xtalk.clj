@@ -676,6 +676,28 @@
     :op-spec      {:arglists '([value])
                    :type [:fn [:xt/str] :xt/str]}}])
 
+(def +xt-common-bytes+
+  [{:op :x-bytes-new :symbol #{'x:bytes-new} :emit :abstract
+    :op-spec {:arglists '([values])}}
+   {:op :x-bytes-count :symbol #{'x:bytes-count} :emit :alias :raw 'x:len
+    :op-spec {:arglists '([value]) :type [:fn [:xt/any] :xt/int]}}
+   {:op :x-bytes-get :symbol #{'x:bytes-get} :emit :alias :raw 'x:get-idx
+    :op-spec {:arglists '([value idx]) :type [:fn [:xt/any :xt/int] :xt/int]}}
+   {:op :x-bytes-set :symbol #{'x:bytes-set} :emit :abstract
+    :op-spec {:arglists '([value idx byte])}}
+   {:op :x-bytes-copy :symbol #{'x:bytes-copy} :emit :abstract
+    :op-spec {:arglists '([value])}}
+   {:op :x-bytes-slice :symbol #{'x:bytes-slice} :emit :abstract
+    :op-spec {:arglists '([value start] [value start end])}}
+   {:op :x-bytes-u8 :symbol #{'x:bytes-u8} :emit :abstract
+    :op-spec {:arglists '([value]) :type [:fn [:xt/int] :xt/int]}}
+   {:op :x-bytes-s8 :symbol #{'x:bytes-s8} :emit :abstract
+    :op-spec {:arglists '([value]) :type [:fn [:xt/int] :xt/int]}}
+   {:op :x-str-encode :symbol #{'x:str-encode} :emit :abstract
+    :op-spec {:arglists '([value])}}
+   {:op :x-str-decode :symbol #{'x:str-decode} :emit :abstract
+    :op-spec {:arglists '([value]) :type [:fn [:xt/any] :xt/str]}}])
+
 ;; common-math
 
 (def +xt-common-math+       
@@ -858,7 +880,10 @@
               :type [:fn [:xt/int :xt/int] :xt/int]}}
    {:op :x-bit-xor         :symbol #{'x:bit-xor}          :macro #'tf-bit-xor  :emit :macro
     :op-spec {:arglists '([x y])
-              :type [:fn [:xt/int :xt/int] :xt/int]}}])
+              :type [:fn [:xt/int :xt/int] :xt/int]}}
+   {:op :x-bit-not         :symbol #{'x:bit-not}           :emit :abstract
+    :op-spec {:arglists '([x])
+              :type [:fn [:xt/int] :xt/int]}}])
 
 (def +xt-lang-throw+
   [{:op :x-throw          :symbol #{'x:throw}           :macro #'tf-throw  :emit :macro
@@ -899,8 +924,9 @@
     :op-spec {:type [:fn [:xt/str :xt/int :xt/any :xt/any] :xt/any]
               :arglists '([host port opts cb])}}
    {:op :x-socket-send :symbol #{'x:socket-send} :emit :abstract
-    :op-spec {:type [:fn [:xt/any :xt/str] :xt/any]
-              :arglists '([conn message])}}
+    :requires #{:x-str-decode}
+    :op-spec {:type [:fn [:xt/any :xt/any] :xt/int]
+              :arglists '([conn bytes])}}
    {:op :x-socket-close :symbol #{'x:socket-close} :emit :abstract
     :op-spec {:type [:fn [:xt/any] :xt/any]
               :arglists '([conn])}}])
@@ -963,12 +989,14 @@
   [{:op :x-file-resolve   :symbol #{'x:file-resolve}     :emit :abstract
     :op-spec {:type [:fn [:xt/str :xt/str] :xt/str]
               :arglists '([root path])}}
-   {:op :x-file-slurp     :symbol #{'x:file-slurp}    :emit :abstract
-    :op-spec {:arglists '([path cb])
-              :type [:fn [:xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]]}}
-   {:op :x-file-spit      :symbol #{'x:file-spit}     :emit :abstract
-    :op-spec {:arglists '([path value cb])
-              :type [:fn [:xt/str :xt/str :xt/obj [:xt/fn [:xt/any :xt/any] :xt/any]]]}}])
+   {:op :x-file-read      :symbol #{'x:file-read}      :emit :abstract
+    :requires #{:x-promise}
+    :op-spec {:arglists '([path])
+              :type [:fn [:xt/str] :xt/promise]}}
+   {:op :x-file-write     :symbol #{'x:file-write}     :emit :abstract
+    :requires #{:x-promise}
+    :op-spec {:arglists '([path bytes])
+              :type [:fn [:xt/str :xt/any] :xt/promise]}}])
 
 ;;
 ;; I've created additional x-pwd and x-file-resolve ops
