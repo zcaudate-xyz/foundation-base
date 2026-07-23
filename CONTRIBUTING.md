@@ -179,7 +179,48 @@ A runtime contribution should document:
 - Update source links and examples when namespaces move.
 - Do not commit local databases, credentials, runtime caches, or generated secrets.
 
+## Commit conventions
+
+Commit messages are the primary input for regression isolation and release notes, so they must describe the change, not just the topic.
+
+### Scope
+
+- One concern per commit: a feature, a fix, a refactor, a regeneration, or a CI/doc change.
+- Do not mix generated output (`test-lang/xtbench/**`, `packages-gen/**`, `public/`, `packages-gen`) with the source or generator change that produced it. Commit the source change first, then the regeneration as its own commit.
+- Do not mix unrelated subsystems in one commit.
+
+### Message structure
+
+Prefix the summary with the affected subsystem:
+
+```text
+<area>: <imperative summary>
+
+<body: what changed and why>
+Refs #<issue>
+```
+
+Examples:
+
+```text
+xtalk: normalize canonical access lowering
+dart/view: fix polyfill init order
+seedgen: regenerate lua bench for xt.lang
+ci: pin docker base image
+docs: update pg sync walkthrough
+```
+
+Common area prefixes: `std`, `code`, `hara`, `rt`, `xt`, `xtalk`, `seedgen`, `src-lang/<lang>`, `ci`, `docs`, `build`.
+
+Rules:
+
+- The summary must match the diff. A commit titled "move X" must actually move X; if the commit mainly changes something else, that something else is the summary.
+- Non-trivial commits reference their tracking issue with `Refs #123` (or `Fixes #123` when the commit resolves it) so release notes and issue linkage can be extracted from `git log` without reading diffs.
+- Release-note-worthy changes should state the user-visible effect in the body.
+
 ## Pull requests
+
+The repository provides a pull-request template (`.github/pull_request_template.md`) with a checklist covering targeted tests, generated artifacts, and documentation.
 
 In the pull-request description, include:
 
