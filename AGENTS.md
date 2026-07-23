@@ -298,6 +298,15 @@ Example: `std-lib-collection` key in config → `[std.lib/std-lib-collection]` i
 - `code.*` - Development tools (test, manage, doc, framework)
 - `rt.*` - Language runtimes
 
+### Commits and PRs
+
+Commit messages must describe the actual diff, use a subsystem prefix
+(`xtalk:`, `seedgen:`, `dart/view:`, `ci:`, `docs:`, ...), and reference the
+tracking issue (`Refs #123`) for non-trivial changes. Keep generated output
+(`test-lang/xtbench/**`, `packages-gen/**`, `public/`) in separate commits
+from the source/generator change. See "Commit conventions" in
+`CONTRIBUTING.md` and `.github/pull_request_template.md`.
+
 ### Common Commands
 
 ```bash
