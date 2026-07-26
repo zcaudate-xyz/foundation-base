@@ -1,4 +1,4 @@
-package newlisp.lib.json;
+package hara.lib.json;
 
 import clojure.lang.Ratio;
 import com.fasterxml.jackson.core.JsonGenerator;

@@ -60,7 +60,7 @@
   (decode [data keywords]))
 
 (extend-protocol YAMLCodec
-  newlisp.lib.snakeyaml.MarkedConstructor$Marked
+  hara.lib.snakeyaml.MarkedConstructor$Marked
   (decode [data keywords]
     (letfn [(from-Mark [^Mark mark]
               {:line (.getLine mark)

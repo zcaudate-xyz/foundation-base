@@ -1,4 +1,4 @@
-package newlisp.lib.security.shamir;
+package hara.lib.security.shamir;
 
 import java.math.BigInteger;
 

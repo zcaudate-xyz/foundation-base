@@ -1,4 +1,4 @@
-package newlisp.lib.image;
+package hara.lib.image;
 
 import java.awt.image.DataBuffer;
 import java.nio.ByteBuffer;

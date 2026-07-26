@@ -1,4 +1,4 @@
-package newlisp.lib.json;
+package hara.lib.json;
 
 import clojure.lang.ITransientCollection;
 import clojure.lang.PersistentVector;

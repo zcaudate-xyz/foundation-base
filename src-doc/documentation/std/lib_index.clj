@@ -351,7 +351,7 @@
 
 "1.  **`render [template data]`**:\n    *   **Purpose**: Renders a Mustache `template` string using the provided `data`.\n    *   **Mechanism**:\n        *   It first preprocesses the `template` using `Mustache/preprocess`.\n        *   The `data` map is flattened into a dot-separated key-value map using `std.lib.collection/tree-flatten`. This allows Mustache to access nested data using dot notation (e.g., `user.name`).\n        *   A `newlisp.lib.mustache.Context` is created with the flattened data.\n        *   Finally, `Mustache/render` is called to produce the output string."
 
-"The underlying `newlisp.lib.mustache` library supports standard Mustache features, including:"
+"The underlying `hara.lib.mustache` library supports standard Mustache features, including:"
 
 [[:code {:lang "text"}
   "Variables:                        {{key}}\nSections (truthy/falsy iteration): {{#section}}...{{/section}}\nInverted Sections (falsy):         {{^section}}...{{/section}}\nConditional Sections (extension):  {{?section}}...{{/section}}\nUnescaped HTML:                    {{{key}}} or {{&key}}"]]

@@ -122,6 +122,6 @@
 (def +init+
   (default/install-type!
    :c :jocl
-   {:type :newlisp/lib.jocl
+   {:type :hara/lib.jocl
     :config {:bootstrap false}
     :instance {:create jocl:create}}))

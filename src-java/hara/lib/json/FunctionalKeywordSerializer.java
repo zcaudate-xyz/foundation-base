@@ -1,4 +1,4 @@
-package newlisp.lib.json;
+package hara.lib.json;
 
 import clojure.lang.IFn;
 import clojure.lang.Keyword;

@@ -217,5 +217,5 @@
        :not-compiled))))
 
 (comment
-  (javac '[newlisp.lib])
+  (javac '[hara.lib])
   (javac '[tahto.core]))

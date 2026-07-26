@@ -1,4 +1,4 @@
-package newlisp.lib.graal;
+package hara.lib.graal;
 
 import org.graalvm.polyglot.HostAccess;
 

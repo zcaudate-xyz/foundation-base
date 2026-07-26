@@ -14,7 +14,7 @@
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]
             [xt.lang.common-lib :as lib])
-  (:import (org.graalvm.polyglot Context Context$Builder Engine Value Source) (org.graalvm.polyglot.io ByteSequence) (newlisp.lib.graal Require ResourceFolder FilesystemFolder)))
+  (:import (org.graalvm.polyglot Context Context$Builder Engine Value Source) (org.graalvm.polyglot.io ByteSequence) (hara.lib.graal Require ResourceFolder FilesystemFolder)))
 
 (def ^:dynamic *lang* nil)
 

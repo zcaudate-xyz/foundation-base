@@ -2,7 +2,7 @@
  * Copyright 2018 Transposit Corporation. All Rights Reserved.
  */
 
-package newlisp.lib.graal;
+package hara.lib.graal;
 
 public class Paths {
   public static String[] splitPath(String path) {

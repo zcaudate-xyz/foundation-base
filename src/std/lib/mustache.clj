@@ -1,6 +1,6 @@
 (ns std.lib.mustache
   (:require [std.lib.collection :as coll])
-  (:import (newlisp.lib.mustache Context Mustache)))
+  (:import (hara.lib.mustache Context Mustache)))
 
 (defn render
   "converts a template with mustache data

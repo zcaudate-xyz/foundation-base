@@ -37,6 +37,6 @@
   ;; compile and set up script macros even when OpenCL is missing.
   (default/install-type!
    :c :jocl
-   {:type :newlisp/lib.jocl.dummy
+   {:type :hara/lib.jocl.dummy
     :config {:bootstrap false}
     :instance {:create (fn [config] config)}}))

@@ -1,4 +1,4 @@
-package newlisp.lib.stream;
+package hara.lib.stream;
 
 import clojure.lang.ISeq;
 import java.util.Spliterator;

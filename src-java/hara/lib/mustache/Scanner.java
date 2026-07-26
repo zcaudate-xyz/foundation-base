@@ -1,4 +1,4 @@
-package newlisp.lib.mustache;
+package hara.lib.mustache;
 
 public class Scanner {
     public static final String TAGS = "#^>!/{&?";

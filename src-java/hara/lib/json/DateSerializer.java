@@ -1,4 +1,4 @@
-package newlisp.lib.json;
+package hara.lib.json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;

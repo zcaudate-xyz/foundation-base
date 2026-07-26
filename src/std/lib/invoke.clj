@@ -19,7 +19,7 @@
     :memoize   {:ns std.lib.memoize}
     :element   {:ns std.object.query}
     :task      {:ns std.task}
-    :opencl    {:ns newlisp.lib.opencl}})
+    :opencl    {:ns hara.lib.opencl}})
 
 (defn multi?
   "returns `true` if `obj` is a multimethod

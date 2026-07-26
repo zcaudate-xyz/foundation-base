@@ -399,7 +399,7 @@
  {:description "wrapper for scribe"
   :include [[script.yaml :complete]]
   :dependencies [org.yaml/snakeyaml]
-  :bundle [{:path "target/classes" :include ["newlisp/lib/snakeyaml"]}]}
+  :bundle [{:path "target/classes" :include ["hara/lib/snakeyaml"]}]}
   
  xyz.zcaudate/std.block
  {:description "blocks for code unit representation"
@@ -439,7 +439,7 @@
   :include [[std.image :complete]]
   :bundle
   [{:path "resources" :include ["assets/std.image"]}
-   {:path "target/classes" :include ["newlisp/lib/image"]}]}
+   {:path "target/classes" :include ["hara/lib/image"]}]}
 
  xyz.zcaudate/std.fs
  {:description "file library"
@@ -452,7 +452,7 @@
   :dependencies
   [com.fasterxml.jackson.core/jackson-databind
    com.fasterxml.jackson.datatype/jackson-datatype-jsr310]
-  :bundle [{:path "target/classes" :include ["newlisp/lib/json"]}]}
+  :bundle [{:path "target/classes" :include ["hara/lib/json"]}]}
  
   xyz.zcaudate/tahto
   {:description "working with other languages"
@@ -487,7 +487,7 @@
   {:description "runtime for graal contexts"
    :include [[tahto.runtime.graal :complete]]
    :bundle [{:path "target/classes" 
-             :include ["newlisp/lib/graal"]}]
+             :include ["hara/lib/graal"]}]
    :dependencies [org.graalvm.sdk/graal-sdk
                   org.graalvm.js/js
                  org.graalvm.js/js-scriptengine
@@ -519,12 +519,12 @@
  xyz.zcaudate/std.lib
  {:description "simple string methods for searching"
   :bundle [{:path "target/classes" 
-            :include ["newlisp/lib/bin"
-                      "newlisp/lib/concurrent"
-                      "newlisp/lib/foundation"
-                      "newlisp/lib/mustache"
-                      "newlisp/lib/security"
-                      "newlisp/lib/stream"]}]
+            :include ["hara/lib/bin"
+                      "hara/lib/concurrent"
+                      "hara/lib/foundation"
+                      "hara/lib/mustache"
+                      "hara/lib/security"
+                      "hara/lib/stream"]}]
   :include [[std.concurrent :complete]
             [std.lib :complete]
             [std.print :complete]

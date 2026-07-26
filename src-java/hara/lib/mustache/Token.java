@@ -1,7 +1,7 @@
-package newlisp.lib.mustache;
+package hara.lib.mustache;
 
-import static newlisp.lib.mustache.Context.isArray;
-import static newlisp.lib.mustache.Context.isFalse;
+import static hara.lib.mustache.Context.isArray;
+import static hara.lib.mustache.Context.isFalse;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package newlisp.lib.foundation;
+package hara.lib.foundation;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ThreadLocalRandom;
