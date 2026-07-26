@@ -1,4 +1,4 @@
-package hara.net.http;
+tahto/net/http/WSException.java:1:package tahto.net.http;
 
 public class WSException extends Exception {
 

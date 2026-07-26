@@ -1,14 +1,14 @@
-(ns hara.runtime.basic.impl-annex.process-php-test
-  (:require [hara.runtime.basic.impl-annex.process-php :refer :all]
+tahto/runtime/basic/impl_annex/process_php_test.clj:1:(ns tahto.runtime.basic.impl-annex.process-php-test
+tahto/runtime/basic/impl_annex/process_php_test.clj:2:  (:require [tahto.runtime.basic.impl-annex.process-php :refer :all]
             [std.lib.env :as env]
-            [hara.runtime.basic.type-oneshot :as p]
+tahto/runtime/basic/impl_annex/process_php_test.clj:4:            [tahto.runtime.basic.type-oneshot :as p]
             [std.json :as json]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (fact:global {:skip (not (env/program-exists? "php"))})
 
-^{:refer hara.runtime.basic.impl-annex.process-php-test/CANARY-PHP :adopt true :added "4.0"}
+tahto/runtime/basic/impl_annex/process_php_test.clj:11:^{:refer tahto.runtime.basic.impl-annex.process-php-test/CANARY-PHP :adopt true :added "4.0"}
 (fact "EVALUATE php code"
 
   (-> (p/rt-oneshot {:lang :php})
@@ -17,7 +17,7 @@
       :value)
   => 10)
 
-^{:refer hara.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.1"}
+tahto/runtime/basic/impl_annex/process_php_test.clj:20:^{:refer tahto.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.1"}
 (fact "captures php eval errors without crashing the wrapper"
   (let [out (-> (p/rt-oneshot {:lang :php})
                 (p/raw-eval-oneshot (default-oneshot-wrap '(not_a_real_php_fn)))
@@ -25,14 +25,14 @@
     [(:type out) (string? (:value out))])
   => ["error" true])
 
-^{:refer hara.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"
-  :id test-hara_runtime_basic_impl_annex_process_php__default_oneshot_wrap_bootstrap}
+tahto/runtime/basic/impl_annex/process_php_test.clj:28:^{:refer tahto.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"
+tahto/runtime/basic/impl_annex/process_php_test.clj:29:  :id test-tahto_runtime_basic_impl_annex_process_php__default_oneshot_wrap_bootstrap}
 (fact "creates the oneshot bootstrap form"
 
   (default-oneshot-wrap 1)
   => string?)
 
-^{:refer hara.runtime.basic.impl-annex.process-php/default-body-transform :added "4.1"}
+tahto/runtime/basic/impl_annex/process_php_test.clj:35:^{:refer tahto.runtime.basic.impl-annex.process-php/default-body-transform :added "4.1"}
 (fact "transforms oneshot forms for return-eval"
   (default-body-transform '[1 2 3] {})
   => '((quote ((fn [] (return [1 2 3])))))
@@ -46,14 +46,14 @@
   (l/emit-as :php [(default-body-transform '[1 2 3] {:bulk true})])
   => #"\(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\)")
 
-^{:refer hara.runtime.basic.impl-annex.process-php/default-basic-client :added "4.0"}
+tahto/runtime/basic/impl_annex/process_php_test.clj:49:^{:refer tahto.runtime.basic.impl-annex.process-php/default-basic-client :added "4.0"}
 (fact "creates the basic client bootstrap"
 
   (default-basic-client 19000)
   => string?)
 
 
-^{:refer hara.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"}
+tahto/runtime/basic/impl_annex/process_php_test.clj:56:^{:refer tahto.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"}
 (fact "creates a single-line php source string for runtime eval"
   (php-body-source '[1 2 3] {})
   => #"\(function \(\)\{\s+return \[1,2,3\];\s+\}\)\(\)"
@@ -61,7 +61,7 @@
   (php-body-source '[1 2 3] {:bulk true})
   => #"\(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\)")
 
-^{:refer hara.runtime.basic.impl-annex.process-php/default-basic-body-transform :added "4.1"}
+tahto/runtime/basic/impl_annex/process_php_test.clj:64:^{:refer tahto.runtime.basic.impl-annex.process-php/default-basic-body-transform :added "4.1"}
 (fact "transforms basic runtime forms into a PHP return statement"
   (second (default-basic-body-transform '[1 2 3] {}))
   => #"^return \(function \(\)\{\s+return \[1,2,3\];\s+\}\)\(\);$"
@@ -69,7 +69,7 @@
   (second (default-basic-body-transform '[1 2 3] {:bulk true}))
   => #"^return \(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\);$")
 
-^{:refer hara.runtime.basic.impl-annex.process-php/php-prefix-params :added "4.1"}
+tahto/runtime/basic/impl_annex/process_php_test.clj:72:^{:refer tahto.runtime.basic.impl-annex.process-php/php-prefix-params :added "4.1"}
 (fact "prefixes bare function parameter symbols with $"
   (php-prefix-params '(fn [x y] (+ x y)))
   => '(fn [$x $y] (+ $x $y))
@@ -83,8 +83,8 @@
   (php-prefix-params '(fn [$x] (+ $x 1)))
   => '(fn [$x] (+ $x 1)))
 
-^{:refer hara.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"
-  :id test-hara_runtime_basic_impl_annex_process_php__php_body_source_locals}
+tahto/runtime/basic/impl_annex/process_php_test.clj:86:^{:refer tahto.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"
+tahto/runtime/basic/impl_annex/process_php_test.clj:87:  :id test-tahto_runtime_basic_impl_annex_process_php__php_body_source_locals}
 (fact "runtime source emits seedgen-style bare PHP locals as valid PHP variables"
   (php-body-source '(do
                       (var $out [])

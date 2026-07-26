@@ -6,8 +6,8 @@
   :aliases
   {"test"    ["run" "-m" "code.test"]
    "manage"  ["run" "-m" "code.manage"]
-   "seedgen" ["run" "-m" "hara.seedgen.cli"]
-   "hara-uberjar" ["run" "-m" "hara.uberjar.build"]
+   "seedgen" ["run" "-m" "tahto.seedgen.cli"]
+   "tahto-uberjar" ["run" "-m" "tahto.uberjar.build"]
    #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "wiki"        ["exec" "-ep" "(let [p (-> (ProcessBuilder. [\"bash\" \"bin/publish-wiki\"]) (.inheritIO) (.start))] (System/exit (.waitFor p)))"]
@@ -106,22 +106,22 @@
    ;; math.infix
    [org.scijava/parsington "3.1.0"]
 
-   ;; hara.runtime.basic
+   ;; tahto.runtime.basic
    [http-kit "2.8.0"]
    [com.rabbitmq/amqp-client "5.21.0"]
 
-   ;; hara.runtime.graal
+   ;; tahto.runtime.graal
    [org.graalvm.polyglot/polyglot "24.1.0"]
    [org.graalvm.js/js-language "24.1.0"]
    [commons-io/commons-io "2.15.1"]
 
-   ;; hara.runtime.jep
+   ;; tahto.runtime.jep
    [black.ninia/jep "4.3.1"]
 
-   ;; hara.runtime.libpython
+   ;; tahto.runtime.libpython
    [clj-python/libpython-clj "2.026"]
 
-   ;; hara.runtime.jocl
+   ;; tahto.runtime.jocl
    [org.jocl/jocl "2.0.4"]
 
    ;; jvm.chisel (runtime link against precompiled Chisel; no Scala compiler plugin needed)
@@ -207,7 +207,7 @@
              :codox {:dependencies [[codox "0.10.8"]]}}
   :codox {:source-paths ["src"]
           :output-path "public/api"
-          :namespaces [#"^std\..*" #"^code\..*" #"^hara\..*" #"^jvm\..*"
+          :namespaces [#"^std\..*" #"^code\..*" #"^tahto\..*" #"^jvm\..*"
                        #"^lib\..*" #"^net\..*" #"^math\..*" #"^xtalk\..*"
                        #"^scaffold\..*"]
           :metadata {:doc/format :markdown}

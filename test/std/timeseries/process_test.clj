@@ -161,7 +161,7 @@
 
   (comment
     (std.log/section
-     (->> (process (->> @(first (vals (:active @(:runtime (:collector @hara.shell.gnuplat-impl-test/*instance*)))))
+     (->> (process (->> @(first (vals (:active @(:runtime (:collector @tahto.shell.gnuplat-impl-test/*instance*)))))
                         :results
                            ;;count
                         (mapv (fn [{:keys [output] :as m}]

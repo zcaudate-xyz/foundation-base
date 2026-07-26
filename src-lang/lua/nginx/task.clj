@@ -1,5 +1,5 @@
 (ns lua.nginx.task
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :lua.nginx
   {:require [[lua.nginx.common-cache :as cache]

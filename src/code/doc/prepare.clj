@@ -19,7 +19,7 @@
   "processes a single meta to generate an interim structure
    (let [project (publish/make-project)
          lookup  (executive/all-pages project)]
-     (sort (keys (prepare 'hara/index {} lookup project))))
+     (sort (keys (prepare 'tahto/index {} lookup project))))
    => '(:anchors :anchors-lu :articles :base :global :id :input :name :namespaces :ns :output :project :references :subtitle :theme :title)"
   {:added "3.0"}
   ([key params lookup {:keys [root] :as project}]

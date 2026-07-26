@@ -1,7 +1,7 @@
-(ns hara.typed.xtalk-parse-test
+tahto/typed/xtalk_parse_test.clj:1:(ns tahto.typed.xtalk-parse-test
   (:use code.test)
-  (:require [hara.typed.xtalk-common :as types]
-            [hara.typed.xtalk-parse :refer :all]))
+tahto/typed/xtalk_parse_test.clj:3:  (:require [tahto.typed.xtalk-common :as types]
+tahto/typed/xtalk_parse_test.clj:4:            [tahto.typed.xtalk-parse :refer :all]))
 
 (def +ctx+ {:ns 'sample.route :aliases '{types xt.event.base-listener}})
 
@@ -28,104 +28,104 @@
                   ([arr idx default]
                    (list (quote x:get-idx) arr idx default))]})
 
-^{:refer hara.typed.xtalk-parse/read-forms :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:31:^{:refer tahto.typed.xtalk-parse/read-forms :added "4.1"}
 (fact "reads forms from files"
-  (pos? (count (read-forms "test/hara.lang/model/spec_xtalk_typed_fixture.clj")))
+  (pos? (count (read-forms "test/tahto.core/model/spec_xtalk_typed_fixture.clj")))
   => true)
 
 (fact "attaches file and source position metadata to read forms"
-  (let [forms (read-forms "test/hara.lang/model/spec_xtalk_typed_fixture.clj")
+  (let [forms (read-forms "test/tahto.core/model/spec_xtalk_typed_fixture.clj")
         first-form (first forms)]
     [(some-> first-form meta :file string?)
      (integer? (some-> first-form meta :line))
      (integer? (some-> first-form meta :column))])
   => [true true true])
 
-^{:refer hara.typed.xtalk-parse/ns-form? :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:44:^{:refer tahto.typed.xtalk-parse/ns-form? :added "4.1"}
 (fact "detects ns forms"
   [(ns-form? '(ns sample.core))
    (ns-form? '(def x 1))]
   => [true false])
 
-^{:refer hara.typed.xtalk-parse/defspec? :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:50:^{:refer tahto.typed.xtalk-parse/defspec? :added "4.1"}
 (fact "detects defspec.xt forms"
   [(defspec? '(defspec.xt User :xt/str))
    (defspec? '(defn.xt user []))]
   => [true false])
 
-^{:refer hara.typed.xtalk-parse/defn? :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:56:^{:refer tahto.typed.xtalk-parse/defn? :added "4.1"}
 (fact "detects xt and clojure defn forms"
   [(defn? '(defn.xt f []))
    (defn? '(defgen.xt f []))
    (defn? '(defmacro.xt f []))]
   => ["defn.xt" "defgen.xt" nil])
 
-^{:refer hara.typed.xtalk-parse/defmacro? :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:63:^{:refer tahto.typed.xtalk-parse/defmacro? :added "4.1"}
 (fact "detects defmacro.xt forms"
   [(defmacro? '(defmacro.xt f []))
    (defmacro? '(defn.xt f []))]
   => [true false])
 
-^{:refer hara.typed.xtalk-parse/defvalue? :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:69:^{:refer tahto.typed.xtalk-parse/defvalue? :added "4.1"}
 (fact "detects def.xt forms"
   [(defvalue? '(def.xt Value 1))
    (defvalue? '(defn.xt f []))]
   => [true false])
 
-^{:refer hara.typed.xtalk-parse/parse-ns-name :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:75:^{:refer tahto.typed.xtalk-parse/parse-ns-name :added "4.1"}
 (fact "extracts namespace names from form streams"
   (parse-ns-name '[(comment x) (ns sample.core) (def x 1)])
   => 'sample.core)
 
-^{:refer hara.typed.xtalk-parse/extract-aliases :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:80:^{:refer tahto.typed.xtalk-parse/extract-aliases :added "4.1"}
 (fact "extracts aliases from require vectors"
   (extract-aliases '[[xt.lang.common-lib :as k]
                      [xt.event.base-listener :as event-common]])
   => '{k xt.lang.common-lib
        event-common xt.event.base-listener})
 
-^{:refer hara.typed.xtalk-parse/extract-ns-aliases :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:87:^{:refer tahto.typed.xtalk-parse/extract-ns-aliases :added "4.1"}
 (fact "extracts aliases from ns forms"
   (extract-ns-aliases '(ns sample.core (:require [xt.lang.common-lib :as k])))
   => '{k xt.lang.common-lib})
 
-^{:refer hara.typed.xtalk-parse/script-form? :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:92:^{:refer tahto.typed.xtalk-parse/script-form? :added "4.1"}
 (fact "detects script forms"
   [(script-form? '(script :xtalk {:require []}))
    (script-form? '(ns sample.core))]
   => [true false])
 
-^{:refer hara.typed.xtalk-parse/extract-script-aliases :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:98:^{:refer tahto.typed.xtalk-parse/extract-script-aliases :added "4.1"}
 (fact "extracts aliases from script forms"
   (extract-script-aliases '[(script :xtalk {:require [[xt.lang.common-lib :as k]]})])
   => '{k xt.lang.common-lib})
 
-^{:refer hara.typed.xtalk-parse/arg-from-inline-form :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:103:^{:refer tahto.typed.xtalk-parse/arg-from-inline-form :added "4.1"}
 (fact "builds args from inline type forms"
   (arg-from-inline-form '(:xt/int id) +ctx+)
   => '{:name id :type {:kind :primitive :name :xt/int} :modifiers []})
 
-^{:refer hara.typed.xtalk-parse/arg-declared-type :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:108:^{:refer tahto.typed.xtalk-parse/arg-declared-type :added "4.1"}
 (fact "reads declared arg metadata"
   (arg-declared-type (with-meta 'id {:- :xt/str}) +ctx+)
   => '{:kind :primitive :name :xt/str})
 
-^{:refer hara.typed.xtalk-parse/binding-symbols :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:113:^{:refer tahto.typed.xtalk-parse/binding-symbols :added "4.1"}
 (fact "extracts symbols from destructuring forms"
   (vec (binding-symbols '[user {:keys [id]} & [opts]]))
   => '[user id opts])
 
-^{:refer hara.typed.xtalk-parse/parse-fn-inputs :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:118:^{:refer tahto.typed.xtalk-parse/parse-fn-inputs :added "4.1"}
 (fact "parses typed and destructured fn args"
   (mapv :name (parse-fn-inputs '[UserMap users :xt/int id & [opts]] +ctx+))
   => '[users id opts])
 
-^{:refer hara.typed.xtalk-parse/parse-spec-decl :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:123:^{:refer tahto.typed.xtalk-parse/parse-spec-decl :added "4.1"}
 (fact "parses spec declarations"
   (-> (parse-spec-decl 'sample.route 'User '[:xt/record ["id" :xt/str]] {:docstring "user"} {} "sample.clj") :type types/type->data)
   => '{:kind :record :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}]})
 
-^{:refer hara.typed.xtalk-parse/parse-decl-preamble :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:128:^{:refer tahto.typed.xtalk-parse/parse-decl-preamble :added "4.1"}
 (fact "splits docstrings attr maps and remaining items"
   (parse-decl-preamble '("doc" {:added "4.1"} [x] (+ x 1)) 'f)
   => '{:docstring "doc"
@@ -133,25 +133,25 @@
        :items ([x] (+ x 1))
        :meta {:added "4.1" :docstring "doc"}})
 
-^{:refer hara.typed.xtalk-parse/parse-defspec :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:136:^{:refer tahto.typed.xtalk-parse/parse-defspec :added "4.1"}
 (fact "parses defspec forms"
   (:name (parse-defspec '(defspec.xt User :xt/str) 'sample.route {} "sample.clj"))
   => "User")
 
-^{:refer hara.typed.xtalk-parse/parse-callable-items :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:141:^{:refer tahto.typed.xtalk-parse/parse-callable-items :added "4.1"}
 (fact "parses callable arg/body sections"
   [(parse-callable-items '([x] (+ x 1)))
    (parse-callable-items '((([x] (+ x 1)))))]
   => '[[[x] ((+ x 1))]
        [(([x] (+ x 1))) ()]])
 
-^{:refer hara.typed.xtalk-parse/multi-callable-items? :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:148:^{:refer tahto.typed.xtalk-parse/multi-callable-items? :added "4.1"}
 (fact "detects multi-arity callable item lists"
   [(multi-callable-items? '(([a] 1) ([a b] 2)))
    (multi-callable-items? '([a] 1))]
   => [true false])
 
-^{:refer hara.typed.xtalk-parse/parse-defn :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:154:^{:refer tahto.typed.xtalk-parse/parse-defn :added "4.1"}
 (fact "parses defn.xt forms"
   (let [fn-def (parse-defn '(defn.xt ^{:- [:xt/maybe User]} find-user [UserMap users :xt/str id] (return id)) 'sample.route {} "sample.clj")]
     [(mapv :name (:inputs fn-def))
@@ -159,33 +159,33 @@
   => '[[users id]
        {:kind :maybe :item {:kind :named :name sample.route/User}}])
 
-^{:refer hara.typed.xtalk-parse/parse-defmacro :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:162:^{:refer tahto.typed.xtalk-parse/parse-defmacro :added "4.1"}
 (fact "parses defmacro.xt forms"
   (get-in (parse-defmacro '(defmacro.xt add [a b] (list '+ a b)) 'sample.route {} "sample.clj") [:body-meta :macro])
   => true)
 
-^{:refer hara.typed.xtalk-parse/parse-defvalue :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:167:^{:refer tahto.typed.xtalk-parse/parse-defvalue :added "4.1"}
 (fact "parses def.xt forms"
   (types/type->data (:type (parse-defvalue '(def.xt ^{:- [:xt/dict :xt/str :xt/num]} ScopeMap {:a 1}) 'sample.route {} "sample.clj")))
   => '{:kind :dict
        :key {:kind :primitive :name :xt/str}
        :value {:kind :primitive :name :xt/num}})
 
-^{:refer hara.typed.xtalk-parse/merge-spec-inputs :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:174:^{:refer tahto.typed.xtalk-parse/merge-spec-inputs :added "4.1"}
 (fact "fills unknown arg types from spec inputs"
   (mapv (comp types/type->data :type)
         (merge-spec-inputs [(types/make-arg 'id types/+unknown-type+ [])]
                            [types/+str-type+]))
   => '[{:kind :primitive :name :xt/str}])
 
-^{:refer hara.typed.xtalk-parse/attach-function-spec :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:181:^{:refer tahto.typed.xtalk-parse/attach-function-spec :added "4.1"}
 (fact "attaches callable specs to fn defs"
   (let [fn-def (types/make-fn-def 'sample.route 'find-user [(types/make-arg 'id types/+unknown-type+ [])] types/+unknown-type+ {} ['id] nil)
         spec (parse-spec-decl 'sample.route 'find-user '[:fn [:xt/str] :xt/bool] {} {} "sample.clj")]
     (types/type->data (:output (attach-function-spec fn-def spec))))
   => '{:kind :primitive :name :xt/bool})
 
-^{:refer hara.typed.xtalk-parse/attach-value-spec :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:188:^{:refer tahto.typed.xtalk-parse/attach-value-spec :added "4.1"}
 (fact "attaches value specs to value defs"
   (let [value-def (types/make-value-def 'sample.route 'ScopeMap types/+unknown-type+ {} {:a 1} nil)
         spec (parse-spec-decl 'sample.route 'ScopeMap '[:xt/dict :xt/str :xt/int] {} {} "sample.clj")]
@@ -194,73 +194,73 @@
        :key {:kind :primitive :name :xt/str}
        :value {:kind :primitive :name :xt/int}})
 
-^{:refer hara.typed.xtalk-parse/spec-map-by-kind :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:197:^{:refer tahto.typed.xtalk-parse/spec-map-by-kind :added "4.1"}
 (fact "indexes filtered specs by type key"
   (keys (spec-map-by-kind [(parse-spec-decl 'sample.route 'find-user '[:fn [:xt/str] :xt/bool] {} {} "sample.clj")]
                           #(= :fn (get-in % [:type :kind]))))
   => '(sample.route/find-user))
 
-^{:refer hara.typed.xtalk-parse/attach-specs :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:203:^{:refer tahto.typed.xtalk-parse/attach-specs :added "4.1"}
 (fact "attaches specs across analysis outputs"
-  (let [analysis (analyze-namespace 'hara.model.spec-xtalk-typed-fixture)]
+tahto/typed/xtalk_parse_test.clj:205:  (let [analysis (analyze-namespace 'tahto.model.spec-xtalk-typed-fixture)]
     [(some? (:spec (first (:functions analysis))))
      (= 3 (count (:specs analysis)))])
   => '[true true])
 
-^{:refer hara.typed.xtalk-parse/analyze-file-raw :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:210:^{:refer tahto.typed.xtalk-parse/analyze-file-raw :added "4.1"}
 (fact "returns raw parsed map without spec attachment"
-  (let [result (analyze-file-raw "test/hara.lang/model/spec_xtalk_typed_fixture.clj")]
+  (let [result (analyze-file-raw "test/tahto.core/model/spec_xtalk_typed_fixture.clj")]
     [(map? result)
      (:ns result)
      (contains? result :specs)
      (contains? result :functions)])
-  => [true 'hara.model.spec-xtalk-typed-fixture true true])
+tahto/typed/xtalk_parse_test.clj:217:  => [true 'tahto.model.spec-xtalk-typed-fixture true true])
 
-^{:refer hara.typed.xtalk-parse/analyze-file :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:219:^{:refer tahto.typed.xtalk-parse/analyze-file :added "4.1"}
 (fact "analyzes files into typed declarations"
-  (:ns (analyze-file "test/hara.lang/model/spec_xtalk_typed_fixture.clj"))
-  => 'hara.model.spec-xtalk-typed-fixture)
+  (:ns (analyze-file "test/tahto.core/model/spec_xtalk_typed_fixture.clj"))
+tahto/typed/xtalk_parse_test.clj:222:  => 'tahto.model.spec-xtalk-typed-fixture)
 
-^{:refer hara.typed.xtalk-parse/register-types! :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:224:^{:refer tahto.typed.xtalk-parse/register-types! :added "4.1"}
 (fact "registers parsed declarations"
   (do
     (types/clear-registry!)
-    (register-types! (analyze-namespace 'hara.model.spec-xtalk-typed-fixture))
-    (some? (types/get-function 'hara.model.spec-xtalk-typed-fixture/find-user)))
+tahto/typed/xtalk_parse_test.clj:228:    (register-types! (analyze-namespace 'tahto.model.spec-xtalk-typed-fixture))
+tahto/typed/xtalk_parse_test.clj:229:    (some? (types/get-function 'tahto.model.spec-xtalk-typed-fixture/find-user)))
   => true)
 
-^{:refer hara.typed.xtalk-parse/analyze-namespace-raw :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:232:^{:refer tahto.typed.xtalk-parse/analyze-namespace-raw :added "4.1"}
 (fact "looks up namespace source file and returns raw analysis"
-  (let [result (analyze-namespace-raw 'hara.model.spec-xtalk-typed-fixture)]
+tahto/typed/xtalk_parse_test.clj:234:  (let [result (analyze-namespace-raw 'tahto.model.spec-xtalk-typed-fixture)]
     [(map? result)
      (:ns result)])
-  => [true 'hara.model.spec-xtalk-typed-fixture])
+tahto/typed/xtalk_parse_test.clj:237:  => [true 'tahto.model.spec-xtalk-typed-fixture])
 
-^{:refer hara.typed.xtalk-parse/analyze-namespace :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:239:^{:refer tahto.typed.xtalk-parse/analyze-namespace :added "4.1"}
 (fact "finds source files for namespaces"
-  (count (:functions (analyze-namespace 'hara.model.spec-xtalk-typed-fixture)))
+tahto/typed/xtalk_parse_test.clj:241:  (count (:functions (analyze-namespace 'tahto.model.spec-xtalk-typed-fixture)))
   => 3)
 
 
-^{:refer hara.typed.xtalk-parse/existing-file-path :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:245:^{:refer tahto.typed.xtalk-parse/existing-file-path :added "4.1"}
 (fact "returns the first existing path or nil"
-  [(existing-file-path ["src/hara/typed.clj" "missing"])
+tahto/typed/xtalk_parse_test.clj:247:  [(existing-file-path ["src/tahto/typed.clj" "missing"])
    (existing-file-path ["missing-1" "missing-2"])]
-  => ["src/hara/typed.clj" nil])
+tahto/typed/xtalk_parse_test.clj:249:  => ["src/tahto/typed.clj" nil])
 
-^{:refer hara.typed.xtalk-parse/file-path-candidates :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:251:^{:refer tahto.typed.xtalk-parse/file-path-candidates :added "4.1"}
 (fact "returns candidate paths for a file path"
-  (file-path-candidates "src/hara.lang/model_annex/foo.clj")
-  => ["src/hara.lang/model_annex/foo.clj"
-      "src/hara/model_annex/foo.clj"
-      "src/hara/model/annex/foo.clj"])
+  (file-path-candidates "src/tahto.core/model_annex/foo.clj")
+  => ["src/tahto.core/model_annex/foo.clj"
+tahto/typed/xtalk_parse_test.clj:255:      "src/tahto/model_annex/foo.clj"
+tahto/typed/xtalk_parse_test.clj:256:      "src/tahto/model/annex/foo.clj"])
 
-^{:refer hara.typed.xtalk-parse/resolve-file-path :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:258:^{:refer tahto.typed.xtalk-parse/resolve-file-path :added "4.1"}
 (fact "resolves a file path via candidates"
-  (resolve-file-path "test/hara.lang/model/spec_xtalk_typed_fixture.clj")
-  => "test/hara/model/spec_xtalk_typed_fixture.clj")
+  (resolve-file-path "test/tahto.core/model/spec_xtalk_typed_fixture.clj")
+tahto/typed/xtalk_parse_test.clj:261:  => "test/tahto/model/spec_xtalk_typed_fixture.clj")
 
-^{:refer hara.typed.xtalk-parse/rest-arg-form? :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:263:^{:refer tahto.typed.xtalk-parse/rest-arg-form? :added "4.1"}
 (fact "recognizes canonical list rest arguments only"
   [(rest-arg-form? '(:.. args))
    (rest-arg-form? '[:.. args])
@@ -268,7 +268,7 @@
    (rest-arg-form? '(:.. args extra))]
   => [true false false false])
 
-^{:refer hara.typed.xtalk-parse/rest-arg-type :added "4.1"}
+tahto/typed/xtalk_parse_test.clj:271:^{:refer tahto.typed.xtalk-parse/rest-arg-type :added "4.1"}
 (fact "creates an unknown-item variadic array type"
   (rest-arg-type)
   => {:kind :array

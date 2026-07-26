@@ -1,22 +1,22 @@
-(ns documentation.hara-common
-  (:require [hara.common.util :as util]
-            [hara.common.grammar :as grammar]
-            [hara.common.emit-helper :as emit-helper]
-            [hara.common.provenance :as provenance])
+tahto/tahto_common.clj:1:(ns documentation.tahto-common
+tahto/tahto_common.clj:2:  (:require [tahto.common.util :as util]
+tahto/tahto_common.clj:3:            [tahto.common.grammar :as grammar]
+tahto/tahto_common.clj:4:            [tahto.common.emit-helper :as emit-helper]
+tahto/tahto_common.clj:5:            [tahto.common.provenance :as provenance])
   (:use code.test))
 
-[[:hero {:title "hara.common"
+tahto/tahto_common.clj:8:[[:hero {:title "tahto.common"
          :subtitle "Shared grammar, emit, and preprocess layers."
-         :lead "`hara.common` holds reusable grammar, emission, preprocess, rewrite, and utility functions shared by target language models."}]]
+tahto/tahto_common.clj:10:         :lead "`tahto.common` holds reusable grammar, emission, preprocess, rewrite, and utility functions shared by target language models."}]]
 
 [[:chapter {:title "Motivation"}]]
-"Target models should not each reinvent expression emission, assignment handling, function rendering, top-level forms, or preprocessing. `hara.common` keeps those concerns reusable."
+tahto/tahto_common.clj:13:"Target models should not each reinvent expression emission, assignment handling, function rendering, top-level forms, or preprocessing. `tahto.common` keeps those concerns reusable."
 
 [[:chapter {:title "Walkthrough" :link "walkthrough"}]]
 
 [[:section {:title "Symbol utilities"}]]
 
-"Target language models work with a lot of symbols. `hara.common.util` provides small helpers for decomposing and recombining qualified symbols, as well as converting between idiomatic naming styles."
+tahto/tahto_common.clj:19:"Target language models work with a lot of symbols. `tahto.common.util` provides small helpers for decomposing and recombining qualified symbols, as well as converting between idiomatic naming styles."
 
 (fact "decompose and recompose symbols"
   (util/sym-id 'L.core/identity)
@@ -51,11 +51,11 @@
   => {:context :lang/lua
       :module 'L.core
       :lang :lua
-      :context/fn #'hara.common.util/lang-rt-default})
+tahto/tahto_common.clj:54:      :context/fn #'tahto.common.util/lang-rt-default})
 
 [[:section {:title "Building grammars"}]]
 
-"The grammar is the dictionary that maps xtalk operators to target-language emission rules. `hara.common.grammar` collects operator definitions from spec and macro namespaces and lets you build a concrete operator table."
+tahto/tahto_common.clj:58:"The grammar is the dictionary that maps xtalk operators to target-language emission rules. `tahto.common.grammar` collects operator definitions from spec and macro namespaces and lets you build a concrete operator table."
 
 (fact "list grammar categories"
   (take 5 (grammar/ops-list))
@@ -76,7 +76,7 @@
 
 [[:section {:title "Emit helpers"}]]
 
-"`hara.common.emit-helper` contains low-level helpers used by the emitter, such as classifying forms and reading grammar options."
+tahto/tahto_common.clj:79:"`tahto.common.emit-helper` contains low-level helpers used by the emitter, such as classifying forms and reading grammar options."
 
 (fact "classify forms"
   (emit-helper/form-key-base :a)
@@ -99,27 +99,27 @@
 
 [[:section {:title "Provenance tracking"}]]
 
-"As code passes through preprocessing and emission, errors need to be traced back to their source. `hara.common.provenance` extracts line numbers and module context from forms and merges provenance frames."
+tahto/tahto_common.clj:102:"As code passes through preprocessing and emission, errors need to be traced back to their source. `tahto.common.provenance` extracts line numbers and module context from forms and merges provenance frames."
 
 (fact "extract line information"
   (provenance/line-of (with-meta '(+ 1 2) {:line 5}))
   => 5)
 
 (fact "build a provenance frame"
-  (provenance/provenance {:hara/module {:id 'L.core}
-                          :hara/namespace 'documentation.hara-common
-                          :hara/form (with-meta '(+ 1 2) {:line 5})})
-  => '{:hara/module L.core
-       :hara/namespace documentation.hara-common
-       :hara/form (+ 1 2)
-       :hara/line 5})
+tahto/tahto_common.clj:109:  (provenance/provenance {:tahto/module {:id 'L.core}
+tahto/tahto_common.clj:110:                          :tahto/namespace 'documentation.tahto-common
+tahto/tahto_common.clj:111:                          :tahto/form (with-meta '(+ 1 2) {:line 5})})
+tahto/tahto_common.clj:112:  => '{:tahto/module L.core
+tahto/tahto_common.clj:113:       :tahto/namespace documentation.tahto-common
+tahto/tahto_common.clj:114:       :tahto/form (+ 1 2)
+tahto/tahto_common.clj:115:       :tahto/line 5})
 
 (fact "merge provenance into options"
   (-> {:lang :lua}
-      (provenance/with-provenance {:hara/phase :emit/direct}
-                                  {:hara/module 'L.core})
-      :hara/provenance)
-  => '{:hara/phase :emit/direct
-       :hara/module L.core})
+tahto/tahto_common.clj:119:      (provenance/with-provenance {:tahto/phase :emit/direct}
+tahto/tahto_common.clj:120:                                  {:tahto/module 'L.core})
+tahto/tahto_common.clj:121:      :tahto/provenance)
+tahto/tahto_common.clj:122:  => '{:tahto/phase :emit/direct
+tahto/tahto_common.clj:123:       :tahto/module L.core})
 
 [[:chapter {:title "API"}]]

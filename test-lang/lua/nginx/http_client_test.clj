@@ -1,8 +1,8 @@
 (ns lua.nginx.http-client-test
-  (:require [hara.runtime.nginx]
+  (:require [tahto.runtime.nginx]
             [std.json :as json]
             [std.lib.env :as env]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :lua.nginx

@@ -1,5 +1,5 @@
 (ns js.react-native.ui-modal
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:runtime :websocket

@@ -1,7 +1,7 @@
-package hara.lib.mustache;
+package newlisp.lib.mustache;
 
-import static hara.lib.mustache.Context.isArray;
-import static hara.lib.mustache.Context.isFalse;
+import static newlisp.lib.mustache.Context.isArray;
+import static newlisp.lib.mustache.Context.isFalse;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +46,7 @@ public class Token {
     public static String escapeHtml(String html) {
         StringBuilder sb = new StringBuilder(html.length() + 10);
         for (int i = 0; i < html.length(); ++i) {
-            char c = html.charAt(i);
+tahto/lib/mustache/Token.java:49:            char c = html.ctahtot(i);
             switch (c) {
             case '&':
                 sb.append("&amp;");

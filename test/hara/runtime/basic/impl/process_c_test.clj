@@ -1,7 +1,7 @@
-(ns hara.runtime.basic.impl.process-c-test
-  (:require [hara.runtime.basic.impl.process-c :refer :all]
+tahto/runtime/basic/impl/process_c_test.clj:1:(ns tahto.runtime.basic.impl.process-c-test
+tahto/runtime/basic/impl/process_c_test.clj:2:  (:require [tahto.runtime.basic.impl.process-c :refer :all]
             [std.lib.env :as env]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :c
@@ -32,7 +32,7 @@
 
 (fact:global {:skip (not (env/program-exists? "tcc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
-^{:refer hara.runtime.basic.impl.process-c-test/CANARY-TCC :adopt true :added "4.0"}
+tahto/runtime/basic/impl/process_c_test.clj:35:^{:refer tahto.runtime.basic.impl.process-c-test/CANARY-TCC :adopt true :added "4.0"}
 (fact "EVALUATE tcc in c"
 
   [(str (!.c (printf "hello world")))
@@ -57,7 +57,7 @@
       ["hello world" "hello world"]
       [-7 -7]])
 
-^{:refer hara.runtime.basic.impl.process-c/get-format-string :added "4.0"}
+tahto/runtime/basic/impl/process_c_test.clj:60:^{:refer tahto.runtime.basic.impl.process-c/get-format-string :added "4.0"}
 (fact "gets the format string given entry"
 
   (get-format-string @hello)
@@ -66,15 +66,15 @@
   (get-format-string @add)
   => "%d")
 
-^{:refer hara.runtime.basic.impl.process-c/transform-form-format :added "4.0"}
+tahto/runtime/basic/impl/process_c_test.clj:69:^{:refer tahto.runtime.basic.impl.process-c/transform-form-format :added "4.0"}
 (fact "formats the form"
 
   (transform-form-format `-/add
                          {:emit {:input {:pointer -/add
                                          :args [1 2]}}})
-  => '(printf "%d" (hara.runtime.basic.impl.process-c-test/add 1 2)))
+tahto/runtime/basic/impl/process_c_test.clj:75:  => '(printf "%d" (tahto.runtime.basic.impl.process-c-test/add 1 2)))
 
-^{:refer hara.runtime.basic.impl.process-c/transform-form :added "4.0"}
+tahto/runtime/basic/impl/process_c_test.clj:77:^{:refer tahto.runtime.basic.impl.process-c/transform-form :added "4.0"}
 (fact "transforms the form for tcc output"
 
   (transform-form '[(printf "hello world")] {})

@@ -33,7 +33,7 @@
   => {0 "ÆÑÊ", 3 "ŒØM", 6 "ÉËÈ"})
 
 ^{:refer std.image.base.display.gradient/lookup-char :added "3.0"}
-(fact "look up a character based on value"
+(fact "look up a ctahtocter based on value"
 
   (str (lookup-char 0))
   => #{"Æ" "Ñ" "Ê"}

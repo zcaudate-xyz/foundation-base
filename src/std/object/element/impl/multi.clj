@@ -54,7 +54,7 @@
 (defn to-element-map-path
   "creates a map path for the element
  
-   (-> (query/query-class String [\"charAt\" :#])
+   (-> (query/query-class String [\"ctahtot\" :#])
        (multi/to-element-map-path))
    => [:method 2 [java.lang.String Integer/TYPE]]"
   {:added "3.0"}

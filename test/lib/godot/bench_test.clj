@@ -3,7 +3,7 @@
   (:require [lib.godot.bench :refer :all]
             [std.lib.network :as network]
             [std.lib.os :as os]
-            [hara.runtime.basic.type-common :as common]))
+            [tahto.runtime.basic.type-common :as common]))
 
 ^{:refer lib.godot.bench/godot-exec :added "4.1"}
 (fact "resolves the godot executable"
@@ -23,12 +23,12 @@
                 lib.godot.bench/start-godot-process (fn [exec root-dir port] :fake-process)
                 lib.godot.bench/wait-for-ready-file (fn [root-dir timeout] true)
                 os/sh-wait (fn [p] p)]
-    (let [server (start-godot-server {:port 52345} :test "/tmp/hara_godot_test")]
+    (let [server (start-godot-server {:port 52345} :test "/tmp/tahto_godot_test")]
       (while (get @*active* 52345) (Thread/sleep 10))
       server))
   => (contains {:type :test
                 :port 52345
-                :root-dir "/tmp/hara_godot_test"
+                :root-dir "/tmp/tahto_godot_test"
                 :process :fake-process}))
 
 ^{:refer lib.godot.bench/stop-godot-server :added "4.1"}

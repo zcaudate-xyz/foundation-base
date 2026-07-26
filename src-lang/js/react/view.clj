@@ -1,6 +1,6 @@
 (ns js.react.view
   "React entrypoint for xt.substrate.view."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[js.react.view.runtime :as runtime]

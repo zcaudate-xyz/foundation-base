@@ -1,7 +1,7 @@
-(ns hara.model.annex.spec-xtalk.fn-r-test
+tahto/model/annex/spec_xtalk/fn_r_test.clj:1:(ns tahto.model.annex.spec-xtalk.fn-r-test
   (:use code.test)
-  (:require [hara.lang :as l]
-             [hara.model.annex.spec-xtalk.fn-r :refer :all]
+  (:require [tahto.core :as l]
+tahto/model/annex/spec_xtalk/fn_r_test.clj:4:             [tahto.model.annex.spec-xtalk.fn-r :refer :all]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-lib :as k]
              [xt.lang.common-string :as xts]
@@ -17,12 +17,12 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.model.annex.spec-xtalk.fn-r/r-tf-x-lu-create :added "4.1"}
+tahto/model/annex/spec_xtalk/fn_r_test.clj:20:^{:refer tahto.model.annex.spec-xtalk.fn-r/r-tf-x-lu-create :added "4.1"}
 (fact "creates an environment-backed lookup"
   (l/emit-as :r [(r-tf-x-lu-create '(_))])
   => "new.env(hash=TRUE,parent=emptyenv())")
 
-^{:refer hara.model.annex.spec-xtalk.fn-r/r-tf-x-lu-get :added "4.1"}
+tahto/model/annex/spec_xtalk/fn_r_test.clj:25:^{:refer tahto.model.annex.spec-xtalk.fn-r/r-tf-x-lu-get :added "4.1"}
 (fact "emits lookup access through get0"
   (l/emit-as :r [(r-tf-x-lu-get '(_ lu key nil))])
   => #"get0\("
@@ -46,7 +46,7 @@
      (boolean (re-find #"==" eq-out))])
   => [true true true true true])
 
-^{:refer hara.model.annex.spec-xtalk.fn-r/r-tf-x-str-char :added "4.1"}
+tahto/model/annex/spec_xtalk/fn_r_test.clj:49:^{:refer tahto.model.annex.spec-xtalk.fn-r/r-tf-x-str-char :added "4.1"}
 (fact "emits R string and predicate helpers"
   (l/emit-as :r [(r-tf-x-str-char '(_ s i))])
   => #"utf8ToInt"

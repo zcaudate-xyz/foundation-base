@@ -86,10 +86,10 @@
      (block/string (block/block nform)))))
 
 (defn latest-run-file
-  "returns the most recent `.hara/runs/run-*.edn` file"
+  "returns the most recent `.tahto/runs/run-*.edn` file"
   {:added "4.1"}
   ([root]
-   (let [dir (fs/path root ".hara/runs")]
+   (let [dir (fs/path root ".tahto/runs")]
       (when (fs/exists? dir)
        (some->> (fs/select dir {:include [#"run-.*\.edn$"]})
                 (filter fs/file?)
@@ -338,7 +338,7 @@
 
    (code.manage.unit.isolate/isolate
      'xt.lang.spec-base-test
-     {:run \".hara/runs/run-1776913569354.edn\"
+     {:run \".tahto/runs/run-1776913569354.edn\"
       :suffix \"-fix\"
       :write false}
      lookup

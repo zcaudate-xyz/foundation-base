@@ -1,12 +1,12 @@
-(ns hara.runtime.chromedriver.spec-test
+tahto/runtime/chromedriver/spec_test.clj:1:(ns tahto.runtime.chromedriver.spec-test
   (:use code.test)
-  (:require [hara.runtime.chromedriver.spec :as spec]
-            [hara.runtime.chromedriver.util :as util]))
+tahto/runtime/chromedriver/spec_test.clj:3:  (:require [tahto.runtime.chromedriver.spec :as spec]
+tahto/runtime/chromedriver/spec_test.clj:4:            [tahto.runtime.chromedriver.util :as util]))
 
-^{:refer hara.runtime.chromedriver.spec/spec-download :added "4.0"}
+tahto/runtime/chromedriver/spec_test.clj:6:^{:refer tahto.runtime.chromedriver.spec/spec-download :added "4.0"}
 (fact "downloads the chrome devtools spec")
 
-^{:refer hara.runtime.chromedriver.spec/list-domains :added "4.0"}
+tahto/runtime/chromedriver/spec_test.clj:9:^{:refer tahto.runtime.chromedriver.spec/list-domains :added "4.0"}
 (fact "lists all domains"
 
   (count (spec/list-domains))
@@ -18,7 +18,7 @@
                   (domains "Target"))))
   => true)
 
-^{:refer hara.runtime.chromedriver.spec/get-domain-raw :added "4.0"}
+tahto/runtime/chromedriver/spec_test.clj:21:^{:refer tahto.runtime.chromedriver.spec/get-domain-raw :added "4.0"}
 (fact "gets the raw domain"
 
   (spec/get-domain-raw "Console")
@@ -26,7 +26,7 @@
                 "disable" map?
                 "enable" map?}))
 
-^{:refer hara.runtime.chromedriver.spec/list-methods :added "4.0"}
+tahto/runtime/chromedriver/spec_test.clj:29:^{:refer tahto.runtime.chromedriver.spec/list-methods :added "4.0"}
 (fact "lists all spec methods"
 
   (let [methods (set (spec/list-methods "Runtime"))]
@@ -41,7 +41,7 @@
                   (methods "reload"))))
   => true)
 
-^{:refer hara.runtime.chromedriver.spec/get-method :added "4.0"}
+tahto/runtime/chromedriver/spec_test.clj:44:^{:refer tahto.runtime.chromedriver.spec/get-method :added "4.0"}
 (fact "gets the method"
 
   (-> (spec/get-method "Page" "captureScreenshot")
@@ -61,13 +61,13 @@
   => (contains {"name" "evaluate"}))
 
 
-^{:refer hara.runtime.chromedriver.spec/tmpl-connection :added "4.0"}
+tahto/runtime/chromedriver/spec_test.clj:64:^{:refer tahto.runtime.chromedriver.spec/tmpl-connection :added "4.0"}
 (fact "creates a connection form given template"
 
   (spec/tmpl-connection ['page-navigate ["Page" "navigate"]])
   => '(defn page-navigate
        [conn url & [{:keys [frame-id referrer referrer-policy transition-type], :as m} timeout opts]]
-       (hara.runtime.chromedriver.connection/send
+tahto/runtime/chromedriver/spec_test.clj:70:       (tahto.runtime.chromedriver.connection/send
         conn
         "Page.navigate"
         (merge {"url" url} m)
@@ -77,19 +77,19 @@
   (spec/tmpl-connection ['page-capture-screenshot ["Page" "captureScreenshot"]])
   => '(defn page-capture-screenshot
        [conn & [{:keys [capture-beyond-viewport clip format from-surface optimize-for-speed quality], :as m} timeout opts]]
-       (hara.runtime.chromedriver.connection/send
+tahto/runtime/chromedriver/spec_test.clj:80:       (tahto.runtime.chromedriver.connection/send
         conn
         "Page.captureScreenshot"
         (merge {} m)
         timeout
         opts)))
 
-^{:refer hara.runtime.chromedriver.spec/tmpl-browser :added "4.0"}
+tahto/runtime/chromedriver/spec_test.clj:87:^{:refer tahto.runtime.chromedriver.spec/tmpl-browser :added "4.0"}
 (fact "constructs the browser template"
 
   (spec/tmpl-browser ['browser-eval 'util/runtime-evaluate])
   => '(def browser-eval
-       (hara.runtime.chromedriver.impl/wrap-browser-state util/runtime-evaluate))
+tahto/runtime/chromedriver/spec_test.clj:92:       (tahto.runtime.chromedriver.impl/wrap-browser-state util/runtime-evaluate))
 
   (-> (spec/tmpl-browser ['browser-eval 'util/runtime-evaluate])
       second

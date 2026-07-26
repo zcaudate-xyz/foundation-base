@@ -1,8 +1,8 @@
-(ns hara.lang.compile-links-test
-  (:require [hara.lang.compile-links :refer :all])
+(ns tahto.core.compile-links-test
+  (:require [tahto.core.compile-links :refer :all])
   (:use code.test))
 
-^{:refer hara.lang.compile-links/get-link-lookup :added "4.0"}
+^{:refer tahto.core.compile-links/get-link-lookup :added "4.0"}
 (fact "gets a lookup value"
 
   (get-link-lookup 'indigo
@@ -21,7 +21,7 @@
                    {#"code$" "hello"})
   => nil)
 
-^{:refer hara.lang.compile-links/get-link-match :added "4.1"}
+^{:refer tahto.core.compile-links/get-link-match :added "4.1"}
 (fact "gets the matching lookup entry"
   (get-link-match 'indigo
                   {'indigo "hello"})
@@ -36,7 +36,7 @@
                   {'code "hello"})
   => nil)
 
-^{:refer hara.lang.compile-links/link-attributes :added "4.0"}
+^{:refer tahto.core.compile-links/link-attributes :added "4.0"}
 (fact "gets link attributes"
 
   (link-attributes 'code

@@ -1,11 +1,11 @@
-(ns hara.model.spec-js.qml-test
-  (:require [hara.lang :as l]
-            [hara.model.spec-js :as js]
-            [hara.model.spec-js.qml :as qml]
+tahto/model/spec_js/qml_test.clj:1:(ns tahto.model.spec-js.qml-test
+  (:require [tahto.core :as l]
+tahto/model/spec_js/qml_test.clj:3:            [tahto.model.spec-js :as js]
+tahto/model/spec_js/qml_test.clj:4:            [tahto.model.spec-js.qml :as qml]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer hara.model.spec-js.qml/qml-props? :added "4.0"}
+tahto/model/spec_js/qml_test.clj:8:^{:refer tahto.model.spec-js.qml/qml-props? :added "4.0"}
 (fact "checks if data is a qml prop"
 
   (qml/qml-props? #{[:hello 1]})
@@ -17,7 +17,7 @@
   (qml/qml-props? [])
   => false)
 
-^{:refer hara.model.spec-js.qml/qml-container? :added "4.0"}
+tahto/model/spec_js/qml_test.clj:20:^{:refer tahto.model.spec-js.qml/qml-container? :added "4.0"}
 (fact "checks if item is a qml container"
 
   (qml/qml-container? [:qml/Item #{}])
@@ -26,7 +26,7 @@
   (qml/qml-container? 1)
   => false)
 
-^{:refer hara.model.spec-js.qml/classify-props :added "4.0"}
+tahto/model/spec_js/qml_test.clj:29:^{:refer tahto.model.spec-js.qml/classify-props :added "4.0"}
 (fact "classifies props"
 
   (qml/classify-props #{[:a 1 :b [:qml/Item]]}
@@ -34,7 +34,7 @@
   => [[:a {:type :qml/value, :value 1}]
       [:b {:type :qml/container, :title "Item", :props [], :children []}]])
 
-^{:refer hara.model.spec-js.qml/classify-container :added "4.0"}
+tahto/model/spec_js/qml_test.clj:37:^{:refer tahto.model.spec-js.qml/classify-container :added "4.0"}
 (fact "classifies a container"
 
   (qml/classify-container
@@ -52,7 +52,7 @@
           :children []}]],
        :children [{:type :qml/value, :value (fn hello [] (+ 1 2))}]})
 
-^{:refer hara.model.spec-js.qml/classify :added "4.0"}
+tahto/model/spec_js/qml_test.clj:55:^{:refer tahto.model.spec-js.qml/classify :added "4.0"}
 (fact "classifies the data structure"
 
   (qml/classify
@@ -103,7 +103,7 @@
           {:type :qml/value,
            :value (fn _test_overlap [] (:+= circle.x 20))}]}]})
 
-^{:refer hara.model.spec-js.qml/emit-value :added "4.0"}
+tahto/model/spec_js/qml_test.clj:106:^{:refer tahto.model.spec-js.qml/emit-value :added "4.0"}
 (fact "emits a value string"
 
   (l/with:emit
@@ -114,7 +114,7 @@
                    {}))
   => " {\n  circle.x = 84;\n  box.rotation = 0;\n}")
 
-^{:refer hara.model.spec-js.qml/emit-container :added "4.0"}
+tahto/model/spec_js/qml_test.clj:117:^{:refer tahto.model.spec-js.qml/emit-container :added "4.0"}
 (fact "emits a container string"
 
   (l/with:emit
@@ -152,7 +152,7 @@
       "  }"
       "}"))
 
-^{:refer hara.model.spec-js.qml/emit-node :added "4.0"}
+tahto/model/spec_js/qml_test.clj:155:^{:refer tahto.model.spec-js.qml/emit-node :added "4.0"}
 (fact "emits either container or value string"
 
   (l/with:emit
@@ -210,7 +210,7 @@
       "  }"
       "}"))
 
-^{:refer hara.model.spec-js.qml/emit-qml :added "4.0"}
+tahto/model/spec_js/qml_test.clj:213:^{:refer tahto.model.spec-js.qml/emit-qml :added "4.0"}
 (fact "emits a qml string"
 
   (l/with:emit

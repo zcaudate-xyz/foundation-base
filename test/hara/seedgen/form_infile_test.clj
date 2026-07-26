@@ -1,13 +1,13 @@
-(ns hara.seedgen.form-infile-test
+tahto/seedgen/form_infile_test.clj:1:(ns tahto.seedgen.form-infile-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [hara.seedgen.common-util :as common]
-            [hara.seedgen.common-infile :as common-infile]
-            [hara.seedgen.form-infile :as form-infile]
-            [hara.seedgen.form-parse :as form-parse]
+tahto/seedgen/form_infile_test.clj:4:            [tahto.seedgen.common-util :as common]
+tahto/seedgen/form_infile_test.clj:5:            [tahto.seedgen.common-infile :as common-infile]
+tahto/seedgen/form_infile_test.clj:6:            [tahto.seedgen.form-infile :as form-infile]
+tahto/seedgen/form_infile_test.clj:7:            [tahto.seedgen.form-parse :as form-parse]
             [std.fs :as fs]))
 
-^{:refer hara.seedgen.form-infile/root-script-meta-langs :added "4.1"}
+tahto/seedgen/form_infile_test.clj:10:^{:refer tahto.seedgen.form-infile/root-script-meta-langs :added "4.1"}
 (fact "extracts declared target languages from the root script meta"
   (let [tmp (java.io.File/createTempFile "seedgen-root-script-meta-langs" ".clj")
         path (.getAbsolutePath tmp)
@@ -17,7 +17,7 @@
     (try
       (spit path (str "(ns sample.metatest-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true :langs [:js :lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(defn.js helper [] (return 1))\n\n"
@@ -41,7 +41,7 @@
     (try
       (spit path (str "(ns sample.target-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true :langs [:js :lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -62,11 +62,11 @@
       (finally
         (fs/delete root {:recursive true})))))
 
-^{:refer hara.seedgen.form-infile/render-top-level-target :added "4.1"}
+tahto/seedgen/form_infile_test.clj:65:^{:refer tahto.seedgen.form-infile/render-top-level-target :added "4.1"}
 (fact "renders a file for a single target language"
   (run-render-target) => [true true true true true true])
 
-^{:refer hara.seedgen.form-infile/seedgen-langadd :added "4.1" :timeout 300000}
+tahto/seedgen/form_infile_test.clj:69:^{:refer tahto.seedgen.form-infile/seedgen-langadd :added "4.1" :timeout 300000}
 (fact "adds seedgen runtimes back from the seedgen root form"
   (let [tmp (java.io.File/createTempFile "seedgen-langadd" ".clj")
         path (.getAbsolutePath tmp)
@@ -76,7 +76,7 @@
         write-sample! (fn []
                         (spit path (str "(ns sample.add-test\n"
                                         "  (:use code.test)\n"
-                                        "  (:require [hara.lang :as l]))\n\n"
+                                        "  (:require [tahto.core :as l]))\n\n"
                                         "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                                         "(l/script- :js {:runtime :basic})\n\n"
                                         "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
@@ -115,7 +115,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :python {:runtime :basic})\n\n"
@@ -148,7 +148,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:r]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
@@ -174,7 +174,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:dart]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
@@ -195,7 +195,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
@@ -217,7 +217,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.base-notify :as notify]\n"
                       "            [xt.lang.base-repl :as repl]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
@@ -240,7 +240,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
@@ -261,7 +261,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
@@ -282,7 +282,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "(l/script- :js {:runtime :basic})\n"))
       (form-infile/seedgen-langadd 'sample.add-test {:write true} lookup nil)
       (finally
@@ -298,7 +298,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -329,7 +329,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -360,7 +360,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.base-notify :as notify]\n"
                       "            [xt.lang.base-repl :as repl]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:python :lua]}}\n"
@@ -384,7 +384,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.base-notify :as notify]\n"
                       "            [xt.lang.base-repl :as repl]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
@@ -411,7 +411,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example.E :added \"4.1\"}\n"
@@ -437,7 +437,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\" :id test-example-a}\n"
@@ -460,7 +460,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -484,7 +484,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -509,7 +509,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -533,7 +533,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -562,7 +562,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example-transform-output :added \"4.1\"}\n"
@@ -584,7 +584,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -614,7 +614,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -666,7 +666,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example-transform-self-ref :added \"4.1\"\n"
@@ -692,7 +692,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example-g :added \"4.1\"\n"
@@ -715,7 +715,7 @@
     (try
       (spit path (str "(ns sample.add-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example-h :added \"4.1\"\n"
@@ -736,7 +736,7 @@
         (.delete tmp))))
   => [true true true true true]
 
-^{:refer hara.seedgen.form-infile/seedgen-langremove :added "4.1"}
+tahto/seedgen/form_infile_test.clj:739:^{:refer tahto.seedgen.form-infile/seedgen-langremove :added "4.1"}
 (fact "purges targeted seedgen runtimes while preserving the seedgen root"
   (let [tmp (java.io.File/createTempFile "seedgen-langremove" ".clj")
         path (.getAbsolutePath tmp)
@@ -746,7 +746,7 @@
         write-sample! (fn []
                         (spit path (str "(ns sample.purge-test\n"
                                         "  (:use code.test)\n"
-                                        "  (:require [hara.lang :as l]))\n\n"
+                                        "  (:require [tahto.core :as l]))\n\n"
                                         "^{:seedgen/root {:all true}}\n"
                                         "(l/script- :js {:runtime :basic})\n\n"
                                         "(l/script- :lua {:runtime :basic})\n\n"
@@ -788,7 +788,7 @@
         write-sample! (fn []
                         (spit path (str "(ns sample.purge-test\n"
                                         "  (:use code.test)\n"
-                                        "  (:require [hara.lang :as l]))\n\n"
+                                        "  (:require [tahto.core :as l]))\n\n"
                                         "^{:seedgen/root {:all true}}\n"
                                         "(l/script- :js {:runtime :basic})\n\n"
                                         "(l/script- :lua {:runtime :basic})\n\n"
@@ -826,7 +826,7 @@
     (try
       (spit path (str "(ns sample.purge-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :lua {:runtime :basic})\n\n"
@@ -853,7 +853,7 @@
     (try
       (spit path (str "(ns sample.purge-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :lua {:runtime :basic})\n"))
@@ -872,7 +872,7 @@
     (try
       (spit path (str "(ns sample.purge-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :lua {:runtime :basic})\n\n"
@@ -898,7 +898,7 @@
   => "(ns sample.purge-test\n  (:use code.test)\n  (:require [hara.lang :as l]))\n\n^{:seedgen/root {:all true, :langs [:js :lua :python]}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"metadata branches\"\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.js\n    (+ 1 2 3))\n  => 6\n\n  ^{:seedgen/base {:lua {:expect 6}}}\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
   )
 
-^{:refer hara.seedgen.form-infile/seedgen-langremove :added "4.1"}
+tahto/seedgen/form_infile_test.clj:901:^{:refer tahto.seedgen.form-infile/seedgen-langremove :added "4.1"}
 (fact "is a no-op when the target language is not present"
   (let [tmp (java.io.File/createTempFile "seedgen-langremove-noop" ".clj")
         path (.getAbsolutePath tmp)
@@ -908,7 +908,7 @@
     (try
       (spit path (str "(ns sample.noop-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer sample/example :added \"4.1\"}\n"

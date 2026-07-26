@@ -1,20 +1,20 @@
-(ns hara.runtime.basic.docker.impl-lua-test
-  (:require [hara.runtime.basic.docker.registry :as registry]
+tahto/runtime/basic/docker/impl_lua_test.clj:1:(ns tahto.runtime.basic.docker.impl-lua-test
+tahto/runtime/basic/docker/impl_lua_test.clj:2:  (:require [tahto.runtime.basic.docker.registry :as registry]
             [std.lib.env :as env]
-            [hara.lang :as l]
-            [hara.lang.script :as script])
+            [tahto.core :as l]
+            [tahto.core.script :as script])
   (:use code.test))
 
 ;;
 ;; Lua basic runtime in a Docker container.
 ;;
-;; Uses the project-owned hara.runtime.basic OpenResty LuaJIT image with Nchan and
+tahto/runtime/basic/docker/impl_lua_test.clj:11:;; Uses the project-owned tahto.runtime.basic OpenResty LuaJIT image with Nchan and
 ;; LuaRocks packages preinstalled.
 ;;
 ;; Bootstrap connects back to the JVM via host.docker.internal:<port>.
 ;;
 ;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-lua:latest
-;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-lua-test
+tahto/runtime/basic/docker/impl_lua_test.clj:17:;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only tahto.runtime.basic.docker.impl-lua-test
 ;;
 
 (l/script- :lua
@@ -25,7 +25,7 @@
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
             (not (env/docker-daemon-available?))
-            (System/getenv "HARA_NO_DOCKER"))
+tahto/runtime/basic/docker/impl_lua_test.clj:28:            (System/getenv "TAHTO_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 

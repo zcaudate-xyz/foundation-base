@@ -1,8 +1,8 @@
-(ns hara.model.spec-js.rewrite-test
-  (:require [hara.model.spec-js.rewrite :as rewrite])
+tahto/model/spec_js/rewrite_test.clj:1:(ns tahto.model.spec-js.rewrite-test
+tahto/model/spec_js/rewrite_test.clj:2:  (:require [tahto.model.spec-js.rewrite :as rewrite])
   (:use code.test))
 
-^{:refer hara.model.spec-js.rewrite/js-rewrite-stage :added "4.1"}
+tahto/model/spec_js/rewrite_test.clj:5:^{:refer tahto.model.spec-js.rewrite/js-rewrite-stage :added "4.1"}
 (fact "keeps JavaScript staging stable when no JS-specific lowering is required"
   (rewrite/js-rewrite-stage
    '(do

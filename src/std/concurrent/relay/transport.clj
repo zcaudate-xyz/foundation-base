@@ -178,7 +178,7 @@
      (assoc stats :output @out))))
 
 (defn op-read-limit
-  "reads an limited amount of characters from stream or until timeout"
+  "reads an limited amount of ctahtocters from stream or until timeout"
   {:added "4.0"}
   ([istream limit timeout interval]
    (let [out  (volatile! nil)

@@ -1,5 +1,5 @@
 (ns js.lib.valtio
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [use val proxy]))
 

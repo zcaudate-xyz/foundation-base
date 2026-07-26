@@ -1,10 +1,10 @@
-(ns hara.seedgen.form-bench-test
+tahto/seedgen/form_bench_test.clj:1:(ns tahto.seedgen.form-bench-test
   (:use code.test)
   (:require [clojure.string :as str]
             [std.fs :as fs]
-            [hara.seedgen.form-bench :as form-bench]))
+tahto/seedgen/form_bench_test.clj:5:            [tahto.seedgen.form-bench :as form-bench]))
 
-^{:refer hara.seedgen.form-bench/seedgen-benchlist :added "4.1"}
+tahto/seedgen/form_bench_test.clj:7:^{:refer tahto.seedgen.form-bench/seedgen-benchlist :added "4.1"}
 (fact "derives bench namespaces from the seedgen root and requested runtimes"
   (let [tmp (java.io.File/createTempFile "seedgen-benchlist" ".clj")
         path (.getAbsolutePath tmp)
@@ -14,7 +14,7 @@
     (try
       (spit path (str "(ns xt.sample.multi-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :lua {:runtime :basic})\n\n"
@@ -52,7 +52,7 @@
       (do
         (spit path (str "(ns xt.sample.multi-test\n"
                         "  (:use code.test)\n"
-                        "  (:require [hara.lang :as l]))\n\n"
+                        "  (:require [tahto.core :as l]))\n\n"
                         "(l/script- :js {:runtime :basic})\n"))
         (form-bench/seedgen-benchlist 'xt.sample.multi-test
                                       {}
@@ -63,7 +63,7 @@
       (finally
         (.delete tmp)))))
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:66:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-kmi-path}
 (fact "writes KMI benches beneath xtbench without touching the canonical seed"
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-kmi"
@@ -74,7 +74,7 @@
         source   (str "^{:no-test true}\n"
                       "(ns kmi.lang.sample-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true :langs [:python]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer kmi.lang.sample/value :id kmi-value-1 :added \"4.1\"}\n"
@@ -113,7 +113,7 @@
       true
       true])
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"}
+tahto/seedgen/form_bench_test.clj:116:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"}
 (fact "creates bench files for the requested runtimes"
   (let [root   (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd"
                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -126,7 +126,7 @@
     (try
       (spit path (str "(ns xt.sample.multi-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :python {:runtime :basic})\n\n"
@@ -157,7 +157,7 @@
       true
       [true true true]])
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:160:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-test-root}
 (fact "writes bench files to the same test root as the source test namespace"
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-test-root"
@@ -171,7 +171,7 @@
     (try
       (spit path (str "(ns xt.sample.multi-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :dart {:runtime :twostep})\n\n"
@@ -199,7 +199,7 @@
       true
       false])
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:202:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-fact-layout}
 (fact "preserves fact layout when generating bench files"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-format"
@@ -213,7 +213,7 @@
     (try
       (spit path (str "(ns xt.sample.format-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :python {:runtime :basic})\n\n"
@@ -235,7 +235,7 @@
        (fs/delete root {:recursive true}))))
   => "(ns samplebench.python.sample.format-test\n  (:use code.test)\n  (:require [hara.lang :as l]))\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"runtime branches\"\n\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:238:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-derived-runtime}
 (fact "generates standalone bench namespaces using the langadd runtime derivation rules"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-derived"
@@ -249,7 +249,7 @@
     (try
       (spit path (str "(ns xt.sample.derived-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]\n"
+                      "  (:require [tahto.core :as l]\n"
                       "            [xt.lang.spec-base :as xt]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
@@ -270,7 +270,7 @@
         (fs/delete root {:recursive true}))))
   => "(ns samplebench.lua.sample.derived-test\n  (:use code.test)\n  (:require [hara.lang :as l]\n            [xt.lang.spec-base :as xt]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-f :added \"4.1\"}\n(fact \"expect can be customised\"\n\n  (!.lua\n    (xt/x:offset 10))\n  => 11)\n")
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:273:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-setup-overrides}
 (fact "renders bench setup outcomes using unified seedgen base overrides"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-setup"
@@ -284,7 +284,7 @@
     (try
       (spit path (str "(ns xt.sample.setup-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:lua]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example-g :added \"4.1\"\n"
@@ -304,7 +304,7 @@
         (fs/delete root {:recursive true}))))
   => "(ns samplebench.lua.sample.setup-test\n  (:use code.test)\n  (:require [hara.lang :as l]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-g :added \"4.1\"\n  :setup [(!.lua (setup-lua))]}\n(fact \"setup bench outcomes\"\n\n  (!.lua 1)\n  => 1)\n")
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:307:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-global-fixtures}
 (fact "renders global fact setup and teardown in bench targets"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-global"
@@ -318,7 +318,7 @@
     (try
       (spit path (str "(ns xt.sample.global-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true, :langs [:dart]}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(fact:global\n"
@@ -349,7 +349,7 @@
        :updated true}
       [true true true true]])
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:352:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-runtime-variant}
 (fact "preserves the concrete runtime variant when a bench target is requested by family name"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-variant"
@@ -363,7 +363,7 @@
     (try
       (spit path (str "(ns xt.db.runtime.parity-roundtrip-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true\n"
                       "                 :langs [:lua.nginx]\n"
                       "                 :js        {:extra [[js.net.conn-sqlite :as js-sqlite]]}\n"
@@ -396,7 +396,7 @@
        :updated true}
       [true true true]])
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:399:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-replace-extra-requires}
 (fact "replaces root-only extra requires with runtime-specific bench requires"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-extra"
@@ -410,7 +410,7 @@
     (try
       (spit path (str "(ns xt.db.runtime.parity-sqlite-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true\n"
                       "                 :langs [:lua.nginx :dart]\n"
                       "                 :js        {:extra [[js.net.conn-sqlite :as js-sqlite]]}\n"
@@ -439,7 +439,7 @@
         (fs/delete root {:recursive true}))))
   => [true true])
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:442:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-remove-extra-requires}
 (fact "removes seedgen extra requires from non-root bench runtimes"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-extra-remove"
@@ -453,7 +453,7 @@
     (try
       (spit path (str "(ns xt.db.runtime.parity-roundtrip-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true\n"
                       "                 :langs [:lua.nginx]\n"
                       "                 :js        {:extra [[js.net.conn-sqlite :as js-sqlite]]}\n"
@@ -475,7 +475,7 @@
   => #(and (re-find #"\[lua\.nginx\.conn-sqlite :as lua-sqlite\]" %)
            (not (re-find #"\[js\.net\.conn-sqlite :as js-sqlite\]" %))))
 
-^{:refer hara.seedgen.form-bench/seedgen-benchadd :added "4.1"
+tahto/seedgen/form_bench_test.clj:478:^{:refer tahto.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-drop-extra-requires}
 (fact "drops root-only extra requires even when the target runtime does not define a replacement"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-extra-drop"
@@ -489,7 +489,7 @@
     (try
       (spit path (str "(ns xt.db.runtime.parity-roundtrip-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true\n"
                       "                 :langs [:ruby]\n"
                       "                 :js {:extra [[js.net.conn-sqlite :as js-sqlite]]}}}\n"
@@ -509,7 +509,7 @@
         (fs/delete root {:recursive true}))))
   => #(not (re-find #"\[js\.lib\.driver-sqlite :as js-sqlite\]" %)))
 
-^{:refer hara.seedgen.form-bench/seedgen-benchremove :added "4.1"}
+tahto/seedgen/form_bench_test.clj:512:^{:refer tahto.seedgen.form-bench/seedgen-benchremove :added "4.1"}
 (fact "removes selected bench files while preserving other runtimes"
   (let [root   (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchremove"
                                                                  (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -522,7 +522,7 @@
     (try
       (spit path (str "(ns xt.sample.multi-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :python {:runtime :basic})\n\n"
@@ -557,7 +557,7 @@
         false
         true])
 
-^{:refer hara.seedgen.form-bench/seedgen-benchremove :added "4.1"
+tahto/seedgen/form_bench_test.clj:560:^{:refer tahto.seedgen.form-bench/seedgen-benchremove :added "4.1"
   :id test-seedgen-benchremove-explicit-runtime}
 (fact "removes explicitly requested bench runtimes even when they are not present in the seed source"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchremove-explicit"
@@ -571,7 +571,7 @@
     (try
       (spit path (str "(ns xt.sample.remove-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n"))
       (let [bench-path (fs/path root "test/samplebench/lua/sample/remove_test.clj")]

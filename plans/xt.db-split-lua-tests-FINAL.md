@@ -47,7 +47,7 @@ For each original file, create a Lua-only copy in `test/xt/db_lua/`:
 
 ```clojure
 (ns xt.db-lua.test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.base-notify :as notify])
   (:use code.test))
 
@@ -108,7 +108,7 @@ For each original file, create a Lua-only copy in `test/xt/db_lua/`:
 
 ```clojure
 (ns xt.db-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.base-notify :as notify])
   (:use code.test))
 

@@ -135,10 +135,10 @@
   "finds any overlaps between entries
  
    (overlapped-entries-single '{:name a
-                                :entries #{[:clj hara.1]}}
+                                :entries #{[:clj tahto.1]}}
                               '[{:name b
-                                 :entries #{[:clj hara.1] [:clj hara.2]}}])
-   => '([#{a b} #{[:clj hara.1]}])"
+                                 :entries #{[:clj tahto.1] [:clj tahto.2]}}])
+   => '([#{a b} #{[:clj tahto.1]}])"
   {:added "3.0"}
   ([x heap]
    (keep (fn [{:keys [name entries]}]
@@ -152,10 +152,10 @@
   "finds any overlapped entries for given map
  
    (overlapped-entries '{a {:name a
-                            :entries #{[:clj hara.1]}}
+                            :entries #{[:clj tahto.1]}}
                          b {:name b
-                            :entries #{[:clj hara.1] [:clj hara.2]}}})
-   => '([#{a b} #{[:clj hara.1]}])"
+                            :entries #{[:clj tahto.1] [:clj tahto.2]}}})
+   => '([#{a b} #{[:clj tahto.1]}])"
   {:added "3.0"}
   ([packages]
    (loop [[x & rest] (vals packages)
@@ -174,11 +174,11 @@
   "finds missing entries given packages and lookup
  
    (missing-entries '{b {:name b
-                         :entries #{[:clj hara.1] [:clj hara.2]}}}
-                    '{:clj {hara.1 \"\"
-                            hara.2 \"\"
-                            hara.3 \"\"}})
-   => '{:clj {hara.3 \"\"}}"
+                         :entries #{[:clj tahto.1] [:clj tahto.2]}}}
+                    '{:clj {tahto.1 \"\"
+                            tahto.2 \"\"
+                            tahto.3 \"\"}})
+   => '{:clj {tahto.3 \"\"}}"
   {:added "3.0"}
   ([packages lookups]
    (reduce (fn [lookups {:keys [entries]}]

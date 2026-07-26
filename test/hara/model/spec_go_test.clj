@@ -1,8 +1,8 @@
-(ns hara.model.spec-go-test
+tahto/model/spec_go_test.clj:1:(ns tahto.model.spec-go-test
   (:require [code.test :as t]
-            [hara.lang :as l]
-            [hara.common.emit :as emit]
-            [hara.model.spec-go :as spec-go])
+            [tahto.core :as l]
+tahto/model/spec_go_test.clj:4:            [tahto.common.emit :as emit]
+tahto/model/spec_go_test.clj:5:            [tahto.model.spec-go :as spec-go])
   (:use code.test))
 
 (fact "test go emission"
@@ -64,33 +64,33 @@
 )
 
 
-^{:refer hara.model.spec-go/go-typesystem :added "4.1"}
+tahto/model/spec_go_test.clj:67:^{:refer tahto.model.spec-go/go-typesystem :added "4.1"}
 (fact "handle generic types"
   (spec-go/go-typesystem '[:> slice int] spec-go/+grammar+ {})
   => "[]int"
   (spec-go/go-typesystem '[:> map string int] spec-go/+grammar+ {})
   => "map[string]int")
 
-^{:refer hara.model.spec-go/go-vector :added "4.1"}
+tahto/model/spec_go_test.clj:74:^{:refer tahto.model.spec-go/go-vector :added "4.1"}
 (fact "emit vector or slice"
   (spec-go/go-vector '[1 2 3] spec-go/+grammar+ {})
   => "[]any{1, 2, 3}"
   (spec-go/go-vector '[:> slice int] spec-go/+grammar+ {})
   => "[]int")
 
-^{:refer hara.model.spec-go/tf-go-arrow :added "4.1"}
+tahto/model/spec_go_test.clj:81:^{:refer tahto.model.spec-go/tf-go-arrow :added "4.1"}
 (fact "macro for channel op"
   (spec-go/tf-go-arrow '(<- ch))
   => '(:% (:- "<-") ch)
   (spec-go/tf-go-arrow '(<- ch 1))
   => '(:% ch (:- " <- ") 1))
 
-^{:refer hara.model.spec-go/go-defstruct :added "4.1"}
+tahto/model/spec_go_test.clj:88:^{:refer tahto.model.spec-go/go-defstruct :added "4.1"}
 (fact "defstruct implementation"
   (spec-go/go-defstruct '(defstruct Person [[name string]]) spec-go/+grammar+ {})
   => "type Person struct {\n  name string\n}")
 
-^{:refer hara.model.spec-go/go-definterface :added "4.1"}
+tahto/model/spec_go_test.clj:93:^{:refer tahto.model.spec-go/go-definterface :added "4.1"}
 (fact "definterface implementation"
   (spec-go/go-definterface '(definterface Reader [Read]) spec-go/+grammar+ {})
   => "type Reader interface {\n  Read\n}")

@@ -1,8 +1,8 @@
-(ns hara.lang.rewrite.hoist-test
+(ns tahto.core.rewrite.hoist-test
   (:require [clojure.walk]
-            [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar]
-            [hara.lang.rewrite.hoist :as hoist])
+tahto/lang/rewrite/hoist_test.clj:3:            [tahto.common.emit-helper :as helper]
+tahto/lang/rewrite/hoist_test.clj:4:            [tahto.common.grammar :as grammar]
+            [tahto.core.rewrite.hoist :as hoist])
   (:use code.test))
 
 (def ^:private +grammar+
@@ -15,7 +15,7 @@
    {:fn-tags #{'fn 'fn.inner}
     :symbol-prefix "test_callback__"}))
 
-^{:refer hara.lang.rewrite.hoist/create-rewriter :added "4.1"}
+^{:refer tahto.core.rewrite.hoist/create-rewriter :added "4.1"}
 (fact "shares the prefix-hoisting rewrite logic"
   ((:rewrite-stage +rewriter+)
    '(var f (xtd/memoize-key

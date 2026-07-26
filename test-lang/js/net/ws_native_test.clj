@@ -1,6 +1,6 @@
 (ns js.net.ws-native-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [net.http.websocket :as ws]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))

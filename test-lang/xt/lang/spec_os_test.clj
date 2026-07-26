@@ -1,7 +1,7 @@
 (ns xt.lang.spec-os-test
   (:use code.test)
   (:require [clojure.set :as set]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/root {:all true, :langs [:python :lua]}}

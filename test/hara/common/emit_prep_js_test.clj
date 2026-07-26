@@ -1,11 +1,11 @@
-(ns hara.common.emit-prep-js-test
-  (:require [hara.lang.book :as b]
-            [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar]
-            [hara.common.util :as ut]
-            [hara.model.spec-js :as js]
-            [hara.model.spec-js.meta :as js-meta]
+tahto/common/emit_prep_js_test.clj:1:(ns tahto.common.emit-prep-js-test
+  (:require [tahto.base.book :as b]
+tahto/common/emit_prep_js_test.clj:3:            [tahto.common.emit-common :as common]
+tahto/common/emit_prep_js_test.clj:4:            [tahto.common.emit-helper :as helper]
+tahto/common/emit_prep_js_test.clj:5:            [tahto.common.grammar :as grammar]
+tahto/common/emit_prep_js_test.clj:6:            [tahto.common.util :as ut]
+tahto/common/emit_prep_js_test.clj:7:            [tahto.model.spec-js :as js]
+tahto/common/emit_prep_js_test.clj:8:            [tahto.model.spec-js.meta :as js-meta]
             [std.lib.env :as env])
   (:use code.test))
 

@@ -1,7 +1,7 @@
 ^{:no-test true}
 (ns postgres.sample.scratch-v3.route-currency
   (:require [std.lib :as h]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [postgres.gen.bind-macro :as bind-pg]
             [postgres.gen.gen-bind :as bind]
             [postgres.sample.scratch-v3]))

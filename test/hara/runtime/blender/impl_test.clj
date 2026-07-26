@@ -1,28 +1,28 @@
-(ns hara.runtime.blender.impl-test
-  (:require [hara.lang :as h]
-            [hara.lang.type-shared :as shared]
-            [hara.runtime.blender.impl :as impl]
+tahto/runtime/blender/impl_test.clj:1:(ns tahto.runtime.blender.impl-test
+  (:require [tahto.core :as h]
+            [tahto.core.type-shared :as shared]
+tahto/runtime/blender/impl_test.clj:4:            [tahto.runtime.blender.impl :as impl]
             [std.lib.env :as env])
   (:use code.test))
 
 (fact:global {:skip (not (env/program-exists? "blender"))})
 
-^{:refer hara.runtime.blender.impl/blender-exec :added "4.1"}
+tahto/runtime/blender/impl_test.clj:10:^{:refer tahto.runtime.blender.impl/blender-exec :added "4.1"}
 (fact "resolves the blender executable"
   (impl/blender-exec)
   => string?)
 
-^{:refer hara.runtime.blender.impl/blender-bootstrap :added "4.1"}
+tahto/runtime/blender/impl_test.clj:15:^{:refer tahto.runtime.blender.impl/blender-bootstrap :added "4.1"}
 (fact "generates python bootstrap code"
   (let [bootstrap (impl/blender-bootstrap 12345)]
     [(boolean (re-find #"def server_blender" bootstrap))
      (boolean (re-find #"def client_blender" bootstrap))
      (boolean (re-find #"return_eval" bootstrap))
-     (boolean (re-find #"HARA_BLENDER_READY" bootstrap))
+tahto/runtime/blender/impl_test.clj:21:     (boolean (re-find #"TAHTO_BLENDER_READY" bootstrap))
      (boolean (re-find #"server_blender\(12345" bootstrap))])
   => [true true true true true])
 
-^{:refer hara.runtime.blender.impl/start-blender :added "4.1"}
+tahto/runtime/blender/impl_test.clj:25:^{:refer tahto.runtime.blender.impl/start-blender :added "4.1"}
 (fact "starts and stops a blender process"
   (let [rt (-> (impl/blender:create {})
                (impl/start-blender))
@@ -35,7 +35,7 @@
     result)
   => [true true true true true])
 
-^{:refer hara.runtime.blender.impl/raw-eval-blender :added "4.1"}
+tahto/runtime/blender/impl_test.clj:38:^{:refer tahto.runtime.blender.impl/raw-eval-blender :added "4.1"}
 (fact "evaluates python code inside blender"
   (let [rt (impl/blender {})]
     (try
@@ -45,7 +45,7 @@
         (impl/stop-blender rt))))
   => [6 true])
 
-^{:refer hara.runtime.blender.impl/raw-eval-blender :added "4.1"
+tahto/runtime/blender/impl_test.clj:48:^{:refer tahto.runtime.blender.impl/raw-eval-blender :added "4.1"
   :id test-raw-eval-blender-errors}
 (fact "propagates python errors"
   (let [rt (impl/blender {})]
@@ -57,7 +57,7 @@
         (impl/stop-blender rt))))
   => #"division( or modulo)? by zero")
 
-^{:refer hara.runtime.blender.impl/invoke-ptr-blender :added "4.1"}
+tahto/runtime/blender/impl_test.clj:60:^{:refer tahto.runtime.blender.impl/invoke-ptr-blender :added "4.1"}
 (fact "invokes a pointer through the blender runtime"
   (let [rt (impl/blender {})]
     (try
@@ -69,14 +69,14 @@
         (impl/stop-blender rt))))
   => true)
 
-^{:refer hara.runtime.blender.impl/blender:create :added "4.1"}
+tahto/runtime/blender/impl_test.clj:72:^{:refer tahto.runtime.blender.impl/blender:create :added "4.1"}
 (fact "creates a blender runtime record"
   (let [rt (impl/blender:create {})]
     [(boolean rt)
      (= :blender (:tag rt))])
   => [true true])
 
-^{:refer hara.runtime.blender.impl/blender :added "4.1"}
+tahto/runtime/blender/impl_test.clj:79:^{:refer tahto.runtime.blender.impl/blender :added "4.1"}
 (fact "creates and starts a blender runtime"
   (let [rt (impl/blender {})]
     (try
@@ -85,7 +85,7 @@
         (impl/stop-blender rt))))
   => true)
 
-^{:refer hara.runtime.blender.impl/blender-shared :added "4.1"}
+tahto/runtime/blender/impl_test.clj:88:^{:refer tahto.runtime.blender.impl/blender-shared :added "4.1"}
 (fact "two shared blender runtimes with the same id share the process"
   (let [rt1 (impl/blender-shared:create {:id :shared-blender-test})
         rt2 (impl/blender-shared:create {:id :shared-blender-test})]
@@ -125,7 +125,7 @@
   => true)
 
 
-^{:refer hara.runtime.blender.impl/stop-blender :added "4.1"}
+tahto/runtime/blender/impl_test.clj:128:^{:refer tahto.runtime.blender.impl/stop-blender :added "4.1"}
 (fact "stops a running blender process"
   (let [rt (impl/blender {})
         _ (impl/stop-blender rt)
@@ -133,10 +133,10 @@
     (boolean (and process (not (.isAlive ^Process process)))))
   => true)
 
-^{:refer hara.runtime.blender.impl/blender-shared:create :added "4.1"}
+tahto/runtime/blender/impl_test.clj:136:^{:refer tahto.runtime.blender.impl/blender-shared:create :added "4.1"}
 (fact "creates a shared blender runtime client"
   (let [rt (impl/blender-shared:create {:id :shared-blender-impl-test})]
-    [(= :hara/rt.blender (get-in rt [:client :type]))
+tahto/runtime/blender/impl_test.clj:139:    [(= :tahto/rt.blender (get-in rt [:client :type]))
      (= impl/blender:create (get-in rt [:client :constructor]))
      (= :shared-blender-impl-test (:id rt))
      (= :shared-blender-impl-test (:rt/id rt))

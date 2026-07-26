@@ -1,6 +1,6 @@
 (ns xt.ui.frames.shell
   "Reusable page and application shell composition."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

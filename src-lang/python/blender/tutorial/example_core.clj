@@ -1,5 +1,5 @@
 (ns python.blender.tutorial.example-core
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :python {:runtime :blender})
 

@@ -35,7 +35,7 @@
 
 (fact "analyses metadata-wrapped facts after seedgen scaffolding"
   (let [code (str "(ns sample.generated-test\n"
-                  "  (:require [hara.lang :as l])\n"
+                  "  (:require [tahto.core :as l])\n"
                   "  (:use code.test))\n\n"
                   "^{:seedgen/root {:all true}}\n"
                   "(l/script- :js {:runtime :basic})\n\n"

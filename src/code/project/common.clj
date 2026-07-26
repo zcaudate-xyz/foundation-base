@@ -16,8 +16,8 @@
 (defn artifact
   "returns the artifact map given a symbol
  
-   (artifact 'hara/hara)
-   => '{:name hara/hara, :artifact \"hara\", :group \"hara\"}"
+   (artifact 'tahto/tahto)
+   => '{:name tahto/tahto, :artifact \"tahto\", :group \"tahto\"}"
   {:added "3.0"}
   ([full]
    (let [group    (or (namespace full)

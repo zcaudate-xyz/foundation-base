@@ -1,7 +1,7 @@
 ^{:seedgen/skip true}
 (ns xt.lang.common-module-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-module :refer :all]
             js.core.impl))
 

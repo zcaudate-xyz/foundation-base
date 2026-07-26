@@ -1,4 +1,4 @@
-(ns clj-kondo.hooks.hara-postgres
+tahto/clj_kondo/hooks/tahto_postgres.clj:1:(ns clj-kondo.hooks.tahto-postgres
   (:require [clj-kondo.hooks-api :as api]
             [clojure.string :as str]))
 
@@ -94,18 +94,18 @@
   (when-let [input (entity-input name-node metadata)]
     (when (map? input)
       (when (contains? input :link)
-        (report-error! name-node :hara.postgres/retired-entity-option
+tahto/clj_kondo/hooks/tahto_postgres.clj:97:        (report-error! name-node :tahto.postgres/retired-entity-option
                        "et/E :link has been removed; use :owner target or :owner [target local-key]"))
       (when (contains? input :spec/addon)
-        (report-error! name-node :hara.postgres/retired-entity-option
+tahto/clj_kondo/hooks/tahto_postgres.clj:100:        (report-error! name-node :tahto.postgres/retired-entity-option
                        "et/E :spec/addon has been removed; use :provides"))
       (when (and (contains? input :owner)
                  (not (owner-valid? (:owner input))))
-        (report-error! name-node :hara.postgres/invalid-owner
+tahto/clj_kondo/hooks/tahto_postgres.clj:104:        (report-error! name-node :tahto.postgres/invalid-owner
                        "et/E :owner must be a target symbol or [target-symbol local-keyword]"))
       (when (and (contains? input :provides)
                  (not (provides-valid? (:provides input))))
-        (report-error! name-node :hara.postgres/invalid-provides
+tahto/clj_kondo/hooks/tahto_postgres.clj:108:        (report-error! name-node :tahto.postgres/invalid-provides
                        "et/E :provides must contain a keyword :key and an optional numeric :priority")))))
 (defn function-shape [node]
   (let [children (rest (:children node))
@@ -141,17 +141,17 @@
                                   (some #(and (seq? %)
                                               (str/starts-with? (str (first %)) "pg/t:")) body))))
                (not= 1 top-let-count))
-      (report! name-node :hara.postgres/one-let (str name " should contain exactly one top-level let")))
+tahto/clj_kondo/hooks/tahto_postgres.clj:144:      (report! name-node :tahto.postgres/one-let (str name " should contain exactly one top-level let")))
     (when (> (count lets) 1)
-      (report! name-node :hara.postgres/nested-let (str name " contains nested or repeated let forms")))
+tahto/clj_kondo/hooks/tahto_postgres.clj:146:      (report! name-node :tahto.postgres/nested-let (str name " contains nested or repeated let forms")))
     (doseq [input input-names]
       (when-not (allowed-input-name? input)
-        (report! name-node :hara.postgres/input-prefix (str "input binding " input " should use i-* or m"))))
+tahto/clj_kondo/hooks/tahto_postgres.clj:149:        (report! name-node :tahto.postgres/input-prefix (str "input binding " input " should use i-* or m"))))
     (doseq [local local-names]
       (when-not (allowed-local-name? local)
-        (report! name-node :hara.postgres/local-prefix (str "local binding " local " should use v-* or o-*"))))
+tahto/clj_kondo/hooks/tahto_postgres.clj:152:        (report! name-node :tahto.postgres/local-prefix (str "local binding " local " should use v-* or o-*"))))
     (when (seq direct-returns)
-      (report! name-node :hara.postgres/return-bound (str name " returns an expression directly; bind it before return")))))
+tahto/clj_kondo/hooks/tahto_postgres.clj:154:      (report! name-node :tahto.postgres/return-bound (str name " returns an expression directly; bind it before return")))))
 (defn defn-pg [{:keys [node]}]
   (if-let [{:keys [name-node args-node] :as shape} (function-shape node)]
     (do (lint-function! shape)

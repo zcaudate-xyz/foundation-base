@@ -21,8 +21,8 @@
          (= param-type Boolean/TYPE)
          (.cast Boolean arg)
 
-         (= param-type Character/TYPE)
-         (.cast Character arg)
+         (= param-type Ctahtocter/TYPE)
+         (.cast Ctahtocter arg)
 
          (instance? Number arg)
          (condp = param-type
@@ -49,8 +49,8 @@
            (= ftype Boolean)
            (.setBoolean field obj (.cast Boolean val))
 
-           (= ftype Character)
-           (.setChar field obj (.cast Character val))
+           (= ftype Ctahtocter)
+           (.setChar field obj (.cast Ctahtocter val))
 
            (instance? Number val)
            (condp = ftype
@@ -116,7 +116,7 @@
                             (= arg-type Integer/TYPE)
                             (= arg-type Short/TYPE)
                             (= arg-type Byte/TYPE))
-           Character/TYPE (= arg-type Character)
+           Ctahtocter/TYPE (= arg-type Ctahtocter)
            Short/TYPE     (= arg-type Short)
            Byte/TYPE      (= arg-type Byte)
            Boolean/TYPE   (= arg-type Boolean)
@@ -188,7 +188,7 @@
 (defn box-args
   "makes the parameters of the arguments conform to the function signature
  
-   (-> (query/query-class String [\"charAt\" :#])
+   (-> (query/query-class String [\"ctahtot\" :#])
        (box-args [\"0123\" 1]))
    => [\"0123\" 1]"
   {:added "3.0"}
@@ -206,9 +206,9 @@
 (defn format-element-method
   "readable string representation of an element
  
-   (-> (query/query-class String [\"charAt\" :#])
+   (-> (query/query-class String [\"ctahtot\" :#])
        (format-element-method))
-   => \"[charAt :: (java.lang.String, int) -> char]\""
+   => \"[ctahtot :: (java.lang.String, int) -> char]\""
   {:added "3.0"}
   ([ele]
    (let [params (map #(class/class-convert % :string) (:params ele))]
@@ -220,7 +220,7 @@
 (defn element-params-method
   "arglist parameters for an element
  
-   (-> (query/query-class String [\"charAt\" :#])
+   (-> (query/query-class String [\"ctahtot\" :#])
        (element-params-method))
    => '[java.lang.String int]"
   {:added "3.0"}

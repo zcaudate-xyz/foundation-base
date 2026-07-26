@@ -17,7 +17,7 @@
 (comment
   (code.manage/find-usages '[code]
                            {:var 'code.framework/analyse})
-  (code.manage/locate-code '[hara]
+  (code.manage/locate-code '[tahto]
                            {:query ['l/script]}))
 
 [[:chapter {:title "Internal usage" :link "internal"}]]

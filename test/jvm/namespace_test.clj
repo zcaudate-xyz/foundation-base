@@ -212,5 +212,5 @@
 (comment
   (code.manage/import {:write true})
 
-  (random-test '[hara])
-  (check '[hara]))
+  (random-test '[tahto])
+  (check '[tahto]))

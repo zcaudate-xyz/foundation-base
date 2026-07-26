@@ -1,6 +1,6 @@
-(ns hara.model.spec-haxe-examples-test
-  (:require [hara.lang :as l]
-            [hara.lang.pointer :as ptr]
+tahto/model/spec_haxe_examples_test.clj:1:(ns tahto.model.spec-haxe-examples-test
+  (:require [tahto.core :as l]
+            [tahto.core.pointer :as ptr]
             [haxe.examples :as examples])
   (:use code.test))
 

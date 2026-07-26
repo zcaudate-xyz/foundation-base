@@ -1,6 +1,6 @@
 (ns xt.db.node.proxy-util-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify]
             [xt.db.node.proxy-util :as proxy-util]))
 

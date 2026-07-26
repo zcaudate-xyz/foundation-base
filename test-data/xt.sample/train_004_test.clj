@@ -1,6 +1,6 @@
 (ns xt.sample.train-004-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/root         {:all true}}

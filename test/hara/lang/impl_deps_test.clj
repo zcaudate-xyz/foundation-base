@@ -1,11 +1,11 @@
-(ns hara.lang.impl-deps-test
-  (:require [hara.common.emit-prep-lua-test :as prep]
-            [hara.lang.impl :as impl]
-            [hara.lang.impl-deps :as deps]
-            [hara.lang.impl-entry :as entry]
-            [hara.lang.library :as lib]
-            [hara.lang.library-snapshot :as snap]
-            [hara.model.spec-lua :as lua]
+(ns tahto.core.impl-deps-test
+tahto/lang/impl_deps_test.clj:2:  (:require [tahto.common.emit-prep-lua-test :as prep]
+            [tahto.core.impl :as impl]
+            [tahto.core.impl-deps :as deps]
+            [tahto.core.impl-entry :as entry]
+            [tahto.core.library :as lib]
+            [tahto.core.library-snapshot :as snap]
+tahto/lang/impl_deps_test.clj:8:            [tahto.model.spec-lua :as lua]
             [xt.lang.common-data])
   (:use code.test))
 
@@ -57,7 +57,7 @@
        :module 'L.app}
       {}))))
 
-^{:refer hara.lang.impl-deps/module-import-form :added "4.0"}
+^{:refer tahto.core.impl-deps/module-import-form :added "4.0"}
 (fact "import form"
 
   (deps/module-import-form prep/+book-min+
@@ -66,7 +66,7 @@
                            {})
   => '(var* :local cjson := (require "cjson")))
 
-^{:refer hara.lang.impl-deps/module-export-form :added "4.0"}
+^{:refer tahto.core.impl-deps/module-export-form :added "4.0"}
 (fact "export form"
 
   (deps/module-export-form prep/+book-min+
@@ -74,7 +74,7 @@
                            {})
   => '(return (tab)))
 
-^{:refer hara.lang.impl-deps/module-link-form :added "4.0"}
+^{:refer tahto.core.impl-deps/module-link-form :added "4.0"}
 (fact "link form for projects"
 
   (deps/module-link-form prep/+book-min+
@@ -82,28 +82,28 @@
                          {:root-ns 'kmi.hello})
   => "./common")
 
-^{:refer hara.lang.impl-deps/has-module-form :added "4.0"}
+^{:refer tahto.core.impl-deps/has-module-form :added "4.0"}
 (fact "checks if module is available"
 
   (deps/has-module-form prep/+book-min+
                         'kmi.common)
   => nil)
 
-^{:refer hara.lang.impl-deps/setup-module-form :added "4.0"}
+^{:refer tahto.core.impl-deps/setup-module-form :added "4.0"}
 (fact "setup the module"
 
   (deps/setup-module-form prep/+book-min+
                           'kmi.common)
   => nil)
 
-^{:refer hara.lang.impl-deps/teardown-module-form :added "4.0"}
+^{:refer tahto.core.impl-deps/teardown-module-form :added "4.0"}
 (fact "teardown the module"
 
   (deps/teardown-module-form prep/+book-min+
                              'kmi.common)
   => nil)
 
-^{:refer hara.lang.impl-deps/has-ptr-form :added "4.0"}
+^{:refer tahto.core.impl-deps/has-ptr-form :added "4.0"}
 (fact "form to check if pointer exists"
 
   (deps/has-ptr-form prep/+book-min+
@@ -111,7 +111,7 @@
                        :module kmi.common})
   => '(not= kmi.common/hello nil))
 
-^{:refer hara.lang.impl-deps/setup-ptr-form :added "4.0"}
+^{:refer tahto.core.impl-deps/setup-ptr-form :added "4.0"}
 (fact "form to setup pointer"
 
   (deps/setup-ptr-form prep/+book-min+
@@ -119,7 +119,7 @@
                          :module kmi.common})
   => nil)
 
-^{:refer hara.lang.impl-deps/teardown-ptr-form :added "4.0"}
+^{:refer tahto.core.impl-deps/teardown-ptr-form :added "4.0"}
 (fact "form to teardown pointer"
 
   (deps/teardown-ptr-form prep/+book-min+
@@ -127,7 +127,7 @@
                             :module kmi.common})
   => '(:= kmi.common/hello nil))
 
-^{:refer hara.lang.impl-deps/collect-script-natives :added "4.0"}
+^{:refer tahto.core.impl-deps/collect-script-natives :added "4.0"}
 (fact "gets native imported modules"
 
   (deps/collect-script-natives [{:native {'cjson "cjson"}}
@@ -136,14 +136,14 @@
                                {})
   => '{cjson "cjson", lustache "lustache"})
 
-^{:refer hara.lang.impl-deps/collect-script-entries :added "4.0"}
+^{:refer tahto.core.impl-deps/collect-script-entries :added "4.0"}
 (fact "collects all entries"
 
   (deps/collect-script-entries (lib/get-book +library-ext+ :lua)
                                '[L.util/add-fn])
   => vector?)
 
-^{:refer hara.lang.impl-deps/collect-script :added "4.0"}
+^{:refer tahto.core.impl-deps/collect-script :added "4.0"}
 (fact "collect dependencies given a form and book"
 
   (-> (deps/collect-script (lib/get-book +library-ext+ :lua)
@@ -176,7 +176,7 @@
        (xt.lang.common-data/obj-keys)
        {}])
 
-^{:refer hara.lang.impl-deps/collect-script-summary :added "4.0"}
+^{:refer tahto.core.impl-deps/collect-script-summary :added "4.0"}
 (fact "summaries the output of `collect-script`"
 
   (-> '[(+ (L.util/sub-fn 1 2) (L.util/add-fn 3 4))
@@ -189,7 +189,7 @@
        {"cjson" {:as cjson}}])
 
 
-^{:refer hara.lang.impl-deps/collect-module :added "4.0"}
+^{:refer tahto.core.impl-deps/collect-module :added "4.0"}
 (fact "collects information for the entire module"
 
   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
@@ -218,7 +218,7 @@
   (./import))
 
 
-^{:refer hara.lang.impl-deps/native-name-with-override :added "4.1"}
+^{:refer tahto.core.impl-deps/native-name-with-override :added "4.1"}
 (fact "applies native override to a native import name"
 
   (deps/native-name-with-override 'cjson {})

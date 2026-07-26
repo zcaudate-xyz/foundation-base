@@ -50,7 +50,7 @@ lein install
 |---|---|
 | `std.*` | Standard libraries and reusable infrastructure |
 | `code.*` | Testing, documentation, source management, queries, tooling, and analysis |
-| `hara.*` | Language authoring, target models, typing, and code generation |
+| `tahto.*` | Language authoring, target models, typing, and code generation |
 | `rt.*` | Runtime adapters and execution environments |
 | `xt.*` | Portable libraries and cross-target application layers |
 | `src-build/` | Walkthroughs, demos, build definitions, and generated projects |
@@ -210,7 +210,7 @@ ci: pin docker base image
 docs: update pg sync walkthrough
 ```
 
-Common area prefixes: `std`, `code`, `hara`, `rt`, `xt`, `xtalk`, `seedgen`, `src-lang/<lang>`, `ci`, `docs`, `build`.
+Common area prefixes: `std`, `code`, `tahto`, `rt`, `xt`, `xtalk`, `seedgen`, `src-lang/<lang>`, `ci`, `docs`, `build`.
 
 Rules:
 

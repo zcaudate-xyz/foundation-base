@@ -61,63 +61,63 @@
 ^{:refer code.framework.link/collect-entries :added "4.0"}
 (fact "splits runtime namespaces into dedicated packages"
   (let [entries          (collect-entries -packages- -lookups-)
-        hara-entries     (set (get-in entries '[xyz.zcaudate/hara :entries]))
+        tahto-entries     (set (get-in entries '[xyz.zcaudate/tahto :entries]))
         postgres-entries (set (get-in entries '[xyz.zcaudate/postgres :entries]))
         solidity-entries (set (get-in entries '[xyz.zcaudate/solidity :entries]))
-        nginx-entries    (set (get-in entries '[xyz.zcaudate/hara.runtime.nginx :entries]))
-        graal-entries    (set (get-in entries '[xyz.zcaudate/hara.runtime.graal :entries]))
-        jep-entries      (set (get-in entries '[xyz.zcaudate/hara.runtime.jep :entries]))
-        redis-entries    (set (get-in entries '[xyz.zcaudate/hara.runtime.redis :entries]))]
-    [(boolean (hara-entries [:clj 'hara.runtime.postgres]))
-     (boolean (hara-entries [:clj 'hara.runtime.solidity]))
-     (boolean (hara-entries [:clj 'hara.runtime.solidity.client]))
-     (boolean (hara-entries [:clj 'hara.runtime.graal]))
-     (boolean (hara-entries [:clj 'hara.runtime.jep]))
-     (boolean (hara-entries [:clj 'hara.runtime.redis]))
-     (boolean (hara-entries [:clj 'hara.runtime.nginx]))
-     (boolean (hara-entries [:clj 'hara.runtime.nginx.config]))
-     (boolean (hara-entries [:clj 'xt.lang.common-lib]))
+        nginx-entries    (set (get-in entries '[xyz.zcaudate/tahto.runtime.nginx :entries]))
+        graal-entries    (set (get-in entries '[xyz.zcaudate/tahto.runtime.graal :entries]))
+        jep-entries      (set (get-in entries '[xyz.zcaudate/tahto.runtime.jep :entries]))
+        redis-entries    (set (get-in entries '[xyz.zcaudate/tahto.runtime.redis :entries]))]
+    [(boolean (tahto-entries [:clj 'tahto.runtime.postgres]))
+     (boolean (tahto-entries [:clj 'tahto.runtime.solidity]))
+     (boolean (tahto-entries [:clj 'tahto.runtime.solidity.client]))
+     (boolean (tahto-entries [:clj 'tahto.runtime.graal]))
+     (boolean (tahto-entries [:clj 'tahto.runtime.jep]))
+     (boolean (tahto-entries [:clj 'tahto.runtime.redis]))
+     (boolean (tahto-entries [:clj 'tahto.runtime.nginx]))
+     (boolean (tahto-entries [:clj 'tahto.runtime.nginx.config]))
+     (boolean (tahto-entries [:clj 'xt.lang.common-lib]))
      (boolean (postgres-entries [:clj 'postgres.core]))
-     (boolean (postgres-entries [:clj 'hara.runtime.postgres]))
+     (boolean (postgres-entries [:clj 'tahto.runtime.postgres]))
      (boolean (solidity-entries [:clj 'solidity.core]))
-     (boolean (solidity-entries [:clj 'hara.runtime.solidity]))
-     (boolean (solidity-entries [:clj 'hara.runtime.solidity.client]))
-     (boolean (nginx-entries [:clj 'hara.runtime.nginx]))
-     (boolean (nginx-entries [:clj 'hara.runtime.nginx.config]))
-     (boolean (graal-entries [:clj 'hara.runtime.graal]))
-     (boolean (jep-entries [:clj 'hara.runtime.jep]))
-     (boolean (redis-entries [:clj 'hara.runtime.redis]))
+     (boolean (solidity-entries [:clj 'tahto.runtime.solidity]))
+     (boolean (solidity-entries [:clj 'tahto.runtime.solidity.client]))
+     (boolean (nginx-entries [:clj 'tahto.runtime.nginx]))
+     (boolean (nginx-entries [:clj 'tahto.runtime.nginx.config]))
+     (boolean (graal-entries [:clj 'tahto.runtime.graal]))
+     (boolean (jep-entries [:clj 'tahto.runtime.jep]))
+     (boolean (redis-entries [:clj 'tahto.runtime.redis]))
      (contains? entries 'xyz.zcaudate/xtalk.lang)
-     (contains? entries 'xyz.zcaudate/hara.runtime.solidity)])
+     (contains? entries 'xyz.zcaudate/tahto.runtime.solidity)])
   => [false false false false false false false false true true true true true true true true true true true false false])
 
 ^{:refer code.framework.link/overlapped-entries-single :added "3.0"}
 (fact "finds any overlaps between entries"
 
   (overlapped-entries-single '{:name a
-                               :entries #{[:clj hara.1]}}
+                               :entries #{[:clj tahto.1]}}
                              '[{:name b
-                                :entries #{[:clj hara.1] [:clj hara.2]}}])
-  => '([#{a b} #{[:clj hara.1]}]))
+                                :entries #{[:clj tahto.1] [:clj tahto.2]}}])
+  => '([#{a b} #{[:clj tahto.1]}]))
 
 ^{:refer code.framework.link/overlapped-entries :added "3.0"}
 (fact "finds any overlapped entries for given map"
 
   (overlapped-entries '{a {:name a
-                           :entries #{[:clj hara.1]}}
+                           :entries #{[:clj tahto.1]}}
                         b {:name b
-                           :entries #{[:clj hara.1] [:clj hara.2]}}})
-  => '([#{a b} #{[:clj hara.1]}]))
+                           :entries #{[:clj tahto.1] [:clj tahto.2]}}})
+  => '([#{a b} #{[:clj tahto.1]}]))
 
 ^{:refer code.framework.link/missing-entries :added "3.0"}
 (fact "finds missing entries given packages and lookup"
 
   (missing-entries '{b {:name b
-                        :entries #{[:clj hara.1] [:clj hara.2]}}}
-                   '{:clj {hara.1 ""
-                           hara.2 ""
-                           hara.3 ""}})
-  => '{:clj {hara.3 ""}})
+                        :entries #{[:clj tahto.1] [:clj tahto.2]}}}
+                   '{:clj {tahto.1 ""
+                           tahto.2 ""
+                           tahto.3 ""}})
+  => '{:clj {tahto.3 ""}})
 
 ^{:refer code.framework.link/collect-external-deps :added "3.0"}
 (fact "collects dependencies from the local system"

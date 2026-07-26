@@ -1,6 +1,6 @@
-(ns hara.runtime.solidity.env-hardhat-test
+tahto/runtime/solidity/env_hardhat_test.clj:1:(ns tahto.runtime.solidity.env-hardhat-test
   (:require [clojure.string :as string]
-            [hara.runtime.solidity.env-hardhat :refer :all]
+tahto/runtime/solidity/env_hardhat_test.clj:3:            [tahto.runtime.solidity.env-hardhat :refer :all]
             [std.fs :as fs]
             [std.lib.env :as env]
             [std.lib.future :as future]
@@ -30,7 +30,7 @@
   :setup    []
   :teardown [(reset! *server* nil)]})
 
-^{:refer hara.runtime.solidity.env-hardhat/start-hardhat-server :added "4.0"}
+tahto/runtime/solidity/env_hardhat_test.clj:33:^{:refer tahto.runtime.solidity.env-hardhat/start-hardhat-server :added "4.0"}
 (fact "starts the hardhat service and constructs the node command"
   (let [captured (atom nil)]
     (with-redefs [fs/create-directory (fn [_] nil)
@@ -54,7 +54,7 @@
               (string/includes? cmd "--hostname 0.0.0.0")
               (string/includes? cmd (str "--port " +default-port+))))))
 
-^{:refer hara.runtime.solidity.env-hardhat/stop-hardhat-server :added "4.0"}
+tahto/runtime/solidity/env_hardhat_test.clj:57:^{:refer tahto.runtime.solidity.env-hardhat/stop-hardhat-server :added "4.0"}
 (fact "stops the hardhat service and returns server entry"
   (with-redefs [fs/create-directory (fn [_] nil)
                 os/sh fake-sh

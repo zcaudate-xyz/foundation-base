@@ -1,9 +1,9 @@
 (ns postgres.core.graph-view
-  (:require [hara.model.spec-postgres.common :as common]
+  (:require [tahto.model.spec-postgres.common :as common]
             [postgres.core.graph-base :as base]
             [postgres.core.graph-query :as query]
-            [hara.lang :as l]
-            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
+            [tahto.core :as l]
+            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
             [std.lib.walk :as walk]

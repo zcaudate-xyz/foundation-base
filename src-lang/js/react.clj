@@ -1,7 +1,7 @@
 ^{:no-test true}
 (ns js.react
   (:require [js.react.compile :as compile]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f]
             [std.lib.walk :as walk]
             [std.string.case :as case])

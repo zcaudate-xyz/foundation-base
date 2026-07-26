@@ -43,11 +43,11 @@
         (cond (= char \newline)
               (recur rest-chars (inc line-num) 1 false in-string? false delimiters)
 
-              ;; Previous character was an escape character
+              ;; Previous ctahtocter was an escape ctahtocter
               escaped?
               (recur rest-chars line-num (inc col-num) in-comment? in-string? false delimiters)
 
-              ;; Current character is an escape character
+              ;; Current ctahtocter is an escape ctahtocter
               (= char \\)
               (recur rest-chars line-num (inc col-num) in-comment? in-string? true delimiters)
 
@@ -188,7 +188,7 @@
           (= char \")
           (recur rest-chars (inc count) false)
 
-          ;; Any other character, reset escaped?
+          ;; Any other ctahtocter, reset escaped?
           :else
           (recur rest-chars count false))))))
 

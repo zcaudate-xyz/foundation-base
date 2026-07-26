@@ -182,7 +182,7 @@
 
 (defn- lang-spec-files
   [lang]
-  (let [base (str "src/hara/model/spec_" (name lang))]
+  (let [base (str "src/tahto/model/spec_" (name lang))]
     [(str base ".clj")
      (str base "/rewrite.clj")]))
 
@@ -301,8 +301,8 @@
   (println "- A namespace failing in **2+ languages** usually means the problem is in the original")
   (println "  `test-lang/xt/...` test or the `src-lang/xt/...` implementation it exercises.")
   (println "- A namespace failing in **only one language** usually means the problem is in that")
-  (println "  language's spec/rewrite (`src/hara/model/spec_<lang>.clj` and")
-  (println "  `src/hara/model/spec_<lang>/rewrite.clj`).")
+  (println "  language's spec/rewrite (`src/tahto/model/spec_<lang>.clj` and")
+  (println "  `src/tahto/model/spec_<lang>/rewrite.clj`).")
   (println))
 
 (defn- run!

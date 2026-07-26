@@ -1,7 +1,7 @@
-(ns hara.model.spec-xtalk-optional-test
-  (:require [hara.lang :as l]
-            [hara.model.spec-xtalk.fn-js :refer [js-tf-x-str-substring]]
-            [hara.model.spec-xtalk.fn-python :refer [python-tf-x-str-substring]])
+tahto/model/spec_xtalk_optional_test.clj:1:(ns tahto.model.spec-xtalk-optional-test
+  (:require [tahto.core :as l]
+tahto/model/spec_xtalk_optional_test.clj:3:            [tahto.model.spec-xtalk.fn-js :refer [js-tf-x-str-substring]]
+tahto/model/spec_xtalk_optional_test.clj:4:            [tahto.model.spec-xtalk.fn-python :refer [python-tf-x-str-substring]])
   (:use code.test))
 
 (fact "js substring emits open-ended ranges"

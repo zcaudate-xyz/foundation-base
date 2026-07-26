@@ -1,5 +1,5 @@
 (ns js.lib.bitcoin
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:import [["bitcoinjs-lib" :as Bitcoin]

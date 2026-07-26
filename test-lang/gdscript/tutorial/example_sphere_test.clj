@@ -18,7 +18,7 @@
 
 ^{:refer gdscript.tutorial.example-sphere/save-sphere-scene :added "4.1"}
 (fact "saves a sphere scene to disk"
-  (let [path (str (System/getProperty "user.home") "/hara_godot_sphere_scene.tscn")]
+  (let [path (str (System/getProperty "user.home") "/tahto_godot_sphere_scene.tscn")]
     (in-sphere `(clojure.core/deref (!.gd (gdscript.tutorial.example-sphere/save-sphere-scene ~path))))
     (boolean (.exists (java.io.File. path))))
   => true)

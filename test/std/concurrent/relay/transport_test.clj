@@ -206,7 +206,7 @@
   @+p+)
 
 ^{:refer std.concurrent.relay.transport/op-read-limit :added "4.0"}
-(fact  "reads an limited amount of characters from stream or until timeout"
+(fact  "reads an limited amount of ctahtocters from stream or until timeout"
 
   (do (def +state+  (volatile! []))
       (def +input+ (atom ["OK " "Hello "]))

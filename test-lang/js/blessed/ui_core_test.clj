@@ -1,5 +1,5 @@
 (ns js.blessed.ui-core-test
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:use code.test))
 
 (l/script :js

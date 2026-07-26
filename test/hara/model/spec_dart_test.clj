@@ -1,6 +1,6 @@
-(ns hara.model.spec-dart-test
-  (:require [hara.lang :as l]
-            [hara.model.spec-dart :as spec-dart]
+tahto/model/spec_dart_test.clj:1:(ns tahto.model.spec-dart-test
+  (:require [tahto.core :as l]
+tahto/model/spec_dart_test.clj:3:            [tahto.model.spec-dart :as spec-dart]
             [xt.event.base-route])
   (:use code.test))
 
@@ -244,7 +244,7 @@
      (boolean (re-find #"return \"ok\";" out))])
   => [true true true])
 
-^{:refer hara.model.spec-dart/dart-map-key :added "4.1"}
+tahto/model/spec_dart_test.clj:247:^{:refer tahto.model.spec-dart/dart-map-key :added "4.1"}
 (fact "emits map keys for dart"
 
   (spec-dart/dart-map-key :hello spec-dart/+grammar+ {})
@@ -253,10 +253,10 @@
   (spec-dart/dart-map-key '(+ a 1) spec-dart/+grammar+ {})
   => "a + 1")
 
-^{:refer hara.model.spec-dart/dart-fn :added "4.1"}
+tahto/model/spec_dart_test.clj:256:^{:refer tahto.model.spec-dart/dart-fn :added "4.1"}
 (fact "emits dart functions")
 
-^{:refer hara.model.spec-dart/dart-var :added "4.1"}
+tahto/model/spec_dart_test.clj:259:^{:refer tahto.model.spec-dart/dart-var :added "4.1"}
 (fact "transforms var destructuring for dart"
 
   (let [[op init a b] (spec-dart/dart-var '(var [a b] expr))]
@@ -279,26 +279,26 @@
   (spec-dart/dart-var '(var entry))
   => '(var* entry))
 
-^{:refer hara.model.spec-dart/dart-tf-let-bind :added "4.1"}
+tahto/model/spec_dart_test.clj:282:^{:refer tahto.model.spec-dart/dart-tf-let-bind :added "4.1"}
 (fact "transforms dart let bindings")
 
-^{:refer hara.model.spec-dart/tf-for-object :added "4.1"}
+tahto/model/spec_dart_test.clj:285:^{:refer tahto.model.spec-dart/tf-for-object :added "4.1"}
 (fact "transforms for:object loops")
 
-^{:refer hara.model.spec-dart/tf-for-array :added "4.1"}
+tahto/model/spec_dart_test.clj:288:^{:refer tahto.model.spec-dart/tf-for-array :added "4.1"}
 (fact "transforms for:array loops")
 
-^{:refer hara.model.spec-dart/tf-for-iter :added "4.1"}
+tahto/model/spec_dart_test.clj:291:^{:refer tahto.model.spec-dart/tf-for-iter :added "4.1"}
 (fact "transforms for:iter loops")
 
-^{:refer hara.model.spec-dart/dart-tf-ternary :added "4.1"}
+tahto/model/spec_dart_test.clj:294:^{:refer tahto.model.spec-dart/dart-tf-ternary :added "4.1"}
 (fact "transforms dart ternary expressions")
 
 
-^{:refer hara.model.spec-dart/dart-string :added "4.1"}
+tahto/model/spec_dart_test.clj:298:^{:refer tahto.model.spec-dart/dart-string :added "4.1"}
 (fact "emits dart strings")
 
-^{:refer hara.model.spec-dart/+meta+ :added "4.1"}
+tahto/model/spec_dart_test.clj:301:^{:refer tahto.model.spec-dart/+meta+ :added "4.1"}
 (fact "appends generated suffixes to Dart package imports"
   ((:module-import spec-dart/+meta+)
    "package:xtalk_ui/page"
@@ -308,9 +308,9 @@
   => '(:- "import 'package:xtalk_ui/page.dart' as event_listener;"))
 
 
-^{:refer hara.model.spec-dart/dart-emit-input-rest :added "4.1"}
+tahto/model/spec_dart_test.clj:311:^{:refer tahto.model.spec-dart/dart-emit-input-rest :added "4.1"}
 (fact "emits Dart's optional list-backed rest parameter"
-  (with-redefs [hara.common.emit-common/*emit-fn*
+tahto/model/spec_dart_test.clj:313:  (with-redefs [tahto.common.emit-common/*emit-fn*
                 (fn [symbol _ _] (name symbol))]
     (spec-dart/dart-emit-input-rest {:symbol 'args} nil nil))
   => "[args = const []]")

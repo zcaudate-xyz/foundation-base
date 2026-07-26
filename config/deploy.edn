@@ -1,5 +1,5 @@
 {:dependencies [:project :dependencies]
- :signing      {:key [:include [:str ["config/keys/" [:global :hara.email] ".secured"]]
+ :signing      {:key [:include [:str ["config/keys/" [:global :tahto.email] ".secured"]]
                                {:type :gpg :secured true}]}
  :packages     [:include "config/packages.edn"
                          {:type :edn}]

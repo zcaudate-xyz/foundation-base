@@ -1,6 +1,6 @@
 (ns haskell.core.builtin
   "Generated outline of Haskell Prelude builtins from `ghci :browse Prelude`."
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :haskell

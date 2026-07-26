@@ -1,5 +1,5 @@
 (ns xt.db.text.sql-manage-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.string.prose :as prose])
   (:use code.test))
 

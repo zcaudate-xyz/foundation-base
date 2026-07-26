@@ -1,6 +1,6 @@
-(ns hara.model.spec-python-optional-test
-  (:require [hara.lang :as l]
-            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base])
+tahto/model/spec_python_optional_test.clj:1:(ns tahto.model.spec-python-optional-test
+  (:require [tahto.core :as l]
+tahto/model/spec_python_optional_test.clj:3:            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base])
   (:use code.test))
 
 (fact "python emission inherits module context for optional xtalk args"

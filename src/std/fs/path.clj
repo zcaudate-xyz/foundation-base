@@ -83,8 +83,8 @@
    (str (section \"project.clj\"))
    => \"project.clj\"
  
-   (str (section \"src\" \"hara/time.clj\"))
-   => \"src/hara/time.clj\""
+   (str (section \"src\" \"tahto/time.clj\"))
+   => \"src/tahto/time.clj\""
   {:added "3.0"}
   ([s & more]
    (Paths/get s (into-array String more))))
@@ -110,8 +110,8 @@
 (defn file-name
   "returns the last section of the path
  
-   (str (file-name \"src/hara\"))
-   => \"hara\""
+   (str (file-name \"src/tahto\"))
+   => \"tahto\""
   {:added "3.0"}
   ([x]
    (.getFileName (path x))))
@@ -165,8 +165,8 @@
 (defn relativize
   "returns one path relative to another
  
-   (str (relativize \"test\" \"src/hara\"))
-   => \"../src/hara\""
+   (str (relativize \"test\" \"src/tahto\"))
+   => \"../src/tahto\""
   {:added "3.0"}
   ([x other]
    (.relativize (path x) (path other))))

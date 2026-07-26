@@ -1,5 +1,5 @@
 (ns documentation.xt-lang
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:use code.test))
 
 (l/script- :js
@@ -14,7 +14,7 @@
 
 [[:hero {:title "xt.lang"
          :subtitle "Portable language primitives and common libraries."
-         :lead "`xt.lang` defines reusable xtalk libraries that target JS, Lua, Python, Dart, and other runtimes through hara.lang emission."}]]
+         :lead "`xt.lang` defines reusable xtalk libraries that target JS, Lua, Python, Dart, and other runtimes through tahto.core emission."}]]
 
 [[:chapter {:title "Motivation" :link "motivation"}]]
 
@@ -22,7 +22,7 @@
 
 [[:chapter {:title "How to use it" :link "usage"}]]
 
-"A hara script requires the libraries it needs, then emitted xtalk code calls those portable helpers. Application examples in `src-build/play/*xtalk*` and tests under `test-lang/xt/lang` show this pattern."
+"A tahto script requires the libraries it needs, then emitted xtalk code calls those portable helpers. Application examples in `src-build/play/*xtalk*` and tests under `test-lang/xt/lang` show this pattern."
 
 (comment
   (l/script :xtalk

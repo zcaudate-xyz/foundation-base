@@ -1,5 +1,5 @@
 (ns js.react-native.helper-debug
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[js.react :as r]

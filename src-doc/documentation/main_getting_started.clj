@@ -17,10 +17,10 @@
                         :title "Use a Clojure library"
                         :text "Start with std.lib and a focused guide."
                         :href "std/index.html"}
-                       {:meta "hara"
+                       {:meta "tahto"
                         :title "Generate target code"
                         :text "Emit a JavaScript or Lua form, then follow the language walkthroughs."
-                        :href "hara/introduction.html"}
+                        :href "tahto/introduction.html"}
                        {:meta "code.test"
                         :title "Run one test namespace"
                         :text "Use a targeted run rather than configuring every optional runtime."

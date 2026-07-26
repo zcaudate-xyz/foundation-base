@@ -1,7 +1,7 @@
-(ns hara.model.spec-dart.rewrite-test
-  (:require [hara.lang :as l]
-             [hara.model.spec-dart :as dart]
-             [hara.model.spec-dart.rewrite :as rewrite]
+tahto/model/spec_dart/rewrite_test.clj:1:(ns tahto.model.spec-dart.rewrite-test
+  (:require [tahto.core :as l]
+tahto/model/spec_dart/rewrite_test.clj:3:             [tahto.model.spec-dart :as dart]
+tahto/model/spec_dart/rewrite_test.clj:4:             [tahto.model.spec-dart.rewrite :as rewrite]
              [xt.lang.common-data]
              [std.string :as str])
   (:use code.test))
@@ -194,17 +194,17 @@
      (str/includes? out "out.add(\"id\")")])
   => [true true])
 
-^{:refer hara.model.spec-dart.rewrite/dart-rewrite-conditional-expression :added "4.1"}
+tahto/model/spec_dart/rewrite_test.clj:197:^{:refer tahto.model.spec-dart.rewrite/dart-rewrite-conditional-expression :added "4.1"}
 (fact "rewrites dart conditional expressions")
 
-^{:refer hara.model.spec-dart.rewrite/dart-rewrite-expression :added "4.1"}
+tahto/model/spec_dart/rewrite_test.clj:200:^{:refer tahto.model.spec-dart.rewrite/dart-rewrite-expression :added "4.1"}
 (fact "rewrites dart expressions")
 
-^{:refer hara.model.spec-dart.rewrite/dart-rewrite-statement :added "4.1"}
+tahto/model/spec_dart/rewrite_test.clj:203:^{:refer tahto.model.spec-dart.rewrite/dart-rewrite-statement :added "4.1"}
 (fact "rewrites dart statements")
 
-^{:refer hara.model.spec-dart.rewrite/dart-rewrite-statements :added "4.1"}
+tahto/model/spec_dart/rewrite_test.clj:206:^{:refer tahto.model.spec-dart.rewrite/dart-rewrite-statements :added "4.1"}
 (fact "rewrites dart statement blocks")
 
-^{:refer hara.model.spec-dart.rewrite/dart-rewrite-stage :added "4.1"}
+tahto/model/spec_dart/rewrite_test.clj:209:^{:refer tahto.model.spec-dart.rewrite/dart-rewrite-stage :added "4.1"}
 (fact "rewrites dart stages")

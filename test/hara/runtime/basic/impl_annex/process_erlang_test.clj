@@ -1,10 +1,10 @@
-(ns hara.runtime.basic.impl-annex.process-erlang-test
+tahto/runtime/basic/impl_annex/process_erlang_test.clj:1:(ns tahto.runtime.basic.impl-annex.process-erlang-test
   (:require [clojure.string :as str]
-            [hara.runtime.basic.impl-annex.process-erlang :refer :all]
-            [hara.lang :as l])
+tahto/runtime/basic/impl_annex/process_erlang_test.clj:3:            [tahto.runtime.basic.impl-annex.process-erlang :refer :all]
+            [tahto.core :as l])
   (:use code.test))
 
-^{:refer hara.runtime.basic.impl-annex.process-erlang/default-body-transform :added "4.1"}
+tahto/runtime/basic/impl_annex/process_erlang_test.clj:7:^{:refer tahto.runtime.basic.impl-annex.process-erlang/default-body-transform :added "4.1"}
 (fact "applies return-transform for erlang"
   (default-body-transform '[1 2 3] {})
   => '[1 2 3]
@@ -12,7 +12,7 @@
   (default-body-transform '[1 2 3] {:bulk true})
   => 3)
 
-^{:refer hara.runtime.basic.impl-annex.process-erlang/erlang-basic-client-forms :added "4.1"}
+tahto/runtime/basic/impl_annex/process_erlang_test.clj:15:^{:refer tahto.runtime.basic.impl-annex.process-erlang/erlang-basic-client-forms :added "4.1"}
 (fact "builds erlang basic client forms from the erlang emitter"
   [(-> (erlang-basic-client-forms "127.0.0.1" 4567)
        count)

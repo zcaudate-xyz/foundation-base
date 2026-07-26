@@ -1,5 +1,5 @@
 (ns kmi.lang.runtime
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [eval read read-string load]))
 
 (l/script :xtalk

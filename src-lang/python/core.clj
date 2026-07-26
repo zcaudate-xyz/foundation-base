@@ -1,7 +1,7 @@
 (ns python.core
   (:require [python.core.builtins :as builtins]
             [python.core.system :as sys]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [eval]))
 

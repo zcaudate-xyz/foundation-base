@@ -1,5 +1,5 @@
 (ns xt.lang.common-data
-  (:require [hara.lang :as l :refer [defspec.xt]])
+  (:require [tahto.core :as l :refer [defspec.xt]])
   (:refer-clojure :exclude [first second nth last get-in]))
 
 (l/script :xtalk

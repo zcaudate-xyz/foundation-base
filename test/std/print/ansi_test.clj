@@ -9,7 +9,7 @@
   => "[30;20m")
 
 ^{:refer std.print.ansi/encode :added "3.0"}
-(fact "encodes the ansi characters for modifiers"
+(fact "encodes the ansi ctahtocters for modifiers"
   (encode :bold)
   => "[1m"
 

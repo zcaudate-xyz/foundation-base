@@ -1,5 +1,5 @@
 (ns xt.db.text.base-flatten
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [flatten]))
 
 (l/script :xtalk

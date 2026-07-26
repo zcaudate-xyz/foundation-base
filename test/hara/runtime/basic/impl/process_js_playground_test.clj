@@ -1,7 +1,7 @@
-(ns hara.runtime.basic.impl.process-js-playground-test
-  (:require [hara.common.util :as ut]
-            [hara.lang :as l]
-            [hara.runtime.js-playground :as playground]
+tahto/runtime/basic/impl/process_js_playground_test.clj:1:(ns tahto.runtime.basic.impl.process-js-playground-test
+tahto/runtime/basic/impl/process_js_playground_test.clj:2:  (:require [tahto.common.util :as ut]
+            [tahto.core :as l]
+tahto/runtime/basic/impl/process_js_playground_test.clj:4:            [tahto.runtime.js-playground :as playground]
             [std.json :as json])
   (:use code.test)
   (:import (java.net URI)
@@ -38,7 +38,7 @@
                             listener))
      :connected connected}))
 
-^{:refer hara.runtime.basic.impl.process-js-playground/CANARY :adopt true :added "4.0"}
+tahto/runtime/basic/impl/process_js_playground_test.clj:41:^{:refer tahto.runtime.basic.impl.process-js-playground/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE js code through a browser websocket"
 
   (let [{:keys [ws connected]} (connect-mock-browser)]

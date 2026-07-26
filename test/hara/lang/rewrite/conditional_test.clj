@@ -1,8 +1,8 @@
-(ns hara.lang.rewrite.conditional-test
+(ns tahto.core.rewrite.conditional-test
   (:use code.test)
-  (:require [hara.lang.rewrite.conditional :as condrw]))
+  (:require [tahto.core.rewrite.conditional :as condrw]))
 
-^{:refer hara.lang.rewrite.conditional/rewrite-conditional-expression-list :added "4.1"}
+^{:refer tahto.core.rewrite.conditional/rewrite-conditional-expression-list :added "4.1"}
 (fact "rewrites shared conditional-expression skeletons"
   [(condrw/rewrite-conditional-expression-list
     '(or a b)
@@ -23,7 +23,7 @@
        '(:? (test a) (expr b) (expr c))
        '((expr (f x)) (expr a))])
 
-^{:refer hara.lang.rewrite.conditional/rewrite-conditional-expression :added "4.1"}
+^{:refer tahto.core.rewrite.conditional/rewrite-conditional-expression :added "4.1"}
 (fact "rewrites a form and wraps it for truthiness checks"
   (letfn [(rewrite-cond-expr [form]
             (condrw/rewrite-conditional-expression

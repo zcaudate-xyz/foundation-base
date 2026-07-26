@@ -19,7 +19,7 @@
     :memoize   {:ns std.lib.memoize}
     :element   {:ns std.object.query}
     :task      {:ns std.task}
-    :opencl    {:ns hara.lib.opencl}})
+    :opencl    {:ns newlisp.lib.opencl}})
 
 (defn multi?
   "returns `true` if `obj` is a multimethod
@@ -373,7 +373,7 @@
 (def +default-fn+
   '{:function   {:ns std.lib.lamdba}
     :predicate  {:ns std.lib.lamdba}
-    :scala      {:ns hara.lang.scala.function}})
+    :scala      {:ns tahto.core.scala.function}})
 
 (defn fn-body
   "creates a function body

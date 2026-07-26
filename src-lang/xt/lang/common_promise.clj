@@ -1,5 +1,5 @@
 (ns xt.lang.common-promise
-  (:require [hara.lang :as l :refer [defspec.xt]])
+  (:require [tahto.core :as l :refer [defspec.xt]])
   (:refer-clojure :exclude [promise]))
 
 (l/script :xtalk

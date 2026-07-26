@@ -1,6 +1,6 @@
 (ns xt.db.text.base-graph-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.db.text.base-graph :as base-graph]
             [xt.db.helpers.data-main-test :as sample]
             [xt.db.text.sql-util :as ut]))

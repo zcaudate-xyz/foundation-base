@@ -3,7 +3,7 @@
   "Reusable browser-side WebGL helpers for rendering fragment shaders and
    reading back pixels. Designed to be used from `js.react` UI code or from
    playground tests."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[js.react :as r]

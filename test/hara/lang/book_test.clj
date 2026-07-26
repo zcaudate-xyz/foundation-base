@@ -1,13 +1,13 @@
-(ns hara.lang.book-test
-  (:require [hara.lang.book :as b]
-  	        [hara.lang.book-entry :as entry]
-            [hara.lang.impl-entry :as impl-entry]
-            [hara.lang.book-meta :as meta]
-            [hara.lang.book-module :as module]
-            [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar]
-            [hara.common.util :as ut]
+(ns tahto.base.book-test
+  (:require [tahto.base.book :as b]
+  	        [tahto.base.book-entry :as entry]
+            [tahto.core.impl-entry :as impl-entry]
+            [tahto.base.book-meta :as meta]
+            [tahto.base.book-module :as module]
+tahto/lang/book_test.clj:7:            [tahto.common.emit-common :as common]
+tahto/lang/book_test.clj:8:            [tahto.common.emit-helper :as helper]
+tahto/lang/book_test.clj:9:            [tahto.common.grammar :as grammar]
+tahto/lang/book_test.clj:10:            [tahto.common.util :as ut]
             [std.lib.template :as template])
   (:use code.test))
 
@@ -66,7 +66,7 @@
       (b/set-entry +macro-entry+)
       second))
 
-^{:refer hara.lang.book/get-base-entry :added "4.0"}
+^{:refer tahto.base.book/get-base-entry :added "4.0"}
 (fact "gets an entry in the book"
 
   (b/get-base-entry +sample+ 'L.core 'identity :fragment)
@@ -75,19 +75,19 @@
   (b/get-base-entry +sample+ 'L.core 'identity-fn :code)
   => +fn-entry+)
 
-^{:refer hara.lang.book/get-code-entry :added "4.0"}
+^{:refer tahto.base.book/get-code-entry :added "4.0"}
 (fact "gets a code entry in the book"
 
   (b/get-code-entry +sample+ 'L.core/identity-fn)
   => +fn-entry+)
 
-^{:refer hara.lang.book/get-fragment-entry :added "4.0"}
+^{:refer tahto.base.book/get-fragment-entry :added "4.0"}
 (fact "gets a fragment entry in the book"
 
   (b/get-fragment-entry +sample+ 'L.core/identity)
   => +macro-entry+)
 
-^{:refer hara.lang.book/get-entry :added "4.0"}
+^{:refer tahto.base.book/get-entry :added "4.0"}
 (fact "gets either the module or code entry"
 
   (b/get-entry +sample+ 'L.core)
@@ -96,13 +96,13 @@
   (b/get-entry +sample+ 'L.core/identity-fn)
   => entry/book-entry?)
 
-^{:refer hara.lang.book/get-module :added "4.0"}
+^{:refer tahto.base.book/get-module :added "4.0"}
 (fact "gets the module"
 
   (b/get-module +sample+ 'L.core)
   => module/book-module?)
 
-^{:refer hara.lang.book/get-code-deps :added "4.0"}
+^{:refer tahto.base.book/get-code-deps :added "4.0"}
 (fact "gets dependencies for a materialized code entry"
   (-> (b/set-entry +sample+
                    (impl-entry/create-code
@@ -116,7 +116,7 @@
       (b/get-code-deps 'L.core/inc-fn))
   => '#{L.core/identity-fn})
 
-^{:refer hara.lang.book/get-code-entry-view :added "4.1"}
+^{:refer tahto.base.book/get-code-entry-view :added "4.1"}
 (fact "gets a code entry materialized for the current book language"
   (b/get-code-entry-view +sample+ 'L.core/identity-fn)
   => (contains '{:id identity-fn
@@ -128,7 +128,7 @@
   (b/get-code-entry-view +sample+ 'L.core/missing)
   => (throws))
 
-^{:refer hara.lang.book/get-deps :added "4.0"}
+^{:refer tahto.base.book/get-deps :added "4.0"}
 (fact "get dependencies for a given id"
 
   (b/get-deps +sample+ 'L.core)
@@ -137,7 +137,7 @@
   (b/get-deps +sample+ 'L.core/identity-fn)
   => #{})
 
-^{:refer hara.lang.book/get-deps-native :added "4.0"}
+^{:refer tahto.base.book/get-deps-native :added "4.0"}
 (fact "gets the imports for a book"
 
   (b/get-deps-native
@@ -165,7 +165,7 @@
    'L.json/read)
   => #{"cjson"})
 
-^{:refer hara.lang.book/list-entries :added "4.0"}
+^{:refer tahto.base.book/list-entries :added "4.0"}
 (fact "lists entries for a given symbol"
 
   (b/list-entries +sample+ :module)
@@ -174,19 +174,19 @@
   (b/list-entries +sample+ :code)
   => '(L.core/identity-fn))
 
-^{:refer hara.lang.book/book-string :added "4.0"}
+^{:refer tahto.base.book/book-string :added "4.0"}
 (fact "shows the book string"
 
   (b/book-string +sample+)
   => "#book [:lua] {L.core {:code 1, :fragment 1}}")
 
-^{:refer hara.lang.book/book? :added "4.0"}
+^{:refer tahto.base.book/book? :added "4.0"}
 (fact "checks that object is a book"
 
   (b/book? +sample+)
   => true)
 
-^{:refer hara.lang.book/book :added "4.0"}
+^{:refer tahto.base.book/book :added "4.0"}
 (fact "creates a book"
 
   (b/book {:lang :lua.redis
@@ -196,7 +196,7 @@
            :merged  #{}})
   => b/book?)
 
-^{:refer hara.lang.book/book-merge :added "4.0"}
+^{:refer tahto.base.book/book-merge :added "4.0"}
 (fact "merges a book with it's parent"
 
   (b/book-merge (b/book {:lang    :lua.redis
@@ -207,7 +207,7 @@
                 +sample+)
   => b/book?)
 
-^{:refer hara.lang.book/book-from :added "4.0"}
+^{:refer tahto.base.book/book-from :added "4.0"}
 (fact "returns the merged book given snapshot"
   (let [snapshot {:lua  {:book +sample+}
                   :lua.redis {:book (b/book {:lang :lua.redis
@@ -218,7 +218,7 @@
     (b/book-from snapshot :lua.redis))
   => b/book?)
 
-^{:refer hara.lang.book/check-compatible-lang :added "4.0"
+^{:refer tahto.base.book/check-compatible-lang :added "4.0"
   :setup [(def +redis+
             (b/book-merge (b/book {:lang    :lua.redis
                                    :meta    (:meta +book+)
@@ -237,7 +237,7 @@
   (b/check-compatible-lang +redis+ :js)
   => false)
 
-^{:refer hara.lang.book/assert-compatible-lang :added "4.0"}
+^{:refer tahto.base.book/assert-compatible-lang :added "4.0"}
 (fact "asserts that the lang is compatible"
 
   (b/assert-compatible-lang +redis+ :lua)
@@ -246,7 +246,7 @@
   (b/assert-compatible-lang +redis+ :js)
   => (throws))
 
-^{:refer hara.lang.book/set-module :added "4.0"}
+^{:refer tahto.base.book/set-module :added "4.0"}
 (fact "adds an addional module to the book"
 
   (-> (b/set-module +redis+
@@ -263,7 +263,7 @@
                   :lang    :js}))
   => (throws))
 
-^{:refer hara.lang.book/put-module :added "4.0"}
+^{:refer tahto.base.book/put-module :added "4.0"}
 (fact "adds or updates a module"
 
   (-> (b/put-module +redis+
@@ -277,7 +277,7 @@
                :alias]))
   => '{cr coroutine, t table, s string})
 
-^{:refer hara.lang.book/delete-module :added "4.0"}
+^{:refer tahto.base.book/delete-module :added "4.0"}
 (fact "deletes a module given a book"
 
   (-> +redis+
@@ -291,7 +291,7 @@
       (b/list-entries :module))
   => '(L.util))
 
-^{:refer hara.lang.book/delete-modules :added "4.0"}
+^{:refer tahto.base.book/delete-modules :added "4.0"}
 (fact "deletes all modules"
 
   (-> +redis+
@@ -305,7 +305,7 @@
       (b/list-entries :module))
   => nil)
 
-^{:refer hara.lang.book/has-module? :added "4.0"}
+^{:refer tahto.base.book/has-module? :added "4.0"}
 (fact "checks that a books has a given module"
 
   (b/has-module? +redis+ 'L.core)
@@ -314,7 +314,7 @@
   (b/has-module? +redis+ 'L.other)
   => false)
 
-^{:refer hara.lang.book/assert-module :added "4.0"}
+^{:refer tahto.base.book/assert-module :added "4.0"}
 (fact "asserts that module exists"
 
   (b/assert-module +redis+ 'L.core)
@@ -323,7 +323,7 @@
   (b/assert-module +redis+ 'L.other)
   => (throws))
 
-^{:refer hara.lang.book/set-entry :added "4.0"}
+^{:refer tahto.base.book/set-entry :added "4.0"}
 (fact "sets entry in the book"
 
   (-> (b/set-entry +redis+
@@ -340,7 +340,7 @@
       (b/list-entries))
   => '(L.core/identity-fn L.core/inc-fn))
 
-^{:refer hara.lang.book/put-entry :added "4.0"}
+^{:refer tahto.base.book/put-entry :added "4.0"}
 (fact "updates entry value in the book"
 
   (-> (b/put-entry +redis+
@@ -363,13 +363,13 @@
                  :namespace L.core,
                  :deps #{}}))
 
-^{:refer hara.lang.book/has-entry? :added "4.0"}
+^{:refer tahto.base.book/has-entry? :added "4.0"}
 (fact "checks that book has an entry"
 
   (b/has-entry? +redis+ 'L.core :fragment 'identity)
   => true)
 
-^{:refer hara.lang.book/assert-entry :added "4.0"}
+^{:refer tahto.base.book/assert-entry :added "4.0"}
 (fact "asserts that module exists"
 
   (b/assert-entry +redis+ 'L.core :fragment 'identity)
@@ -381,7 +381,7 @@
   (b/assert-entry +redis+ 'L.core :fragment 'ERROR)
   => (throws))
 
-^{:refer hara.lang.book/delete-entry :added "4.0"}
+^{:refer tahto.base.book/delete-entry :added "4.0"}
 (fact "deletes an entry"
 
   (-> (b/delete-entry +redis+ 'L.core :fragment 'identity)
@@ -389,13 +389,13 @@
       b/book-string)
   => "#book [:lua.redis] {L.core {:code 1, :fragment 0}}")
 
-^{:refer hara.lang.book/module-create-filename :added "4.0"}
+^{:refer tahto.base.book/module-create-filename :added "4.0"}
 (fact "creates a filename for module"
 
   (b/module-create-filename +redis+ 'redis.core)
   => "core.lua")
 
-^{:refer hara.lang.book/module-create-check :added "4.0"}
+^{:refer tahto.base.book/module-create-check :added "4.0"}
 (fact "checks that bundles are available"
 
   (b/module-create-check +redis+ 'L.redis '{u L.core})
@@ -404,12 +404,12 @@
   (b/module-create-check +redis+ 'L.redis '{u NOT-FOUND})
   => (throws))
 
-^{:refer hara.lang.book/module-create-requires :added "4.0"}
+^{:refer tahto.base.book/module-create-requires :added "4.0"}
 (fact "creates a map for the requires"
   (b/module-create-requires '[[L.core :as u]])
   => '{L.core {:as u, :id L.core}})
 
-^{:refer hara.lang.book/module-normalize-implements :added "4.1"}
+^{:refer tahto.base.book/module-normalize-implements :added "4.1"}
 (fact "normalizes module contracts into a vector of symbols"
   (b/module-normalize-implements nil)
   => []
@@ -426,7 +426,7 @@
   (b/module-normalize-implements "contract")
   => ["contract"])
 
-^{:refer hara.lang.book/module-export-requires :added "4.1"}
+^{:refer tahto.base.book/module-export-requires :added "4.1"}
 (fact "reconstructs module requires from stored link metadata"
   (b/module-export-requires
    (module/book-module
@@ -437,7 +437,7 @@
       :includes #{L.core}}))
   => '[[L.core :as u :include true]])
 
-^{:refer hara.lang.book/module-export-imports :added "4.1"}
+^{:refer tahto.base.book/module-export-imports :added "4.1"}
 (fact "reconstructs native imports from stored module metadata"
   (b/module-export-imports
    (module/book-module
@@ -458,7 +458,7 @@
   => '[[cjson :as cjson]
        [json :as json :bundle [[decoder :version "1"]]]])
 
-^{:refer hara.lang.book/module-specialize-symbol :added "4.1"}
+^{:refer tahto.base.book/module-specialize-symbol :added "4.1"}
 (fact "rewrites self references from one module to another"
   (b/module-specialize-symbol 'L.core 'L.alt 'L.core/identity-fn)
   => 'L.alt/identity-fn
@@ -469,7 +469,7 @@
   (b/module-specialize-symbol 'L.core 'L.alt 'plain-sym)
   => 'plain-sym)
 
-^{:refer hara.lang.book/module-specialize-form :added "4.1"}
+^{:refer tahto.base.book/module-specialize-form :added "4.1"}
 (fact "rewrites self references inside an entry form"
   (b/module-specialize-form 'L.core 'L.alt
                             '(defn f [x] (L.core/identity-fn x)))
@@ -479,7 +479,7 @@
                             '(defn f [x] (L.other/identity-fn x)))
   => '(defn f [x] (L.other/identity-fn x)))
 
-^{:refer hara.lang.book/module-specialize-entry :added "4.1"}
+^{:refer tahto.base.book/module-specialize-entry :added "4.1"}
 (fact "clones an entry into a new module"
   (let [entry (entry/book-entry {:lang :lua
                                  :id 'f
@@ -508,7 +508,7 @@
         nil
         nil]))
 
-^{:refer hara.lang.book/module-specialize-bindings :added "4.1"}
+^{:refer tahto.base.book/module-specialize-bindings :added "4.1"}
 (fact "normalizes specialization bindings keyed by alias or module id"
   (let [module (module/book-module
                 '{:id L.core
@@ -525,7 +525,7 @@
       {'L.core 'L.alt
        'other 'L.x}])
 
-^{:refer hara.lang.book/module-specialize :added "4.1"}
+^{:refer tahto.base.book/module-specialize :added "4.1"}
 (fact "clones a module under a new id with rewritten links"
   (let [source (-> +sample+
                    (b/set-module
@@ -552,7 +552,7 @@
   => ['L.alt 'L.alt '{- L.alt
                       cache L.custom-cache}])
 
-^{:refer hara.lang.book/module-create :added "4.0"}
+^{:refer tahto.base.book/module-create :added "4.0"}
 (fact "creates a module given book and options"
 
   (b/module-create +redis+
@@ -595,7 +595,7 @@
 
 (comment
 
-  ^{:refer hara.lang.book/module-create-bundled :added "4.0"}
+  ^{:refer tahto.base.book/module-create-bundled :added "4.0"}
   (fact "creates bundled packages given input modules"
 
     (b/module-create-bundled

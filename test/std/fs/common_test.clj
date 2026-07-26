@@ -35,13 +35,13 @@
   => (just {:tag :pattern
             :pattern #"hello"}))
 
-^{:refer std.fs.common/characterise-filter :added "3.0"}
-(fact "characterises a filter based on type"
+^{:refer std.fs.common/ctahtocterise-filter :added "3.0"}
+(fact "ctahtocterises a filter based on type"
 
-  (characterise-filter "src")
+  (ctahtocterise-filter "src")
   => (just {:tag :pattern :pattern #"src"})
 
-  (characterise-filter (fn [_] nil))
+  (ctahtocterise-filter (fn [_] nil))
   => (just {:tag :fn :fn fn?}))
 
 (comment

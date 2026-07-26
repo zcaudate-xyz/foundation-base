@@ -18,7 +18,7 @@
 
 ^{:refer gdscript.tutorial.example-procedural/save-procedural-scene :added "4.1"}
 (fact "saves a procedural mesh scene to disk"
-  (let [path (str (System/getProperty "user.home") "/hara_godot_procedural_scene.tscn")]
+  (let [path (str (System/getProperty "user.home") "/tahto_godot_procedural_scene.tscn")]
     (in-procedural `(clojure.core/deref (!.gd (gdscript.tutorial.example-procedural/save-procedural-scene ~path))))
     (boolean (.exists (java.io.File. path))))
   => true)

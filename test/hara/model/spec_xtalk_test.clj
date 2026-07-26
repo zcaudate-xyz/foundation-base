@@ -1,8 +1,8 @@
-(ns hara.model.spec-xtalk-test
-  (:require [hara.lang :as l])
+tahto/model/spec_xtalk_test.clj:1:(ns tahto.model.spec-xtalk-test
+  (:require [tahto.core :as l])
   (:use code.test))
 
-^{:refer hara.model.spec-xtalk/CANARY :adopt true :added "4.0"}
+tahto/model/spec_xtalk_test.clj:5:^{:refer tahto.model.spec-xtalk/CANARY :adopt true :added "4.0"}
 (fact "This is the cross language language"
 
   (l/emit-as

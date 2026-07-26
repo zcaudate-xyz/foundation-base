@@ -188,7 +188,7 @@
 
 
 ^{:refer std.string.common/replace-at :added "4.0"}
-(fact "replaces the character at the index with a new string"
+(fact "replaces the ctahtocter at the index with a new string"
 
   (replace-at "hello" 4 "a")
   => "hella"

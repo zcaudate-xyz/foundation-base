@@ -358,7 +358,7 @@
 
 [[:section {:title "std.dom.type (DOM Type System)" :link "merged-plans-slop-summary-std-dom-summary-md-std-dom-type-dom-type-system"}]]
 
-"This sub-namespace defines the type system for DOM nodes, including metaclasses and metaprops, which describe the characteristics and behavior of different UI elements."
+"This sub-namespace defines the type system for DOM nodes, including metaclasses and metaprops, which describe the ctahtocteristics and behavior of different UI elements."
 
 "**Core Concepts:**"
 
@@ -492,7 +492,7 @@
 
 [[:section {:title "std.image.base.display.gradient (ASCII Gradient Generation)" :link "merged-plans-slop-summary-std-image-summary-md-std-image-base-display-gradient-ascii-gradient-generation"}]]
 
-"This sub-namespace provides utilities for generating ASCII character gradients, used by `std.image.base.display` to render images as text."
+"This sub-namespace provides utilities for generating ASCII ctahtocter gradients, used by `std.image.base.display` to render images as text."
 
 "**Key Functions:**"
 

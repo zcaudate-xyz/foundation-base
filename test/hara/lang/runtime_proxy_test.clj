@@ -1,80 +1,80 @@
-(ns hara.lang.runtime-proxy-test
-  (:require [hara.lang :as l]
-            [hara.lang.runtime :as rt]
-            [hara.lang.runtime-proxy :as p]
-            [hara.common.util :as ut])
+(ns tahto.core.runtime-proxy-test
+  (:require [tahto.core :as l]
+            [tahto.core.runtime :as rt]
+            [tahto.core.runtime-proxy :as p]
+tahto/lang/runtime_proxy_test.clj:5:            [tahto.common.util :as ut])
   (:use code.test))
 
-^{:refer hara.lang.runtime-proxy/proxy-get-rt :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-get-rt :added "4.0"}
 (fact "gets the redirected runtime"
 
   (p/proxy-get-rt
-   'hara.lang
+   'tahto.core
    :js)
   => rt/rt-default?)
 
-^{:refer hara.lang.runtime-proxy/proxy-raw-eval :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-raw-eval :added "4.0"}
 (fact "evaluates the raw string"
 
   (p/proxy-raw-eval
-   {:redirect 'hara.lang
+   {:redirect 'tahto.core
     :lang :js}
    "1 + 1")
   => "1 + 1")
 
-^{:refer hara.lang.runtime-proxy/proxy-init-ptr :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-init-ptr :added "4.0"}
 (fact "initialises ptr"
-  (p/proxy-init-ptr {:redirect 'hara.lang :lang :js} {}) => nil)
+  (p/proxy-init-ptr {:redirect 'tahto.core :lang :js} {}) => nil)
 
-^{:refer hara.lang.runtime-proxy/proxy-tags-ptr :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-tags-ptr :added "4.0"}
 (fact "gets the ptr tags"
 
   (p/proxy-tags-ptr
-   {:redirect 'hara.lang
+   {:redirect 'tahto.core
     :lang :js}
    ((l/ptr :js)))
   => [:default nil nil])
 
-^{:refer hara.lang.runtime-proxy/proxy-deref-ptr :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-deref-ptr :added "4.0"}
 (fact "dereefs the pointer"
-  (p/proxy-deref-ptr {:redirect 'hara.lang :lang :js} {}) => {:library nil})
+  (p/proxy-deref-ptr {:redirect 'tahto.core :lang :js} {}) => {:library nil})
 
-^{:refer hara.lang.runtime-proxy/proxy-display-ptr :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-display-ptr :added "4.0"}
 (fact "displays the pointer"
-  (p/proxy-display-ptr {:redirect 'hara.lang :lang :js} (ut/lang-pointer :js {}))
+  (p/proxy-display-ptr {:redirect 'tahto.core :lang :js} (ut/lang-pointer :js {}))
   => "<free>")
 
-^{:refer hara.lang.runtime-proxy/proxy-invoke-ptr :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-invoke-ptr :added "4.0"}
 (fact "invokes the pointer"
-  (p/proxy-invoke-ptr {:redirect 'hara.lang :lang :js} (ut/lang-pointer :js {}) [])
+  (p/proxy-invoke-ptr {:redirect 'tahto.core :lang :js} (ut/lang-pointer :js {}) [])
   => string?)
 
-^{:refer hara.lang.runtime-proxy/proxy-transform-in-ptr :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-transform-in-ptr :added "4.0"}
 (fact "transforms the pointer on in"
-  (p/proxy-transform-in-ptr {:redirect 'hara.lang :lang :js} (ut/lang-pointer :js {}) [])
+  (p/proxy-transform-in-ptr {:redirect 'tahto.core :lang :js} (ut/lang-pointer :js {}) [])
   => [])
 
-^{:refer hara.lang.runtime-proxy/proxy-transform-out-ptr :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-transform-out-ptr :added "4.0"}
 (fact "transforms the pointer on out"
-  (p/proxy-transform-out-ptr {:redirect 'hara.lang :lang :js} (ut/lang-pointer :js {}) :ret)
+  (p/proxy-transform-out-ptr {:redirect 'tahto.core :lang :js} (ut/lang-pointer :js {}) :ret)
   => :ret)
 
-^{:refer hara.lang.runtime-proxy/proxy-started? :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-started? :added "4.0"}
 (fact "checks if proxied has started"
-  (p/proxy-started? {:redirect 'hara.lang :lang :js}) => true)
+  (p/proxy-started? {:redirect 'tahto.core :lang :js}) => true)
 
-^{:refer hara.lang.runtime-proxy/proxy-stopped? :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-stopped? :added "4.0"}
 (fact "checks if proxied has stopped"
-  (p/proxy-stopped? {:redirect 'hara.lang :lang :js}) => true)
+  (p/proxy-stopped? {:redirect 'tahto.core :lang :js}) => true)
 
-^{:refer hara.lang.runtime-proxy/proxy-remote? :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-remote? :added "4.0"}
 (fact "checks if proxied is remote"
-  (p/proxy-remote? {:redirect 'hara.lang :lang :js}) => false)
+  (p/proxy-remote? {:redirect 'tahto.core :lang :js}) => false)
 
-^{:refer hara.lang.runtime-proxy/proxy-info :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-info :added "4.0"}
 (fact "gets the proxied info"
-  (p/proxy-info {:redirect 'hara.lang :lang :js} :brief) => {})
+  (p/proxy-info {:redirect 'tahto.core :lang :js} :brief) => {})
 
-^{:refer hara.lang.runtime-proxy/proxy-health :added "4.0"}
+^{:refer tahto.core.runtime-proxy/proxy-health :added "4.0"}
 (fact "checks the proxied health"
-  (p/proxy-health {:redirect 'hara.lang :lang :js}) => true)
+  (p/proxy-health {:redirect 'tahto.core :lang :js}) => true)

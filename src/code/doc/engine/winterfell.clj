@@ -39,8 +39,8 @@
   [refer]
   (let [[ns-sym var-sym] (parse-refer refer)]
     (require ns-sym)
-    (require 'hara.runtime.glsl)
-    (when-let [display-fn (requiring-resolve 'hara.lang.workspace/ptr-display-str)]
+    (require 'tahto.runtime.glsl)
+    (when-let [display-fn (requiring-resolve 'tahto.core.workspace/ptr-display-str)]
       (when-let [v (find-var (symbol (str ns-sym) (str var-sym)))]
         (display-fn @v)))))
 

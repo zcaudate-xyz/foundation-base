@@ -1,5 +1,5 @@
 (ns lua.core.posix
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]
             [xt.lang.common-repl :as repl])
   (:refer-clojure :exclude [print flush time re-find read send sync]))

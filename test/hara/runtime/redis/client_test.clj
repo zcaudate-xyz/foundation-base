@@ -1,11 +1,11 @@
-(ns hara.runtime.redis.client-test
+tahto/runtime/redis/client_test.clj:1:(ns tahto.runtime.redis.client-test
   (:require [lib.redis.bench :as bench]
             [lib.redis.event :as event]
             [net.resp.connection :as conn]
             [net.resp.wire :as wire]
-            [hara.runtime.redis.client :as r]
-            [hara.runtime.redis.eval-basic :as eval-basic]
-            [hara.runtime.redis.eval-script :as eval-script]
+tahto/runtime/redis/client_test.clj:6:            [tahto.runtime.redis.client :as r]
+tahto/runtime/redis/client_test.clj:7:            [tahto.runtime.redis.eval-basic :as eval-basic]
+tahto/runtime/redis/client_test.clj:8:            [tahto.runtime.redis.eval-script :as eval-script]
             [std.concurrent :as cc]
             [std.lib.component :as component]
             [std.lib.component.track :as track]
@@ -17,7 +17,7 @@
  {:setup [(bench/start-redis-array [17001])]
   :teardown [(bench/stop-redis-array [17001])]})
 
-^{:refer hara.lang.runtime-h/wrap-start :adopt true :added "3.0"}
+^{:refer tahto.core.runtime-h/wrap-start :adopt true :added "3.0"}
 (fact "install setup steps for keys"
 
   (component/with [|client| (r/client:create {:port 17001})]
@@ -26,20 +26,20 @@
         ((comp event/events-string event/config:get))))
   => "h$tlgx")
 
-^{:refer hara.runtime.redis.client/client-steps :added "3.0"}
+tahto/runtime/redis/client_test.clj:29:^{:refer tahto.runtime.redis.client/client-steps :added "3.0"}
 (fact "clients steps for start up and shutdown")
 
-^{:refer hara.runtime.redis.client/client-start :added "4.0"}
+tahto/runtime/redis/client_test.clj:32:^{:refer tahto.runtime.redis.client/client-start :added "4.0"}
 (fact "starts the client")
 
-^{:refer hara.runtime.redis.client/client:create :added "3.0"}
+tahto/runtime/redis/client_test.clj:35:^{:refer tahto.runtime.redis.client/client:create :added "3.0"}
 (fact "creates a redis client"
 
   (r/client:create {:id "localhost"
                     :port 17001})
   => r/client?)
 
-^{:refer hara.runtime.redis.client/client :added "3.0"}
+tahto/runtime/redis/client_test.clj:42:^{:refer tahto.runtime.redis.client/client :added "3.0"}
 (fact "creates and starts a redis client"
 
   (component/with [|client| (r/client:create {:port 17001})]
@@ -51,7 +51,7 @@
            (map f/string))))
   => ["OK" "1" "2" "3"])
 
-^{:refer hara.runtime.redis.client/test:client :added "3.0"}
+tahto/runtime/redis/client_test.clj:54:^{:refer tahto.runtime.redis.client/test:client :added "3.0"}
 (fact "creates a test client on docker"
 
   (component/with [|client| (r/client:create {:port 17001})]
@@ -59,10 +59,10 @@
       (r/test:client)))
   => r/client?)
 
-^{:refer hara.runtime.redis.client/invoke-ptr-redis :added "4.0"}
+tahto/runtime/redis/client_test.clj:62:^{:refer tahto.runtime.redis.client/invoke-ptr-redis :added "4.0"}
 (fact "invokes the pointer in the redis context")
 
-^{:refer hara.runtime.redis.client/client? :added "3.0"}
+tahto/runtime/redis/client_test.clj:65:^{:refer tahto.runtime.redis.client/client? :added "3.0"}
 (fact "checks that instance is a client"
 
   (r/client? (r/client:create {}))

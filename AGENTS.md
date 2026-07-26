@@ -215,13 +215,13 @@ With `:eval true` it also executes page facts and reports failing sections.
 
 Known flaky class: `prepare-error` reporting `Unable to resolve var ...` or
 `namespace 'std.concurrent' not found` across `lib.*`/`std.concurrent*` pages.
-These trace to `hara.lang.script` issuing `(require ... :reload)` at namespace
-load (src/hara/lang/script.clj:90-111): once `hara.lang` loads mid-sequence it
+These trace to `tahto.core.script` issuing `(require ... :reload)` at namespace
+load (src/tahto/lang/script.clj:90-111): once `tahto.core` loads mid-sequence it
 force-reloads module namespaces and invalidates previously compiled records,
 which aborts later `require`s. The failures are order/timing dependent and come
 and go between JVMs. Running checks per site (e.g. `'[std]`) is far less
 exposed than `:all`; the real fix is removing load-time `:reload` from
-hara.lang, which is a source-tree issue, not a docs one.
+tahto.core, which is a source-tree issue, not a docs one.
 
 ```bash
 # Check all sites
@@ -281,7 +281,7 @@ The `Publish Documentation` workflow runs this after code.doc publishing, so
 `public/api` ships with the GitHub Pages artifact. Known limitation: codox
 only analyses core `def`/`defn` forms — vars defined via custom forms
 (`defn.js`, `invoke/definvoke`, `deftask`, ...) and aggregate namespaces built
-with `f/intern-all` (`std.lib`, `hara.lang`, `code.test`) do not appear in
+with `f/intern-all` (`std.lib`, `tahto.core`, `code.test`) do not appear in
 codox output; use code.doc for those.
 
 ### Page Key Mapping

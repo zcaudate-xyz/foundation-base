@@ -1,6 +1,6 @@
 (ns lean.live-test
-  (:require [hara.lang :as l]
-            [hara.model.annex.spec-lean]
+  (:require [tahto.core :as l]
+            [tahto.model.annex.spec-lean]
             [lean.core :as y]
             [std.lib.env :as env])
   (:use code.test))

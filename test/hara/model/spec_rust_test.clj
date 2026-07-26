@@ -1,9 +1,9 @@
-(ns hara.model.annex.spec-rust-test
+tahto/model/spec_rust_test.clj:1:(ns tahto.model.annex.spec-rust-test
   (:require [std.fs :as fs]
-            [hara.lang :as l]
-            [hara.lang.script :as script]
-            [hara.common.util :as ut]
-            [hara.model.annex.spec-rust :refer :all]
+            [tahto.core :as l]
+            [tahto.core.script :as script]
+tahto/model/spec_rust_test.clj:5:            [tahto.common.util :as ut]
+tahto/model/spec_rust_test.clj:6:            [tahto.model.annex.spec-rust :refer :all]
             [std.lib.os :as os]
             [std.string.prose :as prose])
   (:use code.test))
@@ -543,29 +543,29 @@ fn main() {
   )
 
 
-^{:refer hara.model.annex.spec-rust/rst-typesystem :added "4.0"}
+tahto/model/spec_rust_test.clj:546:^{:refer tahto.model.annex.spec-rust/rst-typesystem :added "4.0"}
 (fact "emits rust typesystem syntax")
 
-^{:refer hara.model.annex.spec-rust/rst-vector :added "4.0"}
+tahto/model/spec_rust_test.clj:549:^{:refer tahto.model.annex.spec-rust/rst-vector :added "4.0"}
 (fact "emits rust vector syntax")
 
-^{:refer hara.model.annex.spec-rust/rst-attributes :added "4.0"}
+tahto/model/spec_rust_test.clj:552:^{:refer tahto.model.annex.spec-rust/rst-attributes :added "4.0"}
 (fact "emits rust attributes")
 
-^{:refer hara.model.annex.spec-rust/rst-defenum :added "4.0"}
+tahto/model/spec_rust_test.clj:555:^{:refer tahto.model.annex.spec-rust/rst-defenum :added "4.0"}
 (fact "emits rust enum definition")
 
-^{:refer hara.model.annex.spec-rust/rst-deftrait :added "4.0"}
+tahto/model/spec_rust_test.clj:558:^{:refer tahto.model.annex.spec-rust/rst-deftrait :added "4.0"}
 (fact "emits rust trait definition")
 
-^{:refer hara.model.annex.spec-rust/rst-defimpl :added "4.0"}
+tahto/model/spec_rust_test.clj:561:^{:refer tahto.model.annex.spec-rust/rst-defimpl :added "4.0"}
 (fact "emits rust impl definition")
 
-^{:refer hara.model.annex.spec-rust/rst-new :added "4.0"}
+tahto/model/spec_rust_test.clj:564:^{:refer tahto.model.annex.spec-rust/rst-new :added "4.0"}
 (fact "emits rust new expression")
 
-^{:refer hara.model.annex.spec-rust/rst-exec :added "4.0"}
+tahto/model/spec_rust_test.clj:567:^{:refer tahto.model.annex.spec-rust/rst-exec :added "4.0"}
 (fact "emits rust exec block")
 
-^{:refer hara.model.annex.spec-rust/rst-defstruct :added "4.0"}
+tahto/model/spec_rust_test.clj:570:^{:refer tahto.model.annex.spec-rust/rst-defstruct :added "4.0"}
 (fact "emits rust struct definition")

@@ -5,7 +5,7 @@
             [scaffold.supabase.local-min :as local-min]
             [std.json :as json]
             [std.lib.env :as env]
-            [hara.lang :as l]))
+            [tahto.core :as l]))
 
 (fact:global
  {:skip (not (env/program-exists? "supabase"))

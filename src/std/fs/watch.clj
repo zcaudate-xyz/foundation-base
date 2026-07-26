@@ -169,16 +169,16 @@
                   (deliver *happy* [cmd (.getName ^File file)]))
                 {:types #{:create :modify}
                  :recursive false
-                 :filter  [\".hara\"]
+                 :filter  [\".tahto\"]
                  :exclude [\".git\" \"target\"]})
  
    (h/watch:list (io/file \".\"))
    => (contains {:save fn?})
  
-   (spit \"happy.hara\" \"hello\")
+   (spit \"happy.tahto\" \"hello\")
  
    (deref *happy*)
-   => [:create \"happy.hara\"]
+   => [:create \"happy.tahto\"]
  
    (h/watch:list (io/file \".\"))
    => {}"

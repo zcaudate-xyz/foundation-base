@@ -13,7 +13,7 @@
 ^{:refer std.object.element.impl.method/invoke-instance-method :added "3.0"}
 (fact "invoke function for an instance method"
 
-  (-> (query/query-class String ["charAt" :#])
+  (-> (query/query-class String ["ctahtot" :#])
       (method/invoke-instance-method ["0123" 1]))
   => \1)
 
@@ -29,7 +29,7 @@
 ^{:refer std.object.element.impl.method/to-instance-method :added "3.0"}
 (fact "creates the parameters for an instance method"
 
-  (-> (query/query-class String ["charAt" :#])
+  (-> (query/query-class String ["ctahtot" :#])
       :delegate
       (method/to-instance-method {:container String}))
   => {:container String
@@ -39,10 +39,10 @@
 ^{:refer std.object.element.impl.method/to-pre-element :added "3.0"}
 (fact "creates the parameters for methods"
 
-  (-> (query/query-class String ["charAt" :#])
+  (-> (query/query-class String ["ctahtot" :#])
       :delegate
       (method/to-pre-element))
-  => (contains {:name "charAt"
+  => (contains {:name "ctahtot"
                 :tag :method
                 :container String
                 :modifiers #{:instance :method :public}

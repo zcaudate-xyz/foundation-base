@@ -3,7 +3,7 @@
             [std.lib.encode :as encode]
             [std.lib.security :as security]))
 
-(defonce +master-key+ (get-in (global/global) [:hara :key]))
+(defonce +master-key+ (get-in (global/global) [:tahto :key]))
 
 (defonce +master-defaults+ {:type "AES"
                             :format "RAW"

@@ -1,5 +1,5 @@
 (ns xt.lang.common-repl
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]
             [xt.lang.common-notify :as notify])
   (:refer-clojure :exclude [print]))

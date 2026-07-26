@@ -75,7 +75,7 @@
 
 
   (fs/delete "test-scratch/hello.jar")
-  (fs/delete "test-scratch/hara")
+  (fs/delete "test-scratch/tahto")
   (fs/delete "test-scratch/output")
   (fs/delete "test-scratch/select"))
 

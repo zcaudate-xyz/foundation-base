@@ -1,14 +1,14 @@
-(ns hara.model.spec-xtalk-typed-test
+tahto/model/spec_xtalk_typed_test.clj:1:(ns tahto.model.spec-xtalk-typed-test
   (:require [clojure.string]
-   [hara.typed :as typed]
-   [hara.typed.xtalk-analysis :as analysis]
-   [hara.typed.xtalk-common :as types]
-   [hara.typed.xtalk-compat :as compat]
-   [hara.typed.xtalk-infer :as infer]
-   [hara.typed.xtalk-lower :as lower]
-   [hara.typed.xtalk-ops :as ops]
-   [hara.typed.xtalk-parse :as parse]
-   [hara.model.spec-js.ts :as ts])
+tahto/model/spec_xtalk_typed_test.clj:3:   [tahto.typed :as typed]
+tahto/model/spec_xtalk_typed_test.clj:4:   [tahto.typed.xtalk-analysis :as analysis]
+tahto/model/spec_xtalk_typed_test.clj:5:   [tahto.typed.xtalk-common :as types]
+tahto/model/spec_xtalk_typed_test.clj:6:   [tahto.typed.xtalk-compat :as compat]
+tahto/model/spec_xtalk_typed_test.clj:7:   [tahto.typed.xtalk-infer :as infer]
+tahto/model/spec_xtalk_typed_test.clj:8:   [tahto.typed.xtalk-lower :as lower]
+tahto/model/spec_xtalk_typed_test.clj:9:   [tahto.typed.xtalk-ops :as ops]
+tahto/model/spec_xtalk_typed_test.clj:10:   [tahto.typed.xtalk-parse :as parse]
+tahto/model/spec_xtalk_typed_test.clj:11:   [tahto.model.spec-js.ts :as ts])
   (:use code.test))
 
 (fact "normalizes xtalk type forms"
@@ -25,8 +25,8 @@
 
 (fact "defspec.xt registers a spec declaration"
   (types/clear-registry!)
-  (eval '(hara.typed/defspec.xt LocalId :xt/str))
-  (-> (typed/spec-def (typed/load-registry) 'hara.model.spec-xtalk-typed-test/LocalId)
+tahto/model/spec_xtalk_typed_test.clj:28:  (eval '(tahto.typed/defspec.xt LocalId :xt/str))
+tahto/model/spec_xtalk_typed_test.clj:29:  (-> (typed/spec-def (typed/load-registry) 'tahto.model.spec-xtalk-typed-test/LocalId)
       :type
       types/type->data)
   => {:kind :primitive :name :xt/str})
@@ -54,14 +54,14 @@
 
 (fact "defspec.xt resolves aliased type names during registration"
   (types/clear-registry!)
-  (eval '(hara.typed/defspec.xt AliasMaybeFixture
+tahto/model/spec_xtalk_typed_test.clj:57:  (eval '(tahto.typed/defspec.xt AliasMaybeFixture
            [:xt/maybe types/User]))
-  (-> (typed/spec-def (typed/load-registry) 'hara.model.spec-xtalk-typed-test/AliasMaybeFixture)
+tahto/model/spec_xtalk_typed_test.clj:59:  (-> (typed/spec-def (typed/load-registry) 'tahto.model.spec-xtalk-typed-test/AliasMaybeFixture)
       :type
       types/type->data)
   => '{:kind :maybe
        :item {:kind :named
-              :name hara.typed.xtalk-common/User}})
+tahto/model/spec_xtalk_typed_test.clj:64:              :name tahto.typed.xtalk-common/User}})
 
 (fact "normalizes record field names to snake_case strings"
   [(types/field-key :hello-world)
@@ -361,7 +361,7 @@
        {:kind :primitive :name :xt/bool}])
 
 (fact "infers fn:> as a zero-arg constant function"
-  (-> (infer/infer-type '(hara.typed.xtalk-intrinsic/const-fn "ok")
+tahto/model/spec_xtalk_typed_test.clj:364:  (-> (infer/infer-type '(tahto.typed.xtalk-intrinsic/const-fn "ok")
                         {:ns 'sample.route
                          :aliases {}})
       :type
@@ -384,17 +384,17 @@
   => true)
 
 (fact "parses defspec.xt and merges function signatures"
-  (let [analysis (parse/analyze-namespace 'hara.model.spec-xtalk-typed-fixture)
+tahto/model/spec_xtalk_typed_test.clj:387:  (let [analysis (parse/analyze-namespace 'tahto.model.spec-xtalk-typed-fixture)
         fn-def (some #(when (= "find-user" (:name %)) %)
                      (:functions analysis))]
     {:spec-count (count (:specs analysis))
      :input-types (mapv (comp types/type->data :type) (:inputs fn-def))
      :output (types/type->data (:output fn-def))})
   => '{:spec-count 3
-       :input-types [{:kind :named :name hara.model.spec-xtalk-typed-fixture/UserMap}
+tahto/model/spec_xtalk_typed_test.clj:394:       :input-types [{:kind :named :name tahto.model.spec-xtalk-typed-fixture/UserMap}
                      {:kind :primitive :name :xt/str}]
         :output {:kind :maybe
-                 :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}})
+tahto/model/spec_xtalk_typed_test.clj:397:                 :item {:kind :named :name tahto.model.spec-xtalk-typed-fixture/User}}})
 
 (fact "parses single-clause multi-arity forms tolerantly"
   (let [fn-def (parse/parse-defn
@@ -517,7 +517,7 @@
   => '[true true true true true true])
 
 (fact "emits TypeScript declarations from xtalk specs"
-  (let [out (ts/emit-namespace-declarations 'hara.model.spec-xtalk-typed-fixture)]
+tahto/model/spec_xtalk_typed_test.clj:520:  (let [out (ts/emit-namespace-declarations 'tahto.model.spec-xtalk-typed-fixture)]
     [(clojure.string/includes? out "export interface User")
      (clojure.string/includes? out "export type UserMap = Record<string, User>;")
      (clojure.string/includes? out "export type find_user = (arg0: UserMap, arg1: string) => User | null;")
@@ -566,34 +566,34 @@
   => '{:kind :primitive :name :xt/str})
 
 (fact "checks valid xtalk functions"
-  (let [ctx (typed/load-ns 'hara.model.spec-xtalk-typed-fixture)]
-    (-> (typed/function-report ctx 'hara.model.spec-xtalk-typed-fixture/find-user)
+tahto/model/spec_xtalk_typed_test.clj:569:  (let [ctx (typed/load-ns 'tahto.model.spec-xtalk-typed-fixture)]
+tahto/model/spec_xtalk_typed_test.clj:570:    (-> (typed/function-report ctx 'tahto.model.spec-xtalk-typed-fixture/find-user)
         (select-keys [:return :errors])))
   => '{:return {:kind :maybe
-                :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}
+tahto/model/spec_xtalk_typed_test.clj:573:                :item {:kind :named :name tahto.model.spec-xtalk-typed-fixture/User}}
        :errors []})
 
 (fact "reports return and call mismatches"
-  (let [ctx (typed/load-ns 'hara.model.spec-xtalk-typed-fixture)]
-    [(-> (typed/function-report ctx 'hara.model.spec-xtalk-typed-fixture/wrong-user-name)
+tahto/model/spec_xtalk_typed_test.clj:577:  (let [ctx (typed/load-ns 'tahto.model.spec-xtalk-typed-fixture)]
+tahto/model/spec_xtalk_typed_test.clj:578:    [(-> (typed/function-report ctx 'tahto.model.spec-xtalk-typed-fixture/wrong-user-name)
          :errors
          first
          :tag)
-     (-> (typed/function-report ctx 'hara.model.spec-xtalk-typed-fixture/find-user-wrong-key)
+tahto/model/spec_xtalk_typed_test.clj:582:     (-> (typed/function-report ctx 'tahto.model.spec-xtalk-typed-fixture/find-user-wrong-key)
          :errors
          first
          :tag)])
   => [:return-type-mismatch :call-arg-type-mismatch])
 
 (fact "exposes typed analysis helpers"
-  (let [ctx (typed/load-ns 'hara.model.spec-xtalk-typed-fixture)]
+tahto/model/spec_xtalk_typed_test.clj:589:  (let [ctx (typed/load-ns 'tahto.model.spec-xtalk-typed-fixture)]
     (typed/with-context-registry
       ctx
-      #(vector (analysis/get-function-input-type 'hara.model.spec-xtalk-typed-fixture/find-user 'id)
-               (analysis/get-function-output-type 'hara.model.spec-xtalk-typed-fixture/find-user))))
+tahto/model/spec_xtalk_typed_test.clj:592:      #(vector (analysis/get-function-input-type 'tahto.model.spec-xtalk-typed-fixture/find-user 'id)
+tahto/model/spec_xtalk_typed_test.clj:593:               (analysis/get-function-output-type 'tahto.model.spec-xtalk-typed-fixture/find-user))))
   => '[{:kind :primitive :name :xt/str}
        {:kind :maybe
-        :item {:kind :named :name hara.model.spec-xtalk-typed-fixture/User}}])
+tahto/model/spec_xtalk_typed_test.clj:596:        :item {:kind :named :name tahto.model.spec-xtalk-typed-fixture/User}}])
 
 (fact "analyzes event-common and event-form namespace specs"
   (let [ctx (typed/load-analysis

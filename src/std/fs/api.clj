@@ -79,7 +79,7 @@
  
    (list \"src\")
  
-   (list \"../hara/src/std/fs\" {:recursive true})"
+   (list \"../tahto/src/std/fs\" {:recursive true})"
   {:added "3.0"}
   ([root] (list root {}))
   ([root opts]

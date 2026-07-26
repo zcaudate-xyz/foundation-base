@@ -1,16 +1,16 @@
-(ns hara.model.spec-lua-try-test
-  (:require [hara.lang :as l]
-            [hara.model.spec-lua :as spec-lua])
+tahto/model/spec_lua_try_test.clj:1:(ns tahto.model.spec-lua-try-test
+  (:require [tahto.core :as l]
+tahto/model/spec_lua_try_test.clj:3:            [tahto.model.spec-lua :as spec-lua])
   (:use code.test))
 
-^{:refer hara.model.spec-lua/+grammar+ :added "4.1"}
+tahto/model/spec_lua_try_test.clj:6:^{:refer tahto.model.spec-lua/+grammar+ :added "4.1"}
 (fact "lua throw emits native lua errors for strings and structured exceptions"
   [(l/emit-as :lua '[(throw "boom")])
    (l/emit-as :lua '[(throw (x:ex "boom" {:a 1}))])]
   => ["error('boom',0)"
       "error({['__type__']='xt.exception',message='boom',data={a=1}},0)"])
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
+tahto/model/spec_lua_try_test.clj:13:^{:refer tahto.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
 (fact "lua try/catch lowers to a pcall wrapper for xt exceptions"
   (let [out (l/emit-as :lua
                        '[(try
@@ -27,7 +27,7 @@
      (boolean (re-find #"print" out))])
   => [true true true true true true true])
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"
+tahto/model/spec_lua_try_test.clj:30:^{:refer tahto.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"
   :id test-lua-rewrite-stage-sync-catch}
 (fact "lua sync catch preserves plain thrown payloads through pcall"
   (let [out (l/emit-as :lua
@@ -40,7 +40,7 @@
      (boolean (re-find #"error\(lua_try_value__" out))])
   => [true true true])
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"
+tahto/model/spec_lua_try_test.clj:43:^{:refer tahto.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"
   :id test-lua-rewrite-stage-try-finally}
 (fact "lua try/finally preserves outer return flow after the pcall rewrite"
   (let [out (l/emit-as :lua

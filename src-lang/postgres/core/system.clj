@@ -1,5 +1,5 @@
 (ns postgres.core.system
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template]))
 

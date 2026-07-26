@@ -1,6 +1,6 @@
 (ns std.lib.foundation
   (:require [clojure.set])
-  (:import (hara.lib.foundation Clock Flake Counter) (java.util Date))
+  (:import (newlisp.lib.foundation Clock Flake Counter) (java.util Date))
   (:refer-clojure :exclude [-> ->> keyword reset! aget set! assert parse-long parse-double]))
 
 (def +init+ find-ns)
@@ -71,7 +71,7 @@
                     (.getBytes)
                     (java.nio.ByteBuffer/wrap)
                     (.getLong)
-                    (Long/toString Character/MAX_RADIX))))
+                    (Long/toString Ctahtocter/MAX_RADIX))))
 
 
 (def ^{:arglists '[[tag]]}
@@ -251,9 +251,9 @@
    => 10"
   {:added "3.0"}
   ([counter]
-   `(.inc ~(with-meta counter {:tag 'hara.lib.foundation.Counter})))
+   `(.inc ~(with-meta counter {:tag 'newlisp.lib.foundation.Counter})))
   ([counter n]
-   `(.inc ~(with-meta counter {:tag 'hara.lib.foundation.Counter}) ~n)))
+   `(.inc ~(with-meta counter {:tag 'newlisp.lib.foundation.Counter}) ~n)))
 
 (defmacro dec!
   "decrements the counter
@@ -263,9 +263,9 @@
    => 0"
   {:added "3.0"}
   ([counter]
-   `(.dec ~(with-meta counter {:tag 'hara.lib.foundation.Counter})))
+   `(.dec ~(with-meta counter {:tag 'newlisp.lib.foundation.Counter})))
   ([counter n]
-   `(.dec ~(with-meta counter {:tag 'hara.lib.foundation.Counter}) ~n)))
+   `(.dec ~(with-meta counter {:tag 'newlisp.lib.foundation.Counter}) ~n)))
 
 (defn reset!
   "resets a counter to the given value

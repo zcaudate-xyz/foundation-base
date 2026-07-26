@@ -1,4 +1,4 @@
-# Babashka Port for hara.lang
+# Babashka Port for tahto.core
 
 ## Overview
 The goal is to provide a `bb.lang` namespace that contains the core logic of `std.lang` without the heavy Java interop and `std.lib` custom metaprogramming, allowing it to run within Babashka. We have started duplicating `std.lang` logic into `src/bb/lang/` and its required helper namespaces into `src/bb/lib/` and `src/bb/string/`.

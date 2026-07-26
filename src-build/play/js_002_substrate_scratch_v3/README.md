@@ -1,6 +1,6 @@
 # js-002 substrate scratch-v3
 
-This `src-build/play` project turns `postgres.sample.scratch-v3` into a set of Hara DSL `xt.substrate` examples.
+This `src-build/play` project turns `postgres.sample.scratch-v3` into a set of Tahto DSL `xt.substrate` examples.
 
 The generated browser page includes four slices:
 

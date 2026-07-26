@@ -1,6 +1,6 @@
 (ns lua.aws.debug-test
   (:require [lib.minio :as minio]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.env :as env])
   (:use code.test))
 

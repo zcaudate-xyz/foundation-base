@@ -6,7 +6,7 @@ It combines:
 
 - reusable libraries under `std.*`;
 - developer tooling under `code.*`;
-- language generation and target models under `hara.*`;
+- language generation and target models under `tahto.*`;
 - runtime adapters under `rt.*`;
 - portable cross-target libraries under `xt.*`.
 
@@ -17,7 +17,7 @@ You do not need to understand the whole repository before using it. Choose a pat
 - [Getting Started](Getting-Started)
 - [Repository Map](Repository-Map)
 - [Examples](Examples)
-- [Hara Language Tooling](Hara-Language-Tooling)
+- [Tahto Language Tooling](Tahto-Language-Tooling)
 - [Code Tools](Code-Tools)
 - [Contributing](Contributing)
 
@@ -26,7 +26,7 @@ You do not need to understand the whole repository before using it. Choose a pat
 | Goal | Page |
 |---|---|
 | Install Foundation Base | [Getting Started](Getting-Started) |
-| Generate JavaScript, Lua, Python, Go, SQL, or Solidity | [Hara Language Tooling](Hara-Language-Tooling) |
+| Generate JavaScript, Lua, Python, Go, SQL, or Solidity | [Tahto Language Tooling](Tahto-Language-Tooling) |
 | Compare source with generated projects | [Examples](Examples) |
 | Run fact-based tests | [Code Tools](Code-Tools) |
 | Understand the namespaces and directories | [Repository Map](Repository-Map) |

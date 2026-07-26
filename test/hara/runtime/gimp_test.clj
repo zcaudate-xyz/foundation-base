@@ -1,8 +1,8 @@
-(ns hara.runtime.gimp-test
-  (:require [hara.lang :as l]
-            [hara.lang.script-control :as script-control]
-            [hara.runtime.gimp :as gimp]
-            [hara.runtime.gimp.impl :as impl]
+tahto/runtime/gimp_test.clj:1:(ns tahto.runtime.gimp-test
+  (:require [tahto.core :as l]
+            [tahto.core.script-control :as script-control]
+tahto/runtime/gimp_test.clj:4:            [tahto.runtime.gimp :as gimp]
+tahto/runtime/gimp_test.clj:5:            [tahto.runtime.gimp.impl :as impl]
             [std.lib.component :as component]
             [std.lib.env :as env])
   (:use code.test))
@@ -26,7 +26,7 @@
   :teardown [(l/rt:stop :python)]})
 
 
-^{:refer hara.runtime.gimp.impl/gimp :added "4.1"}
+tahto/runtime/gimp_test.clj:29:^{:refer tahto.runtime.gimp.impl/gimp :added "4.1"}
 (fact "starts and stops a gimp runtime"
   (let [rt (impl/gimp {})]
     [(boolean rt)
@@ -35,7 +35,7 @@
          true)])
   => [true true true])
 
-^{:refer hara.runtime.gimp.impl/raw-eval-gimp :added "4.1"}
+tahto/runtime/gimp_test.clj:38:^{:refer tahto.runtime.gimp.impl/raw-eval-gimp :added "4.1"}
 (fact "evaluates python in gimp"
   (let [rt (impl/gimp {})]
     (try
@@ -45,8 +45,8 @@
         (component/stop rt))))
   => [6 true])
 
-^{:refer hara.lang/script- :added "4.1"}
-(fact "uses gimp runtime through hara.lang"
+^{:refer tahto.core/script- :added "4.1"}
+(fact "uses gimp runtime through tahto.core"
   [(!.py (+ 1 2 3))
    (string? @(!.py (str (Gimp.version))))]
   => [6 true])

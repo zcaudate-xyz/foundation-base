@@ -1,9 +1,9 @@
 (ns postgres.core.supabase-test
   (:require [clojure.string :as str]
-            [hara.model.spec-postgres :as grammar]
+            [tahto.model.spec-postgres :as grammar]
             [postgres.core.supabase :as s]
             [scaffold.supabase.local-min-support :as support]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (defn- ci?

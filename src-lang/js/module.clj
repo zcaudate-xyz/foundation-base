@@ -1,7 +1,7 @@
 (ns js.module
   (:require [clojure.string]
-            [hara.lang :as l]
-            [hara.lang.impl-deps :as impl-deps]
+            [tahto.core :as l]
+            [tahto.core.impl-deps :as impl-deps]
             [std.lib.foundation :as f]
             [xt.lang.common-module :as module]))
 

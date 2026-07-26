@@ -1,7 +1,7 @@
 (ns circom.core-test
   (:require [circom.core]
-            [hara.lang :as l]
-            [hara.lang.impl :as impl]
+            [tahto.core :as l]
+            [tahto.core.impl :as impl]
             [std.lib.env :as env])
   (:use code.test))
 

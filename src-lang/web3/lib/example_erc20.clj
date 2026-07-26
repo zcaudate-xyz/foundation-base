@@ -1,6 +1,6 @@
 (ns web3.lib.example-erc20
   (:require [clojure.string]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.env :as env]))
 
 (l/script :solidity

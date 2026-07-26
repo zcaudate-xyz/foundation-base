@@ -1,5 +1,5 @@
 (ns kmi.lang.type-pair-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 

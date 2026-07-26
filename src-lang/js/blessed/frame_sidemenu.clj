@@ -1,5 +1,5 @@
 (ns js.blessed.frame-sidemenu
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-group :as ui-group] [js.blessed.ui-core :as ui-core] [js.lib.chalk :as chalk] [xt.lang.common-lib :js k]]})

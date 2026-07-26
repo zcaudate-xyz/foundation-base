@@ -85,19 +85,19 @@
 
 (comment
   (./incomplete)
-  (fs/last-modified "src/hara/string/base/ansi.clj")
+  (fs/last-modified "src/tahto/string/base/ansi.clj")
   (:file-modified (get @*memory* 'std.print.ansi)
                   (get @*memory* 'std.print.ansi-test))
 
   (purge)
 
-  (fetch 'code.framework "src/hara/code/framework.clj")
-  [(:file-modified (fetch 'code.manage "src/hara/code.clj"))]
-  (- (fs/last-modified "src/hara/string.clj")
+  (fetch 'code.framework "src/tahto/code/framework.clj")
+  [(:file-modified (fetch 'code.manage "src/tahto/code.clj"))]
+  (- (fs/last-modified "src/tahto/string.clj")
      (:file-modified
       (get @*memory* 'std.string)))
 
-  (- (fs/last-modified "src/hara/core.clj")
+  (- (fs/last-modified "src/tahto/core.clj")
      (:file-modified
       (get @*memory* 'platform)))
 
@@ -106,7 +106,7 @@
   (keys (prepare-in (read-string (slurp (str +cache-dir+ "/code.framework.docstring.cache")))))
 
   (code.framework.docstring :meta)
-  (fetch 'code.framework "src/hara/code/framework.clj")
+  (fetch 'code.framework "src/tahto/code/framework.clj")
   (./incomplete 'code.framework.docstring)
   (+ 1 2 3)
 

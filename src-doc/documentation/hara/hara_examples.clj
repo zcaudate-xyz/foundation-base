@@ -1,12 +1,12 @@
-(ns documentation.hara-examples
-  (:require [hara.lang :as l]
-            [hara.model.spec-go]
+tahto/tahto_examples.clj:1:(ns documentation.tahto-examples
+  (:require [tahto.core :as l]
+tahto/tahto_examples.clj:3:            [tahto.model.spec-go]
             [std.make :as make :refer [def.make]])
   (:use code.test))
 
-[[:hero {:title "Hara examples"
+tahto/tahto_examples.clj:7:[[:hero {:title "Tahto examples"
          :subtitle "Generated project examples from src-build/play."
-         :lead "The play projects demonstrate hara.lang as a project generator: C pthreads, Go modules, typed xtalk declarations, TypeScript packages, OpenResty Lua, and Blessed terminal UIs."}]]
+         :lead "The play projects demonstrate tahto.core as a project generator: C pthreads, Go modules, typed xtalk declarations, TypeScript packages, OpenResty Lua, and Blessed terminal UIs."}]]
 
 [[:chapter {:title "Generated projects"}]]
 "Use `src-build/play/*/main.clj` for authored source and `src-build/play/*/build.clj` for generated project configuration. The build namespaces use `std.make` to create Makefiles, package files, generated source files, and runnable project layouts."
@@ -21,7 +21,7 @@
 "`l/script- :go` installs the Go book into the current namespace. Once installed, `defn.go` creates a function entry and `l/emit-ptr` emits its generated source."
 
 (fact "define and emit a Go function"
-  ^{:refer hara.lang/script- :added "4.0"}
+  ^{:refer tahto.core/script- :added "4.0"}
   (do
     (l/script- :go)
     (defn.go ^{:- [:string]}
@@ -37,7 +37,7 @@
 "The same pattern works for JavaScript. `l/script- :js` sets up the JS context, then `defn.js` defines a function."
 
 (fact "define and emit a JavaScript function"
-  ^{:refer hara.lang/script- :added "4.0"}
+  ^{:refer tahto.core/script- :added "4.0"}
   (do
     (l/script- :js
       {:require [[xt.lang.spec-base :as xt]]})
@@ -52,7 +52,7 @@
 "For one-off snippets, `l/emit-as` converts a vector of Clojure forms directly to a target language string without needing to define entries."
 
 (fact "emit the same helper in Go, JavaScript, and Lua"
-  ^{:refer hara.lang/emit-as :added "4.0"}
+  ^{:refer tahto.core/emit-as :added "4.0"}
   [(l/emit-as :go '[(defn Add [a b] (return (+ a b)))])
    (l/emit-as :js '[(defn add [a b] (return (+ a b)))])
    (l/emit-as :lua '[(defn add [a b] (return (+ a b)))])]
@@ -65,12 +65,12 @@
 "`l/grammar` returns the grammar map for a language, and `l/lib:overview` returns a data structure describing all modules currently loaded for that language."
 
 (fact "inspect the Go grammar and library overview"
-  ^{:refer hara.lang/grammar :added "4.0"}
+  ^{:refer tahto.core/grammar :added "4.0"}
   (let [g (l/grammar :go)]
     (every? #(contains? g %) [:macros :reserved :emit :structure]))
   => true
 
-  ^{:refer hara.lang/lib:overview :added "4.0"}
+  ^{:refer tahto.core/lib:overview :added "4.0"}
   (map? (l/lib:overview :go))
   => true)
 

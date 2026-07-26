@@ -2,7 +2,7 @@
  * Copyright 2018 Transposit Corporation. All Rights Reserved.
  */
 
-package hara.lib.graal;
+package newlisp.lib.graal;
 
 public abstract class AbstractFolder implements Folder {
   private Folder parent;

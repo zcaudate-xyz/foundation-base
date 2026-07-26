@@ -3,7 +3,7 @@
             [postgres.core.impl-insert :as insert]
             [postgres.core.impl-main :as main]
             [postgres.core.impl-update :as update]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :postgres

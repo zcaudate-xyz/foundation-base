@@ -1,5 +1,5 @@
 (ns xt.event.base-animate
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-data :as xtd]))
 
 (l/script :xtalk

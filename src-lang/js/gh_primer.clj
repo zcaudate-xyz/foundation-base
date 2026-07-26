@@ -1,6 +1,6 @@
 (ns js.gh-primer
   (:require [std.html :as html]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :js

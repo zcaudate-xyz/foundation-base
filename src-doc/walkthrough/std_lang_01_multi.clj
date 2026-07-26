@@ -1,7 +1,7 @@
-(ns walkthrough.hara.lang-01-multi
+(ns walkthrough.tahto.core-01-multi
   ;; Will will create a multi lang environment
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib :as h]
             [std.string :as str]))
 
@@ -29,7 +29,7 @@
 
   (str hello)
   => (std.string/|
-      "![:lang/js :default walkthrough.hara.lang-01-multi/hello :code]"
+      "![:lang/js :default walkthrough.tahto.core-01-multi/hello :code]"
       "function hello(){"
       "  return 1 + 2 + 3;"
       "}"))
@@ -58,7 +58,7 @@
 
   (str world)
   => (std.string/|
-      "![:lang/lua :default walkthrough.hara.lang-01-multi/world :code]"
+      "![:lang/lua :default walkthrough.tahto.core-01-multi/world :code]"
       "local function world()"
       "  return 1 + 2 + 3"
       "end"))
@@ -89,7 +89,7 @@
 
   (str again)
   => (std.string/|
-      "![:lang/python :default walkthrough.hara.lang-01-multi/again :code]"
+      "![:lang/python :default walkthrough.tahto.core-01-multi/again :code]"
       "def again():"
       "  return 1 + 2 + 3"))
 
@@ -118,7 +118,7 @@
 
   (str stuff)
   => (std.string/|
-      "![:lang/r :default walkthrough.hara.lang-01-multi/stuff :code]"
+      "![:lang/r :default walkthrough.tahto.core-01-multi/stuff :code]"
       "stuff <- function (){"
       "  return(1 + 2 + 3);"
       "};"))

@@ -8,9 +8,9 @@
 (fact "processes a single meta to generate an interim structure"
   (let [project (publish/make-project)
         lookup  (executive/all-pages project)]
-    (sort (keys (prepare 'hara/index {} lookup project))))
+    (sort (keys (prepare 'tahto/index {} lookup project))))
   => '(:anchors :anchors-lu :articles :base :global :id :input :name :namespaces :ns :output :project :references :subtitle :theme :title))
 
 (comment
 
-  (:anchors (executive/in-context (prepare 'hara/index))))
+  (:anchors (executive/in-context (prepare 'tahto/index))))

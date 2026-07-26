@@ -1,5 +1,5 @@
 (ns js.react-native.ui-frame-basic
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.common-data :as xtd]

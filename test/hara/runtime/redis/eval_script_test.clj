@@ -1,14 +1,14 @@
-(ns hara.runtime.redis.eval-script-test
+tahto/runtime/redis/eval_script_test.clj:1:(ns tahto.runtime.redis.eval-script-test
   (:require [clojure.string :as str]
              [kmi.redis :as redis]
              [lib.redis.bench :as bench]
              [lib.redis.script :as script]
-             [hara.runtime.redis.client :as r]
-            [hara.runtime.redis.eval-script :refer :all]
+tahto/runtime/redis/eval_script_test.clj:6:             [tahto.runtime.redis.client :as r]
+tahto/runtime/redis/eval_script_test.clj:7:            [tahto.runtime.redis.eval-script :refer :all]
             [std.concurrent :as cc]
-            [hara.lang :as l]
-            [hara.lang.impl :as impl]
-            [hara.lang.pointer :as ptr]
+            [tahto.core :as l]
+            [tahto.core.impl :as impl]
+            [tahto.core.pointer :as ptr]
             [std.lib.component :as component]
             [std.string.prose :as prose])
   (:use code.test))
@@ -17,13 +17,13 @@
  {:setup [(bench/start-redis-array [17001])]
   :teardown [(bench/stop-redis-array [17001])]})
 
-^{:refer hara.runtime.redis.eval-script/raw-compile-form :added "4.0"}
+tahto/runtime/redis/eval_script_test.clj:20:^{:refer tahto.runtime.redis.eval-script/raw-compile-form :added "4.0"}
 (fact "converts a ptr into a form"
 
   (raw-compile-form redis/scan-sub)
   => '(return (kmi.redis/scan-sub (. KEYS [1]))))
 
-^{:refer hara.runtime.redis.eval-script/raw-compile :added "4.0"}
+tahto/runtime/redis/eval_script_test.clj:26:^{:refer tahto.runtime.redis.eval-script/raw-compile :added "4.0"}
 (fact "compiles a function as body and sha"
 
   (raw-compile redis/scan-sub)
@@ -33,19 +33,19 @@
                    (str/includes? % "return scan_sub(KEYS[1])"))
        :sha string?}))
 
-^{:refer hara.runtime.redis.eval-script/raw-prep-in-fn :added "4.0"}
+tahto/runtime/redis/eval_script_test.clj:36:^{:refer tahto.runtime.redis.eval-script/raw-prep-in-fn :added "4.0"}
 (fact "prepares the arguments for entry"
 
   (raw-prep-in-fn {:rt/redis {:nkeys 1}} [:key :arg])
   => [[:key] [:arg]])
 
-^{:refer hara.runtime.redis.eval-script/raw-prep-out-fn :added "4.0"}
+tahto/runtime/redis/eval_script_test.clj:42:^{:refer tahto.runtime.redis.eval-script/raw-prep-out-fn :added "4.0"}
 (fact "prepares arguments out"
 
   (raw-prep-out-fn {:rt/redis {:encode {:out true}}} "{\"a\":1}")
   => {:a 1})
 
-^{:refer hara.runtime.redis.eval-script/rt-install-fn :added "4.0"}
+tahto/runtime/redis/eval_script_test.clj:48:^{:refer tahto.runtime.redis.eval-script/rt-install-fn :added "4.0"}
 (fact "retries the function if not installed"
 
   (with-redefs [script/script:load (fn [& _] :load)
@@ -53,7 +53,7 @@
     ((rt-install-fn {} "sha" "body" [] []) (Exception. "NOSCRIPT")))
   => :eval)
 
-^{:refer hara.runtime.redis.eval-script/redis-invoke-sha :added "4.0"
+tahto/runtime/redis/eval_script_test.clj:56:^{:refer tahto.runtime.redis.eval-script/redis-invoke-sha :added "4.0"
   :setup    [(def -client- (r/client {:port 17001}))
              (cc/req -client- ["FLUSHDB"])
              (cc/req -client- ["SCRIPT" "FLUSH"])]

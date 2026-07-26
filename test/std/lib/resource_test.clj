@@ -19,13 +19,13 @@
 ^{:refer std.lib.resource/res:spec-get :added "3.0"}
 (fact "retrieves a resource spec"
 
-  (res:spec-get :hara/concurrent.atom.executor)
+  (res:spec-get :tahto/concurrent.atom.executor)
   => map?)
 
 ^{:refer std.lib.resource/res:variant-list :added "3.0"}
 (fact "retrieves a list of variants to the spec"
 
-  (res:variant-list :hara/concurrent.atom.executor)
+  (res:variant-list :tahto/concurrent.atom.executor)
   => coll?)
 
 ^{:refer std.lib.resource/res:variant-add :added "3.0"}
@@ -40,10 +40,10 @@
 ^{:refer std.lib.resource/res:mode :added "3.0"}
 (fact "gets the default mode of a resource"
 
-  (res:mode :hara/concurrent.atom.executor)
+  (res:mode :tahto/concurrent.atom.executor)
   => :global
 
-  (res:mode :hara/concurrent.atom.executor :std.concurrent.print)
+  (res:mode :tahto/concurrent.atom.executor :std.concurrent.print)
   => :global)
 
 ^{:refer std.lib.resource/res:active :added "3.0"}
@@ -60,14 +60,14 @@
 ^{:refer std.lib.resource/res-key :added "3.0"}
 (fact "gets a resource key"
 
-  (res-key :shared :hara/concurrent.atom.executor :default {:id :hello})
+  (res-key :shared :tahto/concurrent.atom.executor :default {:id :hello})
   => :hello)
 
 ^{:refer std.lib.resource/res-path :added "3.0"}
 (fact "gets the resource path"
 
-  (res-path :shared :hara/concurrent.atom.executor :default {:id :hello})
-  => '(:shared [:hara/concurrent.atom.executor :default] :hello))
+  (res-path :shared :tahto/concurrent.atom.executor :default {:id :hello})
+  => '(:shared [:tahto/concurrent.atom.executor :default] :hello))
 
 ^{:refer std.lib.resource/res-access-get :added "3.0"}
 (fact "access function for active resource")

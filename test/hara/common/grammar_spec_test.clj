@@ -1,7 +1,7 @@
-(ns hara.common.grammar-spec-test
-  (:require [hara.common.emit-common :as common]
-             [hara.common.emit-helper :as helper]
-             [hara.common.grammar-spec :refer :all])
+tahto/common/grammar_spec_test.clj:1:(ns tahto.common.grammar-spec-test
+tahto/common/grammar_spec_test.clj:2:  (:require [tahto.common.emit-common :as common]
+tahto/common/grammar_spec_test.clj:3:             [tahto.common.emit-helper :as helper]
+tahto/common/grammar_spec_test.clj:4:             [tahto.common.grammar-spec :refer :all])
   (:use code.test))
 
 (defn mixin-add-symbol
@@ -9,13 +9,13 @@
   {:symbol *symbol*
    :base (:base m)})
 
-^{:refer hara.common.grammar-spec/get-comment :added "4.0"}
+tahto/common/grammar_spec_test.clj:12:^{:refer tahto.common.grammar-spec/get-comment :added "4.0"}
 (fact "gets the comment access prefix for a language"
 
   (get-comment helper/+default+ {})
   => "//")
 
-^{:refer hara.common.grammar-spec/format-fargs :added "3.0"}
+tahto/common/grammar_spec_test.clj:18:^{:refer tahto.common.grammar-spec/format-fargs :added "3.0"}
 (fact "formats function inputs"
 
   (format-fargs '[[a b]])
@@ -29,11 +29,11 @@
   => '["" {} (([a] a)
               ([a b] (+ a b)))])
 
-^{:refer hara.common.grammar-spec/format-defn-mixins :added "4.1"}
+tahto/common/grammar_spec_test.clj:32:^{:refer tahto.common.grammar-spec/format-defn-mixins :added "4.1"}
 (fact "applies mixins from symbols, forms and maps in order"
   (binding [*symbol* 'hello]
     [(format-defn-mixins {:base true}
-                         ['hara.common.grammar-spec-test/mixin-add-symbol])
+tahto/common/grammar_spec_test.clj:36:                         ['tahto.common.grammar-spec-test/mixin-add-symbol])
      (format-defn-mixins {:base true}
                          ['(hash-map :from-form *symbol*)])
      (format-defn-mixins {:base true}
@@ -44,13 +44,13 @@
        {:base true
         :from-map true}])
 
-^{:refer hara.common.grammar-spec/format-defn :added "3.0"}
+tahto/common/grammar_spec_test.clj:47:^{:refer tahto.common.grammar-spec/format-defn :added "3.0"}
 (fact "standardize defn forms"
 
   (format-defn '(defn hello "hello" {:list 1} []))
   => '[{:list 1, :doc "hello"} (defn hello [])])
 
-^{:refer hara.common.grammar-spec/tf-for-index :added "4.0"}
+tahto/common/grammar_spec_test.clj:53:^{:refer tahto.common.grammar-spec/tf-for-index :added "4.0"}
 (fact "default for-index transform"
 
   (tf-for-index '(for:index

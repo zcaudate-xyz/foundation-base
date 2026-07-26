@@ -1,20 +1,20 @@
-(ns hara.lang.impl-deps-imports-test
+(ns tahto.core.impl-deps-imports-test
   (:require [xt.lang.common-promise]
             [xt.lang.common-data]
             [xt.lang.common-lib]
             [js.blessed]
             [js.react]
-            [hara.lang.book :as b]
-            [hara.lang.book-module :as module]
-            [hara.common.emit-prep-js-test :as prep-js]
-            [hara.common.emit-prep-lua-test :as prep-lua]
-            [hara.lang.impl :as impl]
-            [hara.lang.impl-deps :as deps]
-            [hara.lang.impl-deps-imports :as deps-imports]
-            [hara.lang.impl-entry :as entry]
-            [hara.lang.library :as lib]
-            [hara.lang.library-snapshot :as snap]
-            [hara.model.spec-lua :as lua])
+            [tahto.base.book :as b]
+            [tahto.base.book-module :as module]
+tahto/lang/impl_deps_imports_test.clj:9:            [tahto.common.emit-prep-js-test :as prep-js]
+tahto/lang/impl_deps_imports_test.clj:10:            [tahto.common.emit-prep-lua-test :as prep-lua]
+            [tahto.core.impl :as impl]
+            [tahto.core.impl-deps :as deps]
+            [tahto.core.impl-deps-imports :as deps-imports]
+            [tahto.core.impl-entry :as entry]
+            [tahto.core.library :as lib]
+            [tahto.core.library-snapshot :as snap]
+tahto/lang/impl_deps_imports_test.clj:17:            [tahto.model.spec-lua :as lua])
   (:use code.test))
 
 (def +library-js-cloned+
@@ -133,7 +133,7 @@
       {}))
     ))
 
-^{:refer hara.lang.impl-deps-imports/get-entry-imports :added "4.0"}
+^{:refer tahto.core.impl-deps-imports/get-entry-imports :added "4.0"}
 (fact "gets all fragment imports from code entries"
 
       (deps-imports/get-entry-imports
@@ -145,7 +145,7 @@
                      ['JS.app/App])))))
       => '{JS.ui/Puck {"@measured/puck" #{Puck}}, JS.ui/Button {"@radix-ui/themes" #{Radix}}})
 
-^{:refer hara.lang.impl-deps-imports/get-namespace-imports :added "4.0"}
+^{:refer tahto.core.impl-deps-imports/get-namespace-imports :added "4.0"}
 (fact "merges imports for both fragment and code entries"
 
       (deps-imports/get-namespace-imports
@@ -154,7 +154,7 @@
         '{JS.ui/Button {"@radix-ui/themes" #{Radix}}}))
       => '{JS.ui {"@measured/puck" #{Puck}, "@radix-ui/themes" #{Radix}}})
 
-^{:refer hara.lang.impl-deps-imports/get-fragment-deps :added "4.0"}
+^{:refer tahto.core.impl-deps-imports/get-fragment-deps :added "4.0"}
 (fact "gets all the fragment dependencies"
 
       (deps-imports/get-fragment-deps
@@ -164,7 +164,7 @@
                ['JS.app/App])))
       => '#{JS.ui/Puck JS.app/Button JS.ui/Button})
 
-^{:refer hara.lang.impl-deps-imports/format-namespace-imports :added "4.0"}
+^{:refer tahto.core.impl-deps-imports/format-namespace-imports :added "4.0"}
 (fact "formats a list of namespace imports into an import map"
 
       (deps-imports/format-namespace-imports
@@ -177,7 +177,7 @@
            "@radix-ui/themes" {:as [* Radix],
                                :bundle {"@radix-ui/themes/styles.css" {}}}})
 
-^{:refer hara.lang.impl-deps-imports/script-import-deps :added "4.0"}
+^{:refer tahto.core.impl-deps-imports/script-import-deps :added "4.0"}
 (fact "collect all native imports"
 
       (deps-imports/script-import-deps
@@ -223,7 +223,7 @@
            :id JS.ui,
            :display :default})
 
-^{:refer hara.lang.impl-deps-imports/script-imports :added "4.0"}
+^{:refer tahto.core.impl-deps-imports/script-imports :added "4.0"}
 (fact "gets the ns imports for a script"
 
       (deps-imports/script-imports
@@ -235,7 +235,7 @@
            "@radix-ui/themes" {:as [* Radix],
                                :bundle {"@radix-ui/themes/styles.css" {}}}})
 
-^{:refer hara.lang.impl-deps-imports/module-imports :added "4.0"}
+^{:refer tahto.core.impl-deps-imports/module-imports :added "4.0"}
 (fact "gets a modules imports as well as code links"
 
       (deps-imports/module-imports
@@ -311,7 +311,7 @@
                      xt.lang.common-sort-by}})
 
 
-^{:refer hara.lang.impl-deps-imports/module-code-deps :added "4.0"}
+^{:refer tahto.core.impl-deps-imports/module-code-deps :added "4.0"}
 (fact "gets the code dependencies for the module"
 
       (impl/with:library [+library-js-cloned+]
@@ -397,7 +397,7 @@
 (comment
 
   (dissoc
-   (hara.lang/get-module
+   (tahto.core/get-module
     +library-js+
     :js
     'JS.app)

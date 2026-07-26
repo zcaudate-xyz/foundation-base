@@ -1,6 +1,6 @@
 ^{:seedgen/skip true}
 (ns xt.substrate.transport-browser-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 

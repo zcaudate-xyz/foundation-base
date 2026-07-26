@@ -1,5 +1,5 @@
 (ns js.lib.eth-solc
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify])
   (:refer-clojure :exclude [compile]))
 

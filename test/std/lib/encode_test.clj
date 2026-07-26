@@ -23,7 +23,7 @@
   => "68656c6c6f")
 
 ^{:refer std.lib.encode/from-hex-chars :added "3.0"}
-(fact "turns two hex characters into a byte value"
+(fact "turns two hex ctahtocters into a byte value"
 
   (byte (from-hex-chars \2 \a))
   => 42)

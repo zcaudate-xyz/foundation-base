@@ -1,6 +1,6 @@
 (ns xt.db.text.sql-call-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [postgres.gen.bind-macro :as gen]
             [xt.lang.common-notify :as notify]))
 

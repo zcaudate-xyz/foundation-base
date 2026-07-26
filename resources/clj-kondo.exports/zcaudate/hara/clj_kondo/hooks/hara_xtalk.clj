@@ -1,4 +1,4 @@
-(ns clj-kondo.hooks.hara-xtalk
+tahto/clj_kondo/hooks/tahto_xtalk.clj:1:(ns clj-kondo.hooks.tahto-xtalk
   "Canonical XTalk checks exposed through clj-kondo.
 
    The hook analyzes the original XTalk form, then returns a small Clojure
@@ -87,7 +87,7 @@
                                      remaining))]
             (when (> (count run) 1)
               (let [targets (mapv (comp :target var-dot-binding api/sexpr) run)]
-                (report! node :hara.xtalk/merge-dot-destructure :warning
+tahto/clj_kondo/hooks/tahto_xtalk.clj:90:                (report! node :tahto.xtalk/merge-dot-destructure :warning
                          (str "adjacent same-object dot bindings can be merged into one destructuring var: "
                               (list 'var (set targets) (:object binding))))))
             (recur (drop (max 1 (count run)) remaining)))
@@ -112,13 +112,13 @@
            head (when (seq? form) (canonical-head (first form)))]
        (when (and (not dot-object?)
                   (nested-dot-access? form))
-         (report! node :hara.xtalk/nested-dot-access :warning
+tahto/clj_kondo/hooks/tahto_xtalk.clj:115:         (report! node :tahto.xtalk/nested-dot-access :warning
                   (str "nested dot access can be flattened into a single dot form: "
                        (flatten-dot-access form))))
        (when (and (api/list-node? node)
                   (= 'fn:> head))
          (when-let [suggestion (fn-arrow-suggestion form)]
-           (report! node :hara.xtalk/redundant-fn-arrow :warning
+tahto/clj_kondo/hooks/tahto_xtalk.clj:121:           (report! node :tahto.xtalk/redundant-fn-arrow :warning
                     (str "fn:> with an explicit argument vector and nil body can use canonical fn with an explicit return: "
                          suggestion))))
        (doseq [[idx child-node] (map-indexed vector (:children node))]
@@ -195,18 +195,18 @@
                         (filter symbol?)
                         (group-by #(symbol (str/replace (name %) "-" "_"))))]
         (when (seq invalid)
-          (report! target-node :hara.xtalk/invalid-destructuring :error
+tahto/clj_kondo/hooks/tahto_xtalk.clj:198:          (report! target-node :tahto.xtalk/invalid-destructuring :error
                    "set destructuring targets must contain only symbols"))
         (doseq [[field bindings] fields]
           (when (> (count bindings) 1)
-            (report! target-node :hara.xtalk/field-collision :error
+tahto/clj_kondo/hooks/tahto_xtalk.clj:202:            (report! target-node :tahto.xtalk/field-collision :error
                      (str "destructuring fields collide after snake_case emission: " field
                           "; prefer spear-case binding "
                           (symbol (str/replace (name field) "_" "-")))))))
 
       (vector? target)
       (when-not (every? symbol? target)
-        (report! target-node :hara.xtalk/invalid-destructuring :error
+tahto/clj_kondo/hooks/tahto_xtalk.clj:209:        (report! target-node :tahto.xtalk/invalid-destructuring :error
                  "vector destructuring targets must contain only symbols")))))
 
 (defn- lint-node! [node context]
@@ -216,12 +216,12 @@
         (api/list-node? node)
         (let [head (canonical-head (first form))]
           (when (and (= :value context) (block-head? head))
-            (report! node :hara.xtalk/block-in-value :error
+tahto/clj_kondo/hooks/tahto_xtalk.clj:219:            (report! node :tahto.xtalk/block-in-value :error
                      (str "block form " head
                           " is not valid in value position; use :? for value conditionals")))
           (when (and (= head '.)
                      (nested-dot-access? form))
-            (report! node :hara.xtalk/nested-dot-access :warning
+tahto/clj_kondo/hooks/tahto_xtalk.clj:224:            (report! node :tahto.xtalk/nested-dot-access :warning
                      (str "nested dot access can be flattened into a single dot form: "
                           (flatten-dot-access form))))
           (when (and (= head 'var)
@@ -231,7 +231,7 @@
             (lint-var-sequence! nodes))
           (when-let [{:keys [target object key]} (when (= head 'var)
                                                    (var-dot-binding form))]
-            (report! node :hara.xtalk/redundant-dot-destructure :warning
+tahto/clj_kondo/hooks/tahto_xtalk.clj:234:            (report! node :tahto.xtalk/redundant-dot-destructure :warning
                      (str "same-name dot binding for \"" key
                           "\" can use object destructuring: "
                           (list 'var #{target} object))))
@@ -239,11 +239,11 @@
                      (or (= 3 (count form))
                          (and (= 4 (count form))
                               (nil? (nth form 3)))))
-            (report! node :hara.xtalk/redundant-get-key :warning
+tahto/clj_kondo/hooks/tahto_xtalk.clj:242:            (report! node :tahto.xtalk/redundant-get-key :warning
                      "simple x:get-key can use canonical dot access (. obj [key])"))
           (when-let [suggestion (when (= head 'fn:>)
                                   (fn-arrow-suggestion form))]
-            (report! node :hara.xtalk/redundant-fn-arrow :warning
+tahto/clj_kondo/hooks/tahto_xtalk.clj:246:            (report! node :tahto.xtalk/redundant-fn-arrow :warning
                      (str "fn:> with an explicit argument vector and nil body can use canonical fn with an explicit return: "
                           suggestion)))
           (doseq [[child-node child-context] (node-pairs head node)]

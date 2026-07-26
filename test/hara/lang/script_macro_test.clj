@@ -1,18 +1,18 @@
-(ns hara.lang.script-macro-test
+(ns tahto.core.script-macro-test
   (:require [clojure.string]
-             [hara.model.spec-postgres :as pg]
-             [hara.lang.book :as book]
-             [hara.lang.book-module :as module]
-             [hara.lang.impl :as impl]
-             [hara.lang.impl-entry :as entry]
-             [hara.lang.library :as lib]
-             [hara.lang.library-snapshot-prep-test :as prep]
-             [hara.lang.pointer :as ptr]
-             [hara.lang.runtime :as rt]
-             [hara.lang.script-macro :as macro]
-             [hara.model.spec-js :as js]
-             [hara.model.spec-lua :as lua]
-             [hara.model.spec-xtalk :as xtalk]
+tahto/lang/script_macro_test.clj:3:             [tahto.model.spec-postgres :as pg]
+             [tahto.base.book :as book]
+             [tahto.base.book-module :as module]
+             [tahto.core.impl :as impl]
+             [tahto.core.impl-entry :as entry]
+             [tahto.core.library :as lib]
+             [tahto.core.library-snapshot-prep-test :as prep]
+             [tahto.core.pointer :as ptr]
+             [tahto.core.runtime :as rt]
+             [tahto.core.script-macro :as macro]
+tahto/lang/script_macro_test.clj:13:             [tahto.model.spec-js :as js]
+tahto/lang/script_macro_test.clj:14:             [tahto.model.spec-lua :as lua]
+tahto/lang/script_macro_test.clj:15:             [tahto.model.spec-xtalk :as xtalk]
              [std.lib.collection :as collection])
   (:use code.test))
 
@@ -23,7 +23,7 @@
 (rt/install-lang! :xtalk)
 (rt/install-lang! :postgres)
 
-^{:refer hara.lang.script-macro/body-arglists :added "4.0"}
+^{:refer tahto.core.script-macro/body-arglists :added "4.0"}
 (fact "makes arglists from body"
 
   (macro/body-arglists '([a b c]))
@@ -32,14 +32,14 @@
   (macro/body-arglists '(([a b c := 5])))
   => '([a b c]))
 
-^{:refer hara.lang.script-macro/intern-in :added "4.0"}
+^{:refer tahto.core.script-macro/intern-in :added "4.0"}
 (fact "interns a macro"
 
   (do (macro/intern-in 'toy '.hello 1)
       (eval '@(var toy.hello)))
   => 1)
 
-^{:refer hara.lang.script-macro/intern-prep :added "4.0"}
+^{:refer tahto.core.script-macro/intern-prep :added "4.0"}
 (fact "outputs the module and form meta"
 
   (macro/intern-prep :lua
@@ -49,7 +49,7 @@
                         :line 1}))
   => '[L.core {:module L.core, :line 1}])
 
-^{:refer hara.lang.script-macro/intern-def$-fn :added "4.0"}
+^{:refer tahto.core.script-macro/intern-def$-fn :added "4.0"}
 (fact "interns a fragment macro"
 
   (impl/with:library [+library+]
@@ -59,7 +59,7 @@
                             {:module 'L.core})
                           {:time 1
                            :line 1}))
-  => #'hara.lang.script-macro-test/hello
+  => #'tahto.core.script-macro-test/hello
 
   (impl/with:library [+library+]
     (collection/filter-vals identity @hello))
@@ -72,7 +72,7 @@
                 :id 'hello,
                 :display :default,
                 :form 'hello,
-                :namespace 'hara.lang.script-macro-test})
+                :namespace 'tahto.core.script-macro-test})
 
   (impl/with:library [+library+]
     (ptr/ptr-display hello {}))
@@ -83,11 +83,11 @@
                          {})
   => "hello(1,2,3)")
 
-^{:refer hara.lang.script-macro/intern-def$ :added "4.0"}
+^{:refer tahto.core.script-macro/intern-def$ :added "4.0"}
 (fact "intern a def fragment macro"
 
   (macro/intern-def$ :x "hello")
-  => #'hara.lang.script-macro-test/def$.hello
+  => #'tahto.core.script-macro-test/def$.hello
 
   (impl/with:library [+library+]
     ^{:module x.core}
@@ -103,7 +103,7 @@
                 :id 'x,
                 :display :default,
                 :form 'x,
-                :namespace 'hara.lang.script-macro-test})
+                :namespace 'tahto.core.script-macro-test})
 
   (impl/with:library [+library+]
     (ptr/ptr-display x {}))
@@ -147,7 +147,7 @@
          (string? (pr-str @frag-var))])))
   => '["x:m-sin" true])
 
-^{:refer hara.lang.script-macro/intern-defmacro-fn :added "4.0"}
+^{:refer tahto.core.script-macro/intern-defmacro-fn :added "4.0"}
 (fact "function to intern a macro"
 
   (impl/with:library [+library+]
@@ -158,7 +158,7 @@
           (vec args))
        '{:module L.core})
      {}))
-  => #'hara.lang.script-macro-test/make-array-0
+  => #'tahto.core.script-macro-test/make-array-0
 
   (impl/with:library [+library+]
     @make-array-0)
@@ -293,18 +293,18 @@
         (string? (pr-str @fn-var)))))
   => true)
 
-^{:refer hara.lang.script-macro/intern-defmacro :added "4.0"}
+^{:refer tahto.core.script-macro/intern-defmacro :added "4.0"}
 (fact "the intern macro function"
 
   (macro/intern-defmacro :x "hello")
-  => #'hara.lang.script-macro-test/defmacro.hello
+  => #'tahto.core.script-macro-test/defmacro.hello
 
   (impl/with:library [+library+]
     ^{:module x.core}
     (defmacro.hello
       divide [x y]
       (list '/ x y)))
-  => #'hara.lang.script-macro-test/divide
+  => #'tahto.core.script-macro-test/divide
 
   (impl/with:library [+library+]
     (ptr/ptr-deref divide))
@@ -314,14 +314,14 @@
     (ptr/ptr-invoke-string divide [1 2] {}))
   => "1 / 2")
 
-^{:refer hara.lang.script-macro/call-thunk :added "4.0"}
+^{:refer tahto.core.script-macro/call-thunk :added "4.0"}
 (fact "calls the thunk given meta to control pointer output"
 
   (macro/call-thunk {:debug true}
                     (fn [] ptr/*print*))
   => #{:input})
 
-^{:refer hara.lang.script-macro/intern-!-fn :added "4.0"}
+^{:refer tahto.core.script-macro/intern-!-fn :added "4.0"}
 (fact "interns a free pointer macro"
 
   (-> (macro/intern-!-fn :lua [1 2 3] {})
@@ -347,30 +347,30 @@
        :form '(+ 1 2)}
       []])
 
-^{:refer hara.lang.script-macro/intern-! :added "4.0"}
+^{:refer tahto.core.script-macro/intern-! :added "4.0"}
 (fact "interns a macro for free evalutation"
 
   (macro/intern-! :lua "hello")
-  => #'hara.lang.script-macro-test/!.hello
+  => #'tahto.core.script-macro-test/!.hello
 
   (-> (!.hello 1 2 3 4 5)
       (clojure.string/replace ";" ""))
   => "1\n2\n3\n4\n5")
 
-^{:refer hara.lang.script-macro/intern-free-fn :added "4.0"}
+^{:refer tahto.core.script-macro/intern-free-fn :added "4.0"}
 (fact "interns a free pointer in the namespace"
 
   (macro/intern-free-fn :lua '(defptr.lua hello 1)
                         {})
-  => #'hara.lang.script-macro-test/hello)
+  => #'tahto.core.script-macro-test/hello)
 
-^{:refer hara.lang.script-macro/intern-free :added "4.0"}
+^{:refer tahto.core.script-macro/intern-free :added "4.0"}
 (fact "creates a defptr macro"
 
   (macro/intern-free :lua "hello")
-  => #'hara.lang.script-macro-test/defptr.hello)
+  => #'tahto.core.script-macro-test/defptr.hello)
 
-^{:refer hara.lang.script-macro/intern-top-level-fn :added "4.0"}
+^{:refer tahto.core.script-macro/intern-top-level-fn :added "4.0"}
 (fact "interns a top level function"
 
   (impl/with:library [+library+]
@@ -386,7 +386,7 @@
           (return (+ x y z)))
        {:module 'L.core})
      {}))
-  => #'hara.lang.script-macro-test/add-more
+  => #'tahto.core.script-macro-test/add-more
 
   (lib/get-entry +library+ '{:lang :lua
                              :module L.core
@@ -404,17 +404,17 @@
     (ptr/ptr-invoke-string add-more [1 2 3] {:layout :full}))
   => "L_core____add_more(1,2,3)")
 
-^{:refer hara.lang.script-macro/intern-top-level :added "4.0"}
+^{:refer tahto.core.script-macro/intern-top-level :added "4.0"}
 (fact "interns a top level macro"
 
   (impl/with:library [+library+]
     (macro/intern-top-level :lua "hello" 'def))
-  => #'hara.lang.script-macro-test/def.hello
+  => #'tahto.core.script-macro-test/def.hello
 
   (impl/with:library [+library+]
     ^{:module L.core}
     (def.hello abc 1))
-  => #'hara.lang.script-macro-test/abc
+  => #'tahto.core.script-macro-test/abc
 
   (impl/with:library [+library+]
     (ptr/ptr-deref abc))
@@ -424,17 +424,17 @@
     (ptr/ptr-display abc {}))
   => "def abc = 1;")
 
-^{:refer hara.lang.script-macro/intern-macros :added "4.0"}
+^{:refer tahto.core.script-macro/intern-macros :added "4.0"}
 (fact "interns the top-level macros in the grammar"
   (macro/intern-macros :lua (:grammar (lib/get-book +library+ :lua)))
   => vector?)
 
-^{:refer hara.lang.script-macro/intern-highlights :added "4.0"}
+^{:refer tahto.core.script-macro/intern-highlights :added "4.0"}
 (fact "interns the highlight macros in the grammar"
   (macro/intern-highlights :lua (:grammar (lib/get-book +library+ :lua)))
   => vector?)
 
-^{:refer hara.lang.script-macro/intern-grammar :added "4.0"}
+^{:refer tahto.core.script-macro/intern-grammar :added "4.0"}
 (fact "interns a bunch of macros in the namespace"
 
   (:macros (:grammar (lib/get-book +library+ :lua)))
@@ -444,7 +444,7 @@
     (macro/intern-grammar :lua (:grammar (lib/get-book +library+ :lua))))
   => map?)
 
-^{:refer hara.lang.script-macro/intern-defmacro-rt-fn :added "4.0"}
+^{:refer tahto.core.script-macro/intern-defmacro-rt-fn :added "4.0"}
 (fact "defines both a library entry as well as a runtime macro"
   (impl/with:library [+library+]
     (macro/intern-defmacro-rt-fn
@@ -456,11 +456,11 @@
      {}))
   => vector?)
 
-^{:refer hara.lang.script-macro/defmacro.! :added "4.0"}
+^{:refer tahto.core.script-macro/defmacro.! :added "4.0"}
 (fact "macro for runtime lang macros")
 
 
-^{:refer hara.lang.script-macro/hydrate-top-level-entry :added "4.0"}
+^{:refer tahto.core.script-macro/hydrate-top-level-entry :added "4.0"}
 (fact "hydrates a top level entry with grammar and module metadata"
 
   (let [plib (lib/library {:snapshot prep/+snap+})]

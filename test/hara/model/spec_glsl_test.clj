@@ -1,9 +1,9 @@
-(ns hara.model.spec-glsl-test
-  (:require [hara.lang :as l]
+tahto/model/spec_glsl_test.clj:1:(ns tahto.model.spec-glsl-test
+  (:require [tahto.core :as l]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer hara.model.spec-glsl/CANARY :adopt true :added "4.0"}
+tahto/model/spec_glsl_test.clj:6:^{:refer tahto.model.spec-glsl/CANARY :adopt true :added "4.0"}
 (fact "top-level definition for shaders"
 
   (l/emit-as

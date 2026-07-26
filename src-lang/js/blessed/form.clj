@@ -1,5 +1,5 @@
 (ns js.blessed.form
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]

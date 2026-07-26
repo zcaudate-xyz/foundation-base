@@ -1,7 +1,7 @@
-(ns hara.common.emit-helper-test
-  (:require [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper :refer :all]
-            [hara.common.grammar :as grammar])
+tahto/common/emit_helper_test.clj:1:(ns tahto.common.emit-helper-test
+tahto/common/emit_helper_test.clj:2:  (:require [tahto.common.emit-common :as common]
+tahto/common/emit_helper_test.clj:3:            [tahto.common.emit-helper :as helper :refer :all]
+tahto/common/emit_helper_test.clj:4:            [tahto.common.grammar :as grammar])
   (:use code.test))
 
 (def +reserved+
@@ -11,11 +11,11 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.common.emit-helper/default-emit-fn :added "4.0"}
+tahto/common/emit_helper_test.clj:14:^{:refer tahto.common.emit-helper/default-emit-fn :added "4.0"}
 (fact "the default emit function"
   (default-emit-fn 'abc {} {}) => "abc")
 
-^{:refer hara.common.emit-helper/pr-single :added "3.0"}
+tahto/common/emit_helper_test.clj:18:^{:refer tahto.common.emit-helper/pr-single :added "3.0"}
 (fact "prints a single quoted string"
 
   (pr-single "hello")
@@ -27,7 +27,7 @@
   (pr-single "''")
   => "'\\'\\''")
 
-^{:refer hara.common.emit-helper/get-option :added "3.0"}
+tahto/common/emit_helper_test.clj:30:^{:refer tahto.common.emit-helper/get-option :added "3.0"}
 (fact "gets either the path option or the default one"
 
   (get-option helper/+default+ [:block :for] :sep)
@@ -36,7 +36,7 @@
   (get-option helper/+default+ [:data :map] :start)
   => "{")
 
-^{:refer hara.common.emit-helper/get-options :added "3.0"}
+tahto/common/emit_helper_test.clj:39:^{:refer tahto.common.emit-helper/get-options :added "3.0"}
 (fact "gets the path option merged with defaults"
 
   (get-options helper/+default+ [:data :map])
@@ -54,7 +54,7 @@
       :namespace ".",
       :range ":"})
 
-^{:refer hara.common.emit-helper/form-key-base :added "4.0"}
+tahto/common/emit_helper_test.clj:57:^{:refer tahto.common.emit-helper/form-key-base :added "4.0"}
 (fact "gets the key for a form"
 
   (form-key-base :a)
@@ -63,7 +63,7 @@
   (form-key-base ())
   => :expression)
 
-^{:refer hara.common.emit-helper/basic-typed-args :added "4.0"}
+tahto/common/emit_helper_test.clj:66:^{:refer tahto.common.emit-helper/basic-typed-args :added "4.0"}
 (fact "typed args without grammar checks"
 
   (mapv (juxt meta identity)
@@ -71,12 +71,12 @@
   => '[[{:- [:int]} i]
        [{:- [:const :int]} j]])
 
-^{:refer hara.common.emit-helper/emit-typed-allowed-args :added "4.0"}
+tahto/common/emit_helper_test.clj:74:^{:refer tahto.common.emit-helper/emit-typed-allowed-args :added "4.0"}
 (fact "allowed declared args other than symbols"
   (emit-typed-allowed-args [[{:modifiers [:int]}] {:modifiers [:int]}] {:allow {:assign #{:symbol}}})
   => throws)
 
-^{:refer hara.common.emit-helper/emit-typed-args :added "3.0"}
+tahto/common/emit_helper_test.clj:79:^{:refer tahto.common.emit-helper/emit-typed-args :added "3.0"}
 (fact "create types args from declarationns"
 
   (emit-typed-args '(:int i := 9, :const :int j := 10)
@@ -115,13 +115,13 @@
                    {:shorthand true})
   => '[{:modifiers [], :symbol out, :value []}])
 
-^{:refer hara.common.emit-helper/emit-symbol-full :added "4.0"}
+tahto/common/emit_helper_test.clj:118:^{:refer tahto.common.emit-helper/emit-symbol-full :added "4.0"}
 (fact "emits a full symbol"
 
   (emit-symbol-full 'hello 'ns +grammar+)
   => "ns____hello")
 
-^{:refer hara.common.emit-helper/emit-type-record :added "4.0"}
+tahto/common/emit_helper_test.clj:124:^{:refer tahto.common.emit-helper/emit-type-record :added "4.0"}
 (fact "formats to standard"
 
   (emit-type-record {:modifiers [:int]
@@ -129,14 +129,14 @@
   => {:symbol "a", :type "int"})
 
 
-^{:refer hara.common.emit-helper/rest-arg-form? :added "4.1"}
+tahto/common/emit_helper_test.clj:132:^{:refer tahto.common.emit-helper/rest-arg-form? :added "4.1"}
 (fact "recognizes only the canonical final rest argument shape"
   (rest-arg-form? '(:.. args)) => true
   (rest-arg-form? '(:.. "args")) => false
   (rest-arg-form? '(:.. args extra)) => false
   (rest-arg-form? '[:.. args]) => false)
 
-^{:refer hara.common.emit-helper/rest-arg-symbol :added "4.1"}
+tahto/common/emit_helper_test.clj:139:^{:refer tahto.common.emit-helper/rest-arg-symbol :added "4.1"}
 (fact "returns the symbol from a canonical rest argument"
   (rest-arg-symbol '(:.. args)) => 'args
   (rest-arg-symbol '(:.. "args")) => nil)

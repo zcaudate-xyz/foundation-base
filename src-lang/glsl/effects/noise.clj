@@ -1,5 +1,5 @@
 (ns glsl.effects.noise
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :glsl
   glsl.effects.noise

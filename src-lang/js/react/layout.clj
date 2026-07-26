@@ -1,6 +1,6 @@
 (ns js.react.layout
   (:require [clojure.string]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]
             [std.lib.foundation :as f]

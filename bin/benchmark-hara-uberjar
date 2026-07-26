@@ -14,21 +14,21 @@ if ! [[ "$TRIALS" =~ ^[1-9][0-9]*$ ]]; then
   exit 2
 fi
 
-tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/hara-uberjar-bench.XXXXXX")"
+tahto-uberjar:17:tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/tahto-uberjar-bench.XXXXXX")"
 trap 'rm -rf "$tmp_dir"' EXIT
 
 cd "$PROJECT_ROOT"
 
 if [[ "$SKIP_BUILD" == "1" ]]; then
-  echo "Reusing the existing Hara standalone uberjar"
+tahto-uberjar:23:  echo "Reusing the existing Tahto standalone uberjar"
 else
-  echo "Building the Hara standalone uberjar"
-  ./lein hara-uberjar
+tahto-uberjar:25:  echo "Building the Tahto standalone uberjar"
+tahto-uberjar:26:  ./lein tahto-uberjar
 fi
 
-jars=(.build/hara-uberjar/target/hara-*-standalone.jar)
+tahto-uberjar:29:jars=(.build/tahto-uberjar/target/tahto-*-standalone.jar)
 if [[ ${#jars[@]} -ne 1 || ! -f "${jars[0]}" ]]; then
-  echo "Expected exactly one Hara standalone jar, found: ${jars[*]}" >&2
+tahto-uberjar:31:  echo "Expected exactly one Tahto standalone jar, found: ${jars[*]}" >&2
   exit 1
 fi
 
@@ -58,7 +58,7 @@ benchmark() {
 
 echo "Benchmarking fresh JVM startup (${TRIALS} trials per mode)"
 benchmark source env -u CLASSPATH java -cp "$classpath" \
-  clojure.main -m hara.uberjar.main emit js "$INPUT"
+tahto-uberjar:61:  clojure.main -m tahto.uberjar.main emit js "$INPUT"
 benchmark uberjar env -u CLASSPATH java -jar "$jar_path" emit js "$INPUT"
 
 source_avg="$(awk '{sum += $1} END {printf "%.3f", sum / NR}' "$tmp_dir/source.tsv")"

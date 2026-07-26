@@ -1,9 +1,9 @@
-(ns hara.lang.script-def-test
-  (:require [hara.lang.script-def :refer :all]
+(ns tahto.core.script-def-test
+  (:require [tahto.core.script-def :refer :all]
             [std.lib.foundation :as f])
   (:use code.test))
 
-^{:refer  hara.lang.script-def/tmpl-entry :added "4.0"}
+^{:refer  tahto.core.script-def/tmpl-entry :added "4.0"}
 (fact "forms for various argument types"
 
   (f/with:template-meta {:type :fragment
@@ -18,7 +18,7 @@
     (tmpl-entry 'compile))
   => '(def$.js ws-compile Webassembly.compile))
 
-^{:refer  hara.lang.script-def/tmpl-macro :added "4.0"}
+^{:refer  tahto.core.script-def/tmpl-macro :added "4.0"}
 (fact "forms for various argument types"
 
   (f/with:template-meta {:tag "js"}

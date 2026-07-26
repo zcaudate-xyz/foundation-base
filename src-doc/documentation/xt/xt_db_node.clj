@@ -1,5 +1,5 @@
 (ns documentation.xt-db-node
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.db.node.kernel-base :as kernel]
             [xt.lang.common-notify :as notify])
   (:use code.test))

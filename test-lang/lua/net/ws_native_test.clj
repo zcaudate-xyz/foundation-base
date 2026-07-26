@@ -1,5 +1,5 @@
 (ns lua.net.ws-native-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.env :as env])
   (:use code.test))
 

@@ -1,17 +1,17 @@
-(ns hara.runtime.basic.impl.process-glsl-test
-  (:require [hara.lang :as l]
-            [hara.runtime.basic.impl.process-glsl :as glsl]
+tahto/runtime/basic/impl/process_glsl_test.clj:1:(ns tahto.runtime.basic.impl.process-glsl-test
+  (:require [tahto.core :as l]
+tahto/runtime/basic/impl/process_glsl_test.clj:3:            [tahto.runtime.basic.impl.process-glsl :as glsl]
             [std.lib.context.space :as space]
             [std.lib.env :as env]
             [std.string.prose :as prose]
-            [hara.common.util :as ut])
+tahto/runtime/basic/impl/process_glsl_test.clj:7:            [tahto.common.util :as ut])
   (:use code.test))
 
 (l/script :glsl
-  hara.runtime.basic.impl.process-glsl-test
+tahto/runtime/basic/impl/process_glsl_test.clj:11:  tahto.runtime.basic.impl.process-glsl-test
   {:runtime :oneshot})
 
-^{:refer hara.runtime.basic.impl.process-glsl/transform-form-run :added "4.0"}
+tahto/runtime/basic/impl/process_glsl_test.clj:14:^{:refer tahto.runtime.basic.impl.process-glsl/transform-form-run :added "4.0"}
 (fact "prepends a #version directive to emitted shader source"
   (l/emit-as
    :glsl '[(:- "#version 460")
@@ -26,7 +26,7 @@
       "  gl_Position = vec4(pos,1.0);"
       "}"))
 
-^{:refer hara.runtime.basic.impl.process-glsl/glsl-oneshot :added "4.0"}
+tahto/runtime/basic/impl/process_glsl_test.clj:29:^{:refer tahto.runtime.basic.impl.process-glsl/glsl-oneshot :added "4.0"}
 (fact "starts the glsl run runtime in the test namespace"
   (space/space:rt-active (env/ns-sym))
   => (contains [:lang/glsl]))
@@ -41,7 +41,7 @@
         (= 0 (.exitValue process))))
     (catch Throwable _ false)))
 
-^{:refer hara.runtime.basic.impl.process-glsl/transform-form-verify :added "4.0"}
+tahto/runtime/basic/impl/process_glsl_test.clj:44:^{:refer tahto.runtime.basic.impl.process-glsl/transform-form-verify :added "4.0"}
 (fact "prepends a #version directive and normalizes the body"
   (glsl/transform-form-verify '(do (var :uniform :vec3 pos)
                                    (fn main [] (:= gl_Position (:vec4 pos 1.0))))
@@ -53,7 +53,7 @@
   (glsl/transform-form-verify nil {})
   => '[(:- "#version 460") (do)])
 
-^{:refer hara.runtime.basic.impl.process-glsl/rt-glsl:create :added "4.0"}
+tahto/runtime/basic/impl/process_glsl_test.clj:56:^{:refer tahto.runtime.basic.impl.process-glsl/rt-glsl:create :added "4.0"}
 (fact "creates a glsl run runtime with default program and exec"
   (let [rt (glsl/rt-glsl:create {:lang :glsl :runtime :oneshot})]
     (and (record? rt)
@@ -68,7 +68,7 @@
  {:skip (not (and (env/program-exists? "gcc")
                   (egl-available?)))})
 
-^{:refer hara.runtime.basic.impl.process-glsl/!.gl :added "4.0"}
+tahto/runtime/basic/impl/process_glsl_test.clj:71:^{:refer tahto.runtime.basic.impl.process-glsl/!.gl :added "4.0"}
 (fact "runs a simple fragment shader through the runtime"
   (do (defrun.gl test-shader
         (fn ^{:- [:void]} main []
@@ -79,14 +79,14 @@
   => true)
 
 
-^{:refer hara.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.0"}
+tahto/runtime/basic/impl/process_glsl_test.clj:82:^{:refer tahto.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.0"}
 (fact "compiles and runs a simple C program"
   (glsl/glsl-sh-exec ["gcc"]
                      "#include <stdio.h>\nint main(){printf(\"hello\");return 0;}"
                      {:extension "c"})
   => "hello")
 
-^{:refer hara.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.0"
+tahto/runtime/basic/impl/process_glsl_test.clj:89:^{:refer tahto.runtime.basic.impl.process-glsl/glsl-sh-exec :added "4.0"
   :id test-glsl-sh-exec-compile-failure}
 (fact "returns stderr output on compile failure when stderr is enabled"
   (string? (glsl/glsl-sh-exec ["gcc"]
@@ -94,14 +94,14 @@
                               {:extension "c" :stderr true}))
   => true)
 
-^{:refer hara.runtime.basic.impl.process-glsl/raw-eval-glsl :added "4.0"}
+tahto/runtime/basic/impl/process_glsl_test.clj:97:^{:refer tahto.runtime.basic.impl.process-glsl/raw-eval-glsl :added "4.0"}
 (fact "compiles and runs a generated C body through the runtime"
   (let [rt (glsl/rt-glsl:create {:lang :glsl :runtime :oneshot})]
     (glsl/raw-eval-glsl rt
                         "#include <stdio.h>\nint main(){printf(\"raw\");return 0;}"))
   => "raw")
 
-^{:refer hara.runtime.basic.impl.process-glsl/invoke-ptr-glsl :added "4.0"}
+tahto/runtime/basic/impl/process_glsl_test.clj:104:^{:refer tahto.runtime.basic.impl.process-glsl/invoke-ptr-glsl :added "4.0"}
 (fact "invokes a glsl pointer through the run harness"
   (let [rt (glsl/rt-glsl:create {:lang :glsl :runtime :oneshot})
         ptr (ut/lang-pointer :glsl

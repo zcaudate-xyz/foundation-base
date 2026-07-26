@@ -2,7 +2,7 @@
  * Copyright 2018 Transposit Corporation. All Rights Reserved.
  */
 
-package hara.lib.graal;
+package newlisp.lib.graal;
 
 import org.graalvm.polyglot.PolyglotException;
 

@@ -1,6 +1,6 @@
 (ns play.tui-001-fetch.build
   (:use [code.test :exclude [-main]])
-  (:require [hara.lang :as  l]
+  (:require [tahto.core :as  l]
             [std.lib :as h]
             [std.make :as make :refer [def.make]]
             [js.webpack :as webpack]

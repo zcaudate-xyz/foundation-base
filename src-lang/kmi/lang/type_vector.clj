@@ -1,5 +1,5 @@
 (ns kmi.lang.type-vector
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [vector]))
 
 (l/script :xtalk

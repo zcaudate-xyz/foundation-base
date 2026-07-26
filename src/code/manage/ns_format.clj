@@ -318,7 +318,7 @@
     :print {:function true}})
 
   (code.manage/refactor-code
-   '[hara]
+   '[tahto]
    {:edits [;ns:merge-forms
             ;ns:sort-forms
             ;use:merge-forms

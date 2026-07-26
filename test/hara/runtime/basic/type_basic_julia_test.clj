@@ -1,9 +1,9 @@
-(ns hara.runtime.basic.type-basic-julia-test
+tahto/runtime/basic/type_basic_julia_test.clj:1:(ns tahto.runtime.basic.type-basic-julia-test
   (:use code.test)
   (:require [std.lib.env :as env]
-            [hara.lang :as l]
-            [hara.lang.script :as script]
-            [hara.model.annex.spec-julia :refer :all]))
+            [tahto.core :as l]
+            [tahto.core.script :as script]
+tahto/runtime/basic/type_basic_julia_test.clj:6:            [tahto.model.annex.spec-julia :refer :all]))
 
 (script/script- :julia
   {:runtime :basic
@@ -45,5 +45,5 @@
   => 16)
 
 (comment
-  (hara.lang/rt:restart)
+  (tahto.core/rt:restart)
   )

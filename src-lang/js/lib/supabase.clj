@@ -1,7 +1,7 @@
 (ns js.lib.supabase
   (:require [net.http :as http]
             [std.json :as json]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template]

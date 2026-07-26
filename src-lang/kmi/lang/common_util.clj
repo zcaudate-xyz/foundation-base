@@ -1,5 +1,5 @@
 (ns kmi.lang.common-util
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [hash count pop nth assoc dissoc to-array find empty keyword symbol vector]))
 
 (l/script :xtalk

@@ -1,5 +1,5 @@
 (ns js.tamagui.ui-input
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:import [["tamagui" :as [* Tamagui]]]

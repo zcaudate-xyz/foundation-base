@@ -1,5 +1,5 @@
 (ns js.react-native.expo-router
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :js

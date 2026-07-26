@@ -53,7 +53,7 @@
 (defn build-prep
   "prepares the build
  
-   (build-prep 'hara.lang)
+   (build-prep 'tahto.core)
    => vector?"
   {:added "4.0"}
   ([ns]
@@ -109,10 +109,10 @@
 
 
 (comment
-  (build-output {:ns 'hara.lang
+  (build-output {:ns 'tahto.core
                  :root ".build"
-                 :build "hara.lang"})
-  (build-output 'hara.lang)
+                 :build "tahto.core"})
+  (build-output 'tahto.core)
   (build-clean 'app.jvm.resp-repl.main)
   
   (build-output 'app.jvm.resp-repl.main)
@@ -131,7 +131,7 @@
   (def -out- '{:main  demo.resp-repl
                :extra [["src-play/demo/resp_repl.clj" "demo/resp_repl.clj"]]
                :package "demo"
-               :deps [hara/net.resp]})
+               :deps [tahto/net.resp]})
   )
 
 

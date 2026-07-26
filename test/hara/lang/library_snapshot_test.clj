@@ -1,17 +1,17 @@
-(ns hara.lang.library-snapshot-test
-  (:require [hara.lang.book :as b]
-            [hara.lang.book-entry :as e]
-            [hara.lang.book-meta :as meta]
-            [hara.lang.book-module :as m]
-            [hara.lang.impl-entry :as entry]
-            [hara.lang.library-snapshot :as snap]
-            [hara.lang.library-snapshot-prep-test :as prep]
-            [hara.model.spec-lua :as lua]
+(ns tahto.core.library-snapshot-test
+  (:require [tahto.base.book :as b]
+            [tahto.base.book-entry :as e]
+            [tahto.base.book-meta :as meta]
+            [tahto.base.book-module :as m]
+            [tahto.core.impl-entry :as entry]
+            [tahto.core.library-snapshot :as snap]
+            [tahto.core.library-snapshot-prep-test :as prep]
+tahto/lang/library_snapshot_test.clj:9:            [tahto.model.spec-lua :as lua]
             [std.lib.deps :as deps]
             [std.lib.env :as env])
   (:use code.test))
 
-^{:refer hara.lang.library-snapshot/get-deps :added "4.0"}
+^{:refer tahto.core.library-snapshot/get-deps :added "4.0"}
 (fact "gets a dependency chain"
 
   (snap/get-deps prep/+snap+ :lua)
@@ -26,25 +26,25 @@
   (deps/deps-ordered prep/+snap+ [:lua])
   => '(:x :lua))
 
-^{:refer hara.lang.library-snapshot/snapshot-string :added "4.0"}
+^{:refer tahto.core.library-snapshot/snapshot-string :added "4.0"}
 (fact "gets the snapshot string"
 
   (snap/snapshot-string prep/+snap+)
   => "#lib.snapshot [:lua :lua.redis :x]")
 
-^{:refer hara.lang.library-snapshot/snapshot? :added "4.0"}
+^{:refer tahto.core.library-snapshot/snapshot? :added "4.0"}
 (fact "checks if object is a snapshot"
 
   (snap/snapshot? prep/+snap+)
   => true)
 
-^{:refer hara.lang.library-snapshot/snapshot :added "4.0"}
+^{:refer tahto.core.library-snapshot/snapshot :added "4.0"}
 (fact "creates a snapshot"
 
   (snap/snapshot {})
   => snap/snapshot?)
 
-^{:refer hara.lang.library-snapshot/snapshot-reset :added "4.0"}
+^{:refer tahto.core.library-snapshot/snapshot-reset :added "4.0"}
 (fact "resets a snapshot to it's blanked modules"
 
   (-> (snap/snapshot-reset prep/+snap+)
@@ -55,7 +55,7 @@
       keys)
   => '(:lua))
 
-^{:refer hara.lang.library-snapshot/snapshot-merge :added "4.0"}
+^{:refer tahto.core.library-snapshot/snapshot-merge :added "4.0"}
 (fact "a rough merge of only the modules from the child to the parent"
 
   (snap/snapshot-merge nil prep/+snap+)
@@ -67,7 +67,7 @@
   (snap/snapshot-merge prep/+snap+ prep/+snap+)
   => map?)
 
-^{:refer hara.lang.library-snapshot/get-book-raw :added "4.0"}
+^{:refer tahto.core.library-snapshot/get-book-raw :added "4.0"}
 (fact "gets the raw book"
 
   (-> (snap/get-book-raw prep/+snap+ :lua)
@@ -80,7 +80,7 @@
       keys)
   => nil)
 
-^{:refer hara.lang.library-snapshot/get-book :added "4.0"}
+^{:refer tahto.core.library-snapshot/get-book :added "4.0"}
 (fact "gets the merged book for a given language"
 
   (-> (snap/get-book prep/+snap+ :lua.redis)
@@ -89,7 +89,7 @@
       set)
   => '#{L.core x.core})
 
-^{:refer hara.lang.library-snapshot/add-book :added "4.0"}
+^{:refer tahto.core.library-snapshot/add-book :added "4.0"}
 (fact "adds a book to a snapshot"
 
   (-> (snap/add-book (snap/snapshot {})
@@ -97,7 +97,7 @@
       (keys))
   => '(:x))
 
-^{:refer hara.lang.library-snapshot/set-module :added "4.0"}
+^{:refer tahto.core.library-snapshot/set-module :added "4.0"}
 (fact "sets a module in the snapshot"
 
   (-> (snap/set-module prep/+snap+
@@ -110,7 +110,7 @@
       (b/book-string))
   => "#book [:lua.redis] {L.redis {:code 0, :fragment 0}}")
 
-^{:refer hara.lang.library-snapshot/delete-module :added "4.0"}
+^{:refer tahto.core.library-snapshot/delete-module :added "4.0"}
 (fact "deletes a module in the snapshot"
 
   (-> (snap/delete-module prep/+snap+
@@ -120,7 +120,7 @@
       (b/book-string))
   => "#book [:lua] {}")
 
-^{:refer hara.lang.library-snapshot/delete-modules :added "4.0"}
+^{:refer tahto.core.library-snapshot/delete-modules :added "4.0"}
 (fact  "deletes a bunch of modules in the snapshot"
   (-> (snap/delete-modules prep/+snap+ :lua ['L.core])
       second
@@ -128,13 +128,13 @@
       (b/book-string))
   => "#book [:lua] {}")
 
-^{:refer hara.lang.library-snapshot/list-modules :added "4.0"}
+^{:refer tahto.core.library-snapshot/list-modules :added "4.0"}
 (fact "list modules for a snapshot"
 
   (set (snap/list-modules prep/+snap+ :lua))
   => '#{L.core x.core})
 
-^{:refer hara.lang.library-snapshot/list-entries :added "4.0"}
+^{:refer tahto.core.library-snapshot/list-entries :added "4.0"}
 (fact "lists entries for a snapshot"
 
   (set (snap/list-entries prep/+snap+ :lua))
@@ -146,7 +146,7 @@
   (snap/list-entries prep/+snap+ :x 'x.core :code)
   => '(identity-fn))
 
-^{:refer hara.lang.library-snapshot/set-entry :added "4.0"}
+^{:refer tahto.core.library-snapshot/set-entry :added "4.0"}
 (fact "stores raw entries and materializes them through the merged book view"
 
   (-> (snap/set-entry prep/+snap+
@@ -177,7 +177,7 @@
                    {}))
   => (throws))
 
-^{:refer hara.lang.library-snapshot/set-entries :added "4.0"
+^{:refer tahto.core.library-snapshot/set-entries :added "4.0"
   :setup [(def +snap-mixed+
             (-> prep/+snap+
                 (snap/set-entries [(entry/create-fragment
@@ -246,7 +246,7 @@
                        :module 'L.core})])
   => (throws))
 
-^{:refer hara.lang.library-snapshot/delete-entry :added "4.0"}
+^{:refer tahto.core.library-snapshot/delete-entry :added "4.0"}
 (fact "deletes an entry from the snapshot"
 
   (-> prep/+snap+
@@ -262,7 +262,7 @@
       first)
   => '([[:modules L.core :code identity-fn] nil]))
 
-^{:refer hara.lang.library-snapshot/delete-entries :added "4.0"}
+^{:refer tahto.core.library-snapshot/delete-entries :added "4.0"}
 (fact "delete entries from the snapshot"
 
   (-> prep/+snap+
@@ -275,16 +275,16 @@
       (b/list-entries))
   => ())
 
-^{:refer hara.lang.library-snapshot/install-check-merged :added "4.0"}
+^{:refer tahto.core.library-snapshot/install-check-merged :added "4.0"}
 (fact "checks that the book is not merged (used to check mutate)"
   (snap/install-check-merged {:merged [1]}) => nil)
 
-^{:refer hara.lang.library-snapshot/install-module-update :added "4.0"}
+^{:refer tahto.core.library-snapshot/install-module-update :added "4.0"}
 (fact "updates the book module"
   (snap/install-module-update (b/book {:lang :lua :meta {:a 1} :grammar {:a 1} :modules {}}) {:id :lua :code {}})
   => vector?)
 
-^{:refer hara.lang.library-snapshot/install-module :added "4.0"}
+^{:refer tahto.core.library-snapshot/install-module :added "4.0"}
 (fact "adds an new module or update fields if exists"
 
   (snap/install-module prep/+snap+
@@ -298,7 +298,7 @@
                                   ["world" :as world]]})
   => vector?)
 
-^{:refer hara.lang.library-snapshot/install-module-specialized :added "4.1"}
+^{:refer tahto.core.library-snapshot/install-module-specialized :added "4.1"}
 (fact "adds a specialized module clone to the snapshot"
   (let [[snapshot status module] (snap/install-module-specialized
                                   prep/+snap+
@@ -311,12 +311,12 @@
      (get-in module [:link '-])])
   => [:new 'L.core-specialized 'L.core-specialized])
 
-^{:refer hara.lang.library-snapshot/install-book-update :added "4.0"}
+^{:refer tahto.core.library-snapshot/install-book-update :added "4.0"}
 (fact "updates the book grammar, meta and parent"
   (snap/install-book-update prep/+snap+ {:lang :lua :grammar {:a 1} :meta {:a 1} :parent :x})
   => vector?)
 
-^{:refer hara.lang.library-snapshot/install-book :added "4.0"}
+^{:refer tahto.core.library-snapshot/install-book :added "4.0"}
 (fact "adds a new book or updates grammar if exists"
 
   (snap/install-book prep/+snap+

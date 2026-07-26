@@ -1,4 +1,4 @@
-package hara.lib.foundation;
+package newlisp.lib.foundation;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ThreadLocalRandom;
@@ -8,7 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * ------------------------------------------------
  *
  * This is an implementation of a 192-bits unique ids which has the
- * following characteristics:
+tahto/lib/foundation/Flake.java:11: * following ctahtocteristics:
  *
  *  - **Monotonic IDs**
  *    Every new ID is larger than the previous one. The idea is that the
@@ -39,7 +39,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *    as defined in https://en.wikipedia.org/wiki/Base64.
  *
  *  - **Web-safe string representation**
- *    The string representation uses only characters which are web-safe and can
+tahto/lib/foundation/Flake.java:42: *    The string representation uses only ctahtocters which are web-safe and can
  *    be put in a URL without the need of URL encoding.
  *
  *  - **Fast**, speed is important so we target under 50 nanosecond for 1 id.
@@ -200,14 +200,14 @@ public class Flake implements Comparable<Flake> {
      *
      * It uses a custom Base64 encoding to ensure the homomorphic property
      *
-     * It also uses a set of characters which can be safely used in a web
+tahto/lib/foundation/Flake.java:203:     * It also uses a set of ctahtocters which can be safely used in a web
      * context without requiring URL encoding as defined by:
      * https://tools.ietf.org/html/rfc3986#section-2.3
      *
-     * We use 64 characters because it is a natural power of 2.
+tahto/lib/foundation/Flake.java:207:     * We use 64 ctahtocters because it is a natural power of 2.
      * To represent 64 combination we need 6 bits. Therefore
      * the general strategy to convert the flake into a base 64 string
-     * is to grab 6 bits at the time and map them directly their character.
+tahto/lib/foundation/Flake.java:210:     * is to grab 6 bits at the time and map them directly their ctahtocter.
      * In order to do so it is easier to work with bytes instead of long (64bits),
      * because every 3 bytes you have exactly 4 6-bits chunks.
      * the following algorithms takes a flake in bytes representations and

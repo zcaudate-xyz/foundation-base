@@ -1,22 +1,22 @@
-(ns hara.model.spec-js-test
-  (:require [hara.lang :as l]
-            [hara.model.spec-js :refer :all]
+tahto/model/spec_js_test.clj:1:(ns tahto.model.spec-js-test
+  (:require [tahto.core :as l]
+tahto/model/spec_js_test.clj:3:            [tahto.model.spec-js :refer :all]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer hara.model.spec-js/emit-html :added "4.0"}
+tahto/model/spec_js_test.clj:7:^{:refer tahto.model.spec-js/emit-html :added "4.0"}
 (fact "emits html"
 
   (emit-html [:hello] +grammar+ {})
   => "<hello></hello>")
 
-^{:refer hara.model.spec-js/js-regex :added "4.0"}
+tahto/model/spec_js_test.clj:13:^{:refer tahto.model.spec-js/js-regex :added "4.0"}
 (fact "outputs the js regex"
 
   (js-regex #"abc")
   => "/abc/")
 
-^{:refer hara.model.spec-js/js-map-key :added "4.0"}
+tahto/model/spec_js_test.clj:19:^{:refer tahto.model.spec-js/js-map-key :added "4.0"}
 (fact "emits a map key"
 
   (js-map-key 'hello +grammar+ {})
@@ -31,7 +31,7 @@
   (js-map-key :hello-world +grammar+ {})
   => "\"hello_world\"")
 
-^{:refer hara.model.spec-js/js-vector :added "4.0"}
+tahto/model/spec_js_test.clj:34:^{:refer tahto.model.spec-js/js-vector :added "4.0"}
 (fact "emits a js vector"
 
   (js-vector [1 2 3 4] +grammar+ {})
@@ -40,7 +40,7 @@
   (js-vector [:div {} "hello"] +grammar+ {})
   => "(\n  <div>hello</div>)")
 
-^{:refer hara.model.spec-js/js-map :added "4.0"}
+tahto/model/spec_js_test.clj:43:^{:refer tahto.model.spec-js/js-map :added "4.0"}
 (fact "emits a js map"
 
   (js-map {:hello-world "hello"} +grammar+ {})
@@ -50,7 +50,7 @@
              '[{:# [hello-world]}])
   => "{hello_world}")
 
-^{:refer hara.model.spec-js/js-set :added "4.0"}
+tahto/model/spec_js_test.clj:53:^{:refer tahto.model.spec-js/js-set :added "4.0"}
 (fact "emits a js set"
 
   (js-set '#{...x y {:a 1 :b 2}} +grammar+ {})
@@ -62,10 +62,10 @@
   (js-set '#{[...x y (% a) 1 :b 2]} +grammar+ {})
   => "(tab ...x y (% a) 1 :b 2)")
 
-^{:refer hara.model.spec-js/js-defclass :added "4.0"}
+tahto/model/spec_js_test.clj:65:^{:refer tahto.model.spec-js/js-defclass :added "4.0"}
 (fact "creates a defclass function"
 
-  (hara.lang/emit-as
+  (tahto.core/emit-as
    :js [(js-defclass '(defclass.js Try
                         [:- React.Component]
 
@@ -101,26 +101,26 @@
       "  }"
       "}"))
 
-^{:refer hara.model.spec-js/js-tf-var-let :added "4.0"}
+tahto/model/spec_js_test.clj:104:^{:refer tahto.model.spec-js/js-tf-var-let :added "4.0"}
 (fact "outputs the let keyword"
 
   (js-tf-var-let '(var a 1))
   => '(var* :let a := 1))
 
-^{:refer hara.model.spec-js/js-tf-var-const :added "4.0"}
+tahto/model/spec_js_test.clj:110:^{:refer tahto.model.spec-js/js-tf-var-const :added "4.0"}
 (fact "outputs the const keyword"
 
   (js-tf-var-const '(const a 1))
   => '(var* :const a := 1))
 
-^{:refer hara.model.spec-js/js-tf-for-object :added "4.0"}
+tahto/model/spec_js_test.clj:116:^{:refer tahto.model.spec-js/js-tf-for-object :added "4.0"}
 (fact "custom for:object code"
 
   (js-tf-for-object '(for:object [[k v] {:a 1}]
                               [k v]))
   => '(for [(var* :let [k v]) :of (Object.entries {:a 1})] [k v]))
 
-^{:refer hara.model.spec-js/js-tf-for-array :added "4.0"}
+tahto/model/spec_js_test.clj:123:^{:refer tahto.model.spec-js/js-tf-for-array :added "4.0"}
 (fact "custom for:array code"
 
   (js-tf-for-array '(for:array [e [1 2 3 4 5]]
@@ -132,7 +132,7 @@
   => '(for [(var* :let i := 0) (< i (. arr length))
             (:++ i)] (var* :let e (. arr [i])) [k v]))
 
-^{:refer hara.model.spec-js/js-tf-for-iter :added "4.0"}
+tahto/model/spec_js_test.clj:135:^{:refer tahto.model.spec-js/js-tf-for-iter :added "4.0"}
 (fact "custom for:iter code"
 
   (js-tf-for-iter '(for:iter [e iter]
@@ -140,16 +140,16 @@
   => '(for [(var* :let e) :of (% iter)] e))
 
 
-^{:refer hara.model.spec-js/js-tf-prototype-create :added "4.1"}
+tahto/model/spec_js_test.clj:143:^{:refer tahto.model.spec-js/js-tf-prototype-create :added "4.1"}
 (fact "creates js prototypes")
 
-^{:refer hara.model.spec-js/js-tf-prototype-method :added "4.1"}
+tahto/model/spec_js_test.clj:146:^{:refer tahto.model.spec-js/js-tf-prototype-method :added "4.1"}
 (fact "calls js prototype methods")
 
 
-^{:refer hara.model.spec-js/js-emit-input-rest :added "4.1"}
+tahto/model/spec_js_test.clj:150:^{:refer tahto.model.spec-js/js-emit-input-rest :added "4.1"}
 (fact "emits a JavaScript variadic parameter"
-  (with-redefs [hara.common.emit-common/*emit-fn*
+tahto/model/spec_js_test.clj:152:  (with-redefs [tahto.common.emit-common/*emit-fn*
                 (fn [symbol _ _] (name symbol))]
     (js-emit-input-rest {:symbol 'args} nil nil))
   => "...args")

@@ -1,9 +1,9 @@
-(ns hara.model.annex.spec-rust-more-test
+tahto/model/spec_rust_more_test.clj:1:(ns tahto.model.annex.spec-rust-more-test
   (:require [std.fs :as fs]
-            [hara.lang :as l]
-            [hara.lang.script :as script]
-            [hara.common.util :as ut]
-            [hara.model.annex.spec-rust :refer :all])
+            [tahto.core :as l]
+            [tahto.core.script :as script]
+tahto/model/spec_rust_more_test.clj:5:            [tahto.common.util :as ut]
+tahto/model/spec_rust_more_test.clj:6:            [tahto.model.annex.spec-rust :refer :all])
   (:use code.test))
 
 (script/script- :rust

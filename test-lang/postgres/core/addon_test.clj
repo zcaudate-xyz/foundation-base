@@ -2,7 +2,7 @@
   (:require [postgres.core :as pg]
             [postgres.core.addon :as addon]
             [postgres.sample.scratch-v1 :as scratch]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :postgres

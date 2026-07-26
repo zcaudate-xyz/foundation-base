@@ -1,16 +1,16 @@
-(ns hara.lang.script-test
+(ns tahto.core.script-test
   (:require [lua.core]
-             [hara.lang :as l]
-             [hara.lang.book :as book]
-             [hara.common.emit-prep-lua-test :as prep-lua]
-             [hara.lang.impl :as impl]
-             [hara.lang.library :as lib]
-             [hara.lang.library-snapshot :as snap]
-             [hara.lang.runtime :as rt]
-             [hara.lang.script :as script]
-             [hara.model.spec-js :as js]
-             [hara.model.spec-lua :as lua]
-             [hara.model.spec-xtalk :as xtalk]
+             [tahto.core :as l]
+             [tahto.base.book :as book]
+tahto/lang/script_test.clj:5:             [tahto.common.emit-prep-lua-test :as prep-lua]
+             [tahto.core.impl :as impl]
+             [tahto.core.library :as lib]
+             [tahto.core.library-snapshot :as snap]
+             [tahto.core.runtime :as rt]
+             [tahto.core.script :as script]
+tahto/lang/script_test.clj:11:             [tahto.model.spec-js :as js]
+tahto/lang/script_test.clj:12:             [tahto.model.spec-lua :as lua]
+tahto/lang/script_test.clj:13:             [tahto.model.spec-xtalk :as xtalk]
              [std.lib.env :as env])
   (:use code.test))
 
@@ -57,22 +57,22 @@
                                :highlights []})
   => '[#{} #{}])
 
-^{:refer hara.lang.script/install :added "4.0"}
+^{:refer tahto.core.script/install :added "4.0"}
 (fact "installs a language"
 
   (impl/with:library [+library+]
-    (binding [*ns* (the-ns 'hara.model.spec-lua)]
+tahto/lang/script_test.clj:64:    (binding [*ns* (the-ns 'tahto.model.spec-lua)]
       (script/install lua/+book+)))
   => vector?)
 
-^{:refer hara.lang.script/script-ns-import :added "4.0"}
+^{:refer tahto.core.script/script-ns-import :added "4.0"}
 (fact "imports the namespace and sets a primary flag"
 
   (impl/with:library [+library+]
     (script/script-ns-import {:require '[[xt.lang.common-data :as xtd :primary true]]}))
   => '#{xt.lang.common-data})
 
-^{:refer hara.lang.script/script-macro-import :added "4.0"}
+^{:refer tahto.core.script/script-macro-import :added "4.0"}
 (fact "import macros into the namespace"
 
   (impl/with:library [+library+]
@@ -80,7 +80,7 @@
                                             :lua)))
   => vector?)
 
-^{:refer hara.lang.script/script-require-target-id :added "4.1"}
+^{:refer tahto.core.script/script-require-target-id :added "4.1"}
 (fact "constructs a target module id from module, source, and alias"
 
   (script/script-require-target-id 'my.module 'source.core nil)
@@ -92,7 +92,7 @@
   (script/script-require-target-id 'my.module 'source.core '[prefix src])
   => 'my.module.src)
 
-^{:refer hara.lang.script/script-specialize-merge-contracts :added "4.1"}
+^{:refer tahto.core.script/script-specialize-merge-contracts :added "4.1"}
 (fact "merges specialization bindings into a contract map"
 
   (script/script-specialize-merge-contracts :demo 'current {}
@@ -110,7 +110,7 @@
                                                           :bindings {'contract.core 'alt.core}}})
   => (throws))
 
-^{:refer hara.lang.script/script-specialize-require :added "4.1"}
+^{:refer tahto.core.script/script-specialize-require :added "4.1"}
 (fact "resolves a specialization require spec"
 
   (let [lib (lib/library:create {})]
@@ -128,7 +128,7 @@
                                  :backend-lang :lua
                                  :target demo.current.src}}})
 
-^{:refer hara.lang.script/script-specialize-config :added "4.1"}
+^{:refer tahto.core.script/script-specialize-config :added "4.1"}
 (fact "processes config require specs for specialization"
 
   (let [lib (lib/library:create {})]
@@ -148,35 +148,35 @@
                                  :backend-lang :lua
                                  :target demo.current.src}}})
 
-^{:refer hara.lang.script/script-fn-base :added "4.0"}
+^{:refer tahto.core.script/script-fn-base :added "4.0"}
 (fact "setup for the runtime"
 
   (impl/with:library [+library+]
     (binding [book/*skip-check* true]
-      (keys (script/script-fn-base :lua 'hara.lang.script-test
+      (keys (script/script-fn-base :lua 'tahto.core.script-test
                                    {:require '[[xt.lang.common-data :as xtd]]}
                                    (l/runtime-library)))))
   => (contains [:module :module/internal :module/primary]))
 
-^{:refer hara.lang.script/script-fn :added "4.0"}
+^{:refer tahto.core.script/script-fn :added "4.0"}
 (fact "calls the regular setup script for the namespace"
 
   (script/script-fn :lua)
   => map?)
 
-^{:refer hara.lang.script/script :added "4.0"}
+^{:refer tahto.core.script/script :added "4.0"}
 (fact "script macro"
 
   (script/script :lua)
   => map?)
 
-^{:refer hara.lang.script/script-test-prep :added "4.0"}
+^{:refer tahto.core.script/script-test-prep :added "4.0"}
 (fact "preps the current namespace"
 
   (script/script-test-prep :js {})
-  => (contains {:module 'hara.lang.script-test}))
+  => (contains {:module 'tahto.core.script-test}))
 
-^{:refer hara.lang.script/resolve-runtime-config :added "4.1"}
+^{:refer tahto.core.script/resolve-runtime-config :added "4.1"}
 (fact "resolves quoted vars, symbols, forms, and config keys"
 
   (script/resolve-runtime-config '+runtime-config+)
@@ -193,19 +193,19 @@
   => (contains {:port 17001
                 :startup {:args ["/bin/sh" "-lc" "ready"]}}))
 
-^{:refer hara.lang.script/script-test :added "4.0"}
+^{:refer tahto.core.script/script-test :added "4.0"}
 (fact "the `script-` function call"
 
   (script/script-test :js {})
   => map?)
 
-^{:refer hara.lang.script/script- :added "4.0"}
+^{:refer tahto.core.script/script- :added "4.0"}
 (fact "macro for test setup"
 
   (script/script- :lua)
   => map?)
 
-^{:refer hara.lang.script/script-test-mode? :added "4.0"}
+^{:refer tahto.core.script/script-test-mode? :added "4.0"}
 (fact "detects test mode from :test-mode and eval-mode"
 
   (script/script-test-mode? {})
@@ -222,24 +222,24 @@
     (script/script-test-mode? {}))
   => false)
 
-^{:refer hara.lang.script/script-ext :added "4.0"}
+^{:refer tahto.core.script/script-ext :added "4.0"}
 (fact "the `script+` function call"
 
   (script/script-ext [:LUA.1 :lua] {:runtime :oneshot})
   => vector?)
 
-^{:refer hara.lang.script/script+ :added "4.0"}
+^{:refer tahto.core.script/script+ :added "4.0"}
 (fact "macro for test extension setup"
 
   (script/script+ [:LUA.2 :lua] {:runtime :oneshot})
   => vector?)
 
-^{:refer hara.lang.script/script-ext-run :added "4.0"}
+^{:refer tahto.core.script/script-ext-run :added "4.0"}
 (fact "function to call with the `!` macro"
   (script/script-ext-run (env/ns-sym) :LUA.0 '(return 1) {})
   => 1)
 
-^{:refer hara.lang.script/! :added "4.0"}
+^{:refer tahto.core.script/! :added "4.0"}
 (fact "switch between defined annex envs"
 
   (l/! [:LUA.0] (xtd/arr-map [1 2 3 4]
@@ -250,13 +250,13 @@
                                  (fn:> [x] (+ x 1))))
   => (throws))
 
-^{:refer hara.lang.script/annex:start :added "4.0"}
+^{:refer tahto.core.script/annex:start :added "4.0"}
 (fact "starts an annex tag"
 
   (script/annex:start :LUA.0)
   => vector?)
 
-^{:refer hara.lang.script/annex:get :added "4.0"}
+^{:refer tahto.core.script/annex:get :added "4.0"}
 (fact "gets the runtime associated with an annex"
 
   (script/annex:get :LUA.0)
@@ -266,32 +266,32 @@
       :library)
   => some?)
 
-^{:refer hara.lang.script/annex:stop :added "4.0"
+^{:refer tahto.core.script/annex:stop :added "4.0"
   :setup [(script/annex:start :LUA.0)]}
 (fact "stops an annex tag"
 
   (script/annex:stop :LUA.0)
   => map?)
 
-^{:refer hara.lang.script/annex:start-all :added "4.0"}
+^{:refer tahto.core.script/annex:start-all :added "4.0"}
 (fact "starts all the annex tags"
 
   (script/annex:start-all)
   => map?)
 
-^{:refer hara.lang.script/annex:stop-all :added "4.0"}
+^{:refer tahto.core.script/annex:stop-all :added "4.0"}
 (fact "stops all annexs"
 
   (script/annex:stop-all)
   => map?)
 
-^{:refer hara.lang.script/annex:restart-all :added "4.0"}
+^{:refer tahto.core.script/annex:restart-all :added "4.0"}
 (fact "stops and starts all annex runtimes"
 
   (script/annex:restart-all)
   => map?)
 
-^{:refer hara.lang.script/annex:list :added "4.0"
+^{:refer tahto.core.script/annex:list :added "4.0"
   :setup [(script/annex:stop-all)]}
 (fact "lists all annexs"
 

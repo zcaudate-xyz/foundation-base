@@ -1,21 +1,21 @@
-(ns hara.runtime.basic.docker.registry-test
+tahto/runtime/basic/docker/registry_test.clj:1:(ns tahto.runtime.basic.docker.registry-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [hara.runtime.basic.docker.registry :refer :all]))
+tahto/runtime/basic/docker/registry_test.clj:4:            [tahto.runtime.basic.docker.registry :refer :all]))
 
-^{:refer hara.runtime.basic.docker.registry/r-bootstrap :added "4.1"}
+tahto/runtime/basic/docker/registry_test.clj:6:^{:refer tahto.runtime.basic.docker.registry/r-bootstrap :added "4.1"}
 (fact "wraps the R bootstrap with jsonlite installation"
   (str/includes? (r-bootstrap 1234 {:host "host.docker.internal"})
                  "install.packages('jsonlite')")
   => true)
 
-^{:refer hara.runtime.basic.docker.registry/registry-dockerfile-path :added "4.1"}
+tahto/runtime/basic/docker/registry_test.clj:12:^{:refer tahto.runtime.basic.docker.registry/registry-dockerfile-path :added "4.1"}
 (fact "resolves repo-local Dockerfile paths for each registered language"
   (every? #(str/ends-with? (registry-dockerfile-path %) "/Dockerfile")
           [:python :js :ruby :php :perl :lua :julia :r :erlang :blender :gimp])
   => true)
 
-^{:refer hara.runtime.basic.docker.registry/registry-config :added "4.1"}
+tahto/runtime/basic/docker/registry_test.clj:18:^{:refer tahto.runtime.basic.docker.registry/registry-config :added "4.1"}
 (fact "returns runtime config for canonical basic images"
   [(-> (registry-config :python) :container :image)
    (-> (registry-config :lua) :container :image)
@@ -28,7 +28,7 @@
       120000
       ["sh" "-c"]])
 
-^{:refer hara.runtime.basic.docker.registry/registry-image :added "4.1"}
+tahto/runtime/basic/docker/registry_test.clj:31:^{:refer tahto.runtime.basic.docker.registry/registry-image :added "4.1"}
 (fact "returns canonical repo-owned images for all basic runtimes"
   (mapv registry-image [:python :js :ruby :php :perl :lua :julia :r :erlang :blender :gimp])
   => ["ghcr.io/zcaudate-xyz/foundation-base/rt-basic-python:latest"
@@ -43,7 +43,7 @@
       "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest"
       "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-gimp:latest"])
 
-^{:refer hara.runtime.basic.docker.registry/registry-dockerfile :added "4.1"}
+tahto/runtime/basic/docker/registry_test.clj:46:^{:refer tahto.runtime.basic.docker.registry/registry-dockerfile :added "4.1"}
 (fact "returns dockerfile source for each registered language"
   (every? #(str/includes? (registry-dockerfile %) "FROM")
           [:python

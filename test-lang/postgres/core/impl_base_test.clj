@@ -1,10 +1,10 @@
 (ns postgres.core.impl-base-test
   (:require [postgres.core]
-            [hara.runtime.postgres.base.application :as app]
+            [tahto.runtime.postgres.base.application :as app]
             [postgres.core.impl-base :refer :all]
             [postgres.sample.scratch-v1 :as scratch]
-            [hara.lang :as l]
-            [hara.lang.book :as book])
+            [tahto.core :as l]
+            [tahto.base.book :as book])
   (:use code.test))
 
 (l/script- :postgres
@@ -31,8 +31,8 @@
   => book/book-entry?)
 
 (fact "prep-entry prefers the live current-module entry"
-  (with-redefs [hara.common.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
-                hara.model.spec-postgres.common/pg-resolve-entry
+  (with-redefs [tahto.common.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
+                tahto.model.spec-postgres.common/pg-resolve-entry
                 (fn [_ _]
                   [{:modules {}}
                    {:id 'Hello
@@ -55,8 +55,8 @@
   => vector?)
 
 (fact "prep-table overlays module tables onto the application view"
-  (with-redefs [hara.common.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
-                hara.model.spec-postgres.common/pg-resolve-entry
+  (with-redefs [tahto.common.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
+                tahto.model.spec-postgres.common/pg-resolve-entry
                 (fn [_ _]
                   [{:modules {}}
                    {:id 'Entry

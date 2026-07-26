@@ -52,7 +52,7 @@
 
 ^{:refer gdscript.tutorial.example-3d/save-scene-to :added "4.1"}
 (fact "saves the current scene to disk"
-  (let [path (str (System/getProperty "user.home") "/hara_godot_scene_3d_test.tscn")]
+  (let [path (str (System/getProperty "user.home") "/tahto_godot_scene_3d_test.tscn")]
     (in-3d `(do (gdscript.tutorial.example-3d/clear-scene)
                 (gdscript.tutorial.example-3d/add-cube 1 [0 0 0])
                 (gdscript.tutorial.example-3d/save-scene-to ~path)))

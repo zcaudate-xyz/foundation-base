@@ -1,7 +1,7 @@
-(ns hara.common.emit-common-op-test
-  (:require [hara.common.emit-common :as common :refer :all]
-            [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar])
+tahto/common/emit_common_op_test.clj:1:(ns tahto.common.emit-common-op-test
+tahto/common/emit_common_op_test.clj:2:  (:require [tahto.common.emit-common :as common :refer :all]
+tahto/common/emit_common_op_test.clj:3:            [tahto.common.emit-helper :as helper]
+tahto/common/emit_common_op_test.clj:4:            [tahto.common.grammar :as grammar])
   (:use code.test))
 
 (def +reserved+
@@ -11,7 +11,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.common.emit-common/emit-common-loop :adopt true :added "4.0"}
+tahto/common/emit_common_op_test.clj:14:^{:refer tahto.common.emit-common/emit-common-loop :adopt true :added "4.0"}
 (fact "emit raw ops"
 
   [:discard]
@@ -227,7 +227,7 @@
   => (throws))
 
 
-^{:refer hara.common.emit-common/emit-common :adopt true :added "4.0"}
+tahto/common/emit_common_op_test.clj:230:^{:refer tahto.common.emit-common/emit-common :adopt true :added "4.0"}
 (fact "emit main raw"
 
   [:discard]

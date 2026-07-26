@@ -1,6 +1,6 @@
 (ns xt.db.system.impl-supabase-realtime-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify]
             [std.lib.env :as env]
             [scaffold.supabase.local-min :as local-min]))

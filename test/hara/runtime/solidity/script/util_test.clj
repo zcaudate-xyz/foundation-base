@@ -1,12 +1,12 @@
-(ns hara.runtime.solidity.script.util-test
-  (:require [hara.runtime.solidity.env-hardhat :as env]
-            [hara.lang :as l]
+tahto/runtime/solidity/script/util_test.clj:1:(ns tahto.runtime.solidity.script.util-test
+tahto/runtime/solidity/script/util_test.clj:2:  (:require [tahto.runtime.solidity.env-hardhat :as env]
+            [tahto.core :as l]
             [solidity.core.util :as util])
   (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
-   :require [[hara.runtime.solidity :as s]
+tahto/runtime/solidity/script/util_test.clj:9:   :require [[tahto.runtime.solidity :as s]
               [solidity.core.util :as util]] :test-mode true})
 
 (fact:global

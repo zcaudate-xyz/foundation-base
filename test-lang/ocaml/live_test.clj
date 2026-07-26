@@ -1,6 +1,6 @@
 (ns ocaml.live-test
-  (:require [hara.lang :as l]
-            [hara.model.annex.spec-ocaml]
+  (:require [tahto.core :as l]
+            [tahto.model.annex.spec-ocaml]
             [ocaml.core :as y]
             [std.lib.env :as env])
   (:use code.test))

@@ -1,6 +1,6 @@
-(ns hara.model.spec-postgres.form-deftype-hydrate-test
-  (:require [hara.runtime.postgres.base.application :as app]
-            [hara.model.spec-postgres.form-deftype-hydrate :refer :all])
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:1:(ns tahto.model.spec-postgres.form-deftype-hydrate-test
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:2:  (:require [tahto.runtime.postgres.base.application :as app]
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:3:            [tahto.model.spec-postgres.form-deftype-hydrate :refer :all])
   (:use code.test))
 
 (defn with-demo-links
@@ -25,7 +25,7 @@
 
                             (= sym 'clojure.core/inc)
                             #'clojure.core/inc))
-                hara.lang.library-snapshot/get-book
+                tahto.core.library-snapshot/get-book
                 (fn [_ _]
                   {:modules {'demo {:code {'Task {:id 'Task
                                                   :module 'demo
@@ -37,12 +37,12 @@
                                                   :lang :postgres
                                                   :section :code
                                                   :static/dbtype :enum}}}}})
-                hara.lang.book/get-base-entry
+                tahto.base.book/get-base-entry
                 (fn [book module id section]
                   (get-in book [:modules module section id]))]
     (f)))
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-check-link :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:45:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-check-link :added "4.1"}
 (fact "pg-deftype-hydrate-check-link validates snapshot links"
   (with-demo-links
     #(pg-deftype-hydrate-check-link {}
@@ -58,15 +58,15 @@
                                    :lang :postgres
                                    :section :code
                                    :static/dbtype :table})))
-                 hara.lang.library-snapshot/get-book (fn [_ _] {:modules {}})
-                 hara.lang.book/get-base-entry (constantly nil)]
+                 tahto.core.library-snapshot/get-book (fn [_ _] {:modules {}})
+                 tahto.base.book/get-base-entry (constantly nil)]
     (pg-deftype-hydrate-check-link {}
                                     nil
                                     {:module 'demo :id 'Task :section :code}
                                     :table))
   => true)
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-link :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:69:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-link :added "4.1"}
 (fact "pg-deftype-hydrate-link resolves self and external links"
   (with-demo-links
     #(pg-deftype-hydrate-link 'Task {:id 'demo} {:ns '-/Task}))
@@ -92,7 +92,7 @@
        :section :code}
       true])
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-sql :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:95:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-sql :added "4.1"}
 (fact "pg-deftype-hydrate-process-sql resolves process vars"
   (with-demo-links
     #(pg-deftype-hydrate-process-sql {:process ['clojure.core/inc]}
@@ -101,7 +101,7 @@
                                      nil))
   => {:process ['clojure.core/inc]})
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-foreign :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:104:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-foreign :added "4.1"}
 (fact "pg-deftype-hydrate-process-foreign annotates foreign links"
   (with-demo-links
     #(pg-deftype-hydrate-process-foreign
@@ -114,7 +114,7 @@
                     :id 'Task
                     :section :code}}})
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-ref :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:117:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-ref :added "4.1"}
 (fact "pg-deftype-hydrate-process-ref supports vector and linked refs"
   (pg-deftype-hydrate-process-ref
    :task
@@ -146,7 +146,7 @@
                     :id 'Task
                     :section :code}}}])
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-enum :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:149:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-enum :added "4.1"}
 (fact "pg-deftype-hydrate-process-enum resolves enum vars"
   (with-demo-links
     #(pg-deftype-hydrate-process-enum
@@ -170,7 +170,7 @@
       {:type :enum
         :enum {:ns 'demo/Status}}])
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-attr :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:173:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-attr :added "4.1"}
 (fact "pg-deftype-hydrate-attr delegates enum attrs to the enum processor"
   (with-demo-links
     #(pg-deftype-hydrate-attr
@@ -184,7 +184,7 @@
       {:type :enum
         :enum {:ns 'demo/Status}}])
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-spec :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:187:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-spec :added "4.1"}
 (fact "pg-deftype-hydrate-spec hydrates each attribute in order"
   (with-demo-links
     #(pg-deftype-hydrate-spec
@@ -207,10 +207,10 @@
       :status {:type :enum
                :enum {:ns 'demo/Status}}])
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:210:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate :added "4.1"}
 (fact "pg-deftype-hydrate adds schema metadata to the form"
   (with-demo-links
-    #(with-redefs [hara.model.spec-postgres.common/pg-hydrate-module-static
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:213:    #(with-redefs [tahto.model.spec-postgres.common/pg-hydrate-module-static
                    (fn [_] {:static/application ["demo"]})
                    std.lib.schema/schema
                    (fn [x] {:vec x})]
@@ -224,7 +224,7 @@
                                 :id :id}}
       '(deftype.pg Demo [:id {:type :uuid :primary true}] {})])
 
-^{:refer hara.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-hook :added "4.1"}
+tahto/model/spec_postgres/form_deftype_hydrate_test.clj:227:^{:refer tahto.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-hook :added "4.1"}
 (fact "pg-deftype-hydrate-hook updates the application tables and pointers"
   (let [calls (atom [])]
     (with-redefs [app/*applications* (atom {})

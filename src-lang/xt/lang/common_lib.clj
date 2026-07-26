@@ -1,5 +1,5 @@
 (ns xt.lang.common-lib
-  (:require [hara.lang :as l :refer [defspec.xt]])
+  (:require [tahto.core :as l :refer [defspec.xt]])
   (:refer-clojure :exclude [identity fn? cat print
                             nil? inc dec zero? pos?
                             neg? even? odd?]))

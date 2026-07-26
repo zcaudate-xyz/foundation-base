@@ -15,8 +15,8 @@
 ^{:seedgen/skip true}
 (ns xt.substrate.walkthrough-js.s32-proxy-full-test
   (:use code.test)
-  (:require [hara.lang :as l]
-            [hara.runtime.chromedriver :as chromedriver]
+  (:require [tahto.core :as l]
+            [tahto.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]))
 
 (l/script- :js

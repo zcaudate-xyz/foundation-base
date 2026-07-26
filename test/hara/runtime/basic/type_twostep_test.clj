@@ -1,8 +1,8 @@
-(ns hara.runtime.basic.type-twostep-test
-  (:require [hara.runtime.basic.impl.process-c]
-            [hara.runtime.basic.impl-annex.process-rust]
-            [hara.runtime.basic.type-common :as common]
-            [hara.runtime.basic.type-twostep :as p]
+tahto/runtime/basic/type_twostep_test.clj:1:(ns tahto.runtime.basic.type-twostep-test
+tahto/runtime/basic/type_twostep_test.clj:2:  (:require [tahto.runtime.basic.impl.process-c]
+tahto/runtime/basic/type_twostep_test.clj:3:            [tahto.runtime.basic.impl-annex.process-rust]
+tahto/runtime/basic/type_twostep_test.clj:4:            [tahto.runtime.basic.type-common :as common]
+tahto/runtime/basic/type_twostep_test.clj:5:            [tahto.runtime.basic.type-twostep :as p]
             [std.fs :as fs]
             [std.lib.os :as os]
             [std.lib.env :as env])
@@ -24,7 +24,7 @@
     (p/sh-exec ["cmd"] "body" {:extension "ext" :stderr true}))
   => "compile failed")
 
-(^{:refer hara.runtime.basic.type-twostep-test/CANARY-GCC :adopt true :added "4.0"}
+tahto/runtime/basic/type_twostep_test.clj:27:(^{:refer tahto.runtime.basic.type-twostep-test/CANARY-GCC :adopt true :added "4.0"}
  fact "runs a full compile and execution cycle for c twostep"
 
   (p/raw-eval-twostep
@@ -33,7 +33,7 @@
    "#include <stdio.h>\nint main(){ printf(\"%d\", 2 + 3); return 0; }")
   => "5")
 
-(^{:refer hara.runtime.basic.type-twostep-test/CANARY-RUSTC :adopt true :added "4.0"}
+tahto/runtime/basic/type_twostep_test.clj:36:(^{:refer tahto.runtime.basic.type-twostep-test/CANARY-RUSTC :adopt true :added "4.0"}
  fact "runs a full compile and execution cycle for rust twostep"
 
   (p/raw-eval-twostep
@@ -42,7 +42,7 @@
    "fn main() { println!(\"{}\", 2 + 3); }")
   => "5")
 
-^{:refer hara.runtime.basic.type-twostep/sh-exec :added "4.0"}
+tahto/runtime/basic/type_twostep_test.clj:45:^{:refer tahto.runtime.basic.type-twostep/sh-exec :added "4.0"}
 (fact "basic function for executing the compile and run process"
 
   (with-redefs [os/sh (fn [opts]
@@ -61,7 +61,7 @@
     (p/sh-exec ["cmd"] "body" {:extension "ext"}))
   => "ok")
 
-^{:refer hara.runtime.basic.type-twostep/local-exec-available? :added "4.1"}
+tahto/runtime/basic/type_twostep_test.clj:64:^{:refer tahto.runtime.basic.type-twostep/local-exec-available? :added "4.1"}
 (fact "checks if the resolved twostep executable exists locally"
   (p/local-exec-available? "ls")
   => true
@@ -75,7 +75,7 @@
   (p/local-exec-available? nil)
   => false)
 
-^{:refer hara.runtime.basic.type-twostep/sh-exec-docker :added "4.1"}
+tahto/runtime/basic/type_twostep_test.clj:78:^{:refer tahto.runtime.basic.type-twostep/sh-exec-docker :added "4.1"}
 (fact "executes compile and run inside a docker container"
   (with-redefs [os/sh (fn [_] :proc)
                 os/sh-wait (fn [_] nil)
@@ -89,7 +89,7 @@
                                                     :exec ["gcc"]}}))
   => "ok")
 
-^{:refer hara.runtime.basic.type-twostep/sh-exec-portable :added "4.1"}
+tahto/runtime/basic/type_twostep_test.clj:92:^{:refer tahto.runtime.basic.type-twostep/sh-exec-portable :added "4.1"}
 (fact "chooses local or container execution based on availability"
   (with-redefs [p/local-exec-available? (fn [_] true)
                 p/sh-exec (fn [_ _ _] "local")
@@ -112,17 +112,17 @@
                                           :force-container true}))
   => "docker")
 
-^{:refer hara.runtime.basic.type-twostep/raw-eval-twostep :added "4.0"}
+tahto/runtime/basic/type_twostep_test.clj:115:^{:refer tahto.runtime.basic.type-twostep/raw-eval-twostep :added "4.0"}
 (fact "evaluates the twostep evaluation"
 
   (with-redefs [p/sh-exec (fn [_ _ _] "result")]
     (p/raw-eval-twostep {:exec [] :process {}} "body"))
   => "result")
 
-^{:refer hara.runtime.basic.type-twostep/invoke-ptr-twostep :added "4.0"}
+tahto/runtime/basic/type_twostep_test.clj:122:^{:refer tahto.runtime.basic.type-twostep/invoke-ptr-twostep :added "4.0"}
 (fact "invokes twostep pointer")
 
-^{:refer hara.runtime.basic.type-twostep/rt-twostep-setup :added "4.0"}
+tahto/runtime/basic/type_twostep_test.clj:125:^{:refer tahto.runtime.basic.type-twostep/rt-twostep-setup :added "4.0"}
 (fact "setup params for the twostep runtime"
 
   (with-redefs [common/get-program-default (fn [& _] :program)
@@ -131,7 +131,7 @@
     (p/rt-twostep-setup :lang nil nil nil))
   => [:program {:a 1} ["cmd"]])
 
-^{:refer hara.runtime.basic.type-twostep/rt-twostep:create :added "4.0"}
+tahto/runtime/basic/type_twostep_test.clj:134:^{:refer tahto.runtime.basic.type-twostep/rt-twostep:create :added "4.0"}
 (fact "creates a twostep runtime"
 
   (with-redefs [p/rt-twostep-setup (fn [& _] [:program {:process :opts} ["cmd"]])
@@ -139,7 +139,7 @@
     (p/rt-twostep:create {:lang :lang :program :program}))
   => map?)
 
-^{:refer hara.runtime.basic.type-twostep/rt-twostep :added "4.0"}
+tahto/runtime/basic/type_twostep_test.clj:142:^{:refer tahto.runtime.basic.type-twostep/rt-twostep :added "4.0"}
 (fact "creates an active twostep runtime"
 
   (with-redefs [p/rt-twostep:create (fn [m] m)]

@@ -1,7 +1,7 @@
-(ns hara.runtime.basic.docker.type-twostep-lean-test
+tahto/runtime/basic/docker/type_twostep_lean_test.clj:1:(ns tahto.runtime.basic.docker.type-twostep-lean-test
   (:use code.test)
-  (:require [hara.runtime.basic.impl-annex.process-lean]
-            [hara.lang :as l]
+tahto/runtime/basic/docker/type_twostep_lean_test.clj:3:  (:require [tahto.runtime.basic.impl-annex.process-lean]
+            [tahto.core :as l]
             [std.lib.env :as env]))
 
 (l/script- :lean
@@ -15,7 +15,7 @@
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
             (not (env/docker-daemon-available?))
-            (System/getenv "HARA_NO_DOCKER"))
+tahto/runtime/basic/docker/type_twostep_lean_test.clj:18:            (System/getenv "TAHTO_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 

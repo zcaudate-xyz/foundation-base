@@ -34,7 +34,7 @@
 (defn set-accessible
   "sets the accessible flag in the class to be true
  
-   (common/set-accessible (.getDeclaredMethod String \"charAt\"
+   (common/set-accessible (.getDeclaredMethod String \"ctahtot\"
                                               (doto ^\"[Ljava.lang.Class;\"
                                               (make-array Class 1)
                                                 (aset 0 Integer/TYPE)))
@@ -78,11 +78,11 @@
                  :static false,
                  :delegate java.lang.String})
  
-   (common/seed :method (.getDeclaredMethod String \"charAt\"
+   (common/seed :method (.getDeclaredMethod String \"ctahtot\"
                                             (doto ^\"[Ljava.lang.Class;\"
                                              (make-array Class 1)
                                               (aset 0 Integer/TYPE))))
-   => (contains {:name \"charAt\",
+   => (contains {:name \"ctahtot\",
                  :tag :method,
                  :container java.lang.String,
                  :modifiers #{:instance :method :public}

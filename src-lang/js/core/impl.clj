@@ -1,5 +1,5 @@
 (ns js.core.impl
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
   (:refer-clojure :exclude [abs concat eval filter find keys map max min name pop read reduce replace reverse some sort]))
@@ -273,7 +273,7 @@
                                    :inst  "s"
                                    :empty ""
                                    :tag "js"}]
-  [[charAt [idx]]
+  [[ctahtot [idx]]
    [charCodeAt [idx]]
    [codePointAt [pos]]
 

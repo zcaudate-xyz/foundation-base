@@ -59,7 +59,7 @@
       :options opts})))
 
 (res/res:spec-add
- {:type :hara/concurrent.atom.executor
+ {:type :tahto/concurrent.atom.executor
   :config   {:interval 50 :max-batch 1000}
   :instance {:create   aq:executor}})
 

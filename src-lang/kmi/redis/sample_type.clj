@@ -1,6 +1,6 @@
 (ns kmi.redis.sample-type
   (:require [kmi.redis.compile :as r]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:refer-clojure :exclude [>]))
 
 (l/script :lua

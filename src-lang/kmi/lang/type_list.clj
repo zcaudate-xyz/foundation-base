@@ -1,5 +1,5 @@
 (ns kmi.lang.type-list
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [list]))
 
 (l/script :xtalk

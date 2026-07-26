@@ -1,5 +1,5 @@
 (ns js.lib.three-extra
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:import [["three/addons/controls/OrbitControls.js" :as [* ThreeOrbitControl]]

@@ -1,14 +1,14 @@
-(ns hara.lang.book-meta-test
-  (:require [hara.lang.book-meta :refer :all]
-            [hara.common.util :as ut]
+(ns tahto.base.book-meta-test
+  (:require [tahto.base.book-meta :refer :all]
+tahto/lang/book_meta_test.clj:3:            [tahto.common.util :as ut]
             [std.lib.template :as template])
   (:use code.test))
 
-^{:refer hara.lang.book-meta/book-meta? :added "4.0"}
+^{:refer tahto.base.book-meta/book-meta? :added "4.0"}
 (fact "checks if object is a book meta"
   (book-meta? (book-meta {})) => true)
 
-^{:refer hara.lang.book-meta/book-meta :added "4.0"}
+^{:refer tahto.base.book-meta/book-meta :added "4.0"}
 (fact "creates a book meta"
 
   (book-meta {:module-export  (fn [{:keys [as]} opts]

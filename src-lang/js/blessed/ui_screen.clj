@@ -1,5 +1,5 @@
 (ns js.blessed.ui-screen
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.common-data :as xtd]

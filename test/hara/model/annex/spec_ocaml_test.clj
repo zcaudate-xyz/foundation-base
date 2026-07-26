@@ -1,9 +1,9 @@
-(ns hara.model.annex.spec-ocaml-test
-  (:require [hara.lang.impl :as impl]
-            [hara.model.annex.spec-ocaml :as spec-ocaml])
+tahto/model/annex/spec_ocaml_test.clj:1:(ns tahto.model.annex.spec-ocaml-test
+  (:require [tahto.core.impl :as impl]
+tahto/model/annex/spec_ocaml_test.clj:3:            [tahto.model.annex.spec-ocaml :as spec-ocaml])
   (:use code.test))
 
-^{:refer hara.model.annex.spec-ocaml/CANARY :adopt true :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:6:^{:refer tahto.model.annex.spec-ocaml/CANARY :adopt true :added "4.1"}
 (fact "basic emit"
 
   (impl/emit-script '(defn hello [x] x) {:lang :ocaml})
@@ -30,38 +30,38 @@
   (impl/emit-as :ocaml ['(fn [x] (+ x 1))])
   => "fun x -> x + 1")
 
-^{:refer hara.model.annex.spec-ocaml/emit-raw-str :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:33:^{:refer tahto.model.annex.spec-ocaml/emit-raw-str :added "4.1"}
 (fact "emits raw strings")
 
-^{:refer hara.model.annex.spec-ocaml/emit-indent-body :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:36:^{:refer tahto.model.annex.spec-ocaml/emit-indent-body :added "4.1"}
 (fact "emits indented bodies")
 
-^{:refer hara.model.annex.spec-ocaml/emit-lines-with :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:39:^{:refer tahto.model.annex.spec-ocaml/emit-lines-with :added "4.1"}
 (fact "emits lines with separators")
 
-^{:refer hara.model.annex.spec-ocaml/ml-invoke :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:42:^{:refer tahto.model.annex.spec-ocaml/ml-invoke :added "4.1"}
 (fact "emits ocaml invocations")
 
-^{:refer hara.model.annex.spec-ocaml/ml-args :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:45:^{:refer tahto.model.annex.spec-ocaml/ml-args :added "4.1"}
 (fact "formats ocaml function arguments")
 
-^{:refer hara.model.annex.spec-ocaml/parse-match-clauses :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:48:^{:refer tahto.model.annex.spec-ocaml/parse-match-clauses :added "4.1"}
 (fact "parses pattern match clauses")
 
-^{:refer hara.model.annex.spec-ocaml/body-expr :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:51:^{:refer tahto.model.annex.spec-ocaml/body-expr :added "4.1"}
 (fact "extracts body expressions")
 
-^{:refer hara.model.annex.spec-ocaml/tf-defn :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:54:^{:refer tahto.model.annex.spec-ocaml/tf-defn :added "4.1"}
 (fact "transforms function definitions")
 
-^{:refer hara.model.annex.spec-ocaml/tf-match :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:57:^{:refer tahto.model.annex.spec-ocaml/tf-match :added "4.1"}
 (fact "transforms pattern match expressions")
 
-^{:refer hara.model.annex.spec-ocaml/tf-if :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:60:^{:refer tahto.model.annex.spec-ocaml/tf-if :added "4.1"}
 (fact "transforms if expressions")
 
-^{:refer hara.model.annex.spec-ocaml/tf-letrec :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:63:^{:refer tahto.model.annex.spec-ocaml/tf-letrec :added "4.1"}
 (fact "transforms letrec expressions")
 
-^{:refer hara.model.annex.spec-ocaml/tf-lambda :added "4.1"}
+tahto/model/annex/spec_ocaml_test.clj:66:^{:refer tahto.model.annex.spec-ocaml/tf-lambda :added "4.1"}
 (fact "transforms lambda expressions")

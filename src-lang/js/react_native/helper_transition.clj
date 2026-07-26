@@ -1,5 +1,5 @@
 (ns js.react-native.helper-transition
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]

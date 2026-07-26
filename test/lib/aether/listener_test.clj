@@ -5,8 +5,8 @@
 
 ^{:refer lib.aether.listener/event->rep :added "3.0"}
 (fact "converts the event to a map representation"
-  (event->rep {:event {:artifact "hara:hara:2.4.0"}})
-  => (contains {:group "hara", :artifact "hara", :version "2.4.0"}))
+  (event->rep {:event {:artifact "tahto:tahto:2.4.0"}})
+  => (contains {:group "tahto", :artifact "tahto", :version "2.4.0"}))
 
 ^{:refer lib.aether.listener/record :added "3.0"}
 (fact "adds an event to the recorder"

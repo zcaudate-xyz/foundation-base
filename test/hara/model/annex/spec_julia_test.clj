@@ -1,8 +1,8 @@
-(ns hara.model.annex.spec-julia-test
-  (:require [hara.lang.script :as script]
-            [hara.model.annex.spec-julia.rewrite :as rewrite]
-            [hara.common.util :as ut]
-            [hara.model.annex.spec-julia :refer :all])
+tahto/model/annex/spec_julia_test.clj:1:(ns tahto.model.annex.spec-julia-test
+  (:require [tahto.core.script :as script]
+tahto/model/annex/spec_julia_test.clj:3:            [tahto.model.annex.spec-julia.rewrite :as rewrite]
+tahto/model/annex/spec_julia_test.clj:4:            [tahto.common.util :as ut]
+tahto/model/annex/spec_julia_test.clj:5:            [tahto.model.annex.spec-julia :refer :all])
   (:refer-clojure :exclude [for import])
   (:use code.test))
 
@@ -101,7 +101,7 @@
   (!.jl (x:arr-push [1] 2))
   => "push!(Any[1],2)")
 
-^{:refer hara.model.annex.spec-julia/tf-local :added "4.0"}
+tahto/model/annex/spec_julia_test.clj:104:^{:refer tahto.model.annex.spec-julia/tf-local :added "4.0"}
 (fact "a more flexible `var` replacement"
 
   (tf-local '(local a 1))
@@ -110,7 +110,7 @@
   (tf-local '(local a := 1))
   => '(var* :local a := 1))
 
-^{:refer hara.model.annex.spec-julia/julia-map-key :added "3.0"}
+tahto/model/annex/spec_julia_test.clj:113:^{:refer tahto.model.annex.spec-julia/julia-map-key :added "3.0"}
 (fact "custom julia map key"
 
   (julia-map-key 123 +grammar+ {})
@@ -126,32 +126,32 @@
   (julia-map-key :abc +grammar+ {})
   => "\"abc\"")
 
-^{:refer hara.model.annex.spec-julia/julia-symbol-global :added "4.1"}
+tahto/model/annex/spec_julia_test.clj:129:^{:refer tahto.model.annex.spec-julia/julia-symbol-global :added "4.1"}
 (fact "emits julia global symbol access")
 
-^{:refer hara.model.annex.spec-julia/tf-for-array :added "4.1"}
+tahto/model/annex/spec_julia_test.clj:132:^{:refer tahto.model.annex.spec-julia/tf-for-array :added "4.1"}
 (fact "transforms for:array loops")
 
-^{:refer hara.model.annex.spec-julia/tf-for-object :added "4.1"}
+tahto/model/annex/spec_julia_test.clj:135:^{:refer tahto.model.annex.spec-julia/tf-for-object :added "4.1"}
 (fact "transforms for:object loops")
 
-^{:refer hara.model.annex.spec-julia/tf-for-iter :added "4.1"}
+tahto/model/annex/spec_julia_test.clj:138:^{:refer tahto.model.annex.spec-julia/tf-for-iter :added "4.1"}
 (fact "transforms for:iter loops")
 
-^{:refer hara.model.annex.spec-julia/tf-for-index :added "4.0"}
+tahto/model/annex/spec_julia_test.clj:141:^{:refer tahto.model.annex.spec-julia/tf-for-index :added "4.0"}
 (fact "for index transform"
  
   (tf-for-index '(for:index [i [0 10 2]]
                              i))
   => '(for [i :in (to 0 2 10)] i))
 
-^{:refer hara.model.annex.spec-julia/tf-dict :added "4.0"}
+tahto/model/annex/spec_julia_test.clj:148:^{:refer tahto.model.annex.spec-julia/tf-dict :added "4.0"}
 (fact "dict transform"
 
   (tf-dict '(dict :a 1 :b 2))
   => '(Dict (=> "a" 1) (=> "b" 2)))
 
-^{:refer hara.model.annex.spec-julia/emit-to :added "4.1"}
+tahto/model/annex/spec_julia_test.clj:154:^{:refer tahto.model.annex.spec-julia/emit-to :added "4.1"}
 (fact "emits a Julia range expression"
   (emit-to [:to 1 1 10] +grammar+ {})
   => "1:10"
@@ -159,7 +159,7 @@
   (emit-to [:to 1 2 10] +grammar+ {})
   => "1:2:10")
 
-^{:refer hara.model.annex.spec-julia/julia-module-link :added "4.0"}
+tahto/model/annex/spec_julia_test.clj:162:^{:refer tahto.model.annex.spec-julia/julia-module-link :added "4.0"}
 (fact "gets the absolute julia based module"
 
   (julia-module-link 'kmi.common {:root-ns 'kmi.hello})
@@ -169,7 +169,7 @@
                    {:root-ns 'kmi :target "src"})
   => "./kmi/exchange")
 
-^{:refer hara.model.annex.spec-julia/julia-module-export :added "4.0"}
+tahto/model/annex/spec_julia_test.clj:172:^{:refer tahto.model.annex.spec-julia/julia-module-export :added "4.0"}
 (fact "outputs the julia module export form"
 
   (julia-module-export 'kmi.common {:root-ns 'kmi.hello})
@@ -179,8 +179,8 @@
   => anything #_(contains '(export (a b))))
 
 
-^{:refer hara.model.annex.spec-julia/tf-ternary :added "4.1"}
+tahto/model/annex/spec_julia_test.clj:182:^{:refer tahto.model.annex.spec-julia/tf-ternary :added "4.1"}
 (fact "transforms ternary expressions")
 
-^{:refer hara.model.annex.spec-julia/emit-throw :added "4.1"}
+tahto/model/annex/spec_julia_test.clj:185:^{:refer tahto.model.annex.spec-julia/emit-throw :added "4.1"}
 (fact "emits throw statements")

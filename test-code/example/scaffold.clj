@@ -1,5 +1,5 @@
 (ns example.scaffold
-  (:require [hara.lib.datomic :as datomic]
+  (:require [newlisp.lib.datomic :as datomic]
             [example.data :as examples]
             [data.family :as family]))
 

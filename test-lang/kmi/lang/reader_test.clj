@@ -1,5 +1,5 @@
 (ns kmi.lang.reader-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
@@ -31,7 +31,7 @@
   => (throws))
 
 ^{:refer kmi.lang.reader/impl-char-at :added "4.1"}
-(fact "extracts one-character slices from strings"
+(fact "extracts one-ctahtocter slices from strings"
 
   (!.js
    [(rdr/impl-char-at "abc" 0)

@@ -1,8 +1,8 @@
-(ns hara.runtime.basic.docker.impl-python-test
-  (:require [hara.runtime.basic.docker.registry :as registry]
+tahto/runtime/basic/docker/impl_python_test.clj:1:(ns tahto.runtime.basic.docker.impl-python-test
+tahto/runtime/basic/docker/impl_python_test.clj:2:  (:require [tahto.runtime.basic.docker.registry :as registry]
             [std.lib.env :as env]
-            [hara.lang :as l]
-            [hara.lang.script :as script])
+            [tahto.core :as l]
+            [tahto.core.script :as script])
   (:use code.test))
 
 ;;
@@ -15,7 +15,7 @@
 ;; No extra packages required — stdlib `socket` + `json` only.
 ;;
 ;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-python:latest
-;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-python-test
+tahto/runtime/basic/docker/impl_python_test.clj:18:;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only tahto.runtime.basic.docker.impl-python-test
 ;;
 
 (l/script- :python
@@ -26,7 +26,7 @@
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
             (not (env/docker-daemon-available?))
-            (System/getenv "HARA_NO_DOCKER"))
+tahto/runtime/basic/docker/impl_python_test.clj:29:            (System/getenv "TAHTO_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 

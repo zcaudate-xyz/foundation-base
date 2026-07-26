@@ -1,9 +1,9 @@
-(ns hara.common.emit-template-test
+tahto/common/emit_template_test.clj:1:(ns tahto.common.emit-template-test
   (:use code.test)
-  (:require [hara.common.emit-template :refer :all]
-            [hara.model.spec-js :as js]))
+tahto/common/emit_template_test.clj:3:  (:require [tahto.common.emit-template :refer :all]
+tahto/common/emit_template_test.clj:4:            [tahto.model.spec-js :as js]))
 
-^{:refer hara.common.emit-template/entry-reserved :added "4.1"}
+tahto/common/emit_template_test.clj:6:^{:refer tahto.common.emit-template/entry-reserved :added "4.1"}
 (fact "gets the reserved grammar entry for a code entry"
   (entry-reserved {:reserved {:add {:emit :macro}}}
                   {:op :add})
@@ -13,7 +13,7 @@
                   {:op :sub})
   => nil)
 
-^{:refer hara.common.emit-template/materialize-code-entry :added "4.1"}
+tahto/common/emit_template_test.clj:16:^{:refer tahto.common.emit-template/materialize-code-entry :added "4.1"}
 (fact "returns the entry unchanged when it cannot be materialized"
   (materialize-code-entry {:grammar {}
                            :modules {:math {}}}
@@ -34,7 +34,7 @@
 (def +js-modules+
   {'JS.core {:id 'JS.core :lang :js :link '{- JS.core}}})
 
-^{:refer hara.common.emit-template/create-code-state :added "4.1"}
+tahto/common/emit_template_test.clj:37:^{:refer tahto.common.emit-template/create-code-state :added "4.1"}
 (fact "hydrates and stages a code entry for the current grammar"
   (let [reserved (get-in js/+grammar+ [:reserved 'defn])]
     (create-code-state +js-entry+ reserved js/+grammar+ +js-modules+))
@@ -46,7 +46,7 @@
     (keys (create-code-state +js-entry+ reserved js/+grammar+ +js-modules+)))
   => '(:hmeta :form :deps :deps-fragment :deps-native :xtalk-ops :xtalk-profiles :polyfill-modules))
 
-^{:refer hara.common.emit-template/cached-code-state :added "4.1"}
+tahto/common/emit_template_test.clj:49:^{:refer tahto.common.emit-template/cached-code-state :added "4.1"}
 (fact "restages a code entry using the per-entry cache"
   (let [reserved (get-in js/+grammar+ [:reserved 'defn])
         cache    (atom {})
@@ -62,7 +62,7 @@
     (count @cache))
   => 1)
 
-^{:refer hara.common.emit-template/cached-entry-deps :added "4.1"}
+tahto/common/emit_template_test.clj:65:^{:refer tahto.common.emit-template/cached-entry-deps :added "4.1"}
 (fact "returns the dependencies of a cached code entry"
   (let [reserved (get-in js/+grammar+ [:reserved 'defn])
         book     {:grammar js/+grammar+
@@ -71,7 +71,7 @@
     (cached-entry-deps book (assoc +js-entry+ :static/code.cache (atom {}))))
   => #{})
 
-^{:refer hara.common.emit-template/code-state-computing? :added "4.1"}
+tahto/common/emit_template_test.clj:74:^{:refer tahto.common.emit-template/code-state-computing? :added "4.1"}
 (fact "returns true if the entry is currently being staged"
   (code-state-computing? {:lang :js :module 'M :id 'foo})
   => false

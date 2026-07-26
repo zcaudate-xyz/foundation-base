@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns python.gimp.tutorial.example-core
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :python
   {:import [["gi" :as gi]]})

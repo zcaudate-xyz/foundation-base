@@ -36,10 +36,10 @@ make index-force
 # Search for symbols
 make search QUERY=emit
 make search QUERY=emit KIND=function
-make search QUERY=emit KIND=function NAMESPACE=hara.lang
+make search QUERY=emit KIND=function NAMESPACE=tahto.core
 
 # Get symbol details
-make symbol NAME=hara.lang/emit
+make symbol NAME=tahto.core/emit
 
 # Show statistics
 make index-stats
@@ -83,8 +83,8 @@ The main CLI tool for index operations:
 # Find all "emit" functions
 ./bin/foundation-index search emit function
 
-# Find "compile" in hara.lang namespace
-./bin/foundation-index search compile function hara.lang
+# Find "compile" in tahto.core namespace
+./bin/foundation-index search compile function tahto.core
 
 # Search with limit
 ./bin/foundation-index search book function bb.lang 10
@@ -94,7 +94,7 @@ The main CLI tool for index operations:
 
 ```bash
 # Get details about a specific function
-./bin/foundation-index get hara.lang/emit
+./bin/foundation-index get tahto.core/emit
 ./bin/foundation-index get bb.lang.base.emit-assign/emit-def-assign
 ```
 
@@ -143,10 +143,10 @@ This script automatically finds and uses the foundation index database.
 
 | Namespace | Purpose |
 |-----------|---------|
-| `hara.lang` | Main transpilation API |
-| `hara.lang.base.emit` | Code emission |
-| `hara.lang.base.compile` | Compilation |
-| `hara.lang.base.book` | Book management |
+| `tahto.core` | Main transpilation API |
+| `tahto.core.base.emit` | Code emission |
+| `tahto.core.base.compile` | Compilation |
+| `tahto.core.base.book` | Book management |
 | `rt.postgres` | PostgreSQL DSL |
 | `rt.postgres.entity` | Entity framework |
 | `bb.lang.*` | Book compilation |

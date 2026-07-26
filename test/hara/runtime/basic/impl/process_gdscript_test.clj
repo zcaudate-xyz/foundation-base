@@ -1,8 +1,8 @@
-(ns hara.runtime.basic.impl.process-gdscript-test
-  (:require [hara.lang :as l]
-            [hara.lang.impl :as impl]
-            [hara.model.spec-gdscript]
-            [hara.runtime.basic.impl.process-gdscript :as gd]
+tahto/runtime/basic/impl/process_gdscript_test.clj:1:(ns tahto.runtime.basic.impl.process-gdscript-test
+  (:require [tahto.core :as l]
+            [tahto.core.impl :as impl]
+tahto/runtime/basic/impl/process_gdscript_test.clj:4:            [tahto.model.spec-gdscript]
+tahto/runtime/basic/impl/process_gdscript_test.clj:5:            [tahto.runtime.basic.impl.process-gdscript :as gd]
             [std.fs :as fs]
             [std.lib.env :as env]
             [std.lib.os :as os])
@@ -12,12 +12,12 @@
  {:skip (not (or (env/program-exists? "godot")
                  (env/program-exists? "godot-4")))})
 
-^{:refer hara.runtime.basic.impl.process-gdscript/default-body-transform :added "4.1"}
+tahto/runtime/basic/impl/process_gdscript_test.clj:15:^{:refer tahto.runtime.basic.impl.process-gdscript/default-body-transform :added "4.1"}
 (fact "wraps body forms for return"
   (impl/emit-as :gdscript [(gd/default-body-transform '[(:= a 1) (+ a 2)] {:bulk true})])
   => "a = 1\nreturn a + 2")
 
-^{:refer hara.runtime.basic.impl.process-gdscript/default-oneshot-wrap :added "4.1"}
+tahto/runtime/basic/impl/process_gdscript_test.clj:20:^{:refer tahto.runtime.basic.impl.process-gdscript/default-oneshot-wrap :added "4.1"}
 (fact "wraps emitted GDScript in a SceneTree script"
   (let [body (impl/emit-as :gdscript [(gd/default-body-transform '[(:= a 1) (+ a 2)] {:bulk true})])]
     (gd/default-oneshot-wrap body "/tmp/out.json"))
@@ -34,7 +34,7 @@
           "  print(__json__)\n"
           "  quit()\n"))
 
-^{:refer hara.runtime.basic.impl.process-gdscript/sh-exec-gdscript :added "4.1"}
+tahto/runtime/basic/impl/process_gdscript_test.clj:37:^{:refer tahto.runtime.basic.impl.process-gdscript/sh-exec-gdscript :added "4.1"}
 (fact "flattens nested process options before invoking Godot"
   (let [calls (atom [])]
     (with-redefs [os/sh (fn [opts]
@@ -50,7 +50,7 @@
        (:args (first @calls))]))
   => ["ok" "/tmp/rt" ["godot" "--headless" "--script" "file.gd"]])
 
-^{:refer hara.runtime.basic.impl.process-gdscript/ensure-project! :added "4.1"}
+tahto/runtime/basic/impl/process_gdscript_test.clj:53:^{:refer tahto.runtime.basic.impl.process-gdscript/ensure-project! :added "4.1"}
 (fact "creates a minimal Godot project in the runtime dir"
   (let [tmp (str (System/getProperty "user.home") "/gw_gd_ensure_" (System/currentTimeMillis))]
     (try
@@ -59,14 +59,14 @@
         [(.. (java.io.File. tmp "project.godot") exists)
          (slurp (java.io.File. tmp "project.godot"))])
       => [true (str "[application]\n"
-                    "config/name=\"hara_gdscript_runtime\"\n"
+tahto/runtime/basic/impl/process_gdscript_test.clj:62:                    "config/name=\"tahto_gdscript_runtime\"\n"
                     "config/features=PackedStringArray(\"4.2\")\n\n"
                     "[rendering]\n"
                     "renderer/rendering_method=\"mobile\"\n")]
       (finally
         (fs/delete tmp)))))
 
-^{:refer hara.runtime.basic.impl.process-gdscript/wrap-godot-eval :added "4.1"}
+tahto/runtime/basic/impl/process_gdscript_test.clj:69:^{:refer tahto.runtime.basic.impl.process-gdscript/wrap-godot-eval :added "4.1"}
 (fact "wraps emitted GDScript in a Node eval script"
   (let [body (impl/emit-as :gdscript [(gd/default-body-transform '[(:= a 1) (+ a 2)] {:bulk true})])]
     (gd/wrap-godot-eval body))
@@ -76,12 +76,12 @@
           "  a = 1\n"
           "  return a + 2\n"))
 
-^{:refer hara.runtime.basic.impl.process-gdscript/transform-form-verify :added "4.1"}
+tahto/runtime/basic/impl/process_gdscript_test.clj:79:^{:refer tahto.runtime.basic.impl.process-gdscript/transform-form-verify :added "4.1"}
 (fact "wraps emitted GDScript in a SceneTree script for syntax checking"
   (gd/transform-form-verify '[(:= a 1)] {})
   => '(:- "extends SceneTree\n\n\n\nfunc _init():\n  a = 1"))
 
-^{:refer hara.runtime.basic.impl.process-gdscript/default-oneshot-in :added "4.1"}
+tahto/runtime/basic/impl/process_gdscript_test.clj:84:^{:refer tahto.runtime.basic.impl.process-gdscript/default-oneshot-in :added "4.1"}
 (fact "writes generated script to runtime project and returns filename"
   (let [tmp (str (System/getProperty "user.home") "/gw_gd_oneshot_" (System/currentTimeMillis))
         body (impl/emit-as :gdscript [(gd/default-body-transform '[(:= a 1) (+ a 2)] {:bulk true})])]
@@ -97,7 +97,7 @@
       (finally
         (fs/delete tmp)))))
 
-^{:refer hara.runtime.basic.impl.process-gdscript/default-oneshot-out :added "4.1"}
+tahto/runtime/basic/impl/process_gdscript_test.clj:100:^{:refer tahto.runtime.basic.impl.process-gdscript/default-oneshot-out :added "4.1"}
 (fact "polls output file and deletes it after reading"
   (let [tmp (java.io.File. (System/getProperty "user.home") (str "gw_gd_out_" (System/currentTimeMillis)))]
     (try
@@ -109,14 +109,14 @@
       (finally
         (when (.exists tmp) (.delete tmp))))))
 
-^{:refer hara.runtime.basic.impl.process-gdscript/default-oneshot-out :added "4.1"
+tahto/runtime/basic/impl/process_gdscript_test.clj:112:^{:refer tahto.runtime.basic.impl.process-gdscript/default-oneshot-out :added "4.1"
   :id test-default-oneshot-out-stdout-fallback}
 (fact "falls back to the last non-blank stdout line"
   (with-redefs-fn {(var gd/+current-output-file+) (atom (java.io.File. "/nonexistent/path"))}
     #(gd/default-oneshot-out "Godot Engine header\n\n  \nfinal line\n"))
   => "final line")
 
-^{:refer hara.runtime.basic.impl.process-gdscript/verify-exec-gdscript :added "4.1"}
+tahto/runtime/basic/impl/process_gdscript_test.clj:119:^{:refer tahto.runtime.basic.impl.process-gdscript/verify-exec-gdscript :added "4.1"}
 (fact "writes GDScript to runtime project and runs Godot syntax check"
   (let [tmp (str (System/getProperty "user.home") "/gw_gd_verify_" (System/currentTimeMillis))
         body "extends SceneTree\n\nfunc _init():\n  pass\n  quit()\n"]

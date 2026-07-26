@@ -1,6 +1,6 @@
 (ns xt.substrate.base-util-handlers
   (:use code.test)
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

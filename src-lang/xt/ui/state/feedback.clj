@@ -1,6 +1,6 @@
 (ns xt.ui.state.feedback
   "Normalized pending, error and retry state."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]]})

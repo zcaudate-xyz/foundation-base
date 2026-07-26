@@ -1,5 +1,5 @@
 (ns js.lib.react-spring
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :js

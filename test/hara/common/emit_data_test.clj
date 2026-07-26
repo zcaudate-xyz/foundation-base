@@ -1,8 +1,8 @@
-(ns hara.common.emit-data-test
-  (:require [hara.common.emit-common :as common]
-            [hara.common.emit-data :as data :refer :all]
-            [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar])
+tahto/common/emit_data_test.clj:1:(ns tahto.common.emit-data-test
+tahto/common/emit_data_test.clj:2:  (:require [tahto.common.emit-common :as common]
+tahto/common/emit_data_test.clj:3:            [tahto.common.emit-data :as data :refer :all]
+tahto/common/emit_data_test.clj:4:            [tahto.common.emit-helper :as helper]
+tahto/common/emit_data_test.clj:5:            [tahto.common.grammar :as grammar])
   (:use code.test))
 
 (def +reserved+
@@ -12,7 +12,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.common.emit-data/default-map-key :added "4.0"}
+tahto/common/emit_data_test.clj:15:^{:refer tahto.common.emit-data/default-map-key :added "4.0"}
 (fact "emits a default map key"
 
   (default-map-key 'hello
@@ -20,7 +20,7 @@
                    {})
   => "hello")
 
-^{:refer hara.common.emit-data/emit-map-key :added "4.0"}
+tahto/common/emit_data_test.clj:23:^{:refer tahto.common.emit-data/emit-map-key :added "4.0"}
 (fact "emits the map key"
 
   (emit-map-key 'hello
@@ -39,7 +39,7 @@
                 {})
   => ":hello")
 
-^{:refer hara.common.emit-data/emit-map-entry :added "3.0"}
+tahto/common/emit_data_test.clj:42:^{:refer tahto.common.emit-data/emit-map-entry :added "3.0"}
 (fact "emits the map entry"
 
   (emit-map-entry [:hello "world"] helper/+default+ {})
@@ -51,7 +51,7 @@
                             [:data :map-entry :assign] " = ") {})
   => "\"hello\" = \"world\"")
 
-^{:refer hara.common.emit-data/emit-singleline-array? :added "4.0"}
+tahto/common/emit_data_test.clj:54:^{:refer tahto.common.emit-data/emit-singleline-array? :added "4.0"}
 (fact "checks that array is all single lines"
 
   (emit-singleline-array? ["1" "2" "3"])
@@ -60,7 +60,7 @@
   (emit-singleline-array? ["1" "\n2" "3"])
   => false)
 
-^{:refer hara.common.emit-data/emit-maybe-multibody :added "4.0"}
+tahto/common/emit_data_test.clj:63:^{:refer tahto.common.emit-data/emit-maybe-multibody :added "4.0"}
 (fact "checks that array is all single lines"
 
   (emit-maybe-multibody ["1" "2"] "hello")
@@ -69,7 +69,7 @@
   (emit-maybe-multibody ["1" "2"] "\nhello")
   => "1  \n  hello")
 
-^{:refer hara.common.emit-data/emit-coll-layout :added "4.0"}
+tahto/common/emit_data_test.clj:72:^{:refer tahto.common.emit-data/emit-coll-layout :added "4.0"}
 (fact "constructs the collection"
 
   (emit-coll-layout :vector 2 ["1" "2" "3"] helper/+default+ {})
@@ -82,7 +82,7 @@
   (emit-coll-layout :tuple 2 ["1" "\n2" "3"] helper/+default+ {})
   => "  (1,\n    \n  2,\n    3)")
 
-^{:refer hara.common.emit-data/emit-coll :added "3.0"}
+tahto/common/emit_data_test.clj:85:^{:refer tahto.common.emit-data/emit-coll :added "3.0"}
 (fact "emits a collection"
 
   (emit-coll :vector [1 2 3] helper/+default+ {})
@@ -96,12 +96,12 @@
                                        {:start "<" :end ">" :space ""}) {})
   => "<1,2,3>")
 
-^{:refer hara.common.emit-data/emit-data-standard :added "4.0"}
+tahto/common/emit_data_test.clj:99:^{:refer tahto.common.emit-data/emit-data-standard :added "4.0"}
 (fact "emits either a custom string or default coll"
   (emit-data-standard :vector [1 2 3] helper/+default+ {})
   => "[1,2,3]")
 
-^{:refer hara.common.emit-data/emit-data :added "3.0"}
+tahto/common/emit_data_test.clj:104:^{:refer tahto.common.emit-data/emit-data :added "3.0"}
 (fact "main function for data forms"
 
   (emit-data :map {:a 1 :b 2} helper/+default+ {:map {}})
@@ -110,24 +110,24 @@
   (emit-data :vector {:a 1 :b 2} helper/+default+ {:map {}})
   => "[[:a 1],[:b 2]]")
 
-^{:refer hara.common.emit-data/emit-quote :added "4.0"}
+tahto/common/emit_data_test.clj:113:^{:refer tahto.common.emit-data/emit-quote :added "4.0"}
 (fact "emit quote structures"
 
   (emit-quote nil nil ''(1 2 3) +grammar+ {})
   => "(1,2,3)")
 
-^{:refer hara.common.emit-data/emit-table-group :added "4.0"}
+tahto/common/emit_data_test.clj:119:^{:refer tahto.common.emit-data/emit-table-group :added "4.0"}
 (fact "gets table group"
   (emit-table-group [:a 1 :b 2 :c :d])
   => [[:a 1] [:b 2] 'c 'd])
 
-^{:refer hara.common.emit-data/emit-table :added "4.0"}
+tahto/common/emit_data_test.clj:124:^{:refer tahto.common.emit-data/emit-table :added "4.0"}
 (fact "emit quote structures"
 
   (emit-table nil nil '(tab :a 1 :b 2) +grammar+ {})
   => "{\"a\":1,\"b\":2}")
 
-^{:refer hara.common.emit-data/test-data-loop :adopt true :added "4.0"}
+tahto/common/emit_data_test.clj:130:^{:refer tahto.common.emit-data/test-data-loop :adopt true :added "4.0"}
 (fact "emit for data structures"
 
   (test-data-loop '[(+ 1 2)]
@@ -168,7 +168,7 @@
                         {})
   => "{1,(+ 1 2),3,4,5}")
 
-^{:refer hara.lang.test-data-emit/test-data-emit :adopt true :added "4.0"}
+^{:refer tahto.core.test-data-emit/test-data-emit :adopt true :added "4.0"}
 (fact "emit for data structures"
 
   (test-data-emit '[(+ 1 2)]

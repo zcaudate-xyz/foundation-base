@@ -1,14 +1,14 @@
-(ns hara.lang.runtime-test
+(ns tahto.core.runtime-test
   (:require [std.json :as json]
-            [hara.lang.book :as book]
-            [hara.common.emit-prep-lua-test :as prep]
-            [hara.lang.impl-deps :as deps]
-            [hara.lang.impl-entry :as entry]
-            [hara.lang.library :as lib]
-            [hara.lang.library-snapshot :as snap]
-            [hara.lang.pointer :as ptr :refer :all]
-            [hara.lang.runtime :as rt]
-            [hara.common.util :as ut]
+            [tahto.base.book :as book]
+tahto/lang/runtime_test.clj:4:            [tahto.common.emit-prep-lua-test :as prep]
+            [tahto.core.impl-deps :as deps]
+            [tahto.core.impl-entry :as entry]
+            [tahto.core.library :as lib]
+            [tahto.core.library-snapshot :as snap]
+            [tahto.core.pointer :as ptr :refer :all]
+            [tahto.core.runtime :as rt]
+tahto/lang/runtime_test.clj:11:            [tahto.common.util :as ut]
             [std.lib.deps]
             [std.lib.env :as env]
             [std.lib.resource :as resource])
@@ -47,14 +47,14 @@
                     :section :fragment
                     :library +library-ext+}))
 
-^{:refer hara.lang.runtime/default-tags-ptr :added "4.0"}
+^{:refer tahto.core.runtime/default-tags-ptr :added "4.0"}
 (fact "runtime default args"
 
   (rt/default-tags-ptr {:runtime :hello}
                        +ptr+)
   => '[:hello L.core/add :fragment])
 
-^{:refer hara.lang.runtime/default-deref-ptr :added "4.0"}
+^{:refer tahto.core.runtime/default-deref-ptr :added "4.0"}
 (fact "runtime default deref"
 
   (rt/default-deref-ptr {:runtime :hello
@@ -66,7 +66,7 @@
                         +ptr+)
   => nil)
 
-^{:refer hara.lang.runtime/default-invoke-ptr :added "4.0"}
+^{:refer tahto.core.runtime/default-invoke-ptr :added "4.0"}
 (fact "runtime default invoke"
 
   (rt/default-invoke-ptr {:runtime :hello
@@ -75,11 +75,11 @@
                          [1 2])
   => "1 + 2")
 
-^{:refer hara.lang.runtime/default-init-ptr :added "4.0"}
+^{:refer tahto.core.runtime/default-init-ptr :added "4.0"}
 (fact "will init pointer if there is a :rt/init key"
   (rt/default-init-ptr {:lang :lua} {}) => nil)
 
-^{:refer hara.lang.runtime/default-display-ptr :added "4.0"}
+^{:refer tahto.core.runtime/default-display-ptr :added "4.0"}
 (fact "runtime default display"
 
   (rt/default-display-ptr {:runtime :hello
@@ -91,55 +91,55 @@
                           (dissoc +ptr+ :library))
   => "[:not-found L.core/add :fragment]")
 
-^{:refer hara.lang.runtime/rt-default :added "4.0"}
+^{:refer tahto.core.runtime/rt-default :added "4.0"}
 (fact "creates a lang runtime"
 
   (rt/rt-default {:lang :lua})
   => rt/rt-default?)
 
-^{:refer hara.lang.runtime/rt-default? :added "4.0"}
+^{:refer tahto.core.runtime/rt-default? :added "4.0"}
 (fact "checks if object is default runtime"
   (rt/rt-default? (rt/rt-default {:lang :lua})) => true)
 
-^{:refer hara.lang.runtime/rt-null :added "4.1"}
+^{:refer tahto.core.runtime/rt-null :added "4.1"}
 (fact "creates a default null runtime"
   (select-keys (rt/rt-null {}) [:lang])
   => {:lang :null})
 
-^{:refer hara.lang.runtime/install-lang! :added "4.0"}
+^{:refer tahto.core.runtime/install-lang! :added "4.0"}
 (fact "installs a language within `std.lib.context`"
   (rt/install-lang! :lua) => (any map? vector?))
 
-^{:refer hara.lang.runtime/install-type! :added "4.0"}
+^{:refer tahto.core.runtime/install-type! :added "4.0"}
 (fact "installs a specific runtime type given `:lang`"
-  (let [create (get-in (resource/res:spec-get :hara/lang.rt)
+tahto/lang/runtime_test.clj:115:  (let [create (get-in (resource/res:spec-get :tahto/lang.rt)
                        [:instance :create])]
     (= create
-       (do (rt/install-type! :lua :test-runtime {:type :hara/lang.rt
+tahto/lang/runtime_test.clj:118:       (do (rt/install-type! :lua :test-runtime {:type :tahto/lang.rt
                                                  :config {:bootstrap false}})
-           (get-in (resource/res:spec-get :hara/lang.rt)
+tahto/lang/runtime_test.clj:120:           (get-in (resource/res:spec-get :tahto/lang.rt)
                    [:instance :create]))))
   => true)
 
-^{:refer hara.lang.runtime/return-format-simple :added "4.0"}
+^{:refer tahto.core.runtime/return-format-simple :added "4.0"}
 (fact "format forms for return"
 
   (rt/return-format-simple [1 2 3])
   => '(1 2 (return 3)))
 
-^{:refer hara.lang.runtime/return-format :added "4.0"}
+^{:refer tahto.core.runtime/return-format :added "4.0"}
 (fact "standard format for return"
 
   (rt/return-format '[1 2 (:= x 3)])
   => '(1 2 (:= x 3)))
 
-^{:refer hara.lang.runtime/return-wrap-invoke :added "4.0"}
+^{:refer tahto.core.runtime/return-wrap-invoke :added "4.0"}
 (fact "wraps forms to be invoked"
 
   (rt/return-wrap-invoke '[1 2 (:= x 3)])
   => '((quote ((fn [] 1 2 (:= x 3))))))
 
-^{:refer hara.lang.runtime/normalize-body-forms :added "4.1"}
+^{:refer tahto.core.runtime/normalize-body-forms :added "4.1"}
 (fact "normalizes runtime eval input into body forms"
   (rt/normalize-body-forms '(do 1 2 (:= x 3)) {})
   => '(1 2 (:= x 3))
@@ -150,7 +150,7 @@
   (rt/normalize-body-forms '[1 2 (:= x 3)] {:bulk true})
   => '[1 2 (:= x 3)])
 
-^{:refer hara.lang.runtime/return-transform :added "4.0"}
+^{:refer tahto.core.runtime/return-transform :added "4.0"}
 (fact "standard return transform"
 
   (rt/return-transform '[1 2 (:= x 3)] {})
@@ -162,7 +162,7 @@
   (rt/return-transform '[1 2 (:= x 3)] {:bulk true})
   => '((quote ((fn [] 1 2 (:= x 3))))))
 
-^{:refer hara.lang.runtime/default-invoke-script :added "4.0"}
+^{:refer tahto.core.runtime/default-invoke-script :added "4.0"}
 (fact "default invoke script call used by most runtimes"
 
   (rt/default-invoke-script {:runtime :hello
@@ -173,7 +173,7 @@
                             {:json false})
   => "10 + 20")
 
-^{:refer hara.lang.runtime/default-lifecycle-prep :added "4.0"}
+^{:refer tahto.core.runtime/default-lifecycle-prep :added "4.0"}
 (fact "prepares mopts for lifecycle"
 
   (rt/default-lifecycle-prep {:library +library-ext+
@@ -181,7 +181,7 @@
                               :module 'L.core})
   => map?)
 
-^{:refer hara.lang.runtime/default-scaffold-setup-for :added "4.0"}
+^{:refer tahto.core.runtime/default-scaffold-setup-for :added "4.0"}
 (fact "setup native modules, defglobals and defruns in the runtime"
   (rt/default-scaffold-setup-for
    (rt/map->RuntimeDefault
@@ -192,7 +192,7 @@
    'L.core)
   => string?)
 
-^{:refer hara.lang.runtime/default-scaffold-setup-to :added "4.0"}
+^{:refer tahto.core.runtime/default-scaffold-setup-to :added "4.0"}
 (fact "setup scaffold up to but not including the current module in the runtime"
   (rt/default-scaffold-setup-to
    (rt/map->RuntimeDefault
@@ -203,7 +203,7 @@
    'L.util)
   => string?)
 
-^{:refer hara.lang.runtime/default-scaffold-imports :added "4.0"}
+^{:refer tahto.core.runtime/default-scaffold-imports :added "4.0"}
 (fact "embed native imports to be globally accessible"
   (rt/default-scaffold-imports
    (rt/map->RuntimeDefault
@@ -214,7 +214,7 @@
    'L.util)
   => string?)
 
-^{:refer hara.lang.runtime/default-lifecycle-fn :added "4.0"}
+^{:refer tahto.core.runtime/default-lifecycle-fn :added "4.0"}
 (fact "constructs a lifecycle fn"
 
   ((rt/default-lifecycle-fn deps/has-module-form)
@@ -237,7 +237,7 @@
                      :library +library-ext+}))
   => "L_util____add_fn != nil")
 
-^{:refer hara.lang.runtime/default-setup-module-emit :added "4.0"}
+^{:refer tahto.core.runtime/default-setup-module-emit :added "4.0"}
 (fact "emits the string for the module"
 
   (rt/default-setup-module-emit
@@ -250,7 +250,7 @@
    'L.util)
   => string?)
 
-^{:refer hara.lang.runtime/default-setup-module-basic :added "4.0"}
+^{:refer tahto.core.runtime/default-setup-module-basic :added "4.0"}
 (fact "basic setup module action"
 
   (rt/default-setup-module-basic
@@ -262,7 +262,7 @@
    'L.util)
   => string?)
 
-^{:refer hara.lang.runtime/default-teardown-module-basic :added "4.0"}
+^{:refer tahto.core.runtime/default-teardown-module-basic :added "4.0"}
 (fact "basic teardown module action"
 
   (rt/default-teardown-module-basic
@@ -274,7 +274,7 @@
    'L.util)
   => "L_util____add_fn = nil\n\nL_util____sub_fn = nil")
 
-^{:refer hara.lang.runtime/default-setup-module :added "4.0"}
+^{:refer tahto.core.runtime/default-setup-module :added "4.0"}
 (fact "default setup module (with error isolation)"
   (rt/default-setup-module
    (rt/map->RuntimeDefault
@@ -285,7 +285,7 @@
    'L.util)
   => string?)
 
-^{:refer hara.lang.runtime/default-teardown-module :added "4.0"}
+^{:refer tahto.core.runtime/default-teardown-module :added "4.0"}
 (fact "default teardown module (with error isolation)"
   (rt/default-teardown-module
    (rt/map->RuntimeDefault
@@ -296,7 +296,7 @@
    'L.util)
   => string?)
 
-^{:refer hara.lang.runtime/multistage-invoke :added "4.0"}
+^{:refer tahto.core.runtime/multistage-invoke :added "4.0"}
 (fact "invokes a multistage pipeline given deps function"
 
   (rt/multistage-invoke
@@ -311,7 +311,7 @@
      (std.lib.deps/deps-ordered book [module-id])))
   => '[[L.core nil] [L.util nil]])
 
-^{:refer hara.lang.runtime/multistage-setup-for :added "4.0"}
+^{:refer tahto.core.runtime/multistage-setup-for :added "4.0"}
 (fact "setup for a given namespace"
 
   (rt/multistage-setup-for
@@ -323,7 +323,7 @@
    'L.util)
   => (contains-in [['L.core string?] ['L.util string?]]))
 
-^{:refer hara.lang.runtime/multistage-setup-to :added "4.0"}
+^{:refer tahto.core.runtime/multistage-setup-to :added "4.0"}
 (fact "setup to a given namespcase"
 
   (rt/multistage-setup-to
@@ -335,7 +335,7 @@
    'L.util)
   => (contains-in [['L.core string?]]))
 
-^{:refer hara.lang.runtime/multistage-teardown-for :added "4.0"}
+^{:refer tahto.core.runtime/multistage-teardown-for :added "4.0"}
 (fact "teardown for a given namespace"
 
   (rt/multistage-teardown-for
@@ -347,7 +347,7 @@
    'L.util)
   => (contains-in [['L.util string?] ['L.core string?]]))
 
-^{:refer hara.lang.runtime/multistage-teardown-at :added "4.0"}
+^{:refer tahto.core.runtime/multistage-teardown-at :added "4.0"}
 (fact "teardown all dependents including this"
 
   (rt/multistage-teardown-at
@@ -359,7 +359,7 @@
    'L.util)
   => '[[L.util "L_util____add_fn = nil\n\nL_util____sub_fn = nil"]])
 
-^{:refer hara.lang.runtime/multistage-teardown-to :added "4.0"}
+^{:refer tahto.core.runtime/multistage-teardown-to :added "4.0"}
 (fact "teardown all dependents upto this"
 
   (rt/multistage-teardown-to

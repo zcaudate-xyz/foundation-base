@@ -5,7 +5,7 @@
    ids resolve directly against the figma-ui package. Styling is Tailwind
    class strings only (`class` -> `className`) - no style objects are built
    here."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:import [["@xtalk/figma-ui" :as [* FigmaUi]]]

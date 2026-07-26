@@ -1,5 +1,5 @@
 (ns js.react.ext-box
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-tree :as xtt] [xt.event.base-box :as event-box] [js.react :as r] [xt.lang.spec-promise :as promise]]})

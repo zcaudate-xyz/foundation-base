@@ -1,7 +1,7 @@
 (ns postgres.sample.scratch-v1-test
   (:require [postgres.core]
             [postgres.sample.scratch-v1 :as scratch]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :postgres

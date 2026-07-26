@@ -1,6 +1,6 @@
 (ns xt.db.system.memory-graph-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [postgres.gen.bind-macro :as gen]
             [xt.db.helpers.seed-system-test :as data]))
 
@@ -345,7 +345,7 @@
   => [true false false true])
 
 ^{:refer xt.db.system.memory-graph/like-char-at :added "4.1"}
-(fact "gets a single character from a string"
+(fact "gets a single ctahtocter from a string"
 
   (!.js
     [(g/like-char-at "hello" 0)

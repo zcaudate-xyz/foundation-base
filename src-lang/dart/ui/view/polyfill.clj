@@ -3,7 +3,7 @@
 
    Components without a Wind widget lower to layout/text primitives here;
    the shared catalog remains the grammar both backends validate against."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]

@@ -1,4 +1,4 @@
-(ns clj-kondo.hooks.hara.lang
+(ns clj-kondo.hooks.tahto.core
   (:require [clj-kondo.hooks-api :as api]))
 
 

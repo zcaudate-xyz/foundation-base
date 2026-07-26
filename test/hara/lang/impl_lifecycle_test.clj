@@ -1,14 +1,14 @@
-(ns hara.lang.impl-lifecycle-test
+(ns tahto.core.impl-lifecycle-test
   (:require [xt.lang.common-data]
              [xt.lang.common-lib]
              [js.blessed :as blessed]
              [js.blessed.ui-core :as ui-core]
              [js.blessed.ui-group :as ui-group]
-             [hara.lang :as l]
-             [hara.lang.compile :as compile]
-             [hara.lang.impl :as impl]
-             [hara.lang.impl-lifecycle :refer :all]
-             [hara.lang.library :as lib]
+             [tahto.core :as l]
+             [tahto.core.compile :as compile]
+             [tahto.core.impl :as impl]
+             [tahto.core.impl-lifecycle :refer :all]
+             [tahto.core.library :as lib]
              [xt.lang.common-lib :as k])
   (:use code.test))
 
@@ -25,7 +25,7 @@
       (require '[xt.lang.common-lib] :reload))
     lib))
 
-^{:refer hara.lang.impl-lifecycle/emit-module-prep :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-prep :added "4.0"}
 (fact "prepares the module for emit"
 
   (-> (emit-module-prep 'xt.lang
@@ -55,12 +55,12 @@
                                                        :root-ns 'js.blessed.ui-core}}})))
   => '#{js.blessed.ui-style xt.lang.common-data xt.lang.common-lib js.react})
 
-^{:refer hara.lang.impl-lifecycle/emit-module-setup-concat :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-setup-concat :added "4.0"}
 (fact "joins setup raw into individual blocks"
   (emit-module-setup-concat {:setup-body "setup" :native-arr ["native"] :link-arr ["link"] :header-arr ["header"] :code-arr ["code"] :export-body "export"})
   => '("setup" "native" "link" "header" "code" "export"))
 
-^{:refer hara.lang.impl-lifecycle/emit-module-setup-join :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-setup-join :added "4.0"}
 (fact "joins setup raw into the setup code"
 
   (-> (emit-module-setup-raw 'js.blessed.ui-core
@@ -70,7 +70,7 @@
       (emit-module-setup-join))
   => string?)
 
-^{:refer hara.lang.impl-lifecycle/emit-module-setup-native-arr :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-setup-native-arr :added "4.0"}
 (fact "creates the setup code for native imports"
 
   (emit-module-setup-native-arr {:lang :js
@@ -98,7 +98,7 @@
   => (contains ["import React from 'https://cdn.example.com/react'"
                 "import Blessed from 'blessed'"] :in-any-order))
 
-^{:refer hara.lang.impl-lifecycle/emit-module-setup-link-import :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-setup-link-import :added "4.0"}
 (fact "creates a import structure from links"
 
   (impl/with:library [+library+]
@@ -122,7 +122,7 @@
   => '{:ns "../react", :suffix "", :as r})
 
 
-^{:refer hara.lang.impl-lifecycle/emit-module-setup-link-import
+^{:refer tahto.core.impl-lifecycle/emit-module-setup-link-import
   :added "4.1"
   :id compile-time-only-import}
 (fact "omits compile-time-only namespace references from runtime imports"
@@ -135,7 +135,7 @@
    {:path-separator "/"
     :root-prefix {'xt.lang "@xtalk/lang"}})
   => nil)
-^{:refer hara.lang.impl-lifecycle/emit-module-setup-link-arr :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-setup-link-arr :added "4.0"}
 (fact "creates the setup code for internal links"
 
   (emit-module-setup-link-arr
@@ -182,19 +182,19 @@
                 "import * as k from './@|libs/xt/lang|common-lib'"
                 "import * as r from './@|react'"] :in-any-order))
 
-^{:refer hara.lang.impl-lifecycle/emit-module-setup-export-body :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-setup-export-body :added "4.0"}
 (fact "the code for exporting the body"
   (emit-module-setup-export-body nil (emit-module-prep 'xt.lang {:lang :lua}))
   => string?)
 
-^{:refer hara.lang.impl-lifecycle/emit-module-setup-raw :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-setup-raw :added "4.0"}
 (fact "creates module setup map of array strings"
 
   (emit-module-setup-raw 'js.blessed.ui-core
                          {:lang :js})
   => map?)
 
-^{:refer hara.lang.impl-lifecycle/emit-module-setup :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-setup :added "4.0"}
 (fact "emits the entire module as string"
 
   (:link (second (emit-module-prep 'xt.lang.common-lib
@@ -206,7 +206,7 @@
                       {:lang :lua})
   => string?)
 
-^{:refer hara.lang.impl-lifecycle/emit-module-teardown-concat :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-teardown-concat :added "4.0"}
 (fact "joins teardown raw into individual blocks"
 
   (-> (emit-module-teardown-raw 'xt.lang.common-lib
@@ -214,7 +214,7 @@
       (emit-module-teardown-concat))
   => coll?)
 
-^{:refer hara.lang.impl-lifecycle/emit-module-teardown-join :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-teardown-join :added "4.0"}
 (fact "joins teardown raw into code"
 
   (-> (emit-module-teardown-raw 'xt.lang.common-lib
@@ -222,12 +222,12 @@
       (emit-module-teardown-join))
   => string?)
 
-^{:refer hara.lang.impl-lifecycle/emit-module-teardown-raw :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-teardown-raw :added "4.0"}
 (fact "creates module teardown map of array strings"
   (emit-module-teardown-raw 'xt.lang.common-lib {:lang :lua})
   => map?)
 
-^{:refer hara.lang.impl-lifecycle/emit-module-teardown :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-teardown :added "4.0"}
 (fact "creates the teardown script"
 
   (emit-module-teardown 'xt.lang.common-lib

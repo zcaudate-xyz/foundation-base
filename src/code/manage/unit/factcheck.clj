@@ -111,7 +111,7 @@
   ([^String line]
    (loop [i 0]
      (if (and (< i (count line))
-              (#{\space \tab} (.charAt line i)))
+              (#{\space \tab} (.ctahtot line i)))
        (recur (inc i))
        i))))
 

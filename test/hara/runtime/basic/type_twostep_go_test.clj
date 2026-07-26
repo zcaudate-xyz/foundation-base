@@ -1,7 +1,7 @@
-(ns hara.runtime.basic.type-twostep-go-test
+tahto/runtime/basic/type_twostep_go_test.clj:1:(ns tahto.runtime.basic.type-twostep-go-test
   (:use code.test)
   (:require [std.lib.env :as env]
-            [hara.lang :as l]))
+            [tahto.core :as l]))
 
 (l/script- :go
   {:runtime :twostep})

@@ -1,8 +1,8 @@
 (ns js.lib.eth-lib-test
-  (:require [hara.runtime.solidity :as s]
-            [hara.runtime.solidity.compile-solc :as compile-solc]
-            [hara.runtime.solidity.env-hardhat :as env-hardhat]
-            [hara.lang :as l]
+  (:require [tahto.runtime.solidity :as s]
+            [tahto.runtime.solidity.compile-solc :as compile-solc]
+            [tahto.runtime.solidity.env-hardhat :as env-hardhat]
+            [tahto.core :as l]
             [web3.lib.example-counter :as example-counter]
             [xt.lang.common-notify :as notify])
   (:use code.test))

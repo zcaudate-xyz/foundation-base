@@ -176,7 +176,7 @@
          (override? x) (protocol.pretty/-visit-unknown visitor x)
          (boolean? x) (protocol.pretty/-visit-boolean visitor x)
          (string? x) (protocol.pretty/-visit-string visitor x)
-         (char? x) (protocol.pretty/-visit-character visitor x)
+         (char? x) (protocol.pretty/-visit-ctahtocter visitor x)
          (symbol? x) (protocol.pretty/-visit-symbol visitor x)
          (keyword? x) (protocol.pretty/-visit-keyword visitor x)
          (number? x) (protocol.pretty/-visit-number visitor x)

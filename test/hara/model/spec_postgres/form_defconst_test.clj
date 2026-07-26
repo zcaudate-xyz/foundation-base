@@ -1,11 +1,11 @@
-(ns hara.model.spec-postgres.form-defconst-test
-  (:require [hara.model.spec-postgres :as g]
-            [hara.model.spec-postgres.form-defconst :as form]
+tahto/model/spec_postgres/form_defconst_test.clj:1:(ns tahto.model.spec-postgres.form-defconst-test
+tahto/model/spec_postgres/form_defconst_test.clj:2:  (:require [tahto.model.spec-postgres :as g]
+tahto/model/spec_postgres/form_defconst_test.clj:3:            [tahto.model.spec-postgres.form-defconst :as form]
             [postgres.sample.scratch-v1 :as scratch]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
-^{:refer hara.model.spec-postgres.form-defconst/pg-defconst-hydrate :added "4.0"}
+tahto/model/spec_postgres/form_defconst_test.clj:8:^{:refer tahto.model.spec-postgres.form-defconst/pg-defconst-hydrate :added "4.0"}
 (fact "creates the "
 
   (def -out-
@@ -26,7 +26,7 @@
   -out-
   => vector?)
 
-^{:refer hara.model.spec-postgres.form-defconst/pg-defconst :added "4.0"}
+tahto/model/spec_postgres/form_defconst_test.clj:29:^{:refer tahto.model.spec-postgres.form-defconst/pg-defconst :added "4.0"}
 (fact "emits the static form"
 
   (form/pg-defconst

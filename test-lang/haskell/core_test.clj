@@ -1,6 +1,6 @@
 (ns haskell.core-test
-  (:require [hara.lang :as l]
-            [hara.model.annex.spec-haskell]
+  (:require [tahto.core :as l]
+            [tahto.model.annex.spec-haskell]
             [haskell.core :as h])
   (:use code.test))
 

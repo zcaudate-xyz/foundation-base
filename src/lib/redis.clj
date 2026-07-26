@@ -6,7 +6,7 @@
             [net.resp.pool :as pool]
             [std.lib.component :as component]
             [std.lib.foundation :as f])
-  (:import (hara.net.resp SocketConnection)))
+  (:import (tahto.net.resp SocketConnection)))
 
 (def ^:dynamic *default*
   {:host "localhost"

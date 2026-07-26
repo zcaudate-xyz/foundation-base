@@ -117,20 +117,20 @@
 
 (comment
   (install-artifact
-   '[hara/hara.stuff "2.4.10"]
+   '[tahto/tahto.stuff "2.4.10"]
    {:artifacts [{:file "project.clj"
                  :extension "project"}
                 {:file "README.md"
                  :extension "readme"}]})
 
   (deploy-artifact
-   '[zaudate/hara.stuff "2.4.10"]
+   '[zaudate/tahto.stuff "2.4.10"]
    {:artifacts [{:file "project.clj"
                  :extension "project"}
                 {:file "README.md"
                  :extension "readme"}]
-    :repository {:id "hara"
-                 :url "https://maven.hara.io"
+    :repository {:id "tahto"
+                 :url "https://maven.tahto.io"
                  :authentication
-                 {:username "hara"
-                  :password "hara"}}}))
+                 {:username "tahto"
+                  :password "tahto"}}}))

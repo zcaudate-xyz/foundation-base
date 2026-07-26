@@ -1,5 +1,5 @@
 (ns kmi.lang.type-pair
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[kmi.lang.protocol-base :as p]

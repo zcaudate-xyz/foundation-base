@@ -1,5 +1,5 @@
 (ns glsl.effects.gradient
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :glsl
   glsl.effects.gradient

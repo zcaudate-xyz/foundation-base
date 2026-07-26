@@ -1,5 +1,5 @@
 (ns js.react.ext-route
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.event.base-route :as event-route] [js.react :as r]]})

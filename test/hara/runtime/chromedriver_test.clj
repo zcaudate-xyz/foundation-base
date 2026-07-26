@@ -1,7 +1,7 @@
-(ns hara.runtime.chromedriver-test
+tahto/runtime/chromedriver_test.clj:1:(ns tahto.runtime.chromedriver-test
   (:use code.test)
-  (:require [hara.runtime.chromedriver :as chromedriver]
-             [hara.lang :as l]
+tahto/runtime/chromedriver_test.clj:3:  (:require [tahto.runtime.chromedriver :as chromedriver]
+             [tahto.core :as l]
              [std.lib :as h]
              [std.lib.env :as env]))
 
@@ -21,13 +21,13 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.runtime.chromedriver-test/browser-eval :added "4.0"}
+tahto/runtime/chromedriver_test.clj:24:^{:refer tahto.runtime.chromedriver-test/browser-eval :added "4.0"}
 (fact "chromedriver evaluates !.js expressions"
 
   (!.js (+ 1 2 3))
   => 6)
 
-^{:refer hara.runtime.chromedriver/goto :added "4.0"
+tahto/runtime/chromedriver_test.clj:30:^{:refer tahto.runtime.chromedriver/goto :added "4.0"
   :setup [(def +browser+ (chromedriver/browser {:port 19222}))]
   :teardown [(h/stop +browser+)]}
 (fact "goto a given page"
@@ -41,7 +41,7 @@
   (h/p:rt-raw-eval +browser+ "1+1")
   => 2)
 
-^{:refer hara.runtime.chromedriver/tab-create :added "4.0"
+tahto/runtime/chromedriver_test.clj:44:^{:refer tahto.runtime.chromedriver/tab-create :added "4.0"
   :setup [(def +browser+ (chromedriver/browser {:port 19223}))]
   :teardown [(h/stop +browser+)]}
 (fact "creates, switches, and closes tabs"
@@ -64,7 +64,7 @@
   (chromedriver/tab-list +browser+)
   => vector?)
 
-^{:refer hara.runtime.chromedriver/with-tab :added "4.0"
+tahto/runtime/chromedriver_test.clj:67:^{:refer tahto.runtime.chromedriver/with-tab :added "4.0"
   :setup [(def +main+
             (do (chromedriver/goto "data:text/html,<title>Main</title>" 4000 (l/rt :js))
                 (chromedriver/current-tab (l/rt :js))))
@@ -85,7 +85,7 @@
   => "Main")
 
 
-^{:refer hara.runtime.chromedriver/current-tab :added "4.0"
+tahto/runtime/chromedriver_test.clj:88:^{:refer tahto.runtime.chromedriver/current-tab :added "4.0"
   :setup [(def +browser+ (chromedriver/browser {:port 19224}))
           (chromedriver/goto "data:text/html,<title>Current Tab</title>" 4000 +browser+)]
   :teardown [(h/stop +browser+)]}
@@ -95,7 +95,7 @@
   => (contains {:target-id string?
                 :session-id string?}))
 
-^{:refer hara.runtime.chromedriver/tab-list :added "4.0"
+tahto/runtime/chromedriver_test.clj:98:^{:refer tahto.runtime.chromedriver/tab-list :added "4.0"
   :setup [(def +browser+ (chromedriver/browser {:port 19225}))
           (chromedriver/goto "data:text/html,<title>Tab List</title>" 4000 +browser+)]
   :teardown [(h/stop +browser+)]}
@@ -104,7 +104,7 @@
   (chromedriver/tab-list +browser+)
   => vector?)
 
-^{:refer hara.runtime.chromedriver/tab-switch :added "4.0"
+tahto/runtime/chromedriver_test.clj:107:^{:refer tahto.runtime.chromedriver/tab-switch :added "4.0"
   :setup [(def +browser+ (chromedriver/browser {:port 19226}))
           (chromedriver/goto "data:text/html,<title>One</title>" 4000 +browser+)]
   :teardown [(h/stop +browser+)]}
@@ -121,7 +121,7 @@
   @(chromedriver/evaluate +browser+ "document.title")
   => (contains {"value" "One"}))
 
-^{:refer hara.runtime.chromedriver/tab-close :added "4.0"
+tahto/runtime/chromedriver_test.clj:124:^{:refer tahto.runtime.chromedriver/tab-close :added "4.0"
   :setup [(def +browser+ (chromedriver/browser {:port 19227}))
           (chromedriver/goto "data:text/html,<title>Main</title>" 4000 +browser+)]
   :teardown [(h/stop +browser+)]}

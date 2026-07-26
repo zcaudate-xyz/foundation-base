@@ -11,7 +11,7 @@
            (str/starts-with? (str ns-sym) "rt.postgres."))
     (symbol (str/replace (str ns-sym)
                          #"^rt\.postgres\."
-                         "hara.runtime.postgres."))
+                         "tahto.runtime.postgres."))
     ns-sym))
 
 (defn- existing-file-path
@@ -27,7 +27,7 @@
   (distinct [file-path
              (str/replace file-path
                           "src/rt/postgres/"
-                          "src/hara/runtime/postgres/")]))
+                          "src/tahto/runtime/postgres/")]))
 
 (defn- resolve-file-path
   [file-path]

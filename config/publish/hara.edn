@@ -1,62 +1,62 @@
 {:theme  "foundation"
- :output "public/hara"
+tahto.edn:2: :output "public/tahto"
  :pages  {index
           {:base  "home.html"
            :input "src-doc/documentation/std_lang_index.clj"
-           :title "hara"
+tahto.edn:6:           :title "tahto"
            :subtitle "language tooling, runtime integration, and polyglot system libraries"}
 
           introduction
           {:input "src-doc/documentation/std_lang_introduction.clj"
            :title "Introduction"
-           :subtitle "what hara.lang is, how the book + grammar model works, and why it exists"}
+           :subtitle "what tahto.core is, how the book + grammar model works, and why it exists"}
 
           comparison
           {:input "src-doc/documentation/std_lang_comparison.clj"
            :title "Comparison"
-           :subtitle "where hara.lang sits relative to straight transpilers, Haxe, Racket, and language workbenches"}
+           :subtitle "where tahto.core sits relative to straight transpilers, Haxe, Racket, and language workbenches"}
 
-          hara-model
-          {:input "src-doc/documentation/hara/hara_model.clj"
-           :title "hara.model"
+tahto.edn:19:          tahto-model
+tahto.edn:20:          {:input "src-doc/documentation/tahto/tahto_model.clj"
+tahto.edn:21:           :title "tahto.model"
            :subtitle "target language specifications and xtalk function libraries"}
 
-          hara-runtime
-          {:input "src-doc/documentation/hara/hara_runtime.clj"
-           :title "hara.runtime"
+tahto.edn:24:          tahto-runtime
+tahto.edn:25:          {:input "src-doc/documentation/tahto/tahto_runtime.clj"
+tahto.edn:26:           :title "tahto.runtime"
            :subtitle "runtime adapters for generated code"}
 
-          hara-typed
-          {:input "src-doc/documentation/hara/hara_typed.clj"
-           :title "hara.typed"
+tahto.edn:29:          tahto-typed
+tahto.edn:30:          {:input "src-doc/documentation/tahto/tahto_typed.clj"
+tahto.edn:31:           :title "tahto.typed"
            :subtitle "typed xtalk analysis and emission"}
 
-          hara-common
-          {:input "src-doc/documentation/hara/hara_common.clj"
-           :title "hara.common"
+tahto.edn:34:          tahto-common
+tahto.edn:35:          {:input "src-doc/documentation/tahto/tahto_common.clj"
+tahto.edn:36:           :title "tahto.common"
            :subtitle "shared grammar, emit, and preprocess layers"}
 
-          hara-seedgen
-          {:input "src-doc/documentation/hara/hara_seedgen.clj"
-           :title "hara.seedgen"
+tahto.edn:39:          tahto-seedgen
+tahto.edn:40:          {:input "src-doc/documentation/tahto/tahto_seedgen.clj"
+tahto.edn:41:           :title "tahto.seedgen"
            :subtitle "seed generation and xtalk test scaffolding"}
 
           examples
-          {:input "src-doc/documentation/hara/hara_examples.clj"
+tahto.edn:45:          {:input "src-doc/documentation/tahto/tahto_examples.clj"
            :title "Examples"
            :subtitle "generated project examples from src-build/play"}
 
           walkthrough-basic
-          {:input "src-doc/documentation/hara/walkthrough_basic.clj"
+tahto.edn:50:          {:input "src-doc/documentation/tahto/walkthrough_basic.clj"
            :title "Walkthrough: basic"
-           :subtitle "basic hara.lang authoring"}
+           :subtitle "basic tahto.core authoring"}
 
           walkthrough-multi
-          {:input "src-doc/documentation/hara/walkthrough_multi.clj"
+tahto.edn:55:          {:input "src-doc/documentation/tahto/walkthrough_multi.clj"
            :title "Walkthrough: multi"
            :subtitle "multiple language contexts"}
 
           walkthrough-live
-          {:input "src-doc/documentation/hara/walkthrough_live.clj"
+tahto.edn:60:          {:input "src-doc/documentation/tahto/walkthrough_live.clj"
            :title "Walkthrough: live"
            :subtitle "live runtime execution"}}}

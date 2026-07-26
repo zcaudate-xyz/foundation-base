@@ -1,10 +1,10 @@
-(ns hara.runtime.basic.type-twostep-lean-test
+tahto/runtime/basic/type_twostep_lean_test.clj:1:(ns tahto.runtime.basic.type-twostep-lean-test
   (:use code.test)
   (:require [std.lib.env :as env]
-            [hara.runtime.basic.impl-annex.process-lean]
-            [hara.lang :as l]))
+tahto/runtime/basic/type_twostep_lean_test.clj:4:            [tahto.runtime.basic.impl-annex.process-lean]
+            [tahto.core :as l]))
 
-(do hara.runtime.basic.impl-annex.process-lean/+lean-twostep+)
+tahto/runtime/basic/type_twostep_lean_test.clj:7:(do tahto.runtime.basic.impl-annex.process-lean/+lean-twostep+)
 
 (l/script- :lean
   {:runtime :twostep :test-mode true})

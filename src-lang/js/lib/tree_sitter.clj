@@ -1,5 +1,5 @@
 (ns js.lib.tree-sitter
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:runtime :basic

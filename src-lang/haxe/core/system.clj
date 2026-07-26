@@ -1,5 +1,5 @@
 (ns haxe.core.system
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.template :as template])
   (:refer-clojure :exclude [eval]))
 

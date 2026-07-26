@@ -1,5 +1,5 @@
 (ns xt.net.ws-native
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-protocol :refer [defprotocol.xt]])
   (:refer-clojure :exclude [send]))
 

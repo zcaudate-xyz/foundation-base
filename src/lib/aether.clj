@@ -181,7 +181,7 @@
   "deploys artifacts to the given coordinate
  
    (deploy-artifact
-    '[hara/jvm.artifact \"2.4.8\"]
+    '[tahto/jvm.artifact \"2.4.8\"]
    {:artifacts [{:file \"jvm.artifact-2.4.8.jar\"
                   :extension \"jar\"}
                  {:file \"jvm.artifact-2.4.8.pom\"

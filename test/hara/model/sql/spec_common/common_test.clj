@@ -1,66 +1,66 @@
-(ns hara.model.sql.spec-common.common-test
+tahto/model/sql/spec_common/common_test.clj:1:(ns tahto.model.sql.spec-common.common-test
   (:use code.test)
-  (:require [hara.model.sql.spec-common.common :refer :all]))
+tahto/model/sql/spec_common/common_test.clj:3:  (:require [tahto.model.sql.spec-common.common :refer :all]))
 
-^{:refer hara.model.sql.spec-common.common/sql-dialect :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:5:^{:refer tahto.model.sql.spec-common.common/sql-dialect :added "4.1"}
 (fact "generates SQL dialect")
 
-^{:refer hara.model.sql.spec-common.common/sql-string :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:8:^{:refer tahto.model.sql.spec-common.common/sql-string :added "4.1"}
 (fact "generates SQL string")
 
-^{:refer hara.model.sql.spec-common.common/sql-ident-base :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:11:^{:refer tahto.model.sql.spec-common.common/sql-ident-base :added "4.1"}
 (fact "generates SQL ident base")
 
-^{:refer hara.model.sql.spec-common.common/sql-ident :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:14:^{:refer tahto.model.sql.spec-common.common/sql-ident :added "4.1"}
 (fact "generates SQL ident")
 
-^{:refer hara.model.sql.spec-common.common/sql-qualified-ident :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:17:^{:refer tahto.model.sql.spec-common.common/sql-qualified-ident :added "4.1"}
 (fact "generates SQL qualified ident")
 
-^{:refer hara.model.sql.spec-common.common/sql-type-name :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:20:^{:refer tahto.model.sql.spec-common.common/sql-type-name :added "4.1"}
 (fact "generates SQL type name")
 
-^{:refer hara.model.sql.spec-common.common/sql-sym-meta :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:23:^{:refer tahto.model.sql.spec-common.common/sql-sym-meta :added "4.1"}
 (fact "generates SQL sym meta")
 
-^{:refer hara.model.sql.spec-common.common/sql-hydrate :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:26:^{:refer tahto.model.sql.spec-common.common/sql-hydrate :added "4.1"}
 (fact "generates SQL hydrate")
 
-^{:refer hara.model.sql.spec-common.common/sql-indent :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:29:^{:refer tahto.model.sql.spec-common.common/sql-indent :added "4.1"}
 (fact "generates SQL indent")
 
-^{:refer hara.model.sql.spec-common.common/sql-resolve-entry :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:32:^{:refer tahto.model.sql.spec-common.common/sql-resolve-entry :added "4.1"}
 (fact "generates SQL resolve entry")
 
-^{:refer hara.model.sql.spec-common.common/sql-enum-entry :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:35:^{:refer tahto.model.sql.spec-common.common/sql-enum-entry :added "4.1"}
 (fact "generates SQL enum entry")
 
-^{:refer hara.model.sql.spec-common.common/sql-enum-values-from-type :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:38:^{:refer tahto.model.sql.spec-common.common/sql-enum-values-from-type :added "4.1"}
 (fact "generates SQL enum values from type")
 
-^{:refer hara.model.sql.spec-common.common/sql-render :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:41:^{:refer tahto.model.sql.spec-common.common/sql-render :added "4.1"}
 (fact "generates SQL render")
 
-^{:refer hara.model.sql.spec-common.common/sql-body :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:44:^{:refer tahto.model.sql.spec-common.common/sql-body :added "4.1"}
 (fact "generates SQL body")
 
-^{:refer hara.model.sql.spec-common.common/sql-column-spec :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:47:^{:refer tahto.model.sql.spec-common.common/sql-column-spec :added "4.1"}
 (fact "generates SQL column spec")
 
-^{:refer hara.model.sql.spec-common.common/sql-column-name :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:50:^{:refer tahto.model.sql.spec-common.common/sql-column-name :added "4.1"}
 (fact "generates SQL column name")
 
-^{:refer hara.model.sql.spec-common.common/sql-column-type :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:53:^{:refer tahto.model.sql.spec-common.common/sql-column-type :added "4.1"}
 (fact "generates SQL column type")
 
-^{:refer hara.model.sql.spec-common.common/sql-reference-target :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:56:^{:refer tahto.model.sql.spec-common.common/sql-reference-target :added "4.1"}
 (fact "generates SQL reference target")
 
-^{:refer hara.model.sql.spec-common.common/sql-reference-column :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:59:^{:refer tahto.model.sql.spec-common.common/sql-reference-column :added "4.1"}
 (fact "generates SQL reference column")
 
-^{:refer hara.model.sql.spec-common.common/sql-column-definition :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:62:^{:refer tahto.model.sql.spec-common.common/sql-column-definition :added "4.1"}
 (fact "generates SQL column definition")
 
-^{:refer hara.model.sql.spec-common.common/sql-enum-values :added "4.1"}
+tahto/model/sql/spec_common/common_test.clj:65:^{:refer tahto.model.sql.spec-common.common/sql-enum-values :added "4.1"}
 (fact "generates SQL enum values")

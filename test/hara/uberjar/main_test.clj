@@ -1,9 +1,9 @@
-(ns hara.uberjar.main-test
+tahto/uberjar/main_test.clj:1:(ns tahto.uberjar.main-test
   (:require [clojure.string :as str]
-            [hara.uberjar.main :as cli])
+tahto/uberjar/main_test.clj:3:            [tahto.uberjar.main :as cli])
   (:use code.test))
 
-^{:refer hara.uberjar.main/run :added "4.1"}
+tahto/uberjar/main_test.clj:6:^{:refer tahto.uberjar.main/run :added "4.1"}
 (fact "runs help, discovery, emission, stdin, and error flows"
   (cli/run ["--help"])
   => {:exit 0 :out cli/usage}

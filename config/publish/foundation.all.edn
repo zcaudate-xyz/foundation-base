@@ -2,271 +2,271 @@
  :output   "public"
  :pages    {index      
             {:base  "home.html"
-             :input "test/documentation/hara/home.clj"
-             :title "hara"
+             :input "test/documentation/tahto/home.clj"
+             :title "tahto"
              :subtitle "patterns and blocks"}
 
-             hara-benchmark
-             {:input "test/documentation/hara/hara_benchmark.clj"
+             tahto-benchmark
+             {:input "test/documentation/tahto/tahto_benchmark.clj"
               :title "benchmark"
               :subtitle "measurement and profile"}
 
-             hara-code
-             {:input "test/documentation/hara/hara_code.clj"
+             tahto-code
+             {:input "test/documentation/tahto/tahto_code.clj"
               :title "code"
               :subtitle "code manipulation"}
 
-            hara-code-block
-            {:input "test/documentation/hara/hara_code_block.clj"
+            tahto-code-block
+            {:input "test/documentation/tahto/tahto_code_block.clj"
              :title "code.block"
              :subtitle "code representation"}
 
-            hara-code-navigate
-            {:input "test/documentation/hara/hara_code_navigate.clj"
+            tahto-code-navigate
+            {:input "test/documentation/tahto/tahto_code_navigate.clj"
              :title "code.navigate"
              :subtitle "code navigate"}
 
-            hara-code-query
-            {:input "test/documentation/hara/hara_code_query.clj"
+            tahto-code-query
+            {:input "test/documentation/tahto/tahto_code_query.clj"
              :title "code.query"
              :subtitle "code query and traversal"}
 
-            hara-config
-            {:input "test/documentation/hara/hara_config.clj"
+            tahto-config
+            {:input "test/documentation/tahto/tahto_config.clj"
              :title "config"
              :subtitle "secured configuration"}
 
-            hara-core
-            {:input "test/documentation/hara/hara_core.clj"
+            tahto-core
+            {:input "test/documentation/tahto/tahto_core.clj"
              :title "core"
              :subtitle "general functions"}
 
-            hara-core-component
-            {:input "test/documentation/hara/hara_core_component.clj"
+            tahto-core-component
+            {:input "test/documentation/tahto/tahto_core_component.clj"
              :title "core.component"
              :subtitle "dependency injection"}
 
-            hara-core-version
-            {:input "test/documentation/hara/hara_core_version.clj"
+            tahto-core-version
+            {:input "test/documentation/tahto/tahto_core_version.clj"
              :title "core.version"
              :subtitle "semantic versioning"}
 
-            hara-core-zip
-            {:input "test/documentation/hara/hara_core_zip.clj"
+            tahto-core-zip
+            {:input "test/documentation/tahto/tahto_core_zip.clj"
              :title "core.zip"
              :subtitle "functional zipper"}
 
-            hara-data
-            {:input "test/documentation/hara/hara_data.clj"
+            tahto-data
+            {:input "test/documentation/tahto/tahto_data.clj"
              :title "data"
              :subtitle "generic data methods"}
 
-            hara-deploy
-            {:input "test/documentation/hara/hara_deploy.clj"
+            tahto-deploy
+            {:input "test/documentation/tahto/tahto_deploy.clj"
              :title "deploy"
              :subtitle "code deployment"}
 
-            hara-event
-            {:input "test/documentation/hara/hara_event.clj"
+            tahto-event
+            {:input "test/documentation/tahto/tahto_event.clj"
              :title "event"
              :subtitle "conditional restarts"}
 
-            hara-function
-            {:input "test/documentation/hara/hara_function.clj"
+            tahto-function
+            {:input "test/documentation/tahto/tahto_function.clj"
              :title "function"
              :subtitle "methods for execution"}
 
-            hara-function-procedure
-            {:input "test/documentation/hara/hara_function_procedure.clj"
+            tahto-function-procedure
+            {:input "test/documentation/tahto/tahto_function_procedure.clj"
              :title "function.procedure"
              :subtitle "self aware executives"}
 
-            hara-function-task
-            {:input "test/documentation/hara/hara_function_task.clj"
+            tahto-function-task
+            {:input "test/documentation/tahto/tahto_function_task.clj"
              :title "function.task"
              :subtitle "executing bulk tasks"}
 
-            hara-image
-            {:input "test/documentation/hara/hara_image.clj"
+            tahto-image
+            {:input "test/documentation/tahto/tahto_image.clj"
              :title "image"
              :subtitle "image manipulation"}
 
-            hara-io-archive
-            {:input "test/documentation/hara/hara_io_archive.clj"
+            tahto-io-archive
+            {:input "test/documentation/tahto/tahto_io_archive.clj"
              :title "io.archive"
              :subtitle "zipped file access"}
 
-            hara-io-binary
-            {:input "test/documentation/hara/hara_io_binary.clj"
+            tahto-io-binary
+            {:input "test/documentation/tahto/tahto_io_binary.clj"
              :title "io.binary"
              :subtitle "binary format coercion"}
 
-            hara-io-file
-            {:input "test/documentation/hara/hara_io_file.clj"
+            tahto-io-file
+            {:input "test/documentation/tahto/tahto_io_file.clj"
              :title "io.file"
              :subtitle "file and directory access"}
 
-            hara-io-project
-            {:input "test/documentation/hara/hara_io_project.clj"
+            tahto-io-project
+            {:input "test/documentation/tahto/tahto_io_project.clj"
              :title "io.project"
              :subtitle "project configuration support"}
             
-            hara-io-scheduler
-            {:input "test/documentation/hara/hara_io_scheduler.clj"
+            tahto-io-scheduler
+            {:input "test/documentation/tahto/tahto_io_scheduler.clj"
              :title "io.scheduler"
              :subtitle "task scheduling and simulation"}
             
-            hara-lib-aether
-            {:input "test/documentation/hara/hara_lib_aether.clj"
+            newlisp-lib-aether
+            {:input "test/documentation/newlisp/newlisp_lib_aether.clj"
              :title "lib.aether"
              :subtitle "interface for org.eclipse.aether"}
             
-            hara-lib-datomic
-            {:input "test/documentation/hara/hara_lib_datomic.clj"
+            newlisp-lib-datomic
+            {:input "test/documentation/newlisp/newlisp_lib_datomic.clj"
              :title "lib.datomic"
              :subtitle "interface for com.datomic"}
             
-            hara-lib-graphstream
-            {:input "test/documentation/hara/hara_lib_graphstream.clj"
+            newlisp-lib-graphstream
+            {:input "test/documentation/newlisp/newlisp_lib_graphstream.clj"
              :title "lib.graphstream"
              :subtitle "interface for org.graphstream"}
             
-            hara-lib-jackson
-            {:input "test/documentation/hara/hara_lib_jackson.clj"
+            newlisp-lib-jackson
+            {:input "test/documentation/newlisp/newlisp_lib_jackson.clj"
              :title "lib.jackson"
              :subtitle "interface for com.fasterxml.jackson"}
             
-            hara-lib-jgit
-            {:input "test/documentation/hara/hara_lib_jgit.clj"
+            newlisp-lib-jgit
+            {:input "test/documentation/newlisp/newlisp_lib_jgit.clj"
              :title "lib.jgit"
              :subtitle "interface for org.eclipse.jgit"}
             
-            hara-lib-jsoup
-            {:input "test/documentation/hara/hara_lib_jsoup.clj"
+            newlisp-lib-jsoup
+            {:input "test/documentation/newlisp/newlisp_lib_jsoup.clj"
              :title "lib.jsoup"
              :subtitle "interface for org.jsoup"}
             
-            hara-lib-opencl
-            {:input "test/documentation/hara/hara_lib_opencl.clj"
+            newlisp-lib-opencl
+            {:input "test/documentation/newlisp/newlisp_lib_opencl.clj"
              :title "lib.opencl"
              :subtitle "interface for org.jocl"}
             
-            hara-lib-oshi
-            {:input "test/documentation/hara/hara_lib_oshi.clj"
+            newlisp-lib-oshi
+            {:input "test/documentation/newlisp/newlisp_lib_oshi.clj"
              :title "lib.oshi"
              :subtitle "interface for com.github.oshi"}
             
-            hara-lib-worldwind
-            {:input "test/documentation/hara/hara_lib_worldwind.clj"
+            newlisp-lib-worldwind
+            {:input "test/documentation/newlisp/newlisp_lib_worldwind.clj"
              :title "lib.worldwind"
              :subtitle "interface for org.nasa.worldwind"}
             
-            hara-lib-rabbitmq
-            {:input "test/documentation/hara/hara_lib_rabbitmq.clj"
+            newlisp-lib-rabbitmq
+            {:input "test/documentation/newlisp/newlisp_lib_rabbitmq.clj"
              :title "lib.rabbitmq"
              :subtitle "interface for rabbitmq"}
 
-            hara-math
-            {:input "test/documentation/hara/hara_math.clj"
+            tahto-math
+            {:input "test/documentation/tahto/tahto_math.clj"
              :title "math"
              :subtitle "basic maths and statistics"}
 
-            hara-math-variant
-            {:input "test/documentation/hara/hara_math_variant.clj"
+            tahto-math-variant
+            {:input "test/documentation/tahto/tahto_math_variant.clj"
              :title "math.variant"
              :subtitle "variant logic package"}
             
-            hara-module
-            {:input "test/documentation/hara/hara_module.clj"
+            tahto-module
+            {:input "test/documentation/tahto/tahto_module.clj"
              :title "module"
              :subtitle "code functionality management"}
             
-            hara-module-deps
-            {:input "test/documentation/hara/hara_module_deps.clj"
+            tahto-module-deps
+            {:input "test/documentation/tahto/tahto_module_deps.clj"
              :title "module.deps"
              :subtitle "dependency management"}
             
-            hara-module-namespace
-            {:input "test/documentation/hara/hara_module_namespace.clj"
+            tahto-module-namespace
+            {:input "test/documentation/tahto/tahto_module_namespace.clj"
              :title "module.namespace"
              :subtitle "namespace management"}
 
-            hara-object
-            {:input "test/documentation/hara/hara_object.clj"
+            tahto-object
+            {:input "test/documentation/tahto/tahto_object.clj"
              :title "object"
              :subtitle "object to data"}
             
-            hara-platform
-            {:input "test/documentation/hara/hara_platform.clj"
+            tahto-platform
+            {:input "test/documentation/tahto/tahto_platform.clj"
              :title "platform"
              :subtitle "platform building blocks"}
 
-            hara-print
-            {:input "test/documentation/hara/hara_print.clj"
+            tahto-print
+            {:input "test/documentation/tahto/tahto_print.clj"
              :title "print"
              :subtitle "print primitives"}
 
-            hara-print-graphic
-            {:input "test/documentation/hara/hara_print_graphic.clj"
+            tahto-print-graphic
+            {:input "test/documentation/tahto/tahto_print_graphic.clj"
              :title "print.graphic"
              :subtitle "print visual primitives"}
 
-            hara-publish
-            {:input "test/documentation/hara/hara_publish.clj"
+            tahto-publish
+            {:input "test/documentation/tahto/tahto_publish.clj"
              :title "publish"
              :subtitle "documentation generation"}
 
-            hara-security
-            {:input "test/documentation/hara/hara_security.clj"
+            tahto-security
+            {:input "test/documentation/tahto/tahto_security.clj"
              :title "security"
              :subtitle "encryption and JCA"}
 
-            hara-security-openpgp
-            {:input "test/documentation/hara/hara_security_openpgp.clj"
+            tahto-security-openpgp
+            {:input "test/documentation/tahto/tahto_security_openpgp.clj"
              :title "security.openpgp"
              :subtitle "interface to bouncycastle openpgp"}
 
-            hara-state
-            {:input "test/documentation/hara/hara_state.clj"
+            tahto-state
+            {:input "test/documentation/tahto/tahto_state.clj"
              :title "state"
              :subtitle "unified state"}
 
-            hara-state-ova
-            {:input "test/documentation/hara/hara_state_ova.clj"
+            tahto-state-ova
+            {:input "test/documentation/tahto/tahto_state_ova.clj"
              :title "state.ova"
              :subtitle "mutable, observable array"}
 
-            hara-state-concurrent
-            {:input "test/documentation/hara/hara_state_concurrent.clj"
+            tahto-state-concurrent
+            {:input "test/documentation/tahto/tahto_state_concurrent.clj"
              :title "state.concurrent"
              :subtitle "concurrent datastructures"}
 
-            hara-string
-            {:input "test/documentation/hara/hara_string.clj"
+            tahto-string
+            {:input "test/documentation/tahto/tahto_string.clj"
              :title "string"
              :subtitle "string manipulation"}
 
-            hara-string-text
-            {:input "test/documentation/hara/hara_string_text.clj"
+            tahto-string-text
+            {:input "test/documentation/tahto/tahto_string_text.clj"
              :title "string.text"
              :subtitle "text manipulation"}
 
-            hara-test
-            {:input "test/documentation/hara/hara_test.clj"
+            tahto-test
+            {:input "test/documentation/tahto/tahto_test.clj"
              :title "test"
              :subtitle "forms and runner"}
 
-            hara-time
-            {:input "test/documentation/hara/hara_time.clj"
+            tahto-time
+            {:input "test/documentation/tahto/tahto_time.clj"
              :title "time"
              :subtitle "unified time"}
 
-            hara-tool-monitor
-            {:input "test/documentation/hara/hara_tool_monitor.clj"
+            tahto-tool-monitor
+            {:input "test/documentation/tahto/tahto_tool_monitor.clj"
              :title "tool.monitor"
              :subtitle "live object monitor"}
 
-            hara-watch
-            {:input "test/documentation/hara/hara_watch.clj"
+            tahto-watch
+            {:input "test/documentation/tahto/tahto_watch.clj"
              :title "watch"
              :subtitle "generalised observer on state"}}}

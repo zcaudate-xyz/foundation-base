@@ -1,6 +1,6 @@
 (ns xt.db.helpers.seed-user-test
   (:require [postgres.core :as pg :refer [defsel.pg defret.pg]]
-            [hara.lang :as l]))
+            [tahto.core :as l]))
 
 (l/script :postgres
   {:require [[postgres.core :as pg]

@@ -1,4 +1,4 @@
-package hara.lib.mustache;
+package newlisp.lib.mustache;
 
 public class ParserException extends Exception {
 

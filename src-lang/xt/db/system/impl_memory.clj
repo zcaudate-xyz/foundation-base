@@ -1,5 +1,5 @@
 (ns xt.db.system.impl-memory
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-protocol :as proto :refer [defimpl.xt]]))
 
 (l/script :xtalk

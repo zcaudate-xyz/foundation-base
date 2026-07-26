@@ -1,7 +1,7 @@
 (ns js.react.compile
   (:require [js.react.compile-components :as c]
             [js.react.compile-directives :as d]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.invoke :as invoke]

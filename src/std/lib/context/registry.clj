@@ -12,7 +12,7 @@
 
 (def +null+ {:context :null
              :rt      {:default {:key :default
-                                 :resource :hara/context.rt.null
+                                 :resource :tahto/context.rt.null
                                  :config   {}}}})
 
 ;;
@@ -47,7 +47,7 @@
             (= :default (:runtime obj))))))
 
 (res/res:spec-add
- {:type :hara/context.rt.null
+ {:type :tahto/context.rt.null
   :instance {:create map->RuntimeNull}})
 
 ;;
@@ -91,7 +91,7 @@
    => (contains-in
        {:context :null,
         :rt {:default {:key :default,
-                       :resource :hara/context.rt.null,
+                       :resource :tahto/context.rt.null,
                        :config {}}}})"
   {:added "3.0"}
   ([ctx]

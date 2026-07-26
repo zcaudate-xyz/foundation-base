@@ -1,5 +1,5 @@
 (ns indigo.prompt.translate-figma-make
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 ;; Figma Make
 

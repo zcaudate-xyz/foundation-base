@@ -1,12 +1,12 @@
 (ns postgres.core.impl-test
   (:require [postgres.core :as pg]
-            [hara.runtime.postgres.base.application :as app]
-            [hara.model.spec-postgres.common-tracker :as tracker]
+            [tahto.runtime.postgres.base.application :as app]
+            [tahto.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl :as impl]
             [postgres.core.impl-main :as main]
             [postgres.sample.scratch-v1 :as scratch]
-            [hara.lang :as l]
-            [hara.lang.book :as book]
+            [tahto.core :as l]
+            [tahto.base.book :as book]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f])
   (:use code.test))

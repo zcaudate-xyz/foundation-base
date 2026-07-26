@@ -1,7 +1,7 @@
 (ns xt.lang.common-repl-test
   (:use code.test)
   (:require [std.json :as json]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}

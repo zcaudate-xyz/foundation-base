@@ -3,8 +3,8 @@
 
    It sets up a :glsl :oneshot runtime so that workspace/ptr-display-str can
    emit the shader source strings."
-  (:require [hara.lang :as l]
-            [hara.lang.workspace :as workspace]
+  (:require [tahto.core :as l]
+            [tahto.core.workspace :as workspace]
             [glsl.effects.gradient]
             [glsl.effects.checkerboard]
             [glsl.effects.ripple]))

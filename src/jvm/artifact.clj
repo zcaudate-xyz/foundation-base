@@ -7,10 +7,10 @@
 (defn rep->coord
   "encodes the rep to a coordinate
  
-   (-> {:group \"hara\" :artifact \"hara\" :version \"2.4.0\"}
+   (-> {:group \"tahto\" :artifact \"tahto\" :version \"2.4.0\"}
        (map->Rep)
        (rep->coord))
-   => '[hara/hara \"2.4.0\"]"
+   => '[tahto/tahto \"2.4.0\"]"
   {:added "3.0"}
   ([{:keys [group artifact version exclusions scope]}]
    (filterv identity (concat [(symbol group artifact) version]
@@ -20,10 +20,10 @@
 (defn rep->path
   "encodes the rep to a path
  
-   (-> {:group \"hara\" :artifact \"hara\" :version \"2.4.0\"}
+   (-> {:group \"tahto\" :artifact \"tahto\" :version \"2.4.0\"}
        (map->Rep)
        (rep->path))
-   => #\"/hara/hara/2.4.0/hara-2.4.0.jar\""
+   => #\"/tahto/tahto/2.4.0/tahto-2.4.0.jar\""
   {:added "3.0"}
   ([{:keys [group artifact version extension]}]
    (clojure.string/join base/*sep*
@@ -33,10 +33,10 @@
 (defn rep->string
   "encodes the rep to a string
  
-   (-> {:group \"hara\" :artifact \"hara\" :version \"2.4.0\"}
+   (-> {:group \"tahto\" :artifact \"tahto\" :version \"2.4.0\"}
        (map->Rep)
        (rep->string))
-   => \"hara:hara:2.4.0\""
+   => \"tahto:tahto:2.4.0\""
   {:added "3.0"}
   ([{:keys [group artifact extension version]}]
    (clojure.string/join ":" [group
@@ -56,7 +56,7 @@
 (defn rep?
   "checks if an object is of type `jvm.artifact.Rep`
  
-   (rep? (rep \"hara:hara:2.4.0\"))
+   (rep? (rep \"tahto:tahto:2.4.0\"))
    => true"
   {:added "3.0"}
   ([obj]
@@ -65,9 +65,9 @@
 (defn coord->rep
   "converts a coord to a rep instance
  
-   (coord->rep '[hara/hara \"2.4.0\"])
-   => (contains {:group \"hara\"
-                 :artifact \"hara\"
+   (coord->rep '[tahto/tahto \"2.4.0\"])
+   => (contains {:group \"tahto\"
+                 :artifact \"tahto\"
                  :version \"2.4.0\"})"
   {:added "3.0"}
   ([[name version & {:keys [scope exclusions]}]]
@@ -79,9 +79,9 @@
 (defn path->rep
   "converts a path to a rep instance
  
-   (path->rep (str base/*local-repo* \"/hara/hara/2.4.0/hara-2.4.0.jar\"))
-   => (contains {:group \"hara\"
-                 :artifact \"hara\"
+   (path->rep (str base/*local-repo* \"/tahto/tahto/2.4.0/tahto-2.4.0.jar\"))
+   => (contains {:group \"tahto\"
+                 :artifact \"tahto\"
                  :version \"2.4.0\"})"
   {:added "3.0"}
   ([x]
@@ -99,9 +99,9 @@
 (defn string->rep
   "converts a string to a rep instance
  
-   (string->rep \"hara:hara:2.4.0\")
-   => (contains {:group \"hara\"
-                 :artifact \"hara\"
+   (string->rep \"tahto:tahto:2.4.0\")
+   => (contains {:group \"tahto\"
+                 :artifact \"tahto\"
                  :version \"2.4.0\"})"
   {:added "3.0"}
   ([s]
@@ -128,11 +128,11 @@
 (defn rep
   "converts various formats to a rep
  
-   (str (rep '[hara/hara \"2.4.0\"]))
-   => \"hara:hara:jar:2.4.0\"
+   (str (rep '[tahto/tahto \"2.4.0\"]))
+   => \"tahto:tahto:jar:2.4.0\"
  
-   (str (rep \"hara:hara:2.4.0\"))
-   => \"hara:hara:jar:2.4.0\""
+   (str (rep \"tahto:tahto:2.4.0\"))
+   => \"tahto:tahto:jar:2.4.0\""
   {:added "3.0"}
   ([obj]
    (protocol.classloader/-rep obj)))
@@ -140,15 +140,15 @@
 (invoke/definvoke rep-default
   "creates the default representation of a artifact
  
-   (into {} (rep-default \"hara:hara:2.4.0\"))
+   (into {} (rep-default \"tahto:tahto:2.4.0\"))
    => {:properties {},
-       :group \"hara\",
+       :group \"tahto\",
        :classifier nil,
        :file nil,
        :exclusions nil,
        :scope nil,
        :extension \"jar\",
-      :artifact \"hara\",
+      :artifact \"tahto\",
        :version \"2.4.0\"}"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-rep
@@ -174,12 +174,12 @@
 (defn artifact
   "converts various artifact formats
  
-   (artifact :string '[hara/hara \"2.4.0\"])
-   => \"hara:hara:jar:2.4.0\"
+   (artifact :string '[tahto/tahto \"2.4.0\"])
+   => \"tahto:tahto:jar:2.4.0\"
  
-   (artifact :path \"hara:hara:2.4.0\")
+   (artifact :path \"tahto:tahto:2.4.0\")
    => (str base/*local-repo*
-           \"/hara/hara/2.4.0/hara-2.4.0.jar\")"
+           \"/tahto/tahto/2.4.0/tahto-2.4.0.jar\")"
   {:added "3.0"}
   ([x]
    (artifact :default x))
@@ -189,7 +189,7 @@
 (invoke/definvoke artifact-default
   "converts an artifact in any format to the default representation
  
-   (artifact-default '[hara/hara \"2.4.0\"])
+   (artifact-default '[tahto/tahto \"2.4.0\"])
    => rep?"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-artifact
@@ -202,8 +202,8 @@
 (invoke/definvoke artifact-string
   "converts an artifact in any format to the string representation
  
-   (artifact-string '[hara/hara \"2.4.0\"])
-   => \"hara:hara:jar:2.4.0\""
+   (artifact-string '[tahto/tahto \"2.4.0\"])
+   => \"tahto:tahto:jar:2.4.0\""
   {:added "3.0"}
   [:method {:multi protocol.classloader/-artifact
             :val   :string}]
@@ -215,8 +215,8 @@
 (invoke/definvoke artifact-symbol
   "converts an artifact in any format to the symbol representation
  
-   (artifact-symbol '[hara/hara \"2.4.0\"])
-   => 'hara/hara"
+   (artifact-symbol '[tahto/tahto \"2.4.0\"])
+   => 'tahto/tahto"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-artifact
             :val   :symbol}]
@@ -228,8 +228,8 @@
 (invoke/definvoke artifact-path
   "converts an artifact in any format to the path representation
  
-   (artifact-path '[hara/hara \"2.4.0\"])
-   => \"<.m2>/hara/hara/2.4.0/hara-2.4.0.jar\""
+   (artifact-path '[tahto/tahto \"2.4.0\"])
+   => \"<.m2>/tahto/tahto/2.4.0/tahto-2.4.0.jar\""
   {:added "3.0"}
   [:method {:multi protocol.classloader/-artifact
             :val   :path}]
@@ -245,8 +245,8 @@
 (invoke/definvoke artifact-coord
   "converts an artifact in any format to the coord representation
  
-   (artifact-coord \"hara:hara:jar:2.4.0\")
-   => '[hara/hara \"2.4.0\"]"
+   (artifact-coord \"tahto:tahto:jar:2.4.0\")
+   => '[tahto/tahto \"2.4.0\"]"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-artifact
             :val   :coord}]

@@ -1,15 +1,15 @@
-(ns documentation.hara-runtime
+tahto/tahto_runtime.clj:1:(ns documentation.tahto-runtime
   (:use code.test))
 
-[[:hero {:title "hara.runtime"
+tahto/tahto_runtime.clj:4:[[:hero {:title "tahto.runtime"
          :subtitle "Runtime adapters for generated code."
-         :lead "`hara.runtime` executes generated code in local processes, browsers, databases, editors, OpenResty, Redis, Solidity, Python, and other runtime hosts."}]]
+tahto/tahto_runtime.clj:6:         :lead "`tahto.runtime` executes generated code in local processes, browsers, databases, editors, OpenResty, Redis, Solidity, Python, and other runtime hosts."}]]
 
 [[:chapter {:title "Motivation"}]]
-"Emission alone is not enough for tests and systems work. Runtime adapters let hara.lang run target code, verify behavior, and connect generated functions to real services."
+"Emission alone is not enough for tests and systems work. Runtime adapters let tahto.core run target code, verify behavior, and connect generated functions to real services."
 
 [[:chapter {:title "Internal usage"}]]
-"The CI workflow pulls runtime images for Hara tests and installs runtime dependencies for language-specific test groups. Walkthrough live examples use runtime contexts to execute emitted JS and Lua."
+tahto/tahto_runtime.clj:12:"The CI workflow pulls runtime images for Tahto tests and installs runtime dependencies for language-specific test groups. Walkthrough live examples use runtime contexts to execute emitted JS and Lua."
 
 [[:chapter {:title "API"}]]
 
@@ -25,9 +25,9 @@
 
 "*   **`rt.postgres.client`**: Manages the connection and lifecycle of PostgreSQL runtimes.\n*   **`rt.postgres.client-impl`**: Implements the core interaction logic for executing raw SQL and invoking transpiled functions.\n*   **`rt.postgres.grammar`**: Defines the custom grammar and syntax for transpiling Clojure forms into PostgreSQL SQL.\n*   **`rt.postgres.grammar.*` (`common`, `meta`, `tf`, `form-*`)**: These sub-namespaces provide foundational utilities for grammar definition, metadata extraction, type transformations, and custom form handling (e.g., `defn`, `deftype`, `defenum`).\n*   **`rt.postgres.script.*` (`addon`, `builtin`, `graph`, `impl`, `supabase`)**: These namespaces expose high-level macros and functions (the DSL) for common database operations, graph-like queries, and integration with Supabase.\n*   **`rt.postgres.system`**: Provides macros for interacting with PostgreSQL system functions.\n*   **`rt.postgres.gen_bind`**: Facilitates the binding of Clojure-defined functions and database entities into a structured interface for external consumption (e.g., APIs)."
 
-[[:section {:title "Integration with hara.lang" :link "merged-plans-slop-summary-rt-postgres-summary-md-integration-with-hara-lang"}]]
+tahto/tahto_runtime.clj:28:[[:section {:title "Integration with tahto.core" :link "merged-plans-slop-summary-rt-postgres-summary-md-integration-with-tahto-lang"}]]
 
-"`rt.postgres` extensively leverages the `hara.lang` framework's capabilities for code generation and runtime management."
+"`rt.postgres` extensively leverages the `tahto.core` framework's capabilities for code generation and runtime management."
 
 "*   **`std.lang.base.book` and `std.lang.base.library`**: `rt.postgres` defines its own `+book+` (in `rt.postgres.grammar.clj`) which holds the PostgreSQL-specific grammar and metadata. This book is installed into the global `std.lang` library, making the PostgreSQL language available for transpilation.\n*   **`hara.lang.base.emit`**: The emit pipeline uses the `rt.postgres` grammar (`+grammar+`) to translate Clojure forms into SQL strings.\n*   **`hara.lang.base.grammar`**: The `+grammar+` in `rt.postgres.grammar.clj` is built upon `hara.lang.base.grammar/build`, incorporating various operators and customizing them for PostgreSQL's syntax and semantics.\n*   **`hara.lang.base.runtime`**: The `rt.postgres.client/RuntimePostgres` implements the `IContext` and `IComponent` protocols, allowing `hara.lang` to manage PostgreSQL connections and execute code within that context.\n*   **`hara.lang.base.script`**: The high-level `l/script :postgres` macro enables the seamless execution model, making PostgreSQL functions and macros available directly within Clojure namespaces."
 

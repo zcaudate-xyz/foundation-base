@@ -1,5 +1,5 @@
 (ns r.core
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [library]))
 

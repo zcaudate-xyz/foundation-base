@@ -18,7 +18,7 @@
                      :null :default {})
   => (contains-in
       [:changed {:null {:context :null, :scratch std.lib.context.registry.RuntimeNull,
-                        :key :default, :resource :hara/context.rt.null, :config {}}}]))
+                        :key :default, :resource :tahto/context.rt.null, :config {}}}]))
 
 ^{:refer std.lib.context.space/space-context-unset :added "3.0"}
 (fact "unsets the context in the space"
@@ -27,7 +27,7 @@
                          (space-context-set :null :default {}))
                        :null)
   => (contains {:context :null, :key :default,
-                :resource :hara/context.rt.null, :config {}}))
+                :resource :tahto/context.rt.null, :config {}}))
 
 ^{:refer std.lib.context.space/space-context-get :added "3.0"}
 (fact "gets the context in the space"
@@ -37,7 +37,7 @@
                      :null)
   => (contains
       {:context :null, :key :default,
-       :resource :hara/context.rt.null, :config {} :variant :default}))
+       :resource :tahto/context.rt.null, :config {} :variant :default}))
 
 ^{:refer std.lib.context.space/space-rt-start :added "3.0"}
 (fact "starts the context runtime"
@@ -116,20 +116,20 @@
   space-context-set
   (space:rt-get rt:scratch :lang/lua)
   (reg/registry-list)
-  (space-rt (space 'hara.lang.codegen.form-test)
+  (space-rt (space 'tahto.core.codegen.form-test)
             :lang/start)
 
   (rt:current)
 
-  (res/res:spec-get :hara/context.space)
-  (res/res-key :namespace :hara/context.space :default {:namespace (the-ns 'std.lib.context.pointer)})
+  (res/res:spec-get :tahto/context.space)
+  (res/res-key :namespace :tahto/context.space :default {:namespace (the-ns 'std.lib.context.pointer)})
 
-  (res/res-stop :hara/context.space)
+  (res/res-stop :tahto/context.space)
 
 
-  (f/hash-code (res/res :hara/context.space))
-  (f/hash-code (res/res :hara/context.space {:namespace 'std.lib.context.pointer}))
-  (f/hash-code (res/res :hara/context.space {:namespace (the-ns 'std.lib.context.pointer)}))
+  (f/hash-code (res/res :tahto/context.space))
+  (f/hash-code (res/res :tahto/context.space {:namespace 'std.lib.context.pointer}))
+  (f/hash-code (res/res :tahto/context.space {:namespace (the-ns 'std.lib.context.pointer)}))
 
 
   (space-create )

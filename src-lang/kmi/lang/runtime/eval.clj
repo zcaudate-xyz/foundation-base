@@ -1,5 +1,5 @@
 (ns kmi.lang.runtime.eval
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [eval apply read symbol? keyword? list? vector?
                           macroexpand macroexpand-1]))
 

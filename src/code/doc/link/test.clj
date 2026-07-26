@@ -74,14 +74,14 @@
 
   (:lookup PROJECT)
   (-> (parse/parse-file
-       "test/documentation/hara_zip.clj" PROJECT)
-      (->> (assoc-in {} [:articles "hara-zip" :elements]))
+       "test/documentation/tahto_zip.clj" PROJECT)
+      (->> (assoc-in {} [:articles "tahto-zip" :elements]))
       (assoc :project PROJECT)
-      (link-tests "hara-zip")
-      (get-in [:articles "hara-zip" :elements]))
+      (link-tests "tahto-zip")
+      (get-in [:articles "tahto-zip" :elements]))
 
   (->> (fn [id sink]
-         (load-file "/Users/chris/Development/chit/hara/test/documentation/hara_zip.clj"))
+         (load-file "/Users/chris/Development/chit/tahto/test/documentation/tahto_zip.clj"))
        runner/accumulate
        failed-tests)
   (map (juxt :line identity))
@@ -93,7 +93,7 @@
                '[code.project :as project]
                '[code.doc.parse :as parse])
 
-      (def project-file "/Users/chris/Development/chit/hara/project.clj")
+      (def project-file "/Users/chris/Development/chit/tahto/project.clj")
 
       (def PROJECT (let [project (project/project project-file)]
                      (assoc project :lookup (project/file-lookup project))))))

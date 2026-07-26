@@ -1,9 +1,9 @@
-(ns hara.runtime.js-playground.client-test
+tahto/runtime/js_playground/client_test.clj:1:(ns tahto.runtime.js-playground.client-test
   (:use code.test)
-  (:require [hara.runtime.js-playground :as playground]
-            [hara.runtime.js-playground.client :refer :all]
-            [hara.runtime.chromedriver :as chromedriver]
-            [hara.lang :as l]
+tahto/runtime/js_playground/client_test.clj:3:  (:require [tahto.runtime.js-playground :as playground]
+tahto/runtime/js_playground/client_test.clj:4:            [tahto.runtime.js-playground.client :refer :all]
+tahto/runtime/js_playground/client_test.clj:5:            [tahto.runtime.chromedriver :as chromedriver]
+            [tahto.core :as l]
             [org.httpkit.server :as server]
             [std.lib.env :as env]
             [std.lib.network :as network]
@@ -12,7 +12,7 @@
 
 (l/script- :js
   {:runtime :chromedriver.instance
-   :require [[hara.runtime.js-playground.client :as client]
+tahto/runtime/js_playground/client_test.clj:15:   :require [[tahto.runtime.js-playground.client :as client]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]]
@@ -90,7 +90,7 @@
   :teardown [(h/stop +browser+)
              ((:stop +server+))]})
 
-^{:refer hara.runtime.js-playground.client/mount! :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:93:^{:refer tahto.runtime.js-playground.client/mount! :added "4.0" :timeout 60000}
 (fact "mount! loads the playground and exposes the global PLAYGROUND api"
 
   @(chromedriver/evaluate +browser+ "typeof globalThis.PLAYGROUND")
@@ -102,7 +102,7 @@
   @(chromedriver/evaluate +browser+ "document.getElementById('root').childElementCount > 0")
   => (contains {"value" true}))
 
-^{:refer hara.runtime.js-playground.client/get-config :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:105:^{:refer tahto.runtime.js-playground.client/get-config :added "4.0" :timeout 60000}
 (fact "get-config reads the playground config from globalThis.PLAYGROUND_CONFIG"
 
   @(chromedriver/evaluate +browser+ "globalThis.PLAYGROUND_CONFIG.title")
@@ -111,7 +111,7 @@
   @(chromedriver/evaluate +browser+ "globalThis.PLAYGROUND_CONFIG.tabs[0].id")
   => (contains {"value" "stage"}))
 
-^{:refer hara.runtime.js-playground.client/App :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:114:^{:refer tahto.runtime.js-playground.client/App :added "4.0" :timeout 60000}
 (fact "App renders the playground shell with topbar, tab bar and sidebar"
 
   @(chromedriver/evaluate +browser+ "document.getElementById('topbar') !== null")
@@ -123,7 +123,7 @@
   @(chromedriver/evaluate +browser+ "document.getElementById('sidebar') !== null")
   => (contains {"value" true}))
 
-^{:refer hara.runtime.js-playground.client/TopMenu :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:126:^{:refer tahto.runtime.js-playground.client/TopMenu :added "4.0" :timeout 60000}
 (fact "TopMenu displays title and compact connected status"
 
   @(chromedriver/evaluate +browser+ "document.querySelector('#topbar').textContent.includes('JS Playground')")
@@ -132,7 +132,7 @@
   @(chromedriver/evaluate +browser+ "document.querySelector('#topbar button').textContent.includes('connected')")
   => (contains {"value" true}))
 
-^{:refer hara.runtime.js-playground.client/TabBar :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:135:^{:refer tahto.runtime.js-playground.client/TabBar :added "4.0" :timeout 60000}
 (fact "TabBar renders configured tabs and tab lifecycle functions work"
 
   @(chromedriver/evaluate +browser+ "Array.from(document.querySelectorAll('button')).some(b => b.textContent === 'Stage')")
@@ -150,7 +150,7 @@
   @(chromedriver/evaluate +browser+ "globalThis.PLAYGROUND.getActiveTab()")
   => (contains {"value" "stage"}))
 
-^{:refer hara.runtime.js-playground.client/ActiveTabPanel :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:153:^{:refer tahto.runtime.js-playground.client/ActiveTabPanel :added "4.0" :timeout 60000}
 (fact "ActiveTabPanel renders stage and custom tab content"
 
   @(chromedriver/evaluate +browser+ "globalThis.PLAYGROUND.switchTab('stage')")
@@ -174,7 +174,7 @@
   @(chromedriver/evaluate +browser+ "globalThis.PLAYGROUND.switchTab('stage')")
   => (contains {"value" nil}))
 
-^{:refer hara.runtime.js-playground.client/format-body :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:177:^{:refer tahto.runtime.js-playground.client/format-body :added "4.0" :timeout 60000}
 (fact "format-body formats strings and json values for display"
 
   (!.js (client/format-body "hello"))
@@ -183,7 +183,7 @@
   (!.js (client/format-body {"a" 1}))
   => #"\"a\"\s*:\s*1")
 
-^{:refer hara.runtime.js-playground.client/eval-body :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:186:^{:refer tahto.runtime.js-playground.client/eval-body :added "4.0" :timeout 60000}
 (fact "eval-body evaluates js expressions and returns status/value pairs"
 
   (!.js (client/eval-body "1 + 2"))
@@ -192,7 +192,7 @@
   (!.js (client/eval-body "'hello'"))
   => ["ok" "hello"])
 
-^{:refer hara.runtime.js-playground.client/make-add-message :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:195:^{:refer tahto.runtime.js-playground.client/make-add-message :added "4.0" :timeout 60000}
 (fact "make-add-message prepends new messages so the latest is first"
 
   (!.js
@@ -204,13 +204,13 @@
     (. messagesRef current))
   => [{"id" "b"} {"id" "a"}])
 
-^{:refer hara.runtime.js-playground.client/make-tab-id :added "4.1" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:207:^{:refer tahto.runtime.js-playground.client/make-tab-id :added "4.1" :timeout 60000}
 (fact "make-tab-id returns a unique tab id"
 
   (!.js (client/make-tab-id "hello"))
   => #"tab-hello-")
 
-^{:refer hara.runtime.js-playground.client/find-tab-index :added "4.1" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:213:^{:refer tahto.runtime.js-playground.client/find-tab-index :added "4.1" :timeout 60000}
 (fact "find-tab-index finds the index of a tab by id"
 
   (!.js (client/find-tab-index [{"id" "a"} {"id" "b"}] "b"))
@@ -219,7 +219,7 @@
   (!.js (client/find-tab-index [{"id" "a"}] "b"))
   => -1)
 
-^{:refer hara.runtime.js-playground.client/has-tab? :added "4.1" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:222:^{:refer tahto.runtime.js-playground.client/has-tab? :added "4.1" :timeout 60000}
 (fact "has-tab? checks whether a tab exists"
 
   (!.js (client/has-tab? [{"id" "a"}] "a"))
@@ -228,7 +228,7 @@
   (!.js (client/has-tab? [{"id" "a"}] "b"))
   => false)
 
-^{:refer hara.runtime.js-playground.client/run-eval :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:231:^{:refer tahto.runtime.js-playground.client/run-eval :added "4.0" :timeout 60000}
 (fact "run-eval records eval status and reply on the message entry"
 
   (!.js
@@ -240,19 +240,19 @@
     (. messagesRef current))
   => (contains [(contains {"status" "ok" "sent" "1 + 1"})]))
 
-^{:refer hara.runtime.js-playground.client/MessageItem :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:243:^{:refer tahto.runtime.js-playground.client/MessageItem :added "4.0" :timeout 60000}
 (fact "MessageItem is a React component function"
 
   (!.js (typeof client/MessageItem))
   => "function")
 
-^{:refer hara.runtime.js-playground.client/MessageList :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:249:^{:refer tahto.runtime.js-playground.client/MessageList :added "4.0" :timeout 60000}
 (fact "MessageList is a React component function"
 
   (!.js (typeof client/MessageList))
   => "function")
 
-^{:refer hara.runtime.js-playground.client/send-response :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:255:^{:refer tahto.runtime.js-playground.client/send-response :added "4.0" :timeout 60000}
 (fact "send-response delivers websocket replies back to the runtime"
 
   (!.js
@@ -262,14 +262,14 @@
     sent)
   => #"\"id\".*\"abc\".*\"status\".*\"ok\".*\"body\".*42")
 
-^{:refer hara.runtime.js-playground.client/make-websocket :added "4.0" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:265:^{:refer tahto.runtime.js-playground.client/make-websocket :added "4.0" :timeout 60000}
 (fact "make-websocket creates a WebSocket and wires handlers"
 
   (!.js (typeof (client/make-websocket "ws://localhost/ws" (fn [s]) (fn [m]) {"current" []} (fn [ms]))))
   => "object")
 
 
-^{:refer hara.runtime.js-playground.client/DomNode :added "4.1" :timeout 60000}
+tahto/runtime/js_playground/client_test.clj:272:^{:refer tahto.runtime.js-playground.client/DomNode :added "4.1" :timeout 60000}
 (fact "DomNode mounts a raw DOM node inside the React-managed tab panel"
 
   @(chromedriver/evaluate +browser+

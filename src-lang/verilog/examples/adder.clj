@@ -1,5 +1,5 @@
 (ns verilog.examples.adder
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :verilog
   {})

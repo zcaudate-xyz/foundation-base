@@ -59,7 +59,7 @@
              height (if (= tag :linebreak) 1 0)]
          (if tag
            (type/void-block tag ch width height)
-           (throw (ex-info "Not a valid void character." {:input ch})))))))
+           (throw (ex-info "Not a valid void ctahtocter." {:input ch})))))))
 
 (defn space
   "creates a space block

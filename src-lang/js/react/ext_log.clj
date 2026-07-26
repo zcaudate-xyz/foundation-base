@@ -1,5 +1,5 @@
 (ns js.react.ext-log
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.event.base-log :as event-log]

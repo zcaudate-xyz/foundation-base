@@ -1,6 +1,6 @@
-(ns hara.model.spec-xtalk-typed-fixture
-  (:require [hara.lang :as l]
-            [hara.typed :refer [defspec.xt]]))
+tahto/model/spec_xtalk_typed_fixture.clj:1:(ns tahto.model.spec-xtalk-typed-fixture
+  (:require [tahto.core :as l]
+tahto/model/spec_xtalk_typed_fixture.clj:3:            [tahto.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-lib :as k]]})

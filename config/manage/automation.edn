@@ -2,8 +2,8 @@
  :policy :observe
  :baseline "config/manage/incomplete-baseline.edn"
  :sections
- {:hara {:selector [hara]
-         :test-command "lein test :with [hara]"}
+ {:tahto {:selector [tahto]
+         :test-command "lein test :with [tahto]"}
   :std {:selector [std]
         :test-command "lein test :with [std]"}
   :xt {:selector [xt.]

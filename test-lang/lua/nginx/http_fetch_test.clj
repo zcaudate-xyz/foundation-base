@@ -1,7 +1,7 @@
 (ns lua.nginx.http-fetch-test
   (:require [lua.nginx.http-fetch]
             [std.lib.env :as env]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (fact:global

@@ -1,10 +1,10 @@
 (ns lua.nginx.websocket-test
   (:require [net.http :as http]
             [net.http.websocket :as client]
-            [hara.runtime.nginx]
+            [tahto.runtime.nginx]
             [std.json :as json]
             [std.lib.env :as env]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :lua.nginx

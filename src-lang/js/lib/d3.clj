@@ -1,5 +1,5 @@
 (ns js.lib.d3
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
   (:refer-clojure :exclude [count filter force format map max merge min namespace partition range reduce reverse shuffle some sort]))

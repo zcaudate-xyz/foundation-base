@@ -1,11 +1,11 @@
-(ns hara.runtime.jocl.runtime-test
+tahto/runtime/jocl/runtime_test.clj:1:(ns tahto.runtime.jocl.runtime-test
   (:refer-clojure :exclude [to-array])
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.component :as component]
             [std.lib.context.pointer :as cptr]
-            [hara.runtime.jocl :as exec :refer :all]
-            [hara.runtime.jocl.env :as jocl-env]))
+tahto/runtime/jocl/runtime_test.clj:7:            [tahto.runtime.jocl :as exec :refer :all]
+tahto/runtime/jocl/runtime_test.clj:8:            [tahto.runtime.jocl.env :as jocl-env]))
 
 (jocl-env/with-stubs exec? exec kernel? init-exec-jocl
                      init-ptr-jocl invoke-ptr-jocl stop-jocl jocl:create
@@ -38,20 +38,20 @@
 (defonce +rt+
   (component/start (jocl:create {})))
 
-^{:refer hara.runtime.jocl.runtime/kernel? :added "3.0"}
+tahto/runtime/jocl/runtime_test.clj:41:^{:refer tahto.runtime.jocl.runtime/kernel? :added "3.0"}
 (fact "check that a code entry "
 
   (kernel? @sample)
   => true)
 
-^{:refer hara.runtime.jocl.runtime/init-exec-jocl :added "3.0"}
+tahto/runtime/jocl/runtime_test.clj:47:^{:refer tahto.runtime.jocl.runtime/init-exec-jocl :added "3.0"}
 (fact "initialises the exec in the runtime"
   ^:hidden
 
   (init-exec-jocl +rt+
                   (cptr/pointer {:context :lang/c
                                  :lang :c
-                                 :module 'hara.runtime.jocl.runtime-test
+tahto/runtime/jocl/runtime_test.clj:54:                                 :module 'tahto.runtime.jocl.runtime-test
                                  :section :code
                                  :id 'sample})
                   @sample)
@@ -64,17 +64,17 @@
       seq)
   =>  [0.0 1.0 4.0 9.0 16.0 25.0 36.0 49.0 64.0 81.0])
 
-^{:refer hara.runtime.jocl.runtime/init-ptr-jocl :added "3.0"}
+tahto/runtime/jocl/runtime_test.clj:67:^{:refer tahto.runtime.jocl.runtime/init-ptr-jocl :added "3.0"}
 (fact "initialises the pointer")
 
-^{:refer hara.runtime.jocl.runtime/invoke-ptr-jocl :added "3.0"}
+tahto/runtime/jocl/runtime_test.clj:70:^{:refer tahto.runtime.jocl.runtime/invoke-ptr-jocl :added "3.0"}
 (fact "invokes a jocl ptr (cached kernel)")
 
-^{:refer hara.runtime.jocl.runtime/stop-jocl :added "3.0"}
+tahto/runtime/jocl/runtime_test.clj:73:^{:refer tahto.runtime.jocl.runtime/stop-jocl :added "3.0"}
 (fact "stops the runtime")
 
-^{:refer hara.runtime.jocl.runtime/jocl:create :added "3.0"}
+tahto/runtime/jocl/runtime_test.clj:76:^{:refer tahto.runtime.jocl.runtime/jocl:create :added "3.0"}
 (fact "creates a new runtime")
 
-^{:refer hara.runtime.jocl.runtime/jocl :added "3.0"}
+tahto/runtime/jocl/runtime_test.clj:79:^{:refer tahto.runtime.jocl.runtime/jocl :added "3.0"}
 (fact "create and starts the runtime")

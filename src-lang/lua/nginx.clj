@@ -1,5 +1,5 @@
 (ns lua.nginx
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.lib.template :as template]

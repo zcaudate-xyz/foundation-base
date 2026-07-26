@@ -1,12 +1,12 @@
-(ns hara.runtime.basic.impl-annex.process-lean-test
+tahto/runtime/basic/impl_annex/process_lean_test.clj:1:(ns tahto.runtime.basic.impl-annex.process-lean-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [hara.runtime.basic.impl-annex.process-lean :refer :all]
-            [hara.runtime.basic.type-twostep :as twostep]
+tahto/runtime/basic/impl_annex/process_lean_test.clj:4:            [tahto.runtime.basic.impl-annex.process-lean :refer :all]
+tahto/runtime/basic/impl_annex/process_lean_test.clj:5:            [tahto.runtime.basic.type-twostep :as twostep]
             [std.fs :as fs]
             [std.lib.os :as os]))
 
-^{:refer hara.runtime.basic.impl-annex.process-lean/sh-exec-lean :added "4.1"}
+tahto/runtime/basic/impl_annex/process_lean_test.clj:9:^{:refer tahto.runtime.basic.impl-annex.process-lean/sh-exec-lean :added "4.1"}
 (fact "executes a lean source file locally"
   (let [calls (atom [])
         result (with-redefs [os/sh (fn [opts] (swap! calls conj opts) :proc)
@@ -34,7 +34,7 @@
     result)
   => "stderr")
 
-^{:refer hara.runtime.basic.impl-annex.process-lean/sh-exec-lean-docker :added "4.1"}
+tahto/runtime/basic/impl_annex/process_lean_test.clj:37:^{:refer tahto.runtime.basic.impl-annex.process-lean/sh-exec-lean-docker :added "4.1"}
 (fact "executes a lean source file inside a docker container"
   (let [calls (atom [])
         result (with-redefs [os/sh (fn [opts] (swap! calls conj opts) :proc)
@@ -58,7 +58,7 @@
      (boolean (some #(str/ends-with? % ".lean") args))])
   => ["ok" "docker" "run" "--rm" true true true true true])
 
-^{:refer hara.runtime.basic.impl-annex.process-lean/sh-exec-lean-portable :added "4.1"}
+tahto/runtime/basic/impl_annex/process_lean_test.clj:61:^{:refer tahto.runtime.basic.impl-annex.process-lean/sh-exec-lean-portable :added "4.1"}
 (fact "chooses local or container execution based on availability"
   (with-redefs [twostep/local-exec-available? (fn [_] true)
                 sh-exec-lean (fn [_ _ _] "local")
@@ -89,7 +89,7 @@
                                                :container-backup false}))
   => "local")
 
-^{:refer hara.runtime.basic.impl-annex.process-lean/transform-form :added "4.1"}
+tahto/runtime/basic/impl_annex/process_lean_test.clj:92:^{:refer tahto.runtime.basic.impl-annex.process-lean/transform-form :added "4.1"}
 (fact "wraps forms into a standalone lean script ending in #eval"
   (transform-form '[(+ 1 2) (+ 3 4)] {})
   => '(:lines (+ 1 2) (:% (:raw-str "#eval ") (+ 3 4)))

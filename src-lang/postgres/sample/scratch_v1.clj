@@ -1,7 +1,7 @@
 (ns postgres.sample.scratch-v1
   (:require [postgres.core :refer [defret.pg defsel.pg]]
-            [hara.runtime.postgres.base.application :as app]
-            [hara.lang :as l]))
+            [tahto.runtime.postgres.base.application :as app]
+            [tahto.core :as l]))
 
 (l/script :postgres
   {:require [[postgres.core :as pg]]

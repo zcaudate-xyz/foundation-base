@@ -1,5 +1,5 @@
 (ns js.lib.osc
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [send]))
 
 (l/script :js

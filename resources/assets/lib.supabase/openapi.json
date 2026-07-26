@@ -9503,7 +9503,7 @@
           "nimbus_oauth_client_secret": { "type": "string", "nullable": true },
           "password_hibp_enabled": { "type": "boolean", "nullable": true },
           "password_min_length": { "type": "integer", "nullable": true },
-          "password_required_characters": {
+          "password_required_ctahtocters": {
             "type": "string",
             "enum": [
               "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:0123456789",
@@ -9762,7 +9762,7 @@
           "nimbus_oauth_client_secret",
           "password_hibp_enabled",
           "password_min_length",
-          "password_required_characters",
+          "password_required_ctahtocters",
           "rate_limit_anonymous_users",
           "rate_limit_email_sent",
           "rate_limit_sms_sent",
@@ -9988,7 +9988,7 @@
             "maximum": 32767,
             "nullable": true
           },
-          "password_required_characters": {
+          "password_required_ctahtocters": {
             "type": "string",
             "enum": [
               "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ:0123456789",

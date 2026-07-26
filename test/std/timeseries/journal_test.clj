@@ -263,12 +263,12 @@
             (img/read nil :awt)
             (img/display {:viewer -viewer-})))))
 
-  (hara.shell/sh "cal")
-  (hara.shell/sh "ls")
-  (hara.shell/sh "ping www.baidu.com")
+  (tahto.shell/sh "cal")
+  (tahto.shell/sh "ls")
+  (tahto.shell/sh "ping www.baidu.com")
   (future-cancel -p-)
 
-  (hara.shell/kill)
+  (tahto.shell/kill)
 
   (gp/plot {:autoscale true
             :terminal :svg})
@@ -279,18 +279,18 @@
   (future
     (dotimes [i 1000]
       (Thread/sleep 400)
-      (-> (:output @(hara.shell/in {:op :bytes :quiet true
+      (-> (:output @(tahto.shell/in {:op :bytes :quiet true
                                     :line (format "plot sin((10*x + %d)/10)" i)})))))
 
   (future-cancel *1)
 
-  (hara.shell/kill-all)
+  (tahto.shell/kill-all)
 
-  (def -svg- (:output @(hara.shell/in  {:op :command :quiet true :line "plot sin(2*x)"})))
+  (def -svg- (:output @(tahto.shell/in  {:op :command :quiet true :line "plot sin(2*x)"})))
 
-  (def -png- (:output @(hara.shell/in  {:op :bytes :quiet true :line "plot sin(2*x)"})))
+  (def -png- (:output @(tahto.shell/in  {:op :bytes :quiet true :line "plot sin(2*x)"})))
 
-  (def -gif- (:output @(hara.shell/in  {:op :bytes :quiet true :line "plot sin(5*x)"})))
+  (def -gif- (:output @(tahto.shell/in  {:op :bytes :quiet true :line "plot sin(5*x)"})))
 
   (use 'std.image)
 

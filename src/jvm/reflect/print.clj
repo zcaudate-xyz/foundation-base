@@ -68,7 +68,7 @@
    ["scala.collection.parallel.mutable" "s.c.p.m"]
    ["scala.collection" "s.c"]
    ["scala." "s."]
-   ["hara." "h."]])
+   ["tahto." "h."]])
 
 (defn format-type
   "returns a nice looking version of the class

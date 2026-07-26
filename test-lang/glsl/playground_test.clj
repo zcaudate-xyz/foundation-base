@@ -5,9 +5,9 @@
    Uses the :runtime :playground js runtime to serve a browser page, then
    creates three GLSL effect tabs and renders each effect to its own canvas."
   (:use code.test)
-  (:require [hara.lang :as l]
-            [hara.runtime.js-playground :as js-playground]
-            [hara.runtime.chromedriver :as chromedriver]
+  (:require [tahto.core :as l]
+            [tahto.runtime.js-playground :as js-playground]
+            [tahto.runtime.chromedriver :as chromedriver]
             [std.json :as json]
             [std.lib.component :as component]
             [glsl.playground-shader-sources :as sources]))
@@ -17,7 +17,7 @@
    :config {:port 0}
    :test-mode true
    :require [[xt.lang.spec-base :as xt]
-             [hara.runtime.js-playground.client :as client]
+             [tahto.runtime.js-playground.client :as client]
              [js.react :as r]
              [js.react.ui-webgl :as ui-webgl]]
    :emit {:lang/jsx false}})

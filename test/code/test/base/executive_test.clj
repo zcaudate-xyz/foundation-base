@@ -41,20 +41,20 @@
   (binding [context/*root* "/tmp/proj"]
     (with-redefs [std.lib.time/system-ms (fn [] 12345)]
       (executive/report-file-path)))
-  => "/tmp/proj/.hara/runs/run-12345.edn")
+  => "/tmp/proj/.tahto/runs/run-12345.edn")
 
 ^{:refer code.test.base.executive/report->run-path :added "4.1"}
 (fact "derives the repl helper path from a report path"
 
-  (executive/report->run-path "/tmp/.hara/runs/run-1.edn")
-  => "/tmp/.hara/runs/run-1.run.edn")
+  (executive/report->run-path "/tmp/.tahto/runs/run-1.edn")
+  => "/tmp/.tahto/runs/run-1.run.edn")
 
 ^{:refer code.test.base.executive/run-file-path :added "4.1"}
 (fact "resolves the repl helper path from params"
 
   (binding [context/*root* "/tmp/proj"]
-    (executive/run-file-path "/tmp/proj/.hara/runs/run-1.edn" {:save-run true}))
-  => "/tmp/proj/.hara/runs/run-1.run.edn"
+    (executive/run-file-path "/tmp/proj/.tahto/runs/run-1.edn" {:save-run true}))
+  => "/tmp/proj/.tahto/runs/run-1.run.edn"
 
   (binding [context/*root* "/tmp/proj"]
     (executive/run-file-path nil {:save-run "custom.run.edn"}))
@@ -105,7 +105,7 @@
       (with-redefs [executive/save-artifact (fn [label path _]
                                               (swap! captured conj [label path]))
                     executive/save-run-history (fn [& _]
-                                                 "/tmp/proj/.hara/runs/run-history.csv")
+                                                 "/tmp/proj/.tahto/runs/run-history.csv")
                     std.lib.time/system-ms (fn [] 1)]
         [(executive/save-report-paths {:passed [] :failed [] :throw [] :timeout []}
                                       'demo.core
@@ -113,10 +113,10 @@
          (count @captured)
          (first @captured)])))
   => [{:report-path nil
-       :run-path "/tmp/proj/.hara/runs/run-1.run.edn"
-       :history-path "/tmp/proj/.hara/runs/run-history.csv"}
+       :run-path "/tmp/proj/.tahto/runs/run-1.run.edn"
+       :history-path "/tmp/proj/.tahto/runs/run-history.csv"}
       1
-      ["Run helper" "/tmp/proj/.hara/runs/run-1.run.edn"]])
+      ["Run helper" "/tmp/proj/.tahto/runs/run-1.run.edn"]])
 
 ^{:refer code.test.base.executive/announce-artifacts :added "4.1"}
 (fact "prints notices and returns the artifact map"
@@ -390,14 +390,14 @@
       [(executive/save-run-history {:failed [{:meta {}}] :throw [] :timeout []}
                                    'demo.core
                                    {:save-run true :run-command 'code.test/run}
-                                   {:run-path "/tmp/.hara/runs/run-1.run.edn"})
+                                   {:run-path "/tmp/.tahto/runs/run-1.run.edn"})
        (let [[mkdir [_ _ content]] @calls]
          [mkdir
           (boolean (re-find #"time,command,failures,report" content))
           (boolean (re-find #",1," content))
           (clojure.string/ends-with? content "\n")])]))
-  => ["/tmp/.hara/runs/run-history.csv"
-      [[:mkdir "/tmp/.hara/runs"] true true true]])
+  => ["/tmp/.tahto/runs/run-history.csv"
+      [[:mkdir "/tmp/.tahto/runs"] true true true]])
 
 ^{:refer code.test.base.executive/load-report :added "4.1"}
 (fact "reads EDN from an existing report file"

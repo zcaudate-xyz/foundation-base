@@ -1,5 +1,5 @@
 (ns kmi.lang.parser-common
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
@@ -133,7 +133,7 @@
   (return false))
 
 (defn.xt read-token
-  "reads a token that starts with the given character"
+  "reads a token that starts with the given ctahtocter"
   {:added "4.1"}
   [reader initch]
   (var out initch)

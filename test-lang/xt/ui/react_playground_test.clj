@@ -6,8 +6,8 @@
    the expected UI descriptors and React renderer. Manual verification:
    open the printed URL in a browser and interact with the list."
   (:use code.test)
-  (:require [hara.lang :as l]
-            [hara.runtime.js-playground :as playground]
+  (:require [tahto.core :as l]
+            [tahto.runtime.js-playground :as playground]
             [std.lib.component :as component]
             [xt.ui.react-playground-ui]))
 
@@ -22,7 +22,7 @@
     (catch Exception _
       false)))
 
-^{:refer hara.runtime.js-playground/play-script :added "4.1"}
+^{:refer tahto.runtime.js-playground/play-script :added "4.1"}
 (fact "emits the xt.ui React POC script and serves it in a playground"
   (let [rt (playground/rt-js-playground {:lang :js :port 0})]
     (try

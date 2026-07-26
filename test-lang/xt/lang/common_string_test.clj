@@ -1,6 +1,6 @@
 (ns xt.lang.common-string-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.string.prose :as prose]))
 
 ^{:seedgen/root {:all true, :langs [:python :lua :dart]}}
@@ -24,7 +24,7 @@
  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-string/get-char :added "4.1"}
-(fact "gets a character code from string"
+(fact "gets a ctahtocter code from string"
 
   (!.js (xts/get-char "abc" (xt/x:offset 0)))
   => 97
@@ -72,7 +72,7 @@
   => "hello_world")
 
 ^{:refer xt.lang.common-string/index-of :added "4.1"}
-(fact "returns index of character in string"
+(fact "returns index of ctahtocter in string"
 
   (!.js (xts/index-of "hello/world" "/"))
   => 5

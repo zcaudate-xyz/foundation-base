@@ -1,6 +1,6 @@
-(ns hara.runtime.graal-test
-  (:require [hara.runtime.graal :refer :all]
-            [hara.lang :as l]
+tahto/runtime/graal_test.clj:1:(ns tahto.runtime.graal-test
+tahto/runtime/graal_test.clj:2:  (:require [tahto.runtime.graal :refer :all]
+            [tahto.core :as l]
             [std.lib.component :as component]
             [std.lib.foundation :as f])
   (:use code.test)
@@ -14,7 +14,7 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.runtime.graal/eval-raw.test :adopt true :added "3.0"}
+tahto/runtime/graal_test.clj:17:^{:refer tahto.runtime.graal/eval-raw.test :adopt true :added "3.0"}
 (fact "EVAL"
 
   (!.js
@@ -34,48 +34,48 @@
   (k/sub 3 9)
   => -6)
 
-^{:refer hara.runtime.graal/add-resource-path :added "3.0"
+tahto/runtime/graal_test.clj:37:^{:refer tahto.runtime.graal/add-resource-path :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
 (fact "adds resource path to context"
 
   (add-resource-path +js+ "assets")
   => +js+)
 
-^{:refer hara.runtime.graal/add-system-path :added "3.0"
+tahto/runtime/graal_test.clj:44:^{:refer tahto.runtime.graal/add-system-path :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
 (fact "adds system path to context"
 
   (add-system-path +js+ ".")
   => +js+)
 
-^{:refer hara.runtime.graal/make-raw :added "3.0"
+tahto/runtime/graal_test.clj:51:^{:refer tahto.runtime.graal/make-raw :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
 (fact "creates the base graal context"
 
   (str (.eval ^Context +js+ "js" "1 + 1"))
   => "2")
 
-^{:refer hara.runtime.graal/close-raw :added "3.0"
+tahto/runtime/graal_test.clj:58:^{:refer tahto.runtime.graal/close-raw :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
 (fact "closes the base graal context"
   (close-raw +js+)
   => nil)
 
-^{:refer hara.runtime.graal/raw-lang :added "3.0"
+tahto/runtime/graal_test.clj:64:^{:refer tahto.runtime.graal/raw-lang :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
 (fact "gets the language context"
 
   (raw-lang +js+)
   => :js)
 
-^{:refer hara.runtime.graal/eval-raw :added "3.0"
+tahto/runtime/graal_test.clj:71:^{:refer tahto.runtime.graal/eval-raw :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
 (fact "performs an exec expression"
 
   (str (eval-raw +js+ "1 + 1"))
   => "2")
 
-^{:refer hara.runtime.graal/unwrap :added "4.1"}
+tahto/runtime/graal_test.clj:78:^{:refer tahto.runtime.graal/unwrap :added "4.1"}
 (fact "unwraps polyglot values to Clojure primitives"
 
   (let [ctx (make-raw {:lang :js})]
@@ -86,14 +86,14 @@
      (unwrap (.eval ^Context ctx "js" "null"))])
   => ["hello" 42 3.14 true nil])
 
-^{:refer hara.runtime.graal/eval-graal :added "4.0"}
+tahto/runtime/graal_test.clj:89:^{:refer tahto.runtime.graal/eval-graal :added "4.0"}
 (fact "evals body in the runtime"
 
   (str (eval-graal (l/rt :js)
                    "1+1"))
   => "2")
 
-^{:refer hara.runtime.graal/invoke-graal :added "4.0"}
+tahto/runtime/graal_test.clj:96:^{:refer tahto.runtime.graal/invoke-graal :added "4.0"}
 (fact "invokes a pointer in the runtime"
 
   (invoke-graal (l/rt :js)
@@ -101,17 +101,17 @@
                 [1 2])
   => -1)
 
-^{:refer hara.runtime.graal/start-graal :added "3.0"}
+tahto/runtime/graal_test.clj:104:^{:refer tahto.runtime.graal/start-graal :added "3.0"}
 (fact "starts the graal runtime"
   (start-graal (rt-graal:create {:lang :js}))
   => rt-graal?)
 
-^{:refer hara.runtime.graal/stop-graal :added "3.0"}
+tahto/runtime/graal_test.clj:109:^{:refer tahto.runtime.graal/stop-graal :added "3.0"}
 (fact "stops the graal runtime"
   (stop-graal (start-graal (rt-graal:create {:lang :js})))
   => rt-graal?)
 
-^{:refer hara.runtime.graal/rt-graal:create :added "4.0"}
+tahto/runtime/graal_test.clj:114:^{:refer tahto.runtime.graal/rt-graal:create :added "4.0"}
 (fact "creates a graal runtime"
 
   (f/-> (rt-graal:create {:lang :js})
@@ -119,12 +119,12 @@
         (component/stop))
   => rt-graal?)
 
-^{:refer hara.runtime.graal/rt-graal :added "3.0"}
+tahto/runtime/graal_test.clj:122:^{:refer tahto.runtime.graal/rt-graal :added "3.0"}
 (fact "creates and starts a graal runtime"
   (rt-graal {:lang :js})
   => rt-graal?)
 
-^{:refer hara.runtime.graal/rt-graal? :added "3.0"}
+tahto/runtime/graal_test.clj:127:^{:refer tahto.runtime.graal/rt-graal? :added "3.0"}
 (fact "checks that object is a graal runtime"
   (rt-graal? (rt-graal:create {:lang :js}))
   => true)

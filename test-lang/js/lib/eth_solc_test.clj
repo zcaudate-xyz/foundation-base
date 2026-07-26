@@ -1,7 +1,7 @@
 (ns js.lib.eth-solc-test
-  (:require [hara.runtime.solidity :as s]
-            [hara.runtime.solidity.env-hardhat :as env-hardhat]
-            [hara.lang :as l]
+  (:require [tahto.runtime.solidity :as s]
+            [tahto.runtime.solidity.env-hardhat :as env-hardhat]
+            [tahto.core :as l]
             [std.string.prose :as prose])
   (:use code.test))
 

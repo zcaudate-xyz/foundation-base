@@ -1,5 +1,5 @@
 (ns python.core.system
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.template :as template]))
 
 (l/script :python

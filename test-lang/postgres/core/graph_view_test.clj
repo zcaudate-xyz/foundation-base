@@ -1,9 +1,9 @@
 (ns postgres.core.graph-view-test
-  (:require [hara.runtime.postgres.base.application :as app]
+  (:require [tahto.runtime.postgres.base.application :as app]
             [postgres.core.graph-view :as view]
             [postgres.core.impl-base :as impl]
             [postgres.sample.scratch-v1 :as scratch]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.schema :as schema])
   (:use code.test))
 

@@ -2,9 +2,9 @@
   (:use code.test)
   (:require [clj-kondo.core :as kondo]
             [postgres.entity :as et :refer :all]
-            [hara.lang :as l]
-            [hara.model.spec-postgres.entity-util :as ut]
-            [hara.common.grammar-spec :as grammar-spec]
+            [tahto.core :as l]
+            [tahto.model.spec-postgres.entity-util :as ut]
+            [tahto.common.grammar-spec :as grammar-spec]
             [std.lib.env :as env]))
 
 (def +reduced-target+
@@ -53,9 +53,9 @@
                       :config-dir ".clj-kondo"
                       :cache false}))
        :findings
-       (filter #(contains? #{:hara.postgres/retired-entity-option
-                             :hara.postgres/invalid-owner
-                             :hara.postgres/invalid-provides}
+       (filter #(contains? #{:tahto.postgres/retired-entity-option
+                             :tahto.postgres/invalid-owner
+                             :tahto.postgres/invalid-provides}
                            (:type %)))
        (mapv :type)))
 
@@ -67,13 +67,13 @@
 
   (lint-entity-source
    "(deftype.pg ^{:! (et/E {:link {:for demo/Task} :spec/addon {:key :tasks}})} Retired [])")
-  => [:hara.postgres/retired-entity-option
-      :hara.postgres/retired-entity-option]
+  => [:tahto.postgres/retired-entity-option
+      :tahto.postgres/retired-entity-option]
 
   (lint-entity-source
    "(deftype.pg ^{:! (et/E {:owner [:task demo/Task] :provides {:key \"tasks\"}})} Invalid [])")
-  => [:hara.postgres/invalid-owner
-      :hara.postgres/invalid-provides])
+  => [:tahto.postgres/invalid-owner
+      :tahto.postgres/invalid-provides])
 
 (fact "resolves minimal and expanded bases from relation requirements"
   (with-test-entity-v2

@@ -1,17 +1,17 @@
-(ns hara.runtime.solidity.compile-deploy-test
-  (:require [hara.runtime.solidity.client :as client]
-            [hara.runtime.solidity.compile-common :as compile-common]
-            [hara.runtime.solidity.compile-deploy :as deploy]
-            [hara.runtime.solidity.compile-solc :as compile]
-            [hara.runtime.solidity.env-hardhat :as env]
-            [hara.lang :as l]
+tahto/runtime/solidity/compile_deploy_test.clj:1:(ns tahto.runtime.solidity.compile-deploy-test
+tahto/runtime/solidity/compile_deploy_test.clj:2:  (:require [tahto.runtime.solidity.client :as client]
+tahto/runtime/solidity/compile_deploy_test.clj:3:            [tahto.runtime.solidity.compile-common :as compile-common]
+tahto/runtime/solidity/compile_deploy_test.clj:4:            [tahto.runtime.solidity.compile-deploy :as deploy]
+tahto/runtime/solidity/compile_deploy_test.clj:5:            [tahto.runtime.solidity.compile-solc :as compile]
+tahto/runtime/solidity/compile_deploy_test.clj:6:            [tahto.runtime.solidity.env-hardhat :as env]
+            [tahto.core :as l]
             [std.lib.component :as component]
             [web3.lib.example-erc20 :as example-erc20])
   (:use code.test))
 
 (l/script- :solidity
   {:config  {:mode :clean}
-   :require [[hara.runtime.solidity :as s]]})
+tahto/runtime/solidity/compile_deploy_test.clj:14:   :require [[tahto.runtime.solidity :as s]]})
 
 (defn.sol ^{:- [:pure :internal]
             :static/returns [:string :memory]}
@@ -24,7 +24,7 @@
   :teardown [(l/rt:stop)
              (env/stop-hardhat-server)]})
 
-^{:refer hara.runtime.solidity.compile-deploy/deploy-base :added "4.0"
+tahto/runtime/solidity/compile_deploy_test.clj:27:^{:refer tahto.runtime.solidity.compile-deploy/deploy-base :added "4.0"
   :setup    [(def +rt+
               (compile/compile-rt-prep))
               (compile/compile-rt-eval
@@ -42,7 +42,7 @@
   => (contains-in
       {"status" true, "contractAddress" string?}))
 
-^{:refer hara.runtime.solidity.compile-deploy/deploy-pointer :added "4.0"
+tahto/runtime/solidity/compile_deploy_test.clj:45:^{:refer tahto.runtime.solidity.compile-deploy/deploy-pointer :added "4.0"
   :setup    [(def +rt+
               (compile/compile-rt-prep))
               (compile/compile-rt-eval
@@ -59,7 +59,7 @@
   => (contains-in
       {"status" true, "contractAddress" string?}))
 
-^{:refer hara.runtime.solidity.compile-deploy/deploy-module :added "4.0"
+tahto/runtime/solidity/compile_deploy_test.clj:62:^{:refer tahto.runtime.solidity.compile-deploy/deploy-module :added "4.0"
   :setup    [(def +rt+
               (compile/compile-rt-prep))
               (compile/compile-rt-eval

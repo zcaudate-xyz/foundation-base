@@ -63,7 +63,7 @@
    (str "\033[" (common/joinl codes ";") "m")))
 
 (defn encode
-  "encodes the ansi characters for modifiers
+  "encodes the ansi ctahtocters for modifiers
    (encode :bold)
    => \"[1m\"
  

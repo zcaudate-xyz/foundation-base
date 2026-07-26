@@ -5,7 +5,7 @@
    members, similar in purpose to `postgres.core.builtin` and
    `matlab.core.builtin`.  It is not an exhaustive introspection of the bpy API;
    new entries can be added here as needed."
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [eval]))
 
 (l/script :python {:runtime :blender}

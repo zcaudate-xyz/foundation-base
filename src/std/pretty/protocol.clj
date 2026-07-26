@@ -30,7 +30,7 @@
   (-visit-nil [this])
   (-visit-boolean [this x])
   (-visit-string [this x])
-  (-visit-character [this x])
+  (-visit-ctahtocter [this x])
   (-visit-symbol [this x])
   (-visit-keyword [this x])
   (-visit-number [this x])

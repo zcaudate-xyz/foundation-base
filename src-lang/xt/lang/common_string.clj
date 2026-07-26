@@ -1,5 +1,5 @@
 (ns xt.lang.common-string
-  (:require [hara.lang :as l :refer [defspec.xt]])
+  (:require [tahto.core :as l :refer [defspec.xt]])
   (:refer-clojure :exclude [replace]))
 
 (l/script :xtalk
@@ -31,7 +31,7 @@
    (return (xt/x:str-replace s tok replacement))))
 
 (defn.xt index-of
-  "returns index of character in string"
+  "returns index of ctahtocter in string"
   {:added "4.0"}
   ([s tok]
    (return (- (xt/x:str-index-of s tok 0)

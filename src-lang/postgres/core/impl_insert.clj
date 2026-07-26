@@ -1,9 +1,9 @@
 (ns postgres.core.impl-insert
-  (:require [hara.model.spec-postgres.common-tracker :as tracker]
+  (:require [tahto.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
-            [hara.lang :as l]
-            [hara.common.emit-preprocess :as preprocess] [hara.common.preprocess-base :as preprocess-base]
-            [hara.common.util :as ut]
+            [tahto.core :as l]
+            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base]
+            [tahto.common.util :as ut]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]))
 

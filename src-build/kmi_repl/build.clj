@@ -2,8 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string]
             [std.make :as make :refer [def.make]]
-            [hara.lang :as l]
-            [hara.lang.compile]))
+            [tahto.core :as l]
+            [tahto.core.compile]))
 
 (def +gitignore+
   ["node_modules"])

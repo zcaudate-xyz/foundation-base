@@ -18,7 +18,7 @@
 
 ^{:refer gdscript.tutorial.example-materials/save-material-sphere :added "4.1"}
 (fact "saves a material sphere scene to disk"
-  (let [path (str (System/getProperty "user.home") "/hara_godot_materials_scene.tscn")]
+  (let [path (str (System/getProperty "user.home") "/tahto_godot_materials_scene.tscn")]
     (in-materials `(clojure.core/deref (!.gd (gdscript.tutorial.example-materials/save-material-sphere ~path))))
     (boolean (.exists (java.io.File. path))))
   => true)

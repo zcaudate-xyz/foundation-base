@@ -1,4 +1,4 @@
-package hara.lib.bin;
+package newlisp.lib.bin;
 
 import java.nio.ByteBuffer;
 import java.io.InputStream;

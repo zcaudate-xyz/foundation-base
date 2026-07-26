@@ -1,6 +1,6 @@
 (ns postgres.core.system-test
   (:require [postgres.core.system :as sys]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :postgres

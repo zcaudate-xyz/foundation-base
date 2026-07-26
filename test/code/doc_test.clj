@@ -17,17 +17,17 @@
 ^{:refer code.doc/publish :added "3.0"}
 (comment "main publish method"
 
-  (publish 'hara/hara-code {}))
+  (publish 'tahto/tahto-code {}))
 
 ^{:refer code.doc/init-template :added "3.0"}
 (comment "initialises the theme template for a given site"
 
-  (init-template "hara"))
+  (init-template "tahto"))
 
 ^{:refer code.doc/deploy-template :added "3.0"}
 (comment "deploys the theme for a given site"
 
-  (deploy-template "hara"))
+  (deploy-template "tahto"))
 
 ^{:refer code.doc/missing :added "4.1"}
 (comment "checks for namespaces not yet referenced by code.doc pages"
@@ -37,8 +37,8 @@
 (comment
   (publish :all {:write true})
 
-  (publish 'hara/hara-publish {:write true})
+  (publish 'tahto/tahto-publish {:write true})
 
-  (publish 'hara/index {:write true})
+  (publish 'tahto/index {:write true})
 
   (publish 'spirit/spirit-io-datomic {:write true}))

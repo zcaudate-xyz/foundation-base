@@ -1,10 +1,10 @@
-(ns hara.runtime.basic-test
-  (:require [hara.runtime.basic :refer :all]
-            [hara.runtime.basic.server-basic :as server-basic]
+tahto/runtime/basic_test.clj:1:(ns tahto.runtime.basic-test
+tahto/runtime/basic_test.clj:2:  (:require [tahto.runtime.basic :refer :all]
+tahto/runtime/basic_test.clj:3:            [tahto.runtime.basic.server-basic :as server-basic]
             [std.concurrent :as cc])
   (:use code.test))
 
-^{:refer hara.runtime.basic/clean-relay :added "4.0"}
+tahto/runtime/basic_test.clj:7:^{:refer tahto.runtime.basic/clean-relay :added "4.0"}
 (fact "cleans the relay on the server"
   (with-redefs [server-basic/get-server (fn [_ _] {:id "test"})
                 server-basic/get-relay (fn [_] :relay)

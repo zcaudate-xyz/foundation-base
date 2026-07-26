@@ -1,15 +1,15 @@
-(ns hara.seedgen-test
+tahto/seedgen_test.clj:1:(ns tahto.seedgen-test
   (:require [code.project :as project]
             [std.fs :as fs]
-            [hara.seedgen.form-bench :as form-bench]
-            [hara.seedgen.form-infile :as form-infile]
-            [hara.seedgen :refer :all])
+tahto/seedgen_test.clj:4:            [tahto.seedgen.form-bench :as form-bench]
+tahto/seedgen_test.clj:5:            [tahto.seedgen.form-infile :as form-infile]
+tahto/seedgen_test.clj:6:            [tahto.seedgen :refer :all])
   (:use code.test))
 
 (def ^:private +seedgen-spacing-source+
   (str "(ns xt.sample.spacing-test\n"
        "  (:use code.test)\n"
-       "  (:require [hara.lang :as l]))\n\n"
+       "  (:require [tahto.core :as l]))\n\n"
        "^{:seedgen/root {:all true}}\n"
        "(l/script- :js {:runtime :basic})\n\n"
        "^{:refer xt.lang.spec-base/example-h :added \"4.1\"\n"
@@ -34,7 +34,7 @@
 (def ^:private +seedgen-suppress-source+
   (str "(ns xt.sample.suppress-test\n"
        "  (:use code.test)\n"
-       "  (:require [hara.lang :as l]))\n\n"
+       "  (:require [tahto.core :as l]))\n\n"
        "^{:seedgen/root {:all true}}\n"
        "(l/script- :js {:runtime :basic})\n\n"
        "^{:refer xt.lang.spec-base/example-h :added \"4.1\"\n"
@@ -48,7 +48,7 @@
 (def ^:private +seedgen-extra-source+
   (str "(ns xt.sample.extra-test\n"
        "  (:use code.test)\n"
-       "  (:require [hara.lang :as l]))\n\n"
+       "  (:require [tahto.core :as l]))\n\n"
        "^{:seedgen/root {:all true\n"
        "                 :langs [:js :lua :python]\n"
        "                 :python {:extra [[xt.lang.common-promise :as p]]}}}\n"
@@ -67,7 +67,7 @@
 (def ^:private +seedgen-script-extra-source+
   (str "(ns xt.sample.script-extra-test\n"
        "  (:use code.test)\n"
-       "  (:require [hara.lang :as l]))\n\n"
+       "  (:require [tahto.core :as l]))\n\n"
        "^{:seedgen/root {:all true\n"
        "                 :langs [:python]\n"
        "                 :python {:extra [[python.net.conn-sqlite :as py-sqlite]]}}}\n"
@@ -85,7 +85,7 @@
 (def ^:private +seedgen-meta-shorthand-source+
   (str "(ns xt.sample.meta-test\n"
        "  (:use code.test)\n"
-       "  (:require [hara.lang :as l]))\n\n"
+       "  (:require [tahto.core :as l]))\n\n"
        "^{:seedgen/root {:all true}}\n"
        "(l/script- :js {:runtime :basic})\n\n"
        "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
@@ -96,7 +96,7 @@
 (def ^:private +seedgen-wait-source+
   (str "(ns xt.sample.wait-test\n"
        "  (:use code.test)\n"
-       "  (:require [hara.lang :as l]\n"
+       "  (:require [tahto.core :as l]\n"
        "            [xt.lang.common-notify :as notify]))\n\n"
        "^{:seedgen/root {:all true}}\n"
        "(l/script- :js {:runtime :basic})\n\n"
@@ -112,7 +112,7 @@
 (def ^:private +seedgen-selector-test-source+
   (str "(ns xt.sample.selector-test\n"
        "  (:use code.test)\n"
-       "  (:require [hara.lang :as l]))\n\n"
+       "  (:require [tahto.core :as l]))\n\n"
        "^{:seedgen/root {:all true}}\n"
        "(l/script- :js {:runtime :basic})\n\n"
        "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
@@ -246,7 +246,7 @@
                    :test-paths ["test"]}]
     (spit path (str "(ns xt.sample.transform-test\n"
                     "  (:use code.test)\n"
-                    "  (:require [hara.lang :as l]))\n\n"
+                    "  (:require [tahto.core :as l]))\n\n"
                     "^{:seedgen/root {:all true :langs [:lua]}}\n"
                     "(l/script- :js {:runtime :basic})\n\n"
                     "^{:refer xt.lang.spec-base/example.A :added \"4.1\"\n"
@@ -263,7 +263,7 @@
      :lookup lookup
      :project project}))
 
-^{:refer hara.seedgen/seedgen-root :added "4.1"}
+tahto/seedgen_test.clj:266:^{:refer tahto.seedgen/seedgen-root :added "4.1"}
 (fact "runs the public root lookup task without crashing on scalar results"
   (seedgen-root '[xt.sample])
 
@@ -274,7 +274,7 @@
                 :results number?
                 :total number?}))
 
-^{:refer hara.seedgen/seedgen-list :added "4.1"}
+tahto/seedgen_test.clj:277:^{:refer tahto.seedgen/seedgen-list :added "4.1"}
 (fact "returns summary information for seedgen list tasks"
   (seedgen-list '[xt.sample] {:return :summary})
   => (contains {:errors 0
@@ -283,7 +283,7 @@
                 :results number?
                 :total number?}))
 
-^{:refer hara.seedgen/seedgen-readforms :added "4.1"}
+tahto/seedgen_test.clj:286:^{:refer tahto.seedgen/seedgen-readforms :added "4.1"}
 (fact "returns summary information for public seedgen readforms analysis"
   (let [project (assoc (project/project)
                        :test-paths (vec (distinct (concat (:test-paths (project/project))
@@ -296,7 +296,7 @@
                   :results 1
                   :total number?})))
 
-^{:refer hara.seedgen/seedgen-benchlist :added "4.1"}
+tahto/seedgen_test.clj:299:^{:refer tahto.seedgen/seedgen-benchlist :added "4.1"}
 (fact "returns summary information for seedgen benchlist tasks"
   (seedgen-benchlist '[xt.sample] {:return :summary})
   => (contains {:errors 0
@@ -305,7 +305,7 @@
                 :results number?
                 :total number?}))
 
-^{:refer hara.seedgen/seedgen-incomplete :added "4.1"}
+tahto/seedgen_test.clj:308:^{:refer tahto.seedgen/seedgen-incomplete :added "4.1"}
 (fact "returns summary information for incomplete seedgen tasks"
   (seedgen-incomplete '[xt.sample] {:print {:result true :summary true}})
 
@@ -316,7 +316,7 @@
                 :results number?
                 :total number?}))
 
-^{:refer hara.seedgen/seedgen-langremove :added "4.1"}
+tahto/seedgen_test.clj:319:^{:refer tahto.seedgen/seedgen-langremove :added "4.1"}
 (fact "langremove removes wrapped runtime checks added by langadd"
   (let [{:keys [root path lookup project]} (seedgen-wait-context "seedgen-langremove-wait")]
     (try
@@ -340,7 +340,7 @@
         (fs/delete root {:recursive true}))))
   => [true true false false false false false])
 
-^{:refer hara.seedgen/seedgen-langadd :added "4.1"}
+tahto/seedgen_test.clj:343:^{:refer tahto.seedgen/seedgen-langadd :added "4.1"}
 (fact "langadd preserves multiline setup and teardown indentation"
   (let [{:keys [root path lookup project]} (seedgen-spacing-context "seedgen-langadd-spacing")]
     (try
@@ -356,7 +356,7 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.seedgen/seedgen-langadd :added "4.1"
+tahto/seedgen_test.clj:359:^{:refer tahto.seedgen/seedgen-langadd :added "4.1"
   :id test-seedgen-langadd-extra-requires}
 (fact "langadd applies root-script extra requires for generated languages"
   (let [{:keys [root path lookup project]} (seedgen-extra-context "seedgen-langadd-extra")]
@@ -373,7 +373,7 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.seedgen/seedgen-langadd :added "4.1"
+tahto/seedgen_test.clj:376:^{:refer tahto.seedgen/seedgen-langadd :added "4.1"
   :id test-seedgen-langadd-drop-inline-extras}
 (fact "langadd drops inline script extras from non-target runtimes"
   (let [{:keys [root path lookup project]} (seedgen-script-extra-context "seedgen-langadd-script-extra")]
@@ -392,7 +392,7 @@
   ;; generated Python script. The root-only JS adapter remains only in JS.
   => [1 2 1])
 
-^{:refer hara.seedgen/seedgen-langadd :added "4.1"
+tahto/seedgen_test.clj:395:^{:refer tahto.seedgen/seedgen-langadd :added "4.1"
   :id test-seedgen-langadd-bulk-selector}
 (fact "bulk seedgen tasks only return test namespaces"
   (let [{:keys [root lookup project]} (seedgen-selector-context "seedgen-task-selector")]
@@ -454,7 +454,7 @@
       '[xt.sample.selector-test]
       '[xt.sample.selector-test]])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"}
+tahto/seedgen_test.clj:457:^{:refer tahto.seedgen/seedgen-benchadd :added "4.1"}
 (fact "benchadd summary reports generated function refs while counting target namespaces"
   (let [root    (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-summary"
                                                                   (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -467,14 +467,14 @@
     (try
       (spit path (str "(ns xt.sample.summary-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"
                       "(fact \"summary branches\"\n"
                       "  (!.js (+ 1 2 3))\n"
                       "  => 6)\n"))
-      (let [output (#'hara.seedgen/seedgen-benchadd-summary
+tahto/seedgen_test.clj:477:      (let [output (#'tahto.seedgen/seedgen-benchadd-summary
                     'xt.sample.summary-test
                     {:rename '{xt [samplebench :lang]}
                      :lang [:python]
@@ -488,7 +488,7 @@
   => ['[example.A]
       '[samplebench.python.sample.summary-test]])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+tahto/seedgen_test.clj:491:^{:refer tahto.seedgen/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-spacing}
 (fact "benchadd preserves multiline setup and teardown indentation"
   (let [{:keys [root bench-path lookup project]} (seedgen-spacing-context "seedgen-benchadd-spacing")]
@@ -505,7 +505,7 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+tahto/seedgen_test.clj:508:^{:refer tahto.seedgen/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-extra-requires}
 (fact "benchadd applies root-script extra requires for generated bench namespaces"
   (let [{:keys [root bench-path lookup project]} (seedgen-extra-context "seedgen-benchadd-extra")]
@@ -522,7 +522,7 @@
          (fs/delete root {:recursive true}))))
   => [true true true])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+tahto/seedgen_test.clj:525:^{:refer tahto.seedgen/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-ref-transform}
 (fact "benchadd recognizes `:ref` metadata and applies target transforms"
   (let [root      (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-ref"
@@ -537,7 +537,7 @@
     (try
       (spit path (str "(ns xt.sample.ref-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true\n"
                       "                 :langs [:python]\n"
                       "                 :js {:extra [[js.net.conn-sqlite :as js-sqlite]]}\n"
@@ -564,7 +564,7 @@
         (fs/delete root {:recursive true}))))
   => [true true false])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+tahto/seedgen_test.clj:567:^{:refer tahto.seedgen/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-drop-inline-extras}
 (fact "benchadd drops inline script extras from non-target runtimes"
   (let [{:keys [root bench-path lookup project]} (seedgen-script-extra-context "seedgen-benchadd-script-extra")]
@@ -581,7 +581,7 @@
          (fs/delete root {:recursive true}))))
   => [1 1 0])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+tahto/seedgen_test.clj:584:^{:refer tahto.seedgen/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-suppressed-setup}
 (fact "benchadd skips suppressed setup items when generating bench files"
   (let [{:keys [root bench-path lookup project]} (seedgen-suppress-context "seedgen-benchadd-suppress")]
@@ -598,7 +598,7 @@
         (fs/delete root {:recursive true}))))
   => [false true true])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+tahto/seedgen_test.clj:601:^{:refer tahto.seedgen/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-shorthand-metadata}
 (fact "benchadd preserves shorthand metadata on generated runtime checks"
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchadd-meta"
@@ -621,15 +621,15 @@
         (fs/delete root {:recursive true}))))
   => #"(?ms)\^\*\(!\.dt \(\+ 1 2 3\)\)")
 
-^{:refer hara.seedgen.form-infile/apply-item-transform-form :added "4.1"}
+tahto/seedgen_test.clj:624:^{:refer tahto.seedgen.form-infile/apply-item-transform-form :added "4.1"}
 (fact "form transforms rewrite each original match once while preserving layout"
-  (#'hara.seedgen.form-infile/apply-item-transform-form
+tahto/seedgen_test.clj:626:  (#'tahto.seedgen.form-infile/apply-item-transform-form
    "(fact \"single-pass\"\n  (!.js\n    +out+)\n  => +out+)"
    (symbol "+out+")
    '(l/as-lua +out+))
   => "(fact \"single-pass\"\n  (!.js\n    (l/as-lua +out+))\n  => (l/as-lua +out+))")
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+tahto/seedgen_test.clj:632:^{:refer tahto.seedgen/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-self-transform}
 (fact "benchadd applies self-referential transforms once"
   (let [{:keys [root bench-path lookup project]} (seedgen-transform-context "seedgen-benchadd-transform")]
@@ -646,7 +646,7 @@
         (fs/delete root {:recursive true}))))
   => [true true false])
 
-^{:refer hara.seedgen/seedgen-benchadd :added "4.1"
+tahto/seedgen_test.clj:649:^{:refer tahto.seedgen/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-sql-call-facts}
 (fact "benchadd keeps all xt.db.text.sql-call call facts"
   (let [proj   (project/project)
@@ -669,7 +669,7 @@
         xtbench.dart.db.text.sql-call-test]
        3])
 
-^{:refer hara.seedgen/seedgen-benchremove :added "4.1"}
+tahto/seedgen_test.clj:672:^{:refer tahto.seedgen/seedgen-benchremove :added "4.1"}
 (fact "removes generated bench namespaces for a selector"
   (let [root     (.toFile (java.nio.file.Files/createTempDirectory "seedgen-benchremove"
                                                                    (make-array java.nio.file.attribute.FileAttribute 0)))
@@ -683,7 +683,7 @@
     (try
       (spit path (str "(ns xt.sample.remove-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n"

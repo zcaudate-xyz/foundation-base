@@ -58,7 +58,7 @@
   (let [val (:value node)]
     (if (string? val) (read-string val) val)))
 
-(defmethod translate-node "CharacterLiteral" [node]
+(defmethod translate-node "CtahtocterLiteral" [node]
   (let [val (:value node)]
     (if (number? val) (char val) val))) ;; Clang might give int code
 

@@ -1,10 +1,10 @@
 (ns web3.lib.example-counter-test
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
-   :require [[hara.runtime.solidity :as s]
+   :require [[tahto.runtime.solidity :as s]
              [web3.lib.example-counter :as counter]]})
 
 (fact:global

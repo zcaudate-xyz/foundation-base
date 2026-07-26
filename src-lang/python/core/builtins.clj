@@ -1,5 +1,5 @@
 (ns python.core.builtins
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [eval]))
 
 (l/script :python

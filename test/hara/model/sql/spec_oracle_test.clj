@@ -1,7 +1,7 @@
-(ns hara.model.sql.spec-oracle-test
+tahto/model/sql/spec_oracle_test.clj:1:(ns tahto.model.sql.spec-oracle-test
   (:require [code.framework :as framework]
-            [hara.lang :as l]
-            [hara.model.sql.spec-oracle :refer :all]
+            [tahto.core :as l]
+tahto/model/sql/spec_oracle_test.clj:4:            [tahto.model.sql.spec-oracle :refer :all]
             [std.block.layout :as layout])
   (:use code.test))
 

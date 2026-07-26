@@ -1,5 +1,5 @@
 (ns indigo.prompt.dsl-ast
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:runtime :basic})

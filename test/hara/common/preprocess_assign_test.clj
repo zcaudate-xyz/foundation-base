@@ -1,8 +1,8 @@
-(ns hara.common.preprocess-assign-test
+tahto/common/preprocess_assign_test.clj:1:(ns tahto.common.preprocess-assign-test
   (:use code.test)
-  (:require [hara.common.emit-prep-lua-test :as prep]
-            [hara.common.preprocess-assign :refer :all]
-            [hara.model.spec-js :as js]))
+tahto/common/preprocess_assign_test.clj:3:  (:require [tahto.common.emit-prep-lua-test :as prep]
+tahto/common/preprocess_assign_test.clj:4:            [tahto.common.preprocess-assign :refer :all]
+tahto/common/preprocess_assign_test.clj:5:            [tahto.model.spec-js :as js]))
 
 (fact "prepares metadata-based inline assignments"
   (let [form (process-inline-assignment '(var a ^:inline (u/identity-fn 1))
@@ -54,7 +54,7 @@
       nil)])
   => '[nil (:= a i)])
 
-^{:refer hara.common.preprocess-assign/process-inline-assignment :added "4.1"}
+tahto/common/preprocess_assign_test.clj:57:^{:refer tahto.common.preprocess-assign/process-inline-assignment :added "4.1"}
 (fact "prepares the form for inline assignment"
   (let [form (process-inline-assignment '(var a := (u/identity-fn 1) :inline)
                                         (:modules prep/+book-min+)
@@ -67,7 +67,7 @@
                  [:assign/inline])
     => {:assign/inline true}))
 
-^{:refer hara.common.preprocess-assign/process-template-assignment :added "4.1"}
+tahto/common/preprocess_assign_test.clj:70:^{:refer tahto.common.preprocess-assign/process-template-assignment :added "4.1"}
 (fact "rewrites rewrite-block xtalk macros in declaration position"
   (process-template-assignment
    '(var a := (x:type-native obj))
@@ -92,7 +92,7 @@
                   (:= a tn))))
             (:= a t)))))
 
-^{:refer hara.common.preprocess-assign/protect-reserved-head :added "4.1"}
+tahto/common/preprocess_assign_test.clj:95:^{:refer tahto.common.preprocess-assign/protect-reserved-head :added "4.1"}
 (fact "protects reserved heads by wrapping them in a volatile"
   (let [out (protect-reserved-head (with-meta '(return value) {:line 10}))]
     [(volatile? (first out))

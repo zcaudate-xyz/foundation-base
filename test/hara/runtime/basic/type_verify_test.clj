@@ -1,10 +1,10 @@
-(ns hara.runtime.basic.type-verify-test
+tahto/runtime/basic/type_verify_test.clj:1:(ns tahto.runtime.basic.type-verify-test
   (:use code.test)
-  (:require [hara.runtime.basic.type-verify :refer :all]
+tahto/runtime/basic/type_verify_test.clj:3:  (:require [tahto.runtime.basic.type-verify :refer :all]
             [std.lib.os :as os]
             [std.fs :as fs]))
 
-^{:refer hara.runtime.basic.type-verify/verify-exec-oneshot :added "4.1"}
+tahto/runtime/basic/type_verify_test.clj:7:^{:refer tahto.runtime.basic.type-verify/verify-exec-oneshot :added "4.1"}
 (fact "returns the source body when the checker exits 0"
   (with-redefs [os/sh (fn [_] :proc)
                 os/sh-wait (fn [_] nil)
@@ -18,7 +18,7 @@
     (verify-exec-oneshot ["checker"] "body" {:stderr true}))
   => "bad syntax")
 
-^{:refer hara.runtime.basic.type-verify/verify-exec-file :added "4.1"}
+tahto/runtime/basic/type_verify_test.clj:21:^{:refer tahto.runtime.basic.type-verify/verify-exec-file :added "4.1"}
 (fact "writes source to a temp file and runs a file-based checker"
   (with-redefs [os/sh (fn [_] :proc)
                 os/sh-wait (fn [_] nil)
@@ -34,7 +34,7 @@
     (verify-exec-file ["checker" "__FILE__"] "body" {:extension "lua" :stderr true}))
   => "compile error")
 
-^{:refer hara.runtime.basic.type-verify/verify-exec-twostep :added "4.1"}
+tahto/runtime/basic/type_verify_test.clj:37:^{:refer tahto.runtime.basic.type-verify/verify-exec-twostep :added "4.1"}
 (fact "delegates to verify-exec-file"
   (with-redefs [verify-exec-file (fn [_args body _opts]
                                    (str "verified:" body))]

@@ -365,7 +365,7 @@
  {:description "rpc based on the redis protocol"
   :include [[net.resp :complete]]
   :bundle
-  [{:path "target/classes" :include ["hara/net/resp"]}]}
+  [{:path "target/classes" :include ["tahto/net/resp"]}]}
 
  xyz.zcaudate/python
  {:description "python libs and helpers"
@@ -399,7 +399,7 @@
  {:description "wrapper for scribe"
   :include [[script.yaml :complete]]
   :dependencies [org.yaml/snakeyaml]
-  :bundle [{:path "target/classes" :include ["hara/lib/snakeyaml"]}]}
+  :bundle [{:path "target/classes" :include ["newlisp/lib/snakeyaml"]}]}
   
  xyz.zcaudate/std.block
  {:description "blocks for code unit representation"
@@ -439,7 +439,7 @@
   :include [[std.image :complete]]
   :bundle
   [{:path "resources" :include ["assets/std.image"]}
-   {:path "target/classes" :include ["hara/lib/image"]}]}
+   {:path "target/classes" :include ["newlisp/lib/image"]}]}
 
  xyz.zcaudate/std.fs
  {:description "file library"
@@ -452,61 +452,61 @@
   :dependencies
   [com.fasterxml.jackson.core/jackson-databind
    com.fasterxml.jackson.datatype/jackson-datatype-jsr310]
-  :bundle [{:path "target/classes" :include ["hara/lib/json"]}]}
+  :bundle [{:path "target/classes" :include ["newlisp/lib/json"]}]}
  
-  xyz.zcaudate/hara
+  xyz.zcaudate/tahto
   {:description "working with other languages"
-   :include [[hara :exclude [hara.runtime.postgres
-                             hara.runtime.graal
-                             hara.runtime.jep
-                             hara.runtime.libpython
-                             hara.runtime.redis
-                             hara.runtime.solidity
-                             hara.runtime.nginx
-                             hara.runtime.basic.impl.process-verilog
-                             hara.runtime.basic.impl-annex.process-r
-                             hara.model.spec-postgres
-                             hara.model.spec-solidity
-                             hara.model.annex.spec-r]]
+   :include [[tahto :exclude [tahto.runtime.postgres
+                             tahto.runtime.graal
+                             tahto.runtime.jep
+                             tahto.runtime.libpython
+                             tahto.runtime.redis
+                             tahto.runtime.solidity
+                             tahto.runtime.nginx
+                             tahto.runtime.basic.impl.process-verilog
+                             tahto.runtime.basic.impl-annex.process-r
+                             tahto.model.spec-postgres
+                             tahto.model.spec-solidity
+                             tahto.model.annex.spec-r]]
              [xt.lang :complete]]}
 
- xyz.zcaudate/hara.runtime.libpython
+ xyz.zcaudate/tahto.runtime.libpython
  {:description "nginx runtime support"
-  :include [[hara.runtime.libpython :complete]]}
+  :include [[tahto.runtime.libpython :complete]]}
  
- xyz.zcaudate/hara.runtime.nginx
+ xyz.zcaudate/tahto.runtime.nginx
  {:description "nginx runtime support"
-  :include [[hara.runtime.nginx :complete]]}
+  :include [[tahto.runtime.nginx :complete]]}
  
- xyz.zcaudate/hara.runtime.redis
+ xyz.zcaudate/tahto.runtime.redis
   {:description "runtime for redis" 
-   :include [[hara.runtime.redis :complete]]
+   :include [[tahto.runtime.redis :complete]]
    :bundle [{:path "resources" :include ["assets/rt.redis"]}]}
   
- xyz.zcaudate/hara.runtime.graal
+ xyz.zcaudate/tahto.runtime.graal
   {:description "runtime for graal contexts"
-   :include [[hara.runtime.graal :complete]]
+   :include [[tahto.runtime.graal :complete]]
    :bundle [{:path "target/classes" 
-             :include ["hara/lib/graal"]}]
+             :include ["newlisp/lib/graal"]}]
    :dependencies [org.graalvm.sdk/graal-sdk
                   org.graalvm.js/js
                  org.graalvm.js/js-scriptengine
 		             commons-io/commons-io]}
  
- xyz.zcaudate/hara.runtime.jep
+ xyz.zcaudate/tahto.runtime.jep
   {:description "runtime for jep" 
-   :include [[hara.runtime.jep :complete]]
+   :include [[tahto.runtime.jep :complete]]
    :dependencies [black.ninia/jep]}
  
  xyz.zcaudate/postgres
  {:description "postgres language and runtime support"
   :include [[postgres :exclude [postgres.sample]]
-            [hara.runtime.postgres :complete]]}
+            [tahto.runtime.postgres :complete]]}
 
  xyz.zcaudate/solidity
  {:description "solidity language and runtime support"
   :include [[solidity.core :complete]
-            [hara.runtime.solidity :complete]]}
+            [tahto.runtime.solidity :complete]]}
 
  xyz.zcaudate/verilog
  {:description "verilog language and runtime support"
@@ -519,12 +519,12 @@
  xyz.zcaudate/std.lib
  {:description "simple string methods for searching"
   :bundle [{:path "target/classes" 
-            :include ["hara/lib/bin"
-                      "hara/lib/concurrent"
-                      "hara/lib/foundation"
-                      "hara/lib/mustache"
-                      "hara/lib/security"
-                      "hara/lib/stream"]}]
+            :include ["newlisp/lib/bin"
+                      "newlisp/lib/concurrent"
+                      "newlisp/lib/foundation"
+                      "newlisp/lib/mustache"
+                      "newlisp/lib/security"
+                      "newlisp/lib/stream"]}]
   :include [[std.concurrent :complete]
             [std.lib :complete]
             [std.print :complete]

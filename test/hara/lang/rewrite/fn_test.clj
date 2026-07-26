@@ -1,13 +1,13 @@
-(ns hara.lang.rewrite.fn-test
+(ns tahto.core.rewrite.fn-test
   (:require [clojure.string :as str]
-            [hara.lang.rewrite.fn :as fnrw])
+            [tahto.core.rewrite.fn :as fnrw])
   (:use code.test))
 
 (defn- passthrough-rewrite
   [forms]
   forms)
 
-^{:refer hara.lang.rewrite.fn/do-form? :added "4.0"}
+^{:refer tahto.core.rewrite.fn/do-form? :added "4.0"}
 (fact "identifies do and do* forms"
   (fnrw/do-form? '(do 1 2 3))
   => 'do
@@ -21,7 +21,7 @@
   (fnrw/do-form? 1)
   => false)
 
-^{:refer hara.lang.rewrite.fn/fn-form? :added "4.0"}
+^{:refer tahto.core.rewrite.fn/fn-form? :added "4.0"}
 (fact "identifies fn forms"
   (fnrw/fn-form? '(fn [x] x))
   => true
@@ -35,7 +35,7 @@
   (fnrw/fn-form? 1)
   => false)
 
-^{:refer hara.lang.rewrite.fn/fn-parts :added "4.0"}
+^{:refer tahto.core.rewrite.fn/fn-parts :added "4.0"}
 (fact "splits fn forms into name, args and body"
   (fnrw/fn-parts '(fn [x] (return x)))
   => [nil '[x] '((return x))]
@@ -46,7 +46,7 @@
   (fnrw/fn-parts '(fn [x]))
   => [nil '[x] nil])
 
-^{:refer hara.lang.rewrite.fn/splice-do* :added "4.0"}
+^{:refer tahto.core.rewrite.fn/splice-do* :added "4.0"}
 (fact "splices do* forms into surrounding list"
   (fnrw/splice-do* '[(do* 1 2) 3])
   => '(1 2 3)
@@ -60,7 +60,7 @@
   (fnrw/splice-do* '[(do* (step x) (return x))])
   => '((step x) (return x)))
 
-^{:refer hara.lang.rewrite.fn/wrap-body :added "4.0"}
+^{:refer tahto.core.rewrite.fn/wrap-body :added "4.0"}
 (fact "wraps multi-form bodies in do"
   (fnrw/wrap-body [])
   => []
@@ -71,7 +71,7 @@
   (fnrw/wrap-body '[(step x) (return x)])
   => '((do (step x) (return x))))
 
-^{:refer hara.lang.rewrite.fn/rewrite-fn-form :added "4.1"}
+^{:refer tahto.core.rewrite.fn/rewrite-fn-form :added "4.1"}
 (fact "rewrites function bodies with optional preparation"
   (fnrw/rewrite-fn-form
    '(fn named [x]
@@ -84,7 +84,7 @@
           (return x)
           (step x))))
 
-^{:refer hara.lang.rewrite.fn/rewrite-fn-body :added "4.0"}
+^{:refer tahto.core.rewrite.fn/rewrite-fn-body :added "4.0"}
 (fact "rewrites function bodies, wrapping multi-form bodies in do"
   (fnrw/rewrite-fn-body '(fn [x]
                            (step x)
@@ -99,7 +99,7 @@
                         passthrough-rewrite)
   => '(fn named [x] (return x)))
 
-^{:refer hara.lang.rewrite.fn/normalize-fn :added "4.1"}
+^{:refer tahto.core.rewrite.fn/normalize-fn :added "4.1"}
 (fact "normalizes lifted functions to anonymous block bodies"
   (fnrw/normalize-fn '(fn named [x]
                         (step x)
@@ -110,7 +110,7 @@
           (step x)
           (return x))))
 
-^{:refer hara.lang.rewrite.fn/lambda-compatible? :added "4.1"}
+^{:refer tahto.core.rewrite.fn/lambda-compatible? :added "4.1"}
 (fact "detects lambda-compatible function forms"
   (fnrw/lambda-compatible? '(fn [x] (return x)))
   => true
@@ -130,7 +130,7 @@
   (fnrw/lambda-compatible? '(fn [x] (do (step x) (return x))))
   => false)
 
-^{:refer hara.lang.rewrite.fn/lift-named-lambda :added "4.1"}
+^{:refer tahto.core.rewrite.fn/lift-named-lambda :added "4.1"}
 (fact "lifts named lambdas into prior var bindings"
   (fnrw/lift-named-lambda '(fn named [x] (return x))
                           passthrough-rewrite

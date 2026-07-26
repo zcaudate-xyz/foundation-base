@@ -1,5 +1,5 @@
 (ns std.lib.time
-  (:import (hara.lib.foundation Clock)))
+  (:import (newlisp.lib.foundation Clock)))
 
 (def ^:dynamic *format* nil)
 

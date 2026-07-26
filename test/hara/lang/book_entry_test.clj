@@ -1,12 +1,12 @@
-(ns hara.lang.book-entry-test
-  (:require [hara.lang.book-entry :refer :all])
+(ns tahto.base.book-entry-test
+  (:require [tahto.base.book-entry :refer :all])
   (:use code.test))
 
-^{:refer hara.lang.book-entry/book-entry? :added "4.0"}
+^{:refer tahto.base.book-entry/book-entry? :added "4.0"}
 (fact "checks if object is a book entry"
   (book-entry? (book-entry {})) => true)
 
-^{:refer hara.lang.book-entry/book-entry :added "4.0"}
+^{:refer tahto.base.book-entry/book-entry :added "4.0"}
 (fact "creates a book entry"
 
   ;;

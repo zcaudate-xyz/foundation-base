@@ -1,5 +1,5 @@
 (ns kmi.lang.type-keyword
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [keyword]))
 
 (l/script :xtalk

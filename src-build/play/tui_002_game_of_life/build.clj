@@ -1,6 +1,6 @@
 (ns play.tui-002-game-of-life.build
   (:use [code.test :exclude [-main]])
-  (:require [hara.lang :as  l]
+  (:require [tahto.core :as  l]
             [js.blessed.project :as blessed-project]
             [std.lib :as h]
             [std.make :as make :refer [def.make]]

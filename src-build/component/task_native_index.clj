@@ -1,7 +1,7 @@
 ^{:no-test true}
 (ns component.task-native-index
   (:require
-   [hara.lang :as l]
+   [tahto.core :as l]
    [std.lib :as h]
    [std.string :as str]
    [std.make :as make]

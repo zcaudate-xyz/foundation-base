@@ -1,10 +1,10 @@
-(ns hara.runtime.basic.type-twostep-haskell-test
+tahto/runtime/basic/type_twostep_haskell_test.clj:1:(ns tahto.runtime.basic.type-twostep-haskell-test
   (:use code.test)
   (:require [std.lib.env :as env]
-            [hara.runtime.basic.impl-annex.process-haskell]
-            [hara.lang :as l]))
+tahto/runtime/basic/type_twostep_haskell_test.clj:4:            [tahto.runtime.basic.impl-annex.process-haskell]
+            [tahto.core :as l]))
 
-(do hara.runtime.basic.impl-annex.process-haskell/+haskell-twostep+)
+tahto/runtime/basic/type_twostep_haskell_test.clj:7:(do tahto.runtime.basic.impl-annex.process-haskell/+haskell-twostep+)
 
 (l/script- :haskell
   {:runtime :twostep :test-mode true})

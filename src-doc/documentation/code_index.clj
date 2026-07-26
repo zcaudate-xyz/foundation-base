@@ -39,7 +39,7 @@
                        :href "code-tool.html"}
                       {:meta "Agents"
                        :title "code.mcp"
-                       :text "MCP server and tool layer for code-manage, code-test, code-doc, and hara-lang actions."
+                       :text "MCP server and tool layer for code-manage, code-test, code-doc, and tahto-lang actions."
                        :href "code-mcp.html"}]}]]
 
 [[:section {:title "Walkthrough"}]]

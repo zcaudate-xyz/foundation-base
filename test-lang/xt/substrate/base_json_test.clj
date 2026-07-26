@@ -1,6 +1,6 @@
 (ns xt.substrate.base-json-test
   (:use code.test)
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js

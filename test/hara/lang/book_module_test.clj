@@ -1,21 +1,21 @@
-(ns hara.lang.book-module-test
+(ns tahto.base.book-module-test
   (:require [xt.lang.common-promise]
             [xt.lang.common-data]
             [xt.lang.common-lib]
             [js.blessed]
             [js.blessed.frame]
-            [hara.lang :as l]
-            [hara.lang.book-module :refer :all]
-            [hara.lang.impl :as impl])
+            [tahto.core :as l]
+            [tahto.base.book-module :refer :all]
+            [tahto.core.impl :as impl])
   (:use code.test))
 
 (def +library+ (impl/clone-default-library))
 
-^{:refer hara.lang.book-module/book-module? :added "4.0"}
+^{:refer tahto.base.book-module/book-module? :added "4.0"}
 (fact "checks of object is a book module"
   (book-module? (book-module {:lang :lua :id 'L.core})) => true)
 
-^{:refer hara.lang.book-module/book-module :added "4.0"}
+^{:refer tahto.base.book-module/book-module :added "4.0"}
 (fact "creates a book module"
 
   (book-module {:id 'L.core
@@ -33,13 +33,13 @@
    {'demo.poly (book-module {:lang :js :id 'demo.poly})
     'demo.core (book-module {:lang :js :id 'demo.core})}})
 
-^{:refer hara.lang.book-module/polyfill-default-alias :added "4.1"}
+^{:refer tahto.base.book-module/polyfill-default-alias :added "4.1"}
 (fact "returns the default alias for a derived polyfill module"
   (polyfill-default-alias 'common-net)  => 'polyfill-net
   (polyfill-default-alias 'polyfill-net) => 'polyfill-net
   (polyfill-default-alias 'net)          => 'polyfill-net)
 
-^{:refer hara.lang.book-module/module-derived-view :added "4.1"}
+^{:refer tahto.base.book-module/module-derived-view :added "4.1"}
 (fact "returns a compilation view with derived polyfill links"
 
   (-> (module-derived-view
@@ -105,7 +105,7 @@
                     :current other.module
                     :polyfill demo.poly}))
 
-^{:refer hara.lang.book-module/resolve-module-view :added "4.1"}
+^{:refer tahto.base.book-module/resolve-module-view :added "4.1"}
 (fact "resolves a module id or module map to the derived compilation view"
 
   (resolve-module-view nil nil) => nil
@@ -131,7 +131,7 @@
       :link)
   => '{polyfill-demo.poly demo.poly})
 
-^{:refer hara.lang.book-module/module-deps-code :added "4.0"}
+^{:refer tahto.base.book-module/module-deps-code :added "4.0"}
 (fact "gets the code link dependencies"
 
   (-> (book-module {:id 'L.nginx
@@ -193,7 +193,7 @@
                                                       :x-promise-catch}}}})))
   => '#{})
 
-^{:refer hara.lang.book-module/module-deps-all :added "4.1"}
+^{:refer tahto.base.book-module/module-deps-all :added "4.1"}
 (fact "gets all module dependencies including explicit links"
   (module-deps-all
    (book-module {:id 'L.nginx
@@ -205,25 +205,25 @@
                                           L.json/parse}}}}))
   => '#{L.core L.json})
 
-^{:refer hara.lang.book-module/module-deps-native :added "4.0"}
+^{:refer tahto.base.book-module/module-deps-native :added "4.0"}
 (fact "gets the native link dependencies"
 
   (impl/with:library [+library+]
     (module-deps-native
-     (hara.lang/get-book +library+ :js)
-     (hara.lang/get-module
+     (tahto.core/get-book +library+ :js)
+     (tahto.core/get-module
       +library+
       :js
       'js.react)))
   => '{"react" #{React}})
 
-^{:refer hara.lang.book-module/module-deps-fragment :added "4.0"}
+^{:refer tahto.base.book-module/module-deps-fragment :added "4.0"}
 (fact "gets all fragments that have beeen used in js.react"
 
   (impl/with:library [+library+]
     (module-deps-fragment
-     (hara.lang/get-book +library+ :js)
-     (hara.lang/get-module
+     (tahto.core/get-book +library+ :js)
+     (tahto.core/get-module
       +library+
       :js
       'js.react)))
@@ -253,12 +253,12 @@
          xt.lang.common-trace/LOG!
          js.react/const})
 
-^{:refer hara.lang.book-module/module-entries :added "4.0"}
+^{:refer tahto.base.book-module/module-entries :added "4.0"}
 (fact "creates an export entry for a module"
 
   (impl/with:library [+library+]
     (module-entries
-     (hara.lang/get-module
+     (tahto.core/get-module
       +library+
       :js
       'js.react)

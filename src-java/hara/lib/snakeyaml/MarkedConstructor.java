@@ -1,4 +1,4 @@
-package hara.lib.snakeyaml;
+package newlisp.lib.snakeyaml;
 
 import org.yaml.snakeyaml.constructor.Construct;
 import org.yaml.snakeyaml.constructor.Constructor;

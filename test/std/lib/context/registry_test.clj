@@ -31,7 +31,7 @@
   => (contains-in
       {:context :null,
        :rt {:default {:key :default,
-                      :resource :hara/context.rt.null,
+                      :resource :tahto/context.rt.null,
                       :config {}}}}))
 
 ^{:refer std.lib.context.registry/registry-rt-list :added "3.0"}

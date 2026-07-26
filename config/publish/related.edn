@@ -5,11 +5,11 @@
    :group :foundation
    :description "standard utility library — collections, strings, fs, concurrency, testing primitives"
    :comparison "closest external overlap: medley plus `clojure.java.io` and `core.async` basics, packaged together with no external dependencies"}
-  {:name "hara"
-   :href "hara/index.html"
+  {:name "tahto"
+   :href "tahto/index.html"
    :group :foundation
    :description "multi-language code generation and runtime emission for JavaScript, Lua, Python, R and SQL targets"
-   :comparison "closest external overlap: template-based code generators; hara emits from live Clojure forms instead of templates"}
+   :comparison "closest external overlap: template-based code generators; tahto emits from live Clojure forms instead of templates"}
   {:name "code.test"
    :href "code/code-test.html"
    :group :foundation
@@ -46,7 +46,7 @@
    :href "https://haxe.org"
    :group :external
    :description "cross-platform language and toolkit targeting many runtimes"
-   :comparison "similar 'write once, target many' goal as xt/hara, via a dedicated language rather than Clojure forms"}]
+   :comparison "similar 'write once, target many' goal as xt/tahto, via a dedicated language rather than Clojure forms"}]
 
  :namespaces
  {jvm.monitor

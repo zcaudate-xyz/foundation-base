@@ -1,14 +1,14 @@
-(ns hara.lang.impl-entry-test
-  (:require [hara.lang.book :as b]
-               [hara.lang.book-entry :as e]
-              [hara.common.emit :as emit]
-              [hara.common.emit-prep-lua-test :as prep]
-              [hara.lang.impl :as impl]
-              [hara.lang.impl-entry :as entry]
-              [hara.lang.library :as lib]
-              [hara.lang.library-snapshot :as snap]
+(ns tahto.core.impl-entry-test
+  (:require [tahto.base.book :as b]
+               [tahto.base.book-entry :as e]
+tahto/lang/impl_entry_test.clj:4:              [tahto.common.emit :as emit]
+tahto/lang/impl_entry_test.clj:5:              [tahto.common.emit-prep-lua-test :as prep]
+              [tahto.core.impl :as impl]
+              [tahto.core.impl-entry :as entry]
+              [tahto.core.library :as lib]
+              [tahto.core.library-snapshot :as snap]
               [xt.substrate.base-frame]
-              [hara.lang.library-snapshot-prep-test :as lprep]
+              [tahto.core.library-snapshot-prep-test :as lprep]
                [std.lib.env :as env])
   (:use code.test))
 
@@ -89,23 +89,23 @@
       (catch Throwable t
         (let [data (ex-data t)]
           {:probe (:probe data)
-           :phase (:hara/phase data)
-           :subsystem (:hara/subsystem data)
-           :lang (:hara/lang data)
-           :module (:hara/module data)
-           :entry (-> data :hara/entry :symbol)
-           :line (:hara/line data)
-           :stack (mapv (juxt :hara/phase :hara/subsystem)
-                        (:hara/provenance-stack data))}))))
+tahto/lang/impl_entry_test.clj:92:           :phase (:tahto/phase data)
+tahto/lang/impl_entry_test.clj:93:           :subsystem (:tahto/subsystem data)
+tahto/lang/impl_entry_test.clj:94:           :lang (:tahto/lang data)
+tahto/lang/impl_entry_test.clj:95:           :module (:tahto/module data)
+tahto/lang/impl_entry_test.clj:96:           :entry (-> data :tahto/entry :symbol)
+tahto/lang/impl_entry_test.clj:97:           :line (:tahto/line data)
+tahto/lang/impl_entry_test.clj:98:           :stack (mapv (juxt :tahto/phase :tahto/subsystem)
+tahto/lang/impl_entry_test.clj:99:                        (:tahto/provenance-stack data))}))))
   => '{:probe true
         :phase :emit/form
-        :subsystem :hara.common.emit-top-level/emit-form
+tahto/lang/impl_entry_test.clj:102:        :subsystem :tahto.common.emit-top-level/emit-form
         :lang :lua
         :module L.core
         :entry L.core/explode-fn
         :line 42
-        :stack [[:emit/form :hara.common.emit-top-level/emit-form]
-                [:emit/entry :hara.lang.impl-entry/emit-entry-raw]]})
+tahto/lang/impl_entry_test.clj:107:        :stack [[:emit/form :tahto.common.emit-top-level/emit-form]
+                [:emit/entry :tahto.core.impl-entry/emit-entry-raw]]})
 
 (fact "emits template entries using merged parent modules from the snapshot"
 
@@ -141,7 +141,7 @@
                        :emit {:label false}}))
   => "function L_core____call_parent(a){\n  return a + 1;\n}")
 
-^{:refer hara.lang.impl-entry/create-common :added "4.0"}
+^{:refer tahto.core.impl-entry/create-common :added "4.0"}
 (fact "create entry common keys from metadata"
 
   (entry/create-common {:lang :lua
@@ -151,7 +151,7 @@
                         :time 1})
   => '{:lang :lua, :namespace L.core, :module L.core, :line 1, :time 1})
 
-^{:refer hara.lang.impl-entry/create-code-raw :added "4.0"}
+^{:refer tahto.core.impl-entry/create-code-raw :added "4.0"}
 (fact "creates a raw entry compatible with submit"
 
   (entry/create-code-raw
@@ -198,7 +198,7 @@
         [a b]
         (return {:sum 4})))
 
-^{:refer hara.lang.impl-entry/create-code-base :added "4.0"}
+^{:refer tahto.core.impl-entry/create-code-base :added "4.0"}
 (fact "creates the base code entry"
 
   (entry/create-code-base
@@ -211,7 +211,7 @@
    @emit/+test-grammar+)
   => e/book-entry?)
 
-^{:refer hara.lang.impl-entry/hydrate-form :added "4.1"}
+^{:refer tahto.core.impl-entry/hydrate-form :added "4.1"}
 (fact "hydrates input forms through the reserved hydrate hook"
 
   (entry/hydrate-form '(do raw)
@@ -222,7 +222,7 @@
   => '[{:probe true}
        (do (x:get-in data ["a"]))])
 
-^{:refer hara.lang.impl-entry/create-code-hydrate :added "4.0"
+^{:refer tahto.core.impl-entry/create-code-hydrate :added "4.0"
   :setup [(def +entry+
             (entry/create-code-base
              '(defn add-fn
@@ -244,7 +244,7 @@
       :form)
   => '(defn add-fn [a b] (return (+ a (+ a 1)))))
 
-^{:refer hara.lang.impl-entry/prepare-code-entry :added "4.1"}
+^{:refer tahto.core.impl-entry/prepare-code-entry :added "4.1"}
 (fact "prepares a raw code entry for storage without eager hydration"
 
   (let [entry (entry/prepare-code-entry {})]
@@ -261,7 +261,7 @@
     (:probe/value (entry/prepare-code-entry {})))
   => true)
 
-^{:refer hara.lang.impl-entry/create-code :added "4.0"}
+^{:refer tahto.core.impl-entry/create-code :added "4.0"}
 (fact "creates the code entry"
 
   (-> (entry/create-code '(defn add-fn
@@ -275,7 +275,7 @@
       :form)
   => '(defn add-fn [a b] (return (+ a (L.core/identity-fn b)))))
 
-^{:refer hara.lang.impl-entry/create-fragment :added "4.0"}
+^{:refer tahto.core.impl-entry/create-fragment :added "4.0"}
 (fact "creates a fragment"
 
   (entry/create-fragment
@@ -285,11 +285,11 @@
     :module 'L.core})
   => e/book-entry?)
 
-^{:refer hara.lang.impl-entry/create-fragment-hydrate :added "4.0"}
+^{:refer tahto.core.impl-entry/create-fragment-hydrate :added "4.0"}
 (fact "hydrates the forms"
   "placeholder for tests")
 
-^{:refer hara.lang.impl-entry/create-macro :added "4.0"}
+^{:refer tahto.core.impl-entry/create-macro :added "4.0"}
 (fact "creates a macro"
 
   (entry/create-macro
@@ -299,15 +299,15 @@
     :module 'L.core})
   => e/book-entry?)
 
-^{:refer hara.lang.impl-entry/with:cache-none :added "4.0"}
+^{:refer tahto.core.impl-entry/with:cache-none :added "4.0"}
 (fact "skips the cache"
   (entry/with:cache-none entry/*cache-none*) => true)
 
-^{:refer hara.lang.impl-entry/with:cache-force :added "4.0"}
+^{:refer tahto.core.impl-entry/with:cache-force :added "4.0"}
 (fact "forces the cache to update"
   (entry/with:cache-force entry/*cache-force*) => true)
 
-^{:refer hara.lang.impl-entry/emit-entry-raw :added "4.0"
+^{:refer tahto.core.impl-entry/emit-entry-raw :added "4.0"
   :setup [(def +entry+ (entry/create-code '(defn add-fn
                                              [a b]
                                              (return (-/add a (-/identity-fn b))))
@@ -326,7 +326,7 @@
                           :layout :full})
   => "function L_core____add_fn(a,b){\n  return a + L_core____identity_fn(b);\n}")
 
-^{:refer hara.lang.impl-entry/emit-entry-cached :added "4.0"
+^{:refer tahto.core.impl-entry/emit-entry-cached :added "4.0"
   :setup [(def +book+
             (-> prep/+book-min+
                 (b/set-entry (entry/create-fragment
@@ -355,14 +355,14 @@
                                                    :display :brief)}})
   => "function L_core____add_fn(a,b){\n  return G + L_core____identity_fn(a + b);\n}")
 
-^{:refer hara.lang.impl-entry/emit-entry-label :added "4.0"}
+^{:refer tahto.core.impl-entry/emit-entry-label :added "4.0"}
 (fact "emits the entry label"
 
   (entry/emit-entry-label (:grammar +book+)
                           (get-in +book+ '[:modules L.core :code add-fn]))
   => "// L.core/add-fn [] ")
 
-^{:refer hara.lang.impl-entry/emit-entry :added "4.0"}
+^{:refer tahto.core.impl-entry/emit-entry :added "4.0"}
 (fact "emits a given entry"
 
   (entry/emit-entry (:grammar +book+)

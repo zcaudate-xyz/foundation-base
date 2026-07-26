@@ -1,20 +1,20 @@
-(ns hara.runtime.basic.docker.impl-julia-test
-  (:require [hara.runtime.basic.docker.registry :as registry]
+tahto/runtime/basic/docker/impl_julia_test.clj:1:(ns tahto.runtime.basic.docker.impl-julia-test
+tahto/runtime/basic/docker/impl_julia_test.clj:2:  (:require [tahto.runtime.basic.docker.registry :as registry]
             [std.lib.env :as env]
-            [hara.lang :as l]
-            [hara.lang.script :as script])
+            [tahto.core :as l]
+            [tahto.core.script :as script])
   (:use code.test))
 
 ;;
 ;; Julia basic runtime in a Docker container.
 ;;
-;; Uses the project-owned hara.runtime.basic Julia image with JSON preinstalled.
+tahto/runtime/basic/docker/impl_julia_test.clj:11:;; Uses the project-owned tahto.runtime.basic Julia image with JSON preinstalled.
 ;;
 ;; The bootstrap connects back to the JVM socket server via
 ;; host.docker.internal:<port>, running the eval loop with JSON + Sockets.
 ;;
 ;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-julia:latest
-;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-julia-test
+tahto/runtime/basic/docker/impl_julia_test.clj:17:;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only tahto.runtime.basic.docker.impl-julia-test
 ;;
 
 (l/script- :julia
@@ -25,7 +25,7 @@
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
             (not (env/docker-daemon-available?))
-            (System/getenv "HARA_NO_DOCKER")
+tahto/runtime/basic/docker/impl_julia_test.clj:28:            (System/getenv "TAHTO_NO_DOCKER")
             (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})

@@ -1,14 +1,14 @@
-(ns hara.lang.compile-test
+(ns tahto.core.compile-test
   (:require [xt.lang.common-data]
              [xt.lang.common-lib]
              [postgres.sample.scratch-v1 :as scratch]
              [std.fs :as fs]
-             [hara.lang.compile :refer :all]
-             [hara.lang.book-module :as bm]
-             [hara.lang.impl :as impl]
-             [hara.lang.library :as lib]
-             [hara.lang.library-snapshot :as snap]
-             [hara.model.spec-js.ts :as ts]
+             [tahto.core.compile :refer :all]
+             [tahto.base.book-module :as bm]
+             [tahto.core.impl :as impl]
+             [tahto.core.library :as lib]
+             [tahto.core.library-snapshot :as snap]
+tahto/lang/compile_test.clj:11:             [tahto.model.spec-js.ts :as ts]
              [std.make :as make]
              [std.make.compile :as compile]
              [xt.lang.common-math :as math])
@@ -35,7 +35,7 @@
       [[".build/src/pkg/file.js" string?]
        [".build/src/pkg/file.d.ts" string?]]))
 
-^{:refer hara.lang.compile/compile-script :added "4.0"}
+^{:refer tahto.core.compile/compile-script :added "4.0"}
 (fact "compiles a script"
 
   (make/with:mock-compile
@@ -49,15 +49,15 @@
   => [".build/src/pkg/file.lua"
       "function gcd(a,b){\n  return (0 == b) ? a : gcd(b,a % b);\n}\n\nfunction gcd(a,b){\n  return (0 == b) ? a : gcd(b,a % b);\n}"])
 
-^{:refer hara.lang.compile/resolve-artifact-producer :added "4.1"}
+^{:refer tahto.core.compile/resolve-artifact-producer :added "4.1"}
 (fact "resolves artifact producers from vars, symbols and functions"
   [(fn? (resolve-artifact-producer #'artifact-producer-fixture))
-   (fn? (resolve-artifact-producer 'hara.lang.compile-test/artifact-producer-fixture))
+   (fn? (resolve-artifact-producer 'tahto.core.compile-test/artifact-producer-fixture))
    (fn? (resolve-artifact-producer artifact-producer-fixture))
    (nil? (resolve-artifact-producer :missing))]
   => [true true true true])
 
-^{:refer hara.lang.compile/artifact-descriptor-seq :added "4.1"}
+^{:refer tahto.core.compile/artifact-descriptor-seq :added "4.1"}
 (fact "normalizes nested artifact descriptors into a flat sequence"
   (vec (artifact-descriptor-seq [{:output "a"}
                                  [{:output "b"}]
@@ -68,7 +68,7 @@
       {:output "c"}
       {:output "d"}])
 
-^{:refer hara.lang.compile/compile-module-artifacts :added "4.1"}
+^{:refer tahto.core.compile/compile-module-artifacts :added "4.1"}
 (fact "includes the primary output and any sidecar artifacts"
   (let [artifacts (compile-module-artifacts
                    "BODY"
@@ -83,7 +83,7 @@
       ["BODY"
        "demo.core::BODY"]])
 
-^{:refer hara.lang.compile/compile-module-single :added "4.0"}
+^{:refer tahto.core.compile/compile-module-single :added "4.0"}
 (fact "compiles a single module"
 
   (make/with:mock-compile
@@ -104,7 +104,7 @@
       [".build/src/pkg/file.lua"
        string?]))
 
-^{:refer hara.lang.compile/compile-module-create-links :added "4.0"}
+^{:refer tahto.core.compile/compile-module-create-links :added "4.0"}
 (fact "creates links for modules"
   (compile-module-create-links '[a.b a.c] 'a {})
   => (contains {'a.b (contains {:label "b"}) 'a.c (contains {:label "c"})}))
@@ -119,7 +119,7 @@
     'mod.c (bm/book-module {:lang :js :id 'mod.c
                             :specialize {'src.core {:bindings {'ContractA 'backend-a}}}})}})
 
-^{:refer hara.lang.compile/compile-module-directory-specialization-conflicts :added "4.1"}
+^{:refer tahto.core.compile/compile-module-directory-specialization-conflicts :added "4.1"}
 (fact "detects conflicting specialization contract backends across modules"
 
   (compile-module-directory-specialization-conflicts
@@ -149,7 +149,7 @@
   => '{})
 
 
-^{:refer hara.lang.compile/compile-module-directory-selected :added "4.0"}
+^{:refer tahto.core.compile/compile-module-directory-selected :added "4.0"}
 (fact "compiles the directory based on sorted imports"
   (make/with:mock-compile
     (compile-module-directory-selected
@@ -177,7 +177,7 @@
        :emit {:artifacts [#'ts/module-dts-artifact]}}))
   => (contains {:files pos-int?}))
 
-^{:refer hara.lang.compile/compile-module-directory :added "4.0"}
+^{:refer tahto.core.compile/compile-module-directory :added "4.0"}
 (fact "compiles a directory"
   (with-redefs [fs/select (constantly ["src/xt/lang/common_lib.clj"])
                 fs/file-namespace (constantly 'xt.lang.common-math)]
@@ -189,7 +189,7 @@
         :main 'xt.lang.common-math})))
   => (contains {:files pos-int?}))
 
-^{:refer hara.lang.compile/specialization-descriptor :added "4.1"}
+^{:refer tahto.core.compile/specialization-descriptor :added "4.1"}
 (fact "normalizes specialization descriptors"
   (specialization-descriptor
    {:lang :lua
@@ -202,7 +202,7 @@
                 :bindings {'cache 'backend.core}
                 :compile-type :graph}))
 
-^{:refer hara.lang.compile/compile-module-specialization :added "4.1"}
+^{:refer tahto.core.compile/compile-module-specialization :added "4.1"}
 (fact "installs a specialization before compiling"
   (let [[status opts]
         (with-redefs [lib/install-module-specialized! (fn [_ lang source target opts]
@@ -224,7 +224,7 @@
      (:target-dir opts)])
   => '[:compiled :lua target.core ".build" "src"])
 
-^{:refer hara.lang.compile/compile-module-specializations :added "4.1"}
+^{:refer tahto.core.compile/compile-module-specializations :added "4.1"}
 (fact "compiles batches of specialization descriptors"
   (with-redefs [compile-module-specialization identity]
     (compile-module-specializations [{:source 'a.core :target 'a.out}
@@ -233,12 +233,12 @@
   => '[{:lang :lua :source a.core :target a.out}
        {:lang :lua :source b.core :target b.out}])
 
-^{:refer hara.lang.compile/compile-module-prep :added "4.0"}
+^{:refer tahto.core.compile/compile-module-prep :added "4.0"}
 (fact "precs the single entry point setup"
   (compile-module-prep {:lang :lua :main 'xt.lang.common-math})
   => vector?)
 
-^{:refer hara.lang.compile/compile-module-root :added "4.0"}
+^{:refer tahto.core.compile/compile-module-root :added "4.0"}
 (fact "compiles module.root"
   (make/with:mock-compile
     (compile-module-root
@@ -248,7 +248,7 @@
        :main   'xt.lang.common-math}))
   => (contains {:files pos-int?}))
 
-^{:refer hara.lang.compile/compile-module-graph :added "4.0"}
+^{:refer tahto.core.compile/compile-module-graph :added "4.0"}
 (fact "compiles a module graph"
 
   (make/with:mock-compile
@@ -263,7 +263,7 @@
   => (contains-in
       {:files 1, :status :changed, :written [[string?]]}))
 
-^{:refer hara.lang.compile/compile-module-schema :added "4.0"}
+^{:refer tahto.core.compile/compile-module-schema :added "4.0"}
 (fact "compiles all namespaces into a single file (for sql)"
 
   (make/with:mock-compile

@@ -1,9 +1,9 @@
-(ns hara.model.sql.spec-common.form-deftype-test
+tahto/model/sql/spec_common/form_deftype_test.clj:1:(ns tahto.model.sql.spec-common.form-deftype-test
   (:use code.test)
-  (:require [hara.model.sql.spec-common.form-deftype :refer :all]))
+tahto/model/sql/spec_common/form_deftype_test.clj:3:  (:require [tahto.model.sql.spec-common.form-deftype :refer :all]))
 
-^{:refer hara.model.sql.spec-common.form-deftype/sql-deftype-format :added "4.1"}
+tahto/model/sql/spec_common/form_deftype_test.clj:5:^{:refer tahto.model.sql.spec-common.form-deftype/sql-deftype-format :added "4.1"}
 (fact "generates SQL deftype format")
 
-^{:refer hara.model.sql.spec-common.form-deftype/sql-deftype :added "4.1"}
+tahto/model/sql/spec_common/form_deftype_test.clj:8:^{:refer tahto.model.sql.spec-common.form-deftype/sql-deftype :added "4.1"}
 (fact "generates SQL deftype")

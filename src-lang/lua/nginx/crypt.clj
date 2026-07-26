@@ -1,5 +1,5 @@
 (ns lua.nginx.crypt
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [print flush time re-find]))
 
 (l/script :lua.nginx

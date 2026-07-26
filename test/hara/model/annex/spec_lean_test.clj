@@ -1,9 +1,9 @@
-(ns hara.model.annex.spec-lean-test
-  (:require [hara.lang.impl :as impl]
-            [hara.model.annex.spec-lean :as spec-lean])
+tahto/model/annex/spec_lean_test.clj:1:(ns tahto.model.annex.spec-lean-test
+  (:require [tahto.core.impl :as impl]
+tahto/model/annex/spec_lean_test.clj:3:            [tahto.model.annex.spec-lean :as spec-lean])
   (:use code.test))
 
-^{:refer hara.model.annex.spec-lean/CANARY :adopt true :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:6:^{:refer tahto.model.annex.spec-lean/CANARY :adopt true :added "4.1"}
 (fact "basic emit"
   (impl/emit-script '(defn hello [x] x) {:lang :lean})
   => "def hello x := x"
@@ -24,41 +24,41 @@
   (impl/emit-as :lean ['(fn [x] (+ x 1))])
   => "fun x => x + 1")
 
-^{:refer hara.model.annex.spec-lean/emit-raw-str :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:27:^{:refer tahto.model.annex.spec-lean/emit-raw-str :added "4.1"}
 (fact "emits raw strings")
 
-^{:refer hara.model.annex.spec-lean/emit-indent-body :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:30:^{:refer tahto.model.annex.spec-lean/emit-indent-body :added "4.1"}
 (fact "emits indented bodies")
 
-^{:refer hara.model.annex.spec-lean/lean-args :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:33:^{:refer tahto.model.annex.spec-lean/lean-args :added "4.1"}
 (fact "formats lean function arguments")
 
-^{:refer hara.model.annex.spec-lean/lean-invoke :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:36:^{:refer tahto.model.annex.spec-lean/lean-invoke :added "4.1"}
 (fact "emits lean invocations")
 
-^{:refer hara.model.annex.spec-lean/parse-match-clauses :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:39:^{:refer tahto.model.annex.spec-lean/parse-match-clauses :added "4.1"}
 (fact "parses pattern match clauses")
 
-^{:refer hara.model.annex.spec-lean/catch-all-pattern? :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:42:^{:refer tahto.model.annex.spec-lean/catch-all-pattern? :added "4.1"}
 (fact "checks catch-all patterns")
 
-^{:refer hara.model.annex.spec-lean/guarded-body :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:45:^{:refer tahto.model.annex.spec-lean/guarded-body :added "4.1"}
 (fact "builds guarded bodies")
 
-^{:refer hara.model.annex.spec-lean/match-form :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:48:^{:refer tahto.model.annex.spec-lean/match-form :added "4.1"}
 (fact "builds match forms")
 
-^{:refer hara.model.annex.spec-lean/tf-defn :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:51:^{:refer tahto.model.annex.spec-lean/tf-defn :added "4.1"}
 (fact "transforms function definitions")
 
-^{:refer hara.model.annex.spec-lean/tf-match :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:54:^{:refer tahto.model.annex.spec-lean/tf-match :added "4.1"}
 (fact "transforms pattern match expressions")
 
-^{:refer hara.model.annex.spec-lean/tf-if :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:57:^{:refer tahto.model.annex.spec-lean/tf-if :added "4.1"}
 (fact "transforms if expressions")
 
-^{:refer hara.model.annex.spec-lean/tf-letrec :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:60:^{:refer tahto.model.annex.spec-lean/tf-letrec :added "4.1"}
 (fact "transforms letrec expressions")
 
-^{:refer hara.model.annex.spec-lean/tf-lambda :added "4.1"}
+tahto/model/annex/spec_lean_test.clj:63:^{:refer tahto.model.annex.spec-lean/tf-lambda :added "4.1"}
 (fact "transforms lambda expressions")

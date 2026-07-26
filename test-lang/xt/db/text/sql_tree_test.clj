@@ -1,5 +1,5 @@
 (ns xt.db.text.sql-tree-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [postgres.gen.bind-macro :as gen]
             [xt.db.helpers.seed-system-test :as data])
   (:use code.test))

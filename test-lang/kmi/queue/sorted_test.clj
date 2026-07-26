@@ -1,6 +1,6 @@
 (ns kmi.queue.sorted-test
-  (:require [hara.runtime.redis]
-            [hara.lang :as l])
+  (:require [tahto.runtime.redis]
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :lua

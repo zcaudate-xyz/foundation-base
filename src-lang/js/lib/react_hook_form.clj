@@ -1,5 +1,5 @@
 (ns js.lib.react-hook-form
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:import  [["react-hook-form" :as #{useForm Controller}]

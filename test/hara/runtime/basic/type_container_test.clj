@@ -1,10 +1,10 @@
-(ns hara.runtime.basic.type-container-test
-  (:require [hara.runtime.basic.type-container :as container]
-            [hara.runtime.basic.type-oneshot :as oneshot]
+tahto/runtime/basic/type_container_test.clj:1:(ns tahto.runtime.basic.type-container-test
+tahto/runtime/basic/type_container_test.clj:2:  (:require [tahto.runtime.basic.type-container :as container]
+tahto/runtime/basic/type_container_test.clj:3:            [tahto.runtime.basic.type-oneshot :as oneshot]
             [lib.docker :as docker])
   (:use code.test))
 
-^{:refer hara.runtime.basic.type-container/start-container-process :added "4.0"}
+tahto/runtime/basic/type_container_test.clj:7:^{:refer tahto.runtime.basic.type-container/start-container-process :added "4.0"}
 (fact "builds container config and starts the docker runtime"
   (with-redefs [lib.docker/start-runtime (fn [_rt container]
                                            container)]
@@ -21,7 +21,7 @@
       :cmd ["escript" "echo ok"]
       :remove true})
 
-^{:refer hara.runtime.basic.type-container/start-container :added "4.1"}
+tahto/runtime/basic/type_container_test.clj:24:^{:refer tahto.runtime.basic.type-container/start-container :added "4.1"}
 (fact "start-container preserves explicit container exec"
 
   (with-redefs [oneshot/rt-oneshot-setup (fn [& _]
@@ -42,7 +42,7 @@
   => {:exec ["sh" "-c"]
       :image "erlang:27-alpine"})
 
-^{:refer hara.runtime.basic.type-container/stop-container :added "4.0"}
+tahto/runtime/basic/type_container_test.clj:45:^{:refer tahto.runtime.basic.type-container/stop-container :added "4.0"}
 (fact "stops the container via docker"
   (with-redefs [docker/stop-container (fn [container]
                                         (:id container))]

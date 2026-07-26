@@ -246,7 +246,7 @@ is empty, return <code class="docutils literal notranslate"><span class="pre">Fa
 <dt id="ascii">
 <code class="sig-name descname">ascii</code><span class="sig-paren">(</span><em class="sig-param">object</em><span class="sig-paren">)</span><a class="headerlink" href="#ascii" title="Permalink to this definition">¶</a></dt>
 <dd><p>As <a class="reference internal" href="#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a>, return a string containing a printable representation of an
-object, but escape the non-ASCII characters in the string returned by
+object, but escape the non-ASCII ctahtocters in the string returned by
 <a class="reference internal" href="#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> using <code class="docutils literal notranslate"><span class="pre">\x</span></code>, <code class="docutils literal notranslate"><span class="pre">\u</span></code> or <code class="docutils literal notranslate"><span class="pre">\U</span></code> escapes.  This generates a string
 similar to that returned by <a class="reference internal" href="#repr" title="repr"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> in Python 2.</p>
 </dd></dl>
@@ -359,7 +359,7 @@ in Python 3.2.</p>
 <dl class="function">
 <dt id="chr">
 <code class="sig-name descname">chr</code><span class="sig-paren">(</span><em class="sig-param">i</em><span class="sig-paren">)</span><a class="headerlink" href="#chr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the string representing a character whose Unicode code point is the
+<dd><p>Return the string representing a ctahtocter whose Unicode code point is the
 integer <em>i</em>.  For example, <code class="docutils literal notranslate"><span class="pre">chr(97)</span></code> returns the string <code class="docutils literal notranslate"><span class="pre">'a'</span></code>, while
 <code class="docutils literal notranslate"><span class="pre">chr(8364)</span></code> returns the string <code class="docutils literal notranslate"><span class="pre">'€'</span></code>. This is the inverse of <a class="reference internal" href="#ord" title="ord"><code class="xref py py-func docutils literal notranslate"><span class="pre">ord()</span></code></a>.</p>
 <p>The valid range for the argument is from 0 through 1,114,111 (0x10FFFF in
@@ -439,7 +439,7 @@ compilation.</p>
 <p class="admonition-title">Note</p>
 <p>When compiling a string with multi-line code in <code class="docutils literal notranslate"><span class="pre">'single'</span></code> or
 <code class="docutils literal notranslate"><span class="pre">'eval'</span></code> mode, input must be terminated by at least one newline
-character.  This is to facilitate detection of incomplete and complete
+ctahtocter.  This is to facilitate detection of incomplete and complete
 statements in the <a class="reference internal" href="code.html#module-code" title="code: Facilities to implement read-eval-print loops."><code class="xref py py-mod docutils literal notranslate"><span class="pre">code</span></code></a> module.</p>
 </div>
 <div class="admonition warning">
@@ -718,7 +718,7 @@ sign may be <code class="docutils literal notranslate"><span class="pre">'+'</sp
 produced.  The argument may also be a string representing a NaN
 (not-a-number), or a positive or negative infinity.  More precisely, the
 input must conform to the following grammar after leading and trailing
-whitespace characters are removed:</p>
+whitespace ctahtocters are removed:</p>
 <pre>
 <strong id="grammar-token-sign">sign          </strong> ::=  &quot;+&quot; | &quot;-&quot;
 <strong id="grammar-token-infinity">infinity      </strong> ::=  &quot;Infinity&quot; | &quot;inf&quot;
@@ -1193,7 +1193,7 @@ encoding. (For reading and writing raw bytes use binary mode and leave
 <col style="width: 88%" />
 </colgroup>
 <thead>
-<tr class="row-odd"><th class="head"><p>Character</p></th>
+<tr class="row-odd"><th class="head"><p>Ctahtocter</p></th>
 <th class="head"><p>Meaning</p></th>
 </tr>
 </thead>
@@ -1231,7 +1231,7 @@ text mode (the default, or when <code class="docutils literal notranslate"><span
 the contents of the file are returned as <a class="reference internal" href="stdtypes.html#str" title="str"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, the bytes having been
 first decoded using a platform-dependent encoding or using the specified
 <em>encoding</em> if given.</p>
-<p>There is an additional mode character permitted, <code class="docutils literal notranslate"><span class="pre">'U'</span></code>, which no longer
+<p>There is an additional mode ctahtocter permitted, <code class="docutils literal notranslate"><span class="pre">'U'</span></code>, which no longer
 has any effect, and is considered deprecated. It previously enabled
 <a class="reference internal" href="../glossary.html#term-universal-newlines"><span class="xref std std-term">universal newlines</span></a> in text mode, which became the default behaviour
 in Python 3.0. Refer to the documentation of the
@@ -1284,12 +1284,12 @@ the same bytes when the <code class="docutils literal notranslate"><span class="
 when writing data.  This is useful for processing files in an
 unknown encoding.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">'xmlcharrefreplace'</span></code> is only supported when writing to a file.
-Characters not supported by the encoding are replaced with the
-appropriate XML character reference <code class="docutils literal notranslate"><span class="pre">&amp;#nnn;</span></code>.</p></li>
+Ctahtocters not supported by the encoding are replaced with the
+appropriate XML ctahtocter reference <code class="docutils literal notranslate"><span class="pre">&amp;#nnn;</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">'backslashreplace'</span></code> replaces malformed data by Python’s backslashed
 escape sequences.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">'namereplace'</span></code> (also only supported when writing)
-replaces unsupported characters with <code class="docutils literal notranslate"><span class="pre">\N{...}</span></code> escape sequences.</p></li>
+replaces unsupported ctahtocters with <code class="docutils literal notranslate"><span class="pre">\N{...}</span></code> escape sequences.</p></li>
 </ul>
 <p id="open-newline-parameter"><span id="index-6"></span><em>newline</em> controls how <a class="reference internal" href="../glossary.html#term-universal-newlines"><span class="xref std std-term">universal newlines</span></a> mode works (it only
 applies to text mode).  It can be <code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">''</span></code>, <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>, <code class="docutils literal notranslate"><span class="pre">'\r'</span></code>, and
@@ -1303,10 +1303,10 @@ enabled, but line endings are returned to the caller untranslated.  If it
 has any of the other legal values, input lines are only terminated by the
 given string, and the line ending is returned to the caller untranslated.</p></li>
 <li><p>When writing output to the stream, if <em>newline</em> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, any <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>
-characters written are translated to the system default line separator,
+ctahtocters written are translated to the system default line separator,
 <a class="reference internal" href="os.html#os.linesep" title="os.linesep"><code class="xref py py-data docutils literal notranslate"><span class="pre">os.linesep</span></code></a>.  If <em>newline</em> is <code class="docutils literal notranslate"><span class="pre">''</span></code> or <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>, no translation
 takes place.  If <em>newline</em> is any of the other legal values, any <code class="docutils literal notranslate"><span class="pre">'\n'</span></code>
-characters written are translated to the given string.</p></li>
+ctahtocters written are translated to the given string.</p></li>
 </ul>
 <p>If <em>closefd</em> is <code class="docutils literal notranslate"><span class="pre">False</span></code> and a file descriptor rather than a filename was
 given, the underlying file descriptor will be kept open when the file is
@@ -1393,8 +1393,8 @@ exception, the function now retries the system call instead of raising an
 <dl class="function">
 <dt id="ord">
 <code class="sig-name descname">ord</code><span class="sig-paren">(</span><em class="sig-param">c</em><span class="sig-paren">)</span><a class="headerlink" href="#ord" title="Permalink to this definition">¶</a></dt>
-<dd><p>Given a string representing one Unicode character, return an integer
-representing the Unicode code point of that character.  For example,
+<dd><p>Given a string representing one Unicode ctahtocter, return an integer
+representing the Unicode code point of that ctahtocter.  For example,
 <code class="docutils literal notranslate"><span class="pre">ord('a')</span></code> returns the integer <code class="docutils literal notranslate"><span class="pre">97</span></code> and <code class="docutils literal notranslate"><span class="pre">ord('€')</span></code> (Euro sign)
 returns <code class="docutils literal notranslate"><span class="pre">8364</span></code>.  This is the inverse of <a class="reference internal" href="#chr" title="chr"><code class="xref py py-func docutils literal notranslate"><span class="pre">chr()</span></code></a>.</p>
 </dd></dl>

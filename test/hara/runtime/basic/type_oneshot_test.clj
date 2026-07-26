@@ -1,21 +1,21 @@
-(ns hara.runtime.basic.type-oneshot-test
-  (:require [hara.runtime.basic.impl.process-js :as js]
-             [hara.runtime.basic.impl.process-lua :as lua]
-             [hara.runtime.basic.impl.process-python :as py]
-             [hara.runtime.basic.impl-annex.process-r :as r]
-             [hara.runtime.basic.type-oneshot :as p]
+tahto/runtime/basic/type_oneshot_test.clj:1:(ns tahto.runtime.basic.type-oneshot-test
+tahto/runtime/basic/type_oneshot_test.clj:2:  (:require [tahto.runtime.basic.impl.process-js :as js]
+tahto/runtime/basic/type_oneshot_test.clj:3:             [tahto.runtime.basic.impl.process-lua :as lua]
+tahto/runtime/basic/type_oneshot_test.clj:4:             [tahto.runtime.basic.impl.process-python :as py]
+tahto/runtime/basic/type_oneshot_test.clj:5:             [tahto.runtime.basic.impl-annex.process-r :as r]
+tahto/runtime/basic/type_oneshot_test.clj:6:             [tahto.runtime.basic.type-oneshot :as p]
              [std.json :as json]
-             [hara.lang.book :as book]
-            [hara.common.emit-prep-lua-test :as prep]
-            [hara.lang.impl-entry :as entry]
-            [hara.lang.library :as lib]
-            [hara.lang.library-snapshot :as snap]
-            [hara.lang.pointer :as ptr]
-             [hara.common.util :as ut]
-             [hara.model.spec-js :as spec-js]
-             [hara.model.spec-lua :as spec-lua]
-             [hara.model.spec-python :as spec-py]
-             [hara.model.annex.spec-r :as spec-r]
+             [tahto.base.book :as book]
+tahto/runtime/basic/type_oneshot_test.clj:9:            [tahto.common.emit-prep-lua-test :as prep]
+            [tahto.core.impl-entry :as entry]
+            [tahto.core.library :as lib]
+            [tahto.core.library-snapshot :as snap]
+            [tahto.core.pointer :as ptr]
+tahto/runtime/basic/type_oneshot_test.clj:14:             [tahto.common.util :as ut]
+tahto/runtime/basic/type_oneshot_test.clj:15:             [tahto.model.spec-js :as spec-js]
+tahto/runtime/basic/type_oneshot_test.clj:16:             [tahto.model.spec-lua :as spec-lua]
+tahto/runtime/basic/type_oneshot_test.clj:17:             [tahto.model.spec-python :as spec-py]
+tahto/runtime/basic/type_oneshot_test.clj:18:             [tahto.model.annex.spec-r :as spec-r]
              [std.lib.env :as env]
              [std.string.prose :as prose])
   (:use code.test))
@@ -66,7 +66,7 @@
                     :section :code
                     :library +library-ext+}))
 
-^{:refer hara.runtime.basic.type-oneshot/invoke-ptr-oneshot.compile :adopt true :added "4.0"}
+tahto/runtime/basic/type_oneshot_test.clj:69:^{:refer tahto.runtime.basic.type-oneshot/invoke-ptr-oneshot.compile :adopt true :added "4.0"}
 (fact "compiles the pointer body"
 
   (ptr/with:input []
@@ -102,7 +102,7 @@
          (p/invoke-ptr-oneshot +ptr-identity+ [1]))))
   => string?)
 
-^{:refer hara.runtime.basic.type-oneshot/sh-exec :added "4.0"}
+tahto/runtime/basic/type_oneshot_test.clj:105:^{:refer tahto.runtime.basic.type-oneshot/sh-exec :added "4.0"}
 (fact "basic function for executing a shell process"
 
   (p/sh-exec ["python3" "-c"] "print(1 + 1)" {})
@@ -114,7 +114,7 @@
   (p/sh-exec ["R" "-s" "-e"] "1 + 1" {})
   => "[1] 2")
 
-^{:refer hara.runtime.basic.type-oneshot/raw-eval-oneshot :added "4.0"}
+tahto/runtime/basic/type_oneshot_test.clj:117:^{:refer tahto.runtime.basic.type-oneshot/raw-eval-oneshot :added "4.0"}
 (fact "evaluates a raw statement with oneshot"
 
   (-> (p/rt-oneshot {:lang :lua})
@@ -125,7 +125,7 @@
       (p/raw-eval-oneshot "1 + 1"))
   => "[1] 2")
 
-^{:refer hara.runtime.basic.type-oneshot/invoke-ptr-oneshot :added "4.0"}
+tahto/runtime/basic/type_oneshot_test.clj:128:^{:refer tahto.runtime.basic.type-oneshot/invoke-ptr-oneshot :added "4.0"}
 (fact "gets the oneshow invoke working"
 
   (-> (p/rt-oneshot {:lang :lua})
@@ -156,13 +156,13 @@
       (json/read))
   => {"return" "number", "value" 30, "type" "data"})
 
-^{:refer hara.runtime.basic.type-oneshot/rt-oneshot-setup :added "4.0"}
+tahto/runtime/basic/type_oneshot_test.clj:159:^{:refer tahto.runtime.basic.type-oneshot/rt-oneshot-setup :added "4.0"}
 (fact "helper function for preparing oneshot params"
 
   (p/rt-oneshot-setup :lua :resty {} nil)
   => vector?)
 
-^{:refer hara.runtime.basic.type-oneshot/rt-oneshot:create :added "4.0"}
+tahto/runtime/basic/type_oneshot_test.clj:165:^{:refer tahto.runtime.basic.type-oneshot/rt-oneshot:create :added "4.0"}
 (fact "creates a oneshot runtime"
 
   (->> (p/rt-oneshot:create {:lang :lua
@@ -170,7 +170,7 @@
        (into {}))
   => map?)
 
-^{:refer hara.runtime.basic.type-oneshot/rt-oneshot :added "4.0"
+tahto/runtime/basic/type_oneshot_test.clj:173:^{:refer tahto.runtime.basic.type-oneshot/rt-oneshot :added "4.0"
   :setup [(defn rt-oneshot
             [lang & [opts]]
             [(-> (p/rt-oneshot (merge {:lang lang} opts))

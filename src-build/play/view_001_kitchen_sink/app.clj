@@ -3,7 +3,7 @@
 
    One shared substrate node drives both demo screens; the tab switch only
    swaps the spec/render-fn pair passed to js.react.view/View."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]

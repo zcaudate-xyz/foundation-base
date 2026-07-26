@@ -1,6 +1,6 @@
 (ns play.tui-000-counter.main
   (:use code.test)
-  (:require [hara.lang :as  l]
+  (:require [tahto.core :as  l]
             [std.lib :as h]))
 
 (fact:global

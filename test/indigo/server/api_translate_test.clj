@@ -5,7 +5,7 @@
   (:use code.test))
 
 ^{:refer indigo.server.api-translate/to-layout :added "4.1"}
-(fact "formats a single hara.lang form as a string"
+(fact "formats a single tahto.core form as a string"
   (to-layout "(defn foo [x] (+ x 1))")
   => "(defn foo [x] (+ x 1))")
 
@@ -20,7 +20,7 @@
   => "[:div \"hello\"]")
 
 ^{:refer indigo.server.api-translate/to-html :added "4.1"}
-(fact "converts a hara.lang form string to HTML"
+(fact "converts a tahto.core form string to HTML"
   (to-html "[:div {} \"hello\"]")
   => "<div>hello</div>")
 

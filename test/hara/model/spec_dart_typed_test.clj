@@ -1,9 +1,9 @@
-(ns hara.model.spec-dart-typed-test
+tahto/model/spec_dart_typed_test.clj:1:(ns tahto.model.spec-dart-typed-test
   (:require [clojure.string :as str]
-            [hara.model.spec-dart.typed :as dart-typed])
+tahto/model/spec_dart_typed_test.clj:3:            [tahto.model.spec-dart.typed :as dart-typed])
   (:use code.test))
 
-^{:refer hara.model.spec-dart.typed/emit-dart-type :added "4.1"}
+tahto/model/spec_dart_typed_test.clj:6:^{:refer tahto.model.spec-dart.typed/emit-dart-type :added "4.1"}
 (fact "maps xtalk primitive and container types to dart"
   [(dart-typed/emit-dart-type {:kind :primitive :name :xt/str} nil)
    (dart-typed/emit-dart-type {:kind :array
@@ -15,7 +15,7 @@
                                :item {:kind :named :name 'sample.user/User}} 'sample.user)]
   => ["String" "List<int>" "Map<String, double>" "User?"])
 
-^{:refer hara.model.spec-dart.typed/emit-analysis-declarations :added "4.1"}
+tahto/model/spec_dart_typed_test.clj:18:^{:refer tahto.model.spec-dart.typed/emit-analysis-declarations :added "4.1"}
 (fact "emits spec/function/value declarations in dart syntax"
   (dart-typed/emit-analysis-declarations
    {:specs [{:ns "sample.user"
@@ -49,7 +49,7 @@
 
 (fact "can emit declarations from typed fixture namespace"
   (let [out (dart-typed/emit-namespace-declarations
-             'hara.model.spec-xtalk-typed-fixture)]
+tahto/model/spec_dart_typed_test.clj:52:             'tahto.model.spec-xtalk-typed-fixture)]
     [(str/includes? out "class User")
      (str/includes? out "typedef UserMap = Map<String, User>")
      (str/includes? out "typedef FindUser = User? Function")])

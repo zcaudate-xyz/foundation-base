@@ -1,5 +1,5 @@
 (ns sznui.v1.screens.demo.quickstart-page-demo.detailed-guides
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib :as h]))
 
 (l/script :js

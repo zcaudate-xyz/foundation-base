@@ -7,10 +7,10 @@
 ^{:added "3.0"}
 (fact "creates a `Dependency` object from map"
 
-  (object/from-data {:artifact '[hara/hara "2.4.8"]}
+  (object/from-data {:artifact '[tahto/tahto "2.4.8"]}
                     Dependency)
   => (partial instance? Dependency)
-  ;;=> #dep{:artifact "hara:hara:jar:2.4.8",
+  ;;=> #dep{:artifact "tahto:tahto:jar:2.4.8",
   ;;        :exclusions [],
   ;;        :optional false,
   ;;        :scope "",
@@ -20,14 +20,14 @@
 ^{:added "3.0"}
 (fact "creates a `DependencyNode` object from map"
 
-  (object/from-data {:artifact '[hara/hara "2.4.8"]}
+  (object/from-data {:artifact '[tahto/tahto "2.4.8"]}
                     DependencyNode)
   => (partial instance? DependencyNode)
   ;;=> #dep.node {:children [],
   ;;              :relocations [],
   ;;              :repositories [],
   ;;              :managed-bits 0,
-  ;;              :artifact "hara:hara:jar:2.4.8",
+  ;;              :artifact "tahto:tahto:jar:2.4.8",
   ;;              :aliases [],
   ;;              :request-context "",
   ;;              :data {}}
@@ -37,13 +37,13 @@
 (fact "creates an `ArtifactRequest` object from map"
 
   (artifact-request
-   {:artifact "hara:hara:2.4.8"
+   {:artifact "tahto:tahto:2.4.8"
     :repositories [{:id "clojars"
                     :authentication {:username "zcaudate"
                                      :password "hello"}
                     :url "https://clojars.org/repo/"}]})
   => (partial instance? ArtifactRequest)
-  ;;=> #req.artifact{:artifact "hara:hara:jar:2.4.8",
+  ;;=> #req.artifact{:artifact "tahto:tahto:jar:2.4.8",
   ;;                 :repositories [{:id "clojars",
   ;;                                 :url "https://clojars.org/repo/"
   ;;                                 :authentication {:username "zcaudate", :password "hello"}}],
@@ -54,11 +54,11 @@
 (fact "creates a `CollectRequest` object from map"
 
   (collect-request
-   {:root {:artifact "hara:hara:2.4.8"}
+   {:root {:artifact "tahto:tahto:2.4.8"}
     :repositories [{:id "clojars"
                     :url "https://clojars.org/repo/"}]})
   => (partial instance? CollectRequest)
-  ;;=> #req.collect{:root {:artifact "hara:hara:jar:2.4.8",
+  ;;=> #req.collect{:root {:artifact "tahto:tahto:jar:2.4.8",
   ;;                       :exclusions [],
   ;;                       :optional false,
   ;;                       :scope "",
@@ -71,11 +71,11 @@
 (fact "creates a `DependencyRequest` object from map"
 
   (dependency-request
-   {:root {:artifact "hara:hara:2.4.8"}
+   {:root {:artifact "tahto:tahto:2.4.8"}
     :repositories [{:id "clojars"
                     :url "https://clojars.org/repo/"}]})
   => (partial instance? DependencyRequest)
-  ;;=> #req.dependency{:root {:artifact "hara:hara:jar:2.4.8",
+  ;;=> #req.dependency{:root {:artifact "tahto:tahto:jar:2.4.8",
   ;;                          :exclusions [],
   ;;                          :optional false,
   ;;                          :scope "",
@@ -88,17 +88,17 @@
 (fact "creates a `DeployRequest` object from map"
 
   (deploy-request
-   {:artifacts [{:group "hara"
+   {:artifacts [{:group "tahto"
                  :artifact "std.string"
                  :version "2.4.8"
                  :extension "jar"
-                 :file "hara-string.jar"}]
+                 :file "tahto-string.jar"}]
     :repository {:id "clojars"
                  :url "https://clojars.org/repo/"
                  :authentication {:username "zcaudate"
                                   :password "hello"}}})
   => (partial instance? DeployRequest)
-  ;;=> #req.deploy{:artifacts ["hara:std.string:jar:2.4.8"]
+  ;;=> #req.deploy{:artifacts ["tahto:std.string:jar:2.4.8"]
   ;;               :repository {:id "clojars",
   ;;                            :authentication {:username "zcaudate", :password "hello"}
   ;;                            :url "https://clojars.org/repo/"}}
@@ -108,19 +108,19 @@
 (fact "creates a `InstallRequest` object from map"
 
   (install-request
-   {:artifacts [{:group "hara"
+   {:artifacts [{:group "tahto"
                  :artifact "std.string"
                  :version "2.4.8"
                  :extension "jar"
-                 :file "hara-string.jar"}
-                {:group "hara"
+                 :file "tahto-string.jar"}
+                {:group "tahto"
                  :artifact "std.string"
                  :version "2.4.8"
                  :extension "pom"
-                 :file "hara-string.pom"}]})
+                 :file "tahto-string.pom"}]})
   => (partial instance? InstallRequest)
-  ;;=> #req.install{:artifacts ["hara:std.string:jar:2.4.8"
-  ;;                            "hara:std.string:pom:2.4.8"]
+  ;;=> #req.install{:artifacts ["tahto:std.string:jar:2.4.8"
+  ;;                            "tahto:std.string:pom:2.4.8"]
   ;;                :metadata []}
   )
 
@@ -128,7 +128,7 @@
 (fact "constructs a metadat request"
 
   (metadata-request
-   {:metadata   {:group "hara"
+   {:metadata   {:group "tahto"
                  :artifact "std.string"
                  :version "2.4.8"}
     :repository {:id "clojars"
@@ -140,7 +140,7 @@
 ^{:refer lib.aether.request/range-request :added "3.0"}
 (fact "constructs a range request"
 
-  (range-request {:artifact {:group "hara"
+  (range-request {:artifact {:group "tahto"
                              :artifact "std.string"
                              :version "2.4.8"}
                   :repositories [{:id "clojars"
@@ -152,7 +152,7 @@
 ^{:refer lib.aether.request/version-request :added "3.0"}
 (fact "constructs a version request"
 
-  (version-request {:artifact {:group "hara"
+  (version-request {:artifact {:group "tahto"
                                :artifact "std.string"
                                :version "2.4.8"}
                     :repositories [{:id "clojars"

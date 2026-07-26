@@ -1,10 +1,10 @@
 (ns postgres.core.graph-test
-  (:require [hara.runtime.postgres.base.application :as app]
+  (:require [tahto.runtime.postgres.base.application :as app]
             [postgres.core.graph :refer :all]
             [postgres.core.graph-view :as view]
             [postgres.core.impl-base :as impl]
             [postgres.sample.scratch-v1 :as scratch]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema])
   (:use code.test))
@@ -64,7 +64,7 @@
 ^{:refer postgres.core.graph/g:modify :added "4.0"}
 (fact  "constructs the modify form"
 
-  (binding [hara.model.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
+  (binding [tahto.model.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:modify scratch/Task
       {:set {:name "name"}
        :where {:id (str (f/uuid-nil))}
@@ -80,7 +80,7 @@
 ^{:refer postgres.core.graph/g:insert :added "4.0"}
 (fact "constructs an insert form"
 
-  (binding [hara.model.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
+  (binding [tahto.model.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:insert scratch/Task
       {:name "name"
        :status "pending"

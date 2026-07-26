@@ -1,5 +1,5 @@
 (ns lua.nginx.common-cache
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [get set flush]))
 
 (l/script :lua.nginx

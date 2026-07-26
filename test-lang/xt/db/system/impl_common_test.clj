@@ -1,6 +1,6 @@
 (ns xt.db.system.impl-common-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.db.system.impl-common :as impl-common]))
 
 ^{:seedgen/root {:all true}}

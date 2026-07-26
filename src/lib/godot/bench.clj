@@ -7,7 +7,7 @@
             [std.lib.future :as future]
             [std.lib.network :as network]
             [std.lib.os :as os]
-            [hara.runtime.basic.type-common :as common]))
+            [tahto.runtime.basic.type-common :as common]))
 
 (def +bench-path+ "test-bench/godot")
 
@@ -27,14 +27,14 @@ func _init():
         if args[i] == \"--port\" and i + 1 < args.size():
             port = int(args[i + 1])
     if port == 0:
-        push_error(\"HARA_GODOT_ERROR: no port provided\")
+        push_error(\"TAHTO_GODOT_ERROR: no port provided\")
         quit()
         return
     if server.listen(port) != OK:
-        push_error(\"HARA_GODOT_ERROR: failed to listen on \" + str(port))
+        push_error(\"TAHTO_GODOT_ERROR: failed to listen on \" + str(port))
         quit()
         return
-    print(\"HARA_GODOT_READY\")
+    print(\"TAHTO_GODOT_READY\")
     thread.start(server_loop)
 
 func _exit_tree():
@@ -111,7 +111,7 @@ func eval_body(body):
         main-file (str root-dir "/main.gd")]
     (when-not (fs/exists? project-file)
       (spit project-file (str "[application]\n"
-                              "config/name=\"hara_godot_bench\"\n"
+                              "config/name=\"tahto_godot_bench\"\n"
                               "config/features=PackedStringArray(\"4.2\")\n\n"
                               "[rendering]\n"
                               "renderer/rendering_method=\"mobile\"\n")))
@@ -148,7 +148,7 @@ func eval_body(body):
     (loop []
       (when (< (System/currentTimeMillis) deadline)
         (if (and (.exists file)
-                 (clojure.string/includes? (slurp file) "HARA_GODOT_READY"))
+                 (clojure.string/includes? (slurp file) "TAHTO_GODOT_READY"))
           true
           (do (Thread/sleep 100)
               (recur)))))))
@@ -193,7 +193,7 @@ func eval_body(body):
   "Returns a scratch directory under the user's home."
   {:added "4.1"}
   []
-  (let [dir (str (System/getProperty "user.home") "/hara_godot_bench_" (System/currentTimeMillis))]
+  (let [dir (str (System/getProperty "user.home") "/tahto_godot_bench_" (System/currentTimeMillis))]
     (fs/create-directory dir)
     dir))
 

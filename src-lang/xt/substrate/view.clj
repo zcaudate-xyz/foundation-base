@@ -4,7 +4,7 @@
    A view specification declares the substrate values it observes. Portable
    render functions consume `snapshot` and return JSON-safe view nodes; target
    adapters own rendering and explicitly local presentation state."
-  (:require [hara.lang :as l :refer [defspec.xt]]))
+  (:require [tahto.core :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

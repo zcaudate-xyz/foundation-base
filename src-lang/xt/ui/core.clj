@@ -4,7 +4,7 @@
    UI functions return these data nodes in both JavaScript and Dart. Platform
    renderers resolve component ids through layered registries; business state
    remains in xt.substrate models."
-  (:require [hara.lang :as l :refer [defspec.xt]]))
+  (:require [tahto.core :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

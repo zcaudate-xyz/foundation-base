@@ -5,7 +5,7 @@
 
 (comment
   ;; PREVIOUS SETUP
-  [hara.runtime.postgres.base.application :as app]
+  [tahto.runtime.postgres.base.application :as app]
   [postgres.sample.scratch-v1 :as scratch]
   (def -tsch- (get-in (app/app "scratch")
                       [:schema

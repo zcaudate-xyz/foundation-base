@@ -33,7 +33,7 @@
     :boolean   [:white]
     :number    [:white]
     :string    [:cyan]
-    :character [:cyan]
+    :ctahtocter [:cyan]
     :keyword   [:blue]
     :symbol    [:white]
 
@@ -260,7 +260,7 @@
     [this value]
     (pr-str value))
 
-  (-visit-character
+  (-visit-ctahtocter
     [this value]
     (pr-str value))
 
@@ -382,9 +382,9 @@
     [this value]
     (color/-document this :number (pr-str value)))
 
-  (-visit-character
+  (-visit-ctahtocter
     [this value]
-    (color/-document this :character (pr-str value)))
+    (color/-document this :ctahtocter (pr-str value)))
 
   (-visit-string
     [this value]

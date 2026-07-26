@@ -1,5 +1,5 @@
 (ns kmi.lang.parser
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [read read-string]))
 
 (l/script :xtalk

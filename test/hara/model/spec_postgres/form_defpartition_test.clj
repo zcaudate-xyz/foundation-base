@@ -1,22 +1,22 @@
-(ns hara.model.spec-postgres.form-defpartition-test
-  (:require [hara.model.spec-postgres.common :as common]
-            [hara.model.spec-postgres.form-defpartition :as form-defpartition])
+tahto/model/spec_postgres/form_defpartition_test.clj:1:(ns tahto.model.spec-postgres.form-defpartition-test
+tahto/model/spec_postgres/form_defpartition_test.clj:2:  (:require [tahto.model.spec-postgres.common :as common]
+tahto/model/spec_postgres/form_defpartition_test.clj:3:            [tahto.model.spec-postgres.form-defpartition :as form-defpartition])
   (:use code.test))
 
-^{:refer hara.model.spec-postgres.form-defpartition/pg-partition-name :added "4.1"}
+tahto/model/spec_postgres/form_defpartition_test.clj:6:^{:refer tahto.model.spec-postgres.form-defpartition/pg-partition-name :added "4.1"}
 (fact "constructs partition name"
 
   (form-defpartition/pg-partition-name "table" "val" ["stack"])
   => "table__stack__val")
 
-^{:refer hara.model.spec-postgres.form-defpartition/pg-partition-def :added "4.1"}
+tahto/model/spec_postgres/form_defpartition_test.clj:12:^{:refer tahto.model.spec-postgres.form-defpartition/pg-partition-def :added "4.1"}
 (fact "recursive definition for partition"
 
   (form-defpartition/pg-partition-def 'parent "base" {:use :col :in ["a"]} [] [])
   => '([:create-table :if-not-exists #{"base__a"} :partition-of #{"parent"} :for :values :in (quote ("a"))]))
 
 
-^{:refer hara.model.spec-postgres.form-defpartition/pg-defpartition :added "4.1"}
+tahto/model/spec_postgres/form_defpartition_test.clj:19:^{:refer tahto.model.spec-postgres.form-defpartition/pg-defpartition :added "4.1"}
 (fact "defpartition block"
 
   (form-defpartition/pg-defpartition '(defpartition part [parent] [{:use :col :in ["a"]}]))

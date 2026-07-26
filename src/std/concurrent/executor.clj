@@ -9,7 +9,7 @@
             [std.protocol.component :as protocol.component]
             [std.protocol.dispatch :as protocol.dispatch]
             [std.protocol.track :as protocol.track])
-  (:import (java.util.concurrent Executors ExecutorService ThreadPoolExecutor ScheduledThreadPoolExecutor TimeUnit BlockingQueue RejectedExecutionHandler) (hara.lib.concurrent LimitedQueue)))
+  (:import (java.util.concurrent Executors ExecutorService ThreadPoolExecutor ScheduledThreadPoolExecutor TimeUnit BlockingQueue RejectedExecutionHandler) (newlisp.lib.concurrent LimitedQueue)))
 
 (defonce ^:dynamic ^:private *shared* (atom {}))
 

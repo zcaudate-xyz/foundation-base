@@ -1,8 +1,8 @@
 ^{:seedgen/skip true}
  (ns xt.substrate-spec-test
    (:use code.test)
-   (:require [hara.typed.xtalk-analysis :as xtalk-analysis]
-             [hara.typed.xtalk-common :as types]))
+   (:require [tahto.typed.xtalk-analysis :as xtalk-analysis]
+             [tahto.typed.xtalk-common :as types]))
 
  ^{:refer xt.substrate.base-space/create-space :added "4.1"}
  (fact "node space declarations mark trailing space args as optional"

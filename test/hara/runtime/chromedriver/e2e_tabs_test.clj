@@ -1,7 +1,7 @@
-(ns hara.runtime.chromedriver.e2e-tabs-test
+tahto/runtime/chromedriver/e2e_tabs_test.clj:1:(ns tahto.runtime.chromedriver.e2e-tabs-test
   (:use code.test)
-  (:require [hara.runtime.chromedriver :as chromedriver]
-            [hara.lang :as l]))
+tahto/runtime/chromedriver/e2e_tabs_test.clj:3:  (:require [tahto.runtime.chromedriver :as chromedriver]
+            [tahto.core :as l]))
 
 (l/script :js
   {:runtime :chromedriver.instance
@@ -13,7 +13,7 @@
  {:setup [(l/rt:restart :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.runtime.chromedriver.e2e-tabs-test/workflow-basic-switch :added "4.0"
+tahto/runtime/chromedriver/e2e_tabs_test.clj:16:^{:refer tahto.runtime.chromedriver.e2e-tabs-test/workflow-basic-switch :added "4.0"
   :setup [(chromedriver/goto "data:text/html,<title>Home</title>" 4000 (l/rt :js))
           (def +home+  (chromedriver/current-tab (l/rt :js)))
           (def +other+ (chromedriver/tab-create (l/rt :js) "data:text/html,<title>Other</title>"))]
@@ -31,7 +31,7 @@
   (!.js document.title)
   => "Home")
 
-^{:refer hara.runtime.chromedriver.e2e-tabs-test/workflow-sequential-tabs :added "4.0"
+tahto/runtime/chromedriver/e2e_tabs_test.clj:34:^{:refer tahto.runtime.chromedriver.e2e-tabs-test/workflow-sequential-tabs :added "4.0"
   :setup [(chromedriver/goto "data:text/html,<title>Base</title>" 4000 (l/rt :js))
           (def +base+ (chromedriver/current-tab (l/rt :js)))
           (def +tabs+
@@ -51,7 +51,7 @@
         +tabs+)
   => ["Tab 1" "Tab 2" "Tab 3"])
 
-^{:refer hara.runtime.chromedriver.e2e-tabs-test/workflow-tab-isolation :added "4.0"
+tahto/runtime/chromedriver/e2e_tabs_test.clj:54:^{:refer tahto.runtime.chromedriver.e2e-tabs-test/workflow-tab-isolation :added "4.0"
   :setup [(chromedriver/goto "data:text/html,<title>Alpha</title>" 4000 (l/rt :js))
           (def +alpha+ (chromedriver/current-tab (l/rt :js)))
           (def +beta+
@@ -78,7 +78,7 @@
   (!.js document.title)
   => "Beta-Changed")
 
-^{:refer hara.runtime.chromedriver.e2e-tabs-test/workflow-temporary-tab :added "4.0"
+tahto/runtime/chromedriver/e2e_tabs_test.clj:81:^{:refer tahto.runtime.chromedriver.e2e-tabs-test/workflow-temporary-tab :added "4.0"
   :setup [(chromedriver/goto "data:text/html,<title>Main</title>" 4000 (l/rt :js))
           (def +main+ (chromedriver/current-tab (l/rt :js)))]
   :teardown [(chromedriver/tab-switch (l/rt :js) +main+ {:bootstrap false})]}
@@ -96,7 +96,7 @@
   (!.js document.title)
   => "Main")
 
-^{:refer hara.runtime.chromedriver.e2e-tabs-test/workflow-compare-tabs :added "4.0"
+tahto/runtime/chromedriver/e2e_tabs_test.clj:99:^{:refer tahto.runtime.chromedriver.e2e-tabs-test/workflow-compare-tabs :added "4.0"
   :setup [(chromedriver/goto "data:text/html,<title>Left</title>" 4000 (l/rt :js))
           (def +left+ (chromedriver/current-tab (l/rt :js)))
           (def +right+

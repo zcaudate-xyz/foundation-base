@@ -18,9 +18,9 @@
    (flush)))
 
 (res/res:variant-add
- :hara/concurrent.atom.executor
+ :tahto/concurrent.atom.executor
  {:id  :std.concurrent.print
-  :alias :hara/print
+  :alias :tahto/print
   :mode {:allow #{:global} :default :global}
   :config {:handler print-handler}
   :hook {:post-setup    (fn [exe] (h/set! *executor* exe))
@@ -31,10 +31,10 @@
   {:added "3.0"}
   []
   (let [exe (or *executor*
-                (res/res :hara/print))]
+                (res/res :tahto/print))]
     (if (or (nil? exe)
             (exe/exec:shutdown? (:executor exe)))
-      (res/res:restart :hara/print)
+      (res/res:restart :tahto/print)
       exe)))
 
 (defn submit

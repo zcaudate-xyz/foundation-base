@@ -1,6 +1,6 @@
 (ns lua.nginx.conn-redis-test
   (:require [std.lib.env :as env]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :lua.nginx

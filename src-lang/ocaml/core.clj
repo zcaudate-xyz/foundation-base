@@ -1,6 +1,6 @@
 (ns ocaml.core
   (:require [ocaml.core.builtin :as builtin]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :ocaml {})

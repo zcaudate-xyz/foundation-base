@@ -3,7 +3,7 @@
 
    Demonstrates an xt.ui headless controller driving a React view through a
    minimal renderer registry. No substrate backend is required."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]

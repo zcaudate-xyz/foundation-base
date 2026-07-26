@@ -67,7 +67,7 @@
 (invoke/definvoke publish
   "main publish method
  
-   (publish 'hara/hara-code {})"
+   (publish 'tahto/tahto-code {})"
   {:added "3.0"}
   [:task {:template :publish
           :params {:title "PUBLISHING HTML FILES"
@@ -100,7 +100,7 @@
 (invoke/definvoke init-template
   "initialises the theme template for a given site
  
-   (init-template \"hara\")"
+   (init-template \"tahto\")"
   {:added "3.0"}
   [:task {:template :code.doc.theme
           :params {:title "INITIALISE TEMPLATE"}
@@ -109,7 +109,7 @@
 (invoke/definvoke deploy-template
   "deploys the theme for a given site
   
-   (deploy-template \"hara\")"
+   (deploy-template \"tahto\")"
   {:added "3.0"}
   [:task {:template :code.doc.theme
           :params {:title "DEPLOY TEMPLATE ASSETS"}
@@ -216,14 +216,14 @@
   (publish '[core] {:write true})
   (publish '[core])
   
-  (require '[hara.deploy])
-  (./code:incomplete '[hara])
-  (hara.deploy/deploy '[hara] {:tag :all})
+  (require '[tahto.deploy])
+  (./code:incomplete '[tahto])
+  (tahto.deploy/deploy '[tahto] {:tag :all})
   (deploy-template [:core] {})
   (publish :all {:write true})
   
   (init-template "bolton" {:write true})
   (def lookup (-> env :publish :sites))
 
-  (lookup :hara)
+  (lookup :tahto)
   (sort (keys lookup)))

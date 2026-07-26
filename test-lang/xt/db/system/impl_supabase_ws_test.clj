@@ -1,6 +1,6 @@
 (ns xt.db.system.impl-supabase-ws-test
   (:use code.test)
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script- :js
   {:runtime :basic

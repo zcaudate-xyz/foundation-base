@@ -8,7 +8,7 @@
 (load-file "src-build/play/js_002_substrate_scratch_v3/build.clj")
 
 ^{:refer play.js-002-substrate-scratch-v3.build/PROJECT :added "4.1"}
-(fact "the scratch-v3 playground emits Hara DSL substrate examples"
+(fact "the scratch-v3 playground emits Tahto DSL substrate examples"
   (let [project (common/make-config
                  (assoc @(:instance play.js-002-substrate-scratch-v3.build/PROJECT)
                         :root "src-build/play/js_002_substrate_scratch_v3"

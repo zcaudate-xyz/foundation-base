@@ -12,7 +12,7 @@ reports, generate and commit the baseline one section at a time:
 lein manage incomplete-report :section code :output target/code.json :write-baseline
 ```
 
-Repeat for `hara`, `std`, `xt`, `code`, `foundation`, `web3`, `kmi`, and
+Repeat for `tahto`, `std`, `xt`, `code`, `foundation`, `web3`, `kmi`, and
 `postgres`, review `incomplete-baseline.edn`, then change `:policy` to
 `:new-only`. Only findings outside that reviewed baseline will fail CI and be
 queued for repair.

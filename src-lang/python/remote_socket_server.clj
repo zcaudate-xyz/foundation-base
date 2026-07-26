@@ -1,5 +1,5 @@
 (ns python.remote-socket-server
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.network :as network]))
 
 (l/script :python
@@ -89,8 +89,8 @@
   
   @(std.concurrent/send +r+
                         (std.json/write
-                         (hara.lang/emit-script
-                          (hara.runtime.basic.impl.process-python/default-body-wrap
+                         (tahto.core/emit-script
+                          (tahto.runtime.basic.impl.process-python/default-body-wrap
                            '[(:- :import bpy)
                              (bpy.ops.object.select_all :action "SELECT")
                              ])
@@ -98,8 +98,8 @@
 
   @(std.concurrent/send +r+
                         (std.json/write
-                         (hara.lang/emit-script
-                          (hara.runtime.basic.impl.process-python/default-body-wrap
+                         (tahto.core/emit-script
+                          (tahto.runtime.basic.impl.process-python/default-body-wrap
                            '[(:- :import bpy)
                              (bpy.msgbus.publish_rna :key "hello")
                              ])

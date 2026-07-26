@@ -1,6 +1,6 @@
-(ns hara.model.spec-xtalk.promise-support-test
+tahto/model/spec_xtalk/promise_support_test.clj:1:(ns tahto.model.spec-xtalk.promise-support-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.spec-base :as xt]
             [xt.lang.spec-promise :as spec-promise]))
 
@@ -122,7 +122,7 @@
       [true true true]
       [true true]])
 
-^{:refer hara.model.spec-xtalk.fn-js/js-tf-x-promise :added "4.1"}
+tahto/model/spec_xtalk/promise_support_test.clj:125:^{:refer tahto.model.spec-xtalk.fn-js/js-tf-x-promise :added "4.1"}
 (fact "js xtalk promise ops emit native promise chains"
   (let [out (l/emit-as :js ['(do (x:promise thunk)
                                  (x:promise-then promise onValue)
@@ -137,7 +137,7 @@
      (boolean (re-find #"instanceof Promise" out))])
   => [true true true true true true])
 
-^{:refer hara.model.spec-xtalk.fn-dart/dart-tf-x-promise :added "4.1"}
+tahto/model/spec_xtalk/promise_support_test.clj:140:^{:refer tahto.model.spec-xtalk.fn-dart/dart-tf-x-promise :added "4.1"}
 (fact "dart xtalk promise ops emit native future chains"
   (let [out (l/emit-as :dart ['(do (x:promise thunk)
                                    (x:promise-then promise onValue)

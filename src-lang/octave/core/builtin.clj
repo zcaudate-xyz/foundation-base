@@ -1,6 +1,6 @@
 matlab/core/builtin.clj:1:(ns matlab.core.builtin
 matlab/core/builtin.clj:2:  "Generated outline of GNU Matlab 8.4 builtins with signatures, from /usr/share/matlab/8.4.0/etc/doc-cache."
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 matlab/core/builtin.clj:6:(l/script :matlab

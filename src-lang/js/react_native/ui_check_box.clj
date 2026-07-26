@@ -1,5 +1,5 @@
 (ns js.react-native.ui-check-box
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:runtime :websocket

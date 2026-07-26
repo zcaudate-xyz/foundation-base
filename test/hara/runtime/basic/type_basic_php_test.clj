@@ -1,11 +1,11 @@
-(ns hara.runtime.basic.type-basic-php-test
+tahto/runtime/basic/type_basic_php_test.clj:1:(ns tahto.runtime.basic.type-basic-php-test
   (:use code.test)
-  (:require [hara.runtime.basic.impl-annex.process-php]
-            [hara.runtime.basic.type-basic :as p]
+tahto/runtime/basic/type_basic_php_test.clj:3:  (:require [tahto.runtime.basic.impl-annex.process-php]
+tahto/runtime/basic/type_basic_php_test.clj:4:            [tahto.runtime.basic.type-basic :as p]
             [std.lib.env :as env]
-            [hara.lang :as l]
-            [hara.lang.pointer :as ptr]
-            [hara.common.util :as ut]
+            [tahto.core :as l]
+            [tahto.core.pointer :as ptr]
+tahto/runtime/basic/type_basic_php_test.clj:8:            [tahto.common.util :as ut]
             [std.lib.component :as component]))
 
 (l/script+ [:php.0 :php]
@@ -16,7 +16,7 @@
   :setup    [(l/annex:start-all)]
   :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.runtime.basic.type-basic-php-test/CANARY-PHP :adopt true :added "4.1"}
+tahto/runtime/basic/type_basic_php_test.clj:19:^{:refer tahto.runtime.basic.type-basic-php-test/CANARY-PHP :adopt true :added "4.1"}
 (fact "php basic can return values"
   [(l/! [:php.0]
      (+ 1 2 3))
@@ -31,7 +31,7 @@
      (+ 20 10))]
   => [6 16 36 30])
 
-^{:refer hara.runtime.basic.type-basic/invoke-ptr-basic :added "4.1"}
+tahto/runtime/basic/type_basic_php_test.clj:34:^{:refer tahto.runtime.basic.type-basic/invoke-ptr-basic :added "4.1"}
 (fact "php basic emits executable input and decodes output"
 
   (let [rt (p/rt-basic {:lang :php
@@ -58,7 +58,7 @@
         (component/stop rt))))
   => nil?)
 
-^{:refer hara.runtime.basic.type-basic/invoke-ptr-basic :added "4.1"
+tahto/runtime/basic/type_basic_php_test.clj:61:^{:refer tahto.runtime.basic.type-basic/invoke-ptr-basic :added "4.1"
   :id test-invoke-ptr-basic-php-error-recovery}
 (fact "php basic survives eval errors and continues serving requests"
 

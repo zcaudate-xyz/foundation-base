@@ -1,30 +1,30 @@
-(ns hara.runtime.basic.impl.process-lua-test
-  (:require [hara.runtime.basic.impl.process-lua :refer :all]
-            [hara.lang :as l])
+tahto/runtime/basic/impl/process_lua_test.clj:1:(ns tahto.runtime.basic.impl.process-lua-test
+tahto/runtime/basic/impl/process_lua_test.clj:2:  (:require [tahto.runtime.basic.impl.process-lua :refer :all]
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :oneshot})
 
-^{:refer hara.runtime.basic.impl.process-lua/CANARY :adopt true  :added "4.0"}
+tahto/runtime/basic/impl/process_lua_test.clj:9:^{:refer tahto.runtime.basic.impl.process-lua/CANARY :adopt true  :added "4.0"}
 (fact "EVALUATE lua code"
   
   (!.lua (+ 1 2 3 4))
   => 10)
 
-^{:refer hara.runtime.basic.impl.process-lua/default-oneshot-wrap :adopt true :added "4.0"}
+tahto/runtime/basic/impl/process_lua_test.clj:15:^{:refer tahto.runtime.basic.impl.process-lua/default-oneshot-wrap :adopt true :added "4.0"}
 (fact "wraps with the eval wrapper"
 
   (default-oneshot-wrap "1")
   => string?)
 
-^{:refer hara.runtime.basic.impl.process-lua/default-basic-client :adopt true :added "4.0"}
+tahto/runtime/basic/impl/process_lua_test.clj:21:^{:refer tahto.runtime.basic.impl.process-lua/default-basic-client :adopt true :added "4.0"}
 (fact "wraps with the eval wrapper"
 
   (default-basic-client 19000)
   => string?)
 
-^{:refer hara.runtime.basic.impl.process-lua/default-basic-client :added "4.1"
+tahto/runtime/basic/impl/process_lua_test.clj:27:^{:refer tahto.runtime.basic.impl.process-lua/default-basic-client :added "4.1"
   :id test-default-basic-client-error-propagation}
 (fact "constructs shared bootstrap without swallowing client loop errors"
   (let [out (default-basic-client 19000)]
@@ -34,7 +34,7 @@
      (boolean (re-find #"(?s)client_basic\(host,port,opts\).*pcall\(function" out))])
   => [true true true false])
 
-^{:refer hara.runtime.basic.impl.process-lua/default-body-wrap :added "4.1"}
+tahto/runtime/basic/impl/process_lua_test.clj:37:^{:refer tahto.runtime.basic.impl.process-lua/default-body-wrap :added "4.1"}
 (fact "marks the wrapper fn as inner"
   (-> (default-body-wrap '[(defn add-10 [x] (return (+ x 10)))
                            (add-10 5)])
@@ -44,7 +44,7 @@
       :inner)
   => true)
 
-^{:refer hara.runtime.basic.impl.process-lua/normalize-forms :added "4.1"}
+tahto/runtime/basic/impl/process_lua_test.clj:47:^{:refer tahto.runtime.basic.impl.process-lua/normalize-forms :added "4.1"}
 (fact "normalizes a top-level do body"
   (normalize-forms '(do (defn add-10 [x] (return (+ x 10)))
                         (add-10 5))
@@ -55,7 +55,7 @@
   (normalize-forms '[1 2 3] {:bulk true})
   => '[1 2 3])
 
-^{:refer hara.runtime.basic.impl.process-lua/default-body-transform :added "4.0"}
+tahto/runtime/basic/impl/process_lua_test.clj:58:^{:refer tahto.runtime.basic.impl.process-lua/default-body-transform :added "4.0"}
 (fact "transform code for return"
 
   (default-body-transform [1 2 3] {})
@@ -73,7 +73,7 @@
                                           {})])
   => #"local function add_10\(x\)")
 
-^{:refer hara.runtime.basic.impl.process-lua/lua-basic-script-globalize-entry :added "4.1"}
+tahto/runtime/basic/impl/process_lua_test.clj:76:^{:refer tahto.runtime.basic.impl.process-lua/lua-basic-script-globalize-entry :added "4.1"}
 (fact "converts local Lua declarations to globals for basic runtime"
   (lua-basic-script-globalize-entry "local function add_10(x) return x + 10 end"
                                     {:entry {:op-key :defn}})

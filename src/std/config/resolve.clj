@@ -15,7 +15,7 @@
 
 (def +config+  "config.edn")
 
-(def +hara-dir+     (delay (str (fs/path (System/getProperty "user.home") ".hara"))))
+(def +tahto-dir+     (delay (str (fs/path (System/getProperty "user.home") ".tahto"))))
 
 (def +user-dir+     (delay (str (fs/path (System/getProperty "user.dir")))))
 
@@ -477,7 +477,7 @@
                                               (fs/path @+user-dir+ path)]))
                    (env/sys:resource path)
                    (first (filter fs/exists?
-                                  [(fs/path @+hara-dir+ path)])))
+                                  [(fs/path @+tahto-dir+ path)])))
          output (if path
                   (resolve-content (slurp path) opts))]
      (if (directive? output)

@@ -1,6 +1,6 @@
 (ns kmi.queue.common-test
-  (:require [hara.runtime.redis]
-            [hara.lang :as l]
+  (:require [tahto.runtime.redis]
+            [tahto.core :as l]
             [std.lib.network :as network])
   (:use code.test))
 

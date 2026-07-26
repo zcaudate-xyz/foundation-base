@@ -167,7 +167,7 @@
   [target-ns api-type entries & [{:keys [header]}]]
   (str (or header "")
        "(ns " target-ns "\n"
-       "  (:require [hara.lang :as l]))\n\n"
+       "  (:require [tahto.core :as l]))\n\n"
        "(l/script :xtalk)\n\n"
        (str/join "\n\n" (map #(emit-module-entry api-type %) entries))
        (when (seq entries) "\n")))
@@ -208,7 +208,7 @@
   {:added "4.1"}
   [target-ns src-ns]
   (str "(ns " target-ns "\n"
-       "  (:require [hara.lang :as l]))\n\n"
+       "  (:require [tahto.core :as l]))\n\n"
        "(l/script :xtalk)\n\n"
        (emit-route-entries src-ns)
        "\n"))

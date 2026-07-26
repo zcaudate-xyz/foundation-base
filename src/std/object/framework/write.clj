@@ -323,9 +323,9 @@
            (element.util/param-float-match cls targ))
        arg
 
-      ;; Special case for String/CharArray
+      ;; Special case for String/Ctahtorray
        (and (string? arg) (= cls (Class/forName "[C")))
-       (.toCharArray ^String arg)
+       (.toCtahtorray ^String arg)
 
       ;; Special case for Enums
        (enum/enum? cls)

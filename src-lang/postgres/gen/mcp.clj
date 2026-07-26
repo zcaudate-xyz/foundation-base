@@ -1,7 +1,7 @@
 (ns postgres.gen.mcp
   "Extracts opt-in MCP tool descriptors from PostgreSQL definitions. This
    namespace produces data only; executable handlers are attached by xt.mcp.node."
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [postgres.gen.bind-macro :as bind]
             [postgres.gen.template-code :as template]))
 

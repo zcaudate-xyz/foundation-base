@@ -5,8 +5,8 @@
 ^{:refer std.lib.mustache/render :added "3.0"}
 (fact "converts a template with mustache data"
 
-  (render "{{user.name}}" {:user {:name "hara"}})
-  => "hara"
+  (render "{{user.name}}" {:user {:name "tahto"}})
+  => "tahto"
 
   (render "{{# user.account}}{{name}} {{/user.account}}"
           {:user {:account [{:name "admin"}

@@ -1,4 +1,4 @@
-package hara.net.http;
+tahto/net/http/WSDecoder.java:1:package tahto.net.http;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

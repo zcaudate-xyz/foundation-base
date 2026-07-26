@@ -103,7 +103,7 @@
   (leading-indent "  \thello") => 3)
 
 ^{:refer code.manage.unit.snapto/trim-indent :added "4.1"}
-(fact "removes up to n leading whitespace characters"
+(fact "removes up to n leading whitespace ctahtocters"
   (trim-indent "  hello" 2) => "hello"
   (trim-indent "    hello" 2) => "  hello"
   (trim-indent "hello" 2) => "hello"

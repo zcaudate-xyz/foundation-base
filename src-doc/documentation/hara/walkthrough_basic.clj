@@ -1,11 +1,11 @@
-(ns documentation.hara-walkthrough-basic
-  (:require [hara.lang :as l]
+tahto/walkthrough_basic.clj:1:(ns documentation.tahto-walkthrough-basic
+  (:require [tahto.core :as l]
             [std.lib :as h])
   (:use code.test))
 
 [[:hero {:title "Walkthrough: basic"
          :subtitle "Source walkthrough from src-doc/walkthrough/std_lang_00_basic.clj"
-         :lead "The basic walkthrough introduces hara.lang script contexts: how a target language is installed into a Clojure namespace, how forms are emitted as target code, and how saved entries link together as a dependency graph."}]]
+         :lead "The basic walkthrough introduces tahto.core script contexts: how a target language is installed into a Clojure namespace, how forms are emitted as target code, and how saved entries link together as a dependency graph."}]]
 
 [[:chapter {:title "Motivation"}]]
 
@@ -28,7 +28,7 @@
 "Once installed, `!.js` evaluates a form *for emission* and returns the generated JavaScript as a string. No JavaScript runtime is involved."
 
 (fact "!.js returns emitted JavaScript as a string"
-  ^{:refer hara.lang/script- :id wt-basic/emit}
+  ^{:refer tahto.core/script- :id wt-basic/emit}
   (l/script- :js
     {:require [[xt.lang.spec-base :as xt]]})
 
@@ -47,7 +47,7 @@
 "`def.js` looks like `def` but instead of a value it produces a *pointer*. The pointer wraps a *book entry*: the recorded form, its language, its module, and its dependency set."
 
 (fact "def.js saves a :def entry in the book"
-  ^{:refer hara.lang/script- :id wt-basic/def-js}
+  ^{:refer tahto.core/script- :id wt-basic/def-js}
   (def.js answer (+ 1 2 3))
 
   (!.js -/answer)
@@ -60,9 +60,9 @@
   => {:context :lang/js
       :lang :js
       :id 'answer
-      :module 'documentation.hara-walkthrough-basic
+tahto/walkthrough_basic.clj:63:      :module 'documentation.tahto-walkthrough-basic
       :section :code
-      :context/fn #'hara.common.util/lang-rt-default})
+tahto/walkthrough_basic.clj:65:      :context/fn #'tahto.common.util/lang-rt-default})
 
 "Inside an emission form, `-/answer` refers to the pointer named `answer` in the current namespace. Dereferencing the pointer (`@answer`) yields the underlying `BookEntry` with the full record: operation, input form, display settings, and dependencies."
 
@@ -71,7 +71,7 @@
 "`defn.js` saves a `:defn` entry. Calling the pointer like a function does not invoke JavaScript — it emits the *call* as a string, which is exactly what you want when building larger generated expressions."
 
 (fact "defn.js saves a :defn entry and emits calls"
-  ^{:refer hara.lang/script- :id wt-basic/defn-js}
+  ^{:refer tahto.core/script- :id wt-basic/defn-js}
   (defn.js greet
     [a b]
     (return (+ a b)))
@@ -87,7 +87,7 @@
 "Only `-/` symbols are treated as links. When a saved form references `-/other-entry`, the reference is rewritten to the fully qualified symbol and recorded in the entry's `:deps` set. The book therefore knows the true dependency graph of every definition — which is what later stages use to emit complete, ordered source files."
 
 (fact "-/ references are recorded as dependencies"
-  ^{:refer hara.lang/script- :id wt-basic/linking}
+  ^{:refer tahto.core/script- :id wt-basic/linking}
   (def.js base (+ 1 2 3))
 
   (defn.js add-base
@@ -97,18 +97,18 @@
   (-> @add-base (into {}) :form)
   => '(defn add-base
        [c]
-       (return (+ documentation.hara-walkthrough-basic/base
+tahto/walkthrough_basic.clj:100:       (return (+ documentation.tahto-walkthrough-basic/base
                   c)))
 
   (-> @add-base (into {}) :deps)
-  => '#{documentation.hara-walkthrough-basic/base})
+tahto/walkthrough_basic.clj:104:  => '#{documentation.tahto-walkthrough-basic/base})
 
 [[:section {:title "Reusable fragments with def$.js"}]]
 
 "`def$.js` saves a `:fragment` entry — a named, replaceable snippet. Referencing the fragment with `-/` inlines its emitted body rather than a symbol, so fragments behave like copy-paste units that still show up in the book."
 
 (fact "def$.js creates an inlineable fragment"
-  ^{:refer hara.lang/script- :id wt-basic/fragment}
+  ^{:refer tahto.core/script- :id wt-basic/fragment}
   (def$.js greeting (+ 1 2 3))
 
   (!.js -/greeting)
@@ -122,7 +122,7 @@
 "`defmacro.js` saves a macro entry. The body is an ordinary Clojure function over *forms*, evaluated while the target code is being emitted — the generated output is whatever the macro returns, re-emitted."
 
 (fact "defmacro.js expands forms during emission"
-  ^{:refer hara.lang/script- :id wt-basic/defmacro}
+  ^{:refer tahto.core/script- :id wt-basic/defmacro}
   (defmacro.js double-add
     [a b]
     (list '+ a a b b))

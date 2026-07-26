@@ -45,7 +45,7 @@
   "queries the java view of the class declaration
  
    (query-class String [#\"^c\" :name])
-   ;;=> [\"charAt\" \"checkBounds\" \"codePointAt\" \"codePointBefore\"
+   ;;=> [\"ctahtot\" \"checkBounds\" \"codePointAt\" \"codePointBefore\"
    ;;    \"codePointCount\" \"compareTo\" \"compareToIgnoreCase\"
    ;;    \"concat\" \"contains\" \"contentEquals\" \"copyValueOf\"]"
   {:added "3.0"}
@@ -80,7 +80,7 @@
   "lists what methods could be applied to a particular instance
  
    (query-hierarchy String [:name #\"^to\"])
-   => [\"toCharArray\" \"toLowerCase\" \"toString\" \"toUpperCase\"]"
+   => [\"toCtahtorray\" \"toLowerCase\" \"toString\" \"toUpperCase\"]"
   {:added "3.0"}
   ([obj selectors]
    (let [grp (input/args-group selectors)
@@ -119,7 +119,7 @@
   "lists what class methods could be applied to a particular instance
  
    (query-instance \"abc\" [:name #\"^to\"])
-   => [\"toCharArray\" \"toLowerCase\" \"toString\" \"toUpperCase\"]
+   => [\"toCtahtorray\" \"toLowerCase\" \"toString\" \"toUpperCase\"]
  
    (query-instance String [:name #\"^to\"])
    => (contains [\"toString\"])"
@@ -132,7 +132,7 @@
   "lists what methods could be applied to a particular instance. includes all super class methods
  
    (query-instance-hierarchy String [:name #\"^to\"])
-   => [\"toCharArray\" \"toLowerCase\" \"toString\" \"toUpperCase\"]"
+   => [\"toCtahtorray\" \"toLowerCase\" \"toString\" \"toUpperCase\"]"
   {:added "3.0"}
   ([obj selectors]
    (select-instance-elements (common/context-class obj) nil selectors)))
@@ -220,7 +220,7 @@
   "creates the form for `element` for definvoke
  
    (invoke-intern-element :element '-foo- {:class String
-                                           :selector [\"charAt\"]} nil)"
+                                           :selector [\"ctahtot\"]} nil)"
   {:added "3.0"}
   [:method {:multi protocol.invoke/-invoke-intern
             :val :element}]

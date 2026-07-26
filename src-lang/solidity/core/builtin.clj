@@ -1,6 +1,6 @@
 (ns solidity.core.builtin
   (:require [clojure.string]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
             [std.string.case :as case]

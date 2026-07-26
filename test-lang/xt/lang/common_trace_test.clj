@@ -1,6 +1,6 @@
 (ns xt.lang.common-trace-test
   (:use code.test)
-  (:require [hara.lang             :as l]
+  (:require [tahto.core             :as l]
             [xt.lang.common-trace :as trace]))
 
 ^{:seedgen/root {:all true, :langs [:js lua :python]}}

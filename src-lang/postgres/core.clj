@@ -1,13 +1,13 @@
 (ns postgres.core
   (:require [postgres.gen.bind-macro]
             [postgres.entity :as entity]
-            [hara.runtime.postgres.base.application :as app]
+            [tahto.runtime.postgres.base.application :as app]
             [postgres.core.addon]
             [postgres.core.builtin]
             [postgres.core.graph]
             [postgres.core.impl]
             [postgres.core.graph-view :as graph-view]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format
                             assert repeat bit-and bit-or count max min]))

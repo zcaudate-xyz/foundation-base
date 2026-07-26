@@ -1,7 +1,7 @@
 (ns xt.substrate.walkthrough.s07-wsserver-test
   (:use code.test)
   (:require [std.json :as json]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [org.httpkit.server :as server]
             [xt.lang.common-notify :as notify]))
 

@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns postgres.sample.scratch-v3.api-currency
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[postgres.sample.scratch-v3.realtime :as realtime]]

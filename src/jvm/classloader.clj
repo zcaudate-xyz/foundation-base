@@ -27,7 +27,7 @@
   "returns the required url
  
    (get-url (fs/path \"src\"))
-   ;;#object[java.net.URL 0x3d202d52 \"file:/Users/chris/Development/hara/hara/src/\"]
+   ;;#object[java.net.URL 0x3d202d52 \"file:/Users/chris/Development/tahto/tahto/src/\"]
    => java.net.URL"
   {:added "3.0"}
   ([path]

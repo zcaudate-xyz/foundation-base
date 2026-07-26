@@ -1,4 +1,4 @@
-package hara.lib.mustache;
+package newlisp.lib.mustache;
 
 import java.util.List;
 import java.util.Map;

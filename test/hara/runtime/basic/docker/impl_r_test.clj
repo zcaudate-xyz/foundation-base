@@ -1,21 +1,21 @@
-(ns hara.runtime.basic.docker.impl-r-test
-  (:require [hara.runtime.basic.docker.registry :as registry]
-            [hara.runtime.basic.impl-annex.process-r :as r]
+tahto/runtime/basic/docker/impl_r_test.clj:1:(ns tahto.runtime.basic.docker.impl-r-test
+tahto/runtime/basic/docker/impl_r_test.clj:2:  (:require [tahto.runtime.basic.docker.registry :as registry]
+tahto/runtime/basic/docker/impl_r_test.clj:3:            [tahto.runtime.basic.impl-annex.process-r :as r]
             [std.lib.env :as env]
-            [hara.lang :as l]
-            [hara.lang.script :as script]
+            [tahto.core :as l]
+            [tahto.core.script :as script]
             [clojure.string :as str])
   (:use code.test))
 
 ;;
 ;; R basic runtime in a Docker container.
 ;;
-;; Uses the project-owned hara.runtime.basic R image.
+tahto/runtime/basic/docker/impl_r_test.clj:13:;; Uses the project-owned tahto.runtime.basic R image.
 ;; The canonical registry entry is based on `rocker/r-ver:4.3`,
 ;; which includes jsonlite and can connect back to the JVM host.
 ;;
 ;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-r:latest
-;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-r-test
+tahto/runtime/basic/docker/impl_r_test.clj:18:;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only tahto.runtime.basic.docker.impl-r-test
 ;;
 
 (defn r-docker-bootstrap
@@ -36,7 +36,7 @@
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
             (not (env/docker-daemon-available?))
-            (System/getenv "HARA_NO_DOCKER"))
+tahto/runtime/basic/docker/impl_r_test.clj:39:            (System/getenv "TAHTO_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
@@ -69,7 +69,7 @@
     (sum [1 2 3 4 5]))
   => 15)
 
-^{:refer hara.runtime.basic.docker.impl-r-test/r-docker-bootstrap :added "4.0"}
+tahto/runtime/basic/docker/impl_r_test.clj:72:^{:refer tahto.runtime.basic.docker.impl-r-test/r-docker-bootstrap :added "4.0"}
 (fact "r docker bootstrap wraps default-basic-client with jsonlite install"
   (let [src (r-docker-bootstrap 9999 {})]
     [(str/includes? src "install.packages")

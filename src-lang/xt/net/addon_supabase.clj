@@ -1,5 +1,5 @@
 (ns xt.net.addon-supabase
-  (:require [hara.lang :as l :refer [defspec.xt]]
+  (:require [tahto.core :as l :refer [defspec.xt]]
             [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :xtalk

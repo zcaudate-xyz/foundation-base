@@ -5,7 +5,7 @@
           :subtitle "Walkthroughs, generated projects, source, tests, and runnable repositories."
           :lead "Examples are a primary way to understand Foundation Base. Each entry keeps the authored Clojure source, build definition, generated repository, and relevant walkthrough close together."
           :badges ["Walkthroughs" "Generated projects" "Source links" "Runnable output"]
-          :actions [{:label "Hara walkthroughs" :href "hara/walkthrough-basic.html" :variant :primary}
+          :actions [{:label "Tahto walkthroughs" :href "tahto/walkthrough-basic.html" :variant :primary}
                     {:label "Repository examples index" :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/wiki/Examples.md"}]}]]
 
 [[:chapter {:title "Language walkthroughs"}]]
@@ -57,7 +57,7 @@
 
 [[:card-grid {:items [{:meta "C pthreads"
                        :title "Source"
-                       :text "The Hara-authored program."
+                       :text "The Tahto-authored program."
                        :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/c_000_pthreads_hello/main.clj"}
                       {:meta "C pthreads"
                        :title "Build"

@@ -1,13 +1,13 @@
-(ns hara.model.spec-elisp-test
-  (:require [hara.lang :as l]
-            [hara.model.spec-elisp :refer :all])
+tahto/model/spec_elisp_test.clj:1:(ns tahto.model.spec-elisp-test
+  (:require [tahto.core :as l]
+tahto/model/spec_elisp_test.clj:3:            [tahto.model.spec-elisp :refer :all])
   (:use code.test))
 
 (fact "emits elisp data structures"
   (emit-elisp {:a 1 :b [2 3]} {})
   => "(let ((__xt_tbl (make-hash-table :test (quote equal)))) (progn (puthash \"a\" 1 __xt_tbl) (puthash \"b\" (vector 2 3) __xt_tbl) __xt_tbl))")
 
-^{:refer hara.model.spec-elisp/+book+ :added "4.1"}
+tahto/model/spec_elisp_test.clj:10:^{:refer tahto.model.spec-elisp/+book+ :added "4.1"}
 (fact "emits xtalk through the elisp backend"
   (l/emit-as :elisp '[(x:print (x:cat "a" "b"))])
   => "(progn (princ (concat \"a\" \"b\")) nil)")
@@ -24,70 +24,70 @@
   (emit-elisp '(list xtt/eq-nested-obj xtt/eq-nested-arr) {})
   => "(list (symbol-function (quote eq-nested-obj)) (symbol-function (quote eq-nested-arr)))")
 
-^{:refer hara.model.spec-elisp/elisp-tf-break :added "4.1"}
+tahto/model/spec_elisp_test.clj:27:^{:refer tahto.model.spec-elisp/elisp-tf-break :added "4.1"}
 (fact "transforms break forms")
 
-^{:refer hara.model.spec-elisp/elisp-tf-bsl :added "4.1"}
+tahto/model/spec_elisp_test.clj:30:^{:refer tahto.model.spec-elisp/elisp-tf-bsl :added "4.1"}
 (fact "left shifts bits")
 
-^{:refer hara.model.spec-elisp/elisp-tf-bsr :added "4.1"}
+tahto/model/spec_elisp_test.clj:33:^{:refer tahto.model.spec-elisp/elisp-tf-bsr :added "4.1"}
 (fact "right shifts bits")
 
-^{:refer hara.model.spec-elisp/elisp-tf-bxor :added "4.1"}
+tahto/model/spec_elisp_test.clj:36:^{:refer tahto.model.spec-elisp/elisp-tf-bxor :added "4.1"}
 (fact "computes bitwise XOR")
 
-^{:refer hara.model.spec-elisp/elisp-tf-band :added "4.1"}
+tahto/model/spec_elisp_test.clj:39:^{:refer tahto.model.spec-elisp/elisp-tf-band :added "4.1"}
 (fact "computes bitwise AND")
 
-^{:refer hara.model.spec-elisp/elisp-tf-bor :added "4.1"}
+tahto/model/spec_elisp_test.clj:42:^{:refer tahto.model.spec-elisp/elisp-tf-bor :added "4.1"}
 (fact "computes bitwise OR")
 
-^{:refer hara.model.spec-elisp/elisp-tf-mod :added "4.1"}
+tahto/model/spec_elisp_test.clj:45:^{:refer tahto.model.spec-elisp/elisp-tf-mod :added "4.1"}
 (fact "computes modulo")
 
-^{:refer hara.model.spec-elisp/elisp-tf-pow :added "4.1"}
+tahto/model/spec_elisp_test.clj:48:^{:refer tahto.model.spec-elisp/elisp-tf-pow :added "4.1"}
 (fact "computes power")
 
-^{:refer hara.model.spec-elisp/elisp-tf-xor :added "4.1"}
+tahto/model/spec_elisp_test.clj:51:^{:refer tahto.model.spec-elisp/elisp-tf-xor :added "4.1"}
 (fact "computes XOR")
 
-^{:refer hara.model.spec-elisp/elisp-tf-throw :added "4.1"}
+tahto/model/spec_elisp_test.clj:54:^{:refer tahto.model.spec-elisp/elisp-tf-throw :added "4.1"}
 (fact "transforms throw forms")
 
-^{:refer hara.model.spec-elisp/elisp-tf-for-array :added "4.1"}
+tahto/model/spec_elisp_test.clj:57:^{:refer tahto.model.spec-elisp/elisp-tf-for-array :added "4.1"}
 (fact "transforms for:array loops")
 
-^{:refer hara.model.spec-elisp/elisp-tf-for-object :added "4.1"}
+tahto/model/spec_elisp_test.clj:60:^{:refer tahto.model.spec-elisp/elisp-tf-for-object :added "4.1"}
 (fact "transforms for:object loops")
 
-^{:refer hara.model.spec-elisp/elisp-tf-for-iter :added "4.1"}
+tahto/model/spec_elisp_test.clj:63:^{:refer tahto.model.spec-elisp/elisp-tf-for-iter :added "4.1"}
 (fact "transforms for:iter loops")
 
-^{:refer hara.model.spec-elisp/elisp-tf-for-index :added "4.1"}
+tahto/model/spec_elisp_test.clj:66:^{:refer tahto.model.spec-elisp/elisp-tf-for-index :added "4.1"}
 (fact "transforms for:index loops")
 
-^{:refer hara.model.spec-elisp/elisp-expand :added "4.1"}
+tahto/model/spec_elisp_test.clj:69:^{:refer tahto.model.spec-elisp/elisp-expand :added "4.1"}
 (fact "expands elisp forms")
 
-^{:refer hara.model.spec-elisp/elisp-invoke :added "4.1"}
+tahto/model/spec_elisp_test.clj:72:^{:refer tahto.model.spec-elisp/elisp-invoke :added "4.1"}
 (fact "emits elisp invocations")
 
-^{:refer hara.model.spec-elisp/elisp-normalize-funcalls :added "4.1"}
+tahto/model/spec_elisp_test.clj:75:^{:refer tahto.model.spec-elisp/elisp-normalize-funcalls :added "4.1"}
 (fact "normalizes elisp function calls")
 
-^{:refer hara.model.spec-elisp/elisp-transform :added "4.1"}
+tahto/model/spec_elisp_test.clj:78:^{:refer tahto.model.spec-elisp/elisp-transform :added "4.1"}
 (fact "transforms elisp forms")
 
-^{:refer hara.model.spec-elisp/emit-elisp-coll :added "4.1"}
+tahto/model/spec_elisp_test.clj:81:^{:refer tahto.model.spec-elisp/emit-elisp-coll :added "4.1"}
 (fact "emits elisp collections")
 
-^{:refer hara.model.spec-elisp/emit-elisp-map :added "4.1"}
+tahto/model/spec_elisp_test.clj:84:^{:refer tahto.model.spec-elisp/emit-elisp-map :added "4.1"}
 (fact "emits elisp maps")
 
-^{:refer hara.model.spec-elisp/emit-elisp-form :added "4.1"}
+tahto/model/spec_elisp_test.clj:87:^{:refer tahto.model.spec-elisp/emit-elisp-form :added "4.1"}
 (fact "emits elisp forms")
 
-^{:refer hara.model.spec-elisp/emit-elisp :added "4.1"}
+tahto/model/spec_elisp_test.clj:90:^{:refer tahto.model.spec-elisp/emit-elisp :added "4.1"}
 (fact "emits code into emacs lisp schema"
   (emit-elisp '(defn hello [x] (return (== x nil))) {})
   => "(defun hello (x) (catch (quote __xt_return__) (throw (quote __xt_return__) (equal x nil))))")

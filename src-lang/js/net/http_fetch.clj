@@ -1,5 +1,5 @@
 (ns js.net.http-fetch
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :js

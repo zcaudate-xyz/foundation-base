@@ -1,11 +1,11 @@
-(ns hara.model.spec-postgres.form-defn-test
-  (:require [hara.model.spec-postgres :as g]
-            [hara.model.spec-postgres.form-defn :refer :all]
-            [hara.lang :as l]
+tahto/model/spec_postgres/form_defn_test.clj:1:(ns tahto.model.spec-postgres.form-defn-test
+tahto/model/spec_postgres/form_defn_test.clj:2:  (:require [tahto.model.spec-postgres :as g]
+tahto/model/spec_postgres/form_defn_test.clj:3:            [tahto.model.spec-postgres.form-defn :refer :all]
+            [tahto.core :as l]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer hara.model.spec-postgres.form-defn/pg-defn-format :added "4.0"}
+tahto/model/spec_postgres/form_defn_test.clj:8:^{:refer tahto.model.spec-postgres.form-defn/pg-defn-format :added "4.0"}
 (fact "formats a defn form"
 
   (pg-defn-format
@@ -21,7 +21,7 @@
        :static/input []}
       (defn hello [] (return 1))])
 
-^{:refer hara.model.spec-postgres.form-defn/pg-defn :added "4.0"}
+tahto/model/spec_postgres/form_defn_test.clj:24:^{:refer tahto.model.spec-postgres.form-defn/pg-defn :added "4.0"}
 (fact "creates the complete defn"
 
   (l/with:emit

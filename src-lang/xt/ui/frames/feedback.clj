@@ -1,6 +1,6 @@
 (ns xt.ui.frames.feedback
   "Reusable pending, error and empty presentation."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

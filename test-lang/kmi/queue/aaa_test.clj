@@ -1,6 +1,6 @@
 (ns kmi.queue.aaa-test
-  (:require [hara.runtime.redis]
-            [hara.lang :as l])
+  (:require [tahto.runtime.redis]
+            [tahto.core :as l])
   (:use code.test))
 
 ;; This is run before kmi.queue.common-test in order to

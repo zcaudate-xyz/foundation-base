@@ -8,7 +8,7 @@
  *   You must not remove this notice, or any other, from this software.
  **/
  
-package hara.lib.stream;
+package newlisp.lib.stream;
  
 import java.io.IOException;
 import java.io.NotSerializableException;

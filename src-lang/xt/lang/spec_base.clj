@@ -1,5 +1,5 @@
 (ns xt.lang.spec-base
-  (:require [hara.lang :as l :refer [defspec.xt]]))
+  (:require [tahto.core :as l :refer [defspec.xt]]))
 
 (l/script :xtalk)
 
@@ -951,7 +951,7 @@
 
 (defmacro.xt ^{:standalone true} 
   x:str-char
-  "gets the character code at an index"
+  "gets the ctahtocter code at an index"
   {:added "4.1"}
   ([value idx] (list (quote x:str-char) value idx)))
 

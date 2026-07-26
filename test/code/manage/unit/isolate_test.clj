@@ -79,7 +79,7 @@
 ^{:refer code.manage.unit.isolate/latest-run-file :added "4.1"}
 (fact "chooses the latest saved run file"
   (let [root  (str (fs/create-tmpdir "isolate-runs"))
-        dir   (str root "/.hara/runs")]
+        dir   (str root "/.tahto/runs")]
     (try
       (fs/create-directory dir)
       (spit (str dir "/run-1.edn") "{}")
@@ -103,7 +103,7 @@
 ^{:refer code.manage.unit.isolate/read-run-file :added "4.1"}
 (fact "reads legacy run reports with unreadable printed values"
   (let [root  (str (fs/create-tmpdir "isolate-read"))
-        dir   (str root "/.hara/runs")
+        dir   (str root "/.tahto/runs")
         path  (str dir "/run-1.edn")]
     (try
       (fs/create-directory dir)
@@ -271,7 +271,7 @@
 (fact "writes an isolated namespace from a saved run report"
   (let [root       (str (fs/create-tmpdir "isolate-task"))
         test-dir   (str root "/test/example")
-        run-dir    (str root "/.hara/runs")
+        run-dir    (str root "/.tahto/runs")
         test-path  (str test-dir "/core_test.clj")
         run-path   (str run-dir "/run-1.edn")
         lookup     {'example.core-test test-path}

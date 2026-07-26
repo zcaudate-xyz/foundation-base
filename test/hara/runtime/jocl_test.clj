@@ -1,8 +1,8 @@
-(ns hara.runtime.jocl-test
+tahto/runtime/jocl_test.clj:1:(ns tahto.runtime.jocl-test
   (:use code.test)
-  (:require [hara.lang :as l]
-            [hara.runtime.jocl :refer :all]
-            [hara.runtime.jocl.env :as jocl-env]))
+  (:require [tahto.core :as l]
+tahto/runtime/jocl_test.clj:4:            [tahto.runtime.jocl :refer :all]
+tahto/runtime/jocl_test.clj:5:            [tahto.runtime.jocl.env :as jocl-env]))
 
 ;; Stubs that keep the file loadable when the native OpenCL library is
 ;; not installed.  When OpenCL is present these macros expand to nothing.
@@ -30,7 +30,7 @@
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.runtime.jocl/CANARY :adopt true :added "4.0"
+tahto/runtime/jocl_test.clj:33:^{:refer tahto.runtime.jocl/CANARY :adopt true :added "4.0"
   :setup [(l/rt:restart :c)]}
 (fact "Basic usage for JOCL"
 

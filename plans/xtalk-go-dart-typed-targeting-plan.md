@@ -7,7 +7,7 @@
 ## Current capabilities (what we can leverage)
 
 1. **Typed AST/registry and namespace analysis already exist**
-   - `hara.lang.typed.xtalk` exposes registration and analysis APIs (`analyze-namespace`, `analyze-and-register!`, registry lookups).
+   - `tahto.core.typed.xtalk` exposes registration and analysis APIs (`analyze-namespace`, `analyze-and-register!`, registry lookups).
    - Parsed analysis includes `:specs`, `:functions`, `:macros`, and `:values` in a normalized type form.
 
 2. **Type normalization already supports a useful common subset**
@@ -15,7 +15,7 @@
    - This is enough to map to both Go and Dart with a few language-specific constraints.
 
 3. **A working declaration backend exists (TypeScript)**
-   - `hara.lang.model.spec-js.ts` already demonstrates:
+   - `tahto.core.model.spec-js.ts` already demonstrates:
      - import/reference collection,
      - identifier sanitization,
      - type rendering,
@@ -23,7 +23,7 @@
    - This file is the best template for additional target backends.
 
 4. **Go runtime/codegen already exists for xtalk language model**
-   - `hara.lang.model.spec-go` and `hara.lang.model.spec-xtalk.fn-go` already provide syntax/runtime mappings for xtalk -> Go code generation.
+   - `tahto.core.model.spec-go` and `tahto.core.model.spec-xtalk.fn-go` already provide syntax/runtime mappings for xtalk -> Go code generation.
    - Typed output can piggyback on this existing target instead of creating a net-new language pipeline.
 
 ## Recommended strategy
@@ -32,7 +32,7 @@ Use a **declaration-first approach** for both Go and Dart, then add optional run
 
 ### Phase 1: Shared typed declaration core (high ROI)
 
-Create a small common module (e.g. `hara.lang.model.spec-xtalk.typed.emit`) that encapsulates:
+Create a small common module (e.g. `tahto.core.model.spec-xtalk.typed.emit`) that encapsulates:
 
 - namespace traversal and dependency grouping,
 - symbol sanitization hooks,

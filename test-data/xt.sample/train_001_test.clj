@@ -1,6 +1,6 @@
 (ns xt.sample.train-001-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-protocol :as proto :refer [defprotocol.xt
                                                        defimpl.xt]]))
 

@@ -1,5 +1,5 @@
 (ns web3.lib.example-erc20-source
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.env :as env])
   (:refer-clojure :exclude [name symbol]))
 

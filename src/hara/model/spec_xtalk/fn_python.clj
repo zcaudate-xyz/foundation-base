@@ -1,4 +1,4 @@
-(ns hara.model.spec-xtalk.fn-python
+tahto/model/spec_xtalk/fn_python.clj:1:(ns tahto.model.spec-xtalk.fn-python
   (:require [std.lib.template :as template]))
 
 (defn python-tf-x-del

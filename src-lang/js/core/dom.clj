@@ -2,7 +2,7 @@
 (ns js.core.dom
   (:require [clojure.string]
             [std.html :as html]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.template :as template])
   (:refer-clojure :exclude [remove val]))
 

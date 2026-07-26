@@ -1,5 +1,5 @@
 (ns xt.db.system.impl-supabase-realtime
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-data :as xtd]

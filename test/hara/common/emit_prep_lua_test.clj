@@ -1,10 +1,10 @@
-(ns hara.common.emit-prep-lua-test
-  (:require [hara.lang.book :as b]
-            [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar]
-            [hara.common.util :as ut]
-            [hara.model.spec-lua :as lua]
+tahto/common/emit_prep_lua_test.clj:1:(ns tahto.common.emit-prep-lua-test
+  (:require [tahto.base.book :as b]
+tahto/common/emit_prep_lua_test.clj:3:            [tahto.common.emit-common :as common]
+tahto/common/emit_prep_lua_test.clj:4:            [tahto.common.emit-helper :as helper]
+tahto/common/emit_prep_lua_test.clj:5:            [tahto.common.grammar :as grammar]
+tahto/common/emit_prep_lua_test.clj:6:            [tahto.common.util :as ut]
+tahto/common/emit_prep_lua_test.clj:7:            [tahto.model.spec-lua :as lua]
             [std.lib.env :as env])
   (:use code.test))
 

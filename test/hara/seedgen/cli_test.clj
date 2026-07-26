@@ -1,8 +1,8 @@
-(ns hara.seedgen.cli-test
-  (:require [hara.seedgen.cli :as cli])
+tahto/seedgen/cli_test.clj:1:(ns tahto.seedgen.cli-test
+tahto/seedgen/cli_test.clj:2:  (:require [tahto.seedgen.cli :as cli])
   (:use code.test))
 
-^{:refer hara.seedgen.cli/collect-selector :added "4.1"}
+tahto/seedgen/cli_test.clj:5:^{:refer tahto.seedgen.cli/collect-selector :added "4.1"}
 (fact "collects :only namespace args into a vector selector"
 
   (cli/collect-selector [":only" "xt.foo" "xt.bar" "xt.baz"])
@@ -17,7 +17,7 @@
   (cli/collect-selector ["'[xt.foo xt.bar]"])
   => [['xt.foo 'xt.bar] []])
 
-^{:refer hara.seedgen.cli/parse-test-args :added "4.1"}
+tahto/seedgen/cli_test.clj:20:^{:refer tahto.seedgen.cli/parse-test-args :added "4.1"}
 (fact "parses seedgen test args, including multi-namespace :only"
 
   (cli/parse-test-args [":only" "xt.foo" "xt.bar" ":with" "[dart ruby]"])
@@ -44,7 +44,7 @@
       :extra [":metrics" "target/out.json"]
       :params {:metrics 'target/out.json}})
 
-^{:refer hara.seedgen.cli/parse-command-args :added "4.1"}
+tahto/seedgen/cli_test.clj:47:^{:refer tahto.seedgen.cli/parse-command-args :added "4.1"}
 (fact "parses seedgen command args, including multi-namespace :only"
 
   (cli/parse-command-args [":only" "xt.foo" "xt.bar" ":lang" "lua"])
@@ -56,12 +56,12 @@
       :params   {:lang 'python}})
 
 
-^{:refer hara.seedgen.cli/seedgen-test :added "4.1"}
+tahto/seedgen/cli_test.clj:59:^{:refer tahto.seedgen.cli/seedgen-test :added "4.1"}
 (fact "is the bench-test runner entry point"
   (var? #'cli/seedgen-test) => true
   (:doc (meta #'cli/seedgen-test)) => "generates and runs xtbench tests for the given selector and languages")
 
-^{:refer hara.seedgen.cli/failure-tree :added "4.1"}
+tahto/seedgen/cli_test.clj:64:^{:refer tahto.seedgen.cli/failure-tree :added "4.1"}
 (fact "groups test failures by canonical namespace and function"
   (let [failed {:meta {:ns 'xtbench.lua.lang.sample-test
                        :refer 'xt.lang.sample/parse
@@ -111,12 +111,12 @@
                                  :line 42}]}]
        :namespace-errors []}])
 
-^{:refer hara.seedgen.cli/-main :added "4.1"}
+tahto/seedgen/cli_test.clj:114:^{:refer tahto.seedgen.cli/-main :added "4.1"}
 (fact "is the CLI entry point"
   (var? #'cli/-main) => true
   (:doc (meta #'cli/-main)) => "main entry point for lein seedgen")
 
-^{:refer hara.seedgen.cli/seedgen-todos :added "4.1"}
+tahto/seedgen/cli_test.clj:119:^{:refer tahto.seedgen.cli/seedgen-todos :added "4.1"}
 (fact "returns 0 TODO facts for a selector matching no namespaces"
   (cli/seedgen-todos 'nonexistent.namespace.selector)
   => 0

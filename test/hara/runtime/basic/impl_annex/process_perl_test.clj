@@ -1,8 +1,8 @@
-(ns hara.runtime.basic.impl-annex.process-perl-test
-  (:require [hara.runtime.basic.impl-annex.process-perl :refer :all]
+tahto/runtime/basic/impl_annex/process_perl_test.clj:1:(ns tahto.runtime.basic.impl-annex.process-perl-test
+tahto/runtime/basic/impl_annex/process_perl_test.clj:2:  (:require [tahto.runtime.basic.impl-annex.process-perl :refer :all]
             [std.concurrent :as cc]
             [std.lib.env :as env]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :perl
@@ -13,7 +13,7 @@
   :setup    [(l/annex:start-all)]
   :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.runtime.basic.impl-annex.process-perl/CANARY :adopt true :added "4.0"}
+tahto/runtime/basic/impl_annex/process_perl_test.clj:16:^{:refer tahto.runtime.basic.impl-annex.process-perl/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE perl code"
   ^:unchecked
 
@@ -21,7 +21,7 @@
   => 10)
 
 
-^{:refer hara.runtime.basic.impl-annex.process-perl/default-body-transform :added "4.1"}
+tahto/runtime/basic/impl_annex/process_perl_test.clj:24:^{:refer tahto.runtime.basic.impl-annex.process-perl/default-body-transform :added "4.1"}
 (fact "transforms oneshot forms for return-eval"
   (default-body-transform '[1 2 3] {})
   => '[1 2 3]
@@ -29,7 +29,7 @@
   (default-body-transform '[1 2 3] {:bulk true})
   => '(do 1 2 3))
 
-^{:refer hara.runtime.basic.impl-annex.process-perl/perl-body-wrap :added "4.0"}
+tahto/runtime/basic/impl_annex/process_perl_test.clj:32:^{:refer tahto.runtime.basic.impl-annex.process-perl/perl-body-wrap :added "4.0"}
 (fact "wraps body forms in a flat do block"
   (perl-body-wrap '[1 2 3])
   => '(do 1 2 3)
@@ -37,7 +37,7 @@
   (perl-body-wrap '[(+ 1 2)])
   => '(do (+ 1 2)))
 
-^{:refer hara.runtime.basic.impl-annex.process-perl/default-basic-body-transform :added "4.0"}
+tahto/runtime/basic/impl_annex/process_perl_test.clj:40:^{:refer tahto.runtime.basic.impl-annex.process-perl/default-basic-body-transform :added "4.0"}
 (fact "transforms basic forms for Perl without a function wrapper"
   (default-basic-body-transform '[1 2 3] {})
   => '(do [1 2 3])
@@ -48,7 +48,7 @@
   (default-basic-body-transform '[1 2 3] {:bulk true})
   => '(do 1 2 3))
 
-^{:refer hara.runtime.basic.impl-annex.process-perl/default-basic-client :added "4.1"}
+tahto/runtime/basic/impl_annex/process_perl_test.clj:51:^{:refer tahto.runtime.basic.impl-annex.process-perl/default-basic-client :added "4.1"}
 (fact "builds perl basic client source from perl forms"
   (let [out (default-basic-client 4567 {:host "127.0.0.1"})]
     [(boolean (re-find #"use IO::Socket::INET;" out))

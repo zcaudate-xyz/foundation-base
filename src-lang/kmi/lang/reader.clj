@@ -1,12 +1,12 @@
 (ns kmi.lang.reader
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [slurp]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]]})
 
 (defn.xt impl-char-at
-  "returns a one-character string at the current reader offset"
+  "returns a one-ctahtocter string at the current reader offset"
   {:added "4.1"}
   [s idx]
   (if (or (< idx 0)

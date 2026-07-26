@@ -1,4 +1,4 @@
-package hara.lib.mustache;
+package newlisp.lib.mustache;
 
 public class Scanner {
     public static final String TAGS = "#^>!/{&?";
@@ -32,13 +32,13 @@ public class Scanner {
     }
 
     public void skipeWhiteSpace() {
-        while (Character.isWhitespace(next()) && !eos()) {
+tahto/lib/mustache/Scanner.java:35:        while (Ctahtocter.isWhitespace(next()) && !eos()) {
             ++idx;
         }
     }
 
     private char next() {
-        return template.charAt(idx);
+tahto/lib/mustache/Scanner.java:41:        return template.ctahtot(idx);
     }
 
     public void pushBack(int count) {

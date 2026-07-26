@@ -1,6 +1,6 @@
 (ns haskell.core
   (:require [haskell.core.builtin :as builtin]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :haskell {})

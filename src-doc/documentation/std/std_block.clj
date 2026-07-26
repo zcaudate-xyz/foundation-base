@@ -348,7 +348,7 @@
 
 [[:section {:title "Parsing errors"}]]
 
-"Unmatched delimiters raise reader errors with the offending character. EOF inside a string or collection is also detected."
+"Unmatched delimiters raise reader errors with the offending ctahtocter. EOF inside a string or collection is also detected."
 
 (fact "unmatched delimiter throws"
   (parse/parse-string "(]")
@@ -419,7 +419,7 @@
   (apply str (construct/newlines 2))
   => "\\n\\n")
 
-(fact "void from a character"
+(fact "void from a ctahtocter"
   (str (construct/void \newline))
   => "\\n")
 
@@ -1139,7 +1139,7 @@
 
 "`^{:refer std.block.base/block-length :added \"3.0\"}`"
 
-"Returns the total character length of the block's string representation."
+"Returns the total ctahtocter length of the block's string representation."
 
 ^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-5 :added "4.0"}
 (fact "block-length example"
@@ -1155,7 +1155,7 @@
 
 "`^{:refer std.block.base/block-width :added \"3.0\"}`"
 
-"Returns the visual width of the block (number of characters on a single line)."
+"Returns the visual width of the block (number of ctahtocters on a single line)."
 
 ^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-6 :added "4.0"}
 (fact "block-width example"
@@ -1181,7 +1181,7 @@
 
 "`^{:refer std.block.base/block-prefixed :added \"3.0\"}`"
 
-"Returns the length of any starting characters (e.g., `(` for a list, `[` for a vector)."
+"Returns the length of any starting ctahtocters (e.g., `(` for a list, `[` for a vector)."
 
 ^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-8 :added "4.0"}
 (fact "block-prefixed example"
@@ -1194,7 +1194,7 @@
 
 "`^{:refer std.block.base/block-suffixed :added \"3.0\"}`"
 
-"Returns the length of any ending characters (e.g., `)` for a list, `]` for a vector)."
+"Returns the length of any ending ctahtocters (e.g., `)` for a list, `]` for a vector)."
 
 ^{:id merged-plans-slop-summary-std-block-base-tutorial-md-example-9 :added "4.0"}
 (fact "block-suffixed example"
@@ -1355,7 +1355,7 @@
 
 "`^{:refer std.block.check/boundary? :added \"3.0\"}`"
 
-"Returns `true` if a character is considered a boundary character in Clojure syntax."
+"Returns `true` if a ctahtocter is considered a boundary ctahtocter in Clojure syntax."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-1 :added "4.0"}
 (fact "boundary? example"
@@ -1370,7 +1370,7 @@
 
 "`^{:refer std.block.check/whitespace? :added \"3.0\"}`"
 
-"Returns `true` if a character is a whitespace character (including spaces, tabs, newlines)."
+"Returns `true` if a ctahtocter is a whitespace ctahtocter (including spaces, tabs, newlines)."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-2 :added "4.0"}
 (fact "whitespace? example"
@@ -1382,7 +1382,7 @@
 
 "`^{:refer std.block.check/comma? :added \"3.0\"}`"
 
-"Returns `true` if a character is a comma."
+"Returns `true` if a ctahtocter is a comma."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-3 :added "4.0"}
 (fact "comma? example"
@@ -1394,7 +1394,7 @@
 
 "`^{:refer std.block.check/linebreak? :added \"3.0\"}`"
 
-"Returns `true` if a character is a linebreak character."
+"Returns `true` if a ctahtocter is a linebreak ctahtocter."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-4 :added "4.0"}
 (fact "linebreak? example"
@@ -1406,7 +1406,7 @@
 
 "`^{:refer std.block.check/delimiter? :added \"3.0\"}`"
 
-"Returns `true` if a character is a collection delimiter (e.g., `(`, `)`, `[`, `]`, `{`, `}`)."
+"Returns `true` if a ctahtocter is a collection delimiter (e.g., `(`, `)`, `[`, `]`, `{`, `}`)."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-5 :added "4.0"}
 (fact "delimiter? example"
@@ -1418,7 +1418,7 @@
 
 "`^{:refer std.block.check/voidspace? :added \"3.0\"}`"
 
-"Determines if an input character represents a \"void space\" (whitespace or comma)."
+"Determines if an input ctahtocter represents a \"void space\" (whitespace or comma)."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-6 :added "4.0"}
 (fact "voidspace? example"
@@ -1430,7 +1430,7 @@
 
 "`^{:refer std.block.check/linetab? :added \"3.0\"}`"
 
-"Checks if a character is a tab character."
+"Checks if a ctahtocter is a tab ctahtocter."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-7 :added "4.0"}
 (fact "linetab? example"
@@ -1442,7 +1442,7 @@
 
 "`^{:refer std.block.check/linespace? :added \"3.0\"}`"
 
-"Returns `true` if a character is a whitespace character that is *not* a linebreak or a tab."
+"Returns `true` if a ctahtocter is a whitespace ctahtocter that is *not* a linebreak or a tab."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-8 :added "4.0"}
 (fact "linespace? example"
@@ -1454,7 +1454,7 @@
 
 "`^{:refer std.block.check/voidspace-or-boundary? :added \"3.0\"}`"
 
-"Checks if a character is either a void space or a boundary character."
+"Checks if a ctahtocter is either a void space or a boundary ctahtocter."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-9 :added "4.0"}
 (fact "voidspace-or-boundary? example"
@@ -1483,7 +1483,7 @@
 
 "`^{:refer std.block.check/void-tag :added \"3.0\"}`"
 
-"Returns the void tag associated with a character (e.g., `:linebreak` for `\\newline`)."
+"Returns the void tag associated with a ctahtocter (e.g., `:linebreak` for `\\newline`)."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-11 :added "4.0"}
 (fact "void-tag example"
@@ -1495,7 +1495,7 @@
 
 "`^{:refer std.block.check/void? :added \"3.0\"}`"
 
-"Determines if a character corresponds to a void block type."
+"Determines if a ctahtocter corresponds to a void block type."
 
 ^{:id merged-plans-slop-summary-std-block-check-tutorial-md-example-12 :added "4.0"}
 (fact "void? example"
@@ -2111,7 +2111,7 @@
 
 "`^{:refer std.block.parse/read-dispatch :added \"3.0\"}`"
 
-"Dispatches parsing logic based on the first character of a form. It returns a keyword indicating the type of form to be parsed."
+"Dispatches parsing logic based on the first ctahtocter of a form. It returns a keyword indicating the type of form to be parsed."
 
 ^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-1 :added "4.0"}
 (fact "read-dispatch example"
@@ -2207,7 +2207,7 @@
 
 "`^{:refer std.block.parse/parse-reader :added \"3.0\"}`"
 
-"Reads a character literal (e.g., `\\c`) from the reader."
+"Reads a ctahtocter literal (e.g., `\\c`) from the reader."
 
 ^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-7 :added "4.0"}
 (fact "parse-reader example"
@@ -2259,7 +2259,7 @@
 
 "`^{:refer std.block.parse/read-whitespace :added \"3.0\"}`"
 
-"Reads a sequence of whitespace characters from the reader and returns them as a vector of void blocks."
+"Reads a sequence of whitespace ctahtocters from the reader and returns them as a vector of void blocks."
 
 ^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-11 :added "4.0"}
 (fact "read-whitespace example"
@@ -2283,7 +2283,7 @@
 
 "`^{:refer std.block.parse/read-start :added \"3.0\"}`"
 
-"Helper function to consume and verify starting characters of a form (e.g., `(` for a list, `~@` for unquote-splicing)."
+"Helper function to consume and verify starting ctahtocters of a form (e.g., `(` for a list, `~@` for unquote-splicing)."
 
 ^{:id merged-plans-slop-summary-std-block-parse-tutorial-md-example-13 :added "4.0"}
 (fact "read-start example"
@@ -2531,7 +2531,7 @@
 
 "`^{:refer std.block.reader/create :added \"3.0\"}`"
 
-"Creates an `IndexingPushbackReader` from a string, suitable for character-by-character reading."
+"Creates an `IndexingPushbackReader` from a string, suitable for ctahtocter-by-ctahtocter reading."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-1 :added "4.0"}
 (fact "create example"
@@ -2572,7 +2572,7 @@
 
 "`^{:refer std.block.reader/step-char :added \"3.0\"}`"
 
-"Moves the reader one character forward and returns the reader itself."
+"Moves the reader one ctahtocter forward and returns the reader itself."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-4 :added "4.0"}
 (fact "step-char example"
@@ -2587,7 +2587,7 @@
 
 "`^{:refer std.block.reader/read-char :added \"3.0\"}`"
 
-"Reads a single character from the reader and advances its position."
+"Reads a single ctahtocter from the reader and advances its position."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-5 :added "4.0"}
 (fact "read-char example"
@@ -2602,7 +2602,7 @@
 
 "`^{:refer std.block.reader/ignore-char :added \"3.0\"}`"
 
-"Reads a single character, ignores it (returns `nil`), and advances the reader's position."
+"Reads a single ctahtocter, ignores it (returns `nil`), and advances the reader's position."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-6 :added "4.0"}
 (fact "ignore-char example"
@@ -2617,7 +2617,7 @@
 
 "`^{:refer std.block.reader/unread-char :added \"3.0\"}`"
 
-"Pushes a character back onto the reader, effectively moving the reader's position backward."
+"Pushes a ctahtocter back onto the reader, effectively moving the reader's position backward."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-7 :added "4.0"}
 (fact "unread-char example"
@@ -2632,7 +2632,7 @@
 
 "`^{:refer std.block.reader/peek-char :added \"3.0\"}`"
 
-"Returns the next character in the stream without advancing the reader's position."
+"Returns the next ctahtocter in the stream without advancing the reader's position."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-8 :added "4.0"}
 (fact "peek-char example"
@@ -2647,7 +2647,7 @@
 
 "`^{:refer std.block.reader/read-while :added \"3.0\"}`"
 
-"Reads characters from the reader as long as a given predicate remains `true`."
+"Reads ctahtocters from the reader as long as a given predicate remains `true`."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-9 :added "4.0"}
 (fact "read-while example"
@@ -2661,7 +2661,7 @@
 
 "`^{:refer std.block.reader/read-until :added \"3.0\"}`"
 
-"Reads characters from the reader until a given predicate becomes `true`."
+"Reads ctahtocters from the reader until a given predicate becomes `true`."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-10 :added "4.0"}
 (fact "read-until example"
@@ -2704,7 +2704,7 @@
 
 "`^{:refer std.block.reader/read-include :added \"3.0\"}`"
 
-"Reads characters, including those that satisfy a predicate, and returns them along with the first character that *doesn't* satisfy the predicate."
+"Reads ctahtocters, including those that satisfy a predicate, and returns them along with the first ctahtocter that *doesn't* satisfy the predicate."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-13 :added "4.0"}
 (fact "read-include example"
@@ -2729,7 +2729,7 @@
 
 "`^{:refer std.block.reader/read-to-boundary :added \"3.0\"}`"
 
-"Reads characters until a boundary character or a character not allowed by `allowed` is encountered."
+"Reads ctahtocters until a boundary ctahtocter or a ctahtocter not allowed by `allowed` is encountered."
 
 ^{:id merged-plans-slop-summary-std-block-reader-tutorial-md-example-15 :added "4.0"}
 (fact "read-to-boundary example"
@@ -2764,13 +2764,13 @@
 
 "*   **`block?`**: Checks if an object is an `IBlock`.\n*   **`block-*` functions**: Accessors for block properties (`block-type`, `block-tag`, `block-string`, `block-length`, `block-width`, `block-height`, `block-prefixed`, `block-suffixed`, `block-verify`).\n*   **`expression?`**: Checks if a block has a value.\n*   **`block-value`**: Returns the Clojure value of an expression block.\n*   **`block-value-string`**: Returns the `pr-str` representation of the block's value.\n*   **`modifier?`**: Checks if a block is a modifier.\n*   **`block-modify`**: Applies a modifier's logic.\n*   **`container?`**: Checks if a block is a container.\n*   **`block-children`**: Returns the child blocks of a container.\n*   **`replace-children`**: Replaces the children of a container.\n*   **`block-info`**: Returns a map of common block information."
 
-[[:section {:title "std.block.check (Character and Token Classification)" :link "merged-plans-slop-summary-std-block-summary-md-std-block-check-character-and-token-classification"}]]
+[[:section {:title "std.block.check (Ctahtocter and Token Classification)" :link "merged-plans-slop-summary-std-block-summary-md-std-block-check-ctahtocter-and-token-classification"}]]
 
-"This sub-namespace provides utilities for classifying characters and Clojure forms, which is essential for the parsing process."
+"This sub-namespace provides utilities for classifying ctahtocters and Clojure forms, which is essential for the parsing process."
 
 "**Core Concepts:**"
 
-"*   **Character Properties:** Functions to determine if a character is a boundary, whitespace, comma, linebreak, or delimiter.\n*   **Form Tags:** Functions to categorize Clojure forms as void, token, or collection types."
+"*   **Ctahtocter Properties:** Functions to determine if a ctahtocter is a boundary, whitespace, comma, linebreak, or delimiter.\n*   **Form Tags:** Functions to categorize Clojure forms as void, token, or collection types."
 
 "**Key Functions:**"
 
@@ -2802,7 +2802,7 @@
 
 [[:section {:title "std.block.parse (Code Parsing)" :link "merged-plans-slop-summary-std-block-summary-md-std-block-parse-code-parsing"}]]
 
-"This sub-namespace defines the core logic for parsing raw input strings into a tree of `std.block` objects. It leverages `clojure.tools.reader` for low-level character reading."
+"This sub-namespace defines the core logic for parsing raw input strings into a tree of `std.block` objects. It leverages `clojure.tools.reader` for low-level ctahtocter reading."
 
 "**Core Concepts:**"
 
@@ -2812,9 +2812,9 @@
 
 "*   **`read-dispatch`**: Determines the block type (`:void`, `:hash`, `:list`, `:token`, etc.) based on the next character.\n*   **`-parse` (multimethod)**: The main dispatch function for parsing different block types.\n    *   **`parse-void`**: Parses whitespace, newlines, commas.\n    *   **`parse-comment`**: Parses a comment line.\n    *   **`parse-token`**: Parses numbers, symbols, booleans, ratios.\n    *   **`parse-keyword`**: Parses keywords (`:key`, `::key`).\n    *   **`parse-reader`**: Parses reader forms (e.g., `\\c`).\n    *   **`read-string-data`**: Parses string literals, handling newlines and escaped characters.\n    *   **`parse-collection`**: Parses collections (`()`, `[]`, `{}`, `#{}`).\n    *   **`parse-cons`**: Parses forms with prefixes (e.g., `'`, `~`, `@`, `#`).\n    *   **`parse-unquote`, `parse-select`, `parse-hash-uneval`, `parse-hash-cursor`, `parse-hash`**: Specific parsers for reader macros and prefixed forms.\n*   **`parse-string`**: Parses an entire string into a single block.\n*   **`parse-root`**: Parses a string into a root block, representing the entire input structure.\n*   **`eof-block?`, `delimiter-block?`**: Check for EOF or delimiter blocks.\n*   **`read-whitespace`**: Reads a sequence of whitespace blocks.\n*   **`parse-non-expressions`**: Parses blocks up to the next expression.\n*   **`read-start`**: Verifies starting delimiters for collections/forms.\n*   **`read-collection`**: Reads all child blocks within a collection, respecting delimiters.\n*   **`read-cons`**: Reads child blocks for cons-like forms (e.g., `'x`, `@y`)."
 
-[[:section {:title "std.block.reader (Low-Level Character Reading)" :link "merged-plans-slop-summary-std-block-summary-md-std-block-reader-low-level-character-reading"}]]
+[[:section {:title "std.block.reader (Low-Level Ctahtocter Reading)" :link "merged-plans-slop-summary-std-block-summary-md-std-block-reader-low-level-ctahtocter-reading"}]]
 
-"This sub-namespace provides an enhanced character-level reader built on top of `clojure.tools.reader`, offering utility functions for detailed input stream manipulation."
+"This sub-namespace provides an enhanced ctahtocter-level reader built on top of `clojure.tools.reader`, offering utility functions for detailed input stream manipulation."
 
 "**Core Concepts:**"
 
@@ -2913,7 +2913,7 @@
 
 "`^{:refer std.block.type/space-block? :added \"3.0\"}`"
 
-"Checks if a block represents a space character."
+"Checks if a block represents a space ctahtocter."
 
 ^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-4 :added "4.0"}
 (fact "space-block? example"
@@ -2925,7 +2925,7 @@
 
 "`^{:refer std.block.type/linebreak-block? :added \"3.0\"}`"
 
-"Checks if a block represents a linebreak character."
+"Checks if a block represents a linebreak ctahtocter."
 
 ^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-5 :added "4.0"}
 (fact "linebreak-block? example"
@@ -2937,7 +2937,7 @@
 
 "`^{:refer std.block.type/linespace-block? :added \"3.0\"}`"
 
-"Checks if a block represents a non-linebreak whitespace character (e.g., `\\space`, `\\tab`)."
+"Checks if a block represents a non-linebreak whitespace ctahtocter (e.g., `\\space`, `\\tab`)."
 
 ^{:id merged-plans-slop-summary-std-block-type-tutorial-md-example-6 :added "4.0"}
 (fact "linespace-block? example"

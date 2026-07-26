@@ -1,9 +1,9 @@
-(ns hara.runtime.basic.docker.impl-js-test
+tahto/runtime/basic/docker/impl_js_test.clj:1:(ns tahto.runtime.basic.docker.impl-js-test
   (:use code.test)
-  (:require [hara.runtime.basic.docker.registry :as registry]
+tahto/runtime/basic/docker/impl_js_test.clj:3:  (:require [tahto.runtime.basic.docker.registry :as registry]
             [std.lib.env :as env]
-            [hara.lang :as l]
-            [hara.lang.script :as script]))
+            [tahto.core :as l]
+            [tahto.core.script :as script]))
 
 ;;
 ;; Node.js basic runtime in a Docker container.
@@ -12,7 +12,7 @@
 ;; Bootstrap connects back to the JVM via host.docker.internal:<port>.
 ;;
 ;; Image: ghcr.io/zcaudate-xyz/foundation-base/rt-basic-js:latest
-;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only hara.runtime.basic.docker.impl-js-test
+tahto/runtime/basic/docker/impl_js_test.clj:15:;; Run with: RT_BASIC_DOCKER_TESTS=true lein test :only tahto.runtime.basic.docker.impl-js-test
 ;;
 
 (l/script- :js
@@ -23,7 +23,7 @@
 (fact:global
  {:skip   (or (not (env/program-exists? "docker"))
               (not (env/docker-daemon-available?))
-              (System/getenv "HARA_NO_DOCKER"))
+tahto/runtime/basic/docker/impl_js_test.clj:26:              (System/getenv "TAHTO_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 

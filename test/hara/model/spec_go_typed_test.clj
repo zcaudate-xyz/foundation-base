@@ -1,9 +1,9 @@
-(ns hara.model.spec-go-typed-test
+tahto/model/spec_go_typed_test.clj:1:(ns tahto.model.spec-go-typed-test
   (:require [clojure.string :as str]
-            [hara.model.spec-go.typed :as go-typed])
+tahto/model/spec_go_typed_test.clj:3:            [tahto.model.spec-go.typed :as go-typed])
   (:use code.test))
 
-^{:refer hara.model.spec-go.typed/emit-go-type :added "4.1"}
+tahto/model/spec_go_typed_test.clj:6:^{:refer tahto.model.spec-go.typed/emit-go-type :added "4.1"}
 (fact "maps xtalk primitive and container types to go"
   [(go-typed/emit-go-type {:kind :primitive :name :xt/str} nil)
    (go-typed/emit-go-type {:kind :array
@@ -20,7 +20,7 @@
                            :item {:kind :named :name 'sample.user/User}} 'sample.user)]
   => ["string" "[]int" "map[any]any" "map[string]any" "*User"])
 
-^{:refer hara.model.spec-go.typed/emit-analysis-declarations :added "4.1"}
+tahto/model/spec_go_typed_test.clj:23:^{:refer tahto.model.spec-go.typed/emit-analysis-declarations :added "4.1"}
 (fact "emits spec/function/value declarations in go syntax"
   (go-typed/emit-analysis-declarations
    {:specs [{:ns "sample.user"
@@ -51,7 +51,7 @@
 
 (fact "can emit declarations from typed fixture namespace"
   (let [out (go-typed/emit-namespace-declarations
-             'hara.model.spec-xtalk-typed-fixture)]
+tahto/model/spec_go_typed_test.clj:54:             'tahto.model.spec-xtalk-typed-fixture)]
     [(str/includes? out "type User map[string]any")
      (str/includes? out "type UserMap map[any]any")
      (str/includes? out "type find_user func(arg0 UserMap, arg1 string) *User")])

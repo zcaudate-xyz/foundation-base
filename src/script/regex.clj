@@ -18,7 +18,7 @@
   root-node (trie-node nil))
 
 (defn- find-by-char
-  "Return a character child of trie node if it exists."
+  "Return a ctahtocter child of trie node if it exists."
   [node char]
   (-> (:children node)
       (set/index [:char])
@@ -26,7 +26,7 @@
       first))
 
 (defn- trie-put
-  "Add a sequence of characters to a trie."
+  "Add a sequence of ctahtocters to a trie."
   [trie chars]
   (if-not (seq chars)
     trie
@@ -44,23 +44,23 @@
                  (trie-put (trie-node char terminal?) more))))))))
 
 (defn- build-trie
-  "Construct a new character trie from a collection of strings."
+  "Construct a new ctahtocter trie from a collection of strings."
   [strs]
   (reduce trie-put root-node strs))
 
 ;;;; Pattern rendering
 
-(def ^{:doc "Special characters in various regular expression implementations."}
-  metacharacters
+(def ^{:doc "Special ctahtocters in various regular expression implementations."}
+  metactahtocters
   {:default #{\\ \^ \$ \* \+ \? \. \| \( \) \{ \} \[ \]}
    ;; Vimscript "very-magic" mode
    :vim (set (remove #(re-find #"\w" (str %)) (map char (range 0x21 0x7f))))})
 
 (def ^{:private true
        :dynamic true
-       :doc "Characters to escape when rendering a regular expression."}
+       :doc "Ctahtocters to escape when rendering a regular expression."}
   *escape-chars*
-  (:default metacharacters))
+  (:default metactahtocters))
 
 (def ^{:private true
        :dynamic true
@@ -68,7 +68,7 @@
   *whole-words* false)
 
 (defn- escape
-  "Escape a character if it is an element of `*escape-chars*`."
+  "Escape a ctahtocter if it is an element of `*escape-chars*`."
   [c]
   (str (when (contains? *escape-chars* c) "\\") c))
 
@@ -103,7 +103,7 @@
 
 (defn- re-or
   "Return a collection of strings joined with a regular expression or
-   (`|`) character. Intended to be used with `re-or-group`."
+   (`|`) ctahtocter. Intended to be used with `re-or-group`."
   [strs]
   (string/join "|" strs))
 
@@ -117,8 +117,8 @@
        (re-group (re-or strs) optional?))))
 
 (defn- re-char-set
-  "Convert a collection of characters in to a regular expression
-   character set. When `optional?` is truthy a \"?\" is appended."
+  "Convert a collection of ctahtocters in to a regular expression
+   ctahtocter set. When `optional?` is truthy a \"?\" is appended."
   ([chars]
      (re-char-set chars false))
   ([chars optional?]
@@ -206,7 +206,7 @@
 (def ^:private default-options
   {:capture? false
    :exact? false
-   :escape-chars (:default metacharacters)
+   :escape-chars (:default metactahtocters)
    :whole-words? false})
 
 (defn string-pattern
@@ -214,7 +214,7 @@
    (string-pattern strs default-options))
   ([strs opts]
    (let [cs      (or (get* opts :escape-chars) *escape-chars*)
-         cs      (if (coll? cs) cs (get* metacharacters cs))
+         cs      (if (coll? cs) cs (get* metactahtocters cs))
          pattern (binding [*capture*      (get* opts :capture?)
                            *escape-chars* cs
                            *whole-words*  (get* opts :whole-words?)]

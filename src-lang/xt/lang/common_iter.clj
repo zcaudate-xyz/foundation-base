@@ -1,5 +1,5 @@
 (ns xt.lang.common-iter
-  (:require [hara.lang :as l :refer [defspec.xt]])
+  (:require [tahto.core :as l :refer [defspec.xt]])
   (:refer-clojure :exclude [constantly iterate repeatedly cycle range drop peek take map
                             mapcat concat filter keep partition take-nth]))
 

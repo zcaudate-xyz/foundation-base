@@ -1,7 +1,7 @@
 (ns xt.lang.spec-base-test
   (:use code.test)
   (:require [clojure.set :as set]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise]))
 
@@ -1953,7 +1953,7 @@
   => true)
 
 ^{:refer xt.lang.spec-base/x:str-char :added "4.1"}
-(fact "gets the character code at an index"
+(fact "gets the ctahtocter code at an index"
 
   (!.js
     (xt/x:str-char "abc" (xt/x:offset 1)))

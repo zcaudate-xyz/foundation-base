@@ -1,10 +1,10 @@
-(ns hara.runtime.basic.type-twostep-ocaml-test
+tahto/runtime/basic/type_twostep_ocaml_test.clj:1:(ns tahto.runtime.basic.type-twostep-ocaml-test
   (:use code.test)
   (:require [std.lib.env :as env]
-            [hara.runtime.basic.impl-annex.process-ocaml]
-            [hara.lang :as l]))
+tahto/runtime/basic/type_twostep_ocaml_test.clj:4:            [tahto.runtime.basic.impl-annex.process-ocaml]
+            [tahto.core :as l]))
 
-(do hara.runtime.basic.impl-annex.process-ocaml/+ocaml-twostep+)
+tahto/runtime/basic/type_twostep_ocaml_test.clj:7:(do tahto.runtime.basic.impl-annex.process-ocaml/+ocaml-twostep+)
 
 (l/script- :ocaml
   {:runtime :twostep :test-mode true})

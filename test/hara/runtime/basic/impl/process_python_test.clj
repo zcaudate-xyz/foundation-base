@@ -1,7 +1,7 @@
-(ns hara.runtime.basic.impl.process-python-test
-  (:require [hara.runtime.basic.impl.process-python :refer :all]
+tahto/runtime/basic/impl/process_python_test.clj:1:(ns tahto.runtime.basic.impl.process-python-test
+tahto/runtime/basic/impl/process_python_test.clj:2:  (:require [tahto.runtime.basic.impl.process-python :refer :all]
             [std.concurrent :as cc]
-            [hara.lang :as l])
+            [tahto.core :as l])
   (:use code.test))
 
 (l/script- :python
@@ -14,7 +14,7 @@
  {:setup    [(l/annex:start-all)]
   :teardown [(l/annex:stop-all)]})
 
-^{:refer hara.runtime.basic.impl.process-python/CANARY :adopt true :added "4.0"}
+tahto/runtime/basic/impl/process_python_test.clj:17:^{:refer tahto.runtime.basic.impl.process-python/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE python code"
 
   (!.py (+ 1 2 3 4))
@@ -24,13 +24,13 @@
     (+ 1 2 3 4))
   => 10)
 
-^{:refer hara.runtime.basic.impl.process-python/default-oneshot-wrap :adopt true :added "4.0"}
+tahto/runtime/basic/impl/process_python_test.clj:27:^{:refer tahto.runtime.basic.impl.process-python/default-oneshot-wrap :adopt true :added "4.0"}
 (fact "creates the ws client connect code"
 
   (default-oneshot-wrap 1)
   => string?)
 
-^{:refer hara.runtime.basic.impl.process-python/default-basic-client :added "4.1"}
+tahto/runtime/basic/impl/process_python_test.clj:33:^{:refer tahto.runtime.basic.impl.process-python/default-basic-client :added "4.1"}
 (fact "buffers utf-8 bytes before decoding in the basic client loop"
 
   (let [out (default-basic-client 19000)]
@@ -40,7 +40,7 @@
      (boolean (re-find #"out\.encode\(\"utf-8\"\)" out))])
   => [true true true true])
 
-^{:refer hara.runtime.basic.impl.process-python/default-body-wrap :added "4.0"}
+tahto/runtime/basic/impl/process_python_test.clj:43:^{:refer tahto.runtime.basic.impl.process-python/default-body-wrap :added "4.0"}
 (fact "creates the scaffolding for the runtime eval to work"
 
   (default-body-wrap ['(+ 1 2 3)])
@@ -60,7 +60,7 @@
     "Δ")
   => "Δ")
 
-^{:refer hara.runtime.basic.impl.process-python/default-body-transform :added "4.0"}
+tahto/runtime/basic/impl/process_python_test.clj:63:^{:refer tahto.runtime.basic.impl.process-python/default-body-transform :added "4.0"}
 (fact "standard python transforms"
 
   (default-body-transform '[1 2 3] {})

@@ -1,9 +1,9 @@
-(ns hara.common.emit-top-level-op-test
-  (:require [hara.common.emit :as emit]
-            [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper]
-            [hara.common.emit-top-level :as top-level]
-            [hara.common.grammar :as grammar])
+tahto/common/emit_top_level_op_test.clj:1:(ns tahto.common.emit-top-level-op-test
+tahto/common/emit_top_level_op_test.clj:2:  (:require [tahto.common.emit :as emit]
+tahto/common/emit_top_level_op_test.clj:3:            [tahto.common.emit-common :as common]
+tahto/common/emit_top_level_op_test.clj:4:            [tahto.common.emit-helper :as helper]
+tahto/common/emit_top_level_op_test.clj:5:            [tahto.common.emit-top-level :as top-level]
+tahto/common/emit_top_level_op_test.clj:6:            [tahto.common.grammar :as grammar])
   (:use code.test))
 
 (def +reserved+
@@ -13,7 +13,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.common.emit/emit-main :adopt true :added "4.0"}
+tahto/common/emit_top_level_op_test.clj:16:^{:refer tahto.common.emit/emit-main :adopt true :added "4.0"}
 (fact "emit do"
 
   (emit/emit-main '(defn hello []

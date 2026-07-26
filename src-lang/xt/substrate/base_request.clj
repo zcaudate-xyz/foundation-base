@@ -1,5 +1,5 @@
 (ns xt.substrate.base-request
-  (:require [hara.lang :as l :refer [defspec.xt]]))
+  (:require [tahto.core :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

@@ -1,6 +1,6 @@
 (ns js.net.conn-redis-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [js.net.conn-redis :as redis]
             [xt.lang.common-notify :as notify]
             [xt.lang.common-repl :as repl]

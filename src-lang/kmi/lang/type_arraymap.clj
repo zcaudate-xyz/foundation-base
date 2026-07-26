@@ -1,5 +1,5 @@
 (ns kmi.lang.type-arraymap
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

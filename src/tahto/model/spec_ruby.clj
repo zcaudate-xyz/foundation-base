@@ -1,0 +1,610 @@
+(ns tahto.model.spec-ruby
+  (:require [clojure.string]
+            [tahto.base.book :as book]
+            [tahto.common.emit :as emit]
+            [tahto.common.emit-common :as common]
+            [tahto.common.emit-helper :as helper]
+            [tahto.common.preprocess-base :as preprocess-base]
+            [tahto.common.emit-top-level :as top]
+            [tahto.common.grammar :as grammar]
+            [tahto.core.script :as script]
+            [tahto.typed.xtalk-analysis :as xtalk-analysis]
+            [tahto.common.util :as ut]
+            [tahto.core.rewrite.destructure :as destruct]
+            [tahto.model.spec-xtalk]
+            [tahto.model.spec-ruby.rewrite :as rewrite]
+            [tahto.model.annex.spec-xtalk.fn-ruby :as fn]
+            [std.lib.collection :as collection]))
+
+(def ^:private +ruby-native-constants+
+  #{"Array" "BasicObject" "Class" "Exception" "FalseClass" "File"
+    "Float" "Hash" "Integer" "IO" "JSON" "Math" "Module" "NilClass"
+    "Numeric" "Object" "Proc" "Range" "Regexp" "RuntimeError" "String"
+    "Symbol" "Time" "TrueClass"})
+
+(defn- ruby-constant-symbol?
+  "checks whether a symbol names an XTalk module constant"
+  [sym {:keys [module book]}]
+  (let [id    (symbol (name sym))
+        ns    (or (namespace sym)
+                  (some-> module :id name symbol))
+        entry (or (get-in module [:code id])
+                  (when ns
+                    (get-in book [:modules (symbol ns) :code id])))]
+    (and (symbol? sym)
+         (re-matches #"[A-Z][A-Za-z0-9_]*" (name sym))
+         (not (contains? +ruby-native-constants+ (name sym)))
+         (= :def (:op-key entry)))))
+
+(defn- ruby-global-constant
+  "emits a Ruby global slot for an XTalk module constant"
+  [sym grammar {:keys [module]}]
+  (let [ns  (or (namespace sym)
+                (some-> module :id name symbol))
+        key (helper/emit-symbol-full (symbol (name sym)) ns grammar)]
+    (str "($__globals__ ||= {})[" (pr-str key) "]")))
+
+(defn- ruby-global-key
+  [key grammar]
+  (if (namespace key)
+    (helper/emit-symbol-full (symbol (name key))
+                             (symbol (namespace key))
+                             grammar)
+    (ut/sym-default-str key)))
+
+(defn ruby-symbol
+  "emit ruby symbol
+   (spec-ruby/ruby-symbol :a spec-ruby/+grammar+ {})
+    => \":a\"
+    (spec-ruby/ruby-symbol 'a spec-ruby/+grammar+ {})
+    => \"a\""
+  {:added "4.1"}
+  [sym grammar mopts]
+  (let [reserved #{"BEGIN" "END" "alias" "and" "begin" "break" "case" "class"
+                   "def" "defined?" "do" "else" "elsif" "end" "ensure" "false"
+                   "for" "if" "in" "module" "next" "nil" "not" "or" "redo"
+                   "rescue" "retry" "return" "self" "super" "then" "true"
+                   "undef" "unless" "until" "when" "while" "yield"}
+        sym-name (when (symbol? sym) (name sym))
+        local-name (when sym-name
+                     (cond-> (clojure.string/replace sym-name "-" "_")
+                       (contains? reserved sym-name) (str "_")))]
+    (cond (keyword? sym)
+          (str ":" (name sym))
+
+    (ruby-constant-symbol? sym mopts)
+          (ruby-global-constant sym grammar mopts)
+
+          (and (symbol? sym)
+               (nil? (namespace sym)))
+          local-name
+
+          :else
+          (common/emit-symbol sym grammar mopts))))
+
+(defn ruby-destructure-key
+  "normalizes xtalk destructuring keys to the Ruby hash key format"
+  {:added "4.1"}
+  [sym]
+  (-> (name sym)
+      (clojure.string/replace "-" "_")))
+
+(defn- ruby-qualified-symbol
+  [sym]
+  (let [{:keys [module]} (preprocess-base/macro-opts)
+        module-id (:id module)]
+    (cond
+      (or (nil? sym)
+          (namespace sym)
+          (:inner (meta sym))
+          (nil? module-id))
+      sym
+
+      :else
+      (symbol (name module-id) (name sym)))))
+
+(defn- ruby-optional-input?
+  [input]
+  (= :maybe (get-in input [:type :kind])))
+
+(defn- ruby-apply-optional-defaults
+  [sym args]
+  (if-not (and sym (vector? args))
+    args
+    (try
+      (let [qualified      (ruby-qualified-symbol sym)
+            fn-def         (xtalk-analysis/resolve-function-def qualified)
+            inferred-count (when fn-def
+                             (count (take-while ruby-optional-input?
+                                                (reverse (:inputs fn-def)))))
+            optional-count (when (and inferred-count
+                                      (pos? inferred-count))
+                             inferred-count)]
+        (if (and optional-count (pos? optional-count))
+          (let [optional-args (take-last optional-count args)]
+            (if (not (neg? (collection/index-at #{:=} args)))
+              args
+              (vec
+               (concat (drop-last optional-count args)
+                       (mapcat (fn [arg]
+                                 [arg := nil])
+                               optional-args)))))
+          args))
+      (catch Throwable _
+        args))))
+
+(defn ruby-method-ref
+  [[_ sym]]
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*]
+    (list ':-
+          (str "method(:"
+               (common/emit-symbol sym grammar mopts)
+               ")"))))
+
+(defn ruby-symbol-global
+  [key _grammar _mopts]
+  (let [globals (list ':- "($__globals__ ||= {})")]
+    (if (= key '!:G)
+      globals
+      (list '. globals [(ruby-global-key key _grammar)]))))
+
+(defn- ruby-vector-destructure-bindings
+  [target temp]
+  (keep-indexed (fn [idx sym]
+                  (when (not= '_ sym)
+                    [sym (list 'x:get-idx temp (list 'x:offset idx) nil)]))
+                target))
+
+(defn ruby-var
+  "emit ruby variable
+   (spec-ruby/ruby-var '(var a 1))
+     => '(:= a 1)"
+  {:added "4.1"}
+  [[_ sym & args]]
+  (let [bound (last args)]
+    (cond
+      (destruct/destructure-target? sym)
+      (apply list 'do*
+             (map (fn [[target value]]
+                    (list ':= target value))
+                  (destruct/destructure-bindings sym bound ruby-destructure-key)))
+
+      (and (vector? sym)
+           (seq sym)
+           (every? symbol? sym))
+      (apply list 'do*
+             (map (fn [[target value]]
+                    (list ':= target value))
+                  (ruby-vector-destructure-bindings sym bound)))
+
+      :else
+      (list ':= sym bound))))
+
+(defn ruby-map
+  "emit ruby hash
+   (l/emit-as :ruby '[{:a 1 :b 2}])
+        => \"{\\\"a\\\" => 1, \\\"b\\\" => 2}\""
+  {:added "4.1"}
+  [m grammar mopts]
+  (let [entries (map (fn [[k v]]
+                       (str (common/*emit-fn* (if (keyword? k)
+                                                (ut/sym-default-str k)
+                                                k)
+                                              grammar mopts)
+                            " => "
+                            (common/*emit-fn* v grammar mopts)))
+                     m)]
+    (str "{" (clojure.string/join ", " entries) "}")))
+
+(defn ruby-string
+  [s]
+  (pr-str s))
+
+(defn ruby-emit-input-rest
+  [{:keys [symbol]} grammar mopts]
+  (str "*" (common/*emit-fn* symbol grammar mopts)))
+
+(defn ruby-emit-args
+  [args grammar mopts]
+  (str "("
+       (clojure.string/join ", "
+                            (common/emit-array args grammar mopts))
+       ")"))
+
+(defn ruby-div
+  [[_ a b & more] grammar mopts]
+  (let [start (str (common/emit-wrapping a grammar mopts)
+                   ".fdiv("
+                   (common/*emit-fn* b grammar mopts)
+                   ")")]
+    (reduce (fn [acc arg]
+              (str acc " / " (common/emit-wrapping arg grammar mopts)))
+            start
+            more)))
+
+(defn ruby-throw
+  [[_ value] grammar mopts]
+  (str "raise("
+       (common/*emit-fn* value grammar mopts)
+       ")"))
+
+(defn- ruby-def-arglists
+  [sym]
+  (let [arglists (-> sym meta :arglists)]
+    (cond
+      (and (seq? arglists)
+           (= 'quote (first arglists)))
+      (second arglists)
+
+      :else
+      arglists)))
+
+(defn- ruby-def-alias-wrapper
+  [sym target]
+  (let [grammar    preprocess-base/*macro-grammar*
+        mopts      preprocess-base/*macro-opts*
+        sym*       (ruby-qualified-symbol sym)
+        target-str (common/*emit-fn* target grammar mopts)
+        sym-str    (common/*emit-fn* sym* grammar mopts)]
+    (list ':- (str "def " sym-str "(*args)\n"
+                   "  return " target-str "(*args)\n"
+                   "end"))))
+
+(defn- ruby-alias-constant-symbol?
+  [sym]
+  (and (symbol? sym)
+       (namespace sym)
+       (re-matches #"[A-Z][A-Za-z0-9_]*" (name sym))))
+
+(defn- ruby-def-alias-target?
+  [form]
+  (or (and (symbol? form)
+           (namespace form)
+           (not (ruby-alias-constant-symbol? form)))
+      (and (seq? form)
+           (= '. (first form))
+           (symbol? (second form))
+           (not (vector? (nth form 2 nil))))))
+
+(defn ruby-def
+  [[_tag sym body :as form]]
+  (cond
+    (seq (ruby-def-arglists sym))
+    (let [arglists (ruby-def-arglists sym)
+          args (first arglists)]
+      (list 'defn- sym args
+            (list 'return
+                  (apply list body args))))
+
+    (ruby-def-alias-target? body)
+    (ruby-def-alias-wrapper sym body)
+
+    (ruby-constant-symbol? sym preprocess-base/*macro-opts*)
+    (list ':-
+          (top/emit-top-level
+           :defglobal
+           (list 'defglobal sym body)
+           preprocess-base/*macro-grammar*
+           preprocess-base/*macro-opts*))
+
+    :else
+    (list ':- (top/emit-top-level :def form preprocess-base/*macro-grammar* preprocess-base/*macro-opts*))))
+
+(defn- ruby-callable-form?
+  [form]
+  (cond
+    (and (seq? form)
+         (#{'fn 'fn.inner} (first form)))
+    true
+
+    (and (seq? form)
+         (= 'quote (first form))
+         (= 2 (count form)))
+    (ruby-callable-form? (second form))
+
+    (and (seq? form)
+         (= 1 (count form)))
+    (ruby-callable-form? (first form))
+
+    :else
+    false))
+
+(defn ruby-invoke
+  [[f & args] grammar mopts]
+  (let [target (common/emit-wrapping f grammar mopts)]
+    (str target
+         (when (or (ruby-callable-form? f)
+                   (seq? f))
+           ".call")
+         (ruby-emit-args args grammar mopts))))
+
+(defn- ruby-zero-arg-call?
+  [prop]
+  (and (seq? prop)
+       (symbol? (first prop))
+       (not= 'call (first prop))
+       (empty? (rest prop))))
+
+(defn- ruby-method-name
+  [sym grammar mopts]
+  (if (= '<< sym)
+    "<<"
+    (common/emit-symbol sym grammar mopts)))
+
+(defn- ruby-dot-entry
+  [prop grammar mopts]
+  (cond
+    (ruby-zero-arg-call? prop)
+    (str "." (ruby-method-name (first prop) grammar mopts))
+
+    (collection/form? prop)
+    (let [sym    (first prop)
+          sym    (if (string? sym) (symbol sym) sym)
+          _      (assert (symbol? sym))
+          braces (meta sym)]
+      (str "."
+           (ruby-method-name sym grammar mopts)
+           (if (not-empty braces)
+             (common/*emit-fn* braces grammar mopts)
+             "")
+           (ruby-emit-args (rest prop) grammar mopts)))
+
+    :else
+    (common/emit-index-entry prop grammar mopts)))
+
+(defn ruby-dot
+  [[_ obj & props]]
+  (let [grammar preprocess-base/*macro-grammar*
+        mopts   preprocess-base/*macro-opts*
+        target  (let [emitted (common/*emit-fn* obj grammar mopts)]
+                  (if (collection/form? obj)
+                    (str "(" emitted ")")
+                    emitted))]
+    (list ':- (str target
+                    (apply str (map #(ruby-dot-entry % grammar mopts) props))))))
+
+(defn ruby-emit-range
+  [separator [_ start & more] grammar mopts]
+  (let [[step end] (if (= 2 (count more))
+                     more
+                     [1 (first more)])]
+    (assert end "Ruby range requires an end value")
+    (assert (= 1 step) "Ruby range does not support custom step values")
+    (str (common/*emit-fn* start grammar mopts)
+         separator
+         (common/*emit-fn* end grammar mopts))))
+
+(defn ruby-defn-
+  [form grammar mopts]
+  (let [[tag name args & more] form]
+    (top/emit-top-level
+     :defn
+     (list* tag name (ruby-apply-optional-defaults name args) more)
+     grammar
+     mopts)))
+
+(defn ruby-defn
+  [[_ sym args & body]]
+  (list* 'defn- sym args (rewrite/rewrite-callable-body args body)))
+
+(defn ruby-defgen
+  [form]
+  (let [rewritten (rewrite/ruby-rewrite-defgen form)]
+    (with-meta (cons 'defn- (rest rewritten))
+      (meta rewritten))))
+
+(defn ruby-fn
+  "basic transform for ruby blocks
+   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
+    => '(fn.inner [a] (+ a 1))"
+  {:added "4.1"}
+  ([[_ & more]]
+   (let [[args body] (if (symbol? (first more))
+                       [(second more) (drop 2 more)]
+                       [(first more) (rest more)])
+         body     (rewrite/rewrite-callable-body args body)
+         grammar  preprocess-base/*macro-grammar*
+         mopts    preprocess-base/*macro-opts*
+         args-str (clojure.string/join ", "
+                                       (common/emit-array args grammar mopts))
+         body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
+     (list ':- "->(" args-str ") {\n" body-str "\n}"))))
+
+(defn tf-for-array
+  "transform for `for:array`"
+  {:added "4.1"}
+  [[_ [e arr] & body]]
+  (let [bound (if (vector? e) e [e])
+        bound (vec (remove #{'_} bound))
+        captures (rewrite/capture-aliases body bound)
+        body  (rewrite/rewrite-callable-body
+               bound
+               (rewrite/rewrite-captured-callables body captures))
+        binding (if (vector? e)
+                  (let [[i v] e]
+                    [[v i] :in (list '. arr '(each_with_index))])
+                  [e :in arr])]
+    (list 'do
+          (apply list 'for binding
+                 (or (not-empty body)
+                     [nil]))
+          nil)))
+
+(defn tf-for-object
+  "transform for `for:object`"
+  {:added "4.1"}
+  [[_ [[k v] m] & body]]
+  (let [bound (vec (remove #{'_} [k v]))
+        captures (rewrite/capture-aliases body bound)
+        body (rewrite/rewrite-callable-body
+              bound
+              (rewrite/rewrite-captured-callables body captures))
+        [binding source] (cond
+                           (= k '_)
+                           [v (list '. (list 'or m {}) '(values))]
+
+                           (= v '_)
+                           [k (list '. (list 'or m {}) '(keys))]
+
+                           :else
+                           [[k v] (list 'or m {})])]
+    (list 'do
+          (apply list 'for [binding :in source]
+                 (or (not-empty body)
+                     [nil]))
+          nil)))
+
+(defn tf-for-iter
+  "transform for `for:iter`"
+  {:added "4.1"}
+  [[_ [e it] & body]]
+  (let [bound (vec (remove #{'_} [e]))
+        body  (rewrite/rewrite-callable-body bound body)]
+    (apply list 'for [e :in it]
+           (or (not-empty body)
+               [nil]))))
+
+(defn tf-for-index
+  "transform for `for:index`"
+  {:added "4.1"}
+  [[_ [i [start stop step]] & body]]
+  (let [step (or step 1)
+        sign (if (and (number? step)
+                      (neg? step))
+               '>
+               '<)]
+    (list 'do
+          (list 'var i start)
+          (apply list 'while (list sign i stop)
+                 (concat body
+                         [(list ':= i (list '+ i step))])))))
+
+(def +features+
+  (-> (grammar/build :exclude [:pointer :block :data-range])
+      (grammar/build:override
+       {:var        {:macro #'ruby-var :emit :macro}
+        :index      {:macro #'ruby-dot :emit :macro}
+        :for-object {:macro #'tf-for-object :emit :macro}
+         :for-array  {:macro #'tf-for-array  :emit :macro}
+         :for-iter   {:macro #'tf-for-iter   :emit :macro}
+         :for-index  {:macro #'tf-for-index  :emit :macro}
+         :def        {:macro #'ruby-def    :emit :macro}
+         :defn       {:symbol #{'defn}   :macro #'ruby-defn   :emit :macro}
+         :defgen     {:symbol #{'defgen} :macro #'ruby-defgen :emit :macro}
+         :spread     {:raw "*" :emit :pre}
+         :with-global {:value true :raw "($__globals__ ||= {})"}
+         :throw      {:emit #'ruby-throw}
+         :and        {:raw "&&"}
+         :or         {:raw "||"}
+         :not        {:raw "!" :emit :prefix}
+        :eq         {:raw "=="}
+        :pow        {:raw "**"}
+        :fn         {:macro  #'ruby-fn   :emit :macro}
+        :neq        {:raw "!="}
+        :gt         {:raw ">"}
+        :lt         {:raw "<"}
+        :div        {:emit #'ruby-div}
+        :gte        {:raw ">="}
+        :lte        {:raw "<="}})
+      (grammar/build:override fn/+ruby+)
+      (grammar/build:extend
+       {:defn-      {:op :defn- :symbol #{'defn-} :type :block :emit #'ruby-defn-}
+        :assign     {:op :assign :symbol #{':=} :raw "=" :emit :infix}
+        :to         {:op :to :symbol #{'to} :emit (fn [form grammar mopts]
+                                                    (ruby-emit-range ".." form grammar mopts))}
+        :to-e       {:op :to-e :symbol #{'to-e} :emit (fn [form grammar mopts]
+                                                        (ruby-emit-range "..." form grammar mopts))}
+        :ruby-method-ref {:op :ruby-method-ref
+                          :symbol #{'ruby-method-ref}
+                          :macro #'ruby-method-ref
+                          :emit :macro}
+        :x-iter-generator {:op :x-iter-generator
+                           :symbol #{'x:iter-generator}
+                           :macro #'fn/ruby-tf-x-iter-generator
+                           :emit :macro}
+        :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
+        :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
+        :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
+        :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))
+
+(def +template+
+  (->> {:banned #{}
+        :allow   {:assign  #{:symbol}}
+        :default {:common    {:statement ""}
+                  :invoke    {:custom #'ruby-invoke}
+                  :block     {:parameter {:start " " :end ""}
+                              :body      {:start "" :end "end" :append false}}
+                  :function  {:raw "def"
+                              :args      {:rest #'ruby-emit-input-rest}
+                              :body      {:start "" :end "end"}}}
+        :block   {:while     {:body {:start "" :end "end"}}
+                  :branch    {:wrap {:start "" :end "end"}
+                              :control {:default {:parameter {:start " " :end ""}
+                                                  :body {:append true :start "" :end ""}}
+                                        :if      {:raw "if"}
+                                        :elseif  {:raw "elsif"}
+                                        :else    {:raw "else"}}}
+                  :try      {:raw  "begin"
+                             :wrap {:start "" :end "end"}
+                             :body {:start "" :end ""}
+                             :control {:catch   {:raw  "rescue Exception =>"
+                                                 :body {:start "" :end ""}}
+                                       :finally {:raw "ensure"
+                                                 :body {:start "" :end ""}}}}}
+        :token   {:nil       {:as "nil"}
+                  :boolean   {:as (fn [b] (if b "true" "false"))}
+                  :string    {:custom #'ruby-string}
+                  :symbol    {:custom #'ruby-symbol
+                              :global #'ruby-symbol-global
+                              :replace (assoc helper/+sym-replace+ \? "?")}}
+        :data    {:vector    {:start "[" :end "]" :space ""}
+                  :map-entry {:assign " => " :space " " :keyword :string}
+                  :map       {:custom #'ruby-map}}
+        :rewrite {:staging [#'rewrite/ruby-rewrite-stage]}
+        :function {:defn      {:raw "def"
+                               :body      {:start "" :end "end"}}}
+        :define   {:def       {:raw "def"}
+                   :defglobal {:raw ""}}}
+       (collection/merge-nested (emit/default-grammar))))
+
+
+(comment
+  :try     {:raw "BEGIN"
+            :wrap    {:start "" :end "END;"}
+            :body    {:start "" :end "EXCEPTION"}
+            :control {:default {:parameter  {:start "" :end ""}
+                                :body {:append true
+                                       :start "" :end ""}}
+                      :catch   {:raw "WHEN"
+                                :parameter  {:start " " :end " THEN"}}}}
+
+  :default {:comment   {:prefix "--"}
+            :common    {:apply ":" :statement ""
+                        :namespace-full "___"
+                        :namespace-sep  "_"}
+            :index     {:offset 1  :end-inclusive true}
+            :return    {:multi true}
+            :block     {:parameter {:start " " :end " "}
+                        :body      {:start "" :end ""}}
+            :function  {:raw "function"
+                        :body      {:start "" :end "end"}}
+            :infix     {:if  {:check "and" :then "or"}}
+            :global    {:reference nil}})
+
+(def +grammar+
+  (grammar/grammar :rb
+                   (grammar/to-reserved +features+)
+                   +template+))
+
+(def +book+
+  (book/book {:lang :ruby
+              :parent :xtalk
+              :meta (book/book-meta {})
+              :grammar +grammar+}))
+
+(def +init+
+  (script/install +book+))
+
+;; The adapter installs a Ruby module and therefore must load after +book+.
+(require 'ruby.lang.concurrent-promise)

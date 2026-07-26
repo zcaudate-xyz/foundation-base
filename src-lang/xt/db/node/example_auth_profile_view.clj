@@ -1,6 +1,6 @@
 (ns xt.db.node.example-auth-profile-view
   "Target-neutral substrate view for the auth/profile example."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

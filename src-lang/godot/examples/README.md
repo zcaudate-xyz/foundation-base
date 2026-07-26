@@ -1,11 +1,11 @@
 # Godot Gaussian Splat Example
 
 This example renders a cloud of colored Gaussian splats in Godot 4 using the
-xtalk `hara.lang` GDScript DSL.
+xtalk `tahto.core` GDScript DSL.
 
 ## File
 
-- `gaussian_splat.clj` — Hara DSL source that compiles to GDScript
+- `gaussian_splat.clj` — Tahto DSL source that compiles to GDScript
 
 ## What it does
 

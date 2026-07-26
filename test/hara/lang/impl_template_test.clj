@@ -1,10 +1,10 @@
-(ns hara.common.emit-template-test
-  (:require [hara.lang.book :as b]
-             [hara.common.emit-helper :as helper]
-             [hara.common.emit-prep-lua-test :as prep]
-             [hara.common.grammar :as grammar]
-             [hara.common.emit-template :refer :all]
-             [hara.lang.impl-entry :as entry]
+tahto/lang/impl_template_test.clj:1:(ns tahto.common.emit-template-test
+  (:require [tahto.base.book :as b]
+tahto/lang/impl_template_test.clj:3:             [tahto.common.emit-helper :as helper]
+tahto/lang/impl_template_test.clj:4:             [tahto.common.emit-prep-lua-test :as prep]
+tahto/lang/impl_template_test.clj:5:             [tahto.common.grammar :as grammar]
+tahto/lang/impl_template_test.clj:6:             [tahto.common.emit-template :refer :all]
+             [tahto.core.impl-entry :as entry]
              [std.lib.env :as env])
   (:use code.test))
 
@@ -100,10 +100,10 @@
   => '[#{}
         "function template_fn(value){\n  return value;\n}"])
 
-^{:refer hara.common.emit-template/entry-reserved :added "4.1"}
+tahto/lang/impl_template_test.clj:103:^{:refer tahto.common.emit-template/entry-reserved :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.common.emit-template/create-code-state :added "4.1"}
+tahto/lang/impl_template_test.clj:106:^{:refer tahto.common.emit-template/create-code-state :added "4.1"}
 (fact "hydrates and stages a code entry for the current grammar"
   (select-keys
    (create-code-state (dissoc +template-parent-entry+
@@ -131,7 +131,7 @@
        :xtalk-profiles #{}
        :polyfill-modules #{}})
 
-^{:refer hara.common.emit-template/cached-code-state :added "4.1"}
+tahto/lang/impl_template_test.clj:134:^{:refer tahto.common.emit-template/cached-code-state :added "4.1"}
 (fact "restages template entries using the per-entry cache"
   (select-keys
    (cached-code-state +template-parent-entry+
@@ -146,10 +146,10 @@
   => '{:form (defn template-fn [value] (return value))
        :deps #{}})
 
-^{:refer hara.common.emit-template/materialize-code-entry :added "4.1"}
+tahto/lang/impl_template_test.clj:149:^{:refer tahto.common.emit-template/materialize-code-entry :added "4.1"}
 (fact "TODO")
 
-^{:refer hara.common.emit-template/cached-entry-deps :added "4.1"}
+tahto/lang/impl_template_test.clj:152:^{:refer tahto.common.emit-template/cached-entry-deps :added "4.1"}
 (fact "returns restaged code dependencies for the current language"
   (cached-entry-deps {:modules (:modules +template-helper-book+)
                       :grammar +template-parent-grammar+

@@ -12,7 +12,7 @@
    components are admitted once a Wind equivalent exists, and \"platform\"
    components (`fg/` prefixed ids) lower directly to @xtalk/figma-ui on web
    and are rejected by portable validation and the Wind backend."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

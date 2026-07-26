@@ -1,14 +1,14 @@
-(ns hara.runtime.vscode-test
+tahto/runtime/vscode_test.clj:1:(ns tahto.runtime.vscode-test
   (:use code.test)
-  (:require [hara.lang :as h]
-            [hara.lang.type-shared :as shared]
-            [hara.runtime.vscode :as vscode]
-            [hara.runtime.vscode.impl :as impl]
+  (:require [tahto.core :as h]
+            [tahto.core.type-shared :as shared]
+tahto/runtime/vscode_test.clj:5:            [tahto.runtime.vscode :as vscode]
+tahto/runtime/vscode_test.clj:6:            [tahto.runtime.vscode.impl :as impl]
             [std.lib.env :as env]))
 
 (fact:global {:skip (not (env/program-exists? "code"))})
 
-^{:refer hara.runtime.vscode/vscode :added "4.1" :timeout 60000}
+tahto/runtime/vscode_test.clj:11:^{:refer tahto.runtime.vscode/vscode :added "4.1" :timeout 60000}
 (fact "starts and stops a vscode runtime"
   (let [rt (vscode/vscode {})]
     [(boolean rt)
@@ -17,7 +17,7 @@
          true)])
   => [true true true])
 
-^{:refer hara.runtime.vscode/raw-eval-vscode :added "4.1" :timeout 60000}
+tahto/runtime/vscode_test.clj:20:^{:refer tahto.runtime.vscode/raw-eval-vscode :added "4.1" :timeout 60000}
 (fact "evaluates js in vscode"
   (let [rt (vscode/vscode {})]
     (try
@@ -27,7 +27,7 @@
         (std.lib.component/stop rt))))
   => [6 "function"])
 
-^{:refer hara.runtime.vscode.impl/vscode-shared:create :added "4.1" :timeout 60000}
+tahto/runtime/vscode_test.clj:30:^{:refer tahto.runtime.vscode.impl/vscode-shared:create :added "4.1" :timeout 60000}
 (fact "two shared vscode runtimes with the same id share the process"
   (let [rt1 (impl/vscode-shared:create {:id :shared-vscode-test})
         rt2 (impl/vscode-shared:create {:id :shared-vscode-test})]

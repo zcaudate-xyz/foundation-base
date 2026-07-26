@@ -3,7 +3,7 @@
 [[:hero {:title "Foundation Base"
           :subtitle "A Clojure-first toolkit for building, generating, testing, and operating polyglot systems."
           :lead "Foundation Base combines reusable Clojure libraries, developer tooling, language generation, and runtime integration in one repository. Start with the area that matches what you want to do; you do not need to understand the entire codebase first."
-          :badges ["std" "code" "hara + rt" "xt"]
+          :badges ["std" "code" "tahto + rt" "xt"]
           :actions [{:label "Getting started" :href "getting-started.html" :variant :primary}
                     {:label "Browse examples" :href "examples.html"}
                     {:label "Contribute" :href "contributing.html"}]}]]
@@ -17,8 +17,8 @@
                        :href "std/index.html"}
                       {:meta "Language generation"
                        :title "Generate code for other languages"
-                       :text "Use Hara books and grammars to emit JavaScript, Lua, Python, Go, SQL, Solidity, and other targets from a shared Clojure authoring model."
-                       :href "hara/introduction.html"}
+                       :text "Use Tahto books and grammars to emit JavaScript, Lua, Python, Go, SQL, Solidity, and other targets from a shared Clojure authoring model."
+                       :href "tahto/introduction.html"}
                       {:meta "Examples"
                        :title "Compare source with generated projects"
                        :text "Follow walkthroughs and open authored Clojure source, build definitions, generated repositories, and reproduction commands."
@@ -46,10 +46,10 @@
                        :title "Development tools"
                        :text "Testing, documentation, structural queries, maintenance, project tooling, and analysis."
                        :href "code-tools.html"}
-                      {:meta "hara.* and rt.*"
+                      {:meta "tahto.* and rt.*"
                        :title "Languages and runtimes"
                        :text "Grammar-driven code generation, typing, target models, and runtime adapters."
-                       :href "hara/index.html"}
+                       :href "tahto/index.html"}
                       {:meta "xt.*"
                        :title "Portable libraries"
                        :text "Cross-target libraries and application layers built with the language tooling."
@@ -69,10 +69,10 @@
 
 [[:section {:title "Generate target-language code"}]]
 
-"`hara.lang` stores code in a reusable intermediate form and emits it through a target grammar. The language tooling also supports modules, dependency tracking, inspection, testing, and runtime execution."
+"`tahto.core` stores code in a reusable intermediate form and emits it through a target grammar. The language tooling also supports modules, dependency tracking, inspection, testing, and runtime execution."
 
 [[:code {:lang "clojure"}
-  "(require '[hara.lang :as l])\n\n(l/emit-as :js '(+ 1 2 3))\n;; => \"1 + 2 + 3\""]]
+  "(require '[tahto.core :as l])\n\n(l/emit-as :js '(+ 1 2 3))\n;; => \"1 + 2 + 3\""]]
 
 [[:section {:title "Run a targeted test"}]]
 

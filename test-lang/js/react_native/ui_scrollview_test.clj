@@ -1,5 +1,5 @@
 (ns js.react-native.ui-scrollview-test
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:use code.test))
 
 (l/script :js

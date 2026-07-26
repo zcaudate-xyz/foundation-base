@@ -1,5 +1,5 @@
 (ns postgres.sample.scratch-v0-bind-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [postgres.sample.scratch-v0.route-scratch :as route-scratch]
             [postgres.sample.scratch-v0.view-log :as view-log])
   (:use code.test))

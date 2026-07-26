@@ -1,8 +1,8 @@
-(ns hara.model.spec-ruby-test
-  (:require [hara.lang :as l]
-            [hara.model.spec-ruby :as spec-ruby]
-            [hara.model.spec-ruby.rewrite :as rewrite]
-            [hara.model.annex.spec-xtalk.fn-ruby :as fn-ruby])
+tahto/model/spec_ruby_test.clj:1:(ns tahto.model.spec-ruby-test
+  (:require [tahto.core :as l]
+tahto/model/spec_ruby_test.clj:3:            [tahto.model.spec-ruby :as spec-ruby]
+tahto/model/spec_ruby_test.clj:4:            [tahto.model.spec-ruby.rewrite :as rewrite]
+tahto/model/spec_ruby_test.clj:5:            [tahto.model.annex.spec-xtalk.fn-ruby :as fn-ruby])
   (:use code.test))
 
 (fact "Ruby Basic Emit"
@@ -251,7 +251,7 @@
           (x:get-key obj "describe" nil)
           (x:get-key (or (proto:get obj) {}) "describe" nil)))
 
-^{:refer hara.model.spec-ruby/ruby-symbol :added "4.1"}
+tahto/model/spec_ruby_test.clj:254:^{:refer tahto.model.spec-ruby/ruby-symbol :added "4.1"}
 (fact "emit ruby symbol"
 
   (spec-ruby/ruby-symbol :a spec-ruby/+grammar+ {})
@@ -269,13 +269,13 @@
                                    :code {'HEX {:op-key :def}}}})
   => "($__globals__ ||= {})[\"xt_lang_common_color____HEX\"]")
 
-^{:refer hara.model.spec-ruby/ruby-destructure-key :added "4.1"}
+tahto/model/spec_ruby_test.clj:272:^{:refer tahto.model.spec-ruby/ruby-destructure-key :added "4.1"}
 (fact "rewrites destructuring keys for ruby")
 
-^{:refer hara.model.spec-ruby/ruby-method-ref :added "4.1"}
+tahto/model/spec_ruby_test.clj:275:^{:refer tahto.model.spec-ruby/ruby-method-ref :added "4.1"}
 (fact "creates ruby method references")
 
-^{:refer hara.model.spec-ruby/ruby-symbol-global :added "4.1"}
+tahto/model/spec_ruby_test.clj:278:^{:refer tahto.model.spec-ruby/ruby-symbol-global :added "4.1"}
 (fact "emit ruby global symbol"
 
   (spec-ruby/ruby-symbol-global '!:G spec-ruby/+grammar+ {})
@@ -286,7 +286,7 @@
   (spec-ruby/ruby-symbol-global 'xt.lang.common-color/HEX spec-ruby/+grammar+ {})
   => '(. (:- "($__globals__ ||= {})") ["xt_lang_common_color____HEX"]))
 
-^{:refer hara.model.spec-ruby/ruby-var :added "4.1"}
+tahto/model/spec_ruby_test.clj:289:^{:refer tahto.model.spec-ruby/ruby-var :added "4.1"}
 (fact "emit ruby variable"
  
   (spec-ruby/ruby-var '(var a 1))
@@ -310,7 +310,7 @@
             (re-find #"b_var = " s)
             (re-find #"\[\"b_var\"\]" s))))
 
-^{:refer hara.model.spec-ruby/ruby-map :added "4.1"}
+tahto/model/spec_ruby_test.clj:313:^{:refer tahto.model.spec-ruby/ruby-map :added "4.1"}
 (fact "emit ruby hash"
 
   (l/emit-as :ruby '[{:a 1 :b 2}])
@@ -319,31 +319,31 @@
   (l/emit-as :ruby '[{:ref-links {} :first-name "Root"}])
   => "{\"ref_links\" => {}, \"first_name\" => \"Root\"}")
 
-^{:refer hara.model.spec-ruby/ruby-emit-args :added "4.1"}
+tahto/model/spec_ruby_test.clj:322:^{:refer tahto.model.spec-ruby/ruby-emit-args :added "4.1"}
 (fact "emits ruby argument lists")
 
-^{:refer hara.model.spec-ruby/ruby-div :added "4.1"}
+tahto/model/spec_ruby_test.clj:325:^{:refer tahto.model.spec-ruby/ruby-div :added "4.1"}
 (fact "emits ruby division")
 
-^{:refer hara.model.spec-ruby/ruby-invoke :added "4.1"}
+tahto/model/spec_ruby_test.clj:328:^{:refer tahto.model.spec-ruby/ruby-invoke :added "4.1"}
 (fact "emits ruby invocations")
 
-^{:refer hara.model.spec-ruby/ruby-dot :added "4.1"}
+tahto/model/spec_ruby_test.clj:331:^{:refer tahto.model.spec-ruby/ruby-dot :added "4.1"}
 (fact "emits ruby dot access")
 
-^{:refer hara.model.spec-ruby/ruby-emit-range :added "4.1"}
+tahto/model/spec_ruby_test.clj:334:^{:refer tahto.model.spec-ruby/ruby-emit-range :added "4.1"}
 (fact "emits ruby ranges")
 
-^{:refer hara.model.spec-ruby/ruby-defn- :added "4.1"}
+tahto/model/spec_ruby_test.clj:337:^{:refer tahto.model.spec-ruby/ruby-defn- :added "4.1"}
 (fact "emits private ruby functions")
 
-^{:refer hara.model.spec-ruby/ruby-defn :added "4.1"}
+tahto/model/spec_ruby_test.clj:340:^{:refer tahto.model.spec-ruby/ruby-defn :added "4.1"}
 (fact "emit ruby function definition"
 
   (l/emit-as :ruby '[(defn add [a b] (return (+ a b)))])
   => "def add(a,b)\n  return a + b\nend")
 
-^{:refer hara.model.spec-ruby/ruby-defgen :added "4.1"}
+tahto/model/spec_ruby_test.clj:346:^{:refer tahto.model.spec-ruby/ruby-defgen :added "4.1"}
 (fact "emits ruby generator definitions with deterministic iterator bindings"
   (spec-ruby/ruby-defgen '(defgen items [xs] (yield xs)))
   => '(defn- items [xs]
@@ -360,13 +360,13 @@
           (fn [items__iter____2]
             (. items__iter____2 (<< items__iter__)))))))
 
-^{:refer hara.model.spec-ruby/ruby-fn :added "4.1"}
+tahto/model/spec_ruby_test.clj:363:^{:refer tahto.model.spec-ruby/ruby-fn :added "4.1"}
 (fact "basic transform for ruby blocks"
 
   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
   => '(:- "->(" "a" ") {\n" "(do (+ a 1))" "\n}"))
 
-^{:refer hara.model.spec-ruby/tf-for-array :added "4.1"}
+tahto/model/spec_ruby_test.clj:369:^{:refer tahto.model.spec-ruby/tf-for-array :added "4.1"}
 (fact "transforms for:array loops using native Ruby iteration"
   (spec-ruby/tf-for-array
    '(for:array [value values]
@@ -386,7 +386,7 @@
           (puts value))
         nil))
 
-^{:refer hara.model.spec-ruby/tf-for-object :added "4.1"}
+tahto/model/spec_ruby_test.clj:389:^{:refer tahto.model.spec-ruby/tf-for-object :added "4.1"}
 (fact "transforms for:object loops using native Ruby iteration"
   (spec-ruby/tf-for-object
    '(for:object [[k v] obj]
@@ -406,10 +406,10 @@
           (puts v))
         nil))
 
-^{:refer hara.model.spec-ruby/tf-for-iter :added "4.1"}
+tahto/model/spec_ruby_test.clj:409:^{:refer tahto.model.spec-ruby/tf-for-iter :added "4.1"}
 (fact "transforms for:iter loops")
 
-^{:refer hara.model.spec-ruby/tf-for-index :added "4.1"}
+tahto/model/spec_ruby_test.clj:412:^{:refer tahto.model.spec-ruby/tf-for-index :added "4.1"}
 (fact "transforms for:index loops without generated temporaries"
   (spec-ruby/tf-for-index
    '(for:index [i [0 3 1]]
@@ -421,19 +421,19 @@
           (:= i (+ i 1)))))
 
 
-^{:refer hara.model.spec-ruby/ruby-string :added "4.1"}
+tahto/model/spec_ruby_test.clj:424:^{:refer tahto.model.spec-ruby/ruby-string :added "4.1"}
 (fact "emits ruby strings")
 
-^{:refer hara.model.spec-ruby/ruby-throw :added "4.1"}
+tahto/model/spec_ruby_test.clj:427:^{:refer tahto.model.spec-ruby/ruby-throw :added "4.1"}
 (fact "emits ruby exceptions")
 
-^{:refer hara.model.spec-ruby/ruby-def :added "4.1"}
+tahto/model/spec_ruby_test.clj:430:^{:refer tahto.model.spec-ruby/ruby-def :added "4.1"}
 (fact "emits ruby definitions")
 
 
-^{:refer hara.model.spec-ruby/ruby-emit-input-rest :added "4.1"}
+tahto/model/spec_ruby_test.clj:434:^{:refer tahto.model.spec-ruby/ruby-emit-input-rest :added "4.1"}
 (fact "emits a Ruby splat parameter"
-  (with-redefs [hara.common.emit-common/*emit-fn*
+tahto/model/spec_ruby_test.clj:436:  (with-redefs [tahto.common.emit-common/*emit-fn*
                 (fn [symbol _ _] (name symbol))]
     (spec-ruby/ruby-emit-input-rest {:symbol 'args} nil nil))
   => "*args")

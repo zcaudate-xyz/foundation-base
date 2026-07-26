@@ -1,4 +1,4 @@
-package hara.lib.concurrent;
+package newlisp.lib.concurrent;
 
 import java.util.concurrent.LinkedBlockingQueue;
 

@@ -1,17 +1,17 @@
-(ns hara.lang.library-test
-  (:require [hara.lang.book :as b]
-            [hara.lang.book-entry :as entry]
-            [hara.lang.book-meta :as meta]
-            [hara.lang.book-module :as module]
-            [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar]
-            [hara.lang.library :as lib]
-            [hara.lang.library-snapshot :as snap]
-            [hara.lang.library-snapshot-prep-test :as prep]
-            [hara.common.emit-prep-lua-test :as lua-prep]
-            [hara.common.util :as ut]
-            [hara.model.spec-lua :as lua]
+(ns tahto.core.library-test
+  (:require [tahto.base.book :as b]
+            [tahto.base.book-entry :as entry]
+            [tahto.base.book-meta :as meta]
+            [tahto.base.book-module :as module]
+tahto/lang/library_test.clj:6:            [tahto.common.emit-common :as common]
+tahto/lang/library_test.clj:7:            [tahto.common.emit-helper :as helper]
+tahto/lang/library_test.clj:8:            [tahto.common.grammar :as grammar]
+            [tahto.core.library :as lib]
+            [tahto.core.library-snapshot :as snap]
+            [tahto.core.library-snapshot-prep-test :as prep]
+tahto/lang/library_test.clj:12:            [tahto.common.emit-prep-lua-test :as lua-prep]
+tahto/lang/library_test.clj:13:            [tahto.common.util :as ut]
+tahto/lang/library_test.clj:14:            [tahto.model.spec-lua :as lua]
             [std.lib.atom :as atom]
             [std.lib.deps :as deps]
             [std.lib.env :as env])
@@ -45,7 +45,7 @@
   (snap/snapshot {:lua {:id :lua
                         :book +contract-book+}}))
 
-^{:refer hara.lang.library/wait-snapshot :added "4.0"}
+^{:refer tahto.core.library/wait-snapshot :added "4.0"}
 (fact "gets the current waiting snapshot"
 
   (lib/wait-snapshot +library+)
@@ -54,7 +54,7 @@
   (meta (lib/wait-snapshot +library+))
   => {:parent nil})
 
-^{:refer hara.lang.library/wait-apply :added "4.0"}
+^{:refer tahto.core.library/wait-apply :added "4.0"}
 (fact "get the library state when task queue is empty"
 
   (snap/snapshot? (lib/wait-apply +library+ identity))
@@ -67,7 +67,7 @@
                    deps/deps-ordered [:lua.redis])
   => '(:x :lua :lua.redis))
 
-^{:refer hara.lang.library/wait-mutate! :added "4.0"}
+^{:refer tahto.core.library/wait-mutate! :added "4.0"}
 (fact "mutates library once task queue is empty"
 
   (-> +library+
@@ -81,13 +81,13 @@
                                [:x :book :modules]))
                  '(x.core)))))
 
-^{:refer hara.lang.library/get-snapshot :added "4.0"}
+^{:refer tahto.core.library/get-snapshot :added "4.0"}
 (fact "gets the current snapshot for the library"
 
   (lib/get-snapshot +library+)
   => snap/snapshot?)
 
-^{:refer hara.lang.library/snapshot-find-module :added "4.1"}
+^{:refer tahto.core.library/snapshot-find-module :added "4.1"}
 (fact "finds a module anywhere in the merged library snapshot"
 
   (-> (lib/snapshot-find-module prep/+snap+ 'L.core)
@@ -105,7 +105,7 @@
   (lib/snapshot-find-module prep/+snap+ 'missing.module)
   => nil)
 
-^{:refer hara.lang.library/entry-arity :added "4.1"}
+^{:refer tahto.core.library/entry-arity :added "4.1"}
 (fact "returns the arity of an entry from its input form"
 
   (lib/entry-arity {:form-input '(defn add-fn [a b] (+ a b))})
@@ -117,7 +117,7 @@
   (lib/entry-arity {:form-input '(do something)})
   => nil)
 
-^{:refer hara.lang.library/entry-abstract? :added "4.1"}
+^{:refer tahto.core.library/entry-abstract? :added "4.1"}
 (fact "checks if an entry was declared with `defabstract`"
 
   (lib/entry-abstract? {:form-input '(defabstract foo [x])})
@@ -129,7 +129,7 @@
   (lib/entry-abstract? {:form-input "not a seq"})
   => false)
 
-^{:refer hara.lang.library/validate-module-implements :added "4.1"}
+^{:refer tahto.core.library/validate-module-implements :added "4.1"}
 (fact "checks that a module satisfies all declared abstract contracts"
 
   (lib/validate-module-implements +contract-snapshot+ :lua 'L.impl)
@@ -155,13 +155,13 @@
                                   :expected 1
                                   :actual 2}]}))
 
-^{:refer hara.lang.library/get-book :added "4.0"}
+^{:refer tahto.core.library/get-book :added "4.0"}
 (fact "gets a book from library"
 
   (lib/get-book +library+ :x)
   => b/book?)
 
-^{:refer hara.lang.library/get-book-raw :added "4.0"}
+^{:refer tahto.core.library/get-book-raw :added "4.0"}
 (fact "gets the raw book, without merge"
 
   (b/list-entries (lib/get-book-raw +library+ :lua.redis))
@@ -170,13 +170,13 @@
   (b/list-entries (lib/get-book +library+ :lua.redis))
   => coll?)
 
-^{:refer hara.lang.library/get-module :added "4.0"}
+^{:refer tahto.core.library/get-module :added "4.0"}
 (fact "gets a module from library"
 
   (lib/get-module +library+ :x 'x.core)
   => module/book-module?)
 
-^{:refer hara.lang.library/get-entry :added "4.0"}
+^{:refer tahto.core.library/get-entry :added "4.0"}
 (fact "gets an entry from library"
 
   (lib/get-entry +library+ '{:lang :lua
@@ -185,7 +185,7 @@
                               :id sub})
   => entry/book-entry?)
 
-^{:refer hara.lang.library/add-book! :added "4.0"}
+^{:refer tahto.core.library/add-book! :added "4.0"}
 (fact "adds a book to the library"
 
   (lib/add-book! +library+
@@ -202,25 +202,25 @@
   (lib/delete-book! +library+ :js)
   => (any nil? map?))
 
-^{:refer hara.lang.library/delete-book! :added "4.0"}
+^{:refer tahto.core.library/delete-book! :added "4.0"}
 (fact "deletes a book"
   (lib/delete-book! +library+ :js) => nil)
 
-^{:refer hara.lang.library/reset-all! :added "4.0"}
+^{:refer tahto.core.library/reset-all! :added "4.0"}
 (fact "resets the library"
 
   (lib/reset-all! +library+
                   (lib/reset-all! +library+))
   => snap/snapshot?)
 
-^{:refer hara.lang.library/list-modules :added "4.0"}
+^{:refer tahto.core.library/list-modules :added "4.0"}
 (fact "lists all modules"
 
   (lib/list-modules +library+ :lua)
   => (contains ['L.core 'x.core]
                :in-any-order :gaps-ok))
 
-^{:refer hara.lang.library/list-entries :added "4.0"}
+^{:refer tahto.core.library/list-entries :added "4.0"}
 (fact "lists entries"
 
   (lib/list-entries +library+ :lua)
@@ -229,7 +229,7 @@
   (lib/list-entries +library+ :lua 'L.core)
   => '{:code (identity-fn), :fragment (add sub)})
 
-^{:refer hara.lang.library/add-module! :added "4.0"}
+^{:refer tahto.core.library/add-module! :added "4.0"}
 (fact "adds a module to the library"
 
   (lib/add-module! +library+ (module/book-module '{:lang :lua.redis
@@ -241,37 +241,37 @@
   (lib/delete-module! +library+ :lua.redis 'L.redis.hello )
   => coll?)
 
-^{:refer hara.lang.library/delete-module! :added "4.0"}
+^{:refer tahto.core.library/delete-module! :added "4.0"}
 (fact "deletes a module from the library"
   (lib/delete-module! +library+ :lua.redis 'L.redis.hello) => coll?)
 
-^{:refer hara.lang.library/delete-modules! :added "4.0"}
+^{:refer tahto.core.library/delete-modules! :added "4.0"}
 (fact  "deletes a bunch of modules from the library"
   (lib/delete-modules! +library+ :lua.redis ['L.redis.hello]) => coll?)
 
-^{:refer hara.lang.library/library-string :added "4.0"}
+^{:refer tahto.core.library/library-string :added "4.0"}
 (fact "returns the library string"
 
   (lib/library-string +library+)
   => string?)
 
-^{:refer hara.lang.library/library? :added "4.0"}
+^{:refer tahto.core.library/library? :added "4.0"}
 (fact "checks if object is a library"
 
   (lib/library? +library+)
   => true)
 
-^{:refer hara.lang.library/library:create :added "4.0"}
+^{:refer tahto.core.library/library:create :added "4.0"}
 (fact "creates a new library"
 
   (lib/library:create {})
   => lib/library?)
 
-^{:refer hara.lang.library/library :added "4.0"}
+^{:refer tahto.core.library/library :added "4.0"}
 (fact "creates and start a new library"
   (lib/library {}) => lib/library?)
 
-^{:refer hara.lang.library/add-entry! :added "4.0"}
+^{:refer tahto.core.library/add-entry! :added "4.0"}
 (fact "adds the entry with the bulk dispatcher"
 
   (comment
@@ -290,7 +290,7 @@
         first
         deref)))
 
-^{:refer hara.lang.library/add-entry-single! :added "4.0"
+^{:refer tahto.core.library/add-entry-single! :added "4.0"
   :setup [(lib/delete-entry! +library+ {:lang :lua
                                         :section :code
                                         :module 'L.core
@@ -308,11 +308,11 @@
                   :deps #{}}))
   => coll?)
 
-^{:refer hara.lang.library/delete-entry! :added "4.0"}
+^{:refer tahto.core.library/delete-entry! :added "4.0"}
 (fact "deletes an entry from the library"
   (lib/delete-entry! +library+ {:lang :lua :module 'L.core :id 'add-fn}) => coll?)
 
-^{:refer hara.lang.library/install-module! :added "4.0"
+^{:refer tahto.core.library/install-module! :added "4.0"
   :setup [(lib/delete-module! +library+  :lua 'L.util)]}
 (fact "installs a module to library"
 
@@ -321,7 +321,7 @@
                        {})
   => coll?)
 
-^{:refer hara.lang.library/install-module-specialized! :added "4.1"}
+^{:refer tahto.core.library/install-module-specialized! :added "4.1"}
 (fact "installs a specialized module clone into the library"
   :setup [(def +specialized-lib+
             (lib/library {:snapshot prep/+snap+}))
@@ -338,7 +338,7 @@
       :id)
   => 'L.core.specialized)
 
-^{:refer hara.lang.library/install-book! :added "4.0"
+^{:refer tahto.core.library/install-book! :added "4.0"
   :setup [(lib/delete-book! +library+ :lua.redis)]}
 (fact "installs a book to library"
 
@@ -351,16 +351,16 @@
   (:parent prep/+book-lua-redis-empty+)
   => :lua)
 
-^{:refer hara.lang.library/purge-book! :added "4.0"}
+^{:refer tahto.core.library/purge-book! :added "4.0"}
 (fact "clears all modules from book"
   (lib/purge-book! +library+ :lua) => coll?)
 
 (comment
   (comment
-  ^{:refer hara.lang.library/create-dispatch-handler :added "4.0"}
+  ^{:refer tahto.core.library/create-dispatch-handler :added "4.0"}
   (fact "the actual dispatch handler")
 
-  ^{:refer hara.lang.library/create-dispatch :added "4.0"}
+  ^{:refer tahto.core.library/create-dispatch :added "4.0"}
   (fact "creates the dispatch for adding entries in bulk"
 
     (comment
@@ -382,7 +382,7 @@
   (atom/swap-return! (:instance +lib+)
     (fn [snapshot]
       [nil (snap/add-book snapshot
-                          hara.common.emit-prep-lua-test/+book-min+)]))
+tahto/lang/library_test.clj:385:                          tahto.common.emit-prep-lua-test/+book-min+)]))
 
   ((:dispatch +lib+) (entry/create-fragment
                       '(def$ G G)

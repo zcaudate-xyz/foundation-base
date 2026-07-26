@@ -1830,7 +1830,7 @@
 
 "`^{:refer code.query.match/p-nth-left :added \"3.0\"}`"
 
-"Creates a matcher that checks if the element at a specific Nth index to the left of the current position has a certain characteristic."
+"Creates a matcher that checks if the element at a specific Nth index to the left of the current position has a certain ctahtocteristic."
 
 ^{:id merged-plans-slop-summary-code-query-match-tutorial-md-example-21 :added "4.0"}
 (fact "p-nth-left example"
@@ -1845,7 +1845,7 @@
 
 "`^{:refer code.query.match/p-nth-right :added \"3.0\"}`"
 
-"Creates a matcher that checks if the element at a specific Nth index to the right of the current position has a certain characteristic."
+"Creates a matcher that checks if the element at a specific Nth index to the right of the current position has a certain ctahtocteristic."
 
 ^{:id merged-plans-slop-summary-code-query-match-tutorial-md-example-22 :added "4.0"}
 (fact "p-nth-right example"

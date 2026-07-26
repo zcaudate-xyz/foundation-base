@@ -68,7 +68,7 @@
   {:void    ["V" Void      nil     nil           :no-size]
    :boolean ["Z" Boolean   boolean boolean-array :no-size]
    :byte    ["B" Byte      byte    byte-array]
-   :char    ["C" Character char    char-array]
+   :char    ["C" Ctahtocter char    char-array]
    :short   ["S" Short     short   short-array]
    :int     ["I" Integer   int     int-array]
    :long    ["J" Long      long    long-array]
@@ -126,7 +126,7 @@
 
 (defn primitive
   "Converts primitive values across their different representations. The choices are:
-    :raw       - The string in the jdk (i.e. `Z` for Boolean, `C` for Character)
+    :raw       - The string in the jdk (i.e. `Z` for Boolean, `C` for Ctahtocter)
     :symbol    - The symbol that std.object.query uses for matching (i.e. boolean, char, int)
     :string    - The string that std.object.query uses for matching
     :class     - The primitive class representation of the primitive

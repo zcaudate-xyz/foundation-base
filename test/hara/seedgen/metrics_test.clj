@@ -1,8 +1,8 @@
-(ns hara.seedgen.metrics-test
-  (:require [hara.seedgen.metrics :refer :all])
+tahto/seedgen/metrics_test.clj:1:(ns tahto.seedgen.metrics-test
+tahto/seedgen/metrics_test.clj:2:  (:require [tahto.seedgen.metrics :refer :all])
   (:use code.test))
 
-^{:refer hara.seedgen.metrics/test-record :added "4.1"}
+tahto/seedgen/metrics_test.clj:5:^{:refer tahto.seedgen.metrics/test-record :added "4.1"}
 (fact "serializes supplied test results without consulting runtime audit state"
   (let [path   "target/xtbench-metrics/test-record.json"
         record (test-record '[xt.lang] [:python]
@@ -29,7 +29,7 @@
              :spec-feature-count 4 :spec-implemented 3
              :spec-abstract 0 :spec-missing 1}})
 
-^{:refer hara.seedgen.metrics/aggregate-records :added "4.1"}
+tahto/seedgen/metrics_test.clj:32:^{:refer tahto.seedgen.metrics/aggregate-records :added "4.1"}
 (fact "aggregates suite and language job records semantically"
   (let [record (aggregate-records
                 "core"
@@ -69,7 +69,7 @@
       :git {:sha "abc123" :ref "refs/heads/main" :event "push"}
       :run {:id 12345 :number 77 :attempt 2 :url "https://example.test/run/12345"}})
 
-^{:refer hara.seedgen.metrics/update-index :added "4.1"}
+tahto/seedgen/metrics_test.clj:72:^{:refer tahto.seedgen.metrics/update-index :added "4.1"}
 (fact "keeps rerun attempts distinct and applies retention"
   (let [record (fn [n attempt]
                  {:workflow-key "core" :status "success" :tests {}

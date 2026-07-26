@@ -1,6 +1,6 @@
 (ns xt.db.poc.n00-basic-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [net.http :as net.http]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))

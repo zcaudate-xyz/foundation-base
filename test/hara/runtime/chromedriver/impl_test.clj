@@ -1,9 +1,9 @@
-(ns hara.runtime.chromedriver.impl-test
+tahto/runtime/chromedriver/impl_test.clj:1:(ns tahto.runtime.chromedriver.impl-test
   (:use code.test)
-  (:require [hara.runtime.chromedriver.impl :as impl]
+tahto/runtime/chromedriver/impl_test.clj:3:  (:require [tahto.runtime.chromedriver.impl :as impl]
             [std.lib :as h]
-            [hara.runtime.basic.type-bench :as bench]
-            [hara.runtime.chromedriver.util :as util]))
+tahto/runtime/chromedriver/impl_test.clj:5:            [tahto.runtime.basic.type-bench :as bench]
+tahto/runtime/chromedriver/impl_test.clj:6:            [tahto.runtime.chromedriver.util :as util]))
 
 (defonce +browser+ (atom nil))
 
@@ -11,7 +11,7 @@
  {:setup    [(reset! +browser+ (impl/browser {:lang :js}))]
   :teardown [(h/stop @+browser+)]})
 
-^{:refer hara.runtime.chromedriver.impl/start-browser-bench :added "4.0"
+tahto/runtime/chromedriver/impl_test.clj:14:^{:refer tahto.runtime.chromedriver.impl/start-browser-bench :added "4.0"
   :setup [(def +rt+ (impl/browser:create {:lang :js}))]
   :teardown (bench/stop-bench-process (:port +rt+))}
 (fact "starts the browser bench"
@@ -19,38 +19,38 @@
   (impl/start-browser-bench +rt+)
   => (contains {:type :bench/basic}))
 
-^{:refer hara.runtime.chromedriver.impl/start-browser-container :added "4.0"}
+tahto/runtime/chromedriver/impl_test.clj:22:^{:refer tahto.runtime.chromedriver.impl/start-browser-container :added "4.0"}
 (fact "starts a browser container")
 
-^{:refer hara.runtime.chromedriver.impl/start-browser :added "4.0"
+tahto/runtime/chromedriver/impl_test.clj:25:^{:refer tahto.runtime.chromedriver.impl/start-browser :added "4.0"
   :setup [(def +rt+ (impl/browser:create {:lang :js}))]
   :teardown [(h/stop +rt+)]}
 (fact "starts the browser bench and connection"
   (impl/start-browser +rt+)
   => +rt+)
 
-^{:refer hara.runtime.chromedriver.impl/stop-browser-raw :added "4.0"}
+tahto/runtime/chromedriver/impl_test.clj:32:^{:refer tahto.runtime.chromedriver.impl/stop-browser-raw :added "4.0"}
 (fact "stops the browser")
 
-^{:refer hara.runtime.chromedriver.impl/raw-eval-browser :added "4.0"}
+tahto/runtime/chromedriver/impl_test.clj:35:^{:refer tahto.runtime.chromedriver.impl/raw-eval-browser :added "4.0"}
 (fact "evaluates the browser"
   (impl/raw-eval-browser @+browser+ "1 + 1")
   => 2)
 
-^{:refer hara.runtime.chromedriver.impl/invoke-ptr-browser :added "4.0"}
+tahto/runtime/chromedriver/impl_test.clj:40:^{:refer tahto.runtime.chromedriver.impl/invoke-ptr-browser :added "4.0"}
 (fact "invokes the browser pointer"
   (impl/invoke-ptr-browser @+browser+
                            identity
                            [1])
   => 1)
 
-^{:refer hara.runtime.chromedriver.impl/browser:create :added "4.0"}
+tahto/runtime/chromedriver/impl_test.clj:47:^{:refer tahto.runtime.chromedriver.impl/browser:create :added "4.0"}
 (fact "creates a browser")
 
-^{:refer hara.runtime.chromedriver.impl/browser :added "4.0"}
+tahto/runtime/chromedriver/impl_test.clj:50:^{:refer tahto.runtime.chromedriver.impl/browser :added "4.0"}
 (fact "starts the browser")
 
-^{:refer hara.runtime.chromedriver.impl/wrap-browser-state :added "4.0"}
+tahto/runtime/chromedriver/impl_test.clj:53:^{:refer tahto.runtime.chromedriver.impl/wrap-browser-state :added "4.0"}
 (fact "wrapper for the browser"
 
   @((impl/wrap-browser-state util/target-info)

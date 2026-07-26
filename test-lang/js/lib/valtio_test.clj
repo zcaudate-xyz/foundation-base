@@ -1,5 +1,5 @@
 (ns js.lib.valtio-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test)
   (:refer-clojure :exclude [use val proxy]))

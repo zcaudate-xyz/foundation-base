@@ -1,11 +1,11 @@
-(ns hara.common.emit-assign-test
-  (:require [hara.lang.book :as b]
-            [hara.common.emit-assign :as assign :refer :all]
-            [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar]
-            [hara.lang.library-snapshot :as snap]
-            [hara.lang.library-snapshot-prep-test :as prep])
+tahto/common/emit_assign_test.clj:1:(ns tahto.common.emit-assign-test
+  (:require [tahto.base.book :as b]
+tahto/common/emit_assign_test.clj:3:            [tahto.common.emit-assign :as assign :refer :all]
+tahto/common/emit_assign_test.clj:4:            [tahto.common.emit-common :as common]
+tahto/common/emit_assign_test.clj:5:            [tahto.common.emit-helper :as helper]
+tahto/common/emit_assign_test.clj:6:            [tahto.common.grammar :as grammar]
+            [tahto.core.library-snapshot :as snap]
+            [tahto.core.library-snapshot-prep-test :as prep])
   (:use code.test))
 
 (def +reserved+
@@ -35,7 +35,7 @@
 (def +snap+
   (snap/add-book prep/+snap+ +book-x+))
 
-^{:refer hara.common.emit-assign/emit-def-assign-inline :added "4.0"}
+tahto/common/emit_assign_test.clj:38:^{:refer tahto.common.emit-assign/emit-def-assign-inline :added "4.0"}
 (fact "assigns an inline form directly"
 
   (emit-def-assign-inline
@@ -44,7 +44,7 @@
   => '(do* (var j := 1)
            (:= j (+ j (1)))))
 
-^{:refer hara.common.emit-assign/assign-options :added "4.1"}
+tahto/common/emit_assign_test.clj:47:^{:refer tahto.common.emit-assign/assign-options :added "4.1"}
 (fact "gets assignment options from reserved entries and metadata"
   (assign-options
    (with-meta '(hello 1)
@@ -60,7 +60,7 @@
    +grammar+)
   => {})
 
-^{:refer hara.common.emit-assign/assign-value :added "4.1"}
+tahto/common/emit_assign_test.clj:63:^{:refer tahto.common.emit-assign/assign-value :added "4.1"}
 (fact "prepares assignment override payloads"
   (assign-value 'a
                 (with-meta '(sym :as [1 2 3])
@@ -88,7 +88,7 @@
                 {})
   => [:template '(a :as [1 2 3])])
 
-^{:refer hara.common.emit-assign/emit-def-assign :added "3.0"}
+tahto/common/emit_assign_test.clj:91:^{:refer tahto.common.emit-assign/emit-def-assign :added "3.0"}
 (fact "emits a declare expression"
 
   (emit-def-assign :def-assign
@@ -119,7 +119,7 @@
                    {})
   => "var out = []")
 
-^{:refer hara.common.emit-assign/test-assign-loop :adopt true :added "4.0"}
+tahto/common/emit_assign_test.clj:122:^{:refer tahto.common.emit-assign/test-assign-loop :adopt true :added "4.0"}
 (fact "emit do"
 
   (assign/test-assign-loop '(var a 1)
@@ -159,7 +159,7 @@
                            {})
   => "const a = b1 + 2")
 
-^{:refer hara.common.emit-assign/test-assign-emit :added "4.0"}
+tahto/common/emit_assign_test.clj:162:^{:refer tahto.common.emit-assign/test-assign-emit :added "4.0"}
 (fact "emit assign forms"
 
   (assign/test-assign-loop (list 'var 'a := (with-meta ()

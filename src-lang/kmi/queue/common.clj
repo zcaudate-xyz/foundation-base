@@ -1,5 +1,5 @@
 (ns kmi.queue.common
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :lua
   {:require [[xt.lang.spec-base :as xt]

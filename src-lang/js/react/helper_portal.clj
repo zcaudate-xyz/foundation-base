@@ -1,5 +1,5 @@
 (ns js.react.helper-portal
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})

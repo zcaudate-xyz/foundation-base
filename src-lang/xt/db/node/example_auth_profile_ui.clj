@@ -1,5 +1,5 @@
 (ns xt.db.node.example-auth-profile-ui
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]

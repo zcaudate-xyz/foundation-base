@@ -1,5 +1,5 @@
 (ns play.js-002-substrate-scratch-v3.app
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:import [["https://esm.sh/react@18.3.1" :as React]
@@ -46,7 +46,7 @@
     [:section {:className "hero"}
      [:p {:className "eyebrow"} "FOUNDATION / XT.SUBSTRATE / SCRATCH_V3"]
      [:h1 "Database-backed substrate slices"]
-     [:p "The schema bindings and model descriptors are emitted from Hara DSL and derive from postgres.sample.scratch-v3."]]
+     [:p "The schema bindings and model descriptors are emitted from Tahto DSL and derive from postgres.sample.scratch-v3."]]
     [:section {:className "demo-grid"}
      (data/arr-map demo/DEMOS
                    (fn [entry]

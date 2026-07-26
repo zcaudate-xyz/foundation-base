@@ -1,5 +1,5 @@
 (ns js.react-native.helper-mobile
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {})

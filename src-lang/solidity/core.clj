@@ -1,7 +1,7 @@
 (ns solidity.core
   (:require [solidity.core.builtin]
             [solidity.core.util]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [assert require bytes]))
 

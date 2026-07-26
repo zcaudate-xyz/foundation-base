@@ -7,14 +7,14 @@
 
 (fact "added `:eclipse` keyword for `Artifact` creation"
 
-  (artifact/artifact :eclipse "hara:code.test:2.4.8")
+  (artifact/artifact :eclipse "tahto:code.test:2.4.8")
   => DefaultArtifact
 
-  (->> "hara:code.test:2.4.8"
+  (->> "tahto:code.test:2.4.8"
        (artifact/artifact :eclipse)
        (artifact/artifact)
        (into {}))
-  => {:group "hara",
+  => {:group "tahto",
       :artifact "code.test",
       :extension "jar",
       :classifier "",
@@ -26,30 +26,30 @@
 
 (fact "creates `DefaultArtifact` from a string"
 
-  (object/from-data "hara:hara:2.8.4" DefaultArtifact)
-  ;;=> #artifact "hara:hara:jar:2.8.4"
+  (object/from-data "tahto:tahto:2.8.4" DefaultArtifact)
+  ;;=> #artifact "tahto:tahto:jar:2.8.4"
   )
 
 ^{:refer lib.aether.artifact/rep-eclipse :added "3.0"}
 (fact "creates a rep from eclipse artifact"
 
-  (str (rep-eclipse (object/from-data "hara:hara:2.8.4" DefaultArtifact)))
-  => "hara:hara:jar:2.8.4")
+  (str (rep-eclipse (object/from-data "tahto:tahto:2.8.4" DefaultArtifact)))
+  => "tahto:tahto:jar:2.8.4")
 
 ^{:refer lib.aether.artifact/artifact-eclipse :added "3.0"}
 (fact "creates an eclipse artifact"
 
-  (artifact-eclipse "hara:hara:jar:2.8.4")
+  (artifact-eclipse "tahto:tahto:jar:2.8.4")
   => DefaultArtifact)
 
 ^{:refer lib.aether.artifact/rep-eclipse-metadata :added "3.0"}
 (fact "creates a rep from an eclipse metadata instance"
 
-  (str (rep-eclipse-metadata (object/from-data "hara:hara:2.8.4" DefaultMetadata)))
-  => "hara:hara:2.8.4")
+  (str (rep-eclipse-metadata (object/from-data "tahto:tahto:2.8.4" DefaultMetadata)))
+  => "tahto:tahto:2.8.4")
 
 ^{:refer lib.aether.artifact/artifact-eclipse-metadata :added "3.0"}
 (fact "creates an eclipse metadata instance"
 
-  (artifact-eclipse-metadata "hara:hara:jar:2.8.4")
+  (artifact-eclipse-metadata "tahto:tahto:jar:2.8.4")
   => DefaultMetadata)

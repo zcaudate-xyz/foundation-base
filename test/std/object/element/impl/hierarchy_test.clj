@@ -26,11 +26,11 @@
   =>  #(-> % count (= 1))
 
   (methods-with-same-name-and-count
-   (.getDeclaredMethod String "charAt"
+   (.getDeclaredMethod String "ctahtot"
                        (into-array Class [Integer/TYPE]))
    CharSequence)
   =>
-  #(-> % count (= 1))  ;; (#<Method java.lang.CharSequence.charAt(int)>)
+  #(-> % count (= 1))  ;; (#<Method java.lang.CharSequence.ctahtot(int)>)
   )
 
 ^{:refer std.object.element.impl.hierarchy/has-overridden-method :added "3.0"}

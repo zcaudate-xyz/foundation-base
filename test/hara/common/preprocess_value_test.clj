@@ -1,10 +1,10 @@
-(ns hara.common.preprocess-value-test
+tahto/common/preprocess_value_test.clj:1:(ns tahto.common.preprocess-value-test
   (:use code.test)
-  (:require [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar]
-            [hara.common.preprocess-value :refer :all]
-            [hara.model.spec-js :as js]
-            [hara.model.spec-lua :as lua]))
+tahto/common/preprocess_value_test.clj:3:  (:require [tahto.common.emit-helper :as helper]
+tahto/common/preprocess_value_test.clj:4:            [tahto.common.grammar :as grammar]
+tahto/common/preprocess_value_test.clj:5:            [tahto.common.preprocess-value :refer :all]
+tahto/common/preprocess_value_test.clj:6:            [tahto.model.spec-js :as js]
+tahto/common/preprocess_value_test.clj:7:            [tahto.model.spec-lua :as lua]))
 
 (def +reserved+
   (-> (grammar/build)
@@ -40,7 +40,7 @@
         (catch e
           (return ["unable to connect"]))))
 
-^{:refer hara.common.preprocess-value/value-block-entry :added "4.1"}
+tahto/common/preprocess_value_test.clj:43:^{:refer tahto.common.preprocess-value/value-block-entry :added "4.1"}
 (fact "returns the reserved entry for block-valued macro calls"
   (let [macro (fn [_] nil)
         grammar {:reserved {'x:block {:emit :macro
@@ -58,7 +58,7 @@
     (value-block-entry 'x:block grammar)
     => nil))
 
-^{:refer hara.common.preprocess-value/expand-value-block :added "4.1"}
+tahto/common/preprocess_value_test.clj:61:^{:refer tahto.common.preprocess-value/expand-value-block :added "4.1"}
 (fact "expands block-valued macro calls"
   (let [macro (fn [[_ & body]] (apply list '+ body))
         grammar {:reserved {'x:block {:emit :macro
@@ -70,7 +70,7 @@
     (expand-value-block '(foo 1 2) {} nil {})
     => nil))
 
-^{:refer hara.common.preprocess-value/resolve-block-form :added "4.1"}
+tahto/common/preprocess_value_test.clj:73:^{:refer tahto.common.preprocess-value/resolve-block-form :added "4.1"}
 (fact "resolves block-valued forms and namespaced fragment wrappers"
   (let [macro (fn [_] nil)
         grammar {:reserved {'x:block {:emit :macro
@@ -89,7 +89,7 @@
     (resolve-block-form '(u/my-op 1 2) grammar modules mopts)
     => '(x:block 1 2)))
 
-^{:refer hara.common.preprocess-value/value-template-args :added "4.1"}
+tahto/common/preprocess_value_test.clj:92:^{:refer tahto.common.preprocess-value/value-template-args :added "4.1"}
 (fact "derives template value args from arglists metadata"
   (value-template-args
    (with-meta
@@ -110,7 +110,7 @@
      {:arglists '([ctx a b & more])}))
   => '[x y])
 
-^{:refer hara.common.preprocess-value/value-standalone :added "4.1"}
+tahto/common/preprocess_value_test.clj:113:^{:refer tahto.common.preprocess-value/value-standalone :added "4.1"}
 (fact "callable xtalk intrinsics use shared value-standalone compilation"
   (value-standalone 'x:add +grammar+)
   => '(fn [x y] (return (+ x y)))
@@ -136,7 +136,7 @@
                                         :value/standalone true}}})
   => '(fn [a b] (return (+ a b))))
 
-^{:refer hara.common.preprocess-value/process-value-form :added "4.1"}
+tahto/common/preprocess_value_test.clj:139:^{:refer tahto.common.preprocess-value/process-value-form :added "4.1"}
 (fact "block-valued xtalk macros are lowered in value positions"
   (value-standalone 'x:type-native js/+grammar+)
   => '(fn [value]

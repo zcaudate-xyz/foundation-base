@@ -3,7 +3,7 @@
             [postgres.core.graph-insert :as insert]
             [postgres.core.graph-query :as query]
             [postgres.core.graph-view :as view]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :postgres

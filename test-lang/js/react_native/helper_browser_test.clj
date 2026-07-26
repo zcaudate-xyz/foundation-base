@@ -1,5 +1,5 @@
 (ns js.react-native.helper-browser-test
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:use code.test))
 
 (l/script :js

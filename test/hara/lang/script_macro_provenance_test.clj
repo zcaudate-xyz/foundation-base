@@ -1,11 +1,11 @@
-(ns hara.lang.script-macro-provenance-test
-  (:require [hara.lang.book-module :as module]
-            [hara.lang.impl :as impl]
-            [hara.lang.library :as lib]
-            [hara.lang.pointer :as ptr]
-            [hara.lang.runtime :as rt]
-            [hara.lang.script-macro :as macro]
-            [hara.model.spec-xtalk :as xtalk])
+(ns tahto.core.script-macro-provenance-test
+  (:require [tahto.base.book-module :as module]
+            [tahto.core.impl :as impl]
+            [tahto.core.library :as lib]
+            [tahto.core.pointer :as ptr]
+            [tahto.core.runtime :as rt]
+            [tahto.core.script-macro :as macro]
+tahto/lang/script_macro_provenance_test.clj:8:            [tahto.model.spec-xtalk :as xtalk])
   (:use code.test))
 
 (rt/install-lang! :xtalk)
@@ -27,15 +27,15 @@
     nil
     (catch Throwable t
       (let [data (ex-data t)]
-        {:phase     (:hara/phase data)
-         :subsystem (:hara/subsystem data)
-         :module    (:hara/module data)
-         :entry     (-> data :hara/entry :symbol)
-         :line      (:hara/line data)
-         :form      (:hara/form data)
-         :stack     (mapv (juxt :hara/phase
-                                :hara/subsystem)
-                          (:hara/provenance-stack data))}))))
+tahto/lang/script_macro_provenance_test.clj:30:        {:phase     (:tahto/phase data)
+tahto/lang/script_macro_provenance_test.clj:31:         :subsystem (:tahto/subsystem data)
+tahto/lang/script_macro_provenance_test.clj:32:         :module    (:tahto/module data)
+tahto/lang/script_macro_provenance_test.clj:33:         :entry     (-> data :tahto/entry :symbol)
+tahto/lang/script_macro_provenance_test.clj:34:         :line      (:tahto/line data)
+tahto/lang/script_macro_provenance_test.clj:35:         :form      (:tahto/form data)
+tahto/lang/script_macro_provenance_test.clj:36:         :stack     (mapv (juxt :tahto/phase
+tahto/lang/script_macro_provenance_test.clj:37:                                :tahto/subsystem)
+tahto/lang/script_macro_provenance_test.clj:38:                          (:tahto/provenance-stack data))}))))
 
 (fact "defn.xt failures report provenance for abstract calls"
 
@@ -65,13 +65,13 @@
          [(first (:stack out))
           (last (:stack out))]])))
   => '[{:phase :emit/form
-        :subsystem :hara.common.emit-top-level/emit-form
+tahto/lang/script_macro_provenance_test.clj:68:        :subsystem :tahto.common.emit-top-level/emit-form
         :module xt.lang.common-lib
         :entry xt.lang.common-lib/fail-type-native
         :line 320
         :form (x:type-native obj)}
-       [[:emit/form :hara.common.emit-top-level/emit-form]
-        [:emit/entry :hara.lang.impl-entry/emit-entry-raw]]])
+tahto/lang/script_macro_provenance_test.clj:73:       [[:emit/form :tahto.common.emit-top-level/emit-form]
+        [:emit/entry :tahto.core.impl-entry/emit-entry-raw]]])
 
 (fact "defn.xt failures keep entry provenance when nested forms explode"
 
@@ -106,10 +106,10 @@
          [(first (:stack out))
           (last (:stack out))]])))
   => '[{:phase :emit/form
-        :subsystem :hara.common.emit-top-level/emit-form
+tahto/lang/script_macro_provenance_test.clj:109:        :subsystem :tahto.common.emit-top-level/emit-form
         :module xt.lang.common-lib
         :entry xt.lang.common-lib/fail-arr-push
         :line 340
         :form (x:arr-push out (f e))}
-       [[:emit/form :hara.common.emit-top-level/emit-form]
-        [:emit/entry :hara.lang.impl-entry/emit-entry-raw]]])
+tahto/lang/script_macro_provenance_test.clj:114:       [[:emit/form :tahto.common.emit-top-level/emit-form]
+        [:emit/entry :tahto.core.impl-entry/emit-entry-raw]]])

@@ -1,29 +1,29 @@
-(ns hara.common.emit-common-test
-  (:require [hara.common.emit-common :as common :refer :all]
-            [hara.common.emit-helper :as helper]
+tahto/common/emit_common_test.clj:1:(ns tahto.common.emit-common-test
+tahto/common/emit_common_test.clj:2:  (:require [tahto.common.emit-common :as common :refer :all]
+tahto/common/emit_common_test.clj:3:            [tahto.common.emit-helper :as helper]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer hara.common.emit-common/with:explode :added "4.0"}
+tahto/common/emit_common_test.clj:7:^{:refer tahto.common.emit-common/with:explode :added "4.0"}
 (fact "form to control `explode` option"
   (with:explode *explode*) => true)
 
-^{:refer hara.common.emit-common/with-trace :added "4.0"}
+tahto/common/emit_common_test.clj:11:^{:refer tahto.common.emit-common/with-trace :added "4.0"}
 (fact "form to control `trace` option"
   (with-trace *trace*) => true)
 
-^{:refer hara.common.emit-common/with-compressed :added "3.0"}
+tahto/common/emit_common_test.clj:15:^{:refer tahto.common.emit-common/with-compressed :added "3.0"}
 (fact "formats without newlines and indents"
   (with-compressed *compressed*) => true)
 
-^{:refer hara.common.emit-common/with-indent :added "3.0"}
+tahto/common/emit_common_test.clj:19:^{:refer tahto.common.emit-common/with-indent :added "3.0"}
 (fact "adds indentation levels"
 
   (with-indent [10]
     *indent*)
   => 10)
 
-^{:refer hara.common.emit-common/newline-indent :added "3.0"}
+tahto/common/emit_common_test.clj:26:^{:refer tahto.common.emit-common/newline-indent :added "3.0"}
 (fact "returns a newline with indent"
 
   (newline-indent)
@@ -33,7 +33,7 @@
     (newline-indent))
   => "\n  ")
 
-^{:refer hara.common.emit-common/emit-reserved-value :added "4.0"}
+tahto/common/emit_common_test.clj:36:^{:refer tahto.common.emit-common/emit-reserved-value :added "4.0"}
 (fact "emits a reserved value"
 
   (emit-reserved-value 'hello
@@ -53,13 +53,13 @@
                        {})
   => (throws))
 
-^{:refer hara.common.emit-common/emit-free-raw :added "4.0"}
+tahto/common/emit_common_test.clj:56:^{:refer tahto.common.emit-common/emit-free-raw :added "4.0"}
 (fact "emits free value"
 
   (emit-free-raw "." [1 2 3] helper/+default+ {})
   => "1.2.3")
 
-^{:refer hara.common.emit-common/emit-free :added "4.0"}
+tahto/common/emit_common_test.clj:62:^{:refer tahto.common.emit-common/emit-free :added "4.0"}
 (fact "emits string with multiline support"
 
   (emit-free " "
@@ -68,7 +68,7 @@
              {})
   => "1 2 3 4")
 
-^{:refer hara.common.emit-common/emit-comment :added "4.0"}
+tahto/common/emit_common_test.clj:71:^{:refer tahto.common.emit-common/emit-comment :added "4.0"}
 (fact "emits a comment"
 
   (emit-comment nil '(:# "This is a comment" A B 1) helper/+default+ {})
@@ -82,7 +82,7 @@
       "// is "
       "// a comment A B 1"))
 
-^{:refer hara.common.emit-common/emit-indent :added "4.0"}
+tahto/common/emit_common_test.clj:85:^{:refer tahto.common.emit-common/emit-indent :added "4.0"}
 (fact "emits an indented form"
 
   (emit-indent nil '(\| "This\nis\nan indented" A B 1)
@@ -92,7 +92,7 @@
       "  is"
       "  an indented A B 1"))
 
-^{:refer hara.common.emit-common/emit-macro :added "4.0"}
+tahto/common/emit_common_test.clj:95:^{:refer tahto.common.emit-common/emit-macro :added "4.0"}
 (fact "emits form"
 
   (emit-macro :double-array
@@ -104,13 +104,13 @@
             {})
   => "[x y c x y c]")
 
-^{:refer hara.common.emit-common/emit-array :added "4.0"}
+tahto/common/emit_common_test.clj:107:^{:refer tahto.common.emit-common/emit-array :added "4.0"}
 (fact  "returns an array of emitted strings"
 
   (emit-array [1 2 3] {} {})
   => '("1" "2" "3"))
 
-^{:refer hara.common.emit-common/emit-wrappable? :added "4.0"}
+tahto/common/emit_common_test.clj:113:^{:refer tahto.common.emit-common/emit-wrappable? :added "4.0"}
 (fact "checks if form if wrappable"
 
   (emit-wrappable? '(!= 1 x)
@@ -128,7 +128,7 @@
                                                 (apply list 'fn args))}}})
   => true)
 
-^{:refer hara.common.emit-common/emit-squash :added "4.0"}
+tahto/common/emit_common_test.clj:131:^{:refer tahto.common.emit-common/emit-squash :added "4.0"}
 (fact "emits a squashed representation"
 
   (emit-squash nil '(:% 1 2 3 "hello")
@@ -137,7 +137,7 @@
                {})
   => "123\"hello\"")
 
-^{:refer hara.common.emit-common/emit-wrapping :added "4.0"}
+tahto/common/emit_common_test.clj:140:^{:refer tahto.common.emit-common/emit-wrapping :added "4.0"}
 (fact "emits a potentially wrapped form"
 
   (emit-wrapping '(!= 1 x)
@@ -146,13 +146,13 @@
                  {})
   => "((!= 1 x))")
 
-^{:refer hara.common.emit-common/wrapped-str :added "3.0"}
+tahto/common/emit_common_test.clj:149:^{:refer tahto.common.emit-common/wrapped-str :added "3.0"}
 (fact "wrapped string using `:start` and `:end` keys of grammar"
 
   (wrapped-str "hello" [:data :map] helper/+default+)
   => "{hello}")
 
-^{:refer hara.common.emit-common/emit-unit :added "4.0"}
+tahto/common/emit_common_test.clj:155:^{:refer tahto.common.emit-common/emit-unit :added "4.0"}
 (fact "emits a unit"
 
   (emit-unit {:default 'hello}
@@ -161,7 +161,7 @@
              {})
   => "hello")
 
-^{:refer hara.common.emit-common/emit-internal :added "4.0"}
+tahto/common/emit_common_test.clj:164:^{:refer tahto.common.emit-common/emit-internal :added "4.0"}
 (fact "emits string within the form"
 
   (emit-internal '(% "hello")
@@ -169,7 +169,7 @@
                  {})
   => "\"hello\"")
 
-^{:refer hara.common.emit-common/emit-internal-str :added "4.0"}
+tahto/common/emit_common_test.clj:172:^{:refer tahto.common.emit-common/emit-internal-str :added "4.0"}
 (fact "emits internal string"
 
   (emit-internal-str
@@ -189,49 +189,49 @@
      {}))
   => "hello\nhello\nhello")
 
-^{:refer hara.common.emit-common/emit-pre :added "3.0"}
+tahto/common/emit_common_test.clj:192:^{:refer tahto.common.emit-common/emit-pre :added "3.0"}
 (fact "emits string before the arg"
 
   (emit-pre "!" '[x] helper/+default+ {})
   => "!x")
 
-^{:refer hara.common.emit-common/emit-post :added "3.0"}
+tahto/common/emit_common_test.clj:198:^{:refer tahto.common.emit-common/emit-post :added "3.0"}
 (fact "emits string after the arg"
 
   (emit-post "--" '[x] helper/+default+ {})
   => "x--")
 
-^{:refer hara.common.emit-common/emit-prefix :added "4.0"}
+tahto/common/emit_common_test.clj:204:^{:refer tahto.common.emit-common/emit-prefix :added "4.0"}
 (fact "emits operator before the arg"
 
   (emit-prefix "hello" '[x] helper/+default+ {})
   => "hello x")
 
-^{:refer hara.common.emit-common/emit-postfix :added "4.0"}
+tahto/common/emit_common_test.clj:210:^{:refer tahto.common.emit-common/emit-postfix :added "4.0"}
 (fact  "emits operator before the arg"
 
   (emit-postfix "hello" '[x] helper/+default+ {})
   => "x hello")
 
-^{:refer hara.common.emit-common/emit-infix :added "3.0"}
+tahto/common/emit_common_test.clj:216:^{:refer tahto.common.emit-common/emit-infix :added "3.0"}
 (fact "emits infix ops"
 
   (emit-infix "|" '[x y z] helper/+default+ {})
   => "x | y | z")
 
-^{:refer hara.common.emit-common/emit-infix-default :added "3.0"}
+tahto/common/emit_common_test.clj:222:^{:refer tahto.common.emit-common/emit-infix-default :added "3.0"}
 (fact "emits infix with a default value"
 
   (emit-infix-default "/" '[x] 1 helper/+default+ {})
   => "1 / x")
 
-^{:refer hara.common.emit-common/emit-infix-pre :added "3.0"}
+tahto/common/emit_common_test.clj:228:^{:refer tahto.common.emit-common/emit-infix-pre :added "3.0"}
 (fact "emits infix with a default value"
 
   (emit-infix-pre "-" '[x] helper/+default+ {})
   => "-x")
 
-^{:refer hara.common.emit-common/emit-infix-if-single :added "4.0"}
+tahto/common/emit_common_test.clj:234:^{:refer tahto.common.emit-common/emit-infix-if-single :added "4.0"}
 (fact "checks for infix in single"
 
   (emit-infix-if '(:? true x y)
@@ -239,7 +239,7 @@
                  {})
   => "true ? x : y")
 
-^{:refer hara.common.emit-common/emit-infix-if :added "3.0"}
+tahto/common/emit_common_test.clj:242:^{:refer tahto.common.emit-common/emit-infix-if :added "3.0"}
 (fact "emits an infix if string"
 
   (emit-infix-if '(:? true x y)
@@ -266,13 +266,13 @@
                  {:reserved  {:?  {:emit :infix-if}}})
   => "true ? x : (:? true y (:? true z t))")
 
-^{:refer hara.common.emit-common/emit-between :added "3.0"}
+tahto/common/emit_common_test.clj:269:^{:refer tahto.common.emit-common/emit-between :added "3.0"}
 (fact "emits the raw symbol between two elems"
 
   (emit-between ":" [1 2] helper/+default+ {})
   => "1:2")
 
-^{:refer hara.common.emit-common/emit-bi :added "3.0"}
+tahto/common/emit_common_test.clj:275:^{:refer tahto.common.emit-common/emit-bi :added "3.0"}
 (fact "emits infix with two args"
 
   (emit-bi "==" '[x y] helper/+default+ {})
@@ -281,7 +281,7 @@
   (emit-bi "==" '[x y z] helper/+default+ {})
   => (throws))
 
-^{:refer hara.common.emit-common/emit-assign :added "3.0"}
+tahto/common/emit_common_test.clj:284:^{:refer tahto.common.emit-common/emit-assign :added "3.0"}
 (fact "emits a setter expression"
 
   (emit-assign ":eq" '[x 1] helper/+default+ {})
@@ -293,14 +293,14 @@
   (emit-assign "=" '[x 1] helper/+default+ {})
   => "x = 1")
 
-^{:refer hara.common.emit-common/emit-return-do :added "4.0"}
+tahto/common/emit_common_test.clj:296:^{:refer tahto.common.emit-common/emit-return-do :added "4.0"}
 (fact "creates a return statement on `do` block"
 
   (emit-return-do
    [1 2 3] helper/+default+ {})
   => "(1 2 (return 3))")
 
-^{:refer hara.common.emit-common/emit-return-base :added "4.0"}
+tahto/common/emit_common_test.clj:303:^{:refer tahto.common.emit-common/emit-return-base :added "4.0"}
 (fact "return base type"
 
   (emit-return-base "break" [1] helper/+default+ {})
@@ -309,7 +309,7 @@
   (emit-return-base "return" [1] helper/+default+ {})
   => "return 1")
 
-^{:refer hara.common.emit-common/emit-return :added "3.0"}
+tahto/common/emit_common_test.clj:312:^{:refer tahto.common.emit-common/emit-return :added "3.0"}
 (fact "creates a return type statement"
 
   (emit-return "break" [1] helper/+default+ {})
@@ -322,13 +322,13 @@
                                           [:default :return :multi] true) {})
   => "return 1, 2, 3")
 
-^{:refer hara.common.emit-common/emit-with-global :added "4.0"}
+tahto/common/emit_common_test.clj:325:^{:refer tahto.common.emit-common/emit-with-global :added "4.0"}
 (fact "customisable emit function for global vars"
 
   (emit-with-global nil '(!:G HELLO) {} {})
   => "HELLO")
 
-^{:refer hara.common.emit-common/emit-symbol-classify :added "3.0"}
+tahto/common/emit_common_test.clj:331:^{:refer tahto.common.emit-common/emit-symbol-classify :added "3.0"}
 (fact "classify symbol given options"
 
   (emit-symbol-classify 't/hello {:module {:alias '{t table}}})
@@ -337,7 +337,7 @@
   (emit-symbol-classify 't.n/hello {:module {:alias '{t table}}})
   => '[:link t.n])
 
-^{:refer hara.common.emit-common/emit-symbol-standard :added "3.0"}
+tahto/common/emit_common_test.clj:340:^{:refer tahto.common.emit-common/emit-symbol-standard :added "3.0"}
 (fact "emits a standard symbol"
 
   (emit-symbol-standard 'print! helper/+default+ {:layout :full})
@@ -349,7 +349,7 @@
                         {:layout :full})
   => "print!")
 
-^{:refer hara.common.emit-common/emit-symbol :added "4.0"}
+tahto/common/emit_common_test.clj:352:^{:refer tahto.common.emit-common/emit-symbol :added "4.0"}
 (fact "emits symbol allowing for custom functions"
 
   (emit-symbol 'a
@@ -358,7 +358,7 @@
                {})
   => "a123")
 
-^{:refer hara.common.emit-common/emit-token :added "3.0"}
+tahto/common/emit_common_test.clj:361:^{:refer tahto.common.emit-common/emit-token :added "3.0"}
 (fact "customisable emit function for tokens"
 
   (emit-token :number 1 helper/+default+ {})
@@ -370,13 +370,13 @@
   (emit-token :string "1" {:token {:string {:emit (fn [s _ _] (keyword s))}}} {})
   => :1)
 
-^{:refer hara.common.emit-common/emit-with-decorate :added "4.0"}
+tahto/common/emit_common_test.clj:373:^{:refer tahto.common.emit-common/emit-with-decorate :added "4.0"}
 (fact "customisable emit function for global vars"
 
   (emit-with-decorate nil '(!:decorate {:id 1} HELLO) {} {})
   => "HELLO")
 
-^{:refer hara.common.emit-common/emit-with-uuid :added "4.0"}
+tahto/common/emit_common_test.clj:379:^{:refer tahto.common.emit-common/emit-with-uuid :added "4.0"}
 (fact "injects uuid for testing"
 
   (emit-with-uuid nil '(!:uuid :hello :world) {} {})
@@ -385,7 +385,7 @@
   (emit-with-uuid nil '(!:uuid) {} {})
   => string?)
 
-^{:refer hara.common.emit-common/emit-with-rand :added "4.0"}
+tahto/common/emit_common_test.clj:388:^{:refer tahto.common.emit-common/emit-with-rand :added "4.0"}
 (fact "injects uuid for testing"
 
   (read-string (emit-with-rand nil '(!:rand :int) {} {}))
@@ -394,21 +394,21 @@
   (read-string (emit-with-rand nil '(!:rand) {} {}))
   => float?)
 
-^{:refer hara.common.emit-common/invoke-kw-parse :added "3.0"}
+tahto/common/emit_common_test.clj:397:^{:refer tahto.common.emit-common/invoke-kw-parse :added "3.0"}
 (fact "seperates standard and keyword arguments"
 
   (invoke-kw-parse [1 2 3 4 :name "hello" :foo "bar"])
   => '[(1 2 3 4)
        ((:name "hello") (:foo "bar"))])
 
-^{:refer hara.common.emit-common/emit-invoke-kw-pair :added "3.0"}
+tahto/common/emit_common_test.clj:404:^{:refer tahto.common.emit-common/emit-invoke-kw-pair :added "3.0"}
 (fact  "emits a kw argument pair"
 
   (emit-invoke-kw-pair [:name "hello"] helper/+default+
                        {})
   => "name=\"hello\"")
 
-^{:refer hara.common.emit-common/emit-invoke-args :added "3.0"}
+tahto/common/emit_common_test.clj:411:^{:refer tahto.common.emit-common/emit-invoke-args :added "3.0"}
 (fact "produces the string for invoke call"
 
   (emit-invoke-args [1 2 3 4 :name "hello" :foo "bar"]
@@ -416,7 +416,7 @@
                     {})
   => '("1" "2" "3" "4" "name=\"hello\"" "foo=\"bar\""))
 
-^{:refer hara.common.emit-common/emit-invoke-layout :added "4.0"}
+tahto/common/emit_common_test.clj:419:^{:refer tahto.common.emit-common/emit-invoke-layout :added "4.0"}
 (fact "layout for invoke blocks"
 
   (emit-invoke-layout ["ab\nc"
@@ -424,13 +424,13 @@
                       helper/+default+ {})
   => "(ab\nc,de\nf)")
 
-^{:refer hara.common.emit-common/emit-invoke-raw :added "3.0"}
+tahto/common/emit_common_test.clj:427:^{:refer tahto.common.emit-common/emit-invoke-raw :added "3.0"}
 (fact "invoke call for reserved ops"
 
   (emit-invoke-raw "-" '[abc] helper/+default+ {})
   => "-(abc)")
 
-^{:refer hara.common.emit-common/emit-invoke-static :added "3.0"}
+tahto/common/emit_common_test.clj:433:^{:refer tahto.common.emit-common/emit-invoke-static :added "3.0"}
 (fact "generates a static call, alternat"
 
   (emit-invoke-static '(:table/new "hello")
@@ -438,7 +438,7 @@
                       {})
   => "table.new(\"hello\")")
 
-^{:refer hara.common.emit-common/emit-invoke-typecast :added "3.0"}
+tahto/common/emit_common_test.clj:441:^{:refer tahto.common.emit-common/emit-invoke-typecast :added "3.0"}
 (fact "generates typecast expression"
 
   (emit-invoke-typecast '(:int (:char 2))
@@ -446,7 +446,7 @@
                         {})
   => "((int)(:char 2))")
 
-^{:refer hara.common.emit-common/emit-invoke :added "3.0"}
+tahto/common/emit_common_test.clj:449:^{:refer tahto.common.emit-common/emit-invoke :added "3.0"}
 (fact "general invoke call, incorporating keywords"
 
   (emit-invoke :invoke
@@ -460,7 +460,7 @@
                helper/+default+
                {}))
 
-^{:refer hara.common.emit-common/emit-new :added "3.0"}
+tahto/common/emit_common_test.clj:463:^{:refer tahto.common.emit-common/emit-new :added "3.0"}
 (fact "invokes a constructor"
 
   (emit-new "new"
@@ -469,7 +469,7 @@
             {})
   => "new String(1,2,3,4)")
 
-^{:refer hara.common.emit-common/emit-class-static-invoke :added "4.0"}
+tahto/common/emit_common_test.clj:472:^{:refer tahto.common.emit-common/emit-class-static-invoke :added "4.0"}
 (fact "creates "
 
   (emit-class-static-invoke
@@ -479,7 +479,7 @@
    {})
   => "String.new(1,2,3,4)")
 
-^{:refer hara.common.emit-common/emit-index-entry :added "3.0"}
+tahto/common/emit_common_test.clj:482:^{:refer tahto.common.emit-common/emit-index-entry :added "3.0"}
 (fact "classifies the index entry"
 
   (emit-index-entry 'hello helper/+default+ {})
@@ -494,13 +494,13 @@
   (emit-index-entry '(call 1 2 3) helper/+default+ {})
   => ".call(1,2,3)")
 
-^{:refer hara.common.emit-common/emit-index :added "3.0"}
+tahto/common/emit_common_test.clj:497:^{:refer tahto.common.emit-common/emit-index :added "3.0"}
 (fact "creates an indexed expression"
 
   (emit-index nil '[x [hello] (world foo bar) baz] helper/+default+ {})
   => "x[hello].world(foo,bar).baz")
 
-^{:refer hara.common.emit-common/emit-op :added "3.0"}
+tahto/common/emit_common_test.clj:503:^{:refer tahto.common.emit-common/emit-op :added "3.0"}
 (fact "helper for the emit op"
 
   (emit-op :- '(:- "~~") (merge helper/+default+
@@ -508,7 +508,7 @@
            {})
   => "~~")
 
-^{:refer hara.common.emit-common/form-key :added "3.0"}
+tahto/common/emit_common_test.clj:511:^{:refer tahto.common.emit-common/form-key :added "3.0"}
 (fact "returns the key associated with the form"
 
   (form-key (first {:a 1}) {}) => [:map-entry :data nil]
@@ -517,7 +517,7 @@
 
   (form-key () {}) => [:invoke :invoke nil])
 
-^{:refer hara.common.emit-common/emit-common-loop :added "4.0"}
+tahto/common/emit_common_test.clj:520:^{:refer tahto.common.emit-common/emit-common-loop :added "4.0"}
 (fact "emits the raw string"
 
   (emit-common-loop '(add 1 (:int 1))
@@ -531,7 +531,7 @@
                      {}))
   => "add(1,((int)1))")
 
-^{:refer hara.common.emit-common/emit-common :added "4.0"}
+tahto/common/emit_common_test.clj:534:^{:refer tahto.common.emit-common/emit-common :added "4.0"}
 (fact "emits a string based on grammar"
 
   (emit-common '(add 1

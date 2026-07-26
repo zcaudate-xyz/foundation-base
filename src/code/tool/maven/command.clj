@@ -142,6 +142,6 @@
   (:all (:releases (std.config/load "config/deploy.edn")))
   
   (code.tool.maven/deploy ['foundation] {:tag :all})
-  (code.tool.maven/deploy ['hara/io.file] {:tag :dev})
-  (code.tool.maven/deploy ['hara] {:tag :jep})
-  (code.tool.maven/install-secure ['hara/base] {:tag :dev}))
+  (code.tool.maven/deploy ['tahto/io.file] {:tag :dev})
+  (code.tool.maven/deploy ['tahto] {:tag :jep})
+  (code.tool.maven/install-secure ['tahto/base] {:tag :dev}))

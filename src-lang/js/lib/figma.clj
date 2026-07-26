@@ -1,7 +1,7 @@
 (ns js.lib.figma
   (:require [js.react.compile :as compile]
             [std.block :as block]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f]
             [std.string.case :as case]))
 

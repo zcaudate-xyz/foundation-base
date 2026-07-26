@@ -1,61 +1,61 @@
 {:ns-groups
  [{:pattern "^xt\\."
-   :name clj-kondo.hooks.hara-xtalk}
-  {:pattern "^hara\\.model\\.spec-xtalk\\."
-   :name clj-kondo.hooks.hara-xtalk}
+tahto/config.edn:3:   :name clj-kondo.hooks.tahto-xtalk}
+tahto/config.edn:4:  {:pattern "^tahto\\.model\\.spec-xtalk\\."
+tahto/config.edn:5:   :name clj-kondo.hooks.tahto-xtalk}
   {:pattern ".+"
-   :name clj-kondo.hooks.hara-postgres}]
+tahto/config.edn:7:   :name clj-kondo.hooks.tahto-postgres}]
 
  :hooks
  {:analyze-call
-  {hara.lang/script clj-kondo.hooks.hara-postgres/script
-   hara.lang/script- clj-kondo.hooks.hara-postgres/script
-   hara.lang/script+ clj-kondo.hooks.hara-postgres/script
-   hara.lang/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
-   hara.typed/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
-   defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
-   defn.js clj-kondo.hooks.hara-xtalk/defn-xt
-   hara.lang/defn.js clj-kondo.hooks.hara-xtalk/defn-xt
-   defvar.js clj-kondo.hooks.hara-xtalk/defvar-xt
-   hara.lang/defvar.js clj-kondo.hooks.hara-xtalk/defvar-xt
-   defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
-   defn.pg clj-kondo.hooks.hara-postgres/defn-pg
-   defrun.pg clj-kondo.hooks.hara-postgres/defn-pg
-   clj-kondo.hooks.hara-xtalk/defn.xt clj-kondo.hooks.hara-xtalk/defn-xt
-   clj-kondo.hooks.hara-xtalk/def.xt clj-kondo.hooks.hara-xtalk/def-xt
-   clj-kondo.hooks.hara-xtalk/defmacro.xt clj-kondo.hooks.hara-xtalk/defmacro-xt
-   clj-kondo.hooks.hara-xtalk/defgen.xt clj-kondo.hooks.hara-xtalk/defgen-xt
-   clj-kondo.hooks.hara-xtalk/defvar.xt clj-kondo.hooks.hara-xtalk/defvar-xt
-   defprotocol.xt clj-kondo.hooks.hara-xtalk/defprotocol-xt
-   xt.lang.common-protocol/defprotocol.xt clj-kondo.hooks.hara-xtalk/defprotocol-xt
-   proto/defprotocol.xt clj-kondo.hooks.hara-xtalk/defprotocol-xt
-   clj-kondo.hooks.hara-xtalk/defspec.xt clj-kondo.hooks.hara-xtalk/defspec-xt
-   clj-kondo.hooks.hara-xtalk/defglobal.xt clj-kondo.hooks.hara-xtalk/defglobal-xt
-   defimpl.xt clj-kondo.hooks.hara-xtalk/defimpl-xt
-   xt.lang.common-protocol/defimpl.xt clj-kondo.hooks.hara-xtalk/defimpl-xt
-   proto/defimpl.xt clj-kondo.hooks.hara-xtalk/defimpl-xt
-   fact clj-kondo.hooks.hara-xtalk/fact-xt
-   fact:global clj-kondo.hooks.hara-xtalk/fact-global-xt
-   clj-kondo.hooks.hara-postgres/defn.pg clj-kondo.hooks.hara-postgres/defn-pg
-   clj-kondo.hooks.hara-postgres/defrun.pg clj-kondo.hooks.hara-postgres/defn-pg
-   deftype.pg clj-kondo.hooks.hara-postgres/deftype-pg
-   clj-kondo.hooks.hara-postgres/deftype.pg clj-kondo.hooks.hara-postgres/deftype-pg}}
+tahto/config.edn:11:  {tahto.core/script clj-kondo.hooks.tahto-postgres/script
+tahto/config.edn:12:   tahto.core/script- clj-kondo.hooks.tahto-postgres/script
+tahto/config.edn:13:   tahto.core/script+ clj-kondo.hooks.tahto-postgres/script
+tahto/config.edn:14:   tahto.core/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+tahto/config.edn:15:   tahto.typed/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+tahto/config.edn:16:   defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+tahto/config.edn:17:   defn.js clj-kondo.hooks.tahto-xtalk/defn-xt
+tahto/config.edn:18:   tahto.core/defn.js clj-kondo.hooks.tahto-xtalk/defn-xt
+tahto/config.edn:19:   defvar.js clj-kondo.hooks.tahto-xtalk/defvar-xt
+tahto/config.edn:20:   tahto.core/defvar.js clj-kondo.hooks.tahto-xtalk/defvar-xt
+tahto/config.edn:21:   defglobal.xt clj-kondo.hooks.tahto-xtalk/defglobal-xt
+tahto/config.edn:22:   defn.pg clj-kondo.hooks.tahto-postgres/defn-pg
+tahto/config.edn:23:   defrun.pg clj-kondo.hooks.tahto-postgres/defn-pg
+tahto/config.edn:24:   clj-kondo.hooks.tahto-xtalk/defn.xt clj-kondo.hooks.tahto-xtalk/defn-xt
+tahto/config.edn:25:   clj-kondo.hooks.tahto-xtalk/def.xt clj-kondo.hooks.tahto-xtalk/def-xt
+tahto/config.edn:26:   clj-kondo.hooks.tahto-xtalk/defmacro.xt clj-kondo.hooks.tahto-xtalk/defmacro-xt
+tahto/config.edn:27:   clj-kondo.hooks.tahto-xtalk/defgen.xt clj-kondo.hooks.tahto-xtalk/defgen-xt
+tahto/config.edn:28:   clj-kondo.hooks.tahto-xtalk/defvar.xt clj-kondo.hooks.tahto-xtalk/defvar-xt
+tahto/config.edn:29:   defprotocol.xt clj-kondo.hooks.tahto-xtalk/defprotocol-xt
+tahto/config.edn:30:   xt.lang.common-protocol/defprotocol.xt clj-kondo.hooks.tahto-xtalk/defprotocol-xt
+tahto/config.edn:31:   proto/defprotocol.xt clj-kondo.hooks.tahto-xtalk/defprotocol-xt
+tahto/config.edn:32:   clj-kondo.hooks.tahto-xtalk/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+tahto/config.edn:33:   clj-kondo.hooks.tahto-xtalk/defglobal.xt clj-kondo.hooks.tahto-xtalk/defglobal-xt
+tahto/config.edn:34:   defimpl.xt clj-kondo.hooks.tahto-xtalk/defimpl-xt
+tahto/config.edn:35:   xt.lang.common-protocol/defimpl.xt clj-kondo.hooks.tahto-xtalk/defimpl-xt
+tahto/config.edn:36:   proto/defimpl.xt clj-kondo.hooks.tahto-xtalk/defimpl-xt
+tahto/config.edn:37:   fact clj-kondo.hooks.tahto-xtalk/fact-xt
+tahto/config.edn:38:   fact:global clj-kondo.hooks.tahto-xtalk/fact-global-xt
+tahto/config.edn:39:   clj-kondo.hooks.tahto-postgres/defn.pg clj-kondo.hooks.tahto-postgres/defn-pg
+tahto/config.edn:40:   clj-kondo.hooks.tahto-postgres/defrun.pg clj-kondo.hooks.tahto-postgres/defn-pg
+tahto/config.edn:41:   deftype.pg clj-kondo.hooks.tahto-postgres/deftype-pg
+tahto/config.edn:42:   clj-kondo.hooks.tahto-postgres/deftype.pg clj-kondo.hooks.tahto-postgres/deftype-pg}}
 
  :linters
  {:namespace-name-mismatch {:level :off}
-  :hara.postgres/one-let {:level :warning}
-  :hara.postgres/nested-let {:level :warning}
-  :hara.postgres/input-prefix {:level :warning}
-  :hara.postgres/local-prefix {:level :warning}
-  :hara.postgres/return-bound {:level :warning}
-  :hara.postgres/retired-entity-option {:level :error}
-  :hara.postgres/invalid-owner {:level :error}
-  :hara.postgres/invalid-provides {:level :error}
-  :hara.xtalk/block-in-value {:level :error}
-  :hara.xtalk/field-collision {:level :error}
-  :hara.xtalk/invalid-destructuring {:level :error}
-  :hara.xtalk/redundant-get-key {:level :warning}
-  :hara.xtalk/redundant-fn-arrow {:level :warning}
-  :hara.xtalk/nested-dot-access {:level :warning}
-  :hara.xtalk/redundant-dot-destructure {:level :warning}
-  :hara.xtalk/merge-dot-destructure {:level :warning}}}
+tahto/config.edn:46:  :tahto.postgres/one-let {:level :warning}
+tahto/config.edn:47:  :tahto.postgres/nested-let {:level :warning}
+tahto/config.edn:48:  :tahto.postgres/input-prefix {:level :warning}
+tahto/config.edn:49:  :tahto.postgres/local-prefix {:level :warning}
+tahto/config.edn:50:  :tahto.postgres/return-bound {:level :warning}
+tahto/config.edn:51:  :tahto.postgres/retired-entity-option {:level :error}
+tahto/config.edn:52:  :tahto.postgres/invalid-owner {:level :error}
+tahto/config.edn:53:  :tahto.postgres/invalid-provides {:level :error}
+tahto/config.edn:54:  :tahto.xtalk/block-in-value {:level :error}
+tahto/config.edn:55:  :tahto.xtalk/field-collision {:level :error}
+tahto/config.edn:56:  :tahto.xtalk/invalid-destructuring {:level :error}
+tahto/config.edn:57:  :tahto.xtalk/redundant-get-key {:level :warning}
+tahto/config.edn:58:  :tahto.xtalk/redundant-fn-arrow {:level :warning}
+tahto/config.edn:59:  :tahto.xtalk/nested-dot-access {:level :warning}
+tahto/config.edn:60:  :tahto.xtalk/redundant-dot-destructure {:level :warning}
+tahto/config.edn:61:  :tahto.xtalk/merge-dot-destructure {:level :warning}}}

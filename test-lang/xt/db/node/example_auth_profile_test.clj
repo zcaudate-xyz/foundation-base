@@ -1,6 +1,6 @@
 (ns xt.db.node.example-auth-profile-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [scaffold.supabase.local-min :as local-min]
             [std.lib.env :as env]
             [xt.lang.common-notify :as notify]))

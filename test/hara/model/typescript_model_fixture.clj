@@ -1,6 +1,6 @@
-(ns hara.model.typescript-model-fixture
-  (:require [hara.lang :as l]
-            [hara.typed :refer [defspec.xt]]))
+tahto/model/typescript_model_fixture.clj:1:(ns tahto.model.typescript-model-fixture
+  (:require [tahto.core :as l]
+tahto/model/typescript_model_fixture.clj:3:            [tahto.typed :refer [defspec.xt]]))
 
 (l/script :xtalk)
 

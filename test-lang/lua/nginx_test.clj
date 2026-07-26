@@ -1,6 +1,6 @@
 (ns lua.nginx-test
-  (:require [hara.runtime.nginx :as nginx]
-            [hara.lang :as l]
+  (:require [tahto.runtime.nginx :as nginx]
+            [tahto.core :as l]
             [std.lib.env :as env]
             [xt.lang.common-notify :as notify])
   (:use code.test))
@@ -163,7 +163,7 @@
 
 (comment
 
-  (hara.runtime.nginx/nginx-conf)
+  (tahto.runtime.nginx/nginx-conf)
   (./import))
 
 

@@ -1,5 +1,5 @@
-(ns documentation.hara-walkthrough-live
-  (:require [hara.lang :as l])
+tahto/walkthrough_live.clj:1:(ns documentation.tahto-walkthrough-live
+  (:require [tahto.core :as l])
   (:use code.test))
 
 [[:hero {:title "Walkthrough: live"
@@ -7,7 +7,7 @@
          :lead "This page promotes the existing walkthrough source into the public Hara docs. The implementation source remains in `src-doc/walkthrough/std_lang_02_live.clj`; this page explains the intent and links it to the surrounding Hara layers."}]]
 
 [[:chapter {:title "Motivation"}]]
-"The walkthrough shows how hara.lang scripts define target contexts, how forms are emitted or executed, and how generated pointers connect Clojure authoring to target language code."
+"The walkthrough shows how tahto.core scripts define target contexts, how forms are emitted or executed, and how generated pointers connect Clojure authoring to target language code."
 
 [[:chapter {:title "How to use it"}]]
 "Read the source file directly for the executable facts. The docs page keeps high-level explanation here and uses selected fact snippets below."
@@ -25,7 +25,7 @@
 "Adding `:runtime :basic` to `l/script-` makes `!.js` execute the generated code and return the result. You can define functions and call them like ordinary Clojure values."
 
 (fact "evaluate JS arithmetic live"
-  ^{:refer hara.lang/script- :added "4.0"}
+  ^{:refer tahto.core/script- :added "4.0"}
   (do
     (l/script- :js
       {:runtime :basic
@@ -34,7 +34,7 @@
   => 6)
 
 (fact "define and call a JS function"
-  ^{:refer hara.lang/emit-ptr :added "4.0"}
+  ^{:refer tahto.core/emit-ptr :added "4.0"}
   (do
     (l/script- :js
       {:runtime :basic
@@ -50,7 +50,7 @@
 "`l/with:print-all` echoes the generated code that is sent to the runtime. Wrap it in `with-out-str` to capture the output as a string."
 
 (fact "capture emitted JS with print-all"
-  ^{:refer hara.lang/with:print-all :added "4.0"}
+  ^{:refer tahto.core/with:print-all :added "4.0"}
   (do
     (l/script- :js
       {:runtime :basic
@@ -65,10 +65,10 @@
 
 [[:section {:title "Live Lua and Python execution"}]]
 
-"The `:basic` runtime works for Lua and Python too. The same hara.lang function body runs in each target process."
+"The `:basic` runtime works for Lua and Python too. The same tahto.core function body runs in each target process."
 
 (fact "evaluate Lua live"
-  ^{:refer hara.lang/script- :added "4.0"}
+  ^{:refer tahto.core/script- :added "4.0"}
   (do
     (l/script- :lua
       {:runtime :basic
@@ -79,7 +79,7 @@
   => 6)
 
 (fact "evaluate Python live"
-  ^{:refer hara.lang/script- :added "4.0"}
+  ^{:refer tahto.core/script- :added "4.0"}
   (do
     (l/script- :python
       {:runtime :basic

@@ -34,8 +34,8 @@
                          :pages {'index {:title "foundation"}}}
                   :std {:output "public/std"
                         :pages {'index {:title "std"}}}
-                  :hara {:output "public/std-lang"
-                         :pages {'index {:title "hara.lang"}}}})]
+                  :tahto {:output "public/std-lang"
+                         :pages {'index {:title "tahto.core"}}}})]
     (render-volume-links 'std/index {} lookup))
   => #"\.\./std-lang/index\.html")
 

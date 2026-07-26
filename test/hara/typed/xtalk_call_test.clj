@@ -1,14 +1,14 @@
-(ns hara.typed.xtalk-call-test
+tahto/typed/xtalk_call_test.clj:1:(ns tahto.typed.xtalk-call-test
   (:use code.test)
-  (:require [hara.typed.xtalk-call :refer :all]
-            [hara.typed.xtalk-common :as types]
-            [hara.typed.xtalk-compat :refer [result]]
-            [hara.typed.xtalk-infer :refer [infer-type]]
-            [hara.typed.xtalk-ops :as ops]))
+tahto/typed/xtalk_call_test.clj:3:  (:require [tahto.typed.xtalk-call :refer :all]
+tahto/typed/xtalk_call_test.clj:4:            [tahto.typed.xtalk-common :as types]
+tahto/typed/xtalk_call_test.clj:5:            [tahto.typed.xtalk-compat :refer [result]]
+tahto/typed/xtalk_call_test.clj:6:            [tahto.typed.xtalk-infer :refer [infer-type]]
+tahto/typed/xtalk_call_test.clj:7:            [tahto.typed.xtalk-ops :as ops]))
 
 (def +ctx+ {:ns 'sample.route :aliases '{k xt.lang.common-lib} :infer infer-type})
 
-^{:refer hara.typed.xtalk-call/infer-op-spec-form :added "4.1"}
+tahto/typed/xtalk_call_test.clj:11:^{:refer tahto.typed.xtalk-call/infer-op-spec-form :added "4.1"}
 (fact "infers result type from builtin op-spec for a given call form"
   [(types/type->data
     (:type (infer-op-spec-form (ops/canonical-entry 'x:add)
@@ -26,14 +26,14 @@
       '{:kind :array
         :item {:kind :primitive :name :xt/str}}])
 
-^{:refer hara.typed.xtalk-call/wildcard-callable? :added "4.1"}
+tahto/typed/xtalk_call_test.clj:29:^{:refer tahto.typed.xtalk-call/wildcard-callable? :added "4.1"}
 (fact "recognizes wildcard-callable types"
   [(wildcard-callable? types/+unknown-type+ +ctx+)
    (wildcard-callable? {:kind :maybe :item {:kind :primitive :name :xt/any}} +ctx+)
    (wildcard-callable? {:kind :primitive :name :xt/str} +ctx+)]
   => [true true false])
 
-^{:refer hara.typed.xtalk-call/callable-types :added "4.1"}
+tahto/typed/xtalk_call_test.clj:36:^{:refer tahto.typed.xtalk-call/callable-types :added "4.1"}
 (fact "extracts callable members from unions"
   (mapv types/type->data
         (callable-types {:kind :union
@@ -44,7 +44,7 @@
          :inputs [{:kind :primitive :name :xt/str}]
          :output {:kind :primitive :name :xt/bool}}])
 
-^{:refer hara.typed.xtalk-call/call-arg-errors :added "4.1"}
+tahto/typed/xtalk_call_test.clj:47:^{:refer tahto.typed.xtalk-call/call-arg-errors :added "4.1"}
 (fact "reports call arg mismatches"
   (call-arg-errors [(result types/+int-type+) (result types/+str-type+)]
                    [types/+str-type+ types/+str-type+]
@@ -55,13 +55,13 @@
          :expected {:kind :primitive :name :xt/str}
          :actual {:kind :primitive :name :xt/int}}])
 
-^{:refer hara.typed.xtalk-call/optional-arity? :added "4.1"}
+tahto/typed/xtalk_call_test.clj:58:^{:refer tahto.typed.xtalk-call/optional-arity? :added "4.1"}
 (fact "accepts missing optional trailing args"
   [(optional-arity? [types/+str-type+ {:kind :maybe :item types/+int-type+}] 1 +ctx+)
    (optional-arity? [types/+str-type+ types/+int-type+] 1 +ctx+)]
   => [true false])
 
-^{:refer hara.typed.xtalk-call/infer-function-call :added "4.1"}
+tahto/typed/xtalk_call_test.clj:64:^{:refer tahto.typed.xtalk-call/infer-function-call :added "4.1"}
 (fact "infers callable outputs and call errors"
   [(types/type->data (:type (infer-function-call '(handler "u1") {:env '{handler {:kind :fn :inputs [{:kind :primitive :name :xt/str}] :output {:kind :primitive :name :xt/bool}}}
                                                            :ns 'sample.route :aliases {} :infer infer-type})))
@@ -69,7 +69,7 @@
   => '[{:kind :primitive :name :xt/bool}
         :not-callable])
 
-^{:refer hara.typed.xtalk-call/infer-builtin-form :added "4.1"}
+tahto/typed/xtalk_call_test.clj:72:^{:refer tahto.typed.xtalk-call/infer-builtin-form :added "4.1"}
 (fact "dispatches builtin inference rules"
   [(types/type->data (:type (infer-builtin-form (ops/canonical-entry 'x:get-key)
                                                 '(x:get-key route "id")
@@ -86,14 +86,14 @@
         :call-arity-mismatch])
 
 
-^{:refer hara.typed.xtalk-call/rest-input-type? :added "4.1"}
+tahto/typed/xtalk_call_test.clj:89:^{:refer tahto.typed.xtalk-call/rest-input-type? :added "4.1"}
 (fact "recognizes only explicitly variadic input types"
   [(rest-input-type? {:kind :array :item types/+str-type+ :rest true})
    (rest-input-type? {:kind :array :item types/+str-type+})
    (rest-input-type? nil)]
   => [true false false])
 
-^{:refer hara.typed.xtalk-call/split-call-inputs :added "4.1"}
+tahto/typed/xtalk_call_test.clj:96:^{:refer tahto.typed.xtalk-call/split-call-inputs :added "4.1"}
 (fact "separates the final variadic input from fixed inputs"
   (let [rest-type {:kind :array :item types/+str-type+ :rest true}]
     (split-call-inputs [types/+int-type+ rest-type]))
@@ -102,7 +102,7 @@
   (split-call-inputs [types/+int-type+ types/+str-type+])
   => {:fixed [types/+int-type+ types/+str-type+] :rest nil})
 
-^{:refer hara.typed.xtalk-call/call-arity? :added "4.1"}
+tahto/typed/xtalk_call_test.clj:105:^{:refer tahto.typed.xtalk-call/call-arity? :added "4.1"}
 (fact "accepts required, optional, and variadic call arities"
   (let [optional {:kind :maybe :item types/+str-type+}
         rest-type {:kind :array :item types/+str-type+ :rest true}]
@@ -112,7 +112,7 @@
      (call-arity? [types/+int-type+] 2 +ctx+)])
   => [true false true false])
 
-^{:refer hara.typed.xtalk-call/expected-call-inputs :added "4.1"}
+tahto/typed/xtalk_call_test.clj:115:^{:refer tahto.typed.xtalk-call/expected-call-inputs :added "4.1"}
 (fact "expands a variadic item type for every extra argument"
   (let [rest-type {:kind :array :item types/+str-type+ :rest true}]
     (expected-call-inputs [types/+int-type+ rest-type] 4))
@@ -120,7 +120,7 @@
   (expected-call-inputs [types/+int-type+ types/+str-type+] 1)
   => [types/+int-type+])
 
-^{:refer hara.typed.xtalk-call/expected-call-arity :added "4.1"}
+tahto/typed/xtalk_call_test.clj:123:^{:refer tahto.typed.xtalk-call/expected-call-arity :added "4.1"}
 (fact "reports fixed arity numerically and variadic arity structurally"
   (let [optional {:kind :maybe :item types/+str-type+}
         rest-type {:kind :array :item types/+str-type+ :rest true}]

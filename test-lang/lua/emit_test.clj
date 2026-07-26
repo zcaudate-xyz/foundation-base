@@ -1,6 +1,6 @@
 ;; test/lua/emit_test.clj
 (ns test.lua.emit-test
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :lua
   {:macro-only true}

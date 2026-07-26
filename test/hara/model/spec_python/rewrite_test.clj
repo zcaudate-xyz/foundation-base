@@ -1,13 +1,13 @@
-(ns hara.model.spec-python.rewrite-test
+tahto/model/spec_python/rewrite_test.clj:1:(ns tahto.model.spec-python.rewrite-test
   (:require [clojure.walk]
-            [hara.model.spec-python :as py]
-            [hara.model.spec-python.rewrite :as rewrite])
+tahto/model/spec_python/rewrite_test.clj:3:            [tahto.model.spec-python :as py]
+tahto/model/spec_python/rewrite_test.clj:4:            [tahto.model.spec-python.rewrite :as rewrite])
   (:use code.test))
 
-^{:refer hara.model.spec-python.rewrite/python-normalize-form :added "4.1"}
+tahto/model/spec_python/rewrite_test.clj:7:^{:refer tahto.model.spec-python.rewrite/python-normalize-form :added "4.1"}
 (fact "normalizes python forms")
 
-^{:refer hara.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+tahto/model/spec_python/rewrite_test.clj:10:^{:refer tahto.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
 (fact "keeps top-level named functions intact"
   (rewrite/python-rewrite-stage
    '(fn f-raw [x]

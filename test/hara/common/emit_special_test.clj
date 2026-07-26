@@ -1,12 +1,12 @@
-(ns hara.common.emit-special-test
-  (:require [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper]
-            [hara.common.emit-prep-lua-test :as prep]
-            [hara.common.emit-special :refer :all]
-            [hara.lang.impl-entry :as entry]
-            [hara.lang.library :as lib]
-            [hara.lang.library-snapshot :as snap]
-            [hara.model.spec-lua :as lua]
+tahto/common/emit_special_test.clj:1:(ns tahto.common.emit-special-test
+tahto/common/emit_special_test.clj:2:  (:require [tahto.common.emit-common :as common]
+tahto/common/emit_special_test.clj:3:            [tahto.common.emit-helper :as helper]
+tahto/common/emit_special_test.clj:4:            [tahto.common.emit-prep-lua-test :as prep]
+tahto/common/emit_special_test.clj:5:            [tahto.common.emit-special :refer :all]
+            [tahto.core.impl-entry :as entry]
+            [tahto.core.library :as lib]
+            [tahto.core.library-snapshot :as snap]
+tahto/common/emit_special_test.clj:9:            [tahto.model.spec-lua :as lua]
             [std.lib.env :as env])
   (:use code.test))
 
@@ -37,7 +37,7 @@
        :module 'L.util}
       {}))))
 
-^{:refer hara.common.emit-special/emit-with-module-all-ids :added "4.0"}
+tahto/common/emit_special_test.clj:40:^{:refer tahto.common.emit-special/emit-with-module-all-ids :added "4.0"}
 (fact "emits the module given snapshot in opts"
 
   (set
@@ -47,7 +47,7 @@
                              identity))
   => '#{add-fn sub-fn})
 
-^{:refer hara.common.emit-special/emit-with-module :added "4.0"}
+tahto/common/emit_special_test.clj:50:^{:refer tahto.common.emit-special/emit-with-module :added "4.0"}
 (fact "emits the module given snapshot in opts"
 
   (emit-with-module nil nil '(module :lua L.util)
@@ -64,7 +64,7 @@
                        :layout :full}))
   => "{\"sub_fn\":L_util____sub_fn,\"add_fn\":L_util____add_fn}")
 
-^{:refer hara.common.emit-special/emit-with-preprocess :added "4.0"}
+tahto/common/emit_special_test.clj:67:^{:refer tahto.common.emit-special/emit-with-preprocess :added "4.0"}
 (fact "emits an eval form"
 
   (emit-with-preprocess '(L.core/sub 1 2)
@@ -75,7 +75,7 @@
   => "(- 1 2)")
 
 
-^{:refer hara.common.emit-special/emit-with-eval :added "4.0"}
+tahto/common/emit_special_test.clj:78:^{:refer tahto.common.emit-special/emit-with-eval :added "4.0"}
 (fact "emits an eval form"
 
   (emit-with-eval nil nil
@@ -103,7 +103,7 @@
                      :snapshot (lib/get-snapshot +library-ext+)}))
   => "1 + 2 + 3")
 
-^{:refer hara.common.emit-special/emit-with-deref :added "4.0"}
+tahto/common/emit_special_test.clj:106:^{:refer tahto.common.emit-special/emit-with-deref :added "4.0"}
 (fact "emits an embedded var"
 
   (def hello 1)
@@ -124,7 +124,7 @@
                     :snapshot (lib/get-snapshot +library-ext+)})
   => "(- 1 2)")
 
-^{:refer hara.common.emit-special/emit-with-lang :added "4.0"}
+tahto/common/emit_special_test.clj:127:^{:refer tahto.common.emit-special/emit-with-lang :added "4.0"}
 (fact "emits an embedded eval"
 
   (emit-with-lang nil nil '(!:lang {:lang :lua} (+ @1 2 3))
@@ -139,7 +139,7 @@
                     {:snapshot (lib/get-snapshot +library-ext+)}))
   => "1 + 2 + 3")
 
-^{:refer hara.common.emit-special/test-special-loop :added "4.0"}
+tahto/common/emit_special_test.clj:142:^{:refer tahto.common.emit-special/test-special-loop :added "4.0"}
 (fact "test step for special ops"
 
   (test-special-loop '(!:lang {:lang :lua} (+ @1 2 3))
@@ -147,7 +147,7 @@
                            {:snapshot (lib/get-snapshot +library-ext+)})
   => "(+ (!:eval 1) 2 3)")
 
-^{:refer hara.common.emit-special/test-special-emit :added "4.0"}
+tahto/common/emit_special_test.clj:150:^{:refer tahto.common.emit-special/test-special-emit :added "4.0"}
 (fact "test function for special ops"
 
   (test-special-emit '(!:lang {:lang :lua} (+ @1 2 3))

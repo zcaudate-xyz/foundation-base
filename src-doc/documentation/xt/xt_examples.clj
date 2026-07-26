@@ -1,10 +1,10 @@
 (ns documentation.xt-examples
   (:use code.test)
   (:require [clojure.string :as str]
-            [hara.typed :as typed]
-            [hara.typed.xtalk-parse :as xtalk-parse]
-            [hara.model.spec-go.typed :as go-typed]
-            [hara.model.spec-js.ts :as ts-typed]))
+            [tahto.typed :as typed]
+            [tahto.typed.xtalk-parse :as xtalk-parse]
+            [tahto.model.spec-go.typed :as go-typed]
+            [tahto.model.spec-js.ts :as ts-typed]))
 
 [[:hero {:title "xt examples"
          :subtitle "POCs, xtbench, and generated project examples."
@@ -28,7 +28,7 @@
 
 [[:section {:title "Inspecting generated xtalk source"}]]
 
-"Generated projects are authored as xtalk source files. The `hara.typed` loader turns a source file into a context that exposes specs, functions, and values declared in the file."
+"Generated projects are authored as xtalk source files. The `tahto.typed` loader turns a source file into a context that exposes specs, functions, and values declared in the file."
 
 (fact "load the Go user directory example as a typed context"
   (-> (typed/load-file "src-build/play/go_001_xtalk_user_directory/main.clj")

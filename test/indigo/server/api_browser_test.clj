@@ -1,7 +1,7 @@
 (ns indigo.server.api-browser-test
   (:require [indigo.server.api-browser :refer :all]
             [code.project :as project]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [clojure.string :as str])
   (:use code.test))
 

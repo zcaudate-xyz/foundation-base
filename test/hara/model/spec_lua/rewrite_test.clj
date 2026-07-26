@@ -1,8 +1,8 @@
-(ns hara.model.spec-lua.rewrite-test
-  (:require [hara.lang :as l]
-            [hara.lang.script :as script]
-            [hara.model.spec-lua :as lua]
-            [hara.model.spec-lua.rewrite :as rewrite])
+tahto/model/spec_lua/rewrite_test.clj:1:(ns tahto.model.spec-lua.rewrite-test
+  (:require [tahto.core :as l]
+            [tahto.core.script :as script]
+tahto/model/spec_lua/rewrite_test.clj:4:            [tahto.model.spec-lua :as lua]
+tahto/model/spec_lua/rewrite_test.clj:5:            [tahto.model.spec-lua.rewrite :as rewrite])
   (:use code.test))
 
 (script/script- :lua)
@@ -24,16 +24,16 @@
     (boolean (re-find #"return nil,\s*'OK'" out)))
   => true)
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-form :added "4.1"}
+tahto/model/spec_lua/rewrite_test.clj:27:^{:refer tahto.model.spec-lua.rewrite/lua-rewrite-form :added "4.1"}
 (fact "rewrites lua forms")
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-statement :added "4.1"}
+tahto/model/spec_lua/rewrite_test.clj:30:^{:refer tahto.model.spec-lua.rewrite/lua-rewrite-statement :added "4.1"}
 (fact "rewrites lua statements")
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-statements :added "4.1"}
+tahto/model/spec_lua/rewrite_test.clj:33:^{:refer tahto.model.spec-lua.rewrite/lua-rewrite-statements :added "4.1"}
 (fact "rewrites lua statement blocks")
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
+tahto/model/spec_lua/rewrite_test.clj:36:^{:refer tahto.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"}
 (fact "hoists named inline functions for lua"
   (rewrite/lua-rewrite-stage
    '(var out
@@ -71,7 +71,7 @@
      (nil? (re-find #"hello\(function \(x\)" out))])
   => [true true])
 
-^{:refer hara.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"
+tahto/model/spec_lua/rewrite_test.clj:74:^{:refer tahto.model.spec-lua.rewrite/lua-rewrite-stage :added "4.1"
   :id test-lua-rewrite-stage-runtime-eval-helper}
 (fact "marks runtime-eval helper defs as inner for lua without affecting normal staging"
   (let [plain (rewrite/lua-rewrite-stage

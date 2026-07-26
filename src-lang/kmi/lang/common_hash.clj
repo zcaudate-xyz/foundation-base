@@ -1,5 +1,5 @@
 (ns kmi.lang.common-hash
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 ;;
 ;; JS

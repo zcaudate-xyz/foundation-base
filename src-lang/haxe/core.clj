@@ -1,8 +1,8 @@
 (ns haxe.core
-  (:require [hara.model.spec-haxe]
+  (:require [tahto.model.spec-haxe]
             [haxe.core.builtins :as builtins]
             [haxe.core.system :as system]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [eval]))
 

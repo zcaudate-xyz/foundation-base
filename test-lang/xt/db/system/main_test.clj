@@ -1,6 +1,6 @@
 (ns xt.db.system.main-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
 

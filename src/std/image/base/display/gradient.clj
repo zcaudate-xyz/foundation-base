@@ -71,7 +71,7 @@
   (create-multi *default-len*))
 
 (defn lookup-char
-  "look up a character based on value
+  "look up a ctahtocter based on value
  
    (str (lookup-char 0))
    => #{\"Æ\" \"Ñ\" \"Ê\"}

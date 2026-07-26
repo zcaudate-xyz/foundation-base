@@ -1,7 +1,7 @@
-(ns hara.runtime.basic.impl.process-dart-test
+tahto/runtime/basic/impl/process_dart_test.clj:1:(ns tahto.runtime.basic.impl.process-dart-test
   (:require [clojure.string :as str]
-             [hara.runtime.basic.impl.process-dart :refer :all]
-             [hara.lang :as l]
+tahto/runtime/basic/impl/process_dart_test.clj:3:             [tahto.runtime.basic.impl.process-dart :refer :all]
+             [tahto.core :as l]
              [std.lib.os :as os]
              [std.lib.env :as env]
              [std.fs :as fs])
@@ -10,7 +10,7 @@
 (fact:global
  {:skip (not (env/program-exists? "dart"))})
 
-^{:refer hara.runtime.basic.impl.process-dart/normalize-dart-source :added "4.1"}
+tahto/runtime/basic/impl/process_dart_test.clj:13:^{:refer tahto.runtime.basic.impl.process-dart/normalize-dart-source :added "4.1"}
 (fact "preserves multiline call continuations when normalizing dart"
 
   (normalize-dart-source "void main() {\n  print(\n    foo(1)\n  )\n}")
@@ -31,13 +31,13 @@
   (normalize-dart-source "xt.lang.common_data.arr_sort(xt.lang.event_log.list_listeners(xt.lang.event_log.new_log(<dynamic, dynamic>{\n  \"listeners\":<dynamic, dynamic>{\n    \"test1\":(id, data, t) {\n      \n    },\n    \"test2\":(id, data, t) {\n      \n    }\n  }\n})),xt.lang.common_lib.identity,(x, y) {\n  return (x).toString().compareTo((y).toString()) < 0;\n})")
   => "xt.lang.common_data.arr_sort(xt.lang.event_log.list_listeners(xt.lang.event_log.new_log(<dynamic, dynamic>{\n  \"listeners\":<dynamic, dynamic>{\n    \"test1\":(id, data, t) {\n      \n    },\n    \"test2\":(id, data, t) {\n      \n    }\n  }\n})),xt.lang.common_lib.identity,(x, y) {\n  return (x).toString().compareTo((y).toString()) < 0;\n});"
 
-^{:refer hara.runtime.basic.impl.process-dart/ensure-dart-imports :added "4.1"}
+tahto/runtime/basic/impl/process_dart_test.clj:34:^{:refer tahto.runtime.basic.impl.process-dart/ensure-dart-imports :added "4.1"}
 (fact "hoists required Dart imports for standalone scripts"
   (ensure-dart-imports "void main() {\n  print(math.max(1, 2));\n  print(jsonEncode({\"a\": 1}));\n}")
   => "import 'dart:convert';\nimport 'dart:math' as math;\n\nvoid main() {\n  print(math.max(1, 2));\n  print(jsonEncode({\"a\": 1}));\n}")
 
 
-^{:refer hara.runtime.basic.impl.process-dart/sh-exec-dart :added "4.1"}
+tahto/runtime/basic/impl/process_dart_test.clj:40:^{:refer tahto.runtime.basic.impl.process-dart/sh-exec-dart :added "4.1"}
 (fact "executes dart twostep pipeline"
   (with-redefs [os/sh (fn [_] {:pid 1})
                 os/sh-wait (fn [_] nil)
@@ -47,7 +47,7 @@
                    :output-flag "-o"}))
   => "42")
 
-^{:refer hara.runtime.basic.impl.process-dart/transform-form :added "4.1"}
+tahto/runtime/basic/impl/process_dart_test.clj:50:^{:refer tahto.runtime.basic.impl.process-dart/transform-form :added "4.1"}
 (fact "wraps forms in standalone dart main"
   (-> (transform-form ['(+ 1 2)] {:bulk true}) pr-str)
   => #"Future<void> main\(\) async"
@@ -101,7 +101,7 @@
   => [true true true])
 
 
-^{:refer hara.runtime.basic.impl.process-dart/dart-package-imports :added "4.1"}
+tahto/runtime/basic/impl/process_dart_test.clj:104:^{:refer tahto.runtime.basic.impl.process-dart/dart-package-imports :added "4.1"}
 (fact "finds package imports referenced by generated Dart source"
   (dart-package-imports "")
   => []
@@ -118,7 +118,7 @@
   (dart-package-imports "x package:abc/def x package:ghi/jkl")
   => ["abc" "ghi"])
 
-^{:refer hara.runtime.basic.impl.process-dart/dart-package-root :added "4.1"}
+tahto/runtime/basic/impl/process_dart_test.clj:121:^{:refer tahto.runtime.basic.impl.process-dart/dart-package-root :added "4.1"}
 (fact "returns cached Dart package root for twostep scripts"
   (dart-package-root "/tmp/root")
   => "/tmp/root/target/dart-twostep"
@@ -126,7 +126,7 @@
   (dart-package-root nil)
   => (str (java.io.File. (System/getProperty "user.dir") "target/dart-twostep")))
 
-^{:refer hara.runtime.basic.impl.process-dart/dart-pubspec :added "4.1"}
+tahto/runtime/basic/impl/process_dart_test.clj:129:^{:refer tahto.runtime.basic.impl.process-dart/dart-pubspec :added "4.1"}
 (fact "creates minimal pubspec for generated twostep scripts"
   (dart-pubspec [])
   => (str "name: foundation_base_dart_twostep\n"
@@ -143,7 +143,7 @@
           "  foo: any\n"
           "  bar: any\n"))
 
-^{:refer hara.runtime.basic.impl.process-dart/ensure-dart-package-context :added "4.1"}
+tahto/runtime/basic/impl/process_dart_test.clj:146:^{:refer tahto.runtime.basic.impl.process-dart/ensure-dart-package-context :added "4.1"}
 (fact "creates cached package root and resolves dependencies"
   (ensure-dart-package-context nil "")
   => nil

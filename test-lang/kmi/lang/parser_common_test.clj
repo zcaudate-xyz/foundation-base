@@ -1,5 +1,5 @@
 (ns kmi.lang.parser-common-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
@@ -39,7 +39,7 @@
   => [true true])
 
 ^{:refer kmi.lang.parser-common/read-comment :added "4.1"}
-(fact "consumes characters until end of line"
+(fact "consumes ctahtocters until end of line"
 
   (!.js (var reader (rdr/create "; comment text\nrest"))
         (rdr/read-char reader)
@@ -115,7 +115,7 @@
   => [true true true true true true])
 
 ^{:refer kmi.lang.parser-common/read-token :added "4.1"}
-(fact "reads a token until a boundary character"
+(fact "reads a token until a boundary ctahtocter"
 
   (!.js (var reader (rdr/create "ello world"))
         (pc/read-token reader "h"))

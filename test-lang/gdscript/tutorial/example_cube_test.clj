@@ -18,7 +18,7 @@
 
 ^{:refer gdscript.tutorial.example-cube/save-cube-scene :added "4.1"}
 (fact "saves a cube scene to disk"
-  (let [path (str (System/getProperty "user.home") "/hara_godot_cube_scene.tscn")]
+  (let [path (str (System/getProperty "user.home") "/tahto_godot_cube_scene.tscn")]
     (in-cube `(clojure.core/deref (!.gd (gdscript.tutorial.example-cube/save-cube-scene ~path))))
     (boolean (.exists (java.io.File. path))))
   => true)

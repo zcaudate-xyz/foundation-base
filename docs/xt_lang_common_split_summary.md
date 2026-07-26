@@ -4,8 +4,8 @@ This note captures the second pass of the xtalk split.
 
 The first pass extracted reusable `xt.lang.common-*` modules out of the old
 `xt.lang.base-lib` surface. The second pass reorganizes
-`hara.lang.base.grammar-xtalk-system` so the public xtalk grammar profiles now
-match the implementation areas that `hara.lang.base.grammar-xtalk` already uses
+`tahto.core.base.grammar-xtalk-system` so the public xtalk grammar profiles now
+match the implementation areas that `tahto.core.base.grammar-xtalk` already uses
 internally.
 
 ## Goal
@@ -43,7 +43,7 @@ That same extraction can keep growing in-place:
 
 ## Final `grammar-xtalk` Shape
 
-`hara.lang.base.grammar-xtalk` is now split into five implementation areas.
+`tahto.core.base.grammar-xtalk` is now split into five implementation areas.
 
 ### 1. Common
 
@@ -86,7 +86,7 @@ Internal groups:
 - `+xt-lang-random+`
 - `+xt-lang-time+`
 
-### 4. `hara.lang` Link Specific
+### 4. `tahto.core` Link Specific
 
 Internal groups:
 
@@ -123,8 +123,8 @@ The system layer now exposes one public xtalk profile per implementation area:
 
 This is the key change.
 
-The detailed split still lives in `hara.lang.base.grammar-xtalk`, but
-`hara.lang.base.grammar-xtalk-system` now flattens those detailed groups into the
+The detailed split still lives in `tahto.core.base.grammar-xtalk`, but
+`tahto.core.base.grammar-xtalk-system` now flattens those detailed groups into the
 five public grammar profiles above.
 
 ## Why This Helps
@@ -152,7 +152,7 @@ The public xtalk categories now line up with the implementation story:
 - portable/common
 - functional helpers
 - language-specific behavior
-- `hara.lang` link adapters
+- `tahto.core` link adapters
 - runtime adapters
 
 That keeps:
@@ -176,7 +176,7 @@ The old fine-grained public profile names such as:
 are no longer the public `grammar-xtalk-system` profile boundary.
 
 They remain useful as internal implementation buckets inside
-`hara.lang.base.grammar-xtalk`, but the system-facing grammar profile model is
+`tahto.core.base.grammar-xtalk`, but the system-facing grammar profile model is
 now area-based.
 
 ## Recommended Usage

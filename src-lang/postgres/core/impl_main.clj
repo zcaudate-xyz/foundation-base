@@ -1,8 +1,8 @@
 (ns postgres.core.impl-main
-  (:require [hara.model.spec-postgres.common-tracker :as tracker]
+  (:require [tahto.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
-            [hara.lang :as l]
-            [hara.common.util :as ut]
+            [tahto.core :as l]
+            [tahto.common.util :as ut]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]
             [std.string.case :as case]))

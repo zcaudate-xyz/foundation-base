@@ -1,13 +1,13 @@
-(ns hara.lang.impl-test
+(ns tahto.core.impl-test
   (:require [clojure.string]
-            [hara.lang.book :as book]
-            [hara.common.emit-prep-lua-test :as prep]
-            [hara.lang.impl :refer :all]
-            [hara.lang.impl-deps :as deps]
-            [hara.lang.impl-entry :as entry]
-            [hara.lang.impl-lifecycle :as lifecycle]
-            [hara.lang.library :as lib]
-            [hara.lang.library-snapshot :as snap]
+            [tahto.base.book :as book]
+tahto/lang/impl_test.clj:4:            [tahto.common.emit-prep-lua-test :as prep]
+            [tahto.core.impl :refer :all]
+            [tahto.core.impl-deps :as deps]
+            [tahto.core.impl-entry :as entry]
+            [tahto.core.impl-lifecycle :as lifecycle]
+            [tahto.core.library :as lib]
+            [tahto.core.library-snapshot :as snap]
             [std.string.prose :as prose])
   (:use code.test))
 
@@ -39,7 +39,7 @@
        :module 'L.util}
       {}))))
 
-^{:refer hara.lang.impl-lifecycle/emit-module-prep :adopt true :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module-prep :adopt true :added "4.0"}
 (fact "prepare data for emit of module"
 
   (-> (lifecycle/emit-module-prep
@@ -50,7 +50,7 @@
       (dissoc :code))
   => '{:setup nil, :teardown nil, :native {}, :direct #{L.core}})
 
-^{:refer hara.lang.impl-lifecycle/emit-module :adopt true :added "4.0"}
+^{:refer tahto.core.impl-lifecycle/emit-module :adopt true :added "4.0"}
 (fact "emits the module string"
 
   (lifecycle/emit-module-setup
@@ -62,49 +62,49 @@
            :link   {:suppress true}}})
   => string?)
 
-^{:refer hara.lang.impl/with:library :added "4.0"}
+^{:refer tahto.core.impl/with:library :added "4.0"}
 (fact "injects a library as the default"
   (with:library [+library+]
     *library*)
   => +library+)
 
-^{:refer hara.lang.impl/default-library :added "4.0"}
+^{:refer tahto.core.impl/default-library :added "4.0"}
 (fact "gets the default library"
 
   (default-library)
   => lib/library?)
 
-^{:refer hara.lang.impl/default-library:reset :added "4.0"}
+^{:refer tahto.core.impl/default-library:reset :added "4.0"}
 (fact "clears the default library, including all grammars"
   (with:library [(lib/library {})]
     (default-library:reset))
   => anything)
 
-^{:refer hara.lang.impl/clone-default-library :added "4.1"}
+^{:refer tahto.core.impl/clone-default-library :added "4.1"}
 (fact "clones the default library"
   (clone-default-library)
   => lib/library?)
 
-^{:refer hara.lang.impl/runtime-library :added "4.0"}
+^{:refer tahto.core.impl/runtime-library :added "4.0"}
 (fact "gets the current runtime (annex or default)"
 
   (runtime-library)
   => lib/library?)
 
-^{:refer hara.lang.impl/grammar :added "4.0"}
+^{:refer tahto.core.impl/grammar :added "4.0"}
 (fact "gets the grammar"
 
   (with:library [+library+]
     (grammar :lua))
   => map?)
 
-^{:refer hara.lang.impl/emit-options :added "4.0"}
+^{:refer tahto.core.impl/emit-options :added "4.0"}
 (fact "create emit options"
 
   (emit-options {:lang :lua})
   => vector?)
 
-^{:refer hara.lang.impl/to-form :added "4.0"}
+^{:refer tahto.core.impl/to-form :added "4.0"}
 (fact "input to form"
 
   (to-form '(+ @1 2 3)
@@ -116,7 +116,7 @@
            {:lang :lua})
   => '(+ (!:eval 1) 2 3))
 
-^{:refer hara.lang.impl/%.form :added "4.0"}
+^{:refer tahto.core.impl/%.form :added "4.0"}
 (fact "converts to a form"
 
   ^{:- :raw}
@@ -126,7 +126,7 @@
   (%.form (+ @1 2 3))
   => '(+ (!:eval 1) 2 3))
 
-^{:refer hara.lang.impl/emit-direct :added "4.0"}
+^{:refer tahto.core.impl/emit-direct :added "4.0"}
 (fact "adds additional controls to transform form"
 
   (emit-direct (:grammar prep/+book-min+)
@@ -136,7 +136,7 @@
                  :lang :lua})
   => "1 + 2 + 3")
 
-(fact "direct emit failures include hara.lang context"
+(fact "direct emit failures include tahto.core context"
 
   (let [grammar (assoc-in (:grammar prep/+book-min+)
                           [:reserved 'boom-op]
@@ -155,35 +155,35 @@
        (catch Throwable t
          (select-keys (ex-data t)
                       [:probe
-                       :hara/phase
-                       :hara/subsystem
-                       :hara/lang
-                       :hara/module
-                       :hara/form
-                       :hara/provenance-stack]))))
+tahto/lang/impl_test.clj:158:                       :tahto/phase
+tahto/lang/impl_test.clj:159:                       :tahto/subsystem
+tahto/lang/impl_test.clj:160:                       :tahto/lang
+tahto/lang/impl_test.clj:161:                       :tahto/module
+tahto/lang/impl_test.clj:162:                       :tahto/form
+tahto/lang/impl_test.clj:163:                       :tahto/provenance-stack]))))
   => '{:probe true
-        :hara/phase :emit/form
-        :hara/subsystem :hara.common.emit-top-level/emit-form
-        :hara/lang :lua
-        :hara/module L.core
-        :hara/form (boom-op 1 2 3)
-        :hara/provenance-stack [{:hara/phase :emit/form
-                                     :hara/subsystem :hara.common.emit-top-level/emit-form
-                                     :hara/lang :lua
-                                     :hara/module L.core
-                                     :hara/namespace hara.lang.impl-test
-                                     :hara/line 19
-                                     :hara/form (boom-op 1 2 3)
-                                     :hara/symbol boom-op}
-                                    {:hara/phase :emit/direct
-                                     :hara/subsystem :hara.lang.impl/emit-direct
-                                     :hara/lang :lua
-                                     :hara/module L.core
-                                     :hara/namespace hara.lang.impl-test
-                                     :hara/line 19
-                                     :hara/form (boom-op 1 2 3)}]})
+tahto/lang/impl_test.clj:165:        :tahto/phase :emit/form
+tahto/lang/impl_test.clj:166:        :tahto/subsystem :tahto.common.emit-top-level/emit-form
+tahto/lang/impl_test.clj:167:        :tahto/lang :lua
+tahto/lang/impl_test.clj:168:        :tahto/module L.core
+tahto/lang/impl_test.clj:169:        :tahto/form (boom-op 1 2 3)
+tahto/lang/impl_test.clj:170:        :tahto/provenance-stack [{:tahto/phase :emit/form
+tahto/lang/impl_test.clj:171:                                     :tahto/subsystem :tahto.common.emit-top-level/emit-form
+tahto/lang/impl_test.clj:172:                                     :tahto/lang :lua
+tahto/lang/impl_test.clj:173:                                     :tahto/module L.core
+tahto/lang/impl_test.clj:174:                                     :tahto/namespace tahto.core.impl-test
+tahto/lang/impl_test.clj:175:                                     :tahto/line 19
+tahto/lang/impl_test.clj:176:                                     :tahto/form (boom-op 1 2 3)
+tahto/lang/impl_test.clj:177:                                     :tahto/symbol boom-op}
+tahto/lang/impl_test.clj:178:                                    {:tahto/phase :emit/direct
+tahto/lang/impl_test.clj:179:                                     :tahto/subsystem :tahto.core.impl/emit-direct
+tahto/lang/impl_test.clj:180:                                     :tahto/lang :lua
+tahto/lang/impl_test.clj:181:                                     :tahto/module L.core
+tahto/lang/impl_test.clj:182:                                     :tahto/namespace tahto.core.impl-test
+tahto/lang/impl_test.clj:183:                                     :tahto/line 19
+tahto/lang/impl_test.clj:184:                                     :tahto/form (boom-op 1 2 3)}]})
 
-^{:refer hara.lang.impl/emit-str :added "4.0"}
+^{:refer tahto.core.impl/emit-str :added "4.0"}
 (fact  "converts to an output string"
 
   (emit-str '(+ 1 2 3)
@@ -195,7 +195,7 @@
             {:lang :lua})
   => "1 + 2 + 3")
 
-^{:refer hara.lang.impl/%.str :added "4.0"}
+^{:refer tahto.core.impl/%.str :added "4.0"}
 (fact "converts to an output string"
 
   ^{:- :raw}
@@ -266,7 +266,7 @@
       "|    1 + 2 + 3;"
       "|    1 + 2 + 3;"))
 
-^{:refer hara.lang.impl/emit-as :added "4.0"}
+^{:refer tahto.core.impl/emit-as :added "4.0"}
 (fact "helper function for emitting multiple forms"
 
   (emit-as :lua '[(+ 1 2 3)
@@ -274,7 +274,7 @@
            {:library +library+})
   => "1 + 2 + 3\n\n4 + 5 + 6")
 
-^{:refer hara.lang.impl/emit-symbol :added "4.0"}
+^{:refer tahto.core.impl/emit-symbol :added "4.0"}
 (fact "emits string given symbol and grammar"
 
   (with:library [+library+]
@@ -295,7 +295,7 @@
                   {:library +library+}))
   => "WRONG")
 
-^{:refer hara.lang.impl/get-entry :added "4.0"}
+^{:refer tahto.core.impl/get-entry :added "4.0"}
 (fact "gets an entry"
 
   (get-entry +library+
@@ -304,7 +304,7 @@
              'identity-fn)
   => book/book-entry?)
 
-^{:refer hara.lang.impl/emit-entry :added "4.0"}
+^{:refer tahto.core.impl/emit-entry :added "4.0"}
 (fact "emits an entry given parameters and options"
 
   (emit-entry '{:lang :lua
@@ -322,7 +322,7 @@
                :layout :full})
   => "function L_core____identity_fn(x){\n  return x;\n}")
 
-^{:refer hara.lang.impl/emit-entry-deps-collect :added "4.0"}
+^{:refer tahto.core.impl/emit-entry-deps-collect :added "4.0"}
 (fact "only collects the dependencies"
   (emit-entry-deps-collect '{:lang :lua
                               :module L.core
@@ -331,7 +331,7 @@
                              :library +library+})
   => (fn [x] (and (seq x) (book/book-entry? (first x)))))
 
-^{:refer hara.lang.impl/emit-entry-deps :added "4.0"}
+^{:refer tahto.core.impl/emit-entry-deps :added "4.0"}
 (fact "emits only the entry deps"
 
   (emit-entry-deps '{:lang :lua
@@ -357,7 +357,7 @@
    "  })(a,b);"
    "}"))
 
-^{:refer hara.lang.impl/emit-script-imports :added "4.0"}
+^{:refer tahto.core.impl/emit-script-imports :added "4.0"}
 (fact "emit imports"
 
   (emit-script-imports
@@ -380,7 +380,7 @@
      :layout :flat}))
   => '("var__(local=cjson,==require(\"https://cdn.example.com/cjson\"));"))
 
-^{:refer hara.lang.impl/emit-script-deps :added "4.0"}
+^{:refer tahto.core.impl/emit-script-deps :added "4.0"}
 (fact "emits the script deps"
 
   (let [[stage grammar book namespace mopts] (emit-options
@@ -392,12 +392,12 @@
     (emit-script-deps deps nil [stage grammar book namespace mopts]))
   => coll?)
 
-^{:refer hara.lang.impl/emit-script-join :added "4.0"}
+^{:refer tahto.core.impl/emit-script-join :added "4.0"}
 (fact "joins the necessary parts of the script"
   (emit-script-join ["import"] ["deps"] "body")
   => "import\n\ndeps\n\nbody")
 
-^{:refer hara.lang.impl/emit-script :added "4.0"}
+^{:refer tahto.core.impl/emit-script :added "4.0"}
 (fact "emits a script with all dependencies"
 
   (emit-script '(-/add-fn 1 2)
@@ -449,27 +449,27 @@
       ""
       "L_util____add_fn(1,2)"))
 
-^{:refer hara.lang.impl/emit-scaffold-raw-imports :added "4.0"}
+^{:refer tahto.core.impl/emit-scaffold-raw-imports :added "4.0"}
 (fact "gets only the scaffold imports"
   (emit-scaffold-raw-imports [] nil (emit-options {:lang :lua :library +library-ext+}))
   => vector?)
 
-^{:refer hara.lang.impl/emit-scaffold-raw :added "4.0"}
+^{:refer tahto.core.impl/emit-scaffold-raw :added "4.0"}
 (fact "creates entries only for defglobal and defrun entries"
   (emit-scaffold-raw identity 'L.core {:lang :lua :library +library-ext+})
   => string?)
 
-^{:refer hara.lang.impl/emit-scaffold-for :added "4.0"}
+^{:refer tahto.core.impl/emit-scaffold-for :added "4.0"}
 (fact "creates scaffold for module and its deps"
   (emit-scaffold-for 'L.core {:lang :lua :library +library-ext+})
   => string?)
 
-^{:refer hara.lang.impl/emit-scaffold-to :added "4.0"}
+^{:refer tahto.core.impl/emit-scaffold-to :added "4.0"}
 (fact "creates scaffold up to module"
   (emit-scaffold-to 'L.core {:lang :lua :library +library-ext+})
   => string?)
 
-^{:refer hara.lang.impl/emit-scaffold-imports :added "4.0"}
+^{:refer tahto.core.impl/emit-scaffold-imports :added "4.0"}
 (fact "create scaggold to expose native imports "
   (emit-scaffold-imports 'L.core {:lang :lua :library +library-ext+})
   => string?)

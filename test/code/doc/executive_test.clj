@@ -11,7 +11,7 @@
       keys
       sort
       vec)
-  ;;[hara/hara-code hara/hara-code-query ... spirit/spirit-net-mail]
+  ;;[tahto/tahto-code tahto/tahto-code-query ... spirit/spirit-net-mail]
   => sequential?)
 
 ^{:refer code.doc.executive/load-var :added "3.0"}
@@ -35,7 +35,7 @@
 
   (let [project (publish/make-project)
         lookup  (all-pages project)]
-    (render 'hara/index {:write false} lookup project))
+    (render 'tahto/index {:write false} lookup project))
   => (contains {:path string?
                 :updated boolean?
                 :time number?}))
@@ -43,7 +43,7 @@
 ^{:refer code.doc.executive/deploy-template :added "3.0"}
 (comment "copies all assets in the template folder to output"
 
-  (deploy-template "hara"
+  (deploy-template "tahto"
                    {:print {:function true}}
                    (all-sites {:root "."})
                    {:root "."}))
@@ -58,12 +58,12 @@
 
 (comment
 
-  (in-context (render 'hara/hara-code {}))
+  (in-context (render 'tahto/tahto-code {}))
 
-  (in-context (render 'hara/index {:write true}))
+  (in-context (render 'tahto/index {:write true}))
   (-> (all-sites {:root "."})
-      (get "hara")
+      (get "tahto")
       :files
       (get "index"))
   (get (all-documents {:root "."})
-       'hara/index))
+       'tahto/index))

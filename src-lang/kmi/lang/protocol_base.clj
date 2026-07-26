@@ -1,5 +1,5 @@
 (ns kmi.lang.protocol-base
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-protocol :as proto])
   (:refer-clojure :exclude [assoc dissoc empty find first hash key keys name
                             namespace next nth pop push reduce rest seq to-array val vals]))

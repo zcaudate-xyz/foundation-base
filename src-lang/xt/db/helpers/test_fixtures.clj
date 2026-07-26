@@ -1,5 +1,5 @@
 (ns xt.db.helpers.test-fixtures
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch]))
 

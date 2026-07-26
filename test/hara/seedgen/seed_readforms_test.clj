@@ -1,10 +1,10 @@
-(ns hara.seedgen.form-parse-test
+tahto/seedgen/seed_readforms_test.clj:1:(ns tahto.seedgen.form-parse-test
   (:use code.test)
   (:require [code.project :as project]
             [std.block.base :as block]
             [std.block.navigate :as nav]
-            [hara.seedgen.form-common :as form-common]
-            [hara.seedgen.form-parse :as seed-readforms]))
+tahto/seedgen/seed_readforms_test.clj:6:            [tahto.seedgen.form-common :as form-common]
+tahto/seedgen/seed_readforms_test.clj:7:            [tahto.seedgen.form-parse :as seed-readforms]))
 
 (defn- summarize-block-items
   [m]
@@ -25,69 +25,69 @@
                         (get m k))])
              [:root :derived :scaffold])))
 
-^{:refer hara.seedgen.form-parse/class-empty :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:28:^{:refer tahto.seedgen.form-parse/class-empty :added "4.1"}
 (fact "returns an empty classification map"
   (seed-readforms/class-empty) => {:root [] :derived [] :scaffold []})
 
-^{:refer hara.seedgen.form-parse/class-explicit :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:32:^{:refer tahto.seedgen.form-parse/class-explicit :added "4.1"}
 (fact "returns explicit seedgen classification from metadata"
   (seed-readforms/class-explicit (with-meta '(l/script- :js) {:seedgen/root true})) => :root
   (seed-readforms/class-explicit (with-meta '(l/script- :lua) {:seedgen/derived true})) => :derived
   (seed-readforms/class-explicit (with-meta '(+ 1 2 3) {:seedgen/scaffold true})) => :scaffold
   (seed-readforms/class-explicit '(+ 1 2 3)) => nil)
 
-^{:refer hara.seedgen.form-parse/form-script? :added "4.1"}
-(fact "recognizes hara.lang/script- forms"
-  (seed-readforms/form-script? #{'hara.lang/script-} '(hara.lang/script- :js {})) => true
-  (seed-readforms/form-script? #{'hara.lang/script-} '(+ 1 2 3)) => false
+tahto/seedgen/seed_readforms_test.clj:39:^{:refer tahto.seedgen.form-parse/form-script? :added "4.1"}
+(fact "recognizes tahto.core/script- forms"
+  (seed-readforms/form-script? #{'tahto.core/script-} '(tahto.core/script- :js {})) => true
+  (seed-readforms/form-script? #{'tahto.core/script-} '(+ 1 2 3)) => false
   (seed-readforms/form-script? #{'l/script-} '(l/script- :js {})) => true)
 
-^{:refer hara.seedgen.form-parse/class-form :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:45:^{:refer tahto.seedgen.form-parse/class-form :added "4.1"}
 (fact "classifies forms as root, derived or scaffold"
-  (seed-readforms/class-form :js #{'hara.lang/script-} '(hara.lang/script- :js {})) => :root
-  (seed-readforms/class-form :js #{'hara.lang/script-} '(hara.lang/script- :lua {})) => :derived
-  (seed-readforms/class-form :js #{'hara.lang/script-} '(!.js 1)) => :root
-  (seed-readforms/class-form :js #{'hara.lang/script-} '(!.lua 1)) => :derived
-  (seed-readforms/class-form :js #{'hara.lang/script-} '(+ 1 2 3)) => :scaffold)
+  (seed-readforms/class-form :js #{'tahto.core/script-} '(tahto.core/script- :js {})) => :root
+  (seed-readforms/class-form :js #{'tahto.core/script-} '(tahto.core/script- :lua {})) => :derived
+  (seed-readforms/class-form :js #{'tahto.core/script-} '(!.js 1)) => :root
+  (seed-readforms/class-form :js #{'tahto.core/script-} '(!.lua 1)) => :derived
+  (seed-readforms/class-form :js #{'tahto.core/script-} '(+ 1 2 3)) => :scaffold)
 
-^{:refer hara.seedgen.form-parse/class-navs :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:53:^{:refer tahto.seedgen.form-parse/class-navs :added "4.1"}
 (fact "classifies a sequence of navigable forms"
-  (let [text "(hara.lang/script- :js {:runtime :basic})\n\n(!.js 1)\n\n(+ 1 2 3)"
+  (let [text "(tahto.core/script- :js {:runtime :basic})\n\n(!.js 1)\n\n(+ 1 2 3)"
         root (nav/parse-root text)
         navs (form-common/nav-top-levels root)]
-    (seed-readforms/class-navs :js #{'hara.lang/script-} navs)
+    (seed-readforms/class-navs :js #{'tahto.core/script-} navs)
     => (contains {:root (fn [v] (= 2 (count v)))
                   :derived []
                   :scaffold (fn [v] (= 1 (count v)))})))
 
-^{:refer hara.seedgen.form-parse/class-merge :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:63:^{:refer tahto.seedgen.form-parse/class-merge :added "4.1"}
 (fact "merges two classifications by concatenating entries"
   (seed-readforms/class-merge {:root [1] :derived [2] :scaffold [3]}
                               {:root [4] :derived [5] :scaffold [6]})
   => {:root [1 4] :derived [2 5] :scaffold [3 6]})
 
-^{:refer hara.seedgen.form-parse/check-arrow? :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:69:^{:refer tahto.seedgen.form-parse/check-arrow? :added "4.1"}
 (fact "recognizes assertion arrow symbols"
   (seed-readforms/check-arrow? '=>) => true
   (seed-readforms/check-arrow? '=>*) => true
   (seed-readforms/check-arrow? '+) => false)
 
-^{:refer hara.seedgen.form-parse/check-classify :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:75:^{:refer tahto.seedgen.form-parse/check-classify :added "4.1"}
 (fact "classifies fact checks by runtime language"
   (let [text "(fact \"hello\"\n  (!.js 1)\n  => 1\n\n  (!.lua 2)\n  => 2)"
         root (nav/parse-root text)
         fact-nav (nav/down root)]
-    (seed-readforms/check-classify :js #{'hara.lang/script-} fact-nav)
+    (seed-readforms/check-classify :js #{'tahto.core/script-} fact-nav)
     => (contains {:root (fn [v] (= 1 (count v)))
                   :derived (fn [v] (= 1 (count v)))
                   :scaffold []})))
 
-^{:refer hara.seedgen.form-parse/fact-classify-meta :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:85:^{:refer tahto.seedgen.form-parse/fact-classify-meta :added "4.1"}
 (fact "classifies setup and teardown metadata on a fact"
   (let [text "^{:setup [(!.js (setup))]\n  :teardown [(!.lua (tear))]}\n(fact \"hello\"\n  (!.js 1)\n  => 1)"
         root (nav/parse-root text)
         fact-nav (nav/down root)]
-    (seed-readforms/fact-classify-meta :js #{'hara.lang/script-} fact-nav)
+    (seed-readforms/fact-classify-meta :js #{'tahto.core/script-} fact-nav)
     => (contains {:fact-setup (contains {:root (fn [v] (= 1 (count v)))
                                          :derived []
                                          :scaffold []})
@@ -95,7 +95,7 @@
                                             :derived (fn [v] (= 1 (count v)))
                                             :scaffold []})})))
 
-^{:refer hara.seedgen.form-parse/fact-config-nav :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:98:^{:refer tahto.seedgen.form-parse/fact-config-nav :added "4.1"}
 (fact "navigates to the config map inside a fact:global form"
   (let [text "(fact:global {:setup [(!.js (setup))]})"
         root (nav/parse-root text)
@@ -104,11 +104,11 @@
             nav/value)
     => {:setup '[(!.js (setup))]}))
 
-^{:refer hara.seedgen.form-parse/global-context :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:107:^{:refer tahto.seedgen.form-parse/global-context :added "4.1"}
 (fact "builds global context for a set of top-level forms"
   (let [text (str "(ns sample\n"
                   "  (:use code.test)\n"
-                  "  (:require [hara.lang :as l]))\n\n"
+                  "  (:require [tahto.core :as l]))\n\n"
                   "^{:seedgen/root {:all true :langs [:js :lua]}}\n"
                   "(l/script- :js {:runtime :basic})\n\n"
                   "(l/script- :lua {:runtime :basic})\n\n"
@@ -127,18 +127,18 @@
                   :global-fact-setup (contains {:root [] :derived [] :scaffold []})
                   :global-fact-teardown (contains {:root [] :derived [] :scaffold []})})))
 
-^{:refer hara.seedgen.form-parse/entry-enrich :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:130:^{:refer tahto.seedgen.form-parse/entry-enrich :added "4.1"}
 (fact "enriches an entry with fact classification"
   (let [text "^{:setup [(!.js (setup))]}\n(fact \"hello\"\n  (!.js 1)\n  => 1)"
         root (nav/parse-root text)
         fact-nav (nav/down root)
         entry {}]
-    (seed-readforms/entry-enrich :js #{'hara.lang/script-} fact-nav entry)
+    (seed-readforms/entry-enrich :js #{'tahto.core/script-} fact-nav entry)
     => (contains {:checks map?
                   :fact-setup map?
                   :fact-teardown map?})))
 
-^{:refer hara.seedgen.form-parse/seedgen-readforms :added "4.1"}
+tahto/seedgen/seed_readforms_test.clj:141:^{:refer tahto.seedgen.form-parse/seedgen-readforms :added "4.1"}
 (fact "returns globals and analyse entries in the train-002 seedgen shape"
   (let [project (assoc (project/project)
                        :test-paths (vec (distinct (concat (:test-paths (project/project))

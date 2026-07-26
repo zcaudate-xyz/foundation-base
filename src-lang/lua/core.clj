@@ -1,5 +1,5 @@
 (ns lua.core
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
   (:refer-clojure :exclude [abs assert byte format load max min print remove sort time type slurp spit]))

@@ -4,7 +4,7 @@
    Styling is Tailwind class strings only (`class` -> `className`); `variant`
    props lower to the shared class bundles in xt.substrate.view-catalog.
    Platform (`fg/`) ids are figma-only and rejected here."
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]

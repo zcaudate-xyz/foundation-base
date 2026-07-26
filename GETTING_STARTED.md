@@ -66,10 +66,10 @@ Try a standard-library helper:
 
 ## Generate target-language code
 
-`hara.lang` emits Clojure forms through target-language grammars:
+`tahto.core` emits Clojure forms through target-language grammars:
 
 ```clojure
-(require '[hara.lang :as l])
+(require '[tahto.core :as l])
 
 (l/emit-as :js '(+ 1 2 3))
 ;; => "1 + 2 + 3"
@@ -84,11 +84,11 @@ Emit a small function:
     (add 1 2)])
 ```
 
-Continue with the published Hara documentation:
+Continue with the published Tahto documentation:
 
-- <https://zcaudate.xyz/foundation-base/hara/index.html>
-- <https://zcaudate.xyz/foundation-base/hara/introduction.html>
-- <https://zcaudate.xyz/foundation-base/hara/walkthrough-basic.html>
+- <https://zcaudate.xyz/foundation-base/tahto/index.html>
+- <https://zcaudate.xyz/foundation-base/tahto/introduction.html>
+- <https://zcaudate.xyz/foundation-base/tahto/walkthrough-basic.html>
 
 ## Run tests
 
@@ -160,7 +160,7 @@ Update both when changing the project's description, navigation, repository map,
 |---|---|
 | `std.*` | Standard libraries and reusable infrastructure |
 | `code.*` | Testing, documentation, source management, queries, tooling, and analysis |
-| `hara.*` | Language authoring, target models, typing, and code generation |
+| `tahto.*` | Language authoring, target models, typing, and code generation |
 | `rt.*` | Runtime adapters and execution environments |
 | `xt.*` | Portable libraries and cross-target application layers |
 | `src-build/` | Walkthroughs, demos, build definitions, and generated projects |

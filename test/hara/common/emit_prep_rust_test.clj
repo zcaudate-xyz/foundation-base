@@ -1,10 +1,10 @@
-(ns hara.common.emit-prep-rust-test
-  (:require [hara.lang.book :as b]
-            [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper]
-            [hara.common.grammar :as grammar]
-            [hara.common.util :as ut]
-            [hara.model.annex.spec-rust :as rust]
+tahto/common/emit_prep_rust_test.clj:1:(ns tahto.common.emit-prep-rust-test
+  (:require [tahto.base.book :as b]
+tahto/common/emit_prep_rust_test.clj:3:            [tahto.common.emit-common :as common]
+tahto/common/emit_prep_rust_test.clj:4:            [tahto.common.emit-helper :as helper]
+tahto/common/emit_prep_rust_test.clj:5:            [tahto.common.grammar :as grammar]
+tahto/common/emit_prep_rust_test.clj:6:            [tahto.common.util :as ut]
+tahto/common/emit_prep_rust_test.clj:7:            [tahto.model.annex.spec-rust :as rust]
             [std.lib.env :as env])
   (:use code.test))
 

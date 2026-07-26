@@ -1,14 +1,14 @@
-(ns hara.common.preprocess-resolve-test
+tahto/common/preprocess_resolve_test.clj:1:(ns tahto.common.preprocess-resolve-test
   (:use code.test)
-  (:require [hara.lang.book-entry :as entry]
-            [hara.common.emit-prep-js-test :as prep-js]
-            [hara.common.emit-prep-lua-test :as prep]
-            [hara.lang.impl-entry :as impl-entry]
-            [hara.lang.library :as lib]
-            [hara.lang.library-snapshot :as snap]
-            [hara.common.preprocess-resolve :refer :all]))
+  (:require [tahto.base.book-entry :as entry]
+tahto/common/preprocess_resolve_test.clj:4:            [tahto.common.emit-prep-js-test :as prep-js]
+tahto/common/preprocess_resolve_test.clj:5:            [tahto.common.emit-prep-lua-test :as prep]
+            [tahto.core.impl-entry :as impl-entry]
+            [tahto.core.library :as lib]
+            [tahto.core.library-snapshot :as snap]
+tahto/common/preprocess_resolve_test.clj:9:            [tahto.common.preprocess-resolve :refer :all]))
 
-^{:refer hara.common.preprocess-resolve/get-fragment :added "4.1"}
+tahto/common/preprocess_resolve_test.clj:11:^{:refer tahto.common.preprocess-resolve/get-fragment :added "4.1"}
 (fact "gets the fragment given a symbol and modules"
   (get-fragment 'L.core/add
                 (:modules prep/+book-min+)
@@ -16,7 +16,7 @@
                           :link '{u L.core}}})
   => entry/book-entry?)
 
-^{:refer hara.common.preprocess-resolve/process-namespaced-resolve :added "4.1"}
+tahto/common/preprocess_resolve_test.clj:19:^{:refer tahto.common.preprocess-resolve/process-namespaced-resolve :added "4.1"}
 (fact "resolves symbol in current namespace"
   (process-namespaced-resolve 'u/add
                               (:modules prep/+book-min+)
@@ -36,7 +36,7 @@
                                         :link '{u L.core}}})
   => (throws))
 
-^{:refer hara.common.preprocess-resolve/process-namespaced-symbol :added "4.1"}
+tahto/common/preprocess_resolve_test.clj:39:^{:refer tahto.common.preprocess-resolve/process-namespaced-symbol :added "4.1"}
 (fact "process namespaced symbols"
   (process-namespaced-symbol 'u/add
                              (:modules prep/+book-min+)
@@ -123,7 +123,7 @@
                              identity)
   => (throws))
 
-^{:refer hara.common.preprocess-resolve/process-standard-symbol :added "4.1"}
+tahto/common/preprocess_resolve_test.clj:126:^{:refer tahto.common.preprocess-resolve/process-standard-symbol :added "4.1"}
 (fact "processes a standard symbol"
   (let [library-js (doto (lib/library:create
                           {:snapshot (snap/snapshot {:js {:id :js
@@ -141,7 +141,7 @@
     [sym @deps-native])
   => '[Puck.Puck {"@measured/puck" #{Puck}}])
 
-^{:refer hara.common.preprocess-resolve/find-natives :added "4.1"}
+tahto/common/preprocess_resolve_test.clj:144:^{:refer tahto.common.preprocess-resolve/find-natives :added "4.1"}
 (fact "find natives for a macro entry"
   (let [library-js (doto (lib/library:create
                           {:snapshot (snap/snapshot {:js {:id :js

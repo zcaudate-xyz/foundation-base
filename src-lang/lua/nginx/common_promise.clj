@@ -1,5 +1,5 @@
 (ns lua.nginx.common-promise
-  (:require [hara.lang :as l])
+  (:require [tahto.core :as l])
   (:refer-clojure :exclude [promise]))
 
 (l/script :lua.nginx

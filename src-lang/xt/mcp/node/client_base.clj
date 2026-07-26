@@ -1,5 +1,5 @@
 (ns xt.mcp.node.client-base
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.mcp.base :as base]

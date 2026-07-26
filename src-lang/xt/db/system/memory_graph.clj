@@ -1,5 +1,5 @@
 (ns xt.db.system.memory-graph
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
@@ -16,7 +16,7 @@
                          (fn [e] (return (== e x))))))
 
 (defn.xt like-char-at
-  "gets a single character from a string"
+  "gets a single ctahtocter from a string"
   {:added "4.1"}
   [s i]
   (when (or (< i 0)

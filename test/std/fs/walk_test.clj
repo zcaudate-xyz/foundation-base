@@ -8,21 +8,21 @@
 (fact "matches according to the defined filter"
 
   (match-single {:root (path/path ".")
-                 :path (path/path "src/hara/test.clj")}
+                 :path (path/path "src/tahto/test.clj")}
                 {:tag :pattern
                  :pattern #"src"})
   => true
 
   (match-single {:root (path/path "src")
-                 :path (path/path "src/hara/test.clj")}
+                 :path (path/path "src/tahto/test.clj")}
                 {:tag :pattern
                  :pattern #"src"})
   => false
 
-  (match-single {:path (path/path "src/hara/test.clj")}
+  (match-single {:path (path/path "src/tahto/test.clj")}
                 {:tag :fn
                  :fn (fn [m]
-                       (re-find #"hara" (str m)))})
+                       (re-find #"tahto" (str m)))})
   => true)
 
 ^{:refer std.fs.walk/match-filter :added "3.0"}
@@ -32,13 +32,13 @@
   => true
 
   (match-filter {:root (path/path "")
-                 :path (path/path "src/hara/test.clj")
+                 :path (path/path "src/tahto/test.clj")
                  :include [{:tag :pattern
                             :pattern #"test"}]})
   => true
 
   (match-filter {:root (path/path "")
-                 :path (path/path "src/hara/test.clj")
+                 :path (path/path "src/tahto/test.clj")
                  :exclude [{:tag :pattern
                             :pattern #"test"}]})
   => false)

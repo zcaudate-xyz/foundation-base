@@ -533,16 +533,16 @@
 
 (comment
 
-  (./reset '[hara.block code.manage])
-  (def a* (analyse-source-code (slurp "src/hara/code/framework.clj")))
+  (./reset '[tahto.block code.manage])
+  (def a* (analyse-source-code (slurp "src/tahto/code/framework.clj")))
 
-  (def a* (analyse-test-code (slurp "test/hara/code/framework_test.clj")))
+  (def a* (analyse-test-code (slurp "test/tahto/code/framework_test.clj")))
 
-  (-> (nav/parse-root (slurp "test/hara/code/base_test.clj"))
+  (-> (nav/parse-root (slurp "test/tahto/code/base_test.clj"))
       (query/select [{:is 'docstrings}])
       (first))
 
-  (-> (nav/parse-root (slurp "test/hara/code/base_test.clj"))
+  (-> (nav/parse-root (slurp "test/tahto/code/base_test.clj"))
       (query/select [{:is 'docstrings}])
       (first)
       (nav/up)

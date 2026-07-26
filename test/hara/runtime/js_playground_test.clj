@@ -1,5 +1,5 @@
-(ns hara.runtime.js-playground-test
-  (:require [hara.runtime.js-playground :refer :all]
+tahto/runtime/js_playground_test.clj:1:(ns tahto.runtime.js-playground-test
+tahto/runtime/js_playground_test.clj:2:  (:require [tahto.runtime.js-playground :refer :all]
             [std.json :as json]
             [std.lib.component :as component]
             [std.protocol.context :as protocol.context])
@@ -33,7 +33,7 @@
                             listener))
      :connected connected}))
 
-^{:refer hara.runtime.js-playground/rt-js-playground:create :added "4.0"}
+tahto/runtime/js_playground_test.clj:36:^{:refer tahto.runtime.js-playground/rt-js-playground:create :added "4.0"}
 (fact "creates a js playground runtime"
 
   (rt-js-playground:create {:lang :js})
@@ -41,7 +41,7 @@
                 :runtime :playground
                 :id string?}))
 
-^{:refer hara.runtime.js-playground/start-js-playground :added "4.0"}
+tahto/runtime/js_playground_test.clj:44:^{:refer tahto.runtime.js-playground/start-js-playground :added "4.0"}
 (fact "starts a js playground server"
 
   (let [rt (start-js-playground (rt-js-playground:create {:lang :js :port 0}))]
@@ -54,7 +54,7 @@
       (finally
         (component/stop rt)))))
 
-^{:refer hara.runtime.js-playground/play-url :added "4.0"}
+tahto/runtime/js_playground_test.clj:57:^{:refer tahto.runtime.js-playground/play-url :added "4.0"}
 (fact "play-url is reachable while the server is running"
 
   (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))
@@ -64,7 +64,7 @@
       (finally
         (component/stop rt)))))
 
-^{:refer hara.runtime.js-playground/raw-eval-js-playground :added "4.0"}
+tahto/runtime/js_playground_test.clj:67:^{:refer tahto.runtime.js-playground/raw-eval-js-playground :added "4.0"}
 (fact "raw-eval returns not-connected when no browser is attached"
 
   (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))]
@@ -74,7 +74,7 @@
       (finally
         (component/stop rt)))))
 
-^{:refer hara.runtime.js-playground/raw-eval-js-playground :added "4.0"
+tahto/runtime/js_playground_test.clj:77:^{:refer tahto.runtime.js-playground/raw-eval-js-playground :added "4.0"
   :id test-raw-eval-js-playground-connected}
 (fact "raw-eval evaluates through a connected browser"
 
@@ -91,7 +91,7 @@
         (.sendClose ^WebSocket ws WebSocket/NORMAL_CLOSURE "done")
         (component/stop rt)))))
 
-^{:refer hara.runtime.js-playground/rt-js-playground :added "4.0"}
+tahto/runtime/js_playground_test.clj:94:^{:refer tahto.runtime.js-playground/rt-js-playground :added "4.0"}
 (fact "creates and starts a js playground runtime"
 
   (let [rt (rt-js-playground {:lang :js :port 0})]
@@ -101,7 +101,7 @@
       (finally
         (component/stop rt)))))
 
-^{:refer hara.runtime.js-playground/start-js-playground :added "4.0"
+tahto/runtime/js_playground_test.clj:104:^{:refer tahto.runtime.js-playground/start-js-playground :added "4.0"
   :id test-start-js-playground-restart}
 (fact "restarting the playground reuses the same port"
 
@@ -115,7 +115,7 @@
           (finally
             (component/stop rt2)))))))
 
-^{:refer hara.runtime.js-playground/playground-client-script :added "4.0"}
+tahto/runtime/js_playground_test.clj:118:^{:refer tahto.runtime.js-playground/playground-client-script :added "4.0"}
 (fact "client script exposes a queryable PLAYGROUND API"
 
   (let [script (playground-client-script)]
@@ -126,7 +126,7 @@
     script => #"PLAYGROUND\[\"closeTab\"\]"
     script => #"PLAYGROUND\[\"setTabContent\"\]"))
 
-^{:refer hara.runtime.js-playground/page-html :added "4.1"}
+tahto/runtime/js_playground_test.clj:129:^{:refer tahto.runtime.js-playground/page-html :added "4.1"}
 (fact "page-html renders the playground page with config and scripts"
 
   (page-html {:title "Custom Playground"
@@ -143,7 +143,7 @@
   (page-html {:title "Custom Playground"})
   => #"<script type=\"module\">")
 
-^{:refer hara.runtime.js-playground/stop-js-playground :added "4.1"}
+tahto/runtime/js_playground_test.clj:146:^{:refer tahto.runtime.js-playground/stop-js-playground :added "4.1"}
 (fact "stop-js-playground stops the server and returns the runtime"
 
   (let [rt (rt-js-playground {:lang :js :port 0})]
@@ -154,7 +154,7 @@
         ;; already stopped
         ))))
 
-^{:refer hara.runtime.js-playground/invoke-ptr-js-playground :added "4.1"}
+tahto/runtime/js_playground_test.clj:157:^{:refer tahto.runtime.js-playground/invoke-ptr-js-playground :added "4.1"}
 (fact "invoke-ptr evaluates through a connected browser"
 
   (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))
@@ -170,7 +170,7 @@
         (.sendClose ^WebSocket ws WebSocket/NORMAL_CLOSURE "done")
         (component/stop rt)))))
 
-^{:refer hara.runtime.js-playground/rt-js-playground-string :added "4.1"}
+tahto/runtime/js_playground_test.clj:173:^{:refer tahto.runtime.js-playground/rt-js-playground-string :added "4.1"}
 (fact "rt-js-playground-string formats the runtime as a readable tag"
 
   (rt-js-playground-string {:lang :js
@@ -179,13 +179,13 @@
                             :port 1234})
   => "#rt.js-playground[:js \"hello\" \"127.0.0.1\" 1234]")
 
-^{:refer hara.runtime.js-playground/play-file :added "4.1"}
+tahto/runtime/js_playground_test.clj:182:^{:refer tahto.runtime.js-playground/play-file :added "4.1"}
 (fact "play-file joins paths under the runtime root"
 
   (play-file {:root "/tmp/foo"} "bar" "baz.js")
   => "/tmp/foo/bar/baz.js")
 
-^{:refer hara.runtime.js-playground/play-script :added "4.1"}
+tahto/runtime/js_playground_test.clj:188:^{:refer tahto.runtime.js-playground/play-script :added "4.1"}
 (fact "play-script emits js and writes a hashed script into the served root"
 
   (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))]
@@ -198,7 +198,7 @@
       (finally
         (component/stop rt)))))
 
-^{:refer hara.runtime.js-playground/play-page :added "4.1"}
+tahto/runtime/js_playground_test.clj:201:^{:refer tahto.runtime.js-playground/play-page :added "4.1"}
 (fact "play-page writes a hashed html page into the served root"
 
   (let [rt (component/start (rt-js-playground:create {:lang :js :port 0}))]

@@ -1,6 +1,6 @@
 (ns xt.substrate.s01-basic-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.lang.common-notify :as notify]))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}

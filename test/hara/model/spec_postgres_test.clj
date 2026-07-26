@@ -1,9 +1,9 @@
-(ns hara.model.spec-postgres-test
+tahto/model/spec_postgres_test.clj:1:(ns tahto.model.spec-postgres-test
   (:use code.test)
   (:require [postgres.core :as pg]
-            [hara.model.spec-postgres :refer :all]
+tahto/model/spec_postgres_test.clj:4:            [tahto.model.spec-postgres :refer :all]
             [postgres.sample.scratch-v1 :as scratch]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.env :as env]))
 
 (l/script- :postgres
@@ -20,7 +20,7 @@
              (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.model.spec-postgres/CANARY :adopt true :added "4.0"}
+tahto/model/spec_postgres_test.clj:23:^{:refer tahto.model.spec-postgres/CANARY :adopt true :added "4.0"}
 (fact "stops the postgres runtime"
 
   (try
@@ -33,7 +33,7 @@
       (throw t)))
   => 3M)
 
-^{:refer hara.model.spec-postgres/CANARY.select :adopt true :added "4.0"}
+tahto/model/spec_postgres_test.clj:36:^{:refer tahto.model.spec-postgres/CANARY.select :adopt true :added "4.0"}
 (fact "BASIC SELECT"
 
   (!.pg
@@ -67,7 +67,7 @@
     :cross-join (unnest (array "X" "Y")) b])
   => '("(A,X)" "(A,Y)" "(B,X)" "(B,Y)"))
 
-^{:refer hara.model.spec-postgres/CANARY.json :adopt true :added "4.0"}
+tahto/model/spec_postgres_test.clj:70:^{:refer tahto.model.spec-postgres/CANARY.json :adopt true :added "4.0"}
 (fact "BASIC JSON SELECT"
 
   (!.pg
@@ -110,18 +110,18 @@
   => #{{"id" "a", "data" 2}
        {"id" "a", "data" 1}})
 
-^{:refer hara.model.spec-postgres/pg-tf-free-data :added "4.1"}
+tahto/model/spec_postgres_test.clj:113:^{:refer tahto.model.spec-postgres/pg-tf-free-data :added "4.1"}
 (fact "transforms free data form to quoted structure"
   (pg-tf-free-data ['>-> '[[a b] [c d]]])
   => '(quote ((quote [[a b] [c d]]))))
 
-^{:refer hara.model.spec-postgres/pg-tf-free-vec :added "4.1"}
+tahto/model/spec_postgres_test.clj:118:^{:refer tahto.model.spec-postgres/pg-tf-free-vec :added "4.1"}
 (fact "transforms free vec form to quoted vector"
   (pg-tf-free-vec ['--- '[a b c]]) => '(quote [a b c])
 
   (pg-tf-free-vec ['--- '[1 2 3]]) => '(quote [1 2 3]))
 
-^{:refer hara.model.spec-postgres/pg-vector :added "4.1"}
+tahto/model/spec_postgres_test.clj:124:^{:refer tahto.model.spec-postgres/pg-vector :added "4.1"}
 (fact "handles array with js meta by emitting through pg-tf-js"
   (pg-vector [1 2 3] {} {})
   => "1 2 3"

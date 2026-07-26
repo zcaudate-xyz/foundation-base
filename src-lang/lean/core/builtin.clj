@@ -1,6 +1,6 @@
 (ns lean.core.builtin
   "Curated outline of common Lean 4 Init/Std builtins."
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :lean

@@ -228,7 +228,7 @@
 
   (unclean 'code.manage)
 
-  (unclean '[hara]))
+  (unclean '[tahto]))
 
 ^{:refer code.manage/unchecked :added "3.0"}
 (comment "returns tests without `=>` checks"
@@ -325,22 +325,22 @@
 
   (code.manage/unchecked 'code.framework.docstring {:print {:function true :item true :result true :summary true}})
 
-  (refactor-code '[hara] {:edits [code.format.ns/expand-shorthand
+  (refactor-code '[tahto] {:edits [code.format.ns/expand-shorthand
                                   code.format.ns/reorder-load-form]})
 
   (refactor-code '[std.lib.security.provider] {:edits [code.format.ns/expand-shorthand
                                                    code.format.ns/reorder-load-form]}))
 
 (comment
-  (find-usages ['hara] {:var 'hara.data.base.seq/index-at})
+  (find-usages ['tahto] {:var 'tahto.data.base.seq/index-at})
 
-  (find-usages ['jvm.artifact] {:var 'hara.data.base.seq/object-of})
+  (find-usages ['jvm.artifact] {:var 'tahto.data.base.seq/object-of})
 
-  (find-usages 'jvm.classloader.url-classloader {:var 'hara.data.base.seq/object-of})
+  (find-usages 'jvm.classloader.url-classloader {:var 'tahto.data.base.seq/object-of})
 
-  (replace-usages ['jvm.artifact] {:var 'hara.data.base.seq/object-of
+  (replace-usages ['jvm.artifact] {:var 'tahto.data.base.seq/object-of
                                    :new 'element-at})
 
   (replace-usages '[jvm.classloader.url-classloader]
-                  {:var 'hara.data.base.seq/object-of
+                  {:var 'tahto.data.base.seq/object-of
                    :new 'element-at}))

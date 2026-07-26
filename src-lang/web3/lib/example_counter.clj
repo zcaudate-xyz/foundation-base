@@ -1,5 +1,5 @@
 (ns web3.lib.example-counter
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.env :as env]))
 
 (l/script :solidity

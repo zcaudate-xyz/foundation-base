@@ -6,10 +6,10 @@
 ^{:refer postgres.typed.typed-resolve/canonical-fn-sym :added "4.1"}
 (fact "canonical-fn-sym rewrites rt.postgres namespaces"
   (typed-resolve/canonical-fn-sym 'rt.postgres.foo/bar)
-  => 'hara.runtime.postgres.foo/bar
+  => 'tahto.runtime.postgres.foo/bar
 
   (typed-resolve/canonical-fn-sym 'rt.postgres.util/one)
-  => 'hara.runtime.postgres.util/one
+  => 'tahto.runtime.postgres.util/one
 
   (typed-resolve/canonical-fn-sym 'rt.postgres/one)
   => 'rt.postgres/one

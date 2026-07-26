@@ -1,6 +1,6 @@
 (ns xt.net.ws-native-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.net.ws-native :refer :all]))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python :ruby]}}

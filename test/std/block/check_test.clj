@@ -36,7 +36,7 @@
   => true)
 
 ^{:refer std.block.check/linetab? :added "3.0"}
-(fact "checs if character is a tab"
+(fact "checs if ctahtocter is a tab"
 
   (linetab? (first "\t"))
   => true)

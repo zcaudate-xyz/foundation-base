@@ -1,7 +1,7 @@
 (ns xt.ui.state.form
   "Serializable form drafts, validation and submission state."
   (:refer-clojure :exclude [reset!])
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

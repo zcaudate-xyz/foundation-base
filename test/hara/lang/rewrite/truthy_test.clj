@@ -1,8 +1,8 @@
-(ns hara.lang.rewrite.truthy-test
+(ns tahto.core.rewrite.truthy-test
   (:use code.test)
-  (:require [hara.lang.rewrite.truthy :as truthy]))
+  (:require [tahto.core.rewrite.truthy :as truthy]))
 
-^{:refer hara.lang.rewrite.truthy/dot-boolish-call? :added "4.0"}
+^{:refer tahto.core.rewrite.truthy/dot-boolish-call? :added "4.0"}
 (fact "detects dotted method calls returning booleans"
   [(truthy/dot-boolish-call? '(. obj (containsKey "a")) '#{containsKey})
    (truthy/dot-boolish-call? '(. obj (isEmpty)) '#{isEmpty})
@@ -12,7 +12,7 @@
    (truthy/dot-boolish-call? '(. obj containsKey) '#{containsKey})]
   => [true true false false false false])
 
-^{:refer hara.lang.rewrite.truthy/boolish-form? :added "4.1"}
+^{:refer tahto.core.rewrite.truthy/boolish-form? :added "4.1"}
 (fact "detects boolish forms with configurable rules"
   [(truthy/boolish-form? '(x:eq a b)
                          {:boolish-ops '#{x:eq}})
@@ -27,12 +27,12 @@
                          {:boolish-ops '#{x:eq}})]
   => [true true true false])
 
-^{:refer hara.lang.rewrite.truthy/truthy-check-form :added "4.0"}
+^{:refer tahto.core.rewrite.truthy/truthy-check-form :added "4.0"}
 (fact "builds a truthiness check for a value"
   (truthy/truthy-check-form 'x)
   => '(and (x:not-nil? x) (not= false x)))
 
-^{:refer hara.lang.rewrite.truthy/wrap-truthy-check :added "4.0"}
+^{:refer tahto.core.rewrite.truthy/wrap-truthy-check :added "4.0"}
 (fact "wraps a form in a truthiness check, preserving source metadata"
   [(truthy/wrap-truthy-check 'source 'x)
    (truthy/wrap-truthy-check 'source 'x (fn [v] (list 'truthy? v)))
@@ -41,7 +41,7 @@
       '(truthy? x)
       {:foo true}])
 
-^{:refer hara.lang.rewrite.truthy/truthy-form :added "4.1"}
+^{:refer tahto.core.rewrite.truthy/truthy-form :added "4.1"}
 (fact "wraps non-bool forms with configurable truthy checks"
   [(truthy/truthy-form 'curr
                        'curr
@@ -57,7 +57,7 @@
       '(and (x:not-nil? curr)
             (not= false curr))])
 
-^{:refer hara.lang.rewrite.truthy/truthy-or-form :added "4.1"}
+^{:refer tahto.core.rewrite.truthy/truthy-or-form :added "4.1"}
 (fact "builds value-preserving truthy fallback chains"
   (truthy/truthy-or-form 'source 'value 'fallback)
   => '(:? (and (x:not-nil? value)

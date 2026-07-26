@@ -505,7 +505,7 @@
    (clojure.string/split-lines
     (slurp "test-data/std.block.heal/cases/005_example.block"))
    [2 5] 3)
-  => ["  (:require [hara.lang :as l]))"
+  => ["  (:require [tahto.core :as l]))"
       ""
       "(l/script :js"
       "  {:require [[js.react :as r]"]
@@ -514,7 +514,7 @@
    (clojure.string/split-lines
     (slurp "test-data/std.block.heal/cases/005_example.block"))
    [2 5] 4)
-  => ["   :require [hara.lang :as l]))"
+  => ["   :require [tahto.core :as l]))"
       ""
       "(l/script :js"
       "  {:require [[js.react :as r]"])
@@ -811,7 +811,7 @@
      "            :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
      "            :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
      "            :maxLength 10}]"
-     "          [:p {:className \"text-xs text-[#6d6d6d] mt-1\"} \"Short symbol (3-10 characters)\"]]"]))
+     "          [:p {:className \"text-xs text-[#6d6d6d] mt-1\"} \"Short symbol (3-10 ctahtocters)\"]]"]))
   => [{:errors
        [{:char "}",
          :line 6,

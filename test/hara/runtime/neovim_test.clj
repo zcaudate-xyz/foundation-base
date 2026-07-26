@@ -1,8 +1,8 @@
-(ns hara.runtime.neovim-test
+tahto/runtime/neovim_test.clj:1:(ns tahto.runtime.neovim-test
   (:use code.test)
-  (:require [hara.lang :as l]
-            [hara.lang.type-shared :as shared]
-            [hara.runtime.neovim.impl :as impl]
+  (:require [tahto.core :as l]
+            [tahto.core.type-shared :as shared]
+tahto/runtime/neovim_test.clj:5:            [tahto.runtime.neovim.impl :as impl]
             [std.lib.env :as env]))
 
 (l/script- :lua
@@ -13,7 +13,7 @@
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer hara.runtime.neovim.impl/neovim :added "4.1"}
+tahto/runtime/neovim_test.clj:16:^{:refer tahto.runtime.neovim.impl/neovim :added "4.1"}
 (fact "starts and stops a neovim runtime"
 
       (let [rt (impl/neovim {})]
@@ -23,7 +23,7 @@
              true)])
   => [true true true])
 
-^{:refer hara.runtime.neovim.impl/raw-eval-neovim :added "4.1"}
+tahto/runtime/neovim_test.clj:26:^{:refer tahto.runtime.neovim.impl/raw-eval-neovim :added "4.1"}
 (fact "evaluates lua in neovim"
   (let [rt (impl/neovim {})]
     (try
@@ -33,8 +33,8 @@
         (std.lib.component/stop rt))))
   => [6 true])
 
-^{:refer hara.lang/script- :added "4.1"}
-(fact "uses neovim runtime through hara.lang"
+^{:refer tahto.core/script- :added "4.1"}
+(fact "uses neovim runtime through tahto.core"
   (try
     [(!.lua (+ 1 2 3))
      (number? (!.lua (vim.api.nvim_create_buf false true)))]
@@ -42,7 +42,7 @@
       (l/rt:stop :lua)))
   => [6 true])
 
-^{:refer hara.runtime.neovim.impl/neovim-shared :added "4.1"}
+tahto/runtime/neovim_test.clj:45:^{:refer tahto.runtime.neovim.impl/neovim-shared :added "4.1"}
 (fact "two shared neovim runtimes with the same id share the process"
   (let [rt1 (impl/neovim-shared:create {:id :shared-neovim-test})
         rt2 (impl/neovim-shared:create {:id :shared-neovim-test})]

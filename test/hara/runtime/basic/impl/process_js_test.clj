@@ -1,7 +1,7 @@
-(ns hara.runtime.basic.impl.process-js-test
+tahto/runtime/basic/impl/process_js_test.clj:1:(ns tahto.runtime.basic.impl.process-js-test
   (:require [clojure.string]
-            [hara.runtime.basic.impl.process-js :refer :all]
-            [hara.lang :as l]
+tahto/runtime/basic/impl/process_js_test.clj:3:            [tahto.runtime.basic.impl.process-js :refer :all]
+            [tahto.core :as l]
             [std.lib.env :as env])
   (:use code.test))
 
@@ -12,7 +12,7 @@
 (fact:global
  {:skip (not (env/program-exists? "node"))})
 
-^{:refer hara.runtime.basic.impl.process-js/CANARY :adopt true :added "4.0"}
+tahto/runtime/basic/impl/process_js_test.clj:15:^{:refer tahto.runtime.basic.impl.process-js/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE js code"
 
   (!.js (+ 1 2 3 4))
@@ -22,7 +22,7 @@
   => string?)
 
 
-^{:refer hara.runtime.basic.impl.process-js/node-path :added "4.1"}
+tahto/runtime/basic/impl/process_js_test.clj:25:^{:refer tahto.runtime.basic.impl.process-js/node-path :added "4.1"}
 (fact "builds a NODE_PATH including the project-local node_modules"
   (let [path (node-path)
         sep (str java.io.File/pathSeparator)

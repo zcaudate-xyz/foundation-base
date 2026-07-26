@@ -31,7 +31,7 @@
 ^{:refer jvm.namespace.dependent/ns-all-dependents :added "3.0"}
 (fact "gets all dependencies"
 
-  (ns-all-dependents 'std.lib.sort '[hara])
+  (ns-all-dependents 'std.lib.sort '[tahto])
   => map?)
 
 ^{:refer jvm.namespace.dependent/reeval :added "3.0"}

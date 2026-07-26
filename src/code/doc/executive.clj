@@ -91,7 +91,7 @@
  
    (let [project (publish/make-project)
          lookup  (all-pages project)]
-     (render 'hara/index {:write false} lookup project))
+     (render 'tahto/index {:write false} lookup project))
    => (contains {:path string?
                  :updated boolean?
                  :time number?})"
@@ -149,7 +149,7 @@
 (defn deploy-template
   "copies all assets in the template folder to output
  
-   (deploy-template \"hara\"
+   (deploy-template \"tahto\"
                     {:print {:function true}}
                    (all-sites {:root \".\"})
                     {:root \".\"})"

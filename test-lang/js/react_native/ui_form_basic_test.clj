@@ -1,5 +1,5 @@
 (ns js.react-native.ui-form-basic-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [std.lib.foundation :as f])
   (:use code.test))
 

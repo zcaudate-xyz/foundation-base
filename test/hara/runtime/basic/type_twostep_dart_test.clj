@@ -1,8 +1,8 @@
-(ns hara.runtime.basic.type-twostep-dart-test
+tahto/runtime/basic/type_twostep_dart_test.clj:1:(ns tahto.runtime.basic.type-twostep-dart-test
   (:use code.test)
   (:require [std.lib.env :as env]
-            [hara.runtime.basic.type-common :as common]
-            [hara.lang :as l]))
+tahto/runtime/basic/type_twostep_dart_test.clj:4:            [tahto.runtime.basic.type-common :as common]
+            [tahto.core :as l]))
 
 (l/script- :dart
   {:runtime :twostep

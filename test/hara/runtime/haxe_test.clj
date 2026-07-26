@@ -1,12 +1,12 @@
-(ns hara.runtime.haxe-test
-  (:require [hara.runtime.haxe.impl :as impl]
+tahto/runtime/haxe_test.clj:1:(ns tahto.runtime.haxe-test
+tahto/runtime/haxe_test.clj:2:  (:require [tahto.runtime.haxe.impl :as impl]
             [std.lib.component :as component]
             [std.lib.env :as env])
   (:use code.test))
 
 (fact:global {:skip (not (env/program-exists? "haxe"))})
 
-^{:refer hara.runtime.haxe.impl/haxe :added "4.1"}
+tahto/runtime/haxe_test.clj:9:^{:refer tahto.runtime.haxe.impl/haxe :added "4.1"}
 (fact "creates and uses a haxe runtime"
   (let [rt (impl/haxe {})]
     [(boolean rt)
@@ -15,7 +15,7 @@
          true)])
   => [true 6 true])
 
-^{:refer hara.runtime.haxe.impl/raw-eval-haxe :added "4.1"}
+tahto/runtime/haxe_test.clj:18:^{:refer tahto.runtime.haxe.impl/raw-eval-haxe :added "4.1"}
 (fact "evaluates string concatenation in haxe"
   (let [rt (impl/haxe {})]
     (try

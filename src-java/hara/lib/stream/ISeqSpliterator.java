@@ -1,4 +1,4 @@
-package hara.lib.stream;
+package newlisp.lib.stream;
 
 import clojure.lang.ISeq;
 import java.util.Spliterator;
@@ -38,7 +38,7 @@ public class ISeqSpliterator<T> implements Spliterator<T> {
     }
 
     @Override
-    public int characteristics() {
+tahto/lib/stream/ISeqSpliterator.java:41:    public int ctahtocteristics() {
         return IMMUTABLE;
     }
 }

@@ -1,7 +1,7 @@
 ^{:seedgen/skip true}
 (ns xt.db.node.runtime-basic-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [clojure.string :as str]
             [xt.lang.common-notify :as notify]
             [xt.db.node.runtime :as runtime]))

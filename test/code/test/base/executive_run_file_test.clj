@@ -35,9 +35,9 @@
 ^{:refer code.test.base.executive/run-file-path :added "4.1"}
 (fact "places the repl helper next to the report by default"
   (executive/run-file-path
-   "/tmp/demo/.hara/runs/run-10.edn"
+   "/tmp/demo/.tahto/runs/run-10.edn"
    {:save-run true})
-  => "/tmp/demo/.hara/runs/run-10.run.edn"
+  => "/tmp/demo/.tahto/runs/run-10.run.edn"
 
   (executive/run-file-path
    nil
@@ -47,9 +47,9 @@
 ^{:refer code.test.base.executive/history-file-path :added "4.1"}
 (fact "places run history next to the saved helper by default or at a custom path"
   (executive/history-file-path
-   {:run-path "/tmp/demo/.hara/runs/run-10.run.edn"}
+   {:run-path "/tmp/demo/.tahto/runs/run-10.run.edn"}
    {:save-run true})
-  => "/tmp/demo/.hara/runs/run-history.csv"
+  => "/tmp/demo/.tahto/runs/run-history.csv"
 
   (binding [context/*root* "/tmp/demo"]
     (executive/history-file-path
@@ -73,7 +73,7 @@
                      :run-command 'code.test/run
                      :test {:order :random}})
               form (edn/read-string (slurp path))]
-          [(boolean (re-find #"\.hara/runs/run-\d+\.run\.edn$" path))
+          [(boolean (re-find #"\.tahto/runs/run-\d+\.run\.edn$" path))
            (.endsWith path ".run.edn")
             (first form)
             (-> form second first)

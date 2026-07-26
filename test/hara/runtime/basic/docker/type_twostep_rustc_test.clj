@@ -1,8 +1,8 @@
-(ns hara.runtime.basic.docker.type-twostep-rustc-test
+tahto/runtime/basic/docker/type_twostep_rustc_test.clj:1:(ns tahto.runtime.basic.docker.type-twostep-rustc-test
   (:use code.test)
-  (:require [hara.runtime.basic.impl-annex.process-rust]
-            [hara.runtime.basic.type-twostep :as twostep]
-            [hara.lang :as l]
+tahto/runtime/basic/docker/type_twostep_rustc_test.clj:3:  (:require [tahto.runtime.basic.impl-annex.process-rust]
+tahto/runtime/basic/docker/type_twostep_rustc_test.clj:4:            [tahto.runtime.basic.type-twostep :as twostep]
+            [tahto.core :as l]
             [std.lib.env :as env]))
 
 (l/script- :rust
@@ -14,7 +14,7 @@
 
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
-            (System/getenv "HARA_NO_DOCKER"))
+tahto/runtime/basic/docker/type_twostep_rustc_test.clj:17:            (System/getenv "TAHTO_NO_DOCKER"))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 

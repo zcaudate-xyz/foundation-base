@@ -34,7 +34,7 @@ The current dependency version is declared in [`project.clj`](https://github.com
 ## Emit JavaScript
 
 ```clojure
-(require '[hara.lang :as l])
+(require '[tahto.core :as l])
 
 (l/emit-as :js '(+ 1 2 3))
 ;; => "1 + 2 + 3"
@@ -51,7 +51,7 @@ Foundation Base uses `code.test`, not `clojure.test`. Targeted test runs are rec
 ## Choose the next page
 
 - [Examples](Examples)
-- [Hara Language Tooling](Hara-Language-Tooling)
+- [Tahto Language Tooling](Tahto-Language-Tooling)
 - [Code Tools](Code-Tools)
 - [Repository Map](Repository-Map)
 

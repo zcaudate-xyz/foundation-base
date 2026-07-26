@@ -62,11 +62,11 @@
   => '{m my.ns}
 
   ;; Multiple aliases
-  (parse/extract-aliases '[[postgres.core :as pg] [hara.runtime.user :as user]])
-  => '{pg postgres.core, user hara.runtime.user}
+  (parse/extract-aliases '[[postgres.core :as pg] [tahto.runtime.user :as user]])
+  => '{pg postgres.core, user tahto.runtime.user}
 
   ;; Ignores non-:as forms
-  (parse/extract-aliases '[[postgres.core :as pg] [hara.runtime.util :refer [foo]]])
+  (parse/extract-aliases '[[postgres.core :as pg] [tahto.runtime.util :refer [foo]]])
   => '{pg postgres.core}
 
   ;; Empty input
@@ -76,8 +76,8 @@
 (fact "parse-aliases extracts aliases from script form"
   ;; From script with :require
   (parse/parse-aliases '(script :postgres {:require [[postgres.core :as pg]
-                                                     [hara.runtime.user :as u]]}))
-  => '{pg postgres.core, u hara.runtime.user}
+                                                     [tahto.runtime.user :as u]]}))
+  => '{pg postgres.core, u tahto.runtime.user}
 
   ;; Empty require
   (parse/parse-aliases '(script :postgres {:require []}))

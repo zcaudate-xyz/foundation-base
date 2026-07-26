@@ -1,5 +1,5 @@
 (ns js.core.style
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js)
 

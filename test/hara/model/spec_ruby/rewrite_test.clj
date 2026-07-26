@@ -1,17 +1,17 @@
-(ns hara.model.spec-ruby.rewrite-test
-  (:require [hara.model.spec-ruby.rewrite :as rewrite])
+tahto/model/spec_ruby/rewrite_test.clj:1:(ns tahto.model.spec-ruby.rewrite-test
+tahto/model/spec_ruby/rewrite_test.clj:2:  (:require [tahto.model.spec-ruby.rewrite :as rewrite])
   (:use code.test))
 
-^{:refer hara.model.spec-ruby.rewrite/rewrite-callable-body :added "4.1"}
+tahto/model/spec_ruby/rewrite_test.clj:5:^{:refer tahto.model.spec-ruby.rewrite/rewrite-callable-body :added "4.1"}
 (fact "rewrites callable bodies")
 
-^{:refer hara.model.spec-ruby.rewrite/rewrite-callable-form :added "4.1"}
+tahto/model/spec_ruby/rewrite_test.clj:8:^{:refer tahto.model.spec-ruby.rewrite/rewrite-callable-form :added "4.1"}
 (fact "rewrites callable forms")
 
-^{:refer hara.model.spec-ruby.rewrite/rewrite-callable-value :added "4.1"}
+tahto/model/spec_ruby/rewrite_test.clj:11:^{:refer tahto.model.spec-ruby.rewrite/rewrite-callable-value :added "4.1"}
 (fact "rewrites callable values")
 
-^{:refer hara.model.spec-ruby.rewrite/rewrite-captured-callables :added "4.1"}
+tahto/model/spec_ruby/rewrite_test.clj:14:^{:refer tahto.model.spec-ruby.rewrite/rewrite-captured-callables :added "4.1"}
 (fact "rewrites only nested callable bodies to use capture aliases"
   (rewrite/rewrite-captured-callables
    '[(:= out
@@ -36,7 +36,7 @@
   => '[(fn [value]
          (return value))])
 
-^{:refer hara.model.spec-ruby.rewrite/capture-aliases :added "4.1"}
+tahto/model/spec_ruby/rewrite_test.clj:39:^{:refer tahto.model.spec-ruby.rewrite/capture-aliases :added "4.1"}
 (fact "creates deterministic capture aliases without colliding with source symbols"
   (rewrite/capture-aliases
    '[(fn [] (return value))]
@@ -49,16 +49,16 @@
    '[value])
   => '{value value__capture____2})
 
-^{:refer hara.model.spec-ruby.rewrite/ruby-rewrite-generator-body :added "4.1"}
+tahto/model/spec_ruby/rewrite_test.clj:52:^{:refer tahto.model.spec-ruby.rewrite/ruby-rewrite-generator-body :added "4.1"}
 (fact "rewrites generator bodies")
 
-^{:refer hara.model.spec-ruby.rewrite/rewrite-callable-forms :added "4.1"}
+tahto/model/spec_ruby/rewrite_test.clj:55:^{:refer tahto.model.spec-ruby.rewrite/rewrite-callable-forms :added "4.1"}
 (fact "rewrites callable forms")
 
-^{:refer hara.model.spec-ruby.rewrite/mark-inline-defs :added "4.1"}
+tahto/model/spec_ruby/rewrite_test.clj:58:^{:refer tahto.model.spec-ruby.rewrite/mark-inline-defs :added "4.1"}
 (fact "marks inline definitions")
 
-^{:refer hara.model.spec-ruby.rewrite/ruby-rewrite-stage :added "4.1"}
+tahto/model/spec_ruby/rewrite_test.clj:61:^{:refer tahto.model.spec-ruby.rewrite/ruby-rewrite-stage :added "4.1"}
 (fact "marks runtime-eval helper defs as inner for Ruby without changing normal staging"
   (let [plain (rewrite/ruby-rewrite-stage
                '(do

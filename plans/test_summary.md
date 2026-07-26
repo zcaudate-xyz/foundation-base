@@ -21,7 +21,7 @@ The `test/` directory mirrors the structure of the `src/` directory, adhering to
 
 The project uses a custom or specialized testing framework `code.test`, which appears to wrap or extend standard testing capabilities.
 
-### Key Characteristics
+### Key Ctahtocteristics
 *   **Namespace:** `(ns ... (:use code.test) ...)` is the standard header.
 *   **Fact Macro:** Tests are defined using the `fact` macro.
 *   **Assertions:** The `=>` arrow syntax is used for assertions (e.g., `(expr) => expected`).
@@ -43,7 +43,7 @@ The project uses a custom or specialized testing framework `code.test`, which ap
 *   Mocking/Context: Uses `reset!` on dynamic vars (e.g., `*lookup*`) in `:setup` to isolate tests.
 
 ### 3.3. Multi-Language/DSL Tests (`std/lang/*`, `web3/*`)
-*   **`l/script`**: Uses `hara.lang` macros (`l/script`, `l/script-`) to define test contexts for specific target languages (e.g., Solidity, JS).
+*   **`l/script`**: Uses `tahto.core` macros (`l/script`, `l/script-`) to define test contexts for specific target languages (e.g., Solidity, JS).
 *   **Runtime Integration**: Tests interact with actual runtimes.
     *   `web3` tests start/stop a Ganache server using `fact:global`.
     *   `s/rt:deploy` is used to deploy contracts before running tests.

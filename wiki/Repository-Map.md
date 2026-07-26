@@ -8,7 +8,7 @@ Foundation Base contains several related systems in one repository.
 |---|---|
 | `std.*` | Standard libraries and reusable infrastructure |
 | `code.*` | Testing, documentation, source queries, maintenance, project tooling, and analysis |
-| `hara.*` | Language authoring, grammar-driven code generation, target models, and typing |
+| `tahto.*` | Language authoring, grammar-driven code generation, target models, and typing |
 | `rt.*` | Runtime adapters and execution environments |
 | `xt.*` | Portable libraries and application layers built with the language tooling |
 
@@ -31,7 +31,7 @@ Foundation Base contains several related systems in one repository.
 
 - Standard utilities: [`src/std`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src/std)
 - Developer tools: [`src/code`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src/code)
-- Language tooling: [Hara docs](https://zcaudate.xyz/foundation-base/hara/index.html)
+- Language tooling: [Tahto docs](https://zcaudate.xyz/foundation-base/tahto/index.html)
 - Generated examples: [`src-build/play`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-build/play)
 - Walkthroughs: [`src-doc/walkthrough`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-doc/walkthrough)
 - Documentation sources: [`src-doc/documentation`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-doc/documentation)

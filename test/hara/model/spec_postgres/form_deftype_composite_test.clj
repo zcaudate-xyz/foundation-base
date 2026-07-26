@@ -1,8 +1,8 @@
-(ns hara.model.spec-postgres.form-deftype-composite-test
-  (:require [hara.model.spec-postgres.common :as common]
-            [hara.model.spec-postgres.form-deftype :as sut]
-            [hara.lang.book :as book]
-            [hara.lang.library-snapshot :as snap])
+tahto/model/spec_postgres/form_deftype_composite_test.clj:1:(ns tahto.model.spec-postgres.form-deftype-composite-test
+tahto/model/spec_postgres/form_deftype_composite_test.clj:2:  (:require [tahto.model.spec-postgres.common :as common]
+tahto/model/spec_postgres/form_deftype_composite_test.clj:3:            [tahto.model.spec-postgres.form-deftype :as sut]
+            [tahto.base.book :as book]
+            [tahto.core.library-snapshot :as snap])
   (:use code.test))
 
 (def mock-book

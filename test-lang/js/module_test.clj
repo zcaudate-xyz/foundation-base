@@ -1,5 +1,5 @@
 (ns js.module-test
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [js.module :refer :all]
             [xt.lang.common-module :as module])
   (:use code.test))

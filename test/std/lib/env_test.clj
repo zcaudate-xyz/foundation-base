@@ -240,7 +240,7 @@
   (match-filter 'code 'code.test)
   => true
 
-  (match-filter 'hara 'spirit.common)
+  (match-filter 'tahto 'spirit.common)
   => false)
 
 ^{:refer std.lib.env/dbg-print :added "4.0"}

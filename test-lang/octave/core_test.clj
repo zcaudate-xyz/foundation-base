@@ -1,6 +1,6 @@
 matlab/core_test.clj:1:(ns matlab.core-test
-  (:require [hara.lang :as l]
-matlab/core_test.clj:3:            [hara.model.annex.spec-matlab]
+  (:require [tahto.core :as l]
+matlab/core_test.clj:3:            [tahto.model.annex.spec-matlab]
 matlab/core_test.clj:4:            [matlab.core :as y])
   (:use code.test))
 

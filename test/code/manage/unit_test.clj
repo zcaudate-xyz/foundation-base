@@ -114,14 +114,14 @@
 (comment
   (project/in-context (import))
   (require '[std.block.navigate :as nav])
-  (def nav (-> (nav/parse-root (slurp "src/hara/code/unit.clj"))
+  (def nav (-> (nav/parse-root (slurp "src/tahto/code/unit.clj"))
                (nav/down)))
 
   (def import-fn (fn [nsp refers]
                    (fn [zloc]
                      (docstring/insert-docstring zloc nsp refers))))
 
-  (def refers (base/analyse-test-code (slurp "test/hara/code/unit_test.clj")))
+  (def refers (base/analyse-test-code (slurp "test/tahto/code/unit_test.clj")))
 
   (get-in refers ['code.manage.unit 'missing :test :code])
   (code.query/modify nav

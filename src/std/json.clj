@@ -2,7 +2,7 @@
   (:require [std.lib.atom :as at]
             [std.lib.env :as env]
             [std.string.case :as case])
-  (:import (hara.lib.json DateSerializer FunctionalKeyDeserializer FunctionalSerializer KeywordSerializer KeywordKeyDeserializer PersistentHashMapDeserializer PersistentVectorDeserializer SymbolSerializer VarSerializer RatioSerializer FunctionalKeywordSerializer) (com.fasterxml.jackson.core JsonGenerator$Feature JsonParser JsonParser$Feature) (com.fasterxml.jackson.databind JsonSerializer ObjectMapper SerializationFeature DeserializationFeature) (com.fasterxml.jackson.databind.module SimpleModule) (java.io InputStream Writer File OutputStream DataOutput Reader) (java.net URL) (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule))
+  (:import (newlisp.lib.json DateSerializer FunctionalKeyDeserializer FunctionalSerializer KeywordSerializer KeywordKeyDeserializer PersistentHashMapDeserializer PersistentVectorDeserializer SymbolSerializer VarSerializer RatioSerializer FunctionalKeywordSerializer) (com.fasterxml.jackson.core JsonGenerator$Feature JsonParser JsonParser$Feature) (com.fasterxml.jackson.databind JsonSerializer ObjectMapper SerializationFeature DeserializationFeature) (com.fasterxml.jackson.databind.module SimpleModule) (java.io InputStream Writer File OutputStream DataOutput Reader) (java.net URL) (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule))
   (:refer-clojure :exclude [read]))
 
 (defn clojure-module

@@ -1,11 +1,11 @@
-(ns hara.lang.library-snapshot-prep-test
-  (:require [hara.lang.book :as b]
-            [hara.common.emit-common :as common]
-            [hara.common.emit-helper :as helper]
-            [hara.common.emit-prep-lua-test :as prep]
-            [hara.common.grammar :as grammar]
-            [hara.lang.library-snapshot :as snap]
-            [hara.common.util :as ut])
+(ns tahto.core.library-snapshot-prep-test
+  (:require [tahto.base.book :as b]
+tahto/lang/library_snapshot_prep_test.clj:3:            [tahto.common.emit-common :as common]
+tahto/lang/library_snapshot_prep_test.clj:4:            [tahto.common.emit-helper :as helper]
+tahto/lang/library_snapshot_prep_test.clj:5:            [tahto.common.emit-prep-lua-test :as prep]
+tahto/lang/library_snapshot_prep_test.clj:6:            [tahto.common.grammar :as grammar]
+            [tahto.core.library-snapshot :as snap]
+tahto/lang/library_snapshot_prep_test.clj:8:            [tahto.common.util :as ut])
   (:use code.test))
 
 (def +book-x-empty+

@@ -1,6 +1,6 @@
 (ns xt.db.helpers.data-main-test
   (:require [postgres.core :as pg]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.lib.collection :as collection]
             [xt.db.helpers.seed-system-test]
             [xt.db.helpers.seed-user-test])

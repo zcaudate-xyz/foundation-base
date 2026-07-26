@@ -1,7 +1,7 @@
 (ns xt.db.node.runtime-test
   (:use code.test)
-  (:require [hara.lang :as l]
-            [hara.runtime.chromedriver :as chromedriver]
+  (:require [tahto.core :as l]
+            [tahto.runtime.chromedriver :as chromedriver]
             [clojure.string :as str]
             [xt.lang.spec-base :as xt]
             [xt.lang.common-repl :as repl]

@@ -1,6 +1,6 @@
 (ns xt.net.http-util-test
   (:use code.test)
-  (:require [hara.lang :as l]
+  (:require [tahto.core :as l]
             [xt.net.http-util :refer :all]))
 
 (l/script- :js

@@ -1,9 +1,9 @@
-(ns hara.seedgen.common-infile-test
+tahto/seedgen/common_infile_test.clj:1:(ns tahto.seedgen.common-infile-test
   (:use code.test)
   (:require [code.project :as project]
-            [hara.seedgen.common-infile :as seed-infile]))
+tahto/seedgen/common_infile_test.clj:4:            [tahto.seedgen.common-infile :as seed-infile]))
 
-^{:refer hara.seedgen.common-infile/seedgen-root :added "4.1"}
+tahto/seedgen/common_infile_test.clj:6:^{:refer tahto.seedgen.common-infile/seedgen-root :added "4.1"}
 (fact "returns an explicit error result when the test file is missing"
   (let [project (assoc (project/project)
                        :test-paths (vec (distinct (concat (:test-paths (project/project))
@@ -16,7 +16,7 @@
     => (contains {:status :error
                   :data :no-test-file})))
 
-^{:refer hara.seedgen.common-infile/seedgen-list :added "4.1"}
+tahto/seedgen/common_infile_test.clj:19:^{:refer tahto.seedgen.common-infile/seedgen-list :added "4.1"}
 (fact "returns an empty list when a test file only declares the seedgen root"
   (let [project (assoc (project/project)
                        :test-paths (vec (distinct (concat (:test-paths (project/project))
@@ -31,7 +31,7 @@
     (try
       (spit path (str "(ns sample.multi-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :lua {:runtime :basic})\n\n"
@@ -41,7 +41,7 @@
         (.delete tmp))))
   => [:lua :python])
 
-^{:refer hara.seedgen.common-infile/seedgen-incomplete :added "4.1"}
+tahto/seedgen/common_infile_test.clj:44:^{:refer tahto.seedgen.common-infile/seedgen-incomplete :added "4.1"}
 (fact "reports facts that are not covered by the seedgen root language"
   (let [tmp (java.io.File/createTempFile "seedgen-incomplete" ".clj")
         path (.getAbsolutePath tmp)
@@ -49,7 +49,7 @@
     (try
       (spit path (str "(ns sample.incomplete-test\n"
                       "  (:use code.test)\n"
-                      "  (:require [hara.lang :as l]))\n\n"
+                      "  (:require [tahto.core :as l]))\n\n"
                       "^{:seedgen/root {:all true}}\n"
                       "(l/script- :js {:runtime :basic})\n\n"
                       "(l/script- :lua {:runtime :basic})\n\n"

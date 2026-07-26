@@ -1,27 +1,27 @@
-(ns hara.runtime.jocl.type-test
+tahto/runtime/jocl/type_test.clj:1:(ns tahto.runtime.jocl.type-test
   (:refer-clojure :exclude [to-array])
   (:use code.test)
-  (:require [hara.runtime.jocl :refer :all]
-            [hara.runtime.jocl.env :as jocl-env]))
+tahto/runtime/jocl/type_test.clj:4:  (:require [tahto.runtime.jocl :refer :all]
+tahto/runtime/jocl/type_test.clj:5:            [tahto.runtime.jocl.env :as jocl-env]))
 
 (jocl-env/with-stubs buffer-type unit-type type-args to-array)
 
 (fact:global
  {:skip (not (jocl-env/opencl-available?))})
 
-^{:refer hara.runtime.jocl.type/buffer-type :added "3.0"}
+tahto/runtime/jocl/type_test.clj:12:^{:refer tahto.runtime.jocl.type/buffer-type :added "3.0"}
 (fact "outputs type information for buffers"
 
   (buffer-type (float-array [1 2 3]))
   => {:buffer true :unit :float :dsize 4 :length 3})
 
-^{:refer hara.runtime.jocl.type/unit-type :added "3.0"}
+tahto/runtime/jocl/type_test.clj:18:^{:refer tahto.runtime.jocl.type/unit-type :added "3.0"}
 (fact "outputs type information for unit inputs"
 
   (unit-type 1)
   => {:unit :long :dsize 8})
 
-^{:refer hara.runtime.jocl.type/type-args :added "3.0"}
+tahto/runtime/jocl/type_test.clj:24:^{:refer tahto.runtime.jocl.type/type-args :added "3.0"}
 (fact "returns and checks type information of inputs"
 
   (type-args '[{:type :float :dsize 4 :buffer true}
@@ -30,14 +30,14 @@
   => [{:buffer true :unit :float :dsize 4 :length 3}
       {:unit :long :dsize 8}])
 
-^{:refer hara.runtime.jocl.type/to-array :added "3.0"}
+tahto/runtime/jocl/type_test.clj:33:^{:refer tahto.runtime.jocl.type/to-array :added "3.0"}
 (fact "converts a value to an array"
  
   (str (type (to-array 10)))
   => "class [J")
 
 
-^{:refer hara.runtime.jocl.type/unit-coerce :added "4.1"}
+tahto/runtime/jocl/type_test.clj:40:^{:refer tahto.runtime.jocl.type/unit-coerce :added "4.1"}
 (fact "coerces scalars to the exact primitive width declared by a kernel"
   [(class (unit-coerce :int 7))
    (class (unit-coerce :long 7))

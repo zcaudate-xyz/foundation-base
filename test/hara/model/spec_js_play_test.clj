@@ -1,11 +1,11 @@
-(ns hara.model.spec-js-play-test
+tahto/model/spec_js_play_test.clj:1:(ns tahto.model.spec-js-play-test
   (:use code.test)
   (:require [clojure.string :as str]
-             [hara.typed.xtalk-parse :as xtalk-parse]
-             [hara.model.spec-js.ts :as ts]))
+tahto/model/spec_js_play_test.clj:4:             [tahto.typed.xtalk-parse :as xtalk-parse]
+tahto/model/spec_js_play_test.clj:5:             [tahto.model.spec-js.ts :as ts]))
 
 (def +typescript-model-fixture+
-  "test/hara/model/typescript_model_fixture.clj")
+tahto/model/spec_js_play_test.clj:8:  "test/tahto/model/typescript_model_fixture.clj")
 
 (fact "emits TypeScript declarations for the playground model"
   (let [analysis (xtalk-parse/analyze-file +typescript-model-fixture+)

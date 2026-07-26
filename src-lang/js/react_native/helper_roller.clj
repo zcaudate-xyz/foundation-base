@@ -1,5 +1,5 @@
 (ns js.react-native.helper-roller
-  (:require [hara.lang :as l]))
+  (:require [tahto.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k]

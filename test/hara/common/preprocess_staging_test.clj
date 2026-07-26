@@ -1,10 +1,10 @@
-(ns hara.common.preprocess-staging-test
+tahto/common/preprocess_staging_test.clj:1:(ns tahto.common.preprocess-staging-test
   (:use code.test)
-  (:require [hara.common.emit-helper :as helper]
-            [hara.common.emit-prep-lua-test :as prep]
-            [hara.common.grammar :as grammar]
-            [hara.common.preprocess-staging :refer :all]
-            [hara.model.spec-js :as js]))
+tahto/common/preprocess_staging_test.clj:3:  (:require [tahto.common.emit-helper :as helper]
+tahto/common/preprocess_staging_test.clj:4:            [tahto.common.emit-prep-lua-test :as prep]
+tahto/common/preprocess_staging_test.clj:5:            [tahto.common.grammar :as grammar]
+tahto/common/preprocess_staging_test.clj:6:            [tahto.common.preprocess-staging :refer :all]
+tahto/common/preprocess_staging_test.clj:7:            [tahto.model.spec-js :as js]))
 
 (def +reserved+
   (-> (grammar/build)
@@ -13,7 +13,7 @@
 (def +grammar+
   (grammar/grammar :test +reserved+ helper/+default+))
 
-^{:refer hara.common.preprocess-staging/to-staging-form :added "4.1"}
+tahto/common/preprocess_staging_test.clj:16:^{:refer tahto.common.preprocess-staging/to-staging-form :added "4.1"}
 (fact "different staging forms"
   (to-staging-form '(!:template (+ 1 2 3))
                    nil
@@ -66,21 +66,21 @@
     (catch Throwable t
       (select-keys (ex-data t)
                    [:probe
-                    :hara/phase
-                    :hara/subsystem
-                    :hara/lang
-                    :hara/line
-                    :hara/module
-                    :hara/symbol
-                    :hara/form])))
+tahto/common/preprocess_staging_test.clj:69:                    :tahto/phase
+tahto/common/preprocess_staging_test.clj:70:                    :tahto/subsystem
+tahto/common/preprocess_staging_test.clj:71:                    :tahto/lang
+tahto/common/preprocess_staging_test.clj:72:                    :tahto/line
+tahto/common/preprocess_staging_test.clj:73:                    :tahto/module
+tahto/common/preprocess_staging_test.clj:74:                    :tahto/symbol
+tahto/common/preprocess_staging_test.clj:75:                    :tahto/form])))
   => '{:probe true
-        :hara/phase :staging/reserved-template
-        :hara/subsystem :hara/reserved-template
-        :hara/lang :lua
-        :hara/line 21
-        :hara/module L.core
-        :hara/symbol hello
-        :hara/form (hello 1 2 3)})
+tahto/common/preprocess_staging_test.clj:77:        :tahto/phase :staging/reserved-template
+tahto/common/preprocess_staging_test.clj:78:        :tahto/subsystem :tahto/reserved-template
+tahto/common/preprocess_staging_test.clj:79:        :tahto/lang :lua
+tahto/common/preprocess_staging_test.clj:80:        :tahto/line 21
+tahto/common/preprocess_staging_test.clj:81:        :tahto/module L.core
+tahto/common/preprocess_staging_test.clj:82:        :tahto/symbol hello
+tahto/common/preprocess_staging_test.clj:83:        :tahto/form (hello 1 2 3)})
 
 (fact "reserved template heads expand before value-position fragments"
   (to-staging-form '(-> xs (u/filter odd?))
@@ -97,7 +97,7 @@
                    identity)
   => '(u/filter xs odd?))
 
-^{:refer hara.common.preprocess-staging/to-staging :added "4.1"}
+tahto/common/preprocess_staging_test.clj:100:^{:refer tahto.common.preprocess-staging/to-staging :added "4.1"}
 (fact "converts the stage"
   (to-staging '(u/add (u/identity-fn 1) 2)
               nil
@@ -307,7 +307,7 @@
                      (x:arr-second e))
           (return obj)))
 
-^{:refer hara.common.preprocess-staging/to-resolve :added "4.1"}
+tahto/common/preprocess_staging_test.clj:310:^{:refer tahto.common.preprocess-staging/to-resolve :added "4.1"}
 (fact "resolves only the code symbols (no macroexpansion)"
   (to-resolve '(u/add (u/identity-fn 1) 2)
               nil
