@@ -6,9 +6,9 @@
             [postgres.core.impl-insert :as insert]
             [postgres.core.impl-main :as main]
             [tahto.core :as l]
-            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base]
+            [tahto.base.emit-preprocess :as preprocess] [tahto.base.preprocess-base :as preprocess-base]
             [tahto.core.library-snapshot :as snap]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.foundation :as f]))
 
 (defn pg-defconst-hydrate

@@ -147,7 +147,7 @@
 
 (defmethod protocol.string/-from-string (Class/forName "[C")
   ([^String string _ _]
-   (.toCtahtorray string)))
+   (.toCharArray string)))
 
 ;;  ------------------
 ;;   java.lang.Class

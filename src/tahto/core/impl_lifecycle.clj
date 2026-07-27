@@ -1,14 +1,14 @@
 (ns tahto.core.impl-lifecycle
   (:require [clojure.string]
             [std.fs :as fs]
-            [tahto.base.book :as book]
-            [tahto.base.book-module :as module]
+            [tahto.common.book :as book]
+            [tahto.common.book-module :as module]
             [tahto.core.compile-links :as links]
-            [tahto.common.emit :as emit]
+            [tahto.base.emit :as emit]
             [tahto.core.impl :as impl]
             [tahto.core.impl-deps :as deps]
             [tahto.core.impl-entry :as entry]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.env :as env]
             [std.lib.foundation :as f]))
 

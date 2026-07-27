@@ -132,7 +132,7 @@
   => true)
 
 ^{:refer code.query.match/p-parent :added "3.0"}
-(fact "checks that the parent of the element contains a certain ctahtocteristic"
+(fact "checks that the parent of the element contains a certain characteristic"
   ((p-parent 'defn) (-> (nav/parse-string "(defn x [])") nav/next nav/next))
   => true
 
@@ -143,7 +143,7 @@
   => false)
 
 ^{:refer code.query.match/p-child :added "3.0"}
-(fact "checks that there is a child of a container that has a certain ctahtocteristic"
+(fact "checks that there is a child of a container that has a certain characteristic"
   ((p-child {:form '=}) (nav/parse-string "(if (= x y))"))
   => true
 
@@ -151,7 +151,7 @@
   => false)
 
 ^{:refer code.query.match/p-first :added "3.0"}
-(fact "checks that the first element of the container has a certain ctahtocteristic"
+(fact "checks that the first element of the container has a certain characteristic"
   ((p-first 'defn) (-> (nav/parse-string "(defn x [])")))
   => true
 
@@ -162,7 +162,7 @@
   => false)
 
 ^{:refer code.query.match/p-last :added "3.0"}
-(fact "checks that the last element of the container has a certain ctahtocteristic"
+(fact "checks that the last element of the container has a certain characteristic"
   ((p-last 1) (-> (nav/parse-string "(defn [] 1)")))
   => true
 
@@ -173,7 +173,7 @@
   => false)
 
 ^{:refer code.query.match/p-nth :added "3.0"}
-(fact "checks that the element at a specific Nth index within the container has a certain ctahtocteristic"
+(fact "checks that the element at a specific Nth index within the container has a certain characteristic"
   ((p-nth [0 'defn]) (-> (nav/parse-string "(defn [] 1)")))
   => true
 
@@ -184,7 +184,7 @@
   => false)
 
 ^{:refer code.query.match/p-nth-left :added "3.0"}
-(fact "checks that the element at a specific Nth index to the left of the current position has a certain ctahtocteristic"
+(fact "checks that the element at a specific Nth index to the left of the current position has a certain characteristic"
   ((p-nth-left [0 'defn]) (-> (nav/parse-string "(defn [] 1)") nav/down))
   => true
 
@@ -192,7 +192,7 @@
   => true)
 
 ^{:refer code.query.match/p-nth-right :added "3.0"}
-(fact "checks that the element at a specific Nth index to the right of the current position has a certain ctahtocteristic"
+(fact "checks that the element at a specific Nth index to the right of the current position has a certain characteristic"
   ((p-nth-right [0 'defn]) (-> (nav/parse-string "(defn [] 1)") nav/down))
   => true
 
@@ -242,7 +242,7 @@
   => true)
 
 ^{:refer code.query.match/p-sibling :added "3.0"}
-(fact "checks that any element on the same level has a certain ctahtocteristic"
+(fact "checks that any element on the same level has a certain characteristic"
   ((p-sibling '=) (-> (nav/parse-string "(if (= x y))") nav/down nav/next nav/next))
   => false
 
@@ -250,7 +250,7 @@
   => true)
 
 ^{:refer code.query.match/p-left :added "3.0"}
-(fact "checks that the element on the left has a certain ctahtocteristic"
+(fact "checks that the element on the left has a certain characteristic"
   ((p-left '=) (-> (nav/parse-string "(if (= x y))") nav/down nav/next nav/next nav/next))
   => true
 
@@ -258,7 +258,7 @@
   => true)
 
 ^{:refer code.query.match/p-right :added "3.0"}
-(fact "checks that the element on the right has a certain ctahtocteristic"
+(fact "checks that the element on the right has a certain characteristic"
   ((p-right 'x) (-> (nav/parse-string "(if (= x y))") nav/down nav/next nav/next))
   => true
 
@@ -266,7 +266,7 @@
   => true)
 
 ^{:refer code.query.match/p-left-of :added "3.0"}
-(fact "checks that any element on the left has a certain ctahtocteristic"
+(fact "checks that any element on the left has a certain characteristic"
   ((p-left-of '=) (-> (nav/parse-string "(= x y)") nav/down nav/next))
   => true
 
@@ -274,7 +274,7 @@
   => true)
 
 ^{:refer code.query.match/p-right-of :added "3.0"}
-(fact "checks that any element on the right has a certain ctahtocteristic"
+(fact "checks that any element on the right has a certain characteristic"
   ((p-right-of 'x) (-> (nav/parse-string "(= x y)") nav/down))
   => true
 

@@ -1,6 +1,6 @@
-(ns tahto.common.grammar-xtalk-system
+(ns tahto.base.grammar-xtalk-system
   (:require [clojure.set :as set]
-            [tahto.common.grammar-xtalk :as xtalk]
+            [tahto.base.grammar-xtalk :as xtalk]
             [std.lib.collection :as collection]
             [std.lib.walk :as walk]))
 

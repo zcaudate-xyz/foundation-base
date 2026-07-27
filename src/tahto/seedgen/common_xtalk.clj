@@ -4,7 +4,7 @@
             [clojure.string :as str]
             [code.project :as project]
             [std.fs :as fs]
-            [tahto.common.grammar :as grammar]
+            [tahto.base.grammar :as grammar]
             [tahto.core.impl :as impl]
             [tahto.core.library :as lib]
             [tahto.core.registry :as reg]
@@ -26,12 +26,12 @@
   "config/xtalk/xtalk_ops.edn")
 
 (def ^:dynamic *model-roots*
-  ["src/tahto.core/model/spec_xtalk"
-   "src/tahto.core/model_annex/spec_xtalk"])
+  ["src/tahto/model/spec_xtalk"
+   "src/tahto/model/annex/spec_xtalk"])
 
 (def ^:dynamic *test-roots*
-  ["test/tahto.core/model/spec_xtalk"
-   "test/tahto.core/model_annex/spec_xtalk"])
+  ["test/tahto/model/spec_xtalk"
+   "test/tahto/model/annex/spec_xtalk"])
 
 (def ^:dynamic *runtime-langs*
   runtime/+runtime-langs+)

@@ -16,7 +16,7 @@
             [std.protocol.log :as protocol.log]
             [std.protocol.request :as protocol.request]
             [std.protocol.wire :as protocol.wire])
-  (:import (tahto.net.resp SocketConnection)))
+  (:import (hara.net.resp SocketConnection)))
 
 (declare map->RedisClient)
 

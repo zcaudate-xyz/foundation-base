@@ -10,13 +10,13 @@
             [tahto.model.spec-postgres.form-vec :as form-vec]
             [tahto.model.spec-postgres.meta :as meta]
             [tahto.model.spec-postgres.tf :as tf]
-            [tahto.base.book :as book]
-            [tahto.common.emit :as emit]
-            [tahto.common.emit-common :as emit-common]
-            [tahto.common.emit-fn :as emit-fn]
-            [tahto.common.grammar :as grammar]
+            [tahto.common.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.emit-common :as emit-common]
+            [tahto.base.emit-fn :as emit-fn]
+            [tahto.base.grammar :as grammar]
             [tahto.core.script :as script]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]))
 
 (defn pg-tf-free-data

@@ -1953,7 +1953,7 @@
   => true)
 
 ^{:refer xt.lang.spec-base/x:str-char :added "4.1"}
-(fact "gets the ctahtocter code at an index"
+(fact "gets the character code at an index"
 
   (!.js
     (xt/x:str-char "abc" (xt/x:offset 1)))

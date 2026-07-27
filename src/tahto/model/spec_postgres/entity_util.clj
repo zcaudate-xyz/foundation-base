@@ -1,6 +1,6 @@
 (ns tahto.model.spec-postgres.entity-util
   (:require [tahto.core :as l]
-            [tahto.common.grammar-spec :as grammar-spec]
+            [tahto.base.grammar-spec :as grammar-spec]
             [std.lib.context.pointer :as ptr]
             [std.lib.env :as env]
             [std.lib.foundation :as f]))

@@ -1,9 +1,9 @@
-(ns tahto.common.emit-common
+(ns tahto.base.emit-common
   (:require [clojure.string]
-            [tahto.common.emit-helper :as helper]
-            [tahto.common.emit-preprocess :as preprocess]
-            [tahto.common.preprocess-base :as preprocess-base]
-            [tahto.common.util :as ut]
+            [tahto.base.emit-helper :as helper]
+            [tahto.base.emit-preprocess :as preprocess]
+            [tahto.base.preprocess-base :as preprocess-base]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.string.case :as case]

@@ -1,5 +1,5 @@
 (ns tahto.model.annex.spec-julia.rewrite
-  (:require [tahto.common.util :as ut]
+  (:require [tahto.base.util :as ut]
               [tahto.core.rewrite.conditional :as condrw]
               [tahto.core.rewrite.destructure :as destruct]
               [tahto.core.rewrite.hoist :as hoist]

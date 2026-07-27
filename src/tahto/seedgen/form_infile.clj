@@ -483,7 +483,7 @@
   [^String line]
   (loop [i 0]
     (if (and (< i (count line))
-             (#{\space \tab} (.ctahtot line i)))
+             (#{\space \tab} (.charAt line i)))
       (recur (inc i))
       i)))
 
@@ -670,7 +670,7 @@
 
 (defn- transform-string-match?
   [match]
-  (or (instance? Ctahtocter match)
+  (or (instance? Character match)
       (instance? CharSequence match)
       (instance? java.util.regex.Pattern match)))
 

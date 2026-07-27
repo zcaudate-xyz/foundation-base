@@ -16,7 +16,7 @@
                          (fn [e] (return (== e x))))))
 
 (defn.xt like-char-at
-  "gets a single ctahtocter from a string"
+  "gets a single character from a string"
   {:added "4.1"}
   [s i]
   (when (or (< i 0)

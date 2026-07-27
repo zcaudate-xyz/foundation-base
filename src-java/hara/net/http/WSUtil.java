@@ -1,4 +1,4 @@
-tahto/net/http/WSUtil.java:1:package tahto.net.http;
+package hara.net.http;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -107,13 +107,13 @@
    (let [tag (first (keys m))]
      (assoc m :tag tag))))
 
-(defn ctahtocterise-filter
-  "ctahtocterises a filter based on type
+(defn characterise-filter
+  "characterises a filter based on type
  
-   (ctahtocterise-filter \"src\")
+   (characterise-filter \"src\")
    => (just {:tag :pattern :pattern #\"src\"})
  
-   (ctahtocterise-filter (fn [_] nil))
+   (characterise-filter (fn [_] nil))
    => (just {:tag :fn :fn fn?})"
   {:added "3.0"}
   ([ft]

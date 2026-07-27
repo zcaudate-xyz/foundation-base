@@ -1,7 +1,7 @@
-(ns tahto.common.emit-template
-  (:require [tahto.common.emit-preprocess :as preprocess]
-              [tahto.common.emit-rewrite :as rewrite]
-              [tahto.common.grammar-xtalk-system :as xtalk-system]))
+(ns tahto.base.emit-template
+  (:require [tahto.base.emit-preprocess :as preprocess]
+              [tahto.base.emit-rewrite :as rewrite]
+              [tahto.base.grammar-xtalk-system :as xtalk-system]))
 
 (def +code-state-keys+
   [:form

@@ -1,6 +1,6 @@
 (ns std.tailwind.analysis
   (:require [tahto.core :as l]
-            [tahto.base.book :as book]
+            [tahto.common.book :as book]
             [tahto.core.library :as lib]
             [std.lib.walk :as walk]
             [std.tailwind :as tailwind]))

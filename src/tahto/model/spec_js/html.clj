@@ -1,9 +1,9 @@
 (ns tahto.model.spec-js.html
   (:require [clojure.string]
             [std.html :as html]
-            [tahto.common.emit :as emit]
-            [tahto.common.emit-common :as common]
-            [tahto.common.util :as ut]
+            [tahto.base.emit :as emit]
+            [tahto.base.emit-common :as common]
+            [tahto.base.util :as ut]
             [std.lib.walk :as walk]))
 
 (defn wrap-indent-inner

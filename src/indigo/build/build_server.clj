@@ -1,7 +1,7 @@
 (ns indigo.build.build-server
   (:require [indigo.client.page-index :as index]
             [indigo.server.pages :as pages]
-            [hara.lang :as l]
+            [tahto.core :as l]
             [std.make :as make :refer [def.make]]))
 
 (def.make PROJECT

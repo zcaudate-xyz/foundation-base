@@ -124,7 +124,7 @@ simpler than they realized. No one was leaking news of their features to us. We 
 to develop software faster than anyone thought possible.
 
 When I was about nine I happened to get hold of a copy of The Day of the Jackal, by Frederick
-Forsyth. The main ctahtocter is an assassin who is hired to kill the president of France. The
+Forsyth. The main character is an assassin who is hired to kill the president of France. The
 assassin has to get past the police to get up to an apartment that overlooks the president's
 route. He walks right by them, dressed up as an old man on crutches, and they never suspect him.
 

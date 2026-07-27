@@ -5,9 +5,9 @@
             [postgres.core.impl-base :as impl]
             [postgres.core.impl-main :as main]
             [tahto.core :as l]
-            [tahto.base.book :as book]
+            [tahto.common.book :as book]
             [tahto.core.library-snapshot :as snap]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]))
 

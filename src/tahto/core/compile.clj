@@ -1,9 +1,9 @@
 (ns tahto.core.compile
   (:require [clojure.string]
             [std.fs :as fs]
-            [tahto.base.book :as book]
+            [tahto.common.book :as book]
             [tahto.core.compile-links :as links]
-            [tahto.common.emit :as emit]
+            [tahto.base.emit :as emit]
             [tahto.core.impl :as impl]
             [tahto.core.impl-deps :as deps]
             [tahto.core.impl-deps-imports :as deps-imports]
@@ -11,7 +11,7 @@
             [tahto.core.library :as lib]
             [tahto.core.library-snapshot :as snap]
             [tahto.core.pointer :as ptr]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.deps]
             [std.lib.foundation :as f]
             [std.make.compile :as compile]))

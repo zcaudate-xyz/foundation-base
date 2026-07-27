@@ -1,5 +1,5 @@
 (ns tahto.model.spec-lua.variant-redis
-  (:require [tahto.base.book :as book]
+  (:require [tahto.common.book :as book]
             [tahto.core.script :as script]
             [tahto.model.spec-lua :as lua]))
 

@@ -1,7 +1,7 @@
-(ns tahto.common.preprocess-input
+(ns tahto.base.preprocess-input
   (:require [clojure.string]
-             [tahto.common.preprocess-base :as preprocess-base]
-             [tahto.common.util :as ut]
+             [tahto.base.preprocess-base :as preprocess-base]
+             [tahto.base.util :as ut]
              [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]
             [std.lib.foundation :as f]

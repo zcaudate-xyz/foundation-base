@@ -133,7 +133,7 @@
   (return false))
 
 (defn.xt read-token
-  "reads a token that starts with the given ctahtocter"
+  "reads a token that starts with the given character"
   {:added "4.1"}
   [reader initch]
   (var out initch)

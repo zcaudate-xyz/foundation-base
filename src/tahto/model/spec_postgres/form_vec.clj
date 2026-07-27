@@ -1,10 +1,10 @@
 (ns tahto.model.spec-postgres.form-vec
   (:require [clojure.string]
             [tahto.model.spec-postgres.common :as common]
-            [tahto.common.emit :as emit]
-            [tahto.common.emit-common :as emit-common]
-            [tahto.common.emit-data :as emit-data]
-            [tahto.common.util :as ut]
+            [tahto.base.emit :as emit]
+            [tahto.base.emit-common :as emit-common]
+            [tahto.base.emit-data :as emit-data]
+            [tahto.base.util :as ut]
             [std.lib.foundation :as f]
             [std.string.prose :as prose]
             [std.string.wrap]))

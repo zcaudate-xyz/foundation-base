@@ -7,7 +7,7 @@
             [tahto.core.pointer :as ptr]
             [tahto.core.runtime :as rt]
             [tahto.core.script-control :as script-control]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [tahto.core.type-shared :as shared]
             [std.lib.collection :as collection]
             [std.lib.context.pointer]

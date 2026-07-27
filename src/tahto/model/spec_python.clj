@@ -1,17 +1,17 @@
 (ns tahto.model.spec-python
   (:require [clojure.string :as string]
-            [tahto.base.book :as book]
- 	    [tahto.common.emit :as emit]
-            [tahto.common.emit-common :as common]
-            [tahto.common.emit-data :as data]
-            [tahto.common.emit-helper :as helper]
-            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base]
-            [tahto.common.emit-top-level :as top]
-            [tahto.common.grammar :as grammar]
-            [tahto.common.grammar-spec :as spec]
+            [tahto.common.book :as book]
+       [tahto.base.emit :as emit]
+            [tahto.base.emit-common :as common]
+            [tahto.base.emit-data :as data]
+            [tahto.base.emit-helper :as helper]
+            [tahto.base.emit-preprocess :as preprocess] [tahto.base.preprocess-base :as preprocess-base]
+            [tahto.base.emit-top-level :as top]
+            [tahto.base.grammar :as grammar]
+            [tahto.base.grammar-spec :as spec]
             [tahto.core.script :as script]
             [tahto.typed.xtalk-analysis :as xtalk-analysis]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [tahto.model.spec-xtalk]
             [tahto.model.spec-python.rewrite :as rewrite]
             [tahto.model.spec-xtalk.fn-python :as fn]
@@ -235,7 +235,7 @@
          (apply list 'fn.inner (with-meta (first args)
                                  {:inner true})
                 (rest args))
-         
+
          :else
          (let [[args body] args]
            (let [args (if (empty? args)
@@ -325,7 +325,7 @@
                  (map (fn [e]
                         (list 'var* e := (list '. bound (list 'get (ut/sym-default-str e)))))
                       sym))
-           
+
            :else
            (list 'var* sym := bound)))))
 
@@ -492,7 +492,7 @@
                       (template/$ (list (b:& (set [(str x) :for x :in (locals)])
                                              (set [(str m) :for m :in sys.modules])))))
     :module-export  (fn [{:keys [as refer]} opts])
-    :module-import  (fn [name {:keys [as refer]} opts]  
+    :module-import  (fn [name {:keys [as refer]} opts]
                       (if as
                         (template/$ (:- :import ~name :as ~as))
                         (template/$ (:- :import ~name))))

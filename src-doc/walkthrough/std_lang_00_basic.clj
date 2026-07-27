@@ -55,10 +55,10 @@
       :id 'a
       :module 'walkthrough.tahto.core-00-basic
       :section :code
-      :context/fn #'tahto.common.util/lang-rt-default}
+      :context/fn #'tahto.base.util/lang-rt-default}
 
   (type @a)
-  => tahto.base.book_entry.BookEntry
+  => tahto.common.book_entry.BookEntry
   
   (into {} @a)
   => (contains-in
@@ -105,7 +105,7 @@
       :id 'hello
       :module 'walkthrough.tahto.core-00-basic
       :section :code
-      :context/fn #'tahto.common.util/lang-rt-default}
+      :context/fn #'tahto.base.util/lang-rt-default}
 
   (into {} @hello)
   => (contains-in

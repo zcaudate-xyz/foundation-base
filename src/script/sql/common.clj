@@ -59,7 +59,7 @@
             in-str?  false
             in-meta? false]
        (if (< i len)
-         (let [char (.ctahtot sql i)]
+         (let [char (.charAt sql i)]
            (case char
              \' (recur (inc i) prev-end (not in-str?) in-meta?)
              \" (recur (inc i) prev-end in-str? (not in-meta?))

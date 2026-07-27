@@ -1,6 +1,6 @@
-(ns tahto.common.emit-block
+(ns tahto.base.emit-block
   (:require [clojure.string]
-            [tahto.common.emit-common :as common]
+            [tahto.base.emit-common :as common]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
 

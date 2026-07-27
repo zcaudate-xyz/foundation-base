@@ -1,9 +1,9 @@
 (ns tahto.model.annex.spec-matlab
   (:require [clojure.string]
-            [tahto.base.book :as book]
-            [tahto.common.emit :as emit]
-            [tahto.common.grammar :as grammar]
-            [tahto.common.preprocess-base :as preprocess]
+            [tahto.common.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.grammar :as grammar]
+            [tahto.base.preprocess-base :as preprocess]
             [tahto.core.impl :as impl]
             [tahto.core.script :as script]
             [tahto.model.spec-xtalk]

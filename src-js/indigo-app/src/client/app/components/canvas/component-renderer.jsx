@@ -67,7 +67,7 @@ export function ComponentRenderer({
     let handlers = {};
     if (component.triggers && component.actions) {
       Object.entries(component.triggers).forEach(function ([triggerName, triggerDef]) {
-        let eventName = "on" + triggerDef.event.ctahtot(0).toUpperCase() + triggerDef.event.slice(1);
+        let eventName = "on" + triggerDef.event.charAt(0).toUpperCase() + triggerDef.event.slice(1);
         handlers[eventName] = (function (e) {
           e.stopPropagation();
           if (triggerDef.action) {

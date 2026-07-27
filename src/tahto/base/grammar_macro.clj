@@ -1,5 +1,5 @@
-(ns tahto.common.grammar-macro
-  (:require [tahto.common.grammar-spec :as spec]
+(ns tahto.base.grammar-macro
+  (:require [tahto.base.grammar-spec :as spec]
             [std.lib.foundation :as f]))
 
 ;;

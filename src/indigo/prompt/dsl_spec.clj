@@ -296,14 +296,14 @@
   
   "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/components/** to the tahto.core dsl to src-translated. follow the original directory layout. please generate file in compilation order"
 
-  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/components/** and src/lib/** to the hara.lang dsl to src-translated. follow the original directory layout. look at the dependency map for the project and generate file in compilation order from least dependent to most"
+  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/components/** and src/lib/** to the tahto.core dsl to src-translated. follow the original directory layout. look at the dependency map for the project and generate file in compilation order from least dependent to most"
 
 
-  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* to the hara.lang dsl to src-translated. follow the original directory layout and do not translate the subdirectories. look at the dependency map for the project and generate file in compilation order from least dependent to most"
+  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* to the tahto.core dsl to src-translated. follow the original directory layout and do not translate the subdirectories. look at the dependency map for the project and generate file in compilation order from least dependent to most"
 
-  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* (DO NOT FOLLOW SUBDIRECTORIES) to the hara.lang dsl to src-translated. DO NOT translate src/components/ui/* follow the original directory layout.  generate file in compilation order from least dependent to most"
+  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* (DO NOT FOLLOW SUBDIRECTORIES) to the tahto.core dsl to src-translated. DO NOT translate src/components/ui/* follow the original directory layout.  generate file in compilation order from least dependent to most"
 
-  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* (DO NOT FOLLOW SUBDIRECTORIES) to the hara.lang dsl to src-translated. DO NOT translate src/components/ui/* follow the original directory layout. "
+  "Given the spec in @translate_dsl, translate src/App.jsx and all files in src/lib/** and src/components/* (DO NOT FOLLOW SUBDIRECTORIES) to the tahto.core dsl to src-translated. DO NOT translate src/components/ui/* follow the original directory layout. "
   
   "I'd like to package exports in src/ui/components/* into a single .tsx file"
   )

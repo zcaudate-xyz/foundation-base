@@ -8,7 +8,7 @@
             [std.protocol.request :as protocol.request]
             [std.protocol.track :as protocol.track]
             [std.protocol.wire :as protocol.wire])
-  (:import (tahto.net.resp SocketConnection SocketConnection$Pipeline) (java.net Socket))
+  (:import (hara.net.resp SocketConnection SocketConnection$Pipeline) (java.net Socket))
   (:refer-clojure :exclude [read]))
 
 (def ^:dynamic *close* nil)

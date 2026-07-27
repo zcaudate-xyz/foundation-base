@@ -8,7 +8,7 @@
             [std.string :as str]
             [tahto.core.impl :as impl]
             [tahto.core.pointer :as ptr]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [tahto.model.spec-c :as c]
             [std.lib.collection :as coll]
             [std.lib.component :as component]

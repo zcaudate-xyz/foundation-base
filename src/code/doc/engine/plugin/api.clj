@@ -23,7 +23,7 @@
   ([^String s]
    (if (empty? s)
      ""
-     (str (-> s (.ctahtot 0) str (.toLowerCase))
+     (str (-> s (.charAt 0) str (.toLowerCase))
           (subs s 1)))))
 
 (defn api-entry-example

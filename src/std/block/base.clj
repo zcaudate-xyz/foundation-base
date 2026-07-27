@@ -143,7 +143,7 @@
    (._height block)))
 
 (defn ^Number block-prefixed
-  "returns the length of the starting ctahtocters
+  "returns the length of the starting characters
  
    (block-prefixed (construct/block #{}))
    => 2"
@@ -152,7 +152,7 @@
    (._prefixed block)))
 
 (defn ^Number block-suffixed
-  "returns the length of the ending ctahtocters
+  "returns the length of the ending characters
  
    (block-suffixed (construct/block #{}))
    => 1"

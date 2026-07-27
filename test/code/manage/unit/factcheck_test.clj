@@ -141,7 +141,7 @@
   => [4 1 0 2])
 
 ^{:refer code.manage.unit.factcheck/trim-indent :added "4.1"}
-(fact "removes up to n leading whitespace ctahtocters"
+(fact "removes up to n leading whitespace characters"
   [(trim-indent "    hello" 2)
    (trim-indent "  hello" 4)
    (trim-indent "hello" 2)

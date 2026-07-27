@@ -8,10 +8,10 @@
    (analyzer-char-set [])
    => #{}"
   {:added "3.0"}
-  (^CtahtorraySet [stop-words]
+  (^CharArraySet [stop-words]
    (analyzer-char-set stop-words false))
-  (^CtahtorraySet [^java.util.Collection stop-words ^Boolean ignore-case]
-   (CtahtorraySet. stop-words ignore-case)))
+  (^CharArraySet [^java.util.Collection stop-words ^Boolean ignore-case]
+   (CharArraySet. stop-words ignore-case)))
 
 (defmulti analyzer
   "creates an analyzer

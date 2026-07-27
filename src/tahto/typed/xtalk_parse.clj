@@ -16,9 +16,8 @@
 
 (defn file-path-candidates
   [file-path]
-  (let [tahto-path  (str/replace file-path "tahto.core/" "tahto/")
-        annex-path (str/replace tahto-path "model_annex/" "model/annex/")]
-    (distinct [file-path tahto-path annex-path])))
+  (let [annex-path (str/replace file-path "model_annex/" "model/annex/")]
+    (distinct [file-path annex-path])))
 
 (defn resolve-file-path
   [file-path]
@@ -27,15 +26,18 @@
 
 (defn read-forms
   [file-path]
-  (with-open [r (reader-types/indexing-push-back-reader (io/reader (resolve-file-path file-path)))]
-    (let [eof (Object.)
-          file-str (some-> file-path str)]
-      (loop [forms []]
-        (let [form (reader/read {:eof eof :read-cond :allow} r)]
-          (if (identical? form eof)
-            forms
-            (recur (conj forms (cond-> form
-                                 file-str (vary-meta assoc :file file-str))))))))))
+  (let [source (if (instance? java.net.URL file-path)
+                 file-path
+                 (resolve-file-path file-path))]
+    (with-open [r (reader-types/indexing-push-back-reader (io/reader source))]
+      (let [eof (Object.)
+            file-str (some-> source str)]
+        (loop [forms []]
+          (let [form (reader/read {:eof eof :read-cond :allow} r)]
+            (if (identical? form eof)
+              forms
+              (recur (conj forms (cond-> form
+                                   file-str (vary-meta assoc :file file-str)))))))))))
 
 (defn ns-form?
   [form]
@@ -477,12 +479,19 @@
   (let [project-map  (project/project)
         source-roots (vec (concat (or (:source-paths project-map) ["src"])
                                   (or (:test-paths project-map) ["test"])))
-        target-file  (project/get-path ns-sym project-map)]
+        resource-base (-> (str ns-sym)
+                          (str/replace "-" "_")
+                          (str/replace "." "/"))
+        target-file  (or (project/get-path ns-sym project-map)
+                         (some io/resource
+                               (map #(str resource-base %)
+                                    [".clj" ".cljc" ".cljs"])))]
     (if target-file
       (analyze-file-raw target-file)
       (throw (ex-info "Namespace source file not found"
                       {:ns ns-sym
-                       :searched source-roots})))))
+                       :searched source-roots
+                       :resource resource-base})))))
 
 (defn analyze-namespace
   [ns-sym]

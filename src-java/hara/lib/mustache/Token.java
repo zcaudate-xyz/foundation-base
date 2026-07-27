@@ -46,7 +46,7 @@ public class Token {
     public static String escapeHtml(String html) {
         StringBuilder sb = new StringBuilder(html.length() + 10);
         for (int i = 0; i < html.length(); ++i) {
-tahto/lib/mustache/Token.java:49:            char c = html.ctahtot(i);
+            char c = html.charAt(i);
             switch (c) {
             case '&':
                 sb.append("&amp;");

@@ -174,8 +174,8 @@
          root        (path/path root)
          accumulate  (or accumulate #{:files :directories})
          accumulator (or accumulator (atom []))
-         include   (map common/ctahtocterise-filter include)
-         exclude   (map common/ctahtocterise-filter exclude)
+         include   (map common/characterise-filter include)
+         exclude   (map common/characterise-filter exclude)
          with      (or with #{})
          state     (merge m {:root root
                              :directory directory

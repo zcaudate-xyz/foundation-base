@@ -546,7 +546,7 @@
         "lineBreak": {
           "anyOf": [
             {
-              "description": "A delimiter, such as a newline ctahtocter, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
+              "description": "A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
               "type": "string"
             },
             {
@@ -3405,7 +3405,7 @@
         "lineBreak": {
           "anyOf": [
             {
-              "description": "A delimiter, such as a newline ctahtocter, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
+              "description": "A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
               "type": "string"
             },
             {
@@ -8017,7 +8017,7 @@
               "type": "string"
             }
           ],
-          "description": "One of: (1) integer value representing the month from `1`-`12`. `1` represents January; (2) case-insensitive month name (e.g., `\"January\"`); (3) case-insensitive, 3-ctahtocter short month name (e.g., `\"Jan\"`)."
+          "description": "One of: (1) integer value representing the month from `1`-`12`. `1` represents January; (2) case-insensitive month name (e.g., `\"January\"`); (3) case-insensitive, 3-character short month name (e.g., `\"Jan\"`)."
         },
         "quarter": {
           "description": "Integer value representing the quarter of the year (from 1-4).",
@@ -8359,7 +8359,7 @@
       "additionalProperties": false,
       "properties": {
         "delimiter": {
-          "description": "The delimiter between records. The delimiter must be a single ctahtocter (i.e., a single 16-bit code unit); so, ASCII delimiters are fine, but emoji delimiters are not.",
+          "description": "The delimiter between records. The delimiter must be a single character (i.e., a single 16-bit code unit); so, ASCII delimiters are fine, but emoji delimiters are not.",
           "maxLength": 1,
           "minLength": 1,
           "type": "string"
@@ -15073,7 +15073,7 @@
         "lineBreak": {
           "anyOf": [
             {
-              "description": "A delimiter, such as a newline ctahtocter, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
+              "description": "A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
               "type": "string"
             },
             {
@@ -16228,7 +16228,7 @@
         "lineBreak": {
           "anyOf": [
             {
-              "description": "A delimiter, such as a newline ctahtocter, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
+              "description": "A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
               "type": "string"
             },
             {
@@ -17076,7 +17076,7 @@
         "lineBreak": {
           "anyOf": [
             {
-              "description": "A delimiter, such as a newline ctahtocter, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
+              "description": "A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
               "type": "string"
             },
             {
@@ -18594,7 +18594,7 @@
         "lineBreak": {
           "anyOf": [
             {
-              "description": "A delimiter, such as a newline ctahtocter, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
+              "description": "A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
               "type": "string"
             },
             {
@@ -20890,7 +20890,7 @@
         "lineBreak": {
           "anyOf": [
             {
-              "description": "A delimiter, such as a newline ctahtocter, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
+              "description": "A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
               "type": "string"
             },
             {
@@ -28109,7 +28109,7 @@
         "lineBreak": {
           "anyOf": [
             {
-              "description": "A delimiter, such as a newline ctahtocter, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
+              "description": "A delimiter, such as a newline character, upon which to break text strings into multiple lines. This property is ignored if the text is array-valued.",
               "type": "string"
             },
             {

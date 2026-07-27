@@ -128,8 +128,11 @@
          canonical-entry (when (and (symbol? op')
                                     (namespace op'))
                            (ops/canonical-entry op'))
-         canonical-op (or (:canonical-symbol canonical-entry)
-                          op')
+         canonical-op (if (and (= :hard-link (:emit canonical-entry))
+                               (not= "x" (namespace op')))
+                        op'
+                        (or (:canonical-symbol canonical-entry)
+                            op'))
          args' (if (= op' :=)
                  (cons (with-meta
                          (lower-form (first args) (assoc ctx :assignment-target true))

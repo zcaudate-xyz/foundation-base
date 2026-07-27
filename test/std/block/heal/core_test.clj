@@ -811,7 +811,7 @@
      "            :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
      "            :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
      "            :maxLength 10}]"
-     "          [:p {:className \"text-xs text-[#6d6d6d] mt-1\"} \"Short symbol (3-10 ctahtocters)\"]]"]))
+     "          [:p {:className \"text-xs text-[#6d6d6d] mt-1\"} \"Short symbol (3-10 characters)\"]]"]))
   => [{:errors
        [{:char "}",
          :line 6,

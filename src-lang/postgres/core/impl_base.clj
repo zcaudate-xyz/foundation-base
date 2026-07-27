@@ -3,10 +3,10 @@
             [tahto.model.spec-postgres.form-deftype-hydrate :as form-deftype-hydrate]
             [tahto.runtime.postgres.base.application :as app]
             [tahto.core :as l]
-            [tahto.common.emit-common :as emit-common]
-            [tahto.common.emit-data :as emit-data]
+            [tahto.base.emit-common :as emit-common]
+            [tahto.base.emit-data :as emit-data]
             [tahto.core.library-snapshot :as snap]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]))

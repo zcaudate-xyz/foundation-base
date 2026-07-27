@@ -3673,7 +3673,7 @@
                         },
                         {
                             "name": "length",
-                            "description": "Size of the content (in ctahtocters).",
+                            "description": "Size of the content (in characters).",
                             "type": "number"
                         },
                         {
@@ -7570,8 +7570,8 @@
                     ]
                 },
                 {
-                    "name": "ctahtocterDataModified",
-                    "description": "Mirrors `DOMCtahtocterDataModified` event.",
+                    "name": "characterDataModified",
+                    "description": "Mirrors `DOMCharacterDataModified` event.",
                     "parameters": [
                         {
                             "name": "nodeId",
@@ -7579,7 +7579,7 @@
                             "$ref": "NodeId"
                         },
                         {
-                            "name": "ctahtocterData",
+                            "name": "characterData",
                             "description": "New text value.",
                             "type": "string"
                         }
@@ -8192,7 +8192,7 @@
                         },
                         {
                             "name": "documentEncoding",
-                            "description": "Only set for documents, contains the document's ctahtocter set encoding.",
+                            "description": "Only set for documents, contains the document's character set encoding.",
                             "optional": true,
                             "type": "string"
                         },
@@ -8283,13 +8283,13 @@
                             "$ref": "DOM.Rect"
                         },
                         {
-                            "name": "startCtahtocterIndex",
-                            "description": "The starting index in ctahtocters, for this post layout textbox substring. Ctahtocters that\nwould be represented as a surrogate pair in UTF-16 have length 2.",
+                            "name": "startCharacterIndex",
+                            "description": "The starting index in characters, for this post layout textbox substring. Characters that\nwould be represented as a surrogate pair in UTF-16 have length 2.",
                             "type": "integer"
                         },
                         {
-                            "name": "numCtahtocters",
-                            "description": "The number of ctahtocters in this post layout textbox substring. Ctahtocters that would be\nrepresented as a surrogate pair in UTF-16 have length 2.",
+                            "name": "numCharacters",
+                            "description": "The number of characters in this post layout textbox substring. Characters that would be\nrepresented as a surrogate pair in UTF-16 have length 2.",
                             "type": "integer"
                         }
                     ]
@@ -8477,7 +8477,7 @@
                         },
                         {
                             "name": "encodingName",
-                            "description": "Contains the document's ctahtocter set encoding.",
+                            "description": "Contains the document's character set encoding.",
                             "$ref": "StringIndex"
                         },
                         {
@@ -8786,7 +8786,7 @@
                         },
                         {
                             "name": "start",
-                            "description": "The starting index in ctahtocters, for this post layout textbox substring. Ctahtocters that\nwould be represented as a surrogate pair in UTF-16 have length 2.",
+                            "description": "The starting index in characters, for this post layout textbox substring. Characters that\nwould be represented as a surrogate pair in UTF-16 have length 2.",
                             "type": "array",
                             "items": {
                                 "type": "integer"
@@ -8794,7 +8794,7 @@
                         },
                         {
                             "name": "length",
-                            "description": "The number of ctahtocters in this post layout textbox substring. Ctahtocters that would be\nrepresented as a surrogate pair in UTF-16 have length 2.",
+                            "description": "The number of characters in this post layout textbox substring. Characters that would be\nrepresented as a surrogate pair in UTF-16 have length 2.",
                             "type": "array",
                             "items": {
                                 "type": "integer"
@@ -13757,7 +13757,7 @@
                         "SamePartyFromCrossPartyContext",
                         "SamePartyConflictsWithOtherAttributes",
                         "NameValuePairExceedsMaxSize",
-                        "DisallowedCtahtocter",
+                        "DisallowedCharacter",
                         "NoCookieContent"
                     ]
                 },
@@ -14057,7 +14057,7 @@
                     "properties": [
                         {
                             "name": "urlPattern",
-                            "description": "Wildcards (`'*'` -> zero or more, `'?'` -> exactly one) are allowed. Escape ctahtocter is\nbackslash. Omitting is equivalent to `\"*\"`.",
+                            "description": "Wildcards (`'*'` -> zero or more, `'?'` -> exactly one) are allowed. Escape character is\nbackslash. Omitting is equivalent to `\"*\"`.",
                             "optional": true,
                             "type": "string"
                         },
@@ -24807,7 +24807,7 @@
                     "properties": [
                         {
                             "name": "urlPattern",
-                            "description": "Wildcards (`'*'` -> zero or more, `'?'` -> exactly one) are allowed. Escape ctahtocter is\nbackslash. Omitting is equivalent to `\"*\"`.",
+                            "description": "Wildcards (`'*'` -> zero or more, `'?'` -> exactly one) are allowed. Escape character is\nbackslash. Omitting is equivalent to `\"*\"`.",
                             "optional": true,
                             "type": "string"
                         },

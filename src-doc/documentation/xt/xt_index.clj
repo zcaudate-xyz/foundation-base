@@ -2,7 +2,7 @@
 
 [[:hero {:title "xt"
          :subtitle "Cross-target libraries, substrates, and runtime building blocks."
-         :lead "`xt.*` is the portable application layer built on hara.lang and xtalk. It contains language-common libraries, database builders, event helpers, network adapters, and substrate transports that can be emitted or exercised across runtimes."
+         :lead "`xt.*` is the portable application layer built on tahto.core and xtalk. It contains language-common libraries, database builders, event helpers, network adapters, and substrate transports that can be emitted or exercised across runtimes."
          :badges ["xtalk" "portable" "runtime" "substrate"]
          :actions [{:label "Back to home" :href "../index.html" :variant :primary}]}]]
 

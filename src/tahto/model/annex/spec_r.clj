@@ -1,16 +1,16 @@
 (ns tahto.model.annex.spec-r
   (:require [clojure.string :as str]
-            [tahto.base.book :as book]
-            [tahto.common.emit :as emit]
-            [tahto.common.emit-common :as common]
-            [tahto.common.emit-data :as data]
-            [tahto.common.emit-preprocess :as preprocess]
-            [tahto.common.emit-top-level :as top]
-            [tahto.common.grammar :as grammar]
-            [tahto.common.grammar-spec :as spec]
+            [tahto.common.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.emit-common :as common]
+            [tahto.base.emit-data :as data]
+            [tahto.base.emit-preprocess :as preprocess]
+            [tahto.base.emit-top-level :as top]
+            [tahto.base.grammar :as grammar]
+            [tahto.base.grammar-spec :as spec]
             [tahto.core.script :as script]
             [tahto.typed.xtalk-analysis :as xtalk-analysis]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [tahto.model.spec-xtalk]
             [tahto.model.annex.spec-r.rewrite :as rewrite]
             [tahto.model.annex.spec-xtalk.fn-r :as fn]
@@ -143,7 +143,7 @@
 (defn r-map
   [m grammar mopts]
   (if (empty? m)
-    "structure(list(), names=ctahtocter())"
+    "structure(list(), names=character())"
     (data/emit-coll :map m grammar mopts)))
 
 (defn tf-formula

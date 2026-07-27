@@ -277,7 +277,7 @@
          :else (compile-matcher {:is template}))))
 
 (defn p-parent
-  "checks that the parent of the element contains a certain ctahtocteristic
+  "checks that the parent of the element contains a certain characteristic
    ((p-parent 'defn) (-> (nav/parse-string \"(defn x [])\") nav/next nav/next))
    => true
  
@@ -297,7 +297,7 @@
                         (m-fn parent))))))))
 
 (defn p-child
-  "checks that there is a child of a container that has a certain ctahtocteristic
+  "checks that there is a child of a container that has a certain characteristic
    ((p-child {:form '=}) (nav/parse-string \"(if (= x y))\"))
    => true
  
@@ -318,7 +318,7 @@
                    false))))))
 
 (defn p-first
-  "checks that the first element of the container has a certain ctahtocteristic
+  "checks that the first element of the container has a certain characteristic
    ((p-first 'defn) (-> (nav/parse-string \"(defn x [])\")))
    => true
  
@@ -336,7 +336,7 @@
                    (m-fn child)))))))
 
 (defn p-last
-  "checks that the last element of the container has a certain ctahtocteristic
+  "checks that the last element of the container has a certain characteristic
    ((p-last 1) (-> (nav/parse-string \"(defn [] 1)\")))
    => true
  
@@ -354,7 +354,7 @@
                    (m-fn child)))))))
 
 (defn p-nth
-  "checks that the last element of the container has a certain ctahtocteristic
+  "checks that the last element of the container has a certain characteristic
    ((p-nth [0 'defn]) (-> (nav/parse-string \"(defn [] 1)\")))
    => true
  
@@ -386,7 +386,7 @@
                   (m-fn dir))))))
 
 (defn p-nth-left
-  "checks that the last element of the container has a certain ctahtocteristic
+  "checks that the last element of the container has a certain characteristic
    ((p-nth-left [0 'defn]) (-> (nav/parse-string \"(defn [] 1)\") nav/down))
    => true
  
@@ -397,7 +397,7 @@
    (p-nth-move num template nav/left)))
 
 (defn p-nth-right
-  "checks that the last element of the container has a certain ctahtocteristic
+  "checks that the last element of the container has a certain characteristic
    ((p-nth-right [0 'defn]) (-> (nav/parse-string \"(defn [] 1)\") nav/down))
    => true
  
@@ -489,7 +489,7 @@
                  (-> nav (nav/up) (tree-search m-fn nav/up (fn [_]))))))))
 
 (defn p-sibling
-  "checks that any element on the same level has a certain ctahtocteristic
+  "checks that any element on the same level has a certain characteristic
    ((p-sibling '=) (-> (nav/parse-string \"(if (= x y))\") nav/down nav/next nav/next))
    => false
  
@@ -505,7 +505,7 @@
                      false))))))
 
 (defn p-left
-  "checks that the element on the left has a certain ctahtocteristic
+  "checks that the element on the left has a certain characteristic
    ((p-left '=) (-> (nav/parse-string \"(if (= x y))\") nav/down nav/next nav/next nav/next))
    => true
  
@@ -520,7 +520,7 @@
                    (m-fn left)))))))
 
 (defn p-right
-  "checks that the element on the right has a certain ctahtocteristic
+  "checks that the element on the right has a certain characteristic
    ((p-right 'x) (-> (nav/parse-string \"(if (= x y))\") nav/down nav/next nav/next))
    => true
  
@@ -535,7 +535,7 @@
                    (m-fn right)))))))
 
 (defn p-left-of
-  "checks that any element on the left has a certain ctahtocteristic
+  "checks that any element on the left has a certain characteristic
    ((p-left-of '=) (-> (nav/parse-string \"(= x y)\") nav/down nav/next))
    => true
  
@@ -550,7 +550,7 @@
                      false))))))
 
 (defn p-right-of
-  "checks that any element on the right has a certain ctahtocteristic
+  "checks that any element on the right has a certain characteristic
    ((p-right-of 'x) (-> (nav/parse-string \"(= x y)\") nav/down))
    => true
  
@@ -568,7 +568,7 @@
                      false))))))
 
 (defn p-left-most
-  "checks that any element on the right has a certain ctahtocteristic
+  "checks that any element on the right has a certain characteristic
    ((p-left-most true) (-> (nav/parse-string \"(= x y)\") nav/down))
    => true
  
@@ -579,7 +579,7 @@
    (Matcher. (fn [nav] (= (-> nav nav/left nil?) bool)))))
 
 (defn p-right-most
-  "checks that any element on the right has a certain ctahtocteristic
+  "checks that any element on the right has a certain characteristic
    ((p-right-most true) (-> (nav/parse-string \"(= x y)\") nav/down nav/next))
    => false
  

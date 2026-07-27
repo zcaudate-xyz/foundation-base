@@ -71,7 +71,7 @@
                     (.getBytes)
                     (java.nio.ByteBuffer/wrap)
                     (.getLong)
-                    (Long/toString Ctahtocter/MAX_RADIX))))
+                    (Long/toString Character/MAX_RADIX))))
 
 
 (def ^{:arglists '[[tag]]}

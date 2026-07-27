@@ -1,6 +1,6 @@
 (ns tahto.runtime.solidity.compile-solc
   (:require [clojure.string]
-            [tahto.base.book-module :as book-module]
+            [tahto.common.book-module :as book-module]
             [js.lib.eth-solc :as eth-solc]
             [tahto.runtime.basic :as basic]
             [tahto.runtime.solidity.compile-common :as common]

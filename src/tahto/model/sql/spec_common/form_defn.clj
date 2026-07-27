@@ -1,8 +1,8 @@
 (ns tahto.model.sql.spec-common.form-defn
   (:require [clojure.string :as str]
             [tahto.model.sql.spec-common.common :as common]
-            [tahto.common.emit-helper :as helper]
-            [tahto.common.grammar-spec :as grammar-spec]))
+            [tahto.base.emit-helper :as helper]
+            [tahto.base.grammar-spec :as grammar-spec]))
 
 (defn sql-defn-format
   "formats a sql defn form"

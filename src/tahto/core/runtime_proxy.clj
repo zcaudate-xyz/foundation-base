@@ -1,5 +1,5 @@
 (ns tahto.core.runtime-proxy
-  (:require [tahto.common.util :as ut]
+  (:require [tahto.base.util :as ut]
             [std.lib.context.space :as space]
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]))

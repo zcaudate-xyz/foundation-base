@@ -345,11 +345,11 @@
 ;; sha256: 6bc667d00c130c6f5888accb5a56cbeab37f675fa1378261f27e98429036fab9
 [[:chapter {:title "std.lib.mustache: A Comprehensive Summary" :link "merged-plans-slop-summary-std-lib-mustache-summary-md"}]]
 
-"The `std.lib.mustache` namespace provides a simple and efficient way to render templates using the Mustache templating language. It leverages the `newlisp.lib.mustache` Java library to process templates, allowing for dynamic content generation based on provided data. This module is useful for tasks such as generating configuration files, dynamic code snippets, or user-facing text."
+"The `std.lib.mustache` namespace provides a simple and efficient way to render templates using the Mustache templating language. It leverages the `hara.lib.mustache` Java library to process templates, allowing for dynamic content generation based on provided data. This module is useful for tasks such as generating configuration files, dynamic code snippets, or user-facing text."
 
 "**Key Features and Concepts:**"
 
-"1.  **`render [template data]`**:\n    *   **Purpose**: Renders a Mustache `template` string using the provided `data`.\n    *   **Mechanism**:\n        *   It first preprocesses the `template` using `Mustache/preprocess`.\n        *   The `data` map is flattened into a dot-separated key-value map using `std.lib.collection/tree-flatten`. This allows Mustache to access nested data using dot notation (e.g., `user.name`).\n        *   A `newlisp.lib.mustache.Context` is created with the flattened data.\n        *   Finally, `Mustache/render` is called to produce the output string."
+"1.  **`render [template data]`**:\n    *   **Purpose**: Renders a Mustache `template` string using the provided `data`.\n    *   **Mechanism**:\n        *   It first preprocesses the `template` using `Mustache/preprocess`.\n        *   The `data` map is flattened into a dot-separated key-value map using `std.lib.collection/tree-flatten`. This allows Mustache to access nested data using dot notation (e.g., `user.name`).\n        *   A `hara.lib.mustache.Context` is created with the flattened data.\n        *   Finally, `Mustache/render` is called to produce the output string."
 
 "The underlying `hara.lib.mustache` library supports standard Mustache features, including:"
 

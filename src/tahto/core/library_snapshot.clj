@@ -1,8 +1,8 @@
 (ns tahto.core.library-snapshot
-  (:require [tahto.base.book :as book]
+  (:require [tahto.common.book :as book]
             [tahto.core.impl-entry :as entry]
-            [tahto.common.emit-template :as impl-template]
-            [tahto.common.util :as ut]
+            [tahto.base.emit-template :as impl-template]
+            [tahto.base.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
             [std.lib.env :as env]

@@ -21,7 +21,7 @@ The `test/` directory mirrors the structure of the `src/` directory, adhering to
 
 The project uses a custom or specialized testing framework `code.test`, which appears to wrap or extend standard testing capabilities.
 
-### Key Ctahtocteristics
+### Key Characteristics
 *   **Namespace:** `(ns ... (:use code.test) ...)` is the standard header.
 *   **Fact Macro:** Tests are defined using the `fact` macro.
 *   **Assertions:** The `=>` arrow syntax is used for assertions (e.g., `(expr) => expected`).

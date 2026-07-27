@@ -1,0 +1,61 @@
+{:ns-groups
+ [{:pattern "^xt\\."
+   :name clj-kondo.hooks.tahto-xtalk}
+  {:pattern "^tahto\\.model\\.spec-xtalk\\."
+   :name clj-kondo.hooks.tahto-xtalk}
+  {:pattern ".+"
+   :name clj-kondo.hooks.tahto-postgres}]
+
+ :hooks
+ {:analyze-call
+  {tahto.core/script clj-kondo.hooks.tahto-postgres/script
+   tahto.core/script- clj-kondo.hooks.tahto-postgres/script
+   tahto.core/script+ clj-kondo.hooks.tahto-postgres/script
+   tahto.core/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+   tahto.typed/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+   defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+   defn.js clj-kondo.hooks.tahto-xtalk/defn-xt
+   tahto.core/defn.js clj-kondo.hooks.tahto-xtalk/defn-xt
+   defvar.js clj-kondo.hooks.tahto-xtalk/defvar-xt
+   tahto.core/defvar.js clj-kondo.hooks.tahto-xtalk/defvar-xt
+   defglobal.xt clj-kondo.hooks.tahto-xtalk/defglobal-xt
+   defn.pg clj-kondo.hooks.tahto-postgres/defn-pg
+   defrun.pg clj-kondo.hooks.tahto-postgres/defn-pg
+   clj-kondo.hooks.tahto-xtalk/defn.xt clj-kondo.hooks.tahto-xtalk/defn-xt
+   clj-kondo.hooks.tahto-xtalk/def.xt clj-kondo.hooks.tahto-xtalk/def-xt
+   clj-kondo.hooks.tahto-xtalk/defmacro.xt clj-kondo.hooks.tahto-xtalk/defmacro-xt
+   clj-kondo.hooks.tahto-xtalk/defgen.xt clj-kondo.hooks.tahto-xtalk/defgen-xt
+   clj-kondo.hooks.tahto-xtalk/defvar.xt clj-kondo.hooks.tahto-xtalk/defvar-xt
+   defprotocol.xt clj-kondo.hooks.tahto-xtalk/defprotocol-xt
+   xt.lang.common-protocol/defprotocol.xt clj-kondo.hooks.tahto-xtalk/defprotocol-xt
+   proto/defprotocol.xt clj-kondo.hooks.tahto-xtalk/defprotocol-xt
+   clj-kondo.hooks.tahto-xtalk/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+   clj-kondo.hooks.tahto-xtalk/defglobal.xt clj-kondo.hooks.tahto-xtalk/defglobal-xt
+   defimpl.xt clj-kondo.hooks.tahto-xtalk/defimpl-xt
+   xt.lang.common-protocol/defimpl.xt clj-kondo.hooks.tahto-xtalk/defimpl-xt
+   proto/defimpl.xt clj-kondo.hooks.tahto-xtalk/defimpl-xt
+   fact clj-kondo.hooks.tahto-xtalk/fact-xt
+   fact:global clj-kondo.hooks.tahto-xtalk/fact-global-xt
+   clj-kondo.hooks.tahto-postgres/defn.pg clj-kondo.hooks.tahto-postgres/defn-pg
+   clj-kondo.hooks.tahto-postgres/defrun.pg clj-kondo.hooks.tahto-postgres/defn-pg
+   deftype.pg clj-kondo.hooks.tahto-postgres/deftype-pg
+   clj-kondo.hooks.tahto-postgres/deftype.pg clj-kondo.hooks.tahto-postgres/deftype-pg}}
+
+ :linters
+ {:namespace-name-mismatch {:level :off}
+  :tahto.postgres/one-let {:level :warning}
+  :tahto.postgres/nested-let {:level :warning}
+  :tahto.postgres/input-prefix {:level :warning}
+  :tahto.postgres/local-prefix {:level :warning}
+  :tahto.postgres/return-bound {:level :warning}
+  :tahto.postgres/retired-entity-option {:level :error}
+  :tahto.postgres/invalid-owner {:level :error}
+  :tahto.postgres/invalid-provides {:level :error}
+  :tahto.xtalk/block-in-value {:level :error}
+  :tahto.xtalk/field-collision {:level :error}
+  :tahto.xtalk/invalid-destructuring {:level :error}
+  :tahto.xtalk/redundant-get-key {:level :warning}
+  :tahto.xtalk/redundant-fn-arrow {:level :warning}
+  :tahto.xtalk/nested-dot-access {:level :warning}
+  :tahto.xtalk/redundant-dot-destructure {:level :warning}
+  :tahto.xtalk/merge-dot-destructure {:level :warning}}}

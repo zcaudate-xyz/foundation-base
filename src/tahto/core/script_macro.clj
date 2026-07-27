@@ -1,6 +1,6 @@
 (ns tahto.core.script-macro
-  (:require [tahto.common.emit :as emit]
-            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base]
+  (:require [tahto.base.emit :as emit]
+            [tahto.base.emit-preprocess :as preprocess] [tahto.base.preprocess-base :as preprocess-base]
             [tahto.core.impl :as impl]
             [tahto.core.impl-entry :as entry]
             [tahto.core.library :as lib]
@@ -8,7 +8,7 @@
             [tahto.core.script-annex :as annex]
             [tahto.core.script-control :as control]
             [tahto.core.script-lint :as lint]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.context.pointer]
             [std.lib.context.space :as space]
             [std.lib.env :as env]

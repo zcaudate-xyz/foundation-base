@@ -1,4 +1,4 @@
-(ns tahto.common.grammar-spec
+(ns tahto.base.grammar-spec
   (:require [std.lib.collection :as collection]
              [std.lib.foundation :as f]
              [std.lib.function :as fn]))

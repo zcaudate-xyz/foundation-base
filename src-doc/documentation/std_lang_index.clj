@@ -4,7 +4,7 @@
 
 [[:hero {:title "tahto"
          :subtitle "Language tooling, runtime integration, and polyglot system libraries."
-         :lead "`hara` groups the language-oriented parts of foundation: `hara.lang` for authoring and emission, `hara.model` for target specs, `hara.runtime` for execution, `hara.typed` for typed xtalk, and examples for generated projects."
+         :lead "`hara` groups the language-oriented parts of foundation: `tahto.core` for authoring and emission, `tahto.model` for target specs, `tahto.runtime` for execution, `tahto.typed` for typed xtalk, and examples for generated projects."
          :badges ["Language tooling" "Runtimes" "Models" "Polyglot"]
          :actions [{:label "Read the introduction" :href "introduction.html" :variant :primary}
                    {:label "Browse examples" :href "examples.html"}]}]]
@@ -48,7 +48,7 @@
                        :text "Typed xtalk analysis and target declaration emission."
                        :href "tahto-typed.html"}
                       {:meta "Shared Emitters"
-                       :title "tahto.common"
+                       :title "tahto.base"
                        :text "Shared grammar, emit, preprocess, rewrite, and utility behavior."
                        :href "tahto-common.html"}
                       {:meta "Generation"

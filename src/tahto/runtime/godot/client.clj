@@ -11,7 +11,7 @@
             [tahto.core.type-shared :as shared]
             [tahto.runtime.basic.impl.process-gdscript :as gdscript]
             [tahto.runtime.basic.type-common :as common]
-            [tahto.base.book :as book]
+            [tahto.common.book :as book]
             [lib.godot.bench :as bench])
   (:import [java.io BufferedReader InputStreamReader]
            [java.net Socket]

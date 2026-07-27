@@ -2,7 +2,7 @@
   (:require [clojure.string]
             [tahto.core.impl :as impl]
             [tahto.core.library :as lib]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [tahto.core.workspace :as workspace]
             [std.lib.collection :as collection]
             [std.lib.env :as env]

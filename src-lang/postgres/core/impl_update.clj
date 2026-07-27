@@ -4,7 +4,7 @@
             [tahto.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [tahto.core :as l]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]))

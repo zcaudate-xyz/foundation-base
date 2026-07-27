@@ -1,0 +1,63 @@
+(ns tahto.base.emit-prep-rust-test
+  (:require [tahto.common.book :as b]
+            [tahto.base.emit-common :as common]
+            [tahto.base.emit-helper :as helper]
+            [tahto.base.grammar :as grammar]
+            [tahto.base.util :as ut]
+            [tahto.model.annex.spec-rust :as rust]
+            [std.lib.env :as env])
+  (:use code.test))
+
+(def +book-empty+
+  (b/book {:lang :rust
+           :meta rust/+meta+
+           :grammar (grammar/grammar :rs
+                      (grammar/to-reserved (grammar/build))
+                      helper/+default+)}))
+
+(def +core-module+
+  (b/book-module
+   {:id       'L.core
+    :lang     :rust
+    :link     '{- L.core}}))
+
+(def +core-fragment-add+
+  (b/book-entry {:lang :rust
+                 :id 'add
+                 :module 'L.core
+                 :section :fragment
+                 :form       '(fn [x y] (list '+ x y))
+                 :template   (fn [x y] (list '+ x y))
+                 :standalone true
+                 :namespace (env/ns-sym)}))
+
+(def +core-fragment-sub+
+  (b/book-entry {:lang :rust
+                 :id 'sub
+                 :module 'L.core
+                 :section :fragment
+                 :template    (fn [x y] (list '- x y))
+                 :standalone '(fn [x y] (return (- x y)))
+                 :namespace (env/ns-sym)}))
+
+(def +core-code-identity-fn+
+  (b/book-entry {:lang :rust
+                 :id 'identity-fn
+                 :module 'L.core
+                 :section :code
+                 :form '(defn identity-fn [x] (return x))
+                 :form-input '(defn identity-fn [x] (return x))
+                 :deps #{}
+                 :namespace (env/ns-sym)
+                 :declared false}))
+
+(def +book-min+
+  (-> +book-empty+
+      (b/set-module +core-module+)
+      second
+      (b/set-entry +core-fragment-add+)
+      second
+      (b/set-entry +core-fragment-sub+)
+      second
+      (b/set-entry +core-code-identity-fn+)
+      second))

@@ -21,18 +21,18 @@
       (.compareTo (base/block-string this)
                   (base/block-string other)))))
 
-(deftype VoidBlock [tag ^Ctahtocter ctahtocter width height]
+(deftype VoidBlock [tag ^Character character width height]
 
   IBlock
   (_type     [_] :void)
   (_tag      [_] tag)
-  (_string   [_] (str ctahtocter))
+  (_string   [_] (str character))
   (_length   [_] 1)
   (_width    [_] width)
   (_height   [_] height)
   (_prefixed [_] 0)
   (_suffixed [_] 0)
-  (_verify   [_] (and tag (= tag (check/void-tag ctahtocter))))
+  (_verify   [_] (and tag (= tag (check/void-tag character))))
 
   Comparable
   (compareTo [this other]
@@ -40,7 +40,7 @@
 
   Object
   (toString [_]
-    (str (or (base/*void-representations* ctahtocter) ctahtocter))))
+    (str (or (base/*void-representations* character) character))))
 
 (defmethod print-method VoidBlock
   ([v ^java.io.Writer w]
@@ -73,7 +73,7 @@
   {:added "3.0"}
   ([block]
    (and (void-block? block)
-        (= (.-ctahtocter ^VoidBlock block) \space))))
+        (= (.-character ^VoidBlock block) \space))))
 
 (defn linebreak-block?
   "checks if block is of type :linebreak

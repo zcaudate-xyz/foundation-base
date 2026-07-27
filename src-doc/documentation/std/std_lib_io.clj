@@ -12,7 +12,7 @@
 
 [[:section {:title "Charsets"}]]
 
-"`std.lib.io` provides helpers for working with ctahtocter sets and checking I/O object types."
+"`std.lib.io` provides helpers for working with character sets and checking I/O object types."
 
 (fact "get the default charset"
   ^{:refer std.lib.io/charset:default :added "3.0"}

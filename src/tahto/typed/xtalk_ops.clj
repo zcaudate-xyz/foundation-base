@@ -1,14 +1,14 @@
 (ns tahto.typed.xtalk-ops
   (:require [clojure.string :as str]
              [tahto.typed.xtalk-common :as types]
-             [tahto.common.grammar-macro]
-             [tahto.common.grammar-spec]
-             [tahto.common.grammar-xtalk]))
+             [tahto.base.grammar-macro]
+             [tahto.base.grammar-spec]
+             [tahto.base.grammar-xtalk]))
 
 (def +op-source-namespaces+
-  '[tahto.common.grammar-spec
-    tahto.common.grammar-macro
-    tahto.common.grammar-xtalk])
+  '[tahto.base.grammar-spec
+    tahto.base.grammar-macro
+    tahto.base.grammar-xtalk])
 
 (def +legacy-op-aliases+
   '{xt.lang.common-lib/len x:len

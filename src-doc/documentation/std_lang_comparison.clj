@@ -4,7 +4,7 @@
 
 [[:hero {:title "Comparison"
          :subtitle "How `tahto.core` differs from straight transpilation and adjacent tools."
-         :lead "`hara.lang` overlaps with transpilers, DSL toolkits, and language workbenches, but its center of gravity is different: it is optimized for **shared authoring**, **grammar-driven code generation**, and **runtime-aware polyglot workflows**."
+         :lead "`tahto.core` overlaps with transpilers, DSL toolkits, and language workbenches, but its center of gravity is different: it is optimized for **shared authoring**, **grammar-driven code generation**, and **runtime-aware polyglot workflows**."
          :badges ["Transpilers" "Language workbenches" "Polyglot systems"]}]]
 
 [[:chapter {:title "Versus straight transpilation"}]]
@@ -21,7 +21,7 @@
 
 [[:callout {:tone :warning
             :title "When a plain transpiler is better"
-            :content "If the only goal is to translate one existing language into another with high fidelity to the source ecosystem, a dedicated transpiler is usually simpler. `hara.lang` is strongest when you want a **shared generation system** rather than a one-off translation pass."}]]
+            :content "If the only goal is to translate one existing language into another with high fidelity to the source ecosystem, a dedicated transpiler is usually simpler. `tahto.core` is strongest when you want a **shared generation system** rather than a one-off translation pass."}]]
 
 [[:chapter {:title "Versus nearby systems"}]]
 
@@ -37,7 +37,7 @@
 
 [[:section {:title "Walkthrough"}]]
 
-"The difference is easiest to see with a concrete example. The same hara.lang form is emitted through different grammars, and each target keeps its own idioms. This is not source-to-source translation; it is shared authoring with target-specific realization."
+"The difference is easiest to see with a concrete example. The same tahto.core form is emitted through different grammars, and each target keeps its own idioms. This is not source-to-source translation; it is shared authoring with target-specific realization."
 
 (fact "shared form, JS realization"
   ^{:refer tahto.core/emit-as :added "4.0"}

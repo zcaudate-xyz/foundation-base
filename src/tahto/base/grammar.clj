@@ -1,10 +1,10 @@
-(ns tahto.common.grammar
+(ns tahto.base.grammar
   (:require [clojure.set]
             [clojure.string]
-            [tahto.common.grammar-macro :as macro]
-            [tahto.common.grammar-spec :as spec]
-            [tahto.common.grammar-xtalk :as xtalk]
-            [tahto.common.grammar-xtalk-system :as xtalk-system]
+            [tahto.base.grammar-macro :as macro]
+            [tahto.base.grammar-spec :as spec]
+            [tahto.base.grammar-xtalk :as xtalk]
+            [tahto.base.grammar-xtalk-system :as xtalk-system]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.impl :as impl]))
@@ -12,7 +12,7 @@
 (defn gen-ops
   "generates ops
  
-   (gen-ops 'tahto.common.grammar-spec \"spec\")
+   (gen-ops 'tahto.base.grammar-spec \"spec\")
    => vector?"
   {:added "4.0"}
   [ns shortcut]
@@ -66,9 +66,9 @@
   #{:functional-core})
 
 (def ^{:generator (fn []
-                    (vec (concat (gen-ops 'tahto.common.grammar-spec "spec")
-                                 (gen-ops 'tahto.common.grammar-macro "macro")
-                                 (gen-ops 'tahto.common.grammar-xtalk "xtalk"))))}
+                    (vec (concat (gen-ops 'tahto.base.grammar-spec "spec")
+                                 (gen-ops 'tahto.base.grammar-macro "macro")
+                                 (gen-ops 'tahto.base.grammar-xtalk "xtalk"))))}
   +op-all+
   (->> (concat [[:builtin spec/+op-builtin+]
                 [:builtin-global spec/+op-builtin-global+]

@@ -2,11 +2,11 @@
   (:require [tahto.model.spec-postgres.common :as common]
             [tahto.model.spec-postgres.form-let :as form-let]
             [tahto.model.spec-postgres.meta :as meta]
-            [tahto.common.emit-common :as emit-common]
-            [tahto.common.emit-fn :as fn]
-            [tahto.common.emit-helper :as helper]
-            [tahto.common.grammar-spec :as grammar-spec]
-            [tahto.common.util :as ut]
+            [tahto.base.emit-common :as emit-common]
+            [tahto.base.emit-fn :as fn]
+            [tahto.base.emit-helper :as helper]
+            [tahto.base.grammar-spec :as grammar-spec]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
 

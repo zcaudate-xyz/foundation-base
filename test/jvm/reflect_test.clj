@@ -37,7 +37,7 @@
 (fact "prints the output on the result to display"
 
   (query-printed "CLASS" query/query-class String [#"^c" :name])
-  => (contains ["ctahtot"])
+  => (contains ["charAt"])
 
   (query-printed "CLASS" query/query-class String [#"^c"])
   => seq?)
@@ -46,8 +46,8 @@
 (fact "queries the java view of the class declaration"
 
   (.? String  #"^c" :name)
-  => (contains ["ctahtot"])
-  ;;["ctahtot" "chars" "checkBoundsBeginEnd"
+  => (contains ["charAt"])
+  ;;["charAt" "chars" "checkBoundsBeginEnd"
   ;; "checkBoundsOffCount" "checkIndex" "checkOffset"
   ;; "codePointAt" "codePointBefore" "codePointCount" "codePoints"
   ;; "coder" "compareTo" "compareToIgnoreCase" "concat" "contains"

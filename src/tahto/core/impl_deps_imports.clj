@@ -1,10 +1,10 @@
 (ns tahto.core.impl-deps-imports
   (:require [clojure.set :as set]
-             [tahto.base.book :as b]
-             [tahto.base.book-module :as module]
+             [tahto.common.book :as b]
+             [tahto.common.book-module :as module]
              [tahto.core.impl-entry :as entry]
-             [tahto.common.emit-template :as impl-template]
-             [tahto.common.util :as ut]
+             [tahto.base.emit-template :as impl-template]
+             [tahto.base.util :as ut]
              [std.lib.collection :as collection]))
 
 (defn- materialize-import-entry

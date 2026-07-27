@@ -1,6 +1,6 @@
 (ns xt.lang.common-module
   (:require [tahto.core :as l]
-            [tahto.base.book :as book]
+            [tahto.common.book :as book]
             [tahto.core.impl-deps :as deps]
             [tahto.core.impl-lifecycle :as lc]
             [tahto.core.library :as lib]

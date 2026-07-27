@@ -1,6 +1,6 @@
 (ns tahto.runtime.jocl.common
   (:require [tahto.runtime.jocl.meta :as meta]
-            [tahto.common.emit-helper :as helper]
+            [tahto.base.emit-helper :as helper]
             [tahto.model.spec-c :as c]
             [std.object :as object]
             [std.string :as str]

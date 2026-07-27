@@ -3,9 +3,9 @@
             [tahto.model.sql.spec-common.form-defenum :as form-defenum]
             [tahto.model.sql.spec-common.form-defn :as form-defn]
             [tahto.model.sql.spec-common.form-deftype :as form-deftype]
-            [tahto.base.book :as book]
-            [tahto.common.emit :as emit]
-            [tahto.common.grammar :as grammar]
+            [tahto.common.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.grammar :as grammar]
             [std.lib.collection :as collection]))
 
 (def +dialect-sql+

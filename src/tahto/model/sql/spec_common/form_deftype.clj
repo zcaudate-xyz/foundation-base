@@ -1,7 +1,7 @@
 (ns tahto.model.sql.spec-common.form-deftype
   (:require [clojure.string :as str]
             [tahto.model.sql.spec-common.common :as common]
-            [tahto.common.grammar-spec :as grammar-spec]))
+            [tahto.base.grammar-spec :as grammar-spec]))
 
 (defn sql-deftype-format
   "formats a sql table form"

@@ -1,8 +1,8 @@
 (ns tahto.model.annex.spec-php
-  (:require [tahto.base.book :as book]
-            [tahto.common.emit :as emit]
-            [tahto.common.emit-common :as common]
-            [tahto.common.grammar :as grammar]
+  (:require [tahto.common.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.emit-common :as common]
+            [tahto.base.grammar :as grammar]
             [tahto.core.script :as script]
             [tahto.model.spec-xtalk]
             [tahto.model.annex.spec-xtalk.fn-php :as fn]

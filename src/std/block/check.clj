@@ -26,8 +26,8 @@
  
    (whitespace? \\space) => true"
   {:added "3.0"}
-  ([^Ctahtocter c]
-   (and c (Ctahtocter/isWhitespace c))))
+  ([^Character c]
+   (and c (Character/isWhitespace c))))
 
 (defn comma?
   "returns whether a char is a comma
@@ -64,7 +64,7 @@
        (comma? c))))
 
 (defn linetab?
-  "checs if ctahtocter is a tab
+  "checs if character is a tab
  
    (linetab? (first \"\\t\"))
    => true"

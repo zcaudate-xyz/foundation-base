@@ -8,7 +8,7 @@
             [std.block :as block]
             [std.block.layout :as layout]
             [tahto.core :as l]
-            [tahto.base.book :as book]
+            [tahto.common.book :as book]
             [std.lib.env :as env]))
 
 ;; Existing endpoints -------------------------------------------------------

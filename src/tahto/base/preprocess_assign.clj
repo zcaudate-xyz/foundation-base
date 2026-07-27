@@ -1,9 +1,9 @@
-(ns tahto.common.preprocess-assign
+(ns tahto.base.preprocess-assign
   (:require [clojure.walk :as walk]
-            [tahto.common.emit-helper :as helper]
-            [tahto.common.preprocess-base :as preprocess-base]
-            [tahto.common.preprocess-value :as value]
-            [tahto.common.util :as ut]
+            [tahto.base.emit-helper :as helper]
+            [tahto.base.preprocess-base :as preprocess-base]
+            [tahto.base.preprocess-value :as value]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
 

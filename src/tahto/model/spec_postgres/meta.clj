@@ -1,6 +1,6 @@
 (ns tahto.model.spec-postgres.meta
   (:require [tahto.core.pointer :as ptr]
-            [tahto.common.util :as ut]))
+            [tahto.base.util :as ut]))
 
 (defn has-function
   "checks for existence of a function"

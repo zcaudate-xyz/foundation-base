@@ -1,0 +1,93 @@
+(ns tahto.base.grammar-macro-test
+  (:require [tahto.base.grammar-macro :refer :all])
+  (:use code.test))
+
+^{:refer tahto.base.grammar-macro/tf-macroexpand :added "3.0"}
+(fact "macroexpands the current form"
+  (tf-macroexpand '(-> 1 (inc)))
+  => '(inc 1))
+
+^{:refer tahto.base.grammar-macro/tf-when :added "3.0"}
+(fact "transforms `when` to branch"
+
+  (tf-when '(when true :A :B :C))
+  => '(br* (if true :A :B :C)))
+
+^{:refer tahto.base.grammar-macro/tf-if :added "3.0"}
+(fact "transforms `if` to branch"
+
+  (tf-if '(if true :A :B))
+  => '(br* (if true :A) (else :B)))
+
+^{:refer tahto.base.grammar-macro/tf-cond :added "3.0"}
+(fact "transforms `cond` to branch"
+  (tf-cond '(cond true :A false :B))
+  => '(br* (if true :A) (elseif false :B))
+
+  (tf-cond '(cond true :A false :B :else :C))
+  => '(br* (if true :A) (elseif false :B) (else :C)))
+
+^{:refer tahto.base.grammar-macro/tf-let-bind :added "4.0"}
+(fact "converts to a statement"
+
+  (tf-let-bind '(let [#{x} 1 b 2]
+                  (return (+ x b))))
+  => '(do* (var #{x} := 1)
+           (var b := 2)
+           (return (+ x b))))
+
+^{:refer tahto.base.grammar-macro/tf-case :added "4.0"}
+(fact "transforms the case statement to switch representation"
+
+  (tf-case '(case (type obj)
+              :A (return A)
+              :B (return B)
+              (return X)))
+  => '(switch
+       [(type obj)]
+       (case [:A] (return A))
+       (case [:B] (return B))
+       (default (return X))))
+
+^{:refer tahto.base.grammar-macro/tf-lambda-arrow :added "4.0"}
+(fact "generalized lambda transformation"
+
+  (tf-lambda-arrow '(fn:> [e] e))
+  => '(fn [e] (return e)))
+
+^{:refer tahto.base.grammar-macro/tf-tcond :added "4.0"}
+(fact "transforms the ternary cond"
+
+  (tf-tcond '(:?> :a a :b b :else c))
+  => '(:? :a [a (:? :b [b c])]))
+
+^{:refer tahto.base.grammar-macro/tf-xor :added "4.0"}
+(fact "transforms xor into boolean-normalized equality"
+
+  (tf-xor '(xor a b))
+  => '(== (not (not a)) (not (not b))))
+
+^{:refer tahto.base.grammar-macro/tf-doto :added "4.0"}
+(fact "basic transformation for `doto` syntax"
+
+  (tf-doto '(doto sym
+              (. a)
+              (b)
+              (. c)))
+  => '(do (. sym a) (b sym) (. sym c)))
+
+^{:refer tahto.base.grammar-macro/tf-do-arrow :added "4.0"}
+(fact "do:> transformation"
+
+  (tf-do-arrow '(do:>
+                 1 2 (return 3)))
+  => '((fn [] 1 2 (return 3))))
+
+^{:refer tahto.base.grammar-macro/tf-forange :added "4.0"}
+(fact "creates the forange form"
+
+  (tf-forange '(forange [i 10] (print i)))
+  => '(for [(var i 0) (< i 10) [(:= i (+ i 1))]] (print i))
+
+  (tf-forange '(forange [i [10 3 -2]] (print i)))
+  => '(for [(var i 10) (< i 3) [(:= i (- i 2))]] (print i)))

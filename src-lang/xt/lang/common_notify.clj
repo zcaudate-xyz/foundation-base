@@ -3,7 +3,7 @@
             [tahto.core :as l]
             [tahto.core.pointer :as ptr]
             [tahto.core.script-macro :as macro]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [tahto.core.type-notify :as notify]
             [std.lib.atom :as atom]
             [std.lib.context.pointer]

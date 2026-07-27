@@ -4,7 +4,7 @@
             [std.concurrent :as cc]
             [std.json :as json]
             [tahto.core :as l]
-            [tahto.common.emit-common :as common]
+            [tahto.base.emit-common :as common]
             [tahto.core.impl :as impl]
             [tahto.core.pointer :as ptr]
             [tahto.core.runtime :as default]

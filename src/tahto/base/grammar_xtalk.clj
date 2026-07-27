@@ -1,8 +1,8 @@
-(ns tahto.common.grammar-xtalk
+(ns tahto.base.grammar-xtalk
   (:require [clojure.string :as str]
             [std.block.template :as gen]
             [std.lib.foundation :as f]
-            [tahto.common.preprocess-base :as preprocess-base]))
+            [tahto.base.preprocess-base :as preprocess-base]))
 
 (defn tf-throw
   "wrapper for throw transform"

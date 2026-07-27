@@ -27,7 +27,7 @@
 (fact "queries the java view of the class declaration"
 
   (query-class String [#"^c" :name])
-  ;;=> ["ctahtot" "checkBounds" "codePointAt" "codePointBefore"
+  ;;=> ["charAt" "checkBounds" "codePointAt" "codePointBefore"
   ;;    "codePointCount" "compareTo" "compareToIgnoreCase"
   ;;    "concat" "contains" "contentEquals" "copyValueOf"]
   => not-empty)
@@ -48,7 +48,7 @@
 (fact "lists what methods could be applied to a particular instance"
 
   (query-hierarchy String [:name #"^to"])
-  => ["toCtahtorray" "toLowerCase" "toString" "toUpperCase"])
+  => ["toCharArray" "toLowerCase" "toString" "toUpperCase"])
 
 ^{:refer std.object.query/all-instance-elements :added "3.0"}
 (fact "returns the hierarchy of elements corresponding to a class"
@@ -66,7 +66,7 @@
 (fact "lists what class methods could be applied to a particular instance"
 
   (query-instance "abc" [:name #"^to"])
-  => ["toCtahtorray" "toLowerCase" "toString" "toUpperCase"]
+  => ["toCharArray" "toLowerCase" "toString" "toUpperCase"]
 
   (query-instance String [:name #"^to"])
   => (contains ["toString"]))
@@ -75,7 +75,7 @@
 (fact "lists what methods could be applied to a particular instance. includes all super class methods"
 
   (query-instance-hierarchy String [:name #"^to"])
-  => ["toCtahtorray" "toLowerCase" "toString" "toUpperCase"])
+  => ["toCharArray" "toLowerCase" "toString" "toUpperCase"])
 
 ^{:refer std.object.query/apply-element :added "3.0"}
 (fact "apply the class element to arguments"
@@ -101,11 +101,11 @@
 (fact "creates the form for `element` for definvoke"
 
   (invoke-intern-element :element '-foo- {:class String
-                                          :selector ["ctahtot"]} nil)
+                                          :selector ["charAt"]} nil)
   ;;   '(clojure.core/let [elem ((clojure.core/get std.object.query/+query-functions+
   ;;                                                (clojure.core/or nil :class))
   ;;                              java.lang.String
-  ;;                              (clojure.core/cons :merge ["ctahtot"]))
+  ;;                              (clojure.core/cons :merge ["charAt"]))
   ;;                        arglists (std.object.element/element-params elem)]
   ;;       (clojure.core/doto (def -foo- elem)
   ;;         (clojure.core/alter-meta! clojure.core/merge {:arglists arglists} {})))

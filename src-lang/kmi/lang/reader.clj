@@ -6,7 +6,7 @@
   {:require [[xt.lang.spec-base :as xt]]})
 
 (defn.xt impl-char-at
-  "returns a one-ctahtocter string at the current reader offset"
+  "returns a one-character string at the current reader offset"
   {:added "4.1"}
   [s idx]
   (if (or (< idx 0)

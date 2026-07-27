@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns tahto.model.annex.spec-xtalk.fn-r
-  (:require [tahto.common.grammar-xtalk :as default]
+  (:require [tahto.base.grammar-xtalk :as default]
             [std.lib.template :as template]))
 
 ;;
@@ -91,7 +91,7 @@
              (== t "double")
              (return "number")
 
-             (== t "ctahtocter")
+             (== t "character")
              (return "string")
 
              (== t "logical")
@@ -186,7 +186,7 @@
   [[_ obj key check]]
   (let [present (template/$
                  (:? (x:is-object? ~obj)
-                     (not (is.na (match (as.ctahtocter ~key)
+                     (not (is.na (match (as.character ~key)
                                         (names ~obj))))
                      (and (is.numeric ~key)
                           (>= ~key 1)
@@ -203,14 +203,14 @@
     (if sync
       (template/$
        (do (:= (. ~obj [(:? (x:is-object? ~obj)
-                            (as.ctahtocter ~key)
+                            (as.character ~key)
                             ~key)])
                ~value)
            ~sync
            ~obj))
       (template/$
        (do (:= (. ~obj [(:? (x:is-object? ~obj)
-                            (as.ctahtocter ~key)
+                            (as.character ~key)
                             ~key)])
                ~value)
            ~obj)))))
@@ -221,14 +221,14 @@
     (if sync
       (template/$
        (do (:= (. ~obj [(:? (x:is-object? ~obj)
-                            (as.ctahtocter ~key)
+                            (as.character ~key)
                             ~key)])
                nil)
            ~sync
            ~obj))
       (template/$
        (do (:= (. ~obj [(:? (x:is-object? ~obj)
-                            (as.ctahtocter ~key)
+                            (as.character ~key)
                             ~key)])
                nil)
            ~obj)))))
@@ -237,7 +237,7 @@
   [[_ obj key default]]
   (let [val (template/$
              (:? (x:is-object? ~obj)
-                 (. ~obj [(as.ctahtocter ~key)])
+                 (. ~obj [(as.character ~key)])
                  (:? (and (is.numeric ~key)
                           (>= ~key 1)
                           (<= ~key (length ~obj)))
@@ -322,7 +322,7 @@
 
 (defn r-tf-x-is-string?
   [[_ e]]
-  (list '== "ctahtocter" (list 'typeof e)))
+  (list '== "character" (list 'typeof e)))
 
 (defn r-tf-x-is-number?
   [[_ e]]
@@ -374,7 +374,7 @@
 (defn r-tf-x-lu-key
   [obj]
   (let [scalar? (template/$ (and (== 1 (length ~obj))
-                                 (or (is.ctahtocter ~obj)
+                                 (or (is.character ~obj)
                                      (is.numeric ~obj)
                                      (is.logical ~obj))))]
     (list ':?
@@ -386,7 +386,7 @@
                 (list ':?
                       scalar?
                       (list 'paste (list 'typeof obj)
-                            (list 'as.ctahtocter obj)
+                            (list 'as.character obj)
                             :sep ":")
                       (list 'tracemem obj))))))
 
@@ -606,7 +606,7 @@
                                     (list 'not (list 'is.null (list 'names vals))))
                           (list 'block
                                 (list 'for ['k :in (list 'names vals)]
-                                      (list ':= (list '. out [(list 'as.ctahtocter 'k)])
+                                      (list ':= (list '. out [(list 'as.character 'k)])
                                             (list '. vals ['k]))))
                           nil)]
                    tail))))

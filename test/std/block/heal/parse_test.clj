@@ -29,7 +29,7 @@
   => [{:char "(", :line 2, :col 3, :type :open, :style :paren}]
 
 
-  ;; Escaped ctahtocter
+  ;; Escaped character
   (parse/parse-delimiters
    "\\(")
   => []

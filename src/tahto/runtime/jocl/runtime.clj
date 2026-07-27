@@ -3,7 +3,7 @@
             [std.protocol.context :as protocol.context]
             [tahto.core.runtime :as default]
             [tahto.core.pointer :as ptr]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as coll]
             [std.lib.component :as component]

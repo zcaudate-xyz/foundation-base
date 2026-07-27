@@ -35,7 +35,7 @@
 ^{:refer std.object.element.impl.multi/to-element-map-path :added "3.0"}
 (fact "creates a map path for the element"
 
-  (-> (query/query-class String ["ctahtot" :#])
+  (-> (query/query-class String ["charAt" :#])
       (multi/to-element-map-path))
   => [:method 2 [java.lang.String Integer/TYPE]])
 

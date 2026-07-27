@@ -48,6 +48,16 @@
     (ut/collect-routes (@! +routes+) "db"))
   => +result+)
 
+^{:refer xt.db.text.base-util/collect-routes-object :added "4.1"}
+(fact "collects routes from an object input"
+
+  (!.js
+    (ut/collect-routes-object
+     {"one" {"url" "/one" "id" 1}
+      "two" {"url" "/two" "id" 2}}))
+  => {"/one" {"url" "/one" "id" 1}
+      "/two" {"url" "/two" "id" 2}})
+
 ^{:refer xt.db.text.base-util/collect-views :added "4.0"
   :setup [(def +views+
             [{:input [{:symbol "i_currency_id", :type "citext"}],

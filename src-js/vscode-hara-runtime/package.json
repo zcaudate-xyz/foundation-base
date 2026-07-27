@@ -1,7 +1,7 @@
 {
-tahto-runtime/package.json:2:  "name": "vscode-tahto-runtime",
-tahto-runtime/package.json:3:  "displayName": "Tahto Runtime for VS Code",
-tahto-runtime/package.json:4:  "description": "Socket-based eval host for the Tahto/Foundatio runtime system",
+  "name": "vscode-tahto-runtime",
+  "displayName": "Tahto Runtime for VS Code",
+  "description": "Socket-based eval host for the Tahto/Foundatio runtime system",
   "version": "0.1.0",
   "publisher": "foundation",
   "engines": {

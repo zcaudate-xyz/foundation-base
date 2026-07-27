@@ -33,15 +33,15 @@
    (String. ^chars (to-hex-chars bytes))))
 
 (defn from-hex-chars
-  "turns two hex ctahtocters into a byte value
+  "turns two hex characters into a byte value
  
    (byte (from-hex-chars \2 \\a))
    => 42"
   {:added "3.0"}
-  ([^Ctahtocter c1 ^Ctahtocter c2]
+  ([^Character c1 ^Character c2]
    (unchecked-byte
-    (+ (bit-shift-left (Ctahtocter/digit c1 16) 4)
-       (Ctahtocter/digit c2 16)))))
+    (+ (bit-shift-left (Character/digit c1 16) 4)
+       (Character/digit c2 16)))))
 
 (defn ^"[B" from-hex
   "turns a hex string into a sequence of bytes

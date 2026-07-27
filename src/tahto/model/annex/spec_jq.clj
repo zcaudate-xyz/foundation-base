@@ -1,9 +1,9 @@
 (ns tahto.model.annex.spec-jq
   (:require [clojure.string]
-            [tahto.base.book :as book]
-            [tahto.common.emit :as emit]
-            [tahto.common.emit-common :as common]
-            [tahto.common.grammar :as grammar]
+            [tahto.common.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.emit-common :as common]
+            [tahto.base.grammar :as grammar]
             [tahto.core.script :as script]
             [tahto.model.spec-xtalk]
             [std.lib.collection :as collection])

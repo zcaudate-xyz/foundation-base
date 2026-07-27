@@ -1,8 +1,8 @@
 (ns tahto.model.sql.spec-common.common
   (:require [clojure.string :as str]
-            [tahto.common.emit :as emit]
-            [tahto.common.emit-helper :as helper]
-            [tahto.base.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.emit-helper :as helper]
+            [tahto.common.book :as book]
             [tahto.core.pointer :as ptr]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))

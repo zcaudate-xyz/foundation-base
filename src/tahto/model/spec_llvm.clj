@@ -1,13 +1,13 @@
 (ns tahto.model.spec-llvm
   (:require [clojure.string]
-            [tahto.base.book :as book]
-            [tahto.common.emit :as emit]
-            [tahto.common.emit-common :as common]
-            [tahto.common.emit-preprocess :as preprocess]
-            [tahto.common.preprocess-base :as preprocess-base]
-            [tahto.common.grammar :as grammar]
+            [tahto.common.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.emit-common :as common]
+            [tahto.base.emit-preprocess :as preprocess]
+            [tahto.base.preprocess-base :as preprocess-base]
+            [tahto.base.grammar :as grammar]
             [tahto.core.script :as script]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]))
 
 (defn tf-define

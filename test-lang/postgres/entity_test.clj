@@ -4,7 +4,7 @@
             [postgres.entity :as et :refer :all]
             [tahto.core :as l]
             [tahto.model.spec-postgres.entity-util :as ut]
-            [tahto.common.grammar-spec :as grammar-spec]
+            [tahto.base.grammar-spec :as grammar-spec]
             [std.lib.env :as env]))
 
 (def +reduced-target+

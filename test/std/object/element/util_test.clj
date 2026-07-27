@@ -74,21 +74,21 @@
 ^{:refer std.object.element.util/box-args :added "3.0"}
 (fact "makes the parameters of the arguments conform to the function signature"
 
-  (-> (query/query-class String ["ctahtot" :#])
+  (-> (query/query-class String ["charAt" :#])
       (box-args ["0123" 1]))
   => ["0123" 1])
 
 ^{:refer std.object.element.util/format-element-method :added "3.0"}
 (fact "readable string representation of an element"
 
-  (-> (query/query-class String ["ctahtot" :#])
+  (-> (query/query-class String ["charAt" :#])
       (format-element-method))
-  => "[ctahtot :: (java.lang.String, int) -> char]")
+  => "[charAt :: (java.lang.String, int) -> char]")
 
 ^{:refer std.object.element.util/element-params-method :added "3.0"}
 (fact "arglist parameters for an element"
 
-  (-> (query/query-class String ["ctahtot" :#])
+  (-> (query/query-class String ["charAt" :#])
       (element-params-method))
   => '[java.lang.String int])
 

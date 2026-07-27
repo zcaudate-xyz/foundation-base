@@ -2,8 +2,8 @@
   (:require [tahto.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [tahto.core :as l]
-            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base]
-            [tahto.common.util :as ut]
+            [tahto.base.emit-preprocess :as preprocess] [tahto.base.preprocess-base :as preprocess-base]
+            [tahto.base.util :as ut]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]))
 

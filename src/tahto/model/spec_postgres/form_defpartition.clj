@@ -1,8 +1,8 @@
 (ns tahto.model.spec-postgres.form-defpartition
   (:require [tahto.model.spec-postgres.common :as common]
-            [tahto.base.book :as book]
-            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base]
-            [tahto.common.grammar-spec :as grammar-spec]
+            [tahto.common.book :as book]
+            [tahto.base.emit-preprocess :as preprocess] [tahto.base.preprocess-base :as preprocess-base]
+            [tahto.base.grammar-spec :as grammar-spec]
             [tahto.core.library-snapshot :as snap]
             [std.lib.foundation :as f]))
 

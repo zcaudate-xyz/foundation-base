@@ -64,13 +64,13 @@
   => 2)
 
 ^{:refer std.block.base/block-prefixed :added "3.0"}
-(fact "returns the length of the starting ctahtocters"
+(fact "returns the length of the starting characters"
 
   (block-prefixed (construct/block #{}))
   => 2)
 
 ^{:refer std.block.base/block-suffixed :added "3.0"}
-(fact "returns the length of the ending ctahtocters"
+(fact "returns the length of the ending characters"
 
   (block-suffixed (construct/block #{}))
   => 1)

@@ -1,13 +1,13 @@
-(ns tahto.common.emit-preprocess
-  (:require [tahto.common.preprocess-input :as input]
-            [tahto.common.preprocess-base :as base]
-            [tahto.common.preprocess-assign :as assign]
-            [tahto.common.preprocess-staging :as staging]
-            [tahto.common.preprocess-resolve :as resolve]
-            [tahto.common.preprocess-value :as value]
+(ns tahto.base.emit-preprocess
+  (:require [tahto.base.preprocess-input :as input]
+            [tahto.base.preprocess-base :as base]
+            [tahto.base.preprocess-assign :as assign]
+            [tahto.base.preprocess-staging :as staging]
+            [tahto.base.preprocess-resolve :as resolve]
+            [tahto.base.preprocess-value :as value]
             [std.lib.foundation :as f]))
 
-(f/intern-in tahto.common.emit-preprocess
+(f/intern-in tahto.base.emit-preprocess
   base/macro-opts
   base/macro-grammar
   base/with:macro-opts

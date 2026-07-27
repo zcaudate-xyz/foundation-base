@@ -294,7 +294,7 @@
 (defn read-token [text start]
   (loop [i start]
     (if (or (>= i (count text))
-            (token-delimiter? (.ctahtot text i)))
+            (token-delimiter? (.charAt text i)))
       [(.substring text start i) i]
       (recur (inc i)))))
 
@@ -306,7 +306,7 @@
                  :remaining #{}}]
       (if (>= i (count text))
         [(str sb) data]
-        (let [ch (.ctahtot text i)]
+        (let [ch (.charAt text i)]
           (case state
             :comment
             (do (.append sb ch)
@@ -319,7 +319,7 @@
               (= ch \\)
               (do (.append sb ch)
                   (when (< (inc i) (count text))
-                    (.append sb (.ctahtot text (inc i))))
+                    (.append sb (.charAt text (inc i))))
                   (recur (+ i 2) :string data))
 
               (= ch \")
@@ -488,7 +488,7 @@
          state :code]
     (when (>= i (count text))
       (throw (ex-info "Unbalanced form" {:start start})))
-    (let [ch (.ctahtot text i)]
+    (let [ch (.charAt text i)]
       (case state
         :comment
         (recur (inc i) depth (if (= ch \newline) :code :comment))

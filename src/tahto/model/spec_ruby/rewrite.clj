@@ -2,7 +2,7 @@
   (:require [clojure.set :as set]
              [clojure.string :as string]
              [clojure.walk :as walk]
-             [tahto.common.util :as ut]
+             [tahto.base.util :as ut]
              [tahto.core.rewrite.common :as common]
              [tahto.core.rewrite.destructure :as destruct]))
 

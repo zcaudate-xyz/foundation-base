@@ -16,7 +16,7 @@
      (loop [index (int 0)]
        (if (= (.length s) index)
          true
-         (if (Ctahtocter/isWhitespace (.ctahtot s index))
+         (if (Character/isWhitespace (.charAt s index))
            (recur (inc index))
            false)))
      true)))
@@ -181,12 +181,12 @@
      (loop [rindex len]
        (if (zero? rindex)
          ""
-         (if (Ctahtocter/isWhitespace (.ctahtot s (dec rindex)))
+         (if (Character/isWhitespace (.charAt s (dec rindex)))
            (recur (dec rindex))
           ;; there is at least one non-whitespace char in the string,
           ;; so no need to check for lindex reaching len.
            (loop [lindex 0]
-             (if (Ctahtocter/isWhitespace (.ctahtot s lindex))
+             (if (Character/isWhitespace (.charAt s lindex))
                (recur (inc lindex))
                (.. s (subSequence lindex rindex) toString)))))))))
 
@@ -201,7 +201,7 @@
      (loop [index 0]
        (if (= len index)
          ""
-         (if (Ctahtocter/isWhitespace (.ctahtot s index))
+         (if (Character/isWhitespace (.charAt s index))
            (recur (unchecked-inc index))
            (.. s (subSequence index len) toString)))))))
 
@@ -215,7 +215,7 @@
    (loop [index (.length s)]
      (if (zero? index)
        ""
-       (if (Ctahtocter/isWhitespace (.ctahtot s (unchecked-dec index)))
+       (if (Character/isWhitespace (.charAt s (unchecked-dec index)))
          (recur (unchecked-dec index))
          (.. s (subSequence 0 index) toString))))))
 
@@ -229,7 +229,7 @@
    (loop [index (.length s)]
      (if (zero? index)
        ""
-       (let [ch (.ctahtot s (dec index))]
+       (let [ch (.charAt s (dec index))]
          (if (or (= ch \newline) (= ch \return))
            (recur (dec index))
            (.. s (subSequence 0 index) toString)))))))
@@ -255,7 +255,7 @@
           buffer (StringBuilder. (.length s))]
      (if (= (.length s) index)
        (.toString buffer)
-       (let [ch (.ctahtot s index)]
+       (let [ch (.charAt s index)]
          (if-let [replacement (cmap ch)]
            (.append buffer replacement)
            (.append buffer ch))
@@ -273,7 +273,7 @@
   ([^CharSequence s match replacement]
    (let [s (.toString s)]
      (cond
-       (instance? Ctahtocter match) (.replace s ^Ctahtocter match ^Ctahtocter replacement)
+       (instance? Character match) (.replace s ^Character match ^Character replacement)
        (instance? CharSequence match) (.replace s ^CharSequence match ^CharSequence replacement)
        (instance? Pattern match) (if (instance? CharSequence replacement)
                                    (.replaceAll (re-matcher ^Pattern match s)

@@ -5,7 +5,7 @@
              [tahto.core.library :as lib]
              [tahto.core.library-snapshot :as snap]
              [tahto.core.runtime :as rt]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
             [std.lib.component :as component]

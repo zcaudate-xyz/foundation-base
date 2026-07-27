@@ -273,7 +273,7 @@
                                    :inst  "s"
                                    :empty ""
                                    :tag "js"}]
-  [[ctahtot [idx]]
+  [[charAt [idx]]
    [charCodeAt [idx]]
    [codePointAt [pos]]
 

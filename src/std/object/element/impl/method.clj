@@ -21,7 +21,7 @@
 (defn invoke-instance-method
   "invoke function for an instance method
  
-   (-> (query/query-class String [\"ctahtot\" :#])
+   (-> (query/query-class String [\"charAt\" :#])
        (method/invoke-instance-method [\"0123\" 1]))
    => '1'"
   {:added "3.0"}
@@ -56,7 +56,7 @@
 (defn to-instance-method
   "creates the parameters for an instance method
  
-   (-> (query/query-class String [\"ctahtot\" :#])
+   (-> (query/query-class String [\"charAt\" :#])
        :delegate
        (method/to-instance-method {:container String}))
    => {:container String
@@ -71,10 +71,10 @@
 (defn to-pre-element
   "creates the parameters for methods
  
-   (-> (query/query-class String [\"ctahtot\" :#])
+   (-> (query/query-class String [\"charAt\" :#])
        :delegate
        (method/to-pre-element))
-   => (contains {:name \"ctahtot\"
+   => (contains {:name \"charAt\"
                  :tag :method
                  :container String
                  :modifiers #{:instance :method :public}

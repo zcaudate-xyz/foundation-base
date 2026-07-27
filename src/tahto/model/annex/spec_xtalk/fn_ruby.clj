@@ -1,6 +1,6 @@
 (ns tahto.model.annex.spec-xtalk.fn-ruby
-  (:require [tahto.common.emit-common :as common]
-            [tahto.common.preprocess-base :as preprocess-base]
+  (:require [tahto.base.emit-common :as common]
+            [tahto.base.preprocess-base :as preprocess-base]
             [std.lib.template :as template]))
 
 (declare ruby-tf-x-return-encode)

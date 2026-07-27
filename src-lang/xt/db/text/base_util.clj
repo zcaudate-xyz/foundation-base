@@ -15,6 +15,15 @@
                  (fn [e] (return (xt/x:obj-assign {:type type}
                                                   e))))))
 
+(defn.xt collect-routes-object
+  "collects route descriptors from an object and indexes them by URL"
+  {:added "4.1"}
+  [routes]
+  (return
+   (xtd/arr-juxt (xt/x:obj-vals routes)
+                 (fn [e] (return (. e ["url"])))
+                 (fn [e] (return e)))))
+
 (defn.xt collect-views
   "collect views into views structure"
   {:added "4.0"}

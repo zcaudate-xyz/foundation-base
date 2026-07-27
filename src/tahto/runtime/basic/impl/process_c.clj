@@ -3,11 +3,11 @@
             [tahto.runtime.basic.type-oneshot :as oneshot]
             [tahto.runtime.basic.type-twostep :as twostep]
             [tahto.runtime.basic.type-verify :as type-verify]
-            [tahto.base.book :as book]
+            [tahto.common.book :as book]
             [tahto.core.impl :as impl]
             [tahto.core.pointer :as ptr]
             [tahto.core.runtime :as rt]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [tahto.model.spec-c :as spec]
             [std.lib.collection :as collection]))
 

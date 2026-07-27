@@ -1,9 +1,9 @@
 (ns tahto.model.spec-xtalk
-  (:require [tahto.base.book :as book]
-            [tahto.common.emit :as emit]
-            [tahto.common.grammar :as grammar]
+  (:require [tahto.common.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.grammar :as grammar]
             [tahto.core.script :as script]
-            [tahto.common.util :as ut]))
+            [tahto.base.util :as ut]))
 
 (def +features+
   (-> (grammar/build-min [:top-declare

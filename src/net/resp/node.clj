@@ -4,7 +4,7 @@
             [std.lib.atom :as atom]
             [std.lib.env :as env]
             [std.lib.foundation :as f])
-  (:import (java.net ServerSocket) (tahto.net.resp SocketConnection)))
+  (:import (java.net ServerSocket) (hara.net.resp SocketConnection)))
 
 (defonce ^:dynamic *active* (atom #{}))
 

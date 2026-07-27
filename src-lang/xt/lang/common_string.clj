@@ -31,7 +31,7 @@
    (return (xt/x:str-replace s tok replacement))))
 
 (defn.xt index-of
-  "returns index of ctahtocter in string"
+  "returns index of character in string"
   {:added "4.0"}
   ([s tok]
    (return (- (xt/x:str-index-of s tok 0)

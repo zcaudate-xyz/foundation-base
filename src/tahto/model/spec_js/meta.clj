@@ -1,9 +1,9 @@
 (ns tahto.model.spec-js.meta
   (:require [clojure.string]
             [std.fs :as fs]
-            [tahto.base.book :as book]
-            [tahto.base.book-module :as module]
-            [tahto.common.util :as ut]))
+            [tahto.common.book :as book]
+            [tahto.common.book-module :as module]
+            [tahto.base.util :as ut]))
 
 ;;
 ;; MODULE

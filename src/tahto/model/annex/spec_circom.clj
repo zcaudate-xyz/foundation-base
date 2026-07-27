@@ -1,10 +1,10 @@
 (ns tahto.model.annex.spec-circom
   (:require [clojure.string]
-            [tahto.base.book :as book]
-            [tahto.common.emit :as emit]
-            [tahto.common.grammar :as grammar]
+            [tahto.common.book :as book]
+            [tahto.base.emit :as emit]
+            [tahto.base.grammar :as grammar]
             [tahto.core.script :as script]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.template :as template]))
 

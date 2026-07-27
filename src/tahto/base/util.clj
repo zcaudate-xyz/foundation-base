@@ -1,6 +1,6 @@
-(ns tahto.common.util
+(ns tahto.base.util
   (:require [clojure.string]
-            [tahto.common.provenance :as provenance]
+            [tahto.base.provenance :as provenance]
             [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]
             [std.lib.context.space :as space]

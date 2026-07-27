@@ -72,13 +72,13 @@ kimi --mcp-config-file /path/to/mcp.json mcp test clojure-light
 
 ```clojure
 ;; Probe a pure function
-(require 'hara.typed.xtalk-common)
-(:name (hara.typed.xtalk-common/primitive-type :xt/int))
+(require 'tahto.typed.xtalk-common)
+(:name (tahto.typed.xtalk-common/primitive-type :xt/int))
 ```
 
 ```clojure
 ;; Run a type check after editing
-(hara.typed.xtalk-analysis/check-namespace 'hara.model.spec-xtalk-typed-fixture)
+(tahto.typed.xtalk-analysis/check-namespace 'tahto.model.spec-xtalk-typed-fixture)
 ```
 
 ## Important notes

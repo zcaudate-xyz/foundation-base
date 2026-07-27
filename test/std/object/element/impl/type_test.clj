@@ -6,7 +6,7 @@
 ^{:refer std.object.element.impl.type/set-accessible :added "3.0"}
 (fact "sets the accessible flag in the class to be true"
 
-  (common/set-accessible (.getDeclaredMethod String "ctahtot"
+  (common/set-accessible (.getDeclaredMethod String "charAt"
                                              (doto ^"[Ljava.lang.Class;"
                                               (make-array Class 1)
                                                (aset 0 Integer/TYPE)))
@@ -28,11 +28,11 @@
                 :static false,
                 :delegate java.lang.String})
 
-  (common/seed :method (.getDeclaredMethod String "ctahtot"
+  (common/seed :method (.getDeclaredMethod String "charAt"
                                            (doto ^"[Ljava.lang.Class;"
                                             (make-array Class 1)
                                              (aset 0 Integer/TYPE))))
-  => (contains {:name "ctahtot",
+  => (contains {:name "charAt",
                 :tag :method,
                 :container java.lang.String,
                 :modifiers #{:instance :method :public}
@@ -43,7 +43,7 @@
   (code.manage/import)
 
   (.setAccessible
-   (.getDeclaredMethod String "ctahtot"
+   (.getDeclaredMethod String "charAt"
                        (doto ^"[Ljava.lang.Class;"
                            (make-array Class 1)
                          (aset 0 Integer/TYPE)))

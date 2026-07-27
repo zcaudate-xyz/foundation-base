@@ -7,7 +7,7 @@
             [tahto.core.impl :as impl]
             [tahto.core.pointer :as ptr]
             [tahto.core.runtime :as default]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [tahto.core.type-notify :as notify]
             [std.lib.atom :as atom]
             [std.lib.component :as component]

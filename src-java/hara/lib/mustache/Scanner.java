@@ -32,13 +32,13 @@ public class Scanner {
     }
 
     public void skipeWhiteSpace() {
-tahto/lib/mustache/Scanner.java:35:        while (Ctahtocter.isWhitespace(next()) && !eos()) {
+        while (Character.isWhitespace(next()) && !eos()) {
             ++idx;
         }
     }
 
     private char next() {
-tahto/lib/mustache/Scanner.java:41:        return template.ctahtot(idx);
+        return template.charAt(idx);
     }
 
     public void pushBack(int count) {

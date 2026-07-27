@@ -1,6 +1,6 @@
-(ns tahto.common.preprocess-value
-  (:require [tahto.common.preprocess-base :as preprocess-base]
-            [tahto.common.preprocess-resolve :as resolve]
+(ns tahto.base.preprocess-value
+  (:require [tahto.base.preprocess-base :as preprocess-base]
+            [tahto.base.preprocess-resolve :as resolve]
             [std.lib.collection :as collection]))
 
 (declare resolve-block-form)

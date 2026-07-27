@@ -31,7 +31,7 @@
   => (throws))
 
 ^{:refer kmi.lang.reader/impl-char-at :added "4.1"}
-(fact "extracts one-ctahtocter slices from strings"
+(fact "extracts one-character slices from strings"
 
   (!.js
    [(rdr/impl-char-at "abc" 0)

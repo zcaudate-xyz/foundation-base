@@ -1,9 +1,9 @@
-(ns tahto.common.emit-special
-  (:require [tahto.base.book :as book]
-            [tahto.common.emit-common :as common]
-            [tahto.common.emit-data :as data]
-            [tahto.common.emit-helper :as helper]
-            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base]
+(ns tahto.base.emit-special
+  (:require [tahto.common.book :as book]
+            [tahto.base.emit-common :as common]
+            [tahto.base.emit-data :as data]
+            [tahto.base.emit-helper :as helper]
+            [tahto.base.emit-preprocess :as preprocess] [tahto.base.preprocess-base :as preprocess-base]
             [std.lib.env :as env]
             [std.lib.foundation :as f]))
 

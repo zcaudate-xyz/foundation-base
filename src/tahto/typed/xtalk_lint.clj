@@ -1,5 +1,5 @@
 (ns tahto.typed.xtalk-lint
-  (:require [tahto.common.grammar :as grammar]
+  (:require [tahto.base.grammar :as grammar]
             [tahto.typed.xtalk-common :as types]
             [tahto.typed.xtalk-parse :as parse]
             [std.string.case :as string-case]))

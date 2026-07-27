@@ -1,8 +1,8 @@
 (ns tahto.model.spec-js.jsx
   (:require [clojure.string]
-            [tahto.common.emit :as emit]
-            [tahto.common.emit-common :as common]
-            [tahto.common.emit-data :as data]
+            [tahto.base.emit :as emit]
+            [tahto.base.emit-common :as common]
+            [tahto.base.emit-data :as data]
             [std.lib.collection :as collection]
             [std.lib.env :as env]
             [std.lib.foundation :as f]

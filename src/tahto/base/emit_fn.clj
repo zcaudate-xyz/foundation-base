@@ -1,9 +1,9 @@
-(ns tahto.common.emit-fn
+(ns tahto.base.emit-fn
   (:require [clojure.string]
-            [tahto.common.emit-block :as block]
-            [tahto.common.emit-common :as common]
-            [tahto.common.emit-data :as data]
-            [tahto.common.emit-helper :as helper]
+            [tahto.base.emit-block :as block]
+            [tahto.base.emit-common :as common]
+            [tahto.base.emit-data :as data]
+            [tahto.base.emit-helper :as helper]
             [std.lib.collection :as collection]
             [std.lib.env :as env]
             [std.lib.foundation :as f]))

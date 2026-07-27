@@ -1,4 +1,4 @@
-(ns tahto.common.emit-rewrite
+(ns tahto.base.emit-rewrite
   (:require [tahto.typed.xtalk-analysis :as xtalk-analysis]
             [tahto.typed.xtalk-infer :as xtalk-infer]
             [tahto.typed.xtalk-lower :as xtalk-lower]))

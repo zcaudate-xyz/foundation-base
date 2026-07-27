@@ -1,6 +1,6 @@
-(ns tahto.common.emit-helper
+(ns tahto.base.emit-helper
   (:require [clojure.string]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
 

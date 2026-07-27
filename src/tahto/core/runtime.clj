@@ -2,18 +2,18 @@
   (:require [clojure.set]
             [clojure.string]
             [std.json :as json]
-            [tahto.common.emit-common :as common]
-            [tahto.common.emit-preprocess :as preprocess] 
-            [tahto.common.preprocess-base :as preprocess-base]
+            [tahto.base.emit-common :as common]
+            [tahto.base.emit-preprocess :as preprocess]
+            [tahto.base.preprocess-base :as preprocess-base]
             [tahto.core.impl :as impl]
             [tahto.core.impl-deps :as deps]
             [tahto.core.impl-lifecycle :as lifecycle]
-            [tahto.base.book-module :as book-module]
+            [tahto.common.book-module :as book-module]
             [tahto.core.library :as lib]
             [tahto.core.library-snapshot :as snap]
             [tahto.core.pointer :as ptr]
             [tahto.core.runtime-proxy :as proxy]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.context.pointer]
             [std.lib.context.registry :as reg]
@@ -48,7 +48,7 @@
   ([{:keys [id library layout emit] :as rt} ptr args]
    (ptr/ptr-invoke-string ptr args
                           {:library library ;; override default library
-                           :layout  layout  
+                           :layout  layout
                            :emit    (merge emit
                                            {:transform (fn [args {:keys [bulk] :as mopts}]
                                                           (if bulk
@@ -96,7 +96,7 @@
                  :else
                  (ptr/ptr-display ptr {:library library
                                        :emit emit})))
-          
+
          :else
          (ptr/ptr-display ptr {:library library
                                :emit emit}))))
@@ -153,7 +153,7 @@
               component)
     -stop    component
     -kill    component}
-   
+
    protocol.component/IComponentQuery
    :body
    {-started?      (if redirect
@@ -183,7 +183,7 @@
   {:added "4.0"}
   ([obj]
    (instance? RuntimeDefault obj)))
-  
+
 (resource/res:spec-add
  {:type :tahto/lang.rt
   :config {:bootstrap false}
@@ -415,7 +415,7 @@
   (fn [rt & args]
     (let [{:keys [book] :as meta} (default-lifecycle-prep rt)
           form (apply f book args)]
-      
+
       (if form
         (let [body (impl/emit-str form meta)]
           (ptr/ptr-invoke rt
@@ -575,7 +575,7 @@
   [rt module-id]
   (multistage-invoke rt module-id default-teardown-module
                      (fn [book module-id]
-                       (binding [tahto.base.book/*dep-types* :module]
+                       (binding [tahto.common.book/*dep-types* :module]
                          (std.lib.deps/dependents-ordered book module-id)))))
 
 (defn multistage-teardown-to
@@ -584,7 +584,7 @@
   [rt module-id]
   (multistage-invoke rt module-id default-teardown-module
                      (fn [book module-id]
-                       (binding [tahto.base.book/*dep-types* :module]
+                       (binding [tahto.common.book/*dep-types* :module]
                          (butlast (std.lib.deps/dependents-ordered book module-id))))))
 
 

@@ -55,7 +55,7 @@
     CPUParticles3D CSGBox3D CSGCombiner3D CSGCylinder3D CSGMesh3D
     CSGPolygon3D CSGPrimitive3D CSGShape3D CSGSphere3D CSGTorus3D Camera2D
     Camera3D CanvasGroup CanvasItem CanvasLayer CanvasModulate CenterContainer
-    ChainIK3D CtahtocterBody2D CtahtocterBody3D CheckBox CheckButton CodeEdit
+    ChainIK3D CharacterBody2D CharacterBody3D CheckBox CheckButton CodeEdit
     CollisionObject2D CollisionObject3D CollisionPolygon2D CollisionPolygon3D
     CollisionShape2D CollisionShape3D ColorPicker ColorPickerButton ColorRect
     ConeTwistJoint3D ConfirmationDialog Container Control
@@ -106,7 +106,7 @@
 (def +classes-node2d+
   '[AnimatableBody2D AnimatedSprite2D Area2D AudioListener2D AudioStreamPlayer2D
     BackBufferCopy Bone2D Camera2D CanvasGroup CanvasItem CanvasLayer
-    CanvasModulate CtahtocterBody2D CollisionObject2D CollisionPolygon2D
+    CanvasModulate CharacterBody2D CollisionObject2D CollisionPolygon2D
     CollisionShape2D CPUParticles2D DampedSpringJoint2D DirectionalLight2D
     Joint2D Light2D Line2D Marker2D MeshInstance2D MotorJoint2D NavigationAgent2D
     NavigationLink2D NavigationObstacle2D NavigationRegion2D Node2D

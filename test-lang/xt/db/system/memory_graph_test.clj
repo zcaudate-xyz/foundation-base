@@ -345,7 +345,7 @@
   => [true false false true])
 
 ^{:refer xt.db.system.memory-graph/like-char-at :added "4.1"}
-(fact "gets a single ctahtocter from a string"
+(fact "gets a single character from a string"
 
   (!.js
     [(g/like-char-at "hello" 0)

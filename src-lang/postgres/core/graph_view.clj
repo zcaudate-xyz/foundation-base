@@ -3,7 +3,7 @@
             [postgres.core.graph-base :as base]
             [postgres.core.graph-query :as query]
             [tahto.core :as l]
-            [tahto.common.emit-preprocess :as preprocess] [tahto.common.preprocess-base :as preprocess-base]
+            [tahto.base.emit-preprocess :as preprocess] [tahto.base.preprocess-base :as preprocess-base]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
             [std.lib.walk :as walk]

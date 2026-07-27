@@ -1,8 +1,8 @@
 (ns tahto.model.spec-elisp
   (:require [clojure.string :as str]
-             [tahto.base.book :as book]
-             [tahto.common.emit-common :as emit-common]
-             [tahto.common.grammar :as grammar]
+             [tahto.common.book :as book]
+             [tahto.base.emit-common :as emit-common]
+             [tahto.base.grammar :as grammar]
              [tahto.core.script :as script]
              [tahto.model.spec-lisp-common :as common]
              [tahto.model.spec-xtalk]

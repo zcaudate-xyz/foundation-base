@@ -4,7 +4,7 @@
             [postgres.core.impl-base :as base]
             [postgres.core.impl-insert :as insert]
             [tahto.core :as l]
-            [tahto.base.book :as book])
+            [tahto.common.book :as book])
   (:use code.test))
 
 (l/script- :postgres

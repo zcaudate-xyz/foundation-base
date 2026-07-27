@@ -1,7 +1,7 @@
 (ns tahto.model.spec-scheme
   (:require [clojure.string :as str]
-            [tahto.base.book :as book]
-            [tahto.common.grammar :as grammar]
+            [tahto.common.book :as book]
+            [tahto.base.grammar :as grammar]
             [tahto.core.script :as script]
             [tahto.model.spec-lisp-common :as common]
             [tahto.model.spec-xtalk]

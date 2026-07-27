@@ -1,14 +1,14 @@
-(ns tahto.common.emit-assign
+(ns tahto.base.emit-assign
   (:require [clojure.string]
-             [tahto.common.emit-block :as block]
-             [tahto.common.emit-common :as common]
-             [tahto.common.emit-data :as data]
-             [tahto.common.emit-fn :as fn]
-             [tahto.common.emit-helper :as helper]
-             [tahto.common.emit-template :as impl-template]
-             [tahto.common.emit-preprocess :as preprocess] 
-             [tahto.common.preprocess-base :as preprocess-base]
-             [tahto.common.util :as ut]
+             [tahto.base.emit-block :as block]
+             [tahto.base.emit-common :as common]
+             [tahto.base.emit-data :as data]
+             [tahto.base.emit-fn :as fn]
+             [tahto.base.emit-helper :as helper]
+             [tahto.base.emit-template :as impl-template]
+             [tahto.base.emit-preprocess :as preprocess]
+             [tahto.base.preprocess-base :as preprocess-base]
+             [tahto.base.util :as ut]
              [std.lib.collection :as collection]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
@@ -60,7 +60,7 @@
                                            (f/error "Inline cannot have multiple returns." {:input @return-ref})
                                            (do (vreset! return-ref (second form))
                                                '<RETURN>))
-                                         
+
                                          :else
                                          (remove (fn [x]
                                                    (= x '<RETURN>))
@@ -82,7 +82,7 @@
                                      form))
                                body)
         asym?      @assign-ref
-        rsym?      (symbol? @return-ref) 
+        rsym?      (symbol? @return-ref)
         smap       (cond-> (zipmap args input)
                      (and rsym? asym?) (assoc @return-ref sym))
         body       (walk/prewalk-replace smap body)
@@ -136,7 +136,7 @@
           args     (helper/emit-typed-args args
                                            grammar
                                            {:shorthand (get-in grammar [:define :shorthand])})
-           
+
           argstrs  (map (fn [{:keys [value symbol] :as arg}]
                            (let [custom (assign-value symbol value grammar mopts)]
                             (if custom
@@ -171,27 +171,27 @@
 
 (defn test-assign-emit
   "emit assign forms
- 
+
    (assign/test-assign-loop (list 'var 'a := (with-meta ()
                                                {:assign/fn (fn [sym]
                                                              (list sym :as [1 2 3]))}))
                             +grammar+
                             {})
    => \"(a :as [1 2 3])\"
- 
+
    (assign/test-assign-loop (list 'var 'a := (with-meta '(sym :as [1 2 3])
                                                {:assign/template 'sym}))
                             +grammar+
                             {})
    => \"(a :as [1 2 3])\"
- 
+
    (assign/test-assign-loop (list 'var 'a := (with-meta '(x.core/identity-fn 1)
                                                {:assign/inline 'x.core/identity-fn}))
                             +grammar+
                             {:lang :x
                              :snapshot +snap+})
    => \"(do* (var a := 1))\"
- 
+
    (assign/test-assign-loop (list 'var 'a := (with-meta '(x.core/complex-fn 1)
                                                {:assign/inline 'x.core/complex-fn}))
                             +grammar+

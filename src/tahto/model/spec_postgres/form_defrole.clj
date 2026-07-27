@@ -2,7 +2,7 @@
   (:require [tahto.model.spec-postgres.common :as common]
             [postgres.core.impl-base :as base]
             [tahto.core :as l]
-            [tahto.common.util :as ut]
+            [tahto.base.util :as ut]
             [std.lib.foundation :as f]))
 
 (defn pg-defrole-access

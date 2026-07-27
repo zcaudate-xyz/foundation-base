@@ -58,7 +58,7 @@
 
 ^{:refer std.lib.class/primitive :added "3.0"}
 (fact "Converts primitive values across their different representations. The choices are:
-   :raw       - The string in the jdk (i.e. `Z` for Boolean, `C` for Ctahtocter)
+   :raw       - The string in the jdk (i.e. `Z` for Boolean, `C` for Character)
    :symbol    - The symbol that std.object.query uses for matching (i.e. boolean, char, int)
    :string    - The string that std.object.query uses for matching
    :class     - The primitive class representation of the primitive
@@ -73,7 +73,7 @@
   (primitive "int" :symbol)
   => 'int
 
-  (primitive Ctahtocter :string)
+  (primitive Character :string)
   => "char"
 
   (primitive "V" :class)

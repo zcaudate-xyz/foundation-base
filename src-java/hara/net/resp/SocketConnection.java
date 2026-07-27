@@ -1,4 +1,4 @@
-tahto/net/resp/SocketConnection.java:1:package tahto.net.resp;
+package hara.net.resp;
 
 import java.io.*;
 import java.net.Socket;

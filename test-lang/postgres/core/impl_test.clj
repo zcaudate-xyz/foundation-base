@@ -6,7 +6,7 @@
             [postgres.core.impl-main :as main]
             [postgres.sample.scratch-v1 :as scratch]
             [tahto.core :as l]
-            [tahto.base.book :as book]
+            [tahto.common.book :as book]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f])
   (:use code.test))

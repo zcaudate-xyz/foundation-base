@@ -40,6 +40,11 @@
   (and (seq? form)
        (#{'initial 'always} (first form))))
 
+(defn- finish-form?
+  [form]
+  (and (seq? form)
+       (= '$finish (first form))))
+
 (defn transform-form
   "Normalises Verilog forms for execution.
 
@@ -76,7 +81,9 @@
                      (apply list 'do stmts)
                      (list 'initial
                            (apply list 'do
-                                  (concat stmts [(list '$finish)]))))]
+                                  (cond-> (vec stmts)
+                                    (not-any? finish-form? stmts)
+                                    (conj (list '$finish))))))]
           (concat modules
                   [(list 'defn '__tahto_tb__ [] body)]))
         forms))))

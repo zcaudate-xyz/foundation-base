@@ -1,6 +1,6 @@
-(ns tahto.common.preprocess-resolve
-  (:require [tahto.common.preprocess-base :as preprocess-base]
-            [tahto.common.util :as ut]
+(ns tahto.base.preprocess-resolve
+  (:require [tahto.base.preprocess-base :as preprocess-base]
+            [tahto.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.walk :as walk]))

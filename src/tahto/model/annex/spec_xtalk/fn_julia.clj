@@ -1,5 +1,5 @@
 (ns tahto.model.annex.spec-xtalk.fn-julia
-  (:require [tahto.common.util :as ut]
+  (:require [tahto.base.util :as ut]
             [std.lib.template :as template]))
 
 (defn julia-free-infix

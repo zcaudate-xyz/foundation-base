@@ -13,7 +13,7 @@
         ["26" :invalid-sql-statement]
         ["28" :invalid-authorization-specification]
         ["2B" :dependent-privilege-descriptors-still-exist]
-        ["2C" :invalid-ctahtocter-set]
+        ["2C" :invalid-character-set]
         ["2D" :invalid-transaction-termination]
         ["2E" :invalid-connection]
         ["33" :invalid-sql-descriptor]

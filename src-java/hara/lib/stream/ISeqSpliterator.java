@@ -38,7 +38,7 @@ public class ISeqSpliterator<T> implements Spliterator<T> {
     }
 
     @Override
-tahto/lib/stream/ISeqSpliterator.java:41:    public int ctahtocteristics() {
+    public int characteristics() {
         return IMMUTABLE;
     }
 }
