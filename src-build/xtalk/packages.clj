@@ -182,7 +182,7 @@
                       "redis" "^4.7.0"))
     (= segment :ui)
     (assoc "peerDependencies"
-           (array-map "@xtalk/figma-ui" "^0.1.3"
+           (array-map "@xtalk/figma-ui" "^0.1.4"
                       "react" ">=18"
                       "react-dom" ">=18")
            "dependencies"
