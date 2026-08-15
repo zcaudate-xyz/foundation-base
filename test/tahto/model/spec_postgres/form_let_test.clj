@@ -39,6 +39,14 @@
   (pg-tf-let-check-body '#{v-a} '[(let [v-b 2] (:= v-b (+ v-a v-b)))])
   => nil
 
+  ;; Later binding values may reference earlier bindings in the same let.
+  (pg-tf-let-check-body
+   '#{v-a}
+   '[(let [(:integer v-b) (+ v-a 1)
+           (:integer v-c) (+ v-b 1)]
+       (:= v-a v-c))])
+  => nil
+
   ;; :for should pass IF the variable is declared (PL/pgSQL semantics)
   (pg-tf-let-check-body '#{v-a i-emails v-email} '[[:for v-email :in :select (elements i-emails)
                                                    (loop [] (:= v-a v-email))]])

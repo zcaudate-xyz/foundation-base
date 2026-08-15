@@ -114,7 +114,7 @@
                                         inner-body (drop 2 x)
                                         pairs      (partition 2 bindings)
                                         inner-syms (reduce (fn [acc [b v]]
-                                                             (check-fn csyms v)
+                                                             (check-fn acc v)
                                                              (clojure.set/union acc (collect-syms b)))
                                                            csyms
                                                            pairs)]
