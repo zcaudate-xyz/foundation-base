@@ -453,7 +453,9 @@
      (:= obj {}))
    (when (xt/x:not-nil? m)
      (xt/for:object [[k mv] m]
-       (var v (. obj [k]))
+       (var v nil)
+       (when (xt/x:has-key? obj k)
+         (:= v (. obj [k])))
        (cond (and (xt/x:is-object? mv)
                   (xt/x:is-object? v))
              (xt/x:set-key obj k (-/obj-assign-nested v mv))

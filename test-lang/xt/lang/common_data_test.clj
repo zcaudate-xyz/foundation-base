@@ -742,6 +742,9 @@
   (!.js (xtd/obj-assign-nested {:a {:b 1}} {:a {:c 2}}))
   => {"a" {"b" 1, "c" 2}}
 
+  (!.js (xtd/obj-assign-nested {:id 1} {:account 2}))
+  => {"id" 1, "account" 2}
+
   (!.js
    (var out {})
    [(xtd/obj-assign-nested out {:a {:c 2}})
@@ -751,6 +754,9 @@
   (!.lua (xtd/obj-assign-nested {:a {:b 1}} {:a {:c 2}}))
   => {"a" {"b" 1, "c" 2}}
 
+  (!.lua (xtd/obj-assign-nested {:id 1} {:account 2}))
+  => {"id" 1, "account" 2}
+
   (!.lua
    (var out {})
    [(xtd/obj-assign-nested out {:a {:c 2}})
@@ -759,6 +765,9 @@
 
   (!.py (xtd/obj-assign-nested {:a {:b 1}} {:a {:c 2}}))
   => {"a" {"b" 1, "c" 2}}
+
+  (!.py (xtd/obj-assign-nested {:id 1} {:account 2}))
+  => {"id" 1, "account" 2}
 
   (!.py
    (var out {})
