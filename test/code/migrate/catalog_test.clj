@@ -3,9 +3,7 @@
   (:use code.test))
 
 (def +catalog-path+
-  (str (or (System/getenv "HARA_WORKSPACE_ROOT")
-           "../../workspace")
-       "/technology/hara-specs-registry/01-lang/007-code-migration/draft/code-migration.edn"))
+  "resources/code/migrate/catalog.edn")
 
 ^{:refer code.migrate.catalog/validate-catalog :added "4.1"}
 (fact "validates the executable migration catalog"
@@ -18,6 +16,15 @@
       :clojure/core-qualified
       :foundation/std-lib-walk
       :foundation/nil-sentinel])
+
+^{:refer code.migrate.catalog/rules-for-pathway :added "4.1"}
+(fact "keeps source and test rules in distinct documents"
+  (let [catalog (load-catalog +catalog-path+)]
+    [(mapv :rule/pathway (:migration/rule-documents catalog))
+     (set (map :rule/drift (:migration/rules catalog)))
+     (every? #(= :source (:rule/pathway %))
+             (rules-for-pathway catalog :source))])
+  => [[:source :test] #{:clojure :foundation} true])
 
 ^{:refer code.migrate.catalog/target-by-id :added "4.1"}
 (fact "locates the first automated port target"

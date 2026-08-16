@@ -113,20 +113,22 @@
                                 {:index index}))))
 
         (and (seq? expected) (= 'contains (first expected)))
-        (list 'let
-              ['actual actual
-               'expected (second expected)]
-              (list 'if
-                    (list 'every?
-                          (list 'fn ['entry]
-                                (list '= (list 'get 'actual (list 'key 'entry))
-                                      (list 'val 'entry)))
-                          'expected)
-                    true
-                    (list 'throw
-                          (list 'ex-info
-                                "migration assertion failed: expected contained values"
-                                {:index index}))))
+        (let [checks (mapv (fn [[key value]]
+                             (list '= (list 'std.foundation/get 'actual key) value))
+                           (second expected))
+              condition (cond
+                          (empty? checks) true
+                          (= 1 (count checks)) (first checks)
+                          :else (apply list 'and checks))]
+          (list 'let
+                ['actual actual]
+                (list 'if
+                      condition
+                      true
+                      (list 'throw
+                            (list 'ex-info
+                                  "migration assertion failed: expected contained values"
+                                  {:index index})))))
 
         :else
         (list 'let
@@ -175,17 +177,19 @@
                          unsupported)})))
 
 (defn verify-pair
-  "verifies a migrated pair without loading the incomplete native test stack"
+  "verifies the emitted source and emitted Test/run file as authorities"
   {:added "4.1"}
   [pair options]
-  (let [migration-catalog (:migration/catalog options)
-        target (when migration-catalog
-                 (engine/target-for-unit (:test pair) migration-catalog))
-        probe  (probe-program (:output (:source pair))
-                              (:output (:test pair))
-                              (:input (:test pair))
-                              migration-catalog
-                              target)
+  (let [program (str (:output (:source pair))
+                     "\n"
+                     (:output (:test pair))
+                     "\n(if (every? Test/passed? (Test/run []))\n"
+                     "  :migration/tests-passed\n"
+                     "  (throw (ex-info \"migrated tests failed\" {})))\n")
+        probe {:program program
+               :operations (:operations (:test pair))
+               :assertions (:assertions (:test pair))
+               :diagnostics (:diagnostics (:test pair))}
         result (verify/verify-source (:program probe) options)]
     (merge probe
            {:verification result

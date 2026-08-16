@@ -1,10 +1,12 @@
 (ns code.migrate
-  (:require [code.migrate.catalog :as catalog]
+  (:require [clojure.java.io :as io]
+            [code.migrate.catalog :as catalog]
             [code.migrate.engine :as engine]
-            [code.migrate.probe :as probe]))
+            [code.migrate.probe :as probe]
+            [code.migrate.source :as source]
+            [code.migrate.test :as test]))
 
-(def +relative-catalog-path+
-  "technology/hara-specs-registry/01-lang/007-code-migration/draft/code-migration.edn")
+(def +catalog-resource+ "code/migrate/catalog.edn")
 
 (defn workspace-root
   "returns the configured Hara workspace root"
@@ -14,10 +16,10 @@
       "../../workspace"))
 
 (defn catalog-path
-  "returns the authoritative migration catalog path"
+  "returns Foundation's authoritative migration catalog path"
   {:added "4.1"}
   []
-  (str (workspace-root) "/" +relative-catalog-path+))
+  (.getPath (io/file (io/resource +catalog-resource+))))
 
 (defn load-catalog
   "loads the authoritative or an explicitly supplied migration catalog"
@@ -43,7 +45,11 @@
   ([unit]
    (plan-unit unit (load-catalog)))
   ([unit migration-catalog]
-   (engine/migrate-unit unit migration-catalog)))
+   (case (:unit/kind unit)
+     :source (source/migrate-unit unit migration-catalog)
+     :test (test/migrate-unit unit migration-catalog)
+     (throw (ex-info "Migration unit requires :source or :test kind"
+                     {:unit/kind (:unit/kind unit)})))))
 
 (defn migrate-unit
   "returns a generated unit or rejects blocking diagnostics"

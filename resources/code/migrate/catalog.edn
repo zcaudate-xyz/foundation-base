@@ -1,0 +1,41 @@
+{:document/id :foundation/code-migration
+ :document/type :code-migration-spec
+ :document/version "alpha"
+ :document/status :draft
+ :migration/rule-paths ["rules/source.edn" "rules/test.edn"]
+ :migration/targets
+ [{:target/id :migration/std-lib-zip
+   :target/order 1
+   :target/status :candidate
+   :target/source-namespace std.lib.zip
+   :target/test-namespace std.lib.zip-test
+   :target/source-path "src/std/lib/zip.clj"
+   :target/test-path "test/std/lib/zip_test.clj"
+   :target/target-source-path "lib/src/std/lib/zip.hal"
+   :target/target-test-path "lib/test/std/lib/zip_test.hal"
+   :target/source-rules
+   [:clojure/core-qualified
+    :foundation/std-lib-foundation
+    :foundation/std-lib-walk
+    :foundation/nil-sentinel
+    :foundation/defrecord-native-struct
+    :foundation/drop-host-printer
+    :foundation/struct-merge
+    :foundation/native-result
+    :clojure/anonymous-function-reader
+    :clojure/callable-predicate
+    :clojure/single-arity-defn
+    :clojure/iterator-first-pipeline
+    :clojure/thread-zero-arity-step
+    :clojure/named-recur
+    :clojure/empty-catch-body
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/qualified-overrides
+    :foundation/code-test-to-native-test]
+   :target/overrides [get find prewalk postwalk]
+   :target/test-alias zip
+   :target/struct-fields
+   {Zipper [context prefix display parent left right depth changed?]}}]}

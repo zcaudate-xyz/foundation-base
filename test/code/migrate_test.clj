@@ -1,13 +1,13 @@
 (ns code.migrate-test
-  (:require [code.migrate :refer :all]
+  (:require [clojure.string :as str]
+            [code.migrate :refer :all]
             [code.migrate.catalog :as catalog])
   (:use code.test))
 
 (def +cases+
   (:cases
    (catalog/read-edn
-    (str (workspace-root)
-         "/technology/hara-specs-registry/01-lang/007-code-migration/draft/conformance/bootstrap-pairs.edn"))))
+    "resources/code/migrate/conformance/bootstrap-pairs.edn")))
 
 (def +source-unit+
   {:unit/kind :source
@@ -21,8 +21,10 @@
 (fact "migrates source and test as one required pair"
   (let [pair (migrate-pair +source-unit+ +test-unit+)]
     [(set (keys pair))
-     (mapv :diagnostics (vals pair))])
-  => [#{:source :test} [[] []]])
+     (mapv :diagnostics (vals pair))
+     (str/includes? (get-in pair [:test :output]) "(Test/run")
+     (str/includes? (get-in pair [:test :output]) "process/check")])
+  => [#{:source :test} [[] []] true true])
 
 ^{:refer code.migrate/migrate-pair
   :id rejects-invalid-pair

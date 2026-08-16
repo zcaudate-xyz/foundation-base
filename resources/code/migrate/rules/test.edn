@@ -1,0 +1,8 @@
+{:document/id :foundation/code-migration-test-rules
+ :document/type :code-migration-rules
+ :rule/pathway :test
+ :migration/rules
+ [{:rule/id :clojure/test-namespace-overrides :rule/drift :clojure :rule/pathway :test :rule/layer :clojure :rule/phase :namespace :rule/kind :namespace-clause :rule/match :refer-clojure :rule/rewrite {:op :target-overrides} :rule/safety :safe :rule/disposition :language-owned :rule/evidence {:source/path "test/std/lib/zip_test.clj"}}
+  {:rule/id :clojure/quoted-refer-metadata :rule/drift :clojure :rule/pathway :test :rule/layer :clojure :rule/phase :test :rule/kind :metadata-value :rule/match :refer :rule/rewrite {:op :quote-symbol} :rule/safety :safe :rule/disposition :direct-rewrite :rule/evidence {:source/path "test/std/lib/zip_test.clj"}}
+  {:rule/id :foundation/qualified-overrides :rule/drift :foundation :rule/pathway :test :rule/layer :foundation :rule/phase :test :rule/kind :symbol-pattern :rule/match :target-overrides :rule/rewrite {:op :qualify-with-target-alias} :rule/safety :safe :rule/disposition :idiom :rule/evidence {:source/path "test/std/lib/zip_test.clj"}}
+  {:rule/id :foundation/code-test-to-native-test :rule/drift :foundation :rule/pathway :test :rule/layer :foundation :rule/phase :test :rule/kind :test-framework :rule/match code.test/fact :rule/rewrite {:op :emit-test-run :check code.test.base.process/check} :rule/safety :review :rule/disposition :native-object :rule/evidence {:source/path "test/std/lib/zip_test.clj"}}]}

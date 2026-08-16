@@ -12,8 +12,7 @@
 (def +cases+
   (:cases
    (catalog/read-edn
-    (str +workspace+
-         "/technology/hara-specs-registry/01-lang/007-code-migration/draft/conformance/bootstrap-pairs.edn"))))
+    "resources/code/migrate/conformance/bootstrap-pairs.edn")))
 
 (def +pair+
   (migrate/migrate-pair

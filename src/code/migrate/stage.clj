@@ -1,5 +1,6 @@
 (ns code.migrate.stage
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [clojure.pprint :as pprint]))
 
 (defn safe-relative-path?
   "checks that a generated path is relative and does not traverse upward"
@@ -51,11 +52,19 @@
         project-file (when project-content
                        (write-generated! stage-root
                                          "project.edn"
-                                         project-content))]
-    {:stage/root (.getCanonicalPath (io/file stage-root))
-     :source/path source-file
-     :test/path test-file
-     :project/path project-file
-     :source/checksum (:output/checksum (:source pair))
-     :test/checksum (:output/checksum (:test pair))
-     :manual-fixups 0}))
+                                         project-content))
+        manifest {:stage/root (.getCanonicalPath (io/file stage-root))
+                  :source/path source-file
+                  :test/path test-file
+                  :project/path project-file
+                  :source/checksum (:output/checksum (:source pair))
+                  :test/checksum (:output/checksum (:test pair))
+                  :source/applied (:applied (:source pair))
+                  :test/applied (:applied (:test pair))
+                  :test/operations (:operations (:test pair))
+                  :test/assertions (:assertions (:test pair))
+                  :manual-fixups 0}
+        manifest-file (write-generated! stage-root
+                                        "migration.edn"
+                                        (with-out-str (pprint/pprint manifest)))]
+    (assoc manifest :manifest/path manifest-file)))

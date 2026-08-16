@@ -33,7 +33,7 @@
   (let [hara         (.getCanonicalPath (io/file hara))
         project-root (.getCanonicalPath (io/file project-root))]
     (assoc
-     (run-process [hara "--project" project-root "--offline" "stdin"]
+     (run-process [hara "--project" project-root "--offline" "--allow-file" "stdin"]
                   {:dir project-root
                    :stdin source})
      :verification/type :source)))
