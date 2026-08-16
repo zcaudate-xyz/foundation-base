@@ -297,12 +297,16 @@
   ([^clojure.lang.IFn f & args]
    (.applyTo f args)))
 
-(defn call
-  "like `invoke` but reverses the function and first argument
+(defn apply-with
+  "applies an optional function to an object as its first argument
  
-   (call 2) => 2
+   (apply-with 2) => 2
  
-   (call 2 + 1 2 3) => 8"
+   (apply-with 2 + 1 2 3) => 8
+
+   (-> 2 (apply-with + 1 2 3)) => 8
+
+   (reduce apply-with 2 [inc inc]) => 4"
   {:added "3.0"}
   ([obj] obj)
   ([obj f] (if (nil? f) obj (f obj)))

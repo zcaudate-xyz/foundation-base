@@ -44,10 +44,10 @@
   "return for default values"
   {:added "3.0"}
   ([val {:keys [async chain post]}]
-   (cond-> (reduce f/call val post)
+   (cond-> (reduce f/apply-with val post)
      async (-> (future/completed)
                (future/future:chain chain))
-     (not async) (f/-> (reduce f/call % chain)))))
+     (not async) (f/-> (reduce f/apply-with % chain)))))
 
 (defn return:format
   "constructs a return function"

@@ -122,12 +122,12 @@
   => "(:left zip)"
 
   (let [target (catalog/target-by-id +catalog+ :migration/std-lib-zip)]
-    (:output (migrate-source "(h/call value f 1 2)" +catalog+ target)))
-  => "(h/call value f 1 2)"
+    (:output (migrate-source "(h/apply-with value f 1 2)" +catalog+ target)))
+  => "(h/apply-with value f 1 2)"
 
   (let [target (catalog/target-by-id +catalog+ :migration/std-lib-zip)]
-    (:output (migrate-source "(-> value (h/call f 1 2))" +catalog+ target)))
-  => "(-> value (h/call f 1 2))"
+    (:output (migrate-source "(-> value (h/apply-with f 1 2))" +catalog+ target)))
+  => "(-> value (h/apply-with f 1 2))"
 
   (let [target (catalog/target-by-id +catalog+ :migration/std-lib-zip)]
     (:output (migrate-source "(try (pred value) (catch Throwable error))"

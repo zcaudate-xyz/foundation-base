@@ -371,7 +371,7 @@
            (-> zip
                (assoc :left (rest left))
                (assoc :right (cons elem right))
-               (h/call (:update-step-left context) elem)))))
+               (h/apply-with (:update-step-left context) elem)))))
   ([zip n]
 
  
@@ -391,7 +391,7 @@
                res (-> zip
                        (assoc :left  (cons elem left))
                        (assoc :right (rest right))
-                       (h/call (:update-step-right context) elem))]
+                       (h/apply-with (:update-step-right context) elem))]
            res)))
   ([zip n]
    (nth (iterate step-right zip) n)))
@@ -418,7 +418,7 @@
                       :left ()
                       :right children
                       :parent zip)
-               (h/call (:update-step-inside context) elem)))))
+               (h/apply-with (:update-step-inside context) elem)))))
   ([zip n]
    (nth (iterate step-inside zip) n)))
 
@@ -445,7 +445,7 @@
                              :right (cons (first left) right))]
            (-> zip
                (assoc :depth (inc  depth) :left (reverse children) :right () :parent parent)
-               (h/call (:update-step-inside-left context) elem)))))
+               (h/apply-with (:update-step-inside-left context) elem)))))
   ([zip n]
    (nth (iterate step-inside-left zip) n)))
 
@@ -467,7 +467,7 @@
                         :depth  (dec depth)}]
              (cond-> (merge zip body)
                (:changed? zip)  (update-child-elements elements)
-               :then (h/call (:update-step-outside context) left))))))
+               :then (h/apply-with (:update-step-outside context) left))))))
   ([zip n]
    (nth (iterate step-outside zip) n)))
 
@@ -547,7 +547,7 @@
      (-> zip
          (update-in [:left] #(cons elem %))
          (assoc :changed? true)
-         (h/call (:update-insert-left context) elem))))
+         (h/apply-with (:update-insert-left context) elem))))
   ([{:keys [context] :as zip} data & more]
    (apply insert-left (insert-left zip data) more)))
 
@@ -560,7 +560,7 @@
      (-> zip
          (update-in [:right] #(cons elem %))
          (assoc :changed? true)
-         (h/call (:update-insert-right context) elem))))
+         (h/apply-with (:update-insert-right context) elem))))
   ([{:keys [context] :as zip} data & more]
    (apply insert-right (insert-right zip data) more)))
 
@@ -578,7 +578,7 @@
            (-> zip
                (update-in [:left] rest)
                (assoc :changed? true)
-               (h/call (:update-delete-left context) elem)))))
+               (h/apply-with (:update-delete-left context) elem)))))
   ([{:keys [context] :as zip} n]
    (nth (iterate delete-left zip) n)))
 
@@ -596,7 +596,7 @@
            (-> zip
                (update-in [:right] rest)
                (assoc :changed? true)
-               (h/call (:update-delete-right context) elem)))))
+               (h/apply-with (:update-delete-right context) elem)))))
   ([{:keys [context] :as zip} n]
    (nth (iterate delete-right zip) n)))
 
@@ -651,7 +651,7 @@
                  (assoc :left ()
                         :right elem
                         :changed? true)
-                 (h/call (:update-step-outside context) left)))
+                 (h/apply-with (:update-step-outside context) left)))
 
            :else
            (-> (step-outside zip)

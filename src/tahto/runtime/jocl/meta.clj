@@ -357,7 +357,7 @@
        ~(if fn?
           `(defn ~(symbol (str (name type) "-info"))
              ([~(symbol (name type))]
-              (coll/map-vals (partial h/call ~(symbol (name type))) ~lu-sym))))
+              (coll/map-vals (partial h/apply-with ~(symbol (name type))) ~lu-sym))))
        ~(info-template:print tname class exclude)])))
 
 (defmacro info-template
@@ -517,7 +517,7 @@
                :summary (select-keys +device-info+ summary)
                :all +device-info+
                (select-keys +device-info+ show))]
-     (coll/map-vals (partial h/call device-id) fns))))
+     (coll/map-vals (partial h/apply-with device-id) fns))))
 
 (resource/res:spec-add
  {:type :tahto/opencl.cpu
@@ -542,4 +542,3 @@
   {:added "3.0"}
   ([]
    (resource/res :tahto/opencl.gpu)))
-

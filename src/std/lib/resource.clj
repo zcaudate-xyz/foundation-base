@@ -303,7 +303,7 @@
                    rall)
             [rargs rstart] [(take extra rall) (drop extra rall)]]
         (cond-> (apply call-fn (conj (vec (reverse rstart)) (reverse rargs)))
-          post (h/call post))))))
+          post (h/apply-with post))))))
 
 (deftemplate res-api-tmpl
   ([[sym res-sym config]]
@@ -330,4 +330,3 @@
    [res:start   res-start {:args [{:name config :default {}}]}]
    [res:restart res-restart {:args []}]
    [res         res-base  {:args [{:name config :default {}}]}]])
-

@@ -170,12 +170,12 @@
 
          async
          (do (f/future:force received
-                             (reduce h/call result post))
+                             (reduce h/apply-with result post))
              final)
 
          :else (h/-> result
-                     (reduce h/call % post)
-                     (reduce h/call % chain)))))
+                     (reduce h/apply-with % post)
+                     (reduce h/apply-with % chain)))))
 
 (defn req:single
   "creates a single request call"
@@ -185,7 +185,7 @@
   ([client command opts]
    (let [{:keys [pre post final async] :as opts} (req:single-prep opts)
          result (h/-> command
-                      (reduce h/call % pre)
+                      (reduce h/apply-with % pre)
                       (request-single client % opts)
                       (process-single client % opts))
          final  (req:single-complete opts result)]
@@ -209,7 +209,7 @@
                                    (let [i        (count inputs)
                                          output   (f/on:success received
                                                                 (fn [arr]
-                                                                  (reduce h/call (nth arr i) post)))
+                                                                  (reduce h/apply-with (nth arr i) post)))
                                          output   (cond-> output
                                                     catch (f/on:exception catch))
                                          final    (if transacted
@@ -219,7 +219,7 @@
                                                     (vary-meta command merge (req:opts-clean opts))
                                                     command)]
                                      [final  (-> m
-                                                 (update :inputs  conj (reduce h/call command pre))
+                                                 (update :inputs  conj (reduce h/apply-with command pre))
                                                  (update :outputs conj final))])))
          _  (swap! (get *current* client) conj output)]
      output)))
@@ -253,7 +253,7 @@
   "processes the client given bulk inputs"
   {:added "3.0"}
   ([client {:keys [inputs received]} {:keys [pre] :as opts}]
-   (let [result  (h/->> (reduce h/call inputs pre)
+   (let [result  (h/->> (reduce h/apply-with inputs pre)
                         (request-bulk client % opts)
                         (process-bulk client inputs % opts))
          _  (f/future:force received result)]
@@ -269,7 +269,7 @@
          [bulk current] (bulk-collect client thunk chain)
          received (f/on:all current
                             (fn [& arr]
-                              (reduce h/call (apply vector arr) post)))
+                              (reduce h/apply-with (apply vector arr) post)))
          received (cond-> received
                     catch (f/on:exception catch))
          final    (f/future:chain received chain)
@@ -326,7 +326,7 @@
                                              transacted  (-> (f/on:success
                                                               final
                                                               (fn [arr]
-                                                                (reduce h/call (nth arr count) post)))
+                                                                (reduce h/apply-with (nth arr count) post)))
                                                              (f/future:chain chain))]
                                          [transacted (-> (update-in m [:inputs :count] inc)
                                                          (update :outputs conj transacted))])))]
@@ -361,7 +361,7 @@
   ([client thunk opts]
    (let [{:keys [async chain pre post] :as opts} (req:opts-init opts)
          state (volatile! nil)
-         _     (reduce h/call nil pre)]
+         _     (reduce h/apply-with nil pre)]
      (bulk client
            (fn []
              (let [res (transact client thunk)]
@@ -369,7 +369,7 @@
            (req:opts-clean opts))
      (-> @state
          (f/on:all (fn [& arr]
-                     (reduce h/call (apply vector arr) post)))
+                     (reduce h/apply-with (apply vector arr) post)))
          (f/future:chain chain)
          (req:return (boolean (or (get *bulk* client)
                                   (get *transact* client)

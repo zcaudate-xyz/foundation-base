@@ -102,7 +102,7 @@
   {:added "3.0"}
   ([{:keys [sym process]}]
    (cond (vector? process)
-         [sym `(map f/call ~sym ~process (repeat ~'opts))]
+         [sym `(map f/apply-with ~sym ~process (repeat ~'opts))]
 
          (symbol? process)
          [sym `(~process ~sym ~'opts)]

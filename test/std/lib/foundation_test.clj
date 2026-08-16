@@ -191,12 +191,16 @@
   (invoke (fn [] (+ 1 2 3)))
   => 6)
 
-^{:refer std.lib.foundation/call :added "3.0"}
-(fact "like `invoke` but reverses the function and first argument"
+^{:refer std.lib.foundation/apply-with :added "3.0"}
+(fact "applies an optional function to an object as its first argument"
 
-  (call 2) => 2
+  (apply-with 2) => 2
 
-  (call 2 + 1 2 3) => 8)
+  (apply-with 2 + 1 2 3) => 8
+
+  (-> 2 (apply-with + 1 2 3)) => 8
+
+  (reduce apply-with 2 [inc inc]) => 4)
 
 ^{:refer std.lib.foundation/const :added "3.0"}
 (fact "converts an expression into a constant at compile time"
