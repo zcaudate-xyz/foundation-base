@@ -772,19 +772,23 @@
   "steps status left to search predicate"
   {:added "3.0"}
   ([zip pred]
-   (binding [*handler* (assoc-in *handler*
-                                 [:step :at-left-most]
-                                 (fn [_] nil))]
-     (find zip step-left pred))))
+   (find zip
+         (fn [current]
+           (if (and current (can-step-left? current))
+             (step-left current)
+             nil))
+         pred)))
 
 (defn find-right
   "steps status right to search for predicate"
   {:added "3.0"}
   ([zip pred]
-   (binding [*handler* (assoc-in *handler*
-                                 [:step :at-right-most]
-                                 (fn [_] nil))]
-     (find zip step-right pred))))
+   (find zip
+         (fn [current]
+           (if (and current (can-step-right? current))
+             (step-right current)
+             nil))
+         pred)))
 
 (defn find-next
   "step status through the tree in depth first order to the first matching element"
