@@ -1,10 +1,7 @@
 (ns code.migrate.probe
   (:require [clojure.string :as str]
-            [code.framework.test.fact :as fact]
-            [code.migrate.engine :as engine]
             [code.migrate.verify :as verify]
             [code.query :as query]
-            [code.test.compile :as compile]
             [std.block.navigate :as nav]))
 
 (defn test-ns-form
@@ -25,173 +22,215 @@
            (= 'code.test (first entry)))))
 
 (defn probe-ns-form
-  "removes code.test only from the temporary verification namespace"
+  "removes native code.test dependencies from the lowered program"
   {:added "4.1"}
   [form]
   (let [[head nsp & body] form
         body (keep (fn [clause]
                      (if (and (seq? clause)
                               (#{:use :require} (first clause)))
-                       (let [entries (remove code-test-entry? (rest clause))]
+                       (let [entries (remove
+                                      (fn [entry]
+                                        (and (vector? entry)
+                                             (contains?
+                                              #{'code.test.base.process
+                                                'code.test.checker.common
+                                                'code.test.checker.collection}
+                                              (first entry))))
+                                      (rest clause))]
                          (when (seq entries)
                            (cons (first clause) entries)))
                        clause))
                    body)]
     (apply list head nsp body)))
 
-(defn fact-operations
-  "compiles Foundation fact forms into their existing operation model"
+(defn top-level-forms
+  "returns top-level forms from emitted Hara source in byte order"
   {:added "4.1"}
   [source]
-  (let [root (nav/parse-root source)]
-    (->> (fact/top-level-fact-navs root)
-         (keep fact/gather-fact)
-         (mapcat (fn [{:keys [sexp]}]
-                   (let [body (rest sexp)
-                         body (if (string? (first body))
-                                (rest body)
-                                body)]
-                     (compile/rewrite-top-level body))))
-         vec)))
+  (loop [cursor (nav/down (nav/parse-root source))
+         output []]
+    (if (nil? cursor)
+      output
+      (recur (nav/right cursor)
+             (cond-> output
+               (nav/expression? cursor)
+               (conj (nav/value cursor)))))))
 
-(defn migrate-operation-form
-  "migrates one compiled fact form through the source target"
+(defn test-run-form?
+  [form]
+  (and (seq? form) (= 'Test/run (first form))))
+
+(defn emitted-test-plan
+  "reads setup and assertion cases exclusively from the emitted test artifact"
   {:added "4.1"}
-  [form migration-catalog target]
-  (if (and migration-catalog target)
-    (-> form
-        pr-str
-        (engine/migrate-source migration-catalog target)
-        :output
-        read-string)
-    form))
+  [source]
+  (let [forms (vec (top-level-forms source))
+        ns-index (first (keep-indexed
+                         (fn [index form]
+                           (when (and (seq? form) (= 'ns (first form))) index))
+                         forms))
+        run-index (first (keep-indexed
+                          (fn [index form]
+                            (when (test-run-form? form) index))
+                          forms))
+        namespace (when ns-index (nth forms ns-index))
+        run-form (when run-index (nth forms run-index))
+        setup (if (and ns-index run-index (< ns-index run-index))
+                (subvec forms (inc ns-index) run-index)
+                [])
+        cases (if (vector? (second run-form)) (second run-form) [])
+        diagnostics (cond-> []
+                      (nil? namespace)
+                      (conj {:type :migration/emitted-test-namespace-missing})
 
-(defn migrate-operation
-  "migrates the input and expected forms of one compiled fact operation"
-  {:added "4.1"}
-  [operation migration-catalog target]
-  (reduce (fn [result path]
-            (if (get-in result path)
-              (update-in result path migrate-operation-form
-                         migration-catalog target)
-              result))
-          operation
-          [[:input :form] [:output :form]]))
+                      (nil? run-form)
+                      (conj {:type :migration/emitted-test-run-missing})
 
-(defn assertion-form
-  "lowers one supported Foundation test operation to native Hara"
-  {:added "4.1"}
-  [operation index]
-  (case (:type operation)
-    :form
-    (:form operation)
+                      (and run-form (not (vector? (second run-form))))
+                      (conj {:type :migration/emitted-test-cases-invalid}))]
+    {:namespace namespace
+     :setup setup
+     :cases cases
+     :checker (nth run-form 2 nil)
+     :diagnostics diagnostics}))
 
-    :test-equal
-    (let [actual   (get-in operation [:input :form])
-          expected (get-in operation [:output :form])]
+(defn function-body
+  [form]
+  (when (and (seq? form) (= 'fn (first form)))
+    (let [body (nnext form)]
       (cond
-        (= 'var? expected)
-        (list 'if
-              (list '= :std.native.Var (list 'type actual))
-              true
-              (list 'throw
-                    (list 'ex-info
-                          "migration assertion failed: expected var"
-                          {:index index})))
+        (empty? body) nil
+        (= 1 (count body)) (first body)
+        :else (cons 'do body)))))
 
-        (and (seq? expected) (= 'throws (first expected)))
+(defn failure-form
+  [message index case]
+  (list 'throw
+        (list 'ex-info
+              message
+              {:assertion/index index
+               :operation/id (:operation/id case)})))
+
+(defn emitted-assertion-form
+  "lowers one emitted Test/run case without consulting Foundation source"
+  {:added "4.1"}
+  [case index]
+  (let [actual (function-body (:test case))
+        expected (:expected case)]
+    (cond
+      (nil? actual)
+      nil
+
+      (and (seq? expected) (= 'checker/throws (first expected)))
+      (list 'let
+            ['threw (list 'try
+                          (list 'do actual false)
+                          (list 'catch 'Throwable 'error true))]
+            (list 'if
+                  'threw
+                  true
+                  (failure-form
+                   "migration assertion failed: expected throw"
+                   index case)))
+
+      (and (seq? expected) (= 'collection/contains (first expected)))
+      (let [checks (mapv (fn [[key value]]
+                           (list '= (list 'std.foundation/get 'actual key) value))
+                         (second expected))
+            condition (cond
+                        (empty? checks) true
+                        (= 1 (count checks)) (first checks)
+                        :else (apply list 'and checks))]
         (list 'let
-              ['threw (list 'try
-                            (list 'do actual false)
-                            (list 'catch 'Throwable 'error true))]
+              ['actual actual]
               (list 'if
-                    'threw
+                    condition
                     true
-                    (list 'throw
-                          (list 'ex-info
-                                "migration assertion failed: expected throw"
-                                {:index index}))))
+                    (failure-form
+                     "migration assertion failed: expected contained values"
+                     index case))))
 
-        (and (seq? expected) (= 'contains (first expected)))
-        (let [checks (mapv (fn [[key value]]
-                             (list '= (list 'std.foundation/get 'actual key) value))
-                           (second expected))
-              condition (cond
-                          (empty? checks) true
-                          (= 1 (count checks)) (first checks)
-                          :else (apply list 'and checks))]
-          (list 'let
-                ['actual actual]
-                (list 'if
-                      condition
-                      true
-                      (list 'throw
-                            (list 'ex-info
-                                  "migration assertion failed: expected contained values"
-                                  {:index index})))))
+      (and (seq? expected) (= 'fn (first expected)))
+      (list 'let
+            ['actual actual]
+            (list 'if
+                  (list expected 'actual)
+                  true
+                  (failure-form
+                   "migration assertion failed: predicate expectation"
+                   index case)))
 
-        :else
-        (list 'let
-              ['actual actual
-               'expected expected]
-              (list 'if
-                    (list '= 'actual 'expected)
-                    true
-                    (list 'throw
-                          (list 'ex-info
-                                "migration assertion failed"
-                                {:assertion/index index
-                                 :actual (list 'quote actual)
-                                 :expected (list 'quote expected)}))))))
-
-    nil))
+      :else
+      (list 'let
+            ['actual actual
+             'expected expected]
+            (list 'if
+                  (list '= 'actual 'expected)
+                  true
+                  (failure-form
+                   "migration assertion failed"
+                   index case))))))
 
 (defn probe-program
-  "creates a self-contained native assertion program for a migrated pair"
+  "lowers the emitted test artifact into an isolated assertion program"
   {:added "4.1"}
-  ([source test]
-   (probe-program source test test))
-  ([source test fact-source]
-   (probe-program source test fact-source nil nil))
-  ([source test fact-source migration-catalog target]
-   (let [operations  (->> (fact-operations fact-source)
-                          (mapv #(migrate-operation % migration-catalog target)))
-         unsupported (->> operations
-                          (remove #(#{:form :test-equal} (:type %)))
-                          vec)
-         forms       (keep-indexed (fn [index operation]
-                                     (assertion-form operation index))
-                                   operations)
-         program     (str source
-                          "\n"
-                          (pr-str (probe-ns-form (test-ns-form test)))
-                          "\n"
-                          (str/join "\n" (map pr-str forms))
-                          "\n:migration/tests-passed\n")]
-     {:program program
-      :operations (count operations)
-      :assertions (count (filter #(= :test-equal (:type %)) operations))
-      :diagnostics (mapv (fn [operation]
-                           {:type :migration/unsupported-test-operation
-                            :operation (:type operation)})
-                         unsupported)})))
+  [source test]
+  (let [plan (emitted-test-plan test)
+        assertions (keep-indexed emitted-assertion-form (:cases plan))
+        unsupported (- (count (:cases plan)) (count assertions))
+        diagnostics (cond-> (vec (:diagnostics plan))
+                      (pos? unsupported)
+                      (conj {:type :migration/emitted-test-case-unsupported
+                             :count unsupported}))
+        program (str source
+                     "\n"
+                     (pr-str (probe-ns-form (:namespace plan)))
+                     "\n"
+                     (str/join "\n" (map pr-str (:setup plan)))
+                     (when (seq (:setup plan)) "\n")
+                     (str/join "\n" (map pr-str assertions))
+                     "\n:migration/tests-passed\n")]
+    {:program program
+     :operations (+ (count (:setup plan)) (count (:cases plan)))
+     :assertions (count (:cases plan))
+     :diagnostics diagnostics}))
+
+(defn native-test-program
+  [source test]
+  (str source
+       "\n"
+       test
+       "\n(if (every? Test/passed? (Test/run []))\n"
+       "  :migration/tests-passed\n"
+       "  (throw (ex-info \"migrated tests failed\" {})))\n"))
 
 (defn verify-pair
-  "verifies the emitted source and emitted Test/run file as authorities"
+  "verifies emitted source and tests in two independent fresh processes"
   {:added "4.1"}
   [pair options]
-  (let [program (str (:output (:source pair))
-                     "\n"
-                     (:output (:test pair))
-                     "\n(if (every? Test/passed? (Test/run []))\n"
-                     "  :migration/tests-passed\n"
-                     "  (throw (ex-info \"migrated tests failed\" {})))\n")
-        probe {:program program
-               :operations (:operations (:test pair))
-               :assertions (:assertions (:test pair))
-               :diagnostics (:diagnostics (:test pair))}
-        result (verify/verify-source (:program probe) options)]
-    (merge probe
-           {:verification result
-            :passed (and (empty? (:diagnostics probe))
-                         (:passed result))})))
+  (let [source (:output (:source pair))
+        test (:output (:test pair))
+        pair-diagnostics (vec (concat (:diagnostics (:source pair))
+                                      (:diagnostics (:test pair))))
+        lowered (probe-program source test)
+        lowered-result (verify/verify-source (:program lowered) options)
+        lowered (assoc lowered
+                       :verification lowered-result
+                       :passed (and (empty? (:diagnostics lowered))
+                                    (:passed lowered-result)))
+        native-program (native-test-program source test)
+        native-result (verify/verify-source native-program options)
+        native {:program native-program
+                :verification native-result
+                :passed (:passed native-result)}
+        diagnostics (vec (concat pair-diagnostics
+                                 (:diagnostics lowered)))]
+    {:operations (:operations lowered)
+     :assertions (:assertions lowered)
+     :diagnostics diagnostics
+     :lowered lowered
+     :native native
+     :passed (and (empty? diagnostics)
+                  (:passed lowered)
+                  (:passed native))}))

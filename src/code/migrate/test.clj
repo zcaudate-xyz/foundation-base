@@ -1,5 +1,6 @@
 (ns code.migrate.test
   (:require [clojure.string :as str]
+            [clojure.walk :as walk]
             [code.framework.test.fact :as fact]
             [code.migrate.engine :as engine]
             [code.query :as query]
@@ -44,29 +45,78 @@
                               (concat (rest require-clause) required))]
     (apply list head name (cons require-clause clauses))))
 
+(defn emitted-fact-meta
+  "retains all source fact metadata while quoting symbolic references"
+  {:added "4.1"}
+  [gathered]
+  (let [metadata (apply dissoc gathered
+                        [:form :sexp :line :test :intro :ns :var])]
+    (cond-> metadata
+      (symbol? (:refer metadata))
+      (assoc :refer (list 'quote (:refer metadata))))))
+
 (defn fact-records
-  "compiles each Foundation fact while retaining its title and metadata"
+  "compiles each Foundation fact with stable identity and ordering"
   {:added "4.1"}
   [source]
   (let [root (nav/parse-root source)]
     (->> (fact/top-level-fact-navs root)
          (keep fact/gather-fact)
-         (mapv (fn [{:keys [sexp intro] :as gathered}]
-                 (let [body (rest sexp)
-                       body (if (string? (first body)) (rest body) body)]
-                   {:title intro
-                    :meta (cond-> (select-keys gathered [:refer :added :id])
-                            (symbol? (:refer gathered))
-                            (assoc :refer (list 'quote (:refer gathered))))
-                    :operations (vec (compile/rewrite-top-level body))}))))))
+         (map-indexed
+          (fn [index {:keys [sexp intro id refer] :as gathered}]
+            (let [body (rest sexp)
+                  body (if (string? (first body)) (rest body) body)
+                  ordinal (inc index)]
+              {:title intro
+               :meta (emitted-fact-meta gathered)
+               :fact/id (or id refer (symbol (str "fact-" ordinal)))
+               :fact/ordinal ordinal
+               :operations (vec (compile/rewrite-top-level body))})))
+         vec)))
+
+(defn zero-arity-thread-form?
+  [form]
+  (and (seq? form)
+       (#{'-> '->>} (first form))
+       (some #(and (seq? %) (= 1 (count %)))
+             (drop 2 form))))
+
+(defn rewrite-test-form
+  "applies only adaptations explicitly owned by the test pathway"
+  {:added "4.1"}
+  [form target applied]
+  (if (contains? (set (:target/rules target))
+                 :clojure.test/thread-zero-arity-step)
+    (walk/postwalk
+     (fn [value]
+       (if (zero-arity-thread-form? value)
+         (do (swap! applied conj :clojure.test/thread-zero-arity-step)
+             (engine/rewrite-zero-arity-thread-steps value))
+         value))
+     form)
+    form))
+
+(defn merge-migration-evidence!
+  [evidence result]
+  (swap! evidence update :applied into (:applied result))
+  (swap! evidence update :diagnostics into (:diagnostics result))
+  result)
 
 (defn migrate-form
-  [form migration-catalog target]
-  (-> form
-      pr-str
-      (engine/migrate-source migration-catalog target)
-      :output
-      read-string))
+  "migrates one test form through test-owned rules only"
+  {:added "4.1"}
+  ([form migration-catalog target]
+   (migrate-form form migration-catalog target
+                 (atom {:applied [] :diagnostics []})))
+  ([form migration-catalog target evidence]
+   (let [applied (atom [])
+         form (rewrite-test-form form target applied)
+         result (-> (engine/migrate-source (pr-str form)
+                                           migration-catalog
+                                           target)
+                    (update :applied #(vec (concat @applied %)))
+                    (merge-migration-evidence! evidence))]
+     (read-string (:output result)))))
 
 (defn checker-form
   "maps Foundation matcher shorthand to native checker constructors"
@@ -84,54 +134,130 @@
 
     :else expected))
 
+(defn fact-id-string
+  [value]
+  (cond
+    (keyword? value) (subs (str value) 1)
+    (symbol? value) (str value)
+    :else (pr-str value)))
+
+(defn operation-id
+  "assigns a stable id from fact identity and source ordinals"
+  {:added "4.1"}
+  [record operation-ordinal assertion-ordinal]
+  (str (fact-id-string (:fact/id record))
+       "#fact-" (:fact/ordinal record)
+       "/operation-" operation-ordinal
+       (when assertion-ordinal
+         (str "/assertion-" assertion-ordinal))))
+
+(defn case-name
+  [title index]
+  (if (str/blank? title)
+    (str "case " index)
+    title))
+
 (defn emit-test-run
-  "emits setup forms and executable Test/run cases from compiled facts"
+  "emits a complete Test/run namespace and one-to-one operation manifest"
   {:added "4.1"}
   [source migration-catalog target]
-  (let [operation-target (assoc target
-                                :unit/kind :test
-                                :target/rules
-                                (vec (distinct
-                                      (concat (:target/source-rules target)
-                                              (:target/test-rules target)))))
+  (let [evidence (atom {:applied [] :diagnostics []})
         migrated-ns (migrate-form (test-ns-form source)
-                                  migration-catalog target)
+                                  migration-catalog target evidence)
         records (fact-records source)
-        state (reduce
-               (fn [state {:keys [title meta operations]}]
-                 (reduce
-                  (fn [state operation]
-                    (case (:type operation)
-                      :form
-                      (update state :setup conj
-                              (migrate-form (:form operation)
-                                            migration-catalog operation-target))
+        state
+        (reduce
+         (fn [state record]
+           (let [assertion-ordinal (atom 0)]
+             (reduce-kv
+              (fn [state operation-index operation]
+                (let [operation-ordinal (inc operation-index)
+                      source-order (inc (:next-order state))
+                      assertion-order (when (= :test-equal (:type operation))
+                                        (swap! assertion-ordinal inc))
+                      id (operation-id record
+                                       operation-ordinal
+                                       assertion-order)
+                      correspondence
+                      {:operation/id id
+                       :fact/id (:fact/id record)
+                       :fact/ordinal (:fact/ordinal record)
+                       :operation/ordinal operation-ordinal
+                       :assertion/ordinal assertion-order
+                       :source/order source-order
+                       :source/type (:type operation)}]
+                  (case (:type operation)
+                    :form
+                    (let [emitted-index (count (:setup state))
+                          emitted (migrate-form (:form operation)
+                                                migration-catalog
+                                                target
+                                                evidence)]
+                      (-> state
+                          (update :setup conj emitted)
+                          (update :operation-correspondence conj
+                                  (assoc correspondence
+                                         :emitted/order source-order
+                                         :emitted/path [:setup emitted-index]))
+                          (assoc :next-order source-order)))
 
-                      :test-equal
-                      (let [index (inc (count (:cases state)))
-                            actual (migrate-form (get-in operation [:input :form])
-                                                 migration-catalog operation-target)
-                            expected (migrate-form (get-in operation [:output :form])
-                                                   migration-catalog operation-target)]
-                        (update state :cases conj
-                                {:name (if (str/blank? title)
-                                         (str "case " index)
-                                         (str title " #" index))
-                                 :meta meta
-                                 :test (list 'fn [] actual)
-                                 :expected (checker-form expected)}))
+                    :test-equal
+                    (let [case-index (count (:cases state))
+                          actual (migrate-form (get-in operation [:input :form])
+                                               migration-catalog
+                                               target
+                                               evidence)
+                          expected (migrate-form (get-in operation [:output :form])
+                                                 migration-catalog
+                                                 target
+                                                 evidence)]
+                      (-> state
+                          (update :cases conj
+                                  {:operation/id id
+                                   :name (case-name (:title record)
+                                                    (inc case-index))
+                                   :meta (:meta record)
+                                   :test (list 'fn [] actual)
+                                   :expected (checker-form expected)})
+                          (update :operation-correspondence conj
+                                  (assoc correspondence
+                                         :emitted/order source-order
+                                         :emitted/path [:cases case-index]))
+                          (assoc :next-order source-order)))
 
-                      (update state :diagnostics conj
-                              {:type :migration/unsupported-test-operation
-                               :operation (:type operation)})))
-                  state
-                  operations))
-               {:setup [] :cases [] :diagnostics []}
-               records)
-        form (list 'Test/run
-                   (:cases state)
-                   'process/check)]
+                    (-> state
+                        (update :diagnostics conj
+                                {:type :migration/unsupported-test-operation
+                                 :operation/id id
+                                 :operation (:type operation)})
+                        (update :operation-correspondence conj
+                                (assoc correspondence
+                                       :emitted/order nil
+                                       :emitted/path nil))
+                        (assoc :next-order source-order)))))
+              state
+              (:operations record))))
+         {:setup []
+          :cases []
+          :diagnostics []
+          :operation-correspondence []
+          :next-order 0}
+         records)
+        emitted-count (+ (count (:setup state)) (count (:cases state)))
+        count-diagnostics
+        (when-not (= (:next-order state) emitted-count)
+          [{:type :migration/test-operation-count
+            :source/operations (:next-order state)
+            :emitted/operations emitted-count}])
+        diagnostics (vec (concat (:diagnostics @evidence)
+                                 (:diagnostics state)
+                                 count-diagnostics))
+        form (list 'Test/run (:cases state) 'process/check)]
     (assoc state
+           :applied (vec (distinct
+                          (concat (:applied @evidence)
+                                  [:foundation/code-test-to-native-test])))
+           :diagnostics diagnostics
            :output (str (pr-str (native-test-ns migrated-ns)) "\n\n"
                         (str/join "\n" (map pr-str (:setup state)))
                         (when (seq (:setup state)) "\n\n")
@@ -149,12 +275,15 @@
                                migration-catalog target)
         output (:output emitted)]
     (merge (select-keys unit [:unit/kind :source/path :target/path])
-           {:input (:source/string unit)
+           {:target/path (or (:target/path unit)
+                             (:target/output-path target))
+            :input (:source/string unit)
             :source/checksum (engine/sha256 (:source/string unit))
             :output output
             :output/checksum (engine/sha256 output)
-            :applied [:foundation/code-test-to-native-test]
+            :applied (:applied emitted)
             :diagnostics (:diagnostics emitted)
             :operations (+ (count (:setup emitted)) (count (:cases emitted)))
             :assertions (count (:cases emitted))
+            :operation-correspondence (:operation-correspondence emitted)
             :changed (not= (:source/string unit) output)})))

@@ -39,32 +39,48 @@
     (spit target content)
     (.getPath ^java.io.File target)))
 
+(defn pathway-manifest
+  [result installed-path staged-path]
+  {:input/path (:source/path result)
+   :output/path installed-path
+   :staged/path staged-path
+   :input/checksum (:source/checksum result)
+   :output/checksum (:output/checksum result)
+   :applied-rules (:applied result)
+   :diagnostics (:diagnostics result)})
+
 (defn stage-pair
-  "writes a generated source/test pair and returns its evidence manifest"
+  "writes a generated source/test pair and a complete manifest.edn"
   {:added "4.1"}
   [pair {:keys [stage-root source-path test-path project-content]}]
-  (let [source-file (write-generated! stage-root
+  (let [source-result (:source pair)
+        test-result (:test pair)
+        source-file (write-generated! stage-root
                                       source-path
-                                      (:output (:source pair)))
+                                      (:output source-result))
         test-file   (write-generated! stage-root
                                       test-path
-                                      (:output (:test pair)))
+                                      (:output test-result))
         project-file (when project-content
                        (write-generated! stage-root
                                          "project.edn"
                                          project-content))
-        manifest {:stage/root (.getCanonicalPath (io/file stage-root))
-                  :source/path source-file
-                  :test/path test-file
+        manifest {:manifest/type :code-migration
+                  :manifest/version 1
+                  :stage/root (.getCanonicalPath (io/file stage-root))
                   :project/path project-file
-                  :source/checksum (:output/checksum (:source pair))
-                  :test/checksum (:output/checksum (:test pair))
-                  :source/applied (:applied (:source pair))
-                  :test/applied (:applied (:test pair))
-                  :test/operations (:operations (:test pair))
-                  :test/assertions (:assertions (:test pair))
+                  :source (pathway-manifest source-result
+                                            (:target/path source-result)
+                                            source-file)
+                  :test (assoc (pathway-manifest test-result
+                                                 (:target/path test-result)
+                                                 test-file)
+                               :operations (:operations test-result)
+                               :assertions (:assertions test-result)
+                               :operation-correspondence
+                               (:operation-correspondence test-result))
                   :manual-fixups 0}
         manifest-file (write-generated! stage-root
-                                        "migration.edn"
+                                        "manifest.edn"
                                         (with-out-str (pprint/pprint manifest)))]
     (assoc manifest :manifest/path manifest-file)))
