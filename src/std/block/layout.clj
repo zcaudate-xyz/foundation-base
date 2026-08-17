@@ -218,7 +218,8 @@
         (cond ('#{fn} (first form))
               (layout-annotate-fn-anon form)
 
-              (is-def? (first form))
+              (and (is-def? (first form))
+                   (not ('#{def defonce declare defprotocol} (first form))))
               (layout-annotate-fn-named form)
               
               (is-binding? (first form))
@@ -271,4 +272,3 @@
   [form & [opts]]
   (binding [common/*layout-fn* layout-default-fn]
     (layout-default-fn form opts)))
-

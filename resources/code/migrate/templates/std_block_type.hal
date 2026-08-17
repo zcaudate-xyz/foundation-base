@@ -1,0 +1,168 @@
+(ns std.block.type
+  (:require [std.block.protocol :as protocol]))
+
+(defstruct Block [type tag string value children props])
+
+(defn block-compare
+  [left right]
+  (+ (compare (:tag left) (:tag right))
+     (compare (:string left) (:string right))))
+
+(extend-type Block protocol/IBlock
+  (block-type [block] (:type block))
+  (block-tag [block] (:tag block))
+  (block-string [block] (:string block))
+  (block-length [block] (str/length (:string block)))
+  (block-width [block] (or (:width (:props block)) (str/length (:string block))))
+  (block-height [block] (or (:height (:props block)) 0))
+  (block-prefixed [block] (str/length (or (:start (:props block)) "")))
+  (block-suffixed [block] (str/length (or (:end (:props block)) "")))
+  (block-verify [block] true)
+  (block-info [block] (:props block)))
+
+(extend-type Block protocol/IBlockExpression
+  (block-value [block] (:value block))
+  (block-value-string [block]
+    (or (:value-string (:props block)) (pr-str (:value block)))))
+
+(extend-type Block protocol/IBlockContainer
+  (block-children [block] (:children block))
+  (replace-children [block children]
+    ((:replace-children (:props block)) block (vec children))))
+
+(extend-type Block protocol/IBlockModifier
+  (block-modify [block accumulator input]
+    ((:modify (:props block)) accumulator input)))
+
+(defn block?
+  [value]
+  (instance? std.block.type/Block value))
+
+(defn void-block
+  [tag character width height]
+  (Block :void tag (str character) nil [] {:width width :height height}))
+
+(defn void-block?
+  [block]
+  (and (block? block) (= :void (protocol/block-type block))))
+
+(defn token-block?
+  [block]
+  (and (block? block) (= :token (protocol/block-type block))))
+
+(defn container-block?
+  [block]
+  (and (block? block) (= :container (protocol/block-type block))))
+
+(defn modifier-block?
+  [block]
+  (and (block? block) (= :modifier (protocol/block-type block))))
+
+(defn error-block?
+  [block]
+  (and (block? block) (= :error (protocol/block-type block))))
+
+(defn code-block?
+  [block]
+  (or (token-block? block)
+      (container-block? block)))
+
+(defn space-block?
+  [block]
+  (and (void-block? block)
+       (= :linespace (protocol/block-tag block))
+       (= " " (protocol/block-string block))))
+
+(defn linebreak-block?
+  [block]
+  (= :linebreak (protocol/block-tag block)))
+
+(defn linespace-block?
+  [block]
+  (= :linespace (protocol/block-tag block)))
+
+(defn eof-block?
+  [block]
+  (= :eof (protocol/block-tag block)))
+
+(defn nil-void?
+  [block]
+  (or (nil? block) (void-block? block)))
+
+(defn comment-block?
+  [block]
+  (and (block? block) (= :comment (protocol/block-tag block))))
+
+(defn comment-block
+  [string]
+  (Block :comment :comment string nil []
+         {:width (str/length string) :height 0}))
+
+(defn token-block
+  [tag string value value-string width height]
+  (Block :token tag string value []
+         {:value-string value-string :width width :height height}))
+
+(defn container-width
+  [block]
+  (str/length (protocol/block-string block)))
+
+(defn container-height
+  [block]
+  (reduce (fn [total child]
+            (+ total (protocol/block-height child)))
+          0
+          (protocol/block-children block)))
+
+(defn container-string
+  [block]
+  (protocol/block-string block))
+
+(defn container-value-string
+  [block]
+  (protocol/block-value-string block))
+
+(defn container-expression-values
+  [children]
+  (keep (fn [child]
+          (if (has? #{:token :container} (:type child))
+            (:value child)
+            nil))
+        children))
+
+(defn container-block
+  [tag children props]
+  (let [start (or (:start props) "")
+        end (or (:end props) "")
+        string (str start
+                    (reduce (fn [output child]
+                              (str output (:string child)))
+                            ""
+                            children)
+                    end)
+        values (container-expression-values children)
+        value (if (= tag :fn)
+                (list 'fn [] (apply list values))
+                nil)
+        value-string (str start
+                          (str/join " "
+                                    (keep (fn [child]
+                                            (if (has? #{:token :container}
+                                                      (:type child))
+                                              (or (:value-string (:props child))
+                                                  (pr-str (:value child)))
+                                              nil))
+                                          children))
+                          end)]
+    (Block :container tag string value (vec children)
+           (assoc props :value-string value-string
+                        :replace-children
+                        (fn [old new-children]
+                          (container-block (:tag old) new-children props))))))
+
+(defn modifier-block
+  [tag string command]
+  (Block :modifier tag string nil []
+         {:width (str/length string)
+          :height 0
+          :modify command}))

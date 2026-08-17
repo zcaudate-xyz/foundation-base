@@ -13,6 +13,7 @@
    :target/test-path "test/std/lib/zip_test.clj"
    :target/target-source-path "lib/src/std/lib/zip.hal"
    :target/target-test-path "lib/test/std/lib/zip_test.hal"
+   :target/expected-assertions 85
    :target/source-rules
    [:clojure/core-qualified
     :foundation/std-lib-foundation
@@ -29,6 +30,7 @@
     :clojure/thread-zero-arity-step
     :clojure/named-recur
     :clojure/empty-catch-body
+    :foundation/zip-cursor-comparator
     :clojure/source-namespace-overrides]
    :target/test-rules
    [:clojure/test-namespace-overrides
@@ -38,4 +40,213 @@
    :target/overrides [get find prewalk postwalk]
    :target/test-alias zip
    :target/struct-fields
-   {Zipper [context prefix display parent left right depth changed?]}}]}
+   {Zipper [context prefix display parent left right depth changed? tag position]}}
+
+  {:target/id :migration/std-block-check
+   :target/order 2
+   :target/status :candidate
+   :target/source-namespace std.block.check
+   :target/test-namespace std.block.check-test
+   :target/source-path "src/std/block/check.clj"
+   :target/test-path "test/std/block/check_test.clj"
+   :target/target-source-path "lib/src/std/block/check.hal"
+   :target/target-test-path "lib/test/std/block/check_test.hal"
+   :target/expected-assertions 20
+   :target/source-rules
+   [:foundation/std-lib-foundation
+    :foundation/std-lib-collection
+    :foundation/hash-map-predicate
+    :foundation/form-predicate
+    :clojure/contains-predicate
+    :clojure/character-literal
+    :clojure/nil-set
+    :clojure/ratio-literal
+    :clojure/map-entry-traversal
+    :clojure/nil-membership
+    :clojure/escaped-character-first
+    :foundation/native-number-taxonomy
+    :clojure/character-whitespace
+    :clojure/string-starts-with
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-protocol
+   :target/order 3
+   :target/status :candidate
+   :target/source-namespace std.protocol.block
+   :target/target-source-namespace std.block.protocol
+   :target/source-path "src/std/protocol/block.clj"
+   :target/target-source-path "lib/src/std/block/protocol.hal"
+   :target/source-rules
+   [:foundation/block-interfaces-to-protocol
+    :clojure/source-namespace-overrides]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-base
+   :target/order 4
+   :target/status :candidate
+   :target/source-namespace std.block.base
+   :target/test-namespace std.block.base-test
+   :target/source-path "src/std/block/base.clj"
+   :target/test-path "test/std/block/base_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/std_block_base.hal"
+   :target/target-source-path "lib/src/std/block/base.hal"
+   :target/target-test-path "lib/test/std/block/base_test.hal"
+   :target/expected-assertions 26
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/ratio-literal
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/block-test-compat
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-reader
+   :target/order 5
+   :target/status :candidate
+   :target/source-namespace std.block.reader
+   :target/test-namespace std.block.reader-test
+   :target/source-path "src/std/block/reader.clj"
+   :target/test-path "test/std/block/reader_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/std_block_reader.hal"
+   :target/target-source-path "lib/src/std/block/reader.hal"
+   :target/target-test-path "lib/test/std/block/reader_test.hal"
+   :target/expected-assertions 15
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides [peek next slurp]}
+
+  {:target/id :migration/std-block-value
+   :target/order 6
+   :target/status :candidate
+   :target/source-namespace std.block.value
+   :target/test-namespace std.block.value-test
+   :target/source-path "src/std/block/value.clj"
+   :target/test-path "test/std/block/value_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/std_block_value.hal"
+   :target/target-source-path "lib/src/std/block/value.hal"
+   :target/target-test-path "lib/test/std/block/value_test.hal"
+   :target/expected-assertions 19
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-type
+   :target/order 7
+   :target/status :candidate
+   :target/source-namespace std.block.type
+   :target/test-namespace std.block.type-test
+   :target/source-path "src/std/block/type.clj"
+   :target/test-path "test/std/block/type_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/std_block_type.hal"
+   :target/target-source-path "lib/src/std/block/type.hal"
+   :target/target-test-path "lib/test/std/block/type_test.hal"
+   :target/expected-assertions 27
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/block-test-compat
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-construct
+   :target/order 8
+   :target/status :candidate
+   :target/source-namespace std.block.construct
+   :target/test-namespace std.block.construct-test
+   :target/source-path "src/std/block/construct.clj"
+   :target/test-path "test/std/block/construct_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/std_block_construct.hal"
+   :target/target-source-path "lib/src/std/block/construct.hal"
+   :target/target-test-path "lib/test/std/block/construct_test.hal"
+   :target/expected-assertions 48
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/qualified-overrides
+    :foundation/block-test-compat
+    :foundation/code-test-to-native-test]
+   :target/overrides [empty newline comment]
+   :target/test-alias construct}
+
+  {:target/id :migration/std-block-parse
+   :target/order 9
+   :target/status :candidate
+   :target/source-namespace std.block.parse
+   :target/test-namespace std.block.parse-test
+   :target/source-path "src/std/block/parse.clj"
+   :target/test-path "test/std/block/parse_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/std_block_parse.hal"
+   :target/target-source-path "lib/src/std/block/parse.hal"
+   :target/target-test-path "lib/test/std/block/parse_test.hal"
+   :target/expected-assertions 60
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/ratio-literal
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/block-test-compat
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-navigate
+   :target/order 10
+   :target/status :candidate
+   :target/source-namespace std.block.navigate
+   :target/test-namespace std.block.navigate-test
+   :target/source-path "src/std/block/navigate.clj"
+   :target/test-path "test/code/edit_test.clj"
+   :target/target-source-path "lib/src/std/block/navigate.hal"
+   :target/target-test-path "lib/test/std/block/navigate_test.hal"
+   :target/expected-assertions 93
+   :target/source-rules
+   [:foundation/std-lib-foundation
+    :foundation/zipper-class
+    :foundation/navigation-template-vars
+    :foundation/navigator-format
+    :foundation/block-cursor-comparator
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/qualified-overrides
+    :foundation/block-test-compat
+    :foundation/code-test-to-native-test]
+   :target/overrides [next replace type]
+   :target/test-alias navigate}]}

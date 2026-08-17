@@ -1,0 +1,129 @@
+(ns std.block.reader
+  (:require [std.block.check :as check]))
+
+(defstruct Reader [source state])
+
+(defn create
+  [source]
+  (std.block.reader/Reader source
+                               (atom {:position 0 :pushed []})))
+
+(defn reader-state [reader] (deref (:state reader)))
+
+(defn reader-position
+  [reader]
+  (let [position (get (reader-state reader) :position)
+        source (:source reader)]
+    (loop [index 0
+           row 1
+           column 1]
+      (if (= index position)
+        [row column]
+        (if (= "\n" (str/char-at source index))
+          (recur (inc index) (inc row) 1)
+          (recur (inc index) row (inc column)))))))
+
+(defn throw-reader
+  [reader message & input]
+  (let [[row column] (reader-position reader)]
+    (throw (ex-info (str message " [row " row ", column " column "]")
+                    {:data (vec input) :row row :col column}))))
+
+(defn read-char
+  [reader]
+  (let [state (reader-state reader)
+        pushed (get state :pushed)]
+    (if (empty? pushed)
+      (let [position (get state :position)
+            source (:source reader)
+            character (if (= position (str/length source))
+                        nil
+                        (first (str/char-at source position)))]
+        (if character
+          (swap! (:state reader)
+                 (fn [current]
+                   (assoc current :position (inc position))))
+          nil)
+        character)
+      (let [character (first pushed)]
+        (swap! (:state reader)
+               (fn [current]
+                 (assoc current :pushed (vec (drop 1 pushed)))))
+        character))))
+
+(defn step-char [reader] (do (read-char reader) reader))
+(defn ignore-char [reader] (do (read-char reader) nil))
+
+(defn unread-char
+  [reader character]
+  (do
+    (swap! (:state reader)
+           (fn [state]
+             (assoc state :pushed
+                    (vec (concat [character] (get state :pushed))))))
+    reader))
+
+(defn peek-char
+  [reader]
+  (let [character (read-char reader)]
+    (if character (unread-char reader character) nil)
+    character))
+
+(defn read-while
+  ([reader predicate]
+   (read-while reader predicate true))
+  ([reader predicate eof?]
+   (loop [output ""]
+     (let [character (read-char reader)]
+       (if (nil? character)
+         (if eof? output (throw-reader reader "Unexpected EOF."))
+         (if (predicate character)
+           (recur (str output character))
+           (do (unread-char reader character) output)))))))
+
+(defn read-until
+  [reader predicate]
+  (read-while reader (fn [character] (not (predicate character))) true))
+
+(defn read-times
+  [reader read-function amount]
+  (loop [index 0
+         output []]
+    (if (= index amount)
+      output
+      (recur (inc index) (conj output (read-function reader))))))
+
+(defn read-repeatedly
+  ([reader read-function]
+   (read-repeatedly reader read-function nil?))
+  ([reader read-function stop-function]
+   (loop [output []]
+     (let [value (read-function reader)]
+       (if (stop-function value)
+         output
+         (recur (conj output value)))))))
+
+(defn read-include
+  ([reader read-function]
+   (read-include reader read-function nil?))
+  ([reader read-function stop-function]
+   (loop [output []]
+     (let [value (read-function reader)]
+       (if (stop-function value)
+         [output value]
+         (recur (conj output value)))))))
+
+(defn slurp
+  [reader]
+  (reduce (fn [output character] (str output character))
+          ""
+          (read-repeatedly reader read-char)))
+
+(defn read-to-boundary
+  ([reader] (read-to-boundary reader #{}))
+  ([reader allowed]
+   (read-while reader
+               (fn [character]
+                 (or (has? allowed character)
+                     (not (check/voidspace-or-boundary? character))))
+               true)))

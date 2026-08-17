@@ -3,6 +3,8 @@
             [clojure.walk :as walk]
             [code.migrate.catalog :as catalog]
             [code.query :as query]
+            [std.block :as block]
+            [std.block.layout.estimate :as estimate]
             [std.block.navigate :as nav])
   (:import (java.security MessageDigest)))
 
@@ -19,7 +21,8 @@
   {:added "4.1"}
   [migration-catalog]
   (->> (:migration/rules migration-catalog)
-       (filter #(and (= :dependency (:rule/kind %))
+       (filter #(and (not= :draft (:rule/status %))
+                     (= :dependency (:rule/kind %))
                      (#{:replace-namespace :replace-symbol}
                       (get-in % [:rule/rewrite :op]))))
        (map (fn [rule]
@@ -32,14 +35,123 @@
 (defn rewrite-ns-form
   "rewrites one Clojure namespace form using target-owned overrides"
   {:added "4.1"}
-  [form overrides]
+  [form overrides output-namespace]
   (let [[head name & clauses] form
+        name (or output-namespace name)
         clauses (remove #(and (seq? %)
                               (#{:refer-clojure :config} (first %)))
                         clauses)]
     (apply list head name
-           (concat clauses
-                   [(list :config {:override (vec overrides)})]))))
+           (cond-> (vec clauses)
+             (seq overrides)
+             (conj (list :config {:override (vec overrides)}))))))
+
+(defn rewrite-block-interface
+  "folds Foundation's JVM block interfaces into native block protocols"
+  {:added "4.1"}
+  [form]
+  (case (second form)
+    IBlock
+    '(defprotocol IBlock
+       (block-type [block])
+       (block-tag [block])
+       (block-string [block])
+       (block-length [block])
+       (block-width [block])
+       (block-height [block])
+       (block-prefixed [block])
+       (block-suffixed [block])
+       (block-verify [block])
+       (block-info [block]))
+
+    IBlockModifier
+    '(defprotocol IBlockModifier
+       (block-modify [block accumulator input]))
+
+    IBlockExpression
+    '(defprotocol IBlockExpression
+       (block-value [block])
+       (block-value-string [block]))
+
+    IBlockContainer
+    '(defprotocol IBlockContainer
+       (block-children [block])
+       (replace-children [block children]))
+
+    nil))
+
+(defn remove-block-interface-remnants
+  "removes folded JVM interfaces and their namespace reset residue"
+  {:added "4.1"}
+  [root]
+  (loop [current root]
+    (if-let [location
+             (first
+              (filter
+               (fn [location]
+                 (let [form (nav/value location)]
+                   (and (seq? form)
+                        (#{'definterface 'comment} (first form)))))
+               (query/select current [seq?])))]
+      (recur (-> location
+                 nav/delete
+                 nav/root-string
+                 nav/parse-root))
+      current)))
+
+(defn namespace-aliases-used
+  "returns aliases referenced by qualified symbols in a migrated block tree"
+  {:added "4.1"}
+  [root]
+  (->> (query/select root [symbol?])
+       (map nav/value)
+       (keep namespace)
+       (map symbol)
+       set))
+
+(defn prune-unused-requires-form
+  "removes aliased require entries unused by the migrated namespace body"
+  {:added "4.1"}
+  [form used]
+  (let [[head name & clauses] form
+        clauses (keep
+                 (fn [clause]
+                   (if (and (seq? clause)
+                            (= :require (first clause)))
+                     (let [entries
+                           (filter
+                            (fn [entry]
+                              (let [options (when (vector? entry)
+                                              (apply hash-map (rest entry)))
+                                    alias   (:as options)]
+                                (or (nil? alias)
+                                    (contains? used alias))))
+                            (rest clause))]
+                       (when (seq entries)
+                         (cons :require entries)))
+                     clause))
+                 clauses)]
+    (apply list head name clauses)))
+
+(defn rewrite-unused-requires
+  "prunes unused aliased requires when explicitly enabled by a target"
+  {:added "4.1"}
+  [root target applied]
+  (if (contains? (set (:target/rules target))
+                 :clojure/prune-unused-requires)
+    (let [used (namespace-aliases-used root)]
+      (query/modify
+       root
+       [seq?]
+       (fn [location]
+         (let [form (nav/value location)]
+           (if (= 'ns (first form))
+             (let [rewritten (prune-unused-requires-form form used)]
+               (when (not= form rewritten)
+                 (swap! applied conj :clojure/prune-unused-requires))
+               (nav/replace location rewritten))
+             location)))))
+    root))
 
 (defn add-require-alias
   "adds a target alias to an existing namespace dependency"
@@ -74,8 +186,17 @@
        root
        [symbol?]
        (fn [location]
-         (let [value (nav/value location)]
-           (if (contains? overrides value)
+         (let [value (nav/value location)
+               inside-ns?
+               (loop [current (:parent location)]
+                 (if current
+                   (let [form (nav/value current)]
+                     (if (and (seq? form) (= 'ns (first form)))
+                       true
+                       (recur (:parent current))))
+                   false))]
+           (if (and (contains? overrides value)
+                    (not inside-ns?))
              (do (swap! applied conj :foundation/qualified-overrides)
                  (nav/replace location
                               (symbol (name alias) (name value))))
@@ -111,6 +232,23 @@
            location))))
     root))
 
+(defn rewrite-loop-parameters
+  "replaces rest-destructured loop parameters with native first/next bindings"
+  {:added "4.1"}
+  [bindings]
+  (reduce-kv
+   (fn [output index [binding _]]
+     (if (and (vector? binding) (= '& (second binding)))
+       (let [parameter (symbol (str "migration-loop-value-" index))]
+         (-> output
+             (update :parameters conj parameter)
+             (update :destructure into
+                     [(first binding) (list 'first parameter)
+                      (nth binding 2) (list 'rest parameter)])))
+       (update output :parameters conj binding)))
+   {:parameters [] :destructure []}
+   (vec bindings)))
+
 (defn rewrite-function-recur
   "rewrites function and loop recur into deterministic named calls"
   {:added "4.1"}
@@ -138,13 +276,17 @@
                  loop-name (symbol (str (name recur-target)
                                         "--loop-"
                                         (swap! counter inc)))
-                 parameters (mapv first bindings)
+                 {:keys [parameters destructure]}
+                 (rewrite-loop-parameters bindings)
                  initial    (map #(rewrite-function-recur (second %)
                                                           recur-target
                                                           counter)
                                  bindings)
                  body       (map #(rewrite-function-recur % loop-name counter)
                                  (nnext form))
+                 body       (if (seq destructure)
+                              [(apply list 'let destructure body)]
+                              body)
                  definition (apply list loop-name parameters body)]
              (list 'letfn [definition]
                    (apply list loop-name initial)))
@@ -314,12 +456,30 @@
                                         (first step)
                                         step))
                                     steps)]
-    (list 'call
+    (list 'apply-with
           seed
           (apply list
                  'comp
                  (concat (reverse normalized)
                          ['iter (list 'partial 'iterate move)])))))
+
+(defn rewrite-navigation-template-vars
+  "expands Foundation navigation accessors without native macro evaluation"
+  {:added "4.1"}
+  [form]
+  (apply list
+         'do
+         (map (fn [entry]
+                (let [[sym accessor] entry]
+                  (list 'defn
+                        sym
+                        (list ['zip]
+                              (list sym 'zip :right))
+                        (list ['zip 'step]
+                              (list 'if-let
+                                    ['elem (list 'std.lib.zip/get 'zip)]
+                                    (list accessor 'elem))))))
+              (drop 2 form))))
 
 (defn iterator-first-pipeline?
   "checks for the bounded lazy search shape requiring iterator consumption"
@@ -335,6 +495,63 @@
          (= ['drop 'take-while 'filter 'first]
             (mapv step-head steps)))))
 
+(defn rewrite-navigator-format
+  "replaces the JVM formatter used by the historical navigator display"
+  {:added "4.1"}
+  [form]
+  (let [[_ _ row col status] form]
+    (list 'str "<" row "," col "> "
+          (list 'apply 'str
+                (list 'map 'std.block.base/block-representation
+                      (nth status 2))))))
+
+(defn cursor-compare-form?
+  "checks for the JVM Comparable cursor lookup used by std.lib.zip"
+  {:added "4.1"}
+  [form]
+  (and (seq? form)
+       (= 'zero? (first form))
+       (= 2 (count form))
+       (seq? (second form))
+       (= 'compare (first (second form)))
+       (= 3 (count (second form)))))
+
+(defn rewrite-zip-cursor-comparator
+  "adds and uses a configurable native cursor comparator in std.lib.zip"
+  {:added "4.1"}
+  [form]
+  (cond
+    (and (= 'defonce (first form)) (= '+base+ (second form)))
+    (list 'defonce '+base+
+          (assoc (nth form 2) :cursor-equal? '=))
+
+    (and (= 'defn (first form)) (= 'from-status (second form)))
+    (walk/postwalk
+     (fn [node]
+       (if (cursor-compare-form? node)
+         (let [[_ [_ left right]] node]
+           (list (list :cursor-equal? 'context) left right))
+         node))
+     form)
+
+    :else form))
+
+(defn rewrite-block-cursor-comparator
+  "configures std.block.navigate to compare logical block identity"
+  {:added "4.1"}
+  [form]
+  (walk/postwalk
+   (fn [node]
+     (if (and (map? node) (contains? node :cursor))
+       (assoc node
+              :cursor-equal?
+              '(fn [left right]
+                 (and (= (base/block-type left) (base/block-type right))
+                      (= (base/block-tag left) (base/block-tag right))
+                      (= (base/block-string left) (base/block-string right)))))
+       node))
+   form))
+
 (defn rewrite-target-forms
   "applies explicitly enabled structural adaptations for one target"
   {:added "4.1"}
@@ -344,8 +561,13 @@
      root
      [seq?]
      (fn [location]
-       (let [original (nav/value location)
-             form     (if (contains? rules :clojure/character-literal)
+       (if (= :root (nav/tag location))
+         location
+         (let [original (nav/value location)
+               form     (if (some rules
+                                  [:clojure/character-literal
+                                   :clojure/nil-set
+                                   :clojure/ratio-literal])
                         (walk/postwalk
                          (fn [value]
                            (cond
@@ -401,8 +623,10 @@
            (do (swap! applied conj (if (= :test (:unit/kind target))
                                      :clojure/test-namespace-overrides
                                      :clojure/source-namespace-overrides))
-               (let [rewritten (rewrite-ns-form form
-                                                (:target/overrides target))
+               (let [rewritten (rewrite-ns-form
+                                form
+                                (:target/overrides target)
+                                (:target/target-source-namespace target))
                      rewritten (if (and (= :test (:unit/kind target))
                                         (:target/test-alias target))
                                  (add-require-alias
@@ -411,6 +635,13 @@
                                   (:target/test-alias target))
                                  rewritten)]
                  (nav/replace location rewritten)))
+
+           (and (contains? rules :foundation/block-interfaces-to-protocol)
+                (= 'definterface (first form)))
+           (do (swap! applied conj :foundation/block-interfaces-to-protocol)
+               (if-let [rewritten (rewrite-block-interface form)]
+                 (nav/replace location rewritten)
+                 (nav/delete location)))
 
            (and (contains? rules :foundation/defrecord-native-struct)
                 (= 'defrecord (first form)))
@@ -433,6 +664,33 @@
                 (= 3 (count form)))
            (do (swap! applied conj :clojure/empty-catch-body)
                (nav/replace location (apply list (concat form [nil]))))
+
+           (and (contains? rules :foundation/navigation-template-vars)
+                (= 'f/template-vars (first form)))
+           (do (swap! applied conj :foundation/navigation-template-vars)
+               (nav/replace location
+                            (rewrite-navigation-template-vars form)))
+
+           (and (contains? rules :foundation/navigator-format)
+                (= 'format (first form))
+                (= "<%d,%d> %s" (second form))
+                (= 5 (count form)))
+           (do (swap! applied conj :foundation/navigator-format)
+               (nav/replace location (rewrite-navigator-format form)))
+
+           (and (contains? rules :foundation/zip-cursor-comparator)
+                (or (and (= 'defonce (first form))
+                         (= '+base+ (second form)))
+                    (and (= 'defn (first form))
+                         (= 'from-status (second form)))))
+           (do (swap! applied conj :foundation/zip-cursor-comparator)
+               (nav/replace location (rewrite-zip-cursor-comparator form)))
+
+           (and (contains? rules :foundation/block-cursor-comparator)
+                (= 'defn (first form))
+                (= 'navigator (second form)))
+           (do (swap! applied conj :foundation/block-cursor-comparator)
+               (nav/replace location (rewrite-block-cursor-comparator form)))
 
            (and (contains? rules :clojure/named-recur)
                 (= 'defn (first form))
@@ -481,8 +739,8 @@
            (not= original form)
            (nav/replace location form)
 
-           :else
-           location))))))
+             :else
+             location)))))))
 
 (defn rewrite-symbol
   "returns a replacement symbol and its rule id when a route applies"
@@ -588,7 +846,7 @@
       (-> cursor nav/root-string nav/parse-root))))
 
 (def +native-class-names+
-  #{"String"})
+  #{"String" "Stream" "Edn" "Crypto" "Process"})
 
 (defn native-class-symbol?
   "checks for a qualified symbol owned by a known std.native class"
@@ -622,6 +880,115 @@
                 :symbol value
                 :safety :manual}))))
 
+(def +source-definition-heads+
+  '#{def defn defn- defmacro defonce defrecord defstruct declare defmethod})
+
+(defn source-form-identity
+  "returns a stable identity for aligning original and rewritten top-level forms"
+  {:added "4.1"}
+  [form index]
+  (cond
+    (and (seq? form) (#{'ns 'ns+} (first form)))
+    [:namespace (second form)]
+
+    (and (seq? form)
+         (contains? +source-definition-heads+ (first form))
+         (symbol? (second form)))
+    [:definition (second form)]
+
+    :else
+    [:position index]))
+
+(defn source-form-records
+  "indexes top-level source forms without discarding surrounding source blocks"
+  {:added "4.1"}
+  [source]
+  (loop [children (vec (block/children (block/parse-root source)))
+         counts {}
+         index 0
+         output []]
+    (if (empty? children)
+      output
+      (let [child (first children)]
+        (if (block/expression? child)
+          (let [form       (block/value child)
+                base       (source-form-identity form index)
+                occurrence (get counts base 0)]
+            (recur (vec (rest children))
+                   (assoc counts base (inc occurrence))
+                   (inc index)
+                   (conj output {:key [base occurrence]
+                                 :form form
+                                 :string (block/string child)
+                                 :multiline (pos? (block/height child))})))
+          (recur (vec (rest children)) counts index output))))))
+
+(defn layout-source-form
+  "lays out one rewritten source form at the migration readability width"
+  {:added "4.1"}
+  [form multiline]
+  (binding [estimate/*readable-len* 80]
+    (block/layout
+     (if multiline
+       (with-meta form (assoc (meta form) :readable-len 1))
+       form))))
+
+(defn layout-rewritten-source
+  "lays out rewritten top-level forms while retaining untouched source blocks"
+  {:added "4.1"}
+  [input output]
+  (let [originals (into {}
+                        (map (juxt :key identity)
+                             (source-form-records input)))]
+    (loop [children (vec (block/children (block/parse-root output)))
+           counts {}
+           index 0
+           rendered []]
+      (if (empty? children)
+        (apply str rendered)
+        (let [child (first children)]
+          (if (block/expression? child)
+            (let [form       (block/value child)
+                  base       (source-form-identity form index)
+                  occurrence (get counts base 0)
+                  key        [base occurrence]
+                  original   (get originals key)
+                  text       (cond
+                               (= (:form original ::missing) form)
+                               (:string original)
+
+                               :else
+                               (str/replace
+                                (block/string
+                                 (layout-source-form form
+                                                     (:multiline original)))
+                                #"(?m)^[ \t]+$"
+                                ""))]
+              (recur (vec (rest children))
+                     (assoc counts base (inc occurrence))
+                     (inc index)
+                     (conj rendered text)))
+            (recur (vec (rest children))
+                   counts
+                   index
+                   (conj rendered (block/string child)))))))))
+
+(defn clean-blank-lines
+  "removes indentation from otherwise empty generated source lines"
+  {:added "4.1"}
+  [source]
+  (str/replace source #"(?m)^[ \t]+$" ""))
+
+(defn migration-source-input
+  "selects a reviewed native template for semantic, non-mechanical targets"
+  {:added "4.1"}
+  [source target applied]
+  (if-let [template (when (= :source (:unit/kind target))
+                      (:target/source-template target))]
+    (do (swap! applied conj :foundation/reviewed-native-template)
+        (slurp template))
+    source))
+
 (defn migrate-source
   "migrates one source string and returns reproducible evidence"
   {:added "4.1"}
@@ -629,7 +996,8 @@
    (migrate-source source migration-catalog nil))
   ([source migration-catalog target]
    (let [applied           (atom [])
-        initial           (nav/parse-root source)
+        working-source    (migration-source-input source target applied)
+        initial           (nav/parse-root working-source)
         override-result   (if target
                             (rewrite-test-override-symbols initial target applied)
                             initial)
@@ -641,10 +1009,24 @@
         target-result     (if target
                             (rewrite-target-forms arity-result target applied)
                             initial)
-        dependency-result (rewrite-dependencies target-result
+        structural-result (if (and target
+                                   (contains? (set (:target/rules target))
+                                              :foundation/block-interfaces-to-protocol))
+                            (remove-block-interface-remnants target-result)
+                            target-result)
+        dependency-result (rewrite-dependencies structural-result
                                                 migration-catalog applied)
-        final             (rewrite-refer-metadata dependency-result applied)
-        output            (nav/root-string final)]
+        require-result    (if target
+                            (rewrite-unused-requires dependency-result
+                                                     target
+                                                     applied)
+                            dependency-result)
+        final             (rewrite-refer-metadata require-result applied)
+        raw-output        (nav/root-string final)
+        output            (if (= :source (:unit/kind target))
+                            (clean-blank-lines
+                             (layout-rewritten-source working-source raw-output))
+                            raw-output)]
      {:input source
       :source/checksum (sha256 source)
       :output/checksum (sha256 output)

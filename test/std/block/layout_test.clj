@@ -91,6 +91,17 @@
                                          b 2]))))
   => "(let ^{:spec {:columns 2, :col-align true}} [^{:readable-len 30} {:keys ^{:tag :vector, :readable-len 10, :spec {:columns 1}} [a b c d e], :as other} b])")
 
+^{:refer std.block.layout/layout-annotate
+  :added "4.1"
+  :id defprotocol-layout}
+(fact "does not treat protocol declarations as function definitions"
+  (-> '(defprotocol IBlock
+         (block-type [block])
+         (block-tag [block]))
+      bind/layout-main
+      str)
+  => "(defprotocol IBlock\n  (block-type [block])\n  (block-tag [block]))")
+
 ^{:refer std.block.layout/layout-default-fn :added "4.0"}
 (fact "the default function for level 1 transformation"
 

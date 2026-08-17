@@ -15,7 +15,17 @@
   => [:foundation/std-lib-foundation
       :clojure/core-qualified
       :foundation/std-lib-walk
-      :foundation/nil-sentinel])
+      :foundation/std-lib-collection
+      :foundation/hash-map-predicate
+      :foundation/form-predicate
+      :foundation/zipper-class
+      :foundation/indexing-reader-native
+      :clojure/contains-predicate
+      :foundation/nil-sentinel
+      :clojure/walk-foundation
+      :clojure/java-io-stream
+      :clojure/edn-native
+      :clojure/pprint-pretty])
 
 ^{:refer code.migrate.catalog/rules-for-pathway :added "4.1"}
 (fact "keeps source and test rules in distinct documents"
@@ -27,7 +37,30 @@
   => [[:source :test] #{:clojure :foundation} true])
 
 ^{:refer code.migrate.catalog/target-by-id :added "4.1"}
-(fact "locates the first automated port target"
-  (:target/source-namespace
-   (target-by-id (load-catalog +catalog-path+) :migration/std-lib-zip))
-  => 'std.lib.zip)
+(fact "orders migration targets from least to most dependent"
+  (let [catalog (load-catalog +catalog-path+)
+        targets (sort-by :target/order (:migration/targets catalog))]
+    [(mapv :target/order targets)
+     (mapv #(or (:target/target-source-namespace %)
+                (:target/source-namespace %))
+           targets)])
+  => [[1 2 3 4 5 6 7 8 9 10]
+      '[std.lib.zip
+        std.block.check
+        std.block.protocol
+        std.block.base
+        std.block.reader
+        std.block.value
+        std.block.type
+        std.block.construct
+        std.block.parse
+        std.block.navigate]])
+
+^{:refer code.migrate.catalog/target-by-id
+  :added "4.1"
+  :id zipper-extension-fields}
+(fact "retains zipper extension fields required by block navigation"
+  (get-in (target-by-id (load-catalog +catalog-path+)
+                        :migration/std-lib-zip)
+          [:target/struct-fields 'Zipper])
+  => '[context prefix display parent left right depth changed? tag position])

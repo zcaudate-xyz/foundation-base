@@ -1,0 +1,78 @@
+(ns std.block.base
+  (:require [std.block.protocol :as protocol]))
+
+(defn block? [value] (satisfies? protocol/IBlock value))
+(defn expression? [block]
+  (and (block? block) (has? #{:token :container} (protocol/block-type block))))
+(defn void? [block]
+  (and (block? block) (= :void (protocol/block-type block))))
+(defn token? [block]
+  (and (block? block) (= :token (protocol/block-type block))))
+(defn container? [block]
+  (and (block? block) (= :container (protocol/block-type block))))
+(defn modifier? [block]
+  (and (block? block) (= :modifier (protocol/block-type block))))
+(defn block-type [block] (protocol/block-type block))
+(defn block-tag [block] (protocol/block-tag block))
+(defn block-string [block] (protocol/block-string block))
+(def void-representations
+  {nil ":eof" "" ":eof" " " "␣" "\n" "\\n" "\r" "\\r" "\t" "\\t" "\f" "\\f"})
+(defn representation-value
+  [value]
+  (if (block? value)
+    (if (void? value)
+      (symbol (or (get void-representations (block-string value))
+                  (block-string value)))
+      (if (token? value)
+        (protocol/block-value value)
+        (if (container? value)
+          (let [children (map representation-value
+                              (protocol/block-children value))]
+            (if (= :list (protocol/block-tag value))
+              (apply list children)
+              (if (= :vector (protocol/block-tag value))
+                (vec children)
+                (protocol/block-value value))))
+          value)))
+    (if (map? value)
+      (reduce-kv (fn [output key item]
+                   (assoc output key (representation-value item)))
+                 {}
+                 value)
+      (if (vector? value)
+        (mapv representation-value value)
+        value))))
+(defn block-representation
+  [block]
+  (if (block? block)
+    (if (void? block)
+      (or (get void-representations (block-string block))
+          (block-string block))
+      (if (token? block)
+        (pr-str (block-value block))
+        (block-string block)))
+    (if (and (map? block) (has? block :tag) (has? block :lines))
+      (str "{:tag " (pr-str (:tag block))
+           ", :lines " (pr-str (representation-value (:lines block))) "}")
+      (if (vector? block)
+        (pr-str (representation-value block))
+        (str block)))))
+(defn block-info [block]
+  {:type (protocol/block-type block)
+   :tag (protocol/block-tag block)
+   :string (protocol/block-string block)
+   :height (protocol/block-height block)
+   :width (protocol/block-width block)})
+(defn block-length [block] (protocol/block-length block))
+(defn block-width [block] (protocol/block-width block))
+(defn block-height [block] (protocol/block-height block))
+(defn block-prefixed [block] (protocol/block-prefixed block))
+(defn block-suffixed [block] (protocol/block-suffixed block))
+(defn block-verify [block] (protocol/block-verify block))
+(defn block-value [block] (protocol/block-value block))
+(defn block-value-string [block] (protocol/block-value-string block))
+(defn block-children [block] (protocol/block-children block))
+(defn block-modify [block accumulator input]
+  (protocol/block-modify block accumulator input))
+(defn replace-children [block children]
+  (protocol/replace-children block (vec children)))

@@ -1,0 +1,108 @@
+(ns std.block.value
+  (:require [std.block.base :as base]))
+
+(defn apply-modifiers
+  [blocks]
+  (loop [out []
+         modifiers ()
+         remaining blocks]
+    (if (empty? remaining)
+      out
+      (let [block (first remaining)
+            more (rest remaining)]
+        (if (base/modifier? block)
+          (recur out (cons block modifiers) more)
+          (if (empty? modifiers)
+            (recur (conj out block) modifiers more)
+            (recur (base/block-modify (first modifiers) out block)
+                   (rest modifiers)
+                   more)))))))
+
+(defn child-values
+  [block]
+  (->> (base/block-children block)
+       (keep (fn [child]
+               (if (or (base/expression? child)
+                       (base/modifier? child))
+                 child
+                 nil)))
+       (apply-modifiers)
+       (mapv base/block-value)))
+
+(defn root-value [block]
+  (apply list 'do (child-values block)))
+
+(defn list-value [block] (apply list (child-values block)))
+(defn vector-value [block] (vec (child-values block)))
+(defn set-value [block] (into #{} (child-values block)))
+
+(defn map-value
+  [block]
+  (let [values (child-values block)]
+    (loop [index 0
+           output {}]
+      (if (= index (count values))
+        output
+        (if (= (inc index) (count values))
+          (throw "Map block requires an even number of values")
+          (recur (+ index 2)
+                 (assoc output
+                        (nth values index)
+                        (nth values (inc index)))))))))
+
+(defn from-value-string
+  [block]
+  (Edn/read (base/block-value-string block)))
+
+(defn deref-value [block] (list 'deref (first (child-values block))))
+(defn meta-value
+  [block]
+  (let [[metadata value] (child-values block)]
+    (with-meta value
+      (if (map? metadata)
+        metadata
+        (if (keyword? metadata)
+          {metadata true}
+          {:tag metadata})))))
+(defn quote-value [block] (list 'quote (first (child-values block))))
+(defn var-value [block] (list 'var (first (child-values block))))
+(defn hash-keyword-value
+  [block]
+  (let [[prefix value] (child-values block)]
+    (reduce-kv (fn [output key item]
+                 (assoc output
+                        (keyword (str (name prefix) "/" (name key)))
+                        item))
+               {}
+               value)))
+(defn select-value
+  [block]
+  (list '? (apply hash-map (child-values block))))
+(defn select-splice-value
+  [block]
+  (list '?-splicing (apply hash-map (child-values block))))
+(defn unquote-value [block] (list 'unquote (first (child-values block))))
+(defn unquote-splice-value
+  [block]
+  (list 'unquote-splicing (first (child-values block))))
+
+(def *container-values*
+  {:root {:value root-value}
+   :fn {:value from-value-string}
+   :list {:value list-value}
+   :map {:value map-value}
+   :set {:value set-value}
+   :vector {:value vector-value}
+   :deref {:value deref-value}
+   :meta {:value meta-value}
+   :quote {:value quote-value}
+   :syntax {:value from-value-string}
+   :var {:value var-value}
+   :hash-keyword {:value hash-keyword-value}
+   :hash-token {:value from-value-string}
+   :hash-meta {:value meta-value}
+   :hash-eval {:value from-value-string}
+   :select {:value select-value}
+   :select-splice {:value select-splice-value}
+   :unquote {:value unquote-value}
+   :unquote-splice {:value unquote-splice-value}})
