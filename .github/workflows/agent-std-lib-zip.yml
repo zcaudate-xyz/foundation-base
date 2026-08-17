@@ -1,0 +1,121 @@
+name: Agent std.lib.zip migration candidate
+
+on:
+  push:
+    branches:
+      - agent/migrate-std-lib-zip-native-hara
+
+permissions:
+  contents: write
+  packages: read
+
+concurrency:
+  group: agent-std-lib-zip-candidate
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC
+
+jobs:
+  validate-and-apply:
+    if: github.event.head_commit.message == 'migrate: run std.lib.zip candidate'
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+
+    steps:
+      - name: Checkout Foundation candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: agent/migrate-std-lib-zip-native-hara
+
+      - name: Checkout pinned Hara workspace
+        uses: actions/checkout@v4
+        with:
+          repository: hara-lang/hara
+          ref: d364fa847e3d61bffe1a0095852730f8d8782938
+          path: hara-workspace/technology/hara
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Build native Hara runtime
+        run: mvn -f hara-workspace/technology/hara/core/java/pom.xml -Ptruffle -DskipTests package
+
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Evaluate candidate, apply exact patch, and retest
+        shell: bash
+        env:
+          HARA_WORKSPACE_ROOT: ${{ github.workspace }}/hara-workspace
+        run: |
+          set -euo pipefail
+          patch_file="$GITHUB_WORKSPACE/.github/agent/std-lib-zip.patch"
+          candidate="${RUNNER_TEMP}/foundation-std-lib-zip-candidate"
+
+          git worktree add --detach "$candidate" HEAD
+          git -C "$candidate" apply "$patch_file"
+
+          run_foundation() {
+            local root="$1"
+            docker run --rm --network host \
+              -e CI=true \
+              -e HARA_WORKSPACE_ROOT="$HARA_WORKSPACE_ROOT" \
+              -e "LEIN_JVM_OPTS=$LEIN_JVM_OPTS" \
+              -v "$HOME/.m2:/root/.m2" \
+              -v "$GITHUB_WORKSPACE:$GITHUB_WORKSPACE" \
+              -v "$RUNNER_TEMP:$RUNNER_TEMP" \
+              -w "$root" \
+              ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+              bash -lc '
+                set -euo pipefail
+                mkdir -p .tmp
+                npm ci --legacy-peer-deps
+                (cd scripts/js_parser && npm ci)
+
+                lein repl :headless :port 7888 > .tmp/nrepl.log 2>&1 &
+                repl_pid=$!
+                for _ in $(seq 1 90); do
+                  [[ -f .nrepl-port ]] && break
+                  sleep 1
+                done
+                [[ -f .nrepl-port ]]
+                port=$(cat .nrepl-port)
+                printf "%s\n" \
+                  "(require (quote [code.test :as test]))" \
+                  "(let [result (test/run (quote [std.lib.zip-test code.migrate.engine-test]))] (prn (select-keys result [:passed :failed :throw :timeout])))" \
+                  ":repl/quit" \
+                  | timeout 180 lein repl :connect "$port"
+                kill "$repl_pid" 2>/dev/null || true
+                wait "$repl_pid" 2>/dev/null || true
+
+                lein test :only std.lib.zip-test
+                lein test :only code.migrate.engine-test
+                HARA_WORKSPACE_ROOT="$HARA_WORKSPACE_ROOT" lein test :with code.migrate
+              '
+          }
+
+          run_foundation "$candidate"
+          git apply "$patch_file"
+          run_foundation "$GITHUB_WORKSPACE"
+
+      - name: Commit the validated candidate bytes
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/agent-std-lib-zip.yml
+          git rm .github/agent/std-lib-zip.patch
+          git add src/code/migrate/engine.clj test/code/migrate/engine_test.clj
+          git commit -m 'migrate: apply std.lib.zip engine contracts'
+          git push origin HEAD:agent/migrate-std-lib-zip-native-hara

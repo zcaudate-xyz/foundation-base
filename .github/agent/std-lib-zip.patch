@@ -1,0 +1,149 @@
+diff --git a/src/code/migrate/engine.clj b/src/code/migrate/engine.clj
+--- a/src/code/migrate/engine.clj
++++ b/src/code/migrate/engine.clj
+@@ -14,17 +14,25 @@
+ (defn dependency-routes
+   "compiles safe namespace replacement rules from a migration catalog"
+   {:added "4.1"}
+-  [migration-catalog]
+-  (->> (:migration/rules migration-catalog)
+-       (filter #(and (= :dependency (:rule/kind %))
+-                     (#{:replace-namespace :replace-symbol}
+-                      (get-in % [:rule/rewrite :op]))))
+-       (map (fn [rule]
+-              [(:rule/match rule)
+-               {:target (or (get-in rule [:rule/rewrite :namespace])
+-                            (get-in rule [:rule/rewrite :symbol]))
+-                :rule/id (:rule/id rule)}]))
+-       (into {})))
++  ([migration-catalog]
++   (dependency-routes migration-catalog nil))
++  ([migration-catalog target]
++   (let [pathway (or (:unit/kind target) :source)
++         active-rules (some->> (:target/rules target) set)]
++     (->> (:migration/rules migration-catalog)
++          (filter #(and (= pathway (:rule/pathway %))
++                        (or (nil? active-rules)
++                            (contains? active-rules (:rule/id %)))
++                        (= :dependency (:rule/kind %))
++                        (#{:replace-namespace :replace-symbol}
++                         (get-in % [:rule/rewrite :op]))))
++          (map (fn [rule]
++                 [(:rule/match rule)
++                  {:target (or (get-in rule [:rule/rewrite :namespace])
++                               (get-in rule [:rule/rewrite :symbol]))
++                   :rule/id (:rule/id rule)}]))
++          (into {})))))
+@@ -312,7 +320,7 @@
+                                         (first step)
+                                         step))
+                                     steps)]
+-    (list 'call
++    (list 'apply-with
+           seed
+           (apply list
+                  'comp
+@@ -535,8 +543,8 @@
+ (defn rewrite-dependencies
+   "rewrites exact and qualified dependency symbols through code.query"
+   {:added "4.1"}
+-  [root migration-catalog applied]
+-  (let [routes (dependency-routes migration-catalog)
++  [root migration-catalog target applied]
++  (let [routes (dependency-routes migration-catalog target)
+         reader-route (get routes 'fn*)
+         root (if reader-route
+                (query/modify
+@@ -642,7 +650,8 @@
+                             (rewrite-target-forms arity-result target applied)
+                             initial)
+         dependency-result (rewrite-dependencies target-result
+-                                                migration-catalog applied)
++                                                migration-catalog
++                                                target applied)
+         final             (rewrite-refer-metadata dependency-result applied)
+         output            (nav/root-string final)]
+      {:input source
+@@ -656,22 +665,24 @@
+ (defn target-for-unit
+   "returns the catalog target owning a normalized migration unit"
+   {:added "4.1"}
+   [unit migration-catalog]
+-  (let [path-key (if (= :test (:unit/kind unit))
+-                   :target/test-path
+-                   :target/source-path)]
+-    (when-let [target (first (filter #(= (:source/path unit) (get % path-key))
+-                                     (:migration/targets migration-catalog)))]
+-      (let [pathway (:unit/kind unit)
+-            rule-key (if (= :test pathway)
+-                       :target/test-rules
+-                       :target/source-rules)]
+-        (assoc target
+-               :unit/kind pathway
+-               :target/rules (get target rule-key []))))))
++  (let [pathway (:unit/kind unit)
++        config-key (catalog/target-pathway-key pathway)]
++    (when-let [target
++               (first
++                (filter #(= (:source/path unit)
++                            (get-in % [config-key :input/path]))
++                        (:migration/targets migration-catalog)))]
++      (catalog/target-for-pathway target pathway))))
+@@ -681,8 +692,12 @@
+   {:added "4.1"}
+   [unit migration-catalog]
+   (let [target (target-for-unit unit migration-catalog)]
++    (when-not target
++      (throw (ex-info "Migration unit is not declared in the catalog"
++                      {:unit/kind (:unit/kind unit)
++                       :source/path (:source/path unit)})))
+     (merge (select-keys unit
+                         [:unit/kind :source/path :target/path])
+            (migrate-source (:source/string unit)
+                            migration-catalog
+                            target))))
+diff --git a/test/code/migrate/engine_test.clj b/test/code/migrate/engine_test.clj
+--- a/test/code/migrate/engine_test.clj
++++ b/test/code/migrate/engine_test.clj
+@@ -46,6 +46,25 @@
+       {:value 'fn?
+        :rule/id :clojure/callable-predicate}]
++
++  (mapv #(-> (rewrite-symbol routes %) :value)
++        '[clojure.core/for
++          clojure.core/doseq
++          clojure.core/dotimes
++          clojure.core/while])
++  => '[std.foundation/for
++       std.foundation/doseq
++       std.foundation/dotimes
++       std.foundation/while]
++
++  (let [target (target-for-unit
++                {:unit/kind :test
++                 :source/path "test/std/lib/zip_test.clj"}
++                +catalog+)
++        routes (dependency-routes +catalog+ target)]
++    [(rewrite-symbol routes 'fn*)
++     (rewrite-symbol routes 'ifn?)])
++  => [{:value 'fn :rule/id :clojure.test/anonymous-function-reader}
++      {:value 'fn? :rule/id :clojure.test/callable-predicate}]
+ 
+   (let [first-pass (:output
+                     (migrate-source "#(+ %1 %2)" +catalog+))
+@@ -154,7 +173,13 @@
+       "(->> (iterate move zip) (drop 1) (take-while right-element) (filter pred) (first))"
+       +catalog+
+       target)))
+-  => "(call zip (comp first (filter pred) (take-while right-element) (drop 1) iter (partial iterate move)))"
++  => "(apply-with zip (comp first (filter pred) (take-while right-element) (drop 1) iter (partial iterate move)))"
++
++  (->> (:migration/rules +catalog+)
++       (filter #(= :clojure/iterator-first-pipeline (:rule/id %)))
++       first
++       :rule/rewrite
++       :op)
++  => :iterator-first-apply-with-pipeline
+ 
+   (let [target (catalog/target-by-id +catalog+ :migration/std-lib-zip)]
+     (:output (migrate-source "(merge zip body)" +catalog+ target)))
