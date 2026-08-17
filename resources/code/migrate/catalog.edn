@@ -7,35 +7,66 @@
  [{:target/id :migration/std-lib-zip
    :target/order 1
    :target/status :candidate
-   :target/source-namespace std.lib.zip
-   :target/test-namespace std.lib.zip-test
-   :target/source-path "src/std/lib/zip.clj"
-   :target/test-path "test/std/lib/zip_test.clj"
-   :target/target-source-path "lib/src/std/lib/zip.hal"
-   :target/target-test-path "lib/test/std/lib/zip_test.hal"
-   :target/source-rules
-   [:clojure/core-qualified
-    :foundation/std-lib-foundation
-    :foundation/std-lib-walk
-    :foundation/nil-sentinel
-    :foundation/defrecord-native-struct
-    :foundation/drop-host-printer
-    :foundation/struct-merge
-    :foundation/native-result
-    :clojure/anonymous-function-reader
-    :clojure/callable-predicate
-    :clojure/single-arity-defn
-    :clojure/iterator-first-pipeline
-    :clojure/thread-zero-arity-step
-    :clojure/named-recur
-    :clojure/empty-catch-body
-    :clojure/source-namespace-overrides]
-   :target/test-rules
-   [:clojure/test-namespace-overrides
-    :clojure/quoted-refer-metadata
-    :foundation/qualified-overrides
-    :foundation/code-test-to-native-test]
-   :target/overrides [get find prewalk postwalk]
-   :target/test-alias zip
-   :target/struct-fields
-   {Zipper [context prefix display parent left right depth changed?]}}]}
+   :target/invariants
+   {:top-level-structure :preserve
+    :comments-and-blank-lines :preserve
+    :metadata :preserve
+    :indentation :preserve
+    :untouched-bytes :preserve
+    :manual-output-edits false}
+   :target/promotion-gates
+   [:foundation/original-tests-pass
+    :migration/catalog-valid
+    :migration/diagnostics-empty
+    :migration/deterministic
+    :migration/layout-preserved
+    :hara/staged-source-evaluates
+    :hara/lowered-test-passes
+    :hara/native-code-test-passes
+    :hara/installed-checksums-match
+    :migration/no-manual-output-changes]
+   :target/source
+   {:input/path "src/std/lib/zip.clj"
+    :output/path "lib/src/std/lib/zip.hal"
+    :namespace std.lib.zip
+    :rules
+    [:clojure/core-qualified
+     :foundation/std-lib-foundation
+     :foundation/std-lib-walk
+     :foundation/nil-sentinel
+     :foundation/defrecord-native-struct
+     :foundation/drop-host-printer
+     :foundation/struct-merge
+     :foundation/native-result
+     :clojure/anonymous-function-reader
+     :clojure/callable-predicate
+     :clojure/single-arity-defn
+     :clojure/iterator-first-pipeline
+     :clojure/thread-zero-arity-step
+     :clojure/named-recur
+     :clojure/empty-catch-body
+     :clojure/source-namespace-overrides]
+    :options
+    {:overrides [get find prewalk postwalk]
+     :struct-fields
+     {Zipper [context prefix display parent left right depth changed?]}}}
+   :target/test
+   {:input/path "test/std/lib/zip_test.clj"
+    :output/path "lib/test/std/lib/zip_test.hal"
+    :namespace std.lib.zip-test
+    :rules
+    [:clojure/test-namespace-overrides
+     :clojure/quoted-refer-metadata
+     :foundation/qualified-overrides
+     :foundation/code-test-to-native-test
+     :foundation.test/std-lib-foundation
+     :clojure.test/core-qualified
+     :foundation.test/std-lib-walk
+     :foundation.test/nil-sentinel
+     :clojure.test/anonymous-function-reader
+     :clojure.test/callable-predicate
+     :clojure.test/thread-zero-arity-step]
+    :options
+    {:source/namespace std.lib.zip
+     :alias zip
+     :overrides [get find prewalk postwalk]}}}]}
