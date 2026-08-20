@@ -249,4 +249,667 @@
     :foundation/block-test-compat
     :foundation/code-test-to-native-test]
    :target/overrides [next replace type]
-   :target/test-alias navigate}]}
+   :target/test-alias navigate}
+
+  {:target/id :migration/std-block-heal-parse
+   :target/order 11
+   :target/status :candidate
+   :target/source-namespace std.block.heal.parse
+   :target/test-namespace std.block.heal.parse-test
+   :target/source-path "src/std/block/heal/parse.clj"
+   :target/test-path "test/std/block/heal/parse_test.clj"
+   :target/target-source-path "lib/src/std/block/heal/parse.hal"
+   :target/target-test-path "lib/test/std/block/heal/parse_test.hal"
+   :target/test-data-paths ["test-data/std.block.heal/cases/001_basic.block"]
+   :target/expected-assertions 44
+   :target/source-rules
+   [:clojure/string-foundation
+    :foundation/std-lib-collection
+    :foundation/string-common-native
+    :foundation/string-trim-right-native
+    :foundation/env-print-native
+    :clojure/character-array-string
+    :clojure/some-native
+    :foundation/map-juxt-native
+    :foundation/rename-keys-native
+    :foundation/heal-line-format-native
+    :foundation/heal-parse-delimiters-native
+    :clojure/nested-map-parameter-destructuring
+    :clojure/character-array-native
+    :clojure/array-set-native
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/env-with-out-string-native
+    :foundation/env-foundation-native
+    :foundation/prose-string-native
+    :foundation/prose-join-lines-native
+    :foundation/prose-spaces-native
+    :foundation/test-file-slurp-native
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-heal-print
+   :target/order 12
+   :target/status :candidate
+   :target/source-namespace std.block.heal.print
+   :target/test-namespace std.block.heal.print-test
+   :target/source-path "src/std/block/heal/print.clj"
+   :target/test-path "test/std/block/heal/print_test.clj"
+   :target/target-source-path "lib/src/std/block/heal/print.hal"
+   :target/target-test-path "lib/test/std/block/heal/print_test.hal"
+   :target/source-dependency-paths ["lib/src/std/block/heal/parse.hal"]
+   :target/test-data-paths ["test-data/std.block.heal/cases/002_complex.block"]
+   :target/expected-assertions 1
+   :target/source-rules
+   [:foundation/env-pr-native
+    :foundation/heal-print-loop-native
+    :clojure/single-arity-defn
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/env-with-out-string-native
+    :foundation/env-foundation-native
+    :foundation/test-file-slurp-native
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-heal-edit
+   :target/order 13
+   :target/status :candidate
+   :target/source-namespace std.block.heal.edit
+   :target/test-namespace std.block.heal.edit-test
+   :target/source-path "src/std/block/heal/edit.clj"
+   :target/test-path "test/std/block/heal/edit_test.clj"
+   :target/target-source-path "lib/src/std/block/heal/edit.hal"
+   :target/target-test-path "lib/test/std/block/heal/edit_test.hal"
+   :target/source-dependency-paths ["lib/src/std/block/heal/parse.hal"
+                                    "lib/src/std/block/heal/print.hal"]
+   :target/expected-assertions 11
+   :target/source-rules
+   [:clojure/string-foundation
+    :foundation/string-common-native
+    :clojure/string-join-native
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-heal-indent
+   :target/order 14
+   :target/status :candidate
+   :target/source-namespace std.block.heal.indent
+   :target/test-namespace std.block.heal.indent-test
+   :target/source-path "src/std/block/heal/indent.clj"
+   :target/test-path "test/std/block/heal/indent_test.clj"
+   :target/target-source-path "lib/src/std/block/heal/indent.hal"
+   :target/target-test-path "lib/test/std/block/heal/indent_test.hal"
+   :target/source-dependency-paths ["lib/src/std/block/heal/parse.hal"]
+   :target/test-data-paths ["test-data/std.block.heal/cases/001_basic.block"
+                            "test-data/std.block.heal/cases/002_complex.block"
+                            "test-data/std.block.heal/cases/004_shorten.block"]
+   :target/expected-assertions 31
+   :target/source-rules
+   [:foundation/std-lib-collection
+    :foundation/map-vals-native
+    :clojure/safe-sequential-get
+    :clojure/volatile-atom-native
+    :clojure/vreset-reset-native
+    :foundation/heal-map-entry-sort-native
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/prose-string-native
+    :foundation/prose-join-lines-native
+    :foundation/test-file-slurp-native
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-heal-core
+   :target/order 15
+   :target/status :candidate
+   :target/source-namespace std.block.heal.core
+   :target/test-namespace std.block.heal.core-test
+   :target/source-path "src/std/block/heal/core.clj"
+   :target/test-path "test/std/block/heal/core_test.clj"
+   :target/target-source-path "lib/src/std/block/heal/core.hal"
+   :target/target-test-path "lib/test/std/block/heal/core_test.hal"
+   :target/source-dependency-paths ["lib/src/std/block/heal/parse.hal"
+                                    "lib/src/std/block/heal/edit.hal"
+                                    "lib/src/std/block/heal/indent.hal"]
+   :target/test-data-paths ["test-data/std.block.heal/cases/002_complex.block"
+                            "test-data/std.block.heal/cases/003_examples.block"
+                            "test-data/std.block.heal/cases/004_shorten.block"
+                            "test-data/std.block.heal/cases/005_example.block"]
+   :target/expected-assertions 50
+   :target/source-rules
+   [:clojure/string-foundation
+    :clojure/integer-max-native
+    :foundation/env-print-native
+    :foundation/prose-string-native
+    :foundation/prose-join-lines-native
+    :foundation/prose-spaces-native
+    :foundation/heal-core-destructuring-native
+    :foundation/heal-content-reduce-native
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/env-with-out-string-native
+    :foundation/env-foundation-native
+    :foundation/prose-string-native
+    :foundation/prose-join-lines-native
+    :foundation/test-file-slurp-native
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-heal
+   :target/order 16
+   :target/status :candidate
+   :target/source-namespace std.block.heal
+   :target/test-namespace std.block.heal-test
+   :target/source-path "src/std/block/heal.clj"
+   :target/test-path "test/std/block/heal_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/std_block_heal.hal"
+   :target/target-source-path "lib/src/std/block/heal.hal"
+   :target/target-test-path "lib/test/std/block/heal_test.hal"
+   :target/source-dependency-paths ["lib/src/std/text/diff.hal"
+                                    "lib/src/std/block/heal/parse.hal"
+                                    "lib/src/std/block/heal/edit.hal"
+                                    "lib/src/std/block/heal/core.hal"
+                                    "lib/src/std/block/heal/print.hal"]
+   :target/expected-assertions 2
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/env-with-out-string-native
+    :foundation/env-foundation-native
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-layout-estimate
+   :target/order 17
+   :target/status :candidate
+   :target/source-namespace std.block.layout.estimate
+   :target/test-namespace std.block.layout.estimate-test
+   :target/source-path "src/std/block/layout/estimate.clj"
+   :target/test-path "test/std/block/estimate_test.clj"
+   :target/target-source-path "lib/src/std/block/layout/estimate.hal"
+   :target/target-test-path "lib/test/std/block/layout/estimate_test.hal"
+   :target/expected-assertions 14
+   :target/source-rules
+   [:foundation/std-lib-collection
+    :foundation/std-lib-foundation
+    :clojure/some-native
+    :clojure/map-destructuring-native
+    :clojure/duplicate-let-binding-native
+    :foundation/layout-readable-width-native
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-layout-common-source
+   :target/order 18
+   :target/status :candidate
+   :target/source-namespace std.block.layout.common
+   :target/source-path "src/std/block/layout/common.clj"
+   :target/target-source-path "lib/src/std/block/layout/common.hal"
+   :target/source-dependency-paths ["lib/src/std/block/base.hal"
+                                    "lib/src/std/block/check.hal"
+                                    "lib/src/std/block/construct.hal"
+                                    "lib/src/std/block/type.hal"
+                                    "lib/src/std/block/layout/estimate.hal"]
+   :target/source-rules
+   [:clojure/string-foundation
+    :foundation/std-lib-collection
+    :foundation/std-lib-foundation
+    :clojure/some-native
+    :clojure/map-destructuring-native
+    :clojure/duplicate-let-binding-native
+    :clojure/apply-fixed-arguments-native
+    :clojure/numeric-equality-native
+    :foundation/layout-map-pairs-native
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-layout
+   :target/order 19
+   :target/status :candidate
+   :target/source-namespace std.block.layout
+   :target/test-namespace std.block.layout-test
+   :target/source-path "src/std/block/layout.clj"
+   :target/test-path "test/std/block/layout_test.clj"
+   :target/target-source-path "lib/src/std/block/layout.hal"
+   :target/target-test-path "lib/test/std/block/layout_test.hal"
+   :target/source-dependency-paths ["lib/src/std/block/base.hal"
+                                    "lib/src/std/block/construct.hal"
+                                    "lib/src/std/block/layout/estimate.hal"
+                                    "lib/src/std/block/layout/common.hal"]
+   :target/expected-assertions 23
+   :target/source-rules
+   [:clojure/string-foundation
+    :foundation/std-lib-collection
+    :foundation/std-lib-walk
+    :foundation/form-predicate
+    :clojure/some-native
+    :clojure/optional-rest-parameter-native
+    :foundation/layout-optional-opts-native
+    :clojure/nested-sequential-parameter-native
+    :clojure/map-destructuring-native
+    :clojure/duplicate-let-binding-native
+    :foundation/layout-hiccup-boolean-native
+    :foundation/layout-default-shadow-native
+    :foundation/merge-meta-native
+    :clojure/apply-fixed-arguments-native
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/print-meta-binding-native
+    :clojure/quoted-collection-order-native
+    :foundation/block-test-compat
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-layout-common-test
+   :target/order 20
+   :target/status :candidate
+   :target/source-namespace std.block.layout.common
+   :target/test-namespace std.block.layout.common-test
+   :target/test-path "test/std/block/layout/common_test.clj"
+   :target/target-test-path "lib/test/std/block/layout/common_test.hal"
+   :target/expected-assertions 55
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-collection-order-native
+    :clojure/string-foundation
+    :foundation/block-test-compat
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-layout-examples-test
+   :target/order 21
+   :target/status :candidate
+   :target/source-namespace std.block.layout
+   :target/test-namespace std.block.layout.layout-examples-test
+   :target/test-path "test/std/block/layout/layout_examples_test.clj"
+   :target/target-test-path "lib/test/std/block/layout/layout_examples_test.hal"
+   :target/expected-assertions 9
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-collection-order-native
+    :clojure/string-foundation
+    :foundation/block-test-compat
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/std-block-template
+   :target/order 22
+   :target/status :candidate
+   :target/source-namespace std.block.template
+   :target/test-namespace std.block.template-test
+   :target/source-path "src/std/block/template.clj"
+   :target/test-path "test/std/block/template_test.clj"
+   :target/target-source-path "lib/src/std/block/template.hal"
+   :target/target-test-path "lib/test/std/block/template_test.hal"
+   :target/expected-assertions 4
+   :target/source-rules
+   [:clojure/string-foundation
+    :clojure/set-foundation
+    :foundation/std-lib-foundation
+    :clojure/optional-rest-parameter-native
+    :clojure/map-destructuring-native
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :clojure/string-foundation
+    :foundation/prose-string-native
+    :foundation/prose-join-lines-native
+    :foundation/block-test-compat
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/code-query-common
+   :target/order 23
+   :target/status :candidate
+   :target/source-namespace code.query.common
+   :target/test-namespace code.query.common-test
+   :target/source-path "src/code/query/common.clj"
+   :target/test-path "test/code/query/common_test.clj"
+   :target/target-source-path "lib/src/code/query/common.hal"
+   :target/target-test-path "lib/test/code/query/common_test.hal"
+   :target/expected-assertions 22
+   :target/source-rules
+   [:clojure/string-foundation
+    :foundation/std-lib-walk
+    :clojure/iobj-native
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/code-query-match-impl
+   :target/order 24
+   :target/status :candidate
+   :target/source-namespace code.query.match.impl
+   :target/test-namespace code.query.match.impl-test
+   :target/source-path "src/code/query/match/impl.clj"
+   :target/test-path "test/code/query/match/impl_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/code_query_match_impl.hal"
+   :target/target-source-path "lib/src/code/query/match/impl.hal"
+   :target/target-test-path "lib/test/code/query/match/impl_test.hal"
+   :target/expected-assertions 8
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/code-query-match-optional
+   :target/order 25
+   :target/status :candidate
+   :target/source-namespace code.query.match.optional
+   :target/test-namespace code.query.match.optional-test
+   :target/source-path "src/code/query/match/optional.clj"
+   :target/test-path "test/code/query/match/optional_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/code_query_match_optional.hal"
+   :target/target-source-path "lib/src/code/query/match/optional.hal"
+   :target/target-test-path "lib/test/code/query/match/optional_test.hal"
+   :target/expected-assertions 2
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/code-query-match-pattern
+   :target/order 26
+   :target/status :candidate
+   :target/source-namespace code.query.match.pattern
+   :target/test-namespace code.query.match.pattern-test
+   :target/source-path "src/code/query/match/pattern.clj"
+   :target/test-path "test/code/query/match/pattern_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/code_query_match_pattern.hal"
+   :target/target-source-path "lib/src/code/query/match/pattern.hal"
+   :target/target-test-path "lib/test/code/query/match/pattern_test.hal"
+   :target/expected-assertions 18
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :foundation/protocol-match-imatch
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/code-query-compile
+   :target/order 27
+   :target/status :candidate
+   :target/source-namespace code.query.compile
+   :target/test-namespace code.query.compile-test
+   :target/source-path "src/code/query/compile.clj"
+   :target/test-path "test/code/query/compile_test.clj"
+   :target/target-source-path "lib/src/code/query/compile.hal"
+   :target/target-test-path "lib/test/code/query/compile_test.hal"
+   :target/expected-assertions 22
+   :target/source-rules
+   [:foundation/std-lib-walk
+    :clojure/iobj-metadata-native
+    :clojure/exception-constructor-native
+    :clojure/integer-parse-native
+    :clojure/number-format-catch-native
+    :clojure/keep-indexed-native
+    :clojure/process-path-binding-native
+    :clojure/list-cons-compatible
+    :clojure/fn-form-compatible
+    :clojure/single-arity-defn
+    :clojure/named-recur
+    :clojure/source-namespace-overrides
+    :clojure/prune-unused-requires]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/work-flow-make-makefile
+   :target/order 28
+   :target/status :candidate
+   :target/source-namespace std.make.makefile
+   :target/target-source-namespace work.flow.make.makefile
+   :target/test-namespace std.make.makefile-test
+   :target/target-test-namespace work.flow.make.makefile-test
+   :target/source-path "src/std/make/makefile.clj"
+   :target/test-path "test/std/make/makefile_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/work_flow_make_makefile.hal"
+   :target/target-source-path "lib/src/work/flow/make/makefile.hal"
+   :target/target-test-path "lib/test/work/flow/make/makefile_test.hal"
+   :target/expected-assertions 1
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/work-flow-make-common-source
+   :target/order 29
+   :target/status :candidate
+   :target/source-namespace std.make.common
+   :target/target-source-namespace work.flow.make.common
+   :target/source-path "src/std/make/common.clj"
+   :target/source-template
+   "resources/code/migrate/templates/work_flow_make_common.hal"
+   :target/target-source-path "lib/src/work/flow/make/common.hal"
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/overrides []}
+
+  {:target/id :migration/work-flow-make-artifact
+   :target/order 30
+   :target/status :candidate
+   :target/source-namespace std.make.compile
+   :target/target-source-namespace work.flow.make.artifact
+   :target/test-namespace std.make.compile-test
+   :target/target-test-namespace work.flow.make.artifact-test
+   :target/source-path "src/std/make/compile.clj"
+   :target/test-path "test/std/make/compile_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/work_flow_make_artifact.hal"
+   :target/target-source-path "lib/src/work/flow/make/artifact.hal"
+   :target/target-test-path "lib/test/work/flow/make/artifact_test.hal"
+   :target/expected-assertions 20
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :foundation/qualified-overrides
+    :foundation/prose-string-native
+    :foundation/prose-pipe-native
+    :foundation/code-test-to-native-test]
+   :target/overrides [compile]
+   :target/test-alias artifact}
+
+  {:target/id :migration/work-flow-make-common-test
+   :target/order 31
+   :target/status :candidate
+   :target/source-namespace std.make.common
+   :target/target-source-namespace work.flow.make.common
+   :target/test-namespace std.make.common-test
+   :target/target-test-namespace work.flow.make.common-test
+   :target/test-path "test/std/make/common_test.clj"
+   :target/target-test-path "lib/test/work/flow/make/common_test.hal"
+   :target/expected-assertions 19
+   :target/allow-process true
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/work-flow-make-readme
+   :target/order 32
+   :target/status :candidate
+   :target/source-namespace std.make.readme
+   :target/target-source-namespace work.flow.make.readme
+   :target/test-namespace std.make.readme-test
+   :target/target-test-namespace work.flow.make.readme-test
+   :target/source-path "src/std/make/readme.clj"
+   :target/test-path "test/std/make/readme_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/work_flow_make_readme.hal"
+   :target/target-source-path "lib/src/work/flow/make/readme.hal"
+   :target/target-test-path "lib/test/work/flow/make/readme_test.hal"
+   :target/expected-assertions 0
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/work-flow-make-project
+   :target/order 33
+   :target/status :candidate
+   :target/source-namespace std.make.project
+   :target/target-source-namespace work.flow.make.project
+   :target/test-namespace std.make.project-test
+   :target/target-test-namespace work.flow.make.project-test
+   :target/source-path "src/std/make/project.clj"
+   :target/test-path "test/std/make/project_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/work_flow_make_project.hal"
+   :target/target-source-path "lib/src/work/flow/make/project.hal"
+   :target/target-test-path "lib/test/work/flow/make/project_test.hal"
+   :target/expected-assertions 7
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :clojure/java-temp-file-native
+    :foundation/test-file-spit-native
+    :foundation/test-file-slurp-native
+    :foundation/code-test-to-native-test]
+   :target/test-requires [[std.lib.fs :as fs]]
+   :target/overrides []}
+
+  {:target/id :migration/work-flow-make-github
+   :target/order 34
+   :target/status :candidate
+   :target/source-namespace std.make.github
+   :target/target-source-namespace work.flow.make.github
+   :target/test-namespace std.make.github-test
+   :target/target-test-namespace work.flow.make.github-test
+   :target/source-path "src/std/make/github.clj"
+   :target/test-path "test/std/make/github_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/work_flow_make_github.hal"
+   :target/target-source-path "lib/src/work/flow/make/github.hal"
+   :target/target-test-path "lib/test/work/flow/make/github_test.hal"
+   :target/expected-assertions 0
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}
+
+  {:target/id :migration/work-flow-make-bulk
+   :target/order 35
+   :target/status :candidate
+   :target/source-namespace std.make.bulk
+   :target/target-source-namespace work.flow.make.bulk
+   :target/test-namespace std.make.bulk-test
+   :target/target-test-namespace work.flow.make.bulk-test
+   :target/source-path "src/std/make/bulk.clj"
+   :target/test-path "test/std/make/bulk_test.clj"
+   :target/source-template
+   "resources/code/migrate/templates/work_flow_make_bulk.hal"
+   :target/target-source-path "lib/src/work/flow/make/bulk.hal"
+   :target/target-test-path "lib/test/work/flow/make/bulk_test.hal"
+   :target/expected-assertions 7
+   :target/source-rules
+   [:foundation/reviewed-native-template
+    :clojure/source-namespace-overrides]
+   :target/test-rules
+   [:clojure/test-namespace-overrides
+    :clojure/quoted-refer-metadata
+    :clojure/quoted-form-metadata
+    :foundation/code-test-to-native-test]
+   :target/overrides []}]}

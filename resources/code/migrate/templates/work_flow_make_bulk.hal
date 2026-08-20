@@ -1,0 +1,157 @@
+(ns work.flow.make.bulk
+  (:require [std.foundation.string :as string]
+            [work.flow.make.common :as common]
+            [work.flow.make.github :as github]
+            [work.flow.make.project :as project]))
+
+(defn- map-values [function input]
+  (reduce-kv (fn [output key value]
+               (assoc output key (function value)))
+             {}
+             input))
+
+(defn- filter-values [predicate input]
+  (reduce-kv (fn [output key value]
+               (if (predicate value) (assoc output key value) output))
+             {}
+             input))
+
+(defn- topological-order [actions]
+  (loop [remaining (map-values
+                    (fn [action] (set (or (:deps action) [])))
+                    actions)
+         ordered []]
+    (if (empty? remaining)
+      ordered
+      (let [ready (vec (filter (fn [key]
+                                 (empty? (get remaining key)))
+                               (keys remaining)))]
+        (if (empty? ready)
+          (throw (ex-info "Cyclic bulk dependencies"
+                          {:graph remaining :ordered ordered}))
+          (let [ready-set (set ready)
+                next-remaining
+                (reduce-kv
+                 (fn [output key dependencies]
+                   (if (has? ready-set key)
+                     output
+                     (assoc output key (difference dependencies ready-set))))
+                 {}
+                 remaining)]
+            (recur next-remaining (vec (concat ordered ready)))))))))
+
+(defn make-bulk-get-keys [changed actions]
+  (let [changed-keys (set (keys (filter-values identity changed)))
+        bulk-order (topological-order actions)
+        bulk-keys (reduce
+                   (fn [selected key]
+                     (let [dependencies (or (:deps (get actions key)) [])
+                           affected? (not (empty?
+                                           (filter #(has? selected %)
+                                                   dependencies)))]
+                       (if affected? (conj selected key) selected)))
+                   changed-keys
+                   bulk-order)]
+    [(filter #(has? bulk-keys %) bulk-order)
+     bulk-order]))
+
+(defn- measure [function]
+  (let [started (OS/time-ms)
+        value (function)]
+    [(- (OS/time-ms) started) value]))
+
+(defn make-bulk-build [options]
+  (let [configs (or (:configs options) {})
+        selected (if (vector? (:only options))
+                   (select-keys configs (:only options))
+                   configs)
+        built (reduce-kv
+               (fn [output key config]
+                 (let [measured (measure #(project/build-all config))
+                       elapsed (nth measured 0)
+                       changed (project/changed-files (nth measured 1))]
+                   (assoc output key [elapsed changed])))
+               {}
+               selected)
+        changed (map-values #(not (empty? (nth % 1))) built)
+        changed (cond
+                  (= :all (:refresh options))
+                  (map-values (fn [_] true) (or (:actions options) {}))
+
+                  (vector? (:refresh options))
+                  (reduce (fn [output key] (assoc output key true))
+                          changed
+                          (:refresh options))
+
+                  :else changed)]
+    [built changed]))
+
+(defn make-bulk [options]
+  (let [actions (or (:actions options) {})
+        configs (or (:configs options) {})
+        build-result (make-bulk-build options)
+        built (nth build-result 0)
+        changed (nth build-result 1)
+        bulk-result (make-bulk-get-keys changed actions)
+        bulking (nth bulk-result 0)
+        started (OS/time-ms)
+        bulked (reduce
+                (fn [output key]
+                  (let [config (or (get configs key)
+                                   (throw (ex-info "CONFIGS NOT FOUND"
+                                                   {:key key :options (keys configs)})))
+                        action (or (:action (get actions key))
+                                   (throw (ex-info "ACTIONS NOT FOUND"
+                                                   {:key key :options (keys actions)})))
+                        measured (measure
+                                  #(first (common/make-run-internal config action)))]
+                    (assoc output key measured)))
+                {}
+                bulking)]
+    {:built built
+     :bulked bulked
+     :total (- (OS/time-ms) started)}))
+
+(defn make-bulk-container-filter [configs containers]
+  (let [containers (set containers)]
+    (filter-values
+     (fn [config]
+       (let [container (:container (deref (:instance config)))]
+         (and (not (nil? container))
+              (has? containers container))))
+     configs)))
+
+(defn make-bulk-container-build [configs & arguments]
+  (let [containers (first arguments)
+        options (or (second arguments) {})
+        selected (if (not (empty? containers))
+                   (make-bulk-container-filter configs containers)
+                   configs)
+        selected-keys (vec (keys selected))]
+    (make-bulk
+     (merge {:name "CONTAINER BUILD"
+             :only selected-keys
+             :configs configs
+             :actions (zipmap selected-keys
+                              (repeat {:action :container-build}))}
+            options))))
+
+(defn make-bulk-gh-init [configs & messages]
+  (let [message (first messages)]
+    (reduce (fn [output entry]
+              (let [key (nth entry 0)
+                    config (nth entry 1)]
+                (project/build-all config)
+                (assoc output key (github/gh-dwim-init config message))))
+            {}
+            (sort-by first configs))))
+
+(defn make-bulk-gh-push [configs & messages]
+  (let [message (first messages)]
+    (reduce (fn [output entry]
+              (let [key (nth entry 0)
+                    config (nth entry 1)]
+                (project/build-all config)
+                (assoc output key (github/gh-dwim-push config message))))
+            {}
+            (sort-by first configs))))

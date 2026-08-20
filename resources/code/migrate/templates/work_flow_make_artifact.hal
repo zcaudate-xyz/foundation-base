@@ -1,0 +1,311 @@
+(ns work.flow.make.artifact
+  (:config {:override [compile]})
+  (:require [std.foundation.string :as string]
+            [std.lib.fs :as fs]
+            [std.lib.fs.path :as path]
+            [work.flow.make.makefile :as makefile]))
+
+(def ^:dynamic *mock-compile* false)
+(defmacro with:mock-compile [& body]
+  `(binding [*mock-compile* true] ~@body))
+
+(def ^:dynamic *compile-filter* nil)
+(defmacro with:compile-filter [filter & body]
+  `(binding [*compile-filter* ~filter] ~@body))
+
+(defn compile-fullbody [body options]
+  (->> (concat
+        (if (:header options) [(:header options)] [])
+        [body]
+        (if (:footer options) [(:footer options)] []))
+       (string/join "\n\n")))
+
+(defn compile-out-path [options]
+  (or (:output options)
+      (if (:root options)
+        (str (:root options)
+             (if (not (empty? (:target options)))
+               (str "/" (:target options)) "")
+             "/" (:file options))
+        (if (:target options)
+          (str (:target options) "/" (:file options))
+          nil))))
+
+(defn- read-text [file]
+  (string/decode-utf8 (fs/read-bytes file)))
+
+(defn- write-text [file body]
+  (let [parent (path/parent file)
+        _ (if parent
+            (fs/create-directory parent {:parents? true :exists-ok? true})
+            nil)]
+    (fs/write-bytes file (string/encode-utf8 body))))
+
+(defn compile-write [file body]
+  (if *mock-compile*
+    [file body]
+    (let [exists? (and file (fs/exists? file))
+          original (if exists? (read-text file) nil)]
+      (cond
+        (not exists?)
+        (if (empty? body)
+          [:blank file]
+          [:written (write-text file body)])
+
+        (empty? body)
+        [:deleted (fs/delete file)]
+
+        (= original body)
+        [:unchanged file]
+
+        :else
+        [:written (write-text file body)]))))
+
+(defn compile-result-seq [results]
+  (cond
+    (nil? results) []
+    (and (vector? results)
+         (= 2 (count results))
+         (or (keyword? (first results))
+             (string? (first results)))) [results]
+    (sequential? results) (mapcat compile-result-seq results)
+    :else []))
+
+(defn compile-write-artifacts [artifacts]
+  (mapv (fn [artifact]
+          (compile-write (:output artifact)
+                         (compile-fullbody (:body artifact) artifact)))
+        artifacts))
+
+(defn compile-summarise [files]
+  (let [files (vec (compile-result-seq files))
+        non-blank (filter (fn [entry]
+                            (and (not= (first entry) :blank)
+                                 (not= (first entry) :deleted)))
+                          files)
+        written (remove (fn [entry]
+                          (or (= (first entry) :unchanged)
+                              (= (first entry) :blank)))
+                        files)]
+    (merge {:files (count non-blank)}
+           (if (empty? written)
+             {:status :unchanged}
+             {:status :changed :written written}))))
+
+(defn compile-resource [options]
+  (mapv (fn [entry]
+          (let [input (nth entry 0)
+                output (compile-out-path (assoc options :file (nth entry 1)))]
+            (if *mock-compile*
+              [input output]
+              (fs/copy-single input output {:parents? true :replace? true}))))
+        (:main options)))
+
+(defn compile-directory [options]
+  (mapv (fn [entry]
+          (let [input (nth entry 0)
+                output (compile-out-path (assoc options :file (nth entry 1)))]
+            (if *mock-compile*
+              output
+              (fs/copy input output {:parents? true :replace? true}))))
+        (:main options)))
+
+(defn compile-custom [options]
+  (let [body ((:fn options) options)]
+    (compile-write (compile-out-path options)
+                   (compile-fullbody body options))))
+
+
+(defonce +types+
+  (atom {:script nil
+         :directory compile-directory
+         :module.schema nil
+         :module.graph nil
+         :custom compile-custom
+         :module.single nil
+         :resource compile-resource
+         :module.directory nil
+         :module.root nil}))
+
+(defn types-list [] (keys (deref +types+)))
+(defn types-add [key function] (swap! +types+ assoc key function))
+(defn types-remove [key function] (swap! +types+ dissoc key))
+
+(defn- prose-line [value]
+  (if (vector? value)
+    (string/join " " (map prose-line value))
+    (string/tag value)))
+
+(defn- prose-lines [values]
+  (string/join "\n" (map prose-line values)))
+
+(defn- json-value [value indent]
+  (cond
+    (string? value) (pr-str value)
+    (keyword? value) (pr-str (name value))
+    (map? value)
+    (let [padding (string/repeat " " indent)
+          child-padding (string/repeat " " (+ indent 2))
+          entries (mapv
+                   (fn [key]
+                     (str child-padding
+                          (pr-str (string/tag key))
+                          " : "
+                          (json-value (get value key) (+ indent 2))))
+                   (keys value))]
+      (str "{\n" (string/join ",\n" entries) "\n" padding "}"))
+    (vector? value)
+    (str "[" (string/join ", " (map (fn [item] (json-value item indent)) value)) "]")
+    :else (pr-str value)))
+
+(defn- json-pretty [value] (json-value value 0))
+
+(defn- yaml-write [value]
+  (str
+   (string/join
+    "\n"
+    (reduce-kv
+     (fn [output key item]
+       (conj output
+             (str (string/tag key) ": "
+                  (if (vector? item)
+                    (str "[" (string/join ", " (map string/tag item)) "]")
+                    (string/tag item)))))
+     [] value))
+   "\n"))
+
+(defn- html-node [node indent]
+  (if (vector? node)
+    (let [tag (name (first node))
+          children (rest node)
+          padding (string/repeat " " indent)]
+      (if (and (= 1 (count children)) (string? (first children)))
+        (str padding "<" tag ">" (first children) "</" tag ">")
+        (str padding "<" tag ">\n"
+             (string/join "\n" (map (fn [child] (html-node child (+ indent 2))) children))
+             "\n" padding "</" tag ">")))
+    (str (string/repeat " " indent) node)))
+
+(defn- html-write [value] (html-node value 0))
+
+
+(defn compile-ext-fn [format]
+  (case format
+    :blank {:fn (fn [_] "")}
+    :raw {:fn prose-lines}
+    :edn {:fn pr-str}
+    :json {:fn json-pretty}
+    :yaml {:fn yaml-write}
+    :html {:fn html-write}
+    :gitignore {:fn prose-lines :file ".gitignore"}
+    :dockerfile {:fn prose-lines :file "Dockerfile"}
+    :readme.md {:fn prose-lines :file "README.md"}
+    :makefile {:fn makefile/write :file "Makefile"}
+    :package.json {:fn json-pretty :file "package.json"}
+    {:fn (fn [value] (pr-str value))}))
+
+(defn compile-resolve [value]
+  (loop [current value]
+    (cond
+      (symbol? current)
+      (let [resolved (resolve current)]
+        (if resolved (recur (deref resolved)) current))
+      (and (fn? current)
+           (not (map? current))
+           (not (set? current))
+           (not (keyword? current))
+           (not (vector? current)))
+      (recur (current))
+      :else current)))
+
+(defn compile-ext [options]
+  (let [descriptor (compile-ext-fn (:format options))
+        main (compile-resolve (:main options))
+        function (:fn descriptor)
+        body (function main)
+        full (compile-fullbody body options)
+        file (or (:file options)
+                 (if (:name options)
+                   (str (:name options) "."
+                        (string/tag (or (:suffix descriptor) (:format options))))
+                   nil)
+                 (:file descriptor)
+                 (throw (ex-info "Need a :file or :name entry" {:input options})))
+        output (compile-out-path (assoc options :file file))]
+    (compile-write output full)))
+
+
+(defn compile-single [output-directory params options]
+  (let [options (merge (or params {}) {:root output-directory} options)
+        compile-function (get (deref +types+) (:type options))
+        result (if compile-function
+                 (compile-function options)
+                 (compile-ext (assoc options :format (or (:format options)
+                                                         (:type options)))))]
+    (if (:hook options) ((:hook options) result) nil)
+    result))
+
+(defn compile-section [config key section]
+  (let [output-directory (if (:build config)
+                           (str (:root config) "/" (:build config))
+                           (:root config))
+        hooks (get (:hooks config) key)
+        _ (if (:pre hooks) ((:pre hooks) key section) nil)
+        receipts (mapv (partial compile-single output-directory (:params config)) section)
+        _ (if (:post hooks) ((:post hooks) key section receipts) nil)
+        summaries (filter map? receipts)
+        files (filter vector? receipts)
+        written (remove (fn [entry] (= :unchanged (first entry))) files)]
+    (remove (fn [summary] (= 0 (:files summary)))
+            (conj summaries
+                  (merge {:files (count files)}
+                         (if (empty? written)
+                           {:status :unchanged}
+                           {:status :changed :written written}))))))
+
+(defn- matches-option? [pattern options]
+  (cond
+    (or (string? pattern) (regex? pattern))
+    (matches-option? {:name pattern} options)
+    (keyword? pattern) (matches-option? {:type pattern} options)
+    (map? pattern)
+    (every? (fn [entry]
+              (let [key (nth entry 0)
+                    comparison (nth entry 1)
+                    value (get options key)]
+                (cond
+                  (regex? comparison) (boolean (re-find comparison value))
+                  (fn? comparison) (comparison value)
+                  (set? comparison) (has? comparison value)
+                  :else (= comparison value))))
+            pattern)
+    :else (throw (ex-info "Invalid compile filter" {:pattern pattern}))))
+
+(defn compile-directive [config sections directive]
+  (cond
+    (keyword? directive)
+    (if-let [section (get sections directive)]
+      (compile-section config directive section)
+      :not-found)
+    (vector? directive)
+    (let [key (first directive)
+          patterns (rest directive)]
+      (if-let [section (get sections key)]
+        (compile-section config key
+                         (filter (fn [options]
+                                   (some (fn [pattern]
+                                           (matches-option? pattern options))
+                                         patterns))
+                                 section))
+        :not-found))))
+
+(defn compile [config & directives]
+  (let [value (deref (:instance config))
+        sections (assoc (or (:sections value) {}) :default (:default value))
+        config (dissoc value :sections :triggers)
+        directives (if (empty? directives) [:default] directives)]
+    (apply list
+           (mapcat (fn [directive]
+                     (let [result (compile-directive config sections directive)]
+                       (if (sequential? result) result [result])))
+                   directives))))

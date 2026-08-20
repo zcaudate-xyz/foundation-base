@@ -1,0 +1,117 @@
+(ns code.query.match.impl
+  (:require [std.protocol.imatch :as imatch]))
+
+(defstruct ActualPattern [expression])
+(defstruct EvaluationPattern [expression])
+
+(declare match-template)
+(declare match-inner)
+
+(extend-type ActualPattern imatch/IMatch
+  (match-value [template obj]
+    {:pass (= (:expression template) obj)
+     :actual obj
+     :expected (:expression template)}))
+
+(extend-type EvaluationPattern imatch/IMatch
+  (match-value [template obj]
+    (let [expected (eval (:expression template))]
+      {:pass (match-template expected obj)
+       :actual obj
+       :expected expected})))
+
+(defn actual-pattern
+  [expression]
+  (code.query.match.impl/ActualPattern expression))
+
+(defn actual-pattern?
+  ([pattern]
+   (instance? code.query.match.impl/ActualPattern pattern))
+  ([pattern expression]
+   (and (actual-pattern? pattern)
+        (= expression (:expression pattern)))))
+
+(defn eval-pattern
+  [expression]
+  (code.query.match.impl/EvaluationPattern expression))
+
+(defn eval-pattern?
+  ([pattern]
+   (instance? code.query.match.impl/EvaluationPattern pattern))
+  ([pattern expression]
+   (and (eval-pattern? pattern)
+        (= expression (:expression pattern)))))
+
+(defn match-map
+  [template obj]
+  (and (map? obj)
+       (= (set (keys template)) (set (keys obj)))
+       (every? (fn [entry]
+                 (match-template (val entry) (get obj (key entry))))
+               template)))
+
+(defn match-template
+  [template obj]
+  (cond
+    (satisfies? imatch/IMatch template)
+    (:pass (imatch/match-value template obj))
+
+    (and (symbol? template) (= template (quote _)))
+    true
+
+    (list? template)
+    (and (or (list? obj) (seq? obj))
+         (match-inner template obj))
+
+    (vector? template)
+    (and (vector? obj) (match-inner template obj))
+
+    (map? template)
+    (match-map template obj)
+
+    (fn? template)
+    (if (= template obj)
+      true
+      (try (boolean (template obj))
+           (catch Throwable error false)))
+
+    (= :std.native.Var (type template))
+    (match-template (deref template) obj)
+
+    (set? template)
+    (boolean (some (fn [candidate]
+                     (match-template candidate obj))
+                   template))
+
+    (regexp? template)
+    (if (string? obj)
+      (boolean (re-find template obj))
+      (and (regexp? obj)
+           (= (re-pattern template) (re-pattern obj))))
+
+    :else
+    (= template obj)))
+
+(defn match-inner
+  [template arr]
+  (loop [remaining-template template
+         remaining-values arr]
+    (let [t (first remaining-template)
+          tmore (rest remaining-template)
+          x (first remaining-values)
+          more (rest remaining-values)]
+      (cond
+        (and (empty? remaining-template) (empty? remaining-values))
+        true
+
+        (empty? remaining-template)
+        false
+
+        (= t (quote &))
+        (match-template (first tmore) (cons x more))
+
+        (match-template t x)
+        (recur tmore more)
+
+        :else
+        false))))

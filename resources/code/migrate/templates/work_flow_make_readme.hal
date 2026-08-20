@@ -1,0 +1,107 @@
+(ns work.flow.make.readme
+  (:require [std.foundation.string :as string]
+            [std.lib.fs :as fs]
+            [std.lib.fs.path :as path]
+            [tool.sh :as sh]))
+
+(defn- read-text [file]
+  (string/decode-utf8 (fs/read-bytes file)))
+
+(defn- write-text [file body]
+  (let [parent (path/parent file)
+        _ (if parent (fs/create-directory parent {:parents? true :exists-ok? true}) nil)]
+    (fs/write-bytes file (string/encode-utf8 body))))
+
+(defn has-orgfile? [config]
+  (string? (:orgfile (deref (:instance config)))))
+
+(defn tangle-params [config]
+  (let [value (deref (:instance config))
+        file (str (:root value) "/" (:orgfile value))]
+    (reduce
+     (fn [output line]
+       (if-let [match (re-find #"\#\+([^\:]*):(.*)$" (string/trim line))]
+         (assoc output
+                (keyword (string/lower-case (nth match 1)))
+                (string/trim (nth match 2)))
+         output))
+     {}
+     (string/split-lines (read-text file)))))
+
+(defn- tangle-output [header]
+  (let [tokens (vec (remove empty? (string/split header #"\s+")))
+        positions (keep-indexed (fn [index token]
+                                  (if (= token ":tangle") index nil))
+                                tokens)
+        index (first positions)]
+    (if index (nth tokens (+ index 1)) nil)))
+
+(defn tangle-parse [config]
+  (let [value (deref (:instance config))
+        root (:root value)
+        file (str root "/" (:orgfile value))]
+    (if (not (fs/exists? file))
+      [root []]
+      (let [state
+            (reduce
+             (fn [state line]
+               (cond
+                 (string/starts-with? line "#+BEGIN_SRC")
+                 (assoc state :current [{:header line :out (tangle-output line)}])
+
+                 (string/starts-with? line "#+END_SRC")
+                 (-> state
+                     (update :blocks conj (:current state))
+                     (assoc :current nil))
+
+                 (:current state)
+                 (update state :current conj line)
+
+                 :else state))
+             {:blocks [] :current nil}
+             (string/split-lines (read-text file)))]
+        [root (:blocks state)]))))
+
+(defn tangle [config]
+  (let [parsed (tangle-parse config)
+        root (nth parsed 0)
+        blocks (filter (fn [block] (:out (first block))) (nth parsed 1))]
+    (mapv (fn [block]
+            (let [header (first block)
+                  output (str root "/" (:out header))]
+              (write-text output (string/join "\n" (rest block)))
+              output))
+          blocks)))
+
+(defn make-readme-raw [content]
+  (let [lines (string/split-lines content)
+        state (reduce
+               (fn [state line]
+                 (if (string/starts-with? line "* ")
+                   {:sections (conj (:sections state) (:current state))
+                    :current [line]}
+                   (update state :current conj line)))
+               {:sections [] :current [(first lines)]}
+               (rest lines))
+        sections (conj (:sections state) (:current state))]
+    (string/join
+     "\n"
+     (mapcat identity
+             (remove (fn [section]
+                       (string/starts-with? (first section) "* Build"))
+                     sections)))))
+
+(defn make-readme [config]
+  (let [value (deref (:instance config))
+        source (str (:root value) "/" (:orgfile value))
+        directory (str (:root value) "/" (:build value))
+        output (str directory "/README.md")]
+    (if (not (fs/exists? source))
+      nil
+      (let [_ (fs/create-directory directory {:parents? true :exists-ok? true})
+            temporary (str directory "/.README.org")
+            _ (write-text temporary (make-readme-raw (read-text source)))
+            result (sh/run ["pandoc" "-f" "org" "-t" "gfm"
+                            "-o" output temporary]
+                           {:cwd directory})]
+        result))))

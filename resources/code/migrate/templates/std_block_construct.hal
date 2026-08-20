@@ -329,10 +329,7 @@
 
 (defn construct-map-values
   [value]
-  (reduce-kv (fn [output key item]
-               (conj (conj output key) item))
-             []
-             value))
+  (vec (mapcat identity (sort (seq value)))))
 
 (defn construct-collection
   [value]
@@ -419,7 +416,9 @@
                  value)
       (if (vector? value)
         (mapv rep value)
-        value))))
+        (if (sequential? value)
+          (apply list (map rep value))
+          value)))))
 
 (defn contents [block] (mapv rep (:children block)))
 

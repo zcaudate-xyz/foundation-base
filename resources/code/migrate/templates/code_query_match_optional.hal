@@ -1,0 +1,25 @@
+(ns code.query.match.optional
+  (:require [code.query.common :as common]))
+
+(defn tag-meta
+  "increments the optional-marker counter and records its numeric position"
+  [ele out]
+  (let [mele (meta ele)]
+    (if (:? mele)
+      (do (swap! out update-in [:?] inc)
+          (with-meta ele (assoc mele :? (:? (deref out)))))
+      ele)))
+
+(defn pattern-seq
+  "generates every concrete pattern represented by optional markers"
+  [pattern]
+  (let [out (atom {:? -1})
+        pattern (prewalk (fn [value] (tag-meta value out)) pattern)
+        combos (range (bit-shift-left 1 (inc (:? (deref out)))))]
+    (distinct
+     (for [combo combos]
+       (let [hide? (fn [value]
+                     (if-let [position (:? (meta value))]
+                       (= 0 (mod (bit-shift-right combo position) 2))
+                       false))]
+         (common/remove-items hide? pattern))))))

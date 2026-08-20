@@ -1,0 +1,107 @@
+(ns work.flow.make.project
+  (:require [std.foundation.string :as string]
+            [std.lib.fs :as fs]
+            [work.flow.make.common :as common]
+            [work.flow.make.artifact :as artifact]
+            [work.flow.make.readme :as readme]
+            [tool.sh :as sh]))
+
+(defn- read-text [file]
+  (string/decode-utf8 (fs/read-bytes file)))
+
+(defn- write-text [file body]
+  (fs/write-bytes file (string/encode-utf8 body) {:mode :replace}))
+
+(defn makefile-parse [config]
+  (let [result
+        (sh/run ["/bin/bash" "-c"
+                 "grep -oE '^[a-zA-Z0-9_-]+:([^=]|$)' Makefile | sed 's/[^a-zA-Z0-9_-]*$//'" ]
+                {:cwd (common/make-dir config)})]
+    (string/split-lines (string/trim (:stdout result)))))
+
+(defn build-default [config]
+  (artifact/compile config :default))
+
+(defn- flatten-results [value]
+  (cond
+    (sequential? value) (mapcat flatten-results value)
+    :else [value]))
+
+(defn changed-files [result]
+  (vec (filter string? (flatten-results result))))
+
+(defn is-changed? [result]
+  (not (empty? (changed-files result))))
+
+(defn build-all [config]
+  (let [value (deref (:instance config))
+        section-keys (sort (keys (or (:sections value) {})))
+        directives (vec (concat section-keys [:default]))
+        _ (common/make-dir-setup config)
+        _ (if (readme/has-orgfile? config)
+            (do (readme/make-readme config)
+                (readme/tangle config))
+            nil)]
+    (apply artifact/compile config directives)))
+
+(defn build-at [root section]
+  (artifact/compile-section {:root root :default section}
+                            :default section))
+
+(defn def-make-fn [definition-symbol config]
+  (let [namespace-symbol (if (namespace definition-symbol)
+                           (symbol (namespace definition-symbol))
+                           (symbol (str (current-namespace))))
+        value (common/make-config-fn
+               (merge {:ns namespace-symbol}
+                      (assoc config :id definition-symbol)))
+        _ (if (:triggers (deref (:instance value)))
+            (common/triggers-set value (:triggers (deref (:instance value))))
+            nil)]
+    value))
+
+(defmacro def.make [definition-name config]
+  (let [qualified (symbol (str (:ns &env)) (name definition-name))]
+    `(def ~definition-name
+       (work.flow.make.project/def-make-fn
+        (quote ~qualified)
+        ~config))))
+
+(defn build-triggered
+  ([] (build-triggered (symbol (str (current-namespace)))))
+  ([namespace]
+   (artifact/with:compile-filter
+    #{namespace}
+    (mapv (fn [config]
+            [(:id (deref (:instance config)))
+             (build-default config)])
+          (common/get-triggered namespace)))))
+
+(defn file-watcher-heal [file namespace]
+  (let [content (read-text file)]
+    (write-text file content)
+    content))
+
+(defn file-watcher-handler
+  ([file] (file-watcher-handler file {}))
+  ([file options]
+   (let [path (str file)]
+     (if (and (or (string/ends-with? path ".clj")
+                  (string/ends-with? path ".cljc"))
+              (not (string/includes? path ".#")))
+       (file-watcher-heal file nil)
+       nil))))
+
+(defn watch
+  ([path] (watch path {}))
+  ([path options]
+   {:watch/path path
+    :watch/options options
+    :watch/handler file-watcher-handler}))
+
+(defn watch-project [config]
+  (let [value (deref (:instance config))
+        tasks (concat (:default value)
+                      (mapcat second (or (:sections value) {})))
+        paths (sort (set (mapcat (fn [task] (or (:search task) [])) tasks)))]
+    (mapv watch paths)))

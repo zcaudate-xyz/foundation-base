@@ -1,0 +1,53 @@
+(ns code.query.match.pattern
+  (:require [code.query.match.impl :as match]
+            [code.query.match.optional :as optional]))
+
+(defn transform-pattern
+  [pattern]
+  (cond
+    (:& (meta pattern))
+    (match/actual-pattern pattern)
+
+    (:% (meta pattern))
+    (match/eval-pattern pattern)
+
+    (list? pattern)
+    (apply list (map transform-pattern pattern))
+
+    (vector? pattern)
+    (vec (map transform-pattern pattern))
+
+    (set? pattern)
+    (set (map transform-pattern pattern))
+
+    (map? pattern)
+    (into {}
+          (map (fn [entry]
+                 [(key entry) (transform-pattern (val entry))])
+               pattern))
+
+    :else
+    pattern))
+
+(defn pattern-single-fn
+  [pattern]
+  (let [template (transform-pattern pattern)]
+    (fn [obj]
+      (match/match-template template obj))))
+
+(defn pattern-matches
+  [template]
+  (let [all-fns (mapv (juxt identity pattern-single-fn)
+                      (optional/pattern-seq template))]
+    (fn [form]
+      (or (mapcat (fn [entry]
+                    (let [candidate (first entry)
+                          predicate (second entry)]
+                      (if (predicate form) [candidate] [])))
+                  all-fns)
+          []))))
+
+(defn pattern-fn
+  [template]
+  (fn [value]
+    (not (empty? ((pattern-matches template) value)))))

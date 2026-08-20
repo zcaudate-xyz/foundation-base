@@ -19,18 +19,40 @@
 (defn dependency-routes
   "compiles safe namespace replacement rules from a migration catalog"
   {:added "4.1"}
-  [migration-catalog]
-  (->> (:migration/rules migration-catalog)
-       (filter #(and (not= :draft (:rule/status %))
-                     (= :dependency (:rule/kind %))
-                     (#{:replace-namespace :replace-symbol}
-                      (get-in % [:rule/rewrite :op]))))
-       (map (fn [rule]
-              [(:rule/match rule)
-               {:target (or (get-in rule [:rule/rewrite :namespace])
-                            (get-in rule [:rule/rewrite :symbol]))
-                :rule/id (:rule/id rule)}]))
-       (into {})))
+  ([migration-catalog]
+   (dependency-routes migration-catalog nil))
+  ([migration-catalog target]
+   (cond->
+    (merge
+     (->> (:migration/targets migration-catalog)
+          (mapcat (fn [entry]
+                    (keep (fn [[source target]]
+                            (when (and source target)
+                              [source
+                               {:target target
+                                :rule/id :code-migrate/catalog-target}]))
+                          [[(:target/source-namespace entry)
+                            (:target/target-source-namespace entry)]
+                           [(:target/test-namespace entry)
+                            (:target/target-test-namespace entry)]])))
+          (into {}))
+     (->> (:migration/rules migration-catalog)
+          (filter #(and (not= :draft (:rule/status %))
+                        (= :dependency (:rule/kind %))
+                        (#{:replace-namespace :replace-symbol}
+                         (get-in % [:rule/rewrite :op]))))
+          (map (fn [rule]
+                 [(:rule/match rule)
+                  {:target (or (get-in rule [:rule/rewrite :namespace])
+                               (get-in rule [:rule/rewrite :symbol]))
+                   :rule/id (:rule/id rule)}]))
+          (into {})))
+     (and (= :test (:unit/kind target))
+          (:target/source-namespace target)
+          (:target/target-source-namespace target))
+     (assoc (:target/source-namespace target)
+            {:target (:target/target-source-namespace target)
+             :rule/id :clojure/test-source-namespace}))))
 
 (defn rewrite-ns-form
   "rewrites one Clojure namespace form using target-owned overrides"
@@ -209,6 +231,14 @@
   [form]
   (apply list (concat (butlast form) (last form))))
 
+(defn parsed-form-block
+  "constructs a replacement block through the parser so map keys retain order"
+  {:added "4.1"}
+  [form]
+  (block/parse-first (pr-str form)))
+
+(declare quoted-location?)
+
 (defn rewrite-single-arity-defns
   "normalizes only defn forms containing exactly one wrapped arity"
   {:added "4.1"}
@@ -223,12 +253,14 @@
              arities (filter #(and (seq? %)
                                     (vector? (first %)))
                              (drop 2 form))]
-         (if (and (= 'defn (first form))
+         (if (and (not (quoted-location? location))
+                  (= 'defn (first form))
                   (= 1 (count arities))
                   (= (last form) (first arities)))
            (do (swap! applied conj :clojure/single-arity-defn)
                (nav/replace location
-                            (rewrite-single-arity-defn form)))
+                            (parsed-form-block
+                             (rewrite-single-arity-defn form))))
            location))))
     root))
 
@@ -248,6 +280,108 @@
        (update output :parameters conj binding)))
    {:parameters [] :destructure []}
    (vec bindings)))
+
+(defn rewrite-optional-rest-parameter
+  "lowers a nested variadic vector pattern into ordinary native bindings"
+  {:added "4.1"}
+  [form]
+  (let [parameter-index (first
+                         (keep-indexed (fn [index value]
+                                         (when (vector? value) index))
+                                       form))
+        parameters      (when parameter-index (nth form parameter-index))
+        amp-index       (when parameters
+                          (.indexOf ^java.util.List parameters '&))
+        pattern         (when (and amp-index (not (neg? amp-index)))
+                          (nth parameters (inc amp-index) nil))]
+    (if (vector? pattern)
+      (let [temporary  'migration-optional-arguments
+            parameters (vec (concat (take amp-index parameters)
+                                    ['& temporary]))
+            bindings   (vec
+                        (mapcat (fn [index name]
+                                  [name (list 'first
+                                              (list 'drop index temporary))])
+                                (range)
+                                pattern))]
+        (apply list
+               (concat (take parameter-index form)
+                       [parameters
+                        (apply list 'let bindings
+                               (drop (inc parameter-index) form))])))
+      form)))
+
+(defn rewrite-print-meta-binding
+  "removes Clojure's printer switch because native pr-str retains metadata"
+  {:added "4.1"}
+  [form]
+  (let [body (nnext form)]
+    (if (and (= 1 (count body))
+             (seq? (first body))
+             (= 'pr-str (first (first body)))
+             (= 2 (count (first body))))
+      (list 'migration-meta-tree (second (first body)))
+      (if (= 1 (count body))
+        (first body)
+        (cons 'do body)))))
+
+(defn rewrite-layout-optional-opts
+  "materializes layout-main's omitted options as a native empty map"
+  {:added "4.1"}
+  [form]
+  (let [body     (last form)
+        bindings (second body)
+        bindings (assoc bindings 1 (list 'or (second bindings) {}))
+        body     (apply list 'let bindings (nnext body))]
+    (apply list (concat (butlast form) [body]))))
+
+(defn rewrite-layout-map-pairs
+  "materializes native map entries before two-column sequence operations"
+  {:added "4.1"}
+  [form]
+  (let [normalized '(if (map? pairs)
+                      (if (Algo/ordered-map? pairs)
+                        (seq pairs)
+                        (sort (seq pairs)))
+                      pairs)]
+    (walk/postwalk
+     (fn [node]
+       (if (= '(if col-sort (sort-by first pairs) pairs) node)
+         (list 'if 'col-sort
+               (list 'sort-by 'first normalized)
+               normalized)
+         node))
+     form)))
+
+(defn rewrite-layout-readable-width
+  "accounts for Clojure's printed commas when estimating native map widths"
+  {:added "4.1"}
+  [form]
+  (apply list
+         (concat
+          (butlast form)
+          ['(letfn [(separator-width [value]
+                      (cond
+                        (map? value)
+                        (+ (max 0 (dec (count value)))
+                           (reduce + 0
+                                   (map separator-width
+                                        (mapcat identity (seq value)))))
+
+                        (or (vector? value) (set? value) (seq? value))
+                        (reduce + 0 (map separator-width value))
+
+                        :else 0))]
+              (+ (count (pr-str form))
+                 (separator-width form)))])))
+
+(defn rewrite-layout-hiccup-boolean
+  "normalizes Foundation's truthy layout result to its documented boolean API"
+  {:added "4.1"}
+  [form]
+  (apply list
+         (concat (butlast form)
+                 [(list 'boolean (last form))])))
 
 (defn rewrite-function-recur
   "rewrites function and loop recur into deterministic named calls"
@@ -289,7 +423,9 @@
                               body)
                  definition (apply list loop-name parameters body)]
              (list 'letfn [definition]
-                   (apply list loop-name initial)))
+                   (list 'let
+                         (vec (mapcat vector parameters initial))
+                         (apply list loop-name parameters))))
 
            :else
            (apply list
@@ -346,11 +482,645 @@
   [form]
   (list 'String/blank? (list 'str (second form))))
 
+(defn rewrite-iobj-instance
+  "rewrites the JVM metadata marker interface to Hara's native protocol"
+  {:added "4.1"}
+  [form]
+  (list 'satisfies? 'IObjType (nth form 2)))
+
+(defn rewrite-iobj-metadata
+  "checks that a native metadata-capable value carries metadata"
+  {:added "4.1"}
+  [form]
+  (let [value (nth form 2)]
+    (list 'and
+          (list 'satisfies? 'IObjType value)
+          (list 'seq (list 'meta value)))))
+
+(defn rewrite-exception-constructor
+  "rewrites the JVM Exception constructor to native exception data"
+  {:added "4.1"}
+  [form]
+  (list 'ex-info (second form) {}))
+
+(defn rewrite-integer-parse
+  "rewrites JVM integer parsing to the native numeric parser"
+  {:added "4.1"}
+  [form]
+  (list 'parse-long (second form)))
+
+(defn rewrite-number-format-catch
+  "rewrites the JVM parse exception catch to native Throwable handling"
+  {:added "4.1"}
+  [form]
+  (apply list 'catch 'Throwable
+         (concat (drop 2 form)
+                 (when (= 3 (count form)) [nil]))))
+
+(defn rewrite-keep-indexed
+  "expands Clojure keep-indexed into native map-indexed and keep calls"
+  {:added "4.1"}
+  [form]
+  (if (and (= '->> (first form))
+           (= 3 (count form))
+           (seq? (nth form 2))
+           (= 'keep-indexed (first (nth form 2))))
+    (let [input    (second form)
+          function (second (nth form 2))]
+      (list 'keep 'identity (list 'map-indexed function input)))
+    (let [[_ function input] form]
+      (list 'keep 'identity (list 'map-indexed function input)))))
+
+(defn rewrite-process-path-binding
+  "lowers process-path's nested sequential parameter into a let binding"
+  {:added "4.1"}
+  [form]
+  (->> form
+       (walk/postwalk
+        (fn [node]
+          (if (and (seq? node)
+                   (vector? (first node))
+                   (= 2 (count (first node)))
+                   (vector? (first (first node))))
+            (let [parameters (first node)
+                  source     'migration-path]
+              (list (vec [source (second parameters)])
+                    (apply list
+                           'let
+                           ['more source
+                            'x (list 'first 'more)
+                            'y (list 'second 'more)
+                            'xs (list 'drop 2 'more)]
+                           (rest node))))
+            node)))
+       (#(rewrite-function-recur % 'process-path))
+       (walk/postwalk
+        (fn [node]
+          (if (and (seq? node)
+                   (= 'process-path (first node))
+                   (= 3 (count node))
+                   (seq? (second node))
+                   (= 'cons (first (second node))))
+            (list 'process-path
+                  (list 'vec (second node))
+                  (nth node 2))
+            node)))))
+
+(defn safe-sequential-bindings
+  "lowers a Clojure sequential pattern to bounds-safe native bindings"
+  {:added "4.1"}
+  [pattern value temporary]
+  (let [amp-index (.indexOf ^java.util.List pattern '&)
+        as-index  (.indexOf ^java.util.List pattern :as)
+        stops     (filter #(not (neg? %)) [amp-index as-index])
+        end       (if (seq stops) (apply min stops) (count pattern))
+        positional (subvec pattern 0 end)
+        rest-name (when-not (neg? amp-index) (nth pattern (inc amp-index)))
+        as-name   (when-not (neg? as-index) (nth pattern (inc as-index)))]
+    (vec
+     (concat
+      [temporary value]
+      (when as-name [as-name temporary])
+      (mapcat (fn [index name]
+                [name (list 'first (list 'drop index temporary))])
+              (range)
+              positional)
+      (when rest-name
+        [rest-name (list 'drop (count positional) temporary)])))))
+
+(defn rewrite-nested-sequential-parameters
+  "lowers strict nested vector parameters to bounds-safe native let bindings"
+  {:added "4.1"}
+  [form]
+  (let [parameter-index (first
+                         (keep-indexed (fn [index value]
+                                         (when (vector? value) index))
+                                       form))
+        parameters      (when parameter-index (nth form parameter-index))
+        nested          (keep-indexed (fn [index value]
+                                        (when (vector? value) [index value]))
+                                      parameters)]
+    (if (seq nested)
+      (let [rewritten (reduce (fn [output [index _]]
+                                (assoc output index
+                                       (symbol (str "migration-argument-" index))))
+                              parameters
+                              nested)
+            bindings  (vec
+                       (mapcat (fn [[index pattern]]
+                                 (let [temporary (nth rewritten index)]
+                                   (safe-sequential-bindings
+                                    pattern temporary
+                                    (symbol (str (name temporary) "-value")))))
+                               nested))]
+        (apply list
+               (concat (take parameter-index form)
+                       [rewritten
+                        (apply list 'let bindings
+                               (drop (inc parameter-index) form))])))
+      form)))
+
+(defn rewrite-merge-meta
+  "lowers Foundation merge-meta to native metadata primitives"
+  {:added "4.1"}
+  [[_ value metadata]]
+  (list 'with-meta value
+        (list 'merge-nested (list 'meta value) metadata)))
+
+(defn rewrite-fixed-apply
+  "lowers Clojure apply with fixed arguments to one explicit native sequence"
+  {:added "4.1"}
+  [[_ function fixed arguments]]
+  (if (= 'list function)
+    (list 'cons fixed arguments)
+    (list 'apply function (list 'concat [fixed] arguments))))
+
+(defn rewrite-layout-default-form-shadow
+  "renames layout-default-fn's duplicate let binding for native lexical scope"
+  {:added "4.1"}
+  [form]
+  (let [body            (last form)
+        bindings        (second body)
+        duplicate-index (first
+                         (keep-indexed
+                          (fn [index value]
+                            (when (and (even? index)
+                                       (pos? index)
+                                       (= 'form value))
+                              index))
+                          bindings))
+        replace-form    (fn [value]
+                          (walk/postwalk
+                           #(if (= 'form %) 'annotated-form %)
+                           value))
+        bindings        (vec
+                         (concat
+                          (subvec bindings 0 duplicate-index)
+                          ['annotated-form (nth bindings (inc duplicate-index))]
+                          (map replace-form
+                               (subvec bindings (+ 2 duplicate-index)))))
+        body            (apply list 'let bindings
+                               (map replace-form (nnext body)))]
+    (apply list (concat (butlast form) [body]))))
+
+(declare postwalk-code)
+
+(defn rewrite-duplicate-let-bindings
+  "renames sequential Clojure let shadows and their later references"
+  {:added "4.1"}
+  [form]
+  (postwalk-code
+   (fn [node]
+     (if (and (seq? node) (= 'let (first node)) (vector? (second node)))
+       (let [state
+             (reduce
+              (fn [{:keys [bindings seen renames]} [binding value]]
+                (let [value   (walk/postwalk #(get renames % %) value)
+                      count   (get seen binding 0)
+                      renamed (if (and (symbol? binding) (pos? count))
+                                (symbol (str (clojure.core/name binding)
+                                             \- \- count))
+                                binding)]
+                  {:bindings (conj bindings renamed value)
+                   :seen (assoc seen binding (inc count))
+                   :renames (if (= binding renamed)
+                              renames
+                              (assoc renames binding renamed))}))
+              {:bindings [] :seen {} :renames {}}
+              (partition 2 (second node)))
+             body (map #(walk/postwalk
+                         (fn [value] (get (:renames state) value value))
+                         %)
+                       (nnext node))]
+         (apply list 'let (:bindings state) body))
+       node))
+   form))
+
+(defn rewrite-heal-core-destructuring
+  "lowers optional and short sequential destructuring used by heal.core"
+  {:added "4.1"}
+  [form]
+  (walk/postwalk
+   (fn [node]
+     (cond
+       (and (seq? node)
+            (= 'defn (first node))
+            (= 'get-block-lines (second node)))
+       (let [parameter-index (first
+                              (keep-indexed
+                               (fn [index value]
+                                 (when (vector? value) index))
+                               node))]
+         (if (= '[lines [start end] start-col & [end-col]]
+                (nth node parameter-index))
+           (apply list
+                  (concat
+                   (take parameter-index node)
+                   ['[lines migration-line start-col & migration-end-cols]
+                   (apply list
+                          'let
+                          (vec (concat
+                                (safe-sequential-bindings
+                                 '[start end] 'migration-line 'migration-line-value)
+                                (safe-sequential-bindings
+                                 '[end-col] 'migration-end-cols 'migration-end-cols-value)))
+                          (drop (inc parameter-index) node))]))
+           node))
+
+       (and (seq? node)
+            (= 'let (first node))
+            (vector? (second node))
+            (contains? #{'[e1 e2 e3 & more] '[e1 e2 & more]}
+                       (first (second node))))
+       (let [bindings (second node)
+             pattern (first bindings)
+             temporary (if (= 3 (.indexOf ^java.util.List pattern '&))
+                         'migration-errors-three
+                         'migration-errors-two)]
+         (apply list
+                'let
+                (vec (concat (safe-sequential-bindings
+                              pattern (second bindings) temporary)
+                             (drop 2 bindings)))
+                (drop 2 node)))
+
+       :else node))
+   form))
+
+(defn rewrite-heal-content-loop
+  "lowers heal-content's bounded tail loop without retaining recursive frames"
+  {:added "4.1"}
+  [form]
+  (let [parameter-index (first
+                         (keep-indexed
+                          (fn [index value]
+                            (when (vector? value) index))
+                          form))
+        body '(reduce
+               (fn [current _]
+                 (let [next-content (heal-content-single-pass current)]
+                   (if (= next-content current)
+                     (reduced current)
+                     next-content)))
+               content
+               (range 51))]
+    (apply list
+           (concat (take (inc parameter-index) form)
+                   [body]))))
+
+(defn rewrite-list-compatible
+  "rewrites Clojure list checks to Hara's native form predicate"
+  {:added "4.1"}
+  [form]
+  (list 'form? (second form)))
+
+(defn rewrite-fn-form-compatible
+  "narrows native callable checks to Clojure fn? semantics for forms"
+  {:added "4.1"}
+  [form]
+  (let [value (second form)]
+    (list 'and
+          (list 'std.foundation/fn? value)
+          (list 'not (list 'form? value)))))
+
 (defn rewrite-string-starts-with
   "rewrites JVM String.startsWith calls to the native String surface"
   {:added "4.1"}
   [form]
   (cons 'String/starts-with? (rest form)))
+
+(defn rewrite-character-array-string
+  "rewrites JVM character-array construction to a native string fold"
+  {:added "4.1"}
+  [form]
+  (list 'apply 'str (second form)))
+
+(defn rewrite-join-lines
+  "rewrites Foundation prose line joining to the native string surface"
+  {:added "4.1"}
+  [form]
+  (list 'apply 'str
+        (list 'interpose "\n" (second form))))
+
+(defn rewrite-prose-pipe
+  "rewrites Foundation's variadic prose line constructor"
+  {:added "4.1"}
+  [form]
+  (list 'std.foundation.string/join "\n" (vec (rest form))))
+
+(defn rewrite-string-join [form]
+  (list 'apply 'str
+        (list 'interpose (second form) (nth form 2))))
+
+(defn rewrite-thread-string-join [form]
+  (let [join-step (last form)
+        values (cons '->> (butlast (rest form)))]
+    (list 'apply 'str
+          (list 'interpose (second join-step) values))))
+
+(defn rewrite-safe-sequential-get [form]
+  (let [values (second form)
+        index (nth form 2)]
+    (list 'if
+          (list '>= index 0)
+          (list 'first (list 'drop index values))
+          nil)))
+
+(defn map-vals-form [function values]
+  (list 'reduce-kv
+        (list 'fn ['output 'key 'value]
+              (list 'assoc 'output 'key (list function 'value)))
+        {}
+        values))
+
+(defn rewrite-map-vals [form]
+  (if (= '->> (first form))
+    (let [step (last form)
+          values (cons '->> (butlast (rest form)))]
+      (map-vals-form (second step) values))
+    (map-vals-form (second form) (nth form 2))))
+
+(defn rewrite-some [form]
+  (list 'first (list 'filter (second form) (nth form 2))))
+
+(defn rewrite-map-juxt [form]
+  (let [selectors (second form)
+        values (nth form 2)
+        value 'migration-map-juxt-value
+        select (fn [selector]
+                 (if (keyword? selector)
+                   (list 'get value selector)
+                   (list selector value)))]
+    (list 'into {}
+          (list 'map
+                (list 'fn [value]
+                      (vec (map select selectors)))
+                values))))
+
+(defn rewrite-file-slurp [form]
+  (list 'std.foundation.string/decode-utf8
+        (list 'deref (list 'File/read (second form)))))
+
+(defn rewrite-file-spit [form]
+  (list 'deref
+        (list 'File/write
+              (second form)
+              (list 'std.foundation.string/encode-utf8 (nth form 2))
+              {:mode :replace})))
+
+(defn rewrite-java-temp-file [form]
+  (let [[_ prefix suffix] form]
+    (list 'std.lib.fs/temp-file
+          "/"
+          {:prefix prefix :suffix suffix})))
+
+(defn rewrite-heal-line-format [form]
+  (list 'std.foundation.string/pad-left
+        (list 'str (nth form 2)) 4 " "))
+
+(defn rewrite-rename-keys [form]
+  (list 'reduce-kv
+        '(fn [output from to]
+           (if (has? output from)
+             (assoc (dissoc output from) to (get output from))
+             output))
+        (second form) (nth form 2)))
+
+(defn map-parameter-bindings [pattern source]
+  (let [defaults  (:or pattern)
+        value-for (fn [binding-symbol selector]
+                    (let [value (list 'get source selector)]
+                      (if (contains? defaults binding-symbol)
+                        (list 'if (list 'has? source selector)
+                              value
+                              (get defaults binding-symbol))
+                        value)))]
+    (vec
+     (concat
+      (when-let [alias (:as pattern)]
+        [alias (if (= alias 'entry) (list 'into {} source) source)])
+      (mapcat (fn [binding-symbol]
+                [binding-symbol
+                 (value-for binding-symbol
+                            (keyword (clojure.core/name binding-symbol)))])
+              (:keys pattern))
+      (mapcat (fn [binding-symbol]
+                [binding-symbol
+                 (value-for binding-symbol
+                            (list 'quote
+                                  (symbol (clojure.core/name binding-symbol))))])
+              (:syms pattern))
+      (mapcat (fn [binding-symbol]
+                [binding-symbol
+                 (value-for binding-symbol
+                            (clojure.core/name binding-symbol))])
+              (:strs pattern))
+      (mapcat (fn [[binding-symbol selector]]
+                [binding-symbol (value-for binding-symbol selector)])
+              (remove (fn [[key _]]
+                        (contains? #{:as :keys :syms :strs :or} key))
+                      pattern))))))
+
+(defn postwalk-code
+  "walks executable forms without descending through quote boundaries"
+  {:added "4.1"}
+  [function form]
+  (if (and (seq? form) (= 'quote (first form)))
+    form
+    (function (walk/walk #(postwalk-code function %) identity form))))
+
+(defn rewrite-map-destructuring
+  "lowers Clojure map patterns in function parameters and let bindings"
+  {:added "4.1"}
+  [form]
+  (let [counter (atom 0)
+        lower-parameters
+        (fn [parameters body]
+          (let [lowered (mapv (fn [parameter]
+                                (if (map? parameter)
+                                  (symbol (str "migration-map-param-"
+                                               (swap! counter inc)))
+                                  parameter))
+                              parameters)
+                bindings (vec (mapcat (fn [pattern source]
+                                        (if (map? pattern)
+                                          (map-parameter-bindings pattern source)
+                                          []))
+                                      parameters lowered))]
+            [lowered (if (seq bindings)
+                       [(apply list 'let bindings body)]
+                       body)]))]
+    (postwalk-code
+     (fn [node]
+       (cond
+         (and (seq? node) (= 'let (first node)) (vector? (second node)))
+         (let [bindings (partition 2 (second node))
+               lowered  (vec
+                         (mapcat
+                          (fn [[pattern value]]
+                            (if (map? pattern)
+                              (let [source (symbol (str "migration-map-value-"
+                                                       (swap! counter inc)))]
+                                (concat [source value]
+                                        (map-parameter-bindings pattern source)))
+                              [pattern value]))
+                          bindings))]
+           (apply list 'let lowered (nnext node)))
+
+         (and (seq? node) (= 'fn (first node)) (vector? (second node)))
+         (let [[parameters body] (lower-parameters (second node) (nnext node))]
+           (apply list 'fn parameters body))
+
+         (and (seq? node) (= 'defn (first node)))
+         (let [parameter-index (first
+                                (keep-indexed (fn [index value]
+                                                (when (vector? value) index))
+                                              node))]
+           (if parameter-index
+             (let [[parameters body]
+                   (lower-parameters (nth node parameter-index)
+                                     (drop (inc parameter-index) node))]
+               (apply list
+                      (concat (take parameter-index node)
+                              [parameters]
+                              body)))
+             (apply list
+                    (map (fn [value]
+                           (if (and (seq? value) (vector? (first value)))
+                             (let [[parameters body]
+                                   (lower-parameters (first value) (rest value))]
+                               (apply list parameters body))
+                             value))
+                         node))))
+
+         :else node))
+     form)))
+
+(defn rewrite-nested-map-parameters [form]
+  (let [counter (atom 0)]
+    (walk/postwalk
+     (fn [node]
+       (if (and (seq? node) (= 'fn (first node))
+                (vector? (second node)) (some map? (second node)))
+         (let [parameters (second node)
+               lowered (mapv (fn [parameter]
+                               (if (map? parameter)
+                                 (symbol (str "migration-map-param-"
+                                              (swap! counter inc)))
+                                 parameter))
+                             parameters)
+               bindings (vec (mapcat (fn [pattern source]
+                                       (if (map? pattern)
+                                         (map-parameter-bindings pattern source)
+                                         []))
+                                     parameters lowered))]
+           (list* 'fn lowered
+                  (list (list* 'let bindings (nnext node)))))
+         node))
+     form)))
+
+(defn rewrite-pair-delimiter-copies [form]
+  (walk/postwalk
+   (fn [node]
+     (cond
+       (and (seq? node) (= 'let (first node))
+            (vector? (second node)) (= 'open (first (second node))))
+       (let [bindings (second node)]
+         (list* 'let
+                (assoc bindings 1 (list 'into {} (second bindings)))
+                (nnext node)))
+
+       (= '(pop stack) node)
+       '(vec (butlast stack))
+
+       :else
+       node))
+   (rewrite-nested-map-parameters form)))
+
+(defn rewrite-print-rainbow-loop [form]
+  (walk/postwalk
+   (fn [node]
+     (if (and (seq? node)
+              (= 'loop (first node))
+              (= '[chars (seq content) line-num 1 col-num 1] (second node)))
+       '(do
+          (reduce
+           (fn [[line-num col-num] char]
+             (let [color (get color-map [line-num col-num])]
+               (if color
+                 (Printer/p (str color char +reset-color+))
+                 (Printer/p char))
+               (if (= char \newline)
+                 [(inc line-num) 1]
+                 [line-num (inc col-num)])))
+           [1 1]
+           (seq content))
+          nil)
+       node))
+   form))
+
+(defn rewrite-parse-delimiters-loop [_]
+  '(defn parse-delimiters
+     "gets all the delimiters in the file"
+     {:added "4.0"}
+     [content]
+     (let [state
+           (reduce
+            (fn [state char]
+              (let [line-num    (get state :line-num)
+                    col-num     (get state :col-num)
+                    in-comment? (get state :in-comment?)
+                    in-string?  (get state :in-string?)
+                    escaped?    (get state :escaped?)]
+                (cond
+                  (= char \newline)
+                  (assoc state :line-num (inc line-num) :col-num 1
+                         :in-comment? false :escaped? false)
+
+                  escaped?
+                  (assoc state :col-num (inc col-num) :escaped? false)
+
+                  (= char \\)
+                  (assoc state :col-num (inc col-num) :escaped? true)
+
+                  in-comment?
+                  (assoc state :col-num (inc col-num))
+
+                  in-string?
+                  (if (= char \")
+                    (assoc state :col-num (inc col-num)
+                           :in-comment? false :in-string? false)
+                    (assoc state :col-num (inc col-num)
+                           :in-comment? false :in-string? true))
+
+                  :else
+                  (let [info (delimiter-info char)]
+                    (cond
+                      (= char \;)
+                      (assoc state :col-num (inc col-num)
+                             :in-comment? true :in-string? false)
+
+                      (= char \")
+                      (assoc state :col-num (inc col-num)
+                             :in-comment? false :in-string? true)
+
+                      info
+                      (assoc state
+                             :col-num (inc col-num)
+                             :delimiters
+                             (conj (get state :delimiters)
+                                   (merge {:char (str char)
+                                           :line line-num
+                                           :col col-num}
+                                          info)))
+
+                      :else
+                      (assoc state :col-num (inc col-num)))))))
+            {:line-num 1 :col-num 1
+             :in-comment? false :in-string? false :escaped? false
+             :delimiters []}
+            (seq content))]
+       (get state :delimiters))))
 
 (defn rewrite-character-literal
   "rewrites ambiguous Clojure delimiter characters to portable native expressions"
@@ -552,6 +1322,18 @@
        node))
    form))
 
+(defn quoted-location?
+  "returns true when a structural rewrite cursor is inside quoted code data"
+  {:added "4.1"}
+  [location]
+  (loop [cursor (nav/up location)]
+    (if (or (nil? cursor) (= :root (nav/tag cursor)))
+      false
+      (let [value (nav/value cursor)]
+        (if (and (seq? value) (= 'quote (first value)))
+          true
+          (recur (nav/up cursor)))))))
+
 (defn rewrite-target-forms
   "applies explicitly enabled structural adaptations for one target"
   {:added "4.1"}
@@ -592,6 +1374,84 @@
                          original)
                         original)]
          (cond
+           (and (contains? rules :foundation/form-predicate)
+                (contains? #{'c/form? 'form?} (first form))
+                (= 2 (count form)))
+           (do (swap! applied conj :foundation/form-predicate)
+               (nav/replace location
+                            (parsed-form-block
+                             (list 'or
+                                   (list 'list? (second form))
+                                   (list 'seq? (second form))))))
+
+           (and (contains? rules :clojure/apply-fixed-arguments-native)
+                (not (quoted-location? location))
+                (= 'apply (first form))
+                (= 4 (count form)))
+           (do (swap! applied conj :clojure/apply-fixed-arguments-native)
+               (nav/replace location
+                            (parsed-form-block (rewrite-fixed-apply form))))
+
+           (and (contains? rules :clojure/map-destructuring-native)
+                (not (quoted-location? location))
+                (contains? #{'defn 'fn 'let} (first form))
+                (not= form (rewrite-map-destructuring form)))
+           (let [rewritten (rewrite-map-destructuring form)
+                 rewritten (if (and (= 'defn (first rewritten))
+                                    (= 'layout-default-fn (second rewritten)))
+                             (rewrite-layout-default-form-shadow rewritten)
+                             rewritten)
+                 rewritten (if (and (contains? rules :foundation/layout-map-pairs-native)
+                                    (= 'defn (first rewritten))
+                                    (= 'layout-two-column (second rewritten)))
+                             (rewrite-layout-map-pairs rewritten)
+                             rewritten)
+                 rewritten (rewrite-duplicate-let-bindings rewritten)]
+             (swap! applied conj :clojure/map-destructuring-native)
+             (when (not= rewritten
+                         (rewrite-map-destructuring form))
+               (swap! applied conj :clojure/duplicate-let-binding-native))
+             (when (= 'layout-default-fn (second form))
+               (swap! applied conj :foundation/layout-default-shadow-native))
+             (when (= 'layout-two-column (second form))
+               (swap! applied conj :foundation/layout-map-pairs-native))
+             (nav/replace location (parsed-form-block rewritten)))
+
+           (and (contains? rules :clojure/print-meta-binding-native)
+                (= 'binding (first form))
+                (= '[*print-meta* true] (second form)))
+           (do (swap! applied conj :clojure/print-meta-binding-native)
+               (nav/replace location
+                            (parsed-form-block
+                             (rewrite-print-meta-binding form))))
+
+           (and (contains? rules :foundation/layout-hiccup-boolean-native)
+                (not (quoted-location? location))
+                (= 'defn (first form))
+                (= 'layout-hiccup-like (second form)))
+           (do (swap! applied conj :foundation/layout-hiccup-boolean-native)
+               (nav/replace location
+                            (parsed-form-block
+                             (rewrite-layout-hiccup-boolean form))))
+
+           (and (contains? rules :foundation/layout-readable-width-native)
+                (not (quoted-location? location))
+                (= 'defn (first form))
+                (= 'get-max-width (second form)))
+           (do (swap! applied conj :foundation/layout-readable-width-native)
+               (nav/replace location
+                            (parsed-form-block
+                             (rewrite-layout-readable-width form))))
+
+           (and (contains? rules :foundation/layout-default-shadow-native)
+                (not (quoted-location? location))
+                (= 'defn (first form))
+                (= 'layout-default-fn (second form)))
+           (do (swap! applied conj :foundation/layout-default-shadow-native)
+               (nav/replace location
+                            (parsed-form-block
+                             (rewrite-layout-default-form-shadow form))))
+
            (and (contains? rules :clojure/map-entry-traversal)
                 (= 'defn (first form))
                 (= 'tag (second form)))
@@ -626,7 +1486,10 @@
                (let [rewritten (rewrite-ns-form
                                 form
                                 (:target/overrides target)
-                                (:target/target-source-namespace target))
+                                (if (= :test (:unit/kind target))
+                                  (or (:target/target-test-namespace target)
+                                      (:target/target-source-namespace target))
+                                  (:target/target-source-namespace target)))
                      rewritten (if (and (= :test (:unit/kind target))
                                         (:target/test-alias target))
                                  (add-require-alias
@@ -692,6 +1555,95 @@
            (do (swap! applied conj :foundation/block-cursor-comparator)
                (nav/replace location (rewrite-block-cursor-comparator form)))
 
+           (and (contains? rules :clojure/keep-indexed-native)
+                (or (and (= 'keep-indexed (first form))
+                         (= 3 (count form)))
+                    (and (= '->> (first form))
+                         (= 3 (count form))
+                         (seq? (nth form 2))
+                         (= 'keep-indexed (first (nth form 2))))))
+           (do (swap! applied conj :clojure/keep-indexed-native)
+               (nav/replace location (rewrite-keep-indexed form)))
+
+           (and (contains? rules :clojure/process-path-binding-native)
+                (= 'defn (first form))
+                (= 'process-path (second form)))
+           (do (swap! applied conj :clojure/process-path-binding-native)
+               (nav/replace location
+                            (parsed-form-block
+                            (rewrite-process-path-binding form))))
+
+           (and (contains? rules :clojure/optional-rest-parameter-native)
+                (not (quoted-location? location))
+                (= 'defn (first form))
+                (not= form (rewrite-optional-rest-parameter form)))
+           (let [rewritten (rewrite-optional-rest-parameter form)]
+             (swap! applied conj :clojure/optional-rest-parameter-native)
+             (if (and (contains? rules :foundation/layout-optional-opts-native)
+                      (= 'layout-main (second form)))
+               (do (swap! applied conj :foundation/layout-optional-opts-native)
+                   (nav/replace location
+                                (parsed-form-block
+                                 (rewrite-layout-optional-opts rewritten))))
+               (nav/replace location (parsed-form-block rewritten))))
+
+           (and (contains? rules :clojure/nested-sequential-parameter-native)
+                (not (quoted-location? location))
+                (contains? #{'defn 'fn} (first form))
+                (not= form (rewrite-nested-sequential-parameters form)))
+           (let [rewritten (rewrite-nested-sequential-parameters form)]
+             (swap! applied conj :clojure/nested-sequential-parameter-native)
+             (nav/replace location (parsed-form-block rewritten)))
+
+           (and (contains? rules :foundation/merge-meta-native)
+                (= 'c/merge-meta (first form)))
+           (do (swap! applied conj :foundation/merge-meta-native)
+               (nav/replace location
+                            (parsed-form-block (rewrite-merge-meta form))))
+
+           (and (contains? rules :foundation/heal-core-destructuring-native)
+                (= 'defn (first form))
+                (contains? #{'get-block-lines
+                             'heal-content-complex-edits
+                             'heal-content-single-pass}
+                           (second form)))
+           (do (swap! applied conj :foundation/heal-core-destructuring-native)
+               (nav/replace location
+                            (parsed-form-block
+                             (rewrite-heal-core-destructuring form))))
+
+           (and (contains? rules :foundation/heal-content-reduce-native)
+                (= 'defn (first form))
+                (= 'heal-content (second form)))
+           (do (swap! applied conj :foundation/heal-content-reduce-native)
+               (nav/replace location
+                            (parsed-form-block
+                             (rewrite-heal-content-loop form))))
+
+           (and (contains? rules :foundation/heal-print-loop-native)
+                (= 'defn (first form))
+                (= 'print-rainbow (second form)))
+           (do (swap! applied conj :foundation/heal-print-loop-native)
+               (nav/replace location (rewrite-print-rainbow-loop form)))
+
+           (and (contains? rules :foundation/heal-parse-delimiters-native)
+                (= 'defn (first form))
+                (= 'parse-delimiters (second form)))
+           (do (swap! applied conj :foundation/heal-parse-delimiters-native)
+               (nav/replace location (rewrite-parse-delimiters-loop form)))
+
+           (and (contains? rules :clojure/list-cons-compatible)
+                (= 'list? (first form))
+                (= 2 (count form)))
+           (do (swap! applied conj :clojure/list-cons-compatible)
+               (nav/replace location (rewrite-list-compatible form)))
+
+           (and (contains? rules :clojure/fn-form-compatible)
+                (= 'fn? (first form))
+                (= 2 (count form)))
+           (do (swap! applied conj :clojure/fn-form-compatible)
+               (nav/replace location (rewrite-fn-form-compatible form)))
+
            (and (contains? rules :clojure/named-recur)
                 (= 'defn (first form))
                 (some #(and (seq? %) (= 'recur (first %)))
@@ -721,6 +1673,162 @@
                 (= '.startsWith (first form)))
            (do (swap! applied conj :clojure/string-starts-with)
                (nav/replace location (rewrite-string-starts-with form)))
+
+           (and (contains? rules :clojure/character-array-string)
+                (= 'String. (first form))
+                (= 2 (count form)))
+           (do (swap! applied conj :clojure/character-array-string)
+               (nav/replace location (rewrite-character-array-string form)))
+
+           (and (contains? rules :foundation/prose-join-lines-native)
+                (= 'prose/join-lines (first form))
+                (= 2 (count form)))
+           (do (swap! applied conj :foundation/prose-join-lines-native)
+               (nav/replace location (rewrite-join-lines form)))
+
+           (and (contains? rules :foundation/prose-pipe-native)
+                (= 'prose/| (first form)))
+           (do (swap! applied conj :foundation/prose-pipe-native)
+               (nav/replace location (rewrite-prose-pipe form)))
+
+           (and (contains? rules :clojure/string-join-native)
+                (= '->> (first form))
+                (seq? (last form))
+                (= 'clojure.string/join (first (last form)))
+                (= 2 (count (last form))))
+           (do (swap! applied conj :clojure/string-join-native)
+               (nav/replace location (rewrite-thread-string-join form)))
+
+           (and (contains? rules :clojure/string-join-native)
+                (= 'clojure.string/join (first form))
+                (= 3 (count form)))
+           (do (swap! applied conj :clojure/string-join-native)
+               (nav/replace location (rewrite-string-join form)))
+
+           (and (contains? rules :clojure/safe-sequential-get)
+                (= 'get (first form))
+                (= 3 (count form))
+                (contains? #{'delimiters 'lines} (second form)))
+           (do (swap! applied conj :clojure/safe-sequential-get)
+               (nav/replace location (rewrite-safe-sequential-get form)))
+
+           (and (contains? rules :foundation/map-vals-native)
+                (or (and (= 'collection/map-vals (first form))
+                         (= 3 (count form)))
+                    (and (= '->> (first form))
+                         (seq? (last form))
+                         (= 'collection/map-vals (first (last form)))
+                         (= 2 (count (last form))))))
+           (do (swap! applied conj :foundation/map-vals-native)
+               (nav/replace location (rewrite-map-vals form)))
+
+           (and (contains? rules :foundation/heal-map-entry-sort-native)
+                (= '(sort lu) form))
+           (do (swap! applied conj :foundation/heal-map-entry-sort-native)
+               (nav/replace location '(sort-by first (seq lu))))
+
+           (and (contains? rules :foundation/prose-spaces-native)
+                (= 'prose/spaces (first form))
+                (= 2 (count form)))
+           (do (swap! applied conj :foundation/prose-spaces-native)
+               (nav/replace location
+                            (list 'apply 'str
+                                  (list 'repeat (second form) " "))))
+
+           (and (contains? rules :clojure/some-native)
+                (= 'some (first form)) (= 3 (count form)))
+           (do (swap! applied conj :clojure/some-native)
+               (nav/replace location (rewrite-some form)))
+
+           (and (contains? rules :foundation/map-juxt-native)
+                (= 'collection/map-juxt (first form)) (= 3 (count form)))
+           (do (swap! applied conj :foundation/map-juxt-native)
+               (nav/replace location (rewrite-map-juxt form)))
+
+           (and (contains? rules :foundation/test-file-slurp-native)
+                (= 'slurp (first form)) (= 2 (count form)))
+           (do (swap! applied conj :foundation/test-file-slurp-native)
+               (nav/replace location (rewrite-file-slurp form)))
+
+           (and (contains? rules :foundation/test-file-spit-native)
+                (= 'spit (first form)) (= 3 (count form)))
+           (do (swap! applied conj :foundation/test-file-spit-native)
+               (nav/replace location (rewrite-file-spit form)))
+
+           (and (contains? rules :clojure/java-temp-file-native)
+                (= 'java.io.File/createTempFile (first form))
+                (= 3 (count form)))
+           (do (swap! applied conj :clojure/java-temp-file-native)
+               (nav/replace location (rewrite-java-temp-file form)))
+
+           (and (contains? rules :foundation/heal-line-format-native)
+                (= 'format (first form)) (= "%4d " (second form)))
+           (do (swap! applied conj :foundation/heal-line-format-native)
+               (nav/replace location (rewrite-heal-line-format form)))
+
+           (and (contains? rules :foundation/rename-keys-native)
+                (= 'collection/rename-keys (first form)) (= 3 (count form)))
+           (do (swap! applied conj :foundation/rename-keys-native)
+               (nav/replace location (rewrite-rename-keys form)))
+
+           (and (contains? rules :clojure/nested-map-parameter-destructuring)
+                (= 'defn (first form))
+                (= 'pair-delimiters (second form)))
+           (do (swap! applied conj :clojure/nested-map-parameter-destructuring)
+               (nav/replace location (rewrite-pair-delimiter-copies form)))
+
+           (and (contains? rules :foundation/string-trim-right-native)
+                (contains? #{'clojure.string/trimr
+                             'std.string.common/trimr
+                             'std.foundation.string/trimr}
+                           (first form)))
+           (do (swap! applied conj :foundation/string-trim-right-native)
+               (nav/replace location
+                            (list 'std.foundation.string/trim-right (second form))))
+
+           (and (contains? rules :clojure/character-array-native)
+                (= 'char-array (first form)))
+           (do (swap! applied conj :clojure/character-array-native)
+               (nav/replace location
+                            (list 'apply 'Arr/new
+                                  (list 'repeat (second form) (nth form 2)))))
+
+           (and (contains? rules :clojure/array-set-native)
+                (= 'aset (first form)))
+           (do (swap! applied conj :clojure/array-set-native)
+               (nav/replace location (cons 'Arr/set (rest form))))
+
+           (and (contains? rules :clojure/iobj-metadata-native)
+                (= 'instance? (first form))
+                (= 'clojure.lang.IObj (second form))
+                (= 3 (count form)))
+           (do (swap! applied conj :clojure/iobj-metadata-native)
+               (nav/replace location (rewrite-iobj-metadata form)))
+
+           (and (contains? rules :clojure/iobj-native)
+                (= 'instance? (first form))
+                (= 'clojure.lang.IObj (second form))
+                (= 3 (count form)))
+           (do (swap! applied conj :clojure/iobj-native)
+               (nav/replace location (rewrite-iobj-instance form)))
+
+           (and (contains? rules :clojure/exception-constructor-native)
+                (= 'Exception. (first form))
+                (= 2 (count form)))
+           (do (swap! applied conj :clojure/exception-constructor-native)
+               (nav/replace location (rewrite-exception-constructor form)))
+
+           (and (contains? rules :clojure/integer-parse-native)
+                (= 'Integer/parseInt (first form))
+                (= 2 (count form)))
+           (do (swap! applied conj :clojure/integer-parse-native)
+               (nav/replace location (rewrite-integer-parse form)))
+
+           (and (contains? rules :clojure/number-format-catch-native)
+                (= 'catch (first form))
+                (= 'java.lang.NumberFormatException (second form)))
+           (do (swap! applied conj :clojure/number-format-catch-native)
+               (nav/replace location (rewrite-number-format-catch form)))
 
            (and (contains? rules :clojure/iterator-first-pipeline)
                 (iterator-first-pipeline? form))
@@ -803,8 +1911,8 @@
 (defn rewrite-dependencies
   "rewrites exact and qualified dependency symbols through code.query"
   {:added "4.1"}
-  [root migration-catalog applied]
-  (let [routes (dependency-routes migration-catalog)
+  [root migration-catalog target applied]
+  (let [routes (dependency-routes migration-catalog target)
         reader-route (get routes 'fn*)
         root (if reader-route
                (query/modify
@@ -846,7 +1954,7 @@
       (-> cursor nav/root-string nav/parse-root))))
 
 (def +native-class-names+
-  #{"String" "Stream" "Edn" "Crypto" "Process"})
+  #{"String" "Stream" "Edn" "Json" "Crypto" "Process" "Arr" "File" "Printer" "OS" "Algo"})
 
 (defn native-class-symbol?
   "checks for a qualified symbol owned by a known std.native class"
@@ -928,10 +2036,15 @@
   {:added "4.1"}
   [form multiline]
   (binding [estimate/*readable-len* 80]
-    (block/layout
-     (if multiline
-       (with-meta form (assoc (meta form) :readable-len 1))
-       form))))
+    (try
+      (block/parse-first
+       (block/string
+        (block/layout
+         (if multiline
+           (with-meta form (assoc (meta form) :readable-len 1))
+           form))))
+      (catch Exception error
+        (block/parse-first (pr-str form))))))
 
 (defn layout-rewritten-source
   "lays out rewritten top-level forms while retaining untouched source blocks"
@@ -1015,7 +2128,9 @@
                             (remove-block-interface-remnants target-result)
                             target-result)
         dependency-result (rewrite-dependencies structural-result
-                                                migration-catalog applied)
+                                                migration-catalog
+                                                target
+                                                applied)
         require-result    (if target
                             (rewrite-unused-requires dependency-result
                                                      target

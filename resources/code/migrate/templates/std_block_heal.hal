@@ -1,0 +1,22 @@
+(ns std.block.heal
+  (:require [std.block.heal.core :as core]
+            [std.block.heal.parse :as parse]
+            [std.block.heal.print :as print]))
+
+(def heal core/heal-content)
+
+(defn print-rainbow
+  "prints out the code in rainbow"
+  {:added "4.0"}
+  [content]
+  (print/print-rainbow
+   content
+   (parse/pair-delimiters
+    (parse/parse-delimiters content))))
+
+(defn rainbow
+  "prints out the code in rainbow"
+  {:added "4.0"}
+  [content]
+  (with:out-string
+    (print-rainbow content)))

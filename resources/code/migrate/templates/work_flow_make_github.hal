@@ -1,0 +1,123 @@
+(ns work.flow.make.github
+  (:require [std.foundation.string :as string]
+            [work.flow.make.common :as common]
+            [work.flow.make.project :as project]
+            [tool.sh :as sh]))
+
+(def ^:dynamic *verbose* true)
+
+(defmacro with-verbose [verbose & body]
+  `(binding [work.flow.make.github/*verbose* ~verbose] ~@body))
+
+(defn gh-sh-opts [config]
+  (let [value (deref (:instance config))]
+    {:cwd (str (:root value) "/" (:build value))}))
+
+(defn- gh-run [argv options]
+  (let [result (sh/run argv options)]
+    (if (or (= 0 (:exit result)) (not *verbose*))
+      result
+      (throw (ex-info "GitHub command failed" result)))))
+
+(defn gh-commit [config message]
+  (let [options (gh-sh-opts config)]
+    (gh-run ["git" "add" "-A"] options)
+    (gh-run ["git" "commit" "-m" message] options)))
+
+(defn gh-push [config]
+  (gh-run ["git" "push"] (gh-sh-opts config)))
+
+(defn gh-save [config message]
+  (gh-commit config message)
+  (gh-push config))
+
+(defn gh-user [] (os/getenv "GITHUB_USER"))
+(defn gh-token [] (os/getenv "GITHUB_TOKEN"))
+
+(defn gh-exists? [config]
+  (let [value (deref (:instance config))
+        repo (:repo (:github value))
+        result (gh-run
+                ["curl" "-u" (str (gh-user) ":" (gh-token))
+                 (str "https://api.github.com/repos/" repo)]
+                {})]
+    (not (string/starts-with? (:stdout result)
+                              "{\n  \"message\": \"Not Found\""))))
+
+(defn gh-setup-remote [config]
+  (let [value (deref (:instance config))
+        github (:github value)
+        repo (:repo github)
+        parts (string/split repo "/")
+        repo-namespace (nth parts 0)
+        repo-name (nth parts 1)
+        user (gh-user)
+        url (if (= user repo-namespace)
+              "https://api.github.com/user/repos"
+              (str "https://api.github.com/orgs/" repo-namespace "/repos"))
+        payload (Json/write
+                 {:name repo-name
+                  :private (boolean (:private github))
+                  :description (or (:description github) "")})]
+    (gh-run ["curl" "-i" "-u" (str user ":" (gh-token))
+             url "-d" payload]
+            {})))
+
+(defn gh-setup-local-init [config]
+  (let [value (deref (:instance config))
+        repo (:repo (:github value))
+        options (gh-sh-opts config)]
+    (gh-run ["git" "init" "."] options)
+    (gh-run ["git" "remote" "add" "origin"
+             (str "git@github.com:" repo ".git")] options)
+    (gh-run ["git" "add" "-A"] options)
+    (gh-run ["git" "commit" "-m" "Initial commit"] options)
+    (gh-run ["git" "push" "-u" "origin" "master"] options)))
+
+(defn gh-setup-local-clone [config]
+  (let [value (deref (:instance config))
+        repo (:repo (:github value))]
+    (gh-run ["git" "clone" (str "git@github.com:" repo ".git")
+             (:build value)]
+            {:cwd (:root value)})))
+
+(defn gh-clone [config]
+  (if (common/make-dir-exists? config)
+    (throw (ex-info "Directory exists." {:dir (common/make-dir config)}))
+    (gh-setup-local-clone config)))
+
+(defn gh-setup [config]
+  (println "\nGH SETUP STARTING\n")
+  (if (gh-exists? config)
+    (do (common/make-dir-teardown config)
+        (gh-setup-local-clone config))
+    (do (gh-setup-remote config)
+        (gh-setup-local-init config)))
+  (println "\nGH SETUP DONE\n"))
+
+(defn gh-local-purge [config]
+  (gh-run ["bash" "-c" "git ls-files -z | xargs -0 rm -f"]
+          {:cwd (common/make-dir config)}))
+
+(defn gh-refresh [config]
+  (throw (ex-info "TODO" {:config config})))
+
+(defn- source-head-message []
+  (str "SRC:"
+       (string/trim (:stdout (gh-run ["git" "rev-parse" "HEAD"] {})))))
+
+(defn gh-dwim-init [config & messages]
+  (let [message (first messages)]
+    (gh-local-purge config)
+    (gh-setup-remote config)
+    (gh-setup config)
+    (gh-local-purge config)
+    (project/build-all config)
+    (gh-save config (or message (source-head-message)))
+    (gh-push config)))
+
+(defn gh-dwim-push [config & messages]
+  (let [message (first messages)]
+    (project/build-all config)
+    (gh-commit config (or message (source-head-message)))
+    (gh-push config)))
