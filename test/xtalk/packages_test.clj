@@ -35,7 +35,10 @@
   => VERSION
 
   (get (js-package :ui) "version")
-  => VERSION)
+  => VERSION
+
+  (get-in (js-package :ui) ["peerDependencies" "@xtalk/figma-ui"])
+  => "^0.1.4")
 
 ^{:refer xtalk.packages/dart-project :added "4.1"}
 (fact "adds application members without changing package workspace entries"

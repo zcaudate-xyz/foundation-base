@@ -225,6 +225,10 @@ jobs:
         if: matrix.lang == 'js'
         run: npm ci --legacy-peer-deps
 
+      - name: Verify figma-ui package consumption
+        if: matrix.lang == 'js'
+        run: npm run test:figma-ui-package
+
       - name: Install JS parser dependencies
         if: matrix.install_js_parser == true
         working-directory: scripts/js_parser
