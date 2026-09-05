@@ -1,4 +1,4 @@
-lang_lang.clj:1:(ns code.mcp.tool.lang-lang
+(ns code.mcp.tool.lang-lang
   (:require [lang.core :as l]
             [lang.common.book :as book]
             [lang.core.library :as lib]))

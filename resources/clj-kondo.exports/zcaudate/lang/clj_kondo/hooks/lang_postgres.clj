@@ -1,4 +1,4 @@
-lang/clj_kondo/hooks/lang_postgres.clj:1:(ns clj-kondo.hooks.lang-postgres
+(ns clj-kondo.hooks.lang-postgres
   (:require [clj-kondo.hooks-api :as api]
             [clojure.string :as str]))
 
@@ -115,6 +115,12 @@ lang/clj_kondo/hooks/lang_postgres.clj:1:(ns clj-kondo.hooks.lang-postgres
                    (rest children) children)
         name-node (first children)
         remainder (rest children)
+            signature (drop-while #(or (api/string-node? %) (api/map-node? %)) remainder)
+            arity-node (first signature)
+            remainder (if (and (api/list-node? arity-node)
+                               (api/vector-node? (first (:children arity-node))))
+                        (:children arity-node)
+                        remainder)
         args-index (first (keep-indexed (fn [i child]
                                          (when (api/vector-node? child) i)) remainder))]
     (when (and name-node args-index)

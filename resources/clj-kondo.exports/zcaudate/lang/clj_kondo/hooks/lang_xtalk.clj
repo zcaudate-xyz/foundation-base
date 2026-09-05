@@ -1,4 +1,4 @@
-lang/clj_kondo/hooks/lang_xtalk.clj:1:(ns clj-kondo.hooks.lang-xtalk
+(ns clj-kondo.hooks.lang-xtalk
   "Canonical XTalk checks exposed through clj-kondo.
 
    The hook analyzes the original XTalk form, then returns a small Clojure

@@ -233,7 +233,7 @@
       (slurp (str (fs/path root "test/samplebench/python/sample/format_test.clj")))
       (finally
        (fs/delete root {:recursive true}))))
-  => "(ns samplebench.python.sample.format-test\n  (:use code.test)\n  (:require [tahto.core :as l]))\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"runtime branches\"\n\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
+  => "(ns samplebench.python.sample.format-test\n  (:use code.test)\n  (:require [lang.core :as l]))\n\n(l/script- :python {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example.A :added \"4.1\"}\n(fact \"runtime branches\"\n\n  (!.python\n    (+ 1 2 3))\n  => 6)\n")
 
 ^{:refer lang.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-derived-runtime}
@@ -268,7 +268,7 @@
       (slurp (str (fs/path root "test/samplebench/lua/sample/derived_test.clj")))
       (finally
         (fs/delete root {:recursive true}))))
-  => "(ns samplebench.lua.sample.derived-test\n  (:use code.test)\n  (:require [tahto.core :as l]\n            [xt.lang.spec-base :as xt]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-f :added \"4.1\"}\n(fact \"expect can be customised\"\n\n  (!.lua\n    (xt/x:offset 10))\n  => 11)\n")
+  => "(ns samplebench.lua.sample.derived-test\n  (:use code.test)\n  (:require [lang.core :as l]\n            [xt.lang.spec-base :as xt]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-f :added \"4.1\"}\n(fact \"expect can be customised\"\n\n  (!.lua\n    (xt/x:offset 10))\n  => 11)\n")
 
 ^{:refer lang.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-setup-overrides}
@@ -302,7 +302,7 @@
       (slurp (str (fs/path root "test/samplebench/lua/sample/setup_test.clj")))
       (finally
         (fs/delete root {:recursive true}))))
-  => "(ns samplebench.lua.sample.setup-test\n  (:use code.test)\n  (:require [tahto.core :as l]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-g :added \"4.1\"\n  :setup [(!.lua (setup-lua))]}\n(fact \"setup bench outcomes\"\n\n  (!.lua 1)\n  => 1)\n")
+  => "(ns samplebench.lua.sample.setup-test\n  (:use code.test)\n  (:require [lang.core :as l]))\n\n(l/script- :lua {:runtime :basic})\n\n^{:refer xt.lang.spec-base/example-g :added \"4.1\"\n  :setup [(!.lua (setup-lua))]}\n(fact \"setup bench outcomes\"\n\n  (!.lua 1)\n  => 1)\n")
 
 ^{:refer lang.seedgen.form-bench/seedgen-benchadd :added "4.1"
   :id test-seedgen-benchadd-global-fixtures}

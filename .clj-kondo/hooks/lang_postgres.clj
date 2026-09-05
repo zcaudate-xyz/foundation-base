@@ -1,4 +1,4 @@
-(ns hooks.tahto-postgres
+(ns hooks.lang-postgres
     "clj-kondo hooks for Hara's generated language macros and PostgreSQL DSL.
 
    l/script- interns grammar macros at runtime. clj-kondo cannot execute that
@@ -79,7 +79,7 @@
                 lang-form)))
 
 (defn script
-      "Model tahto.core/script and tahto.core/script- for clj-kondo."
+      "Model lang.core/script and lang.core/script- for clj-kondo."
       [{:keys [node]}]
       (let [children (:children node)
             lang (script-lang node)
@@ -170,21 +170,21 @@
         (when (map? input)
           (when (contains? input :link)
             (report-error! name-node
-                           :tahto.postgres/retired-entity-option
+                           :lang.postgres/retired-entity-option
                            "et/E :link has been removed; use :owner target or :owner [target local-key]"))
           (when (contains? input :spec/addon)
             (report-error! name-node
-                           :tahto.postgres/retired-entity-option
+                           :lang.postgres/retired-entity-option
                            "et/E :spec/addon has been removed; use :provides"))
           (when (and (contains? input :owner)
                      (not (owner-valid? (:owner input))))
             (report-error! name-node
-                           :tahto.postgres/invalid-owner
+                           :lang.postgres/invalid-owner
                            "et/E :owner must be a target symbol or [target-symbol local-keyword]"))
           (when (and (contains? input :provides)
                      (not (provides-valid? (:provides input))))
             (report-error! name-node
-                           :tahto.postgres/invalid-provides
+                           :lang.postgres/invalid-provides
                            "et/E :provides must contain a keyword :key and an optional numeric :priority")))))
 
 (defn function-shape [node]
@@ -196,6 +196,12 @@
                          children)
             name-node (first children)
             remainder (rest children)
+            signature (drop-while #(or (api/string-node? %) (api/map-node? %)) remainder)
+            arity-node (first signature)
+            remainder (if (and (api/list-node? arity-node)
+                               (api/vector-node? (first (:children arity-node))))
+                        (:children arity-node)
+                        remainder)
             args-index (first (keep-indexed (fn [i child]
                                                 (when (api/vector-node? child) i))
                                             remainder))]
@@ -234,21 +240,21 @@
                                                 (str/starts-with? (str (first %)) "pg/t:"))
                                           body))))
                       (not= 1 top-let-count))
-                 (report! name-node :tahto.postgres/one-let
+                 (report! name-node :lang.postgres/one-let
                           (str name " should contain exactly one top-level let")))
            (when (> (count lets) 1)
-                 (report! name-node :tahto.postgres/nested-let
+                 (report! name-node :lang.postgres/nested-let
                           (str name " contains nested or repeated let forms")))
            (doseq [input input-names]
                   (when-not (allowed-input-name? input)
-                            (report! name-node :tahto.postgres/input-prefix
+                            (report! name-node :lang.postgres/input-prefix
                                      (str "input binding " input " should use i-* or m"))))
            (doseq [local local-names]
                   (when-not (allowed-local-name? local)
-                            (report! name-node :tahto.postgres/local-prefix
+                            (report! name-node :lang.postgres/local-prefix
                                      (str "local binding " local " should use v-* or o-*"))))
            (when (seq direct-returns)
-                 (report! name-node :tahto.postgres/return-bound
+                 (report! name-node :lang.postgres/return-bound
                           (str name " returns an expression directly; bind it before return")))))
 
 (defn defn-pg

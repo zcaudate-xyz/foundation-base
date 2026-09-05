@@ -1,0 +1,61 @@
+{:ns-groups
+ [{:pattern "^xt\\."
+   :name clj-kondo.hooks.lang-xtalk}
+  {:pattern "^lang\\.model\\.spec-xtalk\\."
+   :name clj-kondo.hooks.lang-xtalk}
+  {:pattern ".+"
+   :name clj-kondo.hooks.lang-postgres}]
+
+ :hooks
+ {:analyze-call
+  {lang.core/script clj-kondo.hooks.lang-postgres/script
+   lang.core/script- clj-kondo.hooks.lang-postgres/script
+   lang.core/script+ clj-kondo.hooks.lang-postgres/script
+   lang.core/defspec.xt clj-kondo.hooks.lang-xtalk/defspec-xt
+   lang.typed/defspec.xt clj-kondo.hooks.lang-xtalk/defspec-xt
+   defspec.xt clj-kondo.hooks.lang-xtalk/defspec-xt
+   defn.js clj-kondo.hooks.lang-xtalk/defn-xt
+   lang.core/defn.js clj-kondo.hooks.lang-xtalk/defn-xt
+   defvar.js clj-kondo.hooks.lang-xtalk/defvar-xt
+   lang.core/defvar.js clj-kondo.hooks.lang-xtalk/defvar-xt
+   defglobal.xt clj-kondo.hooks.lang-xtalk/defglobal-xt
+   defn.pg clj-kondo.hooks.lang-postgres/defn-pg
+   defrun.pg clj-kondo.hooks.lang-postgres/defn-pg
+   clj-kondo.hooks.lang-xtalk/defn.xt clj-kondo.hooks.lang-xtalk/defn-xt
+   clj-kondo.hooks.lang-xtalk/def.xt clj-kondo.hooks.lang-xtalk/def-xt
+   clj-kondo.hooks.lang-xtalk/defmacro.xt clj-kondo.hooks.lang-xtalk/defmacro-xt
+   clj-kondo.hooks.lang-xtalk/defgen.xt clj-kondo.hooks.lang-xtalk/defgen-xt
+   clj-kondo.hooks.lang-xtalk/defvar.xt clj-kondo.hooks.lang-xtalk/defvar-xt
+   defprotocol.xt clj-kondo.hooks.lang-xtalk/defprotocol-xt
+   xt.lang.common-protocol/defprotocol.xt clj-kondo.hooks.lang-xtalk/defprotocol-xt
+   proto/defprotocol.xt clj-kondo.hooks.lang-xtalk/defprotocol-xt
+   clj-kondo.hooks.lang-xtalk/defspec.xt clj-kondo.hooks.lang-xtalk/defspec-xt
+   clj-kondo.hooks.lang-xtalk/defglobal.xt clj-kondo.hooks.lang-xtalk/defglobal-xt
+   defimpl.xt clj-kondo.hooks.lang-xtalk/defimpl-xt
+   xt.lang.common-protocol/defimpl.xt clj-kondo.hooks.lang-xtalk/defimpl-xt
+   proto/defimpl.xt clj-kondo.hooks.lang-xtalk/defimpl-xt
+   fact clj-kondo.hooks.lang-xtalk/fact-xt
+   fact:global clj-kondo.hooks.lang-xtalk/fact-global-xt
+   clj-kondo.hooks.lang-postgres/defn.pg clj-kondo.hooks.lang-postgres/defn-pg
+   clj-kondo.hooks.lang-postgres/defrun.pg clj-kondo.hooks.lang-postgres/defn-pg
+   deftype.pg clj-kondo.hooks.lang-postgres/deftype-pg
+   clj-kondo.hooks.lang-postgres/deftype.pg clj-kondo.hooks.lang-postgres/deftype-pg}}
+
+ :linters
+ {:namespace-name-mismatch {:level :off}
+  :lang.postgres/one-let {:level :warning}
+  :lang.postgres/nested-let {:level :warning}
+  :lang.postgres/input-prefix {:level :warning}
+  :lang.postgres/local-prefix {:level :warning}
+  :lang.postgres/return-bound {:level :warning}
+  :lang.postgres/retired-entity-option {:level :error}
+  :lang.postgres/invalid-owner {:level :error}
+  :lang.postgres/invalid-provides {:level :error}
+  :lang.xtalk/block-in-value {:level :error}
+  :lang.xtalk/field-collision {:level :error}
+  :lang.xtalk/invalid-destructuring {:level :error}
+  :lang.xtalk/redundant-get-key {:level :warning}
+  :lang.xtalk/redundant-fn-arrow {:level :warning}
+  :lang.xtalk/nested-dot-access {:level :warning}
+  :lang.xtalk/redundant-dot-destructure {:level :warning}
+  :lang.xtalk/merge-dot-destructure {:level :warning}}}
