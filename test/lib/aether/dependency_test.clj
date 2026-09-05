@@ -6,11 +6,11 @@
 ^{:refer lib.aether.dependency/rep-exclusion :added "3.0"}
 (fact "creates a rep from an exclusion"
 
-  (str (rep-exclusion (artifact-exclusion "tahto:tahto")))
-  => "tahto:tahto:jar:")
+  (str (rep-exclusion (artifact-exclusion "lang:lang")))
+  => "lang:lang:jar:")
 
 ^{:refer lib.aether.dependency/artifact-exclusion :added "3.0"}
 (fact "creates an artifact exclusion"
 
-  (artifact-exclusion "tahto:tahto:jar:2.8.4")
+  (artifact-exclusion "lang:lang:jar:2.8.4")
   => Exclusion)

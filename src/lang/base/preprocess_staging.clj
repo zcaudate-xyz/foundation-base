@@ -16,8 +16,8 @@
          reserved (get-in grammar [:reserved (first form)])
          mopts    (provenance/with-provenance
                    mopts
-                   {:tahto/form form
-                    :tahto/symbol fsym})
+                   {:lang/form form
+                    :lang/symbol fsym})
          template-assignment (assign/process-template-assignment form grammar modules mopts)]
     (cond (= fsym '!:template)
           (walk-fn (eval (second form)))
@@ -28,17 +28,17 @@
            (= :template (:type reserved))
            (let [mopts (provenance/with-provenance
                          mopts
-                        {:tahto/phase :staging/reserved-template
-                         :tahto/subsystem :tahto/reserved-template
-                         :tahto/lang (:lang mopts)
-                         :tahto/module (ut/module-id (:module mopts))})]
+                        {:lang/phase :staging/reserved-template
+                         :lang/subsystem :lang/reserved-template
+                         :lang/lang (:lang mopts)
+                         :lang/module (ut/module-id (:module mopts))})]
              (try
                (binding [preprocess-base/*macro-opts* mopts]
                  (walk-fn ((:macro reserved) form)))
                (catch Throwable t
                  (ut/throw-with-context
                   "lang.core staging template expansion failed"
-                  (:tahto/provenance mopts)
+                  (:lang/provenance mopts)
                   t))))
           
           (= :hard-link (:emit reserved))
@@ -66,11 +66,11 @@
                 (if (:template fe)
                    (let [mopts (provenance/with-provenance
                                  mopts
-                                {:tahto/phase :staging/fragment-template
-                                 :tahto/subsystem :tahto/fragment-template
-                                 :tahto/lang (:lang mopts)
-                                 :tahto/module (ut/module-id (:module mopts))
-                                 :tahto/entry (ut/entry-summary fe)})]
+                                {:lang/phase :staging/fragment-template
+                                 :lang/subsystem :lang/fragment-template
+                                 :lang/lang (:lang mopts)
+                                 :lang/module (ut/module-id (:module mopts))
+                                 :lang/entry (ut/entry-summary fe)})]
                      (do (if deps-fragment
                            (vswap! deps-fragment conj (ut/sym-full fe)))
                          (walk-fn (try
@@ -80,7 +80,7 @@
                                     (catch Throwable t
                                       (ut/throw-with-context
                                        "lang.core staging macro expansion failed"
-                                       (:tahto/provenance mopts)
+                                       (:lang/provenance mopts)
                                        t))))))
                    form)))))))
 
@@ -90,11 +90,11 @@
   [input grammar modules mopts]
   (let [mopts (provenance/with-provenance
                 mopts
-                {:tahto/phase :staging
-                 :tahto/subsystem :tahto/to-staging
-                 :tahto/lang (:lang mopts)
-                 :tahto/module (ut/module-id (:module mopts))
-                 :tahto/entry (some-> (:entry mopts) ut/entry-summary)})]
+                {:lang/phase :staging
+                 :lang/subsystem :lang/to-staging
+                 :lang/lang (:lang mopts)
+                 :lang/module (ut/module-id (:module mopts))
+                 :lang/entry (some-> (:entry mopts) ut/entry-summary)})]
     (binding [preprocess-base/*macro-skip-deps* false
               preprocess-base/*macro-grammar* grammar
               preprocess-base/*macro-opts* mopts]

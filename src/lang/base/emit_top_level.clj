@@ -147,11 +147,11 @@
           (provenance/throw-with-provenance
            "lang.core emit form failed"
            (provenance/provenance
-            (:tahto/provenance mopts)
-            {:tahto/phase :emit/form
-             :tahto/subsystem :lang.base.emit-top-level/emit-form
-             :tahto/line (or (-> mopts :tahto/provenance :tahto/line)
+            (:lang/provenance mopts)
+            {:lang/phase :emit/form
+             :lang/subsystem :lang.base.emit-top-level/emit-form
+             :lang/line (or (-> mopts :lang/provenance :lang/line)
                                 (provenance/line-of form))
-             :tahto/form form
-             :tahto/symbol sym})
+             :lang/form form
+             :lang/symbol sym})
            t))))))

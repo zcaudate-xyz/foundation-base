@@ -368,13 +368,13 @@
 (def +glsl-oneshot+
   [(runtime/install-type!
     :glsl :oneshot
-    {:type :tahto/rt.glsl
+    {:type :lang/rt.glsl
      :instance {:create rt-glsl:create}})])
 
 (def +glsl-verify+
   [(runtime/install-type!
     :glsl :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (comment

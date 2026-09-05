@@ -1,4 +1,4 @@
-(ns documentation.tahto-common
+lang/lang_base.clj:1:(ns documentation.lang-common
   (:require [lang.base.util :as util]
             [lang.base.grammar :as grammar]
             [lang.base.emit-helper :as emit-helper]
@@ -106,20 +106,20 @@
   => 5)
 
 (fact "build a provenance frame"
-  (provenance/provenance {:tahto/module {:id 'L.core}
-                          :tahto/namespace 'documentation.tahto-common
-                          :tahto/form (with-meta '(+ 1 2) {:line 5})})
-  => '{:tahto/module L.core
-       :tahto/namespace documentation.tahto-common
-       :tahto/form (+ 1 2)
-       :tahto/line 5})
+lang/lang_base.clj:109:  (provenance/provenance {:lang/module {:id 'L.core}
+lang/lang_base.clj:110:                          :lang/namespace 'documentation.lang-common
+lang/lang_base.clj:111:                          :lang/form (with-meta '(+ 1 2) {:line 5})})
+lang/lang_base.clj:112:  => '{:lang/module L.core
+lang/lang_base.clj:113:       :lang/namespace documentation.lang-common
+lang/lang_base.clj:114:       :lang/form (+ 1 2)
+lang/lang_base.clj:115:       :lang/line 5})
 
 (fact "merge provenance into options"
   (-> {:lang :lua}
-      (provenance/with-provenance {:tahto/phase :emit/direct}
-                                  {:tahto/module 'L.core})
-      :tahto/provenance)
-  => '{:tahto/phase :emit/direct
-       :tahto/module L.core})
+lang/lang_base.clj:119:      (provenance/with-provenance {:lang/phase :emit/direct}
+lang/lang_base.clj:120:                                  {:lang/module 'L.core})
+lang/lang_base.clj:121:      :lang/provenance)
+lang/lang_base.clj:122:  => '{:lang/phase :emit/direct
+lang/lang_base.clj:123:       :lang/module L.core})
 
 [[:chapter {:title "API"}]]

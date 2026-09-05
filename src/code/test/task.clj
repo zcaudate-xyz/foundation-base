@@ -186,7 +186,7 @@
 (defn run:report
   "runs only failed tests recorded in a saved report file
  
-   (task/run:report \".tahto/runs/run-1781734545292.edn\")"
+   (task/run:report \".lang/runs/run-1781734545292.edn\")"
   {:added "4.1"}
   ([path]
    (run:report path {}))
@@ -277,7 +277,7 @@
 (comment
   (run '[platform])
   (run-errored)
-  (./ns:reset '[tahto])
+  (./ns:reset '[lang])
   (./ns:reset '[std.task])
 
   (fact "hello"

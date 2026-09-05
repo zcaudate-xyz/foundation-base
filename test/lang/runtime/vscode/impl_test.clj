@@ -115,6 +115,6 @@
 (fact "creates a shared vscode runtime client"
   (let [shared (impl/vscode-shared:create {})]
     [(boolean shared)
-     (= :tahto/rt.vscode (-> shared :client :type))
+     (= :lang/rt.vscode (-> shared :client :type))
      (:temp shared)])
   => [true true true])

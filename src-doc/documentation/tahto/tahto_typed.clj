@@ -1,4 +1,4 @@
-(ns documentation.tahto-typed
+lang/lang_typed.clj:1:(ns documentation.lang-typed
   (:use code.test)
   (:require [lang.typed.xtalk-common :as types]
             [lang.typed.xtalk-infer :as infer]

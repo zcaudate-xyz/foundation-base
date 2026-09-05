@@ -457,7 +457,7 @@
   ([] (fn-call :platform-ids {})))
 
 (resource/res:spec-add
- {:type :tahto/opencl.platform
+ {:type :lang/opencl.platform
   :instance {:create (fn [_] (first (list-platforms)))}})
 
 (defn platform:default
@@ -466,7 +466,7 @@
    (platform:default)"
   {:added "3.0"}
   ([]
-   (resource/res :tahto/opencl.platform)))
+   (resource/res :lang/opencl.platform)))
 
 ;;
 ;; Device
@@ -520,13 +520,13 @@
      (coll/map-vals (partial h/apply-with device-id) fns))))
 
 (resource/res:spec-add
- {:type :tahto/opencl.cpu
+ {:type :lang/opencl.cpu
   :instance {:create (fn [_]
                        (first (filter (comp #{:cpu} device-info:type)
                                       (list-devices (platform:default)))))}})
 
 (resource/res:spec-add
- {:type :tahto/opencl.gpu
+ {:type :lang/opencl.gpu
   :instance {:create (fn [_]
                        (first (filter (comp #{:gpu} device-info:type)
                                       (list-devices (platform:default)))))}})
@@ -535,10 +535,10 @@
   "gets the default cpu device"
   {:added "3.0"}
   ([]
-   (resource/res :tahto/opencl.cpu)))
+   (resource/res :lang/opencl.cpu)))
 
 (defn device:gpu
   "gets the default gpu device"
   {:added "3.0"}
   ([]
-   (resource/res :tahto/opencl.gpu)))
+   (resource/res :lang/opencl.gpu)))

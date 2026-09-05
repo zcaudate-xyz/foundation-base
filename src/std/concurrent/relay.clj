@@ -19,9 +19,9 @@
 
 (def +init+
   (resource/res:variant-add
-   :tahto/concurrent.bus
+   :lang/concurrent.bus
    {:id    :relay
-    :alias :tahto/relay
+    :alias :lang/relay
     :mode {:allow #{:global} :default :global}
     :instance {:setup    (fn [bus] (component/start bus) (f/set! *bus* bus) bus)
                :teardown (fn [bus] (f/set! *bus* nil) (component/stop bus) bus)}}))
@@ -31,7 +31,7 @@
   {:added "3.0"}
   []
   (or *bus*
-      (resource/res :tahto/relay)))
+      (resource/res :lang/relay)))
 
 (defmacro with:bus
   "sets the default relay bus"

@@ -160,13 +160,13 @@
 (def +php-oneshot+
   [(rt/install-type!
     :php :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +php-verify+
   [(rt/install-type!
     :php :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 ;;
@@ -224,6 +224,6 @@
 (def +php-basic+
   [(rt/install-type!
     :php :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])

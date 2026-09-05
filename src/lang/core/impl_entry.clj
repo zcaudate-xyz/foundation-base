@@ -283,13 +283,13 @@
           mopts (-> mopts
                     (assoc :entry (assoc entry :display :brief))
                     (provenance/with-provenance
-                      {:tahto/phase :emit/entry
-                       :tahto/subsystem :lang.core.impl-entry/emit-entry-raw
-                       :tahto/form form
-                       :tahto/lang lang
-                       :tahto/module (:module entry)
-                       :tahto/namespace (:namespace entry)
-                       :tahto/entry (ut/entry-summary entry)}))]
+                      {:lang/phase :emit/entry
+                       :lang/subsystem :lang.core.impl-entry/emit-entry-raw
+                       :lang/form form
+                       :lang/lang lang
+                       :lang/module (:module entry)
+                       :lang/namespace (:namespace entry)
+                       :lang/entry (ut/entry-summary entry)}))]
       (binding [preprocess-base/*macro-opts* mopts
                 preprocess-base/*macro-grammar* grammar]
         (try
@@ -302,7 +302,7 @@
             (env/pp  form)
             (ut/throw-with-context
              "lang.core entry emit failed"
-             (:tahto/provenance mopts)
+             (:lang/provenance mopts)
              t)))))))
 
 (def +cached-emit-keys+

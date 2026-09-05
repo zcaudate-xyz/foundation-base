@@ -53,11 +53,11 @@
 (def +ocaml-twostep+
   [(rt/install-type!
     :ocaml :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
 
 (def +ocaml-verify+
   [(rt/install-type!
     :ocaml :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

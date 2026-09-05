@@ -22,7 +22,7 @@
 
 [[:chapter {:title "How to use it" :link "usage"}]]
 
-"A tahto script requires the libraries it needs, then emitted xtalk code calls those portable helpers. Application examples in `src-build/play/*xtalk*` and tests under `test-lang/xt/lang` show this pattern."
+"A lang script requires the libraries it needs, then emitted xtalk code calls those portable helpers. Application examples in `src-build/play/*xtalk*` and tests under `test-lang/xt/lang` show this pattern."
 
 (comment
   (l/script :xtalk

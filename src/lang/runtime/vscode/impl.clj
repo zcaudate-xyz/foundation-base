@@ -50,7 +50,7 @@
   []
   (str (io/file (System/getProperty "user.dir")
                 "src-js"
-                "vscode-tahto-runtime")))
+                "vscode-lang-runtime")))
 
 ;;
 ;; SOCKET IO
@@ -75,7 +75,7 @@
 ;;
 
 (defn start-vscode
-  "Starts a VS Code instance with the Tahto runtime extension and connects a client socket."
+  "Starts a VS Code instance with the Lang runtime extension and connects a client socket."
   {:added "4.1"}
   [{:keys [id exec port] :as rt}]
   (let [exec         (or exec (vscode-exec))
@@ -98,7 +98,7 @@
                                    "--disable-dev-shm-usage"]))
         proc         (os/sh {:args args
                              :wait false
-                             :env {"TAHTO_VSCODE_PORT" (str port)}})]
+                             :env {"LANG_VSCODE_PORT" (str port)}})]
     (network/wait-for-port host port {:timeout 60000})
     (let [socket (Socket. host port)
           in     (BufferedReader. (InputStreamReader. (.getInputStream socket)))
@@ -173,8 +173,8 @@
   (str "(() => {\n"
        "  try {\n"
        "    return eval(" (json/write code) ");\n"
-       "  } catch (_tahto_err) {\n"
-       "    throw _tahto_err;\n"
+       "  } catch (_lang_err) {\n"
+       "    throw _lang_err;\n"
        "  }\n"
        "})()"))
 
@@ -246,7 +246,7 @@
   "Creates a shared VS Code runtime client."
   {:added "4.1"}
   [m]
-  (-> {:rt/client {:type :tahto/rt.vscode
+  (-> {:rt/client {:type :lang/rt.vscode
                    :constructor vscode:create}
        :rt/temp true}
       (merge m)
@@ -256,12 +256,12 @@
 (def +init+
   [(rt/install-type!
     :js :vscode.instance
-    {:type :tahto/rt.vscode
+    {:type :lang/rt.vscode
      :config {:layout :full}
      :instance {:create vscode:create}})
    (rt/install-type!
     :js :vscode
-    {:type :tahto/rt.vscode.shared
+    {:type :lang/rt.vscode.shared
      :config {:layout :full}
      :instance {:create vscode-shared:create}})])
 

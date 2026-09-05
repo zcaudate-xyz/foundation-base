@@ -1,7 +1,7 @@
 {
-  "name": "vscode-tahto-runtime",
-  "displayName": "Tahto Runtime for VS Code",
-  "description": "Socket-based eval host for the Tahto/Foundatio runtime system",
+  "name": "vscode-lang-runtime",
+  "displayName": "Lang Runtime for VS Code",
+  "description": "Socket-based eval host for the Lang/Foundatio runtime system",
   "version": "0.1.0",
   "publisher": "foundation",
   "engines": {

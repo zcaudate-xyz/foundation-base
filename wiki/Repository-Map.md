@@ -31,7 +31,7 @@ Foundation Base contains several related systems in one repository.
 
 - Standard utilities: [`src/std`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src/std)
 - Developer tools: [`src/code`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src/code)
-- Language tooling: [Tahto docs](https://zcaudate.xyz/foundation-base/tahto/index.html)
+- Language tooling: [Lang docs](https://zcaudate.xyz/foundation-base/lang/index.html)
 - Generated examples: [`src-build/play`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-build/play)
 - Walkthroughs: [`src-doc/walkthrough`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-doc/walkthrough)
 - Documentation sources: [`src-doc/documentation`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-doc/documentation)

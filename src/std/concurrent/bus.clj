@@ -396,5 +396,5 @@
 
 (def +resource+
   (res/res:spec-add
-   {:type :tahto/concurrent.bus
+   {:type :lang/concurrent.bus
     :instance {:create bus:create}}))

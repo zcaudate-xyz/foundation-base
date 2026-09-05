@@ -4,7 +4,7 @@
 - [Getting Started](Getting-Started)
 - [Repository Map](Repository-Map)
 - [Examples](Examples)
-- [Tahto Language Tooling](Tahto-Language-Tooling)
+- [Lang Language Tooling](Lang-Language-Tooling)
 - [Code Tools](Code-Tools)
 - [Contributing](Contributing)
 

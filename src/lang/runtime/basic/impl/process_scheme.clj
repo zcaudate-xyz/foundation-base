@@ -331,13 +331,13 @@
 (def +scheme-oneshot+
   [(rt/install-type!
     :scheme :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +scheme-verify+
   [(rt/install-type!
     :scheme :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +scheme-basic-config+
@@ -352,6 +352,6 @@
 (def +scheme-basic+
   [(rt/install-type!
     :scheme :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])

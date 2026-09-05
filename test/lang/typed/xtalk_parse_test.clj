@@ -30,11 +30,11 @@
 
 ^{:refer lang.typed.xtalk-parse/read-forms :added "4.1"}
 (fact "reads forms from files"
-  (pos? (count (read-forms "test/tahto/model/spec_xtalk_typed_fixture.clj")))
+  (pos? (count (read-forms "test/lang/model/spec_xtalk_typed_fixture.clj")))
   => true)
 
 (fact "attaches file and source position metadata to read forms"
-  (let [forms (read-forms "test/tahto/model/spec_xtalk_typed_fixture.clj")
+  (let [forms (read-forms "test/lang/model/spec_xtalk_typed_fixture.clj")
         first-form (first forms)]
     [(some-> first-form meta :file string?)
      (integer? (some-> first-form meta :line))
@@ -209,7 +209,7 @@
 
 ^{:refer lang.typed.xtalk-parse/analyze-file-raw :added "4.1"}
 (fact "returns raw parsed map without spec attachment"
-  (let [result (analyze-file-raw "test/tahto/model/spec_xtalk_typed_fixture.clj")]
+  (let [result (analyze-file-raw "test/lang/model/spec_xtalk_typed_fixture.clj")]
     [(map? result)
      (:ns result)
      (contains? result :specs)
@@ -218,7 +218,7 @@
 
 ^{:refer lang.typed.xtalk-parse/analyze-file :added "4.1"}
 (fact "analyzes files into typed declarations"
-  (:ns (analyze-file "test/tahto/model/spec_xtalk_typed_fixture.clj"))
+  (:ns (analyze-file "test/lang/model/spec_xtalk_typed_fixture.clj"))
   => 'lang.model.spec-xtalk-typed-fixture)
 
 ^{:refer lang.typed.xtalk-parse/register-types! :added "4.1"}
@@ -249,20 +249,20 @@
 
 ^{:refer lang.typed.xtalk-parse/existing-file-path :added "4.1"}
 (fact "returns the first existing path or nil"
-  [(existing-file-path ["src/tahto/typed.clj" "missing"])
+  [(existing-file-path ["src/lang/typed.clj" "missing"])
    (existing-file-path ["missing-1" "missing-2"])]
-  => ["src/tahto/typed.clj" nil])
+  => ["src/lang/typed.clj" nil])
 
 ^{:refer lang.typed.xtalk-parse/file-path-candidates :added "4.1"}
 (fact "returns candidate paths for a file path"
-  (file-path-candidates "src/tahto/model_annex/foo.clj")
-  => ["src/tahto/model_annex/foo.clj"
-      "src/tahto/model/annex/foo.clj"])
+  (file-path-candidates "src/lang/model_annex/foo.clj")
+  => ["src/lang/model_annex/foo.clj"
+      "src/lang/model/annex/foo.clj"])
 
 ^{:refer lang.typed.xtalk-parse/resolve-file-path :added "4.1"}
 (fact "resolves a file path via candidates"
-  (resolve-file-path "test/tahto/model/spec_xtalk_typed_fixture.clj")
-  => "test/tahto/model/spec_xtalk_typed_fixture.clj")
+  (resolve-file-path "test/lang/model/spec_xtalk_typed_fixture.clj")
+  => "test/lang/model/spec_xtalk_typed_fixture.clj")
 
 ^{:refer lang.typed.xtalk-parse/rest-arg-form? :added "4.1"}
 (fact "recognizes canonical list rest arguments only"

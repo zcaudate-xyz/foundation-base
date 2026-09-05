@@ -23,9 +23,9 @@
 
 (def +init+
   (resource/res:variant-add
-   :tahto/concurrent.bus
+   :lang/concurrent.bus
    {:id    :rt.jep/bus
-    :alias :tahto/jep.bus
+    :alias :lang/jep.bus
     :mode {:allow #{:global} :default :global}
     :instance {:setup    (fn [bus] (f/set! *bus* bus) (component/start bus))
                :teardown (fn [bus] (f/set! *bus* nil) (component/stop bus))}}))
@@ -41,7 +41,7 @@
   {:added "3.0"}
   []
   (or *bus*
-      (resource/res :tahto/jep.bus)))
+      (resource/res :lang/jep.bus)))
 
 ;;
 ;; Interpreter
@@ -234,6 +234,6 @@
 
 (default/install-type!
  :python :jep
- {:type :tahto/rt.jep
+ {:type :lang/rt.jep
   :config {:lang :python :layout :full}
   :instance {:create rt-jep:create}})

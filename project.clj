@@ -7,7 +7,7 @@
   {"test"    ["run" "-m" "code.test"]
    "manage"  ["run" "-m" "code.manage"]
    "seedgen" ["run" "-m" "lang.seedgen.cli"]
-   "tahto-uberjar" ["run" "-m" "lang.uberjar.build"]
+   "lang-uberjar" ["run" "-m" "lang.uberjar.build"]
    #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "wiki"        ["exec" "-ep" "(let [p (-> (ProcessBuilder. [\"bash\" \"bin/publish-wiki\"]) (.inheritIO) (.start))] (System/exit (.waitFor p)))"]
@@ -207,7 +207,7 @@
              :codox {:dependencies [[codox "0.10.8"]]}}
   :codox {:source-paths ["src"]
           :output-path "public/api"
-          :namespaces [#"^std\..*" #"^code\..*" #"^tahto\..*" #"^jvm\..*"
+          :namespaces [#"^std\..*" #"^code\..*" #"^lang\..*" #"^jvm\..*"
                        #"^lib\..*" #"^net\..*" #"^math\..*" #"^xtalk\..*"
                        #"^scaffold\..*"]
           :metadata {:doc/format :markdown}

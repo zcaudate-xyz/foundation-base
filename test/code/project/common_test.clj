@@ -5,5 +5,5 @@
 ^{:refer code.project.common/artifact :added "3.0"}
 (fact "returns the artifact map given a symbol"
 
-  (artifact 'tahto/tahto)
-  => '{:name tahto/tahto, :artifact "tahto", :group "tahto"})
+  (artifact 'lang/lang)
+  => '{:name lang/lang, :artifact "lang", :group "lang"})

@@ -62,5 +62,5 @@
   (let [rt (client/godot-shared:create {:id :shared-godot-test})]
     [(shared/rt-is-shared? rt)
      (= :shared-godot-test (:id rt))
-     (= :tahto/rt.godot (get-in rt [:client :type]))])
+     (= :lang/rt.godot (get-in rt [:client :type]))])
   => [true true true])

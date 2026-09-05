@@ -210,7 +210,7 @@ ci: pin docker base image
 docs: update pg sync walkthrough
 ```
 
-Common area prefixes: `std`, `code`, `tahto`, `rt`, `xt`, `xtalk`, `seedgen`, `src-lang/<lang>`, `ci`, `docs`, `build`.
+Common area prefixes: `std`, `code`, `lang`, `rt`, `xt`, `xtalk`, `seedgen`, `src-lang/<lang>`, `ci`, `docs`, `build`.
 
 Rules:
 

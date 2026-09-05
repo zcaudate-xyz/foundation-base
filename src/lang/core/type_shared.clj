@@ -12,7 +12,7 @@
   "gets all shared groups
  
    (shared/get-groups)
-   ;; (:tahto/rt.postgres :tahto/rt.redis :tahto/rt.nginx :tahto/rt.cpython.shared :tahto/rt.luajit.shared)
+   ;; (:lang/rt.postgres :lang/rt.redis :lang/rt.nginx :lang/rt.cpython.shared :lang/rt.luajit.shared)
    => vector?"
   {:added "4.0"}
   []
@@ -21,7 +21,7 @@
 (defn get-group-count
   "gets the group count for a type and id
  
-   (shared/get-group-count :tahto/rt.redis)
+   (shared/get-group-count :lang/rt.redis)
    ;; {:default 21, :test 2}
    => map?"
   {:added "4.0"}
@@ -37,7 +37,7 @@
      (collection/map-vals :count
                  (get @*groups* type)))))
 
-;(:tahto/rt.postgres :tahto/rt.redis :tahto/rt.nginx :tahto/rt.cpython.shared :tahto/rt.luajit.shared)
+;(:lang/rt.postgres :lang/rt.redis :lang/rt.nginx :lang/rt.cpython.shared :lang/rt.luajit.shared)
 
 (defn update-group-count
   "updates the group counte"

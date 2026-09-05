@@ -50,7 +50,7 @@ Before rendering pages, assemble the project environment with `make-project`. It
 ;; => map?
 
 (-> (doc/make-project) :publish :sites keys)
-;; => (:core :tahto :code :xt :std :test-site)
+;; => (:core :lang :code :xt :std :test-site)
 ```
 
 ### Preview a page render {#preview-a-page-render}

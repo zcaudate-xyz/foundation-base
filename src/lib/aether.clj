@@ -181,7 +181,7 @@
   "deploys artifacts to the given coordinate
  
    (deploy-artifact
-    '[tahto/jvm.artifact \"2.4.8\"]
+    '[lang/jvm.artifact \"2.4.8\"]
    {:artifacts [{:file \"jvm.artifact-2.4.8.jar\"
                   :extension \"jar\"}
                  {:file \"jvm.artifact-2.4.8.pom\"
@@ -338,13 +338,13 @@
         {:type :default,
          :print {:title false, :timing false},
          :artifacts
-         [{:file (std.fs/path "/home/chris/Development/tahto/foundation/target/interim/xyz.zcaudate/std.object/foundation-std.object-4.0.1.jar"),
+         [{:file (std.fs/path "/home/chris/Development/lang/foundation/target/interim/xyz.zcaudate/std.object/foundation-std.object-4.0.1.jar"),
            :extension "jar",
            :artifact "std.object",
            :group "xyz.zcaudate",
            :version "4.0.1"}
           {:file
-           (std.fs/path "/home/chris/Development/tahto/foundation/target/interim/xyz.zcaudate/std.object/foundation-std.object-4.0.1.pom.xml"),
+           (std.fs/path "/home/chris/Development/lang/foundation/target/interim/xyz.zcaudate/std.object/foundation-std.object-4.0.1.pom.xml"),
            :extension "pom",
            :artifact "std.object",
            :group "xyz.zcaudate",

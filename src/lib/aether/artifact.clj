@@ -8,8 +8,8 @@
 (invoke/definvoke rep-eclipse
   "creates a rep from eclipse artifact
  
-   (str (rep-eclipse (object/from-data \"tahto:tahto:2.8.4\" DefaultArtifact)))
-   => \"tahto:tahto:jar:2.8.4\""
+   (str (rep-eclipse (object/from-data \"lang:lang:2.8.4\" DefaultArtifact)))
+   => \"lang:lang:jar:2.8.4\""
   {:added "3.0"}
   [:method {:multi protocol.classloader/-rep
             :val   Artifact}]
@@ -27,7 +27,7 @@
 (invoke/definvoke artifact-eclipse
   "creates an eclipse artifact
  
-   (artifact-eclipse \"tahto:tahto:jar:2.8.4\")
+   (artifact-eclipse \"lang:lang:jar:2.8.4\")
    => DefaultArtifact"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-artifact
@@ -63,8 +63,8 @@
 (invoke/definvoke rep-eclipse-metadata
   "creates a rep from an eclipse metadata instance
  
-   (str (rep-eclipse-metadata (object/from-data \"tahto:tahto:2.8.4\" DefaultMetadata)))
-   => \"tahto:tahto:2.8.4\""
+   (str (rep-eclipse-metadata (object/from-data \"lang:lang:2.8.4\" DefaultMetadata)))
+   => \"lang:lang:2.8.4\""
   {:added "3.0"}
   [:method {:multi protocol.classloader/-rep
             :val   Metadata}]
@@ -82,7 +82,7 @@
 (invoke/definvoke artifact-eclipse-metadata
   "creates an eclipse metadata instance
  
-   (artifact-eclipse-metadata \"tahto:tahto:jar:2.8.4\")
+   (artifact-eclipse-metadata \"lang:lang:jar:2.8.4\")
    => DefaultMetadata"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-artifact

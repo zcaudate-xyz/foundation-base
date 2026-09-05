@@ -162,6 +162,6 @@
 (def +bash-basic+
   [(default/install-type!
     :bash :remote
-    {:type :tahto/rt.shell.remote
+    {:type :lang/rt.shell.remote
      :instance {:create #'shell-remote:create}
      :config {:layout :full}})])

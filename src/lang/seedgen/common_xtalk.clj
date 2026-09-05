@@ -26,12 +26,12 @@
   "config/xtalk/xtalk_ops.edn")
 
 (def ^:dynamic *model-roots*
-  ["src/tahto/model/spec_xtalk"
-   "src/tahto/model/annex/spec_xtalk"])
+  ["src/lang/model/spec_xtalk"
+   "src/lang/model/annex/spec_xtalk"])
 
 (def ^:dynamic *test-roots*
-  ["test/tahto/model/spec_xtalk"
-   "test/tahto/model/annex/spec_xtalk"])
+  ["test/lang/model/spec_xtalk"
+   "test/lang/model/annex/spec_xtalk"])
 
 (def ^:dynamic *runtime-langs*
   runtime/+runtime-langs+)

@@ -10,7 +10,7 @@
   (fortran-type 'float)  => "REAL"
   (fortran-type 'double) => "DOUBLE PRECISION"
   (fortran-type 'bool)   => "LOGICAL"
-  (fortran-type 'str)    => "CTAHTOCTER(LEN=*)"
+  (fortran-type 'str)    => "CLANGCTER(LEN=*)"
   (fortran-type 'void)   => "")
 
 ^{:refer lang.model.annex.spec-fortran/fortran-args :added "4.1"}

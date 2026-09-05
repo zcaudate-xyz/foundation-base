@@ -60,7 +60,7 @@
   (let [source-entry (:entry mopts)
         entry (when (= :xtalk (get-in mopts [:entry :lang]))
                 (:entry mopts))
-        ctx (or (:tahto/xtalk-context mopts)
+        ctx (or (:lang/xtalk-context mopts)
                 (when (nil? source-entry)
                   (xtalk-context (assoc mopts :entry entry))))
         fn-ref (when (and (:module entry) (:id entry))

@@ -94,7 +94,7 @@
    => anything"
   {:added "3.0"}
   ([]
-   (let [path (fs/path (System/getProperty "user.home") ".tahto" "global.edn")]
+   (let [path (fs/path (System/getProperty "user.home") ".lang" "global.edn")]
      (if (fs/exists? path)
        (read-string (slurp path))))))
 

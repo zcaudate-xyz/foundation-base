@@ -323,7 +323,7 @@
   "runtime type registration for [:js :playground]"
   [(default/install-type!
     :js :playground
-    {:type :tahto/rt.js-playground
+    {:type :lang/rt.js-playground
      :instance {:create #'rt-js-playground:create}
      :config {:layout :full}})])
 

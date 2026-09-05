@@ -12,9 +12,9 @@ The repository is large because it contains several related systems. You do not 
 |---|---|
 | Install the project and run a first workflow | [`GETTING_STARTED.md`](GETTING_STARTED.md) |
 | Use the standard Clojure libraries | [`std`](https://zcaudate.xyz/foundation-base/std/index.html), including the integrated narrative guides |
-| Generate JavaScript, Lua, Python, Go, SQL, Solidity, or other code | [Tahto introduction](https://zcaudate.xyz/foundation-base/tahto/introduction.html) |
+| Generate JavaScript, Lua, Python, Go, SQL, Solidity, or other code | [Lang introduction](https://zcaudate.xyz/foundation-base/lang/introduction.html) |
 | Browse walkthroughs and generated projects | [`wiki/Examples.md`](wiki/Examples.md) and the [published examples page](https://zcaudate.xyz/foundation-base/examples.html) |
-| Run generated code in external runtimes | [Tahto runtimes](https://zcaudate.xyz/foundation-base/tahto/tahto-runtime.html) |
+| Run generated code in external runtimes | [Lang runtimes](https://zcaudate.xyz/foundation-base/lang/lang-runtime.html) |
 | Write tests using the fact-based test framework | [`code.test` guide](https://zcaudate.xyz/foundation-base/code/code-test.html) |
 | Analyse, query, or refactor Clojure source | [`code.manage`](https://zcaudate.xyz/foundation-base/code/code-manage.html) and [`code.query`](https://zcaudate.xyz/foundation-base/code/code-query.html) |
 | Generate project documentation | [`code.doc`](https://zcaudate.xyz/foundation-base/code-tools.html) |
@@ -110,26 +110,26 @@ The same authoring model can target multiple languages:
     (add 1 2)])
 ```
 
-Tahto goes beyond printing syntax. Language books, grammars, modules, pointers, and runtime adapters make it possible to inspect, test, and execute generated code from the same Clojure workflow.
+Lang goes beyond printing syntax. Language books, grammars, modules, pointers, and runtime adapters make it possible to inspect, test, and execute generated code from the same Clojure workflow.
 
-### Build the standalone Tahto CLI
+### Build the standalone Lang CLI
 
-Build an AOT-compiled uberjar from the Tahto sources in the current checkout:
+Build an AOT-compiled uberjar from the Lang sources in the current checkout:
 
 ```bash
-lein tahto-uberjar
+lein lang-uberjar
 ```
 
 The artifact is written to
-`.build/tahto-uberjar/target/tahto-4.1.5-standalone.jar`. It does not require
+`.build/lang-uberjar/target/lang-4.1.5-standalone.jar`. It does not require
 Leiningen or a Foundation Base checkout at runtime:
 
 ```bash
-java -jar .build/tahto-uberjar/target/tahto-4.1.5-standalone.jar languages
-java -jar .build/tahto-uberjar/target/tahto-4.1.5-standalone.jar \
+java -jar .build/lang-uberjar/target/lang-4.1.5-standalone.jar languages
+java -jar .build/lang-uberjar/target/lang-4.1.5-standalone.jar \
   emit js '[(+ 1 2 3)]'
 printf '[(* 6 7)]\n' | java -jar \
-  .build/tahto-uberjar/target/tahto-4.1.5-standalone.jar emit lua -
+  .build/lang-uberjar/target/lang-4.1.5-standalone.jar emit lua -
 ```
 
 Input is EDN and must be an outer sequential collection of forms. The CLI
@@ -139,11 +139,11 @@ discovers and AOT-compiles their shared namespace closure for faster startup.
 
 Start with:
 
-- [Tahto overview](https://zcaudate.xyz/foundation-base/tahto/index.html)
-- [Introduction](https://zcaudate.xyz/foundation-base/tahto/introduction.html)
-- [Basic walkthrough](https://zcaudate.xyz/foundation-base/tahto/walkthrough-basic.html) — [source](src-doc/walkthrough/std_lang_00_basic.clj)
-- [Multiple-language walkthrough](https://zcaudate.xyz/foundation-base/tahto/walkthrough-multi.html) — [source](src-doc/walkthrough/std_lang_01_multi.clj)
-- [Live runtime walkthrough](https://zcaudate.xyz/foundation-base/tahto/walkthrough-live.html) — [source](src-doc/walkthrough/std_lang_02_live.clj)
+- [Lang overview](https://zcaudate.xyz/foundation-base/lang/index.html)
+- [Introduction](https://zcaudate.xyz/foundation-base/lang/introduction.html)
+- [Basic walkthrough](https://zcaudate.xyz/foundation-base/lang/walkthrough-basic.html) — [source](src-doc/walkthrough/std_lang_00_basic.clj)
+- [Multiple-language walkthrough](https://zcaudate.xyz/foundation-base/lang/walkthrough-multi.html) — [source](src-doc/walkthrough/std_lang_01_multi.clj)
+- [Live runtime walkthrough](https://zcaudate.xyz/foundation-base/lang/walkthrough-live.html) — [source](src-doc/walkthrough/std_lang_02_live.clj)
 
 ## Examples
 
@@ -230,7 +230,7 @@ The prepared pages include:
 - [`Home`](wiki/Home.md)
 - [`Getting Started`](wiki/Getting-Started.md)
 - [`Repository Map`](wiki/Repository-Map.md)
-- [`Tahto Language Tooling`](wiki/Tahto-Language-Tooling.md)
+- [`Lang Language Tooling`](wiki/Lang-Language-Tooling.md)
 - [`Code Tools`](wiki/Code-Tools.md)
 - [`Examples`](wiki/Examples.md)
 - [`Contributing`](wiki/Contributing.md)

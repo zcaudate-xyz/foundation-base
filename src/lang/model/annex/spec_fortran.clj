@@ -23,7 +23,7 @@
       "float" "REAL"
       "double" "DOUBLE PRECISION"
       "bool" "LOGICAL"
-      "str" "CTAHTOCTER(LEN=*)"
+      "str" "CLANGCTER(LEN=*)"
       "void" ""
       (clojure.string/upper-case s))))
 

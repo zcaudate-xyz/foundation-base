@@ -1,4 +1,4 @@
-(ns documentation.tahto-seedgen
+lang/lang_seedgen.clj:1:(ns documentation.lang-seedgen
   (:require [lang.seedgen.common-util :as seedgen])
   (:use code.test))
 

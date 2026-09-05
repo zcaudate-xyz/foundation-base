@@ -14,7 +14,7 @@
 
 [[:chapter {:title "Internal usage" :link "internal"}]]
 
-"`code.mcp.server/default-instructions` advertises code-manage, code-test, tahto-lang, and code-maven capabilities. Individual tool namespaces wrap the same functions that maintainers can run from the REPL or Leiningen."
+"`code.mcp.server/default-instructions` advertises code-manage, code-test, lang-lang, and code-maven capabilities. Individual tool namespaces wrap the same functions that maintainers can run from the REPL or Leiningen."
 
 [[:chapter {:title "Walkthrough" :link "walkthrough"}]]
 

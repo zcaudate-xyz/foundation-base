@@ -209,11 +209,11 @@
 (def +lean-twostep+
   [(rt/install-type!
     :lean :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
 
 (def +lean-verify+
   [(rt/install-type!
     :lean :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

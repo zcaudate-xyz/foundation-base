@@ -63,11 +63,11 @@
 (def +c-twostep+
   [(rt/install-type!
     :rust :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
 
 (def +rust-verify+
   [(rt/install-type!
     :rust :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

@@ -8,7 +8,7 @@
             [code.mcp.tool.code-test :as code-test]
             [code.mcp.tool.form-heal :as form-heal]
             [code.mcp.tool.jvm-namespace :as jvm-namespace]
-            [code.mcp.tool.tahto-lang :as lang.core])
+            [code.mcp.tool.lang-lang :as lang.core])
   (:import [org.springframework.web.reactive.function.server RouterFunctions]
            [org.springframework.http.server.reactive ReactorHttpHandlerAdapter]
            [reactor.netty.http.server HttpServer]

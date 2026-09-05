@@ -212,5 +212,5 @@
 (comment
   (code.manage/import {:write true})
 
-  (random-test '[tahto])
-  (check '[tahto]))
+  (random-test '[lang])
+  (check '[lang]))

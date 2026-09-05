@@ -116,24 +116,24 @@
 (fact "normalises provenance fields"
   (let [form (with-meta '(boom-op 1 2 3) {:line 17})]
     (provenance/provenance
-     {:tahto/module {:id 'L.core}
-      :tahto/namespace *ns*
-      :tahto/form form
-      :tahto/subsystem :test/direct}))
-  => '{:tahto/module L.core
-       :tahto/namespace lang.base.util-test
-       :tahto/line 17
-       :tahto/form (boom-op 1 2 3)
-       :tahto/subsystem :test/direct})
+     {:lang/module {:id 'L.core}
+      :lang/namespace *ns*
+      :lang/form form
+      :lang/subsystem :test/direct}))
+  => '{:lang/module L.core
+       :lang/namespace lang.base.util-test
+       :lang/line 17
+       :lang/form (boom-op 1 2 3)
+       :lang/subsystem :test/direct})
 
 ^{:refer lang.base.provenance/with-provenance :added "4.1"}
 (fact "threads provenance through mopts"
   (-> {:lang :lua}
-      (provenance/with-provenance {:tahto/phase :emit/direct}
-                                  {:tahto/module 'L.core})
-      :tahto/provenance)
-  => '{:tahto/phase :emit/direct
-       :tahto/module L.core})
+      (provenance/with-provenance {:lang/phase :emit/direct}
+                                  {:lang/module 'L.core})
+      :lang/provenance)
+  => '{:lang/phase :emit/direct
+       :lang/module L.core})
 
 ^{:refer lang.base.util/error-with-context :added "4.1"}
 (fact "wraps exceptions with lang.core context"
@@ -146,32 +146,32 @@
   => '["wrap: inner"
        {:inner true
         :outer true
-        :tahto/wrapped true
-         :tahto/cause-class "clojure.lang.ExceptionInfo"
-         :tahto/cause-message "inner"
-         :tahto/cause-data {:inner true}}])
+        :lang/wrapped true
+         :lang/cause-class "clojure.lang.ExceptionInfo"
+         :lang/cause-message "inner"
+         :lang/cause-data {:inner true}}])
 
 (fact "wrapped lang.core errors keep merged provenance"
   (let [form (with-meta '(boom-op 1 2 3) {:line 33})]
     (try
       (throw (ex-info "inner"
                       {:probe true
-                       :tahto/provenance {:tahto/phase :emit/form
-                                             :tahto/subsystem :inner/op
-                                             :tahto/form form}}))
+                       :lang/provenance {:lang/phase :emit/form
+                                             :lang/subsystem :inner/op
+                                             :lang/form form}}))
       (catch Throwable t
         (let [data (ex-data (error-with-context "wrap"
-                                                {:tahto/phase :emit/direct
-                                                 :tahto/subsystem :outer/direct
-                                                 :tahto/module 'L.core}
+                                                {:lang/phase :emit/direct
+                                                 :lang/subsystem :outer/direct
+                                                 :lang/module 'L.core}
                                                 t))]
           {:probe (:probe data)
-           :phase (:tahto/phase data)
-           :subsystem (:tahto/subsystem data)
-           :module (:tahto/module data)
-           :line (:tahto/line data)
-           :stack (mapv (juxt :tahto/phase :tahto/subsystem)
-                        (:tahto/provenance-stack data))}))))
+           :phase (:lang/phase data)
+           :subsystem (:lang/subsystem data)
+           :module (:lang/module data)
+           :line (:lang/line data)
+           :stack (mapv (juxt :lang/phase :lang/subsystem)
+                        (:lang/provenance-stack data))}))))
   => '{:probe true
        :phase :emit/form
        :subsystem :inner/op
@@ -193,7 +193,7 @@
   => '["wrap: inner"
        {:inner true
         :outer true
-        :tahto/wrapped true
-        :tahto/cause-class "clojure.lang.ExceptionInfo"
-        :tahto/cause-message "inner"
-        :tahto/cause-data {:inner true}}])
+        :lang/wrapped true
+        :lang/cause-class "clojure.lang.ExceptionInfo"
+        :lang/cause-message "inner"
+        :lang/cause-data {:inner true}}])

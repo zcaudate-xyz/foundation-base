@@ -120,13 +120,13 @@
 (def +matlab-oneshot+
   [(rt/install-type!
     :matlab :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +matlab-verify+
   [(rt/install-type!
     :matlab :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 ;;
@@ -174,6 +174,6 @@
 (def +matlab-basic+
   [(rt/install-type!
     :matlab :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])

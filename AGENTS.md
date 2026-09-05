@@ -216,7 +216,7 @@ With `:eval true` it also executes page facts and reports failing sections.
 Known flaky class: `prepare-error` reporting `Unable to resolve var ...` or
 `namespace 'std.concurrent' not found` across `lib.*`/`std.concurrent*` pages.
 These trace to `lang.core.script` issuing `(require ... :reload)` at namespace
-load (src/tahto/lang/script.clj:90-111): once `lang.core` loads mid-sequence it
+load (src/lang/lang/script.clj:90-111): once `lang.core` loads mid-sequence it
 force-reloads module namespaces and invalidates previously compiled records,
 which aborts later `require`s. The failures are order/timing dependent and come
 and go between JVMs. Running checks per site (e.g. `'[std]`) is far less

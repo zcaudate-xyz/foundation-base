@@ -19,11 +19,11 @@
 
 (def usage
   (str "Usage:\n"
-       "  java -jar tahto-standalone.jar emit <language> '<edn-forms>'\n"
-       "  java -jar tahto-standalone.jar emit <language> -\n"
-       "  java -jar tahto-standalone.jar languages\n\n"
+       "  java -jar lang-standalone.jar emit <language> '<edn-forms>'\n"
+       "  java -jar lang-standalone.jar emit <language> -\n"
+       "  java -jar lang-standalone.jar languages\n\n"
        "Example:\n"
-       "  java -jar tahto-standalone.jar emit js '[(+ 1 2 3)]'"))
+       "  java -jar lang-standalone.jar emit js '[(+ 1 2 3)]'"))
 
 (defn emit-source
   "emits an EDN collection of forms using a lazily loaded language spec"
@@ -42,7 +42,7 @@
       ((requiring-resolve 'lang.core.impl/emit-as) lang forms))))
 
 (defn run
-  "runs the Tahto command and returns an exit/out/err result map"
+  "runs the Lang command and returns an exit/out/err result map"
   {:added "4.1"}
   ([args]
    (run args (constantly "")))
@@ -75,7 +75,7 @@
         :err (str "Error: " (.getMessage e))}))))
 
 (defn -main
-  "entry point for the standalone Tahto uberjar"
+  "entry point for the standalone Lang uberjar"
   {:added "4.1"}
   [& args]
   (let [{:keys [exit out err]} (run args #(slurp *in*))]

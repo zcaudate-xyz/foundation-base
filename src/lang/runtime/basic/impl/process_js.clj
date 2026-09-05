@@ -107,13 +107,13 @@
 (def +js-oneshot+
   [(rt/install-type!
     :js :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +js-verify+
   [(rt/install-type!
     :js :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 ;;
@@ -176,7 +176,7 @@
 (def +js-basic+
   [(rt/install-type!
     :js :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])
 
@@ -238,7 +238,7 @@
 (def +js-websocket+
   [(rt/install-type!
     :js :websocket
-    {:type :tahto/rt.websocket
+    {:type :lang/rt.websocket
      :instance {:create #'websocket/rt-websocket:create}
      :config {:layout :full}})])
 

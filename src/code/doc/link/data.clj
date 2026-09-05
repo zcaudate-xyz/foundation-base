@@ -68,7 +68,7 @@
   [ns-sym]
   (let [segs (string/split (str ns-sym) #"\.")]
     (if (and (> (count segs) 1)
-             (contains? #{"std" "code" "xt" "tahto"} (first segs)))
+             (contains? #{"std" "code" "xt" "lang"} (first segs)))
       (str (first segs) "." (second segs))
       (first segs))))
 

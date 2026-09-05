@@ -1,4 +1,4 @@
-(ns documentation.tahto-walkthrough-multi
+lang/walkthrough_multi.clj:1:(ns documentation.lang-walkthrough-multi
   (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str])

@@ -3,7 +3,7 @@
 [[:hero {:title "Foundation Base"
           :subtitle "A Clojure-first toolkit for building, generating, testing, and operating polyglot systems."
           :lead "Foundation Base combines reusable Clojure libraries, developer tooling, language generation, and runtime integration in one repository. Start with the area that matches what you want to do; you do not need to understand the entire codebase first."
-          :badges ["std" "code" "tahto + rt" "xt"]
+          :badges ["std" "code" "lang + rt" "xt"]
           :actions [{:label "Getting started" :href "getting-started.html" :variant :primary}
                     {:label "Browse examples" :href "examples.html"}
                     {:label "Contribute" :href "contributing.html"}]}]]
@@ -17,8 +17,8 @@
                        :href "std/index.html"}
                       {:meta "Language generation"
                        :title "Generate code for other languages"
-                       :text "Use Tahto books and grammars to emit JavaScript, Lua, Python, Go, SQL, Solidity, and other targets from a shared Clojure authoring model."
-                       :href "tahto/introduction.html"}
+                       :text "Use Lang books and grammars to emit JavaScript, Lua, Python, Go, SQL, Solidity, and other targets from a shared Clojure authoring model."
+                       :href "lang/introduction.html"}
                       {:meta "Examples"
                        :title "Compare source with generated projects"
                        :text "Follow walkthroughs and open authored Clojure source, build definitions, generated repositories, and reproduction commands."
@@ -49,7 +49,7 @@
                       {:meta "lang.* and rt.*"
                        :title "Languages and runtimes"
                        :text "Grammar-driven code generation, typing, target models, and runtime adapters."
-                       :href "tahto/index.html"}
+                       :href "lang/index.html"}
                       {:meta "xt.*"
                        :title "Portable libraries"
                        :text "Cross-target libraries and application layers built with the language tooling."

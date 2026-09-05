@@ -82,11 +82,11 @@
 (def +circom-twostep+
   [(rt/install-type!
     :circom :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
 
 (def +circom-verify+
   [(rt/install-type!
     :circom :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

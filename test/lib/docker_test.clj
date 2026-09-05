@@ -40,19 +40,19 @@
     (future 
       (docker/start-reaped {:group   "redis"
                             :id      "redis-build1"
-                            :image   "tahto/kmi.infra:v6.2"
+                            :image   "lang/kmi.infra:v6.2"
                             :ports   [6379 17000]
                             :cmd ["redis-server" "--protected-mode" "no"]}))
     (future 
       (docker/start-reaped {:group   "redis"
                             :id      "redis-build2"
-                            :image   "tahto/kmi.infra:v6.2"
+                            :image   "lang/kmi.infra:v6.2"
                             :ports   [6379 17001]
                             :cmd ["redis-server" "--protected-mode" "no"]}))
     (future
       (docker/start-reaped {:group   "redis"
                             :id      "redis-build3"
-                            :image   "tahto/kmi.infra:v6.2"
+                            :image   "lang/kmi.infra:v6.2"
                             :ports   [[6379 17003]]
                             :cmd ["redis-server" "--protected-mode" "no"]})))
 
@@ -97,7 +97,7 @@
   (require 'rt.postgres)
   (common/start-container
    {:id "hello"
-    :image  "tahto/kmi.all:v6.2.1"
+    :image  "lang/kmi.all:v6.2.1"
     :cmd    ["nginx"]
     :remove false})
   
@@ -109,7 +109,7 @@
   (lang.core/script :lua
     {:runtime :redis.client
      :config {:port 6379
-              :container {:image  "tahto/kmi.all:v6.2.1"
+              :container {:image  "lang/kmi.all:v6.2.1"
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}
      :require [[xt.lang.common-repl :as repl]
@@ -118,7 +118,7 @@
   
   (lang.core/script :lua
     {:runtime :basic
-     :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
+     :config {:container {:image  "lang/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]
                [kmi.redis :as r]]})
@@ -130,19 +130,19 @@
     {"local.exchange.0"
      (start-container {:group  "stats"
                        :id     "local.exchange.0"
-                       :image  "tahto/kmi.all:v6.2.1"
+                       :image  "lang/kmi.all:v6.2.1"
                        :ports  [6379]
                        :cmd    ["redis-server" "--protected-mode" "no"]})
      "local.exchange.1"
      (start-container {:group  "stats"
                        :id     "local.exchange.1"
-                       :image  "tahto/kmi.all:v6.2.1"
+                       :image  "lang/kmi.all:v6.2.1"
                        :ports  [6379]
                        :cmd    ["redis-server" "--protected-mode" "no"]})
      "local.mq"
      (start-container {:group  "stats"
                        :id     "local.mq"
-                       :image  "tahto/kmi.all:v6.2.1"
+                       :image  "lang/kmi.all:v6.2.1"
                        :ports  [6379]
                        :cmd    ["redis-server" "--protected-mode" "no"]})})
   
@@ -153,7 +153,7 @@
               :dbname "test-scratch"
               :temp :create
               :container {:group  "stats"
-                          :image  "tahto/kmi.all:v6.2.1"
+                          :image  "lang/kmi.all:v6.2.1"
                           :ports  [5432]
                           :environment {"POSTGRES_PASSWORD" "postgres"
                                         "POSTGRES_USER" "postgres"}
@@ -203,7 +203,7 @@
   
   (common/start-container
    {:id "node"
-    :image  "tahto/kmi.ui:16"
+    :image  "lang/kmi.ui:16"
     :cmd    ["node" "-e" (lang.runtime.basic.impl.process-js/default-basic-client
                           45325
                           {:host "host.docker.internal"})]})
@@ -222,13 +222,13 @@
 
   (lang.core/script :python
     {:runtime :basic
-     :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
+     :config {:container {:image  "lang/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
   (lang.core/script :python
     {:runtime :websocket
-     :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
+     :config {:container {:image  "lang/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
@@ -239,34 +239,34 @@
   
   (lang.core/script :lua
     {:runtime :basic
-     :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
+     :config {:container {:image  "lang/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
   (lang.core/script :lua
     {:runtime :basic
-     :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
+     :config {:container {:image  "lang/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
 
   (lang.core/script :lua
     {:runtime :basic
      :config {:program :resty
-              :container {:image  "tahto/kmi.all:v6.2.1"}}
+              :container {:image  "lang/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
 
   
   (lang.core/script :js
     {:runtime :basic
-     :config {:container {:image  "tahto/kmi.ui:16"
+     :config {:container {:image  "lang/kmi.ui:16"
                           :remove false}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
   (lang.core/script :js
     {:runtime :websocket
-     :config {:container {:image  "tahto/kmi.ui:16"
+     :config {:container {:image  "lang/kmi.ui:16"
                           :remove false}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
@@ -278,7 +278,7 @@
    (+ 1 2 3))
   
   (lang.core/script :js
-    {:config {:container {:image  "tahto/kmi.ui:16.1"
+    {:config {:container {:image  "lang/kmi.ui:16.1"
                           :remove false}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
@@ -305,7 +305,7 @@
   (lang.core/script :lua
     {;:runtime :basic
      #_#_:config {:port 6379
-              :container {:image  "tahto/kmi.infra:v5.0.1"
+              :container {:image  "lang/kmi.infra:v5.0.1"
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}
      :require [[xt.lang.common-repl :as repl]
@@ -315,7 +315,7 @@
     {:runtime :basic
      :config {:bench false}
      #_#_:config {:port 6379
-                  :container {:image  "tahto/kmi.infra:v5.0.1"
+                  :container {:image  "lang/kmi.infra:v5.0.1"
                               :ports  [6379]
                               :cmd    ["redis-server" "--protected-mode" "no"]}}
      :require [[xt.lang.common-repl :as repl]
@@ -327,7 +327,7 @@
   (lang.core/script :lua
     {;:runtime :basic
      #_#_:config {:port 6379
-              :container {:image  "tahto/kmi.infra:v5.0.1"
+              :container {:image  "lang/kmi.infra:v5.0.1"
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}
      :require [[xt.lang.common-repl :as repl]
@@ -338,7 +338,7 @@
   (lang.core/script :lua
     {:runtime :redis.client
      :config {:port 6379
-              :container {:image  "tahto/kmi.infra:v5.0.1"
+              :container {:image  "lang/kmi.infra:v5.0.1"
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}
      :require [[xt.lang.common-repl :as repl]
@@ -347,7 +347,7 @@
   (lang.core/script :lua
     {;:runtime :redis.client
      :config {:port 6379
-              :container {:image  "tahto/kmi.infra:v6.2,1"
+              :container {:image  "lang/kmi.infra:v6.2,1"
                           :ports  [6379]
                           :cmd    ["redis-server" "--protected-mode" "no"]}}})
   
@@ -419,7 +419,7 @@
   
   
   (start-container nil {:group   "redis"
-                        :image   "tahto/kmi.infra:v6.2"
+                        :image   "lang/kmi.infra:v6.2"
                         :ports   [6379]
                         :cmd     ["redis-server" "--protected-mode" "no"]})
   
@@ -428,7 +428,7 @@
   (:container-id
    (start-container nil {:group   "redis"
                          :id      "hello"
-                         :image   "tahto/kmi.infra:v6.2"
+                         :image   "lang/kmi.infra:v6.2"
                          :ports   [6379]
                          :cmd     ["redis-server" "--protected-mode" "no"]}))
   

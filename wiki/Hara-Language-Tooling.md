@@ -1,4 +1,4 @@
-# Tahto Language Tooling
+# Lang Language Tooling
 
 `lang.core` is a language-oriented templating and code-generation system. It stores code in a reusable Clojure representation, emits it through target grammars, and can connect the emitted code to runtime adapters.
 
@@ -27,8 +27,8 @@
 - [Basic authoring source](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_00_basic.clj)
 - [Multiple-language source](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_01_multi.clj)
 - [Live evaluation source](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-doc/walkthrough/std_lang_02_live.clj)
-- [Published Tahto introduction](https://zcaudate.xyz/foundation-base/tahto/introduction.html)
-- [Published Tahto comparison](https://zcaudate.xyz/foundation-base/tahto/comparison.html)
+- [Published Lang introduction](https://zcaudate.xyz/foundation-base/lang/introduction.html)
+- [Published Lang comparison](https://zcaudate.xyz/foundation-base/lang/comparison.html)
 
 ## Related areas
 

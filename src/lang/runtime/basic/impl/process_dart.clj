@@ -700,11 +700,11 @@
 (def +dart-twostep+
   [(rt/install-type!
     :dart :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
 
 (def +dart-verify+
   [(rt/install-type!
     :dart :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

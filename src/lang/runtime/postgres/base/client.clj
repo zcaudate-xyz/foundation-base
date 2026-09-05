@@ -103,20 +103,20 @@
 (def +init+
   [(default/install-type!
     :postgres :jdbc.client
-    {:type :tahto/rt.postgres.base.client
+    {:type :lang/rt.postgres.base.client
      :config {:layout :module}
      :instance {:create rt-postgres:create}})
    
    (default/install-type!
     :postgres :jdbc
-    {:type :tahto/rt.postgres
+    {:type :lang/rt.postgres
      :config {:layout :module
               :lifecycle {:rt/setup    {:export {:suppress true}
                                         :code   {:label true}}
                           :rt/teardown {:code   {:suppress true}}}}
      :instance
      {:create (fn [m]
-                (-> {:rt/client {:type :tahto/rt.postgres
+                (-> {:rt/client {:type :lang/rt.postgres
                                  :constructor rt-postgres:create}}
                     (merge m)
                     (shared/rt-shared:create)))}})])

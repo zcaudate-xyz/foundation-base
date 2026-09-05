@@ -95,13 +95,13 @@
 (fact "emits typed canonical object and array access"
   [(l/emit-as :python
               '[(. obj [key])]
-              {:tahto/xtalk-context
+              {:lang/xtalk-context
                {:infer infer/infer-type
                 :env '{obj {:kind :record :fields []}
                        key {:kind :primitive :name :xt/str}}}})
    (l/emit-as :python
               '[(. arr [i])]
-              {:tahto/xtalk-context
+              {:lang/xtalk-context
                {:infer infer/infer-type
                 :env '{arr {:kind :array
                             :item {:kind :primitive :name :xt/int}}

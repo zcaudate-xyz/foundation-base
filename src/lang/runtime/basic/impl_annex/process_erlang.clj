@@ -58,13 +58,13 @@
 (def +erlang-oneshot+
   [(rt/install-type!
     :erlang :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +erlang-verify+
   [(rt/install-type!
     :erlang :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 ;;
@@ -113,6 +113,6 @@
 (def +erlang-basic+
   [(rt/install-type!
     :erlang :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])

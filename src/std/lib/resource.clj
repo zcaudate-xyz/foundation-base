@@ -56,7 +56,7 @@
 (defn res:spec-get
   "retrieves a resource spec
  
-   (res:spec-get :tahto/concurrent.atom.executor)
+   (res:spec-get :lang/concurrent.atom.executor)
    => map?"
   {:added "3.0"}
   ([type]
@@ -67,7 +67,7 @@
 (defn res:variant-list
   "retrieves a list of variants to the spec
  
-   (res:variant-list :tahto/concurrent.atom.executor)
+   (res:variant-list :lang/concurrent.atom.executor)
    => coll?"
   {:added "3.0"}
   ([] (c/map-vals (comp keys :variant) @*registry*))
@@ -113,10 +113,10 @@
 (defn res:mode
   "gets the default mode of a resource
  
-   (res:mode :tahto/concurrent.atom.executor)
+   (res:mode :lang/concurrent.atom.executor)
    => :global
  
-   (res:mode :tahto/concurrent.atom.executor :std.concurrent.print)
+   (res:mode :lang/concurrent.atom.executor :std.concurrent.print)
    => :global"
   {:added "3.0"}
   ([type]
@@ -188,7 +188,7 @@
 (defn res-key
   "gets a resource key
  
-   (res-key :shared :tahto/concurrent.atom.executor :default {:id :hello})
+   (res-key :shared :lang/concurrent.atom.executor :default {:id :hello})
    => :hello"
   {:added "3.0"}
   ([mode type variant input & [args]]
@@ -208,8 +208,8 @@
 (defn res-path
   "gets the resource path
  
-   (res-path :shared :tahto/concurrent.atom.executor :default {:id :hello})
-   => '(:shared [:tahto/concurrent.atom.executor :default] :hello)"
+   (res-path :shared :lang/concurrent.atom.executor :default {:id :hello})
+   => '(:shared [:lang/concurrent.atom.executor :default] :hello)"
   {:added "3.0"}
   ([mode type variant input]
    (let [key (res-key mode type variant input)

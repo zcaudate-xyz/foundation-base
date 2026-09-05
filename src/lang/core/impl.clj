@@ -32,7 +32,7 @@
       ~@body)))
 
 (resource/res:spec-add
- {:type :tahto/lang.library
+ {:type :lang/lang.library
   :mode {:allow #{:global}
          :default :global}
   :instance {:create #'lib/library:create
@@ -45,7 +45,7 @@
   ([& [override]]
    (or override
        *library*
-       (resource/res :tahto/lang.library))))
+       (resource/res :lang/lang.library))))
 
 (defn default-library:reset
   "clears the default library, including all grammars"
@@ -53,7 +53,7 @@
   ([& [override]]
    (if-let [lib (or override *library*)]
      (component/stop lib)
-     (resource/res:stop :tahto/lang.library))))
+     (resource/res:stop :lang/lang.library))))
 
 (defn clone-default-library
   "clones the default library"
@@ -143,17 +143,17 @@
   (or lang (f/error "Lang required." {:input (keys mopts)}))
   (let [mopts (provenance/with-provenance
                 mopts
-                {:tahto/phase :emit/direct
-                 :tahto/subsystem :lang.core.impl/emit-direct
-                 :tahto/lang lang
-                 :tahto/module (ut/module-id (:module mopts))
-                 :tahto/namespace (ns-name (the-ns namespace))})]
+                {:lang/phase :emit/direct
+                 :lang/subsystem :lang.core.impl/emit-direct
+                 :lang/lang lang
+                 :lang/module (ut/module-id (:module mopts))
+                 :lang/namespace (ns-name (the-ns namespace))})]
     (binding [preprocess-base/*macro-grammar* grammar
               preprocess-base/*macro-opts* mopts]
       (if (not (:suppress emit))
         (let [{:keys [trim transform]} emit
               form (cond-> form transform (transform mopts))
-              mopts (provenance/with-provenance mopts {:tahto/form form})
+              mopts (provenance/with-provenance mopts {:lang/form form})
               _    (if *print-form* (env/p :FORM form))
               body (try
                      (emit/emit form
@@ -163,7 +163,7 @@
                      (catch Throwable t
                        (ut/throw-with-context
                         "lang.core direct emit failed"
-                        (:tahto/provenance mopts)
+                        (:lang/provenance mopts)
                         t)))
               body (cond-> body trim (trim))]
           body)))))

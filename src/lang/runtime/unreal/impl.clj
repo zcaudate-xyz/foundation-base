@@ -306,7 +306,7 @@
    :id :shared})` shares the same Unreal connection across namespaces."
       {:added "4.1"}
       [m]
-      (-> {:rt/client {:type :tahto/rt.unreal
+      (-> {:rt/client {:type :lang/rt.unreal
                        :constructor unreal:create}
            :rt/temp true}
           (merge m)
@@ -316,11 +316,11 @@
 (def +init+
      [(rt/install-type!
        :python :unreal.instance
-       {:type :tahto/rt.unreal
+       {:type :lang/rt.unreal
         :config {:layout :full}
         :instance {:create unreal:create}})
       (rt/install-type!
        :python :unreal
-       {:type :tahto/rt.unreal.shared
+       {:type :lang/rt.unreal.shared
         :config {:layout :full}
         :instance {:create unreal-shared:create}})])

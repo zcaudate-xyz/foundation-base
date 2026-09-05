@@ -54,7 +54,7 @@
   (ruby-tf-x-unpack '(:x-unpack arr))
   => '(:.. arr)
 
-  (str/includes? (slurp "src/tahto/model/annex/spec_xtalk/fn_ruby.clj")
+  (str/includes? (slurp "src/lang/model/annex/spec_xtalk/fn_ruby.clj")
                  (str "ruby" "-raw"))
   => false)
 

@@ -443,7 +443,7 @@
  
    (code.manage/isolate
      [xt.lang.spec-base-test]
-     {:run \".tahto/runs/run-1776913569354.edn\"
+     {:run \".lang/runs/run-1776913569354.edn\"
       :suffix \"-fix\"
       :print {:item true :result true :summary true}})"
   {:added "4.1"}
@@ -459,7 +459,7 @@
 (comment
   (code.manage/isolate
    '[xt.lang.spec-base-test]
-   {;:run ".tahto/runs/run-1776913569354.edn"
+   {;:run ".lang/runs/run-1776913569354.edn"
     :suffix "-fix"
     :print {:item true :result true :summary true}}))
 
@@ -475,7 +475,7 @@
   (code.manage/locate-code '[code.framework]
                            {:query ['comment]
                             :print {:function true :item true :result true :summary true}})
-  (code.manage/locate-code '[tahto]
+  (code.manage/locate-code '[lang]
                            {:query [(list '#{defn defmacro} '_ '^:%?- string? '^:%?- map? 'vector? '& '_)]
                             :print {:function true :item true :result true :summary true}}))
 
@@ -527,7 +527,7 @@
  
    (unclean 'code.manage)
  
-   (unclean '[tahto])"
+   (unclean '[lang])"
   {:added "3.0"}
   [:task {:template :code.locate
           :params {:title "SOURCE CODE WITH COMMENTS"
@@ -634,11 +634,11 @@
     params)))
 
 (comment
-  (refactor-code '[tahto]
+  (refactor-code '[lang]
                  {:edits [fn-format/fn:list-forms]
                   #_#_:write true})
   
-  (refactor-code '[tahto]
+  (refactor-code '[lang]
                  {:edits [fn-format/fn:defmethod-forms]
                   :write true}))
 

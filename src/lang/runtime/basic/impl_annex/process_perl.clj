@@ -77,13 +77,13 @@
 (def +perl-oneshot+
   [(rt/install-type!
     :perl :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +perl-verify+
   [(rt/install-type!
     :perl :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 ;;
@@ -136,6 +136,6 @@
 (def +perl-basic+
   [(rt/install-type!
     :perl :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])

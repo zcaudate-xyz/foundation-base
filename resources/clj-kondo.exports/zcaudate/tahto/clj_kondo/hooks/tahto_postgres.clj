@@ -1,4 +1,4 @@
-(ns clj-kondo.hooks.tahto-postgres
+lang/clj_kondo/hooks/lang_postgres.clj:1:(ns clj-kondo.hooks.lang-postgres
   (:require [clj-kondo.hooks-api :as api]
             [clojure.string :as str]))
 

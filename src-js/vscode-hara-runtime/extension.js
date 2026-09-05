@@ -43,10 +43,10 @@ async function handleLine(line, socket) {
 }
 
 function activate(context) {
-  const portEnv = process.env.TAHTO_VSCODE_PORT;
+  const portEnv = process.env.LANG_VSCODE_PORT;
   const port = portEnv ? parseInt(portEnv, 10) : 0;
   if (isNaN(port)) {
-    console.error('[tahto-runtime] TAHTO_VSCODE_PORT is not a valid number');
+    console.error('[lang-runtime] LANG_VSCODE_PORT is not a valid number');
     return;
   }
 
@@ -71,17 +71,17 @@ function activate(context) {
       connections = connections.filter((c) => c !== socket);
     });
     socket.on('error', (err) => {
-      console.error('[tahto-runtime] socket error:', err.message);
+      console.error('[lang-runtime] socket error:', err.message);
     });
   });
 
   server.listen(port, '127.0.0.1', () => {
     const actualPort = server.address().port;
-    console.log('[tahto-runtime] listening on 127.0.0.1:' + actualPort);
+    console.log('[lang-runtime] listening on 127.0.0.1:' + actualPort);
   });
 
   server.on('error', (err) => {
-    console.error('[tahto-runtime] server error:', err.message);
+    console.error('[lang-runtime] server error:', err.message);
   });
 
   context.subscriptions.push({

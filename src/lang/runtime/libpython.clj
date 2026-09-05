@@ -111,6 +111,6 @@
 (def +init+
   [(default/install-type!
     :python :libpython
-    {:type :tahto/rt.libpython
+    {:type :lang/rt.libpython
      :config {:lang :python :layout :full}
      :instance {:create rt-libpython:create}})])

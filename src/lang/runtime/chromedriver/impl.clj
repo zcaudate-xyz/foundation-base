@@ -194,17 +194,17 @@
 (def +init+
   [(default/install-type!
     :js :chromedriver.instance
-    {:type :tahto/rt.chromedriver
+    {:type :lang/rt.chromedriver
      :config {:layout :full
            :emit {:lang/jsx false}}
      :instance {:create browser:create}})
    
    (default/install-type!
     :js :chromedriver
-    {:type :tahto/rt.chromedriver.shared
+    {:type :lang/rt.chromedriver.shared
      :instance
      {:create (fn [m]
-                (-> {:rt/client {:type :tahto/rt.chromedriver 
+                (-> {:rt/client {:type :lang/rt.chromedriver 
                                  :constructor browser:create}}
                     (merge m)
                     (shared/rt-shared:create)))}})])

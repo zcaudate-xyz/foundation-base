@@ -50,7 +50,7 @@
             host   (or (. opts (get "host")) "127.0.0.1")]
         (. server (bind '(host port)))
         (. server (listen 1))
-        (print "TAHTO_GIMP_READY")
+        (print "LANG_GIMP_READY")
         (. sys (stdout.flush))
         (while true
           (let [result (. server (accept))
@@ -102,7 +102,7 @@
     (loop []
       (when (< (System/currentTimeMillis) deadline)
         (if-let [line (.readLine reader)]
-          (if (str/starts-with? line "TAHTO_GIMP_READY")
+          (if (str/starts-with? line "LANG_GIMP_READY")
             true
             (recur))
           (do (Thread/sleep 50)
@@ -156,7 +156,7 @@
         container-id (str (or id (f/sid)))
         container (docker/start-container
                    {:id      container-id
-                    :group   "tahto"
+                    :group   "lang"
                     :image   image
                     :cmd     (vec (concat exec [bootstrap]))
                     :flags   ["--network=host"]
@@ -295,7 +295,7 @@
 (def +init+
   [(rt/install-type!
     :python :gimp
-    {:type :tahto/rt.gimp
+    {:type :lang/rt.gimp
      :config {:layout :full
               :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-gimp:latest"
                           :exec  ["xvfb-run" "-a" "gimp" "-i"

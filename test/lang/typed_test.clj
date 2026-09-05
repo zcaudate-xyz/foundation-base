@@ -27,7 +27,7 @@
 
 ^{:refer lang.typed/load-file :added "4.1"}
 (fact "creates an xtalk typed context from a source file"
-  (let [ctx (load-file "test/tahto/model/spec_xtalk_typed_fixture.clj")]
+  (let [ctx (load-file "test/lang/model/spec_xtalk_typed_fixture.clj")]
     [(:domain ctx)
      (some? (entry ctx 'lang.model.spec-xtalk-typed-fixture/find-user))])
   => [:xtalk true])

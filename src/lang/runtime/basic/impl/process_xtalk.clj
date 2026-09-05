@@ -62,12 +62,12 @@
 (def +xtalk-oneshot+
   [(rt/install-type!
     :xtalk :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +xtalk-verify+
   [(rt/install-type!
     :xtalk :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
   

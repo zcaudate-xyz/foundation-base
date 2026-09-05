@@ -51,7 +51,7 @@
         (access-kind (:type (infer obj ctx)) ctx))
       (when (symbol? obj)
         (when-let [declared (or (get (meta obj) :-)
-                                (get (meta obj) :tahto/type))]
+                                (get (meta obj) :lang/type))]
           (access-kind declared ctx)))))
 
 (defn lower-dot
@@ -136,7 +136,7 @@
          args' (if (= op' :=)
                  (cons (with-meta
                          (lower-form (first args) (assoc ctx :assignment-target true))
-                         (assoc (meta (first args)) :tahto/xtalk-assignment true))
+                         (assoc (meta (first args)) :lang/xtalk-assignment true))
                        (map #(lower-form % ctx) (rest args)))
                  (map #(lower-form % ctx) args))
          lowered (cons canonical-op args')]

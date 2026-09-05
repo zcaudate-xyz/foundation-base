@@ -117,7 +117,7 @@
 
 (comment
   (install-artifact
-   '[tahto/lang.stuff "2.4.10"]
+   '[lang/lang.stuff "2.4.10"]
    {:artifacts [{:file "project.clj"
                  :extension "project"}
                 {:file "README.md"
@@ -129,8 +129,8 @@
                  :extension "project"}
                 {:file "README.md"
                  :extension "readme"}]
-    :repository {:id "tahto"
+    :repository {:id "lang"
                  :url "https://maven.lang.io"
                  :authentication
-                 {:username "tahto"
-                  :password "tahto"}}}))
+                 {:username "lang"
+                  :password "lang"}}}))

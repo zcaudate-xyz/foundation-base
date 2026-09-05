@@ -1,15 +1,15 @@
 (ns lang.base.provenance)
 
 (def +field-keys+
-  [:tahto/phase
-   :tahto/subsystem
-   :tahto/lang
-   :tahto/module
-   :tahto/namespace
-   :tahto/entry
-   :tahto/symbol
-   :tahto/line
-   :tahto/form])
+  [:lang/phase
+   :lang/subsystem
+   :lang/lang
+   :lang/module
+   :lang/namespace
+   :lang/entry
+   :lang/symbol
+   :lang/line
+   :lang/form])
 
 (defn module-id
   [module]
@@ -55,20 +55,20 @@
 
 (defn frame
   [data]
-  (let [inner (or (:tahto/provenance data) {})
+  (let [inner (or (:lang/provenance data) {})
         base  (merge (select-keys inner +field-keys+)
                      (select-keys data +field-keys+))]
     (if (empty? base)
       {}
-      (let [line (or (:tahto/line base)
-                     (line-of (:tahto/entry base))
-                     (line-of (:tahto/form base))
+      (let [line (or (:lang/line base)
+                     (line-of (:lang/entry base))
+                     (line-of (:lang/form base))
                      (line-of data))]
         (compact
          (assoc base
-                :tahto/module (module-id (:tahto/module base))
-                :tahto/namespace (namespace-id (:tahto/namespace base))
-                :tahto/line line))))))
+                :lang/module (module-id (:lang/module base))
+                :lang/namespace (namespace-id (:lang/namespace base))
+                :lang/line line))))))
 
 (defn provenance
   [& inputs]
@@ -79,7 +79,7 @@
 
 (defn provenance-stack
   [data]
-  (let [stack (:tahto/provenance-stack data)]
+  (let [stack (:lang/provenance-stack data)]
     (cond (seq stack)
           (->> stack
                (mapv frame)
@@ -97,16 +97,16 @@
 
 (defn same-site?
   [left right]
-  (= (select-keys left [:tahto/phase
-                        :tahto/subsystem
-                        :tahto/module
-                        :tahto/namespace
-                        :tahto/line])
-     (select-keys right [:tahto/phase
-                         :tahto/subsystem
-                         :tahto/module
-                         :tahto/namespace
-                         :tahto/line])))
+  (= (select-keys left [:lang/phase
+                        :lang/subsystem
+                        :lang/module
+                        :lang/namespace
+                        :lang/line])
+     (select-keys right [:lang/phase
+                         :lang/subsystem
+                         :lang/module
+                         :lang/namespace
+                         :lang/line])))
 
 (defn append-frame
   [stack current]
@@ -122,10 +122,10 @@
 
 (defn with-provenance
   [mopts & inputs]
-  (let [merged (apply provenance (:tahto/provenance mopts) inputs)]
+  (let [merged (apply provenance (:lang/provenance mopts) inputs)]
     (if (empty? merged)
       mopts
-      (assoc mopts :tahto/provenance merged))))
+      (assoc mopts :lang/provenance merged))))
 
 (defn error-with-provenance
   [message data ^Throwable t]
@@ -136,25 +136,25 @@
         merged      (if (seq stack)
                       (reduce merge {} (reverse stack))
                       {})
-        wrapped?    (:tahto/wrapped cause-data)
+        wrapped?    (:lang/wrapped cause-data)
         plain-data  (dissoc data
-                            :tahto/provenance
-                            :tahto/provenance-stack)
+                            :lang/provenance
+                            :lang/provenance-stack)
         payload     (cond-> (merge cause-data plain-data merged)
                       (seq merged)
-                      (assoc :tahto/provenance merged)
+                      (assoc :lang/provenance merged)
 
                       (seq stack)
-                      (assoc :tahto/provenance-stack stack)
+                      (assoc :lang/provenance-stack stack)
 
                       true
-                      (assoc :tahto/wrapped true
-                             :tahto/cause-class (.getName (class t))
-                             :tahto/cause-message (.getMessage t))
+                      (assoc :lang/wrapped true
+                             :lang/cause-class (.getName (class t))
+                             :lang/cause-message (.getMessage t))
 
                       (and cause-data
                            (not wrapped?))
-                      (assoc :tahto/cause-data cause-data))]
+                      (assoc :lang/cause-data cause-data))]
     (ex-info (if-let [cause-message (.getMessage t)]
                (str message ": " cause-message)
                message)

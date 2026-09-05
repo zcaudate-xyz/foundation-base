@@ -326,7 +326,7 @@
 
 "The `std.lang` module is the core of the `foundation-base` ecosystem, providing a powerful and extensible framework for defining, transpiling, and managing multiple programming languages. It enables developers to write code in a Clojure-like DSL and then generate equivalent code in various target languages (JavaScript, Lua, Python, C, Rust, GLSL, Bash, Scheme, JQ, PostgreSQL, etc.). This module is central to the project's goal of creating a polyglot development environment with unified tooling and runtime management."
 
-[[:section {:title "lang.core (Main Namespace)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-main-namespace"}]]
+[[:section {:title "lang.core (Main Namespace)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-main-namespace"}]]
 
 "This namespace orchestrates the functionality of its submodules, providing a high-level interface for language definition, code generation, and runtime interaction. It re-exports key functions from its sub-namespaces, making it a convenient entry point for language-oriented programming."
 
@@ -338,7 +338,7 @@
 
 "*   **`rt:space`**: Retrieves the runtime for a given language and namespace.\n*   **`get-entry`**: Retrieves a book entry from a pointer or map.\n*   **`as-lua`**: Transforms Clojure vectors to Lua tables (empty vectors to empty maps).\n*   **`rt:invoke`**: Invokes code in a specified runtime.\n*   **`force-reload`**: Forces reloading of a namespace and its dependents."
 
-[[:section {:title "lang.core.base.book (Language Book Management)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-book-language-book-management"}]]
+[[:section {:title "lang.core.base.book (Language Book Management)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-book-language-book-management"}]]
 
 "This sub-namespace defines the core data structures for storing and managing language definitions, including books, modules, and entries. It provides functions for accessing and manipulating these structures."
 
@@ -350,7 +350,7 @@
 
 "*   **`get-base-entry`, `get-code-entry`, `get-entry`, `get-module`**: Functions for retrieving entries and modules from a book.\n*   **`get-code-deps`, `get-deps`**: Functions for retrieving dependencies of code entries and modules.\n*   **`list-entries`**: Lists entries within a book.\n*   **`book-string`**: Returns a string representation of a book.\n*   **`book?`, `book`**: Predicate and constructor for `Book` records.\n*   **`book-merge`**: Merges a book with its parent book (for language inheritance).\n*   **`book-from`**: Returns a merged book from a snapshot.\n*   **`check-compatible-lang`, `assert-compatible-lang`**: Checks and asserts language compatibility.\n*   **`set-module`, `put-module`, `delete-module`, `delete-modules`, `has-module?`, `assert-module`**: Functions for managing modules within a book.\n*   **`set-entry`, `put-entry`, `delete-entry`, `has-entry?`, `assert-entry`**: Functions for managing entries within a module.\n*   **`module-create-bundled`**: Creates bundled packages for modules.\n*   **`module-create-filename`**: Generates a filename for a module.\n*   **`module-create-check`**: Checks for bundle availability.\n*   **`module-create-requires`**: Creates a map for module requirements.\n*   **`module-create`**: Creates a `BookModule` record.\n*   **`module-deps`**: Gets dependencies for a module."
 
-[[:section {:title "lang.core.base.compile (Code Compilation and Output)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-compile-code-compilation-and-output"}]]
+[[:section {:title "lang.core.base.compile (Code Compilation and Output)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-compile-code-compilation-and-output"}]]
 
 "This sub-namespace provides functions for compiling and writing generated code to files, supporting various output formats and module structures."
 
@@ -358,7 +358,7 @@
 
 "*   **`compile-script`**: Compiles a single script entry.\n*   **`compile-module-single`**: Compiles a single module.\n*   **`compile-module-graph-rel`**: Extracts the relative path for a module in a graph.\n*   **`compile-module-graph-single`**: Compiles a single module file within a graph.\n*   **`compile-module-graph`**: Compiles a graph of modules.\n*   **`compile-module-directory-single`**: Compiles a single module file within a directory structure.\n*   **`compile-module-directory`**: Compiles modules from a directory structure.\n*   **`compile-module-schema`**: Compiles all modules into a single schema file (e.g., for SQL)."
 
-[[:section {:title "lang.core.base.emit (Code Emission Pipeline)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-code-emission-pipeline"}]]
+[[:section {:title "lang.core.base.emit (Code Emission Pipeline)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-code-emission-pipeline"}]]
 
 "This sub-namespace defines the core code emission pipeline, responsible for transforming Clojure forms into target language strings based on a grammar."
 
@@ -366,7 +366,7 @@
 
 "*   **`default-grammar`**: Provides a base grammar with common settings.\n*   **`emit-main-loop`**: The recursive function that traverses forms and dispatches to appropriate emitters.\n*   **`emit-main`**: The main entry point for emitting a single form.\n*   **`emit`**: Emits a form to an output string, handling grammar and options.\n*   **`with:emit` (macro)**: Binds the top-level emit function.\n*   **`prep-options`**: Prepares options for the emit pipeline.\n*   **`prep-form`**: Preprocesses a form through different stages (raw, input, staging)."
 
-[[:section {:title "lang.core.base.emit-assign (Assignment Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-assign-assignment-emission"}]]
+[[:section {:title "lang.core.base.emit-assign (Assignment Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-assign-assignment-emission"}]]
 
 "This sub-namespace handles the emission of assignment-related forms, including inline function assignments and variable declarations."
 
@@ -374,7 +374,7 @@
 
 "*   **`emit-def-assign-inline`**: Emits an inline function assignment.\n*   **`emit-def-assign`**: Emits a variable declaration or assignment.\n*   **`test-assign-loop`, `test-assign-emit`**: Test functions for assignment emission."
 
-[[:section {:title "lang.core.base.emit-block (Block Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-block-block-emission"}]]
+[[:section {:title "lang.core.base.emit-block (Block Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-block-block-emission"}]]
 
 "This sub-namespace handles the emission of control flow blocks (do, if, for, while, try, switch) and their associated parameters and bodies."
 
@@ -382,7 +382,7 @@
 
 "*   **`emit-statement`**: Emits a single statement.\n*   **`emit-do`, `emit-do*`**: Emits `do` blocks.\n*   **`block-options`**: Retrieves options for a block.\n*   **`emit-block-body`**: Emits the body of a block.\n*   **`parse-params`**: Parses parameters for a block.\n*   **`emit-params-statement`, `emit-params`**: Emits parameters for a block.\n*   **`emit-block-control`, `emit-block-controls`**: Emits control flow constructs within a block.\n*   **`emit-block-setup`**: Prepares a block for emission.\n*   **`emit-block-inner`**: Emits the inner content of a block.\n*   **`emit-block-standard`**: Emits a generic block.\n*   **`emit-block`**: The main function for emitting block expressions.\n*   **`test-block-loop`, `test-block-emit`**: Test functions for block emission."
 
-[[:section {:title "lang.core.base.emit-common (Common Emission Utilities)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-common-common-emission-utilities"}]]
+[[:section {:title "lang.core.base.emit-common (Common Emission Utilities)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-common-common-emission-utilities"}]]
 
 "This sub-namespace provides fundamental utilities and dynamic variables used across the entire emission pipeline, such as indentation, tracing, and generic emission functions."
 
@@ -394,7 +394,7 @@
 
 "*   **`with:explode`, `with-trace`, `with-compressed`, `with-indent` (macros)**: Control dynamic emission settings.\n*   **`newline-indent`**: Returns a newline with appropriate indentation.\n*   **`emit-reserved-value`**: Emits a reserved value.\n*   **`emit-free-raw`, `emit-free`**: Emits free-form text.\n*   **`emit-comment`**: Emits a comment.\n*   **`emit-indent`**: Emits an indented form.\n*   **`emit-macro`**: Emits a macro.\n*   **`emit-array`**: Emits an array of forms.\n*   **`emit-wrappable?`**: Checks if a form is wrappable.\n*   **`emit-squash`**: Emits a squashed representation.\n*   **`emit-wrapping`**: Emits a potentially wrapped form.\n*   **`wrapped-str`**: Wraps a string with start/end delimiters.\n*   **`emit-unit`**: Emits a unit.\n*   **`emit-internal`, `emit-internal-str`**: Emits internal forms or strings.\n*   **`emit-pre`, `emit-post`, `emit-prefix`, `emit-postfix`**: Emits operators before/after/prefix/postfix to arguments.\n*   **`emit-infix`, `emit-infix-default`, `emit-infix-pre`, `emit-infix-if-single`, `emit-infix-if`**: Emits infix expressions.\n*   **`emit-between`**: Emits a raw symbol between two elements.\n*   **`emit-bi`**: Emits a binary infix operator.\n*   **`emit-assign`**: Emits an assignment.\n*   **`emit-return-do`, `emit-return-base`, `emit-return`**: Emits return statements.\n*   **`emit-with-global`**: Emits a global variable.\n*   **`emit-symbol-classify`**: Classifies a symbol.\n*   **`emit-symbol-standard`**: Emits a standard symbol.\n*   **`emit-symbol`**: Emits a symbol.\n*   **`emit-token`**: Emits a token.\n*   **`emit-with-decorate`**: Emits a decorated form.\n*   **`emit-with-uuid`, `emit-with-rand`**: Emits UUIDs or random numbers.\n*   **`invoke-kw-parse`**: Parses keyword arguments for invocation.\n*   **`emit-invoke-kw-pair`, `emit-invoke-args`, `emit-invoke-layout`, `emit-invoke-raw`, `emit-invoke-static`, `emit-invoke-typecast`, `emit-invoke`**: Emits function invocations.\n*   **`emit-new`**: Emits a constructor call.\n*   **`emit-class-static-invoke`**: Emits a static class invocation.\n*   **`emit-index-entry`, `emit-index`**: Emits indexed expressions.\n*   **`emit-op`**: Dispatches to the appropriate emitter based on the operation.\n*   **`form-key`**: Returns the key associated with a form.\n*   **`emit-common-loop`**: The core emission loop.\n*   **`emit-common`**: Emits a string based on grammar."
 
-[[:section {:title "lang.core.base.emit-data (Data Structure Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-data-data-structure-emission"}]]
+[[:section {:title "lang.core.base.emit-data (Data Structure Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-data-data-structure-emission"}]]
 
 "This sub-namespace handles the emission of various Clojure data structures (maps, vectors, sets, tuples) into their target language equivalents."
 
@@ -402,7 +402,7 @@
 
 "*   **`default-map-key`**: Emits a default map key.\n*   **`emit-map-key`**: Emits a map key.\n*   **`emit-map-entry`**: Emits a map entry.\n*   **`emit-singleline-array?`**: Checks if an array can be emitted on a single line.\n*   **`emit-maybe-multibody`**: Emits a multi-line body if necessary.\n*   **`emit-coll-layout`**: Lays out a collection.\n*   **`emit-coll`**: Emits a collection.\n*   **`emit-data-standard`**: Emits standard data.\n*   **`emit-data`**: The main function for emitting data forms.\n*   **`emit-quote`**: Emits a quoted form.\n*   **`emit-table-group`**: Groups table arguments.\n*   **`emit-table`**: Emits a table.\n*   **`test-data-loop`, `test-data-emit`**: Test functions for data emission."
 
-[[:section {:title "lang.core.base.emit-fn (Function Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-fn-function-emission"}]]
+[[:section {:title "lang.core.base.emit-fn (Function Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-fn-function-emission"}]]
 
 "This sub-namespace handles the emission of function definitions and related constructs, including argument lists, type hints, and function bodies."
 
@@ -410,7 +410,7 @@
 
 "*   **`emit-input-default`**: Emits a default input argument string.\n*   **`emit-hint-type`**: Emits a type hint.\n*   **`emit-def-type`**: Emits a definition type.\n*   **`emit-fn-type`**: Emits a function type.\n*   **`emit-fn-block`**: Retrieves block options for a function.\n*   **`emit-fn-preamble-args`**: Emits preamble arguments for a function.\n*   **`emit-fn-preamble`**: Emits the preamble of a function.\n*   **`emit-fn`**: The main function for emitting function templates.\n*   **`test-fn-loop`, `test-fn-emit`**: Test functions for function emission."
 
-[[:section {:title "lang.core.base.emit-helper (Emission Helper Functions)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-helper-emission-helper-functions"}]]
+[[:section {:title "lang.core.base.emit-helper (Emission Helper Functions)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-helper-emission-helper-functions"}]]
 
 "This sub-namespace provides various helper functions and constants used throughout the emission pipeline, such as default grammar settings, symbol replacement rules, and argument parsing."
 
@@ -418,7 +418,7 @@
 
 "*   **`default-emit-fn`**: The default emit function.\n*   **`pr-single`**: Prints a single-quoted string.\n*   **`+sym-replace+`**: Symbol replacement rules.\n*   **`+default+`**: Default grammar settings.\n*   **`get-option`, `get-options`**: Retrieves grammar options.\n*   **`form-key-base`**: Gets the base key for a form.\n*   **`basic-typed-args`**: Parses basic typed arguments.\n*   **`emit-typed-allowed-args`**: Emits allowed typed arguments.\n*   **`emit-typed-args`**: Emits typed arguments.\n*   **`emit-symbol-full`**: Emits a full symbol.\n*   **`emit-type-record`**: Formats a type record."
 
-[[:section {:title "lang.core.base.emit-preprocess (Emission Preprocessing)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-preprocess-emission-preprocessing"}]]
+[[:section {:title "lang.core.base.emit-preprocess (Emission Preprocessing)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-preprocess-emission-preprocessing"}]]
 
 "This sub-namespace handles the preprocessing of Clojure forms before they are emitted, including macro expansion, symbol resolution, and dependency collection."
 
@@ -430,7 +430,7 @@
 
 "*   **`macro-form`, `macro-opts`, `macro-grammar`**: Accessors for macro context.\n*   **`with:macro-opts` (macro)**: Binds macro options.\n*   **`to-input-form`**: Processes a raw form into an input form.\n*   **`to-input`**: Converts a raw form to an input form.\n*   **`get-fragment`**: Retrieves a fragment (macro) from modules.\n*   **`process-namespaced-resolve`**: Resolves a symbol in the current namespace.\n*   **`process-namespaced-symbol`**: Processes namespaced symbols.\n*   **`process-inline-assignment`**: Prepares a form for inline assignment.\n*   **`to-staging-form`**: Processes different staging forms.\n*   **`to-staging`**: Converts an input form to a staged form, collecting dependencies.\n*   **`to-resolve`**: Resolves code symbols without macroexpansion."
 
-[[:section {:title "lang.core.base.emit-special (Special Form Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-special-special-form-emission"}]]
+[[:section {:title "lang.core.base.emit-special (Special Form Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-special-special-form-emission"}]]
 
 "This sub-namespace handles the emission of special forms, such as `!:module` (for emitting module contents), `!:eval` (for evaluating Clojure code at emit time), and `!:lang` (for embedding code from another language)."
 
@@ -438,7 +438,7 @@
 
 "*   **`emit-with-module-all-ids`**: Emits all IDs from a module.\n*   **`emit-with-module`**: Emits a module.\n*   **`emit-with-preprocess`**: Emits a preprocessed form.\n*   **`emit-with-eval`**: Emits an evaluated form.\n*   **`emit-with-deref`**: Emits a dereferenced var.\n*   **`emit-with-lang`**: Emits an embedded language form.\n*   **`test-special-loop`, `test-special-emit`**: Test functions for special form emission."
 
-[[:section {:title "lang.core.base.emit-top-level (Top-Level Form Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-emit-top-level-top-level-form-emission"}]]
+[[:section {:title "lang.core.base.emit-top-level (Top-Level Form Emission)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-emit-top-level-top-level-form-emission"}]]
 
 "This sub-namespace handles the emission of top-level forms like `defn`, `def`, `defglobal`, `defrun`, and `defclass`."
 
@@ -446,7 +446,7 @@
 
 "*   **`transform-defclass-inner`**: Transforms the body of a `defclass`.\n*   **`emit-def`**: Emits a `def` statement.\n*   **`emit-declare`**: Emits a `declare` statement.\n*   **`emit-top-level`**: The main function for emitting top-level forms.\n*   **`emit-form`**: Emits a customisable form."
 
-[[:section {:title "lang.core.base.grammar (Language Grammar Definition)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-grammar-language-grammar-definition"}]]
+[[:section {:title "lang.core.base.grammar (Language Grammar Definition)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-grammar-language-grammar-definition"}]]
 
 "This sub-namespace defines the structure and semantics of a target language's grammar, including its reserved words, operators, and emission rules."
 
@@ -458,7 +458,7 @@
 
 "*   **`gen-ops`**: Generates operators from a namespace.\n*   **`collect-ops`**: Collects all operators.\n*   **`ops-list`, `ops-symbols`, `ops-summary`, `ops-detail`**: Functions for inspecting operators.\n*   **`build`**: Selects operators for a grammar.\n*   **`build-min`**: Builds a minimal grammar.\n*   **`build-xtalk`**: Builds a grammar with cross-language operators.\n*   **`build:override`, `build:extend`**: Modifies an existing grammar.\n*   **`to-reserved`**: Converts an operator map to a reserved word map.\n*   **`grammar-structure`, `grammar-sections`, `grammar-macros`**: Extracts structural information from a grammar.\n*   **`grammar?`, `grammar`**: Predicate and constructor for `Grammer` records."
 
-[[:section {:title "lang.core.base.grammar-macro (Macro Transformations)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-grammar-macro-macro-transformations"}]]
+[[:section {:title "lang.core.base.grammar-macro (Macro Transformations)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-grammar-macro-macro-transformations"}]]
 
 "This sub-namespace provides macro transformations for common Clojure forms (e.g., `->`, `->>`, `when`, `if`, `cond`, `let`, `case`, `doto`, `fn:>`) into more basic forms suitable for emission."
 
@@ -466,7 +466,7 @@
 
 "*   **`tf-macroexpand`**: Macroexpands a form.\n*   **`tf-when`**: Transforms `when` to a branch.\n*   **`tf-if`**: Transforms `if` to a branch.\n*   **`tf-cond`**: Transforms `cond` to a branch.\n*   **`tf-let-bind`**: Transforms `let` bindings.\n*   **`tf-case`**: Transforms `case` to a switch.\n*   **`tf-lambda-arrow`**: Transforms lambda arrows.\n*   **`tf-tcond`**: Transforms ternary conditions.\n*   **`tf-xor`**: Transforms `xor` to a ternary if.\n*   **`tf-doto`**: Transforms `doto` to a sequence of `do` operations.\n*   **`tf-do-arrow`**: Transforms `do:>` to a function.\n*   **`tf-forange`**: Transforms `forange` to a `for` loop.\n*   **`+op-macro+`, `+op-macro-arrow+`, `+op-macro-let+`, `+op-macro-xor+`, `+op-macro-case+`, `+op-macro-forange+`**: Collections of macro operators."
 
-[[:section {:title "lang.core.base.grammar-spec (Grammar Specification)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-grammar-spec-grammar-specification"}]]
+[[:section {:title "lang.core.base.grammar-spec (Grammar Specification)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-grammar-spec-grammar-specification"}]]
 
 "This sub-namespace defines the core set of operators and their properties that form the basis of most language grammars. It includes operators for built-in functions, math, comparisons, logic, control flow, and top-level definitions."
 
@@ -474,7 +474,7 @@
 
 "*   **`get-comment`**: Retrieves the comment prefix for a language.\n*   **`format-fargs`**: Formats function arguments.\n*   **`format-defn`**: Formats `defn` forms.\n*   **`tf-for-index`**: Transforms `for:index` loops.\n*   **`+op-builtin+`, `+op-builtin-global+`, `+op-builtin-module+`, `+op-builtin-helper+`**: Built-in operators.\n*   **`+op-free-control+`, `+op-free-literal+`**: Free control and literal operators.\n*   **`+op-math+`, `+op-compare+`, `+op-logic+`, `+op-counter+`**: Math, comparison, logic, and counter operators.\n*   **`+op-return+`, `+op-throw+`, `+op-await+`**: Return, throw, and await operators.\n*   **`+op-data-table+`, `+op-data-shortcuts+`, `+op-data-range+`**: Data table, shortcuts, and range operators.\n*   **`+op-vars+`, `+op-bit+`, `+op-pointer+`**: Variable, bit, and pointer operators.\n*   **`+op-fn+`, `+op-block+`**: Function and block operators.\n*   **`+op-control-base+`, `+op-control-general+`, `+op-control-try-catch+`**: Control flow operators.\n*   **`+op-top-base+`, `+op-top-global+`**: Top-level operators.\n*   **`+op-class+`**: Class-related operators.\n*   **`+op-for+`, `+op-coroutine+`**: For loop and coroutine operators."
 
-[[:section {:title "lang.core.base.grammar-xtalk (Cross-Language Operators)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-grammar-xtalk-cross-language-operators"}]]
+[[:section {:title "lang.core.base.grammar-xtalk (Cross-Language Operators)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-grammar-xtalk-cross-language-operators"}]]
 
 "This sub-namespace defines a set of \"cross-talk\" (xtalk) operators that provide a common interface for language-agnostic operations, such as object manipulation, type checking, and I/O. These operators are designed to be implemented differently in each target language."
 
@@ -482,7 +482,7 @@
 
 "*   **`tf-throw`**: Transforms `throw`.\n*   **`tf-eq-nil?`, `tf-not-nil?`**: Transforms nil checks.\n*   **`tf-proto-create`**: Transforms prototype creation.\n*   **`tf-has-key?`**: Transforms key existence checks.\n*   **`tf-get-path`, `tf-get-key`**: Transforms property access.\n*   **`tf-set-key`, `tf-del-key`**: Transforms property setting/deletion.\n*   **`tf-copy-key`**: Transforms key copying.\n*   **`tf-grammar-offset`, `tf-grammar-end-inclusive`**: Retrieves grammar-specific offset/inclusive settings.\n*   **`tf-offset-base`, `tf-offset`, `tf-offset-rev`, `tf-offset-len`, `tf-offset-rlen`**: Transforms offset calculations.\n*   **`tf-global-set`, `tf-global-has?`, `tf-global-del`**: Transforms global variable operations.\n*   **`tf-lu-eq`**: Transforms lookup equality.\n*   **`tf-bit-and`, `tf-bit-or`, `tf-bit-lshift`, `tf-bit-rshift`, `tf-bit-xor`**: Transforms bitwise operations.\n*   **`+op-xtalk-core+`, `+op-xtalk-proto+`, `+op-xtalk-global+`, `+op-xtalk-custom+`, `+op-xtalk-math+`, `+op-xtalk-type+`, `+op-xtalk-bit+`, `+op-xtalk-lu+`, `+op-xtalk-obj+`, `+op-xtalk-arr+`, `+op-xtalk-str+`, `+op-xtalk-js+`, `+op-xtalk-return+`, `+op-xtalk-socket+`, `+op-xtalk-iter+`, `+op-xtalk-cache+`, `+op-xtalk-thread+`, `+op-xtalk-file+`, `+op-xtalk-b64+`, `+op-xtalk-uri+`, `+op-xtalk-special+`**: Collections of cross-language operators."
 
-[[:section {:title "lang.core.base.impl (Core Implementation Utilities)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-impl-core-implementation-utilities"}]]
+[[:section {:title "lang.core.base.impl (Core Implementation Utilities)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-impl-core-implementation-utilities"}]]
 
 "This sub-namespace provides core implementation details and helper functions for the language system, including managing the global library, emit options, and direct code emission."
 
@@ -490,7 +490,7 @@
 
 "*   **`with:library` (macro)**: Binds a library as the default.\n*   **`default-library`, `default-library:reset`**: Manages the default library.\n*   **`runtime-library`**: Retrieves the current runtime library.\n*   **`grammar`**: Retrieves the grammar for a language.\n*   **`emit-options-raw`, `emit-options`**: Prepares emit options.\n*   **`to-form`**: Converts input to a form.\n*   **`%.form` (macro)**: Converts to a form.\n*   **`emit-bulk?`**: Checks if a form is a bulk form.\n*   **`emit-direct`**: Emits a form directly.\n*   **`emit-str`**: Converts a form to an output string.\n*   **`%.str` (macro)**: Converts to an output string.\n*   **`emit-as`**: Emits multiple forms.\n*   **`emit-symbol`**: Emits a symbol.\n*   **`get-entry`**: Retrieves an entry.\n*   **`emit-entry`**: Emits an entry.\n*   **`emit-entry-deps-collect`**: Collects entry dependencies.\n*   **`emit-entry-deps`**: Emits entry dependencies.\n*   **`emit-script-imports`**: Emits script imports.\n*   **`emit-script-deps`**: Emits script dependencies.\n*   **`emit-script-join`**: Joins script parts.\n*   **`emit-script`**: Emits a script with all dependencies.\n*   **`emit-scaffold-raw-imports`**: Emits scaffold raw imports.\n*   **`emit-scaffold-raw`**: Creates scaffold raw entries.\n*   **`emit-scaffold-for`**: Creates scaffold for a module.\n*   **`emit-scaffold-to`**: Creates scaffold up to a module.\n*   **`emit-scaffold-imports`**: Creates scaffold to expose native imports."
 
-[[:section {:title "lang.core.base.impl-deps (Dependency Management Implementation)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-impl-deps-dependency-management-implementation"}]]
+[[:section {:title "lang.core.base.impl-deps (Dependency Management Implementation)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-impl-deps-dependency-management-implementation"}]]
 
 "This sub-namespace provides the implementation details for managing dependencies between modules and entries, including collecting native imports and resolving module links."
 
@@ -498,7 +498,7 @@
 
 "*   **`module-import-form`, `module-export-form`, `module-link-form`**: Generates import/export/link forms.\n*   **`has-module-form`, `setup-module-form`, `teardown-module-form`**: Generates module lifecycle forms.\n*   **`has-ptr-form`, `setup-ptr-form`, `teardown-ptr-form`**: Generates pointer lifecycle forms.\n*   **`collect-script-natives`**: Collects native imported modules.\n*   **`collect-script-entries`**: Collects all entries for a script.\n*   **`collect-script`**: Collects dependencies for a script.\n*   **`collect-script-summary`**: Summarizes script dependencies.\n*   **`collect-module-check-options`**: Checks module options.\n*   **`collect-module-ns-select`**: Selects module namespaces.\n*   **`collect-module-directory-form`**: Collects module directory forms.\n*   **`collect-module`**: Collects information for an entire module."
 
-[[:section {:title "lang.core.base.impl-entry (Entry Implementation)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-impl-entry-entry-implementation"}]]
+[[:section {:title "lang.core.base.impl-entry (Entry Implementation)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-impl-entry-entry-implementation"}]]
 
 "This sub-namespace provides the implementation details for creating and emitting book entries, including handling metadata, preprocessing, and caching."
 
@@ -506,7 +506,7 @@
 
 "*   **`create-common`**: Creates common entry keys from metadata.\n*   **`create-code-raw`**: Creates a raw code entry.\n*   **`create-code-base`**: Creates a base code entry.\n*   **`create-code-hydrate`**: Hydrates code entries.\n*   **`create-code`**: Creates a code entry.\n*   **`create-fragment`**: Creates a fragment entry.\n*   **`create-macro`**: Creates a macro entry.\n*   **`with:cache-none`, `with:cache-force` (macros)**: Control entry caching.\n*   **`emit-entry-raw`**: Emits a raw entry.\n*   **`+cached-emit-keys+`, `+cached-keys+`**: Keys for cached emits.\n*   **`emit-entry-cached`**: Emits a cached entry.\n*   **`emit-entry-label`**: Emits an entry label.\n*   **`emit-entry`**: Emits a given entry."
 
-[[:section {:title "lang.core.base.impl-lifecycle (Lifecycle Implementation)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-impl-lifecycle-lifecycle-implementation"}]]
+[[:section {:title "lang.core.base.impl-lifecycle (Lifecycle Implementation)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-impl-lifecycle-lifecycle-implementation"}]]
 
 "This sub-namespace provides the implementation details for managing the lifecycle of modules, including emitting setup and teardown scripts."
 
@@ -514,7 +514,7 @@
 
 "*   **`emit-module-prep`**: Prepares a module for emission.\n*   **`emit-module-setup-concat`, `emit-module-setup-join`, `emit-module-setup-native-arr`, `emit-module-setup-link-arr`, `emit-module-setup-raw`, `emit-module-setup`**: Functions for emitting module setup code.\n*   **`emit-module-teardown-concat`, `emit-module-teardown-join`, `emit-module-teardown-raw`, `emit-module-teardown`**: Functions for emitting module teardown code."
 
-[[:section {:title "lang.core.base.library (Library Management)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-library-library-management"}]]
+[[:section {:title "lang.core.base.library (Library Management)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-library-library-management"}]]
 
 "This sub-namespace defines the core `Library` record and provides functions for managing a collection of language books and their modules/entries. It handles snapshot management and bulk operations."
 
@@ -522,7 +522,7 @@
 
 "*   **`wait-snapshot`**: Waits for the current snapshot to be ready.\n*   **`wait-apply`**: Applies a function to the library state when the task queue is empty.\n*   **`wait-mutate!`**: Mutates the library state once the task queue is empty.\n*   **`get-snapshot`**: Retrieves the current snapshot.\n*   **`get-book`, `get-book-raw`**: Retrieves a book from the library.\n*   **`get-module`, `get-entry`**: Retrieves a module or entry from the library.\n*   **`add-book!`, `delete-book!`**: Adds or deletes a book.\n*   **`reset-all!`**: Resets the library.\n*   **`list-modules`, `list-entries`**: Lists modules or entries.\n*   **`add-module!`, `delete-module!`, `delete-modules!`**: Adds or deletes modules.\n*   **`library-string`**: Returns a string representation of the library.\n*   **`library?`, `library:create`, `library`**: Predicate and constructors for `Library` records.\n*   **`add-entry!`, `add-entry-single!`, `delete-entry!`**: Adds or deletes entries.\n*   **`install-module!`, `install-book!`, `purge-book!`**: Installs modules or books."
 
-[[:section {:title "lang.core.base.library-snapshot (Library Snapshot Management)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-library-snapshot-library-snapshot-management"}]]
+[[:section {:title "lang.core.base.library-snapshot (Library Snapshot Management)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-library-snapshot-library-snapshot-management"}]]
 
 "This sub-namespace defines the `Snapshot` record and provides functions for managing immutable snapshots of the library's state, enabling efficient versioning and merging of language definitions."
 
@@ -530,7 +530,7 @@
 
 "*   **`get-deps`**: Retrieves dependencies from a snapshot.\n*   **`snapshot-string`**: Returns a string representation of a snapshot.\n*   **`snapshot?`, `snapshot`**: Predicate and constructor for `Snapshot` records.\n*   **`snapshot-reset`**: Resets a snapshot.\n*   **`snapshot-merge`**: Merges two snapshots.\n*   **`get-book-raw`, `get-book`**: Retrieves a book from a snapshot.\n*   **`add-book`**: Adds a book to a snapshot.\n*   **`set-module`, `delete-module`, `delete-modules`**: Manages modules in a snapshot.\n*   **`list-modules`, `list-entries`**: Lists modules or entries in a snapshot.\n*   **`set-entry`, `set-entries`, `delete-entry`, `delete-entries`**: Manages entries in a snapshot.\n*   **`install-check-merged`**: Checks for merged books.\n*   **`install-module-update`, `install-module`**: Updates or installs a module.\n*   **`install-book-update`, `install-book`**: Updates or installs a book."
 
-[[:section {:title "lang.core.base.manage (Language Management Tasks)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-manage-language-management-tasks"}]]
+[[:section {:title "lang.core.base.manage (Language Management Tasks)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-manage-language-management-tasks"}]]
 
 "This sub-namespace provides high-level tasks for managing language definitions, modules, and entries, including overviews, purging, and linting."
 
@@ -538,7 +538,7 @@
 
 "*   **`lib-overview-format`, `lib-overview`**: Formats and displays a library overview.\n*   **`lib-module-env`**: Compiles the module task environment.\n*   **`lib-module-filter`**: Filters modules.\n*   **`lib-module-overview-format`, `lib-module-overview`**: Formats and displays a module overview.\n*   **`lib-module-entries-format-section`, `lib-module-entries-format`, `lib-module-entries`**: Formats and displays module entries.\n*   **`lib-module-purge-fn`, `lib-module-purge`**: Purges modules.\n*   **`lib-module-unused-fn`, `lib-module-unused`**: Lists unused modules.\n*   **`lib-module-missing-line-number-fn`, `lib-module-missing-line-number`**: Lists modules with missing line numbers.\n*   **`lib-module-incorrect-alias-fn`, `lib-module-incorrect-alias`**: Lists modules with incorrect aliases."
 
-[[:section {:title "lang.core.base.pointer (Language Pointers)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-pointer-language-pointers"}]]
+[[:section {:title "lang.core.base.pointer (Language Pointers)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-pointer-language-pointers"}]]
 
 "This sub-namespace defines the `Pointer` record, which acts as a reference to a code entry within a specific language runtime. Pointers enable dynamic invocation and introspection of code across different languages."
 
@@ -546,7 +546,7 @@
 
 "*   **`with:clip`, `with:print`, `with:print-all`, `with:rt-wrap`, `with:rt`, `with:input`, `with:raw` (macros)**: Control pointer behavior.\n*   **`get-entry`**: Retrieves the library entry for a pointer.\n*   **`ptr-tag`**: Creates a tag for a pointer.\n*   **`ptr-deref`**: Dereferences a pointer.\n*   **`ptr-display`**: Displays a pointer.\n*   **`ptr-invoke-meta`**: Prepares metadata for pointer invocation.\n*   **`rt-macro-opts`**: Creates macro options for a runtime.\n*   **`ptr-invoke-string`**: Emits the invocation string for a pointer.\n*   **`ptr-invoke-script`**: Emits a script for a pointer.\n*   **`ptr-intern`**: Interns a pointer into the workspace.\n*   **`ptr-output-json`, `ptr-output`**: Handles pointer output.\n*   **`ptr-invoke`**: Invokes a pointer."
 
-[[:section {:title "lang.core.base.registry (Language Registry)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-registry-language-registry"}]]
+[[:section {:title "lang.core.base.registry (Language Registry)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-registry-language-registry"}]]
 
 "This sub-namespace defines a global registry (`+registry+`) that maps language contexts and runtime keys to their corresponding Clojure namespaces, enabling dynamic loading and instantiation of language runtimes."
 
@@ -554,7 +554,7 @@
 
 "*   **`+registry+`**: An atom storing a map of `[lang runtime-key]` to Clojure namespace symbols."
 
-[[:section {:title "lang.core.base.runtime (Language Runtimes)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-runtime-language-runtimes"}]]
+[[:section {:title "lang.core.base.runtime (Language Runtimes)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-runtime-language-runtimes"}]]
 
 "This sub-namespace defines the `RuntimeDefault` record, which serves as a base implementation for language runtimes. It provides default behaviors for code evaluation, pointer handling, and lifecycle management."
 
@@ -566,7 +566,7 @@
 
 "*   **`default-tags-ptr`, `default-deref-ptr`, `default-invoke-ptr`, `default-init-ptr`, `default-display-ptr`, `default-raw-eval`, `default-transform-in-ptr`, `default-transform-out-ptr`**: Default implementations for `IContext` methods.\n*   **`rt-default-string`**: Returns a string representation of a default runtime.\n*   **`rt-default?`, `rt-default`**: Predicate and constructor for `RuntimeDefault` records.\n*   **`install-lang!`, `install-type!`**: Installs language definitions and runtime types.\n*   **`return-format-simple`, `return-format`, `return-wrap-invoke`, `return-transform`**: Functions for formatting return values.\n*   **`default-invoke-script`**: Default script invocation.\n*   **`default-lifecycle-prep`**: Prepares options for lifecycle management.\n*   **`default-scaffold-array`, `default-scaffold-setup-for`, `default-scaffold-setup-to`, `default-scaffold-imports`**: Functions for scaffolding.\n*   **`default-lifecycle-fn`**: Constructs a lifecycle function.\n*   **`default-has-module?`, `default-has-ptr?`, `default-setup-ptr`, `default-teardown-ptr`**: Default lifecycle functions for modules and pointers.\n*   **`default-setup-module-emit`, `default-setup-module-basic`, `default-teardown-module-basic`, `default-setup-module`, `default-teardown-module`**: Default module setup/teardown functions.\n*   **`multistage-invoke`, `multistage-setup-for`, `multistage-setup-to`, `multistage-teardown-for`, `multistage-teardown-at`, `multistage-teardown-to`**: Multistage lifecycle functions."
 
-[[:section {:title "lang.core.base.runtime-proxy (Runtime Proxy)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-runtime-proxy-runtime-proxy"}]]
+[[:section {:title "lang.core.base.runtime-proxy (Runtime Proxy)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-runtime-proxy-runtime-proxy"}]]
 
 "This sub-namespace defines a proxy mechanism for language runtimes, allowing one runtime to delegate its operations to another. This is useful for creating aliases or for adding layers of functionality."
 
@@ -574,7 +574,7 @@
 
 "*   **`rt-proxy-string`**: Returns a string representation of a runtime proxy.\n*   **`proxy-get-rt`**: Retrieves the redirected runtime.\n*   **`proxy-raw-eval`, `proxy-init-ptr`, `proxy-tags-ptr`, `proxy-deref-ptr`, `proxy-display-ptr`, `proxy-invoke-ptr`, `proxy-transform-in-ptr`, `proxy-transform-out-ptr`**: Proxy implementations for `IContext` methods.\n*   **`proxy-started?`, `proxy-stopped?`, `proxy-remote?`, `proxy-info`, `proxy-health`**: Proxy implementations for `IComponent` methods."
 
-[[:section {:title "lang.core.base.script (Scripting and Runtime Control)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-script-scripting-and-runtime-control"}]]
+[[:section {:title "lang.core.base.script (Scripting and Runtime Control)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-script-scripting-and-runtime-control"}]]
 
 "This sub-namespace provides high-level macros and functions for defining and controlling language scripts and their associated runtimes. It includes mechanisms for installing languages, managing annexes, and executing code in different contexts."
 
@@ -586,7 +586,7 @@
 
 "*   **`install`**: Installs a language book and its runtime.\n*   **`script-ns-import`**: Imports namespaces for a script.\n*   **`script-macro-import`**: Imports macros for a script.\n*   **`script-fn-base`, `script-fn`**: Base functions for script setup.\n*   **`script` (macro)**: Defines a language script.\n*   **`script-test-prep`, `script-test`**: Prepares and runs test scripts.\n*   **`script-` (macro)**: Defines a test script.\n*   **`script-ext`, `script+` (macro)**: Extends a script with additional runtimes (annexes).\n*   **`script-ext-run`**: Executes code in an annex runtime.\n*   **`!` (macro)**: Executes code in a specified annex runtime.\n*   **`annex:start`, `annex:get`, `annex:stop`, `annex:start-all`, `annex:stop-all`, `annex:restart-all`, `annex:list`**: Functions for managing annexes."
 
-[[:section {:title "lang.core.base.script-annex (Script Annex Management)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-script-annex-script-annex-management"}]]
+[[:section {:title "lang.core.base.script-annex (Script Annex Management)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-script-annex-script-annex-management"}]]
 
 "This sub-namespace provides the implementation for managing \"annexes,\" which are extensions to language scripts that allow for dynamic runtime switching and configuration."
 
@@ -594,7 +594,7 @@
 
 "*   **`rt-annex-string`**: Returns a string representation of a runtime annex.\n*   **`rt-annex?`, `rt-annex:create`**: Predicate and constructor for `RuntimeAnnex` records.\n*   **`annex-current`, `annex-reset`**: Manages the current annex.\n*   **`get-annex`**: Retrieves the current annex.\n*   **`clear-annex`**: Clears all runtimes in an annex.\n*   **`get-annex-library`, `get-annex-book`**: Retrieves the library or book from an annex.\n*   **`add-annex-runtime`, `get-annex-runtime`, `remove-annex-runtime`**: Manages runtimes in an annex.\n*   **`register-annex-tag`, `deregister-annex-tag`**: Registers or deregisters annex tags.\n*   **`start-runtime`**: Starts a runtime in an annex.\n*   **`same-runtime?`**: Checks if two runtimes are the same."
 
-[[:section {:title "lang.core.base.script-control (Script Runtime Control)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-script-control-script-runtime-control"}]]
+[[:section {:title "lang.core.base.script-control (Script Runtime Control)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-script-control-script-runtime-control"}]]
 
 "This sub-namespace provides functions for controlling language runtimes, including getting, stopping, and restarting them, as well as executing one-shot evaluations."
 
@@ -602,7 +602,7 @@
 
 "*   **`script-rt-get`**: Retrieves a language runtime.\n*   **`script-rt-stop`, `script-rt-restart`**: Stops or restarts a runtime.\n*   **`script-rt-oneshot-eval`, `script-rt-oneshot`**: Executes one-shot evaluations."
 
-[[:section {:title "lang.core.base.script-def (Script Definition Helpers)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-script-def-script-definition-helpers"}]]
+[[:section {:title "lang.core.base.script-def (Script Definition Helpers)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-script-def-script-definition-helpers"}]]
 
 "This sub-namespace provides helper functions for defining script-related templates and macros."
 
@@ -610,7 +610,7 @@
 
 "*   **`tmpl-entry`**: Creates templates for various argument types.\n*   **`tmpl-macro`**: Creates templates for macros."
 
-[[:section {:title "lang.core.base.script-lint (Script Linting)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-script-lint-script-linting"}]]
+[[:section {:title "lang.core.base.script-lint (Script Linting)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-script-lint-script-linting"}]]
 
 "This sub-namespace provides a basic linter for language scripts, checking for unused variables, unknown symbols, and other potential issues."
 
@@ -618,7 +618,7 @@
 
 "*   **`get-reserved-raw`, `get-reserved`**: Retrieves reserved symbols from a grammar.\n*   **`collect-vars`**: Collects all variables in a form.\n*   **`collect-module-globals`**: Collects global symbols from a module.\n*   **`collect-sym-vars`**: Collects symbols and variables.\n*   **`sym-check-linter`**: Checks the linter.\n*   **`lint-set`, `lint-clear`, `lint-needed?`**: Manages linting settings.\n*   **`lint-entry`**: Lints a single entry."
 
-[[:section {:title "lang.core.base.script-macro (Script Macro Interning)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-script-macro-script-macro-interning"}]]
+[[:section {:title "lang.core.base.script-macro (Script Macro Interning)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-script-macro-script-macro-interning"}]]
 
 "This sub-namespace provides functions for interning language-specific macros and top-level forms into the Clojure environment, making them available for use in scripts."
 
@@ -626,7 +626,7 @@
 
 "*   **`body-arglists`**: Extracts arglists from a function body.\n*   **`intern-in`**: Interns a macro.\n*   **`intern-prep`**: Prepares module and form metadata for interning.\n*   **`intern-def$-fn`, `intern-def$`**: Interns `def$` fragments.\n*   **`intern-defmacro-fn`, `intern-defmacro`**: Interns `defmacro` forms.\n*   **`call-thunk`**: Calls a thunk with pointer output control.\n*   **`intern-!-fn`, `intern-!`**: Interns free pointer macros.\n*   **`intern-free-fn`, `intern-free`**: Interns free pointers.\n*   **`intern-top-level-fn`, `intern-top-level`**: Interns top-level functions.\n*   **`intern-macros`**: Interns all macros from a grammar.\n*   **`intern-highlights`**: Interns highlight macros.\n*   **`intern-grammar`**: Interns a grammar's macros into the namespace.\n*   **`intern-defmacro-rt-fn`, `defmacro.!` (macro)**: Defines runtime language macros."
 
-[[:section {:title "lang.core.base.util (Language Utilities)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-util-language-utilities"}]]
+[[:section {:title "lang.core.base.util (Language Utilities)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-util-language-utilities"}]]
 
 "This sub-namespace provides various utility functions for working with language-related symbols, contexts, and pointers."
 
@@ -634,7 +634,7 @@
 
 "*   **`sym-id`, `sym-module`, `sym-pair`, `sym-full`, `sym-default-str`, `sym-default-inverse-str`**: Functions for manipulating symbols.\n*   **`hashvec?`, `doublevec?`**: Predicates for vector types.\n*   **`lang-context`**: Creates a language context keyword.\n*   **`lang-rt-list`, `lang-rt`**: Lists and retrieves language runtimes.\n*   **`lang-rt-default`**: Retrieves the default runtime function.\n*   **`lang-pointer`**: Creates a language pointer."
 
-[[:section {:title "lang.core.base.workspace (Workspace Management)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-base-workspace-workspace-management"}]]
+[[:section {:title "lang.core.base.workspace (Workspace Management)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-base-workspace-workspace-management"}]]
 
 "This sub-namespace provides functions for managing the language workspace, including emitting modules, printing module contents, and controlling runtime lifecycles."
 
@@ -642,7 +642,7 @@
 
 "*   **`rt-resolve`**: Resolves a runtime.\n*   **`sym-entry`, `sym-pointer`**: Retrieves entries or pointers from symbols.\n*   **`module-entries`**: Retrieves module entries.\n*   **`emit-ptr`**: Emits a pointer as a string.\n*   **`ptr-clip`, `ptr-print`**: Copies or prints pointer text.\n*   **`ptr-setup`, `ptr-teardown`**: Sets up or tears down a pointer.\n*   **`ptr-setup-deps`, `ptr-teardown-deps`**: Sets up or tears down pointer dependencies.\n*   **`emit-module`**: Emits an entire module.\n*   **`print-module`**: Prints a module.\n*   **`rt:module`, `rt:module-purge`**: Manages module purging.\n*   **`rt:inner`**: Retrieves the inner client for a shared runtime.\n*   **`rt:restart`**: Restarts a shared runtime.\n*   **`multistage-tmpl`**: Template for multistage functions.\n*   **`intern-macros`**: Interns macros from one namespace to another."
 
-[[:section {:title "lang.core.interface.type-notify (Notification Server)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-interface-type-notify-notification-server"}]]
+[[:section {:title "lang.core.interface.type-notify (Notification Server)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-interface-type-notify-notification-server"}]]
 
 "This sub-namespace implements a notification server that allows language runtimes to send messages back to the Clojure host, enabling real-time feedback and event handling."
 
@@ -650,7 +650,7 @@
 
 "*   **`has-sink?`, `get-sink`, `clear-sink`**: Manages notification sinks.\n*   **`add-listener`, `remove-listener`**: Manages listeners for sinks.\n*   **`get-oneshot-id`, `remove-oneshot-id`, `clear-oneshot-sinks`**: Manages one-shot notification IDs.\n*   **`process-print`, `process-capture`, `process-message`**: Processes incoming messages.\n*   **`handle-notify-http`, `start-notify-http`, `stop-notify-http`**: Manages HTTP notification server.\n*   **`handle-notify-socket`, `start-notify-socket`, `stop-notify-socket`**: Manages Socket notification server.\n*   **`start-notify`, `stop-notify`**: Starts or stops both notification servers.\n*   **`notify-server-string`**: Returns a string representation of the notification server.\n*   **`NotifyServer` (defimpl record)**: The concrete record type for the notification server.\n*   **`notify-server:create`, `notify-server`**: Constructors for the notification server.\n*   **`default-notify`, `default-notify:reset`**: Manages the default notification server.\n*   **`watch-oneshot`**: Watches for a one-shot notification."
 
-[[:section {:title "lang.core.interface.type-shared (Shared Runtime Management)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-interface-type-shared-shared-runtime-management"}]]
+[[:section {:title "lang.core.interface.type-shared (Shared Runtime Management)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-interface-type-shared-shared-runtime-management"}]]
 
 "This sub-namespace provides mechanisms for managing shared language runtimes, allowing multiple clients to share a single runtime instance."
 
@@ -658,7 +658,7 @@
 
 "*   **`get-groups`**: Retrieves all shared groups.\n*   **`get-group-count`, `update-group-count`**: Manages group counts.\n*   **`get-group-instance`, `set-group-instance`, `update-group-instance`**: Manages group instances.\n*   **`restart-group-instance`**: Restarts a group instance.\n*   **`remove-group-instance`**: Removes a group instance.\n*   **`start-shared`, `stop-shared`, `kill-shared`**: Lifecycle functions for shared runtimes.\n*   **`wrap-shared`**: Wraps a function to operate on a shared runtime.\n*   **`rt-shared-string`**: Returns a string representation of a shared runtime.\n*   **`SharedRuntime` (defimpl record)**: The concrete record type for a shared runtime.\n*   **`rt-shared:create`, `rt-shared`**: Constructors for shared runtimes.\n*   **`rt-is-shared?`**: Checks if a runtime is shared.\n*   **`rt-get-inner`**: Retrieves the inner runtime."
 
-[[:section {:title "lang.core.model. (Language Specifications)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-model-language-specifications"}]]
+[[:section {:title "lang.core.model. (Language Specifications)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-model-language-specifications"}]]
 
 "These sub-namespaces define the specific grammars and templates for various target languages, including Bash, C, GLSL, JQ, JavaScript, Lua, Python, R, Rust, and Scheme. They extend the base grammar with language-specific syntax, operators, and emission rules."
 
@@ -670,7 +670,7 @@
 
 "*   **`+features+`**: Defines language-specific operators and their emission rules.\n*   **`+template+`**: Customizes the emission template for the language.\n*   **`+grammar+`**: The final grammar for the language.\n*   **`+meta+`**: Language-specific metadata (e.g., module import/export functions).\n*   **`+book+`**: The language book, containing its grammar and meta.\n*   **`+init+`**: Installs the language into the system.\n*   **Language-specific transformation functions (e.g., `js-regex`, `lua-map-key`, `python-defn`, `r-token-boolean`, `rst-typesystem`, `bash-quote-item`)**: Implement custom emission logic for various forms and data types."
 
-[[:section {:title "lang.core.strict.basestate (Strict Mode State)" :link "merged-plans-slop-summary-std-lang-summary-md-tahto-lang-strict-basestate-strict-mode-state"}]]
+[[:section {:title "lang.core.strict.basestate (Strict Mode State)" :link "merged-plans-slop-summary-std-lang-summary-md-lang-lang-strict-basestate-strict-mode-state"}]]
 
 "This sub-namespace likely provides state management for a \"strict mode\" within the language system, though its contents are minimal in the provided files."
 

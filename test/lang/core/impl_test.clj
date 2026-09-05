@@ -155,33 +155,33 @@
        (catch Throwable t
          (select-keys (ex-data t)
                       [:probe
-                       :tahto/phase
-                       :tahto/subsystem
-                       :tahto/lang
-                       :tahto/module
-                       :tahto/form
-                       :tahto/provenance-stack]))))
+                       :lang/phase
+                       :lang/subsystem
+                       :lang/lang
+                       :lang/module
+                       :lang/form
+                       :lang/provenance-stack]))))
   => '{:probe true
-        :tahto/phase :emit/form
-        :tahto/subsystem :lang.base.emit-top-level/emit-form
-        :tahto/lang :lua
-        :tahto/module L.core
-        :tahto/form (boom-op 1 2 3)
-        :tahto/provenance-stack [{:tahto/phase :emit/form
-                                     :tahto/subsystem :lang.base.emit-top-level/emit-form
-                                     :tahto/lang :lua
-                                     :tahto/module L.core
-                                     :tahto/namespace lang.core.impl-test
-                                     :tahto/line 19
-                                     :tahto/form (boom-op 1 2 3)
-                                     :tahto/symbol boom-op}
-                                    {:tahto/phase :emit/direct
-                                     :tahto/subsystem :lang.core.impl/emit-direct
-                                     :tahto/lang :lua
-                                     :tahto/module L.core
-                                     :tahto/namespace lang.core.impl-test
-                                     :tahto/line 19
-                                     :tahto/form (boom-op 1 2 3)}]})
+        :lang/phase :emit/form
+        :lang/subsystem :lang.base.emit-top-level/emit-form
+        :lang/lang :lua
+        :lang/module L.core
+        :lang/form (boom-op 1 2 3)
+        :lang/provenance-stack [{:lang/phase :emit/form
+                                     :lang/subsystem :lang.base.emit-top-level/emit-form
+                                     :lang/lang :lua
+                                     :lang/module L.core
+                                     :lang/namespace lang.core.impl-test
+                                     :lang/line 19
+                                     :lang/form (boom-op 1 2 3)
+                                     :lang/symbol boom-op}
+                                    {:lang/phase :emit/direct
+                                     :lang/subsystem :lang.core.impl/emit-direct
+                                     :lang/lang :lua
+                                     :lang/module L.core
+                                     :lang/namespace lang.core.impl-test
+                                     :lang/line 19
+                                     :lang/form (boom-op 1 2 3)}]})
 
 ^{:refer lang.core.impl/emit-str :added "4.0"}
 (fact  "converts to an output string"

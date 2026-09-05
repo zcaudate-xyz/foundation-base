@@ -15,5 +15,5 @@
    (toml/read content :keywordize true)))
 
 (comment
-  (toml/read (slurp "../ops/site/tahto/base/traefik/sites.toml")
+  (toml/read (slurp "../ops/site/lang/base/traefik/sites.toml")
              :keywordize true))

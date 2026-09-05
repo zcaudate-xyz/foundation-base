@@ -1,4 +1,4 @@
-(ns documentation.tahto-runtime
+lang/lang_runtime.clj:1:(ns documentation.lang-runtime
   (:use code.test))
 
 [[:hero {:title "lang.runtime"
@@ -9,7 +9,7 @@
 "Emission alone is not enough for tests and systems work. Runtime adapters let lang.core run target code, verify behavior, and connect generated functions to real services."
 
 [[:chapter {:title "Internal usage"}]]
-"The CI workflow pulls runtime images for Tahto tests and installs runtime dependencies for language-specific test groups. Walkthrough live examples use runtime contexts to execute emitted JS and Lua."
+lang/lang_runtime.clj:12:"The CI workflow pulls runtime images for Lang tests and installs runtime dependencies for language-specific test groups. Walkthrough live examples use runtime contexts to execute emitted JS and Lua."
 
 [[:chapter {:title "API"}]]
 
@@ -25,7 +25,7 @@
 
 "*   **`rt.postgres.client`**: Manages the connection and lifecycle of PostgreSQL runtimes.\n*   **`rt.postgres.client-impl`**: Implements the core interaction logic for executing raw SQL and invoking transpiled functions.\n*   **`rt.postgres.grammar`**: Defines the custom grammar and syntax for transpiling Clojure forms into PostgreSQL SQL.\n*   **`rt.postgres.grammar.*` (`common`, `meta`, `tf`, `form-*`)**: These sub-namespaces provide foundational utilities for grammar definition, metadata extraction, type transformations, and custom form handling (e.g., `defn`, `deftype`, `defenum`).\n*   **`rt.postgres.script.*` (`addon`, `builtin`, `graph`, `impl`, `supabase`)**: These namespaces expose high-level macros and functions (the DSL) for common database operations, graph-like queries, and integration with Supabase.\n*   **`rt.postgres.system`**: Provides macros for interacting with PostgreSQL system functions.\n*   **`rt.postgres.gen_bind`**: Facilitates the binding of Clojure-defined functions and database entities into a structured interface for external consumption (e.g., APIs)."
 
-[[:section {:title "Integration with lang.core" :link "merged-plans-slop-summary-rt-postgres-summary-md-integration-with-tahto-lang"}]]
+lang/lang_runtime.clj:28:[[:section {:title "Integration with lang.core" :link "merged-plans-slop-summary-rt-postgres-summary-md-integration-with-lang-lang"}]]
 
 "`rt.postgres` extensively leverages the `lang.core` framework's capabilities for code generation and runtime management."
 

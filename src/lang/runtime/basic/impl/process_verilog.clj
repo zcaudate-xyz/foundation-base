@@ -67,7 +67,7 @@
     [forms]
 
     (and (seq? forms) (symbol? (first forms)))
-    [(list 'defn '__tahto_tb__ []
+    [(list 'defn '__lang_tb__ []
            (list 'initial
                  (apply list 'do
                         (concat [forms] [(list '$finish)]))))]
@@ -85,7 +85,7 @@
                                     (not-any? finish-form? stmts)
                                     (conj (list '$finish))))))]
           (concat modules
-                  [(list 'defn '__tahto_tb__ [] body)]))
+                  [(list 'defn '__lang_tb__ [] body)]))
         forms))))
 
 ;;
@@ -101,7 +101,7 @@
         {:keys [trim stderr raw root shell output-flag]
          :or {trim clojure.string/trim-newline
               output-flag "-o"}} process
-        tmp-exec  (java.io.File/createTempFile "tahto_verilog_" "")
+        tmp-exec  (java.io.File/createTempFile "lang_verilog_" "")
         tmp-file  (str tmp-exec ".v")
         root-dir  (str (or root (fs/parent tmp-file)))
         run!      (fn [args]
@@ -184,11 +184,11 @@
 (def +verilog-twostep+
   [(rt/install-type!
     :verilog :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
 
 (def +verilog-verify+
   [(rt/install-type!
     :verilog :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

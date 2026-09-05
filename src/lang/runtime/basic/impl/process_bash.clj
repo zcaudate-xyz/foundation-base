@@ -43,11 +43,11 @@
 (def +bash-oneshot+
   [(rt/install-type!
     :bash :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +bash-verify+
   [(rt/install-type!
     :bash :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])

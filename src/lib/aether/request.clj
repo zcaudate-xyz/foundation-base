@@ -164,12 +164,12 @@
   "creates an `ArtifactRequest` object from map
  
    (artifact-request
-    {:artifact \"tahto:tahto:2.4.8\"
+    {:artifact \"lang:lang:2.4.8\"
      :repositories [{:id \"clojars\"
                      :authentication {:username \"zcaudate\"
                                       :password \"hello\"}
                      :url \"https://clojars.org/repo/\"}]})
-   ;;=> #req.artifact{:artifact \"tahto:tahto:jar:2.4.8\",
+   ;;=> #req.artifact{:artifact \"lang:lang:jar:2.4.8\",
    ;;                 :repositories [{:id \"clojars\",
    ;;                                 :url \"https://clojars.org/repo/\"
    ;;                                 :authentication {:username \"zcaudate\", :password \"hello\"}}],
@@ -184,10 +184,10 @@
   "creates a `CollectRequest` object from map
  
    (collect-request
-    {:root {:artifact \"tahto:tahto:2.4.8\"}
+    {:root {:artifact \"lang:lang:2.4.8\"}
      :repositories [{:id \"clojars\"
                      :url \"https://clojars.org/repo/\"}]})
-   ;;=> #req.collect{:root {:artifact \"tahto:tahto:jar:2.4.8\",
+   ;;=> #req.collect{:root {:artifact \"lang:lang:jar:2.4.8\",
    ;;                       :exclusions [],
    ;;                       :optional false,
    ;;                       :scope \"\",
@@ -205,10 +205,10 @@
   "creates a `DependencyRequest` object from map
  
    (dependency-request
-    {:root {:artifact \"tahto:tahto:2.4.8\"}
+    {:root {:artifact \"lang:lang:2.4.8\"}
      :repositories [{:id \"clojars\"
                      :url \"https://clojars.org/repo/\"}]})
-   ;;=> #req.dependency{:root {:artifact \"tahto:tahto:jar:2.4.8\",
+   ;;=> #req.dependency{:root {:artifact \"lang:lang:jar:2.4.8\",
    ;;                          :exclusions [],
    ;;                          :optional false,
    ;;                          :scope \"\",
@@ -226,16 +226,16 @@
   "creates a `DeployRequest` object from map
  
    (deploy-request
-    {:artifacts [{:group \"tahto\"
+    {:artifacts [{:group \"lang\"
                   :artifact \"std.string\"
                   :version \"2.4.8\"
                   :extension \"jar\"
-                  :file \"tahto-string.jar\"}]
+                  :file \"lang-string.jar\"}]
      :repository {:id \"clojars\"
                   :url \"https://clojars.org/repo/\"
                   :authentication {:username \"zcaudate\"
                                    :password \"hello\"}}})
-   ;;=> #req.deploy{:artifacts [\"tahto:std.string:jar:2.4.8\"]
+   ;;=> #req.deploy{:artifacts [\"lang:std.string:jar:2.4.8\"]
    ;;               :repository {:id \"clojars\",
    ;;                            :authentication {:username \"zcaudate\", :password \"hello\"}
    ;;                            :url \"https://clojars.org/repo/\"}}"
@@ -250,18 +250,18 @@
   "creates a `InstallRequest` object from map
  
    (install-request
-    {:artifacts [{:group \"tahto\"
+    {:artifacts [{:group \"lang\"
                   :artifact \"std.string\"
                   :version \"2.4.8\"
                   :extension \"jar\"
-                  :file \"tahto-string.jar\"}
-                 {:group \"tahto\"
+                  :file \"lang-string.jar\"}
+                 {:group \"lang\"
                   :artifact \"std.string\"
                   :version \"2.4.8\"
                   :extension \"pom\"
-                  :file \"tahto-string.pom\"}]})
-   ;;=> #req.install{:artifacts [\"tahto:std.string:jar:2.4.8\"
-   ;;                            \"tahto:std.string:pom:2.4.8\"]
+                  :file \"lang-string.pom\"}]})
+   ;;=> #req.install{:artifacts [\"lang:std.string:jar:2.4.8\"
+   ;;                            \"lang:std.string:pom:2.4.8\"]
    ;;                :metadata []}"
   {:added "3.0"}
   ([{:keys [artifacts] :as m}]
@@ -272,7 +272,7 @@
   "constructs a metadat request
  
    (metadata-request
-    {:metadata   {:group \"tahto\"
+    {:metadata   {:group \"lang\"
                  :artifact \"std.string\"
                   :version \"2.4.8\"}
      :repository {:id \"clojars\"
@@ -288,7 +288,7 @@
 (defn range-request
   "constructs a range request
  
-   (range-request {:artifact {:group \"tahto\"
+   (range-request {:artifact {:group \"lang\"
                               :artifact \"std.string\"
                              :version \"2.4.8\"}
                    :repositories [{:id \"clojars\"
@@ -304,7 +304,7 @@
 (defn version-request
   "constructs a version request
  
-   (version-request {:artifact {:group \"tahto\"
+   (version-request {:artifact {:group \"lang\"
                                 :artifact \"std.string\"
                                :version \"2.4.8\"}
                      :repositories [{:id \"clojars\"

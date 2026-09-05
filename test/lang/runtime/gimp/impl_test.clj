@@ -17,7 +17,7 @@
     [(boolean (re-find #"def server_gimp" bootstrap))
      (boolean (re-find #"def client_gimp" bootstrap))
      (boolean (re-find #"return_eval" bootstrap))
-     (boolean (re-find #"TAHTO_GIMP_READY" bootstrap))
+     (boolean (re-find #"LANG_GIMP_READY" bootstrap))
      (boolean (re-find #"server_gimp\(12345" bootstrap))])
   => [true true true true true])
 

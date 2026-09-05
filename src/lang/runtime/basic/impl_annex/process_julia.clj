@@ -83,13 +83,13 @@
 (def +julia-oneshot+
   [(rt/install-type!
     :julia :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +julia-verify+
   [(rt/install-type!
     :julia :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 ;;
@@ -149,6 +149,6 @@
 (def +julia-basic+
   [(rt/install-type!
     :julia :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])

@@ -192,24 +192,24 @@
 (def +lua-oneshot+
   [(rt/install-type!
     :lua :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create #'oneshot/rt-oneshot:create}
      :config {:layout :full}})
    (rt/install-type!
     :lua.nginx :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create #'oneshot/rt-oneshot:create}
      :config {:layout :full}})])
 
 (def +lua-verify+
   [(rt/install-type!
     :lua :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create #'oneshot/rt-oneshot:create}
      :config {:layout :full}})
    (rt/install-type!
     :lua.nginx :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create #'oneshot/rt-oneshot:create}
      :config {:layout :full}})])
 
@@ -281,12 +281,12 @@
 (def +lua-basic+
   [(rt/install-type!
     :lua :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})
    (rt/install-type!
     :lua.nginx :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])
 
@@ -357,12 +357,12 @@
 (def +lua-websocket+
   [(rt/install-type!
     :lua :websocket
-    {:type :tahto/rt.websocket
+    {:type :lang/rt.websocket
      :instance {:create #'websocket/rt-websocket:create}
      :config {:layout :full}})
    (rt/install-type!
     :lua.nginx :websocket
-    {:type :tahto/rt.websocket
+    {:type :lang/rt.websocket
      :instance {:create #'websocket/rt-websocket:create}
      :config {:layout :full}})])
 

@@ -100,18 +100,18 @@
 (def +lua-oneshot+
   [(default/install-type!
     :lua :redis.client
-    {:type :tahto/rt.redis.client
+    {:type :lang/rt.redis.client
      :config {:bootstrap false
               :layout :flat}
      :instance {:create client:create}})
    (default/install-type!
     :lua :redis
-    {:type :tahto/rt.redis
+    {:type :lang/rt.redis
      :config {:bootstrap false
               :layout :flat}
      :instance
      {:create (fn [m]
-                (-> {:rt/client {:type :tahto/rt.redis
+                (-> {:rt/client {:type :lang/rt.redis
                                  :constructor client:create}}
                     (merge m)
                     (shared/rt-shared:create)))}})])
@@ -119,18 +119,18 @@
 (def +lua-redis-oneshot+
   [(default/install-type!
     :lua.redis :redis.client
-    {:type :tahto/rt.redis.client
+    {:type :lang/rt.redis.client
      :config {:bootstrap false
               :layout :flat}
      :instance {:create client:create}})
    (default/install-type!
     :lua.redis :redis
-    {:type :tahto/rt.redis
+    {:type :lang/rt.redis
      :config {:bootstrap false
               :layout :flat}
      :instance
      {:create (fn [m]
-                (-> {:rt/client {:type :tahto/rt.redis
+                (-> {:rt/client {:type :lang/rt.redis
                                  :constructor client:create}}
                     (merge m)
                     (shared/rt-shared:create)))}})])

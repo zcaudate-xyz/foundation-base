@@ -149,6 +149,6 @@
 (fact "creates a shared neovim runtime client"
   (let [shared (impl/neovim-shared:create {})]
     [(boolean shared)
-     (= :tahto/rt.neovim (-> shared :client :type))
+     (= :lang/rt.neovim (-> shared :client :type))
      (:temp shared)])
   => [true true true])

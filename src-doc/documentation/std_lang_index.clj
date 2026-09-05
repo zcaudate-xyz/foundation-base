@@ -1,8 +1,8 @@
-(ns documentation.tahto-index
+(ns documentation.lang-index
   (:require [lang.core :as l])
   (:use code.test))
 
-[[:hero {:title "tahto"
+[[:hero {:title "lang"
          :subtitle "Language tooling, runtime integration, and polyglot system libraries."
          :lead "`hara` groups the language-oriented parts of foundation: `tahto.core` for authoring and emission, `tahto.model` for target specs, `tahto.runtime` for execution, `tahto.typed` for typed xtalk, and examples for generated projects."
          :badges ["Language tooling" "Runtimes" "Models" "Polyglot"]
@@ -17,8 +17,8 @@
   ^{:refer lang.core/emit-as :added "4.0"}
   (l/emit-as :js '[(defn greet [name]
                      (return (+ "Hello, " name)))
-                   (greet "tahto")])
-  => "function greet(name){\n  return \"Hello, \" + name;\n}\n\ngreet(\"tahto\")")
+                   (greet "lang")])
+  => "function greet(name){\n  return \"Hello, \" + name;\n}\n\ngreet(\"lang\")")
 
 "The same form can be emitted to Lua by changing the language keyword. The grammar and template take care of syntax, statement terminators, and string operators."
 
@@ -26,11 +26,11 @@
   ^{:refer lang.core/emit-as :added "4.0"}
   (l/emit-as :lua '[(defn greet [name]
                       (return (cat "Hello, " name)))
-                    (greet "tahto")])
-  => "local function greet(name)\n  return 'Hello, ' .. name\nend\n\ngreet(\"tahto\")")
+                    (greet "lang")])
+  => "local function greet(name)\n  return 'Hello, ' .. name\nend\n\ngreet(\"lang\")")
 
 [[:card-grid {:title "Subcategories"
-              :lead "The Tahto section covers the compiler, target models, runtimes, typed analysis, shared emitters, seed generation, and examples."
+              :lead "The Lang section covers the compiler, target models, runtimes, typed analysis, shared emitters, seed generation, and examples."
               :items [{:meta "Compiler"
                        :title "lang.core"
                        :text "Book-based authoring, grammar-driven emission, scripts, modules, and language libraries."
@@ -38,23 +38,23 @@
                       {:meta "Language Models"
                        :title "lang.model"
                        :text "Target specifications for JavaScript, Lua, Python, Go, Dart, SQL, Solidity, xtalk, and annex languages."
-                       :href "tahto-model.html"}
+                       :href "lang-model.html"}
                       {:meta "Runtimes"
                        :title "lang.runtime"
                        :text "Runtime clients and execution adapters for browsers, databases, containers, editors, and native tools."
-                       :href "tahto-runtime.html"}
+                       :href "lang-runtime.html"}
                       {:meta "Typing"
                        :title "lang.typed"
                        :text "Typed xtalk analysis and target declaration emission."
-                       :href "tahto-typed.html"}
+                       :href "lang-typed.html"}
                       {:meta "Shared Emitters"
                        :title "lang.base"
                        :text "Shared grammar, emit, preprocess, rewrite, and utility behavior."
-                       :href "tahto-common.html"}
+                       :href "lang-common.html"}
                       {:meta "Generation"
                        :title "lang.seedgen"
                        :text "Seed generation and xtalk test scaffolding."
-                       :href "tahto-seedgen.html"}
+                       :href "lang-seedgen.html"}
                       {:meta "Examples"
                        :title "Generated projects"
                        :text "Play projects and walkthroughs from src-build."
@@ -62,4 +62,4 @@
 
 [[:callout {:tone :info
             :title "Relationship to xt"
-            :content "`tahto` provides the compiler, type, model, and runtime machinery. `xt` is a portable library/application layer built on top of that machinery."}]]
+            :content "`lang` provides the compiler, type, model, and runtime machinery. `xt` is a portable library/application layer built on top of that machinery."}]]

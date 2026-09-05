@@ -139,6 +139,6 @@
 (def +init+
   [(rt/install-type!
     :haxe :haxe
-    {:type :tahto/rt.haxe
+    {:type :lang/rt.haxe
      :config {:layout :full}
      :instance {:create haxe:create}})])

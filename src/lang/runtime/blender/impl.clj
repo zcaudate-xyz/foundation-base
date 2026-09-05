@@ -52,7 +52,7 @@
             host   (or (. opts (get "host")) "127.0.0.1")]
         (. server (bind '(host port)))
         (. server (listen 1))
-        (print "TAHTO_BLENDER_READY")
+        (print "LANG_BLENDER_READY")
         (. sys (stdout.flush))
         (while true
           (let [result (. server (accept))
@@ -104,7 +104,7 @@
     (loop []
       (when (< (System/currentTimeMillis) deadline)
         (if-let [line (.readLine reader)]
-          (if (str/starts-with? line "TAHTO_BLENDER_READY")
+          (if (str/starts-with? line "LANG_BLENDER_READY")
             true
             (recur))
           (do (Thread/sleep 50)
@@ -154,7 +154,7 @@
         container-id (str (or id (f/sid)))
         container (docker/start-container
                    {:id      container-id
-                    :group   "tahto"
+                    :group   "lang"
                     :image   image
                     :cmd     ["blender" "--background" "--python-expr" bootstrap]
                     :flags   ["--network=host"]
@@ -302,7 +302,7 @@
    :id :shared})` shares the same process across namespaces."
   {:added "4.1"}
   [m]
-  (-> {:rt/client {:type :tahto/rt.blender
+  (-> {:rt/client {:type :lang/rt.blender
                    :constructor blender:create}
        :rt/temp true}
       (merge m)
@@ -312,13 +312,13 @@
 (def +init+
   [(rt/install-type!
     :python :blender.instance
-    {:type :tahto/rt.blender
+    {:type :lang/rt.blender
      :config {:layout :full
               :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest"}}
      :instance {:create blender:create}})
    (rt/install-type!
     :python :blender
-    {:type :tahto/rt.blender.shared
+    {:type :lang/rt.blender.shared
      :config {:layout :full
               :container {:image "ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest"}}
      :instance {:create blender-shared:create}})])

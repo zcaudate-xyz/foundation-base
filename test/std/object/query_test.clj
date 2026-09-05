@@ -112,7 +112,7 @@
   => seq?)
 
 (comment
-  (./ns:reset '[tahto])
+  (./ns:reset '[lang])
   (code.manage/import))
 
 

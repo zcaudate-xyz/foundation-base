@@ -1,4 +1,4 @@
-(ns documentation.tahto-walkthrough-live
+lang/walkthrough_live.clj:1:(ns documentation.lang-walkthrough-live
   (:require [lang.core :as l])
   (:use code.test))
 

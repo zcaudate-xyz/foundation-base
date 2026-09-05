@@ -122,13 +122,13 @@
 (def +python-oneshot+
   [(rt/install-type!
     :python :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +python-verify+
   [(rt/install-type!
     :python :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 ;;
@@ -191,7 +191,7 @@
 (def +python-basic+
   [(rt/install-type!
     :python :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])
 
@@ -252,7 +252,7 @@
 (def +python-websocket+
   [(rt/install-type!
     :python :websocket
-    {:type :tahto/rt.websocket
+    {:type :lang/rt.websocket
      :instance {:create #'websocket/rt-websocket:create}
      :config {:layout :full}})])
 
@@ -272,7 +272,7 @@
 (def +python-remote-port+
   [(rt/install-type!
     :python :remote-port
-    {:type :tahto/rt.remote-port
+    {:type :lang/rt.remote-port
      :instance {:create remote-port/rt-remote-port:create}
      :config {:layout :full}})])
 

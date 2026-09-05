@@ -67,7 +67,7 @@
 (invoke/definvoke publish
   "main publish method
  
-   (publish 'tahto/tahto-code {})"
+   (publish 'lang/lang-code {})"
   {:added "3.0"}
   [:task {:template :publish
           :params {:title "PUBLISHING HTML FILES"
@@ -100,7 +100,7 @@
 (invoke/definvoke init-template
   "initialises the theme template for a given site
  
-   (init-template \"tahto\")"
+   (init-template \"lang\")"
   {:added "3.0"}
   [:task {:template :code.doc.theme
           :params {:title "INITIALISE TEMPLATE"}
@@ -109,7 +109,7 @@
 (invoke/definvoke deploy-template
   "deploys the theme for a given site
   
-   (deploy-template \"tahto\")"
+   (deploy-template \"lang\")"
   {:added "3.0"}
   [:task {:template :code.doc.theme
           :params {:title "DEPLOY TEMPLATE ASSETS"}
@@ -217,13 +217,13 @@
   (publish '[core])
   
   (require '[lang.deploy])
-  (./code:incomplete '[tahto])
-  (lang.deploy/deploy '[tahto] {:tag :all})
+  (./code:incomplete '[lang])
+  (lang.deploy/deploy '[lang] {:tag :all})
   (deploy-template [:core] {})
   (publish :all {:write true})
   
   (init-template "bolton" {:write true})
   (def lookup (-> env :publish :sites))
 
-  (lookup :tahto)
+  (lookup :lang)
   (sort (keys lookup)))

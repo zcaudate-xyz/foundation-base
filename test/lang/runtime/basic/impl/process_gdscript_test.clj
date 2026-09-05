@@ -59,7 +59,7 @@
         [(.. (java.io.File. tmp "project.godot") exists)
          (slurp (java.io.File. tmp "project.godot"))])
       => [true (str "[application]\n"
-                    "config/name=\"tahto_gdscript_runtime\"\n"
+                    "config/name=\"lang_gdscript_runtime\"\n"
                     "config/features=PackedStringArray(\"4.2\")\n\n"
                     "[rendering]\n"
                     "renderer/rendering_method=\"mobile\"\n")]

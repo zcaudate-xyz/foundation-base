@@ -228,7 +228,7 @@
 
   (unclean 'code.manage)
 
-  (unclean '[tahto]))
+  (unclean '[lang]))
 
 ^{:refer code.manage/unchecked :added "3.0"}
 (comment "returns tests without `=>` checks"
@@ -325,14 +325,14 @@
 
   (code.manage/unchecked 'code.framework.docstring {:print {:function true :item true :result true :summary true}})
 
-  (refactor-code '[tahto] {:edits [code.format.ns/expand-shorthand
+  (refactor-code '[lang] {:edits [code.format.ns/expand-shorthand
                                   code.format.ns/reorder-load-form]})
 
   (refactor-code '[std.lib.security.provider] {:edits [code.format.ns/expand-shorthand
                                                    code.format.ns/reorder-load-form]}))
 
 (comment
-  (find-usages ['tahto] {:var 'lang.data.base.seq/index-at})
+  (find-usages ['lang] {:var 'lang.data.base.seq/index-at})
 
   (find-usages ['jvm.artifact] {:var 'lang.data.base.seq/object-of})
 

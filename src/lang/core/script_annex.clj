@@ -50,14 +50,14 @@
 
 (def +init-annex+
   [(resource/res:spec-add
-    {:type :tahto/lang.rt.annex
+    {:type :lang/lang.rt.annex
      :config {}
      :instance {:create rt-annex:create}})
 
    (reg/registry-install
     :lang.annex
     {:config {}
-     :rt  {:default {:resource :tahto/lang.rt.annex}}})])
+     :rt  {:default {:resource :lang/lang.rt.annex}}})])
 
 
 

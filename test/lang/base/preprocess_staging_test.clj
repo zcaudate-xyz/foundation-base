@@ -66,21 +66,21 @@
     (catch Throwable t
       (select-keys (ex-data t)
                    [:probe
-                    :tahto/phase
-                    :tahto/subsystem
-                    :tahto/lang
-                    :tahto/line
-                    :tahto/module
-                    :tahto/symbol
-                    :tahto/form])))
+                    :lang/phase
+                    :lang/subsystem
+                    :lang/lang
+                    :lang/line
+                    :lang/module
+                    :lang/symbol
+                    :lang/form])))
   => '{:probe true
-        :tahto/phase :staging/reserved-template
-        :tahto/subsystem :tahto/reserved-template
-        :tahto/lang :lua
-        :tahto/line 21
-        :tahto/module L.core
-        :tahto/symbol hello
-        :tahto/form (hello 1 2 3)})
+        :lang/phase :staging/reserved-template
+        :lang/subsystem :lang/reserved-template
+        :lang/lang :lua
+        :lang/line 21
+        :lang/module L.core
+        :lang/symbol hello
+        :lang/form (hello 1 2 3)})
 
 (fact "reserved template heads expand before value-position fragments"
   (to-staging-form '(-> xs (u/filter odd?))

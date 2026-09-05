@@ -87,7 +87,7 @@
 (def +bash-basic+
   [(default/install-type!
     :bash :basic
-    {:type :tahto/rt.shell.basic
+    {:type :lang/rt.shell.basic
      :instance {:create #'shell-basic:create}
      :config {:layout :full}})])
 

@@ -131,7 +131,7 @@
   (def -out- '{:main  demo.resp-repl
                :extra [["src-play/demo/resp_repl.clj" "demo/resp_repl.clj"]]
                :package "demo"
-               :deps [tahto/net.resp]})
+               :deps [lang/net.resp]})
   )
 
 

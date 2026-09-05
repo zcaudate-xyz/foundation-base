@@ -37,7 +37,7 @@
 
    Must be a non-hidden directory inside the user's home because the
    Godot snap cannot read paths under dot-directories."
-  (str (System/getProperty "user.home") "/tahto_gdscript_runtime"))
+  (str (System/getProperty "user.home") "/lang_gdscript_runtime"))
 
 (defn ensure-project!
   "creates a minimal Godot project in the runtime dir if missing"
@@ -49,7 +49,7 @@
     (let [project (java.io.File. dir "project.godot")]
       (when-not (.exists project)
         (spit project (str "[application]\n"
-                           "config/name=\"tahto_gdscript_runtime\"\n"
+                           "config/name=\"lang_gdscript_runtime\"\n"
                            "config/features=PackedStringArray(\"4.2\")\n\n"
                            "[rendering]\n"
                            "renderer/rendering_method=\"mobile\"\n"))))))
@@ -267,12 +267,12 @@
 (def +gdscript-twostep+
   [(rt/install-type!
     :gdscript :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create #'twostep/rt-twostep:create}})])
 
 (def +gdscript-verify+
   [(rt/install-type!
     :gdscript :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create #'twostep/rt-twostep:create}})])
 

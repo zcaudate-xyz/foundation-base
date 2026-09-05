@@ -295,7 +295,7 @@
   "saves the per-language failing function list and returns the path"
   {:added "4.1"}
   [failing]
-  (let [dir (fs/path ".tahto" "runs")
+  (let [dir (fs/path ".lang" "runs")
         _   (fs/create-directory dir)
         path (fs/path dir (str "seedgen-failing-" (System/currentTimeMillis) ".edn"))]
     (spit (str path) (with-out-str (pprint/pprint failing)))

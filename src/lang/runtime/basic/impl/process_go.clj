@@ -60,11 +60,11 @@
 (def +go-twostep+
   [(rt/install-type!
     :go :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
 
 (def +go-verify+
   [(rt/install-type!
     :go :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

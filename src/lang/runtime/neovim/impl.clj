@@ -149,14 +149,14 @@
   "Wraps Lua code so that the return value is JSON-serialized by Neovim."
   {:added "4.1"}
   [code]
-  (str "local _tahto_eval = function(...)\n"
+  (str "local _lang_eval = function(...)\n"
        code
        "\nend\n"
-       "local _tahto_ok, _tahto_result = pcall(_tahto_eval)\n"
-       "if _tahto_ok then\n"
-       "  return vim.json.encode({ok=true, value=_tahto_result})\n"
+       "local _lang_ok, _lang_result = pcall(_lang_eval)\n"
+       "if _lang_ok then\n"
+       "  return vim.json.encode({ok=true, value=_lang_result})\n"
        "else\n"
-       "  return vim.json.encode({ok=false, error=tostring(_tahto_result)})\n"
+       "  return vim.json.encode({ok=false, error=tostring(_lang_result)})\n"
        "end"))
 
 (defn raw-eval-neovim
@@ -237,7 +237,7 @@
    :id :shared})` shares the same process across namespaces."
   {:added "4.1"}
   [m]
-  (-> {:rt/client {:type :tahto/rt.neovim
+  (-> {:rt/client {:type :lang/rt.neovim
                    :constructor neovim:create}
        :rt/temp true}
       (merge m)
@@ -247,11 +247,11 @@
 (def +init+
   [(rt/install-type!
     :lua :neovim.instance
-    {:type :tahto/rt.neovim
+    {:type :lang/rt.neovim
      :config {:layout :full}
      :instance {:create neovim:create}})
    (rt/install-type!
     :lua :neovim
-    {:type :tahto/rt.neovim.shared
+    {:type :lang/rt.neovim.shared
      :config {:layout :full}
      :instance {:create neovim-shared:create}})])

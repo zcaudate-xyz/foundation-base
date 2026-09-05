@@ -5,7 +5,7 @@
              [lang.model.spec-js.ts :as ts]))
 
 (def +typescript-model-fixture+
-  "test/tahto/model/typescript_model_fixture.clj")
+  "test/lang/model/typescript_model_fixture.clj")
 
 (fact "emits TypeScript declarations for the playground model"
   (let [analysis (xtalk-parse/analyze-file +typescript-model-fixture+)

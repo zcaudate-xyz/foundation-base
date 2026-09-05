@@ -1,4 +1,4 @@
-(ns documentation.tahto-walkthrough-basic
+lang/walkthrough_basic.clj:1:(ns documentation.lang-walkthrough-basic
   (:require [lang.core :as l]
             [std.lib :as h])
   (:use code.test))
@@ -60,7 +60,7 @@
   => {:context :lang/js
       :lang :js
       :id 'answer
-      :module 'documentation.tahto-walkthrough-basic
+lang/walkthrough_basic.clj:63:      :module 'documentation.lang-walkthrough-basic
       :section :code
       :context/fn #'lang.base.util/lang-rt-default})
 
@@ -97,11 +97,11 @@
   (-> @add-base (into {}) :form)
   => '(defn add-base
        [c]
-       (return (+ documentation.tahto-walkthrough-basic/base
+lang/walkthrough_basic.clj:100:       (return (+ documentation.lang-walkthrough-basic/base
                   c)))
 
   (-> @add-base (into {}) :deps)
-  => '#{documentation.tahto-walkthrough-basic/base})
+lang/walkthrough_basic.clj:104:  => '#{documentation.lang-walkthrough-basic/base})
 
 [[:section {:title "Reusable fragments with def$.js"}]]
 

@@ -18,7 +18,7 @@
 (defonce +latest+ (atom {}))
 
 (def ^:private +run-dir+
-  ".tahto/runs")
+  ".lang/runs")
 
 (def ^:private +run-history-file+
   "run-history.csv")
@@ -396,7 +396,7 @@
      (with-meta summary {:data (dissoc items :skipped-ns)}))))
 
 (defn save-report
-  "saves the report to .tahto/runs"
+  "saves the report to .lang/runs"
   {:added "3.0"}
   ([items]
    (save-report items nil context/*settings*))

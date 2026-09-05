@@ -89,14 +89,14 @@
       (catch Throwable t
         (let [data (ex-data t)]
           {:probe (:probe data)
-           :phase (:tahto/phase data)
-           :subsystem (:tahto/subsystem data)
-           :lang (:tahto/lang data)
-           :module (:tahto/module data)
-           :entry (-> data :tahto/entry :symbol)
-           :line (:tahto/line data)
-           :stack (mapv (juxt :tahto/phase :tahto/subsystem)
-                        (:tahto/provenance-stack data))}))))
+           :phase (:lang/phase data)
+           :subsystem (:lang/subsystem data)
+           :lang (:lang/lang data)
+           :module (:lang/module data)
+           :entry (-> data :lang/entry :symbol)
+           :line (:lang/line data)
+           :stack (mapv (juxt :lang/phase :lang/subsystem)
+                        (:lang/provenance-stack data))}))))
   => '{:probe true
         :phase :emit/form
         :subsystem :lang.base.emit-top-level/emit-form

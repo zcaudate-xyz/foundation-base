@@ -6,7 +6,7 @@
             [std.lib.collection :as collection])
   (:refer-clojure :exclude [update]))
 
-(defonce +cache-dir+ ".tahto/code/framework")
+(defonce +cache-dir+ ".lang/code/framework")
 
 (defonce +cache-suffix+ ".cache")
 

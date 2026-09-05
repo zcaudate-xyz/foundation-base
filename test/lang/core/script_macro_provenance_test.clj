@@ -27,15 +27,15 @@
     nil
     (catch Throwable t
       (let [data (ex-data t)]
-        {:phase     (:tahto/phase data)
-         :subsystem (:tahto/subsystem data)
-         :module    (:tahto/module data)
-         :entry     (-> data :tahto/entry :symbol)
-         :line      (:tahto/line data)
-         :form      (:tahto/form data)
-         :stack     (mapv (juxt :tahto/phase
-                                :tahto/subsystem)
-                          (:tahto/provenance-stack data))}))))
+        {:phase     (:lang/phase data)
+         :subsystem (:lang/subsystem data)
+         :module    (:lang/module data)
+         :entry     (-> data :lang/entry :symbol)
+         :line      (:lang/line data)
+         :form      (:lang/form data)
+         :stack     (mapv (juxt :lang/phase
+                                :lang/subsystem)
+                          (:lang/provenance-stack data))}))))
 
 (fact "defn.xt failures report provenance for abstract calls"
 

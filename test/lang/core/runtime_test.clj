@@ -112,12 +112,12 @@
 
 ^{:refer lang.core.runtime/install-type! :added "4.0"}
 (fact "installs a specific runtime type given `:lang`"
-  (let [create (get-in (resource/res:spec-get :tahto/lang.rt)
+  (let [create (get-in (resource/res:spec-get :lang/lang.rt)
                        [:instance :create])]
     (= create
-       (do (rt/install-type! :lua :test-runtime {:type :tahto/lang.rt
+       (do (rt/install-type! :lua :test-runtime {:type :lang/lang.rt
                                                  :config {:bootstrap false}})
-           (get-in (resource/res:spec-get :tahto/lang.rt)
+           (get-in (resource/res:spec-get :lang/lang.rt)
                    [:instance :create]))))
   => true)
 

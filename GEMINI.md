@@ -215,7 +215,7 @@
 - **Layout Cond**: The `cond` form is explicitly handled in `std.block.layout/layout-spec-fn` with `{:columns 2 :col-from 0}` rather than using the generic `+pairing+` set, ensuring correct indentation for test/expression pairs.
 - **Wait Ready Args**: The `rt.basic.server-basic/wait-ready` function accepts arguments in the order `[lang id]`, distinct from other functions that might take `[id lang]`.
 - **Rewrite Seq Check**: The `code.test.compile.rewrite` namespace uses `seq?` to detect list-like forms during AST rewriting but explicitly returns `quote` forms as-is to prevent rewriting nested checks within literals.
-- **Library Reset**: The `lang.core.base.impl/default-library:reset` function stops the library instance bound to `*library*` or a provided override argument; if neither is present, it stops the global `:tahto/lang.library` resource.
+- **Library Reset**: The `lang.core.base.impl/default-library:reset` function stops the library instance bound to `*library*` or a provided override argument; if neither is present, it stops the global `:lang/lang.library` resource.
 - **JS Graphics Libs**: The `src/js/lib` directory contains wrappers for 3D graphics libraries, including `three.clj` (Three.js) and `r3_*.clj` (React Three Fiber ecosystem).
 - **Jules Client**: The namespace `code.ai.jules` provides a client for the Google Jules API (`https://jules.googleapis.com`), utilizing `net.http.client` for requests and `X-Goog-Api-Key` for authentication.
 - **Figma Lib**: The `js.lib.figma` namespace provides a rich set of pre-built UI components based on the Figma UI library, suitable for creating mockups and production UIs.

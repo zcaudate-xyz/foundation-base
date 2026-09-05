@@ -5,7 +5,7 @@ xtalk `lang.core` GDScript DSL.
 
 ## File
 
-- `gaussian_splat.clj` — Tahto DSL source that compiles to GDScript
+- `gaussian_splat.clj` — Lang DSL source that compiles to GDScript
 
 ## What it does
 

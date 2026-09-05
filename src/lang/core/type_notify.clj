@@ -277,7 +277,7 @@
       (std.lib.component/start)))
 
 (resource/res:spec-add
- {:type :tahto/lang.notify
+ {:type :lang/lang.notify
   :mode {:allow #{:global}
          :default :global}
   :instance {:create #'notify-server:create
@@ -291,13 +291,13 @@
   {:added "4.0"}
   []
   (or *notify-override* 
-      (resource/res :tahto/lang.notify)))
+      (resource/res :lang/lang.notify)))
 
 (defn default-notify:reset
   "resets the default notify server"
   {:added "4.0"}
   []
-  (resource/res:stop :tahto/lang.notify))
+  (resource/res:stop :lang/lang.notify))
 
 (defn watch-oneshot
   "returns a completable future

@@ -210,11 +210,11 @@
 (def +init+
   [(default/install-type!
     :python :graal
-    {:type :tahto/rt.graal
+    {:type :lang/rt.graal
      :config {:lang :python :layout :full}
      :instance {:create rt-graal:create}})
    (default/install-type!
     :js :graal
-    {:type :tahto/rt.graal
+    {:type :lang/rt.graal
      :config {:lang :js :layout :full}
      :instance {:create rt-graal:create}})])

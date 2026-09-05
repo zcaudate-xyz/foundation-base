@@ -112,7 +112,7 @@
                          :state (atom {})}))))
 
 (res/res:spec-add
- {:type :tahto/context.space
+ {:type :lang/context.space
   :mode {:key :namespace
          :allow #{:namespace}
          :default :namespace}
@@ -126,7 +126,7 @@
   ([]
    (space *namespace*))
   ([namespace]
-   (res/res :tahto/context.space {:namespace namespace})))
+   (res/res :lang/context.space {:namespace namespace})))
 
 (defn space-resolve
   "resolves a space given various inputs

@@ -5,12 +5,12 @@
 
 ^{:refer lang.typed.xtalk-analysis/analyze-file :added "4.1"}
 (fact "analyzes files directly"
-(count (:specs (analyze-file "test/tahto/model/spec_xtalk_typed_fixture.clj")))
+(count (:specs (analyze-file "test/lang/model/spec_xtalk_typed_fixture.clj")))
   => 3)
 
 ^{:refer lang.typed.xtalk-analysis/analyze-file-raw :added "4.1"}
 (fact "returns raw parsed analysis without spec attachment"
-  (let [result (analyze-file-raw "test/tahto/model/spec_xtalk_typed_fixture.clj")]
+  (let [result (analyze-file-raw "test/lang/model/spec_xtalk_typed_fixture.clj")]
     [(map? result)
      (contains? result :specs)
      (= (:ns result) 'lang.model.spec-xtalk-typed-fixture)])

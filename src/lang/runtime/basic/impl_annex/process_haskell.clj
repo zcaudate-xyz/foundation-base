@@ -56,11 +56,11 @@
 (def +haskell-twostep+
   [(rt/install-type!
     :haskell :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
 
 (def +haskell-verify+
   [(rt/install-type!
     :haskell :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])

@@ -84,11 +84,11 @@ Emit a small function:
     (add 1 2)])
 ```
 
-Continue with the published Tahto documentation:
+Continue with the published Lang documentation:
 
-- <https://zcaudate.xyz/foundation-base/tahto/index.html>
-- <https://zcaudate.xyz/foundation-base/tahto/introduction.html>
-- <https://zcaudate.xyz/foundation-base/tahto/walkthrough-basic.html>
+- <https://zcaudate.xyz/foundation-base/lang/index.html>
+- <https://zcaudate.xyz/foundation-base/lang/introduction.html>
+- <https://zcaudate.xyz/foundation-base/lang/walkthrough-basic.html>
 
 ## Run tests
 

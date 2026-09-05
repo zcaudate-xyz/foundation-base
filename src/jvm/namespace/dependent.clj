@@ -57,7 +57,7 @@
 (defn ns-all-dependents
   "gets all dependencies
  
-   (ns-all-dependents 'std.lib.sort '[tahto])
+   (ns-all-dependents 'std.lib.sort '[lang])
    => map?"
   {:added "3.0"}
   ([ns input]
@@ -106,17 +106,17 @@
   (ns-dependents (.getName *ns*))
   (ns-all-dependents *ns* :all)
 
-  (reeval 'std.lib.sort '[tahto])
+  (reeval 'std.lib.sort '[lang])
 
-  (ns-all-dependents 'std.lib.sort '[tahto])
+  (ns-all-dependents 'std.lib.sort '[lang])
   {std.lib.sort #{jvm.namespace.dependent}, jvm.namespace.dependent #{}}
 
   (clojure.set/difference #{1 2} #{2 3})
 
   (sort/topological-sort)
 
-  (ns-level-dependents (ns-dependents 'lang.data.base.map '[tahto])
-                       '[tahto])
+  (ns-level-dependents (ns-dependents 'lang.data.base.map '[lang])
+                       '[lang])
 
   (common/+namespaces+))
 (defn sort-topo

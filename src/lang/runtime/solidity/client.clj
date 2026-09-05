@@ -210,17 +210,17 @@
 (def +init+
   [(default/install-type!
     :solidity :web3
-    {:type :tahto/rt.web3.instance
+    {:type :lang/rt.web3.instance
      :config {:layout :flat}
      :instance {:create rt-web3:create}})
    
    (default/install-type!
     :solidity :web3.shared
-    {:type :tahto/rt.web3
+    {:type :lang/rt.web3
      :config {:layout :flat}
      :instance
      {:create (fn [m]
-                (-> {:rt/client {:type :tahto/rt.web3 
+                (-> {:rt/client {:type :lang/rt.web3 
                                  :constructor rt-web3:create}}
                     (merge m)
                     (shared/rt-shared:create)))}})])

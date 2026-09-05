@@ -25,7 +25,7 @@
 (fact:global
  {:skip (or (not (env/program-exists? "docker"))
             (not (env/docker-daemon-available?))
-            (System/getenv "TAHTO_NO_DOCKER")
+            (System/getenv "LANG_NO_DOCKER")
             (not (System/getenv "RT_BASIC_DOCKER_TESTS")))
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})

@@ -331,30 +331,30 @@
 (def +init+
   [(default/install-type!
     :lua :nginx.instance
-    {:type :tahto/rt.nginx.instance
+    {:type :lang/rt.nginx.instance
      :config {:layout :full}
      :instance {:create nginx:create}})
    (default/install-type!
     :lua.nginx :nginx.instance
-    {:type :tahto/rt.nginx.instance
+    {:type :lang/rt.nginx.instance
      :config {:layout :full}
      :instance {:create nginx:create}})
    
    (default/install-type!
     :lua :nginx
-    {:type :tahto/rt.nginx
+    {:type :lang/rt.nginx
      :instance
      {:create (fn [m]
-                (-> {:rt/client {:type :tahto/rt.nginx 
+                (-> {:rt/client {:type :lang/rt.nginx 
                                  :constructor nginx:create}}
                     (merge m)
                     (shared/rt-shared:create)))}})
    (default/install-type!
     :lua.nginx :nginx
-    {:type :tahto/rt.nginx
+    {:type :lang/rt.nginx
      :instance
      {:create (fn [m]
-                (-> {:rt/client {:type :tahto/rt.nginx 
+                (-> {:rt/client {:type :lang/rt.nginx 
                                  :constructor nginx:create}}
                     (merge m)
                     (shared/rt-shared:create)))}})])

@@ -18,7 +18,7 @@
     [(boolean (re-find #"def server_blender" bootstrap))
      (boolean (re-find #"def client_blender" bootstrap))
      (boolean (re-find #"return_eval" bootstrap))
-     (boolean (re-find #"TAHTO_BLENDER_READY" bootstrap))
+     (boolean (re-find #"LANG_BLENDER_READY" bootstrap))
      (boolean (re-find #"server_blender\(12345" bootstrap))])
   => [true true true true true])
 
@@ -136,7 +136,7 @@
 ^{:refer lang.runtime.blender.impl/blender-shared:create :added "4.1"}
 (fact "creates a shared blender runtime client"
   (let [rt (impl/blender-shared:create {:id :shared-blender-impl-test})]
-    [(= :tahto/rt.blender (get-in rt [:client :type]))
+    [(= :lang/rt.blender (get-in rt [:client :type]))
      (= impl/blender:create (get-in rt [:client :constructor]))
      (= :shared-blender-impl-test (:id rt))
      (= :shared-blender-impl-test (:rt/id rt))

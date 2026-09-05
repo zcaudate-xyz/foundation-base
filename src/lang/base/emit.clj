@@ -31,8 +31,8 @@
    :snapshot
    :layout
    :emit
-   :tahto/xtalk-context
-   :tahto/provenance])
+   :lang/xtalk-context
+   :lang/provenance])
 
 (defn emit-main-loop
   "creates the raw emit

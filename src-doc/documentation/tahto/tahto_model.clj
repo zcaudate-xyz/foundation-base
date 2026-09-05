@@ -1,4 +1,4 @@
-(ns documentation.tahto-model
+lang/lang_model.clj:1:(ns documentation.lang-model
   (:require [lang.core :as l]
             [lang.model.spec-js :as js]
             [lang.model.spec-lua :as lua])
@@ -17,7 +17,7 @@
 
 [[:section {:title "Emitting code to a target"}]]
 
-"`lang.core/emit-as` is the main entry point for turning a tahto form into target source code. The same expression can be rendered for different language models just by changing the target keyword."
+lang/lang_model.clj:20:"`lang.core/emit-as` is the main entry point for turning a lang form into target source code. The same expression can be rendered for different language models just by changing the target keyword."
 
 (fact "arithmetic emits to multiple targets"
   (l/emit-as :js '[(+ 1 2)])

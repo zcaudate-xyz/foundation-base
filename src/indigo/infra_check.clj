@@ -109,7 +109,7 @@
   (fix-tests)
   (str (f/re-create "lang.util"))
   
-  (partial fs/relativize (fs/path "test/tahto"))
+  (partial fs/relativize (fs/path "test/lang"))
   (map (comp symbol
              #(apply str (replace  {\_ "-" \/ "."} %))
              #(clojure.string/replace % #"\.clj$" "")

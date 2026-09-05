@@ -13,8 +13,8 @@
                extension
                (str "." extension))
          file (if dir
-                (java.io.File/createTempFile "tahto_verify_" ext (java.io.File. dir))
-                (java.io.File/createTempFile "tahto_verify_" ext))]
+                (java.io.File/createTempFile "lang_verify_" ext (java.io.File. dir))
+                (java.io.File/createTempFile "lang_verify_" ext))]
      (str file))))
 
 (defn- substitute-file

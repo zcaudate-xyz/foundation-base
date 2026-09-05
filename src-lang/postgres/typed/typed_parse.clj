@@ -27,7 +27,7 @@
   (distinct [file-path
              (str/replace file-path
                           "src/rt/postgres/"
-                          "src/tahto/runtime/postgres/")]))
+                          "src/lang/runtime/postgres/")]))
 
 (defn- resolve-file-path
   [file-path]

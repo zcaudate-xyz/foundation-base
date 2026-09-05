@@ -12,7 +12,7 @@
                     ($display "hello")
                     ($finish)]
                   {})
-  => '((defn __tahto_tb__ [] (initial (do (reg x)
+  => '((defn __lang_tb__ [] (initial (do (reg x)
                                           ($display "hello")
                                           ($finish))))))
 
@@ -42,7 +42,7 @@
          (reg out)
          (always [posedge clk]
                  (<= out clk)))
-       (defn __tahto_tb__ [] (initial (do ($display "done")
+       (defn __lang_tb__ [] (initial (do ($display "done")
                                          ($finish))))))
 
 ^{:refer lang.runtime.basic.impl.process-verilog/transform-form :added "4.1"
@@ -52,7 +52,7 @@
                       ($display "hello")
                       ($finish))]
                   {})
-  => '((defn __tahto_tb__ [] (do (initial
+  => '((defn __lang_tb__ [] (do (initial
                                   ($display "hello")
                                   ($finish))))))
 

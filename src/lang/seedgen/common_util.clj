@@ -23,11 +23,11 @@
                                          (= :require (first %)))
                                 %)
                              (nnext ns-form))
-        tahto-lang-alias (some #(require-alias % 'lang.core)
+        lang-lang-alias (some #(require-alias % 'lang.core)
                              (rest require-clause))]
     (cond-> #{'lang.core/script-}
-      tahto-lang-alias
-      (conj (symbol (str tahto-lang-alias) "script-")))))
+      lang-lang-alias
+      (conj (symbol (str lang-lang-alias) "script-")))))
 
 (defn seedgen-root-langs
   [test-file include-root?]

@@ -26,7 +26,7 @@
   => ["error" true])
 
 ^{:refer lang.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"
-  :id test-tahto_runtime_basic_impl_annex_process_php__default_oneshot_wrap_bootstrap}
+  :id test-lang_runtime_basic_impl_annex_process_php__default_oneshot_wrap_bootstrap}
 (fact "creates the oneshot bootstrap form"
 
   (default-oneshot-wrap 1)
@@ -84,7 +84,7 @@
   => '(fn [$x] (+ $x 1)))
 
 ^{:refer lang.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"
-  :id test-tahto_runtime_basic_impl_annex_process_php__php_body_source_locals}
+  :id test-lang_runtime_basic_impl_annex_process_php__php_body_source_locals}
 (fact "runtime source emits seedgen-style bare PHP locals as valid PHP variables"
   (php-body-source '(do
                       (var $out [])

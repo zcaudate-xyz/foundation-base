@@ -1,9 +1,9 @@
 {:theme  "foundation"
-lang.edn:2: :output "public/tahto"
+lang.edn:2:lang.edn:2: :output "public/lang"
  :pages  {index
           {:base  "home.html"
            :input "src-doc/documentation/std_lang_index.clj"
-lang.edn:6:           :title "tahto"
+lang.edn:6:lang.edn:6:           :title "lang"
            :subtitle "language tooling, runtime integration, and polyglot system libraries"}
 
           introduction
@@ -16,47 +16,47 @@ lang.edn:12:           :subtitle "what lang.core is, how the book + grammar mode
            :title "Comparison"
 lang.edn:17:           :subtitle "where lang.core sits relative to straight transpilers, Haxe, Racket, and language workbenches"}
 
-lang.edn:19:          tahto-model
+lang.edn:19:lang.edn:19:          lang-model
           
-lang.edn:21:          {:input "src-doc/documentation/tahto/tahto_model.clj"
+lang.edn:21:lang.edn:21:          {:input "src-doc/documentation/lang/lang_model.clj"
 lang.edn:22:           :title "lang.model"
            :subtitle "target language specifications and xtalk function libraries"}
-lang.edn:24:          tahto-runtime
-lang.edn:25:          {:input "src-doc/documentation/tahto/tahto_runtime.clj"
+lang.edn:24:lang.edn:24:          lang-runtime
+lang.edn:25:lang.edn:25:          {:input "src-doc/documentation/lang/lang_runtime.clj"
 lang.edn:26:           :title "lang.runtime"
            :subtitle "runtime adapters for generated code"}
 
-lang.edn:29:          tahto-typed
-lang.edn:30:          {:input "src-doc/documentation/tahto/tahto_typed.clj"
+lang.edn:29:lang.edn:29:          lang-typed
+lang.edn:30:lang.edn:30:          {:input "src-doc/documentation/lang/lang_typed.clj"
 lang.edn:31:           :title "lang.typed"
            :subtitle "typed xtalk analysis and emission"}
 
-lang.edn:34:          tahto-base
-lang.edn:35:          {:input "src-doc/documentation/tahto/tahto_base.clj"
+lang.edn:34:lang.edn:34:          lang-base
+lang.edn:35:lang.edn:35:          {:input "src-doc/documentation/lang/lang_base.clj"
 lang.edn:36:           :title "lang.base"
            :subtitle "shared grammar, emit, and preprocess layers"}
 
-lang.edn:39:          tahto-seedgen
-lang.edn:40:          {:input "src-doc/documentation/tahto/tahto_seedgen.clj"
+lang.edn:39:lang.edn:39:          lang-seedgen
+lang.edn:40:lang.edn:40:          {:input "src-doc/documentation/lang/lang_seedgen.clj"
 lang.edn:41:           :title "lang.seedgen"
            :subtitle "seed generation and xtalk test scaffolding"}
 
           examples
-lang.edn:45:          {:input "src-doc/documentation/tahto/tahto_examples.clj"
+lang.edn:45:lang.edn:45:          {:input "src-doc/documentation/lang/lang_examples.clj"
            :title "Examples"
            :subtitle "generated project examples from src-build/play"}
 
           walkthrough-basic
-lang.edn:50:          {:input "src-doc/documentation/tahto/walkthrough_basic.clj"
+lang.edn:50:lang.edn:50:          {:input "src-doc/documentation/lang/walkthrough_basic.clj"
            :title "Walkthrough: basic"
 lang.edn:52:           :subtitle "basic lang.core authoring"}
 
           walkthrough-multi
-lang.edn:55:          {:input "src-doc/documentation/tahto/walkthrough_multi.clj"
+lang.edn:55:lang.edn:55:          {:input "src-doc/documentation/lang/walkthrough_multi.clj"
            :title "Walkthrough: multi"
            :subtitle "multiple language contexts"}
 
           walkthrough-live
-lang.edn:60:          {:input "src-doc/documentation/tahto/walkthrough_live.clj"
+lang.edn:60:lang.edn:60:          {:input "src-doc/documentation/lang/walkthrough_live.clj"
            :title "Walkthrough: live"
            :subtitle "live runtime execution"}}}

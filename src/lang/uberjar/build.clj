@@ -9,19 +9,19 @@
             [std.fs :as fs]
             [std.lib.os :as os]))
 
-(def +root+ ".build/tahto-uberjar")
+(def +root+ ".build/lang-uberjar")
 
 (def +version+ (:version (project/project)))
 
-(def +jar+ (str +root+ "/target/tahto-" +version+ "-standalone.jar"))
+(def +jar+ (str +root+ "/target/lang-" +version+ "-standalone.jar"))
 
 (def +config+
   {:ns 'lang.uberjar.build
    :main 'lang.uberjar.main
    :root ".build"
-   :build "tahto-uberjar"
+   :build "lang-uberjar"
    :version +version+
-   :uberjar-name (str "tahto-" +version+ "-standalone.jar")
+   :uberjar-name (str "lang-" +version+ "-standalone.jar")
    ;; Keep source fallbacks for dependency namespaces that are not AOT compiled.
    :jar-exclusions []})
 
@@ -71,7 +71,7 @@
         output  (slurp (.getInputStream process))
         exit    (.waitFor process)]
     (when-not (zero? exit)
-      (throw (ex-info "Unable to discover Tahto runtime namespaces"
+      (throw (ex-info "Unable to discover Lang runtime namespaces"
                       {:exit exit :output output})))
     (-> output str/split-lines last edn/read-string set)))
 
@@ -84,7 +84,7 @@
       vec))
 
 (defn build!
-  "stages the current Tahto sources and packages the standalone uberjar"
+  "stages the current Lang sources and packages the standalone uberjar"
   {:added "4.1"}
   []
   (when (fs/exists? +root+)
@@ -103,12 +103,12 @@
                                  :wait true})
         exit (.exitValue process)]
     (when-not (zero? exit)
-      (throw (ex-info "Tahto uberjar build failed" {:exit exit})))
+      (throw (ex-info "Lang uberjar build failed" {:exit exit})))
     (println +jar+)
     +jar+))
 
 (defn -main
-  "builds the standalone Tahto uberjar"
+  "builds the standalone Lang uberjar"
   {:added "4.1"}
   [& _]
   (try

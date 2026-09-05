@@ -1,45 +1,45 @@
 {:ns-groups
  [{:pattern "^xt\\."
-   :name clj-kondo.hooks.tahto-xtalk}
-  {:pattern "^tahto\\.model\\.spec-xtalk\\."
-   :name clj-kondo.hooks.tahto-xtalk}
+lang/config.edn:3:   :name clj-kondo.hooks.lang-xtalk}
+lang/config.edn:4:  {:pattern "^lang\\.model\\.spec-xtalk\\."
+lang/config.edn:5:   :name clj-kondo.hooks.lang-xtalk}
   {:pattern ".+"
-   :name clj-kondo.hooks.tahto-postgres}]
+lang/config.edn:7:   :name clj-kondo.hooks.lang-postgres}]
 
  :hooks
  {:analyze-call
-  {lang.core/script clj-kondo.hooks.tahto-postgres/script
-   lang.core/script- clj-kondo.hooks.tahto-postgres/script
-   lang.core/script+ clj-kondo.hooks.tahto-postgres/script
-   lang.core/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
-   lang.typed/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
-   defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
-   defn.js clj-kondo.hooks.tahto-xtalk/defn-xt
-   lang.core/defn.js clj-kondo.hooks.tahto-xtalk/defn-xt
-   defvar.js clj-kondo.hooks.tahto-xtalk/defvar-xt
-   lang.core/defvar.js clj-kondo.hooks.tahto-xtalk/defvar-xt
-   defglobal.xt clj-kondo.hooks.tahto-xtalk/defglobal-xt
-   defn.pg clj-kondo.hooks.tahto-postgres/defn-pg
-   defrun.pg clj-kondo.hooks.tahto-postgres/defn-pg
-   clj-kondo.hooks.tahto-xtalk/defn.xt clj-kondo.hooks.tahto-xtalk/defn-xt
-   clj-kondo.hooks.tahto-xtalk/def.xt clj-kondo.hooks.tahto-xtalk/def-xt
-   clj-kondo.hooks.tahto-xtalk/defmacro.xt clj-kondo.hooks.tahto-xtalk/defmacro-xt
-   clj-kondo.hooks.tahto-xtalk/defgen.xt clj-kondo.hooks.tahto-xtalk/defgen-xt
-   clj-kondo.hooks.tahto-xtalk/defvar.xt clj-kondo.hooks.tahto-xtalk/defvar-xt
-   defprotocol.xt clj-kondo.hooks.tahto-xtalk/defprotocol-xt
-   xt.lang.common-protocol/defprotocol.xt clj-kondo.hooks.tahto-xtalk/defprotocol-xt
-   proto/defprotocol.xt clj-kondo.hooks.tahto-xtalk/defprotocol-xt
-   clj-kondo.hooks.tahto-xtalk/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
-   clj-kondo.hooks.tahto-xtalk/defglobal.xt clj-kondo.hooks.tahto-xtalk/defglobal-xt
-   defimpl.xt clj-kondo.hooks.tahto-xtalk/defimpl-xt
-   xt.lang.common-protocol/defimpl.xt clj-kondo.hooks.tahto-xtalk/defimpl-xt
-   proto/defimpl.xt clj-kondo.hooks.tahto-xtalk/defimpl-xt
-   fact clj-kondo.hooks.tahto-xtalk/fact-xt
-   fact:global clj-kondo.hooks.tahto-xtalk/fact-global-xt
-   clj-kondo.hooks.tahto-postgres/defn.pg clj-kondo.hooks.tahto-postgres/defn-pg
-   clj-kondo.hooks.tahto-postgres/defrun.pg clj-kondo.hooks.tahto-postgres/defn-pg
-   deftype.pg clj-kondo.hooks.tahto-postgres/deftype-pg
-   clj-kondo.hooks.tahto-postgres/deftype.pg clj-kondo.hooks.tahto-postgres/deftype-pg}}
+lang/config.edn:11:  {lang.core/script clj-kondo.hooks.lang-postgres/script
+lang/config.edn:12:   lang.core/script- clj-kondo.hooks.lang-postgres/script
+lang/config.edn:13:   lang.core/script+ clj-kondo.hooks.lang-postgres/script
+lang/config.edn:14:   lang.core/defspec.xt clj-kondo.hooks.lang-xtalk/defspec-xt
+lang/config.edn:15:   lang.typed/defspec.xt clj-kondo.hooks.lang-xtalk/defspec-xt
+lang/config.edn:16:   defspec.xt clj-kondo.hooks.lang-xtalk/defspec-xt
+lang/config.edn:17:   defn.js clj-kondo.hooks.lang-xtalk/defn-xt
+lang/config.edn:18:   lang.core/defn.js clj-kondo.hooks.lang-xtalk/defn-xt
+lang/config.edn:19:   defvar.js clj-kondo.hooks.lang-xtalk/defvar-xt
+lang/config.edn:20:   lang.core/defvar.js clj-kondo.hooks.lang-xtalk/defvar-xt
+lang/config.edn:21:   defglobal.xt clj-kondo.hooks.lang-xtalk/defglobal-xt
+lang/config.edn:22:   defn.pg clj-kondo.hooks.lang-postgres/defn-pg
+lang/config.edn:23:   defrun.pg clj-kondo.hooks.lang-postgres/defn-pg
+lang/config.edn:24:   clj-kondo.hooks.lang-xtalk/defn.xt clj-kondo.hooks.lang-xtalk/defn-xt
+lang/config.edn:25:   clj-kondo.hooks.lang-xtalk/def.xt clj-kondo.hooks.lang-xtalk/def-xt
+lang/config.edn:26:   clj-kondo.hooks.lang-xtalk/defmacro.xt clj-kondo.hooks.lang-xtalk/defmacro-xt
+lang/config.edn:27:   clj-kondo.hooks.lang-xtalk/defgen.xt clj-kondo.hooks.lang-xtalk/defgen-xt
+lang/config.edn:28:   clj-kondo.hooks.lang-xtalk/defvar.xt clj-kondo.hooks.lang-xtalk/defvar-xt
+lang/config.edn:29:   defprotocol.xt clj-kondo.hooks.lang-xtalk/defprotocol-xt
+lang/config.edn:30:   xt.lang.common-protocol/defprotocol.xt clj-kondo.hooks.lang-xtalk/defprotocol-xt
+lang/config.edn:31:   proto/defprotocol.xt clj-kondo.hooks.lang-xtalk/defprotocol-xt
+lang/config.edn:32:   clj-kondo.hooks.lang-xtalk/defspec.xt clj-kondo.hooks.lang-xtalk/defspec-xt
+lang/config.edn:33:   clj-kondo.hooks.lang-xtalk/defglobal.xt clj-kondo.hooks.lang-xtalk/defglobal-xt
+lang/config.edn:34:   defimpl.xt clj-kondo.hooks.lang-xtalk/defimpl-xt
+lang/config.edn:35:   xt.lang.common-protocol/defimpl.xt clj-kondo.hooks.lang-xtalk/defimpl-xt
+lang/config.edn:36:   proto/defimpl.xt clj-kondo.hooks.lang-xtalk/defimpl-xt
+lang/config.edn:37:   fact clj-kondo.hooks.lang-xtalk/fact-xt
+lang/config.edn:38:   fact:global clj-kondo.hooks.lang-xtalk/fact-global-xt
+lang/config.edn:39:   clj-kondo.hooks.lang-postgres/defn.pg clj-kondo.hooks.lang-postgres/defn-pg
+lang/config.edn:40:   clj-kondo.hooks.lang-postgres/defrun.pg clj-kondo.hooks.lang-postgres/defn-pg
+lang/config.edn:41:   deftype.pg clj-kondo.hooks.lang-postgres/deftype-pg
+lang/config.edn:42:   clj-kondo.hooks.lang-postgres/deftype.pg clj-kondo.hooks.lang-postgres/deftype-pg}}
 
  :linters
  {:namespace-name-mismatch {:level :off}

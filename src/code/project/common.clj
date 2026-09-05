@@ -16,8 +16,8 @@
 (defn artifact
   "returns the artifact map given a symbol
  
-   (artifact 'tahto/tahto)
-   => '{:name tahto/tahto, :artifact \"tahto\", :group \"tahto\"}"
+   (artifact 'lang/lang)
+   => '{:name lang/lang, :artifact \"lang\", :group \"lang\"}"
   {:added "3.0"}
   ([full]
    (let [group    (or (namespace full)

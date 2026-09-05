@@ -107,7 +107,7 @@
 (def +c-oneshot+
   [(rt/install-type!
     :c :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +c-twostep-config+
@@ -131,13 +131,13 @@
 (def +c-twostep+
   [(rt/install-type!
     :c :twostep
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
 
 (def +c-verify+
   [(rt/install-type!
     :c :verify
-    {:type :tahto/rt.twostep
+    {:type :lang/rt.twostep
      :instance {:create twostep/rt-twostep:create}})])
   
 (comment

@@ -202,7 +202,7 @@
   "Creates a shared Godot runtime client."
   {:added "4.1"}
   [m]
-  (-> {:rt/client {:type :tahto/rt.godot
+  (-> {:rt/client {:type :lang/rt.godot
                    :constructor godot:create}
        :rt/temp true}
       (merge m)
@@ -212,11 +212,11 @@
 (def +init+
   [(rt/install-type!
     :gdscript :godot.instance
-    {:type :tahto/rt.godot
+    {:type :lang/rt.godot
      :config {:layout :full}
      :instance {:create godot:create}})
    (rt/install-type!
     :gdscript :godot
-    {:type :tahto/rt.godot.shared
+    {:type :lang/rt.godot.shared
      :config {:layout :full}
      :instance {:create godot-shared:create}})])

@@ -84,13 +84,13 @@
 (def +ruby-oneshot+
   [(rt/install-type!
     :ruby :oneshot
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 (def +ruby-verify+
   [(rt/install-type!
     :ruby :verify
-    {:type :tahto/rt.oneshot
+    {:type :lang/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
 ;;
@@ -143,7 +143,7 @@
 (def +ruby-basic+
   [(rt/install-type!
     :ruby :basic
-    {:type :tahto/rt.basic
+    {:type :lang/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])
 

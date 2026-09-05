@@ -30,97 +30,97 @@
 ^{:refer lang.base.provenance/frame :added "4.1"}
 (fact "builds a compact provenance frame"
   (let [form (with-meta '(boom 1) {:line 33})]
-    (frame {:tahto/provenance {:tahto/phase :emit/form}
-            :tahto/subsystem :probe/op
-            :tahto/module {:id 'demo.core}
-            :tahto/namespace *ns*
-            :tahto/form form}))
-  => '{:tahto/phase :emit/form
-       :tahto/subsystem :probe/op
-       :tahto/module demo.core
-       :tahto/namespace lang.base.provenance-test
-       :tahto/line 33
-       :tahto/form (boom 1)})
+    (frame {:lang/provenance {:lang/phase :emit/form}
+            :lang/subsystem :probe/op
+            :lang/module {:id 'demo.core}
+            :lang/namespace *ns*
+            :lang/form form}))
+  => '{:lang/phase :emit/form
+       :lang/subsystem :probe/op
+       :lang/module demo.core
+       :lang/namespace lang.base.provenance-test
+       :lang/line 33
+       :lang/form (boom 1)})
 
 ^{:refer lang.base.provenance/provenance :added "4.1"}
 (fact "merges provenance inputs into a single frame"
-  (provenance {:tahto/module 'demo.core}
-              {:tahto/line 10}
-              {:tahto/subsystem :emit/direct})
-  => '{:tahto/module demo.core
-       :tahto/line 10
-       :tahto/subsystem :emit/direct})
+  (provenance {:lang/module 'demo.core}
+              {:lang/line 10}
+              {:lang/subsystem :emit/direct})
+  => '{:lang/module demo.core
+       :lang/line 10
+       :lang/subsystem :emit/direct})
 
 ^{:refer lang.base.provenance/provenance-stack :added "4.1"}
 (fact "returns stack frames from explicit stacks or a single frame"
-  [(provenance-stack {:tahto/provenance-stack [{:tahto/module 'demo.core}
-                                                 {:tahto/module 'demo.next}]})
-   (provenance-stack {:tahto/module 'demo.core})]
-  => '[[{:tahto/module demo.core}
-        {:tahto/module demo.next}]
-       [{:tahto/module demo.core}]])
+  [(provenance-stack {:lang/provenance-stack [{:lang/module 'demo.core}
+                                                 {:lang/module 'demo.next}]})
+   (provenance-stack {:lang/module 'demo.core})]
+  => '[[{:lang/module demo.core}
+        {:lang/module demo.next}]
+       [{:lang/module demo.core}]])
 
 ^{:refer lang.base.provenance/same-site? :added "4.1"}
 (fact "compares provenance frames by site fields"
-  [(same-site? {:tahto/phase :emit/form
-                :tahto/subsystem :probe
-                :tahto/module 'demo.core
-                :tahto/line 10}
-               {:tahto/phase :emit/form
-                :tahto/subsystem :probe
-                :tahto/module 'demo.core
-                :tahto/line 10
-                :tahto/form '(ignored)})
-   (same-site? {:tahto/phase :emit/form}
-               {:tahto/phase :emit/direct})]
+  [(same-site? {:lang/phase :emit/form
+                :lang/subsystem :probe
+                :lang/module 'demo.core
+                :lang/line 10}
+               {:lang/phase :emit/form
+                :lang/subsystem :probe
+                :lang/module 'demo.core
+                :lang/line 10
+                :lang/form '(ignored)})
+   (same-site? {:lang/phase :emit/form}
+               {:lang/phase :emit/direct})]
   => [true false])
 
 ^{:refer lang.base.provenance/append-frame :added "4.1"}
 (fact "appends only distinct provenance sites"
-  [(append-frame [{:tahto/phase :emit/form}] {:tahto/phase :emit/form})
-   (append-frame [{:tahto/phase :emit/form}] {:tahto/phase :emit/direct})]
-  => '[[{:tahto/phase :emit/form}]
-       [{:tahto/phase :emit/form}
-        {:tahto/phase :emit/direct}]])
+  [(append-frame [{:lang/phase :emit/form}] {:lang/phase :emit/form})
+   (append-frame [{:lang/phase :emit/form}] {:lang/phase :emit/direct})]
+  => '[[{:lang/phase :emit/form}]
+       [{:lang/phase :emit/form}
+        {:lang/phase :emit/direct}]])
 
 ^{:refer lang.base.provenance/with-provenance :added "4.1"}
 (fact "threads merged provenance into mopts"
   (with-provenance {:lang :lua}
-                   {:tahto/module 'demo.core}
-                   {:tahto/line 10})
+                   {:lang/module 'demo.core}
+                   {:lang/line 10})
   => '{:lang :lua
-       :tahto/provenance {:tahto/module demo.core
-                             :tahto/line 10}})
+       :lang/provenance {:lang/module demo.core
+                             :lang/line 10}})
 
 ^{:refer lang.base.provenance/error-with-provenance :added "4.1"}
 (fact "wraps throwables with merged provenance data"
   (try
     (throw (ex-info "inner"
                     {:inner true
-                     :tahto/provenance {:tahto/phase :emit/form
-                                           :tahto/module 'demo.inner}}))
+                     :lang/provenance {:lang/phase :emit/form
+                                           :lang/module 'demo.inner}}))
     (catch Throwable t
       (let [^Throwable wrapped (error-with-provenance
                                 "wrap"
                                 {:outer true
-                                 :tahto/phase :emit/direct
-                                 :tahto/module 'demo.outer}
+                                 :lang/phase :emit/direct
+                                 :lang/module 'demo.outer}
                                 t)]
         [(.getMessage wrapped)
          (select-keys (ex-data wrapped)
                       [:inner
                        :outer
-                       :tahto/phase
-                       :tahto/module
-                       :tahto/wrapped
-                       :tahto/cause-message])])))
+                       :lang/phase
+                       :lang/module
+                       :lang/wrapped
+                       :lang/cause-message])])))
   => '["wrap: inner"
        {:inner true
         :outer true
-        :tahto/phase :emit/form
-        :tahto/module demo.inner
-        :tahto/wrapped true
-        :tahto/cause-message "inner"}])
+        :lang/phase :emit/form
+        :lang/module demo.inner
+        :lang/wrapped true
+        :lang/cause-message "inner"}])
 
 ^{:refer lang.base.provenance/throw-with-provenance :added "4.1"}
 (fact "throws wrapped provenance exceptions"

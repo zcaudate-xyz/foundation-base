@@ -185,7 +185,7 @@
    (instance? RuntimeDefault obj)))
 
 (resource/res:spec-add
- {:type :tahto/lang.rt
+ {:type :lang/lang.rt
   :config {:bootstrap false}
   :instance {:create rt-default}})
 
@@ -196,7 +196,7 @@
    (rt-default (assoc m :lang :null))))
 
 (resource/res:spec-add
- {:type :tahto/context.rt.null
+ {:type :lang/context.rt.null
   :instance {:create rt-null}})
 
 (alter-var-root #'reg/+rt-null+
@@ -218,7 +218,7 @@
       :scratch (rt-default {:context ctx :lang lang
                             :options (or options
                                          {})})
-      :rt  {:default {:resource :tahto/lang.rt}}})))
+      :rt  {:default {:resource :lang/lang.rt}}})))
 
 (defn install-type!
   "installs a specific runtime type given `:lang`"

@@ -365,7 +365,7 @@
  {:description "rpc based on the redis protocol"
   :include [[net.resp :complete]]
   :bundle
-  [{:path "target/classes" :include ["tahto/net/resp"]}]}
+  [{:path "target/classes" :include ["lang/net/resp"]}]}
 
  xyz.zcaudate/python
  {:description "python libs and helpers"
@@ -454,9 +454,9 @@
    com.fasterxml.jackson.datatype/jackson-datatype-jsr310]
   :bundle [{:path "target/classes" :include ["hara/lib/json"]}]}
  
-  xyz.zcaudate/tahto
+  xyz.zcaudate/lang
   {:description "working with other languages"
-   :include [[tahto :exclude [lang.runtime.postgres
+   :include [[lang :exclude [lang.runtime.postgres
                              lang.runtime.graal
                              lang.runtime.jep
                              lang.runtime.libpython

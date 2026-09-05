@@ -19,7 +19,7 @@
 ^{:refer lang.base.emit-rewrite/canonical-stage :added "4.1"}
 (fact "only applies typed canonical lowering when requested"
   [(canonical-stage '(. arr [i])
-                    {:mopts {:tahto/xtalk-context
+                    {:mopts {:lang/xtalk-context
                              {:infer infer/infer-type
                               :env '{arr {:kind :array
                                           :item {:kind :primitive :name :xt/int}}}}}})

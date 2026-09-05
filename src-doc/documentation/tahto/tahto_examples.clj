@@ -1,10 +1,10 @@
-(ns documentation.tahto-examples
+lang/lang_examples.clj:1:(ns documentation.lang-examples
   (:require [lang.core :as l]
             [lang.model.spec-go]
             [std.make :as make :refer [def.make]])
   (:use code.test))
 
-[[:hero {:title "Tahto examples"
+lang/lang_examples.clj:7:[[:hero {:title "Lang examples"
          :subtitle "Generated project examples from src-build/play."
          :lead "The play projects demonstrate lang.core as a project generator: C pthreads, Go modules, typed xtalk declarations, TypeScript packages, OpenResty Lua, and Blessed terminal UIs."}]]
 

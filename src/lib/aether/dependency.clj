@@ -9,8 +9,8 @@
 (invoke/definvoke rep-exclusion
   "creates a rep from an exclusion
  
-   (str (rep-exclusion (artifact-exclusion \"tahto:tahto\")))
-   => \"tahto:tahto:jar:\""
+   (str (rep-exclusion (artifact-exclusion \"lang:lang\")))
+   => \"lang:lang:jar:\""
   {:added "3.0"}
   [:method {:multi protocol.classloader/-rep
             :val   Exclusion}]
@@ -28,7 +28,7 @@
 (invoke/definvoke artifact-exclusion
   "creates an artifact exclusion
  
-   (artifact-exclusion \"tahto:tahto:jar:2.8.4\")
+   (artifact-exclusion \"lang:lang:jar:2.8.4\")
    => Exclusion"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-artifact
