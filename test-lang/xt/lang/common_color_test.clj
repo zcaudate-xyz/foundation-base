@@ -1,6 +1,6 @@
 (ns xt.lang.common-color-test
   (:require [std.json :as json]
-            [tahto.core :as l]
+            [lang.core :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 

@@ -66,10 +66,10 @@ Try a standard-library helper:
 
 ## Generate target-language code
 
-`tahto.core` emits Clojure forms through target-language grammars:
+`lang.core` emits Clojure forms through target-language grammars:
 
 ```clojure
-(require '[tahto.core :as l])
+(require '[lang.core :as l])
 
 (l/emit-as :js '(+ 1 2 3))
 ;; => "1 + 2 + 3"
@@ -160,7 +160,7 @@ Update both when changing the project's description, navigation, repository map,
 |---|---|
 | `std.*` | Standard libraries and reusable infrastructure |
 | `code.*` | Testing, documentation, source management, queries, tooling, and analysis |
-| `tahto.*` | Language authoring, target models, typing, and code generation |
+| `lang.*` | Language authoring, target models, typing, and code generation |
 | `rt.*` | Runtime adapters and execution environments |
 | `xt.*` | Portable libraries and cross-target application layers |
 | `src-build/` | Walkthroughs, demos, build definitions, and generated projects |

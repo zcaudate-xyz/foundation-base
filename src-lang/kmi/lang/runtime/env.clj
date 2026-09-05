@@ -1,5 +1,5 @@
 (ns kmi.lang.runtime.env
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:refer-clojure :exclude [empty]))
 
 (l/script :xtalk

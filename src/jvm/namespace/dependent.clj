@@ -115,7 +115,7 @@
 
   (sort/topological-sort)
 
-  (ns-level-dependents (ns-dependents 'tahto.data.base.map '[tahto])
+  (ns-level-dependents (ns-dependents 'lang.data.base.map '[tahto])
                        '[tahto])
 
   (common/+namespaces+))

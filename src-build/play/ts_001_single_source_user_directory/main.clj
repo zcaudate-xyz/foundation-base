@@ -1,8 +1,8 @@
 (ns play.ts-001-single-source-user-directory.main
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-lib]
             [xt.lang.common-data]
-            [tahto.typed :refer [defspec.xt]]))
+            [lang.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

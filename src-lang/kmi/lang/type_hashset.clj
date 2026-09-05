@@ -1,5 +1,5 @@
 (ns kmi.lang.type-hashset
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:refer-clojure :exclude [hashset]))
 
 (l/script :xtalk

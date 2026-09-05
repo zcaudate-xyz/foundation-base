@@ -1,5 +1,5 @@
 (ns js.lib.mustache
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:refer-clojure :exclude [keyword]))
 
 (l/script :js

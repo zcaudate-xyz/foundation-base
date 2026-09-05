@@ -1,6 +1,6 @@
 (ns ocaml.core.builtin
   "Curated outline of common OCaml standard library builtins."
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :ocaml

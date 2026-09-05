@@ -1,6 +1,6 @@
 (ns xt.db.system.memory-graph-test
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [postgres.gen.bind-macro :as gen]
             [xt.db.helpers.seed-system-test :as data]))
 

@@ -1,6 +1,6 @@
 (ns js.ui.figma
   "React renderer for portable xt.ui nodes using @xtalk/figma-ui."
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.ui.state.core :as page-source]))
 
 (l/script :js

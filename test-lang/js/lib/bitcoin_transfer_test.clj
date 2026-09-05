@@ -1,5 +1,5 @@
 (ns js.lib.bitcoin-transfer-test
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:use code.test))
 
 (l/script- :js

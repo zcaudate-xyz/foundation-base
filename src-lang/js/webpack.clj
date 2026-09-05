@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns js.webpack
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:static  {:lang/no-lint true}})

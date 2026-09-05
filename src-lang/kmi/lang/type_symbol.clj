@@ -1,5 +1,5 @@
 (ns kmi.lang.type-symbol
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:refer-clojure :exclude [symbol]))
 
 (l/script :xtalk

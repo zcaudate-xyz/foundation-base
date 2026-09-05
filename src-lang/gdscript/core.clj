@@ -1,6 +1,6 @@
 (ns gdscript.core
   (:require [gdscript.core.builtin :as builtin]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.foundation :as f]))
 
 (f/intern-all gdscript.core.builtin)

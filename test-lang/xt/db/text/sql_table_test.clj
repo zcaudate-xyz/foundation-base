@@ -1,5 +1,5 @@
 (ns xt.db.text.sql-table-test
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.string.prose :as prose])
   (:use code.test))
 

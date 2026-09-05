@@ -2,7 +2,7 @@
 (ns xt.db.poc.n01-webworker-test
   (:use code.test)
   (:require [clojure.string]
-            [tahto.core :as l]
+            [lang.core :as l]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
 

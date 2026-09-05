@@ -1,5 +1,5 @@
 (ns js.i18next
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :js

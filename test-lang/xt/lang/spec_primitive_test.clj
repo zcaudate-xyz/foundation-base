@@ -1,6 +1,6 @@
 (ns xt.lang.spec-primitive-test
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-primitive :as primitive]))
 

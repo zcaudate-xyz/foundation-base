@@ -1,12 +1,12 @@
 (ns documentation.tahto-typed
   (:use code.test)
-  (:require [tahto.typed.xtalk-common :as types]
-            [tahto.typed.xtalk-infer :as infer]
-            [tahto.typed.xtalk-parse :as parse]))
+  (:require [lang.typed.xtalk-common :as types]
+            [lang.typed.xtalk-infer :as infer]
+            [lang.typed.xtalk-parse :as parse]))
 
-[[:hero {:title "tahto.typed"
+[[:hero {:title "lang.typed"
          :subtitle "Typed xtalk analysis and emission."
-         :lead "`tahto.typed` analyzes xtalk type declarations, records, functions, calls, compatibility, inference, and lowering for generated target declarations."}]]
+         :lead "`lang.typed` analyzes xtalk type declarations, records, functions, calls, compatibility, inference, and lowering for generated target declarations."}]]
 
 [[:chapter {:title "Motivation"}]]
 "Typed xtalk examples define records and functions once, then emit language-specific declarations such as Go structs or TypeScript `.d.ts` files."
@@ -20,7 +20,7 @@
 
 [[:section {:title "Normalizing type forms"}]]
 
-"`tahto.typed` represents xtalk types as plain data maps. The `normalize-type` function turns the concise type syntax used in source files into these maps."
+"`lang.typed` represents xtalk types as plain data maps. The `normalize-type` function turns the concise type syntax used in source files into these maps."
 
 (fact "normalize records, arrays, and function types"
   (types/type->data
@@ -45,11 +45,11 @@
 "`analyze-namespace` reads a namespace that contains `defspec.xt`, `defn.xt`, and related forms and returns a map of specs, functions, macros, and values."
 
 (fact "analyze an xtalk namespace"
-  (let [analysis (parse/analyze-namespace 'tahto.model.spec-xtalk-typed-fixture)]
+  (let [analysis (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture)]
     [(:ns analysis)
      (count (:specs analysis))
      (count (:functions analysis))])
-  => '[tahto.model.spec-xtalk-typed-fixture 3 3])
+  => '[lang.model.spec-xtalk-typed-fixture 3 3])
 
 [[:section {:title "Registering and inspecting declarations"}]]
 
@@ -57,21 +57,21 @@
 
 (fact "register and look up declarations"
   (types/clear-registry!)
-  (parse/register-types! (parse/analyze-namespace 'tahto.model.spec-xtalk-typed-fixture))
-  [(-> (types/get-spec 'tahto.model.spec-xtalk-typed-fixture/User) :name)
-   (-> (types/get-function 'tahto.model.spec-xtalk-typed-fixture/find-user) :name)]
+  (parse/register-types! (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture))
+  [(-> (types/get-spec 'lang.model.spec-xtalk-typed-fixture/User) :name)
+   (-> (types/get-function 'lang.model.spec-xtalk-typed-fixture/find-user) :name)]
   => '["User" "find-user"])
 
 (fact "extract a function type from a registered declaration"
   (types/clear-registry!)
-  (parse/register-types! (parse/analyze-namespace 'tahto.model.spec-xtalk-typed-fixture))
+  (parse/register-types! (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture))
   (types/type->data
    (types/fn-type
-    (types/get-function 'tahto.model.spec-xtalk-typed-fixture/find-user)))
+    (types/get-function 'lang.model.spec-xtalk-typed-fixture/find-user)))
   => '{:kind :fn
-       :inputs [{:kind :named :name tahto.model.spec-xtalk-typed-fixture/UserMap}
+       :inputs [{:kind :named :name lang.model.spec-xtalk-typed-fixture/UserMap}
                 {:kind :primitive :name :xt/str}]
-       :output {:kind :maybe :item {:kind :named :name tahto.model.spec-xtalk-typed-fixture/User}}})
+       :output {:kind :maybe :item {:kind :named :name lang.model.spec-xtalk-typed-fixture/User}}})
 
 [[:section {:title "Inferring expression types"}]]
 
@@ -100,22 +100,22 @@
 
 (fact "infer a typed function call"
   (types/clear-registry!)
-  (parse/register-types! (parse/analyze-namespace 'tahto.model.spec-xtalk-typed-fixture))
+  (parse/register-types! (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture))
   (types/type->data
    (:type (infer/infer-type '(find-user users "u1")
-                            {:ns 'tahto.model.spec-xtalk-typed-fixture
+                            {:ns 'lang.model.spec-xtalk-typed-fixture
                              :aliases {}
                              :infer infer/infer-type})))
-  => '{:kind :maybe :item {:kind :named :name tahto.model.spec-xtalk-typed-fixture/User}})
+  => '{:kind :maybe :item {:kind :named :name lang.model.spec-xtalk-typed-fixture/User}})
 
 (fact "detect a type mismatch in a call"
   (types/clear-registry!)
-  (parse/register-types! (parse/analyze-namespace 'tahto.model.spec-xtalk-typed-fixture))
+  (parse/register-types! (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture))
   (let [result (infer/infer-type '(find-user users 123)
-                                 {:ns 'tahto.model.spec-xtalk-typed-fixture
+                                 {:ns 'lang.model.spec-xtalk-typed-fixture
                                   :aliases {}
                                   :infer infer/infer-type})]
     [(types/type->data (:type result))
      (-> result :errors first :tag)])
-  => '[{:kind :maybe :item {:kind :named :name tahto.model.spec-xtalk-typed-fixture/User}}
+  => '[{:kind :maybe :item {:kind :named :name lang.model.spec-xtalk-typed-fixture/User}}
        :call-arg-type-mismatch])

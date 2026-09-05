@@ -1,6 +1,6 @@
 (ns matlab.live-test
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.env :as env]))
 
 (fact:global

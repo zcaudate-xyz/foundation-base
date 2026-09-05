@@ -1,6 +1,6 @@
 (ns dart.net.http-fetch-test
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [scaffold.supabase.local-min :as local-min]
             [xt.lang.common-notify :as notify]))
 

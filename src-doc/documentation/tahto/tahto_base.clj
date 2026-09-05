@@ -1,22 +1,22 @@
 (ns documentation.tahto-common
-  (:require [tahto.base.util :as util]
-            [tahto.base.grammar :as grammar]
-            [tahto.base.emit-helper :as emit-helper]
-            [tahto.base.provenance :as provenance])
+  (:require [lang.base.util :as util]
+            [lang.base.grammar :as grammar]
+            [lang.base.emit-helper :as emit-helper]
+            [lang.base.provenance :as provenance])
   (:use code.test))
 
-[[:hero {:title "tahto.base"
+[[:hero {:title "lang.base"
          :subtitle "Shared grammar, emit, and preprocess layers."
-         :lead "`tahto.base` holds reusable grammar, emission, preprocess, rewrite, and utility functions shared by target language models."}]]
+         :lead "`lang.base` holds reusable grammar, emission, preprocess, rewrite, and utility functions shared by target language models."}]]
 
 [[:chapter {:title "Motivation"}]]
-"Target models should not each reinvent expression emission, assignment handling, function rendering, top-level forms, or preprocessing. `tahto.base` keeps those concerns reusable."
+"Target models should not each reinvent expression emission, assignment handling, function rendering, top-level forms, or preprocessing. `lang.base` keeps those concerns reusable."
 
 [[:chapter {:title "Walkthrough" :link "walkthrough"}]]
 
 [[:section {:title "Symbol utilities"}]]
 
-"Target language models work with a lot of symbols. `tahto.base.util` provides small helpers for decomposing and recombining qualified symbols, as well as converting between idiomatic naming styles."
+"Target language models work with a lot of symbols. `lang.base.util` provides small helpers for decomposing and recombining qualified symbols, as well as converting between idiomatic naming styles."
 
 (fact "decompose and recompose symbols"
   (util/sym-id 'L.core/identity)
@@ -51,11 +51,11 @@
   => {:context :lang/lua
       :module 'L.core
       :lang :lua
-      :context/fn #'tahto.base.util/lang-rt-default})
+      :context/fn #'lang.base.util/lang-rt-default})
 
 [[:section {:title "Building grammars"}]]
 
-"The grammar is the dictionary that maps xtalk operators to target-language emission rules. `tahto.base.grammar` collects operator definitions from spec and macro namespaces and lets you build a concrete operator table."
+"The grammar is the dictionary that maps xtalk operators to target-language emission rules. `lang.base.grammar` collects operator definitions from spec and macro namespaces and lets you build a concrete operator table."
 
 (fact "list grammar categories"
   (take 5 (grammar/ops-list))
@@ -76,7 +76,7 @@
 
 [[:section {:title "Emit helpers"}]]
 
-"`tahto.base.emit-helper` contains low-level helpers used by the emitter, such as classifying forms and reading grammar options."
+"`lang.base.emit-helper` contains low-level helpers used by the emitter, such as classifying forms and reading grammar options."
 
 (fact "classify forms"
   (emit-helper/form-key-base :a)
@@ -99,7 +99,7 @@
 
 [[:section {:title "Provenance tracking"}]]
 
-"As code passes through preprocessing and emission, errors need to be traced back to their source. `tahto.base.provenance` extracts line numbers and module context from forms and merges provenance frames."
+"As code passes through preprocessing and emission, errors need to be traced back to their source. `lang.base.provenance` extracts line numbers and module context from forms and merges provenance frames."
 
 (fact "extract line information"
   (provenance/line-of (with-meta '(+ 1 2) {:line 5}))

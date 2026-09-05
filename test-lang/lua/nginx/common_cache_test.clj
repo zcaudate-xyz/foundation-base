@@ -1,7 +1,7 @@
 (ns lua.nginx.common-cache-test
   (:require [std.lib.env :as env]
             [std.json :as json]
-            [tahto.core :as l])
+            [lang.core :as l])
   (:use code.test))
 
 (defn- ci?

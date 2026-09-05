@@ -1,6 +1,6 @@
 (ns js.lib.fastify
   (:require [net.http :as http]
-            [tahto.core :as l]))
+            [lang.core :as l]))
 
 (l/script :js
    {:require [[xt.lang.common-data :as d]

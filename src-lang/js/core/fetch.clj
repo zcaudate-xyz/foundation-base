@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns js.core.fetch
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template]))
 

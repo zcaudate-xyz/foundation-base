@@ -1,5 +1,5 @@
 (ns verilog.examples.hello
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :verilog
   {})

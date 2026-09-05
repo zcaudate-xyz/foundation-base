@@ -1,7 +1,7 @@
 (ns xt.lang.spec-base-test
   (:use code.test)
   (:require [clojure.set :as set]
-            [tahto.core :as l]
+            [lang.core :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-promise :as spec-promise]))
 

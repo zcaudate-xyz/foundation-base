@@ -1,11 +1,11 @@
 # Tahto Language Tooling
 
-`tahto.core` is a language-oriented templating and code-generation system. It stores code in a reusable Clojure representation, emits it through target grammars, and can connect the emitted code to runtime adapters.
+`lang.core` is a language-oriented templating and code-generation system. It stores code in a reusable Clojure representation, emits it through target grammars, and can connect the emitted code to runtime adapters.
 
 ## Smallest example
 
 ```clojure
-(require '[tahto.core :as l])
+(require '[lang.core :as l])
 
 (l/emit-as :js '(+ 1 2 3))
 ;; => "1 + 2 + 3"
@@ -32,10 +32,10 @@
 
 ## Related areas
 
-- `tahto.model` — target language specifications
-- `tahto.runtime` and `rt.*` — runtime adapters
-- `tahto.typed` — typed xtalk analysis and target declarations
-- `tahto.base` — shared emit, grammar, preprocess, and rewrite behaviour
+- `lang.model` — target language specifications
+- `lang.runtime` and `rt.*` — runtime adapters
+- `lang.typed` — typed xtalk analysis and target declarations
+- `lang.base` — shared emit, grammar, preprocess, and rewrite behaviour
 - `xt.*` — portable libraries built on the language tooling
 
 ## Learn through generated projects

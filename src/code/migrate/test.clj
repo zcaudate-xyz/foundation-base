@@ -20,9 +20,9 @@
 
 (defn code-test-entry?
   [entry]
-  (or (contains? '#{code.test tahto.core} entry)
+  (or (contains? '#{code.test lang.core} entry)
       (and (vector? entry)
-           (contains? '#{code.test tahto.core} (first entry)))))
+           (contains? '#{code.test lang.core} (first entry)))))
 
 (defn native-test-ns
   "removes the Foundation runner and adds native checker dependencies"

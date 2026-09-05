@@ -6,8 +6,8 @@
   :aliases
   {"test"    ["run" "-m" "code.test"]
    "manage"  ["run" "-m" "code.manage"]
-   "seedgen" ["run" "-m" "tahto.seedgen.cli"]
-   "tahto-uberjar" ["run" "-m" "tahto.uberjar.build"]
+   "seedgen" ["run" "-m" "lang.seedgen.cli"]
+   "tahto-uberjar" ["run" "-m" "lang.uberjar.build"]
    #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "wiki"        ["exec" "-ep" "(let [p (-> (ProcessBuilder. [\"bash\" \"bin/publish-wiki\"]) (.inheritIO) (.start))] (System/exit (.waitFor p)))"]
@@ -106,22 +106,22 @@
    ;; math.infix
    [org.scijava/parsington "3.1.0"]
 
-   ;; tahto.runtime.basic
+   ;; lang.runtime.basic
    [http-kit "2.8.0"]
    [com.rabbitmq/amqp-client "5.21.0"]
 
-   ;; tahto.runtime.graal
+   ;; lang.runtime.graal
    [org.graalvm.polyglot/polyglot "24.1.0"]
    [org.graalvm.js/js-language "24.1.0"]
    [commons-io/commons-io "2.15.1"]
 
-   ;; tahto.runtime.jep
+   ;; lang.runtime.jep
    [black.ninia/jep "4.3.1"]
 
-   ;; tahto.runtime.libpython
+   ;; lang.runtime.libpython
    [clj-python/libpython-clj "2.026"]
 
-   ;; tahto.runtime.jocl
+   ;; lang.runtime.jocl
    [org.jocl/jocl "2.0.4"]
 
    ;; jvm.chisel (runtime link against precompiled Chisel; no Scala compiler plugin needed)

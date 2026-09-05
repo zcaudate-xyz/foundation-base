@@ -1,6 +1,6 @@
 (ns matlab.core
   (:require [matlab.core.builtin :as builtin]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :matlab

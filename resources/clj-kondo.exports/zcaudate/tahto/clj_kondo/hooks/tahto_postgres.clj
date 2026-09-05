@@ -94,18 +94,18 @@
   (when-let [input (entity-input name-node metadata)]
     (when (map? input)
       (when (contains? input :link)
-        (report-error! name-node :tahto.postgres/retired-entity-option
+        (report-error! name-node :lang.postgres/retired-entity-option
                        "et/E :link has been removed; use :owner target or :owner [target local-key]"))
       (when (contains? input :spec/addon)
-        (report-error! name-node :tahto.postgres/retired-entity-option
+        (report-error! name-node :lang.postgres/retired-entity-option
                        "et/E :spec/addon has been removed; use :provides"))
       (when (and (contains? input :owner)
                  (not (owner-valid? (:owner input))))
-        (report-error! name-node :tahto.postgres/invalid-owner
+        (report-error! name-node :lang.postgres/invalid-owner
                        "et/E :owner must be a target symbol or [target-symbol local-keyword]"))
       (when (and (contains? input :provides)
                  (not (provides-valid? (:provides input))))
-        (report-error! name-node :tahto.postgres/invalid-provides
+        (report-error! name-node :lang.postgres/invalid-provides
                        "et/E :provides must contain a keyword :key and an optional numeric :priority")))))
 (defn function-shape [node]
   (let [children (rest (:children node))
@@ -141,17 +141,17 @@
                                   (some #(and (seq? %)
                                               (str/starts-with? (str (first %)) "pg/t:")) body))))
                (not= 1 top-let-count))
-      (report! name-node :tahto.postgres/one-let (str name " should contain exactly one top-level let")))
+      (report! name-node :lang.postgres/one-let (str name " should contain exactly one top-level let")))
     (when (> (count lets) 1)
-      (report! name-node :tahto.postgres/nested-let (str name " contains nested or repeated let forms")))
+      (report! name-node :lang.postgres/nested-let (str name " contains nested or repeated let forms")))
     (doseq [input input-names]
       (when-not (allowed-input-name? input)
-        (report! name-node :tahto.postgres/input-prefix (str "input binding " input " should use i-* or m"))))
+        (report! name-node :lang.postgres/input-prefix (str "input binding " input " should use i-* or m"))))
     (doseq [local local-names]
       (when-not (allowed-local-name? local)
-        (report! name-node :tahto.postgres/local-prefix (str "local binding " local " should use v-* or o-*"))))
+        (report! name-node :lang.postgres/local-prefix (str "local binding " local " should use v-* or o-*"))))
     (when (seq direct-returns)
-      (report! name-node :tahto.postgres/return-bound (str name " returns an expression directly; bind it before return")))))
+      (report! name-node :lang.postgres/return-bound (str name " returns an expression directly; bind it before return")))))
 (defn defn-pg [{:keys [node]}]
   (if-let [{:keys [name-node args-node] :as shape} (function-shape node)]
     (do (lint-function! shape)

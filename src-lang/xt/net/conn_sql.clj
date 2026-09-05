@@ -1,5 +1,5 @@
 (ns xt.net.conn-sql
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-protocol :as proto :refer [defprotocol.xt defimpl.xt]]))
 
 (l/script :xtalk

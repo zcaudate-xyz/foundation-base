@@ -1,5 +1,5 @@
 (ns xt.event.base-listener-test
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:use code.test))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python]}}

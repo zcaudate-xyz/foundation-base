@@ -1,0 +1,9 @@
+(ns lang.runtime.blender
+  (:require [std.lib :as h]
+            [lang.runtime.blender.impl :as impl])
+  (:refer-clojure :exclude [eval]))
+
+(h/intern-in
+ impl/blender
+ impl/blender:create
+ impl/raw-eval-blender)

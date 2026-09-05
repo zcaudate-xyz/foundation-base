@@ -1,8 +1,8 @@
 (ns xt.lang.common-notify-test
   (:require [net.http :as http]
             [std.json :as json]
-            [tahto.core :as l]
-            [tahto.core.type-notify :as interface]
+            [lang.core :as l]
+            [lang.core.type-notify :as interface]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
@@ -75,7 +75,7 @@
 (fact "gets the rt for the current ceremony"
 
   (notify/notify-ceremony-rt :js)
-  => tahto.runtime.basic.type_basic.RuntimeBasic)
+  => lang.runtime.basic.type_basic.RuntimeBasic)
 
 ^{:refer xt.lang.common-notify/wait-on-call :added "4.0"}
 (fact "generic wait-on-helper for oneshots"

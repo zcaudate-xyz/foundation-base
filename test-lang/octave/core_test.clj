@@ -1,6 +1,6 @@
 (ns matlab.core-test
-  (:require [tahto.core :as l]
-            [tahto.model.annex.spec-matlab]
+  (:require [lang.core :as l]
+            [lang.model.annex.spec-matlab]
             [matlab.core :as y])
   (:use code.test))
 

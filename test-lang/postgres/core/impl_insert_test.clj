@@ -1,10 +1,10 @@
 (ns postgres.core.impl-insert-test
-  (:require [tahto.runtime.postgres.base.application :as app]
-            [tahto.model.spec-postgres.common-tracker :as tracker]
+  (:require [lang.runtime.postgres.base.application :as app]
+            [lang.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [postgres.core.impl-insert :as insert]
-            [tahto.core :as l]
-            [tahto.common.book :as book])
+            [lang.core :as l]
+            [lang.common.book :as book])
   (:use code.test))
 
 (l/script- :postgres

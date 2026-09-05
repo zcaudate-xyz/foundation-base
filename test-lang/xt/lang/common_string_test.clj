@@ -1,6 +1,6 @@
 (ns xt.lang.common-string-test
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.string.prose :as prose]))
 
 ^{:seedgen/root {:all true, :langs [:python :lua :dart]}}

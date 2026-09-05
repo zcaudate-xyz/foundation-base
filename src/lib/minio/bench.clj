@@ -2,7 +2,7 @@
   (:require [clojure.string]
             [std.fs :as fs]
             [std.json :as json]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.collection :as collection]
             [std.lib.env :as env]
             [std.lib.foundation :as f]

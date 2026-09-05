@@ -1,5 +1,5 @@
 (ns verilog.examples.concat
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :verilog
   {})

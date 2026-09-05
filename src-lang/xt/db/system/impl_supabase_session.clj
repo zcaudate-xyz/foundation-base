@@ -1,5 +1,5 @@
 (ns xt.db.system.impl-supabase-session
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

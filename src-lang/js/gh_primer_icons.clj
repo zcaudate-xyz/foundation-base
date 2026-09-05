@@ -1,6 +1,6 @@
 (ns js.gh-primer-icons
   (:require [std.html :as html]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :js

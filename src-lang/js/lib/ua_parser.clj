@@ -1,5 +1,5 @@
 (ns js.lib.ua-parser
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:import [["ua-parser-js" :as UAParser]

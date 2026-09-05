@@ -4,9 +4,9 @@
    The Haxe runtime is currently one-shot: each eval compiles and runs
    a fresh Haxe program via `haxe --interp`.  The grammar is a foundation
    and emits Haxe-shaped code; the exact syntax is still being tuned."
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [haxe.core :as haxe]
-            [tahto.runtime.haxe.impl]
+            [lang.runtime.haxe.impl]
             [std.lib.template :as template])
   (:refer-clojure :exclude [eval]))
 

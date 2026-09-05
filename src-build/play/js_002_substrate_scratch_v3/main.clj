@@ -1,5 +1,5 @@
 (ns play.js-002-substrate-scratch-v3.main
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [postgres.core :as pg]
             [postgres.sample.scratch-v3]
             [xt.lang.common-lib]

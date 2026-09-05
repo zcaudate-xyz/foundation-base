@@ -1,5 +1,5 @@
 (ns std.make.compile-test
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.make.compile :refer :all]
             [std.string.prose :as prose])
   (:use code.test)

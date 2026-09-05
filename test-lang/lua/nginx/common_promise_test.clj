@@ -1,6 +1,6 @@
 (ns lua.nginx.common-promise-test
   (:require [std.lib.env :as env]
-            [tahto.core :as l])
+            [lang.core :as l])
   (:use code.test))
 
 (l/script- :lua.nginx

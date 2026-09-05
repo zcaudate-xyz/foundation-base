@@ -8,16 +8,16 @@
 
  :hooks
  {:analyze-call
-  {tahto.core/script clj-kondo.hooks.tahto-postgres/script
-   tahto.core/script- clj-kondo.hooks.tahto-postgres/script
-   tahto.core/script+ clj-kondo.hooks.tahto-postgres/script
-   tahto.core/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
-   tahto.typed/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+  {lang.core/script clj-kondo.hooks.tahto-postgres/script
+   lang.core/script- clj-kondo.hooks.tahto-postgres/script
+   lang.core/script+ clj-kondo.hooks.tahto-postgres/script
+   lang.core/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
+   lang.typed/defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
    defspec.xt clj-kondo.hooks.tahto-xtalk/defspec-xt
    defn.js clj-kondo.hooks.tahto-xtalk/defn-xt
-   tahto.core/defn.js clj-kondo.hooks.tahto-xtalk/defn-xt
+   lang.core/defn.js clj-kondo.hooks.tahto-xtalk/defn-xt
    defvar.js clj-kondo.hooks.tahto-xtalk/defvar-xt
-   tahto.core/defvar.js clj-kondo.hooks.tahto-xtalk/defvar-xt
+   lang.core/defvar.js clj-kondo.hooks.tahto-xtalk/defvar-xt
    defglobal.xt clj-kondo.hooks.tahto-xtalk/defglobal-xt
    defn.pg clj-kondo.hooks.tahto-postgres/defn-pg
    defrun.pg clj-kondo.hooks.tahto-postgres/defn-pg
@@ -43,19 +43,19 @@
 
  :linters
  {:namespace-name-mismatch {:level :off}
-  :tahto.postgres/one-let {:level :warning}
-  :tahto.postgres/nested-let {:level :warning}
-  :tahto.postgres/input-prefix {:level :warning}
-  :tahto.postgres/local-prefix {:level :warning}
-  :tahto.postgres/return-bound {:level :warning}
-  :tahto.postgres/retired-entity-option {:level :error}
-  :tahto.postgres/invalid-owner {:level :error}
-  :tahto.postgres/invalid-provides {:level :error}
-  :tahto.xtalk/block-in-value {:level :error}
-  :tahto.xtalk/field-collision {:level :error}
-  :tahto.xtalk/invalid-destructuring {:level :error}
-  :tahto.xtalk/redundant-get-key {:level :warning}
-  :tahto.xtalk/redundant-fn-arrow {:level :warning}
-  :tahto.xtalk/nested-dot-access {:level :warning}
-  :tahto.xtalk/redundant-dot-destructure {:level :warning}
-  :tahto.xtalk/merge-dot-destructure {:level :warning}}}
+  :lang.postgres/one-let {:level :warning}
+  :lang.postgres/nested-let {:level :warning}
+  :lang.postgres/input-prefix {:level :warning}
+  :lang.postgres/local-prefix {:level :warning}
+  :lang.postgres/return-bound {:level :warning}
+  :lang.postgres/retired-entity-option {:level :error}
+  :lang.postgres/invalid-owner {:level :error}
+  :lang.postgres/invalid-provides {:level :error}
+  :lang.xtalk/block-in-value {:level :error}
+  :lang.xtalk/field-collision {:level :error}
+  :lang.xtalk/invalid-destructuring {:level :error}
+  :lang.xtalk/redundant-get-key {:level :warning}
+  :lang.xtalk/redundant-fn-arrow {:level :warning}
+  :lang.xtalk/nested-dot-access {:level :warning}
+  :lang.xtalk/redundant-dot-destructure {:level :warning}
+  :lang.xtalk/merge-dot-destructure {:level :warning}}}

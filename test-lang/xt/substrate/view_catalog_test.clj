@@ -1,6 +1,6 @@
 (ns xt.substrate.view-catalog-test
   (:use code.test)
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 ^{:seedgen/root {:langs [:dart]}}
 (l/script- :js

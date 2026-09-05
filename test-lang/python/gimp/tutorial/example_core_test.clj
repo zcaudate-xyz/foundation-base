@@ -1,6 +1,6 @@
 (ns python.gimp.tutorial.example-core-test
   (:require [std.lib.env :as env]
-            [tahto.core :as l]
+            [lang.core :as l]
             [python.gimp.tutorial.example-core])
   (:import [std.lib.foundation Wrapped])
   (:use code.test))

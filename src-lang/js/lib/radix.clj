@@ -1,7 +1,7 @@
 (ns js.lib.radix
   (:require [js.react.compile :as compile]
             [std.block :as block]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.foundation :as f]
             [std.string.case :as case]))
 

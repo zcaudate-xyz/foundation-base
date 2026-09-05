@@ -4,7 +4,7 @@
    Evaluating `build-gaussian-splat-demo` from a REPL with the :default runtime
    active will generate a `splat.gdshader` file and a `gaussian_splat.tscn`
    scene file at the paths you provide."
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :gdscript)
 

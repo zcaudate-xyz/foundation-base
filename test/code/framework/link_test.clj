@@ -64,60 +64,60 @@
         tahto-entries     (set (get-in entries '[xyz.zcaudate/tahto :entries]))
         postgres-entries (set (get-in entries '[xyz.zcaudate/postgres :entries]))
         solidity-entries (set (get-in entries '[xyz.zcaudate/solidity :entries]))
-        nginx-entries    (set (get-in entries '[xyz.zcaudate/tahto.runtime.nginx :entries]))
-        graal-entries    (set (get-in entries '[xyz.zcaudate/tahto.runtime.graal :entries]))
-        jep-entries      (set (get-in entries '[xyz.zcaudate/tahto.runtime.jep :entries]))
-        redis-entries    (set (get-in entries '[xyz.zcaudate/tahto.runtime.redis :entries]))]
-    [(boolean (tahto-entries [:clj 'tahto.runtime.postgres]))
-     (boolean (tahto-entries [:clj 'tahto.runtime.solidity]))
-     (boolean (tahto-entries [:clj 'tahto.runtime.solidity.client]))
-     (boolean (tahto-entries [:clj 'tahto.runtime.graal]))
-     (boolean (tahto-entries [:clj 'tahto.runtime.jep]))
-     (boolean (tahto-entries [:clj 'tahto.runtime.redis]))
-     (boolean (tahto-entries [:clj 'tahto.runtime.nginx]))
-     (boolean (tahto-entries [:clj 'tahto.runtime.nginx.config]))
+        nginx-entries    (set (get-in entries '[xyz.zcaudate/lang.runtime.nginx :entries]))
+        graal-entries    (set (get-in entries '[xyz.zcaudate/lang.runtime.graal :entries]))
+        jep-entries      (set (get-in entries '[xyz.zcaudate/lang.runtime.jep :entries]))
+        redis-entries    (set (get-in entries '[xyz.zcaudate/lang.runtime.redis :entries]))]
+    [(boolean (tahto-entries [:clj 'lang.runtime.postgres]))
+     (boolean (tahto-entries [:clj 'lang.runtime.solidity]))
+     (boolean (tahto-entries [:clj 'lang.runtime.solidity.client]))
+     (boolean (tahto-entries [:clj 'lang.runtime.graal]))
+     (boolean (tahto-entries [:clj 'lang.runtime.jep]))
+     (boolean (tahto-entries [:clj 'lang.runtime.redis]))
+     (boolean (tahto-entries [:clj 'lang.runtime.nginx]))
+     (boolean (tahto-entries [:clj 'lang.runtime.nginx.config]))
      (boolean (tahto-entries [:clj 'xt.lang.common-lib]))
      (boolean (postgres-entries [:clj 'postgres.core]))
-     (boolean (postgres-entries [:clj 'tahto.runtime.postgres]))
+     (boolean (postgres-entries [:clj 'lang.runtime.postgres]))
      (boolean (solidity-entries [:clj 'solidity.core]))
-     (boolean (solidity-entries [:clj 'tahto.runtime.solidity]))
-     (boolean (solidity-entries [:clj 'tahto.runtime.solidity.client]))
-     (boolean (nginx-entries [:clj 'tahto.runtime.nginx]))
-     (boolean (nginx-entries [:clj 'tahto.runtime.nginx.config]))
-     (boolean (graal-entries [:clj 'tahto.runtime.graal]))
-     (boolean (jep-entries [:clj 'tahto.runtime.jep]))
-     (boolean (redis-entries [:clj 'tahto.runtime.redis]))
+     (boolean (solidity-entries [:clj 'lang.runtime.solidity]))
+     (boolean (solidity-entries [:clj 'lang.runtime.solidity.client]))
+     (boolean (nginx-entries [:clj 'lang.runtime.nginx]))
+     (boolean (nginx-entries [:clj 'lang.runtime.nginx.config]))
+     (boolean (graal-entries [:clj 'lang.runtime.graal]))
+     (boolean (jep-entries [:clj 'lang.runtime.jep]))
+     (boolean (redis-entries [:clj 'lang.runtime.redis]))
      (contains? entries 'xyz.zcaudate/xtalk.lang)
-     (contains? entries 'xyz.zcaudate/tahto.runtime.solidity)])
+     (contains? entries 'xyz.zcaudate/lang.runtime.solidity)])
   => [false false false false false false false false true true true true true true true true true true true false false])
 
 ^{:refer code.framework.link/overlapped-entries-single :added "3.0"}
 (fact "finds any overlaps between entries"
 
   (overlapped-entries-single '{:name a
-                               :entries #{[:clj tahto.1]}}
+                               :entries #{[:clj lang.1]}}
                              '[{:name b
-                                :entries #{[:clj tahto.1] [:clj tahto.2]}}])
-  => '([#{a b} #{[:clj tahto.1]}]))
+                                :entries #{[:clj lang.1] [:clj lang.2]}}])
+  => '([#{a b} #{[:clj lang.1]}]))
 
 ^{:refer code.framework.link/overlapped-entries :added "3.0"}
 (fact "finds any overlapped entries for given map"
 
   (overlapped-entries '{a {:name a
-                           :entries #{[:clj tahto.1]}}
+                           :entries #{[:clj lang.1]}}
                         b {:name b
-                           :entries #{[:clj tahto.1] [:clj tahto.2]}}})
-  => '([#{a b} #{[:clj tahto.1]}]))
+                           :entries #{[:clj lang.1] [:clj lang.2]}}})
+  => '([#{a b} #{[:clj lang.1]}]))
 
 ^{:refer code.framework.link/missing-entries :added "3.0"}
 (fact "finds missing entries given packages and lookup"
 
   (missing-entries '{b {:name b
-                        :entries #{[:clj tahto.1] [:clj tahto.2]}}}
-                   '{:clj {tahto.1 ""
-                           tahto.2 ""
-                           tahto.3 ""}})
-  => '{:clj {tahto.3 ""}})
+                        :entries #{[:clj lang.1] [:clj lang.2]}}}
+                   '{:clj {lang.1 ""
+                           lang.2 ""
+                           lang.3 ""}})
+  => '{:clj {lang.3 ""}})
 
 ^{:refer code.framework.link/collect-external-deps :added "3.0"}
 (fact "collects dependencies from the local system"

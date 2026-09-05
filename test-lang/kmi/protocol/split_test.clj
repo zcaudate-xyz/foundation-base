@@ -1,6 +1,6 @@
 (ns kmi.protocol.split-test
   (:use code.test)
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script- :js
   {:runtime :basic

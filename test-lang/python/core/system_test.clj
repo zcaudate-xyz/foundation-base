@@ -1,5 +1,5 @@
 (ns python.core.system-test
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.env :as env])
   (:use code.test))
 

@@ -1,6 +1,6 @@
 (ns xt.mcp.node.kernel-base-test
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
 (l/script- :js

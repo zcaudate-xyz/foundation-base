@@ -1,0 +1,23 @@
+(ns lang.core.rewrite.common-test
+  (:use code.test)
+  (:require [lang.core.rewrite.common :refer :all]))
+
+^{:refer lang.core.rewrite.common/with-form-meta :added "4.1"}
+(fact "copies metadata from source to out when out is an IObj"
+  (with-form-meta (with-meta [1 2 3] {:hello true}) [4 5 6])
+  => [4 5 6]
+
+  (meta (with-form-meta (with-meta [1 2 3] {:hello true}) [4 5 6]))
+  => {:hello true})
+
+^{:refer lang.core.rewrite.common/with-form-meta :added "4.1"
+  :id test-with-form-meta-non-iobj}
+(fact "returns out unchanged when out is not an IObj"
+  (with-form-meta (with-meta [] {:hello true}) "world")
+  => "world"
+
+  (with-form-meta (with-meta [] {:hello true}) 42)
+  => 42
+
+  (with-form-meta (with-meta [] {:hello true}) :keyword)
+  => :keyword)

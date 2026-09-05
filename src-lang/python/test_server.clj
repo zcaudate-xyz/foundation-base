@@ -1,5 +1,5 @@
 (ns python.test-server
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.env :as env]))
 
 (l/script :python

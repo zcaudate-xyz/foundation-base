@@ -332,15 +332,15 @@
                                                    code.format.ns/reorder-load-form]}))
 
 (comment
-  (find-usages ['tahto] {:var 'tahto.data.base.seq/index-at})
+  (find-usages ['tahto] {:var 'lang.data.base.seq/index-at})
 
-  (find-usages ['jvm.artifact] {:var 'tahto.data.base.seq/object-of})
+  (find-usages ['jvm.artifact] {:var 'lang.data.base.seq/object-of})
 
-  (find-usages 'jvm.classloader.url-classloader {:var 'tahto.data.base.seq/object-of})
+  (find-usages 'jvm.classloader.url-classloader {:var 'lang.data.base.seq/object-of})
 
-  (replace-usages ['jvm.artifact] {:var 'tahto.data.base.seq/object-of
+  (replace-usages ['jvm.artifact] {:var 'lang.data.base.seq/object-of
                                    :new 'element-at})
 
   (replace-usages '[jvm.classloader.url-classloader]
-                  {:var 'tahto.data.base.seq/object-of
+                  {:var 'lang.data.base.seq/object-of
                    :new 'element-at}))

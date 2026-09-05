@@ -1,6 +1,6 @@
 (ns ocaml.core-test
-  (:require [tahto.core :as l]
-            [tahto.model.annex.spec-ocaml]
+  (:require [lang.core :as l]
+            [lang.model.annex.spec-ocaml]
             [ocaml.core :as y])
   (:use code.test))
 

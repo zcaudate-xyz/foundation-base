@@ -1,6 +1,6 @@
 (ns play.ts-000-user-directory.types
-  (:require [tahto.core :as l]
-            [tahto.typed :refer [defspec.xt]]))
+  (:require [lang.core :as l]
+            [lang.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

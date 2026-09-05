@@ -1,5 +1,5 @@
 (ns xt.db.text.sql-view-test
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [postgres.gen.bind-macro :as gen]
             [std.string.prose :as prose]
             [xt.db.helpers.seed-system-test :as data]

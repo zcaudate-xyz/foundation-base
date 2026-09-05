@@ -1,6 +1,6 @@
 (ns xt.lang.common-protocol-test
   (:use code.test)
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (do (l/script- :xtalk
       {:require [[xt.lang.common-protocol :as proto]

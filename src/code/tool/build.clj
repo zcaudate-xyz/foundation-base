@@ -53,7 +53,7 @@
 (defn build-prep
   "prepares the build
  
-   (build-prep 'tahto.core)
+   (build-prep 'lang.core)
    => vector?"
   {:added "4.0"}
   ([ns]
@@ -109,10 +109,10 @@
 
 
 (comment
-  (build-output {:ns 'tahto.core
+  (build-output {:ns 'lang.core
                  :root ".build"
-                 :build "tahto.core"})
-  (build-output 'tahto.core)
+                 :build "lang.core"})
+  (build-output 'lang.core)
   (build-clean 'app.jvm.resp-repl.main)
   
   (build-output 'app.jvm.resp-repl.main)

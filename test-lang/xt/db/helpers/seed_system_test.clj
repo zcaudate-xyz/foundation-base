@@ -1,7 +1,7 @@
 (ns xt.db.helpers.seed-system-test
   (:require [postgres.core :as pg
                :refer [defsel.pg defret.pg]]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :postgres

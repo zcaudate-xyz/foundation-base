@@ -1,5 +1,5 @@
 (ns xt.lang.spec-promise-test
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]
             [xt.lang.spec-base :as xt])
   (:use code.test))

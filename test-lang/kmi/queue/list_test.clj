@@ -1,6 +1,6 @@
 (ns kmi.queue.list-test
-  (:require [tahto.runtime.redis]
-            [tahto.core :as l])
+  (:require [lang.runtime.redis]
+            [lang.core :as l])
   (:use code.test))
 
 (l/script- :lua

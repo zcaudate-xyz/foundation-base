@@ -1,6 +1,6 @@
 (ns lean.core
   (:require [lean.core.builtin :as builtin]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :lean {})

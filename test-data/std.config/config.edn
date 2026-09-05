@@ -1,15 +1,15 @@
 {:dependencies [:project :dependencies]
- :signing      {:key [:include [:str ["config/keys/" [:global :tahto.email] ".secured"]]
+ :signing      {:key [:include [:str ["config/keys/" [:global :lang.email] ".secured"]]
                                {:type :gpg :secured true}]}
  :packages     [:include "config/packages.edn"
                          {:type :edn}]
- :releases {:all     [:include "config/secret/tahto.all.edn" 
+ :releases {:all     [:include "config/secret/lang.all.edn" 
                                {:type :edn}]
-            :dev     [:include "config/deploy/tahto.dev.edn" 
+            :dev     [:include "config/deploy/lang.dev.edn" 
                                {:type :edn}]
-            :public  [:include "config/deploy/tahto.public.edn" 
+            :public  [:include "config/deploy/lang.public.edn" 
                                {:type :edn}]
-            :native  [:include "config/deploy/tahto.native.edn" 
+            :native  [:include "config/deploy/lang.native.edn" 
                                {:type :edn}]}
  :repositories      [:include "config/repositories.edn.secured" 
                               {:type :edn :secured true}]}

@@ -6065,10 +6065,10 @@
                                   }
                                 },
                                 "extra": {
-                                  "rawValue": ";; Generated tahto.core UI Component\n",
-                                  "raw": "';; Generated tahto.core UI Component\\n'"
+                                  "rawValue": ";; Generated lang.core UI Component\n",
+                                  "raw": "';; Generated lang.core UI Component\\n'"
                                 },
-                                "value": ";; Generated tahto.core UI Component\n"
+                                "value": ";; Generated lang.core UI Component\n"
                               }
                             },
                             "leadingComments": [
@@ -6353,10 +6353,10 @@
                                   }
                                 },
                                 "extra": {
-                                  "rawValue": "  (:require [tahto.core :as l]\n",
-                                  "raw": "'  (:require [tahto.core :as l]\\n'"
+                                  "rawValue": "  (:require [lang.core :as l]\n",
+                                  "raw": "'  (:require [lang.core :as l]\\n'"
                                 },
-                                "value": "  (:require [tahto.core :as l]\n"
+                                "value": "  (:require [lang.core :as l]\n"
                               }
                             }
                           },
@@ -9622,10 +9622,10 @@
                                           }
                                         },
                                         "extra": {
-                                          "rawValue": "tahto.core code copied to clipboard!",
-                                          "raw": "'tahto.core code copied to clipboard!'"
+                                          "rawValue": "lang.core code copied to clipboard!",
+                                          "raw": "'lang.core code copied to clipboard!'"
                                         },
-                                        "value": "tahto.core code copied to clipboard!"
+                                        "value": "lang.core code copied to clipboard!"
                                       }
                                     ]
                                   }
@@ -11001,10 +11001,10 @@
                                                   }
                                                 },
                                                 "extra": {
-                                                  "rawValue": "tahto.core code copied to clipboard!",
-                                                  "raw": "'tahto.core code copied to clipboard!'"
+                                                  "rawValue": "lang.core code copied to clipboard!",
+                                                  "raw": "'lang.core code copied to clipboard!'"
                                                 },
-                                                "value": "tahto.core code copied to clipboard!"
+                                                "value": "lang.core code copied to clipboard!"
                                               }
                                             ]
                                           }
@@ -11940,10 +11940,10 @@
                                 }
                               },
                               "extra": {
-                                "rawValue": "Generated tahto.core Code",
-                                "raw": "Generated tahto.core Code"
+                                "rawValue": "Generated lang.core Code",
+                                "raw": "Generated lang.core Code"
                               },
-                              "value": "Generated tahto.core Code"
+                              "value": "Generated lang.core Code"
                             }
                           ]
                         },

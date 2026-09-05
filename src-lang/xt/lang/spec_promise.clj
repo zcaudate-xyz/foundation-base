@@ -1,5 +1,5 @@
 (ns xt.lang.spec-promise
-  (:require [tahto.core :as l :refer [defspec.xt]]
+  (:require [lang.core :as l :refer [defspec.xt]]
             [xt.lang.common-promise]))
 
 (l/script :xtalk)

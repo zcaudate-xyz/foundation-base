@@ -1,6 +1,6 @@
 (ns xt.ui.wind
   "Transforms portable UI nodes into fluttersdk_wind WDynamic bundles."
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

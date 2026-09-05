@@ -1,5 +1,5 @@
 (ns kmi.queue.list
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :lua
   {:runtime :redis

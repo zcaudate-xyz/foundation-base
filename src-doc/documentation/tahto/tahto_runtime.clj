@@ -1,12 +1,12 @@
 (ns documentation.tahto-runtime
   (:use code.test))
 
-[[:hero {:title "tahto.runtime"
+[[:hero {:title "lang.runtime"
          :subtitle "Runtime adapters for generated code."
-         :lead "`tahto.runtime` executes generated code in local processes, browsers, databases, editors, OpenResty, Redis, Solidity, Python, and other runtime hosts."}]]
+         :lead "`lang.runtime` executes generated code in local processes, browsers, databases, editors, OpenResty, Redis, Solidity, Python, and other runtime hosts."}]]
 
 [[:chapter {:title "Motivation"}]]
-"Emission alone is not enough for tests and systems work. Runtime adapters let tahto.core run target code, verify behavior, and connect generated functions to real services."
+"Emission alone is not enough for tests and systems work. Runtime adapters let lang.core run target code, verify behavior, and connect generated functions to real services."
 
 [[:chapter {:title "Internal usage"}]]
 "The CI workflow pulls runtime images for Tahto tests and installs runtime dependencies for language-specific test groups. Walkthrough live examples use runtime contexts to execute emitted JS and Lua."
@@ -25,9 +25,9 @@
 
 "*   **`rt.postgres.client`**: Manages the connection and lifecycle of PostgreSQL runtimes.\n*   **`rt.postgres.client-impl`**: Implements the core interaction logic for executing raw SQL and invoking transpiled functions.\n*   **`rt.postgres.grammar`**: Defines the custom grammar and syntax for transpiling Clojure forms into PostgreSQL SQL.\n*   **`rt.postgres.grammar.*` (`common`, `meta`, `tf`, `form-*`)**: These sub-namespaces provide foundational utilities for grammar definition, metadata extraction, type transformations, and custom form handling (e.g., `defn`, `deftype`, `defenum`).\n*   **`rt.postgres.script.*` (`addon`, `builtin`, `graph`, `impl`, `supabase`)**: These namespaces expose high-level macros and functions (the DSL) for common database operations, graph-like queries, and integration with Supabase.\n*   **`rt.postgres.system`**: Provides macros for interacting with PostgreSQL system functions.\n*   **`rt.postgres.gen_bind`**: Facilitates the binding of Clojure-defined functions and database entities into a structured interface for external consumption (e.g., APIs)."
 
-[[:section {:title "Integration with tahto.core" :link "merged-plans-slop-summary-rt-postgres-summary-md-integration-with-tahto-lang"}]]
+[[:section {:title "Integration with lang.core" :link "merged-plans-slop-summary-rt-postgres-summary-md-integration-with-tahto-lang"}]]
 
-"`rt.postgres` extensively leverages the `tahto.core` framework's capabilities for code generation and runtime management."
+"`rt.postgres` extensively leverages the `lang.core` framework's capabilities for code generation and runtime management."
 
 "*   **`std.lang.base.book` and `std.lang.base.library`**: `rt.postgres` defines its own `+book+` (in `rt.postgres.grammar.clj`) which holds the PostgreSQL-specific grammar and metadata. This book is installed into the global `std.lang` library, making the PostgreSQL language available for transpilation.\n*   **`tahto.core.base.emit`**: The emit pipeline uses the `rt.postgres` grammar (`+grammar+`) to translate Clojure forms into SQL strings.\n*   **`tahto.core.base.grammar`**: The `+grammar+` in `rt.postgres.grammar.clj` is built upon `tahto.core.base.grammar/build`, incorporating various operators and customizing them for PostgreSQL's syntax and semantics.\n*   **`tahto.core.base.runtime`**: The `rt.postgres.client/RuntimePostgres` implements the `IContext` and `IComponent` protocols, allowing `tahto.core` to manage PostgreSQL connections and execute code within that context.\n*   **`tahto.core.base.script`**: The high-level `l/script :postgres` macro enables the seamless execution model, making PostgreSQL functions and macros available directly within Clojure namespaces."
 

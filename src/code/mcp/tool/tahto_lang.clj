@@ -1,7 +1,7 @@
 (ns code.mcp.tool.tahto-lang
-  (:require [tahto.core :as l]
-            [tahto.common.book :as book]
-            [tahto.core.library :as lib]))
+  (:require [lang.core :as l]
+            [lang.common.book :as book]
+            [lang.core.library :as lib]))
 
 (defn lang-emit-as-safe
   "Safely evaluate Clojure code, returning a result string or error"
@@ -31,7 +31,7 @@
 
 (def lang-emit-as-tool
   {:name "lang-emit-as"
-   :description (str "Transpile a single Clojure DSL form into a target `tahto.core` language. Use this for quick "
+   :description (str "Transpile a single Clojure DSL form into a target `lang.core` language. Use this for quick "
                      "emit probes, syntax verification, or experimenting with generated output before editing "
                      "language models or runtime code.")
    :inputSchema {:type "object"
@@ -49,8 +49,8 @@
    :isError false})
 
 (def list-languages-tool
-  {:name "tahto.core-list"
-   :description "List the currently installed `tahto.core` language books available to the MCP session."
+  {:name "lang.core-list"
+   :description "List the currently installed `lang.core` language books available to the MCP session."
    :inputSchema {:type "object"}
    :implementation #'list-languages-fn})
 
@@ -61,8 +61,8 @@
    :isError false})
 
 (def list-modules-tool
-  {:name "tahto.core-modules"
-   :description (str "List registered modules for a specific `tahto.core` language. Use this when an agent needs to "
+  {:name "lang.core-modules"
+   :description (str "List registered modules for a specific `lang.core` language. Use this when an agent needs to "
                      "discover the loaded modules before doing emit or manage work.")
    :inputSchema {:type "object"
                  :properties {"lang" {:type "string"

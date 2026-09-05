@@ -1,5 +1,5 @@
 (ns js.lib.fastify-test
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.network :as network]
             [std.lib.os :as os]
             [xt.lang.common-notify :as notify])

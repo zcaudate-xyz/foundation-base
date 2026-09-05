@@ -1,9 +1,9 @@
 (ns postgres.core.graph-insert-test
-  (:require [tahto.runtime.postgres.base.application :as app]
+  (:require [lang.runtime.postgres.base.application :as app]
             [postgres.core.graph-insert :as insert]
             [postgres.core.impl-base :as impl]
             [postgres.sample.scratch-v1 :as scratch]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.collection :as collection]
             [std.lib.schema :as schema]
             [std.lib.walk :as walk])

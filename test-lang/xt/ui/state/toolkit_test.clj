@@ -1,6 +1,6 @@
 (ns xt.ui.state.toolkit-test
   (:use code.test)
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js

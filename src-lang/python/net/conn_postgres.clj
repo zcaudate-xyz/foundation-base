@@ -1,5 +1,5 @@
 (ns python.net.conn-postgres
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :python

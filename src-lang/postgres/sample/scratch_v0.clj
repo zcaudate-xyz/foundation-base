@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns postgres.sample.scratch-v0
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [postgres.core :as pg :refer [defret.pg defsel.pg]]
             [postgres.core.supabase :as s]))
 

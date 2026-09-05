@@ -1,5 +1,5 @@
 (ns play.tui-001-fetch.main
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib :as h]))
 
 (l/script :js

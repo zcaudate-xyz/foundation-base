@@ -1,5 +1,5 @@
 (ns haxe.core.builtins
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.template :as template])
   (:refer-clojure :exclude [eval]))
 

@@ -1,6 +1,6 @@
 (ns component.build-native-v1
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]
             [std.make :as make :refer [def.make]]

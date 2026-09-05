@@ -1,7 +1,7 @@
-(ns walkthrough.tahto.core-02-live
+(ns walkthrough.lang.core-02-live
   ;; Will will create a multi lang environment
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]))
 

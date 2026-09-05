@@ -1,5 +1,5 @@
 (ns js.react-native.ui-swiper
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.common-data :as xtd]

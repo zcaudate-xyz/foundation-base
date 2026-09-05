@@ -1,5 +1,5 @@
 (ns python.test
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.env :as env]))
 
 (l/script :python
@@ -39,7 +39,7 @@
   @(std.concurrent/send +r+
                         (env/do:pp
                          (std.json/write
-                          (tahto.core/emit-script
-                           (tahto.runtime.basic.impl.process-python/default-body-wrap
+                          (lang.core/emit-script
+                           (lang.runtime.basic.impl.process-python/default-body-wrap
                             ['(+ 1 2 3 4)])
                            {:lang :python})))))

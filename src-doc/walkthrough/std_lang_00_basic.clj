@@ -1,8 +1,8 @@
-(ns walkthrough.tahto.core-00-basic
-  ;; Welcome to the basic tahto.core tutorial.
+(ns walkthrough.lang.core-00-basic
+  ;; Welcome to the basic lang.core tutorial.
   ;; We will go through how to write and link code together
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib :as h]))
 
 ;;
@@ -41,7 +41,7 @@
   ^:hidden
   
   (def.js a (+ 1 2 3))
-  => #'walkthrough.tahto.core-00-basic/a
+  => #'walkthrough.lang.core-00-basic/a
 
   (!.js -/a)
   => "a;"
@@ -53,12 +53,12 @@
   => {:context :lang/js
       :lang :js
       :id 'a
-      :module 'walkthrough.tahto.core-00-basic
+      :module 'walkthrough.lang.core-00-basic
       :section :code
-      :context/fn #'tahto.base.util/lang-rt-default}
+      :context/fn #'lang.base.util/lang-rt-default}
 
   (type @a)
-  => tahto.common.book_entry.BookEntry
+  => lang.common.book_entry.BookEntry
   
   (into {} @a)
   => (contains-in
@@ -68,13 +68,13 @@
        :standalone nil
        :template nil
        :op 'def
-       :module 'walkthrough.tahto.core-00-basic
+       :module 'walkthrough.lang.core-00-basic
        :lang :js
        :id 'a
        :declared nil
        :display :default
        :form '(def a (+ 1 2 3))
-       :namespace 'walkthrough.tahto.core-00-basic
+       :namespace 'walkthrough.lang.core-00-basic
        :deps #{}}))
 
 ;;
@@ -87,7 +87,7 @@
   (defn.js hello
     [a b]
     (return (+ a b)))
-  => #'walkthrough.tahto.core-00-basic/hello
+  => #'walkthrough.lang.core-00-basic/hello
 
   (hello 1 2)
   => "hello(1,2)"
@@ -103,9 +103,9 @@
   => {:context :lang/js
       :lang :js
       :id 'hello
-      :module 'walkthrough.tahto.core-00-basic
+      :module 'walkthrough.lang.core-00-basic
       :section :code
-      :context/fn #'tahto.base.util/lang-rt-default}
+      :context/fn #'lang.base.util/lang-rt-default}
 
   (into {} @hello)
   => (contains-in
@@ -115,14 +115,14 @@
        :standalone nil
        :template nil
        :op 'defn
-       :module 'walkthrough.tahto.core-00-basic
+       :module 'walkthrough.lang.core-00-basic
        :lang :js
        :id 'hello
        :declared nil
        :display :default
        :form '(defn hello [a b] (return (+ a b)))
        :doc ""
-       :namespace 'walkthrough.tahto.core-00-basic
+       :namespace 'walkthrough.lang.core-00-basic
        :deps #{}}))
 
 
@@ -137,7 +137,7 @@
   (defn.js world
     [c]
     (return (k/abs (+ (-/hello) -/a c))))
-  => #'walkthrough.tahto.core-00-basic/world
+  => #'walkthrough.lang.core-00-basic/world
 
   (world -10)
   => "world(-10)"
@@ -154,7 +154,7 @@
        :standalone nil
        :template nil
        :op 'defn
-       :module 'walkthrough.tahto.core-00-basic
+       :module 'walkthrough.lang.core-00-basic
        :lang :js
        :id 'world
        :declared nil
@@ -164,14 +164,14 @@
                 (return
                  (x:m-abs
                   (+
-                  (walkthrough.tahto.core-00-basic/hello)
-                  walkthrough.tahto.core-00-basic/a
+                  (walkthrough.lang.core-00-basic/hello)
+                  walkthrough.lang.core-00-basic/a
                   c))))
        :doc ""
-       :namespace 'walkthrough.tahto.core-00-basic
+       :namespace 'walkthrough.lang.core-00-basic
        :deps
-       '#{walkthrough.tahto.core-00-basic/hello
-          walkthrough.tahto.core-00-basic/a}}))
+       '#{walkthrough.lang.core-00-basic/hello
+          walkthrough.lang.core-00-basic/a}}))
 
 ;;
 ;; def$.js saves a `:fragment` entry in the book
@@ -192,7 +192,7 @@
        :standalone nil,
        :template nil,
        :op 'def$,
-       :module 'walkthrough.tahto.core-00-basic,
+       :module 'walkthrough.lang.core-00-basic,
        :lang :js,
        :priority nil,
        :id 'hello-fragment,
@@ -200,7 +200,7 @@
        :declared nil,
        :display :default,
        :form '(+ 1 2 3),
-       :namespace 'walkthrough.tahto.core-00-basic,
+       :namespace 'walkthrough.lang.core-00-basic,
        :deps nil}))
 
 
@@ -224,7 +224,7 @@
        :standalone nil,
        :template fn?,
        :op 'defmacro,
-       :module 'walkthrough.tahto.core-00-basic,
+       :module 'walkthrough.lang.core-00-basic,
        :lang :js,
        :priority nil,
        :id 'double-add,
@@ -232,5 +232,5 @@
        :declared nil,
        :display :default,
        :form '(fn [a b] (list '+ a a b b)),
-       :namespace 'walkthrough.tahto.core-00-basic,
+       :namespace 'walkthrough.lang.core-00-basic,
        :deps nil}))

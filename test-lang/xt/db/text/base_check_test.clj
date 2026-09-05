@@ -1,7 +1,7 @@
 (ns xt.db.text.base-check-test
   (:require [postgres.core :as pg]
             [postgres.sample.scratch-v1 :as scratch]
-            [tahto.core :as l])
+            [lang.core :as l])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}

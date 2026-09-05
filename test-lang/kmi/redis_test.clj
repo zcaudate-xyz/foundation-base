@@ -1,7 +1,7 @@
 (ns kmi.redis-test
   (:require [lib.redis.bench :as bench]
-            [tahto.runtime.redis]
-            [tahto.core :as l])
+            [lang.runtime.redis]
+            [lang.core :as l])
   (:use code.test))
 
 (l/script- :lua

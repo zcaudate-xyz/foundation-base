@@ -1,6 +1,6 @@
 (ns js.react.view-demos-test
   (:use code.test)
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script- :js
   {:runtime :basic

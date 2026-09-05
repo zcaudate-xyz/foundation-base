@@ -1,6 +1,6 @@
 (ns haskell.live-test
-  (:require [tahto.core :as l]
-            [tahto.model.annex.spec-haskell]
+  (:require [lang.core :as l]
+            [lang.model.annex.spec-haskell]
             [haskell.core :as h]
             [std.lib.env :as env])
   (:use code.test))

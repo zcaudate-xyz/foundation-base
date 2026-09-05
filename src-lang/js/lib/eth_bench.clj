@@ -1,5 +1,5 @@
 (ns js.lib.eth-bench
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
 (l/script :js

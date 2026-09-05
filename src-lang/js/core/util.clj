@@ -1,5 +1,5 @@
 (ns js.core.util
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js)
 

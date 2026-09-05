@@ -1,9 +1,9 @@
 (ns postgres.core.graph-query-test
-  (:require [tahto.runtime.postgres.base.application :as app]
+  (:require [lang.runtime.postgres.base.application :as app]
             [postgres.core.graph-query :as q]
             [postgres.core.impl-base :as impl]
             [postgres.sample.scratch-v1 :as scratch]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.schema :as schema])
   (:use code.test))
 

@@ -1,6 +1,6 @@
 (ns circom.core
-  (:require [tahto.core :as l]
-            [tahto.model.annex.spec-circom]))
+  (:require [lang.core :as l]
+            [lang.model.annex.spec-circom]))
 
 (l/script :circom)
 

@@ -216,9 +216,9 @@
   (publish '[core] {:write true})
   (publish '[core])
   
-  (require '[tahto.deploy])
+  (require '[lang.deploy])
   (./code:incomplete '[tahto])
-  (tahto.deploy/deploy '[tahto] {:tag :all})
+  (lang.deploy/deploy '[tahto] {:tag :all})
   (deploy-template [:core] {})
   (publish :all {:write true})
   

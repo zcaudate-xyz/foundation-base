@@ -1,5 +1,5 @@
 (ns gdscript.tutorial.example-core
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :gdscript)
 

@@ -33,8 +33,8 @@
   (data/ns-group 'std.concurrent.queued)
   => "std.concurrent"
 
-  (data/ns-group 'tahto.core)
-  => "tahto.core")
+  (data/ns-group 'lang.core)
+  => "lang.core")
 
 ^{:refer code.doc.link.data/attach-items :added "4.1"}
 (fact "attaches items or an error when empty"

@@ -29,7 +29,7 @@
    => string?"
   {:added "3.0"}
   ([entry]
-   (str "# tahto.deploy\n"
+   (str "# lang.deploy\n"
         "# " (java.util.Date.) "\n"
         "version=" (:version entry) "\n"
         "groupId=" (:group entry) "\n"
@@ -161,8 +161,8 @@
    (if-not simulate
      (spit (str root "/MANIFEST.MF")
            (str "Manifest-Version: 1.0\n"
-                "Built-By: tahto.deploy\n"
-                "Created-By: tahto.deploy\n"
+                "Built-By: lang.deploy\n"
+                "Created-By: lang.deploy\n"
                 "Build-Jdk: " (get (System/getProperties) "java.runtime.version")  "\n"
                 "Main-Class: clojure.main")))
    "MANIFEST.MF"))

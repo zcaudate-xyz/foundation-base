@@ -1,5 +1,5 @@
 (ns xt.lang.common-math
-  (:require [tahto.core :as l :refer [defspec.xt]])
+  (:require [lang.core :as l :refer [defspec.xt]])
   (:refer-clojure :exclude [mod round abs max min quot]))
 
 (l/script :xtalk

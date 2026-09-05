@@ -1,5 +1,5 @@
 (ns js.react-native.helper-browser
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]

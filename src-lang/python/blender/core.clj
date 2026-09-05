@@ -6,7 +6,7 @@
    lets Blender scripts refer to `objects`, `materials`, `context:scene`, etc.
    without repeatedly typing the full `bpy.data...` path."
   (:require [python.blender.core.builtin :as builtin]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [eval]))
 

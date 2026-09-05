@@ -1,6 +1,6 @@
 (ns xt.ui.frames.form
   "Schema-driven form frame over serializable form state and actions."
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

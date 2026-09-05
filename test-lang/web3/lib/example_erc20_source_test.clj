@@ -1,11 +1,11 @@
 (ns web3.lib.example-erc20-source-test
-  (:require [tahto.runtime.solidity.env-hardhat :as env]
-            [tahto.core :as l])
+  (:require [lang.runtime.solidity.env-hardhat :as env]
+            [lang.core :as l])
   (:use code.test))
 
 (l/script :solidity
   {:runtime :web3
-   :require [[tahto.runtime.solidity :as s]
+   :require [[lang.runtime.solidity :as s]
              [web3.lib.example-erc20-source :as source]
              [web3.lib.example-erc20 :as erc20]]})
 

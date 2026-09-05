@@ -1,6 +1,6 @@
 (ns xt.ui.state.model
   "UI-facing facade over local and proxy xt.substrate models."
-  (:require [tahto.core :as l :refer [defspec.xt]]))
+  (:require [lang.core :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

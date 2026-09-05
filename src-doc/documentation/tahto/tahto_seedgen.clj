@@ -1,10 +1,10 @@
 (ns documentation.tahto-seedgen
-  (:require [tahto.seedgen.common-util :as seedgen])
+  (:require [lang.seedgen.common-util :as seedgen])
   (:use code.test))
 
-[[:hero {:title "tahto.seedgen"
+[[:hero {:title "lang.seedgen"
          :subtitle "Seed generation and xtalk test scaffolding."
-         :lead "`tahto.seedgen` supports generated seed files and xtalk-oriented test scaffolding for language/runtime coverage."}]]
+         :lead "`lang.seedgen` supports generated seed files and xtalk-oriented test scaffolding for language/runtime coverage."}]]
 
 [[:chapter {:title "Motivation"}]]
 "When many target languages need similar coverage, seed generation keeps test shape consistent while letting each language specialize emission and runtime details."
@@ -97,7 +97,7 @@
   (let [tmp (java.io.File/createTempFile "seedgen" ".clj")
         path (.getAbsolutePath tmp)]
     (try
-      (spit tmp "^{:seedgen/skip true}\n(ns sample.test\n  (:use code.test)\n  (:require [tahto.core :as l]))\n\n(l/script- :js {:runtime :basic})\n")
+      (spit tmp "^{:seedgen/skip true}\n(ns sample.test\n  (:use code.test)\n  (:require [lang.core :as l]))\n\n(l/script- :js {:runtime :basic})\n")
       (seedgen/seedgen-skip? path)
       (finally
         (.delete tmp))))
@@ -107,7 +107,7 @@
   (let [tmp (java.io.File/createTempFile "seedgen" ".clj")
         path (.getAbsolutePath tmp)]
     (try
-      (spit tmp "(ns sample.test\n  (:use code.test)\n  (:require [tahto.core :as l]))\n\n^{:seedgen/root {:all true}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n")
+      (spit tmp "(ns sample.test\n  (:use code.test)\n  (:require [lang.core :as l]))\n\n^{:seedgen/root {:all true}}\n(l/script- :js {:runtime :basic})\n\n(l/script- :lua {:runtime :basic})\n")
       [(seedgen/seedgen-root-langs path true)
        (seedgen/seedgen-root-langs path false)]
       (finally
@@ -118,7 +118,7 @@
   (let [tmp (java.io.File/createTempFile "seedgen" ".clj")
         path (.getAbsolutePath tmp)]
     (try
-      (spit tmp "(ns sample.test\n  (:use code.test)\n  (:require [tahto.core :as l]))\n\n^{:seedgen/root {:all true}}\n(l/script- :js {:runtime :basic})\n\n^{:refer sample/foo}\n(fact \"x\" (!.js 1) => 1)\n")
+      (spit tmp "(ns sample.test\n  (:use code.test)\n  (:require [lang.core :as l]))\n\n^{:seedgen/root {:all true}}\n(l/script- :js {:runtime :basic})\n\n^{:refer sample/foo}\n(fact \"x\" (!.js 1) => 1)\n")
       (keys (seedgen/seedgen-fact-forms path))
       (finally
         (.delete tmp))))

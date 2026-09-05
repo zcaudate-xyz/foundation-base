@@ -1,5 +1,5 @@
 (ns kmi-repl.main
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:require [[kmi.lang.runtime :as rt]

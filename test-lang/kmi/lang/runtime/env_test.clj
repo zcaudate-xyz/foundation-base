@@ -1,5 +1,5 @@
 (ns kmi.lang.runtime.env-test
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:use code.test))
 
 ^{:seedgen/root {:all true :langs [:lua :python :dart]}}

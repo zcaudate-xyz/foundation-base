@@ -1,5 +1,5 @@
 (ns js.blessed.frame-status-test
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:use code.test))
 
 (l/script :js

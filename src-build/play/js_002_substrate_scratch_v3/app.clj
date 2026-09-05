@@ -1,5 +1,5 @@
 (ns play.js-002-substrate-scratch-v3.app
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:import [["https://esm.sh/react@18.3.1" :as React]

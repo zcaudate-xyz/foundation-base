@@ -1,6 +1,6 @@
 (ns js.tamagui
   (:require [js.react.compile :as compile]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.block :as block]
             [std.lib.foundation :as f]
             [std.string.case :as case]))

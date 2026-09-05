@@ -1,5 +1,5 @@
 (ns js.net.conn-redis
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f]
             [xt.lang.common-protocol :refer [defimpl.xt]])
   (:refer-clojure :exclude [print send]))

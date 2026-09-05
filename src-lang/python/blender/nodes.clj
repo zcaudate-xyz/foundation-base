@@ -1,5 +1,5 @@
 (ns python.blender.nodes
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :python
   {:runtime :blender

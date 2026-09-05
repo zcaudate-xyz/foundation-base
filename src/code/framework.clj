@@ -533,7 +533,7 @@
 
 (comment
 
-  (./reset '[tahto.block code.manage])
+  (./reset '[lang.block code.manage])
   (def a* (analyse-source-code (slurp "src/tahto/code/framework.clj")))
 
   (def a* (analyse-test-code (slurp "test/tahto/code/framework_test.clj")))

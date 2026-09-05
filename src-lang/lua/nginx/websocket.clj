@@ -1,5 +1,5 @@
 (ns lua.nginx.websocket
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :lua.nginx

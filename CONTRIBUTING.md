@@ -50,7 +50,7 @@ lein install
 |---|---|
 | `std.*` | Standard libraries and reusable infrastructure |
 | `code.*` | Testing, documentation, source management, queries, tooling, and analysis |
-| `tahto.*` | Language authoring, target models, typing, and code generation |
+| `lang.*` | Language authoring, target models, typing, and code generation |
 | `rt.*` | Runtime adapters and execution environments |
 | `xt.*` | Portable libraries and cross-target application layers |
 | `src-build/` | Walkthroughs, demos, build definitions, and generated projects |

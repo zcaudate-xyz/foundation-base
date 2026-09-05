@@ -1,5 +1,5 @@
 (ns lua.nginx.conn-sqlite
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f]
             [xt.lang.common-protocol :refer [defimpl.xt]]))
 

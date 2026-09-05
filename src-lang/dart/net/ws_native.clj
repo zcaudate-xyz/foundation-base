@@ -1,5 +1,5 @@
 (ns dart.net.ws-native
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-protocol :refer [defimpl.xt]]))
 
 (l/script :dart

@@ -1,6 +1,6 @@
 (ns python.core-test
   (:require [std.json :as json]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.component :as component])
   (:use code.test))
 

@@ -456,36 +456,36 @@
  
   xyz.zcaudate/tahto
   {:description "working with other languages"
-   :include [[tahto :exclude [tahto.runtime.postgres
-                             tahto.runtime.graal
-                             tahto.runtime.jep
-                             tahto.runtime.libpython
-                             tahto.runtime.redis
-                             tahto.runtime.solidity
-                             tahto.runtime.nginx
-                             tahto.runtime.basic.impl.process-verilog
-                             tahto.runtime.basic.impl-annex.process-r
-                             tahto.model.spec-postgres
-                             tahto.model.spec-solidity
-                             tahto.model.annex.spec-r]]
+   :include [[tahto :exclude [lang.runtime.postgres
+                             lang.runtime.graal
+                             lang.runtime.jep
+                             lang.runtime.libpython
+                             lang.runtime.redis
+                             lang.runtime.solidity
+                             lang.runtime.nginx
+                             lang.runtime.basic.impl.process-verilog
+                             lang.runtime.basic.impl-annex.process-r
+                             lang.model.spec-postgres
+                             lang.model.spec-solidity
+                             lang.model.annex.spec-r]]
              [xt.lang :complete]]}
 
- xyz.zcaudate/tahto.runtime.libpython
+ xyz.zcaudate/lang.runtime.libpython
  {:description "nginx runtime support"
-  :include [[tahto.runtime.libpython :complete]]}
+  :include [[lang.runtime.libpython :complete]]}
  
- xyz.zcaudate/tahto.runtime.nginx
+ xyz.zcaudate/lang.runtime.nginx
  {:description "nginx runtime support"
-  :include [[tahto.runtime.nginx :complete]]}
+  :include [[lang.runtime.nginx :complete]]}
  
- xyz.zcaudate/tahto.runtime.redis
+ xyz.zcaudate/lang.runtime.redis
   {:description "runtime for redis" 
-   :include [[tahto.runtime.redis :complete]]
+   :include [[lang.runtime.redis :complete]]
    :bundle [{:path "resources" :include ["assets/rt.redis"]}]}
   
- xyz.zcaudate/tahto.runtime.graal
+ xyz.zcaudate/lang.runtime.graal
   {:description "runtime for graal contexts"
-   :include [[tahto.runtime.graal :complete]]
+   :include [[lang.runtime.graal :complete]]
    :bundle [{:path "target/classes" 
              :include ["hara/lib/graal"]}]
    :dependencies [org.graalvm.sdk/graal-sdk
@@ -493,20 +493,20 @@
                  org.graalvm.js/js-scriptengine
 		             commons-io/commons-io]}
  
- xyz.zcaudate/tahto.runtime.jep
+ xyz.zcaudate/lang.runtime.jep
   {:description "runtime for jep" 
-   :include [[tahto.runtime.jep :complete]]
+   :include [[lang.runtime.jep :complete]]
    :dependencies [black.ninia/jep]}
  
  xyz.zcaudate/postgres
  {:description "postgres language and runtime support"
   :include [[postgres :exclude [postgres.sample]]
-            [tahto.runtime.postgres :complete]]}
+            [lang.runtime.postgres :complete]]}
 
  xyz.zcaudate/solidity
  {:description "solidity language and runtime support"
   :include [[solidity.core :complete]
-            [tahto.runtime.solidity :complete]]}
+            [lang.runtime.solidity :complete]]}
 
  xyz.zcaudate/verilog
  {:description "verilog language and runtime support"

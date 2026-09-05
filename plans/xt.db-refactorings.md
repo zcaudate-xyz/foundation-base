@@ -42,7 +42,7 @@ Create `xt.db.view.core` with shared logic, then backend-specific wrappers.
 
 ```clojure
 (ns xt.db.view.core
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
@@ -170,7 +170,7 @@ Create `xt.db.view.core` with shared logic, then backend-specific wrappers.
 
 ```clojure
 (ns xt.db.sql-view
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
@@ -309,7 +309,7 @@ Create `xt.db.view.core` with shared logic, then backend-specific wrappers.
 
 ```clojure
 (ns xt.db.cache-view
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
@@ -438,7 +438,7 @@ src/xt/db/
 
 ```clojure
 (ns xt.db.sql-encode.value
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
@@ -491,7 +491,7 @@ src/xt/db/
 
 ```clojure
 (ns xt.db.sql-encode.function
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
@@ -539,7 +539,7 @@ src/xt/db/
 
 ```clojure
 (ns xt.db.sql-encode.core
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
              [xt.db.sql-encode.value :as value]
              [xt.db.sql-encode.column :as column]
              [xt.db.sql-encode.function :as function]
@@ -583,7 +583,7 @@ src/xt/db/
 
 ```clojure
 (ns xt.db.sql-util
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
@@ -666,7 +666,7 @@ src/xt/db/
 
 ```clojure
 (ns xt.db.error
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
@@ -919,7 +919,7 @@ Add to `test/xt/db/refactoring_validation_test.clj`:
 
 ```clojure
 (ns xt.db.refactoring-validation-test
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.db :as db]
             [xt.db.sample-test :as sample])
   (:use code.test))

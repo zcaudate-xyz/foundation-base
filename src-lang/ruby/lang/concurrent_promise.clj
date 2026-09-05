@@ -1,6 +1,6 @@
 (ns ruby.lang.concurrent-promise
   (:refer-clojure :exclude [promise])
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :ruby {})
 

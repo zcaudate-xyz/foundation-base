@@ -1,6 +1,6 @@
 (ns xt.lang.common-resource
-  (:require [tahto.core :as l]
-             [tahto.typed :refer [defspec.xt]]
+  (:require [lang.core :as l]
+             [lang.typed :refer [defspec.xt]]
              [std.lib.env :as env]
              [std.lib.foundation]
              [std.lib.function :as f]

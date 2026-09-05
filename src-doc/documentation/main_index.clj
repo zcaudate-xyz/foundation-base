@@ -46,7 +46,7 @@
                        :title "Development tools"
                        :text "Testing, documentation, structural queries, maintenance, project tooling, and analysis."
                        :href "code-tools.html"}
-                      {:meta "tahto.* and rt.*"
+                      {:meta "lang.* and rt.*"
                        :title "Languages and runtimes"
                        :text "Grammar-driven code generation, typing, target models, and runtime adapters."
                        :href "tahto/index.html"}
@@ -69,10 +69,10 @@
 
 [[:section {:title "Generate target-language code"}]]
 
-"`tahto.core` stores code in a reusable intermediate form and emits it through a target grammar. The language tooling also supports modules, dependency tracking, inspection, testing, and runtime execution."
+"`lang.core` stores code in a reusable intermediate form and emits it through a target grammar. The language tooling also supports modules, dependency tracking, inspection, testing, and runtime execution."
 
 [[:code {:lang "clojure"}
-  "(require '[tahto.core :as l])\n\n(l/emit-as :js '(+ 1 2 3))\n;; => \"1 + 2 + 3\""]]
+  "(require '[lang.core :as l])\n\n(l/emit-as :js '(+ 1 2 3))\n;; => \"1 + 2 + 3\""]]
 
 [[:section {:title "Run a targeted test"}]]
 

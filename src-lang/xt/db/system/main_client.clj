@@ -1,5 +1,5 @@
 (ns xt.db.system.main-client
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 
 (l/script :xtalk)

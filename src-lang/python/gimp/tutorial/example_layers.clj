@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns python.gimp.tutorial.example-layers
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :python
   {:require [[python.gimp.tutorial.example-core :as core]]})

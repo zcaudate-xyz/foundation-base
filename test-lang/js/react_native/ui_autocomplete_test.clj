@@ -1,6 +1,6 @@
 (ns js.react-native.ui-autocomplete-test
   (:require [clojure.string]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.env :as env])
   (:use code.test))
 

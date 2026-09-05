@@ -1,5 +1,5 @@
 (ns xt.lang.common-string
-  (:require [tahto.core :as l :refer [defspec.xt]])
+  (:require [lang.core :as l :refer [defspec.xt]])
   (:refer-clojure :exclude [replace]))
 
 (l/script :xtalk

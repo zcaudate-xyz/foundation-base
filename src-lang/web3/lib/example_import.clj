@@ -1,5 +1,5 @@
 (ns web3.lib.example-erc20-source
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :solidity
   {:require [[solidity.core.builtin :as s]]

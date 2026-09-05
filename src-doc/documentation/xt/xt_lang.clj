@@ -1,5 +1,5 @@
 (ns documentation.xt-lang
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:use code.test))
 
 (l/script- :js
@@ -14,7 +14,7 @@
 
 [[:hero {:title "xt.lang"
          :subtitle "Portable language primitives and common libraries."
-         :lead "`xt.lang` defines reusable xtalk libraries that target JS, Lua, Python, Dart, and other runtimes through tahto.core emission."}]]
+         :lead "`xt.lang` defines reusable xtalk libraries that target JS, Lua, Python, Dart, and other runtimes through lang.core emission."}]]
 
 [[:chapter {:title "Motivation" :link "motivation"}]]
 

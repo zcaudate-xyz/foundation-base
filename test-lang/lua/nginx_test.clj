@@ -1,6 +1,6 @@
 (ns lua.nginx-test
-  (:require [tahto.runtime.nginx :as nginx]
-            [tahto.core :as l]
+  (:require [lang.runtime.nginx :as nginx]
+            [lang.core :as l]
             [std.lib.env :as env]
             [xt.lang.common-notify :as notify])
   (:use code.test))
@@ -163,7 +163,7 @@
 
 (comment
 
-  (tahto.runtime.nginx/nginx-conf)
+  (lang.runtime.nginx/nginx-conf)
   (./import))
 
 

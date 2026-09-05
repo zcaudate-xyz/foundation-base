@@ -9,12 +9,12 @@
    browser over the WebSocket, and then `!.js` forms drive substrate page
    models through `js.react.ext-page`."
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.component :as component]
             [xt.lang.common-notify :as notify]))
 
-(require '[tahto.runtime.js-playground :as js-playground]
-         '[tahto.runtime.chromedriver :as chromedriver])
+(require '[lang.runtime.js-playground :as js-playground]
+         '[lang.runtime.chromedriver :as chromedriver])
 
 (l/script- :js
   {:runtime :playground
@@ -26,7 +26,7 @@
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
-             [tahto.runtime.js-playground.client :as client]
+             [lang.runtime.js-playground.client :as client]
              [js.react.ext-page :as ext-page]]
    :emit {:lang/jsx false}})
 

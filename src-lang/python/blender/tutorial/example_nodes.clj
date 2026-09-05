@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns python.blender.tutorial.example-nodes
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :python
   {:require [[python.blender.nodes :as n]

@@ -1,8 +1,8 @@
 ^{:seedgen/skip true}
 (ns xt.substrate.walkthrough-js.s30-workers-test
   (:use code.test)
-  (:require [tahto.core :as l]
-            [tahto.runtime.chromedriver :as chromedriver]
+  (:require [lang.core :as l]
+            [lang.runtime.chromedriver :as chromedriver]
             [xt.substrate.transport-browser]
             [xt.lang.common-notify :as notify]))
 

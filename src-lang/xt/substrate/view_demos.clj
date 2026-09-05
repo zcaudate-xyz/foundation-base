@@ -13,7 +13,7 @@
    substrate state and `install-handlers` registers the `demo/*` request
    handlers, so dispatch -> state-set -> notify drives live rebuilds on
    every host."
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

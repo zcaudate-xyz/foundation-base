@@ -1,5 +1,5 @@
 (ns js.lib.optics
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [get set remove chars filter finnd nth]))
 

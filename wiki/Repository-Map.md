@@ -8,7 +8,7 @@ Foundation Base contains several related systems in one repository.
 |---|---|
 | `std.*` | Standard libraries and reusable infrastructure |
 | `code.*` | Testing, documentation, source queries, maintenance, project tooling, and analysis |
-| `tahto.*` | Language authoring, grammar-driven code generation, target models, and typing |
+| `lang.*` | Language authoring, grammar-driven code generation, target models, and typing |
 | `rt.*` | Runtime adapters and execution environments |
 | `xt.*` | Portable libraries and application layers built with the language tooling |
 

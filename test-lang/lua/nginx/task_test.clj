@@ -1,8 +1,8 @@
 (ns lua.nginx.task-test
-  (:require [tahto.runtime.nginx.config :as config]
+  (:require [lang.runtime.nginx.config :as config]
             [std.json :as json]
             [std.lib.env :as env]
-            [tahto.core :as l])
+            [lang.core :as l])
   (:use code.test))
 
 (def +resty-http-conf+

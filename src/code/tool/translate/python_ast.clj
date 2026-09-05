@@ -1,6 +1,6 @@
 (ns code.tool.translate.python-ast
   (:require [std.fs :as fs]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.env :as env]
             [std.lib.os :as os]
             [std.make :as make :refer [def.make]]))

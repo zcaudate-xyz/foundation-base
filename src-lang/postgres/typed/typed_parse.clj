@@ -11,7 +11,7 @@
            (str/starts-with? (str ns-sym) "rt.postgres."))
     (symbol (str/replace (str ns-sym)
                          #"^rt\.postgres\."
-                         "tahto.runtime.postgres."))
+                         "lang.runtime.postgres."))
     ns-sym))
 
 (defn- existing-file-path

@@ -1,6 +1,6 @@
 (ns xt.net.ws-phoenix-test
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
 

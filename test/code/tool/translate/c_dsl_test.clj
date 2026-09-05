@@ -1,7 +1,7 @@
 (ns code.tool.translate.c-dsl-test
   (:require [code.tool.translate.c-dsl :as c-dsl]
-            [tahto.core :as l]
-            [tahto.model.spec-c :as c])
+            [lang.core :as l]
+            [lang.model.spec-c :as c])
   (:use code.test))
 
 (fact "Translate basic function declaration"

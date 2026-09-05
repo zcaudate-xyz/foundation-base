@@ -30,7 +30,7 @@ Foundation Base is organised into four primary areas:
 |---|---|
 | `std.*` | Standard libraries and reusable infrastructure: collections, concurrency, filesystems, strings, time, tasks, scheduling, configuration, data handling, and system utilities |
 | `code.*` | Developer tooling: testing, documentation, source queries, code management, project metadata, build tooling, and analysis |
-| `tahto.*` and `rt.*` | Language authoring, grammar-driven code generation, typing, and runtime adapters |
+| `lang.*` and `rt.*` | Language authoring, grammar-driven code generation, typing, and runtime adapters |
 | `xt.*` | Portable libraries and application layers built on top of the language tooling |
 
 Supporting directories include:
@@ -87,10 +87,10 @@ Try a standard-library helper:
 
 ## Generate target-language code
 
-`tahto.core` is a language-oriented templating and code-generation system. Clojure forms are stored in a reusable intermediate representation and emitted through a target grammar.
+`lang.core` is a language-oriented templating and code-generation system. Clojure forms are stored in a reusable intermediate representation and emitted through a target grammar.
 
 ```clojure
-(require '[tahto.core :as l])
+(require '[lang.core :as l])
 
 (l/emit-as :js '[(+ 1 2 3)])
 ;; => "1 + 2 + 3"

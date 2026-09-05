@@ -1,5 +1,5 @@
 (ns js.lib.bitcoin-test
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-data :as xtd])
   (:use code.test))
 

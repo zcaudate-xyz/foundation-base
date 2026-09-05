@@ -1,7 +1,7 @@
 # Godot Gaussian Splat Example
 
 This example renders a cloud of colored Gaussian splats in Godot 4 using the
-xtalk `tahto.core` GDScript DSL.
+xtalk `lang.core` GDScript DSL.
 
 ## File
 

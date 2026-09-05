@@ -1,5 +1,5 @@
 (ns xt.lang.common-trace
-  (:require [tahto.core :as l :refer [defspec.xt]]
+  (:require [lang.core :as l :refer [defspec.xt]]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
             [std.lib.env :as env]))

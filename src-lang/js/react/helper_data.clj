@@ -1,5 +1,5 @@
 (ns js.react.helper-data
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:require [[js.react :as r]]})

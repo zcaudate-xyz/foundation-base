@@ -1,5 +1,5 @@
 (ns xt.db.text.pgrest-tree
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.db.text.pgrest-graph :as pgrest-graph]

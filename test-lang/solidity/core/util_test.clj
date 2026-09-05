@@ -1,6 +1,6 @@
 (ns solidity.core.util-test
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [solidity.core.util :refer :all]))
 
 (l/script- :solidity

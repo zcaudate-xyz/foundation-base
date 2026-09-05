@@ -1,7 +1,7 @@
 (ns postgres.core-test
   (:require [postgres.core :as pg]
-            [tahto.runtime.postgres.base.application :as app]
-            [tahto.core :as l])
+            [lang.runtime.postgres.base.application :as app]
+            [lang.core :as l])
   (:use code.test))
 
 ^{:refer postgres.core/purge-postgres :added "4.0"}

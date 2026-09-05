@@ -3,8 +3,8 @@
   (:require [postgres.core :as pg]
             [postgres.gen.bind-macro :as gen]
             [postgres.sample.scratch-v1 :as scratch]
-            [tahto.core :as l]
-            [tahto.common.book :as book]
+            [lang.core :as l]
+            [lang.common.book :as book]
             [xt.db.helpers.seed-system-test :as data]
             [xt.db.helpers.seed-user-test :as user]))
 

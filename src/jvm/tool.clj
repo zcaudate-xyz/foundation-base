@@ -107,16 +107,16 @@
           code.manage/transform-code
           code.manage/snapto
 
-          tahto.seedgen/seedgen-list
-          tahto.seedgen/seedgen-incomplete
-          tahto.seedgen/seedgen-benchadd
-          tahto.seedgen/seedgen-benchremove
-          tahto.seedgen/seedgen-benchlist
-          tahto.seedgen/seedgen-benchadd
-          tahto.seedgen/seedgen-root
-          tahto.seedgen/seedgen-langadd
-          tahto.seedgen/seedgen-langremove
-          tahto.seedgen/seedgen-readforms
+          lang.seedgen/seedgen-list
+          lang.seedgen/seedgen-incomplete
+          lang.seedgen/seedgen-benchadd
+          lang.seedgen/seedgen-benchremove
+          lang.seedgen/seedgen-benchlist
+          lang.seedgen/seedgen-benchadd
+          lang.seedgen/seedgen-root
+          lang.seedgen/seedgen-langadd
+          lang.seedgen/seedgen-langremove
+          lang.seedgen/seedgen-readforms
           
           code.doc/publish
           code.doc/init-template

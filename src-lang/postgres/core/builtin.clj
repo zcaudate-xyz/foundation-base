@@ -1,6 +1,6 @@
 (ns postgres.core.builtin
-  (:require [tahto.model.spec-postgres]
-            [tahto.core :as l]
+  (:require [lang.model.spec-postgres]
+            [lang.core :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
   (:refer-clojure :exclude [abs concat format replace repeat reverse mod bit-and bit-or count max min]))

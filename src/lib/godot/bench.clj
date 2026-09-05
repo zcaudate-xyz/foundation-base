@@ -7,7 +7,7 @@
             [std.lib.future :as future]
             [std.lib.network :as network]
             [std.lib.os :as os]
-            [tahto.runtime.basic.type-common :as common]))
+            [lang.runtime.basic.type-common :as common]))
 
 (def +bench-path+ "test-bench/godot")
 

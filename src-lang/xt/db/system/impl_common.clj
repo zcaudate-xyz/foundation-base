@@ -1,5 +1,5 @@
 (ns xt.db.system.impl-common
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-protocol :as proto :refer [defprotocol.xt]]))
 
 (l/script :xtalk

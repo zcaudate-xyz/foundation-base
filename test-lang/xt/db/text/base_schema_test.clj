@@ -1,7 +1,7 @@
 (ns xt.db.text.base-schema-test
   (:use code.test)
   (:require [std.json :as json]
-            [tahto.core :as l]))
+            [lang.core :as l]))
 
 ^{:seedgen/root {:all true}}
 (l/script- :js

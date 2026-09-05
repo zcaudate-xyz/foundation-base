@@ -1,5 +1,5 @@
 (ns js.lib.eth-lib
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f]
             [xt.lang.common-notify :as notify])
   (:refer-clojure :exclude [compile]))

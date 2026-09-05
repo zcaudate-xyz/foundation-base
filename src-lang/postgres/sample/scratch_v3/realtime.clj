@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns postgres.sample.scratch-v3.realtime
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

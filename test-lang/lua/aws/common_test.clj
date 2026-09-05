@@ -1,6 +1,6 @@
 (ns lua.aws.common-test
   (:require [clojure.string]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.env :as env]
             [std.string.prose :as prose])
   (:use code.test))

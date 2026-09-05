@@ -1,8 +1,8 @@
 ^{:no-test true}
 (ns postgres.sample.scratch-v3
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [postgres.core :as pg :refer [defret.pg defsel.pg]]
-            [tahto.runtime.postgres.base.application :as app]
+            [lang.runtime.postgres.base.application :as app]
             [postgres.gen.bind-macro :as bind-pg]))
 
 (l/script :postgres

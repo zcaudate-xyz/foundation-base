@@ -74,7 +74,7 @@
 (defn rename-tests
   "rename tests given namespaces
  
-   (rename-tests 'tahto.util.transform 'std.lib.stream.xform)"
+   (rename-tests 'lang.util.transform 'std.lib.stream.xform)"
   {:added "3.0"}
   ([from to]
    (let [from-ns   (symbol (str from "-test"))
@@ -104,10 +104,10 @@
 (comment
   (rename-test-var 'std.lib.class 'class:array:primitive? 'primitive:array?)
   (rename-test-var 'std.lib.return 'ret:resolve 'return-resolve)
-  (rename-tests 'tahto.util.transform 'std.lib.stream.xform)
+  (rename-tests 'lang.util.transform 'std.lib.stream.xform)
 
   (fix-tests)
-  (str (f/re-create "tahto.util"))
+  (str (f/re-create "lang.util"))
   
   (partial fs/relativize (fs/path "test/tahto"))
   (map (comp symbol

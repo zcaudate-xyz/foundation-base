@@ -1,5 +1,5 @@
 (ns xt.lang.common-protocol
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.string.case :as case]))
 
 (l/script :xtalk

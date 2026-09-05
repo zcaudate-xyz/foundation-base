@@ -1,5 +1,5 @@
 (ns js.lib.datetime
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:refer-clojure :exclude [print send]))
 
 (l/script :js

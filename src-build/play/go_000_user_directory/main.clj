@@ -1,6 +1,6 @@
 (ns play.go-000-user-directory.main
-  (:require [tahto.core :as l]
-            [tahto.model.spec-go]))
+  (:require [lang.core :as l]
+            [lang.model.spec-go]))
 
 (l/script :go)
 

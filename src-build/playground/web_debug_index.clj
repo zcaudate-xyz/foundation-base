@@ -1,5 +1,5 @@
 (ns playground.web-debug-index
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]
             [net.http :as http]))

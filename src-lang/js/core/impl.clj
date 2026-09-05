@@ -1,5 +1,5 @@
 (ns js.core.impl
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
   (:refer-clojure :exclude [abs concat eval filter find keys map max min name pop read reduce replace reverse some sort]))

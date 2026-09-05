@@ -1,5 +1,5 @@
 (ns postgres.gen.gen-bind
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [postgres.gen.bind-macro :as gen]
             [std.lib.env :as env]
             [std.lib.foundation :as f]

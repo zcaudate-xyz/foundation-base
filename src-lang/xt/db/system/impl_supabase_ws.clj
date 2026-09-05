@@ -1,5 +1,5 @@
 (ns xt.db.system.impl-supabase-ws
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-protocol :refer [defprotocol.xt]]))
 
 (l/script :xtalk

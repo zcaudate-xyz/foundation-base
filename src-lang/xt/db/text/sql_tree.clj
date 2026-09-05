@@ -1,5 +1,5 @@
 (ns xt.db.text.sql-tree
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.db.text.sql-graph :as sql-graph]

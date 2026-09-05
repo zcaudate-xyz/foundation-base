@@ -1,5 +1,5 @@
 (ns lua.aws.s3
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :lua.nginx
   {:require [[lua.aws.common :as common] [lua.nginx :as n]

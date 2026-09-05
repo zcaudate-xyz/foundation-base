@@ -1,8 +1,8 @@
 ^{:seedgen/skip true}
 (ns xt.db.poc.s06-supabase-auth-test
   (:use code.test)
-  (:require [tahto.core :as l]
-            [tahto.runtime.chromedriver :as chromedriver]
+  (:require [lang.core :as l]
+            [lang.runtime.chromedriver :as chromedriver]
             [xt.lang.common-notify :as notify]
             [scaffold.supabase.local-min :as local-min]))
 

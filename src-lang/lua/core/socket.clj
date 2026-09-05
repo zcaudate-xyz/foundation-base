@@ -1,5 +1,5 @@
 (ns lua.core.socket
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [assert byte format load max min print remove sort time type]))
 

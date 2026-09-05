@@ -1,5 +1,5 @@
 (ns component.web-native
-  (:require [tahto.core :as  l]
+  (:require [lang.core :as  l]
             [std.lib :as h]))
 
 (l/script :js

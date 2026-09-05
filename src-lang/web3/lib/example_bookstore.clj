@@ -1,5 +1,5 @@
 (ns web3.lib.example-bookstore
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.env :as env]))
 
 (l/script :solidity

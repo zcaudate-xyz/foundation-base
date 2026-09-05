@@ -1,5 +1,5 @@
 (ns postgres.sample.scratch-v2
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :postgres
   {:require [[postgres.core :as pg]]

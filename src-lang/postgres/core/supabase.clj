@@ -3,9 +3,9 @@
             [std.lib.context.pointer :as ptr]
             [std.lib.foundation :as f]
             [std.json :as json]
-            [tahto.core :as l]
-            [tahto.core.impl :as impl]
-            [tahto.model.spec-postgres.common :as common]
+            [lang.core :as l]
+            [lang.core.impl :as impl]
+            [lang.model.spec-postgres.common :as common]
             [postgres.core.addon :as addon]))
 
 (l/script :postgres

@@ -1,5 +1,5 @@
 (ns js.react-native.ui-toggle-switch
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:runtime :websocket

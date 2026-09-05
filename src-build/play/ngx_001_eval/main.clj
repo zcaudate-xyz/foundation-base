@@ -1,5 +1,5 @@
 (ns play.ngx-001-eval.main
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]
             [net.http :as http]
@@ -52,7 +52,7 @@
                                '(lua.nginx/http-echo-ws))]]]]))]]]])
 
 (comment
-  (tahto.runtime.nginx/error-logs))
+  (lang.runtime.nginx/error-logs))
 
 
 (comment

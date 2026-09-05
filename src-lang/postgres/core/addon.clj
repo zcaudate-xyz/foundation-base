@@ -1,8 +1,8 @@
 (ns postgres.core.addon
-  (:require [tahto.model.spec-postgres.common :as common]
-            [tahto.model.spec-postgres.tf :as tf]
+  (:require [lang.model.spec-postgres.common :as common]
+            [lang.model.spec-postgres.tf :as tf]
             [std.json :as json]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.template :as template])
   (:refer-clojure :exclude [case update assert throw name]))
 

@@ -218,4 +218,4 @@
 
 (comment
   (javac '[hara.lib])
-  (javac '[tahto.core]))
+  (javac '[lang.core]))

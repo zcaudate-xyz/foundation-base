@@ -1,6 +1,6 @@
 (ns dart.ui.view.runtime
   "Dart/Wind runtime adapter for serializable xt.substrate.view IR."
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :dart
   {:require [[xt.lang.spec-base :as xt]

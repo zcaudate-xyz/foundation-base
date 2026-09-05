@@ -34,7 +34,7 @@ The current dependency version is declared in [`project.clj`](https://github.com
 ## Emit JavaScript
 
 ```clojure
-(require '[tahto.core :as l])
+(require '[lang.core :as l])
 
 (l/emit-as :js '(+ 1 2 3))
 ;; => "1 + 2 + 3"

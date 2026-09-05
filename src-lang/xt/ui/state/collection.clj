@@ -1,6 +1,6 @@
 (ns xt.ui.state.collection
   "Serializable collection query, pagination and selection state."
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]

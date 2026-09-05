@@ -1,6 +1,6 @@
 (ns xt.ui.state.session
   "Platform-neutral authentication and access projection without routing."
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]]})

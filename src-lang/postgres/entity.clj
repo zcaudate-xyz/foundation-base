@@ -1,9 +1,9 @@
 (ns postgres.entity
   (:require [clojure.set :as set]
             [clojure.string :as str]
-            [tahto.model.spec-postgres.entity-util :as ut]
-            [tahto.core :as l]
-            [tahto.base.grammar-spec :as grammar-spec]
+            [lang.model.spec-postgres.entity-util :as ut]
+            [lang.core :as l]
+            [lang.base.grammar-spec :as grammar-spec]
             [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]
             [std.lib.env :as env]

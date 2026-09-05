@@ -1,5 +1,5 @@
 (ns xt.substrate.transport-browser
-  (:require [tahto.core :as l :refer [defspec.xt]]))
+  (:require [lang.core :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.substrate :as main]

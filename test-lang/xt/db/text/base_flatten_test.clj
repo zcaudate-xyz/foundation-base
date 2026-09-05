@@ -1,5 +1,5 @@
 (ns xt.db.text.base-flatten-test
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}

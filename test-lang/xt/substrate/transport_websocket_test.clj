@@ -1,7 +1,7 @@
 ^{:seedgen/skip true}
 (ns xt.substrate.transport-websocket-test
   (:use code.test)
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
 (l/script- :js

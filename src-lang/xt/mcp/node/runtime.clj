@@ -1,5 +1,5 @@
 (ns xt.mcp.node.runtime
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.mcp.node.kernel-base :as kernel-base]

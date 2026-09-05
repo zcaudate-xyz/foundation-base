@@ -1,6 +1,6 @@
 (ns dart.ui.wind
   "Dart entrypoint for the generated portable-to-WDynamic descriptor adapter."
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :dart
   {:require [[xt.ui.wind :as wind-ui]]

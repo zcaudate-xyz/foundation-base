@@ -2,7 +2,7 @@
   (:require [code.mcp.base.server :as base-server]
             [code.mcp.server :as server]
             [code.mcp.tool.basic :as basic]
-            [code.mcp.tool.tahto-lang :as tahto.core])
+            [code.mcp.tool.tahto-lang :as lang.core])
   (:use code.test))
 
 ^{:refer code.mcp.tool.basic/echo-fn :added "4.0"}
@@ -19,15 +19,15 @@
 
 ^{:refer code.mcp.tool.tahto-lang/lang-emit-as-safe :added "4.0"}
 (fact "safely emits code"
-  (tahto.core/lang-emit-as-safe :lua "(+ 1 2)")
+  (lang.core/lang-emit-as-safe :lua "(+ 1 2)")
   => "1 + 2"
 
-  (tahto.core/lang-emit-as-safe :js "(+ 1 2)")
+  (lang.core/lang-emit-as-safe :js "(+ 1 2)")
   => "1 + 2")
 
 ^{:refer code.mcp.tool.tahto-lang/lang-emit-as-fn :added "4.0"}
 (fact "tool wrapper for emit"
-  (tahto.core/lang-emit-as-fn nil {:type "lua" :code "(+ 1 2)"})
+  (lang.core/lang-emit-as-fn nil {:type "lua" :code "(+ 1 2)"})
   => {:content [{:type "text" :text "1 + 2"}]
       :isError false})
 
@@ -49,7 +49,7 @@
         "code-test"
         "code-manage"
         "jvm-namespace"
-        "lang-emit-as" "tahto.core-list" "tahto.core-modules"
+        "lang-emit-as" "lang.core-list" "lang.core-modules"
         "code-doc-init" "code-doc-deploy" "code-doc-publish"
         "code-maven"
         "form-heal-list-edits" "form-heal-get-dsl-deps" "form-heal-refactor-directory"})

@@ -116,7 +116,7 @@
   space-context-set
   (space:rt-get rt:scratch :lang/lua)
   (reg/registry-list)
-  (space-rt (space 'tahto.core.codegen.form-test)
+  (space-rt (space 'lang.core.codegen.form-test)
             :lang/start)
 
   (rt:current)

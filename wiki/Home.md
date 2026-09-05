@@ -6,7 +6,7 @@ It combines:
 
 - reusable libraries under `std.*`;
 - developer tooling under `code.*`;
-- language generation and target models under `tahto.*`;
+- language generation and target models under `lang.*`;
 - runtime adapters under `rt.*`;
 - portable cross-target libraries under `xt.*`.
 

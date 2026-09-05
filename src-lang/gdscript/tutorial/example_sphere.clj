@@ -1,5 +1,5 @@
 (ns gdscript.tutorial.example-sphere
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :gdscript)
 

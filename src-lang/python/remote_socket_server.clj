@@ -1,5 +1,5 @@
 (ns python.remote-socket-server
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.network :as network]))
 
 (l/script :python
@@ -89,8 +89,8 @@
   
   @(std.concurrent/send +r+
                         (std.json/write
-                         (tahto.core/emit-script
-                          (tahto.runtime.basic.impl.process-python/default-body-wrap
+                         (lang.core/emit-script
+                          (lang.runtime.basic.impl.process-python/default-body-wrap
                            '[(:- :import bpy)
                              (bpy.ops.object.select_all :action "SELECT")
                              ])
@@ -98,8 +98,8 @@
 
   @(std.concurrent/send +r+
                         (std.json/write
-                         (tahto.core/emit-script
-                          (tahto.runtime.basic.impl.process-python/default-body-wrap
+                         (lang.core/emit-script
+                          (lang.runtime.basic.impl.process-python/default-body-wrap
                            '[(:- :import bpy)
                              (bpy.msgbus.publish_rna :key "hello")
                              ])

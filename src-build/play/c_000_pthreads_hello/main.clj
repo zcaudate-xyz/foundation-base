@@ -1,5 +1,5 @@
 (ns play.c-000-pthreads-hello.main
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]))
 

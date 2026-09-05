@@ -1,5 +1,5 @@
 (ns xt.db.text.base-scope
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.schema.base :as base]))

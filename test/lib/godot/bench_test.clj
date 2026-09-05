@@ -3,7 +3,7 @@
   (:require [lib.godot.bench :refer :all]
             [std.lib.network :as network]
             [std.lib.os :as os]
-            [tahto.runtime.basic.type-common :as common]))
+            [lang.runtime.basic.type-common :as common]))
 
 ^{:refer lib.godot.bench/godot-exec :added "4.1"}
 (fact "resolves the godot executable"

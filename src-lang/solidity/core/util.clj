@@ -1,5 +1,5 @@
 (ns solidity.core.util
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:refer-clojure :exclude [assert require bytes]))
 
 (l/script :solidity

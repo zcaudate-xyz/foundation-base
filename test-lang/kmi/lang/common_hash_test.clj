@@ -1,6 +1,6 @@
 (ns kmi.lang.common-hash-test
   (:require [std.json :as json]
-            [tahto.core :as l])
+            [lang.core :as l])
   (:use code.test))
 
 ^{:seedgen/root {:all true :langs [:lua :python :dart]}}

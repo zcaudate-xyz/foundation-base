@@ -1,5 +1,5 @@
 (ns documentation.tahto-index
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:use code.test))
 
 [[:hero {:title "tahto"
@@ -11,10 +11,10 @@
 
 [[:section {:title "First steps"}]]
 
-"`tahto.core` lets you write code once in Clojure data and emit it to many targets. The smallest useful program installs a runtime, defines a function, and emits it."
+"`lang.core` lets you write code once in Clojure data and emit it to many targets. The smallest useful program installs a runtime, defines a function, and emits it."
 
 (fact "install a JS runtime and emit a function"
-  ^{:refer tahto.core/emit-as :added "4.0"}
+  ^{:refer lang.core/emit-as :added "4.0"}
   (l/emit-as :js '[(defn greet [name]
                      (return (+ "Hello, " name)))
                    (greet "tahto")])
@@ -23,7 +23,7 @@
 "The same form can be emitted to Lua by changing the language keyword. The grammar and template take care of syntax, statement terminators, and string operators."
 
 (fact "emit the same logic to Lua"
-  ^{:refer tahto.core/emit-as :added "4.0"}
+  ^{:refer lang.core/emit-as :added "4.0"}
   (l/emit-as :lua '[(defn greet [name]
                       (return (cat "Hello, " name)))
                     (greet "tahto")])
@@ -32,27 +32,27 @@
 [[:card-grid {:title "Subcategories"
               :lead "The Tahto section covers the compiler, target models, runtimes, typed analysis, shared emitters, seed generation, and examples."
               :items [{:meta "Compiler"
-                       :title "tahto.core"
+                       :title "lang.core"
                        :text "Book-based authoring, grammar-driven emission, scripts, modules, and language libraries."
                        :href "introduction.html"}
                       {:meta "Language Models"
-                       :title "tahto.model"
+                       :title "lang.model"
                        :text "Target specifications for JavaScript, Lua, Python, Go, Dart, SQL, Solidity, xtalk, and annex languages."
                        :href "tahto-model.html"}
                       {:meta "Runtimes"
-                       :title "tahto.runtime"
+                       :title "lang.runtime"
                        :text "Runtime clients and execution adapters for browsers, databases, containers, editors, and native tools."
                        :href "tahto-runtime.html"}
                       {:meta "Typing"
-                       :title "tahto.typed"
+                       :title "lang.typed"
                        :text "Typed xtalk analysis and target declaration emission."
                        :href "tahto-typed.html"}
                       {:meta "Shared Emitters"
-                       :title "tahto.base"
+                       :title "lang.base"
                        :text "Shared grammar, emit, preprocess, rewrite, and utility behavior."
                        :href "tahto-common.html"}
                       {:meta "Generation"
-                       :title "tahto.seedgen"
+                       :title "lang.seedgen"
                        :text "Seed generation and xtalk test scaffolding."
                        :href "tahto-seedgen.html"}
                       {:meta "Examples"

@@ -1,5 +1,5 @@
 (ns postgres.sample.scratch-v0.route-entries
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :xtalk)
 

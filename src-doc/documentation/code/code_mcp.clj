@@ -6,11 +6,11 @@
 
 [[:hero {:title "code.mcp"
          :subtitle "Agent-facing MCP tool surface."
-         :lead "`code.mcp` exposes foundation maintenance actions as MCP tools, including code management, test execution, documentation helpers, Maven helpers, JVM namespace helpers, and tahto.core probes."}]]
+         :lead "`code.mcp` exposes foundation maintenance actions as MCP tools, including code management, test execution, documentation helpers, Maven helpers, JVM namespace helpers, and lang.core probes."}]]
 
 [[:chapter {:title "Motivation" :link "motivation"}]]
 
-"Agents need structured operations instead of ad hoc shell commands. The MCP layer packages safe, named capabilities around the existing `code.*`, `jvm.*`, and `tahto.*` toolchains."
+"Agents need structured operations instead of ad hoc shell commands. The MCP layer packages safe, named capabilities around the existing `code.*`, `jvm.*`, and `lang.*` toolchains."
 
 [[:chapter {:title "Internal usage" :link "internal"}]]
 
@@ -45,7 +45,7 @@
        set)
   => #{"echo" "ping"
        "clj-eval" "code-test" "code-manage" "jvm-namespace"
-       "lang-emit-as" "tahto.core-list" "tahto.core-modules"
+       "lang-emit-as" "lang.core-list" "lang.core-modules"
        "code-doc-init" "code-doc-deploy" "code-doc-publish"
        "code-maven"
        "form-heal-list-edits" "form-heal-get-dsl-deps" "form-heal-refactor-directory"})

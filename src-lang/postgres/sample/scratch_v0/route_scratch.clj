@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns postgres.sample.scratch-v0.route-scratch
-  (:require [tahto.core :as l]
+  (:require [lang.core :as l]
             [postgres.sample.scratch-v0.route-entries]
             [postgres.gen.gen-bind :as bind]))
 

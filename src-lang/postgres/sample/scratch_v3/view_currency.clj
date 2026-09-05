@@ -1,7 +1,7 @@
 ^{:no-test true}
 (ns postgres.sample.scratch-v3.view-currency
   (:require [std.lib :as h]
-            [tahto.core :as l]
+            [lang.core :as l]
             [postgres.gen.bind-macro :as bind-pg]
             [postgres.gen.gen-bind :as bind]
             [postgres.sample.scratch-v3]))

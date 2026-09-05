@@ -1,8 +1,8 @@
 ^{:seedgen/skip true}
 (ns xt.db.node.example-auth-profile-ui-test
   (:use code.test)
-  (:require [tahto.core :as l]
-            [tahto.runtime.chromedriver :as chromedriver]
+  (:require [lang.core :as l]
+            [lang.runtime.chromedriver :as chromedriver]
             [scaffold.supabase.local-min :as local-min]
             [xt.lang.common-notify :as notify]))
 

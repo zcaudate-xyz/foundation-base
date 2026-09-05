@@ -1,5 +1,5 @@
 (ns js.react.ext-page-test
-  (:require [tahto.core :as l])
+  (:require [lang.core :as l])
   (:use code.test))
 
 (l/script- :js

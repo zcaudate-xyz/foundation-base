@@ -1,6 +1,6 @@
 (ns lib.docker-test
   (:require [lib.docker :as docker]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.env :as env]
             [std.lib.os :as os])
   (:use code.test))
@@ -91,7 +91,7 @@
 
 (comment
   
-  (require '[tahto.core :as l])
+  (require '[lang.core :as l])
   (require '[xt.lang.common-notify :as notify])
   (require 'rt.redis)
   (require 'rt.postgres)
@@ -106,7 +106,7 @@
     ))
   
   
-  (tahto.core/script :lua
+  (lang.core/script :lua
     {:runtime :redis.client
      :config {:port 6379
               :container {:image  "tahto/kmi.all:v6.2.1"
@@ -116,7 +116,7 @@
                [xt.lang.spec-base :as xt]
                [kmi.redis :as r]]})
   
-  (tahto.core/script :lua
+  (lang.core/script :lua
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
@@ -147,7 +147,7 @@
                        :cmd    ["redis-server" "--protected-mode" "no"]})})
   
   
-  (tahto.core/script- :postgres
+  (lang.core/script- :postgres
     {:runtime :jdbc.client
      :config {:port 5432
               :dbname "test-scratch"
@@ -204,7 +204,7 @@
   (common/start-container
    {:id "node"
     :image  "tahto/kmi.ui:16"
-    :cmd    ["node" "-e" (tahto.runtime.basic.impl.process-js/default-basic-client
+    :cmd    ["node" "-e" (lang.runtime.basic.impl.process-js/default-basic-client
                           45325
                           {:host "host.docker.internal"})]})
   
@@ -220,13 +220,13 @@
   (!.lua
    (os.getenv "OS"))
 
-  (tahto.core/script :python
+  (lang.core/script :python
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
-  (tahto.core/script :python
+  (lang.core/script :python
     {:runtime :websocket
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
@@ -237,19 +237,19 @@
    :python
    (repl/notify true))
   
-  (tahto.core/script :lua
+  (lang.core/script :lua
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
-  (tahto.core/script :lua
+  (lang.core/script :lua
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.all:v6.2.1"}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
 
-  (tahto.core/script :lua
+  (lang.core/script :lua
     {:runtime :basic
      :config {:program :resty
               :container {:image  "tahto/kmi.all:v6.2.1"}}
@@ -257,14 +257,14 @@
                [xt.lang.common-lib :as k]]})
 
   
-  (tahto.core/script :js
+  (lang.core/script :js
     {:runtime :basic
      :config {:container {:image  "tahto/kmi.ui:16"
                           :remove false}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
-  (tahto.core/script :js
+  (lang.core/script :js
     {:runtime :websocket
      :config {:container {:image  "tahto/kmi.ui:16"
                           :remove false}}
@@ -277,18 +277,18 @@
   (!.lua
    (+ 1 2 3))
   
-  (tahto.core/script :js
+  (lang.core/script :js
     {:config {:container {:image  "tahto/kmi.ui:16.1"
                           :remove false}}
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
   (lib.docker/start-container
-   (assoc tahto.runtime.basic.type-container/*container*
+   (assoc lang.runtime.basic.type-container/*container*
           :remove false))
 
 
-  tahto.runtime.basic.type-container/*container*
+  lang.runtime.basic.type-container/*container*
   
   
   (!.lua
@@ -297,12 +297,12 @@
   (!.js
    (+ 1 2 3))
   
-  (tahto.core/rt:restart :lua)
-  (tahto.core/rt:restart :js)
-  (:container (tahto.core/rt :lua))
+  (lang.core/rt:restart :lua)
+  (lang.core/rt:restart :js)
+  (:container (lang.core/rt :lua))
   
   
-  (tahto.core/script :lua
+  (lang.core/script :lua
     {;:runtime :basic
      #_#_:config {:port 6379
               :container {:image  "tahto/kmi.infra:v5.0.1"
@@ -311,7 +311,7 @@
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
-  (tahto.core/script :js
+  (lang.core/script :js
     {:runtime :basic
      :config {:bench false}
      #_#_:config {:port 6379
@@ -324,7 +324,7 @@
   (!.js (+ 1 2 3))
   
   
-  (tahto.core/script :lua
+  (lang.core/script :lua
     {;:runtime :basic
      #_#_:config {:port 6379
               :container {:image  "tahto/kmi.infra:v5.0.1"
@@ -335,7 +335,7 @@
   
   (require '[xt.lang.common-notify :as notify])
   
-  (tahto.core/script :lua
+  (lang.core/script :lua
     {:runtime :redis.client
      :config {:port 6379
               :container {:image  "tahto/kmi.infra:v5.0.1"
@@ -344,7 +344,7 @@
      :require [[xt.lang.common-repl :as repl]
                [xt.lang.common-lib :as k]]})
   
-  (tahto.core/script :lua
+  (lang.core/script :lua
     {;:runtime :redis.client
      :config {:port 6379
               :container {:image  "tahto/kmi.infra:v6.2,1"
@@ -352,7 +352,7 @@
                           :cmd    ["redis-server" "--protected-mode" "no"]}}})
   
   
-  (tahto.core/script :lua.redis
+  (lang.core/script :lua.redis
     {:runtime :redis.client
      :config {:host "172.17.0.3"}})
   
@@ -412,7 +412,7 @@
   (!.lua
    (os.date))
   
-  (tahto.core/rt :lua)
+  (lang.core/rt :lua)
   
   
   

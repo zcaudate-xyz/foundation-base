@@ -1,9 +1,9 @@
 (ns postgres.core.graph-view
-  (:require [tahto.model.spec-postgres.common :as common]
+  (:require [lang.model.spec-postgres.common :as common]
             [postgres.core.graph-base :as base]
             [postgres.core.graph-query :as query]
-            [tahto.core :as l]
-            [tahto.base.emit-preprocess :as preprocess] [tahto.base.preprocess-base :as preprocess-base]
+            [lang.core :as l]
+            [lang.base.emit-preprocess :as preprocess] [lang.base.preprocess-base :as preprocess-base]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
             [std.lib.walk :as walk]

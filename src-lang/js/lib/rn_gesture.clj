@@ -1,6 +1,6 @@
 (ns js.lib.rn-gesture
   (:require [std.json :as json]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.env :as env]
             [std.lib.foundation :as f]))
 

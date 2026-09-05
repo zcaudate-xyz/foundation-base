@@ -1,5 +1,5 @@
 (ns glsl.effects.solid
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :glsl
   glsl.effects.solid

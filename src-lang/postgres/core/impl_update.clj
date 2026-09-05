@@ -1,10 +1,10 @@
 (ns postgres.core.impl-update
   (:require [clojure.set]
-            [tahto.model.spec-postgres.common :as common]
-            [tahto.model.spec-postgres.common-tracker :as tracker]
+            [lang.model.spec-postgres.common :as common]
+            [lang.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
-            [tahto.core :as l]
-            [tahto.base.util :as ut]
+            [lang.core :as l]
+            [lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]))

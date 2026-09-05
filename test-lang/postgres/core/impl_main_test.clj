@@ -1,11 +1,11 @@
 (ns postgres.core.impl-main-test
   (:require [postgres.core]
-            [tahto.runtime.postgres.base.application :as app]
-            [tahto.model.spec-postgres.common-tracker :as tracker]
+            [lang.runtime.postgres.base.application :as app]
+            [lang.model.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [postgres.core.impl-main :as main]
-            [tahto.core :as l]
-            [tahto.common.book :as book])
+            [lang.core :as l]
+            [lang.common.book :as book])
   (:use code.test))
 
 (l/script- :postgres

@@ -1,6 +1,6 @@
 (ns js.react.ext-model-test
   (:require [std.fs :as fs]
-            [tahto.core :as l]
+            [lang.core :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 

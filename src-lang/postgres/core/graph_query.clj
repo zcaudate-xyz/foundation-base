@@ -1,13 +1,13 @@
 (ns postgres.core.graph-query
   (:require [clojure.set]
-            [tahto.model.spec-postgres.common :as common]
+            [lang.model.spec-postgres.common :as common]
             [postgres.core.graph-base :as base]
             [postgres.core.impl-base :as impl]
             [postgres.core.impl-main :as main]
-            [tahto.core :as l]
-            [tahto.common.book :as book]
-            [tahto.core.library-snapshot :as snap]
-            [tahto.base.util :as ut]
+            [lang.core :as l]
+            [lang.common.book :as book]
+            [lang.core.library-snapshot :as snap]
+            [lang.base.util :as ut]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema]))
 

@@ -1,7 +1,7 @@
 (ns postgres.gen.template-code-test
   (:require [clojure.string :as str]
             [code.project :as project]
-            [tahto.core :as l]
+            [lang.core :as l]
             [postgres.gen.template-code :as gen]
             [postgres.sample.scratch-v0]
             [std.fs :as fs])
@@ -70,7 +70,7 @@
        (take 6)
        vec)
   => ["(ns postgres.sample.scratch-v0.route-entries"
-      "  (:require [tahto.core :as l]))"
+      "  (:require [lang.core :as l]))"
       ""
       "(l/script :xtalk)"
       ""

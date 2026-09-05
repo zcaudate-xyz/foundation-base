@@ -1,7 +1,7 @@
 (ns code.tool.build-test
   (:require [code.tool.build :refer :all]
             [jvm.deps :as deps]
-            [tahto.core :as l])
+            [lang.core :as l])
   (:use code.test))
 
 ^{:refer code.tool.build/project-form :added "4.0"}
@@ -22,12 +22,12 @@
 
 ^{:refer code.tool.build/build-deps :added "4.0"}
 (fact "gets dependencies for a given file"
-  (build-deps {} 'tahto.core) => empty?)
+  (build-deps {} 'lang.core) => empty?)
 
 ^{:refer code.tool.build/build-prep :added "4.0"}
 (fact "prepares the build environment or data structures for a given namespace, returning a vector of prepared items"
 
-  (build-prep 'tahto.core)
+  (build-prep 'lang.core)
   => vector?)
 
 ^{:refer code.tool.build/build-copy :added "4.0"}
@@ -36,7 +36,7 @@
                 clojure.core/spit (constantly nil)
                 std.fs/copy-single (constantly nil)
                 std.fs/list (constantly [])]
-    (build-copy [{} {}] {:ns 'tahto.core :root ".build" :build "test"}))
+    (build-copy [{} {}] {:ns 'lang.core :root ".build" :build "test"}))
   => true)
 
 ^{:refer code.tool.build/build-output :added "4.0"}
@@ -44,7 +44,7 @@
   (with-redefs [build-prep (constantly [{} {} []])
                 build-copy (constantly true)
                 std.fs/list (constantly [])]
-    (build-output {:ns 'tahto.core :root ".build" :build "test"}))
+    (build-output {:ns 'lang.core :root ".build" :build "test"}))
   => vector?)
 
 (comment

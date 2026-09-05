@@ -1,6 +1,6 @@
 (ns lua.core-test
-  (:require [tahto.core :as l]
-            [tahto.model.spec-lua :as lua]
+  (:require [lang.core :as l]
+            [lang.model.spec-lua :as lua]
             [std.lib.env :as env])
   (:use code.test))
 

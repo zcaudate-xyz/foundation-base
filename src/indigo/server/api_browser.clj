@@ -7,8 +7,8 @@
             [code.test.base.runtime :as rt]
             [std.block :as block]
             [std.block.layout :as layout]
-            [tahto.core :as l]
-            [tahto.common.book :as book]
+            [lang.core :as l]
+            [lang.common.book :as book]
             [std.lib.env :as env]))
 
 ;; Existing endpoints -------------------------------------------------------
@@ -205,7 +205,7 @@
 ;; New endpoints -----------------------------------------------------------
 
 (defn list-libraries
-  "returns the set of languages for which a tahto.core library is available"
+  "returns the set of languages for which a lang.core library is available"
   {:added "4.0"}
   []
   (let [libs (l/default-library)]

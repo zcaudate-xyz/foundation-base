@@ -36,10 +36,10 @@ make index-force
 # Search for symbols
 make search QUERY=emit
 make search QUERY=emit KIND=function
-make search QUERY=emit KIND=function NAMESPACE=tahto.core
+make search QUERY=emit KIND=function NAMESPACE=lang.core
 
 # Get symbol details
-make symbol NAME=tahto.core/emit
+make symbol NAME=lang.core/emit
 
 # Show statistics
 make index-stats
@@ -83,8 +83,8 @@ The main CLI tool for index operations:
 # Find all "emit" functions
 ./bin/foundation-index search emit function
 
-# Find "compile" in tahto.core namespace
-./bin/foundation-index search compile function tahto.core
+# Find "compile" in lang.core namespace
+./bin/foundation-index search compile function lang.core
 
 # Search with limit
 ./bin/foundation-index search book function bb.lang 10
@@ -94,7 +94,7 @@ The main CLI tool for index operations:
 
 ```bash
 # Get details about a specific function
-./bin/foundation-index get tahto.core/emit
+./bin/foundation-index get lang.core/emit
 ./bin/foundation-index get bb.lang.base.emit-assign/emit-def-assign
 ```
 
@@ -143,10 +143,10 @@ This script automatically finds and uses the foundation index database.
 
 | Namespace | Purpose |
 |-----------|---------|
-| `tahto.core` | Main transpilation API |
-| `tahto.core.base.emit` | Code emission |
-| `tahto.core.base.compile` | Compilation |
-| `tahto.core.base.book` | Book management |
+| `lang.core` | Main transpilation API |
+| `lang.core.base.emit` | Code emission |
+| `lang.core.base.compile` | Compilation |
+| `lang.core.base.book` | Book management |
 | `rt.postgres` | PostgreSQL DSL |
 | `rt.postgres.entity` | Entity framework |
 | `bb.lang.*` | Book compilation |

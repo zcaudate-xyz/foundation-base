@@ -117,20 +117,20 @@
 
 (comment
   (install-artifact
-   '[tahto/tahto.stuff "2.4.10"]
+   '[tahto/lang.stuff "2.4.10"]
    {:artifacts [{:file "project.clj"
                  :extension "project"}
                 {:file "README.md"
                  :extension "readme"}]})
 
   (deploy-artifact
-   '[zaudate/tahto.stuff "2.4.10"]
+   '[zaudate/lang.stuff "2.4.10"]
    {:artifacts [{:file "project.clj"
                  :extension "project"}
                 {:file "README.md"
                  :extension "readme"}]
     :repository {:id "tahto"
-                 :url "https://maven.tahto.io"
+                 :url "https://maven.lang.io"
                  :authentication
                  {:username "tahto"
                   :password "tahto"}}}))

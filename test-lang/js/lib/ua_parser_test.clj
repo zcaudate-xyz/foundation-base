@@ -1,6 +1,6 @@
 (ns js.lib.ua-parser-test
   (:require [clojure.string]
-            [tahto.core :as l]
+            [lang.core :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 

@@ -1,6 +1,6 @@
 (ns code.tool.translate.js-ast
   (:require [std.fs :as fs]
-            [tahto.core :as l]
+            [lang.core :as l]
             [std.lib.os :as os]
             [std.make :as make :refer [def.make]]))
 

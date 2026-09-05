@@ -1,6 +1,6 @@
 (ns lean.core-test
-  (:require [tahto.core :as l]
-            [tahto.model.annex.spec-lean]
+  (:require [lang.core :as l]
+            [lang.model.annex.spec-lean]
             [lean.core :as y])
   (:use code.test))
 

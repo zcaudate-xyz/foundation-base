@@ -1,6 +1,6 @@
 (ns js.react-native.enclosed-debug-test
   (:use code.test)
-  (:require [tahto.core :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:runtime :websocket
