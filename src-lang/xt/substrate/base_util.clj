@@ -6,6 +6,7 @@
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-data :as xtd]
              [xt.substrate.base-frame :as frame]
+             [xt.substrate.base-json :as node-json]
              [xt.substrate.base-request :as node-request]
              [xt.substrate.base-router :as router]
              [xt.substrate.base-pubsub :as node-pubsub]]})
@@ -149,7 +150,7 @@
   (var response (frame/response-error-frame
                  (. request ["id"])
                  (. request ["space"])
-                 error
+                 (node-json/normalize-error error)
                  meta))
   (var #{transport-id} ctx)
   (when (xt/x:nil? transport-id)

@@ -21,6 +21,8 @@
   {:added "4.1"}
   [impl session]
   (xtd/set-in impl ["state" "session"] session)
+  (xtd/set-in impl ["client" "defaults" "token"]
+              (xtd/get-in session ["access_token"]))
   (return session))
 
 (defn.xt refresh-session
@@ -93,6 +95,5 @@
   (var refresh-id (xts/str-rand 8))
   (xtd/set-in impl ["state" "auto_refresh" "current"] refresh-id)
   (return (-/auto-refresh-fn impl (-/auto-refresh-interval impl) refresh-id)))
-
 
 

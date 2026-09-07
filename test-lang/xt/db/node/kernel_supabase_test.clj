@@ -580,6 +580,23 @@
   => {"status" "new"
       "message" "stored"})
 
+(fact "rejects auth failures with the provider message and status"
+  (!.js
+   (var result "not-rejected")
+   (try
+    (adaptor/supabase-response-data
+     {"status" 422
+      "body" {"msg" "User already registered"
+              "code" 422}})
+    (catch err
+      (:= result {"message" (xt/x:ex-message err)
+                  "status" (xt/x:get-key (xt/x:ex-data err) "status")
+                  "http_status" (xt/x:get-key (xt/x:ex-data err) "http_status")})))
+   result)
+  => {"message" "User already registered"
+      "status" 422
+      "http_status" 422})
+
 ^{:refer xt.db.node.kernel-supabase/supabase-create-model :added "4.1"}
 (fact "TODO")
 

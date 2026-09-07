@@ -228,6 +228,22 @@
     (xt/x:is-function? util/response-error))
   => true)
 
+(fact "response-error serializes native exceptions for transport"
+  (notify/wait-on :js
+    (promise/x:promise-then
+     (util/response-error
+      {}
+      {"id" "req-1" "space" "auth"}
+      (xt/x:ex "User already registered" {"status" 422})
+      nil
+     {})
+     (fn [response]
+       (var error (. response ["error"]))
+       (repl/notify {"message" (. error ["message"])
+                     "status" (xt/x:get-key (. error ["data"]) "status")}))))
+  => {"message" "User already registered"
+      "status" 422})
+
 ^{:refer xt.substrate.base-util/config-normalize-space :added "4.1"}
 (fact "normalizes declarative space config and rejects mismatched ids"
   (!.js

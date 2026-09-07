@@ -63,6 +63,7 @@
     (node-json/normalize-error "broken")
     (node-json/normalize-error {"error" "denied"})
     (node-json/normalize-error {"status" "error"})
+    (node-json/normalize-error (xt/x:ex "boom" {"status" 422}))
     (node-json/normalize-error 42)])
   => [nil
       {"message" "broken"}
@@ -70,6 +71,8 @@
        "message" "denied"}
       {"status" "error"
        "message" "error"}
+      {"message" "boom"
+       "data" {"status" 422}}
       {"message" "42"}])
 
 ^{:refer xt.substrate.base-json/normalize-frame :added "4.1"}

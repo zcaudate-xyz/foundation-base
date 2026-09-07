@@ -61,13 +61,15 @@
   => {"email" "test@example.com"})
 
 ^{:refer xt.db.system.impl-supabase-session/set-session :added "4.1"}
-(fact "set-session stores the session in impl state and returns it"
+(fact "set-session stores the session and syncs the bearer token"
   (!.js
    (var source (main/create-impl "supabase" {} nil nil))
-   {"returned" (session/set-session source {"refresh_token" "abc"})
-    "stored" (xtd/get-in source ["state" "session"])})
-  => {"returned" {"refresh_token" "abc"}
-      "stored" {"refresh_token" "abc"}})
+   {"returned" (session/set-session source {"refresh_token" "abc" "access_token" "token-123"})
+    "stored" (xtd/get-in source ["state" "session"])
+    "token" (xtd/get-in source ["client" "defaults" "token"])})
+  => {"returned" {"refresh_token" "abc" "access_token" "token-123"}
+      "stored" {"refresh_token" "abc" "access_token" "token-123"}
+      "token" "token-123"})
 
 ^{:refer xt.db.system.impl-supabase-session/refresh-session :added "4.1"}
 (fact "refresh-session returns nil when no refresh token is present"

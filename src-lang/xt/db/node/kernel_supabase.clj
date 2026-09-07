@@ -52,7 +52,13 @@
   (when (and status (>= status 400))
     (var data (-/supabase-error-data response))
     (throw (xt/x:ex (or (. data ["message"])
+                        (. data ["msg"])
+                        (. data ["error_description"])
+                        (. data ["error"])
                         (. body ["message"])
+                        (. body ["msg"])
+                        (. body ["error_description"])
+                        (. body ["error"])
                         "Supabase request failed")
                     data)))
   (return (http-util/get-body-data response)))
@@ -85,7 +91,7 @@
           (var #{client} impl)
           (return
            (-> (http-fetch/request-http client (addon/cmd-signup credentials opts))
-               (promise/x:promise-then http-util/get-body-data)
+               (promise/x:promise-then -/supabase-response-data)
                (promise/x:promise-then
                 (fn [session]
                   (session/set-session impl session)
@@ -107,7 +113,7 @@
           (var #{client} impl)
           (return
            (-> (http-fetch/request-http client (addon/cmd-token-password credentials opts))
-               (promise/x:promise-then http-util/get-body-data)
+               (promise/x:promise-then -/supabase-response-data)
                (promise/x:promise-then
                 (fn [session]
                   (session/set-session impl session)

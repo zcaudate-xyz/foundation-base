@@ -66,6 +66,10 @@
   (cond (xt/x:nil? err)
         (return nil)
 
+        (xt/x:ex-native? err)
+        (return {"message" (xt/x:ex-message err)
+                 "data"    (xt/x:ex-data err)})
+
         (xt/x:is-string? err)
         (return {"message" err})
 
