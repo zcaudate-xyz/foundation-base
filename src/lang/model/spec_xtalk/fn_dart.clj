@@ -293,6 +293,45 @@
 
 (defn dart-tf-x-str-char [[_ s i]]
   (list '. s (list 'codeUnitAt (list '- i (list 'x:offset)))))
+
+(defn dart-tf-x-bytes-new [[_ values]]
+  (template/$
+   (:- "Uint8List.fromList(List<int>.from(" ~values "))")))
+
+(defn dart-tf-x-bytes-set [[_ value idx byte]]
+  (template/$ ('((fn []
+                   (x:set-idx ~value ~idx ~byte)
+                   (return ~value))))))
+
+(defn dart-tf-x-bytes-copy [[_ value]]
+  (template/$
+   (:- "Uint8List.fromList(List<int>.from(" ~value "))")))
+
+(defn dart-tf-x-bytes-slice
+  [[_ value start & [end]]]
+  (let [slice (if end
+               (list '. value (list 'sublist start end))
+               (list '. value (list 'sublist start)))]
+    (list :%
+          (list :- "Uint8List.fromList(List<int>.from(")
+          slice
+          (list :- "))"))))
+
+(defn dart-tf-x-bytes-u8 [[_ value]]
+  (list 'b:& value 255))
+
+(defn dart-tf-x-bytes-s8 [[_ value]]
+  (list ':? (list '> value 127) (list '- value 256) value))
+
+(defn dart-tf-x-str-encode [[_ value]]
+  (list '. 'utf8 (list 'encode value)))
+
+(defn dart-tf-x-str-decode [[_ value]]
+  (list '. 'utf8 (list 'decode value)))
+
+(defn dart-tf-x-bit-not [[_ value]]
+  (list :% (list :- "~(") value (list :- ")")))
+
 (defn dart-tf-x-str-split [[_ s sep]] (list '. s (list 'split sep)))
 (defn dart-tf-x-str-join [[_ sep arr]] (list '. arr (list 'join sep)))
 (defn dart-tf-x-str-index-of [[_ s sub & [start]]]
@@ -328,6 +367,18 @@
    :x-str-trim        {:macro #'dart-tf-x-str-trim       :emit :macro}
    :x-str-trim-left   {:macro #'dart-tf-x-str-trim-left  :emit :macro}
    :x-str-trim-right  {:macro #'dart-tf-x-str-trim-right :emit :macro}})
+
+(def +dart-bytes+
+  {:x-bytes-new   {:macro #'dart-tf-x-bytes-new   :emit :macro}
+   :x-bytes-set   {:macro #'dart-tf-x-bytes-set   :emit :macro
+                   :op-spec {:allow-blocks true}}
+   :x-bytes-copy  {:macro #'dart-tf-x-bytes-copy  :emit :macro}
+   :x-bytes-slice {:macro #'dart-tf-x-bytes-slice :emit :macro}
+   :x-bytes-u8    {:macro #'dart-tf-x-bytes-u8    :emit :macro}
+   :x-bytes-s8    {:macro #'dart-tf-x-bytes-s8    :emit :macro}
+   :x-str-encode  {:macro #'dart-tf-x-str-encode  :emit :macro}
+   :x-str-decode  {:macro #'dart-tf-x-str-decode  :emit :macro}
+   :x-bit-not     {:macro #'dart-tf-x-bit-not     :emit :macro}})
 
 (defn dart-tf-x-lu-create
   ([[_]]
@@ -694,7 +745,7 @@
 (defn dart-tf-x-socket-send
   [[_ conn s]]
   (template/$
-   (. ~conn (write ~s))))
+   (. ~conn (add ~s))))
 
 (defn dart-tf-x-socket-close
   [[_ conn]]
@@ -802,6 +853,7 @@
   (merge +dart-core+
          +dart-math+
          +dart-type+
+         +dart-bytes+
          +dart-str+
          +dart-lu+
          +dart-obj+

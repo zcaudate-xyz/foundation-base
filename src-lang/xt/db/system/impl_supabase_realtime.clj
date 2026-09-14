@@ -55,6 +55,7 @@
   {:added "4.1"}
   [impl]
   (return (or (xtd/get-in impl ["state" "session" "access_token"])
+              (xtd/get-in impl ["client" "defaults" "token"])
               (xtd/get-in impl ["client" "defaults" "apikey"]))))
 
 (defn.xt topic-join-payload
@@ -63,7 +64,8 @@
   [impl topic]
   (var auth-token (-/get-auth-token impl))
   (var payload
-       {"config" {"broadcast" {"ack" false "self" false}}})
+       {"config" {"broadcast" {"ack" false "self" false}
+                   "private" true}})
   (when (xt/x:not-nil? auth-token)
     (xt/x:set-key payload "access_token" auth-token))
   (return
@@ -213,7 +215,8 @@
   [impl]
   (return
    (fn [event]
-     (var caching-fn (xtd/get-in impl ["state" "caching_fn"]))
+     (var caching-fn (or (xtd/get-in impl ["metadata" "caching_fn"])
+                         (xtd/get-in impl ["state" "caching_fn"])))
      (when (xt/x:is-function? caching-fn)
        (var caching-impl (caching-fn))
        (when (and (xt/x:not-nil? caching-impl)

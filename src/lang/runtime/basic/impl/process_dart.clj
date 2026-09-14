@@ -120,7 +120,8 @@
   {:added "4.1"}
   [source]
   (let [convert-needed? (or (str/includes? source "jsonEncode(")
-                            (str/includes? source "jsonDecode("))
+                            (str/includes? source "jsonDecode(")
+                            (str/includes? source "utf8."))
         io-needed?      (or (str/includes? source "Socket.")
                             (str/includes? source "HttpClient")
                             (str/includes? source "Directory.")

@@ -36,7 +36,8 @@
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-                          [xt.db.system.impl-supabase-realtime :as realtime]
+             [xt.db.system.impl-memory :as memory]
+             [xt.db.system.impl-supabase-realtime :as realtime]
              [xt.net.ws-native :as websocket]
              [xt.net.ws-phoenix :as phoenix]]})
 
@@ -95,6 +96,17 @@
          (return (js-websocket/create defaults)))}}))
   => (-> local-min/+config+ :api :anon-key))
 
+^{:refer xt.db.system.impl-supabase-realtime/get-auth-token
+  :added "4.1"
+  :id get-auth-token-user-default}
+(fact "prefers the configured user token over the anonymous key"
+  (!.js
+   (realtime/get-auth-token
+    {"client" {"defaults" {"token" "user-token"
+                             "apikey" "anon-key"}}
+     "state" {"realtimes" {}}}))
+  => "user-token")
+
 ^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
                  :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
@@ -113,7 +125,8 @@
       "event" "phx_join"
       "ref" "#/join/realtime:room:test"
       "join_ref" "#/join/realtime:room:test"
-      "payload" {"config" {"broadcast" {"ack" false "self" false}}
+      "payload" {"config" {"broadcast" {"ack" false "self" false}
+                              "private" true}
                  "access_token" (-> local-min/+config+ :api :anon-key)}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload.no-token :added "4.1"
@@ -136,7 +149,8 @@
       "event" "phx_join"
       "ref" "#/join/realtime:room:test"
       "join_ref" "#/join/realtime:room:test"
-      "payload" {"config" {"broadcast" {"ack" false "self" false}}}})
+      "payload" {"config" {"broadcast" {"ack" false "self" false}
+                              "private" true}}})
 
 ^{:refer xt.db.system.impl-supabase-realtime/topic-leave-payload :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
@@ -192,6 +206,27 @@
     called)
   => {"topic" "realtime:User:1"
       "db/sync" {"User" [{"id" 1}]}})
+
+^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback
+  :added "4.1"
+  :id create-sync-callback-metadata}
+(fact "applies realtime sync through the metadata cache reference"
+  (!.js
+   (var schema {"User" {"id" {"ident" "id"
+                                "type" "uuid"
+                                "order" 0}
+                       "bio" {"ident" "bio"
+                               "type" "text"
+                               "order" 1}}})
+   (var caching (memory/impl-memory schema {}))
+   (var impl {"state" {}
+              "metadata" {"caching_fn" (fn [] (return caching))}})
+   (var callback (realtime/create-sync-callback impl))
+   (callback {"topic" "realtime:User:1"
+              "db/sync" {"User" [{"id" "user-1"
+                                    "bio" "updated"}]}})
+   (xtd/get-in caching ["rows" "User" "user-1" "record" "data" "bio"]))
+  => "updated")
 
 ^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message.phx-reply :added "4.1"
   :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
@@ -433,7 +468,7 @@
   => {}
 
   (notify/wait-on :js
-    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-service+) {})}
       "state" {"realtimes" {}}
       "::/override"
       {"create_ws_client"
@@ -456,7 +491,7 @@
 (fact "subscribes to topics after the websocket is initialized"
 
   (notify/wait-on :js
-    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
+    (var impl {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-service+) {})}
       "state" {"realtimes" {}}
       "::/override"
       {"create_ws_client"

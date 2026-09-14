@@ -224,6 +224,46 @@
 ^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-str-char :added "4.1"}
 (fact "gets string character")
 
+^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-bytes-new :added "4.1"}
+(fact "creates UTF-8 byte arrays"
+  (emit-dart (dart-tf-x-bytes-new '[_ values]))
+  => #"Uint8List\.fromList")
+
+^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-bytes-set :added "4.1"}
+(fact "sets and returns a byte array"
+  (emit-dart (dart-tf-x-bytes-set '[_ value idx byte]))
+  => #"\[idx\].*=.*byte")
+
+^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-bytes-copy :added "4.1"}
+(fact "copies byte arrays"
+  (emit-dart (dart-tf-x-bytes-copy '[_ value]))
+  => #"Uint8List\.fromList")
+
+^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-bytes-slice :added "4.1"}
+(fact "slices byte arrays"
+  (emit-dart (dart-tf-x-bytes-slice '[_ value start end]))
+  => #"sublist")
+
+^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-bytes-u8 :added "4.1"}
+(fact "normalizes unsigned bytes"
+  (emit-dart (dart-tf-x-bytes-u8 '[_ value]))
+  => #"&")
+
+^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-bytes-s8 :added "4.1"}
+(fact "normalizes signed bytes"
+  (emit-dart (dart-tf-x-bytes-s8 '[_ value]))
+  => #"256")
+
+^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-str-encode :added "4.1"}
+(fact "encodes strings as UTF-8"
+  (emit-dart (dart-tf-x-str-encode '[_ value]))
+  => #"utf8\.encode")
+
+^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-str-decode :added "4.1"}
+(fact "decodes UTF-8 byte arrays"
+  (emit-dart (dart-tf-x-str-decode '[_ value]))
+  => #"utf8\.decode")
+
 ^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-str-split :added "4.1"}
 (fact "splits strings"
   (emit-dart (dart-tf-x-str-split '[_ s sep]))
@@ -458,7 +498,9 @@
 (fact "connects sockets")
 
 ^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-send :added "4.1"}
-(fact "sends socket data")
+(fact "sends byte data"
+  (emit-dart (dart-tf-x-socket-send '[_ conn bytes]))
+  => #"\.add")
 
 ^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-close :added "4.1"}
 (fact "closes sockets")

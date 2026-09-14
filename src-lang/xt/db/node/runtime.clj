@@ -5,6 +5,7 @@
           {:require [[xt.lang.spec-base :as xt]
                      [xt.lang.spec-promise :as promise]
                      [xt.substrate :as substrate]
+                     [xt.substrate.base-frame :as frame]
                      [xt.substrate.page-proxy :as page-proxy]
                      [xt.substrate.transport-browser :as browser-transport]
                      [xt.db.node.client-base :as client-base]
@@ -43,17 +44,21 @@
   (:= (. globalThis ["onconnect"])
       (fn [e]
         (var port (. e ["ports"] [0]))
+        (var connection-transport-id
+             (frame/rand-id
+              (xt/x:cat (or transport-id
+                             -/DEFAULT_TRANSPORT)
+                        ".")
+              12))
         (. port (start))
         (return
          (browser-transport/boot-self
           node
-          {"transport_id" (or transport-id
-                              -/DEFAULT_TRANSPORT)
+          {"transport_id" connection-transport-id
            "target" port
            "ready" {"signal" "ready"
-                    "transport" (or transport-id
-                                    -/DEFAULT_TRANSPORT)
-                    "worker" (or transport-id
+                    "transport" connection-transport-id
+                    "worker" (or worker-id
                                  -/DEFAULT_WORKER)}})))))
 
 (defn sharedworket-init-string
@@ -64,7 +69,8 @@
       (xt.db.node.runtime/sharedworker-init-kernel node))
    {:lang :js
     :layout :full
-    :emit {:override (or {"@sqlite.org/sqlite-wasm" "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
+    :emit {:override (or override
+                         {"@sqlite.org/sqlite-wasm" "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
                           "pg" "data:text/javascript,export default {Client: function() {}}"})}}))
 
 
