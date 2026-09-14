@@ -129,6 +129,7 @@
                                     (namespace op'))
                            (ops/canonical-entry op'))
          canonical-op (if (and (= :hard-link (:emit canonical-entry))
+                               (= op op')
                                (not= "x" (namespace op')))
                         op'
                         (or (:canonical-symbol canonical-entry)

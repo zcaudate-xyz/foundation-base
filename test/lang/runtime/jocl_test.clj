@@ -1,4 +1,5 @@
 (ns lang.runtime.jocl-test
+  (:refer-clojure :exclude [meta to-array])
   (:use code.test)
   (:require [lang.core :as l]
             [lang.runtime.jocl :refer :all]

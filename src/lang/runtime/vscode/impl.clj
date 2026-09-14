@@ -50,7 +50,7 @@
   []
   (str (io/file (System/getProperty "user.dir")
                 "src-js"
-                "vscode-lang-runtime")))
+                "vscode-hara-runtime")))
 
 ;;
 ;; SOCKET IO
