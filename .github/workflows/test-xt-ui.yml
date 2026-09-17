@@ -1,0 +1,71 @@
+name: Test xt.ui
+
+on:
+  pull_request:
+    paths:
+      - 'src-lang/xt/ui/**'
+      - 'test-lang/xt/ui/**'
+      - '.github/workflows/test-xt-ui.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: xt-ui-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install isolated UI test dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Do not mutate the root package manifest or lockfile. UI tests need
+          # React and the JS runtime transport, not the optional figma package.
+          mkdir -p .tmp/xt-ui-node
+          node <<'NODE'
+          const fs = require('node:fs');
+          const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
+          const dependencies = {};
+          for (const name of ['react', 'react-dom', 'react-nil', 'ws']) {
+            const entry = lock.packages[`node_modules/${name}`];
+            if (!entry?.version) throw new Error(`Missing locked dependency: ${name}`);
+            dependencies[name] = entry.version;
+          }
+          fs.writeFileSync('.tmp/xt-ui-node/package.json', JSON.stringify({
+            name: 'xt-ui-ci', private: true, dependencies
+          }, null, 2));
+          NODE
+          npm install --prefix .tmp/xt-ui-node --legacy-peer-deps --ignore-scripts --no-audit --no-fund
+      - name: Run canonical xt.ui facts
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network host \
+            -e CI=true \
+            -e "NODE_PATH=$(pwd)/.tmp/xt-ui-node/node_modules" \
+            -e "LEIN_JVM_OPTS=-Xms512m -Xmx3g -Djava.io.tmpdir=$(pwd)/.tmp" \
+            -v "$(pwd):$(pwd)" -w "$(pwd)" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            bash -lc 'lein test :with xt.ui' 2>&1 | tee .tmp/xt-ui-tests.log
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xt-ui-tests
+          path: .tmp/xt-ui-tests.log
+          if-no-files-found: ignore
