@@ -175,7 +175,7 @@
     (fn [err]
       (return {"status" "error"
                "service" service-id
-               "message" (xt/x:ex-message err)
+               "message" (or (xt/x:ex-message err) (xt/x:to-string err))
                "data" (xt/x:ex-data err)})))))
 
 (defn.xt resolve-slot

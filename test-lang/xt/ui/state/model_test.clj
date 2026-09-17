@@ -74,7 +74,7 @@
    (var store (ui-model/store-create (substrate/node-create {"id" "missing-group"}) "space" "missing" nil nil))
    (var message nil)
    (try (ui-model/store-open store)
-        (catch e (:= message (xt/x:ex-message e))))
+        (catch e (:= message (or (xt/x:ex-message e) (xt/x:to-string e)))))
    message)
   => "ERR - Group not found - missing")
 
@@ -85,7 +85,7 @@
    (var pair (page-core/model-ensure (. store ["node"]) "app/account" "account/settings" "draft"))
    (var message nil)
    (try (ui-model/model store "missing")
-        (catch e (:= message (xt/x:ex-message e))))
+        (catch e (:= message (or (xt/x:ex-message e) (xt/x:to-string e)))))
    [(== (ui-model/model store "draft") (xt/x:get-key pair 1)) message])
   => [true "ERR - Model not found - [\"account/settings\",\"missing\"]"])
 

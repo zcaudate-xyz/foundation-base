@@ -138,7 +138,7 @@
     (var controller (page/controller-create {} {"fail" (fn [_self _payload _deps] (xt/x:err "denied"))} nil nil))
     (-> (page/dispatch! controller "fail" nil)
         (promise/x:promise-then (fn [value] (repl/notify ["resolved" value])))
-        (promise/x:promise-catch (fn [err] (repl/notify ["rejected" (xt/x:ex-message err)])))))
+        (promise/x:promise-catch (fn [err] (repl/notify ["rejected" (or (xt/x:ex-message err) (xt/x:to-string err))])))))
   => ["rejected" "denied"])
 
 ^{:refer xt.ui.state.core/actions-create :added "4.1"}

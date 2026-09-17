@@ -65,7 +65,7 @@
    (try
      (ui/registry-register-contract registry
                                     (ui/component-contract "ui/test" nil ["other"] nil nil nil))
-     (catch e (:= message (xt/x:ex-message e))))
+     (catch e (:= message (or (xt/x:ex-message e) (xt/x:to-string e)))))
    [(== result registry)
     (xt/x:get-path registry ["contracts" "ui/test" "props"])
     message])
@@ -127,7 +127,7 @@
    (var message nil)
    (try
      (ui/validate-props contract {"unknown" true})
-     (catch e (:= message (xt/x:ex-message e))))
+     (catch e (:= message (or (xt/x:ex-message e) (xt/x:to-string e)))))
    [(ui/validate-props contract nil)
     (ui/validate-props contract {"value" 0 "on_change" (fn [value] (return value))})
     message])
@@ -140,7 +140,7 @@
    (var message nil)
    (try
      (ui/validate-node registry (ui/node "ui/column" {} [(ui/node "web/only" {} [])]))
-     (catch e (:= message (xt/x:ex-message e))))
+     (catch e (:= message (or (xt/x:ex-message e) (xt/x:to-string e)))))
    [(ui/validate-node registry (ui/node "ui/column" {"class" "gap-4"} [(ui/text "Hello" {})]))
     (ui/validate-node registry [nil "text" 0 [(ui/text "nested" {})]])
     message])
@@ -180,27 +180,31 @@
   => [{"status" "unavailable" "service" "device/camera"} false])
 
 ^{:refer xt.ui.core/effect! :id effect-results :added "4.1"}
-(fact "preserves synchronous and asynchronous results and normalizes thrown failures"
+(fact "preserves results and normalizes both string and native exception failures"
   (notify/wait-on :js
     (var runtime
          (ui/runtime-create nil nil nil
           {"echo" (fn [args] (return args))
            "async" (fn [args] (return (promise/x:promise-run {"saved" (. args ["id"])})))
            "fail" (fn [_args] (xt/x:err "offline"))
-           "invalid" "not a handler"} nil))
+           "invalid" "not a handler"
+           "native" (fn [_args] (xt/x:err (xt/x:ex "denied" {"code" "DENIED"})))} nil))
     (promise/x:promise-then
      (promise/x:promise-all [(ui/effect! runtime "echo" nil)
                             (ui/effect! runtime "async" {"id" 7})
                             (ui/effect! runtime "fail" {})
-                            (ui/effect! runtime "invalid" {})])
+                            (ui/effect! runtime "invalid" {})
+                            (ui/effect! runtime "native" {})])
      (fn [results]
        (repl/notify [(xt/x:get-key results 0)
                      (xt/x:get-key results 1)
                      (xt/x:get-path results [2 "status"])
                      (xt/x:get-path results [2 "service"])
                      (xt/x:get-path results [2 "message"])
-                     (xt/x:get-key results 3)]))))
-  => [{} {"saved" 7} "error" "fail" "offline" {"status" "unavailable" "service" "invalid"}])
+                     (xt/x:get-key results 3)
+                     (xt/x:get-key results 4)]))))
+  => [{} {"saved" 7} "error" "fail" "offline" {"status" "unavailable" "service" "invalid"}
+      {"status" "error" "service" "native" "message" "denied" "data" {"code" "DENIED"}}])
 
 ^{:refer xt.ui.core/resolve-slot :added "4.1"}
 (fact "native slots replace portable fallback content, including an empty replacement"

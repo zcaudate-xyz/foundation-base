@@ -8,7 +8,6 @@
 ;; This adapter is intentionally JavaScript/React-specific, not a portable seed.
 (l/script- :js
   {:runtime :basic
-   :import [["react-dom/server" :as ReactDOMServer]]
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-repl :as repl]
@@ -16,6 +15,20 @@
              [xt.ui.state.core :as state]
              [js.react :as r]
              [xt.ui.react-playground-ui :as demo]]})
+
+(defn.js with-react
+  "supplies the playground's host global using real React, then restores it"
+  [run]
+  (var existed (xt/x:has-key? globalThis "React"))
+  (var previous (xt/x:get-key globalThis "React"))
+  (xt/x:set-key globalThis "React" (require "react"))
+  (try
+    (return (run))
+    (catch err (throw err))
+    (finally
+      (if existed
+        (xt/x:set-key globalThis "React" previous)
+        (xt/x:del-key globalThis "React")))))
 
 ^{:refer xt.ui.react-playground-ui/render-ui-node :added "4.1"}
 (fact "recursively renders descriptors while preserving scalar and missing-renderer behavior"
@@ -34,22 +47,25 @@
 ^{:refer xt.ui.react-playground-ui/react-registry :added "4.1"}
 (fact "React renderers adapt element props and forward native event values"
   (!.js
-   (var registry (demo/react-registry))
-   (var seen [])
-   (var input ((xt/x:get-key registry "ui/input")
-               {"value" "Ada" "placeholder" "Name" "disabled" true
-                "on_change" (fn [value] (xt/x:arr-push seen value) (return value))} []))
-   (var button ((xt/x:get-key registry "ui/button")
-                {"label" "Save" "on_press" (fn [] (xt/x:arr-push seen "pressed") (return "saved"))} []))
-   (var column ((xt/x:get-key registry "ui/column") {"gap" "8px" "padding" "4px"} ["child"]))
-   (var row ((xt/x:get-key registry "ui/row") {} []))
-   (var change-result ((xt/x:get-path input ["props" "onChange"]) {"target" {"value" "Grace"}}))
-   (var press-result ((xt/x:get-path button ["props" "onClick"])))
-   [(. input ["type"]) (xt/x:get-path input ["props" "value"])
-    (xt/x:get-path input ["props" "placeholder"]) (xt/x:get-path input ["props" "disabled"])
-    (. button ["type"]) (xt/x:get-path button ["props" "children"])
-    (xt/x:get-path column ["props" "style"]) (xt/x:get-path row ["props" "style" "flexDirection"])
-    change-result press-result seen])
+   (-/with-react
+    (fn []
+      (var registry (demo/react-registry))
+      (var seen [])
+      (var input ((xt/x:get-key registry "ui/input")
+                  {"value" "Ada" "placeholder" "Name" "disabled" true
+                   "on_change" (fn [value] (xt/x:arr-push seen value) (return value))} []))
+      (var button ((xt/x:get-key registry "ui/button")
+                   {"label" "Save" "on_press" (fn [] (xt/x:arr-push seen "pressed") (return "saved"))} []))
+      (var column ((xt/x:get-key registry "ui/column") {"gap" "8px" "padding" "4px"} ["child"]))
+      (var row ((xt/x:get-key registry "ui/row") {} []))
+      (var change-result ((xt/x:get-path input ["props" "onChange"]) {"target" {"value" "Grace"}}))
+      (var press-result ((xt/x:get-path button ["props" "onClick"])))
+      (return
+       [(. input ["type"]) (xt/x:get-path input ["props" "value"])
+        (xt/x:get-path input ["props" "placeholder"]) (xt/x:get-path input ["props" "disabled"])
+        (. button ["type"]) (xt/x:get-path button ["props" "children"])
+        (xt/x:get-path column ["props" "style"]) (xt/x:get-path row ["props" "style" "flexDirection"])
+        change-result press-result seen]))))
   => ["input" "Ada" "Name" true "button" "Save"
       {"display" "flex" "flexDirection" "column" "gap" "8px" "padding" "4px"}
       "row" "Grace" "saved" ["Grace" "pressed"]])
@@ -90,26 +106,33 @@
 ^{:refer xt.ui.react-playground-ui/App :added "4.1"}
 (fact "the real React component renders its initial state with hooks under server rendering"
   (!.js
-   (var html (ReactDOMServer.renderToStaticMarkup (r/createElement demo/App nil)))
-   [(. html (includes "xt.ui React Playground"))
-    (. html (includes "alpha")) (. html (includes "beta"))
-    (. html (includes "New item...")) (. html (includes "Remove"))])
+   (-/with-react
+    (fn []
+      (var server (require "react-dom/server"))
+      (var html (. server (renderToStaticMarkup (r/createElement demo/App nil))))
+      (return
+       [(. html (includes "xt.ui React Playground"))
+        (. html (includes "alpha")) (. html (includes "beta"))
+        (. html (includes "New item...")) (. html (includes "Remove"))]))))
   => [true true true true true])
 
 ^{:refer xt.ui.react-playground-ui/mount! :added "4.1"}
 (fact "mount hands a real App element to the playground stage and restores host globals"
   (!.js
-   (var had-window (xt/x:has-key? globalThis "window"))
-   (var previous (xt/x:get-key globalThis "window"))
-   (var captured nil)
-   (var result nil)
-   (xt/x:set-key globalThis "window"
-                 {"PLAYGROUND" {"setStage" (fn [element] (:= captured element))}})
-   (try
-     (:= result (demo/mount!))
-     (finally
-       (if had-window
-         (xt/x:set-key globalThis "window" previous)
-         (xt/x:del-key globalThis "window"))))
-   [result (r/isValidElement captured) (== (. captured ["type"]) demo/App)])
+   (-/with-react
+    (fn []
+      (var had-window (xt/x:has-key? globalThis "window"))
+      (var previous (xt/x:get-key globalThis "window"))
+      (var captured nil)
+      (var result nil)
+      (xt/x:set-key globalThis "window"
+                    {"PLAYGROUND" {"setStage" (fn [element] (:= captured element))}})
+      (try
+        (:= result (demo/mount!))
+        (catch err (throw err))
+        (finally
+          (if had-window
+            (xt/x:set-key globalThis "window" previous)
+            (xt/x:del-key globalThis "window"))))
+      (return [result (r/isValidElement captured) (== (. captured ["type"]) demo/App)]))))
   => [true true true])
