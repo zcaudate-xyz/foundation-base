@@ -91,8 +91,10 @@
 (defn pg-deftype-col-fn
   "formats the column on deftype"
   {:added "4.0"}
-  ([[col {:keys [type primary scope sql required unique enum ref] :as m}] mopts]
-   (let [sql (if (and (= type :ref) (:group ref))
+  ([[col attrs] mopts]
+   (let [m (common/validate-pg-jsonb-metadata (or attrs {}))
+         {:keys [type primary scope sql required unique enum ref]} m
+         sql (if (and (= type :ref) (:group ref))
                (dissoc sql :cascade)
                sql)
          [col-name col-attrs ref-toks]
@@ -435,7 +437,9 @@
                   (partition 2)
                   (map vec)
                   (mapcat (fn [[k {:keys [type primary ref sql scope generated] :as attrs}]]
-                            (let [attrs (pg-deftype-format-generated attrs)
+                            (let [attrs (-> attrs
+                                            pg-deftype-format-generated
+                                            common/validate-pg-jsonb-metadata)
                                   {:keys [type primary ref sql scope]} attrs
                                   _     (or type (f/error "type cannot be null" {:attrs attrs}))
                                   _     (if scope (schema/check-scope scope))

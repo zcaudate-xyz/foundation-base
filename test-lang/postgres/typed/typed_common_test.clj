@@ -254,6 +254,27 @@
     (:required c) => true
     (:unique c) => true))
 
+(fact "JSONB metadata helpers preserve aliases and reject invalid metadata"
+  (types/jsonb-column-type? :jsonb) => true
+  (types/jsonb-column-type? :map) => true
+  (types/jsonb-column-type? :array) => true
+  (types/jsonb-column-type? :text) => false
+
+  (types/inferred-jsonb-shape :map nil nil) => :map
+  (types/inferred-jsonb-shape :array nil nil) => :array
+  (types/inferred-jsonb-shape :jsonb nil {:name {:type :text}}) => :map
+  (types/inferred-jsonb-shape :jsonb :opaque nil) => :opaque
+
+  (types/validate-jsonb-metadata!
+   {:type :jsonb :shape :map
+    :map {:name {:type :text}}})
+  => {:type :jsonb :shape :map
+      :map {:name {:type :text}}}
+
+  (types/validate-jsonb-metadata!
+   {:type :jsonb :shape :invalid})
+  => (throws clojure.lang.ExceptionInfo))
+
 ^{:refer postgres.typed.typed-common/make-table-def :added "0.1"}
 (fact "make-table-def creates TableDef with various arities"
   ;; arity 4 - basic table

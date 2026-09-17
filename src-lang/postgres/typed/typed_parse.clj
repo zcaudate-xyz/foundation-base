@@ -111,6 +111,7 @@
 
 (defn parse-column-spec [[col-name col-opts]]
   (let [opts (if (map? col-opts) col-opts {})
+        _ (types/validate-jsonb-metadata! opts)
         base-type (get opts :type :unknown)
         required? (boolean (get opts :required false))
         enum-ref (:enum opts)
@@ -119,19 +120,24 @@
         type-ref (cond
                    enum-ref (types/make-type-ref :enum (:ns enum-ref) base-type)
                    (= :ref base-type) (types/make-type-ref :ref (:ns ref-info) base-type)
-                   :else (types/make-type-ref :primitive nil base-type))]
+                   :else (types/make-type-ref :primitive nil base-type))
+        shape (types/inferred-jsonb-shape base-type
+                                          (:shape opts)
+                                          (:map opts))]
     (types/make-column-def
      col-name type-ref
-     {:required required?
-      :default (or (get-in opts [:sql :default]) (get opts :default))
-      :constraints (merge (when required? {:required true})
-                          (when (get opts :unique) {:unique true})
-                          (when (get opts :primary) {:primary true})
-                          (parse-process-constraints sql-process))
-      :enum-ref enum-ref
-      :scope (get opts :scope)
-      :map-schema (get opts :map)
-      :ref-info ref-info})))
+     (cond-> {:required required?
+              :default (or (get-in opts [:sql :default]) (get opts :default))
+              :constraints (merge (when required? {:required true})
+                                  (when (get opts :unique) {:unique true})
+                                  (when (get opts :primary) {:primary true})
+                                  (parse-process-constraints sql-process))
+              :enum-ref enum-ref
+              :scope (get opts :scope)
+              :map-schema (get opts :map)
+              :items-schema (get opts :items)
+              :ref-info ref-info}
+       shape (assoc :shape shape)))))
 
 (defn parse-deftype [form ns-name dbschema]
   (let [rest-form (rest form)

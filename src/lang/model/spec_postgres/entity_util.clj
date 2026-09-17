@@ -95,11 +95,13 @@
   [ns-str & [priority]]
   {:type :array :required true :priority (or priority 90)
    :scope :-/detail
+   :shape :array
    :sql  {:process [[(symbol ns-str "as-jsonb-array")]]
           :default "[]"}
-   :map  {:status  {:type :text}
-          :message {:type :text}
-          :error   {:type :text}}})
+   :items {:type :map
+           :map  {:status  {:type :text}
+                  :message {:type :text}
+                  :error   {:type :text}}}})
 
 (defn type-log-entry
   [ns-str & [priority]]

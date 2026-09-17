@@ -18,15 +18,24 @@
        "Converts a single map schema entry to a field descriptor.
    Handles nested map schemas recursively."
        [entry-key entry-val]
-       (let [entry-type (get entry-val :type :unknown)
+       (let [_ (types/validate-jsonb-metadata! entry-val)
+             entry-type (get entry-val :type :unknown)
              required? (boolean (get entry-val :required false))
              base-type (get column->field-type entry-type {:type entry-type})
              nested-map-schema (get entry-val :map)
-             with-nested-shape (if (and (or (= :map entry-type) (= :jsonb entry-type))
+             shape-marker (types/inferred-jsonb-shape entry-type
+                                                      (:shape entry-val)
+                                                      nested-map-schema)
+             with-nested-shape (if (and (types/jsonb-column-type? entry-type)
                                         nested-map-schema)
                                    (assoc base-type :shape (map-schema->shape nested-map-schema))
-                                   base-type)]
-            (assoc with-nested-shape
+                                   base-type)
+             ;; :shape is reserved for a nested JsonbShape in field
+             ;; descriptors; keep the explicit column marker separately.
+             with-shape-marker (if shape-marker
+                                 (assoc with-nested-shape :jsonb-shape shape-marker)
+                                 with-nested-shape)]
+            (assoc with-shape-marker
                    :nullable? (not required?)
                    :source (str entry-key))))
 
@@ -43,9 +52,18 @@
 
 (defn resolve-column-type
        "Resolves a ColumnDef's type to a field descriptor.
-   Handles map schemas by creating nested JsonbShapes for :type :map columns."
+   Handles explicit JSONB shapes and nested map schemas for JSONB columns."
        [col]
        (let [tr (:type col)
+             raw-type (cond
+                        (types/type-ref? tr)
+                        (when (= :primitive (:kind tr)) (:name tr))
+
+                        (keyword? tr)
+                        tr
+
+                        :else
+                        nil)
              base (cond
                    (types/type-ref? tr)
                    (case (:kind tr)
@@ -59,15 +77,24 @@
 
                    :else {:type :unknown})
 
-        ;; CRITIQUE FIX: Support for :map key and nested map schemas
              map-schema (:map-schema col)
-             is-map-type? (or (= :map (:name tr))
-                              (= :map (:type col))
-                              (= :map (:type base)))
+             items-schema (:items-schema col)
+             shape-marker (types/inferred-jsonb-shape raw-type
+                                                      (:shape col)
+                                                      map-schema)
+             is-map-type? (or (= :map raw-type)
+                              (= :map (:type base))
+                              (= :map shape-marker))
 
-             col-type (if (and is-map-type? map-schema)
-                          (assoc base :shape (map-schema->shape map-schema))
-                          base)]
+             item-type (when (and (= :array shape-marker)
+                                  items-schema)
+                         (map-schema-entry->field-type :item items-schema))
+             col-type (cond-> base
+                        shape-marker (assoc :jsonb-shape shape-marker)
+                        (and is-map-type? map-schema)
+                        (assoc :shape (map-schema->shape map-schema))
+                        item-type
+                        (assoc :items item-type))]
             (assoc col-type :nullable? (not (:required col)) :source (str (:name col)))))
 
 ;; ─────────────────────────────────────────────────────────────────────────────

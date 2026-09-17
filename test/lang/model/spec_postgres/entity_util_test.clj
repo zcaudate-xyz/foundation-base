@@ -105,9 +105,11 @@
                 :required true
                 :priority 90
                 :scope :-/detail
-                :map {:status {:type :text}
-                      :message {:type :text}
-                      :error {:type :text}}}))
+                :shape :array
+                :items {:type :map
+                        :map {:status {:type :text}
+                              :message {:type :text}
+                              :error {:type :text}}}}))
 
 ^{:refer lang.model.spec-postgres.entity-util/type-log-entry :added "4.1"}
 (fact "type-log-entry generates the default log entry map"

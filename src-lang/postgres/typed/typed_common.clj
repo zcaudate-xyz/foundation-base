@@ -102,6 +102,14 @@
 
 (def CONFIDENCE-LEVELS #{:high :medium :low})
 
+(def JSONB-SHAPES
+  "Explicit shapes supported by JSONB column metadata."
+  #{:map :array :opaque})
+
+(def JSONB-TYPES
+  "Column type aliases which are emitted as PostgreSQL jsonb."
+  #{:jsonb :map :array :image})
+
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Core Records
 ;; ─────────────────────────────────────────────────────────────────────────────
@@ -109,7 +117,7 @@
 (defrecord TypeRef [kind ns name constraints])
 (defrecord EnumDef [ns name values dbschema])
 (defrecord ColumnDef [name type required default constraints enum-ref
-                      scope foreign map-schema ref-info])
+                      scope foreign map-schema items-schema ref-info])
 (defrecord TableDef [ns name columns primary-key addons entity-meta dbschema])
 (defrecord FnDef [ns name inputs output body-meta dbschema])
 (defrecord FnArg [name type modifiers role])
@@ -150,6 +158,134 @@
 (defn table? [t] (or (and (type-ref? t) (= :table (:kind t))) (table-def? t)))
 (defn enum? [t] (or (and (type-ref? t) (= :enum (:kind t))) (enum-def? t)))
 (defn ref? [t] (and (type-ref? t) (= :ref (:kind t))))
+
+(defn jsonb-column-type?
+  "Returns true when a type or primitive TypeRef is emitted as PostgreSQL jsonb."
+  [t]
+  (let [t (if (and (type-ref? t)
+                   (= :primitive (:kind t)))
+            (:name t)
+            t)]
+    (contains? JSONB-TYPES t)))
+
+(defn jsonb-shape-marker?
+  "Returns true for an explicit JSONB shape marker."
+  [shape]
+  (contains? JSONB-SHAPES shape))
+
+(defn inferred-jsonb-shape
+  "Infers the shape implied by a JSONB alias or a nested map schema.
+
+   Plain :jsonb remains unclassified unless its metadata supplies a shape or
+   nested :map schema. The :map and :array aliases retain their historical
+   JSONB emission while carrying their useful semantic shape downstream."
+  [type shape map-schema]
+  (or shape
+      (when map-schema :map)
+      (case (if (and (type-ref? type)
+                     (= :primitive (:kind type)))
+              (:name type)
+              type)
+        :map :map
+        :array :array
+        nil)))
+
+(declare validate-jsonb-metadata!)
+
+(defn- invalid-jsonb-metadata
+  [message data]
+  (throw (ex-info message (merge {:type ::invalid-jsonb-metadata} data))))
+
+(defn- valid-jsonb-schema-key?
+  [k]
+  (or (keyword? k)
+      (symbol? k)
+      (string? k)))
+
+(defn validate-jsonb-metadata!
+  "Validates JSONB shape metadata on a column or nested map entry.
+
+   The function returns the original metadata map so it can be used in
+   parser pipelines. It deliberately accepts plain :jsonb without a marker,
+   preserving the existing open-ended JSONB form."
+  [opts]
+  (when-not (map? opts)
+    (invalid-jsonb-metadata
+     "JSONB metadata must be a map."
+     {:options opts}))
+  (let [{:keys [type shape]} opts
+        map-present? (contains? opts :map)
+        map-schema   (:map opts)
+        items-present? (contains? opts :items)
+        items-schema (:items opts)
+        implied      (case type
+                       :map :map
+                       :array :array
+                       nil)]
+    (when (and (contains? opts :shape)
+               (not (jsonb-shape-marker? shape)))
+      (invalid-jsonb-metadata
+       "Invalid JSONB shape. Expected :map, :array, or :opaque."
+       {:shape shape :options opts}))
+    (when (and (contains? opts :shape)
+               (not (jsonb-column-type? type)))
+      (invalid-jsonb-metadata
+       "JSONB shape metadata requires a JSONB column type."
+       {:shape shape :type type :options opts}))
+    (when (and implied
+               (contains? opts :shape)
+               (not= implied shape))
+      (invalid-jsonb-metadata
+       "JSONB shape conflicts with the column type alias."
+       {:shape shape :type type :expected implied :options opts}))
+    (when map-present?
+      (when-not (jsonb-column-type? type)
+        (invalid-jsonb-metadata
+         "Nested :map metadata requires a JSONB column type."
+         {:type type :options opts}))
+      (when-not (map? map-schema)
+        (invalid-jsonb-metadata
+         "Nested :map metadata must be a map of key schemas."
+         {:map map-schema :options opts}))
+      (when (and (contains? opts :shape)
+                 (not= :map shape))
+        (invalid-jsonb-metadata
+         "Nested :map metadata requires the :map JSONB shape."
+         {:shape shape :options opts}))
+      (when (and implied (not= :map implied))
+        (invalid-jsonb-metadata
+         "Nested :map metadata conflicts with the column type alias."
+         {:type type :options opts}))
+      (doseq [[key entry] map-schema]
+        (when-not (valid-jsonb-schema-key? key)
+          (invalid-jsonb-metadata
+           "JSONB map schema keys must be keywords, symbols, or strings."
+           {:key key :options opts}))
+        (when-not (map? entry)
+          (invalid-jsonb-metadata
+           "JSONB map schema entries must be metadata maps."
+           {:key key :entry entry :options opts}))
+        (validate-jsonb-metadata! entry)))
+    (when items-present?
+      (when-not (jsonb-column-type? type)
+        (invalid-jsonb-metadata
+         "Array item metadata requires a JSONB column type."
+         {:type type :options opts}))
+      (when-not (or (= :array shape)
+                    (= :array implied))
+        (invalid-jsonb-metadata
+         "Array item metadata requires the :array JSONB shape."
+         {:shape shape :type type :options opts}))
+      (when map-present?
+        (invalid-jsonb-metadata
+         "Array item metadata cannot be combined with nested :map metadata."
+         {:options opts}))
+      (when-not (map? items-schema)
+        (invalid-jsonb-metadata
+         "Array item metadata must be a metadata map."
+         {:items items-schema :options opts}))
+      (validate-jsonb-metadata! items-schema))
+    opts))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Type Registry

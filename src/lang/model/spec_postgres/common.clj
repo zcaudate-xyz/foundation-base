@@ -46,6 +46,106 @@
    (or (get +pg-type-alias+ type)
        type)))
 
+(def +pg-jsonb-shapes+
+  "Explicit JSONB shapes accepted by deftype column metadata."
+  #{:map :array :opaque})
+
+(def +pg-jsonb-types+
+  "Types and aliases emitted as PostgreSQL jsonb."
+  #{:jsonb :map :array :image})
+
+(defn pg-jsonb-type?
+  "Returns true when a deftype column type emits PostgreSQL jsonb."
+  [type]
+  (contains? +pg-jsonb-types+ type))
+
+(defn- pg-jsonb-invalid
+  [message data]
+  (f/error message data))
+
+(declare validate-pg-jsonb-metadata)
+
+(defn validate-pg-jsonb-metadata
+  "Validates JSONB shape metadata without changing the emitted SQL type.
+
+   :map and :array remain aliases for PostgreSQL jsonb. The metadata is only
+   consumed by typed parsers and downstream schema conversion."
+  [{:keys [type shape] :as attrs}]
+  (when-not (map? attrs)
+    (pg-jsonb-invalid "JSONB metadata must be a map." {:options attrs}))
+  (let [map-present? (contains? attrs :map)
+        map-schema   (:map attrs)
+        items-present? (contains? attrs :items)
+        items-schema (:items attrs)
+        implied      (case type
+                       :map :map
+                       :array :array
+                       nil)]
+    (when (and (contains? attrs :shape)
+               (not (contains? +pg-jsonb-shapes+ shape)))
+      (pg-jsonb-invalid
+       "Invalid JSONB shape. Expected :map, :array, or :opaque."
+       {:shape shape :options attrs}))
+    (when (and (contains? attrs :shape)
+               (not (pg-jsonb-type? type)))
+      (pg-jsonb-invalid
+       "JSONB shape metadata requires a JSONB column type."
+       {:shape shape :type type :options attrs}))
+    (when (and implied
+               (contains? attrs :shape)
+               (not= implied shape))
+      (pg-jsonb-invalid
+       "JSONB shape conflicts with the column type alias."
+       {:shape shape :type type :expected implied :options attrs}))
+    (when map-present?
+      (when-not (pg-jsonb-type? type)
+        (pg-jsonb-invalid
+         "Nested :map metadata requires a JSONB column type."
+         {:type type :options attrs}))
+      (when-not (map? map-schema)
+        (pg-jsonb-invalid
+         "Nested :map metadata must be a map of key schemas."
+         {:map map-schema :options attrs}))
+      (when (and (contains? attrs :shape)
+                 (not= :map shape))
+        (pg-jsonb-invalid
+         "Nested :map metadata requires the :map JSONB shape."
+         {:shape shape :options attrs}))
+      (when (and implied (not= :map implied))
+        (pg-jsonb-invalid
+         "Nested :map metadata conflicts with the column type alias."
+         {:type type :options attrs}))
+      (doseq [[key entry] map-schema]
+        (when-not (or (keyword? key) (symbol? key) (string? key))
+          (pg-jsonb-invalid
+           "JSONB map schema keys must be keywords, symbols, or strings."
+           {:key key :options attrs}))
+        (when-not (map? entry)
+          (pg-jsonb-invalid
+           "JSONB map schema entries must be metadata maps."
+           {:key key :entry entry :options attrs}))
+        (validate-pg-jsonb-metadata entry)))
+    (when items-present?
+      (when-not (pg-jsonb-type? type)
+        (pg-jsonb-invalid
+         "Array item metadata requires a JSONB column type."
+         {:type type :options attrs}))
+      (when-not (or (= :array shape)
+                    (= :array implied))
+        (pg-jsonb-invalid
+         "Array item metadata requires the :array JSONB shape."
+         {:shape shape :type type :options attrs}))
+      (when map-present?
+        (pg-jsonb-invalid
+         "Array item metadata cannot be combined with nested :map metadata."
+         {:options attrs}))
+      (when-not (map? items-schema)
+        (pg-jsonb-invalid
+         "Array item metadata must be a metadata map."
+         {:items items-schema :options attrs}))
+      (validate-pg-jsonb-metadata items-schema))
+    attrs))
+
 (defn pg-deftype-ref-name
   "gets the ref name"
   {:added "4.0"}

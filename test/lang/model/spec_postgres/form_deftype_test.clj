@@ -80,6 +80,19 @@
           {})))
   => (fn [s] (contains? s :on-delete-cascade)))
 
+(fact "formats JSONB shape metadata without changing SQL types"
+  (pg-deftype-col-fn
+   [:settings {:type :jsonb
+               :shape :map
+               :map {:theme {:type :text}}}]
+   {})
+  => (contains [:jsonb])
+
+  (pg-deftype-col-fn
+   [:items {:type :array :shape :array}]
+   {})
+  => (contains [:jsonb]))
+
 ^{:refer lang.model.spec-postgres.form-deftype/pg-deftype-uniques :added "4.0"}
 (fact "collect unique keys on deftype"
 

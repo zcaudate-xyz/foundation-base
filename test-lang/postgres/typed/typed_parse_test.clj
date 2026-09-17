@@ -118,6 +118,49 @@
     (:name col) => :settings
     (:map-schema col) => {:theme {:type :text}}))
 
+(fact "parse-column-spec retains explicit JSONB shape metadata"
+  (let [map-col (parse/parse-column-spec
+                 [:settings {:type :jsonb
+                             :shape :map
+                             :map {:theme {:type :text}}}])
+        inferred-map-col (parse/parse-column-spec
+                          [:preferences {:type :jsonb
+                                          :map {:locale {:type :text}}}])
+        array-col (parse/parse-column-spec
+                   [:tags {:type :jsonb :shape :array}])
+        array-items-col (parse/parse-column-spec
+                         [:events {:type :jsonb :shape :array
+                                   :items {:type :map
+                                           :map {:name {:type :text}}}}])
+        alias-col (parse/parse-column-spec
+                   [:detail {:type :map}])]
+    (:shape map-col) => :map
+    (:map-schema map-col) => {:theme {:type :text}}
+    (:shape inferred-map-col) => :map
+    (:map-schema inferred-map-col) => {:locale {:type :text}}
+    (:shape array-col) => :array
+    (:items-schema array-items-col)
+    => {:type :map :map {:name {:type :text}}}
+    (:shape alias-col) => :map))
+
+(fact "parse-column-spec rejects invalid JSONB shape metadata"
+  (parse/parse-column-spec [:value {:type :jsonb :shape :object}])
+  => (throws clojure.lang.ExceptionInfo)
+
+  (parse/parse-column-spec [:value {:type :text :shape :map}])
+  => (throws clojure.lang.ExceptionInfo)
+
+  (parse/parse-column-spec [:value {:type :jsonb :shape :array
+                                    :map {:key {:type :text}}}])
+  => (throws clojure.lang.ExceptionInfo)
+
+  (parse/parse-column-spec [:value {:type :array
+                                    :map {:key {:type :text}}}])
+  => (throws clojure.lang.ExceptionInfo)
+
+  (parse/parse-column-spec [:value {:type :jsonb :map []}])
+  => (throws clojure.lang.ExceptionInfo))
+
 ^{:refer postgres.typed.typed-parse/parse-deftype :added "0.1"}
 (fact "parse-deftype handles addons"
   (let [form '(deftype.pg ^{:! (et/E {:addons [:feed]})} Organisation

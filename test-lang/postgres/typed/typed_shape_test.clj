@@ -59,7 +59,59 @@
                                    {:map-schema {:theme {:type :text}}})]
     (let [result (shape/resolve-column-type col)]
       (:type result) => :jsonb
+      (:jsonb-shape result) => :map
       (some? (:shape result)) => true)))
+
+(fact "resolve-column-type retains explicit JSONB shapes"
+  (let [map-col (types/make-column-def
+                 :settings
+                 (types/make-type-ref :primitive nil :jsonb)
+                 {:shape :map
+                  :map-schema {:theme {:type :text}}})
+        inferred-map-col (types/make-column-def
+                          :preferences
+                          (types/make-type-ref :primitive nil :jsonb)
+                          {:map-schema {:locale {:type :text}}})
+        array-col (types/make-column-def
+                   :tags
+                   (types/make-type-ref :primitive nil :jsonb)
+                   {:shape :array})
+        array-items-col (types/make-column-def
+                         :events
+                         (types/make-type-ref :primitive nil :jsonb)
+                         {:shape :array
+                          :items-schema {:type :map
+                                         :map {:name {:type :text}}}})
+        opaque-col (types/make-column-def
+                    :detail
+                    (types/make-type-ref :primitive nil :jsonb)
+                    {:shape :opaque})]
+    (let [map-result (shape/resolve-column-type map-col)
+          inferred-map-result (shape/resolve-column-type inferred-map-col)
+          array-result (shape/resolve-column-type array-col)
+    array-items-result (shape/resolve-column-type array-items-col)
+    opaque-result (shape/resolve-column-type opaque-col)]
+      (:type map-result) => :jsonb
+      (:jsonb-shape map-result) => :map
+      (get-in map-result [:shape :fields :theme :type]) => :text
+      (:jsonb-shape inferred-map-result) => :map
+      (get-in inferred-map-result [:shape :fields :locale :type]) => :text
+      (:type array-result) => :jsonb
+      (:jsonb-shape array-result) => :array
+      (:type array-items-result) => :jsonb
+      (:jsonb-shape array-items-result) => :array
+      (get-in array-items-result [:items :shape :fields :name :type])
+      => :text
+      (:type opaque-result) => :jsonb
+      (:jsonb-shape opaque-result) => :opaque)))
+
+(fact "map-schema-entry->field-type retains nested JSONB shapes"
+  (let [result (shape/map-schema-entry->field-type
+                :items
+                {:type :jsonb
+                 :shape :array})]
+    (:type result) => :jsonb
+    (:jsonb-shape result) => :array))
 
 ^{:refer postgres.typed.typed-shape/table->shape :added "0.1"}
 (fact "table->shape adds :id if not present in columns"

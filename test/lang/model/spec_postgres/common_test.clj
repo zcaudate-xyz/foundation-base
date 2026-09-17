@@ -16,6 +16,47 @@
   (common/pg-type-alias :numeric)
   => :numeric)
 
+(fact "validates JSONB shape metadata"
+  (common/pg-jsonb-type? :jsonb) => true
+  (common/pg-jsonb-type? :map) => true
+  (common/pg-jsonb-type? :array) => true
+  (common/pg-jsonb-type? :text) => false
+
+  (common/validate-pg-jsonb-metadata
+   {:type :jsonb :shape :map
+    :map {:name {:type :text}}})
+  => {:type :jsonb :shape :map
+      :map {:name {:type :text}}}
+
+  (common/validate-pg-jsonb-metadata
+   {:type :jsonb :shape :opaque})
+  => {:type :jsonb :shape :opaque}
+
+  (common/validate-pg-jsonb-metadata
+   {:type :jsonb :shape :array
+    :items {:type :map
+            :map {:name {:type :text}}}})
+  => {:type :jsonb :shape :array
+      :items {:type :map
+              :map {:name {:type :text}}}}
+
+  (common/validate-pg-jsonb-metadata
+   {:type :jsonb :shape :object})
+  => (throws clojure.lang.ExceptionInfo)
+
+  (common/validate-pg-jsonb-metadata
+   {:type :text :shape :map})
+  => (throws clojure.lang.ExceptionInfo)
+
+  (common/validate-pg-jsonb-metadata
+   {:type :jsonb :map []})
+  => (throws clojure.lang.ExceptionInfo)
+
+  (common/validate-pg-jsonb-metadata
+   {:type :jsonb :shape :map
+    :items {:type :text}})
+  => (throws clojure.lang.ExceptionInfo))
+
 ^{:refer lang.model.spec-postgres.common/pg-deftype-ref-name :added "4.1"}
 (fact "gets the ref name"
   (common/pg-deftype-ref-name :user {:raw "user_id"})
