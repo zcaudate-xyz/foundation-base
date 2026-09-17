@@ -17,18 +17,17 @@
              [xt.ui.react-playground-ui :as demo]]})
 
 (defn.js with-react
-  "supplies the playground's host global using real React, then restores it"
+  "uses the runtime import or temporarily supplies the playground's React global"
   [run]
-  (var existed (xt/x:has-key? globalThis "React"))
-  (var previous (xt/x:get-key globalThis "React"))
+  ;; Referencing js.react can install a read-only native import. Leave it intact.
+  (when (xt/x:has-key? globalThis "React")
+    (return (run)))
   (xt/x:set-key globalThis "React" (require "react"))
   (try
     (return (run))
     (catch err (throw err))
     (finally
-      (if existed
-        (xt/x:set-key globalThis "React" previous)
-        (xt/x:del-key globalThis "React")))))
+      (xt/x:del-key globalThis "React"))))
 
 ^{:refer xt.ui.react-playground-ui/render-ui-node :added "4.1"}
 (fact "recursively renders descriptors while preserving scalar and missing-renderer behavior"
