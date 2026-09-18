@@ -64,7 +64,7 @@ jobs:
 
           project_name="$(
             ./lein exec -e \
-              '(require (quote leiningen.core.project)) (println (:name (leiningen.core.project/read "project.clj")))' \
+              '(require (quote leiningen.core.project)) (let [project (leiningen.core.project/read "project.clj")] (println (str (:group project) "/" (:name project))))' \
               | tail -n 1
           )"
           project_version="$(
