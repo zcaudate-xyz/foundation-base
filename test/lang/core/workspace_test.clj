@@ -115,6 +115,11 @@
   (w/rt:module (l/rt 'xt.lang.common-lib :xtalk))
   => map?)
 
+^{:refer lang.core.workspace/rt:setup-report :added "4.1"}
+(fact "exposes setup reports through the workspace and core APIs"
+  (fn? w/rt:setup-report) => true
+  (fn? l/rt:setup-report) => true)
+
 ^{:refer lang.core.workspace/rt:module-meta :added "4.0"}
 (fact "gets the book module for a runtime"
   (w/rt:module-meta :xtalk) => map?)

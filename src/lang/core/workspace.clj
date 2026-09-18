@@ -240,6 +240,7 @@
    [rt:teardown-single std.lib.context.pointer/rt-teardown-module]
    [rt:setup-to  rt/multistage-setup-to]
    [rt:setup rt/multistage-setup-for]
+   [rt:setup-report rt/multistage-setup-report]
    [rt:teardown  rt/multistage-teardown-for]
    [rt:teardown-to  rt/multistage-teardown-to]
    [rt:teardown-at  rt/multistage-teardown-at]
