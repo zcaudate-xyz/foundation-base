@@ -208,16 +208,52 @@
     {:static/schema (first schema)
      :static/application application}))
 
+(defn- pg-resolve-table-symbol
+  [table sym-meta mopts]
+  (when (symbol? table)
+    (let [source-ns (or (:namespace mopts)
+                        (get-in mopts [:entry :namespace]))
+          ns-obj    (or (cond (instance? clojure.lang.Namespace source-ns)
+                              source-ns
+
+                              (symbol? source-ns)
+                              (find-ns source-ns))
+                        *ns*)
+          source-module-id (some-> (get-in sym-meta [:api/meta :db/module])
+                                   str
+                                   symbol)
+          modules          (or (get-in mopts [:book :modules])
+                               (get-in mopts [:snapshot :postgres :book :modules]))
+          source-module    (get modules source-module-id)
+          linked-module    (get-in source-module [:link (some-> table namespace symbol)])
+          table-var        (or (ns-resolve ns-obj table)
+                               (when linked-module
+                                 (ns-resolve ns-obj
+                                             (symbol (str linked-module)
+                                                     (name table)))))]
+      (some-> table-var
+              f/var-sym))))
+
+(defn- pg-hydrate-api-meta
+  [sym-meta mopts]
+  (if-let [table (get-in sym-meta [:api/meta :table])]
+    (if-let [table-sym (pg-resolve-table-symbol table sym-meta mopts)]
+      (assoc-in sym-meta [:api/meta :table] table-sym)
+      sym-meta)
+    sym-meta))
+
 (defn pg-hydrate
   "hydrate function for top level entries"
   {:added "4.0"}
   ([[op sym & body] grammar mopts]
    (let [reserved (collection/qualified-keys (get-in grammar [:reserved op])
-                                     :static)
-          static (merge (pg-hydrate-module-static (:module mopts))
-                        reserved)]
-      [static (apply list op (with-meta sym (merge (meta sym) static))
-                     body)])))
+                                      :static)
+         sym-meta (pg-hydrate-api-meta (meta sym) mopts)
+         hmeta    (merge (pg-hydrate-module-static (:module mopts))
+                         reserved
+                         (select-keys sym-meta [:api/meta]))]
+     [hmeta (apply list op (with-meta sym (merge sym-meta hmeta))
+                   body)])))
 
 (defn pg-current-module-link?
   "checks whether a link points to the active module"
