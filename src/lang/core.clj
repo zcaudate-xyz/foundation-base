@@ -160,6 +160,7 @@
   workspace/rt:inner
   workspace/rt:restart
   workspace/rt:setup
+  workspace/rt:setup-report
   workspace/rt:setup-to
   workspace/rt:setup-single
   workspace/rt:scaffold

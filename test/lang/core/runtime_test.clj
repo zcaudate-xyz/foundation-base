@@ -311,6 +311,43 @@
      (std.lib.deps/deps-ordered book [module-id])))
   => '[[L.core nil] [L.util nil]])
 
+^{:refer lang.core.runtime/multistage-setup-report :added "4.1"}
+(fact "reports setup results by namespace and entry"
+  (let [runtime (rt/map->RuntimeDefault
+                 {:library +library-ext+
+                  :lang :lua
+                  :module 'L.core
+                  :layout :full})]
+    (with-redefs [deps/setup-ptr-form  (fn [_ _] '(setup))
+                  rt/default-has-ptr?  (fn [_ _] false)
+                  rt/default-setup-ptr (fn [_ _] nil)]
+      (->> (rt/multistage-setup-report runtime 'L.util)
+           (map #(select-keys % [:ns :installed :failed :exists]))
+           vec))
+    => [{:ns 'L.core :installed 1 :failed 0 :exists 0}
+        {:ns 'L.util :installed 2 :failed 0 :exists 0}]
+
+    (with-redefs [deps/setup-ptr-form  (fn [_ _] '(setup))
+                  rt/default-has-ptr?  (fn [_ ptr] (= 'sub-fn (:id ptr)))
+                  rt/default-setup-ptr (fn [_ ptr]
+                                         (when (= 'add-fn (:id ptr))
+                                           (throw (ex-info "setup failed" {}))))]
+      (let [reports (rt/multistage-setup-report runtime 'L.util)]
+        (map #(select-keys % [:ns :installed :failed :exists]) reports)))
+    => [{:ns 'L.core :installed 1 :failed 0 :exists 0}
+        {:ns 'L.util :installed 0 :failed 1 :exists 1}]
+
+    (with-redefs [deps/setup-module-form    (fn [_ module-id]
+                                             (when (= 'L.util module-id)
+                                               '(setup-module)))
+                  deps/setup-ptr-form       (fn [_ _] nil)
+                  rt/default-has-module?   (fn [_ _] true)
+                  rt/default-setup-module-form (fn [_ _] nil)]
+      (let [reports (rt/multistage-setup-report runtime 'L.util)]
+        (map #(select-keys % [:ns :installed :failed :exists]) reports)))
+    => [{:ns 'L.core :installed 0 :failed 0 :exists 0}
+        {:ns 'L.util :installed 0 :failed 0 :exists 1}]))
+
 ^{:refer lang.core.runtime/multistage-setup-for :added "4.0"}
 (fact "setup for a given namespace"
 

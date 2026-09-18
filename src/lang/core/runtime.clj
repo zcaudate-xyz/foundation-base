@@ -437,6 +437,10 @@
   default-setup-ptr
   (default-lifecycle-fn deps/setup-ptr-form))
 
+(def ^{:arglists '([rt module-id])}
+  default-setup-module-form
+  (default-lifecycle-fn deps/setup-module-form))
+
 (def ^{:arglists '([rt ptr])}
   default-teardown-ptr
   (default-lifecycle-fn deps/teardown-ptr-form))
@@ -535,6 +539,78 @@
                                                                      (.getMessage ^Throwable t)))})))))
                      arr)))))))
 
+(defn- setup-report-entry
+  "sets up one entry and returns its report counters"
+  [rt module-id id exists-fn setup-fn]
+  (let [exists? (boolean (exists-fn))
+        base    {:ns module-id
+                 :id id
+                 :installed 0
+                 :failed 0
+                 :exists (if exists? 1 0)
+                 :failures []}]
+    (try
+      (setup-fn)
+      (assoc base :installed (if exists? 0 1))
+      (catch Throwable t
+        (assoc base
+               :failed 1
+               :failures [{:id id
+                           :message (.getMessage t)
+                           :error t}])))))
+
+(defn- setup-report-module
+  "reports setup results for one module"
+  [rt {:keys [book]} module-id]
+  (let [module (book-module/module-derived-view
+                book
+                (get-in book [:modules module-id]))
+        pointers (->> (:code module)
+                      vals
+                      (sort-by (juxt :priority :line :time))
+                      (keep (fn [entry]
+                              (let [ptr (ut/lang-pointer
+                                          (:lang rt)
+                                          {:module module-id
+                                           :section :code
+                                           :id (:id entry)
+                                           :library (:library rt)})]
+                                (when (deps/setup-ptr-form book ptr)
+                                  ptr)))))
+        module-result (when (deps/setup-module-form book module-id)
+                        (setup-report-entry
+                         rt
+                         module-id
+                         :module
+                         #(default-has-module? rt module-id)
+                         #(default-setup-module-form rt module-id)))
+        pointer-results (map (fn [ptr]
+                               (setup-report-entry
+                                rt
+                                module-id
+                                (:id ptr)
+                                #(default-has-ptr? rt ptr)
+                                #(default-setup-ptr rt ptr)))
+                             pointers)
+        results (if module-result
+                  (cons module-result pointer-results)
+                  pointer-results)]
+    (let [report (reduce (fn [out result]
+                           (-> out
+                               (update :installed + (:installed result))
+                               (update :failed + (:failed result))
+                               (update :exists + (:exists result))
+                               (update :failures into (:failures result))))
+                         {:ns module-id
+                          :installed 0
+                          :failed 0
+                          :exists 0
+                          :failures []}
+                         results)]
+      (if (seq (:failures report))
+        report
+        (dissoc report :failures)))))
+
 (defn multistage-invoke
   "invokes a multistage pipeline given deps function"
   {:added "4.0"}
@@ -543,6 +619,15 @@
         module-ids (deps-fn book module-id)]
     (mapv (fn [module-id]
             [module-id (module-fn rt module-id meta)])
+          module-ids)))
+
+(defn multistage-setup-report
+  "reports entry-level setup results for a given namespace"
+  {:added "4.1"}
+  [rt module-id]
+  (let [{:keys [book] :as meta} (default-lifecycle-prep rt)
+        module-ids (std.lib.deps/deps-ordered book [module-id])]
+    (mapv #(setup-report-module rt meta %)
           module-ids)))
 
 (defn multistage-setup-for
