@@ -303,10 +303,12 @@
 
           (map? v)
           (let [addon (ut/get-addon (or (:type v) (:key v)))]
-            (merge addon
-                   (dissoc v :ref)
-                   (if (:ref v)
-                     (ref-fn (:key v) (:ref v)))))
+            (if (:ref v)
+              (merge addon
+                     (dissoc v :ref)
+                     (ref-fn (:key v) (:ref v)))
+              (collection/merge-nested addon
+                                       (dissoc v :ref))))
 
           :else
           (f/error "Addon Not Valid" {:input v}))))
