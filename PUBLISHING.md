@@ -31,9 +31,10 @@ Clojars from the protected `release` branch.
 ## Credentials and recovery
 
 The workflow receives `CLOJARS_USERNAME` and `CLOJARS_PASSWORD` only from the
-protected GitHub `clojars` environment. `CLOJARS_PASSWORD` should be a scoped
-Clojars deploy token. Do not put either value in `project.clj`, an encrypted
-file, a commit, a log, or an artifact.
+protected GitHub `clojars` environment. Before the first tag, a repository
+administrator must add both names as environment secrets. `CLOJARS_PASSWORD`
+should be a scoped Clojars deploy token. Do not put either value in
+`project.clj`, an encrypted file, a commit, a log, or an artifact.
 
 Clojars versions are immutable. If a workflow fails before publication, rerun
 the same tag workflow after correcting the delivery problem. Do not retag or
