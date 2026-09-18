@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [clj-kondo.core :as kondo]
             [postgres.entity :as et :refer :all]
+            [postgres.typed.typed-parse :as typed-parse]
             [lang.core :as l]
             [lang.model.spec-postgres.entity-util :as ut]
             [lang.base.grammar-spec :as grammar-spec]
@@ -252,6 +253,45 @@
                 :required true
                 :ref {:ns 'Rev}}
         :priority 77}))
+
+(fact "merges typed addon field metadata with the registered field"
+  (with-test-entity-v2
+    (with-redefs [ut/get-addon
+                  (constantly {:key :detail
+                               :field {:type :map
+                                       :required true
+                                       :scope :-/detail
+                                       :sql {:default "{}"}}
+                               :priority 51})]
+      (E-addon-columns-single
+       {:key :detail
+        :field {:type :jsonb
+                :shape :map
+                :map {:source {:type :text}
+                      :version {:type :integer}}
+                :web {:example {:source "example"
+                                :version 1}}}})
+      => {:key :detail
+          :field {:type :jsonb
+                  :required true
+                  :scope :-/detail
+                  :sql {:default "{}"}
+                  :shape :map
+                  :map {:source {:type :text}
+                        :version {:type :integer}}
+                  :web {:example {:source "example"
+                                  :version 1}}}
+          :priority 51})))
+
+(fact "keeps malformed addon map metadata visible to parser validation"
+  (with-test-entity-v2
+    (let [addon (E-addon-columns-single
+                 {:key :detail
+                  :field {:type :jsonb
+                          :shape :map
+                          :map {:source :text}}})]
+      (typed-parse/parse-column-spec [:detail (:field addon)])
+      => (throws clojure.lang.ExceptionInfo))))
 
 ^{:refer postgres.entity/basis-kind-for :added "4.1"}
 (fact "basis-kind-for distinguishes minimal and expanded bases"
