@@ -31,11 +31,11 @@
     (return null))
   (return
    (renderer props
-             (if (xt/x:nil? children)
-               nil
-               (. children
-                  (map (fn [child]
-                         (return (-/render-ui-node registry child)))))))))
+             (:? (xt/x:nil? children)
+                 nil
+                 (. children
+                    (map (fn [child]
+                           (return (-/render-ui-node registry child)))))))))
 
 (defn.js react-registry
   "minimal registry mapping portable xt.ui components to React elements"

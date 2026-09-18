@@ -28,12 +28,12 @@
                         ["ui/textarea" "WInput"]
                         ["ui/button" "WButton"]
                         ["ui/alert" "WDiv"]
-                        ["ui/spinner" "WDiv"]]
+                        ["ui/spinner" "WDiv"]
                         ["ui/table" "WDiv"]
                         ["ui/table-header" "WDiv"]
                         ["ui/table-body" "WDiv"]
                         ["ui/table-row" "WDiv"]
-                        ["ui/table-cell" "WText"]]
+                        ["ui/table-cell" "WText"]]]
     (ui/registry-register-renderer platform (xt/x:get-key entry 0) (xt/x:get-key entry 1)))
   (return (ui/registry-compose [(catalog/registry) platform])))
 
