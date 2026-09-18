@@ -17,6 +17,7 @@
    "codox"       ["with-profile" "+codox" "run" "-m" "code.doc.codox"]
    "install"     ["exec" "-ep" "(use 'code.tool.maven)   (install :all {:tag :all}) (System/exit 0)"]
    "deploy"      ["exec" "-ep" "(use 'code.tool.maven)   (deploy :all {:tag :all}) (System/exit 0)"]
+   "deploy-root" ["exec" "-ep" "(require '[leiningen.core.project :as project] '[leiningen.deploy :as deploy]) (deploy/deploy (project/read \"project.clj\") \"clojars\") (System/exit 0)"]
    "deploy-lein" ["exec" "-ep" "(use 'code.tool.maven)   (deploy-lein :all {:tag :all}) (System/exit 0)"]
    "push-native-code"  ["run" "-m" "component.task-native-index"]
    "push-c-000-pthreads"        ["run" "-m" "play.c-000-pthreads-hello.build"]
@@ -205,6 +206,10 @@
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}
              :codox {:dependencies [[codox "0.10.8"]]}}
+  :deploy-repositories [["clojars" {:url "https://repo.clojars.org/"
+                                     :username :env/CLOJARS_USERNAME
+                                     :password :env/CLOJARS_PASSWORD
+                                     :sign-releases false}]]
   :codox {:source-paths ["src"]
           :output-path "public/api"
           :namespaces [#"^std\..*" #"^code\..*" #"^lang\..*" #"^jvm\..*"

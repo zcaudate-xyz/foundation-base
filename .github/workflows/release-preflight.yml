@@ -1,0 +1,155 @@
+name: Foundation release preflight
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [release]
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: foundation-release-preflight-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  release-ready:
+    if: github.event.pull_request.draft == false
+    name: release ready
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout the proposed release commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Validate release origin and version
+        id: release
+        shell: bash
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          test "$HEAD_REPO" = "$GITHUB_REPOSITORY"
+          test "$HEAD_REF" = main
+          test "$BASE_REF" = release
+
+          git fetch --no-tags origin "$BASE_SHA" "$HEAD_SHA" main release
+
+          if ! git merge-base --is-ancestor "$BASE_SHA" "$HEAD_SHA"; then
+            parents="$(git show -s --format=%P "$BASE_SHA")"
+            read -r -a parents <<<"$parents"
+            test "${#parents[@]}" = 2
+            git merge-base --is-ancestor "${parents[1]}" "$HEAD_SHA"
+          fi
+
+          project_name="$(
+            ./lein exec -e \
+              '(require (quote leiningen.core.project)) (println (:name (leiningen.core.project/read "project.clj")))' \
+              | tail -n 1
+          )"
+          project_version="$(
+            ./lein exec -e \
+              '(require (quote leiningen.core.project)) (println (:version (leiningen.core.project/read "project.clj")))' \
+              | tail -n 1
+          )"
+
+          test "$project_name" = xyz.zcaudate/foundation-base
+          [[ "$project_version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)([-+][0-9A-Za-z.-]+)?$ ]]
+          [[ "$project_version" != *SNAPSHOT* ]]
+
+          {
+            echo "name=$project_name"
+            echo "version=$project_version"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo '### Release contract'
+            echo
+            echo "- Coordinate: \`$project_name\`"
+            echo "- Version: \`$project_version\`"
+            echo "- Promotion: \`main -> release\`"
+            echo "- Proposed commit: \`$HEAD_SHA\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create test database
+        run: |
+          docker exec "${{ job.services.postgres.id }}" \
+            psql -U postgres -d test-scratch -c 'CREATE DATABASE test;'
+          docker exec "${{ job.services.postgres.id }}" \
+            psql -U postgres -d test-scratch -c 'GRANT ALL PRIVILEGES ON DATABASE test TO postgres;'
+
+      - name: Log into GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USER }}
+          password: ${{ secrets.GH_TOKEN }}
+
+      - name: Pull runtime images
+        run: |
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-haskell:latest
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-lean:latest
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-ocaml:latest
+          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest
+
+      - name: Install root JavaScript dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Install JavaScript parser dependencies
+        run: npm ci
+        working-directory: scripts/js_parser
+
+      - name: Run release tests and package checks
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp
+          docker run --network host \
+            -e 'CI=true' \
+            -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS} -Djava.io.tmpdir=$(pwd)/.tmp" \
+            -e "_JAVA_OPTIONS=-Djava.io.tmpdir=$(pwd)/.tmp" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v /home/runner/.docker/config.json:/root/.docker/config.json:ro \
+            -v "$(pwd):$(pwd)" \
+            -w "$(pwd)" \
+            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
+            bash -lc 'set -euxo pipefail &&
+              apt-get update &&
+              apt-get install -y --no-install-recommends lua5.4 python3 python3-pip redis-server &&
+              lein test &&
+              lein pom &&
+              lein jar'
+
+    services:
+      postgres:
+        image: ghcr.io/zcaudate-xyz/infra-db:main
+        env:
+          POSTGRES_DB: test-scratch
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379

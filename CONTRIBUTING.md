@@ -44,6 +44,31 @@ Install the current project into the local Maven repository:
 lein install
 ```
 
+## Publishing a release
+
+Foundation Base releases are published from the protected `release` branch.
+Prepare the version on `main`, then open a normal merge pull request from
+`main` to `release`. The release preflight validates the branch lineage,
+project version, package generation, and the repository's `code.test` suite.
+Release promotion pull requests must retain their merge commits; do not squash
+or rebase them.
+
+After the preflight succeeds and the pull request has been merged, push a tag
+whose name exactly matches the version in `project.clj`:
+
+```bash
+git tag v4.1.5
+git push origin v4.1.5
+```
+
+The tag workflow verifies that its commit is the current `release` branch head
+and publishes the root `xyz.zcaudate/foundation-base` artifact to Clojars.
+Credentials are held only in the protected GitHub `clojars` environment and
+must never be added to source, documentation, logs, or artifacts. If delivery
+fails after the tag is accepted, rerun the workflow for that same tag rather
+than retagging or changing an already-published version. See
+[`PUBLISHING.md`](PUBLISHING.md) for the complete release procedure.
+
 ## Understand the main areas
 
 | Namespace or path | Purpose |
