@@ -16,7 +16,7 @@ Clojars from the protected `release` branch.
    push the matching version tag:
 
    ```bash
-   version=4.1.5
+   version=4.1.6
    git tag "v${version}"
    git push origin "v${version}"
    ```

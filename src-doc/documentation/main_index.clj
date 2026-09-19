@@ -60,7 +60,7 @@
 "Released Foundation Base artifacts are published to Clojars. For local development, install Java 21 and Leiningen, then clone and install the project."
 
 [[:code {:lang "bash"}
-  "[xyz.zcaudate/foundation-base \"4.1.5\"]\n\n# Local development\ngit clone git@github.com:zcaudate-xyz/foundation-base.git\ncd foundation-base\nlein install\nlein repl"]]
+  "[xyz.zcaudate/foundation-base \"4.1.6\"]\n\n# Local development\ngit clone git@github.com:zcaudate-xyz/foundation-base.git\ncd foundation-base\nlein install\nlein repl"]]
 
 [[:section {:title "Try a standard-library helper"}]]
 
