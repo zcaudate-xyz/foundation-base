@@ -9,7 +9,8 @@
              [xt.db.system.impl-sqlite :as impl-sqlite]
              [xt.db.system.impl-postgres :as impl-postgres]
              [xt.db.system.impl-memory :as impl-memory]
-             [xt.db.system.impl-supabase :as impl-supabase]]})
+             [xt.db.system.impl-supabase :as impl-supabase]
+             [xt.db.system.impl-supabase-js :as impl-supabase-js]]})
 
 (defn.xt create-impl
   "creates impls for local and live backends"
@@ -30,7 +31,11 @@
 
         (== type "supabase")
         (return
-         (impl-supabase/impl-supabase client schema lookup))))
+         (impl-supabase/impl-supabase client schema lookup))
+
+        (== type "supabase-js")
+        (return
+         (impl-supabase-js/impl-supabase-js client schema lookup))))
 
 (defn.xt create-impl-init
   "initialises postgres impls and leaves the wrapper output usable"
