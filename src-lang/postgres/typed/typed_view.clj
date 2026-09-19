@@ -91,18 +91,19 @@
                       (mapcat (fn [ns-sym]
                                 (require ns-sym)
                                 (map (fn [[_ sym]]
-                                       (let [{:keys [id input view]}
+                                       (let [{:keys [id input view] :as bound}
                                              (bind-view-entry @(resolve sym))
                                              entry {:input input
                                                     :view view}
                                              entry-key (if (= "select" (:type view))
                                                          :select-entry
                                                          :return-entry)]
-                                         [sym {:id id
-                                               :table (:table view)
-                                               entry-key entry
-                                               :select-args []
-                                               :return-args []}]))
+                                         [sym (merge bound
+                                                     {:id id
+                                                      :table (:table view)
+                                                      entry-key entry
+                                                      :select-args []
+                                                      :return-args []})]))
                                      (concat (bind/list-view ns-sym :select)
                                              (bind/list-view ns-sym :return)))))
                       distinct

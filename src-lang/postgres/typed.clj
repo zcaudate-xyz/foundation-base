@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [load-file])
   (:require [clojure.string :as string]
             [postgres.typed.export.json-openapi :as compile.json-openapi]
+            [postgres.typed.export.json-view :as compile.json-view]
             [postgres.typed.export.json-schema :as compile.json-schema]
             [postgres.typed.export.ts-schema :as compile.ts-schema]
             [lang.runtime.postgres.base.application :as app]
@@ -9,7 +10,8 @@
             [postgres.typed.typed-common :as types]
             [postgres.typed.typed-infer :as typed-infer]
             [postgres.typed.typed-resolve :as typed-resolve]
-            [postgres.typed.typed-parse :as parse]))
+            [postgres.typed.typed-parse :as parse]
+            [postgres.typed.typed-view :as typed-view]))
 (declare enrich-function-arg-roles input-shape output-shape)
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Shape Formatting Helpers
@@ -468,6 +470,33 @@
   (with-context-registry
     ctx
     #(compile.json-schema/generate-json-schema)))
+
+(defn export-views
+  "Generates the versioned JSON publication for typed postgres views.
+
+   The optional argument may be a predicate over `[symbol descriptor]` view
+   entries or an options map with `:filter`, `:source-namespaces`, and
+   `:preserve-source-order?`. By default, all namespaces in the context are
+   inspected."
+  ([ctx]
+   (export-views ctx {}))
+  ([ctx filter-or-opts]
+   (let [{:keys [filter source-namespaces preserve-source-order?]}
+         (if (fn? filter-or-opts)
+           {:filter filter-or-opts}
+           filter-or-opts)
+         source-namespaces (or source-namespaces
+                               (:namespaces ctx)
+                               [])]
+     (with-context-registry
+       ctx
+       #(let [entries (typed-view/view-entries
+                       source-namespaces
+                       {:preserve-source-order? preserve-source-order?})
+              entries (if filter
+                        (clojure.core/filter filter entries)
+                        entries)]
+          (compile.json-view/generate-views entries))))))
 
 (defn export-typescript
   "Generates TypeScript definitions from a postgres typed context."
