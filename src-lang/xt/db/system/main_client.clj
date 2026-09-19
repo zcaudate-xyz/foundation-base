@@ -15,7 +15,8 @@
              [js.net.http-fetch :as js-fetch]
              [js.net.ws-native :as js-ws]
              [js.net.conn-sqlite :as js-sqlite]
-             [js.net.conn-postgres :as js-postgres]]})
+             [js.net.conn-postgres :as js-postgres]
+             [js.lib.supabase :as supabase]]})
 
 (defn.js create-client
   [type defaults]
@@ -29,6 +30,21 @@
         (do (var client (js-fetch/create defaults (addon/middleware-supabase)))
             (xt/x:set-key client "create_ws_client" js-ws/create)
             (return client))
+
+        (== type "supabase-js")
+        (do (var config (or defaults {}))
+            (var client (xt/x:get-key config "client"))
+            (when client
+              (return client))
+            (var url (or (xt/x:get-key config "url")
+                         (xt/x:get-key config "supabase_url")))
+            (var key (or (xt/x:get-key config "key")
+                         (xt/x:get-key config "anon_key")
+                         (xt/x:get-key config "anonKey")
+                         (xt/x:get-key config "apikey")))
+            (when (and url key)
+              (return (supabase/createSupabaseClient url key)))
+            (return nil))
 
         :else
         (return nil)))
