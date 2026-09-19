@@ -17,6 +17,8 @@
    "codox"       ["with-profile" "+codox" "run" "-m" "code.doc.codox"]
    "install"     ["exec" "-ep" "(use 'code.tool.maven)   (install :all {:tag :all}) (System/exit 0)"]
    "deploy"      ["exec" "-ep" "(use 'code.tool.maven)   (deploy :all {:tag :all}) (System/exit 0)"]
+   "package-clojars" ["exec" "-ep" "(use 'code.tool.maven)   (let [result (package :all {:tag :clojars})] (System/exit (task-exit-code result)))"]
+   "deploy-clojars" ["exec" "-ep" "(use 'code.tool.maven)   (let [result (deploy :all {:tag :clojars})] (System/exit (task-exit-code result)))"]
    "deploy-root" ["exec" "-ep" "(require '[leiningen.core.project :as project] '[leiningen.deploy :as deploy]) (deploy/deploy (project/read \"project.clj\") \"clojars\") (System/exit 0)"]
    "deploy-lein" ["exec" "-ep" "(use 'code.tool.maven)   (deploy-lein :all {:tag :all}) (System/exit 0)"]
    "push-native-code"  ["run" "-m" "component.task-native-index"]

@@ -49,7 +49,9 @@ lein install
 Foundation Base releases are published from the protected `release` branch.
 Prepare the version on `main`, then open a normal merge pull request from
 `main` to `release`. The release preflight validates the branch lineage,
-project version, package generation, and the repository's `code.test` suite.
+project version, root packaging, and the complete split-package artifact
+inventory. The normal `main` CI owns the repository's full `code.test` suite;
+the release gate does not rerun it.
 Release promotion pull requests must retain their merge commits; do not squash
 or rebase them.
 
@@ -61,12 +63,14 @@ git tag v4.1.6
 git push origin v4.1.6
 ```
 
-The tag workflow verifies that its commit is the current `release` branch head
-and publishes the root `xyz.zcaudate/foundation-base` artifact to Clojars.
-Credentials are held only in the protected GitHub `clojars` environment and
-must never be added to source, documentation, logs, or artifacts. If delivery
-fails after the tag is accepted, rerun the workflow for that same tag rather
-than retagging or changing an already-published version. See
+The tag workflow verifies that its commit is the current `release` branch head,
+publishes the split packages selected by `:clojars`, and then publishes the
+root `xyz.zcaudate/foundation-base` artifact to Clojars. Credentials are held
+only in the protected GitHub `clojars` environment and must never be added to
+source, documentation, logs, or artifacts. Split publication is not atomic:
+inspect accepted coordinates before retrying a failed immutable release. If
+delivery fails before any artifact is accepted, rerun the workflow for that
+same tag; otherwise use a new project version. See
 [`PUBLISHING.md`](PUBLISHING.md) for the complete release procedure.
 
 ## Understand the main areas

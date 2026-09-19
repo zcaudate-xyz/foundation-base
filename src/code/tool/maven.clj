@@ -68,6 +68,22 @@
                                   :color  #{:bold}}]}
            :summary  {:aggregate {:packaged   [:packaged + 0]}}})))
 
+(defn task-exit-code
+  "returns a failing process exit code when a task summary has errors"
+  {:added "4.1.6"}
+  ([{:keys [errors] :as summary}]
+   (cond (not (map? summary))
+         (throw (ex-info "Task summary must be a map"
+                         {:summary summary}))
+
+         (not (number? errors))
+         (throw (ex-info "Task summary is missing numeric :errors"
+                         {:summary summary}))
+
+         (pos? errors) 1
+
+         :else 0)))
+
 (invoke/definvoke linkage
   "creates linkages for project
  

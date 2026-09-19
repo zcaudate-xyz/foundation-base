@@ -488,15 +488,15 @@
    :include [[lang.runtime.graal :complete]]
    :bundle [{:path "target/classes" 
              :include ["hara/lib/graal"]}]
-   :dependencies [org.graalvm.sdk/graal-sdk
-                  org.graalvm.js/js
-                 org.graalvm.js/js-scriptengine
-		             commons-io/commons-io]}
+   :dependencies [[org.graalvm.sdk/graal-sdk "21.2.0"]
+                 [org.graalvm.js/js "21.2.0"]
+                 [org.graalvm.js/js-scriptengine "21.2.0"]
+                 commons-io/commons-io]}
  
  xyz.zcaudate/lang.runtime.jep
   {:description "runtime for jep" 
    :include [[lang.runtime.jep :complete]]
-   :dependencies [black.ninia/jep]}
+   :dependencies [[black.ninia/jep "4.3.1"]]}
  
  xyz.zcaudate/postgres
  {:description "postgres language and runtime support"
