@@ -2,7 +2,8 @@
   (:require [clojure.string :as str]
             [postgres.typed.typed-common :as types]
             [postgres.typed.typed-parse :as parse]
-            [postgres.typed :as typed])
+            [postgres.typed :as typed]
+            [postgres.typed.typed-order :as typed-order])
   (:use code.test))
 
 ^{:refer postgres.typed/load-file :added "4.1"}
@@ -231,12 +232,26 @@
 (fact "exports schemas from a postgres context"
   (let [ctx (typed/load-ns 'postgres.sample.scratch-v2)
         openapi (typed/export-openapi ctx (constantly true))
+        named-openapi (typed/export-openapi ctx (constantly true)
+                                            {:root-ns "custom-rpc"})
         json-schema (typed/export-json-schema ctx)
         ts (typed/export-typescript ctx)]
     [(contains? openapi :openapi)
+     (get-in named-openapi [:info :title])
      (map? json-schema)
      (str/includes? ts "interface")])
-  => [true true true])
+  => [true "custom-rpc API" true true])
+
+^{:refer postgres.typed.typed-order/ordered-value :added "4.1"}
+(fact "preserves explicit order and sorts plain nested maps"
+  (let [value (typed-order/ordered-map
+               [[:outer {:z 1 :a {:y 2 :x 3}}]
+                [:first 0]])
+        ordered (typed-order/ordered-value value)]
+    [(mapv #(.getKey ^java.util.Map$Entry %) ordered)
+     (mapv #(.getKey ^java.util.Map$Entry %) (get ordered :outer))
+     (instance? java.util.LinkedHashMap ordered)])
+  => [[:outer :first] [:a :z] true])
 
 
 ^{:refer postgres.typed/inferred->shape :added "4.1"}

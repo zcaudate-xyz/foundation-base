@@ -91,16 +91,19 @@
         field-keys (typed-jsonb/js-keys-form->keywords keys-expr)]
     (when (and (types/jsonb-shape? source-shape)
                (seq field-keys))
-      (types/make-jsonb-shape
-       (into {}
-             (map (fn [k]
-                    [k (get-in source-shape [:fields k]
-                               {:type :jsonb
-                                :nullable? true})]))
-             field-keys)
-       (:source-table source-shape)
-       (:confidence source-shape)
-       (:nullable? source-shape)))))
+      (assoc
+       (types/make-jsonb-shape
+        (into {}
+              (map (fn [k]
+                     [k (get-in source-shape [:fields k]
+                                {:type :jsonb
+                                 :nullable? true})]))
+              field-keys)
+        (:source-table source-shape)
+        (:confidence source-shape)
+        (:nullable? source-shape))
+       :field-order
+       (vec field-keys)))))
 
 (register-call-analyzer!
  'js-select
@@ -367,14 +370,18 @@
 
     ;; Map literal
     (map? expr)
-    {:kind :shaped
-     :shape (types/make-jsonb-shape
-             (into {}
-                   (map (fn [[k v]]
-                          [(literal-map-key k)
-                           (value->field-info (analyze-expr v ctx))]))
-                   expr)
-             nil :high false)}
+    (let [field-order (mapv literal-map-key (keys expr))]
+      {:kind :shaped
+       :shape (assoc
+               (types/make-jsonb-shape
+                (into {}
+                      (map (fn [[k v]]
+                             [(literal-map-key k)
+                              (value->field-info (analyze-expr v ctx))]))
+                      expr)
+                nil :high false)
+               :field-order
+               field-order)})
 
     ;; Set literal used as keyed JSONB/object return when all members are symbols.
     (set? expr)

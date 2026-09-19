@@ -1,6 +1,7 @@
 (ns postgres.typed
   (:refer-clojure :exclude [load-file])
-  (:require [postgres.typed.export.json-openapi :as compile.json-openapi]
+  (:require [clojure.string :as string]
+            [postgres.typed.export.json-openapi :as compile.json-openapi]
             [postgres.typed.export.json-schema :as compile.json-schema]
             [postgres.typed.export.ts-schema :as compile.ts-schema]
             [lang.runtime.postgres.base.application :as app]
@@ -302,18 +303,24 @@
    The application registry remains authoritative for tables. Module enums and
    functions are parsed again so generated namespaces, including RPC modules,
    are present even when the app typed payload is stale or incomplete."
-  [app-name]
-  (let [ctx (load-app app-name)
-        namespaces (app-module-namespaces app-name)]
-    (with-context-registry
-      ctx
-      (fn []
-        (doseq [namespace namespaces]
-          (register-module-analysis!
-           (parse/analyze-namespace namespace)))
-        (assoc (load-registry)
-               :app-name app-name
-               :namespaces namespaces)))))
+  ([app-name]
+   (load-full app-name nil))
+  ([app-name function-filter]
+   (let [ctx (load-app app-name)
+         namespaces (app-module-namespaces app-name)]
+     (with-context-registry
+       ctx
+       (fn []
+         (let [analyses (mapv parse/analyze-namespace namespaces)]
+           (doseq [analysis analyses]
+             (register-module-analysis! analysis))
+           (assoc (load-registry)
+                  :app-name app-name
+                  :namespaces namespaces
+                  :function-filter function-filter
+                  :registration-order
+                  {:functions (mapv :name (mapcat :functions analyses))
+                   :schemas (mapv :name (mapcat :enums analyses))})))))))
 
 (defn entries
   "Returns all typed declarations in a postgres context."
@@ -435,14 +442,25 @@
 (defn export-openapi
   "Generates OpenAPI from a postgres typed context."
   ([ctx]
-   (export-openapi ctx (constantly true)))
-  ([ctx fn-filter]
+   (export-openapi ctx (or (:function-filter ctx)
+                           (constantly true))))
+  ([ctx fn-filter-or-opts]
+   (if (map? fn-filter-or-opts)
+     (export-openapi ctx
+                     (or (:function-filter ctx)
+                         (constantly true))
+                     fn-filter-or-opts)
+     (export-openapi ctx fn-filter-or-opts {})))
+  ([ctx fn-filter opts]
    (with-context-registry
      ctx
-     #(compile.json-openapi/generate-openapi (or (some-> ctx :analysis :ns)
+     #(compile.json-openapi/generate-openapi (or (:root-ns opts)
+                                           (some-> ctx :analysis :ns)
                                            (:app-name ctx)
                                            "postgres")
-                                       fn-filter))))
+                                       fn-filter
+                                       (merge (:registration-order ctx)
+                                              opts)))))
 
 (defn export-json-schema
   "Generates JSON Schema from a postgres typed context."

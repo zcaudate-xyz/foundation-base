@@ -14,10 +14,14 @@
 
 (defn- unique-defs
   [defs]
-  (->> defs
-       (group-by def-name)
-       vals
-       (map first)))
+  (second
+   (reduce (fn [[seen output] definition]
+             (let [name (def-name definition)]
+               (if (contains? seen name)
+                 [seen output]
+                 [(conj seen name) (conj output definition)])))
+           [#{} []]
+           defs)))
 
 (defn- ordered-map
   [entries]
@@ -25,6 +29,70 @@
     (doseq [[key value] entries]
       (.put output key value))
     output))
+
+(defn- map-like?
+  [value]
+  (or (map? value)
+      (instance? java.util.Map value)))
+
+(defn- ordered-value
+  [value]
+  (cond
+    (map-like? value)
+    (ordered-map
+     (map (fn [[key nested-value]]
+            [key (ordered-value nested-value)])
+          (if (instance? java.util.LinkedHashMap value)
+            value
+            (sort-by (comp str key) value))))
+
+    (sequential? value)
+    (mapv ordered-value value)
+
+    :else
+    value))
+
+(defn- order-name
+  [value]
+  (let [value (if (map-like? value)
+                (or (:id value) (:name value))
+                value)]
+    (cond
+      (nil? value) nil
+      (string? value) value
+      (keyword? value) (name value)
+      (symbol? value) (name value)
+      :else (str value))))
+
+(defn- definition-order-keys
+  [definition]
+  (let [name (def-name definition)]
+    (distinct [name
+               (when name (types/normalize-key name))])))
+
+(defn- ordered-defs
+  [defs source-order registration-order]
+  (let [defs (vec (unique-defs defs))
+        by-name (reduce (fn [output definition]
+                          (reduce (fn [output key]
+                                    (if key
+                                      (assoc output key definition)
+                                      output))
+                                  output
+                                  (definition-order-keys definition)))
+                        {}
+                        defs)
+        preferred-names (->> (concat source-order registration-order)
+                             (map order-name)
+                             (remove nil?)
+                             distinct)
+        preferred (keep by-name preferred-names)
+        preferred-set (set preferred)
+        remaining (remove preferred-set defs)]
+    (concat preferred
+            (sort-by (juxt (comp str def-name)
+                           (comp str :ns))
+                     remaining))))
 
 (defn- ordered-field-keys
   [fields field-order]
@@ -62,8 +130,10 @@
                          field-keys))
         required (mapv types/emitted-key
                        (filter #(not (:nullable? (get fields %))) field-keys))]
-    (cond-> {:type "object" :properties properties}
-      (seq required) (assoc :required required))))
+    (ordered-map
+     (cond-> [[:type "object"]
+              [:properties properties]]
+       (seq required) (conj [:required required])))))
 
 (defn arg->openapi
   "Converts a function argument to OpenAPI parameter schema.
@@ -100,9 +170,17 @@
         meta-table (get-in fn-def [:body-meta :api/meta :table])
         inputs (:inputs fn-def)
         request-body (when (seq inputs)
-                       {:content {"application/json"
-                                  {:schema {:type "object"
-                                            :properties (into (sorted-map) (map #(arg->openapi % fn-def) inputs))}}}})
+                       (ordered-map
+                        [[:content
+                          (ordered-map
+                           [["application/json"
+                             (ordered-map
+                              [[:schema
+                                (ordered-map
+                                 [[:type "object"]
+                                  [:properties
+                                   (ordered-map
+                                    (map #(arg->openapi % fn-def) inputs))]])]])]])]]))
         inferred (analyze/cached-infer fn-def)
         output (:output fn-def)
         table-name (cond
@@ -169,47 +247,76 @@
                                                            :in "header"
                                                            :required false
                                                            :schema {:type "string" :default schema-name}
-                                                           :description "Database schema for the request body"}))]
-    {:operationId (types/normalize-key fn-name)
-     :tags [(or schema-name (:ns fn-def) "default")]
-     :summary (get-in fn-def [:body-meta :docstring])
-     :security (when (and expose (not= :sb/query expose))
-                 (case expose
-                   :sb/auth [{"bearerAuth" []}]
-                   :sb/super [{"bearerAuth" ["super"]}]
-                   []))
-     :parameters parameters
-     :requestBody request-body
-     :responses {"200" {:description "Successful response" :content {"application/json" {:schema response-schema}}}
-                 "400" {:description "Bad request"}
-                 "401" {:description "Unauthorized"}
-                 "500" {:description "Internal server error"}}}))
+                                                           :description "Database schema for the request body"}))
+        responses (ordered-map
+                   (list
+                    (list "200"
+                          (ordered-map
+                           [[:description "Successful response"]
+                            [:content
+                             (ordered-map
+                              (list
+                               (list "application/json"
+                                     (ordered-map
+                                      [[:schema (ordered-value response-schema)]]))))]]))
+                    (list "400" (ordered-map [[:description "Bad request"]]))
+                    (list "401" (ordered-map [[:description "Unauthorized"]]))
+                    (list "500" (ordered-map [[:description "Internal server error"]]))))]
+    (ordered-map
+     [[:operationId (types/normalize-key fn-name)]
+      [:tags [(or schema-name (:ns fn-def) "default")]]
+      [:summary (get-in fn-def [:body-meta :docstring])]
+      [:security (when (and expose (not= :sb/query expose))
+                   (case expose
+                     :sb/auth [{"bearerAuth" []}]
+                     :sb/super [{"bearerAuth" ["super"]}]
+                     []))]
+      [:parameters parameters]
+      [:requestBody request-body]
+      [:responses responses]])))
 
 (defn generate-openapi
   "Generates complete OpenAPI 3.0 spec."
-  [root-ns fn-filter]
-  (let [all-vals (vals @types/*type-registry*)
-        fns (->> all-vals
-                 (filter types/fn-def?)
-                 (filter fn-filter)
-                 (unique-defs))
-        tables (->> all-vals
-                    (filter types/table-def?)
-                    (unique-defs))
-        enums (->> all-vals
-                   (filter types/enum-def?)
-                   (unique-defs))]
-    {:openapi "3.0.3"
-     :info {:title (str root-ns " API") :version "0.1.0"}
-     :paths (into (sorted-map)
-                  (map (fn [f]
-                         [(str "/rpc/" (types/normalize-key (:name f)))
-                          {"post" (fn->openapi f)}]))
-                  fns)
-     :components
-     {:schemas (into (sorted-map)
-                      (concat
-                       (map (fn [t] [(def-name t) (shape->openapi (shape/table->shape t))]) tables)
-                       (map (fn [e] [(def-name e) {:type "string" :enum (mapv name (:values e))}]) enums)))}
-     :security [{"bearerAuth" []}]
-     :securityDefinitions {"bearerAuth" {:type "http" :scheme "bearer" :bearerFormat "JWT"}}}))
+  ([root-ns fn-filter]
+   (generate-openapi root-ns fn-filter {}))
+  ([root-ns fn-filter {:keys [function-order schema-order
+                              registration-order]}]
+   (let [all-vals (vals @types/*type-registry*)
+         fns (ordered-defs
+              (filter (every-pred types/fn-def? fn-filter) all-vals)
+              function-order
+              (get registration-order :functions))
+         schemas (ordered-defs
+                  (filter #(or (types/table-def? %)
+                               (types/enum-def? %))
+                          all-vals)
+                  schema-order
+                  (get registration-order :schemas))
+         path-entries (map (fn [f]
+                             [(str "/rpc/" (types/normalize-key (:name f)))
+                              (ordered-map [["post" (fn->openapi f)]])])
+                           fns)
+         schema-entries (map (fn [definition]
+                               [(def-name definition)
+                                (if (types/table-def? definition)
+                                  (shape->openapi (shape/table->shape definition))
+                                  (ordered-map
+                                   [[:type "string"]
+                                    [:enum (mapv name (:values definition))]]))])
+                             schemas)]
+     (ordered-value
+      (ordered-map
+       [[:openapi "3.0.3"]
+        [:info (ordered-map [[:title (str root-ns " API")]
+                             [:version "0.1.0"]])]
+        [:paths (ordered-map path-entries)]
+        [:components
+         (ordered-map
+          [[:schemas (ordered-map schema-entries)]])]
+        [:security [{"bearerAuth" []}]]
+        [:securityDefinitions
+         (ordered-map
+          [["bearerAuth"
+            (ordered-map [[:type "http"]
+                          [:scheme "bearer"]
+                          [:bearerFormat "JWT"]])]])]])))))

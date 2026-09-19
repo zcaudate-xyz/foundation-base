@@ -52,12 +52,15 @@
       "Converts a map schema definition to a JsonbShape."
       [map-schema]
       (when (map? map-schema)
-            (let [fields (into {}
+            (let [field-order (mapv #(keyword (name %)) (keys map-schema))
+                  fields (into {}
                                (map (fn [[k v]]
                                         [(keyword (name k))
                                          (map-schema-entry->field-type k v)]))
                                map-schema)]
-                 (types/make-jsonb-shape fields))))
+                 (assoc (types/make-jsonb-shape fields)
+                        :field-order
+                        field-order))))
 
 (defn resolve-column-type
        "Resolves a ColumnDef's type to a field descriptor.
