@@ -9,5 +9,7 @@
             :lang    [:include "config/deploy/lang.edn" 
                                {:type :edn}]
             :public  [:include "config/deploy/public.edn" 
+                               {:type :edn}]
+            :clojars [:include "config/deploy/clojars.edn"
                                {:type :edn}]}
  :repositories       [:include "config/repositories.edn" {:type :edn}]}

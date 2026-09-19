@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  packages: read
 
 concurrency:
   group: foundation-release-preflight-${{ github.event.pull_request.number }}
@@ -91,62 +90,41 @@ jobs:
             echo "- Proposed commit: \`$HEAD_SHA\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Create test database
-        run: |
-          docker exec "${{ job.services.postgres.id }}" \
-            psql -U postgres -d test-scratch -c 'CREATE DATABASE test;'
-          docker exec "${{ job.services.postgres.id }}" \
-            psql -U postgres -d test-scratch -c 'GRANT ALL PRIVILEGES ON DATABASE test TO postgres;'
+      - name: Prepare package-only repository configuration
+        run: ./scripts/release/prepare-clojars-config.sh package
 
-      - name: Log into GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull runtime images
-        run: |
-          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-haskell:latest
-          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-lean:latest
-          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-ocaml:latest
-          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest
-
-      - name: Install JavaScript parser dependencies
-        run: npm ci
-        working-directory: scripts/js_parser
-
-      - name: Run release tests and package checks
+      - name: Generate and inspect release artifacts
+        env:
+          VERSION: ${{ steps.release.outputs.version }}
         run: |
           set -euo pipefail
-          mkdir -p .tmp
-          docker run --network host \
-            -e 'CI=true' \
-            -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS} -Djava.io.tmpdir=$(pwd)/.tmp" \
-            -e "_JAVA_OPTIONS=-Djava.io.tmpdir=$(pwd)/.tmp" \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v /home/runner/.docker/config.json:/root/.docker/config.json:ro \
-            -v "$(pwd):$(pwd)" \
-            -w "$(pwd)" \
-            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            bash -lc 'set -euxo pipefail &&
-              apt-get update &&
-              apt-get install -y --no-install-recommends lua5.4 python3 python3-pip redis-server &&
-              lein test &&
-              lein pom &&
-              lein jar'
+          trap 'rm -f config/repositories.edn; rm -rf target/interim' EXIT
+          ./lein pom
+          ./lein jar
+          ./lein package-clojars
 
-    services:
-      postgres:
-        image: ghcr.io/zcaudate-xyz/infra-db:main
-        env:
-          POSTGRES_DB: test-scratch
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-        ports:
-          - 5432:5432
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
+          jars="$(find target/interim -type f -name '*.jar' | wc -l | tr -d ' ')"
+          poms="$(find target/interim -type f -name '*.pom.xml' | wc -l | tr -d ' ')"
+          test "$jars" -gt 0
+          test "$jars" = "$poms"
+          test ! -e "target/interim/xyz.zcaudate/foundation-base"
+
+          while IFS= read -r artifact; do
+            case "$artifact" in
+              *-"$VERSION".jar|*-"$VERSION".pom.xml) ;;
+              *)
+                echo "unexpected artifact version: $artifact" >&2
+                exit 1
+                ;;
+            esac
+          done < <(find target/interim -type f \( -name '*.jar' -o -name '*.pom.xml' \))
+
+          {
+            echo
+            echo "### Split-package artifact preflight"
+            echo
+            echo "- Version: \`$VERSION\`"
+            echo "- Packages: \`$jars\`"
+            echo "- JAR/POM inventory: \`$jars/$poms\`"
+            echo "- Root artifact: not included in the split-package inventory"
+          } >> "$GITHUB_STEP_SUMMARY"
