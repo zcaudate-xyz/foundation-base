@@ -40,6 +40,7 @@
    [like            [col pattern]]
    [ilike           [col pattern]]
    [is              [col val]]
+   [filter          [col op value]]
    [in              [col values]]
    [contains        [col value]]
    [containedBy     [col value]]
