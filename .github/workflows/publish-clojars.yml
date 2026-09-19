@@ -110,9 +110,6 @@ jobs:
           docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-ocaml:latest
           docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest
 
-      - name: Install root JavaScript dependencies
-        run: npm ci --legacy-peer-deps
-
       - name: Install JavaScript parser dependencies
         run: npm ci
         working-directory: scripts/js_parser
