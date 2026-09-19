@@ -113,12 +113,60 @@
     (:type result) => :jsonb
     (:jsonb-shape result) => :array))
 
+(fact "map-schema-entry->field-type retains nested array item contracts"
+  (let [result (shape/map-schema-entry->field-type
+                :scope
+                {:type :array
+                 :items {:type :text}})]
+    (:type result) => :array
+    (get-in result [:items :type]) => :text))
+
 ^{:refer postgres.typed.typed-shape/table->shape :added "0.1"}
 (fact "table->shape adds :id if not present in columns"
   (let [table (types/make-table-def "test" "User" [] :id)
         result (shape/table->shape table)]
     ;; table->shape adds :id as a default field if not in columns
     (contains? (:fields result) :id) => true))
+
+(fact "table->shape selects a class-table JSONB variant without changing storage"
+  (let [scope (types/make-column-def
+               :scope
+               (types/make-type-ref :primitive nil :jsonb)
+               {:required false})
+        table (assoc
+               (types/make-table-def
+                "test"
+                "AccessRole"
+                [scope]
+                :id)
+               :variants
+               [(types/make-variant-def
+                 'test/AccessRole
+                 "Org"
+                 :scope
+                 {:type :array
+                  :items {:type :text}})
+                (types/make-variant-def
+                 'test/AccessRole
+                 "Campaign"
+                 :scope
+                 {:type :map
+                  :map {:scope {:type :array
+                                :items {:type :text}}}})])
+        org-shape (shape/table->shape table "Org")
+        campaign-shape (shape/table->shape table "Campaign")
+        fallback-shape (shape/table->shape table "Wallet")
+        op-shape (shape/shape-for-table-op :insert table {:class-table "Org"})]
+    [(get-in org-shape [:fields :scope :type])
+     (get-in org-shape [:fields :scope :jsonb-shape])
+     (get-in org-shape [:fields :scope :items :type])
+     (get-in campaign-shape [:fields :scope :type])
+     (get-in campaign-shape [:fields :scope :jsonb-shape])
+     (get-in campaign-shape [:fields :scope :shape :fields :scope :items :type])
+     (get-in fallback-shape [:fields :scope :type])
+     (get-in fallback-shape [:fields :scope :jsonb-shape])
+     (get-in op-shape [:fields :scope :jsonb-shape])]
+    => [:array :array :text :jsonb :map :text :jsonb nil :array]))
 
 ^{:refer postgres.typed.typed-shape/shape-for-table-op :added "0.1"}
 (fact "shape-for-table-op returns primitive for :id, :exists, :count"

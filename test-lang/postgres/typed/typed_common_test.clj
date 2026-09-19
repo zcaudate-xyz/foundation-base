@@ -275,6 +275,74 @@
    {:type :jsonb :shape :invalid})
   => (throws clojure.lang.ExceptionInfo))
 
+(fact "JSONB variant metadata infers omitted semantic type and rejects physical overrides"
+  (types/normalize-jsonb-variant
+   {:items {:type :text}})
+  => {:type :jsonb
+      :shape :array
+      :items {:type :text}}
+
+  (types/normalize-jsonb-variant
+   {:map {:name {:type :text}}})
+  => {:type :jsonb
+      :map {:name {:type :text}}}
+
+  (types/normalize-jsonb-variant {:scope {:type :text}})
+  => (throws clojure.lang.ExceptionInfo)
+
+  (types/normalize-jsonb-variant {:type :text :shape :map})
+  => (throws clojure.lang.ExceptionInfo))
+
+(fact "analysis->typed attaches distributed variants to their base table"
+  (let [table (types/make-table-def
+               "demo"
+               "AccessRole"
+               [(types/make-column-def
+                 :scope
+                 (types/make-type-ref :primitive nil :jsonb))]
+               :id)
+        variant (types/make-variant-def
+                 'demo/AccessRole
+                 "Org"
+                 :scope
+                 {:type :array :items {:type :text}})
+        typed (types/merge-typed
+               (types/analysis->typed {:tables [table]
+                                       :enums []
+                                       :functions []})
+               (types/analysis->typed {:tables []
+                                       :enums []
+                                       :functions []
+                                       :variants [variant]}))]
+      [(get-in typed [:variants ['demo/AccessRole "Org" :scope] 0 :class-table])
+       (get-in typed [:tables 'demo/AccessRole :variants 0 :field])]
+      => ["Org" :scope]))
+
+(fact "variant registration is independent of table registration order"
+  (let [table (types/make-table-def
+               "demo"
+               "AccessRole"
+               [(types/make-column-def
+                 :scope
+                 (types/make-type-ref :primitive nil :jsonb))]
+               :id)
+        variant (types/make-variant-def
+                 'demo/AccessRole
+                 "Org"
+                 :scope
+                 {:type :array :items {:type :text}})]
+    (types/clear-registry!)
+    (types/register-variant! variant)
+    (types/register-type! 'demo/AccessRole table)
+    (let [before-table (types/get-type 'demo/AccessRole)]
+      (types/clear-registry!)
+      (types/register-type! 'demo/AccessRole table)
+      (types/register-variant! variant)
+      [(get-in before-table [:variants 0 :class-table])
+       (get-in (types/get-type 'demo/AccessRole) [:variants 0 :class-table])])
+    => ["Org" "Org"])
+  (types/clear-registry!))
+
 ^{:refer postgres.typed.typed-common/make-table-def :added "0.1"}
 (fact "make-table-def creates TableDef with various arities"
   ;; arity 4 - basic table

@@ -30,6 +30,45 @@
   (parse/defn? '(deftype.pg User [])) => false
   (parse/defn? nil) => false)
 
+^{:refer postgres.typed.typed-parse/defvariant? :added "4.1"}
+(fact "defvariant? identifies class-table variant forms"
+  (parse/defvariant?
+   '(defvariant.pg tua/AccessRole
+      [:class-table "Org"]
+      [:scope {:type :array :items {:type :text}}])) => true
+  (parse/defvariant? '(deftype.pg User [])) => false
+  (parse/defvariant? nil) => false)
+
+^{:refer postgres.typed.typed-parse/parse-defvariant :added "4.1"}
+(fact "parse-defvariant resolves aliases and retains JSONB contracts"
+  (let [variant
+        (parse/parse-defvariant
+         '(defvariant.pg tua/AccessRole
+            [:class-table "Org"]
+            [:scope {:items {:type :text}}])
+         "test.ns"
+         '{tua gwdb.common.type-user-access})]
+    [(:type variant)
+     (:class-table variant)
+     (:field variant)
+     (get-in variant [:attrs :type])
+     (get-in variant [:attrs :shape])
+     (get-in variant [:attrs :items :type])]
+    => ['gwdb.common.type-user-access/AccessRole
+        "Org"
+        :scope
+        :jsonb
+        :array
+        :text])
+
+  (parse/parse-defvariant
+   '(defvariant.pg tua/AccessRole
+      [:class-table "Org"]
+      [:scope {:type :text}])
+   "test.ns"
+   '{tua gwdb.common.type-user-access})
+  => (throws clojure.lang.ExceptionInfo))
+
 ^{:refer postgres.typed.typed-parse/script? :added "4.1"}
 (fact "script? identifies postgres script forms"
   (parse/script? '(script :postgres {:require []})) => true
