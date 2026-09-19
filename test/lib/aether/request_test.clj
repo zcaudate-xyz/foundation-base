@@ -1,5 +1,6 @@
 (ns lib.aether.request-test
   (:require [lib.aether.request :refer :all]
+            [std.lib.env :as env]
             [std.object :as object])
   (:use code.test)
   (:import (org.eclipse.aether.graph Dependency DependencyNode DefaultDependencyNode) (org.eclipse.aether.repository RemoteRepository RemoteRepository$Builder RepositoryPolicy) (org.eclipse.aether.collection CollectRequest) (org.eclipse.aether.deployment DeployRequest) (org.eclipse.aether.installation InstallRequest) (org.eclipse.aether.resolution ArtifactRequest DependencyRequest)))
@@ -103,6 +104,24 @@
   ;;                            :authentication {:username "zcaudate", :password "hello"}
   ;;                            :url "https://clojars.org/repo/"}}
   )
+
+^{:refer lib.aether.request/deploy-request
+  :id deploy-request-no-auth-log
+  :added "4.1.6"}
+(fact "does not print deployment authentication data"
+
+  (env/with-out-str
+    (deploy-request
+     {:artifacts [{:group "lang"
+                   :artifact "std.string"
+                   :version "2.4.8"
+                   :extension "jar"
+                   :file "lang-string.jar"}]
+      :repository {:id "clojars"
+                   :url "https://clojars.org/repo/"
+                   :authentication {:username "test-user"
+                                    :password "test-token"}}}))
+  => "")
 
 ^{:refer lib.aether.request/install-request :added "3.0"}
 (fact "creates a `InstallRequest` object from map"

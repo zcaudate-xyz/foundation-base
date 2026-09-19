@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: read
-  packages: read
 
 concurrency:
   group: foundation-clojars-${{ github.ref_name }}
@@ -89,58 +88,29 @@ jobs:
             echo "- Commit: \`$GITHUB_SHA\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Create test database
-        run: |
-          docker exec "${{ job.services.postgres.id }}" \
-            psql -U postgres -d test-scratch -c 'CREATE DATABASE test;'
-          docker exec "${{ job.services.postgres.id }}" \
-            psql -U postgres -d test-scratch -c 'GRANT ALL PRIVILEGES ON DATABASE test TO postgres;'
-
-      - name: Log into GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull runtime images
-        run: |
-          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-haskell:latest
-          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-lean:latest
-          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-ocaml:latest
-          docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest
-
-      - name: Install JavaScript parser dependencies
-        run: npm ci
-        working-directory: scripts/js_parser
-
-      - name: Test, package, and publish the root artifact
+      - name: Prepare Clojars repository configuration
         env:
           CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
           CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
         run: |
           set -euo pipefail
-          test -n "$CLOJARS_USERNAME"
-          test -n "$CLOJARS_PASSWORD"
-          mkdir -p .tmp
-          docker run --network host \
-            -e 'CI=true' \
-            -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS} -Djava.io.tmpdir=$(pwd)/.tmp" \
-            -e "_JAVA_OPTIONS=-Djava.io.tmpdir=$(pwd)/.tmp" \
-            -e CLOJARS_USERNAME \
-            -e CLOJARS_PASSWORD \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v /home/runner/.docker/config.json:/root/.docker/config.json:ro \
-            -v "$(pwd):$(pwd)" \
-            -w "$(pwd)" \
-            ghcr.io/zcaudate-xyz/infra-foundation-clean:ci \
-            bash -lc 'set -euxo pipefail &&
-              apt-get update &&
-              apt-get install -y --no-install-recommends lua5.4 python3 python3-pip redis-server &&
-              lein test &&
-              lein pom &&
-              lein jar &&
-              lein deploy-root'
+          ./scripts/release/prepare-clojars-config.sh deploy
+
+      - name: Publish split packages
+        env:
+          CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ./lein pom
+          ./lein jar
+          ./lein deploy-clojars
+
+      - name: Publish root artifact
+        env:
+          CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+        run: ./lein deploy-root
 
       - name: Summarize published release
         run: |
@@ -152,19 +122,6 @@ jobs:
             echo "- Tag: \`${{ github.ref_name }}\`"
             echo "- Commit: \`${{ github.sha }}\`"
             echo "- Registry: https://clojars.org/"
+            echo "- Split packages: published before the root artifact"
+            echo "- Root artifact: published after split packages"
           } >> "$GITHUB_STEP_SUMMARY"
-
-    services:
-      postgres:
-        image: ghcr.io/zcaudate-xyz/infra-db:main
-        env:
-          POSTGRES_DB: test-scratch
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-        ports:
-          - 5432:5432
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
