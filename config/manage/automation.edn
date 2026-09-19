@@ -4,6 +4,8 @@
  :sections
  {:lang {:selector [lang]
          :test-command "lein test :with [lang]"}
+  :hara {:selector [hara]
+         :test-command "lein test :with [hara]"}
   :std {:selector [std]
         :test-command "lein test :with [std]"}
   :xt {:selector [xt.]

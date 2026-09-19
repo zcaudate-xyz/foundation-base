@@ -288,7 +288,7 @@
 - **Pretty Print Failures**: The `code.test` framework uses `std.pretty` to print test failure reports. When a test fails, it attempts to pretty-print the actual values involved in the assertion.
 - **Getting Started**: The project documentation includes a `GETTING_STARTED.md` file containing detailed installation, usage (REPL), development setup instructions, and specific guides for key libraries (`std.lib`, `std.lang`, `std.concurrent`, `std.json`, `std.string`, `code.test`).
 - **Doc Plugin Tags**: `code.doc.engine.plugin.api/entry-tag` replaces dots with underscores in namespace and variable names (e.g., `code.core` -> `code_core`) when generating HTML IDs.
-- **Install Artifacts**: Installing `foundation-base` requires running `lein install` to publish artifacts to the local `~/.m2` repository, as Clojars deployment is currently paused.
+- **Install Artifacts**: Installing `foundation-base` with `lein install` publishes the current checkout to the local `~/.m2` repository; released versions are published to Clojars from the protected `release` branch.
 - **Run Check Logic**: To verify `code.test.base.process/run-check` behavior, tests must explicitly bind `code.test.base.runtime/*eval-mode*` and provide specific metadata to control the skip/run logic, as it relies on global dynamic state.
 - **Rewrite Path**: The `code.test` framework uses a dynamic variable `code.test.compile.rewrite/*path*` to propagate source file paths to nested checks (e.g., within `let` forms) during macro expansion, preventing lost filename metadata.
 - **YAML Write**: The `script.yaml/write` function defaults to flow style (e.g., `{key: value}`) rather than block style for simple maps unless specific `DumperOptions` are provided.

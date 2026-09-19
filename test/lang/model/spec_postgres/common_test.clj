@@ -101,7 +101,44 @@
 (fact "hydrate function for top level entries"
 
   (common/pg-hydrate '(defn foo [] 1) {} {:module {:static {:application "app" :all {:schema ["schema"]}}}})
-  => vector?)
+  => vector?
+
+  (let [[hmeta hydrated]
+        (common/pg-hydrate
+         (list 'defn
+               (with-meta 'foo
+                 {:api/meta {:table 'scratch/Task}})
+               [] 1)
+         {}
+         {:entry {:namespace 'lang.model.spec-postgres.common-test}})]
+    (get-in hmeta [:api/meta :table])
+    => 'postgres.sample.scratch-v1/Task
+    (get-in (meta (second hydrated)) [:api/meta :table])
+    => 'postgres.sample.scratch-v1/Task)
+
+  (let [[_ hydrated]
+        (common/pg-hydrate
+         (list 'defn
+               (with-meta 'foo
+                 {:api/meta {:table 'type/Task
+                             :db/module "demo"}})
+               [] 1)
+         {}
+         {:book {:modules {'demo {:link {'type 'postgres.sample.scratch-v1}}}}
+          :entry {:namespace 'lang.model.spec-postgres.common-test}})]
+    (get-in (meta (second hydrated)) [:api/meta :table])
+    => 'postgres.sample.scratch-v1/Task)
+
+  (let [[_ hydrated]
+        (common/pg-hydrate
+         (list 'defn
+               (with-meta 'foo
+                 {:api/meta {:table "gwdb.common.type-newsroom/NewsroomCollaboration"}})
+               [] 1)
+         {}
+         {:entry {:namespace 'lang.model.spec-postgres.common-test}})]
+    (get-in (meta (second hydrated)) [:api/meta :table])
+    => "gwdb.common.type-newsroom/NewsroomCollaboration"))
 
 ^{:refer lang.model.spec-postgres.common/pg-current-module-link? :added "4.1"}
 (fact "checks postgres module links")

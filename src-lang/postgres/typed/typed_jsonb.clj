@@ -102,14 +102,17 @@
           field-keys (js-keys-form->keywords keys-expr)]
       (when (and (types/jsonb-shape? source-shape)
                  (seq field-keys))
-        (types/make-jsonb-shape
-         (into {}
-               (map (fn [k]
-                      [k (source-field-info ctx source-path k :->)]))
-               field-keys)
-         (:source-table source-shape)
-         (:confidence source-shape)
-         (:nullable? source-shape))))))
+        (assoc
+         (types/make-jsonb-shape
+          (into {}
+                (map (fn [k]
+                       [k (source-field-info ctx source-path k :->)]))
+                field-keys)
+          (:source-table source-shape)
+          (:confidence source-shape)
+          (:nullable? source-shape))
+         :field-order
+         (vec field-keys))))))
 
 (defn expr-jsonb-path
   [ctx expr]

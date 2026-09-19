@@ -1,4 +1,4 @@
-(defproject xyz.zcaudate/foundation-base "4.1.5"  
+(defproject xyz.zcaudate/foundation-base "4.1.6"
   :description "base libraries for foundation"
   :url "https://www.github.com/zcaudate-xyz/foundation-base"
   :license  {:name "MIT License"
@@ -17,6 +17,9 @@
    "codox"       ["with-profile" "+codox" "run" "-m" "code.doc.codox"]
    "install"     ["exec" "-ep" "(use 'code.tool.maven)   (install :all {:tag :all}) (System/exit 0)"]
    "deploy"      ["exec" "-ep" "(use 'code.tool.maven)   (deploy :all {:tag :all}) (System/exit 0)"]
+   "package-clojars" ["exec" "-ep" "(use 'code.tool.maven)   (let [result (package :all {:tag :clojars})] (System/exit (task-exit-code result)))"]
+   "deploy-clojars" ["exec" "-ep" "(use 'code.tool.maven)   (let [result (deploy :all {:tag :clojars})] (System/exit (task-exit-code result)))"]
+   "deploy-root" ["exec" "-ep" "(require '[leiningen.core.project :as project] '[leiningen.deploy :as deploy]) (deploy/deploy (project/read \"project.clj\") \"clojars\") (System/exit 0)"]
    "deploy-lein" ["exec" "-ep" "(use 'code.tool.maven)   (deploy-lein :all {:tag :all}) (System/exit 0)"]
    "push-native-code"  ["run" "-m" "component.task-native-index"]
    "push-c-000-pthreads"        ["run" "-m" "play.c-000-pthreads-hello.build"]
@@ -205,6 +208,10 @@
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}
              :codox {:dependencies [[codox "0.10.8"]]}}
+  :deploy-repositories [["clojars" {:url "https://repo.clojars.org/"
+                                     :username :env/CLOJARS_USERNAME
+                                     :password :env/CLOJARS_PASSWORD
+                                     :sign-releases false}]]
   :codox {:source-paths ["src"]
           :output-path "public/api"
           :namespaces [#"^std\..*" #"^code\..*" #"^lang\..*" #"^jvm\..*"

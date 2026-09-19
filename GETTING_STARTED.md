@@ -33,9 +33,18 @@ Download dependencies:
 lein deps
 ```
 
+## Use the published artifact
+
+Released Foundation Base artifacts are published to Clojars. Add the current
+project version from [`project.clj`](project.clj) to another Leiningen project:
+
+```clojure
+[xyz.zcaudate/foundation-base "4.1.6"]
+```
+
 ## Install locally
 
-Clojars deployment is currently paused. Install Foundation Base into your local Maven repository:
+For local development, install Foundation Base into your local Maven repository:
 
 ```bash
 lein install
@@ -44,7 +53,7 @@ lein install
 The current project version is declared in [`project.clj`](project.clj). At the time of this update it is:
 
 ```clojure
-[xyz.zcaudate/foundation-base "4.1.5"]
+[xyz.zcaudate/foundation-base "4.1.6"]
 ```
 
 Prefer checking `project.clj` rather than copying a version from an old document.

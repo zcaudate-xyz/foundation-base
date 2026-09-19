@@ -2,6 +2,7 @@
   (:require [lang.model.spec-postgres.common :as common]
             [postgres.core.graph-base :as base]
             [postgres.core.graph-query :as query]
+            [postgres.core.impl-base :as impl]
             [lang.core :as l]
             [lang.base.emit-preprocess :as preprocess] [lang.base.preprocess-base :as preprocess-base]
             [std.lib.foundation :as f]
@@ -35,34 +36,127 @@
      :autos  autos
      :tag    tag}))
 
+(defn- table-schema
+  [table-sym]
+  (let [[entry schema _] (impl/prep-table table-sym true (l/rt:macro-opts :postgres))]
+    {:entry entry
+     :schema schema}))
+
+(defn- column-key
+  [column]
+  (cond (keyword? column) column
+        (symbol? column) (keyword (name column))
+        (string? column) (keyword column)
+        :else column))
+
+(defn- column-descriptor
+  [schema descriptor]
+  (let [id    (column-key (or (:id descriptor) descriptor))
+        attrs (first (get schema id))]
+    (when attrs
+      (merge attrs
+             {:id id}
+             (if (map? descriptor)
+               (select-keys descriptor [:type :enum :ref])
+               {})))))
+
+(defn- primary-key-descriptors
+  [table-sym]
+  (let [{:keys [entry schema]} (table-schema table-sym)
+        primary (:static/schema-primary entry)
+        primary (cond (map? primary) [primary]
+                      (vector? primary) primary
+                      :else (->> schema
+                                 (keep (fn [[id [attrs]]]
+                                         (when (:primary attrs)
+                                           {:id id :type (:type attrs)})))
+                                 vec))
+        primary (if (seq primary)
+                  primary
+                  (when-let [attrs (first (get schema :id))]
+                    [{:id :id :type (:type attrs)}]))]
+    (mapv #(column-descriptor schema %) primary)))
+
+(defn- identity-descriptors
+  [table-sym sym]
+  (let [{:keys [schema]} (table-schema table-sym)
+        identity (:identity (meta sym))]
+    (if (nil? identity)
+      (primary-key-descriptors table-sym)
+      (do
+        (when-not (and (vector? identity) (seq identity))
+          (f/error "defret.pg :identity must be a non-empty vector"
+                   {:table table-sym
+                    :identity identity}))
+        (mapv (fn [column]
+                (or (column-descriptor schema column)
+                    (f/error "defret.pg :identity contains an unknown column"
+                             {:table table-sym
+                              :column column
+                              :identity identity})))
+              identity)))))
+
 (defn primary-key
-  "gets the primary key of a schema"
+  "gets the type of the first primary key column of a schema"
   {:added "4.0"}
   [table-sym]
-  (let [table-key (keyword (name table-sym))
-        book      (l/get-book (l/runtime-library) :postgres)
-        link      (some-> (resolve table-sym)
-                          deref
-                          (select-keys [:module :id :section :lang]))
-        [_ entry] (if (seq link)
-                    (common/pg-resolve-entry link {:book book
-                                                   :lang :postgres})
-                    [book nil])
-        primary   (:static/schema-primary entry)]
-    (cond (map? primary)
-          (:type primary)
+  (:type (first (primary-key-descriptors table-sym))))
 
-          (vector? primary)
-          (or (:type (first (filter #(= (:id %) :id) primary)))
-              (:type (first primary)))
+(defn- ret-args
+  [args]
+  (when-not (even? (count args))
+    (f/error "defret.pg arguments must be type/symbol pairs"
+             {:args args}))
+  (mapv (fn [[type sym]]
+          (when-not (symbol? sym)
+            (f/error "defret.pg arguments must bind symbols"
+                     {:type type
+                      :argument sym
+                      :args args}))
+          {:type type :symbol sym})
+        (partition 2 args)))
 
-          :else
-          (->> (:static/schema-seed entry)
-               :tree
-               table-key
-               (keep (fn [[_ [{:keys [primary type]}]]]
-                       (when primary type)))
-               first))))
+(defn- compatible-type?
+  [actual expected]
+  (or (= actual expected)
+      (and (= expected :enum)
+           (contains? #{:enum :text :citext} actual))
+      (and (= expected :citext)
+           (= actual :text))
+      (and (= expected :text)
+           (= actual :citext))
+      (and (= expected :ref)
+           (contains? #{:ref :uuid :text :citext} actual))))
+
+(defn- validate-ret-args
+  [table-sym sym descriptors args]
+  (when (empty? descriptors)
+    (f/error "defret.pg could not resolve an identity"
+             {:table table-sym
+              :symbol sym}))
+  (when (not= (count descriptors) (count args))
+    (f/error "defret.pg argument count does not match identity"
+             {:table table-sym
+              :symbol sym
+              :identity (mapv :id descriptors)
+              :expected (count descriptors)
+              :actual (count args)}))
+  (doseq [[descriptor {:keys [type symbol]}] (map vector descriptors args)]
+    (when-not (compatible-type? type (:type descriptor))
+      (f/error "defret.pg argument type does not match identity column"
+               {:table table-sym
+                :symbol sym
+                :column (:id descriptor)
+                :expected (:type descriptor)
+                :actual type
+                :argument symbol})))
+  args)
+
+(defn- ret-identity
+  [sym descriptors]
+  (let [explicit? (contains? (meta sym) :identity)]
+    (when (or explicit? (< 1 (count descriptors)))
+      (mapv :id descriptors))))
 
 (defn lead-symbol
   "gets the lead symbol"
@@ -112,19 +206,24 @@
   {:added "4.0"}
   [&form sym args query]
   (let [{:keys [table] :as view-map} (make-view-prep sym args)
-        ret-id (lead-symbol args)
-        mopts  (l/rt:macro-opts :postgres)
-        main-form (l/with:macro-opts [mopts]
-                    (query/query-fn table
-                                    {:where {:id ret-id}
-                                     :returning query
-                                     :single true}))]
+        descriptors (identity-descriptors table sym)
+        args'       (ret-args args)
+        _           (validate-ret-args table sym descriptors args')
+        ret-where   (zipmap (map :id descriptors)
+                            (map :symbol args'))
+        identity    (ret-identity sym descriptors)
+        mopts       (l/rt:macro-opts :postgres)
+        main-form   (l/with:macro-opts [mopts]
+                      (query/query-fn table
+                                      {:where ret-where
+                                       :returning query
+                                       :single true}))
+        view-map    (cond-> (assoc view-map :type :return :query query)
+                      identity (assoc :identity identity))]
     (with-meta
       (template/$ (defn.pg ~(with-meta sym
                        {:%% :sql
-                        :static/view (assoc view-map
-                                            :type :return
-                                            :query query)})
+                        :static/view view-map})
              [~@args]
              ~main-form))
       (meta &form))))

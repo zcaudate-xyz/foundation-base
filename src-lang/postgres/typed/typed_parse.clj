@@ -59,6 +59,7 @@
 (defn deftype? [form] (and (seq? form) (= "deftype.pg" (name (first form)))))
 (defn defenum? [form] (and (seq? form) (= "defenum.pg" (name (first form)))))
 (defn defn? [form] (and (seq? form) (= "defn.pg" (name (first form)))))
+(defn defvariant? [form] (and (seq? form) (= "defvariant.pg" (name (first form)))))
 (defn script? [form] (and (seq? form) (= "script" (name (first form))) (= :postgres (second form))))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
@@ -138,6 +139,69 @@
               :items-schema (get opts :items)
               :ref-info ref-info}
        shape (assoc :shape shape)))))
+
+(defn- canonical-variant-type
+  [aliases table]
+  (when (and (symbol? table)
+             (namespace table))
+    (let [alias (symbol (namespace table))
+          type-name (name table)]
+      (cond
+        (and (not= "-" (name alias))
+             (contains? aliases alias))
+        (symbol (str (get aliases alias)) type-name)
+
+        (str/includes? (namespace table) ".")
+        table
+
+        :else
+        (throw (ex-info "defvariant.pg table alias is not declared by the PostgreSQL script."
+                        {:type ::invalid-variant
+                         :table table
+                         :alias alias}))))))
+
+(defn parse-defvariant
+  "Parses a distributed class-table JSONB contract declaration.
+
+   The declaration is retained as typed metadata only; it does not represent a
+   PostgreSQL table or function and therefore never participates in SQL
+   emission."
+  [form ns-name aliases]
+  (let [[_ table selector field] form
+        selector-valid? (and (vector? selector)
+                             (= 2 (count selector))
+                             (= :class-table (first selector))
+                             (string? (second selector)))
+        field-valid? (and (vector? field)
+                          (= 2 (count field))
+                          (keyword? (first field))
+                          (map? (second field)))]
+    (when-not (= 4 (count form))
+      (throw (ex-info "defvariant.pg requires a table, selector, and field contract."
+                      {:type ::invalid-variant
+                       :form form})))
+    (when-not (and (symbol? table)
+                   (namespace table))
+      (throw (ex-info "defvariant.pg requires a qualified table symbol."
+                      {:type ::invalid-variant
+                       :table table})))
+    (when-not selector-valid?
+      (throw (ex-info "defvariant.pg requires [:class-table <literal-string>]."
+                      {:type ::invalid-variant
+                       :selector selector})))
+    (when-not field-valid?
+      (throw (ex-info "defvariant.pg requires [:field-key <attrs-map>]."
+                      {:type ::invalid-variant
+                       :field field})))
+    (types/make-variant-def
+     (canonical-variant-type aliases table)
+     (second selector)
+     (first field)
+     (types/normalize-jsonb-variant (second field))
+     {:namespace ns-name
+      :line (or (:row (meta form))
+                (:line (meta form))
+                1)})))
 
 (defn parse-deftype [form ns-name dbschema]
   (let [rest-form (rest form)
@@ -260,23 +324,28 @@
               (cond
                 (deftype? form) (update acc :tables conj (parse-deftype form ns-name dbschema))
                 (defenum? form) (update acc :enums conj (parse-defenum form ns-name dbschema))
+                (defvariant? form) (update acc :variants conj
+                                            (parse-defvariant form ns-name aliases))
                 (defn? form) (update acc :functions conj
                                      (assoc-in (parse-defn form ns-name dbschema)
                                                [:body-meta :aliases] aliases))
                 :else acc))
-            {:enums [] :tables [] :functions []}
+            {:enums [] :tables [] :functions [] :variants []}
             forms)))
 
 (defn register-types! [analysis]
-  (doseq [enum (:enums analysis)]
-    (let [k (symbol (or (:ns enum) "") (:name enum))]
-      (types/register-type! k enum)))
-  (doseq [table (:tables analysis)]
-    (let [k (symbol (or (:ns table) "") (:name table))]
-      (types/register-type! k table)))
-  (doseq [func (:functions analysis)]
-    (let [k (symbol (or (:ns func) "") (:name func))]
-      (types/register-type! k func)))
+  (doseq [variant (:variants analysis)]
+    (types/register-variant! variant))
+  (let [typed (types/analysis->typed analysis)]
+    (doseq [enum (vals (:enums typed))]
+      (let [k (symbol (or (:ns enum) "") (:name enum))]
+        (types/register-type! k enum)))
+    (doseq [table (vals (:tables typed))]
+      (let [k (symbol (or (:ns table) "") (:name table))]
+        (types/register-type! k table)))
+    (doseq [func (vals (:functions typed))]
+      (let [k (symbol (or (:ns func) "") (:name func))]
+        (types/register-type! k func))))
   analysis)
 
 (defn analyze-namespace [ns-sym]
@@ -284,4 +353,4 @@
         target-file (project/get-path (canonical-postgres-ns ns-sym) project-map)]
     (if target-file
       (analyze-file target-file)
-      {:enums [] :tables [] :functions []})))
+      {:enums [] :tables [] :functions [] :variants []})))

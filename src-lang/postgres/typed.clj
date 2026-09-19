@@ -1,6 +1,8 @@
 (ns postgres.typed
   (:refer-clojure :exclude [load-file])
-  (:require [postgres.typed.export.json-openapi :as compile.json-openapi]
+  (:require [clojure.string :as string]
+            [postgres.typed.export.json-openapi :as compile.json-openapi]
+            [postgres.typed.export.json-view :as compile.json-view]
             [postgres.typed.export.json-schema :as compile.json-schema]
             [postgres.typed.export.ts-schema :as compile.ts-schema]
             [lang.runtime.postgres.base.application :as app]
@@ -8,7 +10,8 @@
             [postgres.typed.typed-common :as types]
             [postgres.typed.typed-infer :as typed-infer]
             [postgres.typed.typed-resolve :as typed-resolve]
-            [postgres.typed.typed-parse :as parse]))
+            [postgres.typed.typed-parse :as parse]
+            [postgres.typed.typed-view :as typed-view]))
 (declare enrich-function-arg-roles input-shape output-shape)
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Shape Formatting Helpers
@@ -212,9 +215,10 @@
 (defn registry->typed
   "Builds a typed payload from a flat registry map."
   [registry]
-  (reduce types/add-typed
-          (types/empty-typed)
-          (vals registry)))
+  (types/attach-variants-to-tables
+   (reduce types/add-typed
+           (types/empty-typed)
+           (vals registry))))
 
 (defn typed->registry
   "Flattens an app typed payload into the registry shape expected by inference."
@@ -245,11 +249,36 @@
 (defn load-app
   "Creates a postgres typed context from an app typed payload."
   [app-name]
-  (let [typed (app/app-typed app-name)]
+  (let [typed (types/attach-variants-to-tables (app/app-typed app-name))]
     {:domain :postgres
      :app-name app-name
      :typed typed
      :registry (typed->registry typed)}))
+
+(defn- module-id->symbol
+  [module-id]
+  (cond
+    (symbol? module-id) module-id
+    (keyword? module-id) (if-let [ns (namespace module-id)]
+                           (symbol ns (name module-id))
+                           (symbol (name module-id)))
+    :else (symbol (str module-id))))
+
+(defn- app-module-namespaces
+  [app-name]
+  (->> (app/app-modules app-name)
+       (keep :id)
+       (map module-id->symbol)
+       distinct
+       (sort-by str)
+       vec))
+
+(defn- register-module-analysis!
+  [analysis]
+  (doseq [type-def (concat (:enums analysis)
+                           (:functions analysis))]
+    (types/register-type! (types/type-key type-def) type-def))
+  analysis)
 
 (defn load-registry
   "Creates a postgres typed context from a registry map, defaulting to the current registry."
@@ -269,6 +298,31 @@
       (f)
       (finally
         (reset! types/*type-registry* current)))))
+
+(defn load-full
+  "Creates a typed context with all declarations from modules belonging to an app.
+
+   The application registry remains authoritative for tables. Module enums and
+   functions are parsed again so generated namespaces, including RPC modules,
+   are present even when the app typed payload is stale or incomplete."
+  ([app-name]
+   (load-full app-name nil))
+  ([app-name function-filter]
+   (let [ctx (load-app app-name)
+         namespaces (app-module-namespaces app-name)]
+     (with-context-registry
+       ctx
+       (fn []
+         (let [analyses (mapv parse/analyze-namespace namespaces)]
+           (doseq [analysis analyses]
+             (register-module-analysis! analysis))
+           (assoc (load-registry)
+                  :app-name app-name
+                  :namespaces namespaces
+                  :function-filter function-filter
+                  :registration-order
+                  {:functions (mapv :name (mapcat :functions analyses))
+                   :schemas (mapv :name (mapcat :enums analyses))})))))))
 
 (defn entries
   "Returns all typed declarations in a postgres context."
@@ -390,14 +444,25 @@
 (defn export-openapi
   "Generates OpenAPI from a postgres typed context."
   ([ctx]
-   (export-openapi ctx (constantly true)))
-  ([ctx fn-filter]
+   (export-openapi ctx (or (:function-filter ctx)
+                           (constantly true))))
+  ([ctx fn-filter-or-opts]
+   (if (map? fn-filter-or-opts)
+     (export-openapi ctx
+                     (or (:function-filter ctx)
+                         (constantly true))
+                     fn-filter-or-opts)
+     (export-openapi ctx fn-filter-or-opts {})))
+  ([ctx fn-filter opts]
    (with-context-registry
      ctx
-     #(compile.json-openapi/generate-openapi (or (some-> ctx :analysis :ns)
+     #(compile.json-openapi/generate-openapi (or (:root-ns opts)
+                                           (some-> ctx :analysis :ns)
                                            (:app-name ctx)
                                            "postgres")
-                                       fn-filter))))
+                                       fn-filter
+                                       (merge (:registration-order ctx)
+                                              opts)))))
 
 (defn export-json-schema
   "Generates JSON Schema from a postgres typed context."
@@ -405,6 +470,33 @@
   (with-context-registry
     ctx
     #(compile.json-schema/generate-json-schema)))
+
+(defn export-views
+  "Generates the versioned JSON publication for typed postgres views.
+
+   The optional argument may be a predicate over `[symbol descriptor]` view
+   entries or an options map with `:filter`, `:source-namespaces`, and
+   `:preserve-source-order?`. By default, all namespaces in the context are
+   inspected."
+  ([ctx]
+   (export-views ctx {}))
+  ([ctx filter-or-opts]
+   (let [{:keys [filter source-namespaces preserve-source-order?]}
+         (if (fn? filter-or-opts)
+           {:filter filter-or-opts}
+           filter-or-opts)
+         source-namespaces (or source-namespaces
+                               (:namespaces ctx)
+                               [])]
+     (with-context-registry
+       ctx
+       #(let [entries (typed-view/view-entries
+                       source-namespaces
+                       {:preserve-source-order? preserve-source-order?})
+              entries (if filter
+                        (clojure.core/filter filter entries)
+                        entries)]
+          (compile.json-view/generate-views entries))))))
 
 (defn export-typescript
   "Generates TypeScript definitions from a postgres typed context."

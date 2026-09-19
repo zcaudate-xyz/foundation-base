@@ -428,7 +428,11 @@
                            (list 'do
                                  [:revoke-all-on-function
                                   function-form
-                                  :from-public]
+                                  :from (case grant
+                                          :all ''[public]
+                                          :auth ''[public anon]
+                                          :admin ''[public anon authenticated]
+                                          grant)]
                                  [:grant-execute-on-function
                                   function-form
                                   :to
