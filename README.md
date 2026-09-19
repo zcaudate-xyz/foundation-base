@@ -60,7 +60,7 @@ Released Foundation Base artifacts are published to Clojars. Add the current
 project version from [`project.clj`](project.clj) to another Leiningen project:
 
 ```clojure
-[xyz.zcaudate/foundation-base "4.1.5"]
+[xyz.zcaudate/foundation-base "4.1.6"]
 ```
 
 ### Clone and install locally

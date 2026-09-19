@@ -57,8 +57,8 @@ After the preflight succeeds and the pull request has been merged, push a tag
 whose name exactly matches the version in `project.clj`:
 
 ```bash
-git tag v4.1.5
-git push origin v4.1.5
+git tag v4.1.6
+git push origin v4.1.6
 ```
 
 The tag workflow verifies that its commit is the current `release` branch head
