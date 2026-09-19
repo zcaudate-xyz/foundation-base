@@ -56,6 +56,28 @@
   (pretty-printer {})
   => std.pretty.PrettyPrinter)
 
+^{:refer std.pretty/pprint-str
+  :id pretty-sorted-map-identity
+  :added "4.1"}
+(fact "uses identity tracking for nested sorted maps"
+  (instance? java.util.IdentityHashMap
+             (:visited (pretty-printer {})))
+  => true
+
+  (let [schema {:type "object"
+                :properties (into (sorted-map)
+                                  [["request" {:type "object"
+                                               :properties (into (sorted-map)
+                                                                 [["id" {:type "string"}]
+                                                                  ["status" {:type "string"}]])}]
+                                   ["role" {:type "object"
+                                            :properties (into (sorted-map)
+                                                              [["id" {:type "string"}]
+                                                               ["level" {:type "string"}]])}]])
+                :required ["request" "role"]}]
+    (pprint-str schema)
+    => string?))
+
 ^{:refer std.pretty/render-out :added "3.0"}
 (fact "helper to pprint and pprint-str"
 
@@ -92,4 +114,3 @@
   (./code:scaffold)
   (./code:arrange)
   (./code:import))
-

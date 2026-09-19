@@ -90,6 +90,27 @@
        (handler printer value)
        (edn/visit-edn printer value)))))
 
+(defn- visited?
+  [visited value]
+  (if (instance? java.util.IdentityHashMap visited)
+    (.containsKey ^java.util.IdentityHashMap visited value)
+    (contains? visited value)))
+
+(defn- mark-visited
+  [printer value]
+  (let [visited (:visited printer)]
+    (cond
+      (instance? java.util.IdentityHashMap visited)
+      (do
+        (.put ^java.util.IdentityHashMap visited value true)
+        printer)
+
+      (set? visited)
+      (assoc printer :visited (conj visited value))
+
+      :else
+      printer)))
+
 (defn format-doc
   "provides a format given a printer and value
  
@@ -107,15 +128,13 @@
                      (char? value)
                      (boolean? value)
                      (nil? value)))
-            (get (:visited printer) value))
+            (visited? (:visited printer) value))
      (format-unknown printer value "circular" (.getName (class value)))
-     (let [printer (if (set? (:visited printer))
-                     (assoc printer :visited (conj (:visited printer) value))
-                     printer)]
+     (let [printer (mark-visited printer value)]
        (if-let [metadata (meta value)]
          (edn/visit-meta printer metadata value)
          (format-doc-edn printer value))))))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ## Type Handlers
 
 (defn pr-handler
@@ -350,7 +369,7 @@
   ([]
    (canonical-printer nil))
   ([handlers]
-   (assoc (CanonicalPrinter. handlers #{})
+   (assoc (CanonicalPrinter. handlers (java.util.IdentityHashMap.))
           :width 0)))
 
 (defrecord PrettyPrinter [width
@@ -528,7 +547,7 @@
   ([opts]
    (->> [{:print-meta *print-meta*
           :print-handlers common-handlers
-          :visited #{}}
+          :visited (java.util.IdentityHashMap.)}
          +defaults+
          opts]
         (reduce coll/merge-nested)
