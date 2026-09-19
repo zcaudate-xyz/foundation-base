@@ -2,11 +2,15 @@ name: Run Code
 
 on:
   push:
-    branches: [main, 'lang/**']
+    branches: [main, release, 'lang/**']
   pull_request:
     branches: [main]
   repository_dispatch:
   workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
 
 env:
   LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
@@ -14,7 +18,7 @@ env:
 
 jobs:
   run-incomplete:
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/lang/')
     name: Incomplete - ${{ matrix.section }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -31,8 +35,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ secrets.GH_USER }}
-          password: ${{ secrets.GH_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Incomplete
         run: |
@@ -88,7 +92,7 @@ jobs:
         run: echo "code.manage webhook is disabled until its URL and secret are configured"
 
   run-group-tests:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/lang/')
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -137,8 +141,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ secrets.GH_USER }}
-          password: ${{ secrets.GH_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Pull runtime images
         if: matrix.name == 'hara'
@@ -189,7 +193,7 @@ jobs:
           - 6379:6379
 
   run-lang-tests:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/lang/')
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/release' || startsWith(github.ref, 'refs/heads/lang/')
     name: Run Tests - ${{ matrix.lang }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
@@ -218,8 +222,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: ${{ secrets.GH_USER }}
-          password: ${{ secrets.GH_TOKEN }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install root JS dependencies
         if: matrix.lang == 'js'

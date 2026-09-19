@@ -102,6 +102,15 @@
 
 (def CONFIDENCE-LEVELS #{:high :medium :low})
 
+(def JSONB-VARIANT-TYPES
+  "Semantic types allowed in a class-table JSONB variant contract."
+  #{nil :jsonb :map :array})
+
+(def JSONB-VARIANT-PHYSICAL-KEYS
+  "deftype.pg attributes which a variant must not replace."
+  #{:sql :ref :primary :required :unique :default :scope
+    :partition-by :generated})
+
 (def JSONB-SHAPES
   "Explicit shapes supported by JSONB column metadata."
   #{:map :array :opaque})
@@ -119,6 +128,7 @@
 (defrecord ColumnDef [name type required default constraints enum-ref
                       scope foreign map-schema items-schema ref-info])
 (defrecord TableDef [ns name columns primary-key addons entity-meta dbschema])
+(defrecord VariantDef [type class-table field attrs source])
 (defrecord FnDef [ns name inputs output body-meta dbschema])
 (defrecord FnArg [name type modifiers role])
 
@@ -147,6 +157,7 @@
 (defn table-def? [x] (instance? TableDef x))
 (defn enum-def? [x] (instance? EnumDef x))
 (defn fn-def? [x] (instance? FnDef x))
+(defn variant-def? [x] (instance? VariantDef x))
 (defn jsonb-shape? [x] (instance? JsonbShape x))
 (defn jsonb-path? [x] (instance? JsonbPath x))
 (defn jsonb-merge? [x] (instance? JsonbMerge x))
@@ -287,11 +298,61 @@
       (validate-jsonb-metadata! items-schema))
     opts))
 
+(defn normalize-jsonb-variant
+  "Normalizes optional JSONB contract markers for a class-table variant.
+
+   Variants describe the semantic payload stored in a JSONB column.  Unlike a
+   normal column declaration, a variant may omit :type when :shape, :map, or
+   :items establishes the JSONB contract.  In that case :jsonb is used only
+   as the semantic base for validation; it does not change the physical
+   column type."
+  [attrs]
+  (when-not (map? attrs)
+    (throw (ex-info "JSONB variant metadata must be a map."
+                    {:type ::invalid-jsonb-variant
+                     :attrs attrs})))
+  (let [type (:type attrs)
+        needs-jsonb? (and (nil? type)
+                          (or (contains? attrs :shape)
+                              (contains? attrs :map)
+                              (contains? attrs :items)))
+        normalized (cond-> attrs
+                     (and needs-jsonb?
+                          (or (contains? attrs :shape)
+                              (contains? attrs :map)
+                              (contains? attrs :items)))
+                     (assoc :type :jsonb)
+
+                     (and (contains? attrs :items)
+                          (not (contains? attrs :shape)))
+                     (assoc :shape :array))]
+    (when-not (contains? JSONB-VARIANT-TYPES (:type normalized))
+      (throw (ex-info "JSONB variants must use :jsonb, :map, or :array."
+                      {:type ::invalid-jsonb-variant
+                       :attrs attrs
+                       :variant-type (:type normalized)})))
+    (when-let [key (some #(when (contains? normalized %) %) JSONB-VARIANT-PHYSICAL-KEYS)]
+      (throw (ex-info "JSONB variants cannot declare physical column attributes."
+                      {:type ::invalid-jsonb-variant
+                       :attrs attrs
+                       :key key})))
+    (when (contains? normalized :reason)
+      (when-not (and (string? (:reason normalized))
+                     (seq (:reason normalized)))
+        (throw (ex-info "JSONB variant :reason must be a non-empty string."
+                        {:type ::invalid-jsonb-variant
+                         :attrs attrs}))))
+    (validate-jsonb-metadata! normalized)
+    normalized))
+
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Type Registry
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (defonce ^:dynamic *type-registry* (atom {}))
+(defonce ^:dynamic *variant-registry* (atom {}))
+
+(declare variants-for-type attach-variants-to-table)
 
 (defn valid-key?
   "Validates that a key is a namespaced symbol (e.g., 'ns/name)."
@@ -310,13 +371,20 @@
                     {:key key
                      :type (type key)
                      :help "Use (symbol \"namespace\" \"name\") to construct valid keys"})))
-  (swap! *type-registry* assoc key type-def))
+  (let [variants (when (table-def? type-def)
+                   (vec (distinct (concat (:variants type-def)
+                                          (variants-for-type key)))))
+        type-def (if (seq variants)
+                   (attach-variants-to-table type-def variants)
+                   type-def)]
+    (swap! *type-registry* assoc key type-def)))
 
 (defn get-type [key]
   (get @*type-registry* key))
 
 (defn clear-registry! []
-  (reset! *type-registry* {}))
+  (reset! *type-registry* {})
+  (reset! *variant-registry* {}))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; App Typed Payload
@@ -330,6 +398,20 @@
       (symbol ns name)
       (symbol name))))
 
+(defn variant-key
+  "Returns the stable dispatch key for a VariantDef."
+  [variant]
+  [(:type variant) (:class-table variant) (:field variant)])
+
+(defn variants-for-type
+  "Returns registered variants for a qualified table type."
+  [type]
+  (->> @*variant-registry*
+       (filter (fn [[key _]]
+                 (= type (first key))))
+       (mapcat (fn [[_ variants]] variants))
+       vec))
+
 (defn empty-typed
   "Empty app-level typed payload."
   []
@@ -338,7 +420,7 @@
    :functions {}})
 
 (defn add-typed
-  "Adds a table/enum/function definition to an app-level typed payload."
+  "Adds a typed declaration to an app-level typed payload."
   [typed type-def]
   (cond
     (table-def? type-def)
@@ -350,27 +432,168 @@
     (fn-def? type-def)
     (assoc-in typed [:functions (type-key type-def)] type-def)
 
+    (variant-def? type-def)
+    (update-in typed [:variants (variant-key type-def)] (fnil conj []) type-def)
+
     :else typed))
 
+(defn- variant-values
+  [variants]
+  (cond
+    (map? variants) (mapcat #(if (sequential? %)
+                               %
+                               [%])
+                            (vals variants))
+    (sequential? variants) variants
+    :else []))
+
+(defn- table-column
+  [table field]
+  (some #(when (= field (:name %)) %)
+        (:columns table)))
+
+(defn- validate-table-variants
+  [table variants]
+  (let [duplicate-groups (->> variants
+                              (group-by variant-key)
+                              (filter (fn [[_ entries]]
+                                        (> (count entries) 1))))]
+    (when (seq duplicate-groups)
+      (throw (ex-info "Multiple JSONB variants match the same table field."
+                      {:type ::duplicate-variant
+                       :table (type-key table)
+                       :variants (mapv second duplicate-groups)})))
+    (doseq [variant variants]
+      (let [column (table-column table (:field variant))
+            attrs (normalize-jsonb-variant (:attrs variant))
+            base-type (when column
+                        (let [type (:type column)]
+                          (if (and (type-ref? type)
+                                   (= :primitive (:kind type)))
+                            (:name type)
+                            type)))
+            base-shape (case base-type
+                         :map :map
+                         :array :array
+                         nil)
+            variant-shape (inferred-jsonb-shape (:type attrs)
+                                                (:shape attrs)
+                                                (:map attrs))]
+        (when-not column
+          (throw (ex-info "JSONB variant references an undeclared table field."
+                          {:type ::orphan-variant
+                           :table (type-key table)
+                           :field (:field variant)
+                           :variant variant})))
+        (when-not (jsonb-column-type? (:type column))
+          (throw (ex-info "JSONB variants require a JSONB-backed base column."
+                          {:type ::incompatible-variant
+                           :table (type-key table)
+                           :field (:field variant)
+                           :base-type base-type
+                           :variant variant})))
+        (when (and base-shape
+                   (not= base-shape variant-shape))
+          (throw (ex-info "JSONB variant shape conflicts with the base column."
+                          {:type ::incompatible-variant
+                           :table (type-key table)
+                           :field (:field variant)
+                           :base-shape base-shape
+                           :variant-shape variant-shape
+                           :variant variant}))))))
+  table)
+
+(defn attach-variants-to-table
+  "Attaches and validates variants for one qualified TableDef."
+  [table variants]
+  (let [variants (vec variants)]
+    (if (seq variants)
+      (assoc (validate-table-variants table variants)
+             :variants variants)
+      table)))
+
+(defn attach-variants-to-tables
+  "Attaches parsed variant declarations to their qualified TableDefs.
+
+   Variant declarations can be parsed before or after their base table because
+   they are retained in a separate typed section.  Attaching them after all
+   declarations have been reduced keeps distributed declarations load-order
+   independent while leaving the flat type registry compatible."
+  [typed]
+  (let [variants (vec (variant-values (:variants typed)))]
+    (if (seq variants)
+      (update typed :tables
+              (fn [tables]
+                (reduce-kv
+                 (fn [acc table-key table]
+                   (let [table-variants (->> variants
+                                              (filter #(= table-key (:type %)))
+                                              vec)]
+                     (if (seq table-variants)
+                       (assoc acc table-key
+                              (attach-variants-to-table table table-variants))
+                       acc)))
+                 tables
+                 tables)))
+      typed)))
+
+(defn register-variant!
+  "Registers a variant and updates an already-registered base TableDef."
+  [variant]
+  (when-not (variant-def? variant)
+    (throw (ex-info "Only VariantDef values can be registered as JSONB variants."
+                    {:type ::invalid-variant
+                     :variant variant})))
+  (normalize-jsonb-variant (:attrs variant))
+  (let [key (variant-key variant)]
+    (swap! *variant-registry*
+           update
+           key
+           (fnil (fn [variants]
+                   (vec (distinct (conj variants variant))))
+                 []))
+    (when-let [table (get @*type-registry* (:type variant))]
+      (swap! *type-registry*
+             assoc
+             (:type variant)
+             (attach-variants-to-table
+              table
+              (variants-for-type (:type variant))))))
+  variant)
+
 (defn analysis->typed
-  "Converts {:tables [] :enums [] :functions []} analysis into app typed maps."
+  "Converts parsed analysis into app typed maps.
+
+   The optional :variants section is retained separately and also attached to
+   matching TableDefs for class-table-aware shape inference."
   [analysis]
-  (reduce add-typed
-          (empty-typed)
-          (concat (:tables analysis)
-                  (:enums analysis)
-                  (:functions analysis))))
+  (attach-variants-to-tables
+   (reduce add-typed
+           (empty-typed)
+           (concat (:tables analysis)
+                   (:enums analysis)
+                   (:functions analysis)
+                   (:variants analysis)))))
 
 (defn merge-typed
   "Merges app-level typed payloads."
   [& typed-maps]
-  (reduce (fn [acc m]
-            (-> acc
-                (update :tables merge (:tables m))
-                (update :enums merge (:enums m))
-                (update :functions merge (:functions m))))
-          (empty-typed)
-          typed-maps))
+  (let [merged (reduce (fn [acc m]
+                         (-> acc
+                             (update :tables merge (:tables m))
+                             (update :enums merge (:enums m))
+                             (update :functions merge (:functions m))
+                             (cond-> (seq (:variants m))
+                               (update :variants
+                                       (fn [variants]
+                                         (merge-with
+                                          (fn [left right]
+                                            (into (vec left) right))
+                                          variants
+                                          (:variants m)))))))
+                       (empty-typed)
+                       typed-maps)]
+    (attach-variants-to-tables merged)))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Constructors
@@ -392,6 +615,12 @@
   ([ns name columns primary-key] (make-table-def ns name columns primary-key nil nil nil))
   ([ns name columns primary-key addons entity-meta dbschema]
    (->TableDef ns name columns primary-key addons entity-meta dbschema)))
+
+(defn make-variant-def
+  ([type class-table field attrs]
+   (make-variant-def type class-table field attrs nil))
+  ([type class-table field attrs source]
+   (->VariantDef type class-table field attrs source)))
 
 (defn make-fn-def [ns name inputs output body-meta dbschema]
   (->FnDef ns name inputs output body-meta dbschema))
@@ -537,9 +766,20 @@
                          (= source1 source2) source1
                          (nil? source1) source2
                          (nil? source2) source1
-                         :else nil)]
-      (->JsonbShape merged-fields source-table :medium
-                    (or (:nullable? shape1) (:nullable? shape2))))))
+                         :else nil)
+          output (->JsonbShape merged-fields source-table :medium
+                               (or (:nullable? shape1) (:nullable? shape2)))]
+      (if (or (contains? shape1 :field-order)
+              (contains? shape2 :field-order))
+        (assoc output
+               :field-order
+               (->> (concat (:field-order shape1)
+                            (:field-order shape2)
+                            (keys merged-fields))
+                    distinct
+                    (filter #(contains? merged-fields %))
+                    vec))
+        output))))
 
 (defn flatten-shape
   "Flattens a JsonbMerge tree into a single map of fields."

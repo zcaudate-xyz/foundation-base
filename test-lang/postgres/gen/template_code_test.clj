@@ -161,6 +161,15 @@
     (mapv (comp :id second) entries)
     => ["echo" "log_all" "log_append" "log_append_public" "log_default" "ping"]))
 
+(fact "can retain source route order when requested"
+  (let [entries (gen/route-entries
+            ['postgres.sample.scratch-v0]
+            #(= :defn (:op-key %))
+            {:preserve-source-order? true})]
+    (mapv (comp :id second) entries)
+    => ["log_all" "log_default" "ping" "echo"
+        "log_append_public" "log_append"]))
+
 ^{:refer postgres.gen.template-code/view-entries :added "4.1"}
 (fact "binds select and return views with the correct entry kinds"
   (let [entries (gen/view-entries ['postgres.sample.scratch-v0])]

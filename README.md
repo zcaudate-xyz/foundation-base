@@ -54,20 +54,23 @@ Supporting directories include:
 
 Some test groups and runtimes also require tools such as Node.js, Python, R, Docker, PostgreSQL, OpenResty, or language-specific compilers. You only need those dependencies for the corresponding subsystem.
 
+### Install from Clojars
+
+Released Foundation Base artifacts are published to Clojars. Add the current
+project version from [`project.clj`](project.clj) to another Leiningen project:
+
+```clojure
+[xyz.zcaudate/foundation-base "4.1.6"]
+```
+
 ### Clone and install locally
 
-Clojars deployment is currently paused, so the simplest installation path is a local Maven install:
+For local development, install the current checkout into your local Maven repository:
 
 ```bash
 git clone git@github.com:zcaudate-xyz/foundation-base.git
 cd foundation-base
 lein install
-```
-
-Then add the current project version from [`project.clj`](project.clj) to another Leiningen project:
-
-```clojure
-[xyz.zcaudate/foundation-base "4.1.5"]
 ```
 
 ### Start a REPL

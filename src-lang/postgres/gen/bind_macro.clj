@@ -226,7 +226,7 @@
   {:added "4.0"}
   [ptr & [opts]]
   (let [entry (bind-entry ptr)
-        {:keys [table type guards autos scope query query-base args] :as view} (:static/view entry)
+        {:keys [table type guards autos scope query query-base args identity] :as view} (:static/view entry)
         {:keys [id] :as m} (bind-function ptr)
         
         table     (name table)
@@ -238,18 +238,20 @@
                            :assert tag-table})
                  (subs id (inc (count tag-table))))]
     (binding [*ns* (the-ns (:namespace entry))]
-      (-> m
-          (update :flags merge (to-lookup scope))
-          (merge {:view  (merge
-                          {:table table
-                           :type  (name type)
-                           :tag   tag
-                           :query  (transform-query (or query-base
-                                                        query)
-                                                    (set (filter symbol? args)))
-                           #_#_:guards (bind-view-guards guards)
-                           #_#_:autos  (bind-view-guards autos)}
-                          opts)})))))
+      (let [view' (merge {:table table
+                          :type  (name type)
+                          :tag   tag
+                          :query (transform-query (or query-base
+                                                      query)
+                                                  (set (filter symbol? args)))
+                          #_#_:guards (bind-view-guards guards)
+                          #_#_:autos  (bind-view-guards autos)}
+                         opts)]
+        (-> m
+            (update :flags merge (to-lookup scope))
+            (merge {:view (cond-> view'
+                            identity (assoc :identity
+                                            (transform-query identity)))}))))))
 
 (defn bind-table
   "gets the table interface"

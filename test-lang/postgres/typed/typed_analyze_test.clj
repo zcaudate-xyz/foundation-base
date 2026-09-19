@@ -226,6 +226,31 @@
       ;; Count returns integer
       (:type (analyze/analyze-table-op 'pg/t:count ['test.ns/Entry] ctx)) => :integer)))
 
+(fact "analyze-table-op applies a literal class-table variant"
+  (types/clear-registry!)
+  (let [table (assoc
+               (types/make-table-def
+                "test.ns"
+                "AccessRole"
+                [(types/make-column-def
+                  :scope
+                  (types/make-type-ref :primitive nil :jsonb))]
+                :id)
+               :variants
+               [(types/make-variant-def
+                 'test.ns/AccessRole
+                 "Org"
+                 :scope
+                 {:type :array :items {:type :text}})])]
+    (types/register-type! 'test.ns/AccessRole table)
+    (let [result (analyze/analyze-table-op
+                  'pg/t:insert
+                  ['test.ns/AccessRole {:class-table "Org"}]
+                  (types/make-context))]
+      [(get-in result [:shape :fields :scope :type])
+       (get-in result [:shape :fields :scope :items :type])]
+      => [:array :text])))
+
 ^{:refer postgres.typed.typed-analyze/analyze-jsonb-merge :added "4.1"}
 (fact "analyze-jsonb-merge combines shapes from merge arguments"
   (let [ctx (types/make-context)]

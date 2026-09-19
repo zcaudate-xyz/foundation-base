@@ -1,0 +1,127 @@
+name: Publish Foundation Base to Clojars
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: foundation-clojars-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  publish:
+    name: Publish Clojars release
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    environment:
+      name: clojars
+
+    steps:
+      - name: Checkout the tagged release
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Validate tag, release branch, and project version
+        id: release
+        shell: bash
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          git fetch origin main release --tags --force
+          test "$(git rev-parse "refs/tags/${TAG_NAME}^{commit}")" = "$GITHUB_SHA"
+          test "$(git rev-parse origin/release)" = "$GITHUB_SHA"
+
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            parents="$(git show -s --format=%P "$GITHUB_SHA")"
+            read -r -a parents <<<"$parents"
+            test "${#parents[@]}" = 2
+            git merge-base --is-ancestor "${parents[1]}" origin/main
+          fi
+
+          project_name="$(
+            ./lein exec -e \
+              '(require (quote leiningen.core.project)) (let [project (leiningen.core.project/read "project.clj")] (println (str (:group project) "/" (:name project))))' \
+              | tail -n 1
+          )"
+          project_version="$(
+            ./lein exec -e \
+              '(require (quote leiningen.core.project)) (println (:version (leiningen.core.project/read "project.clj")))' \
+              | tail -n 1
+          )"
+          expected_tag="v${project_version}"
+
+          test "$project_name" = xyz.zcaudate/foundation-base
+          test "$TAG_NAME" = "$expected_tag"
+          [[ "$project_version" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)([-+][0-9A-Za-z.-]+)?$ ]]
+          [[ "$project_version" != *SNAPSHOT* ]]
+
+          {
+            echo "name=$project_name"
+            echo "version=$project_version"
+            echo "commit=$GITHUB_SHA"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo '### Clojars release contract'
+            echo
+            echo "- Coordinate: \`$project_name\`"
+            echo "- Version: \`$project_version\`"
+            echo "- Tag: \`$TAG_NAME\`"
+            echo "- Commit: \`$GITHUB_SHA\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prepare Clojars repository configuration
+        env:
+          CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ./scripts/release/prepare-clojars-config.sh deploy
+
+      - name: Publish split packages
+        env:
+          CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ./lein pom
+          ./lein jar
+          ./lein deploy-clojars
+
+      - name: Publish root artifact
+        env:
+          CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
+        run: ./lein deploy-root
+
+      - name: Summarize published release
+        run: |
+          {
+            echo '### Clojars publication'
+            echo
+            echo "- Coordinate: \`${{ steps.release.outputs.name }}\`"
+            echo "- Version: \`${{ steps.release.outputs.version }}\`"
+            echo "- Tag: \`${{ github.ref_name }}\`"
+            echo "- Commit: \`${{ github.sha }}\`"
+            echo "- Registry: https://clojars.org/"
+            echo "- Split packages: published before the root artifact"
+            echo "- Root artifact: published after split packages"
+          } >> "$GITHUB_STEP_SUMMARY"

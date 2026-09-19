@@ -1,7 +1,9 @@
 (ns postgres.core.graph-view-test
   (:require [lang.runtime.postgres.base.application :as app]
             [postgres.core.graph-view :as view]
+            [postgres.core.graph-query :as query]
             [postgres.core.impl-base :as impl]
+            [postgres.gen.bind-macro :as gen]
             [postgres.sample.scratch-v1 :as scratch]
             [lang.core :as l]
             [std.lib.schema :as schema])
@@ -61,7 +63,82 @@
       :autos nil})
 
 ^{:refer postgres.core.graph-view/defret-fn :added "4.0"}
-(fact "the defref generator function")
+(fact "the defret generator function derives composite physical keys"
+  (let [captured (atom nil)
+        sym      (with-meta 'task-composite-ret
+                   {:- '[scratch/Task]})]
+    (with-redefs [impl/prep-table
+                  (fn [_ _ _]
+                    [{:static/schema-primary [{:id :id :type :uuid}
+                                              {:id :class-table :type :enum}]}
+                     {:id         [{:type :uuid :primary "default"}]
+                      :class-table [{:type :enum}]}
+                     {}])
+                  query/query-fn
+                  (fn [_ params]
+                    (reset! captured params)
+                    :query)]
+      (view/defret-fn nil
+                      sym
+                      [:uuid 'i-id :text 'i-class-table]
+                      #{:*/data})
+      @captured)
+    => {:where {:id 'i-id
+                :class-table 'i-class-table}
+        :returning #{:*/data}
+        :single true}))
+
+^{:refer postgres.core.graph-view/defret-fn :added "4.0"
+  :id explicit-identity}
+(fact "the defret generator accepts an explicit logical identity"
+  (let [captured (atom nil)
+        sym      (with-meta 'task-logical-ret
+                   {:- '[scratch/Task]
+                    :identity [:class-table :class-ref]})]
+    (with-redefs [impl/prep-table
+                  (fn [_ _ _]
+                    [{:static/schema-primary {:id :id :type :uuid}}
+                     {:class-table [{:type :enum}]
+                      :class-ref   [{:type :uuid}]}
+                     {}])
+                  query/query-fn
+                  (fn [_ params]
+                    (reset! captured params)
+                    :query)]
+      (view/defret-fn nil
+                      sym
+                      [:text 'i-class-table :uuid 'i-class-ref]
+                      #{:*/data})
+      @captured)
+    => {:where {:class-table 'i-class-table
+                :class-ref 'i-class-ref}
+        :returning #{:*/data}
+        :single true}))
+
+^{:refer postgres.core.graph-view/defret-fn :added "4.0"
+  :id invalid-identity-arity}
+(fact "the defret generator rejects incomplete identities"
+  (let [sym (with-meta 'task-invalid-ret
+              {:- '[scratch/Task]})
+        result (try
+                 (with-redefs [impl/prep-table
+                               (fn [_ _ _]
+                                 [{:static/schema-primary [{:id :id :type :uuid}
+                                                           {:id :class-table :type :enum}]}
+                                  {:id         [{:type :uuid}]
+                                   :class-table [{:type :enum}]}
+                                  {}])]
+                   (view/defret-fn nil
+                                   sym
+                                   [:uuid 'i-id]
+                                   #{:*/data}))
+                 :ok
+                 (catch clojure.lang.ExceptionInfo ex
+                   (select-keys (ex-data ex) [:expected :actual :identity])))]
+    result
+    => {:expected 2
+        :actual 1
+        :identity [:id :class-table]}))
 
 ^{:refer postgres.core.graph-view/defret.pg :added "4.0"}
 (fact "creates a returns function"
@@ -82,6 +159,27 @@
        :tag "basic",
        :query #{:*/data},
        :autos nil})
+
+^{:refer postgres.core.graph-view/defret.pg :added "4.0"
+  :id explicit-view}
+(fact "binds an explicit identity into the return view"
+  (view/defret.pg ^{:- [scratch/Task]
+                    :identity [:id]}
+    task-basic-explicit-id
+    [:uuid i-task-id]
+    #{:*/data})
+
+  (gen/bind-view task-basic-explicit-id)
+  => {:input [{:symbol "i_task_id" :type "uuid"}]
+      :return "jsonb"
+      :schema "scratch"
+      :id "task_basic_explicit_id"
+      :flags {}
+      :view {:table "Task"
+             :type "return"
+             :tag "basic_explicit_id"
+             :query ["*/data"]
+             :identity ["id"]}})
 
 ^{:refer postgres.core.graph-view/view-fn :added "4.0"}
 (fact "constructs a view function"

@@ -319,6 +319,40 @@
        {"organisation_accesses"
         {"organisation" "{{i_organisation_id}}"}}}})
 
+^{:refer postgres.gen.bind-macro/bind-view :added "4.1"
+  :id composite-return-identity}
+(fact "preserves composite return identities in generated contracts"
+  (let [entry (book/book-entry
+               {:lang :postgres
+                :section :code
+                :namespace 'postgres.gen.bind-macro-test
+                :id 'task-ret
+                :form '(defn.pg task-ret)
+                :declared 1
+                :static/input [{:modifiers [:uuid]
+                                 :symbol 'i-id}
+                                {:modifiers [:enum]
+                                 :symbol 'i-class-table}]
+                :static/return [:jsonb]
+                :static/schema "scratch"
+                :static/view {:table 'scratch/Task
+                              :type :return
+                              :tag "ret"
+                              :query #{:*/data}
+                              :identity [:id :class-table]}})]
+    (gen/bind-view entry))
+  => {:input [{:symbol "i_id" :type "uuid"}
+              {:symbol "i_class_table" :type "enum"}]
+      :return "jsonb"
+      :schema "scratch"
+      :id "task_ret"
+      :flags {}
+      :view {:table "Task"
+             :type "return"
+             :tag "ret"
+             :query ["*/data"]
+             :identity ["id" "class_table"]}})
+
 ^{:refer postgres.gen.bind-macro/bind-table :added "4.0"}
 (fact "gets the table interface"
 

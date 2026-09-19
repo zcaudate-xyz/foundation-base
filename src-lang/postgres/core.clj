@@ -7,6 +7,7 @@
             [postgres.core.graph]
             [postgres.core.impl]
             [postgres.core.graph-view :as graph-view]
+            [postgres.core.variant :as variant]
             [lang.core :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format
@@ -19,6 +20,7 @@
 
 (f/intern-in graph-view/defret.pg
              graph-view/defsel.pg
+             variant/defvariant.pg
              postgres.gen.bind-macro/bind-app
              postgres.gen.bind-macro/bind-schema
              app/app-create

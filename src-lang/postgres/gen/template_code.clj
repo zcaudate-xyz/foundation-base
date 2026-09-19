@@ -2,6 +2,8 @@
   (:require [clojure.string :as str]
             [code.project :as project]
             [postgres.gen.bind-macro :as bind]
+  [postgres.typed.typed-route :as typed-route]
+  [postgres.typed.typed-view :as typed-view]
             [std.fs :as fs]
             [std.block.template :as template]
             [std.string.prose :as prose]))
@@ -81,75 +83,30 @@
           (map (comp #(emit-route-entry % root) second))
           (str/join "\n\n")))))
 
-(defn- descriptor-id
-  [descriptor]
-  (or (:id descriptor)
-      (throw (ex-info "Generated descriptor has no :id"
-                      {:descriptor descriptor}))))
-
-(defn- assert-unique-ids!
-  [kind entries]
-  (let [duplicates (->> entries
-                        (group-by (comp descriptor-id second))
-                        (keep (fn [[id matches]]
-                                (when (< 1 (count matches))
-                                  {:id id
-                                   :sources (mapv (comp str first) matches)})))
-                        seq)]
-    (when duplicates
-      (throw (ex-info (str "Duplicate generated " (name kind) " ids")
-                      {:kind kind
-                       :duplicates duplicates})))
-    entries))
-
 (defn route-entries
   "Binds functions from one or more generated RPC namespaces. The predicate
    receives a std.lang entry and defaults to all functions. Results are
-   deterministic and duplicate route ids fail generation."
+   deterministic and duplicate route ids fail generation. Source order can be
+   retained with `:preserve-source-order?`; the default remains sorted for
+   compatibility."
   {:added "4.1"}
   ([source-namespaces]
-   (route-entries source-namespaces #(= :defn (:op-key %))))
+   (typed-route/route-entries source-namespaces))
   ([source-namespaces pred]
-   (->> source-namespaces
-        (mapcat (fn [ns-sym]
-                  (require ns-sym)
-                  (map (fn [[_ sym]]
-                         [sym (bind/bind-function @(resolve sym))])
-                       (bind/list-api ns-sym pred))))
-        (sort-by (juxt (comp descriptor-id second)
-                       (comp str first)))
-        vec
-        (assert-unique-ids! :route))))
+   (typed-route/route-entries source-namespaces pred))
+  ([source-namespaces pred opts]
+   (typed-route/route-entries source-namespaces pred opts)))
 
 (defn view-entries
   "Binds defsel.pg/defret.pg entries from one or more namespaces into the
    standard xt.db.node dataview descriptors. Results are deterministic and
-   duplicate view ids fail generation."
+   duplicate view ids fail generation. Source order can be retained with
+   `:preserve-source-order?`; the default remains sorted for compatibility."
   {:added "4.1"}
-  [source-namespaces]
-  (->> source-namespaces
-       (mapcat (fn [ns-sym]
-                 (require ns-sym)
-                 (map (fn [[_ sym]]
-                        (let [{:keys [id input view]}
-                              (bind/bind-view @(resolve sym))
-                              entry {:input input
-                                     :view view}
-                              entry-key (if (= "select" (:type view))
-                                          :select-entry
-                                          :return-entry)]
-                          [sym {:id id
-                                :table (:table view)
-                                entry-key entry
-                                :select-args []
-                                :return-args []}]))
-                      (concat (bind/list-view ns-sym :select)
-                              (bind/list-view ns-sym :return)))))
-       distinct
-       (sort-by (juxt (comp descriptor-id second)
-                      (comp str first)))
-       vec
-       (assert-unique-ids! :view)))
+  ([source-namespaces]
+   (typed-view/view-entries source-namespaces))
+  ([source-namespaces opts]
+   (typed-view/view-entries source-namespaces opts)))
 
 (defn emit-module-entry
   "Emits one templated def.xt entry from a descriptor map."
