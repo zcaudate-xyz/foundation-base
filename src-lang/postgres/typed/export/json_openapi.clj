@@ -19,6 +19,20 @@
        vals
        (map first)))
 
+(defn- ordered-map
+  [entries]
+  (let [output (java.util.LinkedHashMap.)]
+    (doseq [[key value] entries]
+      (.put output key value))
+    output))
+
+(defn- ordered-field-keys
+  [fields field-order]
+  (let [ordered (->> field-order
+                     (filter #(contains? fields %))
+                     distinct)
+        remaining (sort-by str (remove (set ordered) (keys fields)))]
+    (concat ordered remaining)))
 
 (defn field->openapi
   "Converts a field descriptor to OpenAPI schema."
@@ -40,11 +54,14 @@
   "Converts a JsonbShape to OpenAPI schema object."
   [shape]
   (let [fields (:fields shape)
-        properties (into (sorted-map)
-                         (map (fn [[k v]] [(types/emitted-key k) (field->openapi v)]))
-                         fields)
+        field-keys (ordered-field-keys fields (:field-order shape))
+        properties (ordered-map
+                    (map (fn [k]
+                           [(types/emitted-key k)
+                            (field->openapi (get fields k))])
+                         field-keys))
         required (mapv types/emitted-key
-                       (filter #(not (:nullable? (get fields %))) (keys fields)))]
+                       (filter #(not (:nullable? (get fields %))) field-keys))]
     (cond-> {:type "object" :properties properties}
       (seq required) (assoc :required required))))
 

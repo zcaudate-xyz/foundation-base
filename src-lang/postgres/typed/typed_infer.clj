@@ -10,7 +10,13 @@
   [base-shape cols]
   (if (and (types/jsonb-shape? base-shape) (seq cols))
     (let [wanted-cols (set (map #(if (keyword? %) % (keyword (name %))) cols))]
-      (update base-shape :fields select-keys wanted-cols))
+      (let [selected (update base-shape :fields select-keys wanted-cols)]
+        (if (contains? selected :field-order)
+          (update selected
+                  :field-order
+                  (fn [field-order]
+                    (vec (filter wanted-cols field-order))))
+          selected)))
     base-shape))
 
 (defn resolve-table-def

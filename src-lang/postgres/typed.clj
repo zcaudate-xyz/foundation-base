@@ -252,6 +252,31 @@
      :typed typed
      :registry (typed->registry typed)}))
 
+(defn- module-id->symbol
+  [module-id]
+  (cond
+    (symbol? module-id) module-id
+    (keyword? module-id) (if-let [ns (namespace module-id)]
+                           (symbol ns (name module-id))
+                           (symbol (name module-id)))
+    :else (symbol (str module-id))))
+
+(defn- app-module-namespaces
+  [app-name]
+  (->> (app/app-modules app-name)
+       (keep :id)
+       (map module-id->symbol)
+       distinct
+       (sort-by str)
+       vec))
+
+(defn- register-module-analysis!
+  [analysis]
+  (doseq [type-def (concat (:enums analysis)
+                           (:functions analysis))]
+    (types/register-type! (types/type-key type-def) type-def))
+  analysis)
+
 (defn load-registry
   "Creates a postgres typed context from a registry map, defaulting to the current registry."
   ([]
@@ -270,6 +295,25 @@
       (f)
       (finally
         (reset! types/*type-registry* current)))))
+
+(defn load-full
+  "Creates a typed context with all declarations from modules belonging to an app.
+
+   The application registry remains authoritative for tables. Module enums and
+   functions are parsed again so generated namespaces, including RPC modules,
+   are present even when the app typed payload is stale or incomplete."
+  [app-name]
+  (let [ctx (load-app app-name)
+        namespaces (app-module-namespaces app-name)]
+    (with-context-registry
+      ctx
+      (fn []
+        (doseq [namespace namespaces]
+          (register-module-analysis!
+           (parse/analyze-namespace namespace)))
+        (assoc (load-registry)
+               :app-name app-name
+               :namespaces namespaces)))))
 
 (defn entries
   "Returns all typed declarations in a postgres context."

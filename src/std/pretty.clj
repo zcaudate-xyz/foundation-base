@@ -101,9 +101,10 @@
   (let [visited (:visited printer)]
     (cond
       (instance? java.util.IdentityHashMap visited)
-      (do
-        (.put ^java.util.IdentityHashMap visited value true)
-        printer)
+      (let [next (java.util.IdentityHashMap.)]
+        (.putAll ^java.util.Map next ^java.util.Map visited)
+        (.put ^java.util.IdentityHashMap next value true)
+        (assoc printer :visited next))
 
       (set? visited)
       (assoc printer :visited (conj visited value))

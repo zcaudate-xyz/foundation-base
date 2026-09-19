@@ -766,9 +766,20 @@
                          (= source1 source2) source1
                          (nil? source1) source2
                          (nil? source2) source1
-                         :else nil)]
-      (->JsonbShape merged-fields source-table :medium
-                    (or (:nullable? shape1) (:nullable? shape2))))))
+                         :else nil)
+          output (->JsonbShape merged-fields source-table :medium
+                               (or (:nullable? shape1) (:nullable? shape2)))]
+      (if (or (contains? shape1 :field-order)
+              (contains? shape2 :field-order))
+        (assoc output
+               :field-order
+               (->> (concat (:field-order shape1)
+                            (:field-order shape2)
+                            (keys merged-fields))
+                    distinct
+                    (filter #(contains? merged-fields %))
+                    vec))
+        output))))
 
 (defn flatten-shape
   "Flattens a JsonbMerge tree into a single map of fields."

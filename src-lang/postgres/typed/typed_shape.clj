@@ -106,6 +106,12 @@
                         (assoc :items item-type))]
             (assoc col-type :nullable? (not (:required col)) :source (str (:name col)))))
 
+(defn- column-field-key
+       [col]
+       (keyword (str (name (:name col))
+                     (when (= :ref (get-in col [:type :kind]))
+                       "-id"))))
+
 (defn- variant-for
   [table-def class-table field]
   (when (and class-table (seq (:variants table-def)))
@@ -156,15 +162,15 @@
        (table->shape table-def nil))
       ([table-def class-table]
       {:pre [(types/table-def? table-def)]}
-      (let [cols (:columns table-def)
+      (let [raw-cols (:columns table-def)
+            cols (mapv #(variant-column table-def class-table %) raw-cols)
             col-names (set (map :name cols))
             pks (let [pk (:primary-key table-def)]
                      (if (vector? pk) (set pk) #{pk}))
             explicit-fields (into {}
                                   (map (fn [col]
-                                           (let [col (variant-column table-def class-table col)
-                                                 is-ref? (= :ref (get-in col [:type :kind]))
-                                                 col-name (keyword (str (name (:name col)) (when is-ref? "-id")))
+                                           (let [is-ref? (= :ref (get-in col [:type :kind]))
+                                                 col-name (column-field-key col)
                                                  is-pk? (contains? pks (:name col))
                                                  field-type (assoc (resolve-column-type col)
                                                                    :is-ref? is-ref?
@@ -175,8 +181,15 @@
             ;; ONLY add id if it's missing from the explicit list and we want it as a default
             standard-fields (cond-> {}
                                     (not (contains? col-names :id))
-                                    (assoc :id {:type :uuid :nullable? (not (contains? pks :id)) :source (str (:name table-def) ".id")}))]
-           (types/make-jsonb-shape (merge standard-fields explicit-fields) (:name table-def) :high false))))
+                                    (assoc :id {:type :uuid :nullable? (not (contains? pks :id)) :source (str (:name table-def) ".id")}))
+           field-order (vec (concat (when-not (contains? col-names :id)
+                                      [:id])
+                                    (map column-field-key cols)))
+           output (types/make-jsonb-shape (merge standard-fields explicit-fields)
+                                          (:name table-def)
+                                          :high
+                                          false)]
+        (assoc output :field-order field-order))))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Shape Operations

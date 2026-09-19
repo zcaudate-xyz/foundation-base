@@ -64,19 +64,27 @@
              (:visited (pretty-printer {})))
   => true
 
-  (let [schema {:type "object"
-                :properties (into (sorted-map)
-                                  [["request" {:type "object"
-                                               :properties (into (sorted-map)
-                                                                 [["id" {:type "string"}]
-                                                                  ["status" {:type "string"}]])}]
-                                   ["role" {:type "object"
-                                            :properties (into (sorted-map)
-                                                              [["id" {:type "string"}]
-                                                               ["level" {:type "string"}]])}]])
-                :required ["request" "role"]}]
-    (pprint-str schema)
-    => string?))
+  (let [properties (into (sorted-map)
+                         [["id" {:type "string"}]
+                          ["status" {:type "string"}]])
+        schema {:type "object"
+                :properties properties
+                :request {:properties properties}
+                :response {:properties properties}
+                :required ["request" "role"]}
+        output (pprint-str schema)]
+    (and (string? output)
+         (not (clojure.string/includes? output "#<circular")))
+    => true))
+
+^{:refer std.pretty/pprint-str
+  :id pretty-self-cycle
+  :added "4.1"}
+(fact "marks actual self-cycles"
+  (let [cyclic (java.util.HashMap.)]
+    (.put cyclic "self" cyclic)
+    (clojure.string/includes? (pprint-str cyclic) "#<circular"))
+  => true)
 
 ^{:refer std.pretty/render-out :added "3.0"}
 (fact "helper to pprint and pprint-str"
