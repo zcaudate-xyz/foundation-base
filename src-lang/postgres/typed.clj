@@ -212,9 +212,10 @@
 (defn registry->typed
   "Builds a typed payload from a flat registry map."
   [registry]
-  (reduce types/add-typed
-          (types/empty-typed)
-          (vals registry)))
+  (types/attach-variants-to-tables
+   (reduce types/add-typed
+           (types/empty-typed)
+           (vals registry))))
 
 (defn typed->registry
   "Flattens an app typed payload into the registry shape expected by inference."
@@ -245,7 +246,7 @@
 (defn load-app
   "Creates a postgres typed context from an app typed payload."
   [app-name]
-  (let [typed (app/app-typed app-name)]
+  (let [typed (types/attach-variants-to-tables (app/app-typed app-name))]
     {:domain :postgres
      :app-name app-name
      :typed typed

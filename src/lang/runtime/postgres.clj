@@ -8,6 +8,7 @@
             [postgres.core.builtin]
             [postgres.core.graph]
             [postgres.core.graph-view :as graph-view]
+            [postgres.core.variant :as variant]
             [postgres.core.impl]
             [lang.core :as l]
             [std.lib.foundation :as f])
@@ -39,6 +40,7 @@
              
              graph-view/defret.pg
              graph-view/defsel.pg
+             variant/defvariant.pg
 
              entity/E)
 
