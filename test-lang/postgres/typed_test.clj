@@ -268,6 +268,23 @@
      (contains? (:functions typed-payload) 'demo/insert-entry)])
   => [true true])
 
+(fact "registry->typed attaches JSONB variants to their base table"
+  (let [scope (types/make-column-def
+               :scope
+               (types/make-type-ref :primitive nil :jsonb))
+        table (types/make-table-def "demo" "AccessRole" [scope] :id)
+        variant (types/make-variant-def
+                 'demo/AccessRole
+                 "Org"
+                 :scope
+                 {:type :array :items {:type :text}})
+        typed-payload (typed/registry->typed
+                       {'demo/AccessRole table
+                        :org-scope-variant variant})]
+    [(get-in typed-payload [:variants ['demo/AccessRole "Org" :scope] 0 :class-table])
+     (get-in typed-payload [:tables 'demo/AccessRole :variants 0 :field])]
+    => ["Org" :scope]))
+
 ^{:refer postgres.typed/typed->registry :added "4.1"}
 (fact "flattens typed payload sections into one registry"
   (let [table (types/make-table-def "demo" "Entry" [] :id)

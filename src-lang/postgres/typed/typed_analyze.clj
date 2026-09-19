@@ -249,7 +249,9 @@
         params (second args)
         table-def (resolve-table table-expr)]
     (if (and op-info table-def)
-      (let [shape (shape/shape-for-table-op (:op op-info) table-def {})
+      (let [shape (shape/shape-for-table-op (:op op-info)
+                                            table-def
+                                            (if (map? params) params {}))
             returns (if (and (= :array (:returns op-info))
                              (map? params)
                              (true? (:single params)))

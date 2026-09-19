@@ -120,11 +120,16 @@
                        (let [params (nth form 2 nil)]
                          (and (map? params)
                               (form-uses-tracked? (:set params) tracked))))
-                  (let [params (nth form 2 nil)]
-                    {:table (second form)
-                     :columns (:columns params)
-                     :set (:set params)
-                     :op op})
+                  (let [params (nth form 2 nil)
+                        class-table (or (:class-table params)
+                                        (get-in params [:set :class-table])
+                                        (get-in params [:where :class-table]))]
+                    (cond-> {:table (second form)
+                             :columns (:columns params)
+                             :set (:set params)
+                             :op op}
+                      (string? class-table)
+                      (assoc :class-table class-table)))
 
                   (and (= 'let op)
                        (sequential? (second form)))
@@ -260,7 +265,8 @@
         (shape/table->shape table-def)
         meta-cols))
 
-     (when-let [{:keys [table columns]} (find-table-update-spec-in-body body arg-name)]
+     (when-let [{:keys [table columns class-table]}
+                (find-table-update-spec-in-body body arg-name)]
        (when-let [table-def (or (types/get-type table)
                                 (types/get-type (symbol (name table)))
                                 (types/get-type (symbol (str "-/" (name table))))
@@ -268,7 +274,7 @@
                                                (vals @types/*type-registry*))))]
          (when (types/table-def? table-def)
            (select-shape-columns
-            (shape/table->shape table-def)
+            (shape/table->shape table-def class-table)
             columns))))
 
      (when-let [table-sym (and body
