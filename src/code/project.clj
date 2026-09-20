@@ -25,6 +25,7 @@
         (filter fs/exists?)
         (first))))
 
+^{:clj-kondo/ignore [:unresolved-symbol]}
 (invoke/definvoke project-map
   "returns the project map
  
@@ -86,6 +87,7 @@
 
               lookup)))
 
+^{:clj-kondo/ignore [:unresolved-symbol]}
 (invoke/definvoke lookup-ns
   "fast lookup for all-files function
  
@@ -371,3 +373,29 @@
        (or (relative-root-path path project)
            (str (fs/relativize (fs/path ".") path)))
        path))))
+
+(defn find-wrong-namespaces
+  "returns namespace/path mismatches from a project file lookup"
+  ([lookup]
+   (find-wrong-namespaces lookup (project)))
+  ([lookup project-map]
+   (let [roots (concat (or (:source-paths project-map) [])
+                       (or (:test-paths project-map) []))]
+     (->> lookup
+          (keep (fn [[ns path]]
+                  (when-let [root (matching-root path roots project-map)]
+                    (let [relative (-> (fs/relativize
+                                        (fs/path (:root project-map) root)
+                                        path)
+                                       str
+                                       (str/replace #"\\" "/")
+                                       (str/replace #"\.clj[csx]?$" ""))
+                          expected (symbol (fs/file->ns relative))]
+                      (when (not= ns expected)
+                        {:namespace ns
+                         :expected expected
+                         :path path
+                         :root root})))))
+          (sort-by (juxt (comp str :path)
+                         (comp str :namespace)))
+          vec))))

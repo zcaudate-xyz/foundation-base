@@ -1,4 +1,6 @@
 (ns code.project-test
+  {:clj-kondo/config '{:linters {:unresolved-symbol {:level :off}
+                                  :unresolved-namespace {:level :off}}}}
   (:require [code.project :refer :all]
             [std.fs :as fs]
             [std.lib.env :as env])
@@ -171,6 +173,24 @@
 
   (str (code-path (env/ns-sym) true))
   => "test/code/project_test.clj")
+
+^{:refer code.project/find-wrong-namespaces :added "4.1"}
+(fact "finds namespaces that do not match their project-relative file path"
+  (let [project-map {:root "/project"
+                     :source-paths ["src"]
+                     :test-paths ["test"]}
+        lookup {'sample.good "/project/src/sample/good.clj"
+                'sample.bad "/project/src/sample/right.clj"}]
+    (find-wrong-namespaces lookup project-map)
+    => [{:namespace 'sample.bad
+         :expected 'sample.right
+         :path "/project/src/sample/right.clj"
+         :root "src"}]
+
+    (find-wrong-namespaces
+     {'sample.good "/project/src/sample/good.clj"}
+     project-map)
+    => []))
 
 (comment
   (./import))

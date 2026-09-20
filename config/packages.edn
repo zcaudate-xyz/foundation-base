@@ -55,10 +55,6 @@
  {:description "code translation tools"
   :include [[code.tool.translate :complete]]}
 
- xyz.zcaudate/indigo
- {:description "application logic for indigo"
-  :include [[indigo :complete]]}
-
  xyz.zcaudate/jvm
  {:description "jvm library"
   :include [[jvm :exclude [jvm.chisel]]]}
@@ -454,10 +450,14 @@
    com.fasterxml.jackson.datatype/jackson-datatype-jsr310]
   :bundle [{:path "target/classes" :include ["hara/lib/json"]}]}
  
-  xyz.zcaudate/lang
-  {:description "working with other languages"
-   :include [[lang.runtime.redis :complete]
-             [xt.lang :complete]]}
+ xyz.zcaudate/lang
+ {:description "working with other languages"
+  :include [[lang.runtime.redis :complete]
+            [xt.lang :complete]]}
+ 
+ xyz.zcaudate/lang.seedgen
+ {:description "working with other languages"
+  :include [[lang.seedgen :complete]]}
 
  xyz.zcaudate/lang.runtime.libpython
  {:description "nginx runtime support"
@@ -587,5 +587,4 @@
   
  xyz.zcaudate/xtalk.runtime
  {:description "xtalk language"
-  :include [[kmi.lang     :complete]]}
- }
+  :include [[kmi.lang     :complete]]}}
