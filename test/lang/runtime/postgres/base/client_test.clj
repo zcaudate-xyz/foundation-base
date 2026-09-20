@@ -1,4 +1,4 @@
-(ns lang.runtime.annex.postgres.base.client-test
+(ns lang.runtime.postgres.base.client-test
   (:require [lib.postgres :as base]
             [lib.postgres.connection :as conn]
             [lang.runtime.annex.postgres.base.client :as client]

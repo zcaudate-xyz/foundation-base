@@ -1,4 +1,4 @@
-(ns lang.base.emit-template-test
+(ns lang.core.impl-template-test
   (:require [lang.base.book :as b]
              [lang.base.emit-helper :as helper]
              [lang.base.emit-prep-lua-test :as prep]

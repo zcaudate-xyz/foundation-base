@@ -1,4 +1,4 @@
-(ns lang.runtime.annex.postgres.base.application-test
+(ns lang.runtime.postgres.base.application-test
   (:require [lang.runtime.annex.postgres.base.application :refer :all]
             [lang.core :as l])
   (:use code.test))

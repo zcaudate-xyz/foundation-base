@@ -1,4 +1,4 @@
-(ns lang.base.book-module-test
+(ns lang.common.book-module-test
   (:require [xt.lang.common-promise]
             [xt.lang.common-data]
             [xt.lang.common-lib]
