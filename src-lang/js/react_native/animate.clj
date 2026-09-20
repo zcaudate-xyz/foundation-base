@@ -131,34 +131,186 @@
                (-/start anim callback)
                (return anim))))))
 
+(defn.js webUnitlessStyle
+  "checks whether a web style property accepts unitless numbers"
+  {:added "4.1.6"}
+  [key]
+  (return (or (== key "aspectRatio")
+              (== key "flex")
+              (== key "flexGrow")
+              (== key "flexShrink")
+              (== key "fontWeight")
+              (== key "lineHeight")
+              (== key "opacity")
+              (== key "order")
+              (== key "zIndex"))))
+
+(defn.js webTransformValue
+  "converts a React Native transform value into CSS"
+  {:added "4.1.6"}
+  [key value]
+  (cond (k/is-array? value)
+        (do (var out [])
+            (xt/for:array [v value]
+              (xt/x:arr-push out (-/webTransformValue key v)))
+            (return (xt/x:str-join " " out)))
+        
+        (and (== "number" (typeof value))
+             (or (== key "translate")
+                 (== key "translate3d")
+                 (== key "translateX")
+                 (== key "translateY")
+                 (== key "translateZ")
+                 (== key "perspective")))
+        (return (+ value "px"))
+        
+        (and (== "number" (typeof value))
+             (or (== key "rotate")
+                 (== key "rotateX")
+                 (== key "rotateY")
+                 (== key "rotateZ")
+                 (== key "skewX")
+                 (== key "skewY")))
+        (return (+ value "deg"))
+        
+        :else
+        (return value)))
+
+(defn.js webTransform
+  "converts React Native transform entries into a CSS transform string"
+  {:added "4.1.6"}
+  [value]
+  (var out [])
+  (xt/for:array [entry (xtd/arrayify value)]
+    (when (k/is-object? entry)
+      (xt/for:object [[key v] entry]
+        (xt/x:arr-push out
+                       (xt/x:cat key
+                                 "("
+                                 (-/webTransformValue key v)
+                                 ")")))))
+  (return (xt/x:str-join " " out)))
+
+(defn.js webStyleValue
+  "converts an animated style value to a DOM-compatible value"
+  {:added "4.1.6"}
+  [key value]
+  (cond (== key "transform")
+        (return (-/webTransform value))
+        
+        (and (== "number" (typeof value))
+             (not (-/webUnitlessStyle key)))
+        (return (+ value "px"))
+        
+        :else
+        (return value)))
+
+(defn.js webStyle
+  "flattens and converts a React Native style value for the DOM"
+  {:added "4.1.6"}
+  [value]
+  (var out {})
+  (xt/for:array [entry (xtd/arrayify value)]
+    (when (k/is-object? entry)
+      (xtd/obj-assign out entry)))
+  (xt/for:object [[key v] out]
+    (xt/x:set-key out key (-/webStyleValue key v)))
+  (return out))
+
+(defn.js setPropsWeb
+  "sets props on a React Native Web host element"
+  {:added "4.1.6"}
+  [elem props]
+  (when (and elem elem.style)
+    (xt/for:object [[k0 v0] (or props {})]
+      (when (and props.hasOwnProperty
+                 (props.hasOwnProperty k0))
+        (cond (and (== k0 "style")
+                   (or (k/is-object? v0)
+                       (k/is-array? v0)))
+              (xtd/obj-assign elem.style
+                              (-/webStyle v0))
+              
+              (and (== k0 "text")
+                   (or (== "INPUT" elem.tagName)
+                       (== "TEXTAREA" elem.tagName)))
+              (:= elem.value v0)
+              
+              (== k0 "text")
+              (:= elem.textContent v0)
+              
+              :else
+              (:= (. elem [k0]) v0))))
+    (return true))
+  (return false))
+
+(defn.js getNativePropsTarget
+  "resolves a host ref from a wrapper ref"
+  {:added "4.1.6"}
+  [elem]
+  (var target elem)
+  (when (and target
+             target.getNativeRef
+             (k/is-function? target.getNativeRef))
+    (try
+      (var nativeRef (target.getNativeRef))
+      (when nativeRef
+        (:= target nativeRef))
+      (catch e)))
+  (when (and target
+             (not (and target.setNativeProps
+                       (k/is-function? target.setNativeProps)))
+             target.getNode
+             (k/is-function? target.getNode))
+    (try
+      (var nativeRef (target.getNode))
+      (when nativeRef
+        (:= target nativeRef))
+      (catch e)))
+  (when (and target
+             (not (and target.setNativeProps
+                       (k/is-function? target.setNativeProps)))
+             target._component)
+    (:= target target._component))
+  (return target))
+
+(defn.js callNativeProps
+  "calls setNativeProps when available"
+  {:added "4.1.6"}
+  [elem props]
+  (when (and elem
+             elem.setNativeProps
+             (k/is-function? elem.setNativeProps))
+    (try
+      (elem.setNativeProps props)
+      (return true)
+      (catch e)))
+  (return false))
+
+(defn.js setPropsNative
+  "sets props on a React Native host ref"
+  {:added "4.1.6"}
+  [elem props]
+  (var target (-/getNativePropsTarget elem))
+  (when (-/callNativeProps target props)
+    (return true))
+  (when (and target
+             (not= target elem)
+             (-/callNativeProps elem props))
+    (return true))
+  (return false))
+
 (defn.js setPropsAll
   "sets props for all the elements"
   {:added "4.0"}
   [elem props]
-  (cond (and elem
-             elem.setNativeProps
-             (k/is-function? elem.setNativeProps))
-        (try (elem.setNativeProps props)
-             (catch e))
+  (cond (and (== "web" (. n/Platform OS))
+             elem
+             elem.style)
+        (-/setPropsWeb elem props)
         
-        (== "web" (. n/Platform OS))
-        (xt/for:object [[k0 v0] props]
-          (when (props.hasOwnProperty k0)
-            (cond (and (== k0 "style")
-                       (== "object" (typeof v0)))
-                  (:= elem.style
-                      (xtd/arr-foldl [elem.style v0]
-                                     xtd/obj-assign
-                                     {}))
-                  
-                  (and (== k0 "text")
-                       (or (== "INPUT" elem.tagName)
-                           (== "TEXTAREA" elem.tagName)))
-                  (:= elem.v0ue v0)
-                  
-                  :else
-                  (:= (. elem [k0])
-                      (. props [k0])))))))
+        :else
+        (-/setPropsNative elem props)))
 
 (def.js IMPL
   {:create-val        (fn:> [v]
