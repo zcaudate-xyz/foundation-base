@@ -4,7 +4,7 @@
             [postgres.entity :as et :refer :all]
             [postgres.typed.typed-parse :as typed-parse]
             [lang.core :as l]
-            [lang.model.spec-postgres.entity-util :as ut]
+            [lang.model.annex.spec-postgres.entity-util :as ut]
             [lang.base.grammar-spec :as grammar-spec]
             [std.lib.env :as env]))
 

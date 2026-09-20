@@ -1,5 +1,5 @@
 (ns lang.runtime.basic.impl-annex.process-php-test
-  (:require [lang.runtime.basic.impl-annex.process-php :refer :all]
+  (:require [lang.runtime.annex.basic.impl.process-php :refer :all]
             [std.lib.env :as env]
             [lang.runtime.basic.type-oneshot :as p]
             [std.json :as json]
@@ -17,7 +17,7 @@
       :value)
   => 10)
 
-^{:refer lang.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-php/default-oneshot-wrap :added "4.1"}
 (fact "captures php eval errors without crashing the wrapper"
   (let [out (-> (p/rt-oneshot {:lang :php})
                 (p/raw-eval-oneshot (default-oneshot-wrap '(not_a_real_php_fn)))
@@ -25,14 +25,14 @@
     [(:type out) (string? (:value out))])
   => ["error" true])
 
-^{:refer lang.runtime.basic.impl-annex.process-php/default-oneshot-wrap :added "4.0"
+^{:refer lang.runtime.annex.basic.impl.process-php/default-oneshot-wrap :added "4.0"
   :id test-lang_runtime_basic_impl_annex_process_php__default_oneshot_wrap_bootstrap}
 (fact "creates the oneshot bootstrap form"
 
   (default-oneshot-wrap 1)
   => string?)
 
-^{:refer lang.runtime.basic.impl-annex.process-php/default-body-transform :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-php/default-body-transform :added "4.1"}
 (fact "transforms oneshot forms for return-eval"
   (default-body-transform '[1 2 3] {})
   => '((quote ((fn [] (return [1 2 3])))))
@@ -46,14 +46,14 @@
   (l/emit-as :php [(default-body-transform '[1 2 3] {:bulk true})])
   => #"\(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\)")
 
-^{:refer lang.runtime.basic.impl-annex.process-php/default-basic-client :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-php/default-basic-client :added "4.0"}
 (fact "creates the basic client bootstrap"
 
   (default-basic-client 19000)
   => string?)
 
 
-^{:refer lang.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-php/php-body-source :added "4.1"}
 (fact "creates a single-line php source string for runtime eval"
   (php-body-source '[1 2 3] {})
   => #"\(function \(\)\{\s+return \[1,2,3\];\s+\}\)\(\)"
@@ -61,7 +61,7 @@
   (php-body-source '[1 2 3] {:bulk true})
   => #"\(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\)")
 
-^{:refer lang.runtime.basic.impl-annex.process-php/default-basic-body-transform :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-php/default-basic-body-transform :added "4.1"}
 (fact "transforms basic runtime forms into a PHP return statement"
   (second (default-basic-body-transform '[1 2 3] {}))
   => #"^return \(function \(\)\{\s+return \[1,2,3\];\s+\}\)\(\);$"
@@ -69,7 +69,7 @@
   (second (default-basic-body-transform '[1 2 3] {:bulk true}))
   => #"^return \(function \(\)\{\s+1;\s+2;\s+return 3;\s+\}\)\(\);$")
 
-^{:refer lang.runtime.basic.impl-annex.process-php/php-prefix-params :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-php/php-prefix-params :added "4.1"}
 (fact "prefixes bare function parameter symbols with $"
   (php-prefix-params '(fn [x y] (+ x y)))
   => '(fn [$x $y] (+ $x $y))
@@ -83,7 +83,7 @@
   (php-prefix-params '(fn [$x] (+ $x 1)))
   => '(fn [$x] (+ $x 1)))
 
-^{:refer lang.runtime.basic.impl-annex.process-php/php-body-source :added "4.1"
+^{:refer lang.runtime.annex.basic.impl.process-php/php-body-source :added "4.1"
   :id test-lang_runtime_basic_impl_annex_process_php__php_body_source_locals}
 (fact "runtime source emits seedgen-style bare PHP locals as valid PHP variables"
   (php-body-source '(do

@@ -1,7 +1,7 @@
 (ns js.lib.eth-lib-test
-  (:require [lang.runtime.solidity :as s]
-            [lang.runtime.solidity.compile-solc :as compile-solc]
-            [lang.runtime.solidity.env-hardhat :as env-hardhat]
+  (:require [lang.runtime.annex.solidity :as s]
+            [lang.runtime.annex.solidity.compile-solc :as compile-solc]
+            [lang.runtime.annex.solidity.env-hardhat :as env-hardhat]
             [lang.core :as l]
             [web3.lib.example-counter :as example-counter]
             [xt.lang.common-notify :as notify])

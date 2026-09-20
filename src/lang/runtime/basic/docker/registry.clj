@@ -4,11 +4,11 @@
             [lang.runtime.basic.impl.process-lua     :as lua]
             [lang.runtime.basic.impl.process-python  :as python]
             [lang.runtime.basic.impl.process-ruby    :as ruby]
-            [lang.runtime.basic.impl-annex.process-erlang :as erlang]
-            [lang.runtime.basic.impl-annex.process-julia  :as julia]
-            [lang.runtime.basic.impl-annex.process-perl   :as perl]
-            [lang.runtime.basic.impl-annex.process-php    :as php]
-            [lang.runtime.basic.impl-annex.process-r      :as r]))
+            [lang.runtime.annex.basic.impl.process-erlang :as erlang]
+            [lang.runtime.annex.basic.impl.process-julia  :as julia]
+            [lang.runtime.annex.basic.impl.process-perl   :as perl]
+            [lang.runtime.annex.basic.impl.process-php    :as php]
+            [lang.runtime.annex.basic.impl.process-r      :as r]))
 
 ;;
 ;; Canonical Docker image + bootstrap registry for :basic runtimes.

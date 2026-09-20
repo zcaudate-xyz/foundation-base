@@ -1,4 +1,4 @@
-(ns js.react-native.matrix-math
+(ns js.react-native.model-maths
   (:require [lang.core :as l]
             [std.lib.foundation :as f]))
 

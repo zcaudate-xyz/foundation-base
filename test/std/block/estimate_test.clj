@@ -1,4 +1,4 @@
-(ns std.block.layout.estimate-test
+(ns std.block.estimate-test
   (:require [std.block.layout.estimate :as est])
   (:use code.test))
 

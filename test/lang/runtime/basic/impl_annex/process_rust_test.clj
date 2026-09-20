@@ -1,5 +1,5 @@
 (ns lang.runtime.basic.impl-annex.process-rust-test
-  (:require [lang.runtime.basic.impl-annex.process-rust :refer :all]
+  (:require [lang.runtime.annex.basic.impl.process-rust :refer :all]
             [std.lib.env :as env]
             [lang.core :as l])
   (:use code.test))
@@ -20,7 +20,7 @@
 
 (fact:global {:skip (not (env/program-exists? "rustc")) :setup [(l/rt:restart)] :teardown [(l/rt:stop)]})
 
-^{:refer lang.runtime.basic.impl-annex.process-rust/transform-form :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-rust/transform-form :added "4.0"}
 (fact "transforms the rust form"
 
   (transform-form '[(+ 1 2 3)]

@@ -1,4 +1,4 @@
-(ns lang.runtime.base.suite
+(ns lang.runtime.shell.suite
   (:require [std.concurrent :as cc]
             [lang.core :as l]
             [std.lib.component :as component]

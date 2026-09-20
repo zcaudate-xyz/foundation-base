@@ -8,9 +8,9 @@
              [lang.core.library-snapshot :as snap]
              [lang.core.runtime :as rt]
              [lang.core.script :as script]
-             [lang.model.spec-js :as js]
-             [lang.model.spec-lua :as lua]
-             [lang.model.spec-xtalk :as xtalk]
+             [lang.model.builtin.spec-js :as js]
+             [lang.model.builtin.spec-lua :as lua]
+             [lang.model.builtin.spec-xtalk :as xtalk]
              [std.lib.env :as env])
   (:use code.test))
 
@@ -61,7 +61,7 @@
 (fact "installs a language"
 
   (impl/with:library [+library+]
-    (binding [*ns* (the-ns 'lang.model.spec-lua)]
+    (binding [*ns* (the-ns 'lang.model.builtin.spec-lua)]
       (script/install lua/+book+)))
   => vector?)
 

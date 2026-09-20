@@ -10,7 +10,7 @@
 "The walkthrough is executable documentation. Read the scenarios in order and run only the namespace you are studying. The first six stages are self-contained; websocket and browser stages add external runtime requirements."
 
 "```bash
-lein test :only xt.substrate.s01-basic-test
+lein test :only xt.substrate.walkthrough.s01-basic-test
 lein test :only xt.substrate.walkthrough.s02-transport-memory-test
 lein test :only xt.substrate.walkthrough.s03-transport-test
 lein test :only xt.substrate.walkthrough.s04-fanout-test

@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl.process-gdscript
+(ns lang.runtime.annex.basic.impl.process-gdscript
   (:require [clojure.string]
             [xt.lang.common-promise]
             [lang.runtime.basic.type-common :as common]
@@ -6,7 +6,7 @@
             [lang.runtime.basic.type-verify :as type-verify]
             [lang.core.impl :as impl]
             [lang.core.runtime :as rt]
-            [lang.model.spec-gdscript :as spec]
+            [lang.model.annex.spec-gdscript :as spec]
             [std.lib.os :as os]
             [xt.lang.common-lib :as lib]))
 

@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-rust
+(ns lang.runtime.annex.basic.impl.process-rust
   (:require [lang.runtime.basic.type-common :as common]
             [lang.runtime.basic.type-twostep :as twostep]
             [lang.runtime.basic.type-verify :as type-verify]
@@ -7,7 +7,7 @@
             [lang.core.pointer :as ptr]
             [lang.core.runtime :as rt]
             [lang.base.util :as ut]
-            [lang.model.spec-c :as spec]))
+            [lang.model.builtin.spec-c :as spec]))
 
 (def +program-init+
   (common/put-program-options

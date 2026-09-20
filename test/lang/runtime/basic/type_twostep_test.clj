@@ -1,6 +1,6 @@
 (ns lang.runtime.basic.type-twostep-test
   (:require [lang.runtime.basic.impl.process-c]
-            [lang.runtime.basic.impl-annex.process-rust]
+            [lang.runtime.annex.basic.impl.process-rust]
             [lang.runtime.basic.type-common :as common]
             [lang.runtime.basic.type-twostep :as p]
             [std.fs :as fs]

@@ -1,13 +1,13 @@
 (ns lang.model.spec-python.rewrite-test
   (:require [clojure.walk]
-            [lang.model.spec-python :as py]
-            [lang.model.spec-python.rewrite :as rewrite])
+            [lang.model.builtin.spec-python :as py]
+            [lang.model.builtin.spec-python.rewrite :as rewrite])
   (:use code.test))
 
-^{:refer lang.model.spec-python.rewrite/python-normalize-form :added "4.1"}
+^{:refer lang.model.builtin.spec-python.rewrite/python-normalize-form :added "4.1"}
 (fact "normalizes python forms")
 
-^{:refer lang.model.spec-python.rewrite/python-rewrite-stage :added "4.1"}
+^{:refer lang.model.builtin.spec-python.rewrite/python-rewrite-stage :added "4.1"}
 (fact "keeps top-level named functions intact"
   (rewrite/python-rewrite-stage
    '(fn f-raw [x]

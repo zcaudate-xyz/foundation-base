@@ -2,13 +2,13 @@
   (:use code.test)
   (:require [lang.core :as h]
             [lang.core.type-shared :as shared]
-            [lang.runtime.vscode :as vscode]
-            [lang.runtime.vscode.impl :as impl]
+            [lang.runtime.annex.vscode :as vscode]
+            [lang.runtime.annex.vscode.impl :as impl]
             [std.lib.env :as env]))
 
 (fact:global {:skip (not (env/program-exists? "code"))})
 
-^{:refer lang.runtime.vscode/vscode :added "4.1" :timeout 60000}
+^{:refer lang.runtime.annex.vscode/vscode :added "4.1" :timeout 60000}
 (fact "starts and stops a vscode runtime"
   (let [rt (vscode/vscode {})]
     [(boolean rt)
@@ -17,7 +17,7 @@
          true)])
   => [true true true])
 
-^{:refer lang.runtime.vscode/raw-eval-vscode :added "4.1" :timeout 60000}
+^{:refer lang.runtime.annex.vscode/raw-eval-vscode :added "4.1" :timeout 60000}
 (fact "evaluates js in vscode"
   (let [rt (vscode/vscode {})]
     (try
@@ -27,7 +27,7 @@
         (std.lib.component/stop rt))))
   => [6 "function"])
 
-^{:refer lang.runtime.vscode.impl/vscode-shared:create :added "4.1" :timeout 60000}
+^{:refer lang.runtime.annex.vscode.impl/vscode-shared:create :added "4.1" :timeout 60000}
 (fact "two shared vscode runtimes with the same id share the process"
   (let [rt1 (impl/vscode-shared:create {:id :shared-vscode-test})
         rt2 (impl/vscode-shared:create {:id :shared-vscode-test})]

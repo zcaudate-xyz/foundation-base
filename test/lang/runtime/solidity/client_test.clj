@@ -1,12 +1,12 @@
 (ns lang.runtime.solidity.client-test
   (:require [lang.runtime.basic :as basic]
              [lang.runtime.basic.server-basic :as server]
-             [lang.runtime.solidity.client :as client]
-             [lang.runtime.solidity.compile-common :as compile-common]
-             [lang.runtime.solidity.compile-deploy :as deploy]
-             [lang.runtime.solidity.compile-node :as compile-node]
-             [lang.runtime.solidity.compile-solc :as solc]
-            [lang.runtime.solidity.env-hardhat :as env]
+             [lang.runtime.annex.solidity.client :as client]
+             [lang.runtime.annex.solidity.compile-common :as compile-common]
+             [lang.runtime.annex.solidity.compile-deploy :as deploy]
+             [lang.runtime.annex.solidity.compile-node :as compile-node]
+             [lang.runtime.annex.solidity.compile-solc :as solc]
+            [lang.runtime.annex.solidity.env-hardhat :as env]
              [lang.core :as l]
              [std.lib.template :as template]
              [std.lib.component :as component]
@@ -16,24 +16,24 @@
 (l/script- :solidity
   {:runtime :web3
    :config  {:mode :clean}
-   :require [[lang.runtime.solidity :as s]]})
+   :require [[lang.runtime.annex.solidity :as s]]})
 
 ;; Removed global setup
 
-^{:refer lang.runtime.solidity.client/check-node-connection :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/check-node-connection :added "4.0"}
 (fact "checks that the node connection is present"
   (with-redefs [server/get-server (fn [& _] {:id "node"})
                 server/get-relay (fn [& _] :connected)]
     (client/check-node-connection {:node {:id "node"}}))
   => :connected)
 
-^{:refer lang.runtime.solidity.client/contract-fn-name :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/contract-fn-name :added "4.0"}
 (fact "gets the name of a pointer"
   (with-redefs [l/emit-symbol (fn [_ s] (str s))]
     (client/contract-fn-name {:id 'test:hello}))
   => "test:hello")
 
-^{:refer lang.runtime.solidity.client/create-web3-node :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/create-web3-node :added "4.0"}
 (fact "creates the node runtime"
   (let [calls (atom [])]
     (with-redefs [basic/rt-basic (fn [_] :rt-node)
@@ -48,33 +48,33 @@
          (template/$ [(:= (!:G solc) (require "solc"))])
          5000]]))
 
-^{:refer lang.runtime.solidity.client/start-web3 :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/start-web3 :added "4.0"}
 (fact "starts the solidity rt"
   (with-redefs [client/create-web3-node (fn [_] :node)
                 compile-common/get-url (fn [_] "url")]
     (client/start-web3 {:id "id" :config {}}))
   => (contains {:node :node :config {:url "url"}}))
 
-^{:refer lang.runtime.solidity.client/stop-web3 :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/stop-web3 :added "4.0"}
 (fact "stops the solidity rt"
   (with-redefs [component/stop (fn [_] nil)
                 compile-common/set-rt-settings (fn [& _] nil)]
     (client/stop-web3 {:node {}}))
   => {})
 
-^{:refer lang.runtime.solidity.client/raw-eval-web3 :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/raw-eval-web3 :added "4.0"}
 (fact "disables raw-eval for solidity"
   (client/raw-eval-web3 {} "body")
   => (throws))
 
-^{:refer lang.runtime.solidity.client/invoke-ptr-web3-check :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/invoke-ptr-web3-check :added "4.0"}
 (fact "checks that arguments are correct"
   (client/invoke-ptr-web3-check {:abi [{"name" "fn" "inputs" [] "outputs" [{"type" "uint256"}]}]}
                                 "fn"
                                 [])
   => true)
 
-^{:refer lang.runtime.solidity.client/invoke-ptr-web3-call :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/invoke-ptr-web3-call :added "4.0"}
 (fact "invokes a deployed method"
   (with-redefs [compile-node/rt-get-contract (fn [] {:abi []})
                 client/contract-fn-name (fn [_] "fn")
@@ -86,25 +86,25 @@
     (client/invoke-ptr-web3-call {:node {:id "id"}} (atom {:form '(defn f [])}) []))
   => "result")
 
-^{:refer lang.runtime.solidity.client/invoke-ptr-web3 :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/invoke-ptr-web3 :added "4.0"}
 (fact "invokes the runtime, deploying the contract if not available"
   (with-redefs [compile-common/get-contract-address (fn [_] "addr")
                 client/invoke-ptr-web3-call (fn [& _] "result")]
     (client/invoke-ptr-web3 {:node {:id "id"}} 'ptr []))
   => "result")
 
-^{:refer lang.runtime.solidity.client/rt-web3-string :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/rt-web3-string :added "4.0"}
 (fact "gets the runtime string"
   (with-redefs [server/get-server (fn [& _] nil)]
     (client/rt-web3-string {:id "id" :lang :sol :config {:url "url"} :node {:id "node"}}))
   => "#rt.web3[\"id\" {:url \"url\", :node :no-server}]")
 
-^{:refer lang.runtime.solidity.client/rt-web3:create :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/rt-web3:create :added "4.0"}
 (fact "creates a runtime"
   (client/rt-web3:create {})
   => map?)
 
-^{:refer lang.runtime.solidity.client/rt-web3 :added "4.0"}
+^{:refer lang.runtime.annex.solidity.client/rt-web3 :added "4.0"}
 (fact "creates an starts a runtime"
   (with-redefs [client/rt-web3:create (fn [m] m)
                 component/start (fn [m] (assoc m :started true))]
@@ -112,6 +112,6 @@
   => {:started true})
 
 (comment
-  (lang.runtime.solidity.env-hardhat/stop-hardhat-server)
-  (lang.runtime.solidity.env-hardhat/rt:start-hardhat-server)
+  (lang.runtime.annex.solidity.env-hardhat/stop-hardhat-server)
+  (lang.runtime.annex.solidity.env-hardhat/rt:start-hardhat-server)
   )

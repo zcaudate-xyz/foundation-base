@@ -1,7 +1,7 @@
 (ns postgres.core.impl-update-test
   (:require [postgres.core]
-            [lang.runtime.postgres.base.application :as app]
-            [lang.model.spec-postgres.common-tracker :as tracker]
+            [lang.runtime.annex.postgres.base.application :as app]
+            [lang.model.annex.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [postgres.core.impl-update :as update]
             [lang.core :as l]

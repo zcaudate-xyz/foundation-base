@@ -3,7 +3,7 @@
  :ns-groups
  [{:pattern "^xt\\."
    :name clj-kondo.hooks.lang-xtalk}
-  {:pattern "^lang\\.model\\.spec-xtalk\\."
+  {:pattern "^lang\\.model\\.(builtin|annex)\\.spec-xtalk\\."
    :name clj-kondo.hooks.lang-xtalk}
   {:pattern ".+"
    :name clj-kondo.hooks.lang-postgres}]
@@ -65,7 +65,7 @@
   :unresolved-var {:exclude [l/script l/script- l/script+
                              lang.core/script lang.core/script- lang.core/script+
                              lang.core/defspec.xt
-                             lang.model.spec-xtalk.fn-python
+                             lang.model.builtin.spec-python.xtalk-python
                              lang.core.impl
                              code.test/fact code.test/fact:global
                              code.test/=> code.test/contains]}
@@ -98,7 +98,7 @@
   :lang.xtalk/field-collision {:level :error}
   :lang.xtalk/invalid-destructuring {:level :error}}
  :config-in-ns
- {lang.model.spec-python
+ {lang.model.builtin.spec-python
   {:linters {:syntax {:level :off}
              :invalid-arity {:level :off}
              :unsupported-binding {:level :off}

@@ -1,6 +1,6 @@
-(ns lang.model.sql.spec-common.form-defn
+(ns lang.model.annex.sql.spec-common.form-defn
   (:require [clojure.string :as str]
-            [lang.model.sql.spec-common.common :as common]
+            [lang.model.annex.sql.spec-common.common :as common]
             [lang.base.emit-helper :as helper]
             [lang.base.grammar-spec :as grammar-spec]))
 

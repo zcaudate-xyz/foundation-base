@@ -1,5 +1,5 @@
-(ns lang.model.sql.spec-oracle
-  (:require [lang.model.sql.spec-common :as common]
+(ns lang.model.annex.sql.spec-oracle
+  (:require [lang.model.annex.sql.spec-common :as common]
             [lang.core.script :as script]))
 
 (def +dialect+

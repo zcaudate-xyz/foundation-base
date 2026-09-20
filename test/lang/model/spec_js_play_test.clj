@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [clojure.string :as str]
              [lang.typed.xtalk-parse :as xtalk-parse]
-             [lang.model.spec-js.ts :as ts]))
+             [lang.model.builtin.spec-js.ts :as ts]))
 
 (def +typescript-model-fixture+
   "test/lang/model/typescript_model_fixture.clj")

@@ -6,7 +6,7 @@
             [postgres.typed.export.json-schema :as compile.json-schema]
             [postgres.typed.export.portable-edn :as portable-edn]
             [postgres.typed.export.ts-schema :as compile.ts-schema]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [postgres.typed.typed-analyze :as analyze]
             [postgres.typed.typed-common :as types]
             [postgres.typed.typed-infer :as typed-infer]

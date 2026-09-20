@@ -1,6 +1,6 @@
-(ns lang.runtime.blender
+(ns lang.runtime.annex.blender
   (:require [std.lib :as h]
-            [lang.runtime.blender.impl :as impl])
+            [lang.runtime.annex.blender.impl :as impl])
   (:refer-clojure :exclude [eval]))
 
 (h/intern-in

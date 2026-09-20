@@ -1,22 +1,22 @@
 (ns lang.model.spec-postgres.form-defpartition-test
-  (:require [lang.model.spec-postgres.common :as common]
-            [lang.model.spec-postgres.form-defpartition :as form-defpartition])
+  (:require [lang.model.annex.spec-postgres.common :as common]
+            [lang.model.annex.spec-postgres.form-defpartition :as form-defpartition])
   (:use code.test))
 
-^{:refer lang.model.spec-postgres.form-defpartition/pg-partition-name :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-defpartition/pg-partition-name :added "4.1"}
 (fact "constructs partition name"
 
   (form-defpartition/pg-partition-name "table" "val" ["stack"])
   => "table__stack__val")
 
-^{:refer lang.model.spec-postgres.form-defpartition/pg-partition-def :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-defpartition/pg-partition-def :added "4.1"}
 (fact "recursive definition for partition"
 
   (form-defpartition/pg-partition-def 'parent "base" {:use :col :in ["a"]} [] [])
   => '([:create-table :if-not-exists #{"base__a"} :partition-of #{"parent"} :for :values :in (quote ("a"))]))
 
 
-^{:refer lang.model.spec-postgres.form-defpartition/pg-defpartition :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-defpartition/pg-defpartition :added "4.1"}
 (fact "defpartition block"
 
   (form-defpartition/pg-defpartition '(defpartition part [parent] [{:use :col :in ["a"]}]))

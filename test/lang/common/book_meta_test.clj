@@ -1,4 +1,4 @@
-(ns lang.base.book-meta-test
+(ns lang.common.book-meta-test
   (:require [lang.base.book-meta :refer :all]
             [lang.base.util :as ut]
             [std.lib.template :as template])

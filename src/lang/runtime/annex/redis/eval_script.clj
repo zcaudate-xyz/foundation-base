@@ -1,7 +1,7 @@
-(ns lang.runtime.redis.eval-script
+(ns lang.runtime.annex.redis.eval-script
   (:require [lib.redis.script :as script]
             [lang.runtime.basic.impl.process-lua :as lua]
-            [lang.runtime.redis.eval-basic :as eval-basic]
+            [lang.runtime.annex.redis.eval-basic :as eval-basic]
             [std.concurrent :as cc]
             [std.json :as json]
             [lang.core :as l]

@@ -1,6 +1,6 @@
-(ns lang.model.sql.spec-common.form-defenum
+(ns lang.model.annex.sql.spec-common.form-defenum
   (:require [clojure.string :as str]
-            [lang.model.sql.spec-common.common :as common]
+            [lang.model.annex.sql.spec-common.common :as common]
             [lang.base.grammar-spec :as grammar-spec]))
 
 (defn sql-defenum-format

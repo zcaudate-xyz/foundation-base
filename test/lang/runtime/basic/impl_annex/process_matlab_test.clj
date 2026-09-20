@@ -1,5 +1,5 @@
 (ns lang.runtime.basic.impl-annex.process-matlab-test
-  (:require [lang.runtime.basic.impl-annex.process-matlab :refer :all]
+  (:require [lang.runtime.annex.basic.impl.process-matlab :refer :all]
             [std.lib.env :as env]
             [lang.core :as l])
   (:use code.test))
@@ -12,7 +12,7 @@
 (l/script- :matlab
   {:runtime :oneshot :test-mode true})
 
-^{:refer lang.runtime.basic.impl-annex.process-matlab/CANARY :adopt true :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-matlab/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE matlab code"
 
   (!.mat (+ 1 2 3 4))
@@ -36,19 +36,19 @@
   (!.mat (mean [1 2 3 4]))
   => 2.5)
 
-^{:refer lang.runtime.basic.impl-annex.process-matlab/default-oneshot-wrap  :adopt true :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-matlab/default-oneshot-wrap  :adopt true :added "4.0"}
 (fact "creates the oneshot form"
 
   (default-oneshot-wrap "1 + 2")
   => string?)
 
-^{:refer lang.runtime.basic.impl-annex.process-matlab/default-basic-client  :adopt true :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-matlab/default-basic-client  :adopt true :added "4.0"}
 (fact "creates the basic client form"
 
   (default-basic-client 19000)
   => string?)
 
-^{:refer lang.runtime.basic.impl-annex.process-matlab/default-oneshot-trim :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-matlab/default-oneshot-trim :added "4.0"}
 (fact "trim for oneshot"
 
   (default-oneshot-trim "{\"type\":\"data\",\"return\":\"number\",\"value\":10}")

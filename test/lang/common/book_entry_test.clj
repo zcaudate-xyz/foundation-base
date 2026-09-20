@@ -1,4 +1,4 @@
-(ns lang.base.book-entry-test
+(ns lang.common.book-entry-test
   (:require [lang.base.book-entry :refer :all])
   (:use code.test))
 

@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-r
+(ns lang.runtime.annex.basic.impl.process-r
   (:require [clojure.string]
             [lang.runtime.basic.type-basic :as basic]
             [lang.runtime.basic.type-common :as common]

@@ -1,12 +1,12 @@
 (ns lang.runtime.blender-test
-  (:require [lang.runtime.blender.impl :as impl]
+  (:require [lang.runtime.annex.blender.impl :as impl]
             [std.lib.env :as env])
   (:use code.test))
 
 (fact:global {:skip (not (or (env/program-exists? "blender")
                               (env/program-exists? "docker")))})
 
-^{:refer lang.runtime.blender.impl/blender :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/blender :added "4.1"}
 (fact "starts and stops a blender runtime"
   (let [rt (impl/blender {})]
     [(boolean rt)
@@ -15,7 +15,7 @@
          true)])
   => [true true true])
 
-^{:refer lang.runtime.blender.impl/raw-eval-blender :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/raw-eval-blender :added "4.1"}
 (fact "evaluates python in blender"
   (let [rt (impl/blender {})]
     (try

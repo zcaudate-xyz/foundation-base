@@ -137,7 +137,7 @@
      (boolean (re-find #"instanceof Promise" out))])
   => [true true true true true true])
 
-^{:refer lang.model.spec-xtalk.fn-dart/dart-tf-x-promise :added "4.1"}
+^{:refer lang.model.builtin.spec-dart.xtalk-dart/dart-tf-x-promise :added "4.1"}
 (fact "dart xtalk promise ops emit native future chains"
   (let [out (l/emit-as :dart ['(do (x:promise thunk)
                                    (x:promise-then promise onValue)

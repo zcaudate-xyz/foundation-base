@@ -5,7 +5,7 @@
             [lang.core.script :as script]
             [lang.model.annex.spec-lisp-common :as common]
             [lang.model.annex.spec-xtalk]
-            [lang.model.annex.spec-xtalk.fn-scheme :as fn]
+            [lang.model.annex.spec-scheme.xtalk-scheme :as fn]
             [std.lib.collection :as collection]))
 
 (defn scheme-tf-break

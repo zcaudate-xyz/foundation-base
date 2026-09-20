@@ -1,4 +1,4 @@
-(ns lang.runtime.neovim.impl
+(ns lang.runtime.annex.neovim.impl
   (:require [std.json :as json]
             [std.lib.component :as component]
             [std.lib.foundation :as f]

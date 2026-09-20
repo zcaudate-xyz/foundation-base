@@ -8,7 +8,7 @@
              [lang.runtime.basic.type-websocket :as websocket]
              [lang.core.impl :as impl]
              [lang.core.runtime :as rt]
-             [lang.model.spec-lua :as spec]
+             [lang.model.builtin.spec-lua :as spec]
              [std.lib.env :as env]
              [std.lib.os :as os]
              [xt.lang.common-lib :as lib]))

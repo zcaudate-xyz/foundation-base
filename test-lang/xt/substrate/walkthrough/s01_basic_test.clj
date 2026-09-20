@@ -1,4 +1,4 @@
-(ns xt.substrate.s01-basic-test
+(ns xt.substrate.walkthrough.s01-basic-test
   (:use code.test)
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))

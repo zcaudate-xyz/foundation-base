@@ -1,4 +1,4 @@
-(ns lang.model.builtin.spec-xtalk.fn-dart
+(ns lang.model.builtin.spec-dart.xtalk-dart
   (:require [std.lib.collection :as collection]
             [std.lib.template :as template]))
 

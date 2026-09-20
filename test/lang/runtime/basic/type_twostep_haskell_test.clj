@@ -1,10 +1,10 @@
 (ns lang.runtime.basic.type-twostep-haskell-test
   (:use code.test)
   (:require [std.lib.env :as env]
-            [lang.runtime.basic.impl-annex.process-haskell]
+            [lang.runtime.annex.basic.impl.process-haskell]
             [lang.core :as l]))
 
-(do lang.runtime.basic.impl-annex.process-haskell/+haskell-twostep+)
+(do lang.runtime.annex.basic.impl.process-haskell/+haskell-twostep+)
 
 (l/script- :haskell
   {:runtime :twostep :test-mode true})

@@ -1,5 +1,5 @@
 (ns postgres.core.impl-insert
-  (:require [lang.model.spec-postgres.common-tracker :as tracker]
+  (:require [lang.model.annex.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [lang.core :as l]
             [lang.base.emit-preprocess :as preprocess] [lang.base.preprocess-base :as preprocess-base]

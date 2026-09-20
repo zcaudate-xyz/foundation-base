@@ -4,7 +4,7 @@
             [lang.base.emit-helper :as helper]
             [lang.base.grammar :as grammar]
             [lang.base.util :as ut]
-            [lang.model.spec-lua :as lua]
+            [lang.model.builtin.spec-lua :as lua]
             [std.lib.env :as env])
   (:use code.test))
 

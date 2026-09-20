@@ -1,7 +1,7 @@
 (ns lang.model.spec-xtalk-optional-test
   (:require [lang.core :as l]
             [lang.model.spec-xtalk.fn-js :refer [js-tf-x-str-substring]]
-            [lang.model.spec-xtalk.fn-python :refer [python-tf-x-str-substring]])
+            [lang.model.builtin.spec-python.xtalk-python :refer [python-tf-x-str-substring]])
   (:use code.test))
 
 (fact "js substring emits open-ended ranges"

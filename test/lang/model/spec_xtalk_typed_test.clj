@@ -8,7 +8,7 @@
    [lang.typed.xtalk-lower :as lower]
    [lang.typed.xtalk-ops :as ops]
    [lang.typed.xtalk-parse :as parse]
-   [lang.model.spec-js.ts :as ts])
+   [lang.model.builtin.spec-js.ts :as ts])
   (:use code.test))
 
 (fact "normalizes xtalk type forms"

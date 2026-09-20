@@ -1,6 +1,6 @@
-(ns lang.runtime.godot
+(ns lang.runtime.annex.godot
   (:require [lib.godot.bench :as bench]
-            [lang.runtime.godot.client :as client]
+            [lang.runtime.annex.godot.client :as client]
             [std.lib.foundation :as f]))
 
 (f/intern-in client/client:create

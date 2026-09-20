@@ -1,6 +1,6 @@
-(ns lang.runtime.haxe
+(ns lang.runtime.annex.haxe
   (:require [std.lib :as h]
-            [lang.runtime.haxe.impl :as impl])
+            [lang.runtime.annex.haxe.impl :as impl])
   (:refer-clojure :exclude [eval]))
 
 (h/intern-in

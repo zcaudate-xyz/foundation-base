@@ -1,7 +1,7 @@
 (ns lang.model.spec-dart.rewrite-test
   (:require [lang.core :as l]
-             [lang.model.spec-dart :as dart]
-             [lang.model.spec-dart.rewrite :as rewrite]
+             [lang.model.builtin.spec-dart :as dart]
+             [lang.model.builtin.spec-dart.rewrite :as rewrite]
              [xt.lang.common-data]
              [std.string :as str])
   (:use code.test))
@@ -194,17 +194,17 @@
      (str/includes? out "out.add(\"id\")")])
   => [true true])
 
-^{:refer lang.model.spec-dart.rewrite/dart-rewrite-conditional-expression :added "4.1"}
+^{:refer lang.model.builtin.spec-dart.rewrite/dart-rewrite-conditional-expression :added "4.1"}
 (fact "rewrites dart conditional expressions")
 
-^{:refer lang.model.spec-dart.rewrite/dart-rewrite-expression :added "4.1"}
+^{:refer lang.model.builtin.spec-dart.rewrite/dart-rewrite-expression :added "4.1"}
 (fact "rewrites dart expressions")
 
-^{:refer lang.model.spec-dart.rewrite/dart-rewrite-statement :added "4.1"}
+^{:refer lang.model.builtin.spec-dart.rewrite/dart-rewrite-statement :added "4.1"}
 (fact "rewrites dart statements")
 
-^{:refer lang.model.spec-dart.rewrite/dart-rewrite-statements :added "4.1"}
+^{:refer lang.model.builtin.spec-dart.rewrite/dart-rewrite-statements :added "4.1"}
 (fact "rewrites dart statement blocks")
 
-^{:refer lang.model.spec-dart.rewrite/dart-rewrite-stage :added "4.1"}
+^{:refer lang.model.builtin.spec-dart.rewrite/dart-rewrite-stage :added "4.1"}
 (fact "rewrites dart stages")

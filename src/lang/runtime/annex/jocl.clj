@@ -1,6 +1,6 @@
-(ns lang.runtime.jocl
+(ns lang.runtime.annex.jocl
   (:refer-clojure :exclude [meta to-array])
-  (:require [lang.runtime.jocl.env :as jocl-env]
+  (:require [lang.runtime.annex.jocl.env :as jocl-env]
             [lang.core.registry :as reg]
             [lang.core.runtime :as default]
             [std.lib.foundation :as h]))
@@ -25,11 +25,11 @@
         (h/intern-var *ns* sym var)))))
 
 (when +available?+
-  (import-jocl-ns 'lang.runtime.jocl.common)
-  (import-jocl-ns 'lang.runtime.jocl.meta)
-  (import-jocl-ns 'lang.runtime.jocl.exec)
-  (import-jocl-ns 'lang.runtime.jocl.type)
-  (import-jocl-ns 'lang.runtime.jocl.runtime))
+  (import-jocl-ns 'lang.runtime.annex.jocl.common)
+  (import-jocl-ns 'lang.runtime.annex.jocl.meta)
+  (import-jocl-ns 'lang.runtime.annex.jocl.exec)
+  (import-jocl-ns 'lang.runtime.annex.jocl.type)
+  (import-jocl-ns 'lang.runtime.annex.jocl.runtime))
 
 (when-not +available?+
   ;; Install a no-op :c/:jocl runtime type so that `(l/script- :c

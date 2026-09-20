@@ -1,4 +1,4 @@
-(ns lang.runtime.postgres.base.client-impl
+(ns lang.runtime.annex.postgres.base.client-impl
   (:require [clojure.string :as str]
             [lib.jdbc :as jdbc]
             [lib.postgres :as libpg]
@@ -8,7 +8,7 @@
             [lang.core.impl :as impl]
             [lang.core.library :as lib]
             [lang.core.pointer :as ptr]
-            [lang.model.spec-postgres.common :as pgcommon]
+            [lang.model.annex.spec-postgres.common :as pgcommon]
             [lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.context.pointer]

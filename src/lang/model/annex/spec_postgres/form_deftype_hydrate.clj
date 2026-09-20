@@ -1,6 +1,6 @@
 (ns lang.model.annex.spec-postgres.form-deftype-hydrate
   (:require [lang.model.annex.spec-postgres.common :as common]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [lang.base.book :as book]
             [lang.core.library-snapshot :as snap]
             [lang.base.util :as ut]

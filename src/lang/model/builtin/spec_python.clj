@@ -14,7 +14,7 @@
             [lang.base.util :as ut]
             [lang.model.builtin.spec-xtalk]
             [lang.model.builtin.spec-python.rewrite :as rewrite]
-            [lang.model.builtin.spec-xtalk.fn-python :as fn]
+            [lang.model.builtin.spec-python.xtalk-python :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template])

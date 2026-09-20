@@ -1,4 +1,4 @@
-(ns matlab.core.builtin
+(ns octave.core.builtin
   "Generated outline of GNU Matlab 8.4 builtins with signatures, from /usr/share/matlab/8.4.0/etc/doc-cache."
   (:require [lang.core :as l]
             [std.lib.foundation :as f]))

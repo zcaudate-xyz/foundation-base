@@ -1,7 +1,7 @@
 (ns lang.model.annex.spec-postgres.form-deftype
   (:require [clojure.string]
             [lang.model.annex.spec-postgres.common :as common]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [lang.model.annex.spec-postgres.common-tracker :as tracker]
             [lang.model.annex.spec-postgres.form-defpartition :as form-defpartition]
             [lang.base.book :as book]

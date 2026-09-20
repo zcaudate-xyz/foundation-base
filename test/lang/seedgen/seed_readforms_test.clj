@@ -1,4 +1,4 @@
-(ns lang.seedgen.form-parse-test
+(ns lang.seedgen.seed-readforms-test
   (:use code.test)
   (:require [code.project :as project]
             [std.block.base :as block]

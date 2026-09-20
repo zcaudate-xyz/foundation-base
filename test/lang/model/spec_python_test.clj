@@ -1,22 +1,22 @@
 (ns lang.model.spec-python-test
   (:require [clojure.string :as string]
             [lang.core :as l]
-            [lang.model.spec-python :as py]
+            [lang.model.builtin.spec-python :as py]
             [lang.typed.xtalk-infer :as infer]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer lang.model.spec-python/python-emit-nonlocal :added "4.1"}
+^{:refer lang.model.builtin.spec-python/python-emit-nonlocal :added "4.1"}
 (fact "emits python nonlocal statements")
 
-^{:refer lang.model.spec-python/python-defn- :added "4.0"}
+^{:refer lang.model.builtin.spec-python/python-defn- :added "4.0"}
 (fact "hidden function without decorators"
 
   (l/emit-as
    :python '[(defn- hello [] (return 1))])
   => "def hello():\n  return 1")
 
-^{:refer lang.model.spec-python/python-defn :added "4.0"}
+^{:refer lang.model.builtin.spec-python/python-defn :added "4.0"}
 (fact "creates a defn function for python"
 
   (l/emit-as
@@ -33,7 +33,7 @@
       "def hello():"
       "  return 1"))
 
-^{:refer lang.model.spec-python/python-fn :added "4.1"}
+^{:refer lang.model.builtin.spec-python/python-fn :added "4.1"}
 (fact "lifts callbacks that lower to Python assignment statements"
 
   (let [out (l/emit-as
@@ -46,7 +46,7 @@
      (not (boolean (re-find #"lambda elem,props : elem\[\"props\"\] = props" out)))])
   => [true true true true])
 
-^{:refer lang.model.spec-python/python-fn :added "4.1"
+^{:refer lang.model.builtin.spec-python/python-fn :added "4.1"
   :id test-python-fn-direct-assignment}
 (fact "lifts callbacks that use direct assignment"
 
@@ -61,7 +61,7 @@
      (not (boolean (re-find #"lambda link_id : removed = link_id" out)))])
   => [true true true true])
 
-^{:refer lang.model.spec-python/python-fn :added "4.1"
+^{:refer lang.model.builtin.spec-python/python-fn :added "4.1"
   :id test-python-fn-invoke-argument}
 (fact "lifts callbacks passed directly as invoke arguments"
   (let [out (l/emit-as
@@ -75,7 +75,7 @@
      (not (boolean (re-find #"use_callback\(lambda link_id : removed = link_id\)" out)))])
   => [true true true true])
 
-^{:refer lang.model.spec-python/python-dot :added "4.1"}
+^{:refer lang.model.builtin.spec-python/python-dot :added "4.1"}
 (fact "rewrites JS-style array length lookups to len"
   [(l/emit-as
     :python '[(. xs ["length"])])
@@ -83,7 +83,7 @@
     :python '[(. obj ["key"])])]
   => ["len(xs)" "obj.get(\"key\")"])
 
-^{:refer lang.model.spec-xtalk.fn-python/python-tf-x-get-key :added "4.1"}
+^{:refer lang.model.builtin.spec-python.xtalk-python/python-tf-x-get-key :added "4.1"}
 (fact "preserves falsey defaults for canonical key reads"
   (let [out (l/emit-as
               :python '[(x:get-key obj "key" false)])]
@@ -108,7 +108,7 @@
                        i {:kind :primitive :name :xt/int}}}})]
   => ["obj.get(key)" "arr[i]"])
 
-^{:refer lang.model.spec-python/python-defclass :added "4.0"}
+^{:refer lang.model.builtin.spec-python/python-defclass :added "4.0"}
 (fact "emits a defclass template for python"
 
   (l/emit-as
@@ -152,7 +152,7 @@
      (boolean (re-find #"return \{\"FINISHED\"\}" out))])
   => [true true true true true true true true])
 
-^{:refer lang.model.spec-python/python-var :added "4.0"}
+^{:refer lang.model.builtin.spec-python/python-var :added "4.0"}
 (fact "var -> fn.inner shorthand"
 
   (py/python-var '(var hello (fn [x] x)))
@@ -164,7 +164,7 @@
   (py/python-var '(var hello))
   => '(var* hello := nil))
 
-^{:refer lang.model.spec-python/tf-for-object :added "4.0"}
+^{:refer lang.model.builtin.spec-python/tf-for-object :added "4.0"}
 (fact "for object loop"
 
   (py/tf-for-object '(for:object [[k v] arr]
@@ -172,7 +172,7 @@
 
   => '(for [[k v] :in (. arr (items))] [k v]))
 
-^{:refer lang.model.spec-python/tf-for-array :added "4.0"}
+^{:refer lang.model.builtin.spec-python/tf-for-array :added "4.0"}
 (fact  "for array loop"
 
   (py/tf-for-array '(for:array [[i e] arr]
@@ -183,21 +183,21 @@
                                e))
   => '(for [e :in arr] e))
 
-^{:refer lang.model.spec-python/tf-for-iter :added "4.0"}
+^{:refer lang.model.builtin.spec-python/tf-for-iter :added "4.0"}
 (fact "for iter loop"
 
   (py/tf-for-array '(for:iter [e it]
                                e))
   => '(for [e :in it] e))
 
-^{:refer lang.model.spec-python/tf-for-index :added "4.0"}
+^{:refer lang.model.builtin.spec-python/tf-for-index :added "4.0"}
 (fact "for index transform"
 
   (py/tf-for-index '(for:index [i [0 2 10]]
                                i))
   => '(for [i :in (range 0 2 10)] i))
 
-^{:refer lang.model.spec-python/tf-for-return :added "4.0"}
+^{:refer lang.model.builtin.spec-python/tf-for-return :added "4.0"}
 (fact "for return transform"
 
   (py/tf-for-return '(for:return [[ok err] (call)]
@@ -208,20 +208,20 @@
            (catch [Exception :as err]
                (return err))))
 
-^{:refer lang.model.spec-python/python-tf-prototype-create :added "4.1"}
+^{:refer lang.model.builtin.spec-python/python-tf-prototype-create :added "4.1"}
 (fact "creates python prototypes")
 
-^{:refer lang.model.spec-python/python-tf-prototype-get :added "4.1"}
+^{:refer lang.model.builtin.spec-python/python-tf-prototype-get :added "4.1"}
 (fact "gets python prototypes")
 
-^{:refer lang.model.spec-python/python-tf-prototype-set :added "4.1"}
+^{:refer lang.model.builtin.spec-python/python-tf-prototype-set :added "4.1"}
 (fact "sets python prototypes")
 
-^{:refer lang.model.spec-python/python-tf-prototype-method :added "4.1"}
+^{:refer lang.model.builtin.spec-python/python-tf-prototype-method :added "4.1"}
 (fact "calls python prototype methods")
 
 
-^{:refer lang.model.spec-python/python-emit-input-rest :added "4.1"}
+^{:refer lang.model.builtin.spec-python/python-emit-input-rest :added "4.1"}
 (fact "emits a Python variadic parameter"
   (with-redefs [lang.base.emit-common/*emit-fn*
                 (fn [symbol _ _] (name symbol))]

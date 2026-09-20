@@ -1,6 +1,6 @@
 (ns play.go-001-xtalk-user-directory.build
   (:use [code.test :exclude [-main]])
-  (:require [lang.model.spec-go.typed :as go-typed]
+  (:require [lang.model.builtin.spec-go.typed :as go-typed]
             [lang.typed.xtalk-analysis :as xtalk-analysis]
             [std.make :as make :refer [def.make]]
             [play.go-001-xtalk-user-directory.main :as main]))

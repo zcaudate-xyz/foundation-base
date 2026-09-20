@@ -1,7 +1,7 @@
 (ns postgres.core.impl-test
   (:require [postgres.core :as pg]
-            [lang.runtime.postgres.base.application :as app]
-            [lang.model.spec-postgres.common-tracker :as tracker]
+            [lang.runtime.annex.postgres.base.application :as app]
+            [lang.model.annex.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl :as impl]
             [postgres.core.impl-main :as main]
             [postgres.sample.scratch-v1 :as scratch]

@@ -1,16 +1,16 @@
 (ns lang.model.spec-postgres.form-defrole-test
-  (:require [lang.model.spec-postgres.common :as common]
-            [lang.model.spec-postgres.form-defrole :refer :all]
+  (:require [lang.model.annex.spec-postgres.common :as common]
+            [lang.model.annex.spec-postgres.form-defrole :refer :all]
             [lang.core :as l])
   (:use code.test))
 
-^{:refer lang.model.spec-postgres.form-defrole/pg-defrole-access :added "4.0"}
+^{:refer lang.model.annex.spec-postgres.form-defrole/pg-defrole-access :added "4.0"}
 (fact "creates defrole access form"
 
   (pg-defrole-access {:select ['table]} 'role {})
   => vector?)
 
-^{:refer lang.model.spec-postgres.form-defrole/pg-defrole :added "4.0"}
+^{:refer lang.model.annex.spec-postgres.form-defrole/pg-defrole :added "4.0"}
 (fact "creates defrole form"
 
   (with-redefs [l/macro-opts (fn [] {})

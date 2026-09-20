@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-circom
+(ns lang.runtime.annex.basic.impl.process-circom
   (:require [lang.runtime.basic.type-common :as common]
              [lang.runtime.basic.type-twostep :as twostep]
              [lang.runtime.basic.type-verify :as type-verify]

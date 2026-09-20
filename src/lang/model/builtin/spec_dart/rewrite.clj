@@ -1,4 +1,4 @@
-(ns lang.model.annex.spec-dart.rewrite
+(ns lang.model.builtin.spec-dart.rewrite
   (:require [lang.core.rewrite.conditional :as condrw]
               [lang.core.rewrite.common :as rewrite-common]
               [lang.core.rewrite.hoist :as hoist]

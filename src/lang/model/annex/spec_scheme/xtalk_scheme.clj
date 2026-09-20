@@ -1,4 +1,4 @@
-(ns lang.model.builtin.spec-xtalk.fn-scheme
+(ns lang.model.annex.spec-scheme.xtalk-scheme
   (:require [std.lib.collection :as collection]
             [std.lib.template :as template]))
 

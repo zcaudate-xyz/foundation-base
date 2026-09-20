@@ -9,7 +9,7 @@
            (str/starts-with? (namespace sym) "rt.postgres."))
     (symbol (str/replace (namespace sym)
                          #"^rt\.postgres\."
-                         "lang.runtime.postgres.")
+                         "lang.runtime.annex.postgres.")
             (name sym))
     sym))
 

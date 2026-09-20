@@ -1,6 +1,6 @@
 (ns lang.core.script-macro-test
   (:require [clojure.string]
-             [lang.model.spec-postgres :as pg]
+             [lang.model.annex.spec-postgres :as pg]
              [lang.base.book :as book]
              [lang.base.book-module :as module]
              [lang.core.impl :as impl]
@@ -10,9 +10,9 @@
              [lang.core.pointer :as ptr]
              [lang.core.runtime :as rt]
              [lang.core.script-macro :as macro]
-             [lang.model.spec-js :as js]
-             [lang.model.spec-lua :as lua]
-             [lang.model.spec-xtalk :as xtalk]
+             [lang.model.builtin.spec-js :as js]
+             [lang.model.builtin.spec-lua :as lua]
+             [lang.model.builtin.spec-xtalk :as xtalk]
              [std.lib.collection :as collection])
   (:use code.test))
 

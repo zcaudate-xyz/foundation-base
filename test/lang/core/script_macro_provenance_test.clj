@@ -5,7 +5,7 @@
             [lang.core.pointer :as ptr]
             [lang.core.runtime :as rt]
             [lang.core.script-macro :as macro]
-            [lang.model.spec-xtalk :as xtalk])
+            [lang.model.builtin.spec-xtalk :as xtalk])
   (:use code.test))
 
 (rt/install-lang! :xtalk)

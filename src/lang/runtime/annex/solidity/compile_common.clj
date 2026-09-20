@@ -1,5 +1,5 @@
-(ns lang.runtime.solidity.compile-common
-  (:require [lang.runtime.solidity.env-hardhat :as env-hardhat]
+(ns lang.runtime.annex.solidity.compile-common
+  (:require [lang.runtime.annex.solidity.env-hardhat :as env-hardhat]
             [lang.core :as l]
             [std.lib.impl :as impl]
             [std.lib.network :as network]))

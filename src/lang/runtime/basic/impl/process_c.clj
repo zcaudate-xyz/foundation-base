@@ -8,7 +8,7 @@
             [lang.core.pointer :as ptr]
             [lang.core.runtime :as rt]
             [lang.base.util :as ut]
-            [lang.model.spec-c :as spec]
+            [lang.model.builtin.spec-c :as spec]
             [std.lib.collection :as collection]))
 
 (def +program-init+

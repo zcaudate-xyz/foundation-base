@@ -1,6 +1,6 @@
 (ns postgres.core-test
   (:require [postgres.core :as pg]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [lang.core :as l])
   (:use code.test))
 

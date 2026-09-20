@@ -6,7 +6,7 @@
    and emits Haxe-shaped code; the exact syntax is still being tuned."
   (:require [lang.core :as l]
             [haxe.core :as haxe]
-            [lang.runtime.haxe.impl]
+            [lang.runtime.annex.haxe.impl]
             [std.lib.template :as template])
   (:refer-clojure :exclude [eval]))
 
