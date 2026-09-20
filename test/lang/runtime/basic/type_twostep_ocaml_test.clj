@@ -1,10 +1,10 @@
 (ns lang.runtime.basic.type-twostep-ocaml-test
   (:use code.test)
   (:require [std.lib.env :as env]
-            [lang.runtime.basic.impl-annex.process-ocaml]
+            [lang.runtime.annex.basic.impl.process-ocaml]
             [lang.core :as l]))
 
-(do lang.runtime.basic.impl-annex.process-ocaml/+ocaml-twostep+)
+(do lang.runtime.annex.basic.impl.process-ocaml/+ocaml-twostep+)
 
 (l/script- :ocaml
   {:runtime :twostep :test-mode true})

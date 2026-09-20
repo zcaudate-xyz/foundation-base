@@ -1,4 +1,4 @@
-(ns lang.runtime.jocl.type
+(ns lang.runtime.annex.jocl.type
   (:require [std.lib.class :as class]
             [std.lib.foundation :as h]
             [std.lib.bin.buffer :as b])

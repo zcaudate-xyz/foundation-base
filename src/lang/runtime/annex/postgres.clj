@@ -1,9 +1,9 @@
-(ns lang.runtime.postgres
-  (:require [lang.runtime.postgres.base.client :as client]
-            [lang.runtime.postgres.base.client-impl :as client-impl]
+(ns lang.runtime.annex.postgres
+  (:require [lang.runtime.annex.postgres.base.client :as client]
+            [lang.runtime.annex.postgres.base.client-impl :as client-impl]
             [postgres.gen.bind-macro]
             [postgres.entity :as entity]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [postgres.core.addon]
             [postgres.core.builtin]
             [postgres.core.graph]

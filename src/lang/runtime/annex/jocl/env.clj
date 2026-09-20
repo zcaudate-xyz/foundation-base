@@ -1,4 +1,4 @@
-(ns lang.runtime.jocl.env
+(ns lang.runtime.annex.jocl.env
   "Environment helpers for the JOCL runtime.
 
    The functions here deliberately avoid importing `org.jocl.CL` so that

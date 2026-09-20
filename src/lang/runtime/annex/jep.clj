@@ -1,6 +1,6 @@
-(ns lang.runtime.jep
+(ns lang.runtime.annex.jep
   (:require [lang.runtime.basic.impl.process-python :as python]
-            [lang.runtime.jep.bootstrap :as bootstrap]
+            [lang.runtime.annex.jep.bootstrap :as bootstrap]
             [std.concurrent :as cc]
             [lang.core :as l]
             [lang.core.impl :as impl]

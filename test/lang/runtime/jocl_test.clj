@@ -2,8 +2,8 @@
   (:refer-clojure :exclude [meta to-array])
   (:use code.test)
   (:require [lang.core :as l]
-            [lang.runtime.jocl :refer :all]
-            [lang.runtime.jocl.env :as jocl-env]))
+            [lang.runtime.annex.jocl :refer :all]
+            [lang.runtime.annex.jocl.env :as jocl-env]))
 
 ;; Stubs that keep the file loadable when the native OpenCL library is
 ;; not installed.  When OpenCL is present these macros expand to nothing.
@@ -31,7 +31,7 @@
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer lang.runtime.jocl/CANARY :adopt true :added "4.0"
+^{:refer lang.runtime.annex.jocl/CANARY :adopt true :added "4.0"
   :setup [(l/rt:restart :c)]}
 (fact "Basic usage for JOCL"
 

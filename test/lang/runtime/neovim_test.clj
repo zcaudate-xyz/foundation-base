@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [lang.core :as l]
             [lang.core.type-shared :as shared]
-            [lang.runtime.neovim.impl :as impl]
+            [lang.runtime.annex.neovim.impl :as impl]
             [std.lib.env :as env]))
 
 (l/script- :lua
@@ -13,7 +13,7 @@
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer lang.runtime.neovim.impl/neovim :added "4.1"}
+^{:refer lang.runtime.annex.neovim.impl/neovim :added "4.1"}
 (fact "starts and stops a neovim runtime"
 
       (let [rt (impl/neovim {})]
@@ -23,7 +23,7 @@
              true)])
   => [true true true])
 
-^{:refer lang.runtime.neovim.impl/raw-eval-neovim :added "4.1"}
+^{:refer lang.runtime.annex.neovim.impl/raw-eval-neovim :added "4.1"}
 (fact "evaluates lua in neovim"
   (let [rt (impl/neovim {})]
     (try
@@ -42,7 +42,7 @@
       (l/rt:stop :lua)))
   => [6 true])
 
-^{:refer lang.runtime.neovim.impl/neovim-shared :added "4.1"}
+^{:refer lang.runtime.annex.neovim.impl/neovim-shared :added "4.1"}
 (fact "two shared neovim runtimes with the same id share the process"
   (let [rt1 (impl/neovim-shared:create {:id :shared-neovim-test})
         rt2 (impl/neovim-shared:create {:id :shared-neovim-test})]

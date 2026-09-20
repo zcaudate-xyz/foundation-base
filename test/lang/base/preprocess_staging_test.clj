@@ -4,7 +4,7 @@
             [lang.base.emit-prep-lua-test :as prep]
             [lang.base.grammar :as grammar]
             [lang.base.preprocess-staging :refer :all]
-            [lang.model.spec-js :as js]))
+            [lang.model.builtin.spec-js :as js]))
 
 (def +reserved+
   (-> (grammar/build)

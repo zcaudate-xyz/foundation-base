@@ -3,8 +3,8 @@
   (:require [clojure.string :as str]
             [lang.typed :as typed]
             [lang.typed.xtalk-parse :as xtalk-parse]
-            [lang.model.spec-go.typed :as go-typed]
-            [lang.model.spec-js.ts :as ts-typed]))
+            [lang.model.builtin.spec-go.typed :as go-typed]
+            [lang.model.builtin.spec-js.ts :as ts-typed]))
 
 [[:hero {:title "xt examples"
          :subtitle "POCs, xtbench, and generated project examples."

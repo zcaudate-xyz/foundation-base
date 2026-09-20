@@ -1,7 +1,7 @@
 (ns lang.base.emit-template-test
   (:use code.test)
   (:require [lang.base.emit-template :refer :all]
-            [lang.model.spec-js :as js]))
+            [lang.model.builtin.spec-js :as js]))
 
 ^{:refer lang.base.emit-template/entry-reserved :added "4.1"}
 (fact "gets the reserved grammar entry for a code entry"

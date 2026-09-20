@@ -1,6 +1,6 @@
-(ns lang.runtime.neovim
+(ns lang.runtime.annex.neovim
   (:require [std.lib :as h]
-            [lang.runtime.neovim.impl :as impl])
+            [lang.runtime.annex.neovim.impl :as impl])
   (:refer-clojure :exclude [eval]))
 
 (h/intern-in

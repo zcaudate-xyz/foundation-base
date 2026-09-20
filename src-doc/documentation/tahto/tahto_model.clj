@@ -1,7 +1,7 @@
 lang/lang_model.clj:1:(ns documentation.lang-model
   (:require [lang.core :as l]
-            [lang.model.spec-js :as js]
-            [lang.model.spec-lua :as lua])
+            [lang.model.builtin.spec-js :as js]
+            [lang.model.builtin.spec-lua :as lua])
   (:use code.test))
 
 [[:hero {:title "lang.model"

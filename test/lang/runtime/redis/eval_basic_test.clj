@@ -1,7 +1,7 @@
 (ns lang.runtime.redis.eval-basic-test
   (:require [lib.redis.bench :as bench]
              [lib.redis.script :as script]
-             [lang.runtime.redis.eval-basic :refer :all]
+             [lang.runtime.annex.redis.eval-basic :refer :all]
              [lang.core :as l]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-lib :as k])
@@ -17,7 +17,7 @@
   :teardown [(bench/stop-redis-array [17001])
              (l/rt:stop)]})
 
-^{:refer lang.runtime.redis.eval-basic/rt-exception :added "4.0"}
+^{:refer lang.runtime.annex.redis.eval-basic/rt-exception :added "4.0"}
 (fact "processes an exception"
   (try
     (rt-exception (Exception. "ERR Error running script (user_script:1)") {} "body")
@@ -25,21 +25,21 @@
       (.getMessage e)))
   => string?)
 
-^{:refer lang.runtime.redis.eval-basic/redis-raw-eval :added "4.0"}
+^{:refer lang.runtime.annex.redis.eval-basic/redis-raw-eval :added "4.0"}
 (fact "conducts a raw ewal"
   (with-redefs [script/script:eval (fn [& _] 3)]
     (redis-raw-eval (l/rt :lua)
                     "return 1 + 2"))
   => 3)
 
-^{:refer lang.runtime.redis.eval-basic/redis-body-transform :added "4.0"}
+^{:refer lang.runtime.annex.redis.eval-basic/redis-body-transform :added "4.0"}
 (fact "transform body into output form"
 
   (redis-body-transform '(+ 1 2 3)
                         {})
   => '(return (return-wrap (fn [] (return (+ 1 2 3))))))
 
-^{:refer lang.runtime.redis.eval-basic/redis-invoke-ptr-basic :added "4.0"}
+^{:refer lang.runtime.annex.redis.eval-basic/redis-invoke-ptr-basic :added "4.0"}
 (fact "invokes pointer for redis eval"
   (with-redefs [redis-raw-eval (fn [_ _] [2 3 4 5 6])]
     (redis-invoke-ptr-basic

@@ -1,7 +1,7 @@
 (ns postgres.core.impl-base
-  (:require [lang.model.spec-postgres.common :as common]
-            [lang.model.spec-postgres.form-deftype-hydrate :as form-deftype-hydrate]
-            [lang.runtime.postgres.base.application :as app]
+  (:require [lang.model.annex.spec-postgres.common :as common]
+            [lang.model.annex.spec-postgres.form-deftype-hydrate :as form-deftype-hydrate]
+            [lang.runtime.annex.postgres.base.application :as app]
             [lang.core :as l]
             [lang.base.emit-common :as emit-common]
             [lang.base.emit-data :as emit-data]

@@ -1,12 +1,12 @@
 (ns lang.model.spec-js.meta-test
   (:require [lang.core :as l]
-            [lang.model.spec-js.meta :refer :all])
+            [lang.model.builtin.spec-js.meta :refer :all])
   (:use code.test))
 
-^{:refer lang.model.spec-js.meta/js-module-import-async :added "4.0"}
+^{:refer lang.model.builtin.spec-js.meta/js-module-import-async :added "4.0"}
 (fact "helper for import")
 
-^{:refer lang.model.spec-js.meta/js-module-import :added "4.0"}
+^{:refer lang.model.builtin.spec-js.meta/js-module-import :added "4.0"}
 (fact "outputs the js module import from"
 
   (js-module-import 'react '{:as React} {})
@@ -29,7 +29,7 @@
                              :refer [hello world]} {:emit {:lang/format :global}})
   => '(Object.defineProperty !:G "React" {:value (require "react")}))
 
-^{:refer lang.model.spec-js.meta/js-module-import :added "4.1" :id scoped-package-import}
+^{:refer lang.model.builtin.spec-js.meta/js-module-import :added "4.1" :id scoped-package-import}
 (fact "keeps scoped npm links as bare package specifiers"
   (js-module-import
    "@xtalk/lang/common-data"
@@ -37,7 +37,7 @@
    {:emit {:import :link :lang/format :commonjs}})
   => '(const xtd := (require "@xtalk/lang/common-data.js")))
 
-^{:refer lang.model.spec-js.meta/js-module-export :added "4.0"}
+^{:refer lang.model.builtin.spec-js.meta/js-module-export :added "4.0"}
 (fact "outputs the js module export form"
 
   (js-module-export '{} {:emit {:lang/export true}})
@@ -46,7 +46,7 @@
   (js-module-export '{} {:emit {:lang/format :commonjs}})
   => '(:= module.exports (tab)))
 
-^{:refer lang.model.spec-js.meta/js-module-link :added "4.0"}
+^{:refer lang.model.builtin.spec-js.meta/js-module-link :added "4.0"}
 (fact "gets the relative js based module"
 
   (js-module-link 'kmi.common {:base 'kmi.hello})
@@ -65,5 +65,5 @@
                     {:base 'kmi.other.main :target "src"})
   => "../../js/core")
 
-^{:refer lang.model.spec-js.meta/js-transform-entry :added "4.0"}
+^{:refer lang.model.builtin.spec-js.meta/js-transform-entry :added "4.0"}
 (fact "function for transforming :type :module entries")

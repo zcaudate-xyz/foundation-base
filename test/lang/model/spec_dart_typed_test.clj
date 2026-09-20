@@ -1,9 +1,9 @@
 (ns lang.model.spec-dart-typed-test
   (:require [clojure.string :as str]
-            [lang.model.spec-dart.typed :as dart-typed])
+            [lang.model.builtin.spec-dart.typed :as dart-typed])
   (:use code.test))
 
-^{:refer lang.model.spec-dart.typed/emit-dart-type :added "4.1"}
+^{:refer lang.model.builtin.spec-dart.typed/emit-dart-type :added "4.1"}
 (fact "maps xtalk primitive and container types to dart"
   [(dart-typed/emit-dart-type {:kind :primitive :name :xt/str} nil)
    (dart-typed/emit-dart-type {:kind :array
@@ -15,7 +15,7 @@
                                :item {:kind :named :name 'sample.user/User}} 'sample.user)]
   => ["String" "List<int>" "Map<String, double>" "User?"])
 
-^{:refer lang.model.spec-dart.typed/emit-analysis-declarations :added "4.1"}
+^{:refer lang.model.builtin.spec-dart.typed/emit-analysis-declarations :added "4.1"}
 (fact "emits spec/function/value declarations in dart syntax"
   (dart-typed/emit-analysis-declarations
    {:specs [{:ns "sample.user"

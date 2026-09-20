@@ -1,4 +1,4 @@
-(ns lang.runtime.godot.client
+(ns lang.runtime.annex.godot.client
   (:require [clojure.string :as str]
             [std.json :as json]
             [std.lib.component :as component]
@@ -9,7 +9,7 @@
             [lang.core.pointer :as ptr]
             [lang.core.runtime :as rt]
             [lang.core.type-shared :as shared]
-            [lang.runtime.basic.impl.process-gdscript :as gdscript]
+            [lang.runtime.annex.basic.impl.process-gdscript :as gdscript]
             [lang.runtime.basic.type-common :as common]
             [lang.base.book :as book]
             [lib.godot.bench :as bench])

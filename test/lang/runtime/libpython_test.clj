@@ -1,6 +1,6 @@
 (ns lang.runtime.libpython-test
   (:require [libpython-clj2.python :as python]
-            [lang.runtime.libpython :as lp]
+            [lang.runtime.annex.libpython :as lp]
             [std.concurrent :as cc]
             [lang.core :as l])
   (:use code.test))
@@ -13,12 +13,12 @@
   [x]
   (return (+ x 10)))
 
-^{:refer lang.runtime.libpython/TESTING :added "3.0"}
+^{:refer lang.runtime.annex.libpython/TESTING :added "3.0"}
 (fact "performs an exec expression"
   ;; Skips actual python exec
   )
 
-^{:refer lang.runtime.libpython/eval-raw :added "3.0"}
+^{:refer lang.runtime.annex.libpython/eval-raw :added "3.0"}
 (fact "performs an exec expression"
   (with-redefs [python/initialize! (fn [] nil)
                 python/run-simple-string (fn [s] {:globals {"OUT" 2}})]
@@ -26,7 +26,7 @@
             [:globals "OUT"]))
   => 2)
 
-^{:refer lang.runtime.libpython/eval-libpython :added "4.0"}
+^{:refer lang.runtime.annex.libpython/eval-libpython :added "4.0"}
 (fact "evals body in the runtime"
   (with-redefs [python/initialize! (fn [] nil)
                 python/run-simple-string (fn [s] {:globals {"OUT" 2}})]
@@ -34,33 +34,33 @@
                        "OUT = 1 + 1"))
   => 2)
 
-^{:refer lang.runtime.libpython/invoke-libpython :added "4.0"}
+^{:refer lang.runtime.annex.libpython/invoke-libpython :added "4.0"}
 (fact "invokes a pointer in the runtime"
   ;; delegates
   )
 
-^{:refer lang.runtime.libpython/start-libpython :added "3.0"}
+^{:refer lang.runtime.annex.libpython/start-libpython :added "3.0"}
 (fact "starts the libpython runtime"
   (with-redefs [python/initialize! (fn [] nil)]
     (lp/start-libpython {}))
   => {})
 
-^{:refer lang.runtime.libpython/stop-libpython :added "3.0"}
+^{:refer lang.runtime.annex.libpython/stop-libpython :added "3.0"}
 (fact "stops the libpython runtime"
   (lp/stop-libpython {}) => {})
 
-^{:refer lang.runtime.libpython/rt-libpython:create :added "4.0"}
+^{:refer lang.runtime.annex.libpython/rt-libpython:create :added "4.0"}
 (fact "creates a libpython runtime"
   (lp/rt-libpython:create {:lang :js})
   => map?)
 
-^{:refer lang.runtime.libpython/rt-libpython :added "4.0"}
+^{:refer lang.runtime.annex.libpython/rt-libpython :added "4.0"}
 (fact "creates a libpython rt"
   (with-redefs [lp/start-libpython (fn [rt] (assoc rt :started true))]
     (lp/rt-libpython {}))
   => (contains {:started true}))
 
-^{:refer lang.runtime.libpython/rt-libpython? :added "4.0"}
+^{:refer lang.runtime.annex.libpython/rt-libpython? :added "4.0"}
 (fact "checks object is a libpython rt"
   (lp/rt-libpython? (lp/rt-libpython:create {}))
   => true)

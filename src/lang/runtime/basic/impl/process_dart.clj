@@ -5,7 +5,7 @@
             [lang.runtime.basic.type-verify :as type-verify]
             [std.fs :as fs]
             [lang.core.runtime :as rt]
-            [lang.model.spec-dart]
+            [lang.model.builtin.spec-dart]
             [std.lib.foundation :as f]
             [std.lib.os :as os]))
 

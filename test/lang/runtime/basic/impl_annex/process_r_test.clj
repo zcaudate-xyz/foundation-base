@@ -1,5 +1,5 @@
 (ns lang.runtime.basic.impl-annex.process-r-test
-  (:require [lang.runtime.basic.impl-annex.process-r :refer :all]
+  (:require [lang.runtime.annex.basic.impl.process-r :refer :all]
             [clojure.string :as str]
             [lang.core :as l]
             [std.lib.env :as env]
@@ -11,7 +11,7 @@
   :setup    [(l/script- :r {:runtime :oneshot})]
   :teardown []})
 
-^{:refer lang.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-r/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE r code"
   
   (!.R (+ 1 2 3 4))
@@ -23,25 +23,25 @@
   (!.R (mean [1 2 3 4]))
   => 2.5)
 
-^{:refer lang.runtime.basic.impl-annex.process-r/default-oneshot-wrap  :adopt true :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-r/default-oneshot-wrap  :adopt true :added "4.0"}
 (fact "creates the oneshot form"
 
   (default-oneshot-wrap 1)
   => string?)
 
-^{:refer lang.runtime.basic.impl-annex.process-r/default-basic-client  :adopt true :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-r/default-basic-client  :adopt true :added "4.0"}
 (fact "creates the oneshot form"
 
   (default-basic-client 19000)
   => string?)
 
-^{:refer lang.runtime.basic.impl-annex.process-r/default-oneshot-trim :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-r/default-oneshot-trim :added "4.0"}
 (fact "trim for oneshot"
 
   (default-oneshot-trim "{\"type\":\"data\",\"return\":\"number\",\"value\":1}")
   => "{\"type\":\"data\",\"return\":\"number\",\"value\":1}")
 
-^{:refer lang.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.1"
+^{:refer lang.runtime.annex.basic.impl.process-r/CANARY :adopt true :added "4.1"
   :id test-r-canary-grammar-additions}
 (fact "R grammar additions"
   (!.R (df {:a [1 2] :b [3 4]}))
@@ -63,14 +63,14 @@
   (!.R [NA NaN Inf])
   => ["NA" "NaN" "Inf"])
 
-^{:refer lang.runtime.basic.impl-annex.process-r/CANARY :adopt true :added "4.1"
+^{:refer lang.runtime.annex.basic.impl.process-r/CANARY :adopt true :added "4.1"
   :id test-r-canary-errors}
 (fact "R errors are propagated"
   (!.R (throw "boom"))
   => (throws clojure.lang.ExceptionInfo))
 
 
-^{:refer lang.runtime.basic.impl-annex.process-r/default-body-transform :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-r/default-body-transform :added "4.0"}
 (fact "wraps body forms in an R function with explicit return"
   (default-body-transform '[1 2 3] {})
   => '((fn [] (return [1 2 3])))

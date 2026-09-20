@@ -2,13 +2,13 @@
   (:require [lang.core :as l]
              [lang.core.script :as script]
              [lang.base.util :as ut]
-             [lang.model.spec-lua :refer :all]
-             [lang.model.spec-lua.variant-nginx :as nginx])
+             [lang.model.builtin.spec-lua :refer :all]
+             [lang.model.builtin.spec-lua.variant-nginx :as nginx])
   (:use code.test))
 
 (script/script- :lua)
 
-^{:refer lang.model.spec-lua/tf-counter :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/tf-counter :added "4.1"}
 (fact "compound assignment lowers to valid lua assignments"
   [(l/emit-as :lua '[(:+= a 2)])
    (l/emit-as :lua '[(:-= a 2)])
@@ -58,22 +58,22 @@
                    :error   (return err)})
          (return true))))
 
-^{:refer lang.model.spec-lua/lua-tf-incby :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-incby :added "4.1"}
 (fact "transforms incby forms")
 
-^{:refer lang.model.spec-lua/lua-tf-decby :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-decby :added "4.1"}
 (fact "transforms decby forms")
 
-^{:refer lang.model.spec-lua/lua-tf-mulby :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-mulby :added "4.1"}
 (fact "transforms mulby forms")
 
-^{:refer lang.model.spec-lua/lua-tf-local :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-local :added "4.1"}
 (fact "transforms local forms")
 
-^{:refer lang.model.spec-lua/lua-tf-c-ffi :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-c-ffi :added "4.1"}
 (fact "transforms c-ffi forms")
 
-^{:refer lang.model.spec-lua/lua-map-key :added "3.0"}
+^{:refer lang.model.builtin.spec-lua/lua-map-key :added "3.0"}
 (fact "custom lua map key"
 
   (lua-map-key 123 +grammar+ {})
@@ -92,40 +92,40 @@
   (lua-map-key :abc +grammar+ {})
   => "abc")
 
-^{:refer lang.model.spec-lua/lua-tf-for-object :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-for-object :added "4.1"}
 (fact "transforms for:object loops")
 
-^{:refer lang.model.spec-lua/lua-tf-for-array :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-for-array :added "4.1"}
 (fact "transforms for:array loops")
 
-^{:refer lang.model.spec-lua/lua-tf-for-iter :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-for-iter :added "4.1"}
 (fact "transforms for:iter loops")
 
-^{:refer lang.model.spec-lua/lua-tf-for-index :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-for-index :added "4.1"}
 (fact "transforms for:index loops")
 
-^{:refer lang.model.spec-lua/lua-tf-for-return :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-for-return :added "4.1"}
 (fact "transforms for:return loops")
 
-^{:refer lang.model.spec-lua/lua-tf-for-async :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-for-async :added "4.1"}
 (fact "transforms for:async loops")
 
-^{:refer lang.model.spec-lua/lua-tf-yield :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-yield :added "4.1"}
 (fact "transforms yield forms")
 
-^{:refer lang.model.spec-lua/lua-tf-throw :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-throw :added "4.1"}
 (fact "transforms throw forms")
 
-^{:refer lang.model.spec-lua/lua-tf-defgen :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-defgen :added "4.1"}
 (fact "transforms defgen forms")
 
-^{:refer lang.model.spec-lua/lua-tf-prototype-create :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-prototype-create :added "4.1"}
 (fact "creates prototypes")
 
-^{:refer lang.model.spec-lua/lua-tf-prototype-method :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-tf-prototype-method :added "4.1"}
 (fact "calls prototype methods")
 
-^{:refer lang.model.spec-lua/lua-module-link :added "4.0"}
+^{:refer lang.model.builtin.spec-lua/lua-module-link :added "4.0"}
 (fact "gets the absolute lua based module"
 
   (lua-module-link 'kmi.common {:root-ns 'kmi.hello})
@@ -135,22 +135,22 @@
                    {:root-ns 'kmi :target "src"})
   => "./kmi/exchange")
 
-^{:refer lang.model.spec-lua/lua-module-export :added "4.0"}
+^{:refer lang.model.builtin.spec-lua/lua-module-export :added "4.0"}
 (fact "outputs the lua module export form"
 
   (lua-module-export 'kmi.common {:root-ns 'kmi.hello})
   => '(return (tab)))
 
-^{:refer lang.model.spec-lua/variant-meta :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/variant-meta :added "4.1"}
 (fact "provides lua variant metadata")
 
-^{:refer lang.model.spec-lua/variant-grammar :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/variant-grammar :added "4.1"}
 (fact "provides lua variant grammar")
 
-^{:refer lang.model.spec-lua/lua-vector :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-vector :added "4.1"}
 (fact "emits lua vectors")
 
 
-^{:refer lang.model.spec-lua/lua-emit-input-rest :added "4.1"}
+^{:refer lang.model.builtin.spec-lua/lua-emit-input-rest :added "4.1"}
 (fact "emits Lua's anonymous varargs marker"
   (lua-emit-input-rest {:symbol 'args} nil nil) => "...")

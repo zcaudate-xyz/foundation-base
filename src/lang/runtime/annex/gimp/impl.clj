@@ -1,4 +1,4 @@
-(ns lang.runtime.gimp.impl
+(ns lang.runtime.annex.gimp.impl
   (:require [clojure.string :as str]
             [std.json :as json]
             [std.lib.component :as component]

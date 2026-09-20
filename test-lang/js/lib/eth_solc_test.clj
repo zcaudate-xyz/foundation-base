@@ -1,6 +1,6 @@
 (ns js.lib.eth-solc-test
-  (:require [lang.runtime.solidity :as s]
-            [lang.runtime.solidity.env-hardhat :as env-hardhat]
+  (:require [lang.runtime.annex.solidity :as s]
+            [lang.runtime.annex.solidity.env-hardhat :as env-hardhat]
             [lang.core :as l]
             [std.string.prose :as prose])
   (:use code.test))

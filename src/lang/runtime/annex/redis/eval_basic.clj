@@ -1,4 +1,4 @@
-(ns lang.runtime.redis.eval-basic
+(ns lang.runtime.annex.redis.eval-basic
   (:require [lib.redis.script :as script]
             [lang.runtime.basic.impl.process-lua :as lua]
             [std.concurrent :as cc]

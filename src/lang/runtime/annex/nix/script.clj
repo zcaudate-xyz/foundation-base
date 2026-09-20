@@ -1,4 +1,4 @@
-(ns lang.runtime.nix.script
+(ns lang.runtime.annex.nix.script
   (:require [clojure.string]
             [std.string.prose :as prose]))
 

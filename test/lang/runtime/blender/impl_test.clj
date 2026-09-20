@@ -1,18 +1,18 @@
 (ns lang.runtime.blender.impl-test
   (:require [lang.core :as h]
             [lang.core.type-shared :as shared]
-            [lang.runtime.blender.impl :as impl]
+            [lang.runtime.annex.blender.impl :as impl]
             [std.lib.env :as env])
   (:use code.test))
 
 (fact:global {:skip (not (env/program-exists? "blender"))})
 
-^{:refer lang.runtime.blender.impl/blender-exec :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/blender-exec :added "4.1"}
 (fact "resolves the blender executable"
   (impl/blender-exec)
   => string?)
 
-^{:refer lang.runtime.blender.impl/blender-bootstrap :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/blender-bootstrap :added "4.1"}
 (fact "generates python bootstrap code"
   (let [bootstrap (impl/blender-bootstrap 12345)]
     [(boolean (re-find #"def server_blender" bootstrap))
@@ -22,7 +22,7 @@
      (boolean (re-find #"server_blender\(12345" bootstrap))])
   => [true true true true true])
 
-^{:refer lang.runtime.blender.impl/start-blender :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/start-blender :added "4.1"}
 (fact "starts and stops a blender process"
   (let [rt (-> (impl/blender:create {})
                (impl/start-blender))
@@ -35,7 +35,7 @@
     result)
   => [true true true true true])
 
-^{:refer lang.runtime.blender.impl/raw-eval-blender :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/raw-eval-blender :added "4.1"}
 (fact "evaluates python code inside blender"
   (let [rt (impl/blender {})]
     (try
@@ -45,7 +45,7 @@
         (impl/stop-blender rt))))
   => [6 true])
 
-^{:refer lang.runtime.blender.impl/raw-eval-blender :added "4.1"
+^{:refer lang.runtime.annex.blender.impl/raw-eval-blender :added "4.1"
   :id test-raw-eval-blender-errors}
 (fact "propagates python errors"
   (let [rt (impl/blender {})]
@@ -57,7 +57,7 @@
         (impl/stop-blender rt))))
   => #"division( or modulo)? by zero")
 
-^{:refer lang.runtime.blender.impl/invoke-ptr-blender :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/invoke-ptr-blender :added "4.1"}
 (fact "invokes a pointer through the blender runtime"
   (let [rt (impl/blender {})]
     (try
@@ -69,14 +69,14 @@
         (impl/stop-blender rt))))
   => true)
 
-^{:refer lang.runtime.blender.impl/blender:create :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/blender:create :added "4.1"}
 (fact "creates a blender runtime record"
   (let [rt (impl/blender:create {})]
     [(boolean rt)
      (= :blender (:tag rt))])
   => [true true])
 
-^{:refer lang.runtime.blender.impl/blender :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/blender :added "4.1"}
 (fact "creates and starts a blender runtime"
   (let [rt (impl/blender {})]
     (try
@@ -85,7 +85,7 @@
         (impl/stop-blender rt))))
   => true)
 
-^{:refer lang.runtime.blender.impl/blender-shared :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/blender-shared :added "4.1"}
 (fact "two shared blender runtimes with the same id share the process"
   (let [rt1 (impl/blender-shared:create {:id :shared-blender-test})
         rt2 (impl/blender-shared:create {:id :shared-blender-test})]
@@ -125,7 +125,7 @@
   => true)
 
 
-^{:refer lang.runtime.blender.impl/stop-blender :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/stop-blender :added "4.1"}
 (fact "stops a running blender process"
   (let [rt (impl/blender {})
         _ (impl/stop-blender rt)
@@ -133,7 +133,7 @@
     (boolean (and process (not (.isAlive ^Process process)))))
   => true)
 
-^{:refer lang.runtime.blender.impl/blender-shared:create :added "4.1"}
+^{:refer lang.runtime.annex.blender.impl/blender-shared:create :added "4.1"}
 (fact "creates a shared blender runtime client"
   (let [rt (impl/blender-shared:create {:id :shared-blender-impl-test})]
     [(= :lang/rt.blender (get-in rt [:client :type]))

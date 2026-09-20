@@ -1,5 +1,5 @@
 (ns postgres.core.graph-view
-  (:require [lang.model.spec-postgres.common :as common]
+  (:require [lang.model.annex.spec-postgres.common :as common]
             [postgres.core.graph-base :as base]
             [postgres.core.graph-query :as query]
             [postgres.core.impl-base :as impl]

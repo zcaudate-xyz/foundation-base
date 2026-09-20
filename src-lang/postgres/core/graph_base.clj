@@ -1,6 +1,6 @@
 (ns postgres.core.graph-base
   (:require [clojure.string]
-            [lang.model.spec-postgres.common :as common]
+            [lang.model.annex.spec-postgres.common :as common]
             [postgres.core.impl-base :as base]
             [postgres.core.impl-main :as main]
             [postgres.core.impl-update :as update]

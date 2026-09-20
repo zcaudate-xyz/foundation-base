@@ -1,11 +1,11 @@
-(ns lang.runtime.redis.client
+(ns lang.runtime.annex.redis.client
   (:require [lib.redis :as lib]
             [lib.redis.bench :as bench]
             [lib.redis.event :as event]
             [net.resp.connection :as conn]
             [net.resp.pool :as pool]
-            [lang.runtime.redis.eval-basic :as eval-basic]
-            [lang.runtime.redis.eval-script :as eval-script]
+            [lang.runtime.annex.redis.eval-basic :as eval-basic]
+            [lang.runtime.annex.redis.eval-script :as eval-script]
             [lang.core.pointer :as ptr]
             [lang.core.runtime :as default]
             [lang.core.type-shared :as shared]

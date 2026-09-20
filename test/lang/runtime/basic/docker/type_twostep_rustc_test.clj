@@ -1,6 +1,6 @@
 (ns lang.runtime.basic.docker.type-twostep-rustc-test
   (:use code.test)
-  (:require [lang.runtime.basic.impl-annex.process-rust]
+  (:require [lang.runtime.annex.basic.impl.process-rust]
             [lang.runtime.basic.type-twostep :as twostep]
             [lang.core :as l]
             [std.lib.env :as env]))

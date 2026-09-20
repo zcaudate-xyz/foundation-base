@@ -2,8 +2,8 @@
   (:require [kmi.queue.list :as list]
             [lib.redis.bench :as bench]
             [net.resp.connection :as conn]
-            [lang.runtime.redis :refer :all]
-            [lang.runtime.redis.eval-script :as script]
+            [lang.runtime.annex.redis :refer :all]
+            [lang.runtime.annex.redis.eval-script :as script]
             [std.concurrent :as cc])
   (:use code.test))
 
@@ -11,14 +11,14 @@
  {:setup [(bench/start-redis-array [17001])]
   :teardown [(bench/stop-redis-array [17001])]})
 
-^{:refer lang.runtime.redis/generate-script :added "4.0"}
+^{:refer lang.runtime.annex.redis/generate-script :added "4.0"}
 (fact "generates a script given a pointer"
 
   (generate-script kmi.queue.list/mq-list-group-init)
   => string?)
 
-^{:refer lang.runtime.redis/test:req :added "4.0"}
+^{:refer lang.runtime.annex.redis/test:req :added "4.0"}
 (fact "does a request on a single test connection")
 
-^{:refer lang.runtime.redis/test:invoke :added "4.0"}
+^{:refer lang.runtime.annex.redis/test:invoke :added "4.0"}
 (fact "does a script call on a single test connection")

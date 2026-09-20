@@ -1,5 +1,5 @@
 (ns postgres.core.graph-query-test
-  (:require [lang.runtime.postgres.base.application :as app]
+  (:require [lang.runtime.annex.postgres.base.application :as app]
             [postgres.core.graph-query :as q]
             [postgres.core.impl-base :as impl]
             [postgres.sample.scratch-v1 :as scratch]

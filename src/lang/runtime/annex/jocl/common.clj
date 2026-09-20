@@ -1,7 +1,7 @@
-(ns lang.runtime.jocl.common
-  (:require [lang.runtime.jocl.meta :as meta]
+(ns lang.runtime.annex.jocl.common
+  (:require [lang.runtime.annex.jocl.meta :as meta]
             [lang.base.emit-helper :as helper]
-            [lang.model.spec-c :as c]
+            [lang.model.builtin.spec-c :as c]
             [std.object :as object]
             [std.string :as str]
             [std.lib.foundation :as h]

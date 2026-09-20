@@ -1,8 +1,8 @@
 (ns lang.runtime.basic.impl-annex.process-julia-test
-  (:require [lang.runtime.basic.impl-annex.process-julia :refer :all])
+  (:require [lang.runtime.annex.basic.impl.process-julia :refer :all])
   (:use code.test))
 
-^{:refer lang.runtime.basic.impl-annex.process-julia/default-body-wrap :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-julia/default-body-wrap :added "4.1"}
 (fact "creates julia return wrapper"
   (default-body-wrap '[1 2 3])
   => '(do
@@ -12,7 +12,7 @@
           (return 3))
         (:= OUT (OUT-FN))))
 
-^{:refer lang.runtime.basic.impl-annex.process-julia/default-body-transform :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-julia/default-body-transform :added "4.1"}
 (fact "standard julia transforms"
   (default-body-transform '[1 2 3] {})
   => '(do

@@ -1,6 +1,6 @@
 (ns lang.runtime.solidity.env-hardhat-test
   (:require [clojure.string :as string]
-            [lang.runtime.solidity.env-hardhat :refer :all]
+            [lang.runtime.annex.solidity.env-hardhat :refer :all]
             [std.fs :as fs]
             [std.lib.env :as env]
             [std.lib.future :as future]
@@ -30,7 +30,7 @@
   :setup    []
   :teardown [(reset! *server* nil)]})
 
-^{:refer lang.runtime.solidity.env-hardhat/start-hardhat-server :added "4.0"}
+^{:refer lang.runtime.annex.solidity.env-hardhat/start-hardhat-server :added "4.0"}
 (fact "starts the hardhat service and constructs the node command"
   (let [captured (atom nil)]
     (with-redefs [fs/create-directory (fn [_] nil)
@@ -54,7 +54,7 @@
               (string/includes? cmd "--hostname 0.0.0.0")
               (string/includes? cmd (str "--port " +default-port+))))))
 
-^{:refer lang.runtime.solidity.env-hardhat/stop-hardhat-server :added "4.0"}
+^{:refer lang.runtime.annex.solidity.env-hardhat/stop-hardhat-server :added "4.0"}
 (fact "stops the hardhat service and returns server entry"
   (with-redefs [fs/create-directory (fn [_] nil)
                 os/sh fake-sh

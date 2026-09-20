@@ -1,5 +1,5 @@
 (ns lang.model.annex.spec-sql
-  (:require [lang.model.sql.spec-common :as common]
+  (:require [lang.model.annex.sql.spec-common :as common]
             [lang.core.script :as script]))
 
 (def +book+

@@ -6,7 +6,7 @@
              [lang.runtime.basic.type-verify :as type-verify]
              [lang.core.impl :as impl]
              [lang.core.runtime :as rt]
-             [lang.model.spec-ruby :as spec]
+             [lang.model.annex.spec-ruby :as spec]
              [xt.lang.common-lib :as lib]))
 
 (def +ruby-init+

@@ -1,6 +1,6 @@
 (ns postgres.typed-test
   (:use code.test)
-  (:require [lang.runtime.postgres.base.application :as app]
+  (:require [lang.runtime.annex.postgres.base.application :as app]
             [postgres.typed :refer :all]
             [postgres.typed.typed-common :as types]
             [postgres.typed.typed-parse :as parse]))

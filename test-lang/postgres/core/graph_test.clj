@@ -1,5 +1,5 @@
 (ns postgres.core.graph-test
-  (:require [lang.runtime.postgres.base.application :as app]
+  (:require [lang.runtime.annex.postgres.base.application :as app]
             [postgres.core.graph :refer :all]
             [postgres.core.graph-view :as view]
             [postgres.core.impl-base :as impl]
@@ -64,7 +64,7 @@
 ^{:refer postgres.core.graph/g:modify :added "4.0"}
 (fact  "constructs the modify form"
 
-  (binding [lang.model.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
+  (binding [lang.model.annex.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:modify scratch/Task
       {:set {:name "name"}
        :where {:id (str (f/uuid-nil))}
@@ -80,7 +80,7 @@
 ^{:refer postgres.core.graph/g:insert :added "4.0"}
 (fact "constructs an insert form"
 
-  (binding [lang.model.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
+  (binding [lang.model.annex.spec-postgres.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:insert scratch/Task
       {:name "name"
        :status "pending"

@@ -1,5 +1,5 @@
 (ns postgres.core.graph-view-test
-  (:require [lang.runtime.postgres.base.application :as app]
+  (:require [lang.runtime.annex.postgres.base.application :as app]
             [postgres.core.graph-view :as view]
             [postgres.core.graph-query :as query]
             [postgres.core.impl-base :as impl]

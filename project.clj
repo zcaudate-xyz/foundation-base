@@ -118,13 +118,13 @@
    [org.graalvm.js/js-language "24.1.0"]
    [commons-io/commons-io "2.15.1"]
 
-   ;; lang.runtime.jep
+   ;; lang.runtime.annex.jep
    [black.ninia/jep "4.3.1"]
 
-   ;; lang.runtime.libpython
+   ;; lang.runtime.annex.libpython
    [clj-python/libpython-clj "2.026"]
 
-   ;; lang.runtime.jocl
+   ;; lang.runtime.annex.jocl
    [org.jocl/jocl "2.0.4"]
 
    ;; jvm.chisel (runtime link against precompiled Chisel; no Scala compiler plugin needed)

@@ -1,4 +1,4 @@
-(ns lang.runtime.jep.bootstrap
+(ns lang.runtime.annex.jep.bootstrap
   (:require [clojure.string]
             [std.concurrent :as cc]
             [std.fs :as fs]

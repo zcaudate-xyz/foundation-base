@@ -1,6 +1,6 @@
 (ns lang.model.spec-c-test
   (:require [lang.core :as l]
-            [lang.model.spec-c :refer :all])
+            [lang.model.builtin.spec-c :refer :all])
   (:use code.test))
 
 (fact "emit basic C"
@@ -57,7 +57,7 @@
   (l/emit-as :c '[(sizeof x)])
   => "sizeof x")
 
-^{:refer lang.model.spec-c/tf-define :added "4.0"}
+^{:refer lang.model.builtin.spec-c/tf-define :added "4.0"}
 (fact "not sure if this is needed (due to defmacro) but may be good for source to source"
 
   (tf-define '(define A 1))
@@ -66,7 +66,7 @@
   (tf-define '(define A [a b] (+ a b)))
   => '(:- "#define" (:% A (quote (a b))) (+ a b)))
 
-^{:refer lang.model.spec-c/tf-struct :added "4.1"}
+^{:refer lang.model.builtin.spec-c/tf-struct :added "4.1"}
 (fact "transforms struct definition"
 
   (tf-struct '(struct Point [:int x :int y]))
@@ -75,19 +75,19 @@
                   (\\ \\ (\| (do (:- :int "x;") (:- :int "y;"))))
                   (:- "\n};")))))
 
-^{:refer lang.model.spec-c/tf-enum :added "4.1"}
+^{:refer lang.model.builtin.spec-c/tf-enum :added "4.1"}
 (fact "transforms enum definition"
 
   (tf-enum '(enum Color [RED GREEN BLUE]))
   => '(:- "enum" Color (:- "{") (quote [RED GREEN BLUE]) (:- "};")))
 
-^{:refer lang.model.spec-c/tf-typedef :added "4.1"}
+^{:refer lang.model.builtin.spec-c/tf-typedef :added "4.1"}
 (fact "transforms typedef"
 
   (tf-typedef '(typedef :int :my_int))
   => '(:- "typedef" :int "my_int;"))
 
-^{:refer lang.model.spec-c/to-c-type :added "4.1"}
+^{:refer lang.model.builtin.spec-c/to-c-type :added "4.1"}
 (fact "converts C type inputs"
   (to-c-type :int)
   => "int"
@@ -98,18 +98,18 @@
   (to-c-type [:const :char*])
   => "const char*")
 
-^{:refer lang.model.spec-c/c-sanitize :added "4.1"}
+^{:refer lang.model.builtin.spec-c/c-sanitize :added "4.1"}
 (fact "sanitizes symbols for C identifiers"
   (c-sanitize 'hello-world/foo.bar)
   => "hello_world____foo_bar")
 
-^{:refer lang.model.spec-c/c-fn-args :added "4.1"}
+^{:refer lang.model.builtin.spec-c/c-fn-args :added "4.1"}
 (fact "custom C function arguments emission"
 
   (c-fn-args '(quote [[:int argc] [:char** argv]]) nil nil)
   => "(int argc, char** argv)")
 
-^{:refer lang.model.spec-c/emit-defn :added "4.1"}
+^{:refer lang.model.builtin.spec-c/emit-defn :added "4.1"}
 (fact "emits C functions directly"
 
   (emit-defn
@@ -126,13 +126,13 @@
    {:module {:id 'math.core}})
   => "void math_core____add(int lhs, int rhs) {\n\n  return lhs + rhs;\n}")
 
-^{:refer lang.model.spec-c/tf-arrow :added "4.1"}
+^{:refer lang.model.builtin.spec-c/tf-arrow :added "4.1"}
 (fact "transforms arrow ->"
 
   (tf-arrow '(arrow ptr field))
   => '(:% ptr (:- "->" field)))
 
-^{:refer lang.model.spec-c/tf-sizeof :added "4.1"}
+^{:refer lang.model.builtin.spec-c/tf-sizeof :added "4.1"}
 (fact "transforms sizeof"
 
   (tf-sizeof '(sizeof x))

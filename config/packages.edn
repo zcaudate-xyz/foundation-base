@@ -454,14 +454,36 @@
    com.fasterxml.jackson.datatype/jackson-datatype-jsr310]
   :bundle [{:path "target/classes" :include ["hara/lib/json"]}]}
  
-  xyz.zcaudate/lang
-  {:description "working with other languages"
-   :include [[lang.runtime.redis :complete]
-             [xt.lang :complete]]}
+  xyz.zcaudate/lang.core
+  {:description "core language tooling, builtin models, and base runtimes"
+   :include [[lang.base :complete]
+             [lang.core :complete]
+             [lang.model.builtin :complete]
+             [lang.runtime :exclude [lang.runtime.annex
+                                     lang.runtime.graal
+                                     lang.runtime.nginx]]
+             [lang.seedgen :complete]
+             [lang.typed :complete]
+             [lang.uberjar :complete]]}
+
+  xyz.zcaudate/lang.annex
+  {:description "annex language models and optional runtimes"
+   :include [[lang.model.annex :exclude [lang.model.annex.spec-postgres
+                                         lang.model.annex.spec-solidity]]
+             [lang.runtime.annex :exclude [lang.runtime.annex.graal
+                                           lang.runtime.annex.jep
+                                           lang.runtime.annex.libpython
+                                           lang.runtime.annex.postgres
+                                           lang.runtime.annex.redis
+                                           lang.runtime.annex.solidity]]]}
+
+  xyz.zcaudate/xt.lang
+  {:description "cross-target xt language helpers"
+   :include [[xt.lang :complete]]}
 
  xyz.zcaudate/lang.runtime.libpython
- {:description "nginx runtime support"
-  :include [[lang.runtime.libpython :complete]]}
+ {:description "libpython runtime support"
+  :include [[lang.runtime.annex.libpython :complete]]}
  
  xyz.zcaudate/lang.runtime.nginx
  {:description "nginx runtime support"
@@ -469,7 +491,7 @@
  
  xyz.zcaudate/lang.runtime.redis
   {:description "runtime for redis" 
-   :include [[lang.runtime.redis :complete]]
+   :include [[lang.runtime.annex.redis :complete]]
    :bundle [{:path "resources" :include ["assets/rt.redis"]}]}
   
  xyz.zcaudate/lang.runtime.graal
@@ -484,20 +506,20 @@
  
  xyz.zcaudate/lang.runtime.jep
   {:description "runtime for jep" 
-   :include [[lang.runtime.jep :complete]]
+   :include [[lang.runtime.annex.jep :complete]]
    :dependencies [[black.ninia/jep "4.3.1"]]}
  
  xyz.zcaudate/postgres
  {:description "postgres language and runtime support"
   :include [[postgres :exclude [postgres.sample]]
-            [lang.model.spec-postgres :complete]
-            [lang.runtime.postgres :complete]]}
+           [lang.model.annex.spec-postgres :complete]
+            [lang.runtime.annex.postgres :complete]]}
 
  xyz.zcaudate/solidity
  {:description "solidity language and runtime support"
   :include [[solidity.core :complete]
-            [lang.model.spec-solidity :complete]
-            [lang.runtime.solidity :complete]]}
+           [lang.model.annex.spec-solidity :complete]
+            [lang.runtime.annex.solidity :complete]]}
 
  xyz.zcaudate/verilog
  {:description "verilog language and runtime support"

@@ -1,17 +1,17 @@
 (ns lang.model.spec-ruby.rewrite-test
-  (:require [lang.model.spec-ruby.rewrite :as rewrite])
+  (:require [lang.model.annex.spec-ruby.rewrite :as rewrite])
   (:use code.test))
 
-^{:refer lang.model.spec-ruby.rewrite/rewrite-callable-body :added "4.1"}
+^{:refer lang.model.annex.spec-ruby.rewrite/rewrite-callable-body :added "4.1"}
 (fact "rewrites callable bodies")
 
-^{:refer lang.model.spec-ruby.rewrite/rewrite-callable-form :added "4.1"}
+^{:refer lang.model.annex.spec-ruby.rewrite/rewrite-callable-form :added "4.1"}
 (fact "rewrites callable forms")
 
-^{:refer lang.model.spec-ruby.rewrite/rewrite-callable-value :added "4.1"}
+^{:refer lang.model.annex.spec-ruby.rewrite/rewrite-callable-value :added "4.1"}
 (fact "rewrites callable values")
 
-^{:refer lang.model.spec-ruby.rewrite/rewrite-captured-callables :added "4.1"}
+^{:refer lang.model.annex.spec-ruby.rewrite/rewrite-captured-callables :added "4.1"}
 (fact "rewrites only nested callable bodies to use capture aliases"
   (rewrite/rewrite-captured-callables
    '[(:= out
@@ -36,7 +36,7 @@
   => '[(fn [value]
          (return value))])
 
-^{:refer lang.model.spec-ruby.rewrite/capture-aliases :added "4.1"}
+^{:refer lang.model.annex.spec-ruby.rewrite/capture-aliases :added "4.1"}
 (fact "creates deterministic capture aliases without colliding with source symbols"
   (rewrite/capture-aliases
    '[(fn [] (return value))]
@@ -49,16 +49,16 @@
    '[value])
   => '{value value__capture____2})
 
-^{:refer lang.model.spec-ruby.rewrite/ruby-rewrite-generator-body :added "4.1"}
+^{:refer lang.model.annex.spec-ruby.rewrite/ruby-rewrite-generator-body :added "4.1"}
 (fact "rewrites generator bodies")
 
-^{:refer lang.model.spec-ruby.rewrite/rewrite-callable-forms :added "4.1"}
+^{:refer lang.model.annex.spec-ruby.rewrite/rewrite-callable-forms :added "4.1"}
 (fact "rewrites callable forms")
 
-^{:refer lang.model.spec-ruby.rewrite/mark-inline-defs :added "4.1"}
+^{:refer lang.model.annex.spec-ruby.rewrite/mark-inline-defs :added "4.1"}
 (fact "marks inline definitions")
 
-^{:refer lang.model.spec-ruby.rewrite/ruby-rewrite-stage :added "4.1"}
+^{:refer lang.model.annex.spec-ruby.rewrite/ruby-rewrite-stage :added "4.1"}
 (fact "marks runtime-eval helper defs as inner for Ruby without changing normal staging"
   (let [plain (rewrite/ruby-rewrite-stage
                '(do

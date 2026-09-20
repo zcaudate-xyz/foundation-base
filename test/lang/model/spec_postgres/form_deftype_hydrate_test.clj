@@ -1,6 +1,6 @@
 (ns lang.model.spec-postgres.form-deftype-hydrate-test
-  (:require [lang.runtime.postgres.base.application :as app]
-            [lang.model.spec-postgres.form-deftype-hydrate :refer :all])
+  (:require [lang.runtime.annex.postgres.base.application :as app]
+            [lang.model.annex.spec-postgres.form-deftype-hydrate :refer :all])
   (:use code.test))
 
 (defn with-demo-links
@@ -42,7 +42,7 @@
                   (get-in book [:modules module section id]))]
     (f)))
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-check-link :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-check-link :added "4.1"}
 (fact "pg-deftype-hydrate-check-link validates snapshot links"
   (with-demo-links
     #(pg-deftype-hydrate-check-link {}
@@ -66,7 +66,7 @@
                                     :table))
   => true)
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-link :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-link :added "4.1"}
 (fact "pg-deftype-hydrate-link resolves self and external links"
   (with-demo-links
     #(pg-deftype-hydrate-link 'Task {:id 'demo} {:ns '-/Task}))
@@ -92,7 +92,7 @@
        :section :code}
       true])
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-sql :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-sql :added "4.1"}
 (fact "pg-deftype-hydrate-process-sql resolves process vars"
   (with-demo-links
     #(pg-deftype-hydrate-process-sql {:process ['clojure.core/inc]}
@@ -101,7 +101,7 @@
                                      nil))
   => {:process ['clojure.core/inc]})
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-foreign :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-foreign :added "4.1"}
 (fact "pg-deftype-hydrate-process-foreign annotates foreign links"
   (with-demo-links
     #(pg-deftype-hydrate-process-foreign
@@ -114,7 +114,7 @@
                     :id 'Task
                     :section :code}}})
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-ref :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-ref :added "4.1"}
 (fact "pg-deftype-hydrate-process-ref supports vector and linked refs"
   (pg-deftype-hydrate-process-ref
    :task
@@ -146,7 +146,7 @@
                     :id 'Task
                     :section :code}}}])
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-enum :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-process-enum :added "4.1"}
 (fact "pg-deftype-hydrate-process-enum resolves enum vars"
   (with-demo-links
     #(pg-deftype-hydrate-process-enum
@@ -170,7 +170,7 @@
       {:type :enum
         :enum {:ns 'demo/Status}}])
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-attr :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-attr :added "4.1"}
 (fact "pg-deftype-hydrate-attr delegates enum attrs to the enum processor"
   (with-demo-links
     #(pg-deftype-hydrate-attr
@@ -184,7 +184,7 @@
       {:type :enum
         :enum {:ns 'demo/Status}}])
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-spec :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-spec :added "4.1"}
 (fact "pg-deftype-hydrate-spec hydrates each attribute in order"
   (with-demo-links
     #(pg-deftype-hydrate-spec
@@ -207,10 +207,10 @@
       :status {:type :enum
                :enum {:ns 'demo/Status}}])
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate :added "4.1"}
 (fact "pg-deftype-hydrate adds schema metadata to the form"
   (with-demo-links
-    #(with-redefs [lang.model.spec-postgres.common/pg-hydrate-module-static
+    #(with-redefs [lang.model.annex.spec-postgres.common/pg-hydrate-module-static
                    (fn [_] {:static/application ["demo"]})
                    std.lib.schema/schema
                    (fn [x] {:vec x})]
@@ -224,7 +224,7 @@
                                 :id :id}}
       '(deftype.pg Demo [:id {:type :uuid :primary true}] {})])
 
-^{:refer lang.model.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-hook :added "4.1"}
+^{:refer lang.model.annex.spec-postgres.form-deftype-hydrate/pg-deftype-hydrate-hook :added "4.1"}
 (fact "pg-deftype-hydrate-hook updates the application tables and pointers"
   (let [calls (atom [])]
     (with-redefs [app/*applications* (atom {})

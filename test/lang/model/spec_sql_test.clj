@@ -1,7 +1,7 @@
 (ns lang.model.spec-sql-test
   (:require [code.framework :as framework]
             [lang.core :as l]
-            [lang.model.spec-sql :refer :all]
+            [lang.model.annex.spec-sql :refer :all]
             [std.block.layout :as layout])
   (:use code.test))
 

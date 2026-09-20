@@ -1,9 +1,9 @@
 (ns lang.runtime.solidity.compile-deploy-test
-  (:require [lang.runtime.solidity.client :as client]
-            [lang.runtime.solidity.compile-common :as compile-common]
-            [lang.runtime.solidity.compile-deploy :as deploy]
-            [lang.runtime.solidity.compile-solc :as compile]
-            [lang.runtime.solidity.env-hardhat :as env]
+  (:require [lang.runtime.annex.solidity.client :as client]
+            [lang.runtime.annex.solidity.compile-common :as compile-common]
+            [lang.runtime.annex.solidity.compile-deploy :as deploy]
+            [lang.runtime.annex.solidity.compile-solc :as compile]
+            [lang.runtime.annex.solidity.env-hardhat :as env]
             [lang.core :as l]
             [std.lib.component :as component]
             [web3.lib.example-erc20 :as example-erc20])
@@ -11,7 +11,7 @@
 
 (l/script- :solidity
   {:config  {:mode :clean}
-   :require [[lang.runtime.solidity :as s]]})
+   :require [[lang.runtime.annex.solidity :as s]]})
 
 (defn.sol ^{:- [:pure :internal]
             :static/returns [:string :memory]}
@@ -24,7 +24,7 @@
   :teardown [(l/rt:stop)
              (env/stop-hardhat-server)]})
 
-^{:refer lang.runtime.solidity.compile-deploy/deploy-base :added "4.0"
+^{:refer lang.runtime.annex.solidity.compile-deploy/deploy-base :added "4.0"
   :setup    [(def +rt+
               (compile/compile-rt-prep))
               (compile/compile-rt-eval
@@ -42,7 +42,7 @@
   => (contains-in
       {"status" true, "contractAddress" string?}))
 
-^{:refer lang.runtime.solidity.compile-deploy/deploy-pointer :added "4.0"
+^{:refer lang.runtime.annex.solidity.compile-deploy/deploy-pointer :added "4.0"
   :setup    [(def +rt+
               (compile/compile-rt-prep))
               (compile/compile-rt-eval
@@ -59,7 +59,7 @@
   => (contains-in
       {"status" true, "contractAddress" string?}))
 
-^{:refer lang.runtime.solidity.compile-deploy/deploy-module :added "4.0"
+^{:refer lang.runtime.annex.solidity.compile-deploy/deploy-module :added "4.0"
   :setup    [(def +rt+
               (compile/compile-rt-prep))
               (compile/compile-rt-eval

@@ -1,4 +1,4 @@
-(ns lang.model.sql.spec-common.common
+(ns lang.model.annex.sql.spec-common.common
   (:require [clojure.string :as str]
             [lang.base.emit :as emit]
             [lang.base.emit-helper :as helper]

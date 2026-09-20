@@ -1,4 +1,4 @@
-(ns lang.model.builtin.spec-xtalk.fn-go
+(ns lang.model.builtin.spec-go.fn-go
   (:require [std.lib.collection :as collection]))
 
 ;;

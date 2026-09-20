@@ -1,5 +1,5 @@
 (ns lang.runtime.basic.impl-annex.process-perl-test
-  (:require [lang.runtime.basic.impl-annex.process-perl :refer :all]
+  (:require [lang.runtime.annex.basic.impl.process-perl :refer :all]
             [std.concurrent :as cc]
             [std.lib.env :as env]
             [lang.core :as l])
@@ -13,7 +13,7 @@
   :setup    [(l/annex:start-all)]
   :teardown [(l/annex:stop-all)]})
 
-^{:refer lang.runtime.basic.impl-annex.process-perl/CANARY :adopt true :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-perl/CANARY :adopt true :added "4.0"}
 (fact "EVALUATE perl code"
   ^:unchecked
 
@@ -21,7 +21,7 @@
   => 10)
 
 
-^{:refer lang.runtime.basic.impl-annex.process-perl/default-body-transform :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-perl/default-body-transform :added "4.1"}
 (fact "transforms oneshot forms for return-eval"
   (default-body-transform '[1 2 3] {})
   => '[1 2 3]
@@ -29,7 +29,7 @@
   (default-body-transform '[1 2 3] {:bulk true})
   => '(do 1 2 3))
 
-^{:refer lang.runtime.basic.impl-annex.process-perl/perl-body-wrap :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-perl/perl-body-wrap :added "4.0"}
 (fact "wraps body forms in a flat do block"
   (perl-body-wrap '[1 2 3])
   => '(do 1 2 3)
@@ -37,7 +37,7 @@
   (perl-body-wrap '[(+ 1 2)])
   => '(do (+ 1 2)))
 
-^{:refer lang.runtime.basic.impl-annex.process-perl/default-basic-body-transform :added "4.0"}
+^{:refer lang.runtime.annex.basic.impl.process-perl/default-basic-body-transform :added "4.0"}
 (fact "transforms basic forms for Perl without a function wrapper"
   (default-basic-body-transform '[1 2 3] {})
   => '(do [1 2 3])
@@ -48,7 +48,7 @@
   (default-basic-body-transform '[1 2 3] {:bulk true})
   => '(do 1 2 3))
 
-^{:refer lang.runtime.basic.impl-annex.process-perl/default-basic-client :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-perl/default-basic-client :added "4.1"}
 (fact "builds perl basic client source from perl forms"
   (let [out (default-basic-client 4567 {:host "127.0.0.1"})]
     [(boolean (re-find #"use IO::Socket::INET;" out))

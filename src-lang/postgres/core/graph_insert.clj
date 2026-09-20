@@ -1,7 +1,7 @@
 (ns postgres.core.graph-insert
   (:require [clojure.string]
-             [lang.runtime.postgres.base.application :as app]
-             [lang.model.spec-postgres.common :as common]
+             [lang.runtime.annex.postgres.base.application :as app]
+             [lang.model.annex.spec-postgres.common :as common]
              [postgres.core.graph-walk :as walk]
              [postgres.core.impl-base :as base]
              [postgres.core.impl-insert :as insert]

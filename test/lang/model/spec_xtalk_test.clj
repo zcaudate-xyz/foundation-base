@@ -2,7 +2,7 @@
   (:require [lang.core :as l])
   (:use code.test))
 
-^{:refer lang.model.spec-xtalk/CANARY :adopt true :added "4.0"}
+^{:refer lang.model.builtin.spec-xtalk/CANARY :adopt true :added "4.0"}
 (fact "This is the cross language language"
 
   (l/emit-as

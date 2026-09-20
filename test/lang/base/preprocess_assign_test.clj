@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [lang.base.emit-prep-lua-test :as prep]
             [lang.base.preprocess-assign :refer :all]
-            [lang.model.spec-js :as js]))
+            [lang.model.builtin.spec-js :as js]))
 
 (fact "prepares metadata-based inline assignments"
   (let [form (process-inline-assignment '(var a ^:inline (u/identity-fn 1))

@@ -1,4 +1,4 @@
-(ns lang.model.annex.spec-go
+(ns lang.model.builtin.spec-go
   (:require [clojure.string]
             [lang.base.book :as book]
             [lang.base.emit :as emit]
@@ -9,7 +9,7 @@
             [lang.core.script :as script]
             [lang.base.util :as ut]
             [lang.model.annex.spec-xtalk]
-            [lang.model.annex.spec-xtalk.fn-go :as fn-go]
+            [lang.model.builtin.spec-go.fn-go :as fn-go]
             [std.lib.collection :as collection]))
 
 (defn go-typesystem

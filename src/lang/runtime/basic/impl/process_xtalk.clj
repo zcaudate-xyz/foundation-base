@@ -5,7 +5,7 @@
             [lang.runtime.basic.type-verify :as type-verify]
             [lang.core.impl :as impl]
             [lang.core.runtime :as rt]
-            [lang.model.spec-xtalk :as spec]
+            [lang.model.builtin.spec-xtalk :as spec]
             [std.lib.foundation :as f]))
 
 (def +program-init+

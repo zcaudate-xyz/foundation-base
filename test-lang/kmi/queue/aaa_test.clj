@@ -1,5 +1,5 @@
 (ns kmi.queue.aaa-test
-  (:require [lang.runtime.redis]
+  (:require [lang.runtime.annex.redis]
             [lang.core :as l])
   (:use code.test))
 

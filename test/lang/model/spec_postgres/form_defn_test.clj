@@ -1,11 +1,11 @@
 (ns lang.model.spec-postgres.form-defn-test
-  (:require [lang.model.spec-postgres :as g]
-            [lang.model.spec-postgres.form-defn :refer :all]
+  (:require [lang.model.annex.spec-postgres :as g]
+            [lang.model.annex.spec-postgres.form-defn :refer :all]
             [lang.core :as l]
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer lang.model.spec-postgres.form-defn/pg-defn-format :added "4.0"}
+^{:refer lang.model.annex.spec-postgres.form-defn/pg-defn-format :added "4.0"}
 (fact "formats a defn form"
 
   (pg-defn-format
@@ -21,7 +21,7 @@
        :static/input []}
       (defn hello [] (return 1))])
 
-^{:refer lang.model.spec-postgres.form-defn/pg-defn :added "4.0"}
+^{:refer lang.model.annex.spec-postgres.form-defn/pg-defn :added "4.0"}
 (fact "creates the complete defn"
 
   (l/with:emit

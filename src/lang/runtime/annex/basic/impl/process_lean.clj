@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-lean
+(ns lang.runtime.annex.basic.impl.process-lean
   (:require [clojure.string]
             [lang.runtime.basic.type-common :as common]
             [lang.runtime.basic.type-twostep :as twostep]
