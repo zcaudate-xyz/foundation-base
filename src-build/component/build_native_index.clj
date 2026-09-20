@@ -12,10 +12,10 @@
              [yarn install]]
             [:build-web
              [yarn install]
-             [npx expo build:web]]
+             [npx expo export --platform web]]
             [:dev
              [yarn install]
-             [npx expo start --web]]
+             [npx expo start --web --port 19007]]
             [:ios
              [yarn install]
              [npx expo start --ios]]
@@ -50,7 +50,7 @@
                 "make build-web"
                 "git config --global user.name github-actions"
                 "git config --global user.email github-actions@github.com"
-                "cd web-build && git init && git add -A && git commit -m 'deploying to gh-pages'"
+                "cd dist && git init && git add -A && git commit -m 'deploying to gh-pages'"
                 "git remote add origin git@github.com:zcaudate-xyz/demo.foundation-base.git"
                 "git push origin HEAD:gh-pages --force")}]}}]]})
 
@@ -61,7 +61,19 @@
               :description "Js Web Components"}
    :triggers #{"js" "component.web-native"}
    :sections {:common [+expo-makefile+
-                       +github-workflows-build+]
+                       +github-workflows-build+
+                       {:type :raw
+                        :file "metro.config.js"
+                        :main
+                        ["const { getDefaultConfig } = require('expo/metro-config');"
+                         ""
+                         "const config = getDefaultConfig(__dirname);"
+                         ""
+                         "// Extend asset and source extensions"
+                         "config.resolver.assetExts.push('db', 'ttf'); // Add 'ttf' for TrueType Fonts"
+                         "config.resolver.sourceExts.push('db'); // If you have custom '.db' files that need resolving"
+                         ""
+                         "module.exports = config;"]}]
               :node   [{:type :gitignore,
                         :main
                         ["node_modules/**/*"
@@ -73,7 +85,7 @@
                          "*.key"
                          "*.mobileprovision"
                          "*.orig.*"
-                         "web-build/"
+                         "dist/"
                          ".DS_Store"
                          "yarn.lock"
                          "yarn-error.log"]}
@@ -90,55 +102,69 @@
                                   "backgroundColor" "#ffffff"}
                                  "updates" {"fallbackToCacheTimeout" 0},
                                  "assetBundlePatterns" ["**/*"]
+                                 "experiments" {"baseUrl" "/demo.foundation-base"}
                                  "ios" {"supportsTablet" true},}}}
                        
                        {:type :package.json,
-                        :main {"main" "node_modules/expo/AppEntry.js",
-                               "name" "js-web-components",
-                               "private" true,
-                               "homepage" "/demo.foundation-base"
-                               
-                               "scripts"
-                               {"start" "expo start",
-                                "android" "expo start --android",
-                                "ios" "expo start --ios",
-                                "web" "expo start --web",
-                                "eject" "expo eject"},
-                               
-                               "dependencies"
-                               {"react-native-svg" "12.3.0",
-                                "javascript-time-ago" "2.3.11",
-                                "react-native" "0.68.1",
-                                "expo-media-library" "14.1.0",
-                                "expo-web-browser" "10.2.1",
-                                "uuid" "8.3.2",
-                                "react-dom" "17.0.2",
-                                "lightweight-charts" "3.8.0",
-                                "dateformat" "^4",
-                                "react-native-vector-icons" "9.1.0",
-                                "react-native-web" "0.17.7",
-                                "react-native-error-boundary" "1.1.10",
-                                "base-64" "1.0.0",
-                                "react-native-base64" "0.1.0",
-                                "react" "17.0.2",
-                                "react-native-get-random-values" "1.8.0",
-                                "expo-random" "12.2.0"},
-                               "devDependencies"
-                               {"@babel/core" "7.9.0",
-                                "@babel/preset-env" "7.13.15",
-                                "@types/react" "16.9.35",
-                                "@types/react-native" "0.63.2",
-                                "expo" "45.0.3",
-                                "expo-cli" "6.3.7",
-                                "typescript" "4.3.5"},
-                               "metro" {"watchFolders" ["assets"]}}}]}
+                        :main
+                        { ;;"main" "node_modules/expo/AppEntry.js",
+                         "main" "./src/App.js",
+                         "name"  "native-v1"
+                         "scripts" {"start" "expo start"
+                                    "android" "expo start --android"
+                                    "ios" "expo start --ios"
+                                    "web" "expo start --web"
+                                    "eject" "expo eject"}
+                         "private" true
+                         "dependencies" {"@expo/vector-icons" "^14.1.0"
+                                         "@react-navigation/bottom-tabs" "^7.3.10"
+                                         "@react-navigation/elements" "^2.3.8"
+                                         "@react-navigation/native" "^7.1.6"
+                                         "ethers" "^6.15.0"
+                                         "expo" "~53.0.17"
+                                         "expo-auth-session" "^6.2.1"
+                                         "expo-blur" "~14.1.5"
+                                         "expo-constants" "~17.1.7"
+                                         "expo-crypto" "^14.1.5"
+                                         "expo-font" "~13.3.2"
+                                         "expo-haptics" "~14.1.4"
+                                         "expo-image" "~2.3.2"
+                                         "expo-image-picker" "^16.1.4"
+                                         "expo-linking" "~7.1.7"
+                                         "expo-router" "~5.1.3"
+                                         "expo-splash-screen" "~0.30.10"
+                                         "expo-status-bar" "~2.2.3"
+                                         "expo-symbols" "~0.4.5"
+                                         "expo-system-ui" "~5.0.10"
+                                         "expo-web-browser" "~14.2.0"
+                                         "react" "19.0.0"
+                                         "react-dom" "19.0.0"
+                                         "react-native" "0.79.5"
+                                         "react-native-base64" "^0.2.1"
+                                         "react-native-gesture-handler" "~2.24.0"
+                                         "react-native-get-random-values" "^1.11.0"
+                                         "react-native-reanimated" "~3.17.4"
+                                         "react-native-safe-area-context" "5.4.0"
+                                         "react-native-screens" "~4.11.1"
+                                         "react-native-svg" "~15.11.2"
+                                         "react-native-vector-icons" "^10.2.0"
+                                         "react-native-web" "~0.20.0"
+                                         "react-native-webview" "13.13.5"
+                                         "ua-parser-js" "^2.0.4"
+                                         "url" "^0.11.4"
+                                         "uuid" "^11.1.0"}
+                         "devDependencies" {"@babel/core" "^7.25.2"
+                                            "@types/react" "~19.0.10"
+                                            "eslint" "^9.25.0"
+                                            "eslint-config-expo" "~9.2.0"
+                                            "typescript" "~5.8.3"
+                                            "@expo/metro-runtime" "^5.0.4"}
+                         "metro" {"watchFolders" ["assets"]}}}]}
    :default [{:type   :module.graph
               :lang   :js
               :target "src"
               :main   'component.web-native-index
-              :emit   {:code   {:label true
-                                :link    {:path-suffix ".js"
-                                          :path-separator "/"}}}}]})
+              :emit   {:code   {:label true}}}]})
 
 (def +init+
   nil)
