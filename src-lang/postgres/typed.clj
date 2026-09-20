@@ -4,6 +4,7 @@
             [postgres.typed.export.json-openapi :as compile.json-openapi]
             [postgres.typed.export.json-view :as compile.json-view]
             [postgres.typed.export.json-schema :as compile.json-schema]
+            [postgres.typed.export.portable-edn :as portable-edn]
             [postgres.typed.export.ts-schema :as compile.ts-schema]
             [lang.runtime.postgres.base.application :as app]
             [postgres.typed.typed-analyze :as analyze]
@@ -11,7 +12,10 @@
             [postgres.typed.typed-infer :as typed-infer]
             [postgres.typed.typed-resolve :as typed-resolve]
             [postgres.typed.typed-parse :as parse]
-            [postgres.typed.typed-view :as typed-view]))
+            [postgres.typed.typed-view :as typed-view]
+            [std.lib]))
+(std.lib/intern-in portable-edn/export-edn
+                  portable-edn/import-edn)
 (declare enrich-function-arg-roles input-shape output-shape)
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Shape Formatting Helpers

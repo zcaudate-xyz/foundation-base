@@ -1,10 +1,88 @@
 (ns postgres.typed-test
-  (:require [clojure.string :as str]
+  (:require [clojure.edn :as edn]
+            [clojure.string :as str]
+            [lang.runtime.postgres.base.application :as app]
+            [postgres.typed.export.json-openapi :as compile.json-openapi]
             [postgres.typed.typed-common :as types]
             [postgres.typed.typed-parse :as parse]
             [postgres.typed :as typed]
             [postgres.typed.typed-order :as typed-order])
   (:use code.test))
+
+(defn- fixture-context
+  []
+  (let [text-type (types/make-type-ref :primitive nil :text)
+        shape (types/make-jsonb-shape
+               {:name text-type}
+               "fixture/widget"
+               :high
+               true)
+        path (types/make-jsonb-path [:payload :name] 'payload)
+        jsonb-merge (types/make-jsonb-merge path shape)
+        jsonb-array (types/make-jsonb-array text-type)
+        type-union (types/make-type-union [text-type :jsonb])
+        inference (types/make-jsonb-inference shape [path] [jsonb-merge])
+        binding-context (types/make-context
+                         {'payload text-type}
+                         {'payload shape}
+                         {'payload path})
+        column (types/make-column-def
+                'payload
+                :jsonb
+                {:required false
+                 :map-schema shape
+                 :items-schema jsonb-array
+                 :ref-info {:path path
+                            :merge jsonb-merge
+                            :union type-union
+                            :inference inference
+                            :binding binding-context}})
+        table (types/make-table-def
+               "fixture"
+               "widget"
+               [column]
+               ['id]
+               {:kind :entity}
+               {:source 'fixture}
+               :gw)
+        enum (types/make-enum-def "fixture" "status" [:draft :published] :gw)
+        arg (types/->FnArg 'payload text-type {:required true} :payload)
+        fn-def (types/make-fn-def
+                "fixture.rpc"
+                "ping"
+                [arg]
+                text-type
+                {:raw-body '(select payload)
+                 :aliases {}}
+                :gw)
+        typed-payload (reduce types/add-typed
+                              (types/empty-typed)
+                              [table enum])]
+    (with-redefs [app/app-typed (fn [_] typed-payload)
+                  app/app-modules (fn [_] [{:id 'fixture.domain}
+                                           {:id 'fixture.rpc}])
+                  parse/analyze-namespace
+                  (fn [namespace]
+                    {:ns namespace
+                     :enums []
+                     :tables []
+                     :functions [(assoc fn-def :ns (str namespace))]
+                     :variants []})]
+      (assoc (typed/load-full "fixture")
+             :fixture-records
+             {:variant (types/make-variant-def
+                        "fixture/widget"
+                        "fixture/widget-class"
+                        "payload"
+                        {:shape shape}
+                        'fixture.rpc/ping)
+              :shape shape
+              :path path
+              :merge jsonb-merge
+              :array jsonb-array
+              :union type-union
+              :inference inference
+              :binding binding-context}))))
 
 ^{:refer postgres.typed/load-file :added "4.1"}
 (fact "creates a postgres typed context from a source file"
@@ -389,3 +467,85 @@
   (str/includes? (typed/export-typescript (typed/load-ns 'postgres.sample.scratch-v2))
                  "interface")
   => true)
+
+^{:refer postgres.typed/export-edn :added "4.1" :id postgres-typed-edn-round-trip}
+(fact "exports a complete typed context as readable versioned EDN"
+  (let [ctx (fixture-context)
+        snapshot (typed/export-edn ctx)
+        parsed (edn/read-string snapshot)
+        imported (typed/import-edn snapshot)]
+    [(get parsed :postgres.typed/format)
+     (get parsed :postgres.typed/version)
+     (not-any? #(str/includes? snapshot %)
+               ["#Type[" "#Enum[" "#Table[" "#Fn["
+                "#Shape[" "#Merge[" "#Array[" "#Union["])
+     (= ctx imported)
+     (types/table-def? (get-in imported [:registry 'fixture/widget]))
+     (types/fn-def? (typed/entry imported 'fixture.rpc/ping))
+     (types/variant-def? (get-in imported [:fixture-records :variant]))])
+  => [:postgres.typed/context
+      1
+      true
+      true
+      true
+      true
+      true])
+
+^{:refer postgres.typed/import-edn :added "4.1" :id postgres-typed-edn-usable-context}
+(fact "imports records without touching the process registry and keeps contexts usable"
+  (let [ctx (fixture-context)
+        snapshot (typed/export-edn ctx)
+        registry-before @types/*type-registry*
+        imported (typed/import-edn snapshot)
+        generated (with-redefs [compile.json-openapi/generate-openapi
+                                (fn [root-ns fn-filter opts]
+                                  {:root-ns root-ns
+                                   :registered? (contains? @types/*type-registry*
+                                                            'fixture.rpc/ping)
+                                   :filter? (fn? fn-filter)
+                                   :opts opts})]
+                    (typed/export-openapi imported))]
+    [(= registry-before @types/*type-registry*)
+     (:name (typed/entry imported 'fixture.rpc/ping))
+     (:name (first (typed/function-input imported 'fixture.rpc/ping)))
+     (:root-ns generated)
+     (:registered? generated)
+     (:filter? generated)])
+  => [true "ping" 'payload "fixture" true true])
+
+^{:refer postgres.typed/import-edn :added "4.1" :id postgres-typed-edn-validation}
+(fact "rejects unsupported snapshot versions and record tags"
+  (let [snapshot (fn [version context]
+                   (pr-str {:postgres.typed/format :postgres.typed/context
+                            :postgres.typed/version version
+                            :postgres.typed/context context}))
+        version-error (try
+                        (typed/import-edn (snapshot 2 {}))
+                        :no-error
+                        (catch clojure.lang.ExceptionInfo error
+                          (select-keys (ex-data error) [:type :version])))
+        tag-error (try
+                    (typed/import-edn
+                     (snapshot 1
+                               {:postgres.typed/record :unknown
+                                :postgres.typed/data {}}))
+                    :no-error
+                    (catch clojure.lang.ExceptionInfo error
+                      (select-keys (ex-data error) [:type :tag])))]
+    [version-error tag-error])
+  => [{:type :postgres.typed/unsupported-edn-version
+       :version 2}
+      {:type :postgres.typed/unknown-record-tag
+       :tag :unknown}])
+
+^{:refer postgres.typed/export-edn :added "4.1" :id postgres-typed-edn-function-filter}
+(fact "rejects runtime function filters instead of silently dropping them"
+  (let [error (try
+                (typed/export-edn (assoc (fixture-context)
+                                         :function-filter (constantly true)))
+                :no-error
+                (catch clojure.lang.ExceptionInfo error
+                  (select-keys (ex-data error) [:type :path])))]
+    error)
+  => {:type :postgres.typed/non-serializable-value
+      :path [:function-filter]})
