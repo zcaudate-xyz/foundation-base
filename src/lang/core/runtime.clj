@@ -8,7 +8,7 @@
             [lang.core.impl :as impl]
             [lang.core.impl-deps :as deps]
             [lang.core.impl-lifecycle :as lifecycle]
-            [lang.common.book-module :as book-module]
+            [lang.base.book-module :as book-module]
             [lang.core.library :as lib]
             [lang.core.library-snapshot :as snap]
             [lang.core.pointer :as ptr]
@@ -660,7 +660,7 @@
   [rt module-id]
   (multistage-invoke rt module-id default-teardown-module
                      (fn [book module-id]
-                       (binding [lang.common.book/*dep-types* :module]
+                       (binding [lang.base.book/*dep-types* :module]
                          (std.lib.deps/dependents-ordered book module-id)))))
 
 (defn multistage-teardown-to
@@ -669,7 +669,7 @@
   [rt module-id]
   (multistage-invoke rt module-id default-teardown-module
                      (fn [book module-id]
-                       (binding [lang.common.book/*dep-types* :module]
+                       (binding [lang.base.book/*dep-types* :module]
                          (butlast (std.lib.deps/dependents-ordered book module-id))))))
 
 

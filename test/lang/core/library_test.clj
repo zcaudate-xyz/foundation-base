@@ -1,8 +1,8 @@
 (ns lang.core.library-test
-  (:require [lang.common.book :as b]
-            [lang.common.book-entry :as entry]
-            [lang.common.book-meta :as meta]
-            [lang.common.book-module :as module]
+  (:require [lang.base.book :as b]
+            [lang.base.book-entry :as entry]
+            [lang.base.book-meta :as meta]
+            [lang.base.book-module :as module]
             [lang.base.emit-common :as common]
             [lang.base.emit-helper :as helper]
             [lang.base.grammar :as grammar]

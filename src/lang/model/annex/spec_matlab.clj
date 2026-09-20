@@ -1,12 +1,12 @@
 (ns lang.model.annex.spec-matlab
   (:require [clojure.string]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.base.emit :as emit]
             [lang.base.grammar :as grammar]
             [lang.base.preprocess-base :as preprocess]
             [lang.core.impl :as impl]
             [lang.core.script :as script]
-            [lang.model.spec-xtalk]
+            [lang.model.annex.spec-xtalk]
             [std.lib.collection :as collection])
   (:refer-clojure :exclude [for while]))
 

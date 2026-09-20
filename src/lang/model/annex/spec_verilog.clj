@@ -1,6 +1,6 @@
 (ns lang.model.annex.spec-verilog
   (:require [clojure.string]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.base.emit :as emit]
             [lang.base.emit-fn :as emit-fn]
             [lang.base.emit-helper :as helper]

@@ -1,6 +1,6 @@
 (ns lang.core.pointer-test
   (:require [std.json :as json]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.base.emit-prep-lua-test :as prep]
             [lang.core.impl-entry :as entry]
             [lang.core.library :as lib]

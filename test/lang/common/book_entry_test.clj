@@ -1,12 +1,12 @@
-(ns lang.common.book-entry-test
-  (:require [lang.common.book-entry :refer :all])
+(ns lang.base.book-entry-test
+  (:require [lang.base.book-entry :refer :all])
   (:use code.test))
 
-^{:refer lang.common.book-entry/book-entry? :added "4.0"}
+^{:refer lang.base.book-entry/book-entry? :added "4.0"}
 (fact "checks if object is a book entry"
   (book-entry? (book-entry {})) => true)
 
-^{:refer lang.common.book-entry/book-entry :added "4.0"}
+^{:refer lang.base.book-entry/book-entry :added "4.0"}
 (fact "creates a book entry"
 
   ;;

@@ -1,6 +1,6 @@
 (ns lang.core.impl-deps
   (:require [clojure.set :as set]
-             [lang.common.book :as b]
+             [lang.base.book :as b]
              [lang.base.emit :as emit]
              [lang.base.emit-preprocess :as preprocess] [lang.base.preprocess-base :as preprocess-base]
              [lang.base.emit-rewrite :as rewrite]

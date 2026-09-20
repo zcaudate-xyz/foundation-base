@@ -1,7 +1,7 @@
 (ns lang.core.compile
   (:require [clojure.string]
             [std.fs :as fs]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.core.compile-links :as links]
             [lang.base.emit :as emit]
             [lang.core.impl :as impl]

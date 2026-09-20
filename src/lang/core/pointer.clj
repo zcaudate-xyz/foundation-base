@@ -1,9 +1,9 @@
 (ns lang.core.pointer
   (:require [clojure.string]
             [std.json :as json]
-            [lang.common.book :as book]
-            [lang.common.book-entry :as e]
-            [lang.common.book-module :as module]
+            [lang.base.book :as book]
+            [lang.base.book-entry :as e]
+            [lang.base.book-module :as module]
             [lang.base.emit :as emit]
             [lang.base.emit-common :as common]
             [lang.core.impl :as impl]

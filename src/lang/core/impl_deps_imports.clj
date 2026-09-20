@@ -1,7 +1,7 @@
 (ns lang.core.impl-deps-imports
   (:require [clojure.set :as set]
-             [lang.common.book :as b]
-             [lang.common.book-module :as module]
+             [lang.base.book :as b]
+             [lang.base.book-module :as module]
              [lang.core.impl-entry :as entry]
              [lang.base.emit-template :as impl-template]
              [lang.base.util :as ut]

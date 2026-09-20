@@ -1,6 +1,6 @@
 (ns xt.lang.common-module
   (:require [lang.core :as l]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.core.impl-deps :as deps]
             [lang.core.impl-lifecycle :as lc]
             [lang.core.library :as lib]

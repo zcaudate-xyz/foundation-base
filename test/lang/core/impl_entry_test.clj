@@ -1,6 +1,6 @@
 (ns lang.core.impl-entry-test
-  (:require [lang.common.book :as b]
-               [lang.common.book-entry :as e]
+  (:require [lang.base.book :as b]
+               [lang.base.book-entry :as e]
               [lang.base.emit :as emit]
               [lang.base.emit-prep-lua-test :as prep]
               [lang.core.impl :as impl]

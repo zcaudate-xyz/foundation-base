@@ -1,5 +1,5 @@
 (ns lang.core.script-annex-test
-  (:require [lang.common.book :as book]
+  (:require [lang.base.book :as book]
             [lang.core.library :as lib]
              [lang.core.script-annex :as annex]
              [std.lib.context.registry :as reg]

@@ -1,6 +1,6 @@
 (ns lang.core
   (:require [clojure.string]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.core.compile :as compile]
             [lang.base.emit :as emit]
             [lang.base.emit-common :as common]

@@ -456,18 +456,7 @@
  
   xyz.zcaudate/lang
   {:description "working with other languages"
-   :include [[lang :exclude [lang.runtime.postgres
-                             lang.runtime.graal
-                             lang.runtime.jep
-                             lang.runtime.libpython
-                             lang.runtime.redis
-                             lang.runtime.solidity
-                             lang.runtime.nginx
-                             lang.runtime.basic.impl.process-verilog
-                             lang.runtime.basic.impl-annex.process-r
-                             lang.model.spec-postgres
-                             lang.model.spec-solidity
-                             lang.model.annex.spec-r]]
+   :include [[lang.runtime.redis :complete]
              [xt.lang :complete]]}
 
  xyz.zcaudate/lang.runtime.libpython
@@ -501,11 +490,13 @@
  xyz.zcaudate/postgres
  {:description "postgres language and runtime support"
   :include [[postgres :exclude [postgres.sample]]
+            [lang.model.spec-postgres :complete]
             [lang.runtime.postgres :complete]]}
 
  xyz.zcaudate/solidity
  {:description "solidity language and runtime support"
   :include [[solidity.core :complete]
+            [lang.model.spec-solidity :complete]
             [lang.runtime.solidity :complete]]}
 
  xyz.zcaudate/verilog

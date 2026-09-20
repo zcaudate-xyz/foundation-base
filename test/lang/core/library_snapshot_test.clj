@@ -1,8 +1,8 @@
 (ns lang.core.library-snapshot-test
-  (:require [lang.common.book :as b]
-            [lang.common.book-entry :as e]
-            [lang.common.book-meta :as meta]
-            [lang.common.book-module :as m]
+  (:require [lang.base.book :as b]
+            [lang.base.book-entry :as e]
+            [lang.base.book-meta :as meta]
+            [lang.base.book-module :as m]
             [lang.core.impl-entry :as entry]
             [lang.core.library-snapshot :as snap]
             [lang.core.library-snapshot-prep-test :as prep]

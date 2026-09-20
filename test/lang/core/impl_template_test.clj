@@ -1,5 +1,5 @@
 (ns lang.base.emit-template-test
-  (:require [lang.common.book :as b]
+  (:require [lang.base.book :as b]
              [lang.base.emit-helper :as helper]
              [lang.base.emit-prep-lua-test :as prep]
              [lang.base.grammar :as grammar]

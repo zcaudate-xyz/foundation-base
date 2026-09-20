@@ -1,6 +1,6 @@
 (ns lang.model.annex.spec-circom
   (:require [clojure.string]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.base.emit :as emit]
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]

@@ -1,6 +1,6 @@
 (ns lang.model.annex.spec-haskell
   (:require [clojure.string]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.base.emit :as emit]
             [lang.base.emit-common :as common]
             [lang.base.emit-data :as data]

@@ -5,7 +5,7 @@
             [postgres.core.impl-base :as base]
             [postgres.core.impl-main :as main]
             [lang.core :as l]
-            [lang.common.book :as book])
+            [lang.base.book :as book])
   (:use code.test))
 
 (l/script- :postgres

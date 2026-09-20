@@ -1,6 +1,6 @@
 (ns lang.base.preprocess-resolve-test
   (:use code.test)
-  (:require [lang.common.book-entry :as entry]
+  (:require [lang.base.book-entry :as entry]
             [lang.base.emit-prep-js-test :as prep-js]
             [lang.base.emit-prep-lua-test :as prep]
             [lang.core.impl-entry :as impl-entry]

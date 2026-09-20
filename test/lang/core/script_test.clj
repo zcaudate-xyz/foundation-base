@@ -1,7 +1,7 @@
 (ns lang.core.script-test
   (:require [lua.core]
              [lang.core :as l]
-             [lang.common.book :as book]
+             [lang.base.book :as book]
              [lang.base.emit-prep-lua-test :as prep-lua]
              [lang.core.impl :as impl]
              [lang.core.library :as lib]

@@ -4,7 +4,7 @@
              [postgres.sample.scratch-v1 :as scratch]
              [std.fs :as fs]
              [lang.core.compile :refer :all]
-             [lang.common.book-module :as bm]
+             [lang.base.book-module :as bm]
              [lang.core.impl :as impl]
              [lang.core.library :as lib]
              [lang.core.library-snapshot :as snap]

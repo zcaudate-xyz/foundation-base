@@ -1,10 +1,10 @@
 (ns lang.model.annex.spec-php
-  (:require [lang.common.book :as book]
+  (:require [lang.base.book :as book]
             [lang.base.emit :as emit]
             [lang.base.emit-common :as common]
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]
-            [lang.model.spec-xtalk]
+            [lang.model.annex.spec-xtalk]
             [lang.model.annex.spec-xtalk.fn-php :as fn]
             [lang.model.annex.spec-php.rewrite :as rewrite]
             [std.lib.collection :as collection]))

@@ -1,6 +1,6 @@
 (ns lang.core.script-control
   (:require [std.json :as json]
-            [lang.common.book-entry :as e]
+            [lang.base.book-entry :as e]
             [lang.base.emit :as emit]
             [lang.core.impl :as impl]
             [lang.core.library :as lib]

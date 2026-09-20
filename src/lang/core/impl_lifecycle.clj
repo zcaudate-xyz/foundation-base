@@ -1,8 +1,8 @@
 (ns lang.core.impl-lifecycle
   (:require [clojure.string]
             [std.fs :as fs]
-            [lang.common.book :as book]
-            [lang.common.book-module :as module]
+            [lang.base.book :as book]
+            [lang.base.book-module :as module]
             [lang.core.compile-links :as links]
             [lang.base.emit :as emit]
             [lang.core.impl :as impl]

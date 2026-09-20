@@ -1,6 +1,6 @@
 (ns lang.core.impl-test
   (:require [clojure.string]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.base.emit-prep-lua-test :as prep]
             [lang.core.impl :refer :all]
             [lang.core.impl-deps :as deps]

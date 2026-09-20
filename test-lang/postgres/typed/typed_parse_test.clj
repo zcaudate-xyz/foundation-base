@@ -47,14 +47,14 @@
             [:class-table "Org"]
             [:scope {:items {:type :text}}])
          "test.ns"
-         '{tua gwdb.common.type-user-access})]
+         '{tua statsdb.common.type-user-access})]
     [(:type variant)
      (:class-table variant)
      (:field variant)
      (get-in variant [:attrs :type])
      (get-in variant [:attrs :shape])
      (get-in variant [:attrs :items :type])]
-    => ['gwdb.common.type-user-access/AccessRole
+    => ['statsdb.common.type-user-access/AccessRole
         "Org"
         :scope
         :jsonb
@@ -66,7 +66,7 @@
       [:class-table "Org"]
       [:scope {:type :text}])
    "test.ns"
-   '{tua gwdb.common.type-user-access})
+   '{tua statsdb.common.type-user-access})
   => (throws clojure.lang.ExceptionInfo))
 
 ^{:refer postgres.typed.typed-parse/script? :added "4.1"}
@@ -267,7 +267,7 @@
 (fact "parse-runtime-table handles ref link transformation"
   (let [entries [:id {:type :uuid :primary true}
                  :org-id {:type :ref :ref {:link {:module :Organisation :id :id}}}]
-        table (parse/parse-runtime-table :User entries "gwdb.core")]
+        table (parse/parse-runtime-table :User entries "statsdb.core")]
     (:name table) => "User"
     (count (:columns table)) => 2))
 
@@ -277,7 +277,7 @@
                                                :name {:type :text}]
                                         :Organisation [:id {:type :uuid :primary true}
                                                        :handle {:type :citext}]}
-                                       "gwdb.core")]
+                                       "statsdb.core")]
     (count (:tables analysis)) => 2
     (count (:enums analysis)) => 0
     (count (:functions analysis)) => 0

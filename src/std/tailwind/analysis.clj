@@ -1,6 +1,6 @@
 (ns std.tailwind.analysis
   (:require [lang.core :as l]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.core.library :as lib]
             [std.lib.walk :as walk]
             [std.tailwind :as tailwind]))

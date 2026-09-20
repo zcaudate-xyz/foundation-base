@@ -1,5 +1,5 @@
 (ns lang.base.emit-special
-  (:require [lang.common.book :as book]
+  (:require [lang.base.book :as book]
             [lang.base.emit-common :as common]
             [lang.base.emit-data :as data]
             [lang.base.emit-helper :as helper]

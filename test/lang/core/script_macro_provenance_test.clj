@@ -1,5 +1,5 @@
 (ns lang.core.script-macro-provenance-test
-  (:require [lang.common.book-module :as module]
+  (:require [lang.base.book-module :as module]
             [lang.core.impl :as impl]
             [lang.core.library :as lib]
             [lang.core.pointer :as ptr]

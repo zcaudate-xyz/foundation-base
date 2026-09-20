@@ -1,8 +1,8 @@
 (ns lang.core.script-macro-test
   (:require [clojure.string]
              [lang.model.spec-postgres :as pg]
-             [lang.common.book :as book]
-             [lang.common.book-module :as module]
+             [lang.base.book :as book]
+             [lang.base.book-module :as module]
              [lang.core.impl :as impl]
              [lang.core.impl-entry :as entry]
              [lang.core.library :as lib]

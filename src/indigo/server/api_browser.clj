@@ -8,7 +8,7 @@
             [std.block :as block]
             [std.block.layout :as layout]
             [lang.core :as l]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [std.lib.env :as env]))
 
 ;; Existing endpoints -------------------------------------------------------

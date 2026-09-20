@@ -58,7 +58,7 @@
       :context/fn #'lang.base.util/lang-rt-default}
 
   (type @a)
-  => lang.common.book_entry.BookEntry
+  => lang.base.book_entry.BookEntry
   
   (into {} @a)
   => (contains-in

@@ -1,7 +1,7 @@
 (ns lang.model.annex.spec-r-test
   (:require [clojure.walk :as walk]
             [lang.core :as l]
-             [lang.common.book :as book]
+             [lang.base.book :as book]
              [lang.model.annex.spec-r.rewrite :as rewrite]
              [lang.model.annex.spec-r :refer :all])
   (:use code.test))

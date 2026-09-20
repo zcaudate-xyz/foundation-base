@@ -1,6 +1,6 @@
 (ns lang.core.impl
   (:require [clojure.string]
-             [lang.common.book-module :as book-module]
+             [lang.base.book-module :as book-module]
              [lang.base.emit :as emit]
              [lang.base.emit-common :as emit-common]
              [lang.base.emit-preprocess :as preprocess] [lang.base.preprocess-base :as preprocess-base]

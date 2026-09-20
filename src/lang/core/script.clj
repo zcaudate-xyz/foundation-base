@@ -1,8 +1,8 @@
 (ns lang.core.script
   (:require [clojure.set]
             [std.json :as json]
-            [lang.common.book :as book]
-            [lang.common.book-entry :as e]
+            [lang.base.book :as book]
+            [lang.base.book-entry :as e]
             [lang.base.emit :as emit]
             [lang.core.impl :as impl]
             [lang.core.library :as lib]

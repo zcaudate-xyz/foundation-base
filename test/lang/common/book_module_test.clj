@@ -1,21 +1,21 @@
-(ns lang.common.book-module-test
+(ns lang.base.book-module-test
   (:require [xt.lang.common-promise]
             [xt.lang.common-data]
             [xt.lang.common-lib]
             [js.blessed]
             [js.blessed.frame]
             [lang.core :as l]
-            [lang.common.book-module :refer :all]
+            [lang.base.book-module :refer :all]
             [lang.core.impl :as impl])
   (:use code.test))
 
 (def +library+ (impl/clone-default-library))
 
-^{:refer lang.common.book-module/book-module? :added "4.0"}
+^{:refer lang.base.book-module/book-module? :added "4.0"}
 (fact "checks of object is a book module"
   (book-module? (book-module {:lang :lua :id 'L.core})) => true)
 
-^{:refer lang.common.book-module/book-module :added "4.0"}
+^{:refer lang.base.book-module/book-module :added "4.0"}
 (fact "creates a book module"
 
   (book-module {:id 'L.core
@@ -33,13 +33,13 @@
    {'demo.poly (book-module {:lang :js :id 'demo.poly})
     'demo.core (book-module {:lang :js :id 'demo.core})}})
 
-^{:refer lang.common.book-module/polyfill-default-alias :added "4.1"}
+^{:refer lang.base.book-module/polyfill-default-alias :added "4.1"}
 (fact "returns the default alias for a derived polyfill module"
   (polyfill-default-alias 'common-net)  => 'polyfill-net
   (polyfill-default-alias 'polyfill-net) => 'polyfill-net
   (polyfill-default-alias 'net)          => 'polyfill-net)
 
-^{:refer lang.common.book-module/module-derived-view :added "4.1"}
+^{:refer lang.base.book-module/module-derived-view :added "4.1"}
 (fact "returns a compilation view with derived polyfill links"
 
   (-> (module-derived-view
@@ -105,7 +105,7 @@
                     :current other.module
                     :polyfill demo.poly}))
 
-^{:refer lang.common.book-module/resolve-module-view :added "4.1"}
+^{:refer lang.base.book-module/resolve-module-view :added "4.1"}
 (fact "resolves a module id or module map to the derived compilation view"
 
   (resolve-module-view nil nil) => nil
@@ -131,7 +131,7 @@
       :link)
   => '{polyfill-demo.poly demo.poly})
 
-^{:refer lang.common.book-module/module-deps-code :added "4.0"}
+^{:refer lang.base.book-module/module-deps-code :added "4.0"}
 (fact "gets the code link dependencies"
 
   (-> (book-module {:id 'L.nginx
@@ -193,7 +193,7 @@
                                                       :x-promise-catch}}}})))
   => '#{})
 
-^{:refer lang.common.book-module/module-deps-all :added "4.1"}
+^{:refer lang.base.book-module/module-deps-all :added "4.1"}
 (fact "gets all module dependencies including explicit links"
   (module-deps-all
    (book-module {:id 'L.nginx
@@ -205,7 +205,7 @@
                                           L.json/parse}}}}))
   => '#{L.core L.json})
 
-^{:refer lang.common.book-module/module-deps-native :added "4.0"}
+^{:refer lang.base.book-module/module-deps-native :added "4.0"}
 (fact "gets the native link dependencies"
 
   (impl/with:library [+library+]
@@ -217,7 +217,7 @@
       'js.react)))
   => '{"react" #{React}})
 
-^{:refer lang.common.book-module/module-deps-fragment :added "4.0"}
+^{:refer lang.base.book-module/module-deps-fragment :added "4.0"}
 (fact "gets all fragments that have beeen used in js.react"
 
   (impl/with:library [+library+]
@@ -253,7 +253,7 @@
          xt.lang.common-trace/LOG!
          js.react/const})
 
-^{:refer lang.common.book-module/module-entries :added "4.0"}
+^{:refer lang.base.book-module/module-entries :added "4.0"}
 (fact "creates an export entry for a module"
 
   (impl/with:library [+library+]

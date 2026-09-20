@@ -5,7 +5,7 @@
             [postgres.core.impl-base :as impl]
             [postgres.core.impl-main :as main]
             [lang.core :as l]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.core.library-snapshot :as snap]
             [lang.base.util :as ut]
             [std.lib.foundation :as f]

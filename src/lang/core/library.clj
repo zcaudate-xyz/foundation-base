@@ -1,9 +1,9 @@
 (ns lang.core.library
   (:require [clojure.string :as str]
             [std.concurrent :as cc]
-            [lang.common.book :as b]
-            [lang.common.book-entry :as e]
-            [lang.common.book-module :as m]
+            [lang.base.book :as b]
+            [lang.base.book-entry :as e]
+            [lang.base.book-module :as m]
             [lang.core.impl-entry :as entry]
             [lang.core.library-snapshot :as snap]
             [lang.base.util :as ut]

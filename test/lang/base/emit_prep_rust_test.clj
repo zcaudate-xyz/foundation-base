@@ -1,5 +1,5 @@
 (ns lang.base.emit-prep-rust-test
-  (:require [lang.common.book :as b]
+  (:require [lang.base.book :as b]
             [lang.base.emit-common :as common]
             [lang.base.emit-helper :as helper]
             [lang.base.grammar :as grammar]

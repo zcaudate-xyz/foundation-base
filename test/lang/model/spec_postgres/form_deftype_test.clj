@@ -5,7 +5,7 @@
             [lang.model.spec-postgres.form-deftype-hydrate :as hydrate]
             [postgres.sample.scratch-v1 :as scratch]
             [lang.core :as l]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.core.library-snapshot :as snap])
   (:use code.test))
 

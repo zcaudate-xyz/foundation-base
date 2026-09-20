@@ -1,6 +1,6 @@
 (ns lang.base.emit-data
   (:require [clojure.string]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.base.emit-common :as common]
             [lang.base.emit-helper :as helper]
             [lang.base.util :as ut]

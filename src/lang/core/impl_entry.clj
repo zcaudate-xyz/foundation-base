@@ -1,5 +1,5 @@
 (ns lang.core.impl-entry
-  (:require [lang.common.book :as book]
+  (:require [lang.base.book :as book]
              [lang.base.emit-template :as impl-template]
              [lang.base.emit :as emit]
              [lang.base.emit-preprocess :as preprocess] [lang.base.preprocess-base :as preprocess-base]

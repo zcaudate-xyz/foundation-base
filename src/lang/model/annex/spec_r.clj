@@ -1,6 +1,6 @@
 (ns lang.model.annex.spec-r
   (:require [clojure.string :as str]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.base.emit :as emit]
             [lang.base.emit-common :as common]
             [lang.base.emit-data :as data]
@@ -11,7 +11,7 @@
             [lang.core.script :as script]
             [lang.typed.xtalk-analysis :as xtalk-analysis]
             [lang.base.util :as ut]
-            [lang.model.spec-xtalk]
+            [lang.model.annex.spec-xtalk]
             [lang.model.annex.spec-r.rewrite :as rewrite]
             [lang.model.annex.spec-xtalk.fn-r :as fn]
             [std.lib.collection :as collection]

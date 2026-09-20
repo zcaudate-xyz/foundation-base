@@ -1,14 +1,14 @@
-(ns lang.common.book-meta-test
-  (:require [lang.common.book-meta :refer :all]
+(ns lang.base.book-meta-test
+  (:require [lang.base.book-meta :refer :all]
             [lang.base.util :as ut]
             [std.lib.template :as template])
   (:use code.test))
 
-^{:refer lang.common.book-meta/book-meta? :added "4.0"}
+^{:refer lang.base.book-meta/book-meta? :added "4.0"}
 (fact "checks if object is a book meta"
   (book-meta? (book-meta {})) => true)
 
-^{:refer lang.common.book-meta/book-meta :added "4.0"}
+^{:refer lang.base.book-meta/book-meta :added "4.0"}
 (fact "creates a book meta"
 
   (book-meta {:module-export  (fn [{:keys [as]} opts]

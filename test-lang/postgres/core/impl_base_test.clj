@@ -4,7 +4,7 @@
             [postgres.core.impl-base :refer :all]
             [postgres.sample.scratch-v1 :as scratch]
             [lang.core :as l]
-            [lang.common.book :as book])
+            [lang.base.book :as book])
   (:use code.test))
 
 (l/script- :postgres

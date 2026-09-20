@@ -1,5 +1,5 @@
 (ns lang.base.emit-test
-  (:require [lang.common.book-entry :as entry]
+  (:require [lang.base.book-entry :as entry]
             [lang.base.emit :as emit :refer :all]
             [lang.base.emit-common :as common]
             [lang.base.emit-helper :as helper]

@@ -1,5 +1,5 @@
 (ns lang.core.library-snapshot
-  (:require [lang.common.book :as book]
+  (:require [lang.base.book :as book]
             [lang.core.impl-entry :as entry]
             [lang.base.emit-template :as impl-template]
             [lang.base.util :as ut]

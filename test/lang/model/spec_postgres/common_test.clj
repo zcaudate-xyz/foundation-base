@@ -133,12 +133,12 @@
         (common/pg-hydrate
          (list 'defn
                (with-meta 'foo
-                 {:api/meta {:table "gwdb.common.type-newsroom/NewsroomCollaboration"}})
+                 {:api/meta {:table "statsdb.common.type-newsroom/NewsroomCollaboration"}})
                [] 1)
          {}
          {:entry {:namespace 'lang.model.spec-postgres.common-test}})]
     (get-in (meta (second hydrated)) [:api/meta :table])
-    => "gwdb.common.type-newsroom/NewsroomCollaboration"))
+    => "statsdb.common.type-newsroom/NewsroomCollaboration"))
 
 ^{:refer lang.model.spec-postgres.common/pg-current-module-link? :added "4.1"}
 (fact "checks postgres module links")

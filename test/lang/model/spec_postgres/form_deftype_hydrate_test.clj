@@ -37,7 +37,7 @@
                                                   :lang :postgres
                                                   :section :code
                                                   :static/dbtype :enum}}}}})
-                lang.common.book/get-base-entry
+                lang.base.book/get-base-entry
                 (fn [book module id section]
                   (get-in book [:modules module section id]))]
     (f)))
@@ -59,7 +59,7 @@
                                    :section :code
                                    :static/dbtype :table})))
                  lang.core.library-snapshot/get-book (fn [_ _] {:modules {}})
-                 lang.common.book/get-base-entry (constantly nil)]
+                 lang.base.book/get-base-entry (constantly nil)]
     (pg-deftype-hydrate-check-link {}
                                     nil
                                     {:module 'demo :id 'Task :section :code}

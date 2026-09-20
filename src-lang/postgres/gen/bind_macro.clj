@@ -3,7 +3,7 @@
              [lang.model.spec-postgres.common :as common]
              [lang.runtime.postgres.base.application :as app]
              [lang.core :as l]
-             [lang.common.book :as book]
+             [lang.base.book :as book]
              [lang.base.util :as ut]
              [std.lib.collection :as collection]
              [std.lib.deps :as deps]

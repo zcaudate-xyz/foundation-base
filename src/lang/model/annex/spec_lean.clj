@@ -1,11 +1,11 @@
 (ns lang.model.annex.spec-lean
   (:require [clojure.string]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.base.emit :as emit]
             [lang.base.emit-common :as common]
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]
-            [lang.model.spec-xtalk]
+            [lang.model.annex.spec-xtalk]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.string.prose :as prose]))

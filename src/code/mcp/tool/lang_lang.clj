@@ -1,6 +1,6 @@
 (ns code.mcp.tool.lang-lang
   (:require [lang.core :as l]
-            [lang.common.book :as book]
+            [lang.base.book :as book]
             [lang.core.library :as lib]))
 
 (defn lang-emit-as-safe

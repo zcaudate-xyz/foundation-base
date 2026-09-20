@@ -1,7 +1,7 @@
 (ns lang.core-test
   (:require [lang.core :as l]
-            [lang.common.book :as book]
-            [lang.common.book-meta :as meta]
+            [lang.base.book :as book]
+            [lang.base.book-meta :as meta]
             [lang.base.emit-helper :as helper]
             [lang.base.grammar :as grammar]
             [lang.core.impl-entry :as entry]
