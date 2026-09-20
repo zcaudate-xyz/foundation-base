@@ -1,5 +1,6 @@
 (ns postgres.typed-test
   (:require [clojure.edn :as edn]
+            [clojure.pprint :as pprint]
             [clojure.string :as str]
             [lang.runtime.postgres.base.application :as app]
             [postgres.typed.export.json-openapi :as compile.json-openapi]
@@ -472,19 +473,26 @@
 (fact "exports a complete typed context as readable versioned EDN"
   (let [ctx (fixture-context)
         snapshot (typed/export-edn ctx)
-        parsed (edn/read-string snapshot)
-        imported (typed/import-edn snapshot)]
-    [(get parsed :postgres.typed/format)
-     (get parsed :postgres.typed/version)
-     (not-any? #(str/includes? snapshot %)
+        printed (with-out-str (pprint/pprint snapshot))
+        imported (typed/import-edn snapshot)
+        imported-from-data (typed/import-edn (edn/read-string printed))]
+    [(map? snapshot)
+     (get snapshot :postgres.typed/format)
+     (get snapshot :postgres.typed/version)
+     (not-any? #(str/includes? printed %)
                ["#Type[" "#Enum[" "#Table[" "#Fn["
                 "#Shape[" "#Merge[" "#Array[" "#Union["])
      (= ctx imported)
+     (= snapshot (edn/read-string printed))
+     (= ctx imported-from-data)
      (types/table-def? (get-in imported [:registry 'fixture/widget]))
      (types/fn-def? (typed/entry imported 'fixture.rpc/ping))
      (types/variant-def? (get-in imported [:fixture-records :variant]))])
-  => [:postgres.typed/context
+  => [true
+      :postgres.typed/context
       1
+      true
+      true
       true
       true
       true
@@ -516,9 +524,9 @@
 ^{:refer postgres.typed/import-edn :added "4.1" :id postgres-typed-edn-validation}
 (fact "rejects unsupported snapshot versions and record tags"
   (let [snapshot (fn [version context]
-                   (pr-str {:postgres.typed/format :postgres.typed/context
-                            :postgres.typed/version version
-                            :postgres.typed/context context}))
+                   {:postgres.typed/format :postgres.typed/context
+                    :postgres.typed/version version
+                    :postgres.typed/context context})
         version-error (try
                         (typed/import-edn (snapshot 2 {}))
                         :no-error

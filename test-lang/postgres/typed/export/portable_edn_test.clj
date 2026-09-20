@@ -10,8 +10,10 @@
   (let [table (types/make-table-def "demo" "Entry" [] :id)
         ctx (typed/load-registry {'demo/Entry table})
         snapshot (portable-edn/export-edn ctx)]
-    [(map? (edn/read-string snapshot))
+    [(map? snapshot)
+     (= snapshot (edn/read-string (pr-str snapshot)))
      (= ctx (portable-edn/import-edn snapshot))
+     (= ctx (portable-edn/import-edn (edn/read-string (pr-str snapshot))))
      (= snapshot (typed/export-edn ctx))
      (= ctx (typed/import-edn snapshot))])
-  => [true true true true])
+  => [true true true true true true])

@@ -224,11 +224,13 @@
                 :class (some-> value class .getName)})))
 
 (defn export-edn
-  "Returns a versioned, plain EDN snapshot of a postgres typed context.
+  "Returns a versioned, plain EDN data structure for a postgres typed context.
 
-   The returned string can be written with `spit`; `import-edn` accepts the
-   result read with `slurp`. Function filters are runtime values and therefore
-   must be supplied again to APIs such as `export-openapi` after importing."
+   Pretty print the result with `clojure.pprint/pprint` or serialize it with
+   `pr-str`. Read serialized text with `clojure.edn/read-string` before passing
+   it to `import-edn`.
+   Function filters are runtime values and therefore must be supplied again to
+   APIs such as `export-openapi` after importing."
   [ctx]
   (when-not (map? ctx)
     (edn-error "A postgres.typed context must be a map"
@@ -239,37 +241,28 @@
                {:type :postgres.typed/non-serializable-value
                 :path [:function-filter]
                 :class (some-> (:function-filter ctx) class .getName)}))
-  (pr-str {+edn-format-key+ +edn-format+
-           +edn-version-key+ +edn-version+
-           +edn-context-key+ (encode-edn-value ctx [:context])}))
+  {+edn-format-key+ +edn-format+
+   +edn-version-key+ +edn-version+
+   +edn-context-key+ (encode-edn-value ctx [:context])})
 
 (defn import-edn
-  "Returns a postgres typed context from a versioned EDN snapshot string."
-  [text]
-  (when-not (string? text)
-    (edn-error "A postgres.typed EDN snapshot must be text"
+  "Returns a postgres typed context from a snapshot data structure."
+  [snapshot]
+  (when-not (map? snapshot)
+    (edn-error "A postgres.typed EDN snapshot must contain a map"
                {:type :postgres.typed/invalid-edn
-                :value text}))
-  (let [snapshot (try
-                   (edn/read-string text)
-                   (catch Exception error
-                     (edn-error "Invalid postgres.typed EDN snapshot"
-                                {:type :postgres.typed/invalid-edn
-                                 :cause (.getMessage error)})))]
-    (when-not (map? snapshot)
-      (edn-error "A postgres.typed EDN snapshot must contain a map"
-                 {:type :postgres.typed/invalid-edn}))
-    (when-not (= +edn-format+ (get snapshot +edn-format-key+))
-      (edn-error "Unknown postgres.typed EDN snapshot format"
-                 {:type :postgres.typed/invalid-edn-format
-                  :format (get snapshot +edn-format-key+)}))
-    (when-not (= +edn-version+ (get snapshot +edn-version-key+))
-      (edn-error "Unsupported postgres.typed EDN snapshot version"
-                 {:type :postgres.typed/unsupported-edn-version
-                  :version (get snapshot +edn-version-key+)}))
-    (let [ctx (decode-edn-value (get snapshot +edn-context-key+)
-                                [:context])]
-      (when-not (map? ctx)
-        (edn-error "The postgres.typed EDN context must be a map"
-                   {:type :postgres.typed/invalid-context}))
-      ctx)))
+                :value snapshot}))
+  (when-not (= +edn-format+ (get snapshot +edn-format-key+))
+    (edn-error "Unknown postgres.typed EDN snapshot format"
+               {:type :postgres.typed/invalid-edn-format
+                :format (get snapshot +edn-format-key+)}))
+  (when-not (= +edn-version+ (get snapshot +edn-version-key+))
+    (edn-error "Unsupported postgres.typed EDN snapshot version"
+               {:type :postgres.typed/unsupported-edn-version
+                :version (get snapshot +edn-version-key+)}))
+  (let [ctx (decode-edn-value (get snapshot +edn-context-key+)
+                              [:context])]
+    (when-not (map? ctx)
+      (edn-error "The postgres.typed EDN context must be a map"
+                 {:type :postgres.typed/invalid-context}))
+    ctx))
