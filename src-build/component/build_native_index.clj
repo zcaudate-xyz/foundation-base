@@ -159,7 +159,7 @@
                                             "eslint-config-expo" "~9.2.0"
                                             "typescript" "~5.8.3"
                                             "@expo/metro-runtime" "^5.0.4"}
-                         "metro" {"watchFolders" ["assets"]}}}]}
+                         }}]}
    :default [{:type   :module.graph
               :lang   :js
               :target "src"
