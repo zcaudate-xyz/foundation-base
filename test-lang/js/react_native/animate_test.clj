@@ -137,8 +137,12 @@
   => {:text "hello"}
 
   (!.js
+   (var nativeCalls 0)
    (var elem {:style {}
-               :tagName "INPUT"})
+               :tagName "INPUT"
+               :setNativeProps
+               (fn:> [props]
+                 (:= nativeCalls (+ nativeCalls 1)))})
    (a/setPropsAll elem
                   {:text "hello"
                    :style {:opacity 0.5
@@ -148,11 +152,13 @@
    {:value elem.value
     :opacity elem.style.opacity
     :width elem.style.width
-    :transform elem.style.transform})
+    :transform elem.style.transform
+    :nativeCalls nativeCalls})
   => {:value "hello"
       :opacity 0.5
       :width "10px"
-      :transform "translateX(12px) rotateZ(45deg)"})
+      :transform "translateX(12px) rotateZ(45deg)"
+      :nativeCalls 0})
 
 ^{:refer js.react-native.animate/derive :added "4.0" :unchecked true}
 (fact "derives a value from one or more Animated.Value"
