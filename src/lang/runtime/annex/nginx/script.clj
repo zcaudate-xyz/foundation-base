@@ -1,4 +1,4 @@
-(ns lang.runtime.nginx.script
+(ns lang.runtime.annex.nginx.script
   (:require [clojure.string]
             [std.lib.env :as env]
             [std.lib.foundation :as f]

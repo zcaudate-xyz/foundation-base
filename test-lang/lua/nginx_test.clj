@@ -1,5 +1,5 @@
 (ns lua.nginx-test
-  (:require [lang.runtime.nginx :as nginx]
+  (:require [lang.runtime.annex.nginx :as nginx]
             [lang.core :as l]
             [std.lib.env :as env]
             [xt.lang.common-notify :as notify])
@@ -163,7 +163,7 @@
 
 (comment
 
-  (lang.runtime.nginx/nginx-conf)
+  (lang.runtime.annex.nginx/nginx-conf)
   (./import))
 
 

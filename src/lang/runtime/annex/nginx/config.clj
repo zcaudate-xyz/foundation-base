@@ -1,6 +1,6 @@
-(ns lang.runtime.nginx.config
+(ns lang.runtime.annex.nginx.config
   (:require [lua.nginx]
-            [lang.runtime.nginx.script :as script]
+            [lang.runtime.annex.nginx.script :as script]
             [lang.core :as l]
             [std.lib.os :as os]))
 

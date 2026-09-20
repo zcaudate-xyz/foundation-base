@@ -1,5 +1,5 @@
 (ns lua.nginx.task-test
-  (:require [lang.runtime.nginx.config :as config]
+  (:require [lang.runtime.annex.nginx.config :as config]
             [std.json :as json]
             [std.lib.env :as env]
             [lang.core :as l])

@@ -16,8 +16,8 @@
          [:lua    :basic]              'lang.runtime.basic.impl.process-lua
          [:lua    :interactive]        'lang.runtime.basic.impl.process-lua
          [:lua    :websocket]          'lang.runtime.basic.impl.process-lua
-         [:lua    :nginx]              'lang.runtime.nginx
-         [:lua    :nginx.instance]     'lang.runtime.nginx
+         [:lua    :nginx]              'lang.runtime.annex.nginx
+         [:lua    :nginx.instance]     'lang.runtime.annex.nginx
          [:lua    :redis]              'lang.runtime.annex.redis
          [:lua.redis :default]         'lang.runtime.annex.redis
          [:lua.redis :redis]           'lang.runtime.annex.redis
@@ -25,8 +25,8 @@
          [:lua.nginx :basic]           'lang.runtime.basic.impl.process-lua
          [:lua.nginx :interactive]     'lang.runtime.basic.impl.process-lua
          [:lua.nginx :websocket]       'lang.runtime.basic.impl.process-lua
-         [:lua.nginx :nginx]           'lang.runtime.nginx
-         [:lua.nginx :nginx.instance]  'lang.runtime.nginx
+         [:lua.nginx :nginx]           'lang.runtime.annex.nginx
+         [:lua.nginx :nginx.instance]  'lang.runtime.annex.nginx
          [:lua.nginx :remote-port]     'lang.runtime.basic.impl.process-lua
          [:lua.nginx :remote-ws]       'lang.runtime.basic.impl.process-lua
          [:lua.nginx :verify]          'lang.runtime.basic.impl.process-lua

@@ -1,11 +1,11 @@
-(ns lang.runtime.nginx
+(ns lang.runtime.annex.nginx
   (:require [clojure.string]
             [lib.docker :as docker]
             [lua.nginx]
             [net.http :as http]
             [lang.runtime.basic.impl.process-lua :as lua]
-            [lang.runtime.nginx.config :as config]
-            [lang.runtime.nginx.script :as script]
+            [lang.runtime.annex.nginx.config :as config]
+            [lang.runtime.annex.nginx.script :as script]
             [std.fs :as fs]
             [std.json :as json]
             [lang.core :as l]

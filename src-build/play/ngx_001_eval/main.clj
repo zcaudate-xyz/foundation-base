@@ -52,7 +52,7 @@
                                '(lua.nginx/http-echo-ws))]]]]))]]]])
 
 (comment
-  (lang.runtime.nginx/error-logs))
+  (lang.runtime.annex.nginx/error-logs))
 
 
 (comment

@@ -5,7 +5,7 @@
             [std.make :as make :refer [def.make]]
             [std.string :as str]
             [play.ngx-001-eval.main :as main]
-            [lang.runtime.nginx :as nginx]))
+            [lang.runtime.annex.nginx :as nginx]))
 
 (def.make PROJECT
   {:github   {:repo "zcaudate/play.ngx-001-eval"

@@ -1,5 +1,5 @@
 (ns lua.nginx.http-client-test
-  (:require [lang.runtime.nginx]
+  (:require [lang.runtime.annex.nginx]
             [std.json :as json]
             [std.lib.env :as env]
             [lang.core :as l])

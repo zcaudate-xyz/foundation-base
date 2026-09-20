@@ -319,10 +319,6 @@
  {:description "aws library" 
   :include [[lua.aws   :complete]]}
  
- xyz.zcaudate/lua.core
- {:description "core lua library" 
-  :include [[lua.core   :complete]]}
- 
  xyz.zcaudate/lua.nginx
  {:description "nginx library" 
   :include [[lua.nginx   :complete]]}
@@ -457,7 +453,9 @@
              [lang.model.builtin :complete]
              [lang.runtime.basic :complete]
              [lang.runtime :exclude [lang.runtime.annex]]
-             [lang.typed :complete]]}
+             [lang.typed :complete]
+             [lua.core :complete]
+             [xt.lang :complete]]}
  
  xyz.zcaudate/lang.seedgen
  {:description "working with other languages"
@@ -467,17 +465,13 @@
  {:description "working with other languages"
   :include [[lang.uberjar :complete]]}
 
-  xyz.zcaudate/xt.lang
-  {:description "cross-target xt language helpers"
-   :include [[xt.lang :complete]]}
-
  xyz.zcaudate/lang.runtime.libpython
  {:description "libpython runtime support"
   :include [[lang.runtime.annex.libpython :complete]]}
  
  xyz.zcaudate/lang.runtime.nginx
  {:description "nginx runtime support"
-  :include [[lang.runtime.nginx :complete]]}
+  :include [[lang.runtime.annex.nginx :complete]]}
  
  xyz.zcaudate/lang.runtime.redis
   {:description "runtime for redis" 
@@ -486,7 +480,7 @@
   
  xyz.zcaudate/lang.runtime.graal
   {:description "runtime for graal contexts"
-   :include [[lang.runtime.graal :complete]]
+   :include [[lang.runtime.annex.graal :complete]]
    :bundle [{:path "target/classes" 
              :include ["hara/lib/graal"]}]
    :dependencies [[org.graalvm.sdk/graal-sdk "21.2.0"]
