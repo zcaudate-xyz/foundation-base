@@ -1,4 +1,4 @@
-(ns lang.runtime.redis-test
+(ns lang.runtime.annex.redis-test
   (:require [kmi.queue.list :as list]
             [lib.redis.bench :as bench]
             [net.resp.connection :as conn]

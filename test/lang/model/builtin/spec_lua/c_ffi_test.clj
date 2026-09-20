@@ -1,4 +1,4 @@
-(ns lang.model.spec-lua.c-ffi-test
+(ns lang.model.builtin.spec-lua.c-ffi-test
   (:require [lang.model.builtin.spec-lua.c-ffi :as c])
   (:use code.test))
 

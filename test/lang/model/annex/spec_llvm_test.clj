@@ -1,4 +1,4 @@
-(ns lang.model.spec-llvm-test
+(ns lang.model.annex.spec-llvm-test
   (:use code.test)
   (:require [lang.model.annex.spec-llvm :refer :all]))
 

@@ -1,4 +1,4 @@
-(ns lang.model.spec-js.ts-test
+(ns lang.model.builtin.spec-js.ts-test
   (:use code.test)
   (:require [clojure.string :as str]
              [lang.model.builtin.spec-js.ts :refer :all]

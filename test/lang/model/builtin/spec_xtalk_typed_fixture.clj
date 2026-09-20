@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk-typed-fixture
+(ns lang.model.builtin.spec-xtalk-typed-fixture
   (:require [lang.core :as l]
             [lang.typed :refer [defspec.xt]]))
 

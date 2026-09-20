@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.type-basic-php-test
+(ns lang.runtime.annex.basic.impl.type-basic-php-test
   (:use code.test)
   (:require [lang.runtime.annex.basic.impl.process-php]
             [lang.runtime.basic.type-basic :as p]

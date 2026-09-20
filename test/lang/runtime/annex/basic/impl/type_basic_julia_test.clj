@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.type-basic-julia-test
+(ns lang.runtime.annex.basic.impl.type-basic-julia-test
   (:use code.test)
   (:require [std.lib.env :as env]
             [lang.core :as l]

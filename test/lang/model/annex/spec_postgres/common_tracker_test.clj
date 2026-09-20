@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.common-tracker-test
+(ns lang.model.annex.spec-postgres.common-tracker-test
   (:require [lang.model.annex.spec-postgres.common-tracker :as tracker]
             [postgres.sample.scratch-v1 :as scratch])
   (:use code.test))

@@ -1,4 +1,4 @@
-(ns lang.runtime.blender-test
+(ns lang.runtime.annex.blender-test
   (:require [lang.runtime.annex.blender.impl :as impl]
             [std.lib.env :as env])
   (:use code.test))

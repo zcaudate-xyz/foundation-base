@@ -1,4 +1,4 @@
-(ns lang.runtime.redis.client-test
+(ns lang.runtime.annex.redis.client-test
   (:require [lib.redis.bench :as bench]
             [lib.redis.event :as event]
             [net.resp.connection :as conn]

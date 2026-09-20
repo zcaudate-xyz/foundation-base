@@ -1,4 +1,4 @@
-(ns lang.model.spec-dart-typed-test
+(ns lang.model.builtin.spec-dart-typed-test
   (:require [clojure.string :as str]
             [lang.model.builtin.spec-dart.typed :as dart-typed])
   (:use code.test))

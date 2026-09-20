@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-perl-verify-test
+(ns lang.runtime.annex.basic.impl.process-perl-verify-test
   (:require [lang.core :as l]
             [std.lib.context.space :as space]
             [std.lib.env :as env])

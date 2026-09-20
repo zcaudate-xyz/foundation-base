@@ -1,4 +1,4 @@
-(ns lang.model.spec-dart-test
+(ns lang.model.builtin.spec-dart-test
   (:require [lang.core :as l]
             [lang.model.builtin.spec-dart :as spec-dart]
             [xt.event.base-route])

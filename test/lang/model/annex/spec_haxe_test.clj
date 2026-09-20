@@ -1,4 +1,4 @@
-(ns lang.model.spec-haxe-test
+(ns lang.model.annex.spec-haxe-test
   (:require [lang.core :as l]
             [lang.model.annex.spec-haxe :as haxe]
             [std.string.prose :as prose])

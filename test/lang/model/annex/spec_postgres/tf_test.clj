@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.tf-test
+(ns lang.model.annex.spec-postgres.tf-test
   (:require [lang.model.annex.spec-postgres.tf :refer :all])
   (:use code.test))
 

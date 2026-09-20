@@ -1,4 +1,4 @@
-(ns lang.model.spec-glsl-test
+(ns lang.model.builtin.spec-glsl-test
   (:require [lang.core :as l]
             [std.string.prose :as prose])
   (:use code.test))

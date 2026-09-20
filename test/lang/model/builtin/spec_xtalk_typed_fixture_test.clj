@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk-typed-fixture-test
+(ns lang.model.builtin.spec-xtalk-typed-fixture-test
   (:use code.test))
 
 ^{:refer lang.model.spec-xtalk-typed-fixture-test/dummy :added "4.1"}

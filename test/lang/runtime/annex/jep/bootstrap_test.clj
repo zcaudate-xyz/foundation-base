@@ -1,4 +1,4 @@
-(ns lang.runtime.jep.bootstrap-test
+(ns lang.runtime.annex.jep.bootstrap-test
   (:require [lang.runtime.annex.jep.bootstrap :refer :all]
             [std.fs :as fs]
             [std.lib.os :as os])

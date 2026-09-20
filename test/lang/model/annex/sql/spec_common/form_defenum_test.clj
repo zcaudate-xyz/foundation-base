@@ -1,4 +1,4 @@
-(ns lang.model.sql.spec-common.form-defenum-test
+(ns lang.model.annex.sql.spec-common.form-defenum-test
   (:use code.test)
   (:require [lang.model.annex.sql.spec-common.form-defenum :refer :all]))
 

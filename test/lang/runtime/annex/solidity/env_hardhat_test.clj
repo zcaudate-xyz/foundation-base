@@ -1,4 +1,4 @@
-(ns lang.runtime.solidity.env-hardhat-test
+(ns lang.runtime.annex.solidity.env-hardhat-test
   (:require [clojure.string :as string]
             [lang.runtime.annex.solidity.env-hardhat :refer :all]
             [std.fs :as fs]

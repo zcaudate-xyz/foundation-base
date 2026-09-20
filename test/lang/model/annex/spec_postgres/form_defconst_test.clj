@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.form-defconst-test
+(ns lang.model.annex.spec-postgres.form-defconst-test
   (:require [lang.model.annex.spec-postgres :as g]
             [lang.model.annex.spec-postgres.form-defconst :as form]
             [postgres.sample.scratch-v1 :as scratch]

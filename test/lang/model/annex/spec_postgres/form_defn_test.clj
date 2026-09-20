@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.form-defn-test
+(ns lang.model.annex.spec-postgres.form-defn-test
   (:require [lang.model.annex.spec-postgres :as g]
             [lang.model.annex.spec-postgres.form-defn :refer :all]
             [lang.core :as l]

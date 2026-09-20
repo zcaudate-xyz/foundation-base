@@ -1,4 +1,4 @@
-(ns lang.runtime.jocl.env-test
+(ns lang.runtime.annex.jocl.env-test
   (:use code.test)
   (:require [lang.runtime.annex.jocl.env :refer :all]))
 

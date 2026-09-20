@@ -1,4 +1,4 @@
-(ns lang.model.spec-gdscript.rewrite-test
+(ns lang.model.annex.spec-gdscript.rewrite-test
   (:use code.test)
   (:require [lang.model.annex.spec-gdscript.rewrite :refer :all]))
 

@@ -1,4 +1,4 @@
-(ns lang.model.spec-rust-test
+(ns lang.model.annex.spec-rust-test
   (:require [std.fs :as fs]
             [lang.core :as l]
             [lang.core.script :as script]

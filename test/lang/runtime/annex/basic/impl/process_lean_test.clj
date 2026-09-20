@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-lean-test
+(ns lang.runtime.annex.basic.impl.process-lean-test
   (:use code.test)
   (:require [clojure.string :as str]
             [lang.runtime.annex.basic.impl.process-lean :refer :all]

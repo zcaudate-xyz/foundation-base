@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.fn-elisp-test
+(ns lang.model.builtin.spec-xtalk.fn-elisp-test
   (:require [lang.core :as l]
              [lang.model.annex.spec-elisp]
              [lang.model.annex.spec-elisp.xtalk-elisp :refer :all])

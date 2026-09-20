@@ -1,4 +1,4 @@
-(ns lang.runtime.godot.client-test
+(ns lang.runtime.annex.godot.client-test
   (:require [lang.core :as h]
             [lang.core.type-shared :as shared]
             [lang.runtime.annex.godot.client :as client]

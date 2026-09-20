@@ -1,4 +1,4 @@
-(ns lang.model.spec-gdscript-test
+(ns lang.model.builtin.spec-gdscript-test
   (:use code.test)
   (:require [lang.model.annex.spec-gdscript :refer :all]))
 

@@ -1,4 +1,4 @@
-(ns lang.model.spec-lua-try-test
+(ns lang.model.builtin.spec-lua-try-test
   (:require [lang.core :as l]
             [lang.model.builtin.spec-lua :as spec-lua])
   (:use code.test))

@@ -1,4 +1,4 @@
-(ns lang.model.spec-dart.rewrite-test
+(ns lang.model.builtin.spec-dart.rewrite-test
   (:require [lang.core :as l]
              [lang.model.builtin.spec-dart :as dart]
              [lang.model.builtin.spec-dart.rewrite :as rewrite]

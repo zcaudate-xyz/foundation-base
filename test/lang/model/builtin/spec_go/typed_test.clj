@@ -1,4 +1,4 @@
-(ns lang.model.spec-go.typed-test
+(ns lang.model.builtin.spec-go.typed-test
   (:use code.test)
   (:require [clojure.string :as str]
             [lang.model.builtin.spec-go.typed :refer :all]))

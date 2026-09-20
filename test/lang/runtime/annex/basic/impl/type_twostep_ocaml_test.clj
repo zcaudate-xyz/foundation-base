@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.type-twostep-ocaml-test
+(ns lang.runtime.annex.basic.impl.type-twostep-ocaml-test
   (:use code.test)
   (:require [std.lib.env :as env]
             [lang.runtime.annex.basic.impl.process-ocaml]

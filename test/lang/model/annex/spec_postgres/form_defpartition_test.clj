@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.form-defpartition-test
+(ns lang.model.annex.spec-postgres.form-defpartition-test
   (:require [lang.model.annex.spec-postgres.common :as common]
             [lang.model.annex.spec-postgres.form-defpartition :as form-defpartition])
   (:use code.test))

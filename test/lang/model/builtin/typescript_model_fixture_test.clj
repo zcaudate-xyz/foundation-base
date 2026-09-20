@@ -1,4 +1,4 @@
-(ns lang.model.typescript-model-fixture-test
+(ns lang.model.builtin.typescript-model-fixture-test
   (:require [lang.typed :as typed]
             [lang.typed.xtalk-common :as types]
             [lang.model.typescript-model-fixture])

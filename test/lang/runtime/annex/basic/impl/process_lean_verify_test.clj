@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-lean-verify-test
+(ns lang.runtime.annex.basic.impl.process-lean-verify-test
   (:require [lang.core :as l]
             [std.lib.context.space :as space]
             [std.lib.env :as env])

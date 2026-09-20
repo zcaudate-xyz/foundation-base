@@ -1,4 +1,4 @@
-(ns lang.model.spec-lua.rewrite-test
+(ns lang.model.builtin.spec-lua.rewrite-test
   (:require [lang.core :as l]
             [lang.core.script :as script]
             [lang.model.builtin.spec-lua :as lua]

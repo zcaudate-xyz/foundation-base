@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.fn-python-test
+(ns lang.model.builtin.spec-xtalk.fn-python-test
   (:require [lang.core :as l]
             [xt.lang.common-promise]
             [lang.model.builtin.spec-python.xtalk-python :refer :all])

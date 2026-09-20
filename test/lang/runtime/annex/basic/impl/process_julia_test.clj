@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-julia-test
+(ns lang.runtime.annex.basic.impl.process-julia-test
   (:require [lang.runtime.annex.basic.impl.process-julia :refer :all])
   (:use code.test))
 

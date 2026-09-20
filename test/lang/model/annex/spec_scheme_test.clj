@@ -1,4 +1,4 @@
-(ns lang.model.spec-scheme-test
+(ns lang.model.annex.spec-scheme-test
   (:require [lang.core :as l]
             [lang.model.annex.spec-scheme :refer :all])
   (:use code.test))

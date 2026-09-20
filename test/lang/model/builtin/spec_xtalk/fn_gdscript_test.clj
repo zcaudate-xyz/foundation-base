@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.fn-gdscript-test
+(ns lang.model.builtin.spec-xtalk.fn-gdscript-test
   (:use code.test)
   (:require [lang.model.annex.spec-gdscript.xtalk-gdscript :refer :all]))
 

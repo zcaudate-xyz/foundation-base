@@ -1,4 +1,4 @@
-(ns lang.model.sql.spec-oracle-test
+(ns lang.model.annex.sql.spec-oracle-test
   (:require [code.framework :as framework]
             [lang.core :as l]
             [lang.model.annex.sql.spec-oracle :refer :all]

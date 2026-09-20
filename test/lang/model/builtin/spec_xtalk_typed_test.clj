@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk-typed-test
+(ns lang.model.builtin.spec-xtalk-typed-test
   (:require [clojure.string]
    [lang.typed :as typed]
    [lang.typed.xtalk-analysis :as analysis]

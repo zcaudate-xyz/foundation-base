@@ -1,4 +1,4 @@
-(ns lang.model.spec-elisp-test
+(ns lang.model.annex.spec-elisp-test
   (:require [lang.core :as l]
             [lang.model.annex.spec-elisp :refer :all])
   (:use code.test))

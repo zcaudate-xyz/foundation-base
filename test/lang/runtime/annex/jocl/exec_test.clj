@@ -1,4 +1,4 @@
-(ns lang.runtime.jocl.exec-test
+(ns lang.runtime.annex.jocl.exec-test
   (:refer-clojure :exclude [to-array])
   (:use code.test)
   (:require [lang.core :as l]
