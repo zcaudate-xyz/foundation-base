@@ -62,7 +62,7 @@ Examples are a primary entry point into Foundation Base. Each example should kee
 
 ### React Native components
 
-- Generated project: [`zcaudate/foundation.react-native`](https://github.com/zcaudate/foundation.react-native)
+- Generated project: [`zcaudate-xyz/demo.foundation-base`](https://github.com/zcaudate-xyz/demo.foundation-base)
 - Authored index: [`web_native_index.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/component/web_native_index.clj)
 - Build definition: [`build_native_index.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/component/build_native_index.clj)
 - Reproduce: `lein push-native-code`
