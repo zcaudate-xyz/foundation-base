@@ -113,8 +113,52 @@
                           :style {:padding 5
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/setPropsAll :added "4.0" :unchecked true}
-(fact "sets props for all the elements")
+^{:refer js.react-native.animate/setPropsAll :added "4.0"}
+(fact "sets props for native and web elements"
+
+  (!.js
+   (var calls nil)
+   (var elem {:setNativeProps
+              (fn:> [props]
+                (:= calls props))})
+   (a/setPropsAll elem {:opacity 0.5})
+   calls)
+  => {:opacity 0.5}
+
+  (!.js
+   (var calls nil)
+   (var elem {:getNativeRef
+              (fn:> []
+                {:setNativeProps
+                 (fn:> [props]
+                   (:= calls props))})})
+   (a/setPropsAll elem {:text "hello"})
+   calls)
+  => {:text "hello"}
+
+  (!.js
+   (var nativeCalls 0)
+   (var elem {:style {}
+               :tagName "INPUT"
+               :setNativeProps
+               (fn:> [props]
+                 (:= nativeCalls (+ nativeCalls 1)))})
+   (a/setPropsAll elem
+                  {:text "hello"
+                   :style {:opacity 0.5
+                           :width 10
+                           :transform [{:translateX 12}
+                                       {:rotateZ "45deg"}]}})
+   {:value elem.value
+    :opacity elem.style.opacity
+    :width elem.style.width
+    :transform elem.style.transform
+    :nativeCalls nativeCalls})
+  => {:value "hello"
+      :opacity 0.5
+      :width "10px"
+      :transform "translateX(12px) rotateZ(45deg)"
+      :nativeCalls 0})
 
 ^{:refer js.react-native.animate/derive :added "4.0" :unchecked true}
 (fact "derives a value from one or more Animated.Value"

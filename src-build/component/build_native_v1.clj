@@ -12,7 +12,7 @@
              [yarn install]]
             [:build-web
              [yarn install]
-             [npx expo build:web]]
+             [npx expo export --platform web]]
             [:dev
              [yarn install]
              [npx expo start --web --port 19007]]
@@ -29,29 +29,24 @@
    :file ".github/workflows/build.yml"
    :main [[:name "build gh-pages"]
           [:on ["push"]]
+          [:permissions {:contents "write"}]
           [:jobs
            {:build
             {:runs-on "ubuntu-latest"
              :steps
              [{:name "Checkout repo"
-               :uses "actions/checkout@v3"}
+               :uses "actions/checkout@v4"}
               {:name "Node Setup"
-               :uses "actions/setup-node@v3"
-               :with {:node-version "16.x"}}
-              {:name "SSH Init"
-               :run (str/|
-                     "install -m 600 -D /dev/null ~/.ssh/id_rsa"
-                     "echo '${{ secrets.GH_SSH_PRIVATE_KEY }}' > ~/.ssh/id_rsa"
-                     "ssh-keyscan -H www.github.com > ~/.ssh/known_hosts")}
-              
+               :uses "actions/setup-node@v4"
+               :with {:node-version "20.x"}}
               {:name "Deploy gh-pages"
                :run
                (str/|
                 "make build-web"
                 "git config --global user.name github-actions"
                 "git config --global user.email github-actions@github.com"
-                "cd web-build && git init && git add -A && git commit -m 'deploying to gh-pages'"
-                "git remote add origin git@github.com:zcaudate-xyz/demo.foundation-base.git"
+                "cd dist && git init && git add -A && git commit -m 'deploying to gh-pages'"
+                "git remote add origin https://x-access-token:${{ github.token }}@github.com/zcaudate-xyz/demo.foundation-base.git"
                 "git push origin HEAD:gh-pages --force")}]}}]]})
 
 (def.make COMPONENT-NATIVE
@@ -85,7 +80,7 @@
                          "*.key"
                          "*.mobileprovision"
                          "*.orig.*"
-                         "web-build/"
+                         "dist/"
                          ".DS_Store"
                          "yarn.lock"
                          "yarn-error.log"]}
@@ -102,6 +97,7 @@
                                   "backgroundColor" "#ffffff"}
                                  "updates" {"fallbackToCacheTimeout" 0},
                                  "assetBundlePatterns" ["**/*"]
+                                 "experiments" {"baseUrl" "/demo.foundation-base"}
                                  "ios" {"supportsTablet" true},}}}
                        
                        {:type :package.json,
@@ -158,7 +154,7 @@
                                             "eslint-config-expo" "~9.2.0"
                                             "typescript" "~5.8.3"
                                             "@expo/metro-runtime" "^5.0.4"}
-                         "metro" {"watchFolders" ["assets"]}}}]}
+                         }}]}
    :default [{:type   :module.graph
               :lang   :js
               :target "src"
