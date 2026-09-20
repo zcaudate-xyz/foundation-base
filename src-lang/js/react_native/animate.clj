@@ -223,7 +223,8 @@
   [elem props]
   (when (and elem elem.style)
     (xt/for:object [[k0 v0] (or props {})]
-      (when (and props.hasOwnProperty
+      (when (and props
+                 props.hasOwnProperty
                  (props.hasOwnProperty k0))
         (cond (and (== k0 "style")
                    (or (k/is-object? v0)
