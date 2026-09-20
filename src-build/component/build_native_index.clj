@@ -159,7 +159,7 @@
               :lang   :js
               :target "src"
               :main   'component.web-native-index
-              :emit   {:code   {:label true}}}]})
+              :emit   {:code   {:label true\n                                :link    {:path-suffix ".js"\n                                          :path-separator "/"}}}}]})
 
 (def +init+
   nil)
