@@ -29,21 +29,16 @@
    :file ".github/workflows/build.yml"
    :main [[:name "build gh-pages"]
           [:on ["push"]]
+          [:permissions {:contents "write"}]
           [:jobs
            {:build
             {:runs-on "ubuntu-latest"
              :steps
              [{:name "Checkout repo"
-               :uses "actions/checkout@v3"}
+               :uses "actions/checkout@v4"}
               {:name "Node Setup"
-               :uses "actions/setup-node@v3"
+               :uses "actions/setup-node@v4"
                :with {:node-version "20.x"}}
-              {:name "SSH Init"
-               :run (str/|
-                     "install -m 600 -D /dev/null ~/.ssh/id_rsa"
-                     "echo '${{ secrets.GH_SSH_PRIVATE_KEY }}' > ~/.ssh/id_rsa"
-                     "ssh-keyscan -H www.github.com > ~/.ssh/known_hosts")}
-              
               {:name "Deploy gh-pages"
                :run
                (str/|
@@ -51,7 +46,7 @@
                 "git config --global user.name github-actions"
                 "git config --global user.email github-actions@github.com"
                 "cd dist && git init && git add -A && git commit -m 'deploying to gh-pages'"
-                "git remote add origin git@github.com:zcaudate-xyz/demo.foundation-base.git"
+                "git remote add origin https://x-access-token:${{ github.token }}@github.com/zcaudate-xyz/demo.foundation-base.git"
                 "git push origin HEAD:gh-pages --force")}]}}]]})
 
 (def.make COMPONENT-NATIVE
