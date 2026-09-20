@@ -740,6 +740,7 @@
      (type-fn [1])])
   => ["object" "array" "array"]
 
+  ^{:seedgen/base {:lua {:suppress true}}}
   (!.lua
     (var type-fn (fn [obj]
                    (return
@@ -2656,6 +2657,7 @@
     (xt/x:json-decode (encode-fn "hello" "id" "key")))
   => {"return" "string", "key" "key", "id" "id", "value" "hello", "type" "data"}
 
+  ^{:seedgen/base {:lua {:suppress true}}}
   (!.lua
     (var encode-fn
          (fn [value id key]
@@ -2664,6 +2666,7 @@
     (xt/x:json-decode (encode-fn {:a 1} "id" "key")))
   => {"return" "object", "key" "key", "id" "id", "value" {"a" 1}, "type" "data"}
 
+  ^{:seedgen/base {:lua {:suppress true}}}
   (!.lua
     (var encode-fn
          (fn [value id key]
@@ -2696,6 +2699,7 @@
                 "type" "data"
                 "value" 3})
 
+  ^{:seedgen/base {:lua {:suppress true}}}
   (!.lua
     (var encode-fn
          (fn [value id key]
@@ -2745,6 +2749,7 @@
                              (encode-fn out "id-A" "key-B")))))))))
   => (contains-in {"key" "key-B", "id" "id-A", "value" 2, "type" "data"})
 
+  ^{:seedgen/base {:lua {:suppress true}}}
   (!.lua
     (var encode-fn
          (fn [value id key]
