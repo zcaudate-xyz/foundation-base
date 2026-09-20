@@ -37,7 +37,7 @@
                :uses "actions/checkout@v3"}
               {:name "Node Setup"
                :uses "actions/setup-node@v3"
-               :with {:node-version "16.x"}}
+               :with {:node-version "20.x"}}
               {:name "SSH Init"
                :run (str/|
                      "install -m 600 -D /dev/null ~/.ssh/id_rsa"
