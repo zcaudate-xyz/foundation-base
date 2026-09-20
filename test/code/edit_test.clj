@@ -1,4 +1,4 @@
-(ns std.block.navigate-test
+(ns code.edit-test
   (:require [std.block.base :as base]
             [std.block.construct :as construct]
             [std.block.navigate :refer :all]

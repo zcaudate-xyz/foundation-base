@@ -1,5 +1,5 @@
 ^{:seedgen/skip true}
-(ns xt.db.poc.s07-kernel-client-test
+(ns xt.db.poc.s07-adaptor-client-test
   (:use code.test)
   (:require [lang.core :as l]
             [lang.runtime.chromedriver :as chromedriver]

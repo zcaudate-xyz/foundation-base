@@ -1,4 +1,4 @@
-(ns matlab.live-test
+(ns octave.live-test
   (:use code.test)
   (:require [lang.core :as l]
             [std.lib.env :as env]))

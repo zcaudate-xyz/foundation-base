@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl_annex.process-matlab-verify-test
+(ns lang.runtime.basic.impl-annex.process-matlab-verify-test
   (:require [lang.core :as l]
             [std.lib.context.space :as space]
             [std.lib.env :as env])

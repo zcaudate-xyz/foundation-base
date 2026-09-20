@@ -1,4 +1,4 @@
-(ns code.tool.translate.js-dsl-integration-test
+(ns code.tool.translate.js-dsl-parser-test
   (:require [code.tool.translate.js-dsl :as sut]
             [std.fs :as fs]
             [std.json :as json]

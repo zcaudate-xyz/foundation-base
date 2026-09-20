@@ -1,4 +1,4 @@
-(ns js.react-native.enclosed-debug-test
+(ns js.react-native-enclosed-debug-test
   (:use code.test)
   (:require [lang.core :as l]))
 

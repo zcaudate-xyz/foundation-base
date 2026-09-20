@@ -1,4 +1,4 @@
-(ns code.tool.translate.js-ast-test
+(ns indigo.build.build-ast-test
   (:require [code.test :refer [fact]]
             [code.tool.translate.js-ast :as build-ast]
             [std.fs :as fs]

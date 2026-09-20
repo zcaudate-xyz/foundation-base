@@ -1,4 +1,4 @@
-(ns matlab.core
+(ns octave.core
   (:require [matlab.core.builtin :as builtin]
             [lang.core :as l]
             [std.lib.foundation :as f]))

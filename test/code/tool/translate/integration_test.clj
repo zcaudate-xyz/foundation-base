@@ -1,4 +1,4 @@
-(ns code.tool.translate.sample-test
+(ns code.tool.translate.integration-test
   (:require [code.tool.translate.c-dsl :as c-dsl]
             [code.tool.translate.js-dsl :as js-dsl]
             [std.fs :as fs]
@@ -25,5 +25,4 @@
   (env/with-out-str
     (translate-samples))
   => string?)
-
 
