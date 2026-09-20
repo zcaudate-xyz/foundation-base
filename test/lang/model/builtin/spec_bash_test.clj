@@ -1,4 +1,4 @@
-(ns lang.model.spec-bash-test
+(ns lang.model.builtin.spec-bash-test
   (:require [lang.core :as l]
             [lang.model.builtin.spec-bash :refer :all]
             [std.string.prose :as prose])

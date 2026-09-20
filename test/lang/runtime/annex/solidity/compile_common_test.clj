@@ -1,4 +1,4 @@
-(ns lang.runtime.solidity.compile-common-test
+(ns lang.runtime.annex.solidity.compile-common-test
   (:require [lang.runtime.annex.solidity.compile-common :refer :all]
             [lang.core :as l])
   (:use code.test))

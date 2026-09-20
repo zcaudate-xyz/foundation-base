@@ -1,4 +1,4 @@
-(ns lang.runtime.nix.script-test
+(ns lang.runtime.annex.nix.script-test
   (:require [lang.runtime.annex.nix.script :refer :all])
   (:use code.test))
 

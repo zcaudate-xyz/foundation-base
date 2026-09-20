@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.form-let-test
+(ns lang.model.annex.spec-postgres.form-let-test
   (:require [clojure.string]
             [lang.model.annex.spec-postgres.common :as common]
             [lang.model.annex.spec-postgres.form-let :refer :all]

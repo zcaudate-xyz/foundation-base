@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-matlab-test
+(ns lang.runtime.annex.basic.impl.process-matlab-test
   (:require [lang.runtime.annex.basic.impl.process-matlab :refer :all]
             [std.lib.env :as env]
             [lang.core :as l])

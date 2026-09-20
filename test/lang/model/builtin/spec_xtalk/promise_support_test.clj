@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.promise-support-test
+(ns lang.model.builtin.spec-xtalk.promise-support-test
   (:use code.test)
   (:require [lang.core :as l]
             [xt.lang.spec-base :as xt]

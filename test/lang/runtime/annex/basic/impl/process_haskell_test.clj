@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-haskell-test
+(ns lang.runtime.annex.basic.impl.process-haskell-test
   (:use code.test)
   (:require [lang.runtime.annex.basic.impl.process-haskell :refer :all]))
 

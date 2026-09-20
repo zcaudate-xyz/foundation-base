@@ -1,4 +1,4 @@
-(ns lang.runtime.jocl.common-test
+(ns lang.runtime.annex.jocl.common-test
   (:refer-clojure :exclude [to-array])
   (:use code.test)
   (:require [lang.runtime.annex.jocl :refer :all]

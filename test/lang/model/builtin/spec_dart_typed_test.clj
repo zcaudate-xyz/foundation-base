@@ -1,4 +1,4 @@
-(ns lang.model.spec-dart-typed-test
+(ns lang.model.builtin.spec-dart-typed-test
   (:require [clojure.string :as str]
             [lang.model.builtin.spec-dart.typed :as dart-typed])
   (:use code.test))
@@ -49,7 +49,7 @@
 
 (fact "can emit declarations from typed fixture namespace"
   (let [out (dart-typed/emit-namespace-declarations
-             'lang.model.spec-xtalk-typed-fixture)]
+             'lang.model.builtin.spec-xtalk-typed-fixture)]
     [(str/includes? out "class User")
      (str/includes? out "typedef UserMap = Map<String, User>")
      (str/includes? out "typedef FindUser = User? Function")])

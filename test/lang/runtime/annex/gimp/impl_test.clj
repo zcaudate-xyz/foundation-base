@@ -1,4 +1,4 @@
-(ns lang.runtime.gimp.impl-test
+(ns lang.runtime.annex.gimp.impl-test
   (:require [lang.core :as h]
             [lang.runtime.annex.gimp.impl :as impl]
             [std.lib.component :as component]

@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl.process-gdscript-test
+(ns lang.runtime.annex.basic.impl.process-gdscript-test
   (:require [lang.core :as l]
             [lang.core.impl :as impl]
             [lang.model.annex.spec-gdscript]

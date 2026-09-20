@@ -1,4 +1,4 @@
-(ns lang.runtime.blender.impl-test
+(ns lang.runtime.annex.blender.impl-test
   (:require [lang.core :as h]
             [lang.core.type-shared :as shared]
             [lang.runtime.annex.blender.impl :as impl]

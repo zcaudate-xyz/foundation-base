@@ -5,7 +5,7 @@
             [lang.typed.xtalk-parse :as parse]))
 
 (defn fixture-analysis []
-  (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture))
+  (parse/analyze-namespace 'lang.model.builtin.spec-xtalk-typed-fixture))
 
 (defn fixture-function [name]
   (some #(when (= name (:name %)) %) (:functions (fixture-analysis))))
@@ -32,8 +32,8 @@
     (types/clear-registry!)
     (parse/register-types! (fixture-analysis))
     [(-> (check-function (fixture-function "find-user")) :function)
-     (-> (check-function 'lang.model.spec-xtalk-typed-fixture/find-user) :function)
+     (-> (check-function 'lang.model.builtin.spec-xtalk-typed-fixture/find-user) :function)
      (nil? (check-function 'sample.route/missing))])
-  => '[lang.model.spec-xtalk-typed-fixture/find-user
-        lang.model.spec-xtalk-typed-fixture/find-user
+  => '[lang.model.builtin.spec-xtalk-typed-fixture/find-user
+        lang.model.builtin.spec-xtalk-typed-fixture/find-user
         true])

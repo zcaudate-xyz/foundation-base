@@ -1,4 +1,4 @@
-(ns lang.model.spec-lisp-common-test
+(ns lang.model.annex.spec-lisp-common-test
   (:use code.test)
   (:require [lang.model.annex.spec-lisp-common :refer :all]))
 

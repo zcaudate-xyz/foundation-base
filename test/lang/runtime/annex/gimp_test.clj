@@ -1,4 +1,4 @@
-(ns lang.runtime.gimp-test
+(ns lang.runtime.annex.gimp-test
   (:require [lang.core :as l]
             [lang.core.script-control :as script-control]
             [lang.runtime.annex.gimp :as gimp]

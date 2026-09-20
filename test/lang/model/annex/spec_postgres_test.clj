@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres-test
+(ns lang.model.annex.spec-postgres-test
   (:use code.test)
   (:require [postgres.core :as pg]
             [lang.model.annex.spec-postgres :refer :all]

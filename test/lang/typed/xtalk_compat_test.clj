@@ -21,7 +21,7 @@
 
 (defn fixture-register! []
   (types/clear-registry!)
-  (parse/register-types! (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture)))
+  (parse/register-types! (parse/analyze-namespace 'lang.model.builtin.spec-xtalk-typed-fixture)))
 
 ^{:refer lang.typed.xtalk-compat/result :added "4.1"}
 (fact "builds result maps"
@@ -54,7 +54,7 @@
 (fact "resolves named specs from the registry"
   (do
     (fixture-register!)
-    (types/type->data (resolve-type {:kind :named :name 'lang.model.spec-xtalk-typed-fixture/User} +ctx+)))
+    (types/type->data (resolve-type {:kind :named :name 'lang.model.builtin.spec-xtalk-typed-fixture/User} +ctx+)))
   => '{:kind :record
        :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}
                 {:name "name" :type {:kind :primitive :name :xt/str} :optional? false}]})

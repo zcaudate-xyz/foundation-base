@@ -1,4 +1,4 @@
-(ns lang.runtime.libpython-test
+(ns lang.runtime.annex.libpython-test
   (:require [libpython-clj2.python :as python]
             [lang.runtime.annex.libpython :as lp]
             [std.concurrent :as cc]

@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-rust-test
+(ns lang.runtime.annex.basic.impl.process-rust-test
   (:require [lang.runtime.annex.basic.impl.process-rust :refer :all]
             [std.lib.env :as env]
             [lang.core :as l])

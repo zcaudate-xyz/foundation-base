@@ -1,4 +1,4 @@
-(ns lang.model.sql.spec-common.common-test
+(ns lang.model.annex.sql.spec-common.common-test
   (:use code.test)
   (:require [lang.model.annex.sql.spec-common.common :refer :all]))
 

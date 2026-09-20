@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk-test
+(ns lang.model.builtin.spec-xtalk-test
   (:require [lang.core :as l])
   (:use code.test))
 

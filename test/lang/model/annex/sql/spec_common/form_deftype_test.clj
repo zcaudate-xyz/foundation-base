@@ -1,4 +1,4 @@
-(ns lang.model.sql.spec-common.form-deftype-test
+(ns lang.model.annex.sql.spec-common.form-deftype-test
   (:use code.test)
   (:require [lang.model.annex.sql.spec-common.form-deftype :refer :all]))
 

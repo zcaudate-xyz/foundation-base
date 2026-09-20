@@ -1,4 +1,4 @@
-(ns lang.model.spec-js-play-test
+(ns lang.model.builtin.spec-js-play-test
   (:use code.test)
   (:require [clojure.string :as str]
              [lang.typed.xtalk-parse :as xtalk-parse]

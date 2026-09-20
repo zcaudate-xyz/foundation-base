@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.fn-js-test
+(ns lang.model.builtin.spec-xtalk.fn-js-test
   (:require [lang.core :as l]
             [lang.model.spec-xtalk.fn-js :refer :all])
   (:use code.test))

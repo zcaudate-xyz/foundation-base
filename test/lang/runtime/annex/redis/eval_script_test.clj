@@ -1,4 +1,4 @@
-(ns lang.runtime.redis.eval-script-test
+(ns lang.runtime.annex.redis.eval-script-test
   (:require [clojure.string :as str]
              [kmi.redis :as redis]
              [lib.redis.bench :as bench]

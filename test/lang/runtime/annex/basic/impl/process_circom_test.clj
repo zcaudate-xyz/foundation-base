@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-circom-test
+(ns lang.runtime.annex.basic.impl.process-circom-test
   (:require [lang.runtime.annex.basic.impl.process-circom :refer :all]
             [lang.runtime.basic.type-common :as common]
             [lang.core.registry :as registry]

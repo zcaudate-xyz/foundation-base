@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.fn-go-test
+(ns lang.model.builtin.spec-xtalk.fn-go-test
   (:require [lang.model.builtin.spec-go.fn-go :refer :all])
   (:use code.test))
 

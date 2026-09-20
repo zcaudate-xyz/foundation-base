@@ -1,4 +1,4 @@
-(ns lang.runtime.redis.eval-basic-test
+(ns lang.runtime.annex.redis.eval-basic-test
   (:require [lib.redis.bench :as bench]
              [lib.redis.script :as script]
              [lang.runtime.annex.redis.eval-basic :refer :all]

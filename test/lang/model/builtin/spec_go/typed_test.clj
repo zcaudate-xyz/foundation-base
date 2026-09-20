@@ -1,4 +1,4 @@
-(ns lang.model.spec-go.typed-test
+(ns lang.model.builtin.spec-go.typed-test
   (:use code.test)
   (:require [clojure.string :as str]
             [lang.model.builtin.spec-go.typed :refer :all]))
@@ -169,7 +169,7 @@
 
 ^{:refer lang.model.builtin.spec-go.typed/emit-namespace-declarations :added "4.1"}
 (fact "emits namespace declarations"
-  (let [out (emit-namespace-declarations 'lang.model.spec-xtalk-typed-fixture)]
+  (let [out (emit-namespace-declarations 'lang.model.builtin.spec-xtalk-typed-fixture)]
     [(str/includes? out "type User map[string]any")
      (str/includes? out "type UserMap map[any]any")
      (str/includes? out "type find_user func(arg0 UserMap, arg1 string) *User")])

@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.fn-lua-test
+(ns lang.model.builtin.spec-xtalk.fn-lua-test
   (:require [lang.core :as l]
             [lang.model.builtin.spec-lua.variant-nginx :as nginx]
             [lang.model.builtin.spec-lua.xtalk-lua :refer :all])

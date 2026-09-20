@@ -1,4 +1,4 @@
-(ns lang.model.spec-python-test
+(ns lang.model.builtin.spec-python-test
   (:require [clojure.string :as string]
             [lang.core :as l]
             [lang.model.builtin.spec-python :as py]

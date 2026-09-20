@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.meta-test
+(ns lang.model.annex.spec-postgres.meta-test
   (:require [lang.model.annex.spec-postgres.meta :refer :all]
             [postgres.core.builtin :as builtin]
             [lang.core :as l])

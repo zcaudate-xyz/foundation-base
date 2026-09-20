@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.form-vec-test
+(ns lang.model.annex.spec-postgres.form-vec-test
   (:require [lang.model.annex.spec-postgres :as g]
             [lang.model.annex.spec-postgres.form-vec :refer :all]
             [lang.core :as l])
