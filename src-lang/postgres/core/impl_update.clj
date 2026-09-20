@@ -1,7 +1,7 @@
 (ns postgres.core.impl-update
   (:require [clojure.set]
-            [lang.model.spec-postgres.common :as common]
-            [lang.model.spec-postgres.common-tracker :as tracker]
+            [lang.model.annex.spec-postgres.common :as common]
+            [lang.model.annex.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [lang.core :as l]
             [lang.base.util :as ut]

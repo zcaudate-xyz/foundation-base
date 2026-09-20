@@ -1,6 +1,6 @@
 (ns play.go-000-user-directory.main
   (:require [lang.core :as l]
-            [lang.model.spec-go]))
+            [lang.model.builtin.spec-go]))
 
 (l/script :go)
 

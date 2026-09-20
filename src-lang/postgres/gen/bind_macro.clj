@@ -1,7 +1,7 @@
 (ns postgres.gen.bind-macro
   (:require [clojure.string]
-             [lang.model.spec-postgres.common :as common]
-             [lang.runtime.postgres.base.application :as app]
+             [lang.model.annex.spec-postgres.common :as common]
+             [lang.runtime.annex.postgres.base.application :as app]
              [lang.core :as l]
              [lang.base.book :as book]
              [lang.base.util :as ut]

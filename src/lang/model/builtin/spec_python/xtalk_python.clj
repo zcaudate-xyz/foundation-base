@@ -1,4 +1,4 @@
-(ns lang.model.builtin.spec-xtalk.fn-python
+(ns lang.model.builtin.spec-python.xtalk-python
   (:require [std.lib.template :as template]))
 
 (defn python-tf-x-del

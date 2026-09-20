@@ -1,9 +1,9 @@
-(ns lang.runtime.solidity.compile-deploy
+(ns lang.runtime.annex.solidity.compile-deploy
   (:require [js.lib.eth-bench :as eth-bench]
              [lang.runtime.basic :as basic]
-             [lang.runtime.solidity.compile-common :as common]
-             [lang.runtime.solidity.compile-solc :as solc]
-             [lang.runtime.solidity.env-hardhat :as env]
+             [lang.runtime.annex.solidity.compile-common :as common]
+             [lang.runtime.annex.solidity.compile-solc :as solc]
+             [lang.runtime.annex.solidity.env-hardhat :as env]
              [lang.core :as l]
              [std.lib.env :as env-lib]
              [std.lib.foundation :as f]

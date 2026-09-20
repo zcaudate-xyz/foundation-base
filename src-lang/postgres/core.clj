@@ -1,7 +1,7 @@
 (ns postgres.core
   (:require [postgres.gen.bind-macro]
             [postgres.entity :as entity]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [postgres.core.addon]
             [postgres.core.builtin]
             [postgres.core.graph]

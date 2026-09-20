@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.fn-lua
+(ns lang.model.builtin.spec-lua.xtalk-lua
   (:require [std.lib.foundation :as f]
             [std.lib.template :as template]))
 

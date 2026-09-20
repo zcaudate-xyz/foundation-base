@@ -1,7 +1,7 @@
 (ns lang.model.sql.spec-oracle-test
   (:require [code.framework :as framework]
             [lang.core :as l]
-            [lang.model.sql.spec-oracle :refer :all]
+            [lang.model.annex.sql.spec-oracle :refer :all]
             [std.block.layout :as layout])
   (:use code.test))
 

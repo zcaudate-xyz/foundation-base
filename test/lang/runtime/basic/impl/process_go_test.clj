@@ -1,13 +1,13 @@
 (ns lang.runtime.basic.impl.process-go-test
   (:use code.test)
-  (:require [lang.runtime.basic.impl.process-go :refer :all]))
+  (:require [lang.runtime.annex.basic.impl.process-go :refer :all]))
 
-^{:refer lang.runtime.basic.impl.process-go/default-twostep-wrap :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-go/default-twostep-wrap :added "4.1"}
 (fact "prepends standalone go wrapper"
   (default-twostep-wrap "func main() {}")
   => #"package main")
 
-^{:refer lang.runtime.basic.impl.process-go/transform-form :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-go/transform-form :added "4.1"}
 (fact "transforms forms into go main function"
   (-> (transform-form ['(+ 1 2)] {}) pr-str)
   => #"func main"

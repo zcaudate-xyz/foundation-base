@@ -4,8 +4,8 @@
             [lang.base.emit-helper :as helper]
             [lang.base.grammar :as grammar]
             [lang.base.util :as ut]
-            [lang.model.spec-js :as js]
-            [lang.model.spec-js.meta :as js-meta]
+            [lang.model.builtin.spec-js :as js]
+            [lang.model.builtin.spec-js.meta :as js-meta]
             [std.lib.env :as env])
   (:use code.test))
 

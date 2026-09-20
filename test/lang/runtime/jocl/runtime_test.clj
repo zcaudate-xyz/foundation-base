@@ -4,8 +4,8 @@
   (:require [lang.core :as l]
             [std.lib.component :as component]
             [std.lib.context.pointer :as cptr]
-            [lang.runtime.jocl :as exec :refer :all]
-            [lang.runtime.jocl.env :as jocl-env]))
+            [lang.runtime.annex.jocl :as exec :refer :all]
+            [lang.runtime.annex.jocl.env :as jocl-env]))
 
 (jocl-env/with-stubs exec? exec kernel? init-exec-jocl
                      init-ptr-jocl invoke-ptr-jocl stop-jocl jocl:create
@@ -38,13 +38,13 @@
 (defonce +rt+
   (component/start (jocl:create {})))
 
-^{:refer lang.runtime.jocl.runtime/kernel? :added "3.0"}
+^{:refer lang.runtime.annex.jocl.runtime/kernel? :added "3.0"}
 (fact "check that a code entry "
 
   (kernel? @sample)
   => true)
 
-^{:refer lang.runtime.jocl.runtime/init-exec-jocl :added "3.0"}
+^{:refer lang.runtime.annex.jocl.runtime/init-exec-jocl :added "3.0"}
 (fact "initialises the exec in the runtime"
   ^:hidden
 
@@ -64,17 +64,17 @@
       seq)
   =>  [0.0 1.0 4.0 9.0 16.0 25.0 36.0 49.0 64.0 81.0])
 
-^{:refer lang.runtime.jocl.runtime/init-ptr-jocl :added "3.0"}
+^{:refer lang.runtime.annex.jocl.runtime/init-ptr-jocl :added "3.0"}
 (fact "initialises the pointer")
 
-^{:refer lang.runtime.jocl.runtime/invoke-ptr-jocl :added "3.0"}
+^{:refer lang.runtime.annex.jocl.runtime/invoke-ptr-jocl :added "3.0"}
 (fact "invokes a jocl ptr (cached kernel)")
 
-^{:refer lang.runtime.jocl.runtime/stop-jocl :added "3.0"}
+^{:refer lang.runtime.annex.jocl.runtime/stop-jocl :added "3.0"}
 (fact "stops the runtime")
 
-^{:refer lang.runtime.jocl.runtime/jocl:create :added "3.0"}
+^{:refer lang.runtime.annex.jocl.runtime/jocl:create :added "3.0"}
 (fact "creates a new runtime")
 
-^{:refer lang.runtime.jocl.runtime/jocl :added "3.0"}
+^{:refer lang.runtime.annex.jocl.runtime/jocl :added "3.0"}
 (fact "create and starts the runtime")

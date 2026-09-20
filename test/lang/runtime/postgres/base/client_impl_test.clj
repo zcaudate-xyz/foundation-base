@@ -2,8 +2,8 @@
   (:require [lib.jdbc :as jdbc]
             [lib.postgres :as base]
             [lib.postgres.connection :as conn]
-            [lang.runtime.postgres.base.client :as client]
-            [lang.runtime.postgres.base.client-impl :as client-impl]
+            [lang.runtime.annex.postgres.base.client :as client]
+            [lang.runtime.annex.postgres.base.client-impl :as client-impl]
             [postgres.core.addon :as addon]
             [postgres.core.builtin :as builtin]
             [postgres.sample.scratch-v1 :as scratch]
@@ -11,7 +11,7 @@
             [std.lib.component :as component])
   (:use code.test))
 
-^{:refer lang.runtime.postgres.base.client-impl/raw-eval-pg-return :added "4.0"}
+^{:refer lang.runtime.annex.postgres.base.client-impl/raw-eval-pg-return :added "4.0"}
 (fact "returns a regularised result"
 
   (client-impl/raw-eval-pg-return [{:pg_jit_available true}])
@@ -20,7 +20,7 @@
   (client-impl/raw-eval-pg-return [{:result "{\"a\": 1}"}])
   => {:a 1})
 
-^{:refer lang.runtime.postgres.base.client-impl/raw-eval-pg :added "4.0"
+^{:refer lang.runtime.annex.postgres.base.client-impl/raw-eval-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"
                                          :temp :create}))]
   :teardown (component/stop -pg-)}
@@ -30,7 +30,7 @@
     (client-impl/raw-eval-pg -pg- "select 1;"))
   => [{:?column? 1}])
 
-^{:refer lang.runtime.postgres.base.client-impl/init-ptr-pg :added "4.0"
+^{:refer lang.runtime.annex.postgres.base.client-impl/init-ptr-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"
                                          :mode :dev}))]
   :teardown (component/stop -pg-)}
@@ -39,7 +39,7 @@
   (do (client-impl/init-ptr-pg -pg- scratch/addf))
   => anything)
 
-^{:refer lang.runtime.postgres.base.client-impl/prepend-select-check-form :added "4.0"}
+^{:refer lang.runtime.annex.postgres.base.client-impl/prepend-select-check-form :added "4.0"}
 (fact "checks if form needs a `SELECT` prepended"
 
   (client-impl/prepend-select-check builtin/acos
@@ -86,13 +86,13 @@
                              [[:anything]])
   => nil)
 
-^{:refer lang.runtime.postgres.base.client-impl/prepend-select-check :added "4.0"}
+^{:refer lang.runtime.annex.postgres.base.client-impl/prepend-select-check :added "4.0"}
 (fact "checks if values needs a `SELECT` prepended"
 
   (client-impl/prepend-select-check builtin/cot [40])
   => true)
 
-^{:refer lang.runtime.postgres.base.client-impl/invoke-ptr-pg-single :added "4.0"
+^{:refer lang.runtime.annex.postgres.base.client-impl/invoke-ptr-pg-single :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (component/stop -pg-)}
 (fact "invokes single "
@@ -102,21 +102,21 @@
                                     '[(+ 1 2)])
   => 3)
 
-^{:refer lang.runtime.postgres.base.client-impl/invoke-ptr-pg-transform-let-fn :added "4.0"}
+^{:refer lang.runtime.annex.postgres.base.client-impl/invoke-ptr-pg-transform-let-fn :added "4.0"}
 (fact "transforms the let form"
 
   (client-impl/invoke-ptr-pg-transform-let-fn
    'form)
   => '[:do :$$ \\ :begin \\ (\| (do [:loop \\ (\| (do form)) \\ :end-loop])) \\ :end \; \\ :$$ :language "plpgsql" \;])
 
-^{:refer lang.runtime.postgres.base.client-impl/invoke-ptr-pg-transform-try-fn :added "4.0"}
+^{:refer lang.runtime.annex.postgres.base.client-impl/invoke-ptr-pg-transform-try-fn :added "4.0"}
 (fact "transforms the try form"
 
   (client-impl/invoke-ptr-pg-transform-try-fn
    'form)
   => '[:do :$$ \\ :begin \\ (\| form) \\ :end \; \\ :$$ :language "plpgsql" \;])
 
-^{:refer lang.runtime.postgres.base.client-impl/invoke-ptr-pg-transform-prep :added "4.0"}
+^{:refer lang.runtime.annex.postgres.base.client-impl/invoke-ptr-pg-transform-prep :added "4.0"}
 (fact "transforms a form"
 
   (client-impl/invoke-ptr-pg-transform-prep
@@ -127,7 +127,7 @@
    false)
   => '[(try (do [:perform (set_config "temp.out" (:text (+ a b c)) false)]) (catch others (do [:perform (set_config "temp.out" (:text 1) false)]))) true])
 
-^{:refer lang.runtime.postgres.base.client-impl/invoke-ptr-pg-transform :added "4.0"}
+^{:refer lang.runtime.annex.postgres.base.client-impl/invoke-ptr-pg-transform :added "4.0"}
 (fact "transforms a let and try form"
 
   (client-impl/invoke-ptr-pg-transform
@@ -194,7 +194,7 @@
        false]
       [[:select (current-setting "temp.out" false)] true]])
 
-^{:refer lang.runtime.postgres.base.client-impl/invoke-ptr-pg-block :added "4.0"
+^{:refer lang.runtime.annex.postgres.base.client-impl/invoke-ptr-pg-block :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (component/stop -pg-)}
 (fact "invokes a block"
@@ -212,7 +212,7 @@
                                    [])
   => 6)
 
-^{:refer lang.runtime.postgres.base.client-impl/invoke-ptr-pg :added "4.0"
+^{:refer lang.runtime.annex.postgres.base.client-impl/invoke-ptr-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (component/stop -pg-)}
 (fact "invokes a pointer in runtime"
@@ -234,7 +234,7 @@
   => 6)
 
 
-^{:refer lang.runtime.postgres.base.client-impl/invoke-ptr-pg-form :added "4.1"}
+^{:refer lang.runtime.annex.postgres.base.client-impl/invoke-ptr-pg-form :added "4.1"}
 (fact "wraps one form in a free pointer form and invokes it without arguments"
   (with-redefs [client-impl/invoke-ptr-pg-single vector]
     (client-impl/invoke-ptr-pg-form :pg

@@ -1,5 +1,5 @@
 (ns haxe.core
-  (:require [lang.model.spec-haxe]
+  (:require [lang.model.annex.spec-haxe]
             [haxe.core.builtins :as builtins]
             [haxe.core.system :as system]
             [lang.core :as l]

@@ -1,6 +1,6 @@
 (ns lang.runtime.basic.docker.impl-r-test
   (:require [lang.runtime.basic.docker.registry :as registry]
-            [lang.runtime.basic.impl-annex.process-r :as r]
+            [lang.runtime.annex.basic.impl.process-r :as r]
             [std.lib.env :as env]
             [lang.core :as l]
             [lang.core.script :as script]

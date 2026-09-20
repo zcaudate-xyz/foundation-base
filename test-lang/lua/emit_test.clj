@@ -1,5 +1,5 @@
 ;; test/lua/emit_test.clj
-(ns test.lua.emit-test
+(ns lua.emit-test
   (:require [lang.core :as l]))
 
 (l/script :lua

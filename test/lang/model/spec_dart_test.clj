@@ -1,6 +1,6 @@
 (ns lang.model.spec-dart-test
   (:require [lang.core :as l]
-            [lang.model.spec-dart :as spec-dart]
+            [lang.model.builtin.spec-dart :as spec-dart]
             [xt.event.base-route])
   (:use code.test))
 
@@ -244,7 +244,7 @@
      (boolean (re-find #"return \"ok\";" out))])
   => [true true true])
 
-^{:refer lang.model.spec-dart/dart-map-key :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/dart-map-key :added "4.1"}
 (fact "emits map keys for dart"
 
   (spec-dart/dart-map-key :hello spec-dart/+grammar+ {})
@@ -253,10 +253,10 @@
   (spec-dart/dart-map-key '(+ a 1) spec-dart/+grammar+ {})
   => "a + 1")
 
-^{:refer lang.model.spec-dart/dart-fn :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/dart-fn :added "4.1"}
 (fact "emits dart functions")
 
-^{:refer lang.model.spec-dart/dart-var :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/dart-var :added "4.1"}
 (fact "transforms var destructuring for dart"
 
   (let [[op init a b] (spec-dart/dart-var '(var [a b] expr))]
@@ -279,26 +279,26 @@
   (spec-dart/dart-var '(var entry))
   => '(var* entry))
 
-^{:refer lang.model.spec-dart/dart-tf-let-bind :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/dart-tf-let-bind :added "4.1"}
 (fact "transforms dart let bindings")
 
-^{:refer lang.model.spec-dart/tf-for-object :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/tf-for-object :added "4.1"}
 (fact "transforms for:object loops")
 
-^{:refer lang.model.spec-dart/tf-for-array :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/tf-for-array :added "4.1"}
 (fact "transforms for:array loops")
 
-^{:refer lang.model.spec-dart/tf-for-iter :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/tf-for-iter :added "4.1"}
 (fact "transforms for:iter loops")
 
-^{:refer lang.model.spec-dart/dart-tf-ternary :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/dart-tf-ternary :added "4.1"}
 (fact "transforms dart ternary expressions")
 
 
-^{:refer lang.model.spec-dart/dart-string :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/dart-string :added "4.1"}
 (fact "emits dart strings")
 
-^{:refer lang.model.spec-dart/+meta+ :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/+meta+ :added "4.1"}
 (fact "appends generated suffixes to Dart package imports"
   ((:module-import spec-dart/+meta+)
    "package:xtalk_ui/page"
@@ -308,7 +308,7 @@
   => '(:- "import 'package:xtalk_ui/page.dart' as event_listener;"))
 
 
-^{:refer lang.model.spec-dart/dart-emit-input-rest :added "4.1"}
+^{:refer lang.model.builtin.spec-dart/dart-emit-input-rest :added "4.1"}
 (fact "emits Dart's optional list-backed rest parameter"
   (with-redefs [lang.base.emit-common/*emit-fn*
                 (fn [symbol _ _] (name symbol))]

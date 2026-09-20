@@ -3,8 +3,8 @@
   (:require [lang.base.emit-helper :as helper]
             [lang.base.grammar :as grammar]
             [lang.base.preprocess-value :refer :all]
-            [lang.model.spec-js :as js]
-            [lang.model.spec-lua :as lua]))
+            [lang.model.builtin.spec-js :as js]
+            [lang.model.builtin.spec-lua :as lua]))
 
 (def +reserved+
   (-> (grammar/build)

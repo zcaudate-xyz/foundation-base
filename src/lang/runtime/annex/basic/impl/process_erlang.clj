@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-erlang
+(ns lang.runtime.annex.basic.impl.process-erlang
   (:require [clojure.string]
             [lang.runtime.basic.type-basic :as basic]
             [lang.runtime.basic.type-common :as common]

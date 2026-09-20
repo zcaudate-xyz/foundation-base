@@ -1,12 +1,12 @@
 (ns lang.runtime.basic.impl.process-verilog-test
   (:require [clojure.string]
             [lang.core :as l]
-            [lang.runtime.basic.impl.process-verilog :refer :all]
+            [lang.runtime.annex.basic.impl.process-verilog :refer :all]
             [std.lib.env :as env]
             [std.lib.os :as os])
   (:use code.test))
 
-^{:refer lang.runtime.basic.impl.process-verilog/transform-form :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-verilog/transform-form :added "4.1"}
 (fact "wraps non-module statements in a testbench module"
   (transform-form '[(reg x)
                     ($display "hello")
@@ -16,7 +16,7 @@
                                           ($display "hello")
                                           ($finish))))))
 
-^{:refer lang.runtime.basic.impl.process-verilog/transform-form :added "4.1"
+^{:refer lang.runtime.annex.basic.impl.process-verilog/transform-form :added "4.1"
   :id test-transform-form-verilog-modules}
 (fact "leaves pure module definitions at the top level"
   (transform-form '[(defn counter [clk]
@@ -29,7 +29,7 @@
          (always [posedge clk]
                  (<= out clk)))))
 
-^{:refer lang.runtime.basic.impl.process-verilog/transform-form :added "4.1"
+^{:refer lang.runtime.annex.basic.impl.process-verilog/transform-form :added "4.1"
   :id test-transform-form-verilog-mixed-program}
 (fact "separates module definitions from executable statements"
   (transform-form '[(defn counter [clk]
@@ -45,7 +45,7 @@
        (defn __lang_tb__ [] (initial (do ($display "done")
                                          ($finish))))))
 
-^{:refer lang.runtime.basic.impl.process-verilog/transform-form :added "4.1"
+^{:refer lang.runtime.annex.basic.impl.process-verilog/transform-form :added "4.1"
   :id test-transform-form-verilog-existing-blocks}
 (fact "does not wrap existing initial/always blocks in an additional initial"
   (transform-form '[(initial
@@ -56,7 +56,7 @@
                                   ($display "hello")
                                   ($finish))))))
 
-^{:refer lang.runtime.basic.impl.process-verilog/sh-exec-verilog :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-verilog/sh-exec-verilog :added "4.1"}
 (fact "compiles with iverilog and runs with vvp"
   (let [calls (atom [])]
     (with-redefs [os/sh (fn [opts]

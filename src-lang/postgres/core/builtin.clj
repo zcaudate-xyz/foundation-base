@@ -1,5 +1,5 @@
 (ns postgres.core.builtin
-  (:require [lang.model.spec-postgres]
+  (:require [lang.model.annex.spec-postgres]
             [lang.core :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template])

@@ -1,4 +1,4 @@
-(ns lang.model.builtin.spec-xtalk.fn-elisp
+(ns lang.model.annex.spec-elisp.xtalk-elisp
   (:require [std.lib.collection :as collection]
             [std.lib.template :as template]))
 

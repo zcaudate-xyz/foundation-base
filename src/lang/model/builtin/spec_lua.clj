@@ -14,7 +14,7 @@
             [lang.model.builtin.spec-lua.c-ffi :as c-ffi]
             [lang.model.builtin.spec-lua.rewrite :as rewrite]
             [lang.model.builtin.spec-xtalk]
-            [lang.model.builtin.spec-xtalk.fn-lua :as fn]
+            [lang.model.builtin.spec-lua.xtalk-lua :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template]))

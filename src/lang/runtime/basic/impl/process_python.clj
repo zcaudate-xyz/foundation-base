@@ -10,7 +10,7 @@
             [std.json :as json]
             [lang.core.impl :as impl]
             [lang.core.runtime :as rt]
-            [lang.model.spec-python :as spec]
+            [lang.model.builtin.spec-python :as spec]
             [std.lib.os :as os]
             [xt.lang.common-lib :as lib]))
 

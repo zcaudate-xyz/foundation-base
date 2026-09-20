@@ -1,5 +1,5 @@
 ^{:seedgen/skip true}
-(ns xt.substrate.walkthrough-js.s35-playmin-test
+(ns xt.substrate.walkthrough-js.s36-playmin-test
   "Walkthrough test demonstrating js.react.ext-page against a substrate node
    running inside a browser page served by the `:playground` runtime.
 

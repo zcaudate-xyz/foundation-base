@@ -1,11 +1,11 @@
 (ns lang.model.spec-postgres.form-defconst-test
-  (:require [lang.model.spec-postgres :as g]
-            [lang.model.spec-postgres.form-defconst :as form]
+  (:require [lang.model.annex.spec-postgres :as g]
+            [lang.model.annex.spec-postgres.form-defconst :as form]
             [postgres.sample.scratch-v1 :as scratch]
             [lang.core :as l])
   (:use code.test))
 
-^{:refer lang.model.spec-postgres.form-defconst/pg-defconst-hydrate :added "4.0"}
+^{:refer lang.model.annex.spec-postgres.form-defconst/pg-defconst-hydrate :added "4.0"}
 (fact "creates the "
 
   (def -out-
@@ -26,7 +26,7 @@
   -out-
   => vector?)
 
-^{:refer lang.model.spec-postgres.form-defconst/pg-defconst :added "4.0"}
+^{:refer lang.model.annex.spec-postgres.form-defconst/pg-defconst :added "4.0"}
 (fact "emits the static form"
 
   (form/pg-defconst

@@ -1,10 +1,10 @@
 (ns lang.runtime.basic.type-twostep-lean-test
   (:use code.test)
   (:require [std.lib.env :as env]
-            [lang.runtime.basic.impl-annex.process-lean]
+            [lang.runtime.annex.basic.impl.process-lean]
             [lang.core :as l]))
 
-(do lang.runtime.basic.impl-annex.process-lean/+lean-twostep+)
+(do lang.runtime.annex.basic.impl.process-lean/+lean-twostep+)
 
 (l/script- :lean
   {:runtime :twostep :test-mode true})

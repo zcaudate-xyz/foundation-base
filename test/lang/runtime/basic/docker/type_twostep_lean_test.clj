@@ -1,6 +1,6 @@
 (ns lang.runtime.basic.docker.type-twostep-lean-test
   (:use code.test)
-  (:require [lang.runtime.basic.impl-annex.process-lean]
+  (:require [lang.runtime.annex.basic.impl.process-lean]
             [lang.core :as l]
             [std.lib.env :as env]))
 

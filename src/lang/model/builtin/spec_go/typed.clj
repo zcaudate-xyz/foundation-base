@@ -1,4 +1,4 @@
-(ns lang.model.annex.spec-go.typed
+(ns lang.model.builtin.spec-go.typed
   (:require [clojure.string :as str]
             [lang.typed.xtalk-parse :as xtalk-parse]))
 

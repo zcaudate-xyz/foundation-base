@@ -1,12 +1,12 @@
-(ns lang.runtime.solidity.client
+(ns lang.runtime.annex.solidity.client
   (:require [clojure.string]
             [js.lib.eth-bench :as eth-bench]
             [lang.runtime.basic :as basic]
             [lang.runtime.basic.server-basic :as server]
-            [lang.runtime.solidity.compile-common :as common]
-            [lang.runtime.solidity.compile-deploy :as deploy]
-            [lang.runtime.solidity.compile-node :as node]
-            [lang.runtime.solidity.compile-solc :as solc]
+            [lang.runtime.annex.solidity.compile-common :as common]
+            [lang.runtime.annex.solidity.compile-deploy :as deploy]
+            [lang.runtime.annex.solidity.compile-node :as node]
+            [lang.runtime.annex.solidity.compile-solc :as solc]
             [std.fs :as fs]
             [std.json :as json]
             [lang.core :as l]

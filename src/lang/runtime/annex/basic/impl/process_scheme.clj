@@ -1,11 +1,11 @@
-(ns lang.runtime.basic.impl.process-scheme
+(ns lang.runtime.annex.basic.impl.process-scheme
   (:require [clojure.string :as str]
             [lang.runtime.basic.type-basic :as basic]
             [lang.runtime.basic.type-common :as common]
             [lang.runtime.basic.type-oneshot :as oneshot]
             [lang.runtime.basic.type-verify :as type-verify]
             [lang.core.runtime :as rt]
-            [lang.model.spec-scheme :as spec]))
+            [lang.model.annex.spec-scheme :as spec]))
 
 (defn scheme-root
   []

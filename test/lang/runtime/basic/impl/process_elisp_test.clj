@@ -1,7 +1,7 @@
 (ns lang.runtime.basic.impl.process-elisp-test
   (:use code.test)
   (:require [lang.core :as l]
-            [lang.runtime.basic.impl.process-elisp :refer [elisp-root]]
+            [lang.runtime.annex.basic.impl.process-elisp :refer [elisp-root]]
             [std.lib.env :as env]))
 
 (l/script- :elisp
@@ -13,13 +13,13 @@
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer lang.runtime.basic.impl.process-elisp/+elisp-basic-config+ :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-elisp/+elisp-basic-config+ :added "4.1"}
 (fact "elisp basic runtime evaluates simple expressions"
   (!.elisp (+ 1 2))
   => 3)
 
 
-^{:refer lang.runtime.basic.impl.process-elisp/elisp-root :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-elisp/elisp-root :added "4.1"}
 (fact "returns the project root directory"
   (elisp-root)
   => (or (System/getenv "PWD")

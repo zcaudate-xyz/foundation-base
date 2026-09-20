@@ -1,6 +1,6 @@
 (ns postgres.core.addon
-  (:require [lang.model.spec-postgres.common :as common]
-            [lang.model.spec-postgres.tf :as tf]
+  (:require [lang.model.annex.spec-postgres.common :as common]
+            [lang.model.annex.spec-postgres.tf :as tf]
             [std.json :as json]
             [lang.core :as l]
             [std.lib.template :as template])

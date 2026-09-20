@@ -1,6 +1,6 @@
-(ns lang.runtime.vscode
+(ns lang.runtime.annex.vscode
   (:require [std.lib :as h]
-            [lang.runtime.vscode.impl :as impl])
+            [lang.runtime.annex.vscode.impl :as impl])
   (:refer-clojure :exclude [eval]))
 
 (h/intern-in

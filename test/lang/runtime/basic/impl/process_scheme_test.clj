@@ -1,7 +1,7 @@
 (ns lang.runtime.basic.impl.process-scheme-test
   (:use code.test)
   (:require [lang.core :as l]
-            [lang.runtime.basic.impl.process-scheme :refer [scheme-root]]
+            [lang.runtime.annex.basic.impl.process-scheme :refer [scheme-root]]
             [std.lib.env :as env]))
 
 (l/script- :scheme
@@ -13,13 +13,13 @@
   :setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer lang.runtime.basic.impl.process-scheme/+scheme-basic-config+ :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-scheme/+scheme-basic-config+ :added "4.1"}
 (fact "scheme basic runtime evaluates simple expressions"
   (!.scheme (+ 1 2))
   => 3)
 
 
-^{:refer lang.runtime.basic.impl.process-scheme/scheme-root :added "4.1"}
+^{:refer lang.runtime.annex.basic.impl.process-scheme/scheme-root :added "4.1"}
 (fact "returns the project root directory"
   (scheme-root)
   => (or (System/getenv "PWD")

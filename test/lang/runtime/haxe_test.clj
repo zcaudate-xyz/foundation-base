@@ -1,12 +1,12 @@
 (ns lang.runtime.haxe-test
-  (:require [lang.runtime.haxe.impl :as impl]
+  (:require [lang.runtime.annex.haxe.impl :as impl]
             [std.lib.component :as component]
             [std.lib.env :as env])
   (:use code.test))
 
 (fact:global {:skip (not (env/program-exists? "haxe"))})
 
-^{:refer lang.runtime.haxe.impl/haxe :added "4.1"}
+^{:refer lang.runtime.annex.haxe.impl/haxe :added "4.1"}
 (fact "creates and uses a haxe runtime"
   (let [rt (impl/haxe {})]
     [(boolean rt)
@@ -15,7 +15,7 @@
          true)])
   => [true 6 true])
 
-^{:refer lang.runtime.haxe.impl/raw-eval-haxe :added "4.1"}
+^{:refer lang.runtime.annex.haxe.impl/raw-eval-haxe :added "4.1"}
 (fact "evaluates string concatenation in haxe"
   (let [rt (impl/haxe {})]
     (try

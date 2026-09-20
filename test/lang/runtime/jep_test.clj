@@ -1,6 +1,6 @@
 (ns lang.runtime.jep-test
-  (:require [lang.runtime.jep :as jep :refer :all]
-             [lang.runtime.jep.bootstrap :as bootstrap]
+  (:require [lang.runtime.annex.jep :as jep :refer :all]
+             [lang.runtime.annex.jep.bootstrap :as bootstrap]
             [lang.base.util :as ut]
              [std.concurrent :as cc]
              [lang.core :as l]
@@ -13,7 +13,7 @@
   :setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer lang.runtime.jep/jep-bus :added "3.0"
+^{:refer lang.runtime.annex.jep/jep-bus :added "3.0"
   ;; :setup [(assert (= 10 (!.py (+ 1 2 3 4))))]
   }
 (fact "gets or creates a runtime bus for thread isolation"
@@ -21,7 +21,7 @@
   (jep/jep-bus)
   => cc/bus?)
 
-^{:refer lang.runtime.jep/make-interpreter :added "3.0"
+^{:refer lang.runtime.annex.jep/make-interpreter :added "3.0"
   :setup [(mapv (fn [itp]
                   (f/suppress (jep/close-interpreter itp)))
                 @jep/*interpreters*)]}
@@ -34,13 +34,13 @@
         (jep/close-interpreter itp))))
   => jep.SharedInterpreter)
 
-^{:refer lang.runtime.jep/close-interpreter :added "3.0"}
+^{:refer lang.runtime.annex.jep/close-interpreter :added "3.0"}
 (fact "closes the shared interpreter"
   (let [itp (jep/make-interpreter)]
     (close-interpreter itp)
     (contains? @jep/*interpreters* itp) => false))
 
-^{:refer lang.runtime.jep/eval-exec-interpreter :added "3.0"
+^{:refer lang.runtime.annex.jep/eval-exec-interpreter :added "3.0"
   :setup [(mapv (fn [itp]
                   (f/suppress (jep/close-interpreter itp)))
                 @jep/*interpreters*)]}
@@ -51,19 +51,19 @@
                         (eval-get-interpreter itp "[a, b]"))
   => [1 2])
 
-^{:refer lang.runtime.jep/eval-get-interpreter :added "3.0"}
+^{:refer lang.runtime.annex.jep/eval-get-interpreter :added "3.0"}
 (fact "gets a value from the interpreter"
   (jep:temp-interpreter itp
                         (eval-get-interpreter itp "1 + 1"))
   => 2)
 
-^{:refer lang.runtime.jep/jep:temp-interpreter :added "3.0"}
+^{:refer lang.runtime.annex.jep/jep:temp-interpreter :added "3.0"}
 (fact "gets a value from the interpreter"
   (jep:temp-interpreter itp
                         (eval-get-interpreter itp "1 + 1"))
   => 2)
 
-^{:refer lang.runtime.jep/jep-handler :added "3.0"}
+^{:refer lang.runtime.annex.jep/jep-handler :added "3.0"}
 (fact "creates a loop handler from interpreter"
 
   (jep:temp-interpreter itp
@@ -72,7 +72,7 @@
                           (handler {:op :get :body "a"})))
   => 1)
 
-^{:refer lang.runtime.jep/eval-command-jep :added "3.0"
+^{:refer lang.runtime.annex.jep/eval-command-jep :added "3.0"
   :setup    [(def +jep+ (component/start (jep/rt-jep:create {})))]
   :teardown [(component/stop +jep+)]}
 (fact "inputs command input jep context"
@@ -83,14 +83,14 @@
   @(eval-command-jep +jep+ {:op :get :body "a"})
   => 1)
 
-^{:refer lang.runtime.jep/eval-command-fn :added "3.0"
+^{:refer lang.runtime.annex.jep/eval-command-fn :added "3.0"
   :setup    [(def +jep+ (component/start (jep/rt-jep:create {})))]
   :teardown [(component/stop +jep+)]}
 (fact "helper function to input command"
   ((eval-command-fn :get :body) +jep+ "1+1")
   => (any future? 2))
 
-^{:refer lang.runtime.jep/start-jep :added "3.0"}
+^{:refer lang.runtime.annex.jep/start-jep :added "3.0"}
 (fact "starts up the jep runtime"
   (let [jep (rt-jep:create {})]
     (start-jep jep)
@@ -98,19 +98,19 @@
       (rt-jep? jep) => true
       (finally (stop-jep jep)))))
 
-^{:refer lang.runtime.jep/stop-jep :added "3.0"}
+^{:refer lang.runtime.annex.jep/stop-jep :added "3.0"}
 (fact "stops the jep runtime"
   (let [jep (component/start (rt-jep:create {}))]
     (stop-jep jep)
     ;; check if stopped?
     ))
 
-^{:refer lang.runtime.jep/kill-jep :added "3.0"}
+^{:refer lang.runtime.annex.jep/kill-jep :added "3.0"}
 (fact "kills the jep runtime"
   (let [jep (component/start (rt-jep:create {}))]
     (kill-jep jep)))
 
-^{:refer lang.runtime.jep/invoke-ptr-jep :added "4.0"}
+^{:refer lang.runtime.annex.jep/invoke-ptr-jep :added "4.0"}
 (fact "invokes a pointer in the runtime"
 
   (l/script- :python
@@ -125,18 +125,18 @@
                   [1 2])
   => 3)
 
-^{:refer lang.runtime.jep/rt-jep:create :added "3.0"}
+^{:refer lang.runtime.annex.jep/rt-jep:create :added "3.0"}
 (fact "creates a componentizable runtime"
   (rt-jep:create {})
   => rt-jep?)
 
-^{:refer lang.runtime.jep/rt-jep :added "3.0"}
+^{:refer lang.runtime.annex.jep/rt-jep :added "3.0"}
 (fact "creates and starts the runtime"
   (let [jep (rt-jep {})]
     (try
       (rt-jep? jep) => true
       (finally (stop-jep jep)))))
 
-^{:refer lang.runtime.jep/rt-jep? :added "3.0"}
+^{:refer lang.runtime.annex.jep/rt-jep? :added "3.0"}
 (fact "checks that object is a jep runtime"
   (rt-jep? (rt-jep:create {})) => true)

@@ -1,8 +1,8 @@
-(ns lang.model.sql.spec-common
-  (:require [lang.model.sql.spec-common.common :as common]
-            [lang.model.sql.spec-common.form-defenum :as form-defenum]
-            [lang.model.sql.spec-common.form-defn :as form-defn]
-            [lang.model.sql.spec-common.form-deftype :as form-deftype]
+(ns lang.model.annex.sql.spec-common
+  (:require [lang.model.annex.sql.spec-common.common :as common]
+            [lang.model.annex.sql.spec-common.form-defenum :as form-defenum]
+            [lang.model.annex.sql.spec-common.form-defn :as form-defn]
+            [lang.model.annex.sql.spec-common.form-deftype :as form-deftype]
             [lang.base.book :as book]
             [lang.base.emit :as emit]
             [lang.base.grammar :as grammar]

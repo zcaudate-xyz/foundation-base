@@ -1,4 +1,4 @@
-(ns lang.runtime.jocl.meta
+(ns lang.runtime.annex.jocl.meta
   (:require [std.object :as object]
             [std.string :as str]
             [std.lib.collection :as coll]

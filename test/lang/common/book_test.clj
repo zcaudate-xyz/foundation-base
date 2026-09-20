@@ -1,4 +1,4 @@
-(ns lang.base.book-test
+(ns lang.common.book-test
   (:require [lang.base.book :as b]
             [lang.base.book-entry :as entry]
             [lang.core.impl-entry :as impl-entry]

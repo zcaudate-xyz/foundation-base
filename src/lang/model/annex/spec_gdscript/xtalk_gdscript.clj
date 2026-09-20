@@ -1,4 +1,4 @@
-(ns lang.model.builtin.spec-xtalk.fn-gdscript
+(ns lang.model.annex.spec-gdscript.xtalk-gdscript
   (:require [std.lib.template :as template]))
 
 ;;

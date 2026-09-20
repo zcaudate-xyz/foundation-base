@@ -11,7 +11,7 @@
             [lang.core.library-snapshot-prep-test :as prep]
             [lang.base.emit-prep-lua-test :as lua-prep]
             [lang.base.util :as ut]
-            [lang.model.spec-lua :as lua]
+            [lang.model.builtin.spec-lua :as lua]
             [std.lib.atom :as atom]
             [std.lib.deps :as deps]
             [std.lib.env :as env])

@@ -1,8 +1,8 @@
 (ns lang.runtime.gimp-test
   (:require [lang.core :as l]
             [lang.core.script-control :as script-control]
-            [lang.runtime.gimp :as gimp]
-            [lang.runtime.gimp.impl :as impl]
+            [lang.runtime.annex.gimp :as gimp]
+            [lang.runtime.annex.gimp.impl :as impl]
             [std.lib.component :as component]
             [std.lib.env :as env])
   (:use code.test))
@@ -26,7 +26,7 @@
   :teardown [(l/rt:stop :python)]})
 
 
-^{:refer lang.runtime.gimp.impl/gimp :added "4.1"}
+^{:refer lang.runtime.annex.gimp.impl/gimp :added "4.1"}
 (fact "starts and stops a gimp runtime"
   (let [rt (impl/gimp {})]
     [(boolean rt)
@@ -35,7 +35,7 @@
          true)])
   => [true true true])
 
-^{:refer lang.runtime.gimp.impl/raw-eval-gimp :added "4.1"}
+^{:refer lang.runtime.annex.gimp.impl/raw-eval-gimp :added "4.1"}
 (fact "evaluates python in gimp"
   (let [rt (impl/gimp {})]
     (try

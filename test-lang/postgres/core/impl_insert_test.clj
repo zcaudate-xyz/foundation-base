@@ -1,6 +1,6 @@
 (ns postgres.core.impl-insert-test
-  (:require [lang.runtime.postgres.base.application :as app]
-            [lang.model.spec-postgres.common-tracker :as tracker]
+  (:require [lang.runtime.annex.postgres.base.application :as app]
+            [lang.model.annex.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [postgres.core.impl-insert :as insert]
             [lang.core :as l]

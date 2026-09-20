@@ -1,7 +1,7 @@
 (ns postgres.sample.scratch-v3-test
   (:require [clojure.string :as str]
             [lang.core :as l]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [postgres.sample.scratch-v3 :as scratch])
   (:use code.test))
 

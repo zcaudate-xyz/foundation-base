@@ -8,7 +8,7 @@
              [lang.core.impl :as impl]
              [lang.core.library :as lib]
              [lang.core.library-snapshot :as snap]
-             [lang.model.spec-js.ts :as ts]
+             [lang.model.builtin.spec-js.ts :as ts]
              [std.make :as make]
              [std.make.compile :as compile]
              [xt.lang.common-math :as math])

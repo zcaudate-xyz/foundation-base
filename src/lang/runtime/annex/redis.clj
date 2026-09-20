@@ -1,9 +1,9 @@
-(ns lang.runtime.redis
+(ns lang.runtime.annex.redis
   (:require [lib.redis.bench :as bench]
             [lib.redis.event :as event]
             [net.resp.connection :as conn]
-            [lang.runtime.redis.client :as client]
-            [lang.runtime.redis.eval-script :as script]
+            [lang.runtime.annex.redis.client :as client]
+            [lang.runtime.annex.redis.eval-script :as script]
             [std.concurrent :as cc]
             [std.lib.foundation :as f]))
 

@@ -1,6 +1,6 @@
-(ns lang.runtime.gimp
+(ns lang.runtime.annex.gimp
   (:require [std.lib :as h]
-            [lang.runtime.gimp.impl :as impl])
+            [lang.runtime.annex.gimp.impl :as impl])
   (:refer-clojure :exclude [eval]))
 
 (h/intern-in

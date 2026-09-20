@@ -1,15 +1,15 @@
-(ns lang.runtime.jocl.exec
+(ns lang.runtime.annex.jocl.exec
   (:require [std.protocol.component :as protocol.component]
             [std.lib.encode :as encode]
-            [lang.runtime.jocl.common :as common]
-            [lang.runtime.jocl.meta :as meta]
-            [lang.runtime.jocl.type :as type]
+            [lang.runtime.annex.jocl.common :as common]
+            [lang.runtime.annex.jocl.meta :as meta]
+            [lang.runtime.annex.jocl.type :as type]
             [std.object :as object]
             [std.string :as str]
             [lang.core.impl :as impl]
             [lang.core.pointer :as ptr]
             [lang.base.util :as ut]
-            [lang.model.spec-c :as c]
+            [lang.model.builtin.spec-c :as c]
             [std.lib.collection :as coll]
             [std.lib.component :as component]
             [std.lib.env :as env]
@@ -54,7 +54,7 @@
                              :namespace (or namespace (env/ns-sym))
                              :emit {:body {:suppress true}}}))
         ;; :flat layout emits declarations unmangled, so the kernel name is
-        ;; just the entry id (see lang.model.spec-c/emit-defn).
+        ;; just the entry id (see lang.model.builtin.spec-c/emit-defn).
         name      (c/c-sanitize (:id source-ptr))]
     [code name]))
 

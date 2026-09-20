@@ -1,9 +1,9 @@
-(ns lang.runtime.basic.impl.process-go
+(ns lang.runtime.annex.basic.impl.process-go
   (:require [lang.runtime.basic.type-common :as common]
             [lang.runtime.basic.type-twostep :as twostep]
             [lang.runtime.basic.type-verify :as type-verify]
             [lang.core.runtime :as rt]
-            [lang.model.spec-go]))
+            [lang.model.builtin.spec-go]))
 
 (defn default-twostep-wrap
   "Prepends the minimal standalone Go program wrapper."

@@ -1,10 +1,10 @@
-(ns lang.runtime.solidity.compile-solc
+(ns lang.runtime.annex.solidity.compile-solc
   (:require [clojure.string]
             [lang.base.book-module :as book-module]
             [js.lib.eth-solc :as eth-solc]
             [lang.runtime.basic :as basic]
-            [lang.runtime.solidity.compile-common :as common]
-            [lang.runtime.solidity.env-hardhat :as env]
+            [lang.runtime.annex.solidity.compile-common :as common]
+            [lang.runtime.annex.solidity.env-hardhat :as env]
             [lang.core :as l]
             [std.lib.component :as component]
             [std.lib.env]

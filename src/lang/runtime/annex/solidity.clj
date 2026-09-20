@@ -1,17 +1,17 @@
-(ns lang.runtime.solidity
-  (:require [lang.runtime.solidity.client :as client]
-            [lang.runtime.solidity.compile-common :as compile-common]
-            [lang.runtime.solidity.compile-deploy :as compile-deploy]
-            [lang.runtime.solidity.compile-node :as compile-node]
-            [lang.runtime.solidity.compile-solc :as compile-solc]
-            [lang.runtime.solidity.env-hardhat :as env-hardhat]
+(ns lang.runtime.annex.solidity
+  (:require [lang.runtime.annex.solidity.client :as client]
+            [lang.runtime.annex.solidity.compile-common :as compile-common]
+            [lang.runtime.annex.solidity.compile-deploy :as compile-deploy]
+            [lang.runtime.annex.solidity.compile-node :as compile-node]
+            [lang.runtime.annex.solidity.compile-solc :as compile-solc]
+            [lang.runtime.annex.solidity.env-hardhat :as env-hardhat]
             [lang.core :as l]
             [std.lib.env :as env]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [assert require bytes]))
 
 (l/script :solidity
-  lang.runtime.solidity
+  lang.runtime.annex.solidity
   {:require [[solidity.core.builtin :as s]]})
 
 (f/intern-in [rt:start-hardhat-server env-hardhat/start-hardhat-server]

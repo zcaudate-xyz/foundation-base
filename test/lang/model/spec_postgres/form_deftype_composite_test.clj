@@ -1,6 +1,6 @@
 (ns lang.model.spec-postgres.form-deftype-composite-test
-  (:require [lang.model.spec-postgres.common :as common]
-            [lang.model.spec-postgres.form-deftype :as sut]
+  (:require [lang.model.annex.spec-postgres.common :as common]
+            [lang.model.annex.spec-postgres.form-deftype :as sut]
             [lang.base.book :as book]
             [lang.core.library-snapshot :as snap])
   (:use code.test))

@@ -1,4 +1,4 @@
-(ns lang.model.annex.spec-dart
+(ns lang.model.builtin.spec-dart
   (:require [clojure.string]
             [lang.base.book :as book]
              [lang.base.emit :as emit]
@@ -9,8 +9,8 @@
              [lang.core.script :as script]
              [lang.base.util :as ut]
              [lang.model.annex.spec-xtalk]
-             [lang.model.annex.spec-dart.rewrite :as rewrite]
-             [lang.model.annex.spec-xtalk.fn-dart :as fn-dart]
+             [lang.model.builtin.spec-dart.rewrite :as rewrite]
+             [lang.model.builtin.spec-dart.xtalk-dart :as fn-dart]
              [std.lib.collection :as collection]
              [std.lib.template :as template]))
 

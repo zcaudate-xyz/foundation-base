@@ -1,6 +1,6 @@
 (ns lua.core-test
   (:require [lang.core :as l]
-            [lang.model.spec-lua :as lua]
+            [lang.model.builtin.spec-lua :as lua]
             [std.lib.env :as env])
   (:use code.test))
 

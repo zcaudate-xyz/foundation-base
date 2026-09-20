@@ -1,6 +1,6 @@
 (ns postgres.core.impl-base-test
   (:require [postgres.core]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [postgres.core.impl-base :refer :all]
             [postgres.sample.scratch-v1 :as scratch]
             [lang.core :as l]
@@ -32,7 +32,7 @@
 
 (fact "prep-entry prefers the live current-module entry"
   (with-redefs [lang.base.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
-                lang.model.spec-postgres.common/pg-resolve-entry
+                lang.model.annex.spec-postgres.common/pg-resolve-entry
                 (fn [_ _]
                   [{:modules {}}
                    {:id 'Hello
@@ -56,7 +56,7 @@
 
 (fact "prep-table overlays module tables onto the application view"
   (with-redefs [lang.base.emit-common/emit-symbol-classify (fn [_ _] [:self '-])
-                lang.model.spec-postgres.common/pg-resolve-entry
+                lang.model.annex.spec-postgres.common/pg-resolve-entry
                 (fn [_ _]
                   [{:modules {}}
                    {:id 'Entry

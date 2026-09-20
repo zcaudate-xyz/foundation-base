@@ -4,7 +4,7 @@
             [lang.runtime.basic.type-verify :as type-verify]
             [lang.core.impl :as impl]
             [lang.core.runtime :as rt]
-            [lang.model.spec-bash :as spec]))
+            [lang.model.builtin.spec-bash :as spec]))
 
 (def +program-init+
   (common/put-program-options

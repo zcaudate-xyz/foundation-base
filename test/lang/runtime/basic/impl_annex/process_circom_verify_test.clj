@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl_annex.process-circom-verify-test
+(ns lang.runtime.basic.impl-annex.process-circom-verify-test
   (:require [lang.core :as l]
             [std.lib.context.space :as space]
             [std.lib.env :as env])

@@ -1,6 +1,6 @@
 (ns lang.model.annex.spec-postgres.common
   (:require [clojure.string]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [lang.model.annex.spec-postgres.meta :as meta]
             [lang.model.annex.spec-postgres.tf :as tf]
             [lang.base.book :as book]

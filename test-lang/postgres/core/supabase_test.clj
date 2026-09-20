@@ -1,6 +1,6 @@
 (ns postgres.core.supabase-test
   (:require [clojure.string :as str]
-            [lang.model.spec-postgres :as grammar]
+            [lang.model.annex.spec-postgres :as grammar]
             [postgres.core.supabase :as s]
             [scaffold.supabase.local-min-support :as support]
             [lang.core :as l])

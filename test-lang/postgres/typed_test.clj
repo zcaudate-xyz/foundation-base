@@ -2,7 +2,7 @@
   (:require [clojure.edn :as edn]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [postgres.typed.export.json-openapi :as compile.json-openapi]
             [postgres.typed.typed-common :as types]
             [postgres.typed.typed-parse :as parse]
@@ -104,7 +104,7 @@
 (fact "creates a postgres typed context from an app typed payload"
   (let [typed-payload (types/analysis->typed
                        (parse/analyze-namespace 'postgres.sample.scratch-v2))]
-    (with-redefs [lang.runtime.postgres.base.application/app-typed (fn [_] typed-payload)]
+    (with-redefs [lang.runtime.annex.postgres.base.application/app-typed (fn [_] typed-payload)]
       (let [ctx (typed/load-app "demo")]
         [(:app-name ctx)
          (some? (typed/function-def ctx 'postgres.sample.scratch-v2/insert-entry))]))
@@ -266,7 +266,7 @@
                        (parse/analyze-namespace 'postgres.sample.scratch-v2))]
     [(get-in (typed/input-schema ctx 'postgres.sample.scratch-v2/insert-task-raw 'm :openapi)
              [:properties "id" :format])
-     (with-redefs [lang.runtime.postgres.base.application/app-typed (fn [_] typed-payload)]
+     (with-redefs [lang.runtime.annex.postgres.base.application/app-typed (fn [_] typed-payload)]
        (get-in (typed/input-schema (typed/load-app "demo")
                                    'postgres.sample.scratch-v2/insert-task-raw
                                    'm
@@ -291,7 +291,7 @@
         ctx (typed/load-registry {'test.ns/prepare-topic fn-def})
         typed-payload {:tables {} :enums {} :functions {'test.ns/prepare-topic fn-def}}]
     [(-> (typed/output-shape ctx 'test.ns/prepare-topic) :fields keys set)
-     (with-redefs [lang.runtime.postgres.base.application/app-typed (fn [_] typed-payload)]
+     (with-redefs [lang.runtime.annex.postgres.base.application/app-typed (fn [_] typed-payload)]
        (-> (typed/output-shape (typed/load-app "demo") 'test.ns/prepare-topic)
            :fields
            keys

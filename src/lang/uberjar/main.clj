@@ -4,18 +4,18 @@
   (:gen-class))
 
 (def language-namespaces
-  {:xtalk  'lang.model.spec-xtalk
-   :bash   'lang.model.spec-bash
-   :c      'lang.model.spec-c
-   :dart   'lang.model.spec-dart
-   :glsl   'lang.model.spec-glsl
-   :js     'lang.model.spec-js
-   :lua    'lang.model.spec-lua
-   :elisp  'lang.model.spec-elisp
-   :scheme 'lang.model.spec-scheme
-   :python 'lang.model.spec-python
-   :sql    'lang.model.spec-sql
-   :oracle 'lang.model.sql.spec-oracle})
+  {:xtalk  'lang.model.builtin.spec-xtalk
+   :bash   'lang.model.builtin.spec-bash
+   :c      'lang.model.builtin.spec-c
+   :dart   'lang.model.builtin.spec-dart
+   :glsl   'lang.model.builtin.spec-glsl
+   :js     'lang.model.builtin.spec-js
+   :lua    'lang.model.builtin.spec-lua
+   :elisp  'lang.model.annex.spec-elisp
+   :scheme 'lang.model.annex.spec-scheme
+   :python 'lang.model.builtin.spec-python
+   :sql    'lang.model.annex.spec-sql
+   :oracle 'lang.model.annex.sql.spec-oracle})
 
 (def usage
   (str "Usage:\n"

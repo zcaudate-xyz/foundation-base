@@ -13,7 +13,7 @@
             [lang.base.util :as ut]
             [lang.model.annex.spec-gdscript.rewrite :as rewrite]
             [lang.model.annex.spec-xtalk]
-            [lang.model.annex.spec-xtalk.fn-gdscript :as fn]
+            [lang.model.annex.spec-gdscript.xtalk-gdscript :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template])

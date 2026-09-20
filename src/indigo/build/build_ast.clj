@@ -1,4 +1,4 @@
-(ns code.tool.translate.js-ast
+(ns indigo.build.build-ast
   (:require [std.fs :as fs]
             [lang.core :as l]
             [std.lib.env :as env]

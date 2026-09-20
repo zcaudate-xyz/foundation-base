@@ -1,7 +1,7 @@
 (ns lang.model.spec-ruby-test
   (:require [lang.core :as l]
-            [lang.model.spec-ruby :as spec-ruby]
-            [lang.model.spec-ruby.rewrite :as rewrite]
+            [lang.model.annex.spec-ruby :as spec-ruby]
+            [lang.model.annex.spec-ruby.rewrite :as rewrite]
             [lang.model.annex.spec-xtalk.fn-ruby :as fn-ruby])
   (:use code.test))
 
@@ -251,7 +251,7 @@
           (x:get-key obj "describe" nil)
           (x:get-key (or (proto:get obj) {}) "describe" nil)))
 
-^{:refer lang.model.spec-ruby/ruby-symbol :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-symbol :added "4.1"}
 (fact "emit ruby symbol"
 
   (spec-ruby/ruby-symbol :a spec-ruby/+grammar+ {})
@@ -269,13 +269,13 @@
                                    :code {'HEX {:op-key :def}}}})
   => "($__globals__ ||= {})[\"xt_lang_common_color____HEX\"]")
 
-^{:refer lang.model.spec-ruby/ruby-destructure-key :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-destructure-key :added "4.1"}
 (fact "rewrites destructuring keys for ruby")
 
-^{:refer lang.model.spec-ruby/ruby-method-ref :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-method-ref :added "4.1"}
 (fact "creates ruby method references")
 
-^{:refer lang.model.spec-ruby/ruby-symbol-global :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-symbol-global :added "4.1"}
 (fact "emit ruby global symbol"
 
   (spec-ruby/ruby-symbol-global '!:G spec-ruby/+grammar+ {})
@@ -286,7 +286,7 @@
   (spec-ruby/ruby-symbol-global 'xt.lang.common-color/HEX spec-ruby/+grammar+ {})
   => '(. (:- "($__globals__ ||= {})") ["xt_lang_common_color____HEX"]))
 
-^{:refer lang.model.spec-ruby/ruby-var :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-var :added "4.1"}
 (fact "emit ruby variable"
  
   (spec-ruby/ruby-var '(var a 1))
@@ -310,7 +310,7 @@
             (re-find #"b_var = " s)
             (re-find #"\[\"b_var\"\]" s))))
 
-^{:refer lang.model.spec-ruby/ruby-map :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-map :added "4.1"}
 (fact "emit ruby hash"
 
   (l/emit-as :ruby '[{:a 1 :b 2}])
@@ -319,31 +319,31 @@
   (l/emit-as :ruby '[{:ref-links {} :first-name "Root"}])
   => "{\"ref_links\" => {}, \"first_name\" => \"Root\"}")
 
-^{:refer lang.model.spec-ruby/ruby-emit-args :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-emit-args :added "4.1"}
 (fact "emits ruby argument lists")
 
-^{:refer lang.model.spec-ruby/ruby-div :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-div :added "4.1"}
 (fact "emits ruby division")
 
-^{:refer lang.model.spec-ruby/ruby-invoke :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-invoke :added "4.1"}
 (fact "emits ruby invocations")
 
-^{:refer lang.model.spec-ruby/ruby-dot :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-dot :added "4.1"}
 (fact "emits ruby dot access")
 
-^{:refer lang.model.spec-ruby/ruby-emit-range :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-emit-range :added "4.1"}
 (fact "emits ruby ranges")
 
-^{:refer lang.model.spec-ruby/ruby-defn- :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-defn- :added "4.1"}
 (fact "emits private ruby functions")
 
-^{:refer lang.model.spec-ruby/ruby-defn :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-defn :added "4.1"}
 (fact "emit ruby function definition"
 
   (l/emit-as :ruby '[(defn add [a b] (return (+ a b)))])
   => "def add(a,b)\n  return a + b\nend")
 
-^{:refer lang.model.spec-ruby/ruby-defgen :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-defgen :added "4.1"}
 (fact "emits ruby generator definitions with deterministic iterator bindings"
   (spec-ruby/ruby-defgen '(defgen items [xs] (yield xs)))
   => '(defn- items [xs]
@@ -360,13 +360,13 @@
           (fn [items__iter____2]
             (. items__iter____2 (<< items__iter__)))))))
 
-^{:refer lang.model.spec-ruby/ruby-fn :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-fn :added "4.1"}
 (fact "basic transform for ruby blocks"
 
   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
   => '(:- "->(" "a" ") {\n" "(do (+ a 1))" "\n}"))
 
-^{:refer lang.model.spec-ruby/tf-for-array :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/tf-for-array :added "4.1"}
 (fact "transforms for:array loops using native Ruby iteration"
   (spec-ruby/tf-for-array
    '(for:array [value values]
@@ -386,7 +386,7 @@
           (puts value))
         nil))
 
-^{:refer lang.model.spec-ruby/tf-for-object :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/tf-for-object :added "4.1"}
 (fact "transforms for:object loops using native Ruby iteration"
   (spec-ruby/tf-for-object
    '(for:object [[k v] obj]
@@ -406,10 +406,10 @@
           (puts v))
         nil))
 
-^{:refer lang.model.spec-ruby/tf-for-iter :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/tf-for-iter :added "4.1"}
 (fact "transforms for:iter loops")
 
-^{:refer lang.model.spec-ruby/tf-for-index :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/tf-for-index :added "4.1"}
 (fact "transforms for:index loops without generated temporaries"
   (spec-ruby/tf-for-index
    '(for:index [i [0 3 1]]
@@ -421,17 +421,17 @@
           (:= i (+ i 1)))))
 
 
-^{:refer lang.model.spec-ruby/ruby-string :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-string :added "4.1"}
 (fact "emits ruby strings")
 
-^{:refer lang.model.spec-ruby/ruby-throw :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-throw :added "4.1"}
 (fact "emits ruby exceptions")
 
-^{:refer lang.model.spec-ruby/ruby-def :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-def :added "4.1"}
 (fact "emits ruby definitions")
 
 
-^{:refer lang.model.spec-ruby/ruby-emit-input-rest :added "4.1"}
+^{:refer lang.model.annex.spec-ruby/ruby-emit-input-rest :added "4.1"}
 (fact "emits a Ruby splat parameter"
   (with-redefs [lang.base.emit-common/*emit-fn*
                 (fn [symbol _ _] (name symbol))]

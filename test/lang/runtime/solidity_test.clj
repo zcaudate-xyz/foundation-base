@@ -1,16 +1,16 @@
 (ns lang.runtime.solidity-test
-  (:require [lang.runtime.solidity :as s]
-            [lang.runtime.solidity.client :as client]
-            [lang.runtime.solidity.compile-common :as compile-common]
-            [lang.runtime.solidity.compile-solc :as compile-solc]
-            [lang.runtime.solidity.env-hardhat :as env]
+  (:require [lang.runtime.annex.solidity :as s]
+            [lang.runtime.annex.solidity.client :as client]
+            [lang.runtime.annex.solidity.compile-common :as compile-common]
+            [lang.runtime.annex.solidity.compile-solc :as compile-solc]
+            [lang.runtime.annex.solidity.env-hardhat :as env]
             [lang.core :as l]
             [std.lib.env :as senv])
   (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
-   :require [[lang.runtime.solidity :as sol]]
+   :require [[lang.runtime.annex.solidity :as sol]]
    :static  {:contract ["Hello"]}
    :test-mode true})
 
@@ -19,14 +19,14 @@
   :setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer lang.runtime.solidity/exec-rt-web3 :added "4.0"}
+^{:refer lang.runtime.annex.solidity/exec-rt-web3 :added "4.0"}
 (fact "helper function for executing a command via node"
   (with-redefs [l/rt (fn [_] {:runtime :web3})
                 client/stop-web3 (fn [_] nil)]
     (s/exec-rt-web3 nil (fn [_] :ok)))
   => :ok)
 
-^{:refer lang.runtime.solidity/rt:print :added "4.0"}
+^{:refer lang.runtime.annex.solidity/rt:print :added "4.0"}
 (fact "prints module contract code with line numbers"
   (let [calls (atom [])]
     (with-redefs [compile-solc/compile-module-code (fn [m]
@@ -39,7 +39,7 @@
       @calls))
   => [[:module {:name "Test"}] [:pl "contract Test {}"]])
 
-^{:refer lang.runtime.solidity/rt:print :added "4.0"
+^{:refer lang.runtime.annex.solidity/rt:print :added "4.0"
   :id test-rt-print-pointer-contract}
 (fact "prints pointer contract code when :module and :id are supplied"
   (let [calls (atom [])]
@@ -53,7 +53,7 @@
       @calls))
   => [[:ptr {:module "Hello" :id "main"}] [:pl "contract Ptr {}"]])
 
-^{:refer lang.runtime.solidity/rt:print :added "4.0"
+^{:refer lang.runtime.annex.solidity/rt:print :added "4.0"
   :id test-rt-print-no-lines-argument}
 (fact "suppresses line numbers via second argument"
   (let [calls (atom [])]
@@ -64,7 +64,7 @@
       @calls))
   => [["line1\nline2"]])
 
-^{:refer lang.runtime.solidity/rt:print :added "4.0"
+^{:refer lang.runtime.annex.solidity/rt:print :added "4.0"
   :id test-rt-print-no-lines-option}
 (fact "suppresses line numbers via :no-lines option"
   (let [calls (atom [])]
@@ -75,22 +75,22 @@
       @calls))
   => [["line1\nline2"]])
 
-^{:refer lang.runtime.solidity/rt:deploy-ptr :added "4.0"}
+^{:refer lang.runtime.annex.solidity/rt:deploy-ptr :added "4.0"}
 (fact "deploys a ptr a contract"
   ;; Requires web3
   )
 
-^{:refer lang.runtime.solidity/rt:deploy :added "4.0"}
+^{:refer lang.runtime.annex.solidity/rt:deploy :added "4.0"}
 (fact "deploys current namespace as contract"
   ;; Requires web3
   )
 
-^{:refer lang.runtime.solidity/rt:contract :added "4.0"}
+^{:refer lang.runtime.annex.solidity/rt:contract :added "4.0"}
 (fact "gets the contract"
   ;; Requires web3
   )
 
-^{:refer lang.runtime.solidity/rt:bytecode-size :added "4.0"}
+^{:refer lang.runtime.annex.solidity/rt:bytecode-size :added "4.0"}
 (fact "gets the bytecode size"
   ;; Requires web3
   )

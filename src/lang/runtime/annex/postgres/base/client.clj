@@ -1,7 +1,7 @@
-(ns lang.runtime.postgres.base.client
+(ns lang.runtime.annex.postgres.base.client
   (:require [lib.postgres :as base]
             [lib.postgres.connection :as conn]
-            [lang.runtime.postgres.base.client-impl :as client-impl]
+            [lang.runtime.annex.postgres.base.client-impl :as client-impl]
             [lang.core.impl :as impl]
             [lang.core.runtime :as default]
             [lang.core.type-shared :as shared]

@@ -15,7 +15,7 @@
 ^{:refer lang.core.registry/registry-book-ns :added "4.1"}
 (fact "gets the namespace for a registry entry"
   (registry-book-ns :js)
-  => 'lang.model.spec-js
+  => 'lang.model.builtin.spec-js
 
   (registry-book-ns :circom)
   => 'lang.model.annex.spec-circom
@@ -24,13 +24,13 @@
   => 'lang.model.annex.spec-fortran
 
   (registry-book-ns :llvm)
-  => 'lang.model.spec-llvm
+  => 'lang.model.annex.spec-llvm
 
   (registry-book-ns :solidity)
-  => 'lang.model.spec-solidity
+  => 'lang.model.annex.spec-solidity
 
   (registry-book-ns :ruby)
-  => 'lang.model.spec-ruby
+  => 'lang.model.annex.spec-ruby
 
   (registry-book-ns :verilog)
   => 'lang.model.annex.spec-verilog)
@@ -38,18 +38,18 @@
 ^{:refer lang.core.registry/registry-book-info :added "4.1"}
 (fact "gets the full registry entry"
   (registry-book-info :js)
-  => '{:ns lang.model.spec-js
+  => '{:ns lang.model.builtin.spec-js
        :book +book+
        :parent :xtalk})
 
 (fact "gets variant lua book info"
   (registry-book-info :lua.redis)
-  => '{:ns lang.model.spec-lua.variant-redis
+  => '{:ns lang.model.builtin.spec-lua.variant-redis
        :book +book+
        :parent :lua}
 
   (registry-book-info :lua.nginx)
-  => '{:ns lang.model.spec-lua.variant-nginx
+  => '{:ns lang.model.builtin.spec-lua.variant-nginx
        :book +book+
        :parent :lua})
 

@@ -5,7 +5,7 @@
             [std.json :as json]
             [lang.core :as l]
             [lang.core.impl :as impl]
-            [lang.model.spec-postgres.common :as common]
+            [lang.model.annex.spec-postgres.common :as common]
             [postgres.core.addon :as addon]))
 
 (l/script :postgres

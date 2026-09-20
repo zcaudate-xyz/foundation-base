@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk
+(ns lang.model.builtin.spec-xtalk
   (:require [lang.base.book :as book]
             [lang.base.emit :as emit]
             [lang.base.grammar :as grammar]

@@ -3,7 +3,7 @@
             [lang.core.runtime :as rt]
             [lang.core.script-control :refer :all]
             [lang.base.util :as ut]
-            [lang.model.spec-lua]
+            [lang.model.builtin.spec-lua]
             [std.lib.context.registry :as reg]
             [std.lib.context.space :as space])
   (:use code.test))

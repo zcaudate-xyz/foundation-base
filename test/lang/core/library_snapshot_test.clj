@@ -6,7 +6,7 @@
             [lang.core.impl-entry :as entry]
             [lang.core.library-snapshot :as snap]
             [lang.core.library-snapshot-prep-test :as prep]
-            [lang.model.spec-lua :as lua]
+            [lang.model.builtin.spec-lua :as lua]
             [std.lib.deps :as deps]
             [std.lib.env :as env])
   (:use code.test))

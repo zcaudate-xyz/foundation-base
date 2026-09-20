@@ -1,6 +1,6 @@
-(ns code.tool.translate.js-ast-test
+(ns indigo.build.build-ast-test
   (:require [code.test :refer [fact]]
-            [code.tool.translate.js-ast :as build-ast]
+            [indigo.build.build-ast :as build-ast]
             [std.fs :as fs]
             [std.json :as json]
             [std.lib.os :as os]
@@ -39,7 +39,7 @@
     (fs/delete +json-file+)))
 
 
-^{:refer code.tool.translate.js-ast/initialise :added "4.0"}
+^{:refer indigo.build.build-ast/initialise :added "4.0"}
 (fact "initialises the npm project"
 
   (with-redefs [build-ast/initialise (fn [] {:root ".build/code.tool.js-ast"
@@ -48,7 +48,7 @@
   => {:root ".build/code.tool.js-ast"
       :args ["npm" "install"]})
 
-^{:refer code.tool.translate.js-ast/generate-ast :added "4.0"}
+^{:refer indigo.build.build-ast/generate-ast :added "4.0"}
 (fact "generates ast using the build-ast runner"
 
   (let [tmp-input (fs/create-tmpfile "var y = 2;")

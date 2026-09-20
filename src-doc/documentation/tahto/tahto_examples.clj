@@ -1,6 +1,6 @@
 lang/lang_examples.clj:1:(ns documentation.lang-examples
   (:require [lang.core :as l]
-            [lang.model.spec-go]
+            [lang.model.builtin.spec-go]
             [std.make :as make :refer [def.make]])
   (:use code.test))
 

@@ -1,4 +1,4 @@
-(ns lang.runtime.jocl.runtime
+(ns lang.runtime.annex.jocl.runtime
   (:require [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]
             [lang.core.runtime :as default]
@@ -11,7 +11,7 @@
             [std.lib.foundation :as h]
             [std.lib.impl :refer [defimpl]]
             [std.lib.security :as security]
-            [lang.runtime.jocl.exec :as exec]))
+            [lang.runtime.annex.jocl.exec :as exec]))
 
 (defn kernel?
   "check that a code entry 

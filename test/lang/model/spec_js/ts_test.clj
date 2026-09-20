@@ -1,7 +1,7 @@
 (ns lang.model.spec-js.ts-test
   (:use code.test)
   (:require [clojure.string :as str]
-             [lang.model.spec-js.ts :refer :all]
+             [lang.model.builtin.spec-js.ts :refer :all]
              [lang.typed.xtalk-parse :as xtalk-parse]))
 
 (def sample-analysis
@@ -48,7 +48,7 @@
      (str/includes? out "export interface User")])
   => [1 true])
 
-^{:refer lang.model.spec-js.ts/valid-ts-ident? :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/valid-ts-ident? :added "4.1"}
 (fact "checks if string is valid TypeScript identifier"
   (valid-ts-ident? "hello")
   => true
@@ -59,7 +59,7 @@
   (valid-ts-ident? "hello-world")
   => false)
 
-^{:refer lang.model.spec-js.ts/sanitize-ts-ident :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/sanitize-ts-ident :added "4.1"}
 (fact "sanitizes string to valid TypeScript identifier"
   (sanitize-ts-ident "hello-world")
   => "hello_world"
@@ -67,7 +67,7 @@
   (sanitize-ts-ident "123hello")
   => "_123hello")
 
-^{:refer lang.model.spec-js.ts/named-ts-ident :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/named-ts-ident :added "4.1"}
 (fact "creates named TypeScript identifier"
   (named-ts-ident "MyType" 'my.ns)
   => "MyType"
@@ -75,22 +75,22 @@
   (named-ts-ident 'other.ns/Type 'my.ns)
   => "other_ns_Type")
 
-^{:refer lang.model.spec-js.ts/export-ts-ident :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/export-ts-ident :added "4.1"}
 (fact "creates export TypeScript identifier"
   (export-ts-ident "my-type")
   => "my_type")
 
-^{:refer lang.model.spec-js.ts/ns->module-path :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/ns->module-path :added "4.1"}
 (fact "converts namespace to module path"
   (ns->module-path 'my.ns)
   => "./my/ns")
 
-^{:refer lang.model.spec-js.ts/quoted-prop :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/quoted-prop :added "4.1"}
 (fact "quotes property name"
   (quoted-prop "hello-world")
   => "\"hello-world\"")
 
-^{:refer lang.model.spec-js.ts/prop-ident :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/prop-ident :added "4.1"}
 (fact "returns property identifier"
   (prop-ident "hello")
   => "hello"
@@ -98,7 +98,7 @@
   (prop-ident "hello-world")
   => "\"hello-world\"")
 
-^{:refer lang.model.spec-js.ts/unwrap-maybe :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/unwrap-maybe :added "4.1"}
 (fact "unwraps maybe type"
   (unwrap-maybe {:kind :maybe :item {:kind :primitive :name :xt/str}})
   => {:kind :primitive :name :xt/str}
@@ -106,20 +106,20 @@
   (unwrap-maybe {:kind :primitive :name :xt/str})
   => {:kind :primitive :name :xt/str})
 
-^{:refer lang.model.spec-js.ts/emit-record-fields :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-record-fields :added "4.1"}
 (fact "emits TypeScript record fields"
   (emit-record-fields [{:name "foo" :type {:kind :primitive :name :xt/str} :optional? false}]
                       'my.ns)
   => "  foo: string;")
 
-^{:refer lang.model.spec-js.ts/emit-open-record :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-open-record :added "4.1"}
 (fact "emits open record indexer"
   (emit-open-record {:key {:kind :primitive :name :xt/str}
                      :value {:kind :primitive :name :xt/num}}
                     'my.ns)
   => "  [key: string]: number;")
 
-^{:refer lang.model.spec-js.ts/emit-ts-type :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-ts-type :added "4.1"}
 (fact "emits TypeScript type"
   (emit-ts-type {:kind :primitive :name :xt/str} 'my.ns)
   => "string"
@@ -130,7 +130,7 @@
   (emit-ts-type {:kind :named :name 'MyType} 'my.ns)
   => "MyType")
 
-^{:refer lang.model.spec-js.ts/collect-type-refs :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/collect-type-refs :added "4.1"}
 (fact "collects type references"
   (collect-type-refs {:kind :named :name 'other.ns/Type})
   => #{'other.ns/Type}
@@ -138,7 +138,7 @@
   (collect-type-refs {:kind :primitive :name :xt/str})
   => #{})
 
-^{:refer lang.model.spec-js.ts/fn-type :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/fn-type :added "4.1"}
 (fact "creates function type"
   (fn-type {:inputs [{:type {:kind :primitive :name :xt/str}}]
             :output {:kind :primitive :name :xt/num}})
@@ -146,7 +146,7 @@
       :inputs [{:kind :primitive :name :xt/str}]
       :output {:kind :primitive :name :xt/num}})
 
-^{:refer lang.model.spec-js.ts/analysis-import-groups :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/analysis-import-groups :added "4.1"}
 (fact "groups imports from analysis"
   (analysis-import-groups {:ns 'my.ns
                            :specs []
@@ -154,7 +154,7 @@
                            :values []})
   => [])
 
-^{:refer lang.model.spec-js.ts/emit-import-item :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-import-item :added "4.1"}
 (fact "emits import item"
   (emit-import-item 'MyType 'my.ns)
   => "MyType"
@@ -162,12 +162,12 @@
   (emit-import-item 'other.ns/MyType 'my.ns)
   => "MyType as other_ns_MyType")
 
-^{:refer lang.model.spec-js.ts/emit-import-declaration :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-import-declaration :added "4.1"}
 (fact "emits import declaration"
   (emit-import-declaration 'my.ns ['other.ns ['other.ns/Type]])
   => "import type { Type as other_ns_Type } from \"./other/ns\";")
 
-^{:refer lang.model.spec-js.ts/emit-imports :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-imports :added "4.1"}
 (fact "emits grouped type imports"
   (emit-imports {:ns 'sample.user
                  :specs [{:type {:kind :named :name 'other.ns/User}}]
@@ -177,7 +177,7 @@
   => (str "import type { User as other_ns_User } from \"./other/ns\";\n"
           "import type { Token as shared_token_Token } from \"./shared/token\";"))
 
-^{:refer lang.model.spec-js.ts/emit-spec-declaration :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-spec-declaration :added "4.1"}
 (fact "emits spec declarations"
   [(emit-spec-declaration {:ns "sample.user"
                            :name "User"
@@ -193,14 +193,14 @@
   => ["export interface User {\n  id: string;\n}"
       "export type UserMap = Record<string, User>;"])
 
-^{:refer lang.model.spec-js.ts/emit-function-arg :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-function-arg :added "4.1"}
 (fact "emits function arguments"
   (emit-function-arg {:name "user-id"
                       :type {:kind :primitive :name :xt/str}}
                      'sample.user)
   => "user_id: string")
 
-^{:refer lang.model.spec-js.ts/emit-function-declaration :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-function-declaration :added "4.1"}
 (fact "emits function declarations"
   (emit-function-declaration {:ns "sample.user"
                               :name "find_user"
@@ -212,19 +212,19 @@
                                        :item {:kind :named :name 'sample.user/User}}})
   => "export type find_user = (arg0: UserMap, arg1: string) => User | null;")
 
-^{:refer lang.model.spec-js.ts/emit-value-declaration :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-value-declaration :added "4.1"}
 (fact "emits value declarations"
   (emit-value-declaration {:ns "sample.user"
                            :name "DEFAULT_USER"
                            :type {:kind :named :name 'sample.user/User}})
   => "export declare const DEFAULT_USER: User;")
 
-^{:refer lang.model.spec-js.ts/emitted-specs :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emitted-specs :added "4.1"}
 (fact "filters specs shadowed by callable and value declarations"
   (mapv :name (emitted-specs sample-analysis))
   => ["User" "UserMap"])
 
-^{:refer lang.model.spec-js.ts/emit-analysis-declarations :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-analysis-declarations :added "4.1"}
 (fact "emits analysis declarations"
   (emit-analysis-declarations sample-analysis)
   => (str "export interface User {\n"
@@ -234,7 +234,7 @@
           "export type find_user = (arg0: UserMap, arg1: string) => User | null;\n\n"
           "export declare const DEFAULT_USER: User;"))
 
-^{:refer lang.model.spec-js.ts/declaration-output-path :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/declaration-output-path :added "4.1"}
 (fact "maps runtime outputs to declaration sidecars"
   [(declaration-output-path "dist/demo.js")
    (declaration-output-path "dist/demo.bundle.min.js")
@@ -243,7 +243,7 @@
       "dist/demo.bundle.min.d.ts"
       "dist/demo.d.ts"])
 
-^{:refer lang.model.spec-js.ts/module-dts-artifact :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/module-dts-artifact :added "4.1"}
 (fact "builds declaration artifacts alongside runtime output"
   (let [{:keys [output body]}
         (module-dts-artifact {:main 'lang.model.spec-xtalk-typed-fixture
@@ -253,7 +253,7 @@
      (boolean (re-find #"export type find_user" body))])
   => ["dist/spec_xtalk_typed_fixture.d.ts" true true])
 
-^{:refer lang.model.spec-js.ts/emit-namespace-declarations :added "4.1"}
+^{:refer lang.model.builtin.spec-js.ts/emit-namespace-declarations :added "4.1"}
 (fact "emits namespace declarations"
   (let [out (emit-namespace-declarations 'lang.model.spec-xtalk-typed-fixture)]
     [(str/includes? out "export interface User")

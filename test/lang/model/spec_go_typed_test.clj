@@ -1,9 +1,9 @@
 (ns lang.model.spec-go-typed-test
   (:require [clojure.string :as str]
-            [lang.model.spec-go.typed :as go-typed])
+            [lang.model.builtin.spec-go.typed :as go-typed])
   (:use code.test))
 
-^{:refer lang.model.spec-go.typed/emit-go-type :added "4.1"}
+^{:refer lang.model.builtin.spec-go.typed/emit-go-type :added "4.1"}
 (fact "maps xtalk primitive and container types to go"
   [(go-typed/emit-go-type {:kind :primitive :name :xt/str} nil)
    (go-typed/emit-go-type {:kind :array
@@ -20,7 +20,7 @@
                            :item {:kind :named :name 'sample.user/User}} 'sample.user)]
   => ["string" "[]int" "map[any]any" "map[string]any" "*User"])
 
-^{:refer lang.model.spec-go.typed/emit-analysis-declarations :added "4.1"}
+^{:refer lang.model.builtin.spec-go.typed/emit-analysis-declarations :added "4.1"}
 (fact "emits spec/function/value declarations in go syntax"
   (go-typed/emit-analysis-declarations
    {:specs [{:ns "sample.user"

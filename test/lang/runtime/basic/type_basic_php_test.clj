@@ -1,6 +1,6 @@
 (ns lang.runtime.basic.type-basic-php-test
   (:use code.test)
-  (:require [lang.runtime.basic.impl-annex.process-php]
+  (:require [lang.runtime.annex.basic.impl.process-php]
             [lang.runtime.basic.type-basic :as p]
             [std.lib.env :as env]
             [lang.core :as l]

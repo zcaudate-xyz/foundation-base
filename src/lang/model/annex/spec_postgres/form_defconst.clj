@@ -1,6 +1,6 @@
 (ns lang.model.annex.spec-postgres.form-defconst
   (:require [lang.model.annex.spec-postgres.common :as common]
-            [lang.runtime.postgres.base.application :as app]
+            [lang.runtime.annex.postgres.base.application :as app]
             [lang.model.annex.spec-postgres.common-tracker :as tracker]
             [postgres.core.impl-base :as base]
             [postgres.core.impl-insert :as insert]

@@ -3,7 +3,7 @@
             [std.string.prose :as prose])
   (:use code.test))
 
-^{:refer lang.model.spec-glsl/CANARY :adopt true :added "4.0"}
+^{:refer lang.model.builtin.spec-glsl/CANARY :adopt true :added "4.0"}
 (fact "top-level definition for shaders"
 
   (l/emit-as

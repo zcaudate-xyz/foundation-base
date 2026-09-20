@@ -1,12 +1,12 @@
 (ns lang.runtime.solidity.script.util-test
-  (:require [lang.runtime.solidity.env-hardhat :as env]
+  (:require [lang.runtime.annex.solidity.env-hardhat :as env]
             [lang.core :as l]
             [solidity.core.util :as util])
   (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
-   :require [[lang.runtime.solidity :as s]
+   :require [[lang.runtime.annex.solidity :as s]
               [solidity.core.util :as util]] :test-mode true})
 
 (fact:global
