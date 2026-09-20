@@ -1,12 +1,12 @@
 (ns octave.core
-  (:require [matlab.core.builtin :as builtin]
+  (:require [octave.core.builtin :as builtin]
             [lang.core :as l]
             [std.lib.foundation :as f]))
 
 (l/script :matlab
   {:require [[xt.lang.common-lib :as lib]]})
 
-(f/intern-all matlab.core.builtin)
+(f/intern-all octave.core.builtin)
 
 (defn.matlab add
   "adds two numbers or arrays"

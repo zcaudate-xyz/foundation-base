@@ -9,7 +9,7 @@
 
 (l/script- :matlab
   {:runtime :oneshot
-   :require [[matlab.core :as y]] :test-mode true})
+   :require [[octave.core :as y]] :test-mode true})
 
 (fact "live matlab core examples"
   (!.matlab (y/add 1 2))

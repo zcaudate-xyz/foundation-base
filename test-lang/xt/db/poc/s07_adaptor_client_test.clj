@@ -77,7 +77,7 @@
                                  -/Schema
                                  -/SchemaLookup)))
 
-^{:refer xt.db.poc.s07-kernel-client-test/dataview-attach-model
+^{:refer xt.db.poc.s07-adaptor-client-test/dataview-attach-model
   :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)
           (scratch-v0/log-append-public "kernel-client-tree")]}
@@ -122,7 +122,7 @@
        "model_type" "event.model"
        "output" [{"message" "kernel-client-tree"}]}))
 
-^{:refer xt.db.poc.s07-kernel-client-test/attach-pull-model
+^{:refer xt.db.poc.s07-adaptor-client-test/attach-pull-model
   :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log)
           (scratch-v0/log-append-public "kernel-client-pull")

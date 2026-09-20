@@ -1,7 +1,7 @@
 (ns octave.core-test
   (:require [lang.core :as l]
             [lang.model.annex.spec-matlab]
-            [matlab.core :as y])
+            [octave.core :as y])
   (:use code.test))
 
 (fact "emits basic matlab syntax"
