@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.fn-scheme-test
+(ns lang.model.builtin.spec-xtalk.fn-scheme-test
   (:require [lang.core :as l]
              [lang.model.annex.spec-scheme]
              [lang.model.annex.spec-scheme.xtalk-scheme :refer :all])

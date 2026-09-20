@@ -1,4 +1,4 @@
-(ns lang.model.spec-go-test
+(ns lang.model.builtin.spec-go-test
   (:require [code.test :as t]
             [lang.core :as l]
             [lang.base.emit :as emit]

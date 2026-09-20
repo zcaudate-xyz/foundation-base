@@ -1,4 +1,4 @@
-(ns lang.model.spec-js.jsx-test
+(ns lang.model.builtin.spec-js.jsx-test
   (:require [lang.model.builtin.spec-js :as js]
             [lang.model.builtin.spec-js.jsx :refer :all]
             [std.string.prose :as prose])

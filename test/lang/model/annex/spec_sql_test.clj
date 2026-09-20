@@ -1,4 +1,4 @@
-(ns lang.model.spec-sql-test
+(ns lang.model.annex.spec-sql-test
   (:require [code.framework :as framework]
             [lang.core :as l]
             [lang.model.annex.spec-sql :refer :all]

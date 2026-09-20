@@ -1,4 +1,4 @@
-(ns lang.runtime.postgres-test
+(ns lang.runtime.annex.postgres-test
   (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format
                             assert repeat bit-and bit-or count max min])
   (:use code.test)

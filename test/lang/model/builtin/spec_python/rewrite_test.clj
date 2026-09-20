@@ -1,4 +1,4 @@
-(ns lang.model.spec-python.rewrite-test
+(ns lang.model.builtin.spec-python.rewrite-test
   (:require [clojure.walk]
             [lang.model.builtin.spec-python :as py]
             [lang.model.builtin.spec-python.rewrite :as rewrite])

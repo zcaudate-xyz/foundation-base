@@ -1,4 +1,4 @@
-(ns lang.runtime.neovim.impl-test
+(ns lang.runtime.annex.neovim.impl-test
   (:require [lang.core :as h]
             [lang.runtime.annex.neovim.impl :as impl]
             [std.lib.env :as env])

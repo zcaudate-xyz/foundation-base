@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl.process-scheme-test
+(ns lang.runtime.annex.basic.impl.process-scheme-test
   (:use code.test)
   (:require [lang.core :as l]
             [lang.runtime.annex.basic.impl.process-scheme :refer [scheme-root]]

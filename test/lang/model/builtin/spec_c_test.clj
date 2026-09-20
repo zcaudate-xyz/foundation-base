@@ -1,4 +1,4 @@
-(ns lang.model.spec-c-test
+(ns lang.model.builtin.spec-c-test
   (:require [lang.core :as l]
             [lang.model.builtin.spec-c :refer :all])
   (:use code.test))

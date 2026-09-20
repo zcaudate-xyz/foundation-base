@@ -1,4 +1,4 @@
-(ns lang.runtime.neovim-test
+(ns lang.runtime.annex.neovim-test
   (:use code.test)
   (:require [lang.core :as l]
             [lang.core.type-shared :as shared]

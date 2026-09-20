@@ -1,4 +1,4 @@
-(ns lang.model.spec-ruby.rewrite-test
+(ns lang.model.annex.spec-ruby.rewrite-test
   (:require [lang.model.annex.spec-ruby.rewrite :as rewrite])
   (:use code.test))
 

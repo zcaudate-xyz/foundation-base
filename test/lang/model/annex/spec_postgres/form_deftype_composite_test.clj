@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.form-deftype-composite-test
+(ns lang.model.annex.spec-postgres.form-deftype-composite-test
   (:require [lang.model.annex.spec-postgres.common :as common]
             [lang.model.annex.spec-postgres.form-deftype :as sut]
             [lang.base.book :as book]

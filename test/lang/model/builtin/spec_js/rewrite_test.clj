@@ -1,4 +1,4 @@
-(ns lang.model.spec-js.rewrite-test
+(ns lang.model.builtin.spec-js.rewrite-test
   (:require [lang.model.builtin.spec-js.rewrite :as rewrite])
   (:use code.test))
 

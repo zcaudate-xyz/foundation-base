@@ -1,4 +1,4 @@
-(ns lang.runtime.jep-test
+(ns lang.runtime.annex.jep-test
   (:require [lang.runtime.annex.jep :as jep :refer :all]
              [lang.runtime.annex.jep.bootstrap :as bootstrap]
             [lang.base.util :as ut]

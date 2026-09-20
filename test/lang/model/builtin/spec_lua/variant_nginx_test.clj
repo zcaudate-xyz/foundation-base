@@ -1,4 +1,4 @@
-(ns lang.model.spec-lua.variant-nginx-test
+(ns lang.model.builtin.spec-lua.variant-nginx-test
   (:use code.test)
   (:require [lang.model.builtin.spec-lua.variant-nginx :refer :all]))
 

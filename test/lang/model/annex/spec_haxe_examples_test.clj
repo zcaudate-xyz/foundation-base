@@ -1,4 +1,4 @@
-(ns lang.model.spec-haxe-examples-test
+(ns lang.model.annex.spec-haxe-examples-test
   (:require [lang.core :as l]
             [lang.core.pointer :as ptr]
             [haxe.examples :as examples])

@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.form-defrole-test
+(ns lang.model.annex.spec-postgres.form-defrole-test
   (:require [lang.model.annex.spec-postgres.common :as common]
             [lang.model.annex.spec-postgres.form-defrole :refer :all]
             [lang.core :as l])

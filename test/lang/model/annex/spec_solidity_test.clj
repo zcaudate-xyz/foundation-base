@@ -1,4 +1,4 @@
-(ns lang.model.spec-solidity-test
+(ns lang.model.annex.spec-solidity-test
   (:require [lang.model.annex.spec-solidity :as g]
             [lang.core :as l]
             [lang.base.emit :as emit]

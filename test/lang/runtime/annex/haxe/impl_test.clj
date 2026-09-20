@@ -1,4 +1,4 @@
-(ns lang.runtime.haxe.impl-test
+(ns lang.runtime.annex.haxe.impl-test
   (:require [lang.runtime.annex.haxe.impl :as impl]
             [std.lib.component :as component]
             [std.lib.env :as env])

@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.form-deftype-hydrate-test
+(ns lang.model.annex.spec-postgres.form-deftype-hydrate-test
   (:require [lang.runtime.annex.postgres.base.application :as app]
             [lang.model.annex.spec-postgres.form-deftype-hydrate :refer :all])
   (:use code.test))

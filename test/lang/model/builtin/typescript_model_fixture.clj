@@ -1,4 +1,4 @@
-(ns lang.model.typescript-model-fixture
+(ns lang.model.builtin.typescript-model-fixture
   (:require [lang.core :as l]
             [lang.typed :refer [defspec.xt]]))
 

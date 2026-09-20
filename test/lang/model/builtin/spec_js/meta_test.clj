@@ -1,4 +1,4 @@
-(ns lang.model.spec-js.meta-test
+(ns lang.model.builtin.spec-js.meta-test
   (:require [lang.core :as l]
             [lang.model.builtin.spec-js.meta :refer :all])
   (:use code.test))

@@ -1,4 +1,4 @@
-(ns lang.model.spec-js.html-test
+(ns lang.model.builtin.spec-js.html-test
   (:require [std.html :as html]
             [lang.model.builtin.spec-js.html :refer :all])
   (:use code.test))

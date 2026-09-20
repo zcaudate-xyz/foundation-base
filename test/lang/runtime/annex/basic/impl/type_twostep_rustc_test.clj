@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.type-twostep-rustc-test
+(ns lang.runtime.annex.basic.impl.type-twostep-rustc-test
   (:use code.test)
   (:require [std.lib.env :as env]
             [lang.core :as l]))

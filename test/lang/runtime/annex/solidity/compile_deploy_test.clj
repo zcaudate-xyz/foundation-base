@@ -1,4 +1,4 @@
-(ns lang.runtime.solidity.compile-deploy-test
+(ns lang.runtime.annex.solidity.compile-deploy-test
   (:require [lang.runtime.annex.solidity.client :as client]
             [lang.runtime.annex.solidity.compile-common :as compile-common]
             [lang.runtime.annex.solidity.compile-deploy :as deploy]

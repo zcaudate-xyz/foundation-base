@@ -1,4 +1,4 @@
-(ns lang.model.spec-postgres.entity-util-test
+(ns lang.model.annex.spec-postgres.entity-util-test
   (:require [lang.model.annex.spec-postgres.entity-util :refer :all])
   (:use code.test))
 

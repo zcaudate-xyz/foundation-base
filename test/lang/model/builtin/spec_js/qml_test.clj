@@ -1,4 +1,4 @@
-(ns lang.model.spec-js.qml-test
+(ns lang.model.builtin.spec-js.qml-test
   (:require [lang.core :as l]
             [lang.model.builtin.spec-js :as js]
             [lang.model.builtin.spec-js.qml :as qml]

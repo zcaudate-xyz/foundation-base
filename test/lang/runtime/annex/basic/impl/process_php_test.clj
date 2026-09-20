@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-php-test
+(ns lang.runtime.annex.basic.impl.process-php-test
   (:require [lang.runtime.annex.basic.impl.process-php :refer :all]
             [std.lib.env :as env]
             [lang.runtime.basic.type-oneshot :as p]

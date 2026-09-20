@@ -1,4 +1,4 @@
-(ns lang.runtime.graal-test
+(ns lang.runtime.annex.graal-test
   (:require [lang.runtime.graal :refer :all]
             [lang.core :as l]
             [std.lib.component :as component]

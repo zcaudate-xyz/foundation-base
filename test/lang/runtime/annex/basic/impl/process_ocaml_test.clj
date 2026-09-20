@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-ocaml-test
+(ns lang.runtime.annex.basic.impl.process-ocaml-test
   (:use code.test)
   (:require [lang.runtime.annex.basic.impl.process-ocaml :refer :all]))
 

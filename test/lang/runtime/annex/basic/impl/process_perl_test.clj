@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-perl-test
+(ns lang.runtime.annex.basic.impl.process-perl-test
   (:require [lang.runtime.annex.basic.impl.process-perl :refer :all]
             [std.concurrent :as cc]
             [std.lib.env :as env]

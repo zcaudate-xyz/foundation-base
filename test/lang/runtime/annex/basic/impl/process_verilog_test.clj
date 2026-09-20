@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl.process-verilog-test
+(ns lang.runtime.annex.basic.impl.process-verilog-test
   (:require [clojure.string]
             [lang.core :as l]
             [lang.runtime.annex.basic.impl.process-verilog :refer :all]

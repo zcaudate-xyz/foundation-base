@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl.process-elisp-test
+(ns lang.runtime.annex.basic.impl.process-elisp-test
   (:use code.test)
   (:require [lang.core :as l]
             [lang.runtime.annex.basic.impl.process-elisp :refer [elisp-root]]

@@ -1,4 +1,4 @@
-(ns lang.model.spec-js.ts-test
+(ns lang.model.builtin.spec-js.ts-test
   (:use code.test)
   (:require [clojure.string :as str]
              [lang.model.builtin.spec-js.ts :refer :all]
@@ -41,7 +41,7 @@
 
 (fact "does not duplicate same-name callable specs in declaration output"
 
-  (let [out (-> 'lang.model.spec-xtalk-typed-fixture
+  (let [out (-> 'lang.model.builtin.spec-xtalk-typed-fixture
                 xtalk-parse/analyze-namespace
                 emit-analysis-declarations)]
     [(count (re-seq #"export type find_user =" out))
@@ -246,7 +246,7 @@
 ^{:refer lang.model.builtin.spec-js.ts/module-dts-artifact :added "4.1"}
 (fact "builds declaration artifacts alongside runtime output"
   (let [{:keys [output body]}
-        (module-dts-artifact {:main 'lang.model.spec-xtalk-typed-fixture
+        (module-dts-artifact {:main 'lang.model.builtin.spec-xtalk-typed-fixture
                               :runtime-output "dist/spec_xtalk_typed_fixture.js"})]
     [output
      (boolean (re-find #"export interface User" body))
@@ -255,7 +255,7 @@
 
 ^{:refer lang.model.builtin.spec-js.ts/emit-namespace-declarations :added "4.1"}
 (fact "emits namespace declarations"
-  (let [out (emit-namespace-declarations 'lang.model.spec-xtalk-typed-fixture)]
+  (let [out (emit-namespace-declarations 'lang.model.builtin.spec-xtalk-typed-fixture)]
     [(str/includes? out "export interface User")
      (str/includes? out "export type UserMap = Record<string, User>;")
      (str/includes? out "export type find_user =")])

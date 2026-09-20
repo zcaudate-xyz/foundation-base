@@ -1,4 +1,4 @@
-(ns lang.runtime.solidity.script.util-test
+(ns lang.runtime.annex.solidity.script.util-test
   (:require [lang.runtime.annex.solidity.env-hardhat :as env]
             [lang.core :as l]
             [solidity.core.util :as util])

@@ -1,4 +1,4 @@
-(ns lang.runtime.solidity.client-test
+(ns lang.runtime.annex.solidity.client-test
   (:require [lang.runtime.basic :as basic]
              [lang.runtime.basic.server-basic :as server]
              [lang.runtime.annex.solidity.client :as client]

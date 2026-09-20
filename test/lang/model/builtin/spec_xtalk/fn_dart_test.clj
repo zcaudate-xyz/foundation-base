@@ -1,4 +1,4 @@
-(ns lang.model.spec-xtalk.fn-dart-test
+(ns lang.model.builtin.spec-xtalk.fn-dart-test
   (:use code.test)
   (:require [lang.core :as l]
             [lang.model.builtin.spec-dart.xtalk-dart :refer :all]))

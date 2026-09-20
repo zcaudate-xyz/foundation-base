@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-erlang-test
+(ns lang.runtime.annex.basic.impl.process-erlang-test
   (:require [clojure.string :as str]
             [lang.runtime.annex.basic.impl.process-erlang :refer :all]
             [lang.core :as l])

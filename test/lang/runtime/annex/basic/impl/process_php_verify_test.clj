@@ -1,4 +1,4 @@
-(ns lang.runtime.basic.impl-annex.process-php-verify-test
+(ns lang.runtime.annex.basic.impl.process-php-verify-test
   (:require [lang.core :as l]
             [std.lib.context.space :as space]
             [std.lib.env :as env])
