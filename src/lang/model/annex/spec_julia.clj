@@ -9,9 +9,9 @@
              [lang.base.grammar :as grammar]
              [lang.core.script :as script]
              [lang.base.util :as ut]
-             [lang.model.annex.spec-xtalk]
+             [lang.model.builtin.spec-xtalk]
              [lang.model.annex.spec-julia.rewrite :as rewrite]
-             [lang.model.annex.spec-xtalk.fn-julia :as fn]
+             [lang.model.annex.spec-julia.xtalk-julia :as fn]
              [std.lib.collection :as collection]
              [std.lib.foundation :as f]
              [std.lib.template :as template])

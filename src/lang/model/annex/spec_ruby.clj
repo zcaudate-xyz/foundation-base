@@ -11,9 +11,9 @@
             [lang.typed.xtalk-analysis :as xtalk-analysis]
             [lang.base.util :as ut]
             [lang.core.rewrite.destructure :as destruct]
-            [lang.model.annex.spec-xtalk]
+            [lang.model.builtin.spec-xtalk]
             [lang.model.annex.spec-ruby.rewrite :as rewrite]
-            [lang.model.annex.spec-xtalk.fn-ruby :as fn]
+            [lang.model.annex.spec-ruby.xtalk-ruby :as fn]
             [std.lib.collection :as collection]))
 
 (def ^:private +ruby-native-constants+

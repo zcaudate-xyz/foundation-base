@@ -4,8 +4,8 @@
             [lang.base.emit-common :as common]
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]
-            [lang.model.annex.spec-xtalk]
-            [lang.model.annex.spec-xtalk.fn-php :as fn]
+            [lang.model.builtin.spec-xtalk]
+            [lang.model.annex.spec-php.xtalk-php :as fn]
             [lang.model.annex.spec-php.rewrite :as rewrite]
             [std.lib.collection :as collection]))
 

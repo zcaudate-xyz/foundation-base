@@ -7,8 +7,8 @@
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]
             [lang.base.util :as ut]
-            [lang.model.annex.spec-xtalk]
-            [lang.model.annex.spec-xtalk.fn-erlang :as fn]
+            [lang.model.builtin.spec-xtalk]
+            [lang.model.annex.spec-erlang.xtalk-erlang :as fn]
             [std.lib.collection :as collection]
             [std.lib.walk :as walk]))
 

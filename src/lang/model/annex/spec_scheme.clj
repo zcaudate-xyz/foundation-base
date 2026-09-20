@@ -4,7 +4,7 @@
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]
             [lang.model.annex.spec-lisp-common :as common]
-            [lang.model.annex.spec-xtalk]
+            [lang.model.builtin.spec-xtalk]
             [lang.model.annex.spec-scheme.xtalk-scheme :as fn]
             [std.lib.collection :as collection]))
 

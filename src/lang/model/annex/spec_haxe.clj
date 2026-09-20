@@ -5,7 +5,7 @@
             [lang.base.emit-data :as data]
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]
-            [lang.model.annex.spec-xtalk]
+            [lang.model.builtin.spec-xtalk]
             [std.lib.collection :as collection]
             [std.lib.template :as template]))
 

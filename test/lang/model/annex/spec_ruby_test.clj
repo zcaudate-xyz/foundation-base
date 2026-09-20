@@ -2,7 +2,7 @@
   (:require [lang.core :as l]
             [lang.model.annex.spec-ruby :as spec-ruby]
             [lang.model.annex.spec-ruby.rewrite :as rewrite]
-            [lang.model.annex.spec-xtalk.fn-ruby :as fn-ruby])
+            [lang.model.annex.spec-ruby.xtalk-ruby :as fn-ruby])
   (:use code.test))
 
 (fact "Ruby Basic Emit"

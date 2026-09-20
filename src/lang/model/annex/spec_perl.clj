@@ -10,8 +10,8 @@
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]
             [lang.base.util :as ut]
-            [lang.model.annex.spec-xtalk]
-            [lang.model.annex.spec-xtalk.fn-perl :as fn]
+            [lang.model.builtin.spec-xtalk]
+            [lang.model.annex.spec-perl.xtalk-perl :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
 

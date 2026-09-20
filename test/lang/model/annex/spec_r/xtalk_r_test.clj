@@ -1,7 +1,7 @@
-(ns lang.model.annex.spec-xtalk.fn-r-test
+(ns lang.model.annex.spec-r.xtalk-r-test
   (:use code.test)
   (:require [lang.core :as l]
-             [lang.model.annex.spec-xtalk.fn-r :refer :all]
+             [lang.model.annex.spec-r.xtalk-r :refer :all]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-lib :as k]
              [xt.lang.common-string :as xts]
@@ -17,12 +17,12 @@
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer lang.model.annex.spec-xtalk.fn-r/r-tf-x-lu-create :added "4.1"}
+^{:refer lang.model.annex.spec-r.xtalk-r/r-tf-x-lu-create :added "4.1"}
 (fact "creates an environment-backed lookup"
   (l/emit-as :r [(r-tf-x-lu-create '(_))])
   => "new.env(hash=TRUE,parent=emptyenv())")
 
-^{:refer lang.model.annex.spec-xtalk.fn-r/r-tf-x-lu-get :added "4.1"}
+^{:refer lang.model.annex.spec-r.xtalk-r/r-tf-x-lu-get :added "4.1"}
 (fact "emits lookup access through get0"
   (l/emit-as :r [(r-tf-x-lu-get '(_ lu key nil))])
   => #"get0\("
@@ -46,7 +46,7 @@
      (boolean (re-find #"==" eq-out))])
   => [true true true true true])
 
-^{:refer lang.model.annex.spec-xtalk.fn-r/r-tf-x-str-char :added "4.1"}
+^{:refer lang.model.annex.spec-r.xtalk-r/r-tf-x-str-char :added "4.1"}
 (fact "emits R string and predicate helpers"
   (l/emit-as :r [(r-tf-x-str-char '(_ s i))])
   => #"utf8ToInt"

@@ -1,4 +1,4 @@
-(ns lang.model.annex.spec-xtalk.fn-perl
+(ns lang.model.annex.spec-perl.xtalk-perl
   (:require [std.lib.foundation :as f]
             [std.lib.template :as template]))
 

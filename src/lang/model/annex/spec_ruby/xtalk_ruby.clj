@@ -1,4 +1,4 @@
-(ns lang.model.annex.spec-xtalk.fn-ruby
+(ns lang.model.annex.spec-ruby.xtalk-ruby
   (:require [lang.base.emit-common :as common]
             [lang.base.preprocess-base :as preprocess-base]
             [std.lib.template :as template]))

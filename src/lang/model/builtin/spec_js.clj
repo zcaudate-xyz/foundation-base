@@ -17,7 +17,7 @@
             [lang.model.builtin.spec-js.meta :as meta]
             [lang.model.builtin.spec-js.qml :as qml]
             [lang.model.builtin.spec-xtalk]
-            [lang.model.builtin.spec-xtalk.fn-js :as fn]
+            [lang.model.builtin.spec-js.xtalk-js :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.template :as template]

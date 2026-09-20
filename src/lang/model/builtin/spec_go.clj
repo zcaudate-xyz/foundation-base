@@ -8,7 +8,7 @@
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]
             [lang.base.util :as ut]
-            [lang.model.annex.spec-xtalk]
+            [lang.model.builtin.spec-xtalk]
             [lang.model.builtin.spec-go.fn-go :as fn-go]
             [std.lib.collection :as collection]))
 

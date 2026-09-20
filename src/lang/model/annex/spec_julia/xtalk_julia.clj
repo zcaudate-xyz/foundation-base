@@ -1,4 +1,4 @@
-(ns lang.model.annex.spec-xtalk.fn-julia
+(ns lang.model.annex.spec-julia.xtalk-julia
   (:require [lang.base.util :as ut]
             [std.lib.template :as template]))
 

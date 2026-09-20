@@ -6,7 +6,7 @@
             [lang.base.preprocess-base :as preprocess]
             [lang.core.impl :as impl]
             [lang.core.script :as script]
-            [lang.model.annex.spec-xtalk]
+            [lang.model.builtin.spec-xtalk]
             [std.lib.collection :as collection])
   (:refer-clojure :exclude [for while]))
 

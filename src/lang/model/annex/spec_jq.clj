@@ -5,7 +5,7 @@
             [lang.base.emit-common :as common]
             [lang.base.grammar :as grammar]
             [lang.core.script :as script]
-            [lang.model.annex.spec-xtalk]
+            [lang.model.builtin.spec-xtalk]
             [std.lib.collection :as collection])
   (:refer-clojure :exclude [reduce]))
 

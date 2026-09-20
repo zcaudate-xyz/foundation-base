@@ -11,9 +11,9 @@
             [lang.core.script :as script]
             [lang.typed.xtalk-analysis :as xtalk-analysis]
             [lang.base.util :as ut]
-            [lang.model.annex.spec-xtalk]
+            [lang.model.builtin.spec-xtalk]
             [lang.model.annex.spec-r.rewrite :as rewrite]
-            [lang.model.annex.spec-xtalk.fn-r :as fn]
+            [lang.model.annex.spec-r.xtalk-r :as fn]
             [std.lib.collection :as collection]
             [std.lib.template :as template]))
 

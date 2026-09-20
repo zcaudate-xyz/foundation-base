@@ -1,4 +1,4 @@
-(ns lang.model.annex.spec-xtalk.fn-erlang)
+(ns lang.model.annex.spec-erlang.xtalk-erlang)
 
 ;;
 ;; HELPER
