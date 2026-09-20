@@ -384,17 +384,17 @@
   => true)
 
 (fact "parses defspec.xt and merges function signatures"
-  (let [analysis (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture)
+  (let [analysis (parse/analyze-namespace 'lang.model.builtin.spec-xtalk-typed-fixture)
         fn-def (some #(when (= "find-user" (:name %)) %)
                      (:functions analysis))]
     {:spec-count (count (:specs analysis))
      :input-types (mapv (comp types/type->data :type) (:inputs fn-def))
      :output (types/type->data (:output fn-def))})
   => '{:spec-count 3
-       :input-types [{:kind :named :name lang.model.spec-xtalk-typed-fixture/UserMap}
+       :input-types [{:kind :named :name lang.model.builtin.spec-xtalk-typed-fixture/UserMap}
                      {:kind :primitive :name :xt/str}]
         :output {:kind :maybe
-                 :item {:kind :named :name lang.model.spec-xtalk-typed-fixture/User}}})
+                 :item {:kind :named :name lang.model.builtin.spec-xtalk-typed-fixture/User}}})
 
 (fact "parses single-clause multi-arity forms tolerantly"
   (let [fn-def (parse/parse-defn
@@ -517,7 +517,7 @@
   => '[true true true true true true])
 
 (fact "emits TypeScript declarations from xtalk specs"
-  (let [out (ts/emit-namespace-declarations 'lang.model.spec-xtalk-typed-fixture)]
+  (let [out (ts/emit-namespace-declarations 'lang.model.builtin.spec-xtalk-typed-fixture)]
     [(clojure.string/includes? out "export interface User")
      (clojure.string/includes? out "export type UserMap = Record<string, User>;")
      (clojure.string/includes? out "export type find_user = (arg0: UserMap, arg1: string) => User | null;")
@@ -566,34 +566,34 @@
   => '{:kind :primitive :name :xt/str})
 
 (fact "checks valid xtalk functions"
-  (let [ctx (typed/load-ns 'lang.model.spec-xtalk-typed-fixture)]
-    (-> (typed/function-report ctx 'lang.model.spec-xtalk-typed-fixture/find-user)
+  (let [ctx (typed/load-ns 'lang.model.builtin.spec-xtalk-typed-fixture)]
+    (-> (typed/function-report ctx 'lang.model.builtin.spec-xtalk-typed-fixture/find-user)
         (select-keys [:return :errors])))
   => '{:return {:kind :maybe
-                :item {:kind :named :name lang.model.spec-xtalk-typed-fixture/User}}
+                :item {:kind :named :name lang.model.builtin.spec-xtalk-typed-fixture/User}}
        :errors []})
 
 (fact "reports return and call mismatches"
-  (let [ctx (typed/load-ns 'lang.model.spec-xtalk-typed-fixture)]
-    [(-> (typed/function-report ctx 'lang.model.spec-xtalk-typed-fixture/wrong-user-name)
+  (let [ctx (typed/load-ns 'lang.model.builtin.spec-xtalk-typed-fixture)]
+    [(-> (typed/function-report ctx 'lang.model.builtin.spec-xtalk-typed-fixture/wrong-user-name)
          :errors
          first
          :tag)
-     (-> (typed/function-report ctx 'lang.model.spec-xtalk-typed-fixture/find-user-wrong-key)
+     (-> (typed/function-report ctx 'lang.model.builtin.spec-xtalk-typed-fixture/find-user-wrong-key)
          :errors
          first
          :tag)])
   => [:return-type-mismatch :call-arg-type-mismatch])
 
 (fact "exposes typed analysis helpers"
-  (let [ctx (typed/load-ns 'lang.model.spec-xtalk-typed-fixture)]
+  (let [ctx (typed/load-ns 'lang.model.builtin.spec-xtalk-typed-fixture)]
     (typed/with-context-registry
       ctx
-      #(vector (analysis/get-function-input-type 'lang.model.spec-xtalk-typed-fixture/find-user 'id)
-               (analysis/get-function-output-type 'lang.model.spec-xtalk-typed-fixture/find-user))))
+      #(vector (analysis/get-function-input-type 'lang.model.builtin.spec-xtalk-typed-fixture/find-user 'id)
+               (analysis/get-function-output-type 'lang.model.builtin.spec-xtalk-typed-fixture/find-user))))
   => '[{:kind :primitive :name :xt/str}
        {:kind :maybe
-        :item {:kind :named :name lang.model.spec-xtalk-typed-fixture/User}}])
+        :item {:kind :named :name lang.model.builtin.spec-xtalk-typed-fixture/User}}])
 
 (fact "analyzes event-common and event-form namespace specs"
   (let [ctx (typed/load-analysis

@@ -51,7 +51,7 @@
 
 (fact "can emit declarations from typed fixture namespace"
   (let [out (go-typed/emit-namespace-declarations
-             'lang.model.spec-xtalk-typed-fixture)]
+             'lang.model.builtin.spec-xtalk-typed-fixture)]
     [(str/includes? out "type User map[string]any")
      (str/includes? out "type UserMap map[any]any")
      (str/includes? out "type find_user func(arg0 UserMap, arg1 string) *User")])

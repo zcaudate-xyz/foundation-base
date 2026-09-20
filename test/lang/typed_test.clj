@@ -29,24 +29,24 @@
 (fact "creates an xtalk typed context from a source file"
   (let [ctx (load-file "test/lang/model/spec_xtalk_typed_fixture.clj")]
     [(:domain ctx)
-     (some? (entry ctx 'lang.model.spec-xtalk-typed-fixture/find-user))])
+     (some? (entry ctx 'lang.model.builtin.spec-xtalk-typed-fixture/find-user))])
   => [:xtalk true])
 
 ^{:refer lang.typed/load-ns :added "4.1"}
 (fact "creates an xtalk typed context from a namespace"
-  (let [ctx (load-ns 'lang.model.spec-xtalk-typed-fixture)]
+  (let [ctx (load-ns 'lang.model.builtin.spec-xtalk-typed-fixture)]
     [(:domain ctx)
-     (some? (entry ctx 'lang.model.spec-xtalk-typed-fixture/find-user))
+     (some? (entry ctx 'lang.model.builtin.spec-xtalk-typed-fixture/find-user))
      (pos? (count (entries ctx)))])
   => [:xtalk true true])
 
 ^{:refer lang.typed/spec-def :added "4.1"}
 (fact "returns declarations from an xtalk context"
-  (let [ctx (load-ns 'lang.model.spec-xtalk-typed-fixture)]
-    [(:name (spec-def ctx 'lang.model.spec-xtalk-typed-fixture/User))
-     (:name (function-def ctx 'lang.model.spec-xtalk-typed-fixture/find-user))
-     (nil? (macro-def ctx 'lang.model.spec-xtalk-typed-fixture/find-user))
-     (nil? (value-def ctx 'lang.model.spec-xtalk-typed-fixture/find-user))])
+  (let [ctx (load-ns 'lang.model.builtin.spec-xtalk-typed-fixture)]
+    [(:name (spec-def ctx 'lang.model.builtin.spec-xtalk-typed-fixture/User))
+     (:name (function-def ctx 'lang.model.builtin.spec-xtalk-typed-fixture/find-user))
+     (nil? (macro-def ctx 'lang.model.builtin.spec-xtalk-typed-fixture/find-user))
+     (nil? (value-def ctx 'lang.model.builtin.spec-xtalk-typed-fixture/find-user))])
   => ["User" "find-user" true true])
 
 ^{:refer lang.typed/declaration :added "4.1"}
@@ -65,26 +65,26 @@
 
 ^{:refer lang.typed/function-report :added "4.1"}
 (fact "checks a function through an xtalk typed context"
-  (let [report (function-report (load-ns 'lang.model.spec-xtalk-typed-fixture)
-                                'lang.model.spec-xtalk-typed-fixture/find-user)]
+  (let [report (function-report (load-ns 'lang.model.builtin.spec-xtalk-typed-fixture)
+                                'lang.model.builtin.spec-xtalk-typed-fixture/find-user)]
     [(:function report) (:errors report)])
-  => '[lang.model.spec-xtalk-typed-fixture/find-user []])
+  => '[lang.model.builtin.spec-xtalk-typed-fixture/find-user []])
 
 ^{:refer lang.typed/function-input :added "4.1"}
 (fact "returns xtalk function input and output types from context"
-  (let [ctx (load-ns 'lang.model.spec-xtalk-typed-fixture)]
-    [(function-input ctx 'lang.model.spec-xtalk-typed-fixture/find-user 'id)
-     (function-output ctx 'lang.model.spec-xtalk-typed-fixture/find-user)])
+  (let [ctx (load-ns 'lang.model.builtin.spec-xtalk-typed-fixture)]
+    [(function-input ctx 'lang.model.builtin.spec-xtalk-typed-fixture/find-user 'id)
+     (function-output ctx 'lang.model.builtin.spec-xtalk-typed-fixture/find-user)])
   => '[{:kind :primitive :name :xt/str}
-       {:kind :maybe :item {:kind :named :name lang.model.spec-xtalk-typed-fixture/User}}])
+       {:kind :maybe :item {:kind :named :name lang.model.builtin.spec-xtalk-typed-fixture/User}}])
 
 ^{:refer lang.typed/namespace-report :added "4.1"}
 (fact "checks every function in an xtalk context namespace"
-  (let [report (namespace-report (load-ns 'lang.model.spec-xtalk-typed-fixture))]
+  (let [report (namespace-report (load-ns 'lang.model.builtin.spec-xtalk-typed-fixture))]
     [(:namespace report)
-     (some #(= 'lang.model.spec-xtalk-typed-fixture/find-user (:function %))
+     (some #(= 'lang.model.builtin.spec-xtalk-typed-fixture/find-user (:function %))
            (:functions report))])
-  => '[lang.model.spec-xtalk-typed-fixture true])
+  => '[lang.model.builtin.spec-xtalk-typed-fixture true])
 
 
 (defn- sample-context

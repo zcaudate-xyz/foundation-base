@@ -14,13 +14,13 @@
 
 (defn fixture-register! []
   (types/clear-registry!)
-  (parse/register-types! (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture)))
+  (parse/register-types! (parse/analyze-namespace 'lang.model.builtin.spec-xtalk-typed-fixture)))
 
 ^{:refer lang.typed.xtalk-env/maybe-register-function! :added "4.1"}
 (fact "registers functions lazily from namespaces"
   (do
     (types/clear-registry!)
-    (:name (maybe-register-function! 'lang.model.spec-xtalk-typed-fixture/find-user)))
+    (:name (maybe-register-function! 'lang.model.builtin.spec-xtalk-typed-fixture/find-user)))
   => "find-user")
 
 ^{:refer lang.typed.xtalk-env/lookup-symbol-type :added "4.1"}
@@ -29,16 +29,16 @@
     (fixture-register!)
     [(lookup-symbol-type 'user-id {:env '{user-id {:kind :primitive :name :xt/str}} :ns 'sample.route :aliases {} :infer infer-type})
      (types/type->data (lookup-symbol-type 'x:add +ctx+))
-     (types/type->data (lookup-symbol-type 'lang.model.spec-xtalk-typed-fixture/find-user +ctx+))])
+     (types/type->data (lookup-symbol-type 'lang.model.builtin.spec-xtalk-typed-fixture/find-user +ctx+))])
   => '[{:kind :primitive :name :xt/str}
         {:kind :fn
          :inputs [{:kind :primitive :name :xt/num}
                   {:kind :primitive :name :xt/num}]
          :output {:kind :primitive :name :xt/num}}
         {:kind :fn
-         :inputs [{:kind :named :name lang.model.spec-xtalk-typed-fixture/UserMap}
+         :inputs [{:kind :named :name lang.model.builtin.spec-xtalk-typed-fixture/UserMap}
                   {:kind :primitive :name :xt/str}]
-         :output {:kind :maybe :item {:kind :named :name lang.model.spec-xtalk-typed-fixture/User}}}])
+         :output {:kind :maybe :item {:kind :named :name lang.model.builtin.spec-xtalk-typed-fixture/User}}}])
 
 ^{:refer lang.typed.xtalk-env/binding-decl :added "4.1"}
 (fact "extracts binding declarations"

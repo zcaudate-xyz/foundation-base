@@ -13,7 +13,7 @@
 
 (defn fixture-register! []
   (types/clear-registry!)
-  (parse/register-types! (parse/analyze-namespace 'lang.model.spec-xtalk-typed-fixture)))
+  (parse/register-types! (parse/analyze-namespace 'lang.model.builtin.spec-xtalk-typed-fixture)))
 
 (fact "attaches source locations to inference errors"
   (let [loc (-> (infer-type '(value "u1")

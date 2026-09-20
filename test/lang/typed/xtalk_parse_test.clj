@@ -202,7 +202,7 @@
 
 ^{:refer lang.typed.xtalk-parse/attach-specs :added "4.1"}
 (fact "attaches specs across analysis outputs"
-  (let [analysis (analyze-namespace 'lang.model.spec-xtalk-typed-fixture)]
+  (let [analysis (analyze-namespace 'lang.model.builtin.spec-xtalk-typed-fixture)]
     [(some? (:spec (first (:functions analysis))))
      (= 3 (count (:specs analysis)))])
   => '[true true])
@@ -214,27 +214,27 @@
      (:ns result)
      (contains? result :specs)
      (contains? result :functions)])
-  => [true 'lang.model.spec-xtalk-typed-fixture true true])
+  => [true 'lang.model.builtin.spec-xtalk-typed-fixture true true])
 
 ^{:refer lang.typed.xtalk-parse/analyze-file :added "4.1"}
 (fact "analyzes files into typed declarations"
   (:ns (analyze-file "test/lang/model/spec_xtalk_typed_fixture.clj"))
-  => 'lang.model.spec-xtalk-typed-fixture)
+  => 'lang.model.builtin.spec-xtalk-typed-fixture)
 
 ^{:refer lang.typed.xtalk-parse/register-types! :added "4.1"}
 (fact "registers parsed declarations"
   (do
     (types/clear-registry!)
-    (register-types! (analyze-namespace 'lang.model.spec-xtalk-typed-fixture))
-    (some? (types/get-function 'lang.model.spec-xtalk-typed-fixture/find-user)))
+    (register-types! (analyze-namespace 'lang.model.builtin.spec-xtalk-typed-fixture))
+    (some? (types/get-function 'lang.model.builtin.spec-xtalk-typed-fixture/find-user)))
   => true)
 
 ^{:refer lang.typed.xtalk-parse/analyze-namespace-raw :added "4.1"}
 (fact "looks up namespace source file and returns raw analysis"
-  (let [result (analyze-namespace-raw 'lang.model.spec-xtalk-typed-fixture)]
+  (let [result (analyze-namespace-raw 'lang.model.builtin.spec-xtalk-typed-fixture)]
     [(map? result)
      (:ns result)])
-  => [true 'lang.model.spec-xtalk-typed-fixture])
+  => [true 'lang.model.builtin.spec-xtalk-typed-fixture])
 
 (fact "falls back to a classpath source resource"
   (with-redefs [code.project/get-path (fn [& _] nil)]
@@ -243,7 +243,7 @@
 
 ^{:refer lang.typed.xtalk-parse/analyze-namespace :added "4.1"}
 (fact "finds source files for namespaces"
-  (count (:functions (analyze-namespace 'lang.model.spec-xtalk-typed-fixture)))
+  (count (:functions (analyze-namespace 'lang.model.builtin.spec-xtalk-typed-fixture)))
   => 3)
 
 

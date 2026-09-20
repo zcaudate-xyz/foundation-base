@@ -175,7 +175,7 @@
 
 ^{:refer lang.model.builtin.spec-dart.typed/emit-namespace-declarations :added "4.1"}
 (fact "emits namespace declarations"
-  (let [out (emit-namespace-declarations 'lang.model.spec-xtalk-typed-fixture)]
+  (let [out (emit-namespace-declarations 'lang.model.builtin.spec-xtalk-typed-fixture)]
     [(str/includes? out "class User")
      (str/includes? out "typedef UserMap = Map<String, User>")
      (str/includes? out "typedef FindUser = User? Function")])
