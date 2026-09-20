@@ -193,4 +193,8 @@
     => []))
 
 (comment
+  (find-wrong-namespaces
+   (file-lookup (project)))
+  
+  
   (./import))
