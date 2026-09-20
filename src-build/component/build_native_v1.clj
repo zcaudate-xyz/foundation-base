@@ -12,7 +12,7 @@
              [yarn install]]
             [:build-web
              [yarn install]
-             [npx expo build:web]]
+             [npx expo export --platform web]]
             [:dev
              [yarn install]
              [npx expo start --web --port 19007]]
@@ -50,7 +50,7 @@
                 "make build-web"
                 "git config --global user.name github-actions"
                 "git config --global user.email github-actions@github.com"
-                "cd web-build && git init && git add -A && git commit -m 'deploying to gh-pages'"
+                "cd dist && git init && git add -A && git commit -m 'deploying to gh-pages'"
                 "git remote add origin git@github.com:zcaudate-xyz/demo.foundation-base.git"
                 "git push origin HEAD:gh-pages --force")}]}}]]})
 
@@ -85,7 +85,7 @@
                          "*.key"
                          "*.mobileprovision"
                          "*.orig.*"
-                         "web-build/"
+                         "dist/"
                          ".DS_Store"
                          "yarn.lock"
                          "yarn-error.log"]}
@@ -102,6 +102,7 @@
                                   "backgroundColor" "#ffffff"}
                                  "updates" {"fallbackToCacheTimeout" 0},
                                  "assetBundlePatterns" ["**/*"]
+                                 "experiments" {"baseUrl" "/demo.foundation-base"}
                                  "ios" {"supportsTablet" true},}}}
                        
                        {:type :package.json,
