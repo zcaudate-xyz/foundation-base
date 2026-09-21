@@ -115,9 +115,10 @@
              curr (get links curr-ns)
              curr (if (and (:rel curr) (:label curr))
                     curr
-                    (links/link-attributes root-ns curr-ns link-opts))]
-         {:ns (str (fs/relativize (:rel curr)
-                                  rel)
+                    (links/link-attributes root-ns curr-ns link-opts))
+             relative (str (fs/relativize (:rel curr) rel))
+             relative (if (empty? relative) "." relative)]
+         {:ns (str relative
                    path-separator
                    label)
           :suffix suffix
