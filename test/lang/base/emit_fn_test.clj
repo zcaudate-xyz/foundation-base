@@ -82,6 +82,20 @@
                          {})
   => '("int i = 9" "const int j = 10"))
 
+^{:refer lang.base.emit-fn/emit-fn-preamble-args
+  :id emit-fn-preamble-args-js-ignored
+  :added "4.1"}
+(fact "makes repeated ignored javascript arguments unique"
+  (emit-fn-preamble-args :function '[_ _ payload _]
+                         +grammar+
+                         {:lang :js})
+  => '("__unused0" "__unused1" "payload" "__unused2")
+
+  (emit-fn-preamble-args :function '[_ _ payload _]
+                         +grammar+
+                         {:lang :lua})
+  => '("_" "_" "payload" "_"))
+
 ^{:refer lang.base.emit-fn/emit-fn-preamble :added "4.0"}
 (fact "constructs the function preamble"
 

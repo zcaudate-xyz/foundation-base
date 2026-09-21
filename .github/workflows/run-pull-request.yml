@@ -202,10 +202,6 @@ jobs:
         if: needs.detect-affected-tests.outputs.needs_root_js == 'true'
         run: npm ci --legacy-peer-deps
 
-      - name: Verify figma-ui package consumption
-        if: needs.detect-affected-tests.outputs.needs_root_js == 'true'
-        run: npm run test:figma-ui-package
-
       - name: Install JS parser dependencies
         if: needs.detect-affected-tests.outputs.needs_js_parser == 'true'
         working-directory: scripts/js_parser

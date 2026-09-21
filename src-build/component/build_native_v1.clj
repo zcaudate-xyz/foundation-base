@@ -43,6 +43,7 @@
                :run
                (str/|
                 "make build-web"
+                "touch dist/.nojekyll"
                 "git config --global user.name github-actions"
                 "git config --global user.email github-actions@github.com"
                 "cd dist && git init && git add -A && git commit -m 'deploying to gh-pages'"
@@ -159,7 +160,10 @@
               :lang   :js
               :target "src"
               :main   'component.web-native-index
-              :emit   {:code   {:label true}}}]})
+              :emit   {:code   {:label true
+                                :link    {:path-suffix ".js"
+                                          :path-separator "/"
+                                          :ns-label {'component.web-native-index "App"}}}}}]})
 
 (def +init+
   nil)

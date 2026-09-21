@@ -590,6 +590,18 @@
  xyz.zcaudate/xtalk.db
  {:description "xtalk language"
   :include [[xt.db     :complete]]}
+
+ xyz.zcaudate/xtalk.event
+ {:description "xtalk language"
+  :include [[xt.event     :complete]]}
+
+ xyz.zcaudate/xtalk.substrate
+ {:description "xtalk language"
+  :include [[xt.substrate :complete]]}
+
+ xyz.zcaudate/xtalk.net
+ {:description "xtalk language"
+  :include [[xt.net   :complete]]}
   
  xyz.zcaudate/xtalk.runtime
  {:description "xtalk language"
