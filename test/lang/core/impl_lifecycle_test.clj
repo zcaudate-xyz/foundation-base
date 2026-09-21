@@ -121,6 +121,29 @@
       :root-prefix "@"}))
   => '{:ns "../react", :suffix "", :as r})
 
+^{:refer lang.core.impl-lifecycle/emit-module-setup-link-import
+  :added "4.1"
+  :id same-directory-relative-import}
+(fact "prefixes same-directory graph imports with ./"
+  (impl/with:library [+library+]
+    (emit-module-setup-link-import
+     :graph
+     'js.blessed.ui-core
+     'js.blessed.ui-style
+     (compile/compile-module-create-links
+      '[js.blessed.ui-core
+        js.blessed.ui-style
+        js.react
+        xt.lang.common-lib]
+      'js
+      {})
+     (l/get-module
+      +library+
+      :js
+      'js.blessed.ui-core)
+     {:path-separator "/"}))
+  => '{:ns "./ui-style", :suffix "", :as ui-style})
+
 
 ^{:refer lang.core.impl-lifecycle/emit-module-setup-link-import
   :added "4.1"
