@@ -85,7 +85,7 @@
 
 (defn route-entries
   "Binds functions from one or more generated RPC namespaces. The predicate
-   receives a std.lang entry and defaults to all functions. Results are
+   receives a lang.core entry and defaults to all functions. Results are
    deterministic and duplicate route ids fail generation. Source order can be
    retained with `:preserve-source-order?`; the default remains sorted for
    compatibility."
