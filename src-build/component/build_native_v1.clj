@@ -43,6 +43,7 @@
                :run
                (str/|
                 "make build-web"
+                "touch dist/.nojekyll"
                 "git config --global user.name github-actions"
                 "git config --global user.email github-actions@github.com"
                 "cd dist && git init && git add -A && git commit -m 'deploying to gh-pages'"
