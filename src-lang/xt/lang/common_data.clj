@@ -1040,8 +1040,8 @@
   {:added "4.0"}
   [x]
   (cond (xt/x:nil? x) (return x)
-        (xt/x:is-object? x)  (return (xt/x:arr-clone x))
-        (xt/x:is-array?  x)  (return (xt/x:obj-clone x))
+        (xt/x:is-object? x)  (return (xt/x:obj-clone x))
+        (xt/x:is-array?  x)  (return (xt/x:arr-clone x))
         :else (return x)))
 
 (defn.xt clone-nested-loop

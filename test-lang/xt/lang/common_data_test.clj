@@ -1611,16 +1611,22 @@
 (fact "shallow clones an object or array"
 
   (!.js [(xtd/clone-shallow nil)
-          (xtd/clone-shallow 1)])
-  => [nil 1]
+          (xtd/clone-shallow 1)
+          (xtd/clone-shallow {:a 1})
+          (xtd/clone-shallow [1 2])])
+  => [nil 1 {"a" 1} [1 2]]
 
   (!.lua [(xtd/clone-shallow nil)
-          (xtd/clone-shallow 1)])
-  => [nil 1]
+           (xtd/clone-shallow 1)
+           (xtd/clone-shallow {:a 1})
+           (xtd/clone-shallow [1 2])])
+  => [nil 1 {"a" 1} [1 2]]
 
   (!.py [(xtd/clone-shallow nil)
-          (xtd/clone-shallow 1)])
-  => [nil 1])
+         (xtd/clone-shallow 1)
+         (xtd/clone-shallow {:a 1})
+         (xtd/clone-shallow [1 2])])
+  => [nil 1 {"a" 1} [1 2]])
 
 ^{:refer xt.lang.common-data/clone-nested-loop :added "4.1"}
 (fact "clone nested objects loop"
