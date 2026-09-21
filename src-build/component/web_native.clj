@@ -42,6 +42,9 @@
              [js.react-native.ui-util-test :as ui-util-test]]
    })
 
+(defrun.js __import__
+  (:- :import (quote [React]) :from "'react'"))
+
 (defn.js ReactExamples
   []
   (return
@@ -434,5 +437,3 @@
         ["06-ui-toggle"        -/UiToggleButtonExamples]
         ["06-ui-tooltip"       -/UiTooltipExamples]
         ["06-ui-util"          -/UiUtilExamples])))
-
-
