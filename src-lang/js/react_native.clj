@@ -461,9 +461,10 @@
   (var s (or (JSON.stringify e nil 2)
              ""))
   (var arr (str/split s "\n"))
-  (return (+ (-> (xtd/arr-slice arr 1 (- (xt/x:len arr) 1))
-                  (xtd/arr-map (fn:> [l] (str/substring l 2)))
-                  (str/join "\n" )))))
+  (var lines (xtd/arr-map
+              (xtd/arr-slice arr 1 (- (xt/x:len arr) 1))
+              (fn:> [l] (str/substring l 2))))
+  (return (str/join "\n" lines)))
 
 (defn.js format-entry
   "formats an entry"
