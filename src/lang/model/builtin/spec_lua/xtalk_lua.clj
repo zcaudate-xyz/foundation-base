@@ -66,12 +66,32 @@
   [[_ obj]]
   (template/$ (do (var t := (type ~obj))
                   (if (== t "table")
-                    (if (or (and (not= nil cjson)
-                                 (not= nil (. cjson ["array_mt"]))
-                                 (== (getmetatable ~obj) (. cjson ["array_mt"])))
-                            (not= nil (. '(~obj) [1])))
-                      (return "array")
-                      (return "object"))
+                    (do (var mt (getmetatable ~obj))
+                        (var array-mt (:? (not= nil cjson)
+                                          (. cjson ["array_mt"])
+                                          nil))
+                        (var is-array (and (not= nil mt)
+                                           (not= nil array-mt)
+                                           (== mt array-mt)))
+                        (when (not is-array)
+                          (var max 0)
+                          (var count 0)
+                          (var valid true)
+                          (for:object [[k v] ~obj]
+                            (if (== "number" (type k))
+                              (if (or (<= k 0)
+                                      (not= k (math.floor k)))
+                                (:= valid false)
+                                (do (:= count (+ count 1))
+                                    (when (> k max)
+                                      (:= max k))))
+                              (:= valid false)))
+                          (:= is-array (and valid
+                                            (> count 0)
+                                            (== count max))))
+                        (if is-array
+                          (return "array")
+                          (return "object")))
                     (return t)))))
 
 (defn lua-tf-x-has-key?
@@ -519,7 +539,7 @@
                                                    :return (type-fn ~out)
                                                    :type "data"
                                                    :value (json-filter ~out)}))))))
-        (cond r-err
+        (cond (not r-ok)
               (return (cjson.encode {:id  ~id
                                      :key ~key
                                      :type "raw"
@@ -528,14 +548,14 @@
                                      :value (tostring ~out)}))
               
               :else
-              (return ret))))))
+              (return r-err))))))
 
 (defn lua-tf-x-return-wrap
   ([[_ f encode-fn]]
    (template/$
     (do (var out)
         (var '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
-        (cond o-err
+        (cond (not o-ok)
               (return (cjson.encode {:type "error"
                                      :value o-err}))
               
