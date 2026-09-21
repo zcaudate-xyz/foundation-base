@@ -78,8 +78,31 @@
               :lineHeight 18}}
      text]]))
 
+(defn.js IntroLink
+  [#{[label
+       route
+       onNavigate]}]
+  (return
+   [:% n/TouchableOpacity
+    {:onPress (fn []
+                (if onNavigate
+                  (onNavigate route)))
+     :style {:marginRight 8
+             :marginBottom 8
+             :paddingHorizontal 14
+             :paddingVertical 10
+             :borderRadius 9
+             :backgroundColor "#eff6ff"
+             :borderWidth 1
+             :borderColor "#bfdbfe"}}
+    [:% n/Text
+     {:style {:color "#1d4ed8"
+              :fontSize 12
+              :fontWeight "800"}}
+     label]]))
+
 (defn.js IntroPage
-  []
+  [#{onNavigate}]
   (return
    [:% n/ScrollView
     {:style {:flex 1
@@ -205,6 +228,44 @@
       {:title "Components"
        :text "Inputs, buttons, forms, navigation, modals, and utilities."
        :accent "#059669"}]]
+    [:% n/View
+     {:style {:marginTop 8
+              :padding 24
+              :borderRadius 14
+              :backgroundColor "#eaf2ff"
+              :borderWidth 1
+              :borderColor "#c7dcff"}}
+     [:% n/Text
+      {:style {:color "#172554"
+               :fontSize 17
+               :fontWeight "800"}}
+      "Jump right in"]
+     [:% n/Text
+      {:style {:marginTop 7
+               :marginBottom 15
+               :color "#475569"
+               :fontSize 13
+               :lineHeight 20}}
+      "Use a shortcut below, or browse the full catalogue from the navigation rail."]
+     [:% n/View
+      {:style {:flexDirection "row"
+               :flexWrap "wrap"}}
+      [:% -/IntroLink
+       {:label "Native primitives"
+        :route "00a-native-text"
+        :onNavigate onNavigate}]
+      [:% -/IntroLink
+       {:label "UI controls"
+        :route "06-ui-button"
+        :onNavigate onNavigate}]
+      [:% -/IntroLink
+       {:label "Forms & data"
+        :route "00g-ext-form"
+        :onNavigate onNavigate}]
+      [:% -/IntroLink
+       {:label "Animation"
+        :route "01a-ani-base"
+        :onNavigate onNavigate}]]]
     [:% n/View
      {:style {:marginTop 18
               :padding 24

@@ -92,6 +92,17 @@
   []
   (var [l0 setL0] (ext-box/useBox -/Global ["l0"]))
   (var tree (ext-box/listenBox -/Screens []))
+  (var displayFn
+       (fn [Target _branch _parents _root]
+         (return
+          [:% n/View
+           {:style {:flex 1
+                    :padding 24
+                    :overflow "auto"
+                    :backgroundColor "#f8fafc"}}
+           [:% Target
+            {:onNavigate (fn [target]
+                           (setL0 target))}]])))
   (return
    [:% n/View
     {:style {:position "absolute",
@@ -122,7 +133,7 @@
                             :color "#ffffff"
                             :fontWeight "800"
                             :borderRadius 8}
-        :displayFn n/displayTarget}]}]]))
+        :displayFn displayFn}]}]]))
 
 (defrun.js ^{:rt/init true}
   __main__
