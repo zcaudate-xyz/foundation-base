@@ -45,6 +45,255 @@
 (defrun.js __import__
   (:- :import (quote [React]) :from "'react'"))
 
+(defn.js IntroCard
+  [#{[title
+       text
+       accent]}]
+  (return
+   [:% n/View
+    {:style {:flex 1
+             :minWidth 190
+             :marginRight 12
+             :marginBottom 12
+             :padding 18
+             :borderWidth 1
+             :borderColor "#dbe4f0"
+             :borderRadius 14
+             :backgroundColor "#ffffff"}}
+    [:% n/View
+     {:style {:width 34
+              :height 5
+              :marginBottom 15
+              :borderRadius 3
+              :backgroundColor accent}}]
+    [:% n/Text
+     {:style {:marginBottom 7
+              :color "#0f172a"
+              :fontSize 15
+              :fontWeight "800"}}
+     title]
+    [:% n/Text
+     {:style {:color "#64748b"
+              :fontSize 12
+              :lineHeight 18}}
+     text]]))
+
+(defn.js IntroLink
+  [#{[label
+       route
+       onNavigate]}]
+  (return
+   [:% n/TouchableOpacity
+    {:onPress (fn []
+                (if onNavigate
+                  (onNavigate route)))
+     :style {:marginRight 8
+             :marginBottom 8
+             :paddingHorizontal 14
+             :paddingVertical 10
+             :borderRadius 9
+             :backgroundColor "#eff6ff"
+             :borderWidth 1
+             :borderColor "#bfdbfe"}}
+    [:% n/Text
+     {:style {:color "#1d4ed8"
+              :fontSize 12
+              :fontWeight "800"}}
+     label]]))
+
+(defn.js IntroPage
+  [#{onNavigate}]
+  (return
+   [:% n/ScrollView
+    {:style {:flex 1
+             :backgroundColor "#f8fafc"}
+     :contentContainerStyle {:maxWidth 1080
+                             :width "100%"
+                             :alignSelf "center"
+                             :padding 32
+                             :paddingBottom 80}}
+    [:% n/View
+     {:style {:padding 30
+              :borderRadius 20
+              :backgroundColor "#0f172a"
+              :shadowColor "#0f172a"
+              :shadowOffset {:width 0
+                             :height 8}
+              :shadowOpacity 0.16
+              :shadowRadius 18
+              :elevation 3}}
+     [:% n/View
+      {:style {:flexDirection "row"
+               :alignItems "center"
+               :marginBottom 20}}
+      [:% n/View
+       {:style {:width 10
+                :height 10
+                :marginRight 9
+                :borderRadius 5
+                :backgroundColor "#60a5fa"}}]
+      [:% n/Text
+       {:style {:color "#93c5fd"
+                :fontSize 11
+                :fontWeight "800"
+                :letterSpacing 1.2}}
+       "FOUNDATION BASE  /  JS.REACT-NATIVE"]]
+     [:% n/Text
+      {:style {:maxWidth 700
+               :color "#f8fafc"
+               :fontSize 34
+               :fontWeight "800"
+               :lineHeight 42}}
+      "Build interfaces from small, expressive pieces."]
+     [:% n/Text
+      {:style {:maxWidth 680
+               :marginTop 14
+               :color "#cbd5e1"
+               :fontSize 15
+               :lineHeight 24}}
+      "This is an interactive tour of the React Native building blocks in foundation-base. Every panel is live: change a value, press a button, and see the component respond."]
+     [:% n/View
+      {:style {:flexDirection "row"
+               :flexWrap "wrap"
+               :marginTop 24}}
+      [:% n/View
+       {:style {:marginRight 8
+                :marginBottom 8
+                :paddingHorizontal 10
+                :paddingVertical 6
+                :borderRadius 999
+                :backgroundColor "#172554"}}
+       [:% n/Text
+        {:style {:color "#bfdbfe"
+                 :fontSize 10
+                 :fontWeight "800"
+                 :letterSpacing 0.5}}
+        "LIVE PREVIEWS"]]
+      [:% n/View
+       {:style {:marginRight 8
+                :marginBottom 8
+                :paddingHorizontal 10
+                :paddingVertical 6
+                :borderRadius 999
+                :backgroundColor "#172554"}}
+       [:% n/Text
+        {:style {:color "#bfdbfe"
+                 :fontSize 10
+                 :fontWeight "800"
+                 :letterSpacing 0.5}}
+        "SOURCE INCLUDED"]]
+      [:% n/View
+       {:style {:marginBottom 8
+                :paddingHorizontal 10
+                :paddingVertical 6
+                :borderRadius 999
+                :backgroundColor "#172554"}}
+       [:% n/Text
+        {:style {:color "#bfdbfe"
+                 :fontSize 10
+                 :fontWeight "800"
+                 :letterSpacing 0.5}}
+        "WEB READY"]]]]
+    [:% n/View
+     {:style {:marginTop 30
+              :marginBottom 12}}
+     [:% n/Text
+      {:style {:color "#0f172a"
+               :fontSize 22
+               :fontWeight "800"}}
+      "A guided component lab"]
+     [:% n/Text
+      {:style {:maxWidth 720
+               :marginTop 8
+               :color "#64748b"
+               :fontSize 14
+               :lineHeight 21}}
+      "Use the navigation rail to move from core primitives to stateful interactions, physical gestures, and ready-to-use UI components. Start anywhere, then follow the nested examples as a map of the library."]]
+    [:% n/View
+     {:style {:flexDirection "row"
+              :flexWrap "wrap"}}
+     [:% -/IntroCard
+      {:title "Foundations"
+       :text "Text, layout, containers, tabs, lists, and trees."
+       :accent "#2563eb"}]
+     [:% -/IntroCard
+      {:title "State & motion"
+       :text "React helpers, events, animation, transitions, and indicators."
+       :accent "#7c3aed"}]
+     [:% -/IntroCard
+      {:title "Physical UI"
+       :text "Touch, gestures, drag-and-drop, layout, and rollers."
+       :accent "#ea580c"}]
+     [:% -/IntroCard
+      {:title "Components"
+       :text "Inputs, buttons, forms, navigation, modals, and utilities."
+       :accent "#059669"}]]
+    [:% n/View
+     {:style {:marginTop 8
+              :padding 24
+              :borderRadius 14
+              :backgroundColor "#eaf2ff"
+              :borderWidth 1
+              :borderColor "#c7dcff"}}
+     [:% n/Text
+      {:style {:color "#172554"
+               :fontSize 17
+               :fontWeight "800"}}
+      "Jump right in"]
+     [:% n/Text
+      {:style {:marginTop 7
+               :marginBottom 15
+               :color "#475569"
+               :fontSize 13
+               :lineHeight 20}}
+      "Use a shortcut below, or browse the full catalogue from the navigation rail."]
+     [:% n/View
+      {:style {:flexDirection "row"
+               :flexWrap "wrap"}}
+      [:% -/IntroLink
+       {:label "Native primitives"
+        :route "00a-native-text"
+        :onNavigate onNavigate}]
+      [:% -/IntroLink
+       {:label "UI controls"
+        :route "06-ui-button"
+        :onNavigate onNavigate}]
+      [:% -/IntroLink
+       {:label "Forms & data"
+        :route "00g-ext-form"
+        :onNavigate onNavigate}]
+      [:% -/IntroLink
+       {:label "Animation"
+        :route "01a-ani-base"
+        :onNavigate onNavigate}]]]
+    [:% n/View
+     {:style {:marginTop 18
+              :padding 24
+              :borderWidth 1
+              :borderColor "#dbe4f0"
+              :borderRadius 14
+              :backgroundColor "#ffffff"}}
+     [:% n/Text
+      {:style {:color "#0f172a"
+               :fontSize 17
+               :fontWeight "800"}}
+      "How to explore"]
+     [:% n/Text
+      {:style {:marginTop 12
+               :color "#475569"
+               :fontSize 13
+               :lineHeight 23}}
+      "1  Select a section from the left rail.\n2  Interact with the controls inside each example.\n3  Press CODE to reveal the source behind a demo.\n4  Use nested tabs and lists to drill into related features."]
+     [:% n/View
+      {:style {:height 1
+               :marginVertical 20
+               :backgroundColor "#e2e8f0"}}]
+     [:% n/Text
+      {:style {:color "#64748b"
+               :fontSize 12
+               :lineHeight 19}}
+      "The examples are generated from the same Clojure-based DSL that powers the library. They are documentation, experiments, and a set of composable patterns in one place."]]]))
+
 (defn.js ReactExamples
   []
   (return
@@ -391,7 +640,8 @@
 (defn.js raw-controls
   []
   (return
-   (tab ["000-react"         -/ReactExamples]
+   (tab ["000-intro"         -/IntroPage]
+        ["000-react"         -/ReactExamples]
         ["000-react-lazy"    -/ReactLazyExamples]
         ["00a-native-text"   -/NativeExamples]
         ["00a-portal-test"   -/PortalExamples]
