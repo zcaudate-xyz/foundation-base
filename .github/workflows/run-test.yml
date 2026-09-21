@@ -1,4 +1,4 @@
-name: Run Code
+name: Foundation test matrix
 
 on:
   push:
@@ -12,9 +12,12 @@ permissions:
   contents: read
   packages: read
 
+concurrency:
+  group: foundation-run-code-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   run-incomplete:
@@ -29,10 +32,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Log into GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -57,7 +60,7 @@ jobs:
 
       - name: Upload incomplete report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: code-manage-incomplete-${{ matrix.section }}
           path: target/manage-findings/${{ matrix.section }}.json
@@ -75,10 +78,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Download incomplete reports
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: code-manage-incomplete-*
           path: target/manage-findings
@@ -128,7 +131,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Create test database
         run: |
@@ -138,7 +141,7 @@ jobs:
             psql -U postgres -d test-scratch -c 'GRANT ALL PRIVILEGES ON DATABASE test TO postgres;'
 
       - name: Log into GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -151,9 +154,6 @@ jobs:
           docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-lean:latest
           docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-ocaml:latest
           docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest
-
-      - name: Install root JS dependencies
-        run: npm ci --legacy-peer-deps
 
       - name: Install JS parser dependencies
         if: matrix.install_js_parser == true
@@ -209,7 +209,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Create test database
         run: |
@@ -219,11 +219,18 @@ jobs:
             psql -U postgres -d test-scratch -c 'GRANT ALL PRIVILEGES ON DATABASE test TO postgres;'
 
       - name: Log into GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node.js 24
+        if: matrix.lang == 'js'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
 
       - name: Install root JS dependencies
         if: matrix.lang == 'js'

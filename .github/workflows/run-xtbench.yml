@@ -8,10 +8,14 @@ on:
 
 env:
   LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+concurrency:
+  group: xtbench-core-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
+  packages: read
 
 jobs:
   run-xtbench-lang-tests:
@@ -31,10 +35,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Log into GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
@@ -52,7 +56,7 @@ jobs:
 
       - name: Upload metrics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: xtbench-lang-${{ matrix.lang }}
           path: target/xtbench-metrics/result.json
@@ -75,10 +79,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Log into GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
@@ -96,7 +100,7 @@ jobs:
 
       - name: Upload metrics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: xtbench-event-${{ matrix.lang }}
           path: target/xtbench-metrics/result.json
@@ -119,10 +123,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Log into GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
@@ -140,7 +144,7 @@ jobs:
 
       - name: Upload metrics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: xtbench-net-${{ matrix.lang }}
           path: target/xtbench-metrics/result.json
@@ -163,10 +167,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Log into GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
@@ -190,7 +194,7 @@ jobs:
 
       - name: Upload metrics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: xtbench-substrate-${{ matrix.lang }}
           path: target/xtbench-metrics/result.json
@@ -224,10 +228,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Log into GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USER }}
@@ -251,7 +255,7 @@ jobs:
 
       - name: Upload metrics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: xtbench-db-${{ matrix.lang }}
           path: target/xtbench-metrics/result.json
@@ -269,20 +273,22 @@ jobs:
           - 5432:5432
 
   publish-metrics:
+    permissions:
+      contents: write
     name: Publish metrics
     if: always() && github.ref == 'refs/heads/main'
     needs: [run-xtbench-lang-tests, run-xtbench-event-tests, run-xtbench-net-tests, run-xtbench-substrate-tests, run-xtbench-db-tests]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Download metrics
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: xtbench-*
           path: target/xtbench-artifacts
       - name: Setup Leiningen
-        uses: DeLaGuardo/setup-clojure@13.4
+        uses: DeLaGuardo/setup-clojure@13.7.0
         with:
           lein: latest
       - name: Publish metrics branch

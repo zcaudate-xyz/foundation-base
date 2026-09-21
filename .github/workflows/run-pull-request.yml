@@ -17,7 +17,6 @@ concurrency:
 
 env:
   LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   detect-affected-tests:
@@ -29,10 +28,11 @@ jobs:
       files: ${{ steps.affected.outputs.files }}
       needs_hara_images: ${{ steps.affected.outputs.needs_hara_images }}
       needs_js_parser: ${{ steps.affected.outputs.needs_js_parser }}
+      needs_root_js: ${{ steps.affected.outputs.needs_root_js }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -129,6 +129,12 @@ jobs:
             echo 'needs_js_parser=false' >> "$GITHUB_OUTPUT"
           fi
 
+          if grep -qE '^test(-lang)?/js/' affected-test-files.txt; then
+            echo 'needs_root_js=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'needs_root_js=false' >> "$GITHUB_OUTPUT"
+          fi
+
           {
             echo '### Changed Clojure files'
             if [[ -s changed-clj-files.txt ]]; then
@@ -161,7 +167,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Create test database
         run: |
@@ -171,7 +177,7 @@ jobs:
             psql -U postgres -d test-scratch -c 'GRANT ALL PRIVILEGES ON DATABASE test TO postgres;'
 
       - name: Log into GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -185,7 +191,15 @@ jobs:
           docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-twostep-ocaml:latest
           docker pull ghcr.io/zcaudate-xyz/foundation-base/rt-basic-blender:latest
 
+      - name: Set up Node.js 24
+        if: needs.detect-affected-tests.outputs.needs_root_js == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
       - name: Install root JS dependencies
+        if: needs.detect-affected-tests.outputs.needs_root_js == 'true'
         run: npm ci --legacy-peer-deps
 
       - name: Install JS parser dependencies
