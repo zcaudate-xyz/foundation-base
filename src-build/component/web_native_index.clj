@@ -21,7 +21,7 @@
    :file   "App.js"})
 
 (defrun.js __import__
-  nil)
+  (:- :import (quote [React]) :from "'react'"))
 
 (defglobal.js Global
   (base-box/make-box {:l0 "00a-native-text"}))
