@@ -119,6 +119,7 @@
                                          "ethers" "^6.15.0"
                                          "expo" "~53.0.17"
                                          "expo-auth-session" "^6.2.1"
+                                         "expo-asset" "~11.1.3"
                                          "expo-blur" "~14.1.5"
                                          "expo-constants" "~17.1.7"
                                          "expo-crypto" "^14.1.5"
