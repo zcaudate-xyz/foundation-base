@@ -517,19 +517,31 @@
   (return
    [:% -/View
     #{[:style [{:margin 10
-                :padding 10
+                :padding 16
                 :borderStyle "solid"
 	        :borderWidth 1
-	        :borderColor "#aaa"
-                :maxWidth 600}
+	        :borderColor "#e2e8f0"
+                :borderRadius 14
+                :backgroundColor "#ffffff"
+                :shadowColor "#0f172a"
+                :shadowOffset {:width 0
+                               :height 5}
+                :shadowOpacity 0.08
+                :shadowRadius 14
+                :elevation 2
+                :maxWidth 860}
                 (:.. (xtd/arrayify style))]
        (:.. rprops)]}
     [:% -/Text
      {:style [{:position "absolute"
-               :top -12
+               :top -10
+               :left 14
                :fontSize 10
-               :padding 5
-               :color "#666"
+               :paddingHorizontal 8
+               :paddingVertical 3
+               :fontWeight "700"
+               :letterSpacing 0.2
+               :color "#475569"
                :backgroundColor "#fff"}
               (-/PlatformSelect
                {:web {:userSelect "none"}})
@@ -549,13 +561,27 @@
     {:label label}
     [:% -/View
      {:style {:position "absolute"
-              :right -10
-              :top -20
-              :transform [{:scale 0.6}]
+              :right 12
+              :top -17
               :zIndex 10}}
-     [:% -/Button
-      {:title (:? showCode "DEMO" "CODE")
-       :onPress (fn [] (setShowCode (not showCode)))}]]
+     [:% -/TouchableOpacity
+      {:onPress (fn [] (setShowCode (not showCode)))
+       :style {:backgroundColor "#2563eb"
+               :borderRadius 8
+               :paddingHorizontal 11
+               :paddingVertical 7
+               :shadowColor "#1d4ed8"
+               :shadowOffset {:width 0
+                              :height 2}
+               :shadowOpacity 0.22
+               :shadowRadius 5
+               :elevation 2}}
+      [:% -/Text
+       {:style {:color "#ffffff"
+                :fontSize 11
+                :fontWeight "800"
+                :letterSpacing 0.4}}
+       (:? showCode "DEMO" "CODE")]]]
     (:? showCode
         [:% -/Text code]
         children)]))
@@ -864,6 +890,7 @@
     [:% -/FlatList
      {:data  (xtd/arr-map items format)
       :keyExtractor k/identity
+      :style style
       :renderItem (fn [e]
                     (var #{item} e)
                     (var selected (== (. e ["index"]) internal))
@@ -1088,8 +1115,9 @@
     (return [:% -/View])
     (return [:% -/View
              {:style {:flex 1
-                      :padding 10
-                      :overflow "auto"}}
+                      :padding 24
+                      :overflow "auto"
+                      :backgroundColor "#f8fafc"}}
              [:% Target]])))
   
 (defn.js BaseIndicator
