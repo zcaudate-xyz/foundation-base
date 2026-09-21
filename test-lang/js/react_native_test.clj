@@ -103,10 +103,14 @@
 (fact "checks that env is tablet")
 
 ^{:refer js.react-native/format-obj :added "4.0" :unchecked true}
-(fact "formats an object")
+(fact "formats an object"
+  (n/format-obj [1 2])
+  => "1\n2")
 
 ^{:refer js.react-native/format-entry :added "4.0" :unchecked true}
-(fact "formats an entry")
+(fact "formats an entry"
+  (n/format-entry [1 2])
+  => "1\n2")
 
 ^{:refer js.react-native/measure :added "4.0" :unchecked true}
 (fact "measures the element")
