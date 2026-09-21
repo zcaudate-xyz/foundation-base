@@ -1,11 +1,20 @@
-(ns lang.core.pointer-test
-  (:require [std.json :as json]
+(ns ^{:clj-kondo/config '{:linters {:unresolved-symbol {:level :off}
+                                    :unresolved-var {:level :off}}}}
+  lang.core.pointer-test
+  (:require [clojure.string :as string]
+            [std.json :as json]
             [lang.base.book :as book]
+            [lang.base.book-module :as module]
             [lang.base.emit-prep-lua-test :as prep]
+            [lang.core.impl :as impl]
             [lang.core.impl-entry :as entry]
             [lang.core.library :as lib]
             [lang.core.library-snapshot :as snap]
             [lang.core.pointer :refer :all]
+            [lang.core.runtime :as runtime]
+            [lang.core.script-macro :as macro]
+            [lang.model.builtin.spec-js :as js]
+            [lang.model.builtin.spec-xtalk :as xtalk]
             [lang.base.util :as ut]
             [std.lib.foundation :as f]
             [std.string.prose :as prose])
@@ -43,6 +52,25 @@
                     :id 'add
                     :section :fragment
                     :library +library-ext+}))
+
+(def +library-js+
+  (doto (lib/library {})
+    (lib/add-book! (assoc xtalk/+book+ :modules {}))
+    (lib/add-book! js/+book+)
+    (lib/add-module! (module/book-module {:lang :xtalk
+                                          :id 'xt.lang.common-lib}))))
+
+(def +abstract-ptr+
+  (let [reserved ['defn (get-in (lib/get-book +library-js+ :xtalk)
+                                [:grammar :reserved 'defn])]
+        form     (with-meta (list 'defn.xt
+                                  'show-len
+                                  '[arr]
+                                  (list 'return (list 'x:len 'arr)))
+                            {:module 'xt.lang.common-lib
+                             :line 1})]
+    (impl/with:library [+library-js+]
+      (macro/intern-top-level-fn :xtalk reserved form {}))))
 
 ^{:refer lang.core.pointer/with:clip :added "4.0"}
 (fact "form to control `clip` option"
@@ -117,6 +145,30 @@
                                  :library +library-ext+})
                {:layout :full})
   => "function L_core____identity_fn(x){\n  return x;\n}")
+
+^{:refer lang.core.pointer/ptr-display :id pointer-display-target-fallback :added "4.1"}
+(fact "uses the display namespace runtime and falls back to XTalk for abstract forms"
+  (with-redefs [ut/lang-rt-default (fn [_ namespace]
+                                     {:lang :js
+                                      :namespace namespace})]
+    (impl/with:library [+library-js+]
+      (let [js-output (ptr-display @+abstract-ptr+
+                                   {:library +library-js+
+                                    :namespace 'lang.core.pointer-test})
+            xtalk-output (ptr-display @+abstract-ptr+
+                                      {:library +library-js+
+                                       :lang :xtalk})
+            display-runtime (runtime/rt-default {:lang :js
+                                                 :library +library-js+})
+            pointer-output (with-redefs [ut/lang-rt-default
+                                         (fn ([_] display-runtime)
+                                           ([_ _] display-runtime))]
+                             (str @+abstract-ptr+))]
+        [(string/includes? js-output "arr.length")
+         (not (string/includes? js-output "x:len"))
+         (string/includes? xtalk-output "x:len arr")
+         (string/includes? pointer-output "arr.length")])))
+    => [true true true true])
 
 ^{:refer lang.core.pointer/ptr-invoke-meta :added "4.0"}
 (fact "prepares the meta for a pointer"

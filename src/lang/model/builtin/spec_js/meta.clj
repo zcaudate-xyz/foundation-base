@@ -141,8 +141,10 @@
   "outputs the js module export form"
   {:added "4.0"}
   ([body {:keys [entry mopts]}]
-   (let [{:keys [emit]} mopts
-         {:lang/keys [format]} emit]
+   (let [{:keys [emit module]} mopts
+         {:lang/keys [format]} emit
+         per-entry (or (-> module :static :per-entry)
+                       [:export])]
      (cond (= :script (:type emit))
            body
 
@@ -150,7 +152,10 @@
            (case format
              (:none :global :commonjs) body
              (case (:op-key entry)
-               (:defclass :def :defn) (str "export " body)
+               (:defclass :def :defn)
+               (if (some #{:export} per-entry)
+                 (str "export " body)
+                 body)
                body))))))
 
 (def +meta+

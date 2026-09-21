@@ -18,6 +18,46 @@
    lang.core/defn.js clj-kondo.hooks.lang-xtalk/defn-xt
    defvar.js clj-kondo.hooks.lang-xtalk/defvar-xt
    lang.core/defvar.js clj-kondo.hooks.lang-xtalk/defvar-xt
+   def.js clj-kondo.hooks.lang-xtalk/def-xt
+   lang.core/def.js clj-kondo.hooks.lang-xtalk/def-xt
+   defgen.js clj-kondo.hooks.lang-xtalk/defgen-xt
+   lang.core/defgen.js clj-kondo.hooks.lang-xtalk/defgen-xt
+   defrun.js clj-kondo.hooks.lang-xtalk/defn-xt
+   lang.core/defrun.js clj-kondo.hooks.lang-xtalk/defn-xt
+   defmacro.js clj-kondo.hooks.lang-xtalk/defmacro-xt
+   lang.core/defmacro.js clj-kondo.hooks.lang-xtalk/defmacro-xt
+   def$.js clj-kondo.hooks.lang-xtalk/defvar-xt
+   lang.core/def$.js clj-kondo.hooks.lang-xtalk/defvar-xt
+   defglobal.js clj-kondo.hooks.lang-xtalk/defglobal-xt
+   lang.core/defglobal.js clj-kondo.hooks.lang-xtalk/defglobal-xt
+   defimpl.js clj-kondo.hooks.lang-xtalk/defimpl-xt
+   lang.core/defimpl.js clj-kondo.hooks.lang-xtalk/defimpl-xt
+   defprotocol.js clj-kondo.hooks.lang-xtalk/defprotocol-xt
+   lang.core/defprotocol.js clj-kondo.hooks.lang-xtalk/defprotocol-xt
+   defspec.js clj-kondo.hooks.lang-xtalk/defspec-xt
+   lang.core/defspec.js clj-kondo.hooks.lang-xtalk/defspec-xt
+   clj-kondo.hooks.lang-postgres/def.js clj-kondo.hooks.lang-xtalk/def-xt
+   clj-kondo.hooks.lang-postgres/defn.js clj-kondo.hooks.lang-xtalk/defn-xt
+   clj-kondo.hooks.lang-postgres/defgen.js clj-kondo.hooks.lang-xtalk/defgen-xt
+   clj-kondo.hooks.lang-postgres/defrun.js clj-kondo.hooks.lang-xtalk/defn-xt
+   clj-kondo.hooks.lang-postgres/defmacro.js clj-kondo.hooks.lang-xtalk/defmacro-xt
+   clj-kondo.hooks.lang-postgres/def$.js clj-kondo.hooks.lang-xtalk/defvar-xt
+   clj-kondo.hooks.lang-postgres/defglobal.js clj-kondo.hooks.lang-xtalk/defglobal-xt
+   clj-kondo.hooks.lang-postgres/defimpl.js clj-kondo.hooks.lang-xtalk/defimpl-xt
+   clj-kondo.hooks.lang-postgres/defprotocol.js clj-kondo.hooks.lang-xtalk/defprotocol-xt
+   clj-kondo.hooks.lang-postgres/defspec.js clj-kondo.hooks.lang-xtalk/defspec-xt
+   clj-kondo.hooks.lang-postgres/defvar.js clj-kondo.hooks.lang-xtalk/defvar-xt
+   clj-kondo.hooks.lang-xtalk/def.js clj-kondo.hooks.lang-xtalk/def-xt
+   clj-kondo.hooks.lang-xtalk/defn.js clj-kondo.hooks.lang-xtalk/defn-xt
+   clj-kondo.hooks.lang-xtalk/defgen.js clj-kondo.hooks.lang-xtalk/defgen-xt
+   clj-kondo.hooks.lang-xtalk/defrun.js clj-kondo.hooks.lang-xtalk/defn-xt
+   clj-kondo.hooks.lang-xtalk/defmacro.js clj-kondo.hooks.lang-xtalk/defmacro-xt
+   clj-kondo.hooks.lang-xtalk/def$.js clj-kondo.hooks.lang-xtalk/defvar-xt
+   clj-kondo.hooks.lang-xtalk/defglobal.js clj-kondo.hooks.lang-xtalk/defglobal-xt
+   clj-kondo.hooks.lang-xtalk/defimpl.js clj-kondo.hooks.lang-xtalk/defimpl-xt
+   clj-kondo.hooks.lang-xtalk/defprotocol.js clj-kondo.hooks.lang-xtalk/defprotocol-xt
+   clj-kondo.hooks.lang-xtalk/defspec.js clj-kondo.hooks.lang-xtalk/defspec-xt
+   clj-kondo.hooks.lang-xtalk/defvar.js clj-kondo.hooks.lang-xtalk/defvar-xt
    defglobal.xt clj-kondo.hooks.lang-xtalk/defglobal-xt
    defn.pg clj-kondo.hooks.lang-postgres/defn-pg
    defrun.pg clj-kondo.hooks.lang-postgres/defn-pg

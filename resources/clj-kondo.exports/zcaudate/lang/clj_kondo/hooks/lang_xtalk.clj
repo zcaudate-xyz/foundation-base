@@ -10,6 +10,9 @@
   '#{if cond when while for forange for:array for:object for:index for:iter
      for:async do do* doto try switch case br* let})
 
+(def ^:private +runtime-block-heads+
+  '#{r/watch r/init j/delayed})
+
 (defn- canonical-head [head]
   (if (symbol? head)
     (symbol (name head))
@@ -51,8 +54,9 @@
          :object (second source)
          :key key}))))
 
-(defn- statement-sequence-nodes [head node]
-  (let [children (vec (rest (:children node)))]
+(defn- statement-sequence-nodes [raw-head node]
+  (let [head (canonical-head raw-head)
+        children (vec (rest (:children node)))]
     (cond
       (#{'do 'do*} head)
       children
@@ -62,6 +66,9 @@
 
       (#{'when 'while 'for 'forange 'for:array 'for:object
          'for:index 'for:iter 'for:async} head)
+      (drop 1 children)
+
+      (contains? +runtime-block-heads+ raw-head)
       (drop 1 children)
 
       :else
@@ -94,7 +101,8 @@
           (recur (next remaining)))))))
 
 (defn- block-head? [head]
-  (contains? +block-heads+ (canonical-head head)))
+  (or (contains? +block-heads+ (canonical-head head))
+      (contains? +runtime-block-heads+ head)))
 
 (defn- fn-arrow-suggestion [form]
   (let [[_ args body] form]
@@ -132,8 +140,9 @@
          (partition-all 2)
          (keep (fn [[_ value]] value)))))
 
-(defn- node-pairs [head node]
-  (let [children (vec (rest (:children node)))
+(defn- node-pairs [raw-head node context]
+  (let [head (canonical-head raw-head)
+        children (vec (rest (:children node)))
         child (fn [i] (nth children i nil))
         statement-children (fn [xs] (map vector xs (repeat :statement)))]
     (cond
@@ -153,8 +162,33 @@
       (concat [[(child 0) :value]]
               (statement-children (drop 1 children)))
 
-      (#{'do 'do* 'doto 'try 'switch 'case 'br*} head)
+      (= head 'try)
+      (map (fn [child-node]
+             [child-node
+              (if (and (api/list-node? child-node)
+                       (#{'catch 'finally}
+                        (canonical-head (first (api/sexpr child-node)))))
+                :try-control
+                :statement)])
+           children)
+
+      (#{'do 'do* 'doto 'switch 'case 'br*} head)
       (statement-children children)
+
+      (= head 'catch)
+      (if (and (= context :try-control)
+               (symbol? (api/sexpr (child 0))))
+        (statement-children (drop 1 children))
+        (map vector children (repeat :value)))
+
+      (= head 'finally)
+      (if (= context :try-control)
+        (statement-children children)
+        (map vector children (repeat :value)))
+
+      (contains? +runtime-block-heads+ raw-head)
+      (concat [[(child 0) :value]]
+              (statement-children (drop 1 children)))
 
       (= head 'let)
       (concat (map vector (binding-value-nodes (child 0)) (repeat :value))
@@ -177,7 +211,7 @@
                    (drop 2 children))]
         (statement-children body))
 
-      (block-head? head)
+      (block-head? raw-head)
       (statement-children children)
 
       :else
@@ -185,18 +219,32 @@
 
 (declare lint-node!)
 
+(defn- destructuring-target?
+  [form]
+  (or (symbol? form)
+      (and (vector? form)
+           (every? destructuring-target? form))
+      (and (set? form)
+           (every? destructuring-target? form))
+      (and (seq? form)
+           (= := (first form))
+           (symbol? (second form)))
+      (and (seq? form)
+           (= :.. (first form))
+           (symbol? (second form)))))
+
 (defn- lint-var-target! [node]
   (let [target-node (nth (vec (rest (:children node))) 0 nil)
         target (some-> target-node api/sexpr)]
     (cond
       (set? target)
-      (let [invalid (remove symbol? target)
+      (let [invalid (remove destructuring-target? target)
             fields (->> target
                         (filter symbol?)
                         (group-by #(symbol (str/replace (name %) "-" "_"))))]
         (when (seq invalid)
           (report! target-node :lang.xtalk/invalid-destructuring :error
-                   "set destructuring targets must contain only symbols"))
+                   "set destructuring targets must contain valid binding patterns"))
         (doseq [[field bindings] fields]
           (when (> (count bindings) 1)
             (report! target-node :lang.xtalk/field-collision :error
@@ -205,17 +253,18 @@
                           (symbol (str/replace (name field) "_" "-")))))))
 
       (vector? target)
-      (when-not (every? symbol? target)
+      (when-not (every? destructuring-target? target)
         (report! target-node :lang.xtalk/invalid-destructuring :error
-                 "vector destructuring targets must contain only symbols")))))
+                 "vector destructuring targets must contain valid binding patterns")))))
 
 (defn- lint-node! [node context]
   (when node
     (let [form (api/sexpr node)]
       (cond
         (api/list-node? node)
-        (let [head (canonical-head (first form))]
-          (when (and (= :value context) (block-head? head))
+        (let [raw-head (first form)
+              head (canonical-head raw-head)]
+          (when (and (= :value context) (block-head? raw-head))
             (report! node :lang.xtalk/block-in-value :error
                      (str "block form " head
                           " is not valid in value position; use :? for value conditionals")))
@@ -227,7 +276,7 @@
           (when (and (= head 'var)
                      (>= (count form) 2))
             (lint-var-target! node))
-          (when-let [nodes (statement-sequence-nodes head node)]
+          (when-let [nodes (statement-sequence-nodes raw-head node)]
             (lint-var-sequence! nodes))
           (when-let [{:keys [target object key]} (when (= head 'var)
                                                    (var-dot-binding form))]
@@ -246,7 +295,7 @@
             (report! node :lang.xtalk/redundant-fn-arrow :warning
                      (str "fn:> with an explicit argument vector and nil body can use canonical fn with an explicit return: "
                           suggestion)))
-          (doseq [[child-node child-context] (node-pairs head node)]
+          (doseq [[child-node child-context] (node-pairs raw-head node context)]
             (lint-node! child-node child-context)))
 
         (or (api/vector-node? node)
@@ -286,11 +335,12 @@
   (let [form (api/sexpr node)
         head (canonical-head (first form))]
     (cond
-      (#{'defn.xt 'defgen.xt} head)
+      (#{'defn.xt 'defgen.xt
+        'defn.js 'defgen.js 'defrun.js 'defmacro.js} head)
       (doseq [body-node (function-body-nodes node)]
         (lint-node! body-node :statement))
 
-      (= head 'def.xt)
+      (#{'def.xt 'def.js 'defvar.js 'def$.js 'defglobal.js} head)
       (when-let [value-node (last (:children node))]
         (lint-node! value-node :value)))))
 
@@ -325,6 +375,7 @@
   {:node (definition-stub node 'def)})
 
 (defn defmacro-xt [{:keys [node]}]
+  (lint-definition! node)
   {:node (definition-stub node 'defmacro)})
 
 (defn defgen-xt [{:keys [node]}]
@@ -332,6 +383,7 @@
   {:node (definition-stub node 'defn)})
 
 (defn defvar-xt [{:keys [node]}]
+  (lint-definition! node)
   {:node (definition-stub node 'def)})
 
 (defn defspec-xt [{:keys [node]}]
@@ -341,6 +393,7 @@
     {:node (api/list-node [(api/token-node 'do)])}))
 
 (defn defglobal-xt [{:keys [node]}]
+  (lint-definition! node)
   {:node (definition-stub node 'def)})
 
 (defn defprotocol-xt [{:keys [node]}]

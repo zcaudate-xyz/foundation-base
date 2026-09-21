@@ -1,4 +1,6 @@
-(ns lang.core.script-macro-provenance-test
+(ns ^{:clj-kondo/config '{:linters {:unresolved-symbol {:level :off}
+                                    :unresolved-var {:level :off}}}}
+  lang.core.script-macro-provenance-test
   (:require [lang.base.book-module :as module]
             [lang.core.impl :as impl]
             [lang.core.library :as lib]
@@ -55,7 +57,10 @@
                     reserved
                     fn-form
                     {})
-            out    (capture-provenance #(ptr/ptr-display @fn-var {}))]
+            out    (capture-provenance #(impl/emit-entry
+                                          (ptr/ptr-deref @fn-var)
+                                          {:library xlib
+                                           :lang :xtalk}))]
         [(select-keys out [:phase
                            :subsystem
                            :module
@@ -96,7 +101,10 @@
                     reserved
                     fn-form
                     {})
-            out    (capture-provenance #(ptr/ptr-display @fn-var {}))]
+            out    (capture-provenance #(impl/emit-entry
+                                          (ptr/ptr-deref @fn-var)
+                                          {:library xlib
+                                           :lang :xtalk}))]
         [(select-keys out [:phase
                            :subsystem
                            :module

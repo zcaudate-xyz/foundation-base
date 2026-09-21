@@ -1,10 +1,11 @@
 (ns xt.net.ws-native
   (:require [lang.core :as l]
-            [xt.lang.common-protocol :refer [defprotocol.xt]])
+            [xt.lang.common-protocol :as proto :refer [defprotocol.xt]])
   (:refer-clojure :exclude [send]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-protocol :as protocol]
              [xt.net.http-util :as util]]})
 
 (defprotocol.xt IWebsocket

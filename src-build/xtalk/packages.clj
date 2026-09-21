@@ -68,9 +68,19 @@
                         (str "@xtalk/" (name current))
                         (str "package:xtalk_" (name current)))])
                    SEGMENTS))]
-    (cond-> external
-      (= platform :js) (assoc 'js (package-name :js segment))
-      (= platform :dart) (assoc 'dart (package-name :dart segment)))))
+    (cond
+      (= platform :js)
+      (if (= segment :db)
+        (assoc external 'js (package-name :js :net))
+        (assoc external 'js (package-name :js segment)))
+
+      (= platform :dart)
+      (if (= segment :db)
+        (assoc external 'dart (package-name :dart :net))
+        (assoc external 'dart (package-name :dart segment)))
+
+      :else
+      external)))
 
 (defn module-entry
   ([platform segment main]
@@ -293,7 +303,9 @@
 (def +dart-project+
   (dart-project "packages-gen/dart"))
 
+^{:clj-kondo/ignore [:unresolved-symbol]}
 (def.make XTALK-JS +js-project+)
+^{:clj-kondo/ignore [:unresolved-symbol]}
 (def.make XTALK-DART +dart-project+)
 
 (defn generate!

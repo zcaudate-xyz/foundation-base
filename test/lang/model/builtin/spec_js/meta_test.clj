@@ -1,7 +1,10 @@
 (ns lang.model.builtin.spec-js.meta-test
-  (:require [lang.core :as l]
-            [lang.model.builtin.spec-js.meta :refer :all])
-  (:use code.test))
+  (:require [code.test :refer [=> fact]]
+            [lang.core :as l]
+            [lang.model.builtin.spec-js.meta :refer [js-module-import
+                                                       js-module-export
+                                                       js-module-link
+                                                       js-transform-entry]]))
 
 ^{:refer lang.model.builtin.spec-js.meta/js-module-import-async :added "4.0"}
 (fact "helper for import")
@@ -27,10 +30,8 @@
 
   (js-module-import 'react '{:as [:* React]
                              :refer [hello world]} {:emit {:lang/format :global}})
-  => '(Object.defineProperty !:G "React" {:value (require "react")}))
+  => '(Object.defineProperty !:G "React" {:value (require "react")})
 
-^{:refer lang.model.builtin.spec-js.meta/js-module-import :added "4.1" :id scoped-package-import}
-(fact "keeps scoped npm links as bare package specifiers"
   (js-module-import
    "@xtalk/lang/common-data"
    '{:as xtd :suffix ".js"}
@@ -66,4 +67,52 @@
   => "../../js/core")
 
 ^{:refer lang.model.builtin.spec-js.meta/js-transform-entry :added "4.0"}
-(fact "function for transforming :type :module entries")
+(fact "function for transforming :type :module entries"
+
+  (js-transform-entry
+   "function Page(){}"
+   {:entry {:op-key :defn}
+    :mopts {:emit {:lang/format :module}}})
+  => "export function Page(){}"
+
+  (js-transform-entry
+   "function Page(){}"
+   {:entry {:op-key :defn}
+    :mopts {:emit {:lang/format :module}
+            :module {:static {:per-entry [:export]}}}})
+  => "export function Page(){}"
+
+  (js-transform-entry
+   "function Page(){}"
+   {:entry {:op-key :defn}
+    :mopts {:emit {:lang/format :module}
+            :module {:static {:per-entry [:none]}}}})
+  => "function Page(){}"
+
+  (js-transform-entry
+   "const Page = 1"
+   {:entry {:op-key :def}
+    :mopts {:emit {:lang/format :module}
+            :module {:static {:per-entry [:none]}}}})
+  => "const Page = 1"
+
+  (js-transform-entry
+   "class Page {}"
+   {:entry {:op-key :defclass}
+    :mopts {:emit {:lang/format :module}
+            :module {:static {:per-entry [:none]}}}})
+  => "class Page {}"
+
+  (js-transform-entry
+   "Page = 1"
+   {:entry {:op-key :set}
+    :mopts {:emit {:lang/format :module}
+            :module {:static {:per-entry [:export]}}}})
+  => "Page = 1"
+
+  (js-transform-entry
+   "function Page(){}"
+   {:entry {:op-key :defn}
+    :mopts {:emit {:type :script :lang/format :module}
+            :module {:static {:per-entry [:none]}}}})
+  => "function Page(){}")

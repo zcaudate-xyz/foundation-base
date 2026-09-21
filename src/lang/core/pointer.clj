@@ -151,45 +151,73 @@
   "emits the display string for pointer"
   {:added "4.0"}
   ([{:keys [lang form id module section library] :as ptr} meta]
-   (let [library (or library (impl/runtime-library))
-         meta  (assoc meta
-                     :lang lang
-                     :module module
-                     :library library)]
-     (cond form
-           (impl/emit-str form meta)
+   (let [source-lang lang
+         library     (or library (impl/runtime-library))
+         display-ns  (or (:namespace meta) (env/ns-sym))
+         runtime     (or (:runtime meta)
+                         (when-not (:lang meta)
+                           (f/suppress (ut/lang-rt-default ptr display-ns))))
+         target-lang (or (:lang meta) (:lang runtime) source-lang)
+         meta        (assoc meta
+                            :lang target-lang
+                            :module module
+                            :library library
+                            :namespace display-ns)]
+     (letfn [(abstract-error? [t]
+               (when t
+                 (or (= :abstract (:emit (ex-data t)))
+                     (abstract-error? (.getCause ^Throwable t)))))
+             (source-form [entry]
+               (or (:form entry) (:form-input entry)))
+             (display-source [entry]
+               (when-let [form (source-form entry)]
+                 (env/pp-str form)))
+             (emit-with-fallback [emit-fn entry]
+               (try
+                 (emit-fn)
+                 (catch Throwable t
+                   (if (abstract-error? t)
+                     (or (display-source entry)
+                         (throw t))
+                     (throw t)))))]
+       (cond form
+             (emit-with-fallback #(impl/emit-str form meta)
+                                 {:form form})
 
-           (not id)
-           (cond->  "<free"
-             module (str ":" module)
-             :then (str ">"))
-            
-           :else
-           (let [entry (cond-> (get-entry ptr)
-                         (not= :fragment section)
-                         (or (book/get-code-entry-view (lib/get-book library lang)
-                                                      (ut/sym-full ptr))))]
-             (cond (nil? entry)
-                   (str (ptr-tag ptr :not-found))
-                   
-                    (= :fragment section)
-                    (let [{:keys [form standalone template]} entry]
-                      (cond (collection/form? standalone)
-                            (clojure.string/trim (with-out-str (clojure.pprint/pprint (second standalone))))
-                            
-                            (symbol? form)
-                            (str form)
-                            
-                            (not template)
-                            (impl/emit-str form meta)
-                           
-                           :else
-                           (let [args (second form)]
-                             (clojure.string/trim (with-out-str (clojure.pprint/pprint
-                                                      (or (f/suppress (list 'fn:> args (apply template args)))
-                                                          form)))))))
-                   :else
-                   (impl/emit-entry entry meta)))))))
+             (not id)
+             (cond->  "<free"
+               module (str ":" module)
+               :then (str ">"))
+
+             :else
+             (let [entry (cond-> (get-entry ptr)
+                           (not= :fragment section)
+                           (or (book/get-code-entry-view (lib/get-book library source-lang)
+                                                        (ut/sym-full ptr))))]
+               (cond (nil? entry)
+                     (str (ptr-tag ptr :not-found))
+
+                     (= :fragment section)
+                     (let [{:keys [form standalone template]} entry]
+                       (emit-with-fallback
+                        #(cond (collection/form? standalone)
+                               (clojure.string/trim (with-out-str (clojure.pprint/pprint (second standalone))))
+
+                               (symbol? form)
+                               (str form)
+
+                               (not template)
+                               (impl/emit-str form meta)
+
+                              :else
+                              (let [args (second form)]
+                                (clojure.string/trim (with-out-str (clojure.pprint/pprint
+                                                         (or (f/suppress (list 'fn:> args (apply template args)))
+                                                             form))))))
+                        entry))
+                     :else
+                     (emit-with-fallback #(impl/emit-entry entry meta)
+                                         entry))))))))
 
 (defn ptr-invoke-meta
   "prepares the meta for a pointer"

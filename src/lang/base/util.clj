@@ -112,17 +112,18 @@
 (defn lang-rt-default
   "gets the default runtime function"
   {:added "4.0"}
-  [ptr]
-  (let [ns (env/ns-sym)
-        active (set (lang-rt-list ns))
-        {:keys [module lang]} ptr]
-    (or (if (active lang) (lang-rt lang))
-        (let [rts (map (fn [lang] (lang-rt ns lang)) active)]
-          (or (first (filter (fn [rt] (get-in rt [:module/primary module]))
-                             rts))
-              (first (filter (fn [rt] (get-in rt [:module/internal module]))
-                             rts))))
-        (space/space:rt-current ns (:context ptr)))))
+  ([ptr]
+   (lang-rt-default ptr (env/ns-sym)))
+  ([ptr ns]
+   (let [active (set (lang-rt-list ns))
+         {:keys [module lang]} ptr]
+     (or (if (active lang) (lang-rt ns lang))
+         (let [rts (map (fn [lang] (lang-rt ns lang)) active)]
+           (or (first (filter (fn [rt] (get-in rt [:module/primary module]))
+                              rts))
+               (first (filter (fn [rt] (get-in rt [:module/internal module]))
+                              rts))))
+         (space/space:rt-current ns (:context ptr))))))
 
 (defn lang-pointer
   "creates a lang pointer"
