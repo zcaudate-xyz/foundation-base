@@ -120,11 +120,41 @@
   (collection/merge-nested (get-in grammar [:default :function])
                   (get-in grammar [:function key])))
 
+(defn- normalize-js-args
+  "makes repeated ignored JavaScript arguments unique"
+  [args]
+  (if (<= (count (filter #(= '_ (:symbol %)) args)) 1)
+    args
+    (loop [out  []
+           more args
+           used (set (map :symbol args))
+           index 0]
+      (if-let [arg (first more)]
+        (if (= '_ (:symbol arg))
+          (let [[symbol index]
+                (loop [index index]
+                  (let [symbol (symbol (str "__unused" index))]
+                    (if (contains? used symbol)
+                      (recur (inc index))
+                      [symbol (inc index)])))]
+            (recur (conj out (assoc arg :symbol symbol))
+                   (rest more)
+                   (conj used symbol)
+                   index))
+          (recur (conj out arg)
+                 (rest more)
+                 used
+                 index))
+        out))))
+
 (defn emit-fn-preamble-args
   "constructs the function preamble args"
   {:added "4.0"}
   ([key args grammar mopts]
    (let [args  (helper/emit-typed-args args grammar)
+         args  (if (= :js (:lang mopts))
+                 (normalize-js-args args)
+                 args)
          {:keys [sep space assign start end multiline]}
          (collection/merge-nested (helper/get-options grammar [:default :function :args])
                          (get-in grammar [:function key :args]))]
