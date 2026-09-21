@@ -174,6 +174,24 @@
             (conn-sql/query client "SELECT 1;"))))))
   => 1)
 
+^{:refer xt.db.system.impl-sqlite/impl-sqlite-init
+  :added "4.1"
+  :id sqlite-empty-schema}
+(fact "impl-sqlite-init skips empty schema DDL"
+
+  (notify/wait-on [:js 5000]
+    (-> (impl/impl-sqlite (-/sqlite-create)
+                          {}
+                          {})
+        (impl/impl-sqlite-init)
+        (promise/x:promise-then
+         (fn [impl]
+           (var #{client} impl)
+           (var out (conn-sql/query client "SELECT 1;"))
+           (conn-sql/disconnect client)
+           (repl/notify out)))))
+  => 1)
+
 
 ^{:refer xt.db.system.impl-sqlite/rpc-call-async :added "4.1"}
 (fact "sqlite impl does not support remote rpc calls"

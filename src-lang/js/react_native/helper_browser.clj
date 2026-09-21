@@ -2,7 +2,8 @@
   (:require [lang.core :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [xt.lang.common-string :as str]
              [xt.event.base-route :as event-route]
              [js.react :as r]

@@ -12,8 +12,7 @@
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
-             [js.react-native.ui-range :as ui-range]
-             ]
+             [js.react-native.ui-range :as ui-range]]
    })
 
 ^{:refer js.react-native.ui-range/rangeTheme :added "4.0" :unchecked true}

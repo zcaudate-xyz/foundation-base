@@ -9,7 +9,7 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
     :require [[xt.lang.common-lib :as k]
-             [js.react :as r]
+              [js.react :as r]
               [js.react-native :as n]
               [js.react-native.animate :as a]
               [js.react-native.physical-base :as physical-base]

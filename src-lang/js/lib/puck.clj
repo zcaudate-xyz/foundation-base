@@ -6,8 +6,7 @@
             [std.string.case :as case]))
 
 (l/script :js
-  {:import  [["@measured/puck" :as [* Puck]
-              :bundle [["@measured/puck/puck.css"]]]]})
+  {:import  [["@measured/puck" :as [* Puck] :bundle [["@measured/puck/puck.css"]]]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Puck"

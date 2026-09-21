@@ -13,8 +13,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
-             [xt.lang.common-data :as xtd]
-             ]
+             [xt.lang.common-data :as xtd]]
    })
 
 ^{:refer js.react-native.physical-layout/Grid

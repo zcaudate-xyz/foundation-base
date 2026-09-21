@@ -3,7 +3,7 @@
 
 (l/script :js
   {:require [[xt.event.base-log :as event-log]
-              [js.react :as r]]})
+             [js.react :as r]]})
 
 (defn.js makeLog
   "creates a log for react"

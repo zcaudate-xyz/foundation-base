@@ -13,8 +13,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-check-box :as ui-check-box]
-             [js.react-native.physical-addon :as physical-addon]
-             ]
+             [js.react-native.physical-addon :as physical-addon]]
    })
 
 ^{:refer js.react-native.ui-check-box/CheckBoxSimple

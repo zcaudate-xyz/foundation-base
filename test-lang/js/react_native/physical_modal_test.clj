@@ -10,8 +10,7 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r]
-             [js.react-native :as n :include [:fn]]
-             ]
+             [js.react-native :as n :include [:fn]]]
    })
 
 ^{:refer js.react-native.physical-modal/getPosition :adopt true :added "4.0" :unchecked true}

@@ -10,8 +10,7 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.react-native :as n :include [:fn]]
-             [js.react-native.ui-scrollview :as ui-scrollview]
-             ]
+             [js.react-native.ui-scrollview :as ui-scrollview]]
    })
 
 ^{:refer js.react-native.ui-scrollview/ScrollViewImpl :added "4.0" :unchecked true}

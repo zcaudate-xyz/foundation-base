@@ -70,13 +70,22 @@
   
  xyz.zcaudate/js.core
  {:description "js core submodules, module scaffolding and webpack helpers"
-  :include [[js.core.impl :complete]
+  :include [[js.core :complete]
+            [js.core.impl :complete]
             [js.core.fetch :complete]
             [js.core.util :complete]
             [js.core.style :complete]
             [js.core.dom :complete]
             [js.module :complete]
             [js.webpack :complete]]}
+
+ xyz.zcaudate/melbourne
+ {:description "portable Melbourne UI components"
+  :include [[melbourne :complete]]}
+
+ xyz.zcaudate/pune
+ {:description "portable Pune UI components"
+  :include [[pune :complete]]}
 
  xyz.zcaudate/js.gh-primer
  {:description "github primer react components"

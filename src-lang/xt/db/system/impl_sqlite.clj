@@ -160,11 +160,13 @@
          schema
          lookup
          opts} impl)
+  (var sql (xt/x:str-join
+            "\n\n"
+            (manage/table-create-all schema lookup opts)))
   (return
    (-> (conn-sql/connect client {})
        (promise/x:promise-then
         (fn [client]
-          (conn-sql/query client (xt/x:str-join
-                                  "\n\n"
-                                  (manage/table-create-all schema lookup opts)))
+          (when (< 0 (xt/x:str-len sql))
+            (conn-sql/query client sql))
           (return impl))))))

@@ -5,7 +5,7 @@
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
-              [xt.lang.common-string :as str]]})
+             [xt.lang.common-string :as str]]})
 
 (defn.js compile
   [input]

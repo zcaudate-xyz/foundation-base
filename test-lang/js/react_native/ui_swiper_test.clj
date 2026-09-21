@@ -12,8 +12,7 @@
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
-             [js.react-native.ui-swiper :as ui-swiper]
-             ]
+             [js.react-native.ui-swiper :as ui-swiper]]
    })
 
 ^{:refer js.react-native.ui-swiper/swiperTransform :added "4.0" :unchecked true}

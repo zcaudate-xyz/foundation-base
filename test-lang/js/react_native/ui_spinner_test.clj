@@ -11,8 +11,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
-             [js.react-native.ui-spinner :as ui-spinner]
-             ]
+             [js.react-native.ui-spinner :as ui-spinner]]
    })
 
 ^{:refer js.react-native.ui-spinner/spinnerTheme :added "4.0" :unchecked true}

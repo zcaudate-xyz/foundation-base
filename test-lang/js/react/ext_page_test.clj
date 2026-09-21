@@ -126,6 +126,15 @@
    (typeof ext-page/initModelBase))
   => "function")
 
+^{:refer js.react.ext-page/initModelBase
+  :id lifecycle-listener-id-before-effect
+  :added "4.1"}
+(fact "allocates the listener id before the effect callback"
+  (let [source (str (var-get (find-var 'js.react.ext-page/initModelBase)))]
+    (< (.indexOf source "r.id")
+       (.indexOf source "useEffect")))
+  => true)
+
 ^{:refer js.react.ext-page/listenModel :added "4.1"}
 (fact "is a function"
 

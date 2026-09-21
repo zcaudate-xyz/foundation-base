@@ -3,14 +3,14 @@
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
-              [xt.lang.spec-promise :as promise]
-              [xt.lang.common-data :as xtd]
-              [xt.substrate :as substrate]
-              [xt.substrate.page-core :as page-core]
-              [xt.db.system.main :as db-main]
-              [xt.db.system.impl-supabase-session :as session]
-              [xt.db.node.kernel-supabase :as kernel-supabase]
-              [xt.db.node.client-supabase :as supabase]]})
+             [xt.lang.spec-promise :as promise]
+             [xt.lang.common-data :as xtd]
+             [xt.substrate :as substrate]
+             [xt.substrate.page-core :as page-core]
+             [xt.db.system.main :as db-main]
+             [xt.db.system.impl-supabase-session :as session]
+             [xt.db.node.kernel-supabase :as kernel-supabase]
+             [xt.db.node.client-supabase :as supabase]]})
 
 (def.xt DEFAULT_SPACE_ID "example/auth")
 

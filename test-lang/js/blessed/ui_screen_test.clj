@@ -8,11 +8,11 @@
    :import   [["util" :as NodeUtil]]
    :require  [[js.react :as r :include [:fn]]
               [js.lib.valtio :as v]
-               [js.blessed.ui-screen :as ui-screen]
-               [js.blessed.ui-core :as ui-core]
-               [js.blessed :as b :include [:fn]]
-               [js.lib.chalk :as chk]
-               [xt.lang.common-data :as xtd]]
+              [js.blessed.ui-screen :as ui-screen]
+              [js.blessed.ui-core :as ui-core]
+              [js.blessed :as b :include [:fn]]
+              [js.lib.chalk :as chk]
+              [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 
 (fact:global

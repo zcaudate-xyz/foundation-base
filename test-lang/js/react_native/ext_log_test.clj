@@ -10,9 +10,9 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r :include [:fn]]
-              [js.react-native :as n :include [:fn]]
-              [js.react.ext-log :as ext-log]
-              [xt.event.base-log :as event-log]]
+             [js.react-native :as n :include [:fn]]
+             [js.react.ext-log :as ext-log]
+             [xt.event.base-log :as event-log]]
     })
 
 ^{:refer js.react.ext-log/listenLogLatest :adopt true :added "4.0" :unchecked true}

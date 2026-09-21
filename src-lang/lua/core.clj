@@ -5,8 +5,8 @@
   (:refer-clojure :exclude [abs assert byte format load max min print remove sort time type slurp spit]))
 
 (l/script :lua
-  {:import [["cjson"  :as cjson]
-            ["ffi"    :as ffi]
+  {:import [["cjson" :as cjson]
+            ["ffi" :as ffi]
             ["lustache" :as lustache]]})
 
 (def$.lua cjson cjson)

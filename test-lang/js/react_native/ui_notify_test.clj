@@ -11,8 +11,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
-             [js.react-native.ui-notify :as ui-notify]
-             ]
+             [js.react-native.ui-notify :as ui-notify]]
    })
 
 ^{:refer js.react-native.ui-notify/NotifyInner :added "4.0" :unchecked true}

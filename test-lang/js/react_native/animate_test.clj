@@ -11,13 +11,13 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r :include [:fn]]
-              [js.react-native :as n :include [:fn]]
-              [js.react-native.animate :as a]
-              [xt.event.base-animate :as event-animate]
-              [xt.lang.spec-base :as xt]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-math :as math]
-              [xt.lang.common-string :as str]]
+             [js.react-native :as n :include [:fn]]
+             [js.react-native.animate :as a]
+             [xt.event.base-animate :as event-animate]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-math :as math]
+             [xt.lang.common-string :as str]]
    })
 
 ^{:refer js.react-native.animate/val :added "4.0" :unchecked true}

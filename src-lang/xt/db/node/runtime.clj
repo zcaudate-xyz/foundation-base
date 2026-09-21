@@ -73,25 +73,55 @@
                          {"@sqlite.org/sqlite-wasm" "https://esm.sh/@sqlite.org/sqlite-wasm@3.51.2-build8"
                           "pg" "data:text/javascript,export default {Client: function() {}}"})}}))
 
+(defn sharedworker-init-string
+  "emits a standalone SharedWorker kernel script"
+  [& [override]]
+  (sharedworket-init-string override))
 
 (def.xt DEFAULT_SHAREDWORKER_SCRIPT
-  (@! (sharedworket-init-string)))
+  (@! (sharedworker-init-string)))
 
-(defn.xt sharedworker-connect
+(defn.xt ^{:public true} sharedworker-connect-state
+  "connects a client to a SharedWorker and returns its connection state"
   [client config schema lookup source transport-id]
   (-/init-server-proxy client)
+  (var connection nil)
   (return
    (-> (browser-transport/connect-sharedworker
         client
         {"transport_id" (or transport-id
                             -/DEFAULT_TRANSPORT)
          "source" (or source
-                      (browser-transport/sharedworker-source -/DEFAULT_SHAREDWORKER_SCRIPT
-                                                             {"type" "module"}))})
+                      (browser-transport/sharedworker-source
+                       -/DEFAULT_SHAREDWORKER_SCRIPT
+                       {"type" "module"}))})
        (promise/x:promise-then
         (fn [conn]
-          (return
-           (client-base/kernel-init client config schema lookup {})))))))
+          (:= connection conn)
+          (proxy-util/set-default-transport client (. conn ["transport_id"]))
+          (return (client-base/kernel-init client config schema lookup {}))))
+       (promise/x:promise-then
+        (fn [init]
+          (return {"connection" connection
+                   "init" init}))))))
+
+(defn.xt ^{:public true} sharedworker-disconnect
+  "disconnects a SharedWorker connection state"
+  [state]
+  (return (browser-transport/disconnect (. state ["connection"]))))
+
+(defn.xt sharedworker-connect
+  [client config schema lookup source transport-id]
+  (return
+   (-> (-/sharedworker-connect-state client
+                                     config
+                                     schema
+                                     lookup
+                                     source
+                                     transport-id)
+       (promise/x:promise-then
+        (fn [state]
+          (return (. state ["init"])))))))
 
 
 ;;

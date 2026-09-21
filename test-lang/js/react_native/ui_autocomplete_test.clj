@@ -12,13 +12,13 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r]
-              [js.react.ext-model :as ext-model]
-              [js.react-native :as n :include [:fn]]
-              [js.react-native.physical-addon :as physical-addon]
-              [js.react-native.ui-autocomplete :as ui-autocomplete]
-              [js.react-native.ui-input :as ui-input]
-              [xt.lang.spec-base :as xt]
-              [xt.lang.common-string :as str]]
+             [js.react.ext-model :as ext-model]
+             [js.react-native :as n :include [:fn]]
+             [js.react-native.physical-addon :as physical-addon]
+             [js.react-native.ui-autocomplete :as ui-autocomplete]
+             [js.react-native.ui-input :as ui-input]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-string :as str]]
    })
 
 ^{:refer js.react-native.ui-autocomplete/AutocompleteModal :added "4.0" :unchecked true}

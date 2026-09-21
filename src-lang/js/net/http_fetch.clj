@@ -6,7 +6,7 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.lang.common-protocol :as protocol]
-             [xt.net.http-fetch :as fetch]]})
+             [xt.net.http-fetch :as http-fetch]]})
 
 (defn.js request-http-raw
   [client input]
@@ -27,23 +27,23 @@
 
 (defn.js request-http
   [client input]
-  (var handler  (fetch/prepare-middleware client -/request-http-raw))
+  (var handler  (http-fetch/prepare-middleware client -/request-http-raw))
   (return
    (handler client input)))
 
 (defimpl.xt ^{:lang :js}
   HttpFetchClient
   [defaults middleware]
-  fetch/IHttpClient
-  {fetch/request-http -/request-http})
+  http-fetch/IHttpClient
+  {http-fetch/request-http -/request-http})
 
 (defn.js create
   [defaults middleware]
   (return
    (-/HttpFetchClient defaults (or middleware
-                                   [fetch/wrap-prepare-input]))))
+                                   [http-fetch/wrap-prepare-input]))))
 
 (comment
-  (:id @fetch/IHttpClient)
-  (:module @fetch/IHttpClient)
+  (:id @http-fetch/IHttpClient)
+  (:module @http-fetch/IHttpClient)
   )

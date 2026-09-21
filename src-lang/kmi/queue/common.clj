@@ -5,7 +5,7 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as str]
-              [kmi.redis :as r]]
+             [kmi.redis :as r]]
    :static {:lang/lint-globals #{redis}}})
 
 ;;

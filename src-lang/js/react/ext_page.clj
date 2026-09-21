@@ -77,8 +77,8 @@
   (var key (-/model-key space-id path))
   (var #{resultFn
          resultPrint} (or meta {}))
+  (var listener-id (r/id))
   (r/init []
-    (var listener-id (r/id))
     (event-common/add-keyed-listener
      node
      key

@@ -1,0 +1,592 @@
+{    
+    "design": {
+        "type": "light",
+        "color": "blue"
+    },
+    "lookup": {
+        "c81bf054-4d47-11ed-8d18-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "ask",
+            "time_updated": 1665920621349514,
+            "asset_ref_id": "46a83554-cb69-4a91-96cf-5854ae690708",
+            "asset_escrow": 5.9,
+            "id": "c81bf054-4d47-11ed-8d18-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 69,
+            "rate": 31,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "2cfbc3f3-926c-4c86-bda3-8d763c320267",
+            "account": [
+                {
+                    "nickname": "TEST00002",
+                    "profile": [
+                        {
+                            "id": "c8898e7d-3040-4889-85d6-a4f47299df61",
+                            "last_name": "test00002",
+                            "first_name": "test00002",
+                            "picture": null
+                        }
+                    ],
+                    "id": "95005c29-0251-45f7-89d6-47b4720b1586"
+                }
+            ],
+            "prediction": "no",
+            "asset_received": 0,
+            "amount": 19,
+            "contract_returned": null,
+            "time_created": 1665920621360277,
+            "trade": "buy",
+            "account_id": "95005c29-0251-45f7-89d6-47b4720b1586",
+            "rake": null,
+            "frame_created": 9,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "cbe2230c-4d47-11ed-8d18-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "ask",
+            "time_updated": 1665920627682660,
+            "asset_ref_id": "4e673bd5-5232-4c03-8c66-57a7c5fb6805",
+            "asset_escrow": 4.49,
+            "id": "cbe2230c-4d47-11ed-8d18-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 72,
+            "rate": 28,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "8c088738-3aa5-4a0c-825f-d6b5d4a50e29",
+            "account": [
+                {
+                    "nickname": "TEST00008",
+                    "profile": [
+                        {
+                            "id": "b13f1f32-f4c5-4024-bd4b-ed09533a5f10",
+                            "last_name": null,
+                            "first_name": null,
+                            "picture": null
+                        }
+                    ],
+                    "id": "6f797c17-66c3-4aa5-8ba5-949109b7a213"
+                }
+            ],
+            "prediction": "no",
+            "asset_received": 0,
+            "amount": 16,
+            "contract_returned": null,
+            "time_created": 1665920627692321,
+            "trade": "buy",
+            "account_id": "6f797c17-66c3-4aa5-8ba5-949109b7a213",
+            "rake": null,
+            "frame_created": 10,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "cf41b9ea-4d47-11ed-8d18-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "ask",
+            "time_updated": 1665920633342226,
+            "asset_ref_id": "4e673bd5-5232-4c03-8c66-57a7c5fb6805",
+            "asset_escrow": 8.11,
+            "id": "cf41b9ea-4d47-11ed-8d18-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 70,
+            "rate": 30,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "8c088738-3aa5-4a0c-825f-d6b5d4a50e29",
+            "account": [
+                {
+                    "nickname": "TEST00008",
+                    "profile": [
+                        {
+                            "id": "b13f1f32-f4c5-4024-bd4b-ed09533a5f10",
+                            "last_name": null,
+                            "first_name": null,
+                            "picture": null
+                        }
+                    ],
+                    "id": "6f797c17-66c3-4aa5-8ba5-949109b7a213"
+                }
+            ],
+            "prediction": "no",
+            "asset_received": 0,
+            "amount": 27,
+            "contract_returned": null,
+            "time_created": 1665920633351895,
+            "trade": "buy",
+            "account_id": "6f797c17-66c3-4aa5-8ba5-949109b7a213",
+            "rake": null,
+            "frame_created": 11,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "d66953d6-4d47-11ed-8d18-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "ask",
+            "time_updated": 1665920645348037,
+            "asset_ref_id": "aa58b32f-e4e0-4ecf-ba57-b7d25420b4b7",
+            "asset_escrow": 2.41,
+            "id": "d66953d6-4d47-11ed-8d18-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 70,
+            "rate": 30,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "d7b7a6cd-0acc-4831-8a26-2e78ec0c1964",
+            "account": [
+                {
+                    "nickname": "TEST00001",
+                    "profile": [
+                        {
+                            "id": "8e63eaa6-506f-4eb9-8cd5-eb18ae7bb24a",
+                            "last_name": "test00001",
+                            "first_name": "test00001",
+                            "picture": null
+                        }
+                    ],
+                    "id": "73fd735e-b3d3-481d-9e88-7ffab48c97e5"
+                }
+            ],
+            "prediction": "no",
+            "asset_received": 0,
+            "amount": 8,
+            "contract_returned": null,
+            "time_created": 1665920645355474,
+            "trade": "buy",
+            "account_id": "73fd735e-b3d3-481d-9e88-7ffab48c97e5",
+            "rake": null,
+            "frame_created": 13,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "d9fcce74-4d47-11ed-8d18-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "ask",
+            "time_updated": 1665920651347837,
+            "asset_ref_id": "c7d2dc0b-7edf-47ab-837c-215ebdfa9022",
+            "asset_escrow": 5.59,
+            "id": "d9fcce74-4d47-11ed-8d18-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 69,
+            "rate": 31,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "24614080-4584-4098-891b-7d850589d361",
+            "account": [
+                {
+                    "nickname": "TEST00006",
+                    "profile": [
+                        {
+                            "id": "4f044cfa-5b0b-49e3-bd9a-ac3c5bc6aebc",
+                            "last_name": "test00006",
+                            "first_name": "test00006",
+                            "picture": null
+                        }
+                    ],
+                    "id": "d70db59a-6d84-48aa-8ccf-894f1a1bd106"
+                }
+            ],
+            "prediction": "no",
+            "asset_received": 0,
+            "amount": 18,
+            "contract_returned": null,
+            "time_created": 1665920651355147,
+            "trade": "buy",
+            "account_id": "d70db59a-6d84-48aa-8ccf-894f1a1bd106",
+            "rake": null,
+            "frame_created": 14,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "dd902a04-4d47-11ed-8d18-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "ask",
+            "time_updated": 1665920657346823,
+            "asset_ref_id": "c7d2dc0b-7edf-47ab-837c-215ebdfa9022",
+            "asset_escrow": 10.86,
+            "id": "dd902a04-4d47-11ed-8d18-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 69,
+            "rate": 31,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "24614080-4584-4098-891b-7d850589d361",
+            "account": [
+                {
+                    "nickname": "TEST00006",
+                    "profile": [
+                        {
+                            "id": "4f044cfa-5b0b-49e3-bd9a-ac3c5bc6aebc",
+                            "last_name": "test00006",
+                            "first_name": "test00006",
+                            "picture": null
+                        }
+                    ],
+                    "id": "d70db59a-6d84-48aa-8ccf-894f1a1bd106"
+                }
+            ],
+            "prediction": "no",
+            "asset_received": 0,
+            "amount": 35,
+            "contract_returned": null,
+            "time_created": 1665920657354060,
+            "trade": "buy",
+            "account_id": "d70db59a-6d84-48aa-8ccf-894f1a1bd106",
+            "rake": null,
+            "frame_created": 15,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "e1233b2a-4d47-11ed-8d18-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "ask",
+            "time_updated": 1665920663343767,
+            "asset_ref_id": "c7d2dc0b-7edf-47ab-837c-215ebdfa9022",
+            "asset_escrow": 8.69,
+            "id": "e1233b2a-4d47-11ed-8d18-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 69,
+            "rate": 31,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "24614080-4584-4098-891b-7d850589d361",
+            "account": [
+                {
+                    "nickname": "TEST00006",
+                    "profile": [
+                        {
+                            "id": "4f044cfa-5b0b-49e3-bd9a-ac3c5bc6aebc",
+                            "last_name": "test00006",
+                            "first_name": "test00006",
+                            "picture": null
+                        }
+                    ],
+                    "id": "d70db59a-6d84-48aa-8ccf-894f1a1bd106"
+                }
+            ],
+            "prediction": "no",
+            "asset_received": 0,
+            "amount": 28,
+            "contract_returned": null,
+            "time_created": 1665920663351021,
+            "trade": "buy",
+            "account_id": "d70db59a-6d84-48aa-8ccf-894f1a1bd106",
+            "rake": null,
+            "frame_created": 16,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "e98d84d2-4d20-11ed-8d16-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "ask",
+            "time_updated": 1665920639371115,
+            "asset_ref_id": "46a83554-cb69-4a91-96cf-5854ae690708",
+            "asset_escrow": 20.41,
+            "id": "e98d84d2-4d20-11ed-8d16-e12172a36970",
+            "contract_received": 16,
+            "contract_escrow": 0,
+            "position": 66,
+            "rate": 34,
+            "status": "active",
+            "asset_sent": 5.44,
+            "contract_ref_id": "2cfbc3f3-926c-4c86-bda3-8d763c320267",
+            "account": [
+                {
+                    "nickname": "TEST00002",
+                    "profile": [
+                        {
+                            "id": "c8898e7d-3040-4889-85d6-a4f47299df61",
+                            "last_name": "test00002",
+                            "first_name": "test00002",
+                            "picture": null
+                        }
+                    ],
+                    "id": "95005c29-0251-45f7-89d6-47b4720b1586"
+                }
+            ],
+            "prediction": "no",
+            "asset_received": 0,
+            "amount": 60,
+            "contract_returned": null,
+            "time_created": 1665903927977665,
+            "trade": "buy",
+            "account_id": "95005c29-0251-45f7-89d6-47b4720b1586",
+            "rake": null,
+            "frame_created": 2,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "e98d84d6-4d20-11ed-8d16-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "ask",
+            "time_updated": 1665903928133455,
+            "asset_ref_id": "46a83554-cb69-4a91-96cf-5854ae690708",
+            "asset_escrow": 26.41,
+            "id": "e98d84d6-4d20-11ed-8d16-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 67,
+            "rate": 33,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "2cfbc3f3-926c-4c86-bda3-8d763c320267",
+            "account": [
+                {
+                    "nickname": "TEST00002",
+                    "profile": [
+                        {
+                            "id": "c8898e7d-3040-4889-85d6-a4f47299df61",
+                            "last_name": "test00002",
+                            "first_name": "test00002",
+                            "picture": null
+                        }
+                    ],
+                    "id": "95005c29-0251-45f7-89d6-47b4720b1586"
+                }
+            ],
+            "prediction": "no",
+            "asset_received": 0,
+            "amount": 80,
+            "contract_returned": null,
+            "time_created": 1665903928070102,
+            "trade": "buy",
+            "account_id": "95005c29-0251-45f7-89d6-47b4720b1586",
+            "rake": null,
+            "frame_created": 3,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "e98d84de-4d20-11ed-8d16-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "bid",
+            "time_updated": 1665903928334719,
+            "asset_ref_id": "d26f3b8f-dc52-44b1-a494-bf479586e0ed",
+            "asset_escrow": 6.51,
+            "id": "e98d84de-4d20-11ed-8d16-e12172a36970",
+            "contract_received": 5,
+            "contract_escrow": 0,
+            "position": 65,
+            "rate": 65,
+            "status": "active",
+            "asset_sent": 3.25,
+            "contract_ref_id": "28461de6-7f77-44c2-a01e-f01a1e17733d",
+            "account": [
+                {
+                    "nickname": "TEST00004",
+                    "profile": [
+                        {
+                            "id": "7817927d-f52b-47a6-813d-1faa42cfe740",
+                            "last_name": null,
+                            "first_name": null,
+                            "picture": null
+                        }
+                    ],
+                    "id": "80b07d78-6432-4368-9f0d-6df748371121"
+                }
+            ],
+            "prediction": "yes",
+            "asset_received": 0,
+            "amount": 10,
+            "contract_returned": null,
+            "time_created": 1665903928253028,
+            "trade": "buy",
+            "account_id": "80b07d78-6432-4368-9f0d-6df748371121",
+            "rake": null,
+            "frame_created": 5,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "e98d84e2-4d20-11ed-8d16-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "bid",
+            "time_updated": 1665903928435639,
+            "asset_ref_id": "d26f3b8f-dc52-44b1-a494-bf479586e0ed",
+            "asset_escrow": 38.41,
+            "id": "e98d84e2-4d20-11ed-8d16-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 64,
+            "rate": 64,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "28461de6-7f77-44c2-a01e-f01a1e17733d",
+            "account": [
+                {
+                    "nickname": "TEST00004",
+                    "profile": [
+                        {
+                            "id": "7817927d-f52b-47a6-813d-1faa42cfe740",
+                            "last_name": null,
+                            "first_name": null,
+                            "picture": null
+                        }
+                    ],
+                    "id": "80b07d78-6432-4368-9f0d-6df748371121"
+                }
+            ],
+            "prediction": "yes",
+            "asset_received": 0,
+            "amount": 60,
+            "contract_returned": null,
+            "time_created": 1665903928346355,
+            "trade": "buy",
+            "account_id": "80b07d78-6432-4368-9f0d-6df748371121",
+            "rake": null,
+            "frame_created": 6,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "e98d84e6-4d20-11ed-8d16-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "bid",
+            "time_updated": 1665903928536001,
+            "asset_ref_id": "366a75d1-e2e7-4014-9b04-b2da020cdb94",
+            "asset_escrow": 45.51,
+            "id": "e98d84e6-4d20-11ed-8d16-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 65,
+            "rate": 65,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "defd0896-284a-49ef-9f12-d1486ccd6c10",
+            "account": [
+                {
+                    "nickname": "TEST00003",
+                    "profile": [
+                        {
+                            "id": "995ec1cf-9832-4454-bff8-1a2694cf414e",
+                            "last_name": "test00003",
+                            "first_name": "test00003",
+                            "picture": null
+                        }
+                    ],
+                    "id": "a7dee46c-3c3b-4ad9-b933-ff13d68991ca"
+                }
+            ],
+            "prediction": "yes",
+            "asset_received": 0,
+            "amount": 70,
+            "contract_returned": null,
+            "time_created": 1665903928437636,
+            "trade": "buy",
+            "account_id": "a7dee46c-3c3b-4ad9-b933-ff13d68991ca",
+            "rake": null,
+            "frame_created": 7,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        },
+        "e98d84ea-4d20-11ed-8d16-e12172a36970": {
+            "contract_sent": 0,
+            "book_id": "bd95893a-2f41-435d-ad1d-dc48ec2926ab",
+            "frame_completed": null,
+            "side": "bid",
+            "time_updated": 1665903928636438,
+            "asset_ref_id": "d26f3b8f-dc52-44b1-a494-bf479586e0ed",
+            "asset_escrow": 63.01,
+            "id": "e98d84ea-4d20-11ed-8d16-e12172a36970",
+            "contract_received": 0,
+            "contract_escrow": 0,
+            "position": 63,
+            "rate": 63,
+            "status": "active",
+            "asset_sent": 0,
+            "contract_ref_id": "28461de6-7f77-44c2-a01e-f01a1e17733d",
+            "account": [
+                {
+                    "nickname": "TEST00004",
+                    "profile": [
+                        {
+                            "id": "7817927d-f52b-47a6-813d-1faa42cfe740",
+                            "last_name": null,
+                            "first_name": null,
+                            "picture": null
+                        }
+                    ],
+                    "id": "80b07d78-6432-4368-9f0d-6df748371121"
+                }
+            ],
+            "prediction": "yes",
+            "asset_received": 0,
+            "amount": 100,
+            "contract_returned": null,
+            "time_created": 1665903928534161,
+            "trade": "buy",
+            "account_id": "80b07d78-6432-4368-9f0d-6df748371121",
+            "rake": null,
+            "frame_created": 8,
+            "asset_returned": null,
+            "unfilled": null,
+            "decimal": 2
+        }
+    },
+    
+    "priority": [
+        [
+            "c81bf054-4d47-11ed-8d18-e12172a36970",
+            19
+        ],
+        [
+            "d9fcce74-4d47-11ed-8d18-e12172a36970",
+            18
+        ],
+        [
+            "dd902a04-4d47-11ed-8d18-e12172a36970",
+            35
+        ],
+        [
+            "e1233b2a-4d47-11ed-8d18-e12172a36970",
+            28
+        ]
+    ],
+    "rate": 69,
+    "control": {
+        "prediction": "yes",
+        "decimal": 2,
+        "fraction": 0.01
+    }    
+}

@@ -12,8 +12,7 @@
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
-             [js.react-native.ui-slider :as ui-slider]
-             ]
+             [js.react-native.ui-slider :as ui-slider]]
    })
 
 ^{:refer js.react-native.ui-slider/sliderTheme :added "4.0" :unchecked true}

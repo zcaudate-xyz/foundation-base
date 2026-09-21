@@ -1,0 +1,306 @@
+{"exit" [{"t_start" 1648713930000000, "p_exit" 27}
+         {"t_start" 1648713960000000, "p_exit" 29}
+         {"t_start" 1648713990000000, "p_exit" 30}
+         {"t_start" 1648714020000000, "p_exit" 27}
+         {"t_start" 1648714050000000, "p_exit" 29}
+         {"t_start" 1648714080000000, "p_exit" 30}
+         {"t_start" 1648714110000000, "p_exit" 30}
+         {"t_start" 1648714140000000, "p_exit" 28}
+         {"t_start" 1648714170000000, "p_exit" 28}
+         {"t_start" 1648714200000000, "p_exit" 28}
+         {"t_start" 1648714230000000, "p_exit" 30}
+         {"t_start" 1648714260000000, "p_exit" 29}
+         {"t_start" 1648714290000000, "p_exit" 31}
+         {"t_start" 1648714320000000, "p_exit" 27}
+         {"t_start" 1648714350000000, "p_exit" 28}
+         {"t_start" 1648714380000000, "p_exit" 28}
+         {"t_start" 1648714410000000, "p_exit" 26}
+         {"t_start" 1648714440000000, "p_exit" 30}
+         {"t_start" 1648714470000000, "p_exit" 27}
+         {"t_start" 1648714500000000, "p_exit" 31}
+         {"t_start" 1648714530000000, "p_exit" 29}
+         {"t_start" 1648714560000000, "p_exit" 27}
+         {"t_start" 1648714590000000, "p_exit" 28}
+         {"t_start" 1648714620000000, "p_exit" 26}
+         {"t_start" 1648714650000000, "p_exit" 31}
+         {"t_start" 1648714680000000, "p_exit" 29}
+         {"t_start" 1648714710000000, "p_exit" 27}
+         {"t_start" 1648714740000000, "p_exit" 29}
+         {"t_start" 1648714770000000, "p_exit" 28}
+         {"t_start" 1648714800000000, "p_exit" 26}
+         {"t_start" 1648714830000000, "p_exit" 27}
+         {"t_start" 1648714860000000, "p_exit" 28}
+         {"t_start" 1648714890000000, "p_exit" 29}
+         {"t_start" 1648714920000000, "p_exit" 29}],
+ "frame" [{"f_end" 55, "t_start" 1648713930000000, "f_start" 1}
+          {"f_end" 115, "t_start" 1648713960000000, "f_start" 56}
+          {"f_end" 175, "t_start" 1648713990000000, "f_start" 116}
+          {"f_end" 235, "t_start" 1648714020000000, "f_start" 176}
+          {"f_end" 295, "t_start" 1648714050000000, "f_start" 236}
+          {"f_end" 355, "t_start" 1648714080000000, "f_start" 296}
+          {"f_end" 415, "t_start" 1648714110000000, "f_start" 356}
+          {"f_end" 475, "t_start" 1648714140000000, "f_start" 416}
+          {"f_end" 535, "t_start" 1648714170000000, "f_start" 476}
+          {"f_end" 595, "t_start" 1648714200000000, "f_start" 536}
+          {"f_end" 655, "t_start" 1648714230000000, "f_start" 596}
+          {"f_end" 715, "t_start" 1648714260000000, "f_start" 656}
+          {"f_end" 775, "t_start" 1648714290000000, "f_start" 716}
+          {"f_end" 835, "t_start" 1648714320000000, "f_start" 776}
+          {"f_end" 895, "t_start" 1648714350000000, "f_start" 836}
+          {"f_end" 955, "t_start" 1648714380000000, "f_start" 896}
+          {"f_end" 1015, "t_start" 1648714410000000, "f_start" 956}
+          {"f_end" 1075, "t_start" 1648714440000000, "f_start" 1016}
+          {"f_end" 1135, "t_start" 1648714470000000, "f_start" 1076}
+          {"f_end" 1195, "t_start" 1648714500000000, "f_start" 1136}
+          {"f_end" 1255, "t_start" 1648714530000000, "f_start" 1196}
+          {"f_end" 1315, "t_start" 1648714560000000, "f_start" 1256}
+          {"f_end" 1375, "t_start" 1648714590000000, "f_start" 1316}
+          {"f_end" 1435, "t_start" 1648714620000000, "f_start" 1376}
+          {"f_end" 1495, "t_start" 1648714650000000, "f_start" 1436}
+          {"f_end" 1555, "t_start" 1648714680000000, "f_start" 1496}
+          {"f_end" 1615, "t_start" 1648714710000000, "f_start" 1556}
+          {"f_end" 1675, "t_start" 1648714740000000, "f_start" 1616}
+          {"f_end" 1735, "t_start" 1648714770000000, "f_start" 1676}
+          {"f_end" 1795, "t_start" 1648714800000000, "f_start" 1736}
+          {"f_end" 1855, "t_start" 1648714830000000, "f_start" 1796}
+          {"f_end" 1915, "t_start" 1648714860000000, "f_start" 1856}
+          {"f_end" 1975, "t_start" 1648714890000000, "f_start" 1916}
+          {"f_end" 2001, "t_start" 1648714920000000, "f_start" 1976}]
+"info" [{"t_start" 1648713930000000,
+          "n_total" 5308,
+          "n_strike" 40,
+          "n_tx" 60,
+          "p_low" 25,
+          "p_high" 31,
+          "n_volume" 188}
+         {"t_start" 1648713960000000,
+          "n_total" 5067,
+          "n_strike" 34,
+          "n_tx" 47,
+          "p_low" 28,
+          "p_high" 31,
+          "n_volume" 170}
+         {"t_start" 1648713990000000,
+          "n_total" 7172,
+          "n_strike" 55,
+          "n_tx" 87,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 254}
+         {"t_start" 1648714020000000,
+          "n_total" 4440,
+          "n_strike" 34,
+          "n_tx" 49,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 150}
+         {"t_start" 1648714050000000,
+          "n_total" 6221,
+          "n_strike" 44,
+          "n_tx" 66,
+          "p_low" 27,
+          "p_high" 31,
+          "n_volume" 214}
+         {"t_start" 1648714080000000,
+          "n_total" 5066,
+          "n_strike" 40,
+          "n_tx" 57,
+          "p_low" 27,
+          "p_high" 31,
+          "n_volume" 174}
+         {"t_start" 1648714110000000,
+          "n_total" 6190,
+          "n_strike" 41,
+          "n_tx" 57,
+          "p_low" 27,
+          "p_high" 31,
+          "n_volume" 215}
+         {"t_start" 1648714140000000,
+          "n_total" 5864,
+          "n_strike" 45,
+          "n_tx" 66,
+          "p_low" 27,
+          "p_high" 31,
+          "n_volume" 207}
+         {"t_start" 1648714170000000,
+          "n_total" 5749,
+          "n_strike" 44,
+          "n_tx" 69,
+          "p_low" 27,
+          "p_high" 29,
+          "n_volume" 202}
+         {"t_start" 1648714200000000,
+          "n_total" 7192,
+          "n_strike" 52,
+          "n_tx" 85,
+          "p_low" 27,
+          "p_high" 30,
+          "n_volume" 254}
+         {"t_start" 1648714230000000,
+          "n_total" 6142,
+          "n_strike" 48,
+          "n_tx" 71,
+          "p_low" 27,
+          "p_high" 30,
+          "n_volume" 214}
+         {"t_start" 1648714260000000,
+          "n_total" 5868,
+          "n_strike" 43,
+          "n_tx" 63,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 203}
+         {"t_start" 1648714290000000,
+          "n_total" 6146,
+          "n_strike" 46,
+          "n_tx" 66,
+          "p_low" 27,
+          "p_high" 31,
+          "n_volume" 213}
+         {"t_start" 1648714320000000,
+          "n_total" 5845,
+          "n_strike" 45,
+          "n_tx" 66,
+          "p_low" 26,
+          "p_high" 29,
+          "n_volume" 211}
+         {"t_start" 1648714350000000,
+          "n_total" 5328,
+          "n_strike" 41,
+          "n_tx" 59,
+          "p_low" 26,
+          "p_high" 29,
+          "n_volume" 193}
+         {"t_start" 1648714380000000,
+          "n_total" 6632,
+          "n_strike" 53,
+          "n_tx" 82,
+          "p_low" 26,
+          "p_high" 30,
+          "n_volume" 237}
+         {"t_start" 1648714410000000,
+          "n_total" 7130,
+          "n_strike" 50,
+          "n_tx" 76,
+          "p_low" 26,
+          "p_high" 30,
+          "n_volume" 250}
+         {"t_start" 1648714440000000,
+          "n_total" 6217,
+          "n_strike" 48,
+          "n_tx" 69,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 222}
+         {"t_start" 1648714470000000,
+          "n_total" 6196,
+          "n_strike" 47,
+          "n_tx" 69,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 224}
+         {"t_start" 1648714500000000,
+          "n_total" 4589,
+          "n_strike" 36,
+          "n_tx" 53,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 162}
+         {"t_start" 1648714530000000,
+          "n_total" 7076,
+          "n_strike" 57,
+          "n_tx" 90,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 245}
+         {"t_start" 1648714560000000,
+          "n_total" 5290,
+          "n_strike" 42,
+          "n_tx" 61,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 193}
+         {"t_start" 1648714590000000,
+          "n_total" 5611,
+          "n_strike" 44,
+          "n_tx" 67,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 197}
+         {"t_start" 1648714620000000,
+          "n_total" 5598,
+          "n_strike" 45,
+          "n_tx" 74,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 198}
+         {"t_start" 1648714650000000,
+          "n_total" 6240,
+          "n_strike" 42,
+          "n_tx" 59,
+          "p_low" 28,
+          "p_high" 31,
+          "n_volume" 211}
+         {"t_start" 1648714680000000,
+          "n_total" 6657,
+          "n_strike" 52,
+          "n_tx" 79,
+          "p_low" 27,
+          "p_high" 30,
+          "n_volume" 236}
+         {"t_start" 1648714710000000,
+          "n_total" 6198,
+          "n_strike" 49,
+          "n_tx" 76,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 213}
+         {"t_start" 1648714740000000,
+          "n_total" 5175,
+          "n_strike" 39,
+          "n_tx" 58,
+          "p_low" 27,
+          "p_high" 30,
+          "n_volume" 179}
+         {"t_start" 1648714770000000,
+          "n_total" 5415,
+          "n_strike" 45,
+          "n_tx" 65,
+          "p_low" 26,
+          "p_high" 30,
+          "n_volume" 197}
+         {"t_start" 1648714800000000,
+          "n_total" 7784,
+          "n_strike" 64,
+          "n_tx" 99,
+          "p_low" 26,
+          "p_high" 31,
+          "n_volume" 279}
+         {"t_start" 1648714830000000,
+          "n_total" 5362,
+          "n_strike" 37,
+          "n_tx" 56,
+          "p_low" 27,
+          "p_high" 31,
+          "n_volume" 185}
+         {"t_start" 1648714860000000,
+          "n_total" 6501,
+          "n_strike" 52,
+          "n_tx" 84,
+          "p_low" 26,
+          "p_high" 30,
+          "n_volume" 235}
+         {"t_start" 1648714890000000,
+          "n_total" 5220,
+          "n_strike" 37,
+          "n_tx" 51,
+          "p_low" 26,
+          "p_high" 29,
+          "n_volume" 188}
+         {"t_start" 1648714920000000,
+          "n_total" 3165,
+          "n_strike" 21,
+          "n_tx" 32,
+          "p_low" 26,
+          "p_high" 29,
+          "n_volume" 115}]}

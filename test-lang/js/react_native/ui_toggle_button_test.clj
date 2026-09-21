@@ -13,8 +13,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-toggle-button :as ui-toggle-button]
-             [xt.lang.common-math :as math]
-             ]
+             [xt.lang.common-math :as math]]
    })
 
 ^{:refer js.react-native.ui-toggle-button/toggleButtonTheme :added "4.0" :unchecked true}

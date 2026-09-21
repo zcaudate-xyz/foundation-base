@@ -12,8 +12,7 @@
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
-             [js.react-native.ui-util :as ui-util]
-             ]
+             [js.react-native.ui-util :as ui-util]]
    })
 
 ^{:refer js.react-native.ui-util/Page :added "4.0" :unchecked true}

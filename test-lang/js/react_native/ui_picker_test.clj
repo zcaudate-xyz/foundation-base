@@ -12,8 +12,7 @@
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
-             [js.react-native.ui-picker :as ui-picker]
-             ]
+             [js.react-native.ui-picker :as ui-picker]]
    })
 
 ^{:refer js.react-native.ui-picker/pickerTheme :added "4.0" :unchecked true}

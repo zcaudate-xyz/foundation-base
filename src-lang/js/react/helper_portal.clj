@@ -2,7 +2,8 @@
   (:require [lang.core :as l]))
 
 (l/script :js
-  {:require [[xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd]]})
+  {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.js newRegistry
   "creates a new portal registry"

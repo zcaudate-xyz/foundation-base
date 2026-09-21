@@ -3,8 +3,28 @@
             [std.lib.foundation :as f]))
 
 (l/script :js
-  {:import [["react-native" :as [* ReactNative]] ["react-native-video" :as RNVideo] ["react-native-gesture-handler" :as [* RNGestureHandler]] ["@react-navigation/bottom-tabs" :as [* RNNavTabs]] ["react-native" :as [* ReactNative]] ["react-native-localize" :as [* RNLocalize]] ["@react-navigation/drawer" :as [* RNNavDrawer]] ["expo-linear-gradient" :as [* ExpoLinearGradient]] ["react-native-svg" :as [* RNSvg]] ["@react-navigation/stack" :as [* RNNavStack]] ["react-native-error-boundary" :as RNErrorBoundary] ["react-native-safe-area-context" :as [* RNSafeArea]] ["@react-navigation/native" :as [* RNNav]] ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]]
-   :require [[js.react :as r] [js.react.helper-portal :as helper-portal] [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str] [xt.lang.common-trace :as trace] [xt.lang.spec-promise :as promise]]})
+  {:import [["react-native" :as [* ReactNative]]
+            ["react-native-video" :as RNVideo]
+            ["react-native-gesture-handler" :as [* RNGestureHandler]]
+            ["@react-navigation/bottom-tabs" :as [* RNNavTabs]]
+            ["react-native" :as [* ReactNative]]
+            ["react-native-localize" :as [* RNLocalize]]
+            ["@react-navigation/drawer" :as [* RNNavDrawer]]
+            ["expo-linear-gradient" :as [* ExpoLinearGradient]]
+            ["react-native-svg" :as [* RNSvg]]
+            ["@react-navigation/stack" :as [* RNNavStack]]
+            ["react-native-error-boundary" :as RNErrorBoundary]
+            ["react-native-safe-area-context" :as [* RNSafeArea]]
+            ["@react-navigation/native" :as [* RNNav]]
+            ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]]
+   :require [[js.react :as r]
+             [js.react.helper-portal :as helper-portal]
+             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-trace :as trace]
+             [xt.lang.spec-promise :as promise]]})
 
 (comment
   :icon     {:material   []

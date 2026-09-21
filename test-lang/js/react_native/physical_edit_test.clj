@@ -15,8 +15,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.physical-edit :as physical-edit]
              [xt.lang.common-data :as xtd]
-             [xt.lang.common-math :as math]
-             ]
+             [xt.lang.common-math :as math]]
    })
 
 ^{:refer js.react-native.physical-edit/createPan :added "4.0" :unchecked true}

@@ -11,8 +11,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
-             [js.react-native.ui-modal :as ui-modal]
-             ]
+             [js.react-native.ui-modal :as ui-modal]]
    })
 
 ^{:refer js.react-native.ui-modal/ModalBackdrop :added "4.0" :unchecked true}

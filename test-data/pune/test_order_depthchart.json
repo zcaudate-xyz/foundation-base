@@ -1,0 +1,59 @@
+{
+  "market": {
+    "ask": {
+      "volume": [
+        [
+          66,
+          60
+        ],
+        [
+          67,
+          80
+        ]
+      ],
+      "range": [
+        66,
+        67
+      ],
+      "total": 2
+    },
+    "meta": {
+      "key": "BD95893A-2F41-435D-AD1D-DC48EC2926AB",
+      "__type__": "TYPE/BOOK",
+      "code": "NBA/MVP-2022/J.EMBID/BD95893A-2F41-435D-AD1D-DC48EC2926AB"
+    },
+    "bid": {
+      "volume": [
+        [
+          63,
+          100
+        ],
+        [
+          64,
+          60
+        ],
+        [
+          65,
+          75
+        ]
+      ],
+      "range": [
+        63,
+        65
+      ],
+      "total": 4
+    },
+    "last": 65,
+    "spread": [
+      1,
+      65,
+      66
+    ],
+    "frame": 8
+  },
+    "control": {
+        "allotment": 100,
+        "prediction": "yes",
+        "trade": "buy"
+    }
+ }

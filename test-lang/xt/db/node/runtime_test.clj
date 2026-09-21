@@ -138,6 +138,66 @@
             {"error" (xt/x:ex-message err)})))))
   => {"transport-attached" true})
 
+^{:refer xt.db.node.runtime/sharedworker-connect-state :added "4.1"}
+(fact "connect-state initializes a SharedWorker client and returns teardown state"
+
+  (notify/wait-on [:js 20000]
+                  (var client (substrate/node-create {"id" "sharedworker-state-client"}))
+                  (-> (runtime/sharedworker-connect-state client
+                                                          {"primary" {"type" "memory" "defaults" {}}
+                                                           "caching" {"type" "memory" "defaults" {}}}
+                                                          {}
+                                                          {}
+                                                          (browser-transport/sharedworker-source
+                                                           (@! +sharedworker-script+)
+                                                           {"type" "module"})
+                                                          nil)
+                      (promise/x:promise-then
+                       (fn [state]
+                           (var before {"connection" (xt/x:not-nil? (. state ["connection"]))
+                                        "init" (xt/x:not-nil? (. state ["init"]))
+                                        "transport" (xt/x:not-nil? (substrate/transport-get client "xt.db.default.transport"))})
+                           (-> (runtime/sharedworker-disconnect state)
+                               (promise/x:promise-then
+                                (fn [_]
+                                    (repl/notify
+                                     (xt/x:obj-assign
+                                      before
+                                      {"detached" (xt/x:nil? (substrate/transport-get client "xt.db.default.transport"))})))))))
+                      (promise/x:promise-catch
+                       (fn [err]
+                           (repl/notify {"error" (xt/x:ex-message err)})))))
+  => {"connection" true
+      "init" true
+      "transport" true
+      "detached" true})
+
+^{:refer xt.db.node.runtime/sharedworker-disconnect :added "4.1"}
+(fact "disconnect tears down the transport recorded in SharedWorker state"
+
+  (notify/wait-on [:js 20000]
+                  (var client (substrate/node-create {"id" "sharedworker-disconnect-client"}))
+                  (-> (runtime/sharedworker-connect-state client
+                                                          {"primary" {"type" "memory" "defaults" {}}
+                                                           "caching" {"type" "memory" "defaults" {}}}
+                                                          {}
+                                                          {}
+                                                          (browser-transport/sharedworker-source
+                                                           (@! +sharedworker-script+)
+                                                           {"type" "module"})
+                                                          nil)
+                      (promise/x:promise-then
+                       (fn [state]
+                           (return (runtime/sharedworker-disconnect state))))
+                      (promise/x:promise-then
+                       (fn [_]
+                           (repl/notify
+                            {"detached" (xt/x:nil? (substrate/transport-get client "xt.db.default.transport"))})))
+                      (promise/x:promise-catch
+                       (fn [err]
+                           (repl/notify {"error" (xt/x:ex-message err)})))))
+  => {"detached" true})
+
 ^{:refer xt.db.node.runtime/webworker-connect :added "4.1"}
 (fact "connects a client to a WebWorker kernel and initialises it"
 

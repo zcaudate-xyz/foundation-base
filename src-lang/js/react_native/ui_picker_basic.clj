@@ -3,7 +3,8 @@
 
 (l/script :js
   {:require [[xt.lang.common-data :as xtd]
-             [xt.lang.common-lib :as k] [xt.lang.spec-base :as xt]
+             [xt.lang.common-lib :as k]
+             [xt.lang.spec-base :as xt]
              [js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]

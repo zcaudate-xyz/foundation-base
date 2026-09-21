@@ -6,8 +6,7 @@
             [std.string.case :as case]))
 
 (l/script :js
-  {:import [["@radix-ui/themes" :as [* RadixMain]
-             :bundle [["@radix-ui/themes/styles.css"]]]]})
+  {:import [["@radix-ui/themes" :as [* RadixMain] :bundle [["@radix-ui/themes/styles.css"]]]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RadixMain"

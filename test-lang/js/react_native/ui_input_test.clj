@@ -12,8 +12,7 @@
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
-             [js.react-native.ui-input :as ui-input]
-             ]
+             [js.react-native.ui-input :as ui-input]]
    })
 
 ^{:refer js.react-native.ui-input/InputSimple

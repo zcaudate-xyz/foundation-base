@@ -9,7 +9,7 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
     :require [[xt.lang.common-data :as xtd]
-             [js.react :as r]
+              [js.react :as r]
               [js.react-native :as n]
               [js.react-native.animate :as a]
               [xt.lang.spec-base :as xt]

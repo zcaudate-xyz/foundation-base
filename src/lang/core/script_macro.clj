@@ -92,20 +92,40 @@
                                           (second body)
                                           (nnext body))
           [module fmeta]  (intern-prep lang form)
-          entry  (entry/create-macro (apply list 'defmacro sym body)
-                                     (merge smeta
-                                            fmeta
-                                           {:lang lang
-                                            :module module}))
+          eval-ns (clojure.core/the-ns (env/ns-sym))
+          local-fn (get (clojure.core/ns-interns eval-ns) 'fn)
+          _      (when local-fn
+                   (clojure.core/ns-unmap eval-ns 'fn)
+                   (binding [*ns* eval-ns]
+                     (clojure.core/refer 'clojure.core :only '[fn])))
+          entry  (try
+                   (entry/create-macro (apply list 'defmacro sym body)
+                                       (merge smeta
+                                              fmeta
+                                             {:lang lang
+                                              :module module}))
+                   (finally
+                     (when local-fn
+                       (clojure.core/ns-unmap eval-ns 'fn)
+                       (clojure.core/intern eval-ns
+                                            (with-meta 'fn (meta local-fn))
+                                            @local-fn))))
          lib    (impl/runtime-library)
          _      (lib/add-entry-single! lib entry)]
-     (ptr/ptr-intern (:namespace entry)
-                     (with-meta sym (merge attr
-                                           {:doc doc
-                                            :arglists (body-arglists body)}
-                                           (select-keys fmeta +form-allow+)
-                                           smeta))
-                     entry))))
+     (let [target-ns (:namespace entry)]
+       ;; `defmacro.*` intentionally publishes a local macro even when the
+       ;; language setup has already referred a built-in macro with the same
+       ;; name. Remove only that referred mapping before installing the local
+       ;; pointer so namespace shadowing does not emit a warning.
+       (when (contains? (clojure.core/ns-refers target-ns) sym)
+         (clojure.core/ns-unmap target-ns sym))
+       (ptr/ptr-intern target-ns
+                       (with-meta sym (merge attr
+                                             {:doc doc
+                                              :arglists (body-arglists body)}
+                                             (select-keys fmeta +form-allow+)
+                                             smeta))
+                       entry)))))
 
 (defn intern-defmacro
   "the intern macro function"

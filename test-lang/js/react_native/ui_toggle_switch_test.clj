@@ -12,8 +12,7 @@
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
-             [js.react-native.ui-toggle-switch :as ui-toggle-switch]
-             ]
+             [js.react-native.ui-toggle-switch :as ui-toggle-switch]]
    })
 
 ^{:refer js.react-native.ui-toggle-switch/ToggleSwitchSimple

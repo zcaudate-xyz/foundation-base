@@ -14,8 +14,7 @@
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.physical-edit :as physical-edit]
-             [xt.lang.common-data :as xtd]
-             ]
+             [xt.lang.common-data :as xtd]]
    })
 
 ^{:refer js.react-native.physical-dnd/DragAndDropDemo

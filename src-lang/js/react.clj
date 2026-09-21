@@ -8,7 +8,9 @@
   (:refer-clojure :exclude [> ref derive sync get set]))
 
 (l/script :js
-  {:import [["react" :as React] ["react-dom/client" :as ReactDOM] ["react-nil" :as ReactNIL]]
+  {:import [["react" :as React]
+            ["react-dom/client" :as ReactDOM]
+            ["react-nil" :as ReactNIL]]
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]

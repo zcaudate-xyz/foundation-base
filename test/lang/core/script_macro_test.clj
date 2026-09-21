@@ -168,6 +168,37 @@
     (ptr/ptr-invoke-string make-array-0 [1 2 3] {}))
   => "[1,2,3]")
 
+(fact "function to intern a macro replaces referred built-ins quietly"
+
+  (let [ns-sym (symbol (str "lang.core.script-macro-shadow-" (System/nanoTime)))
+        ns-obj (create-ns ns-sym)
+        err    (java.io.StringWriter.)
+        xlib   (lib/library {})]
+    (lib/add-book! xlib (assoc xtalk/+book+ :modules {}))
+    (lib/add-module! xlib (module/book-module {:lang :xtalk
+                                               :id 'xt.lang.common-lib}))
+    (try
+      (binding [*ns* ns-obj]
+        (clojure.core/refer-clojure)
+        (clojure.core/refer 'lang.model.builtin.spec-xtalk :only '[return])
+        (binding [*err* err]
+          (impl/with:library [xlib]
+            (macro/intern-defmacro-fn
+             :xtalk
+             (with-meta
+               (list 'defmacro.xt 'return
+                     {:standalone true}
+                     '[x]
+                     (list 'return 'x))
+               {:module 'xt.lang.common-lib})
+             {}))))
+      [(str err)
+       (contains? (ns-interns ns-obj) 'return)
+       (not (contains? (ns-refers ns-obj) 'return))]
+      (finally
+        (remove-ns ns-sym))))
+  => ["" true true])
+
 (fact "function to intern a macro supports multi-arity clauses"
 
   (let [xlib (lib/library {})]

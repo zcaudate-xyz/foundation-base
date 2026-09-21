@@ -518,3 +518,80 @@
   => (contains-in
       {"output" [{"message" "hello-pull-attach", "id" string?}]}))
 
+^{:refer xt.db.node.client-base-browser-test/rpc-attach-model.sharedworker-sqlite
+  :added "4.1"}
+(fact "attaches a remote ping model before its separate SharedWorker call"
+
+  (notify/wait-on [:js 30000]
+    (var node (substrate/node-create {"id" "rpc-sharedworker-sqlite"}))
+    (var state nil)
+    (var attachment nil)
+    (var before nil)
+    (var after nil)
+    (var page-args {"space_id" "room/superadmin"
+                    "group_id" "system"
+                    "model_id" "ping"})
+    (-> (runtime/sharedworker-connect-state node
+                                            {"primary" (. -/CONFIG ["supabase"])
+                                             "caching" (. -/CONFIG ["sqlite"])}
+                                            {}
+                                            {}
+                                            (-/make-shared-source)
+                                            nil)
+        (promise/x:promise-then
+         (fn [out]
+           (:= state out)
+           (return
+            (client/rpc-attach-model
+             node
+             "db/primary"
+             page-args
+             {"input" []
+              "return" "text"
+              "schema" "scratch_v0"
+              "id" "ping"
+              "flags" {}}
+             {"pipeline" {}
+              "options" {}
+              "defaults" {"args" []
+                           "output" {}}}
+             {}))))
+        (promise/x:promise-then
+         (fn [out]
+           (:= attachment out)
+           (return (page-proxy/group-open-proxy node "room/superadmin" "system" {}))))
+        (promise/x:promise-then
+         (fn [_]
+           (:= before (page-core/model-get-output node "room/superadmin" "system" "ping"))
+           (return
+            (page-proxy/model-proxy-call
+             node
+             "room/superadmin"
+             "system"
+             "ping"
+             []
+             true
+             {}))))
+        (promise/x:promise-then
+         (fn [_]
+           (:= after (page-core/model-get-output node "room/superadmin" "system" "ping"))
+           (repl/notify
+            {"attached" (== "attached" (. attachment ["status"]))
+             "before-call" (xt/x:nil? before)
+             "after-call" after})))
+        (promise/x:promise-catch
+         (fn [err]
+           (repl/notify {"error" (xt/x:ex-message err)})))
+        (promise/x:promise-finally
+         (fn []
+           (-> (client/detach-model node "db/primary" page-args {})
+               (promise/x:promise-catch
+                (fn [_] (return true)))
+               (promise/x:promise-then
+                (fn [_]
+                  (if state
+                    (return (runtime/sharedworker-disconnect state))
+                    (return (promise/x:promise-run true))))))))))
+  => {"attached" true
+      "before-call" true
+      "after-call" "pong"})

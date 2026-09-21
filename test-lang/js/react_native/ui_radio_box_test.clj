@@ -12,8 +12,7 @@
    :require [[js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
-             [js.react-native.ui-radio-box :as ui-radio-box]
-             ]
+             [js.react-native.ui-radio-box :as ui-radio-box]]
    })
 
 ^{:refer js.react-native.ui-radio-box/RadioBoxSimple

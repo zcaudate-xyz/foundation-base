@@ -2,7 +2,15 @@
   (:require [lang.core :as l]))
 
 (l/script :lua.nginx
-  {:require [[lua.nginx.openssl :as ssl] [lua.nginx :as n] [lua.nginx.http-client :as http] [lua.core :as u] [xt.lang.spec-base :as xt] [xt.lang.common-string :as str] [xt.lang.parser-xml :as xml] [xt.lang.common-data :as xtd] [xt.lang.spec-base :as xt]]
+  {:require [[lua.nginx.openssl :as ssl]
+             [lua.nginx :as n]
+             [lua.nginx.http-client :as http]
+             [lua.core :as u]
+             [xt.lang.spec-base :as xt]
+             [xt.lang.common-string :as str]
+             [xt.lang.parser-xml :as xml]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.spec-base :as xt]]
    :import [["resty.md5" :as ngxmd5]
             ["resty.sha256" :as ngxsha256]
             ["resty.string" :as ngxstr]]})

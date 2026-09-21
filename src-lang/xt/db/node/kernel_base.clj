@@ -161,6 +161,7 @@
   (-/kernel-teardown-single node (xtd/get-in config ["primary" "id"]))
   (-/kernel-teardown-single node (xtd/get-in config ["caching" "id"]))
   (substrate/remove-service node (xtd/get-in config ["common"  "id"]))
+  (xt/x:del-key (. node ["meta"]) "xt.db/kernel-init")
   (return {:status  "teardown"
            :data    config}))
 
@@ -186,10 +187,31 @@
   "init-base-main ensures base services are present"
   {:added "4.1"}
   [node config schema lookup]
+  (var meta (. node ["meta"]))
+  (var pending (xtd/get-in meta ["xt.db/kernel-init"]))
+  (when (xt/x:not-nil? pending)
+    (return
+     (promise/x:promise-then
+      pending
+      (fn [_]
+        (return (-/kernel-init-main node config schema lookup))))))
   (if (-/kernel-check-exists node config)
     (return {:status  "no_change"
              :data    (-/kernel-create-config config)})
-    (return (-/kernel-setup-main node config schema lookup))))
+    (do
+      (var setup (-/kernel-setup-main node config schema lookup))
+      (var guarded
+           (-> setup
+               (promise/x:promise-then
+                (fn [result]
+                  (xt/x:del-key meta "xt.db/kernel-init")
+                  (return result)))
+               (promise/x:promise-catch
+                (fn [err]
+                  (xt/x:del-key meta "xt.db/kernel-init")
+                  (xt/x:err err)))))
+      (xt/x:set-key meta "xt.db/kernel-init" guarded)
+      (return guarded))))
 
 (defn.xt ^{:substrate/fn "@xt.db/kernel-init"}
   kernel-init-handler

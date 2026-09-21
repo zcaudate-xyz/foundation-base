@@ -63,7 +63,7 @@
   [:fn [:xt/str [:xt/maybe [:xt/dict :xt/str :xt/any]]] :xt/any])
 
 (defspec.xt sharedworker-url-source
-  [:fn [:xt/str] :xt/any])
+  [:fn [:xt/str [:xt/maybe [:xt/dict :xt/str :xt/any]]] :xt/any])
 
 (defspec.xt node-worker-source
   [:fn [:xt/str [:xt/maybe [:xt/dict :xt/str :xt/any]]] :xt/any])
@@ -499,15 +499,18 @@
           (. (!:G URL) (revokeObjectURL url))
           (throw err))))}))
 
-(defn.xt sharedworker-url-source
+(defn.xt ^{:public true} sharedworker-url-source
   "creates a transport source map backed by a browser SharedWorker,
-   reusing an existing URL so multiple tabs connect to the same worker"
+   reusing an existing URL so multiple tabs connect to the same worker.
+   `opts` is passed as the second argument to the SharedWorker constructor,
+   allowing module workers and named worker instances."
   {:added "4.1"}
-  [url]
+  [url opts]
+  (var worker-opts (or opts {}))
   (return
    {"create_fn"
     (fn [listener]
-      (var shared (new SharedWorker url))
+      (var shared (new SharedWorker url worker-opts))
       (var #{port} shared)
       (. port (start))
       (. port (addEventListener
@@ -524,7 +527,8 @@
   (var config (or opts {}))
   (var eval-flag (. config ["eval"]))
   (var eval-mode (:? (xt/x:nil? eval-flag) true eval-flag))
-  (var Worker-value (require "worker_threads"))
+  (var load (xt/x:eval "require"))
+  (var Worker-value (load "worker_threads"))
   (var #{Worker} Worker-value)
   (return
    {"create_fn"
