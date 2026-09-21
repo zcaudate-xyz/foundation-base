@@ -38,7 +38,7 @@
                :uses "actions/checkout@v4"}
               {:name "Node Setup"
                :uses "actions/setup-node@v4"
-               :with {:node-version "20.x"}}
+               :with {:node-version "24.x"}}
               {:name "Deploy gh-pages"
                :run
                (str/|
@@ -92,10 +92,6 @@
                                  "slug" "js-web-components"
                                  "version" "1.0.0",
                                  "orientation" "portrait",
-                                 "entryPoint" "./src/App.js",
-                                 "splash"
-                                 {"resizeMode" "contain",
-                                  "backgroundColor" "#ffffff"}
                                  "updates" {"fallbackToCacheTimeout" 0},
                                  "assetBundlePatterns" ["**/*"]
                                  "experiments" {"baseUrl" "/demo.foundation-base"}
@@ -110,52 +106,53 @@
                                     "android" "expo start --android"
                                     "ios" "expo start --ios"
                                     "web" "expo start --web"
-                                    "eject" "expo eject"}
+                                    "prebuild" "expo prebuild"}
                          "private" true
-                         "dependencies" {"@expo/vector-icons" "^14.1.0"
+                         "dependencies" {"@expo/vector-icons" "^15.0.2"
                                          "@react-navigation/bottom-tabs" "^7.3.10"
                                          "@react-navigation/elements" "^2.3.8"
                                          "@react-navigation/native" "^7.1.6"
                                          "ethers" "^6.15.0"
-                                         "expo" "~53.0.17"
-                                         "expo-auth-session" "^6.2.1"
-                                         "expo-asset" "~11.1.3"
-                                         "expo-blur" "~14.1.5"
-                                         "expo-constants" "~17.1.7"
-                                         "expo-crypto" "^14.1.5"
-                                         "expo-font" "~13.3.2"
-                                         "expo-haptics" "~14.1.4"
-                                         "expo-image" "~2.3.2"
-                                         "expo-image-picker" "^16.1.4"
-                                         "expo-linking" "~7.1.7"
-                                         "expo-router" "~5.1.3"
-                                         "expo-splash-screen" "~0.30.10"
-                                         "expo-status-bar" "~2.2.3"
-                                         "expo-symbols" "~0.4.5"
-                                         "expo-system-ui" "~5.0.10"
-                                         "expo-web-browser" "~14.2.0"
-                                         "react" "19.0.0"
-                                         "react-dom" "19.0.0"
-                                         "react-native" "0.79.5"
+                                         "expo" "~57.0.24"
+                                         "expo-auth-session" "~57.0.12"
+                                         "expo-asset" "~57.0.18"
+                                         "expo-blur" "~57.0.3"
+                                         "expo-constants" "~57.0.19"
+                                         "expo-crypto" "~57.0.3"
+                                         "expo-font" "~57.0.4"
+                                         "expo-haptics" "~57.0.3"
+                                         "expo-image" "~57.0.5"
+                                         "expo-image-picker" "~57.0.19"
+                                         "expo-linking" "~57.0.10"
+                                         "expo-router" "~57.0.22"
+                                         "expo-splash-screen" "~57.0.9"
+                                         "expo-status-bar" "~57.0.1"
+                                         "expo-symbols" "~57.0.3"
+                                         "expo-system-ui" "~57.0.4"
+                                         "expo-web-browser" "~57.0.3"
+                                         "react" "19.2.3"
+                                         "react-dom" "19.2.3"
+                                         "react-native" "0.86.3"
                                          "react-native-base64" "^0.2.1"
-                                         "react-native-gesture-handler" "~2.24.0"
+                                         "react-native-gesture-handler" "~2.32.0"
                                          "react-native-get-random-values" "^1.11.0"
-                                         "react-native-reanimated" "~3.17.4"
-                                         "react-native-safe-area-context" "5.4.0"
-                                         "react-native-screens" "~4.11.1"
-                                         "react-native-svg" "~15.11.2"
-                                         "react-native-vector-icons" "^10.2.0"
-                                         "react-native-web" "~0.20.0"
-                                         "react-native-webview" "13.13.5"
+                                         "react-native-reanimated" "4.5.1"
+                                         "react-native-safe-area-context" "~5.7.0"
+                                         "react-native-screens" "~4.26.0"
+                                         "react-native-svg" "15.15.4"
+                                         "react-native-vector-icons" "^10.3.0"
+                                         "react-native-web" "~0.21.0"
+                                         "react-native-webview" "13.16.1"
+                                         "react-native-worklets" "0.10.1"
                                          "ua-parser-js" "^2.0.4"
                                          "url" "^0.11.4"
                                          "uuid" "^11.1.0"}
                          "devDependencies" {"@babel/core" "^7.25.2"
-                                            "@types/react" "~19.0.10"
+                                            "@types/react" "~19.2.2"
                                             "eslint" "^9.25.0"
-                                            "eslint-config-expo" "~9.2.0"
-                                            "typescript" "~5.8.3"
-                                            "@expo/metro-runtime" "^5.0.4"}
+                                            "eslint-config-expo" "~57.0.2"
+                                            "typescript" "~6.0.3"
+                                            "@expo/metro-runtime" "~57.0.16"}
                          }}]}
    :default [{:type   :module.graph
               :lang   :js
