@@ -16,7 +16,7 @@
              [melbourne.base-palette :as base-palette]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
-             [xt.lang.common-data :as data]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as string]
              [xt.lang.common-math :as math]
              [xt.lang.common-tree :as tree]
@@ -62,14 +62,14 @@
            index
            :styleContainer [{:overflow "auto"
                              :flex 1}
-                            (:.. (data/arrayify styleMenu))]
+                            (:.. (xtd/arrayify styleMenu))]
            :style   [{:marginVertical 0
                       :borderRadius 0
                       :fontSize 13
                       :width (. dims width)
                       #_#_:maxWidth (. dims width)
                       :fontWeight "400"}
-                     (:.. (data/arrayify styleMenuItem))]
+                     (:.. (xtd/arrayify styleMenuItem))]
            :onPress (fn:> (setVisible false))
            :format format
            :transformations (or {:bg nil}
@@ -157,7 +157,7 @@
                   :justifyContent "center"
                   :fontSize 13
                   :fontWeight "400"}
-                 (:.. (data/arrayify style))]
+                 (:.. (xtd/arrayify style))]
          :transformations {:bg nil}
          (:.. rprops)]}]
      [:% -/DropdownIndexedModal
@@ -193,9 +193,9 @@
                                    value
                                    setValue}))
    (r/watch [value index data]
-     (when (and (data/is-empty? value)
+     (when (and (xtd/is-empty? value)
                 (lib/not-nil? index)
-                (data/not-empty? data))
+                (xtd/not-empty? data))
        (setValue ((or valueFn lib/identity)
                   (. data [index])))))
    (return [:% -/DropdownIndexed

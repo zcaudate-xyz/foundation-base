@@ -40,6 +40,9 @@
              [component.web-pune-frame-graph :as web-pune-frame-graph]]
    :export [MODULE]})
 
+(defrun.js __import__
+  (:- :import (quote [React]) :from "'react'"))
+
 (defn.js BreadcrumbExamples
   []
   (return

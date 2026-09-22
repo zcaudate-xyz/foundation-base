@@ -21,7 +21,7 @@
              [melbourne.base-palette :as base-palette]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
-             [xt.lang.common-data :as data]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as string]
              [xt.lang.common-math :as math]
              [xt.lang.common-tree :as tree]
@@ -49,7 +49,7 @@
                                              (Object.assign {:slim/type "image"
                                                         :fn/type   "field"}
                                                        meta)))
-  (when (data/is-empty? value)
+  (when (xtd/is-empty? value)
     (:= value {}))
   (when (lib/is-string? value)
     (:= value (xt/x:json-decode value)))
@@ -62,7 +62,7 @@
   (var [blob setBlob]   (r/local))
   (var [waiting setWaiting] (r/local))
   #_(var uri (or (and photo (. photo ["uri"]))
-               (and (data/not-empty? data)
+               (and (xtd/not-empty? data)
                     (or (. data  ["url"])
                         (. data  ["thumbnailUrl"])))))
   (return 
@@ -86,4 +86,3 @@
          (:.. fieldProps)]}]]]))
 
 (def.js MODULE (!:module))
-

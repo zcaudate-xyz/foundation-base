@@ -10,7 +10,7 @@
              [js.react-native :as n :include [:fn [:icon :entypo]]]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
-             [xt.lang.common-data :as data]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as string]
              [xt.lang.common-math :as math]
              [xt.lang.common-tree :as tree]
@@ -38,14 +38,14 @@
       setCurrent
       onClose
       (:.. rprops)]}]
-  (var data (xt/x:arr-sort (data/obj-keys screens) lib/identity (fn [x y] (return (x:str-lt x y)))))
+  (var data (xt/x:arr-sort (xtd/obj-keys screens) lib/identity (fn [x y] (return (x:str-lt x y)))))
   (var target (or (xt/x:get-key screens current)
-                  (xt/x:get-key screens (data/first data))))
+                  (xt/x:get-key screens (xtd/first data))))
   (return
    [:% ui-static/Div
     {:design design
      :style [{:flex 1}
-             (:.. (data/arrayify style))]}
+             (:.. (xtd/arrayify style))]}
     [:% ui-static/Div
      {:design design
       :style {:flexDirection "row"}

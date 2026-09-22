@@ -28,6 +28,9 @@
              [xt.lang.common-trace :as trace]]
    :export [MODULE]})
 
+(defrun.js __import__
+  (:- :import (quote [React]) :from "'react'"))
+
 ;;
 ;; Section
 ;;

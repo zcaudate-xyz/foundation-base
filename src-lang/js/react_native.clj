@@ -1,4 +1,5 @@
-(ns js.react-native
+(ns ^{:clj-kondo/config '{:linters {:unresolved-symbol {:level :off}}}}
+  js.react-native
   (:require [lang.core :as l]
             [std.lib.foundation :as f]))
 
@@ -785,7 +786,7 @@
        styleSelected
        (:= format k/identity)]}]
    (var [internal setInternal] (r/local (or index 0)))
-   (r/run []
+   (r/watch [index]
      (if (and (k/is-number? index)
               (not= internal index))
        (setInternal index)))
@@ -793,7 +794,7 @@
      [:% -/View
       {:style {:flexDirection "row"
                :flexWrap "wrap"}}
-      (xtd/arr-map items
+      (xt/x:arr-map items
                    (fn [item i]
                (var text (format item))
                (var selected (== i internal))
@@ -1034,7 +1035,7 @@
              :style {:transform [{:scale 0.8}]}
              :onPress (fn []
                          (var changed
-                              (xtd/arr-map indices
+                              (xt/x:arr-map indices
                                            (fn [e ei]
                                              (return (:? (== ei i) (not e) e)))))
                          (setIndices changed)
@@ -1053,7 +1054,7 @@
     (return [:% -/View
              {:style {:flexDirection "row"
                       :flexWrap "wrap"}}
-             (xtd/arr-map items itemFn)])))
+             (xt/x:arr-map items itemFn)])))
 
 (defn.js TabsMulti
   "creates a multi tab select

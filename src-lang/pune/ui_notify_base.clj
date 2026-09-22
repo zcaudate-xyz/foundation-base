@@ -19,7 +19,7 @@
              [js.react-native.ui-util :as ui-util]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
-             [xt.lang.common-data :as data]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as string]
              [xt.lang.common-math :as math]
              [xt.lang.common-tree :as tree]
@@ -42,7 +42,7 @@
                     (and (not (. e sticky))
                          (< (+ duration (. e time))
                             (xt/x:now-ms))))))
-       (j/map data/id-fn))))
+       (j/map xtd/id-fn))))
 
 (defn.js useOutdated
   [#{events
@@ -52,16 +52,16 @@
   (var refresh   (r/useRefresh))
   (var evictFn
        (fn [ids]
-         (when (data/not-empty? ids)
-           (setEvents (data/obj-omit events ids)))))
+         (when (xtd/not-empty? ids)
+           (setEvents (xtd/obj-omit events ids)))))
   (r/watch [duration events refresh]
     (when (< 0 duration)
-      (when (and (data/not-empty? events))
+      (when (and (xtd/not-empty? events))
         (jc/future-delayed [500]
-          (when (isMounted)
+          (:? (isMounted)
             (refresh))))
       (var outdated (-/getOutdated events duration))
-      (when (data/not-empty? outdated)
+      (when (xtd/not-empty? outdated)
         (evictFn outdated))))
   (return evictFn))
 
@@ -100,7 +100,7 @@
                  {:borderRadius 0}
                  {:borderRadius 3
                   :width 350})
-             (:.. (data/arrayify style))]}
+             (:.. (xtd/arrayify style))]}
     [:% n/Row
      [:% ui-button/Button
       {:design design
@@ -123,8 +123,8 @@
        {:key (xt/x:len data)
         :design design
         :variant __variant
-        :items (:? (data/not-empty? data)
-                   (j/map data (data/key-fn "title"))
+        :items (:? (xtd/not-empty? data)
+                   (j/map data (xtd/key-fn "title"))
                    ["NO NOTIFICATIONS"])
         :style {:width 300}
         :styleText {:width 300
@@ -163,7 +163,7 @@
        :style [{:position "absolute"
                 :top 5
                 :fontSize 11}]}
-      (data/get-in data [index "message"])]]]))
+      (xtd/get-in data [index "message"])]]]))
 
 (defn.js TopNotify
   [#{design
@@ -172,7 +172,7 @@
      data
      onClose}]
   (var [index setIndex] (r/local 0))
-  (var visible (data/not-empty? data))
+  (var visible (xtd/not-empty? data))
   (var notifyElem
        (r/% -/TopNotifyInner
             #{design
@@ -195,5 +195,4 @@
             notifyElem))))
 
 (def.js MODULE (!:module))
-
 

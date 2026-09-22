@@ -21,7 +21,7 @@
              [melbourne.base-palette :as base-palette]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
-             [xt.lang.common-data :as data]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as string]
              [xt.lang.common-math :as math]
              [xt.lang.common-tree :as tree]
@@ -64,7 +64,7 @@
 
 (comment
   "https://picsum.photos/200/300"
-  reader.readAsArrayBuffer)
+  "reader.readAsArrayBuffer")
 
 (defn.js ImagePicker
   "picks an image"
@@ -88,9 +88,9 @@
   (var subSize (- size (* 2 border)))
   (var #{fgNormal
          bgNormal} (base-palette/designPalette design))
-  (var uri (or (and (data/not-empty? photo)
+  (var uri (or (and (xtd/not-empty? photo)
                     (. photo ["uri"]))
-               (and (data/not-empty? data)
+               (and (xtd/not-empty? data)
                     (or (. data  ["url"])
                         (. data  ["thumbnailUrl"])))))
   (var swipeElem
@@ -127,7 +127,7 @@
                                            (math/mix 1 0 (/ (Math.abs position)
                                                          (* 2 subSize))))
                                :transform [{:scale (math/mix 1 2 (/ (Math.abs position) subSize))}]}})}
-                   (:.. (data/arrayify inner))]
+                   (:.. (xtd/arrayify inner))]
            (:.. rprops)]}])
   (return
    [:% n/View

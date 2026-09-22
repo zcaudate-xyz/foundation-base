@@ -1,6 +1,9 @@
 (ns js.lib.react-hook-form-test
+  (:require [lang.core :as l]
+            [lang.core.impl :as impl]
+            [js.lib.react-hook-form :refer :all])
   (:use code.test)
-  (:require [js.lib.react-hook-form :refer :all]))
+  )
 
 ^{:refer js.lib.react-hook-form/useFormState :added "4.1"}
 (fact "is defined"
@@ -21,7 +24,15 @@
   => true)
 
 ^{:refer js.lib.react-hook-form/mergeContexts :added "4.1"}
-(fact "is defined"
+(fact "emits a JavaScript rest parameter and spreads contexts"
 
-  (var? #'mergeContexts)
-  => true)
+  (let [emitted (impl/emit-str
+                 '(defn mergeContexts
+                    [(:.. contexts)]
+                    (return (Object.assign {} (:.. contexts))))
+                 {:lang :js
+                  :layout :flat})]
+    {:defined (var? #'mergeContexts)
+     :emitted emitted})
+  => {:defined true
+      :emitted "function mergeContexts(...contexts){\n  return Object.assign({},...contexts);\n}"})

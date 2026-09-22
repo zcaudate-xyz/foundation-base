@@ -11,7 +11,7 @@
              [js.react-native :as n :include [:fn [:icon :entypo]]]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
-             [xt.lang.common-data :as data]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as string]
              [xt.lang.common-math :as math]
              [xt.lang.common-tree :as tree]
@@ -82,7 +82,7 @@
    [:% n/Row
     {:style [{:width 140 #_(:? mini 160 140)
               :minHeight 80}
-             (:.. (data/arrayify styleContainer))]}
+             (:.. (xtd/arrayify styleContainer))]}
     [:% ui-static/Div
      {:design __design
       :variant __variant

@@ -46,5 +46,5 @@
   (return props))
 
 (defn.js mergeContexts
-  [& contexts]
-  (return (Object.assign {} contexts)))
+  [(:.. contexts)]
+  (return (Object.assign {} (:.. contexts))))

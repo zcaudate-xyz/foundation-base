@@ -21,6 +21,9 @@
              [xt.lang.common-trace :as trace]]
    :export [MODULE]})
 
+(defrun.js __import__
+  (:- :import (quote [React]) :from "'react'"))
+
 (defn.js Chip
   "constructs a error info demo"
   {:added "0.1"}
@@ -66,4 +69,3 @@
                    :size 12}]}]])]))
 
 (def.js MODULE (!:module))
-

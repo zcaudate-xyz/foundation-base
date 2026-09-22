@@ -18,7 +18,7 @@
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as ui]
              [pune.ui-depthchart :as depthchart]
-             [statslink.impl.base-market :as base-market]
+             [pune.common.data-market :as base-market]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
              [xt.lang.common-data :as data]
@@ -75,11 +75,16 @@
   
   (defn.js MarketDepthChartDemo
     []
+    (var #{market control} -/CHART)
+    (var #{allotment prediction} control)
+    (var offers (base-market/live-offers-rate market allotment prediction 20))
     (return
      (n/EnclosedCode 
 {:label "pune.ui-depthchart/MarketDepthChart"
        :style {:height 500}} 
-(r/% depthchart/MarketDepthChart -/CHART) 
+(r/% depthchart/MarketDepthChart {:design {:type "light"}
+                                  :offers offers
+                                  :control control})
 [:% n/View {:style {:height 10}}] 
 (r/% n/TextDisplay -/CHART))))
   

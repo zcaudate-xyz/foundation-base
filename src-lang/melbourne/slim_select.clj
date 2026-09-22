@@ -17,7 +17,7 @@
              [melbourne.ui-dropdown :as ui-dropdown]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
-             [xt.lang.common-data :as data]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as string]
              [xt.lang.common-math :as math]
              [xt.lang.common-tree :as tree]
@@ -51,7 +51,7 @@
    [:% slim-common/FormEnclosed
     #{design
       mini
-      {:variant (data/get-in design ["variant" "label"])}
+      {:variant (xtd/get-in design ["variant" "label"])}
       styleLabel
       labelHide labelNone
       label
@@ -98,7 +98,7 @@
    [:% slim-common/FormEnclosed
     #{design
       mini
-      {:variant (data/get-in design ["variant" "label"])}
+      {:variant (xtd/get-in design ["variant" "label"])}
       styleLabel
       labelHide labelNone
       label
@@ -151,7 +151,7 @@
       mini
       labelHide labelNone
       styleLabel
-      {:variant (data/get-in design ["variant" "label"])}
+      {:variant (xtd/get-in design ["variant" "label"])}
       label
       minWidth}
     [:% ui-dropdown/Dropdown
@@ -164,4 +164,3 @@
         (:.. fieldProps)]}]]))
 
 (def.js MODULE (!:module))
-

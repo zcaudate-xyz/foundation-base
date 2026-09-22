@@ -254,11 +254,11 @@
           (:.. iprops)]} impl)
   (var #{[template
           (:= format lib/identity)]} impl)
-  (var data (or (data/template-entry entry template props)
-                ""))
+  (var entryData (or (data/template-entry entry template props)
+                     ""))
   (var children "")
   (try
-    (:= children (format data props))
+    (:= children (format entryData props))
     (catch e))
   (when (and (not (r/isValidElement children))
              (not (lib/is-string? children)))
@@ -487,10 +487,10 @@
           watch
           template
           (:.. iprops)]} impl)
-  (var #{data} (ext-form/listenFieldsData form watch))
+  (var #{fieldData} (ext-form/listenFieldsData form watch))
   (return (r/% ui-util/Fade
                (Object.assign iprops
-                         {:visible (data/template-entry data template props)})
+                         {:visible (data/template-entry fieldData template props)})
                body)))
 
 (defn.js EntryLayoutFormFold
@@ -503,10 +503,10 @@
           watch
           template
           (:.. iprops)]} impl)
-  (var #{data} (ext-form/listenFieldsData form watch))
+  (var #{fieldData} (ext-form/listenFieldsData form watch))
   (return (r/% ui-util/Fold
                (Object.assign iprops
-                         {:visible (data/template-entry data template props)})
+                         {:visible (data/template-entry fieldData template props)})
                [:% n/View body])))
 
 (defn.js entrySubmitType
@@ -1221,4 +1221,3 @@
                :field  true
                :action true
                :separator true}})
-

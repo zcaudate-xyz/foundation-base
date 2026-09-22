@@ -28,7 +28,7 @@
              [pune.layout-toplevel :as base-layout]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
-             [xt.lang.common-data :as data]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-string :as string]
              [xt.lang.common-math :as math]
              [xt.lang.common-tree :as tree]
@@ -37,12 +37,7 @@
    :export [MODULE]})
 
 (def.js SampleText
-  (@! (string/join "\n" [
-       "Lorem ipsum dolor sit amet. Aut aliquam perspiciatis est atque temporibus At esse esse rem saepe temporibus est voluptatibus molestiae. Est tempora quasi 33 officiis totam est officia inventore. Est nihil quia qui internos nostrum est odit repellendus ea perspiciatis necessitatibus. Aut internos eaque ea omnis quibusdam id esse reprehenderit."
-       ""
-       "Eum dicta ipsam ut natus autem et recusandae ullam et laudantium deserunt. Ad provident officiis qui aperiam sequi qui laudantium nulla aut minima beatae! Qui nulla sunt ab consequatur galisum qui odit dolores et aliquid similique ut iure molestiae. Ut magnam consequuntur ut facere quam est obcaecati veritatis."
-       ""
-       "Sit eaque similique et vitae consequatur qui iure aliquid eum eveniet numquam qui internos nulla aut inventore repellendus et dolores laboriosam. Et consectetur dolorem ab unde voluptatem in Quis totam id deleniti provident. Et fuga quia in laboriosam autem qui repudiandae laborum ut quam assumenda. Et assumenda commodi qui nihil unde nam corrupti quasi."])))
+  "Lorem ipsum dolor sit amet. Aut aliquam perspiciatis est atque temporibus At esse esse rem saepe temporibus est voluptatibus molestiae. Est tempora quasi 33 officiis totam est officia inventore. Est nihil quia qui internos nostrum est odit repellendus ea perspiciatis necessitatibus. Aut internos eaque ea omnis quibusdam id esse reprehenderit.\n\nEum dicta ipsam ut natus autem et recusandae ullam et laudantium deserunt. Ad provident officiis qui aperiam sequi qui laudantium nulla aut minima beatae! Qui nulla sunt ab consequatur galisum qui odit dolores et aliquid similique ut iure molestiae. Ut magnam consequuntur ut facere quam est obcaecati veritatis.\n\nSit eaque similique et vitae consequatur qui iure aliquid eum eveniet numquam qui internos nulla aut inventore repellendus et dolores laboriosam. Et consectetur dolorem ab unde voluptatem in Quis totam id deleniti provident. Et fuga quia in laboriosam autem qui repudiandae laborum ut quam assumenda. Et assumenda commodi qui nihil unde nam corrupti quasi.")
 
 (defn.js FrameHeader
   [#{[design
@@ -130,9 +125,9 @@
                 :icon  "tag"
                 :label "DARK MODE"
                 :design   design
-                :selected (== "dark" (data/get-in design ["type"]))
+                :selected (== "dark" (xtd/get-in design ["type"]))
                 :onPress  (fn:> (setDesign
-                                 {:type (:? (== "dark" (data/get-in design ["type"]))
+                                 {:type (:? (== "dark" (xtd/get-in design ["type"]))
                                             "light"
                                             "dark")}))}
                {:component ui-menu-vert/MainMenuToggle
@@ -167,11 +162,11 @@
   (var isMounted (r/useIsMounted))
   (var refresh   (r/useRefresh))
   (var [index setIndex] (r/local 0))
-  (var data (data/arr-sort (Object.values inbox)
-                        (data/key-fn "time")
+  (var data (xtd/arr-sort (Object.values inbox)
+                        (xtd/key-fn "time")
                         lib/gt))
   (r/watch [inbox refresh]
-    (when (data/not-empty? inbox)
+    (when (xtd/not-empty? inbox)
       (jc/future-delayed [500]
         (:? (isMounted)
             (refresh))))
@@ -182,10 +177,10 @@
                                    (and (not (. e sticky))
                                         (< (+ 5000 (. e time))
                                            (xt/x:now-ms))))))
-                      (j/map data/id-fn)))
-    (when (data/not-empty? outdated)
-      (var out (data/obj-omit inbox outdated))
-      (cond (data/is-empty? out)
+                      (j/map xtd/id-fn)))
+    (when (xtd/not-empty? outdated)
+      (var out (xtd/obj-omit inbox outdated))
+      (cond (xtd/is-empty? out)
             (do (setShowNotify false)
                 (jc/future-delayed [500]
                     (:? (isMounted)
@@ -205,9 +200,9 @@
                    (var entry (. data [index]))
                    (when (lib/nil? entry)
                      (setShowNotify false))
-                   (var out (data/obj-omit inbox [(and entry
+                   (var out (xtd/obj-omit inbox [(and entry
                                                     (. entry id))]))
-                   (cond (data/is-empty? out)
+                   (cond (xtd/is-empty? out)
                          (do (setShowNotify false)
                              (jc/future-delayed [200]
                                (:? (isMounted)

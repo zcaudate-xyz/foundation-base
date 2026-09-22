@@ -62,6 +62,9 @@
              #_[melbourne.slim-table-test :as slim-table-test]]
    :export [MODULE]})
 
+(defrun.js __import__
+  (:- :import (quote [React]) :from "'react'"))
+
 (defn.js PaletteExamples
   []
   (return
