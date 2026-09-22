@@ -161,11 +161,11 @@
       [:% tm/XStack
        {:gap 8}
        [:% tm/Button
-        {:size "3"
+        {:size "$3"
          :onPress (fn [] (setAmount (- amount 5)))}
         "− 5"]
        [:% tm/Button
-        {:size "3"
+        {:size "$3"
          :onPress (fn [] (setAmount (+ amount 5)))}
         "+ 5"]]]]]))
 
@@ -270,12 +270,12 @@
        {:gap 8
         :flexWrap "wrap"}
        [:% tm/Button
-        {:size "3"
+        {:size "$3"
          :chromeless true
          :onPress (fn [] (setMessage "Documentation selected"))}
         "Documentation"]
        [:% tm/Button
-        {:size "3"
+        {:size "$3"
          :chromeless true
          :onPress (fn [] (setMessage "Source selected"))}
         "Source"]]
@@ -308,7 +308,7 @@
        {:color "#9f1239"}
        "We could not load the latest component metadata."]
       [:% tm/Button
-       {:size "3"
+       {:size "$3"
         :alignSelf "flex-start"
         :onPress (fn [] (setRetried true))}
        (:? retried "Retry queued" "Try again")]]]]))
@@ -327,11 +327,11 @@
        :gap 12
        :flexWrap "wrap"}
       [:% tm/Button
-       {:size "4"
+       {:size "$4"
         :onPress (fn [] (setStatus "Submitted successfully"))}
        "Submit form"]
       [:% tm/Button
-       {:size "3"
+       {:size "$3"
         :chromeless true
         :onPress (fn [] (setStatus "Draft saved"))}
        "Save draft"]
@@ -353,7 +353,7 @@
       [:% tm/DialogTrigger
        {:asChild true}
        [:% tm/Button
-        {:size 4}
+        {:size "$4"}
         "Review changes"]]
       [:% tm/DialogPortal
        [:% tm/DialogOverlay
@@ -376,13 +376,13 @@
          [:% tm/DialogClose
           {:asChild true}
           [:% tm/Button
-           {:size "3"
+           {:size "$3"
             :chromeless true}
            "Cancel"]]
          [:% tm/DialogClose
           {:asChild true}
           [:% tm/Button
-           {:size 3}
+           {:size "$3"}
            "Publish"]]]]]]]]))
 
 (defn.js TamaSlimEntryDemo
@@ -428,7 +428,7 @@
       [:% tm/PopoverTrigger
        {:asChild true}
        [:% tm/Button
-        {:size 4}
+        {:size "$4"}
         "Open actions"]]
       [:% tm/PopoverContent
        {:borderRadius 14
@@ -449,7 +449,7 @@
        [:% tm/PopoverClose
         {:asChild true}
         [:% tm/Button
-         {:size "2"
+         {:size "$2"
           :chromeless true}
          "Done"]]]]]]))
 
@@ -613,7 +613,7 @@
       {:alignItems "center"
        :justifyContent "space-between"}
       [:% tm/Button
-       {:size "3"
+       {:size "$3"
         :disabled (== page 1)
         :onPress (fn [] (setPage 1))}
        "Previous"]
@@ -621,7 +621,7 @@
        {:fontWeight "700"}
        "Page " page " of 2"]
       [:% tm/Button
-       {:size "3"
+       {:size "$3"
         :disabled (== page 2)
         :onPress (fn [] (setPage 2))}
        "Next"]]]]))
@@ -727,8 +727,8 @@
   (let [form (pr-str (:form (l/sym-entry :js 'melbourne.tama-slim-test/TamaMenuScreen)))]
     (every? #(clojure.string/includes? form %)
             [":width \"100%\""
-             ":maxWidth "100%""
-             ":alignSelf \"center\""
+             ":maxWidth \"100%\"
+             ":alignSelf \"stretch\""
              ":minWidth 0"]) => true))
 
 ^{:refer melbourne.tama-slim-test/TamaSlimErrorDemo :added "4.1"}
