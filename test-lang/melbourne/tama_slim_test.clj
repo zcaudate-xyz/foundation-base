@@ -727,7 +727,7 @@
   (let [form (pr-str (:form (l/sym-entry :js 'melbourne.tama-slim-test/TamaMenuScreen)))]
     (every? #(clojure.string/includes? form %)
             [":width \"100%\""
-             ":maxWidth \"100%\"
+             ":maxWidth \"100%\""
              ":alignSelf \"stretch\""
              ":minWidth 0"]) => true))
 
