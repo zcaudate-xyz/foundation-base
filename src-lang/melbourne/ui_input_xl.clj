@@ -72,11 +72,12 @@
            #{[design
               variant
               :style [{:height 50
-                       :paddingLeft 8
+                       :paddingHorizontal 14
                        :fontSize 20}
                       (:.. (data/arrayify style))]
               :styleContainer [{:flex 1
-                                :borderRadius 5
+                                :borderRadius 12
+                                :minHeight 50
                                 :height 50}
                                (:.. (data/arrayify styleContainer))]
               :inner [(-/inputPlaceHolder placeholder design)

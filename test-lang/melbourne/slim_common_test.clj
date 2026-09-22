@@ -33,26 +33,28 @@
                  :flex 1
                  :padding 8}}
         [:% slim-common/FormEnclosed
-         {:designNeutral "#333"
+         {:design {:type "light"}
           :label "HELLO"
           :styleLabel {}
           :minWidth 150}
          [:% n/View
           {:style {:paddingTop 10}}
           [:% n/Text
+           {:style {:color "#333"}}
            "WORLD"]]]]
        [:% n/View
         {:style {:backgroundColor "#333"
                  :flex 1
                  :padding 10}}
         [:% slim-common/FormEnclosed
-         {:designNeutral "#eee"
+         {:design {:type "dark"}
           :label "HELLO"
           :styleLabel {}
           :minWidth 150}
          [:% n/View
           {:style {:paddingTop 10}}
           [:% n/Text
+           {:style {:color "#eee"}}
            "WORLD"]]]]]))))
 
 ^{:refer melbourne.slim-common/FormReadOnly :added "4.0"}

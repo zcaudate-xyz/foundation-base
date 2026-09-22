@@ -48,10 +48,8 @@
       (:.. rprops)]}]
   (var __variant
        (data/obj-assign-nested
-        {:fg   {:key "background"
-                :tone "diminish"}
-         :bg   {:key "background"
-                :tone "diminish"}
+        {:fg   {:key "neutral"}
+         :bg   {:key "background"}
          :pressed {:bg {:key "primary"}}
          :highlighted {:fg {:key "neutral"}
                        :bg {:key "background"
@@ -69,6 +67,7 @@
   (return
    [:% ui-check-box/CheckBox
     #{[:theme __theme
+       :outlined true
        :style [{:paddingHorizontal 3
                 }
                __style

@@ -68,6 +68,9 @@
 
 ^{:refer js.react-native.ui-check-box/CheckBox :added "0.1"}
 (fact "creates a slim checkbox"
+  (let [form (pr-str (:form (l/sym-entry :js 'js.react-native.ui-check-box/CheckBox)))]
+    (.contains form "checkbox-marked") => true
+    (.contains form "checkbox-blank-outline") => true)
 
   (defn.js CheckBoxDemo
     []

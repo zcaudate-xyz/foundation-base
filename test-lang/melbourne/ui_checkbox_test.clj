@@ -25,6 +25,9 @@
 
 ^{:refer melbourne.ui-checkbox/CheckBox :added "0.1"}
 (fact "creates a checkbox"
+  (let [form (pr-str (:form (l/sym-entry :js 'melbourne.ui-checkbox/CheckBox)))]
+    (.contains form ":outlined true") => true
+    (.contains form ":key \"neutral\"") => true)
   ^:hidden
   
   (defn.js CheckBoxDemo

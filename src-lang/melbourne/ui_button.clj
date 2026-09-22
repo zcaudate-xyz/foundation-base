@@ -51,8 +51,12 @@
     #{[:refLink refLink
        :onChord setChord
        :theme __theme
-       :style [{:padding 8
-                :borderRadius 3}
+       :style [{:paddingVertical 10
+                :paddingHorizontal 16
+                :minHeight 40
+                :borderRadius 10
+                :alignItems "center"
+                :justifyContent "center"}
                __style
                (:.. (data/arrayify style))]
        :addons [(:? tooltip

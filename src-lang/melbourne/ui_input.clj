@@ -11,7 +11,8 @@
              [xt.lang.common-lib :as lib]
              [js.react-native.ui-input :as ui-input]
              [melbourne.base-palette :as base-palette]
-             [melbourne.base-theme :as base-theme]]
+             [melbourne.base-theme :as base-theme]
+             [melbourne.base-font :as base-font]]
    :export [MODULE]})
 
 (defn.js Input
@@ -48,14 +49,20 @@
    [:% ui-input/Input
     #{[:theme __theme
        :selectionColor (. palette mainColor)
-       :style [{:fontFamily "Helvetica"}
+       :style [base-font/fontFamily
                (:.. (data/arrayify style))]
        :styleContainer [{:flex 1
-                         :borderStyle "solid" 
+                         :minHeight 42
+                         :paddingHorizontal 12
+                         :borderStyle "solid"
                          :borderWidth 1
-                         :borderColor "black"}
+                         :borderRadius 10
+                         :borderColor (base-palette/getColor
+                                       palette
+                                       {:key "neutral"
+                                        :mix "background"
+                                        :ratio 5})}
                         (:.. (data/arrayify styleContainer))]
        (:.. rprops)]}]))
 
 (def.js MODULE (!:module))
-

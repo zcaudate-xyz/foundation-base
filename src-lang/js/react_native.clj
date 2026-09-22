@@ -550,7 +550,8 @@
                 :shadowOpacity 0.08
                 :shadowRadius 14
                 :elevation 2
-                :maxWidth 860}
+                :alignSelf "stretch"
+                :maxWidth "100%"}
                 (:.. (xtd/arrayify style))]
        (:.. rprops)]}
     [:% -/Text
@@ -782,6 +783,7 @@
        checkIndex
        setIndex
        index
+       style
        styleText
        styleSelected
        (:= format k/identity)]}]
@@ -792,8 +794,9 @@
        (setInternal index)))
    (return
      [:% -/View
-      {:style {:flexDirection "row"
-               :flexWrap "wrap"}}
+      {:style [{:flexDirection "row"
+                :flexWrap "wrap"}
+               style]}
       (xt/x:arr-map items
                    (fn [item i]
                (var text (format item))

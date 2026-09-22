@@ -56,7 +56,9 @@
                 {:component n/Icon
                  :allowRef true
                  :name  (or icon
-                            "check")
+                            (:? selected
+                                "checkbox-marked"
+                                "checkbox-blank-outline"))
                  :style [helper-theme-default/CheckBoxDefaultStyle
                          (:..  styleStatic)
                          (n/PlatformSelect
@@ -66,4 +68,3 @@
                 iconProps)
                (:.. inner)]
        (:.. rprops)]}]))
-

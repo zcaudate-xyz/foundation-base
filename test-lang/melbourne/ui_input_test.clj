@@ -75,6 +75,9 @@
 
 ^{:refer melbourne.ui-input/Input :added "0.1"}
 (fact "constructs a themed input"
+  (let [form (pr-str (:form (l/sym-entry :js 'melbourne.ui-input/Input)))]
+    (.contains form "melbourne.base-font/fontFamily") => true
+    (.contains form "Helvetica") => false)
   ^:hidden
   
   (defn.js InputLightExamples

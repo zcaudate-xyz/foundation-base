@@ -18,6 +18,7 @@
              [js.react-native.ui-tooltip :as ui-tooltip]
              [melbourne.base-palette :as base-palette]
              [melbourne.base-theme :as base-theme]
+             [melbourne.base-font :as base-font]
              [melbourne.ui-static :as ui-static]
              [melbourne.ui-button :as ui-button]
              [melbourne.ui-toggle-button :as ui-toggle-button]
@@ -84,7 +85,7 @@
                           :tone "flatten"}}
                     fontOverride
                     variant)
-          :style [{:fontFamily "Lato"}
+          :style [base-font/fontFamily
                   fontStyle
                   (:.. (data/arrayify style))]
           (:.. rprops)]}]))))

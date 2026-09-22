@@ -1,6 +1,7 @@
 (ns melbourne.ui-text-test
   (:use code.test)
-  (:require [lang.core :as l]
+  (:require [clojure.string :as string]
+            [lang.core :as l]
             [std.lib :as h]))
 
 (l/script :js
@@ -237,6 +238,9 @@
 
 ^{:refer melbourne.ui-text/createTextFn :added "0.1"}
 (fact "seed function for the text"
+  (let [form (pr-str (:form (l/sym-entry :js 'melbourne.ui-text/createTextFn)))]
+    (string/includes? form "melbourne.base-font/fontFamily") => true
+    (string/includes? form "Lato") => false)
   ^:hidden
   
   (defn.js TextBaseDemo

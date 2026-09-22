@@ -17,56 +17,62 @@
              [js.core.fetch :as fetch]]
    :export [MODULE]})
 
+(def.js fontFamily
+  (n/PlatformSelect
+   {:web     {:fontFamily "system-ui"}
+    :ios     {:fontFamily "System"}
+    :default {:fontFamily "sans-serif"}}))
+
 (def.js fontH1
-  {:fontFamily "Lato-Bold"
-   :fontSize 30
-   :fontWeight "900"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 30
+                 :fontWeight "800"}))
 
 (def.js fontH2
-  {:fontFamily "Lato-Bold"
-   :fontSize 24
-   :fontWeight "900"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 24
+                 :fontWeight "800"}))
 
 (def.js fontH3
-  {:fontFamily "Lato-Bold"
-   :fontSize 20
-   :fontWeight "900"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 20
+                 :fontWeight "800"}))
 
 (def.js fontH4
-  {:fontFamily "Lato-Bold"
-   :fontSize 16
-   :fontWeight "900"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 16
+                 :fontWeight "800"}))
 
 (def.js fontH5
-  {:fontFamily "Lato-Bold"
-   :fontSize 14
-   :fontWeight "700"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 14
+                 :fontWeight "700"}))
 
 (def.js fontH6
-  {:fontFamily "Lato-Bold"
-   :fontSize 12
-   :fontWeight "700"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 12
+                 :fontWeight "700"}))
 
 (def.js fontP
-  {:fontFamily "Lato"
-   :fontSize 12
-   :fontWeight "400"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 12
+                 :fontWeight "400"}))
 
 (def.js fontText
-  {:fontFamily "Lato"
-   :fontSize 11
-   :fontWeight "400"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 11
+                 :fontWeight "400"}))
 
 (def.js fontItalic
-  {:fontFamily "Lato"
-   :fontSize 11
-   :fontWeight "400"
-   :fontVariant "italic"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 11
+                 :fontWeight "400"
+                 :fontVariant "italic"}))
 
 (def.js fontBold
-  {:fontFamily "Lato-Bold"
-   :fontSize 11
-   :fontWeight "800"})
+  (Object.assign {} -/fontFamily
+                {:fontSize 11
+                 :fontWeight "800"}))
 
 (def.js fontCaption
   (Object.assign

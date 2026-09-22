@@ -56,7 +56,7 @@
    :build    ".build/web-index"
    :github   {:repo   "zcaudate-xyz/demo.foundation-base"
               :description "Foundation Web Components"}
-   :triggers #{"js" "component.web-index" "melbourne" "pune"}
+   :triggers #{"js" "component.web-index" "melbourne" "pune" "tama"}
    :sections {:common [+expo-makefile+
                        +github-workflows-build+
                        {:type :raw
@@ -111,6 +111,9 @@
                                     "eject" "expo eject"}
                          "private" true
                          "dependencies" {"@expo/vector-icons" "^15.0.2"
+                                         "@tamagui/config" "2.0.0-rc.40"
+                                         "@tamagui/get-token" "2.0.0-rc.40"
+                                         "@tamagui/toast" "2.0.0-rc.40"
                                          "@react-navigation/bottom-tabs" "^7.3.10"
                                          "@react-navigation/elements" "^2.3.8"
                                          "@react-navigation/native" "^7.1.6"
@@ -146,6 +149,7 @@
                                          "react-native-web" "~0.21.0"
                                          "lightweight-charts" "3.8.0"
                                          "react-native-webview" "13.16.1"
+                                         "tamagui" "2.0.0-rc.40"
                                          "ua-parser-js" "^2.0.4"
                                          "url" "^0.11.4"
                                          "uuid" "^11.1.0"}

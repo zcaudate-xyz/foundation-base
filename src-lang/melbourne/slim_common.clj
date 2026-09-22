@@ -62,14 +62,17 @@
             {:key "label",
              :style (:? mini
                         {:paddingLeft 5, :paddingTop 10}
-                        {:paddingLeft 5 :paddingTop 8})}
+                        {:paddingLeft 5
+                         :paddingTop 10
+                         :paddingRight 12
+                         :minHeight 40})}
             [:% ui-static/Text
              #{[design
                 :variant (or variant
                              {:fg {:key "primary"
                                    :mix "neutral"
                                    :ratio 5}})
-                :style [(:? mini {} {:paddingBottom 0, :width 110})
+                :style [(:? mini {} {:paddingBottom 0, :width 128})
                         (:.. (data/arrayify styleLabel))]]} label]]))
   (var formElem
        [:% n/View
@@ -293,7 +296,10 @@
      {:style [{:width 5 #_(:? mini 5 115)}
               (:.. (data/arrayify stylePadding))]}]
     [:% n/Row
-     {:style {:paddingVertical 3}}
+     {:style {:paddingVertical 9
+              :paddingHorizontal 4
+              :alignItems "center"
+              :borderRadius 10}}
      [:% ui-checkbox/CheckBox
       #{[design variant
          :indicatorParams {:active {:default {:duration 100}}}
