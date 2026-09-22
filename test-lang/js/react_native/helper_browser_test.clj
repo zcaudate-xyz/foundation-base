@@ -1,5 +1,6 @@
 (ns js.react-native.helper-browser-test
-  (:require [lang.core :as l])
+  (:require [clojure.string :as string]
+            [lang.core :as l])
   (:use code.test))
 
 (l/script :js
@@ -11,11 +12,19 @@
 ^{:refer js.react-native.helper-browser/getHash :added "4.0" :unchecked true}
 (fact "gets the window location hash")
 
-^{:refer js.react-native.helper-browser/getHashRoute :added "4.0" :unchecked true}
-(fact "gets the browser hash route")
+^{:refer js.react-native.helper-browser/getHashRoute :added "4.0"}
+(fact "gets a route from slash-prefixed and bare browser hashes"
+  (let [form (pr-str (:form (l/sym-entry :js 'js.react-native.helper-browser/getHashRoute)))]
+    (string/includes? form "starts-with?") => true
+    (string/includes? form "substring hash 2") => true
+    (string/includes? form "substring hash 1") => true))
 
-^{:refer js.react-native.helper-browser/useHashRoute :added "4.0" :unchecked true}
-(fact "listens to the browser hash route"
+^{:refer js.react-native.helper-browser/useHashRoute :added "4.0"}
+(fact "listens to hash changes and removes both browser listeners"
+  (let [form (pr-str (:form (l/sym-entry :js 'js.react-native.helper-browser/useHashRoute)))]
+    (string/includes? form "hashchange") => true
+    (string/includes? form "popstate") => true
+    (= 2 (count (re-seq #"removeEventListener" form))) => true)
 
   (defn.js UseHashRouteDemo
     []

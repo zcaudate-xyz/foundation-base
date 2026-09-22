@@ -173,6 +173,31 @@ lein push-tui-001-fetch
 lein push-tui-002-game-of-life
 ```
 
+### Deploy the Foundation Web demo
+
+The Foundation Web deployment task lives in
+[`src-build/foundation_deployment/task_web_index.clj`](src-build/foundation_deployment/task_web_index.clj)
+and uses `std.make.github` to push the generated `demo.foundation-base`
+project. Run these forms from the Foundation REPL:
+
+```clojure
+(require '[foundation-deployment.task-web-index :as deploy] :reload)
+
+;; Regenerate .build/web-index
+(deploy/task-build)
+
+;; First-time GitHub setup
+(deploy/task-run "init" "Initial web demo")
+
+;; Subsequent publishes
+(deploy/task-run "publish" "Update web demo")
+```
+
+Use `task-run` rather than `-main` from a REPL; `-main` exits the command-line
+process after completing the task. The equivalent Makefile commands are
+`make foundation-web-build`, `make foundation-web-init`, and
+`make foundation-web-publish`.
+
 See [`wiki/Examples.md`](wiki/Examples.md) for the expanded examples index.
 
 ## Write and run tests

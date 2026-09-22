@@ -15,6 +15,7 @@
              [pune.ui-depthchart-test :as ui-depthchart-test]
              [pune.ui-menu-vert-test :as ui-menu-vert-test]
              [pune.ui-sidemenu-test :as ui-sidemenu-test]
+             [pune.ui-searchbar-test :as ui-searchbar-test]
              [pune.ui-submenu-test :as ui-submenu-test]
              [pune.ui-sidebar-test :as ui-sidebar-test]
              [pune.ui-notify-base-test :as ui-topnotify-test]
@@ -94,6 +95,11 @@
     [:% ui-sidemenu-test/SideMenuTitleDemo]
     [:% ui-sidemenu-test/SideMenuListDemo]
     [:% ui-sidemenu-test/SideMenuFloatingDemo]]))
+
+(defn.js SearchBarExamples
+  []
+  (return
+   [:<> [:% ui-searchbar-test/SearchBarDemo]]))
 
 (defn.js NotifyAlertsExamples
   []
@@ -193,6 +199,7 @@
         ["105-console"       -/ConsoleExamples]
         ["106-breadcrumb"    -/BreadcrumbExamples]
         ["108-sidebar"       -/SideBarExamples]
+        ["109-searchbar"     -/SearchBarExamples]
         ["201-page"          -/PageExamples]
         ["600-sparkline"     -/SparklineExamples]
         ["601-depthchart"    -/DepthchartExamples]

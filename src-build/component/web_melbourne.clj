@@ -42,6 +42,7 @@
              [melbourne.ui-toggle-switch-test :as ui-toggle-switch-test]
              [melbourne.ui-toolbar-test :as ui-toolbar-test]
              [melbourne.slim-common-test :as slim-common-test]
+             [melbourne.slim-style-test :as slim-style-test]
              #_[melbourne.slim-content-test :as slim-content-test]
              [melbourne.slim-dialog-test :as slim-dialog-test]
              [melbourne.slim-entry-test :as slim-entry-test]
@@ -322,6 +323,11 @@
     [:% slim-common-test/FormChipInputDemo]
     [:% slim-common-test/FormLayoutDemo]]))
 
+(defn.js SlimStyleExamples
+  []
+  (return
+   [:<> [:% slim-style-test/SlimStyleLabDemo]]))
+
 (defn.js SlimEntryExamples
   []
   (return
@@ -550,6 +556,7 @@
   []
   (return
    (tab ["201a-slim-common"   -/SlimCommonExamples]
+        ["201a-slim-style"    -/SlimStyleExamples]
         ["201b-slim-number"   -/SlimNumberExamples]
         ["201c-slim-select"   -/SlimSelectExamples]
         ["201e-slim-image"    -/SlimImageExamples]

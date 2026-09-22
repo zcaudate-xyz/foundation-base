@@ -54,6 +54,7 @@
       label
       labelHide labelNone
       styleLabel
+      styleContainer
       children
       (:= minWidth 120)]}]
   (var labelElem
@@ -86,14 +87,16 @@
 
        mini
        [:% n/View
-        {:style {:flex 1
-                 :margin 2}}
+        {:style [{:flex 1
+                  :margin 2}
+                 (:.. (data/arrayify styleContainer))]}
         labelElem formElem]
 
        :else
-       [:% n/Row {:style {:margin 2
-                          :flex 1
-                          :flexWrap "wrap"}}
+       [:% n/Row {:style [{:margin 2
+                           :flex 1
+                           :flexWrap "wrap"}
+                          (:.. (data/arrayify styleContainer))]}
         labelElem formElem])))
 
 (defn.js FormReadOnly

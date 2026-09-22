@@ -23,10 +23,14 @@
   {:added "4.0"}
   []
   (var hash (-/getHash))
-  (return (:? hash
-              (str/substring hash
-                           2)
-              "")))
+  (cond (str/starts-with? hash "#/")
+        (return (str/substring hash 2))
+
+        (str/starts-with? hash "#")
+        (return (str/substring hash 1))
+
+        :else
+        (return "")))
 
 (defn.js useHashRoute
   "listens to the browser hash route"
@@ -41,10 +45,15 @@
                                      (+ "#/" (event-route/get-url route))))
                       (setRouteUrl (-/getHashRoute) true))))
     (when (n/isWeb)
+      (window.addEventListener "hashchange" listener)
       (window.addEventListener "popstate" listener)
-      (return (fn:> (window.removeEventListener
-                     "popstate"
-                     listener)))))
+      (return (fn []
+                (window.removeEventListener
+                 "hashchange"
+                 listener)
+                (window.removeEventListener
+                 "popstate"
+                 listener)))))
   (r/watch [routeUrl]
     (when (and (k/not-nil? routeUrl)
                (n/isWeb))

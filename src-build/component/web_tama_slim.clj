@@ -11,7 +11,9 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.tamagui :as tm]
-             [melbourne.tama-slim-test :as tama-slim-test]]
+             [melbourne.tama-slim-test :as tama-slim-test]
+             [melbourne.tama-form-test :as tama-form-test]
+             [melbourne.tama-overlay-test :as tama-overlay-test]]
    :export [MODULE]})
 
 (defrun.js __import__
@@ -105,6 +107,15 @@
   []
   (return (-/TamaSlimPage tama-slim-test/TamaSlimDemo)))
 
+(defn.js TamaSlimFoundationExamples
+  []
+  (return
+   (-/TamaSlimPage
+    (fn []
+      (return
+       [:<> [:% tama-form-test/TamaFormDemo]
+        [:% tama-overlay-test/TamaOverlayDemo]])))))
+
 (defn.js tama-controls
   []
   (return
@@ -125,6 +136,7 @@
         ["201p-slim-tablep" -/TamaSlimTablepExamples]
         ["201q-slim-tables" -/TamaSlimTablesExamples]
         ["201r-slim-tablex" -/TamaSlimTablexExamples]
-        ["201s-slim" -/TamaSlimOverviewExamples])))
+        ["201s-slim" -/TamaSlimOverviewExamples]
+        ["201t-tama-foundation" -/TamaSlimFoundationExamples])))
 
 (def.js MODULE (!:module))

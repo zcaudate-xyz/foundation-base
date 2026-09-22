@@ -72,5 +72,15 @@ symbol:
 list-namespaces:
 	./bin/foundation-index list-namespaces
 
-.PHONY: demo-xtdb-backbone demo-xtdb-backbone-sql demo-xtdb-backbone-supabase demo-xtdb-backbone-start index index-force index-stats search symbol list-namespaces
-	
+FOUNDATION_LEIN ?= $(if $(shell command -v lein 2>/dev/null),lein,./lein)
+
+foundation-web-build:
+	$(FOUNDATION_LEIN) trampoline run -m foundation-deployment.task-web-index build
+
+foundation-web-init:
+	$(FOUNDATION_LEIN) trampoline run -m foundation-deployment.task-web-index init
+
+foundation-web-publish:
+	$(FOUNDATION_LEIN) trampoline run -m foundation-deployment.task-web-index publish
+
+.PHONY: demo-xtdb-backbone demo-xtdb-backbone-sql demo-xtdb-backbone-supabase demo-xtdb-backbone-start index index-force index-stats search symbol list-namespaces foundation-web-build foundation-web-init foundation-web-publish

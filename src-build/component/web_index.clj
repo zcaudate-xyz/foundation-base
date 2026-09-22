@@ -14,8 +14,10 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react.ext-box :as ext-box]
+             [js.react.ext-route :as ext-route]
              [js.react :as r]
              [js.react-native :as n :include [:fn]]
+             [js.react-native.helper-browser :as helper-browser]
              [js.lib.rn-expo :as x :include [:lib]]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
@@ -51,13 +53,8 @@
    (tab ["00-native"      (web-native/raw-controls)]
         ["01-melbourne"   (web-melbourne/melbourne-controls)]
         ["02-slim"        (web-melbourne/slim-controls)]
-        ["03-pune-frame"  (web-pune-frame/pune-frame-controls)])))
-
-(defrun.js __tama_screen__
-  (base-box/set-data
-   -/Screens
-   ["04-tama"]
-   (web-tama-slim/tama-controls)))
+        ["03-pune-frame"  (web-pune-frame/pune-frame-controls)]
+        ["04-tama"       (web-tama-slim/tama-controls)])))
 
 (defn.js formatSection
   [value]
@@ -207,8 +204,12 @@
 
 (defn.js AppMain
   []
-  (var [l0 setL0] (ext-box/useBox -/Global ["l0"]))
-  (var [l1 setL1] (ext-box/useBox -/Global ["l1"]))
+  (var route (ext-route/makeRoute
+              (or (helper-browser/getHashRoute)
+                  "00-native/000-intro")))
+  (helper-browser/useHashRoute route)
+  (var [l0 setL0] (ext-route/useRouteSegment route [] "00-native"))
+  (var [l1 setL1] (ext-route/useRouteSegment route [l0] "000-intro"))
   (var tree (ext-box/listenBox -/Screens []))
   (var onNavigate (fn [target] (setL1 target)))
   (var displayFn
