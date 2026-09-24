@@ -1,4 +1,4 @@
-(ns component.web-pune-frame
+(ns lang-main.ui-components.sections.web-pune-frame
   (:require [lang.core :as l]
             [std.lib :as h]))
 
@@ -37,8 +37,8 @@
              [xt.lang.common-tree :as tree]
              [xt.lang.common-sort-by :as sort-by]
              [xt.lang.common-trace :as trace]
-             [component.web-pune-frame-demo :as web-pune-frame-demo]
-             [component.web-pune-frame-graph :as web-pune-frame-graph]]
+             [lang-main.ui-components.sections.web-pune-frame-demo :as web-pune-frame-demo]
+             [lang-main.ui-components.sections.web-pune-frame-graph :as web-pune-frame-graph]]
    :export [MODULE]})
 
 (defrun.js __import__

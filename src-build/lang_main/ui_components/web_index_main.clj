@@ -28,12 +28,11 @@
              [xt.lang.common-sort-by :as sort-by]
              [xt.lang.common-trace :as trace]
              [xt.event.base-box :as base-box]
-             [component.web-native :as web-native]
-             [component.web-melbourne :as web-melbourne]
-             [component.web-tama :as web-tama]
-             [component.web-tama-slim :as web-tama-slim]
-             [component.web-pune-frame :as web-pune-frame]]
-   :export [MODULE]
+             [lang-main.ui-components.sections.web-native :as web-native]
+             [lang-main.ui-components.sections.web-melbourne :as web-melbourne]
+             [lang-main.ui-components.sections.web-tama :as web-tama]
+             [lang-main.ui-components.sections.web-tama-slim :as web-tama-slim]
+             [lang-main.ui-components.sections.web-pune-frame :as web-pune-frame]]
    :file   "App.js"})
 
 (defglobal.js Global

@@ -10,6 +10,10 @@
             :id :dev/web-main
             :emit {:native {:suppress true}
                    :lang/jsx false}}
+   ;; These natives are emitted into this namespace by the included modules.
+   ;; Declare them here so jm/import-missing does not import them a second time.
+   :import [["react-native" :as [* ReactNative]]
+            ["expo" :as [* Expo]]]
    :require [[js.module :as jm]
              [js.react :as r]
              [js.react.ext-box :as ext-box]
@@ -21,7 +25,6 @@
              [xt.event.base-box :as base-box]]})
 
 (defrun.js __import__
-  #_#_
   (jm/import-missing)
   (jm/import-set-global))
 
@@ -88,7 +91,7 @@
 (defrun.js ^{:rt/init true}
   __main__
   (base-box/set-data -/Global ["Main"] -/AppMain)
-  (client/client-ws "localhost"
+  #_(client/client-ws "localhost"
                     29001
                     {}))
 

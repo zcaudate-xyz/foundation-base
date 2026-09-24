@@ -1,4 +1,4 @@
-(ns component.web-tama
+(ns lang-main.ui-components.sections.web-tama
   (:require [lang.core :as l]
             [std.lib :as h]))
 

@@ -1,5 +1,4 @@
 (ns lang-demos.js-003-expo-rn.web-debug-build
-  (:use code.test)
   (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]
@@ -12,17 +11,23 @@
              [yarn install]]
             [:build-web
              [yarn install]
-             [npx expo export --platform web --output-dir web-build]]
+             [yarn exec expo export --platform web --output-dir web-build]]
             [:dev
              [yarn install]
-             [npx expo start --web --port 19007]]
+             [yarn exec expo start --web --port 19007]]
             [:ios
              [yarn install]
-             [npx expo start --ios]]
+             [yarn exec expo start --ios]]
             [:android
              [yarn install]
-             [npx expo start --android]]
-            [:purge   [npx expo r -c]]]})
+             [yarn exec expo start --android]]
+            [:purge   [yarn exec expo r -c]]]})
+
+(def +yarn-config+
+  {:type :raw
+   :file ".yarnrc.yml"
+   ;; Expo Metro needs node_modules resolution for react-native-web deep imports.
+   :main ["nodeLinker: node-modules"]})
 
 (def +github-workflows-build+
   {:type :yaml
@@ -62,6 +67,7 @@
    :triggers #{"js" "playground.web-debug"}
    :sections {:common [+expo-makefile+
                        +github-workflows-build+
+                       +yarn-config+
                        {:type :raw
                         :file "metro.config.js"
                         :main
@@ -114,6 +120,7 @@
                                     "web" "expo start --web"
                                     "eject" "expo eject"}
                          "private" true
+                         "packageManager" "yarn@4.9.4"
                          "dependencies" {"expo" "~57.0.0"
                                          "expo-auth-session" "~57.0.12"
                                          "expo-crypto" "~57.0.3"
@@ -138,8 +145,17 @@
                                      :path-separator "/"
                                      :ns-label {'lang-demos.js-003-expo-rn.web-debug-index "App"}}}}}]})
 
-(def +init+
-  nil)
+
+
+
+(defn -main
+  []
+  (make/build-all PLAYGROUND-WEB-DEBUG)
+  (make/run-internal PLAYGROUND-WEB-DEBUG :build-web)
+  
+  (shutdown-agents)
+  (System/exit 0))
+
 
 (comment
 

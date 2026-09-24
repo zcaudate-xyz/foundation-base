@@ -3,8 +3,7 @@
   (:require [clojure.string :as string]
             [lang.core :as l]
             [lang.core.impl :as impl]
-            [melbourne.tama :as tama-source]
-            [component.web-tama-slim]))
+            [melbourne.tama :as tama-source]))
 
 (l/script :js
   {:runtime :websocket

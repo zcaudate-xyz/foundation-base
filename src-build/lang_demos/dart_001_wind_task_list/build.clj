@@ -6,7 +6,7 @@
             [std.lib.env :as env]
             [std.lib.os :as os]
             [std.make :as make :refer [def.make]]
-            [xtalk.packages :as packages]))
+            [lang.runtime.basic.impl.process-dart :as dart-runtime]))
 
 (def +build-root+ ".build/demo-wind-task-list")
 (def +app-root+ (str +build-root+ "/wind_demo"))
@@ -15,15 +15,12 @@
   ["name: wind_demo"
    "description: xt.ui portable task list rendered by fluttersdk_wind"
    "publish_to: none"
-   "resolution: workspace"
    "version: 0.1.0+1"
    "environment:"
    "  sdk: '>=3.6.0 <4.0.0'"
    "dependencies:"
    "  flutter:"
    "    sdk: flutter"
-   "  xtalk_ui: 0.1.0"
-   "  xtalk_lang: 0.1.0"
    "  fluttersdk_wind: ^1.2.0"
    "dev_dependencies:"
    "  flutter_test:"
@@ -35,9 +32,9 @@
 (def +main-dart+
   ["import 'package:flutter/material.dart';"
    "import 'package:fluttersdk_wind/fluttersdk_wind.dart';"
-   "import 'package:xtalk_ui/core.dart' as ui;"
-   "import 'package:xtalk_ui/state/core.dart' as state_ui;"
-   "import 'package:xtalk_ui/wind.dart' as wind_ui;"
+   "import 'package:wind_demo/xt_ui/core.dart' as ui;"
+   "import 'package:wind_demo/xt_ui/state/core.dart' as state_ui;"
+   "import 'package:wind_demo/xt_ui/wind.dart' as wind_ui;"
    ""
    "import 'app.dart' as app;"
    ""
@@ -150,8 +147,29 @@
    "  });"
    "}"])
 
-(def.make PACKAGES
-  (packages/dart-project +build-root+ ["wind_demo"]))
+(defn- normalize-dart-module
+  "adds Dart SDK imports required by emitted raw symbols"
+  [source _static]
+  (dart-runtime/ensure-dart-imports source))
+
+(def +dart-root-prefix+
+  (array-map
+   'xt.lang      "package:wind_demo/xt_lang"
+   'xt.event     "package:wind_demo/xt_event"
+   'xt.net       "package:wind_demo/xt_net"
+   'xt.substrate "package:wind_demo/xt_substrate"
+   'xt.ui        "package:wind_demo/xt_ui"
+   ;; Dart platform adapters retain their nested package layout:
+   ;; dart.ui.wind -> package:wind_demo/xt_ui/ui/wind.dart.
+   'dart         "package:wind_demo/xt_ui"
+   :default      "package:wind_demo"))
+
+(def +dart-code+
+  {:extra-namespaces false
+   :link {:path-separator "/"
+          :path-suffix ".dart"
+          :root-prefix +dart-root-prefix+}
+   :transforms {:full [normalize-dart-module]}})
 
 (def.make APPLICATION
   {:tag "demo-wind-task-list"
@@ -168,13 +186,68 @@
                        :target "wind_demo/test"
                        :file "widget_test.dart"
                        :main +widget-test+}]}
-   :default [{:type :module.single
+   :default [{:type :module.directory
+              :lang :dart
+              :search ["src-lang/xt/lang"]
+              :main 'xt.lang
+              :target "wind_demo/lib/xt_lang"
+              :emit {:code +dart-code+
+                     :lang/format :full}}
+
+             {:type :module.directory
+              :lang :dart
+              :search ["src-lang/xt/event"]
+              :main 'xt.event
+              :target "wind_demo/lib/xt_event"
+              :emit {:code +dart-code+
+                     :lang/format :full}}
+
+             {:type :module.directory
+              :lang :dart
+              :search ["src-lang/xt/net"]
+              :main 'xt.net
+              :target "wind_demo/lib/xt_net"
+              :emit {:code +dart-code+
+                     :lang/format :full}}
+
+             {:type :module.directory
+              :lang :dart
+              :search ["src-lang/xt/substrate"]
+              :main 'xt.substrate
+              :target "wind_demo/lib/xt_substrate"
+              :emit {:code +dart-code+
+                     :lang/format :full}}
+
+             {:type :module.single
+              :lang :dart
+              :main 'xt.substrate
+              :target "wind_demo/lib/xt_substrate"
+              :file "substrate.dart"
+              :emit {:code +dart-code+
+                     :lang/format :full}}
+
+             {:type :module.directory
+              :lang :dart
+              :search ["src-lang/xt/ui"]
+              :main 'xt.ui
+              :target "wind_demo/lib/xt_ui"
+              :emit {:code +dart-code+
+                     :lang/format :full}}
+
+             {:type :module.directory
+              :lang :dart
+              :search ["src-lang/dart/ui"]
+              :main 'dart.ui
+              :target "wind_demo/lib/xt_ui"
+              :emit {:code +dart-code+
+                     :lang/format :full}}
+
+             {:type :module.single
               :lang :dart
               :main 'lang-demos.dart-001-wind-task-list.app
               :target "wind_demo/lib"
               :file "app.dart"
-              :emit {:code {:link {:path-suffix ".dart"
-                                    :root-prefix (packages/root-prefix :dart :ui)}}
+              :emit {:code +dart-code+
                      :lang/format :full}}]})
 
 (defn- run-command!
@@ -205,7 +278,6 @@
 (defn build!
   []
   (ensure-scaffold!)
-  (make/build-all PACKAGES)
   (make/build-all APPLICATION)
   (run-command! +app-root+ ["flutter" "pub" "get"])
   +app-root+)

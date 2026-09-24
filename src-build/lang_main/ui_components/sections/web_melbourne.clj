@@ -1,4 +1,4 @@
-(ns component.web-melbourne
+(ns lang-main.ui-components.sections.web-melbourne
   (:require [lang.core :as l]
             [std.lib :as h]))
 

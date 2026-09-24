@@ -1,4 +1,4 @@
-(ns component.web-pune-frame-graph
+(ns lang-main.ui-components.sections.web-pune-frame-graph
   (:require [lang.core :as l]
             [std.lib :as h]))
 

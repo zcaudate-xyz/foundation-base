@@ -1,4 +1,4 @@
-(ns component.web-native
+(ns lang-main.ui-components.sections.web-native
   (:require [lang.core :as  l]
             [std.lib :as h]))
 

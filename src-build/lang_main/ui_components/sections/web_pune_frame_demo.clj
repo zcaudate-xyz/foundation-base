@@ -1,4 +1,4 @@
-(ns component.web-pune-frame-demo
+(ns lang-main.ui-components.sections.web-pune-frame-demo
   (:require [lang.core :as l]
             [std.lib :as h]))
 
