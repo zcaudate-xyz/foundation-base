@@ -32,7 +32,8 @@
    :layout
    :emit
    :lang/xtalk-context
-   :lang/provenance])
+   :lang/provenance
+   :global-init])
 
 (defn emit-main-loop
   "creates the raw emit

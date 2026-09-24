@@ -29,6 +29,9 @@
 ;; controls whether to print a form
 (def ^:dynamic *print* #{})
 
+;; controls whether free-form scripts include global initializers
+(def ^:dynamic *global-init* false)
+
 ;; controls whether to shortcut at the input string
 (def ^:dynamic *input* #{})
 
@@ -95,6 +98,13 @@
   {:added "4.0"}
   ([& body]
    `(binding [*output* #{:raw}]
+      ~@body)))
+
+(defmacro with:global-init
+  "includes global initializers in free-form scripts"
+  {:added "4.1"}
+  ([& body]
+   `(binding [*global-init* true]
       ~@body)))
 
 (defn get-entry
@@ -265,17 +275,19 @@
   (let [meta (ptr-invoke-meta ptr meta)]
     (binding [impl/*print-form* (:input-form *print*)]
       (cond (:form ptr)
-            (impl/emit-str (:form ptr) meta)
+            (let [meta (if *global-init*
+                         (assoc (merge {:layout :full} meta)
+                                :global-init true)
+                         meta)]
+              (impl/emit-str (:form ptr) meta))
 
             (:id ptr)
-            (let [entry (-> (snap/get-book (:snapshot meta)
-                                           :lang)
-                             
-                             (book/get-base-entry (:module ptr)
-                                                 (:id ptr)
-                                                 (:section ptr)))]
+            (let [entry @ptr]
               (if (= :defrun (:op-key entry))
-                (impl/emit-str (apply list 'do (drop 2 (:form @ptr))) meta)
+                (impl/emit-str (apply list 'do
+                                      (drop 2 (or (:form-input entry)
+                                                  (:form entry))))
+                               meta)
                (impl/emit-str (apply list ptr args) meta)))
             
             :else
@@ -289,22 +301,20 @@
   [ptr args meta]
   (let [meta (ptr-invoke-meta ptr (merge {:layout :full}
                                          meta))
-        ;; A free pointer is evaluated as an isolated expression.  The
-        ;; current module's `:includes` are compile-time conveniences for
-        ;; module code, not dependencies of every ad-hoc expression.  Without
-        ;; removing them here, `!.js (+ 1 2 3)` pulls in every included UI
-        ;; module (and its React references) before evaluating the expression.
-        meta (if (:form ptr)
-               (update meta :module dissoc :includes)
-               meta)]
+        meta (cond-> meta
+               (:form ptr) (assoc :global-init *global-init*))]
     (binding [impl/*print-form* (:input-form *print*)]
       (cond (:form ptr)
             (impl/emit-script (:form ptr) meta)
 
             (:id ptr)
-            (if (= :defrun (:op-key @ptr))
-              (impl/emit-script (apply list 'do (drop 2 (:form @ptr))) meta)
-              (impl/emit-script (apply list ptr args) meta))
+            (let [entry @ptr]
+              (if (= :defrun (:op-key entry))
+                (impl/emit-script (apply list 'do
+                                         (drop 2 (or (:form-input entry)
+                                                     (:form entry))))
+                                  meta)
+                (impl/emit-script (apply list ptr args) meta)))
             
             :else
             (impl/emit-script (with-meta (vec args)

@@ -43,7 +43,6 @@
                       
                       fragment   ;; macros
                       code       ;; main code
-                     includes   ;; included modules
 
                      ;; misc (for adding additional data not related to runtime)
                      static]
@@ -73,7 +72,6 @@
              
              fragment
              code
-             includes
 
             static
             display] :as m}]
@@ -90,7 +88,6 @@
                              ;; Code
                              :fragment {}
                              :code {}
-                            :includes #{}
 
                             ;; Misc
                             :static {}

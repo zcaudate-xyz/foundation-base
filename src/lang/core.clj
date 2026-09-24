@@ -87,6 +87,7 @@
   ptr/with:clip
   ptr/with:input
   ptr/with:raw
+  ptr/with:global-init
   ptr/with:rt
   ptr/with:rt-wrap
   [rt:macro-opts ptr/rt-macro-opts]

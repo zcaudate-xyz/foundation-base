@@ -1,14 +1,15 @@
 (ns lang.core.impl-deps
   (:require [clojure.set :as set]
-             [lang.base.book :as b]
-             [lang.base.emit :as emit]
-             [lang.base.emit-preprocess :as preprocess] [lang.base.preprocess-base :as preprocess-base]
-             [lang.base.emit-rewrite :as rewrite]
-             [lang.base.grammar-xtalk-system :as xtalk-system]
-             [lang.core.impl-deps-imports :as imports]
-             [lang.core.impl-entry :as entry]
-             [lang.base.util :as ut]
-             [std.lib.collection :as collection]
+            [lang.base.book :as b]
+            [lang.base.emit :as emit]
+            [lang.base.emit-preprocess :as preprocess]
+            [lang.base.preprocess-base :as preprocess-base]
+            [lang.base.emit-rewrite :as rewrite]
+            [lang.base.grammar-xtalk-system :as xtalk-system]
+            [lang.core.impl-deps-imports :as imports]
+            [lang.core.impl-entry :as entry]
+            [lang.base.util :as ut]
+            [std.lib.collection :as collection]
             [std.lib.deps :as deps]
             [std.lib.foundation :as f]))
 
@@ -106,12 +107,37 @@
           (or initial {})
           modules))
 
+(defn is-global-entry?
+  [book id]
+  (= :defglobal (:op-key (b/get-code-entry book id))))
+
+(defn collect-script-entry-ids
+  "resolves script entries, optionally omitting global initializers"
+  {:added "4.1"}
+  [book sym-ids global-init]
+  (if global-init
+    (:all (deps/deps-resolve book sym-ids))
+    (loop [all #{}
+           pending (set sym-ids)]
+      (let [pending (set/difference pending all)
+            global-entry? (partial is-global-entry? book)]
+        (if (empty? pending)
+          (set (remove global-entry? all))
+          (let [all (into all pending)
+                next (->> pending
+                          (remove global-entry?)
+                          (mapcat (partial b/get-code-deps book))
+                          set)]
+            (recur all next)))))))
+
 (defn collect-script-entries
   "collects all entries"
   {:added "4.0"}
   ([{:keys [modules] :as book} sym-ids]
-   (let [ids  (collection/seqify sym-ids)
-         ids  (:all (deps/deps-resolve book ids))
+   (collect-script-entries book sym-ids {:global-init true}))
+  ([{:keys [modules] :as book} sym-ids {:keys [global-init]
+                                        :or {global-init true}}]
+   (let [ids  (collect-script-entry-ids book (collection/seqify sym-ids) global-init)
          module-ids (set (map ut/sym-module ids)) 
          module-lu  (->> (deps/deps-ordered book module-ids)
                          (map (fn [i id]
@@ -144,7 +170,8 @@
                              (xtalk-system/xtalk-ops-polyfill-symbols (:grammar book)))
         [entries module-lu] (collect-script-entries book
                                                     (concat sym-ids
-                                                            polyfill-sym-ids))
+                                                            polyfill-sym-ids)
+                                                    {:global-init (not= false (:global-init mopts))})
         natives (imports/script-imports book entries)]
     [form entries natives]))
 

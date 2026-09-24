@@ -348,8 +348,7 @@
        (remove (fn [[alias _]]
                  (= alias '-)))
        (mapv (fn [[alias dep]]
-               (cond-> [dep :as alias]
-                 ((or (:includes module #{}) dep) dep) (conj :include true))))
+               [dep :as alias]))
        (sort-by first)))
 
 (defn module-export-imports
@@ -513,9 +512,6 @@
                               (map :as)
                               (keep (fn [x] (if (vector? x) (last x) x)))
                               (collection/map-juxt [identity identity])))
-         includes   (->> requires
-                         (keep (fn [[k v]] (if (:include v) k)))
-                         (set))
          _          (if (not *skip-check*) (module-create-check book module-id link))]
      (module/book-module {:lang lang
                           :id module-id
@@ -529,7 +525,6 @@
                           :require-impl require-impl
                           :implements implements
                           :specialize (or specialize {})
-                          :includes   includes
 
                           :static static}))))
 
