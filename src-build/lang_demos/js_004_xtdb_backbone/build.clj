@@ -21,101 +21,63 @@
                    :path (. path (resolve __dirname "dist"))}})]))
 
 (def +webapp-index+
-  ["<!doctype html>"
-   "<html lang=\"en\">"
-   "<head>"
-   "  <meta charset=\"utf-8\" />"
-   "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"
-   "  <title>lang-demos.js-004-xtdb-backbone</title>"
-   "  <link rel=\"stylesheet\" href=\"./styles.css\" />"
-   "</head>"
-   "<body>"
-   "  <main id=\"app\"></main>"
-   ""
-   "  <script type=\"module\" src=\"./app.js\"></script>"
-   "</body>"
-   "</html>"])
+  [:html {:lang "en"}
+   [:head
+    [:meta {:charset "utf-8"}]
+    [:meta {:name "viewport"
+            :content "width=device-width, initial-scale=1"}]
+    [:title "lang-demos.js-004-xtdb-backbone"]
+    [:link {:rel "stylesheet"
+            :href "./styles.css"}]]
+   [:body
+    [:main {:id "app"}]
+    [:script {:type "module"
+              :src "./app.js"}]]])
 
 (def +webapp-styles+
-  [":root {"
-   "  color-scheme: dark;"
-   "  font-family: ui-sans-serif, system-ui, sans-serif;"
-   "  background: #0b1020;"
-   "  color: #e5eefc;"
-   "}"
-   ""
-   "* { box-sizing: border-box; }"
-   ""
-   "body {"
-   "  margin: 0;"
-   "  min-height: 100vh;"
-   "  background: linear-gradient(180deg, #0b1020, #121933);"
-   "}"
-   ""
-   "#app {"
-   "  min-height: 100vh;"
-   "}"
-   ""
-   ".shell {"
-   "  display: grid;"
-   "  gap: 1rem;"
-   "  max-width: 960px;"
-   "  margin: 0 auto;"
-   "  padding: 2rem;"
-   "}"
-   ""
-   ".panel {"
-   "  background: rgba(15, 23, 42, 0.92);"
-   "  border: 1px solid rgba(148, 163, 184, 0.18);"
-   "  border-radius: 16px;"
-   "  padding: 1rem 1.25rem;"
-   "  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.3);"
-   "}"
-   ""
-   "form {"
-   "  display: grid;"
-   "  gap: 0.75rem;"
-   "}"
-   ""
-   "label {"
-   "  display: grid;"
-   "  gap: 0.35rem;"
-   "  font-size: 0.95rem;"
-   "}"
-   ""
-   "input, button {"
-   "  border-radius: 10px;"
-   "  border: 1px solid rgba(148, 163, 184, 0.28);"
-   "  padding: 0.7rem 0.85rem;"
-   "  font: inherit;"
-   "}"
-   ""
-   "input {"
-   "  background: #020617;"
-   "  color: inherit;"
-   "}"
-   ""
-   "button {"
-   "  width: fit-content;"
-   "  background: #2563eb;"
-   "  color: white;"
-   "  cursor: pointer;"
-   "}"
-   ""
-    "button:disabled {"
-    "  opacity: 0.65;"
-    "  cursor: not-allowed;"
-    "}"
-   ""
-   "pre {"
-   "  margin: 0;"
-   "  padding: 0.9rem;"
-   "  border-radius: 12px;"
-   "  background: #020617;"
-   "  overflow: auto;"
-   "  white-space: pre-wrap;"
-   "  word-break: break-word;"
-   "}"])
+  [[":root" {:color-scheme :dark
+             :font-family "ui-sans-serif, system-ui, sans-serif"
+             :background "#0b1020"
+             :color "#e5eefc"}]
+   ["*" {:box-sizing :border-box}]
+   ["body" {:margin "0"
+            :min-height "100vh"
+            :background "linear-gradient(180deg, #0b1020, #121933)"}]
+   ["#app" {:min-height "100vh"}]
+   [".shell" {:display :grid
+              :gap "1rem"
+              :max-width "960px"
+              :margin "0 auto"
+              :padding "2rem"}]
+   [".panel" {:background "rgba(15, 23, 42, 0.92)"
+              :border "1px solid rgba(148, 163, 184, 0.18)"
+              :border-radius "16px"
+              :padding "1rem 1.25rem"
+              :box-shadow "0 18px 36px rgba(0, 0, 0, 0.3)"}]
+   ["form" {:display :grid
+            :gap "0.75rem"}]
+   ["label" {:display :grid
+             :gap "0.35rem"
+             :font-size "0.95rem"}]
+   ["input, button" {:border-radius "10px"
+                     :border "1px solid rgba(148, 163, 184, 0.28)"
+                     :padding "0.7rem 0.85rem"
+                     :font :inherit}]
+   ["input" {:background "#020617"
+             :color :inherit}]
+   ["button" {:width "fit-content"
+              :background "#2563eb"
+              :color :white
+              :cursor :pointer}]
+   ["button:disabled" {:opacity "0.65"
+                        :cursor :not-allowed}]
+   ["pre" {:margin "0"
+           :padding "0.9rem"
+           :border-radius "12px"
+           :background "#020617"
+           :overflow :auto
+           :white-space :pre-wrap
+           :word-break :break-word}]])
 
 (def +makefile+
  [[:.PHONY {:- ["init" "build" "build-worker" "sync-worker" "start"]}]
@@ -174,11 +136,12 @@
              :target "sharedworker/src"
              :file "custom.js"
              :main ["export default {};"]}
-            {:type :raw
+            {:type :html
+             :header "<!doctype html>"
              :target "webapp"
              :file "index.html"
              :main +webapp-index+}
-            {:type :raw
+            {:type :css
              :target "webapp"
              :file "styles.css"
              :main +webapp-styles+}]}

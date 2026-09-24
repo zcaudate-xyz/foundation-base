@@ -272,14 +272,17 @@
   "emits the invoke string"
   {:added "4.0"}
   [ptr args meta]
-  (let [meta (ptr-invoke-meta ptr meta)]
+  (let [meta (ptr-invoke-meta ptr meta)
+        global-init? (get ptr :global-init *global-init*)]
     (binding [impl/*print-form* (:input-form *print*)]
       (cond (:form ptr)
-            (let [meta (if *global-init*
+            (let [meta (if global-init?
                          (assoc (merge {:layout :full} meta)
                                 :global-init true)
                          meta)]
-              (impl/emit-str (:form ptr) meta))
+              (if global-init?
+                (impl/emit-script (:form ptr) meta)
+                (impl/emit-str (:form ptr) meta)))
 
             (:id ptr)
             (let [entry @ptr]
@@ -302,7 +305,8 @@
   (let [meta (ptr-invoke-meta ptr (merge {:layout :full}
                                          meta))
         meta (cond-> meta
-               (:form ptr) (assoc :global-init *global-init*))]
+               (:form ptr) (assoc :global-init
+                                  (get ptr :global-init *global-init*)))]
     (binding [impl/*print-form* (:input-form *print*)]
       (cond (:form ptr)
             (impl/emit-script (:form ptr) meta)

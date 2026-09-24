@@ -59,8 +59,8 @@
                "$.user3" {:name "Charlie"
                           :address "Address C"
                           :status "busy"}
-               #_#_"$.user4" {:name "Charlie"
-                              :address "Address C"
+               "$.user4" {:name "David"
+                          :address "Address D"
                           :status "busy"}}
       :style {:position "absolute",
               :top 10,
@@ -78,8 +78,8 @@
      [:% -/WrappedUserCard
       {"$id" "user3"
        :key "3"}]
-     #_[:% -/WrappedUserCard
-      {"$id" "user3"
+     [:% -/WrappedUserCard
+      {"$id" "user4"
        :key "4"}]]
     #_[:% -/WrappedUserCard
        {"$" {:name "Hello"
@@ -119,48 +119,14 @@
   (!.js
     [:div "hello"])
   
-  (h/prn "ehhol")
   
-  (h/with-out-str
-    (l/with:print
-      (h/suppress
-       (!.js
-         (base-box/set-data -/Global ["Main"] -/AppMain)))))
-  
-  (base-box/set-data)
-
-  (l/with:print
-    (!.js
-      -/AppMain))
-  
-  (l/with:print
-    (!.js
-      -/Global))
-  
-  (l/with:print
-    (!.js
-      (+ 1 2 3)))
-  
-  (!.js
-    )
-  
-  (!.js
-    (base-box/set-data -/Global ["Main"] -/AppMain))
-  
-  (!.js
-    (client/client-ws "localhost"
-                      29001
-                      {}))
-  
-  (!.js
-    (alert "hello"))
   
   (!.js
     (console.log "hello"))
   
   (!.js
     (+ 1 2 3))
-
+  
   (!.js
     React)
   (!.js

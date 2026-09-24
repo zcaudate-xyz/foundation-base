@@ -192,7 +192,6 @@
       => '{:require-impl nil,
            :static nil,
            :specialize {},
-           :includes #{},
            :native-lu {},
            :internal {JS.ui ui, JS.app -},
            :implements [],
@@ -208,7 +207,6 @@
       => '{:require-impl nil,
            :static nil,
            :specialize {},
-           :includes #{},
            :native-lu {Puck "@measured/puck",
                        Radix "@radix-ui/themes"},
            :internal {JS.ui -},
@@ -393,37 +391,6 @@
                   xt.lang.common-promise}
            :graph {demo.promise #{xt.lang.common-promise}
                    xt.lang.common-promise #{}}})
-
-(comment
-
-  (dissoc
-   (lang.core/get-module
-    +library-js+
-    :js
-    'JS.app)
-   :code :fragment
-   )
-
-  '{:require-impl nil,
-    :static nil,
-    :native-lu {Puck "@measured/puck", Radix "@radix-ui/themes"},
-    :internal {JS.ui -},
-    :lang :js,
-    :alias {Puck Puck, Radix Radix},
-    :native
-    {"@measured/puck" {:as [* Puck]},
-     "@radix-ui/themes"
-     {:as [* Radix], :bundle [["@radix-ui/themes/styles.css"]]}},
-    :link {- JS.ui},
-    :id JS.ui,
-    :display :default}
-
-  (get-namespace-imports
-   '{}
-   '{JS.ui/Puck {"@measured/puck" #{Puck}},
-     JS.ui/Button {"@radix-ui/themes" #{Radix}}}
-   )
-  {JS.ui {"@measured/puck" #{Puck}, "@radix-ui/themes" #{Radix}}})
 
 (comment
 

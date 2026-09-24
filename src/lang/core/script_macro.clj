@@ -166,8 +166,9 @@
   {:added "4.0"}
   [lang args {:keys [input raw debug clip] :as meta}]
   (let [{:keys [module] :as rt} (ut/lang-rt lang)
-        ptr (ut/lang-pointer lang {:module module
-                                   :form (ptr/free-form args)})]
+        ptr (assoc (ut/lang-pointer lang {:module module
+                                          :form (ptr/free-form args)})
+                   :global-init ptr/*global-init*)]
     (call-thunk meta
                 (fn []
                   (std.lib.context.pointer/rt-invoke-ptr

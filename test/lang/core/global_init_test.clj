@@ -6,6 +6,7 @@
             [lang.core.impl :as impl]
             [lang.core.impl-entry :as entry]
             [lang.core.library :as lib]
+            [lang.core.pointer :as pointer]
             [lang.core.script-macro :as macro]
             [lang.model.builtin.spec-js :as js]
             [lang.model.builtin.spec-xtalk :as xtalk]))
@@ -38,9 +39,12 @@
            (module/book-module {:lang :js :id 'sample.main}))
         default (impl/with:library [library]
                   (macro/intern-!-fn :js ['sample.ui/sample] {}))
+        binding-value (l/with:global-init pointer/*global-init*)
         initialized (impl/with:library [library]
                       (l/with:global-init
                         (macro/intern-!-fn :js ['sample.ui/sample] {})))]
+    binding-value => true
+
     default
     => "globalThis[\"sample_ui$$sample\"]"
 
