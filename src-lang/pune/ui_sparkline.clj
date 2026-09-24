@@ -9,8 +9,8 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react-native :as n :include [:fn :svg]]
-             [js.react :as r :include [:fn]]
+   :require [[js.react-native :as n]
+             [js.react :as r]
              [js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]

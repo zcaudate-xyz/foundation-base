@@ -10,8 +10,8 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
+   :require [[js.react :as r]
+             [js.react-native :as n]
              [melbourne.base-palette :as base-palette]
              [pune.ui-page :as ui-page]]
    :export [MODULE]})

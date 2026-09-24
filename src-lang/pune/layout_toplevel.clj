@@ -10,7 +10,7 @@
              [xt.lang.common-data :as data]
              [xt.lang.common-lib :as lib]
              [js.react :as r]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.ui-frame :as ui-frame]
              [melbourne.base-palette :as base-palette]]
    :export [MODULE]})
@@ -88,20 +88,3 @@
     bodyView]))
 
 (def.js MODULE (!:module))
-
-
-(comment
-
-  (var [topVisible setTopVisible]   (r/local showGuest))
-  (var [leftVisible setLeftVisible] (r/local (not showGuest)))
-  (r/watch [showGuest]
-    (when showGuest
-      (jc/future-delayed [100]
-        (setLeftVisible (not showGuest)))
-      (jc/future-delayed [300]
-        (setTopVisible showGuest)))
-    (when (not showGuest)
-      (jc/future-delayed [100]
-          (setTopVisible showGuest))
-      (jc/future-delayed [300]
-        (setLeftVisible (not showGuest))))))

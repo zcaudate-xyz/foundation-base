@@ -4,7 +4,7 @@
 
 (l/script :js
   {:require [[js.core.impl :as j]
-             [js.react :as r :include [:fn]]
+             [js.react :as r]
              [js.tamagui :as tm]
              [melbourne.slim-core :as slim-core]
              [xt.lang.spec-base :as xt]

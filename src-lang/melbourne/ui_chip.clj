@@ -8,7 +8,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react :as r]
-             [js.react-native :as n :include [[:icon :entypo]]]
+             [js.react-native :as n]
              [melbourne.ui-button :as ui-button]
              [melbourne.ui-static :as ui-static]
              [xt.lang.spec-base :as xt]

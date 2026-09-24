@@ -10,7 +10,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react-native :as n :include [:fn]]
+   :require [[js.react-native :as n]
              [js.react.ext-form :as ext-form]
              [js.react :as r]
              [js.core.impl :as j]

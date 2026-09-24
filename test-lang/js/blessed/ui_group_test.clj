@@ -6,11 +6,11 @@
   {:runtime :basic
    :config   {:emit {:lang/jsx false}}
    :import   [["util" :as NodeUtil]]
-   :require  [[js.react :as r :include [:fn]]
+   :require  [[js.react :as r]
               [js.lib.valtio :as v]
               [js.blessed.ui-group :as ui-group]
               [js.blessed.ui-core :as ui-core]
-              [js.blessed :as b :include [:fn]]
+              [js.blessed :as b]
               [js.lib.chalk :as chk]
               [xt.lang.spec-base :as xt]
               [xt.lang.common-lib :as k]

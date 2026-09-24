@@ -10,24 +10,19 @@
             :id :dev/web-main
             :emit {:native {:suppress true}
                    :lang/jsx false}}
+   
    :import [["react" :as React]]
    :require [[js.module :as jm]
              [js.react :as r]
              [js.react.ext-box :as ext-box]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react.helper-data :as helper]
-             [js.lib.rn-expo :as x :include [:lib]]
+             [js.lib.rn-expo :as x]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-client :as client]
              [xt.event.base-box :as base-box]]})
 
-(comment
-  (xt.lang.common-module/current-natives :js)
-  (xt.lang.common-module/linked-natives :js)
-  (l/rt:module
-   (l/rt :js)))
-
-(defrun.js __import__  
+(defrun.js __import__
   (jm/import-missing)
   (jm/import-set-global))
 
@@ -64,8 +59,8 @@
                "$.user3" {:name "Charlie"
                           :address "Address C"
                           :status "busy"}
-               "$.user4" {:name "Charlie"
-                          :address "Address C"
+               #_#_"$.user4" {:name "Charlie"
+                              :address "Address C"
                           :status "busy"}}
       :style {:position "absolute",
               :top 10,
@@ -82,7 +77,10 @@
        :key "2"}]
      [:% -/WrappedUserCard
       {"$id" "user3"
-       :key "3"}]]
+       :key "3"}]
+     #_[:% -/WrappedUserCard
+      {"$id" "user3"
+       :key "4"}]]
     #_[:% -/WrappedUserCard
        {"$" {:name "Hello"
              :address "World"
@@ -108,6 +106,16 @@
 
 
 (comment
+
+  ^*(!.js
+    -/Global)
+  
+  ^*(!.js
+      (base-box/set-data -/Global ["Main"] -/AppMain))
+  
+  )
+
+(comment
   (!.js
     [:div "hello"])
   
@@ -120,11 +128,29 @@
          (base-box/set-data -/Global ["Main"] -/AppMain)))))
   
   (base-box/set-data)
+
+  (l/with:print
+    (!.js
+      -/AppMain))
+  
+  (l/with:print
+    (!.js
+      -/Global))
+  
+  (l/with:print
+    (!.js
+      (+ 1 2 3)))
+  
+  (!.js
+    )
+  
+  (!.js
+    (base-box/set-data -/Global ["Main"] -/AppMain))
   
   (!.js
     (client/client-ws "localhost"
-                    29001
-                    {}))
+                      29001
+                      {}))
   
   (!.js
     (alert "hello"))

@@ -3,7 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require  [[js.react :as r :include [:fn]]
+  {:require  [[js.react :as r]
               [js.blessed.frame-console :as frame-console]
               [js.blessed.ui-core :as ui-core]
               [js.lib.chalk :as chk]]

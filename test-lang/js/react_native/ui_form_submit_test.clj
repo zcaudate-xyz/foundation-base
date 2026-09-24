@@ -12,7 +12,7 @@
     :require [[js.react-native.helper-color :as c]
               [xt.lang.common-math :as math]
               [js.react :as r]
-              [js.react-native :as n :include [:fn]]
+              [js.react-native :as n]
               [js.react-native.ui-button :as ui-button]
               [js.react-native.ui-input :as ui-input]
               [xt.lang.spec-base :as xt]]

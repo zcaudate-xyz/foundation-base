@@ -14,7 +14,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react :as r]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [js.react-native.ui-tooltip :as ui-tooltip]
              [melbourne.base-palette :as base-palette]
              [melbourne.ui-button :as ui-button]

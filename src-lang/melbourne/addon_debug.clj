@@ -9,7 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react :as r :include [:fn]]
+   :require [[js.react :as r]
              [js.react-native :as n]]
    :export [MODULE]})
 

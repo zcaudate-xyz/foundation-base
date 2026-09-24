@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:require [[js.react :as r :include [:fn]]
+  {:require [[js.react :as r]
              [js.react.ext-route :as ext-route]
              [xt.lang.common-data :as data]]
    :export [MODULE]})

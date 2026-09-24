@@ -3,7 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require  [[js.react :as r :include [:fn]]
+  {:require  [[js.react :as r]
               [js.core.style :as css]
               [js.blessed.form :as f]
               [js.react.ext-form :as ext-form]

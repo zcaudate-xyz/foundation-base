@@ -12,7 +12,7 @@
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.react :as r]
              [js.react.ext-model :as ext-view]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [melbourne.base-palette :as base-palette]
              [melbourne.ui-group :as ui-group]
              [melbourne.ui-text :as ui-text]

@@ -7,7 +7,7 @@
   {:runtime :basic
    :test-mode true
    :config  {:program :resty}
-   :require [[xt.lang.spec-base :as xt :include [:json]]
+   :require [[xt.lang.spec-base :as xt]
              [lua.nginx :as n]
              [lua.nginx.crypt :as crypt]]})
 

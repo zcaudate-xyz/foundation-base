@@ -11,7 +11,7 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.react :as r]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]

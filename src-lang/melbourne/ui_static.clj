@@ -13,7 +13,7 @@
    :require [[js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.ui-tooltip :as ui-tooltip]
              [js.react-native.ui-scrollview :as ui-scrollview]
              [xt.lang.spec-base :as xt]

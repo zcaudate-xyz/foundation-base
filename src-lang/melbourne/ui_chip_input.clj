@@ -8,7 +8,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react :as r]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [js.react-native.ui-util :as ui-util]
              [melbourne.ui-input :as ui-input]
              [melbourne.ui-chip :as ui-chip]

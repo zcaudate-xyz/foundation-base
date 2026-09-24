@@ -3,7 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require  [[js.react :as r :include [:fn]]
+  {:require  [[js.react :as r]
               [js.lib.datetime :as ut]]
    :export  [MODULE]})
 

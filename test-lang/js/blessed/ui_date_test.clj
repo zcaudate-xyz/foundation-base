@@ -5,11 +5,11 @@
 (l/script :js
   {:runtime :basic
    :config   {:emit {:lang/jsx false}}
-   :require  [[js.react :as r :include [:fn]]
+   :require  [[js.react :as r]
               [js.lib.valtio :as v]
               [js.blessed.ui-core :as ui-core]
               [js.blessed.ui-date :as ui-date]
-              [js.blessed :as b :include [:fn]]
+              [js.blessed :as b]
               [js.lib.chalk :as chk]]
    :export  [MODULE]})
 

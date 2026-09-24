@@ -4,7 +4,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:require [[js.react-native :as n :include [:fn [:icon :entypo]]]
+  {:require [[js.react-native :as n]
              [js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]

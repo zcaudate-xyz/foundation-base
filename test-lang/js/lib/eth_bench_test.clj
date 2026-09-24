@@ -10,10 +10,10 @@
 (l/script- :js
    {:runtime :basic
      :require [[xt.lang.spec-base :as xt]
-                [xt.lang.common-lib :as k]
-                [xt.lang.common-repl :as repl]
-                [js.lib.eth-bench :as e :include [:fn]]
-                [js.lib.eth-solc :as eth-solc :include [:fn]]]})
+               [xt.lang.common-lib :as k]
+               [xt.lang.common-repl :as repl]
+               [js.lib.eth-bench :as e]
+               [js.lib.eth-solc :as eth-solc]]})
 
 (fact:global
  {:setup    [(solidity/rt:stop-hardhat-server)

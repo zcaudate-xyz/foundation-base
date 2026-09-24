@@ -10,12 +10,12 @@
 (l/script- :js
    {:runtime :basic
      :require [[xt.lang.spec-base :as xt]
-                [xt.lang.common-lib :as k]
-                [xt.lang.common-data :as xtd]
-                [xt.lang.common-repl :as repl]
-                [js.lib.eth-lib :as e :include [:fn]]
-                [js.lib.eth-solc :as eth-solc :include [:fn]]
-                [web3.lib.example-counter :as example-counter]]})
+               [xt.lang.common-lib :as k]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-repl :as repl]
+               [js.lib.eth-lib :as e]
+               [js.lib.eth-solc :as eth-solc]
+               [web3.lib.example-counter :as example-counter]]})
 
 (fact:global
   {:setup    [(s/rt:stop-hardhat-server)

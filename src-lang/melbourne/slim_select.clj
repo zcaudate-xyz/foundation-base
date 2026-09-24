@@ -8,7 +8,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react :as r]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [js.react.ext-form :as ext-form]
              [xt.event.base-form :as event-form]
              [melbourne.slim-common :as slim-common]

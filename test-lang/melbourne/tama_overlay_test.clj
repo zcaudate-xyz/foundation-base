@@ -13,8 +13,8 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
+   :require [[js.react :as r]
+             [js.react-native :as n]
              [js.tamagui :as tm]
              [melbourne.tama-overlay :as tama-overlay]]
    :export [MODULE]})

@@ -14,7 +14,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react :as r]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [melbourne.ui-text :as ui-text]
              [melbourne.ui-static :as ui-static]
              [xt.lang.spec-base :as xt]

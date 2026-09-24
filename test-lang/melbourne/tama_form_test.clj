@@ -13,9 +13,9 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react :as r :include [:fn]]
+   :require [[js.react :as r]
              [js.react.ext-form :as ext-form]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.tamagui :as tm]
              [melbourne.tama-form :as tama-form]]
    :export [MODULE]})

@@ -9,7 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react-native :as n :include [:fn]]
+   :require [[js.react-native :as n]
              [pune.ui-breadcrumb-test :as ui-breadcrumb-test]
              [pune.ui-console-test :as ui-console-test]
              [pune.ui-depthchart-test :as ui-depthchart-test]

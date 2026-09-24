@@ -9,7 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.react-native :as n :include [:fn]]]})
+   :require [[js.react-native :as n]]})
 
 (fact:global
  {:setup [(l/rt:restart)

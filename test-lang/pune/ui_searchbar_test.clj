@@ -13,8 +13,8 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
+   :require [[js.react :as r]
+             [js.react-native :as n]
              [pune.common.style :as common-style]
              [pune.ui-searchbar :as searchbar]]
    :export [MODULE]})

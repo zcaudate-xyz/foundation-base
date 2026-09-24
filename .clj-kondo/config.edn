@@ -510,10 +510,12 @@
    clj-kondo.hooks.lang-postgres/defrun.pg clj-kondo.hooks.lang-postgres/defn-pg
    deftype.pg clj-kondo.hooks.lang-postgres/deftype-pg
    clj-kondo.hooks.lang-postgres/deftype.pg clj-kondo.hooks.lang-postgres/deftype-pg
-   std.lib/intern-in hooks.std-lib/intern-in-hook
-   std.lib/intern-all hooks.std-lib/intern-all-hook
-   f/intern-in hooks.std-lib/intern-in-hook
-   f/intern-all hooks.std-lib/intern-all-hook}}
+   std.lib/intern-in hooks.lang-postgres/intern-in-hook
+   std.lib/intern-all hooks.lang-postgres/intern-all-hook
+   std.lib.foundation/intern-in hooks.lang-postgres/intern-in-hook
+   std.lib.foundation/intern-all hooks.lang-postgres/intern-all-hook
+   f/intern-in hooks.lang-postgres/intern-in-hook
+   f/intern-all hooks.lang-postgres/intern-all-hook}}
 
  :linters
   {:namespace-name-mismatch {:level :off}
@@ -579,6 +581,7 @@
              :unresolved-var {:level :off}
              :unresolved-namespace {:level :off}}}}
  :lint-as {std.make/def.make clojure.core/def
+           std.lib.impl/defimpl clojure.core/defrecord
            std.lib.template/$ clojure.core/quote
            defn.xt clojure.core/defn
            defgen.xt clojure.core/defn

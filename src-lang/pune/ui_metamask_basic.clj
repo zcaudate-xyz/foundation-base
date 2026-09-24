@@ -8,10 +8,10 @@
             :provider     [["@metamask/detect-provider" :as MetaMaskDetectProvider]]}
    :import  [["@metamask/onboarding" :as MetaMaskOnboarding]]
    :require [[melbourne.ui-text :as ui-text]
-             [js.lib.eth-lib :as eth-lib :include [:fn]]
+             [js.lib.eth-lib :as eth-lib]
              [js.react-native.ui-util :as ui-util]
-             [js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
+             [js.react :as r]
+             [js.react-native :as n]
              [js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]

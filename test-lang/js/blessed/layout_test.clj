@@ -4,7 +4,7 @@
 
 (l/script :js
   {:runtime :basic
-   :require  [[js.react :as r :include [:fn]]
+   :require  [[js.react :as r]
               [js.lib.valtio :as v]
               [js.blessed.layout :as layout]
               [js.blessed.ui-core :as ui-core]

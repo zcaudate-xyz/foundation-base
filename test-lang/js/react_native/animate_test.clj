@@ -10,8 +10,8 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
+   :require [[js.react :as r]
+             [js.react-native :as n]
              [js.react-native.animate :as a]
              [xt.event.base-animate :as event-animate]
              [xt.lang.spec-base :as xt]

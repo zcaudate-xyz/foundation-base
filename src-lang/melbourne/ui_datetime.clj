@@ -9,7 +9,7 @@
              [js.core.fetch :as fetch]
              [xt.lang.common-data :as data]
              [xt.lang.common-lib :as lib]
-             [js.react :as r :include [:fn]]
+             [js.react :as r]
              [melbourne.ui-helper :as ui-helper]
              [melbourne.base-palette :as base-palette]
              [melbourne.base-theme :as base-theme]

@@ -10,7 +10,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react-native :as n :include [:fn]]
+   :require [[js.react-native :as n]
              [melbourne.slim-submit :as slim-submit]
              [melbourne.slim-error :as slim-error]
              [xt.lang.spec-base :as xt]

@@ -13,7 +13,7 @@
    :require [[js.react :as r]
              [js.react.ext-model :as ext-view]
              [js.react.ext-form :as ext-form]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [melbourne.base-palette :as base-palette]
              [melbourne.base-validators :as validators]
              [melbourne.ui-group :as ui-group]

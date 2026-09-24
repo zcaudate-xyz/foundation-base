@@ -9,8 +9,8 @@
             :emit   {:native {:suppress true}
                      :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
+   :require [[js.react :as r]
+             [js.react-native :as n]
              [js.react-native.helper-color :as c]
              [js.lib.lw-charts :as lw]
              [xt.lang.spec-base :as xt]

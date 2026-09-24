@@ -13,7 +13,7 @@
    :require [[js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]
-             [js.react :as r :include [:fn]]
+             [js.react :as r]
              [js.react-native :as n]
              [js.react-native.ui-check-box :as ui-check-box]
              [xt.lang.spec-base :as xt]

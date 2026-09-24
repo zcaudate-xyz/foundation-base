@@ -8,7 +8,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react :as r]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [melbourne.ui-static :as ui-static]
              [melbourne.ui-input :as ui-input]
              [xt.lang.spec-base :as xt]
@@ -53,4 +53,3 @@
                   :width 30}}])]))
 
 (def.js MODULE (!:module))
-

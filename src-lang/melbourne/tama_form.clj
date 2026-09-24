@@ -11,7 +11,7 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.core.impl :as j]
-             [js.react :as r :include [:fn]]
+             [js.react :as r]
              [js.react.ext-form :as ext-form]
              [js.tamagui :as tm]
              [xt.event.base-form :as event-form]

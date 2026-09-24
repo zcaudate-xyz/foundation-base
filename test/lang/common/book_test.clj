@@ -434,8 +434,8 @@
       :lang :lua
       :link {- L.util
              u L.core}
-      :includes #{L.core}}))
-  => '[[L.core :as u :include true]])
+      }))
+  => '[[L.core :as u]])
 
 ^{:refer lang.base.book/module-export-imports :added "4.1"}
 (fact "reconstructs native imports from stored module metadata"

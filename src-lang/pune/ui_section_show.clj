@@ -13,7 +13,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react :as r]
-             [js.react-native :as n :include [:fn [:entypo :icon]]]
+             [js.react-native :as n]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]
              [xt.lang.common-data :as data]

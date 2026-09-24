@@ -13,7 +13,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r]
              [js.react.ext-model :as ext-model]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-autocomplete :as ui-autocomplete]
              [js.react-native.ui-input :as ui-input]

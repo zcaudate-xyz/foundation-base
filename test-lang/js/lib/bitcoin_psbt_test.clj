@@ -4,12 +4,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require  [[js.lib.bitcoin :as bc :include [:ecc     
-                                               :ecpair  
-                                               :bip32
-                                               :bip39
-                                               :wif
-                                               :safe-buffer]]
+   :require  [[js.lib.bitcoin :as bc]
               [xt.lang.spec-base :as xt]]
    :export  [MODULE]})
 

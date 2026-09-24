@@ -16,7 +16,7 @@
              [xt.lang.common-data :as data]
              [xt.lang.common-lib :as lib]
              [js.react :as r]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.ui-tooltip :as ui-tooltip]
              [js.react-native.ui-util :as ui-util]
              [melbourne.base-palette :as base-palette]

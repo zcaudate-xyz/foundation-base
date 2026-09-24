@@ -9,7 +9,7 @@
              [js.core.fetch :as fetch]
              [xt.lang.common-data :as data]
              [xt.lang.common-lib :as lib]
-             [js.react :as r :include [:fn]]
+             [js.react :as r]
              [js.react-native.ui-picker-basic :as ui-picker-basic]
              [melbourne.ui-helper :as ui-helper]
              [melbourne.base-palette :as base-palette]
@@ -117,4 +117,3 @@
                (:.. rprops)]}])))
 
 (def.js MODULE (!:module))
-

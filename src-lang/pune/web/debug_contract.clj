@@ -14,7 +14,7 @@
              [js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]
-             [js.react-native :as n :include [:fn]]]
+             [js.react-native :as n]]
    :export [MODULE]})
 
 (defn.js ContractSingleHeader

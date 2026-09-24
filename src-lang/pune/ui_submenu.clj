@@ -14,7 +14,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react :as r]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [melbourne.ui-toggle-button :as ui-toggle-button]
              [melbourne.ui-static :as ui-static]
              [melbourne.ui-text :as ui-text]

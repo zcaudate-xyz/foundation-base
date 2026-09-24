@@ -14,8 +14,8 @@
              [js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]
-             [js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
+             [js.react :as r]
+             [js.react-native :as n]
              [melbourne.ui-toggle-button :as ui-toggle-button]]
    :export [MODULE]})
 

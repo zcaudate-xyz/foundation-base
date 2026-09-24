@@ -16,7 +16,7 @@
              [js.core.style :as css]
              [js.react-native.helper-color :as c]
              [js.react :as r]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as ui]
              [pune.ui-market-ladder :as market-ladder]

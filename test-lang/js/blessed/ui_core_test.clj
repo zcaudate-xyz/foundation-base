@@ -5,10 +5,10 @@
 (l/script :js
   {:export [MODULE]
    :import [["util" :as NodeUtil]]
-   :require [[js.react :as r :include [:fn]]
+   :require [[js.react :as r]
              [js.lib.valtio :as v]
              [js.blessed.ui-core :as ui-core]
-             [js.blessed :as b :include [:fn]]
+             [js.blessed :as b]
              [js.lib.chalk :as chk]
              [xt.lang.common-lib :as k]
              [xt.lang.common-data :as xtd]

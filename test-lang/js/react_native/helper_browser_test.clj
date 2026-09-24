@@ -5,7 +5,7 @@
 
 (l/script :js
   {:require [[xt.event.base-route :as event-route]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react.ext-route :as ext-route]
              [js.react-native.helper-browser :as helper-browser]]})
 

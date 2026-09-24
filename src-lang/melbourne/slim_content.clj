@@ -8,7 +8,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react :as r]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [js.react-native.helper-color :as c]
              [xt.lang.spec-base :as xt]
              [xt.lang.common-lib :as lib]

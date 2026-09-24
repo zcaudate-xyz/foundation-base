@@ -8,7 +8,7 @@
              [js.core :as jc]
              [js.core.fetch :as fetch]
              [js.react.ext-form :as ext-form]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [xt.event.base-form :as event-form]
              [melbourne.slim-common :as slim-common]
              [melbourne.ui-spinner :as ui-spinner]
@@ -182,6 +182,5 @@
         (:.. fieldProps)]}]]))
 
 (def.js MODULE (!:module))
-
 
 

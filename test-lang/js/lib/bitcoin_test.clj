@@ -5,17 +5,10 @@
 
 (l/script- :js
   {:runtime :basic
-   :require  [[js.lib.bitcoin :as bc :include [:fn
-                                                :ecc
-                                                :ecpair
-                                                :bip32
-                                                :bip39
-                                                :wif
-                                                :message
-                                                :safe-buffer]]
-               [xt.lang.common-data :as xtd]
-               [xt.lang.common-lib :as k]
-               [xt.lang.spec-base :as xt]]
+   :require  [[js.lib.bitcoin :as bc]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-lib :as k]
+              [xt.lang.spec-base :as xt]]
    :export  [MODULE]})
 
 (fact:global

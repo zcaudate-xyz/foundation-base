@@ -11,7 +11,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.react-native.helper-color :as c]
              [js.react :as r]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as ui]
              [xt.lang.common-math :as math]]

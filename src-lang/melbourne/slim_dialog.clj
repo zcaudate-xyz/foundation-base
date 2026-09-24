@@ -9,7 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react-native :as n :include [:fn]]
+   :require [[js.react-native :as n]
              [js.react-native.ui-modal :as ui-modal]
              [melbourne.base-palette :as base-palette]
              [melbourne.base-font :as base-font]

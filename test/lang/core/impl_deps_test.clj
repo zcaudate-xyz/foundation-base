@@ -1,4 +1,4 @@
-(ns lang.core.impl-deps-test
+4(ns lang.core.impl-deps-test
   (:require [lang.base.emit-prep-lua-test :as prep]
             [lang.core.impl :as impl]
             [lang.core.impl-deps :as deps]

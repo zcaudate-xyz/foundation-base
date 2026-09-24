@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:require [[js.react-native :as n :include [:fn]]
+  {:require [[js.react-native :as n]
              [js.react-native-test :as react-native-test]
              [js.react-native.react-test :as react-test]
              [js.react-native.react-lazy-test :as react-lazy-test]

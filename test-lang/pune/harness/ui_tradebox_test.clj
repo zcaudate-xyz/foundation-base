@@ -10,7 +10,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
-   :require [[js.react-native :as n :include [:fn]]
+   :require [[js.react-native :as n]
              [js.react :as r]
              [melbourne.ui-section :as ui-section]
              [pune.harness.ui-tradebox :as ui-tradebox]]

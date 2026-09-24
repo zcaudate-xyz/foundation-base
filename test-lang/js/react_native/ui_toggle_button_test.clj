@@ -10,7 +10,7 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.react :as r]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-toggle-button :as ui-toggle-button]
              [xt.lang.common-math :as math]]

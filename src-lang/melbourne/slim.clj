@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:require [[js.react :as r :include [:fn]]
+  {:require [[js.react :as r]
              [melbourne.slim-core :as slim-core]
              [melbourne.slim-table-list :as slim-table-list]
              [melbourne.slim-table-toolbar :as slim-table-toolbar]

@@ -6,7 +6,7 @@
   {:require [[js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.ui-spinner :as ui-spinner]
              [melbourne.ui-helper :as ui-helper]
              [melbourne.base-palette :as base-palette]
@@ -156,4 +156,3 @@
        (:.. rprops)]}]))
 
 (def.js MODULE (!:module))
-

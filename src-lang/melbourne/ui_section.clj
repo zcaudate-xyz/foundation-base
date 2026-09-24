@@ -13,7 +13,7 @@
    :require [[js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.ui-util :as ui-util]
              [melbourne.ui-static :as ui-static]
              [melbourne.ui-button :as ui-button]

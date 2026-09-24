@@ -13,8 +13,8 @@
    :require [[js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]
-             [js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react :as r]
+             [js.react-native :as n]
              [js.react-native.ui-tooltip :as ui-tooltip]
              [melbourne.base-palette :as base-palette]
              [melbourne.base-theme :as base-theme]
@@ -75,7 +75,3 @@
       :visible visible}]]))
 
 (def.js MODULE (!:module))
-
-(comment
-  (:= confirmTitle "CONFIRM")
-  (:= confirmText "Do you wish to proceed?"))

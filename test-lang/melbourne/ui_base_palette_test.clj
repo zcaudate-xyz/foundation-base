@@ -11,7 +11,7 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.react :as r]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react.ext-form :as ext-form]
              [xt.event.base-form :as event-form]
              [melbourne.slim-common :as slim-common]

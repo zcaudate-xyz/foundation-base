@@ -5,8 +5,8 @@
 (l/script :js
   {:runtime :websocket
    :config {:id :test/repl-tama-menu}
-   :require [[js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
+   :require [[js.react :as r]
+             [js.react-native :as n]
              [js.tamagui :as tm]
              [melbourne.tama :as tama]]
    :export [MODULE]})

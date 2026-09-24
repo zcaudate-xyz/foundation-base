@@ -14,7 +14,7 @@
              [js.core.fetch :as fetch]
              [js.react-native.helper-color :as c]
              [js.react :as r]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as ui-base]
              [xt.lang.spec-base :as xt]

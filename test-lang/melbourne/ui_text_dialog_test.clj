@@ -11,7 +11,7 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.react :as r]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [melbourne.base-palette :as base-palette]
              [melbourne.ui-text-dialog :as ui-text-dialog]
              [melbourne.ui-section :as ui-section]

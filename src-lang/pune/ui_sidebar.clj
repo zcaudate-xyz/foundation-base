@@ -9,7 +9,7 @@
              [js.core.fetch :as fetch]
              [xt.lang.common-data :as data]
              [xt.lang.common-lib :as lib]
-             [js.react-native :as n :include [:fn [:icon :entypo]]]
+             [js.react-native :as n]
              [melbourne.ui-text :as ui-text]
              [melbourne.ui-static :as ui-static]]
    :export [MODULE]})
