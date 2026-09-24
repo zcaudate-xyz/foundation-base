@@ -72,7 +72,7 @@ Configures the aggregation of metrics across all executed tasks.
     *   `selector-fn`: Extracts value from a result.
     *   `accumulator-fn`: `(fn [acc val] ...)` updates the running total.
     *   `init-value`: Initial value for the accumulator.
-*   **:finalise** `(fn [summary items results] -> summary')`: Final transformation of the summary map before return/display.
+*   **:finalise** `(fn [summary items results] -> summary')`: Final transformation of the summary map before return/dislang-demos.
 
 ---
 

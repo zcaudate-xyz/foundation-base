@@ -30,7 +30,7 @@
 
 [[:section {:title "System arrays"}]]
 
-"`array` builds a component array from a vector of configs. `array?` checks the result, and `info-array` summarises the array for display."
+"`array` builds a component array from a vector of configs. `array?` checks the result, and `info-array` summarises the array for dislang-demos."
 
 (fact "construct and inspect a component array"
   (let [arr (array {:constructor identity} [{:id 1} {:id 2}])]

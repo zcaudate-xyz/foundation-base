@@ -69,13 +69,16 @@
                      :output {:path (. -/path (join __dirname "dist"))
                               :filename "main.js"}
                      :plugins
-                     (-> [#_(new (. -/webpack IgnorePlugin) #"\.(css|less)$")
-                          (new (. -/webpack BannerPlugin)
+                     (:? provide
+                         [(new (. -/webpack BannerPlugin)
                                "require(\"source-map-support\").install();"
                                {:raw true :entryOnly false})
-                          (:? provide (new (. -/webpack ProvidePlugin) provide))
+                          (new (. -/webpack ProvidePlugin) provide)
                           (new -/RunNodeWebpackPlugin)]
-                         (.filter (fn:> [x] x)))})))
+                         [(new (. -/webpack BannerPlugin)
+                               "require(\"source-map-support\").install();"
+                               {:raw true :entryOnly false})
+                          (new -/RunNodeWebpackPlugin)])})))
 
 (def.js node-prod-config
   (Object.assign {} -/node-common-config

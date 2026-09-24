@@ -1,0 +1,17 @@
+(ns lang-demos.go-000-user-directory.main
+  (:require [lang.core :as l]
+            [lang.model.builtin.spec-go]))
+
+(l/script :go)
+
+(defn.go ^{:- [:string]}
+  FormatUserKey
+  [:string orgId
+   :string userId]
+  (return (+ orgId ":" userId)))
+
+(defn.go ^{:- [:int]}
+  NextOffset
+  [:int offset
+   :int pageSize]
+  (return (+ offset pageSize)))

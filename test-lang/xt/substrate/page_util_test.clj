@@ -15,7 +15,6 @@
              [xt.substrate.page-util :as page-util]
              [xt.substrate.base-space :as node-space]]})
 
-^{:clj-kondo/ignore [:unresolved-symbol]}
 (defn.js create-node
   []
   (return

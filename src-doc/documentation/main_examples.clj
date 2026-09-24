@@ -29,56 +29,56 @@
               :items [{:meta "C / pthreads"
                        :title "Hello from native threads"
                        :text "A small generated C project using pthreads."
-                       :href "https://github.com/hoebat/play.c-000-pthreads-hello"}
+                       :href "https://github.com/hoebat/lang-demos.c-000-pthreads-hello"}
                       {:meta "OpenResty / Lua"
                        :title "NGX hello"
                        :text "A generated OpenResty project demonstrating Lua emission and server integration."
-                       :href "https://github.com/hoebat/play.ngx-000-hello"}
+                       :href "https://github.com/hoebat/lang-demos.ngx-000-hello"}
                       {:meta "OpenResty / runtime"
                        :title "NGX live evaluation"
                        :text "A generated server for evaluating Lua through the runtime workflow."
-                       :href "https://github.com/hoebat/play.ngx-001-eval"}
+                       :href "https://github.com/hoebat/lang-demos.ngx-001-eval"}
                       {:meta "Terminal UI"
                        :title "Counter"
                        :text "A generated Blessed-style terminal counter application."
-                       :href "https://github.com/hoebat/play.tui-000-counter"}
+                       :href "https://github.com/hoebat/lang-demos.tui-000-counter"}
                       {:meta "Terminal UI"
                        :title "Fetch"
                        :text "A generated terminal application demonstrating data fetching."
-                       :href "https://github.com/hoebat/play.tui-001-fetch"}
+                       :href "https://github.com/hoebat/lang-demos.tui-001-fetch"}
                       {:meta "Terminal UI"
                        :title "Game of Life"
                        :text "A generated terminal Game of Life project."
-                       :href "https://github.com/zcaudate/play.tui-002-game-of-life"}]}]]
+                       :href "https://github.com/zcaudate/lang-demos.tui-002-game-of-life"}]}]]
 
 [[:section {:title "Source and build links"}]]
 
-"Generated repositories are outputs. The authored source and project-generation definitions live in `src-build/play`."
+"Generated repositories are outputs. The authored source and project-generation definitions live in `src-build/projects/play`."
 
 [[:card-grid {:items [{:meta "C pthreads"
                        :title "Source"
                        :text "The Lang-authored program."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/c_000_pthreads_hello/main.clj"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/c_000_pthreads_hello/main.clj"}
                       {:meta "C pthreads"
                        :title "Build"
                        :text "The std.make project definition."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/c_000_pthreads_hello/build.clj"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/c_000_pthreads_hello/build.clj"}
                       {:meta "NGX hello"
                        :title "Source"
                        :text "The authored Lua/OpenResty program."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_000_hello/main.clj"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/ngx_000_hello/main.clj"}
                       {:meta "NGX hello"
                        :title "Build"
                        :text "The generated project definition."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_000_hello/build.clj"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/ngx_000_hello/build.clj"}
                       {:meta "NGX eval"
                        :title "Source"
                        :text "The authored live-evaluation server."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_001_eval/main.clj"}
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/ngx_001_eval/main.clj"}
                       {:meta "NGX eval"
                        :title "Build"
                        :text "The generated project definition."
-                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_001_eval/build.clj"}]}]]
+                       :href "https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/ngx_001_eval/build.clj"}]}]]
 
 [[:chapter {:title "Run from this repository"}]]
 

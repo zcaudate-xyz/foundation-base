@@ -44,7 +44,7 @@ lang.edn:40:          {:input "src-doc/documentation/lang/lang_seedgen.clj"
           examples
 lang.edn:45:          {:input "src-doc/documentation/lang/lang_examples.clj"
            :title "Examples"
-           :subtitle "generated project examples from src-build/play"}
+           :subtitle "generated project examples from src-build/projects/play"}
 
           walkthrough-basic
 lang.edn:50:          {:input "src-doc/documentation/lang/walkthrough_basic.clj"

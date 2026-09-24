@@ -4384,7 +4384,7 @@
                         },
                         {
                             "name": "fontDisplay",
-                            "description": "The font-display.",
+                            "description": "The font-dislang-demos.",
                             "type": "string"
                         },
                         {
@@ -10260,7 +10260,7 @@
                         },
                         {
                             "name": "noDisplayUpdates",
-                            "description": "Whether updates should not be committed and drawn onto the display. False by default. If\ntrue, only side effects of the BeginFrame will be run, such as layout and animations, but\nany visual updates may not be visible on the display or in screenshots.",
+                            "description": "Whether updates should not be committed and drawn onto the dislang-demos. False by default. If\ntrue, only side effects of the BeginFrame will be run, such as layout and animations, but\nany visual updates may not be visible on the display or in screenshots.",
                             "optional": true,
                             "type": "boolean"
                         },
@@ -10274,7 +10274,7 @@
                     "returns": [
                         {
                             "name": "hasDamage",
-                            "description": "Whether the BeginFrame resulted in damage and, thus, a new frame was committed to the\ndisplay. Reported for diagnostic uses, may be removed in the future.",
+                            "description": "Whether the BeginFrame resulted in damage and, thus, a new frame was committed to the\ndislang-demos. Reported for diagnostic uses, may be removed in the future.",
                             "type": "boolean"
                         },
                         {
@@ -14965,7 +14965,7 @@
                     "parameters": [
                         {
                             "name": "requestId",
-                            "description": "Identifier of XHR to replay.",
+                            "description": "Identifier of XHR to relang-demos.",
                             "$ref": "RequestId"
                         }
                     ]

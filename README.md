@@ -39,7 +39,7 @@ Supporting directories include:
 |---|---|
 | `src/`, `src-lang/`, `src-extra/` | Main source trees |
 | `test/`, `test-lang/` | Tests, mirroring the source structure |
-| `src-build/` | Walkthroughs, demos, build definitions, and generated project examples |
+| `src-build/` | Apps, demos, generated project recipes, tooling, and deployment tasks |
 | `src-doc/` | Authored source for the generated documentation site, including narrative guides and API references |
 | `wiki/` | GitHub Wiki-ready topic pages, kept in the main repository for review and versioning |
 | `config/publish/` | Documentation-site configuration |
@@ -154,13 +154,13 @@ Examples should retain links to the authored source, project-generation definiti
 
 | Example | Generated project | Authored source | Build definition |
 |---|---|---|---|
-| C pthreads hello | [`hoebat/play.c-000-pthreads-hello`](https://github.com/hoebat/play.c-000-pthreads-hello) | [`main.clj`](src-build/play/c_000_pthreads_hello/main.clj) | [`build.clj`](src-build/play/c_000_pthreads_hello/build.clj) |
-| OpenResty hello | [`hoebat/play.ngx-000-hello`](https://github.com/hoebat/play.ngx-000-hello) | [`main.clj`](src-build/play/ngx_000_hello/main.clj) | [`build.clj`](src-build/play/ngx_000_hello/build.clj) |
-| OpenResty live evaluation | [`hoebat/play.ngx-001-eval`](https://github.com/hoebat/play.ngx-001-eval) | [`main.clj`](src-build/play/ngx_001_eval/main.clj) | [`build.clj`](src-build/play/ngx_001_eval/build.clj) |
-| TUI counter | [`hoebat/play.tui-000-counter`](https://github.com/hoebat/play.tui-000-counter) | [`main.clj`](src-build/play/tui_000_counter/main.clj) | [`build.clj`](src-build/play/tui_000_counter/build.clj) |
-| TUI fetch | [`hoebat/play.tui-001-fetch`](https://github.com/hoebat/play.tui-001-fetch) | [`main.clj`](src-build/play/tui_001_fetch/main.clj) | [`build.clj`](src-build/play/tui_001_fetch/build.clj) |
-| TUI Game of Life | [`zcaudate/play.tui-002-game-of-life`](https://github.com/zcaudate/play.tui-002-game-of-life) | [`main.clj`](src-build/play/tui_002_game_of_life/main.clj) | [`build.clj`](src-build/play/tui_002_game_of_life/build.clj) |
-| React Native components | [`zcaudate/foundation.react-native`](https://github.com/zcaudate/foundation.react-native) | [`web_native_index.clj`](src-build/component/web_native_index.clj) | [`build_native_index.clj`](src-build/component/build_native_index.clj) |
+| C pthreads hello | [`hoebat/lang-demos.c-000-pthreads-hello`](https://github.com/hoebat/lang-demos.c-000-pthreads-hello) | [`main.clj`](src-build/projects/play/c_000_pthreads_hello/main.clj) | [`build.clj`](src-build/projects/play/c_000_pthreads_hello/build.clj) |
+| OpenResty hello | [`hoebat/lang-demos.ngx-000-hello`](https://github.com/hoebat/lang-demos.ngx-000-hello) | [`main.clj`](src-build/projects/play/ngx_000_hello/main.clj) | [`build.clj`](src-build/projects/play/ngx_000_hello/build.clj) |
+| OpenResty live evaluation | [`hoebat/lang-demos.ngx-001-eval`](https://github.com/hoebat/lang-demos.ngx-001-eval) | [`main.clj`](src-build/projects/play/ngx_001_eval/main.clj) | [`build.clj`](src-build/projects/play/ngx_001_eval/build.clj) |
+| TUI counter | [`hoebat/lang-demos.tui-000-counter`](https://github.com/hoebat/lang-demos.tui-000-counter) | [`main.clj`](src-build/projects/play/tui_000_counter/main.clj) | [`build.clj`](src-build/projects/play/tui_000_counter/build.clj) |
+| TUI fetch | [`hoebat/lang-demos.tui-001-fetch`](https://github.com/hoebat/lang-demos.tui-001-fetch) | [`main.clj`](src-build/projects/play/tui_001_fetch/main.clj) | [`build.clj`](src-build/projects/play/tui_001_fetch/build.clj) |
+| TUI Game of Life | [`zcaudate/lang-demos.tui-002-game-of-life`](https://github.com/zcaudate/lang-demos.tui-002-game-of-life) | [`main.clj`](src-build/projects/play/tui_002_game_of_life/main.clj) | [`build.clj`](src-build/projects/play/tui_002_game_of_life/build.clj) |
+| React Native components | [`zcaudate/foundation.react-native`](https://github.com/zcaudate/foundation.react-native) | [`web_native_index.clj`](src-build/tooling/component/web_native_index.clj) | [`build_native_index.clj`](src-build/tooling/component/build_native_index.clj) |
 
 Generate or push the existing examples with the project aliases:
 
@@ -176,7 +176,7 @@ lein push-tui-002-game-of-life
 ### Deploy the Foundation Web demo
 
 The Foundation Web deployment task lives in
-[`src-build/foundation_deployment/task_web_index.clj`](src-build/foundation_deployment/task_web_index.clj)
+[`src-build/deployment/foundation_deployment/task_web_index.clj`](src-build/deployment/foundation_deployment/task_web_index.clj)
 and uses `std.make.github` to push the generated `demo.foundation-base`
 project. Run these forms from the Foundation REPL:
 
@@ -238,7 +238,7 @@ Start with one focused workflow:
 
 1. emit a small JavaScript or Lua form;
 2. run one `code.test` namespace;
-3. inspect one generated project under `src-build/play`;
+3. inspect one generated project under `src-build/projects/play`;
 4. browse the matching generated documentation and source links.
 
 ### As a contributor

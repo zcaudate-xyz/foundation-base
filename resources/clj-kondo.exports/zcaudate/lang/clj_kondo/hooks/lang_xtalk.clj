@@ -331,16 +331,25 @@
       after-args
       (mapcat #(rest (:children %)) arities))))
 
+(def ^:private +function-definition-ops+
+  #{"defn" "defn-" "defrun" "defgen" "defmacro"})
+
+(def ^:private +value-definition-ops+
+  #{"def" "defvar" "def$" "defglobal"})
+
+(defn- definition-op [head]
+  (when (symbol? head)
+    (first (str/split (name head) #"\."))))
+
 (defn- lint-definition! [node]
   (let [form (api/sexpr node)
-        head (canonical-head (first form))]
+        op (definition-op (first form))]
     (cond
-      (#{'defn.xt 'defgen.xt
-        'defn.js 'defgen.js 'defrun.js 'defmacro.js} head)
+      (contains? +function-definition-ops+ op)
       (doseq [body-node (function-body-nodes node)]
         (lint-node! body-node :statement))
 
-      (#{'def.xt 'def.js 'defvar.js 'def$.js 'defglobal.js} head)
+      (contains? +value-definition-ops+ op)
       (when-let [value-node (last (:children node))]
         (lint-node! value-node :value)))))
 

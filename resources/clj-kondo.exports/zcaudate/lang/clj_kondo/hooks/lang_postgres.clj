@@ -7,7 +7,7 @@
     defconst deftype defenum defindex defpolicy defpublication
     defsubscription deftrigger defpartition])
 (def ^:private +common-ops+
-  '[defrun defn defn- defglobal defgen defimpl defprotocol defspec deftemp defclass defabstract def])
+  '[defrun defn defn- defglobal defgen defimpl defprotocol defspec deftemp defclass defabstract def defvar])
 (def ^:private +language-highlights+
   {:postgres '[return break do:assert]})
 (def ^:private +language-suffix+
@@ -15,7 +15,11 @@
    :dart "dt" :julia "jl" :python "py" :ruby "rb" :rust "rs"
    :golang "go" :c "c" :cpp "cpp" :lua "lua" :sql "sql" :oracle "oracle"})
 (defn- language-suffix [lang]
-  (or (get +language-suffix+ lang) (some-> lang name)))
+  (let [language-name (some-> lang name)
+        base-language (some-> language-name (str/split #"\.") first)]
+    (or (get +language-suffix+ lang)
+        (get +language-suffix+ (some-> base-language keyword))
+        base-language)))
 (defn- generated-symbols [lang]
   (let [suffix (language-suffix lang)
         ops (if (= :postgres lang) +postgres-ops+ +common-ops+)]
@@ -25,16 +29,15 @@
           (for [op ops] (symbol (str op "." suffix))))
          distinct)))
 (defn- placeholder-node [sym]
-  (if (and (symbol? sym)
-           (re-find #"^def(?:n|impl|protocol|spec)\\." (name sym)))
-    (api/list-node [(api/token-node 'clojure.core/defmacro)
-                    (api/token-node sym)
-                    (api/vector-node [(api/token-node '&)
-                                      (api/token-node '_)] )
-                    (api/token-node nil)])
-    (api/list-node [(api/token-node 'clojure.core/def)
-                    (api/token-node sym)
-                    (api/token-node 'clojure.core/identity)])))
+  (api/list-node [(api/token-node 'clojure.core/defmacro)
+                  (api/token-node sym)
+                  (api/vector-node [(api/token-node '&)
+                                    (api/token-node '_)])
+                  (api/token-node nil)]))
+(defn- value-placeholder-node [sym]
+  (api/list-node [(api/token-node 'clojure.core/def)
+                  (api/token-node sym)
+                  (api/token-node 'clojure.core/identity)]))
 (defn- require-node [libspec]
   (let [ns-sym (if (vector? libspec) (first libspec) libspec)
         spec-node (if (vector? libspec)
@@ -55,7 +58,7 @@
             (cons (api/token-node 'do)
                   (concat (map require-node requires)
                           (map placeholder-node (generated-symbols lang))
-                          (map placeholder-node (get +language-highlights+ lang)))))}))
+                          (map value-placeholder-node (get +language-highlights+ lang)))))}))
 (defn form-head [form] (when (seq? form) (str (first form))))
 (defn all-nodes [form] (tree-seq coll? seq form))
 (defn forms-headed [form head] (filter #(= head (form-head %)) (all-nodes form)))

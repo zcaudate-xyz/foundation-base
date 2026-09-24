@@ -104,5 +104,5 @@
   (def +++
     (h/suppress
      (!.js
-      (Object.assign play.web-001-rn.main/I01_FORM
-                {"02h-ui-market"  play.web-001-rn.main-demo/UiDeltaExamples})))))
+      (Object.assign lang-demos.web-001-rn.main/I01_FORM
+                {"02h-ui-market"  lang-demos.web-001-rn.main-demo/UiDeltaExamples})))))

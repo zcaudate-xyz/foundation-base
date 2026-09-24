@@ -1,0 +1,14 @@
+#+STARTUP: showall
+#+GITHUB:  zcaudate/lang-demos.abc-pthreads-hello
+#+DESCRIPTION: Simple Posix Threads Example
+
+* Abc Posix Threads Example
+
+Example for "pthreads.h"
+
+
+*** Dev
+
+#+BEGIN_SRC shell :results output silent :cache no :eval no
+make run
+#+END_SRC

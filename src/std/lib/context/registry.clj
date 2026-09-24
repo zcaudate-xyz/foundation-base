@@ -66,7 +66,7 @@
 (defn registry-install
   "installs a new context type
  
-   (registry-install :play.test)"
+   (registry-install :lang-demos.test)"
   {:added "3.0"}
   ([ctx]
    (registry-install ctx {}))
@@ -79,7 +79,7 @@
 (defn registry-uninstall
   "uninstalls a new context type
  
-   (registry-uninstall :play.test)"
+   (registry-uninstall :lang-demos.test)"
   {:added "3.0"}
   ([ctx]
    (at/atom:clear *registry* [ctx])))

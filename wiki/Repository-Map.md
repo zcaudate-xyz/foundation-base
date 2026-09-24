@@ -21,7 +21,7 @@ Foundation Base contains several related systems in one repository.
 | `src-extra/` | Optional or additional integrations |
 | `test/` | Main tests |
 | `test-lang/` | Language and runtime tests |
-| `src-build/` | Walkthroughs, demos, build definitions, and generated projects |
+| `src-build/` | Apps, demos, generated project recipes, tooling, and deployment tasks |
 | `src-doc/` | Generated-documentation source |
 | `guides/` | Task-oriented Markdown guides |
 | `config/publish/` | Documentation site configuration |
@@ -32,7 +32,7 @@ Foundation Base contains several related systems in one repository.
 - Standard utilities: [`src/std`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src/std)
 - Developer tools: [`src/code`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src/code)
 - Language tooling: [Lang docs](https://zcaudate.xyz/foundation-base/lang/index.html)
-- Generated examples: [`src-build/play`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-build/play)
+- Generated examples: [`src-build/projects/play`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-build/projects/play)
 - Walkthroughs: [`src-doc/walkthrough`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-doc/walkthrough)
 - Documentation sources: [`src-doc/documentation`](https://github.com/zcaudate-xyz/foundation-base/tree/main/src-doc/documentation)
 

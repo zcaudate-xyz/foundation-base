@@ -67,6 +67,13 @@
   [[_ arr item]]
   (list '. arr (list 'add item)))
 
+(defn dart-tf-x-obj-clone
+  [[_ obj]]
+  (template/$
+   (:- "Map<dynamic, dynamic>.from("
+       ~obj
+       " ?? <dynamic, dynamic>{})")))
+
 (defn dart-tf-x-apply
   [[_ f args]]
   (list 'Function.apply f args))
@@ -450,7 +457,8 @@
 (def +dart-obj+
   {:x-obj-keys   {:macro #'dart-tf-x-obj-keys   :emit :macro}
    :x-obj-vals   {:macro #'dart-tf-x-obj-vals   :emit :macro}
-   :x-obj-pairs  {:macro #'dart-tf-x-obj-pairs  :emit :macro}})
+   :x-obj-pairs  {:macro #'dart-tf-x-obj-pairs  :emit :macro}
+   :x-obj-clone  {:macro #'dart-tf-x-obj-clone  :emit :macro}})
 
 (def +dart-json+
   {:x-json-encode {:emit :alias :raw 'jsonEncode}

@@ -89,7 +89,7 @@ Instead of running all tests, `code.dev` defines groups for faster feedback:
     (require '[std.make :as make]
              '[code.dev :as dev])
     ```
-3.  **Find Project Definition**: Locate the `def.make` form in your component (e.g., `src-build/play/.../build.clj`).
+3.  **Find Project Definition**: Locate the `def.make` form in your component (e.g., `src-build/projects/play/.../build.clj`).
 4.  **Run Build**:
     ```clojure
     (require '[my.project.build :as build])
@@ -102,6 +102,6 @@ Instead of running all tests, `code.dev` defines groups for faster feedback:
 
 ## 6. Next Steps for Developer
 
-1.  Identify the specific "app" component (e.g., `src-build/play/...`).
+1.  Identify the specific "app" component (e.g., `src-build/projects/play/...`).
 2.  Check for a `build.clj` or `def.make` in that component.
 3.  Use `std.make` to target that build.

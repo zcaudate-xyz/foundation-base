@@ -256,7 +256,7 @@
             (filter (fn [n]
                       (clojure.string/starts-with? (str n) "stats")))))
       (require ['statsdb.core.execute])
-      (std.make/build play.tui-counter-basic.main/PROJECT
+      (std.make/build lang-demos.tui-counter-basic.main/PROJECT
                       :statsdb))
   
   (emit-as

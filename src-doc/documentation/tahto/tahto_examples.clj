@@ -5,11 +5,11 @@ lang/lang_examples.clj:1:(ns documentation.lang-examples
   (:use code.test))
 
 lang/lang_examples.clj:7:[[:hero {:title "Lang examples"
-         :subtitle "Generated project examples from src-build/play."
+         :subtitle "Generated project examples from src-build/projects/lang-demos."
          :lead "The play projects demonstrate lang.core as a project generator: C pthreads, Go modules, typed xtalk declarations, TypeScript packages, OpenResty Lua, and Blessed terminal UIs."}]]
 
 [[:chapter {:title "Generated projects"}]]
-"Use `src-build/play/*/main.clj` for authored source and `src-build/play/*/build.clj` for generated project configuration. The build namespaces use `std.make` to create Makefiles, package files, generated source files, and runnable project layouts."
+"Use `src-build/projects/play/*/main.clj` for authored source and `src-build/projects/play/*/build.clj` for generated project configuration. The build namespaces use `std.make` to create Makefiles, package files, generated source files, and runnable project layouts."
 
 [[:chapter {:title "Representative examples"}]]
 "Start with Go and TypeScript user-directory examples for typed data, OpenResty examples for Lua runtime integration, and TUI examples for JS/Blessed UI output. Cross-link the xtalk examples from the xt section where relevant."
@@ -82,10 +82,10 @@ lang/lang_examples.clj:7:[[:hero {:title "Lang examples"
 (fact "a minimal std.make project for a Go module"
   (do
     (def.make PROJECT
-      {:github   {:repo "example.com/play.go-000-user-directory"
+      {:github   {:repo "example.com/lang-demos.go-000-user-directory"
                   :description "Simple Go project generated from Clojure"}
        :orgfile  "Main.org"
-       :triggers '#{play.go-000-user-directory.main}
+       :triggers '#{lang-demos.go-000-user-directory.main}
        :sections {:setup [{:type :gitignore
                            :main ["bin"]}
                           {:type :makefile
@@ -94,7 +94,7 @@ lang/lang_examples.clj:7:[[:hero {:title "Lang examples"
                                   [:test ["go test ./..."]]]}]}
        :default [{:type :module.single
                   :lang :go
-                  :main 'play.go-000-user-directory.main
+                  :main 'lang-demos.go-000-user-directory.main
                   :file "user_directory.go"
                   :header "package userdirectory"}]})
 

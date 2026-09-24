@@ -15,13 +15,13 @@
 ^{:refer std.lib.context.registry/registry-install :added "3.0"}
 (fact "installs a new context type"
 
-  (registry-install :play.test)
+  (registry-install :lang-demos.test)
   => vector?)
 
 ^{:refer std.lib.context.registry/registry-uninstall :added "3.0"}
 (fact "uninstalls a new context type"
 
-  (registry-uninstall :play.test)
+  (registry-uninstall :lang-demos.test)
   => map?)
 
 ^{:refer std.lib.context.registry/registry-get :added "3.0"}

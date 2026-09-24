@@ -20,51 +20,51 @@ Examples are a primary entry point into Foundation Base. Each example should kee
 
 ### C pthreads hello
 
-- Generated project: [`hoebat/play.c-000-pthreads-hello`](https://github.com/hoebat/play.c-000-pthreads-hello)
-- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/c_000_pthreads_hello/main.clj)
-- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/c_000_pthreads_hello/build.clj)
+- Generated project: [`hoebat/lang-demos.c-000-pthreads-hello`](https://github.com/hoebat/lang-demos.c-000-pthreads-hello)
+- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/c_000_pthreads_hello/main.clj)
+- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/c_000_pthreads_hello/build.clj)
 - Reproduce: `lein push-c-000-pthreads`
 
 ### OpenResty hello
 
-- Generated project: [`hoebat/play.ngx-000-hello`](https://github.com/hoebat/play.ngx-000-hello)
-- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_000_hello/main.clj)
-- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_000_hello/build.clj)
+- Generated project: [`hoebat/lang-demos.ngx-000-hello`](https://github.com/hoebat/lang-demos.ngx-000-hello)
+- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/ngx_000_hello/main.clj)
+- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/ngx_000_hello/build.clj)
 - Reproduce: `lein push-ngx-000-hello`
 
 ### OpenResty live evaluation
 
-- Generated project: [`hoebat/play.ngx-001-eval`](https://github.com/hoebat/play.ngx-001-eval)
-- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_001_eval/main.clj)
-- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/ngx_001_eval/build.clj)
+- Generated project: [`hoebat/lang-demos.ngx-001-eval`](https://github.com/hoebat/lang-demos.ngx-001-eval)
+- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/ngx_001_eval/main.clj)
+- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/ngx_001_eval/build.clj)
 - Reproduce: `lein push-ngx-001-eval`
 
 ### TUI counter
 
-- Generated project: [`hoebat/play.tui-000-counter`](https://github.com/hoebat/play.tui-000-counter)
-- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_000_counter/main.clj)
-- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_000_counter/build.clj)
+- Generated project: [`hoebat/lang-demos.tui-000-counter`](https://github.com/hoebat/lang-demos.tui-000-counter)
+- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/tui_000_counter/main.clj)
+- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/tui_000_counter/build.clj)
 - Reproduce: `lein push-tui-000-counter`
 
 ### TUI fetch
 
-- Generated project: [`hoebat/play.tui-001-fetch`](https://github.com/hoebat/play.tui-001-fetch)
-- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_001_fetch/main.clj)
-- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_001_fetch/build.clj)
+- Generated project: [`hoebat/lang-demos.tui-001-fetch`](https://github.com/hoebat/lang-demos.tui-001-fetch)
+- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/tui_001_fetch/main.clj)
+- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/tui_001_fetch/build.clj)
 - Reproduce: `lein push-tui-001-fetch`
 
 ### TUI Game of Life
 
-- Generated project: [`zcaudate/play.tui-002-game-of-life`](https://github.com/zcaudate/play.tui-002-game-of-life)
-- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_002_game_of_life/main.clj)
-- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/play/tui_002_game_of_life/build.clj)
+- Generated project: [`zcaudate/lang-demos.tui-002-game-of-life`](https://github.com/zcaudate/lang-demos.tui-002-game-of-life)
+- Authored source: [`main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/tui_002_game_of_life/main.clj)
+- Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/tui_002_game_of_life/build.clj)
 - Reproduce: `lein push-tui-002-game-of-life`
 
 ### React Native components
 
 - Generated project: [`zcaudate-xyz/demo.foundation-base`](https://github.com/zcaudate-xyz/demo.foundation-base)
-- Authored index: [`web_native_index.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/component/web_native_index.clj)
-- Build definition: [`build_native_index.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/component/build_native_index.clj)
+- Authored index: [`web_native_index.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/tooling/component/web_native_index.clj)
+- Build definition: [`build_native_index.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/tooling/component/build_native_index.clj)
 - Reproduce: `lein push-native-code`
 
 ## Adding an example

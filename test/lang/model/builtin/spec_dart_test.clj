@@ -38,6 +38,9 @@
   (l/emit-as :dart ['(x:arr-push items 1)])
   => "items.add(1)"
 
+  (l/emit-as :dart ['(x:obj-clone records)])
+  => "Map<dynamic, dynamic>.from(records ?? <dynamic, dynamic>{})"
+
   (let [out (l/emit-as :dart ['(x:obj-keys records)])]
     [(boolean (re-find #"List<dynamic>\.from" out))
      (boolean (re-find #"\.keys\)" out))])

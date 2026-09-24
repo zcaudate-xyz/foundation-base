@@ -22,12 +22,12 @@
    "deploy-root" ["deploy" "clojars"]
    "deploy-lein" ["exec" "-ep" "(use 'code.tool.maven)   (deploy-lein :all {:tag :all}) (System/exit 0)"]
    "push-native-code"  ["run" "-m" "component.task-native-index"]
-   "push-c-000-pthreads"        ["run" "-m" "play.c-000-pthreads-hello.build"]
-   "push-ngx-000-hello"         ["run" "-m" "play.ngx-000-hello.build"]
-   "push-ngx-001-eval"          ["run" "-m" "play.ngx-001-eval.build"]
-   "push-tui-000-counter"       ["run" "-m" "play.tui-000-counter.build"]
-   "push-tui-001-fetch"         ["run" "-m" "play.tui-001-fetch.build"]
-   "push-tui-002-game-of-life"  ["run" "-m" "play.tui-002-game-of-life.build"]}
+   "push-c-000-pthreads"        ["run" "-m" "lang-demos.c-000-pthreads-hello.build"]
+   "push-ngx-000-hello"         ["run" "-m" "lang-demos.ngx-000-hello.build"]
+   "push-ngx-001-eval"          ["run" "-m" "lang-demos.ngx-001-eval.build"]
+   "push-tui-000-counter"       ["run" "-m" "lang-demos.tui-000-counter.build"]
+   "push-tui-001-fetch"         ["run" "-m" "lang-demos.tui-001-fetch.build"]
+   "push-tui-002-game-of-life"  ["run" "-m" "lang-demos.tui-002-game-of-life.build"]}
   :dependencies
   [ ;; dev
    ;;[org.clojure/clojure "1.11.1"]
@@ -222,7 +222,10 @@
   #_#_:repositories [["atlassian" "https://maven.artifacts.atlassian.com/"]]
   :source-paths      ["src" "src-lang" "src-extra" "src-extra/mcp-clj"]
   :test-paths        ["test" "test-lang"]
-  :resource-paths    ["resources" "src-build" "src-extra" "src-doc" "test-data" "test-code"]
+  :resource-paths    ["resources" "src-build"
+                      "src-build/apps" "src-build/demos" "src-build/projects"
+                      "src-build/tooling" "src-build/deployment"
+                      "src-extra" "src-doc" "test-data" "test-code"]
   :java-source-paths ["src-java" "test-java"]
   :java-output-path  "target/classes"
   :repl-options {:host "0.0.0.0"

@@ -46,6 +46,62 @@
     (:stderr result) => ""
     (filter #(= :error (:level %)) (:findings result)) => []))
 
+(fact "tagged XTalk function definitions are linted across target suffixes"
+  (let [result (lint-source
+                 "(ns sample (:require [lang.core :as l]))
+                  (l/script :lua.nginx {})
+                  (defn.lua bad-lua [] (return (:? (if test 1 2) 3)))
+                  (l/script :go {})
+                  (defn.go bad-go [] (return (:? (if test 1 2) 3)))
+                  (l/script :c {})
+                  (defn.c bad-c [] (return (:? (if test 1 2) 3)))")]
+    (:stderr result) => ""
+    (count (filter #(= :lang.xtalk/block-in-value (:type %))
+                   (:findings result))) => 3
+    (filter #(= :unresolved-symbol (:type %)) (:findings result)) => []))
+
+(fact "tagged function definitions are linted for every target suffix"
+  (let [targets [[:javascript "js"] [:xtalk "xt"] [:typescript "ts"]
+                 [:dart "dt"] [:julia "jl"] [:python "py"] [:ruby "rb"]
+                 [:rust "rs"] [:golang "go"] [:c "c"] [:cpp "cpp"]
+                 [:lua "lua"] [:sql "sql"] [:oracle "oracle"]]
+        source (str "(ns xt.sample (:require [lang.core :as l]))\n"
+                    (clojure.string/join
+                      "\n"
+                      (map (fn [[language suffix]]
+                             (str "(l/script :" (name language) " {})\n"
+                                  "(defn." suffix " target-" suffix " []\n"
+                                  "  (return (:? (if test 1 2) 3)))"))
+                           targets)))
+        result (lint-source source)]
+    (:stderr result) => ""
+    (count (filter #(= :lang.xtalk/block-in-value (:type %))
+                   (:findings result))) => (count targets)
+    (filter #(= :unresolved-symbol (:type %)) (:findings result)) => []))
+
+(fact "the Lua script hook resolves every generated definition family"
+  (let [result (lint-source
+                 "(ns xt.sample (:require [lang.core :as l]))
+                  (l/script :lua.nginx {})
+                  (defrun.lua run [] missing-run)
+                  (defn.lua function [arg] missing-function)
+                  (defn-.lua private-function [] missing-private-function)
+                  (defglobal.lua global-value missing-global)
+                  (defvar.lua variable-value missing-variable)
+                  (defgen.lua generated [] missing-generated)
+                  (defimpl.lua implementation missing-implementation)
+                  (defprotocol.lua protocol (method [arg]))
+                  (defspec.lua specification missing-specification)
+                  (deftemp.lua template missing-template)
+                  (defclass.lua lua-class missing-class)
+                  (defabstract.lua abstract missing-abstract)
+                  (def.lua value missing-value)
+                  (def$.lua dynamic-value missing-dynamic)
+                  (defmacro.lua macro [arg] missing-macro)
+                  (defptr.lua pointer missing-pointer)")]
+    (:stderr result) => ""
+    (filter #(= :error (:level %)) (:findings result)) => []))
+
 (fact "the JavaScript definition hook reports XTalk grammar violations"
   (let [result (lint-source
                  "(ns sample (:require [lang.core :as l]))

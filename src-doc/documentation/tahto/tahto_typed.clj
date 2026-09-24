@@ -12,7 +12,7 @@ lang/lang_typed.clj:1:(ns documentation.lang-typed
 "Typed xtalk examples define records and functions once, then emit language-specific declarations such as Go structs or TypeScript `.d.ts` files."
 
 [[:chapter {:title "Examples"}]]
-"See `src-build/play/go_001_xtalk_user_directory` and `src-build/play/ts_001_single_source_user_directory` for single-source typed xtalk projects."
+"See `src-build/projects/play/go_001_xtalk_user_directory` and `src-build/projects/play/ts_001_single_source_user_directory` for single-source typed xtalk projects."
 
 [[:chapter {:title "API"}]]
 

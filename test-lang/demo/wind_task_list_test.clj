@@ -1,4 +1,4 @@
-(ns demo.wind-task-list-test
+(ns lang-demos.dart-001-wind-task-list-test
   (:use code.test)
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
@@ -11,9 +11,9 @@
              [xt.ui.core :as ui]
              [xt.ui.state.core :as state]
              [xt.ui.widgets.core :as widgets]
-             [demo.wind-task-list.app :as app]]})
+             [lang-demos.dart-001-wind-task-list.app :as app]]})
 
-^{:refer demo.wind-task-list.app/make-controller :added "4.1"}
+^{:refer lang-demos.dart-001-wind-task-list.app/make-controller :added "4.1"}
 (fact "adds and removes trimmed tasks through portable controller actions"
   (notify/wait-on :js
     (var controller (app/make-controller))
@@ -43,7 +43,7 @@
                   (xt/x:len (xt/x:get-key removed "items"))])))))))))))
   => ["" 3 "Ship the demo" 2])
 
-^{:refer demo.wind-task-list.app/view :added "4.1"}
+^{:refer lang-demos.dart-001-wind-task-list.app/view :added "4.1"}
 (fact "produces a valid portable tree and an explicit empty state"
   (!.js
    (var noop (fn [_] nil))

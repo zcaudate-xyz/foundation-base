@@ -8,7 +8,7 @@
 
 ## 1. Global Layout Architecture
 
-The application uses a **resizable pane-based layout** optimized for high-density information display. The interface is divided into four primary regions:
+The application uses a **resizable pane-based layout** optimized for high-density information dislang-demos. The interface is divided into four primary regions:
 
 1.  **Top Navigation Bar:** Global context and controls.
 2.  **Space View (Main Canvas):** The primary visualization area (Top-Left).

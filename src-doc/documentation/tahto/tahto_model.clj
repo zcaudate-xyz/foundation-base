@@ -9,7 +9,7 @@ lang/lang_model.clj:1:(ns documentation.lang-model
          :lead "`lang.model` contains target specs for JS, Lua, Python, Go, Dart, SQL, Solidity, xtalk, and annex languages. These models are the bridge between structured lang.core forms and emitted target code."}]]
 
 [[:chapter {:title "Motivation"}]]
-"A language model owns target syntax, helper functions, type declarations, and runtime-specific emission rules. Generated projects in `src-build/play` use these models when producing Go, TypeScript, Lua, C, and JS artifacts."
+"A language model owns target syntax, helper functions, type declarations, and runtime-specific emission rules. Generated projects in `src-build/projects/play` use these models when producing Go, TypeScript, Lua, C, and JS artifacts."
 
 [[:chapter {:title "API"}]]
 

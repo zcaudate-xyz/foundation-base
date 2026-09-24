@@ -86,3 +86,4 @@ packages-gen
 .tahto/code/framework
 /.lang
 /dart-kernel
+resources/clj-kondo.exports/zcaudate/lang/.cache/v1
