@@ -101,11 +101,6 @@
       (let [deps          (volatile! #{})
             deps-fragment (volatile! #{})
             deps-native   (volatile! {})
-            _             (if-let [includes (-> mopts :module :includes)]
-                            (doseq [inc-id includes]
-                              (if-let [module (get modules inc-id)]
-                                (doseq [entry (vals (:code module))]
-                                  (vswap! deps conj (ut/sym-full entry))))))
             form          (walk/prewalk
                             (fn walk-fn [form]
                               (cond (collection/form? form)

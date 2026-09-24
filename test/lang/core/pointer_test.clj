@@ -1,6 +1,5 @@
-(ns ^{:clj-kondo/config '{:linters {:unresolved-symbol {:level :off}
-                                    :unresolved-var {:level :off}}}}
-  lang.core.pointer-test
+(ns lang.core.pointer-test
+  (:use code.test)
   (:require [clojure.string :as string]
             [std.json :as json]
             [lang.base.book :as book]
@@ -17,8 +16,7 @@
             [lang.model.builtin.spec-xtalk :as xtalk]
             [lang.base.util :as ut]
             [std.lib.foundation :as f]
-            [std.string.prose :as prose])
-  (:use code.test))
+            [std.string.prose :as prose]))
 
 (def +library-ext+
   (doto (lib/library:create
