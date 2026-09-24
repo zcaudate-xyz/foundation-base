@@ -1,9 +1,8 @@
-(ns lang-demos.js-003-expo-rn.web-debug-build
+(ns lang-demos.js-003-expo-rn.build
   (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]
-            [std.make :as make :refer [def.make]]
-            [lang-demos.js-003-expo-rn.web-debug-index :as web-debug]))
+            [std.make :as make :refer [def.make]]))
 
 (def +expo-makefile+
   {:type  :makefile
@@ -59,12 +58,12 @@
                 "git remote add origin git@github.com:zcaudate-xyz/demo.foundation-base.git"
                 "git push origin HEAD:gh-pages --force")}]}}]]})
 
-(def.make PLAYGROUND-WEB-DEBUG
+(def.make JS-003-EXPO-RN
   {:tag      "web-debug"
-   :build    ".build/web-debug"
-   :github   {:repo   "zcaudate-xyz/demo.web-debug"
+   :build    ".build/demo/js-003-expo-rn"
+   :github   {:repo   "zcaudate-xyz/demo.js-003-expo-rn"
               :description "Web Debug"}
-   :triggers #{"js" "playground.web-debug"}
+   :triggers #{"js" "lang-demos.js-003-expo-rn"}
    :sections {:common [+expo-makefile+
                        +github-workflows-build+
                        +yarn-config+
@@ -98,8 +97,8 @@
                        {:type :json
                         :file "app.json"
                         :main  {"expo"
-                                {"name" "Web Debug"
-                                 "slug" "web-debug"
+                                {"name" "Demo JS-003-EXPO-RN"
+                                 "slug" "demo.js-003-expo-rn"
                                  "version" "1.0.0",
                                  "orientation" "portrait",
                                  "entryPoint" "./src/App.js",
@@ -139,34 +138,35 @@
    :default [{:type   :module.graph
               :lang   :js
               :target "src"
-              :main   'lang-demos.js-003-expo-rn.web-debug-index
+              :main   'lang-demos.js-003-expo-rn.main
               :emit   {:code {:label true
                               :link {:path-suffix ".js"
                                      :path-separator "/"
-                                     :ns-label {'lang-demos.js-003-expo-rn.web-debug-index "App"}}}}}]})
+                                     :ns-label {'lang-demos.js-003-expo-rn.main "App"}}}}}]})
 
-
-
+(defn build-js-003-expo-rn
+  []
+  (require '[lang-demos.js-003-expo-rn.main :as web-debug])
+  (make/build-all JS-003-EXPO-RN)
+  (make/run-internal JS-003-EXPO-RN :build-web))
 
 (defn -main
   []
-  (make/build-all PLAYGROUND-WEB-DEBUG)
-  (make/run-internal PLAYGROUND-WEB-DEBUG :build-web)
-  
+  (build-js-003-expo-rn)
   (shutdown-agents)
   (System/exit 0))
 
 
 (comment
 
-  (make/build-all PLAYGROUND-WEB-DEBUG)
-  (do (make/build-all PLAYGROUND-WEB-DEBUG)
-      (make/gh:dwim-init PLAYGROUND-WEB-DEBUG))
-  (make/gh:dwim-init PLAYGROUND-WEB-DEBUG)
-  (make/gh:dwim-push PLAYGROUND-WEB-DEBUG)
+  (make/build-all JS-003-EXPO-RN)
+  (do (make/build-all JS-003-EXPO-RN)
+      (make/gh:dwim-init JS-003-EXPO-RN))
+  (make/gh:dwim-init JS-003-EXPO-RN)
+  (make/gh:dwim-push JS-003-EXPO-RN)
   (def *res*
-    (future (make/run-internal PLAYGROUND-WEB-DEBUG :build-web)))
+    (future (make/run-internal JS-003-EXPO-RN :build-web)))
   (def *res*
-    (make/run PLAYGROUND-WEB-DEBUG :build-web))
-  (make/run PLAYGROUND-WEB-DEBUG :dev)
+    (make/run JS-003-EXPO-RN :build-web))
+  (make/run JS-003-EXPO-RN :dev)
   )

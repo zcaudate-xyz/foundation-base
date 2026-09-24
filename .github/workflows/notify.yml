@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         downstream:
-            - 'zcaudate-xyz/foundation-web'
+            - 'zcaudate-xyz/foundation-ui-components'
 
     steps:
       - name: Notify Downstream

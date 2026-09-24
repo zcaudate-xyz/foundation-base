@@ -2,7 +2,8 @@
   (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]
-            [std.make :as make :refer [def.make]]))
+            [std.make :as make :refer [def.make]]
+            [std.make.github :as github]))
 
 (def +expo-makefile+
   {:type  :makefile
@@ -49,10 +50,10 @@
                 "git push origin HEAD:gh-pages --force")}]}}]]})
 
 (def.make WEB-INDEX
-  {:tag      "web-index"
-   :build    ".build/web-index"
+  {:tag      "foundation-ui-components"
+   :build    ".build/foundation-ui-components"
    :github   {:repo   "zcaudate-xyz/demo.foundation-base"
-              :description "Foundation Web Components"}
+              :description "Foundation UI Components"}
    :triggers #{"js" "lang-main.ui-components.web-index-main" "melbourne" "pune" "tama"}
    :sections {:common [+expo-makefile+
                        +github-workflows-build+
@@ -85,8 +86,8 @@
                        {:type :json
                         :file "app.json"
                         :main  {"expo"
-                                {"name" "Foundation Web"
-                                 "slug" "foundation-web"
+                                {"name" "Foundation UI Components"
+                                 "slug" "foundation-ui-components"
                                  "version" "1.0.0"
                                  "orientation" "portrait"
                                  "entryPoint" "./src/App.js"
@@ -100,7 +101,7 @@
                        {:type :package.json
                         :main
                         {"main" "./src/App.js"
-                         "name" "foundation-web"
+                         "name" "foundation-ui-components"
                          "scripts" {"start" "expo start"
                                     "android" "expo start --android"
                                     "ios" "expo start --ios"
@@ -177,11 +178,32 @@
   []
   (make/run WEB-INDEX :build-web))
 
-(defn -main
-  [& [task]]
+(defn task-gh-init
+  "Initialises the generated project repository and publishes its first revision."
+  [& [message]]
+  (github/gh-dwim-init WEB-INDEX message))
+
+(defn task-gh-push
+  "Regenerates and pushes the generated project repository."
+  [& [message]]
+  (github/gh-dwim-push WEB-INDEX message))
+
+(defn task-run
+  "Runs a UI components web index task without terminating the process."
+  [task & args]
   (case task
+    "build" (task-build)
     "build-web" (task-build-web)
-    (task-build)))
+    "init" (apply task-gh-init args)
+    "publish" (apply task-gh-push args)
+    "push" (apply task-gh-push args)
+    (throw (ex-info "Unknown UI components web index task"
+                    {:task task
+                     :tasks ["build" "build-web" "init" "publish" "push"]}))))
+
+(defn -main
+  [& [task & args]]
+  (apply task-run (or task "build") args))
 
 (comment
   (make/build-all WEB-INDEX)

@@ -17,8 +17,8 @@
    [:run {:- [:package]}
     ["./bin/pthreads_hello"]]])
 
-(def.make PROJECT
-  {:build    ".build/play/c-000-pthreads-hello"
+(def.make C-000-PTHREADS-HELLO
+  {:build    ".build/demo/c-000-pthreads-hello"
    :github   {:repo "zcaudate/lang-demos.c-000-pthreads-hello"
               :description "Simple Posix Threads Example"}
    :orgfile  "Main.org"
@@ -33,13 +33,15 @@
                :file "pthreads_hello.c"
                :target "src"}]})
 
-(def +init+
-  nil)
+^{:eval false
+  ;;
+  ;; BUILD SETUP
+  ;;
+  }
+(fact "Code FOR PROJECT SETUP" 
 
-(defn -main
-  []
-  (make/build-all PROJECT)
-  (make/gh:dwim-init PROJECT))
+  (make/build-all C-000-PTHREADS-HELLO)
+  (make/gh:dwim-push C-000-PTHREADS-HELLO))
 
 ^{:eval false
   ;;
@@ -48,19 +50,9 @@
   }
 (fact "Code FOR PROJECT SETUP" 
 
-  (make/build-all PROJECT)
-  (make/gh:dwim-push PROJECT))
-
-^{:eval false
-  ;;
-  ;; BUILD SETUP
-  ;;
-  }
-(fact "Code FOR PROJECT SETUP" 
-
-  (make/run-internal PROJECT :package)
+  (make/run-internal C-000-PTHREADS-HELLO :package)
   
-  (make/run-internal PROJECT :run))
+  (make/run-internal C-000-PTHREADS-HELLO :run))
 
 ^{:eval false
   ;;
@@ -69,7 +61,7 @@
   :ui/action [:GITHUB :SETUP]}
 (fact "initial setup of repo from github"
 
-  (make/gh:dwim-init PROJECT))
+  (make/gh:dwim-init C-000-PTHREADS-HELLO))
 
 ^{:eval false
   ;;
@@ -78,4 +70,16 @@
   :ui/action [:GITHUB :PUSH]}
 (fact "pushes changes to github"
 
-  (make/gh:dwim-push PROJECT))
+  (make/gh:dwim-push C-000-PTHREADS-HELLO))
+
+(defn build-c-000-pthreads-hello
+  []
+  (require '[lang-demos.build-c-000-pthreads-hello.main])
+  (make/build-all C-000-PTHREADS-HELLO)
+  (make/run-internal C-000-PTHREADS-HELLO :build-web))
+
+(defn -main
+  []
+  (build-c-000-pthreads-hello)
+  (shutdown-agents)
+  (System/exit 0))

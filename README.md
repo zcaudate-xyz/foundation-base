@@ -160,7 +160,7 @@ Examples should retain links to the authored source, project-generation definiti
 | TUI counter | [`hoebat/lang-demos.tui-000-counter`](https://github.com/hoebat/lang-demos.tui-000-counter) | [`main.clj`](src-build/projects/play/tui_000_counter/main.clj) | [`build.clj`](src-build/projects/play/tui_000_counter/build.clj) |
 | TUI fetch | [`hoebat/lang-demos.tui-001-fetch`](https://github.com/hoebat/lang-demos.tui-001-fetch) | [`main.clj`](src-build/projects/play/tui_001_fetch/main.clj) | [`build.clj`](src-build/projects/play/tui_001_fetch/build.clj) |
 | TUI Game of Life | [`zcaudate/lang-demos.tui-002-game-of-life`](https://github.com/zcaudate/lang-demos.tui-002-game-of-life) | [`main.clj`](src-build/projects/play/tui_002_game_of_life/main.clj) | [`build.clj`](src-build/projects/play/tui_002_game_of_life/build.clj) |
-| React Native components | [`zcaudate/foundation.react-native`](https://github.com/zcaudate/foundation.react-native) | [`web_native_index.clj`](src-build/tooling/component/web_native_index.clj) | [`build_native_index.clj`](src-build/tooling/component/build_native_index.clj) |
+| Foundation UI Components | [`zcaudate-xyz/demo.foundation-base`](https://github.com/zcaudate-xyz/demo.foundation-base) | [`web_index_main.clj`](src-build/lang_main/ui_components/web_index_main.clj) | [`web_index_build.clj`](src-build/lang_main/ui_components/web_index_build.clj) |
 
 Generate or push the existing examples with the project aliases:
 
@@ -171,32 +171,33 @@ lein push-ngx-001-eval
 lein push-tui-000-counter
 lein push-tui-001-fetch
 lein push-tui-002-game-of-life
+lein push-foundation-ui-components
 ```
 
-### Deploy the Foundation Web demo
+### Deploy Foundation UI Components
 
-The Foundation Web deployment task lives in
-[`src-build/deployment/foundation_deployment/task_web_index.clj`](src-build/deployment/foundation_deployment/task_web_index.clj)
-and uses `std.make.github` to push the generated `demo.foundation-base`
-project. Run these forms from the Foundation REPL:
+The Foundation UI Components project and its deployment tasks live in
+[`src-build/lang_main/ui_components/web_index_build.clj`](src-build/lang_main/ui_components/web_index_build.clj)
+under the `lang-main.ui-components.web-index-build` namespace. It uses
+`std.make.github` to push the generated `demo.foundation-base` project. Run
+these forms from the Foundation REPL:
 
 ```clojure
-(require '[foundation-deployment.task-web-index :as deploy] :reload)
+(require '[lang-main.ui-components.web-index-build :as web-index] :reload)
 
-;; Regenerate .build/web-index
-(deploy/task-build)
+;; Regenerate .build/foundation-ui-components
+(web-index/task-build)
 
 ;; First-time GitHub setup
-(deploy/task-run "init" "Initial web demo")
+(web-index/task-run "init" "Initial Foundation UI Components")
 
 ;; Subsequent publishes
-(deploy/task-run "publish" "Update web demo")
+(web-index/task-run "publish" "Update Foundation UI Components")
 ```
 
-Use `task-run` rather than `-main` from a REPL; `-main` exits the command-line
-process after completing the task. The equivalent Makefile commands are
-`make foundation-web-build`, `make foundation-web-init`, and
-`make foundation-web-publish`.
+The equivalent Makefile commands are
+`make foundation-ui-components-build`, `make foundation-ui-components-init`,
+and `make foundation-ui-components-publish`.
 
 See [`wiki/Examples.md`](wiki/Examples.md) for the expanded examples index.
 

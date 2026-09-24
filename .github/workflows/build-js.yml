@@ -1,4 +1,4 @@
-name: Build JS
+name: Build Foundation UI Components
 
 on:
   push:
@@ -10,14 +10,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: foundation-build-js-${{ github.ref }}
+  group: foundation-ui-components-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
 
 jobs:
-  build-js-web:
+  build-ui-components-web:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -37,7 +37,7 @@ jobs:
           path: foundation-base
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: Deploying native-code
+      - name: Deploying UI components
         run: >
           docker run --network host
           -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
@@ -47,4 +47,4 @@ jobs:
           -e "GITHUB_TOKEN=${{ secrets.GH_TOKEN }}"
           -e "GITHUB_USER=${{ secrets.GH_USER }}"
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
-          bash -c "cd foundation-base && git config --global --add safe.directory '*' && git config --global user.name 'github-actions' && git config --global user.email 'github-actions@github.com' && lein push-native-code"
+          bash -c "cd foundation-base && git config --global --add safe.directory '*' && git config --global user.name 'github-actions' && git config --global user.email 'github-actions@github.com' && lein run -m lang-main.ui-components.web-index-build publish"

@@ -74,14 +74,14 @@ list-namespaces:
 
 FOUNDATION_LEIN ?= $(if $(shell command -v lein 2>/dev/null),lein,./lein)
 
-foundation-web-build:
-	$(FOUNDATION_LEIN) trampoline run -m foundation-deployment.task-web-index build
+foundation-ui-components-build:
+	$(FOUNDATION_LEIN) trampoline run -m lang-main.ui-components.web-index-build build
 
-foundation-web-init:
-	$(FOUNDATION_LEIN) trampoline run -m foundation-deployment.task-web-index init
+foundation-ui-components-init:
+	$(FOUNDATION_LEIN) trampoline run -m lang-main.ui-components.web-index-build init
 
-foundation-web-publish:
-	$(FOUNDATION_LEIN) trampoline run -m foundation-deployment.task-web-index publish
+foundation-ui-components-publish:
+	$(FOUNDATION_LEIN) trampoline run -m lang-main.ui-components.web-index-build publish
 
 push-tui-000-counter:
 	$(FOUNDATION_LEIN) run -m lang-demos.tui-000-counter.build
@@ -89,4 +89,4 @@ push-tui-000-counter:
 push-tui-001-fetch:
 	$(FOUNDATION_LEIN) run -m lang-demos.tui-001-fetch.build
 
-.PHONY: lang-demos.js-004-xtdb-backbone lang-demos.js-004-xtdb-backbone-sql lang-demos.js-004-xtdb-backbone-supabase lang-demos.js-004-xtdb-backbone-start index index-force index-stats search symbol list-namespaces foundation-web-build foundation-web-init foundation-web-publish push-tui-000-counter push-tui-001-fetch
+.PHONY: lang-demos.js-004-xtdb-backbone lang-demos.js-004-xtdb-backbone-sql lang-demos.js-004-xtdb-backbone-supabase lang-demos.js-004-xtdb-backbone-start index index-force index-stats search symbol list-namespaces foundation-ui-components-build foundation-ui-components-init foundation-ui-components-publish push-tui-000-counter push-tui-001-fetch

@@ -60,12 +60,12 @@ Examples are a primary entry point into Foundation Base. Each example should kee
 - Build definition: [`build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/projects/play/tui_002_game_of_life/build.clj)
 - Reproduce: `lein push-tui-002-game-of-life`
 
-### React Native components
+### Foundation UI Components
 
 - Generated project: [`zcaudate-xyz/demo.foundation-base`](https://github.com/zcaudate-xyz/demo.foundation-base)
-- Authored index: [`web_native_index.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/tooling/component/web_native_index.clj)
-- Build definition: [`build_native_index.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/tooling/component/build_native_index.clj)
-- Reproduce: `lein push-native-code`
+- Authored index: [`web_index_main.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/lang_main/ui_components/web_index_main.clj)
+- Build definition: [`web_index_build.clj`](https://github.com/zcaudate-xyz/foundation-base/blob/main/src-build/lang_main/ui_components/web_index_build.clj)
+- Reproduce: `lein push-foundation-ui-components`
 
 ## Adding an example
 

@@ -21,7 +21,7 @@
    "deploy-clojars" ["exec" "-ep" "(use 'code.tool.maven)   (let [result (deploy :all {:tag :clojars})] (System/exit (task-exit-code result)))"]
    "deploy-root" ["deploy" "clojars"]
    "deploy-lein" ["exec" "-ep" "(use 'code.tool.maven)   (deploy-lein :all {:tag :all}) (System/exit 0)"]
-   "push-native-code"  ["run" "-m" "component.task-native-index"]
+   "push-foundation-ui-components"  ["run" "-m" "lang-main.ui-components.web-index-build" "publish"]
    "push-c-000-pthreads"        ["run" "-m" "lang-demos.c-000-pthreads-hello.build"]
    "push-ngx-000-hello"         ["run" "-m" "lang-demos.ngx-000-hello.build"]
    "push-ngx-001-eval"          ["run" "-m" "lang-demos.ngx-001-eval.build"]
