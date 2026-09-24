@@ -1,5 +1,5 @@
 (ns lang-demos.js-004-xtdb-backbone.app.remote
-  (:require [hara.lang :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:require [[lang-demos.js-004-xtdb-backbone.app.backbone :as backbone]
@@ -7,7 +7,6 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
-             [xt.substrate.page-model :as page-model]
              [xt.substrate.transport-browser :as browser-transport]]})
 
 (defn.js default-session-config
@@ -40,8 +39,12 @@
 (defn.js install-demo-models
   [node space-id]
   (var specs (backbone/page-model-specs))
-  (page-model/model-put node space-id "ping" (xt/x:get-key specs "ping"))
-  (page-model/model-put node space-id "log_append" (xt/x:get-key specs "log_append"))
+  (substrate/page-group-add-attach
+   node space-id "ping"
+   {"main" (xt/x:get-key specs "ping")})
+  (substrate/page-group-add-attach
+   node space-id "log_append"
+   {"main" (xt/x:get-key specs "log_append")})
   (return node))
 
 (defn.js connect-session
@@ -115,11 +118,13 @@
 
 (defn.js set-view-input
   [node space-id model-id view-id input]
-  (return (page-model/view-set-input node space-id model-id view-id input)))
+  (return (substrate/page-model-set-input
+           node space-id model-id view-id input {})))
 
 (defn.js refresh-page-view
   [node space-id model-id view-id]
-  (return (page-model/view-refresh node space-id model-id view-id)))
+  (return (substrate/page-model-update
+           node space-id model-id view-id {})))
 
 (defn.js remote-api
   []

@@ -74,9 +74,9 @@
 
 (defn build-c-000-pthreads-hello
   []
-  (require '[lang-demos.build-c-000-pthreads-hello.main])
+  (require '[lang-demos.c-000-pthreads-hello.main])
   (make/build-all C-000-PTHREADS-HELLO)
-  (make/run-internal C-000-PTHREADS-HELLO :build-web))
+  (make/run-internal C-000-PTHREADS-HELLO :package))
 
 (defn -main
   []

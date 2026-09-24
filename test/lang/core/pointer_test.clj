@@ -217,6 +217,56 @@
       ""
       "print(L_core____identity_fn(1))"))
 
+(fact "does not include implicit module dependencies for free-form scripts"
+  (let [library (doto (lib/library {})
+                  (lib/add-book! (assoc xtalk/+book+ :modules {}))
+                  (lib/add-book! (assoc js/+book+ :modules {})))
+        entry   (entry/create-code-base
+                 '(defn helper [x] (return x))
+                 {:lang :js
+                  :namespace 'lang.core.pointer-test
+                  :module 'sample.ui}
+                 (:grammar js/+book+))
+        _       (lib/add-module!
+                 library
+                 (module/book-module
+                  {:lang :js
+                   :id 'sample.ui
+                   :code {(:id entry) entry}}))
+        _       (lib/add-module!
+                 library
+                 (module/book-module
+                  {:lang :js
+                   :id 'sample.main
+                   :includes #{'sample.ui}}))
+        free    (ut/lang-pointer :js
+                                 {:module 'sample.main
+                                  :form '(+ 1 2 3)
+                                  :library library})
+        direct  (ut/lang-pointer :js
+                                 {:module 'sample.main
+                                  :form '(sample.ui/helper 1)
+                                  :library library})
+        free-out   (ptr-invoke-script free [] {:library library
+                                                :lang :js
+                                                :layout :full})
+        direct-out (ptr-invoke-script direct [] {:library library
+                                                 :lang :js
+                                                 :layout :full})
+        runtime-out (runtime/default-invoke-script
+                     {:runtime :websocket
+                      :lang :js
+                      :library library}
+                     free
+                     []
+                     (fn [_ body] body)
+                     {:json false})]
+    [(string/includes? free-out "1 + 2 + 3")
+     (string/includes? free-out "sample_ui")
+     (string/includes? direct-out "sample_ui")
+     runtime-out]
+    => [true false true "1 + 2 + 3"]))
+
 ^{:refer lang.core.pointer/ptr-intern :added "4.0"}
 (fact "interns the symbol into the workspace environment"
   (ptr-intern *ns* 'foo {:lang :lua}) => #'lang.core.pointer-test/foo)

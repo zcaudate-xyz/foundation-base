@@ -7,7 +7,7 @@
 * Build
 
 #+PKG_OUTPUT: package.json
-#+BEGIN_SRC js :tangle .build/package.json
+#+BEGIN_SRC js :tangle .build/demo/tui-001-fetch/package.json
 {
   "name": "tui-fetch-basic",
   "main": "src/main.js",

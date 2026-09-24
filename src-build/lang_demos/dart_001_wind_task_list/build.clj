@@ -8,7 +8,7 @@
             [std.make :as make :refer [def.make]]
             [lang.runtime.basic.impl.process-dart :as dart-runtime]))
 
-(def +build-root+ ".build/demo-wind-task-list")
+(def +build-root+ ".build/demo/dart-001-wind-task-list")
 (def +app-root+ (str +build-root+ "/wind_demo"))
 
 (def +pubspec+
@@ -171,9 +171,9 @@
           :root-prefix +dart-root-prefix+}
    :transforms {:full [normalize-dart-module]}})
 
-(def.make APPLICATION
+(def.make DART-001-WIND-TASK-LIST
   {:tag "demo-wind-task-list"
-   :build +build-root+
+   :build ".build/demo/dart-001-wind-task-list"
    :sections {:setup [{:type :raw
                        :target "wind_demo"
                        :file "pubspec.yaml"
@@ -278,7 +278,7 @@
 (defn build!
   []
   (ensure-scaffold!)
-  (make/build-all APPLICATION)
+  (make/build-all DART-001-WIND-TASK-LIST)
   (run-command! +app-root+ ["flutter" "pub" "get"])
   +app-root+)
 

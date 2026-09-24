@@ -154,12 +154,12 @@ Examples should retain links to the authored source, project-generation definiti
 
 | Example | Generated project | Authored source | Build definition |
 |---|---|---|---|
-| C pthreads hello | [`hoebat/lang-demos.c-000-pthreads-hello`](https://github.com/hoebat/lang-demos.c-000-pthreads-hello) | [`main.clj`](src-build/projects/play/c_000_pthreads_hello/main.clj) | [`build.clj`](src-build/projects/play/c_000_pthreads_hello/build.clj) |
-| OpenResty hello | [`hoebat/lang-demos.ngx-000-hello`](https://github.com/hoebat/lang-demos.ngx-000-hello) | [`main.clj`](src-build/projects/play/ngx_000_hello/main.clj) | [`build.clj`](src-build/projects/play/ngx_000_hello/build.clj) |
-| OpenResty live evaluation | [`hoebat/lang-demos.ngx-001-eval`](https://github.com/hoebat/lang-demos.ngx-001-eval) | [`main.clj`](src-build/projects/play/ngx_001_eval/main.clj) | [`build.clj`](src-build/projects/play/ngx_001_eval/build.clj) |
-| TUI counter | [`hoebat/lang-demos.tui-000-counter`](https://github.com/hoebat/lang-demos.tui-000-counter) | [`main.clj`](src-build/projects/play/tui_000_counter/main.clj) | [`build.clj`](src-build/projects/play/tui_000_counter/build.clj) |
-| TUI fetch | [`hoebat/lang-demos.tui-001-fetch`](https://github.com/hoebat/lang-demos.tui-001-fetch) | [`main.clj`](src-build/projects/play/tui_001_fetch/main.clj) | [`build.clj`](src-build/projects/play/tui_001_fetch/build.clj) |
-| TUI Game of Life | [`zcaudate/lang-demos.tui-002-game-of-life`](https://github.com/zcaudate/lang-demos.tui-002-game-of-life) | [`main.clj`](src-build/projects/play/tui_002_game_of_life/main.clj) | [`build.clj`](src-build/projects/play/tui_002_game_of_life/build.clj) |
+| C pthreads hello | [`hoebat/lang-demos.c-000-pthreads-hello`](https://github.com/hoebat/lang-demos.c-000-pthreads-hello) | [`main.clj`](src-build/lang_demos/c_000_pthreads_hello/main.clj) | [`build.clj`](src-build/lang_demos/c_000_pthreads_hello/build.clj) |
+| OpenResty hello | [`hoebat/lang-demos.ngx-000-hello`](https://github.com/hoebat/lang-demos.ngx-000-hello) | [`main.clj`](src-build/lang_demos/ngx_000_hello/main.clj) | [`build.clj`](src-build/lang_demos/ngx_000_hello/build.clj) |
+| OpenResty live evaluation | [`hoebat/lang-demos.ngx-001-eval`](https://github.com/hoebat/lang-demos.ngx-001-eval) | [`main.clj`](src-build/lang_demos/ngx_001_eval/main.clj) | [`build.clj`](src-build/lang_demos/ngx_001_eval/build.clj) |
+| TUI counter | [`hoebat/lang-demos.tui-000-counter`](https://github.com/hoebat/lang-demos.tui-000-counter) | [`main.clj`](src-build/lang_demos/tui_000_counter/main.clj) | [`build.clj`](src-build/lang_demos/tui_000_counter/build.clj) |
+| TUI fetch | [`hoebat/lang-demos.tui-001-fetch`](https://github.com/hoebat/lang-demos.tui-001-fetch) | [`main.clj`](src-build/lang_demos/tui_001_fetch/main.clj) | [`build.clj`](src-build/lang_demos/tui_001_fetch/build.clj) |
+| TUI Game of Life | [`zcaudate/lang-demos.tui-002-game-of-life`](https://github.com/zcaudate/lang-demos.tui-002-game-of-life) | [`main.clj`](src-build/lang_demos/tui_002_game_of_life/main.clj) | [`build.clj`](src-build/lang_demos/tui_002_game_of_life/build.clj) |
 | Foundation UI Components | [`zcaudate-xyz/demo.foundation-base`](https://github.com/zcaudate-xyz/demo.foundation-base) | [`web_index_main.clj`](src-build/lang_main/ui_components/web_index_main.clj) | [`web_index_build.clj`](src-build/lang_main/ui_components/web_index_build.clj) |
 
 Generate or push the existing examples with the project aliases:
@@ -239,7 +239,7 @@ Start with one focused workflow:
 
 1. emit a small JavaScript or Lua form;
 2. run one `code.test` namespace;
-3. inspect one generated project under `src-build/projects/play`;
+3. inspect one generated project under `src-build/lang_demos`;
 4. browse the matching generated documentation and source links.
 
 ### As a contributor

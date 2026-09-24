@@ -1,18 +1,18 @@
 (ns lang-demos.view-001-kitchen-sink.build
   "def.make builds for the xt.substrate.view kitchen-sink demo.
 
-   VIEW-KITCHEN-SINK-JS emits the browser app (module.graph -> src/, esbuild
-   bundle -> public/app.js, static index.html + Tailwind CDN). VIEW-KITCHEN-SINK-DART
+   VIEW-001-KITCHEN-SINK-JS emits the browser app (module.graph -> src/, esbuild
+   bundle -> public/app.js, static index.html + Tailwind CDN). VIEW-001-KITCHEN-SINK-DART
    emits a self-contained Dart console package that prepares the same demo maps
-   through dart.ui.view and prints the bundle summary. VIEW-KITCHEN-SINK-FLUTTER
+   through dart.ui.view and prints the bundle summary. VIEW-001-KITCHEN-SINK-FLUTTER
    emits a Flutter package that renders the same demo through fluttersdk_wind's
    WDynamic widget (flutter create scaffold + lib/main.dart host)."
-  (:use code.test)
+  (:use [code.test :exclude [-main]])
   (:require [clojure.string :as str]
             [std.fs :as fs]
             [std.lib.os :as os]
             [std.make :as make :refer [def.make]]
-            [xtalk.packages :as packages]
+            [lang.runtime.basic.impl.process-dart :as dart-runtime]
             [lang-demos.view-001-kitchen-sink.app]))
 
 ;;
@@ -60,9 +60,9 @@
           "public/app.js"
           ".DS_Store"]})
 
-(def.make VIEW-KITCHEN-SINK-JS
+(def.make VIEW-001-KITCHEN-SINK-JS
   {:tag "view-kitchen-sink-js"
-   :build ".build/view-kitchen-sink-js"
+   :build ".build/demo/view-001-kitchen-sink-js"
    :triggers '#{lang-demos.view-001-kitchen-sink.app}
    :sections {:setup [+js-gitignore+
                       {:type :package.json
@@ -105,12 +105,16 @@
                           (str/replace target "lib/" ""))])
              +dart-directories+)))
 
+(defn- normalize-dart-module
+  [source _static]
+  (dart-runtime/ensure-dart-imports source))
+
 (defn dart-code-options
   [package-name]
   {:extra-namespaces false
    :link {:path-suffix ".dart"
           :root-prefix (dart-root-prefix package-name)}
-   :transforms {:full [packages/normalize-dart-module]}})
+   :transforms {:full [normalize-dart-module]}})
 
 (defn dart-entries
   [package-name]
@@ -225,9 +229,9 @@
    :main [".dart_tool/"
           "pubspec.lock"]})
 
-(def.make VIEW-KITCHEN-SINK-DART
+(def.make VIEW-001-KITCHEN-SINK-DART
   {:tag "view-kitchen-sink-dart"
-   :build ".build/view-kitchen-sink-dart"
+   :build ".build/demo/view-001-kitchen-sink-dart"
    :sections {:setup [+dart-gitignore+
                       {:type :raw
                        :file "pubspec.yaml"
@@ -244,7 +248,7 @@
 ;; Flutter
 ;;
 
-(def +flutter-build-root+ ".build/view-kitchen-sink-flutter")
+(def +flutter-build-root+ ".build/demo/view-001-kitchen-sink-flutter")
 
 (def +flutter-pubspec+
   ["name: view_kitchen_sink"
@@ -475,9 +479,9 @@
           ".flutter-plugins"
           ".flutter-plugins-dependencies"]})
 
-(def.make VIEW-KITCHEN-SINK-FLUTTER
+(def.make VIEW-001-KITCHEN-SINK-FLUTTER
   {:tag "view-kitchen-sink-flutter"
-   :build +flutter-build-root+
+   :build ".build/demo/view-001-kitchen-sink-flutter"
    :sections {:setup [+flutter-gitignore+
                       {:type :raw
                        :file "pubspec.yaml"
@@ -525,7 +529,7 @@
 (defn flutter-build!
   []
   (ensure-flutter-scaffold!)
-  (make/build-all VIEW-KITCHEN-SINK-FLUTTER)
+  (make/build-all VIEW-001-KITCHEN-SINK-FLUTTER)
   (run-command! +flutter-build-root+ ["flutter" "pub" "get"])
   +flutter-build-root+)
 
@@ -543,8 +547,8 @@
 (defn -main
   [& [command]]
   (case (or command "build")
-    "build" (do (make/build-all VIEW-KITCHEN-SINK-JS)
-                (make/build-all VIEW-KITCHEN-SINK-DART)
+    "build" (do (make/build-all VIEW-001-KITCHEN-SINK-JS)
+                (make/build-all VIEW-001-KITCHEN-SINK-DART)
                 (flutter-build!))
     "test" (flutter-test!)
     "run-macos" (flutter-run! "macos")
@@ -557,8 +561,8 @@
 (fact "build the kitchen-sink demo for js, dart and flutter"
   (-main "build")
 
-  ;; js: cd .build/view-kitchen-sink-js && make install && make bundle && make start
+  ;; js: cd .build/demo/view-001-kitchen-sink-js && make install && make bundle && make start
   ;;     open http://localhost:8080
-  ;; dart: cd .build/view-kitchen-sink-dart && make get && make run
-  ;; flutter: cd .build/view-kitchen-sink-flutter && make get && make run-macos
+  ;; dart: cd .build/demo/view-001-kitchen-sink-dart && make get && make run
+  ;; flutter: cd .build/demo/view-001-kitchen-sink-flutter && make get && make run-macos
   )

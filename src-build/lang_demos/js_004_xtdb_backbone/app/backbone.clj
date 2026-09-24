@@ -1,5 +1,5 @@
 (ns lang-demos.js-004-xtdb-backbone.app.backbone
-  (:require [hara.lang :as l]
+  (:require [lang.core :as l]
             [lang-demos.js-004-xtdb-backbone.app.config :as config]
             [postgres.core :as pg]
             [postgres.sample.scratch-v0]))
@@ -27,11 +27,11 @@
 
 (l/script :js
   {:require [[js.net.http-fetch :as js-fetch]
-             [xt.db.runtime.client-supabase :as client-supabase]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
-             [xt.lib.supabase :as supabase]]})
+             [xt.net.addon-supabase :as addon]
+             [xt.net.http-util :as http-util]]})
 
 (defn.js resolve-supabase-base-url
   []
@@ -39,24 +39,23 @@
   (var base-url (xt/x:get-key config "base_url"))
   (when (xt/x:not-nil? base-url)
     (return base-url))
-  (var protocol (or (xt/x:get-key config "protocol")
-                    (:? (== "https:" (xtd/get-in globalThis ["location" "protocol"]))
-                        "https:"
-                        "http:")))
-  (var hostname (or (xt/x:get-key config "hostname")
-                    (xtd/get-in globalThis ["location" "hostname"])
-                    "127.0.0.1"))
-  (var port (or (xt/x:get-key config "port")
-                55121))
-  (return (xt/x:cat protocol "//" hostname ":" port)))
+  (var protocol (or (xt/x:get-key config "protocol") "http"))
+  (var hostname (or (xt/x:get-key config "hostname") "127.0.0.1"))
+  (var port (or (xt/x:get-key config "port") 55121))
+  (return
+   (xt/x:cat
+    (xt/x:cat protocol "://")
+    (xt/x:cat hostname (xt/x:cat ":" (xt/x:to-string port))))))
 
 (defn.js default-api-config
   []
   (var config (@! +supabase-config+))
   (return
    {"base_url" (-/resolve-supabase-base-url)
-    "schema_name" (or (xt/x:get-key config "schema_name")
-                      "scratch_v0")
+    "host" (or (xt/x:get-key config "hostname") "127.0.0.1")
+    "port" (or (xt/x:get-key config "port") 55121)
+    "secured" (== "https" (xt/x:get-key config "protocol"))
+    "schema_name" (or (xt/x:get-key config "schema_name") "scratch_v0")
     "api_key" (xt/x:get-key config "api_key")
     "auth_token" (or (xt/x:get-key config "auth_token")
                      (xt/x:get-key config "api_key"))
@@ -71,9 +70,26 @@
 
 (defn.js create-client
   [opts]
-  (var raw (-/merge-api-config opts))
-  (xt/x:set-key raw "transport" (js-fetch/create {} {}))
-  (return (client-supabase/client raw)))
+  (var config (-/merge-api-config opts))
+  (return
+   (js-fetch/create
+    {"host" (xt/x:get-key config "host")
+     "port" (xt/x:get-key config "port")
+     "secured" (xt/x:get-key config "secured")
+     "apikey" (xt/x:get-key config "api_key")
+     "token" (xt/x:get-key config "auth_token")
+     "headers" (xt/x:get-key config "headers")}
+    (addon/middleware-supabase))))
+
+(defn.js response-data
+  [response]
+  (var body (http-util/get-body-data response))
+  (if (xt/x:is-string? body)
+    (try
+      (return (xt/x:json-decode body))
+      (catch err
+        (return body)))
+    (return body)))
 
 (defn.js request-error
   [response tag]
@@ -84,38 +100,58 @@
     (return {"status" "error"
              "tag" tag
              "data" {"status" status
-                     "body" (xt/x:get-key response "body")}})))
+                     "body" (-/response-data response)}})))
+
+(defn.js store-session
+  [client session]
+  (var defaults (xt/x:get-key client "defaults"))
+  (when (xt/x:not-nil? defaults)
+    (xt/x:set-key defaults "token"
+                  (xt/x:get-key session "access_token")))
+  (return client))
+
+(defn.js auth-request
+  [client command tag]
+  (return
+   (promise/x:promise-then
+    (js-fetch/request-http client command)
+    (fn [response]
+      (var error (-/request-error response tag))
+      (if (xt/x:not-nil? error)
+        (return {"data" {"user" nil
+                          "session" nil}
+                 "error" error})
+        (do
+          (var body (-/response-data response))
+          (var session (or (xt/x:get-key body "session") body))
+          (var user (xt/x:get-key body "user"))
+          (when (xt/x:not-nil? session)
+            (-/store-session client session))
+          (return {"data" {"user" user
+                            "session" session}
+                   "error" nil})))))))
+
+(defn.js login
+  [client credentials]
+  (return
+   (-/auth-request
+    client
+    (addon/cmd-token-password credentials {})
+    "demo.xtdb_backbone/login-failed")))
 
 (defn.js sign-up-with-password
   [client credentials]
   (return
-   (promise/x:promise-then
-    (supabase/dispatch-auth-request
-     client
-     {"method" "POST"
-      "url" (supabase/auth-path "/signup")
-      "body" (supabase/password-request-body credentials)}
-     {})
-    (fn [response]
-      (var error (supabase/response-error response))
-      (if (xt/x:not-nil? error)
-        (return {"data" {"user" nil
-                         "session" nil}
-                 "error" error})
-        (do
-          (var out (supabase/auth-response (or (xt/x:get-key response "body") {})))
-          (var data (xt/x:get-key out "data"))
-          (var session (xt/x:get-key data "session"))
-          (var user (xt/x:get-key data "user"))
-          (when (xt/x:not-nil? session)
-            (supabase/store-session! client session user))
-          (return out)))))))
+   (-/auth-request
+    client
+    (addon/cmd-signup credentials {})
+    "demo.xtdb_backbone/signup-failed")))
 
 (defn.js ensure-session
   [client credentials]
   (return
    (promise/x:promise-then
-    (supabase/login client credentials)
+    (-/login client credentials)
     (fn [login-out]
       (if (xt/x:nil? (xt/x:get-key login-out "error"))
         (return login-out)
@@ -131,42 +167,38 @@
   [client]
   (return
    (promise/x:promise-then
-    (client-supabase/dispatch-request
+    (js-fetch/request-http
      client
-     {"method" "POST"
-      "url" "/rest/v1/rpc/ping"}
-     {})
+     (addon/cmd-rpc-call "ping" {} {}))
     (fn [response]
       (var error (-/request-error response "demo.xtdb_backbone/ping-failed"))
       (if (xt/x:not-nil? error)
         (return error)
-        (return (client-supabase/unwrap-response response)))))))
+        (return (-/response-data response)))))))
 
 (defn.js recent-logs-request
   [client]
   (return
    (promise/x:promise-then
-    (client-supabase/dispatch-request
+    (js-fetch/request-http
      client
-     {"method" "GET"
-      "url" "/rest/v1/Log?select=id,message,author_id&order=id.desc&limit=10"}
-     {})
+     (addon/cmd-query-table
+      "Log"
+      "select=id,message,author_id&order=id.desc&limit=10"
+      {}))
     (fn [response]
       (var error (-/request-error response "demo.xtdb_backbone/log-select-failed"))
       (if (xt/x:not-nil? error)
         (return error)
-        (return (client-supabase/unwrap-response response)))))))
+        (return (-/response-data response)))))))
 
 (defn.js log-append-request
   [client message]
   (return
    (promise/x:promise-then
-    (client-supabase/dispatch-request
+    (js-fetch/request-http
      client
-     {"method" "POST"
-      "url" "/rest/v1/rpc/log_append"
-      "body" {"i_message" message}}
-     {})
+     (addon/cmd-rpc-call "log_append" {"i_message" message} {}))
     (fn [response]
       (var error (-/request-error response "demo.xtdb_backbone/log-append-failed"))
       (if (xt/x:not-nil? error)
@@ -178,14 +210,14 @@
             (if (and (xt/x:is-object? logs)
                      (== "error" (xt/x:get-key logs "status")))
               (return logs)
-              (return {"append" (client-supabase/unwrap-response response)
+              (return {"append" (-/response-data response)
                        "logs" logs}))))))))))
 
 (defn.js ping-page-model
   []
   (return
    {"meta" {"title" "scratch_v0 ping"
-            "description" "Calls the public ping RPC from the scratch_v0 schema."}
+             "description" "Calls the public ping RPC from the scratch_v0 schema."}
     "views"
     {"main"
      {"default_input" []
@@ -209,7 +241,7 @@
   []
   (return
    {"meta" {"title" "scratch_v0 log_append"
-            "description" "Signs in, appends a log row, and returns recent scratch_v0 logs."}
+             "description" "Signs in, appends a log row, and returns recent scratch_v0 logs."}
     "views"
     {"main"
      {"default_input" ["hello from scratch_v0"

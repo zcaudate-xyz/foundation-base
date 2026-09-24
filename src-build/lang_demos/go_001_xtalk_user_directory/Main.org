@@ -24,12 +24,12 @@ That means the generated =user_directory.go= contains things like:
 
 * Generated build tree
 
-Running =(make/build-all PROJECT)= writes:
+Running =(make/build-all GO-001-XTALK-USER-DIRECTORY)= writes:
 
-- =.build/.gitignore=
-- =.build/Makefile=
-- =.build/go.mod=
-- =.build/user_directory.go=
+- =.build/demo/go-001-xtalk-user-directory/.gitignore=
+- =.build/demo/go-001-xtalk-user-directory/Makefile=
+- =.build/demo/go-001-xtalk-user-directory/go.mod=
+- =.build/demo/go-001-xtalk-user-directory/user_directory.go=
 
 * Build the project
 
@@ -37,7 +37,7 @@ Running =(make/build-all PROJECT)= writes:
 (load-file "build.clj")
 (require '[std.make :as make]
          '[lang-demos.go-001-xtalk-user-directory.build :as build])
-(make/build-all build/PROJECT)
+(make/build-all build/GO-001-XTALK-USER-DIRECTORY)
 #+END_SRC
 
 * Inspect the generated Go source
@@ -46,5 +46,5 @@ Running =(make/build-all PROJECT)= writes:
 (load-file "build.clj")
 (require '[std.make :as make]
          '[lang-demos.go-001-xtalk-user-directory.build :as build])
-(make/run build/PROJECT :show-source)
+(make/run build/GO-001-XTALK-USER-DIRECTORY :show-source)
 #+END_SRC

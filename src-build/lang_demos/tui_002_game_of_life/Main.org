@@ -21,7 +21,7 @@ make package
 * Build
 
 #+PKG_OUTPUT: package.json
-#+BEGIN_SRC js :tangle .build/package.json
+#+BEGIN_SRC js :tangle .build/demo/tui-002-game-of-life/package.json
 {
   "name": "tui-002-game-of-life",
   "main": "src/main.js",

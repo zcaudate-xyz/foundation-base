@@ -11,13 +11,13 @@ TypeScript declaration files from Clojure sources.
 
 * Generated build tree
 
-Running =(make/build-all PROJECT)= writes:
+Running =(make/build-all TS-000-USER-DIRECTORY)= writes:
 
-- =.build/.gitignore=
-- =.build/Makefile=
-- =.build/package.json=
-- =.build/src/index.js=
-- =.build/src/index.d.ts=
+- =.build/demo/ts-000-user-directory/.gitignore=
+- =.build/demo/ts-000-user-directory/Makefile=
+- =.build/demo/ts-000-user-directory/package.json=
+- =.build/demo/ts-000-user-directory/src/index.js=
+- =.build/demo/ts-000-user-directory/src/index.d.ts=
 
 The declaration artifact is created in =build.clj= by calling the mixer on
 =lang-demos.ts-000-user-directory.types= and writing the output beside the runtime JS
@@ -29,7 +29,7 @@ file.
 (load-file "build.clj")
 (require '[std.make :as make]
          '[lang-demos.ts-000-user-directory.build :as build])
-(make/build-all build/PROJECT)
+(make/build-all build/TS-000-USER-DIRECTORY)
 #+END_SRC
 
 *** Inspect the generated declarations
@@ -38,7 +38,7 @@ file.
 (load-file "build.clj")
 (require '[std.make :as make]
          '[lang-demos.ts-000-user-directory.build :as build])
-(make/run build/PROJECT :show-types)
+(make/run build/TS-000-USER-DIRECTORY :show-types)
 #+END_SRC
 
 *** Inspect the generated JavaScript
@@ -47,5 +47,5 @@ file.
 (load-file "build.clj")
 (require '[std.make :as make]
          '[lang-demos.ts-000-user-directory.build :as build])
-(make/run build/PROJECT :show-js)
+(make/run build/TS-000-USER-DIRECTORY :show-js)
 #+END_SRC

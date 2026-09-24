@@ -63,7 +63,11 @@
   ([lang]
    (current-natives lang (env/ns-sym)))
   ([lang ns]
-   (linked-natives lang ns)))
+   (get-in (l/get-book (l/default-library)
+                       lang)
+           [:modules
+            ns
+            :native])))
 
 (defn expose-module
   "helper function for additional libs"

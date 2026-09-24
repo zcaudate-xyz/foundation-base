@@ -8,7 +8,6 @@
    "manage"  ["run" "-m" "code.manage"]
    "seedgen" ["run" "-m" "lang.seedgen.cli"]
    "lang-uberjar" ["run" "-m" "lang.uberjar.build"]
-   #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "wiki"        ["exec" "-ep" "(let [p (-> (ProcessBuilder. [\"bash\" \"bin/publish-wiki\"]) (.inheritIO) (.start))] (System/exit (.waitFor p)))"]
    "serve"       ["run" "-m" "code.doc.server" "8080"]
@@ -16,10 +15,10 @@
    "doc-check"   ["exec" "-ep" "(require '[code.doc.check :as doc-check]) (System/exit (min 1 (doc-check/check-failures :all)))"]
    "codox"       ["with-profile" "+codox" "run" "-m" "code.doc.codox"]
    "install"     ["exec" "-ep" "(use 'code.tool.maven)   (install :all {:tag :all}) (System/exit 0)"]
-   "deploy-github" ["exec" "-ep" "(use 'code.tool.maven)   (deploy :all {:tag :all}) (System/exit 0)"]
+   "deploy-github"   ["exec" "-ep" "(use 'code.tool.maven)   (deploy :all {:tag :all}) (System/exit 0)"]
    "package-clojars" ["exec" "-ep" "(use 'code.tool.maven)   (let [result (package :all {:tag :clojars})] (System/exit (task-exit-code result)))"]
-   "deploy-clojars" ["exec" "-ep" "(use 'code.tool.maven)   (let [result (deploy :all {:tag :clojars})] (System/exit (task-exit-code result)))"]
-   "deploy-root" ["deploy" "clojars"]
+   "deploy-clojars"  ["exec" "-ep" "(use 'code.tool.maven)   (let [result (deploy :all {:tag :clojars})] (System/exit (task-exit-code result)))"]
+   "deploy-root"     ["deploy" "clojars"]
    "deploy-lein" ["exec" "-ep" "(use 'code.tool.maven)   (deploy-lein :all {:tag :all}) (System/exit 0)"]
    "push-foundation-ui-components"  ["run" "-m" "lang-main.ui-components.web-index-build" "publish"]
    "push-c-000-pthreads"        ["run" "-m" "lang-demos.c-000-pthreads-hello.build"]
@@ -176,18 +175,6 @@
    ;; std.text.diff
    [com.googlecode.java-diff-utils/diffutils "1.3.0"]
 
-   ;; mcp server
-   [com.fasterxml.jackson.core/jackson-core "2.20.0"]
-   [com.fasterxml.jackson.core/jackson-databind "2.15.2"]
-   [io.modelcontextprotocol.sdk/mcp "0.11.2"]
-   [io.modelcontextprotocol.sdk/mcp-spring-webflux "0.11.2"]
-   [org.springframework/spring-webflux "6.0.11"]
-   [org.springframework/spring-context "6.0.11"]
-   [io.projectreactor.netty/reactor-netty "1.1.9"]
-   [hato/hato "1.0.0"]
-   [org.slf4j/slf4j-simple "2.0.13"]
-   ;; -- end mcp
-
    [org.clojure/java.jdbc    "0.7.12"]
    [org.clojure/data.json    "2.4.0"]
    [clj-kondo/clj-kondo      "2024.09.27"]
@@ -220,11 +207,9 @@
           :metadata {:doc/format :markdown}
           :source-uri "https://github.com/zcaudate-xyz/foundation-base/blob/main/{filepath}#L{line}"}
   #_#_:repositories [["atlassian" "https://maven.artifacts.atlassian.com/"]]
-  :source-paths      ["src" "src-lang" "src-extra" "src-extra/mcp-clj"]
+  :source-paths      ["src" "src-lang" "src-refactor"]
   :test-paths        ["test" "test-lang"]
   :resource-paths    ["resources" "src-build"
-                      "src-build/apps" "src-build/demos" "src-build/projects"
-                      "src-build/tooling" "src-build/deployment"
                       "src-extra" "src-doc" "test-data" "test-code"]
   :java-source-paths ["src-java" "test-java"]
   :java-output-path  "target/classes"

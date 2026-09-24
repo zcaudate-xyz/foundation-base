@@ -2,7 +2,7 @@
   (:require [std.config :as config]))
 
 (def +config-file+
-  "src-build/demos/demo_xtdb_backbone/config.edn")
+  "src-build/lang_demos/js_004_xtdb_backbone/config.edn")
 
 (defn load-config
   []

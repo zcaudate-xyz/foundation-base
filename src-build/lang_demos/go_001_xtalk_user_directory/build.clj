@@ -27,7 +27,7 @@
    "user_directory.go"])
 
 (def +main-file+
-  "src-build/projects/play/go_001_xtalk_user_directory/main.clj")
+  "src-build/lang_demos/go_001_xtalk_user_directory/main.clj")
 
 (defn go-source
   [_]
@@ -35,8 +35,8 @@
       xtalk-analysis/analyze-file
       go-typed/emit-analysis-declarations))
 
-(def.make PROJECT
-  {:build    ".build/play/go-001-xtalk-user-directory"
+(def.make GO-001-XTALK-USER-DIRECTORY
+  {:build    ".build/demo/go-001-xtalk-user-directory"
    :github   {:repo "zcaudate/lang-demos.go-001-xtalk-user-directory"
               :description "Go declarations generated from canonical xtalk source"}
    :orgfile  "Main.org"
@@ -55,16 +55,16 @@
 
 (defn -main
   []
-  (make/build-all PROJECT))
+  (make/build-all GO-001-XTALK-USER-DIRECTORY))
 
 ^{:eval false}
-(fact "build the example into .build/"
-  (make/build-all PROJECT))
+(fact "build the example into .build/demo/go-001-xtalk-user-directory"
+  (make/build-all GO-001-XTALK-USER-DIRECTORY))
 
 ^{:eval false}
 (fact "show generated go source"
-  (make/run PROJECT :show-source))
+  (make/run GO-001-XTALK-USER-DIRECTORY :show-source))
 
 ^{:eval false}
 (fact "build the generated go module"
-  (make/run PROJECT :build))
+  (make/run GO-001-XTALK-USER-DIRECTORY :build))

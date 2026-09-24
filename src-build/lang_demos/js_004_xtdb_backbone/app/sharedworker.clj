@@ -1,5 +1,5 @@
 (ns lang-demos.js-004-xtdb-backbone.app.sharedworker
-  (:require [hara.lang :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:runtime :websocket

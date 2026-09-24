@@ -1,11 +1,6 @@
 (ns lang-demos.js-004-xtdb-backbone.build
-  (:require [hara.lang :as l]
-            [std.make :as make :refer [def.make]]
-            [lang-demos.js-004-xtdb-backbone.app.backbone]
-            [lang-demos.js-004-xtdb-backbone.app.main]
-            [lang-demos.js-004-xtdb-backbone.app.remote]
-            [lang-demos.js-004-xtdb-backbone.app.sharedworker]
-            [lang-demos.js-004-xtdb-backbone.app.worker-base]))
+  (:require [lang.core :as l]
+            [std.make :as make :refer [def.make]]))
 
 (def +sharedworker-webpack-config+
   (l/emit-as
@@ -148,9 +143,9 @@
    "webapp/styles.css"
    "webapp/app.js"])
 
-(def.make lang-demos.js-004-xtdb-backbone
+(def.make JS-004-XTDB-BACKBONE
   {:tag "lang-demos.js-004-xtdb-backbone"
-   :build ".build/lang-demos.js-004-xtdb-backbone"
+   :build ".build/demo/js-004-xtdb-backbone"
    :triggers '#{lang-demos.js-004-xtdb-backbone.app.backbone
                 lang-demos.js-004-xtdb-backbone.app.main
                 lang-demos.js-004-xtdb-backbone.app.remote
@@ -207,6 +202,6 @@
 
 (defn -main
   []
-  (make/build-all lang-demos.js-004-xtdb-backbone)
+  (make/build-all JS-004-XTDB-BACKBONE)
   (shutdown-agents)
   (System/exit 0))

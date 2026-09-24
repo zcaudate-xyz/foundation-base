@@ -1,19 +1,15 @@
-(ns lang-demos.js-003-expo-rn.web-debug-index
+(ns lang-demos.js-003-expo-rn.main
   (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]
             [net.http :as http]))
 
 (l/script :js
-  {;:runtime :websocket
+  {:runtime :websocket
    :config {:bench true
             :id :dev/web-main
             :emit {:native {:suppress true}
                    :lang/jsx false}}
-   ;; These natives are emitted into this namespace by the included modules.
-   ;; Declare them here so jm/import-missing does not import them a second time.
-   :import [["react-native" :as [* ReactNative]]
-            ["expo" :as [* Expo]]]
    :require [[js.module :as jm]
              [js.react :as r]
              [js.react.ext-box :as ext-box]
@@ -101,3 +97,6 @@
 
 (def.js MODULE
   (x/registerRootComponent -/App))
+
+(comment
+  (!.js  (+ 1 2)))

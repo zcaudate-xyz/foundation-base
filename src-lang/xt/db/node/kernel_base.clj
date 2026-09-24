@@ -11,6 +11,7 @@
              [xt.db.text.sql-call :as call]
              [xt.db.text.base-tree :as base-tree]
              [xt.db.text.base-flatten :as base-flatten]
+             [xt.db.node.site-map :as site-map]
              [xt.db.system.impl-common :as impl-common]
              [xt.db.system.main :as impl-main]
              [xt.substrate.page-core :as page-core]
@@ -162,6 +163,7 @@
   (-/kernel-teardown-single node (xtd/get-in config ["caching" "id"]))
   (substrate/remove-service node (xtd/get-in config ["common"  "id"]))
   (xt/x:del-key (. node ["meta"]) "xt.db/kernel-init")
+  (xt/x:del-key (. node ["meta"]) "xt.db/site-map")
   (return {:status  "teardown"
            :data    config}))
 
@@ -183,6 +185,18 @@
 ;; INIT
 ;;
 
+(defn.xt kernel-store-site-map-rpc
+  "stores the loaded site-map RPC registry on the common service"
+  {:added "4.1.5"}
+  [node config loaded]
+  (var setup-config (-/kernel-create-config config))
+  (var common-id (xtd/get-in setup-config ["common" "id"]))
+  (var common (substrate/get-service node common-id))
+  (xt/x:set-key common
+                "rpc"
+                (or (. loaded ["rpc"]) {}))
+  (return loaded))
+
 (defn.xt kernel-init-main
   "init-base-main ensures base services are present"
   {:added "4.1"}
@@ -195,23 +209,42 @@
       pending
       (fn [_]
         (return (-/kernel-init-main node config schema lookup))))))
-  (if (-/kernel-check-exists node config)
-    (return {:status  "no_change"
-             :data    (-/kernel-create-config config)})
-    (do
-      (var setup (-/kernel-setup-main node config schema lookup))
-      (var guarded
-           (-> setup
-               (promise/x:promise-then
-                (fn [result]
-                  (xt/x:del-key meta "xt.db/kernel-init")
-                  (return result)))
-               (promise/x:promise-catch
-                (fn [err]
-                  (xt/x:del-key meta "xt.db/kernel-init")
-                  (xt/x:err err)))))
-      (xt/x:set-key meta "xt.db/kernel-init" guarded)
-      (return guarded))))
+  (var init
+       (-> (site-map/load-site-map node config schema lookup)
+           (promise/x:promise-then
+            (fn [loaded]
+              (var next-schema (or (. loaded ["schema"]) schema))
+              (var next-lookup (or (. loaded ["lookup"]) lookup))
+              (if (-/kernel-check-exists node config)
+                (do
+                  (-/kernel-store-site-map-rpc node config loaded)
+                  (return
+                   (promise/x:promise-run
+                    {:status "no_change"
+                     :data (-/kernel-create-config config)})))
+                (do
+                  (var setup (-/kernel-setup-main node
+                                                  config
+                                                  next-schema
+                                                  next-lookup))
+                  (return
+                   (-> setup
+                       (promise/x:promise-then
+                        (fn [result]
+                          (-/kernel-store-site-map-rpc node config loaded)
+                          (return result)))))))))))
+  (var guarded
+       (-> init
+           (promise/x:promise-then
+            (fn [result]
+              (xt/x:del-key meta "xt.db/kernel-init")
+              (return result)))
+           (promise/x:promise-catch
+            (fn [err]
+              (xt/x:del-key meta "xt.db/kernel-init")
+              (xt/x:err err)))))
+  (xt/x:set-key meta "xt.db/kernel-init" guarded)
+  (return guarded))
 
 (defn.xt ^{:substrate/fn "@xt.db/kernel-init"}
   kernel-init-handler
@@ -346,10 +379,26 @@
 ;; RPC HANDLERS
 ;;
 
+(defn.xt rpc-resolve
+  "Resolves a compact RPC id against the worker's loaded site map."
+  {:added "4.1.5"}
+  [node primary-id rpc-spec]
+  (if (xt/x:is-string? rpc-spec)
+    (do
+      (var primary   (-/get-primary-impl node primary-id))
+      (var common-id (xtd/get-in primary ["metadata" "common_id"]))
+      (var common    (substrate/get-service node common-id))
+      (var resolved  (xtd/get-in common ["rpc" rpc-spec]))
+      (when (xt/x:nil? resolved)
+        (xt/x:err (xt/x:cat "Unknown site-map RPC: " rpc-spec)))
+      (return resolved))
+    (return rpc-spec)))
+
 (defn.xt rpc-call-baseline-fn
   "rpc-call-baseline-fn routes rpc args and syncs result to caching"
   {:added "4.1"}
   [node primary-id rpc-spec rpc-args]
+  (:= rpc-spec (-/rpc-resolve node primary-id rpc-spec))
   (var primary    (-/get-primary-impl node primary-id))
   (return
    (-> (impl-common/rpc-call-async primary rpc-spec rpc-args)
@@ -402,7 +451,9 @@
   [space args request node]
   (var primary-id  (xt/x:first args))
   (var page-args   (xt/x:second args))
-  (var rpc-spec    (xt/x:get-idx args (xt/x:offset 2)))
+  (var rpc-spec    (-/rpc-resolve node
+                                  primary-id
+                                  (xt/x:get-idx args (xt/x:offset 2))))
   (var model       (xt/x:get-idx args (xt/x:offset 3)))
   (var #{space-id
          group-id

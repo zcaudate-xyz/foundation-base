@@ -288,7 +288,15 @@
   {:added "4.0"}
   [ptr args meta]
   (let [meta (ptr-invoke-meta ptr (merge {:layout :full}
-                                         meta))]
+                                         meta))
+        ;; A free pointer is evaluated as an isolated expression.  The
+        ;; current module's `:includes` are compile-time conveniences for
+        ;; module code, not dependencies of every ad-hoc expression.  Without
+        ;; removing them here, `!.js (+ 1 2 3)` pulls in every included UI
+        ;; module (and its React references) before evaluating the expression.
+        meta (if (:form ptr)
+               (update meta :module dissoc :includes)
+               meta)]
     (binding [impl/*print-form* (:input-form *print*)]
       (cond (:form ptr)
             (impl/emit-script (:form ptr) meta)

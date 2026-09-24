@@ -4,7 +4,7 @@ This demo compiles a portable XTalk controller and `xt.ui` view to Dart, passes
 that tree through `xt.ui.wind/prepare`, and renders the resulting descriptor and
 action bundle with Flutter's `WDynamic` widget.
 
-Generated Flutter and package files live under `.build/demo-wind-task-list`.
+Generated Flutter and package files live under `.build/demo/dart-001-wind-task-list`.
 They are disposable and should not be edited directly.
 
 ```bash

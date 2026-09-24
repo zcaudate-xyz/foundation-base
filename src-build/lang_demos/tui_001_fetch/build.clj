@@ -16,8 +16,8 @@
           {"main" "dist/main.js"
            "dependencies" {"node-fetch" "2.6.1"}})))
 
-(def.make PROJECT
-  {:build    ".build/play/tui-001-fetch"
+(def.make TUI-001-FETCH
+  {:build    ".build/demo/tui-001-fetch"
    :github   {:repo "zcaudate/lang-demos.tui-001-fetch"
               :description "Simple Blessed TUI Fetch Example"}
    :orgfile  "Main.org"
@@ -40,8 +40,8 @@
 
 (defn -main
   []
-  (make/build-all PROJECT)
-  (make/gh:dwim-init PROJECT))
+  (make/build-all TUI-001-FETCH)
+  (make/gh:dwim-init TUI-001-FETCH))
 
 ^{:eval false
   ;;
@@ -50,7 +50,7 @@
   }
 (fact "Code FOR PROJECT SETUP" 
 
-  (make/build-all PROJECT))
+  (make/build-all TUI-001-FETCH))
 
 ^{:eval false
   ;;
@@ -59,7 +59,7 @@
   }
 (fact "Code FOR PROJECT SETUP" 
 
-  (make/run:init PROJECT))
+  (make/run:init TUI-001-FETCH))
 
 ^{:eval false
   ;;
@@ -68,7 +68,7 @@
   }
 (fact "Code FOR PROJECT SETUP" 
 
-  (make/run:dev PROJECT))
+  (make/run:dev TUI-001-FETCH))
 
 ^{:eval false
   ;;
@@ -77,7 +77,7 @@
   :ui/action [:GITHUB :SETUP]}
 (fact "initial setup of repo from github"
 
-  (make/gh:dwim-init PROJECT))
+  (make/gh:dwim-init TUI-001-FETCH))
 
 ^{:eval false
   ;;
@@ -86,4 +86,4 @@
   :ui/action [:GITHUB :PUSH]}
 (fact "pushes changes to github"
 
-  (make/gh:dwim-push PROJECT))
+  (make/gh:dwim-push TUI-001-FETCH))

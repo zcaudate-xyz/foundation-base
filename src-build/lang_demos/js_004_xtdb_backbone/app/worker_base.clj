@@ -1,10 +1,10 @@
 (ns lang-demos.js-004-xtdb-backbone.app.worker-base
-  (:require [hara.lang :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:require [[js.net.http-fetch :as js-fetch]
              [js.net.conn-sqlite :as sqlite-wasm]
-             [xt.db.node :as db-node]
+             [xt.substrate :as substrate]
              [xt.lang.common-data :as xtd]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
@@ -99,7 +99,9 @@
        shared
        "ready"
        (promise/x:promise-then
-        (db-node/create config)
+        (substrate/node-create
+         {"id" (or (xt/x:get-key config "node_id")
+                   "lang-demos.js-004-xtdb-backbone-worker")})
         (fn [node]
           (xt/x:set-key shared "node" node)
           (return node))))

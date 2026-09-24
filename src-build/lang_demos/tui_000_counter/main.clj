@@ -5,8 +5,8 @@
 
 (fact:global
  {:prelim  [(require 'lang-demos.tui-000-counter.build)
-            (eval (std.make/run:init lang-demos.tui-000-counter.build/PROJECT))]
-  :setup   [(eval (std.make/run:dev lang-demos.tui-000-counter.build/PROJECT))]})
+            (eval (std.make/run:init lang-demos.tui-000-counter.build/TUI-000-COUNTER))]
+  :setup   [(eval (std.make/run:dev lang-demos.tui-000-counter.build/TUI-000-COUNTER))]})
 
 (l/script :js
   {:require [[js.react :as r]

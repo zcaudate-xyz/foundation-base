@@ -1,6 +1,6 @@
 # js-002 substrate scratch-v3
 
-This `src-build/projects/play` project turns `postgres.sample.scratch-v3` into a set of Lang DSL `xt.substrate` examples.
+This `src-build/lang_demos` project turns `postgres.sample.scratch-v3` into a set of Lang DSL `xt.substrate` examples.
 
 The generated browser page includes four slices:
 
@@ -29,13 +29,13 @@ Or from a REPL:
 Artifacts are written to:
 
 ```text
-.build/play-js-002-substrate-scratch/public
+.build/demo/js-002-substrate-scratch/public
 ```
 
 Serve the generated page with:
 
 ```bash
-cd .build/play-js-002-substrate-scratch
+cd .build/demo/js-002-substrate-scratch
 make start
 ```
 

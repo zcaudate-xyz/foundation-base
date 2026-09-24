@@ -1,5 +1,5 @@
 (ns lang-demos.js-004-xtdb-backbone.app.main
-  (:require [hara.lang :as l]))
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:import [["https://esm.sh/react@18.3.1" :as React]

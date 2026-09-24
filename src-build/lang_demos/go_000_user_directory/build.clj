@@ -26,8 +26,8 @@
    "go.mod"
    "user_directory.go"])
 
-(def.make PROJECT
-  {:build    ".build/play/go-000-user-directory"
+(def.make GO-000-USER-DIRECTORY
+  {:build    ".build/demo/go-000-user-directory"
    :github   {:repo "zcaudate/lang-demos.go-000-user-directory"
               :description "Simple Go project generated from Clojure"}
    :orgfile  "Main.org"
@@ -47,16 +47,16 @@
 
 (defn -main
   []
-  (make/build-all PROJECT))
+  (make/build-all GO-000-USER-DIRECTORY))
 
 ^{:eval false}
-(fact "build the example into .build/"
-  (make/build-all PROJECT))
+(fact "build the example into .build/demo/go-000-user-directory"
+  (make/build-all GO-000-USER-DIRECTORY))
 
 ^{:eval false}
 (fact "show generated go source"
-  (make/run PROJECT :show-source))
+  (make/run GO-000-USER-DIRECTORY :show-source))
 
 ^{:eval false}
 (fact "build the generated go module"
-  (make/run PROJECT :build))
+  (make/run GO-000-USER-DIRECTORY :build))

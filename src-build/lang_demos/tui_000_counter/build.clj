@@ -15,8 +15,8 @@
           "tui-000-counter"
           {"main" "dist/main.js"})))
 
-(def.make PROJECT
-  {:build    ".build/play/tui-000-counter"
+(def.make TUI-000-COUNTER
+  {:build    ".build/demo/tui-000-counter"
    :github   {:repo "zcaudate/lang-demos.tui-000-counter"
               :description "Simple Blessed TUI Example"}
    :orgfile  "Main.org"
@@ -39,8 +39,8 @@
 
 (defn -main
   []
-  (make/build-all PROJECT)
-  (make/gh:dwim-init PROJECT))
+  (make/build-all TUI-000-COUNTER)
+  (make/gh:dwim-init TUI-000-COUNTER))
 
 ^{:eval false
   ;;
@@ -49,7 +49,7 @@
   }
 (fact "Code FOR PROJECT SETUP" 
 
-  (make/build-all PROJECT))
+  (make/build-all TUI-000-COUNTER))
 
 ^{:eval false
   ;;
@@ -58,7 +58,7 @@
   }
 (fact "Code FOR PROJECT SETUP" 
 
-  (make/run:init PROJECT))
+  (make/run:init TUI-000-COUNTER))
 
 ^{:eval false
   ;;
@@ -67,7 +67,7 @@
   }
 (fact "Code FOR PROJECT SETUP" 
 
-  (make/run:dev PROJECT))
+  (make/run:dev TUI-000-COUNTER))
 
 ^{:eval false
   ;;
@@ -76,7 +76,7 @@
   :ui/action [:GITHUB :SETUP]}
 (fact "initial setup of repo from github"
 
-  (make/gh:dwim-init PROJECT))
+  (make/gh:dwim-init TUI-000-COUNTER))
 
 ^{:eval false
   ;;
@@ -85,4 +85,4 @@
   :ui/action [:GITHUB :PUSH]}
 (fact "pushes changes to github"
 
-  (make/gh:dwim-push PROJECT))
+  (make/gh:dwim-push TUI-000-COUNTER))

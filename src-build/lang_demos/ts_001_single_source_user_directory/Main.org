@@ -11,13 +11,13 @@ One file, =main.clj=, is used for both outputs:
 
 * Generated build tree
 
-Running =(make/build-all PROJECT)= writes:
+Running =(make/build-all TS-001-SINGLE-SOURCE-USER-DIRECTORY)= writes:
 
-- =.build/.gitignore=
-- =.build/Makefile=
-- =.build/package.json=
-- =.build/src/index.js=
-- =.build/src/index.d.ts=
+- =.build/demo/ts-001-single-source-user-directory/.gitignore=
+- =.build/demo/ts-001-single-source-user-directory/Makefile=
+- =.build/demo/ts-001-single-source-user-directory/package.json=
+- =.build/demo/ts-001-single-source-user-directory/src/index.js=
+- =.build/demo/ts-001-single-source-user-directory/src/index.d.ts=
 
 *** Build the project
 
@@ -25,7 +25,7 @@ Running =(make/build-all PROJECT)= writes:
 (load-file "build.clj")
 (require '[std.make :as make]
          '[lang-demos.ts-001-single-source-user-directory.build :as build])
-(make/build-all build/PROJECT)
+(make/build-all build/TS-001-SINGLE-SOURCE-USER-DIRECTORY)
 #+END_SRC
 
 *** Inspect the generated declarations
@@ -34,7 +34,7 @@ Running =(make/build-all PROJECT)= writes:
 (load-file "build.clj")
 (require '[std.make :as make]
          '[lang-demos.ts-001-single-source-user-directory.build :as build])
-(make/run build/PROJECT :show-types)
+(make/run build/TS-001-SINGLE-SOURCE-USER-DIRECTORY :show-types)
 #+END_SRC
 
 *** Inspect the generated JavaScript
@@ -43,5 +43,5 @@ Running =(make/build-all PROJECT)= writes:
 (load-file "build.clj")
 (require '[std.make :as make]
          '[lang-demos.ts-001-single-source-user-directory.build :as build])
-(make/run build/PROJECT :show-js)
+(make/run build/TS-001-SINGLE-SOURCE-USER-DIRECTORY :show-js)
 #+END_SRC
