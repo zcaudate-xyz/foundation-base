@@ -1,10 +1,8 @@
 (ns lang-main.ui-components.web-index-build
-  (:use code.test)
   (:require [lang.core :as l]
             [std.lib :as h]
             [std.string :as str]
-            [std.make :as make :refer [def.make]]
-            [lang-main.ui-components.web-index-main :as web-index]))
+            [std.make :as make :refer [def.make]]))
 
 (def +expo-makefile+
   {:type  :makefile
@@ -172,6 +170,7 @@
 
 (defn task-build
   []
+  (require '[lang-main.ui-components.web-index-main :as web-index])
   (make/build-all WEB-INDEX))
 
 (defn task-build-web
