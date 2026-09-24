@@ -4,8 +4,7 @@
 (l/script :js
   {:require [[xt.substrate :as substrate]
              [xt.lang.common-data :as data]
-             [xt.db.node.runtime :as runtime]]
-   :static {:export false}})
+             [xt.db.node.runtime :as runtime]]})
 
 (defn.js runtime-init
   []

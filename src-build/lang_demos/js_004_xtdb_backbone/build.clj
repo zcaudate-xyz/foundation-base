@@ -205,3 +205,6 @@
   (make/build-all JS-004-XTDB-BACKBONE)
   (shutdown-agents)
   (System/exit 0))
+
+(comment
+  (std.lib/prn 'hello))

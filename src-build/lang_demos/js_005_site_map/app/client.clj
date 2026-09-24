@@ -9,8 +9,7 @@
              [xt.db.node.proxy-base :as proxy-base]
              [xt.db.node.proxy-supabase :as proxy-supabase]
              [xt.db.node.proxy-util :as proxy-util]
-             [xt.db.node.client-base :as client-base]]
-   :static {:export false}})
+             [xt.db.node.client-base :as client-base]]})
 
 (defn.js stringify
   [value]

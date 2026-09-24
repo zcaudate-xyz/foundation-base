@@ -10,6 +10,7 @@
             :id :dev/web-main
             :emit {:native {:suppress true}
                    :lang/jsx false}}
+   :import [["react" :as React]]
    :require [[js.module :as jm]
              [js.react :as r]
              [js.react.ext-box :as ext-box]
@@ -20,7 +21,13 @@
              [xt.lang.common-client :as client]
              [xt.event.base-box :as base-box]]})
 
-(defrun.js __import__
+(comment
+  (xt.lang.common-module/current-natives :js)
+  (xt.lang.common-module/linked-natives :js)
+  (l/rt:module
+   (l/rt :js)))
+
+(defrun.js __import__  
   (jm/import-missing)
   (jm/import-set-global))
 
@@ -84,10 +91,10 @@
 (defglobal.js Global
   (base-box/make-box {}))
 
-(defrun.js ^{:rt/init true}
+(defrun.js ^{:rt/init false}
   __main__
   (base-box/set-data -/Global ["Main"] -/AppMain)
-  #_(client/client-ws "localhost"
+  (client/client-ws "localhost"
                     29001
                     {}))
 
@@ -98,5 +105,38 @@
 (def.js MODULE
   (x/registerRootComponent -/App))
 
+
+
 (comment
-  (!.js  (+ 1 2)))
+  (!.js
+    [:div "hello"])
+  
+  (h/prn "ehhol")
+  
+  (h/with-out-str
+    (l/with:print
+      (h/suppress
+       (!.js
+         (base-box/set-data -/Global ["Main"] -/AppMain)))))
+  
+  (base-box/set-data)
+  
+  (!.js
+    (client/client-ws "localhost"
+                    29001
+                    {}))
+  
+  (!.js
+    (alert "hello"))
+  
+  (!.js
+    (console.log "hello"))
+  
+  (!.js
+    (+ 1 2 3))
+
+  (!.js
+    React)
+  (!.js
+    ReactNative)
+  )
