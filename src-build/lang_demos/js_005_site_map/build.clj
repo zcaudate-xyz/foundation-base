@@ -31,42 +31,86 @@
             "meta" {}}})
 
 (def +index+
-  ["<!doctype html>"
-   "<html lang=\"en\">"
-   "<head>"
-   "  <meta charset=\"utf-8\" />"
-   "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />"
-   "  <title>SharedWorker site-map demo</title>"
-   "  <link rel=\"stylesheet\" href=\"./styles.css\" />"
-   "</head>"
-   "<body>"
-   "  <main class=\"shell\">"
-   "    <p class=\"eyebrow\">Foundation / SharedWorker / site-map</p>"
-   "    <h1>The worker fetches the schema.</h1>"
-   "    <p class=\"intro\">The page sends only its database config and a site-map URL. The SharedWorker fetches the manifest, schema, lookup, and RPC registry itself.</p>"
-   "    <button id=\"connect\" type=\"button\">Connect and initialise</button>"
-   "    <pre id=\"output\" aria-live=\"polite\">Press connect to initialise the database kernel.</pre>"
-   "  </main>"
-   "  <script type=\"module\" src=\"./client.js\"></script>"
-   "</body>"
-   "</html>"])
+  [:html {:lang "en"}
+   [:head
+    [:meta {:charset "utf-8"}]
+    [:meta {:name "viewport"
+            :content "width=device-width, initial-scale=1"}]
+    [:link {:rel "icon"
+            :href "data:,"}]
+    [:title "SharedWorker site-map demo"]
+    [:link {:rel "stylesheet"
+            :href "./styles.css"}]]
+   [:body
+    [:main {:class "shell"}
+     [:p {:class "eyebrow"} "Foundation / SharedWorker / site-map"]
+     [:h1 "The worker fetches the schema."]
+     [:p {:class "intro"}
+      "The page sends only its database config and a site-map URL. The SharedWorker fetches the manifest, schema, lookup, and RPC registry itself."]
+     [:button {:id "connect"
+               :type "button"}
+      "Connect and initialise"]
+     [:pre {:id "output"
+            :aria-live "polite"}
+      "Press connect to initialise the database kernel."]]
+    [:script {:type "module"
+              :src "./client.js"}]]])
 
 (def +styles+
-  [":root { color-scheme: dark; font-family: ui-sans-serif, system-ui, sans-serif; background: #07110f; color: #eefaf5; }"
-   "* { box-sizing: border-box; }"
-   "body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top left, #17382b, #07110f 56%); }"
-   ".shell { width: min(900px, 100%); margin: 0 auto; padding: clamp(2rem, 8vw, 6rem) 1.25rem; display: grid; gap: 1.25rem; }"
-   ".eyebrow { margin: 0; color: #6fe7b8; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; }"
-   "h1 { max-width: 760px; margin: 0; font-size: clamp(2.8rem, 8vw, 5.6rem); line-height: .98; letter-spacing: -.05em; }"
-   ".intro { max-width: 680px; color: #a7c7ba; font-size: 1.1rem; line-height: 1.65; }"
-   "button { justify-self: start; border: 0; border-radius: 999px; padding: .85rem 1.2rem; background: #6fe7b8; color: #07110f; font: inherit; font-weight: 700; cursor: pointer; }"
-   "button:disabled { opacity: .65; cursor: wait; }"
-   "pre { min-height: 8rem; margin: 0; padding: 1rem; border: 1px solid #24463b; border-radius: 14px; background: rgba(6, 16, 13, .88); color: #c9e8db; overflow: auto; white-space: pre-wrap; word-break: break-word; line-height: 1.5; }"])
+  [[":root" {:color-scheme :dark
+             :font-family "ui-sans-serif, system-ui, sans-serif"
+             :background "#07110f"
+             :color "#eefaf5"}]
+   ["*" {:box-sizing :border-box}]
+   ["body" {:margin "0"
+            :min-height "100vh"
+            :background "radial-gradient(circle at top left, #17382b, #07110f 56%)"}]
+   [".shell" {:width "min(900px, 100%)"
+              :margin "0 auto"
+              :padding "clamp(2rem, 8vw, 6rem) 1.25rem"
+              :display :grid
+              :gap "1.25rem"}]
+   [".eyebrow" {:margin "0"
+                :color "#6fe7b8"
+                :font-size ".72rem"
+                :letter-spacing ".14em"
+                :text-transform :uppercase}]
+   ["h1" {:max-width "760px"
+          :margin "0"
+          :font-size "clamp(2.8rem, 8vw, 5.6rem)"
+          :line-height ".98"
+          :letter-spacing "-.05em"}]
+   [".intro" {:max-width "680px"
+              :color "#a7c7ba"
+              :font-size "1.1rem"
+              :line-height "1.65"}]
+   ["button" {:justify-self :start
+              :border "0"
+              :border-radius "999px"
+              :padding ".85rem 1.2rem"
+              :background "#6fe7b8"
+              :color "#07110f"
+              :font :inherit
+              :font-weight "700"
+              :cursor :pointer}]
+   ["button:disabled" {:opacity ".65"
+                        :cursor :wait}]
+   ["pre" {:min-height "8rem"
+           :margin "0"
+           :padding "1rem"
+           :border "1px solid #24463b"
+           :border-radius "14px"
+           :background "rgba(6, 16, 13, .88)"
+           :color "#c9e8db"
+           :overflow :auto
+           :white-space :pre-wrap
+           :word-break :break-word
+           :line-height "1.5"}]])
 
 (def +makefile+
   [[:.PHONY {:- ["start"]}]
    [:start
-    ["python3 -m http.server 8080 --directory public"]]])
+    ["python3 -m http.server 28011 --directory public"]]])
 
 (def +worker-overrides+
   {"@sqlite.org/sqlite-wasm" "data:text/javascript,export default {}"
@@ -80,11 +124,12 @@
    :sections
    {:setup [{:type :makefile
              :main +makefile+}
-            {:type :raw
+            {:type :html
+             :header "<!doctype html>"
              :target "public"
              :file "index.html"
              :main +index+}
-            {:type :raw
+            {:type :css
              :target "public"
              :file "styles.css"
              :main +styles+}
@@ -121,7 +166,7 @@
      :main 'lang-demos.js-005-site-map.app.client
      :target "public"
      :emit {:code {:link {:path-suffix ".js"
-                          :root-prefix "./"}}}}]})
+                          :root-prefix "/."}}}}]})
 
 (defn -main
   []

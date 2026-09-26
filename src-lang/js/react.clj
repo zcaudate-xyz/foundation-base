@@ -398,10 +398,10 @@
    (var intervalRef (-/ref nil))
    (var stopInterval
         (-/const
-         (fn:> (-/runIntervalStop intervalRef))))
+         (fn (-/runIntervalStop intervalRef))))
    (var startInterval
         (-/const
-         (fn:> (-/runIntervalStart fRef msRef intervalRef))))
+         (fn (-/runIntervalStart fRef msRef intervalRef))))
    (-/watch [ms]
             (startInterval)
             (return stopInterval))

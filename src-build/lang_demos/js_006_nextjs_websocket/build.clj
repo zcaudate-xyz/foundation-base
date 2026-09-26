@@ -1,4 +1,4 @@
-(ns lang-demos.js-006-nextjs-websocket.build
+3(ns lang-demos.js-006-nextjs-websocket.build
   (:require [std.make :as make :refer [def.make]]))
 
 (def +makefile+
@@ -131,6 +131,24 @@
           ".env*"
           "!.env.example"]})
 
+(def +yarn-config+
+  {:type :raw
+   :file ".yarnrc.yml"
+   :main ["nodeLinker: node-modules"]})
+
+(def +yarn-lock+
+  {:type :resource
+   :main [["lang-demos/js-006-nextjs-websocket/yarn.lock" "yarn.lock"]]})
+
+(def +next-config+
+  {:type :raw
+   :file "next.config.js"
+   :main ["const nextConfig = {"
+          "  turbopack: { root: __dirname },"
+          "};"
+          ""
+          "module.exports = nextConfig;"]})
+
 (def +env-example+
   {:type :raw
    :file ".env.example"
@@ -173,34 +191,38 @@
    :sections {:setup [+makefile+
                       +package+
                       +gitignore+
+                      +yarn-config+
+                      +yarn-lock+
+                      +next-config+
                       {:type :css :target "src/app" :file "globals.css" :main +styles+}
                       +env-example+
                       +readme+]}
-   :default [{:type :module.directory
+   :default [{:type :module.graph
               :lang :js
-              :search ["src-build"]
               :main 'lang-demos.js-006-nextjs-websocket.main
               :target "src/generated"
-              :emit {:code {:link {:path-suffix ".js"
-                                   :root-prefix "./"}}}}
-             {:type :module.directory
+              :emit {:code {:link {:path-suffix ".js"}}}}
+             {:type :module.graph
               :lang :js
-              :search ["src-build"]
               :main 'lang-demos.js-006-nextjs-websocket.app.page
               :target "src/app"
               :header "\"use client\";\nimport { App } from '../generated/main.js';"
-              :emit {:code {:link {:path-suffix ".js"
-                                   :root-prefix "./"}}}}
-             {:type :module.directory
+              :emit {:code {:link {:path-suffix ".js"}}}}
+             {:type :module.graph
               :lang :js
-              :search ["src-build"]
               :main 'lang-demos.js-006-nextjs-websocket.app.layout
               :target "src/app"
               :header "import './globals.css';"
-              :emit {:code {:link {:path-suffix ".js"
-                                   :root-prefix "./"}}}}]})
+              :emit {:code {:link {:path-suffix ".js"}}}}]})
 
-(defn build-js-04M06-nextjs-websocket
+(defn build-js-006-nextjs-websocket
   []
   (require '[lang-demos.js-006-nextjs-websocket.main :as main])
+  (require '[lang-demos.js-006-nextjs-websocket.app.page])
+  (require '[lang-demos.js-006-nextjs-websocket.app.layout])
   (make/build-all JS-006-NEXTJS-WEBSOCKET))
+
+(comment
+
+  (make/run JS-006-NEXTJS-WEBSOCKET :dev)
+  )

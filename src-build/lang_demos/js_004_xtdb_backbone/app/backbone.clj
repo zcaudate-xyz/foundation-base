@@ -216,67 +216,57 @@
 (defn.js ping-page-model
   []
   (return
-   {"meta" {"title" "scratch_v0 ping"
-             "description" "Calls the public ping RPC from the scratch_v0 schema."}
-    "views"
-    {"main"
-     {"default_input" []
-      "resolver"
-      {"type" "fn/local"
-       "fn" (fn [_ctx]
-              (return
-               (promise/x:promise-then
-                (-/ping-request (-/create-client nil))
-                (fn [result]
-                  (return result))))
-              )
-       "trigger.post" (fn [_ctx result]
-                        (if (and (xt/x:is-object? result)
-                                 (== "error" (xt/x:get-key result "status")))
-                          (return result)
-                          (return {"reply" result
-                                   "schema_name" "scratch_v0"})))}}}}))
+   {"handler" (fn [_ctx]
+                (return
+                 (promise/x:promise-then
+                  (-/ping-request (-/create-client nil))
+                  (fn [result]
+                    (if (and (xt/x:is-object? result)
+                             (== "error" (xt/x:get-key result "status")))
+                      (return result)
+                      (return {"reply" result
+                               "schema_name" "scratch_v0"}))))))
+    "defaults" {"args" []}
+    "options" {"context"
+               {"meta" {"title" "scratch_v0 ping"
+                        "description" "Calls the public ping RPC from the scratch_v0 schema."}}}}))
 
 (defn.js log-append-page-model
   []
   (return
-   {"meta" {"title" "scratch_v0 log_append"
-             "description" "Signs in, appends a log row, and returns recent scratch_v0 logs."}
-    "views"
-    {"main"
-     {"default_input" ["hello from scratch_v0"
-                       "demo@greenways.local"
-                       "greenways-demo"]
-      "resolver"
-      {"type" "fn/local"
-       "fn" (fn [ctx]
-              (var message (or (xt/x:get-idx (xt/x:get-key ctx "input") 0)
-                               "hello from scratch_v0"))
-              (var email (xt/x:get-idx (xt/x:get-key ctx "input") 1))
-              (var password (xt/x:get-idx (xt/x:get-key ctx "input") 2))
-              (when (or (xt/x:nil? email)
-                        (xt/x:nil? password))
-                (return {"status" "error"
-                         "tag" "demo.xtdb_backbone/missing-credentials"
-                         "data" {"email" email
-                                 "password" password}}))
-              (var client (-/create-client nil))
-              (return
-               (promise/x:promise-then
-                (-/ensure-session client {"email" email
-                                          "password" password})
-                (fn [auth]
-                  (if (xt/x:not-nil? (xt/x:get-key auth "error"))
-                    (return {"status" "error"
-                             "tag" "demo.xtdb_backbone/auth-failed"
-                             "data" (xt/x:get-key auth "error")})
-                    (return (-/log-append-request client message)))))))
-       "trigger.post" (fn [_ctx result]
-                        (if (and (xt/x:is-object? result)
-                                 (== "error" (xt/x:get-key result "status")))
-                          (return result)
-                          (return {"appended" (xt/x:get-key result "append")
-                                   "recent_logs" (xt/x:get-key result "logs")})))}}}}))
+   {"handler" (fn [_ctx message-arg email password]
+                (var message (or message-arg "hello from scratch_v0"))
+                (when (or (xt/x:nil? email)
+                          (xt/x:nil? password))
+                  (return {"status" "error"
+                           "tag" "demo.xtdb_backbone/missing-credentials"
+                           "data" {"email" email
+                                   "password" password}}))
+                (var client (-/create-client nil))
+                (return
+                 (promise/x:promise-then
+                  (-/ensure-session client {"email" email
+                                            "password" password})
+                  (fn [auth]
+                    (if (xt/x:not-nil? (xt/x:get-key auth "error"))
+                      (return {"status" "error"
+                               "tag" "demo.xtdb_backbone/auth-failed"
+                               "data" (xt/x:get-key auth "error")})
+                      (return
+                       (promise/x:promise-then
+                        (-/log-append-request client message)
+                        (fn [result]
+                          (if (and (xt/x:is-object? result)
+                                   (== "error" (xt/x:get-key result "status")))
+                            (return result)
+                            (return {"appended" (xt/x:get-key result "append")
+                                     "recent_logs" (xt/x:get-key result "logs")}))))))))))
+    "defaults" {"args" ["hello from scratch_v0"
+                        "demo@greenways.local"
+                        "greenways-demo"]}
+    "options" {"context"
+               {"meta" {"title" "scratch_v0 log_append"
+                        "description" "Signs in, appends a log row, and returns recent scratch_v0 logs."}}}}))
 
 (defn.js page-model-specs
   []

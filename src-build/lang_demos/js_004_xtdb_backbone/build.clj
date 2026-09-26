@@ -32,7 +32,7 @@
    [:body
     [:main {:id "app"}]
     [:script {:type "module"
-              :src "./app.js"}]]])
+              :src "./main.js"}]]])
 
 (def +webapp-styles+
   [[":root" {:color-scheme :dark
@@ -87,7 +87,7 @@
     ["cd sharedworker && npx webpack"]]
    [:sync-worker
     ["mkdir -p webapp/workers"]
-    ["cp sharedworker/dist/lang-demos.js-004-xtdb-backbone-worker.js webapp/workers/lang-demos.js-004-xtdb-backbone-worker.js"]]
+    ["cp -R sharedworker/dist/. webapp/workers/"]]
    [:build
     ["make build-worker"]
     ["make sync-worker"]]
@@ -103,7 +103,7 @@
    "sharedworker/src/main.js"
    "webapp/index.html"
    "webapp/styles.css"
-   "webapp/app.js"])
+   "webapp/main.js"])
 
 (def.make JS-004-XTDB-BACKBONE
   {:tag "lang-demos.js-004-xtdb-backbone"
@@ -160,14 +160,24 @@
      :search ["src-build"]
      :main 'lang-demos.js-004-xtdb-backbone.app.main
      :target "webapp"
-     :emit {:code {:link {:path-suffix ".js"
-                          :root-prefix "./"}}}}]})
+     :emit {:lang/jsx false
+            :code {:link {:path-suffix ".js"
+                          :root-prefix "/."}}}}]})
+
+(defn build-js-004-xtdb-backbone
+  []
+  (require 'lang-demos.js-004-xtdb-backbone.app.main)
+  (require 'lang-demos.js-004-xtdb-backbone.app.sharedworker)
+  (make/build-all JS-004-XTDB-BACKBONE))
 
 (defn -main
   []
-  (make/build-all JS-004-XTDB-BACKBONE)
+  (build-js-004-xtdb-backbone)
   (shutdown-agents)
   (System/exit 0))
 
 (comment
-  (std.lib/prn 'hello))
+  (std.lib/prn 'hello)
+
+  (make/run JS-004-XTDB-BACKBONE :init)
+  (make/run JS-004-XTDB-BACKBONE :start))

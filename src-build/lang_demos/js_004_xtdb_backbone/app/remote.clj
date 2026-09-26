@@ -78,7 +78,7 @@
     (promise/x:promise-then
      (substrate/request (xt/x:get-key session "node")
                         (xt/x:get-key session "shared_space")
-                        "@xt.db/node-summary"
+                        "@/node-info"
                         []
                         {"transport_id" (xt/x:get-key session "transport_id")})
      (fn [response]

@@ -6,6 +6,7 @@
             ["https://esm.sh/react-dom@18.3.1/client" :as ReactDOM]]
    :require [[lang-demos.js-004-xtdb-backbone.app.remote :as remote]
              [xt.lang.spec-promise :as promise]]
+   :config {:emit {:lang/jsx false}}
    :static {:export false}})
 
 (defn.js error-output

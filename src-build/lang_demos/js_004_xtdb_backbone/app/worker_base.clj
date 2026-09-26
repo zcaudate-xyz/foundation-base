@@ -99,9 +99,10 @@
        shared
        "ready"
        (promise/x:promise-then
-        (substrate/node-create
-         {"id" (or (xt/x:get-key config "node_id")
-                   "lang-demos.js-004-xtdb-backbone-worker")})
+        (promise/x:promise-run
+         (substrate/node-create
+          {"id" (or (xt/x:get-key config "node_id")
+                    "lang-demos.js-004-xtdb-backbone-worker")}))
         (fn [node]
           (xt/x:set-key shared "node" node)
           (return node))))

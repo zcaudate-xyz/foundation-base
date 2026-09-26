@@ -5,12 +5,17 @@
   {:runtime :websocket
    :config {:bench false
             :id :dev/nextjs-websocket
-            :port 29002}
+            :port 29003}
    :import [["react" :as React]]
-   :require [[xt.lang.common-client :as client]
+   :require [[js.module :as jm]
+             [xt.lang.common-client :as client]
              [xt.event.base-box :as base-box]
              [js.react.ext-box :as ext-box]
              [js.react.helper-data :as helper]]})
+
+(defrun.js __import__
+  (jm/import-missing)
+  (jm/import-set-global))
 
 (defn.js UserCard
   [#{name address status}]
@@ -57,38 +62,29 @@
      [:% -/WrappedUserCard {"$id" "user4" :key "user4"}]]]))
 
 (defglobal.js Global
-  (base-box/make-box {}))
+  (base-box/make-box {"DebugConnection" "waiting"}))
+
+(defglobal.js DebugConnection
+  (client/client-ws "localhost"
+                    (or (. process env NEXT_PUBLIC_LANG_WS_PORT) "29003")
+                    {:listeners {"open"  (fn []
+                                           (console.log "open")
+                                           (base-box/set-data -/Global ["DebugConnection"] "connected"))
+                                 "close" (fn []
+                                           (console.log "close")
+                                           (base-box/set-data -/Global ["DebugConnection"] "disconnected"))
+                                 "error" (fn []
+                                           (console.log "error")
+                                           (base-box/set-data -/Global ["DebugConnection"] "errored"))}}))
 
 (defrun.js __init__
-  (base-box/set-data -/Global ["Main"] -/AppMain))
+  (base-box/set-data -/Global ["AppMain"]
+                     (fn [] (return -/AppMain))))
 
 (defn.js App
   [#{socketHost socketPort}]
-  (var [connectionStatus setConnectionStatus]
-       (React.useState "waiting"))
-  (React.useEffect
-   (fn []
-     (var location (. window location))
-     (var host (or socketHost (. location hostname)))
-     (var port (or socketPort 29002))
-     (setConnectionStatus "connecting")
-     (var connection
-          (client/client-ws host port
-                            {:secured (== (. location protocol) "https:")}))
-     (. connection
-        (addEventListener "open"
-                          (fn [] (setConnectionStatus "connected"))))
-     (. connection
-        (addEventListener "error"
-                          (fn [] (setConnectionStatus "error"))))
-     (. connection
-        (addEventListener "close"
-                          (fn [] (setConnectionStatus "disconnected"))))
-     (return
-      (fn []
-        (. connection (close)))))
-   [socketHost socketPort])
-  (var #{Main} (ext-box/listenBox -/Global []))
+  (var AppMain (ext-box/listenBox -/Global ["AppMain"]))
+  (var DebugConnection (ext-box/listenBox -/Global ["DebugConnection"]))
   (return
    [:main {:className "shell"}
     [:header {:className "hero"}
@@ -98,11 +94,26 @@
       [:p {:className "hero-copy"}
        "This Next.js page keeps a live view of the demo data. Connect the websocket to apply changes while the page stays open."]]
      [:div {:className "connection-card"}
-      [:span {:className (+ "connection-dot " connectionStatus)}]
+      [:span {:className (+ "connection-dot " DebugConnection)}];19M
       [:div
        [:span {:className "connection-label"} "WEBSOCKET"]
-       [:strong connectionStatus]]
+       [:strong DebugConnection]]
       [:code (+ (or socketHost "page host") ":" (or socketPort 29002))]]]
-    [:% Main]
+    [:% AppMain]
     [:footer {:className "footer"}
      "The page listens to the shared reactive box while the websocket evaluates updates in the browser."]]))
+
+(comment
+  
+  (!.js
+    (base-box/set-data -/Global ["AppMain"]
+                       (fn [] (return -/AppMain))))
+  
+  (!.js
+    (. (base-box/get-data -/Global ["Main"])
+       (toString)))
+  (!.js
+    (+ 1 2 3))
+  
+  (!.js
+    -/Global))

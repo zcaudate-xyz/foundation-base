@@ -7,12 +7,12 @@
 (defn.js client-ws
   "Creates a WebSocket client for the debug REPL."
   {:added "4.0"}
-  [host port opts]
-  (var #{path secured} opts)
+  [host port (:= opts {})]
+  (var {:# [path secured (:= listeners [])]} (or opts {}))
   (var conn (new WebSocket (+ "ws" (:? secured "s" "")
                               "://" host ":" port "/" (or path ""))))
   (var interval
-       (. window (setInterval (fn [] (. conn (send "ping"))) 30000)))
+       (setInterval (fn [] (. conn (send "ping"))) 30000))
   (. conn
      (addEventListener
       "message"
@@ -29,4 +29,8 @@
       "close"
       (fn []
         (. window (clearInterval interval)))))
+  (for:object [[tag callback] listeners]
+              (. conn
+                 (addEventListener tag callback)))
+  
   (return conn))

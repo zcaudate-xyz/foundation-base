@@ -3,18 +3,18 @@
   (:require [lang.core :as  l]
             [std.lib :as h]))
 
-(fact:global
- {:prelim  [(require 'lang-demos.tui-000-counter.build)
-            (eval (std.make/run:init lang-demos.tui-000-counter.build/TUI-000-COUNTER))]
-  :setup   [(eval (std.make/run:dev lang-demos.tui-000-counter.build/TUI-000-COUNTER))]})
-
 (l/script :js
-  {:require [[js.react :as r]
-             [js.blessed :as b]]
-   :static {:export false}})
+  {:runtime :websocket
+   :config {:bench false
+            :id :dev/target-websocket
+            :port 28001
+            :emit {:lang/jsx false}}
+   :require [[js.react :as r]
+             [js.blessed :as b]
+             [xt.lang.common-client :as client]]})
 
 (defn.js Button
-  [#{left top text disabled color action}]
+  [{:# [left top text disabled color action]}]
   (return
    [:button {:left (or left 0)
              :top  (or top 0)
@@ -25,17 +25,17 @@
                                       (not disabled))
                                (action)))
              :padding {:top 1 :right 2 :bottom 1 :left 2}
-             :style {:bg (:? (not disabled)
-                             [color
-                              "black"])
-                     :fg (:? (not disabled)
-                             ["white"
-                              "gray"])
+             :style {:bg (:? (not disabled) color "black")
+                     :fg (:? (not disabled) "white" "gray")
                      :focus {:bold true}}}]))
 
 (defn.js Counter
   ([]
-   (let [[count setCount] (r/local 0)]
+   (let [[count setCount] (r/local 0)
+         [auto setAuto] (r/local false)]
+     (r/useInterval
+      (fn [] (setCount (mod (+ count 1) 10)))
+      (:? auto 1000 nil))
      (return
       [:box
        [:box {:padding {:top 2 :right 5 :bottom 2 :left 5}
@@ -46,7 +46,6 @@
                      :action (fn [] (setCount 0))
                      :color "gray"
                      :text "RESET"}]
-       
        [:box {:top 8}
         [:% -/Button {:text "DEC"
                       :action (fn [] (setCount
@@ -57,7 +56,11 @@
                       :text "INC"
                       :action (fn [] (setCount (mod (+ count 1)
                                                     10)))
-                      :color "green"}]]]))))
+                      :color "green"}]
+        [:% -/Button {:left 14
+                      :text "AUTO"
+                      :action (fn [] (setAuto (not auto)))
+                      :color (:? auto "green" "gray")}]]]))))
 
 (defn.js App
   ([]
@@ -68,19 +71,21 @@
      [:box {:left 5}
       [:box {:top 3}
        [:text {:top -1 :left 1} "COUNTER"]
-       [:<Counter>]]]])))
+       [:% -/Counter]]]])))
 
 (defn.js Screen
   ([]
-   (const screen (b/screen
-                  {:autoPadding true
-                   :smartCSR true
-                   :title "Tui 000 - Counter"}))
+   (var screen (b/screen
+                {:autoPadding true
+                 :smartCSR true
+                 :title "Tui 000 - Counter"}))
    (screen.key ["q" "C-c" "Esc"]
                (fn []
                  (. this (destroy))))
    (return screen)))
 
 (defrun.js __init__
-  (do (:# (!:uuid))
-      (b/renderBlessed [:% -/App] (-/Screen))))
+  (do
+    (:# (!:uuid))
+    (client/client-ws "localhost" 28001 {})
+    (b/renderBlessed [:% -/App] (-/Screen))))

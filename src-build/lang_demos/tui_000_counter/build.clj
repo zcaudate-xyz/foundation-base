@@ -3,6 +3,7 @@
   (:require [lang.core :as l]
             [std.lib :as h]
             [std.make :as make :refer [def.make]]
+            [std.fs :as fs]
             [js.webpack :as webpack]
             [js.blessed.project :as blessed-project]
             [lang-demos.tui-000-counter.main :as main]))
@@ -13,10 +14,12 @@
 (def +package+
   (:main (blessed-project/module-package-json
           "tui-000-counter"
-          {"main" "dist/main.js"})))
+          {"main" "dist/main.js"
+           "imports" {"#app/*" "./src/*"}})))
 
 (def.make TUI-000-COUNTER
-  {:build    ".build/demo/tui-000-counter"
+  {:tag "demo-tui-000-counter"
+   :build    ".build/demo/tui-000-counter"
    :github   {:repo "zcaudate/lang-demos.tui-000-counter"
               :description "Simple Blessed TUI Example"}
    :orgfile  "Main.org"
@@ -28,14 +31,13 @@
                        {:type :package.json
                         :main +package+}
                        webpack/+node-basic+]}
-   :default  [{:type :module.single
+   :default  [{:type :module.directory
                :lang :js
                :main 'lang-demos.tui-000-counter.main
-               :file "index.js"
-               :target "src"}]})
-
-(def +init+
-  nil)
+               :search ["src-build/lang_demos/tui_000_counter"]
+               :target "src"
+               :emit {:code {:link {:path-suffix ".js"
+                                    :root-prefix "#app"}}}}]})
 
 (defn -main
   []

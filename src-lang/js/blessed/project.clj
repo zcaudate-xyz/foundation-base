@@ -35,7 +35,7 @@
              "run-node-webpack-plugin" "1.3.0",
              "source-map-support" "0.5.19",
              "sucrase" "3.18.1",
-             "webpack" "5.37.1",
+             "webpack" "5.111.1",
              "webpack-cli" "4.7.0",
              "webpack-node-externals" "3.0.0"}
 
