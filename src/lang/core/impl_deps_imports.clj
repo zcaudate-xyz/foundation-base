@@ -85,16 +85,22 @@
 ;;
 ;;
 
+(defn module-imports-from-view
+  "gets imports from a prepared module view"
+  {:added "4.1"}
+  [book module-view]
+  (let [links   (module/module-deps-code book module-view)
+        entries (vals (:code module-view))]
+    {:native (script-imports book entries)
+     :direct links}))
+
 (defn module-imports
-  "gets the ns imports for a script"
+  "gets the imports for a module id"
   {:added "4.0"}
   [book module-id]
-  (let [module    (module/module-derived-view book
-                                              (b/get-module book module-id))
-         links     (module/module-deps-code book module)
-         entries   (vals (:code module))]
-     {:native (script-imports book entries)
-      :direct links}))
+  (module-imports-from-view book
+                            (module/module-derived-view book
+                                                        (b/get-module book module-id))))
 
 (defn module-code-deps
   "resolves all dependencies"

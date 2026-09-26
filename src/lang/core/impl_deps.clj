@@ -194,7 +194,7 @@
   (let [setup    (setup-module-form book module)
         teardown (teardown-module-form book module)
         {:keys [direct
-                native]} (imports/module-imports book (:id module))
+                native]} (imports/module-imports-from-view book module)
         code    (->> (vals (:code module))
                      (sort-by (juxt :priority :line :time)))]
     {:setup    setup

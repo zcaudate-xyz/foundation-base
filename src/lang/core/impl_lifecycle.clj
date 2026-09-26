@@ -12,18 +12,49 @@
             [std.lib.env :as env]
             [std.lib.foundation :as f]))
 
+(defn- refine-module-code
+  "Applies a module's code refinement, retaining ensured entries and their dependencies."
+  [book module {:keys [treeshake ensure]}]
+  (if-not treeshake
+    module
+    (do
+      (when-not (vector? ensure)
+        (f/error "Module treeshaking requires an :ensure vector"
+                 {:module (:id module)
+                  :ensure ensure}))
+      (let [ensure    (vec ensure)
+            local-ids (mapv #(symbol (name %)) ensure)
+            missing   (remove (set (keys (:code module))) local-ids)
+            _         (when (seq missing)
+                        (f/error "Module refinement entries not found"
+                                 {:module (:id module)
+                                  :missing (vec missing)}))
+            root-ids  (mapv #(ut/sym-full (:id module) %) local-ids)
+            required  (deps/collect-script-entry-ids book root-ids true)
+            code      (into (empty (:code module))
+                            (filter (fn [[_ entry]]
+                                      (contains? required (ut/sym-full entry))))
+                            (:code module))]
+        (assoc module :code code)))))
+
 (defn emit-module-prep
-  "prepares the module for emit"
+  "prepares the module for emit, including any per-module code refinement"
   {:added "4.0"}
   [module-id
    {:keys [library
            lang
            emit] :as meta}]
   (let [_ (assert lang "Lang required.")
+        refinement (get-in emit [:code :refine module-id])
+        emit (if (map? (:code emit))
+               (update-in emit [:code] dissoc :refine)
+               emit)
+        meta (assoc meta :emit emit)
         [stage grammar book namespace mopts] (impl/emit-options (merge {:layout :module}
                                                                        meta))
         module (module/module-derived-view book
-                                          (get-in book [:modules module-id]))]
+                                           (get-in book [:modules module-id]))
+        module (refine-module-code book module refinement)]
      [[stage grammar book namespace (assoc mopts :module module)]
       (deps/collect-module book module)]))
 
@@ -220,7 +251,7 @@
                                     (entry/emit-entry grammar entry header-opts)))
                                 header)))
         code-arr     (if (not (-> emit :code :suppress))
-                        (let [code-opts    (update mopts :emit merge (:code emit))]
+                        (let [code-opts    (update mopts :emit merge (dissoc (:code emit) :refine))]
                           (keep (fn [entry]
                                   (binding [*ns* (the-ns (:namespace entry))]
                                     (entry/emit-entry grammar entry code-opts)))
@@ -294,7 +325,7 @@
                  native
                  code]}] (emit-module-prep module-id meta)
         code-arr       (if (not (-> emit :code :suppress))
-                         (let [code-opts    (assoc mopts :emit (:code emit))]
+                         (let [code-opts    (assoc mopts :emit (dissoc (:code emit) :refine))]
                            (keep (fn [entry]
                                    (if-let [form (deps/teardown-ptr-form book entry)]
                                      (impl/emit-direct grammar

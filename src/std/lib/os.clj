@@ -218,11 +218,11 @@
                                 file
                                 [file nil])]
             (f/on:exception
-             (sh {:args (vec (concat ["wget" (str root-url file)]
-                                     (if output ["-O" output])
-                                     args)) 
-                  :async true
-                  :root (str "resources/" root-path)})
+             (apply sh [{:args (vec (concat ["wget" (str root-url file)]
+                                            (if output ["-O" output])
+                                            args))
+                         :async true
+                         :root (str "resources/" root-path)}])
              identity)))
         files)))
 
@@ -341,7 +341,6 @@
   (sh "afplay")
   
   ;;(sh "tmux" "kill-window" "-t" "DEV:CMD")
-  (tmux:fin "hello" "bash")
   (tmux:list-sessions)
   (tmux:list-windows "DEV")
   
@@ -366,6 +365,27 @@
 ;;
 ;;
 ;;
+
+(defn tmux:capture-pane
+  "captures a pane's visible contents as a string
+
+   :start and :end select history line offsets, passed to tmux's -S and -E
+   options.
+
+   (tmux:capture-pane \"DEV:3.1\")
+   => string?
+
+   (tmux:capture-pane \"DEV:3.1\" {:start -120})
+   => string?"
+  {:added "4.0"}
+  ([target]
+   (tmux:capture-pane target {}))
+  ([target {:keys [start end]}]
+   (let [args (cond-> ["tmux" "capture-pane" "-p" "-t" (str target)]
+                (some? start) (into ["-S" (str start)])
+                (some? end)   (into ["-E" (str end)]))]
+     (apply sh (concat args [{:wrap false
+                              :trim false}])))))
 
 (defn say
   "enables audio debugging
