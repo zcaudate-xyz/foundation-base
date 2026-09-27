@@ -16,3 +16,9 @@ The generated =user_directory.go= is a normal Go source file with an explicit
 cd .build/demo/go-000-user-directory
 make build
 #+end_src
+
+The package contains a zero-value-safe =UserDirectory=. =PutUser= upserts a
+user by organization and user ID, =LookupUser= retrieves that scoped entry,
+=RemoveUser= reports whether it removed an entry, and =ResetUserDirectory=
+clears the directory. =UserCount= and =NextOffset= provide the small helpers
+used by callers.

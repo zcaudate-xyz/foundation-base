@@ -20,7 +20,15 @@ That means the generated =user_directory.go= contains things like:
 - =type User map[string]any=
 - =type UserMap map[any]any=
 - =type lookupUser func(arg0 UserMap, arg1 UserId) *User=
+- =type putUser func(arg0 UserMap, arg1 User) UserMap=
+- =type pageUserIds func(arg0 UserMap, arg1 int, arg2 int) []UserId=
 - =var DEFAULT_PAGE_SIZE int=
+
+The canonical XTalk source implements lookup, upsert, removal, reset, count,
+ID listing, and bounded paging. Paging clamps negative offsets to zero and uses
+=DEFAULT_PAGE_SIZE= when the requested size is not positive; page order follows
+the target map's key enumeration. The generated Go file remains a declaration
+surface; it does not contain those runtime bodies.
 
 * Generated build tree
 

@@ -23,24 +23,47 @@
 (defspec.xt lookupUser
   [:fn [UserMap UserId] [:xt/maybe User]])
 
-(defn.xt
+(defn.xt ^{:public true}
   lookupUser
   [users id]
-  (return (x:get-key users id)))
+  (var result nil)
+  (xt/for:array [key (x:obj-keys users)]
+    (when (== key id)
+      (:= result (x:get-key users key))))
+  (return result))
 
 (defspec.xt userIds
   [:fn [UserMap] [:xt/array UserId]])
 
-(defn.xt
+(defn.xt ^{:public true}
   userIds
   [users]
-  (return (x:arr-map (x:obj-keys users)
+  (return (x:obj-keys users)))
+
+(defspec.xt listUsers
+  [:fn [UserMap] [:xt/array User]])
+
+(defn.xt ^{:public true}
+  listUsers
+  [users]
+  (return (x:arr-map (-/userIds users)
                      (fn [id]
-                       (return id)))))
+                       (return (x:get-key users id))))))
+
+(defspec.xt SAMPLE_USERS
+  UserMap)
+
+(def.xt ^{:public true}
+  SAMPLE_USERS
+  {"u-001" {"id" "u-001" "displayName" "Ari Chen" "roles" ["admin" "engineering"]}
+   "u-002" {"id" "u-002" "displayName" "Bea Martin" "roles" ["editor"]}
+   "u-003" {"id" "u-003" "displayName" "Dara Kim" "roles" ["support" "editor"]}
+   "u-004" {"id" "u-004" "displayName" "Eli Navarro" "roles" ["engineering"]}
+   "u-005" {"id" "u-005" "displayName" "Morgan Lee" "roles" ["support" "admin"]}})
 
 (defspec.xt DEFAULT_PAGE_SIZE
   :xt/int)
 
-(def.xt
+(def.xt ^{:public true}
   DEFAULT_PAGE_SIZE
   20)
