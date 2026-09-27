@@ -95,8 +95,15 @@
   ([{:keys [header lang footer main] :as opts}]
    (let [mopts   (last (impl/emit-options opts))
          {:keys [emit]} mopts
-         body    (lifecycle/emit-module-setup main
-                                              mopts)
+         raw     (lifecycle/emit-module-setup-raw main mopts)
+         compile-type (get-in emit [:compile :type])
+         _       (when (and (not (#{:directory :graph} compile-type))
+                            (seq (:link-arr raw)))
+                   (println "WARN: :module.single for" main
+                            "emits internal imports that this output does not include:"
+                            (vec (:link-arr raw))
+                            "Compile those namespaces separately or use :module.directory/:module.graph."))
+         body    (lifecycle/emit-module-setup-join raw)
          full    (compile/compile-fullbody body opts)
 
          ;; output transformations

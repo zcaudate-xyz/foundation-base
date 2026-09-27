@@ -131,16 +131,13 @@
            index 0]
       (if-let [arg (first more)]
         (if (= '_ (:symbol arg))
-          (let [[symbol index]
-                (loop [index index]
-                  (let [symbol (symbol (str "__unused" index))]
-                    (if (contains? used symbol)
-                      (recur (inc index))
-                      [symbol (inc index)])))]
-            (recur (conj out (assoc arg :symbol symbol))
-                   (rest more)
-                   (conj used symbol)
-                   index))
+          (let [candidate (symbol (str "__unused" index))]
+            (if (contains? used candidate)
+              (recur out more used (inc index))
+              (recur (conj out (assoc arg :symbol candidate))
+                     (rest more)
+                     (conj used candidate)
+                     (inc index))))
           (recur (conj out arg)
                  (rest more)
                  used

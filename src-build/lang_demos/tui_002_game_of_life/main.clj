@@ -3,9 +3,19 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:require [[js.react :as r]
-             [js.blessed :as b]]
-   :static {:export false}})
+  {:runtime :websocket
+   :config {:bench false
+            :id :dev/target-websocket
+            :port 28002
+            :emit {:lang/jsx false}}
+   :require [[js.react :as r]
+             [js.blessed :as b]
+             [js.module :as jm]
+             [xt.lang.common-client :as client]]})
+
+(defrun.js __missing__
+  (jm/import-missing)
+  (jm/import-set-global))
 
 (def.js ROWS 32)
 
@@ -22,16 +32,16 @@
    (var grid (new Array rows))
    (var y nil)
    (forange [y rows]
-      (:= (. grid [y])
-          (new Array cols)))
+            (:= (. grid [y])
+                (new Array cols)))
    (return grid)))
 
 (defn.js gridSeed
   ([grid rows cols]
    (forange [y rows]
-     (forange [x cols]
-       (:= (. grid [y] [x])
-           (Math.round (* 0.8 (Math.random))))))))
+            (forange [x cols]
+                     (:= (. grid [y] [x])
+                         (Math.round (* 0.8 (Math.random))))))))
 
 (defn.js gridCreate
   ([rows cols]
@@ -43,10 +53,10 @@
   ([grid y x rows cols]
    (var sum 0)
    (forange [v [-1 2]]
-     (forange [h [-1 2]]
-       (var yi (mod (+ y v rows) rows))
-       (var xi (mod (+ x h cols) cols))
-       (:+= sum (. grid [yi] [xi]))))
+            (forange [h [-1 2]]
+                     (var yi (mod (+ y v rows) rows))
+                     (var xi (mod (+ x h cols) cols))
+                     (:+= sum (. grid [yi] [xi]))))
    (:-= sum (. grid [y] [x]))
    (return sum)))
 
@@ -54,24 +64,24 @@
   ([grid rows cols]
    (var next (-/gridNew rows cols))
    (forange [y rows]
-     (forange [x cols]
-       (var curr  (. grid [y] [x]))
-       (var near  (-/gridCount grid y x rows cols))
-       (cond (and (=== curr 0)
-                  (=== near 3))
-             (:= (. next [y] [x]) 1)
-             
-             (and (=== curr 1)
-                  (or (< near 2)
-                      (> near 3)))
-             (:= (. next [y] [x]) 0)
-             
-             :else
-             (:= (. next [y] [x]) curr))))
+            (forange [x cols]
+                     (var curr  (. grid [y] [x]))
+                     (var near  (-/gridCount grid y x rows cols))
+                     (cond (and (=== curr 0)
+                                (=== near 3))
+                           (:= (. next [y] [x]) 1)
+                           
+                           (and (=== curr 1)
+                                (or (< near 2)
+                                    (> near 3)))
+                           (:= (. next [y] [x]) 0)
+                           
+                           :else
+                           (:= (. next [y] [x]) curr))))
    (return next)))
-  
+
 (defn.js Button
-  [#{left top text disabled color action}]
+  [{:# [left top text disabled color action]}]
   (return
    [:button {:left (or left 0)
              :top  (or top 0)
@@ -83,11 +93,11 @@
                                (action)))
              :padding {:top 1 :right 2 :bottom 1 :left 2}
              :style {:bg (:? (not disabled)
-                             [color
-                              "black"])
+                             color
+                             "black")
                      :fg (:? (not disabled)
-                             ["white"
-                              "gray"])
+                             "white"
+                             "gray")
                      :focus {:bold true}}}]))
 
 (defn.js TimeControl
@@ -95,28 +105,28 @@
    (return
     [:box {:shrink true}
      ;; START
-     [:<Button> {:left 1
-                 :text  "START"
-                 :color "green"
-                 :disabled (not props.state.paused)
-                 :action props.fn.start}]
+     [:% -/Button {:left 1
+                   :text  "START"
+                   :color "green"
+                   :disabled (not props.state.paused)
+                   :action props.fn.start}]
      ;; STOP
-     [:<Button> {:left  10
-                 :text  "STOP"
-                 :color "red"
-                 :disabled props.state.paused
-                 :action props.fn.stop}]
+     [:% -/Button {:left  10
+                   :text  "STOP"
+                   :color "red"
+                   :disabled props.state.paused
+                   :action props.fn.stop}]
      ;; NEXT
-     [:<Button> {:left  21
-                 :text  "NEXT"
-                 :color "blue"
-                 :disabled (not props.state.paused)
-                 :action props.fn.next}]
+     [:% -/Button {:left  21
+                   :text  "NEXT"
+                   :color "blue"
+                   :disabled (not props.state.paused)
+                   :action props.fn.next}]
      ;; RESET
-     [:<Button> {:left  54
-                 :text  "RESET"
-                 :color "grey"
-                 :action props.fn.reset}]])))
+     [:% -/Button {:left  54
+                   :text  "RESET"
+                   :color "grey"
+                   :action props.fn.reset}]])))
 
 (defn.js initialState
   ([rows cols]
@@ -135,39 +145,41 @@
            :height (+ 2 cols)
            :border "line"}
      (. grid (map
-            (fn [row i]
-              (return
-               (. row (map
-                       (fn [col j]
-                         (return
-                          [:box {:top i
-                                 :width 2
-                                 :left (* 2 j)
-                                 :key (+ i "_" j)
-                                 :content ""
-                                 :style {:bg (:? (== 1 col) ["yellow" "black"])}
-                                 :shrink true}]))))))))])))
+              (fn [row i]
+                (return
+                 (. row (map
+                         (fn [col j]
+                           (return
+                            [:box {:top i
+                                   :width 2
+                                   :left (* 2 j)
+                                   :key (+ i "_" j)
+                                   :content ""
+                                   :style {:bg (:? (== 1 col) "yellow" "black")}
+                                   :shrink true}]))))))))])))
 
-(defn.js App
+(defn.js AppMain
   ([]
    (var [state setState]  (r/local (-/initialState -/ROWS -/COLS)))
    (var next-fn
         (fn []
-          (let [#{grid rows cols counter} state]
-            (setState #{...state
-                        {:counter (+ counter 1)
-                         :grid (-/gridNext grid rows cols)}}))))
+          (let [{:# [grid rows cols counter]} state]
+            (setState {:.. [state]
+                       :counter (+ counter 1)
+                       :grid (-/gridNext grid rows cols)}))))
    (var actions {:reset (fn []
-                           (let [#{grid rows cols} state]
-                             (setState #{...state
-                                         {:grid (-/gridCreate rows cols)}})))
-                  :next  next-fn
-                  :start (fn []
-                           (let [#{paused} state]
-                             (setState #{...state, {:paused (not paused)}})))
-                  :stop  (fn []
-                           (let [#{paused} state]
-                             (setState #{...state, {:paused (not paused)}})))})
+                          (let [{:# [grid rows cols]} state]
+                            (setState {:.. [state]
+                                       :grid (-/gridCreate rows cols)})))
+                 :next  next-fn
+                 :start (fn []
+                          (let [#{paused} state]
+                            (setState {:.. [state]
+                                       :paused (not paused)})))
+                 :stop  (fn []
+                          (let [#{paused} state]
+                            (setState {:.. [state]
+                                       :paused (not paused)})))})
    (r/useInterval
     (fn []
       (if (not state.paused)
@@ -179,11 +191,11 @@
            :shrink true}
      [:box {:shrink true}
       [:% -/TimeControl {:state state
-                       :fn actions}]]
+                         :fn actions}]]
      [:box {:top 4
             :shrink true}
       [:% -/GridView {:state state
-                    :fn actions}]]])))
+                      :fn actions}]]])))
 
 (defn.js Screen
   ([]
@@ -195,11 +207,11 @@
                (fn [] (. this (destroy))))
    (return screen)))
 
-(defrun.js __main__
-  (b/renderBlessed [:% -/App] (-/Screen)))
-
-
+(defrun.js __init__
+  (do
+    (:# (!:uuid))
+    (client/client-ws "localhost" 28000 {})
+    (b/renderBlessed [:% -/AppMain] (-/Screen))))
 
 (comment
-  (l/rt:module-meta
-   :js))
+  (l/rt:module-meta :js))

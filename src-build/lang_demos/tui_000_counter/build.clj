@@ -37,7 +37,9 @@
                :search ["src-build/lang_demos/tui_000_counter"]
                :target "src"
                :emit {:code {:link {:path-suffix ".js"
-                                    :root-prefix "#app"}}}}]})
+                                    :root-prefix "#app"}
+                            :refine {'js.react {:treeshake true
+                                                :ensure '[useInterval runIntervalStart]}}}}}]})
 
 (defn -main
   []

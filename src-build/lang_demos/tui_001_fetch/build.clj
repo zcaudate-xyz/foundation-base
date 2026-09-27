@@ -1,4 +1,4 @@
-(ns lang-demos.tui-001-fetch.build
+3(ns lang-demos.tui-001-fetch.build
   (:use [code.test :exclude [-main]])
   (:require [lang.core :as  l]
             [std.lib :as h]
@@ -14,10 +14,12 @@
   (:main (blessed-project/module-package-json
           "tui-001-fetch"
           {"main" "dist/main.js"
+           "imports" {"#app/*" "./src/*"}
            "dependencies" {"node-fetch" "2.6.1"}})))
 
 (def.make TUI-001-FETCH
-  {:build    ".build/demo/tui-001-fetch"
+  {:tag     "demo-tui-001-fetch"
+   :build    ".build/demo/tui-001-fetch"
    :github   {:repo "zcaudate/lang-demos.tui-001-fetch"
               :description "Simple Blessed TUI Fetch Example"}
    :orgfile  "Main.org"
@@ -29,17 +31,17 @@
                        {:type :package.json
                         :main +package+}
                        webpack/+node-basic+]}
-   :default  [{:type :module.single
+   :default  [{:type :module.directory
                :lang :js
                :main 'lang-demos.tui-001-fetch.main
-               :file "index.js"
-               :target "src"}]})
-
-(def +init+
-  nil)
+               :search ["src-build/lang_demos/tui_001_fetch"]
+               :target "src"
+               :emit {:code {:link {:path-suffix ".js"
+                                    :root-prefix "#app"}}}}]})
 
 (defn -main
   []
+  (make/build TUI-001-FETCH)
   (make/build-all TUI-001-FETCH)
   (make/gh:dwim-init TUI-001-FETCH))
 

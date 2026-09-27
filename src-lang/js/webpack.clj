@@ -11,8 +11,7 @@
 
 (def.js jsx-rule
   {:test #"\.jsx?$"
-   :use [{:loader "cache-loader"}
-         {:loader "@sucrase/webpack-loader"
+   :use [{:loader "@sucrase/webpack-loader"
           :options {:transforms ["jsx"]}}]})
 
 (def.js node-rule

@@ -31,7 +31,6 @@
 
             "devDependencies"
             {"@sucrase/webpack-loader" "2.0.0",
-             "cache-loader" "4.1.0",
              "run-node-webpack-plugin" "1.3.0",
              "source-map-support" "0.5.19",
              "sucrase" "3.18.1",

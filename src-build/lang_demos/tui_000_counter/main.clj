@@ -7,11 +7,16 @@
   {:runtime :websocket
    :config {:bench false
             :id :dev/target-websocket
-            :port 28001
+            :port 28000
             :emit {:lang/jsx false}}
    :require [[js.react :as r]
              [js.blessed :as b]
+             [js.module :as jm]
              [xt.lang.common-client :as client]]})
+
+(defrun.js __missing__
+  (jm/import-missing)
+  (jm/import-set-global))
 
 (defn.js Button
   [{:# [left top text disabled color action]}]
@@ -23,7 +28,7 @@
              :mouse true
              :onPress (fn [] (if (and action
                                       (not disabled))
-                               (action)))
+                               (action))) ;33M
              :padding {:top 1 :right 2 :bottom 1 :left 2}
              :style {:bg (:? (not disabled) color "black")
                      :fg (:? (not disabled) "white" "gray")
@@ -60,9 +65,9 @@
         [:% -/Button {:left 14
                       :text "AUTO"
                       :action (fn [] (setAuto (not auto)))
-                      :color (:? auto "green" "gray")}]]]))))
+                      :color (:? auto "blue" "default")}]]]))))
 
-(defn.js App
+(defn.js AppMain
   ([]
    (return
     [:box {:label  "Tui 000 - Counter"
@@ -87,5 +92,18 @@
 (defrun.js __init__
   (do
     (:# (!:uuid))
-    (client/client-ws "localhost" 28001 {})
-    (b/renderBlessed [:% -/App] (-/Screen))))
+    (client/client-ws "localhost" 28000 {})
+    (b/renderBlessed [:% -/AppMain] (-/Screen))))
+
+(comment
+
+  (!.js
+    (b/renderBlessed [:box] (-/Screen))
+    nil)
+  
+  (!.js
+    (b/renderBlessed [:% -/AppMain] (-/Screen))
+    nil)
+  
+  (!.js
+    (+ 1 2 3)))
