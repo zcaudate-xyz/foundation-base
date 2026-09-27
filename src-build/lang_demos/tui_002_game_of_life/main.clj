@@ -164,22 +164,26 @@
    (var next-fn
         (fn []
           (let [{:# [grid rows cols counter]} state]
-            (setState {:.. [state]
-                       :counter (+ counter 1)
-                       :grid (-/gridNext grid rows cols)}))))
+            (setState (Object.assign
+                       {:.. [state]}
+                       {:counter (+ counter 1)
+                        :grid (-/gridNext grid rows cols)})))))
    (var actions {:reset (fn []
                           (let [{:# [grid rows cols]} state]
-                            (setState {:.. [state]
-                                       :grid (-/gridCreate rows cols)})))
+                            (setState (Object.assign
+                                       {:.. [state]}
+                                       {:grid (-/gridCreate rows cols)}))))
                  :next  next-fn
                  :start (fn []
                           (let [#{paused} state]
-                            (setState {:.. [state]
-                                       :paused (not paused)})))
+                            (setState (Object.assign
+                                       {:.. [state]}
+                                       {:paused (not paused)}))))
                  :stop  (fn []
                           (let [#{paused} state]
-                            (setState {:.. [state]
-                                       :paused (not paused)})))})
+                            (setState (Object.assign
+                                       {:.. [state]}
+                                       {:paused (not paused)}))))})
    (r/useInterval
     (fn []
       (if (not state.paused)
