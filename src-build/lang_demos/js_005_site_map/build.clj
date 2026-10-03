@@ -108,9 +108,31 @@
            :line-height "1.5"}]])
 
 (def +makefile+
-  [[:.PHONY {:- ["start"]}]
+  [[:.PHONY {:- ["init" "dev" "build" "preview" "start"]}]
+   [:init
+    ["npm install"]]
+   [:dev
+    ["npm run dev"]]
+   [:build
+    ["npm run build"]]
+   [:preview
+    ["npm run preview"]]
    [:start
-    ["python3 -m http.server 28011 --directory public"]]])
+    ["npm run dev"]]])
+
+(def +package+
+  {"name" "lang-demos.js-005-site-map"
+   "private" true
+   "type" "module"
+   "scripts" {"dev" "vite"
+              "build" "vite build"
+              "preview" "vite preview --host 0.0.0.0"}
+   "devDependencies" {"vite" "^8.3.1"}})
+
+(def +vite-config+
+  ["export default {"
+   "  server: { host: \"0.0.0.0\", port: 28011, strictPort: true },"
+   "};"])
 
 (def +worker-overrides+
   {"@sqlite.org/sqlite-wasm" "data:text/javascript,export default {}"
@@ -124,13 +146,18 @@
    :sections
    {:setup [{:type :makefile
              :main +makefile+}
+            {:type :package.json
+             :main +package+}
+            {:type :raw
+             :file "vite.config.js"
+             :main +vite-config+}
             {:type :html
              :header "<!doctype html>"
-             :target "public"
+             :target "."
              :file "index.html"
              :main +index+}
             {:type :css
-             :target "public"
+             :target "."
              :file "styles.css"
              :main +styles+}
             {:type :json
@@ -164,7 +191,7 @@
      :lang :js
      :search ["src-build"]
      :main 'lang-demos.js-005-site-map.app.client
-     :target "public"
+     :target "."
      :emit {:code {:link {:path-suffix ".js"
                           :root-prefix "/."}}}}]})
 

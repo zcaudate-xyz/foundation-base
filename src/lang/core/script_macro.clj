@@ -235,11 +235,22 @@
       (or (hydrate-hook entry) entry)
       entry)))
 
+(defn- normalize-arglists-meta
+  "Removes the reader quote left on arglists in macro metadata."
+  [smeta]
+  (let [arglists (:arglists smeta)]
+    (if (and (seq? arglists)
+             (= 'quote (first arglists))
+             (= 2 (count arglists)))
+      (assoc smeta :arglists (second arglists))
+      smeta)))
+
 (defn intern-top-level-fn
   "interns a top level function"
   {:added "4.0"}
   ([lang [op reserved] [_ sym & body :as form-raw] smeta]
-   (let [{:keys [format section priority]} reserved
+   (let [smeta (normalize-arglists-meta smeta)
+         {:keys [format section priority]} reserved
          [module fmeta] (intern-prep lang form-raw)
          form          (apply list op sym body)
          meta-entry    (merge smeta

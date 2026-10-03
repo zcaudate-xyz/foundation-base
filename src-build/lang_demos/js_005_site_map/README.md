@@ -16,9 +16,11 @@ Build and serve from the Foundation project root:
 ```sh
 lein run -m lang-demos.js-005-site-map.build
 cd .build/demo/js-005-site-map
+make init
 make start
 ```
 
-Open <http://localhost:8080>, then click **Connect and initialise**. In the
-Network panel, the four `/worker/site-map/*.json` requests are made by the
-SharedWorker, not by the page.
+Open <http://localhost:28011>, then click **Connect and initialise**. Run
+`make build` to create the production bundle in `dist/`, and `make preview` to
+serve that bundle. In the Network panel, the four `/worker/site-map/*.json`
+requests are made by the SharedWorker, not by the page.

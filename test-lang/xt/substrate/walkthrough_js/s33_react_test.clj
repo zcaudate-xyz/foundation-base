@@ -28,7 +28,7 @@
    "space/a"
    "page"
    {"greet" {"handler" (fn [ctx]
-                          (var args (. ctx ["args"]))
+                         (var args (. ctx ["args"]))
                           (return {"value" (xt/x:get-idx args 0)}))
              "defaults" {"args" ["hello"]}
              "options" {"trigger" true}}})
@@ -70,3 +70,65 @@
          (fn [_]
            (repl/notify (-/model-output-value node))))))
   => "world")
+
+
+(comment
+  
+  (!.js
+    (:= (!:G NODE) (substrate/node-create
+                    {"id" "s33-node"
+                     "spaces" {"space/a" {"state" {}}}})))
+  
+  
+  (!.js
+   (page-core/group-add-attach
+    (!:G NODE)
+    "space/a"
+    "page/a"
+    {"greet" {"handler" (fn [{:# [kind, id, space, action, args, meta]}]
+                          (var [value] args)
+                          (return #{value}))
+              "defaults" {"args" ["hello"]}
+              "options" {"trigger" true}}}))
+  
+
+  (!.js
+   (page-core/group-add-attach
+    (!:G NODE)
+    "space/a"
+    "page/a"
+    {"greet" {"handler" (fn [ctx]
+                          (var args (. ctx ["args"]))
+                          (var [value] args)
+                          (return #{value}))
+              "defaults" {"args" ["hello"]}
+              "options" {"trigger" true}}}))
+
+
+  (!.js
+   (substrate/request (!:G NODE)
+                      "space/a"
+                      "@/ping"
+                      []
+                      {}))
+  
+
+  (!.js
+   (!:G NODE))
+  
+  
+  (!.js
+   (page-core/group-add-attach
+    (!:G NODE)
+    "space/a"
+    "page"
+    {"greet" {"handler" (fn [ctx]
+                          (var args (. ctx ["args"]))
+                          (return {"value" (xt/x:get-idx args 0)}))
+              "defaults" {"args" ["hello"]}
+              "options" {"trigger" true}}}))
+  
+  
+  )
+
+

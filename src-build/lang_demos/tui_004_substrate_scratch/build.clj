@@ -8,7 +8,9 @@
   (:main (blessed-project/module-package-json
           "tui-004-substrate-scratch"
           {"main" "dist/main.js"
-           "imports" {"#app/*" "./src/*"}})))
+           "imports" {"#app/*" "./src/*"}
+           "dependencies" {"@sqlite.org/sqlite-wasm" "^3.53.4-build1"
+                          "pg" "^8.23.0"}})))
 
 (def +makefile+
   (:main webpack/+node-makefile+))
@@ -17,7 +19,7 @@
   {:tag "tui-004-substrate-scratch"
    :build ".build/demo/tui-004-substrate-scratch"
    :triggers '#{lang-demos.tui-004-substrate-scratch.main
-                lang-demos.js-002-substrate-scratch.main}
+                lang-demos.tui-004-substrate-scratch.main-data}
    :sections {:setup [{:type :gitignore
                        :main ["dist" "node_modules" "out"]}
                       {:type :makefile
@@ -28,11 +30,12 @@
    :default [{:type :module.directory
               :lang :js
               :main 'lang-demos.tui-004-substrate-scratch.main
-              :search ["src-build"]
+              :search ["src-build/lang_demos/tui_004_substrate_scratch"]
               :target "src"
-              :emit {:lang/format :commonjs
-                     :code {:link {:path-suffix ".js"
-                                   :root-prefix "#app"}}}}]})
+              :emit {:code {:link {:path-suffix ".js"
+                                   :root-prefix "#app"}
+                            :refine {'js.react {:treeshake true
+                                                :ensure '[useInterval runIntervalStart]}}}}}]})
 
 (defn build-tui-004-substrate-scratch
   []

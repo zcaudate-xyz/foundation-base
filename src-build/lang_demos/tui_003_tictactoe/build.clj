@@ -7,7 +7,8 @@
 (def +package+
   (:main (blessed-project/module-package-json
           "tui-003-tictactoe"
-          {"main" "dist/main.js"})))
+          {"main" "dist/main.js"
+           "imports" {"#app/*" "./src/*"}})))
 
 (def +makefile+
   (:main webpack/+node-makefile+))
@@ -26,11 +27,12 @@
    :default [{:type :module.directory
               :lang :js
               :main 'lang-demos.tui-003-tictactoe.main
-              :search ["src-build"]
+              :search ["src-build/lang_demos/tui_003_tictactoe"]
               :target "src"
-              :emit {:lang/format :commonjs
-                     :code {:link {:path-suffix ".js"
-                                   :root-prefix "."}}}}]})
+              :emit {:code {:link {:path-suffix ".js"
+                                   :root-prefix "#app"}
+                            :refine {'js.react {:treeshake true
+                                                :ensure '[useInterval runIntervalStart]}}}}}]})
 
 (defn build-tui-003-tictactoe
   []
@@ -40,3 +42,10 @@
   []
   (build-tui-003-tictactoe)
   (shutdown-agents))
+
+
+(comment
+
+  (make/run:init TUI-003-TICTACTOE)
+  (make/run:dev  TUI-003-TICTACTOE)
+  )

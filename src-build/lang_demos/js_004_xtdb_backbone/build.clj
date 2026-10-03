@@ -80,20 +80,37 @@
            :word-break :break-word}]])
 
 (def +makefile+
- [[:.PHONY {:- ["init" "build" "build-worker" "sync-worker" "start"]}]
+ [[:.PHONY {:- ["init" "build" "build-worker" "sync-worker" "dev" "start"]}]
    [:init
-    ["cd sharedworker && npm install"]]
+    ["cd sharedworker && npm install"]
+    ["cd webapp && npm install"]]
    [:build-worker
     ["cd sharedworker && npx webpack"]]
    [:sync-worker
-    ["mkdir -p webapp/workers"]
-    ["cp -R sharedworker/dist/. webapp/workers/"]]
+    ["mkdir -p webapp/public/workers"]
+    ["cp -R sharedworker/dist/. webapp/public/workers/"]]
    [:build
     ["make build-worker"]
     ["make sync-worker"]]
+   [:dev
+    ["cd webapp && npm run dev"]]
    [:start
     ["make build"]
-    ["python3 -m http.server 8080 --directory webapp"]]])
+    ["cd webapp && npm run dev"]]])
+
+(def +webapp-package+
+  {"name" "lang-demos.js-004-xtdb-backbone-webapp"
+   "private" true
+   "type" "module"
+   "scripts" {"dev" "vite"
+              "build" "vite build"
+              "preview" "vite preview --host 0.0.0.0"}
+   "devDependencies" {"vite" "^8.3.1"}})
+
+(def +vite-config+
+  ["export default {"
+   "  server: { host: \"0.0.0.0\", port: 8080, strictPort: true },"
+   "};"])
 
 (def +expected-files+
   ["Makefile"
@@ -101,9 +118,12 @@
    "sharedworker/webpack.config.js"
    "sharedworker/src/custom.js"
    "sharedworker/src/main.js"
+   "webapp/package.json"
+   "webapp/vite.config.js"
    "webapp/index.html"
    "webapp/styles.css"
-   "webapp/main.js"])
+   "webapp/main.js"
+   "webapp/public/workers/lang-demos.js-004-xtdb-backbone-worker.js"])
 
 (def.make JS-004-XTDB-BACKBONE
   {:tag "lang-demos.js-004-xtdb-backbone"
@@ -116,6 +136,13 @@
    :sections
    {:setup [{:type :makefile
              :main +makefile+}
+            {:type :package.json
+             :target "webapp"
+             :main +webapp-package+}
+            {:type :raw
+             :target "webapp"
+             :file "vite.config.js"
+             :main +vite-config+}
             {:type :raw
              :target "sharedworker"
              :file "webpack.config.js"
@@ -157,7 +184,7 @@
                   :layout :full})]))}
     {:type :module.directory
      :lang :js
-     :search ["src-build"]
+     :search ["src-build/lang_demos/js_004_xtdb_backbone"]
      :main 'lang-demos.js-004-xtdb-backbone.app.main
      :target "webapp"
      :emit {:lang/jsx false

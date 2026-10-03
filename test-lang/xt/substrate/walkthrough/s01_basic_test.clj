@@ -97,3 +97,45 @@
           (substrate/request node "default::space" "counter/inc" [] {})])
         (repl/notify)))
   => [{"count" 1} {"count" 2} {"count" 3}])
+
+
+(comment
+  (defn.js counter-get
+    [space args request node]
+    (return (substrate/get-space-state node (. space ["id"]))))
+
+  (defn.js counter-inc
+    [space args request node]
+    (return (substrate/update-space-state
+             node
+             (. space ["id"])
+             (fn [state space node]
+               (return {"count" (+ (or (. state ["count"]) 0)
+                                   1)})))))
+
+  (defn.js counter-add
+    [space args request node]
+    (return (substrate/update-space-state
+             node
+             (. space ["id"])
+             (fn [state space node]
+               (return {"count" (+ (or (. state ["count"]) 0)
+                                   1)})))))
+
+  
+  (notify/wait-on :js
+    (var node (substrate/node-create
+               {"spaces"
+                {"default::space" {"state" {"count" 0}}}
+                "handlers"
+                {"counter/get"
+                 {"fn" -/counter-get}
+                 "counter/inc"
+                 {"fn" -/counter-inc}}}))
+    (-> (promise/x:promise-all
+         [(substrate/request node "default::space" "counter/inc" [] {})
+          (substrate/request node "default::space" "counter/inc" [] {})
+          (substrate/request node "default::space" "counter/inc" [] {})])
+        (repl/notify)))
+
+  )

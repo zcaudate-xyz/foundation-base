@@ -39,7 +39,28 @@
                (xt/x:second)
                (event-model/get-current nil)
                (repl/notify))))))
-  => "hello world")
+  => "hello world"
+
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {"id" "node"}))
+    (var group (page-core/group-add node
+                                    nil
+                                    "page"
+                                    {"@test/hello"
+                                     {"handler" (fn [context _]
+                                                  (var args (. context ["args"]))
+                                                  (return (xt/x:cat "hello "
+                                                                    (xt/x:get-idx args (xt/x:offset 0)))))
+                                      "defaults" {"args" ["world"]}}}))
+    (-> (. group ["init"])
+        (promise/x:promise-then
+         (fn [_]
+          (-> (page-core/model-ensure node nil "page" "greet")
+               (xt/x:second)
+               (event-model/get-current nil)
+               (repl/notify))))))
+  )
 
 ^{:refer xt.substrate.walkthrough.s06-page-test/demo-001-page-model-update}
 (fact "page-model-update refreshes a model with new args"
@@ -84,39 +105,41 @@
 
 
 ^{:refer xt.substrate.walkthrough.s06-page-test/demo-002-page-model-dependency}
-(fact "refreshing a source model also refreshes its dependents"
+(fact "changing a source input automatically refreshes its dependents"
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
-    (page-core/group-add-attach node
-                                nil
-                                "page"
-                                {"source"
-                                 {"handler" (fn [_]
-                                              (return "beta"))
-                                  "defaults" {"args" []}}
-                                 "derived"
-                                 {"handler" (fn [context]
-                                              (var local-node (. context ["node"]))
-                                              (var source-result
-                                                (page-core/model-ensure local-node
-                                                                        nil
-                                                                        "page"
-                                                                        "source"))
-                                              (var source-val
-                                                (event-model/get-current
-                                                 (xt/x:get-idx source-result (xt/x:offset 1))
-                                                 nil))
-                                              (return (xt/x:cat "derived-" source-val)))
-                                  "defaults" {"args" []}
-                                  "deps" ["source"]}})
+    (var outputs [])
+    (page-core/group-add-attach
+     node nil "page"
+     {"source"
+      {"handler" (fn [context]
+                   (return (xt/x:first (. context ["args"]))))
+       "defaults" {"args" ["alpha"]}}
+      "derived"
+      {"handler" (fn [context]
+                   (var source-val
+                     (page-core/model-get-output (. context ["node"])
+                                                 nil "page" "source"))
+                   (return (xt/x:cat "derived-" source-val)))
+       "defaults" {"args" []}
+       "deps" ["source"]}})
     (-> (substrate/page-model-update node nil "page" "source" {})
         (promise/x:promise-then
          (fn [_]
-           (var derived-result (page-core/model-ensure node nil "page" "derived"))
-           (var derived (xt/x:get-idx derived-result (xt/x:offset 1)))
-           (repl/notify (event-model/get-current derived nil))))))
-  => "derived-beta")
+           (xt/x:arr-push outputs
+                          [(page-core/model-get-output node nil "page" "source")
+                           (page-core/model-get-output node nil "page" "derived")])
+           (return (substrate/page-model-set-input
+                    node nil "page" "source" {"data" ["beta"]} {}))))
+        (promise/x:promise-then
+         (fn [_]
+           (xt/x:arr-push outputs
+                          [(page-core/model-get-output node nil "page" "source")
+                           (page-core/model-get-output node nil "page" "derived")])
+           (repl/notify outputs)))))
+  => [["alpha" "derived-alpha"]
+      ["beta" "derived-beta"]])
 
 ^{:refer xt.substrate.walkthrough.s06-page-test/demo-003-page-model-remote}
 (fact "a page model handler can issue a request over a memory transport"

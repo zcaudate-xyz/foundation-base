@@ -190,7 +190,16 @@
   :profiles {:dev {:plugins [[lein-ancient "0.6.15"]
                              [lein-exec "0.3.7"]
                              [cider/cider-nrepl "0.58.0"]
-                             [lein-dotenv "RELEASE"]]}
+                             [lein-dotenv "RELEASE"]
+                             [lein-with-env-vars "0.2.0"]]
+                    :hooks [leiningen.with-env-vars/auto-inject]
+                    :env-vars {:PATH (let [path (System/getenv "PATH")
+                                           separator java.io.File/pathSeparator]
+                                       (str (or path "")
+                                            (when (seq path) separator)
+                                            "/opt/homebrew/bin"
+                                            separator
+                                            "/usr/local/bin"))}}
              :repl {:injections [(try (require 'jvm.tool)
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}

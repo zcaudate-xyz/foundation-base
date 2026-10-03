@@ -1,9 +1,7 @@
 (ns lang-demos.js-002-substrate-scratch.main
   (:require [lang.core :as l]
             [postgres.core :as pg]
-            [postgres.sample.scratch-v3]
-            [xt.lang.common-lib]
-            [xt.lang.common-data]))
+            [postgres.sample.scratch-v3]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
