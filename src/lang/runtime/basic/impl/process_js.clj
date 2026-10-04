@@ -127,14 +127,33 @@
     (var require (createRequire (+ (or (. process env ["PWD"])
                                        (. process (cwd)))
                                    "/package.json")))
+    (defn basic-return-error [error]
+      (var value := (:? (== "string" (typeof error))
+                       error
+                       {"message" (. error ["message"])
+                        "stack" (. error ["stack"])}))
+      (return (JSON.stringify {"type" "error" "value" value})))
+    (defn basic-return-eval [s]
+      (try
+        (var out := (eval s))
+        (if (and (not (== out nil))
+                 (== "function" (typeof (. out ["then"]))))
+          (return (. (Promise.resolve out)
+                     (then (fn [value] (return (return-encode value)))
+                           (fn [error] (return (basic-return-error error))))))
+          (return (return-encode out)))
+        (catch e (return (basic-return-error e)))))
     (defn client-basic
       [host port opts]
       (let [conn (new net.Socket)
             _      (conn.connect port host)
             stream (rl.createInterface conn conn)]
-        (stream.on "line" (fn [line]
-                            (conn.write (+ (return-eval (JSON.parse line))
-                                           "\n"))))))])
+        (stream.on "line"
+                   (fn [line]
+                     (. (Promise.resolve (basic-return-eval (JSON.parse line)))
+                        (then (fn [out] (conn.write (+ out "\n")))
+                              (fn [error]
+                                (conn.write (+ (basic-return-error error) "\n")))))))))])
 
 (def make-bootstrap
   (fn []
@@ -241,5 +260,4 @@
     {:type :lang/rt.websocket
      :instance {:create #'websocket/rt-websocket:create}
      :config {:layout :full}})])
-
 

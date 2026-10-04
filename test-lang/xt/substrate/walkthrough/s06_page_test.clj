@@ -56,11 +56,10 @@
     (-> (. group ["init"])
         (promise/x:promise-then
          (fn [_]
-          (-> (page-core/model-ensure node nil "page" "greet")
+          (-> (page-core/model-ensure node nil "page" "@test/hello")
                (xt/x:second)
                (event-model/get-current nil)
-               (repl/notify))))))
-  )
+               (repl/notify)))))))
 
 ^{:refer xt.substrate.walkthrough.s06-page-test/demo-001-page-model-update}
 (fact "page-model-update refreshes a model with new args"
