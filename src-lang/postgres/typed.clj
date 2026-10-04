@@ -15,7 +15,9 @@
             [postgres.typed.typed-view :as typed-view]
             [std.lib]))
 (std.lib/intern-in portable-edn/export-edn
-                  portable-edn/import-edn)
+                  portable-edn/import-edn
+                  portable-edn/export-edn-string
+                  portable-edn/import-edn-string)
 (declare enrich-function-arg-roles input-shape output-shape)
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Shape Formatting Helpers

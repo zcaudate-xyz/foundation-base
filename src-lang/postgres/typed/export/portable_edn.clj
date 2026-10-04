@@ -1,5 +1,7 @@
 (ns postgres.typed.export.portable-edn
   (:require [clojure.edn :as edn]
+            [clojure.pprint :as pprint]
+            [clojure.string :as string]
             [postgres.typed.typed-common :as types]))
 
 (def ^:private +edn-format+ :postgres.typed/context)
@@ -10,6 +12,15 @@
 (def ^:private +edn-record-key+ :postgres.typed/record)
 (def ^:private +edn-data-key+ :postgres.typed/data)
 (def ^:private +edn-meta-key+ :postgres.typed/meta)
+(def ^:private +edn-stream-format+ :postgres.typed/context-stream)
+(def ^:private +edn-stream-metadata-key+ :postgres.typed/metadata)
+(def ^:private +edn-stream-entry-counts-key+ :postgres.typed/entry-counts)
+(def ^:private +edn-stream-entry-tag+ :postgres.typed/entry)
+(def ^:private +edn-stream-entry-paths+
+  [[:registry]
+   [:typed :enums]
+   [:typed :functions]
+   [:typed :tables]])
 
 (def ^:private +edn-record-codecs+
   [{:class-name "postgres.typed.typed_common.TypeRef"
@@ -81,9 +92,10 @@
 (defn- record-codec
   [value]
   (when (instance? clojure.lang.IRecord value)
-    (or (some #(when (= (:class-name %)
-                        (.getName (class value)))
-              %)
+    (or (some (fn [codec]
+                (when (= (:class-name codec)
+                         (.getName (class value)))
+                  codec))
               +edn-record-codecs+)
         (edn-error "Unsupported postgres.typed record"
                    {:type :postgres.typed/unsupported-record
@@ -226,9 +238,8 @@
 (defn export-edn
   "Returns a versioned, plain EDN data structure for a postgres typed context.
 
-   Pretty print the result with `clojure.pprint/pprint` or serialize it with
-   `pr-str`. Read serialized text with `clojure.edn/read-string` before passing
-   it to `import-edn`.
+   Use `export-edn-string` and `import-edn-string` when persisting a context so
+   entries remain separately diffable and the encoded metadata is preserved.
    Function filters are runtime values and therefore must be supplied again to
    APIs such as `export-openapi` after importing."
   [ctx]
@@ -266,3 +277,216 @@
       (edn-error "The postgres.typed EDN context must be a map"
                  {:type :postgres.typed/invalid-context}))
     ctx))
+
+(defn- canonical-edn-value
+  [value]
+  (let [compare-values (fn [left right]
+                         (compare (pr-str left) (pr-str right)))
+        metadata (when (meta value)
+                   (canonical-edn-value (meta value)))]
+    (cond
+      (map? value)
+      (with-meta
+        (into (sorted-map-by compare-values)
+              (map (fn [[key item]]
+                     [(canonical-edn-value key)
+                      (canonical-edn-value item)]))
+              value)
+        metadata)
+
+      (vector? value)
+      (with-meta (mapv canonical-edn-value value) metadata)
+
+      (set? value)
+      (with-meta
+        (into (sorted-set-by compare-values)
+              (map canonical-edn-value)
+              value)
+        metadata)
+
+      (seq? value)
+      (with-meta (apply list (map canonical-edn-value value)) metadata)
+
+      :else value)))
+
+(defn- snapshot-entry-path
+  [path]
+  (into [+edn-context-key+] path))
+
+(defn- empty-snapshot-entries
+  [snapshot]
+  (reduce (fn [out path]
+            (let [snapshot-path (snapshot-entry-path path)
+                  entries (get-in out snapshot-path)]
+              (if (map? entries)
+                (assoc-in out snapshot-path
+                          (with-meta (empty entries) (meta entries)))
+                out)))
+          snapshot
+          +edn-stream-entry-paths+))
+
+(defn- stream-entry-forms
+  [snapshot]
+  (for [path +edn-stream-entry-paths+
+        :let [entries (get-in snapshot (snapshot-entry-path path))]
+        :when (map? entries)
+        [key value] (sort-by (comp pr-str first) entries)]
+    [+edn-stream-entry-tag+ {:path path :key key} value]))
+
+(defn- stream-entry-counts
+  [snapshot]
+  (into {}
+        (for [path +edn-stream-entry-paths+
+              :let [entries (get-in snapshot (snapshot-entry-path path))]
+              :when (map? entries)]
+          [path (count entries)])))
+
+(defn- print-edn-list
+  [value]
+  (when (and *print-meta* (meta value))
+    (print "^")
+    (pr (meta value))
+    (print " "))
+  (pprint/pprint-logical-block :prefix "(" :suffix ")"
+    (loop [items (seq value)]
+      (when items
+        (pprint/write-out (first items))
+        (when-let [remaining (next items)]
+          (.write ^java.io.Writer *out* " ")
+          (pprint/pprint-newline :linear)
+          (recur remaining))))))
+
+(defn- edn-pprint-dispatch
+  [value]
+  (if (seq? value)
+    (print-edn-list value)
+    (pprint/simple-dispatch value)))
+
+(defn- print-edn-form
+  [form]
+  (binding [pprint/*print-pprint-dispatch* edn-pprint-dispatch
+            pprint/*print-right-margin* 200
+            *print-namespace-maps* false
+            *print-meta* true]
+    (with-out-str (pprint/pprint (canonical-edn-value form)))))
+
+(defn export-edn-string
+  "Serializes a typed context as a stable EDN stream.
+
+   The first form is the portable snapshot metadata with registry, enum,
+   function, and table entry maps emptied. Each following form has the shape
+   `[:postgres.typed/entry {:path path :key key} value]`. Pass the stream to
+   `import-edn-string` to reconstruct the original typed context. Use
+   `export-edn` when a single snapshot data structure is needed instead."
+  [ctx]
+  (let [snapshot (export-edn ctx)
+        header {+edn-format-key+ +edn-stream-format+
+                +edn-version-key+ +edn-version+
+                +edn-stream-metadata-key+ (empty-snapshot-entries snapshot)
+                +edn-stream-entry-counts-key+ (stream-entry-counts snapshot)}
+        forms (cons header (stream-entry-forms snapshot))]
+    (string/join "\n" (map print-edn-form forms))))
+
+(defn- import-edn-stream
+  [header read-form eof]
+  (let [version (get header +edn-version-key+)
+        snapshot (get header +edn-stream-metadata-key+)
+        expected-counts (get header +edn-stream-entry-counts-key+)]
+    (when-not (= 1 version)
+      (edn-error "Unsupported postgres.typed EDN stream version"
+                 {:type :postgres.typed/unsupported-edn-stream-version
+                  :version version}))
+    (when-not (map? snapshot)
+      (edn-error "A postgres.typed EDN stream must contain metadata"
+                 {:type :postgres.typed/invalid-edn-stream-metadata}))
+    (when-not (map? expected-counts)
+      (edn-error "A postgres.typed EDN stream must declare its entry counts"
+                 {:type :postgres.typed/invalid-edn-stream-metadata}))
+    (let [target-paths
+          (reduce (fn [out path]
+                    (let [entries (get-in snapshot (snapshot-entry-path path))]
+                      (if (map? entries)
+                        (if (empty? entries)
+                          (conj out path)
+                          (edn-error "EDN stream metadata contains entry data"
+                                     {:type :postgres.typed/invalid-edn-stream-metadata
+                                      :path path}))
+                        out)))
+                  #{}
+                  +edn-stream-entry-paths+)]
+      (when-not (= target-paths (set (keys expected-counts)))
+        (edn-error "EDN stream entry counts do not match its metadata"
+                   {:type :postgres.typed/invalid-edn-stream-metadata
+                    :paths target-paths
+                    :entry-count-paths (set (keys expected-counts))}))
+      (when-not (every? (fn [[path count]]
+                          (and (contains? target-paths path)
+                               (integer? count)
+                               (<= 0 count)))
+                        expected-counts)
+        (edn-error "EDN stream entry counts must be nonnegative integers"
+                   {:type :postgres.typed/invalid-edn-stream-metadata
+                    :entry-counts expected-counts}))
+      (loop [snapshot snapshot
+             seen #{}
+             actual-counts (zipmap target-paths (repeat 0))]
+        (let [form (read-form)]
+          (if (identical? eof form)
+            (if (= expected-counts actual-counts)
+              (import-edn snapshot)
+              (edn-error "The postgres.typed EDN stream is incomplete"
+                         {:type :postgres.typed/incomplete-edn-stream
+                          :expected expected-counts
+                          :actual actual-counts}))
+            (let [[tag entry-header value] (when (vector? form) form)
+                  path (:path entry-header)
+                  key (:key entry-header)
+                  identity [path key]]
+              (when-not (and (vector? form)
+                             (= 3 (count form))
+                             (= +edn-stream-entry-tag+ tag)
+                             (map? entry-header)
+                             (contains? entry-header :path)
+                             (contains? entry-header :key)
+                             (contains? target-paths path))
+                (edn-error "Invalid postgres.typed EDN stream entry"
+                           {:type :postgres.typed/invalid-edn-stream-entry
+                            :entry form}))
+              (when (contains? seen identity)
+                (edn-error "Duplicate postgres.typed EDN stream entry"
+                           {:type :postgres.typed/duplicate-edn-stream-entry
+                            :path path
+                            :key key}))
+              (recur (assoc-in snapshot
+                               (conj (snapshot-entry-path path) key)
+                               value)
+                     (conj seen identity)
+                     (update actual-counts path inc)))))))))
+
+(defn import-edn-string
+  "Reads an EDN stream from `export-edn-string` into a typed context.
+
+   Also accepts the previous single-form snapshot representation for migration
+   of existing resources."
+  [source]
+  (when-not (string? source)
+    (edn-error "A postgres.typed EDN stream must be a string"
+               {:type :postgres.typed/invalid-edn-stream}))
+  (with-open [reader (java.io.PushbackReader. (java.io.StringReader. source))]
+    (let [eof (Object.)
+          read-core-form #(binding [*read-eval* false]
+                            (read {:eof eof} reader))
+          first-form (read-core-form)]
+      (when (identical? eof first-form)
+        (edn-error "A postgres.typed EDN stream cannot be empty"
+                   {:type :postgres.typed/invalid-edn-stream}))
+      (if (and (map? first-form)
+               (= +edn-stream-format+ (get first-form +edn-format-key+)))
+        (import-edn-stream first-form
+                           #(edn/read {:eof eof} reader)
+                           eof)
+        (let [ctx (import-edn first-form)]
+          (when-not (identical? eof (read-core-form))
+            (edn-error "A legacy postgres.typed snapshot must contain one EDN form"
+                       {:type :postgres.typed/invalid-edn-stream}))
+          ctx)))))
