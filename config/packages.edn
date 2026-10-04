@@ -207,6 +207,10 @@
   :include [[js.lib.supabase :complete]
             [js.lib.supabase-ssr :complete]]}
 
+ xyz.zcaudate/js.supabase
+ {:description "JavaScript Supabase adapter for xt.db"
+  :include [[js.supabase.db-impl :complete]]}
+
  xyz.zcaudate/js.lib.three
  {:description "js core libraries" 
   :include [[js.lib.three :complete]
