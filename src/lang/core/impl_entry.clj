@@ -330,9 +330,14 @@
 (defn emit-entry-label
   "emits the entry label"
   {:added "4.0"}
-  [grammar entry]
-  (let [{:keys [prefix suffix]} (get-in grammar [:default :comment])]
-    (str prefix " " (ut/sym-full entry) " [" (:line entry) "] " suffix)))
+  ([grammar entry]
+   (emit-entry-label grammar entry {}))
+  ([grammar entry {:keys [line-number?]
+                   :or {line-number? true}}]
+   (let [{:keys [prefix suffix]} (get-in grammar [:default :comment])]
+     (str prefix " " (ut/sym-full entry)
+          (when line-number? (str " [" (:line entry) "]"))
+          " " suffix))))
 
 (defn emit-entry
   "emits a given entry"
@@ -350,6 +355,7 @@
                                     :module (get-in book [:modules module]))))
                       mopts)
             {:keys [label trim cache]} emit
+            label-opts (if (map? label) label {})
              body (cond (or *cache-none*
                             (:static/no-cache entry)
                             (= cache :none))
@@ -373,7 +379,7 @@
                         body
                         (get-in snapshot [(:lang mopts) :book :meta :transforms :entry]))
            body (cond->> body
-                  label (str (emit-entry-label grammar entry) "\n")
+                  label (str (emit-entry-label grammar entry label-opts) "\n")
                   trim  (trim))]
        body))))
 
