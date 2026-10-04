@@ -13,9 +13,13 @@
 (def ^:private +edn-data-key+ :postgres.typed/data)
 (def ^:private +edn-meta-key+ :postgres.typed/meta)
 (def ^:private +edn-stream-format+ :postgres.typed/context-stream)
+(def ^:private +edn-stream-version+ 2)
 (def ^:private +edn-stream-metadata-key+ :postgres.typed/metadata)
 (def ^:private +edn-stream-entry-counts-key+ :postgres.typed/entry-counts)
 (def ^:private +edn-stream-entry-tag+ :postgres.typed/entry)
+(def ^:private +edn-stream-namespace-metadata-key+
+  :postgres.typed/namespace-metadata)
+(def ^:private +edn-stream-namespace-count-key+ :postgres.typed/namespace-count)
 (def ^:private +edn-stream-entry-paths+
   [[:registry]
    [:typed :enums]
@@ -333,6 +337,74 @@
         [key value] (sort-by (comp pr-str first) entries)]
     [+edn-stream-entry-tag+ {:path path :key key} value]))
 
+(defn- encoded-function-data
+  [value]
+  (when (= :fn-def (get value +edn-record-key+))
+    (get value +edn-data-key+)))
+
+(defn- encoded-function-namespace
+  [value]
+  (let [ns-name (:ns (encoded-function-data value))]
+    (cond
+      (symbol? ns-name) ns-name
+      (and (string? ns-name) (seq ns-name)) (symbol ns-name)
+      :else nil)))
+
+(defn- entry-namespace-aliases
+  [value]
+  (let [data (encoded-function-data value)
+        body-meta (:body-meta data)]
+    (when (and (map? body-meta)
+               (contains? body-meta :aliases))
+      (let [namespace (encoded-function-namespace value)
+            aliases (:aliases body-meta)]
+        (when-not (and namespace (map? aliases))
+          (edn-error "Invalid postgres.typed namespace alias metadata"
+                     {:type :postgres.typed/invalid-edn-namespace-metadata
+                      :namespace (:ns data)
+                      :aliases aliases}))
+        {:namespace namespace :aliases aliases}))))
+
+(defn- strip-entry-namespace-aliases
+  [value]
+  (if (entry-namespace-aliases value)
+    (update-in value [+edn-data-key+ :body-meta] dissoc :aliases)
+    value))
+
+(defn- stream-export-data
+  [snapshot]
+  (reduce
+   (fn [{:keys [entries namespaces]} [path key value]]
+     (let [alias-info (entry-namespace-aliases value)
+           namespace (:namespace alias-info)
+           aliases (:aliases alias-info)
+           entry-header {:path path :key key}
+           previous (get namespaces namespace)]
+       (when (and previous (not= aliases (:aliases previous)))
+         (edn-error "Functions in a namespace have inconsistent aliases"
+                    {:type :postgres.typed/inconsistent-edn-namespace-aliases
+                     :namespace namespace
+                     :first (:aliases previous)
+                     :next aliases}))
+       {:entries (conj entries
+                       [+edn-stream-entry-tag+
+                        entry-header
+                        (if alias-info
+                          (strip-entry-namespace-aliases value)
+                          value)])
+        :namespaces (if alias-info
+                      (assoc namespaces namespace
+                             (-> (or previous
+                                     {:aliases aliases :entries []})
+                                 (update :entries conj entry-header)))
+                      namespaces)}))
+   {:entries [] :namespaces {}}
+   (for [path +edn-stream-entry-paths+
+         :let [entries (get-in snapshot (snapshot-entry-path path))]
+         :when (map? entries)
+         [key value] (sort-by (comp pr-str first) entries)]
+     [path key value])))
+
 (defn- stream-entry-counts
   [snapshot]
   (into {}
@@ -374,28 +446,80 @@
   "Serializes a typed context as a stable EDN stream.
 
    The first form is the portable snapshot metadata with registry, enum,
-   function, and table entry maps emptied. Each following form has the shape
-   `[:postgres.typed/entry {:path path :key key} value]`. Pass the stream to
-   `import-edn-string` to reconstruct the original typed context. Use
+   function, and table entry maps emptied. Namespace alias maps are collected
+   once in `:postgres.typed/namespace-metadata`; each following form has the
+   shape `[:postgres.typed/entry {:path path :key key} value]`. Pass the stream
+   to `import-edn-string` to reconstruct the original typed context. Use
    `export-edn` when a single snapshot data structure is needed instead."
   [ctx]
   (let [snapshot (export-edn ctx)
+        {:keys [entries namespaces]} (stream-export-data snapshot)
         header {+edn-format-key+ +edn-stream-format+
-                +edn-version-key+ +edn-version+
+                +edn-version-key+ +edn-stream-version+
                 +edn-stream-metadata-key+ (empty-snapshot-entries snapshot)
-                +edn-stream-entry-counts-key+ (stream-entry-counts snapshot)}
-        forms (cons header (stream-entry-forms snapshot))]
+                +edn-stream-entry-counts-key+ (stream-entry-counts snapshot)
+                +edn-stream-namespace-metadata-key+ namespaces
+                +edn-stream-namespace-count-key+ (count namespaces)}
+        forms (cons header entries)]
     (string/join "\n" (map print-edn-form forms))))
+
+(defn- restore-namespace-aliases
+  [snapshot namespaces]
+  (reduce-kv
+   (fn [snapshot namespace namespace-data]
+     (reduce
+      (fn [snapshot entry-header]
+        (let [path (:path entry-header)
+              key (:key entry-header)
+              entry-path (conj (snapshot-entry-path path) key)
+              value (get-in snapshot entry-path)
+              data (encoded-function-data value)
+              body-meta (:body-meta data)]
+          (when-not (and (= namespace (encoded-function-namespace value))
+                         (map? body-meta)
+                         (not (contains? body-meta :aliases)))
+            (edn-error "Namespace metadata does not match its function entry"
+                       {:type :postgres.typed/invalid-edn-namespace-metadata
+                        :namespace namespace
+                        :entry entry-header}))
+          (assoc-in snapshot
+                    (into entry-path [+edn-data-key+ :body-meta :aliases])
+                    (:aliases namespace-data))))
+      snapshot
+      (:entries namespace-data)))
+   snapshot
+   namespaces))
+
+(defn- valid-namespace-entry-header?
+  [entry-header target-paths]
+  (and (map? entry-header)
+       (contains? entry-header :path)
+       (contains? entry-header :key)
+       (vector? (:path entry-header))
+       (contains? target-paths (:path entry-header))))
 
 (defn- import-edn-stream
   [header read-form eof]
   (let [version (get header +edn-version-key+)
+        namespace-version? (= +edn-stream-version+ version)
         snapshot (get header +edn-stream-metadata-key+)
-        expected-counts (get header +edn-stream-entry-counts-key+)]
-    (when-not (= 1 version)
+        expected-counts (get header +edn-stream-entry-counts-key+)
+        namespace-metadata (get header +edn-stream-namespace-metadata-key+)
+        expected-namespace-count (get header
+                                      +edn-stream-namespace-count-key+)]
+    (when-not (or (= 1 version) namespace-version?)
       (edn-error "Unsupported postgres.typed EDN stream version"
                  {:type :postgres.typed/unsupported-edn-stream-version
                   :version version}))
+    (when (and namespace-version?
+               (not (and (map? namespace-metadata)
+                         (integer? expected-namespace-count)
+                         (<= 0 expected-namespace-count)
+                         (= expected-namespace-count
+                            (count namespace-metadata)))))
+      (edn-error "Invalid postgres.typed namespace metadata"
+                 {:type :postgres.typed/invalid-edn-namespace-metadata
+                  :namespace-count expected-namespace-count}))
     (when-not (map? snapshot)
       (edn-error "A postgres.typed EDN stream must contain metadata"
                  {:type :postgres.typed/invalid-edn-stream-metadata}))
@@ -427,13 +551,31 @@
         (edn-error "EDN stream entry counts must be nonnegative integers"
                    {:type :postgres.typed/invalid-edn-stream-metadata
                     :entry-counts expected-counts}))
+      (when namespace-version?
+        (doseq [[namespace namespace-data] namespace-metadata]
+          (let [entries (:entries namespace-data)]
+            (when-not (and (symbol? namespace)
+                           (seq (str namespace))
+                           (map? namespace-data)
+                           (map? (:aliases namespace-data))
+                           (vector? entries)
+                           (seq entries)
+                           (every? #(valid-namespace-entry-header?
+                                     % target-paths)
+                                   entries))
+              (edn-error "Invalid postgres.typed namespace metadata"
+                         {:type :postgres.typed/invalid-edn-namespace-metadata
+                          :namespace namespace
+                          :metadata namespace-data})))))
       (loop [snapshot snapshot
              seen #{}
              actual-counts (zipmap target-paths (repeat 0))]
         (let [form (read-form)]
           (if (identical? eof form)
             (if (= expected-counts actual-counts)
-              (import-edn snapshot)
+              (import-edn (restore-namespace-aliases
+                           snapshot
+                           (if namespace-version? namespace-metadata {})))
               (edn-error "The postgres.typed EDN stream is incomplete"
                          {:type :postgres.typed/incomplete-edn-stream
                           :expected expected-counts
