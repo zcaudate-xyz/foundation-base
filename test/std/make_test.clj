@@ -3,6 +3,12 @@
             [std.make.github :as github])
   (:use code.test))
 
+^{:refer std.make/build-triggered-single :added "4.1"}
+(fact "publishes the focused triggered build function"
+  [(fn? make/build-triggered-single)
+   (:public (meta #'make/build-triggered-single))]
+  => [true true])
+
 ^{:refer std.make/gh:dwim-init :added "4.0"}
 (fact "prepares the initial project commit"
 

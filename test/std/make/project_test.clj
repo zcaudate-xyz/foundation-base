@@ -1,6 +1,12 @@
 (ns std.make.project-test
+  {:clj-kondo/config '{:linters {:refer-all {:level :off}
+                                  :unresolved-symbol {:level :off}
+                                  :unresolved-namespace {:level :off}
+                                  :invalid-arity {:level :off}}}}
   (:require [std.lib.env :as env]
             [std.lib.trace :as trace]
+            [std.make.common :as common]
+            [std.make.compile :as compile]
             [std.make.project :refer :all])
   (:use code.test))
 
@@ -39,6 +45,56 @@
 
 ^{:refer std.make.project/build-triggered :added "4.0"}
 (fact "builds for a triggering namespace")
+
+^{:refer std.make.project/build-triggered-single :added "4.1"}
+(fact "builds only the triggered namespace module"
+  (let [target-config (common/make-config
+                       {:id 'test.make-single
+                        :tag "test.make-single"
+                        :default [{:type :module.directory :main 'test.trigger/root}
+                                  {:type :custom :file "worker.js"}
+                                  {:type :directory :main [["assets" "assets"]]}]})
+        empty-config (common/make-config
+                      {:id 'test.make-single-empty
+                       :tag "test.make-single-empty"
+                       :default [{:type :module.directory :main 'test.trigger/root}]})
+        current-config (common/make-config
+                        {:id 'test.make-single-current
+                         :tag "test.make-single-current"
+                         :default [{:type :module.directory :main 'test.trigger/root}]})
+        target-triggers (atom {})
+        empty-triggers (atom {})
+        current-triggers (atom {})
+        target-calls (atom [])
+        empty-calls (atom [])]
+    [(common/with:triggers [target-triggers]
+       (common/triggers-set target-config #{"test.trigger"})
+       (with-redefs [compile/compile
+                     (fn [_ & directives]
+                       (swap! target-calls conj
+                              {:directives (vec directives)
+                               :filter compile/*compile-filter*})
+                       :built)]
+         [(mapv first (build-triggered-single 'test.trigger/page))
+          (mapv #(select-keys % [:directives :filter]) @target-calls)]))
+     (common/with:triggers [empty-triggers]
+       (common/triggers-set empty-config #{"test.trigger"})
+       (with-redefs [compile/compile
+                     (fn [_ & _]
+                       (swap! empty-calls conj true)
+                       :built)]
+         [(build-triggered-single 'other.namespace)
+          @empty-calls]))
+     (common/with:triggers [current-triggers]
+       (common/triggers-set current-config #{"test.trigger"})
+       (with-redefs [env/ns-sym (constantly 'test.trigger/page)
+                     compile/compile (constantly :built)]
+         (build-triggered-single)))])
+  => [[['test.make-single]
+       [{:directives [[:default :module.directory]]
+         :filter #{'test.trigger/page}}]]
+      [[] []]
+      [['test.make-single-current :built]]])
 
 (fact "check watch functionality"
   (fn? watch) => true

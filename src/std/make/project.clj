@@ -105,6 +105,23 @@
                     (:id @instance))
                   build-default) mcfgs)))))
 
+(defn build-triggered-single
+  "builds a single namespace for triggering projects"
+  {:added "4.1"
+   :public true}
+  ([]
+   (build-triggered-single (env/ns-sym)))
+  ([ns]
+   (let [mcfgs (common/get-triggered ns)]
+     (compile/with:compile-filter
+       #{ns}
+       (mapv (juxt (fn [{:keys [instance]}]
+                     (:id @instance))
+                   (fn [mcfg]
+                     (compile/compile mcfg
+                                      [:default :module.directory])))
+             mcfgs)))))
+
 (defn file-watcher-heal
   [path ns]
   (let [content (slurp path)
@@ -144,7 +161,8 @@
    (let [cb (fn [type file]
               (when (or (= type :modify)
                         (= type :create))
-                (#'file-watcher-handler (.getPath file) {:prehooks prehooks})))]
+                (#'file-watcher-handler (.getPath ^java.io.File file)
+                                        {:prehooks prehooks})))]
      (watch/start-watcher (watch/watcher path cb {:recursive true
                                                   :types :all})))))
 

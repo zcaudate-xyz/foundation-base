@@ -63,6 +63,7 @@
  project/build-at
  project/build-default
  project/build-triggered
+ project/build-triggered-single
  project/is-changed?
  [watch-project project/watch-project]
  
@@ -72,5 +73,4 @@
  [bulk bulk/make-bulk]
  [bulk-gh-init bulk/make-bulk-gh-init]
  [bulk-gh-push bulk/make-bulk-gh-push])
-
 
