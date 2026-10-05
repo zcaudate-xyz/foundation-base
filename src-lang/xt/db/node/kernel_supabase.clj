@@ -454,7 +454,6 @@
   (substrate/register-handler node "@xt.supabase/refresh" -/supabase-refresh-handler nil)
   (substrate/register-handler node "@xt.supabase/signed-in?" -/supabase-signed-in-handler nil)
   (substrate/register-handler node "@xt.supabase/current-session" -/supabase-current-session-handler nil)
-  
   (substrate/register-handler node "@xt.supabase/rpc-call" -/supabase-rpc-call-handler nil)
   (substrate/register-handler node "@xt.supabase/query-table" -/supabase-query-table-handler nil)
   (substrate/register-handler node "@xt.supabase/health" -/supabase-health-handler nil)

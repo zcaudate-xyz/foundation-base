@@ -88,7 +88,8 @@
                               (xt/x:get-key client "defaults")
                               nil
                               nil))
-  (session/set-session impl session)
+  (when (xt/x:not-nil? session)
+    (session/set-session impl session))
   (substrate/set-service node "auth/supabase" impl)
   (adaptor/init-handlers node)
   (return node))
