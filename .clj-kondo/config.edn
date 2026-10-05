@@ -515,7 +515,9 @@
    std.lib.foundation/intern-in hooks.lang-postgres/intern-in-hook
    std.lib.foundation/intern-all hooks.lang-postgres/intern-all-hook
    f/intern-in hooks.lang-postgres/intern-in-hook
-   f/intern-all hooks.lang-postgres/intern-all-hook}}
+   f/intern-all hooks.lang-postgres/intern-all-hook
+   std.lib.foundation/template-entries hooks.lang-postgres/template-entries
+   f/template-entries hooks.lang-postgres/template-entries}}
 
  :linters
   {:namespace-name-mismatch {:level :off}
