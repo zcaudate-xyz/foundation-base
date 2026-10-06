@@ -81,7 +81,7 @@
 (def.xt DEFAULT_SHAREDWORKER_SCRIPT
   (@! (sharedworker-init-string)))
 
-(defn.xt ^{:public true} sharedworker-connect-state
+(defn.xt sharedworker-connect-state
   "connects a client to a SharedWorker and returns its connection state"
   [client config schema lookup source transport-id]
   (-/init-server-proxy client)
@@ -105,7 +105,7 @@
           (return {"connection" connection
                    "init" init}))))))
 
-(defn.xt ^{:public true} sharedworker-disconnect
+(defn.xt sharedworker-disconnect
   "disconnects a SharedWorker connection state"
   [state]
   (return (browser-transport/disconnect (. state ["connection"]))))
