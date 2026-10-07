@@ -81,11 +81,11 @@
 (def.xt DEFAULT_SHAREDWORKER_SCRIPT
   (@! (sharedworker-init-string)))
 
-(defn.xt sharedworker-connect-state
-  "connects a client to a SharedWorker and returns its connection state"
-  [client config schema lookup source transport-id]
+(defn.xt ^{:public true}
+  sharedworker-connect-transport
+  "connects a client to a SharedWorker without initialising the db kernel"
+  [client source transport-id]
   (-/init-server-proxy client)
-  (var connection nil)
   (return
    (-> (browser-transport/connect-sharedworker
         client
@@ -96,9 +96,19 @@
                        -/DEFAULT_SHAREDWORKER_SCRIPT
                        {"type" "module"}))})
        (promise/x:promise-then
-        (fn [conn]
-          (:= connection conn)
-          (proxy-util/set-default-transport client (. conn ["transport_id"]))
+        (fn [connection]
+          (proxy-util/set-default-transport client (. connection ["transport_id"]))
+          (return {"connection" connection}))))))
+
+(defn.xt sharedworker-connect-state
+  "connects a client to a SharedWorker and returns its connection state"
+  [client config schema lookup source transport-id]
+  (var connection nil)
+  (return
+   (-> (-/sharedworker-connect-transport client source transport-id)
+       (promise/x:promise-then
+        (fn [state]
+          (:= connection (. state ["connection"]))
           (return (client-base/kernel-init client config schema lookup {}))))
        (promise/x:promise-then
         (fn [init]
