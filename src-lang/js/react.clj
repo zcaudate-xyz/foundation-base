@@ -1,4 +1,3 @@
-^{:no-test true}
 (ns js.react
   (:require [js.react.compile :as compile]
             [lang.core :as l]
