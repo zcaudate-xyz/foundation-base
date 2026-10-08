@@ -1,5 +1,5 @@
 {
-  "updated-at" : "2026-10-08T20:30:06.617118998Z",
+  "updated-at" : "2026-10-08T20:30:37.570787040Z",
   "schema-version" : 1,
   "workflows" : {
     "annex" : {
@@ -1968,7 +1968,7 @@
     },
     "core-kmi" : {
       "latest" : {
-        "path" : "runs/core-kmi/142-1.json",
+        "path" : "runs/core-kmi/143-1.json",
         "failure-counts" : {
           "errored" : 0,
           "throw" : 508,
@@ -1976,9 +1976,9 @@
           "failed" : 272
         },
         "run" : {
-          "number" : 142,
-          "id" : 37822063648,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/37822063648",
+          "number" : 143,
+          "id" : 37837839895,
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/37837839895",
           "attempt" : 1
         },
         "workflow-key" : "core-kmi",
@@ -1993,7 +1993,7 @@
         "git" : {
           "ref" : "refs/heads/main",
           "event" : "push",
-          "sha" : "e61ef7f2f8f944a34529e568decdf40f3dead684"
+          "sha" : "d84f41eaa6918eee2e68a0f2190cf49660094800"
         },
         "jobs" : [ {
           "failure-counts" : {
@@ -2024,7 +2024,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T18:30:52.940009175Z",
+          "recorded-at" : "2026-10-08T20:28:57.479090784Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2062,7 +2062,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T18:19:16.941753667Z",
+          "recorded-at" : "2026-10-08T20:18:48.003240098Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2100,7 +2100,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T18:19:31.803750551Z",
+          "recorded-at" : "2026-10-08T20:22:18.871789074Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2110,14 +2110,14 @@
           "suite" : "kmi.lang",
           "failing-count" : 323
         } ],
-        "recorded-at" : "2026-10-08T18:31:56.226460755Z",
+        "recorded-at" : "2026-10-08T20:30:06.612766048Z",
         "workflow-name" : "XTBench Core KMI",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
       },
       "runs" : [ {
-        "path" : "runs/core-kmi/142-1.json",
+        "path" : "runs/core-kmi/143-1.json",
         "failure-counts" : {
           "errored" : 0,
           "throw" : 508,
@@ -2125,9 +2125,9 @@
           "failed" : 272
         },
         "run" : {
-          "number" : 142,
-          "id" : 37822063648,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/37822063648",
+          "number" : 143,
+          "id" : 37837839895,
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/37837839895",
           "attempt" : 1
         },
         "workflow-key" : "core-kmi",
@@ -2142,7 +2142,7 @@
         "git" : {
           "ref" : "refs/heads/main",
           "event" : "push",
-          "sha" : "e61ef7f2f8f944a34529e568decdf40f3dead684"
+          "sha" : "d84f41eaa6918eee2e68a0f2190cf49660094800"
         },
         "jobs" : [ {
           "failure-counts" : {
@@ -2173,7 +2173,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T18:30:52.940009175Z",
+          "recorded-at" : "2026-10-08T20:28:57.479090784Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "success",
@@ -2211,7 +2211,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T18:19:16.941753667Z",
+          "recorded-at" : "2026-10-08T20:18:48.003240098Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2249,7 +2249,7 @@
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T18:19:31.803750551Z",
+          "recorded-at" : "2026-10-08T20:22:18.871789074Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
@@ -2259,36 +2259,36 @@
           "suite" : "kmi.lang",
           "failing-count" : 323
         } ],
-        "recorded-at" : "2026-10-08T18:31:56.226460755Z",
+        "recorded-at" : "2026-10-08T20:30:06.612766048Z",
         "workflow-name" : "XTBench Core KMI",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
       } ]
     },
-    "core-kmi" : {
+    "core" : {
       "latest" : {
-        "path" : "runs/core-kmi/143-1.json",
+        "path" : "runs/core/470-1.json",
         "failure-counts" : {
-          "failed" : 272,
-          "throw" : 508,
+          "failed" : 1144,
+          "throw" : 302,
           "timeout" : 0,
-          "errored" : 0
+          "errored" : 5
         },
         "run" : {
-          "id" : 37837839895,
-          "number" : 143,
+          "id" : 37837839883,
+          "number" : 470,
           "attempt" : 1,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/37837839895"
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/37837839883"
         },
-        "workflow-key" : "core-kmi",
+        "workflow-key" : "core",
         "tests" : {
-          "passed" : 641,
-          "failed" : 272,
-          "throw" : 508,
+          "passed" : 2382,
+          "failed" : 1144,
+          "throw" : 302,
           "timeout" : 0,
-          "skipped" : 0,
-          "errored" : 0
+          "skipped" : 1,
+          "errored" : 5
         },
         "git" : {
           "sha" : "d84f41eaa6918eee2e68a0f2190cf49660094800",
@@ -2297,7 +2297,7 @@
         },
         "jobs" : [ {
           "failure-counts" : {
-            "errored" : 0,
+            "errored" : 2,
             "throw" : 0,
             "timeout" : 0,
             "failed" : 0
@@ -2310,35 +2310,35 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 473,
-            "skipped" : 0,
-            "errored" : 0,
+            "passed" : 296,
+            "skipped" : 1,
+            "errored" : 2,
             "throw" : 0,
             "timeout" : 0,
             "failed" : 0
           },
-          "generated-count" : 28,
+          "generated-count" : 46,
           "git" : {
             "ref" : null,
             "event" : null,
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T20:28:57.479090784Z",
+          "recorded-at" : "2026-10-08T20:21:41.360585575Z",
           "spec" : null,
           "workflow-name" : "local",
-          "status" : "success",
+          "status" : "failure",
           "language" : "dart",
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
-          "suite" : "kmi.lang",
-          "failing-count" : 0
+          "suite" : "xt.db",
+          "failing-count" : 2
         }, {
           "failure-counts" : {
-            "errored" : 0,
-            "throw" : 185,
+            "errored" : 2,
+            "throw" : 34,
             "timeout" : 0,
-            "failed" : 272
+            "failed" : 273
           },
           "run" : {
             "number" : null,
@@ -2348,33 +2348,71 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 17,
+            "passed" : 2,
             "skipped" : 0,
-            "errored" : 0,
-            "throw" : 185,
+            "errored" : 2,
+            "throw" : 34,
             "timeout" : 0,
-            "failed" : 272
+            "failed" : 273
           },
-          "generated-count" : 28,
+          "generated-count" : 46,
           "git" : {
             "ref" : null,
             "event" : null,
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T20:18:48.003240098Z",
+          "recorded-at" : "2026-10-08T20:22:15.364661269Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
           "language" : "lua",
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
-          "suite" : "kmi.lang",
-          "failing-count" : 457
+          "suite" : "xt.db",
+          "failing-count" : 309
+        }, {
+          "failure-counts" : {
+            "errored" : 1,
+            "throw" : 109,
+            "timeout" : 0,
+            "failed" : 2
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 215,
+            "skipped" : 0,
+            "errored" : 1,
+            "throw" : 109,
+            "timeout" : 0,
+            "failed" : 2
+          },
+          "generated-count" : 46,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:25:51.518671342Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "python",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.db",
+          "failing-count" : 112
         }, {
           "failure-counts" : {
             "errored" : 0,
-            "throw" : 323,
+            "throw" : 0,
             "timeout" : 0,
             "failed" : 0
           },
@@ -2386,58 +2424,476 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 151,
+            "passed" : 158,
             "skipped" : 0,
             "errored" : 0,
-            "throw" : 323,
+            "throw" : 0,
             "timeout" : 0,
             "failed" : 0
           },
-          "generated-count" : 28,
+          "generated-count" : 12,
           "git" : {
             "ref" : null,
             "event" : null,
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T20:22:18.871789074Z",
+          "recorded-at" : "2026-10-08T20:25:36.238697366Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "success",
+          "language" : "dart",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.event",
+          "failing-count" : 0
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 7,
+            "timeout" : 0,
+            "failed" : 121
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 7,
+            "timeout" : 0,
+            "failed" : 121
+          },
+          "generated-count" : 12,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:17:16.032983864Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "lua",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.event",
+          "failing-count" : 128
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 14,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 144,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 14,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 12,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:24:45.395166323Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
           "language" : "python",
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
-          "suite" : "kmi.lang",
-          "failing-count" : 323
+          "suite" : "xt.event",
+          "failing-count" : 14
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 3,
+            "timeout" : 0,
+            "failed" : 2
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 564,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 3,
+            "timeout" : 0,
+            "failed" : 2
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:27:51.628784935Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "dart",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.lang",
+          "failing-count" : 5
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 30,
+            "timeout" : 0,
+            "failed" : 540
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 1,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 30,
+            "timeout" : 0,
+            "failed" : 540
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:20:17.534371174Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "lua",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.lang",
+          "failing-count" : 570
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 44,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 528,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 44,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:21:38.355389353Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "python",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.lang",
+          "failing-count" : 44
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 0,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:14:38.276279467Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "success",
+          "language" : "dart",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.net",
+          "failing-count" : 0
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 0,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:22:39.852627697Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "success",
+          "language" : "lua",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.net",
+          "failing-count" : 0
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 0,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:16:16.281887045Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "success",
+          "language" : "python",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.net",
+          "failing-count" : 0
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 2,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 245,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 2,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:29:07.487715109Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "dart",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.substrate",
+          "failing-count" : 2
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 41,
+            "timeout" : 0,
+            "failed" : 206
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 41,
+            "timeout" : 0,
+            "failed" : 206
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:20:50.109540793Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "lua",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.substrate",
+          "failing-count" : 247
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 18,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 229,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 18,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:26:11.506788781Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "python",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.substrate",
+          "failing-count" : 18
         } ],
-        "recorded-at" : "2026-10-08T20:30:06.612766048Z",
-        "workflow-name" : "XTBench Core KMI",
+        "recorded-at" : "2026-10-08T20:30:37.565156794Z",
+        "workflow-name" : "XTBench Core",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
       },
       "runs" : [ {
-        "path" : "runs/core-kmi/143-1.json",
+        "path" : "runs/core/470-1.json",
         "failure-counts" : {
-          "failed" : 272,
-          "throw" : 508,
+          "failed" : 1144,
+          "throw" : 302,
           "timeout" : 0,
-          "errored" : 0
+          "errored" : 5
         },
         "run" : {
-          "id" : 37837839895,
-          "number" : 143,
+          "id" : 37837839883,
+          "number" : 470,
           "attempt" : 1,
-          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/37837839895"
+          "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/37837839883"
         },
-        "workflow-key" : "core-kmi",
+        "workflow-key" : "core",
         "tests" : {
-          "passed" : 641,
-          "failed" : 272,
-          "throw" : 508,
+          "passed" : 2382,
+          "failed" : 1144,
+          "throw" : 302,
           "timeout" : 0,
-          "skipped" : 0,
-          "errored" : 0
+          "skipped" : 1,
+          "errored" : 5
         },
         "git" : {
           "sha" : "d84f41eaa6918eee2e68a0f2190cf49660094800",
@@ -2446,7 +2902,7 @@
         },
         "jobs" : [ {
           "failure-counts" : {
-            "errored" : 0,
+            "errored" : 2,
             "throw" : 0,
             "timeout" : 0,
             "failed" : 0
@@ -2459,35 +2915,35 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 473,
-            "skipped" : 0,
-            "errored" : 0,
+            "passed" : 296,
+            "skipped" : 1,
+            "errored" : 2,
             "throw" : 0,
             "timeout" : 0,
             "failed" : 0
           },
-          "generated-count" : 28,
+          "generated-count" : 46,
           "git" : {
             "ref" : null,
             "event" : null,
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T20:28:57.479090784Z",
+          "recorded-at" : "2026-10-08T20:21:41.360585575Z",
           "spec" : null,
           "workflow-name" : "local",
-          "status" : "success",
+          "status" : "failure",
           "language" : "dart",
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
-          "suite" : "kmi.lang",
-          "failing-count" : 0
+          "suite" : "xt.db",
+          "failing-count" : 2
         }, {
           "failure-counts" : {
-            "errored" : 0,
-            "throw" : 185,
+            "errored" : 2,
+            "throw" : 34,
             "timeout" : 0,
-            "failed" : 272
+            "failed" : 273
           },
           "run" : {
             "number" : null,
@@ -2497,33 +2953,71 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 17,
+            "passed" : 2,
             "skipped" : 0,
-            "errored" : 0,
-            "throw" : 185,
+            "errored" : 2,
+            "throw" : 34,
             "timeout" : 0,
-            "failed" : 272
+            "failed" : 273
           },
-          "generated-count" : 28,
+          "generated-count" : 46,
           "git" : {
             "ref" : null,
             "event" : null,
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T20:18:48.003240098Z",
+          "recorded-at" : "2026-10-08T20:22:15.364661269Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
           "language" : "lua",
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
-          "suite" : "kmi.lang",
-          "failing-count" : 457
+          "suite" : "xt.db",
+          "failing-count" : 309
+        }, {
+          "failure-counts" : {
+            "errored" : 1,
+            "throw" : 109,
+            "timeout" : 0,
+            "failed" : 2
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 215,
+            "skipped" : 0,
+            "errored" : 1,
+            "throw" : 109,
+            "timeout" : 0,
+            "failed" : 2
+          },
+          "generated-count" : 46,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:25:51.518671342Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "python",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.db",
+          "failing-count" : 112
         }, {
           "failure-counts" : {
             "errored" : 0,
-            "throw" : 323,
+            "throw" : 0,
             "timeout" : 0,
             "failed" : 0
           },
@@ -2535,32 +3029,450 @@
           },
           "workflow-key" : "local",
           "tests" : {
-            "passed" : 151,
+            "passed" : 158,
             "skipped" : 0,
             "errored" : 0,
-            "throw" : 323,
+            "throw" : 0,
             "timeout" : 0,
             "failed" : 0
           },
-          "generated-count" : 28,
+          "generated-count" : 12,
           "git" : {
             "ref" : null,
             "event" : null,
             "sha" : null
           },
           "schema-version" : 1,
-          "recorded-at" : "2026-10-08T20:22:18.871789074Z",
+          "recorded-at" : "2026-10-08T20:25:36.238697366Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "success",
+          "language" : "dart",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.event",
+          "failing-count" : 0
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 7,
+            "timeout" : 0,
+            "failed" : 121
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 7,
+            "timeout" : 0,
+            "failed" : 121
+          },
+          "generated-count" : 12,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:17:16.032983864Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "lua",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.event",
+          "failing-count" : 128
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 14,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 144,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 14,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 12,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:24:45.395166323Z",
           "spec" : null,
           "workflow-name" : "local",
           "status" : "failure",
           "language" : "python",
           "kind" : "xtbench-job",
           "metrics-status" : "complete",
-          "suite" : "kmi.lang",
-          "failing-count" : 323
+          "suite" : "xt.event",
+          "failing-count" : 14
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 3,
+            "timeout" : 0,
+            "failed" : 2
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 564,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 3,
+            "timeout" : 0,
+            "failed" : 2
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:27:51.628784935Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "dart",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.lang",
+          "failing-count" : 5
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 30,
+            "timeout" : 0,
+            "failed" : 540
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 1,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 30,
+            "timeout" : 0,
+            "failed" : 540
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:20:17.534371174Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "lua",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.lang",
+          "failing-count" : 570
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 44,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 528,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 44,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:21:38.355389353Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "python",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.lang",
+          "failing-count" : 44
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 0,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:14:38.276279467Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "success",
+          "language" : "dart",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.net",
+          "failing-count" : 0
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 0,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:22:39.852627697Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "success",
+          "language" : "lua",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.net",
+          "failing-count" : 0
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 0,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 0,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:16:16.281887045Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "success",
+          "language" : "python",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.net",
+          "failing-count" : 0
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 2,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 245,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 2,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:29:07.487715109Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "dart",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.substrate",
+          "failing-count" : 2
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 41,
+            "timeout" : 0,
+            "failed" : 206
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 0,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 41,
+            "timeout" : 0,
+            "failed" : 206
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:20:50.109540793Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "lua",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.substrate",
+          "failing-count" : 247
+        }, {
+          "failure-counts" : {
+            "errored" : 0,
+            "throw" : 18,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "run" : {
+            "number" : null,
+            "id" : null,
+            "url" : null,
+            "attempt" : 1
+          },
+          "workflow-key" : "local",
+          "tests" : {
+            "passed" : 229,
+            "skipped" : 0,
+            "errored" : 0,
+            "throw" : 18,
+            "timeout" : 0,
+            "failed" : 0
+          },
+          "generated-count" : 22,
+          "git" : {
+            "ref" : null,
+            "event" : null,
+            "sha" : null
+          },
+          "schema-version" : 1,
+          "recorded-at" : "2026-10-08T20:26:11.506788781Z",
+          "spec" : null,
+          "workflow-name" : "local",
+          "status" : "failure",
+          "language" : "python",
+          "kind" : "xtbench-job",
+          "metrics-status" : "complete",
+          "suite" : "xt.substrate",
+          "failing-count" : 18
         } ],
-        "recorded-at" : "2026-10-08T20:30:06.612766048Z",
-        "workflow-name" : "XTBench Core KMI",
+        "recorded-at" : "2026-10-08T20:30:37.565156794Z",
+        "workflow-name" : "XTBench Core",
         "status" : "failure",
         "metrics-status" : "complete",
         "error" : null
