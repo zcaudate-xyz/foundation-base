@@ -6,6 +6,7 @@
 
 (l/script- :js
   {:runtime :basic
+   :import [["react" :as React]]
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
              [xt.event.base-model :as event-model]
@@ -14,6 +15,68 @@
 (fact:global
  {:setup    [(l/rt:restart :js)]
   :teardown  [(l/rt:stop)]})
+
+;; Exercise the hook subscriptions without requiring a DOM runtime. The demo's
+;; browser smoke test additionally mounts the real components and submits edits.
+(defn.js with-hook-effects
+  [f]
+  (var updates [])
+  (var effects [])
+  (var cleanups [])
+  (var original {:useState React.useState :useRef React.useRef :useEffect React.useEffect})
+  (:= React.useState
+      (fn [initial]
+        (return [(:? (== "function" (typeof initial)) (initial) initial)
+                 (fn [value] (. updates (push value)))])))
+  (:= React.useRef (fn [initial] (return {:current initial})))
+  (:= React.useEffect
+      (fn [effect]
+        (var cleanup (effect))
+        (. effects (push cleanup))
+        (when (== "function" (typeof cleanup)) (. cleanups (push cleanup)))))
+  (try
+    (f updates effects)
+    (return updates)
+    (catch err (throw err))
+    (finally
+      (. cleanups (forEach (fn [cleanup] (cleanup))))
+      (Object.assign React original))))
+
+^{:refer js.react.ext-model/listenView :id follows-model-output-events}
+(fact "listenView follows base-model output events and removes its listener"
+  (!.js
+   (var view (event-model/create-model nil {} [] 0))
+   (event-model/init-model view)
+   (var updates (-/with-hook-effects
+                (fn []
+                  (ext-model/listenView view "success")
+                  (event-model/set-output view 7))))
+   {:updates updates :listeners (event-model/list-listeners view)})
+  => {"updates" [7] "listeners" []})
+
+^{:refer js.react.ext-model/listenViewOutput :id filters-output-destination}
+(fact "listenViewOutput follows model events and ignores the other pipeline destination"
+  (!.js
+   (var view (event-model/create-model nil {:remote {}} [] 0))
+   (event-model/init-model view)
+   (var updates (-/with-hook-effects
+                (fn []
+                  (ext-model/listenViewOutput view ["output"] {} "remote")
+                  (event-model/set-output view 9 false nil "remote")
+                  (event-model/set-output view 3))))
+   (. updates (map (fn [out] (return (. out current))))))
+  => [9])
+
+^{:refer js.react.ext-model/useRefreshArgs :id no-promise-cleanup}
+(fact "refresh effects do not return a Promise as React's cleanup function"
+  (!.js
+   (var view (event-model/create-model (fn:> [x] x) {} [] 0))
+   (event-model/init-model view)
+   (-/with-hook-effects
+    (fn [updates effects]
+      (ext-model/useRefreshArgs view [4] {:remote "none"})
+      (. updates (push (typeof (. effects [0])))))))
+  => ["undefined"])
 
 ^{:refer js.react.ext-model/throttled-setter :added "4.0" :unchecked true}
 (fact "creates a throttled setter which only updates after a delay"
