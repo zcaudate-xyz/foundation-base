@@ -9,7 +9,6 @@
              [xt.event.base-model :as event-model]
              [xt.event.base-listener :as event-common]
              [xt.substrate.page-core :as page-core]
-             [xt.db.node.page-base :as page-base]
              [js.react :as r]
              [xt.lang.spec-promise :as promise]]})
 
@@ -245,42 +244,3 @@
                k/identity)
            (or output (. opts default)))))
 
-(defn.js ^{:public true}
-  listenPageModel
-  "Listens to a field on a declaratively attached page model."
-  {:added "4.1.6"}
-  [page model-id type meta]
-  (return
-   (-/listenModel
-    (. page ["client"])
-    (. page ["space_id"])
-    (page-base/page-model-path page model-id)
-    type
-    (or meta {}))))
-
-(defn.js ^{:public true}
-  listenPageModelOutput
-  "Listens to the full output record on a declaratively attached page model."
-  {:added "4.1.6"}
-  [page model-id types meta]
-  (return
-   (-/listenModelOutput
-    (. page ["client"])
-    (. page ["space_id"])
-    (page-base/page-model-path page model-id)
-    types
-    (or meta {}))))
-
-(defn.js ^{:public true :- [:async]}
-  callPageModel
-  "Invokes a declaratively attached page model."
-  {:added "4.1.6"}
-  [page model-id args save-output opts]
-  (return
-   (await
-    (page-base/page-model-call
-     page
-     model-id
-     args
-     save-output
-     (or opts {})))))
