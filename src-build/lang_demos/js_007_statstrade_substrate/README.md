@@ -4,6 +4,10 @@ A small, runnable slice of the statslink / statsui / [iberia.hook](https://githu
 pattern, implemented inside foundation-base. It lists two topics, selects a detail
 record, and edits its title using the existing Melbourne components.
 
+Follow the [from-scratch walkthrough](WALKTHROUGH.md) to create a separate
+`topic-from-scratch` feature, with complete file contents, REPL checkpoints,
+browser checks, and the steps for connecting a database table.
+
 The `TOPIC` declaration in `model.clj` keeps `:actions`, `:views`, and `:entries`.
 An action applies `:input` to its arguments and context, calls the function
 transformed by `:wrap`, then applies `:output` to the resolved value. Missing
