@@ -206,7 +206,7 @@
         (var nresult (getResult))
         (when (and (or (k/nil? resultTag)
                        (== resultTag (. event data tag)))
-                  (or (not= "view.output"
+                  (or (not= "model.output"
                             (. event type))
                       (== (. event data type)
                           (or dest-key "output")))
@@ -247,7 +247,7 @@
                      :resultFn  (xtd/get-in meta "resultFn")
                      :pred (fn [event]
                              (return (== (. event ["type"])
-                                         (+ "view." tevent))))}})
+                                         (+ "model." tevent))))}})
   (return result))
 
 (defn.js listenViewOutput
@@ -265,7 +265,7 @@
            types
            (fn [type]
              (return (== (. event ["type"])
-                         (+ "view." type))))))))
+                         (+ "model." type))))))))
   (-/initViewBase view
                   dest-key
                   #{meta pred  
@@ -299,7 +299,7 @@
            (setThrottled nresult)))
       meta
      (fn [event]
-       (return (== "view.output"
+       (return (== "model.output"
                    (. event ["type"])))))
     (return
      (fn []
@@ -360,8 +360,7 @@
   [view args opts]
   (:= opts (or opts {}))
   (r/watch [(xt/x:json-encode args)]
-    (return
-     (-/refreshArgsFn view args opts))))
+    (-/refreshArgsFn view args opts)))
 
 (defn.js listenSuccess
   "listens to the successful output"
