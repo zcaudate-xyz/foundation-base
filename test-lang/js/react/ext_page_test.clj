@@ -10,7 +10,8 @@
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
-             [js.react.ext-page :as ext-page]]})
+             [js.react.ext-page :as ext-page]
+             [js.react :as r]]})
 
 (defn.js create-node
   []
@@ -19,7 +20,8 @@
     "spaces" {"space/a" {"state" {}}}}))
 
 (fact:global
- {:setup [(l/rt:restart :js)]
+ {:setup [(l/rt:restart :js)
+          (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer js.react.ext-page/model-key :added "4.1"}
