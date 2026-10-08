@@ -5,8 +5,7 @@
   {:require [[xt.lang.spec-base :as xt]
              [js.react :as r]]})
 
-(defn.js ^{:public true}
-  setup
+(defn.js setup
   "creates an isolated JSDOM window and installs its browser globals"
   {:added "4.1"}
   [opts]
@@ -67,8 +66,7 @@
            "root-instance" nil
            "closed" false}))
 
-(defn.js ^{:public true}
-  render
+(defn.js render
   "renders a React component into the JSDOM root and waits for effects"
   {:added "4.1"}
   [env component props]
@@ -77,14 +75,14 @@
                 (r/createDOMRoot (. env ["root"]))))
   (xt/x:set-key env "root-instance" root)
   (return
-   (React.act
-    (fn []
-      (. root (render
-               (r/createElement component
-                                (or props {}))))))))
+   (Promise.resolve
+    (React.act
+     (fn []
+       (. root (render
+                (r/createElement component
+                                 (or props {})))))))))
 
-(defn.js ^{:public true}
-  teardown
+(defn.js teardown
   "unmounts React, restores globals, and closes the JSDOM window"
   {:added "4.1"}
   [env]
@@ -112,3 +110,31 @@
   (when failure
     (throw failure))
   (return true))
+
+(defn.js run
+  "runs a callback in JSDOM and tears down after its value or promise settles"
+  {:added "4.1"}
+  [opts f]
+  (var env (-/setup opts))
+  (try
+    (var output
+         (. (Promise.resolve (f env))
+            (finally (fn []
+                       (-/teardown env)))))
+    (return output)
+    (catch e
+      (-/teardown env)
+      (throw e))))
+
+(defmacro wait-on
+  "runs a JSDOM callback through notify/wait-on and repl/notify"
+  {:added "4.1"}
+  [opts & body]
+  (list 'xt.lang.common-notify/wait-on
+        :js
+        (list (symbol ".")
+              (list 'js.react.helper-jsdom/run
+                    opts
+                    (list* 'fn '[env] body))
+              (list 'then
+                    (list 'xt.lang.common-repl/>notify)))))
