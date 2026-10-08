@@ -116,21 +116,32 @@
 
 ^{:refer xt.db.system.impl-supabase/cmd-rpc-call-async :added "4.1"}
 (fact "cmd-rpc-call-async builds a supabase rpc POST request"
-  (!.js
-   (impl/cmd-rpc-call-async
-    nil
-    {:input [{:symbol "i_message" :type "text"}]
-     :return "jsonb"
-     :schema "scratch_v0"
-     :id "log_append_public"
-     :flags {}}
-    ["hello"]
-    {:token "abc"}))
+  [(!.js
+    (impl/cmd-rpc-call-async
+     nil
+     {:input [{:symbol "i_message" :type "text"}]
+      :return "jsonb"
+      :schema "scratch_v0"
+      :id "log_append_public"
+      :flags {}}
+     ["hello"]
+     {:token "abc"}))
+   (!.js
+    (impl/cmd-rpc-call-async
+     nil
+     {:input []
+      :return "jsonb"
+      :schema "stats_rpc"
+      :id "super-global-section-update"
+      :flags {}}
+     []
+     {}))]
   => (contains-in
-      {"path" "/rest/v1/rpc/log_append_public"
-       "method" "POST"
-       "headers" map?
-       "body" string?}))
+      [{"path" "/rest/v1/rpc/log_append_public"
+        "method" "POST"
+        "headers" map?
+        "body" string?}
+       {"path" "/rest/v1/rpc/super_global_section_update"}]))
 
 ^{:refer xt.db.system.impl-supabase/rpc-call-async :added "4.1"}
 (fact "performs an rpc call"

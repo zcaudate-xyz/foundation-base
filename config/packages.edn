@@ -242,6 +242,7 @@
             [js.react.compile-directives :base]
             [js.react.compile-states :base]
             [js.react.helper-data :base]
+            [js.react.helper-jsdom :base]
             [js.react.helper-portal :base]
             [js.react.layout :base]]}
  

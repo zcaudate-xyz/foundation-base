@@ -9,6 +9,7 @@
              [xt.db.text.pgrest-tree :as pgrest-tree]
              [xt.lang.common-protocol :as proto]
              [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.net.http-fetch :as http-fetch]
@@ -65,7 +66,7 @@
     (xt/x:set-key headers "Content-Profile" schema)
     (xt/x:set-key headers "Accept-Profile" schema))
   (return
-   (addon/cmd-rpc-call (. rpc-spec ["id"])
+   (addon/cmd-rpc-call (str/replace (. rpc-spec ["id"]) "-" "_")
                        body
                        (-> (xt/x:obj-clone opts)
                            (xt/x:obj-assign {"headers" headers})))))

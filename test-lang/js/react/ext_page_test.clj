@@ -11,7 +11,8 @@
              [xt.substrate :as substrate]
              [xt.substrate.page-core :as page-core]
              [js.react.ext-page :as ext-page]
-             [js.react :as r]]})
+             [js.react :as r]
+             [js.react.helper-jsdom :as helper]]})
 
 (defn.js create-node
   []
@@ -143,6 +144,57 @@
   (!.js
    (typeof ext-page/listenModel))
   => "function")
+
+^{:refer js.react.ext-page/listenModel
+  :id jsdom-listen-model
+  :added "4.1"}
+(fact "updates a mounted component when the page model input changes"
+  (notify/wait-on :js
+    (var node (substrate/node-create (-/create-node)))
+    (page-core/group-add-attach
+     node
+     "space/a"
+     "page"
+     {"ping" {"handler" (fn [ctx]
+                          (return {"ok" true}))
+              "defaults" {"args" [1 2]}}})
+    (var env (helper/setup {}))
+    (var React (require "react"))
+    (var Probe
+         (fn [props]
+           (var value (ext-page/listenModel
+                       (. props ["node"])
+                       "space/a"
+                       ["page" "ping"]
+                       "input"
+                       nil))
+           (return
+            (r/createElement "span" nil
+                             (JSON.stringify (. value ["data"]))))))
+    (. (helper/render env Probe {"node" node})
+       (then (fn [_]
+               (var before document.body.innerHTML)
+               (. (React.act
+                   (fn []
+                     (return
+                      (ext-page/refreshArgsFn
+                       node
+                       "space/a"
+                       ["page" "ping"]
+                       [9 8]
+                       {}))))
+                  (then (fn [_]
+                          (setTimeout
+                           (fn []
+                             (var after document.body.innerHTML)
+                             (var closed (helper/teardown env))
+                             (repl/notify {"before" before
+                                           "after" after
+                                           "closed" closed}))
+                           0))))))))
+  => {"before" "<div id=\"root\"><span>[1,2]</span></div>"
+      "after" "<div id=\"root\"><span>[9,8]</span></div>"
+      "closed" true})
 
 ^{:refer js.react.ext-page/listenModelOutput :added "4.1"}
 (fact "is a function"
