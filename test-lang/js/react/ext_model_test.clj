@@ -1,210 +1,365 @@
 (ns js.react.ext-model-test
-  (:require [std.fs :as fs]
-            [lang.core :as l]
-            [xt.lang.common-notify :as notify])
+  (:require [lang.core :as l]
+            [js.react.helper-jsdom :as helper-source])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
+             [xt.lang.common-notify :as notify]
              [xt.event.base-model :as event-model]
+             [js.react :as r]
+             [js.react.helper-jsdom :as helper]
              [js.react.ext-model :as ext-model]]})
 
 (fact:global
- {:setup    [(l/rt:restart :js)]
-  :teardown  [(l/rt:stop)]})
+ {:setup [(l/rt:restart :js)
+          (l/rt:scaffold-imports :js)]
+  :teardown [(l/rt:stop)]})
 
-^{:refer js.react.ext-model/throttled-setter :added "4.0" :unchecked true}
-(fact "creates a throttled setter which only updates after a delay"
+(defn.js make-test-view
+  [handler pipeline args output]
+  (var view (event-model/create-model handler
+                                      (or pipeline {})
+                                      args
+                                      output
+                                      nil
+                                      nil))
+  (event-model/init-model view)
+  (return view))
 
+(defn.js await-dom
+  [f]
+  (return
+   (new Promise
+        (fn [resolve]
+          (setTimeout (fn [] (resolve (f))) 0)))))
+
+^{:refer js.react.ext-model/throttled-setter :added "4.0"}
+(fact "updates immediately and coalesces delayed values"
   (notify/wait-on :js
-    (var i 0)
-    (var [throttle-fn throttle]
-         (ext-model/throttled-setter
-          (fn []
-            (when (== i 1)
-              (repl/notify i))
-            (:= i (+ i 1)))
-          200))
-    (throttle-fn {})
-    (throttle-fn {}))
-  => 1
+                  (var results [])
+                  (var [setThrottled throttle]
+                       (ext-model/throttled-setter
+                        (fn [value] (. results (push value)))
+                        20))
+                  (setThrottled 1)
+                  (setThrottled 2)
+                  (setTimeout (fn [] (repl/notify {"results" results
+                                                   "mounted" (. throttle ["mounted"])})) 50))
+  => {"results" [1 2] "mounted" true})
 
+^{:refer js.react.ext-model/refresh-view :added "4.0"}
+(fact "refreshes the main pipeline"
   (notify/wait-on :js
-    (var i 0)
-    (var [throttle-fn throttle]
-         (ext-model/throttled-setter
-          (fn []
-            (when (== i 1)
-              (repl/notify i))
-            (:= i (+ i 1)))
-          200))
-    (throttle-fn {})
-    (throttle-fn {})
-    (throttle-fn {})
-    (throttle-fn {})
-    (throttle-fn {}))
-  => 1)
+                  (. (do:>
+                      (var view (-/make-test-view
+                                 (fn:> [x] (return {"value" x}))
+                                 {}
+                                 [3]
+                                 {"value" 0}))
+                      (return (ext-model/refresh-view view {})))
+                     (then (fn [acc]
+                             (repl/notify {"main" (. acc ["main"])
+                                           "output" (event-model/get-current view nil)})))))
+  => {"main" [true {"value" 3}] "output" {"value" 3}})
 
-^{:refer js.react.ext-model/refresh-view :added "4.0" :unchecked true}
-(fact "refreshes the view"
-
+^{:refer js.react.ext-model/refresh-args :added "4.0"}
+(fact "sets new args before refreshing"
   (notify/wait-on :js
-    (. (do:>
-        (var v (event-model/create-model
-                (fn:> [x] (new Promise
-                               (fn [resolve]
-                                 (setTimeout
-                                  (fn []
-                                    (resolve {:value x}))
-                                  100))))
-                {}
-                [3]
-                {:value 0}))
-        (event-model/init-model v)
-        (return (ext-model/refresh-view v)))
-       (then (repl/>notify))))
-  => {"::" "model.run"
-      "post" [false],
-      "main" [true {"value" 3}],
-      "pre" [false]})
+                  (var view (-/make-test-view
+                             (fn:> [x] (return {"value" x}))
+                             {}
+                             [3]
+                             {"value" 0}))
+                  (. (ext-model/refresh-args view [10] {})
+                     (then (fn [_]
+                             (repl/notify (event-model/get-input view))))))
+  => {"current" {"data" [10]}})
 
-^{:refer js.react.ext-model/refresh-args :added "4.0" :unchecked true}
-(fact "refreshes the view view args"
-
+^{:refer js.react.ext-model/refresh-view-remote :added "4.0"}
+(fact "runs the remote pipeline"
   (notify/wait-on :js
-    (. (do:>
-        (var v (event-model/create-model
-                (fn:> [x] (new Promise
-                               (fn [resolve]
-                                 (setTimeout
-                                  (fn []
-                                    (resolve {:value x}))
-                                  100))))
-                {}
-                [3]
-                {:value 0}))
-        (event-model/init-model v)
-        (return (ext-model/refresh-args v [10])))
-       (then (repl/>notify))))
-  => {"::" "model.run"
-      "post" [false],
-      "main" [true {"value" 10}],
-      "pre" [false],})
-
-^{:refer js.react.ext-model/refresh-view-remote :added "4.0" :unchecked true}
-(fact "refreshes view using remote function")
-
-^{:refer js.react.ext-model/refresh-args-remote :added "4.0" :unchecked true}
-(fact "refreshes view using remote function with new args")
-
-^{:refer js.react.ext-model/refresh-view-sync :added "4.0" :unchecked true}
-(fact "refreshes view using sync function")
-
-^{:refer js.react.ext-model/refresh-args-sync :added "4.0" :unchecked true}
-(fact "refreshes view using args function")
-
-^{:refer js.react.ext-model/make-view :added "4.0" :unchecked true}
-(fact "makes and initialises view"
-
+                  (var view (-/make-test-view
+                             (fn:> [x] (return {"main" x}))
+                             {"remote" {"handler" (fn:> [x] (return {"remote" true}))}}
+                             []
+                             nil))
+                  (. (ext-model/refresh-view-remote view true {})
+                     (then (fn [_]
+                             (repl/notify (event-model/get-current view "remote"))))))
+  => {"remote" true})
+^{:refer js.react.ext-model/refresh-args-remote :added "4.0"}
+(fact "sets args and runs the remote pipeline"
   (notify/wait-on :js
-    (. (. (ext-model/make-view
-           (fn:> [x] (new Promise
-                          (fn [resolve]
-                            (setTimeout
-                             (fn []
-                               (resolve {:value x}))
-                             100))))
-           {}
-           [3]
-           {:value 0})
-          ["init"])
-       (then (repl/>notify))))
-  => {"post" [false],
-      "main" [true {"value" 3}],
-      "pre" [false],
-      "::" "model.run"})
-
-^{:refer js.react.ext-model/makeViewRaw :added "4.0" :unchecked true}
-(fact "makes a react compatible view without r/const")
-
-^{:refer js.react.ext-model/makeView :added "4.0" :unchecked true}
-(fact "makes a react compatible view")
-
-^{:refer js.react.ext-model/initViewBase :added "4.0" :unchecked true}
-(fact "initialises the view listener")
-
-^{:refer js.react.ext-model/listenView :added "4.0" :unchecked true}
-(fact "creates the most basic views")
-
-^{:refer js.react.ext-model/listenViewOutput :added "4.0" :unchecked true}
-(fact "creates listeners on the output")
-
-^{:refer js.react.ext-model/listenViewThrottled :added "4.0" :unchecked true}
-(fact "creates the throttled listener")
-
-^{:refer js.react.ext-model/wrap-pending :added "4.0" :unchecked true}
-(fact "wraps function, setting pending flag")
-
-^{:refer js.react.ext-model/refreshArgsFn :added "4.0" :unchecked true}
-(fact "creates the refresh args function")
-
-^{:refer js.react.ext-model/useRefreshArgs :added "4.0" :unchecked true}
-(fact "refreshes args on the view")
-
-^{:refer js.react.ext-model/listenSuccess :added "4.0" :unchecked true}
-(fact "listens to the successful output")
-
-^{:refer js.react.ext-model/handler-base :added "0.1"}
-(fact "constructs a base handler")
-
-^{:refer js.react.ext-model/oneshot-fn :added "0.1"}
-(fact "creates a oneshot function"
-
-  (!.js (var f (ext-model/oneshot-fn))
-        [(f) (f) (f)])
-  => [true false false])
-
-^{:refer js.react.ext-model/input-disabled? :added "0.1"}
-(fact "checks if input has been disabled (context method)"
-
-  (ext-model/input-disabled? {:input {:disabled true}})
-  => true
-
-  (ext-model/input-disabled? {})
-  => true
-
-  (ext-model/input-disabled? {:input {}})
-  => nil)
-
-^{:refer js.react.ext-model/input-data :added "0.1"}
-(fact "gets the input data (context method)"
-
-  (ext-model/input-data {})
-  => nil
-
-  (ext-model/input-data {:input {:data 1}})
-  => 1)
-
-^{:refer js.react.ext-model/input-data-nil? :added "0.1"}
-(fact "ensures that disabled flag or a nil input returns true"
-
-  (ext-model/input-data-nil? {})
-  => true
-
-  (ext-model/input-data-nil? {:input {:data 1
-                                      :disabled true}})
+                  (var view (-/make-test-view
+                             (fn:> [x] (return {"main" x}))
+                             {"remote" {"handler" (fn:> [x] (return {"remote" x}))}}
+                             []
+                             nil))
+                  (. (ext-model/refresh-args-remote view [7] true {})
+                     (then (fn [_]
+                             (repl/notify {"args" (. (event-model/get-input view) ["current"])
+                                           "remote" (event-model/get-current view "remote")})))))
+  => {"args" {"data" [7]} "remote" {"remote" 7}})
+^{:refer js.react.ext-model/refresh-view-sync :added "4.0"}
+(fact "runs the sync pipeline"
+  (notify/wait-on :js
+                  (var view (-/make-test-view
+                             (fn:> [x] (return {"main" x}))
+                             {"sync" {"handler" (fn:> [x] (return {"sync" true}))}}
+                             []
+                             nil))
+                  (. (ext-model/refresh-view-sync view true {})
+                     (then (fn [_]
+                             (repl/notify (event-model/get-current view "sync"))))))
+  => {"sync" true})
+^{:refer js.react.ext-model/refresh-args-sync :added "4.0"}
+(fact "sets args and runs the sync pipeline"
+  (notify/wait-on :js
+                  (var view (-/make-test-view
+                             (fn:> [x] (return {"main" x}))
+                             {"sync" {"handler" (fn:> [x] (return {"sync" x}))}}
+                             []
+                             nil))
+                  (. (ext-model/refresh-args-sync view [8] true {})
+                     (then (fn [_]
+                             (repl/notify {"args" (. (event-model/get-input view) ["current"])
+                                           "sync" (event-model/get-current view "sync")})))))
+  => {"args" {"data" [8]} "sync" {"sync" 8}})
+^{:refer js.react.ext-model/make-view :added "4.0"}
+(fact "creates an initialised view with an init refresh"
+  (notify/wait-on :js
+                  (var view (ext-model/make-view
+                             (fn:> [x] (return {"value" x}))
+                             {}
+                             [3]
+                             {"value" 0}))
+                  (. (. view ["init"])
+                     (then (fn [_]
+                             (repl/notify {"type" (. view ["::"])
+                                           "input" (. (event-model/get-input view) ["current"])})))))
+  => {"type" "event.model" "input" {"data" [3]}})
+^{:refer js.react.ext-model/makeViewRaw :added "4.0"}
+(fact "creates a raw view inside a component"
+  (helper-source/wait-on
+   {}
+   (var controls {})
+   (var Component
+        (fn []
+          (var view (ext-model/makeViewRaw {"handler" (fn:> [x] (return x))
+                                            "defaultArgs" [1]
+                                            "defaultOutput" nil}))
+          (xt/x:set-key controls "view" view)
+          (return (r/createElement "span" nil "ready"))))
+   (return
+    (. (helper/render env Component {})
+       (then (fn [_]
+               (return (== "event.model" (. (. controls ["view"]) ["::"]))))))))
   => true)
+^{:refer js.react.ext-model/makeView :added "4.0"}
+(fact "creates a React stable view"
+  (helper-source/wait-on
+   {}
+   (var controls {})
+   (var Component
+        (fn []
+          (var view (ext-model/makeView {"handler" (fn:> [x] (return x))
+                                         "defaultArgs" [1]
+                                         "defaultOutput" nil}))
+          (xt/x:set-key controls "view" view)
+          (return (r/createElement "span" nil "ready"))))
+   (return
+    (. (helper/render env Component {})
+       (then (fn [_]
+               (return (xt/x:is-object? (. controls ["view"]))))))))
+  => true)
+^{:refer js.react.ext-model/initViewBase :added "4.0"}
+(fact "registers a view listener and returns teardown"
+  (helper-source/wait-on
+   {}
+   (var controls {})
+   (var Component
+        (fn []
+          (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
+          (var [value setValue] (r/local nil))
+          (var ref (r/useFollowRef value))
+          (var cleanup (ext-model/initViewBase
+                        view nil
+                        {"setResult" setValue
+                         "getResult" (fn [] (return value))
+                         "resultRef" ref}))
+          (xt/x:set-key controls "view" view)
+          (xt/x:set-key controls "cleanup" cleanup)
+          (return (r/createElement "span" nil "ready"))))
+   (return
+    (. (helper/render env Component {})
+       (then (fn [_]
+               (return {"listener" (> (count (event-model/list-listeners (. controls ["view"]))) 0)
+                        "cleanup" (xt/x:is-function? (. controls ["cleanup"]))}))))))
+  => {"listener" true "cleanup" true})
+^{:refer js.react.ext-model/listenView :added "4.0"}
+(fact "listens to the current view output"
+  (helper-source/wait-on
+   {}
+   (var controls {})
+   (var Component
+        (fn []
+          (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
+          (var value (ext-model/listenView view "output" nil nil nil))
+          (xt/x:set-key controls "view" view)
+          (xt/x:set-key controls "value" value)
+          (return (r/createElement "span" nil "ready"))))
+   (return
+    (. (helper/render env Component {})
+       (then (fn [_]
+               (event-model/set-output (. controls ["view"]) {"value" 2} false "output" nil nil)
+               (event-model/trigger-listeners (. controls ["view"]) "view.output" {"type" "output"})
+               (return (-/await-dom (fn [] (return (. controls ["value"]))))))))))
+  => {"value" 2})
+^{:refer js.react.ext-model/listenViewOutput :added "4.0"}
+(fact "listens to selected output events"
+  (helper-source/wait-on
+   {}
+   (var controls {})
+   (var Component
+        (fn []
+          (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
+          (var value (ext-model/listenViewOutput view ["output"] nil nil nil))
+          (xt/x:set-key controls "view" view)
+          (xt/x:set-key controls "value" value)
+          (return (r/createElement "span" nil "ready"))))
+   (return
+    (. (helper/render env Component {})
+       (then (fn [_]
+               (event-model/trigger-listeners (. controls ["view"]) "view.output" {"type" "output"})
+               (return (-/await-dom (fn []
+                                      (return {"type" (. (. controls ["value"]) ["type"])
+                                               "current" (. (. controls ["value"]) ["current"])})))))))))
+  => {"type" "output" "current" nil})
+^{:refer js.react.ext-model/listenViewThrottled :added "4.0"}
+(fact "returns a throttled successful output listener"
+  (helper-source/wait-on
+   {}
+   (var controls {})
+   (var Component
+        (fn []
+          (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
+          (var value (ext-model/listenViewThrottled view 10 nil nil))
+          (xt/x:set-key controls "view" view)
+          (xt/x:set-key controls "value" value)
+          (return (r/createElement "span" nil "ready"))))
+   (return
+    (. (helper/render env Component {})
+       (then (fn [_]
+               (event-model/set-output (. controls ["view"]) {"ok" true} false "output" nil nil)
+               (event-model/trigger-listeners (. controls ["view"]) "view.output" {"type" "output"})
+               (return (-/await-dom (fn [] (return (. controls ["value"]))))))))))
+  => {"ok" true})
+^{:refer js.react.ext-model/wrap-pending :added "4.0"}
+(fact "sets pending while a wrapped function is running"
+  (notify/wait-on :js
+                  (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
+                  (var wrapped (ext-model/wrap-pending
+                                (fn [model value]
+                                  (return (. (Promise.resolve value)
+                                             (then (fn [v] (return (+ v 1)))))))
+                                nil))
+                  (. (wrapped view 4)
+                     (then (fn [value]
+                             (repl/notify {"pending" (event-model/is-pending view nil)
+                                           "value" value})))))
+  => {"pending" false "value" 5})
+^{:refer js.react.ext-model/refreshArgsFn :added "4.0"}
+(fact "refreshes args through the selected pipeline"
+  (notify/wait-on :js
+                  (var view (-/make-test-view
+                             (fn:> [x] (return {"value" x}))
+                             {}
+                             [1]
+                             nil))
+                  (. (ext-model/refreshArgsFn view [9] {"remote" "none"})
+                     (then (fn [_]
+                             (repl/notify (event-model/get-current view nil))))))
+  => {"value" 9})
+^{:refer js.react.ext-model/useRefreshArgs :added "4.0"}
+(fact "watches React args and starts a refresh"
+  (helper-source/wait-on
+   {}
+   (var controls {})
+   (var Component
+        (fn []
+          (var view (-/make-test-view (fn:> [x] (return {"value" x})) {} [2] nil))
+          (var result (ext-model/useRefreshArgs view [2] {"remote" "none"}))
+          (xt/x:set-key controls "view" view)
+          (xt/x:set-key controls "result" result)
+          (return (r/createElement "span" nil "ready"))))
+   (return
+    (. (helper/render env Component {})
+       (then (fn [_]
+               (return (-/await-dom
+                        (fn []
+                          (return {"args" (. (event-model/get-input (. controls ["view"])) ["current"])
+                                   "result" (. controls ["result"])})))))))))
+  => {"args" {"data" [2]} "result" nil})
+^{:refer js.react.ext-model/listenSuccess :added "4.0"}
+(fact "combines a success listener with argument refresh"
+  (helper-source/wait-on
+   {}
+   (var controls {})
+   (var Component
+        (fn []
+          (var view (-/make-test-view (fn:> [x] (return {"value" x})) {} [3] {"fallback" true}))
+          (var result (ext-model/listenSuccess view [3] {"remote" "none"
+                                                         "default" {"fallback" true}}
+                                               nil nil))
+          (xt/x:set-key controls "result" result)
+          (return (r/createElement "span" nil "ready"))))
+   (return
+    (. (helper/render env Component {})
+       (then (fn [_]
+               (return (-/await-dom (fn [] (return (. controls ["result"]))))))))))
+  => {"fallback" true})
+^{:refer js.react.ext-model/handler-base :added "0.1"}
+(fact "constructs a handler base"
+  (!.js
+   (var out (ext-model/handler-base (fn [] 1) {"label" "demo"}))
+   (return {"args" (== (xt/x:json-encode (. out ["defaultArgs"])) "[]")
+            "init" (== (. out ["defaultInit"] ["disabled"]) true)
+            "label" (== (. out ["label"]) "demo")}))
+  => {"args" true "init" true "label" true})
+^{:refer js.react.ext-model/oneshot-fn :added "0.1"}
+(fact "allows only the first call"
+  (!.js
+   (var f (ext-model/oneshot-fn))
+   (return [(f) (f) (f)]))
+  => [true false false])
+^{:refer js.react.ext-model/input-disabled? :added "0.1"}
+(fact "checks disabled or missing input"
+  (!.js
+   (return [(ext-model/input-disabled? {})
+            (ext-model/input-disabled? {"input" {"disabled" true}})
+            (ext-model/input-disabled? {"input" {"data" [1]}})]))
+  => [true true false])
+^{:refer js.react.ext-model/input-data :added "0.1"}
+(fact "gets input data"
+  (!.js
+   (return [(ext-model/input-data {})
+            (ext-model/input-data {"input" {"data" 1}})]))
 
+  => [nil 1])
+^{:refer js.react.ext-model/input-data-nil? :added "0.1"}
+(fact "checks missing or disabled input data"
+  (!.js
+   (return [(ext-model/input-data-nil? {})
+            (ext-model/input-data-nil? {"input" {"data" 1}})
+            (ext-model/input-data-nil? {"input" {"data" nil}})]))
+  => [true false true])
 ^{:refer js.react.ext-model/output-empty? :added "0.1"}
-(fact "checks that view is empty (context method)"
-
-  (ext-model/output-empty? {:view {:output {:current nil}}})
-  => true
-
-  (ext-model/output-empty? {:view {:output {:current []}}})
-  => true
-
-  (ext-model/output-empty? {:view {:output {:current [1 2 3]}}})
-  => false)
+(fact "checks empty current output"
+  (!.js
+   (return [(ext-model/output-empty? {"view" {"output" {"current" nil}}})
+            (ext-model/output-empty? {"view" {"output" {"current" []}}})
+            (ext-model/output-empty? {"view" {"output" {"current" [1]}}})]))
+  => [true true false])

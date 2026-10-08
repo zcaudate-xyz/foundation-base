@@ -1,14 +1,14 @@
 (ns js.react.helper-jsdom-test
-  (:require [lang.core :as l]
-            [xt.lang.common-notify :as notify]
-            [js.react.helper-jsdom :as helper-source])
-  (:use code.test))
+    (:require [lang.core :as l]
+              [xt.lang.common-notify :as notify]
+              [js.react.helper-jsdom :as helper-source])
+    (:use code.test))
 
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.common-repl :as repl]
-             [js.react :as r]
-             [js.react.helper-jsdom :as helper]]})
+           {:runtime :basic
+            :require [[xt.lang.common-repl :as repl]
+                      [js.react :as r]
+                      [js.react.helper-jsdom :as helper]]})
 
 (fact:global
  {:setup [(l/rt:restart :js)
@@ -37,20 +37,20 @@
 (fact "renders a component and waits for its effect"
 
   (defn.js Counter
-    []
-    (var [value setValue] (React.useState "before"))
-    (React.useEffect (fn [] (setValue "after")) [])
-    (return [:span value]))
-  
+           []
+           (var [value setValue] (React.useState "before"))
+           (React.useEffect (fn [] (setValue "after")) [])
+           (return [:span value]))
+
   (notify/wait-on :js
-    (var env (helper/setup {}))
-    (. (helper/render env -/Counter {})
-       (then (fn [_]
-               (var html document.body.innerHTML)
-               (helper/teardown env)
-               (repl/notify {"html" html
-                             "closed" (. env ["closed"])
-                             "restored" (== "undefined" (typeof window))})))))
+                  (var env (helper/setup {}))
+                  (. (helper/render env -/Counter {})
+                     (then (fn [_]
+                               (var html document.body.innerHTML)
+                               (helper/teardown env)
+                               (repl/notify {"html" html
+                                             "closed" (. env ["closed"])
+                                             "restored" (== "undefined" (typeof window))})))))
   => {"html" "<div id=\"root\"><span>after</span></div>"
       "closed" true
       "restored" true})
@@ -59,19 +59,19 @@
 (fact "restores global descriptors and is idempotent"
 
   (notify/wait-on :js
-    (var original (Object.getOwnPropertyDescriptor globalThis "navigator"))
-    (var env (helper/setup {}))
-    (var changed (not= original
-                       (Object.getOwnPropertyDescriptor globalThis "navigator")))
-    (var restored (helper/teardown env))
-    (var current (Object.getOwnPropertyDescriptor globalThis "navigator"))
-    (repl/notify {"changed" changed
-                  "restored" restored
-                  "same" (and (== (. original ["configurable"])
-                                  (. current ["configurable"]))
-                              (== (. original ["enumerable"])
-                                  (. current ["enumerable"])))
-                  "second" (helper/teardown env)}))
+                  (var original (Object.getOwnPropertyDescriptor globalThis "navigator"))
+                  (var env (helper/setup {}))
+                  (var changed (not= original
+                                     (Object.getOwnPropertyDescriptor globalThis "navigator")))
+                  (var restored (helper/teardown env))
+                  (var current (Object.getOwnPropertyDescriptor globalThis "navigator"))
+                  (repl/notify {"changed" changed
+                                "restored" restored
+                                "same" (and (== (. original ["configurable"])
+                                                (. current ["configurable"]))
+                                            (== (. original ["enumerable"])
+                                                (. current ["enumerable"])))
+                                "second" (helper/teardown env)}))
   => {"changed" true
       "restored" true
       "same" true
@@ -80,13 +80,13 @@
 ^{:refer js.react.helper-jsdom/run :added "4.1"}
 (fact "waits for an async callback before tearing down JSDOM"
   (notify/wait-on :js
-    (. (helper/run {}
-                   (fn [_]
-                     (return
-                      (. (Promise.resolve nil)
-                         (then (fn [_]
-                                 (return "ready")))))))
-       (then (repl/>notify))))
+                  (. (helper/run {}
+                                 (fn [_]
+                                     (return
+                                      (. (Promise.resolve nil)
+                                         (then (fn [_]
+                                                   (return "ready")))))))
+                     (then (repl/>notify))))
   => "ready"
 
   (!.js
@@ -100,16 +100,32 @@
    (var React (require "react"))
    (var Counter
         (fn []
-          (var [value setValue] (React.useState "before"))
-          (React.useEffect (fn [] (setValue "after")) [])
-          (return (React.createElement "span" nil value))))
+            (var [value setValue] (React.useState "before"))
+            (React.useEffect (fn [] (setValue "after")) [])
+            (return (React.createElement "span" nil value))))
    (return
     (. (helper/render env Counter {})
        (then (fn [_]
-               (return document.body.innerHTML))))))
+                 (return document.body.innerHTML))))))
   => "<div id=\"root\"><span>after</span></div>"
 
   (!.js
    (return (== "undefined" (typeof window))))
   => true)
 
+^{:refer js.react.helper-jsdom/setup :added "4.1"}
+(fact "installs isolated localStorage and restores it on teardown"
+  (!.js
+   (var first (helper/setup {}))
+   (. localStorage (setItem "shared" "first"))
+   (var firstValue (. localStorage (getItem "shared")))
+   (helper/teardown first)
+   (var second (helper/setup {}))
+   (var secondValue (. localStorage (getItem "shared")))
+   (var hasStorage (== "object" (typeof localStorage)))
+   (helper/teardown second)
+   (return {"first" firstValue
+            "second" secondValue
+            "hasStorage" hasStorage
+            "restored" (== "undefined" (typeof window))}))
+  => {"first" "first" "second" nil "hasStorage" true "restored" true})
