@@ -76,3 +76,40 @@
       "restored" true
       "same" true
       "second" true})
+
+^{:refer js.react.helper-jsdom/run :added "4.1"}
+(fact "waits for an async callback before tearing down JSDOM"
+  (notify/wait-on :js
+    (. (helper/run {}
+                   (fn [_]
+                     (return
+                      (. (Promise.resolve nil)
+                         (then (fn [_]
+                                 (return "ready")))))))
+       (then (repl/>notify))))
+  => "ready"
+
+  (!.js
+   (return (== "undefined" (typeof window))))
+  => true)
+
+^{:refer js.react.helper-jsdom/wait-on :added "4.1"}
+(fact "sets up and tears down JSDOM around a React callback"
+  (helper-source/wait-on
+   {}
+   (var React (require "react"))
+   (var Counter
+        (fn []
+          (var [value setValue] (React.useState "before"))
+          (React.useEffect (fn [] (setValue "after")) [])
+          (return (React.createElement "span" nil value))))
+   (return
+    (. (helper/render env Counter {})
+       (then (fn [_]
+               (return document.body.innerHTML))))))
+  => "<div id=\"root\"><span>after</span></div>"
+
+  (!.js
+   (return (== "undefined" (typeof window))))
+  => true)
+
