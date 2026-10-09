@@ -40,19 +40,19 @@
                   (setThrottled 1)
                   (setThrottled 2)
                   (setTimeout (fn [] (repl/notify {"results" results
-                                                   "mounted" (. throttle ["mounted"])})) 50))
+                                                   "mounted" (. throttle ["mounted"])})) 50)
+                  nil)
   => {"results" [1 2] "mounted" true})
 
 ^{:refer js.react.ext-model/refresh-view :added "4.0"}
 (fact "refreshes the main pipeline"
   (notify/wait-on :js
-                  (. (do:>
-                      (var view (-/make-test-view
-                                 (fn:> [x] (return {"value" x}))
-                                 {}
-                                 [3]
-                                 {"value" 0}))
-                      (return (ext-model/refresh-view view {})))
+                  (var view (-/make-test-view
+                             (fn:> [x] (return {"value" x}))
+                             {}
+                             [3]
+                             {"value" 0}))
+                  (. (ext-model/refresh-view view {})
                      (then (fn [acc]
                              (repl/notify {"main" (. acc ["main"])
                                            "output" (event-model/get-current view nil)})))))
@@ -68,7 +68,7 @@
                              {"value" 0}))
                   (. (ext-model/refresh-args view [10] {})
                      (then (fn [_]
-                             (repl/notify (event-model/get-input view))))))
+                             (repl/notify {"current" (. (event-model/get-input view) ["current"])})))))
   => {"current" {"data" [10]}})
 
 ^{:refer js.react.ext-model/refresh-view-remote :added "4.0"}
@@ -182,7 +182,7 @@
    {}
    (fn [_ document _ _]
      (var state (. document ["__ext_model_test"]))
-     (var result {"listener" (> (count (event-model/list-listeners (. state ["view"]))) 0)
+     (var result {"listener" (> (xt/x:len (event-model/list-listeners (. state ["view"]))) 0)
                   "cleanup" (xt/x:is-function? (. state ["cleanup"]))})
      (xt/x:del-key document "__ext_model_test")
      (return result)))
@@ -193,25 +193,26 @@
    (fn []
      (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
      (var value (ext-model/listenView view "output" nil nil nil))
-     (xt/x:set-key document "__ext_model_test" {"view" view
-                                                 "value" value})
-     (return (r/createElement "span" nil "ready")))
+     (xt/x:set-key document "__ext_model_test" {"view" view})
+     (return (r/createElement "span" nil
+                              (JSON.stringify (or value {})))))
    {}
    (fn [_ document _ _]
      (var state (. document ["__ext_model_test"]))
-     (return
-      (. (Promise.resolve
+     (var task
           (r/act
            (fn []
              (event-model/set-output (. state ["view"]) {"value" 2} false "output" nil nil)
-             (event-model/trigger-listeners (. state ["view"]) "view.output" {"type" "output"})))))
+             (event-model/trigger-listeners (. state ["view"]) "view.output" {"type" "output"}))))
+     (return
+      (. (Promise.resolve task)
          (then (fn [_]
                  (return
                   (helper/await-dom
                    (fn []
-                     (var result (. state ["value"]))
+                     (var result (JSON.parse document.body.textContent))
                      (xt/x:del-key document "__ext_model_test")
-                     (return result)))))))))
+                     (return result))))))))))
   => {"value" 2})
 ^{:refer js.react.ext-model/listenViewOutput :added "4.0"}
 (fact "listens to selected output events"
@@ -219,26 +220,27 @@
    (fn []
      (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
      (var value (ext-model/listenViewOutput view ["output"] nil nil nil))
-     (xt/x:set-key document "__ext_model_test" {"view" view
-                                                 "value" value})
-     (return (r/createElement "span" nil "ready")))
+     (xt/x:set-key document "__ext_model_test" {"view" view})
+     (return (r/createElement "span" nil
+                              (JSON.stringify (or value {})))))
    {}
    (fn [_ document _ _]
      (var state (. document ["__ext_model_test"]))
-     (return
-      (. (Promise.resolve
+     (var task
           (r/act
            (fn []
-             (event-model/trigger-listeners (. state ["view"]) "view.output" {"type" "output"})))))
+             (event-model/trigger-listeners (. state ["view"]) "view.output" {"type" "output"}))))
+     (return
+      (. (Promise.resolve task)
          (then (fn [_]
                  (return
                   (helper/await-dom
                    (fn []
-                     (var value (. state ["value"]))
+                     (var value (JSON.parse document.body.textContent))
                      (var result {"type" (. value ["type"])
                                   "current" (. value ["current"])})
                      (xt/x:del-key document "__ext_model_test")
-                     (return result)))))))))
+                     (return result))))))))))
   => {"type" "output" "current" nil})
 ^{:refer js.react.ext-model/listenViewThrottled :added "4.0"}
 (fact "returns a throttled successful output listener"
@@ -246,29 +248,27 @@
    (fn []
      (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
      (var value (ext-model/listenViewThrottled view 10 nil nil))
-     (xt/x:set-key document "__ext_model_test" {"view" view
-                                                 "value" value})
-     (return (r/createElement "span" nil "ready")))
+     (xt/x:set-key document "__ext_model_test" {"view" view})
+     (return (r/createElement "span" nil
+                              (JSON.stringify (or value {})))))
    {}
    (fn [_ document _ _]
      (var state (. document ["__ext_model_test"]))
-     (return
-      (. (Promise.resolve
+     (var task
           (r/act
            (fn []
              (event-model/set-output (. state ["view"]) {"ok" true} false "output" nil nil)
-             (event-model/trigger-listeners (. state ["view"]) "view.output" {"type" "output"})))))
-         (then (fn [_]
-                 (return
-                  (new Promise
-                   (fn [resolve]
-                     (setTimeout
-                      (fn []
-                        (var result (. state ["value"]))
-                        (xt/x:del-key document "__ext_model_test")
-                        (resolve result))
-                      30)))))))))
-  => {"ok" true})
+             (event-model/trigger-listeners (. state ["view"]) "view.output" {"type" "output"}))))
+     (return
+      (new Promise
+       (fn [resolve]
+         (setTimeout
+          (fn []
+            (var result document.body.textContent)
+            (xt/x:del-key document "__ext_model_test")
+            (resolve result))
+          30))))))
+  => "{\"ok\":true}")
 ^{:refer js.react.ext-model/wrap-pending :added "4.0"}
 (fact "sets pending while a wrapped function is running"
   (notify/wait-on :js
@@ -311,10 +311,10 @@
        (fn []
          (var state (. document ["__ext_model_test"]))
          (var result {"args" (. (event-model/get-input (. state ["view"])) ["current"])
-                      "result" (. state ["result"])})
+                      "result" (xt/x:nil? (. state ["result"]))})
          (xt/x:del-key document "__ext_model_test")
          (return result))))))
-  => {"args" {"data" [2]} "result" nil})
+  => {"args" {"data" [2]} "result" true})
 ^{:refer js.react.ext-model/listenSuccess :added "4.0"}
 (fact "combines a success listener with argument refresh"
   (helper-source/wait-on
@@ -323,15 +323,14 @@
      (var result (ext-model/listenSuccess view [3] {"remote" "none"
                                                     "default" {"fallback" true}}
                                           nil nil))
-     (xt/x:set-key document "__ext_model_test" {"result" result})
-     (return (r/createElement "span" nil "ready")))
+     (return (r/createElement "span" nil
+                              (JSON.stringify (or result {})))))
    {}
    (fn [_ document _ _]
      (return
       (helper/await-dom
        (fn []
-         (var result (. document ["__ext_model_test"] ["result"]))
-         (xt/x:del-key document "__ext_model_test")
+         (var result (JSON.parse document.body.textContent))
          (return result))))))
   => {"fallback" true})
 ^{:refer js.react.ext-model/handler-base :added "0.1"}

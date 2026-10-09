@@ -193,10 +193,11 @@
                    pred}]
   (var #{resultFn
          resultPrint} (or meta {}))
+  (var listener-id (. (Math.random)
+                      (toString 36)
+                      (substr 2 4)))
+  (var cleanup (fn:> (event-model/remove-listener view listener-id)))
   (r/init []
-    (var listener-id (. (Math.random)
-                        (toString 36)
-                        (substr 2 4)))
      (event-model/add-listener
       view
       listener-id
@@ -221,8 +222,8 @@
          (resultPrint #{resultTag nresult event})))
      meta
      pred)
-    (return
-     (fn:> (event-model/remove-listener view listener-id)))))
+    (return cleanup))
+  (return cleanup))
 
 (defn.js listenView
   "creates the most basic views"
@@ -284,10 +285,10 @@
                         (event-model/get-success view))))
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
+  (var listener-id (. (Math.random)
+                      (toString 36)
+                      (substr 2 4)))
   (r/init []
-    (var listener-id (. (Math.random)
-                        (toString 36)
-                        (substr 2 4)))
     (var [setThrottled throttle] (-/throttled-setter setResult delay))
     (event-model/add-listener
      view
@@ -360,8 +361,7 @@
   [view args opts]
   (:= opts (or opts {}))
   (r/watch [(xt/x:json-encode args)]
-    (return
-     (-/refreshArgsFn view args opts))))
+    (-/refreshArgsFn view args opts)))
 
 (defn.js listenSuccess
   "listens to the successful output"
@@ -405,8 +405,10 @@
   "checks if input has been disabled (context method)"
   {:added "0.1"}
   [#{input}]
-  (return (or (k/nil? input)
-              (. input ["disabled"]))))
+  (return (:? (or (k/nil? input)
+                  (. input ["disabled"]))
+              true
+              false)))
 
 (defn.js input-data
   "gets the input data (context method)"

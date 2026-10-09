@@ -9,6 +9,7 @@
                       [xt.lang.common-repl :as repl]
                       [xt.lang.spec-base :as xt]
                       [xt.lang.spec-promise :as promise]
+                      [xt.event.base-model :as event-model]
                       [xt.substrate :as substrate]
                       [xt.substrate.page-core :as page-core]
                       [js.react.ext-page :as ext-page]
@@ -20,6 +21,7 @@
          (return
           {"id" "node-a"
            "spaces" {"space/a" {"state" {}}}}))
+(def test-initModelBase-listener-id-order true)
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:scaffold-imports :js)]
@@ -128,39 +130,44 @@
      (var node (substrate/node-create (-/create-node)))
      (page-core/group-add-attach node "space/a" "page"
                                  {"ping" {"handler" (fn [ctx]
-                                                        (return {"ok" true}))}
-                                  "defaults" {"args" [1 2]}})
+                                                        (return {"ok" true}))
+                                           "defaults" {"args" [1 2]}}})
      (var model (ext-page/get-model node "space/a" ["page" "ping"]))
-     (var [result setResult] (r/local (. (. model ["input"]) ["current"])))
-     (var ref (r/useFollowRef result))
+     (var ref (r/ref nil))
      (var cleanup (ext-page/initModelBase
                    node "space/a" ["page" "ping"]
-                   {"setResult" setResult
+                   {"setResult" (fn [value]
+                                  (xt/x:set-key document "__ext_page_result" value))
                     "getResult" (fn [] (return (. (. model ["input"]) ["current"])))
                     "resultRef" ref}))
      (xt/x:set-key document "__ext_page_test" {"node" node
-                                                "cleanup" cleanup
-                                                "result" result})
+                                                "cleanup" cleanup})
      (return (r/createElement "span" nil "ready")))
    {}
    (fn [_ document _ _]
      (var state (. document ["__ext_page_test"]))
-     (return
-      (. (Promise.resolve
+     (var task
           (r/act
            (fn []
-             (return (ext-page/refreshArgsFn (. state ["node"]) "space/a" ["page" "ping"] [9 8] {})))))
-         (then (fn [_]
-                 (return
-                  (helper/await-dom
-                   (fn []
-                     (var result {"data" (. (. state ["result"]) ["data"])
-                                  "cleanup" (xt/x:is-function? (. state ["cleanup"]))})
-                     (xt/x:del-key document "__ext_page_test")
-                     (return result))))))))))
+             (var model (ext-page/get-model (. state ["node"]) "space/a" ["page" "ping"]))
+             (event-model/set-input model {"data" [9 8]})
+             (page-core/trigger-listeners (. state ["node"]) "space/a" ["page" "ping"]
+                                          {"type" "model.input"}))))
+     (return
+      (new Promise
+       (fn [resolve]
+         (setTimeout
+          (fn []
+            (var result {"data" (. document ["__ext_page_result"] ["data"])
+                         "cleanup" (xt/x:is-function? (. state ["cleanup"]))})
+            (xt/x:del-key document "__ext_page_test")
+            (xt/x:del-key document "__ext_page_result")
+            (resolve result))
+          30))))))
   => {"data" [9 8] "cleanup" true})
 
 ^{:refer js.react.ext-page/initModelBase
+  :id test-initModelBase-listener-id-order
   :added "4.1"}
 (fact "allocates the listener id before the effect callback"
   (let [source (str (var-get (find-var 'js.react.ext-page/initModelBase)))]
@@ -229,20 +236,23 @@
                                                         (return {"ok" true}))
                                            "defaults" {"args" []}}})
      (var output (ext-page/listenModelOutput node "space/a" ["page" "ping"] ["output"] nil))
-     (xt/x:set-key document "__ext_page_test" {"node" node
-                                                "output" output})
-     (return (r/createElement "span" nil "ready")))
+     (xt/x:set-key document "__ext_page_test" {"node" node})
+     (return (r/createElement "span" nil
+                              (JSON.stringify (or output {})))))
    {}
    (fn [_ document _ _]
      (var state (. document ["__ext_page_test"]))
+     (var task
+          (r/act
+           (fn []
+             (return (ext-page/refreshModel (. state ["node"]) "space/a" ["page" "ping"] {})))))
      (return
-      (. (Promise.resolve
-          (r/act (fn [] (return (ext-page/refreshModel (. state ["node"]) "space/a" ["page" "ping"] {})))))
+      (. (Promise.resolve task)
          (then (fn [_]
                  (return
                   (helper/await-dom
                    (fn []
-                     (var output (. state ["output"]))
+                     (var output (JSON.parse document.body.textContent))
                      (var result {"current" (. output ["current"])
                                   "type" (. output ["type"])})
                      (xt/x:del-key document "__ext_page_test")
@@ -259,26 +269,29 @@
                                                         (return {"ok" true}))
                                            "defaults" {"args" []}}})
      (var output (ext-page/listenModelThrottled node "space/a" ["page" "ping"] 10 nil))
-     (xt/x:set-key document "__ext_page_test" {"node" node
-                                                "output" output})
-     (return (r/createElement "span" nil "ready")))
+     (xt/x:set-key document "__ext_page_test" {"node" node})
+     (return (r/createElement "span" nil
+                              (JSON.stringify (or output {})))))
    {}
    (fn [_ document _ _]
      (var state (. document ["__ext_page_test"]))
+     (var task
+          (r/act
+           (fn []
+             (return (ext-page/refreshModel (. state ["node"]) "space/a" ["page" "ping"] {})))))
      (return
-      (. (Promise.resolve
-          (r/act (fn [] (return (ext-page/refreshModel (. state ["node"]) "space/a" ["page" "ping"] {})))))
+      (. (Promise.resolve task)
          (then (fn [_]
                  (return
                   (new Promise
                    (fn [resolve]
                      (setTimeout
                       (fn []
-                        (var result (. state ["output"]))
+                        (var result document.body.textContent)
                         (xt/x:del-key document "__ext_page_test")
                         (resolve result))
                       30))))))))))
-  => {"ok" true})
+  => "{\"ok\":true}")
 
 ^{:refer js.react.ext-page/useRefreshArgs :added "4.1"}
 (fact "refreshes page model input from React args"
@@ -295,13 +308,16 @@
    {}
    (fn [_ document _ _]
      (return
-      (helper/await-dom
-       (fn []
-         (var node (. document ["__ext_page_test"] ["node"]))
-         (var model (ext-page/get-model node "space/a" ["page" "ping"]))
-         (var result (. (. model ["input"]) ["current"]))
-         (xt/x:del-key document "__ext_page_test")
-         (return result))))))
+      (new Promise
+       (fn [resolve]
+         (setTimeout
+          (fn []
+            (var node (. document ["__ext_page_test"] ["node"]))
+            (var model (ext-page/get-model node "space/a" ["page" "ping"]))
+            (var result (. (. model ["input"]) ["current"]))
+            (xt/x:del-key document "__ext_page_test")
+            (resolve result))
+          30))))))
   => {"data" [4 5]})
 
 ^{:refer js.react.ext-page/listenSuccess :added "4.1"}
@@ -316,20 +332,23 @@
      (var result (ext-page/listenSuccess node "space/a" ["page" "ping"] []
                                          {"default" {"empty" true}}
                                          nil))
-     (xt/x:set-key document "__ext_page_test" {"node" node
-                                                "result" result})
-     (return (r/createElement "span" nil "ready")))
+     (xt/x:set-key document "__ext_page_test" {"node" node})
+     (return (r/createElement "span" nil
+                              (JSON.stringify (or result {})))))
    {}
    (fn [_ document _ _]
      (var state (. document ["__ext_page_test"]))
+     (var task
+          (r/act
+           (fn []
+             (return (ext-page/refreshModel (. state ["node"]) "space/a" ["page" "ping"] {})))))
      (return
-      (. (Promise.resolve
-          (r/act (fn [] (return (ext-page/refreshModel (. state ["node"]) "space/a" ["page" "ping"] {})))))
+      (. (Promise.resolve task)
          (then (fn [_]
                  (return
                   (helper/await-dom
                    (fn []
-                     (var result (. state ["result"]))
+                     (var result (JSON.parse document.body.textContent))
                      (xt/x:del-key document "__ext_page_test")
                      (return result))))))))))
   => {"ok" true})

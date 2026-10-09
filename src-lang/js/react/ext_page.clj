@@ -78,6 +78,7 @@
   (var #{resultFn
          resultPrint} (or meta {}))
   (var listener-id (r/id))
+  (var cleanup (fn:> (event-common/remove-keyed-listener node key listener-id)))
   (r/init []
     (event-common/add-keyed-listener
      node
@@ -98,8 +99,8 @@
          (resultPrint #{resultTag nresult event})))
      meta
      pred)
-    (return
-     (fn:> (event-common/remove-keyed-listener node key listener-id)))))
+    (return cleanup))
+  (return cleanup))
 
 (defn.js listenModel
   "listens to a single field of a substrate page model"
@@ -155,8 +156,8 @@
                         (event-model/get-success (-/get-model node space-id path) nil))))
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
+  (var listener-id (r/id))
   (r/init []
-    (var listener-id (r/id))
     (var [setThrottled throttle] (-/throttled-setter setResult delay))
     (var key (-/model-key space-id path))
     (event-common/add-keyed-listener
@@ -207,8 +208,7 @@
   [node space-id path args opts]
   (:= opts (or opts {}))
   (r/watch [(xt/x:json-encode args)]
-    (return
-     (-/refreshArgsFn node space-id path args opts))))
+    (-/refreshArgsFn node space-id path args opts)))
 
 (defn.js refreshModel
   "refreshes a substrate page model"
