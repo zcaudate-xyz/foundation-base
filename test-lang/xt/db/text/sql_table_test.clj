@@ -133,7 +133,6 @@
                        {}))
   => +upserts+)
 
-
 ^{:refer xt.db.text.sql-table/prepare-add-input :added "4.1"}
 (fact "prepare add input"
 
@@ -143,15 +142,13 @@
                              sample/SchemaLookup
                              {}))
   => (clojure.string/join "\n\n" +upserts+)
-  
-  ;; "id" only will give a blank
+
   (!.js
     (table/prepare-add-input {"Currency" [{"id" "USD"}]}
                              sample/Schema
                              sample/SchemaLookup
                              (ut/sqlite-opts sample/SchemaLookup)))
 
-  
   (!.js
     (table/prepare-add-input {"Currency" [{"id" "USD" "name" "US Dollar"}]}
                              sample/Schema
@@ -200,4 +197,3 @@
   (s/seedgen-benchadd   '[xt.db.text.sql-table] {:lang [:dart :julia] :write true})
   (s/seedgen-langadd    '[xt.db.text.sql-table] {:lang [:lua :python] :write true})
   (s/seedgen-langremove '[xt.db.text.sql-table] {:lang [:lua :python] :write true}))
-

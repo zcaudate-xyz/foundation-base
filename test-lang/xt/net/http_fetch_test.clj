@@ -23,11 +23,7 @@
   (defrun.pg __init__
     (s/grant-usage #{"scratch_v0"})))
 
-^{:seedgen/root {:all true
-                 :langs [:js :dart :ruby]
-                 :js   {:extra [[js.net.http-fetch :as js-fetch]]}
-                 :dart {:extra [[dart.net.http-fetch :as dart-fetch]]}
-                 :ruby {:extra [[ruby.net.http-fetch :as ruby-fetch]]}}}
+^{:seedgen/root {:js {:extra [[js.net.http-fetch :as js-fetch]]}, :all true, :langs [:js :ruby], :ruby {:extra [[ruby.net.http-fetch :as ruby-fetch]]}, :dart {:extra [[dart.net.http-fetch :as dart-fetch]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.net.http-fetch :as fetch]
@@ -38,19 +34,9 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.net.http-fetch :as fetch]
-             [xt.lang.common-protocol :as proto]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.net.http-fetch :as fetch]
-             [xt.lang.common-protocol :as proto]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.net.http-fetch/prepare-url :added "4.1"}
 (fact "prepares the url for clients"
@@ -80,11 +66,9 @@
      {:path "/sign-in"}))
   => {"url" "http://127.0.0.1:55121/auth/v1/sign-in", "method" "GET", "headers" {"apikey" "TOKEN", "Content-Type" "application/json"}})
 
-^{:refer xt.net.http-fetch/request-http :added "4.1"
-  :seedgen/base {:dart {:suppress true}
-                 :ruby {:transform '{js-fetch/create ruby-fetch/create}}}}
+^{:refer xt.net.http-fetch/request-http :added "4.1" :seedgen/base {:ruby {:transform (quote #:js-fetch{create ruby-fetch/create})}, :dart {:suppress true}}}
 (fact "dispatches request through the wrapped fetch client"
-  
+
   (notify/wait-on :js
     (-> (js-fetch/create
          {:headers {"apikey" (@! (-> local-min/+config+ :api :anon-key))}
@@ -116,7 +100,6 @@
       "headers" {"content-type" "application/json"}
       "body" {"id" "ord-1"}
       "error" nil})
-
 
 ^{:refer xt.net.http-fetch/prepare-handler :added "4.1"}
 (fact "prepares a raw handler with input preparation, middleware, and normalisation"

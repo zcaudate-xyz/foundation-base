@@ -3,7 +3,7 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -13,8 +13,8 @@
              [xt.substrate.transport-memory :as transport-memory]]})
 
 (fact:global
-  {:setup [(l/rt:restart)]
-   :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.walkthroug.s02-transport-memory-test/f00-memory-pair :added "4.1"}
 (fact "two nodes talk to each other over the memory transport"
@@ -32,7 +32,7 @@
     (var client (event-node/node-create {"id" "client"}))
     (var wire (transport-memory/memory-pair {"left_id" "client"
                                              "right_id" "server"}))
-
+        
     ;;
     ;; attaches server and client via memory-pair
     ;; - server has left

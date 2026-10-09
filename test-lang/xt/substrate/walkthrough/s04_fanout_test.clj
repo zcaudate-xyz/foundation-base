@@ -3,7 +3,7 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -13,8 +13,8 @@
              [xt.substrate.transport-memory :as transport-memory]]})
 
 (fact:global
-  {:setup [(l/rt:restart)]
-   :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.walkthrough.s04-fanout-test/demo-001-memory-network}
 (fact "a shared memory network supports stream fanout across multiple transports"

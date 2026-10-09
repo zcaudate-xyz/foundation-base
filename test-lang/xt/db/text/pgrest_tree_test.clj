@@ -12,7 +12,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.text.pgrest-tree/pgrest-query-select :added "4.1"}
 (fact "plans and renders a select request"

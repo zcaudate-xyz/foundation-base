@@ -3,7 +3,7 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python :dart]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -15,8 +15,8 @@
              [xt.substrate.transport-memory :as transport-memory]]})
 
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.walkthroug.s06-page-test/demo-000-page-model-basic}
 (fact "a page model computes its output from args on initial refresh"
@@ -40,7 +40,6 @@
                (event-model/get-current nil)
                (repl/notify))))))
   => "hello world"
-
 
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "node"}))
@@ -101,7 +100,6 @@
            (var model (xt/x:get-idx model-result (xt/x:offset 1)))
            (repl/notify (event-model/get-current model nil))))))
   => "hello substrate")
-
 
 ^{:refer xt.substrate.walkthrough.s06-page-test/demo-002-page-model-dependency}
 (fact "changing a source input automatically refreshes its dependents"
@@ -189,7 +187,6 @@
            (var model (xt/x:get-idx model-result (xt/x:offset 1)))
            (repl/notify (event-model/get-current model nil))))))
   => {"echo" "ping" "server" "server"})
-
 
 ^{:refer xt.substrate.walkthrough.s06-page-test/demo-004-page-model-local-and-remote}
 (fact "a model can have separate local and remote handlers"

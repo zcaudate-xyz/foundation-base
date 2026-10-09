@@ -3,7 +3,7 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -11,23 +11,9 @@
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as event-node]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]
-             [xt.substrate :as event-node]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]
-             [xt.substrate :as event-node]]})
-
 (fact:global
- {:setup    [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate/CANARY.00-transport-attach :added "4.1" :adopt true}
 (fact "create transports between nodes"

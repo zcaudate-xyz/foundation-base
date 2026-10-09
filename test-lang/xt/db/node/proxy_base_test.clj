@@ -19,7 +19,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 (defn.js server-node
   "creates a server node with page-proxy handlers installed"
@@ -65,7 +65,6 @@
        (fn [_]
          (proxy-util/set-default-transport client "server")
          (return (f server client))))))
-
 
 ^{:refer xt.db.node.proxy-base/request-proxy :added "4.1"}
 (fact "forwards a call action to the server"

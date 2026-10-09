@@ -3,7 +3,7 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:langs [:dart]}}
+^{:seedgen/root {}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -16,6 +16,7 @@
 
 ^{:refer xt.db.node.example-auth-profile-view/render :added "4.1"}
 (fact "renders auth state as serializable target-neutral IR"
+
   (!.js
    (var root (auth-view/render
               {"email" "ada@example.com"
@@ -33,6 +34,7 @@
 
 ^{:refer xt.db.node.example-auth-profile-view/install :added "4.1"}
 (fact "installs auth functionality as substrate handlers"
+
   (notify/wait-on :js
     (var node (substrate/node-create {}))
     (auth-view/install node {"space_id" "auth-space"

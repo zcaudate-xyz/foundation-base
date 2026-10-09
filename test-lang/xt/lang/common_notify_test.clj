@@ -6,18 +6,8 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]]})
-
-(l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-repl :as repl]]})
@@ -53,22 +43,6 @@
       (:socket-port (l/default-notify))
       :js :socket
       "127.0.0.1"
-      {}]
-
-  (notify/notify-ceremony (assoc (l/rt :lua)
-                                 :type :basic))
-  => [(:id (l/rt :lua))
-      (:socket-port (l/default-notify))
-      :lua :socket
-      "127.0.0.1"
-      {}]
-
-  (notify/notify-ceremony (assoc (l/rt :python)
-                                 :type :basic))
-  => [(:id (l/rt :python))
-      (:socket-port (l/default-notify))
-      :python :socket
-      "127.0.0.1"
       {}])
 
 ^{:refer xt.lang.common-notify/notify-ceremony-rt :added "4.0"}
@@ -96,14 +70,6 @@
 (fact "sets up a code context and waits for oneshot notification"
 
   (notify/wait-on :js
-    (repl/notify 1))
-  => 1
-
-  (notify/wait-on :lua
-    (repl/notify 1))
-  => 1
-
-  (notify/wait-on :python
     (repl/notify 1))
   => 1)
 

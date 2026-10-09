@@ -52,12 +52,7 @@
     (wstest-stop)
     (wstest-start)))
 
-^{:seedgen/root {:all true
-                 :js   {:extra [[js.net.ws-native :as js-ws]]}
-                 :lua  {:extra [[lua.net.ws-native :as lua-ws]]}
-                 :python {:extra [[python.net.ws-native :as py-ws]]}
-                 :dart {:extra [[dart.net.ws-native :as dart-ws]]}
-                 :ruby {:extra [[ruby.net.ws-native :as ruby-ws]]}}}
+^{:seedgen/root {:lua {:extra [[lua.net.ws-native :as lua-ws]]}, :js {:extra [[js.net.ws-native :as js-ws]]}, :all true, :python {:extra [[python.net.ws-native :as py-ws]]}, :ruby {:extra [[ruby.net.ws-native :as ruby-ws]]}, :dart {:extra [[dart.net.ws-native :as dart-ws]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.substrate :as event-node]
@@ -69,32 +64,11 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-promise :as promise]]})
 
-(l/script- :lua
-  {:runtime :nginx.instance
-   :config {:program :resty}
-   :require [[xt.substrate :as event-node]
-             [xt.substrate.transport-websocket :as ws-transport]
-             [xt.net.ws-native :as ws-native]
-             [lua.net.ws-native :as lua-ws]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.substrate :as event-node]
-             [xt.substrate.transport-websocket :as ws-transport]
-             [xt.net.ws-native :as ws-native]
-             [python.net.ws-native :as py-ws]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]]})
-
 (fact:global
  {:setup [(wstest-restart)
-          (l/rt:restart)]
-  :teardown [(wstest-stop)
-             (l/rt:stop)]})
+                 (l/rt:restart)]
+ :teardown [(wstest-stop)
+                        (l/rt:stop)]})
 
 (defn.js websocket-roundtrip-run [create-fn]
   (var node (event-node/node-create {"id" "node-client"}))
@@ -113,9 +87,9 @@
             ["node"]
             {"transport_id" "server"})))))))
 
-^{:refer xt.substrate.walkthrough.s07-wsserver-test/websocket-roundtrip
-  :added "4.1"}
+^{:refer xt.substrate.walkthrough.s07-wsserver-test/websocket-roundtrip :added "4.1"}
 (fact "a node websocket runtime can attach a live websocket transport and request over it"
+
   ^{:seedgen/base
     {:lua {:transform '{:js :lua js-ws/create lua-ws/create js-ws/connect-ws lua-ws/connect-ws}}
      :ruby {:transform '{:js :ruby js-ws/create ruby-ws/create js-ws/connect-ws ruby-ws/connect-ws}}

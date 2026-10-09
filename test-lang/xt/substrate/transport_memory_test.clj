@@ -3,30 +3,8 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]
-             [xt.lang.common-data :as xtd]
-             [xt.substrate :as event-node]
-             [xt.substrate.base-frame :as frame]
-             [xt.substrate.base-json :as node-json]
-             [xt.substrate.transport-memory :as transport-memory]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]
-             [xt.lang.common-data :as xtd]
-             [xt.substrate :as event-node]
-             [xt.substrate.base-frame :as frame]
-             [xt.substrate.base-json :as node-json]
-             [xt.substrate.transport-memory :as transport-memory]]})
-
-(l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
@@ -39,42 +17,12 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.base-json/encode-frame :added "4.1"}
 (fact "encodes and decodes node frames with normalized JSON-safe errors"
 
   (!.js
-    (var text (node-json/encode-frame
-               (frame/response-error-frame
-                "req-1"
-                "room/a"
-                "boom"
-                nil)))
-    (var out (node-json/decode-frame text))
-    [(xt/x:is-string? text)
-     (. out ["kind"])
-     (. out ["reply_to"])
-     (. out ["status"])
-     (. out ["error"] ["message"])])
-  => [true "response" "req-1" "error" "boom"]
-
-  (!.lua
-    (var text (node-json/encode-frame
-               (frame/response-error-frame
-                "req-1"
-                "room/a"
-                "boom"
-                nil)))
-    (var out (node-json/decode-frame text))
-    [(xt/x:is-string? text)
-     (. out ["kind"])
-     (. out ["reply_to"])
-     (. out ["status"])
-     (. out ["error"] ["message"])])
-  => [true "response" "req-1" "error" "boom"]
-
-  (!.py
     (var text (node-json/encode-frame
                (frame/response-error-frame
                 "req-1"
@@ -131,7 +79,7 @@
                    "action" "demo/echo"
                    "args" [{"ping" 1}]
                    "id" "req-echo"}})
-  
+
   (notify/wait-on :js
     (var wire (transport-memory/memory-pair {"left_id" "host"
                                              "right_id" "peer"}))
@@ -332,9 +280,9 @@
        "wire" "hub"
        "peer" "peer-b"}])
 
-
 ^{:refer xt.substrate.transport-memory/event-text :added "4.1"}
 (fact "unwraps memory endpoint events and passes raw text through"
+
   (!.js
    [(transport-memory/event-text {"data" "ping"})
     (transport-memory/event-text {"text" "pong"})
@@ -343,6 +291,7 @@
 
 ^{:refer xt.substrate.transport-memory/network-targets :added "4.1"}
 (fact "normalizes link config into peer id arrays"
+
   (!.js
    [(transport-memory/network-targets nil)
     (transport-memory/network-targets ["a" "b"])
@@ -351,6 +300,7 @@
 
 ^{:refer xt.substrate.transport-memory/ensure-network-state :added "4.1"}
 (fact "creates and reuses shared network state for endpoint ids"
+
   (!.js
    (var network {"states" {}})
    (var state-a (transport-memory/ensure-network-state network "peer-a"))
@@ -364,6 +314,7 @@
 
 ^{:refer xt.substrate.transport-memory/ensure-network-targets-loop :added "4.1"}
 (fact "materializes peer states for each configured target"
+
   (!.js
    (var network {"states" {}})
    (transport-memory/ensure-network-targets-loop network ["peer-a" "peer-b"] 0)
@@ -374,6 +325,7 @@
 
 ^{:refer xt.substrate.transport-memory/configure-network-links-loop :added "4.1"}
 (fact "applies link config and populates peer relationships"
+
   (!.js
    (var network {"states" {}})
    (transport-memory/configure-network-links-loop
@@ -390,6 +342,7 @@
 
 ^{:refer xt.substrate.transport-memory/create-network-endpoints-loop :added "4.1"}
 (fact "builds memory endpoints from configured network state"
+
   (!.js
    (var network {"states" {}})
    (transport-memory/configure-network-links-loop
@@ -411,6 +364,7 @@
 
 ^{:refer xt.substrate.transport-memory/deliver-network-loop :added "4.1"}
 (fact "delivers text to configured peers in order with wire context"
+
   (notify/wait-on :js
     (var seen [])
     (var network {"states" {"hub" {"id" "hub"}
@@ -446,6 +400,7 @@
 
 ^{:refer xt.substrate.transport-memory/memory-endpoint :added "4.1"}
 (fact "writes to its peer listener and clears the listener on stop"
+
   (notify/wait-on :js
     (var seen [])
     (var peer {"id" "peer"
@@ -470,6 +425,7 @@
 
 ^{:refer xt.substrate.transport-memory/memory-pair :added "4.1"}
 (fact "creates a bidirectional in-memory pair with configured ids"
+
   (notify/wait-on :js
     (var pair (transport-memory/memory-pair {"left_id" "host"
                                              "right_id" "peer"}))
@@ -492,6 +448,7 @@
 
 ^{:refer xt.substrate.transport-memory/link-pair :added "4.1"}
 (fact "links two nodes with a bidirectional in-memory wire"
+
   (notify/wait-on :js
     (var server (event-node/node-create
                  {"id" "link-server"

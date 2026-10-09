@@ -11,11 +11,12 @@
              [xt.lang.spec-base :as xt]]})
 
 (fact:global
-  {:setup [(l/rt:restart)]
-   :teardown [(l/rt:stop)]})
+ {:setup [(l/rt:restart)]
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.base-json/frame-kind? :added "4.1"}
 (fact "recognises supported JSON wire kinds"
+
   (!.js
    [(node-json/frame-kind? frame/KIND_REQUEST)
     (node-json/frame-kind? frame/KIND_RESPONSE)
@@ -26,6 +27,7 @@
 
 ^{:refer xt.substrate.base-json/valid-frame? :added "4.1"}
 (fact "validates request, response and stream frames"
+
   (!.js
    [(node-json/valid-frame?
      {"kind" "request"
@@ -58,6 +60,7 @@
 
 ^{:refer xt.substrate.base-json/normalize-error :added "4.1"}
 (fact "normalises arbitrary errors into JSON-safe maps"
+
   (!.js
    [(node-json/normalize-error nil)
     (node-json/normalize-error "broken")
@@ -77,6 +80,7 @@
 
 ^{:refer xt.substrate.base-json/normalize-frame :added "4.1"}
 (fact "normalises response error payloads before emission"
+
   (!.js
    [(node-json/normalize-frame
      {"kind" "response"
@@ -106,6 +110,7 @@
 
 ^{:refer xt.substrate.base-json/encode-frame :added "4.1"}
 (fact "encodes validated frames as JSON text"
+
   (!.js
    (xt/x:json-decode
     (node-json/encode-frame
@@ -125,6 +130,7 @@
 
 ^{:refer xt.substrate.base-json/decode-frame :added "4.1"}
 (fact "decodes JSON text and validates direct frame inputs"
+
   (!.js
    [(node-json/decode-frame
      "{\"kind\":\"stream\",\"id\":\"evt-1\",\"space\":\"room/a\",\"signal\":\"demo/update\",\"data\":{\"ok\":true}}")

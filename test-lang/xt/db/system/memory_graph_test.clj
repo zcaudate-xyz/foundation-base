@@ -16,7 +16,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.memory-graph/check-ilike-clause :added "4.1"}
 (fact "matches case-insensitive like clauses"
@@ -332,7 +332,6 @@
                 {"id" "XLM.T"
                  "description" "Default Currency for the Stellar TestNet Blockchain"}]
                :in-any-order))
-
 
 ^{:refer xt.db.system.memory-graph/check-in-clause :added "4.1"}
 (fact "emulates the sql in clause"

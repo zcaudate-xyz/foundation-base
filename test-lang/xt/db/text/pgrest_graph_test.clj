@@ -11,7 +11,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.text.pgrest-graph/select-return.count :added "4.1"}
 (fact "supports count and control custom nodes from tree ir"
@@ -326,11 +326,11 @@
     {"id" "USD"}
     ["id"]]
    {}))
-=> ["Currency"
-    {"custom" []
-     "where" [{"id" "USD"}]
-     "links" []
-     "data" ["id"]}])
+  => ["Currency"
+      {"custom" []
+       "where" [{"id" "USD"}]
+       "links" []
+       "data" ["id"]}])
 
 ^{:refer xt.db.text.pgrest-graph/select :added "4.1"}
 (fact "wraps select-return at the top level and accepts query forms"

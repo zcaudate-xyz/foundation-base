@@ -11,12 +11,7 @@
      :config {:dbname "test-scratch"}
      :require [[postgres.sample.scratch-v1 :as scratch]]}))
 
-^{:seedgen/root {:all true
-                 :ruby         {:extra [[ruby.net.conn-postgres :as ruby-postgres]]}
-                 :js           {:extra [[js.net.conn-postgres :as js-postgres]]}
-                 :lua.nginx    {:extra [[lua.nginx.conn-postgres :as lua-postgres]]}
-                 :python       {:extra [[python.net.conn-postgres :as py-postgres]]}
-                 :dart         {:extra [[dart.net.conn-postgres :as dart-postgres]]}}}
+^{:seedgen/root {:js {:extra [[js.net.conn-postgres :as js-postgres]]}, :lua.nginx {:extra [[lua.nginx.conn-postgres :as lua-postgres]]}, :all true, :python {:extra [[python.net.conn-postgres :as py-postgres]]}, :langs [:js :lua.nginx], :ruby {:extra [[ruby.net.conn-postgres :as ruby-postgres]]}, :dart {:extra [[dart.net.conn-postgres :as dart-postgres]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -38,11 +33,10 @@
              [lua.nginx.conn-postgres :as lua-postgres]]})
 
 (fact:global
- {
-  :setup    [(l/rt:restart)
-             (l/rt:setup :postgres)]
-  :teardown [(l/rt:teardown :postgres)
-             (l/rt:stop)]})
+ {:setup [(l/rt:restart)
+                 (l/rt:setup :postgres)]
+ :teardown [(l/rt:teardown :postgres)
+                        (l/rt:stop)]})
 
 ^{:refer xt.db.text.sql-call/decode-return :added "4.0"}
 (fact "decodes the return value"
@@ -114,8 +108,7 @@
            (repl/notify (. err message))))))
   => 30)
 
-^{:refer xt.db.text.sql-call/call-api
-  :added "4.0"}
+^{:refer xt.db.text.sql-call/call-api :added "4.0"}
 (fact "results an api style result"
 
   ^{:seedgen/base {:lua.nginx    {:transform '{js-postgres/create lua-postgres/create}}

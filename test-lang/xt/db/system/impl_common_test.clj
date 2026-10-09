@@ -13,7 +13,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.impl-common/add-db-listener-default :added "4.1"}
 (fact "adds a listener handle to the impl listener map"
@@ -48,7 +48,6 @@
     [(impl-common/remove-db-listener-default impl "l-1")
      (xtd/get-in impl ["listeners" "l-1"])])
   => ["l-1" nil])
-
 
 ^{:refer xt.db.system.impl-common/sync-get-tables :added "4.1"}
 (fact "extracts table names from db/sync and db/remove"

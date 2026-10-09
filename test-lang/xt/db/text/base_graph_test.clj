@@ -16,7 +16,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.text.base-graph/tree-params? :added "4.1"}
 (fact "checks if params are already in canonical tree format"

@@ -323,7 +323,6 @@
   (s/seedgen-langadd 'xt.db.text.base-flatten {:lang [:lua :python] :write true})
   (s/seedgen-langremove 'xt.db.text.base-flatten {:lang [:lua :python] :write true}))
 
-
 ^{:refer xt.db.text.base-flatten/flatten-bulk-ids :added "4.1"}
 (fact "prepares ordered delete ids from nested bulk data"
 

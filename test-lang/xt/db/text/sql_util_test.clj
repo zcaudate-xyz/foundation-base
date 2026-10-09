@@ -426,7 +426,7 @@
   => true)
 
 ^{:refer xt.db.text.sql-util/sqlite-return-format-fn :added "4.0"}
-  (fact "sqlite return format function"
+(fact "sqlite return format function"
 
   (!.js
     (var alias-input {})

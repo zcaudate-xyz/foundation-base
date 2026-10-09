@@ -3,30 +3,8 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]
-             [xt.db.helpers.test-fixtures :as fixtures]
-             [xt.substrate :as main]
-             [xt.substrate.base-router :as router]
-             [xt.substrate.base-request :as req]
-             [xt.substrate.base-util :as util]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.spec-promise :as promise]
-             [xt.db.helpers.test-fixtures :as fixtures]
-             [xt.substrate :as main]
-             [xt.substrate.base-router :as router]
-             [xt.substrate.base-request :as req]
-             [xt.substrate.base-util :as util]]})
-
-(l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]
@@ -39,20 +17,12 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate/node? :added "4.1"}
 (fact "detects node values"
 
   (!.js
-    (main/node? (main/node-create {})))
-  => true
-
-  (!.lua
-    (main/node? (main/node-create {})))
-  => true
-
-  (!.py
     (main/node? (main/node-create {})))
   => true)
 
@@ -61,50 +31,12 @@
 
   (!.js
     (main/transport? (main/transport-create "peer-a" {})))
-  => true
-
-  (!.lua
-    (main/transport? (main/transport-create "peer-a" {})))
-  => true
-
-  (!.py
-    (main/transport? (main/transport-create "peer-a" {})))
   => true)
 
 ^{:refer xt.substrate/transport-create :added "4.1"}
 (fact "creates transport entries"
 
   (!.js
-    (var transport (main/transport-create
-                    "peer-a"
-                    {"meta" {"role" "edge"}
-                     "send_fn" (fn [frame] (return frame))
-                     "start_fn" (fn [listener] (return listener))
-                     "stop_fn" (fn [listener] (return listener))}))
-    [(. transport ["::"])
-     (. transport ["id"])
-     (. transport ["meta"] ["role"])
-     (xt/x:is-function? (. transport ["send_fn"]))
-     (xt/x:is-function? (. transport ["start_fn"]))
-     (xt/x:is-function? (. transport ["stop_fn"]))])
-  => ["substrate.transport" "peer-a" "edge" true true true]
-
-  (!.lua
-    (var transport (main/transport-create
-                    "peer-a"
-                    {"meta" {"role" "edge"}
-                     "send_fn" (fn [frame] (return frame))
-                     "start_fn" (fn [listener] (return listener))
-                     "stop_fn" (fn [listener] (return listener))}))
-    [(. transport ["::"])
-     (. transport ["id"])
-     (. transport ["meta"] ["role"])
-     (xt/x:is-function? (. transport ["send_fn"]))
-     (xt/x:is-function? (. transport ["start_fn"]))
-     (xt/x:is-function? (. transport ["stop_fn"]))])
-  => ["substrate.transport" "peer-a" "edge" true true true]
-
-  (!.py
     (var transport (main/transport-create
                     "peer-a"
                     {"meta" {"role" "edge"}
@@ -126,38 +58,12 @@
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
     (. (main/transport-get n "peer-a") ["id"]))
-  => "peer-a"
-
-  (!.lua
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (. (main/transport-get n "peer-a") ["id"]))
-  => "peer-a"
-
-  (!.py
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (. (main/transport-get n "peer-a") ["id"]))
   => "peer-a")
 
 ^{:refer xt.substrate/transport-list :added "4.1"}
 (fact "lists attached transport ids"
 
   (!.js
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
-    (main/transport-list n))
-  => ["peer-a" "peer-b"]
-
-  (!.lua
-    (var n (main/node-create {}))
-    (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
-    (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
-    (main/transport-list n))
-  => ["peer-a" "peer-b"]
-
-  (!.py
     (var n (main/node-create {}))
     (xt/x:set-key (. n ["transports"]) "peer-a" (main/transport-create "peer-a" {}))
     (xt/x:set-key (. n ["transports"]) "peer-b" (main/transport-create "peer-b" {}))
@@ -181,34 +87,12 @@
        (repl/notify {"captured" captured
                      "out" out}))))
   => {"captured" {"kind" "test"}
-      "out" {"kind" "test"}}
-
-  (!.lua
-    (xt/x:is-function? main/transport-send))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/transport-send))
-  => true)
+      "out" {"kind" "test"}})
 
 ^{:refer xt.substrate/get-services :added "4.1"}
 (fact "node-create keeps a first-class services registry"
 
   (!.js
-   (var n (main/node-create {"id" "node-services"
-                            "services" {"cache" {"scope" "global"}}}))
-   [(. (main/get-service n "cache") ["scope"])
-    (xt/x:obj-keys (main/get-services n))])
-  => ["global" ["cache"]]
-
-  (!.lua
-   (var n (main/node-create {"id" "node-services"
-                            "services" {"cache" {"scope" "global"}}}))
-   [(. (main/get-service n "cache") ["scope"])
-    (xt/x:obj-keys (main/get-services n))])
-  => ["global" ["cache"]]
-
-  (!.py
    (var n (main/node-create {"id" "node-services"
                             "services" {"cache" {"scope" "global"}}}))
    [(. (main/get-service n "cache") ["scope"])
@@ -223,40 +107,12 @@
                             "services" {"cache" {"scope" "global"}}}))
    [(. (main/get-service n "cache") ["scope"])
     (xt/x:nil? (main/get-service n "missing"))])
-  => ["global" true]
-
-  (!.lua
-   (var n (main/node-create {"id" "node-get-service"
-                            "services" {"cache" {"scope" "global"}}}))
-   [(. (main/get-service n "cache") ["scope"])
-    (xt/x:nil? (main/get-service n "missing"))])
-  => ["global" true]
-
-  (!.py
-   (var n (main/node-create {"id" "node-get-service"
-                            "services" {"cache" {"scope" "global"}}}))
-   [(. (main/get-service n "cache") ["scope"])
-    (xt/x:nil? (main/get-service n "missing"))])
   => ["global" true])
 
 ^{:refer xt.substrate/set-service :added "4.1"}
 (fact "set-service registers a runtime service on the node"
 
   (!.js
-   (var n (main/node-create {"id" "node-service-set"}))
-   (main/set-service n "cache" {"scope" "local"})
-   [(. (main/get-service n "cache") ["scope"])
-    (xt/x:obj-keys (main/get-services n))])
-  => ["local" ["cache"]]
-
-  (!.lua
-   (var n (main/node-create {"id" "node-service-set"}))
-   (main/set-service n "cache" {"scope" "local"})
-   [(. (main/get-service n "cache") ["scope"])
-    (xt/x:obj-keys (main/get-services n))])
-  => ["local" ["cache"]]
-
-  (!.py
    (var n (main/node-create {"id" "node-service-set"}))
    (main/set-service n "cache" {"scope" "local"})
    [(. (main/get-service n "cache") ["scope"])
@@ -271,40 +127,12 @@
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) {"role" "test"})
     [(. (main/get-handler n "echo") ["id"])
      (. (main/get-handler n "echo") ["meta"] ["role"])])
-  => ["echo" "test"]
-
-  (!.lua
-    (var n (main/node-create {}))
-    (main/register-handler n "echo" (fn [ctx arg] (return arg)) {"role" "test"})
-    [(. (main/get-handler n "echo") ["id"])
-     (. (main/get-handler n "echo") ["meta"] ["role"])])
-  => ["echo" "test"]
-
-  (!.py
-    (var n (main/node-create {}))
-    (main/register-handler n "echo" (fn [ctx arg] (return arg)) {"role" "test"})
-    [(. (main/get-handler n "echo") ["id"])
-     (. (main/get-handler n "echo") ["meta"] ["role"])])
   => ["echo" "test"])
 
 ^{:refer xt.substrate/unregister-handler :added "4.1"}
 (fact "unregisters handlers from the node"
 
   (!.js
-    (var n (main/node-create {}))
-    (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
-    (main/unregister-handler n "echo")
-    (main/get-handler n "echo"))
-  => nil
-
-  (!.lua
-    (var n (main/node-create {}))
-    (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
-    (main/unregister-handler n "echo")
-    (main/get-handler n "echo"))
-  => nil
-
-  (!.py
     (var n (main/node-create {}))
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (main/unregister-handler n "echo")
@@ -318,56 +146,12 @@
     (var n (main/node-create {}))
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (. (main/get-handler n "echo") ["id"]))
-  => "echo"
-
-  (!.lua
-    (var n (main/node-create {}))
-    (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
-    (. (main/get-handler n "echo") ["id"]))
-  => "echo"
-
-  (!.py
-    (var n (main/node-create {}))
-    (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
-    (. (main/get-handler n "echo") ["id"]))
   => "echo")
 
 ^{:refer xt.substrate/list-handlers :added "4.1"}
 (fact "lists registered handlers"
 
   (!.js
-    (var n (main/node-create {}))
-    (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
-    (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
-    (main/list-handlers n))
-  => ["@/echo"
-      "@/get-service"
-      "@/list-handlers"
-      "@/list-spaces"
-      "@/list-transports"
-      "@/list-triggers"
-      "@/node-info"
-      "@/ping"
-      "echo"
-      "sum"]
-
-  (!.lua
-    (var n (main/node-create {}))
-    (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
-    (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
-    (main/list-handlers n))
-  => ["@/echo"
-      "@/get-service"
-      "@/list-handlers"
-      "@/list-spaces"
-      "@/list-transports"
-      "@/list-triggers"
-      "@/node-info"
-      "@/ping"
-      "echo"
-      "sum"]
-
-  (!.py
     (var n (main/node-create {}))
     (main/register-handler n "echo" (fn [ctx arg] (return arg)) nil)
     (main/register-handler n "sum" (fn [ctx a b] (return (+ a b))) nil)
@@ -391,40 +175,12 @@
     (main/register-trigger n "event/ping" (fn [ctx data] (return data)) {"role" "test"})
     [(. (main/get-trigger n "event/ping") ["id"])
      (. (main/get-trigger n "event/ping") ["meta"] ["role"])])
-  => ["event/ping" "test"]
-
-  (!.lua
-    (var n (main/node-create {}))
-    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) {"role" "test"})
-    [(. (main/get-trigger n "event/ping") ["id"])
-     (. (main/get-trigger n "event/ping") ["meta"] ["role"])])
-  => ["event/ping" "test"]
-
-  (!.py
-    (var n (main/node-create {}))
-    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) {"role" "test"})
-    [(. (main/get-trigger n "event/ping") ["id"])
-     (. (main/get-trigger n "event/ping") ["meta"] ["role"])])
   => ["event/ping" "test"])
 
 ^{:refer xt.substrate/unregister-trigger :added "4.1"}
 (fact "unregisters triggers from the node"
 
   (!.js
-    (var n (main/node-create {}))
-    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
-    (main/unregister-trigger n "event/ping")
-    (main/get-trigger n "event/ping"))
-  => nil
-
-  (!.lua
-    (var n (main/node-create {}))
-    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
-    (main/unregister-trigger n "event/ping")
-    (main/get-trigger n "event/ping"))
-  => nil
-
-  (!.py
     (var n (main/node-create {}))
     (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
     (main/unregister-trigger n "event/ping")
@@ -438,38 +194,12 @@
     (var n (main/node-create {}))
     (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
     (. (main/get-trigger n "event/ping") ["id"]))
-  => "event/ping"
-
-  (!.lua
-    (var n (main/node-create {}))
-    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
-    (. (main/get-trigger n "event/ping") ["id"]))
-  => "event/ping"
-
-  (!.py
-    (var n (main/node-create {}))
-    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
-    (. (main/get-trigger n "event/ping") ["id"]))
   => "event/ping")
 
 ^{:refer xt.substrate/list-triggers :added "4.1"}
 (fact "lists registered triggers"
 
   (!.js
-    (var n (main/node-create {}))
-    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
-    (main/register-trigger n "event/pong" (fn [ctx data] (return data)) nil)
-    (main/list-triggers n))
-  => ["event/ping" "event/pong"]
-
-  (!.lua
-    (var n (main/node-create {}))
-    (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
-    (main/register-trigger n "event/pong" (fn [ctx data] (return data)) nil)
-    (main/list-triggers n))
-  => ["event/ping" "event/pong"]
-
-  (!.py
     (var n (main/node-create {}))
     (main/register-trigger n "event/ping" (fn [ctx data] (return data)) nil)
     (main/register-trigger n "event/pong" (fn [ctx data] (return data)) nil)
@@ -489,36 +219,12 @@
     (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
     [(router/list-subscriptions n "room/a" "event/ping")
      (router/list-subscriptions n "room/b" "event/ping")])
-  => +out+
-
-  (!.lua
-    (var n (main/node-create {}))
-    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
-    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
-    [(router/list-subscriptions n "room/a" "event/ping")
-     (router/list-subscriptions n "room/b" "event/ping")])
-  => +out+
-
-  (!.py
-    (var n (main/node-create {}))
-    (router/add-subscription n "peer-a" "room/a" "event/ping" nil nil)
-    (router/add-subscription n "peer-b" "room/a" "event/ping" nil nil)
-    [(router/list-subscriptions n "room/a" "event/ping")
-     (router/list-subscriptions n "room/b" "event/ping")])
   => +out+)
 
 ^{:refer xt.substrate/broadcast-transport :added "4.1"}
 (fact "broadcast sends to all transports"
 
   (!.js
-    (xt/x:is-function? main/broadcast-transport))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/broadcast-transport))
-  => true
-
-  (!.py
     (xt/x:is-function? main/broadcast-transport))
   => true)
 
@@ -527,28 +233,12 @@
 
   (!.js
     (xt/x:is-function? main/route-stream))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/route-stream))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/route-stream))
   => true)
 
 ^{:refer xt.substrate/receive-request :added "4.1"}
 (fact "receive-request invokes a registered handler"
 
   (!.js
-    (xt/x:is-function? main/receive-request))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/receive-request))
-  => true
-
-  (!.py
     (xt/x:is-function? main/receive-request))
   => true)
 
@@ -557,28 +247,12 @@
 
   (!.js
     (xt/x:is-function? main/receive-response))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/receive-response))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/receive-response))
   => true)
 
 ^{:refer xt.substrate/request :added "4.1"}
 (fact "request runs through the local handler path"
 
   (!.js
-    (xt/x:is-function? main/request))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/request))
-  => true
-
-  (!.py
     (xt/x:is-function? main/request))
   => true)
 
@@ -587,14 +261,6 @@
 
   (!.js
     (xt/x:is-function? main/subscribe))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/subscribe))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/subscribe))
   => true)
 
 ^{:refer xt.substrate/unsubscribe :added "4.1"}
@@ -602,28 +268,12 @@
 
   (!.js
     (xt/x:is-function? main/unsubscribe))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/unsubscribe))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/unsubscribe))
   => true)
 
 ^{:refer xt.substrate/receive-publish :added "4.1"}
 (fact "receive-publish invokes matching triggers"
 
   (!.js
-    (xt/x:is-function? main/receive-publish))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/receive-publish))
-  => true
-
-  (!.py
     (xt/x:is-function? main/receive-publish))
   => true)
 
@@ -649,28 +299,12 @@
 
   (!.js
     (xt/x:is-function? main/receive-frame))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/receive-frame))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/receive-frame))
   => true)
 
 ^{:refer xt.substrate/attach-transport :added "4.1"}
 (fact "attaches transports and registers router connections"
 
   (!.js
-    (xt/x:is-function? main/attach-transport))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/attach-transport))
-  => true
-
-  (!.py
     (xt/x:is-function? main/attach-transport))
   => true)
 
@@ -679,74 +313,12 @@
 
   (!.js
     (xt/x:is-function? main/detach-transport))
-  => true
-
-  (!.lua
-    (xt/x:is-function? main/detach-transport))
-  => true
-
-  (!.py
-    (xt/x:is-function? main/detach-transport))
   => true)
 
 ^{:refer xt.substrate/node-configure :added "4.1"}
 (fact "node-configure applies declarative config to an existing node"
 
   (!.js
-   (var n (main/node-create {"id" "node-b"}))
-   (main/node-configure
-    n
-    {"spaces" {"room/c" {"state" {"count" 4}}}
-     "handlers" {"echo" (fn [space args request node]
-                          (return (. space ["id"])))}
-     "triggers" {"event/tick" (fn [space stream node]
-                                (main/set-space-state node
-                                                      (. space ["id"])
-                                                      (. stream ["data"]))
-                                (return true))}})
-   [(main/list-spaces n)
-    (main/list-handlers n)
-    (main/list-triggers n)])
-  => [["room/c"]
-      ["@/echo"
-       "@/get-service"
-       "@/list-handlers"
-       "@/list-spaces"
-       "@/list-transports"
-       "@/list-triggers"
-       "@/node-info"
-       "@/ping"
-       "echo"]
-      ["event/tick"]]
-
-  (!.lua
-   (var n (main/node-create {"id" "node-b"}))
-   (main/node-configure
-    n
-    {"spaces" {"room/c" {"state" {"count" 4}}}
-     "handlers" {"echo" (fn [space args request node]
-                          (return (. space ["id"])))}
-     "triggers" {"event/tick" (fn [space stream node]
-                                (main/set-space-state node
-                                                      (. space ["id"])
-                                                      (. stream ["data"]))
-                                (return true))}})
-   [(main/list-spaces n)
-    (main/list-handlers n)
-    (main/list-triggers n)])
-  => [["room/c"]
-      ["@/echo"
-       "@/get-service"
-       "@/list-handlers"
-       "@/list-spaces"
-       "@/list-transports"
-       "@/list-triggers"
-       "@/node-info"
-       "@/ping"
-       "echo"]
-      ["event/tick"]]
-
-  (!.py
    (var n (main/node-create {"id" "node-b"}))
    (main/node-configure
     n
@@ -867,27 +439,10 @@
   (s/seedgen-langremove '[xt.substrate] {:lang [:lua :python] :write true})
   (s/seedgen-langadd '[xt.substrate] {:lang [:lua :python] :write true}))
 
-
 ^{:refer xt.substrate/remove-service :added "4.1"}
 (fact "removes a shared service from the node"
 
   (!.js
-    (var n (main/node-create {"id" "node-remove-service"}))
-    (main/set-service n "cache" {"scope" "local"})
-    (main/remove-service n "cache")
-    [(xt/x:nil? (main/get-service n "cache"))
-     (xt/x:obj-keys (main/get-services n))])
-  => [true []]
-
-  (!.lua
-    (var n (main/node-create {"id" "node-remove-service"}))
-    (main/set-service n "cache" {"scope" "local"})
-    (main/remove-service n "cache")
-    [(xt/x:nil? (main/get-service n "cache"))
-     (xt/x:obj-keys (main/get-services n))])
-  => [true []]
-
-  (!.py
     (var n (main/node-create {"id" "node-remove-service"}))
     (main/set-service n "cache" {"scope" "local"})
     (main/remove-service n "cache")

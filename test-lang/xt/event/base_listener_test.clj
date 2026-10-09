@@ -2,46 +2,20 @@
   (:require [lang.core :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.event.base-listener :as event]]})
-
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.spec-base :as xt]
-             [xt.event.base-listener :as event]]})
-
-(l/script- :python
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
              [xt.event.base-listener :as event]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.base-listener/blank-container :added "4.1"}
 (fact "creates a blank listener container"
 
   (!.js
-    (event/blank-container
-     "custom.container"
-     {:info {:name "hello"}}))
-  => {"::" "custom.container"
-      "info" {"name" "hello"}
-      "listeners" {}}
-
-  (!.lua
-    (event/blank-container
-     "custom.container"
-     {:info {:name "hello"}}))
-  => {"::" "custom.container"
-      "info" {"name" "hello"}
-      "listeners" {}}
-
-  (!.py
     (event/blank-container
      "custom.container"
      {:info {:name "hello"}}))
@@ -64,78 +38,12 @@
   => ["custom.container"
       {"hello" "world"}
       true
-      {"name" "hello"}]
-
-  (!.lua
-    (var c (event/make-container
-            (fn:> {:hello "world"})
-            "custom.container"
-            {:info {:name "hello"}}))
-    [(. c ["::"])
-     (. c ["data"])
-     (xt/x:is-function? (. c ["initial"]))
-     (. c ["info"])])
-  => ["custom.container"
-      {"hello" "world"}
-      true
-      {"name" "hello"}]
-
-  (!.py
-    (var c (event/make-container
-            (fn:> {:hello "world"})
-            "custom.container"
-            {:info {:name "hello"}}))
-    [(. c ["::"])
-     (. c ["data"])
-     (xt/x:is-function? (. c ["initial"]))
-     (. c ["info"])])
-  => ["custom.container"
-      {"hello" "world"}
-      true
       {"name" "hello"}])
 
 ^{:refer xt.event.base-listener/make-listener-entry :added "4.1"}
 (fact "creates listener entry metadata"
 
   (!.js
-    (var entry
-         (event/make-listener-entry
-          "a1"
-          "custom"
-          (fn [id data t meta]
-            (return data))
-          {:label "hello"}
-          (fn [e]
-            (return (. e ["ok"])))))
-    [(xt/x:is-function? (. entry ["callback"]))
-     (xt/x:is-function? (. entry ["pred"]))
-     (. entry ["meta"])])
-  => [true
-      true
-      {"label" "hello"
-       "listener/id" "a1"
-       "listener/type" "custom"}]
-
-  (!.lua
-    (var entry
-         (event/make-listener-entry
-          "a1"
-          "custom"
-          (fn [id data t meta]
-            (return data))
-          {:label "hello"}
-          (fn [e]
-            (return (. e ["ok"])))))
-    [(xt/x:is-function? (. entry ["callback"]))
-     (xt/x:is-function? (. entry ["pred"]))
-     (. entry ["meta"])])
-  => [true
-      true
-      {"label" "hello"
-       "listener/id" "a1"
-       "listener/type" "custom"}]
-
-  (!.py
     (var entry
          (event/make-listener-entry
           "a1"
@@ -170,56 +78,12 @@
              "a1" "custom"
              (fn:> [id data t meta] "a1")
              nil nil)})])
-  => [false false true false]
-
-  (!.lua
-    [(event/listener-entry? nil)
-     (event/listener-entry? {})
-     (event/listener-entry?
-      (event/make-listener-entry
-       "a1" "custom"
-       (fn:> [id data t meta] "a1")
-       nil nil))
-     (event/listener-entry?
-      {"a1" (event/make-listener-entry
-             "a1" "custom"
-             (fn:> [id data t meta] "a1")
-             nil nil)})])
-  => [false false true false]
-
-  (!.py
-    [(event/listener-entry? nil)
-     (event/listener-entry? {})
-     (event/listener-entry?
-      (event/make-listener-entry
-       "a1" "custom"
-       (fn:> [id data t meta] "a1")
-       nil nil))
-     (event/listener-entry?
-      {"a1" (event/make-listener-entry
-             "a1" "custom"
-             (fn:> [id data t meta] "a1")
-             nil nil)})])
   => [false false true false])
 
 ^{:refer xt.event.base-listener/arrayify-path :added "4.1"}
 (fact "normalizes listener paths"
 
   (!.js
-    [(event/arrayify-path nil)
-     (event/arrayify-path {})
-     (event/arrayify-path "a")
-     (event/arrayify-path ["a"])])
-  => [[] [] ["a"] ["a"]]
-
-  (!.lua
-    [(event/arrayify-path nil)
-     (event/arrayify-path {})
-     (event/arrayify-path "a")
-     (event/arrayify-path ["a"])])
-  => [[] [] ["a"] ["a"]]
-
-  (!.py
     [(event/arrayify-path nil)
      (event/arrayify-path {})
      (event/arrayify-path "a")
@@ -236,24 +100,6 @@
   => ["hello"
       {"ok" true
        "data" "hello"}
-      {"ok" true}]
-
-  (!.lua
-    [(event/callback-data "hello")
-     (event/callback-data {:ok true :data "hello"})
-     (event/callback-data {:ok true :meta {:base true}})])
-  => ["hello"
-      {"ok" true
-       "data" "hello"}
-      {"ok" true}]
-
-  (!.py
-    [(event/callback-data "hello")
-     (event/callback-data {:ok true :data "hello"})
-     (event/callback-data {:ok true :meta {:base true}})])
-  => ["hello"
-      {"ok" true
-       "data" "hello"}
       {"ok" true}])
 
 ^{:refer xt.event.base-listener/callback-time :added "4.1"}
@@ -264,43 +110,12 @@
      (event/callback-time {:ok true})
      (event/callback-time {:ok true :time 123})
      (event/callback-time {:ok true :t 456})])
-  => [nil nil 123 456]
-
-  (!.lua
-    [(event/callback-time "hello")
-     (event/callback-time {:ok true})
-     (event/callback-time {:ok true :time 123})
-     (event/callback-time {:ok true :t 456})])
-  => [nil nil 123 456]
-
-  (!.py
-    [(event/callback-time "hello")
-     (event/callback-time {:ok true})
-     (event/callback-time {:ok true :time 123})
-     (event/callback-time {:ok true :t 456})])
   => [nil nil 123 456])
 
 ^{:refer xt.event.base-listener/clear-listeners :added "4.1"}
 (fact "clears non-keyed listeners"
 
   (!.js
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
-    (event/add-listener c "b2" "custom" (fn:> [id data t meta] "b2") nil nil)
-    [(xt/x:obj-keys (event/clear-listeners c))
-     (event/list-listeners c)])
-  => (just-in [(just ["a1" "b2"] :in-any-order)
-               []])
-
-  (!.lua
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
-    (event/add-listener c "b2" "custom" (fn:> [id data t meta] "b2") nil nil)
-    [(xt/x:obj-keys (event/clear-listeners c))
-     (event/list-listeners c)])
-  => (just-in [(just ["a1" "b2"] :in-any-order) []])
-
-  (!.py
     (var c (event/blank-container "custom.container" {}))
     (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
     (event/add-listener c "b2" "custom" (fn:> [id data t meta] "b2") nil nil)
@@ -373,120 +188,12 @@
      (. (event/remove-keyed-listener c "group" "k1") ["meta"])
      (xt/x:obj-keys (event/clear-listeners c))
      (event/list-listeners c)])
-  => +out+
-
-  (!.lua
-    (var c (event/make-container
-            (fn:> {:hello "world"})
-            "custom.container"
-            {:info {:name "hello"}}))
-    (var calls [])
-    (event/add-listener c
-                        "a1"
-                        "custom"
-                        (fn [id data t meta]
-                          (xt/x:arr-push calls "a1"))
-                        {:label "one"}
-                        nil)
-    (event/add-listener c
-                        "b2"
-                        "custom"
-                        (fn [id data t meta]
-                          (xt/x:arr-push calls "b2"))
-                        nil
-                        (fn [e]
-                          (return (. e ["ok"]))))
-    (event/add-keyed-listener c
-                              "group"
-                              "k1"
-                              "custom"
-                              (fn [id data t meta]
-                                (xt/x:arr-push calls "k1"))
-                              {:label "group"}
-                              nil)
-    [(. c ["::"])
-     (. c ["data"])
-     (event/list-listeners c)
-     (event/list-listener-types c)
-     (event/list-keyed-listeners c "group")
-     (event/all-keyed-listeners c)
-     (event/trigger-listeners c {:ok true :data "hello"})
-     (event/trigger-keyed-listeners c "group" {:data "world"})
-     calls
-     (. (event/remove-listener c "a1") ["meta"])
-     (. (event/remove-keyed-listener c "group" "k1") ["meta"])
-     (xt/x:obj-keys (event/clear-listeners c))
-     (event/list-listeners c)])
-  => +out+
-
-  (!.py
-    (var c (event/make-container
-            (fn:> {:hello "world"})
-            "custom.container"
-            {:info {:name "hello"}}))
-    (var calls [])
-    (event/add-listener c
-                        "a1"
-                        "custom"
-                        (fn [id data t meta]
-                          (xt/x:arr-push calls "a1"))
-                        {:label "one"}
-                        nil)
-    (event/add-listener c
-                        "b2"
-                        "custom"
-                        (fn [id data t meta]
-                          (xt/x:arr-push calls "b2"))
-                        nil
-                        (fn [e]
-                          (return (. e ["ok"]))))
-    (event/add-keyed-listener c
-                              "group"
-                              "k1"
-                              "custom"
-                              (fn [id data t meta]
-                                (xt/x:arr-push calls "k1"))
-                              {:label "group"}
-                              nil)
-    [(. c ["::"])
-     (. c ["data"])
-     (event/list-listeners c)
-     (event/list-listener-types c)
-     (event/list-keyed-listeners c "group")
-     (event/all-keyed-listeners c)
-     (event/trigger-listeners c {:ok true :data "hello"})
-     (event/trigger-keyed-listeners c "group" {:data "world"})
-     calls
-     (. (event/remove-listener c "a1") ["meta"])
-     (. (event/remove-keyed-listener c "group" "k1") ["meta"])
-     (xt/x:obj-keys (event/clear-listeners c))
-     (event/list-listeners c)])
   => +out+)
 
 ^{:refer xt.event.base-listener/remove-listener :added "4.1"}
 (fact "removes a listener by id"
 
   (!.js
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") {:label "one"} nil)
-    [(. (event/remove-listener c "a1") ["meta"])
-     (event/remove-listener c "missing")
-     (event/list-listeners c)])
-  => [{"label" "one"
-       "listener/id" "a1"
-       "listener/type" "custom"}
-      nil
-      []]
-
-  (!.lua
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") {:label "one"} nil)
-    [(. (event/remove-listener c "a1") ["meta"])
-     (event/remove-listener c "missing")
-     (event/list-listeners c)])
-  => [{"listener/id" "a1", "label" "one", "listener/type" "custom"} nil []]
-
-  (!.py
     (var c (event/blank-container "custom.container" {}))
     (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") {:label "one"} nil)
     [(. (event/remove-listener c "a1") ["meta"])
@@ -506,42 +213,12 @@
     (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
     (event/add-listener c "b2" "custom" (fn:> [id data t meta] "b2") nil nil)
     (event/list-listeners c))
-  => (just ["a1" "b2"] :in-any-order)
-
-  (!.lua
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
-    (event/add-listener c "b2" "custom" (fn:> [id data t meta] "b2") nil nil)
-    (event/list-listeners c))
-  => (just ["a1" "b2"] :in-any-order)
-
-  (!.py
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
-    (event/add-listener c "b2" "custom" (fn:> [id data t meta] "b2") nil nil)
-    (event/list-listeners c))
   => (just ["a1" "b2"] :in-any-order))
 
 ^{:refer xt.event.base-listener/list-listener-types :added "4.1"}
 (fact "indexes listeners by type"
 
   (!.js
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
-    (event/add-listener c "b2" "route" (fn:> [id data t meta] "b2") nil nil)
-    (event/list-listener-types c))
-  => {"custom" ["a1"]
-      "route" ["b2"]}
-
-  (!.lua
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
-    (event/add-listener c "b2" "route" (fn:> [id data t meta] "b2") nil nil)
-    (event/list-listener-types c))
-  => {"custom" ["a1"]
-      "route" ["b2"]}
-
-  (!.py
     (var c (event/blank-container "custom.container" {}))
     (event/add-listener c "a1" "custom" (fn:> [id data t meta] "a1") nil nil)
     (event/add-listener c "b2" "route" (fn:> [id data t meta] "b2") nil nil)
@@ -559,40 +236,6 @@
                                           "listener/id" "a1"
                                           "listener/type" "custom"}}}}}
   (!.js
-    (var out nil)
-    (event/trigger-entry
-     (event/make-listener-entry
-      "a1"
-      "custom"
-      (fn [id data t meta]
-        (:= out {"id" id "data" data "t" t "meta" meta}))
-      {:label "hello"}
-      nil)
-     {:meta {:base true}})
-    out)
-  => {"id" "a1"
-      "data" {}
-      "t" nil
-      "meta" {"base" true
-              "label" "hello"
-              "listener/id" "a1"
-              "listener/type" "custom"}}
-
-  (!.lua
-    (var out nil)
-    (event/trigger-entry
-     (event/make-listener-entry
-      "a1"
-      "custom"
-      (fn [id data t meta]
-        (:= out {"id" id "data" data "t" t "meta" meta}))
-      {:label "hello"}
-      nil)
-     {:meta {:base true}})
-    out)
-  => {"id" "a1", "meta" {"listener/id" "a1", "label" "hello", "base" true, "listener/type" "custom"}, "data" {}}
-
-  (!.py
     (var out nil)
     (event/trigger-entry
      (event/make-listener-entry
@@ -637,82 +280,12 @@
     [(event/trigger-listeners c {:ok true})
      calls])
   => (just-in [(just ["a1" "b2"] :in-any-order)
-               ["a1" "b2"]])
-
-  (!.lua
-    (var c (event/blank-container "custom.container" {}))
-    (var calls [])
-    (event/add-listener
-     c "a1" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "a1"))
-     nil
-     nil)
-    (event/add-listener
-     c "b2" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "b2"))
-     nil
-     (fn [e]
-        (return (. e ["ok"]))))
-    [(event/trigger-listeners c {:ok true})
-     calls])
-  => (just-in [(just ["a1" "b2"] :in-any-order)
-               (just ["a1" "b2"] :in-any-order)])
-
-  (!.py
-    (var c (event/blank-container "custom.container" {}))
-    (var calls [])
-    (event/add-listener
-     c "a1" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "a1"))
-     nil
-     nil)
-    (event/add-listener
-     c "b2" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "b2"))
-     nil
-     (fn [e]
-        (return (. e ["ok"]))))
-    [(event/trigger-listeners c {:ok true})
-     calls])
-  => (just-in [(just ["a1" "b2"] :in-any-order)
-               (just ["a1" "b2"] :in-any-order)]))
+               ["a1" "b2"]]))
 
 ^{:refer xt.event.base-listener/add-keyed-listener :added "4.1"}
 (fact "adds a keyed listener entry"
 
   (!.js
-    (. (event/add-keyed-listener
-        (event/blank-container "custom.container" {})
-        "group"
-        "k1"
-        "custom"
-        (fn:> [id data t meta] "k1")
-        {:label "hello"}
-        nil)
-       ["meta"]))
-  => {"label" "hello"
-      "listener/id" "k1"
-      "listener/type" "custom"}
-
-  (!.lua
-    (. (event/add-keyed-listener
-        (event/blank-container "custom.container" {})
-        "group"
-        "k1"
-        "custom"
-        (fn:> [id data t meta] "k1")
-        {:label "hello"}
-        nil)
-       ["meta"]))
-  => {"label" "hello"
-      "listener/id" "k1"
-      "listener/type" "custom"}
-
-  (!.py
     (. (event/add-keyed-listener
         (event/blank-container "custom.container" {})
         "group"
@@ -738,51 +311,12 @@
   => [{"listener/id" "k1"
        "listener/type" "custom"}
       nil
-      {}]
-
-  (!.lua
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group" "k1" "custom" (fn:> [id data t meta] "k1") nil nil)
-    [(. (event/remove-keyed-listener c "group" "k1") ["meta"])
-     (event/remove-keyed-listener c "group" "missing")
-     (event/all-keyed-listeners c)])
-  => [{"listener/id" "k1"
-       "listener/type" "custom"}
-      nil
-      {}]
-
-  (!.py
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group" "k1" "custom" (fn:> [id data t meta] "k1") nil nil)
-    [(. (event/remove-keyed-listener c "group" "k1") ["meta"])
-     (event/remove-keyed-listener c "group" "missing")
-     (event/all-keyed-listeners c)])
-  => [{"listener/id" "k1"
-       "listener/type" "custom"}
-      nil
       {}])
 
 ^{:refer xt.event.base-listener/list-keyed-listeners :added "4.1"}
 (fact "lists keyed listeners for a group"
 
   (!.js
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group" "k1" "custom" (fn:> [id data t meta] "k1") nil nil)
-    (event/add-keyed-listener c "group" "k2" "custom" (fn:> [id data t meta] "k2") nil nil)
-    [(event/list-keyed-listeners c "group")
-     (event/list-keyed-listeners c "missing")])
-  => (just-in [(just ["k1" "k2"] :in-any-order)
-               []])
-
-  (!.lua
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group" "k1" "custom" (fn:> [id data t meta] "k1") nil nil)
-    (event/add-keyed-listener c "group" "k2" "custom" (fn:> [id data t meta] "k2") nil nil)
-    [(event/list-keyed-listeners c "group")
-     (event/list-keyed-listeners c "missing")])
-  => (just-in [(just ["k1" "k2"] :in-any-order) []])
-
-  (!.py
     (var c (event/blank-container "custom.container" {}))
     (event/add-keyed-listener c "group" "k1" "custom" (fn:> [id data t meta] "k1") nil nil)
     (event/add-keyed-listener c "group" "k2" "custom" (fn:> [id data t meta] "k2") nil nil)
@@ -800,74 +334,12 @@
     (event/add-keyed-listener c "group-b" "k2" "custom" (fn:> [id data t meta] "k2") nil nil)
     (event/all-keyed-listeners c))
   => {"group-a" ["k1"]
-      "group-b" ["k2"]}
-
-  (!.lua
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group-a" "k1" "custom" (fn:> [id data t meta] "k1") nil nil)
-    (event/add-keyed-listener c "group-b" "k2" "custom" (fn:> [id data t meta] "k2") nil nil)
-    (event/all-keyed-listeners c))
-  => {"group-a" ["k1"]
-      "group-b" ["k2"]}
-
-  (!.py
-    (var c (event/blank-container "custom.container" {}))
-    (event/add-keyed-listener c "group-a" "k1" "custom" (fn:> [id data t meta] "k1") nil nil)
-    (event/add-keyed-listener c "group-b" "k2" "custom" (fn:> [id data t meta] "k2") nil nil)
-    (event/all-keyed-listeners c))
-  => {"group-a" ["k1"]
       "group-b" ["k2"]})
 
 ^{:refer xt.event.base-listener/trigger-keyed-listeners :added "4.1"}
 (fact "triggers keyed listeners for a specific group"
 
   (!.js
-    (var c (event/blank-container "custom.container" {}))
-    (var calls [])
-    (event/add-keyed-listener
-     c "group-a" "k1" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "k1"))
-     nil nil)
-    (event/add-keyed-listener
-     c "group-a" "k2" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "k2"))
-     nil nil)
-    (event/add-keyed-listener
-     c "group-b" "k3" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "k3"))
-     nil nil)
-    [(event/trigger-keyed-listeners c "group-a" {:ok true})
-     calls])
-  => (just-in [(just ["k1" "k2"] :in-any-order)
-               (just ["k1" "k2"] :in-any-order)])
-
-  (!.lua
-    (var c (event/blank-container "custom.container" {}))
-    (var calls [])
-    (event/add-keyed-listener
-     c "group-a" "k1" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "k1"))
-     nil nil)
-    (event/add-keyed-listener
-     c "group-a" "k2" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "k2"))
-     nil nil)
-    (event/add-keyed-listener
-     c "group-b" "k3" "custom"
-     (fn [id data t meta]
-       (xt/x:arr-push calls "k3"))
-     nil nil)
-    [(event/trigger-keyed-listeners c "group-a" {:ok true})
-     calls])
-  => (just-in [(just ["k1" "k2"] :in-any-order)
-               (just ["k1" "k2"] :in-any-order)])
-
-  (!.py
     (var c (event/blank-container "custom.container" {}))
     (var calls [])
     (event/add-keyed-listener

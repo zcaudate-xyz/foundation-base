@@ -3,7 +3,7 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:js :lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -13,16 +13,11 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
-
-;; create 
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.walkthrough.s01-basic-test/f00-ping}
 (fact "the simplest handler"
 
-  ;;
-  ;; simplest configuration
-  ;;
   (notify/wait-on :js
     (-> (substrate/node-create
          {"handlers"
@@ -35,11 +30,7 @@
                            {})
         (repl/notify)))
   => "pong"
-  
 
-  ;;
-  ;; using xt.substrate register-handler api
-  ;;
   (notify/wait-on :js
     (var node (substrate/node-create))
     (substrate/register-handler
@@ -56,7 +47,6 @@
         (repl/notify)))
   => "pong")
 
-
 ^{:refer xt.substrate.walkthrough.s01-basic-test/f01-echo}
 (fact "the simplest handler with arguments"
 
@@ -72,7 +62,7 @@
 
 ^{:refer xt.substrate.walkthrough.s01-basic-test/f02-space-state}
 (fact "spaces carry state that handlers can read and update"
-  
+
   (notify/wait-on :js
     (var node (substrate/node-create
                {"spaces"
@@ -97,7 +87,6 @@
           (substrate/request node "default::space" "counter/inc" [] {})])
         (repl/notify)))
   => [{"count" 1} {"count" 2} {"count" 3}])
-
 
 (comment
   (defn.js counter-get

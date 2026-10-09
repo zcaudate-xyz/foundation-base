@@ -21,7 +21,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 (defn.js server-node
   "creates a server node with base and page-proxy handlers installed"

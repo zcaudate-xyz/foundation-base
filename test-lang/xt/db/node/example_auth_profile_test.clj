@@ -5,8 +5,7 @@
             [std.lib.env :as env]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true
-                 :langs [:js :lua.nginx :python :dart :ruby]}}
+^{:seedgen/root {:all true, :langs [:js :lua.nginx :ruby]}}
 (l/script- :js
   {:runtime :basic
    :test-mode true
@@ -57,10 +56,10 @@
 
 (fact:global
  {:skip (not (env/program-exists? "supabase"))
-  :setup [(local-min/start-supabase)
-          (l/rt:restart)]
-  :teardown [(l/rt:stop)
-             (local-min/stop-supabase nil)]})
+ :setup [(local-min/start-supabase)
+                  (l/rt:restart)]
+ :teardown [(l/rt:stop)
+                        (local-min/stop-supabase nil)]})
 
 ^{:refer xt.db.node.example-auth-profile/auth-profile-models :added "4.1"}
 (fact "returns the auth/profile example model specs"
@@ -89,9 +88,7 @@
     (xt/x:not-nil? profile-model)])
   => [true true true])
 
-^{:refer xt.db.node.example-auth-profile/auth-profile-models.integration
-  :added "4.1"
-  :timeout 70000}
+^{:refer xt.db.node.example-auth-profile/auth-profile-models.integration :added "4.1" :timeout 70000}
 (fact "runs the auth/profile model handlers through local-min"
 
   (notify/wait-on [:js 60000]
@@ -155,7 +152,6 @@
   => (contains {"email" string?
                 "display_name" "Test User"
                 "session" nil}))
-
 
 ^{:refer xt.db.node.example-auth-profile/first-arg :added "4.1"}
 (fact "TODO")

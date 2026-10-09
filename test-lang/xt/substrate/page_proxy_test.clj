@@ -3,7 +3,7 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true, :langs [:lua :python :dart]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -114,8 +114,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
-
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.page-proxy/group-list-proxy :added "4.1"}
 (fact "lists remote groups and model ids available on the server"
@@ -145,7 +144,6 @@
          (fn [out]
            (repl/notify out)))))
   => {"pong" "hello"})
-
 
 ^{:refer xt.substrate.page-proxy/echo :added "4.1"}
 (fact "manual transport pair can exchange requests"
@@ -246,7 +244,6 @@
   => {"group_missing" true
       "output_subs" []
       "input_subs" []})
-
 
 ^{:refer xt.substrate.page-proxy/model-serialize-input :added "4.1"}
 (fact "extracts current and updated from an input record"

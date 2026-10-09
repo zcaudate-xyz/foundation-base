@@ -11,52 +11,14 @@
              [xt.lang.spec-base :as xt]
              [xt.lang.common-repl :as repl]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.lang.spec-link :as spec-link]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]]})
-
-(l/script- :python
-  {:runtime :basic
-   :require [[xt.lang.spec-link :as spec-link]
-             [xt.lang.spec-base :as xt]
-             [xt.lang.common-repl :as repl]]})
-
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.spec-link/x:socket-connect :added "4.1"}
 (fact "connects sockets and forwards the connection to callbacks"
 
   (notify/wait-on :js
-    (var connect-fn
-         (fn [host port opts cb]
-           (return
-            (spec-link/x:socket-connect host port opts cb))))
-    (connect-fn  "127.0.0.1"
-                 (@! (:socket-port (l/default-notify)))
-                 {}
-                 (fn [err conn]
-                   (do (repl/notify "OK")
-                       (spec-link/x:socket-close conn)))))
-  => "OK"
-
-  (notify/wait-on :lua
-    (var connect-fn
-         (fn [host port opts cb]
-           (return
-            (spec-link/x:socket-connect host port opts cb))))
-    (connect-fn  "127.0.0.1"
-                 (@! (:socket-port (l/default-notify)))
-                 {}
-                 (fn [err conn]
-                   (do (repl/notify "OK")
-                       (spec-link/x:socket-close conn)))))
-  => "OK"
-
-  (notify/wait-on :python
     (var connect-fn
          (fn [host port opts cb]
            (return
@@ -80,26 +42,6 @@
      (fn [err conn]
        (repl/notify (spec-link/x:socket-send conn (xt/x:str-encode "abc")))
        (spec-link/x:socket-close conn))))
-  => 3
-
-  (notify/wait-on :lua
-    (var send-fn
-         (fn [host port cb]
-           (return (spec-link/x:socket-connect host port {} cb))))
-    (send-fn "127.0.0.1" (@! (:socket-port (l/default-notify)))
-     (fn [err conn]
-       (repl/notify (spec-link/x:socket-send conn (xt/x:str-encode "abc")))
-       (spec-link/x:socket-close conn))))
-  => 3
-
-  (notify/wait-on :python
-    (var send-fn
-         (fn [host port cb]
-           (return (spec-link/x:socket-connect host port {} cb))))
-    (send-fn "127.0.0.1" (@! (:socket-port (l/default-notify)))
-     (fn [err conn]
-       (repl/notify (spec-link/x:socket-send conn (xt/x:str-encode "abc")))
-       (spec-link/x:socket-close conn))))
   => 3)
 
 ^{:refer xt.lang.spec-link/x:socket-close :added "4.1"}
@@ -110,32 +52,6 @@
 
   (notify/wait-on-call
    (fn [] (!.js
-            (var notify-fn
-                 (fn [host port value id key opts]
-                   (return
-                    (spec-link/x:notify-http host port value id key opts))))
-            (notify-fn "127.0.0.1" (@! (:http-port (l/default-notify)))
-                       "hello"
-                       (@! notify/*override-id*)
-                       nil
-                       {}))))
-  => "hello"
-
-  (notify/wait-on-call
-   (fn [] (!.lua
-            (var notify-fn
-                 (fn [host port value id key opts]
-                   (return
-                    (spec-link/x:notify-http host port value id key opts))))
-            (notify-fn "127.0.0.1" (@! (:http-port (l/default-notify)))
-                       "hello"
-                       (@! notify/*override-id*)
-                       nil
-                       {}))))
-  => "hello"
-
-  (notify/wait-on-call
-   (fn [] (!.py
             (var notify-fn
                  (fn [host port value id key opts]
                    (return

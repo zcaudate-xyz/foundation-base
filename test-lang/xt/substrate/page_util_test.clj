@@ -2,7 +2,7 @@
   (:require [lang.core :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python :dart]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-notify :as notify]
@@ -26,7 +26,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.page-util/wrap-space-args :added "4.1"}
 (fact "prepends the model context to handler arguments"
@@ -114,6 +114,7 @@
 
 ^{:refer xt.substrate.page-util/get-group-deps :added "4.1"}
 (fact "compiles local and cross-model dependencies"
+
   (!.js
    (page-util/get-group-deps
     "hello"

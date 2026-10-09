@@ -13,7 +13,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.text.base-tree/tree-control-array :added "4.1"
   :setup [(def +check-tree-control-array+
@@ -79,19 +79,19 @@
                  {"::" "sql/defenum",
                   :schema "scratch-sample-db",
                   :name "EnumCurrencyType"}]}}}})
-          (def +check-tree-count+
-            ["Currency"
-             {"custom" [{"::" "sql/count"}],
-              "where"
-              [{"type"
-                {"args"
-                 [{"name" "{{i_type}}", "::" "sql/arg"}
-                  {"schema" "scratch-sample-db",
-                   "name" "EnumCurrencyType",
-                   "::" "sql/defenum"}],
-                 "::" "sql/cast"}}],
-              "links" [],
-              "data" []}])]}
+                   (def +check-tree-count+
+                     ["Currency"
+                      {"custom" [{"::" "sql/count"}],
+                       "where"
+                       [{"type"
+                         {"args"
+                          [{"name" "{{i_type}}", "::" "sql/arg"}
+                           {"schema" "scratch-sample-db",
+                            "name" "EnumCurrencyType",
+                            "::" "sql/defenum"}],
+                          "::" "sql/cast"}}],
+                       "links" [],
+                       "data" []}])]}
 (fact "provides a count tree"
 
   (!.js
@@ -120,19 +120,19 @@
                  {"::" "sql/defenum",
                   :schema "scratch-sample-db",
                   :name "EnumCurrencyType"}]}}}})
-          (def +check-tree-select+
-            ["Currency"
-             {"custom" [],
-              "where"
-              [{"type"
-                {"args"
-                 [{"name" "{{i_type}}", "::" "sql/arg"}
-                  {"schema" "scratch-sample-db",
-                   "name" "EnumCurrencyType",
-                   "::" "sql/defenum"}],
-                 "::" "sql/cast"}}],
-              "links" [],
-              "data" ["id"]}])]}
+                   (def +check-tree-select+
+                     ["Currency"
+                      {"custom" [],
+                       "where"
+                       [{"type"
+                         {"args"
+                          [{"name" "{{i_type}}", "::" "sql/arg"}
+                           {"schema" "scratch-sample-db",
+                            "name" "EnumCurrencyType",
+                            "::" "sql/defenum"}],
+                          "::" "sql/cast"}}],
+                       "links" [],
+                       "data" ["id"]}])]}
 (fact "provides a select tree"
 
   (!.js
@@ -148,12 +148,12 @@
              {:table "Currency"
               :type "return"
               :query ["id" "description"]}})
-          (def +check-tree-return+
-            ["Currency"
-             {"custom" [],
-              "where" [{"id" "{{RETURN}}"}],
-              "links" [],
-              "data" ["id" "description"]}])]}
+                   (def +check-tree-return+
+                     ["Currency"
+                      {"custom" [],
+                       "where" [{"id" "{{RETURN}}"}],
+                       "links" [],
+                       "data" ["id" "description"]}])]}
 (fact "provides a return tree"
 
   (!.js
@@ -170,19 +170,19 @@
              :view {:table "Currency"
                     :type "select"
                     :query {"type" "fiat"}}})
-          (def +input-tree-combined-return+
-            {:view {:table "Currency"
-                    :type "return"
-                    :query ["id" "name"]}})
-          (def +check-tree-combined+
-            ["Currency"
-             {"custom"
-              [{"::" "sql/keyword",
-                "name" "LIMIT",
-                "args" [{"::" "sql/keyword", "name" 5}]}],
-              "where" [{"type" "fiat"}],
-              "links" [],
-              "data" ["id" "name"]}])]}
+                   (def +input-tree-combined-return+
+                     {:view {:table "Currency"
+                             :type "return"
+                             :query ["id" "name"]}})
+                   (def +check-tree-combined+
+                     ["Currency"
+                      {"custom"
+                       [{"::" "sql/keyword",
+                         "name" "LIMIT",
+                         "args" [{"::" "sql/keyword", "name" 5}]}],
+                       "where" [{"type" "fiat"}],
+                       "links" [],
+                       "data" ["id" "name"]}])]}
 (fact "provides a combined tree"
 
   (!.js
@@ -307,13 +307,13 @@
              :view {:table "Currency"
                     :type "select"
                     :query {"type" "{{i_type}}"}}})
-          (def +input-plan-combined-return+
-            {:input [{:symbol "i_currency_id", :type "text"}
-                     {:symbol "i_note", :type "text"}],
-             :view {:table "Currency"
-                    :type "return"
-                    :query ["id"
-                            {"::" "sql/arg", "name" "{{i_note}}"}]}})]}
+                   (def +input-plan-combined-return+
+                     {:input [{:symbol "i_currency_id", :type "text"}
+                              {:symbol "i_note", :type "text"}],
+                      :view {:table "Currency"
+                             :type "return"
+                             :query ["id"
+                                     {"::" "sql/arg", "name" "{{i_note}}"}]}})]}
 (fact "plans a combined tree with filled select and return input"
 
   (!.js
@@ -365,13 +365,13 @@
              :view {:table "Currency"
                     :type "select"
                     :query {"type" "{{i_type}}"}}})
-          (def +input-plan-view-return+
-            {:input [{"symbol" "i_currency_id", "type" "text"}
-                     {"symbol" "i_note", "type" "text"}]
-             :view {:table "Currency"
-                    :type "return"
-                    :query ["id"
-                            {"::" "sql/arg", "name" "{{i_note}}"}]}})]}
+                   (def +input-plan-view-return+
+                     {:input [{"symbol" "i_currency_id", "type" "text"}
+                              {"symbol" "i_note", "type" "text"}]
+                      :view {:table "Currency"
+                             :type "return"
+                             :query ["id"
+                                     {"::" "sql/arg", "name" "{{i_note}}"}]}})]}
 (fact "plans a db query from entries and schema"
 
   (!.js

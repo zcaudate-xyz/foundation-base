@@ -15,7 +15,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.impl-memory/pull :added "4.1"}
 (fact "pull reads through async semantics"
@@ -105,7 +105,7 @@
 
 ^{:refer xt.db.system.impl-memory/process-add-event :added "4.1"}
 (fact "process-add-event merges nested data into client and links"
-  
+
   (!.js
     (var impl (impl/impl-memory sample/Schema
                                 sample/SchemaLookup))
@@ -165,7 +165,7 @@
 
 ^{:refer xt.db.system.impl-memory/impl-memory :added "4.1"}
 (fact "creates the thin memory impl record with stored schema context"
-  
+
   (!.js
     (impl/impl-memory sample/Schema
                       sample/SchemaLookup))

@@ -2,7 +2,7 @@
   (:require [lang.core :as l])
   (:use code.test))
 
-^{:seedgen/root {:all true, :langs [:lua :python]}}
+^{:seedgen/root {:all true}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-notify :as notify]
@@ -26,7 +26,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.substrate.page-core/runtime-page :added "4.1"}
 (fact "creates a blank runtime container"
@@ -332,6 +332,7 @@
 
 ^{:refer xt.substrate.page-core/get-unknown-deps :added "4.1"}
 (fact "reports missing dependent views in the current space runtime"
+
   (!.js
    (var node (substrate/node-create (-/create-node)))
    (page-core/group-add-attach
@@ -709,7 +710,6 @@
   => {"id" "@/raw/page/space/a"
       "meta" {"space_id" "space/a"}})
 
-
 ^{:refer xt.substrate.page-core/trigger-listeners :added "4.1"}
 (fact "dispatches events to keyed listeners on the node"
 
@@ -734,7 +734,6 @@
       "captured" [{"space_id" "space/a"
                    "path" ["page" "ping"]
                    "value" 9}]})
-
 
 ^{:refer xt.substrate.page-core/proxy-group? :added "4.1"}
 (fact "checks whether a group is marked as a remote proxy"

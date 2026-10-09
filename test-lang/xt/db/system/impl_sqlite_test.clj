@@ -3,12 +3,7 @@
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
 
-^{:seedgen/root {:all true
-                 :js           {:extra [[js.net.conn-sqlite :as js-sqlite]]}
-                 :lua.nginx    {:extra [[lua.nginx.conn-sqlite :as lua-sqlite]]}
-                 :python       {:extra [[python.net.conn-sqlite :as py-sqlite]]}
-                 :dart         {:extra [[dart.net.conn-sqlite :as dart-sqlite]]}
-                 :ruby         {:extra [[ruby.net.conn-sqlite :as ruby-sqlite]]}}}
+^{:seedgen/root {:js {:extra [[js.net.conn-sqlite :as js-sqlite]]}, :lua.nginx {:extra [[lua.nginx.conn-sqlite :as lua-sqlite]]}, :all true, :python {:extra [[python.net.conn-sqlite :as py-sqlite]]}, :langs [:js :lua.nginx], :ruby {:extra [[ruby.net.conn-sqlite :as ruby-sqlite]]}, :dart {:extra [[dart.net.conn-sqlite :as dart-sqlite]]}}}
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.spec-base :as xt]
@@ -58,11 +53,11 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
-  :teardown [(l/rt:stop)]})
+ :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.system.impl-sqlite/pull :added "4.1"}
 (fact "pull reads tree and shorthand query forms from sqlite impl context"
-  
+
   (notify/wait-on :js
     (-> (-/connect-impl)
         (promise/x:promise-then
@@ -138,7 +133,7 @@
 
 ^{:refer xt.db.system.impl-sqlite/process-remove-event :added "4.1"}
 (fact "process-remove-event executes sql deletes through stored sqlite context"
-  
+
   (notify/wait-on :js
     (-> (-/connect-impl)
         (promise/x:promise-then
@@ -161,7 +156,7 @@
 
 ^{:refer xt.db.system.impl-sqlite/impl-sqlite-init :added "4.1"}
 (fact "impl-sqlite-init wires up js.net.conn-sqlite and stores the connection"
-  
+
   (notify/wait-on [:js 5000]
     (-> (impl/impl-sqlite (-/sqlite-create)
                           sample/Schema
@@ -174,9 +169,7 @@
             (conn-sql/query client "SELECT 1;"))))))
   => 1)
 
-^{:refer xt.db.system.impl-sqlite/impl-sqlite-init
-  :added "4.1"
-  :id sqlite-empty-schema}
+^{:refer xt.db.system.impl-sqlite/impl-sqlite-init :added "4.1" :id sqlite-empty-schema}
 (fact "impl-sqlite-init skips empty schema DDL"
 
   (notify/wait-on [:js 5000]
@@ -191,7 +184,6 @@
            (conn-sql/disconnect client)
            (repl/notify out)))))
   => 1)
-
 
 ^{:refer xt.db.system.impl-sqlite/rpc-call-async :added "4.1"}
 (fact "sqlite impl does not support remote rpc calls"

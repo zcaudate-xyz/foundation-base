@@ -21,13 +21,7 @@
   (defrun.pg __init__
     (s/grant-usage #{"scratch_v0"})))
 
-^{:seedgen/root {:all true
-                 :langs [:js :lua.nginx :python :dart :ruby]
-                 :js {:extra [[js.net.ws-native :as js-websocket]]}
-                 :lua.nginx {:extra [[lua.net.ws-native :as lua-websocket]]}
-                 :python {:extra [[python.net.ws-native :as py-websocket]]}
-                 :dart {:extra [[dart.net.ws-native :as dart-websocket]]}
-                 :ruby {:extra [[ruby.net.ws-native :as js-websocket]]}}}
+^{:seedgen/root {:js {:extra [[js.net.ws-native :as js-websocket]]}, :lua.nginx {:extra [[lua.net.ws-native :as lua-websocket]]}, :all true, :python {:extra [[python.net.ws-native :as py-websocket]]}, :langs [:js :lua.nginx :ruby], :ruby {:extra [[ruby.net.ws-native :as js-websocket]]}, :dart {:extra [[dart.net.ws-native :as dart-websocket]]}}}
 (l/script- :js
   {:runtime :basic
    :require [^{:seedgen/extra true}
@@ -55,20 +49,16 @@
 
 (fact:global
  {:skip (not (env/program-exists? "supabase"))
-  :setup [(local-min/start-supabase)
-          (l/rt:restart)
-          (l/rt:setup :postgres)]
-  :teardown [(l/rt:teardown :postgres)
-             (l/rt:stop)
-             (local-min/stop-supabase nil)]})
+ :setup [(local-min/start-supabase)
+                  (l/rt:restart)
+                  (l/rt:setup :postgres)]
+ :teardown [(l/rt:teardown :postgres)
+                        (l/rt:stop)
+                        (local-min/stop-supabase nil)]})
 
-^{:refer xt.db.system.impl-supabase-realtime/prepare-connect-url :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/prepare-connect-url :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "creates the connect-url"
-  
+
   (!.js
     (realtime/prepare-connect-url
      {"client" {"defaults" (xt/x:obj-assign (@! local-min/+config-supabase-anon+) {})}
@@ -80,11 +70,7 @@
      {}))
   => #"ws://127.0.0.1:55121/realtime/v1/websocket")
 
-^{:refer xt.db.system.impl-supabase-realtime/get-auth-token :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/get-auth-token :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "resolves the auth token from client defaults when no session exists"
 
   (!.js
@@ -96,10 +82,9 @@
          (return (js-websocket/create defaults)))}}))
   => (-> local-min/+config+ :api :anon-key))
 
-^{:refer xt.db.system.impl-supabase-realtime/get-auth-token
-  :added "4.1"
-  :id get-auth-token-user-default}
+^{:refer xt.db.system.impl-supabase-realtime/get-auth-token :added "4.1" :id get-auth-token-user-default}
 (fact "prefers the configured user token over the anonymous key"
+
   (!.js
    (realtime/get-auth-token
     {"client" {"defaults" {"token" "user-token"
@@ -107,11 +92,7 @@
      "state" {"realtimes" {}}}))
   => "user-token")
 
-^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "builds a Phoenix join frame for a broadcast topic"
 
   (!.js
@@ -129,11 +110,7 @@
                               "private" true}
                  "access_token" (-> local-min/+config+ :api :anon-key)}})
 
-^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload.no-token :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/topic-join-payload.no-token :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "join payload omits access_token when token is nil"
 
   (!.js
@@ -152,11 +129,7 @@
       "payload" {"config" {"broadcast" {"ack" false "self" false}
                               "private" true}}})
 
-^{:refer xt.db.system.impl-supabase-realtime/topic-leave-payload :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/topic-leave-payload :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "builds a Phoenix leave frame for a broadcast topic"
 
   (!.js
@@ -172,11 +145,7 @@
       "join_ref" "#/leave/realtime:room:test"
       "payload" {}})
 
-^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "dispatches xt.db/event broadcasts to topic callbacks"
 
   (!.js
@@ -207,10 +176,9 @@
   => {"topic" "realtime:User:1"
       "db/sync" {"User" [{"id" 1}]}})
 
-^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback
-  :added "4.1"
-  :id create-sync-callback-metadata}
+^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback :added "4.1" :id create-sync-callback-metadata}
 (fact "applies realtime sync through the metadata cache reference"
+
   (!.js
    (var schema {"User" {"id" {"ident" "id"
                                 "type" "uuid"
@@ -228,11 +196,7 @@
    (xtd/get-in caching ["rows" "User" "user-1" "record" "data" "bio"]))
   => "updated")
 
-^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message.phx-reply :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/create-realtime-on-message.phx-reply :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "phx_reply resolves the topic init promise and marks the topic ready"
 
   (notify/wait-on :js
@@ -260,11 +224,7 @@
   => {"resolved" true
       "ready" true})
 
-^{:refer xt.db.system.impl-supabase-realtime/create-realtime :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/create-realtime :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "creates a realtime connection"
 
   (notify/wait-on :js
@@ -283,11 +243,7 @@
            (repl/notify "opened")))))
   => "opened")
 
-^{:refer xt.db.system.impl-supabase-realtime/get-realtime :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/get-realtime :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "gets a realtime connection"
 
   (!.js
@@ -301,11 +257,7 @@
      "hello"))
   => nil)
 
-^{:refer xt.db.system.impl-supabase-realtime/set-realtime :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/set-realtime :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "stores the realtime websocket client in the impl state"
 
   (!.js
@@ -320,11 +272,7 @@
     (realtime/get-realtime impl "test"))
   => {"id" "test"})
 
-^{:refer xt.db.system.impl-supabase-realtime/ensure-realtime :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/ensure-realtime :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "creates and returns the same realtime client on subsequent calls"
 
   (notify/wait-on :js
@@ -346,11 +294,7 @@
   => {"has_init" true
       "same_client" true})
 
-^{:refer xt.db.system.impl-supabase-realtime/remove-realtime :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/remove-realtime :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "disconnects and removes the realtime client from the impl state"
 
   (notify/wait-on :js
@@ -368,11 +312,7 @@
            (repl/notify {"removed" (xt/x:nil? (realtime/get-realtime impl "default"))})))))
   => {"removed" true})
 
-^{:refer xt.db.system.impl-supabase-realtime/get-realtime-callback :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/get-realtime-callback :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "retrieves a broadcast callback from the realtime client"
 
   (notify/wait-on :js
@@ -395,11 +335,7 @@
   => {"has_callback" true
       "missing" true})
 
-^{:refer xt.db.system.impl-supabase-realtime/add-realtime-callback :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/add-realtime-callback :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "adds a callback to the realtime client state"
 
   (notify/wait-on :js
@@ -421,11 +357,7 @@
            (repl/notify result)))))
   => {"has_callback" true})
 
-^{:refer xt.db.system.impl-supabase-realtime/remove-realtime-callback :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/remove-realtime-callback :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "removes a callback from the realtime client state"
 
   (notify/wait-on :js
@@ -451,11 +383,7 @@
   => {"before" true
       "after" false})
 
-^{:refer xt.db.system.impl-supabase-realtime/get-topics :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {(js-websocket/create defaults) (dart-websocket/create (xt/x:obj-assign defaults {"background" true})) js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/get-topics :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote {js-websocket/create dart-websocket/create, js-websocket/connect-ws dart-websocket/connect-ws, (js-websocket/create defaults) (dart-websocket/create (xt/x:obj-assign defaults {"background" true}))})}}}
 (fact "returns subscribed topics for the realtime client"
 
   (!.js
@@ -483,11 +411,7 @@
            (repl/notify {"ready" (xtd/get-in topics ["realtime:room:topics-test" "ready"])})))))
   => {"ready" true})
 
-^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {(js-websocket/create defaults) (dart-websocket/create (xt/x:obj-assign defaults {"background" true})) js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/subscribe :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote {js-websocket/connect-ws dart-websocket/connect-ws, (js-websocket/create defaults) (dart-websocket/create (xt/x:obj-assign defaults {"background" true}))})}}}
 (fact "subscribes to topics after the websocket is initialized"
 
   (notify/wait-on :js
@@ -511,11 +435,7 @@
   => {"ok" [true true]
       "ready" [true true]})
 
-^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "applies db/sync payloads to the linked caching impl"
 
   (!.js
@@ -544,11 +464,7 @@
     {"synced" (xt/x:get-key caching-impl "sync")})
   => {"synced" {"UserAccount" [{"id" 1 "name" "root"}]}})
 
-^{:refer xt.db.system.impl-supabase-realtime/subscribe.sync :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/subscribe.sync :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "subscribe syncs db/sync events to a linked caching impl"
 
   (!.js
@@ -589,11 +505,7 @@
     {"synced" (xt/x:get-key caching-impl "sync")})
   => {"synced" {"UserAccount" [{"id" 1 "name" "root"}]}})
 
-^{:refer xt.db.system.impl-supabase-realtime/subscribe.remove :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/subscribe.remove :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "subscribe syncs db/remove events to a linked caching impl"
 
   (!.js
@@ -640,11 +552,7 @@
   => {"removed" {"table" "UserAccount"
                  "ids" ["00000000-0000-0000-0000-000000000000"]}})
 
-^{:refer xt.db.system.impl-supabase-realtime/unsubscribe :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/unsubscribe :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "unsubscribes from topics and removes them from state"
 
   (notify/wait-on :js
@@ -662,11 +570,7 @@
   => {"ok" true
       "topics" {}})
 
-^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback.remove :added "4.1"
-  :seedgen/base {:lua.nginx {:transform (quote {js-websocket/create lua-websocket/create js-websocket/connect-ws lua-websocket/connect-ws})}
-                 :python {:transform (quote {js-websocket/create py-websocket/create js-websocket/connect-ws py-websocket/connect-ws})}
-                 :dart {:transform (quote {js-websocket/create dart-websocket/create js-websocket/connect-ws dart-websocket/connect-ws})}}
-}
+^{:refer xt.db.system.impl-supabase-realtime/create-sync-callback.remove :added "4.1" :seedgen/base {:lua.nginx {:transform (quote #:js-websocket{connect-ws lua-websocket/connect-ws, create lua-websocket/create})}, :python {:transform (quote #:js-websocket{connect-ws py-websocket/connect-ws, create py-websocket/create})}, :dart {:transform (quote #:js-websocket{connect-ws dart-websocket/connect-ws, create dart-websocket/create})}}}
 (fact "applies db/remove payloads to the linked caching impl"
 
   (!.js
