@@ -30,7 +30,7 @@
   '[Children Component Fragment Profiler PureComponent StrictMode Suspense
     cloneElement createContext createElement createFactory
     createRef forwardRef isValidElement
-    lazy memo
+    lazy memo act
     useCallback useContext useDebugValue useEffect
     useImperativeHandle useLayoutEffect useMemo
     useReducer useRef useState useSyncExternalStore useTransition

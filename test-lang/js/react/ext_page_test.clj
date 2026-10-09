@@ -20,13 +20,6 @@
          (return
           {"id" "node-a"
            "spaces" {"space/a" {"state" {}}}}))
-(defn.js await-dom
-         [f]
-         (return
-          (new Promise
-               (fn [resolve]
-                   (setTimeout (fn [] (resolve (f))) 0)))))
-
 (fact:global
  {:setup [(l/rt:restart :js)
           (l/rt:scaffold-imports :js)]
@@ -131,35 +124,40 @@
 ^{:refer js.react.ext-page/initModelBase :added "4.1"}
 (fact "updates the keyed listener result"
   (helper-source/wait-on
+   (fn []
+     (var node (substrate/node-create (-/create-node)))
+     (page-core/group-add-attach node "space/a" "page"
+                                 {"ping" {"handler" (fn [ctx]
+                                                        (return {"ok" true}))}
+                                  "defaults" {"args" [1 2]}})
+     (var model (ext-page/get-model node "space/a" ["page" "ping"]))
+     (var [result setResult] (r/local (. (. model ["input"]) ["current"])))
+     (var ref (r/useFollowRef result))
+     (var cleanup (ext-page/initModelBase
+                   node "space/a" ["page" "ping"]
+                   {"setResult" setResult
+                    "getResult" (fn [] (return (. (. model ["input"]) ["current"])))
+                    "resultRef" ref}))
+     (xt/x:set-key document "__ext_page_test" {"node" node
+                                                "cleanup" cleanup
+                                                "result" result})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var node (substrate/node-create (-/create-node)))
-   (page-core/group-add-attach node "space/a" "page"
-                               {"ping" {"handler" (fn [ctx]
-                                                      (return {"ok" true}))}
-                                "defaults" {"args" [1 2]}})
-   (var controls {})
-   (var Component
-        (fn []
-            (var model (ext-page/get-model node "space/a" ["page" "ping"]))
-            (var [result setResult] (r/local (. (. model ["input"]) ["current"])))
-            (var ref (r/useFollowRef result))
-            (var cleanup (ext-page/initModelBase
-                          node "space/a" ["page" "ping"]
-                          {"setResult" setResult
-                           "getResult" (fn [] (return (. (. model ["input"]) ["current"])))
-                           "resultRef" ref}))
-            (xt/x:set-key controls "cleanup" cleanup)
-            (xt/x:set-key controls "result" result)
-            (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-                 (. (ext-page/refreshArgsFn node "space/a" ["page" "ping"] [9 8] {})
-                    (then (fn [_]
-                              (return (-/await-dom
-                                       (fn []
-                                           (return {"data" (. (. controls ["result"]) ["data"])
-                                                    "cleanup" (xt/x:is-function? (. controls ["cleanup"]))}))))))))))))
+   (fn [_ document _ _]
+     (var state (. document ["__ext_page_test"]))
+     (return
+      (. (Promise.resolve
+          (r/act
+           (fn []
+             (return (ext-page/refreshArgsFn (. state ["node"]) "space/a" ["page" "ping"] [9 8] {})))))
+         (then (fn [_]
+                 (return
+                  (helper/await-dom
+                   (fn []
+                     (var result {"data" (. (. state ["result"]) ["data"])
+                                  "cleanup" (xt/x:is-function? (. state ["cleanup"]))})
+                     (xt/x:del-key document "__ext_page_test")
+                     (return result))))))))))
   => {"data" [9 8] "cleanup" true})
 
 ^{:refer js.react.ext-page/initModelBase
@@ -224,100 +222,114 @@
 ^{:refer js.react.ext-page/listenModelOutput :added "4.1"}
 (fact "updates the full output record"
   (helper-source/wait-on
+   (fn []
+     (var node (substrate/node-create (-/create-node)))
+     (page-core/group-add-attach node "space/a" "page"
+                                 {"ping" {"handler" (fn [ctx]
+                                                        (return {"ok" true}))
+                                           "defaults" {"args" []}}})
+     (var output (ext-page/listenModelOutput node "space/a" ["page" "ping"] ["output"] nil))
+     (xt/x:set-key document "__ext_page_test" {"node" node
+                                                "output" output})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var node (substrate/node-create (-/create-node)))
-   (page-core/group-add-attach node "space/a" "page"
-                               {"ping" {"handler" (fn [ctx]
-                                                      (return {"ok" true}))}
-                                "defaults" {"args" []}})
-   (var controls {})
-   (var Component
-        (fn []
-            (var output (ext-page/listenModelOutput node "space/a" ["page" "ping"] ["output"] nil))
-            (xt/x:set-key controls "output" output)
-            (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-                 (. (ext-page/refreshModel node "space/a" ["page" "ping"] {})
-                    (then (fn [_]
-                              (return (-/await-dom
-                                       (fn []
-                                           (return {"current" (. (. controls ["output"]) ["current"])
-                                                    "type" (. (. controls ["output"]) ["type"])}))))))))))))
+   (fn [_ document _ _]
+     (var state (. document ["__ext_page_test"]))
+     (return
+      (. (Promise.resolve
+          (r/act (fn [] (return (ext-page/refreshModel (. state ["node"]) "space/a" ["page" "ping"] {})))))
+         (then (fn [_]
+                 (return
+                  (helper/await-dom
+                   (fn []
+                     (var output (. state ["output"]))
+                     (var result {"current" (. output ["current"])
+                                  "type" (. output ["type"])})
+                     (xt/x:del-key document "__ext_page_test")
+                     (return result))))))))))
   => {"current" {"ok" true} "type" "output"})
 
 ^{:refer js.react.ext-page/listenModelThrottled :added "4.1"}
 (fact "throttles successful page output"
   (helper-source/wait-on
+   (fn []
+     (var node (substrate/node-create (-/create-node)))
+     (page-core/group-add-attach node "space/a" "page"
+                                 {"ping" {"handler" (fn [ctx]
+                                                        (return {"ok" true}))
+                                           "defaults" {"args" []}}})
+     (var output (ext-page/listenModelThrottled node "space/a" ["page" "ping"] 10 nil))
+     (xt/x:set-key document "__ext_page_test" {"node" node
+                                                "output" output})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var node (substrate/node-create (-/create-node)))
-   (page-core/group-add-attach node "space/a" "page"
-                               {"ping" {"handler" (fn [ctx]
-                                                      (return {"ok" true}))}
-                                "defaults" {"args" []}})
-   (var controls {})
-   (var Component
-        (fn []
-            (var output (ext-page/listenModelThrottled node "space/a" ["page" "ping"] 10 nil))
-            (xt/x:set-key controls "output" output)
-            (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-                 (. (ext-page/refreshModel node "space/a" ["page" "ping"] {})
-                    (then (fn [_]
-                              (return
-                               (new Promise
-                                    (fn [resolve]
-                                        (setTimeout
-                                         (fn [] (resolve (. controls ["output"])))
-                                         30))))))))))))
+   (fn [_ document _ _]
+     (var state (. document ["__ext_page_test"]))
+     (return
+      (. (Promise.resolve
+          (r/act (fn [] (return (ext-page/refreshModel (. state ["node"]) "space/a" ["page" "ping"] {})))))
+         (then (fn [_]
+                 (return
+                  (new Promise
+                   (fn [resolve]
+                     (setTimeout
+                      (fn []
+                        (var result (. state ["output"]))
+                        (xt/x:del-key document "__ext_page_test")
+                        (resolve result))
+                      30))))))))))
   => {"ok" true})
 
 ^{:refer js.react.ext-page/useRefreshArgs :added "4.1"}
 (fact "refreshes page model input from React args"
   (helper-source/wait-on
+   (fn []
+     (var node (substrate/node-create (-/create-node)))
+     (page-core/group-add-attach node "space/a" "page"
+                                 {"ping" {"handler" (fn [ctx]
+                                                        (return {"ok" true}))
+                                           "defaults" {"args" []}}})
+     (ext-page/useRefreshArgs node "space/a" ["page" "ping"] [4 5] {})
+     (xt/x:set-key document "__ext_page_test" {"node" node})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var node (substrate/node-create (-/create-node)))
-   (page-core/group-add-attach node "space/a" "page"
-                               {"ping" {"handler" (fn [ctx]
-                                                      (return {"ok" true}))}
-                                "defaults" {"args" []}})
-   (var Component
-        (fn []
-            (ext-page/useRefreshArgs node "space/a" ["page" "ping"] [4 5] {})
-            (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-                 (return (-/await-dom
-                          (fn []
-                              (var model (ext-page/get-model node "space/a" ["page" "ping"]))
-                              (return (. (. model ["input"]) ["current"]))))))))))
+   (fn [_ document _ _]
+     (return
+      (helper/await-dom
+       (fn []
+         (var node (. document ["__ext_page_test"] ["node"]))
+         (var model (ext-page/get-model node "space/a" ["page" "ping"]))
+         (var result (. (. model ["input"]) ["current"]))
+         (xt/x:del-key document "__ext_page_test")
+         (return result))))))
   => {"data" [4 5]})
 
 ^{:refer js.react.ext-page/listenSuccess :added "4.1"}
 (fact "returns the successful page output"
   (helper-source/wait-on
+   (fn []
+     (var node (substrate/node-create (-/create-node)))
+     (page-core/group-add-attach node "space/a" "page"
+                                 {"ping" {"handler" (fn [ctx]
+                                                        (return {"ok" true}))
+                                           "defaults" {"args" []}}})
+     (var result (ext-page/listenSuccess node "space/a" ["page" "ping"] []
+                                         {"default" {"empty" true}}
+                                         nil))
+     (xt/x:set-key document "__ext_page_test" {"node" node
+                                                "result" result})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var node (substrate/node-create (-/create-node)))
-   (page-core/group-add-attach node "space/a" "page"
-                               {"ping" {"handler" (fn [ctx]
-                                                      (return {"ok" true}))}
-                                "defaults" {"args" []}})
-   (var controls {})
-   (var Component
-        (fn []
-            (var result (ext-page/listenSuccess node "space/a" ["page" "ping"] []
-                                                {"default" {"empty" true}}
-                                                nil))
-            (xt/x:set-key controls "result" result)
-            (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-                 (. (ext-page/refreshModel node "space/a" ["page" "ping"] {})
-                    (then (fn [_]
-                              (return (-/await-dom (fn [] (return (. controls ["result"])))))))))))))
+   (fn [_ document _ _]
+     (var state (. document ["__ext_page_test"]))
+     (return
+      (. (Promise.resolve
+          (r/act (fn [] (return (ext-page/refreshModel (. state ["node"]) "space/a" ["page" "ping"] {})))))
+         (then (fn [_]
+                 (return
+                  (helper/await-dom
+                   (fn []
+                     (var result (. state ["result"]))
+                     (xt/x:del-key document "__ext_page_test")
+                     (return result))))))))))
   => {"ok" true})

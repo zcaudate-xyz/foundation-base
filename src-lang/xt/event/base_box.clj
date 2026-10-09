@@ -73,10 +73,10 @@
   [initial]
   (var initialFn initial)
   (when (not (xt/x:is-function? initialFn))
-    (var initialData initialFn)
+    (var initialData (xtd/clone-nested initialFn))
     (:= initialFn
         (fn []
-          (return initialData))))
+          (return (xtd/clone-nested initialData)))))
   (var data (initialFn))
   (return
    {"::" "event.box"

@@ -61,11 +61,12 @@
              localStorage.getItem)
     (var stored (. localStorage (getItem storage-key)))
     (when stored
+      (var stored-data initial)
       (try
-        (:= stored (JSON.parse stored))
+        (:= stored-data (xtd/get-in (JSON.parse stored) path))
         (catch e
-            (:= stored initial)))
-      (event-box/set-data box path stored))
+            (:= stored-data initial)))
+      (event-box/set-data box path stored-data))
     
     
     (event-box/add-listener
@@ -81,26 +82,26 @@
 
 (def.js listenBox -/useListenBox)
 
-(def.js ^{:arglists ([box path])}
+(def.js ^{:arglists '([box path])}
   getData event-box/get-data)
 
-(def.js ^{:arglists ([box path value])}
+(def.js ^{:arglists '([box path value])}
   setData event-box/set-data)
 
-(def.js ^{:arglists ([box path])}
+(def.js ^{:arglists '([box path])}
   delData event-box/del-data)
 
-(def.js ^{:arglists ([box])}
+(def.js ^{:arglists '([box])}
   resetData event-box/reset-data)
 
-(def.js ^{:arglists ([box path value])}
+(def.js ^{:arglists '([box path value])}
   mergeData event-box/merge-data)
 
-(def.js ^{:arglists ([box path value])}
+(def.js ^{:arglists '([box path value])}
   appendData event-box/append-data)
 
-(def.js ^{:arglists ([box listener-id path callback meta])}
+(def.js ^{:arglists '([box listener-id path callback meta])}
   addListener event-box/add-listener)
 
-(def.js ^{:arglists ([box listener-id])}
+(def.js ^{:arglists '([box listener-id])}
   removeListener event-box/remove-listener)

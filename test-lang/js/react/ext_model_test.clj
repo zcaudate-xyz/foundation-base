@@ -29,13 +29,6 @@
   (event-model/init-model view)
   (return view))
 
-(defn.js await-dom
-  [f]
-  (return
-   (new Promise
-        (fn [resolve]
-          (setTimeout (fn [] (resolve (f))) 0)))))
-
 ^{:refer js.react.ext-model/throttled-setter :added "4.0"}
 (fact "updates immediately and coalesces delayed values"
   (notify/wait-on :js
@@ -144,118 +137,137 @@
 ^{:refer js.react.ext-model/makeViewRaw :added "4.0"}
 (fact "creates a raw view inside a component"
   (helper-source/wait-on
+   (fn []
+     (var view (ext-model/makeViewRaw {"handler" (fn:> [x] (return x))
+                                       "defaultArgs" [1]
+                                       "defaultOutput" nil}))
+     (xt/x:set-key document "__ext_model_test" {"view" view})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var controls {})
-   (var Component
-        (fn []
-          (var view (ext-model/makeViewRaw {"handler" (fn:> [x] (return x))
-                                            "defaultArgs" [1]
-                                            "defaultOutput" nil}))
-          (xt/x:set-key controls "view" view)
-          (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-               (return (== "event.model" (. (. controls ["view"]) ["::"]))))))))
+   (fn [_ document _ _]
+     (var result (== "event.model" (. (. document ["__ext_model_test"] ["view"]) ["::"])))
+     (xt/x:del-key document "__ext_model_test")
+     (return result)))
   => true)
 ^{:refer js.react.ext-model/makeView :added "4.0"}
 (fact "creates a React stable view"
   (helper-source/wait-on
+   (fn []
+     (var view (ext-model/makeView {"handler" (fn:> [x] (return x))
+                                    "defaultArgs" [1]
+                                    "defaultOutput" nil}))
+     (xt/x:set-key document "__ext_model_test" {"view" view})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var controls {})
-   (var Component
-        (fn []
-          (var view (ext-model/makeView {"handler" (fn:> [x] (return x))
-                                         "defaultArgs" [1]
-                                         "defaultOutput" nil}))
-          (xt/x:set-key controls "view" view)
-          (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-               (return (xt/x:is-object? (. controls ["view"]))))))))
+   (fn [_ document _ _]
+     (var result (xt/x:is-object? (. document ["__ext_model_test"] ["view"])))
+     (xt/x:del-key document "__ext_model_test")
+     (return result)))
   => true)
 ^{:refer js.react.ext-model/initViewBase :added "4.0"}
 (fact "registers a view listener and returns teardown"
   (helper-source/wait-on
+   (fn []
+     (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
+     (var [value setValue] (r/local nil))
+     (var ref (r/useFollowRef value))
+     (var cleanup (ext-model/initViewBase
+                   view nil
+                   {"setResult" setValue
+                    "getResult" (fn [] (return value))
+                    "resultRef" ref}))
+     (xt/x:set-key document "__ext_model_test" {"view" view
+                                                 "cleanup" cleanup})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var controls {})
-   (var Component
-        (fn []
-          (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
-          (var [value setValue] (r/local nil))
-          (var ref (r/useFollowRef value))
-          (var cleanup (ext-model/initViewBase
-                        view nil
-                        {"setResult" setValue
-                         "getResult" (fn [] (return value))
-                         "resultRef" ref}))
-          (xt/x:set-key controls "view" view)
-          (xt/x:set-key controls "cleanup" cleanup)
-          (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-               (return {"listener" (> (count (event-model/list-listeners (. controls ["view"]))) 0)
-                        "cleanup" (xt/x:is-function? (. controls ["cleanup"]))}))))))
+   (fn [_ document _ _]
+     (var state (. document ["__ext_model_test"]))
+     (var result {"listener" (> (count (event-model/list-listeners (. state ["view"]))) 0)
+                  "cleanup" (xt/x:is-function? (. state ["cleanup"]))})
+     (xt/x:del-key document "__ext_model_test")
+     (return result)))
   => {"listener" true "cleanup" true})
 ^{:refer js.react.ext-model/listenView :added "4.0"}
 (fact "listens to the current view output"
   (helper-source/wait-on
+   (fn []
+     (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
+     (var value (ext-model/listenView view "output" nil nil nil))
+     (xt/x:set-key document "__ext_model_test" {"view" view
+                                                 "value" value})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var controls {})
-   (var Component
-        (fn []
-          (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
-          (var value (ext-model/listenView view "output" nil nil nil))
-          (xt/x:set-key controls "view" view)
-          (xt/x:set-key controls "value" value)
-          (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-               (event-model/set-output (. controls ["view"]) {"value" 2} false "output" nil nil)
-               (event-model/trigger-listeners (. controls ["view"]) "view.output" {"type" "output"})
-               (return (-/await-dom (fn [] (return (. controls ["value"]))))))))))
+   (fn [_ document _ _]
+     (var state (. document ["__ext_model_test"]))
+     (return
+      (. (Promise.resolve
+          (r/act
+           (fn []
+             (event-model/set-output (. state ["view"]) {"value" 2} false "output" nil nil)
+             (event-model/trigger-listeners (. state ["view"]) "view.output" {"type" "output"})))))
+         (then (fn [_]
+                 (return
+                  (helper/await-dom
+                   (fn []
+                     (var result (. state ["value"]))
+                     (xt/x:del-key document "__ext_model_test")
+                     (return result)))))))))
   => {"value" 2})
 ^{:refer js.react.ext-model/listenViewOutput :added "4.0"}
 (fact "listens to selected output events"
   (helper-source/wait-on
+   (fn []
+     (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
+     (var value (ext-model/listenViewOutput view ["output"] nil nil nil))
+     (xt/x:set-key document "__ext_model_test" {"view" view
+                                                 "value" value})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var controls {})
-   (var Component
-        (fn []
-          (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
-          (var value (ext-model/listenViewOutput view ["output"] nil nil nil))
-          (xt/x:set-key controls "view" view)
-          (xt/x:set-key controls "value" value)
-          (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-               (event-model/trigger-listeners (. controls ["view"]) "view.output" {"type" "output"})
-               (return (-/await-dom (fn []
-                                      (return {"type" (. (. controls ["value"]) ["type"])
-                                               "current" (. (. controls ["value"]) ["current"])})))))))))
+   (fn [_ document _ _]
+     (var state (. document ["__ext_model_test"]))
+     (return
+      (. (Promise.resolve
+          (r/act
+           (fn []
+             (event-model/trigger-listeners (. state ["view"]) "view.output" {"type" "output"})))))
+         (then (fn [_]
+                 (return
+                  (helper/await-dom
+                   (fn []
+                     (var value (. state ["value"]))
+                     (var result {"type" (. value ["type"])
+                                  "current" (. value ["current"])})
+                     (xt/x:del-key document "__ext_model_test")
+                     (return result)))))))))
   => {"type" "output" "current" nil})
 ^{:refer js.react.ext-model/listenViewThrottled :added "4.0"}
 (fact "returns a throttled successful output listener"
   (helper-source/wait-on
+   (fn []
+     (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
+     (var value (ext-model/listenViewThrottled view 10 nil nil))
+     (xt/x:set-key document "__ext_model_test" {"view" view
+                                                 "value" value})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var controls {})
-   (var Component
-        (fn []
-          (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
-          (var value (ext-model/listenViewThrottled view 10 nil nil))
-          (xt/x:set-key controls "view" view)
-          (xt/x:set-key controls "value" value)
-          (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-               (event-model/set-output (. controls ["view"]) {"ok" true} false "output" nil nil)
-               (event-model/trigger-listeners (. controls ["view"]) "view.output" {"type" "output"})
-               (return (-/await-dom (fn [] (return (. controls ["value"]))))))))))
+   (fn [_ document _ _]
+     (var state (. document ["__ext_model_test"]))
+     (return
+      (. (Promise.resolve
+          (r/act
+           (fn []
+             (event-model/set-output (. state ["view"]) {"ok" true} false "output" nil nil)
+             (event-model/trigger-listeners (. state ["view"]) "view.output" {"type" "output"})))))
+         (then (fn [_]
+                 (return
+                  (new Promise
+                   (fn [resolve]
+                     (setTimeout
+                      (fn []
+                        (var result (. state ["value"]))
+                        (xt/x:del-key document "__ext_model_test")
+                        (resolve result))
+                      30)))))))))
   => {"ok" true})
 ^{:refer js.react.ext-model/wrap-pending :added "4.0"}
 (fact "sets pending while a wrapped function is running"
@@ -286,40 +298,41 @@
 ^{:refer js.react.ext-model/useRefreshArgs :added "4.0"}
 (fact "watches React args and starts a refresh"
   (helper-source/wait-on
+   (fn []
+     (var view (-/make-test-view (fn:> [x] (return {"value" x})) {} [2] nil))
+     (var result (ext-model/useRefreshArgs view [2] {"remote" "none"}))
+     (xt/x:set-key document "__ext_model_test" {"view" view
+                                                 "result" result})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var controls {})
-   (var Component
-        (fn []
-          (var view (-/make-test-view (fn:> [x] (return {"value" x})) {} [2] nil))
-          (var result (ext-model/useRefreshArgs view [2] {"remote" "none"}))
-          (xt/x:set-key controls "view" view)
-          (xt/x:set-key controls "result" result)
-          (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-               (return (-/await-dom
-                        (fn []
-                          (return {"args" (. (event-model/get-input (. controls ["view"])) ["current"])
-                                   "result" (. controls ["result"])})))))))))
+   (fn [_ document _ _]
+     (return
+      (helper/await-dom
+       (fn []
+         (var state (. document ["__ext_model_test"]))
+         (var result {"args" (. (event-model/get-input (. state ["view"])) ["current"])
+                      "result" (. state ["result"])})
+         (xt/x:del-key document "__ext_model_test")
+         (return result))))))
   => {"args" {"data" [2]} "result" nil})
 ^{:refer js.react.ext-model/listenSuccess :added "4.0"}
 (fact "combines a success listener with argument refresh"
   (helper-source/wait-on
+   (fn []
+     (var view (-/make-test-view (fn:> [x] (return {"value" x})) {} [3] {"fallback" true}))
+     (var result (ext-model/listenSuccess view [3] {"remote" "none"
+                                                    "default" {"fallback" true}}
+                                          nil nil))
+     (xt/x:set-key document "__ext_model_test" {"result" result})
+     (return (r/createElement "span" nil "ready")))
    {}
-   (var controls {})
-   (var Component
-        (fn []
-          (var view (-/make-test-view (fn:> [x] (return {"value" x})) {} [3] {"fallback" true}))
-          (var result (ext-model/listenSuccess view [3] {"remote" "none"
-                                                         "default" {"fallback" true}}
-                                               nil nil))
-          (xt/x:set-key controls "result" result)
-          (return (r/createElement "span" nil "ready"))))
-   (return
-    (. (helper/render env Component {})
-       (then (fn [_]
-               (return (-/await-dom (fn [] (return (. controls ["result"]))))))))))
+   (fn [_ document _ _]
+     (return
+      (helper/await-dom
+       (fn []
+         (var result (. document ["__ext_model_test"] ["result"]))
+         (xt/x:del-key document "__ext_model_test")
+         (return result))))))
   => {"fallback" true})
 ^{:refer js.react.ext-model/handler-base :added "0.1"}
 (fact "constructs a handler base"
