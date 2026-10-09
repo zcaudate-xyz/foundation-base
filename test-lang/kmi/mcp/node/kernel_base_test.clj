@@ -1,4 +1,4 @@
-(ns xt.mcp.node.kernel-base-test
+(ns kmi.mcp.node.kernel-base-test
   (:use code.test)
   (:require [lang.core :as l]
             [xt.lang.common-notify :as notify]))
@@ -10,10 +10,10 @@
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
              [xt.substrate.transport-memory :as transport-memory]
-             [xt.mcp.node.kernel-base :as kernel]
-             [xt.mcp.node.client-base :as client]
-             [xt.mcp.node.proxy-util :as proxy-util]
-             [xt.mcp.node.runtime :as runtime]]})
+             [kmi.mcp.node.kernel-base :as kernel]
+             [kmi.mcp.node.client-base :as client]
+             [kmi.mcp.node.proxy-util :as proxy-util]
+             [kmi.mcp.node.runtime :as runtime]]})
 
 (fact:global
  {:setup [(l/rt:restart :js)]
@@ -27,7 +27,7 @@
                    "required" ["snake_case"]
                    "additional_properties" false}})
 
-^{:refer xt.mcp.node.kernel-base/register-tool :added "4.1"}
+^{:refer kmi.mcp.node.kernel-base/register-tool :added "4.1"}
 (fact "combines MCP data with a generic handler on a named node service"
   (!.js
     (var node (substrate/node-create {}))
@@ -47,7 +47,7 @@
                        "required" ["snake_case"]
                        "additionalProperties" false}}]])
 
-^{:refer xt.mcp.node.kernel-base/handle-message :added "4.1"}
+^{:refer kmi.mcp.node.kernel-base/handle-message :added "4.1"}
 (fact "implements initialize, tools/list, and tools/call over decoded JSON-RPC"
   (notify/wait-on :js
     (var node (substrate/node-create {}))
@@ -77,7 +77,7 @@
       [{"jsonrpc" "2.0" "id" 1
         "result" {"protocolVersion" "2025-11-25"
                   "capabilities" {"tools" {"listChanged" false}}
-                  "serverInfo" {"name" "xt.mcp" "version" "0.1.0"}}}
+                  "serverInfo" {"name" "kmi.mcp" "version" "0.1.0"}}}
        {"jsonrpc" "2.0" "id" 2
         "result" {"isError" false
                   "structuredContent" {"echo" "hello"}}}]))
@@ -109,12 +109,12 @@
        "result" {"isError" true
                  "content" [{"type" "text" "text" "handler failed"}]}}))
 
-^{:refer xt.mcp.node.runtime/init-server-proxy :added "4.1"}
+^{:refer kmi.mcp.node.runtime/init-server-proxy :added "4.1"}
 (fact "keeps proxy installation separate from the server registry"
   (!.js
     (var node (substrate/node-create {}))
     (runtime/init-server-proxy node "server")
-    [(xt/x:not-nil? (substrate/get-handler node "@xt.mcp/message"))
+    [(xt/x:not-nil? (substrate/get-handler node "@kmi.mcp/message"))
      (kernel/get-service node "mcp/example")])
   => [true nil])
 

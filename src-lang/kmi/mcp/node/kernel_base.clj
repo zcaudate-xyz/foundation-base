@@ -1,4 +1,4 @@
-(ns xt.mcp.node.kernel-base
+(ns kmi.mcp.node.kernel-base
   (:require [lang.core :as l]))
 
 (l/script :xtalk
@@ -7,10 +7,10 @@
              [xt.lang.common-data :as xtd]
              [xt.substrate :as substrate]
              [xt.substrate.base-request :as node-request]
-             [xt.mcp.base :as base]]})
+             [kmi.mcp.base :as base]]})
 
 (def.xt DEFAULT_SERVICE "mcp/default")
-(def.xt MESSAGE_ACTION "@xt.mcp/message")
+(def.xt MESSAGE_ACTION "@kmi.mcp/message")
 
 (defn.xt create-service
   "creates MCP registry and session state"
@@ -20,7 +20,7 @@
   (return {"::" "mcp.service"
            "protocol_version" base/PROTOCOL_VERSION
            "server_info" (or (. opts ["server_info"])
-                             {"name" "xt.mcp" "version" "0.1.0"})
+                             {"name" "kmi.mcp" "version" "0.1.0"})
            "instructions" (. opts ["instructions"])
            "authorize_fn" (. opts ["authorize_fn"])
            "tools" {}

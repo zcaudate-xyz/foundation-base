@@ -21,7 +21,7 @@
 
 (fact:global
  {:setup [(l/rt:restart)]
- :teardown [(l/rt:stop)]})
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.event.base-box/make-box :added "4.1"}
 (fact "creates an explicit event box"

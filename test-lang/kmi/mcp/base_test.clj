@@ -1,29 +1,29 @@
-(ns xt.mcp.base-test
+(ns kmi.mcp.base-test
   (:use code.test)
   (:require [lang.core :as l]))
 
 ^{:seedgen/root {:all true, :langs [:js :lua :python :dart]}}
 (l/script- :js
   {:runtime :basic
-   :require [[xt.mcp.base :as base]]})
+   :require [[kmi.mcp.base :as base]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.mcp.base :as base]]})
+   :require [[kmi.mcp.base :as base]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.mcp.base :as base]]})
+   :require [[kmi.mcp.base :as base]]})
 
 (l/script- :dart
   {:runtime :twostep
-   :require [[xt.mcp.base :as base]]})
+   :require [[kmi.mcp.base :as base]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer xt.mcp.base/schema-wire :added "4.1"}
+^{:refer kmi.mcp.base/schema-wire :added "4.1"}
 (fact "camel-cases MCP schema vocabulary without changing property names"
 
   (!.js
@@ -62,7 +62,7 @@
       "properties" {"snake_case" {"type" "string"}}
       "additionalProperties" false})
 
-^{:refer xt.mcp.base/tool-wire :added "4.1"}
+^{:refer kmi.mcp.base/tool-wire :added "4.1"}
 (fact "projects portable snake_case descriptors onto the MCP wire shape"
 
   (!.js
@@ -109,7 +109,7 @@
       "inputSchema" {"type" "object" "properties" {}}
       "annotations" {"readOnlyHint" true}})
 
-^{:refer xt.mcp.base/schema-error :added "4.1"}
+^{:refer kmi.mcp.base/schema-error :added "4.1"}
 (fact "validates required fields, types, and additional properties"
 
   (!.js
@@ -168,7 +168,7 @@
       {} "$" )])
   => [nil "$.snake_case is required"])
 
-^{:refer xt.mcp.base/schema-type-valid? :added "4.1"}
+^{:refer kmi.mcp.base/schema-type-valid? :added "4.1"}
 (fact "checks values against the portable JSON Schema type subset"
 
   (!.js
@@ -215,7 +215,7 @@
      (base/schema-type-valid? "string" 1)])
   => [true true true true true true true false])
 
-^{:refer xt.mcp.base/tool-result :added "4.1"}
+^{:refer kmi.mcp.base/tool-result :added "4.1"}
 (fact "normalizes generic handler output into an MCP tool result"
 
   (!.js

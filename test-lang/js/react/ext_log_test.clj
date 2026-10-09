@@ -19,13 +19,14 @@
 ^{:refer js.react.ext-log/makeLog :added "4.0"}
 (fact "creates a React log"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var log (ext-log/makeLog {"maximum" 2}))
-     (xt/x:set-key document "__ext_log_test" {"log" log})
+     (xt/x:set-key (. props ["state"]) "log" log)
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var log (. document ["__ext_log_test"] ["log"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var log (. (. props ["state"]) ["log"]))
      (event-log/queue-entry log {"id" "a"}
                             nil
                             (fn [entry] entry)
@@ -37,7 +38,6 @@
               (fn []
                 (var result {"type" (. log ["::"])
                              "count" (event-log/get-count log)})
-                (xt/x:del-key document "__ext_log_test")
                 (resolve result))
               0))))))
   => {"type" "event.log" "count" 1})
@@ -45,14 +45,15 @@
 ^{:refer js.react.ext-log/listenLogLatest :added "4.0"}
 (fact "updates with the latest log entry"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var log (ext-log/makeLog {}))
+     (xt/x:set-key (. props ["state"]) "log" log)
      (var latest (ext-log/listenLogLatest log nil))
-     (xt/x:set-key document "__ext_log_test" {"log" log})
      (return (r/createElement "span" nil (JSON.stringify (or latest {})))))
-   {}
-   (fn [_ document _ _]
-     (var log (. document ["__ext_log_test"] ["log"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var log (. (. props ["state"]) ["log"]))
      (return
       (. (Promise.resolve
           (r/act
@@ -68,6 +69,5 @@
                      (var latest (JSON.parse document.body.textContent))
                      (var result {"id" (xt/x:is-string? (. latest ["id"]))
                                   "count" (event-log/get-count log)})
-                     (xt/x:del-key document "__ext_log_test")
                      (return result))))))))))
   => {"id" true "count" 1})

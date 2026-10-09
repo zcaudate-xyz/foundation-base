@@ -1,11 +1,11 @@
-(ns xt.mcp.node.client-base
+(ns kmi.mcp.node.client-base
   (:require [lang.core :as l]))
 
 (l/script :xtalk
-  {:require [[xt.mcp.base :as base]
-             [xt.mcp.node.proxy-util :as proxy-util]]})
+  {:require [[kmi.mcp.base :as base]
+             [kmi.mcp.node.proxy-util :as proxy-util]]})
 
-(def.xt MESSAGE_ACTION "@xt.mcp/message")
+(def.xt MESSAGE_ACTION "@kmi.mcp/message")
 
 (defn.xt message
   "sends one decoded MCP JSON-RPC message through a substrate node"

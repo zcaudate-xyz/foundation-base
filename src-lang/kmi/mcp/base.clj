@@ -1,4 +1,4 @@
-(ns xt.mcp.base
+(ns kmi.mcp.base
   (:require [lang.core :as l]))
 
 (l/script :xtalk
@@ -8,7 +8,7 @@
 (def.xt PROTOCOL_VERSION "2025-11-25")
 
 (defn.xt schema-wire
-  "converts the portable snake_case schema keys used by xt.mcp to MCP wire keys"
+  "converts the portable snake_case schema keys used by kmi.mcp to MCP wire keys"
   {:added "4.1"}
   [schema]
   (when (xt/x:nil? schema)

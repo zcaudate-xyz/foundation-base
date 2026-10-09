@@ -1,12 +1,12 @@
-(ns xt.mcp.node.proxy-base
+(ns kmi.mcp.node.proxy-base
   (:require [lang.core :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.spec-base :as xt]
              [xt.substrate :as substrate]
-             [xt.mcp.node.proxy-util :as proxy-util]]})
+             [kmi.mcp.node.proxy-util :as proxy-util]]})
 
-(def.xt MESSAGE_ACTION "@xt.mcp/message")
+(def.xt MESSAGE_ACTION "@kmi.mcp/message")
 
 (defn.xt request-proxy
   "forwards an MCP message to the server node"

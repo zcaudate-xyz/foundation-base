@@ -1,6 +1,6 @@
 (ns postgres.gen.mcp
   "Extracts opt-in MCP tool descriptors from PostgreSQL definitions. This
-   namespace produces data only; executable handlers are attached by xt.mcp.node."
+   namespace produces data only; executable handlers are attached by kmi.mcp.node."
   (:require [lang.core :as l]
             [postgres.gen.bind-macro :as bind]
             [postgres.gen.template-code :as template]))
@@ -92,7 +92,7 @@
     entries))
 
 (defn render-module
-  "renders descriptors as an xt.mcp data module"
+  "renders descriptors as an kmi.mcp data module"
   {:added "4.1"}
   [target-ns source-namespaces]
   (template/render-module target-ns :mcp (tool-entries source-namespaces)))

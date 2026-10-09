@@ -1,10 +1,10 @@
-(ns xt.mcp.node.runtime
+(ns kmi.mcp.node.runtime
   (:require [lang.core :as l]))
 
 (l/script :xtalk
-  {:require [[xt.mcp.node.kernel-base :as kernel-base]
-             [xt.mcp.node.proxy-base :as proxy-base]
-             [xt.mcp.node.proxy-util :as proxy-util]]})
+  {:require [[kmi.mcp.node.kernel-base :as kernel-base]
+             [kmi.mcp.node.proxy-base :as proxy-base]
+             [kmi.mcp.node.proxy-util :as proxy-util]]})
 
 (defn.xt init-server
   "installs the MCP addon and a named service on an existing substrate node"

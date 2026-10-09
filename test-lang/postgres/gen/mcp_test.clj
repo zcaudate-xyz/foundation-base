@@ -40,7 +40,7 @@
 
 ^{:refer postgres.gen.mcp/render-module :added "4.1"}
 (fact "renders MCP data through the generic module template"
-  (mcp/render-module 'xt.mcp.sample ['postgres.sample.scratch-v0])
+  (mcp/render-module 'kmi.mcp.sample ['postgres.sample.scratch-v0])
   => #(and (re-find #"\^\{:api/type :mcp\}" %)
            (re-find #":input_schema" %)
            (not (re-find #"xt.db" %))))

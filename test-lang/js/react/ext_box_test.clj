@@ -32,14 +32,14 @@
 (fact "updates a mounted component when a matching path changes"
 
   (helper-source/test
-   (fn []
-     (var box (ext-box/createBox {"account" "before" "other" "unchanged"}))
-     (xt/x:set-key document "__ext_box_test" {"box" box})
+   (fn [props]
+     (var box (. props ["box"]))
      (var value (ext-box/useListenBox box ["account"]))
      (return (r/createElement "span" nil value)))
-   {}
-   (fn [_ document _ _]
-     (var box (. document ["__ext_box_test"] ["box"]))
+   (fn [_]
+     (return {"box" (ext-box/createBox {"account" "before" "other" "unchanged"})}))
+   (fn [props document _]
+     (var box (. props ["box"]))
      (var before document.body.innerHTML)
      (var React (require "react"))
      (return
@@ -51,7 +51,6 @@
          (then (fn [_]
                  (var result {"before" before
                               "after" document.body.innerHTML})
-                 (xt/x:del-key document "__ext_box_test")
                  (return result)))))))
   => {"before" "<div id=\"root\"><span>before</span></div>"
       "after" "<div id=\"root\"><span>after</span></div>"})
@@ -59,14 +58,14 @@
 ^{:refer js.react.ext-box/listenBox :added "4.0"}
 (fact "provides the listener alias"
   (helper-source/test
-   (fn []
-     (var box (ext-box/createBox {"value" "a"}))
-     (xt/x:set-key document "__ext_box_test" {"box" box})
+   (fn [props]
+     (var box (. props ["box"]))
      (return (r/createElement "span" nil
                               (ext-box/listenBox box ["value"]))))
-   {}
-   (fn [_ document _ _]
-     (var box (. document ["__ext_box_test"] ["box"]))
+   (fn [_]
+     (return {"box" (ext-box/createBox {"value" "a"})}))
+   (fn [props document _]
+     (var box (. props ["box"]))
      (var React (require "react"))
      (return
       (. (Promise.resolve
@@ -75,27 +74,21 @@
              (event-box/set-data box ["value"] "b"))))
          (then (fn [_]
                  (var result document.body.innerHTML)
-                 (xt/x:del-key document "__ext_box_test")
                  (return result)))))))
   => "<div id=\"root\"><span>b</span></div>")
 
 ^{:refer js.react.ext-box/useBox :added "4.0"}
 (fact "returns a setter that updates the box and component"
+
   (helper-source/test
-   (fn []
-     (var box (ext-box/createBox {"account" "before"}))
-     (var controls {})
-     (xt/x:set-key document "__ext_box_test" {"box" box
-                                              "controls" controls})
+   (fn [#{box controls}]
      (var [value setValue] (ext-box/useBox box ["account"]))
      (xt/x:set-key controls "setValue" setValue)
      (return (r/createElement "span" nil value)))
-   {}
-   (fn [_ document _ _]
-     (var state (. document ["__ext_box_test"]))
-     (var box (. state ["box"]))
-     (var controls (. state ["controls"]))
-     (var React (require "react"))
+   (fn [_]
+     (return {"box" (ext-box/createBox {"account" "before"})
+              "controls" {}}))
+   (fn [#{box controls} document _]
      (return
       (. (Promise.resolve
           (r/act
@@ -104,7 +97,6 @@
          (then (fn [_]
                  (var result {"html" document.body.innerHTML
                               "data" (event-box/get-data box ["account"])})
-                 (xt/x:del-key document "__ext_box_test")
                  (return result)))))))
   => {"html" "<div id=\"root\"><span>after</span></div>"
       "data" "after"})
@@ -113,11 +105,13 @@
 (fact "loads and persists a box path through localStorage"
   (helper-source/test
    (fn [] (return nil))
-   {}
-   (fn [_ _ _ _]
+   (fn [_]
      (. localStorage (setItem "box-storage" "{\"account\":\"stored\"}"))
      (var box (ext-box/createBox {"account" "initial"}))
      (ext-box/attachLocalStorage "box-storage" box "storage-listener" ["account"])
+     (return {"box" box}))
+   (fn [props _ _]
+     (var box (. props ["box"]))
      (var loaded (event-box/get-data box ["account"]))
      (event-box/set-data box ["account"] "updated")
      (return

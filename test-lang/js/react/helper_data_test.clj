@@ -66,9 +66,8 @@
 ^{:refer js.react.helper-data/wrapForward :added "4.0"}
 (fact "forwards a ref through the data wrapper"
   (helper-source/test
-   (fn []
-     (var target (r/createRef))
-     (xt/x:set-key document "__helper_data_test" {"target" target})
+   (fn [props]
+     (var target (. props ["target"]))
      (var Wrapped
           (data/wrapForward
            (fn [props]
@@ -77,13 +76,13 @@
                                       "forwarded")))
            "ForwardedButton"))
      (return (r/createElement Wrapped {"ref" target})))
-   {}
-   (fn [_ document _ _]
-     (var targetRef (. document ["__helper_data_test"] ["target"]))
+   (fn [_]
+     (return {"target" (r/createRef)}))
+   (fn [props document _]
+     (var targetRef (. props ["target"]))
      (var target (. targetRef ["current"]))
      (var result {"html" document.body.innerHTML
                   "tag" (. target ["tagName"])})
-     (xt/x:del-key document "__helper_data_test")
      (return result)))
   => {"html" "<div id=\"root\"><button>forwarded</button></div>"
       "tag" "BUTTON"})

@@ -1,4 +1,4 @@
-(ns xt.mcp.node.proxy-util
+(ns kmi.mcp.node.proxy-util
   (:require [lang.core :as l]))
 
 (l/script :xtalk
