@@ -29,39 +29,39 @@
 ^{:refer js.react.ext-form/makeFree :added "4.0"}
 (fact "creates a free form without validators"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeFree (fn [] (return {"first" "Ada" "extra" 1})) ["first"]))
-     (xt/x:set-key document "__ext_form_test" {"form" form})
+     (xt/x:set-key (. props ["state"]) "form" form)
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var form (. document ["__ext_form_test"] ["form"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var form (. (. props ["state"]) ["form"]))
      (var result (event-form/get-data form))
-     (xt/x:del-key document "__ext_form_test")
      (return result)))
   => {"first" "Ada"})
 
 ^{:refer js.react.ext-form/makeFreeEdit :added "4.0"}
 (fact "returns an editable free form state"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var record {"name" "Ada"})
      (var #{form isChanged}
           (ext-form/makeFreeEdit
            (fn [value] (return {"name" "Ada" "extra" 1}))
            ["name"]
            [record]))
-     (xt/x:set-key document "__ext_form_test" {"form" form
-                                                "isChanged" isChanged})
+     (xt/x:set-key (. props ["state"]) "form" form)
+     (xt/x:set-key (. props ["state"]) "isChanged" isChanged)
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var state (. document ["__ext_form_test"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var state (. props ["state"]))
      (var form (. state ["form"]))
      (event-form/set-field form "name" "Grace")
      (var result {"data" (event-form/get-data form)
                   "changed" ((. state ["isChanged"]))})
-     (xt/x:del-key document "__ext_form_test")
      (return result)))
   => {"data" {"name" "Grace"} "changed" false})
 
@@ -79,25 +79,25 @@
 ^{:refer js.react.ext-form/makeForm :added "4.0"}
 (fact "creates a validated form"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
-     (xt/x:set-key document "__ext_form_test" {"form" form})
+     (xt/x:set-key (. props ["state"]) "form" form)
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var form (. document ["__ext_form_test"] ["form"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var form (. (. props ["state"]) ["form"]))
      (var result {"type" (. form ["::"])
                   "data" (event-form/get-data form)
                   "status" (. (event-form/get-field-result form "first") ["status"])})
-     (xt/x:del-key document "__ext_form_test")
      (return result)))
   => {"type" "event.form" "data" {"first" "Ada"} "status" "pending"})
 
 ^{:refer js.react.ext-form/useListener :added "4.0"}
 (fact "updates all listener variants when form data changes"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
      (var fields (ext-form/listenFields form ["first"] nil))
@@ -108,7 +108,7 @@
      (var formState (ext-form/listenForm form nil))
      (var formData (ext-form/listenFormData form nil))
      (var formResult (ext-form/listenFormResult form nil))
-     (xt/x:set-key document "__ext_form_test" {"form" form})
+     (xt/x:set-key (. props ["state"]) "form" form)
      (return
       (r/createElement "span" nil
                        (JSON.stringify
@@ -120,18 +120,18 @@
                          "form" (xt/x:get-key (. formState ["data"]) "first")
                          "formData" (xt/x:get-key formData "first")
                          "formResult" (. formResult ["status"])}))))
-   {}
-   (fn [_ document _ _]
-     (var state (. document ["__ext_form_test"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var form (. (. props ["state"]) ["form"]))
      (return
       (. (Promise.resolve
-          (r/act (fn [] (event-form/set-field (. state ["form"]) "first" "Grace"))))
+          (r/act (fn [] (event-form/set-field form "first" "Grace"))))
          (then (fn [_]
                  (return
                   (helper/await-dom
                    (fn []
                      (var result (JSON.parse document.body.textContent))
-                     (xt/x:del-key document "__ext_form_test")
                      (return result))))))))))
   => {"fields" "Grace"
       "fieldsData" "Grace"

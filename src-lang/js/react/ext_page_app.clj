@@ -11,8 +11,9 @@
              [js.react.ext-model :as ext-model]
              [xt.lang.spec-promise :as promise]]})
 
-(defn.js listen-sync [source callback]
+(defn.js listen-sync
   {:added "4.1"}
+  [source callback]
   (cond
     (xt/x:is-function? source) (return (source callback))
     (and (xt/x:is-object? source)
