@@ -171,3 +171,36 @@
                     component
                     props
                     callback))))
+
+
+(defn.js withScaffold
+  "renders a component in an isolated JSDOM environment"
+  {:added "4.1"
+   :public true}
+  [component setup callback]
+  (:= callback (or callback
+                   (fn [element]
+                     (return element))))
+  (return
+   (-/withEnv {}
+              (fn [env]
+                (var props (:? (xt/x:is-function? setup)
+                               (setup env)
+                               (or setup {})))
+                (return
+                 (. (-/render env component (or props {}))
+                    (then (fn [element]
+                            (return
+                             (callback props document env))))))))))
+
+(defmacro test
+  "runs a JSDOM callback through notify/wait-on and repl/notify"
+  {:added "4.1"}
+  [component setup callback]
+  (list 'xt.lang.common-notify/wait-on
+        [:js 5000]
+        (list 'xt.lang.common-repl/notify
+              (list js.react.helper-jsdom/withScaffold
+                    component
+                    setup
+                    callback))))

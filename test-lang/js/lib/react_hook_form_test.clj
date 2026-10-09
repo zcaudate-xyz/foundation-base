@@ -19,7 +19,7 @@
 
 ^{:refer js.lib.react-hook-form/useFormState :added "4.1"}
 (fact "creates a form with default values"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var controls (form/useFormState
                     {"defaultValues" {"name" "Ada"}}))
@@ -34,7 +34,7 @@
 
 ^{:refer js.lib.react-hook-form/useFormStateMap :added "4.1"}
 (fact "passes a form state map through unchanged"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
@@ -46,7 +46,7 @@
 
 ^{:refer js.lib.react-hook-form/useControls :added "4.1"}
 (fact "passes form controls through unchanged"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]

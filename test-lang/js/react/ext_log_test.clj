@@ -18,7 +18,7 @@
 
 ^{:refer js.react.ext-log/makeLog :added "4.0"}
 (fact "creates a React log"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var log (ext-log/makeLog {"maximum" 2}))
      (xt/x:set-key document "__ext_log_test" {"log" log})
@@ -44,7 +44,7 @@
 
 ^{:refer js.react.ext-log/listenLogLatest :added "4.0"}
 (fact "updates with the latest log entry"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var log (ext-log/makeLog {}))
      (var latest (ext-log/listenLogLatest log nil))

@@ -18,7 +18,7 @@
 
 ^{:refer js.react.ext-route/makeRoute :added "4.0"}
 (fact "creates a React route from an initial URL"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var route (ext-route/makeRoute "/home?tab=one"))
      (xt/x:set-key document "__ext_route_test" {"route" route})
@@ -37,7 +37,7 @@
 
 ^{:refer js.react.ext-route/listenRouteTree :added "4.0"}
 (fact "tracks route tree changes"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var route (ext-route/makeRoute "/home"))
      (var tree (ext-route/listenRouteTree route))
@@ -60,7 +60,7 @@
 
 ^{:refer js.react.ext-route/listenRouteUrl :added "4.0"}
 (fact "tracks route URL changes"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var route (ext-route/makeRoute "/home"))
      (var url (ext-route/listenRouteUrl route))
@@ -81,7 +81,7 @@
 
 ^{:refer js.react.ext-route/useRouteUrl :added "4.0"}
 (fact "returns a route URL setter"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var route (ext-route/makeRoute "/home"))
      (var [url setUrl] (ext-route/useRouteUrl route))
@@ -103,7 +103,7 @@
 
 ^{:refer js.react.ext-route/listenRouteSegment :added "4.0"}
 (fact "tracks a route segment"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var route (ext-route/makeRoute "/home"))
      (var segment (ext-route/listenRouteSegment route ["home"] "fallback"))
@@ -124,7 +124,7 @@
 
 ^{:refer js.react.ext-route/useRouteSegment :added "4.0"}
 (fact "returns a route segment setter"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var route (ext-route/makeRoute "/home"))
      (var [segment setSegment] (ext-route/useRouteSegment route ["home"] "fallback"))
@@ -146,7 +146,7 @@
 
 ^{:refer js.react.ext-route/listenRouteParam :added "4.0"}
 (fact "tracks a route parameter"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var route (ext-route/makeRoute "/home?tab=one"))
      (var value (ext-route/listenRouteParam route "tab" "fallback"))
@@ -167,7 +167,7 @@
 
 ^{:refer js.react.ext-route/useRouteParam :added "4.0"}
 (fact "returns a route parameter setter"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var route (ext-route/makeRoute "/home"))
      (var [value setValue] (ext-route/useRouteParam route "tab" "fallback"))
@@ -189,7 +189,7 @@
 
 ^{:refer js.react.ext-route/useRouteParamFlag :added "4.0"}
 (fact "maps a route parameter to a binary flag"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var route (ext-route/makeRoute "/home"))
      (var [flag setFlag] (ext-route/useRouteParamFlag route "enabled" "yes" nil))

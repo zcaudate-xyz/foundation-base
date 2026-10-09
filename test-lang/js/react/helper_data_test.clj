@@ -34,7 +34,7 @@
 
 ^{:refer js.react.helper-data/useWrappedComponent :added "4.0"}
 (fact "passes nested context data to the wrapped component"
-  (helper-source/wait-on
+  (helper-source/test
    (data/wrapData
     (fn []
       (var WrappedChild
@@ -65,7 +65,7 @@
 
 ^{:refer js.react.helper-data/wrapForward :added "4.0"}
 (fact "forwards a ref through the data wrapper"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var target (r/createRef))
      (xt/x:set-key document "__helper_data_test" {"target" target})

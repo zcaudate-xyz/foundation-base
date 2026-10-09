@@ -28,7 +28,7 @@
 
 ^{:refer js.react.ext-form/makeFree :added "4.0"}
 (fact "creates a free form without validators"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeFree (fn [] (return {"first" "Ada" "extra" 1})) ["first"]))
      (xt/x:set-key document "__ext_form_test" {"form" form})
@@ -43,7 +43,7 @@
 
 ^{:refer js.react.ext-form/makeFreeEdit :added "4.0"}
 (fact "returns an editable free form state"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var record {"name" "Ada"})
      (var #{form isChanged}
@@ -78,7 +78,7 @@
 
 ^{:refer js.react.ext-form/makeForm :added "4.0"}
 (fact "creates a validated form"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -96,7 +96,7 @@
 
 ^{:refer js.react.ext-form/useListener :added "4.0"}
 (fact "updates all listener variants when form data changes"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -159,7 +159,7 @@
 
 ^{:refer js.react.ext-form/listenFields :added "4.0"}
 (fact "listens to multiple field values and results"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -177,7 +177,7 @@
 
 ^{:refer js.react.ext-form/listenFieldsData :added "4.0"}
 (fact "listens to multiple field data"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -193,7 +193,7 @@
 
 ^{:refer js.react.ext-form/listenField :added "4.0"}
 (fact "listens to one field value and result"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -211,7 +211,7 @@
 
 ^{:refer js.react.ext-form/listenFieldValue :added "4.0"}
 (fact "listens to only one field value"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -227,7 +227,7 @@
 
 ^{:refer js.react.ext-form/listenFieldResult :added "4.0"}
 (fact "listens to one field result"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -243,7 +243,7 @@
 
 ^{:refer js.react.ext-form/listenForm :added "4.0"}
 (fact "listens to the complete form"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -259,7 +259,7 @@
 
 ^{:refer js.react.ext-form/listenFormData :added "4.0"}
 (fact "listens to complete form data"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -275,7 +275,7 @@
 
 ^{:refer js.react.ext-form/listenFormResult :added "4.0"}
 (fact "returns the form validation result"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
@@ -294,7 +294,7 @@
 
 ^{:refer js.react.ext-form/useSubmitField :added "4.0"}
 (fact "returns submit actions for one field"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" ""}))
                                   {"first" [["required" {"message" "Required"
@@ -321,7 +321,7 @@
 
 ^{:refer js.react.ext-form/useSubmitForm :added "4.0"}
 (fact "returns submit actions for the form"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))

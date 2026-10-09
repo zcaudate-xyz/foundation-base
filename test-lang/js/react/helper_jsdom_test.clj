@@ -145,16 +145,30 @@
       "same-document" true
       "element-type" "undefined"})
 
-^{:refer js.react.helper-jsdom/wait-on :added "4.1"}
+^{:refer js.react.helper-jsdom/withScaffold :added "4.1"}
+(fact "passes scaffold props and callback context"
+  (helper-source/test
+   (fn [props]
+     (return [:span (. props ["label"])]))
+   {"label" "Ada"}
+   (fn [props document env]
+     (return {"label" (. props ["label"])
+              "html" document.body.innerHTML
+              "root-id" (. env ["root"] ["id"])})))
+  => {"label" "Ada"
+      "html" "<div id=\"root\"><span>Ada</span></div>"
+      "root-id" "root"})
+
+^{:refer js.react.helper-jsdom/test :added "4.1"}
 (fact "sets up and tears down JSDOM around a React callback"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var React (require "react"))
      (var [value setValue] (React.useState "before"))
      (React.useEffect (fn [] (setValue "after")) [])
      (return (React.createElement "span" nil value)))
    {}
-   (fn [_ document _ _]
+   (fn [_ document _]
      (return document.body.innerHTML)))
   => "<div id=\"root\"><span>after</span></div>"
 

@@ -36,7 +36,7 @@
 
 ^{:refer js.lib.valtio/useVal :added "4.0"}
 (fact "reads a selected snapshot value"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var store (v/make {"name" "Ada"}))
      (return (r/createElement "span" nil
@@ -48,7 +48,7 @@
 
 ^{:refer js.lib.valtio/val :added "4.0"}
 (fact "expands the value macro to a selected snapshot value"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var store (v/make {"name" "Ada"}))
      (return (r/createElement "span" nil
@@ -60,7 +60,7 @@
 
 ^{:refer js.lib.valtio/listen :added "4.0"}
 (fact "expands the listener macro for multiple stores"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var firstStore (v/make {"value" "one"}))
      (var secondStore (v/make {"value" "two"}))
@@ -76,7 +76,7 @@
 
 ^{:refer js.lib.valtio/getAccessors :added "4.0"}
 (fact "creates snapshot getters and proxy setters"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var store (v/make {"value" "before"}))
      (var [getValue setValue resetValue] (v/getAccessors store))
@@ -93,7 +93,7 @@
 
 ^{:refer js.lib.valtio/getFieldAccessors :added "4.0"}
 (fact "creates accessors for one proxy field"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var store (v/make {"value" "before"}))
      (var [getValue setValue resetValue]
@@ -111,7 +111,7 @@
 
 ^{:refer js.lib.valtio/useProxy :added "4.0"}
 (fact "returns a reactive proxy value and setter"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var store (v/make {"value" "before"}))
      (var [value setValue] (v/useProxy store))
@@ -126,7 +126,7 @@
 
 ^{:refer js.lib.valtio/useProxyField :added "4.0"}
 (fact "returns a reactive proxy field and setter"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var store (v/make {"value" "before"}))
      (var [value setValue] (v/useProxyField store "value"))
@@ -139,7 +139,7 @@
 
 ^{:refer js.lib.valtio/wrapProxyField :added "4.0"}
 (fact "wraps a component with a proxy field"
-  (helper-source/wait-on
+  (helper-source/test
    (v/wrapProxyField
     (fn [props]
       (return (r/createElement "span" nil (. props ["value"]))))
@@ -152,7 +152,7 @@
 
 ^{:refer js.lib.valtio/use :added "4.0"}
 (fact "expands the proxy hook macro"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var store (v/make {"value" "ready"}))
      (var [value] (v/use store))
@@ -164,7 +164,7 @@
 
 ^{:refer js.lib.valtio/useData :added "4.0"}
 (fact "provides data state and reset controls"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var store (v/make {"value" "before" "enabled" false}))
      (var data (v/useData store (fn:> {"value" "initial"

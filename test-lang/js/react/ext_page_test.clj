@@ -125,7 +125,7 @@
 
 ^{:refer js.react.ext-page/initModelBase :added "4.1"}
 (fact "updates the keyed listener result"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var node (substrate/node-create (-/create-node)))
      (page-core/group-add-attach node "space/a" "page"
@@ -228,7 +228,7 @@
 
 ^{:refer js.react.ext-page/listenModelOutput :added "4.1"}
 (fact "updates the full output record"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var node (substrate/node-create (-/create-node)))
      (page-core/group-add-attach node "space/a" "page"
@@ -261,7 +261,7 @@
 
 ^{:refer js.react.ext-page/listenModelThrottled :added "4.1"}
 (fact "throttles successful page output"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var node (substrate/node-create (-/create-node)))
      (page-core/group-add-attach node "space/a" "page"
@@ -295,7 +295,7 @@
 
 ^{:refer js.react.ext-page/useRefreshArgs :added "4.1"}
 (fact "refreshes page model input from React args"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var node (substrate/node-create (-/create-node)))
      (page-core/group-add-attach node "space/a" "page"
@@ -322,7 +322,7 @@
 
 ^{:refer js.react.ext-page/listenSuccess :added "4.1"}
 (fact "returns the successful page output"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var node (substrate/node-create (-/create-node)))
      (page-core/group-add-attach node "space/a" "page"

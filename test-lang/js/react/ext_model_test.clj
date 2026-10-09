@@ -136,7 +136,7 @@
   => {"type" "event.model" "input" {"data" [3]}})
 ^{:refer js.react.ext-model/makeViewRaw :added "4.0"}
 (fact "creates a raw view inside a component"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var view (ext-model/makeViewRaw {"handler" (fn:> [x] (return x))
                                        "defaultArgs" [1]
@@ -151,7 +151,7 @@
   => true)
 ^{:refer js.react.ext-model/makeView :added "4.0"}
 (fact "creates a React stable view"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var view (ext-model/makeView {"handler" (fn:> [x] (return x))
                                     "defaultArgs" [1]
@@ -166,7 +166,7 @@
   => true)
 ^{:refer js.react.ext-model/initViewBase :added "4.0"}
 (fact "registers a view listener and returns teardown"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
      (var [value setValue] (r/local nil))
@@ -189,7 +189,7 @@
   => {"listener" true "cleanup" true})
 ^{:refer js.react.ext-model/listenView :added "4.0"}
 (fact "listens to the current view output"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
      (var value (ext-model/listenView view "output" nil nil nil))
@@ -216,7 +216,7 @@
   => {"value" 2})
 ^{:refer js.react.ext-model/listenViewOutput :added "4.0"}
 (fact "listens to selected output events"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
      (var value (ext-model/listenViewOutput view ["output"] nil nil nil))
@@ -244,7 +244,7 @@
   => {"type" "output" "current" nil})
 ^{:refer js.react.ext-model/listenViewThrottled :added "4.0"}
 (fact "returns a throttled successful output listener"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var view (-/make-test-view (fn:> [x] (return x)) {} [] nil))
      (var value (ext-model/listenViewThrottled view 10 nil nil))
@@ -297,7 +297,7 @@
   => {"value" 9})
 ^{:refer js.react.ext-model/useRefreshArgs :added "4.0"}
 (fact "watches React args and starts a refresh"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var view (-/make-test-view (fn:> [x] (return {"value" x})) {} [2] nil))
      (var result (ext-model/useRefreshArgs view [2] {"remote" "none"}))
@@ -317,7 +317,7 @@
   => {"args" {"data" [2]} "result" true})
 ^{:refer js.react.ext-model/listenSuccess :added "4.0"}
 (fact "combines a success listener with argument refresh"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var view (-/make-test-view (fn:> [x] (return {"value" x})) {} [3] {"fallback" true}))
      (var result (ext-model/listenSuccess view [3] {"remote" "none"

@@ -22,7 +22,7 @@
 
 ^{:refer js.react/curr :added "4.1"}
 (fact "reads a ref current value"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var valueRef (r/ref "value"))
      (return [:span (r/curr valueRef)]))
@@ -33,7 +33,7 @@
 
 ^{:refer js.react/curr:set :added "4.1"}
 (fact "writes a ref current value"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var valueRef (r/ref "before"))
      (r/curr:set valueRef "after")
@@ -45,7 +45,7 @@
 
 ^{:refer js.react/const :added "4.1"}
 (fact "keeps a stable constant value"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var value (r/const "constant"))
      (return [:span value]))
@@ -56,7 +56,7 @@
 
 ^{:refer js.react/derive :added "4.1"}
 (fact "derives a callback from a dependency list"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var derived (r/derive []
                             (fn [] (return "derived"))))
@@ -68,7 +68,7 @@
 
 ^{:refer js.react/init :added "4.1"}
 (fact "runs an effect once after mount"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [value setValue] (r/local "before"))
      (r/init []
@@ -81,7 +81,7 @@
 
 ^{:refer js.react/run :added "4.1"}
 (fact "runs an effect without an explicit dependency list"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [value setValue] (r/local false))
      (r/run []
@@ -95,7 +95,7 @@
 
 ^{:refer js.react/watch :added "4.1"}
 (fact "reruns an effect when a watched state changes"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [value setValue] (r/local "before"))
      (var [seen setSeen] (r/local "pending"))
@@ -112,7 +112,7 @@
 
 ^{:refer js.react/sync :added "4.1"}
 (fact "synchronizes one state value into another"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [value setValue] (r/local "source"))
      (var [synced setSynced] (r/local "initial"))
@@ -135,7 +135,7 @@
 
 ^{:refer js.react/ui :added "4.1"}
 (fact "compiles a layout into a React element tree"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (return (r/ui [:span "ui"] {})))
    {}
@@ -145,7 +145,7 @@
 
 ^{:refer js.react/return-ui :added "4.1"}
 (fact "returns a compiled full UI definition"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (r/return-ui {:states {}
                    :actions {}
@@ -159,7 +159,7 @@
 
 ^{:refer js.react/getDOMRoot :added "4.1"}
 (fact "finds the React root attached to a DOM node"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
@@ -174,7 +174,7 @@
 
 ^{:refer js.react/renderDOMRoot :added "4.1"}
 (fact "renders a component into a named DOM root"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ document _ _]
@@ -201,7 +201,7 @@
 
 ^{:refer js.react/useStateFor :added "4.1"}
 (fact "returns a state value and its generated setter"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var controls {"value" "ready"
                     "setValue" (fn [v] (return v))})
@@ -215,7 +215,7 @@
 
 ^{:refer js.react/id :added "4.1"}
 (fact "creates a stable random id of the requested length"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var ident (r/id 8))
      (return (JSON.stringify
@@ -229,7 +229,7 @@
 
 ^{:refer js.react/ref :added "4.1"}
 (fact "creates a React ref with an initial value"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var valueRef (r/ref "initial"))
      (return [:span (r/curr valueRef)]))
@@ -240,7 +240,7 @@
 
 ^{:refer js.react/local :added "4.1"}
 (fact "creates local state and applies an initial effect"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [value setValue] (r/local "before"))
      (r/init []
@@ -253,7 +253,7 @@
 
 ^{:refer js.react/useStep :added "4.1"}
 (fact "completes a step from an effect callback"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [done setDone] (r/useStep (fn [complete]
                                       (complete true))))
@@ -265,7 +265,7 @@
 
 ^{:refer js.react/makeLazy :added "4.1"}
 (fact "keeps functions and wraps non-functions as lazy components"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var original (fn [] nil))
      (var direct (r/makeLazy original))
@@ -278,7 +278,7 @@
 
 ^{:refer js.react/useLazy :added "4.1"}
 (fact "returns a stable lazy component"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var lazy (r/useLazy {}))
      (return [:span (typeof lazy)]))
@@ -289,7 +289,7 @@
 
 ^{:refer js.react/useRefresh :added "4.1"}
 (fact "refreshes the component when called"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var renderRef (r/ref 0))
      (r/curr:set renderRef (+ 1 (r/curr renderRef)))
@@ -303,7 +303,7 @@
 
 ^{:refer js.react/useGetCount :added "4.1"}
 (fact "counts completed renders"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [ready setReady] (r/local false))
      (var getCount (r/useGetCount))
@@ -316,7 +316,7 @@
 
 ^{:refer js.react/useFollowRef :added "4.1"}
 (fact "follows a changing value in a ref"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [value setValue] (r/local "before"))
      (var valueRef (r/useFollowRef value))
@@ -332,7 +332,7 @@
 
 ^{:refer js.react/useIsMounted :added "4.1"}
 (fact "reports mounted during setup and unmounted during cleanup"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [status setStatus] (r/local "none"))
      (var isMounted (r/useIsMounted))
@@ -345,7 +345,7 @@
 
 ^{:refer js.react/useIsMountedWrap :added "4.1"}
 (fact "does not invoke wrapped callbacks after unmount"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [status setStatus] (r/local "none"))
      (var wrap (r/useIsMountedWrap))
@@ -359,7 +359,7 @@
 
 ^{:refer js.react/useMountedCallback :added "4.1"}
 (fact "calls back on mount and unmount"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [status setStatus] (r/local "none"))
      (r/useMountedCallback
@@ -373,7 +373,7 @@
 
 ^{:refer js.react/useFollowDelayed :added "4.1"}
 (fact "returns the value immediately for zero delay"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [value setter] (r/useFollowDelayed "ready" 0 (fn [] (return true))))
      (return [:span (+ value ":" (typeof setter))]))
@@ -384,7 +384,7 @@
 
 ^{:refer js.react/useStablized :added "4.1"}
 (fact "keeps the previous value when input changes"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [data setData] (r/local {"value" 1}))
      (var stable (r/useStablized data true))
@@ -398,7 +398,7 @@
 
 ^{:refer js.react/runIntervalStop :added "4.1"}
 (fact "stops and clears an active interval ref"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
@@ -411,7 +411,7 @@
 
 ^{:refer js.react/runIntervalStart :added "4.1"}
 (fact "starts an interval when a delay is configured"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
@@ -433,7 +433,7 @@
 
 ^{:refer js.react/useInterval :added "4.1"}
 (fact "exposes start and stop interval controls"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [status setStatus] (r/local "initial"))
      (var #{stopInterval
@@ -450,7 +450,7 @@
 
 ^{:refer js.react/runTimeoutStop :added "4.1"}
 (fact "stops and clears an active timeout ref"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var timeoutRef (r/ref (setTimeout (fn [] nil) 1000)))
      (var stopped (r/runTimeoutStop timeoutRef))
@@ -465,7 +465,7 @@
 
 ^{:refer js.react/runTimeoutStart :added "4.1"}
 (fact "starts and replaces a timeout"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
@@ -486,7 +486,7 @@
 
 ^{:refer js.react/useTimeout :added "4.1"}
 (fact "exposes start and stop timeout controls"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [status setStatus] (r/local "initial"))
      (var #{stopTimeout
@@ -503,7 +503,7 @@
 
 ^{:refer js.react/useCountdown :added "4.1"}
 (fact "returns countdown state and controls"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [current setCurrent controls]
        (r/useCountdown 3 nil {"interval" 1000000}))
@@ -517,7 +517,7 @@
 
 ^{:refer js.react/useNow :added "4.1"}
 (fact "returns the current time and controls"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [current controls] (r/useNow 1000000))
      (return [:span (+ (typeof current) ":"
@@ -530,7 +530,7 @@
 
 ^{:refer js.react/useSubmit :added "4.1"}
 (fact "returns submit state and reports an error result"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var controls
           (r/useSubmit {"result" {"status" "error"}
@@ -556,7 +556,7 @@
 
 ^{:refer js.react/convertIndex :added "4.1"}
 (fact "converts values to indices and back"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
@@ -582,7 +582,7 @@
 
 ^{:refer js.react/convertModular :added "4.1"}
 (fact "converts modular indices"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
@@ -603,7 +603,7 @@
 
 ^{:refer js.react/convertIndices :added "4.1"}
 (fact "converts selected values to boolean indices"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
@@ -623,7 +623,7 @@
 
 ^{:refer js.react/convertPosition :added "4.1"}
 (fact "converts between bounded values and positions"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
@@ -641,7 +641,7 @@
 
 ^{:refer js.react/useChanging :added "4.1"}
 (fact "changes the selected value when data no longer contains it"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var [data setData] (r/local ["A" "B"]))
      (var [value setValue] (r/useChanging data))
@@ -654,7 +654,7 @@
 
 ^{:refer js.react/useTree :added "4.1"}
 (fact "selects and renders a tree branch"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var controls
           (r/useTree

@@ -31,7 +31,7 @@
 ^{:refer js.react.ext-box/useListenBox :added "4.0"}
 (fact "updates a mounted component when a matching path changes"
 
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var box (ext-box/createBox {"account" "before" "other" "unchanged"}))
      (xt/x:set-key document "__ext_box_test" {"box" box})
@@ -58,7 +58,7 @@
 
 ^{:refer js.react.ext-box/listenBox :added "4.0"}
 (fact "provides the listener alias"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var box (ext-box/createBox {"value" "a"}))
      (xt/x:set-key document "__ext_box_test" {"box" box})
@@ -81,7 +81,7 @@
 
 ^{:refer js.react.ext-box/useBox :added "4.0"}
 (fact "returns a setter that updates the box and component"
-  (helper-source/wait-on
+  (helper-source/test
    (fn []
      (var box (ext-box/createBox {"account" "before"}))
      (var controls {})
@@ -111,7 +111,7 @@
 
 ^{:refer js.react.ext-box/attachLocalStorage :added "4.0"}
 (fact "loads and persists a box path through localStorage"
-  (helper-source/wait-on
+  (helper-source/test
    (fn [] (return nil))
    {}
    (fn [_ _ _ _]
