@@ -1,5 +1,6 @@
 (ns js.react.ext-table-app-test
   (:require [lang.core :as l]
+            [clojure.string :as str]
             [scaffold.supabase.local-min :as local-min]
             [postgres.core :as pg]
             [postgres.core.supabase :as s]
@@ -11,6 +12,7 @@
    :require [[xt.lang.common-notify :as notify]
              [xt.lang.common-repl :as repl]
              [xt.lang.spec-base :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.spec-promise :as promise]
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
@@ -99,6 +101,36 @@
                    {"where" [{"message" message}]
                     "data" ["id" "message"]}]}))
 
+(defn.js log-row
+  [row]
+  (return
+   (r/createElement "tr" nil
+                   (r/createElement "td" nil (. row ["id"]))
+                   (r/createElement "td" nil (. row ["message"])))))
+
+(defn.js log-view
+  [props]
+  (var view (. props ["view"]))
+  (var rows (or (ext-model/listenModelOutput view ["main"] {} nil nil) []))
+  (return
+   (r/createElement "table" {"data-testid" "log-view"}
+                   (r/createElement "thead" nil
+                                   (r/createElement "tr" nil
+                                                   (r/createElement "th" nil "ID")
+                                                   (r/createElement "th" nil "Message")))
+                   (r/createElement "tbody" nil
+                                   (xtd/arr-map rows
+                                                (fn [row]
+                                                  (return (-/log-row row))))))))
+
+(defn.js append-and-refresh
+  [action view]
+  (return
+   (-> (. action ["init"])
+       (promise/x:promise-then
+        (fn [_]
+          (return (ext-model/refresh-model view {})))))))
+
 (defn.js log-app
   [props]
   (var message (. props ["message"]))
@@ -121,7 +153,15 @@
   (xt/x:set-key (. props ["state"]) "node" node)
   (xt/x:set-key (. props ["state"]) "action" action)
   (xt/x:set-key (. props ["state"]) "view" view)
-  (return (r/createElement "span" nil "log-app")))
+  (var append (fn [] (return (-/append-and-refresh action view))))
+  (xt/x:set-key (. props ["state"]) "append" append)
+  (return
+   (r/createElement "section" nil
+                   (r/createElement "button"
+                                    {"data-testid" "append-log"
+                                     "onClick" append}
+                                    "Append")
+                   (r/createElement -/log-view {"view" view}))))
 
 ^{:refer js.react.ext-table-app-test/append-impl :added "4.1"}
 (fact "describes the public append RPC"
@@ -144,6 +184,17 @@
                       {"where" [{"message" "message"}]
                        "data" ["id" "message"]}]})
 
+^{:refer js.react.ext-table-app-test/log-row :added "4.1"}
+(fact "renders a Log row"
+  (helper-source/test
+   (fn [_]
+     (return (r/createElement -/log-row
+                              {"id" "row-id" "message" "row-message"})))
+   {}
+   (fn [_ document _]
+     (return document.body.innerHTML)))
+  => "<div id=\"root\"><tr><td>row-id</td><td>row-message</td></tr></div>")
+
 ^{:refer js.react.ext-table-app-test/log-app :added "4.1"}
 (fact "refreshes the mounted Log view after log-append-public completes"
   (let [message "ext-table-app/log-append-refresh"]
@@ -155,17 +206,15 @@
          (return (-/log-app props)))
        {"message" message}
        (fn [props document env]
-         (var action (. props ["state"] ["action"]))
+         (var append (. props ["state"] ["append"]))
          (var view (. props ["state"] ["view"]))
-         (-> (. action ["init"])
-             (promise/x:promise-then
-              (fn [_]
-                (return (ext-model/refresh-model view {}))))
+         (-> (append)
              (promise/x:promise-then
               (fn [_]
                 (return
                  (repl/notify
                   {"root-id" (. env ["root" "id"])
+                   "html" document.body.innerHTML
                    "rows" (event-model/get-current view nil)}))))
              (promise/x:promise-finally
               (fn []
@@ -176,6 +225,9 @@
                   {}))))))
        => (contains-in
            {"root-id" "root"
+            "html" (fn [html]
+                     (and (str/includes? html "data-testid=\"append-log\"")
+                          (str/includes? html "data-testid=\"log-view\"")))
             "rows" [{"id" string? "message" message}]}))
       (finally
         (pg/t:delete scratch-v0/Log
