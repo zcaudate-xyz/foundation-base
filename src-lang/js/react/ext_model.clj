@@ -37,11 +37,11 @@
                                   (xt/x:del-key throttle "thread"))))))))
   (return [throttled-fn throttle]))
 
-(defn.js refresh-view
-  "refreshes the view"
+(defn.js refresh-model
+  "refreshes the model"
   {:added "4.0"}
-  [view opts]
-  (var [context disabled] (event-model/pipeline-prep view opts))
+  [model opts]
+  (var [context disabled] (event-model/pipeline-prep model opts))
   (var #{acc} context)
   (return (. (event-model/pipeline-run
               context
@@ -58,19 +58,19 @@
                      (return acc))))))
 
 (defn.js refresh-args
-  "refreshes the view view args"
+  "refreshes the model model args"
   {:added "4.0"}
-  [view args opts]
+  [model args opts]
   
-  (event-model/set-input view {:data args})
-  (return (-/refresh-view view opts)))
+  (event-model/set-input model {:data args})
+  (return (-/refresh-model model opts)))
 
-(defn.js refresh-view-remote
-  "refreshes view using remote function"
+(defn.js refresh-model-remote
+  "refreshes model using remote function"
   {:added "4.0"}
-  [view save-output opts]
-  (when (xtd/get-in view ["pipeline" "remote" "handler"])
-    (var [context disabled] (event-model/pipeline-prep view opts))
+  [model save-output opts]
+  (when (xtd/get-in model ["pipeline" "remote" "handler"])
+    (var [context disabled] (event-model/pipeline-prep model opts))
     (var #{acc} context)
     
     (return (. (event-model/pipeline-run-remote
@@ -87,18 +87,18 @@
                (then (fn:> acc))))))
 
 (defn.js refresh-args-remote
-  "refreshes view using remote function with new args"
+  "refreshes model using remote function with new args"
   {:added "4.0"}
-  [view args save-output opts]
-  (event-model/set-input view {:data args})
-  (return (-/refresh-view-remote view save-output opts)))
+  [model args save-output opts]
+  (event-model/set-input model {:data args})
+  (return (-/refresh-model-remote model save-output opts)))
 
-(defn.js refresh-view-sync
-  "refreshes view using sync function"
+(defn.js refresh-model-sync
+  "refreshes model using sync function"
   {:added "4.0"}
-  [view save-output opts]
-  (when (xtd/get-in view ["pipeline" "sync" "handler"])
-    (var [context disabled] (event-model/pipeline-prep view opts))
+  [model save-output opts]
+  (when (xtd/get-in model ["pipeline" "sync" "handler"])
+    (var [context disabled] (event-model/pipeline-prep model opts))
     (var #{acc} context)
     (return (. (event-model/pipeline-run-sync
                 context
@@ -114,14 +114,14 @@
                (then (fn:> acc))))))
 
 (defn.js refresh-args-sync
-  "refreshes view using args function"
+  "refreshes model using args function"
   {:added "4.0"}
-  [view args save-output opts]
-  (event-model/set-input view {:data args})
-  (return (-/refresh-view-sync view save-output opts)))
+  [model args save-output opts]
+  (event-model/set-input model {:data args})
+  (return (-/refresh-model-sync model save-output opts)))
 
-(defn.js make-view
-  "makes and initialises view"
+(defn.js make-model
+  "makes and initialises model"
   {:added "4.0"}
   [main-handler
    pipeline
@@ -129,19 +129,19 @@
    default-output
    default-process
    options]
-  (var view (event-model/create-model
+  (var model (event-model/create-model
              main-handler
              pipeline
              default-args
              default-output
              default-process
              options))
-  (event-model/init-model view)
-  (xt/x:set-key view "init" (-/refresh-view view))
-  (return view))
+  (event-model/init-model model)
+  (xt/x:set-key model "init" (-/refresh-model model))
+  (return model))
 
-(defn.js makeViewRaw
-  "makes a react compatible view without r/const"
+(defn.js makeModelRaw
+  "makes a react compatible model without r/const"
   {:added "4.0"}
   [#{handler
      pipeline
@@ -150,15 +150,15 @@
      defaultProcess
      options}]
   (return
-   (-/make-view handler
+   (-/make-model handler
                 (or pipeline {})
                 defaultArgs
                 defaultOutput
                 defaultProcess
                 options)))
 
-(defn.js makeView
-  "makes a react compatible view"
+(defn.js makeModel
+  "makes a react compatible model"
   {:added "4.0"}
   [#{handler
      pipeline
@@ -167,7 +167,7 @@
      defaultProcess
      options}]
   (return
-   (r/const (-/makeViewRaw #{handler
+   (r/const (-/makeModelRaw #{handler
                              pipeline
                              defaultArgs
                              defaultOutput
@@ -182,10 +182,10 @@
    :disabled [event-model/get-output "disabled"]
    :success  [event-model/get-success nil "output"]})
 
-(defn.js initViewBase
-  "initialises the view listener"
+(defn.js initModelBase
+  "initialises the model listener"
   {:added "4.0"}
-  [view dest-key #{setResult
+  [model dest-key #{setResult
                    getResult
                    resultRef
                    resultTag
@@ -196,10 +196,10 @@
   (var listener-id (. (Math.random)
                       (toString 36)
                       (substr 2 4)))
-  (var cleanup (fn:> (event-model/remove-listener view listener-id)))
+  (var cleanup (fn:> (event-model/remove-listener model listener-id)))
   (r/init []
      (event-model/add-listener
-      view
+      model
       listener-id
       (fn [id data t meta]
         (var event (xtd/obj-clone data))
@@ -207,7 +207,7 @@
         (var nresult (getResult))
         (when (and (or (k/nil? resultTag)
                        (== resultTag (. event data tag)))
-                  (or (not= "view.output"
+                  (or (not= "model.output"
                             (. event type))
                       (== (. event data type)
                           (or dest-key "output")))
@@ -225,19 +225,19 @@
     (return cleanup))
   (return cleanup))
 
-(defn.js listenView
-  "creates the most basic views"
+(defn.js listenModel
+  "creates the most basic models"
   {:added "4.0"}
-  [view type meta dest-key tag-key]
+  [model type meta dest-key tag-key]
   (var [tfn tkey tevent] (xt/x:get-key -/TYPES type))
   (:= tevent (or tevent type))
   (var getResult (fn []
-                   (var out (tfn view))
+                   (var out (tfn model))
                    (return (xtd/clone-shallow
                             (:? tkey (. out [tkey]) out)))))
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
-  (-/initViewBase view
+  (-/initModelBase model
                   dest-key
                   #{setResult
                     getResult
@@ -248,14 +248,14 @@
                      :resultFn  (xtd/get-in meta "resultFn")
                      :pred (fn [event]
                              (return (== (. event ["type"])
-                                         (+ "view." tevent))))}})
+                                         (+ "model." tevent))))}})
   (return result))
 
-(defn.js listenViewOutput
+(defn.js listenModelOutput
   "creates listeners on the output"
   {:added "4.0"}
-  [view types meta dest-key tag-key]
-  (var getOutput (fn:> (xtd/obj-clone (event-model/get-output view dest-key))))
+  [model types meta dest-key tag-key]
+  (var getOutput (fn:> (xtd/obj-clone (event-model/get-output model dest-key))))
   (var [output setOutput] (r/local getOutput))
   (var wrap (r/useIsMountedWrap))
   (var outputRef (r/useFollowRef output))
@@ -266,8 +266,8 @@
            types
            (fn [type]
              (return (== (. event ["type"])
-                         (+ "view." type))))))))
-  (-/initViewBase view
+                         (+ "model." type))))))))
+  (-/initModelBase model
                   dest-key
                   #{meta pred  
                     {:setResult (wrap setOutput)
@@ -277,12 +277,12 @@
                      :resultFn  (xtd/get-in meta "resultFn")}})
   (return output))
 
-(defn.js listenViewThrottled
+(defn.js listenModelThrottled
   "creates the throttled listener"
   {:added "4.0"}
-  [view delay meta dest-key]
+  [model delay meta dest-key]
   (var getResult (fn:> (xtd/clone-shallow
-                        (event-model/get-success view))))
+                        (event-model/get-success model))))
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
   (var listener-id (. (Math.random)
@@ -291,7 +291,7 @@
   (r/init []
     (var [setThrottled throttle] (-/throttled-setter setResult delay))
     (event-model/add-listener
-     view
+     model
       listener-id
        (fn [_ _ _ _]
          (var nresult (getResult))
@@ -300,12 +300,12 @@
            (setThrottled nresult)))
       meta
      (fn [event]
-       (return (== "view.output"
+       (return (== "model.output"
                    (. event ["type"])))))
     (return
      (fn []
        (xt/x:set-key throttle "mounted" false)
-       (event-model/remove-listener view listener-id))))
+       (event-model/remove-listener model listener-id))))
   (return result))
 
 (defn.js wrap-pending
@@ -315,23 +315,23 @@
   (if with-pending
     (return f)
     (return
-     (fn [view ...args]
-       (event-model/set-pending view true)
+     (fn [model ...args]
+       (event-model/set-pending model true)
        (return
          (. (promise/x:promise
              (fn []
-               (return (f view ...args))))
+               (return (f model ...args))))
             (then (fn [res]
-                    (event-model/set-pending view false)
+                    (event-model/set-pending model false)
                     (return res)))))))))
 
 (defn.js refreshArgsFn
   "creates the refresh args function"
   {:added "4.0"}
-  [view args opts]
+  [model args opts]
   (cond (xtd/arr-every args k/not-nil?)
         (return
-         (. (-/refresh-args view args opts)
+         (. (-/refresh-args model args opts)
             (then
              (fn [acc]
                (var [ok data] (xtd/get-in acc ["main"]))
@@ -340,7 +340,7 @@
                      (do (return
                           ((-/wrap-pending -/refresh-args-remote
                                            (. opts with-pending))
-                           view args true opts)))
+                           model args true opts)))
                      
                      (== (. opts remote) "none")
                      (return nil)
@@ -349,28 +349,28 @@
                      (when (or (k/nil? (. opts remote-check))
                                (. opts (remote-check args)))
                        (if (xtd/not-empty? data)
-                         (return (-/refresh-args-sync view args false opts))
-                         (return (-/refresh-args-remote view args true opts)))))))))
+                         (return (-/refresh-args-sync model args false opts))
+                         (return (-/refresh-args-remote model args true opts)))))))))
 
         :else
-        (return (fn:> (event-model/set-output view nil)))))
+        (return (fn:> (event-model/set-output model nil)))))
 
 (defn.js useRefreshArgs
-  "refreshes args on the view"
+  "refreshes args on the model"
   {:added "4.0"}
-  [view args opts]
+  [model args opts]
   (:= opts (or opts {}))
   (r/watch [(xt/x:json-encode args)]
-    (-/refreshArgsFn view args opts)))
+    (-/refreshArgsFn model args opts)))
 
 (defn.js listenSuccess
   "listens to the successful output"
   {:added "4.0"}
-  [view args opts meta tag-key]
+  [model args opts meta tag-key]
   (:= opts (or opts {}))
-  (var output (r/useStablized (-/listenView view "success" meta (. opts dest) tag-key)
+  (var output (r/useStablized (-/listenModel model "success" meta (. opts dest) tag-key)
                               (. opts stablized)))
-  (-/useRefreshArgs view args opts)
+  (-/useRefreshArgs model args opts)
   (return ((or (. opts then)
                k/identity)
            (or output (. opts default)))))
@@ -425,19 +425,19 @@
               (k/nil? (. input ["data"])))))
 
 (defn.js output-empty?
-  "checks that view is empty (context method)"
+  "checks that model is empty (context method)"
   {:added "0.1"}
-  [#{view}]
-  (return (xtd/is-empty? (event-model/get-current view))))
+  [#{model}]
+  (return (xtd/is-empty? (event-model/get-current model))))
 
 (comment
   
-  (defn.js listenViewInit
-    [view tags meta]
+  (defn.js listenModelInit
+    [model tags meta]
     (var initStart   (r/ref false))
     (var initTag     (r/ref false))
     (var [init setInit] (r/local false))
-    (var out (-/listenViewOutput view
+    (var out (-/listenModelOutput model
                                  ["pending" "output" "elapsed"]
                                  meta))
     (r/watch [out]

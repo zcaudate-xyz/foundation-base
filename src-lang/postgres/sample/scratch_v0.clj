@@ -57,6 +57,16 @@
   [:text i-input]
   i-input)
 
+(defn.pg ^{:%% :sql
+           :- [:text]
+           :props [:immutable :parallel-safe]
+           :api/meta {:sb/grant :all}}
+  echo-plus
+  "Returns a stable scratch-v0 ping response."
+  {:added "4.1.4"}
+  [:text i-input]
+  (|| i-input "-REMOTE"))
+
 (defn.pg ^{:props [:security :definer]
            :api/meta {:sb/grant :auth
                       :mcp {:name "log_append_public"

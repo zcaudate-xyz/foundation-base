@@ -78,7 +78,8 @@
   (var #{resultFn
          resultPrint} (or meta {}))
   (var listener-id (r/id))
-  (var cleanup (fn:> (event-common/remove-keyed-listener node key listener-id)))
+  (var cleanup (fn []
+                 (return (event-common/remove-keyed-listener node key listener-id))))
   (r/init []
     (event-common/add-keyed-listener
      node

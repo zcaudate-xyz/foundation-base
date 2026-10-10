@@ -160,133 +160,128 @@
 ^{:refer js.react.ext-form/listenFields :added "4.0"}
 (fact "listens to multiple field values and results"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
      (var result (ext-form/listenFields form ["first"] nil))
-     (xt/x:set-key document "__ext_form_test" {"result" result})
+     (xt/x:set-key (. props ["state"]) "result" result)
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var result (. document ["__ext_form_test"] ["result"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var result (. (. props ["state"]) ["result"]))
      (var output {"data" (xt/x:get-key (. result ["data"]) "first")
                   "status" (. (. result ["result"] ["first"]) ["status"])})
-     (xt/x:del-key document "__ext_form_test")
      (return output)))
   => {"data" "Ada" "status" "pending"})
 
 ^{:refer js.react.ext-form/listenFieldsData :added "4.0"}
 (fact "listens to multiple field data"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
      (var result (ext-form/listenFieldsData form ["first"] nil))
-     (xt/x:set-key document "__ext_form_test" {"result" result})
+     (xt/x:set-key (. props ["state"]) "result" result)
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var result (xt/x:get-key (. document ["__ext_form_test"] ["result"] ["data"]) "first"))
-     (xt/x:del-key document "__ext_form_test")
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var result (xt/x:get-key (. (. props ["state"]) ["result"] ["data"]) "first"))
      (return result)))
   => "Ada")
 
 ^{:refer js.react.ext-form/listenField :added "4.0"}
 (fact "listens to one field value and result"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
      (var result (ext-form/listenField form "first" nil))
-     (xt/x:set-key document "__ext_form_test" {"result" result})
+     (xt/x:set-key (. props ["state"]) "result" result)
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var result (. document ["__ext_form_test"] ["result"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var result (. (. props ["state"]) ["result"]))
      (var output {"value" (. result ["value"])
                   "status" (. (. result ["result"]) ["status"])})
-     (xt/x:del-key document "__ext_form_test")
      (return output)))
   => {"value" "Ada" "status" "pending"})
 
 ^{:refer js.react.ext-form/listenFieldValue :added "4.0"}
 (fact "listens to only one field value"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
-     (xt/x:set-key document "__ext_form_test"
-                   {"value" (ext-form/listenFieldValue form "first" nil)})
+     (xt/x:set-key (. props ["state"]) "value" (ext-form/listenFieldValue form "first" nil))
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var result (. document ["__ext_form_test"] ["value"]))
-     (xt/x:del-key document "__ext_form_test")
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var result (. (. props ["state"]) ["value"]))
      (return result)))
   => "Ada")
 
 ^{:refer js.react.ext-form/listenFieldResult :added "4.0"}
 (fact "listens to one field result"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
-     (xt/x:set-key document "__ext_form_test"
-                   {"result" (ext-form/listenFieldResult form "first" nil)})
+     (xt/x:set-key (. props ["state"]) "result" (ext-form/listenFieldResult form "first" nil))
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var result (. document ["__ext_form_test"] ["result"] ["status"]))
-     (xt/x:del-key document "__ext_form_test")
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var result (. (. props ["state"]) ["result"] ["status"]))
      (return result)))
   => "pending")
 
 ^{:refer js.react.ext-form/listenForm :added "4.0"}
 (fact "listens to the complete form"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
-     (xt/x:set-key document "__ext_form_test"
-                   {"result" (ext-form/listenForm form nil)})
+     (xt/x:set-key (. props ["state"]) "result" (ext-form/listenForm form nil))
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var result (xt/x:get-key (. document ["__ext_form_test"] ["result"] ["data"]) "first"))
-     (xt/x:del-key document "__ext_form_test")
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var result (xt/x:get-key (. (. props ["state"]) ["result"] ["data"]) "first"))
      (return result)))
   => "Ada")
 
 ^{:refer js.react.ext-form/listenFormData :added "4.0"}
 (fact "listens to complete form data"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
-     (xt/x:set-key document "__ext_form_test"
-                   {"data" (ext-form/listenFormData form nil)})
+     (xt/x:set-key (. props ["state"]) "data" (ext-form/listenFormData form nil))
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var result (xt/x:get-key (. document ["__ext_form_test"] ["data"]) "first"))
-     (xt/x:del-key document "__ext_form_test")
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var result (xt/x:get-key (. (. props ["state"]) ["data"]) "first"))
      (return result)))
   => "Ada")
 
 ^{:refer js.react.ext-form/listenFormResult :added "4.0"}
 (fact "returns the form validation result"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
-     (xt/x:set-key document "__ext_form_test"
-                   {"form" form
-                    "result" (ext-form/listenFormResult form nil)})
+     (xt/x:set-key (. props ["state"]) "form" form)
+     (xt/x:set-key (. props ["state"]) "result" (ext-form/listenFormResult form nil))
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var result (. document ["__ext_form_test"] ["result"]))
-     (xt/x:del-key document "__ext_form_test")
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var result (. (. props ["state"]) ["result"]))
      (return result)))
   => {"::" "validation.result"
       "status" "pending"
@@ -295,7 +290,7 @@
 ^{:refer js.react.ext-form/useSubmitField :added "4.0"}
 (fact "returns submit actions for one field"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" ""}))
                                   {"first" [["required" {"message" "Required"
                                                           "check" (fn:> [v rec]
@@ -304,40 +299,40 @@
      (var actions (ext-form/useSubmitField {"form" form
                                              "field" "first"
                                              "explicit" true}))
-     (xt/x:set-key document "__ext_form_test" {"form" form
-                                                "actions" actions})
+     (xt/x:set-key (. props ["state"]) "form" form)
+     (xt/x:set-key (. props ["state"]) "actions" actions)
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var state (. document ["__ext_form_test"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var state (. props ["state"]))
      (return
       (. (event-form/validate-field (. state ["form"]) "first" nil nil)
          (then (fn [_]
                  (var result {"passed" ((. state ["actions"] ["onActionCheck"]))
                               "hasReset" (xt/x:is-function? (. state ["actions"] ["onActionReset"]))})
-                 (xt/x:del-key document "__ext_form_test")
                  (return result)))))))
   => {"passed" false "hasReset" true})
 
 ^{:refer js.react.ext-form/useSubmitForm :added "4.0"}
 (fact "returns submit actions for the form"
   (helper-source/test
-   (fn []
+   (fn [props]
      (var form (ext-form/makeForm (fn [] (return {"first" "Ada"}))
                                   {"first" [["required" {"check" (fn:> [v rec] (return true))}]]}))
      (var actions (ext-form/useSubmitForm {"form" form
                                             "explicit" true}))
-     (xt/x:set-key document "__ext_form_test" {"form" form
-                                                "actions" actions})
+     (xt/x:set-key (. props ["state"]) "form" form)
+     (xt/x:set-key (. props ["state"]) "actions" actions)
      (return (r/createElement "span" nil "ready")))
-   {}
-   (fn [_ document _ _]
-     (var state (. document ["__ext_form_test"]))
+   (fn [_]
+     (return {"state" {}}))
+   (fn [props document _]
+     (var state (. props ["state"]))
      (return
       (. (event-form/validate-all (. state ["form"]) nil nil)
          (then (fn [_]
                  (var result {"passed" ((. state ["actions"] ["onActionCheck"]))
                               "hasReset" (xt/x:is-function? (. state ["actions"] ["onActionReset"]))})
-                 (xt/x:del-key document "__ext_form_test")
                  (return result)))))))
   => {"passed" true "hasReset" true})
