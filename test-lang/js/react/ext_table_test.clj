@@ -83,6 +83,15 @@
     "call" {}
     "cached" {}}))
 
+^{:refer js.react.ext-table/table-query-input :added "4.1"}
+(fact "uses the configured table spec when a view has no query arguments"
+  (!.js
+    [(ext-table/table-query-input [])
+     (ext-table/table-query-input
+      ["Log" {"data" ["id" "message"]}])])
+  => [nil
+      ["Log" {"data" ["id" "message"]}]])
+
 ^{:refer js.react.ext-table/init-runtime :added "4.1"}
 (fact "initialises the real Supabase runtime and RPC handler"
   

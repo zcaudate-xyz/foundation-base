@@ -1,81 +1,17 @@
-(ns lang-demos.js-007-ext-page.main
-  (:require [lang.core :as l]
-            [postgres.core :as pg]
-            [postgres.sample.scratch-v0]
-            [scaffold.supabase.local-min :as local-min]))
+(ns lang-demos.js-007-ext-page.generated.main
+  (:require [lang.core :as l]))
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
              [xt.substrate :as substrate]
              [xt.db.node.client-supabase :as client-supabase]
-             [xt.db.node.runtime :as db-runtime]
-             [xt.db.system.main :as db-main]
              [js.react :as r]
              [js.react-native :as n]
              [js.react.ext-table :as ext-table]
-             [lang-demos.js-007-ext-page.core :as app-core]
+             [lang-demos.js-007-ext-page.generated.core :as app-core]
+             [lang-demos.js-007-ext-page.generated.runtime :as app-runtime]
              [melbourne.ui-button :as ui-button]
              [melbourne.ui-input :as ui-input]]})
-
-(def.js Schema
-  (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
-
-(def.js SchemaLookup
-  (@! (pg/bind-app (pg/app "scratch_v0"))))
-
-(def.js SupabaseUrl
-  (new URL (or (. process env NEXT_PUBLIC_SUPABASE_URL)
-               (@! (str "http://"
-                        (-> local-min/+config+ :api :hostname)
-                        ":"
-                        (-> local-min/+config+ :api :port))))))
-
-(def.js AnonKey
-  (or (. process env NEXT_PUBLIC_SUPABASE_ANON_KEY)
-      (@! (-> local-min/+config+ :api :anon-key))))
-
-(def.js SupabaseDefaults
-  {"host" (. -/SupabaseUrl hostname)
-   "port" (:? (== "" (. -/SupabaseUrl port))
-              (:? (== "https:" (. -/SupabaseUrl protocol)) 443 80)
-              (Number (. -/SupabaseUrl port)))
-   "secured" (== "https:" (. -/SupabaseUrl protocol))
-   "basepath" (:? (== "/" (. -/SupabaseUrl pathname))
-                  ""
-                  (. -/SupabaseUrl pathname))
-   "apikey" -/AnonKey
-   "token" -/AnonKey})
-
-(def.js RuntimeConfig
-  {"primary" {"type" "supabase"
-              "defaults" -/SupabaseDefaults}
-   "caching" {"type" "memory"
-              "defaults" {}}})
-
-(defn.js install-rpc-service
-  [node]
-  (substrate/set-service
-   node
-   "auth/supabase"
-   (db-main/create-impl "supabase" -/SupabaseDefaults nil nil))
-  (db-runtime/init-server node)
-  (return node))
-
-(defn.js live-context
-  [node]
-  (return {"node" node
-           "runtime" {"config" -/RuntimeConfig
-                      "schema" -/Schema
-                      "lookup" -/SchemaLookup}}))
-
-(defn.js table-impl
-  []
-  (return
-   {"base"
-    {"list" {"spec" ["Log" {"data" ["id" "message"]}]}
-     "data" {"spec" ["Log" {"data" ["id" "message"]}]}}
-    "call" {}
-    "cached" {}}))
 
 (defn.js LogPage
   [props]
@@ -165,13 +101,14 @@
 (defn.js App
   []
   (var node (r/const
-             (-/install-rpc-service
+             (app-runtime/install-rpc-service
               (substrate/node-create {"id" "ext-page-log-node"}))))
-  (var context (r/const (-/live-context node)))
+  (var context (r/const (app-runtime/live-context node)))
+  (var table (r/const (app-runtime/table-impl)))
   (var view (ext-table/useRemoteView
-             (-/table-impl)
+             table
              "data"
-             {}
+             {"defaultArgs" []}
              context
              {}))
   (var append

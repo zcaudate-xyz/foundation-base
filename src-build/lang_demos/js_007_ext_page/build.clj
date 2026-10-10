@@ -1,5 +1,8 @@
 (ns lang-demos.js-007-ext-page.build
-  (:require [lang.core :as l]
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str]
+            [lang.core :as l]
+            ^{:clj-kondo/ignore [:unused-namespace]}
             [postgres.core.supabase :as s]
             [scaffold.supabase.local-min :as local-min]
             [std.make :as make :refer [def.make]]))
@@ -323,6 +326,18 @@
           ""
           "The browser reads `Log` through the ext-table runtime and calls `log_append_public` directly through `xt.db.node.client-supabase`. `yarn build` writes a static site to `out/`, which can be hosted by any static file host. Anyone who can reach the app can append messages."]})
 
+(defn- inject-next-header
+  [^String out static]
+  (if-let [header (-> static :flags :nextjs :header)]
+    (str header "\n\n" out)
+    out))
+
+(defn- inject-next-use-client
+  [^String out static]
+  (if (-> static :flags :nextjs :use-client)
+    (str "'use client'\n\n" out)
+    out))
+
 (def.make JS-007-EXT-PAGE
   {:tag "lang-demos.js-007-ext-page"
    :build ".build/demo/js-007-ext-page"
@@ -338,30 +353,60 @@
                       {:type :css :target "src/app" :file "globals.css" :main +styles+}
                       +env-example+
                       +readme+]}
-   :default [{:type :module.graph
+   :default [{:type :module.directory
               :lang :js
-              :main 'lang-demos.js-007-ext-page.main
-              :target "src/generated"
-              :emit {:code {:link {:path-suffix ".js"}}}}
-             {:type :module.graph
-              :lang :js
-              :main 'lang-demos.js-007-ext-page.app.page
-              :target "src/app"
-              :header "\"use client\";\nimport dynamic from 'next/dynamic';\nconst App = dynamic(() => import('../generated/main.js').then((mod) => mod.App), { ssr: false });"
-              :emit {:code {:link {:path-suffix ".js"}}}}
-             {:type :module.graph
-              :lang :js
-              :main 'lang-demos.js-007-ext-page.app.layout
-              :target "src/app"
-              :header "import './globals.css';"
-              :emit {:code {:link {:path-suffix ".js"}}}}]})
+              :search ["src-build/lang_demos/js_007_ext_page"]
+              :main 'lang-demos.js-007-ext-page
+              :target "src"
+              :emit {:code {:link {:path-suffix ".js"}
+                            :transforms {:full [inject-next-header
+                                                inject-next-use-client]}}}}]})
+
+(defn- module-import-relative
+  [^java.nio.file.Path base-path
+   ^java.nio.file.Path source-dir
+   ^String import-path]
+  (when (str/starts-with? import-path "./")
+    (let [^String target-rel (subs import-path 2)
+          ^java.nio.file.Path target (.resolve base-path target-rel)]
+      (when (.exists ^java.io.File (.toFile target))
+        (let [relative (str (.relativize source-dir target))]
+          (if (str/starts-with? relative ".")
+            relative
+            (str "./" relative)))))))
+
+(defn- fix-module-directory-imports!
+  "Makes module.directory's root-relative imports relative to each file."
+  [directory]
+  (let [^java.io.File base (io/file directory)
+        ^java.nio.file.Path base-path (.toPath base)]
+    (doseq [^java.io.File file (file-seq base)
+            :when (and (.isFile file)
+                       (str/ends-with? (.getName file) ".js"))]
+      (let [^java.nio.file.Path source-path (.toPath file)
+            ^java.nio.file.Path source-dir (.getParent source-path)
+            original (slurp file)
+            fixed (str/replace
+                   original
+                   #"from '(\./[^']+)'"
+                   (fn [[_ import-path]]
+                     (str "from '"
+                          (or (module-import-relative base-path
+                                                      source-dir
+                                                      import-path)
+                              import-path)
+                          "'")))]
+        (when (not= original fixed)
+          (spit file fixed))))))
 
 (defn build-js-007-ext-page
   []
-  (require '[lang-demos.js-007-ext-page.main :as main])
+  (require '[lang-demos.js-007-ext-page.generated.main :as main])
   (require '[lang-demos.js-007-ext-page.app.page])
   (require '[lang-demos.js-007-ext-page.app.layout])
-  (make/build-all JS-007-EXT-PAGE))
+  (let [result (make/build-all JS-007-EXT-PAGE)]
+    (fix-module-directory-imports! ".build/demo/js-007-ext-page/src")
+    result))
 
 (comment
   (setup-scratch-v0)

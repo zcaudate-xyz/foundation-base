@@ -11,7 +11,7 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.react :as r]
-             [js.react.ext-model :as ext-view]
+             [js.react.ext-model :as ext-model]
              [js.react-native :as n]
              [melbourne.base-palette :as base-palette]
              [melbourne.ui-group :as ui-group]
@@ -40,7 +40,7 @@
   
   (defn.js TableListPagedDemo
     []
-    (var views   (r/const {:list (ext-view/makeView
+    (var views   (r/const {:list (ext-model/makeModel
                                   {:defaultArgs []
                                    :handler
                                    (fn:>
@@ -101,7 +101,7 @@
   (defn.js TableListRemotePagedDemo
     []
     (var views
-         (r/const {:list (ext-view/makeView
+         (r/const {:list (ext-model/makeModel
                           {:defaultArgs []
                            :handler
                            (fn:> [showPage display]

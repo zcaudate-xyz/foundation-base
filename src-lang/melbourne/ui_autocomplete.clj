@@ -9,7 +9,7 @@
              [js.core.fetch :as fetch]
              [js.react :as r]
              [js.react-native :as n]
-             [js.react.ext-model :as ext-view]
+             [js.react.ext-model :as ext-model]
              [js.react-native.ui-autocomplete :as ui-autocomplete]
              [melbourne.ui-text :as ui-text]
              [melbourne.ui-static :as ui-static]
@@ -95,7 +95,7 @@
   (var inputRef (r/ref))
   (var [value setValue] (r/local ""))
   (var [visible setVisible] (r/local true))
-  (var view    (ext-view/makeView
+  (var view    (ext-model/makeModel
                 {:handler (fn:> [filt]
                             (jc/future-delayed [300]
                               (return (-/get-names filt))))

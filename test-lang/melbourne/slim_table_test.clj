@@ -11,7 +11,7 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.react :as r]
-             [js.react.ext-model :as ext-view]
+             [js.react.ext-model :as ext-model]
              [js.react.ext-form :as ext-form]
              [js.react-native :as n]
              [melbourne.base-palette :as base-palette]
@@ -201,7 +201,7 @@
   
   (defn.js TableRouterViewDemo
     []
-    (var views   (r/const {:list (ext-view/makeView
+    (var views   (r/const {:list (ext-model/makeModel
                                   {:defaultArgs []
                                    :handler
                                    (fn:>
@@ -298,7 +298,7 @@
 
   (defn.js TableRouterDemo
     []
-    (var views   (r/const {:list (ext-view/makeView
+    (var views   (r/const {:list (ext-model/makeModel
                                   {:defaultArgs []
                                    :handler
                                    (fn:>
@@ -417,7 +417,7 @@
   
   (defn.js TableDemo
     []
-    (var views   (r/const {:list (ext-view/makeView
+    (var views   (r/const {:list (ext-model/makeModel
                                   {:defaultArgs []
                                    :handler
                                    (fn:>
@@ -492,7 +492,7 @@
   
   (defn.js TableStandardDemo
     []
-    (var views   (r/const {:list (ext-view/makeView
+    (var views   (r/const {:list (ext-model/makeModel
                                   {:defaultArgs []
                                    :handler
                                    (fn:>
@@ -567,7 +567,7 @@
   
   (defn.js TableEmbeddedDemo
     []
-    (var views   (r/const {:list (ext-view/makeView
+    (var views   (r/const {:list (ext-model/makeModel
                                   {:defaultArgs []
                                    :handler
                                    (fn:>

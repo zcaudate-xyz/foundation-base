@@ -16,12 +16,11 @@
              [xt.substrate :as substrate]
              [xt.db.node.client-base :as client-base]
              [xt.db.node.client-supabase :as client-supabase]
-             [xt.db.node.runtime :as db-runtime]
-             [xt.db.system.main :as db-main]
              [js.react.helper-jsdom :as helper]
              [js.react :as r]
              [js.react.ext-model :as ext-model]
-             [js.react.ext-table :as ext-table]]})
+             [js.react.ext-table :as ext-table]
+             [lang-demos.js-007-ext-page.generated.runtime :as app-runtime]]})
 
 (do
   (l/script- :postgres
@@ -49,80 +48,21 @@
           (local-min/wait-for-postgrest-ready "scratch_v0" "Log" 120000)]
   :teardown [(l/rt:stop)]})
 
-(def.js Schema
-  (@! (pg/bind-schema (:schema (pg/app "scratch_v0")))))
-
-(def.js SchemaLookup
-  (@! (pg/bind-app (pg/app "scratch_v0"))))
-
-(def.js SupabaseDefaults
-  (xt/x:obj-assign
-   (@! local-min/+config-supabase-anon+)
-   {"token" (@! (-> local-min/+config+ :api :anon-key))}))
-
-(def.js RuntimeConfig
-  {"primary" {"type" "supabase"
-              "defaults" -/SupabaseDefaults}
-   "caching" {"type" "memory"
-              "defaults" {}}})
-
-(defn.js install-rpc-service
-  [node]
-  (substrate/set-service
-   node
-   "auth/supabase"
-   (db-main/create-impl "supabase" -/SupabaseDefaults nil nil))
-  (db-runtime/init-server node)
-  (return node))
-
-(defn.js live-context
-  [node]
-  (return {"node" node
-           "runtime" {"config" -/RuntimeConfig
-                      "schema" -/Schema
-                      "lookup" -/SchemaLookup}}))
-
-(defn.js table-impl
-  []
-  (return
-   {"base"
-    {"list" {"spec" ["Log" {"data" ["id" "message"]}]}
-     "data" {"spec" ["Log" {"data" ["id" "message"]}]}}
-    "call" {}
-    "cached" {}}))
-
-(defn.js log-query
-  [message]
-  (return
-   {"defaultArgs" ["Log"
-                   {"where" [{"message" message}]
-                    "data" ["id" "message"]}]}))
-
 (defn.js log-app
   [props]
-  (var message (. props ["message"]))
-  (var node
-       (-/install-rpc-service
-        (substrate/node-create {"id" "log-app-node"})))
-  (var context (-/live-context node))
+  (var node (app-runtime/install-rpc-service
+             (substrate/node-create {"id" "log-app-node"})))
+  (var context (app-runtime/live-context node))
   (var view
        (ext-table/useRemoteView
-        (-/table-impl)
+        (app-runtime/table-impl)
         "data"
-        (-/log-query message)
+        {"defaultArgs" []}
         context
         {}))
   (xt/x:set-key (. props ["state"]) "node" node)
   (xt/x:set-key (. props ["state"]) "view" view)
   (return (r/createElement "span" nil "log-app")))
-
-^{:refer js.react.ext-table-app-test/log-query :added "4.1"}
-(fact "filters the Log view to the appended message"
-  (!.js
-    (return (-/log-query "message")))
-  => {"defaultArgs" ["Log"
-                      {"where" [{"message" "message"}]
-                       "data" ["id" "message"]}]})
 
 ^{:refer js.react.ext-table-app-test/log-app :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log
@@ -158,8 +98,10 @@
                       {"root-id" (. env ["root"] ["id"])
                        "rpc" rpc-row
                        "rows" rows
-                       "same-id" (== (. rpc-row ["id"])
-                                     (. rows [0] ["id"]))})))))))
+                       "same-id" (and rows
+                                      (> rows.length 0)
+                                      (== (. rpc-row ["id"])
+                                          (. rows [0] ["id"])))})))))))
           (promise/x:promise-finally
            (fn []
              (return

@@ -11,7 +11,7 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.react :as r]
-             [js.react.ext-model :as ext-view]
+             [js.react.ext-model :as ext-model]
              [js.react.ext-form :as ext-form]
              [js.react-native :as n]
              [melbourne.slim-link :as slim-link]
@@ -40,7 +40,7 @@
     []
     (var form   (ext-form/makeForm (fn:> {:account-id nil})
                                    {:account-id []}))
-    (var views  (r/const {:account (ext-view/makeView
+    (var views  (r/const {:account (ext-model/makeModel
                                     {:defaultOutput []
                                      :defaultArgs []
                                      :defaultProcess (event-view/sorted-lookup "name")
@@ -79,7 +79,7 @@
     []
     (var form   (ext-form/makeForm (fn:> {:account-id "id-2"})
                                    {:account-id []}))
-    (var views  (r/const {:account (ext-view/makeView
+    (var views  (r/const {:account (ext-model/makeModel
                                     {:defaultOutput []
                                      :defaultArgs []
                                      :defaultProcess (event-view/sorted-lookup "name")
@@ -118,7 +118,7 @@
     []
     (var form   (ext-form/makeForm (fn:> {:account-id "id-4"})
                                    {:account-id []}))
-    (var views  (r/const {:account (ext-view/makeView
+    (var views  (r/const {:account (ext-model/makeModel
                                     {:defaultOutput []
                                      :defaultArgs []
                                      :defaultProcess (event-view/sorted-lookup "name")
@@ -170,7 +170,7 @@
   
   (defn.js TableListSearchDemo
     []
-    (var views   (r/const {:list (ext-view/makeView
+    (var views   (r/const {:list (ext-model/makeModel
                                   {:handler
                                    (fn [args]
                                      (return
@@ -212,7 +212,7 @@
     (r/watch [example]
       (when example
         (j/delayed [100]
-          (ext-view/refresh-args (. views list)
+          (ext-model/refresh-args (. views list)
                                  [example]))))
     
     (return
@@ -240,10 +240,10 @@
   ^{:refer js.react.ext-model/listenModelOutput :adopt true :added "4.0"}
   (fact "uses an async entry"
 
-    (defn.js ListenViewOutputPane
+    (defn.js ListenModelOutputPane
       [#{view
          types}]
-      (var output (ext-view/listenModelOutput
+      (var output (ext-model/listenModelOutput
                    view types {}))
       (var getCount (r/useGetCount))
       (return
@@ -254,9 +254,9 @@
                     :count (getCount)
                     :view  (data/obj-pick view ["input" "output"])})}]))
     
-    (defn.js ListenViewOutputDemo
+    (defn.js ListenModelOutputDemo
       []
-      (var view (ext-view/makeView
+      (var view (ext-model/makeModel
                  {:handler (fn:> [x y z]
                              (jc/future-delayed [500]
                                                (return (+ x y z))))
@@ -264,14 +264,14 @@
                   :options {:init false}}))
       (var [types setTypes] (r/local ["pending" "disabled"]))
       (r/init []
-              (ext-view/refresh-view view))
+              (ext-model/refresh-model view {}))
       (return
        (n/EnclosedCode 
 {:label "js.react.ext-model/listenModelOutput"} 
 [:% n/Row
          [:% n/Button
           {:title "R"
-           :onPress (fn:> (ext-view/refresh-args
+           :onPress (fn:> (ext-model/refresh-args
                            view
                            [(Math.random)
                             (Math.random)
@@ -281,12 +281,12 @@
           {:title "D"
            :onPress (fn []
                       (event-view/set-input view {})
-                      (ext-view/refresh-view view))}]
+                      (ext-model/refresh-model view {}))}]
          [:% n/TabsMulti
           {:data ["input" "output" "pending" "elapsed" "disabled"]
            :values types
            :setValues setTypes}]] 
-[:% -/ListenViewOutputPane
+[:% -/ListenModelOutputPane
          #{view types
            {:key types}}])))
     

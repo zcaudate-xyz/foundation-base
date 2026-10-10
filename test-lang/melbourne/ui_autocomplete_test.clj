@@ -13,7 +13,7 @@
    :require [[js.react :as r]
              [js.react-native :as n]
              [js.react.ext-form :as ext-form]
-             [js.react.ext-model :as ext-view]
+             [js.react.ext-model :as ext-model]
              [js.core.impl :as j]
              [js.core :as jc]
              [js.core.fetch :as fetch]
@@ -60,7 +60,7 @@
   
   (defn.js SelectSingleDemo
     []
-    (var view    (ext-view/makeView
+    (var view    (ext-model/makeModel
                   {:handler (fn:> [filt]
                               (jc/future-delayed [300]
                                 (return (-/get-names filt))))

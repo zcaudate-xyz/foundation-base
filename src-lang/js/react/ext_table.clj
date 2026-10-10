@@ -24,6 +24,14 @@
     (return ((xt/x:get-key source "listen") callback))
     :else (return nil)))
 
+(defn.js table-query-input
+  "uses the table's configured spec when the model has no query arguments"
+  {:added "4.1"}
+  [args]
+  (when (== 0 (xt/x:len args))
+    (return nil))
+  (return args))
+
 (defn.js init-runtime
   {:added "4.1"}
   [context]
@@ -94,7 +102,10 @@
                        runtime-init
                        (fn [...args]
                          (return (table-util/table-pull
-                                  impl "call" request-level [...args] nil context))))}
+                                  impl "call" request-level
+                                  (-/table-query-input [...args])
+                                  nil
+                                  context))))}
             (or m {})))))
 
 (defn.js useRemoteView

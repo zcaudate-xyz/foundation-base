@@ -11,7 +11,7 @@
                    :lang/jsx false}
             :notify {:type :webpage :path "dev/notify"}}
    :require [[js.react :as r]
-             [js.react.ext-model :as ext-view]
+             [js.react.ext-model :as ext-model]
              [js.react-native :as n]
              [melbourne.base-palette :as base-palette]
              [melbourne.ui-group :as ui-group]
@@ -38,7 +38,7 @@
   
   (defn.js TableDemo
     []
-    (var views   (r/const {:list (ext-view/makeView
+    (var views   (r/const {:list (ext-model/makeModel
                                   {:defaultArgs []
                                    :handler
                                    (fn:>

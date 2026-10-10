@@ -11,7 +11,7 @@
                    :lang/jsx false}
             :notify {:type :websearch :path "dev/notify"}}
    :require [[js.react :as r]
-             [js.react.ext-model :as ext-view]
+             [js.react.ext-model :as ext-model]
              [js.react-native :as n]
              [melbourne.base-palette :as base-palette]
              [melbourne.ui-group :as ui-group]
@@ -42,7 +42,7 @@
   
   (defn.js TableListSearchDemo
     []
-    (var views   (r/const {:list (ext-view/makeView
+    (var views   (r/const {:list (ext-model/makeModel
                                   {:handler
                                    (fn [args]
                                      (return
@@ -84,7 +84,7 @@
     (r/watch [example]
       (when example
         (j/delayed [100]
-          (ext-view/refresh-args (. views list)
+          (ext-model/refresh-args (. views list)
                                  [example]))))
     
     (return

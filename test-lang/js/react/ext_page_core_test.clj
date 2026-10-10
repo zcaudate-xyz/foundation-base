@@ -8,7 +8,8 @@
    :require [[xt.lang.spec-base :as xt]
              [xt.event.base-model :as event-model]
              [js.react :as r]
-             [lang-demos.js-007-ext-page.core :as app-core]]})
+             [lang-demos.js-007-ext-page.generated.core :as app-core]
+             [lang-demos.js-007-ext-page.generated.runtime :as app-runtime]]})
 
 (fact:global
  {:setup [(l/rt:restart :js)
@@ -32,7 +33,28 @@
         (return [:article {:className "log-row"}
                  (. entry message)])))]]))
 
-^{:refer lang-demos.js-007-ext-page.core/useLogState :added "4.1"}
+^{:refer lang-demos.js-007-ext-page.generated.runtime/table-impl
+  :added "4.1"}
+(fact "configures Log id and row reads as dataview queries"
+  (!.js
+    (var impl (app-runtime/table-impl))
+    (var list-spec (xt/x:get-path impl ["base" "list" "spec"]))
+    (var data-spec (xt/x:get-path impl ["base" "data" "spec"]))
+    (return
+     {"list-table" (xt/x:get-key list-spec "table")
+      "list-type" (xt/x:get-path list-spec ["select_entry" "view" "type"])
+      "list-object" (xt/x:is-object? list-spec)
+      "data-table" (xt/x:get-key data-spec "table")
+      "data-type" (xt/x:get-path data-spec ["return_entry" "view" "type"])
+      "data-object" (xt/x:is-object? data-spec)}))
+  => {"list-table" "Log"
+      "list-type" "select"
+      "list-object" true
+      "data-table" "Log"
+      "data-type" "return"
+      "data-object" true})
+
+^{:refer lang-demos.js-007-ext-page.generated.core/useLogState :added "4.1"}
 (fact "appends through an injected action and renders the refreshed model in JSDOM"
   (helper-source/test
    (fn [props]

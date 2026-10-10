@@ -1,4 +1,4 @@
-(ns lang-demos.js-007-ext-page.core
+(ns lang-demos.js-007-ext-page.generated.core
   (:require [lang.core :as l]))
 
 (l/script :js

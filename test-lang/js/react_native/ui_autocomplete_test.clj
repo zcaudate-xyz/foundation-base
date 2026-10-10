@@ -77,7 +77,7 @@
     (var inputRef (r/ref))
     (var [value setValue] (r/local ""))
     (var [visible setVisible] (r/local true))
-    (var view    (ext-model/makeView
+    (var view    (ext-model/makeModel
                   {:handler (fn:> [filt]
                               (new Promise (fn [resolve]
                                 (setTimeout (fn []
