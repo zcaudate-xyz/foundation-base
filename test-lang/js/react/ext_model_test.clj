@@ -45,7 +45,7 @@
     nil)
   => {"results" [1 2] "mounted" true})
 
-^{:refer js.react.ext-model/refresh-view :added "4.0"}
+^{:refer js.react.ext-model/refresh-model :added "4.0"}
 (fact "refreshes the main pipeline"
 
   (notify/wait-on :js
@@ -54,7 +54,7 @@
                {}
                [3]
                {"value" 0}))
-    (. (ext-model/refresh-view view {})
+    (. (ext-model/refresh-model view {})
        (then (fn [acc]
                (repl/notify {"main" (. acc ["main"])
                              "output" (event-model/get-current view nil)})))))
@@ -74,7 +74,7 @@
                (repl/notify {"current" (. (event-model/get-input view) ["current"])})))))
   => {"current" {"data" [10]}})
 
-^{:refer js.react.ext-model/refresh-view-remote :added "4.0"}
+^{:refer js.react.ext-model/refresh-model-remote :added "4.0"}
 (fact "runs the remote pipeline"
   (notify/wait-on :js
     (var view (-/make-test-view
@@ -82,7 +82,7 @@
                {"remote" {"handler" (fn [x] (return {"remote" true}))}}
                []
                nil))
-    (. (ext-model/refresh-view-remote view true {})
+    (. (ext-model/refresh-model-remote view true {})
        (then (fn [_]
                (repl/notify (event-model/get-current view "remote"))))))
   => {"remote" true})
@@ -99,7 +99,7 @@
                (repl/notify {"args" (. (event-model/get-input view) ["current"])
                              "remote" (event-model/get-current view "remote")})))))
   => {"args" {"data" [7]} "remote" {"remote" 7}})
-^{:refer js.react.ext-model/refresh-view-sync :added "4.0"}
+^{:refer js.react.ext-model/refresh-model-sync :added "4.0"}
 (fact "runs the sync pipeline"
   (notify/wait-on :js
     (var view (-/make-test-view
@@ -107,7 +107,7 @@
                {"sync" {"handler" (fn [x] (return {"sync" true}))}}
                []
                nil))
-    (. (ext-model/refresh-view-sync view true {})
+    (. (ext-model/refresh-model-sync view true {})
        (then (fn [_]
                (repl/notify (event-model/get-current view "sync"))))))
   => {"sync" true})
@@ -124,10 +124,10 @@
                (repl/notify {"args" (. (event-model/get-input view) ["current"])
                              "sync" (event-model/get-current view "sync")})))))
   => {"args" {"data" [8]} "sync" {"sync" 8}})
-^{:refer js.react.ext-model/make-view :added "4.0"}
+^{:refer js.react.ext-model/make-model :added "4.0"}
 (fact "creates an initialised view with an init refresh"
   (notify/wait-on :js
-    (var view (ext-model/make-view
+    (var view (ext-model/make-model
                (fn [x] (return {"value" x}))
                {}
                [3]
@@ -137,24 +137,24 @@
                (repl/notify {"type" (. view ["::"])
                              "input" (. (event-model/get-input view) ["current"])})))))
   => {"type" "event.model" "input" {"data" [3]}})
-^{:refer js.react.ext-model/makeViewRaw :added "4.0"}
+^{:refer js.react.ext-model/makeModelRaw :added "4.0"}
 (fact "creates a raw view inside a component"
   (helper-source/test
    (fn [props]
      (return (r/createElement "span" nil "ready")))
    (fn [_]
-     (return {"view" (ext-model/makeViewRaw {"handler" (fn [x] (return x))
+     (return {"view" (ext-model/makeModelRaw {"handler" (fn [x] (return x))
                                              "defaultArgs" [1]
                                              "defaultOutput" nil})}))
    (fn [props document _]
      (var result (== "event.model" (. (. props ["view"]) ["::"])))
      (return result)))
   => true)
-^{:refer js.react.ext-model/makeView :added "4.0"}
+^{:refer js.react.ext-model/makeModel :added "4.0"}
 (fact "creates a React stable view"
   (helper-source/test
    (fn [props]
-     (var view (ext-model/makeView {"handler" (fn [x] (return x))
+     (var view (ext-model/makeModel {"handler" (fn [x] (return x))
                                     "defaultArgs" [1]
                                     "defaultOutput" nil}))
      (xt/x:set-key (. props ["state"]) "view" view)
@@ -165,14 +165,14 @@
      (var result (xt/x:is-object? (. (. props ["state"]) ["view"])))
      (return result)))
   => true)
-^{:refer js.react.ext-model/initViewBase :added "4.0"}
+^{:refer js.react.ext-model/initModelBase :added "4.0"}
 (fact "registers a view listener and returns teardown"
   (helper-source/test
    (fn [props]
      (var view (. props ["view"]))
      (var [value setValue] (r/local nil))
      (var ref (r/useFollowRef value))
-     (var cleanup (ext-model/initViewBase
+     (var cleanup (ext-model/initModelBase
                    view nil
                    {"setResult" setValue
                     "getResult" (fn [] (return value))
@@ -188,12 +188,12 @@
                   "cleanup" (xt/x:is-function? (. state ["cleanup"]))})
      (return result)))
   => {"listener" true "cleanup" true})
-^{:refer js.react.ext-model/listenView :added "4.0"}
+^{:refer js.react.ext-model/listenModel :added "4.0"}
 (fact "listens to the current view output"
   (helper-source/test
    (fn [props]
      (var view (. props ["view"]))
-     (var value (ext-model/listenView view "output" nil nil nil))
+     (var value (ext-model/listenModel view "output" nil nil nil))
      (return (r/createElement "span" nil
                               (JSON.stringify (or value {})))))
    (fn [_]
@@ -214,12 +214,12 @@
                      (var result (JSON.parse document.body.textContent))
                      (return result))))))))))
   => {"value" 2})
-^{:refer js.react.ext-model/listenViewOutput :added "4.0"}
+^{:refer js.react.ext-model/listenModelOutput :added "4.0"}
 (fact "listens to selected output events"
   (helper-source/test
    (fn [props]
      (var view (. props ["view"]))
-     (var value (ext-model/listenViewOutput view ["output"] nil nil nil))
+     (var value (ext-model/listenModelOutput view ["output"] nil nil nil))
      (return (r/createElement "span" nil
                               (JSON.stringify (or value {})))))
    (fn [_]
@@ -241,12 +241,12 @@
                                   "current" (. value ["current"])})
                      (return result))))))))))
   => {"type" "output" "current" nil})
-^{:refer js.react.ext-model/listenViewThrottled :added "4.0"}
+^{:refer js.react.ext-model/listenModelThrottled :added "4.0"}
 (fact "returns a throttled successful output listener"
   (helper-source/test
    (fn [props]
      (var view (. props ["view"]))
-     (var value (ext-model/listenViewThrottled view 10 nil nil))
+     (var value (ext-model/listenModelThrottled view 10 nil nil))
      (return (r/createElement "span" nil
                               (JSON.stringify (or value {})))))
    (fn [_]
@@ -330,7 +330,7 @@
        (fn []
          (var result (JSON.parse document.body.textContent))
          (return result))))))
-  => {"fallback" true})
+  => {"value" 3})
 ^{:refer js.react.ext-model/handler-base :added "0.1"}
 (fact "constructs a handler base"
   (!.js
@@ -369,7 +369,7 @@
 ^{:refer js.react.ext-model/output-empty? :added "0.1"}
 (fact "checks empty current output"
   (!.js
-    (return [(ext-model/output-empty? {"view" {"output" {"current" nil}}})
-             (ext-model/output-empty? {"view" {"output" {"current" []}}})
-             (ext-model/output-empty? {"view" {"output" {"current" [1]}}})]))
+    (return [(ext-model/output-empty? {"model" {"output" {"current" nil}}})
+             (ext-model/output-empty? {"model" {"output" {"current" []}}})
+             (ext-model/output-empty? {"model" {"output" {"current" [1]}}})]))
   => [true true false])

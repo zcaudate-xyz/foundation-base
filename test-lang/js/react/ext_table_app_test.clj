@@ -144,39 +144,37 @@
                       {"where" [{"message" "message"}]
                        "data" ["id" "message"]}]})
 
-^{:refer js.react.ext-table-app-test/log-app :added "4.1"}
+^{:refer js.react.ext-table-app-test/log-app :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log
+            {:where {:message "ext-table-app/log-append-refresh"}})]
+  :teardown [(pg/t:delete scratch-v0/Log
+               {:where {:message "ext-table-app/log-append-refresh"}})]}
 (fact "refreshes the mounted Log view after log-append-public completes"
-  (let [message "ext-table-app/log-append-refresh"]
-    (try
-      (pg/t:delete scratch-v0/Log
-                  {:where {:message message}})
-      (helper-source/test
-       (fn [props]
-         (return (-/log-app props)))
-       {"message" message}
-       (fn [props document env]
-         (var action (. props ["state"] ["action"]))
-         (var view (. props ["state"] ["view"]))
-         (-> (. action ["init"])
-             (promise/x:promise-then
-              (fn [_]
-                (return (ext-model/refresh-model view {}))))
-             (promise/x:promise-then
-              (fn [_]
-                (return
-                 (repl/notify
-                  {"root-id" (. env ["root" "id"])
-                   "rows" (event-model/get-current view nil)}))))
-             (promise/x:promise-finally
-              (fn []
-                (return
-                 (client-base/kernel-teardown
-                  (. props ["state"] ["node"])
-                  "db/primary"
-                  {}))))))
-       => (contains-in
-           {"root-id" "root"
-            "rows" [{"id" string? "message" message}]}))
-      (finally
-        (pg/t:delete scratch-v0/Log
-                    {:where {:message message}})))))
+  (helper-source/test
+   (fn [props]
+     (return (-/log-app props)))
+   {"message" "ext-table-app/log-append-refresh"
+    "state" {}}
+   (fn [props document env]
+     (var action (. props ["state"] ["action"]))
+     (var view (. props ["state"] ["view"]))
+     (return
+      (-> (. action ["init"])
+          (promise/x:promise-then
+           (fn [_]
+             (return (ext-model/refresh-model view {}))))
+          (promise/x:promise-then
+           (fn [_]
+             (return
+              {"root-id" (. env ["root"] ["id"])
+               "rows" (event-model/get-current view nil)})))
+          (promise/x:promise-finally
+           (fn []
+             (return
+              (client-base/kernel-teardown
+               (. props ["state"] ["node"])
+               "db/primary"
+               {}))))))))
+  => (contains-in
+      {"root-id" "root"
+       "rows" [{"id" string? "message" "ext-table-app/log-append-refresh"}]}))

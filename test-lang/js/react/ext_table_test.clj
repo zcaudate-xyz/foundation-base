@@ -21,6 +21,9 @@
              [js.react.ext-model :as ext-model]
              [js.react.ext-table :as ext-table]]})
 
+(declare test-js_react_ext_table__makeActionView_log_append_public
+         test-js_react_ext_table__makeActionView_echo_plus)
+
 (do
   (l/script- :postgres
     {:runtime :jdbc.client
@@ -161,7 +164,7 @@
       "object-cleanup" "object-cleanup"
       "missing" nil})
 
-^{:id "test-js_react_ext_table__makeActionView_log_append_public"
+^{:id test-js_react_ext_table__makeActionView_log_append_public
   :refer js.react.ext-table/makeActionView
   :added "4.1"}
 (fact "builds an action-backed view through Supabase"
@@ -189,7 +192,7 @@
   => {"type" "event.model"
       "output" "hello-REMOTE"})
 
-^{:id "test-js_react_ext_table__makeActionView_echo_plus"
+^{:id test-js_react_ext_table__makeActionView_echo_plus
   :refer js.react.ext-table/makeActionView
   :added "4.1"}
 (fact "initialises Supabase through the node runtime and calls log_append_public once"

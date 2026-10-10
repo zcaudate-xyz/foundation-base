@@ -1,6 +1,7 @@
 (ns js.react.ext-page-test
   (:use code.test)
-  (:require [lang.core :as l]))
+  (:require [lang.core :as l]
+            [js.react.helper-jsdom :as helper-source]))
 
 (l/script- :js
   {:runtime :basic
@@ -20,6 +21,8 @@
   (return
    {"id" "node-a"
     "spaces" {"space/a" {"state" {}}}}))
+
+(declare test-page-listen-model-output-sync)
 
 (fact:global
  {:setup [(l/rt:restart :js)
@@ -173,7 +176,7 @@
                           "cleanup" (xt/x:is-function?
                                      (. state ["cleanup"]))}))
                       0))))))))))
-  => {"result" ["ECHO-CHANGED"]
+  => {"result" "ECHO-CHANGED"
       "cleanup" true})
 
 ^{:refer js.react.ext-page/listenModel
@@ -227,7 +230,9 @@
       "after" "<div id=\"root\"><span>[9,8]</span></div>"
       "closed" true})
 
-^{:refer js.react.ext-page/listenModel :added "4.1"}
+^{:refer js.react.ext-page/listenModel
+  :id test-page-listen-model-output-sync
+  :added "4.1"}
 (fact "syncs selected page output after input changes"
 
   (helper-source/test
