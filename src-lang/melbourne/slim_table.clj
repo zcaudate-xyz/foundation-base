@@ -155,7 +155,7 @@
           views
           display
           (:= displayKey "list")]} props)
-  (var entries (ext-view/listenView
+  (var entries (ext-view/listenModel
                 (. views [displayKey])
                 "success"))
   (var embedded (or (data/get-in display ["list" "embedded"])
@@ -187,7 +187,7 @@
           display
           (:= displayKey "list")]} props)
   (var entries (or (. props entries)
-                   (ext-view/listenView
+                   (ext-view/listenModel
                     (. views [displayKey])
                     "success")))
   (var embedded (or (data/get-in display ["list" "embedded"])

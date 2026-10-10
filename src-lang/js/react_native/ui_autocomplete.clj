@@ -57,8 +57,8 @@
   [#{[sourceView
       sourceInput
       (:.. rprops)]}]
-  (var entries (ext-model/listenView sourceView "success"))
-  (var isBusy  (ext-model/listenView sourceView "pending"))
+  (var entries (ext-model/listenModel sourceView "success"))
+  (var isBusy  (ext-model/listenModel sourceView "pending"))
   (var refInput (r/ref))
   (r/watch [sourceInput isBusy]
     (when (and (not isBusy)

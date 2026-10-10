@@ -16,6 +16,8 @@
              [xt.substrate :as substrate]
              [xt.db.node.client-base :as client-base]
              [xt.db.node.client-supabase :as client-supabase]
+             [xt.db.node.runtime :as db-runtime]
+             [xt.db.system.main :as db-main]
              [js.react.helper-jsdom :as helper]
              [js.react :as r]
              [js.react.ext-model :as ext-model]
@@ -53,16 +55,25 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
+(def.js SupabaseDefaults
+  (xt/x:obj-assign
+   (@! local-min/+config-supabase-anon+)
+   {"token" (@! (-> local-min/+config+ :api :anon-key))}))
+
 (def.js RuntimeConfig
   {"primary" {"type" "supabase"
-              ;; The RPC is granted to authenticated/service_role, so the
-              ;; local integration fixture uses service_role. Browser code
-              ;; must use the anon key together with an authenticated session.
-              "defaults" (xt/x:obj-assign
-                          (@! local-min/+config-supabase-service+)
-                          {"token" (@! (-> local-min/+config+ :api :service-key))})}
+              "defaults" -/SupabaseDefaults}
    "caching" {"type" "memory"
               "defaults" {}}})
+
+(defn.js install-rpc-service
+  [node]
+  (substrate/set-service
+   node
+   "auth/supabase"
+   (db-main/create-impl "supabase" -/SupabaseDefaults nil nil))
+  (db-runtime/init-server node)
+  (return node))
 
 (defn.js live-context
   [node]
@@ -80,18 +91,6 @@
     "call" {}
     "cached" {}}))
 
-(defn.js append-impl
-  []
-  (return
-   {"actions"
-    {"append"
-     {"rpc-spec"
-      {"input" [{"symbol" "i_message" "type" "text"}]
-       "return" "jsonb"
-       "schema" "scratch_v0"
-       "id" "log_append_public"
-       "flags" {}}}}}))
-
 (defn.js log-query
   [message]
   (return
@@ -102,15 +101,10 @@
 (defn.js log-app
   [props]
   (var message (. props ["message"]))
-  (var node (substrate/node-create {"id" "log-app-node"}))
+  (var node
+       (-/install-rpc-service
+        (substrate/node-create {"id" "log-app-node"})))
   (var context (-/live-context node))
-  (var action
-       (ext-table/useActionView
-        (-/append-impl)
-        "append"
-        {"defaultArgs" [message]}
-        context
-        {}))
   (var view
        (ext-table/useRemoteView
         (-/table-impl)
@@ -119,22 +113,8 @@
         context
         {}))
   (xt/x:set-key (. props ["state"]) "node" node)
-  (xt/x:set-key (. props ["state"]) "action" action)
   (xt/x:set-key (. props ["state"]) "view" view)
   (return (r/createElement "span" nil "log-app")))
-
-^{:refer js.react.ext-table-app-test/append-impl :added "4.1"}
-(fact "describes the public append RPC"
-  (!.js
-    (return (-/append-impl)))
-  => {"actions"
-      {"append"
-       {"rpc-spec"
-        {"input" [{"symbol" "i_message" "type" "text"}]
-         "return" "jsonb"
-         "schema" "scratch_v0"
-         "id" "log_append_public"
-         "flags" {}}}}})
 
 ^{:refer js.react.ext-table-app-test/log-query :added "4.1"}
 (fact "filters the Log view to the appended message"
@@ -149,32 +129,46 @@
             {:where {:message "ext-table-app/log-append-refresh"}})]
   :teardown [(pg/t:delete scratch-v0/Log
                {:where {:message "ext-table-app/log-append-refresh"}})]}
-(fact "refreshes the mounted Log view after log-append-public completes"
+(fact "appends through the anonymous RPC and refreshes the mounted Log view"
   (helper-source/test
    (fn [props]
      (return (-/log-app props)))
    {"message" "ext-table-app/log-append-refresh"
     "state" {}}
    (fn [props document env]
-     (var action (. props ["state"] ["action"]))
+     (var node (. props ["state"] ["node"]))
      (var view (. props ["state"] ["view"]))
+     (var message (. props ["message"]))
      (return
-      (-> (. action ["init"])
+      (-> (client-supabase/rpc-call
+           node
+           "auth/supabase"
+           "log_append_public"
+           {"i_message" message}
+           {"headers" {"Content-Profile" "scratch_v0"
+                       "Accept-Profile" "scratch_v0"}})
           (promise/x:promise-then
-           (fn [_]
-             (return (ext-model/refresh-model view {}))))
-          (promise/x:promise-then
-           (fn [_]
+           (fn [rpc-row]
              (return
-              {"root-id" (. env ["root"] ["id"])
-               "rows" (event-model/get-current view nil)})))
+              (-> (ext-model/refresh-model view {})
+                  (promise/x:promise-then
+                   (fn [_]
+                     (var rows (event-model/get-current view nil))
+                     (return
+                      {"root-id" (. env ["root"] ["id"])
+                       "rpc" rpc-row
+                       "rows" rows
+                       "same-id" (== (. rpc-row ["id"])
+                                     (. rows [0] ["id"]))})))))))
           (promise/x:promise-finally
            (fn []
              (return
               (client-base/kernel-teardown
-               (. props ["state"] ["node"])
+               node
                "db/primary"
                {}))))))))
   => (contains-in
       {"root-id" "root"
-       "rows" [{"id" string? "message" "ext-table-app/log-append-refresh"}]}))
+       "rpc" {"id" string? "message" "ext-table-app/log-append-refresh"}
+       "rows" [{"id" string? "message" "ext-table-app/log-append-refresh"}]
+       "same-id" true}))

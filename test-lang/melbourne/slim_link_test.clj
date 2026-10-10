@@ -237,13 +237,13 @@
   (def.js MODULE (!:module)))
 
   
-  ^{:refer js.react.ext-view/listenViewOutput :adopt true :added "4.0"}
+  ^{:refer js.react.ext-model/listenModelOutput :adopt true :added "4.0"}
   (fact "uses an async entry"
 
     (defn.js ListenViewOutputPane
       [#{view
          types}]
-      (var output (ext-view/listenViewOutput
+      (var output (ext-view/listenModelOutput
                    view types {}))
       (var getCount (r/useGetCount))
       (return
@@ -267,7 +267,7 @@
               (ext-view/refresh-view view))
       (return
        (n/EnclosedCode 
-{:label "js.react.ext-view/listenViewOutput"} 
+{:label "js.react.ext-model/listenModelOutput"} 
 [:% n/Row
          [:% n/Button
           {:title "R"

@@ -33,7 +33,7 @@
          viewKey
          viewArgs
          viewOpts} props)
-  (var links (ext-view/listenView 
+  (var links (ext-view/listenModel 
               (. views [viewKey])
               "success"))
   (var #{results
@@ -108,7 +108,7 @@
      viewOpts}
    entry
    field]
-  (var links (ext-view/listenView 
+  (var links (ext-view/listenModel 
               (. views [viewKey])
               "success"))
   (var #{results

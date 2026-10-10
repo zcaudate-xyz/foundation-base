@@ -320,7 +320,7 @@
                                   [(. control showPage) (. control setShowPage)]
                                   (r/local 1)))
   (var entriesAll (-> (or (. props entries)
-                          (ext-view/listenView (. views [displayKey]) "success")
+                          (ext-view/listenModel (. views [displayKey]) "success")
                           [])
                       (sortFn (. control orderBy))))
   (var entries (-> entriesAll
@@ -399,7 +399,7 @@
            ;;:with-pending true
            :meta #{displayKey}})))
   (var entries
-       (ext-view/listenView
+       (ext-view/listenModel
         (. views [displayKey])
         "success"
         {:resultFn
@@ -413,7 +413,7 @@
         nil
         "remote"))
   
-  (var output  (ext-view/listenViewOutput (. views [displayKey])
+  (var output  (ext-view/listenModelOutput (. views [displayKey])
                                           ["pending"]
                                           {}
                                           nil
@@ -543,7 +543,7 @@
           (:= filterFn lib/identity)
           (:= sortFn lib/identity)]} impl)
   (:= entries (-> (or entries
-                      (ext-view/listenView (. views [displayKey]) "success")
+                      (ext-view/listenModel (. views [displayKey]) "success")
                       [])
                   (sortFn (. control orderBy))))
 (var topElem

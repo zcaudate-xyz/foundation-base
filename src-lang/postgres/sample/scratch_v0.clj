@@ -24,11 +24,13 @@
    :message {:type :text :required true}
    :author-id {:type :uuid}])
 
+^{:clj-kondo/ignore [:unresolved-namespace :unresolved-symbol]}
 (defsel.pg ^{:- [-/Log]
              :args []
              :api/view true}
   log-all)
 
+^{:clj-kondo/ignore [:unresolved-namespace :unresolved-symbol]}
 (defret.pg ^{:- [-/Log]
              :args []
              :api/view true}
@@ -68,12 +70,12 @@
   (|| i-input "-REMOTE"))
 
 (defn.pg ^{:props [:security :definer]
-           :api/meta {:sb/grant :auth
+           :api/meta {:sb/grant :all
                       :mcp {:name "log_append_public"
                             :title "Append public log"
-                            :description "Appends a log row for the current authenticated user."}}}
+                            :description "Appends a row to the shared public log."}}}
   log-append-public
-  "Appends a log row for the current authenticated user."
+  "Appends a row to the shared log through the public RPC."
   {:added "4.1.4"}
   [:text i-message]
   (let [o-log (pg/t:insert -/Log

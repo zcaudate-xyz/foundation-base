@@ -34,8 +34,7 @@
   {:type :makefile
    :main '[[:init [yarn install]]
            [:dev [yarn dev]]
-           [:build [yarn build]]
-           [:start [yarn start]]]})
+           [:build [yarn build]]]})
 
 (def +package+
   {:type :package.json
@@ -44,8 +43,7 @@
           "packageManager" "yarn@4.9.4"
           "engines" {"node" ">=20.9.0"}
           "scripts" {"dev" "next dev"
-                     "build" "next build"
-                     "start" "next start"}
+                     "build" "next build"}
           "dependencies" {"next" "16.3.6"
                           "react" "19.2.3"
                           "react-dom" "19.2.3"
@@ -255,6 +253,7 @@
   {:type :raw
    :file "next.config.js"
    :main ["const nextConfig = {"
+          "  output: 'export',"
           "  transpilePackages: ['react-native', 'react-native-web'],"
           "  turbopack: {"
           "    root: __dirname,"
@@ -286,20 +285,16 @@
 (def +env-example+
   {:type :raw
    :file ".env.example"
-   :main ["# The browser uses the public anon key for read-only Log access."
+   :main ["# Public browser credentials for Supabase reads and the public append RPC."
           "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:55121"
-          "NEXT_PUBLIC_SUPABASE_ANON_KEY="
-          ""
-          "# The server route uses this key only when calling log_append_public."
-          "SUPABASE_URL=http://127.0.0.1:55121"
-          "SUPABASE_SERVICE_ROLE_KEY="]})
+          "NEXT_PUBLIC_SUPABASE_ANON_KEY="]})
 
 (def +readme+
   {:type :raw
    :file "README.md"
    :main ["# JS-007 Ext Page"
           ""
-          "A Next.js App Router sample that uses `js.react.ext-table` and `js.react.ext-model` to read the `scratch_v0.Log` table. The append form uses Melbourne UI input and button components."
+          "A static Next.js App Router sample that uses `js.react.ext-table` and `js.react.ext-model` to read and append to the `scratch_v0.Log` table. The form uses Melbourne UI input and button components."
           ""
           "## Prepare local Supabase and build"
           ""
@@ -313,21 +308,20 @@
           ""
           "`setup-scratch-v0` starts the `scaffold.supabase.local-min` stack, installs the `scratch_v0` sample schema, and waits for PostgREST to expose `Log`."
           ""
-          "## Configure and run Next.js"
+          "## Configure and run locally"
           ""
           "In another terminal, from the Foundation repository root:"
           ""
           "```sh"
           "cd .build/demo/js-007-ext-page"
           "cp .env.example .env.local"
-          "# Set SUPABASE_SERVICE_ROLE_KEY from config/scaffold/supabase-local.edn."
           "yarn install"
           "yarn dev"
           "```"
           ""
-          "The app defaults to the local-min URL and anon key. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to override browser reads. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` for the server route; the service role key is never included in the browser bundle."
+          "The app defaults to the local-min URL and anon key. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to override them. The anon key is public and the RPC is intentionally callable without sign-in."
           ""
-          "The browser reads `Log` through the ext-table runtime. Submitting the form posts to `/api/log`, which invokes the existing `log_append_public` PostgREST RPC on the server, then refreshes the ext-model view. This sample intentionally has no sign-in flow, so anyone who can reach the app can append messages. Keep it local unless you add access controls."]})
+          "The browser reads `Log` through the ext-table runtime and calls `log_append_public` directly through `xt.db.node.client-supabase`. `yarn build` writes a static site to `out/`, which can be hosted by any static file host. Anyone who can reach the app can append messages."]})
 
 (def.make JS-007-EXT-PAGE
   {:tag "lang-demos.js-007-ext-page"
@@ -360,11 +354,6 @@
               :main 'lang-demos.js-007-ext-page.app.layout
               :target "src/app"
               :header "import './globals.css';"
-              :emit {:code {:link {:path-suffix ".js"}}}}
-             {:type :module.graph
-              :lang :js
-              :main 'lang-demos.js-007-ext-page.app.api.log.route
-              :target "src/app/api/log"
               :emit {:code {:link {:path-suffix ".js"}}}}]})
 
 (defn build-js-007-ext-page
@@ -372,10 +361,9 @@
   (require '[lang-demos.js-007-ext-page.main :as main])
   (require '[lang-demos.js-007-ext-page.app.page])
   (require '[lang-demos.js-007-ext-page.app.layout])
-  (require '[lang-demos.js-007-ext-page.app.api.log.route])
   (make/build-all JS-007-EXT-PAGE))
 
 (comment
   (setup-scratch-v0)
   (build-js-007-ext-page)
-  (make/run-internal JS-007-EXT-PAGE :dev))
+  (make/run JS-007-EXT-PAGE :dev))

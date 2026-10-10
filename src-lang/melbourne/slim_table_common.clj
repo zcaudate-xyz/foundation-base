@@ -44,7 +44,7 @@
   (var entryId (or (. control showDetail)
                    (. control showModify)))
   (var entries (or (. props entries)
-                   (ext-view/listenView (. views [(or displayKey "list")]) "success")
+                   (ext-view/listenModel (. views [(or displayKey "list")]) "success")
                    []))
   (var remote-entries (or (data/get-in views [displayKey
                                            "remote"

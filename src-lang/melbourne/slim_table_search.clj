@@ -62,7 +62,7 @@
           (:= filterFn lib/identity)
           (:= sortFn lib/identity)]} impl)
   (:= entries (-> (or entries
-                      (ext-view/listenView (. views [displayKey]) "success")
+                      (ext-view/listenModel (. views [displayKey]) "success")
                       [])
                   (sortFn (. control orderBy))))
   (var topElem
