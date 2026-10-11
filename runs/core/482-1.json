@@ -1,0 +1,2308 @@
+{
+  "failure-counts" : {
+    "failed" : 121,
+    "throw" : 52,
+    "timeout" : 0,
+    "errored" : 0
+  },
+  "run" : {
+    "id" : 38109436460,
+    "number" : 482,
+    "attempt" : 1,
+    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/38109436460"
+  },
+  "workflow-key" : "core",
+  "tests" : {
+    "passed" : 685,
+    "failed" : 121,
+    "throw" : 52,
+    "timeout" : 0,
+    "skipped" : 0,
+    "errored" : 0
+  },
+  "git" : {
+    "sha" : "44fbac6c09a41b8d1151b4d6a990e2551cbad0a6",
+    "ref" : "refs/heads/main",
+    "event" : "push"
+  },
+  "schema-version" : 1,
+  "jobs" : [ {
+    "failure-counts" : {
+      "errored" : 0,
+      "throw" : 0,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 158,
+      "skipped" : 0,
+      "errored" : 0,
+      "throw" : 0,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "generated-count" : 12,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-11T03:51:05.344713662Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "success",
+    "language" : "dart",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.event",
+    "failing-count" : 0,
+    "failures" : [ ]
+  }, {
+    "failure-counts" : {
+      "errored" : 0,
+      "throw" : 7,
+      "timeout" : 0,
+      "failed" : 121
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 0,
+      "skipped" : 0,
+      "errored" : 0,
+      "throw" : 7,
+      "timeout" : 0,
+      "failed" : 121
+    },
+    "generated-count" : 12,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-11T03:52:01.891252965Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "failure",
+    "language" : "lua",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.event",
+    "failing-count" : 128,
+    "failures" : [ {
+      "runtime-namespace" : "xtbench.lua.event.base-animate-test",
+      "counts" : {
+        "failed" : 21
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/animate-chained-all",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 284,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/animate-chained-cleanup",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 244,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/animate-chained-one",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 265,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/get-map-input",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 158,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/get-map-paths",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 145,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/get-map-paths-inner",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 127,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/listen-array",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 97,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/listen-map",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 170,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/listen-single",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 72,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/listen-transformations",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 190,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/make-binary-indicator",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 363,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/make-binary-transitions",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 344,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/make-circular-indicator",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 486,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/make-circular-indicator-inner",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 452,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/make-linear-indicator",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 422,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/make-linear-indicator-inner",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 389,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/new-derived",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 30,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/new-progressing",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 207,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/run-with",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 326,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/run-with-cancel",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 216,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-animate/run-with-chained",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_animate_test.clj",
+          "type" : "failed",
+          "line" : 304,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.base-animate-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.base-box-test",
+      "counts" : {
+        "throw" : 1,
+        "failed" : 10
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-box/add-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "throw",
+          "line" : 38,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/append-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 133,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/check-event",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 28,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/del-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 97,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/del-data-raw",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 88,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/get-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 52,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/make-box",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 18,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/merge-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 121,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/reset-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 107,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/set-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 75,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-box/set-data-raw",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_box_test.clj",
+          "type" : "failed",
+          "line" : 66,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.base-box-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.base-form-test",
+      "counts" : {
+        "throw" : 1,
+        "failed" : 18
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/add-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 80,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/check-event",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 71,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/field-fn",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 141,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/get-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 167,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/get-field",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 123,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/get-field-result",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 160,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/get-result",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 151,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-form/make-form",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "throw",
+          "line" : 43,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/reset-all",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 243,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/reset-all-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 185,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/reset-all-validators",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 231,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/reset-field-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 195,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/reset-field-validator",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 220,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/set-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 174,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/set-field",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 113,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/toggle-field",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 132,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/trigger-all",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 91,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/trigger-field",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 102,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-form/validate-field",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_form_test.clj",
+          "type" : "failed",
+          "line" : 205,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.base-form-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.base-listener-test",
+      "counts" : {
+        "throw" : 1,
+        "failed" : 18
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/add-keyed-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 271,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/add-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 148,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/all-keyed-listeners",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 314,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/arrayify-path",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 85,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-listener/blank-container",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "throw",
+          "line" : 17,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/callback-data",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 95,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/callback-time",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 107,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/clear-listeners",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 117,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/list-keyed-listeners",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 302,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/list-listener-types",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 220,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/list-listeners",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 210,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/listener-entry?",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 67,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/make-container",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 28,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/make-listener-entry",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 45,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/remove-keyed-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 288,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/remove-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 195,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/trigger-entry",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 231,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/trigger-keyed-listeners",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 325,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-listener/trigger-listeners",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_listener_test.clj",
+          "type" : "failed",
+          "line" : 248,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.base-listener-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.base-log-latest-test",
+      "counts" : {
+        "failed" : 3
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log-latest/clear-cache",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_latest_test.clj",
+          "type" : "failed",
+          "line" : 31,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log-latest/new-log-latest",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_latest_test.clj",
+          "type" : "failed",
+          "line" : 17,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log-latest/queue-latest",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_latest_test.clj",
+          "type" : "failed",
+          "line" : 46,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.base-log-latest-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.base-log-test",
+      "counts" : {
+        "failed" : 11
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/add-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 165,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/clear",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 99,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/clear-cache",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 111,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/get-count",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 31,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/get-filtered",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 61,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/get-head",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 49,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/get-last",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 40,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/get-slice",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 86,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/get-tail",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 74,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/new-log",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 18,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-log/queue-entry",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_log_test.clj",
+          "type" : "failed",
+          "line" : 125,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.base-log-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.base-route-test",
+      "counts" : {
+        "failed" : 20
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/add-full-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 146,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/add-param-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 130,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/add-path-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 114,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/add-url-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 100,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/changed-params",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 45,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/changed-params-raw",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 35,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/changed-path-raw",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 55,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/get-all-params",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 91,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/get-param",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 81,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/get-segment",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 72,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/get-url",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 64,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/interim-to-url",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 17,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/list-listeners",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 179,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/path-params-from-tree",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 26,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/remove-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 164,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/reset-route",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 261,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/set-param",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 245,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/set-path",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 213,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/set-segment",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 231,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.base-route/set-url",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/base_route_test.clj",
+          "type" : "failed",
+          "line" : 195,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.base-route-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.util-decorate-test",
+      "counts" : {
+        "failed" : 7
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-decorate/incr-fn",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_decorate_test.clj",
+          "type" : "failed",
+          "line" : 20,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-decorate/new-handle",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_decorate_test.clj",
+          "type" : "failed",
+          "line" : 77,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-decorate/plugin-counts",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_decorate_test.clj",
+          "type" : "failed",
+          "line" : 42,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-decorate/plugin-timing",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_decorate_test.clj",
+          "type" : "failed",
+          "line" : 28,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-decorate/run-handle",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_decorate_test.clj",
+          "type" : "failed",
+          "line" : 97,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-decorate/to-handle-callback",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_decorate_test.clj",
+          "type" : "failed",
+          "line" : 56,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise-run",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_decorate_test.clj",
+          "type" : "failed",
+          "line" : 68,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.util-decorate-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.util-task-test",
+      "counts" : {
+        "failed" : 9
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-task/list-completed",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_task_test.clj",
+          "type" : "failed",
+          "line" : 114,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-task/list-loading",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_task_test.clj",
+          "type" : "failed",
+          "line" : 103,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-task/new-task",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_task_test.clj",
+          "type" : "failed",
+          "line" : 39,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 2
+        },
+        "function" : "xt.event.util-task/task-load",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_task_test.clj",
+          "type" : "failed",
+          "line" : 51,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/lua/event/util_task_test.clj",
+          "type" : "failed",
+          "line" : 61,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 2
+        },
+        "function" : "xt.event.util-task/task-unload",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_task_test.clj",
+          "type" : "failed",
+          "line" : 78,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/lua/event/util_task_test.clj",
+          "type" : "failed",
+          "line" : 89,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 2
+        },
+        "function" : "xt.lang.spec-promise/x:promise-run",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_task_test.clj",
+          "type" : "failed",
+          "line" : 21,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/lua/event/util_task_test.clj",
+          "type" : "failed",
+          "line" : 27,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.util-task-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.util-throttle-test",
+      "counts" : {
+        "throw" : 1,
+        "failed" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.util-throttle/throttle-create",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_throttle_test.clj",
+          "type" : "throw",
+          "line" : 20,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-throttle/throttle-run-async",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_throttle_test.clj",
+          "type" : "failed",
+          "line" : 31,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-throttle/throttle-waiting",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_throttle_test.clj",
+          "type" : "failed",
+          "line" : 48,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.util-throttle-test"
+    }, {
+      "runtime-namespace" : "xtbench.lua.event.util-validate-test",
+      "counts" : {
+        "throw" : 3,
+        "failed" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.event.util-validate/create-result",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_validate_test.clj",
+          "type" : "failed",
+          "line" : 90,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.event.util-validate/validate-field",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 42,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/lua/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 67,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.util-validate/validate-step",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 27,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise-run",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/lua/event/util_validate_test.clj",
+          "type" : "failed",
+          "line" : 20,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.util-validate-test"
+    } ]
+  }, {
+    "failure-counts" : {
+      "errored" : 0,
+      "throw" : 45,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 527,
+      "skipped" : 0,
+      "errored" : 0,
+      "throw" : 45,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "generated-count" : 22,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-11T03:50:33.675190743Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "failure",
+    "language" : "python",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.lang",
+    "failing-count" : 45,
+    "failures" : [ {
+      "runtime-namespace" : "xtbench.python.lang.common-color-test",
+      "counts" : {
+        "throw" : 3
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-color/hex->n",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_color_test.clj",
+          "type" : "throw",
+          "line" : 29,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-color/n->hex",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_color_test.clj",
+          "type" : "throw",
+          "line" : 41,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-color/named->rgb",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_color_test.clj",
+          "type" : "throw",
+          "line" : 20,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-color-test"
+    }, {
+      "runtime-namespace" : "xtbench.python.lang.common-data-test",
+      "counts" : {
+        "throw" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-data/memoize-key",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_data_test.clj",
+          "type" : "throw",
+          "line" : 766,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-data/set-in",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_data_test.clj",
+          "type" : "throw",
+          "line" : 417,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-data-test"
+    }, {
+      "runtime-namespace" : "xtbench.python.lang.common-iter-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-iter/repeatedly",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_iter_test.clj",
+          "type" : "throw",
+          "line" : 114,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-iter-test"
+    }, {
+      "runtime-namespace" : "xtbench.python.lang.common-protocol-test",
+      "counts" : {
+        "throw" : 8
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-protocol/create-protocol-fn",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_protocol_test.clj",
+          "type" : "throw",
+          "line" : 62,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-protocol/protocol-exists",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_protocol_test.clj",
+          "type" : "throw",
+          "line" : 103,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-protocol/protocol-has-method",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_protocol_test.clj",
+          "type" : "throw",
+          "line" : 148,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-protocol/protocol-implements",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_protocol_test.clj",
+          "type" : "throw",
+          "line" : 130,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-protocol/protocol-method",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_protocol_test.clj",
+          "type" : "throw",
+          "line" : 29,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-protocol/raw-method",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_protocol_test.clj",
+          "type" : "throw",
+          "line" : 88,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-protocol/register-protocol",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_protocol_test.clj",
+          "type" : "throw",
+          "line" : 114,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-protocol/register-protocol-impl",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_protocol_test.clj",
+          "type" : "throw",
+          "line" : 44,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-protocol-test"
+    }, {
+      "runtime-namespace" : "xtbench.python.lang.common-resource-test",
+      "counts" : {
+        "throw" : 21
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-add-watch",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 275,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-config",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 130,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-config-del",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 116,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-config-list",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 96,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-config-set",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 106,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-item",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 214,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-item-del",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 180,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-item-get",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 223,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-item-set",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 204,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-item-trigger",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 191,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-purge-config",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 63,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-purge-spaces",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 76,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-remove-watch",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 289,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-space",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 160,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-space-clear",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 169,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-space-del",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 149,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-space-list",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 140,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-var",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 241,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-var-entry",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 232,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-var-set",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 250,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-resource/xt-var-trigger",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_resource_test.clj",
+          "type" : "throw",
+          "line" : 262,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-resource-test"
+    }, {
+      "runtime-namespace" : "xtbench.python.lang.common-sort-topo-test",
+      "counts" : {
+        "throw" : 3
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-sort-topo/sort-edges",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_sort_topo_test.clj",
+          "type" : "throw",
+          "line" : 40,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-sort-topo/sort-edges-visit",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_sort_topo_test.clj",
+          "type" : "throw",
+          "line" : 26,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-sort-topo/sort-topo",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_sort_topo_test.clj",
+          "type" : "throw",
+          "line" : 47,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-sort-topo-test"
+    }, {
+      "runtime-namespace" : "xtbench.python.lang.common-tree-test",
+      "counts" : {
+        "throw" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-tree/tree-diff",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_tree_test.clj",
+          "type" : "throw",
+          "line" : 105,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-tree/tree-diff-nested",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/common_tree_test.clj",
+          "type" : "throw",
+          "line" : 111,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-tree-test"
+    }, {
+      "runtime-namespace" : "xtbench.python.lang.spec-base-test",
+      "counts" : {
+        "throw" : 4
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/proto:create",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 89,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/x:copy-key",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 711,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.lang.spec-base/x:return-encode",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 1164,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/python/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 1172,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.spec-base-test"
+    }, {
+      "runtime-namespace" : "xtbench.python.lang.spec-primitive-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-primitive/!:G",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/python/lang/spec_primitive_test.clj",
+          "type" : "throw",
+          "line" : 21,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.spec-primitive-test"
+    } ]
+  }, {
+    "failure-counts" : {
+      "errored" : 0,
+      "throw" : 0,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 0,
+      "skipped" : 0,
+      "errored" : 0,
+      "throw" : 0,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "generated-count" : 0,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-11T03:46:52.651052638Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "success",
+    "language" : "dart",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.net",
+    "failing-count" : 0,
+    "failures" : [ ]
+  }, {
+    "failure-counts" : {
+      "errored" : 0,
+      "throw" : 0,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 0,
+      "skipped" : 0,
+      "errored" : 0,
+      "throw" : 0,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "generated-count" : 0,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-11T03:49:00.130325263Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "success",
+    "language" : "lua",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.net",
+    "failing-count" : 0,
+    "failures" : [ ]
+  }, {
+    "failure-counts" : {
+      "errored" : 0,
+      "throw" : 0,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 0,
+      "skipped" : 0,
+      "errored" : 0,
+      "throw" : 0,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "generated-count" : 0,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-11T03:48:27.507525425Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "success",
+    "language" : "python",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.net",
+    "failing-count" : 0,
+    "failures" : [ ]
+  } ],
+  "recorded-at" : "2026-10-11T03:52:58.246531074Z",
+  "workflow-name" : "XTBench Core",
+  "status" : "failure",
+  "kind" : "xtbench-run",
+  "metrics-status" : "complete",
+  "error" : null
+}
