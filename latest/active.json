@@ -1,326 +1,32 @@
 {
   "failure-counts" : {
-    "failed" : 6,
-    "throw" : 186,
+    "failed" : 5,
+    "throw" : 169,
     "timeout" : 0,
-    "errored" : 2
+    "errored" : 0
   },
   "run" : {
-    "id" : 38056233822,
-    "number" : 154,
+    "id" : 38109436560,
+    "number" : 155,
     "attempt" : 1,
-    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/38056233822"
+    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/38109436560"
   },
   "workflow-key" : "active",
   "tests" : {
-    "passed" : 1083,
-    "failed" : 6,
-    "throw" : 186,
+    "passed" : 805,
+    "failed" : 5,
+    "throw" : 169,
     "timeout" : 0,
-    "skipped" : 1,
-    "errored" : 2
+    "skipped" : 0,
+    "errored" : 0
   },
   "git" : {
-    "sha" : "25af50327e0b241fc6663bb3c5ed804b109c33de",
+    "sha" : "44fbac6c09a41b8d1151b4d6a990e2551cbad0a6",
     "ref" : "refs/heads/main",
     "event" : "push"
   },
   "schema-version" : 1,
   "jobs" : [ {
-    "failure-counts" : {
-      "errored" : 2,
-      "throw" : 17,
-      "timeout" : 0,
-      "failed" : 1
-    },
-    "run" : {
-      "number" : null,
-      "id" : null,
-      "url" : null,
-      "attempt" : 1
-    },
-    "workflow-key" : "local",
-    "tests" : {
-      "passed" : 278,
-      "skipped" : 1,
-      "errored" : 2,
-      "throw" : 17,
-      "timeout" : 0,
-      "failed" : 1
-    },
-    "generated-count" : 46,
-    "git" : {
-      "ref" : null,
-      "event" : null,
-      "sha" : null
-    },
-    "schema-version" : 1,
-    "recorded-at" : "2026-10-10T13:42:19.569208750Z",
-    "spec" : null,
-    "workflow-name" : "local",
-    "status" : "failure",
-    "language" : "ruby",
-    "kind" : "xtbench-job",
-    "metrics-status" : "complete",
-    "suite" : "xt.db",
-    "failing-count" : 20,
-    "failures" : [ {
-      "runtime-namespace" : "xtbench.ruby.db.node.example-auth-profile-view-test",
-      "counts" : {
-        "errored" : 1
-      },
-      "functions" : [ ],
-      "namespace-errors" : [ {
-        "type" : "errored",
-        "count" : 1
-      } ],
-      "namespace" : "db.node.example-auth-profile-view-test"
-    }, {
-      "runtime-namespace" : "xtbench.ruby.db.node.proxy-base-test",
-      "counts" : {
-        "throw" : 3,
-        "failed" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-base/attach-forward-handler",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/node/proxy_base_test.clj",
-          "type" : "throw",
-          "line" : 94,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-base/detach-forward-handler",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/node/proxy_base_test.clj",
-          "type" : "throw",
-          "line" : 133,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "failed" : 1
-        },
-        "function" : "xt.db.node.proxy-base/init-proxy-handlers",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/node/proxy_base_test.clj",
-          "type" : "failed",
-          "line" : 191,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-base/request-proxy",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/node/proxy_base_test.clj",
-          "type" : "throw",
-          "line" : 71,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.node.proxy-base-test"
-    }, {
-      "runtime-namespace" : "xtbench.ruby.db.node.proxy-util-test",
-      "counts" : {
-        "throw" : 2
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-util/request-client",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/node/proxy_util_test.clj",
-          "type" : "throw",
-          "line" : 131,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.node.proxy-util/request-proxy",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/node/proxy_util_test.clj",
-          "type" : "throw",
-          "line" : 108,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.node.proxy-util-test"
-    }, {
-      "runtime-namespace" : "xtbench.ruby.db.system.impl-memory-test",
-      "counts" : {
-        "throw" : 1
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-memory/pull-async",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_memory_test.clj",
-          "type" : "throw",
-          "line" : 38,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.system.impl-memory-test"
-    }, {
-      "runtime-namespace" : "xtbench.ruby.db.system.impl-sqlite-test",
-      "counts" : {
-        "throw" : 9
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/clear-db",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 84,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 2
-        },
-        "function" : "xt.db.system.impl-sqlite/impl-sqlite-init",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 135,
-          "count" : 1
-        }, {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 150,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/process-add-event",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 98,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/process-remove-event",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 112,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/pull",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 39,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/pull-async",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 54,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/record-add",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 72,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.system.impl-sqlite/rpc-call-async",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
-          "type" : "throw",
-          "line" : 166,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.system.impl-sqlite-test"
-    }, {
-      "runtime-namespace" : "xtbench.ruby.db.system.impl-supabase-realtime-test",
-      "counts" : {
-        "errored" : 1
-      },
-      "functions" : [ ],
-      "namespace-errors" : [ {
-        "type" : "errored",
-        "count" : 1
-      } ],
-      "namespace" : "db.system.impl-supabase-realtime-test"
-    }, {
-      "runtime-namespace" : "xtbench.ruby.db.text.sql-call-test",
-      "counts" : {
-        "throw" : 2
-      },
-      "functions" : [ {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.sql-call/call-api",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/text/sql_call_test.clj",
-          "type" : "throw",
-          "line" : 97,
-          "count" : 1
-        } ]
-      }, {
-        "counts" : {
-          "throw" : 1
-        },
-        "function" : "xt.db.text.sql-call/call-raw",
-        "locations" : [ {
-          "path" : "test-lang/xtbench/ruby/db/text/sql_call_test.clj",
-          "type" : "throw",
-          "line" : 68,
-          "count" : 1
-        } ]
-      } ],
-      "namespace-errors" : [ ],
-      "namespace" : "db.text.sql-call-test"
-    } ]
-  }, {
     "failure-counts" : {
       "errored" : 0,
       "throw" : 32,
@@ -349,7 +55,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-10T13:36:34.306398010Z",
+    "recorded-at" : "2026-10-11T03:48:06.893965424Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -734,7 +440,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-10T13:38:55.481571070Z",
+    "recorded-at" : "2026-10-11T03:51:27.110620954Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -1385,7 +1091,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-10T13:44:05.655962034Z",
+    "recorded-at" : "2026-10-11T03:51:28.942213280Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -2469,7 +2175,7 @@
       "namespace" : "substrate.walkthrough.s07-wsserver-test"
     } ]
   } ],
-  "recorded-at" : "2026-10-10T14:15:50.043950280Z",
+  "recorded-at" : "2026-10-11T03:53:30.870769297Z",
   "workflow-name" : "XTBench Active",
   "status" : "failure",
   "kind" : "xtbench-run",
