@@ -1,0 +1,39 @@
+{
+  "failure-counts" : {
+    "failed" : 0,
+    "throw" : 0,
+    "timeout" : 0,
+    "errored" : 0
+  },
+  "run" : {
+    "id" : 38109436546,
+    "number" : 155,
+    "attempt" : 1,
+    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/38109436546"
+  },
+  "workflow-key" : "core-kmi",
+  "tests" : {
+    "passed" : 0,
+    "failed" : 0,
+    "throw" : 0,
+    "timeout" : 0,
+    "skipped" : 0,
+    "errored" : 0
+  },
+  "git" : {
+    "sha" : "44fbac6c09a41b8d1151b4d6a990e2551cbad0a6",
+    "ref" : "refs/heads/main",
+    "event" : "push"
+  },
+  "schema-version" : 1,
+  "jobs" : [ ],
+  "recorded-at" : "2026-10-11T03:53:20.426878134Z",
+  "workflow-name" : "XTBench Core KMI",
+  "status" : "failure",
+  "kind" : "xtbench-run",
+  "metrics-status" : "missing-artifacts",
+  "error" : {
+    "type" : "missing-metrics-artifacts",
+    "message" : "No XTBench job metrics artifacts were published."
+  }
+}
