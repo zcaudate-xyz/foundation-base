@@ -1,6 +1,9 @@
 (ns postgres.gen.rpc-test
   (:use code.test)
-  (:require [postgres.gen.rpc :as rpc]))
+  (:require [lang.base.book :as book]
+            [postgres.gen.rpc :as rpc]
+            [postgres.typed :as typed]
+            [postgres.typed.typed-common :as types]))
 
 (fact "typed output shapes enumerate root and nested returned rows"
   (rpc/shape-rows
@@ -200,3 +203,76 @@
        (|| "Brand:" brand-id)
        {"db/sync" {"Brand" [o-result]}}
        true))
+
+^{:refer postgres.gen.rpc/rpc-client-spec :added "4.1"}
+(fact "builds client descriptors from PostgreSQL book entries and typed functions"
+  (let [book-entry (book/book-entry
+                    {:lang :postgres
+                     :section :code
+                     :id 'book-call
+                     :form '(defn.pg book-call)
+                     :static/input [{:symbol 'actor-id :modifiers [:uuid]}
+                                    {:symbol 'payload :modifiers [:jsonb]}]
+                     :static/return [:jsonb]
+                     :static/schema "book_rpc"})
+        typed-fn (types/make-fn-def
+                  "demo.rpc"
+                  "typed-call"
+                  [(types/->FnArg 'actor-id :uuid [:uuid] :payload)
+                   (types/->FnArg 'expected-revision :integer [:integer] :payload)]
+                  [:jsonb]
+                  {}
+                  "typed_rpc")
+        stats-fn (types/make-fn-def
+                  "statsdb.rpc.api-group-super"
+                  "stats-call"
+                  [(types/->FnArg 'user-id :uuid [:uuid] :payload)]
+                  [:boolean]
+                  {}
+                  nil)
+        ctx (typed/load-registry
+             {'demo.rpc/typed-call typed-fn})
+        missing (try
+                  (rpc/rpc-client-spec
+                   (types/make-fn-def "demo.rpc" "missing-schema" []
+                                      [:boolean] {} nil))
+                  (catch clojure.lang.ExceptionInfo ex (ex-data ex)))]
+    [(rpc/rpc-client-spec book-entry)
+     (rpc/rpc-client-spec typed-fn)
+     (rpc/rpc-client-spec ctx 'demo.rpc/typed-call)
+     (get (rpc/rpc-client-spec ctx 'demo.rpc/typed-call
+                               {:schema "override_rpc"})
+          "schema")
+     (rpc/rpc-client-spec stats-fn)
+     (select-keys missing [:type :function :namespace])])
+  => [{"id" "book_call"
+       "schema" "book_rpc"
+       "input" [{"name" "actor_id" "symbol" "actor_id" "type" "uuid"}
+                {"name" "payload" "symbol" "payload" "type" "jsonb"}]
+       "return" "jsonb"
+       "flags" {}}
+      {"id" "typed-call"
+       "schema" "typed_rpc"
+       "input" [{"name" "actor_id" "symbol" "actor_id" "type" "uuid"}
+                {"name" "expected_revision"
+                 "symbol" "expected_revision"
+                 "type" "integer"}]
+       "return" "jsonb"
+       "flags" {}}
+      {"id" "typed-call"
+       "schema" "typed_rpc"
+       "input" [{"name" "actor_id" "symbol" "actor_id" "type" "uuid"}
+                {"name" "expected_revision"
+                 "symbol" "expected_revision"
+                 "type" "integer"}]
+       "return" "jsonb"
+       "flags" {}}
+      "override_rpc"
+      {"id" "stats-call"
+       "schema" "stats_rpc"
+       "input" [{"name" "user_id" "symbol" "user_id" "type" "uuid"}]
+       "return" "boolean"
+       "flags" {}}
+      {:type :postgres.gen.rpc/missing-schema
+       :function "missing-schema"
+       :namespace "demo.rpc"}])

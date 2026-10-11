@@ -12,12 +12,26 @@
             [postgres.typed.typed-infer :as typed-infer]
             [postgres.typed.typed-resolve :as typed-resolve]
             [postgres.typed.typed-parse :as parse]
+            [postgres.typed.typed-view-internal :as typed-view-internal]
             [postgres.typed.typed-view :as typed-view]
             [std.lib]))
 (std.lib/intern-in portable-edn/export-edn
                   portable-edn/import-edn
                   portable-edn/export-edn-string
                   portable-edn/import-edn-string)
+
+(defmacro ^{:public true} dataview-select
+  "Builds a typed dataview select entry."
+  {:added "4.1"}
+  [table opts]
+  `(typed-view-internal/dataview-entry :select ~table '~opts))
+
+(defmacro ^{:public true} dataview-return
+  "Builds a typed dataview return entry."
+  {:added "4.1"}
+  [table opts]
+  `(typed-view-internal/dataview-entry :return ~table '~opts))
+
 (declare enrich-function-arg-roles input-shape output-shape)
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Shape Formatting Helpers

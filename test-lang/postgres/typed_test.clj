@@ -469,7 +469,8 @@
                  "interface")
   => true)
 
-^{:refer postgres.typed/export-edn :added "4.1" :id postgres-typed-edn-round-trip}
+^{:refer postgres.typed/export-edn :added "4.1"
+  :id ^{:clj-kondo/ignore [:unresolved-symbol]} postgres-typed-edn-round-trip}
 (fact "exports a complete typed context as readable versioned EDN"
   (let [ctx (fixture-context)
         snapshot (typed/export-edn ctx)
@@ -499,7 +500,8 @@
       true
       true])
 
-^{:refer postgres.typed/import-edn :added "4.1" :id postgres-typed-edn-usable-context}
+^{:refer postgres.typed/import-edn :added "4.1"
+  :id ^{:clj-kondo/ignore [:unresolved-symbol]} postgres-typed-edn-usable-context}
 (fact "imports records without touching the process registry and keeps contexts usable"
   (let [ctx (fixture-context)
         snapshot (typed/export-edn ctx)
@@ -521,7 +523,8 @@
      (:filter? generated)])
   => [true "ping" 'payload "fixture" true true])
 
-^{:refer postgres.typed/import-edn :added "4.1" :id postgres-typed-edn-validation}
+^{:refer postgres.typed/import-edn :added "4.1"
+  :id ^{:clj-kondo/ignore [:unresolved-symbol]} postgres-typed-edn-validation}
 (fact "rejects unsupported snapshot versions and record tags"
   (let [snapshot (fn [version context]
                    {:postgres.typed/format :postgres.typed/context
@@ -546,7 +549,8 @@
       {:type :postgres.typed/unknown-record-tag
        :tag :unknown}])
 
-^{:refer postgres.typed/export-edn :added "4.1" :id postgres-typed-edn-function-filter}
+^{:refer postgres.typed/export-edn :added "4.1"
+  :id ^{:clj-kondo/ignore [:unresolved-symbol]} postgres-typed-edn-function-filter}
 (fact "rejects runtime function filters instead of silently dropping them"
   (let [error (try
                 (typed/export-edn (assoc (fixture-context)
@@ -557,3 +561,60 @@
     error)
   => {:type :postgres.typed/non-serializable-value
       :path [:function-filter]})
+
+
+^{:refer postgres.typed/dataview-select :added "4.1"}
+(fact "builds a select dataview entry from a typed table"
+  (let [table (types/make-table-def
+               "fixture" "User"
+               [(types/make-column-def :id
+                 (types/make-type-ref :primitive nil :uuid))
+                (types/make-column-def :org-id
+                 (types/make-type-ref :primitive nil :uuid))]
+               :id)
+        i-org-id nil]
+    (typed/dataview-select table
+      {:args [:uuid i-org-id]
+       :select {:org-id i-org-id}}))
+  => {:input [{:symbol "i_org_id" :type "uuid"}]
+      :view {:table "User"
+             :type "select"
+             :query {"org_id" "{{i_org_id}}"}}})
+
+^{:refer postgres.typed/dataview-return :added "4.1"}
+(fact "builds a return dataview entry using the typed primary key"
+  (let [table (types/make-table-def
+               "fixture" "User"
+               [(types/make-column-def :id
+                 (types/make-type-ref :primitive nil :uuid))]
+               :id)
+        i-user-id nil]
+    (typed/dataview-return table
+      {:args [:uuid i-user-id]
+       :return #{:*/data}}))
+  => {:input [{:symbol "i_user_id" :type "uuid"}]
+      :view {:table "User"
+             :type "return"
+             :query ["*/data"]
+             :identity ["id"]}})
+
+^{:refer postgres.typed/load-full :added "4.1"}
+(fact "loads every application module into the typed context"
+  (let [ctx (fixture-context)]
+    [(select-keys ctx [:app-name :namespaces])
+     (select-keys (typed/entry ctx 'fixture.rpc/ping) [:ns :name])])
+  => [{:app-name "fixture"
+       :namespaces ['fixture.domain 'fixture.rpc]}
+      {:ns "fixture.rpc" :name "ping"}])
+
+^{:refer postgres.typed/export-views :added "4.1"}
+(fact "exports typed view entries grouped by table, kind, and tag"
+  (let [views (typed/export-views
+               (typed/load-ns 'postgres.sample.scratch-v0)
+               {:source-namespaces ['postgres.sample.scratch-v0]})]
+    [(:version views)
+     (get-in views [:views "Log" "select" "all" :view])
+     (get-in views [:views "Log" "return" "default" :input])])
+  => [1
+      {:table "Log" :type "select" :tag "all" :query nil}
+      [{:symbol "i_log_id" :type "uuid"}]])
