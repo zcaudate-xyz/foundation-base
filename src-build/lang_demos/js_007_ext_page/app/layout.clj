@@ -2,8 +2,8 @@
   (:require [lang.core :as l]))
 
 (l/script :js
-  {:static {:export [RootLayout]
-            :flags {:nextjs {:header "import './globals.css';"}}}})
+  {:import [["./globals.css"]]
+   :static {:export [RootLayout]}})
 
 (defn.js RootLayout
   [#{children}]

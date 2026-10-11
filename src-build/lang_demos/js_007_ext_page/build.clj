@@ -1,8 +1,5 @@
 (ns lang-demos.js-007-ext-page.build
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
-            [lang.core :as l]
-            ^{:clj-kondo/ignore [:unused-namespace]}
+  (:require [lang.core :as l]
             [postgres.core.supabase :as s]
             [scaffold.supabase.local-min :as local-min]
             [std.make :as make :refer [def.make]]))
@@ -272,7 +269,7 @@
    :main ["{" 
           "  \"compilerOptions\": {"
           "    \"baseUrl\": \".\","
-          "    \"paths\": { \"pg\": [\"./src/shims/pg.js\"] }"
+          "    \"paths\": { \"pg\": [\"./src/shims/pg.js\"], \"@demo/*\": [\"./src/*\"] }"
           "  }"
           "}"]})
 
@@ -358,57 +355,95 @@
               :search ["src-build/lang_demos/js_007_ext_page"]
               :main 'lang-demos.js-007-ext-page
               :target "src"
-              :emit {:code {:link {:path-suffix ".js"}
+              :emit {:code {:link {:path-suffix ".js"
+                                   :root-prefix "@demo"}
+                            :refine {'js.react-native
+                                     {:treeshake true
+                                      :ensure '[Portal PortalImpl PortalRegistery
+                                                measure measureRef usePortalLayouts]}
+                                     'js.react-native.animate
+                                     {:treeshake true
+                                      :ensure '[IMPL callNativeProps createTransition
+                                                getNativePropsTarget isAnimatedValue
+                                                listenTransformations setPropsAll
+                                                setPropsNative setPropsWeb
+                                                useBinaryIndicator usePressIndicator
+                                                useProgess useShowing webStyle
+                                                webStyleValue webTransform
+                                                webTransformValue webUnitlessStyle]}
+                                     'js.react-native.helper-color
+                                     {:treeshake true
+                                      :ensure '[hsl hsl-parse hsl-parse-raw
+                                                interpolate interpolateColor
+                                                interpolateColorArray interpolateNum
+                                                interpolateScalar interpolateValue
+                                                lighten mix saturate toHSL]}
+                                     'js.react-native.helper-theme
+                                     {:treeshake true
+                                      :ensure '[StageMap StageStatics ThemeLookup
+                                                combinedStatic
+                                                createCombinedTransformations
+                                                createSingleTransformations
+                                                mergeProps prepThemeCombined
+                                                prepThemeSingle transformColor]}
+                                     'js.react-native.helper-theme-default
+                                     {:treeshake true
+                                      :ensure '[BaseBg BaseFg BaseTheme
+                                                ButtonDefaultStyle
+                                                ButtonDefaultTheme FontSize
+                                                InputDefaultBgTheme
+                                                InputDefaultFgTheme
+                                                InputDefaultPipeline
+                                                InputDefaultStyle
+                                                InputDefaultTheme
+                                                PressDefaultPipeline centerFn
+                                                defaultHovering defaultPressing]}
+                                     'js.react-native.model-context
+                                     {:treeshake true
+                                      :ensure '[contextCoordinate
+                                                contextCoordinateCross
+                                                contextCoordinateMain]}
+                                     'js.react-native.model-geom
+                                     {:treeshake true
+                                      :ensure '[POSITION oppositePosition
+                                                triangleBaseStyle]}
+                                     'js.react-native.physical-base
+                                     {:treeshake true
+                                      :ensure '[Box TouchableBasePressing
+                                                TouchableInput mergeChords
+                                                transformInner transformInnerFn
+                                                transformProps useChordDisabled
+                                                useChordEmptyable useChordFocusable
+                                                useChordHighlighted
+                                                useChordHoverable useChordPressable
+                                                useIndicatorCapture useInputable
+                                                useTouchable]}
+                                     'js.react-native.ui-button
+                                     {:treeshake true
+                                      :ensure '[Button buttonTheme]}
+                                     'js.react-native.ui-input
+                                     {:treeshake true
+                                      :ensure '[Input inputTheme]}
+                                     'js.react-native.ui-tooltip
+                                     {:treeshake true
+                                      :ensure '[Tooltip TooltipInner
+                                                TooltipInnerContentArrow
+                                                TooltipInnerHostArrow
+                                                TooltipRawArrow
+                                                tooltipContextOffset
+                                                tooltipPortalOffset]}}
                             :transforms {:full [inject-next-header
                                                 inject-next-use-client]}}}}]})
 
-(defn- module-import-relative
-  [^java.nio.file.Path base-path
-   ^java.nio.file.Path source-dir
-   ^String import-path]
-  (when (str/starts-with? import-path "./")
-    (let [^String target-rel (subs import-path 2)
-          ^java.nio.file.Path target (.resolve base-path target-rel)]
-      (when (.exists ^java.io.File (.toFile target))
-        (let [relative (str (.relativize source-dir target))]
-          (if (str/starts-with? relative ".")
-            relative
-            (str "./" relative)))))))
-
-(defn- fix-module-directory-imports!
-  "Makes module.directory's root-relative imports relative to each file."
-  [directory]
-  (let [^java.io.File base (io/file directory)
-        ^java.nio.file.Path base-path (.toPath base)]
-    (doseq [^java.io.File file (file-seq base)
-            :when (and (.isFile file)
-                       (str/ends-with? (.getName file) ".js"))]
-      (let [^java.nio.file.Path source-path (.toPath file)
-            ^java.nio.file.Path source-dir (.getParent source-path)
-            original (slurp file)
-            fixed (str/replace
-                   original
-                   #"from '(\./[^']+)'"
-                   (fn [[_ import-path]]
-                     (str "from '"
-                          (or (module-import-relative base-path
-                                                      source-dir
-                                                      import-path)
-                              import-path)
-                          "'")))]
-        (when (not= original fixed)
-          (spit file fixed))))))
-
 (defn build-js-007-ext-page
   []
-  (require '[lang-demos.js-007-ext-page.generated.main :as main])
+  (require '[lang-demos.js-007-ext-page.generated.main])
   (require '[lang-demos.js-007-ext-page.app.page])
   (require '[lang-demos.js-007-ext-page.app.layout])
-  (let [result (make/build-all JS-007-EXT-PAGE)]
-    (fix-module-directory-imports! ".build/demo/js-007-ext-page/src")
-    result))
+  (make/build-all JS-007-EXT-PAGE))
 
 (comment
   (setup-scratch-v0)
   (build-js-007-ext-page)
-  (make/run JS-007-EXT-PAGE :dev))
+  (make/run JS-007-EXT-PAGE :dev)
+  (make/run JS-007-EXT-PAGE :init))

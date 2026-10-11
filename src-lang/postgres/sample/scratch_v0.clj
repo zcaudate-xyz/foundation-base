@@ -16,9 +16,10 @@
 (deftype.pg ^{:api/meta {:sb/access {:admin :all
                                      :auth :select
                                      :anon :select}}
+              :final true
               :public true}
   Log
-  "Append-only log rows exposed read-only through Supabase."
+  "Shared log rows exposed through Supabase."
   [:id {:type :uuid :primary true
         :sql {:default (pg/uuid-generate-v4)}}
    :message {:type :text :required true}
@@ -80,6 +81,17 @@
   [:text i-message]
   (let [o-log (pg/t:insert -/Log
                 {:message i-message})]
+    (return o-log)))
+
+(defn.pg ^{:props [:security :definer]
+           :api/meta {:sb/grant :all}}
+  log-delete-public
+  "Deletes one row from the shared log by id through the public RPC."
+  {:added "4.1.4"}
+  [:uuid i-id]
+  (let [o-log (pg/t:delete -/Log
+                {:where {:id i-id}
+                 :single true})]
     (return o-log)))
 
 (defn.pg ^{:props [:security :definer]

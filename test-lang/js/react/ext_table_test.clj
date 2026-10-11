@@ -21,9 +21,6 @@
              [js.react.ext-model :as ext-model]
              [js.react.ext-table :as ext-table]]})
 
-(declare test-js_react_ext_table__makeActionView_log_append_public
-         test-js_react_ext_table__makeActionView_echo_plus)
-
 (do
   (l/script- :postgres
     {:runtime :jdbc.client
@@ -56,11 +53,13 @@
 (def.js SchemaLookup
   (@! (pg/bind-app (pg/app "scratch_v0"))))
 
+
+;; The RPC is granted to authenticated/service_role, so the
+;; local integration fixture uses service_role. Browser code
+;; must use the anon key together with an authenticated session.
+
 (def.js RuntimeConfig
   {"primary" {"type" "supabase"
-              ;; The RPC is granted to authenticated/service_role, so the
-              ;; local integration fixture uses service_role. Browser code
-              ;; must use the anon key together with an authenticated session.
               "defaults" (xt/x:obj-assign
                           (@! local-min/+config-supabase-service+)
                           {"token" (@! (-> local-min/+config+ :api :service-key))})}
@@ -85,6 +84,7 @@
 
 ^{:refer js.react.ext-table/table-query-input :added "4.1"}
 (fact "uses the configured table spec when a view has no query arguments"
+
   (!.js
     [(ext-table/table-query-input [])
      (ext-table/table-query-input
@@ -201,45 +201,43 @@
   => {"type" "event.model"
       "output" "hello-REMOTE"})
 
-^{:id test-js_react_ext_table__makeActionView_echo_plus
-  :refer js.react.ext-table/makeActionView
-  :added "4.1"}
+^{:refer js.react.ext-table/makeActionView
+  :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
 (fact "initialises Supabase through the node runtime and calls log_append_public once"
-  (try
-    (pg/t:delete scratch-v0/Log {:where {:message "MY MESSAGE"}})
-    (notify/wait-on :js
-      (var node (substrate/node-create {"id" "action-live-node"}))
-      (var context {"node" node
-                    "runtime" {"config" -/RuntimeConfig
-                               "schema" -/Schema
-                               "lookup" -/SchemaLookup}})
-      (var view
-           (ext-table/makeActionView
-            {"actions"
-             {"append"
-              {"rpc-spec"
-               {"input" [{"symbol" "i_message" "type" "text"}]
-                "return" "jsonb"
-                "schema" "scratch_v0"
-                "id" "log_append_public"
-                "flags" {}}}}}
-            "append"
-            {"defaultArgs" ["MY MESSAGE"]}
-            context))
-      (repl/notify (. view ["init"])))
-    => (contains-in
-        {"post" [false], "::" "model.run", "main" [true {"message" "MY MESSAGE", "author_id" nil, "id" string?}], "pre" [false]})
-    [(pg/t:count scratch-v0/Log {:where {:message "MY MESSAGE"}})
-     (pg/t:select scratch-v0/Log {:where {:message "MY MESSAGE"}})]
-    => (contains-in
-        [1
-         [{:id string?, :author-id nil, :message "MY MESSAGE"}]])
-    (finally
-      (pg/t:delete scratch-v0/Log {:where {:message "MY MESSAGE"}}))))
+
+  (notify/wait-on :js
+    (var node (substrate/node-create {"id" "action-live-node"}))
+    (var context {"node" node
+                  "runtime" {"config" -/RuntimeConfig
+                             "schema" -/Schema
+                             "lookup" -/SchemaLookup}})
+    (var view
+         (ext-table/makeActionView
+          {"actions"
+           {"append"
+            {"rpc-spec"
+             {"input" [{"symbol" "i_message" "type" "text"}]
+              "return" "jsonb"
+              "schema" "scratch_v0"
+              "id" "log_append_public"
+              "flags" {}}}}}
+          "append"
+          {"defaultArgs" ["MY MESSAGE"]}
+          context))
+    (repl/notify (. view ["init"])))
+  => (contains-in
+      {"post" [false], "::" "model.run", "main" [true {"message" "MY MESSAGE", "author_id" nil, "id" string?}], "pre" [false]})
+
+  [(pg/t:count scratch-v0/Log {:where {:message "MY MESSAGE"}})
+   (pg/t:select scratch-v0/Log {:where {:message "MY MESSAGE"}})]
+  => (contains-in
+      [1
+       [{:id string?, :author-id nil, :message "MY MESSAGE"}]]))
 
 ^{:refer js.react.ext-table/makeActionView :added "4.1"}
 (fact "delegates an action to echo through the initialised runtime"
-
+  
   (notify/wait-on :js
     (var node (substrate/node-create {"id" "action-echo-node"}))
     (var context {"node" node
@@ -263,74 +261,81 @@
     (repl/notify (. view ["init"])))
   => {"post" [false], "::" "model.run", "main" [true "HELLO-REMOTE"], "pre" [false]})
 
-^{:refer js.react.ext-table/useActionView :added "4.1"}
+^{:refer js.react.ext-table/useActionView :added "4.1"
+  :setup [(pg/t:delete scratch-v0/Log)]}
 (fact "runs the mounted action once through real Supabase"
-  (let [message "useActionView/mounted-once"]
-    (try
-      (let [result
-            (helper-source/test
-               (fn [props]
-                 (var view
-                      (ext-table/useActionView
-                       (. props ["impl"])
-                       "append"
-                       {"defaultArgs" ["useActionView/mounted-once"]}
-                       (. props ["context"])
-                       {}))
-                 (xt/x:set-key (. props ["state"]) "view" view)
-                 (return (r/createElement "span" nil "ready")))
-               (fn [_]
-                 (var node (substrate/node-create {"id" "use-action-view-node"}))
-                 (return
-                  {"impl"
-                   {"actions"
-                    {"append"
-                     {"rpc-spec"
-                      {"input" [{"symbol" "i_message" "type" "text"}]
-                       "return" "jsonb"
-                       "schema" "scratch_v0"
-                       "id" "log_append_public"
-                       "flags" {}}}}}
-                   "context" (-/live-context node)
-                   "state" {}}))
-               (fn [props document env]
-                 (var view (. props ["state"] ["view"]))
-                 (return
-                  (. (. view ["init"])
-                     (then
-                         (fn [init]
-                           (return
-                            (new Promise
-                             (fn [resolve]
-                               (setTimeout
-                                (fn []
-                                  (resolve {"root-id" (. env ["root"] ["id"])
-                                            "init" init}))
-                                500))))))
-                     (finally
-                         (fn []
-                           (return
-                            (client-base/kernel-teardown
-                             (. props ["context"] ["node"])
-                             "db/primary"
-                             {}))))))))]
-        result
-        => (contains-in
-            {"root-id" "root"
-             "init"
-             {"main" [true
-                      {"message" "useActionView/mounted-once"
-                       "author_id" nil
-                       "id" string?}]}})
-        (pg/t:count scratch-v0/Log {:where {:message message}})
-        => 1
-        (pg/t:select scratch-v0/Log {:where {:message message}})
-        => (contains-in
-            [{:id string?
-              :author-id nil
-              :message "useActionView/mounted-once"}]))
-      (finally
-        (pg/t:delete scratch-v0/Log {:where {:message message}})))))
+
+  (defn.js TestActionView
+    [{:# [impl context state]}]
+    (var view
+         (ext-table/useActionView
+          impl
+          "append"
+          {"defaultArgs" ["useActionView/mounted-once"]}
+          context
+          {}))
+    (xt/x:set-key state "view" view)
+    (return [:span "ready"](r/createElement "span" nil "ready")))
+  
+  (helper-source/test
+   
+   (fn [_]
+     (var node (substrate/node-create {"id" "use-action-view-node"}))
+     (return
+      {"impl"
+       {"actions"
+        {"append"
+         {"rpc-spec"
+          {"input" [{"symbol" "i_message" "type" "text"}]
+           "return" "jsonb"
+           "schema" "scratch_v0"
+           "id" "log_append_public"
+           "flags" {}}}}}
+       "context" (-/live-context node)
+       "state" {}}))
+   (fn [props document env]
+     (var view (. props ["state"] ["view"]))
+     (return
+      (. (. view ["init"])
+         (then
+          (fn [init]
+            (return
+             (new Promise
+                  (fn [resolve]
+                    (setTimeout
+                     (fn []
+                       (resolve {"root-id" (. env ["root"] ["id"])
+                                 "init" init}))
+                     500))))))
+         (finally
+           (fn []
+             (return
+              (client-base/kernel-teardown
+               (. props ["context"] ["node"])
+               "db/primary"
+               {}))))))))
+
+  (let [message "useActionView/mounted-once"])
+  (try
+    (let [result
+          ]
+      result
+      => (contains-in
+          {"root-id" "root"
+           "init"
+           {"main" [true
+                    {"message" "useActionView/mounted-once"
+                     "author_id" nil
+                     "id" string?}]}})
+      (pg/t:count scratch-v0/Log {:where {:message message}})
+      => 1
+      (pg/t:select scratch-v0/Log {:where {:message message}})
+      => (contains-in
+          [{:id string?
+            :author-id nil
+            :message "useActionView/mounted-once"}]))
+    (finally
+      (pg/t:delete scratch-v0/Log {:where {:message message}}))))
 
 ^{:refer js.react.ext-table/makeRemoteView :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log
@@ -362,6 +367,7 @@
 
 ^{:refer js.react.ext-table/useRemoteView :added "4.1"}
 (fact "refreshes a remote table view through live Supabase"
+
   (let [message "useRemoteView-live"]
     (try
       (pg/t:delete scratch-v0/Log {:where {:message message}})
@@ -375,7 +381,7 @@
                {"defaultArgs"
                 ["Log"
                  {"where" [{"message" "useRemoteView-live"}]
-                  "data" ["id" "message"]}]}
+                  "data"  ["id" "message"]}]}
                (. props ["context"])
                {}))
          (xt/x:set-key (. props ["state"]) "view" view)
@@ -393,20 +399,20 @@
               (fn [init]
                 (return
                  (new Promise
-                  (fn [resolve]
-                    (setTimeout
-                     (fn []
-                       (resolve
-                        {"root-id" (. env ["root"] ["id"])
-                         "output" (event-model/get-current view nil)}))
-                     500))))))
+                      (fn [resolve]
+                        (setTimeout
+                         (fn []
+                           (resolve
+                            {"root-id" (. env ["root"] ["id"])
+                             "output" (event-model/get-current view nil)}))
+                         500))))))
              (finally
-              (fn []
-                (return
-                 (client-base/kernel-teardown
-                  (. props ["context"] ["node"])
-                  "db/primary"
-                  {}))))))))
+               (fn []
+                 (return
+                  (client-base/kernel-teardown
+                   (. props ["context"] ["node"])
+                   "db/primary"
+                   {}))))))))
       => (contains-in
           {"root-id" "root"
            "output" [{"id" string? "message" "useRemoteView-live"}]})

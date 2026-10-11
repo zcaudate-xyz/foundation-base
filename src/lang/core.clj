@@ -63,6 +63,7 @@
   preprocess-base/with:macro-opts
   
   impl/emit-script
+  impl/list-globals
   impl/emit-str
   impl/emit-as
   impl/emit-symbol
