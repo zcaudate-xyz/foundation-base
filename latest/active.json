@@ -6,10 +6,10 @@
     "errored" : 2
   },
   "run" : {
-    "id" : 38109741497,
-    "number" : 156,
+    "id" : 38126900474,
+    "number" : 157,
     "attempt" : 1,
-    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/38109741497"
+    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/38126900474"
   },
   "workflow-key" : "active",
   "tests" : {
@@ -21,7 +21,7 @@
     "errored" : 2
   },
   "git" : {
-    "sha" : "75a65b5f14b286bfd6af751bb135118abfbad6c7",
+    "sha" : "ff5e3d9f1fb534dc67adfb12fd440aed4f5d8226",
     "ref" : "refs/heads/main",
     "event" : "push"
   },
@@ -55,7 +55,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-11T04:35:21.067544528Z",
+    "recorded-at" : "2026-10-11T09:45:39.656898900Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -3218,7 +3218,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-11T04:05:00.691191118Z",
+    "recorded-at" : "2026-10-11T09:08:32.639956551Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -3512,7 +3512,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-11T03:58:47.227642228Z",
+    "recorded-at" : "2026-10-11T09:08:40.364675797Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -3897,7 +3897,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-11T04:00:27.977113256Z",
+    "recorded-at" : "2026-10-11T09:05:42.713462881Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -4548,7 +4548,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-11T04:07:12.529137697Z",
+    "recorded-at" : "2026-10-11T09:14:55.376717843Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -5632,7 +5632,7 @@
       "namespace" : "substrate.walkthrough.s07-wsserver-test"
     } ]
   } ],
-  "recorded-at" : "2026-10-11T04:36:44.785949377Z",
+  "recorded-at" : "2026-10-11T09:46:55.929290204Z",
   "workflow-name" : "XTBench Active",
   "status" : "failure",
   "kind" : "xtbench-run",
