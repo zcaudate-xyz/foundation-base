@@ -81,55 +81,65 @@
   :added "4.1"
   :eval false
   :setup [(pg/t:delete scratch-v0/Log
-                       {:where {:message "ext-table-cache-jsdom"}})
+            {:where {:message "ext-table-cache-jsdom"}})
           (pg/t:insert scratch-v0/Log
-                       {:message "ext-table-cache-jsdom"}
-                       {:track {}})]
+            {:message "ext-table-cache-jsdom"}
+            {:track {}})]
   :teardown [(pg/t:delete scratch-v0/Log
-                          {:where {:message "ext-table-cache-jsdom"}})]}
+               {:where {:message "ext-table-cache-jsdom"}})]}
 (fact "warms the same-node cache with a live pull inside jsdom"
-  (let [message "ext-table-cache-jsdom"]
-    (try
-      (helper-source/test
-       (fn [props]
-         (var view
-              (ext-table/makeRemoteView
-               (. props ["impl"])
+
+  (defn.js TestRemoteView
+    [{:# [impl context state]}]
+    (var view (ext-table/makeRemoteView
+               impl
                "data"
                {"defaultArgs"
                 ["Log"
                  {"where" [{"message" "ext-table-cache-jsdom"}]
                   "data" ["id" "message"]}]}
-               (. props ["context"])))
-         (xt/x:set-key (. props ["state"]) "view" view)
-         (return (r/createElement "span" nil "ready")))
-       (fn [_]
-         (var node (substrate/node-create {"id" "ext-table-cache-jsdom"}))
-         (return {"impl" (-/table-impl)
-                  "context" (-/live-context node)
-                  "state" {}}))
-       (fn [props document env]
-         (var node (. props ["context"] ["node"]))
-         (var view (. props ["state"] ["view"]))
-         (return
-          (. (ext-model/refresh-model view {})
-             (then
-              (fn [_]
-                (var remote-output (event-model/get-current view nil))
-                (return
-                 (. (client-base/pull-cached node "db/primary" ["Log"] {})
-                    (then
-                     (fn [cached-output]
-                       (return {"root-id" (. env ["root"] ["id"])
-                                "remote" remote-output
-                                "cached" cached-output})))))))
-             (finally
-              (fn []
-                (return
-                 (client-base/kernel-teardown node "db/primary" {}))))))))
-  => (contains-in
-      {"root-id" "root"
-       "remote" [{"id" string? "message" message}]
-       "cached" [{"id" string? "message" message}]})
+               context))
+    (xt/x:set-key state "view" view)
+    (return [:span "ready"]))
+
+  (helper-source/test
+   -/TestRemoteView
+   (fn [_]
+     (var node (substrate/node-create {"id" "ext-table-cache-jsdom"}))
+     (return {"impl"    (-/table-impl)
+              "context" (-/live-context node)
+              "state"   {}}))
+   (fn [props document env]
+     (var node (. props ["context"] ["node"]))
+     (var view (. props ["state"]   ["view"]))
+     (return
+      (. (ext-model/refresh-model view {})
+         (then
+          (fn [_]
+            (var remote-output (event-model/get-current view nil))
+            (return
+             (. (client-base/pull-cached node "db/primary" ["Log"] {})
+                (then
+                 (fn [cached-output]
+                   (return {"root-id" (. env ["root"] ["id"])
+                            "remote" remote-output
+                            "cached" cached-output})))))))
+         (finally
+           (fn []
+             (return
+              (client-base/kernel-teardown node "db/primary" {}))))))))
+  => {"root-id" "root", "remote" [{"message" "ext-table-cache-jsdom", "id" "76018aba-a5ba-402b-84ff-0f953b7578fc"}],
+   "cached" [{"message" "ext-table-cache-jsdom", "id" "76018aba-a5ba-402b-84ff-0f953b7578fc"}]}
+  
+  (let [message "ext-table-cache-jsdom"]
+    (try
+      
+      => (contains-in
+          {"root-id" "root"
+           "remote" [{"id" string? "message" message}]
+           "cached" [{"id" string? "message" message}]})
       (finally
-        (pg/t:delete scratch-v0/Log {:where {:message message}})))))
+        (pg/t:delete scratch-v0/Log {:where {:message message}}))))
+
+
+  )

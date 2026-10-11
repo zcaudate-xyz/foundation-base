@@ -86,12 +86,18 @@
 ;;
 
 (defn module-imports-from-view
-  "gets imports from a prepared module view"
+  "gets module-level and entry-derived imports from a prepared module view"
   {:added "4.1"}
   [book module-view]
   (let [links   (module/module-deps-code book module-view)
-        entries (vals (:code module-view))]
-    {:native (script-imports book entries)
+        entries (vals (:code module-view))
+        side-effects (->> (:native module-view)
+                          (filter (fn [[_ opts]] (nil? (:as opts))))
+                          (into {}))
+        native  (merge-with merge
+                            side-effects
+                            (script-imports book entries))]
+    {:native native
      :direct links}))
 
 (defn module-imports

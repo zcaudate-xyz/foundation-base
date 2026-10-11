@@ -48,11 +48,18 @@
           (local-min/wait-for-postgrest-ready "scratch_v0" "Log" 120000)]
   :teardown [(l/rt:stop)]})
 
-(defn.js log-app
+(defn.js LogApp
   [props]
-  (var node (app-runtime/install-rpc-service
-             (substrate/node-create {"id" "log-app-node"})))
-  (var context (app-runtime/live-context node))
+  (var [runtime setRuntime]
+       (r/useState
+        (fn []
+          (var node (app-runtime/install-rpc-service
+                     (substrate/node-create {"id" "log-app-node"})))
+          (var context (app-runtime/live-context node))
+          (return {"node" node
+                   "context" context}))))
+  (var node (. runtime ["node"]))
+  (var context (. runtime ["context"]))
   (var view
        (ext-table/useRemoteView
         (app-runtime/table-impl)
@@ -60,55 +67,77 @@
         {"defaultArgs" []}
         context
         {}))
-  (xt/x:set-key (. props ["state"]) "node" node)
-  (xt/x:set-key (. props ["state"]) "view" view)
+  (var state (. props ["state"]))
+  (xt/x:set-key state "node" node)
+  (xt/x:set-key state "view" view)
+  (r/init []
+    (var resolve-result (. props ["resolve-result"]))
+    (var reject-result (. props ["reject-result"]))
+    (-> (client-supabase/rpc-call
+         node
+         "auth/supabase"
+         "log_append_public"
+         {"i_message" (. props ["message"])}
+         {"headers" {"Content-Profile" "scratch_v0"
+                     "Accept-Profile" "scratch_v0"}})
+        (promise/x:promise-then
+         (fn [rpc-row]
+           (return
+            (-> (ext-model/refresh-model view {})
+                (promise/x:promise-then
+                 (fn [_]
+                   (var rows (event-model/get-current view nil))
+                   (return
+                    {"root-id" (. props ["root-id"])
+                     "rpc" rpc-row
+                     "rows" rows
+                     "same-id" (and rows
+                                    (> rows.length 0)
+                                    (== (. rpc-row ["id"])
+                                        (. rows [0] ["id"])))})))))))
+        (promise/x:promise-finally
+         (fn []
+           (return
+            (client-base/kernel-teardown
+             node
+             "db/primary"
+             {}))))
+        (promise/x:promise-then
+         (fn [result]
+           (xt/x:set-key state "result" result)
+           (resolve-result result)
+           (return result)))
+        (promise/x:promise-catch
+         (fn [error]
+           (reject-result error)
+           (return nil))))
+    (return nil))
   (return (r/createElement "span" nil "log-app")))
 
-^{:refer js.react.ext-table-app-test/log-app :added "4.1"
+^{:refer js.react.ext-table-app-test/LogApp :added "4.1"
   :setup [(pg/t:delete scratch-v0/Log
             {:where {:message "ext-table-app/log-append-refresh"}})]
   :teardown [(pg/t:delete scratch-v0/Log
                {:where {:message "ext-table-app/log-append-refresh"}})]}
 (fact "appends through the anonymous RPC and refreshes the mounted Log view"
   (helper-source/test
-   (fn [props]
-     (return (-/log-app props)))
-   {"message" "ext-table-app/log-append-refresh"
-    "state" {}}
+   -/LogApp
+   (fn [env]
+     (var resolve-result nil)
+     (var reject-result nil)
+     (var result-promise
+          (new Promise
+           (fn [resolve reject]
+             (:= resolve-result resolve)
+             (:= reject-result reject))))
+     (return {"message" "ext-table-app/log-append-refresh"
+              "root-id" (. env ["root"] ["id"])
+              "state" {}
+              "result-promise" result-promise
+              "resolve-result" resolve-result
+              "reject-result" reject-result}))
    (fn [props document env]
-     (var node (. props ["state"] ["node"]))
-     (var view (. props ["state"] ["view"]))
-     (var message (. props ["message"]))
-     (return
-      (-> (client-supabase/rpc-call
-           node
-           "auth/supabase"
-           "log_append_public"
-           {"i_message" message}
-           {"headers" {"Content-Profile" "scratch_v0"
-                       "Accept-Profile" "scratch_v0"}})
-          (promise/x:promise-then
-           (fn [rpc-row]
-             (return
-              (-> (ext-model/refresh-model view {})
-                  (promise/x:promise-then
-                   (fn [_]
-                     (var rows (event-model/get-current view nil))
-                     (return
-                      {"root-id" (. env ["root"] ["id"])
-                       "rpc" rpc-row
-                       "rows" rows
-                       "same-id" (and rows
-                                      (> rows.length 0)
-                                      (== (. rpc-row ["id"])
-                                          (. rows [0] ["id"])))})))))))
-          (promise/x:promise-finally
-           (fn []
-             (return
-              (client-base/kernel-teardown
-               node
-               "db/primary"
-               {}))))))))
+     (return (. props ["result-promise"]))))
   => (contains-in
       {"root-id" "root"
        "rpc" {"id" string? "message" "ext-table-app/log-append-refresh"}

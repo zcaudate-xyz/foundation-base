@@ -28,7 +28,7 @@
      (addEventListener
       "close"
       (fn []
-        (. window (clearInterval interval)))))
+        (clearInterval interval))))
   (for:object [[tag callback] listeners]
               (. conn
                  (addEventListener tag callback)))

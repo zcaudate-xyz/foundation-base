@@ -328,6 +328,17 @@
                                       (assoc :bulk bulk)))]
     (emit-script-join imports-arr deps-arr body)))
 
+(defn list-globals
+  "lists transitive defglobal symbols required by a script form in dependency order"
+  {:added "4.1"}
+  [form meta]
+  (let [[_ _ book _ mopts] (emit-options meta)
+        [_ entries _] (deps/collect-script book form
+                                           (assoc mopts :global-init true))]
+    (->> entries
+         (filter #(= :defglobal (:op-key %)))
+         (mapv ut/sym-full))))
+
 (defn emit-scaffold-raw-imports
   "gets only the scaffold imports"
   {:added "4.0"}

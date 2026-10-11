@@ -257,7 +257,6 @@
   [model types meta dest-key tag-key]
   (var getOutput (fn:> (xtd/obj-clone (event-model/get-output model dest-key))))
   (var [output setOutput] (r/local getOutput))
-  (var wrap (r/useIsMountedWrap))
   (var outputRef (r/useFollowRef output))
   (var pred
        (fn [event]
@@ -270,7 +269,7 @@
   (-/initModelBase model
                   dest-key
                   #{meta pred  
-                    {:setResult (wrap setOutput)
+                    {:setResult setOutput
                      :getResult getOutput
                      :resultRef outputRef
                      :resultTag tag-key
