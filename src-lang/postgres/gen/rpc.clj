@@ -5,10 +5,78 @@
    topic inference and canonical xt.db notification forms. Applications remain
    responsible only for selecting source namespaces and supplying wrapper
    authentication/configuration."
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [postgres.gen.bind-macro :as bind]
+            [postgres.typed :as typed]))
 
 (def +entity-aggregates+
   ["User" "Brand" "Campaign" "Topic"])
+
+(^{:public true}
+ defn rpc-client-spec
+  "Builds a client-base RPC descriptor from a PostgreSQL book entry or typed
+   function definition. A schema override may be supplied in opts."
+  ([source]
+   (rpc-client-spec source {}))
+  ([source opts]
+   (if (and (map? source)
+            (= :postgres (:domain source))
+            (map? (:registry source))
+            (not (map? opts)))
+     (rpc-client-spec (typed/function-def source opts) {})
+     (letfn [(typed-function? [value]
+               (and (map? value)
+                    (contains? value :inputs)
+                    (contains? value :output)
+                    (contains? value :name)))
+             (value-name [value]
+               (cond
+                 (string? value) value
+                 (or (keyword? value) (symbol? value)) (name value)
+                 :else (str value)))
+             (type-name [value]
+               (cond
+                 (sequential? value) (type-name (first value))
+                 (string? value) value
+                 (or (keyword? value) (symbol? value)) (name value)
+                 (and (map? value) (:name value)) (type-name (:name value))
+                 (nil? value) nil
+                 :else (str value)))
+             (client-input [arg]
+               (let [param-name (-> (or (:name arg) (:symbol arg))
+                                    value-name
+                                    (str/replace "-" "_"))
+                     type-value (or (:type arg)
+                                    (first (:modifiers arg)))]
+                 {"name" param-name
+                  "symbol" param-name
+                  "type" (type-name type-value)}))]
+       (let [typed? (typed-function? source)
+             descriptor (if typed?
+                          source
+                          (bind/bind-function source))
+             schema (or (:schema opts)
+                        (:schema descriptor)
+                        (:dbschema descriptor)
+                        (when (and typed?
+                                   (str/starts-with? (str (:ns descriptor))
+                                                     "statsdb.rpc."))
+                          "stats_rpc"))
+             id (if typed? (:name descriptor) (:id descriptor))
+             inputs (if typed? (:inputs descriptor) (:input descriptor))
+             return (if typed? (:output descriptor) (:return descriptor))]
+         (when-not schema
+           (throw (ex-info "Cannot determine PostgreSQL RPC client schema"
+                           {:type :postgres.gen.rpc/missing-schema
+                            :function (or (:name descriptor) (:id descriptor))
+                            :namespace (:ns descriptor)})))
+         {"id" (value-name id)
+          "schema" (value-name schema)
+          "input" (mapv client-input inputs)
+          "return" (type-name return)
+          "flags" {}}))))
+  ([ctx fn-ref opts]
+   (rpc-client-spec (typed/function-def ctx fn-ref) opts)))
 
 (defn snake-name
   [x]

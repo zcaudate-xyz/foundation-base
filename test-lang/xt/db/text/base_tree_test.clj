@@ -1,5 +1,7 @@
 (ns xt.db.text.base-tree-test
-  (:require [lang.core :as l])
+  (:require [lang.core :as l]
+            [postgres.typed :as pg-typed]
+            [postgres.typed.typed-common :as pg-types])
   (:use code.test))
 
 ^{:seedgen/root {:all true}}
@@ -313,7 +315,32 @@
                       :view {:table "Currency"
                              :type "return"
                              :query ["id"
-                                     {"::" "sql/arg", "name" "{{i_note}}"}]}})]}
+                                     {"::" "sql/arg", "name" "{{i_note}}"}]}})
+                   (def +input-plan-view-typed-select+
+                     (let [i-nickname nil]
+                       (pg-typed/dataview-select
+                        (pg-types/make-table-def
+                         "fixture" "UserAccount"
+                         [(pg-types/make-column-def
+                           :id (pg-types/make-type-ref :primitive nil :uuid))
+                          (pg-types/make-column-def
+                           :nickname (pg-types/make-type-ref :primitive nil :citext))]
+                         :id)
+                        {:args [:citext i-nickname]
+                         :select {:nickname i-nickname}})))
+                   (def +input-plan-view-typed-return+
+                     (let [i-user-id nil
+                           i-note nil]
+                       (pg-typed/dataview-return
+                        (pg-types/make-table-def
+                         "fixture" "UserAccount"
+                         [(pg-types/make-column-def
+                           :id (pg-types/make-type-ref :primitive nil :uuid))
+                          (pg-types/make-column-def
+                           :nickname (pg-types/make-type-ref :primitive nil :citext))]
+                         :id)
+                        {:args [:uuid i-user-id :text i-note]
+                         :return [:id :nickname i-note]})))]}
 (fact "plans a combined tree with filled select and return input"
 
   (!.js
@@ -434,4 +461,35 @@
     (xtd/get-in tree [1 "where" 0 "id"])])
   => [true
       "Currency"
-      ["in" [["STATS" "USD"]]]])
+      ["in" [["STATS" "USD"]]]]
+
+  (!.js
+   (var [ok tree] (v/plan-view
+                   sample/Schema
+                   {:table "UserAccount"
+                    :select-entry (@! +input-plan-view-typed-select+)
+                    :select-args ["root"]}))
+   [ok
+    (xt/x:first tree)
+    (xtd/get-in tree [1 "where" 0 "nickname"])
+    (xtd/get-in tree [1 "data"])])
+  => [true
+      "UserAccount"
+      "root"
+      ["id"]]
+
+  (!.js
+   (var [ok tree] (v/plan-view
+                   sample/Schema
+                   {:table "UserAccount"
+                    :return-entry (@! +input-plan-view-typed-return+)
+                    :return-id "00000000-0000-0000-0000-000000000000"
+                    :return-args ["profile"]}))
+   [ok
+    (xt/x:first tree)
+    (xtd/get-in tree [1 "where" 0 "id"])
+    (xtd/get-in tree [1 "data"])])
+  => [true
+      "UserAccount"
+      "00000000-0000-0000-0000-000000000000"
+      ["id" "nickname"]])
