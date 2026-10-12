@@ -4,6 +4,7 @@
             [xt.lang.common-lib]
             [js.blessed]
             [js.react]
+            [js.react-native]
             [lang.base.book :as b]
             [lang.base.book-module :as module]
             [lang.base.emit-prep-js-test :as prep-js]
@@ -23,6 +24,7 @@
                        (require '[xt.lang.common-data] :reload)
                        (require '[xt.lang.common-lib] :reload)
                        (require '[js.react] :reload)
+                       (require '[js.react-native] :reload)
                        (require '[js.blessed] :reload)
                        (require '[js.blessed.ui-core] :reload)
                        (require '[js.blessed.frame-status] :reload)
@@ -231,7 +233,41 @@
                ['JS.app/App])))
       => '{"@measured/puck"   {:as [* Puck]},
            "@radix-ui/themes" {:as [* Radix],
-                               :bundle {"@radix-ui/themes/styles.css" {}}}})
+                               :bundle {"@radix-ui/themes/styles.css" {}}}}
+
+      (let [js-book       (lib/get-book +library-js+ :js)
+            entries       (first (deps/collect-script-entries js-book ['JS.app/App]))
+            ensured-book  (update-in js-book [:modules 'JS.ui :native]
+                                     assoc "keep.css" {:ensure true}
+                                           "drop.css" {})
+            script-imports (deps-imports/script-imports ensured-book entries)
+            ui-imports    (:native (deps-imports/module-imports ensured-book 'JS.ui))
+            react-book    (lib/get-book +library-js-cloned+ :js)
+            react-imports (:native (deps-imports/module-imports react-book
+                                                                'js.react))
+            react-native-imports (:native (deps-imports/module-imports react-book
+                                                                       'js.react-native))
+            lua-book      (lib/get-book +library-lua+ :lua)
+            lua-entries   (first (deps/collect-script-entries lua-book ['L.app/read-json]))
+            lua-imports   (deps-imports/script-imports lua-book lua-entries)
+            parsed-import (:native (b/module-create prep-js/+book-min+
+                                                    'JS.styles
+                                                    {:import [["global.css" :ensure true]]}))]
+        {:script script-imports
+         :ui ui-imports
+         :react (select-keys react-imports ["react" "react-dom/client" "react-nil"])
+         :react-native (select-keys react-native-imports ["react"])
+         :lua lua-imports
+         :parsed parsed-import})
+      => '{:script {"@measured/puck" {:as [* Puck]}
+                   "@radix-ui/themes" {:as [* Radix]
+                                       :bundle {"@radix-ui/themes/styles.css" {}}}}
+          :ui {"keep.css" {:ensure true}}
+          :react {"react" {:as React}
+                  "react-dom/client" {:as ReactDOM}}
+          :react-native {"react" {:as React}}
+          :lua {"cjson" {:as cjson}}
+          :parsed {"global.css" {:ensure true}}})
 
 ^{:refer lang.core.impl-deps-imports/module-imports :added "4.0"}
 (fact "gets a modules imports as well as code links"

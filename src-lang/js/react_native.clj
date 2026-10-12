@@ -1,5 +1,4 @@
-(ns ^{:clj-kondo/config '{:linters {:unresolved-symbol {:level :off}}}}
-  js.react-native
+(ns js.react-native
   (:require [lang.core :as l]
             [std.lib.foundation :as f]))
 
@@ -28,6 +27,7 @@
              [xt.lang.spec-promise :as promise]]})
 
 (comment
+
   :icon     {:material   []
              :feather    [["react-native-vector-icons/Feather" :as RNIcon]]
              :fa         [["react-native-vector-icons/FontAwesome" :as RNIcon]]

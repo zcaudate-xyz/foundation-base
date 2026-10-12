@@ -12,7 +12,8 @@
           "js-008-tui-log"
           {"main" "dist/main.js"
            "packageManager" "yarn@4.6.0"
-           "scripts" {"dev" "webpack --watch"}
+           "scripts" {"dev" "webpack --watch"
+                      "start" "node dist/main.js"}
            "dependencies" {"pg" "^8.23.0"
                            "@sqlite.org/sqlite-wasm" "^3.53.4-build1"}
            "imports" {"#app/*" "./src/*"}
@@ -72,7 +73,7 @@
    :file "README.md"
    :main ["# JS-008 TUI Log"
           ""
-          "A Blessed terminal app for the shared `scratch_v0.Log` activity log. It loads rows through `js.react.ext-table` and appends or deletes entries through public Supabase RPCs."
+          "A Blessed terminal app for the shared `scratch_v0.Log` activity log. It loads rows through `js.react.ext-table`, appends or deletes entries through public Supabase RPCs, and receives inserts, updates, and deletes over the private `scratch_v0:Log` Realtime Broadcast topic. Changes also appear in open JS-007 pages. The heading reports the Realtime connection state."
           ""
           "## Prepare and build"
           ""
@@ -84,7 +85,7 @@
           "(demo/build-js-008-tui-log)"
           "```"
           ""
-          "`setup-scratch-v0` uses the same local Supabase setup as JS-007 and waits for the `scratch_v0.Log` Data API to be ready."
+          "`setup-scratch-v0` uses the same local Supabase setup as JS-007, installs the row Broadcast trigger and channel policy, and waits for the `scratch_v0.Log` Data API to be ready."
           ""
           "## Run the TUI"
           ""
@@ -93,8 +94,10 @@
           "```sh"
           "cd .build/demo/js-008-tui-log"
           "yarn install"
-          "yarn dev"
+          "yarn start"
           "```"
+          ""
+          "`yarn dev` only rebuilds the bundle in watch mode; use `yarn start` to display the terminal app."
           ""
           "The app uses the local-min Supabase URL and anon key by default. Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` to override them. The anon key is public, and the sample RPCs allow anyone who can reach Supabase to append a message or delete a log row by its visible ID."]})
 
@@ -121,12 +124,7 @@
               :search ["src-build/lang_demos/js_008_tui_log"]
               :target "src"
               :emit {:code {:link {:path-suffix ".js"
-                                   :root-prefix "#app"}
-                            :refine {'js.react {:treeshake true
-                                                :ensure '[useFollowRef
-                                                          useIsMountedWrap
-                                                          useStablized
-                                                          convertIndex]}}}}}]})
+                                   :root-prefix "#app"}}}}]})
 
 (defn setup-scratch-v0
   []

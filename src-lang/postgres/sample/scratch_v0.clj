@@ -105,3 +105,25 @@
                 {:message i-message
                  :author-id (s/auth-uid)})]
     (return o-log)))
+
+(defn.pg ^{:- [:trigger]}
+  log-realtime-change
+  "Broadcasts Log row changes as xt.db cache sync requests."
+  []
+  (if (== TG_OP "DELETE")
+    (do
+      (pg/perform
+       (s/realtime-send
+        "scratch_v0:Log"
+        "db/remove"
+        {"db/remove" {"Log" [(:->> (to_jsonb OLD) "id")]}}
+        true))
+      (return OLD))
+    (do
+      (pg/perform
+       (s/realtime-send
+        "scratch_v0:Log"
+        "db/sync"
+        {"db/sync" {"Log" [(to_jsonb NEW)]}}
+        true))
+      (return NEW))))

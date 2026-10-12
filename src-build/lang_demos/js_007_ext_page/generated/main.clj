@@ -3,9 +3,11 @@
 
 (l/script :js
   {:require [[xt.lang.spec-base :as xt]
+             [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
              [xt.db.node.client-supabase :as client-supabase]
              [js.react :as r]
+             [js.react.ext-model :as ext-model]
              [js.react-native :as n]
              [js.react.ext-table :as ext-table]
              [lang-demos.js-007-ext-page.generated.core :as app-core]
@@ -23,6 +25,9 @@
   (var rows (. state rows))
   (var pending (. state pending))
   (var failed (. state failed))
+  (var deleting-id (. state deletingId))
+  (var delete-entry (. state deleteEntry))
+  (var realtime-status (. props realtimeStatus))
   (var row-elements
        (xt/x:arr-map
         rows
@@ -32,7 +37,13 @@
             [:span {:className "row-index"} (+ index 1)]
             [:div
              [:p {:className "row-message"} (. entry message)]
-             [:span {:className "row-id"} (. entry id)]]]))))
+             [:span {:className "row-id"} (. entry id)]]
+            [:% ui-button/Button
+             {:design {:color "red"}
+              :className "delete-button"
+              :text (:? (== deleting-id (. entry id)) "Deleting..." "Delete")
+              :disabled (or pending (not (== nil deleting-id)))
+              :onPress (fn [] (delete-entry (. entry id)))}]]))))
   (var rows-content
        (:? pending
            [:div {:className "empty-state" :role "status"} "Loading log entries..."]
@@ -54,10 +65,10 @@
       [:p {:className "eyebrow"} "EXT PAGE / SUPABASE"]
       [:h1 "Shared activity log"]
       [:p {:className "intro-copy"}
-       "A small client-side workspace backed by the Ext Table and Ext Model layers. Read and append entries directly through Supabase."]]
+       "A small client-side workspace backed by the Ext Table and Ext Model layers. Read, append, and delete entries directly through Supabase."]]
      [:span {:className "live-chip"}
       [:span {:className "live-dot"}]
-      "LOCAL SUPABASE"]]
+      realtime-status]]
     [:div {:className "workspace"}
      [:section {:className "panel"}
       [:div {:className "panel-heading"}
@@ -96,7 +107,7 @@
        [:span {:className "count"} (+ rows.length " entries")]]
       rows-content]]
     [:footer {:className "footer"}
-     "This public sample lets anyone reach and append to the shared log."]]))
+     "Anyone who can reach this public sample can read, append, and delete shared log entries."]]))
 
 (defn.js App
   []
@@ -105,12 +116,57 @@
               (substrate/node-create {"id" "ext-page-log-node"}))))
   (var context (r/const (app-runtime/live-context node)))
   (var table (r/const (app-runtime/table-impl)))
+  (var [realtime-status set-realtime-status] (r/local "CONNECTING"))
   (var view (ext-table/useRemoteView
              table
              "data"
              {"defaultArgs" []}
              context
              {}))
+  (r/init []
+    (var disposed false)
+    (var cleanup nil)
+    (var refresh
+         (fn []
+           (when (not disposed)
+             (return
+              (-> (ext-model/refresh-model view {})
+                  (promise/x:promise-catch
+                   (fn [_] (return nil))))))))
+    (var on-focus (fn [] (refresh)))
+    (var on-visibility-change
+         (fn []
+           (when (== "visible" (. document visibilityState))
+             (refresh))))
+    (. window (addEventListener "focus" on-focus))
+    (. document (addEventListener "visibilitychange" on-visibility-change))
+    (var connection-id
+         (+ "js-007-log/"
+            (. (Math.random)
+               (toString 36)
+               (substr 2 10))))
+    (-> (app-runtime/subscribe-log
+         node context connection-id
+         (fn [_] (refresh)))
+        (promise/x:promise-then
+         (fn [stop]
+           (if disposed
+             (stop)
+             (do
+               (:= cleanup stop)
+               (set-realtime-status "LIVE")))))
+        (promise/x:promise-catch
+         (fn [_]
+           (when (not disposed)
+             (set-realtime-status "OFFLINE"))
+           (return nil))))
+    (return
+     (fn []
+       (:= disposed true)
+       (. window (removeEventListener "focus" on-focus))
+       (. document (removeEventListener "visibilitychange" on-visibility-change))
+       (when cleanup
+         (cleanup)))))
   (var append
        (fn [message]
          (return
@@ -121,4 +177,17 @@
            {"i_message" message}
            {"headers" {"Content-Profile" "scratch_v0"
                        "Accept-Profile" "scratch_v0"}}))))
-  (return [:% -/LogPage {"view" view "append" append}]))
+  (var remove
+       (fn [entry-id]
+         (return
+          (client-supabase/rpc-call
+           node
+           "auth/supabase"
+           "log_delete_public"
+           {"i_id" entry-id}
+           {"headers" {"Content-Profile" "scratch_v0"
+                       "Accept-Profile" "scratch_v0"}}))))
+  (return [:% -/LogPage {"view" view
+                         "append" append
+                         "remove" remove
+                         "realtimeStatus" realtime-status}]))

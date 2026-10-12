@@ -55,6 +55,45 @@
         (map #(b/get-fragment-entry book %) fragments)
         (set/union seen (set fragments)))))))
 
+(defn- emitted-native-imports
+  [book entry]
+  (let [fragments      (get-fragment-deps book [entry])
+        source-entries (map #(b/get-fragment-entry book %) fragments)
+        source-modules (->> (concat [(:module entry)]
+                                    (map :module source-entries))
+                            distinct
+                            (map #(b/get-module book %))
+                            (remove nil?))
+        native-lu      (apply merge (map :native-lu source-modules))
+        native         (apply merge-with merge (map :native source-modules))
+        fragment-native (apply merge-with set/union (map :deps-native source-entries))
+        emitted        (reduce (fn [out sym]
+                                 (if (symbol? sym)
+                                   (let [word   (name sym)
+                                         idx    (.indexOf word ".")
+                                         alias  (if (pos? idx)
+                                                  (symbol (subs word 0 idx))
+                                                  sym)
+                                         package (get native-lu alias)]
+                                     (if package
+                                       (update out package (fnil conj #{}) alias)
+                                       out))
+                                   out))
+                               {}
+                               (tree-seq coll? seq (:form entry)))
+        used           (merge-with set/union
+                                   (:deps-native entry)
+                                   fragment-native
+                                   emitted)]
+    (select-keys native (keys used))))
+
+(defn- get-emitted-entry-imports
+  [book entries]
+  (->> entries
+       (map (partial materialize-import-entry book))
+       (map #(emitted-native-imports book %))
+       (apply merge-with merge)))
+
 (defn format-namespace-imports
   [book ns-imports]
   (reduce (fn [out [module-id m]]
@@ -74,12 +113,23 @@
          natives   (get-entry-imports book entries)]
      (get-namespace-imports (concat natives fnatives))))
 
+(defn- ensured-module-imports
+  [book module-ids]
+  (->> module-ids
+       (map #(b/get-module book %))
+       (remove nil?)
+       (mapcat (fn [module]
+                 (filter (comp :ensure val) (:native module))))
+       (into {})))
+
 (defn script-imports
   "gets the ns imports for a script"
   {:added "4.0"}
   [book entries]
-  (let [ns-imports  (script-import-deps book entries)]
-    (format-namespace-imports book ns-imports)))
+  (let [module-ids (into #{} (keep :module) entries)
+        imports    (get-emitted-entry-imports book entries)
+        ensured    (ensured-module-imports book module-ids)]
+    (merge-with merge imports ensured)))
 
 ;;
 ;;
@@ -91,12 +141,12 @@
   [book module-view]
   (let [links   (module/module-deps-code book module-view)
         entries (vals (:code module-view))
-        side-effects (->> (:native module-view)
-                          (filter (fn [[_ opts]] (nil? (:as opts))))
-                          (into {}))
+        ensured (->> (:native module-view)
+                     (filter (comp :ensure val))
+                     (into {}))
         native  (merge-with merge
-                            side-effects
-                            (script-imports book entries))]
+                            (script-imports book entries)
+                            ensured)]
     {:native native
      :direct links}))
 

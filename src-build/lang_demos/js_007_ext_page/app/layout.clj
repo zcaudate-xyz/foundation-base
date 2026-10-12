@@ -2,7 +2,7 @@
   (:require [lang.core :as l]))
 
 (l/script :js
-  {:import [["./globals.css"]]
+  {:import [["./globals.css" :ensure true]]
    :static {:export [RootLayout]}})
 
 (defn.js RootLayout

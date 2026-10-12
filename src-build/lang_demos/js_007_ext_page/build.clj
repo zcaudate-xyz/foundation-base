@@ -6,7 +6,7 @@
 
 (l/script- :postgres
   {:runtime :jdbc.client
-   :require [[postgres.sample.scratch-v0]
+   :require [[postgres.sample.scratch-v0 :as scratch]
              [postgres.core]
              [postgres.core.supabase :as s]]
    :config {:host (-> local-min/+config+ :db :host)
@@ -19,7 +19,23 @@
    :emit {:code {:transforms {:entry [#'s/transform-entry]}}}})
 
 (defrun.pg __init__
-  (s/grant-usage #{"scratch_v0"}))
+  (s/grant-usage #{"scratch_v0"})
+  (postgres.core/exec [:drop-trigger-if-exists #{"log_realtime_change"} :on scratch/Log])
+  (postgres.core/exec [:create-trigger #{"log_realtime_change"}
+                       :after :insert :or :update :or :delete
+                       :on scratch/Log
+                       :for-each-row
+                       :execute-function (scratch/log-realtime-change)])
+  (postgres.core/exec [:drop-policy-if-exists #{"log-realtime-subscribe"}
+                       :on (. #{"realtime"} #{"messages"})])
+  (postgres.core/exec [:create-policy #{"log-realtime-subscribe"}
+                       :on (. #{"realtime"} #{"messages"})
+                       :for-select
+                       :to #{"anon"}
+                       :using (@! (list 'quote
+                                        (list [(list '==
+                                                     (list 's/realtime-topic)
+                                                     "scratch_v0:Log")])))]))
 
 (defn setup-scratch-v0
   "Starts local-min, installs scratch_v0, and waits for PostgREST."
@@ -196,7 +212,7 @@
               :white-space :nowrap}]
    [".log-list" {:display :grid :gap ".65rem"}]
    [".log-row" {:display :grid
-                :grid-template-columns "2rem minmax(0, 1fr)"
+                :grid-template-columns "2rem minmax(0, 1fr) auto"
                 :gap ".75rem"
                 :align-items :start
                 :padding ".85rem"
@@ -220,6 +236,15 @@
    [".row-id" {:color "#87959a"
                :font-family "ui-monospace, SFMono-Regular, Menlo, monospace"
                :font-size ".62rem"}]
+   [".delete-button" {:min-height "34px"
+                      :padding ".35rem .65rem"
+                      :border 0
+                      :border-radius "8px"
+                      :background "#fff0ee"
+                      :color "#a43b3b"
+                      :font-size ".68rem"
+                      :font-weight 700}]
+   [".delete-button:disabled" {:opacity ".55" :cursor :not-allowed}]
    [".empty-state" {:padding "2.5rem 1rem"
                     :border "1px dashed #dce5e6"
                     :border-radius "12px"
@@ -285,7 +310,7 @@
 (def +env-example+
   {:type :raw
    :file ".env.example"
-   :main ["# Public browser credentials for Supabase reads and the public append RPC."
+   :main ["# Public browser credentials for Supabase reads and public append/delete RPCs."
           "NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:55121"
           "NEXT_PUBLIC_SUPABASE_ANON_KEY="]})
 
@@ -294,7 +319,7 @@
    :file "README.md"
    :main ["# JS-007 Ext Page"
           ""
-          "A static Next.js App Router sample that uses `js.react.ext-table` and `js.react.ext-model` to read and append to the `scratch_v0.Log` table. The form uses Melbourne UI input and button components."
+          "A static Next.js App Router sample that uses `js.react.ext-table` and `js.react.ext-model` to read, append to, and delete rows from the `scratch_v0.Log` table. The form uses Melbourne UI input and button components."
           ""
           "## Prepare local Supabase and build"
           ""
@@ -307,6 +332,7 @@
           "```"
           ""
           "`setup-scratch-v0` starts the `scaffold.supabase.local-min` stack, installs the `scratch_v0` sample schema, and waits for PostgREST to expose `Log`."
+          "It also installs the `Log` change trigger and the private Realtime Broadcast policy for `scratch_v0:Log`. JS-007 and JS-008 subscribe to this topic, so inserts, updates, and deletes made by either demo appear in both open views. The page shows `LIVE`, `CONNECTING`, or `OFFLINE` for its subscription."
           ""
           "## Configure and run locally"
           ""
@@ -321,7 +347,7 @@
           ""
           "The app defaults to the local-min URL and anon key. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to override them. The anon key is public and the RPC is intentionally callable without sign-in."
           ""
-          "The browser reads `Log` through the ext-table runtime and calls `log_append_public` directly through `xt.db.node.client-supabase`. `yarn build` writes a static site to `out/`, which can be hosted by any static file host. Anyone who can reach the app can append messages."]})
+          "The browser reads `Log` through the ext-table runtime, calls the public append and delete RPCs through `xt.db.node.client-supabase`, and receives row changes over Supabase Realtime. `yarn build` writes a static site to `out/`, which can be hosted by any static file host. Anyone who can reach the app can append or delete rows."]})
 
 (defn- inject-next-header
   [^String out static]
@@ -357,81 +383,6 @@
               :target "src"
               :emit {:code {:link {:path-suffix ".js"
                                    :root-prefix "@demo"}
-                            :refine {'js.react-native
-                                     {:treeshake true
-                                      :ensure '[Portal PortalImpl PortalRegistery
-                                                measure measureRef usePortalLayouts]}
-                                     'js.react-native.animate
-                                     {:treeshake true
-                                      :ensure '[IMPL callNativeProps createTransition
-                                                getNativePropsTarget isAnimatedValue
-                                                listenTransformations setPropsAll
-                                                setPropsNative setPropsWeb
-                                                useBinaryIndicator usePressIndicator
-                                                useProgess useShowing webStyle
-                                                webStyleValue webTransform
-                                                webTransformValue webUnitlessStyle]}
-                                     'js.react-native.helper-color
-                                     {:treeshake true
-                                      :ensure '[hsl hsl-parse hsl-parse-raw
-                                                interpolate interpolateColor
-                                                interpolateColorArray interpolateNum
-                                                interpolateScalar interpolateValue
-                                                lighten mix saturate toHSL]}
-                                     'js.react-native.helper-theme
-                                     {:treeshake true
-                                      :ensure '[StageMap StageStatics ThemeLookup
-                                                combinedStatic
-                                                createCombinedTransformations
-                                                createSingleTransformations
-                                                mergeProps prepThemeCombined
-                                                prepThemeSingle transformColor]}
-                                     'js.react-native.helper-theme-default
-                                     {:treeshake true
-                                      :ensure '[BaseBg BaseFg BaseTheme
-                                                ButtonDefaultStyle
-                                                ButtonDefaultTheme FontSize
-                                                InputDefaultBgTheme
-                                                InputDefaultFgTheme
-                                                InputDefaultPipeline
-                                                InputDefaultStyle
-                                                InputDefaultTheme
-                                                PressDefaultPipeline centerFn
-                                                defaultHovering defaultPressing]}
-                                     'js.react-native.model-context
-                                     {:treeshake true
-                                      :ensure '[contextCoordinate
-                                                contextCoordinateCross
-                                                contextCoordinateMain]}
-                                     'js.react-native.model-geom
-                                     {:treeshake true
-                                      :ensure '[POSITION oppositePosition
-                                                triangleBaseStyle]}
-                                     'js.react-native.physical-base
-                                     {:treeshake true
-                                      :ensure '[Box TouchableBasePressing
-                                                TouchableInput mergeChords
-                                                transformInner transformInnerFn
-                                                transformProps useChordDisabled
-                                                useChordEmptyable useChordFocusable
-                                                useChordHighlighted
-                                                useChordHoverable useChordPressable
-                                                useIndicatorCapture useInputable
-                                                useTouchable]}
-                                     'js.react-native.ui-button
-                                     {:treeshake true
-                                      :ensure '[Button buttonTheme]}
-                                     'js.react-native.ui-input
-                                     {:treeshake true
-                                      :ensure '[Input inputTheme]}
-                                     'js.react-native.ui-tooltip
-                                     {:treeshake true
-                                      :ensure '[Tooltip TooltipInner
-                                                TooltipInnerContentArrow
-                                                TooltipInnerHostArrow
-                                                TooltipRawArrow
-                                                tooltipContextOffset
-                                                tooltipPortalOffset]}}
                             :transforms {:full [inject-next-header
                                                 inject-next-use-client]}}}}]})
 

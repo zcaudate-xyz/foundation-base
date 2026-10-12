@@ -8,7 +8,7 @@
 
 (defn.js useLogState
   "Keeps the shared log view and append lifecycle independent of its UI/runtime."
-  [#{view append}]
+  [#{view append remove}]
   (var model-output (ext-model/listenModelOutput
                      view
                      ["output" "pending" "error"]
@@ -18,6 +18,7 @@
   (var [submitting setSubmitting] (r/local (== 1 0)))
   (var [notice setNotice] (r/local ""))
   (var [noticeError setNoticeError] (r/local (== 1 0)))
+  (var [deletingId setDeletingId] (r/local nil))
   (var rows (or (. model-output current) []))
   (var pending (or (event-model/is-pending view nil)
                    (. model-output pending)))
@@ -47,12 +48,32 @@
                  (setNoticeError true)))
               (finally
                (fn [] (setSubmitting false)))))))
+  (var deleteEntry
+       (fn [entry-id]
+         (when (and (not deletingId) entry-id)
+           (setDeletingId entry-id)
+           (setNotice (+ "Deleting entry " entry-id "..."))
+           (setNoticeError false)
+           (. (remove entry-id)
+              (then
+               (fn [_]
+                 (setNotice (+ "Deleted entry " entry-id "."))
+                 (return (ext-model/refresh-model view {}))))
+              (catch
+               (fn [error]
+                 (setNotice (or (. error message)
+                                "Unable to delete this entry."))
+                 (setNoticeError true)))
+              (finally
+               (fn [] (setDeletingId nil)))))))
   (return {"message" message
            "setMessage" setMessage
            "submitting" submitting
            "notice" notice
            "noticeError" noticeError
            "appendEntry" appendEntry
+           "deletingId" deletingId
+           "deleteEntry" deleteEntry
            "rows" rows
            "pending" pending
            "failed" failed}))
