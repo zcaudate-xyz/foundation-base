@@ -199,6 +199,21 @@
   (return
    (-/supabase-request node service-id (addon/cmd-query-table table-name query opts))))
 
+(defn.xt ^{:substrate/fn "@xt.supabase/storage-upload"}
+  supabase-storage-upload-handler
+  "uploads an object to Supabase Storage on the requested service"
+  {:added "4.2"}
+  [space args request node]
+  (var service-id  (xt/x:first args))
+  (var bucket      (xt/x:second args))
+  (var object-path (xt/x:get-idx args (xt/x:offset 2)))
+  (var data        (xt/x:get-idx args (xt/x:offset 3)))
+  (var opts        (or (xt/x:get-idx args (xt/x:offset 4)) {}))
+  (return
+   (-/supabase-request node
+                       service-id
+                       (addon/cmd-storage-upload bucket object-path data opts))))
+
 (defn.xt ^{:substrate/fn "@xt.supabase/health"}
   supabase-health-handler
   "calls the auth health endpoint on the requested service"
@@ -456,6 +471,7 @@
   (substrate/register-handler node "@xt.supabase/current-session" -/supabase-current-session-handler nil)
   (substrate/register-handler node "@xt.supabase/rpc-call" -/supabase-rpc-call-handler nil)
   (substrate/register-handler node "@xt.supabase/query-table" -/supabase-query-table-handler nil)
+  (substrate/register-handler node "@xt.supabase/storage-upload" -/supabase-storage-upload-handler nil)
   (substrate/register-handler node "@xt.supabase/health" -/supabase-health-handler nil)
   (substrate/register-handler node "@xt.supabase/admin-create-user" -/supabase-admin-create-user-handler nil)
   (substrate/register-handler node "@xt.supabase/admin-delete-user" -/supabase-admin-delete-user-handler nil)

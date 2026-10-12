@@ -77,15 +77,59 @@
 ;;
 ;; Queries
 
+(def.js EntryScopeContext (r/createContext nil))
+
+(defn.js ^{:public true}
+  useEntryScope
+  "Returns the active authentication entry used to scope API query caches."
+  []
+  (return (r/useContext -/EntryScopeContext)))
+
+(defn.js ^{:public true}
+  entryQueryKey
+  "Builds a query key that isolates each active user entry."
+  [key scope input]
+  (return [key scope input]))
+
+(defn.js entryQueryStale?
+  "Identifies cached API queries owned by a different entry."
+  [query-key scope]
+  (return (and (>= (. query-key ["length"]) 3)
+               (not= (. query-key [1]) scope))))
+
+(defn.js ^{:public true}
+  EntryScopeProvider
+  "Scopes API queries to an actor or impersonated entry and drops stale entry caches."
+  [{:# [scope children]}]
+  (var client (-/useQueryClient))
+  (var previous (r/useRef scope))
+  (r/useEffect
+   (fn []
+     (when (not= (. previous ["current"]) scope)
+       (. client
+          (removeQueries
+           {"predicate"
+            (fn [query]
+              (var query-key (. query ["queryKey"]))
+              (return (-/entryQueryStale? query-key scope)))}))
+       (:= (. previous ["current"]) scope))
+     (return (fn [] nil)))
+   [scope])
+  (return
+   [:% (. -/EntryScopeContext Provider)
+    {:value scope}
+    children]))
+
 (defn.js useApiQueriesSingle
   "A hook for managing a single API query, including its input, output, and transformation."
   {:added "0.1"}
   [[key q]]
+  (var scope (-/useEntryScope))
   (var [input setInput]   (r/useState))
-  (var raw (-/useQuery {:queryKey [key input]
+  (var raw (-/useQuery {:queryKey (-/entryQueryKey key scope input)
                          :queryFn
                          (fn [#{queryKey}]
-                           (var [_ input] queryKey)
+                           (var [query-name query-scope input] queryKey)
                            (return (q.fn input)))
                          :enabled (or q.enabled (k/not-nil? input))}))
   (var #{[(:= transform k/identity)

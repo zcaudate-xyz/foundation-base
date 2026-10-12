@@ -552,6 +552,39 @@
       "method" "POST"
       "path" "/rest/v1/rpc/ping"})
 
+^{:refer xt.net.addon-supabase/cmd-storage-upload :added "4.2"}
+(fact "encodes the object path and preserves upload body, auth, and headers"
+  (!.js
+   (var body {"blob" true})
+   (var command
+        (addon/cmd-storage-upload
+         "profile images"
+         "avatars/a b.png"
+         body
+         {"content-type" "image/png"
+          "upsert" true
+          "token" "entry-jwt"
+          "headers" {"x-trace" "trace-1"}}))
+   [(== body (. command ["body"]))
+    (. command ["method"])
+    (. command ["path"])
+    (. command ["headers"] ["Content-Type"])
+    (. command ["headers"] ["x-upsert"])
+    (. command ["headers"] ["x-trace"])
+    (. command ["token"])])
+  => [true
+      "POST"
+      "/storage/v1/object/profile%20images/avatars/a%20b.png"
+      "image/png"
+      "true"
+      "trace-1"
+      "entry-jwt"]
+
+  (!.js
+   (. (addon/cmd-storage-upload "images" "a.png" {} {})
+      ["headers"] ["x-upsert"]))
+  => "false")
+
 ^{:refer xt.net.addon-supabase/cmd-query-table :added "4.1"}
 (fact "builds the query table request"
   (addon/cmd-query-table "scratch_v0.Log" "select=*" {})

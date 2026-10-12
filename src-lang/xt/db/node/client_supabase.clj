@@ -90,6 +90,15 @@
                               [service-id table-name query (or opts {})]
                               opts)))
 
+(defn.xt storage-upload
+  "uploads an object to Supabase Storage on the requested service"
+  {:added "4.2"}
+  [node service-id bucket object-path data opts]
+  (return
+   (proxy-util/request-client node "@xt.supabase/storage-upload"
+                              [service-id bucket object-path data (or opts {})]
+                              opts)))
+
 (defn.xt attach-model
   "attaches a Supabase-backed page model to the node"
   {:added "4.1"}

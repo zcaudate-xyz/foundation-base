@@ -92,6 +92,42 @@
      (return (-/waitForOutput document "value"))))
   => "ready")
 
+^{:refer js.lib.react-query/entryQueryKey :added "4.2"}
+(fact "includes the active entry in every API query key"
+  (!.js
+   (rq/entryQueryKey "profile" "target-1" {"page" 2}))
+  => ["profile" "target-1" {"page" 2}])
+
+^{:refer js.lib.react-query/entryQueryStale? :added "4.2"}
+(fact "prunes only queries scoped to a different active entry"
+  (!.js
+   [(rq/entryQueryStale? ["profile" "actor-1" nil] "target-1")
+    (rq/entryQueryStale? ["profile" "target-1" nil] "target-1")
+    (rq/entryQueryStale? ["public" nil] "target-1")])
+  => [true false false])
+
+^{:refer js.lib.react-query/EntryScopeProvider :added "4.2"}
+(fact "provides the active entry scope to descendant query components"
+  (helper-source/test
+   (fn []
+     (var query-client (new rq/QueryClient {}))
+     (var App
+          (fn []
+            (var scope (rq/useEntryScope))
+            (return (r/createElement "output"
+                                     {"data-testid" "value"}
+                                     scope))))
+     (return
+      (r/createElement rq/QueryClientProvider
+                       {"client" query-client}
+                       (r/createElement rq/EntryScopeProvider
+                                        {"scope" "target"}
+                                        (r/createElement App)))))
+   {}
+   (fn [_ document _]
+     (return (-/waitForOutput document "value"))))
+  => "target")
+
 ^{:refer js.lib.react-query/useApiQueriesSingle :added "4.1"}
 (fact "resolves a real local Supabase ping query in JSDOM"
   (helper-source/test
