@@ -65,18 +65,31 @@
   (return
    (browser-transport/sharedworker-url-source
     "/workers/lang-demos-js-009-log-sharedworker.js"
-    {"type" "module"})))
+    {"type" "classic"})))
 
 (defn.js connect-client
   [client]
+  (var connected
+       (db-runtime/sharedworker-connect-transport
+        client
+        (-/sharedworker-source)
+        "log-sharedworker-transport"))
   (return
-   (db-runtime/sharedworker-connect-state
-    client
-    -/RuntimeConfig
-    -/Schema
-    -/SchemaLookup
-    (-/sharedworker-source)
-    "log-sharedworker-transport")))
+   (. connected
+      (then
+       (fn [state]
+         (var connection (. state ["connection"]))
+         (return
+          (. (substrate/request
+              client
+              nil
+              "@xt.db/kernel-init"
+              [-/RuntimeConfig -/Schema -/SchemaLookup]
+              {"transport_id" (. connection ["transport_id"])})
+             (then
+              (fn [init]
+                (return {"connection" connection
+                         "init" init}))))))))))
 
 (defn.js disconnect-client
   [state]
@@ -84,10 +97,7 @@
 
 (defn.js live-context
   [node]
-  (return {"node" node
-           "runtime" {"config" -/RuntimeConfig
-                      "schema" -/Schema
-                      "lookup" -/SchemaLookup}}))
+  (return {"node" node}))
 
 (defn.js table-impl
   []

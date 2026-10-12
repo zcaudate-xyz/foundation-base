@@ -14,7 +14,7 @@
 (def +package+
   (-> js007/+package+
       (assoc-in [:main "name"] "lang-demos-js-009-log-sharedworker")
-      (assoc-in [:main "scripts" "dev"] "webpack --config webpack.worker.config.js && next dev")
+      (assoc-in [:main "scripts" "dev"] "webpack --config webpack.worker.config.js && next dev -p 3109")
       (assoc-in [:main "scripts" "build"] "webpack --config webpack.worker.config.js && next build")
       (assoc-in [:main "devDependencies" "webpack"] "^5.97.1")
       (assoc-in [:main "devDependencies" "webpack-cli"] "^4.10.0")))
@@ -67,9 +67,11 @@
           "yarn install"
           "yarn dev"
           ""
+          "`yarn dev` serves the page at `http://localhost:3109`. The page reads once on startup and listens for Supabase Realtime updates through the SharedWorker, so it does not re-read the log when you switch tabs or windows."
+          ""
           "The dev command bundles the SharedWorker before starting Next.js. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local to override the local-min defaults. yarn build creates the worker bundle and exports the static site to out/."
           ""
-          "The worker owns the Supabase service and database kernel. Log reads and log_append_public calls travel through the page's worker proxy. Anyone who can reach the app can append messages."]})
+          "The worker owns the Supabase service, database kernel, and Realtime subscription. Log reads and log_append_public calls travel through the page's worker proxy. Anyone who can reach the app can append messages."]})
 
 (def.make JS-009-LOG-SHAREDWORKER
   {:tag "lang-demos.js-009-log-sharedworker"

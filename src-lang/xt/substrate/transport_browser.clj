@@ -90,16 +90,26 @@
   "waits until a connection state records its ready event"
   {:added "4.1"}
   [state]
-  (var #{ready} state)
+  (var #{ready wait_count timeout_ms} state)
+  (when (and (xt/x:is-object? ready)
+             (== (. ready ["signal"]) "error"))
+    (xt/x:err
+     (or (. ready ["error"])
+         (new Error "Worker script failed to start."))))
   (if (xt/x:not-nil? ready)
     (return (promise/x:promise-run ready))
-    (return
-     (promise/x:promise-then
-      (promise/x:with-delay 10
-        (fn []
-          (return nil)))
-      (fn [_]
-        (return (-/await-ready state)))))))
+    (if (>= (* wait_count 10) timeout_ms)
+      (xt/x:err
+       (new Error "Worker connection timed out waiting for its ready signal."))
+      (do
+        (xt/x:set-key state "wait_count" (+ wait_count 1))
+        (return
+         (promise/x:promise-then
+          (promise/x:with-delay 10
+            (fn []
+              (return nil)))
+          (fn [_]
+            (return (-/await-ready state)))))))))
 
 (defn.xt connection-record
   "creates a connection record from an attached transport"
@@ -139,7 +149,9 @@
              (return
               (start-fn
                (fn [event ctx]
-                 (if (-/ready-event? event opts)
+                 (if (or (and (xt/x:is-object? event)
+                             (== (. event ["signal"]) "error"))
+                         (-/ready-event? event opts))
                    (do
                      (xt/x:set-key state "ready" event)
                      (return event))
@@ -182,24 +194,38 @@
   {:added "4.1"}
   [node transport-id endpoint opts]
   (var config (or opts {}))
-  (var state {"ready" nil})
+  (var state {"ready" nil
+              "wait_count" 0
+              "timeout_ms" (or (. config ["ready_timeout"]) 15000)})
   (var wait-ready (:? (xt/x:has-key? config "wait_ready")
                       (. config ["wait_ready"])
                       true))
   (return
-   (promise/x:promise-then
-    (main/attach-transport
-     node
-     transport-id
-     (-/wrap-ready-endpoint endpoint state config))
-    (fn [_]
-      (if wait-ready
-        (return
-         (promise/x:promise-then
-          (-/await-ready state)
-          (fn [ready]
-            (return (-/connection-record node transport-id ready)))))
-        (return (-/connection-record node transport-id nil)))))))
+   (promise/x:promise-catch
+    (promise/x:promise-then
+     (main/attach-transport
+      node
+      transport-id
+      (-/wrap-ready-endpoint endpoint state config))
+     (fn [_]
+       (if wait-ready
+         (return
+          (promise/x:promise-then
+           (-/await-ready state)
+           (fn [ready]
+             (return
+              (-/connection-record node transport-id ready)))))
+         (return
+          (-/connection-record node transport-id nil)))))
+    (fn [error]
+      (return
+       (promise/x:promise-then
+        (promise/x:promise-catch
+         (main/detach-transport node transport-id)
+         (fn [_]
+           (return nil)))
+        (fn [_]
+          (xt/x:err error))))))))
 
 (defn.xt event-data
   "normalizes a browser worker message event into its payload"
@@ -512,12 +538,31 @@
     (fn [listener]
       (var shared (new SharedWorker url worker-opts))
       (var #{port} shared)
-      (. port (start))
+      (xt/x:set-key port "sharedworker" shared)
+      (. shared (addEventListener
+                 "error"
+                 (fn [event]
+                   (listener
+                    {"signal" "error"
+                     "error" (new Error
+                                (or (. event ["message"])
+                                    "SharedWorker script failed to load or initialize."))})
+                   (return nil))
+                 false))
       (. port (addEventListener
                "message"
                (fn [e]
                  (return (listener (. e ["data"]))))
                false))
+      (. port (addEventListener
+               "messageerror"
+               (fn [_]
+                 (listener
+                  {"signal" "error"
+                   "error" (new Error "SharedWorker message could not be read.")})
+                 (return nil))
+               false))
+      (. port (start))
       (return port))}))
 
 (defn.xt node-worker-source

@@ -58,7 +58,7 @@
           "private" true
           "packageManager" "yarn@4.9.4"
           "engines" {"node" ">=20.9.0"}
-          "scripts" {"dev" "next dev"
+          "scripts" {"dev" "next dev -p 3107"
                      "build" "next build"}
           "dependencies" {"next" "16.3.6"
                           "react" "19.2.3"
@@ -344,6 +344,8 @@
           "yarn install"
           "yarn dev"
           "```"
+          ""
+          "`yarn dev` serves the page at `http://localhost:3107`."
           ""
           "The app defaults to the local-min URL and anon key. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to override them. The anon key is public and the RPC is intentionally callable without sign-in."
           ""
