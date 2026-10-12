@@ -380,7 +380,8 @@
                       +readme+]}
    :default [{:type :module.directory
               :lang :js
-              :search ["src-build/lang_demos/js_007_ext_page"]
+              :search ["src-build/lang_demos/js_007_ext_page"
+                       "src-build/lang_demos/shared_log"]
               :main 'lang-demos.js-007-ext-page
               :target "src"
               :emit {:code {:link {:path-suffix ".js"

@@ -121,7 +121,8 @@
    :default [{:type :module.directory
               :lang :js
               :main 'lang-demos.js-008-tui-log.main
-              :search ["src-build/lang_demos/js_008_tui_log"]
+              :search ["src-build/lang_demos/js_008_tui_log"
+                       "src-build/lang_demos/shared_log"]
               :target "src"
               :emit {:code {:link {:path-suffix ".js"
                                    :root-prefix "#app"}}}}]})

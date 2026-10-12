@@ -12,7 +12,6 @@
              [xt.event.base-model :as event-model]
              [xt.substrate :as substrate]
              [xt.db.node.client-base :as client-base]
-             [xt.db.node.client-supabase :as client-supabase]
              [xt.lang.common-client :as client]
              [js.react :as r]
              [js.react.ext-model :as ext-model]
@@ -20,6 +19,7 @@
              [js.blessed :as b]
              [js.blessed.ui-core :as ui-core]
              [js.module :as jm]
+             [lang-demos.shared-log.actions :as log-actions]
              [lang-demos.js-008-tui-log.runtime :as app-runtime]]})
 
 (defrun.js __missing__
@@ -62,13 +62,7 @@
            (set-submitting true)
            (setNotice "Appending to the shared log...")
            (setNoticeError false)
-           (-> (client-supabase/rpc-call
-                node
-                "auth/supabase"
-                "log_append_public"
-                {"i_message" clean-message}
-                {"headers" {"Content-Profile" "scratch_v0"
-                            "Accept-Profile" "scratch_v0"}})
+           (-> (log-actions/append-log node clean-message)
                (promise/x:promise-then
                 (fn [rpc-row]
                   (set-message "")
@@ -172,13 +166,7 @@
            (set-deleting-id entry-id)
            (set-notice (+ "Deleting entry " entry-id "..."))
            (set-notice-error false)
-           (-> (client-supabase/rpc-call
-                node
-                "auth/supabase"
-                "log_delete_public"
-                {"i_id" entry-id}
-                {"headers" {"Content-Profile" "scratch_v0"
-                            "Accept-Profile" "scratch_v0"}})
+           (-> (log-actions/delete-log node entry-id)
                (promise/x:promise-then
                 (fn [_]
                   (set-notice (+ "Deleted entry " entry-id "."))

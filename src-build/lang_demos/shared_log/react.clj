@@ -1,4 +1,4 @@
-(ns lang-demos.js-007-ext-page.generated.core
+(ns lang-demos.shared-log.react
   (:require [lang.core :as l]))
 
 (l/script :js
@@ -7,7 +7,7 @@
              [js.react.ext-model :as ext-model]]})
 
 (defn.js useLogState
-  "Keeps the shared log view and append lifecycle independent of its UI/runtime."
+  "Keeps log state shared and refreshes through the view's backing node."
   [#{view append remove}]
   (var model-output (ext-model/listenModelOutput
                      view

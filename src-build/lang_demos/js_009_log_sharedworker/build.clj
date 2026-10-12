@@ -106,7 +106,8 @@
                   :layout :full})]))}
     {:type :module.directory
      :lang :js
-     :search ["src-build/lang_demos/js_009_log_sharedworker"]
+     :search ["src-build/lang_demos/js_009_log_sharedworker"
+              "src-build/lang_demos/shared_log"]
      :main 'lang-demos.js-009-log-sharedworker
      :target "src"
      :emit {:code {:link {:path-suffix ".js"}

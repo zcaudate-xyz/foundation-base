@@ -5,17 +5,14 @@
   {:require [[xt.lang.spec-base :as xt]
              [xt.lang.spec-promise :as promise]
              [xt.substrate :as substrate]
-             [xt.db.node.client-supabase :as client-supabase]
              [js.react :as r]
              [js.react.ext-model :as ext-model]
-             [js.react-native :as n]
              [js.react.ext-table :as ext-table]
-             [lang-demos.js-009-log-sharedworker.generated.core :as app-core]
-             [lang-demos.js-009-log-sharedworker.generated.runtime :as app-runtime]
-             [melbourne.ui-button :as ui-button]
-             [melbourne.ui-input :as ui-input]]})
+             [lang-demos.shared-log.actions :as log-actions]
+             [lang-demos.shared-log.page :as log-page]
+             [lang-demos.js-009-log-sharedworker.generated.runtime :as app-runtime]]})
 
-(defn.js LogPage
+(defn.js LogContent
   [props]
   (var node (. props node))
   (var context (app-runtime/live-context node))
@@ -28,6 +25,7 @@
               context)))
   (var initial-fetch-ref (r/ref nil))
   (var refresh-timeout-ref (r/ref nil))
+  (var [realtime-status set-realtime-status] (r/local "CONNECTING"))
   (var [realtime-error set-realtime-error] (r/local ""))
   (r/init []
     (var active true)
@@ -60,11 +58,13 @@
         (promise/x:promise-then
          (fn [_]
            (when active
-             (set-realtime-error ""))
+             (set-realtime-error "")
+             (set-realtime-status "LIVE"))
            (return true)))
         (promise/x:promise-catch
          (fn [error]
            (when active
+             (set-realtime-status "OFFLINE")
              (set-realtime-error
               (or (. error message)
                   "Unable to subscribe to shared log updates.")))
@@ -81,118 +81,16 @@
             (fn [_] (return nil)))))))
   (var append
        (fn [message]
-         (return
-          (client-supabase/rpc-call
-           node
-           "auth/supabase"
-           "log_append_public"
-           {"i_message" message}
-           {"headers" {"Content-Profile" "scratch_v0"
-                       "Accept-Profile" "scratch_v0"}}))))
+         (return (log-actions/append-log node message))))
   (var remove
        (fn [entry-id]
-         (return
-          (client-supabase/rpc-call
-           node
-           "auth/supabase"
-           "log_delete_public"
-           {"i_id" entry-id}
-           {"headers" {"Content-Profile" "scratch_v0"
-                       "Accept-Profile" "scratch_v0"}}))))
-  (var state (app-core/useLogState {"view" view "append" append "remove" remove}))
-  (var message (. state message))
-  (var submitting (. state submitting))
-  (var notice (. state notice))
-  (var notice-error (. state noticeError))
-  (var rows (. state rows))
-  (var pending (. state pending))
-  (var failed (. state failed))
-  (var deleting-id (. state deletingId))
-  (var delete-entry (. state deleteEntry))
-  (var row-elements
-       (xt/x:arr-map
-        rows
-        (fn [entry index]
-          (return
-           [:article {:key (. entry id) :className "log-row"}
-            [:span {:className "row-index"} (+ index 1)]
-            [:div
-             [:p {:className "row-message"} (. entry message)]
-             [:span {:className "row-id"} (. entry id)]]
-            [:% ui-button/Button
-             {:design {:color "red"}
-              :className "delete-button"
-              :text (:? (== deleting-id (. entry id)) "Deleting..." "Delete")
-              :disabled (or pending (not (== nil deleting-id)))
-              :onPress (fn [] (delete-entry (. entry id)))}]]))))
-  (var rows-content
-       (:? pending
-           [:div {:className "empty-state" :role "status"} "Loading log entries..."]
-           (:? failed
-               [:div {:className "empty-state" :role "alert"}
-                "The log could not be loaded. Check the local Supabase connection and schema grants."]
-               (:? (== 0 rows.length)
-                   [:div {:className "empty-state"} "No entries yet. Add the first one here."]
-                   [:div {:className "log-list"} row-elements]))))
+         (return (log-actions/delete-log node entry-id))))
   (return
-   [:main {:className "shell"}
-    [:header {:className "topbar"}
-     [:div {:className "brand"}
-      [:span {:className "brand-mark"} "ST"]
-      [:span "STATSTRADE / OPERATIONS"]]
-     [:span {:className "topbar-tag"} "FOUNDATION SAMPLE"]]
-    [:section {:className "intro"}
-     [:div
-      [:p {:className "eyebrow"} "EXT PAGE / SHAREDWORKER"]
-      [:h1 "Shared activity log"]
-      [:p {:className "intro-copy"}
-       "The page reads and appends through a proxy connection to a SharedWorker that owns the Supabase node."]]
-     [:span {:className "live-chip"}
-      [:span {:className "live-dot"}]
-      (:? realtime-error "REALTIME OFFLINE" "SHARED WORKER")]]
-    (:? realtime-error
-        [:p {:className "notice error" :role "alert"}
-         (+ "Supabase Realtime is unavailable: " realtime-error)]
-        nil)
-    [:div {:className "workspace"}
-     [:section {:className "panel"}
-      [:div {:className "panel-heading"}
-       [:div
-        [:h2 "Append an entry"]
-        [:p {:className "panel-subtitle"}
-         "The shared worker calls log_append_public with the public anon key."]]]
-      [:div {:className "entry-form"}
-       [:label {:className "field-label" :htmlFor "log-message"}
-        "Message"]
-       [:% ui-input/Input
-        {:design {:color "blue"}
-         :id "log-message"
-         :className "entry-input"
-         :accessibilityLabel "Log message"
-         :placeholder "Write a short activity note..."
-         :value message
-         :onChangeText (. state setMessage)
-         :multiline true
-         :numberOfLines 4}]
-       [:% ui-button/Button
-        {:design {:color "blue"}
-         :className "submit-button"
-         :text (:? submitting "Appending..." "Add to log")
-         :disabled (or submitting (== "" (. message (trim))))
-         :onPress (. state appendEntry)}]
-       [:p {:className (+ "notice" (:? notice-error " error" ""))
-            :role "status"}
-        notice]]]
-     [:section {:className "panel"}
-      [:div {:className "list-header"}
-       [:div
-        [:h2 "Log entries"]
-        [:p {:className "panel-subtitle"}
-         "Rows loaded by the shared worker's anon-key read runtime."]]
-       [:span {:className "count"} (+ rows.length " entries")]]
-      rows-content]]
-    [:footer {:className "footer"}
-     "All pages connect to the same SharedWorker node for this shared log."]]))
+   [:% log-page/LogPage {"view" view
+                         "append" append
+                         "remove" remove
+                         "realtimeStatus" realtime-status
+                         "realtimeError" realtime-error}]))
 
 (defn.js App
   []
@@ -243,22 +141,11 @@
              (catch (fn [_] nil)))))))
    [])
   (when worker-state
-    (return [:% -/LogPage {"node" node}]))
+    (return [:% -/LogContent {"node" node}]))
   (return
-   [:main {:className "shell"}
-    [:header {:className "topbar"}
-     [:div {:className "brand"}
-      [:span {:className "brand-mark"} "ST"]
-      [:span "STATSTRADE / OPERATIONS"]]
-     [:span {:className "topbar-tag"} "FOUNDATION SAMPLE"]]
-    [:section {:className "intro"}
-     [:div
-      [:p {:className "eyebrow"} "EXT PAGE / SHAREDWORKER"]
-      [:h1 "Shared activity log"]
-      [:p {:className "intro-copy"}
-       "Connecting to the SharedWorker that owns the Supabase node..."]]]
-    [:section {:className "panel" :role (:? worker-error "alert" "status")}
-     [:p {:className (:? worker-error "notice error" "notice")}
-      (:? worker-error
-          (+ "Unable to connect to the SharedWorker: " worker-error)
-          "The shared log is starting.")]]]))
+   [:% log-page/LogPageStatus
+    {"status" (:? worker-error "OFFLINE" "CONNECTING")
+     "error" worker-error
+     "message" (:? worker-error
+                 (+ "Unable to connect to the SharedWorker: " worker-error)
+                 "The shared log is starting.")}]))
