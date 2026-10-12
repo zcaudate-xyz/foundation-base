@@ -63,6 +63,31 @@
                      :method "GET"}
                     opts)))
 
+(defn.xt cmd-storage-upload
+  "uploads an object to Supabase Storage"
+  {:added "4.2"}
+  [bucket object-path data opts]
+  (var segments (xt/x:str-split object-path "/"))
+  (var encoded-parts [])
+  (xt/for:array [segment segments]
+    (xt/x:arr-push encoded-parts (encodeURIComponent segment)))
+  (var content-type (or (. opts ["content-type"])
+                        (. opts ["contentType"])))
+  (var headers (xt/x:obj-assign {} (. opts ["headers"])))
+  (xt/x:set-key headers "x-upsert"
+                (xt/x:to-string (== true (. opts ["upsert"]))))
+  (when content-type
+    (xt/x:set-key headers "Content-Type" content-type))
+  (return
+   (xt/x:obj-assign opts
+                    {:path (xt/x:cat "/storage/v1/object/"
+                                     (encodeURIComponent bucket)
+                                     "/"
+                                     (xt/x:str-join "/" encoded-parts))
+                     :method "POST"
+                     :body data
+                     :headers headers})))
+
 
 (defn.xt cmd-health
   "calls the auth health endpoint against local supabase"
