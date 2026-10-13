@@ -1,0 +1,2478 @@
+{
+  "failure-counts" : {
+    "failed" : 6,
+    "throw" : 186,
+    "timeout" : 0,
+    "errored" : 2
+  },
+  "run" : {
+    "id" : 38334199636,
+    "number" : 162,
+    "attempt" : 1,
+    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/38334199636"
+  },
+  "workflow-key" : "active",
+  "tests" : {
+    "passed" : 1085,
+    "failed" : 6,
+    "throw" : 186,
+    "timeout" : 0,
+    "skipped" : 1,
+    "errored" : 2
+  },
+  "git" : {
+    "sha" : "67cbff9bf6f1515f1bfe3c9099b74ca46a2d3f8e",
+    "ref" : "refs/heads/main",
+    "event" : "push"
+  },
+  "schema-version" : 1,
+  "jobs" : [ {
+    "failure-counts" : {
+      "errored" : 2,
+      "throw" : 17,
+      "timeout" : 0,
+      "failed" : 1
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 280,
+      "skipped" : 1,
+      "errored" : 2,
+      "throw" : 17,
+      "timeout" : 0,
+      "failed" : 1
+    },
+    "generated-count" : 46,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-13T01:57:36.143959152Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "failure",
+    "language" : "ruby",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.db",
+    "failing-count" : 20,
+    "failures" : [ {
+      "runtime-namespace" : "xtbench.ruby.db.node.example-auth-profile-view-test",
+      "counts" : {
+        "errored" : 1
+      },
+      "functions" : [ ],
+      "namespace-errors" : [ {
+        "type" : "errored",
+        "count" : 1
+      } ],
+      "namespace" : "db.node.example-auth-profile-view-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.db.node.proxy-base-test",
+      "counts" : {
+        "throw" : 3,
+        "failed" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.node.proxy-base/attach-forward-handler",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/node/proxy_base_test.clj",
+          "type" : "throw",
+          "line" : 94,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.node.proxy-base/detach-forward-handler",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/node/proxy_base_test.clj",
+          "type" : "throw",
+          "line" : 133,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.db.node.proxy-base/init-proxy-handlers",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/node/proxy_base_test.clj",
+          "type" : "failed",
+          "line" : 191,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.node.proxy-base/request-proxy",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/node/proxy_base_test.clj",
+          "type" : "throw",
+          "line" : 71,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "db.node.proxy-base-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.db.node.proxy-util-test",
+      "counts" : {
+        "throw" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.node.proxy-util/request-client",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/node/proxy_util_test.clj",
+          "type" : "throw",
+          "line" : 131,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.node.proxy-util/request-proxy",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/node/proxy_util_test.clj",
+          "type" : "throw",
+          "line" : 108,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "db.node.proxy-util-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.db.system.impl-memory-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-memory/pull-async",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_memory_test.clj",
+          "type" : "throw",
+          "line" : 38,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "db.system.impl-memory-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.db.system.impl-sqlite-test",
+      "counts" : {
+        "throw" : 9
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-sqlite/clear-db",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
+          "type" : "throw",
+          "line" : 84,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.db.system.impl-sqlite/impl-sqlite-init",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
+          "type" : "throw",
+          "line" : 135,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
+          "type" : "throw",
+          "line" : 150,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-sqlite/process-add-event",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
+          "type" : "throw",
+          "line" : 98,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-sqlite/process-remove-event",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
+          "type" : "throw",
+          "line" : 112,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-sqlite/pull",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
+          "type" : "throw",
+          "line" : 39,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-sqlite/pull-async",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
+          "type" : "throw",
+          "line" : 54,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-sqlite/record-add",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
+          "type" : "throw",
+          "line" : 72,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.system.impl-sqlite/rpc-call-async",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/impl_sqlite_test.clj",
+          "type" : "throw",
+          "line" : 166,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "db.system.impl-sqlite-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.db.system.impl-supabase-realtime-test",
+      "counts" : {
+        "errored" : 1
+      },
+      "functions" : [ ],
+      "namespace-errors" : [ {
+        "type" : "errored",
+        "count" : 1
+      } ],
+      "namespace" : "db.system.impl-supabase-realtime-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.db.text.sql-call-test",
+      "counts" : {
+        "throw" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.text.sql-call/call-api",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/text/sql_call_test.clj",
+          "type" : "throw",
+          "line" : 97,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.text.sql-call/call-raw",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/text/sql_call_test.clj",
+          "type" : "throw",
+          "line" : 68,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "db.text.sql-call-test"
+    } ]
+  }, {
+    "failure-counts" : {
+      "errored" : 0,
+      "throw" : 32,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 127,
+      "skipped" : 0,
+      "errored" : 0,
+      "throw" : 32,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "generated-count" : 12,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-13T01:54:29.681674150Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "failure",
+    "language" : "ruby",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.event",
+    "failing-count" : 32,
+    "failures" : [ {
+      "runtime-namespace" : "xtbench.ruby.event.base-box-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-box/add-listener",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/base_box_test.clj",
+          "type" : "throw",
+          "line" : 38,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.base-box-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.event.base-form-test",
+      "counts" : {
+        "throw" : 6
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-form/check-all-passed",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/base_form_test.clj",
+          "type" : "throw",
+          "line" : 344,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-form/check-any-errored",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/base_form_test.clj",
+          "type" : "throw",
+          "line" : 356,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-form/check-field-errored",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/base_form_test.clj",
+          "type" : "throw",
+          "line" : 333,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-form/check-field-passed",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/base_form_test.clj",
+          "type" : "throw",
+          "line" : 321,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-form/validate-all",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/base_form_test.clj",
+          "type" : "throw",
+          "line" : 238,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.base-form/validate-field",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/base_form_test.clj",
+          "type" : "throw",
+          "line" : 253,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.base-form-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.event.util-decorate-test",
+      "counts" : {
+        "throw" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.util-decorate/run-handle",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_decorate_test.clj",
+          "type" : "throw",
+          "line" : 97,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise-run",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_decorate_test.clj",
+          "type" : "throw",
+          "line" : 68,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.util-decorate-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.event.util-task-test",
+      "counts" : {
+        "throw" : 13
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 3
+        },
+        "function" : "xt.event.util-task/load-tasks",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 250,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 282,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 316,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.util-task/load-tasks-single",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 230,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.event.util-task/task-load",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 51,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 61,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.event.util-task/task-unload",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 78,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 89,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.util-task/unload-tasks",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 352,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.event.util-task/unload-tasks-loop",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 103,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 120,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.lang.spec-promise/x:promise-run",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 21,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/event/util_task_test.clj",
+          "type" : "throw",
+          "line" : 27,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.util-task-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.event.util-throttle-test",
+      "counts" : {
+        "throw" : 3
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.util-throttle/throttle-active",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_throttle_test.clj",
+          "type" : "throw",
+          "line" : 88,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.util-throttle/throttle-run",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_throttle_test.clj",
+          "type" : "throw",
+          "line" : 48,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.util-throttle/throttle-run-async",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_throttle_test.clj",
+          "type" : "throw",
+          "line" : 31,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.util-throttle-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.event.util-validate-test",
+      "counts" : {
+        "throw" : 7
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.event.util-validate/validate-all",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 134,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 159,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.event.util-validate/validate-field",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 42,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 67,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.event.util-validate/validate-fields-loop",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 90,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 109,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.event.util-validate/validate-step",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/event/util_validate_test.clj",
+          "type" : "throw",
+          "line" : 27,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "event.util-validate-test"
+    } ]
+  }, {
+    "failure-counts" : {
+      "errored" : 0,
+      "throw" : 46,
+      "timeout" : 0,
+      "failed" : 5
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 521,
+      "skipped" : 0,
+      "errored" : 0,
+      "throw" : 46,
+      "timeout" : 0,
+      "failed" : 5
+    },
+    "generated-count" : 22,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-13T01:56:57.887101880Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "failure",
+    "language" : "ruby",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.lang",
+    "failing-count" : 51,
+    "failures" : [ {
+      "runtime-namespace" : "xtbench.ruby.lang.common-iter-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-iter/repeatedly",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_iter_test.clj",
+          "type" : "throw",
+          "line" : 114,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-iter-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.lang.common-notify-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-notify/wait-on",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_notify_test.clj",
+          "type" : "throw",
+          "line" : 32,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-notify-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.lang.common-promise-test",
+      "counts" : {
+        "throw" : 7
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-promise/promise",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_promise_test.clj",
+          "type" : "throw",
+          "line" : 155,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-promise/promise-all",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_promise_test.clj",
+          "type" : "throw",
+          "line" : 235,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-promise/promise-catch",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_promise_test.clj",
+          "type" : "throw",
+          "line" : 222,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-promise/promise-finally",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_promise_test.clj",
+          "type" : "throw",
+          "line" : 260,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-promise/promise-new",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_promise_test.clj",
+          "type" : "throw",
+          "line" : 189,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-promise/promise-then",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_promise_test.clj",
+          "type" : "throw",
+          "line" : 211,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-promise/with-delay",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_promise_test.clj",
+          "type" : "throw",
+          "line" : 249,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-promise-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.lang.common-repl-test",
+      "counts" : {
+        "throw" : 12,
+        "failed" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-repl/<!",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 170,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-repl/>notify",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 163,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-repl/notify",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 156,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.lang.common-repl/notify-http",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "failed",
+          "line" : 131,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-repl/notify-http-full",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 143,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-repl/notify-socket",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 93,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-repl/notify-socket-full",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 105,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-repl/notify-socket-handler",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 77,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-repl/notify-socket-http",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 118,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 3
+        },
+        "function" : "xt.lang.common-repl/notify-with-promise",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 22,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 36,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 50,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.common-repl/socket-connect",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/common_repl_test.clj",
+          "type" : "throw",
+          "line" : 65,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.common-repl-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.lang.spec-base-test",
+      "counts" : {
+        "throw" : 6,
+        "failed" : 3
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/for:array",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 24,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/x:async-run",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 79,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/x:del",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 200,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/x:ex",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 240,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.lang.spec-base/x:return-encode",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 1124,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/lang/spec_base_test.clj",
+          "type" : "throw",
+          "line" : 1132,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.lang.spec-base/x:return-eval",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_base_test.clj",
+          "type" : "failed",
+          "line" : 1166,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.lang.spec-base/x:return-wrap",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_base_test.clj",
+          "type" : "failed",
+          "line" : 1143,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.lang.spec-base/x:type-native",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_base_test.clj",
+          "type" : "failed",
+          "line" : 270,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.spec-base-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.lang.spec-bytes-test",
+      "counts" : {
+        "throw" : 3
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/x:bit-not",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_bytes_test.clj",
+          "type" : "throw",
+          "line" : 38,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/x:bytes-new",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_bytes_test.clj",
+          "type" : "throw",
+          "line" : 16,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/x:str-encode",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_bytes_test.clj",
+          "type" : "throw",
+          "line" : 29,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.spec-bytes-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.lang.spec-link-test",
+      "counts" : {
+        "throw" : 2,
+        "failed" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "failed" : 1
+        },
+        "function" : "xt.lang.spec-link/x:notify-http",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_link_test.clj",
+          "type" : "failed",
+          "line" : 49,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-link/x:socket-connect",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_link_test.clj",
+          "type" : "throw",
+          "line" : 20,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-link/x:socket-send",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_link_test.clj",
+          "type" : "throw",
+          "line" : 36,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.spec-link-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.lang.spec-os-test",
+      "counts" : {
+        "throw" : 3
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-os/x:file-read",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_os_test.clj",
+          "type" : "throw",
+          "line" : 53,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-os/x:file-write",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_os_test.clj",
+          "type" : "throw",
+          "line" : 63,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-os/x:shell",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_os_test.clj",
+          "type" : "throw",
+          "line" : 28,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.spec-os-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.lang.spec-promise-test",
+      "counts" : {
+        "throw" : 11
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-base/x:async-run",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 44,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 20,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise-all",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 72,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise-catch",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 99,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise-finally",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 113,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise-native?",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 133,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise-new",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 32,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.lang.spec-promise/x:promise-run",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 54,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 60,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:promise-then",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 87,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.lang.spec-promise/x:with-delay",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/lang/spec_promise_test.clj",
+          "type" : "throw",
+          "line" : 145,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "lang.spec-promise-test"
+    } ]
+  }, {
+    "failure-counts" : {
+      "errored" : 0,
+      "throw" : 91,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "run" : {
+      "number" : null,
+      "id" : null,
+      "url" : null,
+      "attempt" : 1
+    },
+    "workflow-key" : "local",
+    "tests" : {
+      "passed" : 157,
+      "skipped" : 0,
+      "errored" : 0,
+      "throw" : 91,
+      "timeout" : 0,
+      "failed" : 0
+    },
+    "generated-count" : 22,
+    "git" : {
+      "ref" : null,
+      "event" : null,
+      "sha" : null
+    },
+    "schema-version" : 1,
+    "recorded-at" : "2026-10-13T02:02:51.361206763Z",
+    "spec" : null,
+    "workflow-name" : "local",
+    "status" : "failure",
+    "language" : "ruby",
+    "kind" : "xtbench-job",
+    "metrics-status" : "complete",
+    "suite" : "xt.substrate",
+    "failing-count" : 91,
+    "failures" : [ {
+      "runtime-namespace" : "xtbench.ruby.substrate-test",
+      "counts" : {
+        "throw" : 7
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-util-handlers/echo",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate_test.clj",
+          "type" : "throw",
+          "line" : 401,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-util-handlers/get-service",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate_test.clj",
+          "type" : "throw",
+          "line" : 412,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-util-handlers/override",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate_test.clj",
+          "type" : "throw",
+          "line" : 424,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-util-handlers/ping",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate_test.clj",
+          "type" : "throw",
+          "line" : 390,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate/node-create",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate_test.clj",
+          "type" : "throw",
+          "line" : 350,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate/publish",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate_test.clj",
+          "type" : "throw",
+          "line" : 282,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate/transport-send",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate_test.clj",
+          "type" : "throw",
+          "line" : 75,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate-transport-test",
+      "counts" : {
+        "throw" : 5
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 3
+        },
+        "function" : "xt.substrate/CANARY.00-transport-attach",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate_transport_test.clj",
+          "type" : "throw",
+          "line" : 20,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate_transport_test.clj",
+          "type" : "throw",
+          "line" : 44,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate_transport_test.clj",
+          "type" : "throw",
+          "line" : 68,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.substrate/CANARY.00-transport-two-way",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate_transport_test.clj",
+          "type" : "throw",
+          "line" : 95,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate_transport_test.clj",
+          "type" : "throw",
+          "line" : 135,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate-transport-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.base-pubsub-test",
+      "counts" : {
+        "throw" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-pubsub/invoke-trigger",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/base_pubsub_test.clj",
+          "type" : "throw",
+          "line" : 46,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-pubsub/receive-publish",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/base_pubsub_test.clj",
+          "type" : "throw",
+          "line" : 72,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.base-pubsub-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.base-request-test",
+      "counts" : {
+        "throw" : 4
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-request/ensure-promise",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/base_request_test.clj",
+          "type" : "throw",
+          "line" : 22,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.substrate.base-request/invoke-handler",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/base_request_test.clj",
+          "type" : "throw",
+          "line" : 106,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate/base_request_test.clj",
+          "type" : "throw",
+          "line" : 130,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-request/response-body",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/base_request_test.clj",
+          "type" : "throw",
+          "line" : 143,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.base-request-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.base-router-test",
+      "counts" : {
+        "throw" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-router/receive-subscribe",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/base_router_test.clj",
+          "type" : "throw",
+          "line" : 214,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-router/receive-unsubscribe",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/base_router_test.clj",
+          "type" : "throw",
+          "line" : 227,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.base-router-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.base-util-test",
+      "counts" : {
+        "throw" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "notify/wait-on",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/base_util_test.clj",
+          "type" : "throw",
+          "line" : 129,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-util/pending-await",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/base_util_test.clj",
+          "type" : "throw",
+          "line" : 75,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.base-util-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.page-core-test",
+      "counts" : {
+        "throw" : 15
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/group-add",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 417,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/group-refresh",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 316,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/group-trigger",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 625,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/group-trigger-raw",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 600,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/group-update",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 525,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/model-get-output",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 583,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/model-refresh",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 248,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/model-refresh-dependents",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 225,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/model-refresh-dependents-unthrottled",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 287,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/model-refresh-remote",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 267,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/model-remote-call",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 205,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/model-set-input",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 565,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/model-trigger",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 649,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/model-update",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 548,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-core/space-trigger-all",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_core_test.clj",
+          "type" : "throw",
+          "line" : 667,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.page-core-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.page-proxy-test",
+      "counts" : {
+        "throw" : 22
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/echo",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 150,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/echo-local",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 134,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-close-proxy",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 210,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-handle-close",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 392,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-handle-list",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 353,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-handle-open",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 363,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-handle-trigger",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 512,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-handle-update",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 428,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-list-proxy",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 121,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-open-proxy",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 176,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-snapshot",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 298,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/group-sync-proxy",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 780,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/model-get-output",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 748,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/model-handle-proxy-call",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 528,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/model-handle-set-input",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 469,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/model-handle-trigger",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 495,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/model-handle-update",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 446,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/model-proxy-call",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 712,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/proxy-dispatch-op",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 760,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/proxy-dispatcher",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 667,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/publish-model-input",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 324,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-proxy/publish-model-output",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_proxy_test.clj",
+          "type" : "throw",
+          "line" : 312,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.page-proxy-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.page-util-test",
+      "counts" : {
+        "throw" : 2
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-util/run-refresh",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_util_test.clj",
+          "type" : "throw",
+          "line" : 96,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.page-util/run-remote",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/page_util_test.clj",
+          "type" : "throw",
+          "line" : 74,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.page-util-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.request-promise-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.base-util/request",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/request_promise_test.clj",
+          "type" : "throw",
+          "line" : 20,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.request-promise-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.transport-memory-test",
+      "counts" : {
+        "throw" : 10
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.transport-memory/deliver-network-loop",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 367,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.transport-memory/link-pair",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 451,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.transport-memory/memory-endpoint",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 403,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 3
+        },
+        "function" : "xt.substrate.transport-memory/memory-network",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 165,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 204,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 243,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.transport-memory/memory-pair",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 428,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 3
+        },
+        "function" : "xt.substrate.transport-memory/text-endpoint",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 42,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 82,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate/transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 122,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.transport-memory-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.walkthrough.s01-basic-test",
+      "counts" : {
+        "throw" : 4
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.substrate.walkthrough.s01-basic-test/f00-ping",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s01_basic_test.clj",
+          "type" : "throw",
+          "line" : 20,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s01_basic_test.clj",
+          "type" : "throw",
+          "line" : 33,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s01-basic-test/f01-echo",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s01_basic_test.clj",
+          "type" : "throw",
+          "line" : 52,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s01-basic-test/f02-space-state",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s01_basic_test.clj",
+          "type" : "throw",
+          "line" : 65,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.walkthrough.s01-basic-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.walkthrough.s02-transport-memory-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthroug.s02-transport-memory-test/f00-memory-pair",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s02_transport_memory_test.clj",
+          "type" : "throw",
+          "line" : 21,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.walkthrough.s02-transport-memory-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.walkthrough.s03-transport-test",
+      "counts" : {
+        "throw" : 3
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s03-transport-test/demo-000-stream-frame-basic",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s03_transport_test.clj",
+          "type" : "throw",
+          "line" : 26,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s03-transport-test/demo-001-stream-frame-trigger",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s03_transport_test.clj",
+          "type" : "throw",
+          "line" : 54,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s03-transport-test/demo-002-request-frame-handle",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s03_transport_test.clj",
+          "type" : "throw",
+          "line" : 96,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.walkthrough.s03-transport-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.walkthrough.s04-fanout-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s04-fanout-test/demo-001-memory-network",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s04_fanout_test.clj",
+          "type" : "throw",
+          "line" : 21,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.walkthrough.s04-fanout-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.walkthrough.s05-multiplex-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s05-multiplex-test/demo-001-memory-network",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s05_multiplex_test.clj",
+          "type" : "throw",
+          "line" : 21,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.walkthrough.s05-multiplex-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.walkthrough.s06-page-test",
+      "counts" : {
+        "throw" : 8
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.substrate.walkthroug.s06-page-test/demo-000-page-model-basic",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s06_page_test.clj",
+          "type" : "throw",
+          "line" : 23,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s06_page_test.clj",
+          "type" : "throw",
+          "line" : 43,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.substrate.walkthrough.s06-page-test/demo-001-page-model-update",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s06_page_test.clj",
+          "type" : "throw",
+          "line" : 65,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s06_page_test.clj",
+          "type" : "throw",
+          "line" : 84,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s06-page-test/demo-002-page-model-dependency",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s06_page_test.clj",
+          "type" : "throw",
+          "line" : 106,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s06-page-test/demo-003-page-model-remote",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s06_page_test.clj",
+          "type" : "throw",
+          "line" : 143,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.substrate.walkthrough.s06-page-test/demo-004-page-model-local-and-remote",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s06_page_test.clj",
+          "type" : "throw",
+          "line" : 193,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s06_page_test.clj",
+          "type" : "throw",
+          "line" : 215,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.walkthrough.s06-page-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.substrate.walkthrough.s07-wsserver-test",
+      "counts" : {
+        "throw" : 1
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.substrate.walkthrough.s07-wsserver-test/websocket-roundtrip",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/substrate/walkthrough/s07_wsserver_test.clj",
+          "type" : "throw",
+          "line" : 91,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "substrate.walkthrough.s07-wsserver-test"
+    } ]
+  } ],
+  "recorded-at" : "2026-10-13T02:33:38.774471450Z",
+  "workflow-name" : "XTBench Active",
+  "status" : "failure",
+  "kind" : "xtbench-run",
+  "metrics-status" : "complete",
+  "error" : null
+}
