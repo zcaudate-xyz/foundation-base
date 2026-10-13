@@ -143,7 +143,7 @@
        (promise/x:promise-then
         cleanup
         (fn [_]
-          (return (xt/x:err err)))))))))
+          (xt/x:err err))))))))
 
 (defn.xt ^{:public true}
   page-model-call
