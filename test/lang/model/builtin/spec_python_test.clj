@@ -227,3 +227,8 @@
                 (fn [symbol _ _] (name symbol))]
     (py/python-emit-input-rest {:symbol 'args} nil nil))
   => "*args")
+
+^{:refer lang.model.builtin.spec-python/python-symbol-global :id test-global-assignment}
+(fact "global initializers use assignable dictionary access"
+  (l/emit-as :python '[(defglobal REGISTRY {})] {:module {:id 'sample}})
+  => "(globals())[\"sample____REGISTRY\"] = {}")

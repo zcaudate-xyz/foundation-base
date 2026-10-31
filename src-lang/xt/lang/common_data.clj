@@ -516,7 +516,7 @@
   (when (xt/x:nil? obj)
     (return out))
   (xt/for:array [k ks]
-    (var v (. obj [k]))
+    (var v (xt/x:get-key obj k nil))
     (if (xt/x:not-nil? v)
       (xt/x:set-key out k v)))
   (return out))
@@ -584,7 +584,7 @@
                               nil))
 
                   (xt/x:is-object? obj)
-                  (return (. obj [k]))
+                  (return (xt/x:get-key obj k nil))
 
                   :else
                   (return nil))))
@@ -602,7 +602,7 @@
             (return nil))
 
           (xt/x:is-object? curr)
-          (:= curr (. curr [k]))
+          (:= curr (xt/x:get-key curr k nil))
 
           :else
           (return nil))
@@ -635,7 +635,7 @@
   
   (var k (xt/x:first arr))
   (var narr (-/arr-slice arr 1 nil))
-  (var child (. obj [k]))
+  (var child (xt/x:get-key obj k nil))
   (if (== 0 (xt/x:len narr))
     (xt/x:set-key obj k v)
     (xt/x:set-key obj k (-/set-in child narr v)))

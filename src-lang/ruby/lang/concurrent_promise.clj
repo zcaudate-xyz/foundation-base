@@ -14,7 +14,7 @@
 
 (defn.rb promise [thunk]
   (-/ensure-loaded)
-  (var output (:- "Concurrent::Promises.future(&thunk).run"))
+  (var output (:- "Concurrent::Promises.future { value = thunk.call; value.is_a?(Concurrent::Promises::Future) ? value : Concurrent::Promises.fulfilled_future(value) }.flat.run"))
   (return output))
 
 (defn.rb async-run [thunk]
@@ -48,12 +48,12 @@ end"))
 
 (defn.rb promise-then [promise thunk]
   (-/ensure-loaded)
-  (var output (:- "promise.then(&thunk).run"))
+  (var output (:- "(promise.is_a?(Concurrent::Promises::Future) ? promise : Concurrent::Promises.fulfilled_future(promise)).then { |value| result = thunk.call(value); result.is_a?(Concurrent::Promises::Future) ? result : Concurrent::Promises.fulfilled_future(result) }.flat.run"))
   (return output))
 
 (defn.rb promise-catch [promise thunk]
   (-/ensure-loaded)
-  (var output (:- "promise.rescue(&thunk).run"))
+  (var output (:- "(promise.is_a?(Concurrent::Promises::Future) ? promise : Concurrent::Promises.fulfilled_future(promise)).chain { |fulfilled, value, reason| result = fulfilled ? value : thunk.call(reason); result.is_a?(Concurrent::Promises::Future) ? result : Concurrent::Promises.fulfilled_future(result) }.flat.run"))
   (return output))
 
 (defn.rb promise-finally [promise thunk]

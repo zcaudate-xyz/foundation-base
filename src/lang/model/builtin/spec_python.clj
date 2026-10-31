@@ -26,9 +26,9 @@
 
 (defn- python-symbol-global
   [fsym grammar mopts]
-  (list '. '(globals) [(helper/emit-symbol-full fsym
+  (list '. '(globals) (list 'setitem (helper/emit-symbol-full fsym
                                                 (namespace fsym)
-                                                grammar)]))
+                                                grammar))))
 
 (defn- python-token-boolean
   [v]
