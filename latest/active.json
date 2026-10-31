@@ -1,27 +1,27 @@
 {
   "failure-counts" : {
     "failed" : 6,
-    "throw" : 186,
+    "throw" : 191,
     "timeout" : 0,
     "errored" : 2
   },
   "run" : {
-    "id" : 38334199636,
-    "number" : 162,
+    "id" : 41202298932,
+    "number" : 163,
     "attempt" : 1,
-    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/38334199636"
+    "url" : "https://github.com/zcaudate-xyz/foundation-base/actions/runs/41202298932"
   },
   "workflow-key" : "active",
   "tests" : {
-    "passed" : 1085,
+    "passed" : 1101,
     "failed" : 6,
-    "throw" : 186,
+    "throw" : 191,
     "timeout" : 0,
-    "skipped" : 1,
+    "skipped" : 3,
     "errored" : 2
   },
   "git" : {
-    "sha" : "67cbff9bf6f1515f1bfe3c9099b74ca46a2d3f8e",
+    "sha" : "33e9e268aeda9411f1df0c1f783a3935f9ce3f5e",
     "ref" : "refs/heads/main",
     "event" : "push"
   },
@@ -29,7 +29,7 @@
   "jobs" : [ {
     "failure-counts" : {
       "errored" : 2,
-      "throw" : 17,
+      "throw" : 22,
       "timeout" : 0,
       "failed" : 1
     },
@@ -41,21 +41,21 @@
     },
     "workflow-key" : "local",
     "tests" : {
-      "passed" : 280,
-      "skipped" : 1,
+      "passed" : 296,
+      "skipped" : 3,
       "errored" : 2,
-      "throw" : 17,
+      "throw" : 22,
       "timeout" : 0,
       "failed" : 1
     },
-    "generated-count" : 46,
+    "generated-count" : 52,
     "git" : {
       "ref" : null,
       "event" : null,
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T01:57:36.143959152Z",
+    "recorded-at" : "2026-10-31T12:53:13.922646330Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -63,7 +63,7 @@
     "kind" : "xtbench-job",
     "metrics-status" : "complete",
     "suite" : "xt.db",
-    "failing-count" : 20,
+    "failing-count" : 25,
     "failures" : [ {
       "runtime-namespace" : "xtbench.ruby.db.node.example-auth-profile-view-test",
       "counts" : {
@@ -158,6 +158,57 @@
       } ],
       "namespace-errors" : [ ],
       "namespace" : "db.node.proxy-util-test"
+    }, {
+      "runtime-namespace" : "xtbench.ruby.db.system.backend-selection-test",
+      "counts" : {
+        "throw" : 5
+      },
+      "functions" : [ {
+        "counts" : {
+          "throw" : 1
+        },
+        "function" : "xt.db.node.kernel-base/kernel-teardown-main",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/backend_selection_test.clj",
+          "type" : "throw",
+          "line" : 173,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.db.node.kernel-base/set-backends",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/backend_selection_test.clj",
+          "type" : "throw",
+          "line" : 59,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/db/system/backend_selection_test.clj",
+          "type" : "throw",
+          "line" : 149,
+          "count" : 1
+        } ]
+      }, {
+        "counts" : {
+          "throw" : 2
+        },
+        "function" : "xt.db.system.main/create-impl-init",
+        "locations" : [ {
+          "path" : "test-lang/xtbench/ruby/db/system/backend_selection_test.clj",
+          "type" : "throw",
+          "line" : 84,
+          "count" : 1
+        }, {
+          "path" : "test-lang/xtbench/ruby/db/system/backend_selection_test.clj",
+          "type" : "throw",
+          "line" : 131,
+          "count" : 1
+        } ]
+      } ],
+      "namespace-errors" : [ ],
+      "namespace" : "db.system.backend-selection-test"
     }, {
       "runtime-namespace" : "xtbench.ruby.db.system.impl-memory-test",
       "counts" : {
@@ -349,7 +400,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T01:54:29.681674150Z",
+    "recorded-at" : "2026-10-31T12:47:27.157909948Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -734,7 +785,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T01:56:57.887101880Z",
+    "recorded-at" : "2026-10-31T12:47:17.042635246Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -1385,7 +1436,7 @@
       "sha" : null
     },
     "schema-version" : 1,
-    "recorded-at" : "2026-10-13T02:02:51.361206763Z",
+    "recorded-at" : "2026-10-31T12:56:36.645566439Z",
     "spec" : null,
     "workflow-name" : "local",
     "status" : "failure",
@@ -2469,7 +2520,7 @@
       "namespace" : "substrate.walkthrough.s07-wsserver-test"
     } ]
   } ],
-  "recorded-at" : "2026-10-13T02:33:38.774471450Z",
+  "recorded-at" : "2026-10-31T13:02:30.496034676Z",
   "workflow-name" : "XTBench Active",
   "status" : "failure",
   "kind" : "xtbench-run",
